@@ -12,7 +12,9 @@
 <style>
 :root{
   --green:#1a5c3a; --green-l:#2e7d52; --bg:#f4f5f2; --card:#ffffff;
-  --ink:#1c1e1c; --sub:#6b7268; --line:#dfe3dc;
+  --ink:#1c1e1c; --sub:#6b7268; --line:#dfe3dc; --line2:#eef0eb;
+  --soft:#eef1ec; --inpBg:#ffffff; --hdr:#1a5c3a; --title:#1a5c3a;
+  --advBg:#f0f7f1; --advLine:#cfe5d4;
   --gold:#fdd835; --red:#e53935; --blue:#1e88e5; --accent:#1a5c3a;
   --danger:#c62828;
 }
@@ -26,7 +28,7 @@ body{
 }
 input, textarea{-webkit-user-select:auto; user-select:auto;}
 header.app{
-  background:var(--green); color:#fff; padding:10px 16px;
+  background:var(--hdr); color:#fff; padding:10px 16px;
   padding-top:calc(10px + env(safe-area-inset-top));
   display:flex; align-items:center; gap:8px;
   position:sticky; top:0; z-index:20;
@@ -35,21 +37,21 @@ header.app h1{font-size:16px; margin:0; font-weight:700; letter-spacing:.03em;}
 header.app .sub{font-size:11px; opacity:.85;}
 main{max-width:520px; margin:0 auto; padding:12px;}
 .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
-.card h2{font-size:14px; margin:0 0 10px; color:var(--green); display:flex; align-items:center; justify-content:space-between;}
+.card h2{font-size:14px; margin:0 0 10px; color:var(--title); display:flex; align-items:center; justify-content:space-between;}
 .card h2 .mini{font-size:11px; color:var(--sub); font-weight:normal;}
 label.f{display:block; font-size:12px; color:var(--sub); margin:10px 0 4px;}
 .inp, select.inp, textarea.inp{
   width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px;
-  font-size:16px; background:#fff; color:var(--ink);
+  font-size:16px; background:var(--inpBg); color:var(--ink);
 }
 textarea.inp{resize:vertical; min-height:56px;}
 .inp{min-width:0; max-width:100%;}
-input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; background:#fff; min-height:44px;}
+input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; background:var(--inpBg); min-height:44px;}
 .row{display:flex; gap:8px;} .row>*{flex:1; min-width:0;}
 .chips{display:flex; flex-wrap:wrap; gap:8px;}
 .chip{
   padding:8px 14px; border-radius:999px; border:1.5px solid var(--line);
-  background:#fff; font-size:14px; cursor:pointer; user-select:none;
+  background:var(--card); color:var(--ink); font-size:14px; cursor:pointer; user-select:none;
 }
 .chip.on{background:var(--green); border-color:var(--green); color:#fff; font-weight:600;}
 .btn{
@@ -57,16 +59,16 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
   padding:12px 16px; border-radius:12px; border:none; font-size:15px; font-weight:600;
   background:var(--green); color:#fff; cursor:pointer; width:100%;
 }
-.btn.sec{background:#fff; color:var(--green); border:1.5px solid var(--green);}
-.btn.ghost{background:#eef1ec; color:var(--ink);}
-.btn.danger{background:#fff; color:var(--danger); border:1.5px solid var(--danger);}
+.btn.sec{background:var(--card); color:var(--title); border:1.5px solid var(--green);}
+.btn.ghost{background:var(--soft); color:var(--ink);}
+.btn.danger{background:var(--card); color:var(--danger); border:1.5px solid var(--danger);}
 .btn.sm{padding:8px 12px; font-size:13px; width:auto; border-radius:10px;}
 .btn:disabled{opacity:.4;}
 .btnrow{display:flex; gap:8px; margin-top:10px;} .btnrow .btn{flex:1;}
 /* tab bar */
 nav.tabs{
   position:fixed; bottom:0; left:0; right:0; z-index:30;
-  background:#fff; border-top:1px solid var(--line);
+  background:var(--card); border-top:1px solid var(--line);
   display:flex; padding-bottom:env(safe-area-inset-bottom);
 }
 nav.tabs button{
@@ -98,39 +100,39 @@ nav.tabs button.on{color:var(--green); font-weight:700;}
 }
 .sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px #fff inset;}
 .statbar{display:flex; gap:6px; margin-top:10px;}
-.stat{flex:1; background:#eef1ec; border-radius:10px; padding:8px 4px; text-align:center;}
+.stat{flex:1; background:var(--soft); border-radius:10px; padding:8px 4px; text-align:center;}
 .stat b{display:block; font-size:17px;} .stat span{font-size:10.5px; color:var(--sub);}
 /* nudge pad */
-.nudge{display:none; margin-top:10px; background:#eef1ec; border-radius:12px; padding:10px; text-align:center;}
+.nudge{display:none; margin-top:10px; background:var(--soft); border-radius:12px; padding:10px; text-align:center;}
 .nudge.on{display:block;}
 .npad{display:grid; grid-template-columns:48px 48px 48px; gap:6px; justify-content:center; margin:6px 0;}
-.npad button{width:48px; height:42px; border-radius:10px; border:1px solid var(--line); background:#fff; font-size:17px; cursor:pointer;}
+.npad button{width:48px; height:42px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer;}
 .npad .blank{visibility:hidden;}
 table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
 table.tbl th{font-size:11px; color:var(--sub); text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); font-weight:600;}
-table.tbl td{padding:7px 6px; border-bottom:1px solid #eef0eb;}
+table.tbl td{padding:7px 6px; border-bottom:1px solid var(--line2);}
 table.tbl tr:last-child td{border-bottom:none;}
 .right{text-align:right;} .center{text-align:center;}
 .listItem{
   display:flex; justify-content:space-between; align-items:center; gap:8px;
-  padding:12px 4px; border-bottom:1px solid #eef0eb; cursor:pointer;
+  padding:12px 4px; border-bottom:1px solid var(--line2); cursor:pointer;
 }
 .listItem:last-child{border-bottom:none;}
 .listItem .t{font-weight:600;} .listItem .d{font-size:12px; color:var(--sub); margin-top:2px;}
 .listItem .big{font-size:20px; font-weight:800; color:var(--green); white-space:nowrap;}
 .listItem .big small{font-size:11px; color:var(--sub); font-weight:normal;}
-.badge{display:inline-block; font-size:10.5px; background:#eef1ec; color:var(--sub); border-radius:6px; padding:2px 6px; margin-right:4px;}
+.badge{display:inline-block; font-size:10.5px; background:var(--soft); color:var(--sub); border-radius:6px; padding:2px 6px; margin-right:4px;}
 .empty{color:var(--sub); font-size:13px; text-align:center; padding:18px 6px;}
 /* advice */
-.advice{background:#f0f7f1; border:1px solid #cfe5d4; border-radius:12px; padding:12px; margin-top:10px;}
-.advice .dir{font-size:17px; font-weight:800; color:var(--green); margin:4px 0;}
+.advice{background:var(--advBg); border:1px solid var(--advLine); border-radius:12px; padding:12px; margin-top:10px;}
+.advice .dir{font-size:17px; font-weight:800; color:var(--title); margin:4px 0;}
 .advice .note{font-size:11.5px; color:var(--sub); line-height:1.5;}
 .kv{display:flex; justify-content:space-between; font-size:13px; padding:4px 0;}
 .kv span:first-child{color:var(--sub);}
 /* modal */
 .ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
 .sheet{
-  background:#fff; width:100%; max-width:520px; border-radius:18px 18px 0 0; padding:16px;
+  background:var(--card); width:100%; max-width:520px; border-radius:18px 18px 0 0; padding:16px;
   max-height:88vh; overflow-y:auto; padding-bottom:calc(16px + env(safe-area-inset-bottom));
 }
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--green);}
@@ -147,34 +149,31 @@ table.tbl tr:last-child td{border-bottom:none;}
   z-index:40; background:var(--green); color:#fff; padding:11px 18px; border-radius:999px;
   font-size:13px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.35); cursor:pointer; display:none; white-space:nowrap;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#141714; --card:#1e231e; --ink:#e7eae5; --sub:#9aa396; --line:#343b34;
-    --green:#2f9e68; --green-l:#3c9a68; --accent:#2f9e68;
-  }
-  header.app{background:#143626;}
-  .chip{background:var(--card); color:var(--ink); border-color:#3a423a;}
-  .btn.sec{background:var(--card); color:#7fd0a2; border-color:#2f9e68;}
-  .btn.ghost{background:#2a302a; color:var(--ink);}
-  .btn.danger{background:var(--card); color:#ff8a80; border-color:#a33;}
-  .inp, select.inp, textarea.inp, input.inp[type="date"]{background:#262c26; color:var(--ink); border-color:#3a423a;}
-  nav.tabs{background:#1a1f1a; border-color:#2c332c;}
-  .stat, .nudge{background:#262c26;}
-  .npad button{background:#1e231e; color:var(--ink); border-color:#3a423a;}
-  .advice{background:#1c2b20; border-color:#2c4533;}
-  .sheet{background:#1e231e;}
-  table.tbl td{border-color:#2a312a;}
-  .listItem{border-color:#2a312a;}
-  .badge{background:#2a302a;}
-  .card h2{color:#7fd0a2;}
-  .advice .dir{color:#7fd0a2;}
+html.dark{
+  --bg:#141714; --card:#1e231e; --ink:#e7eae5; --sub:#9aa396; --line:#343b34; --line2:#2a312a;
+  --soft:#2a302a; --inpBg:#262c26; --hdr:#143626; --title:#7fd0a2; --advBg:#1c2b20; --advLine:#2c4533;
+  --green:#2f9e68; --green-l:#3c9a68; --accent:#2f9e68; --danger:#ff8a80;
 }
+@media (prefers-color-scheme: dark){
+  html.auto{
+    --bg:#141714; --card:#1e231e; --ink:#e7eae5; --sub:#9aa396; --line:#343b34; --line2:#2a312a;
+    --soft:#2a302a; --inpBg:#262c26; --hdr:#143626; --title:#7fd0a2; --advBg:#1c2b20; --advLine:#2c4533;
+    --green:#2f9e68; --green-l:#3c9a68; --accent:#2f9e68; --danger:#ff8a80;
+  }
+}
+details.adv{border:1px solid var(--line); border-radius:12px; padding:2px 12px 8px; margin-top:12px; background:var(--card);}
+details.adv summary{cursor:pointer; font-size:13px; color:var(--sub); padding:9px 0; list-style:none; font-weight:600;}
+details.adv summary::-webkit-details-marker{display:none;}
+details.adv summary::before{content:"▸ ";}
+details.adv[open] summary::before{content:"▾ ";}
+header.app .gear{margin-left:auto; background:none; border:none; color:#fff; font-size:21px; cursor:pointer; padding:4px;}
 </style>
 </head>
 <body>
 <header class="app">
   <div style="font-size:22px">🏹</div>
   <div><h1>Archery Note</h1><div class="sub">得点記録 &amp; サイト調整サポート</div></div>
+  <button class="gear" id="btnSettings" aria-label="設定">⚙</button>
 </header>
 <main id="main"></main>
 <nav class="tabs" id="tabs">
@@ -429,7 +428,6 @@ function renderRecord(m){
   m.innerHTML=`
   <div class="card">
     <h2>新しい練習を始める</h2>
-    <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
     <label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select>
     <label class="f">距離</label>
     <div class="chips" id="fDistChips">
@@ -437,21 +435,25 @@ function renderRecord(m){
       <div class="chip" data-d="custom">カスタム</div>
     </div>
     <div id="fDistCustomWrap" style="display:none"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
-    <div class="row">
-      <div><label class="f">的サイズ</label><select class="inp" id="fFace">
-        ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}<option value="T40">40cm 三つ目（縦）</option></select></div>
-      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
-    </div>
-    <div class="row">
-      <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
-      <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
-    </div>
-    <div class="hint">お使いのサイトの目盛りの読みをそのまま記入します。左右はセンター（エクステンションバー）からの目盛りで、<b>右なら 2、左なら -2</b> のように記録するのがおすすめ。数値で統一しておくと相関分析が使えます。わからなければ空欄でOK。</div>
-    <label class="f">天候・コンディション</label>
-    <div class="row">
-      <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
-      <input class="inp" id="fNote" placeholder="メモ（任意）">
-    </div>
+    <details class="adv">
+      <summary>詳細（日付・的・本数・サイト値・天候）</summary>
+      <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
+      <div class="row">
+        <div><label class="f">的サイズ</label><select class="inp" id="fFace">
+          ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}<option value="T40">40cm 三つ目（縦）</option></select></div>
+        <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
+      </div>
+      <div class="row">
+        <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
+        <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
+      </div>
+      <div class="hint">サイトの目盛りをそのまま記入（左右は<b>右なら 2、左なら -2</b>）。台帳に記録があれば自動入力されます。</div>
+      <label class="f">天候・コンディション</label>
+      <div class="row">
+        <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
+        <input class="inp" id="fNote" placeholder="メモ（任意）">
+      </div>
+    </details>
     <div class="btnrow"><button class="btn" id="fStart">▶ 記録開始</button></div>
     ${db.setups.length?"":`<div class="hint">💡 「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
   </div>`;
@@ -496,14 +498,13 @@ function renderActive(m){
     <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
     ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips" style="margin-bottom:8px">
       ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<div class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</div>`).join("")}
-      <span style="font-size:11px;color:var(--sub);align-self:center">← 的の表示サイズ</span>
     </div>`}
     <div class="tgWrap" id="tgWrap">
       ${targetMarkup(s.faceD,"tg",s.faceType)}
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
-    <div class="hint">タップ＆ドラッグで着弾位置 → 指を離して確定。<b>押したまま0.4秒で微調整モード</b>（動きがゆっくりになります）。下の矢チップをタップすると選択して微調整・削除できます。</div>
+    <div class="hint">タップ＆ドラッグ→離して確定 ・ <b>押したまま0.4秒で微調整</b> ・ 矢チップをタップで修正</div>
     <div class="scoreChips" id="curChips"></div>
     <div class="nudge" id="nudge">
       <div style="font-size:12px;color:var(--sub)">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
@@ -906,13 +907,14 @@ function renderSight(m){
       <div class="note">サイト値を数値で記録した複数回の練習から「ズレが0になる値」を推定しています。データが増えるほど精度が上がります。</div>
     </div>`:`<div class="hint">💡 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
     ${interpHtml}
-    <h2 style="margin-top:14px">換算設定</h2>
-    <div class="row">
-      <div><label class="f">アイ〜サイト距離 (mm)</label><input class="inp" id="sgEye" inputmode="numeric" value="${db.settings.eyeSight||850}"></div>
-      <div><label class="f">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70||""}" placeholder="例: 4"></div>
-      <div><label class="f">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70||""}" placeholder="例: 4"></div>
-    </div>
-    <div class="hint">クリック量は「サイトを1クリック動かすと70mで着弾が何cm動くか」。一度測っておくと提案がクリック数で出ます（他の距離へは自動換算）。</div>
+    <details class="adv">
+      <summary>クリック換算の設定（任意）</summary>
+      <div class="row">
+        <div><label class="f">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70||""}" placeholder="例: 4"></div>
+        <div><label class="f">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70||""}" placeholder="例: 4"></div>
+      </div>
+      <div class="hint">「サイトを1クリック動かすと70mで着弾が何cm動くか」。一度測って登録すると提案がクリック数でも出ます（他の距離へは自動換算）。アイ〜サイト距離は右上の⚙設定から。</div>
+    </details>
   </div>`:""}`;
   const sgSetup=$("#sgSetup");
   if(sgSetup) sgSetup.onchange=e=>{ ui.sightSel.setupId=e.target.value; render(); };
@@ -922,8 +924,6 @@ function renderSight(m){
   document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
     if(confirm("この記録を削除しますか？")){ db.sightMarks=db.sightMarks.filter(x=>x.id!==b.dataset.del); save(); render(); }
   });
-  const eye=$("#sgEye");
-  if(eye) eye.onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); render(); };
   const cv=$("#sgCalV"), ch=$("#sgCalH");
   if(cv) cv.onchange=e=>{ setup.calibV70=parseFloat(e.target.value)||null; save(); render(); };
   if(ch) ch.onchange=e=>{ setup.calibH70=parseFloat(e.target.value)||null; save(); render(); };
@@ -964,8 +964,28 @@ function renderGear(m){
       </div><div style="font-size:18px;color:var(--sub)">›</div></div>`;
     }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
     <div class="btnrow"><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
-  </div>
-  <div class="card"><h2>データ管理</h2>
+    <div class="hint">バックアップ・テーマなどは右上の <b>⚙設定</b> から。</div>
+  </div>`;
+  $("#gAdd").onclick=()=>openGearForm(null);
+  document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
+}
+
+/* ---------- ⚙ 設定 ---------- */
+function applyTheme(){
+  const t=db.settings.theme||"auto";
+  document.documentElement.className=t;
+}
+function openSettings(){
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  const th=db.settings.theme||"auto";
+  ovl.innerHTML=`<div class="sheet"><h3>⚙ 設定</h3>
+    <label class="f">テーマ</label>
+    <div class="chips" id="thChips">
+      ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<div class="chip ${th===v?"on":""}" data-th="${v}">${lb}</div>`).join("")}
+    </div>
+    <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
+    <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
+    <h3 style="margin-top:18px;font-size:14px">データ管理</h3>
     <div class="btnrow">
       <button class="btn sec" id="dExp">⬇ バックアップ保存</button>
       <button class="btn sec" id="dImp">⬆ 読み込み</button>
@@ -973,23 +993,30 @@ function renderGear(m){
     <input type="file" id="dFile" accept=".json" style="display:none">
     <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
     <div class="hint" style="color:var(--danger)">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
+    <div class="hint" style="text-align:center;margin-top:12px">Archery Note v${APP_VER}</div>
+    <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
   </div>`;
-  $("#gAdd").onclick=()=>openGearForm(null);
-  document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
-  $("#dExp").onclick=()=>{
+  document.body.appendChild(ovl);
+  ovl.querySelectorAll("#thChips .chip").forEach(c=>c.onclick=()=>{
+    db.settings.theme=c.dataset.th; save(); applyTheme();
+    ovl.querySelectorAll("#thChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+  });
+  ovl.querySelector("#setEye").onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); };
+  ovl.querySelector("#setClose").onclick=()=>{ ovl.remove(); render(); };
+  ovl.querySelector("#dExp").onclick=()=>{
     const blob=new Blob([JSON.stringify(db,null,1)],{type:"application/json"});
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
     a.download=`archery-note-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
   };
-  $("#dImp").onclick=()=>$("#dFile").click();
-  $("#dFile").onchange=e=>{
+  ovl.querySelector("#dImp").onclick=()=>ovl.querySelector("#dFile").click();
+  ovl.querySelector("#dFile").onchange=e=>{
     const f=e.target.files[0]; if(!f)return;
     const r=new FileReader();
     r.onload=()=>{ try{
       const d=JSON.parse(r.result);
       if(!d.sessions||!d.setups) throw 0;
       if(confirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`)){
-        db=Object.assign({settings:{eyeSight:850},active:null,sightMarks:[]},d); save(); render(); toast("読み込みました");
+        db=Object.assign({settings:{eyeSight:850},active:null,sightMarks:[]},d); save(); applyTheme(); ovl.remove(); render(); toast("読み込みました");
       }
     }catch(_){ toast("ファイルを読み込めませんでした"); } };
     r.readAsText(f);
@@ -1057,8 +1084,10 @@ function openGearForm(id){
 if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1")){
   navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
+applyTheme();
+$("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
-const APP_VER=3;
+const APP_VER=4;
 function checkUpdate(){
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
