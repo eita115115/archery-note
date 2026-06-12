@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1a5c3a">
 <link rel="manifest" href="manifest.json">
 <title>Archery Note — 得点記録 &amp; サイト調整</title>
@@ -38,6 +38,8 @@ label.f{display:block; font-size:12px; color:var(--sub); margin:10px 0 4px;}
   font-size:16px; background:#fff; color:var(--ink);
 }
 textarea.inp{resize:vertical; min-height:56px;}
+.inp{min-width:0; max-width:100%;}
+input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; background:#fff; min-height:44px;}
 .row{display:flex; gap:8px;} .row>*{flex:1; min-width:0;}
 .chips{display:flex; flex-wrap:wrap; gap:8px;}
 .chip{
@@ -193,6 +195,20 @@ function groupStats(arrows){
   const rr=Math.sqrt(arrows.reduce((a,p)=>a+(p.x-mx)**2+(p.y-my)**2,0)/n);
   return {n,mx,my,rr};
 }
+/* 外れ値（中心から2×RMSより遠い矢）を最大2回反復で除外した統計 */
+function robustStats(arrows){
+  let used=arrows.slice(), excluded=[];
+  for(let i=0;i<2 && used.length>=5;i++){
+    const st=groupStats(used);
+    const th=st.rr*2.0;
+    const out=used.filter(a=>Math.hypot(a.x-st.mx,a.y-st.my)>th);
+    if(!out.length) break;
+    excluded=excluded.concat(out);
+    used=used.filter(a=>Math.hypot(a.x-st.mx,a.y-st.my)<=th);
+  }
+  const st=groupStats(used);
+  return st?Object.assign(st,{used,excluded,total:arrows.length}):null;
+}
 
 /* ============ target SVG ============ */
 function targetMarkup(faceD, idPrefix){
@@ -220,9 +236,14 @@ function plotSession(sess, container){
   let html="";
   sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length]); }); });
   const all=sess.ends.flat();
-  const st=groupStats(all);
+  const st=robustStats(all);
   if(st){
     const w=ringW(faceD);
+    st.excluded.forEach(a=>{
+      const r=faceD/70;
+      html+=`<g><line x1="${a.x-r}" y1="${-a.y-r}" x2="${a.x+r}" y2="${-a.y+r}" stroke="#000" stroke-width="${faceD/300}"/>`+
+        `<line x1="${a.x-r}" y1="${-a.y+r}" x2="${a.x+r}" y2="${-a.y-r}" stroke="#000" stroke-width="${faceD/300}"/></g>`;
+    });
     html+=`<g><line x1="${st.mx-w*0.8}" y1="${-st.my}" x2="${st.mx+w*0.8}" y2="${-st.my}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<line x1="${st.mx}" y1="${-st.my-w*0.8}" x2="${st.mx}" y2="${-st.my+w*0.8}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<circle cx="${st.mx}" cy="${-st.my}" r="${st.rr}" fill="none" stroke="#000" stroke-dasharray="${faceD/60} ${faceD/120}" stroke-width="${faceD/400}"/></g>`;
@@ -237,7 +258,7 @@ function cmOffsetText(v, axis){
   return v>0?`上に ${a}cm`:`下に ${a}cm`;
 }
 function adviceFor(sess, setup){
-  const all=sess.ends.flat(); const st=groupStats(all);
+  const all=sess.ends.flat(); const st=robustStats(all);
   if(!st || st.n<3) return null;
   const dist=sess.dist;
   const eye=(db.settings.eyeSight||850);
@@ -275,7 +296,7 @@ function regressionAdvice(setupId, dist){
   [["sightV","my","v"],["sightH","mx","h"]].forEach(([key,axis,tag])=>{
     const pts=[];
     ss.forEach(s=>{
-      const v=parseFloat(s[key]); const st=groupStats(s.ends.flat());
+      const v=parseFloat(s[key]); const st=robustStats(s.ends.flat());
       if(isFinite(v) && st && st.n>=6) pts.push([v, st[axis]]);
     });
     const uniq=new Set(pts.map(p=>p[0]));
@@ -293,7 +314,7 @@ function latestMark(setupId, dist){
 
 /* ============ views ============ */
 let view="record";
-let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null };
+let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, zoom:1 };
 function showView(v){ view=v; ui.selArrow=-1; render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
@@ -329,12 +350,13 @@ function renderRecord(m){
     <div class="row">
       <div><label class="f">的サイズ</label><select class="inp" id="fFace">
         ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}</select></div>
-      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows"><option value="6">6本</option><option value="3">3本</option></select></div>
+      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
     <div class="row">
-      <div><label class="f">サイト 上下</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
-      <div><label class="f">サイト 左右</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2.0"></div>
+      <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
+      <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
     </div>
+    <div class="hint">お使いのサイトの目盛りの読みをそのまま記入します。左右はセンター（エクステンションバー）からの目盛りで、<b>右なら 2、左なら -2</b> のように記録するのがおすすめ。数値で統一しておくと相関分析が使えます。わからなければ空欄でOK。</div>
     <label class="f">天候・コンディション</label>
     <div class="row">
       <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
@@ -381,6 +403,10 @@ function renderActive(m){
   m.innerHTML=`
   <div class="card">
     <h2>記録中 <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${s.faceD}cm的 ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
+    <div class="chips" id="zoomChips" style="margin-bottom:8px">
+      ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<div class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</div>`).join("")}
+      <span style="font-size:11px;color:var(--sub);align-self:center">← 的の表示サイズ</span>
+    </div>
     <div class="tgWrap" id="tgWrap">
       ${targetMarkup(s.faceD,"tg")}
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
@@ -406,6 +432,13 @@ function renderActive(m){
   </div>
   <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>`;
   attachTargetInput(s);
+  function applyZoom(){ const M=s.faceD/2*1.18/(ui.zoom||1); $("#tgsvg").setAttribute("viewBox", `${-M} ${-M} ${2*M} ${2*M}`); }
+  document.querySelectorAll("#zoomChips .chip").forEach(c=>c.onclick=()=>{
+    ui.zoom=+c.dataset.z;
+    document.querySelectorAll("#zoomChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    applyZoom();
+  });
+  applyZoom();
   $("#bUndo").onclick=()=>{ if(s.cur.length){ s.cur.pop(); ui.selArrow=-1; save(); refreshActive(); } else toast("このエンドに矢がありません"); };
   $("#bEnd").onclick=()=>{
     if(!s.cur.length){ toast("矢を記録してください"); return; }
@@ -534,7 +567,7 @@ function openSummary(sess, isNew){
   const setup=db.setups.find(x=>x.id===sess.setupId);
   const all=sess.ends.flat();
   const total=all.reduce((a,x)=>a+x.s,0);
-  const st=groupStats(all);
+  const st=robustStats(all);
   const adv=adviceFor(sess, setup);
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet">
@@ -547,7 +580,8 @@ function openSummary(sess, isNew){
     </div>
     <div id="sumPlot" style="margin-top:10px"></div>
     ${st?`<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
-    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>`:""}
+    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
+    ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`:""}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
       <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm から計算した参考値です（サイトタブで変更可）。</div></div>`:""}
@@ -608,7 +642,7 @@ function openHistDetail(id){
   const ovl=document.createElement("div"); ovl.className="ovl";
   const all=sess.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
   const setup=db.setups.find(x=>x.id===sess.setupId);
-  const st=groupStats(all);
+  const st=robustStats(all);
   const adv=adviceFor(sess,setup);
   ovl.innerHTML=`<div class="sheet">
     <h3>${fmtD(sess.date)} ・ ${sess.dist}m ・ ${sess.faceD}cm的</h3>
@@ -621,7 +655,8 @@ function openHistDetail(id){
     </div>
     <div id="hPlot" style="margin-top:10px"></div>
     ${st?`<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
-    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>`:""}
+    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
+    ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`:""}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     <table class="tbl" style="margin-top:8px"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
     ${sess.ends.map((end,i)=>{
@@ -686,7 +721,7 @@ function renderSight(m){
   <div class="card">
     <h2>🔧 調整アドバイス <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
     ${adv?`
-      <div style="font-size:12px;color:var(--sub)">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本）の着弾傾向：</div>
+      <div style="font-size:12px;color:var(--sub)">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
       <div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
       <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
       :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
