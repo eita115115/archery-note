@@ -796,7 +796,8 @@ function renderGear(m){
       <button class="btn sec" id="dImp">⬆ 読み込み</button>
     </div>
     <input type="file" id="dFile" accept=".json" style="display:none">
-    <div class="hint">データはこの端末のブラウザ内に保存されます。機種変更前やこまめなバックアップに JSON 書き出しをご利用ください。</div>
+    <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
+    <div class="hint" style="color:var(--danger)">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
   </div>`;
   $("#gAdd").onclick=()=>openGearForm(null);
   document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
