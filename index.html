@@ -207,20 +207,23 @@ function faceLabel(s){ return s.faceType==="triple" ? "40cm三つ目" : `${s.fac
 /* ============ scoring ============ */
 function ringW(faceD){ return faceD/20; }
 const SPOT_Y=[22,0,-22]; /* 三つ目的のスポット中心(上・中・下, cm, y上向き) */
-function scoreAt(relX,relY,faceD,faceType){
-  const r=Math.hypot(relX,relY), w=ringW(faceD);
+/* 線かみ(ラインカッター)判定: シャフト外周が線に触れていれば内側の点数。
+   shaftCm = シャフト半径(cm)。中心点の距離からシャフト半径を引いて判定する。 */
+function scoreAt(relX,relY,faceD,faceType,shaftCm){
+  const w=ringW(faceD);
+  const r=Math.max(0, Math.hypot(relX,relY)-(shaftCm||0));
   if(r<=w/2) return {s:10,X:true};
   let s=11-Math.ceil(r/w);
   if(faceType==="triple" && s<6) s=0;
   if(s<1) s=0;
   return {s:Math.min(10,Math.max(0,s)),X:false};
 }
-function hitFromGlobal(gx,gy,faceD,faceType){
-  if(faceType!=="triple"){ return Object.assign({x:gx,y:gy}, scoreAt(gx,gy,faceD,faceType)); }
+function hitFromGlobal(gx,gy,faceD,faceType,shaftCm){
+  if(faceType!=="triple"){ return Object.assign({x:gx,y:gy}, scoreAt(gx,gy,faceD,faceType,shaftCm)); }
   let spot=0,best=Infinity;
   SPOT_Y.forEach((c,i)=>{ const d=Math.hypot(gx,gy-c); if(d<best){best=d;spot=i;} });
   const rx=gx, ry=gy-SPOT_Y[spot];
-  return Object.assign({x:rx,y:ry,spot}, scoreAt(rx,ry,faceD,"triple"));
+  return Object.assign({x:rx,y:ry,spot}, scoreAt(rx,ry,faceD,"triple",shaftCm));
 }
 function zoneStyle(s,X){
   if(s>=9) return {bg:"var(--gold)",fg:"#1c1e1c"};
@@ -479,9 +482,12 @@ function renderRecord(m){
     const d=distState.d;
     if(!d){ toast("距離を入力してください"); return; }
     const fv=faceSel.value;
+    const selSetup=db.setups.find(x=>x.id===$("#fSetup").value);
+    const dia=Math.min(9.3, Math.max(3, parseFloat(selSetup&&selSetup.arrowDia)||5.7));
     db.active={
       id:uid(), date:$("#fDate").value||today(), setupId:$("#fSetup").value||null,
       dist:d, faceD: fv==="T40"?40:+fv, faceType: fv==="T40"?"triple":"single", perEnd:+$("#fArrows").value,
+      shaft:+(dia/20).toFixed(3),
       sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
       wx:$("#fWx").value, note:$("#fNote").value.trim(),
       ends:[], cur:[]
@@ -595,7 +601,7 @@ function nudgeArrow(dirKey){
   if(dirKey==="del"){ s.cur.splice(ui.selArrow,1); ui.selArrow=-1; save(); refreshActive(); return; }
   const a=s.cur[ui.selArrow], step=s.faceD/200;
   if(dirKey==="u")a.y+=step; if(dirKey==="d")a.y-=step; if(dirKey==="l")a.x-=step; if(dirKey==="r")a.x+=step;
-  Object.assign(a, scoreAt(a.x,a.y,s.faceD,s.faceType));
+  Object.assign(a, scoreAt(a.x,a.y,s.faceD,s.faceType,s.shaft||0));
   save(); refreshActive();
 }
 
@@ -650,7 +656,7 @@ function attachTargetInput(s){
     if(s.faceType==="triple"){ MX=14; MY=36; }
     const p={x:Math.max(-MX,Math.min(MX,drag.p.x)), y:Math.max(-MY,Math.min(MY,drag.p.y))};
     drag=null; cur.innerHTML=""; lens.style.display="none"; lens.classList.remove("fine"); lensTag.style.display="none";
-    const hit=hitFromGlobal(p.x,p.y,s.faceD,s.faceType);
+    const hit=hitFromGlobal(p.x,p.y,s.faceD,s.faceType,s.shaft||0);
     const rec={x:+hit.x.toFixed(2), y:+hit.y.toFixed(2), s:hit.s, X:hit.X};
     if(hit.spot!=null) rec.spot=hit.spot;
     s.cur.push(rec);
@@ -950,7 +956,7 @@ function openMarkForm(setupId,dist){
 
 /* ---------- 用具 ---------- */
 const GEAR_FIELDS=[
-  ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["arrow","矢 (シャフト/長さ/ポイント)"],
+  ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["arrow","矢 (シャフト/長さ/ポイント)"],["arrowDia","矢の直径 (mm) — 線かみ判定に使用"],
   ["brace","ブレースハイト"],["tiller","ティラー"],["plunger","プランジャー"],["nock","ノッキングポイント"],["notes","その他メモ"]
 ];
 function renderGear(m){
@@ -1087,7 +1093,7 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
-const APP_VER=4;
+const APP_VER=5;
 function checkUpdate(){
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
