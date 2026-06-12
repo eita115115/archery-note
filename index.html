@@ -22,7 +22,9 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
   background:var(--bg); color:var(--ink); font-size:15px;
   padding-bottom:calc(64px + env(safe-area-inset-bottom));
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
 }
+input, textarea{-webkit-user-select:auto; user-select:auto;}
 header.app{
   background:var(--green); color:#fff; padding:10px 16px;
   padding-top:calc(10px + env(safe-area-inset-top));
@@ -618,6 +620,8 @@ function attachTargetInput(s){
     lens.style.left = half? "auto":"8px"; lens.style.right = half? "8px":"auto";
     lensTag.style.left = half? "auto":"12px"; lensTag.style.right = half? "12px":"auto";
   }
+  svg.addEventListener("contextmenu", e=>e.preventDefault());
+  svg.addEventListener("selectstart", e=>e.preventDefault());
   svg.addEventListener("pointerdown", e=>{
     if(s.cur.length>=s.perEnd){ toast(`1エンド${s.perEnd}本です。「エンド確定」を押してください`); return; }
     e.preventDefault(); svg.setPointerCapture(e.pointerId);
@@ -1054,7 +1058,7 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
   navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
-const APP_VER=2;
+const APP_VER=3;
 function checkUpdate(){
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
