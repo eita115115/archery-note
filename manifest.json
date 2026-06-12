@@ -1,0 +1,11 @@
+{
+  "name": "Archery Note — 得点記録 & サイト調整",
+  "short_name": "ArcheryNote",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f5f2",
+  "theme_color": "#1a5c3a",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
