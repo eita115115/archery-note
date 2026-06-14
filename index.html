@@ -267,19 +267,61 @@ function groupStats(arrows){
   const sy=Math.sqrt(arrows.reduce((a,p)=>a+(p.y-my)**2,0)/n);
   return {n,mx,my,rr,sx,sy};
 }
-/* 外れ値（中心から2×RMSより遠い矢）を最大2回反復で除外した統計 */
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function median(vals){
+  const a=vals.filter(Number.isFinite).sort((x,y)=>x-y);
+  if(!a.length) return 0;
+  const m=Math.floor(a.length/2);
+  return a.length%2?a[m]:(a[m-1]+a[m])/2;
+}
+function weightedStats(arrows, weights){
+  const n=arrows.length;
+  const sw=weights.reduce((a,w)=>a+w,0);
+  if(!n || sw<=0) return groupStats(arrows);
+  const mx=arrows.reduce((a,p,i)=>a+p.x*weights[i],0)/sw;
+  const my=arrows.reduce((a,p,i)=>a+p.y*weights[i],0)/sw;
+  const rr=Math.sqrt(arrows.reduce((a,p,i)=>a+weights[i]*((p.x-mx)**2+(p.y-my)**2),0)/sw);
+  const sx=Math.sqrt(arrows.reduce((a,p,i)=>a+weights[i]*(p.x-mx)**2,0)/sw);
+  const sy=Math.sqrt(arrows.reduce((a,p,i)=>a+weights[i]*(p.y-my)**2,0)/sw);
+  return {n,mx,my,rr,sx,sy};
+}
+/* 中央値/MADと重み付き中心で、明らかな外れ値を除いたグルーピング統計 */
 function robustStats(arrows){
-  let used=arrows.slice(), excluded=[];
-  for(let i=0;i<2 && used.length>=5;i++){
-    const st=groupStats(used);
-    const th=st.rr*2.0;
-    const out=used.filter(a=>Math.hypot(a.x-st.mx,a.y-st.my)>th);
-    if(!out.length) break;
-    excluded=excluded.concat(out);
-    used=used.filter(a=>Math.hypot(a.x-st.mx,a.y-st.my)<=th);
+  const total=arrows.length;
+  if(!total) return null;
+  if(total<5){
+    const st=groupStats(arrows);
+    return Object.assign(st,{used:arrows.slice(),excluded:[],total,method:"simple",confidence:total>=3?.55:.35});
   }
-  const st=groupStats(used);
-  return st?Object.assign(st,{used,excluded,total:arrows.length}):null;
+  const cx=median(arrows.map(a=>a.x)), cy=median(arrows.map(a=>a.y));
+  const ds=arrows.map(a=>Math.hypot(a.x-cx,a.y-cy));
+  const md=median(ds);
+  const mad=median(ds.map(d=>Math.abs(d-md)));
+  const base=groupStats(arrows);
+  const sigma=Math.max(1.4826*mad, base.rr*.35, 0.01);
+  const limit=Math.max(md+3*sigma, md*2.2, base.rr*1.65);
+  let used=[], excluded=[];
+  const maxExcluded=Math.floor(total*.25);
+  arrows.forEach((a,i)=>{
+    const obvious=ds[i]>limit && ds[i]>md+2.4*sigma && excluded.length<maxExcluded;
+    (obvious?excluded:used).push(a);
+  });
+  if(used.length<Math.max(3,total-excluded.length)){
+    used=arrows.slice(); excluded=[];
+  }
+  const ux=median(used.map(a=>a.x)), uy=median(used.map(a=>a.y));
+  const uds=used.map(a=>Math.hypot(a.x-ux,a.y-uy));
+  const udm=median(uds);
+  const scale=Math.max(udm+3*median(uds.map(d=>Math.abs(d-udm))), base.rr, 0.01);
+  const weights=used.map(a=>{
+    const u=Math.hypot(a.x-ux,a.y-uy)/scale;
+    return u>=1?0.05:(1-u*u)**2;
+  });
+  const st=weightedStats(used, weights);
+  const outRate=excluded.length/total;
+  const sample=clamp((used.length-2)/10,.35,1);
+  const outPenalty=clamp(1-outRate*1.6,.55,1);
+  return Object.assign(st,{used,excluded,total,method:"median-biweight",confidence:sample*outPenalty});
 }
 
 /* ============ target SVG ============ */
@@ -361,25 +403,70 @@ function cmOffsetText(v, axis){
   if(axis==="x") return v>0?`右に ${a}cm`:`左に ${a}cm`;
   return v>0?`上に ${a}cm`:`下に ${a}cm`;
 }
+function pct(v){ return `${Math.round(v*100)}%`; }
+function sightTrend(setupId){
+  if(!setupId) return null;
+  const byDist={};
+  db.sightMarks.filter(m=>m.setupId===setupId).forEach(m=>{
+    const v=parseFloat(m.v);
+    if(isFinite(v)) byDist[m.dist]=v;
+  });
+  const pts=Object.keys(byDist).map(d=>[+d,byDist[d]]).sort((a,b)=>a[0]-b[0]);
+  if(pts.length<2) return null;
+  const r=regress(pts);
+  return r?{pts,slope:r.b,est:d=>r.a+r.b*d}:null;
+}
+function adviceModel(sess, setup, st){
+  const dist=sess.dist, w=ringW(sess.faceD);
+  const facePenalty=st.rr>w*2.8?.82:st.rr>w*2.0?.9:1;
+  const confidence=clamp((st.confidence||.6)*facePenalty,.35,1);
+  const nudge=clamp(.45+confidence*.55,.55,1);
+  const p=parseFloat(setup&&setup.poundage);
+  let vFactor=nudge, hFactor=nudge, notes=[];
+  notes.push(`信頼度 ${pct(confidence)}（${st.n}本使用${st.excluded.length?` / 外れ値${st.excluded.length}本除外`:""}）。初回補正率は ${pct(nudge)} です。`);
+  if(isFinite(p)){
+    if(dist>=50 && p<36){
+      vFactor*=.88;
+      notes.push(`ポンドが控えめで長距離のため、上下は軌道変化の影響を見て少し控えめにします。`);
+    }else if(dist>=50 && p>=42){
+      vFactor*=1.04;
+      notes.push(`ポンドが高めで弾道が比較的フラットな前提として、上下補正を少し強めにできます。`);
+    }
+  }
+  const tr=sightTrend(setup&&setup.id);
+  if(tr){
+    const span=tr.pts[tr.pts.length-1][0]-tr.pts[0][0];
+    notes.push(`距離別サイト値 ${tr.pts.length}点から軌道傾向を参照中（${tr.pts[0][0]}〜${tr.pts[tr.pts.length-1][0]}m）。`);
+    if(span>=30 && Math.abs(tr.slope)>.03) vFactor*=1.02;
+  }
+  if(st.n<6) notes.push("本数が少ないため、数本確認してから追加調整する前提の提案です。");
+  if(st.rr>w*2.5) notes.push("グルーピングが広めなので、サイトより射形・風・照準の再現性も同時に見てください。");
+  return {confidence,vFactor:clamp(vFactor,.45,1.1),hFactor:clamp(hFactor,.45,1.05),notes};
+}
 function adviceFor(sess, setup){
   const all=sess.ends.flat(); const st=robustStats(all);
   if(!st || st.n<3) return null;
   const dist=sess.dist;
   const eye=(db.settings.eyeSight||850);
-  const out={st, lines:[]};
-  const TH=ringW(sess.faceD)/8; // 無視できるズレのしきい値
+  const model=adviceModel(sess, setup, st);
+  const out={st, lines:[], notes:model.notes, confidence:model.confidence};
+  const TH=Math.max(ringW(sess.faceD)/8, st.rr*.10); // 無視できるズレのしきい値
   // 上下
   if(Math.abs(st.my)>TH){
-    const mm=(Math.abs(st.my)*10*eye/(dist*1000));
-    let l=`サイトを<b>${st.my>0?"上":"下"}</b>へ（グルーピング中心が${cmOffsetText(st.my,"y")}） — 目安 ${mm.toFixed(1)}mm`;
-    if(setup && setup.calibV70){ const cpc=setup.calibV70*dist/70; l+=` ≒ ${(Math.abs(st.my)/cpc).toFixed(1)}クリック`; }
+    const adj=Math.abs(st.my)*model.vFactor;
+    const mm=(adj*10*eye/(dist*1000));
+    let l=`サイトを<b>${st.my>0?"上":"下"}</b>へ（中心は${cmOffsetText(st.my,"y")}、補正 ${pct(model.vFactor)}） — 目安 ${mm.toFixed(1)}mm`;
+    if(setup && setup.calibV70){ const cpc=setup.calibV70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
+    if(sess.sightV) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightV)}</span>`;
     out.lines.push({axis:"v", html:l});
   }
   // 左右
   if(Math.abs(st.mx)>TH){
-    const mm=(Math.abs(st.mx)*10*eye/(dist*1000));
-    let l=`サイトを<b>${st.mx>0?"右":"左"}</b>へ（グルーピング中心が${cmOffsetText(st.mx,"x")}） — 目安 ${mm.toFixed(1)}mm`;
-    if(setup && setup.calibH70){ const cpc=setup.calibH70*dist/70; l+=` ≒ ${(Math.abs(st.mx)/cpc).toFixed(1)}クリック`; }
+    const adj=Math.abs(st.mx)*model.hFactor;
+    const mm=(adj*10*eye/(dist*1000));
+    let l=`サイトを<b>${st.mx>0?"右":"左"}</b>へ（中心は${cmOffsetText(st.mx,"x")}、補正 ${pct(model.hFactor)}） — 目安 ${mm.toFixed(1)}mm`;
+    if(setup && setup.calibH70){ const cpc=setup.calibH70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
+    if(sess.sightH) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightH)}</span>`;
     out.lines.push({axis:"h", html:l});
   }
   if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です 👏"});
@@ -743,6 +830,7 @@ function openSummary(sess, isNew){
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
       ${shapeNote(adv.st)}
+      ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm から計算した参考値です（サイトタブで変更可）。</div></div>`:""}
     ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
     <div class="btnrow"><button class="btn ghost" id="sumClose">閉じる</button></div>
@@ -934,6 +1022,7 @@ function renderSight(m){
       <div style="font-size:12px;color:var(--sub)">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
       <div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
       ${shapeNote(adv.st)}
+      ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
       :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
     ${(reg.v||reg.h)?`<div class="advice">
@@ -1123,7 +1212,7 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
-const APP_VER=7;
+const APP_VER=8;
 function checkUpdate(){
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
