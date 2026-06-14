@@ -193,12 +193,65 @@ header.app .gear{margin-left:auto; background:none; border:none; color:#fff; fon
 "use strict";
 /* ============ storage ============ */
 const KEY="archeryNote.v1";
+const SNAP_KEY="archeryNote.snapshots.v1";
+const SCHEMA_VER=2;
+const APP_VER=13;
 let db = load();
-function load(){
-  try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d && d.sessions) return Object.assign({setups:[],sightMarks:[],sessions:[],settings:{eyeSight:850},active:null}, d); }catch(e){}
-  return {setups:[], sightMarks:[], sessions:[], settings:{eyeSight:850}, active:null};
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],settings:{eyeSight:850,theme:"auto"},active:null}; }
+function normalizeDb(d){
+  const base=blankDb(), src=(d&&typeof d==="object")?d:{};
+  const out=Object.assign(base,src);
+  out.settings=Object.assign(base.settings,src.settings||{});
+  ["setups","sightMarks","sessions"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  if(out.active==null) out.active=null;
+  out.schema=SCHEMA_VER;
+  return out;
 }
-function save(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+function load(){
+  try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d && d.sessions) return normalizeDb(d); }catch(e){}
+  return blankDb();
+}
+function dataCounts(d=db){
+  return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length};
+}
+function hashText(s){
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  return (h>>>0).toString(36);
+}
+function readSnapshots(){
+  try{ const a=JSON.parse(localStorage.getItem(SNAP_KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; }
+}
+function snapshotLabel(s){
+  const c=s.counts||dataCounts(s.data||{});
+  return `${new Date(s.ts||Date.now()).toLocaleString()}（練習${c.sessions||0} / 用具${c.setups||0} / サイト${c.marks||0}）`;
+}
+function writeSafetySnapshot(reason="auto", force=false){
+  try{
+    const raw=JSON.stringify(db), h=hashText(raw), now=Date.now();
+    let snaps=readSnapshots().filter(s=>s&&s.hash!==h);
+    const latest=readSnapshots()[0];
+    if(!force && latest && latest.hash===h) return;
+    if(!force && latest && now-(latest.ts||0)<30*60*1000) return;
+    snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
+    snaps=snaps.slice(0,6);
+    for(;;){
+      try{ localStorage.setItem(SNAP_KEY,JSON.stringify(snaps)); break; }
+      catch(e){ if(snaps.length<=1) throw e; snaps.pop(); }
+    }
+  }catch(e){ console.warn("snapshot failed",e); }
+}
+function save(opts){
+  const o=typeof opts==="string"?{reason:opts}:opts||{};
+  db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
+  try{
+    localStorage.setItem(KEY, JSON.stringify(db));
+    writeSafetySnapshot(o.reason||"auto", !!o.forceSnapshot);
+  }catch(e){
+    console.error(e);
+    try{ toast("保存容量が足りません。設定からバックアップ保存してください"); }catch(_){}
+  }
+}
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -651,7 +704,8 @@ function regress(pts){
   let vx=0,cv=0; pts.forEach(p=>{vx+=(p[0]-xb)**2; cv+=(p[0]-xb)*(p[1]-yb);});
   if(vx<1e-9) return null;
   const b=cv/vx, a=yb-b*xb;
-  return {a,b,zero: Math.abs(b)>1e-9? -a/b : null};
+  let ss=0,se=0; pts.forEach(p=>{ ss+=(p[1]-yb)**2; se+=(p[1]-(a+b*p[0]))**2; });
+  return {a,b,zero: Math.abs(b)>1e-9? -a/b : null,r2:ss>1e-9?clamp(1-se/ss,0,1):0,kind:"linear",est:d=>a+b*d};
 }
 function robustLine(pts){
   if(pts.length<2) return null;
@@ -666,6 +720,27 @@ function robustLine(pts){
   const yb=pts.reduce((s,p)=>s+p[1],0)/pts.length;
   let ss=0,se=0; pts.forEach(p=>{ ss+=(p[1]-yb)**2; se+=(p[1]-(a+b*p[0]))**2; });
   return {a,b,zero:Math.abs(b)>1e-9?-a/b:null,r2:ss>1e-9?clamp(1-se/ss,0,1):0};
+}
+function solve3(A,b){
+  const m=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<3;c++){
+    let piv=c; for(let r=c+1;r<3;r++) if(Math.abs(m[r][c])>Math.abs(m[piv][c])) piv=r;
+    if(Math.abs(m[piv][c])<1e-9) return null;
+    [m[c],m[piv]]=[m[piv],m[c]];
+    const div=m[c][c]; for(let k=c;k<4;k++) m[c][k]/=div;
+    for(let r=0;r<3;r++) if(r!==c){ const f=m[r][c]; for(let k=c;k<4;k++) m[r][k]-=f*m[c][k]; }
+  }
+  return [m[0][3],m[1][3],m[2][3]];
+}
+function quadraticFit(pts){
+  if(pts.length<4) return null;
+  const sx=[0,0,0,0,0], sy=[0,0,0];
+  pts.forEach(([x,y])=>{ let p=1; for(let i=0;i<5;i++){ sx[i]+=p; p*=x; } sy[0]+=y; sy[1]+=x*y; sy[2]+=x*x*y; });
+  const coef=solve3([[sx[0],sx[1],sx[2]],[sx[1],sx[2],sx[3]],[sx[2],sx[3],sx[4]]],sy);
+  if(!coef) return null;
+  const [a,b,c]=coef, yb=pts.reduce((s,p)=>s+p[1],0)/pts.length;
+  let ss=0,se=0; pts.forEach(([x,y])=>{ const e=a+b*x+c*x*x; ss+=(y-yb)**2; se+=(y-e)**2; });
+  return {a,b,c,kind:"curve",r2:ss>1e-9?clamp(1-se/ss,0,1):0,est:d=>a+b*d+c*d*d};
 }
 /* setup+distance のセッション群から「ズレ0になるサイト値」を回帰推定 */
 function regressionAdvice(setupId, dist){
@@ -693,9 +768,26 @@ function sightInterp(setupId){
     .forEach(m=>{ const v=parseFloat(m.v); if(isFinite(v)) byDist[m.dist]=v; });
   const pts=Object.keys(byDist).map(d=>[+d, byDist[d]]).sort((a,b)=>a[0]-b[0]);
   if(pts.length<2) return null;
-  const r=regress(pts);
-  if(!r) return null;
-  return {pts, have:pts.map(p=>p[0]), est:d=>r.a+r.b*d};
+  const line=regress(pts);
+  if(!line) return null;
+  const curve=quadraticFit(pts);
+  const model=(curve && curve.r2>line.r2+.04)?curve:line;
+  return {pts, have:pts.map(p=>p[0]), model:model.kind, r2:model.r2, est:model.est};
+}
+function calibrationProfile(setupId){
+  const setup=db.setups.find(x=>x.id===setupId)||{};
+  const dists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist));
+  const sess=db.sessions.filter(s=>s.setupId===setupId);
+  const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;
+  const rich=gearPrecisionProfile(setup);
+  const score=clamp(dists.size*.12 + Math.min(withSight,10)*.035 + rich.score*.32 + (String(setup.arrowSpeed||"").trim()?0.14:0),0,1);
+  const level=score>=.72?"高":score>=.42?"中":"育成中";
+  const next=[];
+  if(dists.size<3) next.push("異なる距離のサイト値");
+  if(withSight<5) next.push("練習開始時のサイト値");
+  if(!setup.arrowSpeed) next.push("実測初速");
+  if(rich.score<.65) next.push("矢重量/FOC/ベイン");
+  return {score,level,dists:dists.size,withSight,gearLevel:rich.level,next};
 }
 function latestMark(setupId, dist){
   const ms=db.sightMarks.filter(m=>m.setupId===setupId && m.dist===dist).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.ts||0)-(a.ts||0));
@@ -1168,13 +1260,14 @@ function renderSight(m){
   const adv=lastSess?adviceFor(lastSess, setup):null;
   const reg=sid?regressionAdvice(sid,dist):{};
   const interp=sid?sightInterp(sid):null;
+  const cal=sid?calibrationProfile(sid):null;
   let interpHtml="";
   if(interp){
     const preds=[18,30,50,70].filter(d=>!interp.have.includes(d)).map(d=>`<div class="chip">${d}m → <b>${interp.est(d).toFixed(1)}</b></div>`);
     interpHtml=`<h2 style="margin-top:14px">📏 サイトマーク予測（上下）</h2>
-      <div style="font-size:12px;color:var(--sub)">実測: ${interp.pts.map(p=>`${p[0]}m = ${p[1]}`).join(" ・ ")}</div>
+      <div style="font-size:12px;color:var(--sub)">実測: ${interp.pts.map(p=>`${p[0]}m = ${p[1]}`).join(" ・ ")} / ${interp.model==="curve"?"カーブ近似":"直線近似"} / 一致度${pct(interp.r2||0)}</div>
       ${preds.length?`<div class="chips" style="margin-top:8px">${preds.join("")}</div>`:`<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
-      <div class="hint">2距離以上の実測サイト値からの直線近似です。実際はわずかにカーブするので、新しい距離の最初の数本は慎重に。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
+      <div class="hint">2距離以上の実測サイト値から予測します。4距離以上ある場合は、弾道に近いカーブ近似が有効なときだけ自動採用します。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
   }
   m.innerHTML=`
   <div class="card">
@@ -1188,6 +1281,11 @@ function renderSight(m){
       <span style="font-size:17px;font-weight:800">${cur?`上下 ${esc(cur.v||"—")} ・ 左右 ${esc(cur.h||"—")}`:"未登録"}</span></div>
       ${cur?`<div class="note">${fmtD(cur.date)} ${esc(cur.note||"")}</div>`:""}
     </div>
+    ${cal?`<div class="advice" style="background:var(--card);border-color:var(--line)">
+      <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score*100)}%）</span></div>
+      <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
+      ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
+    </div>`:""}
     <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button></div>
     ${marks.length?`<table class="tbl" style="margin-top:10px"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
       ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
@@ -1472,6 +1570,7 @@ function applyTheme(){
 function openSettings(){
   const ovl=document.createElement("div"); ovl.className="ovl";
   const th=db.settings.theme||"auto";
+  const snaps=readSnapshots();
   ovl.innerHTML=`<div class="sheet"><h3>⚙ 設定</h3>
     <label class="f">テーマ</label>
     <div class="chips" id="thChips">
@@ -1485,6 +1584,12 @@ function openSettings(){
       <button class="btn sec" id="dImp">⬆ 読み込み</button>
     </div>
     <input type="file" id="dFile" accept=".json" style="display:none">
+    <h3 style="margin-top:18px;font-size:14px">自動退避</h3>
+    ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動退避はまだありません。保存操作を行うと端末内に退避データが残ります。</div>`}
+    <div class="btnrow">
+      <button class="btn sec" id="dSnapNow">今すぐ退避</button>
+      <button class="btn ghost" id="dSnapRestore" ${snaps.length?"":"disabled"}>選択した退避を復元</button>
+    </div>
     <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
     <div class="hint" style="color:var(--danger)">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
     <div class="hint" style="text-align:center;margin-top:12px">Archery Note v${APP_VER}</div>
@@ -1502,6 +1607,18 @@ function openSettings(){
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
     a.download=`archery-note-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
   };
+  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータを退避しました"); ovl.remove(); openSettings(); };
+  ovl.querySelector("#dSnapRestore").onclick=()=>{
+    const sel=ovl.querySelector("#dSnapSel");
+    const snap=readSnapshots()[sel?+sel.value:0];
+    if(!snap||!snap.data){ toast("復元できる退避データがありません"); return; }
+    if(confirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先に退避してから置き換えます。よろしいですか？`)){
+      writeSafetySnapshot("restore-before",true);
+      db=normalizeDb(snap.data);
+      save({reason:"restore",forceSnapshot:true});
+      applyTheme(); ovl.remove(); render(); toast("退避データを復元しました");
+    }
+  };
   ovl.querySelector("#dImp").onclick=()=>ovl.querySelector("#dFile").click();
   ovl.querySelector("#dFile").onchange=e=>{
     const f=e.target.files[0]; if(!f)return;
@@ -1510,7 +1627,8 @@ function openSettings(){
       const d=JSON.parse(r.result);
       if(!d.sessions||!d.setups) throw 0;
       if(confirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`)){
-        db=Object.assign({settings:{eyeSight:850},active:null,sightMarks:[]},d); save(); applyTheme(); ovl.remove(); render(); toast("読み込みました");
+        writeSafetySnapshot("import-before",true);
+        db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); ovl.remove(); render(); toast("読み込みました");
       }
     }catch(_){ toast("ファイルを読み込めませんでした"); } };
     r.readAsText(f);
@@ -1604,7 +1722,6 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
-const APP_VER=12;
 function checkUpdate(){
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
