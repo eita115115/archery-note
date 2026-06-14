@@ -417,10 +417,18 @@ function sightTrend(setupId){
   return r?{pts,slope:r.b,est:d=>r.a+r.b*d}:null;
 }
 function num(v){ const n=parseFloat(v); return isFinite(n)?n:null; }
+function estimatedTotalArrowWeight(setup){
+  const explicit=num(setup&&setup.arrowWeight);
+  if(explicit!=null) return explicit;
+  const gpi=num(setup&&setup.shaftGpi), len=num(setup&&setup.arrowLength);
+  if(gpi==null || len==null) return null;
+  const point=num(setup&&setup.pointWeight)||100;
+  return gpi*len+point+27;
+}
 function physicsProfile(setup){
   const p=num(setup&&setup.poundage);
   const drawIn=num(setup&&setup.drawLength)||28;
-  const massGr=num(setup&&setup.arrowWeight) || (p?clamp(p*8.4,260,520):330);
+  const massGr=estimatedTotalArrowWeight(setup) || (p?clamp(p*8.4,260,520):330);
   const diaMm=num(setup&&setup.arrowDia)||5.7;
   const speedRaw=num(setup&&setup.arrowSpeed);
   const measuredSpeed=speedRaw!=null;
@@ -1165,9 +1173,60 @@ function openMarkForm(setupId,dist){
 }
 
 /* ---------- 用具 ---------- */
+const CATALOG_SHAFTS=[
+  {id:"x10",name:"EASTON X10",aliases:["X10"],type:"carbon",dia:5.5,gpiA:3.8,gpiB:1950,sizes:[1000,900,830,750,700,650,600,550,500,450,410,380,350,325]},
+  {id:"x10-32",name:"EASTON X10 3.2mm Parallel Pro",aliases:["X10 3.2","3.2MM PARALLEL PRO"],type:"carbon",dia:3.2,gpiA:3.4,gpiB:2200,sizes:[1000,900,800,750,700,650,600,550,500,460,420,380,340]},
+  {id:"ace",name:"EASTON A/C/E",aliases:["A/C/E","ACE"],type:"carbon",dia:5.5,gpiA:4.0,gpiB:1450,sizes:[1250,1100,1000,920,850,780,720,670,620,570,520,470,430,400,370]},
+  {id:"x10-4",name:"EASTON X10 4mm Parallel Pro",aliases:["X10 4MM","4MM PARALLEL PRO"],type:"carbon",dia:4.0,gpiA:4.4,gpiB:2000,sizes:[1150,1000,880,810,710,660,610,570,520,470,420,380,340,300,250]},
+  {id:"superdrive23",name:"EASTON SuperDrive 23",aliases:["SUPERDRIVE 23","SD23"],type:"carbon",dia:9.3,gpiA:7.0,gpiB:900,sizes:[475,375,325]},
+  {id:"superdrive-micro",name:"EASTON SuperDrive Micro",aliases:["SUPERDRIVE MICRO"],type:"carbon",dia:4.0,gpiA:4.9,gpiB:1800,sizes:[950,850,750,675,625,575,525,475,425,375,325]},
+  {id:"avance",name:"EASTON Avance",aliases:["AVANCE"],type:"carbon",dia:4.2,gpiA:4.1,gpiB:1700,sizes:[2000,1800,1600,1400,1150,1000,900,810,730,660,600,550,500,450,400,340]},
+  {id:"avance-sport",name:"EASTON Avance Sport",aliases:["AVANCE SPORT"],type:"carbon",dia:4.2,gpiA:4.4,gpiB:1600,sizes:[2000,1800,1600,1400,1150,1000,900,810,730,660,600,550,500,450,400,340]},
+  {id:"vector",name:"EASTON Vector",aliases:["VECTOR"],type:"carbon",dia:5.0,gpiA:3.2,gpiB:1300,sizes:[2000,1800,1600,1400,1200,1000,800,600]},
+  {id:"revelation",name:"Black Eagle Revelation",aliases:["REVELATION","BLACK EAGLE"],type:"carbon",dia:5.0,gpiA:5.0,gpiB:1800,sizes:[800,750,700,650,600,550,500,450,400,350,300]},
+  {id:"paragon",name:"SKYLON Carbon Paragon",aliases:["PARAGON","SKYLON"],type:"carbon",dia:4.2,gpiA:4.6,gpiB:1800,sizes:[1000,900,850,800,750,700,650,600,550,500,450,400,350]},
+  {id:"x23",name:"EASTON X23",aliases:["X23"],type:"aluminum",sizes:[2312,2314,2315,2318]},
+  {id:"x7",name:"EASTON X7 Eclipse",aliases:["X7","ECLIPSE"],type:"aluminum",sizes:[1514,1614,1714,1814,1914,2014,2114,2212,2312]},
+  {id:"xx75pp",name:"EASTON XX75 Platinum Plus",aliases:["PLATINUM PLUS","XX75"],type:"aluminum",sizes:[1416,1516,1616,1716,1816,1916,2016]},
+  {id:"jazz",name:"EASTON XX75 Jazz",aliases:["JAZZ"],type:"aluminum",sizes:[1214,1416,1516,1616,1716,1816,1916]}
+];
+function normGearText(s){
+  return String(s||"").normalize("NFKC").toUpperCase().replace(/[・_/]+/g," ").replace(/\s+/g," ").trim();
+}
+function aluminumDiaMm(code){ return Math.floor(code/100)/64*25.4; }
+function aluminumGpi(code){
+  const od=Math.floor(code/100)/64, wall=(code%100)/1000, id=Math.max(0,od-2*wall);
+  return (Math.PI/4*(od*od-id*id))*0.0975*7000;
+}
+function carbonGpi(fam,spine){ return clamp(fam.gpiA+fam.gpiB/spine,3,18); }
+function extractCatalogNumber(txt, sizes){
+  const ordered=[...sizes].sort((a,b)=>String(b).length-String(a).length);
+  return ordered.find(s=>new RegExp(`(^|[^0-9])${String(s).replace("-","[- ]?")}([^0-9]|$)`).test(txt))||null;
+}
+function parseLengthIn(txt){ const m=txt.match(/([0-9]{2}(?:\.[0-9])?)\s*(?:INCH|IN|")/); return m?+m[1]:null; }
+function parsePointGr(txt){ const m=txt.match(/(?:POINT|PNT|ポイント|PT)\s*([0-9]{2,3})|([0-9]{2,3})\s*(?:GR|GRAIN|グレイン)/); return m?+(m[1]||m[2]):null; }
+function inferCatalogGear(vals){
+  const txt=normGearText([vals.arrow,vals.notes,vals.shaftSpine].join(" "));
+  if(!txt) return null;
+  const fam=[...CATALOG_SHAFTS]
+    .sort((a,b)=>Math.max(...b.aliases.map(x=>x.length))-Math.max(...a.aliases.map(x=>x.length)))
+    .find(f=>f.aliases.some(a=>new RegExp(`(^|\\s)${normGearText(a).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}(\\s|$)`).test(txt)));
+  if(!fam) return null;
+  const spine=extractCatalogNumber(txt, fam.sizes) || num(vals.shaftSpine);
+  if(!spine) return {fam,missing:"spine"};
+  const dia=fam.type==="aluminum"?aluminumDiaMm(spine):fam.dia;
+  const gpi=fam.type==="aluminum"?aluminumGpi(spine):carbonGpi(fam,spine);
+  const len=num(vals.arrowLength)||parseLengthIn(txt)||null;
+  const point=num(vals.pointWeight)||parsePointGr(txt)||null;
+  const total=len?gpi*len+(point||100)+27:null;
+  const notes=[`${fam.name} ${spine} をカタログ掲載モデルとして認識`, `シャフト重量 ${gpi.toFixed(2)}gr/in${fam.type==="carbon"?"（モデル別近似）":"（番手から計算）"}`, `外径 ${dia.toFixed(2)}mm${fam.type==="carbon"?"（代表値/推定）":"（番手から計算）"}`];
+  if(total) notes.push(`総矢重量 ${total.toFixed(0)}gr（矢尺${len}in、ポイント${point||100}gr、ノック/ベイン等27grとして推定）`);
+  return {fam,spine,dia,gpi,len,point,total,notes};
+}
 const GEAR_FIELDS=[
   ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","矢 (シャフト/長さ/ポイント)"],
-  ["arrowDia","矢の直径 (mm)"],["arrowWeight","矢重量 (gr)"],["arrowSpeed","実測初速 (fps / m/s・任意)"],["arrowCd","抗力係数 Cd (任意)"],
+  ["shaftSpine","シャフト番手/スパイン"],["arrowLength","矢尺/シャフト長 (inch)"],["pointWeight","ポイント重量 (gr)"],
+  ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["arrowSpeed","実測初速 (fps / m/s・任意)"],["arrowCd","抗力係数 Cd (任意)"],
   ["brace","ブレースハイト"],["tiller","ティラー"],["plunger","プランジャー"],["nock","ノッキングポイント"],["notes","その他メモ"]
 ];
 function renderGear(m){
@@ -1270,10 +1329,32 @@ function openGearForm(id){
   ovl.innerHTML=`<div class="sheet"><h3>${s?"セッティング編集":"新しいセッティング"}</h3>
     <label class="f">名前 *</label><input class="inp" id="gfName" value="${esc(s?s.name:"")}" placeholder="例: メイン70m仕様">
     ${GEAR_FIELDS.map(([k,lb])=>`<label class="f">${lb}</label><input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}">`).join("")}
+    <div class="btnrow"><button class="btn sec" id="gfInfer">📖 カタログから推定</button></div>
+    <div class="hint" id="gfInferHint">矢の欄に「Easton X10 650 29inch 110gr」のように入れると、掲載モデル・スパイン・直径・GPI・総矢重量を推定します。</div>
     <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
   </div>`;
   document.body.appendChild(ovl);
   ovl.querySelector("#gfCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#gfInfer").onclick=()=>{
+    const vals={};
+    GEAR_FIELDS.forEach(([k])=>vals[k]=ovl.querySelector("#gf_"+k).value.trim());
+    const inf=inferCatalogGear(vals);
+    const hint=ovl.querySelector("#gfInferHint");
+    if(!inf){ hint.textContent="カタログ推定できるシャフト名が見つかりませんでした。例: X10 650 / ACE 720 / Avance 660 / XX75 1916"; toast("シャフト名を読み取れません"); return; }
+    if(inf.missing){ hint.textContent=`${inf.fam.name} は見つかりました。スパイン/番手も矢の欄に入れてください。`; toast("番手を追加してください"); return; }
+    const set=(k,v)=>{ const el=ovl.querySelector("#gf_"+k); if(el && v!=null) el.value=String(v); };
+    set("shaftSpine", inf.spine);
+    set("arrowDia", inf.dia.toFixed(2));
+    set("shaftGpi", inf.gpi.toFixed(2));
+    if(inf.len) set("arrowLength", inf.len);
+    if(inf.point) set("pointWeight", inf.point);
+    if(inf.total) set("arrowWeight", inf.total.toFixed(0));
+    const old=ovl.querySelector("#gf_notes").value.trim();
+    const note=`カタログ推定: ${inf.notes.join(" / ")}`;
+    ovl.querySelector("#gf_notes").value=old?`${old}\n${note}`:note;
+    hint.innerHTML=inf.notes.map(esc).join("<br>");
+    toast("カタログ情報から推定しました");
+  };
   ovl.querySelector("#gfSave").onclick=()=>{
     const name=ovl.querySelector("#gfName").value.trim();
     if(!name){ toast("名前を入力してください"); return; }
@@ -1304,7 +1385,7 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
-const APP_VER=9;
+const APP_VER=10;
 function checkUpdate(){
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
