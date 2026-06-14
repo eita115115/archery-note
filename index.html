@@ -227,7 +227,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=17;
+const APP_VER=18;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -748,7 +748,11 @@ function adviceFor(sess, setup){
   const dist=sess.dist;
   const eye=(db.settings.eyeSight||850);
   const model=adviceModel(sess, setup, st);
-  const out={st, lines:[], notes:model.notes, confidence:model.confidence};
+  const personal=personalModel(sess, setup, st);
+  const quality=sessionQuality(sess, setup, st);
+  const out={st, lines:[], notes:model.notes, confidence:model.confidence, personal, quality};
+  if(personal && personal.sample>=2) out.notes.unshift(`個人モデル: ${personal.state}（同条件${personal.sample}回 / 安定度${pct(personal.stability||0)}）。`);
+  if(quality.score<.48) out.notes.unshift(`この回の判断信頼度は${quality.label}です。${quality.reasons.join("・")}。`);
   const TH=Math.max(ringW(sess.faceD)/8, st.rr*.10); // 無視できるズレのしきい値
   // 上下
   if(Math.abs(st.my)>TH){
@@ -787,9 +791,11 @@ function judgementFor(adv,sess){
   const st=adv.st, w=ringW(sess.faceD);
   const hasMove=adv.lines.some(l=>l.axis!=="-");
   if(!hasMove) return {label:"維持",tone:"ok",text:"サイトは触らず、この基準で本数を重ねて確認できます。"};
+  if(adv.personal && adv.personal.state==="今回だけの可能性" && (adv.personal.stability||0)>.45) return {label:"保留",tone:"hold",text:"過去の同条件傾向と今回の中心が逆方向です。まず追加エンドで再現性を確認します。"};
   if(st.n<6 || (adv.confidence||0)<.45) return {label:"保留",tone:"hold",text:"まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。"};
   if(st.rr>w*2.8) return {label:"射形優先",tone:"warn",text:"中心は読めますが散りが大きめです。サイト調整は半分以下に抑え、リリース・押し手・照準の再現性を先に見ます。"};
   if(isWindy(sess) && st.sx>st.sy*1.15) return {label:"風を考慮",tone:"hold",text:"横方向の偏りに風の影響が混ざりやすい状況です。無風または風待ちで再確認すると精度が上がります。"};
+  if(adv.personal && adv.personal.state==="過去と一致" && (adv.confidence||0)>=.62) return {label:"動かす",tone:"ok",text:"今回の中心と過去の同条件傾向が一致しています。提案量を目安に動かす根拠があります。"};
   if((adv.confidence||0)>=.72 && st.rr<=w*2.2) return {label:"動かす",tone:"ok",text:"グルーピング中心と信頼度が揃っています。提案量を目安にサイトを動かす価値があります。"};
   return {label:"少量調整",tone:"mid",text:"傾向は見えています。提案量の半分〜7割程度で様子を見るのが現実的です。"};
 }
@@ -818,6 +824,115 @@ function conditionHtml(sess,st,setup){
   const notes=conditionInsights(sess,st,setup).slice(0,4);
   return notes.length?`<div class="advice" style="background:var(--card);border-color:var(--line)">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
 }
+function sessionMetrics(sess){
+  const all=(sess.ends||[]).flat();
+  const total=all.reduce((a,x)=>a+x.s,0);
+  const st=robustStats(all);
+  return {all,total,avg:all.length?total/all.length:0,st};
+}
+function sessionQuality(sess, setup, st){
+  const m=sessionMetrics(sess);
+  st=st||m.st;
+  if(!st) return {score:.2,label:"低",tone:"warn",reasons:["矢数が不足"],metrics:m};
+  const w=ringW(sess.faceD);
+  const sample=clamp((m.all.length-3)/33,0,1);
+  const group=clamp(1-st.rr/(w*3.2),0,1);
+  const confidence=st.confidence||.45;
+  const outRate=m.all.length?st.excluded.length/m.all.length:0;
+  let score=confidence*.52 + sample*.18 + group*.22 + (m.all.length>=6?.08:0);
+  const reasons=[];
+  if(isWindy(sess)){ score*=.86; reasons.push("風の影響あり"); }
+  if(outRate>.18){ score*=.86; reasons.push("外れ値が多め"); }
+  if(st.rr>w*2.6){ score*=.82; reasons.push("グルーピング広め"); }
+  if(m.all.length<6) reasons.push("本数少なめ");
+  if(setup){
+    const gp=gearPrecisionProfile(setup);
+    if(gp.score<.45){ score*=.94; reasons.push("用具入力が少なめ"); }
+  }
+  score=clamp(score,.12,1);
+  const label=score>=.72?"高":score>=.48?"中":"低";
+  const tone=score>=.72?"ok":score>=.48?"mid":"warn";
+  if(!reasons.length) reasons.push("判断材料は良好");
+  return {score,label,tone,reasons,metrics:m};
+}
+function dirAlign(ax,ay,bx,by){
+  const am=Math.hypot(ax,ay), bm=Math.hypot(bx,by);
+  if(am<.01||bm<.01) return 0;
+  return clamp((ax*bx+ay*by)/(am*bm),-1,1);
+}
+function personalModel(sess,setup,currentSt){
+  if(!sess || !currentSt) return null;
+  const same=db.sessions.filter(s=>s.id!==sess.id && (s.setupId||"")==(sess.setupId||"") && s.dist===sess.dist && s.faceD===sess.faceD && (s.faceType||"single")===(sess.faceType||"single"))
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1))
+    .slice(-10);
+  const items=same.map(s=>{
+    const q=sessionQuality(s,setup);
+    return q.metrics.st?{sess:s,q,st:q.metrics.st}:null;
+  }).filter(Boolean);
+  if(items.length<2) return {sample:items.length,state:"育成中",text:"同条件データがまだ少ないため、今回の記録を個人モデルの材料として蓄積します。"};
+  let sw=0,mx=0,my=0,rr=0,avg=0;
+  items.forEach((it,i)=>{
+    const recency=.72 + (i+1)/items.length*.28;
+    const w=Math.max(.08,it.q.score)*recency;
+    sw+=w; mx+=it.st.mx*w; my+=it.st.my*w; rr+=it.st.rr*w; avg+=it.q.metrics.avg*w;
+  });
+  mx/=sw; my/=sw; rr/=sw; avg/=sw;
+  const centers=items.map(it=>({x:it.st.mx,y:it.st.my}));
+  const spread=groupStats(centers);
+  const ring=ringW(sess.faceD);
+  const histMag=Math.hypot(mx,my), curMag=Math.hypot(currentSt.mx,currentSt.my);
+  const align=dirAlign(mx,my,currentSt.mx,currentSt.my);
+  const stability=spread?clamp(1-spread.rr/(ring*2.4),0,1):.5;
+  const support=histMag>ring*.28 && curMag>ring*.28 && align>.42;
+  const conflict=histMag>ring*.28 && curMag>ring*.28 && align<-.25;
+  const state=support?"過去と一致":conflict?"今回だけの可能性":"観察継続";
+  let text;
+  if(support) text="過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。";
+  else if(conflict) text="過去の偏りと今回の中心が逆方向です。風や射形の一時要因を疑い、追加エンドで確認する価値があります。";
+  else text="過去傾向はまだ決定的ではありません。今回の中心とグルーピング形状を主材料にします。";
+  return {sample:items.length,state,text,mx,my,rr,avg,align,stability,spread,histMag,curMag};
+}
+function personalModelHtml(adv,sess,setup){
+  if(!adv || !adv.personal) return "";
+  const p=adv.personal;
+  const tone=p.state==="過去と一致"?"#0f9d58":p.state==="今回だけの可能性"?"#c62828":"#8a6d1d";
+  if(p.sample<2) return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>個人モデル: 育成中</b> — ${esc(p.text)}</div></div>`;
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b style="color:${tone}">個人モデル: ${p.state}</b> — ${esc(p.text)}</div>
+    <div class="kv"><span>過去の加重中心</span><span>${cmOffsetText(p.mx,"x")} / ${cmOffsetText(p.my,"y")}</span></div>
+    <div class="kv"><span>同条件データ</span><span>${p.sample}回 / 安定度 ${pct(p.stability)}</span></div>
+  </div>`;
+}
+function trustHtml(sess,setup,st){
+  const q=sessionQuality(sess,setup,st);
+  const color=q.tone==="ok"?"#0f9d58":q.tone==="warn"?"#c62828":"#8a6d1d";
+  return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>`;
+}
+function nextActionPlan(sess,adv,setup){
+  const plan=[];
+  const q=sessionQuality(sess,setup,adv&&adv.st);
+  const j=judgementFor(adv,sess);
+  if(!adv){ return ["6本以上を記録して、中心とばらつきを出す。"]; }
+  if(j && j.label==="動かす") plan.push("提案方向へサイトを動かし、次の1エンドは同じ狙い方で確認する。");
+  else if(j && j.label==="少量調整") plan.push("提案量の半分〜7割だけ動かし、中心が戻るか確認する。");
+  else if(j && (j.label==="保留" || j.label==="風を考慮")) plan.push("サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。");
+  else if(j && j.label==="射形優先") plan.push("サイト調整は控えめにして、リリース・押し手・照準時間の再現性を先に整える。");
+  if(adv.personal && adv.personal.state==="今回だけの可能性") plan.push("過去傾向と逆なので、風向/射形メモを残して次回の同距離データと比較する。");
+  if(adv.personal && adv.personal.state==="過去と一致") plan.push("調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。");
+  if(q.score<.48) plan.push("この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。");
+  const st=adv.st;
+  if(st.sy>st.sx*1.35) plan.push("上下散りが強いので、アンカー高・引き尺・リリース圧を1項目ずつ固定して確認する。");
+  else if(st.sx>st.sy*1.35) plan.push("左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。");
+  if(setup){
+    const gp=gearPrecisionProfile(setup);
+    if(gp.missing.length) plan.push(`精度を上げる追加データ: ${esc(gp.missing.slice(0,2).join("・"))}`);
+  }
+  return plan.slice(0,4);
+}
+function nextActionHtml(sess,adv,setup){
+  const plan=nextActionPlan(sess,adv,setup);
+  return plan.length?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>次のアクション</b></div>${plan.map((p,i)=>`<div class="note">${i+1}. ${p}</div>`).join("")}</div>`:"";
+}
 function roundProgressHtml(sess){
   const r=ROUND_TYPES.find(x=>x.id===sess.round);
   if(!r || !r.arrows) return "";
@@ -827,13 +942,15 @@ function roundProgressHtml(sess){
   return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)} / ${shot}/${r.arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
 }
 function sessionsCsv(){
-  const head=["date","setup","distance_m","round","face","arrows","total","avg","x","ten","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","excluded","sight_v","sight_h","condition","note"];
+  const head=["date","setup","distance_m","round","face","arrows","total","avg","x","ten","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
   const rows=[head];
   db.sessions.forEach(s=>{
     const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===s.setupId);
+    const q=sessionQuality(s,setup,st);
+    const p=personalModel(s,setup,st);
     rows.push([s.date,setup?setup.name:"",s.dist,roundLabel(s.round),faceLabel(s),all.length,total,all.length?(total/all.length).toFixed(3):"",
       all.filter(a=>a.X).length,all.filter(a=>a.s===10).length,st?st.mx.toFixed(2):"",st?st.my.toFixed(2):"",st?st.rr.toFixed(2):"",
-      st?st.sx.toFixed(2):"",st?st.sy.toFixed(2):"",st?pct(st.confidence||0):"",st?st.excluded.length:"",
+      st?st.sx.toFixed(2):"",st?st.sy.toFixed(2):"",st?pct(st.confidence||0):"",q.label,p?p.state:"",st?st.excluded.length:"",
       s.sightV||"",s.sightH||"",windText(s),s.note||""]);
   });
   return "\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
@@ -1339,6 +1456,7 @@ function openSummary(sess, isNew){
     </div>
     <div id="sumPlot" style="margin-top:10px"></div>
     ${groupSummaryHtml(st)}
+    ${trustHtml(sess,setup,st)}
     ${roundProgressHtml(sess)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
@@ -1346,7 +1464,9 @@ function openSummary(sess, isNew){
       ${shapeNote(adv.st)}
       ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm と弾道モデルから計算した参考値です（サイトタブで変更可）。</div></div>`:""}
+    ${personalModelHtml(adv,sess,setup)}
     ${conditionHtml(sess,st,setup)}
+    ${nextActionHtml(sess,adv,setup)}
     ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
     <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
   </div>`;
@@ -1387,9 +1507,10 @@ function renderHistory(m){
     ${ss.length? ss.map(s=>{
       const all=s.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
       const setup=db.setups.find(x=>x.id===s.setupId);
+      const q=sessionQuality(s,setup);
       return `<div class="listItem" data-id="${s.id}">
         <div><div class="t">${fmtD(s.date)} ・ ${s.dist}m</div>
-        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
+        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
         <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></div>`;
     }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
   </div></div>
@@ -1545,6 +1666,7 @@ function openHistDetail(id){
     </div>
     <div id="hPlot" style="margin-top:10px"></div>
     ${groupSummaryHtml(st)}
+    ${trustHtml(sess,setup,st)}
     ${roundProgressHtml(sess)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     <table class="tbl" style="margin-top:8px"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
@@ -1553,7 +1675,9 @@ function openHistDetail(id){
       return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td></tr>`;
     }).join("")}</table>
     ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
+    ${personalModelHtml(adv,sess,setup)}
     ${conditionHtml(sess,st,setup)}
+    ${nextActionHtml(sess,adv,setup)}
     <div class="btnrow">
       <button class="btn danger" id="hDel">削除</button>
       <button class="btn sec" id="hEdit">✏ 編集</button>
@@ -1646,7 +1770,10 @@ function renderSight(m){
       ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
       :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
+    ${adv?trustHtml(lastSess,setup,adv.st):""}
+    ${adv?personalModelHtml(adv,lastSess,setup):""}
     ${adv?conditionHtml(lastSess,adv.st,setup):""}
+    ${adv?nextActionHtml(lastSess,adv,setup):""}
     ${(reg.v||reg.h)?`<div class="advice">
       <div style="font-size:12px;color:var(--sub)">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
       ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)})</span></div>`:""}

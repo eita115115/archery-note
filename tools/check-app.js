@@ -42,6 +42,8 @@ assert(html.includes("sessionsCsv") && html.includes("scorecardSvg"), "Export fl
 assert(html.includes("judgementFor") && html.includes("conditionInsights"), "Analysis judgement flows missing");
 assert(html.includes("histFilter") && html.includes("histSetup"), "History filters missing");
 assert(html.includes("ROUND_TYPES") && html.includes("roundProgressHtml"), "Round scoring support missing");
+assert(html.includes("personalModel") && html.includes("sessionQuality") && html.includes("nextActionPlan"), "Personal decision model missing");
+assert(html.includes("decision_quality") && html.includes("personal_model"), "CSV decision columns missing");
 const trashDb = {sessions:[],setups:[],sightMarks:[],trash:[]};
 let trashSaved = 0;
 const trashApi = new Function("db","save","uid","today","TRASH_LIMIT", section("function cloneData", "/* ============ scoring") + "\nreturn {trashItem,restoreTrash,roundLabel};")(
@@ -64,6 +66,40 @@ const arrows = [
 ];
 const st = statsApi.robustStats(arrows);
 assert(st && st.excluded.length === 1 && st.method === "ellipse-biweight", "Robust grouping failed");
+
+const analysisDb = {sessions:[]};
+const analysisApi = new Function(
+  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats",
+  section("function windText", "function roundProgressHtml") + "\nreturn {sessionQuality,personalModel,judgementFor,nextActionPlan};"
+)(
+  analysisDb,
+  statsApi.robustStats,
+  f=>f/20,
+  (v,a,b)=>Math.max(a,Math.min(b,v)),
+  v=>{ const n=parseFloat(v); return Number.isFinite(n)?n:null; },
+  () => ({score:.85,missing:[]}),
+  v=>`${Math.round(v*100)}%`,
+  (v,axis)=>`${axis}:${v.toFixed(1)}`,
+  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
+  statsApi.groupStats
+);
+const sessAt = (id,cx,cy) => ({id,date:`2026-06-${id}`,setupId:"main",dist:70,faceD:122,faceType:"single",wx:"晴れ",ends:[[
+  {x:cx-0.5,y:cy,s:9},{x:cx+0.3,y:cy+0.2,s:9},{x:cx,y:cy-0.4,s:10},
+  {x:cx+0.4,y:cy+0.4,s:9},{x:cx-0.2,y:cy-0.1,s:10},{x:cx+0.1,y:cy+0.3,s:9}
+],[
+  {x:cx-0.4,y:cy+0.1,s:9},{x:cx+0.2,y:cy-0.2,s:10},{x:cx+0.5,y:cy+0.1,s:9},
+  {x:cx-0.1,y:cy+0.4,s:9},{x:cx+0.2,y:cy+0.2,s:10},{x:cx-0.3,y:cy-0.3,s:9}
+]]});
+analysisDb.sessions.push(sessAt("01",2,1), sessAt("02",2.4,1.2));
+const current = sessAt("03",2.8,1.3);
+const curSt = statsApi.robustStats(current.ends.flat());
+const q = analysisApi.sessionQuality(current,{id:"main"});
+const pm = analysisApi.personalModel(current,{id:"main"},curSt);
+assert(q.score > .45 && ["中","高"].includes(q.label), "Session quality failed");
+assert(pm && pm.sample === 2 && pm.state === "過去と一致", "Personal model failed");
+const judgement = analysisApi.judgementFor({st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},current);
+assert(judgement && judgement.label === "動かす", "Personal judgement failed");
+assert(analysisApi.nextActionPlan(current,{st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},{id:"main"}).length > 0, "Next action plan failed");
 
 const normGearText = s => String(s || "").normalize("NFKC").toUpperCase().replace(/[・_/]+/g, " ").replace(/\s+/g, " ").trim();
 const physicsApi = new Function("normGearText", section("function clamp", "function simulateArrow") + "\nreturn {physicsProfile};")(normGearText);
