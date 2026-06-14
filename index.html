@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1a5c3a" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#143626" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.json">
@@ -227,7 +227,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=2;
-const APP_VER=15;
+const APP_VER=16;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],settings:{eyeSight:850,theme:"auto"},active:null}; }
 function normalizeDb(d){
