@@ -258,15 +258,6 @@ function zoneStyle(s,X){
   return {bg:"#c9cec6",fg:"#555"};
 }
 function scoreLabel(a){ return a.s===0?"M":(a.X?"X":String(a.s)); }
-function groupStats(arrows){
-  const n=arrows.length;
-  if(!n) return null;
-  const mx=arrows.reduce((a,p)=>a+p.x,0)/n, my=arrows.reduce((a,p)=>a+p.y,0)/n;
-  const rr=Math.sqrt(arrows.reduce((a,p)=>a+(p.x-mx)**2+(p.y-my)**2,0)/n);
-  const sx=Math.sqrt(arrows.reduce((a,p)=>a+(p.x-mx)**2,0)/n);
-  const sy=Math.sqrt(arrows.reduce((a,p)=>a+(p.y-my)**2,0)/n);
-  return {n,mx,my,rr,sx,sy};
-}
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
 function median(vals){
   const a=vals.filter(Number.isFinite).sort((x,y)=>x-y);
@@ -274,18 +265,34 @@ function median(vals){
   const m=Math.floor(a.length/2);
   return a.length%2?a[m]:(a[m-1]+a[m])/2;
 }
-function weightedStats(arrows, weights){
+function momentStats(arrows, weights){
   const n=arrows.length;
+  if(!n) return null;
+  weights=weights||arrows.map(()=>1);
   const sw=weights.reduce((a,w)=>a+w,0);
-  if(!n || sw<=0) return groupStats(arrows);
+  if(sw<=0) return momentStats(arrows);
   const mx=arrows.reduce((a,p,i)=>a+p.x*weights[i],0)/sw;
   const my=arrows.reduce((a,p,i)=>a+p.y*weights[i],0)/sw;
-  const rr=Math.sqrt(arrows.reduce((a,p,i)=>a+weights[i]*((p.x-mx)**2+(p.y-my)**2),0)/sw);
-  const sx=Math.sqrt(arrows.reduce((a,p,i)=>a+weights[i]*(p.x-mx)**2,0)/sw);
-  const sy=Math.sqrt(arrows.reduce((a,p,i)=>a+weights[i]*(p.y-my)**2,0)/sw);
-  return {n,mx,my,rr,sx,sy};
+  let vx=0,vy=0,cov=0;
+  arrows.forEach((p,i)=>{ const dx=p.x-mx, dy=p.y-my, w=weights[i]; vx+=w*dx*dx; vy+=w*dy*dy; cov+=w*dx*dy; });
+  vx/=sw; vy/=sw; cov/=sw;
+  const rr=Math.sqrt(Math.max(0,vx+vy));
+  const sx=Math.sqrt(Math.max(0,vx)), sy=Math.sqrt(Math.max(0,vy));
+  const disc=Math.sqrt(Math.max(0,(vx-vy)**2+4*cov*cov));
+  const l1=Math.max(0,(vx+vy+disc)/2), l2=Math.max(0,(vx+vy-disc)/2);
+  const major=Math.sqrt(l1), minor=Math.sqrt(l2);
+  const angleDeg=(0.5*Math.atan2(2*cov,vx-vy))*180/Math.PI;
+  const corr=(sx>0&&sy>0)?clamp(cov/(sx*sy),-1,1):0;
+  const effN=sw*sw/weights.reduce((a,w)=>a+w*w,0);
+  return {n,mx,my,rr,sx,sy,cov,corr,major,minor,angleDeg,effN};
 }
-/* 中央値/MADと重み付き中心で、明らかな外れ値を除いたグルーピング統計 */
+function groupStats(arrows){ return momentStats(arrows); }
+function weightedStats(arrows, weights){ return momentStats(arrows, weights); }
+function robustScale(vals, center, fallback){
+  const dev=vals.map(v=>Math.abs(v-center));
+  return Math.max(1.4826*median(dev), fallback||0, 0.01);
+}
+/* 中央値/MAD・楕円距離・重み付き中心で、明らかな外れ値を除いたグルーピング統計 */
 function robustStats(arrows){
   const total=arrows.length;
   if(!total) return null;
@@ -299,11 +306,18 @@ function robustStats(arrows){
   const mad=median(ds.map(d=>Math.abs(d-md)));
   const base=groupStats(arrows);
   const sigma=Math.max(1.4826*mad, base.rr*.35, 0.01);
+  const sx0=robustScale(arrows.map(a=>a.x), cx, base.sx*.45);
+  const sy0=robustScale(arrows.map(a=>a.y), cy, base.sy*.45);
+  const eds=arrows.map(a=>Math.hypot((a.x-cx)/sx0,(a.y-cy)/sy0));
+  const em=median(eds), emad=median(eds.map(d=>Math.abs(d-em)));
   const limit=Math.max(md+3*sigma, md*2.2, base.rr*1.65);
+  const eLimit=Math.max(3.15, em+3*Math.max(1.4826*emad,.35));
   let used=[], excluded=[];
   const maxExcluded=Math.floor(total*.25);
   arrows.forEach((a,i)=>{
-    const obvious=ds[i]>limit && ds[i]>md+2.4*sigma && excluded.length<maxExcluded;
+    const radial=ds[i]>limit && ds[i]>md+2.4*sigma;
+    const elliptical=eds[i]>eLimit && eds[i]>3.15;
+    const obvious=(radial||elliptical) && excluded.length<maxExcluded;
     (obvious?excluded:used).push(a);
   });
   if(used.length<Math.max(3,total-excluded.length)){
@@ -312,16 +326,21 @@ function robustStats(arrows){
   const ux=median(used.map(a=>a.x)), uy=median(used.map(a=>a.y));
   const uds=used.map(a=>Math.hypot(a.x-ux,a.y-uy));
   const udm=median(uds);
+  const xScale=robustScale(used.map(a=>a.x), ux, base.sx*.55);
+  const yScale=robustScale(used.map(a=>a.y), uy, base.sy*.55);
   const scale=Math.max(udm+3*median(uds.map(d=>Math.abs(d-udm))), base.rr, 0.01);
   const weights=used.map(a=>{
-    const u=Math.hypot(a.x-ux,a.y-uy)/scale;
+    const radialU=Math.hypot(a.x-ux,a.y-uy)/scale;
+    const ellU=Math.hypot((a.x-ux)/xScale,(a.y-uy)/yScale)/3;
+    const u=Math.max(radialU,ellU);
     return u>=1?0.05:(1-u*u)**2;
   });
   const st=weightedStats(used, weights);
   const outRate=excluded.length/total;
-  const sample=clamp((used.length-2)/10,.35,1);
+  const sample=clamp((st.effN-2)/10,.35,1);
   const outPenalty=clamp(1-outRate*1.6,.55,1);
-  return Object.assign(st,{used,excluded,total,method:"median-biweight",confidence:sample*outPenalty});
+  const skewPenalty=st.minor>0?clamp(st.minor/st.major+.35,.55,1):.7;
+  return Object.assign(st,{used,excluded,total,method:"ellipse-biweight",confidence:sample*outPenalty*skewPenalty});
 }
 
 /* ============ target SVG ============ */
@@ -387,6 +406,9 @@ function plotSession(sess, container){
     html+=`<g><line x1="${st.mx-w*0.8}" y1="${-st.my}" x2="${st.mx+w*0.8}" y2="${-st.my}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<line x1="${st.mx}" y1="${-st.my-w*0.8}" x2="${st.mx}" y2="${-st.my+w*0.8}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<circle cx="${st.mx}" cy="${-st.my}" r="${st.rr}" fill="none" stroke="#000" stroke-dasharray="${faceD/60} ${faceD/120}" stroke-width="${faceD/400}"/></g>`;
+    if(st.major!=null && st.minor!=null){
+      html+=`<ellipse cx="${st.mx}" cy="${-st.my}" rx="${st.major}" ry="${st.minor}" transform="rotate(${-st.angleDeg} ${st.mx} ${-st.my})" fill="none" stroke="#0f9d58" stroke-dasharray="${faceD/90} ${faceD/160}" stroke-width="${faceD/380}"/>`;
+    }
   }
   marks.innerHTML=html;
 }
@@ -394,9 +416,21 @@ function plotSession(sess, container){
 /* ============ sight advice ============ */
 function shapeNote(st){
   if(!st || st.n<6) return "";
-  if(st.sy>st.sx*1.3) return `<div class="note">📊 <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下が原因になりやすいです。</div>`;
-  if(st.sx>st.sy*1.3) return `<div class="note">📊 <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンドやプランジャー由来が多いです。</div>`;
+  const tilt=Math.abs(st.angleDeg||0);
+  const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&tilt>15&&tilt<75;
+  if(tilted) return `<div class="note">📊 <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
+  if(st.sy>st.sx*1.3) return `<div class="note">📊 <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
+  if(st.sx>st.sy*1.3) return `<div class="note">📊 <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
   return "";
+}
+function groupSummaryHtml(st){
+  if(!st) return "";
+  return `<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
+    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
+    <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
+    ${st.major!=null?`<div class="kv"><span>グルーピング楕円</span><span>長軸 ${st.major.toFixed(1)}cm ・ 短軸 ${st.minor.toFixed(1)}cm ・ 角度 ${st.angleDeg.toFixed(0)}°</span></div>`:""}
+    <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / ${st.method}</span></div>
+    ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`;
 }
 function cmOffsetText(v, axis){
   const a=Math.abs(v).toFixed(1);
@@ -425,6 +459,54 @@ function estimatedTotalArrowWeight(setup){
   const point=num(setup&&setup.pointWeight)||100;
   return gpi*len+point+27;
 }
+function airDensity(setup){
+  const temp=num(setup&&setup.temperature);
+  const tC=temp==null?15:temp;
+  const tK=tC+273.15;
+  const alt=clamp(num(setup&&setup.altitude)||0,-200,4000);
+  const hum=clamp((num(setup&&setup.humidity)==null?50:num(setup&&setup.humidity))/100,0,1);
+  const pressure=101325*Math.pow(Math.max(0.2,1-2.25577e-5*alt),5.25588);
+  const sat=610.94*Math.exp((17.625*tC)/(tC+243.04));
+  const vapor=clamp(hum*sat,0,pressure*.08);
+  const dry=pressure-vapor;
+  return clamp(dry/(287.05*tK)+vapor/(461.495*tK),.82,1.32);
+}
+function estimateArrowCd(setup, diaMm){
+  const explicit=num(setup&&setup.arrowCd);
+  if(explicit!=null) return clamp(explicit,.55,1.9);
+  let cd=diaMm<=4.2?1.03:diaMm<=5.5?1.12:diaMm<=7?1.22:1.34;
+  const vane=normGearText(setup&&setup.vane);
+  if(/FEATHER|羽根|ナチュラル/.test(vane)) cd+=.14;
+  else if(/SPIN|WING|XS|GAS PRO|KURLY|ELIVANES/.test(vane)) cd+=.07;
+  else if(/LOW|TINY|1\.5|1 5/.test(vane)) cd-=.03;
+  const vh=num(setup&&setup.vaneHeight);
+  if(vh!=null) cd+=clamp((vh-1.8)*.045,-.05,.12);
+  const foc=num(setup&&setup.foc);
+  if(foc!=null && foc>16) cd+=.015;
+  return clamp(cd,.75,1.75);
+}
+function gearVariation(setup){
+  const spread=num(setup&&setup.shaftSetWeightSpread);
+  const straight=num(setup&&setup.shaftStraightness);
+  const foc=num(setup&&setup.foc);
+  const nock=normGearText(setup&&setup.nockFit);
+  let penalty=0, notes=[];
+  if(spread!=null){
+    const p=clamp(spread/10,0,.16); penalty+=p;
+    if(spread>=4) notes.push(`矢セット重量差 ${spread}gr は上下散りの要因になり得るため、補正を少し控えめにします。`);
+  }
+  if(straight!=null){
+    const p=straight<=.002?.01:straight<=.004?.025:.055; penalty+=p;
+    if(straight>.004) notes.push(`シャフト真直度 ${straight}inch はグルーピング評価の不確かさとして扱います。`);
+  }
+  if(foc!=null && (foc<9 || foc>18)){
+    penalty+=.025;
+    notes.push(`FOC ${foc}% は一般的なターゲット矢の中心域から外れるため、弾道推定の信頼度を少し下げます。`);
+  }
+  if(/ゆる|LOOSE/.test(nock)){ penalty+=.035; notes.push("ノックフィットが緩めのため、左右/上下の再現性に影響する前提で見ます。"); }
+  if(/きつ|TIGHT/.test(nock)){ penalty+=.02; notes.push("ノックフィットがきつめのため、リリース離れの影響を少し見込みます。"); }
+  return {penalty:clamp(penalty,0,.28), confidenceFactor:clamp(1-penalty,.72,1), notes};
+}
 function physicsProfile(setup){
   const p=num(setup&&setup.poundage);
   const drawIn=num(setup&&setup.drawLength)||28;
@@ -440,13 +522,16 @@ function physicsProfile(setup){
     const drawN=(p||36)*4.44822;
     const drawM=drawIn*0.0254;
     const stored=0.5*drawN*drawM;
-    const eff=p&&p>=45?.78:.72;
+    const explicitEff=num(setup&&setup.bowEfficiency);
+    const eff=explicitEff!=null?clamp(explicitEff/100,.55,.88):(p&&p>=45?.78:.72);
     speedMps=Math.sqrt(Math.max(1,2*stored*eff/massKg));
   }
   speedMps=clamp(speedMps,35,95);
-  const cd=clamp(num(setup&&setup.arrowCd)||1.15,.6,1.8);
+  const cd=estimateArrowCd(setup||{}, diaMm);
   const area=Math.PI*(diaMm/1000/2)**2;
-  return {pound:p||null, drawIn, massGr, diaMm, speedMps, speedFps:speedMps/0.3048, measuredSpeed, cd, area, massKg, rho:1.2};
+  const rho=airDensity(setup||{});
+  const variation=gearVariation(setup||{});
+  return {pound:p||null, drawIn, massGr, diaMm, speedMps, speedFps:speedMps/0.3048, measuredSpeed, cd, area, massKg, rho, variation};
 }
 function simulateArrow(distM, angle, phys){
   let x=0,y=0,t=0;
@@ -495,14 +580,16 @@ function trajectoryModel(sess, setup, eyeMm){
 function adviceModel(sess, setup, st){
   const dist=sess.dist, w=ringW(sess.faceD);
   const facePenalty=st.rr>w*2.8?.82:st.rr>w*2.0?.9:1;
-  const confidence=clamp((st.confidence||.6)*facePenalty,.35,1);
-  const nudge=clamp(.45+confidence*.55,.55,1);
+  const gear=gearVariation(setup||{});
+  let confidence=clamp((st.confidence||.6)*facePenalty*gear.confidenceFactor,.32,1);
+  const nudge=clamp(.45+confidence*.55,.52,1);
   const eye=(db.settings.eyeSight||850);
   const traj=trajectoryModel(sess, setup, eye);
   const p=parseFloat(setup&&setup.poundage);
   let vFactor=nudge, hFactor=nudge, notes=[];
   notes.push(`信頼度 ${pct(confidence)}（${st.n}本使用${st.excluded.length?` / 外れ値${st.excluded.length}本除外`:""}）。初回補正率は ${pct(nudge)} です。`);
-  notes.push(`物理モデル: 初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、飛翔 ${traj.tof.toFixed(2)}秒、入射速度 ${traj.impactSpeed.toFixed(1)}m/s、仰角 ${(traj.angle*180/Math.PI).toFixed(1)}°。`);
+  notes.push(`物理モデル: 初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、矢重量 ${traj.phys.massGr.toFixed(0)}gr、Cd ${traj.phys.cd.toFixed(2)}、空気密度 ${traj.phys.rho.toFixed(2)}kg/m³、飛翔 ${traj.tof.toFixed(2)}秒、入射速度 ${traj.impactSpeed.toFixed(1)}m/s。`);
+  gear.notes.forEach(n=>notes.push(n));
   if(isFinite(p)){
     if(dist>=50 && p<36){
       vFactor*=.88;
@@ -526,6 +613,7 @@ function adviceModel(sess, setup, st){
   }
   if(st.n<6) notes.push("本数が少ないため、数本確認してから追加調整する前提の提案です。");
   if(st.rr>w*2.5) notes.push("グルーピングが広めなので、サイトより射形・風・照準の再現性も同時に見てください。");
+  if(st.major && st.minor>0 && st.major>st.minor*1.7) notes.push(`楕円長軸が短軸の ${(st.major/st.minor).toFixed(1)}倍あるため、中心補正と同時に散り方向の原因も優先して見ます。`);
   return {confidence,vFactor:clamp(vFactor,.45,1.1),hFactor:clamp(hFactor,.45,1.05),notes,traj};
 }
 function adviceFor(sess, setup){
@@ -922,10 +1010,7 @@ function openSummary(sess, isNew){
       <div class="stat"><b>${all.filter(a=>a.X).length}</b><span>X</span></div>
     </div>
     <div id="sumPlot" style="margin-top:10px"></div>
-    ${st?`<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
-    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
-    <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
-    ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`:""}
+    ${groupSummaryHtml(st)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
       ${shapeNote(adv.st)}
@@ -1033,10 +1118,7 @@ function openHistDetail(id){
       <div class="stat"><b>${all.filter(a=>a.X).length}</b><span>X</span></div>
     </div>
     <div id="hPlot" style="margin-top:10px"></div>
-    ${st?`<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
-    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
-    <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
-    ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`:""}
+    ${groupSummaryHtml(st)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     <table class="tbl" style="margin-top:8px"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
     ${sess.ends.map((end,i)=>{
@@ -1276,26 +1358,53 @@ const GEAR_SUGGESTIONS={
     "BCY 8125","BCY 8190","BCY 652 Spectra","Angel Majesty 777","Fast Flight Plus","GAS Bowstrings Recurve"
   ],
   pointWeight:["60","70","80","90","100","110","120","130","140","150"],
+  shaftSetWeightSpread:["1","2","3","4","5","6","8","10"],
+  shaftStraightness:["0.001","0.002","0.003","0.004","0.005","0.006"],
+  foc:["9","10","11","12","13","14","15","16","17","18"],
+  vane:["GAS PRO Spin Vanes","XS Wings","Spin Wing","Range-O-Matic Spin Vanes","EliVanes P3","Bohning X Vane","AAE WAV","Kurly Vanes","Natural Feather"],
+  vaneHeight:["1.5","1.75","2.0","2.5","3.0","4.0"],
+  nockFit:["普通","やや緩い","ややきつい","Loose","Tight"],
   poundage:["24","26","28","30","32","34","36","38","40","42","44","46","48","50"],
   drawLength:["24","25","26","27","28","29","30","31","32"],
   arrowLength:["25","26","27","28","29","30","31","32"],
   arrowCd:["0.90","1.00","1.10","1.20","1.30","1.45"],
+  bowEfficiency:["65","68","70","72","75","78","80","82"],
+  temperature:["0","5","10","15","20","25","30","35"],
+  altitude:["0","100","300","500","800","1000","1500"],
+  humidity:["30","40","50","60","70","80","90"],
   brace:["8.0 inch","8.25 inch","8.5 inch","8.75 inch","9.0 inch","9.25 inch"],
-  tiller:["0mm","+2mm","+3mm","+4mm","+5mm","+6mm"]
+  tiller:["0mm","+2mm","+3mm","+4mm","+5mm","+6mm"],
+  centerShot:["矢先 1/2本 外","矢先 1本 外","センター","やや内"],
+  plungerTension:["弱め","中間","強め","1回転戻し","2回転戻し"]
 };
 const GEAR_FIELDS=[
-  ["bow","ハンドル/弓"],["limbs","リム"],["sight","サイト"],["rest","レスト"],["string","弦"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","矢 (シャフト/長さ/ポイント)"],
+  ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","矢 (シャフト/長さ/ポイント)"],
+  ["sight","サイト"],["rest","レスト"],["string","弦"],
   ["shaftSpine","シャフト番手/スパイン"],["arrowLength","矢尺/シャフト長 (inch)"],["pointWeight","ポイント重量 (gr)"],
-  ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["arrowSpeed","実測初速 (fps / m/s・任意)"],["arrowCd","抗力係数 Cd (任意)"],
-  ["brace","ブレースハイト"],["tiller","ティラー"],["plunger","プランジャー"],["nock","ノッキングポイント"],["notes","その他メモ"]
+  ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["shaftSetWeightSpread","矢セット重量差 (gr)"],["shaftStraightness","シャフト真直度 (inch)"],
+  ["foc","FOC (%)"],["vane","ベイン/羽根"],["vaneHeight","ベイン高さ (mm)"],["nock","ノック/ノッキングポイント"],["nockFit","ノックフィット"],
+  ["arrowSpeed","実測初速 (fps / m/s・任意)"],["arrowCd","抗力係数 Cd (任意)"],["bowEfficiency","弓効率 (%)"],["temperature","気温 (℃)"],["altitude","標高 (m)"],["humidity","湿度 (%)"],
+  ["brace","ブレースハイト"],["tiller","ティラー"],["centerShot","センターショット"],["plunger","プランジャー"],["plungerTension","プランジャー硬さ/位置"],["notes","その他メモ"]
 ];
-const GEAR_NUMERIC_FIELDS=new Set(["poundage","drawLength","shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","arrowSpeed","arrowCd"]);
+const GEAR_SECTIONS=[
+  {title:"基本", keys:["bow","limbs","poundage","drawLength","arrow"], open:true},
+  {title:"矢の実測・精密データ", keys:["shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","shaftSetWeightSpread","shaftStraightness","foc","vane","vaneHeight","nock","nockFit"]},
+  {title:"サイト・チューニング", keys:["sight","rest","string","brace","tiller","centerShot","plunger","plungerTension"]},
+  {title:"物理モデル補正", keys:["arrowSpeed","arrowCd","bowEfficiency","temperature","altitude","humidity"]},
+  {title:"メモ", keys:["notes"]}
+];
+const GEAR_NUMERIC_FIELDS=new Set(["poundage","drawLength","shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","shaftSetWeightSpread","shaftStraightness","foc","vaneHeight","arrowSpeed","arrowCd","bowEfficiency","temperature","altitude","humidity"]);
 const GEAR_PLACEHOLDERS={
   arrow:"例: EASTON X10 650 29inch 110gr",
   poundage:"例: 38",
   drawLength:"例: 28.5",
   arrowSpeed:"例: 205fps / 62.5m/s",
-  arrowCd:"未入力なら矢径から推定"
+  arrowCd:"未入力なら矢径とベインから推定",
+  bowEfficiency:"未入力なら72〜78%で推定",
+  shaftSetWeightSpread:"同一セットの最大差。例: 3",
+  shaftStraightness:"例: 0.003",
+  foc:"例: 12",
+  notes:"個体差、チューニング履歴、気づいたこと"
 };
 function gearOptions(k){
   if(k==="arrow") return shaftSuggestions();
@@ -1307,16 +1416,45 @@ function gearFieldHtml(k,lb,s){
   const list=opts.length?` list="${listId}" autocomplete="off"`:"";
   const mode=GEAR_NUMERIC_FIELDS.has(k)?` inputmode="decimal"`:"";
   const ph=GEAR_PLACEHOLDERS[k]?` placeholder="${esc(GEAR_PLACEHOLDERS[k])}"`:"";
+  if(k==="notes") return `<label class="f" for="gf_${k}">${lb}</label><textarea class="inp" id="gf_${k}"${ph}>${esc(s?s[k]:"")}</textarea>`;
   return `<label class="f" for="gf_${k}">${lb}</label><input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}"${list}${mode}${ph}>${opts.length?`<datalist id="${listId}">${opts.map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`:""}`;
+}
+function gearSectionHtml(sec,s){
+  const body=sec.keys.map(k=>{
+    const f=GEAR_FIELDS.find(x=>x[0]===k);
+    return f?gearFieldHtml(f[0],f[1],s):"";
+  }).join("");
+  return sec.open?body:`<details class="adv"><summary>${sec.title}</summary>${body}</details>`;
+}
+function gearPrecisionProfile(s){
+  const checks=[
+    ["arrowWeight","矢重量"],["arrowDia","矢径"],["arrowLength","矢尺"],["pointWeight","ポイント重量"],
+    ["poundage","実測ポンド"],["drawLength","引き尺"],["arrowSpeed","実測初速"],["shaftSetWeightSpread","矢セット重量差"],
+    ["foc","FOC"],["vane","ベイン"],["temperature","気温/環境"]
+  ];
+  const filled=checks.filter(([k])=>s&&String(s[k]||"").trim()).map(x=>x[1]);
+  const missing=checks.filter(([k])=>!(s&&String(s[k]||"").trim())).map(x=>x[1]);
+  const score=filled.length/checks.length;
+  const level=score>=.78?"高":score>=.5?"中":"低";
+  return {score,level,filled,missing};
+}
+function gearPrecisionHtml(s){
+  const p=gearPrecisionProfile(s);
+  const next=p.missing.slice(0,3).join("・");
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>演算入力の充実度: ${p.level}</b>（${Math.round(p.score*100)}%）</div>
+    ${next?`<div class="note">次に測ると効く項目: ${esc(next)}</div>`:`<div class="note">主要な物理モデル項目はかなり埋まっています。</div>`}
+  </div>`;
 }
 function renderGear(m){
   m.innerHTML=`<div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
     <div id="gearList">${db.setups.length? db.setups.map(s=>{
       const cnt=db.sessions.filter(x=>x.setupId===s.id).length;
+      const gp=gearPrecisionProfile(s);
       return `<div class="listItem" data-id="${s.id}"><div>
         <div class="t">${esc(s.name)}</div>
         <div class="d">${[s.bow,s.limbs,s.poundage?s.poundage+"lbs":""].filter(Boolean).map(esc).join(" ・ ")||"詳細未入力"}</div>
-        <div class="d">練習${cnt}回 ・ 変更履歴${(s.history||[]).length}件</div>
+        <div class="d">練習${cnt}回 ・ 演算入力 ${gp.level} ・ 変更履歴${(s.history||[]).length}件</div>
       </div><div style="font-size:18px;color:var(--sub)">›</div></div>`;
     }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
     <div class="btnrow"><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
@@ -1382,6 +1520,7 @@ function openGearDetail(id){
   const s=db.setups.find(x=>x.id===id); if(!s)return;
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet"><h3>${esc(s.name)}</h3>
+    ${gearPrecisionHtml(s)}
     <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th style="width:40%">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
     ${(s.history&&s.history.length)?`<h3 style="margin-top:14px;font-size:13px">変更履歴</h3>
       ${[...s.history].reverse().map(h=>`<div style="font-size:12px;padding:6px 0;border-bottom:1px solid #eef0eb">
@@ -1408,9 +1547,9 @@ function openGearForm(id){
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet"><h3>${s?"セッティング編集":"新しいセッティング"}</h3>
     <label class="f">名前 *</label><input class="inp" id="gfName" value="${esc(s?s.name:"")}" placeholder="例: メイン70m仕様">
-    ${GEAR_FIELDS.map(([k,lb])=>gearFieldHtml(k,lb,s)).join("")}
+    ${GEAR_SECTIONS.map(sec=>gearSectionHtml(sec,s)).join("")}
     <div class="btnrow"><button class="btn sec" id="gfInfer">📖 カタログから推定</button></div>
-    <div class="hint" id="gfInferHint">候補リストはSHIBUYA/ARICOの取扱カテゴリとカタログ掲載シャフトを参考にしています。矢の欄に「Easton X10 650 29inch 110gr」のように入れると、掲載モデル・スパイン・直径・GPI・総矢重量を推定します。</div>
+    <div class="hint" id="gfInferHint">矢の欄に「Easton X10 650 29inch 110gr」のように入れると、掲載モデル・スパイン・直径・GPI・総矢重量を推定します。精密に使う場合は矢セット重量差、FOC、ベイン、実測初速も追加してください。</div>
     <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
   </div>`;
   document.body.appendChild(ovl);
@@ -1465,7 +1604,7 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
-const APP_VER=11;
+const APP_VER=12;
 function checkUpdate(){
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
