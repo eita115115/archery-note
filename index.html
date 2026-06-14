@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1a5c3a" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#143626" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.json">
@@ -23,12 +23,17 @@ html,body{margin:0;padding:0;}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
   background:var(--bg); color:var(--ink); font-size:15px;
+  padding-bottom:76px;
   padding-bottom:calc(64px + env(safe-area-inset-bottom));
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
 }
 input, textarea{-webkit-user-select:auto; user-select:auto;}
+button:focus-visible,.chip:focus-visible,.listItem:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{
+  outline:3px solid var(--green); outline-offset:2px;
+}
 header.app{
   background:var(--hdr); color:#fff; padding:10px 16px;
+  padding-top:10px;
   padding-top:calc(10px + env(safe-area-inset-top));
   display:flex; align-items:center; gap:8px;
   position:sticky; top:0; z-index:20;
@@ -69,7 +74,8 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 nav.tabs{
   position:fixed; bottom:0; left:0; right:0; z-index:30;
   background:var(--card); border-top:1px solid var(--line);
-  display:flex; padding-bottom:env(safe-area-inset-bottom);
+  display:flex; padding-bottom:0;
+  padding-bottom:env(safe-area-inset-bottom);
 }
 nav.tabs button{
   flex:1; background:none; border:none; padding:8px 0 6px; font-size:10.5px; color:var(--sub);
@@ -137,21 +143,23 @@ table.tbl tr:last-child td{border-bottom:none;}
 .ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
 .sheet{
   background:var(--card); width:100%; max-width:520px; border-radius:18px 18px 0 0; padding:16px;
-  max-height:88vh; overflow-y:auto; padding-bottom:calc(16px + env(safe-area-inset-bottom));
+  max-height:88vh; overflow-y:auto; padding-bottom:16px;
+  padding-bottom:calc(16px + env(safe-area-inset-bottom));
 }
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--green);}
 .toast{
   position:fixed; bottom:84px; left:50%; transform:translateX(-50%); z-index:60;
   background:var(--ink); color:#fff; padding:9px 18px; border-radius:999px; font-size:13.5px;
-  opacity:0; transition:opacity .2s; pointer-events:none; white-space:nowrap;
+  opacity:0; transition:opacity .2s; pointer-events:none; max-width:calc(100vw - 24px); text-align:center;
 }
 .toast.show{opacity:.95;}
 .histChip{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:baseline;}
 .tgWrap svg.main.triple{width:58%; margin:0 auto;}
 .updbar{
-  position:fixed; left:50%; transform:translateX(-50%); bottom:calc(76px + env(safe-area-inset-bottom));
+  position:fixed; left:50%; transform:translateX(-50%); bottom:76px;
+  bottom:calc(76px + env(safe-area-inset-bottom));
   z-index:40; background:var(--green); color:#fff; padding:11px 18px; border-radius:999px;
-  font-size:13px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.35); cursor:pointer; display:none; white-space:nowrap;
+  font-size:13px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.35); cursor:pointer; display:none; max-width:calc(100vw - 24px); text-align:center;
 }
 html.dark{
   --bg:#141714; --card:#1e231e; --ink:#e7eae5; --sub:#9aa396; --line:#343b34; --line2:#2a312a;
@@ -171,6 +179,16 @@ details.adv summary::-webkit-details-marker{display:none;}
 details.adv summary::before{content:"▸ ";}
 details.adv[open] summary::before{content:"▾ ";}
 header.app .gear{margin-left:auto; background:none; border:none; color:#fff; font-size:21px; cursor:pointer; padding:4px;}
+@media (max-width:360px){
+  main{padding:8px;}
+  .row{flex-direction:column;}
+  .btnrow{flex-direction:column;}
+  .statbar{flex-wrap:wrap;}
+  .stat{min-width:46%;}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
+}
 </style>
 </head>
 <body>
@@ -191,11 +209,25 @@ header.app .gear{margin-left:auto; background:none; border:none; color:#fff; fon
 
 <script>
 "use strict";
+/* 小さな互換性補助: 古いSafari/WebViewでも主要機能が落ちないようにする */
+if(!Array.prototype.flat){
+  Object.defineProperty(Array.prototype,"flat",{value:function(depth){
+    const d=depth==null?1:Number(depth)||0, out=[];
+    (function walk(a,n){ a.forEach(v=>{ if(Array.isArray(v)&&n>0) walk(v,n-1); else out.push(v); }); })(this,d);
+    return out;
+  }});
+}
+if(!Array.prototype.flatMap){
+  Object.defineProperty(Array.prototype,"flatMap",{value:function(fn,thisArg){ return this.map(fn,thisArg).flat(); }});
+}
+if(!Object.values){ Object.values=o=>Object.keys(o).map(k=>o[k]); }
+if(!Number.isFinite){ Number.isFinite=v=>typeof v==="number" && isFinite(v); }
+if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;i++) s+=arguments[i]*arguments[i]; return Math.sqrt(s); }; }
 /* ============ storage ============ */
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=2;
-const APP_VER=14;
+const APP_VER=15;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],settings:{eyeSight:850,theme:"auto"},active:null}; }
 function normalizeDb(d){
@@ -995,11 +1027,25 @@ function nudgeArrow(dirKey){
 
 /* target pointer input with long-press fine mode + lens */
 function attachTargetInput(s){
-  const svg=$("#tgsvg"), lens=$("#lens"), lensSvg=$("#lensSvg"), lensTag=$("#lensTag"), cur=$("#tgcur"), wrap=$("#tgWrap");
+  const svg=$("#tgsvg"), lens=$("#lens"), lensSvg=$("#lensSvg"), lensTag=$("#lensTag"), cur=$("#tgcur");
   let drag=null;
-  function toSvg(e){
-    const pt=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());
-    return {x:pt.x, y:-pt.y};
+  function clientPoint(e){
+    const t=(e.changedTouches&&e.changedTouches[0])||(e.touches&&e.touches[0])||e;
+    if(!t || t.clientX==null) return null;
+    return {x:t.clientX,y:t.clientY,id:e.pointerId!=null?e.pointerId:(t.identifier!=null?t.identifier:"mouse")};
+  }
+  function clientToSvg(x,y){
+    const ctm=svg.getScreenCTM();
+    if(!ctm) return {x:0,y:0};
+    const inv=ctm.inverse();
+    if(window.DOMPoint){
+      const pt=new DOMPoint(x,y).matrixTransform(inv);
+      return {x:pt.x, y:-pt.y};
+    }
+    const pt=svg.createSVGPoint();
+    pt.x=x; pt.y=y;
+    const p=pt.matrixTransform(inv);
+    return {x:p.x, y:-p.y};
   }
   function drawCursor(p){
     const w=ringW(s.faceD);
@@ -1023,35 +1069,43 @@ function attachTargetInput(s){
     lens.style.left = half? "auto":"8px"; lens.style.right = half? "8px":"auto";
     lensTag.style.left = half? "auto":"12px"; lensTag.style.right = half? "12px":"auto";
   }
+  function resetDrag(){
+    if(drag&&drag.tm) clearTimeout(drag.tm);
+    drag=null; cur.innerHTML=""; lens.style.display="none";
+    lens.classList.remove("fine","cut","miss");
+    lensTag.classList.remove("fine","cut","miss"); lensTag.style.display="none";
+  }
   svg.addEventListener("contextmenu", e=>e.preventDefault());
   svg.addEventListener("selectstart", e=>e.preventDefault());
-  svg.addEventListener("pointerdown", e=>{
+  function down(e){
     if(s.cur.length>=s.perEnd){ toast(`1エンド${s.perEnd}本です。「エンド確定」を押してください`); return; }
-    e.preventDefault(); svg.setPointerCapture(e.pointerId);
-    const p=toSvg(e);
-    drag={p, raw:{x:e.clientX,y:e.clientY}, fine:false, id:e.pointerId,
+    const cp=clientPoint(e); if(!cp) return;
+    e.preventDefault();
+    if(e.pointerId!=null && svg.setPointerCapture){ try{ svg.setPointerCapture(e.pointerId); }catch(_){} }
+    const p=clientToSvg(cp.x,cp.y);
+    drag={p, raw:{x:cp.x,y:cp.y}, fine:false, id:cp.id,
       tm:setTimeout(()=>{ if(drag){ drag.fine=true; lens.classList.add("fine"); lensTag.classList.add("fine"); lensTag.style.display="block"; drawCursor(drag.p); } },400)};
     lens.style.display="block"; lens.classList.remove("cut","miss"); lensTag.classList.remove("fine","cut","miss"); lensTag.textContent="位置調整中…"; lensTag.style.display="block";
     drawCursor(p);
-  });
-  svg.addEventListener("pointermove", e=>{
-    if(!drag || e.pointerId!==drag.id) return;
+  }
+  function move(e){
+    const cp=clientPoint(e); if(!drag || !cp || cp.id!==drag.id) return;
     e.preventDefault();
-    const ctm=svg.getScreenCTM().inverse();
-    const a=new DOMPoint(e.clientX,e.clientY).matrixTransform(ctm);
-    const b=new DOMPoint(drag.raw.x,drag.raw.y).matrixTransform(ctm);
+    const a=clientToSvg(cp.x,cp.y);
+    const b=clientToSvg(drag.raw.x,drag.raw.y);
     const k=drag.fine?0.25:1;
-    drag.p={x:drag.p.x+(a.x-b.x)*k, y:drag.p.y-(a.y-b.y)*k};
-    drag.raw={x:e.clientX,y:e.clientY};
+    drag.p={x:drag.p.x+(a.x-b.x)*k, y:drag.p.y+(a.y-b.y)*k};
+    drag.raw={x:cp.x,y:cp.y};
     drawCursor(drag.p);
-  });
+  }
   function up(e){
-    if(!drag || e.pointerId!==drag.id) return;
+    const cp=clientPoint(e); if(!drag || !cp || cp.id!==drag.id) return;
+    e.preventDefault();
     clearTimeout(drag.tm);
     let MX=s.faceD/2*1.18, MY=MX;
     if(s.faceType==="triple"){ MX=14; MY=36; }
     const p={x:Math.max(-MX,Math.min(MX,drag.p.x)), y:Math.max(-MY,Math.min(MY,drag.p.y))};
-    drag=null; cur.innerHTML=""; lens.style.display="none"; lens.classList.remove("fine","cut","miss"); lensTag.classList.remove("fine","cut","miss"); lensTag.style.display="none";
+    resetDrag();
     const hit=hitFromGlobal(p.x,p.y,s.faceD,s.faceType,lineCutRadius(s.faceD,s.faceType));
     const rec={x:+hit.x.toFixed(2), y:+hit.y.toFixed(2), s:hit.s, X:hit.X};
     if(hit.spot!=null) rec.spot=hit.spot;
@@ -1059,8 +1113,24 @@ function attachTargetInput(s){
     save(); refreshActive();
     toast(`${scoreLabel(hit)} 点を記録`);
   }
-  svg.addEventListener("pointerup", up);
-  svg.addEventListener("pointercancel", e=>{ if(drag&&e.pointerId===drag.id){ clearTimeout(drag.tm); drag=null; cur.innerHTML=""; lens.style.display="none"; lens.classList.remove("fine","cut","miss"); lensTag.classList.remove("fine","cut","miss"); lensTag.style.display="none"; } });
+  function cancel(e){
+    const cp=clientPoint(e);
+    if(!drag || !cp || cp.id===drag.id) resetDrag();
+  }
+  if(window.PointerEvent){
+    svg.addEventListener("pointerdown", down);
+    svg.addEventListener("pointermove", move);
+    svg.addEventListener("pointerup", up);
+    svg.addEventListener("pointercancel", cancel);
+  }else{
+    svg.addEventListener("touchstart", down, {passive:false});
+    svg.addEventListener("touchmove", move, {passive:false});
+    svg.addEventListener("touchend", up, {passive:false});
+    svg.addEventListener("touchcancel", cancel, {passive:false});
+    svg.addEventListener("mousedown", down);
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  }
 }
 
 function finishSession(){
@@ -1795,13 +1865,15 @@ applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
 function checkUpdate(){
+  if(location.protocol==="file:") return;
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
     .then(j=>{ if(j && j.v>APP_VER) $("#updBar").style.display="block"; })
     .catch(()=>{});
 }
 $("#updBar").onclick=()=>location.reload();
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) checkUpdate(); });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) writeSafetySnapshot("hidden"); else checkUpdate(); });
+window.addEventListener("pagehide",()=>writeSafetySnapshot("pagehide"));
 checkUpdate();
 render();
 </script>

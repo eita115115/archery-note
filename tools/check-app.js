@@ -22,6 +22,20 @@ const appVer = /const APP_VER=(\d+)/.exec(html)?.[1];
 const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf8")).v;
 const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"), "utf8"))?.[1];
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
+assert(!/user-scalable\s*=\s*no|maximum-scale\s*=/.test(html), "Viewport must allow user zoom");
+assert(html.includes("window.PointerEvent") && html.includes("touchstart") && html.includes("mousedown"), "Input fallback handlers missing");
+assert(html.includes("createSVGPoint()"), "SVG coordinate fallback missing");
+assert(html.includes("Array.prototype.flat") && html.includes("Object.values") && html.includes("Math.hypot"), "Compatibility polyfills missing");
+const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
+new Function(sw);
+assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match("./index.html")'), "Service worker navigation fallback missing");
+
+const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel};")();
+const normalized = storageApi.normalizeDb({sessions:[{id:"s"}], settings:{eyeSight:900}});
+assert(normalized.schema >= 2 && normalized.sessions.length === 1 && normalized.settings.eyeSight === 900, "Storage normalization failed");
+assert(storageApi.dataCounts({sessions:[1,2],setups:[1],sightMarks:[1,2,3]}).marks === 3, "Data counts failed");
+assert(storageApi.hashText("abc") === storageApi.hashText("abc"), "Hash stability failed");
+assert(storageApi.snapshotLabel({ts:Date.now(),counts:{sessions:2,setups:1,marks:3}}).includes("練習2"), "Snapshot label failed");
 
 const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats};")();
 const arrows = [
