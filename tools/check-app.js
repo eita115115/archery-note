@@ -23,7 +23,7 @@ const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf
 const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"), "utf8"))?.[1];
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
 
-const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats};")();
+const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats};")();
 const arrows = [
   {x:1,y:1},{x:2,y:1.5},{x:0,y:.5},{x:1.2,y:1.7},{x:.8,y:.9},{x:1.5,y:1.1},
   {x:2.1,y:2.0},{x:1.7,y:1.6},{x:28,y:-20}
@@ -56,6 +56,26 @@ assert(inf && inf.spine === 650 && Math.round(inf.total) === 334, "Catalog infer
 const formHtml = gearApi.GEAR_SECTIONS.map(sec => gearApi.gearSectionHtml(sec, {bow:"HOYT GMX3"})).join("");
 assert(formHtml.includes("<details class=\"adv\"><summary>矢の実測・精密データ</summary>"), "Gear section UI missing");
 assert(gearApi.GEAR_FIELDS.length >= 30, "Gear fields unexpectedly small");
+
+const historyApi = new Function(
+  "db","robustStats","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc",
+  section("function sessionGroupPoint", "function scoreDistCard") + "\nreturn {groupingTrendCard};"
+)(
+  {setups:[{id:"main",name:"Main setup"}]},
+  statsApi.robustStats,
+  f=>f/20,
+  statsApi.groupStats,
+  s=>s.faceType==="triple" ? "40cm三つ目" : `${s.faceD}cm的`,
+  iso=>iso,
+  (v,axis)=>`${axis}:${v.toFixed(1)}`,
+  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))
+);
+const sampleSessions = [
+  {id:"b",date:"2026-02-01",setupId:"main",dist:70,faceD:122,faceType:"single",ends:[[{x:2,y:1,s:9},{x:3,y:2,s:9},{x:1,y:1,s:10},{x:2,y:0,s:10},{x:3,y:1,s:9},{x:2,y:2,s:9}]]},
+  {id:"a",date:"2026-01-01",setupId:"main",dist:70,faceD:122,faceType:"single",ends:[[{x:-1,y:0,s:10},{x:0,y:1,s:10},{x:-2,y:0,s:9},{x:-1,y:-1,s:10},{x:0,y:0,s:10},{x:-1,y:1,s:10}]]}
+];
+const trendHtml = historyApi.groupingTrendCard(sampleSessions);
+assert(trendHtml.includes("グルーピング推移") && trendHtml.includes("Main setup"), "Grouping trend card failed");
 
 console.log(`Archery Note checks OK (v${version})`);
 console.log(`Robust grouping: used=${st.n}, excluded=${st.excluded.length}, confidence=${Math.round(st.confidence*100)}%`);
