@@ -32,10 +32,30 @@ assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match
 
 const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel};")();
 const normalized = storageApi.normalizeDb({sessions:[{id:"s"}], settings:{eyeSight:900}});
-assert(normalized.schema >= 2 && normalized.sessions.length === 1 && normalized.settings.eyeSight === 900, "Storage normalization failed");
+assert(normalized.schema >= 3 && normalized.sessions.length === 1 && normalized.settings.eyeSight === 900 && Array.isArray(normalized.trash), "Storage normalization failed");
 assert(storageApi.dataCounts({sessions:[1,2],setups:[1],sightMarks:[1,2,3]}).marks === 3, "Data counts failed");
 assert(storageApi.hashText("abc") === storageApi.hashText("abc"), "Hash stability failed");
 assert(storageApi.snapshotLabel({ts:Date.now(),counts:{sessions:2,setups:1,marks:3}}).includes("練習2"), "Snapshot label failed");
+assert(html.includes("TRASH_LIMIT") && html.includes("restoreTrash") && html.includes("trashSettingsHtml"), "Trash/restore support missing");
+assert(html.includes("openSetupWizard") && html.includes("openCalibrationWizard"), "Wizard/calibration flows missing");
+assert(html.includes("sessionsCsv") && html.includes("scorecardSvg"), "Export flows missing");
+assert(html.includes("judgementFor") && html.includes("conditionInsights"), "Analysis judgement flows missing");
+assert(html.includes("histFilter") && html.includes("histSetup"), "History filters missing");
+assert(html.includes("ROUND_TYPES") && html.includes("roundProgressHtml"), "Round scoring support missing");
+const trashDb = {sessions:[],setups:[],sightMarks:[],trash:[]};
+let trashSaved = 0;
+const trashApi = new Function("db","save","uid","today","TRASH_LIMIT", section("function cloneData", "/* ============ scoring") + "\nreturn {trashItem,restoreTrash,roundLabel};")(
+  trashDb,
+  () => { trashSaved++; },
+  () => `id${trashSaved + trashDb.trash.length + 1}`,
+  () => "2026-06-14",
+  50
+);
+const deletedSession = {id:"sess1",date:"2026-06-14",dist:70,ends:[[]]};
+const trashEntry = trashApi.trashItem("session","test session",deletedSession);
+assert(trashDb.trash.length === 1 && trashEntry.label === "test session", "Trash insert failed");
+assert(trashApi.restoreTrash(trashEntry.id) && trashDb.sessions[0].id === "sess1" && trashDb.trash.length === 0, "Trash restore failed");
+assert(trashApi.roundLabel("70m72") === "70m 72射", "Round label failed");
 
 const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats};")();
 const arrows = [

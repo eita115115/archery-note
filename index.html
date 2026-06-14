@@ -226,15 +226,17 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 /* ============ storage ============ */
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
-const SCHEMA_VER=2;
-const APP_VER=16;
+const SCHEMA_VER=3;
+const APP_VER=17;
+const TRASH_LIMIT=50;
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],settings:{eyeSight:850,theme:"auto"},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
 function normalizeDb(d){
   const base=blankDb(), src=(d&&typeof d==="object")?d:{};
   const out=Object.assign(base,src);
   out.settings=Object.assign(base.settings,src.settings||{});
-  ["setups","sightMarks","sessions"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  ["setups","sightMarks","sessions","trash"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
   return out;
@@ -292,6 +294,45 @@ function today(){ return new Date().toISOString().slice(0,10); }
 function fmtD(iso){ if(!iso)return""; const [y,m,d]=iso.split("-"); return `${y}/${+m}/${+d}`; }
 const ENDCOLORS=["#e5484d","#1e6fd9","#0f9d58","#f59e0b","#8b5cf6","#ec4899","#0ea5b7","#7c5e10","#475569","#b91c1c","#1d4ed8","#047857"];
 function faceLabel(s){ return s.faceType==="triple" ? "40cm三つ目" : `${s.faceD}cm的`; }
+function cloneData(v){ return JSON.parse(JSON.stringify(v)); }
+function trashItem(type,label,data){
+  db.trash=db.trash||[];
+  const item={id:uid(),type,label:label||"削除データ",data:cloneData(data),date:today(),ts:Date.now()};
+  db.trash.unshift(item);
+  db.trash=db.trash.slice(0,TRASH_LIMIT);
+  return item;
+}
+function restoreTrash(id){
+  const i=(db.trash||[]).findIndex(x=>x.id===id);
+  if(i<0) return false;
+  const item=db.trash[i], data=cloneData(item.data);
+  if(item.type==="session"){
+    if(!db.sessions.some(s=>s.id===data.id)) db.sessions.push(data);
+  }else if(item.type==="sightMark"){
+    if(!db.sightMarks.some(m=>m.id===data.id)) db.sightMarks.push(data);
+  }else if(item.type==="setupBundle"){
+    const setup=data.setup;
+    if(setup && !db.setups.some(s=>s.id===setup.id)) db.setups.push(setup);
+    (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });
+  }
+  db.trash.splice(i,1);
+  save({reason:"restore-trash",forceSnapshot:true});
+  return true;
+}
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":"削除データ"; }
+function downloadText(filename,text,type){
+  const blob=new Blob([text],{type:type||"text/plain"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+}
+function csvCell(v){ return `"${String(v==null?"":v).replace(/"/g,'""')}"`; }
+const ROUND_TYPES=[
+  {id:"free",label:"自由練習",arrows:null},
+  {id:"70m72",label:"70m 72射",arrows:72,dist:70},
+  {id:"50m72",label:"50m 72射",arrows:72,dist:50},
+  {id:"30m36",label:"30m 36射",arrows:36,dist:30},
+  {id:"18m60",label:"18m 60射",arrows:60,dist:18}
+];
+function roundLabel(id){ return (ROUND_TYPES.find(r=>r.id===(id||"free"))||ROUND_TYPES[0]).label; }
 
 /* ============ scoring ============ */
 function ringW(faceD){ return faceD/20; }
@@ -730,6 +771,123 @@ function adviceFor(sess, setup){
   if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です 👏"});
   return out;
 }
+function windText(sess){
+  const parts=[];
+  if(sess.wx) parts.push(sess.wx);
+  if(sess.windDir) parts.push(sess.windDir);
+  if(sess.windSpeed) parts.push(`${sess.windSpeed}m/s`);
+  return parts.join(" / ");
+}
+function isWindy(sess){
+  const ws=num(sess&&sess.windSpeed);
+  return /風 強/.test(sess&&sess.wx||"") || (ws!=null && ws>=3.5);
+}
+function judgementFor(adv,sess){
+  if(!adv) return null;
+  const st=adv.st, w=ringW(sess.faceD);
+  const hasMove=adv.lines.some(l=>l.axis!=="-");
+  if(!hasMove) return {label:"維持",tone:"ok",text:"サイトは触らず、この基準で本数を重ねて確認できます。"};
+  if(st.n<6 || (adv.confidence||0)<.45) return {label:"保留",tone:"hold",text:"まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。"};
+  if(st.rr>w*2.8) return {label:"射形優先",tone:"warn",text:"中心は読めますが散りが大きめです。サイト調整は半分以下に抑え、リリース・押し手・照準の再現性を先に見ます。"};
+  if(isWindy(sess) && st.sx>st.sy*1.15) return {label:"風を考慮",tone:"hold",text:"横方向の偏りに風の影響が混ざりやすい状況です。無風または風待ちで再確認すると精度が上がります。"};
+  if((adv.confidence||0)>=.72 && st.rr<=w*2.2) return {label:"動かす",tone:"ok",text:"グルーピング中心と信頼度が揃っています。提案量を目安にサイトを動かす価値があります。"};
+  return {label:"少量調整",tone:"mid",text:"傾向は見えています。提案量の半分〜7割程度で様子を見るのが現実的です。"};
+}
+function judgementHtml(adv,sess){
+  const j=judgementFor(adv,sess);
+  if(!j) return "";
+  const color=j.tone==="ok"?"#0f9d58":j.tone==="warn"?"#c62828":"#8a6d1d";
+  return `<div class="note" style="margin-top:6px"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
+}
+function conditionInsights(sess,st,setup){
+  const out=[];
+  const wind=windText(sess);
+  if(wind) out.push(`条件メモ: ${esc(wind)}${sess.note?` / ${esc(sess.note)}`:""}`);
+  if(st){
+    if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
+    if(st.sy>st.sx*1.35) out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
+    else if(st.sx>st.sy*1.35) out.push("次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。");
+    else if(st.rr<ringW(sess.faceD)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
+    if(setup && !setup.arrowSpeed) out.push("精度向上: 実測初速を入れると、上下サイトのmm換算と距離別予測が安定します。");
+    if(setup && !setup.shaftSetWeightSpread) out.push("精度向上: 矢セット重量差を入れると、上下散りの信頼度判定が強くなります。");
+  }
+  if(sess.round && sess.round!=="free") out.push(`ラウンド: ${roundLabel(sess.round)} の途中/結果として扱っています。`);
+  return out;
+}
+function conditionHtml(sess,st,setup){
+  const notes=conditionInsights(sess,st,setup).slice(0,4);
+  return notes.length?`<div class="advice" style="background:var(--card);border-color:var(--line)">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
+}
+function roundProgressHtml(sess){
+  const r=ROUND_TYPES.find(x=>x.id===sess.round);
+  if(!r || !r.arrows) return "";
+  const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0);
+  const shot=all.length, remain=Math.max(0,r.arrows-shot);
+  const pace=shot?total/shot*r.arrows:0;
+  return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)} / ${shot}/${r.arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
+}
+function sessionsCsv(){
+  const head=["date","setup","distance_m","round","face","arrows","total","avg","x","ten","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","excluded","sight_v","sight_h","condition","note"];
+  const rows=[head];
+  db.sessions.forEach(s=>{
+    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===s.setupId);
+    rows.push([s.date,setup?setup.name:"",s.dist,roundLabel(s.round),faceLabel(s),all.length,total,all.length?(total/all.length).toFixed(3):"",
+      all.filter(a=>a.X).length,all.filter(a=>a.s===10).length,st?st.mx.toFixed(2):"",st?st.my.toFixed(2):"",st?st.rr.toFixed(2):"",
+      st?st.sx.toFixed(2):"",st?st.sy.toFixed(2):"",st?pct(st.confidence||0):"",st?st.excluded.length:"",
+      s.sightV||"",s.sightH||"",windText(s),s.note||""]);
+  });
+  return "\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
+}
+function exportSessionsCsv(){
+  downloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8");
+  db.settings.lastBackupAt=new Date().toISOString();
+  save("csv-export");
+}
+function scorecardSvg(sess){
+  const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);
+  const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(scoreLabel).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
+  const h=210+rows.length*34;
+  const title=`${fmtD(sess.date)} ${sess.dist}m ${roundLabel(sess.round)}`;
+  const bg="#f7f8f4", ink="#1c1e1c", green="#1a5c3a";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="${h}" viewBox="0 0 900 ${h}">
+  <rect width="900" height="${h}" fill="${bg}"/>
+  <text x="48" y="62" font-family="sans-serif" font-size="34" font-weight="700" fill="${green}">Archery Note Scorecard</text>
+  <text x="48" y="102" font-family="sans-serif" font-size="22" fill="${ink}">${esc(title)}</text>
+  <text x="48" y="134" font-family="sans-serif" font-size="18" fill="#667064">${esc(setup?setup.name:"セッティング未指定")} / ${esc(faceLabel(sess))} / ${all.length}射</text>
+  <text x="650" y="92" font-family="sans-serif" font-size="48" font-weight="800" fill="${green}" text-anchor="end">${total}</text>
+  <text x="666" y="92" font-family="sans-serif" font-size="18" fill="#667064">点</text>
+  <text x="650" y="124" font-family="sans-serif" font-size="18" fill="#667064" text-anchor="end">平均 ${all.length?(total/all.length).toFixed(2):"-"} / X ${all.filter(a=>a.X).length}</text>
+  <rect x="48" y="160" width="804" height="34" rx="6" fill="#dde7dc"/>
+  <text x="70" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}">End</text>
+  <text x="150" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}">Scores</text>
+  <text x="808" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}" text-anchor="end">Sum</text>
+  ${rows.map((r,i)=>`<g transform="translate(0 ${202+i*34})">
+    <rect x="48" y="0" width="804" height="28" rx="5" fill="${i%2?"#ffffff":"#eef1ec"}"/>
+    <text x="78" y="20" font-family="sans-serif" font-size="17" fill="${ink}" text-anchor="middle">${r.i}</text>
+    <text x="150" y="20" font-family="sans-serif" font-size="17" fill="${ink}">${esc(r.scores)}</text>
+    <text x="808" y="20" font-family="sans-serif" font-size="17" font-weight="700" fill="${green}" text-anchor="end">${r.sum}</text>
+  </g>`).join("")}
+  ${sess.note||windText(sess)?`<text x="48" y="${h-32}" font-family="sans-serif" font-size="16" fill="#667064">${esc([windText(sess),sess.note].filter(Boolean).join(" / "))}</text>`:""}
+</svg>`;
+}
+function exportScorecardImage(sess){
+  downloadText(`archery-scorecard-${sess.date||today()}-${sess.dist}m.svg`,scorecardSvg(sess),"image/svg+xml;charset=utf-8");
+}
+function backupReminderHtml(){
+  if(db.sessions.length<3) return "";
+  const t=db.settings.lastBackupAt?Date.parse(db.settings.lastBackupAt):0;
+  const days=t?Math.floor((Date.now()-t)/(24*60*60*1000)):999;
+  if(days<30) return `<div class="hint">最終バックアップ/CSV出力: ${new Date(t).toLocaleDateString()}。月1回の保存ペースは良好です。</div>`;
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
+}
+function trashSettingsHtml(){
+  const items=(db.trash||[]).slice(0,8);
+  if(!items.length) return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
+  return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱 <span style="font-size:11px;color:var(--sub)">最新${items.length}/${(db.trash||[]).length}件</span></h3>
+    <table class="tbl"><tr><th>種類</th><th>内容</th><th>削除日</th><th></th></tr>
+    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost" data-restore-trash="${it.id}" style="padding:4px 8px">復元</button></td></tr>`).join("")}</table>
+    <div class="btnrow"><button class="btn danger" id="trashClear">ゴミ箱を空にする</button></div>`;
+}
 function regress(pts){
   const n=pts.length; if(n<2) return null;
   const xb=pts.reduce((a,p)=>a+p[0],0)/n, yb=pts.reduce((a,p)=>a+p[1],0)/n;
@@ -828,7 +986,7 @@ function latestMark(setupId, dist){
 
 /* ============ views ============ */
 let view="record";
-let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, zoom:1 };
+let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1 };
 function showView(v){ view=v; ui.selArrow=-1; render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
@@ -863,6 +1021,9 @@ function renderRecord(m){
     <details class="adv">
       <summary>詳細（日付・的・本数・サイト値・天候）</summary>
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
+      <label class="f">ラウンド</label><select class="inp" id="fRound">
+        ${ROUND_TYPES.map(r=>`<option value="${r.id}">${r.label}</option>`).join("")}
+      </select>
       <div class="row">
         <div><label class="f">的サイズ</label><select class="inp" id="fFace">
           ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}<option value="T40">40cm 三つ目（縦）</option></select></div>
@@ -877,6 +1038,10 @@ function renderRecord(m){
       <div class="row">
         <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
         <input class="inp" id="fNote" placeholder="メモ（任意）">
+      </div>
+      <div class="row">
+        <div><label class="f">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
+        <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
     <div class="btnrow"><button class="btn" id="fStart">▶ 記録開始</button></div>
@@ -909,7 +1074,8 @@ function renderRecord(m){
       dist:d, faceD: fv==="T40"?40:+fv, faceType: fv==="T40"?"triple":"single", perEnd:+$("#fArrows").value,
       shaft:+lineCutRadius(fv==="T40"?40:+fv, fv==="T40"?"triple":"single").toFixed(3),
       sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
-      wx:$("#fWx").value, note:$("#fNote").value.trim(),
+      wx:$("#fWx").value, note:$("#fNote").value.trim(), windDir:$("#fWindDir").value, windSpeed:$("#fWindSpeed").value.trim(),
+      round:$("#fRound").value||"free",
       ends:[], cur:[]
     };
     save(); render();
@@ -1173,13 +1339,16 @@ function openSummary(sess, isNew){
     </div>
     <div id="sumPlot" style="margin-top:10px"></div>
     ${groupSummaryHtml(st)}
+    ${roundProgressHtml(sess)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
+      ${judgementHtml(adv,sess)}
       ${shapeNote(adv.st)}
       ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm と弾道モデルから計算した参考値です（サイトタブで変更可）。</div></div>`:""}
+    ${conditionHtml(sess,st,setup)}
     ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
-    <div class="btnrow"><button class="btn ghost" id="sumClose">閉じる</button></div>
+    <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
   </div>`;
   document.body.appendChild(ovl);
   plotSession(sess, ovl.querySelector("#sumPlot"));
@@ -1190,23 +1359,45 @@ function openSummary(sess, isNew){
       note:`練習記録より（${all.length}本 / 平均${(total/all.length).toFixed(1)}）`});
     save(); toast("サイト台帳に記録しました"); mk.disabled=true;
   };
+  ovl.querySelector("#sumCard").onclick=()=>exportScorecardImage(sess);
   ovl.querySelector("#sumClose").onclick=()=>{ ovl.remove(); render(); };
 }
 
 /* ---------- 履歴 ---------- */
 function renderHistory(m){
-  const ss=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
-  m.innerHTML=`<div class="card"><h2>練習履歴 <span class="mini">${ss.length}回</span></h2><div id="histList">
+  const allSs=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
+  const hf=ui.histFilter||{setupId:"",dist:"",round:""};
+  const dists=[...new Set(allSs.map(s=>s.dist).filter(Boolean))].sort((a,b)=>b-a);
+  const rounds=[...new Set(allSs.map(s=>s.round||"free"))];
+  const ss=allSs.filter(s=>
+    (!hf.setupId || (hf.setupId==="__none"?!s.setupId:s.setupId===hf.setupId)) &&
+    (!hf.dist || String(s.dist)===String(hf.dist)) &&
+    (!hf.round || (s.round||"free")===hf.round)
+  );
+  m.innerHTML=`<div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
+    <div class="row">
+      <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${hf.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map(d=>`<option value="${d}" ${String(hf.dist)===String(d)?"selected":""}>${d}m</option>`).join("")}</select></div>
+    </div>
+    <div class="row">
+      <div><label class="f">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map(r=>`<option value="${r}" ${hf.round===r?"selected":""}>${roundLabel(r)}</option>`).join("")}</select></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
+    </div>
+    <div id="histList">
     ${ss.length? ss.map(s=>{
       const all=s.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
       const setup=db.setups.find(x=>x.id===s.setupId);
       return `<div class="listItem" data-id="${s.id}">
         <div><div class="t">${fmtD(s.date)} ・ ${s.dist}m</div>
-        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
+        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
         <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></div>`;
     }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
   </div></div>
-  ${groupingTrendCard(ss)}${distTrendCard(ss)}${scoreDistCard()}${monthlyCard()}`;
+  ${groupingTrendCard(ss)}${distTrendCard(ss)}${scoreDistCard(ss)}${monthlyCard(ss)}`;
+  $("#histSetup").onchange=e=>{ ui.histFilter.setupId=e.target.value; render(); };
+  $("#histDist").onchange=e=>{ ui.histFilter.dist=e.target.value; render(); };
+  $("#histRound").onchange=e=>{ ui.histFilter.round=e.target.value; render(); };
+  $("#histClear").onclick=()=>{ ui.histFilter={setupId:"",dist:"",round:""}; render(); };
   document.querySelectorAll("#histList .listItem").forEach(li=>li.onclick=()=>openHistDetail(li.dataset.id));
 }
 function sessionGroupPoint(s){
@@ -1281,8 +1472,8 @@ function groupingTrendItem(g){
     </div>
   </div>`;
 }
-function scoreDistCard(){
-  const all=db.sessions.flatMap(s=>s.ends.flat());
+function scoreDistCard(ss){
+  const all=(ss||db.sessions).flatMap(s=>s.ends.flat());
   if(all.length<12) return "";
   const keys=["X","10","9","8","7","6","5","4","3","2","1","M"];
   const cnt={}; keys.forEach(k=>cnt[k]=0);
@@ -1299,10 +1490,11 @@ function scoreDistCard(){
       </div>`;
     }).join("")+`</div>`;
 }
-function monthlyCard(){
-  if(!db.sessions.length) return "";
+function monthlyCard(ss){
+  const src=ss||db.sessions;
+  if(!src.length) return "";
   const m={};
-  db.sessions.forEach(s=>{
+  src.forEach(s=>{
     const k=(s.date||"").slice(0,7); if(!k) return;
     const all=s.ends.flat();
     m[k]=m[k]||{c:0,n:0,sum:0};
@@ -1344,7 +1536,7 @@ function openHistDetail(id){
   const adv=adviceFor(sess,setup);
   ovl.innerHTML=`<div class="sheet">
     <h3>${fmtD(sess.date)} ・ ${sess.dist}m ・ ${faceLabel(sess)}</h3>
-    <div style="font-size:12px;color:var(--sub)">${setup?esc(setup.name):"セッティング未指定"}${sess.wx?" ・ "+esc(sess.wx):""}${sess.note?" ・ "+esc(sess.note):""}</div>
+    <div style="font-size:12px;color:var(--sub)">${setup?esc(setup.name):"セッティング未指定"}${sess.round&&sess.round!=="free"?" ・ "+roundLabel(sess.round):""}${windText(sess)?" ・ "+esc(windText(sess)):""}${sess.note?" ・ "+esc(sess.note):""}</div>
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
@@ -1353,16 +1545,21 @@ function openHistDetail(id){
     </div>
     <div id="hPlot" style="margin-top:10px"></div>
     ${groupSummaryHtml(st)}
+    ${roundProgressHtml(sess)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     <table class="tbl" style="margin-top:8px"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
     ${sess.ends.map((end,i)=>{
       const sorted=[...end].sort((a,b)=>b.s-a.s);
       return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td></tr>`;
     }).join("")}</table>
-    ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${shapeNote(adv.st)}</div>`:""}
+    ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
+    ${conditionHtml(sess,st,setup)}
     <div class="btnrow">
       <button class="btn danger" id="hDel">削除</button>
       <button class="btn sec" id="hEdit">✏ 編集</button>
+    </div>
+    <div class="btnrow">
+      <button class="btn sec" id="hCard">画像保存</button>
       <button class="btn ghost" id="hClose">閉じる</button>
     </div>
   </div>`;
@@ -1376,9 +1573,11 @@ function openHistDetail(id){
     db.active=cp; save(); ovl.remove(); showView("record");
     toast("過去の記録を編集中。「セッション終了」で上書き保存されます");
   };
+  ovl.querySelector("#hCard").onclick=()=>exportScorecardImage(sess);
   ovl.querySelector("#hDel").onclick=()=>{
     if(confirm("この練習記録を削除しますか？")){
-      db.sessions=db.sessions.filter(s=>s.id!==id); save(); ovl.remove(); render();
+      trashItem("session",`${fmtD(sess.date)} ${sess.dist}m`,sess);
+      db.sessions=db.sessions.filter(s=>s.id!==id); save({reason:"delete-session",forceSnapshot:true}); ovl.remove(); render(); toast("削除しました。設定から復元できます");
     }
   };
 }
@@ -1428,7 +1627,7 @@ function renderSight(m){
       <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
       ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
     </div>`:""}
-    <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button></div>
+    <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
     ${marks.length?`<table class="tbl" style="margin-top:10px"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
       ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
       <td style="font-size:11px;color:var(--sub)">${esc(mk.note||"")}</td>
@@ -1442,10 +1641,12 @@ function renderSight(m){
     ${adv?`
       <div style="font-size:12px;color:var(--sub)">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
       <div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
+      ${judgementHtml(adv,lastSess)}
       ${shapeNote(adv.st)}
       ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
       :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
+    ${adv?conditionHtml(lastSess,adv.st,setup):""}
     ${(reg.v||reg.h)?`<div class="advice">
       <div style="font-size:12px;color:var(--sub)">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
       ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)})</span></div>`:""}
@@ -1467,8 +1668,11 @@ function renderSight(m){
   document.querySelectorAll(".chips .chip[data-d]").forEach(c=>c.onclick=()=>{ ui.sightSel.dist=+c.dataset.d; render(); });
   const add=$("#sgAdd");
   if(add) add.onclick=()=>openMarkForm(sid,dist);
+  const calMode=$("#sgCalMode");
+  if(calMode) calMode.onclick=()=>openCalibrationWizard(sid);
   document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
-    if(confirm("この記録を削除しますか？")){ db.sightMarks=db.sightMarks.filter(x=>x.id!==b.dataset.del); save(); render(); }
+    const mk=db.sightMarks.find(x=>x.id===b.dataset.del);
+    if(confirm("この記録を削除しますか？")){ if(mk) trashItem("sightMark",`${mk.dist}m サイト値`,mk); db.sightMarks=db.sightMarks.filter(x=>x.id!==b.dataset.del); save({reason:"delete-sight-mark",forceSnapshot:true}); render(); toast("削除しました。設定から復元できます"); }
   });
   const cv=$("#sgCalV"), ch=$("#sgCalH");
   if(cv) cv.onchange=e=>{ setup.calibV70=parseFloat(e.target.value)||null; save(); render(); };
@@ -1491,6 +1695,38 @@ function openMarkForm(setupId,dist){
     db.sightMarks.push({id:uid(), setupId, dist, v:ovl.querySelector("#mkV").value.trim(), h:ovl.querySelector("#mkH").value.trim(),
       date:ovl.querySelector("#mkDate").value||today(), ts:Date.now(), note:ovl.querySelector("#mkNote").value.trim()});
     save(); ovl.remove(); render(); toast("台帳に記録しました");
+  };
+}
+function openCalibrationWizard(setupId){
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup){ toast("セッティングを選んでください"); return; }
+  const dists=[70,50,30,18];
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>校正モード — ${esc(setup.name)}</h3>
+    <div class="hint">実測できている距離だけ入力してください。複数距離が揃うほど、距離別サイト予測と個人補正が強くなります。</div>
+    <label class="f">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
+    ${dists.map(d=>{
+      const mk=latestMark(setupId,d)||{};
+      return `<div class="row">
+        <div><label class="f">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v||"")}"></div>
+        <div><label class="f">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h||"")}"></div>
+      </div>`;
+    }).join("")}
+    <label class="f">メモ</label><input class="inp" id="calNote" placeholder="例: 校正日 / 無風 / ベスト確認">
+    <div class="btnrow"><button class="btn ghost" id="calCancel">キャンセル</button><button class="btn" id="calSave">校正値を保存</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  ovl.querySelector("#calCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#calSave").onclick=()=>{
+    const date=ovl.querySelector("#calDate").value||today();
+    const note=ovl.querySelector("#calNote").value.trim()||"校正モード";
+    let n=0;
+    dists.forEach(d=>{
+      const v=ovl.querySelector(`#calV_${d}`).value.trim(), h=ovl.querySelector(`#calH_${d}`).value.trim();
+      if(v||h){ db.sightMarks.push({id:uid(),setupId,dist:d,v,h,date,ts:Date.now(),note}); n++; }
+    });
+    if(!n){ toast("1つ以上入力してください"); return; }
+    save({reason:"calibration",forceSnapshot:true}); ovl.remove(); render(); toast(`${n}距離の校正値を保存しました`);
   };
 }
 
@@ -1686,6 +1922,30 @@ function gearPrecisionHtml(s){
     ${next?`<div class="note">次に測ると効く項目: ${esc(next)}</div>`:`<div class="note">主要な物理モデル項目はかなり埋まっています。</div>`}
   </div>`;
 }
+function setupComparisonHtml(setupId){
+  const ss=db.sessions.filter(s=>s.setupId===setupId).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  if(ss.length<2) return "";
+  const last=ss[ss.length-1];
+  const prev=[...ss.slice(0,-1)].reverse().find(s=>s.dist===last.dist) || ss[ss.length-2];
+  const metric=s=>{
+    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0);
+    return {all,st,total,avg:all.length?total/all.length:0};
+  };
+  const a=metric(prev), b=metric(last);
+  const delta=(x,unit="",goodLow=false)=>{
+    const sign=x>0?"+":"";
+    const good=goodLow?x<0:x>0;
+    const color=Math.abs(x)<.01?"var(--sub)":good?"#0f9d58":"#c62828";
+    return `<b style="color:${color}">${sign}${x.toFixed(2)}${unit}</b>`;
+  };
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>用具比較</b> — ${fmtD(prev.date)} → ${fmtD(last.date)}${prev.dist===last.dist?` / ${last.dist}m`:` / ${prev.dist}m→${last.dist}m`}</div>
+    <div class="kv"><span>平均点</span><span>${a.avg.toFixed(2)} → ${b.avg.toFixed(2)}（${delta(b.avg-a.avg)}）</span></div>
+    ${a.st&&b.st?`<div class="kv"><span>グルーピング半径</span><span>${a.st.rr.toFixed(1)}cm → ${b.st.rr.toFixed(1)}cm（${delta(b.st.rr-a.st.rr,"cm",true)}）</span></div>
+    <div class="kv"><span>中心の移動</span><span>${driftText(b.st.mx-a.st.mx,b.st.my-a.st.my)}</span></div>`:""}
+    <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
+  </div>`;
+}
 function renderGear(m){
   m.innerHTML=`<div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
     <div id="gearList">${db.setups.length? db.setups.map(s=>{
@@ -1697,9 +1957,10 @@ function renderGear(m){
         <div class="d">練習${cnt}回 ・ 演算入力 ${gp.level} ・ 変更履歴${(s.history||[]).length}件</div>
       </div><div style="font-size:18px;color:var(--sub)">›</div></div>`;
     }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
-    <div class="btnrow"><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
+    <div class="btnrow"><button class="btn sec" id="gWizard">初回セットアップ</button><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
     <div class="hint">バックアップ・テーマなどは右上の <b>⚙設定</b> から。</div>
   </div>`;
+  $("#gWizard").onclick=()=>openSetupWizard();
   $("#gAdd").onclick=()=>openGearForm(null);
   document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
 }
@@ -1721,10 +1982,12 @@ function openSettings(){
     <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
     <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
     <h3 style="margin-top:18px;font-size:14px">データ管理</h3>
+    ${backupReminderHtml()}
     <div class="btnrow">
       <button class="btn sec" id="dExp">⬇ バックアップ保存</button>
       <button class="btn sec" id="dImp">⬆ 読み込み</button>
     </div>
+    <div class="btnrow"><button class="btn sec" id="dCsv">CSV出力</button></div>
     <input type="file" id="dFile" accept=".json" style="display:none">
     <h3 style="margin-top:18px;font-size:14px">自動退避</h3>
     ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動退避はまだありません。保存操作を行うと端末内に退避データが残ります。</div>`}
@@ -1732,6 +1995,7 @@ function openSettings(){
       <button class="btn sec" id="dSnapNow">今すぐ退避</button>
       <button class="btn ghost" id="dSnapRestore" ${snaps.length?"":"disabled"}>選択した退避を復元</button>
     </div>
+    ${trashSettingsHtml()}
     <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
     <div class="hint" style="color:var(--danger)">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
     <div class="hint" style="text-align:center;margin-top:12px">Archery Note v${APP_VER}</div>
@@ -1745,10 +2009,13 @@ function openSettings(){
   ovl.querySelector("#setEye").onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); };
   ovl.querySelector("#setClose").onclick=()=>{ ovl.remove(); render(); };
   ovl.querySelector("#dExp").onclick=()=>{
+    db.settings.lastBackupAt=new Date().toISOString();
+    save({reason:"json-export",forceSnapshot:true});
     const blob=new Blob([JSON.stringify(db,null,1)],{type:"application/json"});
     const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
     a.download=`archery-note-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
   };
+  ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
   ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータを退避しました"); ovl.remove(); openSettings(); };
   ovl.querySelector("#dSnapRestore").onclick=()=>{
     const sel=ovl.querySelector("#dSnapSel");
@@ -1775,12 +2042,77 @@ function openSettings(){
     }catch(_){ toast("ファイルを読み込めませんでした"); } };
     r.readAsText(f);
   };
+  ovl.querySelectorAll("[data-restore-trash]").forEach(b=>b.onclick=()=>{
+    if(restoreTrash(b.dataset.restoreTrash)){ ovl.remove(); render(); openSettings(); toast("復元しました"); }
+  });
+  const tc=ovl.querySelector("#trashClear");
+  if(tc) tc.onclick=()=>{
+    if(confirm("ゴミ箱の中身を完全に削除しますか？")){
+      db.trash=[]; save({reason:"clear-trash",forceSnapshot:true}); ovl.remove(); openSettings(); toast("ゴミ箱を空にしました");
+    }
+  };
+}
+function openSetupWizard(){
+  const opts=k=>gearOptions(k).slice(0,80).map(v=>`<option value="${esc(v)}"></option>`).join("");
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>初回セットアップ</h3>
+    <div class="hint">最初は分かる範囲だけで大丈夫です。矢とサイト値が入るほど、調整提案の精度が上がります。</div>
+    <label class="f">名前 *</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
+    <label class="f">ハンドル/弓</label><input class="inp" id="wBow" list="wBowList"><datalist id="wBowList">${opts("bow")}</datalist>
+    <label class="f">リム</label><input class="inp" id="wLimbs" list="wLimbsList"><datalist id="wLimbsList">${opts("limbs")}</datalist>
+    <div class="row">
+      <div><label class="f">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
+      <div><label class="f">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
+    </div>
+    <label class="f">矢（シャフト/番手/長さ/ポイント）</label><input class="inp" id="wArrow" list="wArrowList" placeholder="例: EASTON X10 650 29inch 110gr"><datalist id="wArrowList">${opts("arrow")}</datalist>
+    <label class="f">サイト</label><input class="inp" id="wSight" list="wSightList"><datalist id="wSightList">${opts("sight")}</datalist>
+    <details class="adv" open>
+      <summary>実測サイト値（分かる距離だけ）</summary>
+      ${[70,50,30,18].map(d=>`<div class="row">
+        <div><label class="f">${d}m 上下</label><input class="inp" id="wV_${d}" inputmode="decimal"></div>
+        <div><label class="f">${d}m 左右</label><input class="inp" id="wH_${d}" inputmode="decimal"></div>
+      </div>`).join("")}
+    </details>
+    <div class="btnrow"><button class="btn ghost" id="wCancel">キャンセル</button><button class="btn" id="wSave">保存して開始</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  ovl.querySelector("#wCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#wSave").onclick=()=>{
+    const name=ovl.querySelector("#wName").value.trim();
+    if(!name){ toast("名前を入力してください"); return; }
+    const n={id:uid(),name,history:[],createdAt:today()};
+    GEAR_FIELDS.forEach(([k])=>n[k]="");
+    n.bow=ovl.querySelector("#wBow").value.trim();
+    n.limbs=ovl.querySelector("#wLimbs").value.trim();
+    n.poundage=ovl.querySelector("#wPound").value.trim();
+    n.drawLength=ovl.querySelector("#wDraw").value.trim();
+    n.arrow=ovl.querySelector("#wArrow").value.trim();
+    n.sight=ovl.querySelector("#wSight").value.trim();
+    const inf=inferCatalogGear(n);
+    if(inf && !inf.missing){
+      n.shaftSpine=String(inf.spine);
+      n.arrowDia=inf.dia.toFixed(2);
+      n.shaftGpi=inf.gpi.toFixed(2);
+      if(inf.len) n.arrowLength=String(inf.len);
+      if(inf.point) n.pointWeight=String(inf.point);
+      if(inf.total) n.arrowWeight=inf.total.toFixed(0);
+      n.notes=`カタログ推定: ${inf.notes.join(" / ")}`;
+    }
+    db.setups.push(n);
+    [70,50,30,18].forEach(d=>{
+      const v=ovl.querySelector(`#wV_${d}`).value.trim(), h=ovl.querySelector(`#wH_${d}`).value.trim();
+      if(v||h) db.sightMarks.push({id:uid(),setupId:n.id,dist:d,v,h,date:today(),ts:Date.now(),note:"初回セットアップ"});
+    });
+    ui.sightSel.setupId=n.id;
+    save({reason:"setup-wizard",forceSnapshot:true}); ovl.remove(); render(); toast("初回セットアップを保存しました");
+  };
 }
 function openGearDetail(id){
   const s=db.setups.find(x=>x.id===id); if(!s)return;
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet"><h3>${esc(s.name)}</h3>
     ${gearPrecisionHtml(s)}
+    ${setupComparisonHtml(id)}
     <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th style="width:40%">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
     ${(s.history&&s.history.length)?`<h3 style="margin-top:14px;font-size:13px">変更履歴</h3>
       ${[...s.history].reverse().map(h=>`<div style="font-size:12px;padding:6px 0;border-bottom:1px solid #eef0eb">
@@ -1796,9 +2128,11 @@ function openGearDetail(id){
   ovl.querySelector("#gEdit").onclick=()=>{ ovl.remove(); openGearForm(id); };
   ovl.querySelector("#gDel").onclick=()=>{
     if(confirm(`「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`)){
+      const marks=db.sightMarks.filter(x=>x.setupId===id);
+      trashItem("setupBundle",s.name,{setup:s,sightMarks:marks});
       db.setups=db.setups.filter(x=>x.id!==id);
       db.sightMarks=db.sightMarks.filter(x=>x.setupId!==id);
-      save(); ovl.remove(); render();
+      save({reason:"delete-setup",forceSnapshot:true}); ovl.remove(); render(); toast("削除しました。設定から復元できます");
     }
   };
 }
