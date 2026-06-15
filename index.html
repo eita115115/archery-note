@@ -259,7 +259,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=25;
+const APP_VER=26;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -2192,7 +2192,7 @@ function openCalibrationWizard(setupId){
 
 /* ---------- 用具 ---------- */
 const CATALOG_SHAFTS=[
-  {id:"x10",name:"EASTON X10",aliases:["X10"],type:"carbon",dia:5.5,gpiA:3.8,gpiB:1950,sizes:[1000,900,830,750,700,650,600,550,500,450,410,380,350,325]},
+  {id:"x10",name:"EASTON X10",aliases:["X10"],type:"carbon",dia:5.5,gpiA:3.8,gpiB:1950,sizes:[1000,900,830,750,700,650,600,550,500,450,410,380,350,325],gpi:{1000:5.3,900:5.8,830:6.2,750:6.4,700:6.7,650:6.8,600:7.0,550:7.5,500:7.8,450:8.1,410:8.5,380:8.9,350:8.8,325:9.2}},
   {id:"x10-32",name:"EASTON X10 3.2mm Parallel Pro",aliases:["X10 3.2","3.2MM PARALLEL PRO"],type:"carbon",dia:3.2,gpiA:3.4,gpiB:2200,sizes:[1000,900,800,750,700,650,600,550,500,460,420,380,340]},
   {id:"ace",name:"EASTON A/C/E",aliases:["A/C/E","ACE"],type:"carbon",dia:5.5,gpiA:4.0,gpiB:1450,sizes:[1250,1100,1000,920,850,780,720,670,620,570,520,470,430,400,370]},
   {id:"x10-4",name:"EASTON X10 4mm Parallel Pro",aliases:["X10 4MM","4MM PARALLEL PRO"],type:"carbon",dia:4.0,gpiA:4.4,gpiB:2000,sizes:[1150,1000,880,810,710,660,610,570,520,470,420,380,340,300,250]},
@@ -2216,28 +2216,22 @@ function aluminumGpi(code){
   const od=Math.floor(code/100)/64, wall=(code%100)/1000, id=Math.max(0,od-2*wall);
   return (Math.PI/4*(od*od-id*id))*0.0975*7000;
 }
-function carbonGpi(fam,spine){ return clamp(fam.gpiA+fam.gpiB/spine,3,18); }
-function extractCatalogNumber(txt, sizes){
-  const ordered=[...sizes].sort((a,b)=>String(b).length-String(a).length);
-  return ordered.find(s=>new RegExp(`(^|[^0-9])${String(s).replace("-","[- ]?")}([^0-9]|$)`).test(txt))||null;
-}
-function parseLengthIn(txt){ const m=txt.match(/([0-9]{2}(?:\.[0-9])?)\s*(?:INCH|IN|")/); return m?+m[1]:null; }
-function parsePointGr(txt){ const m=txt.match(/(?:POINT|PNT|ポイント|PT)\s*([0-9]{2,3})|([0-9]{2,3})\s*(?:GR|GRAIN|グレイン)/); return m?+(m[1]||m[2]):null; }
+function carbonGpi(fam,spine){ return fam.gpi&&fam.gpi[spine]?fam.gpi[spine]:clamp(fam.gpiA+fam.gpiB/spine,3,18); }
 function inferCatalogGear(vals){
-  const txt=normGearText([vals.arrow,vals.notes,vals.shaftSpine].join(" "));
+  const txt=normGearText(vals.arrow);
   if(!txt) return null;
   const fam=[...CATALOG_SHAFTS]
     .sort((a,b)=>Math.max(...b.aliases.map(x=>x.length))-Math.max(...a.aliases.map(x=>x.length)))
     .find(f=>f.aliases.some(a=>new RegExp(`(^|\\s)${normGearText(a).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}(\\s|$)`).test(txt)));
   if(!fam) return null;
-  const spine=extractCatalogNumber(txt, fam.sizes) || num(vals.shaftSpine);
+  const spine=num(vals.shaftSpine);
   if(!spine) return {fam,missing:"spine"};
   const dia=fam.type==="aluminum"?aluminumDiaMm(spine):fam.dia;
   const gpi=fam.type==="aluminum"?aluminumGpi(spine):carbonGpi(fam,spine);
-  const len=num(vals.arrowLength)||parseLengthIn(txt)||null;
-  const point=num(vals.pointWeight)||parsePointGr(txt)||null;
+  const len=num(vals.arrowLength)||null;
+  const point=num(vals.pointWeight)||null;
   const total=len?gpi*len+(point||100)+27:null;
-  const notes=[`${fam.name} ${spine} をカタログ掲載モデルとして認識`, `シャフト重量 ${gpi.toFixed(2)}gr/in${fam.type==="carbon"?"（モデル別近似）":"（番手から計算）"}`, `外径 ${dia.toFixed(2)}mm${fam.type==="carbon"?"（代表値/推定）":"（番手から計算）"}`];
+  const notes=[`${fam.name} / 番手 ${spine} をカタログ掲載モデルとして認識`, `シャフト重量 ${gpi.toFixed(2)}gr/in${fam.gpi&&fam.gpi[spine]?"（メーカー掲載値）":fam.type==="carbon"?"（モデル別近似）":"（番手から計算）"}`, `外径 ${dia.toFixed(2)}mm${fam.type==="carbon"?"（代表値/推定）":"（番手から計算）"}`];
   if(total) notes.push(`総矢重量 ${total.toFixed(0)}gr（矢尺${len}in、ポイント${point||100}gr、ノック/ベイン等27grとして推定）`);
   return {fam,spine,dia,gpi,len,point,total,notes};
 }
@@ -2250,32 +2244,26 @@ function uniqGear(items){
   });
 }
 function shaftSuggestions(){
-  const examples=[
-    "EASTON X10 650 29inch 110gr","EASTON X10 4mm Parallel Pro 660 29inch 110gr","EASTON X10 3.2mm Parallel Pro 700 29inch 100gr",
-    "EASTON A/C/E 720 28inch 100gr","EASTON Avance 660 28inch 100gr","EASTON Avance Sport 660 28inch 100gr",
-    "EASTON XX75 Platinum Plus 1916 29inch 100gr","EASTON X7 Eclipse 1814","EASTON X23 2315",
-    "SKYLON Carbon Paragon 650 29inch 100gr","Black Eagle Revelation 650 29inch 100gr"
-  ];
-  return uniqGear([...examples,...CATALOG_SHAFTS.flatMap(f=>[f.name,...f.sizes.map(sp=>`${f.name} ${sp}`)])]);
+  return uniqGear(CATALOG_SHAFTS.map(f=>f.name));
 }
 const COMMON_SPINES=[2000,1800,1600,1400,1250,1200,1150,1100,1000,950,920,900,880,850,830,810,800,780,750,730,720,710,700,675,670,660,650,625,620,610,600,575,570,550,525,520,500,475,470,460,450,430,425,420,410,400,380,375,370,350,340,325,300,250,2318,2315,2314,2312,2212,2114,2016,2014,1916,1914,1816,1814,1716,1714,1616,1614,1516,1514,1416,1414,1214];
 const GEAR_SUGGESTIONS={
   bow:[
-    "HOYT GMX3","HOYT XCEED 2","HOYT Formula XD","HOYT Arcos","HOYT RCRV Podium","HOYT RCRV Comp","HOYT Concept X37","HOYT Concept X40",
-    "WIAWIS META-LX","WIAWIS ATF-X","WIAWIS CX7","WIN&WIN WIAWIS TFT-G",
-    "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK KOREA MK XG","MK KOREA MK XD","MK KOREA ZEST",
+    "HOYT Grand Prix GMX3 2026 H25","HOYT Grand Prix XCEED 2 H25","HOYT Grand Prix XCEED 2 H27","HOYT Formula SR H25","HOYT RCRV Podium H25","HOYT RCRV Comp H25","HOYT Formula XD","HOYT GMX3","HOYT XCEED 2",
+    "WIAWIS ATF-EX H25","WIAWIS META LX H25","WIAWIS ATF-DX H25","WIAWIS META DX H25","WIAWIS ATF-X H25","WIAWIS RADICAL PRO H25","WIAWIS CX7 H25","WIN&WIN WIAWIS TFT-G",
+    "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK ZX","MK KOREA MK XG","MK KOREA MK XD","MK KOREA ZEST",
     "WNS Vantage AX","WNS Motive FX","WNS Explorer DX",
     "KINETIC Vygo V2","KINETIC Novana V2","KINETIC Sovren","KINETIC Zivio V2",
-    "FIVICS ONIX PRO","FIVICS VX 25inch","FIVICS VELLATOR 25inch","FIVICS ARGON-X",
+    "FIVICS ONIX PRO","FIVICS VX 25inch","FIVICS VELLATOR 25inch","FIVICS ARGON-X","FIVICS VELLATOR",
     "SAMICK Discovery","SAMICK Polaris","MATHEWS Title","PSE Laser"
   ],
   limbs:[
     "HOYT Formula SR","HOYT Formula XD","HOYT Formula Metrix","HOYT GP Metrix","HOYT Grand Prix Axia Wood","HOYT Grand Prix Velos","HOYT RCRV Podium","HOYT RCRV Comp",
     "WIAWIS NS-G","WIAWIS NS-G2","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam",
-    "MK ARCHERY MX","MK KOREA MK XD","MK KOREA MK ZEST","MK KOREA N3","MK KOREA X-CORE",
+    "MK ARCHERY MX","MK KOREA MK XD","MK KOREA MK ZEST","MK KOREA ZEST","MK KOREA N3","MK KOREA X-CORE",
     "WNS Vantage G7","WNS Delta C2","WNS Explorer W1",
     "KINETIC Vaultage Carbon/Foam","SAMICK Discovery R1","SAMICK Polaris",
-    "FIVICS SKADI Wood","FIVICS SKADI-CX","FIVICS ARGON-X Wood"
+    "FIVICS SKADI Wood","FIVICS SKADI-CX","FIVICS ARGON-X Wood","FIVICS SKADI Wood Core","FIVICS ARGON-X Wood Core"
   ],
   sight:[
     "SHIBUYA ULTIMA RC PRO G2","SHIBUYA ULTIMA RC PRO","SHIBUYA ULTIMA RC III","SHIBUYA Dual Click","SHIBUYA ULTIMA CP PRO G2","SHIBUYA OKULUS Scope",
@@ -2304,7 +2292,7 @@ const GEAR_SUGGESTIONS={
   shaftSetWeightSpread:["1","2","3","4","5","6","8","10"],
   shaftStraightness:["0.001","0.002","0.003","0.004","0.005","0.006"],
   foc:["9","10","11","12","13","14","15","16","17","18"],
-  vane:["GAS PRO Spin Vanes","XS Wings","Spin Wing","Range-O-Matic Spin Vanes","EliVanes P3","Bohning X Vane","AAE WAV","Kurly Vanes","Natural Feather"],
+  vane:["KOREA ARCHERY Jet6","KOREA ARCHERY Jet6 S","GAS PRO Spin Vanes","XS Wings","Spin Wing","Range-O-Matic Spin Vanes","EliVanes P3","Bohning X Vane","AAE WAV","Kurly Vanes","Natural Feather"],
   vaneHeight:["1.5","1.75","2.0","2.5","3.0","4.0"],
   nockFit:["普通","やや緩い","ややきつい","Loose","Tight"],
   poundage:["24","26","28","30","32","34","36","38","40","42","44","46","48","50"],
@@ -2321,7 +2309,7 @@ const GEAR_SUGGESTIONS={
   plungerTension:["弱め","中間","強め","1回転戻し","2回転戻し"]
 };
 const GEAR_FIELDS=[
-  ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","矢 (シャフト/長さ/ポイント)"],
+  ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","シャフト銘柄"],
   ["sight","サイト"],["rest","レスト"],["string","弦"],["stabilizer","スタビライザー/ウエイト"],["tab","タブ/リリーサー"],
   ["shaftSpine","シャフト番手/スパイン"],["arrowLength","矢尺/シャフト長 (inch)"],["pointWeight","ポイント重量 (gr)"],
   ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["shaftSetWeightSpread","矢セット重量差 (gr)"],["shaftStraightness","シャフト真直度 (inch)"],
@@ -2338,7 +2326,7 @@ const GEAR_SECTIONS=[
 ];
 const GEAR_NUMERIC_FIELDS=new Set(["poundage","drawLength","shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","shaftSetWeightSpread","shaftStraightness","foc","vaneHeight","arrowSpeed","arrowCd","bowEfficiency","temperature","altitude","humidity"]);
 const GEAR_PLACEHOLDERS={
-  arrow:"例: EASTON X10 650 29inch 110gr",
+  arrow:"例: EASTON X10",
   poundage:"例: 38",
   drawLength:"例: 28.5",
   arrowSpeed:"例: 205fps / 62.5m/s",
@@ -2390,7 +2378,7 @@ function spineGuidance(s){
   const p=num(s&&s.poundage);
   const draw=num(s&&s.drawLength);
   const len=num(s&&s.arrowLength) || (draw!=null ? draw+1.75 : null);
-  const point=num(s&&s.pointWeight) || (s&&s.arrow ? parsePointGr(normGearText(s.arrow)) : null) || 100;
+  const point=num(s&&s.pointWeight) || 100;
   if(p==null || len==null) return {ready:false, missing:[p==null?"実測ポンド":null,len==null?"矢尺":null].filter(Boolean)};
   const drawAdj=draw!=null ? (draw-28)*1.2 : 0;
   const eff=p + drawAdj + (len-28)*2.0 + (point-100)*0.055;
@@ -2573,7 +2561,12 @@ function openSetupWizard(){
       <div><label class="f">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
       <div><label class="f">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
     </div>
-    <label class="f">矢（シャフト/番手/長さ/ポイント）</label><input class="inp" id="wArrow" list="wArrowList" placeholder="例: EASTON X10 650 29inch 110gr"><datalist id="wArrowList">${opts("arrow")}</datalist>
+    <label class="f">シャフト銘柄</label><input class="inp" id="wArrow" list="wArrowList" placeholder="例: EASTON X10"><datalist id="wArrowList">${opts("arrow")}</datalist>
+    <div class="row">
+      <div><label class="f">番手/スパイン</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
+      <div><label class="f">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
+    </div>
+    <label class="f">ポイント重量 (gr)</label><input class="inp" id="wPoint" inputmode="decimal" list="wPointList" placeholder="例: 110"><datalist id="wPointList">${opts("pointWeight")}</datalist>
     <label class="f">サイト</label><input class="inp" id="wSight" list="wSightList"><datalist id="wSightList">${opts("sight")}</datalist>
     <details class="adv" open>
       <summary>実測サイト値（分かる距離だけ）</summary>
@@ -2596,14 +2589,14 @@ function openSetupWizard(){
     n.poundage=ovl.querySelector("#wPound").value.trim();
     n.drawLength=ovl.querySelector("#wDraw").value.trim();
     n.arrow=ovl.querySelector("#wArrow").value.trim();
+    n.shaftSpine=ovl.querySelector("#wSpine").value.trim();
+    n.arrowLength=ovl.querySelector("#wArrowLength").value.trim();
+    n.pointWeight=ovl.querySelector("#wPoint").value.trim();
     n.sight=ovl.querySelector("#wSight").value.trim();
     const inf=inferCatalogGear(n);
     if(inf && !inf.missing){
-      n.shaftSpine=String(inf.spine);
       n.arrowDia=inf.dia.toFixed(2);
       n.shaftGpi=inf.gpi.toFixed(2);
-      if(inf.len) n.arrowLength=String(inf.len);
-      if(inf.point) n.pointWeight=String(inf.point);
       if(inf.total) n.arrowWeight=inf.total.toFixed(0);
       n.notes=`カタログ推定: ${inf.notes.join(" / ")}`;
     }
@@ -2654,7 +2647,7 @@ function openGearForm(id){
     <label class="f">名前 *</label><input class="inp" id="gfName" value="${esc(s?s.name:"")}" placeholder="例: メイン70m仕様">
     ${GEAR_SECTIONS.map(sec=>gearSectionHtml(sec,s)).join("")}
     <div class="btnrow"><button class="btn sec" id="gfInfer">📖 カタログから推定</button></div>
-    <div class="hint" id="gfInferHint">矢の欄に「Easton X10 650 29inch 110gr」のように入れると、掲載モデル・スパイン・直径・GPI・総矢重量を推定します。精密に使う場合は矢セット重量差、FOC、ベイン、実測初速も追加してください。</div>
+    <div class="hint" id="gfInferHint">シャフト銘柄と番手を別々に入れると、掲載モデル・直径・GPI・総矢重量を推定します。矢尺とポイント重量は専用欄に入れてください。</div>
     <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
   </div>`;
   document.body.appendChild(ovl);
@@ -2664,14 +2657,12 @@ function openGearForm(id){
     GEAR_FIELDS.forEach(([k])=>vals[k]=ovl.querySelector("#gf_"+k).value.trim());
     const inf=inferCatalogGear(vals);
     const hint=ovl.querySelector("#gfInferHint");
-    if(!inf){ hint.textContent="カタログ推定できるシャフト名が見つかりませんでした。例: X10 650 / ACE 720 / Avance 660 / XX75 1916"; toast("シャフト名を読み取れません"); return; }
-    if(inf.missing){ hint.textContent=`${inf.fam.name} は見つかりました。スパイン/番手も矢の欄に入れてください。`; toast("番手を追加してください"); return; }
+    if(!inf){ hint.textContent="カタログ推定できるシャフト名が見つかりませんでした。例: EASTON X10 / EASTON A/C/E / EASTON Avance / EASTON XX75 Platinum Plus"; toast("シャフト名を読み取れません"); return; }
+    if(inf.missing){ hint.textContent=`${inf.fam.name} は見つかりました。番手/スパイン欄も入力してください。`; toast("番手を追加してください"); return; }
     const set=(k,v)=>{ const el=ovl.querySelector("#gf_"+k); if(el && v!=null) el.value=String(v); };
     set("shaftSpine", inf.spine);
     set("arrowDia", inf.dia.toFixed(2));
     set("shaftGpi", inf.gpi.toFixed(2));
-    if(inf.len) set("arrowLength", inf.len);
-    if(inf.point) set("pointWeight", inf.point);
     if(inf.total) set("arrowWeight", inf.total.toFixed(0));
     const old=ovl.querySelector("#gf_notes").value.trim();
     const note=`カタログ推定: ${inf.notes.join(" / ")}`;

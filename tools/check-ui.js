@@ -57,6 +57,7 @@ function staticUiChecks() {
   assert(/\.row\{flex-direction:column;\}/.test(html), "Small-screen row stacking missing");
   assert(html.includes("データで育つ記録アプリ") && html.includes("点取りから調整提案へ") && html.includes("足りない材料を見る"), "systematic onboarding UI missing");
   assert(html.includes("判断信頼度") && html.includes("個人モデル") && html.includes("次のアクション") && html.includes("個人データ準備度") && html.includes("スパイン初期候補") && html.includes("RK4-3D") && html.includes("物理校正"), "analysis cards missing");
+  assert(html.includes("シャフト銘柄") && html.includes("番手/スパイン") && html.includes("HOYT Grand Prix XCEED 2 H25"), "separated gear fields missing");
 }
 
 function screenshot(browser, view) {

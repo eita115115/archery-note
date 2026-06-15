@@ -174,10 +174,13 @@ const gearApi = new Function(
   v=>{ const n=parseFloat(v); return Number.isFinite(n)?n:null; },
   s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))
 );
-const inf = gearApi.inferCatalogGear({arrow:"EASTON X10 650 29inch 110gr", notes:"", shaftSpine:"", arrowLength:"", pointWeight:""});
+const inf = gearApi.inferCatalogGear({arrow:"EASTON X10", notes:"", shaftSpine:"650", arrowLength:"29", pointWeight:"110"});
 assert(inf && inf.spine === 650 && Math.round(inf.total) === 334, "Catalog inference failed");
+const missingInf = gearApi.inferCatalogGear({arrow:"EASTON X10", notes:"", shaftSpine:"", arrowLength:"29", pointWeight:"110"});
+assert(missingInf && missingInf.missing === "spine", "Separated shaft/spine inference failed");
 const formHtml = gearApi.GEAR_SECTIONS.map(sec => gearApi.gearSectionHtml(sec, {bow:"HOYT GMX3"})).join("");
 assert(formHtml.includes("<details class=\"adv\"><summary>矢の実測・精密データ</summary>"), "Gear section UI missing");
+assert(formHtml.includes("シャフト銘柄") && formHtml.includes("HOYT Grand Prix XCEED 2 H25"), "Separated gear model UI missing");
 assert(gearApi.GEAR_FIELDS.length >= 32, "Gear fields unexpectedly small");
 assert(gearApi.GEAR_FIELDS.some(([k]) => k === "stabilizer") && gearApi.GEAR_FIELDS.some(([k]) => k === "tab"), "New gear fields missing");
 const sp = gearApi.spineGuidance({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"});
