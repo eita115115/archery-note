@@ -227,7 +227,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=20;
+const APP_VER=21;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -659,33 +659,69 @@ function physicsProfile(setup){
   const variation=gearVariation(setup||{});
   return {pound:p||null, drawIn, massGr, diaMm, speedMps, speedFps:speedMps/0.3048, measuredSpeed, cd, area, massKg, rho, variation};
 }
-function simulateArrow(distM, angle, phys){
-  let x=0,y=0,t=0;
-  let vx=phys.speedMps*Math.cos(angle), vy=phys.speedMps*Math.sin(angle);
-  const k=0.5*phys.rho*phys.cd*phys.area/phys.massKg, dt=0.004, g=9.80665;
-  let px=x,py=y,pt=t,pvx=vx,pvy=vy;
-  for(let i=0;i<4000 && x<distM && y>-80;i++){
-    px=x; py=y; pt=t; pvx=vx; pvy=vy;
-    const v=Math.hypot(vx,vy);
-    const ax=-k*v*vx, ay=-g-k*v*vy;
-    vx+=ax*dt; vy+=ay*dt; x+=vx*dt; y+=vy*dt; t+=dt;
-  }
-  if(x>=distM && x!==px){
-    const q=(distM-px)/(x-px);
-    y=py+(y-py)*q; t=pt+(t-pt)*q; vx=pvx+(vx-pvx)*q; vy=pvy+(vy-pvy)*q;
-  }
-  return {y,t,speed:Math.hypot(vx,vy)};
+function sessionWindSpeed(sess){
+  const v=num(sess&&sess.windSpeed);
+  if(v!=null) return clamp(v,0,18);
+  const wx=String(sess&&sess.wx||"");
+  if(/風\s*強|強風/.test(wx)) return 5;
+  if(/風\s*弱|弱風/.test(wx)) return 2;
+  return sess&&sess.windDir?2.5:0;
 }
-function solveZeroAngle(distM, phys){
+function windModel(sess){
+  const speed=sessionWindSpeed(sess);
+  const dir=String(sess&&sess.windDir||"");
+  if(speed<=0) return {speed:0,down:0,side:0,variability:0,known:false,label:"無風扱い"};
+  let down=0, side=0, variability=.18, known=true, label=dir||"風向未指定";
+  if(/向かい/.test(dir)){ down=-speed; label="向かい風"; }
+  else if(/追い/.test(dir)){ down=speed; label="追い風"; }
+  else if(/左から/.test(dir)){ side=speed; label="左から"; }
+  else if(/右から/.test(dir)){ side=-speed; label="右から"; }
+  else if(/巻き/.test(dir)){ side=speed*.55; down=-speed*.2; variability=.55; label="巻き風"; }
+  else{ side=speed*.35; variability=.45; known=false; }
+  return {speed,down,side,variability,known,label};
+}
+function windDriftText(cm){
+  const a=Math.abs(cm).toFixed(1);
+  return cm>0?`右へ${a}cm`:cm<0?`左へ${a}cm`:`0.0cm`;
+}
+function simulateArrow(distM, angle, phys, wind){
+  wind=wind||{down:0,side:0};
+  const k=0.5*phys.rho*phys.cd*phys.area/phys.massKg, dt=0.006, g=9.80665;
+  let s={x:0,y:0,z:0,t:0,vx:phys.speedMps*Math.cos(angle),vy:phys.speedMps*Math.sin(angle),vz:0};
+  const deriv=a=>{
+    const rx=a.vx-(wind.down||0), ry=a.vy, rz=a.vz-(wind.side||0);
+    const rv=Math.hypot(rx,ry,rz);
+    return {x:a.vx,y:a.vy,z:a.vz,t:1,vx:-k*rv*rx,vy:-g-k*rv*ry,vz:-k*rv*rz};
+  };
+  const add=(a,d,h)=>({x:a.x+d.x*h,y:a.y+d.y*h,z:a.z+d.z*h,t:a.t+d.t*h,vx:a.vx+d.vx*h,vy:a.vy+d.vy*h,vz:a.vz+d.vz*h});
+  const mix=(a,k1,k2,k3,k4)=>{
+    const h=dt/6;
+    return {x:a.x+h*(k1.x+2*k2.x+2*k3.x+k4.x),y:a.y+h*(k1.y+2*k2.y+2*k3.y+k4.y),z:a.z+h*(k1.z+2*k2.z+2*k3.z+k4.z),t:a.t+dt,
+      vx:a.vx+h*(k1.vx+2*k2.vx+2*k3.vx+k4.vx),vy:a.vy+h*(k1.vy+2*k2.vy+2*k3.vy+k4.vy),vz:a.vz+h*(k1.vz+2*k2.vz+2*k3.vz+k4.vz)};
+  };
+  let prev=s;
+  for(let i=0;i<5000 && s.x<distM && s.y>-100;i++){
+    prev=s;
+    const k1=deriv(s), k2=deriv(add(s,k1,dt/2)), k3=deriv(add(s,k2,dt/2)), k4=deriv(add(s,k3,dt));
+    s=mix(s,k1,k2,k3,k4);
+  }
+  if(s.x>=distM && s.x!==prev.x){
+    const q=(distM-prev.x)/(s.x-prev.x);
+    s={x:distM,y:prev.y+(s.y-prev.y)*q,z:prev.z+(s.z-prev.z)*q,t:prev.t+(s.t-prev.t)*q,
+      vx:prev.vx+(s.vx-prev.vx)*q,vy:prev.vy+(s.vy-prev.vy)*q,vz:prev.vz+(s.vz-prev.vz)*q};
+  }
+  return {y:s.y,z:s.z,t:s.t,speed:Math.hypot(s.vx,s.vy,s.vz),state:s};
+}
+function solveZeroAngle(distM, phys, wind){
   let lo=-0.05, hi=0.42;
-  let yl=simulateArrow(distM,lo,phys).y, yh=simulateArrow(distM,hi,phys).y;
+  let yl=simulateArrow(distM,lo,phys,wind).y, yh=simulateArrow(distM,hi,phys,wind).y;
   if(!(yl<=0 && yh>=0)){
     const v=phys.speedMps, g=9.80665;
     const s=clamp(g*distM/(v*v),-.95,.95);
     return 0.5*Math.asin(s);
   }
   for(let i=0;i<32;i++){
-    const mid=(lo+hi)/2, ym=simulateArrow(distM,mid,phys).y;
+    const mid=(lo+hi)/2, ym=simulateArrow(distM,mid,phys,wind).y;
     if(ym>=0) hi=mid; else lo=mid;
   }
   return (lo+hi)/2;
@@ -693,15 +729,30 @@ function solveZeroAngle(distM, phys){
 function trajectoryModel(sess, setup, eyeMm){
   const distM=Math.max(5, sess.dist||70);
   const phys=physicsProfile(setup||{});
-  const angle=solveZeroAngle(distM, phys);
-  const base=simulateArrow(distM, angle, phys);
+  const wind=windModel(sess||{});
+  const angle=solveZeroAngle(distM, phys, wind);
+  const base=simulateArrow(distM, angle, phys, wind);
   const dth=0.0015;
-  const up=simulateArrow(distM, angle+dth, phys);
-  const dn=simulateArrow(distM, angle-dth, phys);
+  const up=simulateArrow(distM, angle+dth, phys, wind);
+  const dn=simulateArrow(distM, angle-dth, phys, wind);
   const sens=Math.max(distM*.55, (up.y-dn.y)/(2*dth));
   const mmPerCmV=(0.01/sens)*eyeMm;
   const mmPerCmH=(0.01/distM)*eyeMm;
-  return {phys, angle, tof:base.t, impactSpeed:base.speed, sens, mmPerCmV, mmPerCmH};
+  const windDriftCm=base.z*100;
+  const windUncertaintyCm=Math.abs(windDriftCm)*(wind.variability||0) + (wind.speed?0.35:0);
+  const has=k=>String((setup||{})[k]||"").trim();
+  const modelScore=clamp(
+    (phys.measuredSpeed ? .20 : .08) +
+    (has("arrowWeight") ? .13 : .06) +
+    (has("arrowDia") ? .11 : .05) +
+    (has("arrowCd") ? .10 : .04) +
+    (has("temperature") ? .07 : .03) +
+    (has("altitude") ? .06 : .02) +
+    (has("humidity") ? .05 : .02) +
+    (wind.speed ? (wind.known ? .12 : .06) : .08),
+    0,1
+  );
+  return {phys, wind, angle, tof:base.t, impactSpeed:base.speed, sens, mmPerCmV, mmPerCmH, windDriftCm, windUncertaintyCm, modelScore, engine:"RK4-3D"};
 }
 function adviceModel(sess, setup, st){
   const dist=sess.dist, w=ringW(sess.faceD);
@@ -714,7 +765,14 @@ function adviceModel(sess, setup, st){
   const p=parseFloat(setup&&setup.poundage);
   let vFactor=nudge, hFactor=nudge, notes=[];
   notes.push(`信頼度 ${pct(confidence)}（${st.n}本使用${st.excluded.length?` / 外れ値${st.excluded.length}本除外`:""}）。初回補正率は ${pct(nudge)} です。`);
-  notes.push(`物理モデル: 初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、矢重量 ${traj.phys.massGr.toFixed(0)}gr、Cd ${traj.phys.cd.toFixed(2)}、空気密度 ${traj.phys.rho.toFixed(2)}kg/m³、飛翔 ${traj.tof.toFixed(2)}秒、入射速度 ${traj.impactSpeed.toFixed(1)}m/s。`);
+  notes.push(`物理エンジン: ${traj.engine}（3D空気抵抗/RK4）。初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、矢重量 ${traj.phys.massGr.toFixed(0)}gr、Cd ${traj.phys.cd.toFixed(2)}、空気密度 ${traj.phys.rho.toFixed(2)}kg/m³、飛翔 ${traj.tof.toFixed(2)}秒、入射速度 ${traj.impactSpeed.toFixed(1)}m/s、入力充実度 ${pct(traj.modelScore)}。`);
+  if(traj.wind.speed){
+    notes.push(`風モデル: ${traj.wind.label} ${traj.wind.speed.toFixed(1)}m/sを風ベクトル化。横流れ推定 ${windDriftText(traj.windDriftCm)}（不確かさ±${traj.windUncertaintyCm.toFixed(1)}cm）。`);
+    if(Math.abs(traj.windDriftCm)>w*.25 && Math.sign(traj.windDriftCm)===Math.sign(st.mx)){
+      hFactor*=.78; confidence*=.92;
+      notes.push("左右ズレの一部は風で説明できるため、左右サイト補正は控えめにします。");
+    }
+  }
   gear.notes.forEach(n=>notes.push(n));
   if(isFinite(p)){
     if(dist>=50 && p<36){
@@ -818,6 +876,11 @@ function conditionInsights(sess,st,setup){
   const wind=windText(sess);
   if(wind) out.push(`条件メモ: ${esc(wind)}${sess.note?` / ${esc(sess.note)}`:""}`);
   if(st){
+    const wm=windModel(sess||{});
+    if(wm.speed){
+      const traj=trajectoryModel(sess,setup||{},db.settings.eyeSight||850);
+      out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm）として扱います。`);
+    }
     if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
     if(st.sy>st.sx*1.35) out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
     else if(st.sx>st.sy*1.35) out.push("次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。");

@@ -46,6 +46,7 @@ assert(html.includes("personalModel") && html.includes("sessionQuality") && html
 assert(html.includes("decision_quality") && html.includes("personal_model"), "CSV decision columns missing");
 assert(html.includes("robustWeightedLine") && html.includes("modelReadinessProfile") && html.includes("個人モデル育成度"), "v19 weighted model readiness missing");
 assert(html.includes("spineGuidance") && html.includes("スパイン初期候補") && html.includes("stabilizer"), "v20 gear guidance missing");
+assert(html.includes("RK4-3D") && html.includes("windModel") && html.includes("横流れ推定"), "v21 physics engine missing");
 assert(fs.existsSync(path.join(root, "tools", "extract-catalog.py")), "Catalog extraction tool missing");
 const trashDb = {sessions:[],setups:[],sightMarks:[],trash:[]};
 let trashSaved = 0;
@@ -108,7 +109,7 @@ assert(judgement && judgement.label === "動かす", "Personal judgement failed"
 assert(analysisApi.nextActionPlan(current,{st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},{id:"main"}).length > 0, "Next action plan failed");
 
 const normGearText = s => String(s || "").normalize("NFKC").toUpperCase().replace(/[・_/]+/g, " ").replace(/\s+/g, " ").trim();
-const physicsApi = new Function("normGearText", section("function clamp", "function simulateArrow") + "\nreturn {physicsProfile};")(normGearText);
+const physicsApi = new Function("normGearText", section("function clamp", "function adviceModel") + "\nreturn {physicsProfile,trajectoryModel,windModel};")(normGearText);
 const phys = physicsApi.physicsProfile({
   poundage:"38", drawLength:"28.5", shaftGpi:"6.8", arrowLength:"29", pointWeight:"110", arrowDia:"5.5",
   vane:"Spin Wing", vaneHeight:"2.0", temperature:"30", altitude:"500", humidity:"70",
@@ -118,6 +119,16 @@ assert(phys.speedFps > 150 && phys.speedFps < 260, "Physics speed out of range")
 assert(phys.rho > .9 && phys.rho < 1.25, "Air density out of range");
 assert(phys.cd > 1.1 && phys.cd < 1.3, "Arrow Cd out of range");
 assert(phys.variation.confidenceFactor < 1, "Gear variation did not apply");
+const calmTraj = physicsApi.trajectoryModel({dist:70}, {
+  poundage:"38", drawLength:"28.5", shaftGpi:"6.8", arrowLength:"29", pointWeight:"110", arrowDia:"5.5",
+  vane:"Spin Wing", temperature:"30", altitude:"500", humidity:"70"
+}, 850);
+const windTraj = physicsApi.trajectoryModel({dist:70, windDir:"左から", windSpeed:"4"}, {
+  poundage:"38", drawLength:"28.5", shaftGpi:"6.8", arrowLength:"29", pointWeight:"110", arrowDia:"5.5",
+  vane:"Spin Wing", temperature:"30", altitude:"500", humidity:"70"
+}, 850);
+assert(calmTraj.engine === "RK4-3D" && calmTraj.tof > .6 && calmTraj.tof < 1.5, "RK4 trajectory failed");
+assert(windTraj.wind.side > 0 && windTraj.windDriftCm > 0 && windTraj.windUncertaintyCm > 0, "Wind drift model failed");
 
 const gearApi = new Function(
   "clamp","num","esc",
