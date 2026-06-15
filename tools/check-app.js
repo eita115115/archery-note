@@ -44,6 +44,7 @@ assert(html.includes("histFilter") && html.includes("histSetup"), "History filte
 assert(html.includes("ROUND_TYPES") && html.includes("roundProgressHtml"), "Round scoring support missing");
 assert(html.includes("personalModel") && html.includes("sessionQuality") && html.includes("nextActionPlan"), "Personal decision model missing");
 assert(html.includes("decision_quality") && html.includes("personal_model"), "CSV decision columns missing");
+assert(html.includes("robustWeightedLine") && html.includes("modelReadinessProfile") && html.includes("個人モデル育成度"), "v19 weighted model readiness missing");
 const trashDb = {sessions:[],setups:[],sightMarks:[],trash:[]};
 let trashSaved = 0;
 const trashApi = new Function("db","save","uid","today","TRASH_LIMIT", section("function cloneData", "/* ============ scoring") + "\nreturn {trashItem,restoreTrash,roundLabel};")(
@@ -66,6 +67,9 @@ const arrows = [
 ];
 const st = statsApi.robustStats(arrows);
 assert(st && st.excluded.length === 1 && st.method === "ellipse-biweight", "Robust grouping failed");
+const lineApi = new Function(section("function clamp", "function solve3") + "\nreturn {robustWeightedLine};")();
+const wr = lineApi.robustWeightedLine([[5,3,1],[6,1.5,1],[7,0.2,1],[8,-1.1,1],[9,-2.6,1],[12,20,0.05]]);
+assert(wr && wr.kind === "weighted-robust" && wr.zero > 6.8 && wr.zero < 7.5 && wr.quality > .4, "Weighted robust sight regression failed");
 
 const analysisDb = {sessions:[]};
 const analysisApi = new Function(
