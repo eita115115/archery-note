@@ -61,25 +61,42 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .chip.on{background:var(--green); border-color:var(--green); color:#fff; font-weight:600;}
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
-  padding:12px 16px; border-radius:12px; border:none; font-size:15px; font-weight:600;
+  padding:12px 16px; border-radius:14px; border:none; font-size:15px; font-weight:600;
   background:var(--green); color:#fff; cursor:pointer; width:100%;
+  box-shadow:0 2px 8px rgba(26,92,58,.15);
 }
+.btn:active{transform:translateY(1px);}
 .btn.sec{background:var(--card); color:var(--title); border:1.5px solid var(--green);}
-.btn.ghost{background:var(--soft); color:var(--ink);}
+.btn.ghost{background:var(--soft); color:var(--ink); box-shadow:none;}
 .btn.danger{background:var(--card); color:var(--danger); border:1.5px solid var(--danger);}
 .btn.sm{padding:8px 12px; font-size:13px; width:auto; border-radius:10px;}
 .btn:disabled{opacity:.4;}
 .btnrow{display:flex; gap:8px; margin-top:10px;} .btnrow .btn{flex:1;}
+.introCopy{
+  border:1px solid var(--advLine); border-radius:16px; padding:12px;
+  background:linear-gradient(135deg,var(--advBg),var(--card)); margin-bottom:10px;
+}
+.introCopy .kicker{font-size:12px; font-weight:800; color:var(--title); letter-spacing:.04em; margin-bottom:4px;}
+.introCopy p{margin:0; font-size:12px; color:var(--sub); line-height:1.55;}
 .workflow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
 .flowBtn{
-  border:1.5px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);
-  min-width:0; padding:10px 8px; min-height:66px; text-align:left; cursor:pointer;
+  display:grid; grid-template-columns:38px 1fr; align-items:center; gap:9px;
+  border:1.5px solid var(--line); border-radius:18px; background:var(--card); color:var(--ink);
+  min-width:0; padding:10px 9px; min-height:76px; text-align:left; cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.04); position:relative; overflow:hidden;
+}
+.flowIcon{
+  width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:18px; background:var(--soft);
 }
 .flowBtn b{display:block; font-size:13px; color:var(--title); margin-bottom:3px;}
-.flowBtn span{display:block; font-size:10.5px; color:var(--sub); line-height:1.35; overflow-wrap:anywhere;}
+.flowBtn .flowText span{display:block; font-size:10.5px; color:var(--sub); line-height:1.35; overflow-wrap:anywhere;}
 .flowBtn.on{border-color:var(--green); background:var(--advBg); box-shadow:0 0 0 1px var(--advLine) inset;}
+.flowBtn[data-mode="practice"] .flowIcon{background:#e6f4ec;}
+.flowBtn[data-mode="calibration"] .flowIcon{background:#edf3ff;}
+.flowBtn[data-mode="diagnosis"] .flowIcon{background:#fff6df;}
 .guideLine{display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--sub); line-height:1.45; margin-top:8px;}
-.guideLine b{color:var(--title);}
+.guideLine b{color:var(--title); white-space:nowrap; flex:0 0 auto;}
 .compactStack>*:first-child{margin-top:0;}
 /* tab bar */
 nav.tabs{
@@ -242,7 +259,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=23;
+const APP_VER=24;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -822,7 +839,7 @@ function personalPhysicsCalibration(setupId){
     (hasSetup("arrowWeight") ? .08 : .03),
     0,1
   );
-  const level=score>=.72?"安定":score>=.45?"育成中+":score>=.22?"育成中":"未校正";
+  const level=score>=.72?"校正安定":score>=.45?"データ充実":score>=.22?"データ蓄積中":"未校正";
   const notes=[];
   if(windRatios.length) notes.push(`風効き ${windFactor.toFixed(2)}倍（横風${windRatios.length}回）`);
   if(v70!=null||h70!=null) notes.push(`目盛り効き ${v70!=null?`上下${v70.toFixed(1)}cm@70m`:""}${v70!=null&&h70!=null?" / ":""}${h70!=null?`左右${h70.toFixed(1)}cm@70m`:""}`);
@@ -833,7 +850,7 @@ function personalPhysicsCalibration(setupId){
 function physicsCalibrationHtml(setupId){
   const c=personalPhysicsCalibration(setupId);
   if(!c) return "";
-  const color=c.level==="安定"?"#0f9d58":c.level==="未校正"?"#8a6d1d":"#1e6fd9";
+  const color=c.level==="校正安定"?"#0f9d58":c.level==="未校正"?"#8a6d1d":"#1e6fd9";
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
     <div class="note"><b style="color:${color}">物理校正: ${c.level}</b>（${pct(c.score)}）</div>
     <div class="kv"><span>校正材料</span><span>有効練習 ${c.usable}回 / 風 ${c.wind.sample}回 / サイト値 ${c.sight.n}点</span></div>
@@ -1037,7 +1054,7 @@ function personalModel(sess,setup,currentSt){
     const q=sessionQuality(s,setup);
     return q.metrics.st?{sess:s,q,st:q.metrics.st}:null;
   }).filter(Boolean);
-  if(items.length<2) return {sample:items.length,state:"育成中",text:"同条件データがまだ少ないため、今回の記録を個人モデルの材料として蓄積します。"};
+  if(items.length<2) return {sample:items.length,state:"データ蓄積中",text:"同条件データがまだ少ないため、今回の記録を個人モデルの材料として蓄積します。"};
   let sw=0,mx=0,my=0,rr=0,avg=0;
   items.forEach((it,i)=>{
     const recency=.72 + (i+1)/items.length*.28;
@@ -1064,7 +1081,7 @@ function personalModelHtml(adv,sess,setup){
   if(!adv || !adv.personal) return "";
   const p=adv.personal;
   const tone=p.state==="過去と一致"?"#0f9d58":p.state==="今回だけの可能性"?"#c62828":"#8a6d1d";
-  if(p.sample<2) return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>個人モデル: 育成中</b> — ${esc(p.text)}</div></div>`;
+  if(p.sample<2) return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
     <div class="note"><b style="color:${tone}">個人モデル: ${p.state}</b> — ${esc(p.text)}</div>
     <div class="kv"><span>過去の加重中心</span><span>${cmOffsetText(p.mx,"x")} / ${cmOffsetText(p.my,"y")}</span></div>
@@ -1303,7 +1320,7 @@ function calibrationProfile(setupId){
   const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;
   const rich=gearPrecisionProfile(setup);
   const score=clamp(dists.size*.12 + Math.min(withSight,10)*.035 + rich.score*.32 + (String(setup.arrowSpeed||"").trim()?0.14:0),0,1);
-  const level=score>=.72?"高":score>=.42?"中":"育成中";
+  const level=score>=.72?"高":score>=.42?"中":"データ蓄積中";
   const next=[];
   if(dists.size<3) next.push("異なる距離のサイト値");
   if(withSight<5) next.push("練習開始時のサイト値");
@@ -1328,7 +1345,7 @@ function modelReadinessProfile(setupId){
   const sightDists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist)).size;
   const gp=gearPrecisionProfile(setup);
   const score=clamp(good.length*.035 + repeatGroups*.13 + Math.min(withSight,10)*.035 + sightDists*.06 + gp.score*.24,0,1);
-  const level=score>=.72?"高":score>=.45?"中":"育成中";
+  const level=score>=.72?"高":score>=.45?"中":"データ蓄積中";
   const next=[];
   if(good.length<5) next.push("6本以上の練習記録");
   if(repeatGroups<2) next.push("同じ距離/的での反復");
@@ -1341,7 +1358,7 @@ function modelReadinessHtml(setupId){
   if(!setupId) return "";
   const p=modelReadinessProfile(setupId);
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
-    <div class="note"><b>個人モデル育成度: ${p.level}</b>（${pct(p.score)}）</div>
+    <div class="note"><b>個人データ準備度: ${p.level}</b>（${pct(p.score)}）</div>
     <div class="kv"><span>使える練習</span><span>${p.good}回 / 同条件反復 ${p.repeatGroups}組</span></div>
     <div class="kv"><span>サイト校正材料</span><span>サイト値つき練習 ${p.withSight}回 / 台帳 ${p.sightDists}距離</span></div>
     ${p.next.length?`<div class="note">次に効くデータ: ${esc(p.next.slice(0,3).join("・"))}</div>`:`<div class="note">履歴・サイト値・用具入力の土台がかなり揃っています。</div>`}
@@ -1373,10 +1390,10 @@ function setupOptions(sel){
 }
 function setupSystemSummary(setupId){
   const setup=db.setups.find(s=>s.id===setupId);
-  if(!setup) return {level:"準備中", lines:["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルが育ちます。"], next:"用具タブで初回セットアップ"};
+  if(!setup) return {level:"準備中", lines:["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"], next:"用具タブで初回セットアップ"};
   const gp=gearPrecisionProfile(setup), mp=modelReadinessProfile(setupId), pc=personalPhysicsCalibration(setupId), cp=calibrationProfile(setupId);
   const score=clamp(gp.score*.25 + mp.score*.25 + (pc?pc.score*.28:0) + (cp?cp.score*.22:0),0,1);
-  const level=score>=.72?"安定運用":score>=.45?"育成中":score>=.22?"初期運用":"準備中";
+  const level=score>=.72?"提案安定":score>=.45?"データ充実":score>=.22?"データ蓄積中":"準備中";
   const next=[];
   if(gp.score<.65) next.push((gp.missing||[])[0]||"用具入力");
   if(mp.good<5) next.push("6本以上の練習");
@@ -1384,7 +1401,7 @@ function setupSystemSummary(setupId){
   if(pc && pc.wind.sample<2) next.push("横風メモつき練習");
   return {
     level,
-    lines:[`用具入力 ${gp.level} / 個人モデル ${mp.level} / 物理校正 ${pc?pc.level:"未校正"}`],
+    lines:[`用具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc?pc.level:"未校正"}`],
     next:next.slice(0,2).join("・") || "同条件で記録を重ねる"
   };
 }
@@ -1397,13 +1414,17 @@ function renderRecord(m){
   const sys=setupSystemSummary(defSetup);
   m.innerHTML=`
   <div class="card">
-    <h2>今日やること <span class="mini">${sys.level}</span></h2>
-    <div class="workflow" id="flowMode">
-      <button class="flowBtn ${mode==="practice"?"on":""}" data-mode="practice"><b>練習記録</b><span>いつもの点取りと調整提案</span></button>
-      <button class="flowBtn ${mode==="calibration"?"on":""}" data-mode="calibration"><b>校正用</b><span>サイト値・風・物理モデルを育てる</span></button>
-      <button class="flowBtn" data-mode="diagnosis"><b>状態確認</b><span>足りないデータを確認</span></button>
+    <h2>今日やること <span class="mini">今の材料: ${sys.level}</span></h2>
+    <div class="introCopy">
+      <div class="kicker">データで育つ記録アプリ</div>
+      <p>点取りだけでも使えます。サイト値・風・用具を少しずつ残すほど、調整提案があなたの弓に合っていきます。</p>
     </div>
-    <div class="guideLine"><b>状態</b><span>${sys.lines.map(esc).join(" / ")}。次に効くデータ: ${esc(sys.next)}</span></div>
+    <div class="workflow" id="flowMode">
+      <button class="flowBtn ${mode==="practice"?"on":""}" data-mode="practice"><span class="flowIcon">🎯</span><span class="flowText"><b>練習記録</b><span>点取りから調整提案へ</span></span></button>
+      <button class="flowBtn ${mode==="calibration"?"on":""}" data-mode="calibration"><span class="flowIcon">📏</span><span class="flowText"><b>校正用</b><span>サイト値・風メモを残す</span></span></button>
+      <button class="flowBtn" data-mode="diagnosis"><span class="flowIcon">🔍</span><span class="flowText"><b>状態確認</b><span>足りない材料を見る</span></span></button>
+    </div>
+    <div class="guideLine"><b>材料</b><span>${sys.lines.map(esc).join(" / ")}。次に効くデータ: ${esc(sys.next)}</span></div>
   </div>
   <div class="card">
     <h2>新しい練習を始める</h2>

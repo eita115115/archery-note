@@ -23,7 +23,7 @@ const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf
 const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"), "utf8"))?.[1];
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
 assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html), "Viewport must suppress accidental zoom during scoring");
-assert(html.includes("今日やること") && html.includes("校正記録を開始") && html.includes("モデル診断・校正状況"), "v23 workflow UI missing");
+assert(html.includes("データで育つ記録アプリ") && html.includes("点取りから調整提案へ") && html.includes("足りない材料を見る"), "v24 onboarding UI missing");
 assert(html.includes("window.PointerEvent") && html.includes("touchstart") && html.includes("mousedown"), "Input fallback handlers missing");
 assert(html.includes("createSVGPoint()"), "SVG coordinate fallback missing");
 assert(html.includes("Array.prototype.flat") && html.includes("Object.values") && html.includes("Math.hypot"), "Compatibility polyfills missing");
@@ -45,7 +45,7 @@ assert(html.includes("histFilter") && html.includes("histSetup"), "History filte
 assert(html.includes("ROUND_TYPES") && html.includes("roundProgressHtml"), "Round scoring support missing");
 assert(html.includes("personalModel") && html.includes("sessionQuality") && html.includes("nextActionPlan"), "Personal decision model missing");
 assert(html.includes("decision_quality") && html.includes("personal_model"), "CSV decision columns missing");
-assert(html.includes("robustWeightedLine") && html.includes("modelReadinessProfile") && html.includes("個人モデル育成度"), "v19 weighted model readiness missing");
+assert(html.includes("robustWeightedLine") && html.includes("modelReadinessProfile") && html.includes("個人データ準備度"), "v19 weighted model readiness missing");
 assert(html.includes("spineGuidance") && html.includes("スパイン初期候補") && html.includes("stabilizer"), "v20 gear guidance missing");
 assert(html.includes("RK4-3D") && html.includes("windModel") && html.includes("横流れ推定"), "v21 physics engine missing");
 assert(html.includes("personalPhysicsCalibration") && html.includes("物理校正") && html.includes("履歴推定"), "v22 personal physics calibration missing");

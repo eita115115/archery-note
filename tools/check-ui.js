@@ -55,8 +55,8 @@ function staticUiChecks() {
   assert(html.includes("記録") && html.includes("履歴") && html.includes("サイト") && html.includes("用具"), "Tab labels missing");
   assert(/@media \(max-width:360px\)/.test(html), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(html), "Small-screen row stacking missing");
-  assert(html.includes("今日やること") && html.includes("校正記録を開始") && html.includes("モデル診断・校正状況"), "systematic workflow UI missing");
-  assert(html.includes("判断信頼度") && html.includes("個人モデル") && html.includes("次のアクション") && html.includes("個人モデル育成度") && html.includes("スパイン初期候補") && html.includes("RK4-3D") && html.includes("物理校正"), "analysis cards missing");
+  assert(html.includes("データで育つ記録アプリ") && html.includes("点取りから調整提案へ") && html.includes("足りない材料を見る"), "systematic onboarding UI missing");
+  assert(html.includes("判断信頼度") && html.includes("個人モデル") && html.includes("次のアクション") && html.includes("個人データ準備度") && html.includes("スパイン初期候補") && html.includes("RK4-3D") && html.includes("物理校正"), "analysis cards missing");
 }
 
 function screenshot(browser, view) {
