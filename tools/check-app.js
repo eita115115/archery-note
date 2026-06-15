@@ -47,6 +47,7 @@ assert(html.includes("decision_quality") && html.includes("personal_model"), "CS
 assert(html.includes("robustWeightedLine") && html.includes("modelReadinessProfile") && html.includes("個人モデル育成度"), "v19 weighted model readiness missing");
 assert(html.includes("spineGuidance") && html.includes("スパイン初期候補") && html.includes("stabilizer"), "v20 gear guidance missing");
 assert(html.includes("RK4-3D") && html.includes("windModel") && html.includes("横流れ推定"), "v21 physics engine missing");
+assert(html.includes("personalPhysicsCalibration") && html.includes("物理校正") && html.includes("履歴推定"), "v22 personal physics calibration missing");
 assert(fs.existsSync(path.join(root, "tools", "extract-catalog.py")), "Catalog extraction tool missing");
 const trashDb = {sessions:[],setups:[],sightMarks:[],trash:[]};
 let trashSaved = 0;
@@ -129,6 +130,39 @@ const windTraj = physicsApi.trajectoryModel({dist:70, windDir:"左から", windS
 }, 850);
 assert(calmTraj.engine === "RK4-3D" && calmTraj.tof > .6 && calmTraj.tof < 1.5, "RK4 trajectory failed");
 assert(windTraj.wind.side > 0 && windTraj.windDriftCm > 0 && windTraj.windUncertaintyCm > 0, "Wind drift model failed");
+const calibDb = {
+  setups:[{id:"main",poundage:"38",drawLength:"28.5",shaftGpi:"6.8",arrowLength:"29",pointWeight:"110",arrowDia:"5.5",arrowWeight:"334",vane:"Spin Wing",temperature:"30",altitude:"500",humidity:"70"}],
+  sessions:[],
+  sightMarks:[{setupId:"main",dist:30,v:"4.2"},{setupId:"main",dist:50,v:"5.6"},{setupId:"main",dist:70,v:"6.8"}],
+  settings:{eyeSight:850}
+};
+const calibSess = (id, sightV, cx, cy, windDir="", windSpeed="") => ({
+  id, date:`2026-05-${id}`, setupId:"main", dist:70, faceD:122, faceType:"single", sightV:String(sightV), windDir, windSpeed,
+  ends:[[0,1,2,3,4,5].map(i=>({x:cx+(i%3-1)*.2,y:cy+(Math.floor(i/3)-.5)*.2,s:9}))]
+});
+calibDb.sessions.push(
+  calibSess("01",5,0,2),
+  calibSess("02",6,0,0),
+  calibSess("03",7,0,-2),
+  calibSess("04",6,11,0,"左から","4"),
+  calibSess("05",6,10.5,0,"左から","4")
+);
+const calibApi = new Function(
+  "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc",
+  section("function clamp", "function adviceModel") + section("function regress", "function calibrationProfile") + "\nreturn {personalPhysicsCalibration,physicsCalibrationHtml};"
+)(
+  calibDb,
+  normGearText,
+  statsApi.robustStats,
+  (s,setup,st) => ({score:.82, metrics:{st:st||statsApi.robustStats(s.ends.flat()), all:s.ends.flat(), avg:9}}),
+  f=>f/20,
+  s=>!!(s.windSpeed && +s.windSpeed>=3.5),
+  v=>`${Math.round(v*100)}%`,
+  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))
+);
+const pcal = calibApi.personalPhysicsCalibration("main");
+assert(pcal && pcal.click.v70 > 1.5 && pcal.click.v70 < 2.5 && pcal.wind.sample >= 2 && pcal.wind.factor > .7 && pcal.score > .25, "Personal physics calibration failed");
+assert(calibApi.physicsCalibrationHtml("main").includes("物理校正"), "Physics calibration UI failed");
 
 const gearApi = new Function(
   "clamp","num","esc",

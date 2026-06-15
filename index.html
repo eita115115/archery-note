@@ -227,7 +227,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=21;
+const APP_VER=22;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -754,6 +754,77 @@ function trajectoryModel(sess, setup, eyeMm){
   );
   return {phys, wind, angle, tof:base.t, impactSpeed:base.speed, sens, mmPerCmV, mmPerCmH, windDriftCm, windUncertaintyCm, modelScore, engine:"RK4-3D"};
 }
+function weightedMedian(items, fallback){
+  const a=items.filter(x=>x&&isFinite(x.v)&&isFinite(x.w)&&x.w>0).sort((x,y)=>x.v-y.v);
+  if(!a.length) return fallback==null?null:fallback;
+  const half=a.reduce((s,x)=>s+x.w,0)/2;
+  let c=0;
+  for(const x of a){ c+=x.w; if(c>=half) return x.v; }
+  return a[a.length-1].v;
+}
+function personalPhysicsCalibration(setupId){
+  if(!setupId) return null;
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup) return null;
+  const eye=db.settings.eyeSight||850;
+  const sessions=db.sessions.filter(s=>s.setupId===setupId)
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  const usable=sessions.map((s,i)=>{
+    const st=robustStats(s.ends.flat());
+    if(!st || st.n<6) return null;
+    const q=sessionQuality(s,setup,st);
+    const recency=.72+(i+1)/Math.max(1,sessions.length)*.28;
+    return {s,st,q,w:clamp(q.score*recency,.05,1)};
+  }).filter(Boolean);
+  const windRatios=[], windConflicts=[];
+  usable.forEach(it=>{
+    const wm=windModel(it.s);
+    if(!wm.speed || !wm.side) return;
+    const traj=trajectoryModel(it.s,setup,eye);
+    if(Math.abs(traj.windDriftCm)<.6 || Math.abs(it.st.mx)>ringW(it.s.faceD)*4) return;
+    const ratio=it.st.mx/traj.windDriftCm;
+    if(ratio>0 && ratio<2.6) windRatios.push({v:ratio,w:it.w});
+    else if(Math.abs(it.st.mx)>ringW(it.s.faceD)*.35) windConflicts.push(it);
+  });
+  const clickV=[], clickH=[];
+  [...new Set(sessions.map(s=>s.dist).filter(Boolean))].forEach(d=>{
+    const r=regressionAdvice(setupId,d);
+    if(r.v && isFinite(r.v.slope) && Math.abs(r.v.slope)>.05) clickV.push({v:Math.abs(r.v.slope)*70/d,w:clamp(r.v.quality||r.v.r2||.2,.05,1)});
+    if(r.h && isFinite(r.h.slope) && Math.abs(r.h.slope)>.05) clickH.push({v:Math.abs(r.h.slope)*70/d,w:clamp(r.h.quality||r.h.r2||.2,.05,1)});
+  });
+  const sightMarks=db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v)));
+  const markPts=sightMarks.map(m=>[m.dist, parseFloat(m.v)]).filter(p=>isFinite(p[0])&&isFinite(p[1]));
+  const sightFit=markPts.length>=2 ? robustLine(markPts) : null;
+  const windFactor=weightedMedian(windRatios,1);
+  const v70=weightedMedian(clickV,null), h70=weightedMedian(clickH,null);
+  const hasSetup=k=>String((setup||{})[k]||"").trim();
+  const score=clamp(
+    Math.min(usable.length,12)*.035 +
+    Math.min(windRatios.length,6)*.055 +
+    Math.min(clickV.length+clickH.length,8)*.045 +
+    Math.min(new Set(markPts.map(p=>p[0])).size,5)*.055 +
+    (hasSetup("arrowSpeed") ? .12 : .03) +
+    (hasSetup("arrowWeight") ? .08 : .03),
+    0,1
+  );
+  const level=score>=.72?"安定":score>=.45?"育成中+":score>=.22?"育成中":"未校正";
+  const notes=[];
+  if(windRatios.length) notes.push(`風効き ${windFactor.toFixed(2)}倍（横風${windRatios.length}回）`);
+  if(v70!=null||h70!=null) notes.push(`目盛り効き ${v70!=null?`上下${v70.toFixed(1)}cm@70m`:""}${v70!=null&&h70!=null?" / ":""}${h70!=null?`左右${h70.toFixed(1)}cm@70m`:""}`);
+  if(sightFit) notes.push(`距離別サイト値 ${markPts.length}点 / 一致度${pct(sightFit.r2||0)}`);
+  if(!notes.length) notes.push("サイト値つき練習・横風メモ・複数距離の台帳が増えるほど校正されます。");
+  return {score,level,usable:usable.length,wind:{factor:windFactor,sample:windRatios.length,conflicts:windConflicts.length},click:{v70,h70,vSample:clickV.length,hSample:clickH.length},sight:{n:markPts.length,r2:sightFit?sightFit.r2:0},notes};
+}
+function physicsCalibrationHtml(setupId){
+  const c=personalPhysicsCalibration(setupId);
+  if(!c) return "";
+  const color=c.level==="安定"?"#0f9d58":c.level==="未校正"?"#8a6d1d":"#1e6fd9";
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b style="color:${color}">物理校正: ${c.level}</b>（${pct(c.score)}）</div>
+    <div class="kv"><span>校正材料</span><span>有効練習 ${c.usable}回 / 風 ${c.wind.sample}回 / サイト値 ${c.sight.n}点</span></div>
+    ${c.notes.map(n=>`<div class="note">・${esc(n)}</div>`).join("")}
+  </div>`;
+}
 function adviceModel(sess, setup, st){
   const dist=sess.dist, w=ringW(sess.faceD);
   const facePenalty=st.rr>w*2.8?.82:st.rr>w*2.0?.9:1;
@@ -762,13 +833,18 @@ function adviceModel(sess, setup, st){
   const nudge=clamp(.45+confidence*.55,.52,1);
   const eye=(db.settings.eyeSight||850);
   const traj=trajectoryModel(sess, setup, eye);
+  const pcal=personalPhysicsCalibration(setup&&setup.id);
   const p=parseFloat(setup&&setup.poundage);
   let vFactor=nudge, hFactor=nudge, notes=[];
   notes.push(`信頼度 ${pct(confidence)}（${st.n}本使用${st.excluded.length?` / 外れ値${st.excluded.length}本除外`:""}）。初回補正率は ${pct(nudge)} です。`);
   notes.push(`物理エンジン: ${traj.engine}（3D空気抵抗/RK4）。初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、矢重量 ${traj.phys.massGr.toFixed(0)}gr、Cd ${traj.phys.cd.toFixed(2)}、空気密度 ${traj.phys.rho.toFixed(2)}kg/m³、飛翔 ${traj.tof.toFixed(2)}秒、入射速度 ${traj.impactSpeed.toFixed(1)}m/s、入力充実度 ${pct(traj.modelScore)}。`);
+  if(pcal && pcal.score>.2) notes.push(`個人校正: ${pcal.level}（${pct(pcal.score)}）。${pcal.notes.slice(0,2).join(" / ")}`);
   if(traj.wind.speed){
-    notes.push(`風モデル: ${traj.wind.label} ${traj.wind.speed.toFixed(1)}m/sを風ベクトル化。横流れ推定 ${windDriftText(traj.windDriftCm)}（不確かさ±${traj.windUncertaintyCm.toFixed(1)}cm）。`);
-    if(Math.abs(traj.windDriftCm)>w*.25 && Math.sign(traj.windDriftCm)===Math.sign(st.mx)){
+    const windFactor=pcal&&pcal.wind.sample?pcal.wind.factor:1;
+    const drift=traj.windDriftCm*windFactor;
+    const unc=traj.windUncertaintyCm + Math.abs(drift)*(pcal&&pcal.wind.sample?clamp(.28-pcal.wind.sample*.025,.08,.28):.22);
+    notes.push(`風モデル: ${traj.wind.label} ${traj.wind.speed.toFixed(1)}m/sを風ベクトル化。横流れ推定 ${windDriftText(drift)}（不確かさ±${unc.toFixed(1)}cm${windFactor!==1?` / 個人係数${windFactor.toFixed(2)}倍`:""}）。`);
+    if(Math.abs(drift)>w*.25 && Math.sign(drift)===Math.sign(st.mx)){
       hFactor*=.78; confidence*=.92;
       notes.push("左右ズレの一部は風で説明できるため、左右サイト補正は控えめにします。");
     }
@@ -806,7 +882,7 @@ function adviceModel(sess, setup, st){
   if(st.n<6) notes.push("本数が少ないため、数本確認してから追加調整する前提の提案です。");
   if(st.rr>w*2.5) notes.push("グルーピングが広めなので、サイトより射形・風・照準の再現性も同時に見てください。");
   if(st.major && st.minor>0 && st.major>st.minor*1.7) notes.push(`楕円長軸が短軸の ${(st.major/st.minor).toFixed(1)}倍あるため、中心補正と同時に散り方向の原因も優先して見ます。`);
-  return {confidence,vFactor:clamp(vFactor,.45,1.1),hFactor:clamp(hFactor,.45,1.05),notes,traj};
+  return {confidence,vFactor:clamp(vFactor,.45,1.1),hFactor:clamp(hFactor,.45,1.05),notes,traj,pcal};
 }
 function adviceFor(sess, setup){
   const all=sess.ends.flat(); const st=robustStats(all);
@@ -816,7 +892,7 @@ function adviceFor(sess, setup){
   const model=adviceModel(sess, setup, st);
   const personal=personalModel(sess, setup, st);
   const quality=sessionQuality(sess, setup, st);
-  const out={st, lines:[], notes:model.notes, confidence:model.confidence, personal, quality};
+  const out={st, lines:[], notes:model.notes, confidence:model.confidence, personal, quality, pcal:model.pcal};
   if(personal && personal.sample>=2) out.notes.unshift(`個人モデル: ${personal.state}（同条件${personal.sample}回 / 安定度${pct(personal.stability||0)}）。`);
   if(quality.score<.48) out.notes.unshift(`この回の判断信頼度は${quality.label}です。${quality.reasons.join("・")}。`);
   const TH=Math.max(ringW(sess.faceD)/8, st.rr*.10); // 無視できるズレのしきい値
@@ -826,6 +902,7 @@ function adviceFor(sess, setup){
     const mm=adj*model.traj.mmPerCmV;
     let l=`サイトを<b>${st.my>0?"上":"下"}</b>へ（中心は${cmOffsetText(st.my,"y")}、補正 ${pct(model.vFactor)}） — 目安 ${mm.toFixed(1)}mm`;
     if(setup && setup.calibV70){ const cpc=setup.calibV70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
+    else if(model.pcal && model.pcal.click.v70){ const cpc=model.pcal.click.v70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
     if(sess.sightV) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightV)}</span>`;
     out.lines.push({axis:"v", html:l});
   }
@@ -835,6 +912,7 @@ function adviceFor(sess, setup){
     const mm=adj*model.traj.mmPerCmH;
     let l=`サイトを<b>${st.mx>0?"右":"左"}</b>へ（中心は${cmOffsetText(st.mx,"x")}、補正 ${pct(model.hFactor)}） — 目安 ${mm.toFixed(1)}mm`;
     if(setup && setup.calibH70){ const cpc=setup.calibH70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
+    else if(model.pcal && model.pcal.click.h70){ const cpc=model.pcal.click.h70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
     if(sess.sightH) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightH)}</span>`;
     out.lines.push({axis:"h", html:l});
   }
@@ -879,7 +957,9 @@ function conditionInsights(sess,st,setup){
     const wm=windModel(sess||{});
     if(wm.speed){
       const traj=trajectoryModel(sess,setup||{},db.settings.eyeSight||850);
-      out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm）として扱います。`);
+      const pc=personalPhysicsCalibration(setup&&setup.id);
+      const wf=pc&&pc.wind.sample?pc.wind.factor:1;
+      out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm*wf)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm${wf!==1?` / 個人係数${wf.toFixed(2)}倍`:""}）として扱います。`);
     }
     if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
     if(st.sy>st.sx*1.35) out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
@@ -1908,6 +1988,7 @@ function renderSight(m){
       ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
     </div>`:""}
     ${modelReadinessHtml(sid)}
+    ${physicsCalibrationHtml(sid)}
     <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
     ${marks.length?`<table class="tbl" style="margin-top:10px"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
       ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
@@ -2446,6 +2527,7 @@ function openGearDetail(id){
   ovl.innerHTML=`<div class="sheet"><h3>${esc(s.name)}</h3>
     ${gearPrecisionHtml(s)}
     ${modelReadinessHtml(id)}
+    ${physicsCalibrationHtml(id)}
     ${setupComparisonHtml(id)}
     <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th style="width:40%">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
     ${(s.history&&s.history.length)?`<h3 style="margin-top:14px;font-size:13px">変更履歴</h3>
