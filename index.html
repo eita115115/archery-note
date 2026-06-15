@@ -259,7 +259,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=24;
+const APP_VER=25;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -794,6 +794,16 @@ function weightedMedian(items, fallback){
   for(const x of a){ c+=x.w; if(c>=half) return x.v; }
   return a[a.length-1].v;
 }
+function levelFromScore(score, tiers){
+  const s=clamp(score||0,0,1);
+  return tiers.find(t=>s>=t.min).label;
+}
+const LEVELS={
+  physics:[{min:.72,label:"校正安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"未校正"}],
+  data:[{min:.72,label:"高"},{min:.45,label:"中"},{min:0,label:"データ蓄積中"}],
+  calibration:[{min:.72,label:"高"},{min:.42,label:"中"},{min:0,label:"データ蓄積中"}],
+  system:[{min:.72,label:"提案安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"準備中"}]
+};
 function personalPhysicsCalibration(setupId){
   if(!setupId) return null;
   const setup=db.setups.find(s=>s.id===setupId);
@@ -839,7 +849,7 @@ function personalPhysicsCalibration(setupId){
     (hasSetup("arrowWeight") ? .08 : .03),
     0,1
   );
-  const level=score>=.72?"校正安定":score>=.45?"データ充実":score>=.22?"データ蓄積中":"未校正";
+  const level=levelFromScore(score, LEVELS.physics);
   const notes=[];
   if(windRatios.length) notes.push(`風効き ${windFactor.toFixed(2)}倍（横風${windRatios.length}回）`);
   if(v70!=null||h70!=null) notes.push(`目盛り効き ${v70!=null?`上下${v70.toFixed(1)}cm@70m`:""}${v70!=null&&h70!=null?" / ":""}${h70!=null?`左右${h70.toFixed(1)}cm@70m`:""}`);
@@ -1320,7 +1330,7 @@ function calibrationProfile(setupId){
   const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;
   const rich=gearPrecisionProfile(setup);
   const score=clamp(dists.size*.12 + Math.min(withSight,10)*.035 + rich.score*.32 + (String(setup.arrowSpeed||"").trim()?0.14:0),0,1);
-  const level=score>=.72?"高":score>=.42?"中":"データ蓄積中";
+  const level=levelFromScore(score, LEVELS.calibration);
   const next=[];
   if(dists.size<3) next.push("異なる距離のサイト値");
   if(withSight<5) next.push("練習開始時のサイト値");
@@ -1345,7 +1355,7 @@ function modelReadinessProfile(setupId){
   const sightDists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist)).size;
   const gp=gearPrecisionProfile(setup);
   const score=clamp(good.length*.035 + repeatGroups*.13 + Math.min(withSight,10)*.035 + sightDists*.06 + gp.score*.24,0,1);
-  const level=score>=.72?"高":score>=.45?"中":"データ蓄積中";
+  const level=levelFromScore(score, LEVELS.data);
   const next=[];
   if(good.length<5) next.push("6本以上の練習記録");
   if(repeatGroups<2) next.push("同じ距離/的での反復");
@@ -1388,12 +1398,30 @@ function render(){
 function setupOptions(sel){
   return `<option value="">（セッティング未指定）</option>`+db.setups.map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
 }
+const RECORD_FLOW_MODES=[
+  {id:"practice",icon:"🎯",title:"練習記録",desc:"点取りから調整提案へ"},
+  {id:"calibration",icon:"📏",title:"校正用",desc:"サイト値・風メモを残す"},
+  {id:"diagnosis",icon:"🔍",title:"状態確認",desc:"足りない材料を見る"}
+];
+function recordIntroHtml(sys, mode){
+  const flow=RECORD_FLOW_MODES.map(f=>`
+      <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
+  return `<div class="card">
+    <h2>今日やること <span class="mini">今の材料: ${sys.level}</span></h2>
+    <div class="introCopy">
+      <div class="kicker">データで育つ記録アプリ</div>
+      <p>点取りだけでも使えます。サイト値・風・用具を少しずつ残すほど、調整提案があなたの弓に合っていきます。</p>
+    </div>
+    <div class="workflow" id="flowMode">${flow}</div>
+    <div class="guideLine"><b>材料</b><span>${sys.lines.map(esc).join(" / ")}。次に効くデータ: ${esc(sys.next)}</span></div>
+  </div>`;
+}
 function setupSystemSummary(setupId){
   const setup=db.setups.find(s=>s.id===setupId);
   if(!setup) return {level:"準備中", lines:["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"], next:"用具タブで初回セットアップ"};
   const gp=gearPrecisionProfile(setup), mp=modelReadinessProfile(setupId), pc=personalPhysicsCalibration(setupId), cp=calibrationProfile(setupId);
   const score=clamp(gp.score*.25 + mp.score*.25 + (pc?pc.score*.28:0) + (cp?cp.score*.22:0),0,1);
-  const level=score>=.72?"提案安定":score>=.45?"データ充実":score>=.22?"データ蓄積中":"準備中";
+  const level=levelFromScore(score, LEVELS.system);
   const next=[];
   if(gp.score<.65) next.push((gp.missing||[])[0]||"用具入力");
   if(mp.good<5) next.push("6本以上の練習");
@@ -1413,19 +1441,7 @@ function renderRecord(m){
   const mode=ui.recordMode||"practice";
   const sys=setupSystemSummary(defSetup);
   m.innerHTML=`
-  <div class="card">
-    <h2>今日やること <span class="mini">今の材料: ${sys.level}</span></h2>
-    <div class="introCopy">
-      <div class="kicker">データで育つ記録アプリ</div>
-      <p>点取りだけでも使えます。サイト値・風・用具を少しずつ残すほど、調整提案があなたの弓に合っていきます。</p>
-    </div>
-    <div class="workflow" id="flowMode">
-      <button class="flowBtn ${mode==="practice"?"on":""}" data-mode="practice"><span class="flowIcon">🎯</span><span class="flowText"><b>練習記録</b><span>点取りから調整提案へ</span></span></button>
-      <button class="flowBtn ${mode==="calibration"?"on":""}" data-mode="calibration"><span class="flowIcon">📏</span><span class="flowText"><b>校正用</b><span>サイト値・風メモを残す</span></span></button>
-      <button class="flowBtn" data-mode="diagnosis"><span class="flowIcon">🔍</span><span class="flowText"><b>状態確認</b><span>足りない材料を見る</span></span></button>
-    </div>
-    <div class="guideLine"><b>材料</b><span>${sys.lines.map(esc).join(" / ")}。次に効くデータ: ${esc(sys.next)}</span></div>
-  </div>
+  ${recordIntroHtml(sys,mode)}
   <div class="card">
     <h2>新しい練習を始める</h2>
     <label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select>
