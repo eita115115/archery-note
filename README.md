@@ -53,8 +53,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
 
 ```powershell
 & 'C:\Users\eita2\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' tools\check-app.js
+& 'C:\Users\eita2\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' tools\check-ui.js
 git diff --check
 ```
+
+`tools\check-ui.js` はローカルの Chrome/Edge を使って、スマホ幅・小型スマホ幅・PC幅のスクリーンショットを `artifacts\ui-smoke\` に生成します。生成物は `.gitignore` で除外されます。
+
+このCodex環境から `.git` へ書き込めない場合は、最後のコミットだけPowerShellで実行してください。
 
 ## ファイル
 
@@ -62,6 +67,7 @@ git diff --check
 - `manifest.json` / `sw.js` / `icon.svg` — PWA用（ホーム画面追加・オフライン動作）
 - `serve.ps1` — ローカル確認用の簡易サーバー
 - `tools/check-app.js` — 構文・公開番号・代表演算の検証スクリプト
+- `tools/check-ui.js` — Chrome/Edgeを使ったスマホ幅・PC幅のUIスモーク検査
 
 ## 関連アプリ
 
