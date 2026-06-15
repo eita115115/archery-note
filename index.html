@@ -259,7 +259,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=26;
+const APP_VER=27;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -2192,7 +2192,8 @@ function openCalibrationWizard(setupId){
 
 /* ---------- 用具 ---------- */
 const CATALOG_SHAFTS=[
-  {id:"x10",name:"EASTON X10",aliases:["X10"],type:"carbon",dia:5.5,gpiA:3.8,gpiB:1950,sizes:[1000,900,830,750,700,650,600,550,500,450,410,380,350,325],gpi:{1000:5.3,900:5.8,830:6.2,750:6.4,700:6.7,650:6.8,600:7.0,550:7.5,500:7.8,450:8.1,410:8.5,380:8.9,350:8.8,325:9.2}},
+  {id:"x10-protour",name:"EASTON X10 ProTour",aliases:["X10 PROTOUR","X10 PRO TOUR","PROTOUR"],type:"carbon",dia:5.0,gpiA:4.7,gpiB:1600,sizes:[770,720,670,620,570,520,470,420,380,340],gpi:{770:6.0,720:6.2,670:6.5,620:6.7,570:6.9,520:7.3,470:7.6,420:8.0,380:8.4,340:8.8},odIn:{770:.181,720:.183,670:.186,620:.188,570:.191,520:.194,470:.198,420:.202,380:.207,340:.213}},
+  {id:"x10",name:"EASTON X10",aliases:["X10"],type:"carbon",dia:5.5,gpiA:3.8,gpiB:1950,sizes:[1000,900,830,750,700,650,600,550,500,450,410,380,350,325],gpi:{1000:5.3,900:5.8,830:6.2,750:6.4,700:6.7,650:6.8,600:7.0,550:7.5,500:7.8,450:8.1,410:8.5,380:8.9,350:8.8,325:9.2},odIn:{1000:.182,900:.185,830:.188,750:.191,700:.194,650:.197,600:.200,550:.203,500:.206,450:.209,410:.212,380:.215,350:.218,325:.221}},
   {id:"x10-32",name:"EASTON X10 3.2mm Parallel Pro",aliases:["X10 3.2","3.2MM PARALLEL PRO"],type:"carbon",dia:3.2,gpiA:3.4,gpiB:2200,sizes:[1000,900,800,750,700,650,600,550,500,460,420,380,340]},
   {id:"ace",name:"EASTON A/C/E",aliases:["A/C/E","ACE"],type:"carbon",dia:5.5,gpiA:4.0,gpiB:1450,sizes:[1250,1100,1000,920,850,780,720,670,620,570,520,470,430,400,370]},
   {id:"x10-4",name:"EASTON X10 4mm Parallel Pro",aliases:["X10 4MM","4MM PARALLEL PRO"],type:"carbon",dia:4.0,gpiA:4.4,gpiB:2000,sizes:[1150,1000,880,810,710,660,610,570,520,470,420,380,340,300,250]},
@@ -2217,6 +2218,7 @@ function aluminumGpi(code){
   return (Math.PI/4*(od*od-id*id))*0.0975*7000;
 }
 function carbonGpi(fam,spine){ return fam.gpi&&fam.gpi[spine]?fam.gpi[spine]:clamp(fam.gpiA+fam.gpiB/spine,3,18); }
+function carbonDiaMm(fam,spine){ return fam.odIn&&fam.odIn[spine]?fam.odIn[spine]*25.4:fam.dia; }
 function inferCatalogGear(vals){
   const txt=normGearText(vals.arrow);
   if(!txt) return null;
@@ -2226,12 +2228,16 @@ function inferCatalogGear(vals){
   if(!fam) return null;
   const spine=num(vals.shaftSpine);
   if(!spine) return {fam,missing:"spine"};
-  const dia=fam.type==="aluminum"?aluminumDiaMm(spine):fam.dia;
+  const listed=!fam.sizes||fam.sizes.includes(spine);
+  const dia=fam.type==="aluminum"?aluminumDiaMm(spine):carbonDiaMm(fam,spine);
   const gpi=fam.type==="aluminum"?aluminumGpi(spine):carbonGpi(fam,spine);
   const len=num(vals.arrowLength)||null;
   const point=num(vals.pointWeight)||null;
   const total=len?gpi*len+(point||100)+27:null;
-  const notes=[`${fam.name} / 番手 ${spine} をカタログ掲載モデルとして認識`, `シャフト重量 ${gpi.toFixed(2)}gr/in${fam.gpi&&fam.gpi[spine]?"（メーカー掲載値）":fam.type==="carbon"?"（モデル別近似）":"（番手から計算）"}`, `外径 ${dia.toFixed(2)}mm${fam.type==="carbon"?"（代表値/推定）":"（番手から計算）"}`];
+  const gpiSource=fam.type==="aluminum"?"（番手から計算）":fam.gpi&&fam.gpi[spine]?"（メーカー掲載値）":"（モデル別近似）";
+  const diaSource=fam.type==="aluminum"?"（番手から計算）":fam.odIn&&fam.odIn[spine]?"（メーカー掲載値）":"（代表値/推定）";
+  const notes=[`${fam.name} / 番手 ${spine} をカタログ掲載モデルとして認識`, `シャフト重量 ${gpi.toFixed(2)}gr/in${gpiSource}`, `外径 ${dia.toFixed(2)}mm${diaSource}`];
+  if(!listed) notes.push(`注意: 番手 ${spine} はこのモデルの掲載サイズ一覧では未確認のため、重量・外径は近似として扱います`);
   if(total) notes.push(`総矢重量 ${total.toFixed(0)}gr（矢尺${len}in、ポイント${point||100}gr、ノック/ベイン等27grとして推定）`);
   return {fam,spine,dia,gpi,len,point,total,notes};
 }
@@ -2244,13 +2250,16 @@ function uniqGear(items){
   });
 }
 function shaftSuggestions(){
-  return uniqGear(CATALOG_SHAFTS.map(f=>f.name));
+  const other=[
+    "EASTON RX7","EASTON X10 ProTour","EASTON 4MM ML","FIVICS Five-X","FIVICS TENPRO","VICTORY VAP V1","VICTORY VAP V3"
+  ];
+  return uniqGear([...CATALOG_SHAFTS.map(f=>f.name),...other]);
 }
 const COMMON_SPINES=[2000,1800,1600,1400,1250,1200,1150,1100,1000,950,920,900,880,850,830,810,800,780,750,730,720,710,700,675,670,660,650,625,620,610,600,575,570,550,525,520,500,475,470,460,450,430,425,420,410,400,380,375,370,350,340,325,300,250,2318,2315,2314,2312,2212,2114,2016,2014,1916,1914,1816,1814,1716,1714,1616,1614,1516,1514,1416,1414,1214];
 const GEAR_SUGGESTIONS={
   bow:[
-    "HOYT Grand Prix GMX3 2026 H25","HOYT Grand Prix XCEED 2 H25","HOYT Grand Prix XCEED 2 H27","HOYT Formula SR H25","HOYT RCRV Podium H25","HOYT RCRV Comp H25","HOYT Formula XD","HOYT GMX3","HOYT XCEED 2",
-    "WIAWIS ATF-EX H25","WIAWIS META LX H25","WIAWIS ATF-DX H25","WIAWIS META DX H25","WIAWIS ATF-X H25","WIAWIS RADICAL PRO H25","WIAWIS CX7 H25","WIN&WIN WIAWIS TFT-G",
+    "HOYT Grand Prix GMX3 2026 H25","HOYT Grand Prix GMX3 2024 H25","HOYT Grand Prix XCEED 2 H25","HOYT Grand Prix XCEED 2 H27","HOYT Grand Prix XCEED","HOYT Formula SR H25","HOYT Formula XD","HOYT RCRV Podium H25","HOYT RCRV Comp H25","HOYT GMX3","HOYT XCEED 2",
+    "WIAWIS ATF-EX H25","WIAWIS META LX H25","WIAWIS ATF-DX H25","WIAWIS META DX H25","WIAWIS ATF-X H25","WIAWIS RADICAL PRO H25","WIAWIS CX7 H25","WIAWIS INNO CXT H25","WIAWIS INNO CXT H23","WIN&WIN NEW WINEX 2021 H25","WIN&WIN WIAWIS TFT-G",
     "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK ZX","MK KOREA MK XG","MK KOREA MK XD","MK KOREA ZEST",
     "WNS Vantage AX","WNS Motive FX","WNS Explorer DX",
     "KINETIC Vygo V2","KINETIC Novana V2","KINETIC Sovren","KINETIC Zivio V2",
@@ -2258,17 +2267,17 @@ const GEAR_SUGGESTIONS={
     "SAMICK Discovery","SAMICK Polaris","MATHEWS Title","PSE Laser"
   ],
   limbs:[
-    "HOYT Formula SR","HOYT Formula XD","HOYT Formula Metrix","HOYT GP Metrix","HOYT Grand Prix Axia Wood","HOYT Grand Prix Velos","HOYT RCRV Podium","HOYT RCRV Comp",
-    "WIAWIS NS-G","WIAWIS NS-G2","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam",
-    "MK ARCHERY MX","MK KOREA MK XD","MK KOREA MK ZEST","MK KOREA ZEST","MK KOREA N3","MK KOREA X-CORE",
+    "HOYT Formula SR","HOYT Formula XD","HOYT Formula Metrix","HOYT GP Metrix","HOYT Grand Prix Axia Wood","HOYT Grand Prix Velos","HOYT Grand Prix Axia Wood Core","HOYT RCRV Podium","HOYT RCRV Comp",
+    "WIAWIS NS-G","WIAWIS NS-G2","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS NS-XP Wood Core ILF","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam",
+    "MK ARCHERY MX","MK KOREA MK XD","MK XD","MK KOREA MK ZEST","MK KOREA ZEST","MK KOREA N3","MK KOREA X-CORE",
     "WNS Vantage G7","WNS Delta C2","WNS Explorer W1",
     "KINETIC Vaultage Carbon/Foam","SAMICK Discovery R1","SAMICK Polaris",
     "FIVICS SKADI Wood","FIVICS SKADI-CX","FIVICS ARGON-X Wood","FIVICS SKADI Wood Core","FIVICS ARGON-X Wood Core"
   ],
   sight:[
-    "SHIBUYA ULTIMA RC PRO G2","SHIBUYA ULTIMA RC PRO","SHIBUYA ULTIMA RC III","SHIBUYA Dual Click","SHIBUYA ULTIMA CP PRO G2","SHIBUYA OKULUS Scope",
+    "SHIBUYA ULTIMA RC PRO G2 520 Carbon","SHIBUYA ULTIMA RC IV 520 Carbon","SHIBUYA ULTIMA RC PRO G2 Double Mount","SHIBUYA ULTIMA RC PRO 520 Carbon","SHIBUYA Dual Click","SHIBUYA ULTIMA CP PRO G2","SHIBUYA OKULUS Scope",
     "AXCEL Achieve XP Recurve","AXCEL Curve RX Pro","AXCEL Achieve XP Pro Compound","AXCEL AVX",
-    "WIAWIS WS700","FIVICS FV-300","FIVICS FV-150","AVALON Tec One","CARTEL Focus K"
+    "WIAWIS WS700","FIVICS FV-300","FIVICS FV-150","AVALON Tec One","CARTEL Focus K","CARTEL Midas RX-10","CARTEL Midas 105","CARTEL RX-103"
   ],
   rest:[
     "SHIBUYA Ultima Recurve Rest","SHIBUYA Magnetic Rest","AAE Free Flyte Elite","Spigarelli Z/T","Hoyt Super Rest","Beiter Rest","WIAWIS S-RV"
@@ -2280,13 +2289,16 @@ const GEAR_SUGGESTIONS={
     "EASTON G Nock","EASTON Pin Nock","EASTON Super Nock","Beiter Pin Nock","Beiter In-Out Nock","FIVICS Pin Nock","Bohning F Nock"
   ],
   string:[
-    "BCY 8125","BCY 8190","BCY 652 Spectra","Angel Majesty 777","Fast Flight Plus","GAS Bowstrings Recurve"
+    "BCY 8125","BCY 8190","BCY 652 Spectra","Angel Majesty 777","Fast Flight Plus","GAS Bowstrings Recurve",
+    "GAS Bowstrings High Octane","GAS Bowstrings Ghost XV","FirstString X-IT Wire","FirstString Premium Custom String","ARICO STRING BCY Spectra 652","ARICO STRING Angel Majesty 777"
   ],
   stabilizer:[
-    "SHIBUYA Vanquish PRO","SHIBUYA Vanquish","EASTON Contour CS","WIAWIS ACS EL","WIAWIS ACS LX","WIAWIS ACS15","WIAWIS S21","WNS SAT","AXCEL TriLock","AVALON Tec One"
+    "SHIBUYA VERSA","SHIBUYA PRIMUS","SHIBUYA Vanquish","SHIBUYA Vanquish PRO","EASTON Contour CS","EASTON Halcyon","EASTON Z-Comp","WIAWIS ACS EL","WIAWIS ACS LX","WIAWIS ACS15","WIAWIS S21","WNS SAT","AXCEL TriLock","AVALON Tec One",
+    "SHREWD Index","SHREWD RevX","SHREWD Revel","RAMRODS VEKTOR","RAMRODS Ultra V4","RAMRODS BEAST","CONQUEST SmacDown 625","CONQUEST SmacDown 500 Pro","WIN&WIN HMC Plus","FIVICS SKADI-CX","FIVICS V Upper Rod","FIVICS CORE-A Damper"
   ],
   tab:[
-    "SHIBUYA APEX","WIAWIS EZR","WIAWIS EZ","FIVICS Saker II","WIN&WIN AT-100","AXCEL Contour Tab","AAE Cavalier Elite","STAN Onnex","T.R.U. Ball Execution"
+    "SHIBUYA APEX","SHIBUYA Tab","WIAWIS EZR","WIAWIS EZ","FIVICS Saker II","FIVICS JM1","FIVICS JM2","WIN&WIN AT-100","AXCEL Contour Tab","AAE Cavalier Elite","STAN Onnex","T.R.U. Ball Execution",
+    "ANGEL Tab 1 Plus Cordovan","ANGEL Tab 2 Plus Cordovan","ANGEL Tab 2 Super Fine Leather","Sherwood Tab Type-1","CARTEL Tab","NEET Glove","Naigai GT-301 Tab"
   ],
   pointWeight:["60","70","80","90","100","110","120","130","140","150"],
   shaftSetWeightSpread:["1","2","3","4","5","6","8","10"],
