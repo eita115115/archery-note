@@ -45,6 +45,8 @@ assert(html.includes("ROUND_TYPES") && html.includes("roundProgressHtml"), "Roun
 assert(html.includes("personalModel") && html.includes("sessionQuality") && html.includes("nextActionPlan"), "Personal decision model missing");
 assert(html.includes("decision_quality") && html.includes("personal_model"), "CSV decision columns missing");
 assert(html.includes("robustWeightedLine") && html.includes("modelReadinessProfile") && html.includes("個人モデル育成度"), "v19 weighted model readiness missing");
+assert(html.includes("spineGuidance") && html.includes("スパイン初期候補") && html.includes("stabilizer"), "v20 gear guidance missing");
+assert(fs.existsSync(path.join(root, "tools", "extract-catalog.py")), "Catalog extraction tool missing");
 const trashDb = {sessions:[],setups:[],sightMarks:[],trash:[]};
 let trashSaved = 0;
 const trashApi = new Function("db","save","uid","today","TRASH_LIMIT", section("function cloneData", "/* ============ scoring") + "\nreturn {trashItem,restoreTrash,roundLabel};")(
@@ -119,7 +121,7 @@ assert(phys.variation.confidenceFactor < 1, "Gear variation did not apply");
 
 const gearApi = new Function(
   "clamp","num","esc",
-  section("const CATALOG_SHAFTS=", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,GEAR_SECTIONS,GEAR_FIELDS};"
+  section("const CATALOG_SHAFTS=", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS};"
 )(
   (v,a,b)=>Math.max(a,Math.min(b,v)),
   v=>{ const n=parseFloat(v); return Number.isFinite(n)?n:null; },
@@ -129,7 +131,11 @@ const inf = gearApi.inferCatalogGear({arrow:"EASTON X10 650 29inch 110gr", notes
 assert(inf && inf.spine === 650 && Math.round(inf.total) === 334, "Catalog inference failed");
 const formHtml = gearApi.GEAR_SECTIONS.map(sec => gearApi.gearSectionHtml(sec, {bow:"HOYT GMX3"})).join("");
 assert(formHtml.includes("<details class=\"adv\"><summary>矢の実測・精密データ</summary>"), "Gear section UI missing");
-assert(gearApi.GEAR_FIELDS.length >= 30, "Gear fields unexpectedly small");
+assert(gearApi.GEAR_FIELDS.length >= 32, "Gear fields unexpectedly small");
+assert(gearApi.GEAR_FIELDS.some(([k]) => k === "stabilizer") && gearApi.GEAR_FIELDS.some(([k]) => k === "tab"), "New gear fields missing");
+const sp = gearApi.spineGuidance({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"});
+assert(sp && sp.ready && sp.candidates.includes(660) && ["概ね候補域","候補を表示"].includes(sp.state), "Spine guidance failed");
+assert(gearApi.gearPrecisionHtml({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"}).includes("スパイン初期候補"), "Spine guidance UI missing");
 
 const historyApi = new Function(
   "db","robustStats","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc",

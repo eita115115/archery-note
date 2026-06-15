@@ -227,7 +227,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=19;
+const APP_VER=20;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -824,6 +824,8 @@ function conditionInsights(sess,st,setup){
     else if(st.rr<ringW(sess.faceD)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
     if(setup && !setup.arrowSpeed) out.push("精度向上: 実測初速を入れると、上下サイトのmm換算と距離別予測が安定します。");
     if(setup && !setup.shaftSetWeightSpread) out.push("精度向上: 矢セット重量差を入れると、上下散りの信頼度判定が強くなります。");
+    const sp=setup?spineGuidance(setup):null;
+    if(sp && sp.ready && (sp.state==="柔らかめ寄り" || sp.state==="硬め寄り")) out.push(`用具確認: スパインが${sp.state}です。候補 ${sp.candidates.slice(0,3).join(" / ")} と矢飛びを比較してください。`);
   }
   if(sess.round && sess.round!=="free") out.push(`ラウンド: ${roundLabel(sess.round)} の途中/結果として扱っています。`);
   return out;
@@ -2020,24 +2022,25 @@ function shaftSuggestions(){
 const COMMON_SPINES=[2000,1800,1600,1400,1250,1200,1150,1100,1000,950,920,900,880,850,830,810,800,780,750,730,720,710,700,675,670,660,650,625,620,610,600,575,570,550,525,520,500,475,470,460,450,430,425,420,410,400,380,375,370,350,340,325,300,250,2318,2315,2314,2312,2212,2114,2016,2014,1916,1914,1816,1814,1716,1714,1616,1614,1516,1514,1416,1414,1214];
 const GEAR_SUGGESTIONS={
   bow:[
-    "HOYT GMX3","HOYT XCEED 2","HOYT Formula XD","HOYT Arcos",
+    "HOYT GMX3","HOYT XCEED 2","HOYT Formula XD","HOYT Arcos","HOYT RCRV Podium","HOYT RCRV Comp","HOYT Concept X37","HOYT Concept X40",
     "WIAWIS META-LX","WIAWIS ATF-X","WIAWIS CX7","WIN&WIN WIAWIS TFT-G",
-    "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK KOREA MK XD","MK KOREA ZEST",
+    "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK KOREA MK XG","MK KOREA MK XD","MK KOREA ZEST",
     "WNS Vantage AX","WNS Motive FX","WNS Explorer DX",
     "KINETIC Vygo V2","KINETIC Novana V2","KINETIC Sovren","KINETIC Zivio V2",
     "FIVICS ONIX PRO","FIVICS VX 25inch","FIVICS VELLATOR 25inch","FIVICS ARGON-X",
-    "SAMICK Discovery","SAMICK Polaris"
+    "SAMICK Discovery","SAMICK Polaris","MATHEWS Title","PSE Laser"
   ],
   limbs:[
-    "HOYT Formula SR","HOYT Formula XD","HOYT Grand Prix Axia Wood","HOYT Grand Prix Velos",
-    "WIAWIS NS-G","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam",
+    "HOYT Formula SR","HOYT Formula XD","HOYT Formula Metrix","HOYT GP Metrix","HOYT Grand Prix Axia Wood","HOYT Grand Prix Velos","HOYT RCRV Podium","HOYT RCRV Comp",
+    "WIAWIS NS-G","WIAWIS NS-G2","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam",
     "MK ARCHERY MX","MK KOREA MK XD","MK KOREA MK ZEST","MK KOREA N3","MK KOREA X-CORE",
     "WNS Vantage G7","WNS Delta C2","WNS Explorer W1",
     "KINETIC Vaultage Carbon/Foam","SAMICK Discovery R1","SAMICK Polaris",
     "FIVICS SKADI Wood","FIVICS SKADI-CX","FIVICS ARGON-X Wood"
   ],
   sight:[
-    "SHIBUYA ULTIMA RC PRO","SHIBUYA ULTIMA RC III","SHIBUYA Dual Click","AXCEL Achieve XP Recurve","AXCEL Curve RX Pro",
+    "SHIBUYA ULTIMA RC PRO G2","SHIBUYA ULTIMA RC PRO","SHIBUYA ULTIMA RC III","SHIBUYA Dual Click","SHIBUYA ULTIMA CP PRO G2","SHIBUYA OKULUS Scope",
+    "AXCEL Achieve XP Recurve","AXCEL Curve RX Pro","AXCEL Achieve XP Pro Compound","AXCEL AVX",
     "WIAWIS WS700","FIVICS FV-300","FIVICS FV-150","AVALON Tec One","CARTEL Focus K"
   ],
   rest:[
@@ -2051,6 +2054,12 @@ const GEAR_SUGGESTIONS={
   ],
   string:[
     "BCY 8125","BCY 8190","BCY 652 Spectra","Angel Majesty 777","Fast Flight Plus","GAS Bowstrings Recurve"
+  ],
+  stabilizer:[
+    "SHIBUYA Vanquish PRO","SHIBUYA Vanquish","EASTON Contour CS","WIAWIS ACS EL","WIAWIS ACS LX","WIAWIS ACS15","WIAWIS S21","WNS SAT","AXCEL TriLock","AVALON Tec One"
+  ],
+  tab:[
+    "SHIBUYA APEX","WIAWIS EZR","WIAWIS EZ","FIVICS Saker II","WIN&WIN AT-100","AXCEL Contour Tab","AAE Cavalier Elite","STAN Onnex","T.R.U. Ball Execution"
   ],
   pointWeight:["60","70","80","90","100","110","120","130","140","150"],
   shaftSetWeightSpread:["1","2","3","4","5","6","8","10"],
@@ -2074,7 +2083,7 @@ const GEAR_SUGGESTIONS={
 };
 const GEAR_FIELDS=[
   ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","矢 (シャフト/長さ/ポイント)"],
-  ["sight","サイト"],["rest","レスト"],["string","弦"],
+  ["sight","サイト"],["rest","レスト"],["string","弦"],["stabilizer","スタビライザー/ウエイト"],["tab","タブ/リリーサー"],
   ["shaftSpine","シャフト番手/スパイン"],["arrowLength","矢尺/シャフト長 (inch)"],["pointWeight","ポイント重量 (gr)"],
   ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["shaftSetWeightSpread","矢セット重量差 (gr)"],["shaftStraightness","シャフト真直度 (inch)"],
   ["foc","FOC (%)"],["vane","ベイン/羽根"],["vaneHeight","ベイン高さ (mm)"],["nock","ノック/ノッキングポイント"],["nockFit","ノックフィット"],
@@ -2084,7 +2093,7 @@ const GEAR_FIELDS=[
 const GEAR_SECTIONS=[
   {title:"基本", keys:["bow","limbs","poundage","drawLength","arrow"], open:true},
   {title:"矢の実測・精密データ", keys:["shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","shaftSetWeightSpread","shaftStraightness","foc","vane","vaneHeight","nock","nockFit"]},
-  {title:"サイト・チューニング", keys:["sight","rest","string","brace","tiller","centerShot","plunger","plungerTension"]},
+  {title:"サイト・チューニング", keys:["sight","rest","string","stabilizer","tab","brace","tiller","centerShot","plunger","plungerTension"]},
   {title:"物理モデル補正", keys:["arrowSpeed","arrowCd","bowEfficiency","temperature","altitude","humidity"]},
   {title:"メモ", keys:["notes"]}
 ];
@@ -2096,6 +2105,8 @@ const GEAR_PLACEHOLDERS={
   arrowSpeed:"例: 205fps / 62.5m/s",
   arrowCd:"未入力なら矢径とベインから推定",
   bowEfficiency:"未入力なら72〜78%で推定",
+  stabilizer:"例: SHIBUYA Vanquish PRO",
+  tab:"例: SHIBUYA APEX",
   shaftSetWeightSpread:"同一セットの最大差。例: 3",
   shaftStraightness:"例: 0.003",
   foc:"例: 12",
@@ -2133,12 +2144,51 @@ function gearPrecisionProfile(s){
   const level=score>=.78?"高":score>=.5?"中":"低";
   return {score,level,filled,missing};
 }
+function carbonSpineCandidates(){
+  return COMMON_SPINES.filter(n=>n<=2000 && !(n>1200 && n%100>=10 && n%100<=20));
+}
+function spineGuidance(s){
+  const p=num(s&&s.poundage);
+  const draw=num(s&&s.drawLength);
+  const len=num(s&&s.arrowLength) || (draw!=null ? draw+1.75 : null);
+  const point=num(s&&s.pointWeight) || (s&&s.arrow ? parsePointGr(normGearText(s.arrow)) : null) || 100;
+  if(p==null || len==null) return {ready:false, missing:[p==null?"実測ポンド":null,len==null?"矢尺":null].filter(Boolean)};
+  const drawAdj=draw!=null ? (draw-28)*1.2 : 0;
+  const eff=p + drawAdj + (len-28)*2.0 + (point-100)*0.055;
+  const ideal=clamp(1425 - eff*18.2, 300, 1500);
+  const candidates=carbonSpineCandidates()
+    .map(v=>({v,d:Math.abs(v-ideal)}))
+    .sort((a,b)=>a.d-b.d || a.v-b.v)
+    .slice(0,5)
+    .map(x=>x.v);
+  const actual=num(s&&s.shaftSpine);
+  let state="候補を表示", tone="mid", text="カタログ表で最終確認してください。";
+  if(actual!=null){
+    const aluminum=actual>1200 && actual%100>=10 && actual%100<=20;
+    if(aluminum){ state="アルミ番手", text="アルミ番手はカーボンスパインと体系が違うため、番手表と実射で確認します。"; }
+    else{
+      const diff=actual-ideal;
+      if(Math.abs(diff)<=90){ state="概ね候補域"; tone="ok"; text="現在の番手は初期候補レンジに入っています。"; }
+      else if(diff>90){ state="柔らかめ寄り"; tone="warn"; text="現在の番手は初期候補より柔らかめの可能性があります。矢飛びとチューニングを確認してください。"; }
+      else{ state="硬め寄り"; tone="warn"; text="現在の番手は初期候補より硬めの可能性があります。矢飛びとチューニングを確認してください。"; }
+    }
+  }
+  return {ready:true, eff, ideal, candidates, actual, point, len, state, tone, text};
+}
+function spineGuidanceHtml(s){
+  const g=spineGuidance(s);
+  if(!g.ready) return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}を入れると、候補レンジを表示できます。</div>`;
+  const color=g.tone==="ok"?"#0f9d58":g.tone==="warn"?"#c62828":"#8a6d1d";
+  return `<div class="note"><b>スパイン初期候補</b>: ${g.candidates.join(" / ")}（動的負荷 ${g.eff.toFixed(1)}lbs相当、矢尺${g.len.toFixed(1)}in、ポイント${g.point}gr）</div>
+    <div class="note"><b style="color:${color}">${g.state}</b> — ${esc(g.text)}</div>`;
+}
 function gearPrecisionHtml(s){
   const p=gearPrecisionProfile(s);
   const next=p.missing.slice(0,3).join("・");
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
     <div class="note"><b>演算入力の充実度: ${p.level}</b>（${Math.round(p.score*100)}%）</div>
     ${next?`<div class="note">次に測ると効く項目: ${esc(next)}</div>`:`<div class="note">主要な物理モデル項目はかなり埋まっています。</div>`}
+    ${spineGuidanceHtml(s)}
   </div>`;
 }
 function setupComparisonHtml(setupId){

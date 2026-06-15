@@ -1,4 +1,5 @@
 .claude/
 .venv/
 .tmp-*
+artifacts/catalog/
 artifacts/ui-smoke/
