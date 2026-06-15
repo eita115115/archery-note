@@ -1,5 +1,6 @@
 .claude/
 .venv/
+__pycache__/
 .tmp-*
 artifacts/catalog/
 artifacts/ui-smoke/
