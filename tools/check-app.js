@@ -23,6 +23,7 @@ const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf
 const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"), "utf8"))?.[1];
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
 assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html), "Viewport must suppress accidental zoom during scoring");
+assert(html.includes("今日やること") && html.includes("校正記録を開始") && html.includes("モデル診断・校正状況"), "v23 workflow UI missing");
 assert(html.includes("window.PointerEvent") && html.includes("touchstart") && html.includes("mousedown"), "Input fallback handlers missing");
 assert(html.includes("createSVGPoint()"), "SVG coordinate fallback missing");
 assert(html.includes("Array.prototype.flat") && html.includes("Object.values") && html.includes("Math.hypot"), "Compatibility polyfills missing");

@@ -19,7 +19,7 @@
   --danger:#c62828;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0; overflow-x:hidden;}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
   background:var(--bg); color:var(--ink); font-size:15px;
@@ -40,7 +40,7 @@ header.app{
 }
 header.app h1{font-size:16px; margin:0; font-weight:700; letter-spacing:.03em;}
 header.app .sub{font-size:11px; opacity:.85;}
-main{max-width:520px; margin:0 auto; padding:12px;}
+main{width:100%; max-width:520px; margin:0 auto; padding:12px;}
 .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
 .card h2{font-size:14px; margin:0 0 10px; color:var(--title); display:flex; align-items:center; justify-content:space-between;}
 .card h2 .mini{font-size:11px; color:var(--sub); font-weight:normal;}
@@ -53,10 +53,10 @@ textarea.inp{resize:vertical; min-height:56px;}
 .inp{min-width:0; max-width:100%;}
 input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; background:var(--inpBg); min-height:44px;}
 .row{display:flex; gap:8px;} .row>*{flex:1; min-width:0;}
-.chips{display:flex; flex-wrap:wrap; gap:8px;}
+.chips{display:flex; flex-wrap:wrap; gap:8px; min-width:0; max-width:100%;}
 .chip{
   padding:8px 14px; border-radius:999px; border:1.5px solid var(--line);
-  background:var(--card); color:var(--ink); font-size:14px; cursor:pointer; user-select:none;
+  max-width:100%; background:var(--card); color:var(--ink); font-size:14px; cursor:pointer; user-select:none;
 }
 .chip.on{background:var(--green); border-color:var(--green); color:#fff; font-weight:600;}
 .btn{
@@ -70,6 +70,17 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .btn.sm{padding:8px 12px; font-size:13px; width:auto; border-radius:10px;}
 .btn:disabled{opacity:.4;}
 .btnrow{display:flex; gap:8px; margin-top:10px;} .btnrow .btn{flex:1;}
+.workflow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
+.flowBtn{
+  border:1.5px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink);
+  min-width:0; padding:10px 8px; min-height:66px; text-align:left; cursor:pointer;
+}
+.flowBtn b{display:block; font-size:13px; color:var(--title); margin-bottom:3px;}
+.flowBtn span{display:block; font-size:10.5px; color:var(--sub); line-height:1.35; overflow-wrap:anywhere;}
+.flowBtn.on{border-color:var(--green); background:var(--advBg); box-shadow:0 0 0 1px var(--advLine) inset;}
+.guideLine{display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--sub); line-height:1.45; margin-top:8px;}
+.guideLine b{color:var(--title);}
+.compactStack>*:first-child{margin-top:0;}
 /* tab bar */
 nav.tabs{
   position:fixed; bottom:0; left:0; right:0; z-index:30;
@@ -78,7 +89,7 @@ nav.tabs{
   padding-bottom:env(safe-area-inset-bottom);
 }
 nav.tabs button{
-  flex:1; background:none; border:none; padding:8px 0 6px; font-size:10.5px; color:var(--sub);
+  flex:1 1 0; min-width:0; background:none; border:none; padding:8px 0 6px; font-size:10.5px; color:var(--sub);
   display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer;
 }
 nav.tabs button .ic{font-size:21px; line-height:1;}
@@ -179,6 +190,10 @@ details.adv summary::-webkit-details-marker{display:none;}
 details.adv summary::before{content:"▸ ";}
 details.adv[open] summary::before{content:"▾ ";}
 header.app .gear{margin-left:auto; background:none; border:none; color:#fff; font-size:21px; cursor:pointer; padding:4px;}
+@media (max-width:520px){
+  .workflow{grid-template-columns:1fr;}
+  .flowBtn{min-height:0;}
+}
 @media (max-width:360px){
   main{padding:8px;}
   .row{flex-direction:column;}
@@ -227,7 +242,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=22;
+const APP_VER=23;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -1339,7 +1354,7 @@ function latestMark(setupId, dist){
 
 /* ============ views ============ */
 let view="record";
-let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1 };
+let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice" };
 function showView(v){ view=v; ui.selArrow=-1; render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
@@ -1356,12 +1371,40 @@ function render(){
 function setupOptions(sel){
   return `<option value="">（セッティング未指定）</option>`+db.setups.map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
 }
+function setupSystemSummary(setupId){
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup) return {level:"準備中", lines:["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルが育ちます。"], next:"用具タブで初回セットアップ"};
+  const gp=gearPrecisionProfile(setup), mp=modelReadinessProfile(setupId), pc=personalPhysicsCalibration(setupId), cp=calibrationProfile(setupId);
+  const score=clamp(gp.score*.25 + mp.score*.25 + (pc?pc.score*.28:0) + (cp?cp.score*.22:0),0,1);
+  const level=score>=.72?"安定運用":score>=.45?"育成中":score>=.22?"初期運用":"準備中";
+  const next=[];
+  if(gp.score<.65) next.push((gp.missing||[])[0]||"用具入力");
+  if(mp.good<5) next.push("6本以上の練習");
+  if(cp.dists<3) next.push("複数距離のサイト値");
+  if(pc && pc.wind.sample<2) next.push("横風メモつき練習");
+  return {
+    level,
+    lines:[`用具入力 ${gp.level} / 個人モデル ${mp.level} / 物理校正 ${pc?pc.level:"未校正"}`],
+    next:next.slice(0,2).join("・") || "同条件で記録を重ねる"
+  };
+}
 function renderRecord(m){
   if(db.active){ renderActive(m); return; }
   const last=db.sessions[db.sessions.length-1];
   const defSetup=last?last.setupId:(db.setups[0]?db.setups[0].id:"");
   const defDist=last?last.dist:70;
+  const mode=ui.recordMode||"practice";
+  const sys=setupSystemSummary(defSetup);
   m.innerHTML=`
+  <div class="card">
+    <h2>今日やること <span class="mini">${sys.level}</span></h2>
+    <div class="workflow" id="flowMode">
+      <button class="flowBtn ${mode==="practice"?"on":""}" data-mode="practice"><b>練習記録</b><span>いつもの点取りと調整提案</span></button>
+      <button class="flowBtn ${mode==="calibration"?"on":""}" data-mode="calibration"><b>校正用</b><span>サイト値・風・物理モデルを育てる</span></button>
+      <button class="flowBtn" data-mode="diagnosis"><b>状態確認</b><span>足りないデータを確認</span></button>
+    </div>
+    <div class="guideLine"><b>状態</b><span>${sys.lines.map(esc).join(" / ")}。次に効くデータ: ${esc(sys.next)}</span></div>
+  </div>
   <div class="card">
     <h2>新しい練習を始める</h2>
     <label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select>
@@ -1371,7 +1414,7 @@ function renderRecord(m){
       <div class="chip" data-d="custom">カスタム</div>
     </div>
     <div id="fDistCustomWrap" style="display:none"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
-    <details class="adv">
+    <details class="adv" ${mode==="calibration"?"open":""}>
       <summary>詳細（日付・的・本数・サイト値・天候）</summary>
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
       <label class="f">ラウンド</label><select class="inp" id="fRound">
@@ -1390,20 +1433,25 @@ function renderRecord(m){
       <label class="f">天候・コンディション</label>
       <div class="row">
         <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
-        <input class="inp" id="fNote" placeholder="メモ（任意）">
+        <input class="inp" id="fNote" placeholder="${mode==="calibration"?"例: 校正用・サイト1目盛り確認":"メモ（任意）"}" value="${mode==="calibration"?"校正用":""}">
       </div>
       <div class="row">
         <div><label class="f">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
         <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
-    <div class="btnrow"><button class="btn" id="fStart">▶ 記録開始</button></div>
+    ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>校正用のコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
+    <div class="btnrow"><button class="btn" id="fStart">▶ ${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
     ${db.setups.length?"":`<div class="hint">💡 「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
   </div>`;
   const distState={d:defDist};
   const faceSel=$("#fFace");
   const suggestFace=d=>{ faceSel.value = d>=60?122:(d<=18?40:80); };
   suggestFace(defDist);
+  document.querySelectorAll("#flowMode .flowBtn").forEach(b=>b.onclick=()=>{
+    if(b.dataset.mode==="diagnosis"){ showView("sight"); return; }
+    ui.recordMode=b.dataset.mode; render();
+  });
   document.querySelectorAll("#fDistChips .chip").forEach(c=>c.onclick=()=>{
     document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.remove("on"));
     c.classList.add("on");
@@ -1429,6 +1477,7 @@ function renderRecord(m){
       sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
       wx:$("#fWx").value, note:$("#fNote").value.trim(), windDir:$("#fWindDir").value, windSpeed:$("#fWindSpeed").value.trim(),
       round:$("#fRound").value||"free",
+      purpose:ui.recordMode||"practice",
       ends:[], cur:[]
     };
     save(); render();
@@ -1982,19 +2031,22 @@ function renderSight(m){
       <span style="font-size:17px;font-weight:800">${cur?`上下 ${esc(cur.v||"—")} ・ 左右 ${esc(cur.h||"—")}`:"未登録"}</span></div>
       ${cur?`<div class="note">${fmtD(cur.date)} ${esc(cur.note||"")}</div>`:""}
     </div>
-    ${cal?`<div class="advice" style="background:var(--card);border-color:var(--line)">
-      <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score*100)}%）</span></div>
-      <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
-      ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
-    </div>`:""}
-    ${modelReadinessHtml(sid)}
-    ${physicsCalibrationHtml(sid)}
     <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
     ${marks.length?`<table class="tbl" style="margin-top:10px"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
       ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
       <td style="font-size:11px;color:var(--sub)">${esc(mk.note||"")}</td>
       <td class="right"><button class="btn sm ghost" data-del="${mk.id}" style="padding:4px 8px">✕</button></td></tr>`).join("")}</table>`
       :`<div class="empty">この距離の記録はまだありません</div>`}
+    <details class="adv">
+      <summary>モデル診断・校正状況</summary>
+      ${cal?`<div class="advice" style="background:var(--card);border-color:var(--line);margin-top:10px">
+        <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score*100)}%）</span></div>
+        <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
+        ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
+      </div>`:""}
+      ${modelReadinessHtml(sid)}
+      ${physicsCalibrationHtml(sid)}
+    </details>
     `:`<div class="empty">先に「用具」タブでセッティングを登録してください。<br>サイト台帳はセッティングごとに管理されます。</div>`}
   </div>
   ${setup?`
@@ -2008,17 +2060,23 @@ function renderSight(m){
       ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
       :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
-    ${adv?trustHtml(lastSess,setup,adv.st):""}
-    ${adv?personalModelHtml(adv,lastSess,setup):""}
-    ${adv?conditionHtml(lastSess,adv.st,setup):""}
-    ${adv?nextActionHtml(lastSess,adv,setup):""}
-    ${(reg.v||reg.h)?`<div class="advice">
-      <div style="font-size:12px;color:var(--sub)">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
-      ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)} / 品質${pct(reg.v.quality||0)})</span></div>`:""}
-      ${reg.h?`<div class="dir">左右サイトの推定最適値：<b>${reg.h.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.h.n}回分 / 一致度${pct(reg.h.r2||0)} / 品質${pct(reg.h.quality||0)})</span></div>`:""}
-      <div class="note">サイト値を数値で記録した複数回の練習から「ズレが0になる値」を、練習信頼度・風・本数を加味した外れ値に強い推定で求めています。データが増えるほど精度が上がります。</div>
-    </div>`:`<div class="hint">💡 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
-    ${interpHtml}
+    <details class="adv" ${adv?"":"open"}>
+      <summary>判断の根拠</summary>
+      ${adv?trustHtml(lastSess,setup,adv.st):""}
+      ${adv?personalModelHtml(adv,lastSess,setup):""}
+      ${adv?conditionHtml(lastSess,adv.st,setup):""}
+      ${adv?nextActionHtml(lastSess,adv,setup):""}
+    </details>
+    <details class="adv">
+      <summary>サイト値分析・予測</summary>
+      ${(reg.v||reg.h)?`<div class="advice" style="margin-top:10px">
+        <div style="font-size:12px;color:var(--sub)">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
+        ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)} / 品質${pct(reg.v.quality||0)})</span></div>`:""}
+        ${reg.h?`<div class="dir">左右サイトの推定最適値：<b>${reg.h.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.h.n}回分 / 一致度${pct(reg.h.r2||0)} / 品質${pct(reg.h.quality||0)})</span></div>`:""}
+        <div class="note">サイト値を数値で記録した複数回の練習から「ズレが0になる値」を、練習信頼度・風・本数を加味した外れ値に強い推定で求めています。データが増えるほど精度が上がります。</div>
+      </div>`:`<div class="hint">💡 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
+      ${interpHtml}
+    </details>
     <details class="adv">
       <summary>クリック換算の設定（任意）</summary>
       <div class="row">
