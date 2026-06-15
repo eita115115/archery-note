@@ -261,7 +261,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=28;
+const APP_VER=29;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -2265,19 +2265,19 @@ const GEAR_SUGGESTIONS={
   bow:[
     "HOYT Grand Prix GMX3 2026 H25","HOYT Grand Prix GMX3 2024 H25","HOYT Grand Prix XCEED 2 H25","HOYT Grand Prix XCEED 2 H27","HOYT Grand Prix XCEED","HOYT Formula SR H25","HOYT Formula XD","HOYT RCRV Podium H25","HOYT RCRV Comp H25","HOYT GMX3","HOYT XCEED 2",
     "WIAWIS ATF-EX H25","WIAWIS META LX H25","WIAWIS ATF-DX H25","WIAWIS META DX H25","WIAWIS ATF-X H25","WIAWIS RADICAL PRO H25","WIAWIS CX7 H25","WIAWIS INNO CXT H25","WIAWIS INNO CXT H23","WIN&WIN NEW WINEX 2021 H25","WIN&WIN WIAWIS TFT-G",
-    "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK ZX","MK KOREA MK XG","MK KOREA MK XD","MK KOREA ZEST",
+    "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK ZX","MK KOREA MK XG",
     "WNS Vantage AX","WNS Motive FX","WNS Explorer DX",
     "KINETIC Vygo V2","KINETIC Novana V2","KINETIC Sovren","KINETIC Zivio V2",
     "FIVICS ONIX PRO","FIVICS VX 25inch","FIVICS VELLATOR 25inch","FIVICS ARGON-X","FIVICS VELLATOR",
     "SAMICK Discovery","SAMICK Polaris","MATHEWS Title","PSE Laser"
   ],
   limbs:[
-    "HOYT Formula SR","HOYT Formula XD","HOYT Formula Metrix","HOYT GP Metrix","HOYT Grand Prix Axia Wood","HOYT Grand Prix Velos","HOYT Grand Prix Axia Wood Core","HOYT RCRV Podium","HOYT RCRV Comp",
-    "WIAWIS NS-G","WIAWIS NS-G2","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS NS-XP Wood Core ILF","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam",
-    "MK ARCHERY MX","MK KOREA MK XD","MK XD","MK KOREA MK ZEST","MK KOREA ZEST","MK KOREA N3","MK KOREA X-CORE",
-    "WNS Vantage G7","WNS Delta C2","WNS Explorer W1",
-    "KINETIC Vaultage Carbon/Foam","SAMICK Discovery R1","SAMICK Polaris",
-    "FIVICS SKADI Wood","FIVICS SKADI-CX","FIVICS ARGON-X Wood","FIVICS SKADI Wood Core","FIVICS ARGON-X Wood Core"
+    "HOYT Grand Prix METRIX Foam Core","HOYT Grand Prix METRIX Wood Core","HOYT Formula METRIX Foam Core","HOYT Formula METRIX Wood Core","HOYT Formula AXIA Foam Core","HOYT Formula AXIA Wood Core","HOYT Grand Prix AXIA Wood Core","HOYT Formula RCRV PODIUM Limbs","HOYT Grand Prix RCRV PODIUM Limbs","HOYT Grand Prix COMP Limbs","HOYT Formula Carbon Integra",
+    "WIAWIS NS-G2 Foam Core","WIAWIS NS-G2 Wood Core","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS NS-XP Wood Core ILF","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam","WIAWIS CX7 Wood Core","WIAWIS CX7 Foam Core","WIAWIS NS-G Wood Core","WIAWIS NS-G Graphene Foam Core","WIN&WIN NEW WINEX Foam Core",
+    "MK XD Limbs","MK KOREA ZEST Limbs","MK KOREA N3 Limbs","MK KOREA X-CORE Limbs",
+    "WNS Vantage G7 Limbs","WNS Delta C2 Limbs","WNS Explorer W1 Limbs",
+    "KINETIC Vaultage Carbon/Foam Limbs","SAMICK Discovery R1 Limbs","SAMICK Polaris Limbs",
+    "FIVICS SKADI Limbs Wood Core","FIVICS ARGON-X Limbs Wood Core"
   ],
   sight:[
     "SHIBUYA ULTIMA RC PRO G2 520 Carbon","SHIBUYA ULTIMA RC IV 520 Carbon","SHIBUYA ULTIMA RC PRO G2 Double Mount","SHIBUYA ULTIMA RC PRO 520 Carbon","SHIBUYA Dual Click","SHIBUYA ULTIMA CP PRO G2","SHIBUYA OKULUS Scope",
@@ -2328,7 +2328,7 @@ const GEAR_SUGGESTIONS={
   tuningResult:["未確認","良好","硬め傾向","柔らかめ傾向","右寄り","左寄り","縦散り","横散り","再確認"]
 };
 const GEAR_FIELDS=[
-  ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","シャフト銘柄"],
+  ["bow","ハンドル/弓本体"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","シャフト銘柄"],
   ["sight","サイト"],["rest","レスト"],["string","弦"],["stabilizer","スタビライザー/ウエイト"],["tab","タブ/リリーサー"],
   ["shaftSpine","シャフト番手/スパイン"],["arrowLength","矢尺/シャフト長 (inch)"],["pointWeight","ポイント重量 (gr)"],
   ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["shaftSetWeightSpread","矢セット重量差 (gr)"],["shaftStraightness","シャフト真直度 (inch)"],
@@ -2623,7 +2623,7 @@ function openSetupWizard(){
   ovl.innerHTML=`<div class="sheet"><h3>初回セットアップ</h3>
     <div class="hint">最初は分かる範囲だけで大丈夫です。矢とサイト値が入るほど、調整提案の精度が上がります。</div>
     <label class="f">名前 *</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
-    ${choiceFieldHtml("wBow","ハンドル/弓",choiceOpts("bow"),"","","")}
+    ${choiceFieldHtml("wBow","ハンドル/弓本体",choiceOpts("bow"),"","","")}
     ${choiceFieldHtml("wLimbs","リム",choiceOpts("limbs"),"","","")}
     <div class="row">
       <div><label class="f">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>

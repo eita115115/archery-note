@@ -168,7 +168,7 @@ assert(calibApi.physicsCalibrationHtml("main").includes("物理校正"), "Physic
 
 const gearApi = new Function(
   "clamp","num","esc",
-  section("const CATALOG_SHAFTS=", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS};"
+  section("const CATALOG_SHAFTS=", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS,GEAR_SUGGESTIONS};"
 )(
   (v,a,b)=>Math.max(a,Math.min(b,v)),
   v=>{ const n=parseFloat(v); return Number.isFinite(n)?n:null; },
@@ -187,6 +187,17 @@ assert(formHtml.includes("<details class=\"adv\"><summary>矢の実測・精密�
 assert(formHtml.includes("シャフト銘柄") && formHtml.includes("HOYT Grand Prix XCEED 2 H25"), "Separated gear model UI missing");
 assert(formHtml.includes("SHIBUYA ULTIMA RC IV 520 Carbon") && formHtml.includes("RAMRODS VEKTOR") && formHtml.includes("GAS Bowstrings Ghost XV") && formHtml.includes("ANGEL Tab 2 Plus Cordovan"), "Expanded gear knowledge missing");
 assert(formHtml.includes("choicePick") && formHtml.includes("候補にないので手入力"), "Gear dropdown/manual UI missing");
+const bowKeys = gearApi.GEAR_SUGGESTIONS.bow.map(normGearText);
+const limbKeys = gearApi.GEAR_SUGGESTIONS.limbs.map(normGearText);
+assert(!limbKeys.some(v => /FORMULA SR|FORMULA XD/.test(v)), "Handle-only HOYT risers leaked into limbs");
+assert(!bowKeys.some(v => /MK KOREA MK XD|MK XD|MK KOREA ZEST/.test(v)), "Limb-only MK entries leaked into bow");
+assert(!limbKeys.some(v => v === "HOYT RCRV PODIUM" || v === "HOYT RCRV COMP"), "Ambiguous HOYT limb labels missing limb context");
+assert(!limbKeys.some(v => v.includes("SKADI-CX")), "Stabilizer leaked into limbs");
+assert(!bowKeys.some(v => limbKeys.includes(v)), "Handle/limb dropdown overlap");
+assert(gearApi.GEAR_SUGGESTIONS.stabilizer.some(v => normGearText(v).includes("SKADI-CX")), "Known stabilizer entry missing from stabilizer list");
+assert(!gearApi.GEAR_SUGGESTIONS.stabilizer.some(v => /LIMBS|リム/.test(normGearText(v))), "Limb entries leaked into stabilizer dropdown");
+assert(!gearApi.GEAR_SUGGESTIONS.sight.some(v => /LIMBS|リム|H25/.test(normGearText(v))), "Bow/limb entries leaked into sight dropdown");
+assert(formHtml.includes("ハンドル/弓本体") && formHtml.includes("HOYT Formula RCRV PODIUM Limbs"), "Separated handle/limb labels missing");
 assert(gearApi.GEAR_FIELDS.length >= 32, "Gear fields unexpectedly small");
 assert(gearApi.GEAR_FIELDS.some(([k]) => k === "stabilizer") && gearApi.GEAR_FIELDS.some(([k]) => k === "tab"), "New gear fields missing");
 assert(gearApi.GEAR_FIELDS.some(([k]) => k === "tuningMethod") && gearApi.GEAR_FIELDS.some(([k]) => k === "tuningResult"), "Tuning practice fields missing");
