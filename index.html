@@ -52,6 +52,8 @@ label.f{display:block; font-size:12px; color:var(--sub); margin:10px 0 4px;}
 textarea.inp{resize:vertical; min-height:56px;}
 .inp{min-width:0; max-width:100%;}
 input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; background:var(--inpBg); min-height:44px;}
+.choiceManual{margin-top:6px;}
+.choiceManual.is-hidden{display:none;}
 .row{display:flex; gap:8px;} .row>*{flex:1; min-width:0;}
 .chips{display:flex; flex-wrap:wrap; gap:8px; min-width:0; max-width:100%;}
 .chip{
@@ -259,7 +261,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=27;
+const APP_VER=28;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -995,6 +997,9 @@ function conditionInsights(sess,st,setup){
   const out=[];
   const wind=windText(sess);
   if(wind) out.push(`条件メモ: ${esc(wind)}${sess.note?` / ${esc(sess.note)}`:""}`);
+  if(setup && (setup.tuningMethod||setup.tuningResult)){
+    out.push(`チューニング記録: ${esc([setup.tuningMethod,setup.tuningResult].filter(Boolean).join(" / "))}`);
+  }
   if(st){
     const wm=windModel(sess||{});
     if(wm.speed){
@@ -2318,7 +2323,9 @@ const GEAR_SUGGESTIONS={
   brace:["8.0 inch","8.25 inch","8.5 inch","8.75 inch","9.0 inch","9.25 inch"],
   tiller:["0mm","+2mm","+3mm","+4mm","+5mm","+6mm"],
   centerShot:["矢先 1/2本 外","矢先 1本 外","センター","やや内"],
-  plungerTension:["弱め","中間","強め","1回転戻し","2回転戻し"]
+  plungerTension:["弱め","中間","強め","1回転戻し","2回転戻し"],
+  tuningMethod:["未実施","ベアシャフト確認","ウォークバック確認","距離別サイト校正","プランジャー確認","ブレースハイト比較","センターショット確認","ティラー確認","ペーパーチューニング"],
+  tuningResult:["未確認","良好","硬め傾向","柔らかめ傾向","右寄り","左寄り","縦散り","横散り","再確認"]
 };
 const GEAR_FIELDS=[
   ["bow","ハンドル/弓"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","シャフト銘柄"],
@@ -2327,12 +2334,12 @@ const GEAR_FIELDS=[
   ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["shaftSetWeightSpread","矢セット重量差 (gr)"],["shaftStraightness","シャフト真直度 (inch)"],
   ["foc","FOC (%)"],["vane","ベイン/羽根"],["vaneHeight","ベイン高さ (mm)"],["nock","ノック/ノッキングポイント"],["nockFit","ノックフィット"],
   ["arrowSpeed","実測初速 (fps / m/s・任意)"],["arrowCd","抗力係数 Cd (任意)"],["bowEfficiency","弓効率 (%)"],["temperature","気温 (℃)"],["altitude","標高 (m)"],["humidity","湿度 (%)"],
-  ["brace","ブレースハイト"],["tiller","ティラー"],["centerShot","センターショット"],["plunger","プランジャー"],["plungerTension","プランジャー硬さ/位置"],["notes","その他メモ"]
+  ["brace","ブレースハイト"],["tiller","ティラー"],["centerShot","センターショット"],["plunger","プランジャー"],["plungerTension","プランジャー硬さ/位置"],["tuningMethod","確認したチューニング"],["tuningResult","チューニング結果"],["notes","その他メモ"]
 ];
 const GEAR_SECTIONS=[
   {title:"基本", keys:["bow","limbs","poundage","drawLength","arrow"], open:true},
   {title:"矢の実測・精密データ", keys:["shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","shaftSetWeightSpread","shaftStraightness","foc","vane","vaneHeight","nock","nockFit"]},
-  {title:"サイト・チューニング", keys:["sight","rest","string","stabilizer","tab","brace","tiller","centerShot","plunger","plungerTension"]},
+  {title:"サイト・チューニング", keys:["sight","rest","string","stabilizer","tab","brace","tiller","centerShot","plunger","plungerTension","tuningMethod","tuningResult"]},
   {title:"物理モデル補正", keys:["arrowSpeed","arrowCd","bowEfficiency","temperature","altitude","humidity"]},
   {title:"メモ", keys:["notes"]}
 ];
@@ -2349,6 +2356,7 @@ const GEAR_PLACEHOLDERS={
   shaftSetWeightSpread:"同一セットの最大差。例: 3",
   shaftStraightness:"例: 0.003",
   foc:"例: 12",
+  tuningResult:"例: ベアシャフトが少し硬め / 30mで左右が揃った",
   notes:"個体差、チューニング履歴、気づいたこと"
 };
 function gearOptions(k){
@@ -2356,12 +2364,59 @@ function gearOptions(k){
   if(k==="shaftSpine") return COMMON_SPINES.map(String);
   return GEAR_SUGGESTIONS[k]||[];
 }
+const MANUAL_CHOICE="__manual__";
+function choiceMatch(opts,value){
+  const key=normGearText(value);
+  return opts.find(v=>normGearText(v)===key)||"";
+}
+function choiceFieldHtml(id,lb,opts,value,placeholder,mode){
+  const cur=String(value||"");
+  const match=choiceMatch(opts,cur);
+  const custom=cur && !match;
+  const inputValue=custom?cur:match;
+  const ph=placeholder?` placeholder="${esc(placeholder)}"`:"";
+  const md=mode||"";
+  return `<label class="f" for="${id}Pick">${lb}</label>
+    <select class="inp choicePick" id="${id}Pick" data-target="${id}">
+      <option value="">選択なし</option>
+      ${opts.map(v=>`<option value="${esc(v)}" ${match===v?"selected":""}>${esc(v)}</option>`).join("")}
+      <option value="${MANUAL_CHOICE}" ${custom?"selected":""}>候補にないので手入力</option>
+    </select>
+    <input class="inp choiceManual ${custom?"":"is-hidden"}" id="${id}" value="${esc(inputValue)}"${md}${ph}>`;
+}
+function bindChoiceFields(root){
+  root.querySelectorAll(".choicePick").forEach(sel=>{
+    const input=root.querySelector("#"+sel.dataset.target);
+    if(!input) return;
+    const sync=(focusManual=false)=>{
+      const manual=sel.value===MANUAL_CHOICE;
+      input.classList.toggle("is-hidden",!manual);
+      if(!manual) input.value=sel.value||"";
+      else if(focusManual) input.focus();
+    };
+    sel.onchange=()=>sync(true);
+    sync(false);
+  });
+}
+function setChoiceValue(root,id,value){
+  const input=root.querySelector("#"+id);
+  if(!input) return;
+  input.value=String(value==null?"":value);
+  const pick=root.querySelector(`[data-target="${id}"]`);
+  if(!pick) return;
+  const val=input.value;
+  const match=[...pick.options].find(o=>o.value && o.value!==MANUAL_CHOICE && normGearText(o.value)===normGearText(val));
+  if(match){ pick.value=match.value; input.value=match.value; input.classList.add("is-hidden"); }
+  else if(val){ pick.value=MANUAL_CHOICE; input.classList.remove("is-hidden"); }
+  else{ pick.value=""; input.classList.add("is-hidden"); }
+}
 function gearFieldHtml(k,lb,s){
   const opts=gearOptions(k), listId=`gfList_${k}`;
   const list=opts.length?` list="${listId}" autocomplete="off"`:"";
   const mode=GEAR_NUMERIC_FIELDS.has(k)?` inputmode="decimal"`:"";
   const ph=GEAR_PLACEHOLDERS[k]?` placeholder="${esc(GEAR_PLACEHOLDERS[k])}"`:"";
   if(k==="notes") return `<label class="f" for="gf_${k}">${lb}</label><textarea class="inp" id="gf_${k}"${ph}>${esc(s?s[k]:"")}</textarea>`;
+  if(opts.length && !GEAR_NUMERIC_FIELDS.has(k)) return choiceFieldHtml(`gf_${k}`,lb,opts,s?s[k]:"",GEAR_PLACEHOLDERS[k]||"",mode);
   return `<label class="f" for="gf_${k}">${lb}</label><input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}"${list}${mode}${ph}>${opts.length?`<datalist id="${listId}">${opts.map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`:""}`;
 }
 function gearSectionHtml(sec,s){
@@ -2375,7 +2430,7 @@ function gearPrecisionProfile(s){
   const checks=[
     ["arrowWeight","矢重量"],["arrowDia","矢径"],["arrowLength","矢尺"],["pointWeight","ポイント重量"],
     ["poundage","実測ポンド"],["drawLength","引き尺"],["arrowSpeed","実測初速"],["shaftSetWeightSpread","矢セット重量差"],
-    ["foc","FOC"],["vane","ベイン"],["temperature","気温/環境"]
+    ["foc","FOC"],["vane","ベイン"],["tuningMethod","チューニング確認"],["temperature","気温/環境"]
   ];
   const filled=checks.filter(([k])=>s&&String(s[k]||"").trim()).map(x=>x[1]);
   const missing=checks.filter(([k])=>!(s&&String(s[k]||"").trim())).map(x=>x[1]);
@@ -2562,24 +2617,25 @@ function openSettings(){
   };
 }
 function openSetupWizard(){
-  const opts=k=>gearOptions(k).slice(0,80).map(v=>`<option value="${esc(v)}"></option>`).join("");
+  const choiceOpts=k=>gearOptions(k).slice(0,80);
+  const opts=k=>choiceOpts(k).map(v=>`<option value="${esc(v)}"></option>`).join("");
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet"><h3>初回セットアップ</h3>
     <div class="hint">最初は分かる範囲だけで大丈夫です。矢とサイト値が入るほど、調整提案の精度が上がります。</div>
     <label class="f">名前 *</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
-    <label class="f">ハンドル/弓</label><input class="inp" id="wBow" list="wBowList"><datalist id="wBowList">${opts("bow")}</datalist>
-    <label class="f">リム</label><input class="inp" id="wLimbs" list="wLimbsList"><datalist id="wLimbsList">${opts("limbs")}</datalist>
+    ${choiceFieldHtml("wBow","ハンドル/弓",choiceOpts("bow"),"","","")}
+    ${choiceFieldHtml("wLimbs","リム",choiceOpts("limbs"),"","","")}
     <div class="row">
       <div><label class="f">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
       <div><label class="f">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
     </div>
-    <label class="f">シャフト銘柄</label><input class="inp" id="wArrow" list="wArrowList" placeholder="例: EASTON X10"><datalist id="wArrowList">${opts("arrow")}</datalist>
+    ${choiceFieldHtml("wArrow","シャフト銘柄",choiceOpts("arrow"),"","例: EASTON X10","")}
     <div class="row">
       <div><label class="f">番手/スパイン</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
       <div><label class="f">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
     </div>
     <label class="f">ポイント重量 (gr)</label><input class="inp" id="wPoint" inputmode="decimal" list="wPointList" placeholder="例: 110"><datalist id="wPointList">${opts("pointWeight")}</datalist>
-    <label class="f">サイト</label><input class="inp" id="wSight" list="wSightList"><datalist id="wSightList">${opts("sight")}</datalist>
+    ${choiceFieldHtml("wSight","サイト",choiceOpts("sight"),"","","")}
     <details class="adv" open>
       <summary>実測サイト値（分かる距離だけ）</summary>
       ${[70,50,30,18].map(d=>`<div class="row">
@@ -2590,6 +2646,7 @@ function openSetupWizard(){
     <div class="btnrow"><button class="btn ghost" id="wCancel">キャンセル</button><button class="btn" id="wSave">保存して開始</button></div>
   </div>`;
   document.body.appendChild(ovl);
+  bindChoiceFields(ovl);
   ovl.querySelector("#wCancel").onclick=()=>ovl.remove();
   ovl.querySelector("#wSave").onclick=()=>{
     const name=ovl.querySelector("#wName").value.trim();
@@ -2663,6 +2720,7 @@ function openGearForm(id){
     <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
   </div>`;
   document.body.appendChild(ovl);
+  bindChoiceFields(ovl);
   ovl.querySelector("#gfCancel").onclick=()=>ovl.remove();
   ovl.querySelector("#gfInfer").onclick=()=>{
     const vals={};
@@ -2671,7 +2729,7 @@ function openGearForm(id){
     const hint=ovl.querySelector("#gfInferHint");
     if(!inf){ hint.textContent="カタログ推定できるシャフト名が見つかりませんでした。例: EASTON X10 / EASTON A/C/E / EASTON Avance / EASTON XX75 Platinum Plus"; toast("シャフト名を読み取れません"); return; }
     if(inf.missing){ hint.textContent=`${inf.fam.name} は見つかりました。番手/スパイン欄も入力してください。`; toast("番手を追加してください"); return; }
-    const set=(k,v)=>{ const el=ovl.querySelector("#gf_"+k); if(el && v!=null) el.value=String(v); };
+    const set=(k,v)=>setChoiceValue(ovl,"gf_"+k,v);
     set("shaftSpine", inf.spine);
     set("arrowDia", inf.dia.toFixed(2));
     set("shaftGpi", inf.gpi.toFixed(2));

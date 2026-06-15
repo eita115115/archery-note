@@ -59,6 +59,7 @@ function staticUiChecks() {
   assert(html.includes("判断信頼度") && html.includes("個人モデル") && html.includes("次のアクション") && html.includes("個人データ準備度") && html.includes("スパイン初期候補") && html.includes("RK4-3D") && html.includes("物理校正"), "analysis cards missing");
   assert(html.includes("シャフト銘柄") && html.includes("番手/スパイン") && html.includes("HOYT Grand Prix XCEED 2 H25"), "separated gear fields missing");
   assert(html.includes("EASTON X10 ProTour") && html.includes("SHIBUYA ULTIMA RC IV 520 Carbon") && html.includes("RAMRODS VEKTOR") && html.includes("GAS Bowstrings Ghost XV"), "expanded gear knowledge missing");
+  assert(html.includes("choicePick") && html.includes("候補にないので手入力") && html.includes("確認したチューニング"), "gear dropdown/tuning UI missing");
 }
 
 function screenshot(browser, view) {
