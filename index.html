@@ -16,13 +16,17 @@
   --soft:#eef1ec; --inpBg:#ffffff; --hdr:#1a5c3a; --title:#1a5c3a;
   --advBg:#f0f7f1; --advLine:#cfe5d4;
   --gold:#fdd835; --red:#e53935; --blue:#1e88e5; --accent:#1a5c3a;
-  --danger:#c62828;
+  --danger:#c62828; --paper:#fbfaf5; --paper2:#f2eadc; --ink2:#24312d;
+  --teal:#0f766e; --amber:#b56b1f; --navy:#24537b; --mint:#dcefe6;
+  --shadow:0 10px 30px rgba(32,42,34,.10);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0; overflow-x:hidden;}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
-  background:var(--bg); color:var(--ink); font-size:15px;
+  background:
+    linear-gradient(180deg,var(--paper) 0,var(--bg) 36%,var(--bg) 100%);
+  color:var(--ink); font-size:15px;
   padding-bottom:76px;
   padding-bottom:calc(64px + env(safe-area-inset-bottom));
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
@@ -37,11 +41,12 @@ header.app{
   padding-top:calc(10px + env(safe-area-inset-top));
   display:flex; align-items:center; gap:8px;
   position:sticky; top:0; z-index:20;
+  box-shadow:0 2px 16px rgba(0,0,0,.12);
 }
 header.app h1{font-size:16px; margin:0; font-weight:700; letter-spacing:.03em;}
 header.app .sub{font-size:11px; opacity:.85;}
-main{width:100%; max-width:520px; margin:0 auto; padding:12px;}
-.card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
+main{width:100%; max-width:520px; min-width:0; margin:0 auto; padding:12px;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
 .card h2{font-size:14px; margin:0 0 10px; color:var(--title); display:flex; align-items:center; justify-content:space-between;}
 .card h2 .mini{font-size:11px; color:var(--sub); font-weight:normal;}
 label.f{display:block; font-size:12px; color:var(--sub); margin:10px 0 4px;}
@@ -74,6 +79,95 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .btn.sm{padding:8px 12px; font-size:13px; width:auto; border-radius:10px;}
 .btn:disabled{opacity:.4;}
 .btnrow{display:flex; gap:8px; margin-top:10px;} .btnrow .btn{flex:1;}
+.missionPanel{
+  color:#fff; background:linear-gradient(135deg,#163b2a 0%,#1d5f3e 58%,#24537b 100%);
+  border-radius:8px; padding:15px; margin-bottom:12px; box-shadow:var(--shadow);
+  border:1px solid rgba(255,255,255,.12); overflow:hidden; min-width:0; width:100%;
+}
+.missionTop{display:grid; grid-template-columns:minmax(0,1fr) 84px; gap:12px; align-items:start; min-width:0;}
+.eyebrow{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.72; font-weight:800;}
+.missionPanel h2{margin:3px 0 5px; font-size:21px; letter-spacing:0; color:#fff;}
+.missionPanel p{margin:0; font-size:12px; line-height:1.55; color:rgba(255,255,255,.82);}
+.readinessDial{
+  aspect-ratio:1; border-radius:50%; background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.24); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  box-shadow:inset 0 0 0 8px rgba(255,255,255,.05);
+}
+.readinessDial b{font-size:22px; line-height:1;}
+.readinessDial span{font-size:10px; opacity:.78; margin-top:3px;}
+.readinessRail{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px;}
+.readinessCell{
+  min-height:62px; border-radius:8px; padding:8px; background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.16); min-width:0;
+}
+.readinessCell .k{font-size:10.5px; opacity:.72;}
+.readinessCell b{display:block; font-size:13px; margin-top:2px;}
+.readinessCell .bar{height:4px; border-radius:999px; margin-top:7px; background:rgba(255,255,255,.22); overflow:hidden;}
+.readinessCell .bar i{display:block; height:100%; border-radius:999px; background:#f0c66a;}
+.missionFlow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px;}
+.flowBtn{
+  display:grid; grid-template-columns:34px 1fr; align-items:center; gap:8px;
+  border:1px solid rgba(255,255,255,.18); border-radius:8px; background:rgba(255,255,255,.10); color:#fff;
+  min-width:0; padding:9px 8px; min-height:70px; text-align:left; cursor:pointer;
+  box-shadow:none; position:relative; overflow:hidden; min-width:0;
+}
+.flowIcon{
+  width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:16px; background:rgba(255,255,255,.16);
+}
+.flowBtn b{display:block; font-size:12.5px; color:#fff; margin-bottom:3px;}
+.flowBtn .flowText{min-width:0;}
+.flowBtn .flowText span{display:block; font-size:10.5px; color:rgba(255,255,255,.72); line-height:1.35; overflow-wrap:anywhere;}
+.flowBtn.on{border-color:#f0c66a; background:rgba(240,198,106,.16); box-shadow:inset 0 0 0 1px rgba(240,198,106,.35);}
+.missionNext{margin-top:10px; display:flex; gap:8px; align-items:flex-start; color:rgba(255,255,255,.84); font-size:12px; line-height:1.45;}
+.missionNext b{color:#fff; white-space:nowrap;}
+.missionNext span{min-width:0; overflow-wrap:anywhere;}
+.launchPanel{
+  background:var(--card); border:1px solid var(--line); border-radius:8px; margin-bottom:12px; box-shadow:var(--shadow); min-width:0; width:100%;
+}
+.launchHead{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px;
+  padding:12px 14px; border-bottom:1px solid var(--line2); background:var(--paper);
+}
+.launchHead h2{font-size:15px; margin:0; color:var(--title);}
+.stepBadge{
+  width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:var(--ink2); color:#fff; font-size:12px; font-weight:800; flex:0 0 auto;
+}
+.launchTitle{display:flex; align-items:center; gap:9px; min-width:0;}
+.launchBody{padding:14px;}
+.setupLens{
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:10px 0 4px;
+}
+.lensCard{
+  border:1px solid var(--line); border-radius:8px; padding:9px; background:var(--paper);
+  min-height:58px; min-width:0;
+}
+.lensCard .k{font-size:10.5px; color:var(--sub);}
+.lensCard b{display:block; margin-top:2px; font-size:13px; color:var(--ink);}
+.lensCard span{display:block; margin-top:2px; font-size:10.5px; color:var(--sub); line-height:1.35;}
+.quickDists{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; margin-top:6px;}
+.quickDists .chip{display:flex; align-items:center; justify-content:center; padding:9px 4px; border-radius:8px; font-size:13px;}
+.fieldBand{
+  display:grid; grid-template-columns:1fr; gap:10px;
+}
+.recordDetails{margin-top:12px;}
+.recordDetails summary{display:flex; align-items:center; justify-content:space-between;}
+.tinyAction{
+  border:1px solid var(--line); background:var(--card); color:var(--title); border-radius:8px;
+  padding:7px 10px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
+  max-width:92px; overflow:hidden; text-overflow:ellipsis;
+}
+.insightStrip{
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px;
+}
+.insightTile{
+  border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--card);
+  min-height:74px; min-width:0;
+}
+.insightTile .k{font-size:10.5px; color:var(--sub);}
+.insightTile b{display:block; font-size:18px; color:var(--title); margin-top:2px;}
+.insightTile span{display:block; font-size:10.5px; color:var(--sub); margin-top:2px; line-height:1.35;}
 .introCopy{
   border:1px solid var(--advLine); border-radius:16px; padding:12px;
   background:linear-gradient(135deg,var(--advBg),var(--card)); margin-bottom:10px;
@@ -81,22 +175,6 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .introCopy .kicker{font-size:12px; font-weight:800; color:var(--title); letter-spacing:.04em; margin-bottom:4px;}
 .introCopy p{margin:0; font-size:12px; color:var(--sub); line-height:1.55;}
 .workflow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
-.flowBtn{
-  display:grid; grid-template-columns:38px 1fr; align-items:center; gap:9px;
-  border:1.5px solid var(--line); border-radius:18px; background:var(--card); color:var(--ink);
-  min-width:0; padding:10px 9px; min-height:76px; text-align:left; cursor:pointer;
-  box-shadow:0 1px 3px rgba(0,0,0,.04); position:relative; overflow:hidden;
-}
-.flowIcon{
-  width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-size:18px; background:var(--soft);
-}
-.flowBtn b{display:block; font-size:13px; color:var(--title); margin-bottom:3px;}
-.flowBtn .flowText span{display:block; font-size:10.5px; color:var(--sub); line-height:1.35; overflow-wrap:anywhere;}
-.flowBtn.on{border-color:var(--green); background:var(--advBg); box-shadow:0 0 0 1px var(--advLine) inset;}
-.flowBtn[data-mode="practice"] .flowIcon{background:#e6f4ec;}
-.flowBtn[data-mode="calibration"] .flowIcon{background:#edf3ff;}
-.flowBtn[data-mode="diagnosis"] .flowIcon{background:#fff6df;}
 .guideLine{display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--sub); line-height:1.45; margin-top:8px;}
 .guideLine b{color:var(--title); white-space:nowrap; flex:0 0 auto;}
 .compactStack>*:first-child{margin-top:0;}
@@ -195,12 +273,16 @@ html.dark{
   --bg:#141714; --card:#1e231e; --ink:#e7eae5; --sub:#9aa396; --line:#343b34; --line2:#2a312a;
   --soft:#2a302a; --inpBg:#262c26; --hdr:#143626; --title:#7fd0a2; --advBg:#1c2b20; --advLine:#2c4533;
   --green:#2f9e68; --green-l:#3c9a68; --accent:#2f9e68; --danger:#ff8a80;
+  --paper:#171b17; --paper2:#25261f; --ink2:#d8e6dc; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1c2b20;
+  --shadow:0 10px 30px rgba(0,0,0,.28);
 }
 @media (prefers-color-scheme: dark){
   html.auto{
     --bg:#141714; --card:#1e231e; --ink:#e7eae5; --sub:#9aa396; --line:#343b34; --line2:#2a312a;
     --soft:#2a302a; --inpBg:#262c26; --hdr:#143626; --title:#7fd0a2; --advBg:#1c2b20; --advLine:#2c4533;
     --green:#2f9e68; --green-l:#3c9a68; --accent:#2f9e68; --danger:#ff8a80;
+    --paper:#171b17; --paper2:#25261f; --ink2:#d8e6dc; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1c2b20;
+    --shadow:0 10px 30px rgba(0,0,0,.28);
   }
 }
 details.adv{border:1px solid var(--line); border-radius:12px; padding:2px 12px 8px; margin-top:12px; background:var(--card);}
@@ -211,7 +293,15 @@ details.adv[open] summary::before{content:"▾ ";}
 header.app .gear{margin-left:auto; background:none; border:none; color:#fff; font-size:21px; cursor:pointer; padding:4px;}
 @media (max-width:520px){
   .workflow{grid-template-columns:1fr;}
-  .flowBtn{min-height:0;}
+  .missionTop{grid-template-columns:1fr;}
+  .readinessDial{display:none;}
+  .readinessRail,.missionFlow{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .readinessRail>*:last-child,.missionFlow>*:last-child{grid-column:1/-1;}
+  .flowBtn{grid-template-columns:1fr; justify-items:center; text-align:center; min-height:84px; padding:8px 5px;}
+  .flowIcon{width:30px;height:30px;}
+  .flowBtn b{font-size:12px;}
+  .flowBtn .flowText span{font-size:9.8px;}
+  .quickDists{grid-template-columns:repeat(4,minmax(0,1fr));}
 }
 @media (max-width:360px){
   main{padding:8px;}
@@ -219,6 +309,8 @@ header.app .gear{margin-left:auto; background:none; border:none; color:#fff; fon
   .btnrow{flex-direction:column;}
   .statbar{flex-wrap:wrap;}
   .stat{min-width:46%;}
+  .missionTop,.setupLens,.insightStrip{grid-template-columns:1fr;}
+  .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
@@ -261,7 +353,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=29;
+const APP_VER=30;
 const TRASH_LIMIT=50;
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -1404,26 +1496,39 @@ function setupOptions(sel){
   return `<option value="">（セッティング未指定）</option>`+db.setups.map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
 }
 const RECORD_FLOW_MODES=[
-  {id:"practice",icon:"🎯",title:"練習記録",desc:"点取りから調整提案へ"},
-  {id:"calibration",icon:"📏",title:"校正用",desc:"サイト値・風メモを残す"},
-  {id:"diagnosis",icon:"🔍",title:"状態確認",desc:"足りない材料を見る"}
+  {id:"practice",icon:"◎",title:"練習記録",desc:"点取りから調整提案へ"},
+  {id:"calibration",icon:"↕",title:"校正用",desc:"サイト値・風メモを残す"},
+  {id:"diagnosis",icon:"?",title:"状態確認",desc:"足りない材料を見る"}
 ];
+function scorePct(v){ return Math.round(clamp(v||0,0,1)*100); }
+function readinessCellHtml(label,level,score){
+  return `<div class="readinessCell"><div class="k">${label}</div><b>${esc(level)}</b><div class="bar"><i style="width:${scorePct(score)}%"></i></div></div>`;
+}
 function recordIntroHtml(sys, mode){
   const flow=RECORD_FLOW_MODES.map(f=>`
       <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
-  return `<div class="card">
-    <h2>今日やること <span class="mini">今の材料: ${sys.level}</span></h2>
-    <div class="introCopy">
-      <div class="kicker">データで育つ記録アプリ</div>
-      <p>点取りだけでも使えます。サイト値・風・用具を少しずつ残すほど、調整提案があなたの弓に合っていきます。</p>
+  const p=sys.profiles||{};
+  return `<section class="missionPanel">
+    <div class="missionTop">
+      <div>
+        <div class="eyebrow">Archery Note cockpit</div>
+        <h2>今日の作戦盤</h2>
+        <p>データで育つ記録アプリ。点取りだけでも使えます。サイト値・風・用具を少しずつ残すほど、調整提案があなたの弓に合っていきます。</p>
+      </div>
+      <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
     </div>
-    <div class="workflow" id="flowMode">${flow}</div>
-    <div class="guideLine"><b>材料</b><span>${sys.lines.map(esc).join(" / ")}。次に効くデータ: ${esc(sys.next)}</span></div>
-  </div>`;
+    <div class="readinessRail">
+      ${readinessCellHtml("用具",p.gear?p.gear.level:"低",p.gear?p.gear.score:0)}
+      ${readinessCellHtml("履歴",p.model?p.model.level:"データ蓄積中",p.model?p.model.score:0)}
+      ${readinessCellHtml("物理校正",p.physics?p.physics.level:"未校正",p.physics?p.physics.score:0)}
+    </div>
+    <div class="missionFlow" id="flowMode">${flow}</div>
+    <div class="missionNext"><b>次の材料</b><span>${esc(sys.next)} / ${sys.lines.map(esc).join(" / ")}</span></div>
+  </section>`;
 }
 function setupSystemSummary(setupId){
   const setup=db.setups.find(s=>s.id===setupId);
-  if(!setup) return {level:"準備中", lines:["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"], next:"用具タブで初回セットアップ"};
+  if(!setup) return {score:0,level:"準備中", profiles:{}, lines:["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"], next:"用具タブで初回セットアップ"};
   const gp=gearPrecisionProfile(setup), mp=modelReadinessProfile(setupId), pc=personalPhysicsCalibration(setupId), cp=calibrationProfile(setupId);
   const score=clamp(gp.score*.25 + mp.score*.25 + (pc?pc.score*.28:0) + (cp?cp.score*.22:0),0,1);
   const level=levelFromScore(score, LEVELS.system);
@@ -1433,10 +1538,27 @@ function setupSystemSummary(setupId){
   if(cp.dists<3) next.push("複数距離のサイト値");
   if(pc && pc.wind.sample<2) next.push("横風メモつき練習");
   return {
+    score,
     level,
+    profiles:{gear:gp,model:mp,physics:pc||{score:0,level:"未校正"},calibration:cp},
     lines:[`用具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc?pc.level:"未校正"}`],
     next:next.slice(0,2).join("・") || "同条件で記録を重ねる"
   };
+}
+function recordSetupSnapshot(setupId,dist){
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup) return `<div class="setupLens" id="setupLens">
+    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b><span>用具登録で調整提案が強くなります</span></div>
+    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b><span>距離を選ぶと実測値を呼び出します</span></div>
+  </div>`;
+  const gp=gearPrecisionProfile(setup);
+  const mp=modelReadinessProfile(setupId);
+  const mk=dist?latestMark(setupId,dist):null;
+  const markText=mk?`上下 ${esc(mk.v||"—")} / 左右 ${esc(mk.h||"—")}`:"記録なし";
+  return `<div class="setupLens" id="setupLens">
+    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b><span>${[setup.bow,setup.limbs,setup.poundage?setup.poundage+"lbs":""].filter(Boolean).map(esc).join(" / ")||"詳細入力待ち"}</span></div>
+    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b><span>演算入力 ${gp.level} / 個人モデル ${mp.level}</span></div>
+  </div>`;
 }
 function renderRecord(m){
   if(db.active){ renderActive(m); return; }
@@ -1447,16 +1569,23 @@ function renderRecord(m){
   const sys=setupSystemSummary(defSetup);
   m.innerHTML=`
   ${recordIntroHtml(sys,mode)}
-  <div class="card">
-    <h2>新しい練習を始める</h2>
-    <label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select>
+  <section class="launchPanel">
+    <div class="launchHead">
+      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"校正条件を組む":"練習を始める"}</h2></div>
+      <button class="tinyAction" id="jumpGear">${db.setups.length?"用具を開く":"用具登録"}</button>
+    </div>
+    <div class="launchBody">
+    <div class="fieldBand">
+      <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
+      ${recordSetupSnapshot(defSetup,defDist)}
+    </div>
     <label class="f">距離</label>
-    <div class="chips" id="fDistChips">
+    <div class="chips quickDists" id="fDistChips">
       ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
       <div class="chip" data-d="custom">カスタム</div>
     </div>
     <div id="fDistCustomWrap" style="display:none"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
-    <details class="adv" ${mode==="calibration"?"open":""}>
+    <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
       <summary>詳細（日付・的・本数・サイト値・天候）</summary>
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
       <label class="f">ラウンド</label><select class="inp" id="fRound">
@@ -1485,29 +1614,37 @@ function renderRecord(m){
     ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>校正用のコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
     <div class="btnrow"><button class="btn" id="fStart">▶ ${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
     ${db.setups.length?"":`<div class="hint">💡 「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
-  </div>`;
+    </div>
+  </section>`;
   const distState={d:defDist};
   const faceSel=$("#fFace");
   const suggestFace=d=>{ faceSel.value = d>=60?122:(d<=18?40:80); };
   suggestFace(defDist);
+  $("#jumpGear").onclick=()=>showView("gear");
   document.querySelectorAll("#flowMode .flowBtn").forEach(b=>b.onclick=()=>{
     if(b.dataset.mode==="diagnosis"){ showView("sight"); return; }
     ui.recordMode=b.dataset.mode; render();
   });
+  function refreshLens(){
+    const old=$("#setupLens");
+    if(old) old.outerHTML=recordSetupSnapshot($("#fSetup").value, distState.d);
+  }
   document.querySelectorAll("#fDistChips .chip").forEach(c=>c.onclick=()=>{
     document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.remove("on"));
     c.classList.add("on");
     if(c.dataset.d==="custom"){ $("#fDistCustomWrap").style.display="block"; distState.d=null; }
     else{ $("#fDistCustomWrap").style.display="none"; distState.d=+c.dataset.d; suggestFace(distState.d); fillSight(); }
+    refreshLens();
   });
-  $("#fDistCustom").oninput=e=>{ distState.d=+e.target.value||null; if(distState.d) {suggestFace(distState.d); fillSight();} };
+  $("#fDistCustom").oninput=e=>{ distState.d=+e.target.value||null; if(distState.d) {suggestFace(distState.d); fillSight();} refreshLens(); };
   function fillSight(){
     const sid=$("#fSetup").value, d=distState.d;
     if(!sid||!d) return;
     const mk=latestMark(sid,d);
     if(mk){ $("#fSightV").value=mk.v??""; $("#fSightH").value=mk.h??""; }
   }
-  $("#fSetup").onchange=fillSight; fillSight();
+  $("#fSetup").onchange=()=>{ fillSight(); refreshLens(); };
+  fillSight();
   $("#fStart").onclick=()=>{
     const d=distState.d;
     if(!d){ toast("距離を入力してください"); return; }
@@ -1811,6 +1948,24 @@ function openSummary(sess, isNew){
 }
 
 /* ---------- 履歴 ---------- */
+function historyOverviewHtml(allSs,ss){
+  const src=ss&&ss.length?ss:allSs;
+  if(!allSs.length) return "";
+  const arrows=src.flatMap(s=>s.ends.flat());
+  const total=arrows.reduce((a,x)=>a+x.s,0);
+  const avg=arrows.length?total/arrows.length:0;
+  const recent=[...src].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1)).slice(0,5);
+  const recentAvg=recent.length?recent.flatMap(s=>s.ends.flat()).reduce((a,x)=>a+x.s,0)/Math.max(1,recent.flatMap(s=>s.ends.flat()).length):0;
+  const setupCount=new Set(src.map(s=>s.setupId||"none")).size;
+  const distCount=new Set(src.map(s=>s.dist).filter(Boolean)).size;
+  const quality=src.map(s=>sessionQuality(s,db.setups.find(x=>x.id===s.setupId))).filter(Boolean);
+  const qAvg=quality.length?quality.reduce((a,q)=>a+q.score,0)/quality.length:0;
+  return `<div class="insightStrip">
+    <div class="insightTile"><div class="k">履歴の地図</div><b>${src.length}回</b><span>${arrows.length}本 / ${distCount}距離 / ${setupCount}用具</span></div>
+    <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"}</span></div>
+    <div class="insightTile"><div class="k">判断材料</div><b>${pct(qAvg)}</b><span>サイト値・本数・用具入力の平均充実度</span></div>
+  </div>`;
+}
 function renderHistory(m){
   const allSs=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
   const hf=ui.histFilter||{setupId:"",dist:"",round:""};
@@ -1821,7 +1976,8 @@ function renderHistory(m){
     (!hf.dist || String(s.dist)===String(hf.dist)) &&
     (!hf.round || (s.round||"free")===hf.round)
   );
-  m.innerHTML=`<div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
+  m.innerHTML=`${historyOverviewHtml(allSs,ss)}
+  <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
       <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${hf.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
       <div><label class="f">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map(d=>`<option value="${d}" ${String(hf.dist)===String(d)?"selected":""}>${d}m</option>`).join("")}</select></div>
@@ -2509,8 +2665,24 @@ function setupComparisonHtml(setupId){
     <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
   </div>`;
 }
+function gearWorkbenchHtml(){
+  const setups=db.setups||[];
+  if(!setups.length) return "";
+  const gp=setups.map(s=>gearPrecisionProfile(s));
+  const avg=gp.length?gp.reduce((a,p)=>a+p.score,0)/gp.length:0;
+  const linked=db.sessions.filter(s=>s.setupId).length;
+  const marks=db.sightMarks.length;
+  const top=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)}))
+    .sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
+  return `<div class="insightStrip">
+    <div class="insightTile"><div class="k">用具ライブラリ</div><b>${setups.length}件</b><span>練習紐付け ${linked}回 / サイト値 ${marks}点</span></div>
+    <div class="insightTile"><div class="k">演算入力</div><b>${pct(avg)}</b><span>矢重量・矢径・FOC・実測初速の平均充実度</span></div>
+    <div class="insightTile"><div class="k">最も育っている用具</div><b>${top?esc(top.s.name):"—"}</b><span>${top?`演算 ${top.p.level} / 個人モデル ${top.m.level}`:"登録待ち"}</span></div>
+  </div>`;
+}
 function renderGear(m){
-  m.innerHTML=`<div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
+  m.innerHTML=`${gearWorkbenchHtml()}
+  <div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
     <div id="gearList">${db.setups.length? db.setups.map(s=>{
       const cnt=db.sessions.filter(x=>x.setupId===s.id).length;
       const gp=gearPrecisionProfile(s);

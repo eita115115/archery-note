@@ -61,6 +61,7 @@ function staticUiChecks() {
   assert(/@media \(max-width:360px\)/.test(html), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(html), "Small-screen row stacking missing");
   assert(html.includes("データで育つ記録アプリ") && html.includes("点取りから調整提案へ") && html.includes("足りない材料を見る"), "systematic onboarding UI missing");
+  assert(html.includes("今日の作戦盤") && html.includes("missionPanel") && html.includes("setupLens") && html.includes("insightStrip"), "cockpit composition missing");
   assert(html.includes("判断信頼度") && html.includes("個人モデル") && html.includes("次のアクション") && html.includes("個人データ準備度") && html.includes("スパイン初期候補") && html.includes("RK4-3D") && html.includes("物理校正"), "analysis cards missing");
   assert(html.includes("シャフト銘柄") && html.includes("番手/スパイン") && html.includes("ハンドル/弓本体") && html.includes("HOYT Grand Prix XCEED 2 H25") && html.includes("HOYT Formula RCRV PODIUM Limbs"), "separated gear fields missing");
   assert(html.includes("EASTON X10 ProTour") && html.includes("SHIBUYA ULTIMA RC IV 520 Carbon") && html.includes("RAMRODS VEKTOR") && html.includes("GAS Bowstrings Ghost XV"), "expanded gear knowledge missing");
