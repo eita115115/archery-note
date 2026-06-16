@@ -32,6 +32,12 @@ assert(html.includes("Array.prototype.flat") && html.includes("Object.values") &
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
 new Function(sw);
 assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match("./index.html")'), "Service worker navigation fallback missing");
+const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const cap = JSON.parse(fs.readFileSync(path.join(root, "capacitor.config.json"), "utf8"));
+assert(pkg.scripts["build:native-web"] && pkg.scripts["native:sync"], "Native build scripts missing");
+assert(cap.appId === "com.eita.archerynote" && cap.webDir === "dist/native", "Capacitor config mismatch");
+assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "native-transition.md")), "Native transition files missing");
+assert(html.includes("nativeReadinessHtml") && html.includes("アプリ基盤") && html.includes("RK4-3D JS core"), "Native readiness UI missing");
 
 const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel};")();
 const normalized = storageApi.normalizeDb({sessions:[{id:"s"}], settings:{eyeSight:900}});

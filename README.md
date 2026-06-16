@@ -1,13 +1,13 @@
 # Archery Note 🏹
 
-アーチェリーの得点記録＆サイト調整サポートアプリ（スマホ対応・単一HTML）。
+アーチェリーの得点記録＆サイト調整サポートアプリ（スマホ対応・PWA継続 / ネイティブ化準備中）。
 
 ## 使い方
 
 ローカルで開くだけでも動きます（`index.html` をブラウザで開く）。
 スマホで使うには、どこかに置いて（おすすめは GitHub Pages）URLを開き、
 ブラウザのメニューから **「ホーム画面に追加」** するとアプリのように使えます。
-HTTPSで開けばオフラインでも動作します（Service Worker対応）。
+HTTPSで開けばオフラインでも動作します（Service Worker対応）。今後のネイティブ配信に向けて、Capacitor用のWeb出力と設定も用意しています。
 
 ローカルでの動作確認用サーバー:
 
@@ -48,6 +48,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
 - **ダークモード**: ⚙設定から自動/ライト/ダークを選択（既定は端末に追従）。
 - **線かみ判定**: 矢の中心点からアプリ上の矢円半径を引いて採点（表示された矢円が線に少しでも触れていれば内側の点数）。微調整モード中は線かみ時にカーソルが緑、線なし時に赤で表示されます。
 - **環境対応**: 連続入力中の誤ズームを抑制し、PointerEvent非対応環境ではタッチ/マウス入力へフォールバック。オフライン時のトップページ復帰も補強。
+- **ネイティブ準備**: PWAを高速な実験場として残しつつ、`npm run build:native-web` でCapacitor向けWeb資産を生成できます。設定画面では保存・演算・配布基盤の準備状態を確認できます。
 
 ## 更新時の注意
 
@@ -58,6 +59,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
 ```powershell
 & 'C:\Users\eita2\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' tools\check-app.js
 & 'C:\Users\eita2\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' tools\check-ui.js
+npm run build:native-web
 git diff --check
 ```
 
@@ -71,6 +73,8 @@ git diff --check
 
 抽出結果とPDF本体は `artifacts\catalog\` に置き、Gitには含めません。アプリへ入れる候補は、人の目でノイズを落としてから `index.html` に反映します。
 
+ネイティブ化の方針は `docs/native-transition.md` を参照してください。最初はPWAを維持しながら、CapacitorでiOS/Android配信用の土台を作り、保存層と物理コアを段階的に分離します。
+
 このCodex環境から `.git` へ書き込めない場合は、最後のコミットだけPowerShellで実行してください。
 
 ## ファイル
@@ -78,8 +82,10 @@ git diff --check
 - `index.html` — アプリ本体（依存ライブラリなし）
 - `manifest.json` / `sw.js` / `icon.svg` — PWA用（ホーム画面追加・オフライン動作）
 - `serve.ps1` — ローカル確認用の簡易サーバー
+- `package.json` / `capacitor.config.json` — 将来のiOS/Androidアプリ化に向けたCapacitor準備
 - `tools/check-app.js` — 構文・公開番号・代表演算の検証スクリプト
 - `tools/check-ui.js` — Chrome/Edgeを使ったスマホ幅・PC幅のUIスモーク検査
+- `tools/build-native-web.js` — Capacitorへ渡すWeb資産を `dist/native` に生成
 - `tools/extract-catalog.py` — カタログPDFから用具名候補を抽出する開発補助ツール
 
 ## 関連アプリ

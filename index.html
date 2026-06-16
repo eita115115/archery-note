@@ -168,6 +168,14 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .insightTile .k{font-size:10.5px; color:var(--sub);}
 .insightTile b{display:block; font-size:18px; color:var(--title); margin-top:2px;}
 .insightTile span{display:block; font-size:10.5px; color:var(--sub); margin-top:2px; line-height:1.35;}
+.nativeStack{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
+.nativePill{
+  border:1px solid var(--line); border-radius:8px; padding:9px; background:var(--paper);
+  min-width:0;
+}
+.nativePill .k{font-size:10.5px; color:var(--sub);}
+.nativePill b{display:block; font-size:13px; color:var(--title); margin-top:2px;}
+.nativePill span{display:block; font-size:10.5px; color:var(--sub); line-height:1.35; margin-top:2px;}
 .introCopy{
   border:1px solid var(--advLine); border-radius:16px; padding:12px;
   background:linear-gradient(135deg,var(--advBg),var(--card)); margin-bottom:10px;
@@ -309,7 +317,7 @@ header.app .gear{margin-left:auto; background:none; border:none; color:#fff; fon
   .btnrow{flex-direction:column;}
   .statbar{flex-wrap:wrap;}
   .stat{min-width:46%;}
-  .missionTop,.setupLens,.insightStrip{grid-template-columns:1fr;}
+  .missionTop,.setupLens,.insightStrip,.nativeStack{grid-template-columns:1fr;}
   .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 @media (prefers-reduced-motion: reduce){
@@ -353,8 +361,10 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=30;
+const APP_VER=31;
 const TRASH_LIMIT=50;
+const ENGINE_VER="RK4-3D JS core v31";
+const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
 function normalizeDb(d){
@@ -373,6 +383,40 @@ function load(){
 }
 function dataCounts(d=db){
   return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length};
+}
+function runtimeKind(){
+  const w=typeof window!=="undefined"?window:{};
+  const nav=typeof navigator!=="undefined"?navigator:{};
+  const isNative=!!(w.Capacitor && typeof w.Capacitor.getPlatform==="function");
+  const standalone=!!(nav.standalone || (typeof w.matchMedia==="function" && w.matchMedia("(display-mode: standalone)").matches));
+  if(isNative) return {kind:"Native", label:"ネイティブ容器", tone:"ok"};
+  if(standalone) return {kind:"PWA", label:"ホーム画面", tone:"mid"};
+  return {kind:"Web", label:"ブラウザ", tone:"mid"};
+}
+function nativeReadinessProfile(){
+  const counts=dataCounts();
+  const runtime=runtimeKind();
+  const storageScore=clamp((counts.sessions?0.22:0.12)+(counts.setups?0.22:0.08)+(db.settings.lastBackupAt?0.18:0)+(readSnapshots().length?0.18:0)+0.20,0,1);
+  const engineScore=.78;
+  const shellScore=.58;
+  const next=[];
+  if(!db.settings.lastBackupAt) next.push("バックアップ保存");
+  if(!counts.setups) next.push("用具登録");
+  if(counts.sessions<3) next.push("練習記録");
+  if(!next.length) next.push("同条件の記録を増やす");
+  return {runtime,storageScore,engineScore,shellScore,next,counts};
+}
+function nativeReadinessHtml(){
+  const p=nativeReadinessProfile();
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER}</div>
+    <div class="nativeStack">
+      <div class="nativePill"><div class="k">保存</div><b>${pct(p.storageScore)}</b><span>バックアップと復元を維持</span></div>
+      <div class="nativePill"><div class="k">演算</div><b>${pct(p.engineScore)}</b><span>物理コア分離へ移行中</span></div>
+      <div class="nativePill"><div class="k">配布</div><b>${pct(p.shellScore)}</b><span>${NATIVE_CHANNEL}</span></div>
+    </div>
+    <div class="note">次に整える材料: ${p.next.map(esc).join("・")}</div>
+  </div>`;
 }
 function hashText(s){
   let h=2166136261;
@@ -2717,6 +2761,8 @@ function openSettings(){
     </div>
     <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
     <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
+    <h3 style="margin-top:18px;font-size:14px">アプリ基盤</h3>
+    ${nativeReadinessHtml()}
     <h3 style="margin-top:18px;font-size:14px">データ管理</h3>
     ${backupReminderHtml()}
     <div class="btnrow">

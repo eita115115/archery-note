@@ -4,3 +4,5 @@ __pycache__/
 .tmp-*
 artifacts/catalog/
 artifacts/ui-smoke/
+dist/
+node_modules/
