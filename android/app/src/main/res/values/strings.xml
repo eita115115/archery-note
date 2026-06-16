@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Archery Note</string>
+    <string name="title_activity_main">Archery Note</string>
+    <string name="package_name">com.eita.archerynote</string>
+    <string name="custom_url_scheme">com.eita.archerynote</string>
+</resources>

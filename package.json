@@ -8,6 +8,9 @@
     "check:ui": "node tools/check-ui.js",
     "build:native-web": "node tools/build-native-web.js",
     "native:sync": "npm run build:native-web && npx cap sync",
+    "native:sync:android": "npm run build:native-web && npx cap sync android",
+    "native:open:android": "npm run native:sync:android && npx cap open android",
+    "native:build:android": "npm run native:sync:android && cd android && gradlew.bat assembleDebug",
     "native:add:android": "npm run build:native-web && npx cap add android",
     "native:add:ios": "npm run build:native-web && npx cap add ios"
   },

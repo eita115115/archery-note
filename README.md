@@ -75,6 +75,16 @@ git diff --check
 
 ネイティブ化の方針は `docs/native-transition.md` を参照してください。最初はPWAを維持しながら、CapacitorでiOS/Android配信用の土台を作り、保存層と物理コアを段階的に分離します。
 
+Android開発環境:
+
+```powershell
+npm run native:sync:android
+npm run native:open:android
+npm run native:build:android
+```
+
+初回だけAndroid Studioのセットアップウィザードで Android SDK、Android SDK Platform 36、Android SDK Build-Tools、Android SDK Platform-Tools を入れてください。
+
 このCodex環境から `.git` へ書き込めない場合は、最後のコミットだけPowerShellで実行してください。
 
 ## ファイル
@@ -83,6 +93,7 @@ git diff --check
 - `manifest.json` / `sw.js` / `icon.svg` — PWA用（ホーム画面追加・オフライン動作）
 - `serve.ps1` — ローカル確認用の簡易サーバー
 - `package.json` / `capacitor.config.json` — 将来のiOS/Androidアプリ化に向けたCapacitor準備
+- `android/` — Capacitorで生成したAndroidネイティブプロジェクト
 - `tools/check-app.js` — 構文・公開番号・代表演算の検証スクリプト
 - `tools/check-ui.js` — Chrome/Edgeを使ったスマホ幅・PC幅のUIスモーク検査
 - `tools/build-native-web.js` — Capacitorへ渡すWeb資産を `dist/native` に生成

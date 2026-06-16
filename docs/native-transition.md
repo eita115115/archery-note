@@ -53,9 +53,12 @@ npm run build:native-web
 After native platforms are intentionally added:
 
 ```powershell
-npm run native:add:android
+npm run native:sync:android
+npm run native:open:android
+npm run native:build:android
 npm run native:add:ios
-npm run native:sync
 ```
+
+The Android platform has been added under `android/`. Android Studio first-run setup still needs the Android SDK, Android SDK Platform 36, Android SDK Build-Tools, and Platform-Tools before local debug builds can run.
 
 Android can be developed on Windows with Android Studio. iOS packaging and App Store submission still require a Mac or a cloud build service with Apple signing.
