@@ -361,9 +361,10 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=31;
+const APP_VER=32;
 const TRASH_LIMIT=50;
-const ENGINE_VER="RK4-3D JS core v31";
+const STORAGE_ADAPTER_VER="storage-adapter v32";
+const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
@@ -378,11 +379,42 @@ function normalizeDb(d){
   return out;
 }
 function load(){
-  try{ const d=JSON.parse(localStorage.getItem(KEY)); if(d && d.sessions) return normalizeDb(d); }catch(e){}
+  try{ const d=JSON.parse(storageGetItem(KEY)); if(d && d.sessions) return normalizeDb(d); }catch(e){}
   return blankDb();
 }
 function dataCounts(d=db){
   return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length};
+}
+function storageBridge(){
+  const w=typeof window!=="undefined"?window:{};
+  return w.ArcheryNativeStorage||w.ArcheryStorage||null;
+}
+function storageGetItem(key){
+  const bridge=storageBridge();
+  try{
+    if(bridge && typeof bridge.getItem==="function"){
+      const v=bridge.getItem(key);
+      if(typeof v==="string" || v==null) return v;
+    }
+  }catch(e){}
+  try{ return typeof localStorage!=="undefined" ? localStorage.getItem(key) : null; }catch(e){ return null; }
+}
+function storageSetItem(key,value){
+  const bridge=storageBridge();
+  try{
+    if(bridge && typeof bridge.setItem==="function"){
+      const ok=bridge.setItem(key,value);
+      if(ok!==false) return true;
+    }
+  }catch(e){}
+  if(typeof localStorage==="undefined") return false;
+  localStorage.setItem(key,value);
+  return true;
+}
+function storageDriverProfile(){
+  const bridge=storageBridge();
+  const native=!!(bridge && typeof bridge.getItem==="function" && typeof bridge.setItem==="function");
+  return {id:native?"native-sync-bridge":"localStorage",label:native?"ネイティブ保存ブリッジ":"ブラウザ保存",version:STORAGE_ADAPTER_VER,native};
 }
 function runtimeKind(){
   const w=typeof window!=="undefined"?window:{};
@@ -396,20 +428,21 @@ function runtimeKind(){
 function nativeReadinessProfile(){
   const counts=dataCounts();
   const runtime=runtimeKind();
+  const storage=storageDriverProfile();
   const storageScore=clamp((counts.sessions?0.22:0.12)+(counts.setups?0.22:0.08)+(db.settings.lastBackupAt?0.18:0)+(readSnapshots().length?0.18:0)+0.20,0,1);
-  const engineScore=.78;
+  const engineScore=.84;
   const shellScore=.58;
   const next=[];
   if(!db.settings.lastBackupAt) next.push("バックアップ保存");
   if(!counts.setups) next.push("用具登録");
   if(counts.sessions<3) next.push("練習記録");
   if(!next.length) next.push("同条件の記録を増やす");
-  return {runtime,storageScore,engineScore,shellScore,next,counts};
+  return {runtime,storage,storageScore,engineScore,shellScore,next,counts};
 }
 function nativeReadinessHtml(){
   const p=nativeReadinessProfile();
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
-    <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER}</div>
+    <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER} / ${esc(p.storage.label)}</div>
     <div class="nativeStack">
       <div class="nativePill"><div class="k">保存</div><b>${pct(p.storageScore)}</b><span>バックアップと復元を維持</span></div>
       <div class="nativePill"><div class="k">演算</div><b>${pct(p.engineScore)}</b><span>物理コア分離へ移行中</span></div>
@@ -424,7 +457,7 @@ function hashText(s){
   return (h>>>0).toString(36);
 }
 function readSnapshots(){
-  try{ const a=JSON.parse(localStorage.getItem(SNAP_KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; }
+  try{ const a=JSON.parse(storageGetItem(SNAP_KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; }
 }
 function snapshotLabel(s){
   const c=s.counts||dataCounts(s.data||{});
@@ -440,7 +473,7 @@ function writeSafetySnapshot(reason="auto", force=false){
     snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
     snaps=snaps.slice(0,6);
     for(;;){
-      try{ localStorage.setItem(SNAP_KEY,JSON.stringify(snaps)); break; }
+      try{ storageSetItem(SNAP_KEY,JSON.stringify(snaps)); break; }
       catch(e){ if(snaps.length<=1) throw e; snaps.pop(); }
     }
   }catch(e){ console.warn("snapshot failed",e); }
@@ -449,7 +482,7 @@ function save(opts){
   const o=typeof opts==="string"?{reason:opts}:opts||{};
   db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
   try{
-    localStorage.setItem(KEY, JSON.stringify(db));
+    storageSetItem(KEY, JSON.stringify(db));
     writeSafetySnapshot(o.reason||"auto", !!o.forceSnapshot);
   }catch(e){
     console.error(e);
@@ -924,6 +957,15 @@ function trajectoryModel(sess, setup, eyeMm){
   );
   return {phys, wind, angle, tof:base.t, impactSpeed:base.speed, sens, mmPerCmV, mmPerCmH, windDriftCm, windUncertaintyCm, modelScore, engine:"RK4-3D"};
 }
+const ArcheryPhysicsCore=Object.freeze({
+  version:"RK4-3D JS core",
+  trajectory:trajectoryModel,
+  physicsProfile,
+  windModel,
+  robustStats,
+  groupStats
+});
+if(typeof window!=="undefined") window.ArcheryPhysicsCore=ArcheryPhysicsCore;
 function weightedMedian(items, fallback){
   const a=items.filter(x=>x&&isFinite(x.v)&&isFinite(x.w)&&x.w>0).sort((x,y)=>x.v-y.v);
   if(!a.length) return fallback==null?null:fallback;

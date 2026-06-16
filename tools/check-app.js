@@ -38,13 +38,16 @@ assert(pkg.scripts["build:native-web"] && pkg.scripts["native:sync"], "Native bu
 assert(cap.appId === "com.eita.archerynote" && cap.webDir === "dist/native", "Capacitor config mismatch");
 assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "native-transition.md")), "Native transition files missing");
 assert(html.includes("nativeReadinessHtml") && html.includes("アプリ基盤") && html.includes("RK4-3D JS core"), "Native readiness UI missing");
+assert(html.includes("storageGetItem") && html.includes("storageSetItem") && html.includes("storageDriverProfile"), "Storage adapter missing");
+assert(html.includes("ArcheryPhysicsCore") && html.includes("window.ArcheryPhysicsCore"), "Physics core interface missing");
 
-const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel};")();
+const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel,storageGetItem,storageSetItem,storageDriverProfile};")();
 const normalized = storageApi.normalizeDb({sessions:[{id:"s"}], settings:{eyeSight:900}});
 assert(normalized.schema >= 3 && normalized.sessions.length === 1 && normalized.settings.eyeSight === 900 && Array.isArray(normalized.trash), "Storage normalization failed");
 assert(storageApi.dataCounts({sessions:[1,2],setups:[1],sightMarks:[1,2,3]}).marks === 3, "Data counts failed");
 assert(storageApi.hashText("abc") === storageApi.hashText("abc"), "Hash stability failed");
 assert(storageApi.snapshotLabel({ts:Date.now(),counts:{sessions:2,setups:1,marks:3}}).includes("練習2"), "Snapshot label failed");
+assert(storageApi.storageGetItem("__missing__") == null && storageApi.storageSetItem("__test__", "1") === false && storageApi.storageDriverProfile().id === "localStorage", "Storage adapter fallback failed");
 assert(html.includes("TRASH_LIMIT") && html.includes("restoreTrash") && html.includes("trashSettingsHtml"), "Trash/restore support missing");
 assert(html.includes("openSetupWizard") && html.includes("openCalibrationWizard"), "Wizard/calibration flows missing");
 assert(html.includes("sessionsCsv") && html.includes("scorecardSvg"), "Export flows missing");
@@ -119,7 +122,7 @@ assert(judgement && judgement.label === "動かす", "Personal judgement failed"
 assert(analysisApi.nextActionPlan(current,{st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},{id:"main"}).length > 0, "Next action plan failed");
 
 const normGearText = s => String(s || "").normalize("NFKC").toUpperCase().replace(/[・_/]+/g, " ").replace(/\s+/g, " ").trim();
-const physicsApi = new Function("normGearText", section("function clamp", "function adviceModel") + "\nreturn {physicsProfile,trajectoryModel,windModel};")(normGearText);
+const physicsApi = new Function("normGearText", section("function clamp", "function adviceModel") + "\nreturn {physicsProfile,trajectoryModel,windModel,ArcheryPhysicsCore};")(normGearText);
 const phys = physicsApi.physicsProfile({
   poundage:"38", drawLength:"28.5", shaftGpi:"6.8", arrowLength:"29", pointWeight:"110", arrowDia:"5.5",
   vane:"Spin Wing", vaneHeight:"2.0", temperature:"30", altitude:"500", humidity:"70",
@@ -139,6 +142,7 @@ const windTraj = physicsApi.trajectoryModel({dist:70, windDir:"左から", windS
 }, 850);
 assert(calmTraj.engine === "RK4-3D" && calmTraj.tof > .6 && calmTraj.tof < 1.5, "RK4 trajectory failed");
 assert(windTraj.wind.side > 0 && windTraj.windDriftCm > 0 && windTraj.windUncertaintyCm > 0, "Wind drift model failed");
+assert(physicsApi.ArcheryPhysicsCore && physicsApi.ArcheryPhysicsCore.trajectory({dist:70}, {poundage:"38"}, 850).engine === "RK4-3D", "Physics core facade failed");
 const calibDb = {
   setups:[{id:"main",poundage:"38",drawLength:"28.5",shaftGpi:"6.8",arrowLength:"29",pointWeight:"110",arrowDia:"5.5",arrowWeight:"334",vane:"Spin Wing",temperature:"30",altitude:"500",humidity:"70"}],
   sessions:[],

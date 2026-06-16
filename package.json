@@ -1,6 +1,6 @@
 {
   "name": "archery-note",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "private": true,
   "description": "Archery scoring, sight adjustment, and equipment notebook with a native-ready shell.",
   "scripts": {

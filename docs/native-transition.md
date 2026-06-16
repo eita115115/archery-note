@@ -19,13 +19,14 @@ The scoring UI, line-cutter behavior, equipment records, history analysis, and R
    - `capacitor.config.json` points Capacitor at that bundle.
 
 2. Storage adapter
-   - Current storage is `localStorage`.
+   - Current storage uses a small synchronous adapter over `localStorage`.
+   - A native shell can expose `window.ArcheryNativeStorage` with compatible `getItem` / `setItem` methods as an interim bridge.
    - Native target should move long-term records to SQLite or a native file-backed store.
    - JSON export/import remains the compatibility bridge.
 
 3. Physics core
    - Current engine is JavaScript RK4 with robust statistics.
-   - Next step is to isolate physics and grouping calculations behind a stable interface.
+   - `window.ArcheryPhysicsCore` exposes trajectory, wind, robust statistics, and grouping entry points.
    - If heavier simulation is needed, the same interface can later be backed by Web Worker, WebAssembly, Rust, Swift, or Kotlin.
 
 4. Native capabilities
