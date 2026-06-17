@@ -62,7 +62,7 @@ function staticUiChecks() {
   assert(/@media \(max-width:360px\)/.test(html), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(html), "Small-screen row stacking missing");
   assert(html.includes("データで育つ記録アプリ") && html.includes("点取りから調整提案へ") && html.includes("足りない材料を見る"), "systematic onboarding UI missing");
-  assert(html.includes("練習を始める") && html.includes("missionPanel") && html.includes("convergeMission") && html.includes("phaseArc") && html.includes("setupLens") && html.includes("insightStrip"), "record flow composition missing");
+  assert(html.includes("練習を始める") && html.includes("missionPanel") && html.includes("convergeMission") && html.includes("phaseArc") && html.includes("simplePromise") && html.includes("quickSelects") && html.includes("missionMore") && html.includes("summaryDecisionHtml") && html.includes("setupLens") && html.includes("insightStrip"), "lightweight record flow composition missing");
   assert(html.includes("pageHero") && html.includes("Growth map") && html.includes("Sight lab") && html.includes("Equipment lab") && html.includes("liveHud"), "reborn workspace surfaces missing");
   assert(html.includes("statusPill") && html.includes("nativeSignal") && html.includes("触感") && html.includes("共有"), "native-feel UI missing");
   assert(html.includes("判断信頼度") && html.includes("個人モデル") && html.includes("次のアクション") && html.includes("個人データ準備度") && html.includes("スパイン初期候補") && html.includes("RK4-3D") && html.includes("物理校正"), "analysis cards missing");

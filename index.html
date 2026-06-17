@@ -200,6 +200,18 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .convergeMission .flowBtn.on{border-color:var(--green); background:var(--advBg); box-shadow:inset 0 0 0 1px var(--advLine);}
 .convergeMission .missionNext{color:var(--sub); border-top:1px solid var(--line2); padding-top:10px;}
 .convergeMission .missionNext b{color:var(--title);}
+.simplePromise{
+  display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;
+  border:1px solid var(--advLine); border-radius:999px; padding:8px 10px; margin-top:10px;
+  background:var(--advBg); color:var(--title); font-size:12px; font-weight:800; text-align:center;
+}
+.simplePromise span{color:var(--sub); font-weight:700;}
+.missionMore{margin-top:10px;}
+.missionMore summary{
+  border:1px solid var(--line); border-radius:8px; padding:9px 10px;
+  background:var(--paper); color:var(--title); font-size:12px; font-weight:800;
+}
+.missionMore[open] summary{margin-bottom:10px;}
 .coachCard{
   display:grid; grid-template-columns:40px minmax(0,1fr); gap:10px; align-items:center;
   border:1px solid var(--advLine); border-radius:8px; padding:10px; background:var(--advBg); margin-top:10px;
@@ -210,6 +222,10 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .launchPanel.convergeLaunch{border-radius:8px; overflow:hidden;}
 .convergeLaunch .launchHead{background:var(--card);}
 .convergeLaunch .launchBody{padding:14px;}
+.quickStartCopy{color:var(--sub); font-size:12px; line-height:1.5; margin:0 0 10px;}
+.quickSelects{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;}
+.quickSelects .f{margin-top:0;}
+.softDivider{height:1px; background:var(--line2); margin:12px 0;}
 .startPrimary{
   min-height:56px; border-radius:999px; font-size:16px; box-shadow:0 10px 24px rgba(23,100,61,.18);
 }
@@ -235,6 +251,18 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .sightMiniDial .originDot{fill:var(--ink); opacity:.72;}
 .sightMiniDial b{display:block; color:var(--title); font-size:14px;}
 .sightMiniDial span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:3px;}
+.decisionCard{
+  border:1px solid var(--advLine); border-radius:8px; padding:12px; margin:10px 0;
+  background:var(--advBg); color:var(--ink);
+}
+.decisionCard .k{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--sub); font-weight:900;}
+.decisionCard b{display:block; color:var(--title); font-size:24px; line-height:1.15; margin:3px 0;}
+.decisionCard p{margin:0; color:var(--ink); font-size:12.5px; line-height:1.55;}
+.decisionCard span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:6px;}
+.decisionCard.warn{background:#fff4f2; border-color:#f1c4bd;}
+.decisionCard.hold{background:#fff8eb; border-color:#efd29c;}
+.decisionCard.ok{background:var(--advBg);}
+.summaryDetails{margin-top:10px;}
 .launchPanel{
   background:var(--card); border:1px solid var(--line); border-radius:8px; margin-bottom:12px; box-shadow:var(--shadow); min-width:0; width:100%;
 }
@@ -474,6 +502,7 @@ header.app .gear{
   .phaseArc text{font-size:10px;}
   .sightMiniDial .dialGrid{grid-template-columns:1fr;}
   .sightMiniDial svg{justify-self:center;}
+  .quickSelects{grid-template-columns:1fr;}
   .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 @media (prefers-reduced-motion: reduce){
@@ -518,7 +547,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=34;
+const APP_VER=35;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
@@ -1446,6 +1475,18 @@ function judgementHtml(adv,sess){
   const color=j.tone==="ok"?"#0f9d58":j.tone==="warn"?"#c62828":"#8a6d1d";
   return `<div class="note" style="margin-top:6px"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
 }
+function summaryDecisionHtml(adv,sess){
+  const j=judgementFor(adv,sess);
+  if(!j) return "";
+  const tone=j.tone==="ok"?"ok":j.tone==="warn"?"warn":"hold";
+  const move=adv && adv.lines ? adv.lines.filter(l=>l.axis!=="-").length : 0;
+  return `<div class="decisionCard ${tone}">
+    <div class="k">今回の判断</div>
+    <b>${esc(j.label)}</b>
+    <p>${esc(j.text)}</p>
+    <span>${move?"サイトを動かす前に、下の提案量と信頼度を確認できます。":"今日はサイトを触らず、同じ条件で本数を重ねる判断です。"}</span>
+  </div>`;
+}
 function conditionInsights(sess,st,setup){
   const out=[];
   const wind=windText(sess);
@@ -1896,30 +1937,34 @@ function recordIntroHtml(sys, mode){
       <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
   const p=sys.profiles||{};
   const nf=nativeFeatureProfile();
-  return `${recordPhaseArcHtml(0,"条件を決めたら、そのまま的へ。")}
+  return `${recordPhaseArcHtml(0,"今日はまず記録。詳しい材料はあとから足せます。")}
   <section class="missionPanel convergeMission">
     <div class="missionTop">
       <img class="startLogoMark" src="icon.svg" alt="">
       <div>
         <div class="eyebrow">Archery Note</div>
         <h2>${mode==="calibration"?"校正記録を始める":"練習を始める"}</h2>
-        <p>データで育つ記録アプリ。点取りだけでも使えます。サイト値・風・用具を少しずつ残すほど、調整提案があなたの弓に合っていきます。</p>
+        <p>点取りだけで始められます。サイト値・風・用具は、余裕がある時だけ詳しく残せます。</p>
       </div>
       <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
     </div>
-    <div class="readinessRail">
-      ${readinessCellHtml("用具",p.gear?p.gear.level:"低",p.gear?p.gear.score:0)}
-      ${readinessCellHtml("履歴",p.model?p.model.level:"データ蓄積中",p.model?p.model.score:0)}
-      ${readinessCellHtml("物理校正",p.physics?p.physics.level:"未校正",p.physics?p.physics.score:0)}
-    </div>
-    <div class="nativeSignal">
-      <span class="on">${esc(nf.runtime.label)}</span>
-      <span class="${nf.haptics?"on":""}">触感${nf.haptics?"ON":"待ち"}</span>
-      <span class="${nf.share?"on":""}">共有${nf.share?"ON":"待ち"}</span>
-    </div>
-    <div class="missionFlow" id="flowMode">${flow}</div>
-    <div class="missionNext"><b>次の材料</b><span>${esc(sys.next)} / ${sys.lines.map(esc).join(" / ")}</span></div>
+    <div class="simplePromise">距離を選ぶ <span>→</span> 的でタップ <span>→</span> 結果を見る</div>
     ${recordCoachCardHtml()}
+    <details class="adv missionMore" ${mode==="calibration"?"open":""}>
+      <summary>詳しいモード・準備度を見る</summary>
+      <div class="readinessRail">
+        ${readinessCellHtml("用具",p.gear?p.gear.level:"低",p.gear?p.gear.score:0)}
+        ${readinessCellHtml("履歴",p.model?p.model.level:"データ蓄積中",p.model?p.model.score:0)}
+        ${readinessCellHtml("物理校正",p.physics?p.physics.level:"未校正",p.physics?p.physics.score:0)}
+      </div>
+      <div class="nativeSignal">
+        <span class="on">${esc(nf.runtime.label)}</span>
+        <span class="${nf.haptics?"on":""}">触感${nf.haptics?"ON":"待ち"}</span>
+        <span class="${nf.share?"on":""}">共有${nf.share?"ON":"待ち"}</span>
+      </div>
+      <div class="missionFlow" id="flowMode">${flow}</div>
+      <div class="missionNext"><b>次の材料</b><span>${esc(sys.next)} / ${sys.lines.map(esc).join(" / ")}</span></div>
+    </details>
   </section>`;
 }
 function setupSystemSummary(setupId){
@@ -1967,31 +2012,34 @@ function renderRecord(m){
   ${recordIntroHtml(sys,mode)}
   <section class="launchPanel convergeLaunch">
     <div class="launchHead">
-      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"校正条件を組む":"練習を始める"}</h2></div>
-      <button class="tinyAction" id="jumpGear">${db.setups.length?"用具を開く":"用具登録"}</button>
+      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"校正条件を組む":"今日の練習"}</h2></div>
+      <button class="tinyAction" id="jumpGear">用具</button>
     </div>
     <div class="launchBody">
-    <div class="fieldBand">
-      <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
-      ${recordSetupSnapshot(defSetup,defDist)}
-    </div>
+    <p class="quickStartCopy">まずは距離・的・本数だけで始められます。サイト値や風は、必要な時だけ下で詳しく残せます。</p>
     <label class="f">距離</label>
     <div class="chips quickDists" id="fDistChips">
       ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
       <div class="chip" data-d="custom">カスタム</div>
     </div>
     <div id="fDistCustomWrap" style="display:none"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+    <div class="quickSelects">
+      <div><label class="f">的サイズ</label><select class="inp" id="fFace">
+        ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}<option value="T40">40cm 三つ目（縦）</option></select></div>
+      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
+    </div>
+    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
+    <div class="softDivider"></div>
     <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
-      <summary>詳細（日付・的・本数・サイト値・天候）</summary>
+      <summary>詳しく残す（日付・用具・サイト値・天候）</summary>
+      <div class="fieldBand">
+        <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
+        ${recordSetupSnapshot(defSetup,defDist)}
+      </div>
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
       <label class="f">ラウンド</label><select class="inp" id="fRound">
         ${ROUND_TYPES.map(r=>`<option value="${r.id}">${r.label}</option>`).join("")}
       </select>
-      <div class="row">
-        <div><label class="f">的サイズ</label><select class="inp" id="fFace">
-          ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}<option value="T40">40cm 三つ目（縦）</option></select></div>
-        <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
-      </div>
       <div class="row">
         <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
         <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
@@ -2008,7 +2056,6 @@ function renderRecord(m){
       </div>
     </details>
     ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>校正用のコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
-    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
     ${db.setups.length?"":`<div class="hint">「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
     </div>
   </section>`;
@@ -2395,6 +2442,7 @@ function openSummary(sess, isNew){
   ovl.innerHTML=`<div class="sheet">
     ${recordPhaseArcHtml(2,"結果を確認して、次のエンドやサイト台帳へつなげる。")}
     <h3>${isNew?"おつかれさまでした！":""} ${fmtD(sess.date)} ・ ${sess.dist}m</h3>
+    ${summaryDecisionHtml(adv,sess)}
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
@@ -2403,18 +2451,21 @@ function openSummary(sess, isNew){
     </div>
     <div id="sumPlot" style="margin-top:10px"></div>
     ${groupSummaryHtml(st)}
-    ${trustHtml(sess,setup,st)}
-    ${roundProgressHtml(sess)}
-    ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
-    ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
-      ${judgementHtml(adv,sess)}
-      ${shapeNote(adv.st)}
-      ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
-      <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm と弾道モデルから計算した参考値です（サイトタブで変更可）。</div></div>`:""}
     ${summarySightDialHtml(sess,adv)}
-    ${personalModelHtml(adv,sess,setup)}
-    ${conditionHtml(sess,st,setup)}
     ${nextActionHtml(sess,adv,setup)}
+    <details class="adv summaryDetails">
+      <summary>分析根拠・個人モデルを見る</summary>
+      ${trustHtml(sess,setup,st)}
+      ${roundProgressHtml(sess)}
+      ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
+      ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
+        ${judgementHtml(adv,sess)}
+        ${shapeNote(adv.st)}
+        ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
+        <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm と弾道モデルから計算した参考値です（サイトタブで変更可）。</div></div>`:""}
+      ${personalModelHtml(adv,sess,setup)}
+      ${conditionHtml(sess,st,setup)}
+    </details>
     ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
     <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
   </div>`;

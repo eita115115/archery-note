@@ -1,4 +1,4 @@
-const CACHE = "archery-note-v34";
+const CACHE = "archery-note-v35";
 const ASSETS = ["./index.html", "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {

@@ -24,8 +24,8 @@ const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
 assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html), "Viewport must suppress accidental zoom during scoring");
 assert(html.includes("データで育つ記録アプリ") && html.includes("点取りから調整提案へ") && html.includes("足りない材料を見る"), "onboarding UI missing");
-assert(html.includes("練習を始める") && html.includes("missionPanel") && html.includes("convergeMission") && html.includes("recordSetupSnapshot") && html.includes("gearWorkbenchHtml"), "v34 record launch UI missing");
-assert(html.includes("levelFromScore") && html.includes("RECORD_FLOW_MODES") && html.includes("recordIntroHtml") && html.includes("recordPhaseArcHtml") && html.includes("summarySightDialHtml"), "record UI helpers missing");
+assert(html.includes("練習を始める") && html.includes("missionPanel") && html.includes("convergeMission") && html.includes("simplePromise") && html.includes("quickSelects") && html.includes("recordSetupSnapshot") && html.includes("gearWorkbenchHtml"), "v35 lightweight record launch UI missing");
+assert(html.includes("levelFromScore") && html.includes("RECORD_FLOW_MODES") && html.includes("recordIntroHtml") && html.includes("recordPhaseArcHtml") && html.includes("summarySightDialHtml") && html.includes("summaryDecisionHtml"), "record UI helpers missing");
 assert(html.includes("window.PointerEvent") && html.includes("touchstart") && html.includes("mousedown"), "Input fallback handlers missing");
 assert(html.includes("createSVGPoint()"), "SVG coordinate fallback missing");
 assert(html.includes("Array.prototype.flat") && html.includes("Object.values") && html.includes("Math.hypot"), "Compatibility polyfills missing");
