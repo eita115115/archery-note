@@ -6,6 +6,7 @@ const outDir = path.join(root, "dist", "native");
 const files = [
   "index.html",
   "style.css",
+  "app.js",
   "manifest.json",
   "sw.js",
   "icon.svg",
@@ -22,8 +23,8 @@ function assertInsideRoot(target) {
 }
 
 function readVersion() {
-  const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-  const appVer = /const APP_VER=(\d+)/.exec(html)?.[1];
+  const appJs = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const appVer = /const APP_VER=(\d+)/.exec(appJs)?.[1];
   const jsonVer = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf8")).v;
   if (!appVer || +appVer !== +jsonVer) {
     throw new Error(`Version mismatch before native build: app=${appVer} json=${jsonVer}`);

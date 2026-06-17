@@ -7,7 +7,8 @@ const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
 const html = fs.readFileSync(htmlPath, "utf8");
 const css = fs.readFileSync(path.join(root, "style.css"), "utf8");
-const surface = `${html}\n${css}`;
+const appJs = fs.readFileSync(path.join(root, "app.js"), "utf8");
+const surface = `${html}\n${css}\n${appJs}`;
 const appUrl = `file:///${htmlPath.replace(/\\/g, "/")}`;
 const outDir = path.join(root, "artifacts", "ui-smoke");
 
@@ -52,27 +53,29 @@ function pngSize(file) {
 
 function staticUiChecks() {
   const gearList = name => {
-    const match = new RegExp(`\\n  ${name}:\\[([\\s\\S]*?)\\n  \\],`).exec(html);
+    const match = new RegExp(`\\n  ${name}:\\[([\\s\\S]*?)\\n  \\],`).exec(appJs);
     assert(match, `${name} gear list missing`);
     return match[1];
   };
   assert(/<meta name="viewport"[^>]*maximum-scale=1/.test(html), "Viewport zoom guard missing");
   assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
+  assert(html.includes('<script src="app.js"></script>') && !/<script>([\s\S]*?)<\/script>/.test(html), "External app script missing");
+  assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
   assert(/<nav class="tabs" id="tabs">/.test(html), "Tab bar missing");
   const tabMatches = [...html.matchAll(/<button data-v="([^"]+)">[\s\S]*?<\/button>/g)].map(m => m[1]);
   assert(tabMatches.join(",") === "record,history,sight,gear", `Unexpected tabs: ${tabMatches.join(",")}`);
-  assert(html.includes("記録") && html.includes("履歴") && html.includes("サイト調整") && html.includes("用具"), "Tab labels missing");
+  assert(surface.includes("記録") && surface.includes("履歴") && surface.includes("サイト調整") && surface.includes("用具"), "Tab labels missing");
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
-  assert(html.includes("データで育つ記録アプリ") && html.includes("点取りから調整提案へ") && html.includes("足りない材料を見る"), "systematic onboarding UI missing");
+  assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りない材料を見る"), "systematic onboarding UI missing");
   assert(surface.includes("練習を始める") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("phaseArc") && surface.includes("simplePromise") && surface.includes("quickSelects") && surface.includes("missionMore") && surface.includes("summaryDecisionHtml") && surface.includes("setupLens") && surface.includes("insightStrip"), "lightweight record flow composition missing");
-  assert(surface.includes("pageHero") && html.includes("Growth map") && html.includes("Sight tuning") && html.includes("Equipment lab") && surface.includes("liveHud"), "reborn workspace surfaces missing");
-  assert(surface.includes("statusPill") && surface.includes("nativeSignal") && html.includes("触感") && html.includes("共有"), "native-feel UI missing");
-  assert(html.includes("判断信頼度") && html.includes("個人モデル") && html.includes("次のアクション") && html.includes("個人データ準備度") && html.includes("スパイン初期候補") && html.includes("RK4-3D") && html.includes("物理校正"), "analysis cards missing");
-  assert(html.includes("アプリ情報・保存状態") && surface.includes("nativeStack") && html.includes("PWA + Capacitor-ready") && html.includes("ブラウザ保存"), "native readiness UI missing");
-  assert(html.includes("シャフト銘柄") && html.includes("番手/スパイン") && html.includes("ハンドル/弓本体") && html.includes("HOYT Grand Prix XCEED 2 H25") && html.includes("HOYT Formula RCRV PODIUM Limbs"), "separated gear fields missing");
-  assert(html.includes("EASTON X10 ProTour") && html.includes("SHIBUYA ULTIMA RC IV 520 Carbon") && html.includes("RAMRODS VEKTOR") && html.includes("GAS Bowstrings Ghost XV"), "expanded gear knowledge missing");
-  assert(html.includes("choicePick") && html.includes("候補にないので手入力") && html.includes("確認したチューニング"), "gear dropdown/tuning UI missing");
+  assert(surface.includes("pageHero") && surface.includes("Growth map") && surface.includes("Sight tuning") && surface.includes("Equipment lab") && surface.includes("liveHud"), "reborn workspace surfaces missing");
+  assert(surface.includes("statusPill") && surface.includes("nativeSignal") && surface.includes("触感") && surface.includes("共有"), "native-feel UI missing");
+  assert(surface.includes("判断信頼度") && surface.includes("個人モデル") && surface.includes("次のアクション") && surface.includes("個人データ準備度") && surface.includes("スパイン初期候補") && surface.includes("RK4-3D") && surface.includes("物理校正"), "analysis cards missing");
+  assert(surface.includes("アプリ情報・保存状態") && surface.includes("nativeStack") && surface.includes("PWA + Capacitor-ready") && surface.includes("ブラウザ保存"), "native readiness UI missing");
+  assert(surface.includes("シャフト銘柄") && surface.includes("番手/スパイン") && surface.includes("ハンドル/弓本体") && surface.includes("HOYT Grand Prix XCEED 2 H25") && surface.includes("HOYT Formula RCRV PODIUM Limbs"), "separated gear fields missing");
+  assert(surface.includes("EASTON X10 ProTour") && surface.includes("SHIBUYA ULTIMA RC IV 520 Carbon") && surface.includes("RAMRODS VEKTOR") && surface.includes("GAS Bowstrings Ghost XV"), "expanded gear knowledge missing");
+  assert(surface.includes("choicePick") && surface.includes("候補にないので手入力") && surface.includes("確認したチューニング"), "gear dropdown/tuning UI missing");
   const bowList = gearList("bow");
   const limbList = gearList("limbs");
   assert(!/Formula SR|Formula XD/.test(limbList), "handle names leaked into limb dropdown");

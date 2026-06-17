@@ -1,0 +1,2963 @@
+"use strict";
+/* 小さな互換性補助: 古いSafari/WebViewでも主要機能が落ちないようにする */
+if(!Array.prototype.flat){
+  Object.defineProperty(Array.prototype,"flat",{value:function(depth){
+    const d=depth==null?1:Number(depth)||0, out=[];
+    (function walk(a,n){ a.forEach(v=>{ if(Array.isArray(v)&&n>0) walk(v,n-1); else out.push(v); }); })(this,d);
+    return out;
+  }});
+}
+if(!Array.prototype.flatMap){
+  Object.defineProperty(Array.prototype,"flatMap",{value:function(fn,thisArg){ return this.map(fn,thisArg).flat(); }});
+}
+if(!Object.values){ Object.values=o=>Object.keys(o).map(k=>o[k]); }
+if(!Number.isFinite){ Number.isFinite=v=>typeof v==="number" && isFinite(v); }
+if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;i++) s+=arguments[i]*arguments[i]; return Math.sqrt(s); }; }
+/* ============ storage ============ */
+const KEY="archeryNote.v1";
+const SNAP_KEY="archeryNote.snapshots.v1";
+const SCHEMA_VER=3;
+const APP_VER=37;
+const TRASH_LIMIT=50;
+const STORAGE_ADAPTER_VER="storage-adapter v32";
+const ENGINE_VER="RK4-3D JS core v32";
+const NATIVE_CHANNEL="PWA + Capacitor-ready";
+let db = load();
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null},active:null}; }
+function normalizeDb(d){
+  const base=blankDb(), src=(d&&typeof d==="object")?d:{};
+  const out=Object.assign(base,src);
+  out.settings=Object.assign(base.settings,src.settings||{});
+  ["setups","sightMarks","sessions","trash"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
+  if(out.active==null) out.active=null;
+  out.schema=SCHEMA_VER;
+  return out;
+}
+function load(){
+  try{ const d=JSON.parse(storageGetItem(KEY)); if(d && d.sessions) return normalizeDb(d); }catch(e){}
+  return blankDb();
+}
+function dataCounts(d=db){
+  return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length};
+}
+function storageBridge(){
+  const w=typeof window!=="undefined"?window:{};
+  return w.ArcheryNativeStorage||w.ArcheryStorage||null;
+}
+function storageGetItem(key){
+  const bridge=storageBridge();
+  try{
+    if(bridge && typeof bridge.getItem==="function"){
+      const v=bridge.getItem(key);
+      if(typeof v==="string" || v==null) return v;
+    }
+  }catch(e){}
+  try{ return typeof localStorage!=="undefined" ? localStorage.getItem(key) : null; }catch(e){ return null; }
+}
+function storageSetItem(key,value){
+  const bridge=storageBridge();
+  try{
+    if(bridge && typeof bridge.setItem==="function"){
+      const ok=bridge.setItem(key,value);
+      if(ok!==false) return true;
+    }
+  }catch(e){}
+  if(typeof localStorage==="undefined") return false;
+  localStorage.setItem(key,value);
+  return true;
+}
+function storageDriverProfile(){
+  const bridge=storageBridge();
+  const native=!!(bridge && typeof bridge.getItem==="function" && typeof bridge.setItem==="function");
+  return {id:native?"native-sync-bridge":"localStorage",label:native?"ネイティブ保存ブリッジ":"ブラウザ保存",version:STORAGE_ADAPTER_VER,native};
+}
+function runtimeKind(){
+  const w=typeof window!=="undefined"?window:{};
+  const nav=typeof navigator!=="undefined"?navigator:{};
+  const isNative=!!(w.Capacitor && typeof w.Capacitor.getPlatform==="function");
+  const standalone=!!(nav.standalone || (typeof w.matchMedia==="function" && w.matchMedia("(display-mode: standalone)").matches));
+  if(isNative) return {kind:"Native", label:"ネイティブ容器", tone:"ok"};
+  if(standalone) return {kind:"PWA", label:"ホーム画面", tone:"mid"};
+  return {kind:"Web", label:"ブラウザ", tone:"mid"};
+}
+function capPlugin(name){
+  const w=typeof window!=="undefined"?window:{};
+  return w.Capacitor && w.Capacitor.Plugins ? w.Capacitor.Plugins[name] : null;
+}
+function nativeFeatureProfile(){
+  const rt=runtimeKind();
+  const nav=typeof navigator!=="undefined"?navigator:{};
+  return {
+    runtime:rt,
+    haptics:!!capPlugin("Haptics") || typeof nav.vibrate==="function",
+    share:!!capPlugin("Share") || typeof nav.share==="function",
+    filesystem:!!capPlugin("Filesystem"),
+    statusBar:!!capPlugin("StatusBar"),
+    splash:!!capPlugin("SplashScreen")
+  };
+}
+function nativePulse(kind){
+  const h=capPlugin("Haptics");
+  try{
+    if(h && typeof h.impact==="function"){
+      const style=kind==="heavy"?"HEAVY":kind==="light"?"LIGHT":"MEDIUM";
+      h.impact({style}).catch(()=>{});
+      return true;
+    }
+    if(h && typeof h.selectionChanged==="function"){
+      h.selectionChanged().catch(()=>{});
+      return true;
+    }
+  }catch(e){}
+  try{
+    if(navigator.vibrate){
+      const pat=kind==="success"?[12,24,18]:kind==="heavy"?28:12;
+      navigator.vibrate(pat);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function updateAppChrome(){
+  const st=$("#appStatus");
+  if(!st) return;
+  const rt=runtimeKind();
+  const dot=rt.kind==="Native"?"native":"";
+  st.innerHTML=`<span class="statusDot ${dot}"></span><span>${esc(rt.label)}</span>`;
+  const sb=capPlugin("StatusBar");
+  try{
+    if(sb && typeof sb.setBackgroundColor==="function") sb.setBackgroundColor({color:"#17643d"}).catch(()=>{});
+    if(sb && typeof sb.setStyle==="function") sb.setStyle({style:"DARK"}).catch(()=>{});
+  }catch(e){}
+}
+function nativeReadinessProfile(){
+  const counts=dataCounts();
+  const runtime=runtimeKind();
+  const storage=storageDriverProfile();
+  const native=nativeFeatureProfile();
+  const storageScore=clamp((counts.sessions?0.22:0.12)+(counts.setups?0.22:0.08)+(db.settings.lastBackupAt?0.18:0)+(readSnapshots().length?0.18:0)+0.20,0,1);
+  const engineScore=.84;
+  const nativeScore=clamp(
+    (native.haptics ? .25 : .08) +
+    (native.share ? .25 : .08) +
+    (native.filesystem ? .20 : .04) +
+    (native.statusBar ? .12 : .04) +
+    (native.splash ? .10 : .04) +
+    (runtime.kind==="Native" ? .08 : 0),
+    0,1
+  );
+  const shellScore=clamp(.54 + nativeScore*.36,0,1);
+  const next=[];
+  if(!db.settings.lastBackupAt) next.push("バックアップ保存");
+  if(!counts.setups) next.push("用具登録");
+  if(counts.sessions<3) next.push("練習記録");
+  if(!next.length) next.push("同条件の記録を増やす");
+  return {runtime,storage,native,nativeScore,storageScore,engineScore,shellScore,next,counts};
+}
+function nativeReadinessHtml(){
+  const p=nativeReadinessProfile();
+  const nf=p.native;
+  return `<details class="adv appInfoDetails">
+    <summary>アプリ情報・保存状態</summary>
+    <div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER} / ${esc(p.storage.label)}</div>
+    <div class="nativeStack">
+      <div class="nativePill"><div class="k">保存</div><b>${pct(p.storageScore)}</b><span>バックアップと復元を維持</span></div>
+      <div class="nativePill"><div class="k">演算</div><b>${pct(p.engineScore)}</b><span>物理コア分離へ移行中</span></div>
+      <div class="nativePill"><div class="k">触感/共有</div><b>${pct(p.nativeScore)}</b><span>${nf.haptics?"触感 ":""}${nf.share?"共有 ":""}${nf.filesystem?"ファイル ":""}${nf.statusBar?"表示 ":""}</span></div>
+      <div class="nativePill"><div class="k">配布</div><b>${pct(p.shellScore)}</b><span>${NATIVE_CHANNEL}</span></div>
+    </div>
+    <div class="note">次に整える材料: ${p.next.map(esc).join("・")}</div>
+    </div>
+  </details>`;
+}
+function hashText(s){
+  let h=2166136261;
+  for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
+  return (h>>>0).toString(36);
+}
+function readSnapshots(){
+  try{ const a=JSON.parse(storageGetItem(SNAP_KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; }
+}
+function snapshotLabel(s){
+  const c=s.counts||dataCounts(s.data||{});
+  return `${new Date(s.ts||Date.now()).toLocaleString()}（練習${c.sessions||0} / 用具${c.setups||0} / サイト${c.marks||0}）`;
+}
+function writeSafetySnapshot(reason="auto", force=false){
+  try{
+    const raw=JSON.stringify(db), h=hashText(raw), now=Date.now();
+    let snaps=readSnapshots().filter(s=>s&&s.hash!==h);
+    const latest=readSnapshots()[0];
+    if(!force && latest && latest.hash===h) return;
+    if(!force && latest && now-(latest.ts||0)<30*60*1000) return;
+    snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
+    snaps=snaps.slice(0,6);
+    for(;;){
+      try{ storageSetItem(SNAP_KEY,JSON.stringify(snaps)); break; }
+      catch(e){ if(snaps.length<=1) throw e; snaps.pop(); }
+    }
+  }catch(e){ console.warn("snapshot failed",e); }
+}
+function save(opts){
+  const o=typeof opts==="string"?{reason:opts}:opts||{};
+  db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
+  try{
+    storageSetItem(KEY, JSON.stringify(db));
+    writeSafetySnapshot(o.reason||"auto", !!o.forceSnapshot);
+  }catch(e){
+    console.error(e);
+    try{ toast("保存容量が足りません。設定からバックアップ保存してください"); }catch(_){}
+  }
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),1700); }
+function today(){ return new Date().toISOString().slice(0,10); }
+function fmtD(iso){ if(!iso)return""; const [y,m,d]=iso.split("-"); return `${y}/${+m}/${+d}`; }
+const ENDCOLORS=["#e5484d","#1e6fd9","#0f9d58","#f59e0b","#8b5cf6","#ec4899","#0ea5b7","#7c5e10","#475569","#b91c1c","#1d4ed8","#047857"];
+function faceLabel(s){ return s.faceType==="triple" ? "40cm三つ目" : `${s.faceD}cm的`; }
+function cloneData(v){ return JSON.parse(JSON.stringify(v)); }
+function trashItem(type,label,data){
+  db.trash=db.trash||[];
+  const item={id:uid(),type,label:label||"削除データ",data:cloneData(data),date:today(),ts:Date.now()};
+  db.trash.unshift(item);
+  db.trash=db.trash.slice(0,TRASH_LIMIT);
+  return item;
+}
+function restoreTrash(id){
+  const i=(db.trash||[]).findIndex(x=>x.id===id);
+  if(i<0) return false;
+  const item=db.trash[i], data=cloneData(item.data);
+  if(item.type==="session"){
+    if(!db.sessions.some(s=>s.id===data.id)) db.sessions.push(data);
+  }else if(item.type==="sightMark"){
+    if(!db.sightMarks.some(m=>m.id===data.id)) db.sightMarks.push(data);
+  }else if(item.type==="setupBundle"){
+    const setup=data.setup;
+    if(setup && !db.setups.some(s=>s.id===setup.id)) db.setups.push(setup);
+    (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });
+  }
+  db.trash.splice(i,1);
+  save({reason:"restore-trash",forceSnapshot:true});
+  return true;
+}
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":"削除データ"; }
+function downloadText(filename,text,type){
+  const blob=new Blob([text],{type:type||"text/plain"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+}
+async function shareOrDownloadText(filename,text,type,title){
+  const mime=type||"text/plain";
+  try{
+    const file=new File([text],filename,{type:mime});
+    if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+      await navigator.share({title:title||filename,files:[file]});
+      nativePulse("success");
+      return true;
+    }
+  }catch(e){}
+  try{
+    const fs=capPlugin("Filesystem"), sh=capPlugin("Share");
+    if(fs && sh && typeof fs.writeFile==="function" && typeof sh.share==="function"){
+      const res=await fs.writeFile({path:filename,data:text,directory:"CACHE",encoding:"utf8",recursive:true});
+      await sh.share({title:title||filename,text:title||filename,url:res.uri,dialogTitle:title||"共有"});
+      nativePulse("success");
+      return true;
+    }
+  }catch(e){}
+  try{
+    if(navigator.share && text.length<90000){
+      await navigator.share({title:title||filename,text});
+      nativePulse("success");
+      return true;
+    }
+  }catch(e){}
+  downloadText(filename,text,mime);
+  nativePulse("light");
+  return false;
+}
+function csvCell(v){ return `"${String(v==null?"":v).replace(/"/g,'""')}"`; }
+const ROUND_TYPES=[
+  {id:"free",label:"自由練習",arrows:null},
+  {id:"70m72",label:"70m 72射",arrows:72,dist:70},
+  {id:"50m72",label:"50m 72射",arrows:72,dist:50},
+  {id:"30m36",label:"30m 36射",arrows:36,dist:30},
+  {id:"18m60",label:"18m 60射",arrows:60,dist:18}
+];
+function roundLabel(id){ return (ROUND_TYPES.find(r=>r.id===(id||"free"))||ROUND_TYPES[0]).label; }
+
+/* ============ scoring ============ */
+function ringW(faceD){ return faceD/20; }
+const SPOT_Y=[22,0,-22]; /* 三つ目的のスポット中心(上・中・下, cm, y上向き) */
+function arrowMarkRadius(faceD){ return faceD/85; }
+function targetLineHalfWidth(faceD,faceType){
+  return faceType==="single" ? faceD/1200 : faceD/640;
+}
+function lineCutRadius(faceD,faceType){
+  return arrowMarkRadius(faceD)+targetLineHalfWidth(faceD,faceType);
+}
+/* 線かみ(ラインカッター)判定: アプリ上の矢円が線に少しでも触れていれば内側の点数。
+   touchCm = 画面上の矢円半径 + 的線の半分の太さ(cm)。 */
+function scoreAt(relX,relY,faceD,faceType,touchRadiusCm){
+  const w=ringW(faceD);
+  const touchCm=touchRadiusCm==null ? lineCutRadius(faceD,faceType) : touchRadiusCm;
+  const r=Math.max(0, Math.hypot(relX,relY)-touchCm);
+  if(r<=w/2) return {s:10,X:true};
+  let s=11-Math.ceil(r/w);
+  if(faceType==="triple" && s<6) s=0;
+  if(s<1) s=0;
+  return {s:Math.min(10,Math.max(0,s)),X:false};
+}
+function scoreRank(hit){ return hit.s*2+(hit.X?1:0); }
+function isLineCutting(relX,relY,faceD,faceType){
+  const center=scoreAt(relX,relY,faceD,faceType,0);
+  const cut=scoreAt(relX,relY,faceD,faceType,lineCutRadius(faceD,faceType));
+  return scoreRank(cut)>scoreRank(center);
+}
+function isLineCuttingFromGlobal(gx,gy,faceD,faceType){
+  if(faceType!=="triple") return isLineCutting(gx,gy,faceD,faceType);
+  let spot=0,best=Infinity;
+  SPOT_Y.forEach((c,i)=>{ const d=Math.hypot(gx,gy-c); if(d<best){best=d;spot=i;} });
+  return isLineCutting(gx,gy-SPOT_Y[spot],faceD,"triple");
+}
+function hitFromGlobal(gx,gy,faceD,faceType,touchRadiusCm){
+  if(faceType!=="triple"){ return Object.assign({x:gx,y:gy}, scoreAt(gx,gy,faceD,faceType,touchRadiusCm)); }
+  let spot=0,best=Infinity;
+  SPOT_Y.forEach((c,i)=>{ const d=Math.hypot(gx,gy-c); if(d<best){best=d;spot=i;} });
+  const rx=gx, ry=gy-SPOT_Y[spot];
+  return Object.assign({x:rx,y:ry,spot}, scoreAt(rx,ry,faceD,"triple",touchRadiusCm));
+}
+function zoneStyle(s,X){
+  if(s>=9) return {bg:"var(--gold)",fg:"#1c1e1c"};
+  if(s>=7) return {bg:"var(--red)",fg:"#fff"};
+  if(s>=5) return {bg:"var(--blue)",fg:"#fff"};
+  if(s>=3) return {bg:"#222",fg:"#fff"};
+  if(s>=1) return {bg:"#fff",fg:"#1c1e1c"};
+  return {bg:"#c9cec6",fg:"#555"};
+}
+function scoreLabel(a){ return a.s===0?"M":(a.X?"X":String(a.s)); }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+function median(vals){
+  const a=vals.filter(Number.isFinite).sort((x,y)=>x-y);
+  if(!a.length) return 0;
+  const m=Math.floor(a.length/2);
+  return a.length%2?a[m]:(a[m-1]+a[m])/2;
+}
+function momentStats(arrows, weights){
+  const n=arrows.length;
+  if(!n) return null;
+  weights=weights||arrows.map(()=>1);
+  const sw=weights.reduce((a,w)=>a+w,0);
+  if(sw<=0) return momentStats(arrows);
+  const mx=arrows.reduce((a,p,i)=>a+p.x*weights[i],0)/sw;
+  const my=arrows.reduce((a,p,i)=>a+p.y*weights[i],0)/sw;
+  let vx=0,vy=0,cov=0;
+  arrows.forEach((p,i)=>{ const dx=p.x-mx, dy=p.y-my, w=weights[i]; vx+=w*dx*dx; vy+=w*dy*dy; cov+=w*dx*dy; });
+  vx/=sw; vy/=sw; cov/=sw;
+  const rr=Math.sqrt(Math.max(0,vx+vy));
+  const sx=Math.sqrt(Math.max(0,vx)), sy=Math.sqrt(Math.max(0,vy));
+  const disc=Math.sqrt(Math.max(0,(vx-vy)**2+4*cov*cov));
+  const l1=Math.max(0,(vx+vy+disc)/2), l2=Math.max(0,(vx+vy-disc)/2);
+  const major=Math.sqrt(l1), minor=Math.sqrt(l2);
+  const angleDeg=(0.5*Math.atan2(2*cov,vx-vy))*180/Math.PI;
+  const corr=(sx>0&&sy>0)?clamp(cov/(sx*sy),-1,1):0;
+  const effN=sw*sw/weights.reduce((a,w)=>a+w*w,0);
+  return {n,mx,my,rr,sx,sy,cov,corr,major,minor,angleDeg,effN};
+}
+function groupStats(arrows){ return momentStats(arrows); }
+function weightedStats(arrows, weights){ return momentStats(arrows, weights); }
+function robustScale(vals, center, fallback){
+  const dev=vals.map(v=>Math.abs(v-center));
+  return Math.max(1.4826*median(dev), fallback||0, 0.01);
+}
+/* 中央値/MAD・楕円距離・重み付き中心で、明らかな外れ値を除いたグルーピング統計 */
+function robustStats(arrows){
+  const total=arrows.length;
+  if(!total) return null;
+  if(total<5){
+    const st=groupStats(arrows);
+    return Object.assign(st,{used:arrows.slice(),excluded:[],total,method:"simple",confidence:total>=3?.55:.35});
+  }
+  const cx=median(arrows.map(a=>a.x)), cy=median(arrows.map(a=>a.y));
+  const ds=arrows.map(a=>Math.hypot(a.x-cx,a.y-cy));
+  const md=median(ds);
+  const mad=median(ds.map(d=>Math.abs(d-md)));
+  const base=groupStats(arrows);
+  const sigma=Math.max(1.4826*mad, base.rr*.35, 0.01);
+  const sx0=robustScale(arrows.map(a=>a.x), cx, base.sx*.45);
+  const sy0=robustScale(arrows.map(a=>a.y), cy, base.sy*.45);
+  const eds=arrows.map(a=>Math.hypot((a.x-cx)/sx0,(a.y-cy)/sy0));
+  const em=median(eds), emad=median(eds.map(d=>Math.abs(d-em)));
+  const limit=Math.max(md+3*sigma, md*2.2, base.rr*1.65);
+  const eLimit=Math.max(3.15, em+3*Math.max(1.4826*emad,.35));
+  let used=[], excluded=[];
+  const maxExcluded=Math.floor(total*.25);
+  arrows.forEach((a,i)=>{
+    const radial=ds[i]>limit && ds[i]>md+2.4*sigma;
+    const elliptical=eds[i]>eLimit && eds[i]>3.15;
+    const obvious=(radial||elliptical) && excluded.length<maxExcluded;
+    (obvious?excluded:used).push(a);
+  });
+  if(used.length<Math.max(3,total-excluded.length)){
+    used=arrows.slice(); excluded=[];
+  }
+  const ux=median(used.map(a=>a.x)), uy=median(used.map(a=>a.y));
+  const uds=used.map(a=>Math.hypot(a.x-ux,a.y-uy));
+  const udm=median(uds);
+  const xScale=robustScale(used.map(a=>a.x), ux, base.sx*.55);
+  const yScale=robustScale(used.map(a=>a.y), uy, base.sy*.55);
+  const scale=Math.max(udm+3*median(uds.map(d=>Math.abs(d-udm))), base.rr, 0.01);
+  const weights=used.map(a=>{
+    const radialU=Math.hypot(a.x-ux,a.y-uy)/scale;
+    const ellU=Math.hypot((a.x-ux)/xScale,(a.y-uy)/yScale)/3;
+    const u=Math.max(radialU,ellU);
+    return u>=1?0.05:(1-u*u)**2;
+  });
+  const st=weightedStats(used, weights);
+  const outRate=excluded.length/total;
+  const sample=clamp((st.effN-2)/10,.35,1);
+  const outPenalty=clamp(1-outRate*1.6,.55,1);
+  const skewPenalty=st.minor>0?clamp(st.minor/st.major+.35,.55,1):.7;
+  return Object.assign(st,{used,excluded,total,method:"ellipse-biweight",confidence:sample*outPenalty*skewPenalty});
+}
+
+/* ============ target SVG ============ */
+function targetMarkup(faceD, idPrefix, faceType){
+  const w=ringW(faceD);
+  const spotG=(cx,cy)=>{
+    let h="";
+    [[6,"#37a6e0"],[7,"#f23b3b"],[8,"#f23b3b"],[9,"#ffe14d"],[10,"#ffe14d"]].forEach(([sc,fill])=>{
+      h+=`<circle cx="${cx}" cy="${cy}" r="${(11-sc)*w}" fill="${fill}" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
+    });
+    h+=`<circle cx="${cx}" cy="${cy}" r="${w/2}" fill="none" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
+    h+=`<line x1="${cx-w/6}" y1="${cy}" x2="${cx+w/6}" y2="${cy}" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
+    h+=`<line x1="${cx}" y1="${cy-w/6}" x2="${cx}" y2="${cy+w/6}" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
+    return h;
+  };
+  if(faceType==="triple"){
+    let g=`<rect x="-14" y="-36" width="28" height="72" rx="1.5" fill="#f7f6f0" stroke="#bbb" stroke-width="0.2"/>`;
+    SPOT_Y.forEach(c=>{ g+=spotG(0,-c); });
+    return `<svg class="main triple" id="${idPrefix}svg" viewBox="-15 -37.5 30 75" xmlns="http://www.w3.org/2000/svg">
+    <g id="${idPrefix}main"><g>${g}</g><g id="${idPrefix}marks"></g><g id="${idPrefix}cur"></g></g>
+  </svg>`;
+  }
+  if(faceType==="spot"){
+    const M=5*w*1.25;
+    return `<svg class="main" id="${idPrefix}svg" viewBox="${-M} ${-M} ${2*M} ${2*M}" xmlns="http://www.w3.org/2000/svg">
+    <g id="${idPrefix}main"><g>${spotG(0,0)}</g><g id="${idPrefix}marks"></g><g id="${idPrefix}cur"></g></g>
+  </svg>`;
+  }
+  const R=faceD/2, M=R*1.18;
+  const zones=[ [10,"#fff"],[9,"#fff"],[8,"#1c1e1c"],[7,"#1c1e1c"],[6,"#37a6e0"],[5,"#37a6e0"],[4,"#f23b3b"],[3,"#f23b3b"],[2,"#ffe14d"],[1,"#ffe14d"] ];
+  let g="";
+  zones.forEach(([k,fill])=>{ g+=`<circle cx="0" cy="0" r="${k*w}" fill="${fill}" stroke="${fill==="#1c1e1c"?"#e9ebe6":"#1c1e1c"}" stroke-width="${R/300}"/>`; });
+  g+=`<circle cx="0" cy="0" r="${w/2}" fill="none" stroke="#1c1e1c" stroke-width="${R/300}"/>`;
+  g+=`<line x1="${-w/6}" y1="0" x2="${w/6}" y2="0" stroke="#1c1e1c" stroke-width="${R/300}"/>`;
+  g+=`<line x1="0" y1="${-w/6}" x2="0" y2="${w/6}" stroke="#1c1e1c" stroke-width="${R/300}"/>`;
+  return `<svg class="main" id="${idPrefix}svg" viewBox="${-M} ${-M} ${2*M} ${2*M}" xmlns="http://www.w3.org/2000/svg">
+    <g id="${idPrefix}main"><g>${g}</g><g id="${idPrefix}marks"></g><g id="${idPrefix}cur"></g></g>
+  </svg>`;
+}
+function markCircle(a, faceD, color, label){
+  const r=arrowMarkRadius(faceD);
+  return `<g><circle cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/4}" opacity="0.92"/>`+
+    (label?`<text x="${a.x}" y="${-a.y}" font-size="${r*1.2}" fill="#fff" text-anchor="middle" dominant-baseline="central" font-weight="bold">${label}</text>`:"")+`</g>`;
+}
+/* static plot for history/summary */
+function plotSession(sess, container){
+  const faceD=sess.faceD;
+  const ft=sess.faceType==="triple"?"spot":sess.faceType;
+  container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,"pl",ft)}</div>`+
+    (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"");
+  const marks=$("#plmarks");
+  let html="";
+  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length]); }); });
+  const all=sess.ends.flat();
+  const st=robustStats(all);
+  if(st){
+    const w=ringW(faceD);
+    st.excluded.forEach(a=>{
+      const r=faceD/70;
+      html+=`<g><line x1="${a.x-r}" y1="${-a.y-r}" x2="${a.x+r}" y2="${-a.y+r}" stroke="#000" stroke-width="${faceD/300}"/>`+
+        `<line x1="${a.x-r}" y1="${-a.y+r}" x2="${a.x+r}" y2="${-a.y-r}" stroke="#000" stroke-width="${faceD/300}"/></g>`;
+    });
+    html+=`<g><line x1="${st.mx-w*0.8}" y1="${-st.my}" x2="${st.mx+w*0.8}" y2="${-st.my}" stroke="#000" stroke-width="${faceD/400}"/>`+
+      `<line x1="${st.mx}" y1="${-st.my-w*0.8}" x2="${st.mx}" y2="${-st.my+w*0.8}" stroke="#000" stroke-width="${faceD/400}"/>`+
+      `<circle cx="${st.mx}" cy="${-st.my}" r="${st.rr}" fill="none" stroke="#000" stroke-dasharray="${faceD/60} ${faceD/120}" stroke-width="${faceD/400}"/></g>`;
+    if(st.major!=null && st.minor!=null){
+      html+=`<ellipse cx="${st.mx}" cy="${-st.my}" rx="${st.major}" ry="${st.minor}" transform="rotate(${-st.angleDeg} ${st.mx} ${-st.my})" fill="none" stroke="#0f9d58" stroke-dasharray="${faceD/90} ${faceD/160}" stroke-width="${faceD/380}"/>`;
+    }
+  }
+  marks.innerHTML=html;
+}
+
+/* ============ sight advice ============ */
+function shapeNote(st){
+  if(!st || st.n<6) return "";
+  const tilt=Math.abs(st.angleDeg||0);
+  const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&tilt>15&&tilt<75;
+  if(tilted) return `<div class="note">📊 <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
+  if(st.sy>st.sx*1.3) return `<div class="note">📊 <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
+  if(st.sx>st.sy*1.3) return `<div class="note">📊 <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
+  return "";
+}
+function groupSummaryHtml(st){
+  if(!st) return "";
+  return `<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
+    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
+    <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
+    ${st.major!=null?`<div class="kv"><span>グルーピング楕円</span><span>長軸 ${st.major.toFixed(1)}cm ・ 短軸 ${st.minor.toFixed(1)}cm ・ 角度 ${st.angleDeg.toFixed(0)}°</span></div>`:""}
+    <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / ${st.method}</span></div>
+    ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`;
+}
+function cmOffsetText(v, axis){
+  const a=Math.abs(v).toFixed(1);
+  if(axis==="x") return v>0?`右に ${a}cm`:`左に ${a}cm`;
+  return v>0?`上に ${a}cm`:`下に ${a}cm`;
+}
+function pct(v){ return `${Math.round(v*100)}%`; }
+function sightTrend(setupId){
+  if(!setupId) return null;
+  const byDist={};
+  db.sightMarks.filter(m=>m.setupId===setupId).forEach(m=>{
+    const v=parseFloat(m.v);
+    if(isFinite(v)) byDist[m.dist]=v;
+  });
+  const pts=Object.keys(byDist).map(d=>[+d,byDist[d]]).sort((a,b)=>a[0]-b[0]);
+  if(pts.length<2) return null;
+  const r=regress(pts);
+  return r?{pts,slope:r.b,est:d=>r.a+r.b*d}:null;
+}
+function num(v){ const n=parseFloat(v); return isFinite(n)?n:null; }
+function estimatedTotalArrowWeight(setup){
+  const explicit=num(setup&&setup.arrowWeight);
+  if(explicit!=null) return explicit;
+  const gpi=num(setup&&setup.shaftGpi), len=num(setup&&setup.arrowLength);
+  if(gpi==null || len==null) return null;
+  const point=num(setup&&setup.pointWeight)||100;
+  return gpi*len+point+27;
+}
+function airDensity(setup){
+  const temp=num(setup&&setup.temperature);
+  const tC=temp==null?15:temp;
+  const tK=tC+273.15;
+  const alt=clamp(num(setup&&setup.altitude)||0,-200,4000);
+  const hum=clamp((num(setup&&setup.humidity)==null?50:num(setup&&setup.humidity))/100,0,1);
+  const pressure=101325*Math.pow(Math.max(0.2,1-2.25577e-5*alt),5.25588);
+  const sat=610.94*Math.exp((17.625*tC)/(tC+243.04));
+  const vapor=clamp(hum*sat,0,pressure*.08);
+  const dry=pressure-vapor;
+  return clamp(dry/(287.05*tK)+vapor/(461.495*tK),.82,1.32);
+}
+function estimateArrowCd(setup, diaMm){
+  const explicit=num(setup&&setup.arrowCd);
+  if(explicit!=null) return clamp(explicit,.55,1.9);
+  let cd=diaMm<=4.2?1.03:diaMm<=5.5?1.12:diaMm<=7?1.22:1.34;
+  const vane=normGearText(setup&&setup.vane);
+  if(/FEATHER|羽根|ナチュラル/.test(vane)) cd+=.14;
+  else if(/SPIN|WING|XS|GAS PRO|KURLY|ELIVANES/.test(vane)) cd+=.07;
+  else if(/LOW|TINY|1\.5|1 5/.test(vane)) cd-=.03;
+  const vh=num(setup&&setup.vaneHeight);
+  if(vh!=null) cd+=clamp((vh-1.8)*.045,-.05,.12);
+  const foc=num(setup&&setup.foc);
+  if(foc!=null && foc>16) cd+=.015;
+  return clamp(cd,.75,1.75);
+}
+function gearVariation(setup){
+  const spread=num(setup&&setup.shaftSetWeightSpread);
+  const straight=num(setup&&setup.shaftStraightness);
+  const foc=num(setup&&setup.foc);
+  const nock=normGearText(setup&&setup.nockFit);
+  let penalty=0, notes=[];
+  if(spread!=null){
+    const p=clamp(spread/10,0,.16); penalty+=p;
+    if(spread>=4) notes.push(`矢セット重量差 ${spread}gr は上下散りの要因になり得るため、補正を少し控えめにします。`);
+  }
+  if(straight!=null){
+    const p=straight<=.002?.01:straight<=.004?.025:.055; penalty+=p;
+    if(straight>.004) notes.push(`シャフト真直度 ${straight}inch はグルーピング評価の不確かさとして扱います。`);
+  }
+  if(foc!=null && (foc<9 || foc>18)){
+    penalty+=.025;
+    notes.push(`FOC ${foc}% は一般的なターゲット矢の中心域から外れるため、弾道推定の信頼度を少し下げます。`);
+  }
+  if(/ゆる|LOOSE/.test(nock)){ penalty+=.035; notes.push("ノックフィットが緩めのため、左右/上下の再現性に影響する前提で見ます。"); }
+  if(/きつ|TIGHT/.test(nock)){ penalty+=.02; notes.push("ノックフィットがきつめのため、リリース離れの影響を少し見込みます。"); }
+  return {penalty:clamp(penalty,0,.28), confidenceFactor:clamp(1-penalty,.72,1), notes};
+}
+function physicsProfile(setup){
+  const p=num(setup&&setup.poundage);
+  const drawIn=num(setup&&setup.drawLength)||28;
+  const massGr=estimatedTotalArrowWeight(setup) || (p?clamp(p*8.4,260,520):330);
+  const diaMm=num(setup&&setup.arrowDia)||5.7;
+  const speedRaw=num(setup&&setup.arrowSpeed);
+  const measuredSpeed=speedRaw!=null;
+  const massKg=massGr*0.00006479891;
+  let speedMps;
+  if(measuredSpeed){
+    speedMps=speedRaw>100 ? speedRaw*0.3048 : speedRaw;
+  }else{
+    const drawN=(p||36)*4.44822;
+    const drawM=drawIn*0.0254;
+    const stored=0.5*drawN*drawM;
+    const explicitEff=num(setup&&setup.bowEfficiency);
+    const eff=explicitEff!=null?clamp(explicitEff/100,.55,.88):(p&&p>=45?.78:.72);
+    speedMps=Math.sqrt(Math.max(1,2*stored*eff/massKg));
+  }
+  speedMps=clamp(speedMps,35,95);
+  const cd=estimateArrowCd(setup||{}, diaMm);
+  const area=Math.PI*(diaMm/1000/2)**2;
+  const rho=airDensity(setup||{});
+  const variation=gearVariation(setup||{});
+  return {pound:p||null, drawIn, massGr, diaMm, speedMps, speedFps:speedMps/0.3048, measuredSpeed, cd, area, massKg, rho, variation};
+}
+function sessionWindSpeed(sess){
+  const v=num(sess&&sess.windSpeed);
+  if(v!=null) return clamp(v,0,18);
+  const wx=String(sess&&sess.wx||"");
+  if(/風\s*強|強風/.test(wx)) return 5;
+  if(/風\s*弱|弱風/.test(wx)) return 2;
+  return sess&&sess.windDir?2.5:0;
+}
+function windModel(sess){
+  const speed=sessionWindSpeed(sess);
+  const dir=String(sess&&sess.windDir||"");
+  if(speed<=0) return {speed:0,down:0,side:0,variability:0,known:false,label:"無風扱い"};
+  let down=0, side=0, variability=.18, known=true, label=dir||"風向未指定";
+  if(/向かい/.test(dir)){ down=-speed; label="向かい風"; }
+  else if(/追い/.test(dir)){ down=speed; label="追い風"; }
+  else if(/左から/.test(dir)){ side=speed; label="左から"; }
+  else if(/右から/.test(dir)){ side=-speed; label="右から"; }
+  else if(/巻き/.test(dir)){ side=speed*.55; down=-speed*.2; variability=.55; label="巻き風"; }
+  else{ side=speed*.35; variability=.45; known=false; }
+  return {speed,down,side,variability,known,label};
+}
+function windDriftText(cm){
+  const a=Math.abs(cm).toFixed(1);
+  return cm>0?`右へ${a}cm`:cm<0?`左へ${a}cm`:`0.0cm`;
+}
+function simulateArrow(distM, angle, phys, wind){
+  wind=wind||{down:0,side:0};
+  const k=0.5*phys.rho*phys.cd*phys.area/phys.massKg, dt=0.006, g=9.80665;
+  let s={x:0,y:0,z:0,t:0,vx:phys.speedMps*Math.cos(angle),vy:phys.speedMps*Math.sin(angle),vz:0};
+  const deriv=a=>{
+    const rx=a.vx-(wind.down||0), ry=a.vy, rz=a.vz-(wind.side||0);
+    const rv=Math.hypot(rx,ry,rz);
+    return {x:a.vx,y:a.vy,z:a.vz,t:1,vx:-k*rv*rx,vy:-g-k*rv*ry,vz:-k*rv*rz};
+  };
+  const add=(a,d,h)=>({x:a.x+d.x*h,y:a.y+d.y*h,z:a.z+d.z*h,t:a.t+d.t*h,vx:a.vx+d.vx*h,vy:a.vy+d.vy*h,vz:a.vz+d.vz*h});
+  const mix=(a,k1,k2,k3,k4)=>{
+    const h=dt/6;
+    return {x:a.x+h*(k1.x+2*k2.x+2*k3.x+k4.x),y:a.y+h*(k1.y+2*k2.y+2*k3.y+k4.y),z:a.z+h*(k1.z+2*k2.z+2*k3.z+k4.z),t:a.t+dt,
+      vx:a.vx+h*(k1.vx+2*k2.vx+2*k3.vx+k4.vx),vy:a.vy+h*(k1.vy+2*k2.vy+2*k3.vy+k4.vy),vz:a.vz+h*(k1.vz+2*k2.vz+2*k3.vz+k4.vz)};
+  };
+  let prev=s;
+  for(let i=0;i<5000 && s.x<distM && s.y>-100;i++){
+    prev=s;
+    const k1=deriv(s), k2=deriv(add(s,k1,dt/2)), k3=deriv(add(s,k2,dt/2)), k4=deriv(add(s,k3,dt));
+    s=mix(s,k1,k2,k3,k4);
+  }
+  if(s.x>=distM && s.x!==prev.x){
+    const q=(distM-prev.x)/(s.x-prev.x);
+    s={x:distM,y:prev.y+(s.y-prev.y)*q,z:prev.z+(s.z-prev.z)*q,t:prev.t+(s.t-prev.t)*q,
+      vx:prev.vx+(s.vx-prev.vx)*q,vy:prev.vy+(s.vy-prev.vy)*q,vz:prev.vz+(s.vz-prev.vz)*q};
+  }
+  return {y:s.y,z:s.z,t:s.t,speed:Math.hypot(s.vx,s.vy,s.vz),state:s};
+}
+function solveZeroAngle(distM, phys, wind){
+  let lo=-0.05, hi=0.42;
+  let yl=simulateArrow(distM,lo,phys,wind).y, yh=simulateArrow(distM,hi,phys,wind).y;
+  if(!(yl<=0 && yh>=0)){
+    const v=phys.speedMps, g=9.80665;
+    const s=clamp(g*distM/(v*v),-.95,.95);
+    return 0.5*Math.asin(s);
+  }
+  for(let i=0;i<32;i++){
+    const mid=(lo+hi)/2, ym=simulateArrow(distM,mid,phys,wind).y;
+    if(ym>=0) hi=mid; else lo=mid;
+  }
+  return (lo+hi)/2;
+}
+function trajectoryModel(sess, setup, eyeMm){
+  const distM=Math.max(5, sess.dist||70);
+  const phys=physicsProfile(setup||{});
+  const wind=windModel(sess||{});
+  const angle=solveZeroAngle(distM, phys, wind);
+  const base=simulateArrow(distM, angle, phys, wind);
+  const dth=0.0015;
+  const up=simulateArrow(distM, angle+dth, phys, wind);
+  const dn=simulateArrow(distM, angle-dth, phys, wind);
+  const sens=Math.max(distM*.55, (up.y-dn.y)/(2*dth));
+  const mmPerCmV=(0.01/sens)*eyeMm;
+  const mmPerCmH=(0.01/distM)*eyeMm;
+  const windDriftCm=base.z*100;
+  const windUncertaintyCm=Math.abs(windDriftCm)*(wind.variability||0) + (wind.speed?0.35:0);
+  const has=k=>String((setup||{})[k]||"").trim();
+  const modelScore=clamp(
+    (phys.measuredSpeed ? .20 : .08) +
+    (has("arrowWeight") ? .13 : .06) +
+    (has("arrowDia") ? .11 : .05) +
+    (has("arrowCd") ? .10 : .04) +
+    (has("temperature") ? .07 : .03) +
+    (has("altitude") ? .06 : .02) +
+    (has("humidity") ? .05 : .02) +
+    (wind.speed ? (wind.known ? .12 : .06) : .08),
+    0,1
+  );
+  return {phys, wind, angle, tof:base.t, impactSpeed:base.speed, sens, mmPerCmV, mmPerCmH, windDriftCm, windUncertaintyCm, modelScore, engine:"RK4-3D"};
+}
+const ArcheryPhysicsCore=Object.freeze({
+  version:"RK4-3D JS core",
+  trajectory:trajectoryModel,
+  physicsProfile,
+  windModel,
+  robustStats,
+  groupStats
+});
+if(typeof window!=="undefined") window.ArcheryPhysicsCore=ArcheryPhysicsCore;
+function weightedMedian(items, fallback){
+  const a=items.filter(x=>x&&isFinite(x.v)&&isFinite(x.w)&&x.w>0).sort((x,y)=>x.v-y.v);
+  if(!a.length) return fallback==null?null:fallback;
+  const half=a.reduce((s,x)=>s+x.w,0)/2;
+  let c=0;
+  for(const x of a){ c+=x.w; if(c>=half) return x.v; }
+  return a[a.length-1].v;
+}
+function levelFromScore(score, tiers){
+  const s=clamp(score||0,0,1);
+  return tiers.find(t=>s>=t.min).label;
+}
+const LEVELS={
+  physics:[{min:.72,label:"校正安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"未校正"}],
+  data:[{min:.72,label:"高"},{min:.45,label:"中"},{min:0,label:"データ蓄積中"}],
+  calibration:[{min:.72,label:"高"},{min:.42,label:"中"},{min:0,label:"データ蓄積中"}],
+  system:[{min:.72,label:"提案安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"準備中"}]
+};
+function personalPhysicsCalibration(setupId){
+  if(!setupId) return null;
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup) return null;
+  const eye=db.settings.eyeSight||850;
+  const sessions=db.sessions.filter(s=>s.setupId===setupId)
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  const usable=sessions.map((s,i)=>{
+    const st=robustStats(s.ends.flat());
+    if(!st || st.n<6) return null;
+    const q=sessionQuality(s,setup,st);
+    const recency=.72+(i+1)/Math.max(1,sessions.length)*.28;
+    return {s,st,q,w:clamp(q.score*recency,.05,1)};
+  }).filter(Boolean);
+  const windRatios=[], windConflicts=[];
+  usable.forEach(it=>{
+    const wm=windModel(it.s);
+    if(!wm.speed || !wm.side) return;
+    const traj=trajectoryModel(it.s,setup,eye);
+    if(Math.abs(traj.windDriftCm)<.6 || Math.abs(it.st.mx)>ringW(it.s.faceD)*4) return;
+    const ratio=it.st.mx/traj.windDriftCm;
+    if(ratio>0 && ratio<2.6) windRatios.push({v:ratio,w:it.w});
+    else if(Math.abs(it.st.mx)>ringW(it.s.faceD)*.35) windConflicts.push(it);
+  });
+  const clickV=[], clickH=[];
+  [...new Set(sessions.map(s=>s.dist).filter(Boolean))].forEach(d=>{
+    const r=regressionAdvice(setupId,d);
+    if(r.v && isFinite(r.v.slope) && Math.abs(r.v.slope)>.05) clickV.push({v:Math.abs(r.v.slope)*70/d,w:clamp(r.v.quality||r.v.r2||.2,.05,1)});
+    if(r.h && isFinite(r.h.slope) && Math.abs(r.h.slope)>.05) clickH.push({v:Math.abs(r.h.slope)*70/d,w:clamp(r.h.quality||r.h.r2||.2,.05,1)});
+  });
+  const sightMarks=db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v)));
+  const markPts=sightMarks.map(m=>[m.dist, parseFloat(m.v)]).filter(p=>isFinite(p[0])&&isFinite(p[1]));
+  const sightFit=markPts.length>=2 ? robustLine(markPts) : null;
+  const windFactor=weightedMedian(windRatios,1);
+  const v70=weightedMedian(clickV,null), h70=weightedMedian(clickH,null);
+  const hasSetup=k=>String((setup||{})[k]||"").trim();
+  const score=clamp(
+    Math.min(usable.length,12)*.035 +
+    Math.min(windRatios.length,6)*.055 +
+    Math.min(clickV.length+clickH.length,8)*.045 +
+    Math.min(new Set(markPts.map(p=>p[0])).size,5)*.055 +
+    (hasSetup("arrowSpeed") ? .12 : .03) +
+    (hasSetup("arrowWeight") ? .08 : .03),
+    0,1
+  );
+  const level=levelFromScore(score, LEVELS.physics);
+  const notes=[];
+  if(windRatios.length) notes.push(`風効き ${windFactor.toFixed(2)}倍（横風${windRatios.length}回）`);
+  if(v70!=null||h70!=null) notes.push(`目盛り効き ${v70!=null?`上下${v70.toFixed(1)}cm@70m`:""}${v70!=null&&h70!=null?" / ":""}${h70!=null?`左右${h70.toFixed(1)}cm@70m`:""}`);
+  if(sightFit) notes.push(`距離別サイト値 ${markPts.length}点 / 一致度${pct(sightFit.r2||0)}`);
+  if(!notes.length) notes.push("サイト値つき練習・横風メモ・複数距離の台帳が増えるほど校正されます。");
+  return {score,level,usable:usable.length,wind:{factor:windFactor,sample:windRatios.length,conflicts:windConflicts.length},click:{v70,h70,vSample:clickV.length,hSample:clickH.length},sight:{n:markPts.length,r2:sightFit?sightFit.r2:0},notes};
+}
+function physicsCalibrationHtml(setupId){
+  const c=personalPhysicsCalibration(setupId);
+  if(!c) return "";
+  const color=c.level==="校正安定"?"#0f9d58":c.level==="未校正"?"#8a6d1d":"#1e6fd9";
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b style="color:${color}">物理校正: ${c.level}</b>（${pct(c.score)}）</div>
+    <div class="kv"><span>校正材料</span><span>有効練習 ${c.usable}回 / 風 ${c.wind.sample}回 / サイト値 ${c.sight.n}点</span></div>
+    ${c.notes.map(n=>`<div class="note">・${esc(n)}</div>`).join("")}
+  </div>`;
+}
+function adviceModel(sess, setup, st){
+  const dist=sess.dist, w=ringW(sess.faceD);
+  const facePenalty=st.rr>w*2.8?.82:st.rr>w*2.0?.9:1;
+  const gear=gearVariation(setup||{});
+  let confidence=clamp((st.confidence||.6)*facePenalty*gear.confidenceFactor,.32,1);
+  const nudge=clamp(.45+confidence*.55,.52,1);
+  const eye=(db.settings.eyeSight||850);
+  const traj=trajectoryModel(sess, setup, eye);
+  const pcal=personalPhysicsCalibration(setup&&setup.id);
+  const p=parseFloat(setup&&setup.poundage);
+  let vFactor=nudge, hFactor=nudge, notes=[];
+  notes.push(`信頼度 ${pct(confidence)}（${st.n}本使用${st.excluded.length?` / 外れ値${st.excluded.length}本除外`:""}）。初回補正率は ${pct(nudge)} です。`);
+  notes.push(`物理エンジン: ${traj.engine}（3D空気抵抗/RK4）。初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、矢重量 ${traj.phys.massGr.toFixed(0)}gr、Cd ${traj.phys.cd.toFixed(2)}、空気密度 ${traj.phys.rho.toFixed(2)}kg/m³、飛翔 ${traj.tof.toFixed(2)}秒、入射速度 ${traj.impactSpeed.toFixed(1)}m/s、入力充実度 ${pct(traj.modelScore)}。`);
+  if(pcal && pcal.score>.2) notes.push(`個人校正: ${pcal.level}（${pct(pcal.score)}）。${pcal.notes.slice(0,2).join(" / ")}`);
+  if(traj.wind.speed){
+    const windFactor=pcal&&pcal.wind.sample?pcal.wind.factor:1;
+    const drift=traj.windDriftCm*windFactor;
+    const unc=traj.windUncertaintyCm + Math.abs(drift)*(pcal&&pcal.wind.sample?clamp(.28-pcal.wind.sample*.025,.08,.28):.22);
+    notes.push(`風モデル: ${traj.wind.label} ${traj.wind.speed.toFixed(1)}m/sを風ベクトル化。横流れ推定 ${windDriftText(drift)}（不確かさ±${unc.toFixed(1)}cm${windFactor!==1?` / 個人係数${windFactor.toFixed(2)}倍`:""}）。`);
+    if(Math.abs(drift)>w*.25 && Math.sign(drift)===Math.sign(st.mx)){
+      hFactor*=.78; confidence*=.92;
+      notes.push("左右ズレの一部は風で説明できるため、左右サイト補正は控えめにします。");
+    }
+  }
+  gear.notes.forEach(n=>notes.push(n));
+  if(isFinite(p)){
+    if(dist>=50 && p<36){
+      vFactor*=.88;
+      notes.push(`ポンドが控えめで長距離のため、上下は軌道変化の影響を見て少し控えめにします。`);
+    }else if(dist>=50 && p>=42){
+      vFactor*=1.04;
+      notes.push(`ポンドが高めで弾道が比較的フラットな前提として、上下補正を少し強めにできます。`);
+    }
+  }
+  const tr=sightTrend(setup&&setup.id);
+  if(tr){
+    const span=tr.pts[tr.pts.length-1][0]-tr.pts[0][0];
+    notes.push(`距離別サイト値 ${tr.pts.length}点から軌道傾向を参照中（${tr.pts[0][0]}〜${tr.pts[tr.pts.length-1][0]}m）。`);
+    if(span>=30 && Math.abs(tr.slope)>.03) vFactor*=1.02;
+  }
+  if(setup&&setup.id){
+    const reg=regressionAdvice(setup.id, dist);
+    const sv=num(sess.sightV), sh=num(sess.sightH);
+    const qs=[];
+    if(reg.v){
+      if((reg.v.quality||0)>.5){ vFactor*=clamp(.98+(reg.v.quality||0)*.08,.98,1.05); qs.push(reg.v.quality||0); }
+      notes.push(`データ同化: 信頼度つき過去回帰では上下サイト ${reg.v.zero.toFixed(1)} が推定最適値${sv!=null?`（現在との差 ${(reg.v.zero-sv).toFixed(1)}）`:""}。一致度 ${pct(reg.v.r2||0)} / 品質 ${pct(reg.v.quality||0)}。`);
+    }
+    if(reg.h){
+      if((reg.h.quality||0)>.5){ hFactor*=clamp(.98+(reg.h.quality||0)*.08,.98,1.05); qs.push(reg.h.quality||0); }
+      notes.push(`データ同化: 信頼度つき過去回帰では左右サイト ${reg.h.zero.toFixed(1)} が推定最適値${sh!=null?`（現在との差 ${(reg.h.zero-sh).toFixed(1)}）`:""}。一致度 ${pct(reg.h.r2||0)} / 品質 ${pct(reg.h.quality||0)}。`);
+    }
+    if(qs.length) confidence=clamp(confidence*(.96+Math.max(...qs)*.08),.32,1);
+  }
+  if(st.n<6) notes.push("本数が少ないため、数本確認してから追加調整する前提の提案です。");
+  if(st.rr>w*2.5) notes.push("グルーピングが広めなので、サイトより射形・風・照準の再現性も同時に見てください。");
+  if(st.major && st.minor>0 && st.major>st.minor*1.7) notes.push(`楕円長軸が短軸の ${(st.major/st.minor).toFixed(1)}倍あるため、中心補正と同時に散り方向の原因も優先して見ます。`);
+  return {confidence,vFactor:clamp(vFactor,.45,1.1),hFactor:clamp(hFactor,.45,1.05),notes,traj,pcal};
+}
+function adviceFor(sess, setup){
+  const all=sess.ends.flat(); const st=robustStats(all);
+  if(!st || st.n<3) return null;
+  const dist=sess.dist;
+  const eye=(db.settings.eyeSight||850);
+  const model=adviceModel(sess, setup, st);
+  const personal=personalModel(sess, setup, st);
+  const quality=sessionQuality(sess, setup, st);
+  const out={st, lines:[], notes:model.notes, confidence:model.confidence, personal, quality, pcal:model.pcal};
+  if(personal && personal.sample>=2) out.notes.unshift(`個人モデル: ${personal.state}（同条件${personal.sample}回 / 安定度${pct(personal.stability||0)}）。`);
+  if(quality.score<.48) out.notes.unshift(`この回の判断信頼度は${quality.label}です。${quality.reasons.join("・")}。`);
+  const TH=Math.max(ringW(sess.faceD)/8, st.rr*.10); // 無視できるズレのしきい値
+  // 上下
+  if(Math.abs(st.my)>TH){
+    const adj=Math.abs(st.my)*model.vFactor;
+    const mm=adj*model.traj.mmPerCmV;
+    let l=`サイトを<b>${st.my>0?"上":"下"}</b>へ（中心は${cmOffsetText(st.my,"y")}、補正 ${pct(model.vFactor)}） — 目安 ${mm.toFixed(1)}mm`;
+    if(setup && setup.calibV70){ const cpc=setup.calibV70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
+    else if(model.pcal && model.pcal.click.v70){ const cpc=model.pcal.click.v70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
+    if(sess.sightV) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightV)}</span>`;
+    out.lines.push({axis:"v", html:l});
+  }
+  // 左右
+  if(Math.abs(st.mx)>TH){
+    const adj=Math.abs(st.mx)*model.hFactor;
+    const mm=adj*model.traj.mmPerCmH;
+    let l=`サイトを<b>${st.mx>0?"右":"左"}</b>へ（中心は${cmOffsetText(st.mx,"x")}、補正 ${pct(model.hFactor)}） — 目安 ${mm.toFixed(1)}mm`;
+    if(setup && setup.calibH70){ const cpc=setup.calibH70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
+    else if(model.pcal && model.pcal.click.h70){ const cpc=model.pcal.click.h70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
+    if(sess.sightH) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightH)}</span>`;
+    out.lines.push({axis:"h", html:l});
+  }
+  if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です 👏"});
+  return out;
+}
+function summarySightDialHtml(sess, adv){
+  if(!adv || !adv.st) return "";
+  const st=adv.st;
+  const span=Math.max(ringW(sess.faceD)*2.4, st.rr*1.4, 6);
+  const dx=clamp(st.mx/span,-1,1)*36;
+  const dy=clamp(-st.my/span,-1,1)*36;
+  const move=adv.lines.some(l=>l.axis!=="-");
+  const label=`${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}`;
+  return `<div class="sightMiniDial">
+    <div class="dialGrid">
+      <svg viewBox="0 0 110 110" aria-hidden="true">
+        <circle class="ring" cx="55" cy="55" r="48"/>
+        <circle class="ring" cx="55" cy="55" r="30" style="opacity:.55"/>
+        <line class="axis" x1="10" y1="55" x2="100" y2="55"/>
+        <line class="axis" x1="55" y1="10" x2="55" y2="100"/>
+        <line class="vector" x1="55" y1="55" x2="${(55+dx).toFixed(1)}" y2="${(55+dy).toFixed(1)}"/>
+        <circle class="originDot" cx="55" cy="55" r="3.5"/>
+        <circle class="groupDot" cx="${(55+dx).toFixed(1)}" cy="${(55+dy).toFixed(1)}" r="7"/>
+      </svg>
+      <div>
+        <b>${move?"中心ズレからサイト方向を読む":"中心はほぼ合っています"}</b>
+        <span>緑の点が今回のグルーピング中心です。${label}。信頼度は ${pct(adv.confidence||0)}、外れ値を除いた中心を使っています。</span>
+      </div>
+    </div>
+  </div>`;
+}
+function windText(sess){
+  const parts=[];
+  if(sess.wx) parts.push(sess.wx);
+  if(sess.windDir) parts.push(sess.windDir);
+  if(sess.windSpeed) parts.push(`${sess.windSpeed}m/s`);
+  return parts.join(" / ");
+}
+function isWindy(sess){
+  const ws=num(sess&&sess.windSpeed);
+  return /風 強/.test(sess&&sess.wx||"") || (ws!=null && ws>=3.5);
+}
+function judgementFor(adv,sess){
+  if(!adv) return null;
+  const st=adv.st, w=ringW(sess.faceD);
+  const hasMove=adv.lines.some(l=>l.axis!=="-");
+  if(!hasMove) return {label:"維持",tone:"ok",text:"サイトは触らず、この基準で本数を重ねて確認できます。"};
+  if(adv.personal && adv.personal.state==="今回だけの可能性" && (adv.personal.stability||0)>.45) return {label:"保留",tone:"hold",text:"過去の同条件傾向と今回の中心が逆方向です。まず追加エンドで再現性を確認します。"};
+  if(st.n<6 || (adv.confidence||0)<.45) return {label:"保留",tone:"hold",text:"まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。"};
+  if(st.rr>w*2.8) return {label:"射形優先",tone:"warn",text:"中心は読めますが散りが大きめです。サイト調整は半分以下に抑え、リリース・押し手・照準の再現性を先に見ます。"};
+  if(isWindy(sess) && st.sx>st.sy*1.15) return {label:"風を考慮",tone:"hold",text:"横方向の偏りに風の影響が混ざりやすい状況です。無風または風待ちで再確認すると精度が上がります。"};
+  if(adv.personal && adv.personal.state==="過去と一致" && (adv.confidence||0)>=.62) return {label:"動かす",tone:"ok",text:"今回の中心と過去の同条件傾向が一致しています。提案量を目安に動かす根拠があります。"};
+  if((adv.confidence||0)>=.72 && st.rr<=w*2.2) return {label:"動かす",tone:"ok",text:"グルーピング中心と信頼度が揃っています。提案量を目安にサイトを動かす価値があります。"};
+  return {label:"少量調整",tone:"mid",text:"傾向は見えています。提案量の半分〜7割程度で様子を見るのが現実的です。"};
+}
+function judgementHtml(adv,sess){
+  const j=judgementFor(adv,sess);
+  if(!j) return "";
+  const color=j.tone==="ok"?"#0f9d58":j.tone==="warn"?"#c62828":"#8a6d1d";
+  return `<div class="note" style="margin-top:6px"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
+}
+function summaryDecisionHtml(adv,sess){
+  const j=judgementFor(adv,sess);
+  if(!j) return "";
+  const tone=j.tone==="ok"?"ok":j.tone==="warn"?"warn":"hold";
+  const move=adv && adv.lines ? adv.lines.filter(l=>l.axis!=="-").length : 0;
+  return `<div class="decisionCard ${tone}">
+    <div class="k">今回の判断</div>
+    <b>${esc(j.label)}</b>
+    <p>${esc(j.text)}</p>
+    <span>${move?"サイトを動かす前に、下の提案量と信頼度を確認できます。":"今日はサイトを触らず、同じ条件で本数を重ねる判断です。"}</span>
+  </div>`;
+}
+function conditionInsights(sess,st,setup){
+  const out=[];
+  const wind=windText(sess);
+  if(wind) out.push(`条件メモ: ${esc(wind)}${sess.note?` / ${esc(sess.note)}`:""}`);
+  if(setup && (setup.tuningMethod||setup.tuningResult)){
+    out.push(`チューニング記録: ${esc([setup.tuningMethod,setup.tuningResult].filter(Boolean).join(" / "))}`);
+  }
+  if(st){
+    const wm=windModel(sess||{});
+    if(wm.speed){
+      const traj=trajectoryModel(sess,setup||{},db.settings.eyeSight||850);
+      const pc=personalPhysicsCalibration(setup&&setup.id);
+      const wf=pc&&pc.wind.sample?pc.wind.factor:1;
+      out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm*wf)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm${wf!==1?` / 個人係数${wf.toFixed(2)}倍`:""}）として扱います。`);
+    }
+    if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
+    if(st.sy>st.sx*1.35) out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
+    else if(st.sx>st.sy*1.35) out.push("次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。");
+    else if(st.rr<ringW(sess.faceD)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
+    if(setup && !setup.arrowSpeed) out.push("精度向上: 実測初速を入れると、上下サイトのmm換算と距離別予測が安定します。");
+    if(setup && !setup.shaftSetWeightSpread) out.push("精度向上: 矢セット重量差を入れると、上下散りの信頼度判定が強くなります。");
+    const sp=setup?spineGuidance(setup):null;
+    if(sp && sp.ready && (sp.state==="柔らかめ寄り" || sp.state==="硬め寄り")) out.push(`用具確認: スパインが${sp.state}です。候補 ${sp.candidates.slice(0,3).join(" / ")} と矢飛びを比較してください。`);
+  }
+  if(sess.round && sess.round!=="free") out.push(`ラウンド: ${roundLabel(sess.round)} の途中/結果として扱っています。`);
+  return out;
+}
+function conditionHtml(sess,st,setup){
+  const notes=conditionInsights(sess,st,setup).slice(0,4);
+  return notes.length?`<div class="advice" style="background:var(--card);border-color:var(--line)">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
+}
+function sessionMetrics(sess){
+  const all=(sess.ends||[]).flat();
+  const total=all.reduce((a,x)=>a+x.s,0);
+  const st=robustStats(all);
+  return {all,total,avg:all.length?total/all.length:0,st};
+}
+function sessionQuality(sess, setup, st){
+  const m=sessionMetrics(sess);
+  st=st||m.st;
+  if(!st) return {score:.2,label:"低",tone:"warn",reasons:["矢数が不足"],metrics:m};
+  const w=ringW(sess.faceD);
+  const sample=clamp((m.all.length-3)/33,0,1);
+  const group=clamp(1-st.rr/(w*3.2),0,1);
+  const confidence=st.confidence||.45;
+  const outRate=m.all.length?st.excluded.length/m.all.length:0;
+  let score=confidence*.52 + sample*.18 + group*.22 + (m.all.length>=6?.08:0);
+  const reasons=[];
+  if(isWindy(sess)){ score*=.86; reasons.push("風の影響あり"); }
+  if(outRate>.18){ score*=.86; reasons.push("外れ値が多め"); }
+  if(st.rr>w*2.6){ score*=.82; reasons.push("グルーピング広め"); }
+  if(m.all.length<6) reasons.push("本数少なめ");
+  if(setup){
+    const gp=gearPrecisionProfile(setup);
+    if(gp.score<.45){ score*=.94; reasons.push("用具入力が少なめ"); }
+  }
+  score=clamp(score,.12,1);
+  const label=score>=.72?"高":score>=.48?"中":"低";
+  const tone=score>=.72?"ok":score>=.48?"mid":"warn";
+  if(!reasons.length) reasons.push("判断材料は良好");
+  return {score,label,tone,reasons,metrics:m};
+}
+function dirAlign(ax,ay,bx,by){
+  const am=Math.hypot(ax,ay), bm=Math.hypot(bx,by);
+  if(am<.01||bm<.01) return 0;
+  return clamp((ax*bx+ay*by)/(am*bm),-1,1);
+}
+function personalModel(sess,setup,currentSt){
+  if(!sess || !currentSt) return null;
+  const same=db.sessions.filter(s=>s.id!==sess.id && (s.setupId||"")==(sess.setupId||"") && s.dist===sess.dist && s.faceD===sess.faceD && (s.faceType||"single")===(sess.faceType||"single"))
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1))
+    .slice(-10);
+  const items=same.map(s=>{
+    const q=sessionQuality(s,setup);
+    return q.metrics.st?{sess:s,q,st:q.metrics.st}:null;
+  }).filter(Boolean);
+  if(items.length<2) return {sample:items.length,state:"データ蓄積中",text:"同条件データがまだ少ないため、今回の記録を個人モデルの材料として蓄積します。"};
+  let sw=0,mx=0,my=0,rr=0,avg=0;
+  items.forEach((it,i)=>{
+    const recency=.72 + (i+1)/items.length*.28;
+    const w=Math.max(.08,it.q.score)*recency;
+    sw+=w; mx+=it.st.mx*w; my+=it.st.my*w; rr+=it.st.rr*w; avg+=it.q.metrics.avg*w;
+  });
+  mx/=sw; my/=sw; rr/=sw; avg/=sw;
+  const centers=items.map(it=>({x:it.st.mx,y:it.st.my}));
+  const spread=groupStats(centers);
+  const ring=ringW(sess.faceD);
+  const histMag=Math.hypot(mx,my), curMag=Math.hypot(currentSt.mx,currentSt.my);
+  const align=dirAlign(mx,my,currentSt.mx,currentSt.my);
+  const stability=spread?clamp(1-spread.rr/(ring*2.4),0,1):.5;
+  const support=histMag>ring*.28 && curMag>ring*.28 && align>.42;
+  const conflict=histMag>ring*.28 && curMag>ring*.28 && align<-.25;
+  const state=support?"過去と一致":conflict?"今回だけの可能性":"観察継続";
+  let text;
+  if(support) text="過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。";
+  else if(conflict) text="過去の偏りと今回の中心が逆方向です。風や射形の一時要因を疑い、追加エンドで確認する価値があります。";
+  else text="過去傾向はまだ決定的ではありません。今回の中心とグルーピング形状を主材料にします。";
+  return {sample:items.length,state,text,mx,my,rr,avg,align,stability,spread,histMag,curMag};
+}
+function personalModelHtml(adv,sess,setup){
+  if(!adv || !adv.personal) return "";
+  const p=adv.personal;
+  const tone=p.state==="過去と一致"?"#0f9d58":p.state==="今回だけの可能性"?"#c62828":"#8a6d1d";
+  if(p.sample<2) return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b style="color:${tone}">個人モデル: ${p.state}</b> — ${esc(p.text)}</div>
+    <div class="kv"><span>過去の加重中心</span><span>${cmOffsetText(p.mx,"x")} / ${cmOffsetText(p.my,"y")}</span></div>
+    <div class="kv"><span>同条件データ</span><span>${p.sample}回 / 安定度 ${pct(p.stability)}</span></div>
+  </div>`;
+}
+function trustHtml(sess,setup,st){
+  const q=sessionQuality(sess,setup,st);
+  const color=q.tone==="ok"?"#0f9d58":q.tone==="warn"?"#c62828":"#8a6d1d";
+  return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>`;
+}
+function nextActionPlan(sess,adv,setup){
+  const plan=[];
+  const q=sessionQuality(sess,setup,adv&&adv.st);
+  const j=judgementFor(adv,sess);
+  if(!adv){ return ["6本以上を記録して、中心とばらつきを出す。"]; }
+  if(j && j.label==="動かす") plan.push("提案方向へサイトを動かし、次の1エンドは同じ狙い方で確認する。");
+  else if(j && j.label==="少量調整") plan.push("提案量の半分〜7割だけ動かし、中心が戻るか確認する。");
+  else if(j && (j.label==="保留" || j.label==="風を考慮")) plan.push("サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。");
+  else if(j && j.label==="射形優先") plan.push("サイト調整は控えめにして、リリース・押し手・照準時間の再現性を先に整える。");
+  if(adv.personal && adv.personal.state==="今回だけの可能性") plan.push("過去傾向と逆なので、風向/射形メモを残して次回の同距離データと比較する。");
+  if(adv.personal && adv.personal.state==="過去と一致") plan.push("調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。");
+  if(q.score<.48) plan.push("この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。");
+  const st=adv.st;
+  if(st.sy>st.sx*1.35) plan.push("上下散りが強いので、アンカー高・引き尺・リリース圧を1項目ずつ固定して確認する。");
+  else if(st.sx>st.sy*1.35) plan.push("左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。");
+  if(setup){
+    const gp=gearPrecisionProfile(setup);
+    if(gp.missing.length) plan.push(`精度を上げる追加データ: ${esc(gp.missing.slice(0,2).join("・"))}`);
+  }
+  return plan.slice(0,4);
+}
+function nextActionHtml(sess,adv,setup){
+  const plan=nextActionPlan(sess,adv,setup);
+  return plan.length?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>次のアクション</b></div>${plan.map((p,i)=>`<div class="note">${i+1}. ${p}</div>`).join("")}</div>`:"";
+}
+function roundProgressHtml(sess){
+  const r=ROUND_TYPES.find(x=>x.id===sess.round);
+  if(!r || !r.arrows) return "";
+  const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0);
+  const shot=all.length, remain=Math.max(0,r.arrows-shot);
+  const pace=shot?total/shot*r.arrows:0;
+  return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)} / ${shot}/${r.arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
+}
+function sessionsCsv(){
+  const head=["date","setup","distance_m","round","face","arrows","total","avg","x","ten","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
+  const rows=[head];
+  db.sessions.forEach(s=>{
+    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===s.setupId);
+    const q=sessionQuality(s,setup,st);
+    const p=personalModel(s,setup,st);
+    rows.push([s.date,setup?setup.name:"",s.dist,roundLabel(s.round),faceLabel(s),all.length,total,all.length?(total/all.length).toFixed(3):"",
+      all.filter(a=>a.X).length,all.filter(a=>a.s===10).length,st?st.mx.toFixed(2):"",st?st.my.toFixed(2):"",st?st.rr.toFixed(2):"",
+      st?st.sx.toFixed(2):"",st?st.sy.toFixed(2):"",st?pct(st.confidence||0):"",q.label,p?p.state:"",st?st.excluded.length:"",
+      s.sightV||"",s.sightH||"",windText(s),s.note||""]);
+  });
+  return "\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
+}
+function exportSessionsCsv(){
+  shareOrDownloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8","Archery Note CSV");
+  db.settings.lastBackupAt=new Date().toISOString();
+  save("csv-export");
+}
+function scorecardSvg(sess){
+  const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);
+  const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(scoreLabel).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
+  const h=210+rows.length*34;
+  const title=`${fmtD(sess.date)} ${sess.dist}m ${roundLabel(sess.round)}`;
+  const bg="#f7f8f4", ink="#1c1e1c", green="#1a5c3a";
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="${h}" viewBox="0 0 900 ${h}">
+  <rect width="900" height="${h}" fill="${bg}"/>
+  <text x="48" y="62" font-family="sans-serif" font-size="34" font-weight="700" fill="${green}">Archery Note Scorecard</text>
+  <text x="48" y="102" font-family="sans-serif" font-size="22" fill="${ink}">${esc(title)}</text>
+  <text x="48" y="134" font-family="sans-serif" font-size="18" fill="#667064">${esc(setup?setup.name:"セッティング未指定")} / ${esc(faceLabel(sess))} / ${all.length}射</text>
+  <text x="650" y="92" font-family="sans-serif" font-size="48" font-weight="800" fill="${green}" text-anchor="end">${total}</text>
+  <text x="666" y="92" font-family="sans-serif" font-size="18" fill="#667064">点</text>
+  <text x="650" y="124" font-family="sans-serif" font-size="18" fill="#667064" text-anchor="end">平均 ${all.length?(total/all.length).toFixed(2):"-"} / X ${all.filter(a=>a.X).length}</text>
+  <rect x="48" y="160" width="804" height="34" rx="6" fill="#dde7dc"/>
+  <text x="70" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}">End</text>
+  <text x="150" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}">Scores</text>
+  <text x="808" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}" text-anchor="end">Sum</text>
+  ${rows.map((r,i)=>`<g transform="translate(0 ${202+i*34})">
+    <rect x="48" y="0" width="804" height="28" rx="5" fill="${i%2?"#ffffff":"#eef1ec"}"/>
+    <text x="78" y="20" font-family="sans-serif" font-size="17" fill="${ink}" text-anchor="middle">${r.i}</text>
+    <text x="150" y="20" font-family="sans-serif" font-size="17" fill="${ink}">${esc(r.scores)}</text>
+    <text x="808" y="20" font-family="sans-serif" font-size="17" font-weight="700" fill="${green}" text-anchor="end">${r.sum}</text>
+  </g>`).join("")}
+  ${sess.note||windText(sess)?`<text x="48" y="${h-32}" font-family="sans-serif" font-size="16" fill="#667064">${esc([windText(sess),sess.note].filter(Boolean).join(" / "))}</text>`:""}
+</svg>`;
+}
+function exportScorecardImage(sess){
+  shareOrDownloadText(`archery-scorecard-${sess.date||today()}-${sess.dist}m.svg`,scorecardSvg(sess),"image/svg+xml;charset=utf-8","Archery Note Scorecard");
+}
+function backupReminderHtml(){
+  if(db.sessions.length<3) return "";
+  const t=db.settings.lastBackupAt?Date.parse(db.settings.lastBackupAt):0;
+  const days=t?Math.floor((Date.now()-t)/(24*60*60*1000)):999;
+  if(days<30) return `<div class="hint">最終バックアップ/CSV出力: ${new Date(t).toLocaleDateString()}。月1回の保存ペースは良好です。</div>`;
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
+}
+function trashSettingsHtml(){
+  const items=(db.trash||[]).slice(0,8);
+  if(!items.length) return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
+  return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱 <span style="font-size:11px;color:var(--sub)">最新${items.length}/${(db.trash||[]).length}件</span></h3>
+    <table class="tbl"><tr><th>種類</th><th>内容</th><th>削除日</th><th></th></tr>
+    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost" data-restore-trash="${it.id}" style="padding:4px 8px">復元</button></td></tr>`).join("")}</table>
+    <div class="btnrow"><button class="btn danger" id="trashClear">ゴミ箱を空にする</button></div>`;
+}
+function regress(pts){
+  const n=pts.length; if(n<2) return null;
+  const xb=pts.reduce((a,p)=>a+p[0],0)/n, yb=pts.reduce((a,p)=>a+p[1],0)/n;
+  let vx=0,cv=0; pts.forEach(p=>{vx+=(p[0]-xb)**2; cv+=(p[0]-xb)*(p[1]-yb);});
+  if(vx<1e-9) return null;
+  const b=cv/vx, a=yb-b*xb;
+  let ss=0,se=0; pts.forEach(p=>{ ss+=(p[1]-yb)**2; se+=(p[1]-(a+b*p[0]))**2; });
+  return {a,b,zero: Math.abs(b)>1e-9? -a/b : null,r2:ss>1e-9?clamp(1-se/ss,0,1):0,kind:"linear",est:d=>a+b*d};
+}
+function robustLine(pts){
+  if(pts.length<2) return null;
+  const slopes=[];
+  for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+    const dx=pts[j][0]-pts[i][0];
+    if(Math.abs(dx)>1e-9) slopes.push((pts[j][1]-pts[i][1])/dx);
+  }
+  if(!slopes.length) return null;
+  const b=median(slopes);
+  const a=median(pts.map(p=>p[1]-b*p[0]));
+  const yb=pts.reduce((s,p)=>s+p[1],0)/pts.length;
+  let ss=0,se=0; pts.forEach(p=>{ ss+=(p[1]-yb)**2; se+=(p[1]-(a+b*p[0]))**2; });
+  return {a,b,zero:Math.abs(b)>1e-9?-a/b:null,r2:ss>1e-9?clamp(1-se/ss,0,1):0};
+}
+function weightedLineFit(pts){
+  const clean=pts.map(p=>({x:+p[0],y:+p[1],w:clamp(+p[2]||1,.02,2)}))
+    .filter(p=>isFinite(p.x)&&isFinite(p.y)&&isFinite(p.w)&&p.w>0);
+  if(clean.length<2) return null;
+  const sw=clean.reduce((a,p)=>a+p.w,0);
+  const xb=clean.reduce((a,p)=>a+p.x*p.w,0)/sw;
+  const yb=clean.reduce((a,p)=>a+p.y*p.w,0)/sw;
+  let vx=0,cv=0;
+  clean.forEach(p=>{ vx+=(p.x-xb)*(p.x-xb)*p.w; cv+=(p.x-xb)*(p.y-yb)*p.w; });
+  if(Math.abs(vx)<1e-9) return null;
+  const b=cv/vx, a=yb-b*xb;
+  let ss=0,se=0;
+  clean.forEach(p=>{ const e=a+b*p.x; ss+=(p.y-yb)*(p.y-yb)*p.w; se+=(p.y-e)*(p.y-e)*p.w; });
+  const scatter=Math.sqrt(Math.max(0,se/sw));
+  return {a,b,zero:Math.abs(b)>1e-9?-a/b:null,r2:ss>1e-9?clamp(1-se/ss,0,1):0,n:clean.length,weight:sw,scatter,kind:"weighted"};
+}
+function robustWeightedLine(pts){
+  if(pts.length<2) return null;
+  const base=robustLine(pts.map(p=>[p[0],p[1]]));
+  if(!base) return null;
+  const residuals=pts.map(p=>p[1]-(base.a+base.b*p[0]));
+  const center=median(residuals);
+  const scale=Math.max(1.4826*median(residuals.map(r=>Math.abs(r-center))), .05);
+  const weighted=pts.map((p,i)=>{
+    const u=Math.abs(residuals[i]-center)/(scale*2.5);
+    const rw=u>=1?.08:(1-u*u)**2;
+    return [p[0],p[1],(+p[2]||1)*rw];
+  });
+  const fit=weightedLineFit(weighted);
+  if(!fit || fit.zero==null || !isFinite(fit.zero)) return null;
+  const avgW=fit.weight/Math.max(1,fit.n);
+  fit.kind="weighted-robust";
+  fit.quality=clamp((fit.r2||0)*.5 + clamp((fit.n-1)/5,0,1)*.28 + clamp(avgW,.1,1)*.22,0,1);
+  fit.base=base;
+  return fit;
+}
+function solve3(A,b){
+  const m=A.map((r,i)=>[...r,b[i]]);
+  for(let c=0;c<3;c++){
+    let piv=c; for(let r=c+1;r<3;r++) if(Math.abs(m[r][c])>Math.abs(m[piv][c])) piv=r;
+    if(Math.abs(m[piv][c])<1e-9) return null;
+    [m[c],m[piv]]=[m[piv],m[c]];
+    const div=m[c][c]; for(let k=c;k<4;k++) m[c][k]/=div;
+    for(let r=0;r<3;r++) if(r!==c){ const f=m[r][c]; for(let k=c;k<4;k++) m[r][k]-=f*m[c][k]; }
+  }
+  return [m[0][3],m[1][3],m[2][3]];
+}
+function quadraticFit(pts){
+  if(pts.length<4) return null;
+  const sx=[0,0,0,0,0], sy=[0,0,0];
+  pts.forEach(([x,y])=>{ let p=1; for(let i=0;i<5;i++){ sx[i]+=p; p*=x; } sy[0]+=y; sy[1]+=x*y; sy[2]+=x*x*y; });
+  const coef=solve3([[sx[0],sx[1],sx[2]],[sx[1],sx[2],sx[3]],[sx[2],sx[3],sx[4]]],sy);
+  if(!coef) return null;
+  const [a,b,c]=coef, yb=pts.reduce((s,p)=>s+p[1],0)/pts.length;
+  let ss=0,se=0; pts.forEach(([x,y])=>{ const e=a+b*x+c*x*x; ss+=(y-yb)**2; se+=(y-e)**2; });
+  return {a,b,c,kind:"curve",r2:ss>1e-9?clamp(1-se/ss,0,1):0,est:d=>a+b*d+c*d*d};
+}
+/* setup+distance のセッション群から「ズレ0になるサイト値」を回帰推定 */
+function regressionAdvice(setupId, dist){
+  const setup=db.setups.find(s=>s.id===setupId);
+  const ss=db.sessions.filter(s=>s.setupId===setupId && s.dist===dist)
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  const res={};
+  [["sightV","my","v"],["sightH","mx","h"]].forEach(([key,axis,tag])=>{
+    const pts=[];
+    ss.forEach((s,i)=>{
+      const v=parseFloat(s[key]); const st=robustStats(s.ends.flat());
+      if(isFinite(v) && st && st.n>=6){
+        const q=sessionQuality(s,setup,st);
+        const recency=.72 + (i+1)/Math.max(1,ss.length)*.28;
+        const sample=clamp((st.n-4)/14,.55,1);
+        const windFactor=isWindy(s)?.82:1;
+        const w=clamp(q.score*sample*recency*windFactor,.06,1);
+        pts.push([v, st[axis], w]);
+      }
+    });
+    const uniq=new Set(pts.map(p=>p[0]));
+    if(pts.length>=2 && uniq.size>=2){
+      const r=robustWeightedLine(pts) || robustLine(pts);
+      if(r && r.zero!=null && isFinite(r.zero)){
+        res[tag]={zero:r.zero, n:pts.length, r2:r.r2, slope:r.b, quality:r.quality||r.r2||0, scatter:r.scatter||0, model:r.kind||"robust"};
+      }
+    }
+  });
+  return res;
+}
+/* セッティングの実測サイト値（上下）から距離→サイト値を直線近似 */
+function sightInterp(setupId){
+  const byDist={};
+  [...db.sightMarks].filter(m=>m.setupId===setupId)
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts||0)-(b.ts||0))
+    .forEach(m=>{ const v=parseFloat(m.v); if(isFinite(v)) byDist[m.dist]=v; });
+  const pts=Object.keys(byDist).map(d=>[+d, byDist[d]]).sort((a,b)=>a[0]-b[0]);
+  if(pts.length<2) return null;
+  const line=regress(pts);
+  if(!line) return null;
+  const curve=quadraticFit(pts);
+  const model=(curve && curve.r2>line.r2+.04)?curve:line;
+  return {pts, have:pts.map(p=>p[0]), model:model.kind, r2:model.r2, est:model.est};
+}
+function calibrationProfile(setupId){
+  const setup=db.setups.find(x=>x.id===setupId)||{};
+  const dists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist));
+  const sess=db.sessions.filter(s=>s.setupId===setupId);
+  const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;
+  const rich=gearPrecisionProfile(setup);
+  const score=clamp(dists.size*.12 + Math.min(withSight,10)*.035 + rich.score*.32 + (String(setup.arrowSpeed||"").trim()?0.14:0),0,1);
+  const level=levelFromScore(score, LEVELS.calibration);
+  const next=[];
+  if(dists.size<3) next.push("異なる距離のサイト値");
+  if(withSight<5) next.push("練習開始時のサイト値");
+  if(!setup.arrowSpeed) next.push("実測初速");
+  if(rich.score<.65) next.push("矢重量/FOC/ベイン");
+  return {score,level,dists:dists.size,withSight,gearLevel:rich.level,next};
+}
+function modelReadinessProfile(setupId){
+  const setup=db.setups.find(x=>x.id===setupId)||{};
+  const sess=db.sessions.filter(s=>s.setupId===setupId);
+  const usable=sess.map(s=>({s,q:sessionQuality(s,setup)}))
+    .filter(x=>x.q.metrics.st && x.q.metrics.st.n>=6);
+  const good=usable.filter(x=>x.q.score>=.48);
+  const byKey={};
+  good.forEach(x=>{
+    const s=x.s;
+    const k=[s.dist,s.faceD,s.faceType||"single"].join("|");
+    (byKey[k]=byKey[k]||[]).push(x);
+  });
+  const repeatGroups=Object.values(byKey).filter(g=>g.length>=2).length;
+  const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;
+  const sightDists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist)).size;
+  const gp=gearPrecisionProfile(setup);
+  const score=clamp(good.length*.035 + repeatGroups*.13 + Math.min(withSight,10)*.035 + sightDists*.06 + gp.score*.24,0,1);
+  const level=levelFromScore(score, LEVELS.data);
+  const next=[];
+  if(good.length<5) next.push("6本以上の練習記録");
+  if(repeatGroups<2) next.push("同じ距離/的での反復");
+  if(withSight<4) next.push("練習開始時のサイト値");
+  if(sightDists<3) next.push("複数距離のサイト台帳");
+  if(gp.score<.65) next.push("矢重量・矢径・実測初速");
+  return {score,level,total:sess.length,usable:usable.length,good:good.length,repeatGroups,withSight,sightDists,gearLevel:gp.level,next};
+}
+function modelReadinessHtml(setupId){
+  if(!setupId) return "";
+  const p=modelReadinessProfile(setupId);
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>個人データ準備度: ${p.level}</b>（${pct(p.score)}）</div>
+    <div class="kv"><span>使える練習</span><span>${p.good}回 / 同条件反復 ${p.repeatGroups}組</span></div>
+    <div class="kv"><span>サイト校正材料</span><span>サイト値つき練習 ${p.withSight}回 / 台帳 ${p.sightDists}距離</span></div>
+    ${p.next.length?`<div class="note">次に効くデータ: ${esc(p.next.slice(0,3).join("・"))}</div>`:`<div class="note">履歴・サイト値・用具入力の土台がかなり揃っています。</div>`}
+  </div>`;
+}
+function latestMark(setupId, dist){
+  const ms=db.sightMarks.filter(m=>m.setupId===setupId && m.dist===dist).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.ts||0)-(a.ts||0));
+  return ms[0]||null;
+}
+
+/* ============ views ============ */
+let view="record";
+let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice" };
+function showView(v){ view=v; ui.selArrow=-1; nativePulse("light"); render(); }
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
+
+function render(){
+  updateAppChrome();
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  const m=$("#main");
+  if(view==="record") renderRecord(m);
+  else if(view==="history") renderHistory(m);
+  else if(view==="sight") renderSight(m);
+  else renderGear(m);
+}
+
+/* ---------- 記録 ---------- */
+function setupOptions(sel){
+  return `<option value="">（セッティング未指定）</option>`+db.setups.map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
+}
+const RECORD_FLOW_MODES=[
+  {id:"practice",icon:"◎",title:"練習記録",desc:"点取りから調整提案へ"},
+  {id:"calibration",icon:"↕",title:"校正用",desc:"サイト値・風メモを残す"},
+  {id:"diagnosis",icon:"?",title:"状態確認",desc:"足りない材料を見る"}
+];
+const RECORD_PHASES=["準備","記録","確認","蓄積"];
+function scorePct(v){ return Math.round(clamp(v||0,0,1)*100); }
+function readinessCellHtml(label,level,score){
+  return `<div class="readinessCell"><div class="k">${label}</div><b>${esc(level)}</b><div class="bar"><i style="width:${scorePct(score)}%"></i></div></div>`;
+}
+function recordPhaseArcHtml(step, subtitle){
+  const cur=Math.max(0,Math.min(RECORD_PHASES.length-1,Math.round(step||0)));
+  const xs=[32,130,228,326];
+  const rails=xs.slice(0,-1).map((x,i)=>`<line class="seg ${i<cur?"on":""} ${i===cur-1?"cur":""}" x1="${x}" y1="18" x2="${xs[i+1]}" y2="18"/>`).join("");
+  const nodes=RECORD_PHASES.map((label,i)=>`<g>
+      <circle class="node ${i<=cur?"on":""} ${i===cur?"cur":""}" cx="${xs[i]}" cy="18" r="10"/>
+      <circle class="nodeCore" cx="${xs[i]}" cy="18" r="3.2"/>
+      <text class="${i<=cur?"on":""}" x="${xs[i]}" y="44" text-anchor="middle">${esc(label)}</text>
+    </g>`).join("");
+  return `<section class="phaseArc" aria-label="記録フロー">
+    <svg viewBox="0 0 360 50" role="img" aria-hidden="true">
+      <line class="rail" x1="32" y1="18" x2="326" y2="18"/>
+      ${rails}
+      ${nodes}
+    </svg>
+    ${subtitle?`<div class="phaseSub">${esc(subtitle)}</div>`:""}
+  </section>`;
+}
+function recordCoachCardHtml(){
+  return `<div class="coachCard">
+    <img src="icon.svg" alt="">
+    <div><b>3ステップで使います</b><span>条件を決める → 的でタップ → 結果で次の調整を見る</span></div>
+  </div>`;
+}
+function recordIntroHtml(sys, mode){
+  const flow=RECORD_FLOW_MODES.map(f=>`
+      <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
+  const p=sys.profiles||{};
+  const nf=nativeFeatureProfile();
+  return `${recordPhaseArcHtml(0,"今日はまず記録。詳しい材料はあとから足せます。")}
+  <section class="missionPanel convergeMission">
+    <div class="missionTop">
+      <img class="startLogoMark" src="icon.svg" alt="">
+      <div>
+        <div class="eyebrow">Archery Note</div>
+        <h2>${mode==="calibration"?"校正記録を始める":"練習を始める"}</h2>
+        <p>点取りだけで始められます。サイト値・風・用具は、余裕がある時だけ詳しく残せます。</p>
+      </div>
+      <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
+    </div>
+    <div class="simplePromise">距離を選ぶ <span>→</span> 的でタップ <span>→</span> 結果を見る</div>
+    ${recordCoachCardHtml()}
+    <details class="adv missionMore" ${mode==="calibration"?"open":""}>
+      <summary>詳しいモード・準備度を見る</summary>
+      <div class="readinessRail">
+        ${readinessCellHtml("用具",p.gear?p.gear.level:"低",p.gear?p.gear.score:0)}
+        ${readinessCellHtml("履歴",p.model?p.model.level:"データ蓄積中",p.model?p.model.score:0)}
+        ${readinessCellHtml("物理校正",p.physics?p.physics.level:"未校正",p.physics?p.physics.score:0)}
+      </div>
+      <div class="nativeSignal">
+        <span class="on">${esc(nf.runtime.label)}</span>
+        <span class="${nf.haptics?"on":""}">触感${nf.haptics?"ON":"待ち"}</span>
+        <span class="${nf.share?"on":""}">共有${nf.share?"ON":"待ち"}</span>
+      </div>
+      <div class="missionFlow" id="flowMode">${flow}</div>
+      <div class="missionNext"><b>次の材料</b><span>${esc(sys.next)} / ${sys.lines.map(esc).join(" / ")}</span></div>
+    </details>
+  </section>`;
+}
+function setupSystemSummary(setupId){
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup) return {score:0,level:"準備中", profiles:{}, lines:["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"], next:"用具タブで初回セットアップ"};
+  const gp=gearPrecisionProfile(setup), mp=modelReadinessProfile(setupId), pc=personalPhysicsCalibration(setupId), cp=calibrationProfile(setupId);
+  const score=clamp(gp.score*.25 + mp.score*.25 + (pc?pc.score*.28:0) + (cp?cp.score*.22:0),0,1);
+  const level=levelFromScore(score, LEVELS.system);
+  const next=[];
+  if(gp.score<.65) next.push((gp.missing||[])[0]||"用具入力");
+  if(mp.good<5) next.push("6本以上の練習");
+  if(cp.dists<3) next.push("複数距離のサイト値");
+  if(pc && pc.wind.sample<2) next.push("横風メモつき練習");
+  return {
+    score,
+    level,
+    profiles:{gear:gp,model:mp,physics:pc||{score:0,level:"未校正"},calibration:cp},
+    lines:[`用具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc?pc.level:"未校正"}`],
+    next:next.slice(0,2).join("・") || "同条件で記録を重ねる"
+  };
+}
+function recordSetupSnapshot(setupId,dist){
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup) return `<div class="setupLens" id="setupLens">
+    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b><span>用具登録で調整提案が強くなります</span></div>
+    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b><span>距離を選ぶと実測値を呼び出します</span></div>
+  </div>`;
+  const gp=gearPrecisionProfile(setup);
+  const mp=modelReadinessProfile(setupId);
+  const mk=dist?latestMark(setupId,dist):null;
+  const markText=mk?`上下 ${esc(mk.v||"—")} / 左右 ${esc(mk.h||"—")}`:"記録なし";
+  return `<div class="setupLens" id="setupLens">
+    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b><span>${[setup.bow,setup.limbs,setup.poundage?setup.poundage+"lbs":""].filter(Boolean).map(esc).join(" / ")||"詳細入力待ち"}</span></div>
+    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b><span>演算入力 ${gp.level} / 個人モデル ${mp.level}</span></div>
+  </div>`;
+}
+function renderRecord(m){
+  if(db.active){ renderActive(m); return; }
+  const last=db.sessions[db.sessions.length-1];
+  const defSetup=last?last.setupId:(db.setups[0]?db.setups[0].id:"");
+  const defDist=last?last.dist:70;
+  const mode=ui.recordMode||"practice";
+  const sys=setupSystemSummary(defSetup);
+  m.innerHTML=`
+  ${recordIntroHtml(sys,mode)}
+  <section class="launchPanel convergeLaunch">
+    <div class="launchHead">
+      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"校正条件を組む":"今日の練習"}</h2></div>
+      <button class="tinyAction" id="jumpGear">用具</button>
+    </div>
+    <div class="launchBody">
+    <p class="quickStartCopy">まずは距離・的・本数だけで始められます。サイト値や風は、必要な時だけ下で詳しく残せます。</p>
+    <label class="f">距離</label>
+    <div class="chips quickDists" id="fDistChips">
+      ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
+      <div class="chip" data-d="custom">カスタム</div>
+    </div>
+    <div id="fDistCustomWrap" style="display:none"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+    <div class="quickSelects">
+      <div><label class="f">的サイズ</label><select class="inp" id="fFace">
+        ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}<option value="T40">40cm 三つ目（縦）</option></select></div>
+      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
+    </div>
+    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
+    <div class="softDivider"></div>
+    <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
+      <summary>詳しく残す（日付・用具・サイト値・天候）</summary>
+      <div class="fieldBand">
+        <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
+        ${recordSetupSnapshot(defSetup,defDist)}
+      </div>
+      <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
+      <label class="f">ラウンド</label><select class="inp" id="fRound">
+        ${ROUND_TYPES.map(r=>`<option value="${r.id}">${r.label}</option>`).join("")}
+      </select>
+      <div class="row">
+        <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
+        <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
+      </div>
+      <div class="hint">サイトの目盛りをそのまま記入（左右は<b>右なら 2、左なら -2</b>）。台帳に記録があれば自動入力されます。</div>
+      <label class="f">天候・コンディション</label>
+      <div class="row">
+        <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
+        <input class="inp" id="fNote" placeholder="${mode==="calibration"?"例: 校正用・サイト1目盛り確認":"メモ（任意）"}" value="${mode==="calibration"?"校正用":""}">
+      </div>
+      <div class="row">
+        <div><label class="f">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
+        <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
+      </div>
+    </details>
+    ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>校正用のコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
+    ${db.setups.length?"":`<div class="hint">「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
+    </div>
+  </section>`;
+  const distState={d:defDist};
+  const faceSel=$("#fFace");
+  const suggestFace=d=>{ faceSel.value = d>=60?122:(d<=18?40:80); };
+  suggestFace(defDist);
+  $("#jumpGear").onclick=()=>showView("gear");
+  document.querySelectorAll("#flowMode .flowBtn").forEach(b=>b.onclick=()=>{
+    if(b.dataset.mode==="diagnosis"){ showView("sight"); return; }
+    ui.recordMode=b.dataset.mode; render();
+  });
+  function refreshLens(){
+    const old=$("#setupLens");
+    if(old) old.outerHTML=recordSetupSnapshot($("#fSetup").value, distState.d);
+  }
+  document.querySelectorAll("#fDistChips .chip").forEach(c=>c.onclick=()=>{
+    document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.remove("on"));
+    c.classList.add("on");
+    if(c.dataset.d==="custom"){ $("#fDistCustomWrap").style.display="block"; distState.d=null; }
+    else{ $("#fDistCustomWrap").style.display="none"; distState.d=+c.dataset.d; suggestFace(distState.d); fillSight(); }
+    refreshLens();
+  });
+  $("#fDistCustom").oninput=e=>{ distState.d=+e.target.value||null; if(distState.d) {suggestFace(distState.d); fillSight();} refreshLens(); };
+  function fillSight(){
+    const sid=$("#fSetup").value, d=distState.d;
+    if(!sid||!d) return;
+    const mk=latestMark(sid,d);
+    if(mk){ $("#fSightV").value=mk.v??""; $("#fSightH").value=mk.h??""; }
+  }
+  $("#fSetup").onchange=()=>{ fillSight(); refreshLens(); };
+  fillSight();
+  $("#fStart").onclick=()=>{
+    const d=distState.d;
+    if(!d){ toast("距離を入力してください"); return; }
+    const fv=faceSel.value;
+    db.active={
+      id:uid(), date:$("#fDate").value||today(), setupId:$("#fSetup").value||null,
+      dist:d, faceD: fv==="T40"?40:+fv, faceType: fv==="T40"?"triple":"single", perEnd:+$("#fArrows").value,
+      shaft:+lineCutRadius(fv==="T40"?40:+fv, fv==="T40"?"triple":"single").toFixed(3),
+      sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
+      wx:$("#fWx").value, note:$("#fNote").value.trim(), windDir:$("#fWindDir").value, windSpeed:$("#fWindSpeed").value.trim(),
+      round:$("#fRound").value||"free",
+      purpose:ui.recordMode||"practice",
+      ends:[], cur:[]
+    };
+    nativePulse("success");
+    save(); render();
+  };
+}
+
+function sessionArrows(sess){
+  return [...((sess&&sess.ends)||[]).flat(), ...((sess&&sess.cur)||[])];
+}
+function heroMetricHtml(k,b,span){
+  return `<div class="heroMetric"><div class="k">${esc(k)}</div><b>${esc(b)}</b><span>${esc(span||"")}</span></div>`;
+}
+function pageHeroHtml(type,ctx){
+  ctx=ctx||{};
+  if(type==="history"){
+    const src=ctx.ss||db.sessions||[];
+    const arrows=src.flatMap(s=>s.ends.flat());
+    const total=arrows.reduce((a,x)=>a+x.s,0);
+    const latest=src[0]||null;
+    return `<section class="pageHero">
+      <div class="kicker">Growth map</div>
+      <h2>分布と偏移を読む</h2>
+      <p>点数だけでなく、同じ用具・同じ距離の中心移動を追います。過去のグルーピングがあるほど、今回のズレが偶然か傾向か見えやすくなります。</p>
+      <div class="heroMetrics">
+        ${heroMetricHtml("練習",`${src.length}回`,`${arrows.length}本を集計`)}
+        ${heroMetricHtml("平均",arrows.length?(total/arrows.length).toFixed(2):"—","フィルター後の平均点")}
+        ${heroMetricHtml("直近",latest?`${fmtD(latest.date)} ${latest.dist}m`:"—",latest?roundLabel(latest.round):"記録待ち")}
+      </div>
+    </section>`;
+  }
+  if(type==="sight"){
+    const setup=ctx.setup, dist=ctx.dist, marks=ctx.marks||[], adv=ctx.adv;
+    const cur=marks[0];
+    return `<section class="pageHero">
+      <div class="kicker">Sight tuning</div>
+      <h2>サイト値を整える</h2>
+      <p>距離ごとのサイト値と最新グルーピングから、動かす時・保留する時・射形を優先する時を分けて見ます。</p>
+      <div class="heroMetrics">
+        ${heroMetricHtml("対象",setup?setup.name:"用具未指定",dist?`${dist}m`:"距離未指定")}
+        ${heroMetricHtml("最新サイト",cur?`上下 ${cur.v||"—"}`:"未登録",cur?`左右 ${cur.h||"—"}`:"台帳へ記録")}
+        ${heroMetricHtml("提案",adv&&adv.lines.length?adv.lines[0].text||"調整あり":"材料待ち",adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
+      </div>
+    </section>`;
+  }
+  if(type==="gear"){
+    const setups=db.setups||[];
+    const profiles=setups.map(s=>gearPrecisionProfile(s));
+    const avg=profiles.length?profiles.reduce((a,p)=>a+p.score,0)/profiles.length:0;
+    const best=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)})).sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
+    return `<section class="pageHero">
+      <div class="kicker">Equipment lab</div>
+      <h2>用具を演算できるデータにする</h2>
+      <p>ハンドルやリムの名前だけで終わらせず、矢重量・矢径・FOC・実測初速まで整理します。ここが整うほど物理モデルが現実の弓に近づきます。</p>
+      <div class="heroMetrics">
+        ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
+        ${heroMetricHtml("演算入力",pct(avg),"用具データの平均充実度")}
+        ${heroMetricHtml("主戦用具",best?best.s.name:"—",best?`演算 ${best.p.level} / 個人 ${best.m.level}`:"初回セットアップ待ち")}
+      </div>
+    </section>`;
+  }
+  return "";
+}
+function liveSessionHeroHtml(s,setup){
+  const all=sessionArrows(s);
+  const total=all.reduce((a,x)=>a+x.s,0);
+  const avg=all.length?(total/all.length).toFixed(2):"—";
+  const remain=Math.max(0,(s.perEnd||6)-(s.cur||[]).length);
+  const r=ROUND_TYPES.find(x=>x.id===s.round);
+  const roundRemain=r&&r.arrows?Math.max(0,r.arrows-all.length):null;
+  return `<section class="liveHud">
+    <div class="kicker">Live scoring desk</div>
+    <h2>${s._edit?"過去記録を整える":"今このエンドに集中"}</h2>
+    <div class="liveGrid">
+      <div class="liveCell"><div class="k">合計</div><b>${total}</b></div>
+      <div class="liveCell"><div class="k">平均</div><b>${avg}</b></div>
+      <div class="liveCell"><div class="k">現在エンド</div><b>${(s.cur||[]).length}/${s.perEnd||6}</b></div>
+      <div class="liveCell"><div class="k">残り</div><b>${roundRemain==null?`${remain}本`:roundRemain+"本"}</b></div>
+    </div>
+    <div class="nativeSignal">
+      <span class="on">${setup?esc(setup.name):"用具未指定"}</span>
+      <span>${s.dist}m / ${faceLabel(s)}</span>
+      <span>${runtimeKind().label}</span>
+    </div>
+  </section>`;
+}
+function renderActive(m){
+  const s=db.active;
+  const setup=db.setups.find(x=>x.id===s.setupId);
+  m.innerHTML=`
+  ${recordPhaseArcHtml(1,"的をタップして、このエンドを積み上げる。")}
+  ${liveSessionHeroHtml(s,setup)}
+  <div class="card targetFocusCard">
+    <div class="targetTools">
+      <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
+      ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips">
+        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<div class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</div>`).join("")}
+      </div>`}
+    </div>
+    <div class="tgWrap" id="tgWrap">
+      ${targetMarkup(s.faceD,"tg",s.faceType)}
+      <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
+      <div class="lensTag" id="lensTag">微調整モード</div>
+    </div>
+    <div class="targetHint">タップ＆ドラッグで確定。押したまま0.4秒で微調整、矢チップをタップで修正できます。</div>
+    <div class="scoreChips" id="curChips"></div>
+    <div class="nudge" id="nudge">
+      <div style="font-size:12px;color:var(--sub)">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
+      <div class="npad">
+        <span class="blank"></span><button data-n="u">▲</button><span class="blank"></span>
+        <button data-n="l">◀</button><button data-n="del" style="color:var(--danger)">🗑</button><button data-n="r">▶</button>
+        <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
+      </div>
+      <button class="btn sm ghost" id="nudgeDone">選択解除</button>
+    </div>
+    <div class="statbar" id="statbar"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="bUndo">↩ 1本取消</button>
+      <button class="btn sec" id="bEnd">エンド確定</button>
+    </div>
+    <div class="btnrow"><button class="btn danger" id="bFinish">セッション終了</button></div>
+  </div>
+  <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>`;
+  attachTargetInput(s);
+  function applyZoom(){ if(s.faceType==="triple") return; const M=s.faceD/2*1.18/(ui.zoom||1); $("#tgsvg").setAttribute("viewBox", `${-M} ${-M} ${2*M} ${2*M}`); }
+  document.querySelectorAll("#zoomChips .chip").forEach(c=>c.onclick=()=>{
+    ui.zoom=+c.dataset.z;
+    document.querySelectorAll("#zoomChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    applyZoom();
+  });
+  applyZoom();
+  $("#bUndo").onclick=()=>{ if(s.cur.length){ s.cur.pop(); ui.selArrow=-1; nativePulse("light"); save(); refreshActive(); } else toast("このエンドに矢がありません"); };
+  $("#bEnd").onclick=()=>{
+    if(!s.cur.length){ toast("矢を記録してください"); return; }
+    if(s.editIndex!=null){
+      const at=Math.min(s.editIndex, s.ends.length);
+      s.ends.splice(at,0,s.cur); toast(`エンド${at+1}を更新しました`); s.editIndex=null;
+    }else{
+      s.ends.push(s.cur); toast(`エンド${s.ends.length} 確定`);
+    }
+    s.cur=[]; ui.selArrow=-1; nativePulse("success"); save(); refreshActive();
+  };
+  $("#bFinish").onclick=()=>finishSession();
+  document.querySelectorAll("#nudge .npad button").forEach(b=>b.onclick=()=>nudgeArrow(b.dataset.n));
+  $("#nudgeDone").onclick=()=>{ ui.selArrow=-1; refreshActive(); };
+  refreshActive();
+}
+function refreshActive(){
+  const s=db.active; if(!s) return;
+  // markers
+  let html="";
+  const gp=a=> s.faceType==="triple" ? {x:a.x, y:a.y+SPOT_Y[a.spot||0]} : a;
+  s.ends.forEach((end,ei)=>end.forEach(a=>{ html+=markCircle(gp(a),s.faceD,"rgba(60,60,60,.45)"); }));
+  s.cur.forEach((a,i)=>{ html+=markCircle(gp(a),s.faceD, i===ui.selArrow?"#111":"var(--green-l)", scoreLabel(a)); });
+  $("#tgmarks").innerHTML=html;
+  // chips
+  $("#curChips").innerHTML = s.cur.map((a,i)=>{
+    const z=zoneStyle(a.s,a.X);
+    return `<div class="sc ${i===ui.selArrow?"sel":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}">${scoreLabel(a)}</div>`;
+  }).join("") || `<span style="font-size:12px;color:var(--sub);align-self:center">エンド${s.ends.length+1}：的をタップして記録</span>`;
+  document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
+    ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; nativePulse("light"); refreshActive();
+  });
+  $("#nudge").classList.toggle("on", ui.selArrow>=0);
+  // stats
+  const all=[...s.ends.flat(), ...s.cur];
+  const total=all.reduce((a,x)=>a+x.s,0);
+  const tens=all.filter(a=>a.s===10).length, xs=all.filter(a=>a.X).length;
+  $("#statbar").innerHTML=`
+    <div class="stat"><b>${total}</b><span>合計</span></div>
+    <div class="stat"><b>${all.length?(total/all.length).toFixed(2):"-"}</b><span>平均/本</span></div>
+    <div class="stat"><b>${tens}</b><span>10点</span></div>
+    <div class="stat"><b>${xs}</b><span>X</span></div>`;
+  // ends table
+  $("#endsTbl").innerHTML = s.ends.length? `<table class="tbl"><tr><th>#</th><th>得点</th><th class="right">計</th><th></th></tr>`+
+    s.ends.map((end,i)=>{
+      const sorted=[...end].sort((a,b)=>b.s-a.s || (b.X?1:0)-(a.X?1:0));
+      return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td>
+        <td>${sorted.map(scoreLabel).join("・")}</td>
+        <td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td>
+        <td class="right"><button class="btn sm ghost" data-open="${i}" style="padding:4px 8px">✏</button></td></tr>`;
+    }).join("")+`</table>` : `<div class="empty">確定したエンドはまだありません</div>`;
+  document.querySelectorAll("#endsTbl [data-open]").forEach(b=>b.onclick=()=>{
+    if(s.cur.length){ toast("先に現在のエンドを確定（または取消）してください"); return; }
+    s.editIndex=+b.dataset.open;
+    s.cur=s.ends.splice(s.editIndex,1)[0];
+    ui.selArrow=-1; save(); refreshActive();
+    toast(`エンド${s.editIndex+1}を編集中（確定で戻ります）`);
+  });
+}
+function nudgeArrow(dirKey){
+  const s=db.active; if(!s || ui.selArrow<0 || !s.cur[ui.selArrow]) return;
+  if(dirKey==="del"){ s.cur.splice(ui.selArrow,1); ui.selArrow=-1; nativePulse("heavy"); save(); refreshActive(); return; }
+  const a=s.cur[ui.selArrow], step=s.faceD/200;
+  if(dirKey==="u")a.y+=step; if(dirKey==="d")a.y-=step; if(dirKey==="l")a.x-=step; if(dirKey==="r")a.x+=step;
+  Object.assign(a, scoreAt(a.x,a.y,s.faceD,s.faceType,lineCutRadius(s.faceD,s.faceType)));
+  nativePulse("light"); save(); refreshActive();
+}
+
+/* target pointer input with long-press fine mode + lens */
+function attachTargetInput(s){
+  const svg=$("#tgsvg"), lens=$("#lens"), lensSvg=$("#lensSvg"), lensTag=$("#lensTag"), cur=$("#tgcur");
+  let drag=null;
+  function clientPoint(e){
+    const t=(e.changedTouches&&e.changedTouches[0])||(e.touches&&e.touches[0])||e;
+    if(!t || t.clientX==null) return null;
+    return {x:t.clientX,y:t.clientY,id:e.pointerId!=null?e.pointerId:(t.identifier!=null?t.identifier:"mouse")};
+  }
+  function clientToSvg(x,y){
+    const ctm=svg.getScreenCTM();
+    if(!ctm) return {x:0,y:0};
+    const inv=ctm.inverse();
+    if(window.DOMPoint){
+      const pt=new DOMPoint(x,y).matrixTransform(inv);
+      return {x:pt.x, y:-pt.y};
+    }
+    const pt=svg.createSVGPoint();
+    pt.x=x; pt.y=y;
+    const p=pt.matrixTransform(inv);
+    return {x:p.x, y:-p.y};
+  }
+  function drawCursor(p){
+    const w=ringW(s.faceD);
+    const fine=!!(drag&&drag.fine);
+    const cutting=fine && isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType);
+    const c=fine ? (cutting?"#0f9d58":"#c62828") : "#111";
+    lens.classList.toggle("cut", cutting);
+    lens.classList.toggle("miss", fine&&!cutting);
+    lensTag.classList.toggle("cut", cutting);
+    lensTag.classList.toggle("miss", fine&&!cutting);
+    if(fine) lensTag.textContent=cutting?"線かみ":"線なし";
+    cur.innerHTML=`<g>
+      <line x1="${p.x-w}" y1="${-p.y}" x2="${p.x+w}" y2="${-p.y}" stroke="${c}" stroke-width="${s.faceD/500}"/>
+      <line x1="${p.x}" y1="${-p.y-w}" x2="${p.x}" y2="${-p.y+w}" stroke="${c}" stroke-width="${s.faceD/500}"/>
+      <circle cx="${p.x}" cy="${-p.y}" r="${arrowMarkRadius(s.faceD)}" fill="none" stroke="${c}" stroke-width="${s.faceD/400}"/>
+    </g>`;
+    const z=ringW(s.faceD)*2.2;
+    lensSvg.setAttribute("viewBox", `${p.x-z} ${-p.y-z} ${2*z} ${2*z}`);
+    // lens位置: 指と重ならない側へ
+    const half = p.x<0;
+    lens.style.left = half? "auto":"8px"; lens.style.right = half? "8px":"auto";
+    lensTag.style.left = half? "auto":"12px"; lensTag.style.right = half? "12px":"auto";
+  }
+  function resetDrag(){
+    if(drag&&drag.tm) clearTimeout(drag.tm);
+    drag=null; cur.innerHTML=""; lens.style.display="none";
+    lens.classList.remove("fine","cut","miss");
+    lensTag.classList.remove("fine","cut","miss"); lensTag.style.display="none";
+  }
+  svg.addEventListener("contextmenu", e=>e.preventDefault());
+  svg.addEventListener("selectstart", e=>e.preventDefault());
+  function down(e){
+    if(s.cur.length>=s.perEnd){ toast(`1エンド${s.perEnd}本です。「エンド確定」を押してください`); return; }
+    const cp=clientPoint(e); if(!cp) return;
+    e.preventDefault();
+    if(e.pointerId!=null && svg.setPointerCapture){ try{ svg.setPointerCapture(e.pointerId); }catch(_){} }
+    const p=clientToSvg(cp.x,cp.y);
+    drag={p, raw:{x:cp.x,y:cp.y}, fine:false, id:cp.id,
+      tm:setTimeout(()=>{ if(drag){ drag.fine=true; lens.classList.add("fine"); lensTag.classList.add("fine"); lensTag.style.display="block"; drawCursor(drag.p); } },400)};
+    lens.style.display="block"; lens.classList.remove("cut","miss"); lensTag.classList.remove("fine","cut","miss"); lensTag.textContent="位置調整中…"; lensTag.style.display="block";
+    drawCursor(p);
+  }
+  function move(e){
+    const cp=clientPoint(e); if(!drag || !cp || cp.id!==drag.id) return;
+    e.preventDefault();
+    const a=clientToSvg(cp.x,cp.y);
+    const b=clientToSvg(drag.raw.x,drag.raw.y);
+    const k=drag.fine?0.25:1;
+    drag.p={x:drag.p.x+(a.x-b.x)*k, y:drag.p.y+(a.y-b.y)*k};
+    drag.raw={x:cp.x,y:cp.y};
+    drawCursor(drag.p);
+  }
+  function up(e){
+    const cp=clientPoint(e); if(!drag || !cp || cp.id!==drag.id) return;
+    e.preventDefault();
+    clearTimeout(drag.tm);
+    let MX=s.faceD/2*1.18, MY=MX;
+    if(s.faceType==="triple"){ MX=14; MY=36; }
+    const p={x:Math.max(-MX,Math.min(MX,drag.p.x)), y:Math.max(-MY,Math.min(MY,drag.p.y))};
+    resetDrag();
+    const hit=hitFromGlobal(p.x,p.y,s.faceD,s.faceType,lineCutRadius(s.faceD,s.faceType));
+    const rec={x:+hit.x.toFixed(2), y:+hit.y.toFixed(2), s:hit.s, X:hit.X};
+    if(hit.spot!=null) rec.spot=hit.spot;
+    s.cur.push(rec);
+    nativePulse(isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType)?"success":"light");
+    save(); refreshActive();
+    toast(`${scoreLabel(hit)} 点を記録`);
+  }
+  function cancel(e){
+    const cp=clientPoint(e);
+    if(!drag || !cp || cp.id===drag.id) resetDrag();
+  }
+  if(window.PointerEvent){
+    svg.addEventListener("pointerdown", down);
+    svg.addEventListener("pointermove", move);
+    svg.addEventListener("pointerup", up);
+    svg.addEventListener("pointercancel", cancel);
+  }else{
+    svg.addEventListener("touchstart", down, {passive:false});
+    svg.addEventListener("touchmove", move, {passive:false});
+    svg.addEventListener("touchend", up, {passive:false});
+    svg.addEventListener("touchcancel", cancel, {passive:false});
+    svg.addEventListener("mousedown", down);
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+  }
+}
+
+function finishSession(){
+  const s=db.active;
+  const shot=s.ends.flat().length + s.cur.length;
+  if(!shot){ if(confirm("矢が0本です。このセッションを破棄しますか？")){ db.active=null; nativePulse("heavy"); save(); render(); } return; }
+  if(s.cur.length){
+    if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
+    else s.ends.push(s.cur);
+    s.cur=[];
+  }
+  delete s.cur; delete s.editIndex;
+  const isEdit=!!s._edit; delete s._edit;
+  db.active=null;
+  if(isEdit){
+    const i=db.sessions.findIndex(x=>x.id===s.id);
+    if(i>=0) db.sessions[i]=s; else db.sessions.push(s);
+  }else{
+    db.sessions.push(s);
+  }
+  nativePulse("success");
+  save();
+  openSummary(s, !isEdit);
+}
+
+/* ---------- summary modal ---------- */
+function openSummary(sess, isNew){
+  const setup=db.setups.find(x=>x.id===sess.setupId);
+  const all=sess.ends.flat();
+  const total=all.reduce((a,x)=>a+x.s,0);
+  const st=robustStats(all);
+  const adv=adviceFor(sess, setup);
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet">
+    ${recordPhaseArcHtml(2,"結果を確認して、次のエンドやサイト台帳へつなげる。")}
+    <h3>${isNew?"おつかれさまでした！":""} ${fmtD(sess.date)} ・ ${sess.dist}m</h3>
+    ${summaryDecisionHtml(adv,sess)}
+    <div class="statbar">
+      <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
+      <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
+      <div class="stat"><b>${all.filter(a=>a.s===10).length}</b><span>10点</span></div>
+      <div class="stat"><b>${all.filter(a=>a.X).length}</b><span>X</span></div>
+    </div>
+    <div id="sumPlot" style="margin-top:10px"></div>
+    ${groupSummaryHtml(st)}
+    ${summarySightDialHtml(sess,adv)}
+    ${nextActionHtml(sess,adv,setup)}
+    <details class="adv summaryDetails">
+      <summary>分析根拠・個人モデルを見る</summary>
+      ${trustHtml(sess,setup,st)}
+      ${roundProgressHtml(sess)}
+      ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
+      ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
+        ${judgementHtml(adv,sess)}
+        ${shapeNote(adv.st)}
+        ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
+        <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm と弾道モデルから計算した参考値です（サイトタブで変更可）。</div></div>`:""}
+      ${personalModelHtml(adv,sess,setup)}
+      ${conditionHtml(sess,st,setup)}
+    </details>
+    ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
+    <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  plotSession(sess, ovl.querySelector("#sumPlot"));
+  const mk=ovl.querySelector("#sumMark");
+  if(mk) mk.onclick=()=>{
+    db.sightMarks.push({id:uid(), setupId:sess.setupId, dist:sess.dist,
+      v:sess.sightV, h:sess.sightH, date:sess.date, ts:Date.now(),
+      note:`練習記録より（${all.length}本 / 平均${(total/all.length).toFixed(1)}）`});
+    save(); toast("サイト台帳に記録しました"); mk.disabled=true;
+  };
+  ovl.querySelector("#sumCard").onclick=()=>exportScorecardImage(sess);
+  ovl.querySelector("#sumClose").onclick=()=>{ ovl.remove(); render(); };
+}
+
+/* ---------- 履歴 ---------- */
+function historyOverviewHtml(allSs,ss){
+  const src=ss&&ss.length?ss:allSs;
+  if(!allSs.length) return "";
+  const arrows=src.flatMap(s=>s.ends.flat());
+  const total=arrows.reduce((a,x)=>a+x.s,0);
+  const avg=arrows.length?total/arrows.length:0;
+  const recent=[...src].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1)).slice(0,5);
+  const recentAvg=recent.length?recent.flatMap(s=>s.ends.flat()).reduce((a,x)=>a+x.s,0)/Math.max(1,recent.flatMap(s=>s.ends.flat()).length):0;
+  const setupCount=new Set(src.map(s=>s.setupId||"none")).size;
+  const distCount=new Set(src.map(s=>s.dist).filter(Boolean)).size;
+  const quality=src.map(s=>sessionQuality(s,db.setups.find(x=>x.id===s.setupId))).filter(Boolean);
+  const qAvg=quality.length?quality.reduce((a,q)=>a+q.score,0)/quality.length:0;
+  return `<div class="insightStrip">
+    <div class="insightTile"><div class="k">履歴の地図</div><b>${src.length}回</b><span>${arrows.length}本 / ${distCount}距離 / ${setupCount}用具</span></div>
+    <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"}</span></div>
+    <div class="insightTile"><div class="k">判断材料</div><b>${pct(qAvg)}</b><span>サイト値・本数・用具入力の平均充実度</span></div>
+  </div>`;
+}
+function renderHistory(m){
+  const allSs=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
+  const hf=ui.histFilter||{setupId:"",dist:"",round:""};
+  const dists=[...new Set(allSs.map(s=>s.dist).filter(Boolean))].sort((a,b)=>b-a);
+  const rounds=[...new Set(allSs.map(s=>s.round||"free"))];
+  const ss=allSs.filter(s=>
+    (!hf.setupId || (hf.setupId==="__none"?!s.setupId:s.setupId===hf.setupId)) &&
+    (!hf.dist || String(s.dist)===String(hf.dist)) &&
+    (!hf.round || (s.round||"free")===hf.round)
+  );
+  m.innerHTML=`${pageHeroHtml("history",{ss})}${historyOverviewHtml(allSs,ss)}
+  <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
+    <div class="row">
+      <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${hf.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map(d=>`<option value="${d}" ${String(hf.dist)===String(d)?"selected":""}>${d}m</option>`).join("")}</select></div>
+    </div>
+    <div class="row">
+      <div><label class="f">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map(r=>`<option value="${r}" ${hf.round===r?"selected":""}>${roundLabel(r)}</option>`).join("")}</select></div>
+      <div style="display:flex;align-items:flex-end"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
+    </div>
+    <div id="histList">
+    ${ss.length? ss.map(s=>{
+      const all=s.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
+      const setup=db.setups.find(x=>x.id===s.setupId);
+      const q=sessionQuality(s,setup);
+      return `<div class="listItem" data-id="${s.id}">
+        <div><div class="t">${fmtD(s.date)} ・ ${s.dist}m</div>
+        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
+        <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></div>`;
+    }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
+  </div></div>
+  ${groupingTrendCard(ss)}${distTrendCard(ss)}${scoreDistCard(ss)}${monthlyCard(ss)}`;
+  $("#histSetup").onchange=e=>{ ui.histFilter.setupId=e.target.value; render(); };
+  $("#histDist").onchange=e=>{ ui.histFilter.dist=e.target.value; render(); };
+  $("#histRound").onchange=e=>{ ui.histFilter.round=e.target.value; render(); };
+  $("#histClear").onclick=()=>{ ui.histFilter={setupId:"",dist:"",round:""}; render(); };
+  document.querySelectorAll("#histList .listItem").forEach(li=>li.onclick=()=>openHistDetail(li.dataset.id));
+}
+function sessionGroupPoint(s){
+  const all=s.ends.flat();
+  if(all.length<3) return null;
+  const st=robustStats(all);
+  if(!st || st.n<3) return null;
+  const total=all.reduce((a,x)=>a+x.s,0);
+  const setup=db.setups.find(x=>x.id===s.setupId);
+  return {id:s.id,date:s.date||"",setupId:s.setupId||"none",setupName:setup?setup.name:"未指定",dist:s.dist,faceD:s.faceD,faceType:s.faceType||"single",
+    mx:st.mx,my:st.my,rr:st.rr,sx:st.sx,sy:st.sy,major:st.major,minor:st.minor,n:st.n,total,avg:total/all.length};
+}
+function driftText(dx,dy){
+  const parts=[];
+  if(Math.abs(dx)>=.2) parts.push(dx>0?`右${Math.abs(dx).toFixed(1)}cm`:`左${Math.abs(dx).toFixed(1)}cm`);
+  if(Math.abs(dy)>=.2) parts.push(dy>0?`上${Math.abs(dy).toFixed(1)}cm`:`下${Math.abs(dy).toFixed(1)}cm`);
+  return parts.length?parts.join(" / "):"ほぼ変化なし";
+}
+function groupingTrendCard(ss){
+  const by={};
+  [...ss].reverse().forEach(s=>{
+    const p=sessionGroupPoint(s);
+    if(!p) return;
+    const key=[p.setupId,p.dist,p.faceD,p.faceType].join("|");
+    (by[key]=by[key]||[]).push(p);
+  });
+  const groups=Object.values(by).filter(g=>g.length>=2)
+    .sort((a,b)=>(b[b.length-1].date||"").localeCompare(a[a.length-1].date||""))
+    .slice(0,4);
+  if(!groups.length) return "";
+  return `<div class="card"><h2>グルーピング推移 <span class="mini">過去中心の分布と偏移</span></h2>`+
+    groups.map(g=>groupingTrendItem(g)).join("")+
+    `<div class="hint">丸は各練習のグルーピング中心、線は時系列、緑の楕円は過去中心の分布です。的の中心からどちらへ偏り続けているか、直近でどちらへ流れているかを見るための俯瞰です。</div></div>`;
+}
+function groupingTrendItem(g){
+  const latest=g[g.length-1], first=g[0], prev=g[g.length-2];
+  const centers=g.map(p=>({x:p.mx,y:p.my}));
+  const cst=groupStats(centers);
+  const w=ringW(latest.faceD);
+  const maxAbs=Math.max(w*2.6, ...g.map(p=>Math.max(Math.abs(p.mx)+p.rr*.25,Math.abs(p.my)+p.rr*.25)), Math.abs(cst.mx)+(cst.major||0)*1.6, Math.abs(cst.my)+(cst.major||0)*1.6, 4);
+  const M=Math.min(latest.faceD/2*.9, maxAbs*1.25);
+  const path=g.map((p,i)=>`${i?"L":"M"}${p.mx},${-p.my}`).join("");
+  const avgRr=g.reduce((a,p)=>a+p.rr,0)/g.length;
+  const recentDx=latest.mx-prev.mx, recentDy=latest.my-prev.my;
+  const allDx=latest.mx-first.mx, allDy=latest.my-first.my;
+  const bias=Math.hypot(latest.mx,latest.my);
+  const biasState=bias<=w*.25?"センター付近":bias<=w*.75?"軽い偏り":"偏り強め";
+  const setup=esc(latest.setupName);
+  return `<div style="border-top:1px solid var(--line);padding:10px 0">
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <svg viewBox="${-M} ${-M} ${2*M} ${2*M}" style="width:128px;max-width:38%;aspect-ratio:1;border:1px solid var(--line);border-radius:8px;background:var(--inpBg);flex:0 0 auto">
+        <circle cx="0" cy="0" r="${w/2}" fill="none" stroke="var(--sub)" stroke-width="${M/140}"/>
+        <circle cx="0" cy="0" r="${w}" fill="none" stroke="var(--line)" stroke-width="${M/160}"/>
+        <line x1="${-M}" y1="0" x2="${M}" y2="0" stroke="var(--line)" stroke-width="${M/150}"/>
+        <line x1="0" y1="${-M}" x2="0" y2="${M}" stroke="var(--line)" stroke-width="${M/150}"/>
+        ${cst&&cst.major!=null?`<ellipse cx="${cst.mx}" cy="${-cst.my}" rx="${Math.max(cst.major,.18)}" ry="${Math.max(cst.minor,.18)}" transform="rotate(${-cst.angleDeg} ${cst.mx} ${-cst.my})" fill="rgba(15,157,88,.10)" stroke="#0f9d58" stroke-width="${M/95}"/>`:""}
+        <path d="${path}" fill="none" stroke="#1e6fd9" stroke-width="${M/75}" stroke-linecap="round" stroke-linejoin="round"/>
+        ${g.map((p,i)=>{
+          const r=i===g.length-1?M/18:M/25;
+          const fill=i===g.length-1?"#0f9d58":"#1e6fd9";
+          return `<circle cx="${p.mx}" cy="${-p.my}" r="${r}" fill="${fill}" opacity="${0.35+i/g.length*.55}" stroke="#fff" stroke-width="${M/120}"/>`;
+        }).join("")}
+      </svg>
+      <div style="flex:1;min-width:0">
+        <div class="t" style="font-weight:800">${setup} ・ ${latest.dist}m ・ ${faceLabel(latest)}</div>
+        <div class="d">${g.length}回 / ${fmtD(first.date)}〜${fmtD(latest.date)} / 平均グルーピング半径 ${avgRr.toFixed(1)}cm</div>
+        <div class="kv"><span>最新の中心</span><span>${cmOffsetText(latest.mx,"x")} / ${cmOffsetText(latest.my,"y")}（${biasState}）</span></div>
+        <div class="kv"><span>前回から</span><span>${driftText(recentDx,recentDy)}</span></div>
+        <div class="kv"><span>初回から</span><span>${driftText(allDx,allDy)}</span></div>
+        <div class="kv"><span>過去中心の広がり</span><span>${cst.rr.toFixed(1)}cm${cst.major!=null?` / 長軸${cst.major.toFixed(1)}cm`:""}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+function scoreDistCard(ss){
+  const all=(ss||db.sessions).flatMap(s=>s.ends.flat());
+  if(all.length<12) return "";
+  const keys=["X","10","9","8","7","6","5","4","3","2","1","M"];
+  const cnt={}; keys.forEach(k=>cnt[k]=0);
+  all.forEach(a=>{ cnt[a.s===0?"M":(a.X?"X":String(a.s))]++; });
+  const max=Math.max(...keys.map(k=>cnt[k]))||1;
+  return `<div class="card"><h2>得点分布 <span class="mini">全${all.length}本</span></h2>`+
+    keys.filter(k=>cnt[k]>0 || ["X","10","9","8","7"].includes(k)).map(k=>{
+      const sNum=k==="X"?10:(k==="M"?0:+k);
+      const z=zoneStyle(sNum,k==="X");
+      return `<div style="display:flex;align-items:center;gap:8px;padding:2px 0">
+        <div style="width:28px;text-align:center;font-weight:700;font-size:12px;background:${z.bg};color:${z.fg};border-radius:6px;padding:2px 0">${k}</div>
+        <div style="flex:1;background:var(--line);border-radius:5px;height:14px;overflow:hidden"><div style="width:${(cnt[k]/max*100).toFixed(1)}%;height:100%;background:var(--green-l)"></div></div>
+        <div style="width:70px;font-size:11px;color:var(--sub);text-align:right">${cnt[k]}本 (${(cnt[k]/all.length*100).toFixed(0)}%)</div>
+      </div>`;
+    }).join("")+`</div>`;
+}
+function monthlyCard(ss){
+  const src=ss||db.sessions;
+  if(!src.length) return "";
+  const m={};
+  src.forEach(s=>{
+    const k=(s.date||"").slice(0,7); if(!k) return;
+    const all=s.ends.flat();
+    m[k]=m[k]||{c:0,n:0,sum:0};
+    m[k].c++; m[k].n+=all.length; m[k].sum+=all.reduce((a,x)=>a+x.s,0);
+  });
+  const keys=Object.keys(m).sort().reverse().slice(0,6);
+  if(!keys.length) return "";
+  return `<div class="card"><h2>月間サマリー</h2><table class="tbl"><tr><th>月</th><th class="right">練習</th><th class="right">本数</th><th class="right">平均/本</th></tr>`+
+    keys.map(k=>`<tr><td>${k.replace("-","/")}</td><td class="right">${m[k].c}回</td><td class="right">${m[k].n}本</td><td class="right"><b>${m[k].n?(m[k].sum/m[k].n).toFixed(2):"-"}</b></td></tr>`).join("")+
+    `</table></div>`;
+}
+function distTrendCard(ss){
+  // 距離別 平均点推移（簡易スパークライン）
+  const byDist={};
+  [...ss].reverse().forEach(s=>{
+    const all=s.ends.flat(); if(!all.length)return;
+    (byDist[s.dist]=byDist[s.dist]||[]).push(all.reduce((a,x)=>a+x.s,0)/all.length);
+  });
+  const dists=Object.keys(byDist).filter(d=>byDist[d].length>=2).sort((a,b)=>b-a);
+  if(!dists.length) return "";
+  return `<div class="card"><h2>距離別 平均点の推移</h2>`+dists.map(d=>{
+    const pts=byDist[d]; const W=300,H=46;
+    const min=Math.min(...pts), max=Math.max(...pts), span=(max-min)||1;
+    const path=pts.map((v,i)=>`${i?"L":"M"}${(i/(pts.length-1))*W},${H-4-((v-min)/span)*(H-10)}`).join("");
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0">
+      <div style="width:52px;font-weight:700">${d}m</div>
+      <svg width="100%" viewBox="0 0 ${W} ${H}" style="flex:1;max-height:${H}px"><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
+      ${pts.map((v,i)=>`<circle cx="${(i/(pts.length-1))*W}" cy="${H-4-((v-min)/span)*(H-10)}" r="3" fill="var(--green)"/>`).join("")}</svg>
+      <div style="width:54px;text-align:right;font-size:12px">${pts[pts.length-1].toFixed(2)}<br><span style="color:var(--sub);font-size:10px">最新平均</span></div>
+    </div>`;
+  }).join("")+`</div>`;
+}
+function openHistDetail(id){
+  const sess=db.sessions.find(s=>s.id===id); if(!sess)return;
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  const all=sess.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
+  const setup=db.setups.find(x=>x.id===sess.setupId);
+  const st=robustStats(all);
+  const adv=adviceFor(sess,setup);
+  ovl.innerHTML=`<div class="sheet">
+    <h3>${fmtD(sess.date)} ・ ${sess.dist}m ・ ${faceLabel(sess)}</h3>
+    <div style="font-size:12px;color:var(--sub)">${setup?esc(setup.name):"セッティング未指定"}${sess.round&&sess.round!=="free"?" ・ "+roundLabel(sess.round):""}${windText(sess)?" ・ "+esc(windText(sess)):""}${sess.note?" ・ "+esc(sess.note):""}</div>
+    <div class="statbar">
+      <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
+      <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
+      <div class="stat"><b>${all.filter(a=>a.s===10).length}</b><span>10点</span></div>
+      <div class="stat"><b>${all.filter(a=>a.X).length}</b><span>X</span></div>
+    </div>
+    <div id="hPlot" style="margin-top:10px"></div>
+    ${groupSummaryHtml(st)}
+    ${trustHtml(sess,setup,st)}
+    ${roundProgressHtml(sess)}
+    ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
+    <table class="tbl" style="margin-top:8px"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
+    ${sess.ends.map((end,i)=>{
+      const sorted=[...end].sort((a,b)=>b.s-a.s);
+      return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td></tr>`;
+    }).join("")}</table>
+    ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
+    ${personalModelHtml(adv,sess,setup)}
+    ${conditionHtml(sess,st,setup)}
+    ${nextActionHtml(sess,adv,setup)}
+    <div class="btnrow">
+      <button class="btn danger" id="hDel">削除</button>
+      <button class="btn sec" id="hEdit">✏ 編集</button>
+    </div>
+    <div class="btnrow">
+      <button class="btn sec" id="hCard">画像保存</button>
+      <button class="btn ghost" id="hClose">閉じる</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ovl);
+  plotSession(sess, ovl.querySelector("#hPlot"));
+  ovl.querySelector("#hClose").onclick=()=>ovl.remove();
+  ovl.querySelector("#hEdit").onclick=()=>{
+    if(db.active){ toast("記録中のセッションがあります。先に終了してください"); return; }
+    const cp=JSON.parse(JSON.stringify(sess));
+    cp.cur=[]; cp._edit=true;
+    db.active=cp; save(); ovl.remove(); showView("record");
+    toast("過去の記録を編集中。「セッション終了」で上書き保存されます");
+  };
+  ovl.querySelector("#hCard").onclick=()=>exportScorecardImage(sess);
+  ovl.querySelector("#hDel").onclick=()=>{
+    if(confirm("この練習記録を削除しますか？")){
+      trashItem("session",`${fmtD(sess.date)} ${sess.dist}m`,sess);
+      db.sessions=db.sessions.filter(s=>s.id!==id); save({reason:"delete-session",forceSnapshot:true}); ovl.remove(); render(); toast("削除しました。設定から復元できます");
+    }
+  };
+}
+
+/* ---------- サイト ---------- */
+function renderSight(m){
+  if(!ui.sightSel.setupId && db.setups[0]) ui.sightSel.setupId=db.setups[0].id;
+  const sid=ui.sightSel.setupId;
+  const setup=db.setups.find(x=>x.id===sid);
+  // 距離候補: 台帳・セッションにある距離 + 定番
+  const dset=new Set([70,50,30,18]);
+  db.sightMarks.filter(x=>x.setupId===sid).forEach(x=>dset.add(x.dist));
+  db.sessions.filter(x=>x.setupId===sid).forEach(x=>dset.add(x.dist));
+  const dists=[...dset].sort((a,b)=>b-a);
+  if(!dists.includes(ui.sightSel.dist)) ui.sightSel.dist=dists[0];
+  const dist=ui.sightSel.dist;
+  const marks=db.sightMarks.filter(x=>x.setupId===sid && x.dist===dist).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.ts||0)-(a.ts||0));
+  const cur=marks[0];
+  // 最新セッション（同setup×距離）
+  const lastSess=[...db.sessions].reverse().find(s=>s.setupId===sid && s.dist===dist);
+  const adv=lastSess?adviceFor(lastSess, setup):null;
+  const reg=sid?regressionAdvice(sid,dist):{};
+  const interp=sid?sightInterp(sid):null;
+  const cal=sid?calibrationProfile(sid):null;
+  let interpHtml="";
+  if(interp){
+    const preds=[18,30,50,70].filter(d=>!interp.have.includes(d)).map(d=>`<div class="chip">${d}m → <b>${interp.est(d).toFixed(1)}</b></div>`);
+    interpHtml=`<h2 style="margin-top:14px">📏 サイトマーク予測（上下）</h2>
+      <div style="font-size:12px;color:var(--sub)">実測: ${interp.pts.map(p=>`${p[0]}m = ${p[1]}`).join(" ・ ")} / ${interp.model==="curve"?"カーブ近似":"直線近似"} / 一致度${pct(interp.r2||0)}</div>
+      ${preds.length?`<div class="chips" style="margin-top:8px">${preds.join("")}</div>`:`<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
+      <div class="hint">2距離以上の実測サイト値から予測します。4距離以上ある場合は、弾道に近いカーブ近似が有効なときだけ自動採用します。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
+  }
+  m.innerHTML=`${pageHeroHtml("sight",{setup,dist,marks,adv,lastSess})}
+  <div class="card">
+    <h2>サイト台帳</h2>
+    ${db.setups.length?`
+    <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map(s=>`<option value="${s.id}" ${s.id===sid?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
+    <label class="f">距離</label>
+    <div class="chips">${dists.map(d=>`<div class="chip ${d===dist?"on":""}" data-d="${d}">${d}m</div>`).join("")}</div>
+    <div class="advice" style="background:var(--card);border-color:var(--line)">
+      <div class="kv"><span>現在のサイト（最新記録）</span>
+      <span style="font-size:17px;font-weight:800">${cur?`上下 ${esc(cur.v||"—")} ・ 左右 ${esc(cur.h||"—")}`:"未登録"}</span></div>
+      ${cur?`<div class="note">${fmtD(cur.date)} ${esc(cur.note||"")}</div>`:""}
+    </div>
+    <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
+    ${marks.length?`<table class="tbl" style="margin-top:10px"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
+      ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
+      <td style="font-size:11px;color:var(--sub)">${esc(mk.note||"")}</td>
+      <td class="right"><button class="btn sm ghost" data-del="${mk.id}" style="padding:4px 8px">✕</button></td></tr>`).join("")}</table>`
+      :`<div class="empty">この距離の記録はまだありません</div>`}
+    <details class="adv">
+      <summary>モデル診断・校正状況</summary>
+      ${cal?`<div class="advice" style="background:var(--card);border-color:var(--line);margin-top:10px">
+        <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score*100)}%）</span></div>
+        <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
+        ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
+      </div>`:""}
+      ${modelReadinessHtml(sid)}
+      ${physicsCalibrationHtml(sid)}
+    </details>
+    `:`<div class="empty">先に「用具」タブでセッティングを登録してください。<br>サイト台帳はセッティングごとに管理されます。</div>`}
+  </div>
+  ${setup?`
+  <div class="card">
+    <h2>🔧 調整アドバイス <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
+    ${adv?`
+      <div style="font-size:12px;color:var(--sub)">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
+      <div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
+      ${judgementHtml(adv,lastSess)}
+      ${shapeNote(adv.st)}
+      ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
+      <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
+      :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
+    <details class="adv" ${adv?"":"open"}>
+      <summary>判断の根拠</summary>
+      ${adv?trustHtml(lastSess,setup,adv.st):""}
+      ${adv?personalModelHtml(adv,lastSess,setup):""}
+      ${adv?conditionHtml(lastSess,adv.st,setup):""}
+      ${adv?nextActionHtml(lastSess,adv,setup):""}
+    </details>
+    <details class="adv">
+      <summary>サイト値分析・予測</summary>
+      ${(reg.v||reg.h)?`<div class="advice" style="margin-top:10px">
+        <div style="font-size:12px;color:var(--sub)">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
+        ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)} / 品質${pct(reg.v.quality||0)})</span></div>`:""}
+        ${reg.h?`<div class="dir">左右サイトの推定最適値：<b>${reg.h.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.h.n}回分 / 一致度${pct(reg.h.r2||0)} / 品質${pct(reg.h.quality||0)})</span></div>`:""}
+        <div class="note">サイト値を数値で記録した複数回の練習から「ズレが0になる値」を、練習信頼度・風・本数を加味した外れ値に強い推定で求めています。データが増えるほど精度が上がります。</div>
+      </div>`:`<div class="hint">💡 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
+      ${interpHtml}
+    </details>
+    <details class="adv">
+      <summary>クリック換算の設定（任意）</summary>
+      <div class="row">
+        <div><label class="f">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70||""}" placeholder="例: 4"></div>
+        <div><label class="f">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70||""}" placeholder="例: 4"></div>
+      </div>
+      <div class="hint">「サイトを1クリック動かすと70mで着弾が何cm動くか」。一度測って登録すると提案がクリック数でも出ます（他の距離へは自動換算）。アイ〜サイト距離は右上の⚙設定から。</div>
+    </details>
+  </div>`:""}`;
+  const sgSetup=$("#sgSetup");
+  if(sgSetup) sgSetup.onchange=e=>{ ui.sightSel.setupId=e.target.value; render(); };
+  document.querySelectorAll(".chips .chip[data-d]").forEach(c=>c.onclick=()=>{ ui.sightSel.dist=+c.dataset.d; render(); });
+  const add=$("#sgAdd");
+  if(add) add.onclick=()=>openMarkForm(sid,dist);
+  const calMode=$("#sgCalMode");
+  if(calMode) calMode.onclick=()=>openCalibrationWizard(sid);
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    const mk=db.sightMarks.find(x=>x.id===b.dataset.del);
+    if(confirm("この記録を削除しますか？")){ if(mk) trashItem("sightMark",`${mk.dist}m サイト値`,mk); db.sightMarks=db.sightMarks.filter(x=>x.id!==b.dataset.del); save({reason:"delete-sight-mark",forceSnapshot:true}); render(); toast("削除しました。設定から復元できます"); }
+  });
+  const cv=$("#sgCalV"), ch=$("#sgCalH");
+  if(cv) cv.onchange=e=>{ setup.calibV70=parseFloat(e.target.value)||null; save(); render(); };
+  if(ch) ch.onchange=e=>{ setup.calibH70=parseFloat(e.target.value)||null; save(); render(); };
+}
+function openMarkForm(setupId,dist){
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>サイト値を記録（${dist}m）</h3>
+    <label class="f">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
+    <div class="row">
+      <div><label class="f">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
+      <div><label class="f">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
+    </div>
+    <label class="f">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・ベスト調整">
+    <div class="btnrow"><button class="btn ghost" id="mkCancel">キャンセル</button><button class="btn" id="mkSave">保存</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  ovl.querySelector("#mkCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#mkSave").onclick=()=>{
+    db.sightMarks.push({id:uid(), setupId, dist, v:ovl.querySelector("#mkV").value.trim(), h:ovl.querySelector("#mkH").value.trim(),
+      date:ovl.querySelector("#mkDate").value||today(), ts:Date.now(), note:ovl.querySelector("#mkNote").value.trim()});
+    save(); ovl.remove(); render(); toast("台帳に記録しました");
+  };
+}
+function openCalibrationWizard(setupId){
+  const setup=db.setups.find(s=>s.id===setupId);
+  if(!setup){ toast("セッティングを選んでください"); return; }
+  const dists=[70,50,30,18];
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>校正モード — ${esc(setup.name)}</h3>
+    <div class="hint">実測できている距離だけ入力してください。複数距離が揃うほど、距離別サイト予測と個人補正が強くなります。</div>
+    <label class="f">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
+    ${dists.map(d=>{
+      const mk=latestMark(setupId,d)||{};
+      return `<div class="row">
+        <div><label class="f">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v||"")}"></div>
+        <div><label class="f">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h||"")}"></div>
+      </div>`;
+    }).join("")}
+    <label class="f">メモ</label><input class="inp" id="calNote" placeholder="例: 校正日 / 無風 / ベスト確認">
+    <div class="btnrow"><button class="btn ghost" id="calCancel">キャンセル</button><button class="btn" id="calSave">校正値を保存</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  ovl.querySelector("#calCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#calSave").onclick=()=>{
+    const date=ovl.querySelector("#calDate").value||today();
+    const note=ovl.querySelector("#calNote").value.trim()||"校正モード";
+    let n=0;
+    dists.forEach(d=>{
+      const v=ovl.querySelector(`#calV_${d}`).value.trim(), h=ovl.querySelector(`#calH_${d}`).value.trim();
+      if(v||h){ db.sightMarks.push({id:uid(),setupId,dist:d,v,h,date,ts:Date.now(),note}); n++; }
+    });
+    if(!n){ toast("1つ以上入力してください"); return; }
+    save({reason:"calibration",forceSnapshot:true}); ovl.remove(); render(); toast(`${n}距離の校正値を保存しました`);
+  };
+}
+
+/* ---------- 用具 ---------- */
+const CATALOG_SHAFTS=[
+  {id:"x10-protour",name:"EASTON X10 ProTour",aliases:["X10 PROTOUR","X10 PRO TOUR","PROTOUR"],type:"carbon",dia:5.0,gpiA:4.7,gpiB:1600,sizes:[770,720,670,620,570,520,470,420,380,340],gpi:{770:6.0,720:6.2,670:6.5,620:6.7,570:6.9,520:7.3,470:7.6,420:8.0,380:8.4,340:8.8},odIn:{770:.181,720:.183,670:.186,620:.188,570:.191,520:.194,470:.198,420:.202,380:.207,340:.213}},
+  {id:"x10",name:"EASTON X10",aliases:["X10"],type:"carbon",dia:5.5,gpiA:3.8,gpiB:1950,sizes:[1000,900,830,750,700,650,600,550,500,450,410,380,350,325],gpi:{1000:5.3,900:5.8,830:6.2,750:6.4,700:6.7,650:6.8,600:7.0,550:7.5,500:7.8,450:8.1,410:8.5,380:8.9,350:8.8,325:9.2},odIn:{1000:.182,900:.185,830:.188,750:.191,700:.194,650:.197,600:.200,550:.203,500:.206,450:.209,410:.212,380:.215,350:.218,325:.221}},
+  {id:"x10-32",name:"EASTON X10 3.2mm Parallel Pro",aliases:["X10 3.2","3.2MM PARALLEL PRO"],type:"carbon",dia:3.2,gpiA:3.4,gpiB:2200,sizes:[1000,900,800,750,700,650,600,550,500,460,420,380,340]},
+  {id:"ace",name:"EASTON A/C/E",aliases:["A/C/E","ACE"],type:"carbon",dia:5.5,gpiA:4.0,gpiB:1450,sizes:[1250,1100,1000,920,850,780,720,670,620,570,520,470,430,400,370]},
+  {id:"x10-4",name:"EASTON X10 4mm Parallel Pro",aliases:["X10 4MM","4MM PARALLEL PRO"],type:"carbon",dia:4.0,gpiA:4.4,gpiB:2000,sizes:[1150,1000,880,810,710,660,610,570,520,470,420,380,340,300,250]},
+  {id:"superdrive23",name:"EASTON SuperDrive 23",aliases:["SUPERDRIVE 23","SD23"],type:"carbon",dia:9.3,gpiA:7.0,gpiB:900,sizes:[475,375,325]},
+  {id:"superdrive-micro",name:"EASTON SuperDrive Micro",aliases:["SUPERDRIVE MICRO"],type:"carbon",dia:4.0,gpiA:4.9,gpiB:1800,sizes:[950,850,750,675,625,575,525,475,425,375,325]},
+  {id:"avance",name:"EASTON Avance",aliases:["AVANCE"],type:"carbon",dia:4.2,gpiA:4.1,gpiB:1700,sizes:[2000,1800,1600,1400,1150,1000,900,810,730,660,600,550,500,450,400,340]},
+  {id:"avance-sport",name:"EASTON Avance Sport",aliases:["AVANCE SPORT"],type:"carbon",dia:4.2,gpiA:4.4,gpiB:1600,sizes:[2000,1800,1600,1400,1150,1000,900,810,730,660,600,550,500,450,400,340]},
+  {id:"vector",name:"EASTON Vector",aliases:["VECTOR"],type:"carbon",dia:5.0,gpiA:3.2,gpiB:1300,sizes:[2000,1800,1600,1400,1200,1000,800,600]},
+  {id:"revelation",name:"Black Eagle Revelation",aliases:["REVELATION","BLACK EAGLE"],type:"carbon",dia:5.0,gpiA:5.0,gpiB:1800,sizes:[800,750,700,650,600,550,500,450,400,350,300]},
+  {id:"paragon",name:"SKYLON Carbon Paragon",aliases:["PARAGON","SKYLON"],type:"carbon",dia:4.2,gpiA:4.6,gpiB:1800,sizes:[1000,900,850,800,750,700,650,600,550,500,450,400,350]},
+  {id:"x23",name:"EASTON X23",aliases:["X23"],type:"aluminum",sizes:[2312,2314,2315,2318]},
+  {id:"x7",name:"EASTON X7 Eclipse",aliases:["X7","ECLIPSE"],type:"aluminum",sizes:[1514,1614,1714,1814,1914,2014,2114,2212,2312]},
+  {id:"xx75pp",name:"EASTON XX75 Platinum Plus",aliases:["PLATINUM PLUS","XX75"],type:"aluminum",sizes:[1416,1516,1616,1716,1816,1916,2016]},
+  {id:"jazz",name:"EASTON XX75 Jazz",aliases:["JAZZ"],type:"aluminum",sizes:[1214,1416,1516,1616,1716,1816,1916]}
+];
+function normGearText(s){
+  return String(s||"").normalize("NFKC").toUpperCase().replace(/[・_/]+/g," ").replace(/\s+/g," ").trim();
+}
+function aluminumDiaMm(code){ return Math.floor(code/100)/64*25.4; }
+function aluminumGpi(code){
+  const od=Math.floor(code/100)/64, wall=(code%100)/1000, id=Math.max(0,od-2*wall);
+  return (Math.PI/4*(od*od-id*id))*0.0975*7000;
+}
+function carbonGpi(fam,spine){ return fam.gpi&&fam.gpi[spine]?fam.gpi[spine]:clamp(fam.gpiA+fam.gpiB/spine,3,18); }
+function carbonDiaMm(fam,spine){ return fam.odIn&&fam.odIn[spine]?fam.odIn[spine]*25.4:fam.dia; }
+function inferCatalogGear(vals){
+  const txt=normGearText(vals.arrow);
+  if(!txt) return null;
+  const fam=[...CATALOG_SHAFTS]
+    .sort((a,b)=>Math.max(...b.aliases.map(x=>x.length))-Math.max(...a.aliases.map(x=>x.length)))
+    .find(f=>f.aliases.some(a=>new RegExp(`(^|\\s)${normGearText(a).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}(\\s|$)`).test(txt)));
+  if(!fam) return null;
+  const spine=num(vals.shaftSpine);
+  if(!spine) return {fam,missing:"spine"};
+  const listed=!fam.sizes||fam.sizes.includes(spine);
+  const dia=fam.type==="aluminum"?aluminumDiaMm(spine):carbonDiaMm(fam,spine);
+  const gpi=fam.type==="aluminum"?aluminumGpi(spine):carbonGpi(fam,spine);
+  const len=num(vals.arrowLength)||null;
+  const point=num(vals.pointWeight)||null;
+  const total=len?gpi*len+(point||100)+27:null;
+  const gpiSource=fam.type==="aluminum"?"（番手から計算）":fam.gpi&&fam.gpi[spine]?"（メーカー掲載値）":"（モデル別近似）";
+  const diaSource=fam.type==="aluminum"?"（番手から計算）":fam.odIn&&fam.odIn[spine]?"（メーカー掲載値）":"（代表値/推定）";
+  const notes=[`${fam.name} / 番手 ${spine} をカタログ掲載モデルとして認識`, `シャフト重量 ${gpi.toFixed(2)}gr/in${gpiSource}`, `外径 ${dia.toFixed(2)}mm${diaSource}`];
+  if(!listed) notes.push(`注意: 番手 ${spine} はこのモデルの掲載サイズ一覧では未確認のため、重量・外径は近似として扱います`);
+  if(total) notes.push(`総矢重量 ${total.toFixed(0)}gr（矢尺${len}in、ポイント${point||100}gr、ノック/ベイン等27grとして推定）`);
+  return {fam,spine,dia,gpi,len,point,total,notes};
+}
+function uniqGear(items){
+  const seen=new Set();
+  return items.filter(v=>{
+    const key=normGearText(v);
+    if(!key||seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+function shaftSuggestions(){
+  const other=[
+    "EASTON RX7","EASTON X10 ProTour","EASTON 4MM ML","FIVICS Five-X","FIVICS TENPRO","VICTORY VAP V1","VICTORY VAP V3"
+  ];
+  return uniqGear([...CATALOG_SHAFTS.map(f=>f.name),...other]);
+}
+const COMMON_SPINES=[2000,1800,1600,1400,1250,1200,1150,1100,1000,950,920,900,880,850,830,810,800,780,750,730,720,710,700,675,670,660,650,625,620,610,600,575,570,550,525,520,500,475,470,460,450,430,425,420,410,400,380,375,370,350,340,325,300,250,2318,2315,2314,2312,2212,2114,2016,2014,1916,1914,1816,1814,1716,1714,1616,1614,1516,1514,1416,1414,1214];
+const GEAR_SUGGESTIONS={
+  bow:[
+    "HOYT Grand Prix GMX3 2026 H25","HOYT Grand Prix GMX3 2024 H25","HOYT Grand Prix XCEED 2 H25","HOYT Grand Prix XCEED 2 H27","HOYT Grand Prix XCEED","HOYT Formula SR H25","HOYT Formula XD","HOYT RCRV Podium H25","HOYT RCRV Comp H25","HOYT GMX3","HOYT XCEED 2",
+    "WIAWIS ATF-EX H25","WIAWIS META LX H25","WIAWIS ATF-DX H25","WIAWIS META DX H25","WIAWIS ATF-X H25","WIAWIS RADICAL PRO H25","WIAWIS CX7 H25","WIAWIS INNO CXT H25","WIAWIS INNO CXT H23","WIN&WIN NEW WINEX 2021 H25","WIN&WIN WIAWIS TFT-G",
+    "MK ARCHERY X-ON","MK ARCHERY XG","MK KOREA MK ZX","MK ZX","MK KOREA MK XG",
+    "WNS Vantage AX","WNS Motive FX","WNS Explorer DX",
+    "KINETIC Vygo V2","KINETIC Novana V2","KINETIC Sovren","KINETIC Zivio V2",
+    "FIVICS ONIX PRO","FIVICS VX 25inch","FIVICS VELLATOR 25inch","FIVICS ARGON-X","FIVICS VELLATOR",
+    "SAMICK Discovery","SAMICK Polaris","MATHEWS Title","PSE Laser"
+  ],
+  limbs:[
+    "HOYT Grand Prix METRIX Foam Core","HOYT Grand Prix METRIX Wood Core","HOYT Formula METRIX Foam Core","HOYT Formula METRIX Wood Core","HOYT Formula AXIA Foam Core","HOYT Formula AXIA Wood Core","HOYT Grand Prix AXIA Wood Core","HOYT Formula RCRV PODIUM Limbs","HOYT Grand Prix RCRV PODIUM Limbs","HOYT Grand Prix COMP Limbs","HOYT Formula Carbon Integra",
+    "WIAWIS NS-G2 Foam Core","WIAWIS NS-G2 Wood Core","WIAWIS NS-XP Wood","WIAWIS NS-XP Foam","WIAWIS NS-XP Wood Core ILF","WIAWIS MXT-XP Wood","WIAWIS MXT-XP Foam","WIAWIS MXT-XT Wood","WIAWIS MXT-XT Foam","WIAWIS CX7 Wood Core","WIAWIS CX7 Foam Core","WIAWIS NS-G Wood Core","WIAWIS NS-G Graphene Foam Core","WIN&WIN NEW WINEX Foam Core",
+    "MK XD Limbs","MK KOREA ZEST Limbs","MK KOREA N3 Limbs","MK KOREA X-CORE Limbs",
+    "WNS Vantage G7 Limbs","WNS Delta C2 Limbs","WNS Explorer W1 Limbs",
+    "KINETIC Vaultage Carbon/Foam Limbs","SAMICK Discovery R1 Limbs","SAMICK Polaris Limbs",
+    "FIVICS SKADI Limbs Wood Core","FIVICS ARGON-X Limbs Wood Core"
+  ],
+  sight:[
+    "SHIBUYA ULTIMA RC PRO G2 520 Carbon","SHIBUYA ULTIMA RC IV 520 Carbon","SHIBUYA ULTIMA RC PRO G2 Double Mount","SHIBUYA ULTIMA RC PRO 520 Carbon","SHIBUYA Dual Click","SHIBUYA ULTIMA CP PRO G2","SHIBUYA OKULUS Scope",
+    "AXCEL Achieve XP Recurve","AXCEL Curve RX Pro","AXCEL Achieve XP Pro Compound","AXCEL AVX",
+    "WIAWIS WS700","FIVICS FV-300","FIVICS FV-150","AVALON Tec One","CARTEL Focus K","CARTEL Midas RX-10","CARTEL Midas 105","CARTEL RX-103"
+  ],
+  rest:[
+    "SHIBUYA Ultima Recurve Rest","SHIBUYA Magnetic Rest","AAE Free Flyte Elite","Spigarelli Z/T","Hoyt Super Rest","Beiter Rest","WIAWIS S-RV"
+  ],
+  plunger:[
+    "SHIBUYA DX Plunger","SHIBUYA Ultima Plunger","Beiter Plunger","WIAWIS ACS Plunger","FIVICS Cushion Plunger","AAE Gold Plunger"
+  ],
+  nock:[
+    "EASTON G Nock","EASTON Pin Nock","EASTON Super Nock","Beiter Pin Nock","Beiter In-Out Nock","FIVICS Pin Nock","Bohning F Nock"
+  ],
+  string:[
+    "BCY 8125","BCY 8190","BCY 652 Spectra","Angel Majesty 777","Fast Flight Plus","GAS Bowstrings Recurve",
+    "GAS Bowstrings High Octane","GAS Bowstrings Ghost XV","FirstString X-IT Wire","FirstString Premium Custom String","ARICO STRING BCY Spectra 652","ARICO STRING Angel Majesty 777"
+  ],
+  stabilizer:[
+    "SHIBUYA VERSA","SHIBUYA PRIMUS","SHIBUYA Vanquish","SHIBUYA Vanquish PRO","EASTON Contour CS","EASTON Halcyon","EASTON Z-Comp","WIAWIS ACS EL","WIAWIS ACS LX","WIAWIS ACS15","WIAWIS S21","WNS SAT","AXCEL TriLock","AVALON Tec One",
+    "SHREWD Index","SHREWD RevX","SHREWD Revel","RAMRODS VEKTOR","RAMRODS Ultra V4","RAMRODS BEAST","CONQUEST SmacDown 625","CONQUEST SmacDown 500 Pro","WIN&WIN HMC Plus","FIVICS SKADI-CX","FIVICS V Upper Rod","FIVICS CORE-A Damper"
+  ],
+  tab:[
+    "SHIBUYA APEX","SHIBUYA Tab","WIAWIS EZR","WIAWIS EZ","FIVICS Saker II","FIVICS JM1","FIVICS JM2","WIN&WIN AT-100","AXCEL Contour Tab","AAE Cavalier Elite","STAN Onnex","T.R.U. Ball Execution",
+    "ANGEL Tab 1 Plus Cordovan","ANGEL Tab 2 Plus Cordovan","ANGEL Tab 2 Super Fine Leather","Sherwood Tab Type-1","CARTEL Tab","NEET Glove","Naigai GT-301 Tab"
+  ],
+  pointWeight:["60","70","80","90","100","110","120","130","140","150"],
+  shaftSetWeightSpread:["1","2","3","4","5","6","8","10"],
+  shaftStraightness:["0.001","0.002","0.003","0.004","0.005","0.006"],
+  foc:["9","10","11","12","13","14","15","16","17","18"],
+  vane:["KOREA ARCHERY Jet6","KOREA ARCHERY Jet6 S","GAS PRO Spin Vanes","XS Wings","Spin Wing","Range-O-Matic Spin Vanes","EliVanes P3","Bohning X Vane","AAE WAV","Kurly Vanes","Natural Feather"],
+  vaneHeight:["1.5","1.75","2.0","2.5","3.0","4.0"],
+  nockFit:["普通","やや緩い","ややきつい","Loose","Tight"],
+  poundage:["24","26","28","30","32","34","36","38","40","42","44","46","48","50"],
+  drawLength:["24","25","26","27","28","29","30","31","32"],
+  arrowLength:["25","26","27","28","29","30","31","32"],
+  arrowCd:["0.90","1.00","1.10","1.20","1.30","1.45"],
+  bowEfficiency:["65","68","70","72","75","78","80","82"],
+  temperature:["0","5","10","15","20","25","30","35"],
+  altitude:["0","100","300","500","800","1000","1500"],
+  humidity:["30","40","50","60","70","80","90"],
+  brace:["8.0 inch","8.25 inch","8.5 inch","8.75 inch","9.0 inch","9.25 inch"],
+  tiller:["0mm","+2mm","+3mm","+4mm","+5mm","+6mm"],
+  centerShot:["矢先 1/2本 外","矢先 1本 外","センター","やや内"],
+  plungerTension:["弱め","中間","強め","1回転戻し","2回転戻し"],
+  tuningMethod:["未実施","ベアシャフト確認","ウォークバック確認","距離別サイト校正","プランジャー確認","ブレースハイト比較","センターショット確認","ティラー確認","ペーパーチューニング"],
+  tuningResult:["未確認","良好","硬め傾向","柔らかめ傾向","右寄り","左寄り","縦散り","横散り","再確認"]
+};
+const GEAR_FIELDS=[
+  ["bow","ハンドル/弓本体"],["limbs","リム"],["poundage","ポンド (実測)"],["drawLength","引き尺 (inch)"],["arrow","シャフト銘柄"],
+  ["sight","サイト"],["rest","レスト"],["string","弦"],["stabilizer","スタビライザー/ウエイト"],["tab","タブ/リリーサー"],
+  ["shaftSpine","シャフト番手/スパイン"],["arrowLength","矢尺/シャフト長 (inch)"],["pointWeight","ポイント重量 (gr)"],
+  ["arrowDia","矢の直径 (mm)"],["shaftGpi","シャフト重量 (gr/in)"],["arrowWeight","矢重量 合計 (gr)"],["shaftSetWeightSpread","矢セット重量差 (gr)"],["shaftStraightness","シャフト真直度 (inch)"],
+  ["foc","FOC (%)"],["vane","ベイン/羽根"],["vaneHeight","ベイン高さ (mm)"],["nock","ノック/ノッキングポイント"],["nockFit","ノックフィット"],
+  ["arrowSpeed","実測初速 (fps / m/s・任意)"],["arrowCd","抗力係数 Cd (任意)"],["bowEfficiency","弓効率 (%)"],["temperature","気温 (℃)"],["altitude","標高 (m)"],["humidity","湿度 (%)"],
+  ["brace","ブレースハイト"],["tiller","ティラー"],["centerShot","センターショット"],["plunger","プランジャー"],["plungerTension","プランジャー硬さ/位置"],["tuningMethod","確認したチューニング"],["tuningResult","チューニング結果"],["notes","その他メモ"]
+];
+const GEAR_SECTIONS=[
+  {title:"基本", keys:["bow","limbs","poundage","drawLength","arrow"], open:true},
+  {title:"矢の実測・精密データ", keys:["shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","shaftSetWeightSpread","shaftStraightness","foc","vane","vaneHeight","nock","nockFit"]},
+  {title:"サイト・チューニング", keys:["sight","rest","string","stabilizer","tab","brace","tiller","centerShot","plunger","plungerTension","tuningMethod","tuningResult"]},
+  {title:"物理モデル補正", keys:["arrowSpeed","arrowCd","bowEfficiency","temperature","altitude","humidity"]},
+  {title:"メモ", keys:["notes"]}
+];
+const GEAR_NUMERIC_FIELDS=new Set(["poundage","drawLength","shaftSpine","arrowLength","pointWeight","arrowDia","shaftGpi","arrowWeight","shaftSetWeightSpread","shaftStraightness","foc","vaneHeight","arrowSpeed","arrowCd","bowEfficiency","temperature","altitude","humidity"]);
+const GEAR_PLACEHOLDERS={
+  arrow:"例: EASTON X10",
+  poundage:"例: 38",
+  drawLength:"例: 28.5",
+  arrowSpeed:"例: 205fps / 62.5m/s",
+  arrowCd:"未入力なら矢径とベインから推定",
+  bowEfficiency:"未入力なら72〜78%で推定",
+  stabilizer:"例: SHIBUYA Vanquish PRO",
+  tab:"例: SHIBUYA APEX",
+  shaftSetWeightSpread:"同一セットの最大差。例: 3",
+  shaftStraightness:"例: 0.003",
+  foc:"例: 12",
+  tuningResult:"例: ベアシャフトが少し硬め / 30mで左右が揃った",
+  notes:"個体差、チューニング履歴、気づいたこと"
+};
+function gearOptions(k){
+  if(k==="arrow") return shaftSuggestions();
+  if(k==="shaftSpine") return COMMON_SPINES.map(String);
+  return GEAR_SUGGESTIONS[k]||[];
+}
+const MANUAL_CHOICE="__manual__";
+function choiceMatch(opts,value){
+  const key=normGearText(value);
+  return opts.find(v=>normGearText(v)===key)||"";
+}
+function choiceFieldHtml(id,lb,opts,value,placeholder,mode){
+  const cur=String(value||"");
+  const match=choiceMatch(opts,cur);
+  const custom=cur && !match;
+  const inputValue=custom?cur:match;
+  const ph=placeholder?` placeholder="${esc(placeholder)}"`:"";
+  const md=mode||"";
+  return `<label class="f" for="${id}Pick">${lb}</label>
+    <select class="inp choicePick" id="${id}Pick" data-target="${id}">
+      <option value="">選択なし</option>
+      ${opts.map(v=>`<option value="${esc(v)}" ${match===v?"selected":""}>${esc(v)}</option>`).join("")}
+      <option value="${MANUAL_CHOICE}" ${custom?"selected":""}>候補にないので手入力</option>
+    </select>
+    <input class="inp choiceManual ${custom?"":"is-hidden"}" id="${id}" value="${esc(inputValue)}"${md}${ph}>`;
+}
+function bindChoiceFields(root){
+  root.querySelectorAll(".choicePick").forEach(sel=>{
+    const input=root.querySelector("#"+sel.dataset.target);
+    if(!input) return;
+    const sync=(focusManual=false)=>{
+      const manual=sel.value===MANUAL_CHOICE;
+      input.classList.toggle("is-hidden",!manual);
+      if(!manual) input.value=sel.value||"";
+      else if(focusManual) input.focus();
+    };
+    sel.onchange=()=>sync(true);
+    sync(false);
+  });
+}
+function setChoiceValue(root,id,value){
+  const input=root.querySelector("#"+id);
+  if(!input) return;
+  input.value=String(value==null?"":value);
+  const pick=root.querySelector(`[data-target="${id}"]`);
+  if(!pick) return;
+  const val=input.value;
+  const match=[...pick.options].find(o=>o.value && o.value!==MANUAL_CHOICE && normGearText(o.value)===normGearText(val));
+  if(match){ pick.value=match.value; input.value=match.value; input.classList.add("is-hidden"); }
+  else if(val){ pick.value=MANUAL_CHOICE; input.classList.remove("is-hidden"); }
+  else{ pick.value=""; input.classList.add("is-hidden"); }
+}
+function gearFieldHtml(k,lb,s){
+  const opts=gearOptions(k), listId=`gfList_${k}`;
+  const list=opts.length?` list="${listId}" autocomplete="off"`:"";
+  const mode=GEAR_NUMERIC_FIELDS.has(k)?` inputmode="decimal"`:"";
+  const ph=GEAR_PLACEHOLDERS[k]?` placeholder="${esc(GEAR_PLACEHOLDERS[k])}"`:"";
+  if(k==="notes") return `<label class="f" for="gf_${k}">${lb}</label><textarea class="inp" id="gf_${k}"${ph}>${esc(s?s[k]:"")}</textarea>`;
+  if(opts.length && !GEAR_NUMERIC_FIELDS.has(k)) return choiceFieldHtml(`gf_${k}`,lb,opts,s?s[k]:"",GEAR_PLACEHOLDERS[k]||"",mode);
+  return `<label class="f" for="gf_${k}">${lb}</label><input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}"${list}${mode}${ph}>${opts.length?`<datalist id="${listId}">${opts.map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`:""}`;
+}
+function gearSectionHtml(sec,s){
+  const body=sec.keys.map(k=>{
+    const f=GEAR_FIELDS.find(x=>x[0]===k);
+    return f?gearFieldHtml(f[0],f[1],s):"";
+  }).join("");
+  return sec.open?body:`<details class="adv"><summary>${sec.title}</summary>${body}</details>`;
+}
+function gearPrecisionProfile(s){
+  const checks=[
+    ["arrowWeight","矢重量"],["arrowDia","矢径"],["arrowLength","矢尺"],["pointWeight","ポイント重量"],
+    ["poundage","実測ポンド"],["drawLength","引き尺"],["arrowSpeed","実測初速"],["shaftSetWeightSpread","矢セット重量差"],
+    ["foc","FOC"],["vane","ベイン"],["tuningMethod","チューニング確認"],["temperature","気温/環境"]
+  ];
+  const filled=checks.filter(([k])=>s&&String(s[k]||"").trim()).map(x=>x[1]);
+  const missing=checks.filter(([k])=>!(s&&String(s[k]||"").trim())).map(x=>x[1]);
+  const score=filled.length/checks.length;
+  const level=score>=.78?"高":score>=.5?"中":"低";
+  return {score,level,filled,missing};
+}
+function carbonSpineCandidates(){
+  return COMMON_SPINES.filter(n=>n<=2000 && !(n>1200 && n%100>=10 && n%100<=20));
+}
+function spineGuidance(s){
+  const p=num(s&&s.poundage);
+  const draw=num(s&&s.drawLength);
+  const len=num(s&&s.arrowLength) || (draw!=null ? draw+1.75 : null);
+  const point=num(s&&s.pointWeight) || 100;
+  if(p==null || len==null) return {ready:false, missing:[p==null?"実測ポンド":null,len==null?"矢尺":null].filter(Boolean)};
+  const drawAdj=draw!=null ? (draw-28)*1.2 : 0;
+  const eff=p + drawAdj + (len-28)*2.0 + (point-100)*0.055;
+  const ideal=clamp(1425 - eff*18.2, 300, 1500);
+  const candidates=carbonSpineCandidates()
+    .map(v=>({v,d:Math.abs(v-ideal)}))
+    .sort((a,b)=>a.d-b.d || a.v-b.v)
+    .slice(0,5)
+    .map(x=>x.v);
+  const actual=num(s&&s.shaftSpine);
+  let state="候補を表示", tone="mid", text="カタログ表で最終確認してください。";
+  if(actual!=null){
+    const aluminum=actual>1200 && actual%100>=10 && actual%100<=20;
+    if(aluminum){ state="アルミ番手", text="アルミ番手はカーボンスパインと体系が違うため、番手表と実射で確認します。"; }
+    else{
+      const diff=actual-ideal;
+      if(Math.abs(diff)<=90){ state="概ね候補域"; tone="ok"; text="現在の番手は初期候補レンジに入っています。"; }
+      else if(diff>90){ state="柔らかめ寄り"; tone="warn"; text="現在の番手は初期候補より柔らかめの可能性があります。矢飛びとチューニングを確認してください。"; }
+      else{ state="硬め寄り"; tone="warn"; text="現在の番手は初期候補より硬めの可能性があります。矢飛びとチューニングを確認してください。"; }
+    }
+  }
+  return {ready:true, eff, ideal, candidates, actual, point, len, state, tone, text};
+}
+function spineGuidanceHtml(s){
+  const g=spineGuidance(s);
+  if(!g.ready) return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}を入れると、候補レンジを表示できます。</div>`;
+  const color=g.tone==="ok"?"#0f9d58":g.tone==="warn"?"#c62828":"#8a6d1d";
+  return `<div class="note"><b>スパイン初期候補</b>: ${g.candidates.join(" / ")}（動的負荷 ${g.eff.toFixed(1)}lbs相当、矢尺${g.len.toFixed(1)}in、ポイント${g.point}gr）</div>
+    <div class="note"><b style="color:${color}">${g.state}</b> — ${esc(g.text)}</div>`;
+}
+function gearPrecisionHtml(s){
+  const p=gearPrecisionProfile(s);
+  const next=p.missing.slice(0,3).join("・");
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>演算入力の充実度: ${p.level}</b>（${Math.round(p.score*100)}%）</div>
+    ${next?`<div class="note">次に測ると効く項目: ${esc(next)}</div>`:`<div class="note">主要な物理モデル項目はかなり埋まっています。</div>`}
+    ${spineGuidanceHtml(s)}
+  </div>`;
+}
+function setupComparisonHtml(setupId){
+  const ss=db.sessions.filter(s=>s.setupId===setupId).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  if(ss.length<2) return "";
+  const last=ss[ss.length-1];
+  const prev=[...ss.slice(0,-1)].reverse().find(s=>s.dist===last.dist) || ss[ss.length-2];
+  const metric=s=>{
+    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0);
+    return {all,st,total,avg:all.length?total/all.length:0};
+  };
+  const a=metric(prev), b=metric(last);
+  const delta=(x,unit="",goodLow=false)=>{
+    const sign=x>0?"+":"";
+    const good=goodLow?x<0:x>0;
+    const color=Math.abs(x)<.01?"var(--sub)":good?"#0f9d58":"#c62828";
+    return `<b style="color:${color}">${sign}${x.toFixed(2)}${unit}</b>`;
+  };
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>用具比較</b> — ${fmtD(prev.date)} → ${fmtD(last.date)}${prev.dist===last.dist?` / ${last.dist}m`:` / ${prev.dist}m→${last.dist}m`}</div>
+    <div class="kv"><span>平均点</span><span>${a.avg.toFixed(2)} → ${b.avg.toFixed(2)}（${delta(b.avg-a.avg)}）</span></div>
+    ${a.st&&b.st?`<div class="kv"><span>グルーピング半径</span><span>${a.st.rr.toFixed(1)}cm → ${b.st.rr.toFixed(1)}cm（${delta(b.st.rr-a.st.rr,"cm",true)}）</span></div>
+    <div class="kv"><span>中心の移動</span><span>${driftText(b.st.mx-a.st.mx,b.st.my-a.st.my)}</span></div>`:""}
+    <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
+  </div>`;
+}
+function gearWorkbenchHtml(){
+  const setups=db.setups||[];
+  if(!setups.length) return "";
+  const gp=setups.map(s=>gearPrecisionProfile(s));
+  const avg=gp.length?gp.reduce((a,p)=>a+p.score,0)/gp.length:0;
+  const linked=db.sessions.filter(s=>s.setupId).length;
+  const marks=db.sightMarks.length;
+  const top=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)}))
+    .sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
+  return `<div class="insightStrip">
+    <div class="insightTile"><div class="k">用具ライブラリ</div><b>${setups.length}件</b><span>練習紐付け ${linked}回 / サイト値 ${marks}点</span></div>
+    <div class="insightTile"><div class="k">演算入力</div><b>${pct(avg)}</b><span>矢重量・矢径・FOC・実測初速の平均充実度</span></div>
+    <div class="insightTile"><div class="k">最も育っている用具</div><b>${top?esc(top.s.name):"—"}</b><span>${top?`演算 ${top.p.level} / 個人モデル ${top.m.level}`:"登録待ち"}</span></div>
+  </div>`;
+}
+function renderGear(m){
+  m.innerHTML=`${pageHeroHtml("gear")}${gearWorkbenchHtml()}
+  <div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
+    <div id="gearList">${db.setups.length? db.setups.map(s=>{
+      const cnt=db.sessions.filter(x=>x.setupId===s.id).length;
+      const gp=gearPrecisionProfile(s);
+      const mp=modelReadinessProfile(s.id);
+      return `<div class="listItem" data-id="${s.id}"><div>
+        <div class="t">${esc(s.name)}</div>
+        <div class="d">${[s.bow,s.limbs,s.poundage?s.poundage+"lbs":""].filter(Boolean).map(esc).join(" ・ ")||"詳細未入力"}</div>
+        <div class="d">練習${cnt}回 ・ 演算入力 ${gp.level} ・ 個人モデル ${mp.level} ・ 変更履歴${(s.history||[]).length}件</div>
+      </div><div style="font-size:18px;color:var(--sub)">›</div></div>`;
+    }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
+    <div class="btnrow"><button class="btn sec" id="gWizard">初回セットアップ</button><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
+    <div class="hint">バックアップ・テーマなどは右上の <b>⚙設定</b> から。</div>
+  </div>`;
+  $("#gWizard").onclick=()=>openSetupWizard();
+  $("#gAdd").onclick=()=>openGearForm(null);
+  document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
+}
+
+/* ---------- ⚙ 設定 ---------- */
+function applyTheme(){
+  const t=db.settings.theme||"auto";
+  document.documentElement.className=t;
+}
+function openSettings(){
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  const th=db.settings.theme||"auto";
+  const snaps=readSnapshots();
+  ovl.innerHTML=`<div class="sheet"><h3>⚙ 設定</h3>
+    <label class="f">テーマ</label>
+    <div class="chips" id="thChips">
+      ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<div class="chip ${th===v?"on":""}" data-th="${v}">${lb}</div>`).join("")}
+    </div>
+    <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
+    <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
+    ${nativeReadinessHtml()}
+    <h3 style="margin-top:18px;font-size:14px">データ管理</h3>
+    ${backupReminderHtml()}
+    <div class="btnrow">
+      <button class="btn sec" id="dExp">⬇ バックアップ保存</button>
+      <button class="btn sec" id="dImp">⬆ 読み込み</button>
+    </div>
+    <div class="btnrow"><button class="btn sec" id="dCsv">CSV出力</button></div>
+    <input type="file" id="dFile" accept=".json" style="display:none">
+    <h3 style="margin-top:18px;font-size:14px">自動退避</h3>
+    ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動退避はまだありません。保存操作を行うと端末内に退避データが残ります。</div>`}
+    <div class="btnrow">
+      <button class="btn sec" id="dSnapNow">今すぐ退避</button>
+      <button class="btn ghost" id="dSnapRestore" ${snaps.length?"":"disabled"}>選択した退避を復元</button>
+    </div>
+    ${trashSettingsHtml()}
+    <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
+    <div class="hint" style="color:var(--danger)">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
+    <div class="hint" style="text-align:center;margin-top:12px">Archery Note v${APP_VER}</div>
+    <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  ovl.querySelectorAll("#thChips .chip").forEach(c=>c.onclick=()=>{
+    db.settings.theme=c.dataset.th; save(); applyTheme();
+    ovl.querySelectorAll("#thChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+  });
+  ovl.querySelector("#setEye").onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); };
+  ovl.querySelector("#setClose").onclick=()=>{ ovl.remove(); render(); };
+  ovl.querySelector("#dExp").onclick=()=>{
+    db.settings.lastBackupAt=new Date().toISOString();
+    save({reason:"json-export",forceSnapshot:true});
+    shareOrDownloadText(`archery-note-${today()}.json`,JSON.stringify(db,null,1),"application/json","Archery Note Backup");
+  };
+  ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
+  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータを退避しました"); ovl.remove(); openSettings(); };
+  ovl.querySelector("#dSnapRestore").onclick=()=>{
+    const sel=ovl.querySelector("#dSnapSel");
+    const snap=readSnapshots()[sel?+sel.value:0];
+    if(!snap||!snap.data){ toast("復元できる退避データがありません"); return; }
+    if(confirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先に退避してから置き換えます。よろしいですか？`)){
+      writeSafetySnapshot("restore-before",true);
+      db=normalizeDb(snap.data);
+      save({reason:"restore",forceSnapshot:true});
+      applyTheme(); ovl.remove(); render(); toast("退避データを復元しました");
+    }
+  };
+  ovl.querySelector("#dImp").onclick=()=>ovl.querySelector("#dFile").click();
+  ovl.querySelector("#dFile").onchange=e=>{
+    const f=e.target.files[0]; if(!f)return;
+    const r=new FileReader();
+    r.onload=()=>{ try{
+      const d=JSON.parse(r.result);
+      if(!d.sessions||!d.setups) throw 0;
+      if(confirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`)){
+        writeSafetySnapshot("import-before",true);
+        db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); ovl.remove(); render(); toast("読み込みました");
+      }
+    }catch(_){ toast("ファイルを読み込めませんでした"); } };
+    r.readAsText(f);
+  };
+  ovl.querySelectorAll("[data-restore-trash]").forEach(b=>b.onclick=()=>{
+    if(restoreTrash(b.dataset.restoreTrash)){ ovl.remove(); render(); openSettings(); toast("復元しました"); }
+  });
+  const tc=ovl.querySelector("#trashClear");
+  if(tc) tc.onclick=()=>{
+    if(confirm("ゴミ箱の中身を完全に削除しますか？")){
+      db.trash=[]; save({reason:"clear-trash",forceSnapshot:true}); ovl.remove(); openSettings(); toast("ゴミ箱を空にしました");
+    }
+  };
+}
+function openSetupWizard(){
+  const choiceOpts=k=>gearOptions(k).slice(0,80);
+  const opts=k=>choiceOpts(k).map(v=>`<option value="${esc(v)}"></option>`).join("");
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>初回セットアップ</h3>
+    <div class="hint">最初は分かる範囲だけで大丈夫です。矢とサイト値が入るほど、調整提案の精度が上がります。</div>
+    <label class="f">名前 *</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
+    ${choiceFieldHtml("wBow","ハンドル/弓本体",choiceOpts("bow"),"","","")}
+    ${choiceFieldHtml("wLimbs","リム",choiceOpts("limbs"),"","","")}
+    <div class="row">
+      <div><label class="f">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
+      <div><label class="f">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
+    </div>
+    ${choiceFieldHtml("wArrow","シャフト銘柄",choiceOpts("arrow"),"","例: EASTON X10","")}
+    <div class="row">
+      <div><label class="f">番手/スパイン</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
+      <div><label class="f">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
+    </div>
+    <label class="f">ポイント重量 (gr)</label><input class="inp" id="wPoint" inputmode="decimal" list="wPointList" placeholder="例: 110"><datalist id="wPointList">${opts("pointWeight")}</datalist>
+    ${choiceFieldHtml("wSight","サイト",choiceOpts("sight"),"","","")}
+    <details class="adv" open>
+      <summary>実測サイト値（分かる距離だけ）</summary>
+      ${[70,50,30,18].map(d=>`<div class="row">
+        <div><label class="f">${d}m 上下</label><input class="inp" id="wV_${d}" inputmode="decimal"></div>
+        <div><label class="f">${d}m 左右</label><input class="inp" id="wH_${d}" inputmode="decimal"></div>
+      </div>`).join("")}
+    </details>
+    <div class="btnrow"><button class="btn ghost" id="wCancel">キャンセル</button><button class="btn" id="wSave">保存して開始</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  bindChoiceFields(ovl);
+  ovl.querySelector("#wCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#wSave").onclick=()=>{
+    const name=ovl.querySelector("#wName").value.trim();
+    if(!name){ toast("名前を入力してください"); return; }
+    const n={id:uid(),name,history:[],createdAt:today()};
+    GEAR_FIELDS.forEach(([k])=>n[k]="");
+    n.bow=ovl.querySelector("#wBow").value.trim();
+    n.limbs=ovl.querySelector("#wLimbs").value.trim();
+    n.poundage=ovl.querySelector("#wPound").value.trim();
+    n.drawLength=ovl.querySelector("#wDraw").value.trim();
+    n.arrow=ovl.querySelector("#wArrow").value.trim();
+    n.shaftSpine=ovl.querySelector("#wSpine").value.trim();
+    n.arrowLength=ovl.querySelector("#wArrowLength").value.trim();
+    n.pointWeight=ovl.querySelector("#wPoint").value.trim();
+    n.sight=ovl.querySelector("#wSight").value.trim();
+    const inf=inferCatalogGear(n);
+    if(inf && !inf.missing){
+      n.arrowDia=inf.dia.toFixed(2);
+      n.shaftGpi=inf.gpi.toFixed(2);
+      if(inf.total) n.arrowWeight=inf.total.toFixed(0);
+      n.notes=`カタログ推定: ${inf.notes.join(" / ")}`;
+    }
+    db.setups.push(n);
+    [70,50,30,18].forEach(d=>{
+      const v=ovl.querySelector(`#wV_${d}`).value.trim(), h=ovl.querySelector(`#wH_${d}`).value.trim();
+      if(v||h) db.sightMarks.push({id:uid(),setupId:n.id,dist:d,v,h,date:today(),ts:Date.now(),note:"初回セットアップ"});
+    });
+    ui.sightSel.setupId=n.id;
+    save({reason:"setup-wizard",forceSnapshot:true}); ovl.remove(); render(); toast("初回セットアップを保存しました");
+  };
+}
+function openGearDetail(id){
+  const s=db.setups.find(x=>x.id===id); if(!s)return;
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>${esc(s.name)}</h3>
+    ${gearPrecisionHtml(s)}
+    ${modelReadinessHtml(id)}
+    ${physicsCalibrationHtml(id)}
+    ${setupComparisonHtml(id)}
+    <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th style="width:40%">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
+    ${(s.history&&s.history.length)?`<h3 style="margin-top:14px;font-size:13px">変更履歴</h3>
+      ${[...s.history].reverse().map(h=>`<div style="font-size:12px;padding:6px 0;border-bottom:1px solid #eef0eb">
+        <b>${fmtD(h.date)}</b> — ${h.changes.map(c=>`${esc(c.label)}: ${esc(c.from||"（未設定）")} → <b>${esc(c.to||"（削除）")}</b>`).join(" / ")}</div>`).join("")}`:""}
+    <div class="btnrow">
+      <button class="btn danger" id="gDel">削除</button>
+      <button class="btn sec" id="gEdit">編集</button>
+      <button class="btn ghost" id="gClose">閉じる</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ovl);
+  ovl.querySelector("#gClose").onclick=()=>ovl.remove();
+  ovl.querySelector("#gEdit").onclick=()=>{ ovl.remove(); openGearForm(id); };
+  ovl.querySelector("#gDel").onclick=()=>{
+    if(confirm(`「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`)){
+      const marks=db.sightMarks.filter(x=>x.setupId===id);
+      trashItem("setupBundle",s.name,{setup:s,sightMarks:marks});
+      db.setups=db.setups.filter(x=>x.id!==id);
+      db.sightMarks=db.sightMarks.filter(x=>x.setupId!==id);
+      save({reason:"delete-setup",forceSnapshot:true}); ovl.remove(); render(); toast("削除しました。設定から復元できます");
+    }
+  };
+}
+function openGearForm(id){
+  const s=id?db.setups.find(x=>x.id===id):null;
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>${s?"セッティング編集":"新しいセッティング"}</h3>
+    <label class="f">名前 *</label><input class="inp" id="gfName" value="${esc(s?s.name:"")}" placeholder="例: メイン70m仕様">
+    ${GEAR_SECTIONS.map(sec=>gearSectionHtml(sec,s)).join("")}
+    <div class="btnrow"><button class="btn sec" id="gfInfer">📖 カタログから推定</button></div>
+    <div class="hint" id="gfInferHint">シャフト銘柄と番手を別々に入れると、掲載モデル・直径・GPI・総矢重量を推定します。矢尺とポイント重量は専用欄に入れてください。</div>
+    <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
+  </div>`;
+  document.body.appendChild(ovl);
+  bindChoiceFields(ovl);
+  ovl.querySelector("#gfCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#gfInfer").onclick=()=>{
+    const vals={};
+    GEAR_FIELDS.forEach(([k])=>vals[k]=ovl.querySelector("#gf_"+k).value.trim());
+    const inf=inferCatalogGear(vals);
+    const hint=ovl.querySelector("#gfInferHint");
+    if(!inf){ hint.textContent="カタログ推定できるシャフト名が見つかりませんでした。例: EASTON X10 / EASTON A/C/E / EASTON Avance / EASTON XX75 Platinum Plus"; toast("シャフト名を読み取れません"); return; }
+    if(inf.missing){ hint.textContent=`${inf.fam.name} は見つかりました。番手/スパイン欄も入力してください。`; toast("番手を追加してください"); return; }
+    const set=(k,v)=>setChoiceValue(ovl,"gf_"+k,v);
+    set("shaftSpine", inf.spine);
+    set("arrowDia", inf.dia.toFixed(2));
+    set("shaftGpi", inf.gpi.toFixed(2));
+    if(inf.total) set("arrowWeight", inf.total.toFixed(0));
+    const old=ovl.querySelector("#gf_notes").value.trim();
+    const note=`カタログ推定: ${inf.notes.join(" / ")}`;
+    ovl.querySelector("#gf_notes").value=old?`${old}\n${note}`:note;
+    hint.innerHTML=inf.notes.map(esc).join("<br>");
+    toast("カタログ情報から推定しました");
+  };
+  ovl.querySelector("#gfSave").onclick=()=>{
+    const name=ovl.querySelector("#gfName").value.trim();
+    if(!name){ toast("名前を入力してください"); return; }
+    if(s){
+      const changes=[];
+      if(s.name!==name) changes.push({label:"名前",from:s.name,to:name});
+      GEAR_FIELDS.forEach(([k,lb])=>{
+        const v=ovl.querySelector("#gf_"+k).value.trim();
+        if((s[k]||"")!==v) changes.push({label:lb,from:s[k]||"",to:v});
+        s[k]=v;
+      });
+      s.name=name;
+      if(changes.length){ (s.history=s.history||[]).push({date:today(),changes}); toast("変更を履歴に記録しました"); }
+    }else{
+      const n={id:uid(), name, history:[], createdAt:today()};
+      GEAR_FIELDS.forEach(([k])=>n[k]=ovl.querySelector("#gf_"+k).value.trim());
+      db.setups.push(n);
+      if(!ui.sightSel.setupId) ui.sightSel.setupId=n.id;
+    }
+    save(); ovl.remove(); render();
+  };
+}
+
+/* ============ init ============ */
+if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1")){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+applyTheme();
+$("#btnSettings").onclick=openSettings;
+/* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
+function checkUpdate(){
+  if(location.protocol==="file:") return;
+  fetch("version.json?ts="+Date.now(),{cache:"no-store"})
+    .then(r=>r.json())
+    .then(j=>{ if(j && j.v>APP_VER) $("#updBar").style.display="block"; })
+    .catch(()=>{});
+}
+$("#updBar").onclick=()=>location.reload();
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) writeSafetySnapshot("hidden"); else checkUpdate(); });
+window.addEventListener("pagehide",()=>writeSafetySnapshot("pagehide"));
+checkUpdate();
+render();

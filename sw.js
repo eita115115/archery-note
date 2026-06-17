@@ -1,5 +1,5 @@
-const CACHE = "archery-note-v36";
-const ASSETS = ["./index.html", "./style.css", "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
+const CACHE = "archery-note-v37";
+const ASSETS = ["./index.html", "./style.css", "./app.js", "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
