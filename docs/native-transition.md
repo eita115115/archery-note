@@ -36,6 +36,13 @@ The scoring UI, line-cutter behavior, equipment records, history analysis, and R
    - Optional notifications for backup reminders.
    - Later: iCloud/Drive backup, camera-assisted form data, and account sync if needed.
 
+Current Android shell work:
+
+- `@capacitor/haptics` is wired to tab changes, arrow placement, nudge, end confirmation, and session completion.
+- `@capacitor/share` + `@capacitor/filesystem` are used for JSON backup, CSV export, and scorecard SVG handoff when running inside a native shell.
+- `@capacitor/status-bar` keeps the native chrome aligned with the app header.
+- The web/PWA fallback remains file download and browser-native share when available.
+
 5. Store readiness
    - Keep the app useful without network access.
    - Avoid a thin WebView impression by making backup, storage, sharing, and device polish feel app-native.

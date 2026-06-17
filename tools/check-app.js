@@ -35,9 +35,12 @@ assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const cap = JSON.parse(fs.readFileSync(path.join(root, "capacitor.config.json"), "utf8"));
 assert(pkg.scripts["build:native-web"] && pkg.scripts["native:sync"], "Native build scripts missing");
+assert(pkg.dependencies && pkg.dependencies["@capacitor/haptics"] && pkg.dependencies["@capacitor/share"] && pkg.dependencies["@capacitor/filesystem"], "Native haptics/share/filesystem plugins missing");
 assert(cap.appId === "com.eita.archerynote" && cap.webDir === "dist/native", "Capacitor config mismatch");
 assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "native-transition.md")), "Native transition files missing");
 assert(html.includes("nativeReadinessHtml") && html.includes("アプリ基盤") && html.includes("RK4-3D JS core"), "Native readiness UI missing");
+assert(html.includes("pageHeroHtml") && html.includes("liveSessionHeroHtml") && html.includes("Growth map") && html.includes("Sight lab") && html.includes("Equipment lab"), "Reborn workspace UI missing");
+assert(html.includes("nativePulse") && html.includes("shareOrDownloadText") && html.includes("capPlugin") && html.includes("appStatus"), "Native interaction layer missing");
 assert(html.includes("storageGetItem") && html.includes("storageSetItem") && html.includes("storageDriverProfile"), "Storage adapter missing");
 assert(html.includes("ArcheryPhysicsCore") && html.includes("window.ArcheryPhysicsCore"), "Physics core interface missing");
 

@@ -11,21 +11,23 @@
 <title>Archery Note — 得点記録 &amp; サイト調整</title>
 <style>
 :root{
-  --green:#1a5c3a; --green-l:#2e7d52; --bg:#f4f5f2; --card:#ffffff;
+  --green:#17643d; --green-l:#2e7d52; --bg:#f4f5f2; --card:#ffffff;
   --ink:#1c1e1c; --sub:#6b7268; --line:#dfe3dc; --line2:#eef0eb;
   --soft:#eef1ec; --inpBg:#ffffff; --hdr:#1a5c3a; --title:#1a5c3a;
   --advBg:#f0f7f1; --advLine:#cfe5d4;
   --gold:#fdd835; --red:#e53935; --blue:#1e88e5; --accent:#1a5c3a;
   --danger:#c62828; --paper:#fbfaf5; --paper2:#f2eadc; --ink2:#24312d;
   --teal:#0f766e; --amber:#b56b1f; --navy:#24537b; --mint:#dcefe6;
-  --shadow:0 10px 30px rgba(32,42,34,.10);
+  --shadow:0 10px 30px rgba(32,42,34,.10); --glass:rgba(255,255,255,.74);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0; overflow-x:hidden;}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
   background:
-    linear-gradient(180deg,var(--paper) 0,var(--bg) 36%,var(--bg) 100%);
+    radial-gradient(circle at 10% -10%,rgba(23,100,61,.14),transparent 34%),
+    radial-gradient(circle at 94% 0,rgba(36,83,123,.12),transparent 30%),
+    linear-gradient(180deg,var(--paper) 0,var(--bg) 42%,var(--bg) 100%);
   color:var(--ink); font-size:15px;
   padding-bottom:76px;
   padding-bottom:calc(64px + env(safe-area-inset-bottom));
@@ -36,7 +38,8 @@ button:focus-visible,.chip:focus-visible,.listItem:focus-visible,input:focus-vis
   outline:3px solid var(--green); outline-offset:2px;
 }
 header.app{
-  background:var(--hdr); color:#fff; padding:10px 16px;
+  background:linear-gradient(135deg,#123523 0%,#17643d 62%,#24537b 100%); color:#fff; padding:10px 16px;
+  padding-right:58px;
   padding-top:10px;
   padding-top:calc(10px + env(safe-area-inset-top));
   display:flex; align-items:center; gap:8px;
@@ -45,7 +48,21 @@ header.app{
 }
 header.app h1{font-size:16px; margin:0; font-weight:700; letter-spacing:.03em;}
 header.app .sub{font-size:11px; opacity:.85;}
-main{width:100%; max-width:520px; min-width:0; margin:0 auto; padding:12px;}
+header.app .appLogo{
+  width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); font-size:20px; flex:0 0 auto;
+}
+header.app .appIdentity{min-width:0; flex:1 1 auto;}
+header.app .appIdentity h1,header.app .appIdentity .sub{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+header.app .statusPill{
+  border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.10); color:#fff;
+  border-radius:999px; padding:5px 8px; font-size:10.5px; font-weight:800; display:flex; align-items:center; gap:5px;
+  max-width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:0 0 auto;
+}
+header.app .statusPill span:last-child{overflow:hidden; text-overflow:ellipsis;}
+header.app .statusDot{width:7px;height:7px;border-radius:50%;background:#f0c66a;box-shadow:0 0 0 3px rgba(240,198,106,.18);flex:0 0 auto;}
+header.app .statusDot.native{background:#73e6a8;box-shadow:0 0 0 3px rgba(115,230,168,.18);}
+main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px;}
 .card{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
 .card h2{font-size:14px; margin:0 0 10px; color:var(--title); display:flex; align-items:center; justify-content:space-between;}
 .card h2 .mini{font-size:11px; color:var(--sub); font-weight:normal;}
@@ -122,6 +139,14 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .missionNext{margin-top:10px; display:flex; gap:8px; align-items:flex-start; color:rgba(255,255,255,.84); font-size:12px; line-height:1.45;}
 .missionNext b{color:#fff; white-space:nowrap;}
 .missionNext span{min-width:0; overflow-wrap:anywhere;}
+.nativeSignal{
+  display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;
+}
+.nativeSignal span{
+  border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.10); color:rgba(255,255,255,.86);
+  border-radius:999px; padding:4px 8px; font-size:10.5px; font-weight:800;
+}
+.nativeSignal .on{background:rgba(115,230,168,.18); color:#fff; border-color:rgba(115,230,168,.35);}
 .launchPanel{
   background:var(--card); border:1px solid var(--line); border-radius:8px; margin-bottom:12px; box-shadow:var(--shadow); min-width:0; width:100%;
 }
@@ -168,6 +193,31 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .insightTile .k{font-size:10.5px; color:var(--sub);}
 .insightTile b{display:block; font-size:18px; color:var(--title); margin-top:2px;}
 .insightTile span{display:block; font-size:10.5px; color:var(--sub); margin-top:2px; line-height:1.35;}
+.pageHero{
+  border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:12px;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,.82),rgba(255,255,255,.54)),
+    linear-gradient(135deg,var(--paper),var(--soft));
+  box-shadow:var(--shadow); overflow:hidden;
+}
+.pageHero .kicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--title); font-weight:900;}
+.pageHero h2{margin:4px 0 4px; font-size:20px; color:var(--ink); line-height:1.2;}
+.pageHero p{margin:0; color:var(--sub); font-size:12px; line-height:1.55;}
+.heroMetrics{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px;}
+.heroMetric{border:1px solid var(--line); border-radius:8px; background:var(--glass); padding:8px; min-width:0;}
+.heroMetric .k{font-size:10px; color:var(--sub);}
+.heroMetric b{display:block; color:var(--title); font-size:14px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.heroMetric span{display:block; color:var(--sub); font-size:10.5px; margin-top:2px; line-height:1.35;}
+.liveHud{
+  border:1px solid var(--line); border-radius:8px; margin-bottom:12px; padding:13px;
+  background:linear-gradient(135deg,var(--ink2),#17643d 58%,#24537b); color:#fff; box-shadow:var(--shadow);
+}
+.liveHud .kicker{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.72; font-weight:900;}
+.liveHud h2{font-size:20px;margin:3px 0;color:#fff;}
+.liveGrid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-top:10px;}
+.liveCell{border:1px solid rgba(255,255,255,.16); border-radius:8px; background:rgba(255,255,255,.10); padding:8px; min-width:0;}
+.liveCell .k{font-size:10px; opacity:.72;}
+.liveCell b{display:block; font-size:15px; margin-top:2px;}
 .nativeStack{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
 .nativePill{
   border:1px solid var(--line); border-radius:8px; padding:9px; background:var(--paper);
@@ -192,6 +242,7 @@ nav.tabs{
   background:var(--card); border-top:1px solid var(--line);
   display:flex; padding-bottom:0;
   padding-bottom:env(safe-area-inset-bottom);
+  box-shadow:0 -8px 24px rgba(0,0,0,.07);
 }
 nav.tabs button{
   flex:1 1 0; min-width:0; background:none; border:none; padding:8px 0 6px; font-size:10.5px; color:var(--sub);
@@ -282,7 +333,7 @@ html.dark{
   --soft:#2a302a; --inpBg:#262c26; --hdr:#143626; --title:#7fd0a2; --advBg:#1c2b20; --advLine:#2c4533;
   --green:#2f9e68; --green-l:#3c9a68; --accent:#2f9e68; --danger:#ff8a80;
   --paper:#171b17; --paper2:#25261f; --ink2:#d8e6dc; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1c2b20;
-  --shadow:0 10px 30px rgba(0,0,0,.28);
+  --shadow:0 10px 30px rgba(0,0,0,.28); --glass:rgba(30,35,30,.72);
 }
 @media (prefers-color-scheme: dark){
   html.auto{
@@ -290,7 +341,7 @@ html.dark{
     --soft:#2a302a; --inpBg:#262c26; --hdr:#143626; --title:#7fd0a2; --advBg:#1c2b20; --advLine:#2c4533;
     --green:#2f9e68; --green-l:#3c9a68; --accent:#2f9e68; --danger:#ff8a80;
     --paper:#171b17; --paper2:#25261f; --ink2:#d8e6dc; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1c2b20;
-    --shadow:0 10px 30px rgba(0,0,0,.28);
+    --shadow:0 10px 30px rgba(0,0,0,.28); --glass:rgba(30,35,30,.72);
   }
 }
 details.adv{border:1px solid var(--line); border-radius:12px; padding:2px 12px 8px; margin-top:12px; background:var(--card);}
@@ -298,13 +349,23 @@ details.adv summary{cursor:pointer; font-size:13px; color:var(--sub); padding:9p
 details.adv summary::-webkit-details-marker{display:none;}
 details.adv summary::before{content:"▸ ";}
 details.adv[open] summary::before{content:"▾ ";}
-header.app .gear{margin-left:auto; background:none; border:none; color:#fff; font-size:21px; cursor:pointer; padding:4px;}
+header.app .gear{
+  position:absolute; right:12px; top:8px; top:calc(8px + env(safe-area-inset-top));
+  width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:#fff; font-size:20px; cursor:pointer; padding:0; flex:0 0 auto;
+}
+@media (max-width:420px){
+  header.app{gap:7px; padding-left:12px; padding-right:52px;}
+  header.app .statusPill{max-width:82px; padding:5px 7px;}
+}
 @media (max-width:520px){
+  header.app .statusPill{display:none;}
   .workflow{grid-template-columns:1fr;}
   .missionTop{grid-template-columns:1fr;}
   .readinessDial{display:none;}
   .readinessRail,.missionFlow{grid-template-columns:repeat(2,minmax(0,1fr));}
   .readinessRail>*:last-child,.missionFlow>*:last-child{grid-column:1/-1;}
+  .heroMetrics,.liveGrid{grid-template-columns:repeat(2,minmax(0,1fr));}
   .flowBtn{grid-template-columns:1fr; justify-items:center; text-align:center; min-height:84px; padding:8px 5px;}
   .flowIcon{width:30px;height:30px;}
   .flowBtn b{font-size:12px;}
@@ -317,7 +378,7 @@ header.app .gear{margin-left:auto; background:none; border:none; color:#fff; fon
   .btnrow{flex-direction:column;}
   .statbar{flex-wrap:wrap;}
   .stat{min-width:46%;}
-  .missionTop,.setupLens,.insightStrip,.nativeStack{grid-template-columns:1fr;}
+  .missionTop,.setupLens,.insightStrip,.nativeStack,.heroMetrics,.liveGrid{grid-template-columns:1fr;}
   .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 @media (prefers-reduced-motion: reduce){
@@ -327,8 +388,9 @@ header.app .gear{margin-left:auto; background:none; border:none; color:#fff; fon
 </head>
 <body>
 <header class="app">
-  <div style="font-size:22px">🏹</div>
-  <div><h1>Archery Note</h1><div class="sub">得点記録 &amp; サイト調整サポート</div></div>
+  <div class="appLogo">🏹</div>
+  <div class="appIdentity"><h1>Archery Note</h1><div class="sub">データで育つ記録アプリ</div></div>
+  <div class="statusPill" id="appStatus"><span class="statusDot"></span><span>起動中</span></div>
   <button class="gear" id="btnSettings" aria-label="設定">⚙</button>
 </header>
 <main id="main"></main>
@@ -361,7 +423,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=32;
+const APP_VER=33;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
@@ -425,27 +487,89 @@ function runtimeKind(){
   if(standalone) return {kind:"PWA", label:"ホーム画面", tone:"mid"};
   return {kind:"Web", label:"ブラウザ", tone:"mid"};
 }
+function capPlugin(name){
+  const w=typeof window!=="undefined"?window:{};
+  return w.Capacitor && w.Capacitor.Plugins ? w.Capacitor.Plugins[name] : null;
+}
+function nativeFeatureProfile(){
+  const rt=runtimeKind();
+  const nav=typeof navigator!=="undefined"?navigator:{};
+  return {
+    runtime:rt,
+    haptics:!!capPlugin("Haptics") || typeof nav.vibrate==="function",
+    share:!!capPlugin("Share") || typeof nav.share==="function",
+    filesystem:!!capPlugin("Filesystem"),
+    statusBar:!!capPlugin("StatusBar"),
+    splash:!!capPlugin("SplashScreen")
+  };
+}
+function nativePulse(kind){
+  const h=capPlugin("Haptics");
+  try{
+    if(h && typeof h.impact==="function"){
+      const style=kind==="heavy"?"HEAVY":kind==="light"?"LIGHT":"MEDIUM";
+      h.impact({style}).catch(()=>{});
+      return true;
+    }
+    if(h && typeof h.selectionChanged==="function"){
+      h.selectionChanged().catch(()=>{});
+      return true;
+    }
+  }catch(e){}
+  try{
+    if(navigator.vibrate){
+      const pat=kind==="success"?[12,24,18]:kind==="heavy"?28:12;
+      navigator.vibrate(pat);
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+function updateAppChrome(){
+  const st=$("#appStatus");
+  if(!st) return;
+  const rt=runtimeKind();
+  const dot=rt.kind==="Native"?"native":"";
+  st.innerHTML=`<span class="statusDot ${dot}"></span><span>${esc(rt.label)}</span>`;
+  const sb=capPlugin("StatusBar");
+  try{
+    if(sb && typeof sb.setBackgroundColor==="function") sb.setBackgroundColor({color:"#17643d"}).catch(()=>{});
+    if(sb && typeof sb.setStyle==="function") sb.setStyle({style:"DARK"}).catch(()=>{});
+  }catch(e){}
+}
 function nativeReadinessProfile(){
   const counts=dataCounts();
   const runtime=runtimeKind();
   const storage=storageDriverProfile();
+  const native=nativeFeatureProfile();
   const storageScore=clamp((counts.sessions?0.22:0.12)+(counts.setups?0.22:0.08)+(db.settings.lastBackupAt?0.18:0)+(readSnapshots().length?0.18:0)+0.20,0,1);
   const engineScore=.84;
-  const shellScore=.58;
+  const nativeScore=clamp(
+    (native.haptics ? .25 : .08) +
+    (native.share ? .25 : .08) +
+    (native.filesystem ? .20 : .04) +
+    (native.statusBar ? .12 : .04) +
+    (native.splash ? .10 : .04) +
+    (runtime.kind==="Native" ? .08 : 0),
+    0,1
+  );
+  const shellScore=clamp(.54 + nativeScore*.36,0,1);
   const next=[];
   if(!db.settings.lastBackupAt) next.push("バックアップ保存");
   if(!counts.setups) next.push("用具登録");
   if(counts.sessions<3) next.push("練習記録");
   if(!next.length) next.push("同条件の記録を増やす");
-  return {runtime,storage,storageScore,engineScore,shellScore,next,counts};
+  return {runtime,storage,native,nativeScore,storageScore,engineScore,shellScore,next,counts};
 }
 function nativeReadinessHtml(){
   const p=nativeReadinessProfile();
+  const nf=p.native;
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
     <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER} / ${esc(p.storage.label)}</div>
     <div class="nativeStack">
       <div class="nativePill"><div class="k">保存</div><b>${pct(p.storageScore)}</b><span>バックアップと復元を維持</span></div>
       <div class="nativePill"><div class="k">演算</div><b>${pct(p.engineScore)}</b><span>物理コア分離へ移行中</span></div>
+      <div class="nativePill"><div class="k">触感/共有</div><b>${pct(p.nativeScore)}</b><span>${nf.haptics?"触感 ":""}${nf.share?"共有 ":""}${nf.filesystem?"ファイル ":""}${nf.statusBar?"表示 ":""}</span></div>
       <div class="nativePill"><div class="k">配布</div><b>${pct(p.shellScore)}</b><span>${NATIVE_CHANNEL}</span></div>
     </div>
     <div class="note">次に整える材料: ${p.next.map(esc).join("・")}</div>
@@ -526,6 +650,36 @@ function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サ�
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);
+}
+async function shareOrDownloadText(filename,text,type,title){
+  const mime=type||"text/plain";
+  try{
+    const file=new File([text],filename,{type:mime});
+    if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){
+      await navigator.share({title:title||filename,files:[file]});
+      nativePulse("success");
+      return true;
+    }
+  }catch(e){}
+  try{
+    const fs=capPlugin("Filesystem"), sh=capPlugin("Share");
+    if(fs && sh && typeof fs.writeFile==="function" && typeof sh.share==="function"){
+      const res=await fs.writeFile({path:filename,data:text,directory:"CACHE",encoding:"utf8",recursive:true});
+      await sh.share({title:title||filename,text:title||filename,url:res.uri,dialogTitle:title||"共有"});
+      nativePulse("success");
+      return true;
+    }
+  }catch(e){}
+  try{
+    if(navigator.share && text.length<90000){
+      await navigator.share({title:title||filename,text});
+      nativePulse("success");
+      return true;
+    }
+  }catch(e){}
+  downloadText(filename,text,mime);
+  nativePulse("light");
+  return false;
 }
 function csvCell(v){ return `"${String(v==null?"":v).replace(/"/g,'""')}"`; }
 const ROUND_TYPES=[
@@ -1334,7 +1488,7 @@ function sessionsCsv(){
   return "\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
 }
 function exportSessionsCsv(){
-  downloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8");
+  shareOrDownloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8","Archery Note CSV");
   db.settings.lastBackupAt=new Date().toISOString();
   save("csv-export");
 }
@@ -1366,7 +1520,7 @@ function scorecardSvg(sess){
 </svg>`;
 }
 function exportScorecardImage(sess){
-  downloadText(`archery-scorecard-${sess.date||today()}-${sess.dist}m.svg`,scorecardSvg(sess),"image/svg+xml;charset=utf-8");
+  shareOrDownloadText(`archery-scorecard-${sess.date||today()}-${sess.dist}m.svg`,scorecardSvg(sess),"image/svg+xml;charset=utf-8","Archery Note Scorecard");
 }
 function backupReminderHtml(){
   if(db.sessions.length<3) return "";
@@ -1565,10 +1719,11 @@ function latestMark(setupId, dist){
 /* ============ views ============ */
 let view="record";
 let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice" };
-function showView(v){ view=v; ui.selArrow=-1; render(); }
+function showView(v){ view=v; ui.selArrow=-1; nativePulse("light"); render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
 function render(){
+  updateAppChrome();
   document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
   const m=$("#main");
   if(view==="record") renderRecord(m);
@@ -1594,6 +1749,7 @@ function recordIntroHtml(sys, mode){
   const flow=RECORD_FLOW_MODES.map(f=>`
       <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
   const p=sys.profiles||{};
+  const nf=nativeFeatureProfile();
   return `<section class="missionPanel">
     <div class="missionTop">
       <div>
@@ -1607,6 +1763,11 @@ function recordIntroHtml(sys, mode){
       ${readinessCellHtml("用具",p.gear?p.gear.level:"低",p.gear?p.gear.score:0)}
       ${readinessCellHtml("履歴",p.model?p.model.level:"データ蓄積中",p.model?p.model.score:0)}
       ${readinessCellHtml("物理校正",p.physics?p.physics.level:"未校正",p.physics?p.physics.score:0)}
+    </div>
+    <div class="nativeSignal">
+      <span class="on">${esc(nf.runtime.label)}</span>
+      <span class="${nf.haptics?"on":""}">触感${nf.haptics?"ON":"待ち"}</span>
+      <span class="${nf.share?"on":""}">共有${nf.share?"ON":"待ち"}</span>
     </div>
     <div class="missionFlow" id="flowMode">${flow}</div>
     <div class="missionNext"><b>次の材料</b><span>${esc(sys.next)} / ${sys.lines.map(esc).join(" / ")}</span></div>
@@ -1745,14 +1906,95 @@ function renderRecord(m){
       purpose:ui.recordMode||"practice",
       ends:[], cur:[]
     };
+    nativePulse("success");
     save(); render();
   };
 }
 
+function sessionArrows(sess){
+  return [...((sess&&sess.ends)||[]).flat(), ...((sess&&sess.cur)||[])];
+}
+function heroMetricHtml(k,b,span){
+  return `<div class="heroMetric"><div class="k">${esc(k)}</div><b>${esc(b)}</b><span>${esc(span||"")}</span></div>`;
+}
+function pageHeroHtml(type,ctx){
+  ctx=ctx||{};
+  if(type==="history"){
+    const src=ctx.ss||db.sessions||[];
+    const arrows=src.flatMap(s=>s.ends.flat());
+    const total=arrows.reduce((a,x)=>a+x.s,0);
+    const latest=src[0]||null;
+    return `<section class="pageHero">
+      <div class="kicker">Growth map</div>
+      <h2>分布と偏移を読む</h2>
+      <p>点数だけでなく、同じ用具・同じ距離の中心移動を追います。過去のグルーピングがあるほど、今回のズレが偶然か傾向か見えやすくなります。</p>
+      <div class="heroMetrics">
+        ${heroMetricHtml("練習",`${src.length}回`,`${arrows.length}本を集計`)}
+        ${heroMetricHtml("平均",arrows.length?(total/arrows.length).toFixed(2):"—","フィルター後の平均点")}
+        ${heroMetricHtml("直近",latest?`${fmtD(latest.date)} ${latest.dist}m`:"—",latest?roundLabel(latest.round):"記録待ち")}
+      </div>
+    </section>`;
+  }
+  if(type==="sight"){
+    const setup=ctx.setup, dist=ctx.dist, marks=ctx.marks||[], adv=ctx.adv;
+    const cur=marks[0];
+    return `<section class="pageHero">
+      <div class="kicker">Sight lab</div>
+      <h2>次のサイト調整を決める</h2>
+      <p>サイト台帳、最新グルーピング、個人校正を一つの判断にまとめます。動かすべき時と、保留すべき時を分けて扱います。</p>
+      <div class="heroMetrics">
+        ${heroMetricHtml("対象",setup?setup.name:"用具未指定",dist?`${dist}m`:"距離未指定")}
+        ${heroMetricHtml("最新サイト",cur?`上下 ${cur.v||"—"}`:"未登録",cur?`左右 ${cur.h||"—"}`:"台帳へ記録")}
+        ${heroMetricHtml("提案",adv&&adv.lines.length?adv.lines[0].text||"調整あり":"材料待ち",adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
+      </div>
+    </section>`;
+  }
+  if(type==="gear"){
+    const setups=db.setups||[];
+    const profiles=setups.map(s=>gearPrecisionProfile(s));
+    const avg=profiles.length?profiles.reduce((a,p)=>a+p.score,0)/profiles.length:0;
+    const best=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)})).sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
+    return `<section class="pageHero">
+      <div class="kicker">Equipment lab</div>
+      <h2>用具を演算できるデータにする</h2>
+      <p>ハンドルやリムの名前だけで終わらせず、矢重量・矢径・FOC・実測初速まで整理します。ここが整うほど物理モデルが現実の弓に近づきます。</p>
+      <div class="heroMetrics">
+        ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
+        ${heroMetricHtml("演算入力",pct(avg),"用具データの平均充実度")}
+        ${heroMetricHtml("主戦用具",best?best.s.name:"—",best?`演算 ${best.p.level} / 個人 ${best.m.level}`:"初回セットアップ待ち")}
+      </div>
+    </section>`;
+  }
+  return "";
+}
+function liveSessionHeroHtml(s,setup){
+  const all=sessionArrows(s);
+  const total=all.reduce((a,x)=>a+x.s,0);
+  const avg=all.length?(total/all.length).toFixed(2):"—";
+  const remain=Math.max(0,(s.perEnd||6)-(s.cur||[]).length);
+  const r=ROUND_TYPES.find(x=>x.id===s.round);
+  const roundRemain=r&&r.arrows?Math.max(0,r.arrows-all.length):null;
+  return `<section class="liveHud">
+    <div class="kicker">Live scoring desk</div>
+    <h2>${s._edit?"過去記録を整える":"今このエンドに集中"}</h2>
+    <div class="liveGrid">
+      <div class="liveCell"><div class="k">合計</div><b>${total}</b></div>
+      <div class="liveCell"><div class="k">平均</div><b>${avg}</b></div>
+      <div class="liveCell"><div class="k">現在エンド</div><b>${(s.cur||[]).length}/${s.perEnd||6}</b></div>
+      <div class="liveCell"><div class="k">残り</div><b>${roundRemain==null?`${remain}本`:roundRemain+"本"}</b></div>
+    </div>
+    <div class="nativeSignal">
+      <span class="on">${setup?esc(setup.name):"用具未指定"}</span>
+      <span>${s.dist}m / ${faceLabel(s)}</span>
+      <span>${runtimeKind().label}</span>
+    </div>
+  </section>`;
+}
 function renderActive(m){
   const s=db.active;
   const setup=db.setups.find(x=>x.id===s.setupId);
   m.innerHTML=`
+  ${liveSessionHeroHtml(s,setup)}
   <div class="card">
     <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
     ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips" style="margin-bottom:8px">
@@ -1790,7 +2032,7 @@ function renderActive(m){
     applyZoom();
   });
   applyZoom();
-  $("#bUndo").onclick=()=>{ if(s.cur.length){ s.cur.pop(); ui.selArrow=-1; save(); refreshActive(); } else toast("このエンドに矢がありません"); };
+  $("#bUndo").onclick=()=>{ if(s.cur.length){ s.cur.pop(); ui.selArrow=-1; nativePulse("light"); save(); refreshActive(); } else toast("このエンドに矢がありません"); };
   $("#bEnd").onclick=()=>{
     if(!s.cur.length){ toast("矢を記録してください"); return; }
     if(s.editIndex!=null){
@@ -1799,7 +2041,7 @@ function renderActive(m){
     }else{
       s.ends.push(s.cur); toast(`エンド${s.ends.length} 確定`);
     }
-    s.cur=[]; ui.selArrow=-1; save(); refreshActive();
+    s.cur=[]; ui.selArrow=-1; nativePulse("success"); save(); refreshActive();
   };
   $("#bFinish").onclick=()=>finishSession();
   document.querySelectorAll("#nudge .npad button").forEach(b=>b.onclick=()=>nudgeArrow(b.dataset.n));
@@ -1820,7 +2062,7 @@ function refreshActive(){
     return `<div class="sc ${i===ui.selArrow?"sel":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}">${scoreLabel(a)}</div>`;
   }).join("") || `<span style="font-size:12px;color:var(--sub);align-self:center">エンド${s.ends.length+1}：的をタップして記録</span>`;
   document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
-    ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; refreshActive();
+    ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; nativePulse("light"); refreshActive();
   });
   $("#nudge").classList.toggle("on", ui.selArrow>=0);
   // stats
@@ -1851,11 +2093,11 @@ function refreshActive(){
 }
 function nudgeArrow(dirKey){
   const s=db.active; if(!s || ui.selArrow<0 || !s.cur[ui.selArrow]) return;
-  if(dirKey==="del"){ s.cur.splice(ui.selArrow,1); ui.selArrow=-1; save(); refreshActive(); return; }
+  if(dirKey==="del"){ s.cur.splice(ui.selArrow,1); ui.selArrow=-1; nativePulse("heavy"); save(); refreshActive(); return; }
   const a=s.cur[ui.selArrow], step=s.faceD/200;
   if(dirKey==="u")a.y+=step; if(dirKey==="d")a.y-=step; if(dirKey==="l")a.x-=step; if(dirKey==="r")a.x+=step;
   Object.assign(a, scoreAt(a.x,a.y,s.faceD,s.faceType,lineCutRadius(s.faceD,s.faceType)));
-  save(); refreshActive();
+  nativePulse("light"); save(); refreshActive();
 }
 
 /* target pointer input with long-press fine mode + lens */
@@ -1943,6 +2185,7 @@ function attachTargetInput(s){
     const rec={x:+hit.x.toFixed(2), y:+hit.y.toFixed(2), s:hit.s, X:hit.X};
     if(hit.spot!=null) rec.spot=hit.spot;
     s.cur.push(rec);
+    nativePulse(isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType)?"success":"light");
     save(); refreshActive();
     toast(`${scoreLabel(hit)} 点を記録`);
   }
@@ -1969,7 +2212,7 @@ function attachTargetInput(s){
 function finishSession(){
   const s=db.active;
   const shot=s.ends.flat().length + s.cur.length;
-  if(!shot){ if(confirm("矢が0本です。このセッションを破棄しますか？")){ db.active=null; save(); render(); } return; }
+  if(!shot){ if(confirm("矢が0本です。このセッションを破棄しますか？")){ db.active=null; nativePulse("heavy"); save(); render(); } return; }
   if(s.cur.length){
     if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
     else s.ends.push(s.cur);
@@ -1984,6 +2227,7 @@ function finishSession(){
   }else{
     db.sessions.push(s);
   }
+  nativePulse("success");
   save();
   openSummary(s, !isEdit);
 }
@@ -2062,7 +2306,7 @@ function renderHistory(m){
     (!hf.dist || String(s.dist)===String(hf.dist)) &&
     (!hf.round || (s.round||"free")===hf.round)
   );
-  m.innerHTML=`${historyOverviewHtml(allSs,ss)}
+  m.innerHTML=`${pageHeroHtml("history",{ss})}${historyOverviewHtml(allSs,ss)}
   <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
       <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${hf.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
@@ -2303,7 +2547,7 @@ function renderSight(m){
       ${preds.length?`<div class="chips" style="margin-top:8px">${preds.join("")}</div>`:`<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
       <div class="hint">2距離以上の実測サイト値から予測します。4距離以上ある場合は、弾道に近いカーブ近似が有効なときだけ自動採用します。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
   }
-  m.innerHTML=`
+  m.innerHTML=`${pageHeroHtml("sight",{setup,dist,marks,adv,lastSess})}
   <div class="card">
     <h2>サイト台帳</h2>
     ${db.setups.length?`
@@ -2767,7 +3011,7 @@ function gearWorkbenchHtml(){
   </div>`;
 }
 function renderGear(m){
-  m.innerHTML=`${gearWorkbenchHtml()}
+  m.innerHTML=`${pageHeroHtml("gear")}${gearWorkbenchHtml()}
   <div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
     <div id="gearList">${db.setups.length? db.setups.map(s=>{
       const cnt=db.sessions.filter(x=>x.setupId===s.id).length;
@@ -2835,9 +3079,7 @@ function openSettings(){
   ovl.querySelector("#dExp").onclick=()=>{
     db.settings.lastBackupAt=new Date().toISOString();
     save({reason:"json-export",forceSnapshot:true});
-    const blob=new Blob([JSON.stringify(db,null,1)],{type:"application/json"});
-    const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
-    a.download=`archery-note-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
+    shareOrDownloadText(`archery-note-${today()}.json`,JSON.stringify(db,null,1),"application/json","Archery Note Backup");
   };
   ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
   ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータを退避しました"); ovl.remove(); openSettings(); };
