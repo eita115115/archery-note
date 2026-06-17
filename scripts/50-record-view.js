@@ -22,8 +22,8 @@ function setupOptions(sel){
 }
 const RECORD_FLOW_MODES=[
   {id:"practice",icon:"◎",title:"練習記録",desc:"点取りから調整提案へ"},
-  {id:"calibration",icon:"↕",title:"校正用",desc:"サイト値・風メモを残す"},
-  {id:"diagnosis",icon:"?",title:"状態確認",desc:"足りない材料を見る"}
+  {id:"calibration",icon:"↕",title:"サイト値を残す",desc:"サイト値・風メモも一緒に"},
+  {id:"diagnosis",icon:"?",title:"足りないデータを見る",desc:"提案の材料を確認"}
 ];
 const RECORD_PHASES=["準備","記録","確認","蓄積"];
 function scorePct(v){ return Math.round(clamp(v||0,0,1)*100); }
@@ -65,7 +65,7 @@ function recordIntroHtml(sys, mode){
       <img class="startLogoMark" src="icon.svg" alt="">
       <div>
         <div class="eyebrow">Archery Note</div>
-        <h2>${mode==="calibration"?"校正記録を始める":"練習を始める"}</h2>
+        <h2>${mode==="calibration"?"サイト値も残す":"練習を始める"}</h2>
         <p>点取りだけで始められます。サイト値・風・用具は、余裕がある時だけ詳しく残せます。</p>
       </div>
       <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
@@ -134,7 +134,7 @@ function renderRecord(m){
   ${recordIntroHtml(sys,mode)}
   <section class="launchPanel convergeLaunch">
     <div class="launchHead">
-      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"校正条件を組む":"今日の練習"}</h2></div>
+      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"サイト値を残す練習":"今日の練習"}</h2></div>
       <button class="tinyAction" id="jumpGear">用具</button>
     </div>
     <div class="launchBody">
@@ -146,11 +146,18 @@ function renderRecord(m){
     </div>
     <div id="fDistCustomWrap" style="display:none"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
     <div class="quickSelects">
-      <div><label class="f">的サイズ</label><select class="inp" id="fFace">
-        ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}<option value="T40">40cm 三つ目（縦）</option></select></div>
+      <div><label class="f">的</label><select class="inp" id="fFace">
+        <optgroup label="ターゲット">
+          ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}
+          <option value="T40">40cm 三つ目（縦）</option>
+        </optgroup>
+        <optgroup label="フィールド">
+          ${FIELD_FACE_SIZES.map(f=>`<option value="F${f}">${f}cm フィールド</option>`).join("")}
+        </optgroup>
+      </select></div>
       <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
-    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
+    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"記録開始"}</button></div>
     <div class="softDivider"></div>
     <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
       <summary>詳しく残す（日付・用具・サイト値・天候）</summary>
@@ -170,21 +177,30 @@ function renderRecord(m){
       <label class="f">天候・コンディション</label>
       <div class="row">
         <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
-        <input class="inp" id="fNote" placeholder="${mode==="calibration"?"例: 校正用・サイト1目盛り確認":"メモ（任意）"}" value="${mode==="calibration"?"校正用":""}">
+        <input class="inp" id="fNote" placeholder="${mode==="calibration"?"例: サイト1目盛り確認":"メモ（任意）"}" value="${mode==="calibration"?"サイト値確認":""}">
       </div>
       <div class="row">
         <div><label class="f">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
         <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
-    ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>校正用のコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
+    ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
     ${db.setups.length?"":`<div class="hint">「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
     </div>
   </section>`;
   const distState={d:defDist};
   const faceSel=$("#fFace");
-  const suggestFace=d=>{ faceSel.value = d>=60?122:(d<=18?40:80); };
+  const suggestFace=d=>{ if(String(faceSel.value).startsWith("F")) return; faceSel.value = d>=60?122:(d<=18?40:80); };
   suggestFace(defDist);
+  faceSel.onchange=()=>{
+    if(String(faceSel.value).startsWith("F") && $("#fArrows").value==="6") $("#fArrows").value="3";
+  };
+  $("#fRound").onchange=e=>{
+    if(e.target.value==="field72"){
+      if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
+      $("#fArrows").value="3";
+    }
+  };
   $("#jumpGear").onclick=()=>showView("gear");
   document.querySelectorAll("#flowMode .flowBtn").forEach(b=>b.onclick=()=>{
     if(b.dataset.mode==="diagnosis"){ showView("sight"); return; }
@@ -214,10 +230,11 @@ function renderRecord(m){
     const d=distState.d;
     if(!d){ toast("距離を入力してください"); return; }
     const fv=faceSel.value;
+    const face=parseFaceChoice(fv);
     db.active={
       id:uid(), date:$("#fDate").value||today(), setupId:$("#fSetup").value||null,
-      dist:d, faceD: fv==="T40"?40:+fv, faceType: fv==="T40"?"triple":"single", perEnd:+$("#fArrows").value,
-      shaft:+lineCutRadius(fv==="T40"?40:+fv, fv==="T40"?"triple":"single").toFixed(3),
+      dist:d, faceD: face.faceD, faceType: face.faceType, perEnd:+$("#fArrows").value,
+      shaft:+lineCutRadius(face.faceD, face.faceType).toFixed(3),
       sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
       wx:$("#fWx").value, note:$("#fNote").value.trim(), windDir:$("#fWindDir").value, windSpeed:$("#fWindSpeed").value.trim(),
       round:$("#fRound").value||"free",
@@ -392,7 +409,7 @@ function refreshActive(){
   $("#tgmarks").innerHTML=html;
   // chips
   $("#curChips").innerHTML = s.cur.map((a,i)=>{
-    const z=zoneStyle(a.s,a.X);
+    const z=zoneStyle(a.s,a.X,s.faceType);
     return `<div class="sc ${i===ui.selArrow?"sel":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}">${scoreLabel(a)}</div>`;
   }).join("") || `<span style="font-size:12px;color:var(--sub);align-self:center">エンド${s.ends.length+1}：的をタップして記録</span>`;
   document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
@@ -402,12 +419,11 @@ function refreshActive(){
   // stats
   const all=[...s.ends.flat(), ...s.cur];
   const total=all.reduce((a,x)=>a+x.s,0);
-  const tens=all.filter(a=>a.s===10).length, xs=all.filter(a=>a.X).length;
   $("#statbar").innerHTML=`
     <div class="stat"><b>${total}</b><span>合計</span></div>
     <div class="stat"><b>${all.length?(total/all.length).toFixed(2):"-"}</b><span>平均/本</span></div>
-    <div class="stat"><b>${tens}</b><span>10点</span></div>
-    <div class="stat"><b>${xs}</b><span>X</span></div>`;
+    <div class="stat"><b>${perfectScoreCount(all,s)}</b><span>${perfectScoreLabel(s)}</span></div>
+    <div class="stat"><b>${secondaryScoreCount(all,s)}</b><span>${secondaryScoreLabel(s)}</span></div>`;
   // ends table
   $("#endsTbl").innerHTML = s.ends.length? `<table class="tbl"><tr><th>#</th><th>得点</th><th class="right">計</th><th></th></tr>`+
     s.ends.map((end,i)=>{
@@ -457,7 +473,7 @@ function attachTargetInput(s){
     return {x:p.x, y:-p.y};
   }
   function drawCursor(p){
-    const w=ringW(s.faceD);
+    const w=ringW(s.faceD,s.faceType);
     const fine=!!(drag&&drag.fine);
     const cutting=fine && isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType);
     const c=fine ? (cutting?"#0f9d58":"#c62828") : "#111";
@@ -471,7 +487,7 @@ function attachTargetInput(s){
       <line x1="${p.x}" y1="${-p.y-w}" x2="${p.x}" y2="${-p.y+w}" stroke="${c}" stroke-width="${s.faceD/500}"/>
       <circle cx="${p.x}" cy="${-p.y}" r="${arrowMarkRadius(s.faceD)}" fill="none" stroke="${c}" stroke-width="${s.faceD/400}"/>
     </g>`;
-    const z=ringW(s.faceD)*2.2;
+    const z=ringW(s.faceD,s.faceType)*2.2;
     lensSvg.setAttribute("viewBox", `${p.x-z} ${-p.y-z} ${2*z} ${2*z}`);
     // lens位置: 指と重ならない側へ
     const half = p.x<0;
@@ -581,8 +597,8 @@ function openSummary(sess, isNew){
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
-      <div class="stat"><b>${all.filter(a=>a.s===10).length}</b><span>10点</span></div>
-      <div class="stat"><b>${all.filter(a=>a.X).length}</b><span>X</span></div>
+      <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
+      <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
     <div id="sumPlot" style="margin-top:10px"></div>
     ${groupSummaryHtml(st)}

@@ -74,7 +74,7 @@ function groupingTrendItem(g){
   const latest=g[g.length-1], first=g[0], prev=g[g.length-2];
   const centers=g.map(p=>({x:p.mx,y:p.my}));
   const cst=groupStats(centers);
-  const w=ringW(latest.faceD);
+  const w=ringW(latest.faceD,latest.faceType);
   const maxAbs=Math.max(w*2.6, ...g.map(p=>Math.max(Math.abs(p.mx)+p.rr*.25,Math.abs(p.my)+p.rr*.25)), Math.abs(cst.mx)+(cst.major||0)*1.6, Math.abs(cst.my)+(cst.major||0)*1.6, 4);
   const M=Math.min(latest.faceD/2*.9, maxAbs*1.25);
   const path=g.map((p,i)=>`${i?"L":"M"}${p.mx},${-p.my}`).join("");
@@ -111,16 +111,19 @@ function groupingTrendItem(g){
   </div>`;
 }
 function scoreDistCard(ss){
-  const all=(ss||db.sessions).flatMap(s=>s.ends.flat());
+  const records=(ss||db.sessions).flatMap(s=>s.ends.flat().map(a=>({a,faceType:s.faceType||"single"})));
+  const all=records.map(x=>x.a);
   if(all.length<12) return "";
-  const keys=["X","10","9","8","7","6","5","4","3","2","1","M"];
+  const fieldOnly=records.length && records.every(x=>(x.faceType||"single")==="field");
+  const keys=fieldOnly?["6","5","4","3","2","1","M"]:["X","10","9","8","7","6","5","4","3","2","1","M"];
   const cnt={}; keys.forEach(k=>cnt[k]=0);
-  all.forEach(a=>{ cnt[a.s===0?"M":(a.X?"X":String(a.s))]++; });
+  records.forEach(({a})=>{ cnt[a.s===0?"M":(a.X?"X":String(a.s))]++; });
   const max=Math.max(...keys.map(k=>cnt[k]))||1;
   return `<div class="card"><h2>得点分布 <span class="mini">全${all.length}本</span></h2>`+
-    keys.filter(k=>cnt[k]>0 || ["X","10","9","8","7"].includes(k)).map(k=>{
+    keys.filter(k=>cnt[k]>0 || (!fieldOnly && ["X","10","9","8","7"].includes(k))).map(k=>{
       const sNum=k==="X"?10:(k==="M"?0:+k);
-      const z=zoneStyle(sNum,k==="X");
+      const rec=records.find(x=>(x.a.s===0?"M":(x.a.X?"X":String(x.a.s)))===k);
+      const z=zoneStyle(sNum,k==="X",rec&&rec.faceType);
       return `<div style="display:flex;align-items:center;gap:8px;padding:2px 0">
         <div style="width:28px;text-align:center;font-weight:700;font-size:12px;background:${z.bg};color:${z.fg};border-radius:6px;padding:2px 0">${k}</div>
         <div style="flex:1;background:var(--line);border-radius:5px;height:14px;overflow:hidden"><div style="width:${(cnt[k]/max*100).toFixed(1)}%;height:100%;background:var(--green-l)"></div></div>
@@ -178,8 +181,8 @@ function openHistDetail(id){
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
-      <div class="stat"><b>${all.filter(a=>a.s===10).length}</b><span>10点</span></div>
-      <div class="stat"><b>${all.filter(a=>a.X).length}</b><span>X</span></div>
+      <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
+      <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
     <div id="hPlot" style="margin-top:10px"></div>
     ${groupSummaryHtml(st)}

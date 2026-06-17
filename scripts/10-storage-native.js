@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=38;
+const APP_VER=39;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
@@ -204,7 +204,23 @@ function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("sh
 function today(){ return new Date().toISOString().slice(0,10); }
 function fmtD(iso){ if(!iso)return""; const [y,m,d]=iso.split("-"); return `${y}/${+m}/${+d}`; }
 const ENDCOLORS=["#e5484d","#1e6fd9","#0f9d58","#f59e0b","#8b5cf6","#ec4899","#0ea5b7","#7c5e10","#475569","#b91c1c","#1d4ed8","#047857"];
-function faceLabel(s){ return s.faceType==="triple" ? "40cm三つ目" : `${s.faceD}cm的`; }
+const FIELD_FACE_SIZES=[80,60,40,20];
+function parseFaceChoice(value){
+  const v=String(value||"");
+  if(v==="T40") return {faceD:40,faceType:"triple"};
+  if(v[0]==="F") return {faceD:+v.slice(1)||40,faceType:"field"};
+  return {faceD:+v||122,faceType:"single"};
+}
+function faceLabel(s){
+  if(s.faceType==="triple") return "40cm三つ目";
+  if(s.faceType==="field") return `${s.faceD}cmフィールド`;
+  return `${s.faceD}cm的`;
+}
+function perfectScoreValue(sess){ return sess&&sess.faceType==="field" ? 6 : 10; }
+function perfectScoreLabel(sess){ return `${perfectScoreValue(sess)}点`; }
+function perfectScoreCount(arrows,sess){ const top=perfectScoreValue(sess); return (arrows||[]).filter(a=>a.s===top).length; }
+function secondaryScoreLabel(sess){ return sess&&sess.faceType==="field" ? "5点以上" : "X"; }
+function secondaryScoreCount(arrows,sess){ return sess&&sess.faceType==="field" ? (arrows||[]).filter(a=>a.s>=5).length : (arrows||[]).filter(a=>a.X).length; }
 function cloneData(v){ return JSON.parse(JSON.stringify(v)); }
 function trashItem(type,label,data){
   db.trash=db.trash||[];
@@ -271,6 +287,7 @@ const ROUND_TYPES=[
   {id:"70m72",label:"70m 72射",arrows:72,dist:70},
   {id:"50m72",label:"50m 72射",arrows:72,dist:50},
   {id:"30m36",label:"30m 36射",arrows:36,dist:30},
-  {id:"18m60",label:"18m 60射",arrows:60,dist:18}
+  {id:"18m60",label:"18m 60射",arrows:60,dist:18},
+  {id:"field72",label:"フィールド 24標的/72射",arrows:72}
 ];
 function roundLabel(id){ return (ROUND_TYPES.find(r=>r.id===(id||"free"))||ROUND_TYPES[0]).label; }

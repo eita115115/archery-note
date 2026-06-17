@@ -43,7 +43,7 @@ assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer
 assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
 assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
 assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html), "Viewport must suppress accidental zoom during scoring");
-assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りない材料を見る"), "onboarding UI missing");
+assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "onboarding UI missing");
 assert(surface.includes("練習を始める") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("simplePromise") && surface.includes("quickSelects") && surface.includes("recordSetupSnapshot") && surface.includes("gearWorkbenchHtml"), "lightweight record launch UI missing");
 assert(surface.includes("levelFromScore") && surface.includes("RECORD_FLOW_MODES") && surface.includes("recordIntroHtml") && surface.includes("recordPhaseArcHtml") && surface.includes("summarySightDialHtml") && surface.includes("summaryDecisionHtml"), "record UI helpers missing");
 assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
@@ -80,6 +80,8 @@ assert(surface.includes("sessionsCsv") && surface.includes("scorecardSvg"), "Exp
 assert(surface.includes("judgementFor") && surface.includes("conditionInsights"), "Analysis judgement flows missing");
 assert(surface.includes("histFilter") && surface.includes("histSetup"), "History filters missing");
 assert(surface.includes("ROUND_TYPES") && surface.includes("roundProgressHtml"), "Round scoring support missing");
+assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "Field target setup UI missing");
+assert(surface.includes("サイト値を残す") && surface.includes("足りないデータを見る") && !surface.includes("校正用") && !surface.includes("状態確認"), "Record mode labels should be user-facing");
 assert(surface.includes("personalModel") && surface.includes("sessionQuality") && surface.includes("nextActionPlan"), "Personal decision model missing");
 assert(surface.includes("decision_quality") && surface.includes("personal_model"), "CSV decision columns missing");
 assert(surface.includes("robustWeightedLine") && surface.includes("modelReadinessProfile") && surface.includes("個人データ準備度"), "v19 weighted model readiness missing");
@@ -101,6 +103,41 @@ const trashEntry = trashApi.trashItem("session","test session",deletedSession);
 assert(trashDb.trash.length === 1 && trashEntry.label === "test session", "Trash insert failed");
 assert(trashApi.restoreTrash(trashEntry.id) && trashDb.sessions[0].id === "sess1" && trashDb.trash.length === 0, "Trash restore failed");
 assert(trashApi.roundLabel("70m72") === "70m 72射", "Round label failed");
+
+const faceApi = new Function(section("function uid", "function cloneData") + "\nreturn {FIELD_FACE_SIZES,parseFaceChoice,faceLabel,perfectScoreValue,perfectScoreLabel,perfectScoreCount,secondaryScoreLabel,secondaryScoreCount};")();
+const f40 = faceApi.parseFaceChoice("F40");
+assert(f40.faceD === 40 && f40.faceType === "field" && faceApi.faceLabel(f40) === "40cmフィールド", "Field face parsing failed");
+assert(faceApi.FIELD_FACE_SIZES.join(",") === "80,60,40,20", "Field face sizes changed unexpectedly");
+const fieldHits = [{s:6},{s:5},{s:4},{s:6}];
+assert(faceApi.perfectScoreLabel(f40) === "6点" && faceApi.perfectScoreCount(fieldHits,f40) === 2, "Field perfect score helpers failed");
+assert(faceApi.secondaryScoreLabel(f40) === "5点以上" && faceApi.secondaryScoreCount(fieldHits,f40) === 3, "Field secondary score helpers failed");
+
+const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,hitFromGlobal,zoneStyle};")();
+const fieldD = 80;
+const fw = scoreApi.ringW(fieldD, "field");
+const fieldTouch = scoreApi.lineCutRadius(fieldD, "field");
+assert(scoreApi.isFieldFace("field") && fw === fieldD / 12, "Field ring width failed");
+assert(scoreApi.scoreAt(0,0,fieldD,"field",0).s === 6, "Field center score failed");
+assert(scoreApi.scoreAt(fw*1.5,0,fieldD,"field",0).s === 5, "Field 5-ring score failed");
+assert(scoreApi.scoreAt(fw*3.5,0,fieldD,"field",0).s === 3, "Field black-ring score failed");
+assert(scoreApi.scoreAt(fw*5.5,0,fieldD,"field",0).s === 1, "Field outer-ring score failed");
+assert(scoreApi.scoreAt(fw*6.05,0,fieldD,"field",0).s === 0, "Field miss score failed");
+assert(scoreApi.scoreAt(fw+fieldTouch*.8,0,fieldD,"field",fieldTouch).s === 6, "Field line-cutter inner score failed");
+assert(scoreApi.scoreAt(fw+fieldTouch*1.2,0,fieldD,"field",fieldTouch).s === 5, "Field line-cutter outer score failed");
+assert(scoreApi.hitFromGlobal(fw*2.4,0,fieldD,"field",fieldTouch).s === 4, "Field global hit score failed");
+assert(scoreApi.zoneStyle(5,false,"field").bg === "var(--gold)" && scoreApi.zoneStyle(4,false,"field").bg === "#222", "Field score chip colors failed");
+
+const targetApi = new Function(
+  "ringW","isFieldFace","targetLineHalfWidth","SPOT_Y",
+  section("function targetMarkup", "function markCircle") + "\nreturn {targetMarkup};"
+)(
+  scoreApi.ringW,
+  scoreApi.isFieldFace,
+  scoreApi.targetLineHalfWidth,
+  [22,0,-22]
+);
+const fieldSvg = targetApi.targetMarkup(80, "tf", "field");
+assert(fieldSvg.includes('class="main field"') && fieldSvg.includes("#ffe14d") && fieldSvg.includes("#1c1e1c"), "Field target SVG failed");
 
 const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats};")();
 const arrows = [
@@ -243,17 +280,18 @@ assert(sp && sp.ready && sp.candidates.includes(660) && ["概ね候補域","候�
 assert(gearApi.gearPrecisionHtml({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"}).includes("スパイン初期候補"), "Spine guidance UI missing");
 
 const historyApi = new Function(
-  "db","robustStats","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc",
-  section("function sessionGroupPoint", "function scoreDistCard") + "\nreturn {groupingTrendCard};"
+  "db","robustStats","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc","zoneStyle",
+  section("function sessionGroupPoint", "function monthlyCard") + "\nreturn {groupingTrendCard,scoreDistCard};"
 )(
   {setups:[{id:"main",name:"Main setup"}]},
   statsApi.robustStats,
-  f=>f/20,
+  scoreApi.ringW,
   statsApi.groupStats,
-  s=>s.faceType==="triple" ? "40cm三つ目" : `${s.faceD}cm的`,
+  faceApi.faceLabel,
   iso=>iso,
   (v,axis)=>`${axis}:${v.toFixed(1)}`,
-  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))
+  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
+  scoreApi.zoneStyle
 );
 const sampleSessions = [
   {id:"b",date:"2026-02-01",setupId:"main",dist:70,faceD:122,faceType:"single",ends:[[{x:2,y:1,s:9},{x:3,y:2,s:9},{x:1,y:1,s:10},{x:2,y:0,s:10},{x:3,y:1,s:9},{x:2,y:2,s:9}]]},
@@ -261,6 +299,10 @@ const sampleSessions = [
 ];
 const trendHtml = historyApi.groupingTrendCard(sampleSessions);
 assert(trendHtml.includes("グルーピング推移") && trendHtml.includes("Main setup"), "Grouping trend card failed");
+const fieldDistHtml = historyApi.scoreDistCard([{id:"field",date:"2026-03-01",dist:30,faceD:40,faceType:"field",ends:[[
+  {s:6},{s:5},{s:4},{s:3},{s:2},{s:1},{s:6},{s:5},{s:4},{s:3},{s:2},{s:0}
+]]}]);
+assert(fieldDistHtml.includes("得点分布") && fieldDistHtml.includes(">6</div>") && !fieldDistHtml.includes(">10</div>") && !fieldDistHtml.includes(">X</div>"), "Field score distribution failed");
 
 console.log(`Archery Note checks OK (v${version})`);
 console.log(`Robust grouping: used=${st.n}, excluded=${st.excluded.length}, confidence=${Math.round(st.confidence*100)}%`);

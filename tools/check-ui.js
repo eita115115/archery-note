@@ -79,7 +79,10 @@ function staticUiChecks() {
   assert(surface.includes("記録") && surface.includes("履歴") && surface.includes("サイト調整") && surface.includes("用具"), "Tab labels missing");
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
-  assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りない材料を見る"), "systematic onboarding UI missing");
+  assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "systematic onboarding UI missing");
+  assert(surface.includes("サイト値を残す") && surface.includes("足りないデータを見る") && !surface.includes("校正用") && !surface.includes("状態確認"), "record mode labels should stay user-facing");
+  assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "field target setup UI missing");
+  assert(surface.includes("perfectScoreLabel") && surface.includes("secondaryScoreLabel") && surface.includes("5点以上"), "field-aware score labels missing");
   assert(surface.includes("初回の操作ガイド") && surface.includes("次から表示しない") && surface.includes("activeGuideSeen"), "first-run active guide missing");
   assert(surface.includes("練習を始める") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("phaseArc") && surface.includes("simplePromise") && surface.includes("quickSelects") && surface.includes("missionMore") && surface.includes("summaryDecisionHtml") && surface.includes("setupLens") && surface.includes("insightStrip"), "lightweight record flow composition missing");
   assert(surface.includes("pageHero") && surface.includes("Growth map") && surface.includes("Sight tuning") && surface.includes("Equipment lab") && surface.includes("liveHud"), "reborn workspace surfaces missing");

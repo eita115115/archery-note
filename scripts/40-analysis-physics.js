@@ -261,10 +261,10 @@ function personalPhysicsCalibration(setupId){
     const wm=windModel(it.s);
     if(!wm.speed || !wm.side) return;
     const traj=trajectoryModel(it.s,setup,eye);
-    if(Math.abs(traj.windDriftCm)<.6 || Math.abs(it.st.mx)>ringW(it.s.faceD)*4) return;
+    if(Math.abs(traj.windDriftCm)<.6 || Math.abs(it.st.mx)>ringW(it.s.faceD,it.s.faceType)*4) return;
     const ratio=it.st.mx/traj.windDriftCm;
     if(ratio>0 && ratio<2.6) windRatios.push({v:ratio,w:it.w});
-    else if(Math.abs(it.st.mx)>ringW(it.s.faceD)*.35) windConflicts.push(it);
+    else if(Math.abs(it.st.mx)>ringW(it.s.faceD,it.s.faceType)*.35) windConflicts.push(it);
   });
   const clickV=[], clickH=[];
   [...new Set(sessions.map(s=>s.dist).filter(Boolean))].forEach(d=>{
@@ -306,7 +306,7 @@ function physicsCalibrationHtml(setupId){
   </div>`;
 }
 function adviceModel(sess, setup, st){
-  const dist=sess.dist, w=ringW(sess.faceD);
+  const dist=sess.dist, w=ringW(sess.faceD,sess.faceType);
   const facePenalty=st.rr>w*2.8?.82:st.rr>w*2.0?.9:1;
   const gear=gearVariation(setup||{});
   let confidence=clamp((st.confidence||.6)*facePenalty*gear.confidenceFactor,.32,1);
@@ -375,7 +375,7 @@ function adviceFor(sess, setup){
   const out={st, lines:[], notes:model.notes, confidence:model.confidence, personal, quality, pcal:model.pcal};
   if(personal && personal.sample>=2) out.notes.unshift(`個人モデル: ${personal.state}（同条件${personal.sample}回 / 安定度${pct(personal.stability||0)}）。`);
   if(quality.score<.48) out.notes.unshift(`この回の判断信頼度は${quality.label}です。${quality.reasons.join("・")}。`);
-  const TH=Math.max(ringW(sess.faceD)/8, st.rr*.10); // 無視できるズレのしきい値
+  const TH=Math.max(ringW(sess.faceD,sess.faceType)/8, st.rr*.10); // 無視できるズレのしきい値
   // 上下
   if(Math.abs(st.my)>TH){
     const adj=Math.abs(st.my)*model.vFactor;
@@ -402,7 +402,7 @@ function adviceFor(sess, setup){
 function summarySightDialHtml(sess, adv){
   if(!adv || !adv.st) return "";
   const st=adv.st;
-  const span=Math.max(ringW(sess.faceD)*2.4, st.rr*1.4, 6);
+  const span=Math.max(ringW(sess.faceD,sess.faceType)*2.4, st.rr*1.4, 6);
   const dx=clamp(st.mx/span,-1,1)*36;
   const dy=clamp(-st.my/span,-1,1)*36;
   const move=adv.lines.some(l=>l.axis!=="-");
@@ -438,7 +438,7 @@ function isWindy(sess){
 }
 function judgementFor(adv,sess){
   if(!adv) return null;
-  const st=adv.st, w=ringW(sess.faceD);
+  const st=adv.st, w=ringW(sess.faceD,sess.faceType);
   const hasMove=adv.lines.some(l=>l.axis!=="-");
   if(!hasMove) return {label:"維持",tone:"ok",text:"サイトは触らず、この基準で本数を重ねて確認できます。"};
   if(adv.personal && adv.personal.state==="今回だけの可能性" && (adv.personal.stability||0)>.45) return {label:"保留",tone:"hold",text:"過去の同条件傾向と今回の中心が逆方向です。まず追加エンドで再現性を確認します。"};
@@ -482,10 +482,10 @@ function conditionInsights(sess,st,setup){
       const wf=pc&&pc.wind.sample?pc.wind.factor:1;
       out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm*wf)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm${wf!==1?` / 個人係数${wf.toFixed(2)}倍`:""}）として扱います。`);
     }
-    if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
+    if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD,sess.faceType)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
     if(st.sy>st.sx*1.35) out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
     else if(st.sx>st.sy*1.35) out.push("次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。");
-    else if(st.rr<ringW(sess.faceD)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
+    else if(st.rr<ringW(sess.faceD,sess.faceType)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
     if(setup && !setup.arrowSpeed) out.push("精度向上: 実測初速を入れると、上下サイトのmm換算と距離別予測が安定します。");
     if(setup && !setup.shaftSetWeightSpread) out.push("精度向上: 矢セット重量差を入れると、上下散りの信頼度判定が強くなります。");
     const sp=setup?spineGuidance(setup):null;
@@ -508,7 +508,7 @@ function sessionQuality(sess, setup, st){
   const m=sessionMetrics(sess);
   st=st||m.st;
   if(!st) return {score:.2,label:"低",tone:"warn",reasons:["矢数が不足"],metrics:m};
-  const w=ringW(sess.faceD);
+  const w=ringW(sess.faceD,sess.faceType);
   const sample=clamp((m.all.length-3)/33,0,1);
   const group=clamp(1-st.rr/(w*3.2),0,1);
   const confidence=st.confidence||.45;
@@ -553,7 +553,7 @@ function personalModel(sess,setup,currentSt){
   mx/=sw; my/=sw; rr/=sw; avg/=sw;
   const centers=items.map(it=>({x:it.st.mx,y:it.st.my}));
   const spread=groupStats(centers);
-  const ring=ringW(sess.faceD);
+  const ring=ringW(sess.faceD,sess.faceType);
   const histMag=Math.hypot(mx,my), curMag=Math.hypot(currentSt.mx,currentSt.my);
   const align=dirAlign(mx,my,currentSt.mx,currentSt.my);
   const stability=spread?clamp(1-spread.rr/(ring*2.4),0,1):.5;
@@ -616,14 +616,14 @@ function roundProgressHtml(sess){
   return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)} / ${shot}/${r.arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
 }
 function sessionsCsv(){
-  const head=["date","setup","distance_m","round","face","arrows","total","avg","x","ten","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
+  const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
   const rows=[head];
   db.sessions.forEach(s=>{
     const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===s.setupId);
     const q=sessionQuality(s,setup,st);
     const p=personalModel(s,setup,st);
     rows.push([s.date,setup?setup.name:"",s.dist,roundLabel(s.round),faceLabel(s),all.length,total,all.length?(total/all.length).toFixed(3):"",
-      all.filter(a=>a.X).length,all.filter(a=>a.s===10).length,st?st.mx.toFixed(2):"",st?st.my.toFixed(2):"",st?st.rr.toFixed(2):"",
+      secondaryScoreCount(all,s),perfectScoreCount(all,s),st?st.mx.toFixed(2):"",st?st.my.toFixed(2):"",st?st.rr.toFixed(2):"",
       st?st.sx.toFixed(2):"",st?st.sy.toFixed(2):"",st?pct(st.confidence||0):"",q.label,p?p.state:"",st?st.excluded.length:"",
       s.sightV||"",s.sightH||"",windText(s),s.note||""]);
   });
@@ -647,7 +647,7 @@ function scorecardSvg(sess){
   <text x="48" y="134" font-family="sans-serif" font-size="18" fill="#667064">${esc(setup?setup.name:"セッティング未指定")} / ${esc(faceLabel(sess))} / ${all.length}射</text>
   <text x="650" y="92" font-family="sans-serif" font-size="48" font-weight="800" fill="${green}" text-anchor="end">${total}</text>
   <text x="666" y="92" font-family="sans-serif" font-size="18" fill="#667064">点</text>
-  <text x="650" y="124" font-family="sans-serif" font-size="18" fill="#667064" text-anchor="end">平均 ${all.length?(total/all.length).toFixed(2):"-"} / X ${all.filter(a=>a.X).length}</text>
+  <text x="650" y="124" font-family="sans-serif" font-size="18" fill="#667064" text-anchor="end">平均 ${all.length?(total/all.length).toFixed(2):"-"} / ${esc(secondaryScoreLabel(sess))} ${secondaryScoreCount(all,sess)}</text>
   <rect x="48" y="160" width="804" height="34" rx="6" fill="#dde7dc"/>
   <text x="70" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}">End</text>
   <text x="150" y="183" font-family="sans-serif" font-size="15" font-weight="700" fill="${ink}">Scores</text>

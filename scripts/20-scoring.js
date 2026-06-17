@@ -1,10 +1,12 @@
 "use strict";
 /* Archery Note: scoring and grouping math */
 /* ============ scoring ============ */
-function ringW(faceD){ return faceD/20; }
+function isFieldFace(faceType){ return faceType==="field"; }
+function ringW(faceD,faceType){ return isFieldFace(faceType) ? faceD/12 : faceD/20; }
 const SPOT_Y=[22,0,-22]; /* 三つ目的のスポット中心(上・中・下, cm, y上向き) */
 function arrowMarkRadius(faceD){ return faceD/85; }
 function targetLineHalfWidth(faceD,faceType){
+  if(isFieldFace(faceType)) return faceD/900;
   return faceType==="single" ? faceD/1200 : faceD/640;
 }
 function lineCutRadius(faceD,faceType){
@@ -13,9 +15,14 @@ function lineCutRadius(faceD,faceType){
 /* 線かみ(ラインカッター)判定: アプリ上の矢円が線に少しでも触れていれば内側の点数。
    touchCm = 画面上の矢円半径 + 的線の半分の太さ(cm)。 */
 function scoreAt(relX,relY,faceD,faceType,touchRadiusCm){
-  const w=ringW(faceD);
+  const w=ringW(faceD,faceType);
   const touchCm=touchRadiusCm==null ? lineCutRadius(faceD,faceType) : touchRadiusCm;
   const r=Math.max(0, Math.hypot(relX,relY)-touchCm);
+  if(isFieldFace(faceType)){
+    if(r>w*6) return {s:0,X:false};
+    if(r<=w) return {s:6,X:false};
+    return {s:Math.max(0,7-Math.ceil(r/w)),X:false};
+  }
   if(r<=w/2) return {s:10,X:true};
   let s=11-Math.ceil(r/w);
   if(faceType==="triple" && s<6) s=0;
@@ -41,7 +48,12 @@ function hitFromGlobal(gx,gy,faceD,faceType,touchRadiusCm){
   const rx=gx, ry=gy-SPOT_Y[spot];
   return Object.assign({x:rx,y:ry,spot}, scoreAt(rx,ry,faceD,"triple",touchRadiusCm));
 }
-function zoneStyle(s,X){
+function zoneStyle(s,X,faceType){
+  if(isFieldFace(faceType)){
+    if(s>=5) return {bg:"var(--gold)",fg:"#1c1e1c"};
+    if(s>=1) return {bg:"#222",fg:"#fff"};
+    return {bg:"#c9cec6",fg:"#555"};
+  }
   if(s>=9) return {bg:"var(--gold)",fg:"#1c1e1c"};
   if(s>=7) return {bg:"var(--red)",fg:"#fff"};
   if(s>=5) return {bg:"var(--blue)",fg:"#fff"};
