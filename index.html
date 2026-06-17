@@ -147,6 +147,94 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
   border-radius:999px; padding:4px 8px; font-size:10.5px; font-weight:800;
 }
 .nativeSignal .on{background:rgba(115,230,168,.18); color:#fff; border-color:rgba(115,230,168,.35);}
+.phaseArc{
+  border:1px solid var(--line); border-radius:8px; padding:10px 10px 8px; margin-bottom:12px;
+  background:var(--card); box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.phaseArc svg{width:100%; height:50px; display:block; overflow:visible;}
+.phaseArc .rail{fill:none; stroke:var(--line2); stroke-width:6; stroke-linecap:round;}
+.phaseArc .seg{fill:none; stroke:var(--line); stroke-width:6; stroke-linecap:round; transition:stroke .18s;}
+.phaseArc .seg.on{stroke:var(--green);}
+.phaseArc .seg.cur{stroke:var(--amber);}
+.phaseArc .node{fill:var(--card); stroke:var(--line); stroke-width:3;}
+.phaseArc .node.on{fill:var(--green); stroke:var(--green);}
+.phaseArc .node.cur{fill:var(--amber); stroke:var(--amber);}
+.phaseArc .nodeCore{fill:#fff; opacity:.92;}
+.phaseArc text{font-size:11px; fill:var(--sub); font-weight:700;}
+.phaseArc text.on{fill:var(--title);}
+.phaseSub{font-size:11.5px; color:var(--sub); text-align:center; line-height:1.4; margin-top:-2px;}
+.missionPanel.convergeMission{
+  color:var(--ink); background:var(--card); border-color:var(--line);
+  border-radius:8px; padding:14px; box-shadow:var(--shadow);
+}
+.convergeMission .missionTop{grid-template-columns:68px minmax(0,1fr) 62px; align-items:center;}
+.startLogoMark{
+  width:64px; height:64px; border-radius:50%; padding:10px; background:var(--paper);
+  border:1px solid var(--line); box-shadow:inset 0 0 0 5px rgba(23,100,61,.04);
+}
+.convergeMission .eyebrow{color:var(--title); opacity:.72;}
+.missionPanel.convergeMission h2{color:var(--ink); font-size:23px; line-height:1.18; margin:3px 0 5px;}
+.missionPanel.convergeMission p{color:var(--sub); font-size:12px;}
+.convergeMission .readinessDial{
+  background:var(--soft); border-color:var(--line); color:var(--title); box-shadow:inset 0 0 0 7px rgba(23,100,61,.05);
+}
+.convergeMission .readinessDial b{font-size:19px;}
+.convergeMission .readinessDial span{font-size:9.5px; color:var(--sub);}
+.convergeMission .readinessCell{
+  background:var(--paper); border-color:var(--line); min-height:56px;
+}
+.convergeMission .readinessCell .k{color:var(--sub); opacity:1;}
+.convergeMission .readinessCell b{color:var(--ink);}
+.convergeMission .readinessCell .bar{background:var(--line2);}
+.convergeMission .readinessCell .bar i{background:var(--green);}
+.convergeMission .nativeSignal span{
+  border-color:var(--line); background:var(--paper); color:var(--sub);
+}
+.convergeMission .nativeSignal .on{background:var(--advBg); color:var(--title); border-color:var(--advLine);}
+.convergeMission .flowBtn{
+  color:var(--ink); background:var(--paper); border-color:var(--line); min-height:64px;
+}
+.convergeMission .flowIcon{background:var(--soft); color:var(--title);}
+.convergeMission .flowBtn b{color:var(--ink);}
+.convergeMission .flowBtn .flowText span{color:var(--sub);}
+.convergeMission .flowBtn.on{border-color:var(--green); background:var(--advBg); box-shadow:inset 0 0 0 1px var(--advLine);}
+.convergeMission .missionNext{color:var(--sub); border-top:1px solid var(--line2); padding-top:10px;}
+.convergeMission .missionNext b{color:var(--title);}
+.coachCard{
+  display:grid; grid-template-columns:40px minmax(0,1fr); gap:10px; align-items:center;
+  border:1px solid var(--advLine); border-radius:8px; padding:10px; background:var(--advBg); margin-top:10px;
+}
+.coachCard img{width:40px; height:40px; border-radius:50%; padding:6px; background:var(--card); border:1px solid var(--advLine);}
+.coachCard b{display:block; color:var(--title); font-size:13px;}
+.coachCard span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:2px;}
+.launchPanel.convergeLaunch{border-radius:8px; overflow:hidden;}
+.convergeLaunch .launchHead{background:var(--card);}
+.convergeLaunch .launchBody{padding:14px;}
+.startPrimary{
+  min-height:56px; border-radius:999px; font-size:16px; box-shadow:0 10px 24px rgba(23,100,61,.18);
+}
+.targetFocusCard{padding:12px;}
+.targetFocusCard h2{font-size:13px;}
+.targetFocusCard .tgWrap svg.main{border-radius:8px; background:var(--soft);}
+.targetTools{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;}
+.targetTools .chips{flex:1; justify-content:flex-end;}
+.targetHint{
+  border:1px solid var(--line); border-radius:8px; background:var(--paper);
+  color:var(--sub); font-size:11.5px; line-height:1.45; padding:8px; margin-top:8px;
+}
+.sightMiniDial{
+  border:1px solid var(--advLine); border-radius:8px; padding:12px; margin-top:10px;
+  background:linear-gradient(135deg,var(--card),var(--advBg));
+}
+.sightMiniDial .dialGrid{display:grid; grid-template-columns:110px minmax(0,1fr); gap:12px; align-items:center;}
+.sightMiniDial svg{width:110px; height:110px; display:block;}
+.sightMiniDial .ring{fill:var(--card); stroke:var(--advLine); stroke-width:2;}
+.sightMiniDial .axis{stroke:var(--line); stroke-width:1.5;}
+.sightMiniDial .vector{stroke:var(--green); stroke-width:3; stroke-linecap:round;}
+.sightMiniDial .groupDot{fill:var(--green); stroke:#fff; stroke-width:3;}
+.sightMiniDial .originDot{fill:var(--ink); opacity:.72;}
+.sightMiniDial b{display:block; color:var(--title); font-size:14px;}
+.sightMiniDial span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:3px;}
 .launchPanel{
   background:var(--card); border:1px solid var(--line); border-radius:8px; margin-bottom:12px; box-shadow:var(--shadow); min-width:0; width:100%;
 }
@@ -362,6 +450,8 @@ header.app .gear{
   header.app .statusPill{display:none;}
   .workflow{grid-template-columns:1fr;}
   .missionTop{grid-template-columns:1fr;}
+  .convergeMission .missionTop{grid-template-columns:1fr; text-align:center;}
+  .startLogoMark{justify-self:center;}
   .readinessDial{display:none;}
   .readinessRail,.missionFlow{grid-template-columns:repeat(2,minmax(0,1fr));}
   .readinessRail>*:last-child,.missionFlow>*:last-child{grid-column:1/-1;}
@@ -371,6 +461,8 @@ header.app .gear{
   .flowBtn b{font-size:12px;}
   .flowBtn .flowText span{font-size:9.8px;}
   .quickDists{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .targetTools{align-items:stretch; flex-direction:column;}
+  .targetTools .chips{justify-content:flex-start;}
 }
 @media (max-width:360px){
   main{padding:8px;}
@@ -379,6 +471,9 @@ header.app .gear{
   .statbar{flex-wrap:wrap;}
   .stat{min-width:46%;}
   .missionTop,.setupLens,.insightStrip,.nativeStack,.heroMetrics,.liveGrid{grid-template-columns:1fr;}
+  .phaseArc text{font-size:10px;}
+  .sightMiniDial .dialGrid{grid-template-columns:1fr;}
+  .sightMiniDial svg{justify-self:center;}
   .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 @media (prefers-reduced-motion: reduce){
@@ -423,7 +518,7 @@ if(!Math.hypot){ Math.hypot=function(){ let s=0; for(let i=0;i<arguments.length;
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=33;
+const APP_VER=34;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
@@ -1295,6 +1390,32 @@ function adviceFor(sess, setup){
   if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です 👏"});
   return out;
 }
+function summarySightDialHtml(sess, adv){
+  if(!adv || !adv.st) return "";
+  const st=adv.st;
+  const span=Math.max(ringW(sess.faceD)*2.4, st.rr*1.4, 6);
+  const dx=clamp(st.mx/span,-1,1)*36;
+  const dy=clamp(-st.my/span,-1,1)*36;
+  const move=adv.lines.some(l=>l.axis!=="-");
+  const label=`${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}`;
+  return `<div class="sightMiniDial">
+    <div class="dialGrid">
+      <svg viewBox="0 0 110 110" aria-hidden="true">
+        <circle class="ring" cx="55" cy="55" r="48"/>
+        <circle class="ring" cx="55" cy="55" r="30" style="opacity:.55"/>
+        <line class="axis" x1="10" y1="55" x2="100" y2="55"/>
+        <line class="axis" x1="55" y1="10" x2="55" y2="100"/>
+        <line class="vector" x1="55" y1="55" x2="${(55+dx).toFixed(1)}" y2="${(55+dy).toFixed(1)}"/>
+        <circle class="originDot" cx="55" cy="55" r="3.5"/>
+        <circle class="groupDot" cx="${(55+dx).toFixed(1)}" cy="${(55+dy).toFixed(1)}" r="7"/>
+      </svg>
+      <div>
+        <b>${move?"中心ズレからサイト方向を読む":"中心はほぼ合っています"}</b>
+        <span>緑の点が今回のグルーピング中心です。${label}。信頼度は ${pct(adv.confidence||0)}、外れ値を除いた中心を使っています。</span>
+      </div>
+    </div>
+  </div>`;
+}
 function windText(sess){
   const parts=[];
   if(sess.wx) parts.push(sess.wx);
@@ -1741,20 +1862,47 @@ const RECORD_FLOW_MODES=[
   {id:"calibration",icon:"↕",title:"校正用",desc:"サイト値・風メモを残す"},
   {id:"diagnosis",icon:"?",title:"状態確認",desc:"足りない材料を見る"}
 ];
+const RECORD_PHASES=["準備","記録","確認","蓄積"];
 function scorePct(v){ return Math.round(clamp(v||0,0,1)*100); }
 function readinessCellHtml(label,level,score){
   return `<div class="readinessCell"><div class="k">${label}</div><b>${esc(level)}</b><div class="bar"><i style="width:${scorePct(score)}%"></i></div></div>`;
+}
+function recordPhaseArcHtml(step, subtitle){
+  const cur=Math.max(0,Math.min(RECORD_PHASES.length-1,Math.round(step||0)));
+  const xs=[32,130,228,326];
+  const rails=xs.slice(0,-1).map((x,i)=>`<line class="seg ${i<cur?"on":""} ${i===cur-1?"cur":""}" x1="${x}" y1="18" x2="${xs[i+1]}" y2="18"/>`).join("");
+  const nodes=RECORD_PHASES.map((label,i)=>`<g>
+      <circle class="node ${i<=cur?"on":""} ${i===cur?"cur":""}" cx="${xs[i]}" cy="18" r="10"/>
+      <circle class="nodeCore" cx="${xs[i]}" cy="18" r="3.2"/>
+      <text class="${i<=cur?"on":""}" x="${xs[i]}" y="44" text-anchor="middle">${esc(label)}</text>
+    </g>`).join("");
+  return `<section class="phaseArc" aria-label="記録フロー">
+    <svg viewBox="0 0 360 50" role="img" aria-hidden="true">
+      <line class="rail" x1="32" y1="18" x2="326" y2="18"/>
+      ${rails}
+      ${nodes}
+    </svg>
+    ${subtitle?`<div class="phaseSub">${esc(subtitle)}</div>`:""}
+  </section>`;
+}
+function recordCoachCardHtml(){
+  return `<div class="coachCard">
+    <img src="icon.svg" alt="">
+    <div><b>3ステップで使います</b><span>条件を決める → 的でタップ → 結果で次の調整を見る</span></div>
+  </div>`;
 }
 function recordIntroHtml(sys, mode){
   const flow=RECORD_FLOW_MODES.map(f=>`
       <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
   const p=sys.profiles||{};
   const nf=nativeFeatureProfile();
-  return `<section class="missionPanel">
+  return `${recordPhaseArcHtml(0,"条件を決めたら、そのまま的へ。")}
+  <section class="missionPanel convergeMission">
     <div class="missionTop">
+      <img class="startLogoMark" src="icon.svg" alt="">
       <div>
-        <div class="eyebrow">Archery Note cockpit</div>
-        <h2>今日の作戦盤</h2>
+        <div class="eyebrow">Archery Note</div>
+        <h2>${mode==="calibration"?"校正記録を始める":"練習を始める"}</h2>
         <p>データで育つ記録アプリ。点取りだけでも使えます。サイト値・風・用具を少しずつ残すほど、調整提案があなたの弓に合っていきます。</p>
       </div>
       <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
@@ -1771,6 +1919,7 @@ function recordIntroHtml(sys, mode){
     </div>
     <div class="missionFlow" id="flowMode">${flow}</div>
     <div class="missionNext"><b>次の材料</b><span>${esc(sys.next)} / ${sys.lines.map(esc).join(" / ")}</span></div>
+    ${recordCoachCardHtml()}
   </section>`;
 }
 function setupSystemSummary(setupId){
@@ -1816,7 +1965,7 @@ function renderRecord(m){
   const sys=setupSystemSummary(defSetup);
   m.innerHTML=`
   ${recordIntroHtml(sys,mode)}
-  <section class="launchPanel">
+  <section class="launchPanel convergeLaunch">
     <div class="launchHead">
       <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"校正条件を組む":"練習を始める"}</h2></div>
       <button class="tinyAction" id="jumpGear">${db.setups.length?"用具を開く":"用具登録"}</button>
@@ -1859,8 +2008,8 @@ function renderRecord(m){
       </div>
     </details>
     ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>校正用のコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
-    <div class="btnrow"><button class="btn" id="fStart">▶ ${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
-    ${db.setups.length?"":`<div class="hint">💡 「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
+    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"校正記録を開始":"記録開始"}</button></div>
+    ${db.setups.length?"":`<div class="hint">「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
     </div>
   </section>`;
   const distState={d:defDist};
@@ -1994,18 +2143,21 @@ function renderActive(m){
   const s=db.active;
   const setup=db.setups.find(x=>x.id===s.setupId);
   m.innerHTML=`
+  ${recordPhaseArcHtml(1,"的をタップして、このエンドを積み上げる。")}
   ${liveSessionHeroHtml(s,setup)}
-  <div class="card">
-    <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
-    ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips" style="margin-bottom:8px">
-      ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<div class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</div>`).join("")}
-    </div>`}
+  <div class="card targetFocusCard">
+    <div class="targetTools">
+      <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
+      ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips">
+        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<div class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</div>`).join("")}
+      </div>`}
+    </div>
     <div class="tgWrap" id="tgWrap">
       ${targetMarkup(s.faceD,"tg",s.faceType)}
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
-    <div class="hint">タップ＆ドラッグ→離して確定 ・ <b>押したまま0.4秒で微調整</b> ・ 矢チップをタップで修正</div>
+    <div class="targetHint">タップ＆ドラッグで確定。押したまま0.4秒で微調整、矢チップをタップで修正できます。</div>
     <div class="scoreChips" id="curChips"></div>
     <div class="nudge" id="nudge">
       <div style="font-size:12px;color:var(--sub)">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
@@ -2241,6 +2393,7 @@ function openSummary(sess, isNew){
   const adv=adviceFor(sess, setup);
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet">
+    ${recordPhaseArcHtml(2,"結果を確認して、次のエンドやサイト台帳へつなげる。")}
     <h3>${isNew?"おつかれさまでした！":""} ${fmtD(sess.date)} ・ ${sess.dist}m</h3>
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
@@ -2258,6 +2411,7 @@ function openSummary(sess, isNew){
       ${shapeNote(adv.st)}
       ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
       <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight||850}mm と弾道モデルから計算した参考値です（サイトタブで変更可）。</div></div>`:""}
+    ${summarySightDialHtml(sess,adv)}
     ${personalModelHtml(adv,sess,setup)}
     ${conditionHtml(sess,st,setup)}
     ${nextActionHtml(sess,adv,setup)}
