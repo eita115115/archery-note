@@ -5,6 +5,7 @@ const root = path.resolve(__dirname, "..");
 const outDir = path.join(root, "dist", "native");
 const files = [
   "index.html",
+  "style.css",
   "manifest.json",
   "sw.js",
   "icon.svg",

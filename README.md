@@ -50,6 +50,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
 - **線かみ判定**: 矢の中心点からアプリ上の矢円半径を引いて採点（表示された矢円が線に少しでも触れていれば内側の点数）。微調整モード中は線かみ時にカーソルが緑、線なし時に赤で表示されます。
 - **環境対応**: 連続入力中の誤ズームを抑制し、PointerEvent非対応環境ではタッチ/マウス入力へフォールバック。オフライン時のトップページ復帰も補強。
 - **ネイティブ準備**: PWAを高速な実験場として残しつつ、`npm run build:native-web` でCapacitor向けWeb資産を生成できます。設定画面では保存・演算・配布基盤の準備状態を確認できます。保存は将来のネイティブ保存へ差し替えやすいアダプター層を通し、物理計算は `ArcheryPhysicsCore` として外部から呼べる入口を持ちます。Androidアプリ内ではHaptics/Share/Filesystem/StatusBarを使い、点の記録やエンド確定の触感、バックアップ・CSV・スコアカードの共有シートに対応します。
+- **コード整理**: 画面スタイルは `style.css` に分離し、`index.html` はアプリ構造とロジック中心に整理し始めています。今後は保存・採点・物理演算・各画面UIも段階的に分けていきます。
 
 ## 更新時の注意
 
@@ -90,7 +91,8 @@ npm run native:build:android
 
 ## ファイル
 
-- `index.html` — アプリ本体（依存ライブラリなし）
+- `index.html` — アプリ本体のHTML/JS（依存ライブラリなし）
+- `style.css` — 画面スタイル
 - `manifest.json` / `sw.js` / `icon.svg` — PWA用（ホーム画面追加・オフライン動作）
 - `serve.ps1` — ローカル確認用の簡易サーバー
 - `package.json` / `capacitor.config.json` — 将来のiOS/Androidアプリ化に向けたCapacitor準備
