@@ -5,8 +5,18 @@ const root = path.resolve(__dirname, "..");
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const cssPath = path.join(root, "style.css");
 const css = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
-const appPath = path.join(root, "app.js");
-const appJs = fs.existsSync(appPath) ? fs.readFileSync(appPath, "utf8") : "";
+const appScripts = [
+  "scripts/00-compat.js",
+  "scripts/10-storage-native.js",
+  "scripts/20-scoring.js",
+  "scripts/30-target-svg.js",
+  "scripts/40-analysis-physics.js",
+  "scripts/50-record-view.js",
+  "scripts/60-history-sight-view.js",
+  "scripts/70-gear-settings.js",
+  "scripts/90-init.js",
+];
+const appJs = appScripts.map(file => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 const surface = `${html}\n${css}\n${appJs}`;
 const inlineScripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
 const scripts = appJs;
@@ -24,7 +34,8 @@ function section(start, end) {
 
 new Function(scripts);
 
-assert(html.includes('<script src="app.js"></script>') && inlineScripts.length === 0 && scripts.includes("const APP_VER="), "External app script missing");
+assert(appScripts.every(file => html.includes(`<script src="${file}"></script>`)) && inlineScripts.length === 0 && scripts.includes("const APP_VER="), "External app scripts missing");
+assert(!fs.existsSync(path.join(root, "app.js")), "Legacy app.js should not remain after script split");
 const appVer = /const APP_VER=(\d+)/.exec(scripts)?.[1];
 const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf8")).v;
 const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"), "utf8"))?.[1];
@@ -35,12 +46,13 @@ assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html)
 assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りない材料を見る"), "onboarding UI missing");
 assert(surface.includes("練習を始める") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("simplePromise") && surface.includes("quickSelects") && surface.includes("recordSetupSnapshot") && surface.includes("gearWorkbenchHtml"), "lightweight record launch UI missing");
 assert(surface.includes("levelFromScore") && surface.includes("RECORD_FLOW_MODES") && surface.includes("recordIntroHtml") && surface.includes("recordPhaseArcHtml") && surface.includes("summarySightDialHtml") && surface.includes("summaryDecisionHtml"), "record UI helpers missing");
+assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
 assert(surface.includes("window.PointerEvent") && surface.includes("touchstart") && surface.includes("mousedown"), "Input fallback handlers missing");
 assert(surface.includes("createSVGPoint()"), "SVG coordinate fallback missing");
 assert(surface.includes("Array.prototype.flat") && surface.includes("Object.values") && surface.includes("Math.hypot"), "Compatibility polyfills missing");
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
 new Function(sw);
-assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match("./index.html")') && sw.includes("./style.css") && sw.includes("./app.js"), "Service worker navigation fallback missing");
+assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match("./index.html")') && sw.includes("./style.css") && appScripts.every(file => sw.includes(`./${file}`)), "Service worker navigation fallback missing");
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const cap = JSON.parse(fs.readFileSync(path.join(root, "capacitor.config.json"), "utf8"));
 const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "utf8"));

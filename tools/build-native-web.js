@@ -3,10 +3,21 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const outDir = path.join(root, "dist", "native");
+const appScripts = [
+  "scripts/00-compat.js",
+  "scripts/10-storage-native.js",
+  "scripts/20-scoring.js",
+  "scripts/30-target-svg.js",
+  "scripts/40-analysis-physics.js",
+  "scripts/50-record-view.js",
+  "scripts/60-history-sight-view.js",
+  "scripts/70-gear-settings.js",
+  "scripts/90-init.js",
+];
 const files = [
   "index.html",
   "style.css",
-  "app.js",
+  ...appScripts,
   "manifest.json",
   "sw.js",
   "icon.svg",
@@ -23,7 +34,7 @@ function assertInsideRoot(target) {
 }
 
 function readVersion() {
-  const appJs = fs.readFileSync(path.join(root, "app.js"), "utf8");
+  const appJs = fs.readFileSync(path.join(root, "scripts", "10-storage-native.js"), "utf8");
   const appVer = /const APP_VER=(\d+)/.exec(appJs)?.[1];
   const jsonVer = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf8")).v;
   if (!appVer || +appVer !== +jsonVer) {
@@ -41,7 +52,9 @@ function main() {
   for (const file of files) {
     const src = path.join(root, file);
     if (!fs.existsSync(src)) throw new Error(`Missing native asset: ${file}`);
-    fs.copyFileSync(src, path.join(outDir, file));
+    const dest = path.join(outDir, file);
+    fs.mkdirSync(path.dirname(dest), { recursive: true });
+    fs.copyFileSync(src, dest);
   }
 
   fs.writeFileSync(

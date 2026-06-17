@@ -339,6 +339,9 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .workflow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
 .guideLine{display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--sub); line-height:1.45; margin-top:8px;}
 .guideLine b{color:var(--title); white-space:nowrap; flex:0 0 auto;}
+.activeGuide{margin-top:8px;}
+.activeGuide .guideLine{margin-top:6px;}
+.activeGuideDone{margin-top:8px;}
 .compactStack>*:first-child{margin-top:0;}
 /* tab bar */
 nav.tabs{

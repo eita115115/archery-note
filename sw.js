@@ -1,5 +1,16 @@
-const CACHE = "archery-note-v37";
-const ASSETS = ["./index.html", "./style.css", "./app.js", "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
+const CACHE = "archery-note-v38";
+const APP_SCRIPTS = [
+  "./scripts/00-compat.js",
+  "./scripts/10-storage-native.js",
+  "./scripts/20-scoring.js",
+  "./scripts/30-target-svg.js",
+  "./scripts/40-analysis-physics.js",
+  "./scripts/50-record-view.js",
+  "./scripts/60-history-sight-view.js",
+  "./scripts/70-gear-settings.js",
+  "./scripts/90-init.js",
+];
+const ASSETS = ["./index.html", "./style.css", ...APP_SCRIPTS, "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

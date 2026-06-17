@@ -7,7 +7,18 @@ const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
 const html = fs.readFileSync(htmlPath, "utf8");
 const css = fs.readFileSync(path.join(root, "style.css"), "utf8");
-const appJs = fs.readFileSync(path.join(root, "app.js"), "utf8");
+const appScripts = [
+  "scripts/00-compat.js",
+  "scripts/10-storage-native.js",
+  "scripts/20-scoring.js",
+  "scripts/30-target-svg.js",
+  "scripts/40-analysis-physics.js",
+  "scripts/50-record-view.js",
+  "scripts/60-history-sight-view.js",
+  "scripts/70-gear-settings.js",
+  "scripts/90-init.js",
+];
+const appJs = appScripts.map(file => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 const surface = `${html}\n${css}\n${appJs}`;
 const appUrl = `file:///${htmlPath.replace(/\\/g, "/")}`;
 const outDir = path.join(root, "artifacts", "ui-smoke");
@@ -59,7 +70,8 @@ function staticUiChecks() {
   };
   assert(/<meta name="viewport"[^>]*maximum-scale=1/.test(html), "Viewport zoom guard missing");
   assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
-  assert(html.includes('<script src="app.js"></script>') && !/<script>([\s\S]*?)<\/script>/.test(html), "External app script missing");
+  assert(appScripts.every(file => html.includes(`<script src="${file}"></script>`)) && !/<script>([\s\S]*?)<\/script>/.test(html), "External app scripts missing");
+  assert(!fs.existsSync(path.join(root, "app.js")), "Legacy app.js should not remain after script split");
   assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
   assert(/<nav class="tabs" id="tabs">/.test(html), "Tab bar missing");
   const tabMatches = [...html.matchAll(/<button data-v="([^"]+)">[\s\S]*?<\/button>/g)].map(m => m[1]);
@@ -68,6 +80,7 @@ function staticUiChecks() {
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
   assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りない材料を見る"), "systematic onboarding UI missing");
+  assert(surface.includes("初回の操作ガイド") && surface.includes("次から表示しない") && surface.includes("activeGuideSeen"), "first-run active guide missing");
   assert(surface.includes("練習を始める") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("phaseArc") && surface.includes("simplePromise") && surface.includes("quickSelects") && surface.includes("missionMore") && surface.includes("summaryDecisionHtml") && surface.includes("setupLens") && surface.includes("insightStrip"), "lightweight record flow composition missing");
   assert(surface.includes("pageHero") && surface.includes("Growth map") && surface.includes("Sight tuning") && surface.includes("Equipment lab") && surface.includes("liveHud"), "reborn workspace surfaces missing");
   assert(surface.includes("statusPill") && surface.includes("nativeSignal") && surface.includes("触感") && surface.includes("共有"), "native-feel UI missing");
