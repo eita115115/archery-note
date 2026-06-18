@@ -123,6 +123,20 @@ function recordSetupSnapshot(setupId,dist){
     <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b><span>入力材料 ${gp.level} / 履歴 ${mp.level}</span></div>
   </div>`;
 }
+function faceChoiceValue(sess){
+  if(!sess) return "122";
+  if(sess.faceType==="triple") return "T40";
+  if(sess.faceType==="field") return `F${sess.faceD||80}`;
+  return String(sess.faceD||122);
+}
+function recordFastActionsHtml(last){
+  const lastLabel=last?`${last.dist}m・${faceLabel(last)}`:"履歴なし";
+  return `<section class="homeActions" aria-label="すぐ使う">
+    <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span>今の条件で開始</span></button>
+    <button class="homeAction" id="quickRepeat" type="button" ${last?"":"disabled"}><b>前回と同じ</b><span>${esc(lastLabel)}</span></button>
+    <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分布と偏移</span></button>
+  </section>`;
+}
 function renderRecord(m){
   if(db.active){ renderActive(m); return; }
   const last=db.sessions[db.sessions.length-1];
@@ -132,9 +146,10 @@ function renderRecord(m){
   const sys=setupSystemSummary(defSetup);
   m.innerHTML=`
   ${recordPhaseArcHtml(0,"まず今日の記録を始める。詳しい材料はあとから足せます。")}
+  ${recordFastActionsHtml(last)}
   <section class="launchPanel convergeLaunch startFirst">
     <div class="launchHead">
-      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"サイト値を残す練習":"今日の記録を始める"}</h2></div>
+      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"サイト値を残す練習":"条件を選ぶ"}</h2></div>
       <button class="tinyAction" id="jumpGear">用具</button>
     </div>
     <div class="launchBody">
@@ -157,7 +172,7 @@ function renderRecord(m){
       </select></div>
       <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
-    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"今日の記録を始める"}</button></div>
+    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"この条件で開始"}</button></div>
     <p class="startAssist">距離・的サイズはこの画面で変更できます。細かい入力はあとからで大丈夫です。</p>
     <div class="softDivider"></div>
     <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
@@ -204,6 +219,25 @@ function renderRecord(m){
     }
   };
   $("#jumpGear").onclick=()=>showView("gear");
+  $("#quickStart").onclick=()=>$("#fStart").click();
+  $("#quickHistory").onclick=()=>showView("history");
+  if(last){
+    $("#quickRepeat").onclick=()=>{
+      distState.d=last.dist||defDist;
+      const known=[70,50,30,18].includes(+distState.d);
+      const key=known?String(distState.d):"custom";
+      document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.toggle("on", String(x.dataset.d)===key));
+      $("#fDistCustomWrap").style.display=known?"none":"block";
+      if(!known) $("#fDistCustom").value=distState.d||"";
+      faceSel.value=faceChoiceValue(last);
+      $("#fArrows").value=last.perEnd||6;
+      $("#fSetup").value=last.setupId||"";
+      $("#fRound").value=last.round||"free";
+      fillSight();
+      refreshLens();
+      $("#fStart").click();
+    };
+  }
   document.querySelectorAll("#flowMode .flowBtn").forEach(b=>b.onclick=()=>{
     if(b.dataset.mode==="diagnosis"){ showView("sight"); return; }
     ui.recordMode=b.dataset.mode; render();

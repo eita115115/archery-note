@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=44;
+const APP_VER=45;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
@@ -107,11 +107,12 @@ function nativePulse(kind){
   return false;
 }
 function updateAppChrome(){
-  const st=$("#appStatus");
-  if(!st) return;
   const rt=runtimeKind();
-  const dot=rt.kind==="Native"?"native":"";
-  st.innerHTML=`<span class="statusDot ${dot}"></span><span>${esc(rt.label)}</span>`;
+  const st=$("#appStatus");
+  if(st){
+    const dot=rt.kind==="Native"?"native":"";
+    st.innerHTML=`<span class="statusDot ${dot}"></span><span>${esc(rt.label)}</span>`;
+  }
   const sb=capPlugin("StatusBar");
   try{
     if(sb && typeof sb.setBackgroundColor==="function") sb.setBackgroundColor({color:"#17643d"}).catch(()=>{});

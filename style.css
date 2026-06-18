@@ -46,15 +46,8 @@ header.app .appLogo{
 }
 header.app .appIdentity{min-width:0; flex:1 1 auto;}
 header.app .appIdentity h1,header.app .appIdentity .sub{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-header.app .statusPill{
-  border:1px solid var(--line); background:var(--soft); color:var(--title);
-  border-radius:999px; padding:5px 8px; font-size:10.5px; font-weight:800; display:flex; align-items:center; gap:5px;
-  max-width:100px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:0 0 auto;
-}
-header.app .statusPill{display:none;}
-header.app .statusPill span:last-child{overflow:hidden; text-overflow:ellipsis;}
-header.app .statusDot{width:7px;height:7px;border-radius:50%;background:#f0c66a;box-shadow:0 0 0 3px rgba(240,198,106,.18);flex:0 0 auto;}
-header.app .statusDot.native{background:#73e6a8;box-shadow:0 0 0 3px rgba(115,230,168,.18);}
+.statusDot{width:7px;height:7px;border-radius:50%;background:#f0c66a;box-shadow:0 0 0 3px rgba(240,198,106,.18);flex:0 0 auto;}
+.statusDot.native{background:#73e6a8;box-shadow:0 0 0 3px rgba(115,230,168,.18);}
 main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:10px 10px 12px;}
 .bootFallback{
   min-height:52vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
@@ -64,7 +57,7 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:10px 10px 
 }
 @keyframes bootFallbackDelay{to{opacity:1; visibility:visible; pointer-events:auto;}}
 .bootFallback .bootIcon{
-  width:54px; height:54px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  width:54px; height:54px; border-radius:14px; display:flex; align-items:center; justify-content:center;
   background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); font-size:26px;
 }
 .bootFallback h2{font-size:18px; margin:4px 0 0; color:var(--title);}
@@ -242,6 +235,18 @@ select.inp{padding-right:32px;}
 .coachCard img{width:40px; height:40px; border-radius:50%; padding:6px; background:var(--card); border:1px solid var(--advLine);}
 .coachCard b{display:block; color:var(--title); font-size:13px;}
 .coachCard span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:2px;}
+.homeActions{
+  display:grid; grid-template-columns:1.35fr 1fr 1fr; gap:8px; margin-bottom:10px;
+}
+.homeAction{
+  min-height:56px; border:1px solid var(--line); border-radius:999px; background:var(--card); color:var(--ink);
+  padding:9px 12px; text-align:center; cursor:pointer; box-shadow:var(--shadow);
+}
+.homeAction b{display:block; font-size:13.5px; line-height:1.2; color:inherit;}
+.homeAction span{display:block; font-size:10.5px; line-height:1.25; color:var(--sub); margin-top:3px;}
+.homeAction.primary{background:var(--green); border-color:var(--green); color:#fff; box-shadow:0 8px 18px rgba(23,100,61,.16);}
+.homeAction.primary span{color:rgba(255,255,255,.82);}
+.homeAction:disabled{opacity:.45; cursor:not-allowed;}
 .launchPanel.convergeLaunch{border-radius:8px; overflow:hidden;}
 .convergeLaunch .launchHead{background:var(--card);}
 .convergeLaunch .launchBody{padding:13px;}
@@ -531,10 +536,10 @@ header.app .gear{
 }
 @media (max-width:420px){
   header.app{gap:7px; padding-left:12px; padding-right:52px;}
-  header.app .statusPill{max-width:82px; padding:5px 7px;}
+  .homeActions{grid-template-columns:1fr 1fr;}
+  .homeAction.primary{grid-column:1 / -1;}
 }
 @media (max-width:520px){
-  header.app .statusPill{display:none;}
   .workflow{grid-template-columns:1fr;}
   .missionTop{grid-template-columns:1fr;}
   .convergeMission .missionTop{grid-template-columns:1fr; text-align:center;}
