@@ -65,14 +65,14 @@ function recordIntroHtml(sys, mode){
       <img class="startLogoMark" src="icon.svg" alt="">
       <div>
         <div class="eyebrow">Archery Note</div>
-        <h2>${mode==="calibration"?"サイト値も残す":"今日のズレを、次の調整へ"}</h2>
-        <p>距離を選んで的をタップ。結果で、サイトを動かすか・保留するかを見ます。</p>
+        <h2>${mode==="calibration"?"サイト値も残す":"今日のズレを、次の一射へ。"}</h2>
+        <p>得点・着弾・用具をまとめて残せる、アーチェリー練習ノート。結果で、サイトを動かすか・保留するかを見ます。</p>
       </div>
       <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
     </div>
     <div class="simplePromise">記録する <span>→</span> ズレを見る <span>→</span> 次を決める</div>
     <details class="adv missionMore" ${mode==="calibration"?"open":""}>
-      <summary>詳しいモード・準備度を見る</summary>
+      <summary>詳しく使う</summary>
       <div class="readinessRail">
         ${readinessCellHtml("用具",p.gear?p.gear.level:"低",p.gear?p.gear.score:0)}
         ${readinessCellHtml("履歴",p.model?p.model.level:"データ蓄積中",p.model?p.model.score:0)}
@@ -119,7 +119,7 @@ function recordSetupSnapshot(setupId,dist){
   const markText=mk?`上下 ${esc(mk.v||"—")} / 左右 ${esc(mk.h||"—")}`:"記録なし";
   return `<div class="setupLens" id="setupLens">
     <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b><span>${[setup.bow,setup.limbs,setup.poundage?setup.poundage+"lbs":""].filter(Boolean).map(esc).join(" / ")||"詳細入力待ち"}</span></div>
-    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b><span>演算入力 ${gp.level} / 個人モデル ${mp.level}</span></div>
+    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b><span>入力材料 ${gp.level} / 履歴 ${mp.level}</span></div>
   </div>`;
 }
 function renderRecord(m){
@@ -259,7 +259,7 @@ function pageHeroHtml(type,ctx){
     const total=arrows.reduce((a,x)=>a+x.s,0);
     const latest=src[0]||null;
     return `<section class="pageHero">
-      <div class="kicker">Growth map</div>
+      <div class="kicker">履歴</div>
       <h2>分布と偏移を読む</h2>
       <p>点数だけでなく、同じ用具・同じ距離の中心移動を追います。過去のグルーピングがあるほど、今回のズレが偶然か傾向か見えやすくなります。</p>
       <div class="heroMetrics">
@@ -273,7 +273,7 @@ function pageHeroHtml(type,ctx){
     const setup=ctx.setup, dist=ctx.dist, marks=ctx.marks||[], adv=ctx.adv;
     const cur=marks[0];
     return `<section class="pageHero">
-      <div class="kicker">Sight tuning</div>
+      <div class="kicker">サイト調整</div>
       <h2>サイト値を整える</h2>
       <p>距離ごとのサイト値と最新グルーピングから、動かす時・保留する時・射形を優先する時を分けて見ます。</p>
       <div class="heroMetrics">
@@ -289,13 +289,13 @@ function pageHeroHtml(type,ctx){
     const avg=profiles.length?profiles.reduce((a,p)=>a+p.score,0)/profiles.length:0;
     const best=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)})).sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
     return `<section class="pageHero">
-      <div class="kicker">Equipment lab</div>
-      <h2>用具を演算できるデータにする</h2>
-      <p>ハンドルやリムの名前だけで終わらせず、矢重量・矢径・FOC・実測初速まで整理します。ここが整うほど物理モデルが現実の弓に近づきます。</p>
+      <div class="kicker">用具</div>
+      <h2>いつものセッティングを残す</h2>
+      <p>ハンドル、リム、矢、サイト値をまとめて保存します。分かる範囲だけで始めて、必要な時だけ細かい実測値を足せます。</p>
       <div class="heroMetrics">
         ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
-        ${heroMetricHtml("演算入力",pct(avg),"用具データの平均充実度")}
-        ${heroMetricHtml("主戦用具",best?best.s.name:"—",best?`演算 ${best.p.level} / 個人 ${best.m.level}`:"初回セットアップ待ち")}
+        ${heroMetricHtml("入力材料",pct(avg),"用具データの平均充実度")}
+        ${heroMetricHtml("主戦用具",best?best.s.name:"—",best?`入力 ${best.p.level} / 履歴 ${best.m.level}`:"初回セットアップ待ち")}
       </div>
     </section>`;
   }
@@ -616,7 +616,7 @@ function openSummary(sess, isNew){
     ${summarySightDialHtml(sess,adv)}
     ${nextActionHtml(sess,adv,setup)}
     <details class="adv summaryDetails">
-      <summary>分析根拠・個人モデルを見る</summary>
+      <summary>詳しい根拠を見る</summary>
       ${trustHtml(sess,setup,st)}
       ${roundProgressHtml(sess)}
       ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}

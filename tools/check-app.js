@@ -43,9 +43,9 @@ assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer
 assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
 assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
 assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html), "Viewport must suppress accidental zoom during scoring");
-assert(surface.includes("今日のズレを次の調整へ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "onboarding UI missing");
+assert(surface.includes("今日のズレを、次の一射へ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "onboarding UI missing");
 assert(surface.includes("起動に失敗しました") && surface.includes("bootFallback"), "startup recovery fallback missing");
-assert(surface.includes("今日のズレを、次の調整へ") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("simplePromise") && surface.includes("ズレを見る") && surface.includes("quickSelects") && surface.includes("recordSetupSnapshot") && surface.includes("gearWorkbenchHtml"), "lightweight record launch UI missing");
+assert(surface.includes("今日のズレを、次の一射へ。") && surface.includes("アーチェリー練習ノート") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("simplePromise") && surface.includes("ズレを見る") && surface.includes("詳しく使う") && surface.includes("quickSelects") && surface.includes("recordSetupSnapshot") && surface.includes("gearWorkbenchHtml"), "lightweight record launch UI missing");
 assert(surface.includes("levelFromScore") && surface.includes("RECORD_FLOW_MODES") && surface.includes("recordIntroHtml") && surface.includes("recordPhaseArcHtml") && surface.includes("summarySightDialHtml") && surface.includes("summaryDecisionHtml"), "record UI helpers missing");
 assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
 assert(surface.includes("window.PointerEvent") && surface.includes("touchstart") && surface.includes("mousedown"), "Input fallback handlers missing");
@@ -63,8 +63,8 @@ assert(pkg.dependencies && pkg.dependencies["@capacitor/haptics"] && pkg.depende
 assert(cap.appId === "com.eita.archerynote" && cap.webDir === "dist/native", "Capacitor config mismatch");
 assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "native-transition.md")), "Native transition files missing");
 assert(surface.includes("nativeReadinessHtml") && surface.includes("アプリ情報・保存状態") && surface.includes("RK4-3D JS core"), "Native readiness UI missing");
-assert(surface.includes("pageHeroHtml") && surface.includes("liveSessionHeroHtml") && surface.includes("Growth map") && surface.includes("Sight tuning") && surface.includes("Equipment lab"), "Reborn workspace UI missing");
-assert(surface.includes("nativePulse") && surface.includes("shareOrDownloadText") && surface.includes("capPlugin") && surface.includes("appStatus"), "Native interaction layer missing");
+assert(surface.includes("pageHeroHtml") && surface.includes("liveSessionHeroHtml") && surface.includes("分布と偏移を読む") && surface.includes("サイト値を整える") && surface.includes("いつものセッティングを残す"), "Reborn workspace UI missing");
+assert(surface.includes("nativePulse") && surface.includes("shareOrDownloadText") && surface.includes("capPlugin") && surface.includes("appStatus") && surface.includes("freshReload"), "Native interaction layer missing");
 assert(surface.includes("storageGetItem") && surface.includes("storageSetItem") && surface.includes("storageDriverProfile"), "Storage adapter missing");
 assert(surface.includes("scheduleSafetySnapshot") && surface.includes("flushSafetySnapshot") && surface.includes("requestIdleCallback"), "Deferred snapshot saving missing");
 assert(surface.includes("ArcheryPhysicsCore") && surface.includes("window.ArcheryPhysicsCore"), "Physics core interface missing");

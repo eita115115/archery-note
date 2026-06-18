@@ -14,7 +14,21 @@ function checkUpdate(){
     .then(j=>{ if(j && j.v>APP_VER) $("#updBar").style.display="block"; })
     .catch(()=>{});
 }
-$("#updBar").onclick=()=>location.reload();
+function freshReload(){
+  const bar=$("#updBar");
+  if(bar) bar.textContent="更新中...";
+  const url=new URL(location.href);
+  url.searchParams.set("appv", String(Date.now()));
+  const reload=()=>location.replace(url.toString());
+  if(navigator.serviceWorker && navigator.serviceWorker.getRegistrations){
+    navigator.serviceWorker.getRegistrations()
+      .then(regs=>Promise.all(regs.map(r=>r.update().catch(()=>{}))))
+      .finally(reload);
+  }else{
+    reload();
+  }
+}
+$("#updBar").onclick=freshReload;
 document.addEventListener("visibilitychange",()=>{ if(document.hidden) flushSafetySnapshot(); else checkUpdate(); });
 window.addEventListener("pagehide",()=>flushSafetySnapshot());
 checkUpdate();

@@ -324,8 +324,8 @@ function gearWorkbenchHtml(){
     .sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
   return `<div class="insightStrip">
     <div class="insightTile"><div class="k">用具ライブラリ</div><b>${setups.length}件</b><span>練習紐付け ${linked}回 / サイト値 ${marks}点</span></div>
-    <div class="insightTile"><div class="k">演算入力</div><b>${pct(avg)}</b><span>矢重量・矢径・FOC・実測初速の平均充実度</span></div>
-    <div class="insightTile"><div class="k">最も育っている用具</div><b>${top?esc(top.s.name):"—"}</b><span>${top?`演算 ${top.p.level} / 個人モデル ${top.m.level}`:"登録待ち"}</span></div>
+    <div class="insightTile"><div class="k">入力材料</div><b>${pct(avg)}</b><span>矢重量・矢径・FOC・実測初速の平均充実度</span></div>
+    <div class="insightTile"><div class="k">よく使う用具</div><b>${top?esc(top.s.name):"—"}</b><span>${top?`入力 ${top.p.level} / 履歴 ${top.m.level}`:"登録待ち"}</span></div>
   </div>`;
 }
 function renderGear(m){
@@ -338,7 +338,7 @@ function renderGear(m){
       return `<div class="listItem" data-id="${s.id}"><div>
         <div class="t">${esc(s.name)}</div>
         <div class="d">${[s.bow,s.limbs,s.poundage?s.poundage+"lbs":""].filter(Boolean).map(esc).join(" ・ ")||"詳細未入力"}</div>
-        <div class="d">練習${cnt}回 ・ 演算入力 ${gp.level} ・ 個人モデル ${mp.level} ・ 変更履歴${(s.history||[]).length}件</div>
+        <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level} ・ 変更履歴${(s.history||[]).length}件</div>
       </div><div style="font-size:18px;color:var(--sub)">›</div></div>`;
     }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
     <div class="btnrow"><button class="btn sec" id="gWizard">初回セットアップ</button><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
