@@ -498,11 +498,27 @@ function conditionHtml(sess,st,setup){
   const notes=conditionInsights(sess,st,setup).slice(0,4);
   return notes.length?`<div class="advice" style="background:var(--card);border-color:var(--line)">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
 }
+const SESSION_METRIC_CACHE=new Map();
+function sessionMetricSignature(sess){
+  const ends=(sess&&sess.ends)||[];
+  let n=0,total=0,last="";
+  ends.forEach((end,ei)=>end.forEach((a,ai)=>{
+    n++; total+=a.s||0;
+    if(ei===ends.length-1 && ai===end.length-1) last=[a.x,a.y,a.s,a.X?1:0,a.spot==null?"":a.spot].join(":");
+  }));
+  return [sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,last].join("|");
+}
 function sessionMetrics(sess){
+  const sig=sessionMetricSignature(sess||{});
+  const cached=SESSION_METRIC_CACHE.get(sig);
+  if(cached) return cached;
   const all=(sess.ends||[]).flat();
   const total=all.reduce((a,x)=>a+x.s,0);
   const st=robustStats(all);
-  return {all,total,avg:all.length?total/all.length:0,st};
+  const metrics={all,total,avg:all.length?total/all.length:0,st};
+  SESSION_METRIC_CACHE.set(sig,metrics);
+  if(SESSION_METRIC_CACHE.size>240) SESSION_METRIC_CACHE.delete(SESSION_METRIC_CACHE.keys().next().value);
+  return metrics;
 }
 function sessionQuality(sess, setup, st){
   const m=sessionMetrics(sess);

@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=3;
-const APP_VER=39;
+const APP_VER=40;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
@@ -171,11 +171,24 @@ function snapshotLabel(s){
   const c=s.counts||dataCounts(s.data||{});
   return `${new Date(s.ts||Date.now()).toLocaleString()}（練習${c.sessions||0} / 用具${c.setups||0} / サイト${c.marks||0}）`;
 }
-function writeSafetySnapshot(reason="auto", force=false){
+let snapshotJob=null, snapshotPending=null;
+function runIdleTask(fn, timeout){
+  const w=typeof window!=="undefined"?window:{};
+  if(typeof w.requestIdleCallback==="function") return {kind:"idle",id:w.requestIdleCallback(fn,{timeout:timeout||1500})};
+  return {kind:"timeout",id:setTimeout(fn,0)};
+}
+function cancelIdleTask(job){
+  const w=typeof window!=="undefined"?window:{};
+  if(!job) return;
+  if(job.kind==="idle" && typeof w.cancelIdleCallback==="function") w.cancelIdleCallback(job.id);
+  else clearTimeout(job.id);
+}
+function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
   try{
-    const raw=JSON.stringify(db), h=hashText(raw), now=Date.now();
-    let snaps=readSnapshots().filter(s=>s&&s.hash!==h);
-    const latest=readSnapshots()[0];
+    const raw=rawOverride||JSON.stringify(db), h=hashText(raw), now=Date.now();
+    const current=readSnapshots();
+    let snaps=current.filter(s=>s&&s.hash!==h);
+    const latest=current[0];
     if(!force && latest && latest.hash===h) return;
     if(!force && latest && now-(latest.ts||0)<30*60*1000) return;
     snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
@@ -186,12 +199,34 @@ function writeSafetySnapshot(reason="auto", force=false){
     }
   }catch(e){ console.warn("snapshot failed",e); }
 }
+function flushSafetySnapshot(){
+  if(!snapshotPending) return;
+  const p=snapshotPending;
+  snapshotPending=null;
+  if(snapshotJob){ cancelIdleTask(snapshotJob); snapshotJob=null; }
+  writeSafetySnapshot(p.reason,p.force,p.raw);
+}
+function scheduleSafetySnapshot(reason, raw, force){
+  if(force){
+    snapshotPending=null;
+    if(snapshotJob){ cancelIdleTask(snapshotJob); snapshotJob=null; }
+    writeSafetySnapshot(reason,true,raw);
+    return;
+  }
+  snapshotPending={reason,raw,force:false};
+  if(snapshotJob) return;
+  snapshotJob=runIdleTask(()=>{
+    snapshotJob=null;
+    flushSafetySnapshot();
+  },1800);
+}
 function save(opts){
   const o=typeof opts==="string"?{reason:opts}:opts||{};
   db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
   try{
-    storageSetItem(KEY, JSON.stringify(db));
-    writeSafetySnapshot(o.reason||"auto", !!o.forceSnapshot);
+    const raw=JSON.stringify(db);
+    storageSetItem(KEY, raw);
+    scheduleSafetySnapshot(o.reason||"auto", raw, !!o.forceSnapshot);
   }catch(e){
     console.error(e);
     try{ toast("保存容量が足りません。設定からバックアップ保存してください"); }catch(_){}

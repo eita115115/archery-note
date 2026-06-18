@@ -79,6 +79,7 @@ function staticUiChecks() {
   assert(surface.includes("記録") && surface.includes("履歴") && surface.includes("サイト調整") && surface.includes("用具"), "Tab labels missing");
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
+  assert(surface.includes("content-visibility:auto") && surface.includes("contain-intrinsic-size"), "offscreen rendering guard missing");
   assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "systematic onboarding UI missing");
   assert(surface.includes("サイト値を残す") && surface.includes("足りないデータを見る") && !surface.includes("校正用") && !surface.includes("状態確認"), "record mode labels should stay user-facing");
   assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "field target setup UI missing");

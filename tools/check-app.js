@@ -65,6 +65,7 @@ assert(surface.includes("nativeReadinessHtml") && surface.includes("アプリ情
 assert(surface.includes("pageHeroHtml") && surface.includes("liveSessionHeroHtml") && surface.includes("Growth map") && surface.includes("Sight tuning") && surface.includes("Equipment lab"), "Reborn workspace UI missing");
 assert(surface.includes("nativePulse") && surface.includes("shareOrDownloadText") && surface.includes("capPlugin") && surface.includes("appStatus"), "Native interaction layer missing");
 assert(surface.includes("storageGetItem") && surface.includes("storageSetItem") && surface.includes("storageDriverProfile"), "Storage adapter missing");
+assert(surface.includes("scheduleSafetySnapshot") && surface.includes("flushSafetySnapshot") && surface.includes("requestIdleCallback"), "Deferred snapshot saving missing");
 assert(surface.includes("ArcheryPhysicsCore") && surface.includes("window.ArcheryPhysicsCore"), "Physics core interface missing");
 
 const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel,storageGetItem,storageSetItem,storageDriverProfile};")();
@@ -83,6 +84,7 @@ assert(surface.includes("ROUND_TYPES") && surface.includes("roundProgressHtml"),
 assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "Field target setup UI missing");
 assert(surface.includes("サイト値を残す") && surface.includes("足りないデータを見る") && !surface.includes("校正用") && !surface.includes("状態確認"), "Record mode labels should be user-facing");
 assert(surface.includes("personalModel") && surface.includes("sessionQuality") && surface.includes("nextActionPlan"), "Personal decision model missing");
+assert(surface.includes("SESSION_METRIC_CACHE") && surface.includes("sessionMetricSignature"), "Session metric cache missing");
 assert(surface.includes("decision_quality") && surface.includes("personal_model"), "CSV decision columns missing");
 assert(surface.includes("robustWeightedLine") && surface.includes("modelReadinessProfile") && surface.includes("個人データ準備度"), "v19 weighted model readiness missing");
 assert(surface.includes("spineGuidance") && surface.includes("スパイン初期候補") && surface.includes("stabilizer"), "v20 gear guidance missing");

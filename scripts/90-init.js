@@ -15,7 +15,7 @@ function checkUpdate(){
     .catch(()=>{});
 }
 $("#updBar").onclick=()=>location.reload();
-document.addEventListener("visibilitychange",()=>{ if(document.hidden) writeSafetySnapshot("hidden"); else checkUpdate(); });
-window.addEventListener("pagehide",()=>writeSafetySnapshot("pagehide"));
+document.addEventListener("visibilitychange",()=>{ if(document.hidden) flushSafetySnapshot(); else checkUpdate(); });
+window.addEventListener("pagehide",()=>flushSafetySnapshot());
 checkUpdate();
 render();

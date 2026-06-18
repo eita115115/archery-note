@@ -453,7 +453,9 @@ function nudgeArrow(dirKey){
 /* target pointer input with long-press fine mode + lens */
 function attachTargetInput(s){
   const svg=$("#tgsvg"), lens=$("#lens"), lensSvg=$("#lensSvg"), lensTag=$("#lensTag"), cur=$("#tgcur");
-  let drag=null;
+  let drag=null, cursorFrame=0, cursorPoint=null;
+  const raf=window.requestAnimationFrame||function(cb){ return setTimeout(cb,16); };
+  const caf=window.cancelAnimationFrame||clearTimeout;
   function clientPoint(e){
     const t=(e.changedTouches&&e.changedTouches[0])||(e.touches&&e.touches[0])||e;
     if(!t || t.clientX==null) return null;
@@ -494,8 +496,18 @@ function attachTargetInput(s){
     lens.style.left = half? "auto":"8px"; lens.style.right = half? "8px":"auto";
     lensTag.style.left = half? "auto":"12px"; lensTag.style.right = half? "12px":"auto";
   }
+  function scheduleCursor(p){
+    cursorPoint=p;
+    if(cursorFrame) return;
+    cursorFrame=raf(()=>{
+      cursorFrame=0;
+      if(cursorPoint) drawCursor(cursorPoint);
+    });
+  }
   function resetDrag(){
     if(drag&&drag.tm) clearTimeout(drag.tm);
+    if(cursorFrame){ caf(cursorFrame); cursorFrame=0; }
+    cursorPoint=null;
     drag=null; cur.innerHTML=""; lens.style.display="none";
     lens.classList.remove("fine","cut","miss");
     lensTag.classList.remove("fine","cut","miss"); lensTag.style.display="none";
@@ -509,7 +521,7 @@ function attachTargetInput(s){
     if(e.pointerId!=null && svg.setPointerCapture){ try{ svg.setPointerCapture(e.pointerId); }catch(_){} }
     const p=clientToSvg(cp.x,cp.y);
     drag={p, raw:{x:cp.x,y:cp.y}, fine:false, id:cp.id,
-      tm:setTimeout(()=>{ if(drag){ drag.fine=true; lens.classList.add("fine"); lensTag.classList.add("fine"); lensTag.style.display="block"; drawCursor(drag.p); } },400)};
+      tm:setTimeout(()=>{ if(drag){ drag.fine=true; lens.classList.add("fine"); lensTag.classList.add("fine"); lensTag.style.display="block"; scheduleCursor(drag.p); } },400)};
     lens.style.display="block"; lens.classList.remove("cut","miss"); lensTag.classList.remove("fine","cut","miss"); lensTag.textContent="位置調整中…"; lensTag.style.display="block";
     drawCursor(p);
   }
@@ -521,7 +533,7 @@ function attachTargetInput(s){
     const k=drag.fine?0.25:1;
     drag.p={x:drag.p.x+(a.x-b.x)*k, y:drag.p.y+(a.y-b.y)*k};
     drag.raw={x:cp.x,y:cp.y};
-    drawCursor(drag.p);
+    scheduleCursor(drag.p);
   }
   function up(e){
     const cp=clientPoint(e); if(!drag || !cp || cp.id!==drag.id) return;
@@ -641,7 +653,8 @@ function historyOverviewHtml(allSs,ss){
   const total=arrows.reduce((a,x)=>a+x.s,0);
   const avg=arrows.length?total/arrows.length:0;
   const recent=[...src].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1)).slice(0,5);
-  const recentAvg=recent.length?recent.flatMap(s=>s.ends.flat()).reduce((a,x)=>a+x.s,0)/Math.max(1,recent.flatMap(s=>s.ends.flat()).length):0;
+  const recentArrows=recent.flatMap(s=>s.ends.flat());
+  const recentAvg=recentArrows.length?recentArrows.reduce((a,x)=>a+x.s,0)/recentArrows.length:0;
   const setupCount=new Set(src.map(s=>s.setupId||"none")).size;
   const distCount=new Set(src.map(s=>s.dist).filter(Boolean)).size;
   const quality=src.map(s=>sessionQuality(s,db.setups.find(x=>x.id===s.setupId))).filter(Boolean);
