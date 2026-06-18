@@ -129,10 +129,21 @@ function faceChoiceValue(sess){
   if(sess.faceType==="field") return `F${sess.faceD||80}`;
   return String(sess.faceD||122);
 }
-function recordFastActionsHtml(last){
-  const lastLabel=last?`${last.dist}m・${faceLabel(last)}`:"履歴なし";
+function suggestedFaceValue(dist,last){
+  if(last && last.faceD) return faceChoiceValue(last);
+  return String((dist||70)>=60?122:((dist||70)<=18?40:80));
+}
+function actionFaceLabel(value){
+  const f=parseFaceChoice(value);
+  if(f.faceType==="triple") return "40cm三つ目";
+  if(f.faceType==="field") return `${f.faceD}cmフィールド`;
+  return `${f.faceD}cm`;
+}
+function recordFastActionsHtml(last,dist,faceValue){
+  const currentLabel=`${dist}m・${actionFaceLabel(faceValue)}で開始`;
+  const lastLabel=last?`${last.dist}m・${actionFaceLabel(faceChoiceValue(last))}`:"履歴なし";
   return `<section class="homeActions" aria-label="すぐ使う">
-    <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span>今の条件で開始</span></button>
+    <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span id="quickStartMeta">${esc(currentLabel)}</span></button>
     <button class="homeAction" id="quickRepeat" type="button" ${last?"":"disabled"}><b>前回と同じ</b><span>${esc(lastLabel)}</span></button>
     <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分布と偏移</span></button>
   </section>`;
@@ -144,9 +155,11 @@ function renderRecord(m){
   const defDist=last?last.dist:70;
   const mode=ui.recordMode||"practice";
   const sys=setupSystemSummary(defSetup);
+  const defFace=suggestedFaceValue(defDist,last);
+  const defPerEnd=last&&last.perEnd?last.perEnd:6;
   m.innerHTML=`
   ${recordPhaseArcHtml(0,"まず今日の記録を始める。詳しい材料はあとから足せます。")}
-  ${recordFastActionsHtml(last)}
+  ${recordFastActionsHtml(last,defDist,defFace)}
   <section class="launchPanel convergeLaunch startFirst">
     <div class="launchHead">
       <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"サイト値を残す練習":"条件を選ぶ"}</h2></div>
@@ -163,14 +176,14 @@ function renderRecord(m){
     <div class="quickSelects">
       <div><label class="f">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
-          ${[122,80,60,40].map(f=>`<option value="${f}">${f}cm</option>`).join("")}
-          <option value="T40">40cm 三つ目（縦）</option>
+          ${[122,80,60,40].map(f=>`<option value="${f}" ${String(defFace)===String(f)?"selected":""}>${f}cm</option>`).join("")}
+          <option value="T40" ${defFace==="T40"?"selected":""}>40cm 三つ目（縦）</option>
         </optgroup>
         <optgroup label="フィールド">
-          ${FIELD_FACE_SIZES.map(f=>`<option value="F${f}">${f}cm フィールド</option>`).join("")}
+          ${FIELD_FACE_SIZES.map(f=>`<option value="F${f}" ${defFace===`F${f}`?"selected":""}>${f}cm フィールド</option>`).join("")}
         </optgroup>
       </select></div>
-      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
+      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===defPerEnd?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
     <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"この条件で開始"}</button></div>
     <p class="startAssist">距離・的サイズはこの画面で変更できます。細かい入力はあとからで大丈夫です。</p>
@@ -208,15 +221,20 @@ function renderRecord(m){
   const distState={d:defDist};
   const faceSel=$("#fFace");
   const suggestFace=d=>{ if(String(faceSel.value).startsWith("F")) return; faceSel.value = d>=60?122:(d<=18?40:80); };
-  suggestFace(defDist);
+  function updateQuickStartMeta(){
+    const meta=$("#quickStartMeta");
+    if(meta && distState.d) meta.textContent=`${distState.d}m・${actionFaceLabel(faceSel.value)}で開始`;
+  }
   faceSel.onchange=()=>{
     if(String(faceSel.value).startsWith("F") && $("#fArrows").value==="6") $("#fArrows").value="3";
+    updateQuickStartMeta();
   };
   $("#fRound").onchange=e=>{
     if(e.target.value==="field72"){
       if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
       $("#fArrows").value="3";
     }
+    updateQuickStartMeta();
   };
   $("#jumpGear").onclick=()=>showView("gear");
   $("#quickStart").onclick=()=>$("#fStart").click();
@@ -251,9 +269,10 @@ function renderRecord(m){
     c.classList.add("on");
     if(c.dataset.d==="custom"){ $("#fDistCustomWrap").style.display="block"; distState.d=null; }
     else{ $("#fDistCustomWrap").style.display="none"; distState.d=+c.dataset.d; suggestFace(distState.d); fillSight(); }
+    updateQuickStartMeta();
     refreshLens();
   });
-  $("#fDistCustom").oninput=e=>{ distState.d=+e.target.value||null; if(distState.d) {suggestFace(distState.d); fillSight();} refreshLens(); };
+  $("#fDistCustom").oninput=e=>{ distState.d=+e.target.value||null; if(distState.d) {suggestFace(distState.d); fillSight();} updateQuickStartMeta(); refreshLens(); };
   function fillSight(){
     const sid=$("#fSetup").value, d=distState.d;
     if(!sid||!d) return;
