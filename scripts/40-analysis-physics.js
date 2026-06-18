@@ -460,11 +460,15 @@ function summaryDecisionHtml(adv,sess){
   if(!j) return "";
   const tone=j.tone==="ok"?"ok":j.tone==="warn"?"warn":"hold";
   const move=adv && adv.lines ? adv.lines.filter(l=>l.axis!=="-").length : 0;
+  const reason=move
+    ? "方向と量は下に出ます。先に、動かす根拠が十分かを確認します。"
+    : "動かさない理由を先に見て、同じ条件で本数を重ねます。";
   return `<div class="decisionCard ${tone}">
-    <div class="k">今回の判断</div>
+    <div class="k">動かすべきか</div>
+    <span class="decisionQuestion">サイトを触る前の判断</span>
     <b>${esc(j.label)}</b>
     <p>${esc(j.text)}</p>
-    <span>${move?"サイトを動かす前に、下の提案量と信頼度を確認できます。":"今日はサイトを触らず、同じ条件で本数を重ねる判断です。"}</span>
+    <span>${reason}</span>
   </div>`;
 }
 function conditionInsights(sess,st,setup){

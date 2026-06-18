@@ -8,6 +8,7 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.da
 
 function render(){
   updateAppChrome();
+  if(typeof syncUpdateBarVisibility==="function") syncUpdateBarVisibility();
   document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
   const m=$("#main");
   if(view==="record") renderRecord(m);
@@ -26,6 +27,7 @@ const RECORD_FLOW_MODES=[
   {id:"diagnosis",icon:"?",title:"足りないデータを見る",desc:"提案の材料を確認"}
 ];
 const RECORD_PHASES=["準備","記録","確認","蓄積"];
+const SHOT_REASON_TAGS=["良射","押し手","リリース","クリッカー","風","狙いミス","矢が怪しい","不明"];
 function scorePct(v){ return Math.round(clamp(v||0,0,1)*100); }
 function readinessCellHtml(label,level,score){
   return `<div class="readinessCell"><div class="k">${label}</div><b>${esc(level)}</b><div class="bar"><i style="width:${scorePct(score)}%"></i></div></div>`;
@@ -59,8 +61,7 @@ function recordIntroHtml(sys, mode){
       <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
   const p=sys.profiles||{};
   const nf=nativeFeatureProfile();
-  return `${recordPhaseArcHtml(0,"まず記録。詳しい材料はあとから。")}
-  <section class="missionPanel convergeMission">
+  return `<section class="missionPanel convergeMission">
     <div class="missionTop">
       <img class="startLogoMark" src="icon.svg" alt="">
       <div>
@@ -130,14 +131,14 @@ function renderRecord(m){
   const mode=ui.recordMode||"practice";
   const sys=setupSystemSummary(defSetup);
   m.innerHTML=`
-  ${recordIntroHtml(sys,mode)}
-  <section class="launchPanel convergeLaunch">
+  ${recordPhaseArcHtml(0,"まず今日の記録を始める。詳しい材料はあとから足せます。")}
+  <section class="launchPanel convergeLaunch startFirst">
     <div class="launchHead">
-      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"サイト値を残す練習":"今日の練習"}</h2></div>
+      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode==="calibration"?"サイト値を残す練習":"今日の記録を始める"}</h2></div>
       <button class="tinyAction" id="jumpGear">用具</button>
     </div>
     <div class="launchBody">
-    <p class="quickStartCopy">距離・的・本数だけで始められます。サイト値や風は、必要な時だけ残します。</p>
+    <p class="quickStartCopy">距離・的・本数だけで始められます。サイト値や風は、余裕がある時だけ残します。</p>
     <label class="f">距離</label>
     <div class="chips quickDists" id="fDistChips">
       ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
@@ -156,7 +157,8 @@ function renderRecord(m){
       </select></div>
       <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===6?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
-    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"記録開始"}</button></div>
+    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"今日の記録を始める"}</button></div>
+    <p class="startAssist">距離・的サイズはこの画面で変更できます。細かい入力はあとからで大丈夫です。</p>
     <div class="softDivider"></div>
     <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
       <summary>詳しく残す（日付・用具・サイト値・天候）</summary>
@@ -186,7 +188,8 @@ function renderRecord(m){
     ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
     ${db.setups.length?"":`<div class="hint">「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
     </div>
-  </section>`;
+  </section>
+  ${recordIntroHtml(sys,mode)}`;
   const distState={d:defDist};
   const faceSel=$("#fFace");
   const suggestFace=d=>{ if(String(faceSel.value).startsWith("F")) return; faceSel.value = d>=60?122:(d<=18?40:80); };
@@ -247,6 +250,34 @@ function renderRecord(m){
 
 function sessionArrows(sess){
   return [...((sess&&sess.ends)||[]).flat(), ...((sess&&sess.cur)||[])];
+}
+function arrowMetaSummaryHtml(sess){
+  const arrows=((sess&&sess.ends)||[]).flat();
+  const tagged=arrows.filter(a=>a&&(a.reason||a.no));
+  if(!tagged.length) return "";
+  const reasons={};
+  const byNo={};
+  tagged.forEach(a=>{
+    if(a.reason) reasons[a.reason]=(reasons[a.reason]||0)+1;
+    if(a.no){
+      const k=String(a.no).trim();
+      if(k){
+        const b=byNo[k]||(byNo[k]={n:0,x:0,y:0,score:0,reasons:{}});
+        b.n++; b.x+=a.x||0; b.y+=a.y||0; b.score+=a.s||0;
+        if(a.reason) b.reasons[a.reason]=(b.reasons[a.reason]||0)+1;
+      }
+    }
+  });
+  const reasonLine=Object.entries(reasons).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${esc(k)} ${v}本`).join(" / ");
+  const rows=Object.entries(byNo).sort((a,b)=>b[1].n-a[1].n || String(a[0]).localeCompare(String(b[0]))).slice(0,6).map(([no,b])=>{
+    const rx=b.x/b.n, ry=b.y/b.n, avg=b.score/b.n;
+    const topReason=Object.entries(b.reasons).sort((a,c)=>c[1]-a[1])[0];
+    return `<div class="note">#${esc(no)}: ${b.n}本 / 平均${avg.toFixed(1)} / ${cmOffsetText(rx,"x")}・${cmOffsetText(ry,"y")}${topReason?` / ${esc(topReason[0])} ${topReason[1]}本`:""}</div>`;
+  }).join("");
+  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="note"><b>矢番号・外れ理由メモ</b>${reasonLine?` — ${reasonLine}`:""}</div>
+    ${rows}
+  </div>`;
 }
 function heroMetricHtml(k,b,span){
   return `<div class="heroMetric"><div class="k">${esc(k)}</div><b>${esc(b)}</b><span>${esc(span||"")}</span></div>`;
@@ -362,6 +393,7 @@ function renderActive(m){
         <button data-n="l">◀</button><button data-n="del" style="color:var(--danger)">🗑</button><button data-n="r">▶</button>
         <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
       </div>
+      <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
     </div>
     <div class="statbar" id="statbar"></div>
@@ -398,6 +430,36 @@ function renderActive(m){
   $("#nudgeDone").onclick=()=>{ ui.selArrow=-1; refreshActive(); };
   refreshActive();
 }
+function shotMetaHtml(a,index){
+  const tags=SHOT_REASON_TAGS.map(tag=>`<button class="reasonTag ${a.reason===tag?"on":""}" data-reason="${esc(tag)}">${esc(tag)}</button>`).join("");
+  return `<div class="shotMetaGrid">
+    <div>
+      <label class="metaLabel" for="shotArrowNo">矢番号</label>
+      <input class="inp" id="shotArrowNo" inputmode="numeric" maxlength="8" value="${esc(a.no||"")}" placeholder="${index+1}">
+    </div>
+    <div>
+      <span class="metaLabel">外れ理由</span>
+      <div class="reasonTags" id="shotReasonTags">${tags}</div>
+    </div>
+  </div>`;
+}
+function bindShotMeta(){
+  const s=db.active, a=s&&s.cur&&s.cur[ui.selArrow];
+  if(!a) return;
+  const no=$("#shotArrowNo");
+  if(no) no.oninput=e=>{
+    a.no=e.target.value.trim();
+    save("shot-meta");
+  };
+  if(no) no.onchange=()=>refreshActive();
+  document.querySelectorAll("#shotReasonTags .reasonTag").forEach(btn=>btn.onclick=()=>{
+    const reason=btn.dataset.reason;
+    a.reason=a.reason===reason?"":reason;
+    nativePulse("light");
+    save("shot-meta");
+    refreshActive();
+  });
+}
 function refreshActive(){
   const s=db.active; if(!s) return;
   // markers
@@ -409,12 +471,18 @@ function refreshActive(){
   // chips
   $("#curChips").innerHTML = s.cur.map((a,i)=>{
     const z=zoneStyle(a.s,a.X,s.faceType);
-    return `<div class="sc ${i===ui.selArrow?"sel":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}">${scoreLabel(a)}</div>`;
+    return `<div class="sc ${i===ui.selArrow?"sel":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</div>`;
   }).join("") || `<span style="font-size:12px;color:var(--sub);align-self:center">エンド${s.ends.length+1}：的をタップして記録</span>`;
   document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
     ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; nativePulse("light"); refreshActive();
   });
   $("#nudge").classList.toggle("on", ui.selArrow>=0);
+  const meta=$("#shotMeta");
+  if(meta){
+    const a=s.cur[ui.selArrow];
+    meta.innerHTML=a?shotMetaHtml(a,ui.selArrow):"";
+    if(a) bindShotMeta();
+  }
   // stats
   const all=[...s.ends.flat(), ...s.cur];
   const total=all.reduce((a,x)=>a+x.s,0);
@@ -620,6 +688,7 @@ function openSummary(sess, isNew){
       ${trustHtml(sess,setup,st)}
       ${roundProgressHtml(sess)}
       ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
+      ${arrowMetaSummaryHtml(sess)}
       ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
         ${judgementHtml(adv,sess)}
         ${shapeNote(adv.st)}

@@ -21,14 +21,14 @@
 <header class="app">
   <div class="appLogo">🏹</div>
   <div class="appIdentity"><h1>Archery Note</h1><div class="sub">今日のズレを、次の一射へ</div></div>
-  <div class="statusPill" id="appStatus"><span class="statusDot"></span><span>起動中</span></div>
+  <div class="statusPill" id="appStatus"><span class="statusDot"></span><span>準備中</span></div>
   <button class="gear" id="btnSettings" aria-label="設定">⚙</button>
 </header>
 <main id="main">
-  <section class="bootFallback" id="bootFallback">
+  <section class="bootFallback" id="bootFallback" aria-live="polite">
     <div class="bootIcon">🏹</div>
-    <h2>起動に失敗しました</h2>
-    <p>再読み込みしても開かない場合は、設定からバックアップや自動退避を確認してください。</p>
+    <h2>読み込みに時間がかかっています</h2>
+    <p>通信が不安定な場合は再読み込みしてください。記録は端末内に保存されます。</p>
     <a class="btn bootReload" href="./index.html">再読み込み</a>
   </section>
 </main>
@@ -38,7 +38,7 @@
   <button data-v="sight" aria-label="サイト調整"><span class="ic">🔧</span>サイト調整</button>
   <button data-v="gear" aria-label="用具"><span class="ic">🏹</span>用具</button>
 </nav>
-<div class="updbar" id="updBar">更新できます。タップで反映</div>
+<div class="updbar" id="updBar" hidden>新しい版があります。タップで更新</div>
 <div class="toast" id="toast"></div>
 
 <script src="scripts/00-compat.js"></script>

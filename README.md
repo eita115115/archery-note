@@ -22,7 +22,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
 
 ## 機能
 
-- **記録**: 的をタップして着弾位置を入力。距離は70/50/30/18m＋自由設定、ターゲット的・三つ目的・フィールド的に対応。
+- **記録**: 的をタップして着弾位置を入力。距離は70/50/30/18m＋自由設定、ターゲット的・三つ目的・フィールド的に対応。必要な矢だけ矢番号と外れ理由タグを残せます。
 - **結果**: グルーピング中心、ばらつき、外れ値を見て、サイトを動かすか・保留するか・射形を優先するかを表示。
 - **履歴**: 練習一覧、着弾プロット、距離別平均、過去中心の分布/偏移を確認。
 - **サイト調整**: セッティング×距離ごとにサイト値を残し、最新の記録と見比べられます。
@@ -46,7 +46,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
 
 ## 更新時の注意
 
-公開のたびに `scripts/10-storage-native.js` 内の `APP_VER` と `version.json` の `v` を**同じ値に揃えて+1**すること（更新通知バナーの仕組み）。
+公開番号は次のコマンドで一括更新します。`APP_VER`、`version.json`、`sw.js` のキャッシュ名、`package.json` / `package-lock.json` のバージョンを同じ番号に揃えます。
+
+```powershell
+npm run version:bump
+# または番号を指定
+node tools\bump-version.js 44
+```
 
 更新前の検証:
 
@@ -92,6 +98,7 @@ npm run native:build:android
 - `android/` — Capacitorで生成したAndroidネイティブプロジェクト
 - `tools/check-app.js` — 構文・公開番号・代表演算の検証スクリプト
 - `tools/check-ui.js` — Chrome/Edgeを使ったスマホ幅・PC幅のUIスモーク検査
+- `tools/bump-version.js` — 公開番号を関連ファイルへ一括反映
 - `tools/build-native-web.js` — Capacitorへ渡すWeb資産を `dist/native` に生成
 - `tools/extract-catalog.py` — カタログPDFから用具名候補を抽出する開発補助ツール
 

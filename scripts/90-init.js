@@ -7,11 +7,19 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
+let updateAvailable=false;
+function syncUpdateBarVisibility(){
+  const bar=$("#updBar");
+  if(!bar) return;
+  const show=!!updateAvailable && !(db&&db.active);
+  bar.hidden=!show;
+  bar.style.display=show?"block":"none";
+}
 function checkUpdate(){
-  if(location.protocol==="file:") return;
+  if(location.protocol==="file:"){ updateAvailable=false; syncUpdateBarVisibility(); return; }
   fetch("version.json?ts="+Date.now(),{cache:"no-store"})
     .then(r=>r.json())
-    .then(j=>{ if(j && j.v>APP_VER) $("#updBar").style.display="block"; })
+    .then(j=>{ updateAvailable=!!(j && j.v>APP_VER); syncUpdateBarVisibility(); })
     .catch(()=>{});
 }
 function freshReload(){

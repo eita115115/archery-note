@@ -189,6 +189,7 @@ function openHistDetail(id){
     ${trustHtml(sess,setup,st)}
     ${roundProgressHtml(sess)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
+    ${arrowMetaSummaryHtml(sess)}
     <table class="tbl" style="margin-top:8px"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
     ${sess.ends.map((end,i)=>{
       const sorted=[...end].sort((a,b)=>b.s-a.s);
