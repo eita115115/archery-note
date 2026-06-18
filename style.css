@@ -6,7 +6,7 @@
   --gold:#fdd835; --red:#e53935; --blue:#1e88e5; --accent:#1a5c3a;
   --danger:#c62828; --paper:#fbfaf5; --paper2:#f2eadc; --ink2:#24312d;
   --teal:#0f766e; --amber:#b56b1f; --navy:#24537b; --mint:#dcefe6;
-  --shadow:0 10px 30px rgba(32,42,34,.10); --glass:rgba(255,255,255,.74);
+  --shadow:0 8px 22px rgba(32,42,34,.08); --glass:rgba(255,255,255,.74);
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0; overflow-x:hidden;}
@@ -35,7 +35,7 @@ header.app{
   box-shadow:0 2px 16px rgba(0,0,0,.12);
 }
 header.app h1{font-size:16px; margin:0; font-weight:700; letter-spacing:.03em;}
-header.app .sub{font-size:11px; opacity:.85;}
+header.app .sub{font-size:11px; opacity:.9;}
 header.app .appLogo{
   width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
   background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); font-size:20px; flex:0 0 auto;
@@ -51,7 +51,18 @@ header.app .statusPill span:last-child{overflow:hidden; text-overflow:ellipsis;}
 header.app .statusDot{width:7px;height:7px;border-radius:50%;background:#f0c66a;box-shadow:0 0 0 3px rgba(240,198,106,.18);flex:0 0 auto;}
 header.app .statusDot.native{background:#73e6a8;box-shadow:0 0 0 3px rgba(115,230,168,.18);}
 main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px;}
-.card{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.04);}
+.bootFallback{
+  min-height:52vh; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  text-align:center; color:var(--ink); padding:28px 14px;
+}
+.bootFallback .bootIcon{
+  width:54px; height:54px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow); font-size:26px;
+}
+.bootFallback h2{font-size:18px; margin:4px 0 0; color:var(--title);}
+.bootFallback p{font-size:12px; color:var(--sub); line-height:1.65; margin:0; max-width:320px;}
+.bootFallback .bootReload{width:auto; min-width:148px; text-decoration:none; margin-top:4px;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(0,0,0,.03);}
 @supports (content-visibility:auto){
   main > .card,
   main > .launchPanel,
@@ -201,7 +212,7 @@ input.inp[type="date"]{-webkit-appearance:none; appearance:none; display:block; 
 .convergeMission .missionNext b{color:var(--title);}
 .simplePromise{
   display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;
-  border:1px solid var(--advLine); border-radius:999px; padding:8px 10px; margin-top:10px;
+  border:1px solid var(--advLine); border-radius:999px; padding:9px 10px; margin-top:10px;
   background:var(--advBg); color:var(--title); font-size:12px; font-weight:800; text-align:center;
 }
 .simplePromise span{color:var(--sub); font-weight:700;}
@@ -360,13 +371,18 @@ nav.tabs{
   background:var(--card); border-top:1px solid var(--line);
   display:flex; padding-bottom:0;
   padding-bottom:env(safe-area-inset-bottom);
-  box-shadow:0 -8px 24px rgba(0,0,0,.07);
+  box-shadow:0 -8px 22px rgba(0,0,0,.06);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
 }
 nav.tabs button{
-  flex:1 1 0; min-width:0; background:none; border:none; padding:8px 0 6px; font-size:10.5px; color:var(--sub);
-  display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer;
+  flex:1 1 0; min-width:0; background:none; border:none; padding:7px 0 6px; font-size:10.5px; color:var(--sub);
+  display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;
 }
-nav.tabs button .ic{font-size:21px; line-height:1;}
+nav.tabs button .ic{
+  width:30px; height:26px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; line-height:1; transition:background .18s, box-shadow .18s, transform .18s;
+}
+nav.tabs button.on .ic{background:var(--advBg); box-shadow:inset 0 0 0 1px var(--advLine); transform:translateY(-1px);}
 nav.tabs button.on{color:var(--green); font-weight:700;}
 /* target */
 .tgWrap{position:relative; width:100%; touch-action:none;}
@@ -443,8 +459,8 @@ table.tbl tr:last-child td{border-bottom:none;}
 .updbar{
   position:fixed; left:50%; transform:translateX(-50%); bottom:76px;
   bottom:calc(76px + env(safe-area-inset-bottom));
-  z-index:40; background:var(--green); color:#fff; padding:11px 18px; border-radius:999px;
-  font-size:13px; font-weight:700; box-shadow:0 4px 14px rgba(0,0,0,.35); cursor:pointer; display:none; max-width:calc(100vw - 24px); text-align:center;
+  z-index:40; background:var(--card); color:var(--title); border:1px solid var(--advLine); padding:9px 14px; border-radius:999px;
+  font-size:12px; font-weight:800; box-shadow:0 8px 18px rgba(0,0,0,.12); cursor:pointer; display:none; max-width:calc(100vw - 24px); text-align:center;
 }
 html.dark{
   --bg:#141714; --card:#1e231e; --ink:#e7eae5; --sub:#9aa396; --line:#343b34; --line2:#2a312a;

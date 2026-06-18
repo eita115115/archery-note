@@ -43,8 +43,9 @@ assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer
 assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
 assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
 assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html), "Viewport must suppress accidental zoom during scoring");
-assert(surface.includes("データで育つ記録アプリ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "onboarding UI missing");
-assert(surface.includes("練習を始める") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("simplePromise") && surface.includes("quickSelects") && surface.includes("recordSetupSnapshot") && surface.includes("gearWorkbenchHtml"), "lightweight record launch UI missing");
+assert(surface.includes("今日のズレを次の調整へ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "onboarding UI missing");
+assert(surface.includes("起動に失敗しました") && surface.includes("bootFallback"), "startup recovery fallback missing");
+assert(surface.includes("今日のズレを、次の調整へ") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("simplePromise") && surface.includes("ズレを見る") && surface.includes("quickSelects") && surface.includes("recordSetupSnapshot") && surface.includes("gearWorkbenchHtml"), "lightweight record launch UI missing");
 assert(surface.includes("levelFromScore") && surface.includes("RECORD_FLOW_MODES") && surface.includes("recordIntroHtml") && surface.includes("recordPhaseArcHtml") && surface.includes("summarySightDialHtml") && surface.includes("summaryDecisionHtml"), "record UI helpers missing");
 assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
 assert(surface.includes("window.PointerEvent") && surface.includes("touchstart") && surface.includes("mousedown"), "Input fallback handlers missing");

@@ -59,19 +59,18 @@ function recordIntroHtml(sys, mode){
       <button class="flowBtn ${mode===f.id?"on":""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`).join("");
   const p=sys.profiles||{};
   const nf=nativeFeatureProfile();
-  return `${recordPhaseArcHtml(0,"今日はまず記録。詳しい材料はあとから足せます。")}
+  return `${recordPhaseArcHtml(0,"まず記録。詳しい材料はあとから。")}
   <section class="missionPanel convergeMission">
     <div class="missionTop">
       <img class="startLogoMark" src="icon.svg" alt="">
       <div>
         <div class="eyebrow">Archery Note</div>
-        <h2>${mode==="calibration"?"サイト値も残す":"練習を始める"}</h2>
-        <p>点取りだけで始められます。サイト値・風・用具は、余裕がある時だけ詳しく残せます。</p>
+        <h2>${mode==="calibration"?"サイト値も残す":"今日のズレを、次の調整へ"}</h2>
+        <p>距離を選んで的をタップ。結果で、サイトを動かすか・保留するかを見ます。</p>
       </div>
       <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
     </div>
-    <div class="simplePromise">距離を選ぶ <span>→</span> 的でタップ <span>→</span> 結果を見る</div>
-    ${recordCoachCardHtml()}
+    <div class="simplePromise">記録する <span>→</span> ズレを見る <span>→</span> 次を決める</div>
     <details class="adv missionMore" ${mode==="calibration"?"open":""}>
       <summary>詳しいモード・準備度を見る</summary>
       <div class="readinessRail">
@@ -138,7 +137,7 @@ function renderRecord(m){
       <button class="tinyAction" id="jumpGear">用具</button>
     </div>
     <div class="launchBody">
-    <p class="quickStartCopy">まずは距離・的・本数だけで始められます。サイト値や風は、必要な時だけ下で詳しく残せます。</p>
+    <p class="quickStartCopy">距離・的・本数だけで始められます。サイト値や風は、必要な時だけ残します。</p>
     <label class="f">距離</label>
     <div class="chips quickDists" id="fDistChips">
       ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
