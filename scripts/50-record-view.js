@@ -139,6 +139,19 @@ function actionFaceLabel(value){
   if(f.faceType==="field") return `${f.faceD}cmフィールド`;
   return `${f.faceD}cm`;
 }
+function triggerReleaseMotion(el){
+  if(!el) return;
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  el.classList.remove("is-releasing");
+  void el.offsetWidth;
+  el.classList.add("is-releasing");
+  setTimeout(()=>el.classList.remove("is-releasing"),520);
+}
+function bindReleaseMotion(el){
+  if(!el) return;
+  el.addEventListener("pointerdown",()=>triggerReleaseMotion(el),{passive:true});
+  el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" ") triggerReleaseMotion(el); });
+}
 function recordFastActionsHtml(last,dist,faceValue){
   const currentLabel=`${dist}m / ${actionFaceLabel(faceValue)}`;
   const lastLabel=last?`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`:"なし";
@@ -230,6 +243,8 @@ function renderRecord(m){
     updateQuickStartMeta();
   };
   $("#jumpGear").onclick=()=>showView("gear");
+  bindReleaseMotion($("#quickStart"));
+  bindReleaseMotion($("#fStart"));
   $("#quickStart").onclick=()=>$("#fStart").click();
   const quickHistory=$("#quickHistory");
   if(quickHistory) quickHistory.onclick=()=>showView("history");
