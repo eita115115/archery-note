@@ -263,7 +263,7 @@ select.inp{padding-right:32px;}
 .coachCard b{display:block; color:var(--title); font-size:13px;}
 .coachCard span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:2px;}
 .homeActions{
-  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;
+  display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:4px 0 10px;
   animation:appRise .42s cubic-bezier(.2,.8,.2,1) .04s both;
 }
 .homeAction{
@@ -290,7 +290,7 @@ select.inp{padding-right:32px;}
 .homeAction:disabled{opacity:.45; cursor:not-allowed;}
 .launchPanel.convergeLaunch{border-radius:8px; overflow:hidden;}
 .convergeLaunch .launchHead{background:var(--card);}
-.convergeLaunch .launchBody{padding:13px;}
+.convergeLaunch .launchBody{padding:12px 13px 13px;}
 .quickStartCopy{color:var(--sub); font-size:12px; line-height:1.5; margin:0 0 10px;}
 .startFirst{
   border-color:rgba(23,100,61,.18);
@@ -376,8 +376,13 @@ select.inp{padding-right:32px;}
 .fieldBand{
   display:grid; grid-template-columns:1fr; gap:10px;
 }
-.recordDetails{margin-top:12px;}
-.recordDetails summary{display:flex; align-items:center; justify-content:space-between;}
+.recordDetails{margin-top:10px; border:none!important; background:transparent!important; padding:0!important;}
+.recordDetails summary{
+  display:flex; align-items:center; justify-content:flex-start; gap:4px;
+  width:max-content; margin-left:auto; padding:7px 0 0!important;
+}
+.recordDetails summary::before{content:"＋ "!important; font-size:10px;}
+.recordDetails[open] summary::before{content:"− "!important;}
 .tinyAction{
   border:1px solid var(--line); background:var(--card); color:var(--title); border-radius:8px;
   padding:7px 10px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
@@ -410,12 +415,22 @@ select.inp{padding-right:32px;}
   border:1px solid var(--line); border-radius:8px; margin-bottom:12px; padding:13px;
   background:linear-gradient(135deg,var(--ink2),#17643d 58%,#24537b); color:#fff; box-shadow:var(--shadow);
 }
+.compactHud{
+  background:var(--card); color:var(--ink); padding:10px 11px; margin-bottom:8px;
+  box-shadow:var(--press-shadow);
+}
 .liveHud .kicker{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.72; font-weight:900;}
 .liveHud h2{font-size:20px;margin:3px 0;color:#fff;}
+.liveContext{display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--title); font-size:12px; font-weight:800; line-height:1.35;}
+.liveContext span{min-width:0; color:var(--sub); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 .liveGrid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-top:10px;}
 .liveCell{border:1px solid rgba(255,255,255,.16); border-radius:8px; background:rgba(255,255,255,.10); padding:8px; min-width:0;}
 .liveCell .k{font-size:10px; opacity:.72;}
 .liveCell b{display:block; font-size:15px; margin-top:2px;}
+.compactHud .liveGrid{margin-top:8px;}
+.compactHud .liveCell{background:var(--soft); border-color:var(--line); color:var(--ink); padding:7px 4px; text-align:center;}
+.compactHud .liveCell .k{color:var(--sub); opacity:1;}
+.compactHud .liveCell b{color:var(--title);}
 .nativeStack{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
 .nativePill{
   border:1px solid var(--line); border-radius:8px; padding:9px; background:var(--paper);

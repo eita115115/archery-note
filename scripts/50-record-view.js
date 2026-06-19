@@ -140,12 +140,12 @@ function actionFaceLabel(value){
   return `${f.faceD}cm`;
 }
 function recordFastActionsHtml(last,dist,faceValue){
-  const currentLabel=`${dist}m・${actionFaceLabel(faceValue)}で開始`;
-  const lastLabel=last?`${last.dist}m・${actionFaceLabel(faceChoiceValue(last))}`:"履歴なし";
+  const currentLabel=`${dist}m / ${actionFaceLabel(faceValue)}`;
+  const lastLabel=last?`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`:"なし";
   return `<section class="homeActions" aria-label="すぐ使う">
     <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span id="quickStartMeta">${esc(currentLabel)}</span></button>
-    <button class="homeAction" id="quickRepeat" type="button" ${last?"":"disabled"}><b>前回と同じ</b><span>${esc(lastLabel)}</span></button>
-    <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分布と偏移</span></button>
+    ${last?`<button class="homeAction" id="quickRepeat" type="button"><b>前回と同じ</b><span>${esc(lastLabel)}</span></button>
+    <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分析</span></button>`:""}
   </section>`;
 }
 function renderRecord(m){
@@ -154,11 +154,9 @@ function renderRecord(m){
   const defSetup=last?last.setupId:(db.setups[0]?db.setups[0].id:"");
   const defDist=last?last.dist:70;
   const mode=ui.recordMode||"practice";
-  const sys=setupSystemSummary(defSetup);
   const defFace=suggestedFaceValue(defDist,last);
   const defPerEnd=last&&last.perEnd?last.perEnd:6;
   m.innerHTML=`
-  ${recordPhaseArcHtml(0,"まず今日の記録を始める。詳しい材料はあとから足せます。")}
   ${recordFastActionsHtml(last,defDist,defFace)}
   <section class="launchPanel convergeLaunch startFirst">
     <div class="launchHead">
@@ -166,7 +164,6 @@ function renderRecord(m){
       <button class="tinyAction" id="jumpGear">用具</button>
     </div>
     <div class="launchBody">
-    <p class="quickStartCopy">距離・的・本数だけで始められます。サイト値や風は、余裕がある時だけ残します。</p>
     <label class="f">距離</label>
     <div class="chips quickDists" id="fDistChips">
       ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
@@ -186,10 +183,8 @@ function renderRecord(m){
       <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===defPerEnd?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
     <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"この条件で開始"}</button></div>
-    <p class="startAssist">距離・的サイズはこの画面で変更できます。細かい入力はあとからで大丈夫です。</p>
-    <div class="softDivider"></div>
     <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
-      <summary>詳しく残す（日付・用具・サイト値・天候）</summary>
+      <summary>詳しく残す</summary>
       <div class="fieldBand">
         <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
         ${recordSetupSnapshot(defSetup,defDist)}
@@ -214,16 +209,14 @@ function renderRecord(m){
       </div>
     </details>
     ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
-    ${db.setups.length?"":`<div class="hint">「用具」タブでセッティングを登録しておくと、サイト台帳や調整提案がセッティングごとに管理できます。</div>`}
     </div>
-  </section>
-  ${recordIntroHtml(sys,mode)}`;
+  </section>`;
   const distState={d:defDist};
   const faceSel=$("#fFace");
   const suggestFace=d=>{ if(String(faceSel.value).startsWith("F")) return; faceSel.value = d>=60?122:(d<=18?40:80); };
   function updateQuickStartMeta(){
     const meta=$("#quickStartMeta");
-    if(meta && distState.d) meta.textContent=`${distState.d}m・${actionFaceLabel(faceSel.value)}で開始`;
+    if(meta && distState.d) meta.textContent=`${distState.d}m / ${actionFaceLabel(faceSel.value)}`;
   }
   faceSel.onchange=()=>{
     if(String(faceSel.value).startsWith("F") && $("#fArrows").value==="6") $("#fArrows").value="3";
@@ -238,7 +231,8 @@ function renderRecord(m){
   };
   $("#jumpGear").onclick=()=>showView("gear");
   $("#quickStart").onclick=()=>$("#fStart").click();
-  $("#quickHistory").onclick=()=>showView("history");
+  const quickHistory=$("#quickHistory");
+  if(quickHistory) quickHistory.onclick=()=>showView("history");
   if(last){
     $("#quickRepeat").onclick=()=>{
       distState.d=last.dist||defDist;
@@ -392,19 +386,13 @@ function liveSessionHeroHtml(s,setup){
   const remain=Math.max(0,(s.perEnd||6)-(s.cur||[]).length);
   const r=ROUND_TYPES.find(x=>x.id===s.round);
   const roundRemain=r&&r.arrows?Math.max(0,r.arrows-all.length):null;
-  return `<section class="liveHud">
-    <div class="kicker">Live scoring desk</div>
-    <h2>${s._edit?"過去記録を整える":"今このエンドに集中"}</h2>
+  return `<section class="liveHud compactHud">
+    <div class="liveContext">${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}<span>${setup?esc(setup.name):"用具未指定"}</span></div>
     <div class="liveGrid">
       <div class="liveCell"><div class="k">合計</div><b>${total}</b></div>
       <div class="liveCell"><div class="k">平均</div><b>${avg}</b></div>
       <div class="liveCell"><div class="k">現在エンド</div><b>${(s.cur||[]).length}/${s.perEnd||6}</b></div>
       <div class="liveCell"><div class="k">残り</div><b>${roundRemain==null?`${remain}本`:roundRemain+"本"}</b></div>
-    </div>
-    <div class="nativeSignal">
-      <span class="on">${setup?esc(setup.name):"用具未指定"}</span>
-      <span>${s.dist}m / ${faceLabel(s)}</span>
-      <span>${runtimeKind().label}</span>
     </div>
   </section>`;
 }
@@ -422,7 +410,6 @@ function renderActive(m){
   const s=db.active;
   const setup=db.setups.find(x=>x.id===s.setupId);
   m.innerHTML=`
-  ${recordPhaseArcHtml(1,"的をタップして、このエンドを積み上げる。")}
   ${liveSessionHeroHtml(s,setup)}
   <div class="card targetFocusCard">
     <div class="targetTools">
@@ -436,7 +423,7 @@ function renderActive(m){
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
-    <div class="targetHint">タップ＆ドラッグで確定。押したまま0.4秒で微調整、矢チップをタップで修正できます。</div>
+    <div class="targetHint">タップで記録。矢チップで修正。</div>
     ${activeGuideHtml()}
     <div class="scoreChips" id="curChips"></div>
     <div class="nudge" id="nudge">
@@ -731,7 +718,6 @@ function openSummary(sess, isNew){
   const adv=adviceFor(sess, setup);
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet">
-    ${recordPhaseArcHtml(2,"結果を確認して、次のエンドやサイト台帳へつなげる。")}
     <h3>${isNew?"おつかれさまでした！":""} ${fmtD(sess.date)} ・ ${sess.dist}m</h3>
     ${summaryDecisionHtml(adv,sess)}
     <div class="statbar">
