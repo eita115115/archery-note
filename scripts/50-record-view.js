@@ -3,7 +3,7 @@
 /* ============ views ============ */
 let view="record";
 let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice", freshArrow:-1, freshTimer:0 };
-function showView(v){ view=v; ui.selArrow=-1; nativePulse("light"); render(); }
+function showView(v){ if(view===v) return; view=v; ui.selArrow=-1; nativePulse("light"); render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
 function render(){
@@ -15,6 +15,7 @@ function render(){
   else if(view==="history") renderHistory(m);
   else if(view==="sight") renderSight(m);
   else renderGear(m);
+  playScreenEntry(m);
 }
 
 /* ---------- 記録 ---------- */
@@ -139,18 +140,34 @@ function actionFaceLabel(value){
   if(f.faceType==="field") return `${f.faceD}cmフィールド`;
   return `${f.faceD}cm`;
 }
-function triggerReleaseMotion(el){
+function motionAllowed(){
+  return !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+function restartMotion(el,cls,ms){
   if(!el) return;
-  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  el.classList.remove("is-releasing");
+  if(!motionAllowed()) return;
+  el.classList.remove(cls);
   void el.offsetWidth;
-  el.classList.add("is-releasing");
-  setTimeout(()=>el.classList.remove("is-releasing"),520);
+  el.classList.add(cls);
+  if(ms) setTimeout(()=>el.classList.remove(cls),ms);
+}
+function playScreenEntry(el){
+  restartMotion(el,"screenIn",520);
+}
+function triggerReleaseMotion(el){
+  restartMotion(el,"is-releasing",520);
 }
 function bindReleaseMotion(el){
   if(!el) return;
   el.addEventListener("pointerdown",()=>triggerReleaseMotion(el),{passive:true});
   el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" ") triggerReleaseMotion(el); });
+}
+function targetImpactMotion(hit){
+  const wrap=$("#tgWrap");
+  if(!wrap || !hit) return;
+  const strong=(hit.X || hit.s>=9);
+  wrap.style.setProperty("--impact-color", hit.X?"#d7a923":strong?"var(--green)":"var(--teal)");
+  restartMotion(wrap,strong?"impactStrong":"impact",620);
 }
 function recordFastActionsHtml(last,dist,faceValue){
   const currentLabel=`${dist}m / ${actionFaceLabel(faceValue)}`;
@@ -679,6 +696,7 @@ function attachTargetInput(s){
     ui.freshArrow=s.cur.length-1;
     nativePulse(isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType)?"success":"light");
     save(); refreshActive();
+    targetImpactMotion(hit);
     toast(`${scoreLabel(hit)} 点を記録`);
   }
   function cancel(e){
