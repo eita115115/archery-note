@@ -94,6 +94,7 @@ function staticUiChecks() {
   assert(surface.includes("SHOT_REASON_TAGS") && surface.includes("外れ理由") && surface.includes("矢番号") && surface.includes("arrowMetaSummaryHtml"), "shot reason and arrow-number note UI missing");
   assert(surface.includes("判断信頼度") && surface.includes("個人モデル") && surface.includes("次のアクション") && surface.includes("個人データ準備度") && surface.includes("スパイン初期候補") && surface.includes("RK4-3D") && surface.includes("物理校正"), "analysis cards missing");
   assert(surface.includes("アプリ情報・保存状態") && surface.includes("nativeStack") && surface.includes("PWA + Capacitor-ready") && surface.includes("ブラウザ保存"), "native readiness UI missing");
+  assert(surface.includes("自動バックアップ") && surface.includes("今すぐバックアップ") && surface.includes("バックアップデータを復元しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "backup settings copy should be user-facing");
   assert(surface.includes("シャフト銘柄") && surface.includes("番手/スパイン") && surface.includes("ハンドル/弓本体") && surface.includes("HOYT Grand Prix XCEED 2 H25") && surface.includes("HOYT Formula RCRV PODIUM Limbs"), "separated gear fields missing");
   assert(surface.includes("EASTON X10 ProTour") && surface.includes("SHIBUYA ULTIMA RC IV 520 Carbon") && surface.includes("RAMRODS VEKTOR") && surface.includes("GAS Bowstrings Ghost XV"), "expanded gear knowledge missing");
   assert(surface.includes("choicePick") && surface.includes("候補にないので手入力") && surface.includes("確認したチューニング"), "gear dropdown/tuning UI missing");

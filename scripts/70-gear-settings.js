@@ -374,11 +374,11 @@ function openSettings(){
     </div>
     <div class="btnrow"><button class="btn sec" id="dCsv">CSV出力</button></div>
     <input type="file" id="dFile" accept=".json" style="display:none">
-    <h3 style="margin-top:18px;font-size:14px">自動退避</h3>
-    ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動退避はまだありません。保存操作を行うと端末内に退避データが残ります。</div>`}
+    <h3 style="margin-top:18px;font-size:14px">自動バックアップ</h3>
+    ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動バックアップはまだありません。保存操作を行うと端末内に復元用バックアップが残ります。</div>`}
     <div class="btnrow">
-      <button class="btn sec" id="dSnapNow">今すぐ退避</button>
-      <button class="btn ghost" id="dSnapRestore" ${snaps.length?"":"disabled"}>選択した退避を復元</button>
+      <button class="btn sec" id="dSnapNow">今すぐバックアップ</button>
+      <button class="btn ghost" id="dSnapRestore" ${snaps.length?"":"disabled"}>選択したバックアップを復元</button>
     </div>
     ${trashSettingsHtml()}
     <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
@@ -399,16 +399,16 @@ function openSettings(){
     shareOrDownloadText(`archery-note-${today()}.json`,JSON.stringify(db,null,1),"application/json","Archery Note Backup");
   };
   ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
-  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータを退避しました"); ovl.remove(); openSettings(); };
+  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータをバックアップしました"); ovl.remove(); openSettings(); };
   ovl.querySelector("#dSnapRestore").onclick=()=>{
     const sel=ovl.querySelector("#dSnapSel");
     const snap=readSnapshots()[sel?+sel.value:0];
-    if(!snap||!snap.data){ toast("復元できる退避データがありません"); return; }
-    if(confirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先に退避してから置き換えます。よろしいですか？`)){
+    if(!snap||!snap.data){ toast("復元できるバックアップデータがありません"); return; }
+    if(confirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先にバックアップしてから置き換えます。よろしいですか？`)){
       writeSafetySnapshot("restore-before",true);
       db=normalizeDb(snap.data);
       save({reason:"restore",forceSnapshot:true});
-      applyTheme(); ovl.remove(); render(); toast("退避データを復元しました");
+      applyTheme(); ovl.remove(); render(); toast("バックアップデータを復元しました");
     }
   };
   ovl.querySelector("#dImp").onclick=()=>ovl.querySelector("#dFile").click();
