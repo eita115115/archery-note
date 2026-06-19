@@ -14,7 +14,7 @@
   --logo-surface-a:#fdfdf8; --logo-surface-b:#edf4ed;
   --target-surface-a:#eef1eb; --target-surface-b:#e6ebe4;
   --radius-card:20px; --radius-panel:22px; --radius-control:14px;
-  --ease-app:cubic-bezier(.16,1,.3,1);
+  --ease-app:cubic-bezier(.2,.8,.2,1);
   --motion-fast:.16s; --motion-med:.34s;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -87,12 +87,6 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px 10px 
   62%{opacity:1; transform:scale(1.08);}
   100%{opacity:1; transform:scale(1);}
 }
-@keyframes arrowFlight{
-  0%{opacity:0; transform:translateX(-120%) scaleX(.28);}
-  18%{opacity:.9;}
-  72%{opacity:.55; transform:translateX(58%) scaleX(1);}
-  100%{opacity:0; transform:translateX(120%) scaleX(.18);}
-}
 @keyframes impactFlash{
   0%{filter:drop-shadow(0 0 0 rgba(23,100,61,0)); opacity:.58;}
   48%{filter:drop-shadow(0 0 5px rgba(23,100,61,.34)); opacity:1;}
@@ -102,41 +96,6 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px 10px 
   from{opacity:.94; transform:translateY(6px);}
   to{opacity:1; transform:translateY(0);}
 }
-@keyframes screenSettle{
-  from{opacity:.88; transform:translateY(10px) scale(.992);}
-  to{opacity:1; transform:translateY(0) scale(1);}
-}
-@keyframes targetImpact{
-  0%{opacity:0; transform:scale(.985);}
-  38%{opacity:.34; transform:scale(1.01);}
-  100%{opacity:0; transform:scale(1.028);}
-}
-@keyframes targetImpactStrong{
-  0%{opacity:0; transform:scale(.976);}
-  28%{opacity:.55; transform:scale(1.018);}
-  100%{opacity:0; transform:scale(1.045);}
-}
-@keyframes targetSettle{
-  0%,100%{transform:translate3d(0,0,0) scale(1);}
-  32%{transform:translate3d(0,-2px,0) scale(1.006);}
-  62%{transform:translate3d(0,1px,0) scale(.998);}
-}
-@keyframes tabSettle{
-  0%{transform:translateY(0) scale(.92);}
-  55%{transform:translateY(-3px) scale(1.04);}
-  100%{transform:translateY(-1px) scale(1);}
-}
-@keyframes sheetUp{
-  from{opacity:.86; transform:translateY(22px) scale(.985);}
-  to{opacity:1; transform:translateY(0) scale(1);}
-}
-@keyframes fadeIn{
-  from{opacity:0;}
-  to{opacity:1;}
-}
-main.screenIn > *{animation:screenSettle var(--motion-med) var(--ease-app) both;}
-main.screenIn > *:nth-child(2){animation-delay:.035s;}
-main.screenIn > *:nth-child(3){animation-delay:.07s;}
 .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius-card); padding:15px; margin-bottom:12px; box-shadow:var(--shadow);}
 @supports (content-visibility:auto){
   main > .card,
@@ -334,12 +293,6 @@ select.inp{padding-right:32px;}
   content:""; position:absolute; inset:1px 14px auto; height:1px; border-radius:999px;
   background:rgba(255,255,255,.26); pointer-events:none; z-index:-1;
 }
-.homeAction.primary::before,.startPrimary::before{
-  content:""; position:absolute; left:18px; right:18px; top:50%; height:2px; border-radius:999px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.88),transparent);
-  opacity:0; transform-origin:center; pointer-events:none; z-index:1;
-}
-.homeAction.primary.is-releasing::before,.startPrimary.is-releasing::before{animation:arrowFlight .46s cubic-bezier(.16,1,.3,1) both;}
 .homeAction.primary b,.homeAction.primary span{position:relative; z-index:1;}
 .homeAction.primary span{color:rgba(255,255,255,.82);}
 .homeAction:active{transform:translateY(1px) scale(.982);}
@@ -538,18 +491,11 @@ nav.tabs button .ic::before,nav.tabs button .ic::after{content:""; position:abso
 .ic-gear::before{width:18px;height:18px;border:2px solid currentColor;border-left-color:transparent;border-bottom-color:transparent;border-radius:50%;transform:rotate(45deg);opacity:.86;}
 .ic-gear::after{width:2px;height:20px;background:currentColor;border-radius:999px;transform:rotate(18deg);}
 nav.tabs button.on{background:rgba(23,100,61,.055);}
-nav.tabs button.on .ic{background:var(--advBg); box-shadow:inset 0 0 0 1px var(--advLine); transform:translateY(-1px); color:var(--green); animation:tabSettle .36s var(--ease-app) both;}
+nav.tabs button.on .ic{background:var(--advBg); box-shadow:inset 0 0 0 1px var(--advLine); transform:translateY(-1px); color:var(--green);}
 nav.tabs button.on{color:var(--green); font-weight:700;}
 /* target */
 .tgWrap{position:relative; width:100%; touch-action:none; border-radius:18px;}
 .tgWrap svg.main{width:100%; display:block; border-radius:18px; background:#e9ebe6; touch-action:none; transform-origin:center; transition:transform var(--motion-fast), filter var(--motion-fast);}
-.tgWrap::after{
-  content:""; position:absolute; inset:4px; border:2px solid var(--impact-color,var(--green));
-  border-radius:18px; opacity:0; pointer-events:none; transform:scale(.985);
-}
-.tgWrap.impact::after{animation:targetImpact .46s var(--ease-app) both;}
-.tgWrap.impactStrong::after{animation:targetImpactStrong .56s var(--ease-app) both;}
-.tgWrap.impactStrong svg.main{animation:targetSettle .48s var(--ease-app) both;}
 .lens{
   position:absolute; top:8px; width:128px; height:128px; border-radius:50%;
   border:3px solid var(--green); background:#e9ebe6; box-shadow:0 2px 10px rgba(0,0,0,.25);
@@ -582,7 +528,7 @@ nav.tabs button.on{color:var(--green); font-weight:700;}
 .stat b{display:block; font-size:17px;} .stat span{font-size:10.5px; color:var(--sub);}
 /* nudge pad */
 .nudge{display:none; margin-top:10px; background:var(--soft); border-radius:18px; padding:10px; text-align:center;}
-.nudge.on{display:block; animation:screenSettle .26s var(--ease-app) both;}
+.nudge.on{display:block;}
 .shotMeta{
   margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
   text-align:left;
@@ -621,12 +567,11 @@ table.tbl tr:last-child td{border-bottom:none;}
 .kv{display:flex; justify-content:space-between; font-size:13px; padding:4px 0;}
 .kv span:first-child{color:var(--sub);}
 /* modal */
-.ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center; animation:fadeIn .18s ease-out both;}
+.ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
 .sheet{
   background:var(--card); width:100%; max-width:520px; border-radius:24px 24px 0 0; padding:16px;
   max-height:88vh; overflow-y:auto; padding-bottom:16px;
   padding-bottom:calc(16px + env(safe-area-inset-bottom));
-  animation:sheetUp .32s var(--ease-app) both;
 }
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--green);}
 .toast{

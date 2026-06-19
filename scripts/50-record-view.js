@@ -15,7 +15,6 @@ function render(){
   else if(view==="history") renderHistory(m);
   else if(view==="sight") renderSight(m);
   else renderGear(m);
-  playScreenEntry(m);
 }
 
 /* ---------- 記録 ---------- */
@@ -140,35 +139,6 @@ function actionFaceLabel(value){
   if(f.faceType==="field") return `${f.faceD}cmフィールド`;
   return `${f.faceD}cm`;
 }
-function motionAllowed(){
-  return !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-}
-function restartMotion(el,cls,ms){
-  if(!el) return;
-  if(!motionAllowed()) return;
-  el.classList.remove(cls);
-  void el.offsetWidth;
-  el.classList.add(cls);
-  if(ms) setTimeout(()=>el.classList.remove(cls),ms);
-}
-function playScreenEntry(el){
-  restartMotion(el,"screenIn",520);
-}
-function triggerReleaseMotion(el){
-  restartMotion(el,"is-releasing",520);
-}
-function bindReleaseMotion(el){
-  if(!el) return;
-  el.addEventListener("pointerdown",()=>triggerReleaseMotion(el),{passive:true});
-  el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" ") triggerReleaseMotion(el); });
-}
-function targetImpactMotion(hit){
-  const wrap=$("#tgWrap");
-  if(!wrap || !hit) return;
-  const strong=(hit.X || hit.s>=9);
-  wrap.style.setProperty("--impact-color", hit.X?"#d7a923":strong?"var(--green)":"var(--teal)");
-  restartMotion(wrap,strong?"impactStrong":"impact",620);
-}
 function recordFastActionsHtml(last,dist,faceValue){
   const currentLabel=`${dist}m / ${actionFaceLabel(faceValue)}`;
   const lastLabel=last?`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`:"なし";
@@ -260,8 +230,6 @@ function renderRecord(m){
     updateQuickStartMeta();
   };
   $("#jumpGear").onclick=()=>showView("gear");
-  bindReleaseMotion($("#quickStart"));
-  bindReleaseMotion($("#fStart"));
   $("#quickStart").onclick=()=>$("#fStart").click();
   const quickHistory=$("#quickHistory");
   if(quickHistory) quickHistory.onclick=()=>showView("history");
@@ -696,7 +664,6 @@ function attachTargetInput(s){
     ui.freshArrow=s.cur.length-1;
     nativePulse(isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType)?"success":"light");
     save(); refreshActive();
-    targetImpactMotion(hit);
     toast(`${scoreLabel(hit)} 点を記録`);
   }
   function cancel(e){
