@@ -9,7 +9,11 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.da
 function render(){
   updateAppChrome();
   if(typeof syncUpdateBarVisibility==="function") syncUpdateBarVisibility();
-  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  const tabs=Array.prototype.slice.call(document.querySelectorAll("#tabs button"));
+  const activeIndex=Math.max(0,tabs.findIndex(b=>b.dataset.v===view));
+  const tabBar=$("#tabs");
+  if(tabBar) tabBar.style.setProperty("--active-tab", activeIndex);
+  tabs.forEach(b=>b.classList.toggle("on",b.dataset.v===view));
   const m=$("#main");
   if(view==="record") renderRecord(m);
   else if(view==="history") renderHistory(m);

@@ -15,7 +15,8 @@
   --target-surface-a:#eef1eb; --target-surface-b:#e6ebe4;
   --radius-card:20px; --radius-panel:22px; --radius-control:14px;
   --ease-app:cubic-bezier(.2,.8,.2,1);
-  --motion-fast:.16s; --motion-med:.34s;
+  --ease-fluid:cubic-bezier(.22,1,.36,1);
+  --motion-fast:.16s; --motion-med:.34s; --motion-fluid:.42s;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0; overflow-x:hidden;}
@@ -467,14 +468,25 @@ nav.tabs{
   position:fixed; bottom:8px; bottom:max(8px,env(safe-area-inset-bottom)); left:50%; right:auto; z-index:30;
   width:calc(100% - 20px); max-width:560px; transform:translateX(-50%);
   min-height:64px; background:var(--chrome-bg); border:1px solid var(--chrome-border); border-radius:24px;
-  display:flex; padding:4px; overflow:hidden;
+  --active-tab:0;
+  display:flex; padding:4px; overflow:hidden; isolation:isolate;
   box-shadow:0 1px 2px rgba(20,38,28,.04),0 14px 34px rgba(20,38,28,.14);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
 }
+nav.tabs::before{
+  content:""; position:absolute; z-index:0; pointer-events:none;
+  top:4px; bottom:4px; left:4px; width:calc((100% - 8px)/4);
+  border-radius:20px;
+  background:linear-gradient(180deg,rgba(23,100,61,.11),rgba(23,100,61,.055));
+  box-shadow:inset 0 0 0 1px rgba(23,100,61,.08),0 8px 18px rgba(20,38,28,.06);
+  transform:translate3d(calc(var(--active-tab,0) * 100%),0,0);
+  transition:transform var(--motion-fluid) var(--ease-fluid), background var(--motion-fast), box-shadow var(--motion-fast);
+}
 nav.tabs button{
+  position:relative; z-index:1;
   flex:1 1 0; min-width:0; min-height:56px; background:none; border:none; border-radius:18px; padding:7px 0 6px; font-size:10.5px; color:var(--sub);
   display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;
-  transition:color var(--motion-fast), background var(--motion-fast), transform var(--motion-fast);
+  transition:color var(--motion-fast), transform var(--motion-fast);
 }
 nav.tabs button .ic{
   width:30px; height:26px; border-radius:999px; display:flex; align-items:center; justify-content:center;
@@ -490,8 +502,7 @@ nav.tabs button .ic::before,nav.tabs button .ic::after{content:""; position:abso
 .ic-sight::after{width:5px;height:5px;background:currentColor;border-radius:50%;box-shadow:8px 7px 0 currentColor,-7px -7px 0 currentColor;}
 .ic-gear::before{width:18px;height:18px;border:2px solid currentColor;border-left-color:transparent;border-bottom-color:transparent;border-radius:50%;transform:rotate(45deg);opacity:.86;}
 .ic-gear::after{width:2px;height:20px;background:currentColor;border-radius:999px;transform:rotate(18deg);}
-nav.tabs button.on{background:rgba(23,100,61,.055);}
-nav.tabs button.on .ic{background:var(--advBg); box-shadow:inset 0 0 0 1px var(--advLine); transform:translateY(-1px); color:var(--green);}
+nav.tabs button.on .ic{background:rgba(255,255,255,.58); box-shadow:inset 0 0 0 1px var(--advLine); transform:translateY(-1px); color:var(--green);}
 nav.tabs button.on{color:var(--green); font-weight:700;}
 /* target */
 .tgWrap{position:relative; width:100%; touch-action:none; border-radius:18px;}
