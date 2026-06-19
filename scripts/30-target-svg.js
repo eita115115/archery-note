@@ -54,9 +54,10 @@ function targetMarkup(faceD, idPrefix, faceType){
     <g id="${idPrefix}main"><g>${g}</g><g id="${idPrefix}marks"></g><g id="${idPrefix}cur"></g></g>
   </svg>`;
 }
-function markCircle(a, faceD, color, label){
+function markCircle(a, faceD, color, label, cls){
   const r=arrowMarkRadius(faceD);
-  return `<g><circle cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/4}" opacity="0.92"/>`+
+  const klass=cls?` class="${cls}"`:"";
+  return `<g${klass}><circle cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/4}" opacity="0.92"/>`+
     (label?`<text x="${a.x}" y="${-a.y}" font-size="${r*1.2}" fill="#fff" text-anchor="middle" dominant-baseline="central" font-weight="bold">${label}</text>`:"")+`</g>`;
 }
 /* static plot for history/summary */

@@ -2,7 +2,7 @@
 /* Archery Note: record and active-session views */
 /* ============ views ============ */
 let view="record";
-let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice" };
+let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice", freshArrow:-1, freshTimer:0 };
 function showView(v){ view=v; ui.selArrow=-1; nativePulse("light"); render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
@@ -519,13 +519,20 @@ function refreshActive(){
   let html="";
   const gp=a=> s.faceType==="triple" ? {x:a.x, y:a.y+SPOT_Y[a.spot||0]} : a;
   s.ends.forEach((end,ei)=>end.forEach(a=>{ html+=markCircle(gp(a),s.faceD,"rgba(60,60,60,.45)"); }));
-  s.cur.forEach((a,i)=>{ html+=markCircle(gp(a),s.faceD, i===ui.selArrow?"#111":"var(--green-l)", scoreLabel(a)); });
+  s.cur.forEach((a,i)=>{ html+=markCircle(gp(a),s.faceD, i===ui.selArrow?"#111":"var(--green-l)", scoreLabel(a), i===ui.freshArrow?"shotNew":""); });
   $("#tgmarks").innerHTML=html;
   // chips
   $("#curChips").innerHTML = s.cur.map((a,i)=>{
     const z=zoneStyle(a.s,a.X,s.faceType);
-    return `<div class="sc ${i===ui.selArrow?"sel":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</div>`;
+    return `<div class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</div>`;
   }).join("") || `<span style="font-size:12px;color:var(--sub);align-self:center">エンド${s.ends.length+1}：的をタップして記録</span>`;
+  if(ui.freshArrow>=0){
+    clearTimeout(ui.freshTimer);
+    ui.freshTimer=setTimeout(()=>{
+      ui.freshArrow=-1;
+      document.querySelectorAll(".shotNew,.sc.fresh").forEach(el=>el.classList.remove("shotNew","fresh"));
+    },640);
+  }
   document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
     ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; nativePulse("light"); refreshActive();
   });
@@ -667,6 +674,7 @@ function attachTargetInput(s){
     const rec={x:+hit.x.toFixed(2), y:+hit.y.toFixed(2), s:hit.s, X:hit.X};
     if(hit.spot!=null) rec.spot=hit.spot;
     s.cur.push(rec);
+    ui.freshArrow=s.cur.length-1;
     nativePulse(isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType)?"success":"light");
     save(); refreshActive();
     toast(`${scoreLabel(hit)} 点を記録`);

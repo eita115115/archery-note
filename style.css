@@ -63,6 +63,28 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:10px 10px 
 .bootFallback h2{font-size:18px; margin:4px 0 0; color:var(--title);}
 .bootFallback p{font-size:12px; color:var(--sub); line-height:1.65; margin:0; max-width:320px;}
 .bootFallback .bootReload{width:auto; min-width:148px; text-decoration:none; margin-top:4px;}
+@keyframes appRise{
+  from{opacity:.84; transform:translateY(12px) scale(.985);}
+  to{opacity:1; transform:translateY(0) scale(1);}
+}
+@keyframes primaryPulse{
+  0%,100%{transform:translateY(0); box-shadow:0 8px 18px rgba(23,100,61,.16);}
+  50%{transform:translateY(-1px); box-shadow:0 14px 28px rgba(23,100,61,.28);}
+}
+@keyframes scorePop{
+  0%{opacity:.45; transform:scale(.72);}
+  58%{opacity:1; transform:scale(1.12);}
+  100%{opacity:1; transform:scale(1);}
+}
+@keyframes markPop{
+  0%{opacity:.3; transform:scale(.38);}
+  62%{opacity:1; transform:scale(1.18);}
+  100%{opacity:1; transform:scale(1);}
+}
+@keyframes decisionSlide{
+  from{opacity:.82; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
 .card{background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:10px; box-shadow:var(--shadow);}
 @supports (content-visibility:auto){
   main > .card,
@@ -166,6 +188,7 @@ select.inp{padding-right:32px;}
 .phaseArc{
   border:0; border-radius:8px; padding:7px 8px 4px; margin-bottom:8px;
   background:transparent; box-shadow:none;
+  animation:appRise .36s cubic-bezier(.2,.8,.2,1) both;
 }
 .phaseArc svg{width:100%; height:50px; display:block; overflow:visible;}
 .phaseArc .rail{fill:none; stroke:var(--line2); stroke-width:6; stroke-linecap:round;}
@@ -182,6 +205,7 @@ select.inp{padding-right:32px;}
 .missionPanel.convergeMission{
   color:var(--ink); background:linear-gradient(180deg,var(--card),var(--soft)); border-color:var(--line);
   border-radius:8px; padding:14px; box-shadow:var(--shadow);
+  animation:appRise .42s cubic-bezier(.2,.8,.2,1) .16s both;
 }
 .convergeMission .missionTop{grid-template-columns:68px minmax(0,1fr) 62px; align-items:center;}
 .startLogoMark{
@@ -237,15 +261,19 @@ select.inp{padding-right:32px;}
 .coachCard span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:2px;}
 .homeActions{
   display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;
+  animation:appRise .42s cubic-bezier(.2,.8,.2,1) .04s both;
 }
 .homeAction{
   min-height:56px; border:1px solid var(--line); border-radius:999px; background:var(--card); color:var(--ink);
   padding:9px 12px; text-align:center; cursor:pointer; box-shadow:0 5px 14px rgba(20,38,28,.06);
+  transition:transform .12s, box-shadow .18s, background .18s, border-color .18s;
 }
 .homeAction b{display:block; font-size:13.5px; line-height:1.2; color:inherit;}
 .homeAction span{display:block; font-size:10.5px; line-height:1.25; color:var(--sub); margin-top:3px;}
-.homeAction.primary{grid-column:1 / -1; min-height:58px; background:var(--green); border-color:var(--green); color:#fff; box-shadow:0 8px 18px rgba(23,100,61,.16);}
+.homeAction.primary{grid-column:1 / -1; min-height:58px; background:var(--green); border-color:var(--green); color:#fff; box-shadow:0 8px 18px rgba(23,100,61,.16); animation:primaryPulse 2.8s ease-in-out infinite;}
 .homeAction.primary span{color:rgba(255,255,255,.82);}
+.homeAction:active{transform:scale(.985);}
+.homeAction.primary:active{animation:none;}
 .homeAction:disabled{opacity:.45; cursor:not-allowed;}
 .launchPanel.convergeLaunch{border-radius:8px; overflow:hidden;}
 .convergeLaunch .launchHead{background:var(--card);}
@@ -254,6 +282,7 @@ select.inp{padding-right:32px;}
 .startFirst{
   border-color:rgba(23,100,61,.18);
   box-shadow:0 8px 24px rgba(23,100,61,.10);
+  animation:appRise .42s cubic-bezier(.2,.8,.2,1) .10s both;
 }
 .startFirst .launchHead{
   background:linear-gradient(180deg,var(--card),var(--soft));
@@ -292,6 +321,7 @@ select.inp{padding-right:32px;}
 .decisionCard{
   border:1px solid var(--advLine); border-radius:8px; padding:12px; margin:10px 0;
   background:var(--advBg); color:var(--ink);
+  animation:decisionSlide .34s ease-out both;
 }
 .decisionCard .k{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--sub); font-weight:900;}
 .decisionCard b{display:block; color:var(--title); font-size:24px; line-height:1.15; margin:3px 0;}
@@ -435,8 +465,11 @@ nav.tabs button.on{color:var(--green); font-weight:700;}
 .sc{
   width:40px; height:40px; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center;
   font-weight:700; font-size:15px; border:2px solid transparent; cursor:pointer;
+  transform-origin:center;
 }
 .sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px #fff inset;}
+.sc.fresh{animation:scorePop .38s cubic-bezier(.2,1.2,.2,1) both;}
+.shotNew{transform-box:fill-box; transform-origin:center; animation:markPop .42s cubic-bezier(.2,1.15,.2,1) both;}
 .statbar{display:flex; gap:6px; margin-top:10px;}
 .stat{flex:1; background:var(--soft); border-radius:8px; padding:9px 4px; text-align:center;}
 .stat b{display:block; font-size:17px;} .stat span{font-size:10.5px; color:var(--sub);}
