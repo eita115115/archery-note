@@ -4,6 +4,7 @@ __pycache__/
 .tmp-*
 artifacts/
 artifacts/catalog/
+artifacts/lighthouse/
 artifacts/ui-smoke/
 android/.idea/
 dist/

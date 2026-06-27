@@ -8,8 +8,9 @@
     "check:app": "node tools/check-app.js",
     "check:ui": "node tools/check-ui.js",
     "lint": "eslint \"*.js\" \"scripts/**/*.js\" \"tools/**/*.js\" \"tests/**/*.js\" \"eslint.config.mjs\"",
-    "format:check": "prettier \"package*.json\" \"README.md\" \"CHANGELOG.md\" \"CODE_OF_CONDUCT.md\" \"CONTRIBUTING.md\" \"SECURITY.md\" \"THIRD_PARTY.md\" \"docs/**/*.md\" \".github/**/*.md\" \"eslint.config.mjs\" \"playwright.config.js\" \"tools/e2e-server.js\" \"tests/**/*.js\" \".prettierrc\" --check",
+    "format:check": "prettier \"package*.json\" \"README.md\" \"CHANGELOG.md\" \"CODE_OF_CONDUCT.md\" \"CONTRIBUTING.md\" \"SECURITY.md\" \"THIRD_PARTY.md\" \"docs/**/*.md\" \".github/**/*.md\" \"eslint.config.mjs\" \"playwright.config.js\" \"tools/e2e-server.js\" \"tools/lighthouse-baseline.js\" \"tests/**/*.js\" \".prettierrc\" --check",
     "test:e2e": "playwright test",
+    "lighthouse:baseline": "node tools/lighthouse-baseline.js",
     "version:bump": "node tools/bump-version.js",
     "build:native-web": "node tools/build-native-web.js",
     "native:sync": "npm run build:native-web && npx cap sync",
@@ -28,6 +29,7 @@
     "@playwright/test": "^1.61.1",
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
+    "lighthouse": "^13.4.0",
     "prettier": "^3.9.0"
   },
   "dependencies": {
