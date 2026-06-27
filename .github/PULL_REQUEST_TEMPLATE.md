@@ -24,6 +24,12 @@
 
 UI変更がある場合は貼ってください。
 
+## Third-party assets
+
+- [ ] This PR does not add or change third-party assets.
+- [ ] If this PR adds or changes images, icons, fonts, model files, copied code, screenshots, or other externally derived assets, `THIRD_PARTY.md` and `NOTICE` have been updated.
+- [ ] No asset with unknown origin is included.
+
 ## Risks
 
 既知のリスクや未確認事項があれば書いてください。
