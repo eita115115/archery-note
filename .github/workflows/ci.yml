@@ -28,3 +28,9 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: npm run check:ui
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: E2E smoke test
+        run: npm run test:e2e
