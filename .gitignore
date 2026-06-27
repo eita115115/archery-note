@@ -8,3 +8,5 @@ artifacts/ui-smoke/
 android/.idea/
 dist/
 node_modules/
+playwright-report/
+test-results/
