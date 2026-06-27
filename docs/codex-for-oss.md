@@ -21,6 +21,14 @@ This repository requires ongoing maintenance in the following areas:
 - release notes
 - documentation updates
 
+## Current Quality Baseline
+
+The repository is ready for OSS review from a quality-baseline perspective. The CI workflow now covers app checks, UI checks, lint, format check, and a minimal Playwright E2E smoke test.
+
+A local Lighthouse baseline is available with `npm run lighthouse:baseline`. It is intentionally not enforced in CI yet, and no score threshold is part of the current quality gate.
+
+Phase 2 quality baseline work is intentionally separated from Service Worker changes, storage migration, and analysis integration. Those areas need focused design and review before implementation.
+
 ## Planned Use Of Codex / API Credits
 
 Codex and API credits would be used for OSS maintenance tasks, including:
@@ -35,3 +43,10 @@ Codex and API credits would be used for OSS maintenance tasks, including:
 - Japanese and English documentation improvements
 
 The focus is maintenance quality and review support, not simply generating more features.
+
+## Future Work
+
+- Service Worker update strategy
+- Storage migration and rollback planning
+- Analysis and stats integration
+- Third-party asset review for OCR, pose, and AI features before enabling those features
