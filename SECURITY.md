@@ -6,13 +6,11 @@
 
 ## Reporting a Vulnerability
 
-脆弱性を見つけた場合は、公開IssueではなくGitHubのprivate vulnerability reportingまたはSecurity Advisoryの非公開導線から報告してください。
+If GitHub private vulnerability reporting is available for this repository, please use the Security tab and choose "Report a vulnerability".
 
-- Repository: https://github.com/eita115115/archery-note
-- Private advisory URL: https://github.com/eita115115/archery-note/security/advisories/new
-- Subject: `Archery Note security`
+If that option is not available, please open a minimal public issue asking for a private security contact. Do not include vulnerability details, exploit steps, or sensitive information in a public issue.
 
-申請前に専用のsecurity contactを公開する場合は、この欄に追記します。存在しないメールアドレスは記載しません。
+申請前にGitHub private vulnerability reportingを有効化することを推奨します。専用のsecurity contactを公開する場合は、この欄に追記します。存在しないメールアドレスは記載しません。
 
 ## Scope
 

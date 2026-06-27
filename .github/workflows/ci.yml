@@ -25,4 +25,6 @@ jobs:
         run: npm run check:app
 
       - name: Check UI
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
         run: npm run check:ui
