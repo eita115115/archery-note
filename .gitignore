@@ -2,6 +2,7 @@
 .venv/
 __pycache__/
 .tmp-*
+artifacts/
 artifacts/catalog/
 artifacts/ui-smoke/
 android/.idea/

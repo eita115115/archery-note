@@ -1,109 +1,85 @@
-# Archery Note 🏹
+# Archery Note
 
-得点・着弾・用具をまとめて残せる、アーチェリー練習ノート。
-記録した位置から、サイトを動かすか・保留するか・射形を見直すかの判断材料を見られます。
+Archery Noteは、アーチェリー競技者向けのオフライン対応OSS練習記録PWAです。得点、着弾位置、サイト値、用具、履歴を一元管理できます。
 
-## 使い方
+## Demo
 
-1. 距離・的サイズ・1エンドの本数を選ぶ
-2. 的をタップして着弾位置を記録する
-3. 結果で「動かす / 保留 / 射形優先」を確認する
+- Web: https://eita115115.github.io/archery-note/
 
-サイト値、風、用具は分かる時だけ追加できます。最初は点取りだけで使えます。
+## Why This Project Exists
 
-スマホでは公開URLを開き、ブラウザのメニューから **「ホーム画面に追加」** するとアプリのように使えます。ローカルでは `index.html` をブラウザで開くだけでも動きます。
+アーチェリーの練習記録は、紙、メモアプリ、表計算で管理されがちです。しかし、得点、着弾位置、サイト調整、用具情報、練習履歴を一つの流れで扱うには、競技特化のworkflowが必要です。
 
-ローカルでの動作確認用サーバー:
+Archery Noteは、競技者が練習場でも使いやすいように、オフライン対応と端末内保存を重視した公開OSSとして開発しています。最初は点取りだけで使え、必要に応じてサイト値、風、用具情報を追加できます。
+
+## Features
+
+- 得点記録
+- 着弾位置記録
+- サイト調整記録
+- 用具管理
+- 練習履歴
+- JSONバックアップ/復元
+- CSV出力
+- PWA / offline support
+- Capacitor native-ready shell
+
+## Data And Privacy
+
+- 練習データは原則として端末内に保存されます。
+- GitHub Pagesはアプリ本体を配信するだけで、練習データを保存しません。
+- JSONバックアップ/復元とCSV出力に対応しています。
+- ブラウザや端末のストレージを消すと、未バックアップの記録が失われる可能性があります。
+
+## Quick Start
+
+```bash
+npm install
+npm run check:app
+npm run check:ui
+```
+
+ローカル確認用サーバー:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File serve.ps1
-# → http://localhost:8741/
 ```
 
-## 機能
+## Project Structure
 
-- **記録**: 的をタップして着弾位置を入力。距離は70/50/30/18m＋自由設定、ターゲット的・三つ目的・フィールド的に対応。必要な矢だけ矢番号と外れ理由タグを残せます。
-- **結果**: グルーピング中心、ばらつき、外れ値を見て、サイトを動かすか・保留するか・射形を優先するかを表示。
-- **履歴**: 練習一覧、着弾プロット、距離別平均、過去中心の分布/偏移を確認。
-- **サイト調整**: セッティング×距離ごとにサイト値を残し、最新の記録と見比べられます。
-- **用具**: ハンドル、リム、矢、サイト、弦などをプルダウン中心で記録。候補にない用具だけ手入力できます。
-- **データ保護**: 端末内保存、JSONバックアップ/復元、自動バックアップ、ゴミ箱復元、CSV出力に対応。
+- `index.html` - アプリのHTMLシェル
+- `style.css` - 画面スタイル
+- `scripts/` - 保存、採点、分析、画面描画、用具、設定、起動処理
+- `manifest.json` / `sw.js` / `icon.svg` - PWA用ファイル
+- `tools/check-app.js` - 構文、公開番号、代表演算の検証
+- `tools/check-ui.js` - Chrome/Edgeを使ったスマホ幅・PC幅のUIスモーク検査
+- `tools/bump-version.js` - 公開番号を関連ファイルへ一括反映
+- `tools/build-native-web.js` - Capacitorへ渡すWeb資産を `dist/native` に生成
+- `docs/native-transition.md` - PWAからnative-ready shellへ進める方針
 
-<details>
-<summary>詳しい分析・用具・開発メモ</summary>
+## Development Notes
 
-- 線かみ判定は、表示された矢円が線に少しでも触れていれば内側の点数になります。微調整モード中は線かみ時にカーソルが緑、線なし時に赤で表示されます。
-- 結果画面では、明らかな外れ値を除いたグルーピング中心、RMS半径、上下/左右のばらつき、縦長・横長・斜め方向の傾向を見ます。
-- 調整提案は、距離、的サイズ、サイト値、風、用具入力、矢重量、初速、過去データを参考にします。信頼度が低い時は、無理に動かさない判断も表示します。
-- サイト値を複数距離で残すと、距離別サイト予測やクリック換算の材料になります。
-- 用具入力では、シャフト銘柄・番手・矢尺・ポイント重量を分けて管理します。カタログ掲載シャフトは直径・GPI・総矢重量の推定に使えます。
-- フィールド的は World Archery 式の80/60/40/20cmに対応します。黄は6・5点、黒は4・3・2・1点、外れはMとして採点します。
-- 連続入力中の誤ズームを抑制し、PointerEvent非対応環境ではタッチ/マウス入力へフォールバックします。
-- PWAを基本にしつつ、Capacitor向けWeb資産とAndroidプロジェクトも用意しています。ネイティブ化の方針は `docs/native-transition.md` を参照してください。
-- 画面スタイルは `style.css`、アプリロジックは `scripts/` 配下の機能別ファイルに分離しています。
-
-</details>
-
-## 更新時の注意
-
-公開番号は次のコマンドで一括更新します。`APP_VER`、`version.json`、`sw.js` のキャッシュ名、`package.json` / `package-lock.json` のバージョンを同じ番号に揃えます。
+公開番号は `APP_VER`、`version.json`、`sw.js` のキャッシュ名、`package.json` / `package-lock.json` のバージョンを揃えます。
 
 ```powershell
 npm run version:bump
-# または番号を指定
-node tools\bump-version.js 44
 ```
 
-更新前の検証:
+UIや保存に関わる変更をした場合は、少なくとも以下を確認してください。
 
-```powershell
-& 'C:\Users\eita2\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' tools\check-app.js
-& 'C:\Users\eita2\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe' tools\check-ui.js
-npm run build:native-web
-git diff --check
+```bash
+npm run check:app
+npm run check:ui
 ```
 
-`tools\check-ui.js` はローカルの Chrome/Edge を使って、スマホ幅・小型スマホ幅・PC幅のスクリーンショットを `artifacts\ui-smoke\` に生成します。生成物は `.gitignore` で除外されます。
+## Contributing
 
-カタログPDFから用具候補を下ごしらえする開発用ツール:
+貢献方法は [CONTRIBUTING.md](CONTRIBUTING.md) を参照してください。
 
-```powershell
-.\.venv\Scripts\python.exe tools\extract-catalog.py artifacts\catalog\SBA2026_27.pdf
-```
+## Security
 
-抽出結果とPDF本体は `artifacts\catalog\` に置き、Gitには含めません。アプリへ入れる候補は、人の目でノイズを落としてから `scripts/70-gear-settings.js` に反映します。
+脆弱性報告は [SECURITY.md](SECURITY.md) を参照してください。公開Issueには脆弱性の詳細を書かないでください。
 
-ネイティブ化の方針は `docs/native-transition.md` を参照してください。最初はPWAを維持しながら、CapacitorでiOS/Android配信用の土台を作り、保存層と物理コアを段階的に分離します。
+## License
 
-Android開発環境:
-
-```powershell
-npm run native:sync:android
-npm run native:open:android
-npm run native:build:android
-```
-
-初回だけAndroid Studioのセットアップウィザードで Android SDK、Android SDK Platform 36、Android SDK Build-Tools、Android SDK Platform-Tools を入れてください。
-
-このCodex環境から `.git` へ書き込めない場合は、最後のコミットだけPowerShellで実行してください。
-
-## ファイル
-
-- `index.html` — アプリのHTMLシェル
-- `style.css` — 画面スタイル
-- `scripts/` — アプリロジック（保存、採点、分析、画面描画、用具、設定、起動処理）
-- `manifest.json` / `sw.js` / `icon.svg` — PWA用（ホーム画面追加・オフライン動作）
-- `serve.ps1` — ローカル確認用の簡易サーバー
-- `package.json` / `capacitor.config.json` — 将来のiOS/Androidアプリ化に向けたCapacitor準備
-- `android/` — Capacitorで生成したAndroidネイティブプロジェクト
-- `tools/check-app.js` — 構文・公開番号・代表演算の検証スクリプト
-- `tools/check-ui.js` — Chrome/Edgeを使ったスマホ幅・PC幅のUIスモーク検査
-- `tools/bump-version.js` — 公開番号を関連ファイルへ一括反映
-- `tools/build-native-web.js` — Capacitorへ渡すWeb資産を `dist/native` に生成
-- `tools/extract-catalog.py` — カタログPDFから用具名候補を抽出する開発補助ツール
-
-## 関連アプリ
-
-同じフォルダに **射形リアルタイム分析アプリ** `../archery-form/index.html` があります。
-カメラで射形（フォーム）をリアルタイムに分析して日本語アドバイスを出します。
-記録アプリと併用すると効果的です。
+Apache License 2.0. See [LICENSE](LICENSE).

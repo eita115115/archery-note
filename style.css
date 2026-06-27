@@ -597,7 +597,7 @@ table.tbl tr:last-child td{border-bottom:none;}
   position:fixed; left:50%; transform:translateX(-50%); bottom:102px;
   bottom:calc(98px + env(safe-area-inset-bottom));
   z-index:40; background:var(--card); color:var(--title); border:1px solid var(--advLine); padding:9px 14px; border-radius:999px;
-  font-size:12px; font-weight:800; box-shadow:0 8px 18px rgba(0,0,0,.12); cursor:pointer; display:none; max-width:calc(100vw - 24px); text-align:center;
+  font-family:inherit; font-size:12px; font-weight:800; box-shadow:0 8px 18px rgba(0,0,0,.12); cursor:pointer; display:none; max-width:calc(100vw - 24px); text-align:center;
 }
 .updbar:not([hidden]){display:block;}
 .updbar[hidden]{display:none!important;}
