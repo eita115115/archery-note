@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="Archery Noteは、アーチェリーの得点・着弾・用具をまとめて残し、練習後にサイトを動かすか・保留するかの判断材料を見られる練習ノートです。">
 <meta name="theme-color" content="#1a5c3a" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#143626" media="(prefers-color-scheme: dark)">
@@ -37,8 +37,8 @@
   <button data-v="sight" aria-label="サイト調整"><span class="ic ic-sight" aria-hidden="true"></span>サイト調整</button>
   <button data-v="gear" aria-label="用具"><span class="ic ic-gear" aria-hidden="true"></span>用具</button>
 </nav>
-<div class="updbar" id="updBar" hidden>新しい版があります。タップで更新</div>
-<div class="toast" id="toast"></div>
+<button type="button" class="updbar" id="updBar" hidden aria-live="polite">新しい版があります。タップで更新</button>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script src="scripts/00-compat.js"></script>
 <script src="scripts/10-storage-native.js"></script>

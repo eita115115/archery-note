@@ -42,7 +42,10 @@ const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
 assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
 assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
-assert(/maximum-scale\s*=\s*1/.test(html) && /user-scalable\s*=\s*no/.test(html), "Viewport must suppress accidental zoom during scoring");
+assert(!/user-scalable\s*=\s*no/i.test(html), "Viewport must not disable user scaling");
+assert(!/maximum-scale\s*=\s*1/i.test(html), "Viewport must not lock maximum scale to 1");
+assert(/id="updBar" hidden[^>]*aria-live="polite"/.test(html), "Update banner should announce available updates politely");
+assert(/id="toast" role="status" aria-live="polite" aria-atomic="true"/.test(html), "Toast should be exposed as a polite status live region");
 assert(css.includes("touch-action:manipulation") && css.includes("--chrome-bg") && css.includes("min-height:48px"), "Native-feel touch/chrome styling missing");
 assert(surface.includes("@keyframes appRise") && !surface.includes("primaryPulse") && surface.includes("scorePop") && surface.includes("markPop") && surface.includes("impactFlash") && surface.includes("shotNew") && surface.includes("freshArrow") && surface.includes("prefers-reduced-motion") && surface.includes("ic-record") && surface.includes("ic-sight"), "Minimal recording feedback, tab icons, and reduced-motion guard missing");
 assert(surface.includes("--active-tab") && surface.includes("nav.tabs::before") && surface.includes('setProperty("--active-tab"'), "Smooth state-following tab motion missing");

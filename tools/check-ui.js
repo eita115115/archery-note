@@ -68,7 +68,10 @@ function staticUiChecks() {
     assert(match, `${name} gear list missing`);
     return match[1];
   };
-  assert(/<meta name="viewport"[^>]*maximum-scale=1/.test(html), "Viewport zoom guard missing");
+  assert(!/<meta name="viewport"[^>]*user-scalable\s*=\s*no/i.test(html), "Viewport must not disable user scaling");
+  assert(!/<meta name="viewport"[^>]*maximum-scale\s*=\s*1/i.test(html), "Viewport must not lock maximum scale to 1");
+  assert(/id="updBar" hidden[^>]*aria-live="polite"/.test(html), "Update banner live region missing");
+  assert(/id="toast" role="status" aria-live="polite" aria-atomic="true"/.test(html), "Toast status live region missing");
   assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
   assert(appScripts.every(file => html.includes(`<script src="${file}"></script>`)) && !/<script>([\s\S]*?)<\/script>/.test(html), "External app scripts missing");
   assert(!fs.existsSync(path.join(root, "app.js")), "Legacy app.js should not remain after script split");
