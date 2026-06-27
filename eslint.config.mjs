@@ -35,7 +35,7 @@ export default [
     },
   },
   {
-    files: ["tools/**/*.js"],
+    files: ["playwright.config.js", "tests/**/*.js", "tools/**/*.js"],
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "commonjs",
