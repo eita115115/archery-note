@@ -4,6 +4,7 @@
   "private": true,
   "description": "Archery scoring, sight adjustment, and equipment notebook with a native-ready shell.",
   "scripts": {
+    "check:all": "npm run check:app && npm run check:ui",
     "check:app": "node tools/check-app.js",
     "check:ui": "node tools/check-ui.js",
     "version:bump": "node tools/bump-version.js",
