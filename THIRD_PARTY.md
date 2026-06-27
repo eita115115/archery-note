@@ -2,12 +2,12 @@
 
 This document tracks third-party software, assets, and model files used by Archery Note.
 
-| Name | Source | License | Usage | Notes |
-|---|---|---|---|---|
-| npm dependencies | `package.json` | See dependency licenses | development/build | Review before release |
-| Capacitor | `@capacitor/*` packages | MIT | native-ready shell | Used through npm dependencies |
-| App icon assets | `icon.svg`, `apple-touch-icon.png` | Project asset | app shell | Maintained in this repository |
-| README screenshots | `docs/screenshots/*.png`, captured from the Archery Note public demo | Apache-2.0 | README documentation | Self-made UI screenshots with sample local data; no third-party asset content is intentionally included |
+| Name               | Source                                                               | License                 | Usage                | Notes                                                                                                   |
+| ------------------ | -------------------------------------------------------------------- | ----------------------- | -------------------- | ------------------------------------------------------------------------------------------------------- |
+| npm dependencies   | `package.json`                                                       | See dependency licenses | development/build    | Review before release                                                                                   |
+| Capacitor          | `@capacitor/*` packages                                              | MIT                     | native-ready shell   | Used through npm dependencies                                                                           |
+| App icon assets    | `icon.svg`, `apple-touch-icon.png`                                   | Project asset           | app shell            | Maintained in this repository                                                                           |
+| README screenshots | `docs/screenshots/*.png`, captured from the Archery Note public demo | Apache-2.0              | README documentation | Self-made UI screenshots with sample local data; no third-party asset content is intentionally included |
 
 Archery Note does not include OCR, pose, photo AI, or external model files in this OSS readiness work.
 

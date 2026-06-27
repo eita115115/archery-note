@@ -258,10 +258,7 @@ async function screenshot(browser, view) {
     `--user-data-dir=${profile}`,
     "about:blank",
   ];
-  const proc = spawn(browser, args, { stdio: ["ignore", "pipe", "pipe"] });
-  let text = "";
-  proc.stdout.on("data", d => { text += d.toString(); });
-  proc.stderr.on("data", d => { text += d.toString(); });
+  const proc = spawn(browser, args, { stdio: ["ignore", "ignore", "ignore"] });
   let client;
   try {
     const wsUrl = await waitForPageTarget(port);

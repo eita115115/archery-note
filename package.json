@@ -7,6 +7,8 @@
     "check:all": "npm run check:app && npm run check:ui",
     "check:app": "node tools/check-app.js",
     "check:ui": "node tools/check-ui.js",
+    "lint": "eslint \"*.js\" \"scripts/**/*.js\" \"tools/**/*.js\" \"eslint.config.mjs\"",
+    "format:check": "prettier \"package*.json\" \"README.md\" \"CHANGELOG.md\" \"CODE_OF_CONDUCT.md\" \"CONTRIBUTING.md\" \"SECURITY.md\" \"THIRD_PARTY.md\" \"docs/**/*.md\" \".github/**/*.md\" \"eslint.config.mjs\" \".prettierrc\" --check",
     "version:bump": "node tools/bump-version.js",
     "build:native-web": "node tools/build-native-web.js",
     "native:sync": "npm run build:native-web && npx cap sync",
@@ -20,7 +22,11 @@
     "@capacitor/android": "^8.4.0",
     "@capacitor/cli": "^8.4.0",
     "@capacitor/core": "^8.4.0",
-    "@capacitor/ios": "^8.4.0"
+    "@capacitor/ios": "^8.4.0",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
+    "prettier": "^3.9.0"
   },
   "dependencies": {
     "@capacitor/filesystem": "^8.1.2",
