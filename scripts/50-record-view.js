@@ -797,5 +797,41 @@ function historyOverviewHtml(allSs,ss){
     <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
     <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
     <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
+  </div>${distanceSummaryHtml(sessionRows)}`;
+}
+function distanceBucketInfo(dist){
+  const n=Number(dist);
+  if(Number.isFinite(n) && n>0){
+    const rounded=Math.round(n*10)/10;
+    const label=`${Number.isInteger(rounded)?rounded:rounded.toFixed(1)}m`;
+    return {key:`dist:${label}`,label,sort:rounded};
+  }
+  return {key:"dist:none",label:"距離未設定",sort:-1};
+}
+function distanceSummaryHtml(sessionRows){
+  const byDist=new Map();
+  sessionRows.forEach(r=>{
+    const info=distanceBucketInfo(r.s&&r.s.dist);
+    const g=byDist.get(info.key)||{label:info.label,sort:info.sort,sessions:0,arrows:0,total:0,best:null,latestDate:""};
+    g.sessions++;
+    g.arrows+=r.arrows.length;
+    g.total+=r.total;
+    if((r.s&&r.s.date||"")>g.latestDate) g.latestDate=r.s.date||"";
+    if(r.arrows.length && (!g.best || r.total>g.best.total || (r.total===g.best.total && (r.s&&r.s.date||"")>(g.best.date||"")))){
+      g.best={total:r.total,date:r.s&&r.s.date||"",arrows:r.arrows.length};
+    }
+    byDist.set(info.key,g);
+  });
+  const rows=[...byDist.values()].sort((a,b)=>b.sort-a.sort || b.sessions-a.sessions || a.label.localeCompare(b.label));
+  if(!rows.length) return "";
+  return `<div class="card"><h2>距離別サマリー <span class="mini">${rows.length}距離</span></h2>
+    ${rows.map(g=>{
+      const avg=g.arrows?(g.total/g.arrows).toFixed(2):"—";
+      const latest=g.latestDate?fmtD(g.latestDate):"—";
+      return `<div class="listItem" style="cursor:default">
+        <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本 / 最新 ${esc(latest)}</div></div>
+        <div class="big">${avg}<small> / 最高${g.best?g.best.total:"—"}</small></div>
+      </div>`;
+    }).join("")}
   </div>`;
 }
