@@ -766,21 +766,36 @@ function openSummary(sess, isNew){
 
 /* ---------- 履歴 ---------- */
 function historyOverviewHtml(allSs,ss){
-  const src=ss&&ss.length?ss:allSs;
+  const src=Array.isArray(ss)?ss:allSs;
   if(!allSs.length) return "";
-  const arrows=src.flatMap(s=>s.ends.flat());
-  const total=arrows.reduce((a,x)=>a+x.s,0);
+  const arrowsOf=s=>Array.isArray(s&&s.ends)?s.ends.flatMap(end=>Array.isArray(end)?end:[]):[];
+  const scoreOf=a=>{ const v=Number(a&&a.s); return Number.isFinite(v)?v:0; };
+  const sessionRows=src.map(s=>{
+    const arrows=arrowsOf(s);
+    const total=arrows.reduce((a,x)=>a+scoreOf(x),0);
+    return {s,arrows,total};
+  });
+  const arrows=sessionRows.flatMap(r=>r.arrows);
+  const total=sessionRows.reduce((a,r)=>a+r.total,0);
   const avg=arrows.length?total/arrows.length:0;
   const recent=[...src].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1)).slice(0,5);
-  const recentArrows=recent.flatMap(s=>s.ends.flat());
-  const recentAvg=recentArrows.length?recentArrows.reduce((a,x)=>a+x.s,0)/recentArrows.length:0;
+  const recentSet=new Set(recent);
+  const recentRows=sessionRows.filter(r=>recentSet.has(r.s));
+  const recentArrows=recentRows.flatMap(r=>r.arrows);
+  const recentTotal=recentRows.reduce((a,r)=>a+r.total,0);
+  const recentAvg=recentArrows.length?recentTotal/recentArrows.length:0;
   const setupCount=new Set(src.map(s=>s.setupId||"none")).size;
   const distCount=new Set(src.map(s=>s.dist).filter(Boolean)).size;
   const quality=src.map(s=>sessionQuality(s,db.setups.find(x=>x.id===s.setupId))).filter(Boolean);
-  const qAvg=quality.length?quality.reduce((a,q)=>a+q.score,0)/quality.length:0;
+  const qualityScores=quality.map(q=>Number(q.score)).filter(Number.isFinite);
+  const qAvg=qualityScores.length?qualityScores.reduce((a,s)=>a+s,0)/qualityScores.length:0;
+  const latest=recent[0]||null;
+  const latestLabel=latest?[fmtD(latest.date),latest.dist?`${latest.dist}m`:""].filter(Boolean).join(" "):"—";
+  const best=sessionRows.filter(r=>r.arrows.length).sort((a,b)=>b.total-a.total || b.arrows.length-a.arrows.length || (b.s.date||"").localeCompare(a.s.date||""))[0];
+  const bestMeta=best?[fmtD(best.s.date),best.s.dist?`${best.s.dist}m`:"",`${best.arrows.length}本`].filter(Boolean).join(" / "):"記録待ち";
   return `<div class="insightStrip">
-    <div class="insightTile"><div class="k">履歴の地図</div><b>${src.length}回</b><span>${arrows.length}本 / ${distCount}距離 / ${setupCount}用具</span></div>
-    <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"}</span></div>
-    <div class="insightTile"><div class="k">判断材料</div><b>${pct(qAvg)}</b><span>サイト値・本数・用具入力の平均充実度</span></div>
+    <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
+    <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
+    <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
   </div>`;
 }
