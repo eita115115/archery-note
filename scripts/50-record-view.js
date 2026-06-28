@@ -797,7 +797,7 @@ function historyOverviewHtml(allSs,ss){
     <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
     <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
     <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
-  </div>${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows)}`;
+  </div>${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows)}${groupingSummaryHtml(sessionRows)}`;
 }
 function distanceBucketInfo(dist){
   const n=Number(dist);
@@ -895,6 +895,65 @@ function sightSummaryHtml(sessionRows){
       return `<div class="listItem" style="cursor:default">
         <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName||"用具未指定")} / 最新 ${esc(latest.date?latest.date.label:"—")} / 台帳${g.markCount}・練習${g.sessionCount}</div></div>
         <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+function groupingMetricNumber(v){
+  const n=Number(v);
+  return Number.isFinite(n)?n:null;
+}
+function groupingMetricText(v){
+  const n=groupingMetricNumber(v);
+  return n==null?"—":`${n.toFixed(1)}cm`;
+}
+function groupingSessionRow(row){
+  const arrows=(row&&Array.isArray(row.arrows)?row.arrows:[])
+    .map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)}))
+    .filter(a=>Number.isFinite(a.x) && Number.isFinite(a.y));
+  if(arrows.length<3) return null;
+  const st=robustStats(arrows);
+  const rr=st&&groupingMetricNumber(st.rr);
+  if(!st || st.n<3 || rr==null) return null;
+  return {
+    session:row.s,
+    distInfo:distanceBucketInfo(row.s&&row.s.dist),
+    date:sightDateInfo(row.s||{}),
+    rr,
+    sx:groupingMetricNumber(st.sx),
+    sy:groupingMetricNumber(st.sy),
+    n:st.n
+  };
+}
+function groupingSummaryHtml(sessionRows){
+  const rows=(sessionRows||[]).map(groupingSessionRow).filter(Boolean);
+  if(!rows.length) return "";
+  const avg=rows.reduce((a,r)=>a+r.rr,0)/rows.length;
+  const best=[...rows].sort((a,b)=>a.rr-b.rr || (b.date.sort||"").localeCompare(a.date.sort||""))[0];
+  const latest=[...rows].sort((a,b)=>(b.date.sort||"").localeCompare(a.date.sort||"") || b.rr-a.rr)[0];
+  const byDist=new Map();
+  rows.forEach(r=>{
+    const g=byDist.get(r.distInfo.key)||{label:r.distInfo.label,sort:r.distInfo.sort,sessions:0,total:0,best:null,latest:null};
+    g.sessions++;
+    g.total+=r.rr;
+    if(!g.best || r.rr<g.best.rr) g.best=r;
+    if(!g.latest || (r.date.sort||"")>(g.latest.date.sort||"")) g.latest=r;
+    byDist.set(r.distInfo.key,g);
+  });
+  const groups=[...byDist.values()].sort((a,b)=>b.sort-a.sort || b.sessions-a.sessions || a.label.localeCompare(b.label));
+  const meta=r=>[r.distInfo.label,r.date.label].filter(x=>x&&x!=="—").join(" / ")||"—";
+  return `<div class="card"><h2>グルーピングサマリー <span class="mini">対象${rows.length}回</span></h2>
+    <div class="insightStrip">
+      <div class="insightTile"><div class="k">平均RMS</div><b>${groupingMetricText(avg)}</b><span>${rows.length}セッションから集計</span></div>
+      <div class="insightTile"><div class="k">最小RMS</div><b>${groupingMetricText(best&&best.rr)}</b><span>${esc(best?meta(best):"—")}</span></div>
+      <div class="insightTile"><div class="k">最新RMS</div><b>${groupingMetricText(latest&&latest.rr)}</b><span>${esc(latest?meta(latest):"—")}</span></div>
+    </div>
+    ${groups.map(g=>{
+      const distAvg=g.sessions?g.total/g.sessions:null;
+      const latest=g.latest&&g.latest.date.label?g.latest.date.label:"—";
+      return `<div class="listItem" style="cursor:default">
+        <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / 最新 ${esc(latest)}</div></div>
+        <div class="big">${groupingMetricText(distAvg)}<small> / 最小${groupingMetricText(g.best&&g.best.rr)}</small></div>
       </div>`;
     }).join("")}
   </div>`;
