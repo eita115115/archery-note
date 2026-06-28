@@ -1,0 +1,14 @@
+{
+  "schema": 3,
+  "setups": [],
+  "sightMarks": [],
+  "sessions": [],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850,
+    "theme": "auto",
+    "lastBackupAt": null,
+    "activeGuideSeen": false
+  },
+  "active": null
+}

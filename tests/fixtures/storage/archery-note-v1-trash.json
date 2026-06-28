@@ -1,0 +1,104 @@
+{
+  "schema": 3,
+  "setups": [],
+  "sightMarks": [],
+  "sessions": [],
+  "trash": [
+    {
+      "id": "fixture-trash-session",
+      "type": "session",
+      "label": "Deleted 70m practice",
+      "data": {
+        "id": "fixture-deleted-session",
+        "date": "2026-06-18",
+        "setupId": "fixture-deleted-setup",
+        "dist": 70,
+        "faceD": 122,
+        "faceType": "single",
+        "perEnd": 6,
+        "shaft": 1.459,
+        "sightV": "5.3",
+        "sightH": "0",
+        "wx": "windy",
+        "note": "Deleted practice session",
+        "windDir": "right",
+        "windSpeed": "3",
+        "round": "70m72",
+        "purpose": "practice",
+        "ends": [
+          [
+            {
+              "x": 1.1,
+              "y": 0.5,
+              "s": 10,
+              "X": false
+            },
+            {
+              "x": -2.2,
+              "y": 1.4,
+              "s": 9,
+              "X": false
+            }
+          ]
+        ]
+      },
+      "date": "2026-06-18",
+      "ts": 1781740800000
+    },
+    {
+      "id": "fixture-trash-sight-mark",
+      "type": "sightMark",
+      "label": "Deleted 50m sight mark",
+      "data": {
+        "id": "fixture-deleted-mark-50m",
+        "setupId": "fixture-deleted-setup",
+        "dist": 50,
+        "v": "4.2",
+        "h": "0.1",
+        "date": "2026-06-17",
+        "ts": 1781654400000,
+        "note": "Deleted sight mark"
+      },
+      "date": "2026-06-17",
+      "ts": 1781654400000
+    },
+    {
+      "id": "fixture-trash-setup-bundle",
+      "type": "setupBundle",
+      "label": "Deleted backup setup",
+      "data": {
+        "setup": {
+          "id": "fixture-deleted-setup",
+          "name": "Deleted backup setup",
+          "bow": "Recurve",
+          "limbs": "Backup limbs",
+          "poundage": 34,
+          "arrow": "Backup shaft",
+          "note": "Setup bundle in trash",
+          "history": []
+        },
+        "sightMarks": [
+          {
+            "id": "fixture-deleted-bundle-mark-30m",
+            "setupId": "fixture-deleted-setup",
+            "dist": 30,
+            "v": "2.8",
+            "h": "0",
+            "date": "2026-06-16",
+            "ts": 1781568000000,
+            "note": "Sight mark deleted with setup"
+          }
+        ]
+      },
+      "date": "2026-06-16",
+      "ts": 1781568000000
+    }
+  ],
+  "settings": {
+    "eyeSight": 850,
+    "theme": "auto",
+    "lastBackupAt": null,
+    "activeGuideSeen": false
+  },
+  "active": null
+}

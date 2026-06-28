@@ -1,0 +1,219 @@
+{
+  "schema": 3,
+  "setups": [
+    {
+      "id": "fixture-setup-recurve-1",
+      "name": "Competition recurve",
+      "bow": "Recurve handle",
+      "limbs": "Medium 38lb limbs",
+      "poundage": 38,
+      "drawLength": 28.5,
+      "arrow": "Sample carbon shaft",
+      "shaftSpine": 600,
+      "arrowLength": 29,
+      "pointWeight": 100,
+      "arrowDia": 5.7,
+      "shaftGpi": 7.4,
+      "arrowWeight": 310,
+      "vane": "Spin vane",
+      "nock": "Pin nock",
+      "note": "Representative setup notes",
+      "history": [
+        {
+          "date": "2026-06-20",
+          "note": "Tiller and brace height checked"
+        }
+      ]
+    }
+  ],
+  "sightMarks": [
+    {
+      "id": "fixture-mark-70m",
+      "setupId": "fixture-setup-recurve-1",
+      "dist": 70,
+      "v": "5.4",
+      "h": "0.2",
+      "date": "2026-06-20",
+      "ts": 1781913600000,
+      "note": "Calm baseline sight mark"
+    },
+    {
+      "id": "fixture-mark-30m",
+      "setupId": "fixture-setup-recurve-1",
+      "dist": 30,
+      "v": "2.7",
+      "h": "0",
+      "date": "2026-06-21",
+      "ts": 1782000000000,
+      "note": "Short distance setup"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "fixture-session-70m-1",
+      "date": "2026-06-21",
+      "setupId": "fixture-setup-recurve-1",
+      "dist": 70,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "shaft": 1.459,
+      "sightV": "5.4",
+      "sightH": "0.2",
+      "wx": "calm, overcast",
+      "note": "Representative 70m practice session",
+      "windDir": "left",
+      "windSpeed": "1.5",
+      "round": "70m72",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.2,
+            "y": 0.1,
+            "s": 10,
+            "X": true,
+            "no": "1"
+          },
+          {
+            "x": -1.1,
+            "y": 0.8,
+            "s": 10,
+            "X": false,
+            "no": "2"
+          },
+          {
+            "x": 1.8,
+            "y": -0.9,
+            "s": 9,
+            "X": false,
+            "no": "3"
+          },
+          {
+            "x": -2.4,
+            "y": -1.5,
+            "s": 9,
+            "X": false,
+            "no": "4"
+          },
+          {
+            "x": 3.2,
+            "y": 1.1,
+            "s": 9,
+            "X": false,
+            "no": "5",
+            "reason": "release"
+          },
+          {
+            "x": -3.5,
+            "y": 2.2,
+            "s": 8,
+            "X": false,
+            "no": "6",
+            "reason": "wind"
+          }
+        ],
+        [
+          {
+            "x": 0.5,
+            "y": -0.4,
+            "s": 10,
+            "X": true,
+            "no": "1"
+          },
+          {
+            "x": -0.8,
+            "y": 0.6,
+            "s": 10,
+            "X": false,
+            "no": "2"
+          },
+          {
+            "x": 2.1,
+            "y": 1.5,
+            "s": 9,
+            "X": false,
+            "no": "3"
+          },
+          {
+            "x": -1.7,
+            "y": -2.2,
+            "s": 9,
+            "X": false,
+            "no": "4"
+          },
+          {
+            "x": 4.2,
+            "y": 0.2,
+            "s": 8,
+            "X": false,
+            "no": "5",
+            "reason": "aim"
+          },
+          {
+            "x": -2.9,
+            "y": 3.1,
+            "s": 8,
+            "X": false,
+            "no": "6"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "fixture-session-18m-triple-1",
+      "date": "2026-06-22",
+      "setupId": "fixture-setup-recurve-1",
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "triple",
+      "perEnd": 3,
+      "shaft": 0.48,
+      "sightV": "2.1",
+      "sightH": "0",
+      "wx": "indoor",
+      "note": "Triple face representative session",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "18m60",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.1,
+            "y": -0.2,
+            "s": 10,
+            "X": true,
+            "spot": 0,
+            "no": "1"
+          },
+          {
+            "x": -0.6,
+            "y": 0.7,
+            "s": 10,
+            "X": false,
+            "spot": 1,
+            "no": "2"
+          },
+          {
+            "x": 1.4,
+            "y": -1.2,
+            "s": 9,
+            "X": false,
+            "spot": 2,
+            "no": "3",
+            "reason": "timing"
+          }
+        ]
+      ]
+    }
+  ],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850,
+    "theme": "auto",
+    "lastBackupAt": "2026-06-22T09:00:00.000Z",
+    "activeGuideSeen": true
+  },
+  "active": null
+}

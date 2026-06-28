@@ -1,0 +1,96 @@
+{
+  "schema": 3,
+  "setups": [
+    {
+      "id": "fixture-active-setup",
+      "name": "Active practice setup",
+      "bow": "Recurve",
+      "limbs": "Training limbs",
+      "poundage": 36,
+      "arrow": "Training shaft",
+      "note": "Setup used by active session",
+      "history": []
+    }
+  ],
+  "sightMarks": [
+    {
+      "id": "fixture-active-mark-30m",
+      "setupId": "fixture-active-setup",
+      "dist": 30,
+      "v": "2.9",
+      "h": "-0.1",
+      "date": "2026-06-23",
+      "ts": 1782172800000,
+      "note": "Active session sight mark"
+    }
+  ],
+  "sessions": [],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850,
+    "theme": "auto",
+    "lastBackupAt": null,
+    "activeGuideSeen": true
+  },
+  "active": {
+    "id": "fixture-active-session",
+    "date": "2026-06-23",
+    "setupId": "fixture-active-setup",
+    "dist": 30,
+    "faceD": 80,
+    "faceType": "single",
+    "perEnd": 6,
+    "shaft": 0.955,
+    "sightV": "2.9",
+    "sightH": "-0.1",
+    "wx": "light wind",
+    "note": "In-progress practice session",
+    "windDir": "front-left",
+    "windSpeed": "2",
+    "round": "30m36",
+    "purpose": "practice",
+    "ends": [
+      [
+        {
+          "x": 0.3,
+          "y": 0.4,
+          "s": 10,
+          "X": true,
+          "no": "1"
+        },
+        {
+          "x": -1.5,
+          "y": 0.9,
+          "s": 9,
+          "X": false,
+          "no": "2"
+        },
+        {
+          "x": 2.4,
+          "y": -1.8,
+          "s": 8,
+          "X": false,
+          "no": "3",
+          "reason": "release"
+        }
+      ]
+    ],
+    "cur": [
+      {
+        "x": -0.4,
+        "y": 0.2,
+        "s": 10,
+        "X": true,
+        "no": "4"
+      },
+      {
+        "x": 3.1,
+        "y": -2.6,
+        "s": 8,
+        "X": false,
+        "no": "5",
+        "reason": "aim"
+      }
+    ]
+  }
+}
