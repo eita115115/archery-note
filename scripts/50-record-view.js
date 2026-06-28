@@ -797,7 +797,7 @@ function historyOverviewHtml(allSs,ss){
     <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
     <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
     <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
-  </div>${distanceSummaryHtml(sessionRows)}`;
+  </div>${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows)}`;
 }
 function distanceBucketInfo(dist){
   const n=Number(dist);
@@ -831,6 +831,70 @@ function distanceSummaryHtml(sessionRows){
       return `<div class="listItem" style="cursor:default">
         <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本 / 最新 ${esc(latest)}</div></div>
         <div class="big">${avg}<small> / 最高${g.best?g.best.total:"—"}</small></div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+function sightValueText(v){
+  const raw=String(v==null?"":v).trim();
+  if(!raw) return "—";
+  const n=Number(raw);
+  return Number.isFinite(n)?raw:"—";
+}
+function hasSightInput(v){
+  return v!=null && String(v).trim()!=="";
+}
+function sightDateInfo(item){
+  const iso=String(item&&item.date||"").trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(iso)) return {sort:iso,label:fmtD(iso)};
+  const ts=Number(item&&item.ts);
+  if(Number.isFinite(ts) && ts>0){
+    const d=new Date(ts);
+    if(Number.isFinite(d.getTime())){
+      const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+      const fallback=`${y}-${m}-${day}`;
+      return {sort:fallback,label:fmtD(fallback)};
+    }
+  }
+  return {sort:"",label:"—"};
+}
+function setupNameFor(id){
+  const setup=(db.setups||[]).find(s=>s.id===id);
+  return setup&&setup.name?setup.name:"用具未指定";
+}
+function sightSummaryHtml(sessionRows){
+  const hf=ui.histFilter||{setupId:"",dist:""};
+  const setupOk=id=>!hf.setupId || (hf.setupId==="__none"?!id:hf.setupId===id);
+  const distOk=dist=>!hf.dist || String(dist)===String(hf.dist);
+  const markRows=(Array.isArray(db.sightMarks)?db.sightMarks:[])
+    .filter(m=>setupOk(m&&m.setupId) && distOk(m&&m.dist))
+    .map(m=>Object.assign({source:"台帳"},m));
+  const sessionSightRows=(sessionRows||[]).map(r=>r.s).filter(s=>s && (hasSightInput(s.sightV)||hasSightInput(s.sightH)))
+    .map(s=>({source:"練習",setupId:s.setupId,dist:s.dist,v:s.sightV,h:s.sightH,date:s.date,ts:0}));
+  const rows=[...markRows,...sessionSightRows];
+  if(!rows.length) return "";
+  const byDist=new Map();
+  rows.forEach(row=>{
+    const info=distanceBucketInfo(row.dist);
+    const date=sightDateInfo(row);
+    const current=byDist.get(info.key)||{label:info.label,sort:info.sort,markCount:0,sessionCount:0,latest:null};
+    if(row.source==="台帳") current.markCount++;
+    else current.sessionCount++;
+    const candidate={row,date,setupName:setupNameFor(row.setupId)};
+    if(!current.latest || date.sort>current.latest.date.sort || (date.sort===current.latest.date.sort && row.source==="台帳")){
+      current.latest=candidate;
+    }
+    byDist.set(info.key,current);
+  });
+  const groups=[...byDist.values()].sort((a,b)=>b.sort-a.sort || (b.latest&&b.latest.date.sort||"").localeCompare(a.latest&&a.latest.date.sort||"") || a.label.localeCompare(b.label));
+  const totalMarks=markRows.length, totalSessions=sessionSightRows.length;
+  return `<div class="card"><h2>サイトサマリー <span class="mini">台帳${totalMarks}件 / 練習入力${totalSessions}回</span></h2>
+    ${groups.map(g=>{
+      const latest=g.latest||{};
+      const row=latest.row||{};
+      return `<div class="listItem" style="cursor:default">
+        <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName||"用具未指定")} / 最新 ${esc(latest.date?latest.date.label:"—")} / 台帳${g.markCount}・練習${g.sessionCount}</div></div>
+        <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
       </div>`;
     }).join("")}
   </div>`;
