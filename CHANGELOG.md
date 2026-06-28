@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+## v0.3.0-phase3-safety-baseline - 2026-06-28
+
+### Summary
+
+Phase 3 safety baseline for Archery Note. This release adds documentation and
+automated checks that protect storage compatibility, backup/restore behavior,
+CSV export behavior, and release/version marker alignment before future Service
+Worker, storage migration, or archery-master integration work.
+
+### Added
+
+- Service Worker update strategy documentation
+- Read-only analysis integration plan
+- Storage contract fixtures for the current `archeryNote.v1` / `schema: 3`
+- Storage contract checker
+- Storage backup/restore/CSV round-trip checker
+- Version marker alignment checker
+- `check:storage`
+- `check:version`
+- `check:all` now runs app, UI, storage, and version checks
+
+### Validation
+
+- `npm run check:version`
+- `npm run check:storage`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No storage schema change
+- No Service Worker runtime change
+- No app UI behavior change
+- No version bump
+- No package-lock change
+- No archery-master merge
+- No OCR / pose / AI / model files
+
+### Notes For Future Integration
+
+Future Service Worker, storage migration, analysis, or archery-master integration
+work should build on these checks and remain split into small PRs.
+
 ## v0.2.0-quality-baseline - 2026-06-28
 
 ### Added
