@@ -1,0 +1,57 @@
+{
+  "schema": 3,
+  "setups": [
+    {
+      "id": "fixture-legacy-setup",
+      "name": "Legacy recurve setup",
+      "bow": "Legacy bow",
+      "poundage": 35,
+      "note": "Partial legacy setup",
+      "legacySetupField": "preserve setup metadata"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "fixture-legacy-session",
+      "date": "2025-12-20",
+      "setupId": "fixture-legacy-setup",
+      "dist": 50,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "sightV": "4.8",
+      "sightH": "0",
+      "wx": "legacy weather text",
+      "note": "Partial legacy session",
+      "round": "free",
+      "ends": [
+        [
+          {
+            "x": 0.7,
+            "y": -0.3,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": -2.5,
+            "y": 1.9,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ],
+      "legacySessionField": {
+        "source": "older export",
+        "keptForContractTest": true
+      }
+    }
+  ],
+  "settings": {
+    "eyeSight": 820,
+    "legacySetting": "preserve settings metadata"
+  },
+  "legacyTopLevelField": {
+    "source": "partial legacy fixture",
+    "keptForContractTest": true
+  }
+}
