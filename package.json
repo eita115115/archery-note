@@ -4,10 +4,11 @@
   "private": true,
   "description": "Archery scoring, sight adjustment, and equipment notebook with a native-ready shell.",
   "scripts": {
-    "check:all": "npm run check:app && npm run check:ui && npm run check:storage",
+    "check:all": "npm run check:app && npm run check:ui && npm run check:storage && npm run check:version",
     "check:app": "node tools/check-app.js",
     "check:storage": "node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js",
     "check:ui": "node tools/check-ui.js",
+    "check:version": "node tools/check-version-alignment.js",
     "lint": "eslint \"*.js\" \"scripts/**/*.js\" \"tools/**/*.js\" \"tests/**/*.js\" \"eslint.config.mjs\"",
     "format:check": "prettier \"package*.json\" \"README.md\" \"CHANGELOG.md\" \"CODE_OF_CONDUCT.md\" \"CONTRIBUTING.md\" \"SECURITY.md\" \"THIRD_PARTY.md\" \"docs/**/*.md\" \".github/**/*.md\" \"eslint.config.mjs\" \"playwright.config.js\" \"tools/e2e-server.js\" \"tools/lighthouse-baseline.js\" \"tests/**/*.js\" \".prettierrc\" --check",
     "test:e2e": "playwright test",
