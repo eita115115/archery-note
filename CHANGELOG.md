@@ -2,6 +2,69 @@
 
 ## Unreleased
 
+## v0.4.0-read-only-analysis-baseline - 2026-06-29
+
+### Summary
+
+Read-only analysis baseline for Archery Note. This release adds visible analysis
+summaries based on existing session, distance, sight, and grouping data without
+changing the saved data format.
+
+### Added
+
+- Read-only record/session summary
+- Read-only distance summary
+- Read-only sight summary
+- Read-only grouping summary based on existing safe RMS values
+- Viewport zoom policy documentation
+- App version marker bump to `55` / `0.55.0`
+
+### Analysis Details
+
+- Session summary includes session count, arrow count, average score, latest
+  record, and best total where safely available
+- Distance summary includes distance, session count, arrow count, average score,
+  best total, and latest record date
+- Sight summary includes sight mark counts, practice sight value counts, latest
+  sight values by distance, update date, vertical/horizontal sight values, and
+  setup context where safely available
+- Grouping summary includes target session count, average RMS, best RMS, latest
+  RMS, and distance-level average RMS where safely available
+- Missing or invalid distance values are grouped as `距離未設定`
+- Missing or invalid values are safely displayed as `—`
+- NaN and Infinity are guarded against
+
+### Validation
+
+- `npm run check:app`
+- `npm run check:ui`
+- `npm run check:storage`
+- `npm run check:version`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No storage schema change
+- No migration
+- No new persisted fields
+- No backup/import/export format change
+- No Service Worker strategy change
+- No dependency changes
+- No CI workflow changes
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+This release is the first visible read-only analysis baseline after the Phase 3
+safety baseline. Future analysis work should continue to be split into small PRs
+and should avoid persisted data changes unless covered by explicit migration
+tests.
+
 ## v0.3.0-phase3-safety-baseline - 2026-06-28
 
 ### Summary
