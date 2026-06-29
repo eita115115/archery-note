@@ -2,6 +2,62 @@
 
 ## Unreleased
 
+## v0.5.0-analysis-view-baseline - 2026-06-29
+
+### Summary
+
+Analysis view baseline for Archery Note. This release introduces the first
+dedicated Analysis view for read-only analysis navigation while preserving the
+existing saved data format.
+
+### Added
+
+- Dedicated Analysis tab and view shell
+- Analysis entry point in the bottom navigation
+- App version marker bump to `57` / `0.57.0`
+
+### Changed
+
+- Move existing lower History analysis cards into the Analysis view:
+  - Grouping trend
+  - Distance average score trend
+  - Score distribution
+  - Monthly summary
+- Keep History focused on practice summaries and the practice history list
+- Update UI smoke checks for the five-tab bottom navigation
+
+### Validation
+
+- `npm run check:app`
+- `npm run check:ui`
+- `npm run check:storage`
+- `npm run check:version`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No score trend addition
+- No new analysis calculation
+- No storage schema change
+- No migration
+- No new persisted fields
+- No backup/import/export format change
+- No Service Worker strategy change
+- No dependency changes
+- No CI workflow changes
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+This release is the first baseline for separating analysis from the History
+screen. Future work should continue to add analysis features in small read-only
+steps before any persisted data changes.
+
 ## v0.4.1-history-analysis-ui - 2026-06-29
 
 ### Summary
