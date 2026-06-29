@@ -404,6 +404,7 @@ function renderAnalysis(m){
   const cards=[
     historySummaryDetailsHtml(historySessionRows(ss),{setupId:"",dist:""}),
     scoreTrendCard(ss),
+    setupPerformanceCard(ss),
     groupingTrendCard(ss),
     distTrendCard(ss),
     scoreDistCard(ss),
@@ -822,6 +823,56 @@ function scoreTrendCard(ss){
     </div>`;
   }).join("");
   return `<div class="card"><h2>スコア推移 <span class="mini">直近${rows.length}回</span></h2>${body}</div>`;
+}
+function setupPerformanceLabel(setupId){
+  if(!setupId) return {key:"setup:none",label:"セットアップ未設定"};
+  const setup=(db.setups||[]).find(s=>s.id===setupId);
+  if(setup) return {key:`setup:${setup.id}`,label:setup.name||"名称未設定"};
+  return {key:"setup:deleted",label:"削除済みセットアップ"};
+}
+function setupPerformanceCard(ss){
+  const rows=historySessionRows(ss);
+  const groups=new Map();
+  rows.forEach(r=>{
+    const info=setupPerformanceLabel(r.s&&r.s.setupId);
+    const g=groups.get(info.key)||{
+      label:info.label,
+      sessions:0,
+      arrows:0,
+      total:0,
+      best:null,
+      latestDate:""
+    };
+    g.sessions++;
+    g.arrows+=r.arrows.length;
+    g.total+=r.total;
+    const date=r.s&&r.s.date||"";
+    if(date>g.latestDate) g.latestDate=date;
+    if(r.arrows.length && (!g.best || r.total>g.best.total || (r.total===g.best.total && date>(g.best.date||"")))){
+      g.best={total:r.total,date,arrows:r.arrows.length};
+    }
+    groups.set(info.key,g);
+  });
+  const list=[...groups.values()]
+    .filter(g=>g.sessions)
+    .sort((a,b)=>
+      b.sessions-a.sessions ||
+      (b.latestDate||"").localeCompare(a.latestDate||"") ||
+      (b.arrows?b.total/b.arrows:-1)-(a.arrows?a.total/a.arrows:-1) ||
+      a.label.localeCompare(b.label)
+    );
+  if(!list.length) return "";
+  const body=list.map(g=>{
+    const avg=g.arrows?g.total/g.arrows:null;
+    const avgText=Number.isFinite(avg)?avg.toFixed(2):"—";
+    const bestText=g.best&&Number.isFinite(g.best.total)?String(g.best.total):"—";
+    const latest=g.latestDate?fmtD(g.latestDate):"—";
+    return `<div class="listItem" style="cursor:default">
+      <div><div class="t">${esc(g.label)}</div><div class="d">記録 ${g.sessions}回 / 矢数 ${g.arrows} / 最新 ${esc(latest)}</div></div>
+      <div class="big">${avgText}<small> / 最高${bestText}</small></div>
+    </div>`;
+  }).join("");
+  return `<div class="card"><h2>セットアップ別成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
 }
 function historyOverviewHtml(allSs,ss){
   const src=Array.isArray(ss)?ss:allSs;
