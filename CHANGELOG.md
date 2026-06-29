@@ -2,6 +2,57 @@
 
 ## Unreleased
 
+## v0.6.0-read-only-score-trend - 2026-06-29
+
+### Summary
+
+Read-only score trend release for Archery Note. This release separates History
+and Analysis responsibilities further and adds a small score trend card to the
+Analysis view using existing saved session data only.
+
+### Added
+
+- Read-only `スコア推移` card in the Analysis view
+- Recent saved-session trend display with date, average score, total score,
+  distance, and arrow count
+- Missing-distance handling as `距離未設定`
+
+### Changed
+
+- Move detailed distance, sight, and grouping summaries from History to Analysis
+- Keep History focused on lightweight record summary and practice history
+- Keep Analysis focused on trend and summary reading
+- Bump app/package version markers to `58` / `0.58.0`
+
+### Validation
+
+- `node tools/check-version-alignment.js`
+- `npm run check:version`
+- `npm run check:storage`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No storage schema change
+- No migration
+- No new persisted fields
+- No backup/import/export format change
+- No Service Worker strategy change
+- No dependency changes
+- No CI workflow changes
+- No docs other than this changelog entry
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+The score trend is read-only and uses existing saved sessions only. It does not
+save derived analysis data or change import/export compatibility.
+
 ## v0.5.0-analysis-view-baseline - 2026-06-29
 
 ### Summary
