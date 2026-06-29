@@ -2,6 +2,57 @@
 
 ## Unreleased
 
+## v0.4.1-history-analysis-ui - 2026-06-29
+
+### Summary
+
+History analysis UI organization release. This release makes the read-only
+analysis summaries added in `v0.4.0-read-only-analysis-baseline` easier to scan,
+especially on mobile, without changing the saved data format.
+
+### Changed
+
+- Keep the main record/session summary visible in the initial History view
+- Move distance, sight, and grouping summary details into a more
+  compact/collapsible presentation
+- Preserve existing read-only analysis values while reducing the amount of
+  detail shown before the main practice history
+- Align missing distance display around `距離未設定`
+- Bump app version markers to `56` / `0.56.0`
+
+### Validation
+
+- `npm run check:app`
+- `npm run check:ui`
+- `npm run check:storage`
+- `npm run check:version`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No new analysis feature
+- No score trend addition
+- No Analysis tab or subview
+- No storage schema change
+- No migration
+- No new persisted fields
+- No backup/import/export format change
+- No Service Worker strategy change
+- No dependency changes
+- No CI workflow changes
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+This release is a small UI organization release after the read-only analysis
+baseline. Future analysis work should decide whether to continue inside History
+or move toward a dedicated Analysis tab/subview.
+
 ## v0.4.0-read-only-analysis-baseline - 2026-06-29
 
 ### Summary
