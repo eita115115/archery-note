@@ -12,11 +12,15 @@ function render(){
   const tabs=Array.prototype.slice.call(document.querySelectorAll("#tabs button"));
   const activeIndex=Math.max(0,tabs.findIndex(b=>b.dataset.v===view));
   const tabBar=$("#tabs");
-  if(tabBar) tabBar.style.setProperty("--active-tab", activeIndex);
+  if(tabBar){
+    tabBar.style.setProperty("--active-tab", activeIndex);
+    tabBar.style.setProperty("--tab-count", tabs.length||1);
+  }
   tabs.forEach(b=>b.classList.toggle("on",b.dataset.v===view));
   const m=$("#main");
   if(view==="record") renderRecord(m);
   else if(view==="history") renderHistory(m);
+  else if(view==="analysis") renderAnalysis(m);
   else if(view==="sight") renderSight(m);
   else renderGear(m);
 }
@@ -335,6 +339,18 @@ function heroMetricHtml(k,b,span){
 }
 function pageHeroHtml(type,ctx){
   ctx=ctx||{};
+  if(type==="analysis"){
+    return `<section class="pageHero">
+      <div class="kicker">分析</div>
+      <h2>傾向をまとめる入口</h2>
+      <p>スコア・距離・サイト・グルーピングの読み取りを、ここへ段階的に集めます。今は履歴画面の分析サマリーを確認できます。</p>
+      <div class="heroMetrics">
+        ${heroMetricHtml("現在","履歴で確認","既存サマリー")}
+        ${heroMetricHtml("対象","スコア・距離","サイト・グルーピング")}
+        ${heroMetricHtml("次の置き場","準備中","追加分析はここへ")}
+      </div>
+    </section>`;
+  }
   if(type==="history"){
     const src=ctx.ss||db.sessions||[];
     const arrows=src.flatMap(s=>s.ends.flat());
@@ -382,6 +398,32 @@ function pageHeroHtml(type,ctx){
     </section>`;
   }
   return "";
+}
+function renderAnalysis(m){
+  m.innerHTML=`${pageHeroHtml("analysis")}
+  <div class="card">
+    <h2>現在の分析</h2>
+    <div class="note">履歴画面にある分析サマリーを入口にします。</div>
+    <div class="listItem" id="analysisHistoryJump" role="button" tabindex="0">
+      <div>
+        <div class="t">履歴画面の分析サマリー</div>
+        <div class="d">記録サマリー、距離別、サイト、グルーピングを確認</div>
+      </div>
+      <div class="big"><small>開く</small></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>次に置く予定</h2>
+    <div class="note">追加分析はここに少しずつまとめていきます。</div>
+  </div>`;
+  const jump=$("#analysisHistoryJump");
+  if(jump){
+    const go=()=>showView("history");
+    jump.onclick=go;
+    jump.onkeydown=e=>{
+      if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); }
+    };
+  }
 }
 function liveSessionHeroHtml(s,setup){
   const all=sessionArrows(s);
