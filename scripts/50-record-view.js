@@ -405,6 +405,7 @@ function renderAnalysis(m){
     historySummaryDetailsHtml(historySessionRows(ss),{setupId:"",dist:""}),
     scoreTrendCard(ss),
     setupPerformanceCard(ss),
+    sightHistoryCard(ss),
     groupingTrendCard(ss),
     distTrendCard(ss),
     scoreDistCard(ss),
@@ -873,6 +874,41 @@ function setupPerformanceCard(ss){
     </div>`;
   }).join("");
   return `<div class="card"><h2>セットアップ別成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
+}
+function sightHistoryCard(ss){
+  const markRows=(Array.isArray(db.sightMarks)?db.sightMarks:[])
+    .filter(m=>hasSightInput(m&&m.v)||hasSightInput(m&&m.h))
+    .map(m=>Object.assign({source:"台帳"},m));
+  const sessionRows=(Array.isArray(ss)?ss:[])
+    .filter(s=>hasSightInput(s&&s.sightV)||hasSightInput(s&&s.sightH))
+    .map(s=>({
+      source:"練習",
+      setupId:s.setupId,
+      dist:s.dist,
+      v:s.sightV,
+      h:s.sightH,
+      date:s.date,
+      ts:0
+    }));
+  const rows=[...markRows,...sessionRows].map(row=>{
+    const date=sightDateInfo(row);
+    const setup=setupPerformanceLabel(row.setupId);
+    const distInfo=distanceBucketInfo(row.dist);
+    return {row,date,setup,distInfo};
+  }).sort((a,b)=>
+    (b.date.sort||"").localeCompare(a.date.sort||"") ||
+    (b.distInfo.sort>0?1:0)-(a.distInfo.sort>0?1:0) ||
+    (b.setup.key==="setup:none"?0:1)-(a.setup.key==="setup:none"?0:1) ||
+    a.setup.label.localeCompare(b.setup.label)
+  ).slice(0,10);
+  if(!rows.length) return "";
+  const body=rows.map(({row,date,setup,distInfo})=>{
+    return `<div class="listItem" style="cursor:default">
+      <div><div class="t">${esc(date.label)} ・ ${esc(distInfo.label)}</div><div class="d">${esc(setup.label)} / ${esc(row.source||"履歴")}</div></div>
+      <div class="big">上下 ${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
+    </div>`;
+  }).join("");
+  return `<div class="card"><h2>サイト履歴 <span class="mini">直近${rows.length}件</span></h2>${body}</div>`;
 }
 function historyOverviewHtml(allSs,ss){
   const src=Array.isArray(ss)?ss:allSs;
