@@ -347,7 +347,7 @@ function pageHeroHtml(type,ctx){
       <div class="heroMetrics">
         ${heroMetricHtml("練習",`${src.length}回`,`${arrows.length}本を集計`)}
         ${heroMetricHtml("平均",arrows.length?(total/arrows.length).toFixed(2):"—","フィルター後の平均点")}
-        ${heroMetricHtml("直近",latest?`${fmtD(latest.date)} ${latest.dist}m`:"—",latest?roundLabel(latest.round):"記録待ち")}
+        ${heroMetricHtml("直近",latest?[fmtD(latest.date),distanceLabel(latest.dist)].filter(Boolean).join(" "):"—",latest?roundLabel(latest.round):"記録待ち")}
       </div>
     </section>`;
   }
@@ -790,14 +790,17 @@ function historyOverviewHtml(allSs,ss){
   const qualityScores=quality.map(q=>Number(q.score)).filter(Number.isFinite);
   const qAvg=qualityScores.length?qualityScores.reduce((a,s)=>a+s,0)/qualityScores.length:0;
   const latest=recent[0]||null;
-  const latestLabel=latest?[fmtD(latest.date),latest.dist?`${latest.dist}m`:""].filter(Boolean).join(" "):"—";
+  const latestLabel=latest?[fmtD(latest.date),distanceLabel(latest.dist)].filter(Boolean).join(" "):"—";
   const best=sessionRows.filter(r=>r.arrows.length).sort((a,b)=>b.total-a.total || b.arrows.length-a.arrows.length || (b.s.date||"").localeCompare(a.s.date||""))[0];
-  const bestMeta=best?[fmtD(best.s.date),best.s.dist?`${best.s.dist}m`:"",`${best.arrows.length}本`].filter(Boolean).join(" / "):"記録待ち";
+  const bestMeta=best?[fmtD(best.s.date),distanceLabel(best.s.dist),`${best.arrows.length}本`].filter(Boolean).join(" / "):"記録待ち";
   return `<div class="insightStrip">
     <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
     <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
     <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
   </div>${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows)}${groupingSummaryHtml(sessionRows)}`;
+}
+function distanceLabel(dist){
+  return distanceBucketInfo(dist).label;
 }
 function distanceBucketInfo(dist){
   const n=Number(dist);
@@ -807,6 +810,13 @@ function distanceBucketInfo(dist){
     return {key:`dist:${label}`,label,sort:rounded};
   }
   return {key:"dist:none",label:"距離未設定",sort:-1};
+}
+function historyAnalysisDetailsHtml(title, meta, bodyHtml){
+  if(!bodyHtml) return "";
+  return `<details class="adv historyAnalysisDetails">
+    <summary>${esc(title)} <span class="mini">${esc(meta||"")}</span></summary>
+    ${bodyHtml}
+  </details>`;
 }
 function distanceSummaryHtml(sessionRows){
   const byDist=new Map();
@@ -824,16 +834,15 @@ function distanceSummaryHtml(sessionRows){
   });
   const rows=[...byDist.values()].sort((a,b)=>b.sort-a.sort || b.sessions-a.sessions || a.label.localeCompare(b.label));
   if(!rows.length) return "";
-  return `<div class="card"><h2>距離別サマリー <span class="mini">${rows.length}距離</span></h2>
-    ${rows.map(g=>{
+  const body=rows.map(g=>{
       const avg=g.arrows?(g.total/g.arrows).toFixed(2):"—";
       const latest=g.latestDate?fmtD(g.latestDate):"—";
       return `<div class="listItem" style="cursor:default">
         <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本 / 最新 ${esc(latest)}</div></div>
         <div class="big">${avg}<small> / 最高${g.best?g.best.total:"—"}</small></div>
       </div>`;
-    }).join("")}
-  </div>`;
+    }).join("");
+  return historyAnalysisDetailsHtml("距離別サマリー",`${rows.length}距離`,body);
 }
 function sightValueText(v){
   const raw=String(v==null?"":v).trim();
@@ -888,16 +897,15 @@ function sightSummaryHtml(sessionRows){
   });
   const groups=[...byDist.values()].sort((a,b)=>b.sort-a.sort || (b.latest&&b.latest.date.sort||"").localeCompare(a.latest&&a.latest.date.sort||"") || a.label.localeCompare(b.label));
   const totalMarks=markRows.length, totalSessions=sessionSightRows.length;
-  return `<div class="card"><h2>サイトサマリー <span class="mini">台帳${totalMarks}件 / 練習入力${totalSessions}回</span></h2>
-    ${groups.map(g=>{
+  const body=groups.map(g=>{
       const latest=g.latest||{};
       const row=latest.row||{};
       return `<div class="listItem" style="cursor:default">
         <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName||"用具未指定")} / 最新 ${esc(latest.date?latest.date.label:"—")} / 台帳${g.markCount}・練習${g.sessionCount}</div></div>
         <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
       </div>`;
-    }).join("")}
-  </div>`;
+    }).join("");
+  return historyAnalysisDetailsHtml("サイトサマリー",`台帳${totalMarks}件 / 練習入力${totalSessions}回`,body);
 }
 function groupingMetricNumber(v){
   const n=Number(v);
@@ -942,8 +950,7 @@ function groupingSummaryHtml(sessionRows){
   });
   const groups=[...byDist.values()].sort((a,b)=>b.sort-a.sort || b.sessions-a.sessions || a.label.localeCompare(b.label));
   const meta=r=>[r.distInfo.label,r.date.label].filter(x=>x&&x!=="—").join(" / ")||"—";
-  return `<div class="card"><h2>グルーピングサマリー <span class="mini">対象${rows.length}回</span></h2>
-    <div class="insightStrip">
+  const body=`<div class="insightStrip">
       <div class="insightTile"><div class="k">平均RMS</div><b>${groupingMetricText(avg)}</b><span>${rows.length}セッションから集計</span></div>
       <div class="insightTile"><div class="k">最小RMS</div><b>${groupingMetricText(best&&best.rr)}</b><span>${esc(best?meta(best):"—")}</span></div>
       <div class="insightTile"><div class="k">最新RMS</div><b>${groupingMetricText(latest&&latest.rr)}</b><span>${esc(latest?meta(latest):"—")}</span></div>
@@ -955,6 +962,6 @@ function groupingSummaryHtml(sessionRows){
         <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / 最新 ${esc(latest)}</div></div>
         <div class="big">${groupingMetricText(distAvg)}<small> / 最小${groupingMetricText(g.best&&g.best.rr)}</small></div>
       </div>`;
-    }).join("")}
-  </div>`;
+    }).join("")}`;
+  return historyAnalysisDetailsHtml("グルーピングサマリー",`対象${rows.length}回`,body);
 }
