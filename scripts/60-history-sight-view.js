@@ -30,8 +30,8 @@ function renderHistory(m){
         <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
         <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></div>`;
     }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
-  </div></div>
-  ${groupingTrendCard(ss)}${distTrendCard(ss)}${scoreDistCard(ss)}${monthlyCard(ss)}`;
+    <div class="hint">詳しい傾向は「分析」タブで確認できます。</div>
+  </div></div>`;
   $("#histSetup").onchange=e=>{ ui.histFilter.setupId=e.target.value; render(); };
   $("#histDist").onchange=e=>{ ui.histFilter.dist=e.target.value; render(); };
   $("#histRound").onchange=e=>{ ui.histFilter.round=e.target.value; render(); };
