@@ -2,6 +2,62 @@
 
 ## Unreleased
 
+## v0.7.0-read-only-performance-summaries - 2026-06-30
+
+### Summary
+
+Read-only performance summaries release for Archery Note. This release adds
+setup performance and sight history summaries to the Analysis view using
+existing saved data only.
+
+### Added
+
+- Read-only `セットアップ別成績` card in the Analysis view
+- Setup-based performance summary with record count, arrow count, average score,
+  best total, and latest record date
+- Read-only `サイト履歴` card in the Analysis view
+- Recent sight history display with date, distance, vertical sight, horizontal
+  sight, setup name, and source
+- Safe handling for missing setup, deleted setup references, missing distance,
+  and missing sight values
+
+### Changed
+
+- Continue separating History and Analysis responsibilities
+- Keep History focused on lightweight record summary and practice history
+- Keep Analysis focused on trend and performance summary reading
+- Bump app/package version markers to `59` / `0.59.0`
+
+### Validation
+
+- `node tools/check-version-alignment.js`
+- `npm run check:version`
+- `npm run check:storage`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No storage schema change
+- No migration
+- No new persisted fields
+- No backup/import/export format change
+- No Service Worker strategy change
+- No dependency changes
+- No CI workflow changes
+- No docs other than this changelog entry
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+These summaries are read-only and use existing saved sessions, setup data, and
+sight mark data only. They do not save derived analysis data or change
+import/export compatibility.
+
 ## v0.6.0-read-only-score-trend - 2026-06-29
 
 ### Summary
