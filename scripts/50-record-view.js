@@ -403,6 +403,7 @@ function renderAnalysis(m){
   const ss=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
   const cards=[
     historySummaryDetailsHtml(historySessionRows(ss),{setupId:"",dist:""}),
+    scoreTrendCard(ss),
     groupingTrendCard(ss),
     distTrendCard(ss),
     scoreDistCard(ss),
@@ -805,6 +806,22 @@ function historySessionRows(src){
 }
 function historySummaryDetailsHtml(sessionRows,filter){
   return `${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows,filter)}${groupingSummaryHtml(sessionRows)}`;
+}
+function scoreTrendCard(ss){
+  const rows=historySessionRows(ss).filter(r=>r.arrows.length).slice(0,8);
+  if(!rows.length) return "";
+  const body=rows.map(r=>{
+    const avg=r.arrows.length?r.total/r.arrows.length:null;
+    const avgText=Number.isFinite(avg)?avg.toFixed(2):"—";
+    const totalText=Number.isFinite(r.total)?String(r.total):"—";
+    const date=r.s&&r.s.date?fmtD(r.s.date):"日付未設定";
+    const dist=distanceLabel(r.s&&r.s.dist);
+    return `<div class="listItem" style="cursor:default">
+      <div><div class="t">${esc(date)}</div><div class="d">${esc(dist)} / ${r.arrows.length}本</div></div>
+      <div class="big">${avgText}<small> / 合計${totalText}</small></div>
+    </div>`;
+  }).join("");
+  return `<div class="card"><h2>スコア推移 <span class="mini">直近${rows.length}回</span></h2>${body}</div>`;
 }
 function historyOverviewHtml(allSs,ss){
   const src=Array.isArray(ss)?ss:allSs;
