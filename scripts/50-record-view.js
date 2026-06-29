@@ -402,6 +402,7 @@ function pageHeroHtml(type,ctx){
 function renderAnalysis(m){
   const ss=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
   const cards=[
+    historySummaryDetailsHtml(historySessionRows(ss),{setupId:"",dist:""}),
     groupingTrendCard(ss),
     distTrendCard(ss),
     scoreDistCard(ss),
@@ -792,16 +793,23 @@ function openSummary(sess, isNew){
 }
 
 /* ---------- 履歴 ---------- */
-function historyOverviewHtml(allSs,ss){
-  const src=Array.isArray(ss)?ss:allSs;
-  if(!allSs.length) return "";
+function historySessionRows(src){
+  const rows=Array.isArray(src)?src:[];
   const arrowsOf=s=>Array.isArray(s&&s.ends)?s.ends.flatMap(end=>Array.isArray(end)?end:[]):[];
   const scoreOf=a=>{ const v=Number(a&&a.s); return Number.isFinite(v)?v:0; };
-  const sessionRows=src.map(s=>{
+  return rows.map(s=>{
     const arrows=arrowsOf(s);
     const total=arrows.reduce((a,x)=>a+scoreOf(x),0);
     return {s,arrows,total};
   });
+}
+function historySummaryDetailsHtml(sessionRows,filter){
+  return `${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows,filter)}${groupingSummaryHtml(sessionRows)}`;
+}
+function historyOverviewHtml(allSs,ss){
+  const src=Array.isArray(ss)?ss:allSs;
+  if(!allSs.length) return "";
+  const sessionRows=historySessionRows(src);
   const arrows=sessionRows.flatMap(r=>r.arrows);
   const total=sessionRows.reduce((a,r)=>a+r.total,0);
   const avg=arrows.length?total/arrows.length:0;
@@ -824,7 +832,7 @@ function historyOverviewHtml(allSs,ss){
     <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
     <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
     <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
-  </div>${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows)}${groupingSummaryHtml(sessionRows)}`;
+  </div>`;
 }
 function distanceLabel(dist){
   return distanceBucketInfo(dist).label;
@@ -898,8 +906,8 @@ function setupNameFor(id){
   const setup=(db.setups||[]).find(s=>s.id===id);
   return setup&&setup.name?setup.name:"用具未指定";
 }
-function sightSummaryHtml(sessionRows){
-  const hf=ui.histFilter||{setupId:"",dist:""};
+function sightSummaryHtml(sessionRows,filter){
+  const hf=filter||ui.histFilter||{setupId:"",dist:""};
   const setupOk=id=>!hf.setupId || (hf.setupId==="__none"?!id:hf.setupId===id);
   const distOk=dist=>!hf.dist || String(dist)===String(hf.dist);
   const markRows=(Array.isArray(db.sightMarks)?db.sightMarks:[])
