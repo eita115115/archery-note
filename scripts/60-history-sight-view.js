@@ -26,7 +26,7 @@ function renderHistory(m){
       const setup=db.setups.find(x=>x.id===s.setupId);
       const q=sessionQuality(s,setup);
       return `<div class="listItem" data-id="${s.id}">
-        <div><div class="t">${fmtD(s.date)} ・ ${s.dist}m</div>
+        <div><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
         <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
         <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></div>`;
     }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
@@ -47,6 +47,14 @@ function sessionGroupPoint(s){
   const setup=db.setups.find(x=>x.id===s.setupId);
   return {id:s.id,date:s.date||"",setupId:s.setupId||"none",setupName:setup?setup.name:"未指定",dist:s.dist,faceD:s.faceD,faceType:s.faceType||"single",
     mx:st.mx,my:st.my,rr:st.rr,sx:st.sx,sy:st.sy,major:st.major,minor:st.minor,n:st.n,total,avg:total/all.length};
+}
+function historyDistanceLabel(dist){
+  const n=Number(dist);
+  if(Number.isFinite(n) && n>0){
+    const rounded=Math.round(n*10)/10;
+    return `${Number.isInteger(rounded)?rounded:rounded.toFixed(1)}m`;
+  }
+  return "距離未設定";
 }
 function driftText(dx,dy){
   const parts=[];
@@ -100,7 +108,7 @@ function groupingTrendItem(g){
         }).join("")}
       </svg>
       <div style="flex:1;min-width:0">
-        <div class="t" style="font-weight:800">${setup} ・ ${latest.dist}m ・ ${faceLabel(latest)}</div>
+        <div class="t" style="font-weight:800">${setup} ・ ${historyDistanceLabel(latest.dist)} ・ ${faceLabel(latest)}</div>
         <div class="d">${g.length}回 / ${fmtD(first.date)}〜${fmtD(latest.date)} / 平均グルーピング半径 ${avgRr.toFixed(1)}cm</div>
         <div class="kv"><span>最新の中心</span><span>${cmOffsetText(latest.mx,"x")} / ${cmOffsetText(latest.my,"y")}（${biasState}）</span></div>
         <div class="kv"><span>前回から</span><span>${driftText(recentDx,recentDy)}</span></div>
@@ -152,16 +160,18 @@ function distTrendCard(ss){
   const byDist={};
   [...ss].reverse().forEach(s=>{
     const all=s.ends.flat(); if(!all.length)return;
-    (byDist[s.dist]=byDist[s.dist]||[]).push(all.reduce((a,x)=>a+x.s,0)/all.length);
+    const info={key:`dist:${historyDistanceLabel(s.dist)}`,label:historyDistanceLabel(s.dist),sort:Number(s.dist)||-1};
+    const g=byDist[info.key]=byDist[info.key]||{label:info.label,sort:info.sort,pts:[]};
+    g.pts.push(all.reduce((a,x)=>a+x.s,0)/all.length);
   });
-  const dists=Object.keys(byDist).filter(d=>byDist[d].length>=2).sort((a,b)=>b-a);
-  if(!dists.length) return "";
-  return `<div class="card"><h2>距離別 平均点の推移</h2>`+dists.map(d=>{
-    const pts=byDist[d]; const W=300,H=46;
+  const groups=Object.values(byDist).filter(g=>g.pts.length>=2).sort((a,b)=>b.sort-a.sort || a.label.localeCompare(b.label));
+  if(!groups.length) return "";
+  return `<div class="card"><h2>距離別 平均点の推移</h2>`+groups.map(g=>{
+    const pts=g.pts; const W=300,H=46;
     const min=Math.min(...pts), max=Math.max(...pts), span=(max-min)||1;
     const path=pts.map((v,i)=>`${i?"L":"M"}${(i/(pts.length-1))*W},${H-4-((v-min)/span)*(H-10)}`).join("");
     return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-      <div style="width:52px;font-weight:700">${d}m</div>
+      <div style="width:72px;font-weight:700">${esc(g.label)}</div>
       <svg width="100%" viewBox="0 0 ${W} ${H}" style="flex:1;max-height:${H}px"><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
       ${pts.map((v,i)=>`<circle cx="${(i/(pts.length-1))*W}" cy="${H-4-((v-min)/span)*(H-10)}" r="3" fill="var(--green)"/>`).join("")}</svg>
       <div style="width:54px;text-align:right;font-size:12px">${pts[pts.length-1].toFixed(2)}<br><span style="color:var(--sub);font-size:10px">最新平均</span></div>
@@ -176,7 +186,7 @@ function openHistDetail(id){
   const st=robustStats(all);
   const adv=adviceFor(sess,setup);
   ovl.innerHTML=`<div class="sheet">
-    <h3>${fmtD(sess.date)} ・ ${sess.dist}m ・ ${faceLabel(sess)}</h3>
+    <h3>${fmtD(sess.date)} ・ ${historyDistanceLabel(sess.dist)} ・ ${faceLabel(sess)}</h3>
     <div style="font-size:12px;color:var(--sub)">${setup?esc(setup.name):"セッティング未指定"}${sess.round&&sess.round!=="free"?" ・ "+roundLabel(sess.round):""}${windText(sess)?" ・ "+esc(windText(sess)):""}${sess.note?" ・ "+esc(sess.note):""}</div>
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
@@ -221,7 +231,7 @@ function openHistDetail(id){
   ovl.querySelector("#hCard").onclick=()=>exportScorecardImage(sess);
   ovl.querySelector("#hDel").onclick=()=>{
     if(confirm("この練習記録を削除しますか？")){
-      trashItem("session",`${fmtD(sess.date)} ${sess.dist}m`,sess);
+      trashItem("session",`${fmtD(sess.date)} ${historyDistanceLabel(sess.dist)}`,sess);
       db.sessions=db.sessions.filter(s=>s.id!==id); save({reason:"delete-session",forceSnapshot:true}); ovl.remove(); render(); toast("削除しました。設定から復元できます");
     }
   };
