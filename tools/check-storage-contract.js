@@ -1,5 +1,6 @@
 "use strict";
 
+const assertStrict = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
 
@@ -99,6 +100,20 @@ function checkBaseShape(name, db) {
   assertArray(db.sessions, `[${name}] sessions`);
   assertArray(db.trash, `[${name}] trash`);
   assertObject(db.settings, `[${name}] settings`);
+}
+
+function checkNormalizeIdempotency(storageApi, fixtures) {
+  Object.entries(fixtures).forEach(([name, fixture]) => {
+    const once = storageApi.normalizeDb(clone(fixture));
+    const twice = storageApi.normalizeDb(clone(once));
+    try {
+      assertStrict.deepStrictEqual(twice, once);
+    } catch (error) {
+      throw new Error(`[${name}] normalizeDb should be idempotent: ${error.message}`, {
+        cause: error,
+      });
+    }
+  });
 }
 
 function checkBlank(storageApi, fixtures) {
@@ -404,6 +419,7 @@ function main() {
   const fixtures = loadFixtures();
   const storageApi = loadStorageApi();
 
+  checkNormalizeIdempotency(storageApi, fixtures);
   checkBlank(storageApi, fixtures);
   checkRepresentative(storageApi, fixtures);
   checkActiveSession(storageApi, fixtures);
