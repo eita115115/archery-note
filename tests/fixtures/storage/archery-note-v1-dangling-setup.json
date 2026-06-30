@@ -1,0 +1,148 @@
+{
+  "schema": 3,
+  "setups": [
+    {
+      "id": "fixture-valid-setup",
+      "name": "Known setup",
+      "bow": "Known bow",
+      "limbs": "Known limbs",
+      "poundage": 36,
+      "arrow": "Known shaft",
+      "note": "Valid setup for dangling setup fixture"
+    }
+  ],
+  "sightMarks": [],
+  "sessions": [
+    {
+      "id": "fixture-session-valid-setup",
+      "date": "2026-06-24",
+      "setupId": "fixture-valid-setup",
+      "dist": 70,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "shaft": 1.459,
+      "sightV": "5.5",
+      "sightH": "0.1",
+      "wx": "calm",
+      "note": "Session with a valid setup reference",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "70m72",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.3,
+            "y": -0.4,
+            "s": 10,
+            "X": true,
+            "no": "1"
+          },
+          {
+            "x": -1.2,
+            "y": 0.8,
+            "s": 10,
+            "X": false,
+            "no": "2"
+          },
+          {
+            "x": 2.4,
+            "y": -1.1,
+            "s": 9,
+            "X": false,
+            "no": "3"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "fixture-session-missing-setup",
+      "date": "2026-06-25",
+      "setupId": "missing-setup-001",
+      "dist": 50,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "shaft": 1.459,
+      "sightV": "4.4",
+      "sightH": "-0.1",
+      "wx": "light wind",
+      "note": "Session with a dangling setup reference",
+      "windDir": "right",
+      "windSpeed": "2.0",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 1.1,
+            "y": -0.2,
+            "s": 10,
+            "X": false,
+            "no": "1"
+          },
+          {
+            "x": -3.3,
+            "y": 2.8,
+            "s": 8,
+            "X": false,
+            "no": "2",
+            "reason": "wind"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "fixture-session-no-setup",
+      "date": "2026-06-26",
+      "setupId": null,
+      "dist": 30,
+      "faceD": 80,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.95,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "Session without setup reference",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.4,
+            "y": 0.5,
+            "s": 10,
+            "X": false,
+            "no": "1"
+          },
+          {
+            "x": -2.1,
+            "y": 1.6,
+            "s": 9,
+            "X": false,
+            "no": "2"
+          },
+          {
+            "x": 3,
+            "y": -2.4,
+            "s": 8,
+            "X": false,
+            "no": "3"
+          }
+        ]
+      ]
+    }
+  ],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850,
+    "theme": "auto",
+    "lastBackupAt": null,
+    "activeGuideSeen": true
+  },
+  "active": null
+}

@@ -12,6 +12,7 @@ const fixtureFiles = {
   activeSession: "archery-note-v1-active-session.json",
   trash: "archery-note-v1-trash.json",
   partialLegacy: "archery-note-v1-partial-legacy.json",
+  danglingSetup: "archery-note-v1-dangling-setup.json",
 };
 
 function assert(ok, message) {
@@ -282,6 +283,36 @@ function checkPartialLegacy(storageApi, fixtures) {
   );
 }
 
+function checkDanglingSetup(storageApi, fixtures) {
+  const db = storageApi.normalizeDb(clone(fixtures.danglingSetup));
+  checkBaseShape("dangling-setup", db);
+  assertEqual(db.setups.length, 1, "[dangling-setup] setup count");
+  assertEqual(db.sessions.length, 3, "[dangling-setup] session count");
+
+  const valid = db.sessions.find((session) => session.id === "fixture-session-valid-setup");
+  assertObject(valid, "[dangling-setup] valid setup session");
+  assertEqual(valid.setupId, "fixture-valid-setup", "[dangling-setup] valid setupId");
+  assert(
+    db.setups.some((setup) => setup.id === valid.setupId),
+    "[dangling-setup] valid setup should exist",
+  );
+
+  const dangling = db.sessions.find((session) => session.id === "fixture-session-missing-setup");
+  assertObject(dangling, "[dangling-setup] missing setup session");
+  assertEqual(dangling.setupId, "missing-setup-001", "[dangling-setup] dangling setupId");
+  assert(
+    !db.setups.some((setup) => setup.id === dangling.setupId),
+    "[dangling-setup] dangling setupId should not exist in setups",
+  );
+  assertEqual(dangling.dist, 50, "[dangling-setup] dangling distance");
+  assertEqual(dangling.ends[0][1].reason, "wind", "[dangling-setup] dangling arrow reason");
+
+  const noSetup = db.sessions.find((session) => session.id === "fixture-session-no-setup");
+  assertObject(noSetup, "[dangling-setup] no setup session");
+  assertEqual(noSetup.setupId, null, "[dangling-setup] no setup setupId");
+  assertEqual(noSetup.dist, 30, "[dangling-setup] no setup distance");
+}
+
 function main() {
   const fixtures = loadFixtures();
   const storageApi = loadStorageApi();
@@ -292,6 +323,7 @@ function main() {
   checkTrashNormalize(storageApi, fixtures);
   checkTrashRestore(storageApi, fixtures);
   checkPartialLegacy(storageApi, fixtures);
+  checkDanglingSetup(storageApi, fixtures);
 
   console.log("Storage contract checks OK");
 }

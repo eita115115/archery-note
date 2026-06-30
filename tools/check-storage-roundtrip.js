@@ -17,6 +17,7 @@ const fixtureFiles = {
   activeSession: "archery-note-v1-active-session.json",
   trash: "archery-note-v1-trash.json",
   partialLegacy: "archery-note-v1-partial-legacy.json",
+  danglingSetup: "archery-note-v1-dangling-setup.json",
 };
 const expectedCsvHeader = [
   "date",
@@ -269,6 +270,28 @@ function checkPartialLegacyRoundTrip(db) {
   );
 }
 
+function checkDanglingSetupRoundTrip(db) {
+  const valid = db.sessions.find((session) => session.id === "fixture-session-valid-setup");
+  assertObject(valid, "[dangling-setup] valid setup session");
+  assertEqual(valid.setupId, "fixture-valid-setup", "[dangling-setup] valid setupId");
+  assert(
+    db.setups.some((setup) => setup.id === valid.setupId),
+    "[dangling-setup] valid setup should survive JSON round trip",
+  );
+
+  const dangling = db.sessions.find((session) => session.id === "fixture-session-missing-setup");
+  assertObject(dangling, "[dangling-setup] dangling setup session");
+  assertEqual(dangling.setupId, "missing-setup-001", "[dangling-setup] dangling setupId");
+  assert(
+    !db.setups.some((setup) => setup.id === dangling.setupId),
+    "[dangling-setup] dangling setup should remain missing after JSON round trip",
+  );
+
+  const noSetup = db.sessions.find((session) => session.id === "fixture-session-no-setup");
+  assertObject(noSetup, "[dangling-setup] no setup session");
+  assertEqual(noSetup.setupId, null, "[dangling-setup] no setup setupId");
+}
+
 function checkSnapshot(storageApi, representative) {
   const normalized = storageApi.normalizeDb(clone(representative));
   const result = createImportSnapshot(normalized);
@@ -337,6 +360,12 @@ function checkCsvForAllFixtures(normalized) {
   assertEqual(legacyRows[1][0], "2025-12-20", "[partial-legacy CSV] date");
   assertEqual(legacyRows[1][1], "Legacy recurve setup", "[partial-legacy CSV] setup");
   assertEqual(legacyRows[1][6], "19", "[partial-legacy CSV] score total");
+
+  const danglingRows = checkCsvRows("dangling-setup", normalized.danglingSetup, 4);
+  assertEqual(danglingRows[1][1], "Known setup", "[dangling-setup CSV] valid setup name");
+  assertEqual(danglingRows[2][1], "", "[dangling-setup CSV] dangling setup name");
+  assertEqual(danglingRows[2][2], "50", "[dangling-setup CSV] dangling distance");
+  assertEqual(danglingRows[3][1], "", "[dangling-setup CSV] no setup name");
 }
 
 function main() {
@@ -353,6 +382,7 @@ function main() {
   checkActiveRoundTrip(normalized.activeSession);
   checkTrashRoundTrip(normalized.trash);
   checkPartialLegacyRoundTrip(normalized.partialLegacy);
+  checkDanglingSetupRoundTrip(normalized.danglingSetup);
   checkSnapshot(storageApi, fixtures.representative);
   checkCsvForAllFixtures(normalized);
 
