@@ -13,6 +13,7 @@ const fixtureFiles = {
   trash: "archery-note-v1-trash.json",
   partialLegacy: "archery-note-v1-partial-legacy.json",
   danglingSetup: "archery-note-v1-dangling-setup.json",
+  sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
 };
 
 function assert(ok, message) {
@@ -313,6 +314,92 @@ function checkDanglingSetup(storageApi, fixtures) {
   assertEqual(noSetup.dist, 30, "[dangling-setup] no setup distance");
 }
 
+function checkSightMarksCompatibility(storageApi, fixtures) {
+  const db = storageApi.normalizeDb(clone(fixtures.sightMarksCompatibility));
+  checkBaseShape("sight-marks-compatibility", db);
+  assertEqual(db.setups.length, 1, "[sight-marks-compatibility] setup count");
+  assertEqual(db.sightMarks.length, 4, "[sight-marks-compatibility] sight mark count");
+  assertEqual(db.sessions.length, 3, "[sight-marks-compatibility] session count");
+
+  const valid = db.sightMarks.find((mark) => mark.id === "fixture-sight-mark-valid");
+  assertObject(valid, "[sight-marks-compatibility] valid sight mark");
+  assertEqual(valid.setupId, "fixture-sight-setup", "[sight-marks-compatibility] valid setupId");
+  assert(
+    db.setups.some((setup) => setup.id === valid.setupId),
+    "[sight-marks-compatibility] valid setup should exist",
+  );
+  assertEqual(valid.dist, 70, "[sight-marks-compatibility] valid distance");
+  assertEqual(valid.v, "5.7", "[sight-marks-compatibility] valid vertical sight");
+  assertEqual(valid.h, "0.2", "[sight-marks-compatibility] valid horizontal sight");
+  assertEqual(
+    valid.legacyMarkField.source,
+    "older sight notebook",
+    "[sight-marks-compatibility] legacy sight mark field",
+  );
+
+  const dangling = db.sightMarks.find((mark) => mark.id === "fixture-sight-mark-dangling-setup");
+  assertObject(dangling, "[sight-marks-compatibility] dangling sight mark");
+  assertEqual(
+    dangling.setupId,
+    "missing-sight-setup-001",
+    "[sight-marks-compatibility] dangling setupId",
+  );
+  assert(
+    !db.setups.some((setup) => setup.id === dangling.setupId),
+    "[sight-marks-compatibility] dangling setupId should not exist in setups",
+  );
+  assertEqual(dangling.dist, 50, "[sight-marks-compatibility] dangling distance");
+  assertEqual(dangling.v, "4.8", "[sight-marks-compatibility] dangling vertical sight");
+  assertEqual(dangling.h, "", "[sight-marks-compatibility] missing horizontal sight");
+
+  const noSetup = db.sightMarks.find((mark) => mark.id === "fixture-sight-mark-no-setup");
+  assertObject(noSetup, "[sight-marks-compatibility] no setup sight mark");
+  assertEqual(noSetup.setupId, null, "[sight-marks-compatibility] no setup setupId");
+  assertEqual(noSetup.dist, 30, "[sight-marks-compatibility] no setup distance");
+  assertEqual(noSetup.v, "", "[sight-marks-compatibility] missing vertical sight");
+  assertEqual(noSetup.h, "-0.1", "[sight-marks-compatibility] no setup horizontal sight");
+
+  const missingDistance = db.sightMarks.find(
+    (mark) => mark.id === "fixture-sight-mark-missing-distance",
+  );
+  assertObject(missingDistance, "[sight-marks-compatibility] missing distance sight mark");
+  assertEqual(
+    missingDistance.dist,
+    null,
+    "[sight-marks-compatibility] missing distance should stay null",
+  );
+
+  const session = db.sessions.find((item) => item.id === "fixture-session-sight-valid");
+  assertObject(session, "[sight-marks-compatibility] valid sight session");
+  assertEqual(session.sightV, "5.7", "[sight-marks-compatibility] session sightV");
+  assertEqual(session.sightH, "0.2", "[sight-marks-compatibility] session sightH");
+  assertEqual(
+    session.legacySessionField.source,
+    "older sight export",
+    "[sight-marks-compatibility] legacy session field",
+  );
+
+  const danglingSession = db.sessions.find(
+    (item) => item.id === "fixture-session-sight-dangling-setup",
+  );
+  assertObject(danglingSession, "[sight-marks-compatibility] dangling sight session");
+  assertEqual(
+    danglingSession.setupId,
+    "missing-sight-setup-001",
+    "[sight-marks-compatibility] dangling session setupId",
+  );
+  assert(
+    !Object.hasOwn(danglingSession, "sightH"),
+    "[sight-marks-compatibility] missing session sightH should stay absent",
+  );
+
+  const noSetupSession = db.sessions.find((item) => item.id === "fixture-session-sight-no-setup");
+  assertObject(noSetupSession, "[sight-marks-compatibility] no setup sight session");
+  assertEqual(noSetupSession.setupId, null, "[sight-marks-compatibility] no setup session setupId");
+  assertEqual(noSetupSession.dist, null, "[sight-marks-compatibility] no setup session distance");
+  assertObject(db.legacyTopLevelField, "[sight-marks-compatibility] legacy top-level field");
+}
+
 function main() {
   const fixtures = loadFixtures();
   const storageApi = loadStorageApi();
@@ -324,6 +411,7 @@ function main() {
   checkTrashRestore(storageApi, fixtures);
   checkPartialLegacy(storageApi, fixtures);
   checkDanglingSetup(storageApi, fixtures);
+  checkSightMarksCompatibility(storageApi, fixtures);
 
   console.log("Storage contract checks OK");
 }

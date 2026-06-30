@@ -1,0 +1,176 @@
+{
+  "schema": 3,
+  "setups": [
+    {
+      "id": "fixture-sight-setup",
+      "name": "Sight compatibility setup",
+      "bow": "Sight test bow",
+      "limbs": "Sight test limbs",
+      "poundage": 38,
+      "arrow": "Sight test shaft",
+      "note": "Valid setup for sight mark compatibility"
+    }
+  ],
+  "sightMarks": [
+    {
+      "id": "fixture-sight-mark-valid",
+      "setupId": "fixture-sight-setup",
+      "dist": 70,
+      "v": "5.7",
+      "h": "0.2",
+      "date": "2026-06-27",
+      "ts": 1782518400000,
+      "note": "Valid sight mark with complete values",
+      "legacyMarkField": {
+        "source": "older sight notebook"
+      }
+    },
+    {
+      "id": "fixture-sight-mark-dangling-setup",
+      "setupId": "missing-sight-setup-001",
+      "dist": 50,
+      "v": "4.8",
+      "h": "",
+      "date": "2026-06-28",
+      "ts": 1782604800000,
+      "note": "Sight mark with a missing setup reference"
+    },
+    {
+      "id": "fixture-sight-mark-no-setup",
+      "setupId": null,
+      "dist": 30,
+      "v": "",
+      "h": "-0.1",
+      "date": "2026-06-29",
+      "ts": 1782691200000,
+      "note": "Sight mark without setup reference"
+    },
+    {
+      "id": "fixture-sight-mark-missing-distance",
+      "setupId": "fixture-sight-setup",
+      "dist": null,
+      "v": "3.3",
+      "h": "0",
+      "date": "2026-06-30",
+      "ts": 1782777600000,
+      "note": "Sight mark without distance"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "fixture-session-sight-valid",
+      "date": "2026-06-27",
+      "setupId": "fixture-sight-setup",
+      "dist": 70,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "shaft": 1.459,
+      "sightV": "5.7",
+      "sightH": "0.2",
+      "wx": "clear",
+      "note": "Session with complete sight values",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "70m72",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.2,
+            "y": -0.3,
+            "s": 10,
+            "X": true,
+            "no": "1"
+          },
+          {
+            "x": -1.4,
+            "y": 1.1,
+            "s": 9,
+            "X": false,
+            "no": "2"
+          }
+        ]
+      ],
+      "legacySessionField": {
+        "source": "older sight export"
+      }
+    },
+    {
+      "id": "fixture-session-sight-dangling-setup",
+      "date": "2026-06-28",
+      "setupId": "missing-sight-setup-001",
+      "dist": 50,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "shaft": 1.459,
+      "sightV": "4.9",
+      "wx": "light rain",
+      "note": "Session with dangling setup and missing horizontal sight",
+      "windDir": "left",
+      "windSpeed": "1.0",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 1.2,
+            "y": -0.8,
+            "s": 9,
+            "X": false,
+            "no": "1"
+          },
+          {
+            "x": -2.2,
+            "y": 2.3,
+            "s": 8,
+            "X": false,
+            "no": "2",
+            "reason": "rain"
+          }
+        ]
+      ]
+    },
+    {
+      "id": "fixture-session-sight-no-setup",
+      "date": "2026-06-29",
+      "setupId": null,
+      "dist": null,
+      "faceD": 80,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.95,
+      "sightV": "",
+      "sightH": "0.0",
+      "wx": "",
+      "note": "Session without setup and distance",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.5,
+            "y": 0.6,
+            "s": 10,
+            "X": false,
+            "no": "1"
+          }
+        ]
+      ]
+    }
+  ],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850,
+    "theme": "auto",
+    "lastBackupAt": null,
+    "activeGuideSeen": true
+  },
+  "active": null,
+  "legacyTopLevelField": {
+    "source": "sight compatibility fixture"
+  }
+}

@@ -18,6 +18,7 @@ const fixtureFiles = {
   trash: "archery-note-v1-trash.json",
   partialLegacy: "archery-note-v1-partial-legacy.json",
   danglingSetup: "archery-note-v1-dangling-setup.json",
+  sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
 };
 const expectedCsvHeader = [
   "date",
@@ -292,6 +293,71 @@ function checkDanglingSetupRoundTrip(db) {
   assertEqual(noSetup.setupId, null, "[dangling-setup] no setup setupId");
 }
 
+function checkSightMarksCompatibilityRoundTrip(db) {
+  const valid = db.sightMarks.find((mark) => mark.id === "fixture-sight-mark-valid");
+  assertObject(valid, "[sight-marks-compatibility] valid sight mark");
+  assertEqual(valid.setupId, "fixture-sight-setup", "[sight-marks-compatibility] valid setupId");
+  assertEqual(valid.v, "5.7", "[sight-marks-compatibility] valid vertical sight");
+  assertEqual(valid.h, "0.2", "[sight-marks-compatibility] valid horizontal sight");
+  assertEqual(
+    valid.legacyMarkField.source,
+    "older sight notebook",
+    "[sight-marks-compatibility] legacy mark field",
+  );
+
+  const dangling = db.sightMarks.find((mark) => mark.id === "fixture-sight-mark-dangling-setup");
+  assertObject(dangling, "[sight-marks-compatibility] dangling sight mark");
+  assertEqual(
+    dangling.setupId,
+    "missing-sight-setup-001",
+    "[sight-marks-compatibility] dangling setupId",
+  );
+  assert(
+    !db.setups.some((setup) => setup.id === dangling.setupId),
+    "[sight-marks-compatibility] dangling setup should remain missing",
+  );
+  assertEqual(dangling.h, "", "[sight-marks-compatibility] missing horizontal sight");
+
+  const noSetup = db.sightMarks.find((mark) => mark.id === "fixture-sight-mark-no-setup");
+  assertObject(noSetup, "[sight-marks-compatibility] no setup sight mark");
+  assertEqual(noSetup.setupId, null, "[sight-marks-compatibility] no setup setupId");
+  assertEqual(noSetup.v, "", "[sight-marks-compatibility] missing vertical sight");
+
+  const missingDistance = db.sightMarks.find(
+    (mark) => mark.id === "fixture-sight-mark-missing-distance",
+  );
+  assertObject(missingDistance, "[sight-marks-compatibility] missing distance sight mark");
+  assertEqual(
+    missingDistance.dist,
+    null,
+    "[sight-marks-compatibility] missing distance should remain null",
+  );
+
+  const validSession = db.sessions.find((session) => session.id === "fixture-session-sight-valid");
+  assertObject(validSession, "[sight-marks-compatibility] valid sight session");
+  assertEqual(validSession.sightV, "5.7", "[sight-marks-compatibility] session sightV");
+  assertEqual(validSession.sightH, "0.2", "[sight-marks-compatibility] session sightH");
+  assertEqual(
+    validSession.legacySessionField.source,
+    "older sight export",
+    "[sight-marks-compatibility] legacy session field",
+  );
+
+  const danglingSession = db.sessions.find(
+    (session) => session.id === "fixture-session-sight-dangling-setup",
+  );
+  assertObject(danglingSession, "[sight-marks-compatibility] dangling sight session");
+  assertEqual(
+    danglingSession.setupId,
+    "missing-sight-setup-001",
+    "[sight-marks-compatibility] dangling session setupId",
+  );
+  assert(
+    !Object.hasOwn(danglingSession, "sightH"),
+    "[sight-marks-compatibility] missing session sightH should stay absent",
+  );
+}
+
 function checkSnapshot(storageApi, representative) {
   const normalized = storageApi.normalizeDb(clone(representative));
   const result = createImportSnapshot(normalized);
@@ -366,6 +432,22 @@ function checkCsvForAllFixtures(normalized) {
   assertEqual(danglingRows[2][1], "", "[dangling-setup CSV] dangling setup name");
   assertEqual(danglingRows[2][2], "50", "[dangling-setup CSV] dangling distance");
   assertEqual(danglingRows[3][1], "", "[dangling-setup CSV] no setup name");
+
+  const sightRows = checkCsvRows(
+    "sight-marks-compatibility",
+    normalized.sightMarksCompatibility,
+    4,
+  );
+  assertEqual(sightRows[1][1], "Sight compatibility setup", "[sight CSV] valid setup name");
+  assertEqual(sightRows[1][19], "5.7", "[sight CSV] valid sight_v");
+  assertEqual(sightRows[1][20], "0.2", "[sight CSV] valid sight_h");
+  assertEqual(sightRows[2][1], "", "[sight CSV] dangling setup name");
+  assertEqual(sightRows[2][2], "50", "[sight CSV] dangling distance");
+  assertEqual(sightRows[2][19], "4.9", "[sight CSV] dangling sight_v");
+  assertEqual(sightRows[2][20], "", "[sight CSV] missing sight_h");
+  assertEqual(sightRows[3][1], "", "[sight CSV] no setup name");
+  assertEqual(sightRows[3][2], "", "[sight CSV] missing distance");
+  assertEqual(sightRows[3][20], "0.0", "[sight CSV] no setup sight_h");
 }
 
 function main() {
@@ -383,6 +465,7 @@ function main() {
   checkTrashRoundTrip(normalized.trash);
   checkPartialLegacyRoundTrip(normalized.partialLegacy);
   checkDanglingSetupRoundTrip(normalized.danglingSetup);
+  checkSightMarksCompatibilityRoundTrip(normalized.sightMarksCompatibility);
   checkSnapshot(storageApi, fixtures.representative);
   checkCsvForAllFixtures(normalized);
 
