@@ -2,6 +2,60 @@
 
 ## Unreleased
 
+## v0.11.0-active-workflow-guard - 2026-07-02
+
+### Summary
+
+Closes the busy-guard gap left open by `v0.10.0-safer-update-flow`. The update banner and update reload path are now suppressed while a backup, export, import, restore, or trash-restore workflow is in progress, in addition to the existing active-session guard.
+
+### Added
+
+- Runtime-only active-workflow busy guard: `activeWorkflowCount`, `beginActiveWorkflow()`, `endActiveWorkflow()` in `scripts/90-init.js`
+- Static checks in `tools/check-pwa-update-flow.js` for the new guard functions and for each guarded call site
+
+### Changed
+
+- `isUpdateReloadBlocked()` now returns true while `db.active` exists or `activeWorkflowCount>0`
+- Backup/JSON export, CSV export, import, snapshot restore, and trash restore now call `beginActiveWorkflow()` / `endActiveWorkflow()` around their work
+- `docs/pwa-safer-update-notification-flow.md` updated to describe the implemented guard and mark the busy-guard gap closed
+- Bump app/package version markers to `63` / `0.63.0`
+
+### Validation
+
+- `node tools/check-version-alignment.js`
+- `node tools/check-pwa-update-flow.js`
+- `node tools/check-pwa-assets.js`
+- `node tools/check-storage-contract.js`
+- `node tools/check-storage-roundtrip.js`
+- `npm run check:app`
+- `npm run check:ui`
+- `npm run check:pwa`
+- `npm run check:version`
+- `npm run check:storage`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+- Manual browser check: backup export click hides the update banner while the share/download is in flight and restores it once settled, with no console errors
+
+### Not Changed
+
+- No storage schema change, no new persisted fields (the busy flag is an in-memory counter only)
+- No backup/import/export/CSV format change
+- No Service Worker strategy change (`skipWaiting()`, `clients.claim()`, fetch strategy, `ASSETS`, cache marker format all untouched beyond the version-number bump)
+- No waiting-worker or `controllerchange` UI
+- No storage migration implementation
+- No runtime app UI changes outside the update-banner suppression behavior
+- No dependency changes
+- No CI workflow changes
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+The busy guard is intentionally runtime-only (an in-memory counter, not persisted). A future storage migration implementation may reuse `beginActiveWorkflow()` / `endActiveWorkflow()` around its own work.
+
 ## v0.10.0-safer-update-flow - 2026-07-01
 
 ### Summary
