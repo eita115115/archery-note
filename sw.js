@@ -1,4 +1,5 @@
 const CACHE = "archery-note-v60";
+const CACHE_PREFIX = "archery-note-v";
 const APP_SCRIPTS = [
   "./scripts/00-compat.js",
   "./scripts/10-storage-native.js",
@@ -17,7 +18,7 @@ self.addEventListener("install", e => {
 });
 self.addEventListener("activate", e => {
   e.waitUntil(
-    caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith(CACHE_PREFIX) && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

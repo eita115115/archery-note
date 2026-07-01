@@ -95,8 +95,22 @@ function manifestIconReferences(manifestPath) {
     .map(normalizeAsset);
 }
 
+function assertCacheCleanupScope(text) {
+  if (!/\bconst\s+CACHE_PREFIX\s*=\s*["']archery-note-v["']\s*;/.test(text)) {
+    fail("Service Worker cache cleanup prefix guard was not found");
+  }
+
+  const scopedCleanupPattern =
+    /\.filter\(\s*([A-Za-z_$][\w$]*)\s*=>\s*\1\.startsWith\(CACHE_PREFIX\)\s*&&\s*\1\s*!==\s*CACHE\s*\)/;
+  if (!scopedCleanupPattern.test(text)) {
+    fail("Service Worker cache cleanup must require key.startsWith(CACHE_PREFIX) and key !== CACHE");
+  }
+}
+
 const swText = readText("sw.js");
 const html = readText("index.html");
+
+assertCacheCleanupScope(swText);
 
 const rawAssets = extractSwArray(swText, "ASSETS");
 const assets = rawAssets.map(normalizeAsset);
