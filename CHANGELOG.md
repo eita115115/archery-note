@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+## v1.0.0 - 2026-07-02
+
+### Summary
+
+Archery Note の最初の安定公開版。v0.1.0 から v0.11.0 までの 11 回のチェックポイントで、OSS 品質基盤・CI・静的検査・分析ビュー・PWA 更新安全策・データ保護ガードを段階的に積み上げてきた成果を v1.0.0 として公開する。
+
+### Highlights
+
+- 得点・着弾・サイト調整・用具・履歴・分析を一つの PWA で管理
+- オフライン対応、端末内保存、JSON バックアップ/復元、CSV 出力
+- PWA 更新リロードは練習中・バックアップ/インポート/復元中に自動抑止
+- ライト/ダーク/自動テーマ、モバイルファースト UI
+- Apache-2.0 ライセンス、CONTRIBUTING/SECURITY/CODE_OF_CONDUCT 完備
+- CI 品質ゲート: check:all (app/ui/pwa/storage/version)、lint、format、e2e、audit
+- ストレージ互換性チェッカー (contract/round-trip) で既存データ保護を検証
+
+### Journey (v0.1.0 → v1.0.0)
+
+| Release | Milestone                                                    |
+| ------- | ------------------------------------------------------------ |
+| v0.1.0  | OSS readiness baseline                                       |
+| v0.2.0  | Quality baseline (CI, lint, format, e2e, Lighthouse)         |
+| v0.3.0  | Phase 3 safety baseline (storage contract/round-trip checks) |
+| v0.4.0  | Read-only analysis baseline                                  |
+| v0.4.1  | History/analysis UI organization                             |
+| v0.5.0  | Analysis view baseline (dedicated tab)                       |
+| v0.6.0  | Read-only score trend                                        |
+| v0.7.0  | Read-only performance summaries                              |
+| v0.8.0  | Storage migration safety (fixtures, checkers)                |
+| v0.9.0  | PWA update safety (SW version/asset checks, cache cleanup)   |
+| v0.10.0 | Safer update flow (isUpdateReloadBlocked, static checks)     |
+| v0.11.0 | Active workflow guard (backup/import/restore busy guard)     |
+
+### Not Changed
+
+- No storage schema change from `archeryNote.v1` / `schema: 3`
+- No backup/import/export/CSV format change
+- No Service Worker strategy change
+- No dependency changes beyond dev tooling
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+内部バージョン体系 (APP_VER / package.json) は PWA 更新検知用の連番であり、リリースタグのバージョンとは独立している。v1.0.0 以降の UI 改装は v1.1 以降で段階的に進める予定。
+
 ## v0.11.0-active-workflow-guard - 2026-07-02
 
 ### Summary
