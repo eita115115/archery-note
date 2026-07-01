@@ -650,7 +650,8 @@ function sessionsCsv(){
   return "\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
 }
 function exportSessionsCsv(){
-  shareOrDownloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8","Archery Note CSV");
+  beginActiveWorkflow();
+  shareOrDownloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8","Archery Note CSV").finally(endActiveWorkflow);
   db.settings.lastBackupAt=new Date().toISOString();
   save("csv-export");
 }

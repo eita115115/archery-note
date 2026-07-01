@@ -8,8 +8,17 @@ applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
 let updateAvailable=false;
+let activeWorkflowCount=0;
+function beginActiveWorkflow(){
+  activeWorkflowCount++;
+  syncUpdateBarVisibility();
+}
+function endActiveWorkflow(){
+  activeWorkflowCount=Math.max(0,activeWorkflowCount-1);
+  syncUpdateBarVisibility();
+}
 function isUpdateReloadBlocked(){
-  return !!(db&&db.active);
+  return !!(db&&db.active) || activeWorkflowCount>0;
 }
 function syncUpdateBarVisibility(){
   const bar=$("#updBar");
