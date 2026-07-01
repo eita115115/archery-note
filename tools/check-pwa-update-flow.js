@@ -19,9 +19,36 @@ function assertNoMatch(pattern, text, message) {
   if (pattern.test(text)) fail(message);
 }
 
+function sliceBetween(text, startPattern, endText, label) {
+  const startMatch = startPattern.exec(text);
+  if (!startMatch) fail(`${label} start was not found`);
+  const start = startMatch.index;
+  const end = text.indexOf(endText, start);
+  if (end < 0) fail(`${label} end was not found`);
+  return text.slice(start, end);
+}
+
+function indexOfMatch(pattern, text, message) {
+  const match = pattern.exec(text);
+  if (!match) fail(message);
+  return match.index;
+}
+
+function assertOrder(beforePattern, afterPattern, text, message) {
+  const before = indexOfMatch(beforePattern, text, `${message}: first pattern was not found`);
+  const after = indexOfMatch(afterPattern, text, `${message}: second pattern was not found`);
+  if (before >= after) fail(message);
+}
+
 const initText = readText("scripts/90-init.js");
 const swText = readText("sw.js");
 const flowText = `${initText}\n${swText}`;
+const freshReloadText = sliceBetween(
+  initText,
+  /function\s+freshReload\s*\(\)\s*\{/,
+  '$("#updBar").onclick=freshReload;',
+  "freshReload",
+);
 
 assertMatch(
   /fetch\(\s*["']version\.json\?ts=["']\s*\+\s*Date\.now\(\)\s*,\s*\{\s*cache\s*:\s*["']no-store["']\s*\}\s*\)/,
@@ -36,9 +63,42 @@ assertMatch(
 );
 
 assertMatch(
-  /function\s+syncUpdateBarVisibility\s*\(\)\s*\{[\s\S]*?const\s+show\s*=\s*!!updateAvailable\s*&&\s*!\(\s*db\s*&&\s*db\.active\s*\)/,
+  /function\s+isUpdateReloadBlocked\s*\(\)\s*\{[\s\S]*?return\s+!!\(\s*db\s*&&\s*db\.active\s*\)\s*;?\s*\}/,
   initText,
-  "update bar visibility must stay gated by db.active",
+  "isUpdateReloadBlocked must guard against db.active",
+);
+
+assertMatch(
+  /function\s+syncUpdateBarVisibility\s*\(\)\s*\{[\s\S]*?const\s+show\s*=\s*!!updateAvailable\s*&&\s*!isUpdateReloadBlocked\(\)/,
+  initText,
+  "update bar visibility must stay gated by the update reload guard",
+);
+
+assertMatch(
+  /if\s*\(\s*isUpdateReloadBlocked\(\)\s*\)\s*\{[\s\S]*?syncUpdateBarVisibility\(\)[\s\S]*?return\s*;[\s\S]*?\}/,
+  freshReloadText,
+  "freshReload must re-check update reload safety before proceeding",
+);
+
+assertOrder(
+  /isUpdateReloadBlocked\(\)/,
+  /navigator\.serviceWorker\.getRegistrations\(\)/,
+  freshReloadText,
+  "freshReload safety re-check must happen before registration.update()",
+);
+
+assertOrder(
+  /isUpdateReloadBlocked\(\)/,
+  /location\.replace\(\s*url\.toString\(\)\s*\)/,
+  freshReloadText,
+  "freshReload safety re-check must happen before location.replace()",
+);
+
+assertOrder(
+  /flushSafetySnapshot\(\)/,
+  /location\.replace\(\s*url\.toString\(\)\s*\)/,
+  freshReloadText,
+  "freshReload should flush pending snapshots before location.replace()",
 );
 
 assertMatch(
