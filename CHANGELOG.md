@@ -2,6 +2,77 @@
 
 ## Unreleased
 
+## v0.10.0-safer-update-flow - 2026-07-01
+
+### Summary
+
+Safer update flow release for Archery Note. This release documents the target update notification behavior, adds static checks for the current PWA update flow, and suppresses update prompts/reloads while an active session is present.
+
+### Added
+
+- Safer update notification flow documentation
+- PWA update flow static checks
+- Static checks for `version.json` no-store fetching, `APP_VER` comparison,
+  `db.active` guarding, `registration.update()`, and `location.replace()` with
+  `appv`
+- Static checks that `controllerchange` / waiting-worker flow has not been
+  introduced yet
+- Static checks that `skipWaiting()` / `clients.claim()` remain present for the
+  current release line
+
+### Changed
+
+- Centralize update reload blocking with `isUpdateReloadBlocked()`
+- Keep update bar visibility gated by active workflow state
+- Re-check update reload safety in the update click path before
+  `registration.update()` or reload
+- Prevent unsafe update clicks from reaching `registration.update()` or
+  `location.replace()`
+- Call `flushSafetySnapshot()` before the update reload path
+- Bump app/package version markers to `62` / `0.62.0`
+
+### Validation
+
+- `node tools/check-version-alignment.js`
+- `node tools/check-pwa-update-flow.js`
+- `node tools/check-pwa-assets.js`
+- `node tools/check-storage-contract.js`
+- `node tools/check-storage-roundtrip.js`
+- `npm run check:version`
+- `npm run check:pwa`
+- `npm run check:storage`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No Service Worker implementation changes
+- No `skipWaiting()` behavior change
+- No `clients.claim()` behavior change
+- No fetch strategy change
+- No `ASSETS` change
+- No cache cleanup logic change
+- No waiting-worker update flow
+- No `controllerchange` update UI
+- No storage migration implementation
+- No storage schema change
+- No new persisted fields
+- No localStorage or IndexedDB key changes
+- No backup/import/export format change
+- No runtime app UI changes
+- No Analysis or History UI changes
+- No dependency changes
+- No CI workflow changes
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+This release keeps the existing PWA update mechanism but makes the reload path safer. The update prompt remains suppressed during active sessions, and update clicks now re-check safety before proceeding. Backup/export/import/restore-specific busy guards are not implemented in this release because there is no dedicated busy state yet.
+
 ## v0.9.0-pwa-update-safety - 2026-07-01
 
 ### Summary
