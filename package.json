@@ -6,7 +6,7 @@
   "scripts": {
     "check:all": "npm run check:app && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version",
     "check:app": "node tools/check-app.js",
-    "check:pwa": "node tools/check-pwa-assets.js",
+    "check:pwa": "node tools/check-pwa-assets.js && node tools/check-pwa-update-flow.js",
     "check:storage": "node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js",
     "check:ui": "node tools/check-ui.js",
     "check:version": "node tools/check-version-alignment.js",
