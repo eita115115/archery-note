@@ -2,6 +2,65 @@
 
 ## Unreleased
 
+## v0.9.0-pwa-update-safety - 2026-07-01
+
+### Summary
+
+PWA update safety release for Archery Note. This release documents PWA update safety requirements, strengthens Service Worker version and asset checks, and narrows cache cleanup behavior before changing the update notification flow.
+
+### Added
+
+- PWA update safety checklist documentation
+- Service Worker version marker checks for package version, `APP_VER`, `version.json.v`, and `archery-note-vXX` cache marker alignment
+- PWA asset list check for the hand-written Service Worker `ASSETS` list
+- `npm run check:pwa`
+- `check:pwa` integration into `check:all`
+- Static guard for Archery Note cache prefix cleanup behavior
+
+### Changed
+
+- Narrow Service Worker activate-time cache cleanup to Archery Note-managed caches only
+- Preserve unrelated caches during Service Worker activation
+- Bump app/package version markers to `61` / `0.61.0`
+
+### Validation
+
+- `node tools/check-version-alignment.js`
+- `node tools/check-pwa-assets.js`
+- `node tools/check-storage-contract.js`
+- `node tools/check-storage-roundtrip.js`
+- `npm run check:version`
+- `npm run check:pwa`
+- `npm run check:storage`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No PWA update notification flow change
+- No `skipWaiting()` behavior change
+- No `clients.claim()` behavior change
+- No fetch strategy change
+- No `ASSETS` change
+- No storage migration implementation
+- No storage schema change
+- No new persisted fields
+- No localStorage or IndexedDB key changes
+- No backup/import/export format change
+- No runtime app UI changes
+- No Analysis or History UI changes
+- No dependency changes
+- No CI workflow changes
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+This release prepares the project for safer future PWA update changes. It does not change the update notification flow yet. The main runtime behavior change is limited to narrowing Service Worker cache cleanup so only Archery Note-managed caches are deleted during activation.
+
 ## v0.8.0-storage-migration-safety - 2026-07-01
 
 ### Summary
