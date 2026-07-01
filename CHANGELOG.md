@@ -2,6 +2,65 @@
 
 ## Unreleased
 
+## v0.8.0-storage-migration-safety - 2026-07-01
+
+### Summary
+
+Storage migration safety release for Archery Note. This release strengthens
+storage fixtures, round-trip checks, and migration readiness documentation
+before implementing any storage migration.
+
+### Added
+
+- Storage fixture for sessions with dangling `setupId` references
+- Storage fixture for `sightMarks` compatibility, including dangling setup
+  references, missing distance, missing sight values, and session-side `sightV`
+  / `sightH`
+- Storage migration safety checklist documentation
+- Normalize idempotency check across storage fixtures
+
+### Changed
+
+- Strengthen storage contract validation around dangling setup references
+- Strengthen storage round-trip validation for sight marks and session sight
+  values
+- Bump app/package version markers to `60` / `0.60.0`
+
+### Validation
+
+- `node tools/check-version-alignment.js`
+- `node tools/check-storage-contract.js`
+- `node tools/check-storage-roundtrip.js`
+- `npm run check:version`
+- `npm run check:storage`
+- `npm run check:all`
+- `npm run format:check`
+- `npm run lint`
+- `npm run test:e2e`
+- `npm audit --omit=dev`: 0 vulnerabilities
+
+### Not Changed
+
+- No storage migration implementation
+- No storage schema change
+- No new persisted fields
+- No localStorage or IndexedDB key changes
+- No backup/import/export format change
+- No runtime app code changes
+- No Analysis or History UI changes
+- No Service Worker strategy change
+- No dependency changes
+- No CI workflow changes
+- No archery-master direct merge
+- No OCR / pose / AI / model files
+
+### Notes
+
+This release prepares the project for future storage migration work. It does
+not implement migration behavior yet. The goal is to make future migration
+changes safer by preserving existing data shapes, dangling references, sight
+mark data, legacy fields, active sessions, and trash/restore behavior.
+
 ## v0.7.0-read-only-performance-summaries - 2026-06-30
 
 ### Summary
