@@ -396,7 +396,8 @@ function openSettings(){
   ovl.querySelector("#dExp").onclick=()=>{
     db.settings.lastBackupAt=new Date().toISOString();
     save({reason:"json-export",forceSnapshot:true});
-    shareOrDownloadText(`archery-note-${today()}.json`,JSON.stringify(db,null,1),"application/json","Archery Note Backup");
+    beginActiveWorkflow();
+    shareOrDownloadText(`archery-note-${today()}.json`,JSON.stringify(db,null,1),"application/json","Archery Note Backup").finally(endActiveWorkflow);
   };
   ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
   ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータをバックアップしました"); ovl.remove(); openSettings(); };
@@ -405,15 +406,19 @@ function openSettings(){
     const snap=readSnapshots()[sel?+sel.value:0];
     if(!snap||!snap.data){ toast("復元できるバックアップデータがありません"); return; }
     if(confirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先にバックアップしてから置き換えます。よろしいですか？`)){
-      writeSafetySnapshot("restore-before",true);
-      db=normalizeDb(snap.data);
-      save({reason:"restore",forceSnapshot:true});
-      applyTheme(); ovl.remove(); render(); toast("バックアップデータを復元しました");
+      beginActiveWorkflow();
+      try{
+        writeSafetySnapshot("restore-before",true);
+        db=normalizeDb(snap.data);
+        save({reason:"restore",forceSnapshot:true});
+        applyTheme(); ovl.remove(); render(); toast("バックアップデータを復元しました");
+      }finally{ endActiveWorkflow(); }
     }
   };
   ovl.querySelector("#dImp").onclick=()=>ovl.querySelector("#dFile").click();
   ovl.querySelector("#dFile").onchange=e=>{
     const f=e.target.files[0]; if(!f)return;
+    beginActiveWorkflow();
     const r=new FileReader();
     r.onload=()=>{ try{
       const d=JSON.parse(r.result);
@@ -422,11 +427,15 @@ function openSettings(){
         writeSafetySnapshot("import-before",true);
         db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); ovl.remove(); render(); toast("読み込みました");
       }
-    }catch(_){ toast("ファイルを読み込めませんでした"); } };
+    }catch(_){ toast("ファイルを読み込めませんでした"); } finally{ endActiveWorkflow(); } };
+    r.onerror=()=>{ endActiveWorkflow(); toast("ファイルを読み込めませんでした"); };
     r.readAsText(f);
   };
   ovl.querySelectorAll("[data-restore-trash]").forEach(b=>b.onclick=()=>{
-    if(restoreTrash(b.dataset.restoreTrash)){ ovl.remove(); render(); openSettings(); toast("復元しました"); }
+    beginActiveWorkflow();
+    try{
+      if(restoreTrash(b.dataset.restoreTrash)){ ovl.remove(); render(); openSettings(); toast("復元しました"); }
+    }finally{ endActiveWorkflow(); }
   });
   const tc=ovl.querySelector("#trashClear");
   if(tc) tc.onclick=()=>{

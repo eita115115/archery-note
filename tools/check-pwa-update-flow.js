@@ -63,9 +63,21 @@ assertMatch(
 );
 
 assertMatch(
-  /function\s+isUpdateReloadBlocked\s*\(\)\s*\{[\s\S]*?return\s+!!\(\s*db\s*&&\s*db\.active\s*\)\s*;?\s*\}/,
+  /function\s+isUpdateReloadBlocked\s*\(\)\s*\{[\s\S]*?return\s+!!\(\s*db\s*&&\s*db\.active\s*\)\s*\|\|\s*activeWorkflowCount\s*>\s*0\s*;?\s*\}/,
   initText,
-  "isUpdateReloadBlocked must guard against db.active",
+  "isUpdateReloadBlocked must guard against db.active and an active workflow count",
+);
+
+assertMatch(
+  /function\s+beginActiveWorkflow\s*\(\)\s*\{[\s\S]*?activeWorkflowCount\+\+;[\s\S]*?syncUpdateBarVisibility\(\);[\s\S]*?\}/,
+  initText,
+  "beginActiveWorkflow must increment activeWorkflowCount and resync the update bar",
+);
+
+assertMatch(
+  /function\s+endActiveWorkflow\s*\(\)\s*\{[\s\S]*?activeWorkflowCount\s*=\s*Math\.max\(\s*0\s*,\s*activeWorkflowCount\s*-\s*1\s*\);[\s\S]*?syncUpdateBarVisibility\(\);[\s\S]*?\}/,
+  initText,
+  "endActiveWorkflow must decrement activeWorkflowCount (never below zero) and resync the update bar",
 );
 
 assertMatch(
@@ -153,6 +165,39 @@ assertMatch(
   /self\.clients\.claim\(\)/,
   swText,
   "current Service Worker activate flow should still contain self.clients.claim()",
+);
+
+const gearText = readText("scripts/70-gear-settings.js");
+const analysisText = readText("scripts/40-analysis-physics.js");
+
+assertMatch(
+  /ovl\.querySelector\(\s*["']#dExp["']\s*\)\.onclick\s*=\s*\(\)\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?shareOrDownloadText\([\s\S]*?\)\.finally\(\s*endActiveWorkflow\s*\);[\s\S]*?\};/,
+  gearText,
+  "backup/JSON export must be guarded by beginActiveWorkflow/endActiveWorkflow",
+);
+
+assertMatch(
+  /function\s+exportSessionsCsv\s*\(\)\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?shareOrDownloadText\([\s\S]*?\)\.finally\(\s*endActiveWorkflow\s*\);[\s\S]*?\}/,
+  analysisText,
+  "CSV export must be guarded by beginActiveWorkflow/endActiveWorkflow",
+);
+
+assertMatch(
+  /ovl\.querySelector\(\s*["']#dSnapRestore["']\s*\)\.onclick\s*=\s*\(\)\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?\}finally\{\s*endActiveWorkflow\(\);\s*\}/,
+  gearText,
+  "snapshot restore must be guarded by beginActiveWorkflow/endActiveWorkflow",
+);
+
+assertMatch(
+  /ovl\.querySelector\(\s*["']#dFile["']\s*\)\.onchange\s*=\s*e\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?r\.onload\s*=\s*\(\)\s*=>\s*\{[\s\S]*?\}\s*finally\{\s*endActiveWorkflow\(\);\s*\}\s*\};[\s\S]*?r\.onerror\s*=\s*\(\)\s*=>\s*\{\s*endActiveWorkflow\(\);/,
+  gearText,
+  "import must be guarded by beginActiveWorkflow/endActiveWorkflow on both the success and error paths",
+);
+
+assertMatch(
+  /ovl\.querySelectorAll\(\s*["']\[data-restore-trash\]["']\s*\)\.forEach\(\s*b\s*=>\s*b\.onclick\s*=\s*\(\)\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?\}finally\{\s*endActiveWorkflow\(\);\s*\}/,
+  gearText,
+  "trash restore must be guarded by beginActiveWorkflow/endActiveWorkflow",
 );
 
 console.log("PWA update flow checks OK");

@@ -49,6 +49,10 @@ Current safety guardrails:
 
 - update checks use `cache: "no-store"` for `version.json`
 - the update banner is hidden while `db.active` exists
+- the update banner is also hidden while `activeWorkflowCount>0` (see
+  `beginActiveWorkflow()` / `endActiveWorkflow()` in `scripts/90-init.js`),
+  which covers backup/JSON export, CSV export, import, snapshot restore, and
+  trash restore
 - pending safety snapshots are flushed on page hide paths
 - version markers are checked by `tools/check-version-alignment.js`
 - PWA asset and cache cleanup checks are covered by
@@ -61,56 +65,76 @@ Current safety guardrails:
 
 ## Current Gaps
 
-The current behavior is usable, but these gaps should be closed before deeper
-PWA update changes:
+The busy-guard gap for backup/export/import/restore/trash-restore workflows
+that used to be listed here is closed (see `activeWorkflowCount` /
+`beginActiveWorkflow()` / `endActiveWorkflow()` below). Remaining gaps:
 
-- update banner visibility depends on the `db.active` state when
-  `syncUpdateBarVisibility()` runs
-- the update click path does not yet perform a final safety re-check before
-  reload
-- backup, export, import, and restore workflows do not yet have a dedicated
-  busy guard for update notification suppression
+- storage migration is not implemented yet, so there is no dedicated guard for
+  a migration-in-progress workflow; a future migration implementation should
+  wrap itself with `beginActiveWorkflow()` / `endActiveWorkflow()` the same way
 - update notification flow changes and storage migration changes would be hard
   to debug if shipped in the same PR
 - `skipWaiting()` and `clients.claim()` are immediate-control behavior and
-  should remain unchanged during the v0.10 safer notification work
+  should remain unchanged until a separate checkpoint revisits them
+- waiting-worker UI and `controllerchange` handling remain deferred decisions,
+  not implemented
 
 ## Target Behavior
 
-Future implementation should move toward this behavior:
+Implementation status of the target behavior below: everything except the
+last two bullets (waiting-worker/`controllerchange` and revisiting
+`skipWaiting()`/`clients.claim()`) is implemented as of the active-workflow
+busy guard change.
 
 - do not show the update banner while an active workflow is running
+  (implemented: `db.active` and `activeWorkflowCount`)
 - do not automatically reload while an active workflow is running
+  (implemented: there is no automatic reload path at all — reload only
+  happens from the update banner click)
 - do not reload from the update banner click path while an active workflow is
-  running
+  running (implemented: `freshReload()` re-checks `isUpdateReloadBlocked()`)
 - perform a final safety-state check immediately before any update-triggered
-  reload
+  reload (implemented)
 - flush pending safety snapshots before any user-triggered update reload
+  (implemented)
 - suppress update notification and reload during backup, export, import, and
-  restore workflows
+  restore workflows (implemented: `beginActiveWorkflow()` /
+  `endActiveWorkflow()`)
 - keep update notification flow changes separate from storage migration changes
+  (holds — storage migration is not implemented yet)
 - do not change `skipWaiting()` or `clients.claim()` in the v0.10 safer update
-  notification work
+  notification work (holds)
 - defer waiting-worker and `controllerchange` UI decisions until a separate
-  checkpoint
-
-These are target requirements, not implemented behavior.
+  checkpoint (not implemented, still deferred)
 
 ## Active Workflow Definition
 
-Future implementation should treat these as active workflows:
+The runtime treats these as active workflows:
 
 - active session: `db.active` exists
-- backup or JSON export in progress
-- CSV export in progress
-- import in progress
-- restore from safety snapshot in progress
-- trash restore in progress
-- future storage migration in progress
+- backup or JSON export in progress (`scripts/70-gear-settings.js`, `#dExp`)
+- CSV export in progress (`scripts/40-analysis-physics.js`,
+  `exportSessionsCsv()`)
+- import in progress (`scripts/70-gear-settings.js`, `#dFile` change handler)
+- restore from safety snapshot in progress (`scripts/70-gear-settings.js`,
+  `#dSnapRestore`)
+- trash restore in progress (`scripts/70-gear-settings.js`,
+  `[data-restore-trash]` click handler)
+- future storage migration in progress (not implemented yet; a future
+  migration should call `beginActiveWorkflow()` / `endActiveWorkflow()` around
+  its work)
 
-The current runtime does not have a dedicated busy flag for all of these
-workflows. A future implementation may add a small active-workflow guard, but it
-must not change storage schema or persisted data format.
+Each of the implemented workflows above calls `beginActiveWorkflow()` before
+starting and `endActiveWorkflow()` when it settles (success, failure, or user
+cancellation), via `try/finally` for synchronous work and `.finally(...)` for
+the async share/download path. `isUpdateReloadBlocked()` in
+`scripts/90-init.js` returns true while `db.active` exists or
+`activeWorkflowCount>0`.
+
+The busy flag is runtime-only (an in-memory counter). It is not persisted and
+does not change storage schema or persisted data format. A future storage
+migration implementation may reuse it, but must not change what it guards
+today.
 
 ## Update Banner Display Rules
 
