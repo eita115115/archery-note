@@ -8,10 +8,13 @@ applyTheme();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
 let updateAvailable=false;
+function isUpdateReloadBlocked(){
+  return !!(db&&db.active);
+}
 function syncUpdateBarVisibility(){
   const bar=$("#updBar");
   if(!bar) return;
-  const show=!!updateAvailable && !(db&&db.active);
+  const show=!!updateAvailable && !isUpdateReloadBlocked();
   bar.hidden=!show;
   bar.style.display=show?"block":"none";
 }
@@ -23,6 +26,8 @@ function checkUpdate(){
     .catch(()=>{});
 }
 function freshReload(){
+  if(isUpdateReloadBlocked()){ syncUpdateBarVisibility(); return; }
+  if(typeof flushSafetySnapshot==="function") flushSafetySnapshot();
   const bar=$("#updBar");
   if(bar) bar.textContent="更新中...";
   const url=new URL(location.href);
