@@ -407,6 +407,15 @@ select.inp{padding-right:32px;}
 }
 .recordDetails summary::before{content:"＋ "!important; font-size:10px;}
 .recordDetails[open] summary::before{content:"− "!important;}
+.recordDistCustomWrap{display:none;}
+.recordNeutralAdvice{background:var(--card); border-color:var(--line);}
+.recordNudgeHint{font-size:var(--font-size-sm); color:var(--sub);}
+.recordNudgeDelete{color:var(--danger);}
+.recordCurEmpty{font-size:var(--font-size-sm); color:var(--sub); align-self:center;}
+.recordEndEditBtn{padding:4px var(--space-3);}
+.recordSummaryPlot{margin-top:var(--space-4);}
+.recordAdviceLabel{font-size:var(--font-size-sm); color:var(--sub);}
+.recordReadOnlyItem{cursor:default;}
 .tinyAction{
   border:1px solid var(--line); background:var(--card); color:var(--title); border-radius:14px;
   padding:7px 10px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
