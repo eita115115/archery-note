@@ -89,6 +89,14 @@ function staticUiChecks() {
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
   assert(surface.includes("content-visibility:auto") && surface.includes("contain-intrinsic-size"), "offscreen rendering guard missing");
   assert(css.includes("touch-action:manipulation") && css.includes("--chrome-bg") && css.includes("min-height:48px"), "native-feel touch/chrome styling missing");
+  assert(/\.mt10\{margin-top:var\(--space-4\);\}/.test(css), ".mt10 must preserve 10px spacing via --space-4");
+  assert(/\.subNote\{font-size:var\(--font-size-sm\);/.test(css), ".subNote must preserve 12px text size");
+  assert(/\.subNoteSm\{font-size:var\(--font-size-xs\);/.test(css), ".subNoteSm must preserve 11px text size");
+  assert(/\.histScoreLabel\{[^}]*font-size:var\(--font-size-sm\);/.test(css), ".histScoreLabel must preserve 12px text size");
+  assert(/\.histScoreCount\{[^}]*font-size:var\(--font-size-xs\);/.test(css), ".histScoreCount must preserve 11px text size");
+  assert(/\.histTrendRow\{[^}]*gap:var\(--space-4\);/.test(css), ".histTrendRow must preserve 10px gap");
+  assert(/\.histTrendValue\{[^}]*font-size:var\(--font-size-sm\);/.test(css), ".histTrendValue must preserve 12px text size");
+  assert(/\.histSightVal\{font-size:17px;/.test(css), ".histSightVal must preserve 17px text size");
   assert(surface.includes("@keyframes appRise") && !surface.includes("primaryPulse") && surface.includes("scorePop") && surface.includes("markPop") && surface.includes("impactFlash") && surface.includes("shotNew") && surface.includes("freshArrow") && surface.includes("prefers-reduced-motion") && surface.includes("ic-record") && surface.includes("ic-analysis") && surface.includes("ic-sight"), "minimal recording feedback, tab icons, and reduced-motion guard missing");
   assert(surface.includes("--active-tab") && surface.includes("nav.tabs::before") && surface.includes('setProperty("--active-tab"'), "smooth state-following tab motion missing");
   assert(!surface.includes("targetImpact") && !surface.includes("screenIn") && !surface.includes("triggerReleaseMotion") && !surface.includes("arrowFlight"), "overdone transition/target animation should not return");
