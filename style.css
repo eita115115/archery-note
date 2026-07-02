@@ -602,9 +602,9 @@ table.tbl tr:last-child td{border-bottom:none;}
 .kv{display:flex; justify-content:space-between; font-size:13px; padding:4px 0;}
 .kv span:first-child{color:var(--sub);}
 /* utility */
-.mt8{margin-top:var(--space-3);} .mt10{margin-top:var(--space-5);} .mt14{margin-top:var(--space-6);}
-.subNote{font-size:var(--font-size-md); color:var(--sub);}
-.subNoteSm{font-size:var(--font-size-sm); color:var(--sub);}
+.mt8{margin-top:var(--space-3);} .mt10{margin-top:var(--space-4);} .mt14{margin-top:var(--space-6);}
+.subNote{font-size:var(--font-size-sm); color:var(--sub);}
+.subNoteSm{font-size:var(--font-size-xs); color:var(--sub);}
 /* history & sight view */
 .histFilterEnd{display:flex; align-items:flex-end;}
 .histRecentBlock{border-top:1px solid var(--line); padding:10px 0;}
@@ -613,18 +613,29 @@ table.tbl tr:last-child td{border-bottom:none;}
 .histRecentBody{flex:1; min-width:0;}
 .histRecentTitle{font-weight:800;}
 .histScoreRow{display:flex; align-items:center; gap:8px; padding:2px 0;}
-.histScoreLabel{width:28px; text-align:center; font-weight:700; font-size:var(--font-size-md); border-radius:6px; padding:2px 0;}
+.histScoreLabel{width:28px; text-align:center; font-weight:700; font-size:var(--font-size-sm); border-radius:6px; padding:2px 0;}
 .histScoreTrack{flex:1; background:var(--line); border-radius:5px; height:14px; overflow:hidden;}
 .histScoreFill{height:100%; background:var(--green-l);}
-.histScoreCount{width:70px; font-size:var(--font-size-sm); color:var(--sub); text-align:right;}
-.histTrendRow{display:flex; align-items:center; gap:var(--space-5); padding:6px 0;}
+.histScoreCount{width:70px; font-size:var(--font-size-xs); color:var(--sub); text-align:right;}
+.histTrendRow{display:flex; align-items:center; gap:var(--space-4); padding:6px 0;}
 .histTrendLabel{width:72px; font-weight:700;}
 .histTrendChart{flex:1;}
-.histTrendValue{width:54px; text-align:right; font-size:var(--font-size-md);}
+.histTrendValue{width:54px; text-align:right; font-size:var(--font-size-sm);}
 .histTrendSub{color:var(--sub); font-size:10px;}
 .histAdviceCard{background:var(--card); border-color:var(--line);}
-.histSightVal{font-size:var(--font-size-lg); font-weight:800;}
+/* No token: preserves the extracted 17px inline style. */
+.histSightVal{font-size:17px; font-weight:800;}
 .histDelBtn{padding:4px var(--space-3);}
+/* gear & settings view */
+.gearAdviceCard{background:var(--card); border-color:var(--line);}
+.gearChevron{font-size:18px; color:var(--sub);}
+.sheet .settingsH3{margin-top:18px; font-size:var(--font-size-md);}
+.settingsFileInputHidden{display:none;}
+.settingsDangerHint{color:var(--danger);}
+.settingsVersionFooter{text-align:center; margin-top:var(--space-5);}
+.gearTh40{width:40%;}
+.sheet .gearHistoryH3{margin-top:14px; font-size:13px;}
+.gearHistoryRow{font-size:var(--font-size-sm); padding:6px 0; border-bottom:1px solid #eef0eb;}
 /* modal */
 .ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
 .sheet{
