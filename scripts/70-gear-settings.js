@@ -283,7 +283,7 @@ function spineGuidanceHtml(s){
 function gearPrecisionHtml(s){
   const p=gearPrecisionProfile(s);
   const next=p.missing.slice(0,3).join("・");
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  return `<div class="advice gearAdviceCard">
     <div class="note"><b>演算入力の充実度: ${p.level}</b>（${Math.round(p.score*100)}%）</div>
     ${next?`<div class="note">次に測ると効く項目: ${esc(next)}</div>`:`<div class="note">主要な物理モデル項目はかなり埋まっています。</div>`}
     ${spineGuidanceHtml(s)}
@@ -305,7 +305,7 @@ function setupComparisonHtml(setupId){
     const color=Math.abs(x)<.01?"var(--sub)":good?"#0f9d58":"#c62828";
     return `<b style="color:${color}">${sign}${x.toFixed(2)}${unit}</b>`;
   };
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  return `<div class="advice gearAdviceCard">
     <div class="note"><b>用具比較</b> — ${fmtD(prev.date)} → ${fmtD(last.date)}${prev.dist===last.dist?` / ${last.dist}m`:` / ${prev.dist}m→${last.dist}m`}</div>
     <div class="kv"><span>平均点</span><span>${a.avg.toFixed(2)} → ${b.avg.toFixed(2)}（${delta(b.avg-a.avg)}）</span></div>
     ${a.st&&b.st?`<div class="kv"><span>グルーピング半径</span><span>${a.st.rr.toFixed(1)}cm → ${b.st.rr.toFixed(1)}cm（${delta(b.st.rr-a.st.rr,"cm",true)}）</span></div>
@@ -339,7 +339,7 @@ function renderGear(m){
         <div class="t">${esc(s.name)}</div>
         <div class="d">${[s.bow,s.limbs,s.poundage?s.poundage+"lbs":""].filter(Boolean).map(esc).join(" ・ ")||"詳細未入力"}</div>
         <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level} ・ 変更履歴${(s.history||[]).length}件</div>
-      </div><div style="font-size:18px;color:var(--sub)">›</div></div>`;
+      </div><div class="gearChevron">›</div></div>`;
     }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
     <div class="btnrow"><button class="btn sec" id="gWizard">初回セットアップ</button><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
     <div class="hint">バックアップ・テーマなどは右上の <b>⚙設定</b> から。</div>
@@ -366,15 +366,15 @@ function openSettings(){
     <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
     <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
     ${nativeReadinessHtml()}
-    <h3 style="margin-top:18px;font-size:14px">データ管理</h3>
+    <h3 class="settingsH3">データ管理</h3>
     ${backupReminderHtml()}
     <div class="btnrow">
       <button class="btn sec" id="dExp">⬇ バックアップ保存</button>
       <button class="btn sec" id="dImp">⬆ 読み込み</button>
     </div>
     <div class="btnrow"><button class="btn sec" id="dCsv">CSV出力</button></div>
-    <input type="file" id="dFile" accept=".json" style="display:none">
-    <h3 style="margin-top:18px;font-size:14px">自動バックアップ</h3>
+    <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
+    <h3 class="settingsH3">自動バックアップ</h3>
     ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動バックアップはまだありません。保存操作を行うと端末内に復元用バックアップが残ります。</div>`}
     <div class="btnrow">
       <button class="btn sec" id="dSnapNow">今すぐバックアップ</button>
@@ -382,8 +382,8 @@ function openSettings(){
     </div>
     ${trashSettingsHtml()}
     <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
-    <div class="hint" style="color:var(--danger)">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
-    <div class="hint" style="text-align:center;margin-top:12px">Archery Note v${APP_VER}</div>
+    <div class="hint settingsDangerHint">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
+    <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
     <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
   </div>`;
   document.body.appendChild(ovl);
@@ -514,9 +514,9 @@ function openGearDetail(id){
     ${modelReadinessHtml(id)}
     ${physicsCalibrationHtml(id)}
     ${setupComparisonHtml(id)}
-    <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th style="width:40%">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
-    ${(s.history&&s.history.length)?`<h3 style="margin-top:14px;font-size:13px">変更履歴</h3>
-      ${[...s.history].reverse().map(h=>`<div style="font-size:12px;padding:6px 0;border-bottom:1px solid #eef0eb">
+    <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th class="gearTh40">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
+    ${(s.history&&s.history.length)?`<h3 class="gearHistoryH3">変更履歴</h3>
+      ${[...s.history].reverse().map(h=>`<div class="gearHistoryRow">
         <b>${fmtD(h.date)}</b> — ${h.changes.map(c=>`${esc(c.label)}: ${esc(c.from||"（未設定）")} → <b>${esc(c.to||"（削除）")}</b>`).join(" / ")}</div>`).join("")}`:""}
     <div class="btnrow">
       <button class="btn danger" id="gDel">削除</button>
