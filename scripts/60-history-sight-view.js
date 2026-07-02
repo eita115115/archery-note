@@ -18,7 +18,7 @@ function renderHistory(m){
     </div>
     <div class="row">
       <div><label class="f">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map(r=>`<option value="${r}" ${hf.round===r?"selected":""}>${roundLabel(r)}</option>`).join("")}</select></div>
-      <div style="display:flex;align-items:flex-end"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
+      <div class="histFilterEnd"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
     </div>
     <div id="histList">
     ${ss.length? ss.map(s=>{
@@ -92,9 +92,9 @@ function groupingTrendItem(g){
   const bias=Math.hypot(latest.mx,latest.my);
   const biasState=bias<=w*.25?"センター付近":bias<=w*.75?"軽い偏り":"偏り強め";
   const setup=esc(latest.setupName);
-  return `<div style="border-top:1px solid var(--line);padding:10px 0">
-    <div style="display:flex;align-items:flex-start;gap:10px">
-      <svg viewBox="${-M} ${-M} ${2*M} ${2*M}" style="width:128px;max-width:38%;aspect-ratio:1;border:1px solid var(--line);border-radius:8px;background:var(--inpBg);flex:0 0 auto">
+  return `<div class="histRecentBlock">
+    <div class="histRecentHead">
+      <svg viewBox="${-M} ${-M} ${2*M} ${2*M}" class="histRecentTarget">
         <circle cx="0" cy="0" r="${w/2}" fill="none" stroke="var(--sub)" stroke-width="${M/140}"/>
         <circle cx="0" cy="0" r="${w}" fill="none" stroke="var(--line)" stroke-width="${M/160}"/>
         <line x1="${-M}" y1="0" x2="${M}" y2="0" stroke="var(--line)" stroke-width="${M/150}"/>
@@ -107,8 +107,8 @@ function groupingTrendItem(g){
           return `<circle cx="${p.mx}" cy="${-p.my}" r="${r}" fill="${fill}" opacity="${0.35+i/g.length*.55}" stroke="#fff" stroke-width="${M/120}"/>`;
         }).join("")}
       </svg>
-      <div style="flex:1;min-width:0">
-        <div class="t" style="font-weight:800">${setup} ・ ${historyDistanceLabel(latest.dist)} ・ ${faceLabel(latest)}</div>
+      <div class="histRecentBody">
+        <div class="t histRecentTitle">${setup} ・ ${historyDistanceLabel(latest.dist)} ・ ${faceLabel(latest)}</div>
         <div class="d">${g.length}回 / ${fmtD(first.date)}〜${fmtD(latest.date)} / 平均グルーピング半径 ${avgRr.toFixed(1)}cm</div>
         <div class="kv"><span>最新の中心</span><span>${cmOffsetText(latest.mx,"x")} / ${cmOffsetText(latest.my,"y")}（${biasState}）</span></div>
         <div class="kv"><span>前回から</span><span>${driftText(recentDx,recentDy)}</span></div>
@@ -132,10 +132,10 @@ function scoreDistCard(ss){
       const sNum=k==="X"?10:(k==="M"?0:+k);
       const rec=records.find(x=>(x.a.s===0?"M":(x.a.X?"X":String(x.a.s)))===k);
       const z=zoneStyle(sNum,k==="X",rec&&rec.faceType);
-      return `<div style="display:flex;align-items:center;gap:8px;padding:2px 0">
-        <div style="width:28px;text-align:center;font-weight:700;font-size:12px;background:${z.bg};color:${z.fg};border-radius:6px;padding:2px 0">${k}</div>
-        <div style="flex:1;background:var(--line);border-radius:5px;height:14px;overflow:hidden"><div style="width:${(cnt[k]/max*100).toFixed(1)}%;height:100%;background:var(--green-l)"></div></div>
-        <div style="width:70px;font-size:11px;color:var(--sub);text-align:right">${cnt[k]}本 (${(cnt[k]/all.length*100).toFixed(0)}%)</div>
+      return `<div class="histScoreRow">
+        <div class="histScoreLabel" style="background:${z.bg};color:${z.fg}">${k}</div>
+        <div class="histScoreTrack"><div class="histScoreFill" style="width:${(cnt[k]/max*100).toFixed(1)}%"></div></div>
+        <div class="histScoreCount">${cnt[k]}本 (${(cnt[k]/all.length*100).toFixed(0)}%)</div>
       </div>`;
     }).join("")+`</div>`;
 }
@@ -170,11 +170,11 @@ function distTrendCard(ss){
     const pts=g.pts; const W=300,H=46;
     const min=Math.min(...pts), max=Math.max(...pts), span=(max-min)||1;
     const path=pts.map((v,i)=>`${i?"L":"M"}${(i/(pts.length-1))*W},${H-4-((v-min)/span)*(H-10)}`).join("");
-    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0">
-      <div style="width:72px;font-weight:700">${esc(g.label)}</div>
-      <svg width="100%" viewBox="0 0 ${W} ${H}" style="flex:1;max-height:${H}px"><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
+    return `<div class="histTrendRow">
+      <div class="histTrendLabel">${esc(g.label)}</div>
+      <svg width="100%" viewBox="0 0 ${W} ${H}" class="histTrendChart" style="max-height:${H}px"><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
       ${pts.map((v,i)=>`<circle cx="${(i/(pts.length-1))*W}" cy="${H-4-((v-min)/span)*(H-10)}" r="3" fill="var(--green)"/>`).join("")}</svg>
-      <div style="width:54px;text-align:right;font-size:12px">${pts[pts.length-1].toFixed(2)}<br><span style="color:var(--sub);font-size:10px">最新平均</span></div>
+      <div class="histTrendValue">${pts[pts.length-1].toFixed(2)}<br><span class="histTrendSub">最新平均</span></div>
     </div>`;
   }).join("")+`</div>`;
 }
@@ -187,25 +187,25 @@ function openHistDetail(id){
   const adv=adviceFor(sess,setup);
   ovl.innerHTML=`<div class="sheet">
     <h3>${fmtD(sess.date)} ・ ${historyDistanceLabel(sess.dist)} ・ ${faceLabel(sess)}</h3>
-    <div style="font-size:12px;color:var(--sub)">${setup?esc(setup.name):"セッティング未指定"}${sess.round&&sess.round!=="free"?" ・ "+roundLabel(sess.round):""}${windText(sess)?" ・ "+esc(windText(sess)):""}${sess.note?" ・ "+esc(sess.note):""}</div>
+    <div class="subNote">${setup?esc(setup.name):"セッティング未指定"}${sess.round&&sess.round!=="free"?" ・ "+roundLabel(sess.round):""}${windText(sess)?" ・ "+esc(windText(sess)):""}${sess.note?" ・ "+esc(sess.note):""}</div>
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
       <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
-    <div id="hPlot" style="margin-top:10px"></div>
+    <div id="hPlot" class="mt10"></div>
     ${groupSummaryHtml(st)}
     ${trustHtml(sess,setup,st)}
     ${roundProgressHtml(sess)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${arrowMetaSummaryHtml(sess)}
-    <table class="tbl" style="margin-top:8px"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
+    <table class="tbl mt8"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
     ${sess.ends.map((end,i)=>{
       const sorted=[...end].sort((a,b)=>b.s-a.s);
       return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td></tr>`;
     }).join("")}</table>
-    ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">🔧 この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
+    ${adv?`<div class="advice"><div class="subNote">🔧 この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
     ${personalModelHtml(adv,sess,setup)}
     ${conditionHtml(sess,st,setup)}
     ${nextActionHtml(sess,adv,setup)}
@@ -260,9 +260,9 @@ function renderSight(m){
   let interpHtml="";
   if(interp){
     const preds=[18,30,50,70].filter(d=>!interp.have.includes(d)).map(d=>`<div class="chip">${d}m → <b>${interp.est(d).toFixed(1)}</b></div>`);
-    interpHtml=`<h2 style="margin-top:14px">📏 サイトマーク予測（上下）</h2>
-      <div style="font-size:12px;color:var(--sub)">実測: ${interp.pts.map(p=>`${p[0]}m = ${p[1]}`).join(" ・ ")} / ${interp.model==="curve"?"カーブ近似":"直線近似"} / 一致度${pct(interp.r2||0)}</div>
-      ${preds.length?`<div class="chips" style="margin-top:8px">${preds.join("")}</div>`:`<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
+    interpHtml=`<h2 class="mt14">📏 サイトマーク予測（上下）</h2>
+      <div class="subNote">実測: ${interp.pts.map(p=>`${p[0]}m = ${p[1]}`).join(" ・ ")} / ${interp.model==="curve"?"カーブ近似":"直線近似"} / 一致度${pct(interp.r2||0)}</div>
+      ${preds.length?`<div class="chips mt8">${preds.join("")}</div>`:`<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
       <div class="hint">2距離以上の実測サイト値から予測します。4距離以上ある場合は、弾道に近いカーブ近似が有効なときだけ自動採用します。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
   }
   m.innerHTML=`${pageHeroHtml("sight",{setup,dist,marks,adv,lastSess})}
@@ -272,20 +272,20 @@ function renderSight(m){
     <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map(s=>`<option value="${s.id}" ${s.id===sid?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
     <div class="chips">${dists.map(d=>`<div class="chip ${d===dist?"on":""}" data-d="${d}">${d}m</div>`).join("")}</div>
-    <div class="advice" style="background:var(--card);border-color:var(--line)">
+    <div class="advice histAdviceCard">
       <div class="kv"><span>現在のサイト（最新記録）</span>
-      <span style="font-size:17px;font-weight:800">${cur?`上下 ${esc(cur.v||"—")} ・ 左右 ${esc(cur.h||"—")}`:"未登録"}</span></div>
+      <span class="histSightVal">${cur?`上下 ${esc(cur.v||"—")} ・ 左右 ${esc(cur.h||"—")}`:"未登録"}</span></div>
       ${cur?`<div class="note">${fmtD(cur.date)} ${esc(cur.note||"")}</div>`:""}
     </div>
     <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
-    ${marks.length?`<table class="tbl" style="margin-top:10px"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
+    ${marks.length?`<table class="tbl mt10"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
       ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
-      <td style="font-size:11px;color:var(--sub)">${esc(mk.note||"")}</td>
-      <td class="right"><button class="btn sm ghost" data-del="${mk.id}" style="padding:4px 8px">✕</button></td></tr>`).join("")}</table>`
+      <td class="subNoteSm">${esc(mk.note||"")}</td>
+      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${mk.id}">✕</button></td></tr>`).join("")}</table>`
       :`<div class="empty">この距離の記録はまだありません</div>`}
     <details class="adv">
       <summary>モデル診断・校正状況</summary>
-      ${cal?`<div class="advice" style="background:var(--card);border-color:var(--line);margin-top:10px">
+      ${cal?`<div class="advice histAdviceCard mt10">
         <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score*100)}%）</span></div>
         <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
         ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
@@ -299,7 +299,7 @@ function renderSight(m){
   <div class="card">
     <h2>🔧 調整アドバイス <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
     ${adv?`
-      <div style="font-size:12px;color:var(--sub)">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
+      <div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
       <div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
       ${judgementHtml(adv,lastSess)}
       ${shapeNote(adv.st)}
@@ -315,10 +315,10 @@ function renderSight(m){
     </details>
     <details class="adv">
       <summary>サイト値分析・予測</summary>
-      ${(reg.v||reg.h)?`<div class="advice" style="margin-top:10px">
-        <div style="font-size:12px;color:var(--sub)">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
-        ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)} / 品質${pct(reg.v.quality||0)})</span></div>`:""}
-        ${reg.h?`<div class="dir">左右サイトの推定最適値：<b>${reg.h.zero.toFixed(1)}</b> <span style="font-size:11px;color:var(--sub)">(${reg.h.n}回分 / 一致度${pct(reg.h.r2||0)} / 品質${pct(reg.h.quality||0)})</span></div>`:""}
+      ${(reg.v||reg.h)?`<div class="advice">
+        <div class="subNote">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
+        ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span class="subNoteSm">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)} / 品質${pct(reg.v.quality||0)})</span></div>`:""}
+        ${reg.h?`<div class="dir">左右サイトの推定最適値：<b>${reg.h.zero.toFixed(1)}</b> <span class="subNoteSm">(${reg.h.n}回分 / 一致度${pct(reg.h.r2||0)} / 品質${pct(reg.h.quality||0)})</span></div>`:""}
         <div class="note">サイト値を数値で記録した複数回の練習から「ズレが0になる値」を、練習信頼度・風・本数を加味した外れ値に強い推定で求めています。データが増えるほど精度が上がります。</div>
       </div>`:`<div class="hint">💡 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
       ${interpHtml}
