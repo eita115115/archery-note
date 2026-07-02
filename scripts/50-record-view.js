@@ -177,7 +177,7 @@ function renderRecord(m){
       ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
       <div class="chip" data-d="custom">カスタム</div>
     </div>
-    <div id="fDistCustomWrap" style="display:none"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+    <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
     <div class="quickSelects">
       <div><label class="f">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
@@ -216,7 +216,7 @@ function renderRecord(m){
         <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
-    ${mode==="calibration"?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
+    ${mode==="calibration"?`<div class="advice recordNeutralAdvice"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>`:""}
     </div>
   </section>`;
   const distState={d:defDist};
@@ -329,7 +329,7 @@ function arrowMetaSummaryHtml(sess){
     const topReason=Object.entries(b.reasons).sort((a,c)=>c[1]-a[1])[0];
     return `<div class="note">#${esc(no)}: ${b.n}本 / 平均${avg.toFixed(1)} / ${cmOffsetText(rx,"x")}・${cmOffsetText(ry,"y")}${topReason?` / ${esc(topReason[0])} ${topReason[1]}本`:""}</div>`;
   }).join("");
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  return `<div class="advice recordNeutralAdvice">
     <div class="note"><b>矢番号・外れ理由メモ</b>${reasonLine?` — ${reasonLine}`:""}</div>
     ${rows}
   </div>`;
@@ -462,10 +462,10 @@ function renderActive(m){
     ${activeGuideHtml()}
     <div class="scoreChips" id="curChips"></div>
     <div class="nudge" id="nudge">
-      <div style="font-size:12px;color:var(--sub)">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
+      <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
       <div class="npad">
         <span class="blank"></span><button data-n="u">▲</button><span class="blank"></span>
-        <button data-n="l">◀</button><button data-n="del" style="color:var(--danger)">🗑</button><button data-n="r">▶</button>
+        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">🗑</button><button data-n="r">▶</button>
         <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
       </div>
       <div class="shotMeta" id="shotMeta"></div>
@@ -547,7 +547,7 @@ function refreshActive(){
   $("#curChips").innerHTML = s.cur.map((a,i)=>{
     const z=zoneStyle(a.s,a.X,s.faceType);
     return `<div class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</div>`;
-  }).join("") || `<span style="font-size:12px;color:var(--sub);align-self:center">エンド${s.ends.length+1}：的をタップして記録</span>`;
+  }).join("") || `<span class="recordCurEmpty">エンド${s.ends.length+1}：的をタップして記録</span>`;
   if(ui.freshArrow>=0){
     clearTimeout(ui.freshTimer);
     ui.freshTimer=setTimeout(()=>{
@@ -580,7 +580,7 @@ function refreshActive(){
       return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td>
         <td>${sorted.map(scoreLabel).join("・")}</td>
         <td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td>
-        <td class="right"><button class="btn sm ghost" data-open="${i}" style="padding:4px 8px">✏</button></td></tr>`;
+        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">✏</button></td></tr>`;
     }).join("")+`</table>` : `<div class="empty">確定したエンドはまだありません</div>`;
   document.querySelectorAll("#endsTbl [data-open]").forEach(b=>b.onclick=()=>{
     if(s.cur.length){ toast("先に現在のエンドを確定（または取消）してください"); return; }
@@ -761,7 +761,7 @@ function openSummary(sess, isNew){
       <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
-    <div id="sumPlot" style="margin-top:10px"></div>
+    <div id="sumPlot" class="recordSummaryPlot"></div>
     ${groupSummaryHtml(st)}
     ${summarySightDialHtml(sess,adv)}
     ${nextActionHtml(sess,adv,setup)}
@@ -771,7 +771,7 @@ function openSummary(sess, isNew){
       ${roundProgressHtml(sess)}
       ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
       ${arrowMetaSummaryHtml(sess)}
-      ${adv?`<div class="advice"><div style="font-size:12px;color:var(--sub)">サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
+      ${adv?`<div class="advice"><div class="recordAdviceLabel">サイト調整の提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
         ${judgementHtml(adv,sess)}
         ${shapeNote(adv.st)}
         ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
@@ -818,7 +818,7 @@ function scoreTrendCard(ss){
     const totalText=Number.isFinite(r.total)?String(r.total):"—";
     const date=r.s&&r.s.date?fmtD(r.s.date):"日付未設定";
     const dist=distanceLabel(r.s&&r.s.dist);
-    return `<div class="listItem" style="cursor:default">
+    return `<div class="listItem recordReadOnlyItem">
       <div><div class="t">${esc(date)}</div><div class="d">${esc(dist)} / ${r.arrows.length}本</div></div>
       <div class="big">${avgText}<small> / 合計${totalText}</small></div>
     </div>`;
@@ -868,7 +868,7 @@ function setupPerformanceCard(ss){
     const avgText=Number.isFinite(avg)?avg.toFixed(2):"—";
     const bestText=g.best&&Number.isFinite(g.best.total)?String(g.best.total):"—";
     const latest=g.latestDate?fmtD(g.latestDate):"—";
-    return `<div class="listItem" style="cursor:default">
+    return `<div class="listItem recordReadOnlyItem">
       <div><div class="t">${esc(g.label)}</div><div class="d">記録 ${g.sessions}回 / 矢数 ${g.arrows} / 最新 ${esc(latest)}</div></div>
       <div class="big">${avgText}<small> / 最高${bestText}</small></div>
     </div>`;
@@ -903,7 +903,7 @@ function sightHistoryCard(ss){
   ).slice(0,10);
   if(!rows.length) return "";
   const body=rows.map(({row,date,setup,distInfo})=>{
-    return `<div class="listItem" style="cursor:default">
+    return `<div class="listItem recordReadOnlyItem">
       <div><div class="t">${esc(date.label)} ・ ${esc(distInfo.label)}</div><div class="d">${esc(setup.label)} / ${esc(row.source||"履歴")}</div></div>
       <div class="big">上下 ${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
     </div>`;
@@ -976,7 +976,7 @@ function distanceSummaryHtml(sessionRows){
   const body=rows.map(g=>{
       const avg=g.arrows?(g.total/g.arrows).toFixed(2):"—";
       const latest=g.latestDate?fmtD(g.latestDate):"—";
-      return `<div class="listItem" style="cursor:default">
+      return `<div class="listItem recordReadOnlyItem">
         <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本 / 最新 ${esc(latest)}</div></div>
         <div class="big">${avg}<small> / 最高${g.best?g.best.total:"—"}</small></div>
       </div>`;
@@ -1039,7 +1039,7 @@ function sightSummaryHtml(sessionRows,filter){
   const body=groups.map(g=>{
       const latest=g.latest||{};
       const row=latest.row||{};
-      return `<div class="listItem" style="cursor:default">
+      return `<div class="listItem recordReadOnlyItem">
         <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName||"用具未指定")} / 最新 ${esc(latest.date?latest.date.label:"—")} / 台帳${g.markCount}・練習${g.sessionCount}</div></div>
         <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
       </div>`;
@@ -1097,7 +1097,7 @@ function groupingSummaryHtml(sessionRows){
     ${groups.map(g=>{
       const distAvg=g.sessions?g.total/g.sessions:null;
       const latest=g.latest&&g.latest.date.label?g.latest.date.label:"—";
-      return `<div class="listItem" style="cursor:default">
+      return `<div class="listItem recordReadOnlyItem">
         <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / 最新 ${esc(latest)}</div></div>
         <div class="big">${groupingMetricText(distAvg)}<small> / 最小${groupingMetricText(g.best&&g.best.rr)}</small></div>
       </div>`;
