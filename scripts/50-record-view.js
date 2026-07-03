@@ -2,7 +2,7 @@
 /* Archery Note: record and active-session views */
 /* ============ views ============ */
 let view="record";
-let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice", freshArrow:-1, freshTimer:0 };
+let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, analysisFilter:{setupId:"",dist:"",round:"",period:"all"}, zoom:1, recordMode:"practice", freshArrow:-1, freshTimer:0 };
 function showView(v){ if(view===v) return; view=v; ui.selArrow=-1; nativePulse("light"); render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
@@ -370,6 +370,9 @@ function pageHeroHtml(type,ctx){
   if(type==="sight"){
     const setup=ctx.setup, dist=ctx.dist, marks=ctx.marks||[], adv=ctx.adv;
     const cur=marks[0];
+    const axes=adv?adv.lines.map(l=>l.axis):[];
+    const hasV=axes.includes("v"), hasH=axes.includes("h");
+    const advSummary=!adv?"材料待ち":hasV&&hasH?"上下・左右調整":hasV?"上下調整あり":hasH?"左右調整あり":"調整不要";
     return `<section class="pageHero">
       <div class="kicker">サイト調整</div>
       <h2>サイト値を整える</h2>
@@ -377,7 +380,7 @@ function pageHeroHtml(type,ctx){
       <div class="heroMetrics">
         ${heroMetricHtml("対象",setup?setup.name:"用具未指定",dist?`${dist}m`:"距離未指定")}
         ${heroMetricHtml("最新サイト",cur?`上下 ${cur.v||"—"}`:"未登録",cur?`左右 ${cur.h||"—"}`:"台帳へ記録")}
-        ${heroMetricHtml("提案",adv&&adv.lines.length?adv.lines[0].text||"調整あり":"材料待ち",adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
+        ${heroMetricHtml("提案",advSummary,adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
       </div>
     </section>`;
   }
@@ -399,9 +402,102 @@ function pageHeroHtml(type,ctx){
   }
   return "";
 }
+function analysisFilterBarHtml(allRows,f){
+  const dists=[...new Set(allRows.map(r=>r.dist).filter(Boolean))].sort((a,b)=>b-a);
+  const periods=[["all","全期間"],["3m","3ヶ月"],["1m","1ヶ月"]];
+  return `<div class="card analysisFilterCard">
+    <div class="row">
+      <div><label class="f">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${f.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map(d=>`<option value="${d}" ${String(f.dist)===String(d)?"selected":""}>${d}m</option>`).join("")}</select></div>
+    </div>
+    <label class="f">期間</label>
+    <div class="chips" id="anPeriods">${periods.map(([id,lb])=>`<div class="chip ${f.period===id?"on":""}" data-period="${id}">${lb}</div>`).join("")}</div>
+  </div>`;
+}
+function analysisKpiHtml(rows){
+  const scored=rows.filter(r=>r.n);
+  if(!scored.length) return "";
+  const sorted=[...scored].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  const arrows=scored.reduce((a,r)=>a+r.n,0);
+  const avg=arrows?scored.reduce((a,r)=>a+r.total,0)/arrows:0;
+  const ma=movingAverage(sorted.map(r=>r.avg),5);
+  const latestMa=ma.length?ma[ma.length-1]:null;
+  const prevMa=ma.length>1?ma[ma.length-2]:null;
+  const delta=latestMa!=null&&prevMa!=null?latestMa-prevMa:null;
+  const trend=delta==null?"—":delta>0.02?`↑ +${delta.toFixed(2)}`:delta<-0.02?`↓ ${delta.toFixed(2)}`:"→ 横ばい";
+  const rrRows=sorted.filter(r=>r.st&&Number.isFinite(r.st.rr));
+  const latestRr=rrRows.length?rrRows[rrRows.length-1].st.rr:null;
+  const bestRr=rrRows.length?Math.min(...rrRows.map(r=>r.st.rr)):null;
+  const best=[...scored].sort((a,b)=>b.total-a.total||(b.date||"").localeCompare(a.date||""))[0];
+  return `<div class="insightStrip">
+    <div class="insightTile"><div class="k">平均点</div><b>${avg.toFixed(2)}</b><span>${scored.length}回 ${arrows}本 / 移動平均 ${trend}</span></div>
+    <div class="insightTile"><div class="k">グルーピング</div><b>${latestRr!=null?latestRr.toFixed(1)+"cm":"—"}</b><span>最新RMS / 最小 ${bestRr!=null?bestRr.toFixed(1)+"cm":"—"}</span></div>
+    <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${best?[fmtD(best.date),best.dist?`${best.dist}m`:"",`${best.n}本`].filter(Boolean).join(" / "):"記録待ち"}</span></div>
+  </div>`;
+}
+function analysisTrendChartHtml(rows){
+  const sorted=rows.filter(r=>r.n).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  if(sorted.length<3) return "";
+  const avgs=sorted.map(r=>r.avg);
+  const ma=movingAverage(avgs,5).map((v,i)=>v==null?avgs[i]:v);
+  const W=320,H=96;
+  const min=Math.min(...avgs,...ma), max=Math.max(...avgs,...ma), span=(max-min)||1;
+  const px=i=>(i/(sorted.length-1))*W;
+  const py=v=>H-10-((v-min)/span)*(H-22);
+  const maPath=ma.map((v,i)=>`${i?"L":"M"}${px(i).toFixed(1)},${py(v).toFixed(1)}`).join("");
+  return `<div class="card"><h2>スコア推移グラフ <span class="mini">${sorted.length}回 / 線は直近5回移動平均</span></h2>
+    <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H+20}px" role="img" aria-label="平均点の推移">
+      <text x="2" y="10" font-size="9" fill="var(--sub)">${max.toFixed(1)}</text>
+      <text x="2" y="${H-2}" font-size="9" fill="var(--sub)">${min.toFixed(1)}</text>
+      ${sorted.map((r,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(r.avg).toFixed(1)}" r="3" fill="var(--green)" opacity=".5"/>`).join("")}
+      <path d="${maPath}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
+    </svg>
+    <div class="hint">丸は各練習の平均点/本、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。</div>
+  </div>`;
+}
+function personalBestCard(rows){
+  const pbs=personalBests(rows).slice(0,6);
+  if(!pbs.length) return "";
+  const body=pbs.map(g=>{
+    const lb=[g.dist?`${g.dist}m`:"距離未設定",g.round!=="free"?roundLabel(g.round):"自由練習"].join(" ・ ");
+    return `<div class="listItem recordReadOnlyItem">
+      <div><div class="t">${esc(lb)}</div><div class="d">${g.sessions}回 / ベスト日 ${g.bestTotal?fmtD(g.bestTotal.date):"—"}${g.bestTotal?` / ${g.bestTotal.arrows}本`:""}</div></div>
+      <div class="big">${g.bestTotal?g.bestTotal.total:"—"}<small> / 平均ベスト${g.bestAvg?g.bestAvg.avg.toFixed(2):"—"}</small></div>
+    </div>`;
+  }).join("");
+  return `<div class="card"><h2>自己ベスト <span class="mini">距離×ラウンド別</span></h2>${body}</div>`;
+}
+function conditionSplitCard(rows){
+  const cs=conditionSplit(rows,isWindy);
+  if(cs.windy.sessions<2 || cs.calm.sessions<2) return "";
+  const line=g=>`<div class="listItem recordReadOnlyItem">
+    <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本${g.biasX!=null&&Math.abs(g.biasX)>=.3?` / 平均中心 ${cmOffsetText(g.biasX,"x")}`:""}</div></div>
+    <div class="big">${g.avg!=null?g.avg.toFixed(2):"—"}<small> / RMS ${g.avgRms!=null?g.avgRms.toFixed(1)+"cm":"—"}</small></div>
+  </div>`;
+  return `<div class="card"><h2>条件比較 <span class="mini">風あり vs 風なし</span></h2>${line(cs.calm)}${line(cs.windy)}
+    <div class="hint">風の有無で平均点とグルーピングがどれだけ変わるかの俯瞰です。風ありの平均中心が横へ流れていれば、風待ちやエイムオフの効果を検討できます。</div></div>`;
+}
+function reasonBreakdownCard(rows){
+  const rb=reasonBreakdown(rows);
+  if(rb.tagged<5) return "";
+  const body=rb.items.slice(0,6).map(g=>`<div class="listItem recordReadOnlyItem">
+    <div><div class="t">${esc(g.reason)}</div><div class="d">${g.count}本${(Math.abs(g.mx||0)>=.3||Math.abs(g.my||0)>=.3)?` / 平均ズレ ${driftText(g.mx||0,g.my||0)}`:""}</div></div>
+    <div class="big">${g.avg!=null?g.avg.toFixed(2):"—"}<small> / 平均点</small></div>
+  </div>`).join("");
+  return `<div class="card"><h2>外れ理由タグ分析 <span class="mini">${rb.tagged}本にタグ</span></h2>${body}
+  <div class="hint">記録中に付けた理由タグ別の平均点と平均ズレ方向です。特定のタグが同じ方向へ寄っていれば、次の練習の重点候補になります。</div></div>`;
+}
 function renderAnalysis(m){
-  const ss=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
+  const f=ui.analysisFilter;
+  const allRows=buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
+  const rows=filterAnalysisRows(allRows, {setupId:f.setupId, dist:f.dist, round:f.round, period:f.period, today:today()});
+  const ss=rows.map(r=>r.s).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
   const cards=[
+    analysisKpiHtml(rows),
+    analysisTrendChartHtml(rows),
+    personalBestCard(rows),
+    conditionSplitCard(rows),
+    reasonBreakdownCard(rows),
     historySummaryDetailsHtml(historySessionRows(ss),{setupId:"",dist:""}),
     scoreTrendCard(ss),
     setupPerformanceCard(ss),
@@ -412,7 +508,13 @@ function renderAnalysis(m){
     monthlyCard(ss)
   ].filter(Boolean).join("");
   m.innerHTML=`${pageHeroHtml("analysis")}
-  ${cards||`<div class="card"><h2>分析</h2><div class="empty">記録が増えると、グルーピング推移や月間サマリーがここに表示されます。</div></div>`}`;
+  ${allRows.length?analysisFilterBarHtml(allRows,f):""}
+  ${cards||`<div class="card"><h2>分析</h2><div class="empty">${allRows.length?"この絞り込みに合う記録がありません。フィルタを広げてください。":"記録が増えると、グルーピング推移や月間サマリーがここに表示されます。"}</div></div>`}`;
+  const anSetup=$("#anSetup");
+  if(anSetup) anSetup.onchange=e=>{ f.setupId=e.target.value; render(); };
+  const anDist=$("#anDist");
+  if(anDist) anDist.onchange=e=>{ f.dist=e.target.value; render(); };
+  document.querySelectorAll("#anPeriods .chip[data-period]").forEach(c=>c.onclick=()=>{ f.period=c.dataset.period; render(); });
 }
 function liveSessionHeroHtml(s,setup){
   const all=sessionArrows(s);
@@ -747,9 +849,8 @@ function finishSession(){
 /* ---------- summary modal ---------- */
 function openSummary(sess, isNew){
   const setup=db.setups.find(x=>x.id===sess.setupId);
-  const all=sess.ends.flat();
-  const total=all.reduce((a,x)=>a+x.s,0);
-  const st=robustStats(all);
+  const m=sessionMetrics(sess);
+  const all=m.all, total=m.total, st=m.st;
   const adv=adviceFor(sess, setup);
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet">

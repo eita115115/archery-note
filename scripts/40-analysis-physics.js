@@ -242,17 +242,27 @@ const LEVELS={
   calibration:[{min:.72,label:"高"},{min:.42,label:"中"},{min:0,label:"データ蓄積中"}],
   system:[{min:.72,label:"提案安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"準備中"}]
 };
+const PCAL_CACHE=new Map();
+/* 校正はセッション横断のRK4連鎖を含み重いので、db更新時刻をキーにメモ化する */
 function personalPhysicsCalibration(setupId){
   if(!setupId) return null;
+  const key=[setupId,db.updatedAt||"",db.sessions.length,db.sightMarks.length].join("|");
+  if(PCAL_CACHE.has(key)) return PCAL_CACHE.get(key);
+  const out=computePersonalPhysicsCalibration(setupId);
+  PCAL_CACHE.set(key,out);
+  if(PCAL_CACHE.size>8) PCAL_CACHE.delete(PCAL_CACHE.keys().next().value);
+  return out;
+}
+function computePersonalPhysicsCalibration(setupId){
   const setup=db.setups.find(s=>s.id===setupId);
   if(!setup) return null;
   const eye=db.settings.eyeSight||850;
   const sessions=db.sessions.filter(s=>s.setupId===setupId)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
   const usable=sessions.map((s,i)=>{
-    const st=robustStats(s.ends.flat());
+    const q=sessionQuality(s,setup);
+    const st=q&&q.metrics?q.metrics.st:null;
     if(!st || st.n<6) return null;
-    const q=sessionQuality(s,setup,st);
     const recency=.72+(i+1)/Math.max(1,sessions.length)*.28;
     return {s,st,q,w:clamp(q.score*recency,.05,1)};
   }).filter(Boolean);
@@ -365,7 +375,7 @@ function adviceModel(sess, setup, st){
   return {confidence,vFactor:clamp(vFactor,.45,1.1),hFactor:clamp(hFactor,.45,1.05),notes,traj,pcal};
 }
 function adviceFor(sess, setup){
-  const all=sess.ends.flat(); const st=robustStats(all);
+  const st=sessionMetrics(sess).st;
   if(!st || st.n<3) return null;
   const dist=sess.dist;
   const eye=(db.settings.eyeSight||850);
@@ -505,12 +515,12 @@ function conditionHtml(sess,st,setup){
 const SESSION_METRIC_CACHE=new Map();
 function sessionMetricSignature(sess){
   const ends=(sess&&sess.ends)||[];
-  let n=0,total=0,last="";
+  let n=0,total=0,xs=0,ys=0,last="";
   ends.forEach((end,ei)=>end.forEach((a,ai)=>{
-    n++; total+=a.s||0;
+    n++; total+=a.s||0; xs+=a.x||0; ys+=a.y||0;
     if(ei===ends.length-1 && ai===end.length-1) last=[a.x,a.y,a.s,a.X?1:0,a.spot==null?"":a.spot].join(":");
   }));
-  return [sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,last].join("|");
+  return [sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,xs.toFixed(2),ys.toFixed(2),last].join("|");
 }
 function sessionMetrics(sess){
   const sig=sessionMetricSignature(sess||{});
@@ -639,7 +649,7 @@ function sessionsCsv(){
   const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
   const rows=[head];
   db.sessions.forEach(s=>{
-    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===s.setupId);
+    const m=sessionMetrics(s), all=m.all, st=m.st, total=m.total, setup=db.setups.find(x=>x.id===s.setupId);
     const q=sessionQuality(s,setup,st);
     const p=personalModel(s,setup,st);
     rows.push([s.date,setup?setup.name:"",s.dist,roundLabel(s.round),faceLabel(s),all.length,total,all.length?(total/all.length).toFixed(3):"",
@@ -789,9 +799,10 @@ function regressionAdvice(setupId, dist){
   [["sightV","my","v"],["sightH","mx","h"]].forEach(([key,axis,tag])=>{
     const pts=[];
     ss.forEach((s,i)=>{
-      const v=parseFloat(s[key]); const st=robustStats(s.ends.flat());
+      const v=parseFloat(s[key]);
+      const q=sessionQuality(s,setup);
+      const st=q&&q.metrics?q.metrics.st:null;
       if(isFinite(v) && st && st.n>=6){
-        const q=sessionQuality(s,setup,st);
         const recency=.72 + (i+1)/Math.max(1,ss.length)*.28;
         const sample=clamp((st.n-4)/14,.55,1);
         const windFactor=isWindy(s)?.82:1;

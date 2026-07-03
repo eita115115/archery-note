@@ -6,6 +6,7 @@ const APP_SCRIPTS = [
   "./scripts/20-scoring.js",
   "./scripts/30-target-svg.js",
   "./scripts/40-analysis-physics.js",
+  "./scripts/45-analysis-core.js",
   "./scripts/50-record-view.js",
   "./scripts/60-history-sight-view.js",
   "./scripts/70-gear-settings.js",
@@ -30,7 +31,10 @@ self.addEventListener("fetch", e => {
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        if (res && (res.ok || res.type === "opaque")) {
+        // キャッシュ肥大防止: version.json?ts= / index.html?appv= のような
+        // クエリ付きユニークURLと外部オリジンは保存しない
+        const cacheable = url.origin === self.location.origin && url.search === "";
+        if (cacheable && res && (res.ok || res.type === "opaque")) {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, copy));
         }
