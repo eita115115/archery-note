@@ -215,4 +215,150 @@ function sampleSession() {
   assert(m1 === m2, "identical session hits the metrics cache");
 }
 
+/* ---------- 分析コア (45-analysis-core.js) ---------- */
+
+const coreScript = fs.readFileSync(path.join(root, "scripts", "45-analysis-core.js"), "utf8");
+const core = new Function(
+  `${coreScript}
+return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown};`,
+)();
+
+// テスト用の metricsFn: sessionMetrics 互換の形を robustStats から作る
+const metricsFn = (s) => {
+  const all = s.ends.flat();
+  const total = all.reduce((a, x) => a + (x.s || 0), 0);
+  return { all, total, avg: all.length ? total / all.length : 0, st: scoring.robustStats(all) };
+};
+
+function coreSession(id, date, dist, opts) {
+  const o = opts || {};
+  return Object.assign({
+    id,
+    date,
+    dist,
+    setupId: o.setupId === undefined ? "setup-a" : o.setupId,
+    faceD: 122,
+    faceType: "single",
+    round: o.round || "free",
+    windSpeed: o.windSpeed || "",
+    ends: o.ends || [
+      [{ x: 1, y: 0, s: 9 }, { x: 0, y: 1, s: 10 }, { x: -1, y: 0, s: 9 }],
+      [{ x: 0, y: -1, s: 10 }, { x: 1, y: 1, s: 9 }, { x: -1, y: -1, s: 9 }],
+    ],
+  }, o.extra || {});
+}
+
+const coreSessions = [
+  coreSession("c1", "2026-05-01", 70),
+  coreSession("c2", "2026-06-20", 70, { windSpeed: "5" }),
+  coreSession("c3", "2026-06-28", 30, { setupId: "", round: "30m36" }),
+];
+const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
+
+// buildAnalysisRows: 正常系 + 欠損系
+{
+  const rows = core.buildAnalysisRows(coreSessions, coreSetups, metricsFn);
+  assertEqual(rows.length, 3, "buildAnalysisRows row count");
+  assertEqual(rows[0].setupName, "Main recurve", "row resolves setup name");
+  assertEqual(rows[0].n, 6, "row arrow count");
+  assertEqual(rows[0].total, 56, "row total");
+  assertEqual(rows[2].dist, 30, "row numeric distance");
+  assertEqual(rows[2].round, "30m36", "row round");
+  assertEqual(core.buildAnalysisRows([], [], metricsFn).length, 0, "empty sessions give empty rows");
+  assertEqual(
+    core.buildAnalysisRows([{ id: "broken" }, null], [], metricsFn).length,
+    0,
+    "sessions without ends are dropped",
+  );
+  const noDist = core.buildAnalysisRows([coreSession("nd", "2026-01-01", undefined)], [], metricsFn);
+  assertEqual(noDist[0].dist, null, "missing distance becomes null");
+}
+
+// filterAnalysisRows: setup / dist / period
+{
+  const rows = core.buildAnalysisRows(coreSessions, coreSetups, metricsFn);
+  assertEqual(core.filterAnalysisRows(rows, {}).length, 3, "no filter keeps all");
+  assertEqual(core.filterAnalysisRows(rows, { setupId: "setup-a" }).length, 2, "setup filter");
+  assertEqual(core.filterAnalysisRows(rows, { setupId: "__none" }).length, 1, "no-setup filter");
+  assertEqual(core.filterAnalysisRows(rows, { dist: "70" }).length, 2, "distance filter");
+  assertEqual(core.filterAnalysisRows(rows, { round: "30m36" }).length, 1, "round filter");
+  assertEqual(
+    core.filterAnalysisRows(rows, { period: "1m", today: "2026-07-03" }).length,
+    2,
+    "1-month period filter",
+  );
+  assertEqual(
+    core.filterAnalysisRows(rows, { period: "1m" }).length,
+    3,
+    "period without today keeps all",
+  );
+}
+
+// isoWeekKey / aggregateByPeriod
+{
+  assertEqual(core.isoWeekKey("2026-01-01"), "2026-W01", "ISO week of 2026-01-01");
+  assertEqual(core.isoWeekKey("2024-12-30"), "2025-W01", "ISO week year rollover");
+  assertEqual(core.isoWeekKey("bad-date"), "", "invalid date gives empty key");
+  const rows = core.buildAnalysisRows(coreSessions, coreSetups, metricsFn);
+  const months = core.aggregateByPeriod(rows, "month");
+  assertEqual(months.length, 2, "monthly bucket count");
+  assertEqual(months[0].key, "2026-05", "monthly buckets sorted ascending");
+  assertEqual(months[1].sessions, 2, "June session count");
+  assertClose(months[1].avg, 56 / 6, 1e-9, "June average per arrow");
+  assert(months[1].best && months[1].best.total === 56, "June best total");
+  assertEqual(core.aggregateByPeriod([], "month").length, 0, "empty rows aggregate to nothing");
+}
+
+// movingAverage
+{
+  const ma = core.movingAverage([1, 2, 3, 4, 5], 3);
+  assertClose(ma[0], 1, 1e-9, "MA head");
+  assertClose(ma[1], 1.5, 1e-9, "MA partial window");
+  assertClose(ma[4], 4, 1e-9, "MA full window");
+  assertEqual(core.movingAverage([], 5).length, 0, "MA of empty input");
+  assertEqual(core.movingAverage([1, NaN, 3], 2)[1], null, "MA masks non-finite input");
+}
+
+// personalBests
+{
+  const rows = core.buildAnalysisRows(coreSessions, coreSetups, metricsFn);
+  const pbs = core.personalBests(rows);
+  assertEqual(pbs.length, 2, "PB group count (round×distance)");
+  assertEqual(pbs[0].dist, 70, "PB groups sorted by distance desc");
+  assertEqual(pbs[0].sessions, 2, "PB 70m session count");
+  assertEqual(pbs[0].bestTotal.total, 56, "PB best total");
+  assertEqual(core.personalBests([]).length, 0, "PB of empty rows");
+}
+
+// conditionSplit
+{
+  const rows = core.buildAnalysisRows(coreSessions, coreSetups, metricsFn);
+  const cs = core.conditionSplit(rows, (s) => Number(s.windSpeed) >= 3.5);
+  assertEqual(cs.windy.sessions, 1, "windy session count");
+  assertEqual(cs.calm.sessions, 2, "calm session count");
+  assertClose(cs.windy.avg, 56 / 6, 1e-9, "windy average");
+  const empty = core.conditionSplit([], () => true);
+  assertEqual(empty.windy.avg, null, "empty split has null averages");
+}
+
+// reasonBreakdown
+{
+  const tagged = coreSession("rt", "2026-06-01", 70, {
+    ends: [[
+      { x: 2, y: 0, s: 8, reason: "リリース" },
+      { x: 2.4, y: 0.2, s: 8, reason: "リリース" },
+      { x: 0, y: -3, s: 8, reason: "風" },
+      { x: 0.1, y: 0, s: 10 },
+    ]],
+  });
+  const rows = core.buildAnalysisRows([tagged], [], metricsFn);
+  const rb = core.reasonBreakdown(rows);
+  assertEqual(rb.tagged, 3, "tagged arrow count");
+  assertEqual(rb.items[0].reason, "リリース", "most frequent tag first");
+  assertEqual(rb.items[0].count, 2, "tag count");
+  assertClose(rb.items[0].mx, 2.2, 1e-9, "tag mean x offset");
+  assertClose(rb.items[0].avg, 8, 1e-9, "tag mean score");
+  assertEqual(core.reasonBreakdown([]).tagged, 0, "no rows means no tags");
+}
+
 console.log("Analysis core characterization checks OK");
