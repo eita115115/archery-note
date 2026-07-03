@@ -222,3 +222,100 @@ function summarizeFormShot(history, anchorStartTs, releaseTs) {
     frames: win.length,
   };
 }
+
+/* ---------- 分析結果の活用: 記録統計・コーチングコメント・トレンド・得点との関係 ---------- */
+
+/* 1 記録の要約統計。features 配列から中央値・ドリフト率・アンカー再現性を出す */
+function formRecordStats(record){
+  const feats=(record&&Array.isArray(record.features))?record.features:[];
+  if(!feats.length) return null;
+  const md=(key)=>formMedian(feats.map((f)=>f.angles&&f.angles[key]).filter(Number.isFinite));
+  const holds=feats.map((f)=>f.phase&&f.phase.anchorMs).filter(Number.isFinite);
+  const av=formAnchorVariation(feats.map((f)=>({anchorNorm:f.anchorNorm})));
+  const withRelease=feats.filter((f)=>f.release);
+  const drifted=withRelease.filter((f)=>f.release.stable===false).length;
+  const confs=feats.map((f)=>f.confidence).filter(Number.isFinite);
+  const scores=feats.map((f)=>f.score).filter(Number.isFinite);
+  return {
+    shots:feats.length,
+    bowArm:md("bowArm"),
+    drawArm:md("drawArm"),
+    holdMs:holds.length?formMedian(holds):null,
+    anchorStd:av.std,
+    anchorLabel:av.label,
+    driftRate:withRelease.length?drifted/withRelease.length:null,
+    confidence:confs.length?confs.reduce((a,x)=>a+x,0)/confs.length:null,
+    score:scores.length?formMedian(scores):null,
+  };
+}
+
+/* 構造化コーチングコメント（archery-master buildStructuredFormComment を
+   本アプリの formAnalysis 形状へ再構成）。観測→原因候補→確認点→次の練習の
+   4 区分で、断定を避けた日本語文を返す。prevRecord があれば前回比も述べる */
+function formRecordInsights(record, prevRecord){
+  const st=formRecordStats(record);
+  if(!st) return null;
+  const prev=prevRecord?formRecordStats(prevRecord):null;
+  const facts=[], causes=[], checks=[], next=[];
+  if(st.holdMs!=null) facts.push(`フルドロー保持は中央値 ${(st.holdMs/1000).toFixed(1)} 秒でした。`);
+  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°（エリート基準 ${FORM_REF.bowArmAngle.ideal}°±${FORM_REF.bowArmAngle.sigma}°）です。`);
+  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°（基準 ${FORM_REF.drawArmAngle.ideal}°）です。`);
+  if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカー位置ばらつきは σ=${st.anchorStd.toFixed(3)}（${st.anchorLabel}）です。`);
+  if(st.driftRate!=null&&st.driftRate>0) facts.push(`${Math.round(st.driftRate*100)}% の射で、リリース前 0.5 秒に弓手/引き手のドリフトを観測しました。`);
+  if(st.confidence!=null) facts.push(`骨格検出の信頼度は平均 ${(st.confidence*100).toFixed(0)}% です。`);
+
+  if(st.driftRate!=null&&st.driftRate>=0.5) causes.push("保持中に押し引きの張り合いが緩んでいる可能性があります（断定ではありません）。");
+  if(st.bowArm!=null&&st.bowArm<FORM_REF.bowArmAngle.ideal-FORM_REF.bowArmAngle.sigma) causes.push("弓手肘が曲がり気味で、押しが的方向へ届いていない可能性があります。");
+  if(st.drawArm!=null&&st.drawArm<FORM_REF.drawArmAngle.ideal-FORM_REF.drawArmAngle.sigma) causes.push("引き手肘の張りが浅く、力線から外れやすい姿勢の可能性があります。");
+  if(st.anchorStd!=null&&st.anchorStd>0.045) causes.push("アンカー位置の再現性が不足している可能性があります。");
+  if(prev&&st.holdMs!=null&&prev.holdMs!=null){
+    const d=(st.holdMs-prev.holdMs)/1000;
+    if(d>=0.4) causes.push(`保持時間が前回より ${d.toFixed(1)} 秒長くなっています。`);
+    else if(d<=-0.4) causes.push(`保持時間が前回より ${(-d).toFixed(1)} 秒短くなっています。`);
+  }
+  if(prev&&st.anchorStd!=null&&prev.anchorStd!=null&&st.anchorStd>prev.anchorStd*1.5&&st.anchorStd>0.03) causes.push("アンカーの再現性が前回より不安定になっています。");
+
+  if(st.driftRate!=null&&st.driftRate>0) checks.push("リリース直前に弓手のグリップ位置が下がっていないか、横からの映像で確認してください。");
+  if(st.anchorStd!=null&&st.anchorStd>0.045) checks.push("アンカーの接触点（顎の位置）が射ごとにずれていないか確認してください。");
+  if(st.bowArm!=null&&Math.abs(st.bowArm-FORM_REF.bowArmAngle.ideal)>FORM_REF.bowArmAngle.sigma) checks.push("セットアップの時点で弓手肘の向きが決まっているかを確認してください。");
+  if(st.holdMs!=null&&st.holdMs>4500) checks.push("保持が長め（4.5秒超）です。狙い直しの回数が増えていないか振り返ってください。");
+
+  if(st.driftRate!=null&&st.driftRate>=0.5) next.push("次の練習ではリリース前 0.5 秒の弓手固定を意識ポイントに入れてください。");
+  if(st.anchorStd!=null&&st.anchorStd>0.045) next.push("同じ接触点で止まる練習（ミラー・ゴム弓）を数本足してください。");
+  if(st.bowArm!=null&&st.bowArm<FORM_REF.bowArmAngle.ideal-FORM_REF.bowArmAngle.sigma) next.push("押し手の伸びを1項目だけ意識して、次の記録で弓手肘の中央値の変化を見てください。");
+  if(!next.length) next.push("同じ撮影角度で記録を重ね、前回比の変化量で確認を続けてください。");
+  return {facts,causes,checks,next,stats:st,prev};
+}
+
+/* 記録の時系列（トレンド表示用）。日付昇順 */
+function formTrendSeries(records){
+  return (records||[]).map((r)=>{
+    const st=formRecordStats(r);
+    if(!st) return null;
+    return {id:r.id,date:r.date||"",ts:r.ts||0,bowArm:st.bowArm,drawArm:st.drawArm,
+      holdS:st.holdMs!=null?st.holdMs/1000:null,anchorStd:st.anchorStd,driftRate:st.driftRate,score:st.score};
+  }).filter(Boolean).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts-b.ts));
+}
+
+/* 射形×得点: sessionId で紐付いた記録から、リリース安定（ドリフト率<50%）の
+   回とドリフトが多い回の平均点を比較する。metricsFn には sessionMetrics を渡す */
+function formScoreLink(records, sessions, metricsFn){
+  const byId={};
+  (sessions||[]).forEach((s)=>{ if(s&&s.id) byId[s.id]=s; });
+  const pairs=(records||[]).map((r)=>{
+    const s=r&&r.sessionId?byId[r.sessionId]:null;
+    if(!s) return null;
+    const st=formRecordStats(r);
+    if(!st) return null;
+    const m=metricsFn(s);
+    if(!m.all.length) return null;
+    return {recordId:r.id,date:r.date||"",avg:m.avg,driftRate:st.driftRate,formScore:st.score,anchorStd:st.anchorStd};
+  }).filter(Boolean);
+  const stable=pairs.filter((p)=>p.driftRate!=null&&p.driftRate<0.5);
+  const drifty=pairs.filter((p)=>p.driftRate!=null&&p.driftRate>=0.5);
+  const avgOf=(a)=>a.length?a.reduce((x,p)=>x+p.avg,0)/a.length:null;
+  const split=(stable.length&&drifty.length)
+    ?{stableAvg:avgOf(stable),driftAvg:avgOf(drifty),stableN:stable.length,driftN:drifty.length}
+    :null;
+  return {n:pairs.length,pairs,split};
+}

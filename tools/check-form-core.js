@@ -24,7 +24,8 @@ const core = new Function(
   `${coreScript}
 return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
   formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase,
-  formPreReleaseWindow, formAnchorVariation, summarizeFormShot};`,
+  formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
+  formRecordStats, formRecordInsights, formTrendSeries, formScoreLink};`,
 )();
 
 /* ---------- 幾何ヘルパー ---------- */
@@ -197,6 +198,91 @@ function anchorHistory(releaseTs, drift) {
   assertClose(shot.angles.bowArm, 171, 1e-9, "median bow arm");
   assert(shot.confidence > 0.8, "summary confidence");
   assertEqual(core.summarizeFormShot([], 0, 10000), null, "no history no summary");
+}
+
+
+/* ---------- 記録統計・コーチングコメント・トレンド・得点との関係 ---------- */
+
+function makeFormRecord(id, date, opts) {
+  const o = opts || {};
+  const stable = o.stable == null ? true : o.stable;
+  const feature = (i) => ({
+    phase: { anchorMs: o.holdMs == null ? 1800 : o.holdMs },
+    angles: { bowArm: o.bowArm == null ? 171 : o.bowArm, drawArm: o.drawArm == null ? 150 : o.drawArm },
+    anchorNorm: 0.2 + i * (o.anchorSpread || 0.002),
+    release: { bowMove: 0.02, drawMove: 0.02, stable },
+    confidence: 0.9,
+    score: 80,
+  });
+  return {
+    id, date, ts: o.ts || 0, sessionId: o.sessionId || null, setupId: null,
+    shots: o.shots || 3, modelVer: "test", appVer: 66, fps: 20,
+    features: Array.from({ length: o.shots || 3 }, (_, i) => feature(i)), note: "",
+  };
+}
+
+{
+  const st = core.formRecordStats(makeFormRecord("r1", "2026-07-01", { holdMs: 2000, bowArm: 168 }));
+  assertEqual(st.shots, 3, "record stats shot count");
+  assertClose(st.bowArm, 168, 1e-9, "record stats bow arm median");
+  assertClose(st.holdMs, 2000, 1e-9, "record stats hold median");
+  assertEqual(st.driftRate, 0, "all-stable record has zero drift rate");
+  assertEqual(core.formRecordStats({ features: [] }), null, "empty record stats");
+  assertEqual(core.formRecordStats(null), null, "null record stats");
+}
+{
+  // ドリフトが多い記録: 原因候補と「次の練習」にドリフト対策が入る
+  const drifty = makeFormRecord("r2", "2026-07-02", { stable: false });
+  const ins = core.formRecordInsights(drifty);
+  assert(ins.facts.some((t) => t.includes("ドリフト")), "drift observed in facts");
+  assert(ins.causes.length >= 1, "drifty record has causes");
+  assert(ins.next.some((t) => t.includes("弓手固定")), "drift countermeasure in next");
+}
+{
+  // 安定した記録: 既定の「次の練習」だけが出る
+  const ins = core.formRecordInsights(makeFormRecord("r3", "2026-07-02", {}));
+  assert(ins.next.length === 1 && ins.next[0].includes("同じ撮影角度"), "stable record gets default next");
+}
+{
+  // 前回比: 保持時間の変化が原因候補に載る
+  const prev = makeFormRecord("p", "2026-07-01", { holdMs: 1500 });
+  const cur = makeFormRecord("c", "2026-07-02", { holdMs: 2600 });
+  const ins = core.formRecordInsights(cur, prev);
+  assert(ins.causes.some((t) => t.includes("前回より") && t.includes("長く")), "hold delta vs previous reported");
+}
+{
+  const series = core.formTrendSeries([
+    makeFormRecord("b", "2026-07-02", { ts: 2 }),
+    makeFormRecord("a", "2026-07-01", { ts: 1 }),
+  ]);
+  assertEqual(series.length, 2, "trend series length");
+  assertEqual(series[0].id, "a", "trend series sorted by date");
+  assert(Number.isFinite(series[0].bowArm) && Number.isFinite(series[0].holdS), "trend point fields");
+  assertEqual(core.formTrendSeries([]).length, 0, "empty trend series");
+}
+{
+  const sessions = [
+    { id: "s1", ends: [[{ s: 10 }, { s: 9 }]] },
+    { id: "s2", ends: [[{ s: 7 }, { s: 6 }]] },
+  ];
+  const metricsFn = (s) => {
+    const all = s.ends.flat();
+    const total = all.reduce((a, x) => a + x.s, 0);
+    return { all, total, avg: all.length ? total / all.length : 0, st: null };
+  };
+  const records = [
+    makeFormRecord("f1", "2026-07-01", { sessionId: "s1", stable: true }),
+    makeFormRecord("f2", "2026-07-02", { sessionId: "s2", stable: false }),
+    makeFormRecord("f3", "2026-07-03", {}), // 未紐付け
+  ];
+  const link = core.formScoreLink(records, sessions, metricsFn);
+  assertEqual(link.n, 2, "only linked records pair up");
+  assert(link.split, "split computed with both stable and drifty");
+  assertClose(link.split.stableAvg, 9.5, 1e-9, "stable-day average");
+  assertClose(link.split.driftAvg, 6.5, 1e-9, "drift-day average");
+  const none = core.formScoreLink([makeFormRecord("f4", "2026-07-04", {})], sessions, metricsFn);
+  assertEqual(none.n, 0, "unlinked records give no pairs");
+  assertEqual(none.split, null, "no split without pairs");
 }
 
 console.log("Form core checks OK");
