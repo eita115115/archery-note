@@ -6,6 +6,7 @@ const APP_SCRIPTS = [
   "./scripts/20-scoring.js",
   "./scripts/30-target-svg.js",
   "./scripts/40-analysis-physics.js",
+  "./scripts/45-analysis-core.js",
   "./scripts/50-record-view.js",
   "./scripts/60-history-sight-view.js",
   "./scripts/70-gear-settings.js",
