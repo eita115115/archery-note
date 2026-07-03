@@ -295,8 +295,8 @@ function setupComparisonHtml(setupId){
   const last=ss[ss.length-1];
   const prev=[...ss.slice(0,-1)].reverse().find(s=>s.dist===last.dist) || ss[ss.length-2];
   const metric=s=>{
-    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0);
-    return {all,st,total,avg:all.length?total/all.length:0};
+    const m=sessionMetrics(s);
+    return {all:m.all,st:m.st,total:m.total,avg:m.avg};
   };
   const a=metric(prev), b=metric(last);
   const delta=(x,unit="",goodLow=false)=>{

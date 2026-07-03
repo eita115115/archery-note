@@ -296,11 +296,12 @@ assert(sp && sp.ready && sp.candidates.includes(660) && ["概ね候補域","候�
 assert(gearApi.gearPrecisionHtml({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"}).includes("スパイン初期候補"), "Spine guidance UI missing");
 
 const historyApi = new Function(
-  "db","robustStats","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc","zoneStyle",
+  "db","robustStats","sessionMetrics","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc","zoneStyle",
   section("function sessionGroupPoint", "function monthlyCard") + "\nreturn {groupingTrendCard,scoreDistCard};"
 )(
   {setups:[{id:"main",name:"Main setup"}]},
   statsApi.robustStats,
+  s => { const all = s.ends.flat(); const total = all.reduce((a,x)=>a+x.s,0); return {all, total, avg: all.length ? total/all.length : 0, st: statsApi.robustStats(all)}; },
   scoreApi.ringW,
   statsApi.groupStats,
   faceApi.faceLabel,

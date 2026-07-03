@@ -69,8 +69,7 @@ function plotSession(sess, container){
   const marks=$("#plmarks");
   let html="";
   sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length]); }); });
-  const all=sess.ends.flat();
-  const st=robustStats(all);
+  const st=sessionMetrics(sess).st;
   if(st){
     const w=ringW(faceD,ft);
     st.excluded.forEach(a=>{

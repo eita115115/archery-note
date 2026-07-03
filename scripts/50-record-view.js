@@ -370,6 +370,9 @@ function pageHeroHtml(type,ctx){
   if(type==="sight"){
     const setup=ctx.setup, dist=ctx.dist, marks=ctx.marks||[], adv=ctx.adv;
     const cur=marks[0];
+    const axes=adv?adv.lines.map(l=>l.axis):[];
+    const hasV=axes.includes("v"), hasH=axes.includes("h");
+    const advSummary=!adv?"材料待ち":hasV&&hasH?"上下・左右調整":hasV?"上下調整あり":hasH?"左右調整あり":"調整不要";
     return `<section class="pageHero">
       <div class="kicker">サイト調整</div>
       <h2>サイト値を整える</h2>
@@ -377,7 +380,7 @@ function pageHeroHtml(type,ctx){
       <div class="heroMetrics">
         ${heroMetricHtml("対象",setup?setup.name:"用具未指定",dist?`${dist}m`:"距離未指定")}
         ${heroMetricHtml("最新サイト",cur?`上下 ${cur.v||"—"}`:"未登録",cur?`左右 ${cur.h||"—"}`:"台帳へ記録")}
-        ${heroMetricHtml("提案",adv&&adv.lines.length?adv.lines[0].text||"調整あり":"材料待ち",adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
+        ${heroMetricHtml("提案",advSummary,adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
       </div>
     </section>`;
   }
@@ -747,9 +750,8 @@ function finishSession(){
 /* ---------- summary modal ---------- */
 function openSummary(sess, isNew){
   const setup=db.setups.find(x=>x.id===sess.setupId);
-  const all=sess.ends.flat();
-  const total=all.reduce((a,x)=>a+x.s,0);
-  const st=robustStats(all);
+  const m=sessionMetrics(sess);
+  const all=m.all, total=m.total, st=m.st;
   const adv=adviceFor(sess, setup);
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet">

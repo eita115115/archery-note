@@ -39,14 +39,13 @@ function renderHistory(m){
   document.querySelectorAll("#histList .listItem").forEach(li=>li.onclick=()=>openHistDetail(li.dataset.id));
 }
 function sessionGroupPoint(s){
-  const all=s.ends.flat();
-  if(all.length<3) return null;
-  const st=robustStats(all);
+  const m=sessionMetrics(s);
+  if(m.all.length<3) return null;
+  const st=m.st;
   if(!st || st.n<3) return null;
-  const total=all.reduce((a,x)=>a+x.s,0);
   const setup=db.setups.find(x=>x.id===s.setupId);
   return {id:s.id,date:s.date||"",setupId:s.setupId||"none",setupName:setup?setup.name:"未指定",dist:s.dist,faceD:s.faceD,faceType:s.faceType||"single",
-    mx:st.mx,my:st.my,rr:st.rr,sx:st.sx,sy:st.sy,major:st.major,minor:st.minor,n:st.n,total,avg:total/all.length};
+    mx:st.mx,my:st.my,rr:st.rr,sx:st.sx,sy:st.sy,major:st.major,minor:st.minor,n:st.n,total:m.total,avg:m.avg};
 }
 function historyDistanceLabel(dist){
   const n=Number(dist);
@@ -183,7 +182,7 @@ function openHistDetail(id){
   const ovl=document.createElement("div"); ovl.className="ovl";
   const all=sess.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
   const setup=db.setups.find(x=>x.id===sess.setupId);
-  const st=robustStats(all);
+  const st=sessionMetrics(sess).st;
   const adv=adviceFor(sess,setup);
   ovl.innerHTML=`<div class="sheet">
     <h3>${fmtD(sess.date)} ・ ${historyDistanceLabel(sess.dist)} ・ ${faceLabel(sess)}</h3>
