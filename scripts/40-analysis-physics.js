@@ -299,7 +299,7 @@ function physicsCalibrationHtml(setupId){
   const c=personalPhysicsCalibration(setupId);
   if(!c) return "";
   const color=c.level==="校正安定"?"#0f9d58":c.level==="未校正"?"#8a6d1d":"#1e6fd9";
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  return `<div class="advice analysisAdviceCard">
     <div class="note"><b style="color:${color}">物理校正: ${c.level}</b>（${pct(c.score)}）</div>
     <div class="kv"><span>校正材料</span><span>有効練習 ${c.usable}回 / 風 ${c.wind.sample}回 / サイト値 ${c.sight.n}点</span></div>
     ${c.notes.map(n=>`<div class="note">・${esc(n)}</div>`).join("")}
@@ -383,7 +383,7 @@ function adviceFor(sess, setup){
     let l=`サイトを<b>${st.my>0?"上":"下"}</b>へ（中心は${cmOffsetText(st.my,"y")}、補正 ${pct(model.vFactor)}） — 目安 ${mm.toFixed(1)}mm`;
     if(setup && setup.calibV70){ const cpc=setup.calibV70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
     else if(model.pcal && model.pcal.click.v70){ const cpc=model.pcal.click.v70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
-    if(sess.sightV) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightV)}</span>`;
+    if(sess.sightV) l+=` <span class="subNoteSm">現在 ${esc(sess.sightV)}</span>`;
     out.lines.push({axis:"v", html:l});
   }
   // 左右
@@ -393,7 +393,7 @@ function adviceFor(sess, setup){
     let l=`サイトを<b>${st.mx>0?"右":"左"}</b>へ（中心は${cmOffsetText(st.mx,"x")}、補正 ${pct(model.hFactor)}） — 目安 ${mm.toFixed(1)}mm`;
     if(setup && setup.calibH70){ const cpc=setup.calibH70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
     else if(model.pcal && model.pcal.click.h70){ const cpc=model.pcal.click.h70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
-    if(sess.sightH) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightH)}</span>`;
+    if(sess.sightH) l+=` <span class="subNoteSm">現在 ${esc(sess.sightH)}</span>`;
     out.lines.push({axis:"h", html:l});
   }
   if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です 👏"});
@@ -411,7 +411,7 @@ function summarySightDialHtml(sess, adv){
     <div class="dialGrid">
       <svg viewBox="0 0 110 110" aria-hidden="true">
         <circle class="ring" cx="55" cy="55" r="48"/>
-        <circle class="ring" cx="55" cy="55" r="30" style="opacity:.55"/>
+        <circle class="ring dialRingInner" cx="55" cy="55" r="30"/>
         <line class="axis" x1="10" y1="55" x2="100" y2="55"/>
         <line class="axis" x1="55" y1="10" x2="55" y2="100"/>
         <line class="vector" x1="55" y1="55" x2="${(55+dx).toFixed(1)}" y2="${(55+dy).toFixed(1)}"/>
@@ -453,7 +453,7 @@ function judgementHtml(adv,sess){
   const j=judgementFor(adv,sess);
   if(!j) return "";
   const color=j.tone==="ok"?"#0f9d58":j.tone==="warn"?"#c62828":"#8a6d1d";
-  return `<div class="note" style="margin-top:6px"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
+  return `<div class="note analysisMt6"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
 }
 function summaryDecisionHtml(adv,sess){
   const j=judgementFor(adv,sess);
@@ -500,7 +500,7 @@ function conditionInsights(sess,st,setup){
 }
 function conditionHtml(sess,st,setup){
   const notes=conditionInsights(sess,st,setup).slice(0,4);
-  return notes.length?`<div class="advice" style="background:var(--card);border-color:var(--line)">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
+  return notes.length?`<div class="advice analysisAdviceCard">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
 }
 const SESSION_METRIC_CACHE=new Map();
 function sessionMetricSignature(sess){
@@ -590,8 +590,8 @@ function personalModelHtml(adv,sess,setup){
   if(!adv || !adv.personal) return "";
   const p=adv.personal;
   const tone=p.state==="過去と一致"?"#0f9d58":p.state==="今回だけの可能性"?"#c62828":"#8a6d1d";
-  if(p.sample<2) return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  if(p.sample<2) return `<div class="advice analysisAdviceCard"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
+  return `<div class="advice analysisAdviceCard">
     <div class="note"><b style="color:${tone}">個人モデル: ${p.state}</b> — ${esc(p.text)}</div>
     <div class="kv"><span>過去の加重中心</span><span>${cmOffsetText(p.mx,"x")} / ${cmOffsetText(p.my,"y")}</span></div>
     <div class="kv"><span>同条件データ</span><span>${p.sample}回 / 安定度 ${pct(p.stability)}</span></div>
@@ -625,7 +625,7 @@ function nextActionPlan(sess,adv,setup){
 }
 function nextActionHtml(sess,adv,setup){
   const plan=nextActionPlan(sess,adv,setup);
-  return plan.length?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>次のアクション</b></div>${plan.map((p,i)=>`<div class="note">${i+1}. ${p}</div>`).join("")}</div>`:"";
+  return plan.length?`<div class="advice analysisAdviceCard"><div class="note"><b>次のアクション</b></div>${plan.map((p,i)=>`<div class="note">${i+1}. ${p}</div>`).join("")}</div>`:"";
 }
 function roundProgressHtml(sess){
   const r=ROUND_TYPES.find(x=>x.id===sess.round);
@@ -690,14 +690,14 @@ function backupReminderHtml(){
   const t=db.settings.lastBackupAt?Date.parse(db.settings.lastBackupAt):0;
   const days=t?Math.floor((Date.now()-t)/(24*60*60*1000)):999;
   if(days<30) return `<div class="hint">最終バックアップ/CSV出力: ${new Date(t).toLocaleDateString()}。月1回の保存ペースは良好です。</div>`;
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
+  return `<div class="advice analysisAdviceCard"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
 }
 function trashSettingsHtml(){
   const items=(db.trash||[]).slice(0,8);
-  if(!items.length) return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
-  return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱 <span style="font-size:11px;color:var(--sub)">最新${items.length}/${(db.trash||[]).length}件</span></h3>
+  if(!items.length) return `<h3 class="trashH3">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
+  return `<h3 class="trashH3">ゴミ箱 <span class="subNoteSm">最新${items.length}/${(db.trash||[]).length}件</span></h3>
     <table class="tbl"><tr><th>種類</th><th>内容</th><th>削除日</th><th></th></tr>
-    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost" data-restore-trash="${it.id}" style="padding:4px 8px">復元</button></td></tr>`).join("")}</table>
+    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost trashRestoreBtn" data-restore-trash="${it.id}">復元</button></td></tr>`).join("")}</table>
     <div class="btnrow"><button class="btn danger" id="trashClear">ゴミ箱を空にする</button></div>`;
 }
 function regress(pts){
@@ -867,7 +867,7 @@ function modelReadinessProfile(setupId){
 function modelReadinessHtml(setupId){
   if(!setupId) return "";
   const p=modelReadinessProfile(setupId);
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  return `<div class="advice analysisAdviceCard">
     <div class="note"><b>個人データ準備度: ${p.level}</b>（${pct(p.score)}）</div>
     <div class="kv"><span>使える練習</span><span>${p.good}回 / 同条件反復 ${p.repeatGroups}組</span></div>
     <div class="kv"><span>サイト校正材料</span><span>サイト値つき練習 ${p.withSight}回 / 台帳 ${p.sightDists}距離</span></div>
