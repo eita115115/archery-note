@@ -22,7 +22,8 @@ function normalizeDb(d){
   return out;
 }
 function load(){
-  try{ const d=JSON.parse(storageGetItem(KEY)); if(d && d.sessions) return normalizeDb(d); }catch(e){}
+  /* sessions キー欠落でも setups 等を持つ正当なデータは normalizeDb が補完して保持する */
+  try{ const d=JSON.parse(storageGetItem(KEY)); if(d && typeof d==="object" && !Array.isArray(d)) return normalizeDb(d); }catch(e){}
   return blankDb();
 }
 function dataCounts(d=db){

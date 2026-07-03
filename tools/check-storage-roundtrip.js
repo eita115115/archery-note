@@ -19,6 +19,7 @@ const fixtureFiles = {
   partialLegacy: "archery-note-v1-partial-legacy.json",
   danglingSetup: "archery-note-v1-dangling-setup.json",
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
+  missingSessions: "archery-note-v1-missing-sessions.json",
 };
 const expectedCsvHeader = [
   "date",
@@ -98,6 +99,12 @@ function loadStorageApi() {
     "localStorage",
     `${storageScript}\nreturn {KEY, SNAP_KEY, normalizeDb, blankDb, dataCounts};`,
   )(makeLocalStorageShim());
+}
+
+function loadDbFromRaw(raw) {
+  const shim = makeLocalStorageShim();
+  shim.setItem("archeryNote.v1", raw);
+  return new Function("localStorage", `${storageScript}\nreturn db;`)(shim);
 }
 
 function createImportSnapshot(db) {
@@ -358,6 +365,30 @@ function checkSightMarksCompatibilityRoundTrip(db) {
   );
 }
 
+function checkMissingSessionsLoad(fixture) {
+  // sessions キーを欠く正当なバックアップでも load() が setups を破棄しないこと
+  const db = loadDbFromRaw(JSON.stringify(fixture));
+  checkBaseShape("missing-sessions load", db);
+  assert(
+    db.setups.some((setup) => setup.id === "fixture-missing-sessions-setup"),
+    "[missing-sessions load] setups should survive load()",
+  );
+  assert(
+    db.sightMarks.some((mark) => mark.id === "fixture-missing-sessions-mark"),
+    "[missing-sessions load] sight marks should survive load()",
+  );
+  assertEqual(db.sessions.length, 0, "[missing-sessions load] sessions normalize to empty");
+  assertEqual(db.settings.eyeSight, 850, "[missing-sessions load] settings survive load()");
+
+  // 壊れた入力・非オブジェクトは従来どおり blankDb になること
+  ["null", "[1,2]", '"text"', "42", "{broken json"].forEach((raw) => {
+    const blank = loadDbFromRaw(raw);
+    checkBaseShape(`invalid load (${raw})`, blank);
+    assertEqual(blank.setups.length, 0, `[invalid load (${raw})] setups`);
+    assertEqual(blank.sessions.length, 0, `[invalid load (${raw})] sessions`);
+  });
+}
+
 function checkSnapshot(storageApi, representative) {
   const normalized = storageApi.normalizeDb(clone(representative));
   const result = createImportSnapshot(normalized);
@@ -466,8 +497,10 @@ function main() {
   checkPartialLegacyRoundTrip(normalized.partialLegacy);
   checkDanglingSetupRoundTrip(normalized.danglingSetup);
   checkSightMarksCompatibilityRoundTrip(normalized.sightMarksCompatibility);
+  checkMissingSessionsLoad(fixtures.missingSessions);
   checkSnapshot(storageApi, fixtures.representative);
   checkCsvForAllFixtures(normalized);
+  checkCsvRows("missing-sessions", normalized.missingSessions, 1);
 
   console.log("Storage round-trip checks OK");
 }

@@ -15,6 +15,7 @@ const fixtureFiles = {
   partialLegacy: "archery-note-v1-partial-legacy.json",
   danglingSetup: "archery-note-v1-dangling-setup.json",
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
+  missingSessions: "archery-note-v1-missing-sessions.json",
 };
 
 function assert(ok, message) {
