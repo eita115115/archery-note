@@ -30,7 +30,10 @@ self.addEventListener("fetch", e => {
   e.respondWith(
     fetch(e.request)
       .then(res => {
-        if (res && (res.ok || res.type === "opaque")) {
+        // キャッシュ肥大防止: version.json?ts= / index.html?appv= のような
+        // クエリ付きユニークURLと外部オリジンは保存しない
+        const cacheable = url.origin === self.location.origin && url.search === "";
+        if (cacheable && res && (res.ok || res.type === "opaque")) {
           const copy = res.clone();
           caches.open(CACHE).then(c => c.put(e.request, copy));
         }
