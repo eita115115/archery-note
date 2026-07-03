@@ -16,6 +16,7 @@ const fixtureFiles = {
   danglingSetup: "archery-note-v1-dangling-setup.json",
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
   missingSessions: "archery-note-v1-missing-sessions.json",
+  formAnalyses: "archery-note-v1-form-analyses.json",
 };
 
 function assert(ok, message) {
@@ -416,6 +417,26 @@ function checkSightMarksCompatibility(storageApi, fixtures) {
   assertObject(db.legacyTopLevelField, "[sight-marks-compatibility] legacy top-level field");
 }
 
+function checkFormAnalysesCompatibility(storageApi, fixtures) {
+  // schema 4 前方互換: 現行(schema 3)実装は formAnalyses を未知フィールドとして
+  // 破棄せず保持しなければならない（docs/storage-schema4-design.md）
+  const db = storageApi.normalizeDb(clone(fixtures.formAnalyses));
+  checkBaseShape("form-analyses", db);
+  assertArray(db.formAnalyses, "[form-analyses] formAnalyses");
+  assertEqual(db.formAnalyses.length, 1, "[form-analyses] record count");
+  const rec = db.formAnalyses[0];
+  assertEqual(rec.id, "fixture-form-analysis-1", "[form-analyses] record id");
+  assertEqual(rec.sessionId, "fixture-form-session", "[form-analyses] session link");
+  assertArray(rec.features, "[form-analyses] features");
+  assertEqual(rec.features.length, 2, "[form-analyses] feature count");
+  assertEqual(rec.features[0].angles.bowElbow, 171, "[form-analyses] nested angle survives");
+  assertEqual(rec.features[0].phase.anchorMs, 1800, "[form-analyses] nested phase survives");
+  assert(
+    db.sessions.some((session) => session.id === "fixture-form-session"),
+    "[form-analyses] linked session survives",
+  );
+}
+
 function main() {
   const fixtures = loadFixtures();
   const storageApi = loadStorageApi();
@@ -429,6 +450,7 @@ function main() {
   checkPartialLegacy(storageApi, fixtures);
   checkDanglingSetup(storageApi, fixtures);
   checkSightMarksCompatibility(storageApi, fixtures);
+  checkFormAnalysesCompatibility(storageApi, fixtures);
 
   console.log("Storage contract checks OK");
 }

@@ -1,0 +1,76 @@
+{
+  "schema": 3,
+  "setups": [
+    {
+      "id": "fixture-form-setup",
+      "name": "Form tracking setup",
+      "poundage": "38"
+    }
+  ],
+  "sightMarks": [],
+  "sessions": [
+    {
+      "id": "fixture-form-session",
+      "date": "2026-07-01",
+      "setupId": "fixture-form-setup",
+      "dist": 70,
+      "faceD": 122,
+      "faceType": "single",
+      "round": "free",
+      "ends": [
+        [
+          { "x": 1.2, "y": 0.4, "s": 9 },
+          { "x": -0.6, "y": 1.1, "s": 10, "X": true },
+          { "x": 0.3, "y": -0.8, "s": 10 }
+        ]
+      ]
+    }
+  ],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850
+  },
+  "active": null,
+  "formAnalyses": [
+    {
+      "id": "fixture-form-analysis-1",
+      "date": "2026-07-01",
+      "ts": 1782800000000,
+      "sessionId": "fixture-form-session",
+      "setupId": "fixture-form-setup",
+      "shots": 2,
+      "modelVer": "pose_landmarker_lite v1",
+      "appVer": 65,
+      "fps": 18.5,
+      "features": [
+        {
+          "phase": { "drawMs": 2100, "anchorMs": 1800, "releaseToFollowMs": 400 },
+          "angles": {
+            "bowShoulder": 96,
+            "bowElbow": 171,
+            "drawElbow": 151,
+            "drawShoulder": 84,
+            "torsoLean": 3,
+            "headTilt": 2
+          },
+          "release": { "drawHandSpeed": 1.8, "elbowLineDeg": 4 },
+          "confidence": 0.91
+        },
+        {
+          "phase": { "drawMs": 2300, "anchorMs": 1650, "releaseToFollowMs": 380 },
+          "angles": {
+            "bowShoulder": 94,
+            "bowElbow": 169,
+            "drawElbow": 149,
+            "drawShoulder": 86,
+            "torsoLean": 4,
+            "headTilt": 3
+          },
+          "release": { "drawHandSpeed": 2.1, "elbowLineDeg": 6 },
+          "confidence": 0.88
+        }
+      ],
+      "note": "schema 3 実装にとっては未知フィールド。破棄されないことを固定する"
+    }
+  ]
+}

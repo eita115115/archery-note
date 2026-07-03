@@ -20,6 +20,7 @@ const fixtureFiles = {
   danglingSetup: "archery-note-v1-dangling-setup.json",
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
   missingSessions: "archery-note-v1-missing-sessions.json",
+  formAnalyses: "archery-note-v1-form-analyses.json",
 };
 const expectedCsvHeader = [
   "date",
@@ -501,6 +502,17 @@ function main() {
   checkSnapshot(storageApi, fixtures.representative);
   checkCsvForAllFixtures(normalized);
   checkCsvRows("missing-sessions", normalized.missingSessions, 1);
+
+  // schema 4 前方互換: JSON 往復で formAnalyses が保持され、CSV には影響しない
+  const fa = normalized.formAnalyses;
+  assertArray(fa.formAnalyses, "[form-analyses] formAnalyses after round trip");
+  assertEqual(fa.formAnalyses.length, 1, "[form-analyses] record survives round trip");
+  assertEqual(
+    fa.formAnalyses[0].features[1].release.drawHandSpeed,
+    2.1,
+    "[form-analyses] nested feature survives round trip",
+  );
+  checkCsvRows("form-analyses", fa, 2);
 
   console.log("Storage round-trip checks OK");
 }
