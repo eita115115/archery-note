@@ -1,4 +1,4 @@
-const CACHE = "archery-note-v64";
+const CACHE = "archery-note-v65";
 const CACHE_PREFIX = "archery-note-v";
 const APP_SCRIPTS = [
   "./scripts/00-compat.js",
