@@ -454,9 +454,20 @@ function checkFormAnalysisTrashRestore(storageApi, fixtures) {
   );
 }
 
+function checkDbRevContract() {
+  assert(/^let DB_REV\s*=\s*0/m.test(storageScript), "[db-rev] storage script should declare let DB_REV");
+  const saveBody = section("function save(", "function uid");
+  assert(
+    saveBody.includes("DB_REV++"),
+    "[db-rev] save() should bump DB_REV so session metric caches invalidate",
+  );
+}
+
 function main() {
   const fixtures = loadFixtures();
   const storageApi = loadStorageApi();
+
+  checkDbRevContract();
 
   checkNormalizeIdempotency(storageApi, fixtures);
   checkBlank(storageApi, fixtures);
