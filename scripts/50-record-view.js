@@ -495,6 +495,7 @@ function renderAnalysis(m){
   const cards=[
     analysisKpiHtml(rows),
     analysisTrendChartHtml(rows),
+    formTrackingCard(),
     personalBestCard(rows),
     conditionSplitCard(rows),
     reasonBreakdownCard(rows),
@@ -515,6 +516,7 @@ function renderAnalysis(m){
   const anDist=$("#anDist");
   if(anDist) anDist.onchange=e=>{ f.dist=e.target.value; render(); };
   document.querySelectorAll("#anPeriods .chip[data-period]").forEach(c=>c.onclick=()=>{ f.period=c.dataset.period; render(); });
+  bindFormTrackingCard();
 }
 function liveSessionHeroHtml(s,setup){
   const all=sessionArrows(s);

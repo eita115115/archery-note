@@ -741,3 +741,11 @@ header.app .gear{
   *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
   .bootFallback{opacity:1; visibility:visible; pointer-events:auto;}
 }
+
+/* form tracking (beta) */
+.formCamWrap{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#0f1412;min-height:120px}
+.formCamWrap video{width:100%;display:block;opacity:.9}
+.formCamWrap canvas{position:absolute;inset:0;width:100%;height:100%}
+.formPhaseTag{position:absolute;top:8px;right:8px;background:rgba(13,59,36,.85);color:#eafff2;border-radius:8px;padding:2px 10px;font-size:12px;font-weight:700}
+.formPhaseTag.release{background:rgba(198,40,40,.9)}
+.formPhaseTag.fulldraw{background:rgba(184,134,11,.9)}

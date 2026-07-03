@@ -365,6 +365,12 @@ function openSettings(){
     </div>
     <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
     <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
+    <label class="f">射形トラッキング（ベータ）</label>
+    <div class="chips" id="ftChips">
+      <div class="chip ${db.settings.formTrackingEnabled?"":"on"}" data-ft="0">OFF</div>
+      <div class="chip ${db.settings.formTrackingEnabled?"on":""}" data-ft="1">ON</div>
+    </div>
+    <div class="hint">ONにすると分析タブにカメラでの射形解析が出ます。解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
     ${nativeReadinessHtml()}
     <h3 class="settingsH3">データ管理</h3>
     ${backupReminderHtml()}
@@ -392,6 +398,11 @@ function openSettings(){
     ovl.querySelectorAll("#thChips .chip").forEach(x=>x.classList.toggle("on",x===c));
   });
   ovl.querySelector("#setEye").onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); };
+  ovl.querySelectorAll("#ftChips .chip").forEach(c=>c.onclick=()=>{
+    db.settings.formTrackingEnabled=c.dataset.ft==="1"; save();
+    ovl.querySelectorAll("#ftChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    toast(db.settings.formTrackingEnabled?"射形トラッキングを有効にしました（分析タブ）":"射形トラッキングを無効にしました");
+  });
   ovl.querySelector("#setClose").onclick=()=>{ ovl.remove(); render(); };
   ovl.querySelector("#dExp").onclick=()=>{
     db.settings.lastBackupAt=new Date().toISOString();

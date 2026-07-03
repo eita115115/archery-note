@@ -3,19 +3,19 @@
 /* ============ storage ============ */
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
-const SCHEMA_VER=3;
+const SCHEMA_VER=4; /* v4: formAnalyses 追加のみ（docs/storage-schema4-design.md） */
 const APP_VER=65;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false},active:null}; }
 function normalizeDb(d){
   const base=blankDb(), src=(d&&typeof d==="object")?d:{};
   const out=Object.assign(base,src);
   out.settings=Object.assign(base.settings,src.settings||{});
-  ["setups","sightMarks","sessions","trash"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  ["setups","sightMarks","sessions","trash","formAnalyses"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
@@ -278,12 +278,14 @@ function restoreTrash(id){
     const setup=data.setup;
     if(setup && !db.setups.some(s=>s.id===setup.id)) db.setups.push(setup);
     (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });
+  }else if(item.type==="formAnalysis"){
+    if(!db.formAnalyses.some(f=>f.id===data.id)) db.formAnalyses.push(data);
   }
   db.trash.splice(i,1);
   save({reason:"restore-trash",forceSnapshot:true});
   return true;
 }
-function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":"削除データ"; }
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":t==="formAnalysis"?"射形記録":"削除データ"; }
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);

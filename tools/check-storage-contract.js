@@ -96,7 +96,7 @@ function assertHasOwn(object, key, label) {
 }
 
 function checkBaseShape(name, db) {
-  assertEqual(db.schema, 3, `[${name}] schema`);
+  assertEqual(db.schema, 4, `[${name}] schema`);
   assertArray(db.setups, `[${name}] setups`);
   assertArray(db.sightMarks, `[${name}] sightMarks`);
   assertArray(db.sessions, `[${name}] sessions`);
@@ -437,6 +437,23 @@ function checkFormAnalysesCompatibility(storageApi, fixtures) {
   );
 }
 
+function checkFormAnalysisTrashRestore(storageApi, fixtures) {
+  const db = storageApi.normalizeDb(clone(fixtures.formAnalyses));
+  const rec = db.formAnalyses[0];
+  const trashApi = loadTrashApi(db, () => {});
+  const item = trashApi.trashItem("formAnalysis", "射形記録", rec);
+  db.formAnalyses = db.formAnalyses.filter((f) => f.id !== rec.id);
+  assert(trashApi.restoreTrash(item.id), "[form-analyses trash] restore should succeed");
+  assert(
+    db.formAnalyses.some((f) => f.id === rec.id),
+    "[form-analyses trash] record should return to formAnalyses",
+  );
+  assert(
+    !trashApi.restoreTrash(item.id),
+    "[form-analyses trash] second restore of same id should fail",
+  );
+}
+
 function main() {
   const fixtures = loadFixtures();
   const storageApi = loadStorageApi();
@@ -451,6 +468,7 @@ function main() {
   checkDanglingSetup(storageApi, fixtures);
   checkSightMarksCompatibility(storageApi, fixtures);
   checkFormAnalysesCompatibility(storageApi, fixtures);
+  checkFormAnalysisTrashRestore(storageApi, fixtures);
 
   console.log("Storage contract checks OK");
 }
