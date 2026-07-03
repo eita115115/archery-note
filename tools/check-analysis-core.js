@@ -45,12 +45,13 @@ return {ringW, arrowMarkRadius, lineCutRadius, scoreAt, isLineCutting, hitFromGl
 )();
 
 const analysis = new Function(
-  `${scoringScript}
+  `let DB_REV = 0; /* 10-storage-native.js の世代カウンタ相当。bumpDbRev が save() の DB_REV++ を模す */
+${scoringScript}
 ${section(analysisScript, "function num(", "function estimatedTotalArrowWeight")}
 ${section(analysisScript, "function sessionWindSpeed", "function windDriftText")}
 ${section(analysisScript, "const SESSION_METRIC_CACHE", "function sessionQuality")}
 ${section(analysisScript, "function regress(", "function solve3(")}
-return {sessionWindSpeed, windModel, sessionMetricSignature, sessionMetrics, regress, robustLine, robustWeightedLine};`,
+return {sessionWindSpeed, windModel, sessionMetricSignature, sessionMetrics, regress, robustLine, robustWeightedLine, bumpDbRev(){ DB_REV++; }};`,
 )();
 
 /* ---------- scoreAt / 線かみ ---------- */
@@ -214,6 +215,35 @@ function sampleSession() {
   const m2 = analysis.sessionMetrics(s);
   assert(m1 === m2, "identical session hits the metrics cache");
 }
+
+// DB世代カウンタ: 署名が衝突するナッジ編集でも save 相当の DB_REV++ で再計算されること
+{
+  const s = sampleSession();
+  const sigBefore = analysis.sessionMetricSignature(s);
+  const m1 = analysis.sessionMetrics(s);
+  // 最終矢以外の2本を逆方向に同距離ナッジ → 本数/合計点/x合計/y合計/最終矢が全て不変で旧署名は衝突する
+  s.ends[0][0].x += 0.4;
+  s.ends[0][1].x -= 0.4;
+  assertEqual(
+    analysis.sessionMetricSignature(s),
+    sigBefore,
+    "opposite equal nudges collide with the pre-save signature (documented limit)",
+  );
+  assert(analysis.sessionMetrics(s) === m1, "before save the collision still returns cached metrics");
+  analysis.bumpDbRev(); // save() 相当
+  assert(analysis.sessionMetricSignature(s) !== sigBefore, "DB_REV bump changes the signature");
+  const m2 = analysis.sessionMetrics(s);
+  assert(m2 !== m1, "post-save metrics are recomputed, not the stale cache entry");
+  const fresh = scoring.robustStats(s.ends.flat());
+  assertClose(m2.st.sx, fresh.sx, 1e-12, "recomputed stats reflect the nudged positions");
+  assert(m2.st.sx !== m1.st.sx, "nudge actually changes the spread, proving the old cache was stale");
+}
+
+// 実装側の署名が世代カウンタを参照していること（ハーネス外でも DB_REV が効く静的保証）
+assert(
+  section(analysisScript, "function sessionMetricSignature", "function sessionMetrics").includes("DB_REV"),
+  "sessionMetricSignature must include DB_REV in the cache key",
+);
 
 /* ---------- 分析コア (45-analysis-core.js) ---------- */
 
