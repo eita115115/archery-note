@@ -636,6 +636,12 @@ table.tbl tr:last-child td{border-bottom:none;}
 .gearTh40{width:40%;}
 .sheet .gearHistoryH3{margin-top:14px; font-size:13px;}
 .gearHistoryRow{font-size:var(--font-size-sm); padding:6px 0; border-bottom:1px solid #eef0eb;}
+/* analysis & physics view */
+.analysisAdviceCard{background:var(--card); border-color:var(--line);}
+.analysisMt6{margin-top:6px;}
+.dialRingInner{opacity:.55;}
+.sheet .trashH3{margin-top:18px; font-size:var(--font-size-md);}
+.btn.trashRestoreBtn{padding:4px var(--space-3);}
 /* modal */
 .ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
 .sheet{
