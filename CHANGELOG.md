@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+## v1.2.0 - 2026-07-03
+
+### Summary
+
+スマホカメラでの射形トラッキング（ベータ）を追加。姿勢推定は 100% 端末内で行い、映像・生ランドマークは保存せず、保存されるのは角度・保持時間などの派生特徴量のみ（ユーザーが明示的に保存した場合、1 記録あたり約 2KB）。機能フラグは既定 OFF で、有効化しない限り従来の動作は一切変わらない。
+
+### Added
+
+- 射形トラッキング（ベータ、設定から有効化）: カメラ + MediaPipe Pose Landmarker (lite) による骨格オーバーレイ、フェーズ表示（SETUP→DRAWING→ANCHORING→FULL_DRAW→RELEASE→FOLLOW）、リリース自動検出、1 射ごとの要約カード（弓手/引き手肘角度・保持時間・リリース前ドリフト）
+- 分析タブの射形カード: 直近の射形記録（肘角度の中央値・保持・アンカー再現性）、記録の削除→ゴミ箱復元対応
+- 純関数の射形コア `scripts/46-form-core.js`（実射検証済みの検出ロジック: 胴体長正規化・250ms 窓の離脱量ベースのリリース判定・ヒステリシス付きステートマシン）と単体テスト `npm run check:form`
+- pose 資産の自己ホスト（`assets/pose/`、Apache-2.0、出所と SHA-256 は THIRD_PARTY.md / docs/form-tracking-assets.md に記録。CDN 不使用、機能有効時のみ遅延ロード）
+
+### Changed
+
+- ストレージ schema 3 → 4: `formAnalyses` 配列の追加のみ（docs/storage-schema4-design.md）。既存データの形状・意味は不変で、v4 のバックアップは旧バージョンのアプリでも読める（前方互換をフィクスチャで検証済み）
+- 設定に「射形トラッキング（ベータ）」トグルを追加（既定 OFF）
+
+### Not Changed
+
+- ストレージキー `archeryNote.v1`、JSON バックアップ/復元、CSV 出力の形式
+- Service Worker の更新戦略。pose 資産は precache に含めない（初回ロードを重くしない）
+- 機能フラグ OFF 時の全動作
+
 ## v1.1.0 - 2026-07-03
 
 ### Summary
