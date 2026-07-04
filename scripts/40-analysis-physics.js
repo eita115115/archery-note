@@ -520,7 +520,8 @@ function sessionMetricSignature(sess){
     n++; total+=a.s||0; xs+=a.x||0; ys+=a.y||0;
     if(ei===ends.length-1 && ai===end.length-1) last=[a.x,a.y,a.s,a.X?1:0,a.spot==null?"":a.spot].join(":");
   }));
-  return [sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,xs.toFixed(2),ys.toFixed(2),last].join("|");
+  /* DB_REV: save()ごとに増える世代カウンタ。署名衝突（例: 2本を逆方向に同距離ナッジ）でも編集保存後に必ず再計算させる */
+  return [typeof DB_REV==="number"?DB_REV:0,sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,xs.toFixed(2),ys.toFixed(2),last].join("|");
 }
 function sessionMetrics(sess){
   const sig=sessionMetricSignature(sess||{});

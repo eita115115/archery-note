@@ -222,7 +222,10 @@ function scheduleSafetySnapshot(reason, raw, force){
     flushSafetySnapshot();
   },1800);
 }
+/* メモリ上のみのDB世代カウンタ。save()ごとに増やし、セッション統計キャッシュの無効化に使う（保存はしない） */
+let DB_REV=0;
 function save(opts){
+  DB_REV++;
   const o=typeof opts==="string"?{reason:opts}:opts||{};
   db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
   try{
