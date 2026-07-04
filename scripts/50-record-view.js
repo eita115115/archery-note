@@ -160,6 +160,18 @@ function recordFastActionsHtml(last,dist,faceValue){
     <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分析</span></button>`:""}
   </section>`;
 }
+/* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
+function selectedMultiRound(roundId){
+  if(!roundId || ROUND_TYPES.some(r=>r.id===roundId)) return null;
+  const def=findRoundDef(roundId);
+  return def&&Array.isArray(def.stages)&&def.stages.length?def:null;
+}
+/* ステージ一覧の1行表示（例「90m→70m→50m→30m（各36射）」） */
+function multiRoundStagesText(def){
+  const counts=[...new Set(def.stages.map(st=>st.arrows))];
+  if(counts.length===1) return `${def.stages.map(st=>`${st.dist}m`).join("→")}（各${counts[0]}射）`;
+  return def.stages.map(st=>`${st.dist}m ${st.arrows}射`).join("→");
+}
 function renderRecord(m){
   if(db.active){ renderActive(m); return; }
   const last=db.sessions[db.sessions.length-1];
@@ -204,7 +216,11 @@ function renderRecord(m){
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
       <label class="f">ラウンド</label><select class="inp" id="fRound">
         ${ROUND_TYPES.map(r=>`<option value="${r.id}">${r.label}</option>`).join("")}
+        <optgroup label="多距離ラウンド">
+          ${multiRoundDefs().map(r=>`<option value="${r.id}">${esc(r.label)}</option>`).join("")}
+        </optgroup>
       </select>
+      <div class="hint" id="fRoundStages" style="display:none"></div>
       <div class="row">
         <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
         <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
@@ -234,10 +250,33 @@ function renderRecord(m){
     if(String(faceSel.value).startsWith("F") && $("#fArrows").value==="6") $("#fArrows").value="3";
     updateQuickStartMeta();
   };
+  /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
+  function applyMultiRoundStage0(def){
+    const st0=def.stages[0];
+    distState.d=st0.dist;
+    const known=[70,50,30,18].includes(+st0.dist);
+    const key=known?String(st0.dist):"custom";
+    document.querySelectorAll("#fDistChips .chip").forEach(x=>{ const on=String(x.dataset.d)===key; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+    $("#fDistCustomWrap").style.display=known?"none":"block";
+    if(!known) $("#fDistCustom").value=st0.dist;
+    faceSel.value=st0.faceType==="triple"?"T40":(st0.faceType==="field"?`F${st0.faceD}`:String(st0.faceD));
+    $("#fArrows").value=st0.perEnd||6;
+    fillSight(); refreshLens();
+  }
   $("#fRound").onchange=e=>{
-    if(e.target.value==="field72"){
-      if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
-      $("#fArrows").value="3";
+    const def=selectedMultiRound(e.target.value);
+    const stagesEl=$("#fRoundStages");
+    if(def){
+      applyMultiRoundStage0(def);
+      stagesEl.style.display="block";
+      stagesEl.innerHTML=`<b>${esc(def.label)}</b>：${esc(multiRoundStagesText(def))}`;
+    }else{
+      stagesEl.style.display="none";
+      stagesEl.textContent="";
+      if(e.target.value==="field72"){
+        if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
+        $("#fArrows").value="3";
+      }
     }
     updateQuickStartMeta();
   };
@@ -288,20 +327,25 @@ function renderRecord(m){
   $("#fSetup").onchange=()=>{ fillSight(); refreshLens(); };
   fillSight();
   $("#fStart").onclick=()=>{
-    const d=distState.d;
+    const roundId=$("#fRound").value||"free";
+    const mdef=selectedMultiRound(roundId);
+    const st0=mdef?mdef.stages[0]:null;
+    const d=st0?st0.dist:distState.d;
     if(!d){ toast("距離を入力してください"); return; }
     const fv=faceSel.value;
-    const face=parseFaceChoice(fv);
+    /* 多距離ラウンドは dist/faceD/faceType/perEnd を stage[0] から採る */
+    const face=st0?{faceD:st0.faceD, faceType:st0.faceType||"single"}:parseFaceChoice(fv);
     db.active={
       id:uid(), date:$("#fDate").value||today(), setupId:$("#fSetup").value||null,
-      dist:d, faceD: face.faceD, faceType: face.faceType, perEnd:+$("#fArrows").value,
+      dist:d, faceD: face.faceD, faceType: face.faceType, perEnd:st0?(st0.perEnd||6):+$("#fArrows").value,
       shaft:+lineCutRadius(face.faceD, face.faceType).toFixed(3),
       sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
       wx:$("#fWx").value, note:$("#fNote").value.trim(), windDir:$("#fWindDir").value, windSpeed:$("#fWindSpeed").value.trim(),
-      round:$("#fRound").value||"free",
+      round:roundId,
       purpose:ui.recordMode||"practice",
       ends:[], cur:[]
     };
+    if(st0) db.active.roundGroup={gid:uid(), roundId, stage:0, stageCount:mdef.stages.length};
     nativePulse("success");
     save(); render();
   };
