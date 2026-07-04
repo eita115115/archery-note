@@ -186,11 +186,13 @@ function checkCallSiteClassification() {
 }
 
 function checkLifecycleFlushContract() {
-  /* 90-init.js: 離脱契機と更新リロードで flushPendingSave が snapshot flush より先に呼ばれること */
+  /* 90-init.js: 離脱契機と更新リロードで flushPendingSave が snapshot flush より先に呼ばれること。
+     [^\n]* で addEventListener と同一行に限定する（境界を越えて隣のハンドラにマッチすると検査が空文化する）。
+     ハンドラを複数行に書き換えた場合はこの検査も合わせて更新すること。 */
   [
-    [/window\.addEventListener\(\s*["']pagehide["'][\s\S]*?flushPendingSave\(\)[\s\S]*?flushSafetySnapshot\(\)/, "pagehide"],
-    [/document\.addEventListener\(\s*["']visibilitychange["'][\s\S]*?flushPendingSave\(\)[\s\S]*?flushSafetySnapshot\(\)/, "visibilitychange(hidden)"],
-    [/window\.addEventListener\(\s*["']beforeunload["'][\s\S]*?flushPendingSave\(\)[\s\S]*?flushSafetySnapshot\(\)/, "beforeunload"],
+    [/window\.addEventListener\(\s*["']pagehide["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "pagehide"],
+    [/document\.addEventListener\(\s*["']visibilitychange["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "visibilitychange(hidden)"],
+    [/window\.addEventListener\(\s*["']beforeunload["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "beforeunload"],
   ].forEach(([pattern, label]) => {
     assert(
       pattern.test(initScript),
