@@ -24,9 +24,10 @@ function sanitizeArrowList(arrows){
   if(!Array.isArray(arrows)) return;
   arrows.forEach(a=>{
     if(!a || typeof a!=="object") return;
-    a.x=arrowNumberOrKeep(a.x);
-    a.y=arrowNumberOrKeep(a.y);
-    a.s=arrowNumberOrKeep(a.s);
+    /* 変化時のみ代入: 元々キーが無い矢に own property (x: undefined 等) を生やさない */
+    const x=arrowNumberOrKeep(a.x); if(x!==a.x) a.x=x;
+    const y=arrowNumberOrKeep(a.y); if(y!==a.y) a.y=y;
+    const s=arrowNumberOrKeep(a.s); if(s!==a.s) a.s=s;
   });
 }
 function sanitizeSessionArrows(sess){
@@ -42,6 +43,7 @@ function normalizeDb(d){
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
   out.sessions.forEach(sanitizeSessionArrows);
+  out.trash.forEach(t=>{ if(t.type==="session") sanitizeSessionArrows(t.data); });
   if(out.active && typeof out.active==="object"){
     sanitizeSessionArrows(out.active);
     sanitizeArrowList(out.active.cur);

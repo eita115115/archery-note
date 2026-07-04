@@ -317,6 +317,11 @@ return {groupingSessionRow};`,
     ]),
     // 有限座標が3本未満 → 両者とも null
     rowOf("eq-too-few", [[{ x: NaN, y: 0, s: 0 }, { x: 1, y: 1, s: 9 }, { x: 0, y: 1, s: 9 }]]),
+    // 境界: 非有限混入で有限座標がちょうど3本 → 両者とも行が出る側
+    rowOf("eq-exactly-three", [
+      [{ x: NaN, y: 2, s: 0 }, { x: "abc", y: 1, s: 8 }, { x: 0.3, y: -0.2, s: 10 }],
+      [{ x: -0.9, y: 0.4, s: 9 }, { x: 1.4, y: 1.1, s: 8 }],
+    ]),
   ];
 
   fixtures.forEach((row) => {

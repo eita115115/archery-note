@@ -488,6 +488,24 @@ function checkArrowCoordinateSanitize(storageApi) {
   assertEqual(db.active.ends[0][0].x, 2.5, "[arrow-sanitize] active end arrow x becomes number");
   assertEqual(db.active.cur[0].x, -1.5, "[arrow-sanitize] active cur arrow x becomes number");
   assertEqual(db.active.cur[0].s, 7, "[arrow-sanitize] active cur arrow s becomes number");
+
+  // ゴミ箱内セッションも同じサニタイズを通ること（restoreTrash は normalizeDb を通らないため）。
+  const trashDb = storageApi.normalizeDb({
+    trash: [
+      { id: "t1", type: "session", data: { id: "s1", ends: [[{ x: "3.5", y: "1", s: "6" }]] } },
+      { id: "t2", type: "setup", data: { id: "g1" } },
+    ],
+  });
+  assertEqual(trashDb.trash[0].data.ends[0][0].x, 3.5, "[arrow-sanitize] trashed session arrow x becomes number");
+  assertEqual(trashDb.trash[0].data.ends[0][0].s, 6, "[arrow-sanitize] trashed session arrow s becomes number");
+  assertEqual(trashDb.trash.length, 2, "[arrow-sanitize] non-session trash entries pass through untouched");
+
+  // キーを持たない矢に own property を生やさないこと（変化時のみ代入）。
+  const bare = storageApi.normalizeDb({ sessions: [{ id: "b", ends: [[{ x: 1, y: 2 }]] }] });
+  assert(
+    !Object.hasOwn(bare.sessions[0].ends[0][0], "s"),
+    "[arrow-sanitize] missing s must not become an own undefined property",
+  );
 }
 
 function checkDbRevContract() {
