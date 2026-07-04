@@ -1,5 +1,42 @@
 "use strict";
 /* Archery Note: history and sight-adjustment views */
+/* 履歴一覧の行: 「スコアカードの記録行」。合計点を主役数値（tabular-nums・大型）にし、
+   ラウンド/ステージ・天気は小さいバッジへ格下げする。ロジック（集計）は不変・表示のみ */
+function historyRowHtml(s){
+  const all=s.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
+  const setup=db.setups.find(x=>x.id===s.setupId);
+  const q=sessionQuality(s,setup);
+  const badges=[
+    `<span class="badge">${faceLabel(s)}</span>`,
+    setup?`<span class="badge">${esc(setup.name)}</span>`:"",
+    `<span class="badge">信頼 ${q.label}</span>`,
+    s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}${s.roundGroup?` ${(Number(s.roundGroup.stage)||0)+1}/${s.roundGroup.stageCount}`:""}</span>`:"",
+    s.wx?`<span class="badge">${esc(s.wx)}</span>`:""
+  ].filter(Boolean).join("");
+  return `<button type="button" class="listItem historyRow" data-id="${s.id}" data-testid="history-row">
+    <div class="historyRowMain"><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
+    <div class="d">${badges}${all.length}本</div></div>
+    <div class="big historyRowTotal">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></button>`;
+}
+/* 同日複数セッションを hairline 見出しでまとめ、月替わりに月ラベルを出す。集計・並び順は不変 */
+function historyGroupedListHtml(ss){
+  let prevMonth="", prevDate="";
+  const parts=[];
+  ss.forEach(s=>{
+    const iso=s.date||"";
+    const month=iso.slice(0,7);
+    if(month && month!==prevMonth){
+      parts.push(`<div class="historyMonthLabel">${month.replace("-","年")}月</div>`);
+      prevMonth=month; prevDate="";
+    }
+    if(iso && iso!==prevDate){
+      parts.push(`<div class="historyDateHead">${fmtD(iso)}</div>`);
+      prevDate=iso;
+    }
+    parts.push(historyRowHtml(s));
+  });
+  return parts.join("");
+}
 function renderHistory(m){
   const allSs=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
   const hf=ui.histFilter||{setupId:"",dist:"",round:""};
@@ -10,7 +47,7 @@ function renderHistory(m){
     (!hf.dist || String(s.dist)===String(hf.dist)) &&
     (!hf.round || (s.round||"free")===hf.round)
   );
-  m.innerHTML=`${pageHeroHtml("history",{ss})}${historyOverviewHtml(allSs,ss)}
+  m.innerHTML=`${pageHeroHtml("history",{ss})}
   <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
       <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${hf.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
@@ -21,22 +58,19 @@ function renderHistory(m){
       <div class="histFilterEnd"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
     </div>
     <div id="histList">
-    ${ss.length? ss.map(s=>{
-      const all=s.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
-      const setup=db.setups.find(x=>x.id===s.setupId);
-      const q=sessionQuality(s,setup);
-      return `<button type="button" class="listItem" data-id="${s.id}">
-        <div><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
-        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}${s.roundGroup?` ${(Number(s.roundGroup.stage)||0)+1}/${s.roundGroup.stageCount}`:""}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
-        <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></button>`;
-    }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
-    <div class="hint">詳しい傾向は「分析」タブで確認できます。</div>
+    ${ss.length? historyGroupedListHtml(ss) : (allSs.length?`<div class="empty">この絞り込みに合う記録がありません。フィルタを広げてください。</div>`:`<div class="empty historyEmpty" data-testid="history-empty">
+        <p>まだ記録がありません。最初の1回を記録すると、ここに合計点とグルーピングの推移が並びます。</p>
+        <button type="button" class="btn" id="histEmptyCta">記録タブへ</button>
+      </div>`)}
+    ${ss.length?`<div class="hint">詳しい傾向は「分析」タブで確認できます。</div>`:""}
   </div></div>`;
   $("#histSetup").onchange=e=>{ ui.histFilter.setupId=e.target.value; render(); };
   $("#histDist").onchange=e=>{ ui.histFilter.dist=e.target.value; render(); };
   $("#histRound").onchange=e=>{ ui.histFilter.round=e.target.value; render(); };
   $("#histClear").onclick=()=>{ ui.histFilter={setupId:"",dist:"",round:""}; render(); };
   document.querySelectorAll("#histList .listItem").forEach(li=>li.onclick=()=>openHistDetail(li.dataset.id));
+  const cta=$("#histEmptyCta");
+  if(cta) cta.onclick=()=>showView("record");
 }
 function sessionGroupPoint(s){
   const m=sessionMetrics(s);
@@ -185,18 +219,25 @@ function histRoundGroupHtml(sess){
   const stages=db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid)
     .sort((a,b)=>(Number(a.roundGroup.stage)||0)-(Number(b.roundGroup.stage)||0));
   if(!stages.length) return "";
+  const maxDist=Math.max(...stages.map(x=>Number(x.dist)||0),1);
   let total=0, arrows=0;
   const rows=stages.map(x=>{
     const all=x.ends.flat(), t=all.reduce((a,c)=>a+c.s,0);
     total+=t; arrows+=all.length;
     const cur=x.id===sess.id;
-    return `<div class="kv"><span>ステージ${(Number(x.roundGroup.stage)||0)+1} ・ ${historyDistanceLabel(x.dist)}</span>
-      <span>${t}点 / ${all.length}射${cur?"（表示中）":` <button type="button" class="btn sm ghost" data-stage-jump="${x.id}">開く</button>`}</span></div>`;
+    const d=Number(x.dist)||0;
+    return `<tr class="${cur?"stageRowCur":""}">
+      <td><span class="stageTick" style="width:${8+Math.round((d/maxDist)*22)}px"></span>ステージ${(Number(x.roundGroup.stage)||0)+1} ・ ${historyDistanceLabel(x.dist)}</td>
+      <td class="right">${all.length}射</td>
+      <td class="right"><b>${t}</b></td>
+      <td class="right">${cur?`<span class="mini">（表示中）</span>`:`<button type="button" class="btn sm ghost" data-stage-jump="${x.id}">開く</button>`}</td>
+    </tr>`;
   }).join("");
-  return `<div class="advice histAdviceCard">
-    <div class="note"><b>${esc(roundLabel(rg.roundId))}</b> のステージ</div>
-    ${rows}
-    <div class="kv"><span>ラウンド合計</span><span><b>${total}点</b> / ${arrows}射${stages.length===Number(rg.stageCount)?"":`（${stages.length}/${rg.stageCount}ステージ）`}</span></div>
+  return `<div class="mt10" data-testid="history-stage-table">
+    <div class="subNote">${esc(roundLabel(rg.roundId))} のステージ（行程表）</div>
+    <table class="tbl mt8 stageTable"><tr><th>ステージ</th><th class="right">本数</th><th class="right">得点</th><th class="right"></th></tr>${rows}
+    <tr class="stageTotalRow"><td><b>ラウンド合計</b>${stages.length===Number(rg.stageCount)?"":` <span class="mini">(${stages.length}/${rg.stageCount}ステージ)</span>`}</td><td class="right">${arrows}射</td><td class="right"><b>${total}</b></td><td class="right"></td></tr>
+    </table>
   </div>`;
 }
 function openHistDetail(id){
@@ -206,38 +247,51 @@ function openHistDetail(id){
   const setup=db.setups.find(x=>x.id===sess.setupId);
   const st=sessionMetrics(sess).st;
   const adv=adviceFor(sess,setup);
-  ovl.innerHTML=`<div class="sheet">
+  /* 構成（正本 B節）: 主役数値 → 着弾図 → エンド表 → 分析カード群 → 操作。
+     ロジック（集計・adviceFor 等）は不変・呼び出し順と見た目だけを並べ替える */
+  const endTableHtml=`<table class="tbl mt8 histEndTable" data-testid="history-end-table"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
+    ${sess.ends.map((end,i)=>{
+      const sorted=[...end].sort((a,b)=>b.s-a.s);
+      return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td></tr>`;
+    }).join("")}</table>`;
+  /* 初心者文法（正本 机上モード 5節）: 一言解釈を持つカード（サイト提案・個人モデル・次のアクション）は
+     そのまま表示。数値の羅列だけの groupSummaryHtml/使用サイト/矢番号メモは「詳しく」に畳む */
+  const detailNumbersHtml=`${groupSummaryHtml(st)}
+    ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
+    ${trustHtml(sess,setup,st)}
+    ${arrowMetaSummaryHtml(sess)}`;
+  const analysisCardsHtml=`
+    ${adv?`<div class="advice"><div class="subNote">${icon("tool")} この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
+    ${personalModelHtml(adv,sess,setup)}
+    ${roundProgressHtml(sess)}
+    ${histRoundGroupHtml(sess)}
+    ${conditionHtml(sess,st,setup)}
+    ${nextActionHtml(sess,adv,setup)}
+    <details class="adv histDetailNumbers" data-testid="history-detail-numbers">
+      <summary>詳しく（グルーピングの数値・信頼度・使用サイト）</summary>
+      ${detailNumbersHtml}
+    </details>`;
+  ovl.innerHTML=`<div class="sheet histDetailSheet">
     <h3>${fmtD(sess.date)} ・ ${historyDistanceLabel(sess.dist)} ・ ${faceLabel(sess)}</h3>
     <div class="subNote">${setup?esc(setup.name):"セッティング未指定"}${sess.round&&sess.round!=="free"?" ・ "+roundLabel(sess.round):""}${windText(sess)?" ・ "+esc(windText(sess)):""}${sess.note?" ・ "+esc(sess.note):""}</div>
-    <div class="statbar">
+    <div class="statbar" data-testid="history-detail-stats">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total/all.length).toFixed(2)}</b><span>平均/本</span></div>
       <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
     <div id="hPlot" class="mt10"></div>
-    ${groupSummaryHtml(st)}
-    ${trustHtml(sess,setup,st)}
-    ${roundProgressHtml(sess)}
-    ${histRoundGroupHtml(sess)}
-    ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
-    ${arrowMetaSummaryHtml(sess)}
-    <table class="tbl mt8"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
-    ${sess.ends.map((end,i)=>{
-      const sorted=[...end].sort((a,b)=>b.s-a.s);
-      return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td></tr>`;
-    }).join("")}</table>
-    ${adv?`<div class="advice"><div class="subNote">${icon("tool")} この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
-    ${personalModelHtml(adv,sess,setup)}
-    ${conditionHtml(sess,st,setup)}
-    ${nextActionHtml(sess,adv,setup)}
-    <div class="btnrow">
-      <button class="btn danger" id="hDel">削除</button>
-      <button class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
-    </div>
-    <div class="btnrow">
-      <button class="btn sec" id="hCard">画像保存</button>
-      <button class="btn ghost" id="hClose">閉じる</button>
+    ${endTableHtml}
+    ${analysisCardsHtml}
+    <div class="histDetailActions">
+      <div class="btnrow">
+        <button class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
+        <button class="btn sec" id="hCard">画像保存</button>
+      </div>
+      <div class="btnrow">
+        <button class="btn ghost" id="hClose">閉じる</button>
+        <button class="btn danger" id="hDel">削除</button>
+      </div>
     </div>
   </div>`;
   openModal(ovl,{escapeTarget:"#hClose"});

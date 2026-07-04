@@ -496,6 +496,8 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .pageHero .kicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--title); font-weight:900;}
 .pageHero h2{margin:4px 0 4px; font-size:20px; color:var(--ink); line-height:1.2;}
 .pageHero p{margin:0; color:var(--sub); font-size:12px; line-height:1.55;}
+/* 履歴ヒーロー: 見出しではなく todayConclusion() の1文（結論）。長文でも読みやすい行間に */
+.pageHero h2.pageHeroLead{font-size:17px; line-height:1.45; font-weight:800;}
 .heroMetrics{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px;}
 .heroMetric{border:1px solid var(--line); border-radius:10px; background:var(--glass); padding:8px; min-width:0;}
 .heroMetric .k{font-size:10px; color:var(--sub);}
@@ -742,6 +744,19 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .subNoteSm{font-size:var(--font-size-xs); color:var(--sub);}
 /* history & sight view */
 .histFilterEnd{display:flex; align-items:flex-end;}
+/* 履歴一覧: 月ラベル・日付見出しは hairline のみで区切る（白カード段組は使わない） */
+.historyMonthLabel{
+  font-size:10.5px; letter-spacing:.08em; color:var(--sub); font-weight:800;
+  margin:14px 0 2px; padding-top:10px; border-top:1px solid var(--line);
+}
+.historyMonthLabel:first-child{margin-top:0; padding-top:0; border-top:none;}
+.historyDateHead{font-size:11px; color:var(--sub); font-weight:700; margin:8px 0 2px;}
+.historyRow{align-items:flex-start;}
+.historyRowMain{min-width:0;}
+.historyRowTotal{font-size:24px;}
+.historyEmpty{display:flex; flex-direction:column; align-items:center; gap:10px; padding:24px 12px;}
+.historyEmpty p{margin:0; max-width:32em;}
+.historyEmpty .btn{width:auto; padding-left:22px; padding-right:22px;}
 .histRecentBlock{border-top:1px solid var(--line); padding:10px 0;}
 .histRecentHead{display:flex; align-items:flex-start; gap:10px;}
 .histRecentTarget{width:128px; max-width:38%; aspect-ratio:1; border:1px solid var(--line); border-radius:8px; background:var(--inpBg); flex:0 0 auto;}
@@ -758,9 +773,25 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .histTrendValue{width:54px; text-align:right; font-size:var(--font-size-sm);}
 .histTrendSub{color:var(--sub); font-size:10px;}
 .histAdviceCard{background:var(--card); border-color:var(--line);}
+/* 多距離ラウンドのステージ一覧: P1 の目盛り表現（距離に応じた棒の長さ）をテーブル行に揃える */
+.stageTable td,.stageTable th{font-variant-numeric:tabular-nums;}
+.stageTick{display:inline-block; height:3px; background:var(--accent); border-radius:999px; margin-right:6px; vertical-align:middle;}
+.stageRowCur td{color:var(--title); font-weight:700;}
+.stageTotalRow td{border-top:1px solid var(--line); padding-top:9px;}
 /* No token: preserves the extracted 17px inline style. */
 .histSightVal{font-size:17px; font-weight:800;}
 .histDelBtn{padding:4px var(--space-3); min-width:var(--tap-target-min);}
+.histEndTable td,.histEndTable th{font-variant-numeric:tabular-nums;}
+/* 履歴詳細の操作列: 下部に固定（sticky）。編集=通常、画像保存=sec、削除=danger で右端へ隔離 */
+.histDetailActions{
+  position:sticky; bottom:calc(-1 * (16px + env(safe-area-inset-bottom))); left:0; right:0;
+  margin:14px -16px calc(-16px - env(safe-area-inset-bottom)); padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background:var(--card); border-top:1px solid var(--line);
+}
+.histDetailActions .btnrow:first-child{margin-top:0;}
+.histDetailActions .btnrow:last-child{justify-content:space-between;}
+.histDetailActions .btnrow:last-child #hClose{flex:1;}
+.histDetailActions #hDel{flex:0 0 auto; width:auto; padding-left:18px; padding-right:18px;}
 /* gear & settings view */
 .gearAdviceCard{background:var(--card); border-color:var(--line);}
 .gearChevron{font-size:18px; color:var(--sub);}
