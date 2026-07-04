@@ -503,9 +503,20 @@ function analysisTrendChartHtml(rows){
     <div class="hint">丸は各練習の平均点/本、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。</div>
   </div>`;
 }
+/* 多距離ラウンドの「ラウンド合計ベスト」行（IMP-09）: complete なグループのみ対象。
+   roundGroup 付きの行が無ければ空文字（従来の自己ベスト表示は不変） */
+function roundGroupBestRowsHtml(rows){
+  const bests=roundGroupBests(aggregateRoundGroups(rows));
+  if(!bests.length) return "";
+  return bests.sort((a,b)=>b.total-a.total).map(b=>`<div class="listItem recordReadOnlyItem">
+    <div><div class="t">${esc(roundLabel(b.roundId))} 合計</div><div class="d">完了ラウンドのベスト / ${fmtD(b.date)}</div></div>
+    <div class="big">${b.total}<small> / ${b.arrows}射</small></div>
+  </div>`).join("");
+}
 function personalBestCard(rows){
   const pbs=personalBests(rows).slice(0,6);
-  if(!pbs.length) return "";
+  const groupRows=roundGroupBestRowsHtml(rows);
+  if(!pbs.length && !groupRows) return "";
   const body=pbs.map(g=>{
     const lb=[g.dist?`${g.dist}m`:"距離未設定",g.round!=="free"?roundLabel(g.round):"自由練習"].join(" ・ ");
     return `<div class="listItem recordReadOnlyItem">
@@ -513,7 +524,7 @@ function personalBestCard(rows){
       <div class="big">${g.bestTotal?g.bestTotal.total:"—"}<small> / 平均ベスト${g.bestAvg?g.bestAvg.avg.toFixed(2):"—"}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>自己ベスト <span class="mini">距離×ラウンド別</span></h2>${body}</div>`;
+  return `<div class="card"><h2>自己ベスト <span class="mini">距離×ラウンド別</span></h2>${body}${groupRows}</div>`;
 }
 function conditionSplitCard(rows){
   const cs=conditionSplit(rows,isWindy);

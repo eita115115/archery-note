@@ -349,6 +349,96 @@ function renderGear(m){
   document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
 }
 
+/* ---------- カスタムラウンド（IMP-09 多距離ラウンド定義） ---------- */
+/* 的の選択肢は parseFaceChoice の語彙（122/80/60/40 単一・T40 三つ目・F〜 フィールド）に合わせる */
+const CUSTOM_ROUND_FACES=[["122","122cm"],["80","80cm"],["60","60cm"],["40","40cm"],["T40","40cm 三つ目（縦）"],["F80","80cm フィールド"],["F60","60cm フィールド"],["F40","40cm フィールド"],["F20","20cm フィールド"]];
+function customRoundStagesText(def){
+  return def.stages.map(st=>`${st.dist}m ${st.arrows}射`).join("→");
+}
+function customRoundsSettingsHtml(){
+  const list=db.customRounds||[];
+  return `<details class="adv"><summary>カスタムラウンド（多距離）</summary>
+    <div class="hint">距離ごとのステージを持つ自分用ラウンドを定義できます。保存すると記録タブのラウンド選択（多距離ラウンド）に表示されます。</div>
+    ${list.length?list.map(r=>`<button type="button" class="listItem" data-cr="${r.id}"><div>
+      <div class="t">${esc(r.label)}</div>
+      <div class="d">${esc(customRoundStagesText(r))}</div>
+    </div><div class="gearChevron">›</div></button>`).join(""):`<div class="empty">カスタムラウンドはまだありません。</div>`}
+    <div class="btnrow"><button class="btn sec" id="crAdd">＋ カスタムラウンドを追加</button></div>
+  </details>`;
+}
+function openCustomRoundForm(id){
+  const src=id?(db.customRounds||[]).find(r=>r.id===id):null;
+  if(id&&!src){ openSettings(); return; }
+  /* 編集中のステージ状態。的は faceChoiceValue の値文字列で持ち、保存時に parseFaceChoice で faceD/faceType へ戻す */
+  const stages=(src?src.stages:[{dist:70,faceD:122,faceType:"single",arrows:36,perEnd:6}]).map(st=>({dist:st.dist,face:faceChoiceValue(st),arrows:st.arrows,perEnd:st.perEnd||6}));
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>${src?"カスタムラウンド編集":"新しいカスタムラウンド"}</h3>
+    <label class="f">名前 *</label><input class="inp" id="crName" value="${esc(src?src.label:"")}" placeholder="例: 60m/30m 各36射">
+    <div id="crStages"></div>
+    <div class="btnrow"><button class="btn sec" id="crAddStage">＋ ステージを追加</button></div>
+    ${src?`<div class="btnrow"><button class="btn danger" id="crDel">この定義を削除</button></div>`:""}
+    <div class="btnrow"><button class="btn ghost" id="crCancel">キャンセル</button><button class="btn" id="crSave">保存</button></div>
+  </div>`;
+  openModal(ovl,{escapeTarget:"#crCancel"});
+  function stageRowHtml(st,i){
+    return `<div class="advice recordNeutralAdvice">
+      <div class="kv"><span><b>ステージ${i+1}</b></span><span>${stages.length>1?`<button type="button" class="btn sm ghost" data-del-stage="${i}">✕ 削除</button>`:""}</span></div>
+      <div class="row">
+        <div><label class="f">距離 (m)</label><input class="inp" data-st-dist="${i}" inputmode="numeric" value="${esc(st.dist==null?"":st.dist)}" placeholder="例: 60"></div>
+        <div><label class="f">的</label><select class="inp" data-st-face="${i}">${CUSTOM_ROUND_FACES.map(([v,lb])=>`<option value="${v}" ${String(st.face)===v?"selected":""}>${lb}</option>`).join("")}</select></div>
+      </div>
+      <div class="row">
+        <div><label class="f">射数</label><input class="inp" data-st-arrows="${i}" inputmode="numeric" value="${esc(st.arrows==null?"":st.arrows)}" placeholder="例: 36"></div>
+        <div><label class="f">1エンドの本数</label><select class="inp" data-st-perend="${i}">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===(+st.perEnd||6)?"selected":""}>${n}本</option>`).join("")}</select></div>
+      </div>
+    </div>`;
+  }
+  function renderStages(){
+    ovl.querySelector("#crStages").innerHTML=stages.map(stageRowHtml).join("");
+    ovl.querySelectorAll("[data-st-dist]").forEach(inp=>inp.onchange=e=>{ stages[+inp.dataset.stDist].dist=e.target.value.trim(); });
+    ovl.querySelectorAll("[data-st-face]").forEach(sel=>sel.onchange=e=>{ stages[+sel.dataset.stFace].face=e.target.value; });
+    ovl.querySelectorAll("[data-st-arrows]").forEach(inp=>inp.onchange=e=>{ stages[+inp.dataset.stArrows].arrows=e.target.value.trim(); });
+    ovl.querySelectorAll("[data-st-perend]").forEach(sel=>sel.onchange=e=>{ stages[+sel.dataset.stPerend].perEnd=+e.target.value||6; });
+    ovl.querySelectorAll("[data-del-stage]").forEach(b=>b.onclick=()=>{ stages.splice(+b.dataset.delStage,1); renderStages(); });
+  }
+  renderStages();
+  ovl.querySelector("#crAddStage").onclick=()=>{
+    const prev=stages[stages.length-1];
+    stages.push({dist:"",face:prev?prev.face:"122",arrows:prev?prev.arrows:36,perEnd:prev?prev.perEnd:6});
+    renderStages();
+  };
+  ovl.querySelector("#crCancel").onclick=()=>{ closeModal(ovl); openSettings(); };
+  ovl.querySelector("#crSave").onclick=()=>{
+    const label=ovl.querySelector("#crName").value.trim();
+    if(!label){ toast("名前を入力してください"); return; }
+    const clean=[];
+    for(let i=0;i<stages.length;i++){
+      const dist=+stages[i].dist, arrows=+stages[i].arrows, perEnd=+stages[i].perEnd||6;
+      if(!(dist>0&&arrows>0)){ toast(`ステージ${i+1}の距離と射数を入力してください`); return; }
+      const f=parseFaceChoice(stages[i].face);
+      clean.push({dist,faceD:f.faceD,faceType:f.faceType,arrows,perEnd});
+    }
+    db.customRounds=Array.isArray(db.customRounds)?db.customRounds:[];
+    if(src){
+      const i=db.customRounds.findIndex(r=>r.id===id);
+      if(i>=0) db.customRounds[i]={id,label,stages:clean}; else db.customRounds.push({id,label,stages:clean});
+    }else{
+      db.customRounds.push({id:uid(),label,stages:clean});
+    }
+    /* 定義の保存は重要操作なので同期 save()。multiRoundDefs は db.customRounds を直接読むため即反映される */
+    save({reason:"custom-round",forceSnapshot:true});
+    closeModal(ovl); openSettings(); toast("カスタムラウンドを保存しました");
+  };
+  const del=ovl.querySelector("#crDel");
+  if(del) del.onclick=()=>{
+    if(confirm(`「${src.label}」を削除しますか？\n（過去の練習記録は残ります。記録タブの選択肢から消えます）`)){
+      db.customRounds=(db.customRounds||[]).filter(r=>r.id!==id);
+      save({reason:"delete-custom-round",forceSnapshot:true});
+      closeModal(ovl); openSettings(); toast("削除しました");
+    }
+  };
+}
+
 /* ---------- ⚙ 設定 ---------- */
 function applyTheme(){
   const t=db.settings.theme||"auto";
@@ -372,6 +462,8 @@ function openSettings(){
     </div>
     <div class="hint">ONにすると分析タブにカメラでの射形解析が出ます。解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
     ${nativeReadinessHtml()}
+    <h3 class="settingsH3">カスタムラウンド</h3>
+    ${customRoundsSettingsHtml()}
     <h3 class="settingsH3">データ管理</h3>
     ${backupReminderHtml()}
     <div class="btnrow">
@@ -404,6 +496,9 @@ function openSettings(){
     toast(db.settings.formTrackingEnabled?"射形トラッキングを有効にしました（分析タブ）":"射形トラッキングを無効にしました");
   });
   ovl.querySelector("#setClose").onclick=()=>{ closeModal(ovl); render(); };
+  ovl.querySelectorAll("[data-cr]").forEach(li=>li.onclick=()=>{ closeModal(ovl); openCustomRoundForm(li.dataset.cr); });
+  const crAdd=ovl.querySelector("#crAdd");
+  if(crAdd) crAdd.onclick=()=>{ closeModal(ovl); openCustomRoundForm(null); };
   ovl.querySelector("#dExp").onclick=()=>{
     db.settings.lastBackupAt=new Date().toISOString();
     save({reason:"json-export",forceSnapshot:true});
