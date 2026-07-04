@@ -167,6 +167,56 @@ assertMatch(
   "current Service Worker activate flow should still contain self.clients.claim()",
 );
 
+const poseCacheMatch = /\bconst\s+POSE_CACHE\s*=\s*["']([^"']+)["']\s*;/.exec(swText);
+if (!poseCacheMatch) fail("sw.js must define POSE_CACHE for pose asset cache-first serving");
+const cachePrefixMatch = /\bconst\s+CACHE_PREFIX\s*=\s*["']([^"']+)["']\s*;/.exec(swText);
+if (!cachePrefixMatch) fail("sw.js must define CACHE_PREFIX");
+if (poseCacheMatch[1].startsWith(cachePrefixMatch[1])) {
+  fail(
+    `POSE_CACHE (${poseCacheMatch[1]}) must not start with CACHE_PREFIX (${cachePrefixMatch[1]}); ` +
+      "otherwise the activate cleanup would delete the pose cache on every app update",
+  );
+}
+
+assertMatch(
+  /url\.pathname\.includes\(\s*["']\/assets\/pose\/["']\s*\)/,
+  swText,
+  "sw.js fetch handler must special-case same-origin /assets/pose/ requests",
+);
+
+const swPoseBranch = sliceBetween(
+  swText,
+  /url\.pathname\.includes\(\s*["']\/assets\/pose\/["']\s*\)/,
+  "return;",
+  "pose fetch branch",
+);
+
+assertOrder(
+  /caches\.open\(POSE_CACHE\)[\s\S]{0,200}?\.match\(\s*e\.request\s*\)/,
+  /fetch\(\s*e\.request\s*\)/,
+  swPoseBranch,
+  "pose assets must be served cache-first: a POSE_CACHE-scoped cache lookup must appear before fetch(e.request)",
+);
+
+assertNoMatch(
+  /caches\.match\(/,
+  swPoseBranch,
+  "pose branch must not use unscoped caches.match (entries in older/other caches would win over POSE_CACHE)",
+);
+
+assertMatch(
+  /caches\.open\(POSE_CACHE\)/,
+  swText,
+  "pose asset responses must be stored in POSE_CACHE, not the versioned app cache",
+);
+
+const swAssetsBlock = sliceBetween(swText, /\bconst\s+ASSETS\s*=\s*\[/, "];", "ASSETS array");
+assertNoMatch(
+  /assets\/pose/,
+  swAssetsBlock,
+  "install precache (ASSETS) must not include assets/pose (about 15MB; loaded only when form tracking is enabled)",
+);
+
 const gearText = readText("scripts/70-gear-settings.js");
 const analysisText = readText("scripts/40-analysis-physics.js");
 
