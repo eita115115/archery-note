@@ -32,6 +32,7 @@
   </section>
 </main>
 <nav class="tabs" id="tabs" aria-label="主な画面">
+  <!-- aria-current="page" は初期ビュー=record と同期。既定ビューを変えるときは render() 側と合わせること -->
   <button data-v="record" aria-label="記録" aria-current="page"><span class="ic ic-record" aria-hidden="true"></span>記録</button>
   <button data-v="history" aria-label="履歴"><span class="ic ic-history" aria-hidden="true"></span>履歴</button>
   <button data-v="analysis" aria-label="分析"><span class="ic ic-analysis" aria-hidden="true"></span>分析</button>

@@ -178,8 +178,8 @@ function renderRecord(m){
     <div class="launchBody">
     <label class="f">距離</label>
     <div class="chips quickDists" id="fDistChips">
-      ${[70,50,30,18].map(d=>`<button type="button" class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</button>`).join("")}
-      <button type="button" class="chip" data-d="custom">カスタム</button>
+      ${[70,50,30,18].map(d=>`<button type="button" class="chip ${d===defDist?"on":""}" aria-pressed="${d===defDist}" data-d="${d}">${d}m</button>`).join("")}
+      <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
     </div>
     <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
     <div class="quickSelects">
@@ -250,7 +250,7 @@ function renderRecord(m){
       distState.d=last.dist||defDist;
       const known=[70,50,30,18].includes(+distState.d);
       const key=known?String(distState.d):"custom";
-      document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.toggle("on", String(x.dataset.d)===key));
+      document.querySelectorAll("#fDistChips .chip").forEach(x=>{ const on=String(x.dataset.d)===key; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
       $("#fDistCustomWrap").style.display=known?"none":"block";
       if(!known) $("#fDistCustom").value=distState.d||"";
       faceSel.value=faceChoiceValue(last);
@@ -271,8 +271,8 @@ function renderRecord(m){
     if(old) old.outerHTML=recordSetupSnapshot($("#fSetup").value, distState.d);
   }
   document.querySelectorAll("#fDistChips .chip").forEach(c=>c.onclick=()=>{
-    document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.remove("on"));
-    c.classList.add("on");
+    document.querySelectorAll("#fDistChips .chip").forEach(x=>{ x.classList.remove("on"); x.setAttribute("aria-pressed","false"); });
+    c.classList.add("on"); c.setAttribute("aria-pressed","true");
     if(c.dataset.d==="custom"){ $("#fDistCustomWrap").style.display="block"; distState.d=null; }
     else{ $("#fDistCustomWrap").style.display="none"; distState.d=+c.dataset.d; suggestFace(distState.d); fillSight(); }
     updateQuickStartMeta();
@@ -415,7 +415,7 @@ function analysisFilterBarHtml(allRows,f){
       <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map(d=>`<option value="${d}" ${String(f.dist)===String(d)?"selected":""}>${d}m</option>`).join("")}</select></div>
     </div>
     <label class="f">期間</label>
-    <div class="chips" id="anPeriods">${periods.map(([id,lb])=>`<button type="button" class="chip ${f.period===id?"on":""}" data-period="${id}">${lb}</button>`).join("")}</div>
+    <div class="chips" id="anPeriods">${periods.map(([id,lb])=>`<button type="button" class="chip ${f.period===id?"on":""}" aria-pressed="${f.period===id}" data-period="${id}">${lb}</button>`).join("")}</div>
   </div>`;
 }
 function analysisKpiHtml(rows){
@@ -519,7 +519,11 @@ function renderAnalysis(m){
   if(anSetup) anSetup.onchange=e=>{ f.setupId=e.target.value; render(); };
   const anDist=$("#anDist");
   if(anDist) anDist.onchange=e=>{ f.dist=e.target.value; render(); };
-  document.querySelectorAll("#anPeriods .chip[data-period]").forEach(c=>c.onclick=()=>{ f.period=c.dataset.period; render(); });
+  document.querySelectorAll("#anPeriods .chip[data-period]").forEach(c=>c.onclick=()=>{
+    const hadFocus=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#anPeriods"));
+    f.period=c.dataset.period; render();
+    if(hadFocus){ const chip=document.querySelector(`#anPeriods [data-period="${c.dataset.period}"]`); if(chip) chip.focus({preventScroll:true}); }
+  });
   bindFormTrackingCard();
 }
 function liveSessionHeroHtml(s,setup){
@@ -558,7 +562,7 @@ function renderActive(m){
     <div class="targetTools">
       <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
       ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips">
-        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<button type="button" class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</button>`).join("")}
+        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<button type="button" class="chip ${(ui.zoom||1)===z?"on":""}" aria-pressed="${(ui.zoom||1)===z}" data-z="${z}">${lb}</button>`).join("")}
       </div>`}
     </div>
     <div class="tgWrap" id="tgWrap">
@@ -591,7 +595,7 @@ function renderActive(m){
   function applyZoom(){ if(s.faceType==="triple") return; const M=s.faceD/2*1.18/(ui.zoom||1); $("#tgsvg").setAttribute("viewBox", `${-M} ${-M} ${2*M} ${2*M}`); }
   document.querySelectorAll("#zoomChips .chip").forEach(c=>c.onclick=()=>{
     ui.zoom=+c.dataset.z;
-    document.querySelectorAll("#zoomChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    document.querySelectorAll("#zoomChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
     applyZoom();
   });
   applyZoom();
@@ -651,11 +655,18 @@ function refreshActive(){
   s.ends.forEach((end,ei)=>end.forEach(a=>{ html+=markCircle(gp(a),s.faceD,"rgba(60,60,60,.45)"); }));
   s.cur.forEach((a,i)=>{ html+=markCircle(gp(a),s.faceD, i===ui.selArrow?"#111":"var(--green-l)", scoreLabel(a), i===ui.freshArrow?"shotNew":""); });
   $("#tgmarks").innerHTML=html;
-  // chips
-  $("#curChips").innerHTML = s.cur.map((a,i)=>{
+  // chips（innerHTML 全置換でフォーカス中のチップが消えるため、置換前に data-i を控えて復元する）
+  const chipsBox=$("#curChips");
+  const focused=document.activeElement;
+  const focusI=(focused && focused.classList && focused.classList.contains("sc") && chipsBox.contains(focused))?focused.dataset.i:null;
+  chipsBox.innerHTML = s.cur.map((a,i)=>{
     const z=zoneStyle(a.s,a.X,s.faceType);
-    return `<button type="button" class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</button>`;
+    return `<button type="button" class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" aria-pressed="${i===ui.selArrow}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</button>`;
   }).join("") || `<span class="recordCurEmpty">エンド${s.ends.length+1}：的をタップして記録</span>`;
+  if(focusI!=null){
+    const back=chipsBox.querySelector(`.sc[data-i="${focusI}"]`);
+    if(back) back.focus({preventScroll:true});
+  }
   if(ui.freshArrow>=0){
     clearTimeout(ui.freshTimer);
     ui.freshTimer=setTimeout(()=>{
