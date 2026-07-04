@@ -150,8 +150,8 @@ function openFormDetail(rec){
     <div class="hint">⚠ = リリース前0.5秒にドリフトを観測した射。コメントは観測にもとづく候補で、断定ではありません。</div>
     <div class="btnrow"><button class="btn ghost" id="fdClose">閉じる</button></div>
   </div>`;
-  document.body.appendChild(ovl);
-  ovl.querySelector("#fdClose").onclick=()=>ovl.remove();
+  openModal(ovl,{escapeTarget:"#fdClose"});
+  ovl.querySelector("#fdClose").onclick=()=>closeModal(ovl);
 }
 
 function drawFormSkeleton(ctx,l,w,h){
@@ -189,7 +189,7 @@ function openFormCapture(){
     </div>
     <div class="hint">リリースは自動検出されます。映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです。</div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#fcClose"});
   beginActiveWorkflow();
   const video=ovl.querySelector("#fcVideo"), canvas=ovl.querySelector("#fcCanvas");
   const ctx=canvas.getContext("2d");
@@ -205,7 +205,7 @@ function openFormCapture(){
     if(raf) cancelAnimationFrame(raf);
     try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){}
     endActiveWorkflow();
-    ovl.remove();
+    closeModal(ovl);
   }
   async function startCamera(){
     stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false});

@@ -205,6 +205,30 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("opens settings as a dialog, closes on Escape, and restores focus", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  await page.locator("#btnSettings").click();
+  const ovl = page.locator(".ovl");
+  await expect(ovl).toBeVisible();
+  await expect(ovl).toHaveAttribute("role", "dialog");
+  await expect(ovl).toHaveAttribute("aria-modal", "true");
+  await expect(page.locator("body")).toHaveClass(/modalOpen/);
+  await expect(page.locator(".ovl .sheet")).toBeFocused();
+
+  await page.keyboard.press("Escape");
+  await expect(ovl).toHaveCount(0);
+  await expect(page.locator("body")).not.toHaveClass(/modalOpen/);
+  await expect(page.locator("#btnSettings")).toBeFocused();
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("syncs aria-pressed on settings theme and form tracking chips", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

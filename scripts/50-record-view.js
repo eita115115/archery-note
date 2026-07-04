@@ -903,7 +903,7 @@ function openSummary(sess, isNew){
     ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
     <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#sumClose"});
   plotSession(sess, ovl.querySelector("#sumPlot"));
   const mk=ovl.querySelector("#sumMark");
   if(mk) mk.onclick=()=>{
@@ -913,7 +913,7 @@ function openSummary(sess, isNew){
     save(); toast("サイト台帳に記録しました"); mk.disabled=true;
   };
   ovl.querySelector("#sumCard").onclick=()=>exportScorecardImage(sess);
-  ovl.querySelector("#sumClose").onclick=()=>{ ovl.remove(); render(); };
+  ovl.querySelector("#sumClose").onclick=()=>{ closeModal(ovl); render(); };
 }
 
 /* ---------- 履歴 ---------- */
