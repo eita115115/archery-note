@@ -471,6 +471,13 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   padding:7px 10px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
   max-width:92px; overflow:hidden; text-overflow:ellipsis;
 }
+/* 分析タブ「今日の結論」: 机上モードの入口カード。金面は使わず、hairlineの罫線と大きめの本文だけで目立たせる */
+.todayConclusionCard{
+  border-top:2px solid var(--accent);
+  animation:appRise .36s var(--ease-app) both; /* motion:因果 — タブを開いた結果として最初に読む一言が現れる */
+}
+.todayConclusionKicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--sub); font-weight:900;}
+.todayConclusionText{margin:6px 0 0; font-size:17px; line-height:1.55; color:var(--title);}
 .insightStrip{
   display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px;
 }

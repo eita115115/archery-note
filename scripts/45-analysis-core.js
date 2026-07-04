@@ -194,6 +194,56 @@ function conditionSplit(rows, isWindyFn){
   return {windy:fin(windy), calm:fin(calm)};
 }
 
+/* 「今日の結論」1文を選ぶ。新しい統計計算はしない — 既存の analysisKpiHtml / groupingTrendItem が
+   使っているのと同じ値（scored行の avg・移動平均・robustStats の rr/mx/my）だけを読み、
+   意味を日本語1文へ言い換えるだけの純関数。db/DOM 非依存、rows は buildAnalysisRows の出力。
+   戻り値: {kind, text} kind は表示側の見た目分岐用（テストでも確認する） */
+function todayConclusion(rows){
+  const scored=(rows||[]).filter(r=>r && r.n && r.st);
+  // しきい値1: 判定に十分なセッション数（2回未満は傾向を語れない = データ不足扱い）
+  const MIN_SESSIONS=2;
+  if(scored.length<MIN_SESSIONS){
+    return {kind:"few", text:"記録が増えると、ここに今日いちばん大事な一言が出ます。まずは数回続けてみましょう。"};
+  }
+  const sorted=[...scored].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  const latest=sorted[sorted.length-1];
+
+  // グルーピング（矢の集まり）判定: 最新RMSと全体平均RMSを比較する
+  const rrRows=sorted.filter(r=>r.st && Number.isFinite(r.st.rr));
+  const latestRr=latest.st && Number.isFinite(latest.st.rr)?latest.st.rr:null;
+  const avgRr=rrRows.length?rrRows.reduce((a,r)=>a+r.st.rr,0)/rrRows.length:null;
+  // しきい値2: 最新RMSが全体平均より 0.3cm 以上締まっていれば「安定/締まってきた」扱い
+  const RR_TIGHT_DELTA=0.3;
+  const groupingTight=latestRr!=null && avgRr!=null && (avgRr-latestRr)>=RR_TIGHT_DELTA;
+  // しきい値3: 中心オフセットが 1.0cm 以上ズレていれば「まだ中心が寄っている」扱い
+  const OFFSET_THRESHOLD=1.0;
+  const mx=latest.st&&Number.isFinite(latest.st.mx)?latest.st.mx:0;
+  const my=latest.st&&Number.isFinite(latest.st.my)?latest.st.my:0;
+  const offCenter=Math.max(Math.abs(mx),Math.abs(my))>=OFFSET_THRESHOLD;
+  if(groupingTight && offCenter){
+    const dir=Math.abs(my)>=Math.abs(mx)?(my>0?"上":"下"):(mx>0?"右":"左");
+    const axisWord=Math.abs(my)>=Math.abs(mx)?"上下":"左右";
+    return {kind:"grouping-tight-offcenter", text:`グルーピング（矢の集まり）は安定しています。${axisWord}のズレ（${dir}寄り）だけ直すと、次はもっと10点が増えそうです。`};
+  }
+
+  // 平均点の調子判定: analysisKpiHtml と同じ移動平均（直近5回）と同じ横ばいしきい値(0.02)を使う
+  const ma=movingAverage(sorted.map(r=>r.avg),5);
+  const latestMa=ma.length?ma[ma.length-1]:null;
+  const prevMa=ma.length>1?ma[ma.length-2]:null;
+  const delta=latestMa!=null&&prevMa!=null?latestMa-prevMa:null;
+  const TREND_FLAT=0.02;
+  if(delta!=null && delta>TREND_FLAT){
+    return {kind:"trend-up", text:`平均点が上向きです。この調子で同じ距離・用具の練習を続けると良さそうです。`};
+  }
+  if(delta!=null && delta<-TREND_FLAT){
+    return {kind:"trend-down", text:`平均点がやや下がり気味のようです。本数を安定させてから、グルーピングと中心のどちらがズレているかを見るとよさそうです。`};
+  }
+  if(groupingTight){
+    return {kind:"grouping-tight", text:"グルーピング（矢の集まり）は安定しています。この調子を保てば点数もついてきそうです。"};
+  }
+  return {kind:"steady", text:"大きな崩れはなく、安定して練習できているようです。"};
+}
+
 /* arrow.reason タグ別の本数・平均点・平均ズレ方向(cm) */
 function reasonBreakdown(rows){
   const by=new Map();

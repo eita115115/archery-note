@@ -499,7 +499,7 @@ function analysisKpiHtml(rows){
   const best=[...scored].sort((a,b)=>b.total-a.total||(b.date||"").localeCompare(a.date||""))[0];
   return `<div class="insightStrip">
     <div class="insightTile"><div class="k">平均点</div><b>${avg.toFixed(2)}</b><span>${scored.length}回 ${arrows}本 / 移動平均 ${trend}</span></div>
-    <div class="insightTile"><div class="k">グルーピング</div><b>${latestRr!=null?latestRr.toFixed(1)+"cm":"—"}</b><span>最新RMS / 最小 ${bestRr!=null?bestRr.toFixed(1)+"cm":"—"}</span></div>
+    <div class="insightTile"><div class="k">矢の集まり具合（グルーピング）</div><b>${latestRr!=null?latestRr.toFixed(1)+"cm":"—"}</b><span>最新の半径(RMS) / 最小 ${bestRr!=null?bestRr.toFixed(1)+"cm":"—"}</span></div>
     <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${best?[fmtD(best.date),best.dist?`${best.dist}m`:"",`${best.n}本`].filter(Boolean).join(" / "):"記録待ち"}</span></div>
   </div>`;
 }
@@ -513,14 +513,14 @@ function analysisTrendChartHtml(rows){
   const px=i=>(i/(sorted.length-1))*W;
   const py=v=>H-10-((v-min)/span)*(H-22);
   const maPath=ma.map((v,i)=>`${i?"L":"M"}${px(i).toFixed(1)},${py(v).toFixed(1)}`).join("");
-  return `<div class="card"><h2>スコア推移グラフ <span class="mini">${sorted.length}回 / 線は直近5回移動平均</span></h2>
-    <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H+20}px" role="img" aria-label="平均点の推移">
-      <text x="2" y="10" font-size="9" fill="var(--sub)">${max.toFixed(1)}</text>
-      <text x="2" y="${H-2}" font-size="9" fill="var(--sub)">${min.toFixed(1)}</text>
+  return `<div class="card"><h2>得点の推移 <span class="mini">${sorted.length}回 / 線は直近5回の移動平均</span></h2>
+    <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H+20}px" role="img" aria-label="平均点（点/本）の推移">
+      <text x="2" y="10" font-size="9" fill="var(--sub)">${max.toFixed(1)}点</text>
+      <text x="2" y="${H-2}" font-size="9" fill="var(--sub)">${min.toFixed(1)}点</text>
       ${sorted.map((r,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(r.avg).toFixed(1)}" r="3" fill="var(--green)" opacity=".5"/>`).join("")}
       <path d="${maPath}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
     </svg>
-    <div class="hint">丸は各練習の平均点/本、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。</div>
+    <div class="hint">丸は各練習の平均点（1本あたり）、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。</div>
   </div>`;
 }
 /* 多距離ラウンドの「ラウンド合計ベスト」行（IMP-09）: complete なグループのみ対象。
@@ -551,10 +551,10 @@ function conditionSplitCard(rows){
   if(cs.windy.sessions<2 || cs.calm.sessions<2) return "";
   const line=g=>`<div class="listItem recordReadOnlyItem">
     <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本${g.biasX!=null&&Math.abs(g.biasX)>=.3?` / 平均中心 ${cmOffsetText(g.biasX,"x")}`:""}</div></div>
-    <div class="big">${g.avg!=null?g.avg.toFixed(2):"—"}<small> / RMS ${g.avgRms!=null?g.avgRms.toFixed(1)+"cm":"—"}</small></div>
+    <div class="big">${g.avg!=null?g.avg.toFixed(2):"—"}<small> / 矢の集まり半径(RMS) ${g.avgRms!=null?g.avgRms.toFixed(1)+"cm":"—"}</small></div>
   </div>`;
-  return `<div class="card"><h2>条件比較 <span class="mini">風あり vs 風なし</span></h2>${line(cs.calm)}${line(cs.windy)}
-    <div class="hint">風の有無で平均点とグルーピングがどれだけ変わるかの俯瞰です。風ありの平均中心が横へ流れていれば、風待ちやエイムオフの効果を検討できます。</div></div>`;
+  return `<div class="card"><h2>風の有無で比べる <span class="mini">風あり vs 風なし</span></h2>${line(cs.calm)}${line(cs.windy)}
+    <div class="hint">風の有無で平均点と矢の集まり方がどれだけ変わるかの俯瞰です。風ありの平均中心が横へ流れていれば、風待ちやエイムオフの効果を検討できます。</div></div>`;
 }
 function reasonBreakdownCard(rows){
   const rb=reasonBreakdown(rows);
@@ -563,33 +563,55 @@ function reasonBreakdownCard(rows){
     <div><div class="t">${esc(g.reason)}</div><div class="d">${g.count}本${(Math.abs(g.mx||0)>=.3||Math.abs(g.my||0)>=.3)?` / 平均ズレ ${driftText(g.mx||0,g.my||0)}`:""}</div></div>
     <div class="big">${g.avg!=null?g.avg.toFixed(2):"—"}<small> / 平均点</small></div>
   </div>`).join("");
-  return `<div class="card"><h2>外れ理由タグ分析 <span class="mini">${rb.tagged}本にタグ</span></h2>${body}
+  return `<div class="card"><h2>外れた理由の傾向 <span class="mini">${rb.tagged}本にタグ</span></h2>${body}
   <div class="hint">記録中に付けた理由タグ別の平均点と平均ズレ方向です。特定のタグが同じ方向へ寄っていれば、次の練習の重点候補になります。</div></div>`;
+}
+/* 「今日の結論」カード: 初心者文法の入口。既存の todayConclusion() の言い換え文をそのまま大きく出す。
+   新しい統計計算はしない — 表示だけの薄いラッパー */
+function todayConclusionCardHtml(rows){
+  const c=todayConclusion(rows);
+  if(!c) return "";
+  return `<div class="card todayConclusionCard" data-testid="today-conclusion">
+    <div class="todayConclusionKicker">今日の結論</div>
+    <p class="todayConclusionText">${esc(c.text)}</p>
+  </div>`;
 }
 function renderAnalysis(m){
   const f=ui.analysisFilter;
   const allRows=buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
   const rows=filterAnalysisRows(allRows, {setupId:f.setupId, dist:f.dist, round:f.round, period:f.period, today:today()});
   const ss=rows.map(r=>r.s).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
+  const sessionRows=historySessionRows(ss);
+  /* 全体構成（正本 5節）: 結論 → 得点の推移 → ばらつき(グルーピング) → サイト → 条件比較 → 月間 → その他。
+     ロジックは変えず、既存カード関数の呼び出し順だけを並べ替える */
   const cards=[
+    // 得点の推移
     analysisKpiHtml(rows),
     analysisTrendChartHtml(rows),
-    formTrackingCard(),
-    personalBestCard(rows),
+    scoreTrendCard(ss),
+    // 矢の集まり具合（グルーピング＝ばらつき）
+    groupingTrendCard(ss),
+    groupingSummaryHtml(sessionRows),
+    // サイト
+    sightHistoryCard(ss),
+    sightSummaryHtml(sessionRows,{setupId:"",dist:""}),
+    // 条件比較
     conditionSplitCard(rows),
     reasonBreakdownCard(rows),
-    historySummaryDetailsHtml(historySessionRows(ss),{setupId:"",dist:""}),
-    scoreTrendCard(ss),
-    setupPerformanceCard(ss),
-    sightHistoryCard(ss),
-    groupingTrendCard(ss),
+    // 月間
+    monthlyCard(ss),
     distTrendCard(ss),
     scoreDistCard(ss),
-    monthlyCard(ss)
+    // その他
+    formTrackingCard(),
+    personalBestCard(rows),
+    setupPerformanceCard(ss),
+    distanceSummaryHtml(sessionRows)
   ].filter(Boolean).join("");
   m.innerHTML=`${pageHeroHtml("analysis")}
+  ${todayConclusionCardHtml(rows)}
   ${allRows.length?analysisFilterBarHtml(allRows,f):""}
-  ${cards||`<div class="card"><h2>分析</h2><div class="empty">${allRows.length?"この絞り込みに合う記録がありません。フィルタを広げてください。":"記録が増えると、グルーピング推移や月間サマリーがここに表示されます。"}</div></div>`}`;
+  ${cards||`<div class="card"><h2>分析</h2><div class="empty">${allRows.length?"この絞り込みに合う記録がありません。フィルタを広げてください。":"記録が増えると、矢の集まり具合や月間まとめがここに表示されます。"}</div></div>`}`;
   const anSetup=$("#anSetup");
   if(anSetup) anSetup.onchange=e=>{ f.setupId=e.target.value; render(); };
   const anDist=$("#anDist");
@@ -1155,7 +1177,7 @@ function scoreTrendCard(ss){
       <div class="big">${avgText}<small> / 合計${totalText}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>スコア推移 <span class="mini">直近${rows.length}回</span></h2>${body}</div>`;
+  return `<div class="card"><h2>直近の得点 <span class="mini">直近${rows.length}回</span></h2>${body}</div>`;
 }
 function setupPerformanceLabel(setupId){
   if(!setupId) return {key:"setup:none",label:"セットアップ未設定"};
@@ -1205,7 +1227,7 @@ function setupPerformanceCard(ss){
       <div class="big">${avgText}<small> / 最高${bestText}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>セットアップ別成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
+  return `<div class="card"><h2>用具ごとの成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
 }
 function sightHistoryCard(ss){
   const markRows=(Array.isArray(db.sightMarks)?db.sightMarks:[])
@@ -1240,7 +1262,7 @@ function sightHistoryCard(ss){
       <div class="big">上下 ${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>サイト履歴 <span class="mini">直近${rows.length}件</span></h2>${body}</div>`;
+  return `<div class="card"><h2>サイト値の記録 <span class="mini">直近${rows.length}件</span></h2>${body}</div>`;
 }
 function historyOverviewHtml(allSs,ss){
   const src=Array.isArray(ss)?ss:allSs;
@@ -1313,7 +1335,7 @@ function distanceSummaryHtml(sessionRows){
         <div class="big">${avg}<small> / 最高${g.best?g.best.total:"—"}</small></div>
       </div>`;
     }).join("");
-  return historyAnalysisDetailsHtml("距離別サマリー",`${rows.length}距離`,body);
+  return historyAnalysisDetailsHtml("距離ごとのまとめ",`${rows.length}距離`,body);
 }
 function sightValueText(v){
   const raw=String(v==null?"":v).trim();
@@ -1376,7 +1398,7 @@ function sightSummaryHtml(sessionRows,filter){
         <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
       </div>`;
     }).join("");
-  return historyAnalysisDetailsHtml("サイトサマリー",`台帳${totalMarks}件 / 練習入力${totalSessions}回`,body);
+  return historyAnalysisDetailsHtml("サイト値のまとめ",`台帳${totalMarks}件 / 練習入力${totalSessions}回`,body);
 }
 function groupingMetricNumber(v){
   const n=Number(v);
@@ -1420,9 +1442,9 @@ function groupingSummaryHtml(sessionRows){
   const groups=[...byDist.values()].sort((a,b)=>b.sort-a.sort || b.sessions-a.sessions || a.label.localeCompare(b.label));
   const meta=r=>[r.distInfo.label,r.date.label].filter(x=>x&&x!=="—").join(" / ")||"—";
   const body=`<div class="insightStrip">
-      <div class="insightTile"><div class="k">平均RMS</div><b>${groupingMetricText(avg)}</b><span>${rows.length}セッションから集計</span></div>
-      <div class="insightTile"><div class="k">最小RMS</div><b>${groupingMetricText(best&&best.rr)}</b><span>${esc(best?meta(best):"—")}</span></div>
-      <div class="insightTile"><div class="k">最新RMS</div><b>${groupingMetricText(latest&&latest.rr)}</b><span>${esc(latest?meta(latest):"—")}</span></div>
+      <div class="insightTile"><div class="k">平均の集まり半径(RMS)</div><b>${groupingMetricText(avg)}</b><span>${rows.length}セッションから集計</span></div>
+      <div class="insightTile"><div class="k">最小の集まり半径(RMS)</div><b>${groupingMetricText(best&&best.rr)}</b><span>${esc(best?meta(best):"—")}</span></div>
+      <div class="insightTile"><div class="k">最新の集まり半径(RMS)</div><b>${groupingMetricText(latest&&latest.rr)}</b><span>${esc(latest?meta(latest):"—")}</span></div>
     </div>
     ${groups.map(g=>{
       const distAvg=g.sessions?g.total/g.sessions:null;
@@ -1432,5 +1454,5 @@ function groupingSummaryHtml(sessionRows){
         <div class="big">${groupingMetricText(distAvg)}<small> / 最小${groupingMetricText(g.best&&g.best.rr)}</small></div>
       </div>`;
     }).join("")}`;
-  return historyAnalysisDetailsHtml("グルーピングサマリー",`対象${rows.length}回`,body);
+  return historyAnalysisDetailsHtml("矢の集まり具合のまとめ（グルーピングサマリー）",`対象${rows.length}回`,body);
 }

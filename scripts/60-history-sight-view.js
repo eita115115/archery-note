@@ -73,9 +73,9 @@ function groupingTrendCard(ss){
     .sort((a,b)=>(b[b.length-1].date||"").localeCompare(a[a.length-1].date||""))
     .slice(0,4);
   if(!groups.length) return "";
-  return `<div class="card"><h2>グルーピング推移 <span class="mini">過去中心の分布と偏移</span></h2>`+
+  return `<div class="card"><h2>矢の集まり具合の推移 <span class="mini">過去の中心の分布と偏移</span></h2>`+
     groups.map(g=>groupingTrendItem(g)).join("")+
-    `<div class="hint">丸は各練習のグルーピング中心、線は時系列、緑の楕円は過去中心の分布です。的の中心からどちらへ偏り続けているか、直近でどちらへ流れているかを見るための俯瞰です。</div></div>`;
+    `<div class="hint">丸は各練習のグルーピング（矢の集まり）中心、線は時系列、緑の楕円は過去中心の分布です。的の中心からどちらへ偏り続けているか、直近でどちらへ流れているかを見るための俯瞰です。</div></div>`;
 }
 function groupingTrendItem(g){
   const latest=g[g.length-1], first=g[0], prev=g[g.length-2];
@@ -108,7 +108,7 @@ function groupingTrendItem(g){
       </svg>
       <div class="histRecentBody">
         <div class="t histRecentTitle">${setup} ・ ${historyDistanceLabel(latest.dist)} ・ ${faceLabel(latest)}</div>
-        <div class="d">${g.length}回 / ${fmtD(first.date)}〜${fmtD(latest.date)} / 平均グルーピング半径 ${avgRr.toFixed(1)}cm</div>
+        <div class="d">${g.length}回 / ${fmtD(first.date)}〜${fmtD(latest.date)} / 平均の集まり半径(RMS) ${avgRr.toFixed(1)}cm</div>
         <div class="kv"><span>最新の中心</span><span>${cmOffsetText(latest.mx,"x")} / ${cmOffsetText(latest.my,"y")}（${biasState}）</span></div>
         <div class="kv"><span>前回から</span><span>${driftText(recentDx,recentDy)}</span></div>
         <div class="kv"><span>初回から</span><span>${driftText(allDx,allDy)}</span></div>
@@ -126,7 +126,7 @@ function scoreDistCard(ss){
   const cnt={}; keys.forEach(k=>cnt[k]=0);
   records.forEach(({a})=>{ cnt[a.s===0?"M":(a.X?"X":String(a.s))]++; });
   const max=Math.max(...keys.map(k=>cnt[k]))||1;
-  return `<div class="card"><h2>得点分布 <span class="mini">全${all.length}本</span></h2>`+
+  return `<div class="card"><h2>得点の内訳 <span class="mini">全${all.length}本</span></h2>`+
     keys.filter(k=>cnt[k]>0 || (!fieldOnly && ["X","10","9","8","7"].includes(k))).map(k=>{
       const sNum=k==="X"?10:(k==="M"?0:+k);
       const rec=records.find(x=>(x.a.s===0?"M":(x.a.X?"X":String(x.a.s)))===k);
@@ -150,7 +150,7 @@ function monthlyCard(ss){
   });
   const keys=Object.keys(m).sort().reverse().slice(0,6);
   if(!keys.length) return "";
-  return `<div class="card"><h2>月間サマリー</h2><table class="tbl"><tr><th>月</th><th class="right">練習</th><th class="right">本数</th><th class="right">平均/本</th></tr>`+
+  return `<div class="card"><h2>月ごとのまとめ</h2><table class="tbl"><tr><th>月</th><th class="right">練習</th><th class="right">本数</th><th class="right">平均/本</th></tr>`+
     keys.map(k=>`<tr><td>${k.replace("-","/")}</td><td class="right">${m[k].c}回</td><td class="right">${m[k].n}本</td><td class="right"><b>${m[k].n?(m[k].sum/m[k].n).toFixed(2):"-"}</b></td></tr>`).join("")+
     `</table></div>`;
 }
@@ -165,15 +165,15 @@ function distTrendCard(ss){
   });
   const groups=Object.values(byDist).filter(g=>g.pts.length>=2).sort((a,b)=>b.sort-a.sort || a.label.localeCompare(b.label));
   if(!groups.length) return "";
-  return `<div class="card"><h2>距離別 平均点の推移</h2>`+groups.map(g=>{
+  return `<div class="card"><h2>距離ごとの調子 <span class="mini">平均点(点/本)の推移</span></h2>`+groups.map(g=>{
     const pts=g.pts; const W=300,H=46;
     const min=Math.min(...pts), max=Math.max(...pts), span=(max-min)||1;
     const path=pts.map((v,i)=>`${i?"L":"M"}${(i/(pts.length-1))*W},${H-4-((v-min)/span)*(H-10)}`).join("");
     return `<div class="histTrendRow">
       <div class="histTrendLabel">${esc(g.label)}</div>
-      <svg width="100%" viewBox="0 0 ${W} ${H}" class="histTrendChart" style="max-height:${H}px"><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
+      <svg width="100%" viewBox="0 0 ${W} ${H}" class="histTrendChart" style="max-height:${H}px" role="img" aria-label="${esc(g.label)}の平均点（点/本）推移"><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
       ${pts.map((v,i)=>`<circle cx="${(i/(pts.length-1))*W}" cy="${H-4-((v-min)/span)*(H-10)}" r="3" fill="var(--green)"/>`).join("")}</svg>
-      <div class="histTrendValue">${pts[pts.length-1].toFixed(2)}<br><span class="histTrendSub">最新平均</span></div>
+      <div class="histTrendValue">${pts[pts.length-1].toFixed(2)}点<br><span class="histTrendSub">最新平均/本</span></div>
     </div>`;
   }).join("")+`</div>`;
 }
