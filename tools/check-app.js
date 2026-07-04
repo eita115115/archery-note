@@ -380,11 +380,11 @@ const sampleSessions = [
   {id:"a",date:"2026-01-01",setupId:"main",dist:70,faceD:122,faceType:"single",ends:[[{x:-1,y:0,s:10},{x:0,y:1,s:10},{x:-2,y:0,s:9},{x:-1,y:-1,s:10},{x:0,y:0,s:10},{x:-1,y:1,s:10}]]}
 ];
 const trendHtml = historyApi.groupingTrendCard(sampleSessions);
-assert(trendHtml.includes("グルーピング推移") && trendHtml.includes("Main setup"), "Grouping trend card failed");
+assert(trendHtml.includes("矢の集まり具合の推移") && trendHtml.includes("Main setup"), "Grouping trend card failed");
 const fieldDistHtml = historyApi.scoreDistCard([{id:"field",date:"2026-03-01",dist:30,faceD:40,faceType:"field",ends:[[
   {s:6},{s:5},{s:4},{s:3},{s:2},{s:1},{s:6},{s:5},{s:4},{s:3},{s:2},{s:0}
 ]]}]);
-assert(fieldDistHtml.includes("得点分布") && fieldDistHtml.includes(">6</div>") && !fieldDistHtml.includes(">10</div>") && !fieldDistHtml.includes(">X</div>"), "Field score distribution failed");
+assert(fieldDistHtml.includes("得点の内訳") && fieldDistHtml.includes(">6</div>") && !fieldDistHtml.includes(">10</div>") && !fieldDistHtml.includes(">X</div>"), "Field score distribution failed");
 
 console.log(`Archery Note checks OK (v${version})`);
 console.log(`Robust grouping: used=${st.n}, excluded=${st.excluded.length}, confidence=${Math.round(st.confidence*100)}%`);

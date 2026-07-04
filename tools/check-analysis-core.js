@@ -350,7 +350,7 @@ assert(
 const coreScript = fs.readFileSync(path.join(root, "scripts", "45-analysis-core.js"), "utf8");
 const core = new Function(
   `${coreScript}
-return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown, aggregateRoundGroups, roundGroupBests};`,
+return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown, aggregateRoundGroups, roundGroupBests, todayConclusion};`,
 )();
 
 // テスト用の metricsFn: sessionMetrics 互換の形を robustStats から作る
@@ -560,6 +560,94 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
   assertClose(rb.items[0].mx, 2.2, 1e-9, "tag mean x offset");
   assertClose(rb.items[0].avg, 8, 1e-9, "tag mean score");
   assertEqual(core.reasonBreakdown([]).tagged, 0, "no rows means no tags");
+}
+
+// todayConclusion: 「今日の結論」1文選択（データ不足 / 良い / 悪いの3態）
+{
+  // ヘルパー: sessionMetrics 互換の行を直接組み立てる（buildAnalysisRows を介さず、
+  // st.mx/my/rr を狙った値に固定してしきい値の境界を検証する）
+  function conclusionRow(id, date, avg, st) {
+    return { id, date, n: 6, avg, total: avg * 6, st };
+  }
+  function stOf(rr, mx, my) {
+    return { rr, mx, my, sx: 1, sy: 1, n: 6, total: 6, method: "simple", confidence: 0.6, excluded: [] };
+  }
+
+  // データ不足: セッション1回だけ
+  {
+    const rows = [conclusionRow("d1", "2026-06-01", 9, stOf(3, 0, 0))];
+    const c = core.todayConclusion(rows);
+    assertEqual(c.kind, "few", "single session gives 'few' conclusion");
+    assert(c.text.length > 0, "few conclusion has text");
+    assertEqual(core.todayConclusion([]).kind, "few", "empty rows also give 'few' conclusion");
+  }
+
+  // 良いケース: グルーピングが締まってきていて（RMS改善）、かつ中心はほぼ合っている
+  // → 平均点も横ばいなら「グルーピング安定」の一言（中心オフセット無し版）になる
+  {
+    const rows = [
+      conclusionRow("g1", "2026-05-01", 8.5, stOf(4.0, 0.1, 0.1)),
+      conclusionRow("g2", "2026-05-15", 8.5, stOf(3.8, 0.1, 0.1)),
+      conclusionRow("g3", "2026-06-01", 8.5, stOf(3.4, 0.1, 0.1)), // avgRr(3.73) - latestRr(3.4) >= 0.3
+    ];
+    const c = core.todayConclusion(rows);
+    assertEqual(c.kind, "grouping-tight", "tight grouping with centered shots gives grouping-tight");
+    assert(c.text.includes("安定"), "grouping-tight text mentions stability");
+  }
+
+  // 良いケース+中心ズレ: グルーピングは締まっているが中心が上に寄っている
+  // → 「上下を直せば伸びる」系の一言（グルーピング良好+中心オフセット優先）
+  {
+    const rows = [
+      conclusionRow("o1", "2026-05-01", 8.5, stOf(4.0, 0.1, 0.1)),
+      conclusionRow("o2", "2026-05-15", 8.5, stOf(3.8, 0.1, 0.1)),
+      conclusionRow("o3", "2026-06-01", 8.5, stOf(3.4, 0.1, 1.5)), // my=1.5cm >= OFFSET_THRESHOLD
+    ];
+    const c = core.todayConclusion(rows);
+    assertEqual(c.kind, "grouping-tight-offcenter", "tight grouping + off-center gives combined conclusion");
+    assert(c.text.includes("上下"), "off-center text names the axis (up/down)");
+    assert(c.text.includes("上") , "off-center text names the direction");
+  }
+
+  // 悪いケース: 平均点が下降トレンド（移動平均が下がり続けている）
+  {
+    const rows = [
+      conclusionRow("t1", "2026-05-01", 9.5, stOf(5, 0, 0)),
+      conclusionRow("t2", "2026-05-08", 9.3, stOf(5, 0, 0)),
+      conclusionRow("t3", "2026-05-15", 8.8, stOf(5, 0, 0)),
+      conclusionRow("t4", "2026-05-22", 8.2, stOf(5, 0, 0)),
+      conclusionRow("t5", "2026-05-29", 7.5, stOf(5, 0, 0)),
+      conclusionRow("t6", "2026-06-05", 6.8, stOf(5, 0, 0)),
+    ];
+    const c = core.todayConclusion(rows);
+    assertEqual(c.kind, "trend-down", "declining moving average gives trend-down");
+    assert(c.text.length > 0, "trend-down conclusion has text");
+  }
+
+  // 悪いケース側の対称: 平均点が上昇トレンド
+  {
+    const rows = [
+      conclusionRow("u1", "2026-05-01", 6.8, stOf(5, 0, 0)),
+      conclusionRow("u2", "2026-05-08", 7.5, stOf(5, 0, 0)),
+      conclusionRow("u3", "2026-05-15", 8.2, stOf(5, 0, 0)),
+      conclusionRow("u4", "2026-05-22", 8.8, stOf(5, 0, 0)),
+      conclusionRow("u5", "2026-05-29", 9.3, stOf(5, 0, 0)),
+      conclusionRow("u6", "2026-06-05", 9.5, stOf(5, 0, 0)),
+    ];
+    const c = core.todayConclusion(rows);
+    assertEqual(c.kind, "trend-up", "rising moving average gives trend-up");
+  }
+
+  // rows に st の無い行（未スコア）が混ざっても落ちないこと
+  {
+    const rows = [
+      { id: "x1", date: "2026-05-01", n: 0, avg: null, total: 0, st: null },
+      conclusionRow("x2", "2026-05-01", 8.5, stOf(4, 0, 0)),
+      conclusionRow("x3", "2026-06-01", 8.5, stOf(4, 0, 0)),
+    ];
+    const c = core.todayConclusion(rows);
+    assert(c && typeof c.text === "string", "unscored rows are filtered out without throwing");
+  }
 }
 
 console.log("Analysis core characterization checks OK");
