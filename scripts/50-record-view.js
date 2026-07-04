@@ -16,7 +16,11 @@ function render(){
     tabBar.style.setProperty("--active-tab", activeIndex);
     tabBar.style.setProperty("--tab-count", tabs.length||1);
   }
-  tabs.forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  tabs.forEach(b=>{
+    const on=b.dataset.v===view;
+    b.classList.toggle("on",on);
+    if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+  });
   const m=$("#main");
   if(view==="record") renderRecord(m);
   else if(view==="history") renderHistory(m);
@@ -174,8 +178,8 @@ function renderRecord(m){
     <div class="launchBody">
     <label class="f">距離</label>
     <div class="chips quickDists" id="fDistChips">
-      ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
-      <div class="chip" data-d="custom">カスタム</div>
+      ${[70,50,30,18].map(d=>`<button type="button" class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</button>`).join("")}
+      <button type="button" class="chip" data-d="custom">カスタム</button>
     </div>
     <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
     <div class="quickSelects">
@@ -411,7 +415,7 @@ function analysisFilterBarHtml(allRows,f){
       <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map(d=>`<option value="${d}" ${String(f.dist)===String(d)?"selected":""}>${d}m</option>`).join("")}</select></div>
     </div>
     <label class="f">期間</label>
-    <div class="chips" id="anPeriods">${periods.map(([id,lb])=>`<div class="chip ${f.period===id?"on":""}" data-period="${id}">${lb}</div>`).join("")}</div>
+    <div class="chips" id="anPeriods">${periods.map(([id,lb])=>`<button type="button" class="chip ${f.period===id?"on":""}" data-period="${id}">${lb}</button>`).join("")}</div>
   </div>`;
 }
 function analysisKpiHtml(rows){
@@ -554,7 +558,7 @@ function renderActive(m){
     <div class="targetTools">
       <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
       ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips">
-        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<div class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</div>`).join("")}
+        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<button type="button" class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</button>`).join("")}
       </div>`}
     </div>
     <div class="tgWrap" id="tgWrap">
@@ -650,7 +654,7 @@ function refreshActive(){
   // chips
   $("#curChips").innerHTML = s.cur.map((a,i)=>{
     const z=zoneStyle(a.s,a.X,s.faceType);
-    return `<div class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</div>`;
+    return `<button type="button" class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</button>`;
   }).join("") || `<span class="recordCurEmpty">エンド${s.ends.length+1}：的をタップして記録</span>`;
   if(ui.freshArrow>=0){
     clearTimeout(ui.freshTimer);
