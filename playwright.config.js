@@ -2,6 +2,9 @@
 
 const { defineConfig } = require("@playwright/test");
 
+/* PORT を上書きすると並行 worktree でもポート衝突なく実行できる（既定は従来どおり 4173） */
+const port = Number(process.env.PORT || 4173);
+
 module.exports = defineConfig({
   testDir: "tests/e2e",
   timeout: 30000,
@@ -11,7 +14,7 @@ module.exports = defineConfig({
   retries: 0,
   reporter: "list",
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: `http://127.0.0.1:${port}`,
     headless: true,
     screenshot: "off",
     trace: "off",
@@ -33,6 +36,6 @@ module.exports = defineConfig({
     command: "node tools/e2e-server.js",
     reuseExistingServer: !process.env.CI,
     timeout: 15000,
-    url: "http://127.0.0.1:4173",
+    url: `http://127.0.0.1:${port}`,
   },
 });

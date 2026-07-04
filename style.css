@@ -653,6 +653,8 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .btn.trashRestoreBtn{padding:4px var(--space-3);}
 /* modal */
 .ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
+body.modalOpen{overflow:hidden;}
+.sheet:focus{outline:none;} /* dialog コンテナへの初期フォーカスでリングを出さない */
 .sheet{
   background:var(--card); width:100%; max-width:520px; border-radius:24px 24px 0 0; padding:16px;
   max-height:88vh; overflow-y:auto; padding-bottom:16px;

@@ -312,6 +312,44 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),1700); }
 function today(){ return new Date().toISOString().slice(0,10); }
+/* ---------- モーダル共通（dialog 化とフォーカス管理） ---------- */
+const MODAL_FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+function openModal(ovl,opts){
+  const o=opts||{};
+  const sheet=ovl.querySelector(".sheet")||ovl;
+  ovl.setAttribute("role","dialog");
+  ovl.setAttribute("aria-modal","true");
+  ovl._modalPrevFocus=document.activeElement;
+  ovl._modalKeydown=e=>{
+    if(!document.body.contains(ovl)) return;
+    if(e.key==="Escape"){
+      e.preventDefault(); e.stopPropagation();
+      const btn=o.escapeTarget?ovl.querySelector(o.escapeTarget):null;
+      if(btn) btn.click(); else closeModal(ovl);
+      return;
+    }
+    if(e.key!=="Tab") return;
+    /* 最低限のフォーカストラップ: Tab で背面に抜けない */
+    const items=[...ovl.querySelectorAll(MODAL_FOCUSABLE)].filter(el=>el.getClientRects().length);
+    if(!items.length){ e.preventDefault(); sheet.focus({preventScroll:true}); return; }
+    const cur=document.activeElement, inside=ovl.contains(cur);
+    if(e.shiftKey){
+      if(!inside||cur===items[0]||cur===sheet){ e.preventDefault(); items[items.length-1].focus(); }
+    }else if(!inside||cur===items[items.length-1]){ e.preventDefault(); items[0].focus(); }
+  };
+  document.addEventListener("keydown",ovl._modalKeydown,true);
+  document.body.appendChild(ovl);
+  document.body.classList.add("modalOpen");
+  if(!sheet.hasAttribute("tabindex")) sheet.setAttribute("tabindex","-1");
+  sheet.focus({preventScroll:true});
+}
+function closeModal(ovl){
+  if(ovl._modalKeydown){ document.removeEventListener("keydown",ovl._modalKeydown,true); ovl._modalKeydown=null; }
+  ovl.remove();
+  if(!document.querySelector("body > .ovl")) document.body.classList.remove("modalOpen");
+  const prev=ovl._modalPrevFocus; ovl._modalPrevFocus=null;
+  if(prev&&typeof prev.focus==="function"&&document.contains(prev)){ try{ prev.focus({preventScroll:true}); }catch(_){} }
+}
 function fmtD(iso){ if(!iso)return""; const [y,m,d]=iso.split("-"); return `${y}/${+m}/${+d}`; }
 const ENDCOLORS=["#e5484d","#1e6fd9","#0f9d58","#f59e0b","#8b5cf6","#ec4899","#0ea5b7","#7c5e10","#475569","#b91c1c","#1d4ed8","#047857"];
 const FIELD_FACE_SIZES=[80,60,40,20];

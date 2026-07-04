@@ -392,7 +392,7 @@ function openSettings(){
     <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
     <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#setClose"});
   ovl.querySelectorAll("#thChips .chip").forEach(c=>c.onclick=()=>{
     db.settings.theme=c.dataset.th; save(); applyTheme();
     ovl.querySelectorAll("#thChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
@@ -403,7 +403,7 @@ function openSettings(){
     ovl.querySelectorAll("#ftChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
     toast(db.settings.formTrackingEnabled?"射形トラッキングを有効にしました（分析タブ）":"射形トラッキングを無効にしました");
   });
-  ovl.querySelector("#setClose").onclick=()=>{ ovl.remove(); render(); };
+  ovl.querySelector("#setClose").onclick=()=>{ closeModal(ovl); render(); };
   ovl.querySelector("#dExp").onclick=()=>{
     db.settings.lastBackupAt=new Date().toISOString();
     save({reason:"json-export",forceSnapshot:true});
@@ -411,7 +411,7 @@ function openSettings(){
     shareOrDownloadText(`archery-note-${today()}.json`,JSON.stringify(db,null,1),"application/json","Archery Note Backup").finally(endActiveWorkflow);
   };
   ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
-  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータをバックアップしました"); ovl.remove(); openSettings(); };
+  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータをバックアップしました"); closeModal(ovl); openSettings(); };
   ovl.querySelector("#dSnapRestore").onclick=()=>{
     const sel=ovl.querySelector("#dSnapSel");
     const snap=readSnapshots()[sel?+sel.value:0];
@@ -422,7 +422,7 @@ function openSettings(){
         writeSafetySnapshot("restore-before",true);
         db=normalizeDb(snap.data);
         save({reason:"restore",forceSnapshot:true});
-        applyTheme(); ovl.remove(); render(); toast("バックアップデータを復元しました");
+        applyTheme(); closeModal(ovl); render(); toast("バックアップデータを復元しました");
       }finally{ endActiveWorkflow(); }
     }
   };
@@ -436,7 +436,7 @@ function openSettings(){
       if(!d.sessions||!d.setups) throw 0;
       if(confirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`)){
         writeSafetySnapshot("import-before",true);
-        db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); ovl.remove(); render(); toast("読み込みました");
+        db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); closeModal(ovl); render(); toast("読み込みました");
       }
     }catch(_){ toast("ファイルを読み込めませんでした"); } finally{ endActiveWorkflow(); } };
     r.onerror=()=>{ endActiveWorkflow(); toast("ファイルを読み込めませんでした"); };
@@ -445,13 +445,13 @@ function openSettings(){
   ovl.querySelectorAll("[data-restore-trash]").forEach(b=>b.onclick=()=>{
     beginActiveWorkflow();
     try{
-      if(restoreTrash(b.dataset.restoreTrash)){ ovl.remove(); render(); openSettings(); toast("復元しました"); }
+      if(restoreTrash(b.dataset.restoreTrash)){ closeModal(ovl); render(); openSettings(); toast("復元しました"); }
     }finally{ endActiveWorkflow(); }
   });
   const tc=ovl.querySelector("#trashClear");
   if(tc) tc.onclick=()=>{
     if(confirm("ゴミ箱の中身を完全に削除しますか？")){
-      db.trash=[]; save({reason:"clear-trash",forceSnapshot:true}); ovl.remove(); openSettings(); toast("ゴミ箱を空にしました");
+      db.trash=[]; save({reason:"clear-trash",forceSnapshot:true}); closeModal(ovl); openSettings(); toast("ゴミ箱を空にしました");
     }
   };
 }
@@ -484,9 +484,9 @@ function openSetupWizard(){
     </details>
     <div class="btnrow"><button class="btn ghost" id="wCancel">キャンセル</button><button class="btn" id="wSave">保存して開始</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#wCancel"});
   bindChoiceFields(ovl);
-  ovl.querySelector("#wCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#wCancel").onclick=()=>closeModal(ovl);
   ovl.querySelector("#wSave").onclick=()=>{
     const name=ovl.querySelector("#wName").value.trim();
     if(!name){ toast("名前を入力してください"); return; }
@@ -514,7 +514,7 @@ function openSetupWizard(){
       if(v||h) db.sightMarks.push({id:uid(),setupId:n.id,dist:d,v,h,date:today(),ts:Date.now(),note:"初回セットアップ"});
     });
     ui.sightSel.setupId=n.id;
-    save({reason:"setup-wizard",forceSnapshot:true}); ovl.remove(); render(); toast("初回セットアップを保存しました");
+    save({reason:"setup-wizard",forceSnapshot:true}); closeModal(ovl); render(); toast("初回セットアップを保存しました");
   };
 }
 function openGearDetail(id){
@@ -535,16 +535,16 @@ function openGearDetail(id){
       <button class="btn ghost" id="gClose">閉じる</button>
     </div>
   </div>`;
-  document.body.appendChild(ovl);
-  ovl.querySelector("#gClose").onclick=()=>ovl.remove();
-  ovl.querySelector("#gEdit").onclick=()=>{ ovl.remove(); openGearForm(id); };
+  openModal(ovl,{escapeTarget:"#gClose"});
+  ovl.querySelector("#gClose").onclick=()=>closeModal(ovl);
+  ovl.querySelector("#gEdit").onclick=()=>{ closeModal(ovl); openGearForm(id); };
   ovl.querySelector("#gDel").onclick=()=>{
     if(confirm(`「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`)){
       const marks=db.sightMarks.filter(x=>x.setupId===id);
       trashItem("setupBundle",s.name,{setup:s,sightMarks:marks});
       db.setups=db.setups.filter(x=>x.id!==id);
       db.sightMarks=db.sightMarks.filter(x=>x.setupId!==id);
-      save({reason:"delete-setup",forceSnapshot:true}); ovl.remove(); render(); toast("削除しました。設定から復元できます");
+      save({reason:"delete-setup",forceSnapshot:true}); closeModal(ovl); render(); toast("削除しました。設定から復元できます");
     }
   };
 }
@@ -558,9 +558,9 @@ function openGearForm(id){
     <div class="hint" id="gfInferHint">シャフト銘柄と番手を別々に入れると、掲載モデル・直径・GPI・総矢重量を推定します。矢尺とポイント重量は専用欄に入れてください。</div>
     <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#gfCancel"});
   bindChoiceFields(ovl);
-  ovl.querySelector("#gfCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#gfCancel").onclick=()=>closeModal(ovl);
   ovl.querySelector("#gfInfer").onclick=()=>{
     const vals={};
     GEAR_FIELDS.forEach(([k])=>vals[k]=ovl.querySelector("#gf_"+k).value.trim());
@@ -598,6 +598,6 @@ function openGearForm(id){
       db.setups.push(n);
       if(!ui.sightSel.setupId) ui.sightSel.setupId=n.id;
     }
-    save(); ovl.remove(); render();
+    save(); closeModal(ovl); render();
   };
 }
