@@ -27,7 +27,7 @@ function renderHistory(m){
       const q=sessionQuality(s,setup);
       return `<button type="button" class="listItem" data-id="${s.id}">
         <div><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
-        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
+        <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}${s.roundGroup?` ${(Number(s.roundGroup.stage)||0)+1}/${s.roundGroup.stageCount}`:""}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
         <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></button>`;
     }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
     <div class="hint">詳しい傾向は「分析」タブで確認できます。</div>
@@ -177,6 +177,28 @@ function distTrendCard(ss){
     </div>`;
   }).join("")+`</div>`;
 }
+/* 多距離ラウンド（IMP-09）: 履歴詳細に同 gid の他ステージ一覧とラウンド合計を出す。
+   roundGroup の無いセッションでは空文字（既存表示不変）。ステージ行の「開く」で該当詳細へ移動 */
+function histRoundGroupHtml(sess){
+  const rg=sess&&sess.roundGroup;
+  if(!rg||!rg.gid) return "";
+  const stages=db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid)
+    .sort((a,b)=>(Number(a.roundGroup.stage)||0)-(Number(b.roundGroup.stage)||0));
+  if(!stages.length) return "";
+  let total=0, arrows=0;
+  const rows=stages.map(x=>{
+    const all=x.ends.flat(), t=all.reduce((a,c)=>a+c.s,0);
+    total+=t; arrows+=all.length;
+    const cur=x.id===sess.id;
+    return `<div class="kv"><span>ステージ${(Number(x.roundGroup.stage)||0)+1} ・ ${historyDistanceLabel(x.dist)}</span>
+      <span>${t}点 / ${all.length}射${cur?"（表示中）":` <button type="button" class="btn sm ghost" data-stage-jump="${x.id}">開く</button>`}</span></div>`;
+  }).join("");
+  return `<div class="advice histAdviceCard">
+    <div class="note"><b>${esc(roundLabel(rg.roundId))}</b> のステージ</div>
+    ${rows}
+    <div class="kv"><span>ラウンド合計</span><span><b>${total}点</b> / ${arrows}射${stages.length===Number(rg.stageCount)?"":`（${stages.length}/${rg.stageCount}ステージ）`}</span></div>
+  </div>`;
+}
 function openHistDetail(id){
   const sess=db.sessions.find(s=>s.id===id); if(!sess)return;
   const ovl=document.createElement("div"); ovl.className="ovl";
@@ -197,6 +219,7 @@ function openHistDetail(id){
     ${groupSummaryHtml(st)}
     ${trustHtml(sess,setup,st)}
     ${roundProgressHtml(sess)}
+    ${histRoundGroupHtml(sess)}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${arrowMetaSummaryHtml(sess)}
     <table class="tbl mt8"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
@@ -219,6 +242,7 @@ function openHistDetail(id){
   </div>`;
   openModal(ovl,{escapeTarget:"#hClose"});
   plotSession(sess, ovl.querySelector("#hPlot"));
+  ovl.querySelectorAll("[data-stage-jump]").forEach(b=>b.onclick=()=>{ closeModal(ovl); openHistDetail(b.dataset.stageJump); });
   ovl.querySelector("#hClose").onclick=()=>closeModal(ovl);
   ovl.querySelector("#hEdit").onclick=()=>{
     if(db.active){ toast("記録中のセッションがあります。先に終了してください"); return; }

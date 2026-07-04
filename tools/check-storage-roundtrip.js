@@ -202,7 +202,7 @@ function assertHasOwn(object, key, label) {
 }
 
 function checkBaseShape(name, db) {
-  assertEqual(db.schema, 4, `[${name}] schema`);
+  assertEqual(db.schema, 5, `[${name}] schema`);
   assertArray(db.setups, `[${name}] setups`);
   assertArray(db.sightMarks, `[${name}] sightMarks`);
   assertArray(db.sessions, `[${name}] sessions`);
@@ -400,7 +400,7 @@ function checkSnapshot(storageApi, representative) {
   const latest = result.snapshots[0];
   assertEqual(latest.reason, "import-before", "[snapshot] reason");
   assertObject(latest.data, "[snapshot] payload data");
-  assertEqual(latest.data.schema, 4, "[snapshot] payload schema");
+  assertEqual(latest.data.schema, 5, "[snapshot] payload schema");
   assertEqual(latest.counts.sessions, 2, "[snapshot] representative session count");
   assertEqual(latest.counts.setups, 1, "[snapshot] representative setup count");
   assertEqual(latest.counts.marks, 2, "[snapshot] representative sight mark count");

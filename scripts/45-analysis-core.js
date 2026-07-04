@@ -23,6 +23,7 @@ function buildAnalysisRows(sessions, setups, metricsFn){
       faceD:s.faceD,
       faceType:s.faceType||"single",
       round:s.round||"free",
+      roundGroup:s.roundGroup||null,
       n:m.all.length,
       total:m.total,
       avg:m.avg,
@@ -122,6 +123,51 @@ function personalBests(rows){
     by.set(key,g);
   });
   return [...by.values()].sort((a,b)=>((b.dist==null?-1:b.dist)-(a.dist==null?-1:a.dist)) || b.sessions-a.sessions);
+}
+
+/* 多距離ラウンド集計（IMP-09）: roundGroup 付きの行を gid で束ね、1グループ=ラウンド1回分にする。
+   roundGroup の無い行（従来セッション）は集計に含めない。
+   stages は roundGroup.stage 昇順、date はグループ内の最も早い日付、
+   complete は stageCount 分の「異なる stage」が揃っているか（同 stage の重複行では完了扱いにしない） */
+function aggregateRoundGroups(rows){
+  const by=new Map();
+  (rows||[]).forEach(r=>{
+    const rg=r&&r.roundGroup;
+    if(!rg || !rg.gid) return;
+    const g=by.get(rg.gid)||{gid:rg.gid,roundId:rg.roundId||"",date:"",stageCount:0,items:[]};
+    if(!g.roundId && rg.roundId) g.roundId=rg.roundId;
+    const sc=Number(rg.stageCount);
+    if(Number.isFinite(sc) && sc>g.stageCount) g.stageCount=sc;
+    if(r.date && (!g.date || r.date<g.date)) g.date=r.date;
+    const st=Number(rg.stage);
+    g.items.push({stage:Number.isFinite(st)?st:0,dist:r.dist,total:r.total||0,n:r.n||0});
+    by.set(rg.gid,g);
+  });
+  return [...by.values()].map(g=>{
+    const items=g.items.slice().sort((a,b)=>a.stage-b.stage);
+    return {
+      gid:g.gid,
+      roundId:g.roundId,
+      date:g.date,
+      stages:items.map(it=>({dist:it.dist,total:it.total,n:it.n})),
+      total:items.reduce((a,it)=>a+it.total,0),
+      arrows:items.reduce((a,it)=>a+it.n,0),
+      complete:g.stageCount>0 && new Set(items.map(it=>it.stage)).size===g.stageCount
+    };
+  }).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+/* roundId ごとの自己ベスト: complete なグループのみ対象。同点は新しい日付を採用 */
+function roundGroupBests(groups){
+  const by=new Map();
+  (groups||[]).forEach(g=>{
+    if(!g || !g.complete || !g.roundId) return;
+    const cur=by.get(g.roundId);
+    if(!cur || g.total>cur.total || (g.total===cur.total && g.date>cur.date)){
+      by.set(g.roundId,{roundId:g.roundId,total:g.total,arrows:g.arrows,date:g.date});
+    }
+  });
+  return [...by.values()];
 }
 
 /* 風あり/なしの成績比較。isWindyFn にはアプリの isWindy を注入する */

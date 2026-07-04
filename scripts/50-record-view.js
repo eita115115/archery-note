@@ -153,12 +153,27 @@ function actionFaceLabel(value){
 }
 function recordFastActionsHtml(last,dist,faceValue){
   const currentLabel=`${dist}m / ${actionFaceLabel(faceValue)}`;
-  const lastLabel=last?`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`:"なし";
+  /* 直前が多距離ラウンドのステージなら、押下時の挙動（ラウンドをステージ1から再開）に合わせたラベルにする */
+  const lastRound=last&&last.roundGroup?roundLabel(last.roundGroup.roundId):null;
+  const lastTitle=lastRound?`${lastRound}をもう一度`:"前回と同じ";
+  const lastLabel=last?(lastRound?"最初の距離から":`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`):"なし";
   return `<section class="homeActions" aria-label="すぐ使う">
     <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span id="quickStartMeta">${esc(currentLabel)}</span></button>
-    ${last?`<button class="homeAction" id="quickRepeat" type="button"><b>前回と同じ</b><span>${esc(lastLabel)}</span></button>
+    ${last?`<button class="homeAction" id="quickRepeat" type="button"><b>${esc(lastTitle)}</b><span>${esc(lastLabel)}</span></button>
     <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分析</span></button>`:""}
   </section>`;
+}
+/* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
+function selectedMultiRound(roundId){
+  if(!roundId || ROUND_TYPES.some(r=>r.id===roundId)) return null;
+  const def=findRoundDef(roundId);
+  return def&&Array.isArray(def.stages)&&def.stages.length?def:null;
+}
+/* ステージ一覧の1行表示（例「90m→70m→50m→30m（各36射）」） */
+function multiRoundStagesText(def){
+  const counts=[...new Set(def.stages.map(st=>st.arrows))];
+  if(counts.length===1) return `${def.stages.map(st=>`${st.dist}m`).join("→")}（各${counts[0]}射）`;
+  return def.stages.map(st=>`${st.dist}m ${st.arrows}射`).join("→");
 }
 function renderRecord(m){
   if(db.active){ renderActive(m); return; }
@@ -204,7 +219,11 @@ function renderRecord(m){
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
       <label class="f">ラウンド</label><select class="inp" id="fRound">
         ${ROUND_TYPES.map(r=>`<option value="${r.id}">${r.label}</option>`).join("")}
+        <optgroup label="多距離ラウンド">
+          ${multiRoundDefs().map(r=>`<option value="${r.id}">${esc(r.label)}</option>`).join("")}
+        </optgroup>
       </select>
+      <div class="hint" id="fRoundStages" style="display:none"></div>
       <div class="row">
         <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
         <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
@@ -234,10 +253,33 @@ function renderRecord(m){
     if(String(faceSel.value).startsWith("F") && $("#fArrows").value==="6") $("#fArrows").value="3";
     updateQuickStartMeta();
   };
+  /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
+  function applyMultiRoundStage0(def){
+    const st0=def.stages[0];
+    distState.d=st0.dist;
+    const known=[70,50,30,18].includes(+st0.dist);
+    const key=known?String(st0.dist):"custom";
+    document.querySelectorAll("#fDistChips .chip").forEach(x=>{ const on=String(x.dataset.d)===key; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+    $("#fDistCustomWrap").style.display=known?"none":"block";
+    if(!known) $("#fDistCustom").value=st0.dist;
+    faceSel.value=st0.faceType==="triple"?"T40":(st0.faceType==="field"?`F${st0.faceD}`:String(st0.faceD));
+    $("#fArrows").value=st0.perEnd||6;
+    fillSight(); refreshLens();
+  }
   $("#fRound").onchange=e=>{
-    if(e.target.value==="field72"){
-      if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
-      $("#fArrows").value="3";
+    const def=selectedMultiRound(e.target.value);
+    const stagesEl=$("#fRoundStages");
+    if(def){
+      applyMultiRoundStage0(def);
+      stagesEl.style.display="block";
+      stagesEl.innerHTML=`<b>${esc(def.label)}</b>：${esc(multiRoundStagesText(def))}`;
+    }else{
+      stagesEl.style.display="none";
+      stagesEl.textContent="";
+      if(e.target.value==="field72"){
+        if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
+        $("#fArrows").value="3";
+      }
     }
     updateQuickStartMeta();
   };
@@ -288,20 +330,25 @@ function renderRecord(m){
   $("#fSetup").onchange=()=>{ fillSight(); refreshLens(); };
   fillSight();
   $("#fStart").onclick=()=>{
-    const d=distState.d;
+    const roundId=$("#fRound").value||"free";
+    const mdef=selectedMultiRound(roundId);
+    const st0=mdef?mdef.stages[0]:null;
+    const d=st0?st0.dist:distState.d;
     if(!d){ toast("距離を入力してください"); return; }
     const fv=faceSel.value;
-    const face=parseFaceChoice(fv);
+    /* 多距離ラウンドは dist/faceD/faceType/perEnd を stage[0] から採る */
+    const face=st0?{faceD:st0.faceD, faceType:st0.faceType||"single"}:parseFaceChoice(fv);
     db.active={
       id:uid(), date:$("#fDate").value||today(), setupId:$("#fSetup").value||null,
-      dist:d, faceD: face.faceD, faceType: face.faceType, perEnd:+$("#fArrows").value,
+      dist:d, faceD: face.faceD, faceType: face.faceType, perEnd:st0?(st0.perEnd||6):+$("#fArrows").value,
       shaft:+lineCutRadius(face.faceD, face.faceType).toFixed(3),
       sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
       wx:$("#fWx").value, note:$("#fNote").value.trim(), windDir:$("#fWindDir").value, windSpeed:$("#fWindSpeed").value.trim(),
-      round:$("#fRound").value||"free",
+      round:roundId,
       purpose:ui.recordMode||"practice",
       ends:[], cur:[]
     };
+    if(st0) db.active.roundGroup={gid:uid(), roundId, stage:0, stageCount:mdef.stages.length};
     nativePulse("success");
     save(); render();
   };
@@ -459,9 +506,20 @@ function analysisTrendChartHtml(rows){
     <div class="hint">丸は各練習の平均点/本、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。</div>
   </div>`;
 }
+/* 多距離ラウンドの「ラウンド合計ベスト」行（IMP-09）: complete なグループのみ対象。
+   roundGroup 付きの行が無ければ空文字（従来の自己ベスト表示は不変） */
+function roundGroupBestRowsHtml(rows){
+  const bests=roundGroupBests(aggregateRoundGroups(rows));
+  if(!bests.length) return "";
+  return bests.sort((a,b)=>b.total-a.total).map(b=>`<div class="listItem recordReadOnlyItem">
+    <div><div class="t">${esc(roundLabel(b.roundId))} 合計</div><div class="d">完了ラウンドのベスト / ${fmtD(b.date)}</div></div>
+    <div class="big">${b.total}<small> / ${b.arrows}射</small></div>
+  </div>`).join("");
+}
 function personalBestCard(rows){
   const pbs=personalBests(rows).slice(0,6);
-  if(!pbs.length) return "";
+  const groupRows=roundGroupBestRowsHtml(rows);
+  if(!pbs.length && !groupRows) return "";
   const body=pbs.map(g=>{
     const lb=[g.dist?`${g.dist}m`:"距離未設定",g.round!=="free"?roundLabel(g.round):"自由練習"].join(" ・ ");
     return `<div class="listItem recordReadOnlyItem">
@@ -469,7 +527,7 @@ function personalBestCard(rows){
       <div class="big">${g.bestTotal?g.bestTotal.total:"—"}<small> / 平均ベスト${g.bestAvg?g.bestAvg.avg.toFixed(2):"—"}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>自己ベスト <span class="mini">距離×ラウンド別</span></h2>${body}</div>`;
+  return `<div class="card"><h2>自己ベスト <span class="mini">距離×ラウンド別</span></h2>${body}${groupRows}</div>`;
 }
 function conditionSplitCard(rows){
   const cs=conditionSplit(rows,isWindy);
@@ -532,9 +590,13 @@ function liveSessionHeroHtml(s,setup){
   const avg=all.length?(total/all.length).toFixed(2):"—";
   const remain=Math.max(0,(s.perEnd||6)-(s.cur||[]).length);
   const r=ROUND_TYPES.find(x=>x.id===s.round);
-  const roundRemain=r&&r.arrows?Math.max(0,r.arrows-all.length):null;
+  /* 多距離ラウンド中は「残り」をステージ規定射数（arrows）基準にする */
+  const stageDef=sessionStageDef(s);
+  const quota=stageDef&&stageDef.arrows?stageDef.arrows:(r&&r.arrows?r.arrows:null);
+  const roundRemain=quota?Math.max(0,quota-all.length):null;
+  const rg=s.roundGroup;
   return `<section class="liveHud compactHud">
-    <div class="liveContext">${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}<span>${setup?esc(setup.name):"用具未指定"}</span></div>
+    <div class="liveContext">${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}<span>${setup?esc(setup.name):"用具未指定"}</span>${rg?`<span>ステージ ${(+rg.stage||0)+1}/${rg.stageCount}・${s.dist}m</span>`:""}</div>
     <div class="liveGrid">
       <div class="liveCell"><div class="k">合計</div><b>${total}</b></div>
       <div class="liveCell"><div class="k">平均</div><b>${avg}</b></div>
@@ -553,9 +615,19 @@ function activeGuideHtml(){
     <button class="btn sm ghost activeGuideDone" id="activeGuideDone">次から表示しない</button>
   </details>`;
 }
+/* 多距離ラウンドの次ステージ定義。最終ステージ・編集モード・単一距離では null */
+function nextStageDef(s){
+  const rg=s&&s.roundGroup;
+  if(!rg || s._edit) return null;
+  const stage=Number(rg.stage)||0;
+  if(stage>=rg.stageCount-1) return null;
+  const def=findRoundDef(rg.roundId);
+  return def&&Array.isArray(def.stages)?def.stages[stage+1]||null:null;
+}
 function renderActive(m){
   const s=db.active;
   const setup=db.setups.find(x=>x.id===s.setupId);
+  const nextStage=nextStageDef(s);
   m.innerHTML=`
   ${liveSessionHeroHtml(s,setup)}
   <div class="card targetFocusCard">
@@ -588,6 +660,7 @@ function renderActive(m){
       <button class="btn ghost" id="bUndo">↩ 1本取消</button>
       <button class="btn sec" id="bEnd">エンド確定</button>
     </div>
+    ${nextStage?`<div class="btnrow"><button class="btn sec" id="bNextStage">次の距離へ（${nextStage.dist}m）</button></div>`:""}
     <div class="btnrow"><button class="btn danger" id="bFinish">セッション終了</button></div>
   </div>
   <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>`;
@@ -611,6 +684,8 @@ function renderActive(m){
     s.cur=[]; ui.selArrow=-1; nativePulse("success"); save(); refreshActive();
   };
   $("#bFinish").onclick=()=>finishSession();
+  const bNext=$("#bNextStage");
+  if(bNext) bNext.onclick=()=>advanceRoundStage();
   const guideDone=$("#activeGuideDone");
   if(guideDone) guideDone.onclick=()=>{ db.settings.activeGuideSeen=true; save("active-guide"); render(); };
   document.querySelectorAll("#nudge .npad button").forEach(b=>b.onclick=()=>nudgeArrow(b.dataset.n));
@@ -843,10 +918,59 @@ function attachTargetInput(s){
   }
 }
 
+/* 多距離ラウンド: 現ステージを db.sessions へ確定し、次ステージの active を自動生成する（IMP-09）。
+   ステージ確定は重要操作なので scheduleSave ではなく同期 save() を使う。サマリは挟まず toast のみ */
+function advanceRoundStage(){
+  const s=db.active;
+  const next=s?nextStageDef(s):null;
+  if(!next){ toast("次のステージ定義が見つかりません"); return; }
+  const shot=s.ends.flat().length + s.cur.length;
+  if(!shot){ toast("このステージの矢がまだありません"); return; }
+  const stageDef=sessionStageDef(s);
+  if(stageDef&&stageDef.arrows&&shot<stageDef.arrows && !confirm(`このステージは ${shot}/${stageDef.arrows} 射です。確定して次の距離へ進みますか？`)) return;
+  if(s.cur.length){
+    if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
+    else s.ends.push(s.cur);
+    s.cur=[];
+  }
+  delete s.cur; delete s.editIndex;
+  db.sessions.push(s);
+  const rg=s.roundGroup;
+  const nextFaceType=next.faceType||"single";
+  /* サイト値は次距離の台帳最新値からプリフィル（latestMark を再利用） */
+  const mk=s.setupId?latestMark(s.setupId,next.dist):null;
+  db.active={
+    id:uid(), date:s.date, setupId:s.setupId,
+    dist:next.dist, faceD:next.faceD, faceType:nextFaceType, perEnd:next.perEnd||6,
+    shaft:+lineCutRadius(next.faceD,nextFaceType).toFixed(3),
+    sightV:mk&&mk.v!=null?String(mk.v).trim():"", sightH:mk&&mk.h!=null?String(mk.h).trim():"",
+    wx:s.wx, note:s.note, windDir:s.windDir, windSpeed:s.windSpeed,
+    round:s.round,
+    roundGroup:{gid:rg.gid, roundId:rg.roundId, stage:(Number(rg.stage)||0)+1, stageCount:rg.stageCount},
+    purpose:s.purpose,
+    ends:[], cur:[]
+  };
+  ui.selArrow=-1;
+  nativePulse("success");
+  save();
+  toast(`${next.dist}m を開始（ステージ ${(Number(rg.stage)||0)+2}/${rg.stageCount}）`);
+  render();
+}
+
 function finishSession(){
   const s=db.active;
   const shot=s.ends.flat().length + s.cur.length;
-  if(!shot){ if(confirm("矢が0本です。このセッションを破棄しますか？")){ db.active=null; nativePulse("heavy"); save(); render(); } return; }
+  const rg=s.roundGroup;
+  if(!shot){
+    /* 多距離ラウンドで確定済みステージがあれば、破棄されるのが現ステージだけと分かる文言にする */
+    const doneStages=rg&&rg.gid?db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid).length:0;
+    const msg=doneStages?`このステージを破棄しますか？（確定済みの ${doneStages} ステージは履歴に残ります）`:"矢が0本です。このセッションを破棄しますか？";
+    if(confirm(msg)){ db.active=null; nativePulse("heavy"); save(); render(); }
+    return;
+  }
+  /* 多距離ラウンド途中（最終ステージ以外）の終了は confirm を挟む。編集モード・単一距離は従来どおり */
+  if(rg && !s._edit && (Number(rg.stage)||0)<rg.stageCount-1 &&
+     !confirm(`ラウンド途中です（${(Number(rg.stage)||0)+1}/${rg.stageCount}）。ここで終了すると残りのステージは記録できません。終了しますか？`)) return;
   if(s.cur.length){
     if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
     else s.ends.push(s.cur);
@@ -867,6 +991,20 @@ function finishSession(){
 }
 
 /* ---------- summary modal ---------- */
+/* 多距離ラウンドのラウンド合計ブロック: 同 gid の全ステージを aggregateRoundGroups で束ねる。
+   roundGroup の無い単一距離セッションでは空文字（サマリ不変） */
+function roundGroupSummaryHtml(sess){
+  const rg=sess&&sess.roundGroup;
+  if(!rg||!rg.gid) return "";
+  const rows=buildAnalysisRows(db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid), db.setups, sessionMetrics);
+  const g=aggregateRoundGroups(rows)[0];
+  if(!g||!g.stages.length) return "";
+  const breakdown=g.stages.map(st=>`${st.dist}m ${st.total}点`).join(" / ");
+  return `<div class="advice recordNeutralAdvice">
+    <div class="note"><b>${esc(roundLabel(rg.roundId))} 合計 ${g.total}</b> / ${g.arrows}射${g.complete?"":`（${g.stages.length}/${rg.stageCount}ステージ）`}</div>
+    <div class="note">${esc(breakdown)}</div>
+  </div>`;
+}
 function openSummary(sess, isNew){
   const setup=db.setups.find(x=>x.id===sess.setupId);
   const m=sessionMetrics(sess);
@@ -882,6 +1020,7 @@ function openSummary(sess, isNew){
       <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
+    ${roundGroupSummaryHtml(sess)}
     <div id="sumPlot" class="recordSummaryPlot"></div>
     ${groupSummaryHtml(st)}
     ${summarySightDialHtml(sess,adv)}

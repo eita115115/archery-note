@@ -229,6 +229,54 @@ test("opens settings as a dialog, closes on Escape, and restores focus", async (
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("records a multi-distance round with stage advance and history badges", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+  page.on("dialog", (dialog) => dialog.accept());
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  await page.locator(".recordDetails summary").click();
+  await page.locator("#fRound").selectOption("wa1440_men");
+  await expect(page.locator("#fRoundStages")).toContainText("WA1440 男子");
+  await page.locator("#fStart").click();
+
+  // ステージ1: 90m から開始
+  const hud = page.locator(".liveContext");
+  await expect(hud).toContainText("90m");
+  await expect(hud).toContainText("ステージ 1/4");
+  const target = page.locator("#tgsvg");
+  for (let i = 0; i < 3; i++) await target.click();
+  await page.locator("#bEnd").click();
+  // 36射未満の確定 confirm は dialog ハンドラで承認される
+  await page.locator("#bNextStage").click();
+
+  // ステージ2: 70m へ遷移（2ステージで打ち切り）
+  await expect(hud).toContainText("70m");
+  await expect(hud).toContainText("ステージ 2/4");
+  await target.click();
+  await page.locator("#bFinish").click();
+  await expect(page.locator(".ovl .sheet")).toContainText("WA1440 男子 合計");
+  await page.locator("#sumClose").click();
+
+  // 履歴: 各ステージにグループバッジ、詳細にステージ一覧とラウンド合計
+  await mainTab(page, "履歴").click();
+  await expect(page.locator("#histList")).toContainText("WA1440 男子 1/4");
+  await expect(page.locator("#histList")).toContainText("WA1440 男子 2/4");
+  await page.locator("#histList .listItem", { hasText: "90m" }).first().click();
+  const sheet = page.locator(".ovl .sheet");
+  await expect(sheet).toContainText("ラウンド合計");
+  await expect(sheet).toContainText("（表示中）");
+  await page.locator("[data-stage-jump]").click();
+  await expect(page.locator(".ovl .sheet")).toContainText("70m");
+  await page.locator("#hClose").click();
+  await expect(page.locator(".ovl")).toHaveCount(0);
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("syncs aria-pressed on settings theme and form tracking chips", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {
