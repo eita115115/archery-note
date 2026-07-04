@@ -414,7 +414,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 .recordNudgeHint{font-size:var(--font-size-sm); color:var(--sub);}
 .recordNudgeDelete{color:var(--danger);}
 .recordCurEmpty{font-size:var(--font-size-sm); color:var(--sub); align-self:center;}
-.recordEndEditBtn{padding:4px var(--space-3);}
+.recordEndEditBtn{padding:4px var(--space-3); min-width:var(--tap-target-min);}
 .recordSummaryPlot{margin-top:var(--space-4);}
 .recordAdviceLabel{font-size:var(--font-size-sm); color:var(--sub);}
 .recordReadOnlyItem{cursor:default;}
@@ -552,10 +552,13 @@ nav.tabs button.on{color:var(--green); font-weight:700;}
 /* score chips */
 .scoreChips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; min-height:36px;}
 .sc{
-  width:40px; height:40px; border-radius:13px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative; width:40px; height:40px; border-radius:13px; display:flex; flex-direction:column; align-items:center; justify-content:center;
   font-weight:700; font-size:15px; border:2px solid transparent; cursor:pointer;
   transform-origin:center; transition:transform var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast);
 }
+/* 視覚は40pxのまま当たり判定だけ44px（--tap-target-min）へ拡張。gap:6px なので隣接チップとは重ならない */
+/* absolute の基準は padding box（36px）なので -4px で外形40px+2px=44px になる */
+.sc::before{content:""; position:absolute; inset:-4px; border-radius:inherit;}
 button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-align:inherit; -webkit-appearance:none; appearance:none;}
 .sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px #fff inset,0 8px 18px rgba(20,38,28,.10);}
 .sc.fresh{animation:scorePop .38s cubic-bezier(.2,1.2,.2,1) both;}
@@ -576,6 +579,7 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 .reasonTags{display:flex; flex-wrap:wrap; gap:6px;}
 .reasonTag{
   border:1px solid var(--line); background:var(--card); color:var(--ink);
+  min-width:var(--tap-target-min); min-height:var(--tap-target-min);
   border-radius:999px; padding:7px 9px; font-size:11.5px; font-weight:700; cursor:pointer;
 }
 .reasonTag.on{background:var(--green); border-color:var(--green); color:#fff;}
@@ -628,7 +632,7 @@ table.tbl tr:last-child td{border-bottom:none;}
 .histAdviceCard{background:var(--card); border-color:var(--line);}
 /* No token: preserves the extracted 17px inline style. */
 .histSightVal{font-size:17px; font-weight:800;}
-.histDelBtn{padding:4px var(--space-3);}
+.histDelBtn{padding:4px var(--space-3); min-width:var(--tap-target-min);}
 /* gear & settings view */
 .gearAdviceCard{background:var(--card); border-color:var(--line);}
 .gearChevron{font-size:18px; color:var(--sub);}
