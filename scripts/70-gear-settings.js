@@ -361,14 +361,14 @@ function openSettings(){
   ovl.innerHTML=`<div class="sheet"><h3>⚙ 設定</h3>
     <label class="f">テーマ</label>
     <div class="chips" id="thChips">
-      ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<div class="chip ${th===v?"on":""}" data-th="${v}">${lb}</div>`).join("")}
+      ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<button type="button" class="chip ${th===v?"on":""}" aria-pressed="${th===v}" data-th="${v}">${lb}</button>`).join("")}
     </div>
     <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
     <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
     <label class="f">射形トラッキング（ベータ）</label>
     <div class="chips" id="ftChips">
-      <div class="chip ${db.settings.formTrackingEnabled?"":"on"}" data-ft="0">OFF</div>
-      <div class="chip ${db.settings.formTrackingEnabled?"on":""}" data-ft="1">ON</div>
+      <button type="button" class="chip ${db.settings.formTrackingEnabled?"":"on"}" aria-pressed="${!db.settings.formTrackingEnabled}" data-ft="0">OFF</button>
+      <button type="button" class="chip ${db.settings.formTrackingEnabled?"on":""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
     </div>
     <div class="hint">ONにすると分析タブにカメラでの射形解析が出ます。解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
     ${nativeReadinessHtml()}
@@ -395,12 +395,12 @@ function openSettings(){
   document.body.appendChild(ovl);
   ovl.querySelectorAll("#thChips .chip").forEach(c=>c.onclick=()=>{
     db.settings.theme=c.dataset.th; save(); applyTheme();
-    ovl.querySelectorAll("#thChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    ovl.querySelectorAll("#thChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
   });
   ovl.querySelector("#setEye").onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); };
   ovl.querySelectorAll("#ftChips .chip").forEach(c=>c.onclick=()=>{
     db.settings.formTrackingEnabled=c.dataset.ft==="1"; save();
-    ovl.querySelectorAll("#ftChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    ovl.querySelectorAll("#ftChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
     toast(db.settings.formTrackingEnabled?"射形トラッキングを有効にしました（分析タブ）":"射形トラッキングを無効にしました");
   });
   ovl.querySelector("#setClose").onclick=()=>{ ovl.remove(); render(); };

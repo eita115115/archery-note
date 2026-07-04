@@ -25,10 +25,10 @@ function renderHistory(m){
       const all=s.ends.flat(); const total=all.reduce((a,x)=>a+x.s,0);
       const setup=db.setups.find(x=>x.id===s.setupId);
       const q=sessionQuality(s,setup);
-      return `<div class="listItem" data-id="${s.id}">
+      return `<button type="button" class="listItem" data-id="${s.id}">
         <div><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
         <div class="d"><span class="badge">${faceLabel(s)}</span>${setup?`<span class="badge">${esc(setup.name)}</span>`:""}<span class="badge">信頼 ${q.label}</span>${s.round&&s.round!=="free"?`<span class="badge">${roundLabel(s.round)}</span>`:""}${s.wx?`<span class="badge">${esc(s.wx)}</span>`:""}${all.length}本</div></div>
-        <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></div>`;
+        <div class="big">${total}<small> / 平均${(total/all.length).toFixed(2)}</small></div></button>`;
     }).join(""):`<div class="empty">まだ記録がありません。「記録」タブから始めましょう。</div>`}
     <div class="hint">詳しい傾向は「分析」タブで確認できます。</div>
   </div></div>`;
@@ -270,7 +270,7 @@ function renderSight(m){
     ${db.setups.length?`
     <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map(s=>`<option value="${s.id}" ${s.id===sid?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
-    <div class="chips">${dists.map(d=>`<div class="chip ${d===dist?"on":""}" data-d="${d}">${d}m</div>`).join("")}</div>
+    <div class="chips" id="sgDistChips">${dists.map(d=>`<button type="button" class="chip ${d===dist?"on":""}" aria-pressed="${d===dist}" data-d="${d}">${d}m</button>`).join("")}</div>
     <div class="advice histAdviceCard">
       <div class="kv"><span>現在のサイト（最新記録）</span>
       <span class="histSightVal">${cur?`上下 ${esc(cur.v||"—")} ・ 左右 ${esc(cur.h||"—")}`:"未登録"}</span></div>
@@ -333,7 +333,11 @@ function renderSight(m){
   </div>`:""}`;
   const sgSetup=$("#sgSetup");
   if(sgSetup) sgSetup.onchange=e=>{ ui.sightSel.setupId=e.target.value; render(); };
-  document.querySelectorAll(".chips .chip[data-d]").forEach(c=>c.onclick=()=>{ ui.sightSel.dist=+c.dataset.d; render(); });
+  document.querySelectorAll("#sgDistChips .chip[data-d]").forEach(c=>c.onclick=()=>{
+    const hadFocus=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#sgDistChips"));
+    ui.sightSel.dist=+c.dataset.d; render();
+    if(hadFocus){ const chip=document.querySelector(`#sgDistChips [data-d="${c.dataset.d}"]`); if(chip) chip.focus({preventScroll:true}); }
+  });
   const add=$("#sgAdd");
   if(add) add.onclick=()=>openMarkForm(sid,dist);
   const calMode=$("#sgCalMode");

@@ -618,7 +618,7 @@ function renderActive(m){
   refreshActive();
 }
 function shotMetaHtml(a,index){
-  const tags=SHOT_REASON_TAGS.map(tag=>`<button class="reasonTag ${a.reason===tag?"on":""}" data-reason="${esc(tag)}">${esc(tag)}</button>`).join("");
+  const tags=SHOT_REASON_TAGS.map(tag=>`<button type="button" class="reasonTag ${a.reason===tag?"on":""}" aria-pressed="${a.reason===tag}" data-reason="${esc(tag)}">${esc(tag)}</button>`).join("");
   return `<div class="shotMetaGrid">
     <div>
       <label class="metaLabel" for="shotArrowNo">矢番号</label>
@@ -641,10 +641,13 @@ function bindShotMeta(){
   if(no) no.onchange=()=>refreshActive();
   document.querySelectorAll("#shotReasonTags .reasonTag").forEach(btn=>btn.onclick=()=>{
     const reason=btn.dataset.reason;
+    /* refreshActive() が #shotMeta を innerHTML で作り直すため、フォーカス中のタグを data-reason で復元する */
+    const hadFocus=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#shotReasonTags"));
     a.reason=a.reason===reason?"":reason;
     nativePulse("light");
     save("shot-meta");
     refreshActive();
+    if(hadFocus){ const back=document.querySelector(`#shotReasonTags .reasonTag[data-reason="${reason}"]`); if(back) back.focus({preventScroll:true}); }
   });
 }
 function refreshActive(){
