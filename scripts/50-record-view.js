@@ -34,9 +34,9 @@ function setupOptions(sel){
   return `<option value="">（セッティング未指定）</option>`+db.setups.map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
 }
 const RECORD_FLOW_MODES=[
-  {id:"practice",icon:"◎",title:"練習記録",desc:"点取りから調整提案へ"},
-  {id:"calibration",icon:"↕",title:"サイト値を残す",desc:"サイト値・風メモも一緒に"},
-  {id:"diagnosis",icon:"?",title:"足りないデータを見る",desc:"提案の材料を確認"}
+  {id:"practice",icon:icon("target"),title:"練習記録",desc:"点取りから調整提案へ"},
+  {id:"calibration",icon:icon("updown"),title:"サイト値を残す",desc:"サイト値・風メモも一緒に"},
+  {id:"diagnosis",icon:icon("help"),title:"足りないデータを見る",desc:"提案の材料を確認"}
 ];
 const RECORD_PHASES=["準備","記録","確認","蓄積"];
 const SHOT_REASON_TAGS=["良射","押し手","リリース","クリッカー","風","狙いミス","矢が怪しい","不明"];
@@ -649,7 +649,7 @@ function renderActive(m){
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
       <div class="npad">
         <span class="blank"></span><button data-n="u">▲</button><span class="blank"></span>
-        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">🗑</button><button data-n="r">▶</button>
+        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">${icon("trash")}</button><button data-n="r">▶</button>
         <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
       </div>
       <div class="shotMeta" id="shotMeta"></div>
@@ -657,7 +657,7 @@ function renderActive(m){
     </div>
     <div class="statbar" id="statbar"></div>
     <div class="btnrow">
-      <button class="btn ghost" id="bUndo">↩ 1本取消</button>
+      <button class="btn ghost" id="bUndo">1本取消</button>
       <button class="btn sec" id="bEnd">エンド確定</button>
     </div>
     ${nextStage?`<div class="btnrow"><button class="btn sec" id="bNextStage">次の距離へ（${nextStage.dist}m）</button></div>`:""}
@@ -777,7 +777,7 @@ function refreshActive(){
       return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td>
         <td>${sorted.map(scoreLabel).join("・")}</td>
         <td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td>
-        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">✏</button></td></tr>`;
+        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">${icon("pencil")}</button></td></tr>`;
     }).join("")+`</table>` : `<div class="empty">確定したエンドはまだありません</div>`;
   document.querySelectorAll("#endsTbl [data-open]").forEach(b=>b.onclick=()=>{
     if(s.cur.length){ toast("先に現在のエンドを確定（または取消）してください"); return; }
@@ -920,14 +920,14 @@ function attachTargetInput(s){
 
 /* 多距離ラウンド: 現ステージを db.sessions へ確定し、次ステージの active を自動生成する（IMP-09）。
    ステージ確定は重要操作なので scheduleSave ではなく同期 save() を使う。サマリは挟まず toast のみ */
-function advanceRoundStage(){
+async function advanceRoundStage(){
   const s=db.active;
   const next=s?nextStageDef(s):null;
   if(!next){ toast("次のステージ定義が見つかりません"); return; }
   const shot=s.ends.flat().length + s.cur.length;
   if(!shot){ toast("このステージの矢がまだありません"); return; }
   const stageDef=sessionStageDef(s);
-  if(stageDef&&stageDef.arrows&&shot<stageDef.arrows && !confirm(`このステージは ${shot}/${stageDef.arrows} 射です。確定して次の距離へ進みますか？`)) return;
+  if(stageDef&&stageDef.arrows&&shot<stageDef.arrows && !await appConfirm(`このステージは ${shot}/${stageDef.arrows} 射です。確定して次の距離へ進みますか？`,{okLabel:"次の距離へ"})) return;
   if(s.cur.length){
     if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
     else s.ends.push(s.cur);
@@ -957,7 +957,7 @@ function advanceRoundStage(){
   render();
 }
 
-function finishSession(){
+async function finishSession(){
   const s=db.active;
   const shot=s.ends.flat().length + s.cur.length;
   const rg=s.roundGroup;
@@ -965,12 +965,12 @@ function finishSession(){
     /* 多距離ラウンドで確定済みステージがあれば、破棄されるのが現ステージだけと分かる文言にする */
     const doneStages=rg&&rg.gid?db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid).length:0;
     const msg=doneStages?`このステージを破棄しますか？（確定済みの ${doneStages} ステージは履歴に残ります）`:"矢が0本です。このセッションを破棄しますか？";
-    if(confirm(msg)){ db.active=null; nativePulse("heavy"); save(); render(); }
+    if(await appConfirm(msg,{danger:true,okLabel:"破棄"})){ db.active=null; nativePulse("heavy"); save(); render(); }
     return;
   }
-  /* 多距離ラウンド途中（最終ステージ以外）の終了は confirm を挟む。編集モード・単一距離は従来どおり */
+  /* 多距離ラウンド途中（最終ステージ以外）の終了は appConfirm を挟む。編集モード・単一距離は従来どおり */
   if(rg && !s._edit && (Number(rg.stage)||0)<rg.stageCount-1 &&
-     !confirm(`ラウンド途中です（${(Number(rg.stage)||0)+1}/${rg.stageCount}）。ここで終了すると残りのステージは記録できません。終了しますか？`)) return;
+     !await appConfirm(`ラウンド途中です（${(Number(rg.stage)||0)+1}/${rg.stageCount}）。ここで終了すると残りのステージは記録できません。終了しますか？`,{okLabel:"終了する"})) return;
   if(s.cur.length){
     if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
     else s.ends.push(s.cur);
@@ -1039,7 +1039,7 @@ function openSummary(sess, isNew){
       ${personalModelHtml(adv,sess,setup)}
       ${conditionHtml(sess,st,setup)}
     </details>
-    ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
+    ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">${icon("ledger")} このサイト値を台帳に記録</button></div>`:""}
     <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
   </div>`;
   openModal(ovl,{escapeTarget:"#sumClose"});

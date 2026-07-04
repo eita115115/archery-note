@@ -89,11 +89,11 @@ function formTrackingCard(){
       <div><div class="t">${fmtD(r.date)} ・ ${s.shots}射${r.sessionId?" ・ 練習に紐付け":""}</div>
       <div class="d">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} / アンカー ${esc(s.anchorLabel)} / タップで詳細</div></div>
       <div class="big">${s.bowArm!=null?s.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</small></div>
-      <button class="btn sm ghost histDelBtn" data-del-form="${r.id}">✕</button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${r.id}">${icon("del")}</button>
     </div>`;
   }).join("");
   return `<div class="card"><h2>射形トラッキング <span class="mini">ベータ / 端末内解析</span></h2>
-    <div class="btnrow"><button class="btn" id="formStart">📷 射形を解析する</button></div>
+    <div class="btnrow"><button class="btn" id="formStart">${icon("camera")} 射形を解析する</button></div>
     ${formTrendMiniHtml()}
     ${rows||`<div class="empty">まだ射形記録がありません。カメラを横に置いて数射解析してみましょう。</div>`}
     ${formScoreLinkHtml()}
@@ -108,11 +108,11 @@ function bindFormTrackingCard(){
     const rec=(db.formAnalyses||[]).find(r=>r.id===li.dataset.formId);
     if(rec) openFormDetail(rec);
   });
-  document.querySelectorAll("[data-del-form]").forEach(b=>b.onclick=e=>{
+  document.querySelectorAll("[data-del-form]").forEach(b=>b.onclick=async e=>{
     e.stopPropagation();
     const rec=(db.formAnalyses||[]).find(r=>r.id===b.dataset.delForm);
     if(!rec) return;
-    if(confirm("この射形記録を削除しますか？")){
+    if(await appConfirm("この射形記録を削除しますか？",{danger:true,okLabel:"削除"})){
       trashItem("formAnalysis",`${fmtD(rec.date)} 射形${rec.shots||0}射`,rec);
       db.formAnalyses=db.formAnalyses.filter(r=>r.id!==rec.id);
       save({reason:"delete-form-analysis",forceSnapshot:true});
@@ -146,8 +146,8 @@ function openFormDetail(rec){
     ${ins?formInsightBlockHtml("確認点",ins.checks):""}
     ${ins?formInsightBlockHtml("次の練習",ins.next):""}
     <table class="tbl mt8"><tr><th>射</th><th>弓手肘</th><th>引き手肘</th><th class="right">保持</th></tr>
-    ${(rec.features||[]).map((f,i)=>`<tr><td>${i+1}</td><td>${f.angles&&Number.isFinite(f.angles.bowArm)?f.angles.bowArm.toFixed(0)+"°":"—"}${f.release&&f.release.stable===false?" ⚠":""}</td><td>${f.angles&&Number.isFinite(f.angles.drawArm)?f.angles.drawArm.toFixed(0)+"°":"—"}</td><td class="right">${f.phase&&Number.isFinite(f.phase.anchorMs)?(f.phase.anchorMs/1000).toFixed(1)+"s":"—"}</td></tr>`).join("")}</table>
-    <div class="hint">⚠ = リリース前0.5秒にドリフトを観測した射。コメントは観測にもとづく候補で、断定ではありません。</div>
+    ${(rec.features||[]).map((f,i)=>`<tr><td>${i+1}</td><td>${f.angles&&Number.isFinite(f.angles.bowArm)?f.angles.bowArm.toFixed(0)+"°":"—"}${f.release&&f.release.stable===false?` ${icon("warn")}`:""}</td><td>${f.angles&&Number.isFinite(f.angles.drawArm)?f.angles.drawArm.toFixed(0)+"°":"—"}</td><td class="right">${f.phase&&Number.isFinite(f.phase.anchorMs)?(f.phase.anchorMs/1000).toFixed(1)+"s":"—"}</td></tr>`).join("")}</table>
+    <div class="hint">${icon("warn")} = リリース前0.5秒にドリフトを観測した射。コメントは観測にもとづく候補で、断定ではありません。</div>
     <div class="btnrow"><button class="btn ghost" id="fdClose">閉じる</button></div>
   </div>`;
   openModal(ovl,{escapeTarget:"#fdClose"});
@@ -220,7 +220,7 @@ function openFormCapture(){
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem";
     div.innerHTML=`<div><div class="t">第${shots.length}射</div>
-      <div class="d">保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?" / ⚠ リリース前ドリフト":""}</div></div>
+      <div class="d">保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?` / ${icon("warn")} リリース前ドリフト`:""}</div></div>
       <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>`;
     ovl.querySelector("#fcShots").prepend(div);
     const saveBtn=ovl.querySelector("#fcSave");
@@ -253,15 +253,15 @@ function openFormCapture(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
       if(lms) drawFormSkeleton(ctx,lms,canvas.width,canvas.height);
       if(raw&&disp){
-        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 信頼度 <b>${Math.round(disp.conf*100)}%</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>${raw.occluded.length?`<br>⚠ 検出低下: ${raw.occluded.map(esc).join("・")}`:""}`;
+        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 信頼度 <b>${Math.round(disp.conf*100)}%</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>${raw.occluded.length?`<br>${icon("warn")} 検出低下: ${raw.occluded.map(esc).join("・")}`:""}`;
       }else{
         hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 人物を検出中…（横向き全身が写る位置に置いてください）`;
       }
     }
     raf=requestAnimationFrame(loop);
   }
-  ovl.querySelector("#fcClose").onclick=()=>{
-    if(!shots.length || confirm(`${shots.length}射の解析結果を保存せずに閉じますか？`)) stop();
+  ovl.querySelector("#fcClose").onclick=async()=>{
+    if(!shots.length || await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})) stop();
   };
   ovl.querySelector("#fcSave").onclick=()=>{
     if(!shots.length) return;

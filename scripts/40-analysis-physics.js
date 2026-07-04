@@ -5,9 +5,9 @@ function shapeNote(st){
   if(!st || st.n<6) return "";
   const tilt=Math.abs(st.angleDeg||0);
   const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&tilt>15&&tilt<75;
-  if(tilted) return `<div class="note">📊 <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
-  if(st.sy>st.sx*1.3) return `<div class="note">📊 <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
-  if(st.sx>st.sy*1.3) return `<div class="note">📊 <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
+  if(tilted) return `<div class="note">${icon("ruler")} <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
+  if(st.sy>st.sx*1.3) return `<div class="note">${icon("ruler")} <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
+  if(st.sx>st.sy*1.3) return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
   return "";
 }
 function groupSummaryHtml(st){
@@ -406,7 +406,7 @@ function adviceFor(sess, setup){
     if(sess.sightH) l+=` <span class="subNoteSm">現在 ${esc(sess.sightH)}</span>`;
     out.lines.push({axis:"h", html:l});
   }
-  if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です 👏"});
+  if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です。"});
   return out;
 }
 function summarySightDialHtml(sess, adv){

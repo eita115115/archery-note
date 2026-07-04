@@ -229,12 +229,55 @@ test("opens settings as a dialog, closes on Escape, and restores focus", async (
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore", async ({
+  page,
+}) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  await mainTab(page, "履歴").click();
+  const row = page.locator("#histList .listItem").first();
+  await row.click();
+  const detailSheet = page.locator(".ovl .sheet");
+  await expect(detailSheet).toBeVisible();
+  const delBtn = page.locator("#hDel");
+
+  // キャンセルボタン: データは消えない
+  await delBtn.click();
+  const confirmSheet = page.locator(".ovl .confirmSheet");
+  await expect(confirmSheet).toBeVisible();
+  await expect(confirmSheet).toContainText("この練習記録を削除しますか？");
+  await page.locator(".ovl .confirmSheet #acCancel").click();
+  await expect(confirmSheet).toHaveCount(0);
+  await expect(detailSheet).toBeVisible();
+  await expect(detailSheet).toContainText("2026/6/27");
+
+  // Escape でもキャンセル扱い。フォーカスは削除ボタンへ復帰する
+  await delBtn.click();
+  await expect(confirmSheet).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(confirmSheet).toHaveCount(0);
+  await expect(delBtn).toBeFocused();
+
+  // 確認: 削除が実行され、履歴から消える
+  await delBtn.click();
+  await expect(confirmSheet).toBeVisible();
+  await page.locator(".ovl .confirmSheet #acOk").click();
+  await expect(page.locator(".ovl")).toHaveCount(0);
+  await expect(page.locator("#histList")).not.toContainText("2026/6/27 ・ 70m");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("records a multi-distance round with stage advance and history badges", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {
     globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
   }, sampleDb);
-  page.on("dialog", (dialog) => dialog.accept());
 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
@@ -251,14 +294,21 @@ test("records a multi-distance round with stage advance and history badges", asy
   const target = page.locator("#tgsvg");
   for (let i = 0; i < 3; i++) await target.click();
   await page.locator("#bEnd").click();
-  // 36射未満の確定 confirm は dialog ハンドラで承認される
+  // 36射未満の確定は appConfirm ダイアログ。確認ボタンをクリックして進める
   await page.locator("#bNextStage").click();
+  await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
+  await page.locator(".ovl .confirmSheet #acOk").click();
+  await expect(page.locator(".ovl .confirmSheet")).toHaveCount(0);
 
   // ステージ2: 70m へ遷移（2ステージで打ち切り）
   await expect(hud).toContainText("70m");
   await expect(hud).toContainText("ステージ 2/4");
   await target.click();
   await page.locator("#bFinish").click();
+  // ラウンド途中終了も appConfirm ダイアログ経由
+  await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
+  await page.locator(".ovl .confirmSheet #acOk").click();
+  await expect(page.locator(".ovl .sheet.confirmSheet")).toHaveCount(0);
   await expect(page.locator(".ovl .sheet")).toContainText("WA1440 男子 合計");
   await page.locator("#sumClose").click();
 

@@ -227,13 +227,13 @@ function openHistDetail(id){
       const sorted=[...end].sort((a,b)=>b.s-a.s);
       return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td></tr>`;
     }).join("")}</table>
-    ${adv?`<div class="advice"><div class="subNote">🔧 この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
+    ${adv?`<div class="advice"><div class="subNote">${icon("tool")} この回からのサイト調整提案</div>${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv,sess)}${shapeNote(adv.st)}${adv.notes.slice(0,3).map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:""}
     ${personalModelHtml(adv,sess,setup)}
     ${conditionHtml(sess,st,setup)}
     ${nextActionHtml(sess,adv,setup)}
     <div class="btnrow">
       <button class="btn danger" id="hDel">削除</button>
-      <button class="btn sec" id="hEdit">✏ 編集</button>
+      <button class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
     </div>
     <div class="btnrow">
       <button class="btn sec" id="hCard">画像保存</button>
@@ -252,8 +252,8 @@ function openHistDetail(id){
     toast("過去の記録を編集中。「セッション終了」で上書き保存されます");
   };
   ovl.querySelector("#hCard").onclick=()=>exportScorecardImage(sess);
-  ovl.querySelector("#hDel").onclick=()=>{
-    if(confirm("この練習記録を削除しますか？")){
+  ovl.querySelector("#hDel").onclick=async()=>{
+    if(await appConfirm("この練習記録を削除しますか？",{danger:true,okLabel:"削除"})){
       trashItem("session",`${fmtD(sess.date)} ${historyDistanceLabel(sess.dist)}`,sess);
       db.sessions=db.sessions.filter(s=>s.id!==id); save({reason:"delete-session",forceSnapshot:true}); closeModal(ovl); render(); toast("削除しました。設定から復元できます");
     }
@@ -283,7 +283,7 @@ function renderSight(m){
   let interpHtml="";
   if(interp){
     const preds=[18,30,50,70].filter(d=>!interp.have.includes(d)).map(d=>`<div class="chip">${d}m → <b>${interp.est(d).toFixed(1)}</b></div>`);
-    interpHtml=`<h2 class="mt14">📏 サイトマーク予測（上下）</h2>
+    interpHtml=`<h2 class="mt14">${icon("ruler")} サイトマーク予測（上下）</h2>
       <div class="subNote">実測: ${interp.pts.map(p=>`${p[0]}m = ${p[1]}`).join(" ・ ")} / ${interp.model==="curve"?"カーブ近似":"直線近似"} / 一致度${pct(interp.r2||0)}</div>
       ${preds.length?`<div class="chips mt8">${preds.join("")}</div>`:`<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
       <div class="hint">2距離以上の実測サイト値から予測します。4距離以上ある場合は、弾道に近いカーブ近似が有効なときだけ自動採用します。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
@@ -304,7 +304,7 @@ function renderSight(m){
     ${marks.length?`<table class="tbl mt10"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
       ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
       <td class="subNoteSm">${esc(mk.note||"")}</td>
-      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${mk.id}">✕</button></td></tr>`).join("")}</table>`
+      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${mk.id}">${icon("del")}</button></td></tr>`).join("")}</table>`
       :`<div class="empty">この距離の記録はまだありません</div>`}
     <details class="adv">
       <summary>モデル診断・校正状況</summary>
@@ -320,7 +320,7 @@ function renderSight(m){
   </div>
   ${setup?`
   <div class="card">
-    <h2>🔧 調整アドバイス <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
+    <h2>${icon("tool")} 調整アドバイス <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
     ${adv?`
       <div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
       <div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
@@ -339,11 +339,11 @@ function renderSight(m){
     <details class="adv">
       <summary>サイト値分析・予測</summary>
       ${(reg.v||reg.h)?`<div class="advice">
-        <div class="subNote">📐 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
+        <div class="subNote">${icon("ruler")} 過去データの相関分析（サイト値 × 着弾ズレ の回帰）</div>
         ${reg.v?`<div class="dir">上下サイトの推定最適値：<b>${reg.v.zero.toFixed(1)}</b> <span class="subNoteSm">(${reg.v.n}回分 / 一致度${pct(reg.v.r2||0)} / 品質${pct(reg.v.quality||0)})</span></div>`:""}
         ${reg.h?`<div class="dir">左右サイトの推定最適値：<b>${reg.h.zero.toFixed(1)}</b> <span class="subNoteSm">(${reg.h.n}回分 / 一致度${pct(reg.h.r2||0)} / 品質${pct(reg.h.quality||0)})</span></div>`:""}
         <div class="note">サイト値を数値で記録した複数回の練習から「ズレが0になる値」を、練習信頼度・風・本数を加味した外れ値に強い推定で求めています。データが増えるほど精度が上がります。</div>
-      </div>`:`<div class="hint">💡 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
+      </div>`:`<div class="hint">${icon("bulb")} 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
       ${interpHtml}
     </details>
     <details class="adv">
@@ -352,7 +352,7 @@ function renderSight(m){
         <div><label class="f">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70||""}" placeholder="例: 4"></div>
         <div><label class="f">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70||""}" placeholder="例: 4"></div>
       </div>
-      <div class="hint">「サイトを1クリック動かすと70mで着弾が何cm動くか」。一度測って登録すると提案がクリック数でも出ます（他の距離へは自動換算）。アイ〜サイト距離は右上の⚙設定から。</div>
+      <div class="hint">「サイトを1クリック動かすと70mで着弾が何cm動くか」。一度測って登録すると提案がクリック数でも出ます（他の距離へは自動換算）。アイ〜サイト距離は右上の設定から。</div>
     </details>
   </div>`:""}`;
   const sgSetup=$("#sgSetup");
@@ -366,9 +366,9 @@ function renderSight(m){
   if(add) add.onclick=()=>openMarkForm(sid,dist);
   const calMode=$("#sgCalMode");
   if(calMode) calMode.onclick=()=>openCalibrationWizard(sid);
-  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
     const mk=db.sightMarks.find(x=>x.id===b.dataset.del);
-    if(confirm("この記録を削除しますか？")){ if(mk) trashItem("sightMark",`${mk.dist}m サイト値`,mk); db.sightMarks=db.sightMarks.filter(x=>x.id!==b.dataset.del); save({reason:"delete-sight-mark",forceSnapshot:true}); render(); toast("削除しました。設定から復元できます"); }
+    if(await appConfirm("この記録を削除しますか？",{danger:true,okLabel:"削除"})){ if(mk) trashItem("sightMark",`${mk.dist}m サイト値`,mk); db.sightMarks=db.sightMarks.filter(x=>x.id!==b.dataset.del); save({reason:"delete-sight-mark",forceSnapshot:true}); render(); toast("削除しました。設定から復元できます"); }
   });
   const cv=$("#sgCalV"), ch=$("#sgCalH");
   if(cv) cv.onchange=e=>{ setup.calibV70=parseFloat(e.target.value)||null; save(); render(); };

@@ -322,6 +322,13 @@ function openModal(ovl,opts){
   ovl._modalPrevFocus=document.activeElement;
   ovl._modalKeydown=e=>{
     if(!document.body.contains(ovl)) return;
+    /* 複数モーダルの重ね掛け（例: 確認ダイアログ）では最前面のみが Escape/Tab を処理する。
+       document への capture リスナーは登録順に発火するため、自分より後に開いたモーダルが
+       存在する間は何もしない */
+    if(document.querySelectorAll("body > .ovl").length>1){
+      const overlays=[...document.querySelectorAll("body > .ovl")];
+      if(overlays[overlays.length-1]!==ovl) return;
+    }
     if(e.key==="Escape"){
       e.preventDefault(); e.stopPropagation();
       const btn=o.escapeTarget?ovl.querySelector(o.escapeTarget):null;
@@ -350,6 +357,49 @@ function closeModal(ovl){
   const prev=ovl._modalPrevFocus; ovl._modalPrevFocus=null;
   if(prev&&typeof prev.focus==="function"&&document.contains(prev)){ try{ prev.focus({preventScroll:true}); }catch(_){} }
 }
+/* window.confirm() の代替。openModal ベースの小型確認ダイアログを開き、確認/キャンセルを Promise<boolean> で返す。
+   Escape=キャンセル。フォーカス復帰は openModal/closeModal の既存機構に委ねる。 */
+function appConfirm(message,opts){
+  const o=opts||{};
+  return new Promise(resolve=>{
+    const ovl=document.createElement("div"); ovl.className="ovl";
+    ovl.innerHTML=`<div class="sheet confirmSheet">
+      ${o.title?`<h3>${esc(o.title)}</h3>`:""}
+      <div class="confirmMsg">${esc(message)}</div>
+      <div class="btnrow">
+        <button type="button" class="btn ghost" id="acCancel">${esc(o.cancelLabel||"キャンセル")}</button>
+        <button type="button" class="btn ${o.danger?"danger":""}" id="acOk">${esc(o.okLabel||"確認")}</button>
+      </div>
+    </div>`;
+    let settled=false;
+    const finish=v=>{ if(settled) return; settled=true; closeModal(ovl); resolve(v); };
+    openModal(ovl,{escapeTarget:"#acCancel"});
+    ovl.querySelector("#acCancel").onclick=()=>finish(false);
+    ovl.querySelector("#acOk").onclick=()=>finish(true);
+  });
+}
+/* ---------- インライン SVG アイコン（絵文字グリフの置き換え） ----------
+   16/20px グリッド・stroke ベース・currentColor。テンプレート内では icon("del") のように呼ぶ。 */
+const ICONS={
+  del:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg>',
+  trash:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6h11M8 6V4.4h4V6M7.2 6l.6 10.4a1 1 0 0 0 1 .96h2.4a1 1 0 0 0 1-.96L12.8 6"/></svg>',
+  gear:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.6v2.1M10 15.3v2.1M17.4 10h-2.1M4.7 10H2.6M15.1 4.9l-1.5 1.5M6.4 13.6l-1.5 1.5M15.1 15.1l-1.5-1.5M6.4 6.4L4.9 4.9"/></svg>',
+  camera:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.2h2.6L6.6 5h6.8l1 2.2H17v8.3H3z"/><circle cx="10" cy="11.2" r="2.6"/></svg>',
+  warn:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.6 18 16.6H2z"/><path d="M10 8v4"/><circle cx="10" cy="14.4" r=".2" fill="currentColor"/></svg>',
+  tool:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.2 3.4a3 3 0 0 0-3.9 3.9L3 13.6V17h3.4l6.3-6.3a3 3 0 0 0 3.9-3.9l-2.1 2.1-2-2z"/></svg>',
+  ruler:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.5" width="15" height="7" rx="1.2"/><path d="M6 6.5v2.4M9.5 6.5v3.4M13 6.5v2.4"/></svg>',
+  bulb:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.8a4.6 4.6 0 0 0-2.6 8.4c.5.4.8 1 .8 1.6v.5h3.6v-.5c0-.6.3-1.2.8-1.6A4.6 4.6 0 0 0 10 2.8z"/><path d="M8.5 16.4h3"/></svg>',
+  book:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4.2h5.4a2 2 0 0 1 2 2v10.6H5a2 2 0 0 1-2-2z"/><path d="M17 4.2h-5.4a2 2 0 0 0-2 2v10.6H15a2 2 0 0 0 2-2z"/></svg>',
+  ledger:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.6" width="12" height="14.8" rx="1.4"/><path d="M7 6.4h6M7 9.4h6M7 12.4h4"/></svg>',
+  pencil:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.6 3.4 16.6 7.4 6.8 17.2H2.8v-4z"/></svg>',
+  down:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v11M5.5 10 10 14.5 14.5 10"/><path d="M4 17h12"/></svg>',
+  up:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17V6M5.5 10 10 5.5 14.5 10"/><path d="M4 3h12"/></svg>',
+  target:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="3.6"/><circle cx="10" cy="10" r=".4" fill="currentColor" stroke="none"/></svg>',
+  updown:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 6 10 3l3 3M7 14l3 3 3-3"/><path d="M10 3v14"/></svg>',
+  help:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M7.8 8a2.2 2.2 0 1 1 3.3 1.9c-.7.4-1.1.9-1.1 1.7v.4"/><circle cx="10" cy="14" r=".2" fill="currentColor"/></svg>',
+  chevron:'<svg class="icoInline" viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>'
+};
+function icon(name){ return ICONS[name]||""; }
 function fmtD(iso){ if(!iso)return""; const [y,m,d]=iso.split("-"); return `${y}/${+m}/${+d}`; }
 const ENDCOLORS=["#e5484d","#1e6fd9","#0f9d58","#f59e0b","#8b5cf6","#ec4899","#0ea5b7","#7c5e10","#475569","#b91c1c","#1d4ed8","#047857"];
 const FIELD_FACE_SIZES=[80,60,40,20];
