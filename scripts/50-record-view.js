@@ -22,6 +22,7 @@ function render(){
     if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
   });
   const m=$("#main");
+  m.classList.remove("hasActiveDock");
   if(view==="record") renderRecord(m);
   else if(view==="history") renderHistory(m);
   else if(view==="analysis") renderAnalysis(m);
@@ -157,10 +158,17 @@ function recordFastActionsHtml(last,dist,faceValue){
   const lastRound=last&&last.roundGroup?roundLabel(last.roundGroup.roundId):null;
   const lastTitle=lastRound?`${lastRound}をもう一度`:"前回と同じ";
   const lastLabel=last?(lastRound?"最初の距離から":`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`):"なし";
-  return `<section class="homeActions" aria-label="すぐ使う">
-    <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span id="quickStartMeta">${esc(currentLabel)}</span></button>
-    ${last?`<button class="homeAction" id="quickRepeat" type="button"><b>${esc(lastTitle)}</b><span>${esc(lastLabel)}</span></button>
-    <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分析</span></button>`:""}
+  /* 金面はセッション票の「この条件で開始」1つだけに絞る（design-language: 金面は1画面1つ）。
+     このバンドは墨面＋左に金アクセントバーの控えめな面。last が無い初回はセッション票の
+     fStart だけが唯一のCTAになるようバンド自体を出さない */
+  if(!last) return "";
+  return `<section class="homeActions recordRepeatBand" aria-label="すぐ使う">
+    <button class="homeAction repeatMain" id="quickStart" type="button">
+      <span class="repeatEyebrow">${esc(lastTitle)}</span>
+      <b id="quickStartMeta">${esc(currentLabel)}</b>
+      <span class="repeatSub">${esc(lastLabel)}</span>
+    </button>
+    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b><span>分析</span></button>
   </section>`;
 }
 /* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
@@ -169,11 +177,17 @@ function selectedMultiRound(roundId){
   const def=findRoundDef(roundId);
   return def&&Array.isArray(def.stages)&&def.stages.length?def:null;
 }
-/* ステージ一覧の1行表示（例「90m→70m→50m→30m（各36射）」） */
-function multiRoundStagesText(def){
-  const counts=[...new Set(def.stages.map(st=>st.arrows))];
-  if(counts.length===1) return `${def.stages.map(st=>`${st.dist}m`).join("→")}（各${counts[0]}射）`;
-  return def.stages.map(st=>`${st.dist}m ${st.arrows}射`).join("→");
+/* 多距離ラウンドのステージ一覧を「計器の行程表」風に表示（目盛り＋距離降順の目盛り線）。
+   当たり判定・記録ロジックには触れない、表示専用の集計 */
+function multiRoundStageGaugeHtml(def){
+  const stages=def.stages;
+  const maxDist=Math.max(...stages.map(st=>st.dist));
+  const ticks=stages.map((st,i)=>`
+    <div class="stageGaugeTick">
+      <div class="stageGaugeMark" style="height:${8+Math.round((st.dist/maxDist)*18)}px"></div>
+      <b>${st.dist}m</b><span>${st.arrows}射</span>
+    </div>${i<stages.length-1?`<div class="stageGaugeRail"></div>`:""}`).join("");
+  return `<div class="stageGauge" aria-label="${esc(def.label)}のステージ行程">${ticks}</div>`;
 }
 function renderRecord(m){
   if(db.active){ renderActive(m); return; }
@@ -197,6 +211,7 @@ function renderRecord(m){
       <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
     </div>
     <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="quickSelects">
       <div><label class="f">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
@@ -209,12 +224,13 @@ function renderRecord(m){
       </select></div>
       <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===defPerEnd?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
-    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"この条件で開始"}</button></div>
+    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
+    <div class="btnrow"><button class="btn startPrimary" id="fStart" data-testid="record-start">${mode==="calibration"?"サイト値つきで開始":"この条件で開始"}</button></div>
+    <div class="sessionCondition">${recordSetupSnapshot(defSetup,defDist)}</div>
     <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
       <summary>詳しく残す</summary>
       <div class="fieldBand">
         <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
-        ${recordSetupSnapshot(defSetup,defDist)}
       </div>
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
       <label class="f">ラウンド</label><select class="inp" id="fRound">
@@ -223,7 +239,7 @@ function renderRecord(m){
           ${multiRoundDefs().map(r=>`<option value="${r.id}">${esc(r.label)}</option>`).join("")}
         </optgroup>
       </select>
-      <div class="hint" id="fRoundStages" style="display:none"></div>
+      <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
       <div class="row">
         <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
         <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
@@ -272,7 +288,7 @@ function renderRecord(m){
     if(def){
       applyMultiRoundStage0(def);
       stagesEl.style.display="block";
-      stagesEl.innerHTML=`<b>${esc(def.label)}</b>：${esc(multiRoundStagesText(def))}`;
+      stagesEl.innerHTML=`<div class="stageGaugeLabel">${esc(def.label)}</div>${multiRoundStageGaugeHtml(def)}`;
     }else{
       stagesEl.style.display="none";
       stagesEl.textContent="";
@@ -284,11 +300,12 @@ function renderRecord(m){
     updateQuickStartMeta();
   };
   $("#jumpGear").onclick=()=>showView("gear");
-  $("#quickStart").onclick=()=>$("#fStart").click();
   const quickHistory=$("#quickHistory");
   if(quickHistory) quickHistory.onclick=()=>showView("history");
   if(last){
-    $("#quickRepeat").onclick=()=>{
+    /* 「前回と同じ」帯（quickStart, 元 quickRepeat）: 前回条件をフォームへ復元してから即開始する。
+       金面は下のセッション票の fStart 1つだけに絞ったため、このボタン自体は墨面のまま */
+    $("#quickStart").onclick=()=>{
       distState.d=last.dist||defDist;
       const known=[70,50,30,18].includes(+distState.d);
       const key=known?String(distState.d):"custom";
@@ -584,7 +601,9 @@ function renderAnalysis(m){
   });
   bindFormTrackingCard();
 }
-function liveSessionHeroHtml(s,setup){
+/* HUD が使う3値（エンドn・合計・残り）と、折りたたみに回す詳細値をまとめて計算する。
+   refreshActive() 側の状態モーション（数値ティック）も同じ計算を使う */
+function liveHudMetrics(s){
   const all=sessionArrows(s);
   const total=all.reduce((a,x)=>a+x.s,0);
   const avg=all.length?(total/all.length).toFixed(2):"—";
@@ -594,14 +613,27 @@ function liveSessionHeroHtml(s,setup){
   const stageDef=sessionStageDef(s);
   const quota=stageDef&&stageDef.arrows?stageDef.arrows:(r&&r.arrows?r.arrows:null);
   const roundRemain=quota?Math.max(0,quota-all.length):null;
+  return {total, avg, endNo:s.ends.length+1, remainText:roundRemain==null?`${remain}`:String(roundRemain)};
+}
+function liveSessionHeroHtml(s,setup){
+  const hm=liveHudMetrics(s);
   const rg=s.roundGroup;
-  return `<section class="liveHud compactHud">
-    <div class="liveContext">${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}<span>${setup?esc(setup.name):"用具未指定"}</span>${rg?`<span>ステージ ${(+rg.stage||0)+1}/${rg.stageCount}・${s.dist}m</span>`:""}</div>
-    <div class="liveGrid">
-      <div class="liveCell"><div class="k">合計</div><b>${total}</b></div>
-      <div class="liveCell"><div class="k">平均</div><b>${avg}</b></div>
-      <div class="liveCell"><div class="k">現在エンド</div><b>${(s.cur||[]).length}/${s.perEnd||6}</b></div>
-      <div class="liveCell"><div class="k">残り</div><b>${roundRemain==null?`${remain}本`:roundRemain+"本"}</b></div>
+  /* 射場モードの「いま必要な3つ」= エンドn・合計・残り。用具名・平均・ステージ詳細は details へ畳む */
+  return `<section class="liveHud compactHud" data-testid="active-hud">
+    <div class="liveContext">
+      <span>${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}</span>
+      <details class="liveHudMore"><summary>詳細</summary>
+        <div class="liveHudMoreBody">
+          <span>${setup?esc(setup.name):"用具未指定"}</span>
+          <span>平均 ${hm.avg}</span>
+          ${rg?`<span>ステージ ${(+rg.stage||0)+1}/${rg.stageCount}・${s.dist}m</span>`:""}
+        </div>
+      </details>
+    </div>
+    <div class="liveGrid liveGrid3">
+      <div class="liveCell"><div class="k">エンド</div><b class="tnum" id="hudEndNo">${hm.endNo}</b></div>
+      <div class="liveCell"><div class="k">合計</div><b class="tnum" id="hudTotal">${hm.total}</b></div>
+      <div class="liveCell"><div class="k">残り</div><b class="tnum" id="hudRemain">${hm.remainText}<small>本</small></b></div>
     </div>
   </section>`;
 }
@@ -628,23 +660,23 @@ function renderActive(m){
   const s=db.active;
   const setup=db.setups.find(x=>x.id===s.setupId);
   const nextStage=nextStageDef(s);
+  m.classList.add("hasActiveDock"); /* 固定操作列の高さ分、下部に呼吸を確保する（style.css: main.hasActiveDock） */
   m.innerHTML=`
   ${liveSessionHeroHtml(s,setup)}
-  <div class="card targetFocusCard">
+  <div class="card targetFocusCard targetFocusWide">
     <div class="targetTools">
       <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
       ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips">
         ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<button type="button" class="chip ${(ui.zoom||1)===z?"on":""}" aria-pressed="${(ui.zoom||1)===z}" data-z="${z}">${lb}</button>`).join("")}
       </div>`}
     </div>
-    <div class="tgWrap" id="tgWrap">
+    <div class="tgWrap tgWrapWide" id="tgWrap" data-testid="active-target">
       ${targetMarkup(s.faceD,"tg",s.faceType)}
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
-    <div class="targetHint">タップで記録。矢チップで修正。</div>
     ${activeGuideHtml()}
-    <div class="scoreChips" id="curChips"></div>
+    <div class="scoreChips" id="curChips" data-testid="active-arrow-chips"></div>
     <div class="nudge" id="nudge">
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
       <div class="npad">
@@ -655,15 +687,17 @@ function renderActive(m){
       <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
     </div>
-    <div class="statbar" id="statbar"></div>
-    <div class="btnrow">
-      <button class="btn ghost" id="bUndo">1本取消</button>
-      <button class="btn sec" id="bEnd">エンド確定</button>
-    </div>
-    ${nextStage?`<div class="btnrow"><button class="btn sec" id="bNextStage">次の距離へ（${nextStage.dist}m）</button></div>`:""}
-    <div class="btnrow"><button class="btn danger" id="bFinish">セッション終了</button></div>
+    <details class="adv activeStatsMore"><summary>この練習の詳細</summary>
+      <div class="statbar" id="statbar"></div>
+    </details>
+    ${nextStage?`<div class="btnrow activeNextStageRow"><button class="btn sec" id="bNextStage">次の距離へ（${nextStage.dist}m）</button></div>`:""}
   </div>
-  <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>`;
+  <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>
+  <div class="activeActionDock" id="activeActionDock" data-testid="active-action-dock">
+    <button class="btn ghost" id="bUndo" data-testid="active-undo">1本取消</button>
+    <button class="btn sec" id="bEnd" data-testid="active-end">エンド確定</button>
+    <button class="btn activeFinishBtn" id="bFinish" data-testid="active-finish">終了</button>
+  </div>`;
   attachTargetInput(s);
   function applyZoom(){ if(s.faceType==="triple") return; const M=s.faceD/2*1.18/(ui.zoom||1); $("#tgsvg").setAttribute("viewBox", `${-M} ${-M} ${2*M} ${2*M}`); }
   document.querySelectorAll("#zoomChips .chip").forEach(c=>c.onclick=()=>{
@@ -725,6 +759,31 @@ function bindShotMeta(){
     if(hadFocus){ const back=document.querySelector(`#shotReasonTags .reasonTag[data-reason="${reason}"]`); if(back) back.focus({preventScroll:true}); }
   });
 }
+/* motion:因果 — 矢の着弾座標（SVG座標系、yは上向き正）から4象限のどこから来たかを判定するだけの表示用ヘルパー。
+   attachTargetInput の座標計算・当たり判定には一切関与しない */
+function impactQuadrantClass(a){
+  const x=a&&a.x||0, y=a&&a.y||0;
+  return `impactFrom-${y>=0?"n":"s"}${x>=0?"e":"w"}`;
+}
+/* motion:状態 — HUD の3値（エンド・合計・残り）が前回描画時と変わっていたら短いティッククラスを付ける。
+   render() を跨いだ状態は #main の dataset に載せて持ち回す（DOM 再構築に強い） */
+function updateHudMetrics(s){
+  const hud=$('[data-testid="active-hud"]');
+  if(!hud) return;
+  const hm=liveHudMetrics(s);
+  const fields=[["hudEndNo",String(hm.endNo)],["hudTotal",String(hm.total)],["hudRemain",hm.remainText]];
+  fields.forEach(([id,val])=>{
+    const el=$("#"+id);
+    if(!el) return;
+    const prev=el.dataset.v;
+    const textNode=el.firstChild;
+    if(textNode&&textNode.nodeType===3) textNode.textContent=val; else el.textContent=val;
+    if(prev!=null && prev!==val){
+      el.classList.remove("tick"); void el.offsetWidth; el.classList.add("tick");
+    }
+    el.dataset.v=val;
+  });
+}
 function refreshActive(){
   const s=db.active; if(!s) return;
   // markers
@@ -739,7 +798,9 @@ function refreshActive(){
   const focusI=(focused && focused.classList && focused.classList.contains("sc") && chipsBox.contains(focused))?focused.dataset.i:null;
   chipsBox.innerHTML = s.cur.map((a,i)=>{
     const z=zoneStyle(a.s,a.X,s.faceType);
-    return `<button type="button" class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" aria-pressed="${i===ui.selArrow}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</button>`;
+    /* motion:因果 — 的タップの着弾象限から得点チップが現れる方向を決める（表示のみ。当たり判定・座標計算は不変） */
+    const fromCls=i===ui.freshArrow?`fresh ${impactQuadrantClass(a)}`:"";
+    return `<button type="button" class="sc ${i===ui.selArrow?"sel":""} ${fromCls}" aria-pressed="${i===ui.selArrow}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</button>`;
   }).join("") || `<span class="recordCurEmpty">エンド${s.ends.length+1}：的をタップして記録</span>`;
   if(focusI!=null){
     const back=chipsBox.querySelector(`.sc[data-i="${focusI}"]`);
@@ -751,6 +812,15 @@ function refreshActive(){
       ui.freshArrow=-1;
       document.querySelectorAll(".shotNew,.sc.fresh").forEach(el=>el.classList.remove("shotNew","fresh"));
     },640);
+    /* 記録直後、矢チップ列が固定操作列（activeActionDock）の裏に隠れていたら見える位置まで押し上げる。
+       ドックは position:fixed のため通常の scrollIntoView はドックの高さを考慮しないので手計算する */
+    const dock=$("#activeActionDock");
+    if(dock){
+      const dockTop=dock.getBoundingClientRect().top;
+      const chipsBottom=chipsBox.getBoundingClientRect().bottom;
+      const overlap=chipsBottom-dockTop;
+      if(overlap>0) window.scrollBy({top:overlap+12, behavior:"smooth"});
+    }
   }
   document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
     ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; nativePulse("light"); refreshActive();
@@ -770,6 +840,8 @@ function refreshActive(){
     <div class="stat"><b>${all.length?(total/all.length).toFixed(2):"-"}</b><span>平均/本</span></div>
     <div class="stat"><b>${perfectScoreCount(all,s)}</b><span>${perfectScoreLabel(s)}</span></div>
     <div class="stat"><b>${secondaryScoreCount(all,s)}</b><span>${secondaryScoreLabel(s)}</span></div>`;
+  /* motion:状態 — HUD の合計・残りが変わった時だけ短いティックを掛ける（値が同じなら再アニメしない） */
+  updateHudMetrics(s);
   // ends table
   $("#endsTbl").innerHTML = s.ends.length? `<table class="tbl"><tr><th>#</th><th>得点</th><th class="right">計</th><th></th></tr>`+
     s.ends.map((end,i)=>{
