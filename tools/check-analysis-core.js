@@ -503,6 +503,15 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
   assertEqual(g2.total, 30, "incomplete group still sums its stages");
   assertEqual(core.aggregateRoundGroups([]).length, 0, "empty rows aggregate to no groups");
 
+  // 同 stage の重複行（例: 破損データや二重取り込み）では stageCount と行数が一致しても complete にしない
+  const dupSessions = [
+    coreSession("dup-a", "2026-06-25", 70, { round: "wa1440_men", extra: { roundGroup: rg("grp-dup", 0, 2) } }),
+    coreSession("dup-b", "2026-06-26", 70, { round: "wa1440_men", extra: { roundGroup: rg("grp-dup", 0, 2) } }),
+  ];
+  const dupGroups = core.aggregateRoundGroups(core.buildAnalysisRows(dupSessions, coreSetups, metricsFn));
+  assertEqual(dupGroups.length, 1, "duplicate-stage rows stay one group");
+  assertEqual(dupGroups[0].complete, false, "duplicate stages do not count as complete");
+
   // roundGroupBests: complete のみ対象。高得点でも不完全な grp-2 は無視される
   const bests = core.roundGroupBests(groups);
   assertEqual(bests.length, 1, "bests count (incomplete groups ignored)");

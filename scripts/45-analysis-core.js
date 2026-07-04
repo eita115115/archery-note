@@ -128,7 +128,7 @@ function personalBests(rows){
 /* 多距離ラウンド集計（IMP-09）: roundGroup 付きの行を gid で束ね、1グループ=ラウンド1回分にする。
    roundGroup の無い行（従来セッション）は集計に含めない。
    stages は roundGroup.stage 昇順、date はグループ内の最も早い日付、
-   complete は stageCount 分の距離ステージが揃っているか */
+   complete は stageCount 分の「異なる stage」が揃っているか（同 stage の重複行では完了扱いにしない） */
 function aggregateRoundGroups(rows){
   const by=new Map();
   (rows||[]).forEach(r=>{
@@ -152,7 +152,7 @@ function aggregateRoundGroups(rows){
       stages:items.map(it=>({dist:it.dist,total:it.total,n:it.n})),
       total:items.reduce((a,it)=>a+it.total,0),
       arrows:items.reduce((a,it)=>a+it.n,0),
-      complete:g.stageCount>0 && items.length===g.stageCount
+      complete:g.stageCount>0 && new Set(items.map(it=>it.stage)).size===g.stageCount
     };
   }).sort((a,b)=>a.date.localeCompare(b.date));
 }

@@ -153,10 +153,13 @@ function actionFaceLabel(value){
 }
 function recordFastActionsHtml(last,dist,faceValue){
   const currentLabel=`${dist}m / ${actionFaceLabel(faceValue)}`;
-  const lastLabel=last?`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`:"なし";
+  /* 直前が多距離ラウンドのステージなら、押下時の挙動（ラウンドをステージ1から再開）に合わせたラベルにする */
+  const lastRound=last&&last.roundGroup?roundLabel(last.roundGroup.roundId):null;
+  const lastTitle=lastRound?`${lastRound}をもう一度`:"前回と同じ";
+  const lastLabel=last?(lastRound?"最初の距離から":`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`):"なし";
   return `<section class="homeActions" aria-label="すぐ使う">
     <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span id="quickStartMeta">${esc(currentLabel)}</span></button>
-    ${last?`<button class="homeAction" id="quickRepeat" type="button"><b>前回と同じ</b><span>${esc(lastLabel)}</span></button>
+    ${last?`<button class="homeAction" id="quickRepeat" type="button"><b>${esc(lastTitle)}</b><span>${esc(lastLabel)}</span></button>
     <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分析</span></button>`:""}
   </section>`;
 }
@@ -957,7 +960,17 @@ function advanceRoundStage(){
 function finishSession(){
   const s=db.active;
   const shot=s.ends.flat().length + s.cur.length;
-  if(!shot){ if(confirm("矢が0本です。このセッションを破棄しますか？")){ db.active=null; nativePulse("heavy"); save(); render(); } return; }
+  const rg=s.roundGroup;
+  if(!shot){
+    /* 多距離ラウンドで確定済みステージがあれば、破棄されるのが現ステージだけと分かる文言にする */
+    const doneStages=rg&&rg.gid?db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid).length:0;
+    const msg=doneStages?`このステージを破棄しますか？（確定済みの ${doneStages} ステージは履歴に残ります）`:"矢が0本です。このセッションを破棄しますか？";
+    if(confirm(msg)){ db.active=null; nativePulse("heavy"); save(); render(); }
+    return;
+  }
+  /* 多距離ラウンド途中（最終ステージ以外）の終了は confirm を挟む。編集モード・単一距離は従来どおり */
+  if(rg && !s._edit && (Number(rg.stage)||0)<rg.stageCount-1 &&
+     !confirm(`ラウンド途中です（${(Number(rg.stage)||0)+1}/${rg.stageCount}）。ここで終了すると残りのステージは記録できません。終了しますか？`)) return;
   if(s.cur.length){
     if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
     else s.ends.push(s.cur);

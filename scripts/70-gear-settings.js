@@ -357,7 +357,7 @@ function customRoundStagesText(def){
 }
 function customRoundsSettingsHtml(){
   const list=db.customRounds||[];
-  return `<details class="adv"><summary>カスタムラウンド（多距離）</summary>
+  return `<details class="adv"><summary>多距離ラウンドの定義を管理</summary>
     <div class="hint">距離ごとのステージを持つ自分用ラウンドを定義できます。保存すると記録タブのラウンド選択（多距離ラウンド）に表示されます。</div>
     ${list.length?list.map(r=>`<button type="button" class="listItem" data-cr="${r.id}"><div>
       <div class="t">${esc(r.label)}</div>
@@ -415,9 +415,14 @@ function openCustomRoundForm(id){
     for(let i=0;i<stages.length;i++){
       const dist=+stages[i].dist, arrows=+stages[i].arrows, perEnd=+stages[i].perEnd||6;
       if(!(dist>0&&arrows>0)){ toast(`ステージ${i+1}の距離と射数を入力してください`); return; }
+      if(!Number.isInteger(arrows)){ toast(`ステージ${i+1}の射数は正の整数で入力してください`); return; }
+      if(perEnd>arrows){ toast(`ステージ${i+1}の1エンドの本数（${perEnd}本）が射数（${arrows}射）を超えています`); return; }
       const f=parseFaceChoice(stages[i].face);
       clean.push({dist,faceD:f.faceD,faceType:f.faceType,arrows,perEnd});
     }
+    /* 記録中のラウンド定義を書き換えると進行中のステージ遷移が壊れうるので警告（保存自体は可能） */
+    if(src && db.active && db.active.roundGroup && db.active.roundGroup.roundId===id &&
+       !confirm("記録中のラウンドがあり、変更するとステージ進行が完了できなくなる可能性があります。保存しますか？")) return;
     db.customRounds=Array.isArray(db.customRounds)?db.customRounds:[];
     if(src){
       const i=db.customRounds.findIndex(r=>r.id===id);
@@ -431,7 +436,8 @@ function openCustomRoundForm(id){
   };
   const del=ovl.querySelector("#crDel");
   if(del) del.onclick=()=>{
-    if(confirm(`「${src.label}」を削除しますか？\n（過去の練習記録は残ります。記録タブの選択肢から消えます）`)){
+    const activeWarn=db.active&&db.active.roundGroup&&db.active.roundGroup.roundId===id?"\n記録中のラウンドがあり、削除するとステージ進行が完了できなくなる可能性があります。":"";
+    if(confirm(`「${src.label}」を削除しますか？${activeWarn}\n（過去の練習記録は残ります。記録タブの選択肢から消えます）`)){
       db.customRounds=(db.customRounds||[]).filter(r=>r.id!==id);
       save({reason:"delete-custom-round",forceSnapshot:true});
       closeModal(ovl); openSettings(); toast("削除しました");
