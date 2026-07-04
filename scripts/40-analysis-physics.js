@@ -517,7 +517,8 @@ function sessionMetricSignature(sess){
   const ends=(sess&&sess.ends)||[];
   let n=0,total=0,xs=0,ys=0,last="";
   ends.forEach((end,ei)=>end.forEach((a,ai)=>{
-    n++; total+=a.s||0; xs+=a.x||0; ys+=a.y||0;
+    /* 入力防御: 文字列座標/点数が混じっても文字列連結で署名生成が壊れないよう Number 化 */
+    n++; total+=Number(a&&a.s)||0; xs+=Number(a&&a.x)||0; ys+=Number(a&&a.y)||0;
     if(ei===ends.length-1 && ai===end.length-1) last=[a.x,a.y,a.s,a.X?1:0,a.spot==null?"":a.spot].join(":");
   }));
   /* DB_REV: save()ごとに増える世代カウンタ。署名衝突（例: 2本を逆方向に同距離ナッジ）でも編集保存後に必ず再計算させる */
@@ -529,7 +530,9 @@ function sessionMetrics(sess){
   if(cached) return cached;
   const all=(sess.ends||[]).flat();
   const total=all.reduce((a,x)=>a+x.s,0);
-  const st=robustStats(all);
+  /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
+  const pts=all.map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
+  const st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st};
   SESSION_METRIC_CACHE.set(sig,metrics);
   if(SESSION_METRIC_CACHE.size>240) SESSION_METRIC_CACHE.delete(SESSION_METRIC_CACHE.keys().next().value);
