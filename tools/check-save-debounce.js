@@ -77,16 +77,29 @@ function loadApi() {
       store.delete(key);
     },
   };
+  /* max-wait 検証用に Date.now() を手動で進められる決定的クロック */
+  let fakeNowMs = 1700000000000;
+  const clock = { advance: (ms) => (fakeNowMs += ms) };
+  class FakeDate extends Date {
+    constructor(...args) {
+      if (args.length === 0) super(fakeNowMs);
+      else super(...args);
+    }
+    static now() {
+      return fakeNowMs;
+    }
+  }
   const api = new Function(
     "localStorage",
     "setTimeout",
     "clearTimeout",
+    "Date",
     `${storageScript}
 return {save, scheduleSave, flushPendingSave, hasPendingSave, KEY, SNAP_KEY,
   getDb: () => db, getRev: () => DB_REV};`,
-  )(localStorageShim, timers.setTimeout, timers.clearTimeout);
+  )(localStorageShim, timers.setTimeout, timers.clearTimeout, FakeDate);
   const keyWrites = () => writes.filter((w) => w.key === api.KEY);
-  return { timers, writes, keyWrites, api };
+  return { timers, writes, keyWrites, api, clock };
 }
 
 function checkDebounceCoalescing() {
@@ -104,6 +117,25 @@ function checkDebounceCoalescing() {
   assert(!api.hasPendingSave(), "[debounce] pending flag clears after the write");
   const written = JSON.parse(keyWrites()[0].value);
   assertEqual(written.settings.eyeSight, 804, "[debounce] the write contains the latest db state");
+}
+
+function checkMaxWait() {
+  /* 連続入力（600ms未満間隔）でも SAVE_MAX_WAIT_MS で先送りが打ち切られ途中書き込みされること */
+  assert(/const SAVE_DEBOUNCE_MS=600;/.test(storageScript), "[max-wait] SAVE_DEBOUNCE_MS should stay 600");
+  assert(/const SAVE_MAX_WAIT_MS=3000;/.test(storageScript), "[max-wait] SAVE_MAX_WAIT_MS should stay 3000");
+  const { timers, keyWrites, api, clock } = loadApi();
+  for (let i = 0; i < 10; i += 1) {
+    api.getDb().settings.eyeSight = 900 + i;
+    api.scheduleSave("nudge");
+    clock.advance(500); // デバウンス窓(600ms)より短い間隔の連打
+  }
+  assert(
+    keyWrites().length >= 1,
+    "[max-wait] continuous input must not defer the write indefinitely",
+  );
+  timers.runAll();
+  const last = JSON.parse(keyWrites()[keyWrites().length - 1].value);
+  assertEqual(last.settings.eyeSight, 909, "[max-wait] final state is persisted after the burst");
 }
 
 function checkFlushPendingSave() {
@@ -191,7 +223,7 @@ function checkLifecycleFlushContract() {
      ハンドラを複数行に書き換えた場合はこの検査も合わせて更新すること。 */
   [
     [/window\.addEventListener\(\s*["']pagehide["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "pagehide"],
-    [/document\.addEventListener\(\s*["']visibilitychange["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "visibilitychange(hidden)"],
+    [/document\.addEventListener\(\s*["']visibilitychange["'][^\n]*document\.hidden\)\s*\{[^}]*flushPendingSave\(\);[^}]*flushSafetySnapshot\(\)/, "visibilitychange(hidden): flush must live inside the hidden branch"],
     [/window\.addEventListener\(\s*["']beforeunload["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "beforeunload"],
   ].forEach(([pattern, label]) => {
     assert(
@@ -216,6 +248,7 @@ function checkLifecycleFlushContract() {
 
 function main() {
   checkDebounceCoalescing();
+  checkMaxWait();
   checkFlushPendingSave();
   checkImmediateSaveStaysImmediate();
   checkSnapshotStillScheduled();
