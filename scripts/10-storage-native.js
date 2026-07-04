@@ -3,14 +3,14 @@
 /* ============ storage ============ */
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
-const SCHEMA_VER=4; /* v4: formAnalyses 追加のみ（docs/storage-schema4-design.md） */
+const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
 const APP_VER=70;
 const TRASH_LIMIT=50;
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -38,7 +38,7 @@ function normalizeDb(d){
   const base=blankDb(), src=(d&&typeof d==="object")?d:{};
   const out=Object.assign(base,src);
   out.settings=Object.assign(base.settings,src.settings||{});
-  ["setups","sightMarks","sessions","trash","formAnalyses"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  ["setups","sightMarks","sessions","trash","formAnalyses","customRounds"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
@@ -440,4 +440,35 @@ const ROUND_TYPES=[
   {id:"18m60",label:"18m 60射",arrows:60,dist:18},
   {id:"field72",label:"フィールド 24標的/72射",arrows:72}
 ];
-function roundLabel(id){ return (ROUND_TYPES.find(r=>r.id===(id||"free"))||ROUND_TYPES[0]).label; }
+/* 多距離ラウンド定義（IMP-09）: 各 stage は従来どおりの単一距離セッション1件として保存し、
+   session.roundGroup={gid,roundId,stage,stageCount} で連結する。
+   W.A. 1440 ラウンド: 長距離2種（122cm的）は6本エンド、50/30m（80cm的）は3本エンド、各距離36射 */
+const MULTI_ROUND_PRESETS=[
+  {id:"wa1440_men",label:"WA1440 男子",stages:[
+    {dist:90,faceD:122,faceType:"single",arrows:36,perEnd:6},
+    {dist:70,faceD:122,faceType:"single",arrows:36,perEnd:6},
+    {dist:50,faceD:80,faceType:"single",arrows:36,perEnd:3},
+    {dist:30,faceD:80,faceType:"single",arrows:36,perEnd:3}
+  ]},
+  {id:"wa1440_women",label:"WA1440 女子",stages:[
+    {dist:70,faceD:122,faceType:"single",arrows:36,perEnd:6},
+    {dist:60,faceD:122,faceType:"single",arrows:36,perEnd:6},
+    {dist:50,faceD:80,faceType:"single",arrows:36,perEnd:3},
+    {dist:30,faceD:80,faceType:"single",arrows:36,perEnd:3}
+  ]}
+];
+/* プリセット＋カスタム定義の一覧。customRounds 省略時は db.customRounds を使う（id 重複はカスタム優先） */
+function multiRoundDefs(customRounds){
+  const custom=Array.isArray(customRounds)?customRounds:((typeof db!=="undefined"&&db&&Array.isArray(db.customRounds))?db.customRounds:[]);
+  const byId=new Map();
+  MULTI_ROUND_PRESETS.forEach(r=>{ if(r&&r.id) byId.set(r.id,r); });
+  custom.forEach(r=>{ if(r&&r.id) byId.set(r.id,r); });
+  return [...byId.values()];
+}
+function findRoundDef(id,customRounds){ return multiRoundDefs(customRounds).find(r=>r.id===id)||null; }
+function roundLabel(id){
+  const base=ROUND_TYPES.find(r=>r.id===(id||"free"));
+  if(base) return base.label;
+  const def=findRoundDef(id);
+  return def?def.label:ROUND_TYPES[0].label;
+}

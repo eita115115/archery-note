@@ -1,0 +1,100 @@
+{
+  "schema": 4,
+  "setups": [
+    {
+      "id": "fixture-round-setup",
+      "name": "Multi distance setup",
+      "poundage": "40"
+    }
+  ],
+  "sightMarks": [],
+  "sessions": [
+    {
+      "id": "fixture-round-stage-1",
+      "date": "2026-07-02",
+      "setupId": "fixture-round-setup",
+      "dist": 60,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "custom-6030",
+      "roundGroup": {
+        "gid": "fixture-round-group-1",
+        "roundId": "custom-6030",
+        "stage": 0,
+        "stageCount": 2
+      },
+      "ends": [
+        [
+          { "x": 1.1, "y": 0.3, "s": 9 },
+          { "x": -0.4, "y": 0.9, "s": 10, "X": true },
+          { "x": 0.2, "y": -0.7, "s": 10 }
+        ]
+      ]
+    },
+    {
+      "id": "fixture-round-stage-2",
+      "date": "2026-07-02",
+      "setupId": "fixture-round-setup",
+      "dist": 30,
+      "faceD": 80,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "custom-6030",
+      "roundGroup": {
+        "gid": "fixture-round-group-1",
+        "roundId": "custom-6030",
+        "stage": 1,
+        "stageCount": 2
+      },
+      "ends": [
+        [
+          { "x": 0.5, "y": 0.2, "s": 10 },
+          { "x": -0.9, "y": 0.4, "s": 9 },
+          { "x": 0.1, "y": 1.2, "s": 9 }
+        ]
+      ]
+    },
+    {
+      "id": "fixture-round-plain-session",
+      "date": "2026-06-15",
+      "setupId": "fixture-round-setup",
+      "dist": 70,
+      "faceD": 122,
+      "faceType": "single",
+      "round": "free",
+      "ends": [
+        [
+          { "x": 0.8, "y": -0.5, "s": 9 },
+          { "x": -0.2, "y": 0.6, "s": 10 }
+        ]
+      ]
+    }
+  ],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850
+  },
+  "active": null,
+  "formAnalyses": [],
+  "customRounds": [
+    {
+      "id": "custom-6030",
+      "label": "カスタム 60/30m",
+      "stages": [
+        { "dist": 60, "faceD": 122, "faceType": "single", "arrows": 36, "perEnd": 6 },
+        { "dist": 30, "faceD": 80, "faceType": "single", "arrows": 36, "perEnd": 3 }
+      ]
+    },
+    {
+      "id": "wa1440_men",
+      "label": "WA1440 男子（カスタム上書き）",
+      "stages": [
+        { "dist": 90, "faceD": 122, "faceType": "single", "arrows": 36, "perEnd": 6 },
+        { "dist": 70, "faceD": 122, "faceType": "single", "arrows": 36, "perEnd": 6 },
+        { "dist": 50, "faceD": 80, "faceType": "single", "arrows": 36, "perEnd": 3 },
+        { "dist": 30, "faceD": 80, "faceType": "single", "arrows": 36, "perEnd": 3 }
+      ]
+    }
+  ]
+}
