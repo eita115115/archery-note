@@ -167,6 +167,42 @@ assertMatch(
   "current Service Worker activate flow should still contain self.clients.claim()",
 );
 
+const poseCacheMatch = /\bconst\s+POSE_CACHE\s*=\s*["']([^"']+)["']\s*;/.exec(swText);
+if (!poseCacheMatch) fail("sw.js must define POSE_CACHE for pose asset cache-first serving");
+const cachePrefixMatch = /\bconst\s+CACHE_PREFIX\s*=\s*["']([^"']+)["']\s*;/.exec(swText);
+if (!cachePrefixMatch) fail("sw.js must define CACHE_PREFIX");
+if (poseCacheMatch[1].startsWith(cachePrefixMatch[1])) {
+  fail(
+    `POSE_CACHE (${poseCacheMatch[1]}) must not start with CACHE_PREFIX (${cachePrefixMatch[1]}); ` +
+      "otherwise the activate cleanup would delete the pose cache on every app update",
+  );
+}
+
+assertMatch(
+  /url\.pathname\.includes\(\s*["']\/assets\/pose\/["']\s*\)/,
+  swText,
+  "sw.js fetch handler must special-case same-origin /assets/pose/ requests",
+);
+
+assertMatch(
+  /caches\.match\(e\.request\)\.then\(\s*hit\s*=>\s*hit\s*\|\|\s*fetch\(e\.request\)/,
+  swText,
+  "pose assets must be served cache-first (cache hit returned before any network fetch)",
+);
+
+assertMatch(
+  /caches\.open\(POSE_CACHE\)/,
+  swText,
+  "pose asset responses must be stored in POSE_CACHE, not the versioned app cache",
+);
+
+const swAssetsBlock = sliceBetween(swText, /\bconst\s+ASSETS\s*=\s*\[/, "];", "ASSETS array");
+assertNoMatch(
+  /assets\/pose/,
+  swAssetsBlock,
+  "install precache (ASSETS) must not include assets/pose (about 15MB; loaded only when form tracking is enabled)",
+);
+
 const gearText = readText("scripts/70-gear-settings.js");
 const analysisText = readText("scripts/40-analysis-physics.js");
 
