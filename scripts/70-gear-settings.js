@@ -214,6 +214,20 @@ function setChoiceValue(root,id,value){
   else if(val){ pick.value=MANUAL_CHOICE; input.classList.remove("is-hidden"); }
   else{ pick.value=""; input.classList.add("is-hidden"); }
 }
+/* スペックシート様式: 単位が明確な数値項目だけ、ラベル末尾の単位表記を入力欄右の固定表示へ移す。
+   単位マップに無い項目（「(実測)」等の注記付きラベルを含む）はラベルをそのまま使う。
+   表示のみの変更で、値・キー・GEAR_FIELDS の文言そのものは変えない */
+const GEAR_UNIT_LABELS={
+  poundage:"lbs",drawLength:"inch",arrowLength:"inch",pointWeight:"gr",arrowDia:"mm",shaftGpi:"gr/in",
+  arrowWeight:"gr",shaftSetWeightSpread:"gr",shaftStraightness:"inch",foc:"%",vaneHeight:"mm",
+  bowEfficiency:"%",temperature:"℃",altitude:"m",humidity:"%"
+};
+function gearLabelUnit(k,lb){
+  const unit=GEAR_UNIT_LABELS[k];
+  if(!unit) return {label:lb,unit:""};
+  const stripped=lb.replace(/\s*\([^()]*\)\s*$/,"").trim();
+  return {label:stripped||lb,unit};
+}
 function gearFieldHtml(k,lb,s){
   const opts=gearOptions(k), listId=`gfList_${k}`;
   const list=opts.length?` list="${listId}" autocomplete="off"`:"";
@@ -221,7 +235,10 @@ function gearFieldHtml(k,lb,s){
   const ph=GEAR_PLACEHOLDERS[k]?` placeholder="${esc(GEAR_PLACEHOLDERS[k])}"`:"";
   if(k==="notes") return `<label class="f" for="gf_${k}">${lb}</label><textarea class="inp" id="gf_${k}"${ph}>${esc(s?s[k]:"")}</textarea>`;
   if(opts.length && !GEAR_NUMERIC_FIELDS.has(k)) return choiceFieldHtml(`gf_${k}`,lb,opts,s?s[k]:"",GEAR_PLACEHOLDERS[k]||"",mode);
-  return `<label class="f" for="gf_${k}">${lb}</label><input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}"${list}${mode}${ph}>${opts.length?`<datalist id="${listId}">${opts.map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`:""}`;
+  const {label,unit}=gearLabelUnit(k,lb);
+  const input=`<input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}"${list}${mode}${ph}>`;
+  const body=unit?`<div class="fieldUnit">${input}<span class="fieldUnitLabel">${esc(unit)}</span></div>`:input;
+  return `<label class="f" for="gf_${k}">${esc(label)}</label>${body}${opts.length?`<datalist id="${listId}">${opts.map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`:""}`;
 }
 function gearSectionHtml(sec,s){
   const body=sec.keys.map(k=>{
@@ -328,24 +345,51 @@ function gearWorkbenchHtml(){
     <div class="insightTile"><div class="k">よく使う用具</div><b>${top?esc(top.s.name):"—"}</b><span>${top?`入力 ${top.p.level} / 履歴 ${top.m.level}`:"登録待ち"}</span></div>
   </div>`;
 }
+/* pageHeroHtml("gear") の縮小版。P3 と同じ原則（説明削減・直近使用1行）で、
+   50-record-view.js の pageHeroHtml 本体は並行改修中のため触らず、ここで独立に描画する */
+function gearHeroHtml(){
+  const setups=db.setups||[];
+  const lastSess=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1))[0];
+  const lastSetup=lastSess&&setups.find(s=>s.id===lastSess.setupId);
+  return `<section class="pageHero">
+    <div class="kicker">用具</div>
+    <h2>いつものセッティングを残す</h2>
+    <div class="heroMetrics">
+      ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
+      ${heroMetricHtml("直近使用",lastSetup?lastSetup.name:"—",lastSess?fmtD(lastSess.date):"記録待ち")}
+    </div>
+  </section>`;
+}
 function renderGear(m){
-  m.innerHTML=`${pageHeroHtml("gear")}${gearWorkbenchHtml()}
-  <div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
+  const lastSess=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1))[0];
+  const activeId=lastSess?lastSess.setupId:"";
+  m.innerHTML=`${gearHeroHtml()}${gearWorkbenchHtml()}
+  <div class="card"><h2>機材台帳 <span class="mini">${db.setups.length}件</span></h2>
     <div id="gearList">${db.setups.length? db.setups.map(s=>{
       const cnt=db.sessions.filter(x=>x.setupId===s.id).length;
       const gp=gearPrecisionProfile(s);
       const mp=modelReadinessProfile(s.id);
-      return `<div class="listItem" data-id="${s.id}"><div>
-        <div class="t">${esc(s.name)}</div>
-        <div class="d">${[s.bow,s.limbs,s.poundage?s.poundage+"lbs":""].filter(Boolean).map(esc).join(" ・ ")||"詳細未入力"}</div>
-        <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level} ・ 変更履歴${(s.history||[]).length}件</div>
+      const active=activeId===s.id;
+      return `<div class="listItem gearLedgerItem" data-id="${s.id}" data-testid="gear-ledger-item"><div>
+        <div class="t">${active?`<span class="gearActiveDot" title="使用中" aria-hidden="true"></span>`:""}${esc(s.name)}</div>
+        <div class="gearLedgerSpecs">
+          <span class="gearSpecCell">弓<b>${s.bow?esc(s.bow):"—"}</b></span>
+          <span class="gearSpecCell">リム<b>${s.limbs?esc(s.limbs):"—"}</b></span>
+          <span class="gearSpecCell">ポンド<b>${s.poundage?esc(s.poundage)+"lbs":"—"}</b></span>
+        </div>
+        <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level}</div>
       </div><div class="gearChevron">${icon("chevron")}</div></div>`;
-    }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
-    <div class="btnrow"><button class="btn sec" id="gWizard">初回セットアップ</button><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
+    }).join(""):`<div class="empty">
+      <p>セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</p>
+      <button class="btn" id="gWizardEmpty" data-testid="gear-wizard-start">初回セットアップを始める</button>
+    </div>`}</div>
+    ${db.setups.length?`<div class="btnrow"><button class="btn sec" id="gWizard" data-testid="gear-wizard-start">初回セットアップ</button><button class="btn" id="gAdd" data-testid="gear-add">＋ 新しいセッティング</button></div>`:""}
     <div class="hint">バックアップ・テーマなどは右上の <b>設定</b> から。</div>
   </div>`;
-  $("#gWizard").onclick=()=>openSetupWizard();
-  $("#gAdd").onclick=()=>openGearForm(null);
+  const wiz=$("#gWizard")||$("#gWizardEmpty");
+  if(wiz) wiz.onclick=()=>openSetupWizard();
+  const add=$("#gAdd");
+  if(add) add.onclick=()=>openGearForm(null);
   document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
 }
 
@@ -357,13 +401,13 @@ function customRoundStagesText(def){
 }
 function customRoundsSettingsHtml(){
   const list=db.customRounds||[];
-  return `<details class="adv"><summary>多距離ラウンドの定義を管理</summary>
-    <div class="hint">距離ごとのステージを持つ自分用ラウンドを定義できます。保存すると記録タブのラウンド選択（多距離ラウンド）に表示されます。</div>
+  return `<details class="adv" data-testid="settings-custom-rounds"><summary>多距離ラウンドの定義を管理</summary>
+    <div class="hint">保存すると記録タブのラウンド選択（多距離ラウンド）に表示されます。</div>
     ${list.length?list.map(r=>`<button type="button" class="listItem" data-cr="${r.id}"><div>
       <div class="t">${esc(r.label)}</div>
       <div class="d">${esc(customRoundStagesText(r))}</div>
     </div><div class="gearChevron">${icon("chevron")}</div></button>`).join(""):`<div class="empty">カスタムラウンドはまだありません。</div>`}
-    <div class="btnrow"><button class="btn sec" id="crAdd">＋ カスタムラウンドを追加</button></div>
+    <div class="btnrow"><button class="btn sec" id="crAdd" data-testid="settings-custom-round-add">＋ カスタムラウンドを追加</button></div>
   </details>`;
 }
 function openCustomRoundForm(id){
@@ -455,39 +499,60 @@ function openSettings(){
   const th=db.settings.theme||"auto";
   const snaps=readSnapshots();
   ovl.innerHTML=`<div class="sheet"><h3>${icon("gear")} 設定</h3>
-    <label class="f">テーマ</label>
-    <div class="chips" id="thChips">
-      ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<button type="button" class="chip ${th===v?"on":""}" aria-pressed="${th===v}" data-th="${v}">${lb}</button>`).join("")}
+    <div class="settingsGroup" data-testid="settings-group-app">
+      <div class="settingsGroupTitle">アプリ情報</div>
+      ${nativeReadinessHtml()}
+      <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
     </div>
-    <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
-    <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
-    <label class="f">射形トラッキング（ベータ）</label>
-    <div class="chips" id="ftChips">
-      <button type="button" class="chip ${db.settings.formTrackingEnabled?"":"on"}" aria-pressed="${!db.settings.formTrackingEnabled}" data-ft="0">OFF</button>
-      <button type="button" class="chip ${db.settings.formTrackingEnabled?"on":""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
+
+    <div class="settingsGroup" data-testid="settings-group-display">
+      <div class="settingsGroupTitle">表示</div>
+      <label class="f">テーマ</label>
+      <div class="chips" id="thChips" data-testid="settings-theme-chips">
+        ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<button type="button" class="chip ${th===v?"on":""}" aria-pressed="${th===v}" data-th="${v}">${lb}</button>`).join("")}
+      </div>
+      <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
+      <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
+      <label class="f">射形トラッキング（ベータ）</label>
+      <div class="chips" id="ftChips">
+        <button type="button" class="chip ${db.settings.formTrackingEnabled?"":"on"}" aria-pressed="${!db.settings.formTrackingEnabled}" data-ft="0">OFF</button>
+        <button type="button" class="chip ${db.settings.formTrackingEnabled?"on":""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
+      </div>
+      <div class="hint">ONにすると分析タブにカメラでの射形解析が出ます。解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
+      <h3 class="settingsH3">カスタムラウンド</h3>
+      <div class="settingsActionHint">距離ごとのステージを持つ自分用ラウンドを増減・編集します。</div>
+      ${customRoundsSettingsHtml()}
     </div>
-    <div class="hint">ONにすると分析タブにカメラでの射形解析が出ます。解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
-    ${nativeReadinessHtml()}
-    <h3 class="settingsH3">カスタムラウンド</h3>
-    ${customRoundsSettingsHtml()}
-    <h3 class="settingsH3">データ管理</h3>
-    ${backupReminderHtml()}
-    <div class="btnrow">
-      <button class="btn sec" id="dExp">${icon("down")} バックアップ保存</button>
-      <button class="btn sec" id="dImp">${icon("up")} 読み込み</button>
+
+    <div class="settingsGroup" data-testid="settings-group-data">
+      <div class="settingsGroupTitle">データ</div>
+      ${backupReminderHtml()}
+      <div class="settingsActionHint">練習記録・セッティングをまとめて1つのJSONファイルに書き出します。</div>
+      <div class="btnrow">
+        <button class="btn sec" id="dExp" data-testid="settings-export">${icon("down")} バックアップ保存</button>
+        <button class="btn sec" id="dImp" data-testid="settings-import">${icon("up")} 読み込み</button>
+      </div>
+      <div class="settingsActionHint">練習記録だけを表計算ソフトで開けるCSV形式で書き出します。</div>
+      <div class="btnrow"><button class="btn sec" id="dCsv" data-testid="settings-csv">CSV出力</button></div>
+      <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
+      <h3 class="settingsH3">自動バックアップ</h3>
+      <div class="settingsActionHint">バックアップ・読み込み操作のたびに、端末内へ復元用の控えを自動で残します。</div>
+      ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動バックアップはまだありません。保存操作を行うと端末内に復元用バックアップが残ります。</div>`}
+      <div class="btnrow">
+        <button class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">今すぐバックアップ</button>
+        <button class="btn ghost" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length?"":"disabled"}>選択したバックアップを復元</button>
+      </div>
+      <div class="settingsActionHint">削除した用具・練習記録の一時保管です。ここから元に戻せます。</div>
+      ${trashSettingsHtml()}
+      <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
     </div>
-    <div class="btnrow"><button class="btn sec" id="dCsv">CSV出力</button></div>
-    <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
-    <h3 class="settingsH3">自動バックアップ</h3>
-    ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動バックアップはまだありません。保存操作を行うと端末内に復元用バックアップが残ります。</div>`}
-    <div class="btnrow">
-      <button class="btn sec" id="dSnapNow">今すぐバックアップ</button>
-      <button class="btn ghost" id="dSnapRestore" ${snaps.length?"":"disabled"}>選択したバックアップを復元</button>
+
+    <div class="settingsGroup settingsDangerZone" data-testid="settings-group-danger">
+      <div class="settingsGroupTitle">危険域</div>
+      ${trashClearButtonHtml()}
+      <div class="hint settingsDangerHint">${icon("warn")} iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
     </div>
-    ${trashSettingsHtml()}
-    <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
-    <div class="hint settingsDangerHint">${icon("warn")} iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
-    <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
+
     <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
   </div>`;
   openModal(ovl,{escapeTarget:"#setClose"});
@@ -626,13 +691,17 @@ function openGearDetail(id){
     ${modelReadinessHtml(id)}
     ${physicsCalibrationHtml(id)}
     ${setupComparisonHtml(id)}
-    <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th class="gearTh40">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
+    <div class="specSheet" data-testid="gear-spec-sheet">${GEAR_FIELDS.map(([k,lb])=>{
+      if(!s[k]) return "";
+      const {label,unit}=gearLabelUnit(k,lb);
+      return `<div class="specRow"><span>${esc(label)}</span><b>${esc(s[k])}${unit?esc(unit):""}</b></div>`;
+    }).join("")}</div>
     ${(s.history&&s.history.length)?`<h3 class="gearHistoryH3">変更履歴</h3>
       ${[...s.history].reverse().map(h=>`<div class="gearHistoryRow">
         <b>${fmtD(h.date)}</b> — ${h.changes.map(c=>`${esc(c.label)}: ${esc(c.from||"（未設定）")} → <b>${esc(c.to||"（削除）")}</b>`).join(" / ")}</div>`).join("")}`:""}
     <div class="btnrow">
-      <button class="btn danger" id="gDel">削除</button>
-      <button class="btn sec" id="gEdit">編集</button>
+      <button class="btn danger" id="gDel" data-testid="gear-delete">削除</button>
+      <button class="btn sec" id="gEdit" data-testid="gear-edit">編集</button>
       <button class="btn ghost" id="gClose">閉じる</button>
     </div>
   </div>`;

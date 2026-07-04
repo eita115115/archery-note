@@ -711,13 +711,20 @@ function backupReminderHtml(){
   if(days<30) return `<div class="hint">最終バックアップ/CSV出力: ${new Date(t).toLocaleDateString()}。月1回の保存ペースは良好です。</div>`;
   return `<div class="advice analysisAdviceCard"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
 }
+/* ゴミ箱の一覧+復元は「データ」節、全消去ボタンは危険域へ分離して表示する（表示のみの分割。
+   #trashClear の挙動・確認ダイアログの有無は変えない） */
 function trashSettingsHtml(){
   const items=(db.trash||[]).slice(0,8);
   if(!items.length) return `<h3 class="trashH3">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
   return `<h3 class="trashH3">ゴミ箱 <span class="subNoteSm">最新${items.length}/${(db.trash||[]).length}件</span></h3>
     <table class="tbl"><tr><th>種類</th><th>内容</th><th>削除日</th><th></th></tr>
-    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost trashRestoreBtn" data-restore-trash="${it.id}">復元</button></td></tr>`).join("")}</table>
-    <div class="btnrow"><button class="btn danger" id="trashClear">ゴミ箱を空にする</button></div>`;
+    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost trashRestoreBtn" data-restore-trash="${it.id}">復元</button></td></tr>`).join("")}</table>`;
+}
+function trashClearButtonHtml(){
+  const items=(db.trash||[]).slice(0,8);
+  if(!items.length) return "";
+  return `<div class="settingsActionHint">ゴミ箱の中身を完全に削除します。元に戻せません。</div>
+    <div class="btnrow"><button class="btn danger" id="trashClear" data-testid="settings-trash-clear">ゴミ箱を空にする</button></div>`;
 }
 function regress(pts){
   const n=pts.length; if(n<2) return null;
