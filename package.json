@@ -10,7 +10,7 @@
     "check:globals": "node tools/check-globals.js",
     "check:app": "node tools/check-app.js",
     "check:pwa": "node tools/check-pwa-assets.js && node tools/check-pwa-update-flow.js",
-    "check:storage": "node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js",
+    "check:storage": "node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js && node tools/check-save-debounce.js",
     "check:ui": "node tools/check-ui.js",
     "check:version": "node tools/check-version-alignment.js",
     "lint": "eslint \"*.js\" \"scripts/**/*.js\" \"tools/**/*.js\" \"tests/**/*.js\" \"eslint.config.mjs\"",
