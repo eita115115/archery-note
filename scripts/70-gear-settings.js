@@ -330,25 +330,13 @@ function setupComparisonHtml(setupId){
     <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
   </div>`;
 }
-function gearWorkbenchHtml(){
-  const setups=db.setups||[];
-  if(!setups.length) return "";
-  const gp=setups.map(s=>gearPrecisionProfile(s));
-  const avg=gp.length?gp.reduce((a,p)=>a+p.score,0)/gp.length:0;
-  const linked=db.sessions.filter(s=>s.setupId).length;
-  const marks=db.sightMarks.length;
-  const top=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)}))
-    .sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
-  return `<div class="insightStrip">
-    <div class="insightTile"><div class="k">用具ライブラリ</div><b>${setups.length}件</b><span>練習紐付け ${linked}回 / サイト値 ${marks}点</span></div>
-    <div class="insightTile"><div class="k">入力材料</div><b>${pct(avg)}</b><span>矢重量・矢径・FOC・実測初速の平均充実度</span></div>
-    <div class="insightTile"><div class="k">よく使う用具</div><b>${top?esc(top.s.name):"—"}</b><span>${top?`入力 ${top.p.level} / 履歴 ${top.m.level}`:"登録待ち"}</span></div>
-  </div>`;
-}
-/* pageHeroHtml("gear") の縮小版。P3 と同じ原則（説明削減・直近使用1行）で、
+/* pageHeroHtml("gear") の縮小版。旧指標行（用具ライブラリ/入力材料/よく使う用具）はここへ統合し、
+   上部の数値枠は 登録件数・入力材料%・直近使用 の1ブロック3値まで。「よく使う用具」は台帳の金ドットが担う。
    50-record-view.js の pageHeroHtml 本体は並行改修中のため触らず、ここで独立に描画する */
 function gearHeroHtml(){
   const setups=db.setups||[];
+  const gp=setups.map(s=>gearPrecisionProfile(s));
+  const avg=gp.length?gp.reduce((a,p)=>a+p.score,0)/gp.length:0;
   const lastSess=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1))[0];
   const lastSetup=lastSess&&setups.find(s=>s.id===lastSess.setupId);
   return `<section class="pageHero">
@@ -356,6 +344,7 @@ function gearHeroHtml(){
     <h2>いつものセッティングを残す</h2>
     <div class="heroMetrics">
       ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
+      ${heroMetricHtml("入力材料",setups.length?pct(avg):"—","用具データの平均充実度")}
       ${heroMetricHtml("直近使用",lastSetup?lastSetup.name:"—",lastSess?fmtD(lastSess.date):"記録待ち")}
     </div>
   </section>`;
@@ -363,7 +352,7 @@ function gearHeroHtml(){
 function renderGear(m){
   const lastSess=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1))[0];
   const activeId=lastSess?lastSess.setupId:"";
-  m.innerHTML=`${gearHeroHtml()}${gearWorkbenchHtml()}
+  m.innerHTML=`${gearHeroHtml()}
   <div class="card"><h2>機材台帳 <span class="mini">${db.setups.length}件</span></h2>
     <div id="gearList">${db.setups.length? db.setups.map(s=>{
       const cnt=db.sessions.filter(x=>x.setupId===s.id).length;
@@ -383,10 +372,11 @@ function renderGear(m){
       <p>セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</p>
       <button class="btn" id="gWizardEmpty" data-testid="gear-wizard-start">初回セットアップを始める</button>
     </div>`}</div>
-    ${db.setups.length?`<div class="btnrow"><button class="btn sec" id="gWizard" data-testid="gear-wizard-start">初回セットアップ</button><button class="btn" id="gAdd" data-testid="gear-add">＋ 新しいセッティング</button></div>`:""}
+    ${db.setups.length?`<div class="btnrow"><button class="btn" id="gAdd" data-testid="gear-add">＋ 新しいセッティング</button></div>`:""}
     <div class="hint">バックアップ・テーマなどは右上の <b>設定</b> から。</div>
   </div>`;
-  const wiz=$("#gWizard")||$("#gWizardEmpty");
+  /* 初回セットアップ導線は空状態専用（登録済みなら金面CTAは「＋新しいセッティング」1つ） */
+  const wiz=$("#gWizardEmpty");
   if(wiz) wiz.onclick=()=>openSetupWizard();
   const add=$("#gAdd");
   if(add) add.onclick=()=>openGearForm(null);
