@@ -158,7 +158,10 @@ test("exposes distance chips as buttons with synced aria-pressed", async ({ page
   await expect(pressed).toHaveAttribute("data-d", "70");
 
   await page.locator('#fDistChips .chip[data-d="30"]').click();
-  await expect(page.locator('#fDistChips .chip[data-d="30"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('#fDistChips .chip[data-d="30"]')).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   await expect(pressed).toHaveCount(1);
   await expect(unexpectedErrors).toEqual([]);
 });
