@@ -106,7 +106,7 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
 
   await mainTab(page, "用具").click();
-  await expect(page.locator("#main")).toContainText("用具セッティング");
+  await expect(page.locator("#main")).toContainText("機材台帳");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
 
   await mainTab(page, "記録").click();
