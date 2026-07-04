@@ -113,3 +113,55 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(page.locator("#main")).toContainText("今日の記録を始める");
   await expect(unexpectedErrors).toEqual([]);
 });
+
+test("moves exactly one aria-current marker when switching tabs", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  const currentTab = page.locator('#tabs button[aria-current="page"]');
+  await expect(currentTab).toHaveCount(1);
+  await expect(currentTab).toHaveAttribute("data-v", "record");
+
+  await mainTab(page, "履歴").click();
+  await expect(currentTab).toHaveCount(1);
+  await expect(currentTab).toHaveAttribute("data-v", "history");
+
+  await mainTab(page, "記録").click();
+  await expect(currentTab).toHaveCount(1);
+  await expect(currentTab).toHaveAttribute("data-v", "record");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("exposes distance chips as buttons with synced aria-pressed", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  const chips = page.locator("#fDistChips .chip");
+  await expect(chips.first()).toBeVisible();
+  const chipCount = await chips.count();
+  for (let i = 0; i < chipCount; i++) {
+    await expect(chips.nth(i)).toHaveJSProperty("tagName", "BUTTON");
+  }
+
+  const pressed = page.locator('#fDistChips .chip[aria-pressed="true"]');
+  await expect(pressed).toHaveCount(1);
+  await expect(pressed).toHaveAttribute("data-d", "70");
+
+  await page.locator('#fDistChips .chip[data-d="30"]').click();
+  await expect(page.locator('#fDistChips .chip[data-d="30"]')).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(pressed).toHaveCount(1);
+  await expect(unexpectedErrors).toEqual([]);
+});
