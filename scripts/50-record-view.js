@@ -407,18 +407,7 @@ function heroMetricHtml(k,b,span){
 }
 function pageHeroHtml(type,ctx){
   ctx=ctx||{};
-  if(type==="analysis"){
-    return `<section class="pageHero">
-      <div class="kicker">分析</div>
-      <h2>傾向をまとめる入口</h2>
-      <p>スコア・距離・サイト・グルーピングの読み取りを、ここへ段階的に集めます。</p>
-      <div class="heroMetrics">
-        ${heroMetricHtml("現在","分析タブ","推移と分布")}
-        ${heroMetricHtml("対象","スコア・距離","サイト・グルーピング")}
-        ${heroMetricHtml("履歴","記録一覧","練習本体を確認")}
-      </div>
-    </section>`;
-  }
+  /* 分析タブにヒーローは置かない（結論→根拠→詳細の原則: 一等地は「今日の結論」カードが使う） */
   if(type==="history"){
     const src=ctx.ss||db.sessions||[];
     const arrows=src.flatMap(s=>s.ends.flat());
@@ -608,8 +597,7 @@ function renderAnalysis(m){
     setupPerformanceCard(ss),
     distanceSummaryHtml(sessionRows)
   ].filter(Boolean).join("");
-  m.innerHTML=`${pageHeroHtml("analysis")}
-  ${todayConclusionCardHtml(rows)}
+  m.innerHTML=`${todayConclusionCardHtml(rows)}
   ${allRows.length?analysisFilterBarHtml(allRows,f):""}
   ${cards||`<div class="card"><h2>分析</h2><div class="empty">${allRows.length?"この絞り込みに合う記録がありません。フィルタを広げてください。":"記録が増えると、矢の集まり具合や月間まとめがここに表示されます。"}</div></div>`}`;
   const anSetup=$("#anSetup");
