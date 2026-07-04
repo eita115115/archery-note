@@ -636,7 +636,7 @@ function bindShotMeta(){
   const no=$("#shotArrowNo");
   if(no) no.oninput=e=>{
     a.no=e.target.value.trim();
-    save("shot-meta");
+    scheduleSave("shot-meta"); /* キーストロークごとの全量書き込みを避ける（flush は pagehide 等で保証） */
   };
   if(no) no.onchange=()=>refreshActive();
   document.querySelectorAll("#shotReasonTags .reasonTag").forEach(btn=>btn.onclick=()=>{
@@ -645,7 +645,7 @@ function bindShotMeta(){
     const hadFocus=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#shotReasonTags"));
     a.reason=a.reason===reason?"":reason;
     nativePulse("light");
-    save("shot-meta");
+    scheduleSave("shot-meta");
     refreshActive();
     if(hadFocus){ const back=document.querySelector(`#shotReasonTags .reasonTag[data-reason="${reason}"]`); if(back) back.focus({preventScroll:true}); }
   });
@@ -718,7 +718,7 @@ function nudgeArrow(dirKey){
   const a=s.cur[ui.selArrow], step=s.faceD/200;
   if(dirKey==="u")a.y+=step; if(dirKey==="d")a.y-=step; if(dirKey==="l")a.x-=step; if(dirKey==="r")a.x+=step;
   Object.assign(a, scoreAt(a.x,a.y,s.faceD,s.faceType,lineCutRadius(s.faceD,s.faceType)));
-  nativePulse("light"); save(); refreshActive();
+  nativePulse("light"); scheduleSave("nudge"); refreshActive();
 }
 
 /* target pointer input with long-press fine mode + lens */
@@ -820,7 +820,7 @@ function attachTargetInput(s){
     s.cur.push(rec);
     ui.freshArrow=s.cur.length-1;
     nativePulse(isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType)?"success":"light");
-    save(); refreshActive();
+    scheduleSave("arrow-add"); refreshActive();
     toast(`${scoreLabel(hit)} 点を記録`);
   }
   function cancel(e){

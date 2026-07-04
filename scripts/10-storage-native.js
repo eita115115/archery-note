@@ -251,11 +251,16 @@ function scheduleSafetySnapshot(reason, raw, force){
     flushSafetySnapshot();
   },1800);
 }
-/* メモリ上のみのDB世代カウンタ。save()ごとに増やし、セッション統計キャッシュの無効化に使う（保存はしない） */
+/* メモリ上のみのDB世代カウンタ。db変異（save/scheduleSave）ごとに増やし、セッション統計キャッシュの無効化に使う（保存はしない） */
 let DB_REV=0;
-function save(opts){
-  DB_REV++;
-  const o=typeof opts==="string"?{reason:opts}:opts||{};
+/* 高頻度の記録操作（的タップ・ナッジ・理由タグ・矢番号入力）は scheduleSave() でデバウンス書き込みにする。
+ * db 全体の JSON.stringify + 書き込みは記録が増えると1回数十msになるため（docs 実測: 300セッションで約50ms/iPhone相当）。
+ * データ損失の上限はこのデバウンス窓のみ: pagehide / visibilitychange(hidden) / beforeunload と
+ * 更新リロード（freshReload）前に必ず flushPendingSave() で同期書き込みする（scripts/90-init.js）。
+ * インポート・復元・削除・セッション終了などの重要操作は従来どおり save() で即時同期書き込み。 */
+const SAVE_DEBOUNCE_MS=600;
+let pendingSaveTimer=null, pendingSaveOpts=null;
+function writeDbNow(o){
   db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
   try{
     const raw=JSON.stringify(db);
@@ -265,6 +270,35 @@ function save(opts){
     console.error(e);
     try{ toast("保存容量が足りません。設定からバックアップ保存してください"); }catch(_){}
   }
+}
+function hasPendingSave(){ return pendingSaveTimer!=null; }
+function flushPendingSave(){
+  if(pendingSaveTimer==null) return;
+  clearTimeout(pendingSaveTimer);
+  pendingSaveTimer=null;
+  const o=pendingSaveOpts||{};
+  pendingSaveOpts=null;
+  writeDbNow(o);
+}
+function scheduleSave(opts){
+  const o=typeof opts==="string"?{reason:opts}:opts||{};
+  if(o.forceSnapshot){ save(o); return; } /* スナップショット強制は重要操作なので即時に倒す */
+  DB_REV++; /* キャッシュ無効化は「変異した時点」で。書き込み遅延とは独立 */
+  pendingSaveOpts=o;
+  if(pendingSaveTimer!=null) clearTimeout(pendingSaveTimer);
+  pendingSaveTimer=setTimeout(()=>{
+    pendingSaveTimer=null;
+    const p=pendingSaveOpts||o;
+    pendingSaveOpts=null;
+    writeDbNow(p);
+  },SAVE_DEBOUNCE_MS);
+}
+function save(opts){
+  DB_REV++;
+  const o=typeof opts==="string"?{reason:opts}:opts||{};
+  /* 即時書き込みは db 全体の最新状態を書くので、保留中のデバウンス書き込みはここで吸収される */
+  if(pendingSaveTimer!=null){ clearTimeout(pendingSaveTimer); pendingSaveTimer=null; pendingSaveOpts=null; }
+  writeDbNow(o);
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 const $=s=>document.querySelector(s);
