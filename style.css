@@ -321,19 +321,24 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 }
 .homeAction b{display:block; font-size:13.5px; line-height:1.2; color:inherit;}
 .homeAction span{display:block; font-size:10.5px; line-height:1.25; color:var(--sub); margin-top:3px;}
-.homeAction.primary{
-  grid-column:1 / -1; min-height:68px; border-radius:12px; color:#1b1b18; position:relative; overflow:hidden; isolation:isolate;
-  background:var(--accent);
-  border-color:var(--accent);
-  box-shadow:none;
-}
-.homeAction.primary::after{display:none;}
-.homeAction.primary b,.homeAction.primary span{position:relative; z-index:1;}
-.homeAction.primary span{color:rgba(27,27,24,.72);}
 /* motion:因果 — 押下で沈む */
 .homeAction:active{transform:translateY(1px) scale(.982);}
-.homeAction.primary:active{box-shadow:inset 0 2px 4px rgba(0,0,0,.16);}
 .homeAction:disabled{opacity:.45; cursor:not-allowed;}
+/* 「前回と同じ」帯: 墨面＋左に金アクセントバー（金の塗りはセッション票の startPrimary のみに限定するため、
+   ここは面ではなくアクセントバー1本にとどめる） */
+.recordRepeatBand{grid-template-columns:minmax(0,1fr) 74px;}
+.repeatMain{
+  grid-column:auto; text-align:left; background:#1b1b18; color:#f2f0e8; border-color:rgba(255,255,255,.10);
+  position:relative; padding-left:16px; min-height:64px;
+}
+html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
+.repeatMain::before{
+  content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:999px; background:var(--accent);
+}
+.repeatEyebrow{display:block; font-size:10px; letter-spacing:.06em; color:rgba(242,240,232,.68); font-weight:700;}
+.repeatMain b{font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums;}
+.repeatSub{color:rgba(242,240,232,.6)!important;}
+.repeatHistory{min-height:64px;}
 .launchPanel.convergeLaunch{border-radius:var(--radius-panel); overflow:hidden;}
 .convergeLaunch .launchHead{background:var(--card);}
 .convergeLaunch .launchBody{padding:12px 13px 13px;}
@@ -360,6 +365,12 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .targetFocusCard{padding:12px; border-radius:12px;}
 .targetFocusCard h2{font-size:13px;}
 .targetFocusCard .tgWrap svg.main{border-radius:12px; background:var(--target-surface-a); box-shadow:none;}
+/* 記録中: 的を主役にするため左右 padding を切り詰め、的の実効幅を画面幅いっぱいに近づける（現行より拡大方向）。
+   ただし縦方向はビューポート高の一定割合で頭打ちにし、固定操作列（activeActionDock）や矢チップ列が
+   常にドックの裏へ隠れないようにする */
+.targetFocusWide{padding-left:6px; padding-right:6px;}
+.targetFocusWide .targetTools{padding:0 6px;}
+.tgWrapWide{margin:0 auto; max-width:min(100%, 36vh); max-width:min(100%, 36dvh); max-height:36dvh;}
 .targetTools{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:8px;}
 .targetTools .chips{flex:1; justify-content:flex-end;}
 .targetHint{
@@ -417,11 +428,28 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .lensCard .k{font-size:10.5px; color:var(--sub);}
 .lensCard b{display:block; margin-top:2px; font-size:13px; color:var(--ink);}
 .lensCard span{display:block; margin-top:2px; font-size:10.5px; color:var(--sub); line-height:1.35;}
+/* セッション票の下に小さく置く「直近の調子」（設計要求: 開始までに視線が縦1本で済む配置） */
+.sessionCondition{margin-top:4px;}
+.sessionCondition .setupLens{margin:0; opacity:.86;}
+.sessionCondition .lensCard{padding:7px 9px; min-height:44px;}
+.sessionCondition .lensCard b{font-size:11.5px;}
+.sessionCondition .lensCard span{font-size:9.5px;}
+/* セッション票内の罫線区切り（スコアカードの紙の文法: hairlineで距離／的・本数／開始 を分ける） */
+.sessionCardRule{height:1px; background:var(--line2); margin:12px 0;}
 .quickDists{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; margin-top:6px;}
 .quickDists .chip{display:flex; align-items:center; justify-content:center; padding:9px 4px; border-radius:10px; font-size:13px;}
 .fieldBand{
   display:grid; grid-template-columns:1fr; gap:10px;
 }
+/* 多距離ラウンドのステージ行程表（計器の目盛り風）。ロジックは fRoundStages の JS 側で組み立て済み */
+.stageGaugeWrap{border:1px solid var(--advLine); border-radius:10px; background:var(--advBg); padding:10px 10px 8px;}
+.stageGaugeLabel{font-size:11.5px; font-weight:800; color:var(--title); margin-bottom:6px;}
+.stageGauge{display:flex; align-items:flex-end; gap:0;}
+.stageGaugeTick{display:flex; flex-direction:column; align-items:center; min-width:0;}
+.stageGaugeMark{width:2px; background:var(--accent); border-radius:999px; margin-bottom:4px;}
+.stageGaugeTick b{font-size:12px; color:var(--title); font-variant-numeric:tabular-nums; white-space:nowrap;}
+.stageGaugeTick span{font-size:9.5px; color:var(--sub); margin-top:1px; white-space:nowrap;}
+.stageGaugeRail{flex:1; height:1px; background:var(--line); margin-bottom:16px; min-width:8px;}
 .recordDetails{margin-top:10px; border:none!important; background:transparent!important; padding:0!important;}
 .recordDetails summary{
   display:flex; align-items:center; justify-content:flex-start; gap:4px;
@@ -478,7 +506,20 @@ html.dark .liveHud,html.auto .liveHud{background:#0e100d;}
 .liveHud .kicker{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.72; font-weight:900;}
 .liveHud h2{font-size:20px;margin:3px 0;color:#f2f0e8; font-variant-numeric:tabular-nums;}
 .liveContext{display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--title); font-size:12px; font-weight:800; line-height:1.35;}
-.liveContext span{min-width:0; color:var(--sub); font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.liveContext>span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+/* HUD の「詳細」折りたたみ: 射場モードで畳んでおく用具名・平均・ステージ情報 */
+.liveHudMore{position:relative; flex:0 0 auto;}
+.liveHudMore summary{
+  list-style:none; cursor:pointer; font-size:10.5px; font-weight:700; color:var(--sub);
+  padding:2px 6px; border:1px solid var(--line); border-radius:999px; background:var(--soft);
+}
+.liveHudMore summary::-webkit-details-marker{display:none;}
+.liveHudMoreBody{
+  position:absolute; right:0; top:calc(100% + 6px); z-index:5; min-width:180px;
+  display:flex; flex-direction:column; gap:3px; padding:8px 10px; border-radius:10px;
+  background:var(--card); border:1px solid var(--line); box-shadow:var(--shadow-raised);
+}
+.liveHudMoreBody span{font-size:11px; color:var(--sub); white-space:nowrap;}
 .liveGrid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-top:10px;}
 .liveCell{border:1px solid rgba(255,255,255,.14); border-radius:10px; background:rgba(255,255,255,.08); padding:8px; min-width:0;}
 .liveCell .k{font-size:10px; opacity:.72;}
@@ -487,6 +528,16 @@ html.dark .liveHud,html.auto .liveHud{background:#0e100d;}
 .compactHud .liveCell{background:var(--soft); border-color:var(--line); color:var(--ink); padding:7px 4px; text-align:center;}
 .compactHud .liveCell .k{color:var(--sub); opacity:1;}
 .compactHud .liveCell b{color:var(--title);}
+/* 記録中HUDの「いま必要な3つ」: エンド・合計・残りだけを大型 tabular-nums で並べる */
+.liveGrid3{grid-template-columns:repeat(3,minmax(0,1fr));}
+.liveGrid3 .liveCell b{font-size:22px; font-weight:800;}
+.liveGrid3 .liveCell b small{font-size:11px; font-weight:600; margin-left:1px; opacity:.75;}
+/* motion:状態 — HUD数値が変わった瞬間だけ知覚できる短いティック */
+.liveCell b.tick{animation:hudTick var(--motion-fast) var(--ease-app);}
+@keyframes hudTick{
+  0%{transform:translateY(-3px); opacity:.5;}
+  100%{transform:translateY(0); opacity:1;}
+}
 .nativeStack{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:8px;}
 .nativePill{
   border:1px solid var(--line); border-radius:10px; padding:9px; background:var(--paper);
@@ -508,6 +559,24 @@ html.dark .liveHud,html.auto .liveHud{background:#0e100d;}
 .activeGuide .guideLine{margin-top:6px;}
 .activeGuideDone{margin-top:8px;}
 .compactStack>*:first-child{margin-top:0;}
+/* 記録中の操作固定列（親指圏＝タブバー直上）。エンド確定・undo・終了の3つに絞り、終了は視覚を控えめにする */
+.activeActionDock{
+  position:fixed; left:50%; transform:translateX(-50%); z-index:29;
+  bottom:calc(8px + 64px + 8px); bottom:calc(max(8px,env(safe-area-inset-bottom)) + 64px + 8px);
+  width:calc(100% - 20px); max-width:560px;
+  display:grid; grid-template-columns:1fr 1.3fr auto; gap:8px;
+  background:var(--chrome-bg); border:1px solid var(--chrome-border); border-radius:12px;
+  padding:8px; box-shadow:var(--shadow-raised);
+  backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+}
+.activeActionDock .btn{min-height:48px; width:auto;}
+/* 終了: 誤タップ防止のため視覚を控えめに（本体の appConfirm 確認は不変） */
+.activeFinishBtn{background:transparent; color:var(--sub); border:1px solid var(--line); font-weight:700;}
+.activeStatsMore{margin-top:10px;}
+.activeNextStageRow{margin-bottom:0;}
+/* ドックの高さ分、記録中カードの下に呼吸を確保（endsTbl カードが隠れないように） */
+.targetFocusWide{margin-bottom:0;}
+main.hasActiveDock{padding-bottom:calc(64px + 16px + 96px);}
 /* tab bar */
 nav.tabs{
   position:fixed; bottom:8px; bottom:max(8px,env(safe-area-inset-bottom)); left:50%; right:auto; z-index:30;
@@ -584,8 +653,34 @@ nav.tabs button.on{color:var(--accent-strong); font-weight:700;}
 .sc::before{content:""; position:absolute; inset:-4px; border-radius:inherit;}
 button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-align:inherit; -webkit-appearance:none; appearance:none;}
 .sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px var(--card) inset;}
-/* motion:因果 — タップ結果を的から得点チップへ視覚的に反映 */
+/* motion:因果 — タップ結果を的から得点チップへ視覚的に反映。
+   着弾象限（impactFrom-*）ごとに開始オフセットを変え、「的の着弾方向からチップが来た」感触にする。
+   座標計算・当たり判定には無関係の表示専用クラス */
 .sc.fresh{animation:scorePop .38s cubic-bezier(.2,1.2,.2,1) both;}
+.sc.fresh.impactFrom-ne{animation-name:scorePopFromNE;}
+.sc.fresh.impactFrom-nw{animation-name:scorePopFromNW;}
+.sc.fresh.impactFrom-se{animation-name:scorePopFromSE;}
+.sc.fresh.impactFrom-sw{animation-name:scorePopFromSW;}
+@keyframes scorePopFromNE{
+  0%{opacity:.35; transform:translate(10px,-10px) scale(.72);}
+  58%{opacity:1; transform:translate(0,0) scale(1.06);}
+  100%{opacity:1; transform:translate(0,0) scale(1);}
+}
+@keyframes scorePopFromNW{
+  0%{opacity:.35; transform:translate(-10px,-10px) scale(.72);}
+  58%{opacity:1; transform:translate(0,0) scale(1.06);}
+  100%{opacity:1; transform:translate(0,0) scale(1);}
+}
+@keyframes scorePopFromSE{
+  0%{opacity:.35; transform:translate(10px,10px) scale(.72);}
+  58%{opacity:1; transform:translate(0,0) scale(1.06);}
+  100%{opacity:1; transform:translate(0,0) scale(1);}
+}
+@keyframes scorePopFromSW{
+  0%{opacity:.35; transform:translate(-10px,10px) scale(.72);}
+  58%{opacity:1; transform:translate(0,0) scale(1.06);}
+  100%{opacity:1; transform:translate(0,0) scale(1);}
+}
 .shotNew{transform-box:fill-box; transform-origin:center; animation:markPop .42s cubic-bezier(.2,1.15,.2,1) both;}
 .shotNew circle{animation:impactFlash .42s ease-out both;}
 .statbar{display:flex; gap:6px; margin-top:10px;}

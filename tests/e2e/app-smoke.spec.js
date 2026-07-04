@@ -89,7 +89,7 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(page).toHaveTitle(/Archery Note/);
   await expect(page.getByRole("heading", { name: "Archery Note" })).toBeVisible();
   await expect(page.locator("#bootFallback")).toBeHidden();
-  await expect(page.locator("#main")).toContainText("今日の記録を始める");
+  await expect(page.getByTestId("record-start")).toBeVisible();
 
   await expect(mainTab(page, "記録")).toBeVisible();
   await expect(mainTab(page, "履歴")).toBeVisible();
@@ -110,7 +110,7 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
 
   await mainTab(page, "記録").click();
-  await expect(page.locator("#main")).toContainText("今日の記録を始める");
+  await expect(page.getByTestId("record-start")).toBeVisible();
   await expect(unexpectedErrors).toEqual([]);
 });
 
@@ -285,15 +285,15 @@ test("records a multi-distance round with stage advance and history badges", asy
   await page.locator(".recordDetails summary").click();
   await page.locator("#fRound").selectOption("wa1440_men");
   await expect(page.locator("#fRoundStages")).toContainText("WA1440 男子");
-  await page.locator("#fStart").click();
+  await page.getByTestId("record-start").click();
 
   // ステージ1: 90m から開始
-  const hud = page.locator(".liveContext");
+  const hud = page.getByTestId("active-hud");
   await expect(hud).toContainText("90m");
   await expect(hud).toContainText("ステージ 1/4");
-  const target = page.locator("#tgsvg");
+  const target = page.getByTestId("active-target").locator("#tgsvg");
   for (let i = 0; i < 3; i++) await target.click();
-  await page.locator("#bEnd").click();
+  await page.getByTestId("active-end").click();
   // 36射未満の確定は appConfirm ダイアログ。確認ボタンをクリックして進める
   await page.locator("#bNextStage").click();
   await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
@@ -304,7 +304,7 @@ test("records a multi-distance round with stage advance and history badges", asy
   await expect(hud).toContainText("70m");
   await expect(hud).toContainText("ステージ 2/4");
   await target.click();
-  await page.locator("#bFinish").click();
+  await page.getByTestId("active-finish").click();
   // ラウンド途中終了も appConfirm ダイアログ経由
   await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
   await page.locator(".ovl .confirmSheet #acOk").click();
