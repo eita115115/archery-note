@@ -123,6 +123,28 @@ assert(trashDb.trash.length === 1 && trashEntry.label === "test session", "Trash
 assert(trashApi.restoreTrash(trashEntry.id) && trashDb.sessions[0].id === "sess1" && trashDb.trash.length === 0, "Trash restore failed");
 assert(trashApi.roundLabel("70m72") === "70m 72射", "Round label failed");
 
+/* IMP-09 多距離ラウンド定義ヘルパー: roundLabel の未知IDフォールバック / findRoundDef / sessionStageDef */
+const roundDb = {customRounds:[{id:"cr-custom",label:"カスタム60/30",stages:[
+  {dist:60,faceD:122,faceType:"single",arrows:36,perEnd:6},
+  {dist:30,faceD:80,faceType:"single",arrows:36,perEnd:3}
+]}]};
+const roundApi = new Function("db", section("const ROUND_TYPES=", "/* Archery Note: scoring") + "\nreturn {ROUND_TYPES,MULTI_ROUND_PRESETS,multiRoundDefs,findRoundDef,roundLabel,sessionStageDef};")(roundDb);
+assert(roundApi.roundLabel("wa1440_men") === "WA1440 男子", "Multi-round preset label failed");
+assert(roundApi.roundLabel("cr-custom") === "カスタム60/30", "Custom round label failed");
+assert(roundApi.roundLabel("__unknown__") === "自由練習", "Unknown round id must fall back to free label");
+assert(roundApi.roundLabel() === "自由練習", "Empty round id must fall back to free label");
+const waWomen = roundApi.findRoundDef("wa1440_women");
+assert(waWomen && waWomen.stages.length === 4 && waWomen.stages[0].dist === 70 && waWomen.stages[3].dist === 30, "Preset findRoundDef failed");
+assert(roundApi.findRoundDef("cr-custom").stages[1].dist === 30 && roundApi.findRoundDef("__unknown__") === null, "Custom/unknown findRoundDef failed");
+const presetStage = roundApi.sessionStageDef({roundGroup:{gid:"g1",roundId:"wa1440_men",stage:1,stageCount:4}});
+assert(presetStage && presetStage.dist === 70 && presetStage.faceD === 122 && presetStage.arrows === 36 && presetStage.perEnd === 6, "sessionStageDef preset stage failed");
+const customStage = roundApi.sessionStageDef({roundGroup:{gid:"g2",roundId:"cr-custom",stage:1,stageCount:2}});
+assert(customStage && customStage.dist === 30 && customStage.faceD === 80 && customStage.perEnd === 3, "sessionStageDef custom stage failed");
+assert(roundApi.sessionStageDef({round:"free"}) === null, "sessionStageDef without roundGroup must be null");
+assert(roundApi.sessionStageDef(null) === null, "sessionStageDef null session must be null");
+assert(roundApi.sessionStageDef({roundGroup:{gid:"g3",roundId:"wa1440_men",stage:9,stageCount:4}}) === null, "sessionStageDef out-of-range stage must be null");
+assert(roundApi.sessionStageDef({roundGroup:{gid:"g4",roundId:"__unknown__",stage:0,stageCount:1}}) === null, "sessionStageDef unknown round must be null");
+
 const faceApi = new Function(section("function uid", "function cloneData") + "\nreturn {FIELD_FACE_SIZES,parseFaceChoice,faceLabel,perfectScoreValue,perfectScoreLabel,perfectScoreCount,secondaryScoreLabel,secondaryScoreCount};")();
 const f40 = faceApi.parseFaceChoice("F40");
 assert(f40.faceD === 40 && f40.faceType === "field" && faceApi.faceLabel(f40) === "40cmフィールド", "Field face parsing failed");
