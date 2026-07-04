@@ -410,20 +410,24 @@ function pageHeroHtml(type,ctx){
   /* 分析タブにヒーローは置かない（結論→根拠→詳細の原則: 一等地は「今日の結論」カードが使う） */
   if(type==="history"){
     const src=ctx.ss||db.sessions||[];
-    const arrows=src.flatMap(s=>s.ends.flat());
-    const total=arrows.reduce((a,x)=>a+x.s,0);
-    const latest=src[0]||null;
+    const sessionRows=historySessionRows(src);
+    const arrows=sessionRows.flatMap(r=>r.arrows);
+    const total=sessionRows.reduce((a,r)=>a+r.total,0);
     /* 結論→根拠: 説明文ではなく既存の todayConclusion() 計算をそのまま言い換えた1行だけを置く。
-       新しい統計は作らない — 分析タブの「今日の結論」と同じ入力（buildAnalysisRows）を使う */
+       新しい統計は作らない — 分析タブの「今日の結論」と同じ入力（buildAnalysisRows）を使う。
+       数値枠は 練習・平均・最高合計 の3つに一本化（旧「記録サマリー」カードはここへ統合。
+       「直近」はリスト先頭行が直近そのものなので数値枠には置かない） */
     const rows=buildAnalysisRows(src,db.setups,sessionMetrics);
     const conclusion=todayConclusion(rows);
+    const best=sessionRows.filter(r=>r.arrows.length).sort((a,b)=>b.total-a.total || b.arrows.length-a.arrows.length || (b.s.date||"").localeCompare(a.s.date||""))[0];
+    const bestMeta=best?[fmtD(best.s.date),distanceLabel(best.s.dist),`${best.arrows.length}本`].filter(Boolean).join(" / "):"記録待ち";
     return `<section class="pageHero" data-testid="history-hero">
       <div class="kicker">履歴</div>
       <h2 class="pageHeroLead" data-testid="history-hero-trend">${esc(conclusion?conclusion.text:"")}</h2>
       <div class="heroMetrics">
         ${heroMetricHtml("練習",`${src.length}回`,`${arrows.length}本を集計`)}
         ${heroMetricHtml("平均",arrows.length?(total/arrows.length).toFixed(2):"—","フィルター後の平均点")}
-        ${heroMetricHtml("直近",latest?[fmtD(latest.date),distanceLabel(latest.dist)].filter(Boolean).join(" "):"—",latest?roundLabel(latest.round):"記録待ち")}
+        ${heroMetricHtml("最高合計",best?`${best.total}`:"—",bestMeta)}
       </div>
     </section>`;
   }
@@ -1255,34 +1259,8 @@ function sightHistoryCard(ss){
   }).join("");
   return `<div class="card"><h2>サイト値の記録 <span class="mini">直近${rows.length}件</span></h2>${body}</div>`;
 }
-function historyOverviewHtml(allSs,ss){
-  const src=Array.isArray(ss)?ss:allSs;
-  if(!allSs.length) return "";
-  const sessionRows=historySessionRows(src);
-  const arrows=sessionRows.flatMap(r=>r.arrows);
-  const total=sessionRows.reduce((a,r)=>a+r.total,0);
-  const avg=arrows.length?total/arrows.length:0;
-  const recent=[...src].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1)).slice(0,5);
-  const recentSet=new Set(recent);
-  const recentRows=sessionRows.filter(r=>recentSet.has(r.s));
-  const recentArrows=recentRows.flatMap(r=>r.arrows);
-  const recentTotal=recentRows.reduce((a,r)=>a+r.total,0);
-  const recentAvg=recentArrows.length?recentTotal/recentArrows.length:0;
-  const setupCount=new Set(src.map(s=>s.setupId||"none")).size;
-  const distCount=new Set(src.map(s=>s.dist).filter(Boolean)).size;
-  const quality=src.map(s=>sessionQuality(s,db.setups.find(x=>x.id===s.setupId))).filter(Boolean);
-  const qualityScores=quality.map(q=>Number(q.score)).filter(Number.isFinite);
-  const qAvg=qualityScores.length?qualityScores.reduce((a,s)=>a+s,0)/qualityScores.length:0;
-  const latest=recent[0]||null;
-  const latestLabel=latest?[fmtD(latest.date),distanceLabel(latest.dist)].filter(Boolean).join(" "):"—";
-  const best=sessionRows.filter(r=>r.arrows.length).sort((a,b)=>b.total-a.total || b.arrows.length-a.arrows.length || (b.s.date||"").localeCompare(a.s.date||""))[0];
-  const bestMeta=best?[fmtD(best.s.date),distanceLabel(best.s.dist),`${best.arrows.length}本`].filter(Boolean).join(" / "):"記録待ち";
-  return `<div class="insightStrip">
-    <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
-    <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
-    <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
-  </div>`;
-}
+/* 旧 historyOverviewHtml（記録サマリー insightStrip）は履歴ヒーローへ統合済み（UI-P3 差し戻し対応）。
+   同種数値の二重掲示（練習回数・平均点の重複）を避けるため、履歴一覧の集計数値はヒーロー1箇所のみ */
 function distanceLabel(dist){
   return distanceBucketInfo(dist).label;
 }

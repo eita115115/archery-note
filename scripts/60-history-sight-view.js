@@ -47,7 +47,7 @@ function renderHistory(m){
     (!hf.dist || String(s.dist)===String(hf.dist)) &&
     (!hf.round || (s.round||"free")===hf.round)
   );
-  m.innerHTML=`${pageHeroHtml("history",{ss})}${historyOverviewHtml(allSs,ss)}
+  m.innerHTML=`${pageHeroHtml("history",{ss})}
   <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
       <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${hf.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
