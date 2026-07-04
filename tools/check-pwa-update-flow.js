@@ -184,10 +184,24 @@ assertMatch(
   "sw.js fetch handler must special-case same-origin /assets/pose/ requests",
 );
 
-assertMatch(
-  /caches\.match\(e\.request\)\.then\(\s*hit\s*=>\s*hit\s*\|\|\s*fetch\(e\.request\)/,
+const swPoseBranch = sliceBetween(
   swText,
-  "pose assets must be served cache-first (cache hit returned before any network fetch)",
+  /url\.pathname\.includes\(\s*["']\/assets\/pose\/["']\s*\)/,
+  "return;",
+  "pose fetch branch",
+);
+
+assertOrder(
+  /caches\.open\(POSE_CACHE\)[\s\S]{0,200}?\.match\(\s*e\.request\s*\)/,
+  /fetch\(\s*e\.request\s*\)/,
+  swPoseBranch,
+  "pose assets must be served cache-first: a POSE_CACHE-scoped cache lookup must appear before fetch(e.request)",
+);
+
+assertNoMatch(
+  /caches\.match\(/,
+  swPoseBranch,
+  "pose branch must not use unscoped caches.match (entries in older/other caches would win over POSE_CACHE)",
 );
 
 assertMatch(

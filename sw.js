@@ -41,12 +41,18 @@ self.addEventListener("fetch", e => {
   // ネット優先だと HTTP キャッシュ失効（GitHub Pages は max-age=600）後の解析開始ごとに
   // 約15MB を再ダウンロードしてしまう。オフライン＋未キャッシュ時は fetch の失敗が
   // そのまま伝播する（従来のネット優先経路でも未キャッシュなら失敗するのと同等）。
+  // 照会は POSE_CACHE に限定する（全キャッシュ横断の caches.match だと旧世代キャッシュの
+  // pose エントリが先にヒットし、POSE_CACHE の世代切り替えが効かなくなるため）。
+  // 既知の制約: 旧世代の pose キャッシュ（pose-v1 等）は activate の掃除では消えず残留する。
+  // 現行ローダー（47-form-view.js）はクエリなし URL のみ生成する前提。クエリ付きで読む変更を入れる場合はキャッシュ肥大に注意。
   if (url.origin === self.location.origin && url.pathname.includes("/assets/pose/")) {
     e.respondWith(
-      caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
-        if (res && res.ok) {
+      caches.open(POSE_CACHE).then(c => c.match(e.request)).then(hit => hit || fetch(e.request).then(res => {
+        // status 200 のみ保存（206 部分レスポンスは Cache.put が TypeError で reject する）。
+        // put は waitUntil で応答返却後も完走させ、quota 超過等の reject は無害化する。
+        if (res && res.status === 200) {
           const copy = res.clone();
-          caches.open(POSE_CACHE).then(c => c.put(e.request, copy));
+          e.waitUntil(caches.open(POSE_CACHE).then(c => c.put(e.request, copy)).catch(() => {}));
         }
         return res;
       }))
