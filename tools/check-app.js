@@ -131,7 +131,7 @@ const fieldHits = [{s:6},{s:5},{s:4},{s:6}];
 assert(faceApi.perfectScoreLabel(f40) === "6点" && faceApi.perfectScoreCount(fieldHits,f40) === 2, "Field perfect score helpers failed");
 assert(faceApi.secondaryScoreLabel(f40) === "5点以上" && faceApi.secondaryScoreCount(fieldHits,f40) === 3, "Field secondary score helpers failed");
 
-const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,hitFromGlobal,zoneStyle};")();
+const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,isLineCuttingFromGlobal,hitFromGlobal,zoneStyle,SPOT_Y};")();
 const fieldD = 80;
 const fw = scoreApi.ringW(fieldD, "field");
 const fieldTouch = scoreApi.lineCutRadius(fieldD, "field");
@@ -146,6 +146,46 @@ assert(scoreApi.scoreAt(fw+fieldTouch*1.2,0,fieldD,"field",fieldTouch).s === 5, 
 assert(scoreApi.hitFromGlobal(fw*2.4,0,fieldD,"field",fieldTouch).s === 4, "Field global hit score failed");
 assert(scoreApi.zoneStyle(5,false,"field").bg === "var(--gold)" && scoreApi.zoneStyle(4,false,"field").bg === "#222", "Field score chip colors failed");
 
+/* Triple (vertical 3-spot) regression. Expected values derived from ring geometry, not from the implementation. */
+const tripleD = 40; // 標準的な40cm三つ目的
+const tw = scoreApi.ringW(tripleD, "triple"); // ringW = faceD/20 = 40/20 = 2cm
+const tripleTouch = scoreApi.lineCutRadius(tripleD, "triple"); // arrowMarkRadius(40/85≈0.4706cm) + targetLineHalfWidth(triple: 40/640=0.0625cm) ≈ 0.5331cm
+assert(tw === tripleD / 20, "Triple ring width failed");
+assert(Math.abs(tripleTouch - (tripleD / 85 + tripleD / 640)) < 1e-12, "Triple line-cut radius failed");
+/* 通常採点（touch=0 の純幾何）: Xリングは r<=w/2=1cm、n点リング境界は r=(11-n)*2cm */
+const tripleCenter = scoreApi.scoreAt(0,0,tripleD,"triple",0); // r=0 <= 1cm → X(10)
+assert(tripleCenter.s === 10 && tripleCenter.X === true, "Triple center X failed");
+const triple10 = scoreApi.scoreAt(tw*0.75,0,tripleD,"triple",0); // r=1.5cm: Xリング外(>1)かつ10リング内(<=2) → 10(Xなし)
+assert(triple10.s === 10 && triple10.X === false, "Triple 10-ring score failed");
+assert(scoreApi.scoreAt(tw*1.5,0,tripleD,"triple",0).s === 9, "Triple 9-ring score failed"); // r=3cm: 2<r<=4 → 9
+assert(scoreApi.scoreAt(tw*2.5,0,tripleD,"triple",0).s === 8, "Triple 8-ring score failed"); // r=5cm: 4<r<=6 → 8
+assert(scoreApi.scoreAt(tw*3.5,0,tripleD,"triple",0).s === 7, "Triple 7-ring score failed"); // r=7cm: 6<r<=8 → 7
+assert(scoreApi.scoreAt(tw*4.5,0,tripleD,"triple",0).s === 6, "Triple 6-ring score failed"); // r=9cm: 8<r<=10 → 6
+/* 「6未満はM」境界: 6リング外縁は r=10cm。single なら5点になる位置が triple では 0(M) */
+assert(scoreApi.scoreAt(tw*5,0,tripleD,"triple",0).s === 6, "Triple 6-ring edge score failed"); // r=10cm ちょうど → 6
+assert(scoreApi.scoreAt(tw*5.05,0,tripleD,"triple",0).s === 0, "Triple just-outside-6 must be M"); // r=10.1cm → s=5 → M
+assert(scoreApi.scoreAt(tw*5.5,0,tripleD,"single",0).s === 5, "Single 5-ring sanity failed"); // r=11cm は single だと5点
+assert(scoreApi.scoreAt(tw*5.5,0,tripleD,"triple",0).s === 0, "Triple 5-ring position must be M"); // 同じ r=11cm が triple では M
+/* ラインカッター境界: 矢円(半径0.4706cm)が6リング線(半幅0.0625cm)に触れる条件は 中心距離 <= 10cm + tripleTouch */
+assert(scoreApi.scoreAt(tw*5+tripleTouch*.8,0,tripleD,"triple",tripleTouch).s === 6, "Triple line-cutter inner score failed"); // 10+0.8*touch: 円が6リングに接触 → 6
+assert(scoreApi.scoreAt(tw*5+tripleTouch*1.2,0,tripleD,"triple",tripleTouch).s === 0, "Triple line-cutter outer must be M"); // 10+1.2*touch: 届かない → M
+/* hitFromGlobal のスポット割当: SPOT_Y=[22,0,-22]（上・中・下, cm, y上向き）。局所座標 = (gx, gy-SPOT_Y[spot]) */
+assert(scoreApi.SPOT_Y.join(",") === "22,0,-22", "Triple spot geometry changed unexpectedly");
+const topHit = scoreApi.hitFromGlobal(0,22,tripleD,"triple",tripleTouch); // gy=22 は上スポット中心 → spot=0, 局所(0,0) → X
+assert(topHit.spot === 0 && topHit.x === 0 && topHit.y === 0 && topHit.s === 10 && topHit.X === true, "Triple top spot assignment failed");
+const bottomHit = scoreApi.hitFromGlobal(3,-21,tripleD,"triple",tripleTouch); // 下スポット(-22)まで√(9+1)≈3.16cm、中(0)まで21.2cm → spot=2, 局所(3,1), r=3.1623-0.5331=2.629cm → 9
+assert(bottomHit.spot === 2 && bottomHit.x === 3 && bottomHit.y === 1 && bottomHit.s === 9, "Triple bottom spot local coords failed");
+const upperHit = scoreApi.hitFromGlobal(0,13,tripleD,"triple",tripleTouch); // 上(22)まで9cm < 中(0)まで13cm → spot=0, 局所y=-9, r=9-0.5331=8.467cm → 6
+assert(upperHit.spot === 0 && upperHit.y === -9 && upperHit.s === 6, "Triple upper-half spot assignment failed");
+const midHit = scoreApi.hitFromGlobal(0,11,tripleD,"triple",tripleTouch); // gy=11 は上下等距離(11cm)。現実装は先着(小さい index=上)を採用 → spot=0, 局所y=-11 → M
+// タイブレークの固定は WA 規則由来ではなく、保存データ(spot/局所座標)の無断変化を検知するための回帰固定。意図的に仕様を変える場合はこのテストを更新すること。
+assert(midHit.spot === 0 && midHit.y === -11 && midHit.s === 0, "Triple midpoint tie should pick top spot");
+const nearMidHit = scoreApi.hitFromGlobal(0,10.9,tripleD,"triple",tripleTouch); // 中(0)まで10.9cm < 上(22)まで11.1cm → spot=1, 局所y=10.9 → M
+assert(nearMidHit.spot === 1 && nearMidHit.y === 10.9 && nearMidHit.s === 0, "Triple below-midpoint should pick middle spot");
+/* isLineCuttingFromGlobal: ドラッグ中のカッター表示が使う経路。スポット選択+局所化の後に isLineCutting と同じ判定になること */
+assert(scoreApi.isLineCuttingFromGlobal(0, 22 + tw*5 + tripleTouch*.8, tripleD, "triple") === true, "Triple global line-cutter true case failed"); // 上スポット局所r=10+0.8*touch: 素の採点はM、カッター込みで6 → true
+assert(scoreApi.isLineCuttingFromGlobal(0, 33, tripleD, "triple") === false, "Triple global line-cutter false case failed"); // 上スポット局所r=11cm: カッター込みでも r-touch>10 で M のまま → false
+
 const targetApi = new Function(
   "ringW","isFieldFace","targetLineHalfWidth","SPOT_Y",
   section("function targetMarkup", "function markCircle") + "\nreturn {targetMarkup};"
@@ -153,7 +193,7 @@ const targetApi = new Function(
   scoreApi.ringW,
   scoreApi.isFieldFace,
   scoreApi.targetLineHalfWidth,
-  [22,0,-22]
+  scoreApi.SPOT_Y
 );
 const fieldSvg = targetApi.targetMarkup(80, "tf", "field");
 assert(fieldSvg.includes('class="main field"') && fieldSvg.includes("#ffe14d") && fieldSvg.includes("#1c1e1c"), "Field target SVG failed");
