@@ -239,6 +239,30 @@ function sampleSession() {
   assert(m2.st.sx !== m1.st.sx, "nudge actually changes the spread, proving the old cache was stale");
 }
 
+// 入力防御: 非有限座標（NaN/Infinity/null/undefined）が混ざっても sessionMetrics は
+// NaN を統計へ伝播させず、有限座標の矢だけを robustStats に渡すこと
+{
+  const s = sampleSession();
+  s.id = "s-nonfinite";
+  s.ends[0].push({ x: NaN, y: 2, s: 7 });
+  s.ends[1].push({ x: Infinity, y: null, s: 6 }, { x: undefined, y: 0, s: 5 });
+  const m = analysis.sessionMetrics(s);
+  assertEqual(m.all.length, 7, "all keeps every arrow (score base unchanged)");
+  assertEqual(m.total, 56, "total stays score-based over all arrows");
+  const st = m.st;
+  assert(st, "stats exist despite non-finite coordinates");
+  assertEqual(st.total, 4, "only finite-coordinate arrows enter the stats");
+  ["mx", "my", "rr", "sx", "sy"].forEach((k) => {
+    assert(Number.isFinite(st[k]), `st.${k} must be finite, got ${st[k]}`);
+  });
+  const expected = scoring.robustStats(
+    sampleSession().ends.flat().map((a) => ({ x: a.x, y: a.y })),
+  );
+  assertClose(st.rr, expected.rr, 1e-12, "stats match finite-only robustStats (rr)");
+  assertClose(st.mx, expected.mx, 1e-12, "stats match finite-only robustStats (mx)");
+  assertClose(st.sy, expected.sy, 1e-12, "stats match finite-only robustStats (sy)");
+}
+
 // 実装側の署名が世代カウンタを参照していること（ハーネス外でも DB_REV が効く静的保証）
 assert(
   section(analysisScript, "function sessionMetricSignature", "function sessionMetrics").includes("DB_REV"),

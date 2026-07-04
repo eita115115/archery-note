@@ -454,6 +454,42 @@ function checkFormAnalysisTrashRestore(storageApi, fixtures) {
   );
 }
 
+function checkArrowCoordinateSanitize(storageApi) {
+  // インポート経路（normalizeDb）で数値文字列座標が数値化されること。
+  // 変換できない値は矢を削除せず値をそのまま残す（既存データ保全）。
+  const db = storageApi.normalizeDb({
+    sessions: [
+      {
+        id: "sanitize-session",
+        ends: [
+          [
+            { x: "1.2", y: "-0.5", s: "9" },
+            { x: "abc", y: null, s: 10 },
+            { x: 0.4, y: 0.2, s: 10, X: true },
+          ],
+        ],
+      },
+    ],
+    active: {
+      ends: [[{ x: "2.5", y: "0", s: "8" }]],
+      cur: [{ x: "-1.5", y: "3.25", s: "7" }],
+    },
+  });
+  const end = db.sessions[0].ends[0];
+  assertEqual(end.length, 3, "[arrow-sanitize] no arrow is dropped");
+  assertEqual(end[0].x, 1.2, "[arrow-sanitize] string x becomes number");
+  assertEqual(end[0].y, -0.5, "[arrow-sanitize] string y becomes number");
+  assertEqual(end[0].s, 9, "[arrow-sanitize] string s becomes number");
+  assertEqual(end[1].x, "abc", "[arrow-sanitize] unconvertible x is kept as-is");
+  assertEqual(end[1].y, null, "[arrow-sanitize] null y is kept as-is");
+  assertEqual(end[1].s, 10, "[arrow-sanitize] numeric s stays untouched");
+  assertEqual(end[2].x, 0.4, "[arrow-sanitize] numeric x stays untouched");
+  assertEqual(end[2].X, true, "[arrow-sanitize] other arrow fields survive");
+  assertEqual(db.active.ends[0][0].x, 2.5, "[arrow-sanitize] active end arrow x becomes number");
+  assertEqual(db.active.cur[0].x, -1.5, "[arrow-sanitize] active cur arrow x becomes number");
+  assertEqual(db.active.cur[0].s, 7, "[arrow-sanitize] active cur arrow s becomes number");
+}
+
 function checkDbRevContract() {
   assert(/^let DB_REV\s*=\s*0/m.test(storageScript), "[db-rev] storage script should declare let DB_REV");
   const saveBody = section("function save(", "function uid");
@@ -468,6 +504,7 @@ function main() {
   const storageApi = loadStorageApi();
 
   checkDbRevContract();
+  checkArrowCoordinateSanitize(storageApi);
 
   checkNormalizeIdempotency(storageApi, fixtures);
   checkBlank(storageApi, fixtures);

@@ -11,6 +11,28 @@ const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
 function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false},active:null}; }
+/* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
+function arrowNumberOrKeep(v){
+  if(typeof v==="number") return v;
+  if(typeof v==="string" && v.trim()!==""){
+    const n=Number(v);
+    if(Number.isFinite(n)) return n;
+  }
+  return v;
+}
+function sanitizeArrowList(arrows){
+  if(!Array.isArray(arrows)) return;
+  arrows.forEach(a=>{
+    if(!a || typeof a!=="object") return;
+    a.x=arrowNumberOrKeep(a.x);
+    a.y=arrowNumberOrKeep(a.y);
+    a.s=arrowNumberOrKeep(a.s);
+  });
+}
+function sanitizeSessionArrows(sess){
+  if(!sess || typeof sess!=="object" || !Array.isArray(sess.ends)) return;
+  sess.ends.forEach(sanitizeArrowList);
+}
 function normalizeDb(d){
   const base=blankDb(), src=(d&&typeof d==="object")?d:{};
   const out=Object.assign(base,src);
@@ -19,6 +41,11 @@ function normalizeDb(d){
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
+  out.sessions.forEach(sanitizeSessionArrows);
+  if(out.active && typeof out.active==="object"){
+    sanitizeSessionArrows(out.active);
+    sanitizeArrowList(out.active.cur);
+  }
   return out;
 }
 function load(){
