@@ -350,7 +350,7 @@ assert(
 const coreScript = fs.readFileSync(path.join(root, "scripts", "45-analysis-core.js"), "utf8");
 const core = new Function(
   `${coreScript}
-return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown};`,
+return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown, aggregateRoundGroups, roundGroupBests};`,
 )();
 
 // テスト用の metricsFn: sessionMetrics 互換の形を robustStats から作る
@@ -458,6 +458,68 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
   assertEqual(pbs[0].sessions, 2, "PB 70m session count");
   assertEqual(pbs[0].bestTotal.total, 56, "PB best total");
   assertEqual(core.personalBests([]).length, 0, "PB of empty rows");
+}
+
+// aggregateRoundGroups / roundGroupBests（IMP-09 多距離ラウンド）
+{
+  const assertStrict = require("node:assert/strict");
+  const rg = (gid, stage, stageCount) => ({ gid, roundId: "wa1440_men", stage, stageCount });
+  const highEnds = [
+    [{ x: 0, y: 0, s: 10, X: true }, { x: 1, y: 0, s: 10 }, { x: 0, y: 1, s: 10 }],
+  ];
+  const groupSessions = [
+    // グループ1（complete: 2/2 ステージ）。ステージ順と行順を逆にして stage 昇順ソートを確認
+    coreSession("g1-s2", "2026-06-10", 30, { round: "wa1440_men", extra: { roundGroup: rg("grp-1", 1, 2) } }),
+    coreSession("g1-s1", "2026-06-09", 70, { round: "wa1440_men", extra: { roundGroup: rg("grp-1", 0, 2) } }),
+    // グループ2（不完全: 1/2 ステージ）
+    coreSession("g2-s1", "2026-06-20", 70, {
+      round: "wa1440_men",
+      ends: highEnds,
+      extra: { roundGroup: rg("grp-2", 0, 2) },
+    }),
+    // roundGroup なしの既存行（集計に混ざらないこと）
+    coreSession("plain", "2026-06-05", 70),
+  ];
+  const rows = core.buildAnalysisRows(groupSessions, coreSetups, metricsFn);
+  assertEqual(rows[3].roundGroup, null, "plain row has null roundGroup");
+  assertEqual(rows[0].roundGroup.gid, "grp-1", "grouped row keeps roundGroup");
+
+  const groups = core.aggregateRoundGroups(rows);
+  assertEqual(groups.length, 2, "group count (plain rows excluded)");
+  const g1 = groups.find((g) => g.gid === "grp-1");
+  assert(g1, "group grp-1 exists");
+  assertEqual(g1.roundId, "wa1440_men", "group roundId");
+  assertEqual(g1.date, "2026-06-09", "group date is the earliest stage date");
+  assertEqual(g1.stages.length, 2, "group stage count");
+  assertEqual(g1.stages[0].dist, 70, "stages sorted by roundGroup.stage");
+  assertEqual(g1.stages[1].dist, 30, "second stage distance");
+  assertEqual(g1.stages[0].total, 56, "stage total");
+  assertEqual(g1.stages[0].n, 6, "stage arrow count");
+  assertEqual(g1.total, 112, "group total sums stages");
+  assertEqual(g1.arrows, 12, "group arrows sum stages");
+  assertEqual(g1.complete, true, "2/2 stages is complete");
+  const g2 = groups.find((g) => g.gid === "grp-2");
+  assertEqual(g2.complete, false, "1/2 stages is incomplete");
+  assertEqual(g2.total, 30, "incomplete group still sums its stages");
+  assertEqual(core.aggregateRoundGroups([]).length, 0, "empty rows aggregate to no groups");
+
+  // roundGroupBests: complete のみ対象。高得点でも不完全な grp-2 は無視される
+  const bests = core.roundGroupBests(groups);
+  assertEqual(bests.length, 1, "bests count (incomplete groups ignored)");
+  assertEqual(bests[0].roundId, "wa1440_men", "best roundId");
+  assertEqual(bests[0].total, 112, "best total comes from the complete group");
+  assertEqual(bests[0].date, "2026-06-09", "best date");
+  assertEqual(core.roundGroupBests([]).length, 0, "no groups means no bests");
+
+  // 既存 personalBests の結果が不変であること: roundGroup の有無だけが違う行集合で出力が一致する
+  const noGroupSessions = groupSessions.map((s) => {
+    const c = JSON.parse(JSON.stringify(s));
+    delete c.roundGroup;
+    return c;
+  });
+  const pbWith = core.personalBests(core.buildAnalysisRows(groupSessions, coreSetups, metricsFn));
+  const pbWithout = core.personalBests(core.buildAnalysisRows(noGroupSessions, coreSetups, metricsFn));
+  assertStrict.deepStrictEqual(pbWith, pbWithout, "personalBests ignores roundGroup");
 }
 
 // conditionSplit
