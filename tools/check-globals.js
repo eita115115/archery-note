@@ -162,6 +162,7 @@ const swList = /const APP_SCRIPTS = \[([\s\S]*?)\]/.exec(sw);
 const swScripts = swList ? [...swList[1].matchAll(/"\.\/(scripts\/[^"]+)"/g)].map(m => m[1]) : [];
 if (swScripts.join(",") !== appScripts.join(",")) {
   fail(`index.html と sw.js APP_SCRIPTS のスクリプト一覧が一致しません\n  index.html: ${appScripts.join(", ")}\n  sw.js:      ${swScripts.join(", ")}`);
+  process.exit(1); // 前提が崩れているので以降の解析（と "OK" 出力）を行わない
 }
 
 /* ロード順に連結（連結後の行番号 → 元ファイル/行 のマップを作る） */
