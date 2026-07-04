@@ -413,10 +413,13 @@ function pageHeroHtml(type,ctx){
     const arrows=src.flatMap(s=>s.ends.flat());
     const total=arrows.reduce((a,x)=>a+x.s,0);
     const latest=src[0]||null;
-    return `<section class="pageHero">
+    /* 結論→根拠: 説明文ではなく既存の todayConclusion() 計算をそのまま言い換えた1行だけを置く。
+       新しい統計は作らない — 分析タブの「今日の結論」と同じ入力（buildAnalysisRows）を使う */
+    const rows=buildAnalysisRows(src,db.setups,sessionMetrics);
+    const conclusion=todayConclusion(rows);
+    return `<section class="pageHero" data-testid="history-hero">
       <div class="kicker">履歴</div>
-      <h2>分布と偏移を読む</h2>
-      <p>点数だけでなく、同じ用具・同じ距離の中心移動を追います。過去のグルーピングがあるほど、今回のズレが偶然か傾向か見えやすくなります。</p>
+      <h2 class="pageHeroLead" data-testid="history-hero-trend">${esc(conclusion?conclusion.text:"")}</h2>
       <div class="heroMetrics">
         ${heroMetricHtml("練習",`${src.length}回`,`${arrows.length}本を集計`)}
         ${heroMetricHtml("平均",arrows.length?(total/arrows.length).toFixed(2):"—","フィルター後の平均点")}
