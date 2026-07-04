@@ -1173,13 +1173,11 @@ function groupingMetricText(v){
   return n==null?"—":`${n.toFixed(1)}cm`;
 }
 function groupingSessionRow(row){
-  const arrows=(row&&Array.isArray(row.arrows)?row.arrows:[])
-    .map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)}))
-    .filter(a=>Number.isFinite(a.x) && Number.isFinite(a.y));
-  if(arrows.length<3) return null;
-  const st=robustStats(arrows);
-  const rr=st&&groupingMetricNumber(st.rr);
-  if(!st || st.n<3 || rr==null) return null;
+  /* robustStats 直呼びはやめ、同じ Number 化＋有限フィルタ済みの sessionMetrics キャッシュを経由する */
+  const st=row&&row.s?sessionMetrics(row.s).st:null;
+  if(!st || st.total<3 || st.n<3) return null;
+  const rr=groupingMetricNumber(st.rr);
+  if(rr==null) return null;
   return {
     session:row.s,
     distInfo:distanceBucketInfo(row.s&&row.s.dist),

@@ -263,6 +263,77 @@ function sampleSession() {
   assertClose(st.sy, expected.sy, 1e-12, "stats match finite-only robustStats (sy)");
 }
 
+/* ---------- groupingSessionRow と旧直接計算の等価性 ---------- */
+
+// 履歴グルーピング行の統計は、旧実装（robustStats 直呼び: Number 化＋有限フィルタ）と
+// 一致しなければならない。旧計算はここで独立に再現し、実装の内部経路には依存しない。
+{
+  const recordScript = fs.readFileSync(path.join(root, "scripts", "50-record-view.js"), "utf8");
+  const record = new Function(
+    "sessionMetrics",
+    "robustStats",
+    "distanceBucketInfo",
+    "sightDateInfo",
+    `${section(recordScript, "function groupingMetricNumber", "function groupingSummaryHtml")}
+return {groupingSessionRow};`,
+  )(
+    analysis.sessionMetrics,
+    scoring.robustStats,
+    (dist) => ({ key: String(dist), label: String(dist), sort: Number(dist) || 0 }),
+    () => ({ sort: "", label: "—" }),
+  );
+
+  // 旧 groupingSessionRow の統計計算をテスト内で独立再現
+  function legacyGroupingStats(row) {
+    const arrows = (row && Array.isArray(row.arrows) ? row.arrows : [])
+      .map((a) => ({ x: Number(a && a.x), y: Number(a && a.y) }))
+      .filter((a) => Number.isFinite(a.x) && Number.isFinite(a.y));
+    if (arrows.length < 3) return null;
+    const st = scoring.robustStats(arrows);
+    if (!st || st.n < 3 || !Number.isFinite(Number(st.rr))) return null;
+    return { rr: Number(st.rr), sx: Number(st.sx), sy: Number(st.sy), n: st.n };
+  }
+
+  function rowOf(id, ends) {
+    const s = { id, date: "2026-06-01", dist: 70, faceD: 122, faceType: "single", ends };
+    return { s, arrows: ends.flat() };
+  }
+
+  const fixtures = [
+    // 文字列座標（インポート由来を想定）
+    rowOf("eq-strings", [
+      [{ x: "1.2", y: "0.4", s: "9" }, { x: "-0.6", y: "1.1", s: "9" }, { x: "0.1", y: "-0.8", s: 10 }],
+      [{ x: "2.0", y: "0.0", s: 8 }, { x: "-1.4", y: "-0.9", s: 9 }, { x: "0.5", y: "0.7", s: 10 }],
+    ]),
+    // 非有限座標の混入
+    rowOf("eq-nonfinite", [
+      [{ x: 0, y: 0, s: 10 }, { x: NaN, y: 1, s: 9 }, { x: 1, y: 0.5, s: 9 }],
+      [{ x: Infinity, y: null, s: 8 }, { x: -1, y: -0.5, s: 9 }, { x: 0.5, y: 1.2, s: 9 }, { x: -0.5, y: 0.8, s: 10 }],
+    ]),
+    // M（0点）混在: 座標付きミスと大外れ値
+    rowOf("eq-miss", [
+      [{ x: 0.2, y: 0.1, s: 10, X: true }, { x: 58, y: -44, s: 0 }, { x: -0.8, y: 0.6, s: 9 }],
+      [{ x: 1.1, y: -0.3, s: 9 }, { x: -0.4, y: -1.0, s: 9 }, { x: 0.7, y: 0.9, s: 10 }],
+    ]),
+    // 有限座標が3本未満 → 両者とも null
+    rowOf("eq-too-few", [[{ x: NaN, y: 0, s: 0 }, { x: 1, y: 1, s: 9 }, { x: 0, y: 1, s: 9 }]]),
+  ];
+
+  fixtures.forEach((row) => {
+    const legacy = legacyGroupingStats(row);
+    const current = record.groupingSessionRow(row);
+    if (legacy == null) {
+      assertEqual(current, null, `[grouping-eq ${row.s.id}] both null`);
+      return;
+    }
+    assert(current, `[grouping-eq ${row.s.id}] current result exists`);
+    assertEqual(current.n, legacy.n, `[grouping-eq ${row.s.id}] n`);
+    assertClose(current.rr, legacy.rr, 1e-12, `[grouping-eq ${row.s.id}] rr`);
+    assertClose(current.sx, legacy.sx, 1e-12, `[grouping-eq ${row.s.id}] sx`);
+    assertClose(current.sy, legacy.sy, 1e-12, `[grouping-eq ${row.s.id}] sy`);
+  });
+}
+
 // 実装側の署名が世代カウンタを参照していること（ハーネス外でも DB_REV が効く静的保証）
 assert(
   section(analysisScript, "function sessionMetricSignature", "function sessionMetrics").includes("DB_REV"),
