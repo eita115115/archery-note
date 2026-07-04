@@ -337,14 +337,14 @@ function renderSight(m){
   let interpHtml="";
   if(interp){
     const preds=[18,30,50,70].filter(d=>!interp.have.includes(d)).map(d=>`<div class="chip">${d}m → <b>${interp.est(d).toFixed(1)}</b></div>`);
-    interpHtml=`<h2 class="mt14">${icon("ruler")} サイトマーク予測（上下）</h2>
+    interpHtml=`<h2 class="mt14"><span class="h2Icon">${icon("ruler")} サイトマーク予測（上下）</span></h2>
       <div class="subNote">実測: ${interp.pts.map(p=>`${p[0]}m = ${p[1]}`).join(" ・ ")} / ${interp.model==="curve"?"カーブ近似":"直線近似"} / 一致度${pct(interp.r2||0)}</div>
       ${preds.length?`<div class="chips mt8">${preds.join("")}</div>`:`<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
       <div class="hint">2距離以上の実測サイト値から予測します。4距離以上ある場合は、弾道に近いカーブ近似が有効なときだけ自動採用します。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
   }
   m.innerHTML=`${pageHeroHtml("sight",{setup,dist,marks,adv,lastSess})}
   <div class="card">
-    <h2>${icon("ledger")} サイト台帳</h2>
+    <h2><span class="h2Icon">${icon("ledger")} サイト台帳</span></h2>
     ${db.setups.length?`
     <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map(s=>`<option value="${s.id}" ${s.id===sid?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
@@ -359,7 +359,7 @@ function renderSight(m){
   </div>
   ${setup?`
   <div class="card">
-    <h2>${icon("tool")} 詳しく <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
+    <h2><span class="h2Icon">${icon("tool")} 詳しく</span> <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
     ${adv?`<div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>`
       :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
     <details class="adv" ${adv?"":"open"}>

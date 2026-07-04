@@ -459,22 +459,6 @@ function pageHeroHtml(type,ctx){
       ${body}
     </section>`;
   }
-  if(type==="gear"){
-    const setups=db.setups||[];
-    const profiles=setups.map(s=>gearPrecisionProfile(s));
-    const avg=profiles.length?profiles.reduce((a,p)=>a+p.score,0)/profiles.length:0;
-    const best=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)})).sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
-    return `<section class="pageHero">
-      <div class="kicker">用具</div>
-      <h2>いつものセッティングを残す</h2>
-      <p>ハンドル、リム、矢、サイト値をまとめて保存します。分かる範囲だけで始めて、必要な時だけ細かい実測値を足せます。</p>
-      <div class="heroMetrics">
-        ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
-        ${heroMetricHtml("入力材料",pct(avg),"用具データの平均充実度")}
-        ${heroMetricHtml("主戦用具",best?best.s.name:"—",best?`入力 ${best.p.level} / 履歴 ${best.m.level}`:"初回セットアップ待ち")}
-      </div>
-    </section>`;
-  }
   return "";
 }
 function analysisFilterBarHtml(allRows,f){
@@ -812,6 +796,16 @@ function updateHudMetrics(s){
     el.dataset.v=val;
   });
 }
+/* 矢チップ列が固定操作列（activeActionDock）の裏に隠れていたら見える位置まで押し上げる。
+   ドックは position:fixed のため通常の scrollIntoView はドックの高さを考慮しないので手計算する */
+function revealChipsAboveDock(chipsBox,behavior){
+  const dock=$("#activeActionDock");
+  if(!dock || !chipsBox) return;
+  const dockTop=dock.getBoundingClientRect().top;
+  const chipsBottom=chipsBox.getBoundingClientRect().bottom;
+  const overlap=chipsBottom-dockTop;
+  if(overlap>0) window.scrollBy({top:overlap+12, behavior});
+}
 function refreshActive(){
   const s=db.active; if(!s) return;
   // markers
@@ -840,15 +834,11 @@ function refreshActive(){
       ui.freshArrow=-1;
       document.querySelectorAll(".shotNew,.sc.fresh").forEach(el=>el.classList.remove("shotNew","fresh"));
     },640);
-    /* 記録直後、矢チップ列が固定操作列（activeActionDock）の裏に隠れていたら見える位置まで押し上げる。
-       ドックは position:fixed のため通常の scrollIntoView はドックの高さを考慮しないので手計算する */
-    const dock=$("#activeActionDock");
-    if(dock){
-      const dockTop=dock.getBoundingClientRect().top;
-      const chipsBottom=chipsBox.getBoundingClientRect().bottom;
-      const overlap=chipsBottom-dockTop;
-      if(overlap>0) window.scrollBy({top:overlap+12, behavior:"smooth"});
-    }
+    /* 記録直後は結果が動いたことが分かるよう滑らかに押し上げる */
+    revealChipsAboveDock(chipsBox,"smooth");
+  }else{
+    /* 初期表示（再描画・タブ復帰含む）でもチップ行がドックの裏に隠れていたら、無演出で即座に押し上げる */
+    revealChipsAboveDock(chipsBox,"instant");
   }
   document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
     ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; nativePulse("light"); refreshActive();
