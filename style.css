@@ -686,6 +686,13 @@ body.modalOpen{overflow:hidden;}
   box-shadow:var(--shadow-raised);
 }
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--title);}
+/* 確認ダイアログ（appConfirm）: .sheet より小さい面。破壊的操作の直前だけ登場モーションを持つ */
+.confirmSheet{max-width:360px; border-radius:12px;}
+.confirmSheet .confirmMsg{font-size:14.5px; line-height:1.6; color:var(--ink); white-space:pre-line;}
+/* motion:注意 — 不可逆操作の直前のみ、確認ダイアログの登場を強調する */
+.confirmSheet{animation:confirmIn var(--motion-med) var(--ease-app);}
+@keyframes confirmIn{from{opacity:0; transform:translateY(10px) scale(.98);}to{opacity:1; transform:translateY(0) scale(1);}}
+.icoInline{display:inline-block; vertical-align:-3px; flex:0 0 auto;}
 /* トースト: 計器風 — 罫線＋墨面 */
 .toast{
   position:fixed; bottom:96px; bottom:calc(92px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(12px) scale(.98); z-index:60;

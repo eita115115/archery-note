@@ -233,19 +233,19 @@ assertMatch(
 );
 
 assertMatch(
-  /ovl\.querySelector\(\s*["']#dSnapRestore["']\s*\)\.onclick\s*=\s*\(\)\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?\}finally\{\s*endActiveWorkflow\(\);\s*\}/,
+  /ovl\.querySelector\(\s*["']#dSnapRestore["']\s*\)\.onclick\s*=\s*(?:async\s*)?\(\)\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?\}finally\{\s*endActiveWorkflow\(\);\s*\}/,
   gearText,
   "snapshot restore must be guarded by beginActiveWorkflow/endActiveWorkflow",
 );
 
 assertMatch(
-  /ovl\.querySelector\(\s*["']#dFile["']\s*\)\.onchange\s*=\s*e\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?r\.onload\s*=\s*\(\)\s*=>\s*\{[\s\S]*?\}\s*finally\{\s*endActiveWorkflow\(\);\s*\}\s*\};[\s\S]*?r\.onerror\s*=\s*\(\)\s*=>\s*\{\s*endActiveWorkflow\(\);/,
+  /ovl\.querySelector\(\s*["']#dFile["']\s*\)\.onchange\s*=\s*e\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?r\.onload\s*=\s*(?:async\s*)?\(\)\s*=>\s*\{[\s\S]*?\}\s*finally\{\s*endActiveWorkflow\(\);\s*\}\s*\};[\s\S]*?r\.onerror\s*=\s*\(\)\s*=>\s*\{\s*endActiveWorkflow\(\);/,
   gearText,
   "import must be guarded by beginActiveWorkflow/endActiveWorkflow on both the success and error paths",
 );
 
 assertMatch(
-  /ovl\.querySelectorAll\(\s*["']\[data-restore-trash\]["']\s*\)\.forEach\(\s*b\s*=>\s*b\.onclick\s*=\s*\(\)\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?\}finally\{\s*endActiveWorkflow\(\);\s*\}/,
+  /ovl\.querySelectorAll\(\s*["']\[data-restore-trash\]["']\s*\)\.forEach\(\s*b\s*=>\s*b\.onclick\s*=\s*(?:async\s*)?\(\)\s*=>\s*\{[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?\}finally\{\s*endActiveWorkflow\(\);\s*\}/,
   gearText,
   "trash restore must be guarded by beginActiveWorkflow/endActiveWorkflow",
 );

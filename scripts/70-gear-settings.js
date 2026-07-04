@@ -339,10 +339,10 @@ function renderGear(m){
         <div class="t">${esc(s.name)}</div>
         <div class="d">${[s.bow,s.limbs,s.poundage?s.poundage+"lbs":""].filter(Boolean).map(esc).join(" ・ ")||"詳細未入力"}</div>
         <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level} ・ 変更履歴${(s.history||[]).length}件</div>
-      </div><div class="gearChevron">›</div></div>`;
+      </div><div class="gearChevron">${icon("chevron")}</div></div>`;
     }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
     <div class="btnrow"><button class="btn sec" id="gWizard">初回セットアップ</button><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
-    <div class="hint">バックアップ・テーマなどは右上の <b>⚙設定</b> から。</div>
+    <div class="hint">バックアップ・テーマなどは右上の <b>設定</b> から。</div>
   </div>`;
   $("#gWizard").onclick=()=>openSetupWizard();
   $("#gAdd").onclick=()=>openGearForm(null);
@@ -362,7 +362,7 @@ function customRoundsSettingsHtml(){
     ${list.length?list.map(r=>`<button type="button" class="listItem" data-cr="${r.id}"><div>
       <div class="t">${esc(r.label)}</div>
       <div class="d">${esc(customRoundStagesText(r))}</div>
-    </div><div class="gearChevron">›</div></button>`).join(""):`<div class="empty">カスタムラウンドはまだありません。</div>`}
+    </div><div class="gearChevron">${icon("chevron")}</div></button>`).join(""):`<div class="empty">カスタムラウンドはまだありません。</div>`}
     <div class="btnrow"><button class="btn sec" id="crAdd">＋ カスタムラウンドを追加</button></div>
   </details>`;
 }
@@ -382,7 +382,7 @@ function openCustomRoundForm(id){
   openModal(ovl,{escapeTarget:"#crCancel"});
   function stageRowHtml(st,i){
     return `<div class="advice recordNeutralAdvice">
-      <div class="kv"><span><b>ステージ${i+1}</b></span><span>${stages.length>1?`<button type="button" class="btn sm ghost" data-del-stage="${i}">✕ 削除</button>`:""}</span></div>
+      <div class="kv"><span><b>ステージ${i+1}</b></span><span>${stages.length>1?`<button type="button" class="btn sm ghost" data-del-stage="${i}">${icon("del")} 削除</button>`:""}</span></div>
       <div class="row">
         <div><label class="f">距離 (m)</label><input class="inp" data-st-dist="${i}" inputmode="numeric" value="${esc(st.dist==null?"":st.dist)}" placeholder="例: 60"></div>
         <div><label class="f">的</label><select class="inp" data-st-face="${i}">${CUSTOM_ROUND_FACES.map(([v,lb])=>`<option value="${v}" ${String(st.face)===v?"selected":""}>${lb}</option>`).join("")}</select></div>
@@ -408,7 +408,7 @@ function openCustomRoundForm(id){
     renderStages();
   };
   ovl.querySelector("#crCancel").onclick=()=>{ closeModal(ovl); openSettings(); };
-  ovl.querySelector("#crSave").onclick=()=>{
+  ovl.querySelector("#crSave").onclick=async()=>{
     const label=ovl.querySelector("#crName").value.trim();
     if(!label){ toast("名前を入力してください"); return; }
     const clean=[];
@@ -422,7 +422,7 @@ function openCustomRoundForm(id){
     }
     /* 記録中のラウンド定義を書き換えると進行中のステージ遷移が壊れうるので警告（保存自体は可能） */
     if(src && db.active && db.active.roundGroup && db.active.roundGroup.roundId===id &&
-       !confirm("記録中のラウンドがあり、変更するとステージ進行が完了できなくなる可能性があります。保存しますか？")) return;
+       !await appConfirm("記録中のラウンドがあり、変更するとステージ進行が完了できなくなる可能性があります。保存しますか？",{okLabel:"保存する"})) return;
     db.customRounds=Array.isArray(db.customRounds)?db.customRounds:[];
     if(src){
       const i=db.customRounds.findIndex(r=>r.id===id);
@@ -435,9 +435,9 @@ function openCustomRoundForm(id){
     closeModal(ovl); openSettings(); toast("カスタムラウンドを保存しました");
   };
   const del=ovl.querySelector("#crDel");
-  if(del) del.onclick=()=>{
+  if(del) del.onclick=async()=>{
     const activeWarn=db.active&&db.active.roundGroup&&db.active.roundGroup.roundId===id?"\n記録中のラウンドがあり、削除するとステージ進行が完了できなくなる可能性があります。":"";
-    if(confirm(`「${src.label}」を削除しますか？${activeWarn}\n（過去の練習記録は残ります。記録タブの選択肢から消えます）`)){
+    if(await appConfirm(`「${src.label}」を削除しますか？${activeWarn}\n（過去の練習記録は残ります。記録タブの選択肢から消えます）`,{danger:true,okLabel:"削除"})){
       db.customRounds=(db.customRounds||[]).filter(r=>r.id!==id);
       save({reason:"delete-custom-round",forceSnapshot:true});
       closeModal(ovl); openSettings(); toast("削除しました");
@@ -445,7 +445,7 @@ function openCustomRoundForm(id){
   };
 }
 
-/* ---------- ⚙ 設定 ---------- */
+/* ---------- 設定 ---------- */
 function applyTheme(){
   const t=db.settings.theme||"auto";
   document.documentElement.className=t;
@@ -454,7 +454,7 @@ function openSettings(){
   const ovl=document.createElement("div"); ovl.className="ovl";
   const th=db.settings.theme||"auto";
   const snaps=readSnapshots();
-  ovl.innerHTML=`<div class="sheet"><h3>⚙ 設定</h3>
+  ovl.innerHTML=`<div class="sheet"><h3>${icon("gear")} 設定</h3>
     <label class="f">テーマ</label>
     <div class="chips" id="thChips">
       ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<button type="button" class="chip ${th===v?"on":""}" aria-pressed="${th===v}" data-th="${v}">${lb}</button>`).join("")}
@@ -473,8 +473,8 @@ function openSettings(){
     <h3 class="settingsH3">データ管理</h3>
     ${backupReminderHtml()}
     <div class="btnrow">
-      <button class="btn sec" id="dExp">⬇ バックアップ保存</button>
-      <button class="btn sec" id="dImp">⬆ 読み込み</button>
+      <button class="btn sec" id="dExp">${icon("down")} バックアップ保存</button>
+      <button class="btn sec" id="dImp">${icon("up")} 読み込み</button>
     </div>
     <div class="btnrow"><button class="btn sec" id="dCsv">CSV出力</button></div>
     <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
@@ -486,7 +486,7 @@ function openSettings(){
     </div>
     ${trashSettingsHtml()}
     <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
-    <div class="hint settingsDangerHint">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
+    <div class="hint settingsDangerHint">${icon("warn")} iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
     <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
     <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
   </div>`;
@@ -513,11 +513,11 @@ function openSettings(){
   };
   ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
   ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータをバックアップしました"); closeModal(ovl); openSettings(); };
-  ovl.querySelector("#dSnapRestore").onclick=()=>{
+  ovl.querySelector("#dSnapRestore").onclick=async()=>{
     const sel=ovl.querySelector("#dSnapSel");
     const snap=readSnapshots()[sel?+sel.value:0];
     if(!snap||!snap.data){ toast("復元できるバックアップデータがありません"); return; }
-    if(confirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先にバックアップしてから置き換えます。よろしいですか？`)){
+    if(await appConfirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先にバックアップしてから置き換えます。よろしいですか？`,{danger:true,okLabel:"復元する"})){
       beginActiveWorkflow();
       try{
         writeSafetySnapshot("restore-before",true);
@@ -532,10 +532,10 @@ function openSettings(){
     const f=e.target.files[0]; if(!f)return;
     beginActiveWorkflow();
     const r=new FileReader();
-    r.onload=()=>{ try{
+    r.onload=async()=>{ try{
       const d=JSON.parse(r.result);
       if(!d.sessions||!d.setups) throw 0;
-      if(confirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`)){
+      if(await appConfirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`,{danger:true,okLabel:"読み込む"})){
         writeSafetySnapshot("import-before",true);
         db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); closeModal(ovl); render(); toast("読み込みました");
       }
@@ -550,8 +550,8 @@ function openSettings(){
     }finally{ endActiveWorkflow(); }
   });
   const tc=ovl.querySelector("#trashClear");
-  if(tc) tc.onclick=()=>{
-    if(confirm("ゴミ箱の中身を完全に削除しますか？")){
+  if(tc) tc.onclick=async()=>{
+    if(await appConfirm("ゴミ箱の中身を完全に削除しますか？",{danger:true,okLabel:"空にする"})){
       db.trash=[]; save({reason:"clear-trash",forceSnapshot:true}); closeModal(ovl); openSettings(); toast("ゴミ箱を空にしました");
     }
   };
@@ -639,8 +639,8 @@ function openGearDetail(id){
   openModal(ovl,{escapeTarget:"#gClose"});
   ovl.querySelector("#gClose").onclick=()=>closeModal(ovl);
   ovl.querySelector("#gEdit").onclick=()=>{ closeModal(ovl); openGearForm(id); };
-  ovl.querySelector("#gDel").onclick=()=>{
-    if(confirm(`「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`)){
+  ovl.querySelector("#gDel").onclick=async()=>{
+    if(await appConfirm(`「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`,{danger:true,okLabel:"削除"})){
       const marks=db.sightMarks.filter(x=>x.setupId===id);
       trashItem("setupBundle",s.name,{setup:s,sightMarks:marks});
       db.setups=db.setups.filter(x=>x.id!==id);
@@ -655,7 +655,7 @@ function openGearForm(id){
   ovl.innerHTML=`<div class="sheet"><h3>${s?"セッティング編集":"新しいセッティング"}</h3>
     <label class="f">名前 *</label><input class="inp" id="gfName" value="${esc(s?s.name:"")}" placeholder="例: メイン70m仕様">
     ${GEAR_SECTIONS.map(sec=>gearSectionHtml(sec,s)).join("")}
-    <div class="btnrow"><button class="btn sec" id="gfInfer">📖 カタログから推定</button></div>
+    <div class="btnrow"><button class="btn sec" id="gfInfer">${icon("book")} カタログから推定</button></div>
     <div class="hint" id="gfInferHint">シャフト銘柄と番手を別々に入れると、掲載モデル・直径・GPI・総矢重量を推定します。矢尺とポイント重量は専用欄に入れてください。</div>
     <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
   </div>`;
