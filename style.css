@@ -502,6 +502,14 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .heroMetric{border:1px solid var(--line); border-radius:10px; background:var(--glass); padding:8px; min-width:0;}
 .heroMetric .k{font-size:10px; color:var(--sub);}
 .heroMetric b{display:block; color:var(--title); font-size:14px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums;}
+/* サイトタブ「いまの提案」: 方向（SVG矢印＋言葉）＋量（tabular-nums大型）を主役にする単一ブロック */
+.sightNow{margin-top:10px;}
+.sightNowDir{display:flex; align-items:center; gap:6px; font-size:15px; font-weight:800; color:var(--title);}
+.sightNowDir .icoInline{width:22px; height:22px; color:var(--accent-strong);}
+.sightNowAmount{font-size:38px; font-weight:800; color:var(--title); line-height:1.05; margin-top:2px; font-variant-numeric:tabular-nums;}
+.sightNowAmount small{font-size:15px; font-weight:600; color:var(--sub); margin-left:4px;}
+.sightNowNote{margin:6px 0 0; color:var(--sub); font-size:12px; line-height:1.55;}
+.sightNowNeutral .sightNowDir .icoInline{color:var(--green);}
 .heroMetric span{display:block; color:var(--sub); font-size:10.5px; margin-top:2px; line-height:1.35;}
 .liveHud{
   border:1px solid rgba(255,255,255,.10); border-radius:var(--radius-card); margin-bottom:12px; padding:13px;
@@ -719,6 +727,10 @@ table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
 table.tbl th{font-size:11px; color:var(--sub); text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); font-weight:600;}
 table.tbl td{padding:7px 6px; border-bottom:1px solid var(--line2);}
 table.tbl tr:last-child td{border-bottom:none;}
+table.tbl td,table.tbl th{font-variant-numeric:tabular-nums;}
+/* サイト台帳: 計器の目盛り台帳。使用中（先頭=最新）の行にだけ金ドットを置く */
+.ledgerCurrent td{color:var(--title);}
+.ledgerDot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; box-shadow:0 0 0 3px rgba(217,165,32,.18); vertical-align:middle;}
 .right{text-align:right;} .center{text-align:center;}
 .listItem{
   display:flex; justify-content:space-between; align-items:center; gap:8px;

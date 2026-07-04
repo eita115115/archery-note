@@ -344,46 +344,33 @@ function renderSight(m){
   }
   m.innerHTML=`${pageHeroHtml("sight",{setup,dist,marks,adv,lastSess})}
   <div class="card">
-    <h2>サイト台帳</h2>
+    <h2>${icon("ledger")} サイト台帳</h2>
     ${db.setups.length?`
     <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map(s=>`<option value="${s.id}" ${s.id===sid?"selected":""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
     <div class="chips" id="sgDistChips">${dists.map(d=>`<button type="button" class="chip ${d===dist?"on":""}" aria-pressed="${d===dist}" data-d="${d}">${d}m</button>`).join("")}</div>
-    <div class="advice histAdviceCard">
-      <div class="kv"><span>現在のサイト（最新記録）</span>
-      <span class="histSightVal">${cur?`上下 ${esc(cur.v||"—")} ・ 左右 ${esc(cur.h||"—")}`:"未登録"}</span></div>
-      ${cur?`<div class="note">${fmtD(cur.date)} ${esc(cur.note||"")}</div>`:""}
-    </div>
-    <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ サイト値を手動で記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
-    ${marks.length?`<table class="tbl mt10"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
-      ${marks.map(mk=>`<tr><td>${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
+    <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
+    ${marks.length?`<table class="tbl ledgerTbl mt10" data-testid="sight-ledger"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
+      ${marks.map((mk,i)=>`<tr class="${i===0?"ledgerCurrent":""}"><td>${i===0?`<span class="ledgerDot" title="使用中"></span>`:""}${fmtD(mk.date)}</td><td><b>${esc(mk.v||"—")}</b></td><td><b>${esc(mk.h||"—")}</b></td>
       <td class="subNoteSm">${esc(mk.note||"")}</td>
       <td class="right"><button class="btn sm ghost histDelBtn" data-del="${mk.id}">${icon("del")}</button></td></tr>`).join("")}</table>`
       :`<div class="empty">この距離の記録はまだありません</div>`}
-    <details class="adv">
-      <summary>モデル診断・校正状況</summary>
-      ${cal?`<div class="advice histAdviceCard mt10">
-        <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score*100)}%）</span></div>
-        <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
-        ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
-      </div>`:""}
-      ${modelReadinessHtml(sid)}
-      ${physicsCalibrationHtml(sid)}
-    </details>
     `:`<div class="empty">先に「用具」タブでセッティングを登録してください。<br>サイト台帳はセッティングごとに管理されます。</div>`}
   </div>
   ${setup?`
   <div class="card">
-    <h2>${icon("tool")} 調整アドバイス <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
-    ${adv?`
-      <div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>
-      <div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
+    <h2>${icon("tool")} 詳しく <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
+    ${adv?`<div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length?`、外れ値${adv.st.excluded.length}本除外`:""}）の着弾傾向：</div>`
+      :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
+    <details class="adv" ${adv?"":"open"}>
+      <summary>調整アドバイスの全体像</summary>
+      ${adv?`<div class="advice">${adv.lines.map(l=>`<div class="dir">${l.html}</div>`).join("")}
       ${judgementHtml(adv,lastSess)}
       ${shapeNote(adv.st)}
       ${adv.notes.map(n=>`<div class="note">・${n}</div>`).join("")}
-      <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
-      :`<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`}
-    <details class="adv" ${adv?"":"open"}>
+      <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx,"x")} / ${cmOffsetText(adv.st.my,"y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`:""}
+    </details>
+    <details class="adv">
       <summary>判断の根拠</summary>
       ${adv?trustHtml(lastSess,setup,adv.st):""}
       ${adv?personalModelHtml(adv,lastSess,setup):""}
@@ -399,6 +386,16 @@ function renderSight(m){
         <div class="note">サイト値を数値で記録した複数回の練習から「ズレが0になる値」を、練習信頼度・風・本数を加味した外れ値に強い推定で求めています。データが増えるほど精度が上がります。</div>
       </div>`:`<div class="hint">${icon("bulb")} 練習開始時にサイト値を<b>数値で</b>入力して回数を重ねると、ここに「サイト値と着弾ズレの相関」から推定した最適サイト値が表示されます。</div>`}
       ${interpHtml}
+    </details>
+    <details class="adv">
+      <summary>モデル診断・校正状況</summary>
+      ${cal?`<div class="advice histAdviceCard mt10">
+        <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score*100)}%）</span></div>
+        <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
+        ${cal.next.length?`<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0,3).join("・"))}</div>`:`<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
+      </div>`:""}
+      ${modelReadinessHtml(sid)}
+      ${physicsCalibrationHtml(sid)}
     </details>
     <details class="adv">
       <summary>クリック換算の設定（任意）</summary>

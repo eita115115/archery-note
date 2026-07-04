@@ -409,6 +409,30 @@ function adviceFor(sess, setup){
   if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です。"});
   return out;
 }
+/* サイトタブの「いまの提案」表示専用の整形（表示のみ・計算はadviceForと同じ入力を再利用）。
+   上下と左右の両方に動きがある場合はズレの大きい軸を主提案に選ぶ。ロジック（量・方向の算出）は変えない */
+function primarySightSuggestion(sess, setup, adv){
+  if(!adv) return null;
+  const moves=adv.lines.filter(l=>l.axis!=="-");
+  if(!moves.length) return {axis:"-", none:true};
+  const st=adv.st, dist=sess.dist;
+  const model=adviceModel(sess, setup, st);
+  const axis=moves.length>1 ? (Math.abs(st.my)*model.vFactor>=Math.abs(st.mx)*model.hFactor?"v":"h") : moves[0].axis;
+  if(axis==="v"){
+    const adj=Math.abs(st.my)*model.vFactor;
+    const mm=adj*model.traj.mmPerCmV;
+    let clicks=null, clickLabel=null;
+    if(setup && setup.calibV70){ clicks=adj/(setup.calibV70*dist/70); clickLabel="クリック"; }
+    else if(model.pcal && model.pcal.click.v70){ clicks=adj/(model.pcal.click.v70*dist/70); clickLabel="目盛り（推定）"; }
+    return {axis, dir:st.my>0?"up":"down", dirLabel:st.my>0?"上":"下", mm, clicks, clickLabel, other:moves.length>1};
+  }
+  const adj=Math.abs(st.mx)*model.hFactor;
+  const mm=adj*model.traj.mmPerCmH;
+  let clicks=null, clickLabel=null;
+  if(setup && setup.calibH70){ clicks=adj/(setup.calibH70*dist/70); clickLabel="クリック"; }
+  else if(model.pcal && model.pcal.click.h70){ clicks=adj/(model.pcal.click.h70*dist/70); clickLabel="目盛り（推定）"; }
+  return {axis, dir:st.mx>0?"right":"left", dirLabel:st.mx>0?"右":"左", mm, clicks, clickLabel, other:moves.length>1};
+}
 function summarySightDialHtml(sess, adv){
   if(!adv || !adv.st) return "";
   const st=adv.st;
