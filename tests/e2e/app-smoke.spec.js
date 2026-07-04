@@ -165,3 +165,70 @@ test("exposes distance chips as buttons with synced aria-pressed", async ({ page
   await expect(pressed).toHaveCount(1);
   await expect(unexpectedErrors).toEqual([]);
 });
+
+test("exposes history rows and sight distance chips as buttons", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  await mainTab(page, "履歴").click();
+  const row = page.locator("#histList .listItem").first();
+  await expect(row).toBeVisible();
+  await expect(row).toHaveJSProperty("tagName", "BUTTON");
+  await row.click();
+  await expect(page.locator(".ovl .sheet")).toBeVisible();
+  await page.locator("#hClose").click();
+  await expect(page.locator(".ovl")).toHaveCount(0);
+
+  await mainTab(page, "サイト調整").click();
+  const chips = page.locator("#sgDistChips .chip");
+  await expect(chips.first()).toBeVisible();
+  const chipCount = await chips.count();
+  for (let i = 0; i < chipCount; i++) {
+    await expect(chips.nth(i)).toHaveJSProperty("tagName", "BUTTON");
+  }
+
+  const pressed = page.locator('#sgDistChips .chip[aria-pressed="true"]');
+  await expect(pressed).toHaveCount(1);
+  await expect(pressed).toHaveAttribute("data-d", "70");
+
+  await page.locator('#sgDistChips .chip[data-d="30"]').click();
+  await expect(page.locator('#sgDistChips .chip[data-d="30"]')).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(pressed).toHaveCount(1);
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("syncs aria-pressed on settings theme and form tracking chips", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  await page.locator("#btnSettings").click();
+  await expect(page.locator("#thChips .chip").first()).toBeVisible();
+
+  const pressedTheme = page.locator('#thChips .chip[aria-pressed="true"]');
+  await expect(pressedTheme).toHaveCount(1);
+  await expect(pressedTheme).toHaveAttribute("data-th", "auto");
+  await page.locator('#thChips .chip[data-th="dark"]').click();
+  await expect(pressedTheme).toHaveCount(1);
+  await expect(pressedTheme).toHaveAttribute("data-th", "dark");
+
+  const pressedFt = page.locator('#ftChips .chip[aria-pressed="true"]');
+  await expect(pressedFt).toHaveCount(1);
+  await expect(pressedFt).toHaveAttribute("data-ft", "0");
+  await page.locator('#ftChips .chip[data-ft="1"]').click();
+  await expect(pressedFt).toHaveCount(1);
+  await expect(pressedFt).toHaveAttribute("data-ft", "1");
+  await expect(unexpectedErrors).toEqual([]);
+});
