@@ -432,20 +432,31 @@ function pageHeroHtml(type,ctx){
     </section>`;
   }
   if(type==="sight"){
-    const setup=ctx.setup, dist=ctx.dist, marks=ctx.marks||[], adv=ctx.adv;
-    const cur=marks[0];
-    const axes=adv?adv.lines.map(l=>l.axis):[];
-    const hasV=axes.includes("v"), hasH=axes.includes("h");
-    const advSummary=!adv?"材料待ち":hasV&&hasH?"上下・左右調整":hasV?"上下調整あり":hasH?"左右調整あり":"調整不要";
-    return `<section class="pageHero">
+    const setup=ctx.setup, dist=ctx.dist, adv=ctx.adv, lastSess=ctx.lastSess;
+    const sug=lastSess?primarySightSuggestion(lastSess,setup,adv):null;
+    let body;
+    if(!setup){
+      body=`<p class="pageHeroLead sightNowNote">先に「用具」タブでセッティングを登録すると、ここに提案が出ます。</p>`;
+    }else if(!adv){
+      body=`<p class="pageHeroLead sightNowNote">この距離・用具の練習記録がまだありません。練習を1回記録すると、ここに提案が出ます。</p>`;
+    }else if(!sug || sug.none){
+      body=`<div class="sightNow sightNowNeutral" data-testid="sight-now-suggestion">
+        <div class="sightNowDir">${icon("target")}<span>調整不要</span></div>
+        <p class="sightNowNote">グルーピング中心はほぼセンターです。今の設定のまま本数を重ねられます。</p>
+      </div>`;
+    }else{
+      const arrowIcon=icon(sug.dir);
+      const q=sessionQuality(lastSess,setup);
+      body=`<div class="sightNow" data-testid="sight-now-suggestion">
+        <div class="sightNowDir">${arrowIcon}<span>${sug.dirLabel}へ</span></div>
+        <div class="sightNowAmount">${sug.clicks!=null?`${Math.abs(sug.clicks).toFixed(1)}<small>${esc(sug.clickLabel)}</small>`:`${sug.mm.toFixed(1)}<small>mm</small>`}</div>
+        <p class="sightNowNote">${sug.clicks!=null?`目安 ${sug.mm.toFixed(1)}mm相当。`:"クリック換算を登録すると回数でも表示できます。"}${sug.other?" 上下・左右の両方に動きがあります（詳細は下）。":""} 信頼度 ${q.label}。</p>
+      </div>`;
+    }
+    return `<section class="pageHero" data-testid="sight-hero">
       <div class="kicker">サイト調整</div>
-      <h2>サイト値を整える</h2>
-      <p>距離ごとのサイト値と最新グルーピングから、動かす時・保留する時・射形を優先する時を分けて見ます。</p>
-      <div class="heroMetrics">
-        ${heroMetricHtml("対象",setup?setup.name:"用具未指定",dist?`${dist}m`:"距離未指定")}
-        ${heroMetricHtml("最新サイト",cur?`上下 ${cur.v||"—"}`:"未登録",cur?`左右 ${cur.h||"—"}`:"台帳へ記録")}
-        ${heroMetricHtml("提案",advSummary,adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
-      </div>
+      <h2 class="pageHeroLead">いまの提案</h2>
+      ${body}
     </section>`;
   }
   if(type==="gear"){
