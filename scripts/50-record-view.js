@@ -576,9 +576,13 @@ function liveSessionHeroHtml(s,setup){
   const avg=all.length?(total/all.length).toFixed(2):"—";
   const remain=Math.max(0,(s.perEnd||6)-(s.cur||[]).length);
   const r=ROUND_TYPES.find(x=>x.id===s.round);
-  const roundRemain=r&&r.arrows?Math.max(0,r.arrows-all.length):null;
+  /* 多距離ラウンド中は「残り」をステージ規定射数（arrows）基準にする */
+  const stageDef=sessionStageDef(s);
+  const quota=stageDef&&stageDef.arrows?stageDef.arrows:(r&&r.arrows?r.arrows:null);
+  const roundRemain=quota?Math.max(0,quota-all.length):null;
+  const rg=s.roundGroup;
   return `<section class="liveHud compactHud">
-    <div class="liveContext">${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}<span>${setup?esc(setup.name):"用具未指定"}</span></div>
+    <div class="liveContext">${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}<span>${setup?esc(setup.name):"用具未指定"}</span>${rg?`<span>ステージ ${(+rg.stage||0)+1}/${rg.stageCount}・${s.dist}m</span>`:""}</div>
     <div class="liveGrid">
       <div class="liveCell"><div class="k">合計</div><b>${total}</b></div>
       <div class="liveCell"><div class="k">平均</div><b>${avg}</b></div>
@@ -597,9 +601,19 @@ function activeGuideHtml(){
     <button class="btn sm ghost activeGuideDone" id="activeGuideDone">次から表示しない</button>
   </details>`;
 }
+/* 多距離ラウンドの次ステージ定義。最終ステージ・編集モード・単一距離では null */
+function nextStageDef(s){
+  const rg=s&&s.roundGroup;
+  if(!rg || s._edit) return null;
+  const stage=Number(rg.stage)||0;
+  if(stage>=rg.stageCount-1) return null;
+  const def=findRoundDef(rg.roundId);
+  return def&&Array.isArray(def.stages)?def.stages[stage+1]||null:null;
+}
 function renderActive(m){
   const s=db.active;
   const setup=db.setups.find(x=>x.id===s.setupId);
+  const nextStage=nextStageDef(s);
   m.innerHTML=`
   ${liveSessionHeroHtml(s,setup)}
   <div class="card targetFocusCard">
@@ -632,6 +646,7 @@ function renderActive(m){
       <button class="btn ghost" id="bUndo">↩ 1本取消</button>
       <button class="btn sec" id="bEnd">エンド確定</button>
     </div>
+    ${nextStage?`<div class="btnrow"><button class="btn sec" id="bNextStage">次の距離へ（${nextStage.dist}m）</button></div>`:""}
     <div class="btnrow"><button class="btn danger" id="bFinish">セッション終了</button></div>
   </div>
   <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>`;
@@ -655,6 +670,8 @@ function renderActive(m){
     s.cur=[]; ui.selArrow=-1; nativePulse("success"); save(); refreshActive();
   };
   $("#bFinish").onclick=()=>finishSession();
+  const bNext=$("#bNextStage");
+  if(bNext) bNext.onclick=()=>advanceRoundStage();
   const guideDone=$("#activeGuideDone");
   if(guideDone) guideDone.onclick=()=>{ db.settings.activeGuideSeen=true; save("active-guide"); render(); };
   document.querySelectorAll("#nudge .npad button").forEach(b=>b.onclick=()=>nudgeArrow(b.dataset.n));
@@ -887,6 +904,45 @@ function attachTargetInput(s){
   }
 }
 
+/* 多距離ラウンド: 現ステージを db.sessions へ確定し、次ステージの active を自動生成する（IMP-09）。
+   ステージ確定は重要操作なので scheduleSave ではなく同期 save() を使う。サマリは挟まず toast のみ */
+function advanceRoundStage(){
+  const s=db.active;
+  const next=s?nextStageDef(s):null;
+  if(!next){ toast("次のステージ定義が見つかりません"); return; }
+  const shot=s.ends.flat().length + s.cur.length;
+  if(!shot){ toast("このステージの矢がまだありません"); return; }
+  const stageDef=sessionStageDef(s);
+  if(stageDef&&stageDef.arrows&&shot<stageDef.arrows && !confirm(`このステージは ${shot}/${stageDef.arrows} 射です。確定して次の距離へ進みますか？`)) return;
+  if(s.cur.length){
+    if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
+    else s.ends.push(s.cur);
+    s.cur=[];
+  }
+  delete s.cur; delete s.editIndex;
+  db.sessions.push(s);
+  const rg=s.roundGroup;
+  const nextFaceType=next.faceType||"single";
+  /* サイト値は次距離の台帳最新値からプリフィル（latestMark を再利用） */
+  const mk=s.setupId?latestMark(s.setupId,next.dist):null;
+  db.active={
+    id:uid(), date:s.date, setupId:s.setupId,
+    dist:next.dist, faceD:next.faceD, faceType:nextFaceType, perEnd:next.perEnd||6,
+    shaft:+lineCutRadius(next.faceD,nextFaceType).toFixed(3),
+    sightV:mk&&mk.v!=null?String(mk.v).trim():"", sightH:mk&&mk.h!=null?String(mk.h).trim():"",
+    wx:s.wx, note:s.note, windDir:s.windDir, windSpeed:s.windSpeed,
+    round:s.round,
+    roundGroup:{gid:rg.gid, roundId:rg.roundId, stage:(Number(rg.stage)||0)+1, stageCount:rg.stageCount},
+    purpose:s.purpose,
+    ends:[], cur:[]
+  };
+  ui.selArrow=-1;
+  nativePulse("success");
+  save();
+  toast(`${next.dist}m を開始（ステージ ${(Number(rg.stage)||0)+2}/${rg.stageCount}）`);
+  render();
+}
+
 function finishSession(){
   const s=db.active;
   const shot=s.ends.flat().length + s.cur.length;
@@ -911,6 +967,20 @@ function finishSession(){
 }
 
 /* ---------- summary modal ---------- */
+/* 多距離ラウンドのラウンド合計ブロック: 同 gid の全ステージを aggregateRoundGroups で束ねる。
+   roundGroup の無い単一距離セッションでは空文字（サマリ不変） */
+function roundGroupSummaryHtml(sess){
+  const rg=sess&&sess.roundGroup;
+  if(!rg||!rg.gid) return "";
+  const rows=buildAnalysisRows(db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid), db.setups, sessionMetrics);
+  const g=aggregateRoundGroups(rows)[0];
+  if(!g||!g.stages.length) return "";
+  const breakdown=g.stages.map(st=>`${st.dist}m ${st.total}点`).join(" / ");
+  return `<div class="advice recordNeutralAdvice">
+    <div class="note"><b>${esc(roundLabel(rg.roundId))} 合計 ${g.total}</b> / ${g.arrows}射${g.complete?"":`（${g.stages.length}/${rg.stageCount}ステージ）`}</div>
+    <div class="note">${esc(breakdown)}</div>
+  </div>`;
+}
 function openSummary(sess, isNew){
   const setup=db.setups.find(x=>x.id===sess.setupId);
   const m=sessionMetrics(sess);
@@ -926,6 +996,7 @@ function openSummary(sess, isNew){
       <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
+    ${roundGroupSummaryHtml(sess)}
     <div id="sumPlot" class="recordSummaryPlot"></div>
     ${groupSummaryHtml(st)}
     ${summarySightDialHtml(sess,adv)}

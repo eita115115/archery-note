@@ -472,3 +472,11 @@ function roundLabel(id){
   const def=findRoundDef(id);
   return def?def.label:ROUND_TYPES[0].label;
 }
+/* session.roundGroup から現在ステージの定義（dist/faceD/faceType/arrows/perEnd）を引く。無ければ null */
+function sessionStageDef(sess){
+  const rg=sess&&sess.roundGroup;
+  if(!rg) return null;
+  const def=findRoundDef(rg.roundId);
+  const stage=def&&Array.isArray(def.stages)?def.stages[Number(rg.stage)||0]:null;
+  return stage||null;
+}

@@ -643,11 +643,16 @@ function nextActionHtml(sess,adv,setup){
 }
 function roundProgressHtml(sess){
   const r=ROUND_TYPES.find(x=>x.id===sess.round);
-  if(!r || !r.arrows) return "";
+  /* ROUND_TYPES に無い id は多距離ラウンド: 現在ステージ定義の arrows で進捗を出す（IMP-09） */
+  const stage=r?null:sessionStageDef(sess);
+  const arrows=r&&r.arrows?r.arrows:(stage&&stage.arrows?stage.arrows:null);
+  if(!arrows) return "";
+  const rg=sess.roundGroup;
+  const stageInfo=stage&&rg?` ステージ${(Number(rg.stage)||0)+1}/${rg.stageCount}`:"";
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0);
-  const shot=all.length, remain=Math.max(0,r.arrows-shot);
-  const pace=shot?total/shot*r.arrows:0;
-  return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)} / ${shot}/${r.arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
+  const shot=all.length, remain=Math.max(0,arrows-shot);
+  const pace=shot?total/shot*arrows:0;
+  return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)}${stageInfo} / ${shot}/${arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
 }
 function sessionsCsv(){
   const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
