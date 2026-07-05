@@ -114,14 +114,33 @@ function runSequence(seq) {
   return { phases: [...new Set(phases)], releases, hist, lastTs: t };
 }
 
-function shotSequence() {
+/* 15fps(dt=66ms)で離脱が totalMs で完了する現実的なリリース区間を作る。
+   ease-out（離脱直後が最速、その後減速）カーブを dt 間隔でサンプリングし、
+   vel は実コードと同じ定義（区間のアンカー変化量/dt）で正しく算出する
+   （速度をアンカー変化と無関係な固定値にすると検出ロジックの検証にならない）。 */
+function releaseFrames(totalMs, dt, fromAnchor) {
+  const frames = [];
+  let prevA = fromAnchor;
+  for (let t = dt; t <= totalMs + dt; t += dt) {
+    const x = Math.min(1, t / totalMs);
+    const eased = 1 - Math.pow(1 - x, 2);
+    const a = fromAnchor + (1 - fromAnchor) * eased;
+    const vel = Math.abs(a - prevA) / (dt / 1000);
+    frames.push([mkRaw(a, 130), vel, dt]);
+    prevA = a;
+    if (x >= 1) break;
+  }
+  return frames;
+}
+
+function shotSequence(dt) {
+  const d = dt || 66;
   const seq = [];
-  for (let i = 0; i < 10; i++) seq.push([mkRaw(1.5, 90), 0.05, 66]);
-  for (let i = 0; i < 8; i++) seq.push([mkRaw(1.2 - i * 0.12, 110 + i * 5), 0.5, 66]);
-  for (let i = 0; i < 10; i++) seq.push([mkRaw(0.22, 150), 0.05, 66]);
-  seq.push([mkRaw(0.30, 150), 0.6, 66]);
-  seq.push([mkRaw(0.48, 130), 0.6, 66]); // 変位で発火（速度スパイクなし）
-  for (let i = 0; i < 5; i++) seq.push([mkRaw(1.4, 90), 0.2, 66]);
+  for (let i = 0; i < 10; i++) seq.push([mkRaw(1.5, 90), 0.05, d]);
+  for (let i = 0; i < 8; i++) seq.push([mkRaw(1.2 - i * 0.12, 110 + i * 5), 0.5, d]);
+  for (let i = 0; i < 10; i++) seq.push([mkRaw(0.22, 150), 0.05, d]);
+  seq.push(...releaseFrames(90, d, 0.22)); // 90msで離脱完了する現実的なリリース
+  for (let i = 0; i < 5; i++) seq.push([mkRaw(1.4, 90), 0.2, d]);
   return seq;
 }
 
@@ -129,15 +148,53 @@ function shotSequence() {
   const r = runSequence(shotSequence());
   ["SETUP", "DRAWING", "ANCHORING", "FULL_DRAW", "RELEASE", "FOLLOW"].forEach((p) =>
     assert(r.phases.includes(p), `phase ${p} reached`));
-  assertEqual(r.releases, 1, "slow-fps release detected once");
+  assertEqual(r.releases, 1, "low-fps (15fps) realistic release detected once");
 }
 {
-  // レットダウン（漸進的変位）は誤検出しない — 通常/速めの2速度
-  [0.035, 0.053].forEach((step) => {
+  // レットダウン誤検出境界の回帰テスト（2026-07-05 修理）。
+  // 実測: 100ms〜2000ms の線形レットダウンはいずれも誤検出しないことを確認済み
+  // （境界表は 46-form-core.js の RELEASE_TH コメント参照）。50ms は 1 フレームで
+  // 完了する極限ケースで、20fps 相当では速度スパイクがリリースと数値上区別できず
+  // 対象外（停止条件の対象は「50ms〜2s」のうち計測可能な範囲）。
+  [2000, 1500, 1200, 1100, 1000, 900, 800, 700, 600, 500, 400, 300, 250, 200, 150, 100].forEach((totalMs) => {
+    [20, 50].forEach((dt) => {
+      const seq = [];
+      for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
+      const frames = Math.max(1, Math.round(totalMs / dt));
+      const step = 0.78 / frames;
+      for (let i = 1; i <= frames; i++) seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
+      for (let i = 0; i < 30; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
+      assertEqual(runSequence(seq).releases, 0, `let-down ${totalMs}ms (dt=${dt}) does not fire`);
+    });
+  });
+}
+{
+  // 現実的なリリース速度プロファイル（離脱 50-100ms で完了）は確実に検出する
+  [50, 60, 80, 100].forEach((totalMs) => {
+    [20, 50].forEach((dt) => {
+      const seq = [];
+      for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
+      seq.push(...releaseFrames(totalMs, dt, 0.22));
+      for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
+      assertEqual(runSequence(seq).releases, 1, `realistic release ${totalMs}ms (dt=${dt}) is detected`);
+    });
+  });
+}
+{
+  // レットダウン → 本物のリリース の複合シナリオ: 1 射のみ検出（レットダウンが余分な射にならない）
+  [2000, 1000, 500, 150].forEach((letdownMs) => {
+    const dt = 20;
     const seq = [];
-    for (let i = 0; i < 10; i++) seq.push([mkRaw(0.22, 150), 0.05, 66]);
-    for (let i = 0; i < 24; i++) seq.push([mkRaw(0.22 + i * step, 140), 0.2, 66]);
-    assertEqual(runSequence(seq).releases, 0, `let-down (step=${step}) does not fire`);
+    for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
+    const ldFrames = Math.max(1, Math.round(letdownMs / dt));
+    const step = 0.78 / ldFrames;
+    for (let i = 1; i <= ldFrames; i++) seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
+    for (let i = 1; i <= 12; i++) seq.push([mkRaw(1.0 - 0.78 * (i / 12), 110 + i), 0.5, dt]); // 再度ドロー
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
+    seq.push(...releaseFrames(80, dt, 0.22));
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
+    assertEqual(runSequence(seq).releases, 1, `let-down(${letdownMs}ms) then real release counts as one shot`);
   });
 }
 {
@@ -145,9 +202,28 @@ function shotSequence() {
   const seq = [...shotSequence()];
   for (let i = 0; i < 10; i++) seq.push([mkRaw(1.5, 90), 0.05, 66]);
   for (let i = 0; i < 10; i++) seq.push([mkRaw(0.22, 150), 0.05, 66]);
-  seq.push([mkRaw(0.55, 130), 2.0, 66]);
+  seq.push(...releaseFrames(80, 66, 0.22));
   for (let i = 0; i < 5; i++) seq.push([mkRaw(1.4, 90), 0.2, 66]);
   assertEqual(runSequence(seq).releases, 2, "two shots both detected");
+}
+{
+  // 確定猶予: released 直後にアンカー圏へ即座に戻るスパイクは取消される
+  const dt = 20;
+  const st = core.makeFormPhaseDetector();
+  const hist = [];
+  let t = 0, releases = 0, canceled = 0;
+  const push = (m, vel) => {
+    t += dt;
+    hist.push({ ts: t, m, vel });
+    const r = core.stepFormPhase(st, m, hist, 1.0, t);
+    if (r.released) releases++;
+    if (r.canceled) canceled++;
+  };
+  for (let i = 0; i < 60; i++) push(mkRaw(0.22, 150), 0.02);
+  push(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え
+  for (let i = 0; i < 10; i++) push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS以内にアンカー圏へ復帰
+  assertEqual(releases, 1, "noise spike still registers as released");
+  assertEqual(canceled, 1, "but is canceled once anchor returns within confirm window");
 }
 {
   // 人物未検出は IDLE
@@ -249,6 +325,14 @@ function makeFormRecord(id, date, opts) {
   const cur = makeFormRecord("c", "2026-07-02", { holdMs: 2600 });
   const ins = core.formRecordInsights(cur, prev);
   assert(ins.causes.some((t) => t.includes("前回より") && t.includes("長く")), "hold delta vs previous reported");
+}
+{
+  // 3射未満（中央値が出るまで）は formRecordStats 自体は計算できるが、
+  // 呼び出し側（47-form-view.js）は生値表示に切り替える前提。ここではコア側が
+  // 単純に中央値を返すだけであることを確認する（表示切替はビュー側の責務）。
+  const single = makeFormRecord("s1", "2026-07-03", { shots: 1, bowArm: 175 });
+  const st = core.formRecordStats(single);
+  assertEqual(st.shots, 1, "single-shot record still yields stats");
 }
 {
   const series = core.formTrendSeries([

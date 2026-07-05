@@ -214,19 +214,39 @@ function openFormCapture(){
     await video.play();
     canvas.width=video.videoWidth; canvas.height=video.videoHeight;
   }
+  function refreshShotsHint(){
+    const saveBtn=ovl.querySelector("#fcSave");
+    saveBtn.disabled=!shots.length;
+    saveBtn.textContent=shots.length?`保存して終了（${shots.length}射）`:"保存して終了";
+  }
+  function renumberShots(){
+    ovl.querySelectorAll("#fcShots [data-shot-id]").forEach((div,i)=>{
+      const idx=shots.length-1-i; // 一覧は新しい射が先頭（prepend）
+      const t=div.querySelector(".t");
+      if(t) t.textContent=`第${idx+1}射`;
+    });
+  }
   function onShot(now){
     const shot=summarizeFormShot(history,anchorStartTs,now);
     if(!shot) return;
+    shot.id=uid();
     shots.push(shot);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem";
+    div.dataset.shotId=shot.id;
     div.innerHTML=`<div><div class="t">第${shots.length}射</div>
       <div class="d">保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?` / ${icon("warn")} リリース前ドリフト`:""}</div></div>
-      <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>`;
+      <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>
+      <button class="btn sm ghost" data-rm-shot="${shot.id}" aria-label="この射を取り消す">${icon("del")}</button>`;
+    div.querySelector("[data-rm-shot]").onclick=()=>{
+      shots=shots.filter(s=>s.id!==shot.id);
+      div.remove();
+      renumberShots();
+      refreshShotsHint();
+      nativePulse("light");
+    };
     ovl.querySelector("#fcShots").prepend(div);
-    const saveBtn=ovl.querySelector("#fcSave");
-    saveBtn.disabled=false;
-    saveBtn.textContent=`保存して終了（${shots.length}射）`;
+    refreshShotsHint();
     nativePulse("light");
   }
   function loop(){
@@ -244,7 +264,18 @@ function openFormCapture(){
       if(raw&&last&&last.m){ const dt=(now-last.ts)/1000; if(dt>0) vel=formDist(raw.dW,last.m.dW)/dt/raw.bodyScale; }
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
-      const {phase,released}=stepFormPhase(detector,raw,history,1.0,now);
+      const {phase,released,canceled}=stepFormPhase(detector,raw,history,1.0,now);
+      if(canceled){
+        /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す */
+        const last=shots[shots.length-1];
+        if(last){
+          shots=shots.filter(s=>s.id!==last.id);
+          const div=ovl.querySelector(`#fcShots [data-shot-id="${last.id}"]`);
+          if(div) div.remove();
+          renumberShots();
+          refreshShotsHint();
+        }
+      }
       if((phase==="ANCHORING"||phase==="FULL_DRAW")&&!anchorStartTs) anchorStartTs=now;
       if(released){ onShot(now); anchorStartTs=0; }
       if(phase==="SETUP"||phase==="IDLE") anchorStartTs=0;

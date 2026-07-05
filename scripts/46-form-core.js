@@ -26,16 +26,20 @@ const FORM_REF = Object.freeze({
   drawForceLine: { ideal: 0.072, sigma: 0.064 },
 });
 
-/* フェーズ検出しきい値（F1 実射調整済み。RISE_WINDOW を伸ばすと
-   レットダウンを誤検出するので変更時は check-form-core のケースを必ず通す） */
+/* フェーズ検出しきい値。2026-07-05 レットダウン誤検出の修理で再調整
+   （tools/check-form-core.js の境界ケースを必ず通すこと。docs/form-tracking-feasibility.md
+   の「短窓の離脱量を主条件」という旧設計は、250ms窓では1.1秒未満の引き戻しが
+   無条件に誤検出される欠陥があったため撤回した。実測境界は同ファイル冒頭コメント参照）。
+   RELEASE_RISE は未使用化のみ（表示・別ロジックからの参照除去は今回のスコープ外）。 */
 const FORM_PH = Object.freeze({
   CLOSE_IN: 0.35,
   FULLDRAW_MS: 350,
-  RELEASE_RISE: 0.18,
-  RELEASE_TH: 1.2,
-  RISE_WINDOW_MS: 250,
+  RELEASE_RISE: 0.18, // 2026-07-05: リリース判定には使わない（下記 stepFormPhase 参照）。将来別用途で参照する可能性があるため残す
+  RELEASE_TH: 9, // 瞬間速度スパイク（胴体長/秒）。単独主条件に昇格（2026-07-05）
+  RISE_WINDOW_MS: 250, // 速度スパイクの短窓（maxV 算出用に流用）
   REFRACTORY_MS: 1000,
   DRAW_SPEED: 0.25,
+  CONFIRM_MS: 400, // リリース確定猶予: この間にアンカー圏へ戻ったら取消（自己修復）
 });
 
 const FORM_PHASES = Object.freeze({
@@ -138,18 +142,37 @@ function makeFormEma(alpha) {
 }
 
 function makeFormPhaseDetector() {
-  return { cur: FORM_PHASES.SETUP, anchorSince: 0, lastReleaseTs: 0, lastRise: 0 };
+  return { cur: FORM_PHASES.SETUP, anchorSince: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null };
 }
 
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
-   sens>1 で検出されやすくなる（しきい値を除算） */
+   sens>1 で検出されやすくなる（しきい値を除算）。
+   2026-07-05: リリース判定を「250ms窓の累積離脱量(rise)」主体から
+   「短窓内の瞬間速度スパイク(maxV)」単独主体へ変更した。旧ロジックは
+   rise>0.18 が単独でも発火したため、1.1秒未満のどんな速さの引き戻し
+   （レットダウン）も無条件にリリースとして誤検出していた
+   （tools/check-form-core.js のレットダウン境界ケース参照）。
+   maxV 単独条件は 100ms〜2秒の線形レットダウンで発火せず、
+   50-100msで完了する現実的なリリース速度プロファイルは確実に検出する
+   （実測境界表は同ファイル）。
+   加えて「確定猶予」(CONFIRM_MS) を設けた: released 判定後もアンカー圏へ
+   即座に戻った場合は取消フラグ(canceled)を返す。呼び出し側は canceled=true の
+   場合、直前に追加したショットを取り消すこと（誤検出の自己修復）。 */
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
   if (!raw) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; return { phase: st.cur, released: false }; }
+  if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
+    if (raw.anchorNorm < FORM_PH.CLOSE_IN) {
+      // アンカー圏へ即座に戻った = 離脱ではなく一時的な検出ノイズ/引き戻しだった。取消
+      st.pendingRelease = null; st.lastReleaseTs = 0; st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
+      return { phase: st.cur, released: false, canceled: true };
+    }
+  } else if (st.pendingRelease) {
+    st.pendingRelease = null; // 猶予終了、確定（取消なし）
+  }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) { st.cur = FORM_PHASES.RELEASE; return { phase: st.cur, released: false }; }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) { st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0; return { phase: st.cur, released: false }; }
   const close = raw.anchorNorm < FORM_PH.CLOSE_IN;
-  // 短窓の離脱量が主条件（低FPSで速度スパイクを取り逃すため）。窓を広げるとレットダウン誤検出
   const win = history.filter((h) => h.m && h.ts >= now - FORM_PH.RISE_WINDOW_MS);
   const closeFrames = win.filter((h) => h.m.anchorNorm < FORM_PH.CLOSE_IN);
   const minAnchor = win.length ? Math.min(...win.map((h) => h.m.anchorNorm)) : raw.anchorNorm;
@@ -157,8 +180,9 @@ function stepFormPhase(st, raw, history, sens, now) {
   st.lastRise = rise;
   const maxV = win.length ? Math.max(...win.map((h) => h.vel || 0)) : 0;
   if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
-    && (rise > FORM_PH.RELEASE_RISE / s || maxV > FORM_PH.RELEASE_TH / s)) {
+    && maxV > FORM_PH.RELEASE_TH / s) {
     st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;
+    st.pendingRelease = { ts: now };
     return { phase: st.cur, released: true };
   }
   if (close) {
