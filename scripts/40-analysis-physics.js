@@ -566,7 +566,7 @@ function sessionMetrics(sess){
   const st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st};
   SESSION_METRIC_CACHE.set(sig,metrics);
-  if(SESSION_METRIC_CACHE.size>240) SESSION_METRIC_CACHE.delete(SESSION_METRIC_CACHE.keys().next().value);
+  if(SESSION_METRIC_CACHE.size>800) SESSION_METRIC_CACHE.delete(SESSION_METRIC_CACHE.keys().next().value);
   return metrics;
 }
 function sessionQuality(sess, setup, st){
@@ -898,7 +898,11 @@ function calibrationProfile(setupId){
   if(rich.score<.65) next.push("矢重量/FOC/ベイン");
   return {score,level,dists:dists.size,withSight,gearLevel:rich.level,next};
 }
+const _MODEL_READINESS_CACHE=new Map();
 function modelReadinessProfile(setupId){
+  const cacheKey=setupId+"|"+DB_REV;
+  const hit=_MODEL_READINESS_CACHE.get(cacheKey);
+  if(hit) return hit;
   const setup=db.setups.find(x=>x.id===setupId)||{};
   const sess=db.sessions.filter(s=>s.setupId===setupId);
   const usable=sess.map(s=>({s,q:sessionQuality(s,setup)}))
@@ -922,7 +926,10 @@ function modelReadinessProfile(setupId){
   if(withSight<4) next.push("練習開始時のサイト値");
   if(sightDists<3) next.push("複数距離のサイト台帳");
   if(gp.score<.65) next.push("矢重量・矢径・実測初速");
-  return {score,level,total:sess.length,usable:usable.length,good:good.length,repeatGroups,withSight,sightDists,gearLevel:gp.level,next};
+  const result={score,level,total:sess.length,usable:usable.length,good:good.length,repeatGroups,withSight,sightDists,gearLevel:gp.level,next};
+  _MODEL_READINESS_CACHE.set(cacheKey,result);
+  if(_MODEL_READINESS_CACHE.size>20) _MODEL_READINESS_CACHE.delete(_MODEL_READINESS_CACHE.keys().next().value);
+  return result;
 }
 function modelReadinessHtml(setupId){
   if(!setupId) return "";

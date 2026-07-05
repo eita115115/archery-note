@@ -6,11 +6,9 @@ function historyRowHtml(s) {
   const all = s.ends.flat();
   const total = all.reduce((a, x) => a + x.s, 0);
   const setup = db.setups.find((x) => x.id === s.setupId);
-  const q = sessionQuality(s, setup);
   const badges = [
     `<span class="badge">${faceLabel(s)}</span>`,
     setup ? `<span class="badge">${esc(setup.name)}</span>` : "",
-    `<span class="badge">信頼 ${q.label}</span>`,
     s.round && s.round !== "free"
       ? `<span class="badge">${roundLabel(s.round)}${s.roundGroup ? ` ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}` : ""}</span>`
       : "",
@@ -57,7 +55,8 @@ function renderHistory(m) {
       (!hf.dist || String(s.dist) === String(hf.dist)) &&
       (!hf.round || (s.round || "free") === hf.round),
   );
-  m.innerHTML = `${pageHeroHtml("history", { ss })}
+  const _heroRows = buildAnalysisRows(ss, db.setups, sessionMetrics);
+  m.innerHTML = `${pageHeroHtml("history", { ss, rows: _heroRows })}
   <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
       <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${s.id}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
@@ -70,7 +69,7 @@ function renderHistory(m) {
     <div id="histList">
     ${
       ss.length
-        ? historyGroupedListHtml(ss)
+        ? historyGroupedListHtml(ss.slice(0, ui._histLimit || 50)) + (ss.length > (ui._histLimit || 50) ? `<div class="btnrow"><button class="btn ghost" id="histMore">さらに表示（残り${ss.length - (ui._histLimit || 50)}件）</button></div>` : "")
         : allSs.length
           ? `<div class="empty">この絞り込みに合う記録がありません。フィルタを広げてください。</div>`
           : `<div class="empty historyEmpty" data-testid="history-empty">
@@ -81,20 +80,26 @@ function renderHistory(m) {
   </div></div>`;
   $("#histSetup").onchange = (e) => {
     ui.histFilter.setupId = e.target.value;
+    ui._histLimit = 0;
     render();
   };
   $("#histDist").onchange = (e) => {
     ui.histFilter.dist = e.target.value;
+    ui._histLimit = 0;
     render();
   };
   $("#histRound").onchange = (e) => {
     ui.histFilter.round = e.target.value;
+    ui._histLimit = 0;
     render();
   };
   $("#histClear").onclick = () => {
     ui.histFilter = { setupId: "", dist: "", round: "" };
+    ui._histLimit = 0;
     render();
   };
+  const more = $("#histMore");
+  if (more) more.onclick = () => { ui._histLimit = (ui._histLimit || 50) + 50; render(); };
   document
     .querySelectorAll("#histList .listItem")
     .forEach((li) => (li.onclick = () => openHistDetail(li.dataset.id)));
@@ -145,7 +150,8 @@ function driftText(dx, dy) {
 }
 function groupingTrendCard(ss) {
   const by = {};
-  [...ss].reverse().forEach((s) => {
+  const recent = ss.slice(0, 120);
+  [...recent].reverse().forEach((s) => {
     const p = sessionGroupPoint(s);
     if (!p) return;
     const key = [p.setupId, p.dist, p.faceD, p.faceType].join("|");

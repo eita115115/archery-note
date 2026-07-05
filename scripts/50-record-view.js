@@ -584,7 +584,7 @@ function pageHeroHtml(type, ctx) {
        新しい統計は作らない — 分析タブの「今日の結論」と同じ入力（buildAnalysisRows）を使う。
        数値枠は 練習・平均・最高合計 の3つに一本化（旧「記録サマリー」カードはここへ統合。
        「直近」はリスト先頭行が直近そのものなので数値枠には置かない） */
-    const rows = buildAnalysisRows(src, db.setups, sessionMetrics);
+    const rows = ctx.rows || buildAnalysisRows(src, db.setups, sessionMetrics);
     const conclusion = todayConclusion(rows);
     const best = sessionRows
       .filter((r) => r.arrows.length)
