@@ -26,16 +26,20 @@ const FORM_REF = Object.freeze({
   drawForceLine: { ideal: 0.072, sigma: 0.064 },
 });
 
-/* フェーズ検出しきい値（F1 実射調整済み。RISE_WINDOW を伸ばすと
-   レットダウンを誤検出するので変更時は check-form-core のケースを必ず通す） */
+/* フェーズ検出しきい値。2026-07-05 レットダウン誤検出の修理で再調整
+   （tools/check-form-core.js の境界ケースを必ず通すこと。docs/form-tracking-feasibility.md
+   の「短窓の離脱量を主条件」という旧設計は、250ms窓では1.1秒未満の引き戻しが
+   無条件に誤検出される欠陥があったため撤回した。実測境界は同ファイル冒頭コメント参照）。
+   RELEASE_RISE は未使用化のみ（表示・別ロジックからの参照除去は今回のスコープ外）。 */
 const FORM_PH = Object.freeze({
   CLOSE_IN: 0.35,
   FULLDRAW_MS: 350,
-  RELEASE_RISE: 0.18,
-  RELEASE_TH: 1.2,
-  RISE_WINDOW_MS: 250,
+  RELEASE_RISE: 0.18, // 2026-07-05: リリース判定には使わない（下記 stepFormPhase 参照）。将来別用途で参照する可能性があるため残す
+  RELEASE_TH: 9, // 瞬間速度スパイク（胴体長/秒）。単独主条件に昇格（2026-07-05）
+  RISE_WINDOW_MS: 250, // 速度スパイクの短窓（maxV 算出用に流用）
   REFRACTORY_MS: 1000,
   DRAW_SPEED: 0.25,
+  CONFIRM_MS: 400, // リリース確定猶予: この間にアンカー圏へ戻ったら取消（自己修復）
 });
 
 const FORM_PHASES = Object.freeze({
@@ -138,18 +142,37 @@ function makeFormEma(alpha) {
 }
 
 function makeFormPhaseDetector() {
-  return { cur: FORM_PHASES.SETUP, anchorSince: 0, lastReleaseTs: 0, lastRise: 0 };
+  return { cur: FORM_PHASES.SETUP, anchorSince: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null };
 }
 
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
-   sens>1 で検出されやすくなる（しきい値を除算） */
+   sens>1 で検出されやすくなる（しきい値を除算）。
+   2026-07-05: リリース判定を「250ms窓の累積離脱量(rise)」主体から
+   「短窓内の瞬間速度スパイク(maxV)」単独主体へ変更した。旧ロジックは
+   rise>0.18 が単独でも発火したため、1.1秒未満のどんな速さの引き戻し
+   （レットダウン）も無条件にリリースとして誤検出していた
+   （tools/check-form-core.js のレットダウン境界ケース参照）。
+   maxV 単独条件は 100ms〜2秒の線形レットダウンで発火せず、
+   50-100msで完了する現実的なリリース速度プロファイルは確実に検出する
+   （実測境界表は同ファイル）。
+   加えて「確定猶予」(CONFIRM_MS) を設けた: released 判定後もアンカー圏へ
+   即座に戻った場合は取消フラグ(canceled)を返す。呼び出し側は canceled=true の
+   場合、直前に追加したショットを取り消すこと（誤検出の自己修復）。 */
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
   if (!raw) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; return { phase: st.cur, released: false }; }
+  if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
+    if (raw.anchorNorm < FORM_PH.CLOSE_IN) {
+      // アンカー圏へ即座に戻った = 離脱ではなく一時的な検出ノイズ/引き戻しだった。取消
+      st.pendingRelease = null; st.lastReleaseTs = 0; st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
+      return { phase: st.cur, released: false, canceled: true };
+    }
+  } else if (st.pendingRelease) {
+    st.pendingRelease = null; // 猶予終了、確定（取消なし）
+  }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) { st.cur = FORM_PHASES.RELEASE; return { phase: st.cur, released: false }; }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) { st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0; return { phase: st.cur, released: false }; }
   const close = raw.anchorNorm < FORM_PH.CLOSE_IN;
-  // 短窓の離脱量が主条件（低FPSで速度スパイクを取り逃すため）。窓を広げるとレットダウン誤検出
   const win = history.filter((h) => h.m && h.ts >= now - FORM_PH.RISE_WINDOW_MS);
   const closeFrames = win.filter((h) => h.m.anchorNorm < FORM_PH.CLOSE_IN);
   const minAnchor = win.length ? Math.min(...win.map((h) => h.m.anchorNorm)) : raw.anchorNorm;
@@ -157,8 +180,9 @@ function stepFormPhase(st, raw, history, sens, now) {
   st.lastRise = rise;
   const maxV = win.length ? Math.max(...win.map((h) => h.vel || 0)) : 0;
   if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
-    && (rise > FORM_PH.RELEASE_RISE / s || maxV > FORM_PH.RELEASE_TH / s)) {
+    && maxV > FORM_PH.RELEASE_TH / s) {
     st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;
+    st.pendingRelease = { ts: now };
     return { phase: st.cur, released: true };
   }
   if (close) {
@@ -251,38 +275,43 @@ function formRecordStats(record){
 
 /* 構造化コーチングコメント（archery-master buildStructuredFormComment を
    本アプリの formAnalysis 形状へ再構成）。観測→原因候補→確認点→次の練習の
-   4 区分で、断定を避けた日本語文を返す。prevRecord があれば前回比も述べる */
+   4 区分で、断定を避けた日本語文を返す。prevRecord があれば前回比も述べる。
+   2026-07-05: エリート基準（FORM_REF.ideal/sigma）との比較表示を停止した。
+   カメラ yaw 角 ±30° で引き手肘が基準 sigma の 1.1 倍相当ずれることが判明し、
+   採点の物差しが撮影角度に飲まれるため（妥当性監査で確認）。FORM_REF・
+   formGaussScore は削除せず未使用化のみ（出典が追跡できないため表示停止、
+   将来根拠が得られたら復活可能）。代わりに「自分の直近中央値との差」で
+   自分基準の変化を伝える。撮影角度が毎回同じであることが前提になるため、
+   その旨の注記は呼び出し側（47-form-view.js）で行う。 */
 function formRecordInsights(record, prevRecord){
   const st=formRecordStats(record);
   if(!st) return null;
   const prev=prevRecord?formRecordStats(prevRecord):null;
   const facts=[], causes=[], checks=[], next=[];
   if(st.holdMs!=null) facts.push(`フルドロー保持は中央値 ${(st.holdMs/1000).toFixed(1)} 秒でした。`);
-  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°（エリート基準 ${FORM_REF.bowArmAngle.ideal}°±${FORM_REF.bowArmAngle.sigma}°）です。`);
-  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°（基準 ${FORM_REF.drawArmAngle.ideal}°）です。`);
+  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°${prev&&prev.bowArm!=null?`（前回比 ${st.bowArm-prev.bowArm>=0?"+":""}${(st.bowArm-prev.bowArm).toFixed(0)}°）`:""}です。`);
+  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°${prev&&prev.drawArm!=null?`（前回比 ${st.drawArm-prev.drawArm>=0?"+":""}${(st.drawArm-prev.drawArm).toFixed(0)}°）`:""}です。`);
   if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカー位置ばらつきは σ=${st.anchorStd.toFixed(3)}（${st.anchorLabel}）です。`);
   if(st.driftRate!=null&&st.driftRate>0) facts.push(`${Math.round(st.driftRate*100)}% の射で、リリース前 0.5 秒に弓手/引き手のドリフトを観測しました。`);
   if(st.confidence!=null) facts.push(`骨格検出の鮮明さは平均 ${(st.confidence*100).toFixed(0)}% です（カメラの角度による測定誤差は反映されません）。`);
 
   if(st.driftRate!=null&&st.driftRate>=0.5) causes.push("保持中に押し引きの張り合いが緩んでいる可能性があります（断定ではありません）。");
-  if(st.bowArm!=null&&st.bowArm<FORM_REF.bowArmAngle.ideal-FORM_REF.bowArmAngle.sigma) causes.push("弓手肘が曲がり気味で、押しが的方向へ届いていない可能性があります。");
-  if(st.drawArm!=null&&st.drawArm<FORM_REF.drawArmAngle.ideal-FORM_REF.drawArmAngle.sigma) causes.push("引き手肘の張りが浅く、力線から外れやすい姿勢の可能性があります。");
   if(st.anchorStd!=null&&st.anchorStd>0.045) causes.push("アンカー位置の再現性が不足している可能性があります。");
   if(prev&&st.holdMs!=null&&prev.holdMs!=null){
     const d=(st.holdMs-prev.holdMs)/1000;
     if(d>=0.4) causes.push(`保持時間が前回より ${d.toFixed(1)} 秒長くなっています。`);
     else if(d<=-0.4) causes.push(`保持時間が前回より ${(-d).toFixed(1)} 秒短くなっています。`);
   }
+  if(prev&&st.bowArm!=null&&prev.bowArm!=null&&Math.abs(st.bowArm-prev.bowArm)>=6) causes.push(`弓手肘が前回より ${Math.abs(st.bowArm-prev.bowArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`);
+  if(prev&&st.drawArm!=null&&prev.drawArm!=null&&Math.abs(st.drawArm-prev.drawArm)>=6) causes.push(`引き手肘が前回より ${Math.abs(st.drawArm-prev.drawArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`);
   if(prev&&st.anchorStd!=null&&prev.anchorStd!=null&&st.anchorStd>prev.anchorStd*1.5&&st.anchorStd>0.03) causes.push("アンカーの再現性が前回より不安定になっています。");
 
   if(st.driftRate!=null&&st.driftRate>0) checks.push("リリース直前に弓手のグリップ位置が下がっていないか、横からの映像で確認してください。");
   if(st.anchorStd!=null&&st.anchorStd>0.045) checks.push("アンカーの接触点（顎の位置）が射ごとにずれていないか確認してください。");
-  if(st.bowArm!=null&&Math.abs(st.bowArm-FORM_REF.bowArmAngle.ideal)>FORM_REF.bowArmAngle.sigma) checks.push("セットアップの時点で弓手肘の向きが決まっているかを確認してください。");
   if(st.holdMs!=null&&st.holdMs>4500) checks.push("保持が長め（4.5秒超）です。狙い直しの回数が増えていないか振り返ってください。");
 
   if(st.driftRate!=null&&st.driftRate>=0.5) next.push("次の練習ではリリース前 0.5 秒の弓手固定を意識ポイントに入れてください。");
   if(st.anchorStd!=null&&st.anchorStd>0.045) next.push("同じ接触点で止まる練習（ミラー・ゴム弓）を数本足してください。");
-  if(st.bowArm!=null&&st.bowArm<FORM_REF.bowArmAngle.ideal-FORM_REF.bowArmAngle.sigma) next.push("押し手の伸びを1項目だけ意識して、次の記録で弓手肘の中央値の変化を見てください。");
   if(!next.length) next.push("同じ撮影角度で記録を重ね、前回比の変化量で確認を続けてください。");
   return {facts,causes,checks,next,stats:st,prev};
 }
