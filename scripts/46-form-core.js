@@ -306,6 +306,37 @@ function formPreReleaseWindow(history, releaseTs, windowSec) {
   };
 }
 
+/* 矢プレゼンスのシャドー判定しきい値。stepFormPhase の速度スパイク方式とは
+   完全に独立し、取消動作には使わない（表示・保存の注釈専用）。 */
+const ARROW_CHECK = Object.freeze({
+  GONE_TH: 0.35, // 猶予窓の代表値がこの値未満なら「矢が消えた」とみなす
+  STILL_TH: 0.55, // 猶予窓の代表値がこの値以上なら「矢がまだある」とみなす
+  // 両者の間はグレーゾーン（"unclear"）。閾値は arrowPresence の PRESENT_TH と揃えつつ、
+  // シャドー判定側は誤って「不一致」と煽らないよう GONE 側を保守的に低くしている。
+});
+
+/* 速度スパイクで released が発火した直後の確定猶予窓（CONFIRM_MS）における
+   矢プレゼンス系列から、シャドー判定を作る。preScores=発火直前（フルドロー中）の
+   スコア列、confirmScores=猶予窓中のスコア列（いずれも arrowPresence の返り値の配列）。
+   戻り値の judgment は "shot-match"（矢が消えた=リリースと整合）/
+   "letdown-mismatch"（矢がまだある=レットダウンの疑い、要確認）/
+   "unclear"（判定材料不足 or グレーゾーン）のいずれか。
+   この関数の戻り値は表示・保存注釈にのみ使い、released/canceled の判定を変えない。 */
+function judgeArrowCheck(preScores, confirmScores) {
+  const pre = (preScores || []).filter(Number.isFinite);
+  const confirm = (confirmScores || []).filter(Number.isFinite);
+  const preScore = pre.length ? formMedian(pre) : null;
+  const confirmScore = confirm.length ? formMedian(confirm) : null;
+  if (confirmScore == null) {
+    return { judgment: "unclear", preScore, confirmScore, pre: pre.length, confirm: confirm.length };
+  }
+  let judgment;
+  if (confirmScore < ARROW_CHECK.GONE_TH) judgment = "shot-match";
+  else if (confirmScore >= ARROW_CHECK.STILL_TH) judgment = "letdown-mismatch";
+  else judgment = "unclear";
+  return { judgment, preScore, confirmScore, pre: pre.length, confirm: confirm.length };
+}
+
 /* 複数射のアンカー位置再現性（胴体長比の標準偏差） */
 function formAnchorVariation(shots) {
   const vals = (shots || []).map((s) => s && s.anchorNorm).filter(Number.isFinite);

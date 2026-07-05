@@ -26,7 +26,7 @@ return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, f
   formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase,
   formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
   formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
-  ARROW_PRESENCE, arrowPresence};`,
+  ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
 )();
 
 /* ---------- 幾何ヘルパー ---------- */
@@ -536,6 +536,36 @@ function recordCase(label, score) { scoreTable.push({ label, score: +score.toFix
   assertEqual(core.arrowPresence(null, AP_P1, AP_P2), 0, "null imageData scores zero");
   assertEqual(core.arrowPresence(makeFrame(10, 10, 0, 0, 1), null, AP_P2), 0, "null p1 scores zero");
   assertEqual(core.arrowPresence(makeFrame(10, 10, 0, 0, 1), AP_P1, AP_P1), 0, "degenerate zero-length segment scores zero");
+}
+
+/* ---------- 矢プレゼンス シャドー判定 (judgeArrowCheck) ---------- */
+
+{
+  // 矢が消えた（発射と一致）: 猶予窓のスコアが低い
+  const r = core.judgeArrowCheck([0.9, 0.85, 0.95], [0.1, 0.0, 0.05]);
+  assertEqual(r.judgment, "shot-match", "arrow gone in confirm window matches shot");
+}
+{
+  // 矢がまだある（レットダウンの疑い）: 猶予窓のスコアが高いまま
+  const r = core.judgeArrowCheck([0.9, 0.85, 0.95], [0.8, 0.75, 0.9]);
+  assertEqual(r.judgment, "letdown-mismatch", "arrow still present in confirm window flags mismatch");
+}
+{
+  // グレーゾーン: しきい値の間
+  const r = core.judgeArrowCheck([0.9, 0.85], [0.45, 0.48]);
+  assertEqual(r.judgment, "unclear", "mid-range confirm score is unclear");
+}
+{
+  // 猶予窓のスコアが無い（フレーム取得失敗等）
+  const r = core.judgeArrowCheck([0.9], []);
+  assertEqual(r.judgment, "unclear", "no confirm-window samples is unclear");
+  assertEqual(r.confirmScore, null, "confirmScore null when no samples");
+}
+{
+  // preScores が空でも confirm 側だけで判定できる
+  const r = core.judgeArrowCheck([], [0.05, 0.1]);
+  assertEqual(r.judgment, "shot-match", "judgment works without pre-release samples");
+  assertEqual(r.preScore, null, "preScore null when no samples");
 }
 
 console.log("Form core checks OK");
