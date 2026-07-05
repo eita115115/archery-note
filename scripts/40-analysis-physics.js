@@ -10,13 +10,20 @@ function shapeNote(st){
   if(st.sx>st.sy*1.3) return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
   return "";
 }
-function groupSummaryHtml(st){
+/* 信頼度の算出根拠1行注記。v2の説明文禁止に抵触しないよう「詳しく」details 内でのみ表示する */
+function confidenceNoteHtml(kind){
+  return kind==="calc"
+    ? `<div class="subNoteSm">演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出しています。</div>`
+    : `<div class="subNoteSm">判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出しています。</div>`;
+}
+function groupSummaryHtml(st, opts){
   if(!st) return "";
   return `<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
     <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
     <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
     ${st.major!=null?`<div class="kv"><span>グルーピング楕円</span><span>長軸 ${st.major.toFixed(1)}cm ・ 短軸 ${st.minor.toFixed(1)}cm ・ 角度 ${st.angleDeg.toFixed(0)}°</span></div>`:""}
     <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / ${st.method}</span></div>
+    ${opts&&opts.withConfidenceNote?confidenceNoteHtml("calc"):""}
     ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`;
 }
 function cmOffsetText(v, axis){
@@ -638,7 +645,9 @@ function personalModelHtml(adv,sess,setup){
 function trustHtml(sess,setup,st){
   const q=sessionQuality(sess,setup,st);
   const color=q.tone==="ok"?"#0f9d58":q.tone==="warn"?"#c62828":"#8a6d1d";
-  return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>`;
+  /* trustHtml は全呼び出し箇所が details（詳しく/詳しい根拠/判断の根拠）内のため、注記を常設できる */
+  return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>
+    ${confidenceNoteHtml("judge")}`;
 }
 function nextActionPlan(sess,adv,setup){
   const plan=[];

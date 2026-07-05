@@ -178,6 +178,7 @@ function openFormCapture(){
     <h3>射形トラッキング <span class="mini">ベータ</span></h3>
     <div class="formCamWrap"><video id="fcVideo" playsinline muted></video><canvas id="fcCanvas"></canvas><div class="formPhaseTag" id="fcPhase">準備中</div></div>
     <div class="note" id="fcHud">解析モデルを読み込んでいます…（初回のみ約15MB）</div>
+    <div class="hint">検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。</div>
     <div id="fcShots"></div>
     <div class="btnrow">
       <button class="btn sec sm" id="fcSwap">前/背面</button>
@@ -187,7 +188,7 @@ function openFormCapture(){
       <button class="btn" id="fcSave" disabled>保存して終了</button>
       <button class="btn ghost" id="fcClose">保存せず閉じる</button>
     </div>
-    <div class="hint">リリースは自動検出されます。映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです。</div>
+    <div class="hint">リリースは自動検出されます。映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです。毎回同じ位置・角度で撮ると比較の精度が上がります。</div>
   </div>`;
   openModal(ovl,{escapeTarget:"#fcClose"});
   beginActiveWorkflow();
@@ -253,7 +254,7 @@ function openFormCapture(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
       if(lms) drawFormSkeleton(ctx,lms,canvas.width,canvas.height);
       if(raw&&disp){
-        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 信頼度 <b>${Math.round(disp.conf*100)}%</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>${raw.occluded.length?`<br>${icon("warn")} 検出低下: ${raw.occluded.map(esc).join("・")}`:""}`;
+        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 検出の鮮明さ <b>${Math.round(disp.conf*100)}%</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>${raw.occluded.length?`<br>${icon("warn")} 検出低下: ${raw.occluded.map(esc).join("・")}`:""}`;
       }else{
         hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 人物を検出中…（横向き全身が写る位置に置いてください）`;
       }

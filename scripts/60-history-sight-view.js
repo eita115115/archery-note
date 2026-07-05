@@ -255,7 +255,7 @@ function openHistDetail(id){
     }).join("")}</table>`;
   /* 初心者文法（正本 机上モード 5節）: 一言解釈を持つカード（サイト提案・個人モデル・次のアクション）は
      そのまま表示。数値の羅列だけの groupSummaryHtml/使用サイト/矢番号メモは「詳しく」に畳む */
-  const detailNumbersHtml=`${groupSummaryHtml(st)}
+  const detailNumbersHtml=`${groupSummaryHtml(st,{withConfidenceNote:true})}
     ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
     ${trustHtml(sess,setup,st)}
     ${arrowMetaSummaryHtml(sess)}`;

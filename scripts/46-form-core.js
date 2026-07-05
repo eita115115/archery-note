@@ -262,7 +262,7 @@ function formRecordInsights(record, prevRecord){
   if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°（基準 ${FORM_REF.drawArmAngle.ideal}°）です。`);
   if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカー位置ばらつきは σ=${st.anchorStd.toFixed(3)}（${st.anchorLabel}）です。`);
   if(st.driftRate!=null&&st.driftRate>0) facts.push(`${Math.round(st.driftRate*100)}% の射で、リリース前 0.5 秒に弓手/引き手のドリフトを観測しました。`);
-  if(st.confidence!=null) facts.push(`骨格検出の信頼度は平均 ${(st.confidence*100).toFixed(0)}% です。`);
+  if(st.confidence!=null) facts.push(`骨格検出の鮮明さは平均 ${(st.confidence*100).toFixed(0)}% です（カメラの角度による測定誤差は反映されません）。`);
 
   if(st.driftRate!=null&&st.driftRate>=0.5) causes.push("保持中に押し引きの張り合いが緩んでいる可能性があります（断定ではありません）。");
   if(st.bowArm!=null&&st.bowArm<FORM_REF.bowArmAngle.ideal-FORM_REF.bowArmAngle.sigma) causes.push("弓手肘が曲がり気味で、押しが的方向へ届いていない可能性があります。");
