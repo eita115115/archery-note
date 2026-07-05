@@ -79,7 +79,7 @@ assert(pkg.scripts["build:native-web"] && pkg.scripts["native:sync"], "Native bu
 assert(pkg.scripts["version:bump"], "Version bump script missing");
 assert(pkg.dependencies && pkg.dependencies["@capacitor/haptics"] && pkg.dependencies["@capacitor/share"] && pkg.dependencies["@capacitor/filesystem"], "Native haptics/share/filesystem plugins missing");
 assert(cap.appId === "com.eita.archerynote" && cap.webDir === "dist/native", "Capacitor config mismatch");
-assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "native-transition.md")), "Native transition files missing");
+assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "features", "native-transition.md")), "Native transition files missing");
 assert(surface.includes("nativeReadinessHtml") && surface.includes("アプリ情報・保存状態") && surface.includes("RK4-3D JS core"), "Native readiness UI missing");
 assert(surface.includes("pageHeroHtml") && surface.includes("liveSessionHeroHtml") && surface.includes("pageHeroLead") && surface.includes("history-hero-trend") && surface.includes("いまの提案") && surface.includes("いつものセッティングを残す"), "Reborn workspace UI missing");
 assert(surface.includes("nativePulse") && surface.includes("shareOrDownloadText") && surface.includes("capPlugin") && surface.includes("updateAppChrome") && surface.includes("freshReload"), "Native interaction layer missing");

@@ -1,7 +1,7 @@
 # LAN server: open http://<PC-IP>:8742/ from iPhone on the same Wi-Fi
 # (ASCII only in this file: PowerShell 5.1 misreads UTF-8 .ps1 without BOM)
 $Port = 8742
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 $mime = @{ ".html"="text/html; charset=utf-8"; ".js"="text/javascript; charset=utf-8"; ".json"="application/json"; ".svg"="image/svg+xml"; ".png"="image/png"; ".css"="text/css" }
 $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Any, $Port)
 $listener.Start()

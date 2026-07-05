@@ -10,7 +10,7 @@ This file is the durable implementation brief for integrating the stronger parts
 
 - Keep `archery-note` as the single target repository and public brand.
 - Preserve existing local data. Migrations must be idempotent and must not delete legacy data on failure.
-- Do the work in small, reviewable steps. After each step, run the narrowest useful validation and update `docs/codex-progress.md`.
+- Do the work in small, reviewable steps. After each step, run the narrowest useful validation and update `docs/codex/codex-progress.md`.
 - Keep the web/PWA surface first. Treat Android/Capacitor work as secondary unless requested.
 - Keep OCR, pose, AI, and third-party model assets default-off until provenance and redistribution terms are documented.
 - Avoid sibling-repository assumptions in README, docs, and runtime behavior.
@@ -251,7 +251,7 @@ docs/development.md
 docs/architecture.md
 docs/data-model.md
 docs/pwa-update.md
-docs/codex-for-oss.md
+docs/codex/codex-for-oss.md
 .github/ISSUE_TEMPLATE/bug_report.md
 .github/ISSUE_TEMPLATE/feature_request.md
 .github/PULL_REQUEST_TEMPLATE.md
@@ -885,7 +885,7 @@ docs/pwa-update.md
 -Update banner appears when a waiting worker exists
 -User action triggers `SKIP_WAITING`
 -`controllerchange` reloads once
-docs/codex-for-oss.md
+docs/codex/codex-for-oss.md
 # Codex for OSS usage plan
 Archery Note is an offline-first OSS PWA for archery practice records, sight adjustment,
 equipment notes, and training history analysis.

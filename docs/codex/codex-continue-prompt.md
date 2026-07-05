@@ -12,14 +12,14 @@ Continue the Archery Note integration loop.
 
 Read these files first:
 - AGENTS.md
-- docs/integration-plan.md
-- docs/codex-progress.md
+- docs/codex/integration-plan.md
+- docs/codex/codex-progress.md
 
 Then do exactly one small task:
-- If docs/codex-progress.md says phase reconciliation is not done, perform only
-  the repository inventory and update docs/codex-progress.md.
+- If docs/codex/codex-progress.md says phase reconciliation is not done, perform only
+  the repository inventory and update docs/codex/codex-progress.md.
 - Otherwise, pick the next not-started or in-progress task from
-  docs/codex-progress.md that is safe to do now.
+  docs/codex/codex-progress.md that is safe to do now.
 
 Rules:
 - Start with git status --short.
@@ -30,7 +30,7 @@ Rules:
 - Keep the primary iPhone workflow simple.
 - Make the smallest useful change.
 - Run the narrowest relevant validation.
-- Update docs/codex-progress.md with changed files, validation, and the next
+- Update docs/codex/codex-progress.md with changed files, validation, and the next
   task.
 - Stop and ask me before risky storage migration, Service Worker activation
   changes, dependency additions, or broad UI rewrites.
@@ -53,12 +53,12 @@ Use $archery-note. Assume no memory of prior sessions.
 
 Read these files first, in this order:
 - AGENTS.md
-- docs/codex-progress.md (current status and next task)
+- docs/codex/codex-progress.md (current status and next task)
 - references/recipes.md in the $archery-note skill
-- docs/integration-plan.md (only the Codex Working Summary and the section
+- docs/codex/integration-plan.md (only the Codex Working Summary and the section
   relevant to the next task)
 
-Then do exactly one small task: the "Next task" from docs/codex-progress.md,
+Then do exactly one small task: the "Next task" from docs/codex/codex-progress.md,
 following the matching recipe (scoring / UI / release / storage) literally.
 
 Hard invariants:
@@ -73,7 +73,7 @@ Rules:
 - Start with git status --short. Inspect current code; do not trust remembered
   line numbers, versions, or storage keys.
 - Make the smallest useful change and run the recipe's validation commands.
-- Update docs/codex-progress.md with changed files, validation results
+- Update docs/codex/codex-progress.md with changed files, validation results
   (including failures), risk notes, and the next task.
 - Stop and ask before: storage migration, Service Worker activation changes,
   dependency additions, broad UI rewrites, or anything a recipe's stop
@@ -93,7 +93,7 @@ Final response format:
 From the repository root:
 
 ```powershell
-codex exec --sandbox workspace-write -o artifacts/codex-last-report.md "Use $archery-note. Continue the Archery Note integration loop. Read AGENTS.md, docs/integration-plan.md, and docs/codex-progress.md first. Do exactly one small task from docs/codex-progress.md, starting with phase reconciliation if it is not done. Preserve existing local data, keep risky OCR/pose/AI features default-off, run the narrowest relevant validation, and update docs/codex-progress.md with changed files, validation, risk notes, and the next task. Stop and ask before risky storage migration, Service Worker activation changes, dependency additions, or broad UI rewrites."
+codex exec --sandbox workspace-write -o artifacts/codex-last-report.md "Use $archery-note. Continue the Archery Note integration loop. Read AGENTS.md, docs/codex/integration-plan.md, and docs/codex/codex-progress.md first. Do exactly one small task from docs/codex/codex-progress.md, starting with phase reconciliation if it is not done. Preserve existing local data, keep risky OCR/pose/AI features default-off, run the narrowest relevant validation, and update docs/codex/codex-progress.md with changed files, validation, risk notes, and the next task. Stop and ask before risky storage migration, Service Worker activation changes, dependency additions, or broad UI rewrites."
 ```
 
 Review the first few runs manually before scheduling or fully automating this.

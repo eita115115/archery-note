@@ -24,7 +24,7 @@ Primary brief: [integration-plan.md](integration-plan.md)
   this ledger. Branches created before `18f3d532` do not contain the
   `check:ui` token guard until merged/rebased onto current `main`.
 - Guidance docs (`AGENTS.md`, `CLAUDE.md`, this ledger,
-  `docs/integration-plan.md`, `docs/codex-continue-prompt.md`) are committed
+  `docs/codex/integration-plan.md`, `docs/codex/codex-continue-prompt.md`) are committed
   on `main` as of 2026-07-03.
 - Next task: reconcile the Phase Ledger rows and Next Task Detail against the
   current repository (releases through `v1.0.0`, UI extraction series).
@@ -34,7 +34,7 @@ Primary brief: [integration-plan.md](integration-plan.md)
 
 - Do one small task per Codex run or checkpoint.
 - Start every run with `git status --short`.
-- Read `AGENTS.md`, this file, and `docs/integration-plan.md` before editing.
+- Read `AGENTS.md`, this file, and `docs/codex/integration-plan.md` before editing.
 - Prefer web/PWA work first. Do Android/Capacitor work only when the task needs
   it.
 - Preserve existing local user data. Storage migrations must be idempotent and
@@ -89,7 +89,7 @@ Expected validation:
 ```powershell
 git status --short
 git diff --check
-npx prettier --check docs/codex-progress.md
+npx prettier --check docs/codex/codex-progress.md
 npm run format:check
 ```
 
@@ -97,21 +97,21 @@ npm run format:check
 
 ### 2026-06-29 - Setup durable integration loop
 
-- Added `docs/integration-plan.md` from the source PDF.
+- Added `docs/codex/integration-plan.md` from the source PDF.
 - Added this progress ledger.
-- Added `docs/codex-continue-prompt.md` for copy/paste or `codex exec` use.
+- Added `docs/codex/codex-continue-prompt.md` for copy/paste or `codex exec` use.
 - Added AGENTS guidance so future Codex runs know how to continue.
 
 Validation:
 
-- `npx prettier docs/integration-plan.md docs/codex-progress.md docs/codex-continue-prompt.md AGENTS.md --check`
+- `npx prettier docs/codex/integration-plan.md docs/codex/codex-progress.md docs/codex/codex-continue-prompt.md AGENTS.md --check`
   passed after formatting.
 - `npm run format:check` passed.
 - `git status --short` reviewed; setup files remained untracked.
 
 ### 2026-06-29 - Reconcile progress ledger with v0.5.0 baseline
 
-- Read `docs/integration-plan.md`, current repository scripts/workflows, PWA
+- Read `docs/codex/integration-plan.md`, current repository scripts/workflows, PWA
   markers, storage checks, and analysis view structure.
 - Updated this ledger to reflect releases through
   `v0.5.0-analysis-view-baseline`.
@@ -122,7 +122,7 @@ Validation:
 
 - `git status --short`: reviewed.
 - `git diff --check`: pass.
-- `npx prettier --check docs/codex-progress.md`: pass.
+- `npx prettier --check docs/codex/codex-progress.md`: pass.
 - `npm run format:check`: pass.
 
 Risk notes:
@@ -177,7 +177,7 @@ Risk notes:
   current `package.json` scripts (`check:pwa`, `check:storage`,
   `check:version`, `check:all`, etc.).
 - Added a low-cost-model bullet to the integration-plan working summary and a
-  "Fable unavailable" start prompt to `docs/codex-continue-prompt.md`.
+  "Fable unavailable" start prompt to `docs/codex/codex-continue-prompt.md`.
 - No app code, storage, Service Worker, version marker, or release change.
 
 Validation:
@@ -205,8 +205,8 @@ Risk notes:
   (branch, `v1.0.0`, `APP_VER 64`, `style.css` dirty state) and set the next
   task to a full ledger reconciliation.
 - Committed the durable guidance files (`AGENTS.md`,
-  `docs/integration-plan.md`, `docs/codex-progress.md`,
-  `docs/codex-continue-prompt.md`). `CLAUDE.md` and the unrelated `style.css`
+  `docs/codex/integration-plan.md`, `docs/codex/codex-progress.md`,
+  `docs/codex/codex-continue-prompt.md`). `CLAUDE.md` and the unrelated `style.css`
   change stay uncommitted on purpose.
 - No app code, storage, scoring, Service Worker, or version-marker change.
 
@@ -244,7 +244,7 @@ until rebased/merged; the Phase Ledger rows above are still stale.
 ## Last Run Report
 
 - Changed files:
-  - `docs/codex-progress.md` (this reconciliation)
+  - `docs/codex/codex-progress.md` (this reconciliation)
   - Five guidance docs committed to `main` on 2026-07-03
 - Validation:
   - `git status --short` (in-flight analysis/physics work identified and

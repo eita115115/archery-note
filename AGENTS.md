@@ -70,7 +70,7 @@ unavailable and work continues on Codex or a low-cost model. In that case:
 
 - Follow the matching recipe in the `$archery-note` skill
   (`references/recipes.md`) literally: scoring, UI, release, or storage.
-- Do exactly one small task per run, then update `docs/codex-progress.md`.
+- Do exactly one small task per run, then update `docs/codex/codex-progress.md`.
 - Never break these invariants: the visible arrow circle and line-cutter
   scoring agree; legacy user data is never deleted; the primary iPhone
   workflow stays simple.
@@ -94,12 +94,12 @@ scoring, storage, or release decisions.
 
 ## Long-Running Integration Loop
 
-- The durable integration brief lives in `docs/integration-plan.md`.
-- Progress and next-task state live in `docs/codex-progress.md`.
+- The durable integration brief lives in `docs/codex/integration-plan.md`.
+- Progress and next-task state live in `docs/codex/codex-progress.md`.
 - A ready-to-paste continuation prompt lives in
-  `docs/codex-continue-prompt.md`.
+  `docs/codex/codex-continue-prompt.md`.
 - For integration work, read all three files before editing.
-- Do exactly one small task per run, then update `docs/codex-progress.md` with
+- Do exactly one small task per run, then update `docs/codex/codex-progress.md` with
   changed files, validation, risk notes, and the next task.
 - If phase reconciliation is not done, do repository inventory and update the
   ledger before implementing new behavior.
