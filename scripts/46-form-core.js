@@ -79,6 +79,99 @@ function formMedian(vals) {
   return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
 }
 
+/* 矢プレゼンス検出しきい値。合成フレーム分離性テスト（tools/check-form-core.js）で
+   決定。古典 CV のみ（勾配ベースの「細い線」検出＝リッジ連続率）、ML モデル・
+   外部依存は使わない。ROI は両手首を結ぶ帯（±BAND_HALF_PX）に限定し、全画面
+   Hough は行わない（モバイル負荷をフレーム数ms級に抑えるため）。
+   単純な「隣接差分がしきい値超え」だけだとランダムノイズの単発エッジも拾って
+   しまう（背景テクスチャで誤検出）。矢の線は直交プロファイル上で「山（または谷）
+   が RIDGE_HALF_PX 以内の近距離に両側の反対符号エッジを伴う」形（=細いリッジ）
+   になるため、その形状を要求して誤検出を抑える。 */
+const ARROW_PRESENCE = Object.freeze({
+  BAND_HALF_PX: 6, // ROI帯の半幅（線の中心から左右何pxを走査するか）
+  RIDGE_HALF_PX: 2, // リッジ判定の近傍幅（線の実太さの想定上限に合わせる）
+  MARGIN_FRAC: 0.12, // 手首付近（グリップ・レスト遮蔽）を除外する区間比率（線の両端）
+  SAMPLE_STEP_PX: 3, // 線に沿ったサンプル間隔
+  RIDGE_TH: 70, // 直交プロファイルの二階差分（凸凹の鋭さ）がこの値を超えたら「リッジあり」
+  PRESENT_TH: 0.55, // スコアがこの値以上で「矢あり」と判定する既定しきい値
+});
+
+function formGray(data, w, h, x, y) {
+  const xi = Math.max(0, Math.min(w - 1, Math.round(x)));
+  const yi = Math.max(0, Math.min(h - 1, Math.round(y)));
+  const i = (yi * w + xi) * 4;
+  // ITU-R BT.601 輝度近似（整数演算で軽量化）
+  return (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+}
+
+/* 弓手手首(p1)〜引き手手首(p2)を結ぶ帯状 ROI に沿って、線分方向と直交する
+   輝度リッジ（細い線の断面形状）が連続して存在する割合(0-1)を返す。
+   p1/p2 は正規化座標(0-1)、imageData は {data:Uint8ClampedArray(RGBA), width, height}
+   （キャンバスのピクセル座標系）。ROI 限定のためフレームあたりの処理は
+   数百点程度のサンプルのみ（Hough 全画面走査はしない）。 */
+function arrowPresence(imageData, p1, p2, opts) {
+  const o = Object.assign({}, ARROW_PRESENCE, opts || {});
+  if (!imageData || !imageData.data || !p1 || !p2) return 0;
+  const w = imageData.width, h = imageData.height;
+  const x1 = p1.x * w, y1 = p1.y * h, x2 = p2.x * w, y2 = p2.y * h;
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.hypot(dx, dy);
+  if (len < 1e-3) return 0;
+  const ux = dx / len, uy = dy / len; // 線方向単位ベクトル
+  const nx = -uy, ny = ux; // 直交単位ベクトル
+  const margin = len * o.MARGIN_FRAC;
+  const start = margin, end = len - margin;
+  if (end <= start) return 0;
+  const steps = Math.max(1, Math.floor((end - start) / o.SAMPLE_STEP_PX));
+  const rh = o.RIDGE_HALF_PX;
+  const bandN = o.BAND_HALF_PX * 2 + 1;
+  // 各サンプル位置の直交プロファイル(平滑化前)と、そこで最も鋭いリッジの位置・強度を求める
+  const profiles = [];
+  const peakOffset = []; // そのサンプルで最もリッジが強い直交オフセット(prof index)
+  const peakRidge = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = start + (i / steps) * (end - start);
+    const cx = x1 + ux * t, cy = y1 + uy * t;
+    const prof = new Array(bandN);
+    for (let b = -o.BAND_HALF_PX; b <= o.BAND_HALF_PX; b++) {
+      prof[b + o.BAND_HALF_PX] = formGray(imageData.data, w, h, cx + nx * b, cy + ny * b);
+    }
+    profiles.push(prof);
+    let bestK = -1, bestRidge = 0;
+    for (let k = rh; k < bandN - rh; k++) {
+      const ridge = Math.abs(2 * prof[k] - prof[k - rh] - prof[k + rh]);
+      if (ridge > bestRidge) { bestRidge = ridge; bestK = k; }
+    }
+    peakOffset.push(bestK);
+    peakRidge.push(bestRidge);
+  }
+  // 「線」は隣接サンプル間でリッジの直交位置がほぼ同じまま連続する。
+  // ランダムノイズのリッジは位置・強度が毎サンプル独立にばらつくため、
+  // 前後 RUN 個のサンプルすべてでリッジが閾値を超え、かつ直交位置が
+  // ±POS_TOL に収まって連続しているときだけ「矢の線」としてカウントする
+  // （単発〜2連続の強いリッジは背景テクスチャの偶然として除外する）。
+  const POS_TOL = rh;
+  const RUN = 3;
+  let hit = 0, total = 0;
+  for (let i = 0; i < profiles.length; i++) {
+    total++;
+    if (peakRidge[i] <= o.RIDGE_TH || peakOffset[i] < 0) continue;
+    let runLen = 1;
+    for (let d = 1; d < RUN; d++) {
+      const j = i - d;
+      if (j < 0 || peakRidge[j] <= o.RIDGE_TH || Math.abs(peakOffset[j] - peakOffset[i]) > POS_TOL) break;
+      runLen++;
+    }
+    for (let d = 1; d < RUN; d++) {
+      const j = i + d;
+      if (j >= profiles.length || peakRidge[j] <= o.RIDGE_TH || Math.abs(peakOffset[j] - peakOffset[i]) > POS_TOL) break;
+      runLen++;
+    }
+    if (runLen >= Math.min(RUN, profiles.length)) hit++;
+  }
+  return total ? hit / total : 0;
+}
+
 /* 33 ランドマーク → 射形メトリクス。handedness: "right"（既定、弓手=左腕）| "left"。
    戻り値の距離系はすべて胴体長比 */
 function computeFormMetrics(landmarks, handedness) {
@@ -211,6 +304,37 @@ function formPreReleaseWindow(history, releaseTs, windowSec) {
     windowSec: w, frames: frames.length, bowMove, drawMove, headMove,
     bowDrift: bowMove > 0.05, drawDrift: drawMove > 0.06, headDrift: headMove > 0.05,
   };
+}
+
+/* 矢プレゼンスのシャドー判定しきい値。stepFormPhase の速度スパイク方式とは
+   完全に独立し、取消動作には使わない（表示・保存の注釈専用）。 */
+const ARROW_CHECK = Object.freeze({
+  GONE_TH: 0.35, // 猶予窓の代表値がこの値未満なら「矢が消えた」とみなす
+  STILL_TH: 0.55, // 猶予窓の代表値がこの値以上なら「矢がまだある」とみなす
+  // 両者の間はグレーゾーン（"unclear"）。閾値は arrowPresence の PRESENT_TH と揃えつつ、
+  // シャドー判定側は誤って「不一致」と煽らないよう GONE 側を保守的に低くしている。
+});
+
+/* 速度スパイクで released が発火した直後の確定猶予窓（CONFIRM_MS）における
+   矢プレゼンス系列から、シャドー判定を作る。preScores=発火直前（フルドロー中）の
+   スコア列、confirmScores=猶予窓中のスコア列（いずれも arrowPresence の返り値の配列）。
+   戻り値の judgment は "shot-match"（矢が消えた=リリースと整合）/
+   "letdown-mismatch"（矢がまだある=レットダウンの疑い、要確認）/
+   "unclear"（判定材料不足 or グレーゾーン）のいずれか。
+   この関数の戻り値は表示・保存注釈にのみ使い、released/canceled の判定を変えない。 */
+function judgeArrowCheck(preScores, confirmScores) {
+  const pre = (preScores || []).filter(Number.isFinite);
+  const confirm = (confirmScores || []).filter(Number.isFinite);
+  const preScore = pre.length ? formMedian(pre) : null;
+  const confirmScore = confirm.length ? formMedian(confirm) : null;
+  if (confirmScore == null) {
+    return { judgment: "unclear", preScore, confirmScore, pre: pre.length, confirm: confirm.length };
+  }
+  let judgment;
+  if (confirmScore < ARROW_CHECK.GONE_TH) judgment = "shot-match";
+  else if (confirmScore >= ARROW_CHECK.STILL_TH) judgment = "letdown-mismatch";
+  else judgment = "unclear";
+  return { judgment, preScore, confirmScore, pre: pre.length, confirm: confirm.length };
 }
 
 /* 複数射のアンカー位置再現性（胴体長比の標準偏差） */

@@ -25,7 +25,8 @@ const core = new Function(
 return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
   formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase,
   formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
-  formRecordStats, formRecordInsights, formTrendSeries, formScoreLink};`,
+  formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
+  ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
 )();
 
 /* ---------- 幾何ヘルパー ---------- */
@@ -377,6 +378,194 @@ function makeFormRecord(id, date, opts) {
   const none = core.formScoreLink([makeFormRecord("f4", "2026-07-04", {})], sessions, metricsFn);
   assertEqual(none.n, 0, "unlinked records give no pairs");
   assertEqual(none.split, null, "no split without pairs");
+}
+
+/* ---------- 矢プレゼンス検出（合成フレーム） ---------- */
+
+/* mulberry32: 低ビットの周期性が弱い簡易 PRNG。ANSI C 由来の単純 LCG は低ビットに
+   短周期があり、背景ノイズが偶然「線っぽい」周期パターンを作ってしまい検出器の
+   分離性テストとして不適切だったため、こちらに置き換えた。 */
+function makeRng(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = s;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* 合成 RGBA バッファを作る。bg=背景輝度(0-255), noiseAmp=一様乱数ノイズ振幅。
+   seed 付き PRNG でテストの再現性を保つ。 */
+function makeFrame(w, h, bg, noiseAmp, seed) {
+  const data = new Uint8ClampedArray(w * h * 4);
+  const rnd = makeRng(seed == null ? 1 : seed);
+  for (let i = 0; i < w * h; i++) {
+    const n = noiseAmp ? (rnd() * 2 - 1) * noiseAmp : 0;
+    const v = Math.max(0, Math.min(255, bg + n));
+    data[i * 4] = v; data[i * 4 + 1] = v; data[i * 4 + 2] = v; data[i * 4 + 3] = 255;
+  }
+  return { data, width: w, height: h };
+}
+
+/* frame に p1-p2 を結ぶ細線（幅 lineW px, 輝度 lineVal）を描く。occludeFrac が
+   与えられれば線分中央付近をその比率だけ背景輝度で塗り戻す（レスト付近の部分遮蔽を模擬）。 */
+function drawLine(frame, p1, p2, lineVal, lineW, occludeFrac) {
+  const { data, width: w, height: h } = frame;
+  const x1 = p1.x * w, y1 = p1.y * h, x2 = p2.x * w, y2 = p2.y * h;
+  const len = Math.hypot(x2 - x1, y2 - y1);
+  const steps = Math.ceil(len * 2);
+  const halfW = lineW / 2;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    if (occludeFrac && Math.abs(t - 0.5) < occludeFrac / 2) continue; // 中央部を遮蔽
+    const cx = x1 + (x2 - x1) * t, cy = y1 + (y2 - y1) * t;
+    for (let ox = -halfW; ox <= halfW; ox++) {
+      for (let oy = -halfW; oy <= halfW; oy++) {
+        const xi = Math.round(cx + ox), yi = Math.round(cy + oy);
+        if (xi < 0 || yi < 0 || xi >= w || yi >= h) continue;
+        const i2 = (yi * w + xi) * 4;
+        data[i2] = lineVal; data[i2 + 1] = lineVal; data[i2 + 2] = lineVal;
+      }
+    }
+  }
+  return frame;
+}
+
+/* p1-p2 を中点まわりに deg 度だけ回転させた新しい点対を返す（傾き検証用） */
+function rotatePts(p1, p2, deg) {
+  const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+  const rad = (deg * Math.PI) / 180;
+  const cos = Math.cos(rad), sin = Math.sin(rad);
+  const rot = (p) => {
+    const dx = p.x - mx, dy = p.y - my;
+    return { x: mx + dx * cos - dy * sin, y: my + dx * sin + dy * cos };
+  };
+  return [rot(p1), rot(p2)];
+}
+
+const AP_P1 = { x: 0.2, y: 0.5 }, AP_P2 = { x: 0.8, y: 0.5 };
+const AP_W = 200, AP_H = 200;
+
+{
+  // (a) 黒地に細線あり → 高スコア
+  const f = drawLine(makeFrame(AP_W, AP_H, 20, 0, 1), AP_P1, AP_P2, 230, 2);
+  const score = core.arrowPresence(f, AP_P1, AP_P2);
+  assert(score > 0.8, `synthetic line on dark bg scores high, got ${score}`);
+}
+{
+  // (b) 線なし → 低スコア
+  const f = makeFrame(AP_W, AP_H, 20, 0, 1);
+  const score = core.arrowPresence(f, AP_P1, AP_P2);
+  assertEqual(score, 0, `no line present scores zero, got ${score}`);
+}
+
+const scoreTable = [];
+function recordCase(label, score) { scoreTable.push({ label, score: +score.toFixed(3) }); }
+
+{
+  // (c) ノイズ・背景テクスチャ・部分遮蔽・傾き±15° の合成条件下での分離性
+  const withLine = [];
+  const withoutLine = [];
+
+  // ノイズ背景（線あり/なし）
+  {
+    const f = drawLine(makeFrame(AP_W, AP_H, 40, 12, 7), AP_P1, AP_P2, 220, 2);
+    const s = core.arrowPresence(f, AP_P1, AP_P2);
+    recordCase("noisy bg + line", s); withLine.push(s);
+  }
+  {
+    const f = makeFrame(AP_W, AP_H, 40, 12, 7);
+    const s = core.arrowPresence(f, AP_P1, AP_P2);
+    recordCase("noisy bg, no line", s); withoutLine.push(s);
+  }
+  // 背景テクスチャ（強めノイズ、線あり/なし）
+  {
+    const f = drawLine(makeFrame(AP_W, AP_H, 60, 25, 42), AP_P1, AP_P2, 210, 2);
+    const s = core.arrowPresence(f, AP_P1, AP_P2);
+    recordCase("textured bg + line", s); withLine.push(s);
+  }
+  {
+    const f = makeFrame(AP_W, AP_H, 60, 25, 42);
+    const s = core.arrowPresence(f, AP_P1, AP_P2);
+    recordCase("textured bg, no line", s); withoutLine.push(s);
+  }
+  // 部分遮蔽（レスト付近、線の中央20%を欠損させても検出できるか）
+  {
+    const f = drawLine(makeFrame(AP_W, AP_H, 30, 8, 3), AP_P1, AP_P2, 220, 2, 0.2);
+    const s = core.arrowPresence(f, AP_P1, AP_P2);
+    recordCase("partially occluded line (rest area)", s); withLine.push(s);
+  }
+  // 傾き ±15°（線あり/なし）
+  [15, -15].forEach((deg) => {
+    const [q1, q2] = rotatePts(AP_P1, AP_P2, deg);
+    const f = drawLine(makeFrame(AP_W, AP_H, 35, 10, 11 + deg), q1, q2, 215, 2);
+    const s = core.arrowPresence(f, q1, q2);
+    recordCase(`tilted ${deg}deg + line`, s); withLine.push(s);
+    const fNo = makeFrame(AP_W, AP_H, 35, 10, 11 + deg);
+    const sNo = core.arrowPresence(fNo, q1, q2);
+    recordCase(`tilted ${deg}deg, no line`, sNo); withoutLine.push(sNo);
+  });
+  // (d) 明暗2条件（明るい背景+暗い線／暗い背景+明るい線）
+  {
+    const f = drawLine(makeFrame(AP_W, AP_H, 220, 6, 5), AP_P1, AP_P2, 30, 2);
+    const s = core.arrowPresence(f, AP_P1, AP_P2);
+    recordCase("bright bg, dark line", s); withLine.push(s);
+  }
+  {
+    const f = drawLine(makeFrame(AP_W, AP_H, 15, 6, 6), AP_P1, AP_P2, 200, 2);
+    const s = core.arrowPresence(f, AP_P1, AP_P2);
+    recordCase("dark bg, bright line", s); withLine.push(s);
+  }
+
+  const minWith = Math.min(...withLine);
+  const maxWithout = Math.max(...withoutLine);
+
+  console.log("\n矢プレゼンス検出: 合成フレーム分離性テーブル");
+  console.log("label".padEnd(36), "score");
+  scoreTable.forEach((r) => console.log(r.label.padEnd(36), r.score));
+  console.log(`  min(あり)=${minWith.toFixed(3)}  max(なし)=${maxWithout.toFixed(3)}  分離しきい値候補=${core.ARROW_PRESENCE.PRESENT_TH}`);
+
+  assert(minWith > maxWithout, `presence/absence score distributions must not overlap: min(with)=${minWith} <= max(without)=${maxWithout}`);
+  assert(minWith > core.ARROW_PRESENCE.PRESENT_TH, `weakest "present" case must clear PRESENT_TH, got ${minWith}`);
+  assert(maxWithout < core.ARROW_PRESENCE.PRESENT_TH, `strongest "absent" case must stay below PRESENT_TH, got ${maxWithout}`);
+}
+{
+  // 境界: null 入力
+  assertEqual(core.arrowPresence(null, AP_P1, AP_P2), 0, "null imageData scores zero");
+  assertEqual(core.arrowPresence(makeFrame(10, 10, 0, 0, 1), null, AP_P2), 0, "null p1 scores zero");
+  assertEqual(core.arrowPresence(makeFrame(10, 10, 0, 0, 1), AP_P1, AP_P1), 0, "degenerate zero-length segment scores zero");
+}
+
+/* ---------- 矢プレゼンス シャドー判定 (judgeArrowCheck) ---------- */
+
+{
+  // 矢が消えた（発射と一致）: 猶予窓のスコアが低い
+  const r = core.judgeArrowCheck([0.9, 0.85, 0.95], [0.1, 0.0, 0.05]);
+  assertEqual(r.judgment, "shot-match", "arrow gone in confirm window matches shot");
+}
+{
+  // 矢がまだある（レットダウンの疑い）: 猶予窓のスコアが高いまま
+  const r = core.judgeArrowCheck([0.9, 0.85, 0.95], [0.8, 0.75, 0.9]);
+  assertEqual(r.judgment, "letdown-mismatch", "arrow still present in confirm window flags mismatch");
+}
+{
+  // グレーゾーン: しきい値の間
+  const r = core.judgeArrowCheck([0.9, 0.85], [0.45, 0.48]);
+  assertEqual(r.judgment, "unclear", "mid-range confirm score is unclear");
+}
+{
+  // 猶予窓のスコアが無い（フレーム取得失敗等）
+  const r = core.judgeArrowCheck([0.9], []);
+  assertEqual(r.judgment, "unclear", "no confirm-window samples is unclear");
+  assertEqual(r.confirmScore, null, "confirmScore null when no samples");
+}
+{
+  // preScores が空でも confirm 側だけで判定できる
+  const r = core.judgeArrowCheck([], [0.05, 0.1]);
+  assertEqual(r.judgment, "shot-match", "judgment works without pre-release samples");
+  assertEqual(r.preScore, null, "preScore null when no samples");
 }
 
 console.log("Form core checks OK");
