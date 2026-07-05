@@ -1,0 +1,26 @@
+{
+ "schema": 3,
+ "setups": [
+  {
+   "id": "fixture-missing-sessions-setup",
+   "name": "Backup without sessions",
+   "poundage": "38",
+   "note": "Partial backup that lost its sessions array"
+  }
+ ],
+ "sightMarks": [
+  {
+   "id": "fixture-missing-sessions-mark",
+   "setupId": "fixture-missing-sessions-setup",
+   "dist": 70,
+   "v": "6.1",
+   "h": "",
+   "date": "2026-05-01",
+   "ts": 1777600000000,
+   "note": "Sight value kept even though sessions are missing"
+  }
+ ],
+ "settings": {
+  "eyeSight": 850
+ }
+}

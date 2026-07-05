@@ -214,6 +214,20 @@ function setChoiceValue(root,id,value){
   else if(val){ pick.value=MANUAL_CHOICE; input.classList.remove("is-hidden"); }
   else{ pick.value=""; input.classList.add("is-hidden"); }
 }
+/* スペックシート様式: 単位が明確な数値項目だけ、ラベル末尾の単位表記を入力欄右の固定表示へ移す。
+   単位マップに無い項目（「(実測)」等の注記付きラベルを含む）はラベルをそのまま使う。
+   表示のみの変更で、値・キー・GEAR_FIELDS の文言そのものは変えない */
+const GEAR_UNIT_LABELS={
+  poundage:"lbs",drawLength:"inch",arrowLength:"inch",pointWeight:"gr",arrowDia:"mm",shaftGpi:"gr/in",
+  arrowWeight:"gr",shaftSetWeightSpread:"gr",shaftStraightness:"inch",foc:"%",vaneHeight:"mm",
+  bowEfficiency:"%",temperature:"℃",altitude:"m",humidity:"%"
+};
+function gearLabelUnit(k,lb){
+  const unit=GEAR_UNIT_LABELS[k];
+  if(!unit) return {label:lb,unit:""};
+  const stripped=lb.replace(/\s*\([^()]*\)\s*$/,"").trim();
+  return {label:stripped||lb,unit};
+}
 function gearFieldHtml(k,lb,s){
   const opts=gearOptions(k), listId=`gfList_${k}`;
   const list=opts.length?` list="${listId}" autocomplete="off"`:"";
@@ -221,7 +235,10 @@ function gearFieldHtml(k,lb,s){
   const ph=GEAR_PLACEHOLDERS[k]?` placeholder="${esc(GEAR_PLACEHOLDERS[k])}"`:"";
   if(k==="notes") return `<label class="f" for="gf_${k}">${lb}</label><textarea class="inp" id="gf_${k}"${ph}>${esc(s?s[k]:"")}</textarea>`;
   if(opts.length && !GEAR_NUMERIC_FIELDS.has(k)) return choiceFieldHtml(`gf_${k}`,lb,opts,s?s[k]:"",GEAR_PLACEHOLDERS[k]||"",mode);
-  return `<label class="f" for="gf_${k}">${lb}</label><input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}"${list}${mode}${ph}>${opts.length?`<datalist id="${listId}">${opts.map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`:""}`;
+  const {label,unit}=gearLabelUnit(k,lb);
+  const input=`<input class="inp" id="gf_${k}" value="${esc(s?s[k]:"")}"${list}${mode}${ph}>`;
+  const body=unit?`<div class="fieldUnit">${input}<span class="fieldUnitLabel">${esc(unit)}</span></div>`:input;
+  return `<label class="f" for="gf_${k}">${esc(label)}</label>${body}${opts.length?`<datalist id="${listId}">${opts.map(v=>`<option value="${esc(v)}"></option>`).join("")}</datalist>`:""}`;
 }
 function gearSectionHtml(sec,s){
   const body=sec.keys.map(k=>{
@@ -275,7 +292,7 @@ function spineGuidance(s){
 }
 function spineGuidanceHtml(s){
   const g=spineGuidance(s);
-  if(!g.ready) return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}を入れると、候補レンジを表示できます。</div>`;
+  if(!g.ready) return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}未入力</div>`;
   const color=g.tone==="ok"?"#0f9d58":g.tone==="warn"?"#c62828":"#8a6d1d";
   return `<div class="note"><b>スパイン初期候補</b>: ${g.candidates.join(" / ")}（動的負荷 ${g.eff.toFixed(1)}lbs相当、矢尺${g.len.toFixed(1)}in、ポイント${g.point}gr）</div>
     <div class="note"><b style="color:${color}">${g.state}</b> — ${esc(g.text)}</div>`;
@@ -295,8 +312,8 @@ function setupComparisonHtml(setupId){
   const last=ss[ss.length-1];
   const prev=[...ss.slice(0,-1)].reverse().find(s=>s.dist===last.dist) || ss[ss.length-2];
   const metric=s=>{
-    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0);
-    return {all,st,total,avg:all.length?total/all.length:0};
+    const m=sessionMetrics(s);
+    return {all:m.all,st:m.st,total:m.total,avg:m.avg};
   };
   const a=metric(prev), b=metric(last);
   const delta=(x,unit="",goodLow=false)=>{
@@ -313,43 +330,156 @@ function setupComparisonHtml(setupId){
     <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
   </div>`;
 }
-function gearWorkbenchHtml(){
+/* pageHeroHtml("gear") の縮小版。旧指標行（用具ライブラリ/入力材料/よく使う用具）はここへ統合し、
+   上部の数値枠は 登録件数・入力材料%・直近使用 の1ブロック3値まで。「よく使う用具」は台帳の金ドットが担う。
+   50-record-view.js の pageHeroHtml 本体は並行改修中のため触らず、ここで独立に描画する */
+function gearHeroHtml(){
   const setups=db.setups||[];
-  if(!setups.length) return "";
   const gp=setups.map(s=>gearPrecisionProfile(s));
   const avg=gp.length?gp.reduce((a,p)=>a+p.score,0)/gp.length:0;
-  const linked=db.sessions.filter(s=>s.setupId).length;
-  const marks=db.sightMarks.length;
-  const top=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)}))
-    .sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
-  return `<div class="insightStrip">
-    <div class="insightTile"><div class="k">用具ライブラリ</div><b>${setups.length}件</b><span>練習紐付け ${linked}回 / サイト値 ${marks}点</span></div>
-    <div class="insightTile"><div class="k">入力材料</div><b>${pct(avg)}</b><span>矢重量・矢径・FOC・実測初速の平均充実度</span></div>
-    <div class="insightTile"><div class="k">よく使う用具</div><b>${top?esc(top.s.name):"—"}</b><span>${top?`入力 ${top.p.level} / 履歴 ${top.m.level}`:"登録待ち"}</span></div>
-  </div>`;
+  const lastSess=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1))[0];
+  const lastSetup=lastSess&&setups.find(s=>s.id===lastSess.setupId);
+  return `<section class="pageHero">
+    <div class="kicker">用具</div>
+    <h2>いつものセッティングを残す</h2>
+    <div class="heroMetrics">
+      ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
+      ${heroMetricHtml("入力材料",setups.length?pct(avg):"—","用具データの平均充実度")}
+      ${heroMetricHtml("直近使用",lastSetup?lastSetup.name:"—",lastSess?fmtD(lastSess.date):"記録待ち")}
+    </div>
+  </section>`;
 }
 function renderGear(m){
-  m.innerHTML=`${pageHeroHtml("gear")}${gearWorkbenchHtml()}
-  <div class="card"><h2>用具セッティング <span class="mini">${db.setups.length}件</span></h2>
+  const lastSess=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1))[0];
+  const activeId=lastSess?lastSess.setupId:"";
+  m.innerHTML=`${gearHeroHtml()}
+  <div class="card"><h2>機材台帳 <span class="mini">${db.setups.length}件</span></h2>
     <div id="gearList">${db.setups.length? db.setups.map(s=>{
       const cnt=db.sessions.filter(x=>x.setupId===s.id).length;
       const gp=gearPrecisionProfile(s);
       const mp=modelReadinessProfile(s.id);
-      return `<div class="listItem" data-id="${s.id}"><div>
-        <div class="t">${esc(s.name)}</div>
-        <div class="d">${[s.bow,s.limbs,s.poundage?s.poundage+"lbs":""].filter(Boolean).map(esc).join(" ・ ")||"詳細未入力"}</div>
-        <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level} ・ 変更履歴${(s.history||[]).length}件</div>
-      </div><div class="gearChevron">›</div></div>`;
-    }).join(""):`<div class="empty">セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</div>`}</div>
-    <div class="btnrow"><button class="btn sec" id="gWizard">初回セットアップ</button><button class="btn" id="gAdd">＋ 新しいセッティング</button></div>
-    <div class="hint">バックアップ・テーマなどは右上の <b>⚙設定</b> から。</div>
+      const active=activeId===s.id;
+      return `<div class="listItem gearLedgerItem" data-id="${s.id}" data-testid="gear-ledger-item"><div>
+        <div class="t">${active?`<span class="gearActiveDot" title="使用中" aria-hidden="true"></span>`:""}${esc(s.name)}</div>
+        <div class="gearLedgerSpecs">
+          <span class="gearSpecCell">弓<b>${s.bow?esc(s.bow):"—"}</b></span>
+          <span class="gearSpecCell">リム<b>${s.limbs?esc(s.limbs):"—"}</b></span>
+          <span class="gearSpecCell">ポンド<b>${s.poundage?esc(s.poundage)+"lbs":"—"}</b></span>
+        </div>
+        <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level}</div>
+      </div><div class="gearChevron">${icon("chevron")}</div></div>`;
+    }).join(""):`<div class="empty">
+      <p>セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</p>
+      <button class="btn" id="gWizardEmpty" data-testid="gear-wizard-start">初回セットアップを始める</button>
+    </div>`}</div>
+    ${db.setups.length?`<div class="btnrow"><button class="btn" id="gAdd" data-testid="gear-add">＋ 新しいセッティング</button></div>`:""}
+    <div class="hint">バックアップ・テーマなどは右上の <b>設定</b> から。</div>
   </div>`;
-  $("#gWizard").onclick=()=>openSetupWizard();
-  $("#gAdd").onclick=()=>openGearForm(null);
+  /* 初回セットアップ導線は空状態専用（登録済みなら金面CTAは「＋新しいセッティング」1つ） */
+  const wiz=$("#gWizardEmpty");
+  if(wiz) wiz.onclick=()=>openSetupWizard();
+  const add=$("#gAdd");
+  if(add) add.onclick=()=>openGearForm(null);
   document.querySelectorAll("#gearList .listItem").forEach(li=>li.onclick=()=>openGearDetail(li.dataset.id));
 }
 
-/* ---------- ⚙ 設定 ---------- */
+/* ---------- カスタムラウンド（IMP-09 多距離ラウンド定義） ---------- */
+/* 的の選択肢は parseFaceChoice の語彙（122/80/60/40 単一・T40 三つ目・F〜 フィールド）に合わせる */
+const CUSTOM_ROUND_FACES=[["122","122cm"],["80","80cm"],["60","60cm"],["40","40cm"],["T40","40cm 三つ目（縦）"],["F80","80cm フィールド"],["F60","60cm フィールド"],["F40","40cm フィールド"],["F20","20cm フィールド"]];
+function customRoundStagesText(def){
+  return def.stages.map(st=>`${st.dist}m ${st.arrows}射`).join("→");
+}
+function customRoundsSettingsHtml(){
+  const list=db.customRounds||[];
+  return `<details class="adv" data-testid="settings-custom-rounds"><summary>多距離ラウンドの定義を管理</summary>
+    <div class="hint">保存すると記録タブのラウンド選択（多距離ラウンド）に表示されます。</div>
+    ${list.length?list.map(r=>`<button type="button" class="listItem" data-cr="${r.id}"><div>
+      <div class="t">${esc(r.label)}</div>
+      <div class="d">${esc(customRoundStagesText(r))}</div>
+    </div><div class="gearChevron">${icon("chevron")}</div></button>`).join(""):`<div class="empty">カスタムラウンドはまだありません。</div>`}
+    <div class="btnrow"><button class="btn sec" id="crAdd" data-testid="settings-custom-round-add">＋ カスタムラウンドを追加</button></div>
+  </details>`;
+}
+function openCustomRoundForm(id){
+  const src=id?(db.customRounds||[]).find(r=>r.id===id):null;
+  if(id&&!src){ openSettings(); return; }
+  /* 編集中のステージ状態。的は faceChoiceValue の値文字列で持ち、保存時に parseFaceChoice で faceD/faceType へ戻す */
+  const stages=(src?src.stages:[{dist:70,faceD:122,faceType:"single",arrows:36,perEnd:6}]).map(st=>({dist:st.dist,face:faceChoiceValue(st),arrows:st.arrows,perEnd:st.perEnd||6}));
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet"><h3>${src?"カスタムラウンド編集":"新しいカスタムラウンド"}</h3>
+    <label class="f">名前 *</label><input class="inp" id="crName" value="${esc(src?src.label:"")}" placeholder="例: 60m/30m 各36射">
+    <div id="crStages"></div>
+    <div class="btnrow"><button class="btn sec" id="crAddStage">＋ ステージを追加</button></div>
+    ${src?`<div class="btnrow"><button class="btn danger" id="crDel">この定義を削除</button></div>`:""}
+    <div class="btnrow"><button class="btn ghost" id="crCancel">キャンセル</button><button class="btn" id="crSave">保存</button></div>
+  </div>`;
+  openModal(ovl,{escapeTarget:"#crCancel"});
+  function stageRowHtml(st,i){
+    return `<div class="advice recordNeutralAdvice">
+      <div class="kv"><span><b>ステージ${i+1}</b></span><span>${stages.length>1?`<button type="button" class="btn sm ghost" data-del-stage="${i}">${icon("del")} 削除</button>`:""}</span></div>
+      <div class="row">
+        <div><label class="f">距離 (m)</label><input class="inp" data-st-dist="${i}" inputmode="numeric" value="${esc(st.dist==null?"":st.dist)}" placeholder="例: 60"></div>
+        <div><label class="f">的</label><select class="inp" data-st-face="${i}">${CUSTOM_ROUND_FACES.map(([v,lb])=>`<option value="${v}" ${String(st.face)===v?"selected":""}>${lb}</option>`).join("")}</select></div>
+      </div>
+      <div class="row">
+        <div><label class="f">射数</label><input class="inp" data-st-arrows="${i}" inputmode="numeric" value="${esc(st.arrows==null?"":st.arrows)}" placeholder="例: 36"></div>
+        <div><label class="f">1エンドの本数</label><select class="inp" data-st-perend="${i}">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===(+st.perEnd||6)?"selected":""}>${n}本</option>`).join("")}</select></div>
+      </div>
+    </div>`;
+  }
+  function renderStages(){
+    ovl.querySelector("#crStages").innerHTML=stages.map(stageRowHtml).join("");
+    ovl.querySelectorAll("[data-st-dist]").forEach(inp=>inp.onchange=e=>{ stages[+inp.dataset.stDist].dist=e.target.value.trim(); });
+    ovl.querySelectorAll("[data-st-face]").forEach(sel=>sel.onchange=e=>{ stages[+sel.dataset.stFace].face=e.target.value; });
+    ovl.querySelectorAll("[data-st-arrows]").forEach(inp=>inp.onchange=e=>{ stages[+inp.dataset.stArrows].arrows=e.target.value.trim(); });
+    ovl.querySelectorAll("[data-st-perend]").forEach(sel=>sel.onchange=e=>{ stages[+sel.dataset.stPerend].perEnd=+e.target.value||6; });
+    ovl.querySelectorAll("[data-del-stage]").forEach(b=>b.onclick=()=>{ stages.splice(+b.dataset.delStage,1); renderStages(); });
+  }
+  renderStages();
+  ovl.querySelector("#crAddStage").onclick=()=>{
+    const prev=stages[stages.length-1];
+    stages.push({dist:"",face:prev?prev.face:"122",arrows:prev?prev.arrows:36,perEnd:prev?prev.perEnd:6});
+    renderStages();
+  };
+  ovl.querySelector("#crCancel").onclick=()=>{ closeModal(ovl); openSettings(); };
+  ovl.querySelector("#crSave").onclick=async()=>{
+    const label=ovl.querySelector("#crName").value.trim();
+    if(!label){ toast("名前を入力してください"); return; }
+    const clean=[];
+    for(let i=0;i<stages.length;i++){
+      const dist=+stages[i].dist, arrows=+stages[i].arrows, perEnd=+stages[i].perEnd||6;
+      if(!(dist>0&&arrows>0)){ toast(`ステージ${i+1}の距離と射数を入力してください`); return; }
+      if(!Number.isInteger(arrows)){ toast(`ステージ${i+1}の射数は正の整数で入力してください`); return; }
+      if(perEnd>arrows){ toast(`ステージ${i+1}の1エンドの本数（${perEnd}本）が射数（${arrows}射）を超えています`); return; }
+      const f=parseFaceChoice(stages[i].face);
+      clean.push({dist,faceD:f.faceD,faceType:f.faceType,arrows,perEnd});
+    }
+    /* 記録中のラウンド定義を書き換えると進行中のステージ遷移が壊れうるので警告（保存自体は可能） */
+    if(src && db.active && db.active.roundGroup && db.active.roundGroup.roundId===id &&
+       !await appConfirm("記録中のラウンドがあり、変更するとステージ進行が完了できなくなる可能性があります。保存しますか？",{okLabel:"保存する"})) return;
+    db.customRounds=Array.isArray(db.customRounds)?db.customRounds:[];
+    if(src){
+      const i=db.customRounds.findIndex(r=>r.id===id);
+      if(i>=0) db.customRounds[i]={id,label,stages:clean}; else db.customRounds.push({id,label,stages:clean});
+    }else{
+      db.customRounds.push({id:uid(),label,stages:clean});
+    }
+    /* 定義の保存は重要操作なので同期 save()。multiRoundDefs は db.customRounds を直接読むため即反映される */
+    save({reason:"custom-round",forceSnapshot:true});
+    closeModal(ovl); openSettings(); toast("カスタムラウンドを保存しました");
+  };
+  const del=ovl.querySelector("#crDel");
+  if(del) del.onclick=async()=>{
+    const activeWarn=db.active&&db.active.roundGroup&&db.active.roundGroup.roundId===id?"\n記録中のラウンドがあり、削除するとステージ進行が完了できなくなる可能性があります。":"";
+    if(await appConfirm(`「${src.label}」を削除しますか？${activeWarn}\n（過去の練習記録は残ります。記録タブの選択肢から消えます）`,{danger:true,okLabel:"削除"})){
+      db.customRounds=(db.customRounds||[]).filter(r=>r.id!==id);
+      save({reason:"delete-custom-round",forceSnapshot:true});
+      closeModal(ovl); openSettings(); toast("削除しました");
+    }
+  };
+}
+
+/* ---------- 設定 ---------- */
 function applyTheme(){
   const t=db.settings.theme||"auto";
   document.documentElement.className=t;
@@ -358,41 +488,78 @@ function openSettings(){
   const ovl=document.createElement("div"); ovl.className="ovl";
   const th=db.settings.theme||"auto";
   const snaps=readSnapshots();
-  ovl.innerHTML=`<div class="sheet"><h3>⚙ 設定</h3>
-    <label class="f">テーマ</label>
-    <div class="chips" id="thChips">
-      ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<div class="chip ${th===v?"on":""}" data-th="${v}">${lb}</div>`).join("")}
+  ovl.innerHTML=`<div class="sheet"><h3>${icon("gear")} 設定</h3>
+    <div class="settingsGroup" data-testid="settings-group-app">
+      <div class="settingsGroupTitle">アプリ情報</div>
+      ${nativeReadinessHtml()}
+      <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
     </div>
-    <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
-    <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
-    ${nativeReadinessHtml()}
-    <h3 class="settingsH3">データ管理</h3>
-    ${backupReminderHtml()}
-    <div class="btnrow">
-      <button class="btn sec" id="dExp">⬇ バックアップ保存</button>
-      <button class="btn sec" id="dImp">⬆ 読み込み</button>
+
+    <div class="settingsGroup" data-testid="settings-group-display">
+      <div class="settingsGroupTitle">表示</div>
+      <label class="f">テーマ</label>
+      <div class="chips" id="thChips" data-testid="settings-theme-chips">
+        ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<button type="button" class="chip ${th===v?"on":""}" aria-pressed="${th===v}" data-th="${v}">${lb}</button>`).join("")}
+      </div>
+      <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
+      <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
+      <label class="f">射形トラッキング（ベータ）</label>
+      <div class="chips" id="ftChips">
+        <button type="button" class="chip ${db.settings.formTrackingEnabled?"":"on"}" aria-pressed="${!db.settings.formTrackingEnabled}" data-ft="0">OFF</button>
+        <button type="button" class="chip ${db.settings.formTrackingEnabled?"on":""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
+      </div>
+      <div class="hint">解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
+      <h3 class="settingsH3">カスタムラウンド</h3>
+      <div class="settingsActionHint">距離ごとのステージを持つ自分用ラウンドを増減・編集します。</div>
+      ${customRoundsSettingsHtml()}
     </div>
-    <div class="btnrow"><button class="btn sec" id="dCsv">CSV出力</button></div>
-    <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
-    <h3 class="settingsH3">自動バックアップ</h3>
-    ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動バックアップはまだありません。保存操作を行うと端末内に復元用バックアップが残ります。</div>`}
-    <div class="btnrow">
-      <button class="btn sec" id="dSnapNow">今すぐバックアップ</button>
-      <button class="btn ghost" id="dSnapRestore" ${snaps.length?"":"disabled"}>選択したバックアップを復元</button>
+
+    <div class="settingsGroup" data-testid="settings-group-data">
+      <div class="settingsGroupTitle">データ</div>
+      ${backupReminderHtml()}
+      <div class="settingsActionHint">練習記録・セッティングをまとめて1つのJSONファイルに書き出します。</div>
+      <div class="btnrow">
+        <button class="btn sec" id="dExp" data-testid="settings-export">${icon("down")} バックアップ保存</button>
+        <button class="btn sec" id="dImp" data-testid="settings-import">${icon("up")} 読み込み</button>
+      </div>
+      <div class="settingsActionHint">練習記録だけを表計算ソフトで開けるCSV形式で書き出します。</div>
+      <div class="btnrow"><button class="btn sec" id="dCsv" data-testid="settings-csv">CSV出力</button></div>
+      <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
+      <h3 class="settingsH3">自動バックアップ</h3>
+      <div class="settingsActionHint">バックアップ・読み込み操作のたびに、端末内へ復元用の控えを自動で残します。</div>
+      ${snaps.length?`<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s,i)=>`<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>`:`<div class="empty">自動バックアップはまだありません。保存操作を行うと端末内に復元用バックアップが残ります。</div>`}
+      <div class="btnrow">
+        <button class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">今すぐバックアップ</button>
+        <button class="btn ghost" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length?"":"disabled"}>選択したバックアップを復元</button>
+      </div>
+      <div class="settingsActionHint">削除した用具・練習記録の一時保管です。ここから元に戻せます。</div>
+      ${trashSettingsHtml()}
+      <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
     </div>
-    ${trashSettingsHtml()}
-    <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
-    <div class="hint settingsDangerHint">⚠️ iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
-    <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
+
+    <div class="settingsGroup settingsDangerZone" data-testid="settings-group-danger">
+      <div class="settingsGroupTitle">危険域</div>
+      ${trashClearButtonHtml()}
+      <div class="hint settingsDangerHint">${icon("warn")} iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
+    </div>
+
     <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#setClose"});
   ovl.querySelectorAll("#thChips .chip").forEach(c=>c.onclick=()=>{
     db.settings.theme=c.dataset.th; save(); applyTheme();
-    ovl.querySelectorAll("#thChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    ovl.querySelectorAll("#thChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
   });
   ovl.querySelector("#setEye").onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); };
-  ovl.querySelector("#setClose").onclick=()=>{ ovl.remove(); render(); };
+  ovl.querySelectorAll("#ftChips .chip").forEach(c=>c.onclick=()=>{
+    db.settings.formTrackingEnabled=c.dataset.ft==="1"; save();
+    ovl.querySelectorAll("#ftChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+    toast(db.settings.formTrackingEnabled?"射形トラッキングを有効にしました（分析タブ）":"射形トラッキングを無効にしました");
+  });
+  ovl.querySelector("#setClose").onclick=()=>{ closeModal(ovl); render(); };
+  ovl.querySelectorAll("[data-cr]").forEach(li=>li.onclick=()=>{ closeModal(ovl); openCustomRoundForm(li.dataset.cr); });
+  const crAdd=ovl.querySelector("#crAdd");
+  if(crAdd) crAdd.onclick=()=>{ closeModal(ovl); openCustomRoundForm(null); };
   ovl.querySelector("#dExp").onclick=()=>{
     db.settings.lastBackupAt=new Date().toISOString();
     save({reason:"json-export",forceSnapshot:true});
@@ -400,18 +567,18 @@ function openSettings(){
     shareOrDownloadText(`archery-note-${today()}.json`,JSON.stringify(db,null,1),"application/json","Archery Note Backup").finally(endActiveWorkflow);
   };
   ovl.querySelector("#dCsv").onclick=()=>exportSessionsCsv();
-  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータをバックアップしました"); ovl.remove(); openSettings(); };
-  ovl.querySelector("#dSnapRestore").onclick=()=>{
+  ovl.querySelector("#dSnapNow").onclick=()=>{ writeSafetySnapshot("manual",true); toast("現在のデータをバックアップしました"); closeModal(ovl); openSettings(); };
+  ovl.querySelector("#dSnapRestore").onclick=async()=>{
     const sel=ovl.querySelector("#dSnapSel");
     const snap=readSnapshots()[sel?+sel.value:0];
     if(!snap||!snap.data){ toast("復元できるバックアップデータがありません"); return; }
-    if(confirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先にバックアップしてから置き換えます。よろしいですか？`)){
+    if(await appConfirm(`${snapshotLabel(snap)} を復元します。\n現在のデータも先にバックアップしてから置き換えます。よろしいですか？`,{danger:true,okLabel:"復元する"})){
       beginActiveWorkflow();
       try{
         writeSafetySnapshot("restore-before",true);
         db=normalizeDb(snap.data);
         save({reason:"restore",forceSnapshot:true});
-        applyTheme(); ovl.remove(); render(); toast("バックアップデータを復元しました");
+        applyTheme(); closeModal(ovl); render(); toast("バックアップデータを復元しました");
       }finally{ endActiveWorkflow(); }
     }
   };
@@ -420,12 +587,12 @@ function openSettings(){
     const f=e.target.files[0]; if(!f)return;
     beginActiveWorkflow();
     const r=new FileReader();
-    r.onload=()=>{ try{
+    r.onload=async()=>{ try{
       const d=JSON.parse(r.result);
       if(!d.sessions||!d.setups) throw 0;
-      if(confirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`)){
+      if(await appConfirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`,{danger:true,okLabel:"読み込む"})){
         writeSafetySnapshot("import-before",true);
-        db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); ovl.remove(); render(); toast("読み込みました");
+        db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); closeModal(ovl); render(); toast("読み込みました");
       }
     }catch(_){ toast("ファイルを読み込めませんでした"); } finally{ endActiveWorkflow(); } };
     r.onerror=()=>{ endActiveWorkflow(); toast("ファイルを読み込めませんでした"); };
@@ -434,13 +601,13 @@ function openSettings(){
   ovl.querySelectorAll("[data-restore-trash]").forEach(b=>b.onclick=()=>{
     beginActiveWorkflow();
     try{
-      if(restoreTrash(b.dataset.restoreTrash)){ ovl.remove(); render(); openSettings(); toast("復元しました"); }
+      if(restoreTrash(b.dataset.restoreTrash)){ closeModal(ovl); render(); openSettings(); toast("復元しました"); }
     }finally{ endActiveWorkflow(); }
   });
   const tc=ovl.querySelector("#trashClear");
-  if(tc) tc.onclick=()=>{
-    if(confirm("ゴミ箱の中身を完全に削除しますか？")){
-      db.trash=[]; save({reason:"clear-trash",forceSnapshot:true}); ovl.remove(); openSettings(); toast("ゴミ箱を空にしました");
+  if(tc) tc.onclick=async()=>{
+    if(await appConfirm("ゴミ箱の中身を完全に削除しますか？",{danger:true,okLabel:"空にする"})){
+      db.trash=[]; save({reason:"clear-trash",forceSnapshot:true}); closeModal(ovl); openSettings(); toast("ゴミ箱を空にしました");
     }
   };
 }
@@ -473,9 +640,9 @@ function openSetupWizard(){
     </details>
     <div class="btnrow"><button class="btn ghost" id="wCancel">キャンセル</button><button class="btn" id="wSave">保存して開始</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#wCancel"});
   bindChoiceFields(ovl);
-  ovl.querySelector("#wCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#wCancel").onclick=()=>closeModal(ovl);
   ovl.querySelector("#wSave").onclick=()=>{
     const name=ovl.querySelector("#wName").value.trim();
     if(!name){ toast("名前を入力してください"); return; }
@@ -503,7 +670,7 @@ function openSetupWizard(){
       if(v||h) db.sightMarks.push({id:uid(),setupId:n.id,dist:d,v,h,date:today(),ts:Date.now(),note:"初回セットアップ"});
     });
     ui.sightSel.setupId=n.id;
-    save({reason:"setup-wizard",forceSnapshot:true}); ovl.remove(); render(); toast("初回セットアップを保存しました");
+    save({reason:"setup-wizard",forceSnapshot:true}); closeModal(ovl); render(); toast("初回セットアップを保存しました");
   };
 }
 function openGearDetail(id){
@@ -514,26 +681,30 @@ function openGearDetail(id){
     ${modelReadinessHtml(id)}
     ${physicsCalibrationHtml(id)}
     ${setupComparisonHtml(id)}
-    <table class="tbl">${GEAR_FIELDS.map(([k,lb])=>s[k]?`<tr><th class="gearTh40">${lb}</th><td>${esc(s[k])}</td></tr>`:"").join("")}</table>
+    <div class="specSheet" data-testid="gear-spec-sheet">${GEAR_FIELDS.map(([k,lb])=>{
+      if(!s[k]) return "";
+      const {label,unit}=gearLabelUnit(k,lb);
+      return `<div class="specRow"><span>${esc(label)}</span><b>${esc(s[k])}${unit?esc(unit):""}</b></div>`;
+    }).join("")}</div>
     ${(s.history&&s.history.length)?`<h3 class="gearHistoryH3">変更履歴</h3>
       ${[...s.history].reverse().map(h=>`<div class="gearHistoryRow">
         <b>${fmtD(h.date)}</b> — ${h.changes.map(c=>`${esc(c.label)}: ${esc(c.from||"（未設定）")} → <b>${esc(c.to||"（削除）")}</b>`).join(" / ")}</div>`).join("")}`:""}
     <div class="btnrow">
-      <button class="btn danger" id="gDel">削除</button>
-      <button class="btn sec" id="gEdit">編集</button>
+      <button class="btn danger" id="gDel" data-testid="gear-delete">削除</button>
+      <button class="btn sec" id="gEdit" data-testid="gear-edit">編集</button>
       <button class="btn ghost" id="gClose">閉じる</button>
     </div>
   </div>`;
-  document.body.appendChild(ovl);
-  ovl.querySelector("#gClose").onclick=()=>ovl.remove();
-  ovl.querySelector("#gEdit").onclick=()=>{ ovl.remove(); openGearForm(id); };
-  ovl.querySelector("#gDel").onclick=()=>{
-    if(confirm(`「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`)){
+  openModal(ovl,{escapeTarget:"#gClose"});
+  ovl.querySelector("#gClose").onclick=()=>closeModal(ovl);
+  ovl.querySelector("#gEdit").onclick=()=>{ closeModal(ovl); openGearForm(id); };
+  ovl.querySelector("#gDel").onclick=async()=>{
+    if(await appConfirm(`「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`,{danger:true,okLabel:"削除"})){
       const marks=db.sightMarks.filter(x=>x.setupId===id);
       trashItem("setupBundle",s.name,{setup:s,sightMarks:marks});
       db.setups=db.setups.filter(x=>x.id!==id);
       db.sightMarks=db.sightMarks.filter(x=>x.setupId!==id);
-      save({reason:"delete-setup",forceSnapshot:true}); ovl.remove(); render(); toast("削除しました。設定から復元できます");
+      save({reason:"delete-setup",forceSnapshot:true}); closeModal(ovl); render(); toast("削除しました。設定から復元できます");
     }
   };
 }
@@ -543,13 +714,13 @@ function openGearForm(id){
   ovl.innerHTML=`<div class="sheet"><h3>${s?"セッティング編集":"新しいセッティング"}</h3>
     <label class="f">名前 *</label><input class="inp" id="gfName" value="${esc(s?s.name:"")}" placeholder="例: メイン70m仕様">
     ${GEAR_SECTIONS.map(sec=>gearSectionHtml(sec,s)).join("")}
-    <div class="btnrow"><button class="btn sec" id="gfInfer">📖 カタログから推定</button></div>
+    <div class="btnrow"><button class="btn sec" id="gfInfer">${icon("book")} カタログから推定</button></div>
     <div class="hint" id="gfInferHint">シャフト銘柄と番手を別々に入れると、掲載モデル・直径・GPI・総矢重量を推定します。矢尺とポイント重量は専用欄に入れてください。</div>
     <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#gfCancel"});
   bindChoiceFields(ovl);
-  ovl.querySelector("#gfCancel").onclick=()=>ovl.remove();
+  ovl.querySelector("#gfCancel").onclick=()=>closeModal(ovl);
   ovl.querySelector("#gfInfer").onclick=()=>{
     const vals={};
     GEAR_FIELDS.forEach(([k])=>vals[k]=ovl.querySelector("#gf_"+k).value.trim());
@@ -587,6 +758,6 @@ function openGearForm(id){
       db.setups.push(n);
       if(!ui.sightSel.setupId) ui.sightSel.setupId=n.id;
     }
-    save(); ovl.remove(); render();
+    save(); closeModal(ovl); render();
   };
 }

@@ -13,6 +13,9 @@ const appScripts = [
   "scripts/20-scoring.js",
   "scripts/30-target-svg.js",
   "scripts/40-analysis-physics.js",
+  "scripts/45-analysis-core.js",
+  "scripts/46-form-core.js",
+  "scripts/47-form-view.js",
   "scripts/50-record-view.js",
   "scripts/60-history-sight-view.js",
   "scripts/70-gear-settings.js",
@@ -98,6 +101,9 @@ function staticUiChecks() {
   assert(/\.histTrendValue\{[^}]*font-size:var\(--font-size-sm\);/.test(css), ".histTrendValue must preserve 12px text size");
   assert(/\.histSightVal\{font-size:17px;/.test(css), ".histSightVal must preserve 17px text size");
   assert(surface.includes("@keyframes appRise") && !surface.includes("primaryPulse") && surface.includes("scorePop") && surface.includes("markPop") && surface.includes("impactFlash") && surface.includes("shotNew") && surface.includes("freshArrow") && surface.includes("prefers-reduced-motion") && surface.includes("ic-record") && surface.includes("ic-analysis") && surface.includes("ic-sight"), "minimal recording feedback, tab icons, and reduced-motion guard missing");
+  // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
+  assert(html.includes('class="ic ic-record"') && html.includes('viewBox="0 0 24 24"') && html.includes('stroke-linecap="butt"') && !css.includes(".ic-record::before"), "tab icons must be inline 24px-grid SVGs with butt caps (no CSS pseudo icons)");
+  assert(appJs.includes('class="icoInline" viewBox="0 0 24 24"') && !/class="icoInline"[^>]*stroke-linecap="round"/.test(appJs), "icon() set must use the 24px grid with butt caps");
   assert(surface.includes("--active-tab") && surface.includes("nav.tabs::before") && surface.includes('setProperty("--active-tab"'), "smooth state-following tab motion missing");
   assert(!surface.includes("targetImpact") && !surface.includes("screenIn") && !surface.includes("triggerReleaseMotion") && !surface.includes("arrowFlight"), "overdone transition/target animation should not return");
   assert(surface.includes("今日のズレを、次の一射へ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "systematic onboarding UI missing");
@@ -106,12 +112,16 @@ function staticUiChecks() {
   assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "field target setup UI missing");
   assert(surface.includes("perfectScoreLabel") && surface.includes("secondaryScoreLabel") && surface.includes("5点以上"), "field-aware score labels missing");
   assert(surface.includes("初回の操作ガイド") && surface.includes("次から表示しない") && surface.includes("activeGuideSeen"), "first-run active guide missing");
-  assert(surface.includes("今日の記録を始める") && surface.includes("前回と同じ") && surface.includes("履歴を見る") && surface.includes("homeActions") && surface.includes("quickRepeat") && surface.includes("quickStartMeta") && surface.includes("actionFaceLabel") && !surface.includes("今の条件で開始") && surface.includes("今日のズレを、次の一射へ。") && surface.includes("アーチェリー練習ノート") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("phaseArc") && surface.includes("simplePromise") && surface.includes("ズレを見る") && surface.includes("詳しく使う") && surface.includes("quickSelects") && surface.includes("missionMore") && surface.includes("summaryDecisionHtml") && surface.includes("setupLens") && surface.includes("insightStrip"), "lightweight record flow composition missing");
+  assert(surface.includes("この条件で開始") && surface.includes("前回と同じ") && surface.includes("recordRepeatBand") && surface.includes("homeActions") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("actionFaceLabel") && !surface.includes("今の条件で開始") && surface.includes("今日のズレを、次の一射へ。") && surface.includes("アーチェリー練習ノート") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("phaseArc") && surface.includes("simplePromise") && surface.includes("ズレを見る") && surface.includes("詳しく使う") && surface.includes("quickSelects") && surface.includes("missionMore") && surface.includes("summaryDecisionHtml") && surface.includes("setupLens") && surface.includes("insightStrip"), "lightweight record flow composition missing");
   assert(surface.includes("compactHud") && !surface.includes("まず今日の記録を始める。詳しい材料") && !surface.includes("距離・的サイズはこの画面で変更できます") && !surface.includes("タップ＆ドラッグで確定"), "record screen should stay compact and low-noise");
-  assert(surface.includes("pageHero") && surface.includes("分布と偏移を読む") && surface.includes("サイト値を整える") && surface.includes("いつものセッティングを残す") && surface.includes("liveHud"), "reborn workspace surfaces missing");
+  assert(surface.includes("pageHero") && surface.includes("pageHeroLead") && surface.includes("history-hero-trend") && surface.includes("いまの提案") && surface.includes("いつものセッティングを残す") && surface.includes("liveHud"), "reborn workspace surfaces missing");
   assert(surface.includes("nativeSignal") && surface.includes("触感") && surface.includes("共有") && surface.includes("freshReload") && !html.includes("statusPill"), "native-feel UI should not crowd the header");
   assert(surface.includes("SHOT_REASON_TAGS") && surface.includes("外れ理由") && surface.includes("矢番号") && surface.includes("arrowMetaSummaryHtml"), "shot reason and arrow-number note UI missing");
   assert(surface.includes("判断信頼度") && surface.includes("個人モデル") && surface.includes("次のアクション") && surface.includes("個人データ準備度") && surface.includes("スパイン初期候補") && surface.includes("RK4-3D") && surface.includes("物理校正"), "analysis cards missing");
+  // 「信頼度」の語の分離（監査 High/Medium 対応）: 射形側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
+  assert(surface.includes("検出の鮮明さ") && !appJs.includes("・ 信頼度"), "form-tracking must say 検出の鮮明さ, not bare 信頼度, in the capture HUD");
+  assert(surface.includes("カメラの角度による測定誤差は反映されません") && surface.includes("毎回同じ位置・角度で撮ると比較の精度が上がります"), "form-tracking measurement-error and camera-position hints missing");
+  assert(surface.includes("演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出") && surface.includes("判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出"), "confidence derivation notes missing");
   assert(surface.includes("アプリ情報・保存状態") && surface.includes("nativeStack") && surface.includes("PWA + Capacitor-ready") && surface.includes("ブラウザ保存"), "native readiness UI missing");
   assert(surface.includes("自動バックアップ") && surface.includes("今すぐバックアップ") && surface.includes("バックアップデータを復元しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "backup settings copy should be user-facing");
   assert(surface.includes("シャフト銘柄") && surface.includes("番手/スパイン") && surface.includes("ハンドル/弓本体") && surface.includes("HOYT Grand Prix XCEED 2 H25") && surface.includes("HOYT Formula RCRV PODIUM Limbs"), "separated gear fields missing");

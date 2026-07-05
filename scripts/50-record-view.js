@@ -2,7 +2,7 @@
 /* Archery Note: record and active-session views */
 /* ============ views ============ */
 let view="record";
-let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, zoom:1, recordMode:"practice", freshArrow:-1, freshTimer:0 };
+let ui={ selArrow:-1, sightSel:{setupId:null, dist:70}, histOpen:null, histFilter:{setupId:"",dist:"",round:""}, analysisFilter:{setupId:"",dist:"",round:"",period:"all"}, zoom:1, recordMode:"practice", freshArrow:-1, freshTimer:0 };
 function showView(v){ if(view===v) return; view=v; ui.selArrow=-1; nativePulse("light"); render(); }
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>showView(b.dataset.v));
 
@@ -16,8 +16,13 @@ function render(){
     tabBar.style.setProperty("--active-tab", activeIndex);
     tabBar.style.setProperty("--tab-count", tabs.length||1);
   }
-  tabs.forEach(b=>b.classList.toggle("on",b.dataset.v===view));
+  tabs.forEach(b=>{
+    const on=b.dataset.v===view;
+    b.classList.toggle("on",on);
+    if(on) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current");
+  });
   const m=$("#main");
+  m.classList.remove("hasActiveDock");
   if(view==="record") renderRecord(m);
   else if(view==="history") renderHistory(m);
   else if(view==="analysis") renderAnalysis(m);
@@ -30,9 +35,9 @@ function setupOptions(sel){
   return `<option value="">（セッティング未指定）</option>`+db.setups.map(s=>`<option value="${s.id}" ${s.id===sel?"selected":""}>${esc(s.name)}</option>`).join("");
 }
 const RECORD_FLOW_MODES=[
-  {id:"practice",icon:"◎",title:"練習記録",desc:"点取りから調整提案へ"},
-  {id:"calibration",icon:"↕",title:"サイト値を残す",desc:"サイト値・風メモも一緒に"},
-  {id:"diagnosis",icon:"?",title:"足りないデータを見る",desc:"提案の材料を確認"}
+  {id:"practice",icon:icon("target"),title:"練習記録",desc:"点取りから調整提案へ"},
+  {id:"calibration",icon:icon("updown"),title:"サイト値を残す",desc:"サイト値・風メモも一緒に"},
+  {id:"diagnosis",icon:icon("help"),title:"足りないデータを見る",desc:"提案の材料を確認"}
 ];
 const RECORD_PHASES=["準備","記録","確認","蓄積"];
 const SHOT_REASON_TAGS=["良射","押し手","リリース","クリッカー","風","狙いミス","矢が怪しい","不明"];
@@ -73,9 +78,8 @@ function recordIntroHtml(sys, mode){
     <div class="missionTop">
       <img class="startLogoMark" src="icon.svg" alt="">
       <div>
-        <div class="eyebrow">Archery Note</div>
+        <div class="eyebrow">アーチェリー練習ノート</div>
         <h2>${mode==="calibration"?"サイト値も残す":"今日のズレを、次の一射へ。"}</h2>
-        <p>得点・着弾・用具をまとめて残せる、アーチェリー練習ノート。結果で、サイトを動かすか・保留するかを見ます。</p>
       </div>
       <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
     </div>
@@ -119,16 +123,14 @@ function setupSystemSummary(setupId){
 function recordSetupSnapshot(setupId,dist){
   const setup=db.setups.find(s=>s.id===setupId);
   if(!setup) return `<div class="setupLens" id="setupLens">
-    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b><span>用具登録で調整提案が強くなります</span></div>
-    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b><span>距離を選ぶと実測値を呼び出します</span></div>
+    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b></div>
+    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b></div>
   </div>`;
-  const gp=gearPrecisionProfile(setup);
-  const mp=modelReadinessProfile(setupId);
   const mk=dist?latestMark(setupId,dist):null;
   const markText=mk?`上下 ${esc(mk.v||"—")} / 左右 ${esc(mk.h||"—")}`:"記録なし";
   return `<div class="setupLens" id="setupLens">
-    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b><span>${[setup.bow,setup.limbs,setup.poundage?setup.poundage+"lbs":""].filter(Boolean).map(esc).join(" / ")||"詳細入力待ち"}</span></div>
-    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b><span>入力材料 ${gp.level} / 履歴 ${mp.level}</span></div>
+    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b></div>
+    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b></div>
   </div>`;
 }
 function faceChoiceValue(sess){
@@ -149,12 +151,40 @@ function actionFaceLabel(value){
 }
 function recordFastActionsHtml(last,dist,faceValue){
   const currentLabel=`${dist}m / ${actionFaceLabel(faceValue)}`;
-  const lastLabel=last?`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`:"なし";
-  return `<section class="homeActions" aria-label="すぐ使う">
-    <button class="homeAction primary" id="quickStart" type="button"><b>今日の記録を始める</b><span id="quickStartMeta">${esc(currentLabel)}</span></button>
-    ${last?`<button class="homeAction" id="quickRepeat" type="button"><b>前回と同じ</b><span>${esc(lastLabel)}</span></button>
-    <button class="homeAction" id="quickHistory" type="button"><b>履歴を見る</b><span>分析</span></button>`:""}
+  /* 直前が多距離ラウンドのステージなら、押下時の挙動（ラウンドをステージ1から再開）に合わせたラベルにする */
+  const lastRound=last&&last.roundGroup?roundLabel(last.roundGroup.roundId):null;
+  const lastTitle=lastRound?`${lastRound}をもう一度`:"前回と同じ";
+  const lastLabel=last?(lastRound?"最初の距離から":`${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`):"なし";
+  /* 金面はセッション票の「この条件で開始」1つだけに絞る（design-language: 金面は1画面1つ）。
+     このバンドは墨面＋左に金アクセントバーの控えめな面。last が無い初回はセッション票の
+     fStart だけが唯一のCTAになるようバンド自体を出さない */
+  if(!last) return "";
+  return `<section class="homeActions recordRepeatBand" aria-label="すぐ使う">
+    <button class="homeAction repeatMain" id="quickStart" type="button">
+      <span class="repeatEyebrow">${esc(lastTitle)}</span>
+      <b id="quickStartMeta">${esc(currentLabel)}</b>
+      <span class="repeatSub">${esc(lastLabel)}</span>
+    </button>
+    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b><span>分析</span></button>
   </section>`;
+}
+/* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
+function selectedMultiRound(roundId){
+  if(!roundId || ROUND_TYPES.some(r=>r.id===roundId)) return null;
+  const def=findRoundDef(roundId);
+  return def&&Array.isArray(def.stages)&&def.stages.length?def:null;
+}
+/* 多距離ラウンドのステージ一覧を「計器の行程表」風に表示（目盛り＋距離降順の目盛り線）。
+   当たり判定・記録ロジックには触れない、表示専用の集計 */
+function multiRoundStageGaugeHtml(def){
+  const stages=def.stages;
+  const maxDist=Math.max(...stages.map(st=>st.dist));
+  const ticks=stages.map((st,i)=>`
+    <div class="stageGaugeTick">
+      <div class="stageGaugeMark" style="height:${8+Math.round((st.dist/maxDist)*18)}px"></div>
+      <b>${st.dist}m</b><span>${st.arrows}射</span>
+    </div>${i<stages.length-1?`<div class="stageGaugeRail"></div>`:""}`).join("");
+  return `<div class="stageGauge" aria-label="${esc(def.label)}のステージ行程">${ticks}</div>`;
 }
 function renderRecord(m){
   if(db.active){ renderActive(m); return; }
@@ -174,10 +204,11 @@ function renderRecord(m){
     <div class="launchBody">
     <label class="f">距離</label>
     <div class="chips quickDists" id="fDistChips">
-      ${[70,50,30,18].map(d=>`<div class="chip ${d===defDist?"on":""}" data-d="${d}">${d}m</div>`).join("")}
-      <div class="chip" data-d="custom">カスタム</div>
+      ${[70,50,30,18].map(d=>`<button type="button" class="chip ${d===defDist?"on":""}" aria-pressed="${d===defDist}" data-d="${d}">${d}m</button>`).join("")}
+      <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
     </div>
     <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="quickSelects">
       <div><label class="f">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
@@ -190,17 +221,22 @@ function renderRecord(m){
       </select></div>
       <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}" ${n===defPerEnd?"selected":""}>${n}本</option>`).join("")}</select></div>
     </div>
-    <div class="btnrow"><button class="btn startPrimary" id="fStart">${mode==="calibration"?"サイト値つきで開始":"この条件で開始"}</button></div>
+    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
+    <div class="btnrow"><button class="btn startPrimary" id="fStart" data-testid="record-start">${mode==="calibration"?"サイト値つきで開始":"この条件で開始"}</button></div>
+    <div class="sessionCondition">${recordSetupSnapshot(defSetup,defDist)}</div>
     <details class="adv recordDetails" ${mode==="calibration"?"open":""}>
       <summary>詳しく残す</summary>
       <div class="fieldBand">
         <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
-        ${recordSetupSnapshot(defSetup,defDist)}
       </div>
       <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
       <label class="f">ラウンド</label><select class="inp" id="fRound">
         ${ROUND_TYPES.map(r=>`<option value="${r.id}">${r.label}</option>`).join("")}
+        <optgroup label="多距離ラウンド">
+          ${multiRoundDefs().map(r=>`<option value="${r.id}">${esc(r.label)}</option>`).join("")}
+        </optgroup>
       </select>
+      <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
       <div class="row">
         <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
         <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
@@ -230,23 +266,47 @@ function renderRecord(m){
     if(String(faceSel.value).startsWith("F") && $("#fArrows").value==="6") $("#fArrows").value="3";
     updateQuickStartMeta();
   };
+  /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
+  function applyMultiRoundStage0(def){
+    const st0=def.stages[0];
+    distState.d=st0.dist;
+    const known=[70,50,30,18].includes(+st0.dist);
+    const key=known?String(st0.dist):"custom";
+    document.querySelectorAll("#fDistChips .chip").forEach(x=>{ const on=String(x.dataset.d)===key; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+    $("#fDistCustomWrap").style.display=known?"none":"block";
+    if(!known) $("#fDistCustom").value=st0.dist;
+    faceSel.value=st0.faceType==="triple"?"T40":(st0.faceType==="field"?`F${st0.faceD}`:String(st0.faceD));
+    $("#fArrows").value=st0.perEnd||6;
+    fillSight(); refreshLens();
+  }
   $("#fRound").onchange=e=>{
-    if(e.target.value==="field72"){
-      if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
-      $("#fArrows").value="3";
+    const def=selectedMultiRound(e.target.value);
+    const stagesEl=$("#fRoundStages");
+    if(def){
+      applyMultiRoundStage0(def);
+      stagesEl.style.display="block";
+      stagesEl.innerHTML=`<div class="stageGaugeLabel">${esc(def.label)}</div>${multiRoundStageGaugeHtml(def)}`;
+    }else{
+      stagesEl.style.display="none";
+      stagesEl.textContent="";
+      if(e.target.value==="field72"){
+        if(!String(faceSel.value).startsWith("F")) faceSel.value="F80";
+        $("#fArrows").value="3";
+      }
     }
     updateQuickStartMeta();
   };
   $("#jumpGear").onclick=()=>showView("gear");
-  $("#quickStart").onclick=()=>$("#fStart").click();
   const quickHistory=$("#quickHistory");
   if(quickHistory) quickHistory.onclick=()=>showView("history");
   if(last){
-    $("#quickRepeat").onclick=()=>{
+    /* 「前回と同じ」帯（quickStart, 元 quickRepeat）: 前回条件をフォームへ復元してから即開始する。
+       金面は下のセッション票の fStart 1つだけに絞ったため、このボタン自体は墨面のまま */
+    $("#quickStart").onclick=()=>{
       distState.d=last.dist||defDist;
       const known=[70,50,30,18].includes(+distState.d);
       const key=known?String(distState.d):"custom";
-      document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.toggle("on", String(x.dataset.d)===key));
+      document.querySelectorAll("#fDistChips .chip").forEach(x=>{ const on=String(x.dataset.d)===key; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
       $("#fDistCustomWrap").style.display=known?"none":"block";
       if(!known) $("#fDistCustom").value=distState.d||"";
       faceSel.value=faceChoiceValue(last);
@@ -267,8 +327,8 @@ function renderRecord(m){
     if(old) old.outerHTML=recordSetupSnapshot($("#fSetup").value, distState.d);
   }
   document.querySelectorAll("#fDistChips .chip").forEach(c=>c.onclick=()=>{
-    document.querySelectorAll("#fDistChips .chip").forEach(x=>x.classList.remove("on"));
-    c.classList.add("on");
+    document.querySelectorAll("#fDistChips .chip").forEach(x=>{ x.classList.remove("on"); x.setAttribute("aria-pressed","false"); });
+    c.classList.add("on"); c.setAttribute("aria-pressed","true");
     if(c.dataset.d==="custom"){ $("#fDistCustomWrap").style.display="block"; distState.d=null; }
     else{ $("#fDistCustomWrap").style.display="none"; distState.d=+c.dataset.d; suggestFace(distState.d); fillSight(); }
     updateQuickStartMeta();
@@ -284,20 +344,25 @@ function renderRecord(m){
   $("#fSetup").onchange=()=>{ fillSight(); refreshLens(); };
   fillSight();
   $("#fStart").onclick=()=>{
-    const d=distState.d;
+    const roundId=$("#fRound").value||"free";
+    const mdef=selectedMultiRound(roundId);
+    const st0=mdef?mdef.stages[0]:null;
+    const d=st0?st0.dist:distState.d;
     if(!d){ toast("距離を入力してください"); return; }
     const fv=faceSel.value;
-    const face=parseFaceChoice(fv);
+    /* 多距離ラウンドは dist/faceD/faceType/perEnd を stage[0] から採る */
+    const face=st0?{faceD:st0.faceD, faceType:st0.faceType||"single"}:parseFaceChoice(fv);
     db.active={
       id:uid(), date:$("#fDate").value||today(), setupId:$("#fSetup").value||null,
-      dist:d, faceD: face.faceD, faceType: face.faceType, perEnd:+$("#fArrows").value,
+      dist:d, faceD: face.faceD, faceType: face.faceType, perEnd:st0?(st0.perEnd||6):+$("#fArrows").value,
       shaft:+lineCutRadius(face.faceD, face.faceType).toFixed(3),
       sightV:$("#fSightV").value.trim(), sightH:$("#fSightH").value.trim(),
       wx:$("#fWx").value, note:$("#fNote").value.trim(), windDir:$("#fWindDir").value, windSpeed:$("#fWindSpeed").value.trim(),
-      round:$("#fRound").value||"free",
+      round:roundId,
       purpose:ui.recordMode||"practice",
       ends:[], cur:[]
     };
+    if(st0) db.active.roundGroup={gid:uid(), roundId, stage:0, stageCount:mdef.stages.length};
     nativePulse("success");
     save(); render();
   };
@@ -339,95 +404,245 @@ function heroMetricHtml(k,b,span){
 }
 function pageHeroHtml(type,ctx){
   ctx=ctx||{};
-  if(type==="analysis"){
-    return `<section class="pageHero">
-      <div class="kicker">分析</div>
-      <h2>傾向をまとめる入口</h2>
-      <p>スコア・距離・サイト・グルーピングの読み取りを、ここへ段階的に集めます。</p>
-      <div class="heroMetrics">
-        ${heroMetricHtml("現在","分析タブ","推移と分布")}
-        ${heroMetricHtml("対象","スコア・距離","サイト・グルーピング")}
-        ${heroMetricHtml("履歴","記録一覧","練習本体を確認")}
-      </div>
-    </section>`;
-  }
+  /* 分析タブにヒーローは置かない（結論→根拠→詳細の原則: 一等地は「今日の結論」カードが使う） */
   if(type==="history"){
     const src=ctx.ss||db.sessions||[];
-    const arrows=src.flatMap(s=>s.ends.flat());
-    const total=arrows.reduce((a,x)=>a+x.s,0);
-    const latest=src[0]||null;
-    return `<section class="pageHero">
+    const sessionRows=historySessionRows(src);
+    const arrows=sessionRows.flatMap(r=>r.arrows);
+    const total=sessionRows.reduce((a,r)=>a+r.total,0);
+    /* 結論→根拠: 説明文ではなく既存の todayConclusion() 計算をそのまま言い換えた1行だけを置く。
+       新しい統計は作らない — 分析タブの「今日の結論」と同じ入力（buildAnalysisRows）を使う。
+       数値枠は 練習・平均・最高合計 の3つに一本化（旧「記録サマリー」カードはここへ統合。
+       「直近」はリスト先頭行が直近そのものなので数値枠には置かない） */
+    const rows=buildAnalysisRows(src,db.setups,sessionMetrics);
+    const conclusion=todayConclusion(rows);
+    const best=sessionRows.filter(r=>r.arrows.length).sort((a,b)=>b.total-a.total || b.arrows.length-a.arrows.length || (b.s.date||"").localeCompare(a.s.date||""))[0];
+    const bestMeta=best?[fmtD(best.s.date),distanceLabel(best.s.dist),`${best.arrows.length}本`].filter(Boolean).join(" / "):"記録待ち";
+    return `<section class="pageHero" data-testid="history-hero">
       <div class="kicker">履歴</div>
-      <h2>分布と偏移を読む</h2>
-      <p>点数だけでなく、同じ用具・同じ距離の中心移動を追います。過去のグルーピングがあるほど、今回のズレが偶然か傾向か見えやすくなります。</p>
+      <h2 class="pageHeroLead" data-testid="history-hero-trend">${esc(conclusion?conclusion.text:"")}</h2>
       <div class="heroMetrics">
         ${heroMetricHtml("練習",`${src.length}回`,`${arrows.length}本を集計`)}
         ${heroMetricHtml("平均",arrows.length?(total/arrows.length).toFixed(2):"—","フィルター後の平均点")}
-        ${heroMetricHtml("直近",latest?[fmtD(latest.date),distanceLabel(latest.dist)].filter(Boolean).join(" "):"—",latest?roundLabel(latest.round):"記録待ち")}
+        ${heroMetricHtml("最高合計",best?`${best.total}`:"—",bestMeta)}
       </div>
     </section>`;
   }
   if(type==="sight"){
-    const setup=ctx.setup, dist=ctx.dist, marks=ctx.marks||[], adv=ctx.adv;
-    const cur=marks[0];
-    return `<section class="pageHero">
+    const setup=ctx.setup, dist=ctx.dist, adv=ctx.adv, lastSess=ctx.lastSess;
+    const sug=lastSess?primarySightSuggestion(lastSess,setup,adv):null;
+    let body;
+    if(!setup){
+      body=`<p class="pageHeroLead sightNowNote">用具セッティング未登録</p>`;
+    }else if(!adv){
+      body=`<p class="pageHeroLead sightNowNote">この距離・用具の練習記録なし</p>`;
+    }else if(!sug || sug.none){
+      body=`<div class="sightNow sightNowNeutral" data-testid="sight-now-suggestion">
+        <div class="sightNowDir">${icon("target")}<span>調整不要</span></div>
+        <p class="sightNowNote">グルーピング中心はほぼセンターです。今の設定のまま本数を重ねられます。</p>
+      </div>`;
+    }else{
+      const arrowIcon=icon(sug.dir);
+      const q=sessionQuality(lastSess,setup);
+      body=`<div class="sightNow" data-testid="sight-now-suggestion">
+        <div class="sightNowDir">${arrowIcon}<span>${sug.dirLabel}へ</span></div>
+        <div class="sightNowAmount">${sug.clicks!=null?`${Math.abs(sug.clicks).toFixed(1)}<small>${esc(sug.clickLabel)}</small>`:`${sug.mm.toFixed(1)}<small>mm</small>`}</div>
+        <p class="sightNowNote">${sug.clicks!=null?`目安 ${sug.mm.toFixed(1)}mm相当。`:""}${sug.other?" 上下・左右の両方に動きがあります（詳細は下）。":""} 信頼度 ${q.label}。</p>
+      </div>`;
+    }
+    return `<section class="pageHero" data-testid="sight-hero">
       <div class="kicker">サイト調整</div>
-      <h2>サイト値を整える</h2>
-      <p>距離ごとのサイト値と最新グルーピングから、動かす時・保留する時・射形を優先する時を分けて見ます。</p>
-      <div class="heroMetrics">
-        ${heroMetricHtml("対象",setup?setup.name:"用具未指定",dist?`${dist}m`:"距離未指定")}
-        ${heroMetricHtml("最新サイト",cur?`上下 ${cur.v||"—"}`:"未登録",cur?`左右 ${cur.h||"—"}`:"台帳へ記録")}
-        ${heroMetricHtml("提案",adv&&adv.lines.length?adv.lines[0].text||"調整あり":"材料待ち",adv?`信頼 ${sessionQuality(ctx.lastSess||{},setup).label}`:"練習記録が必要")}
-      </div>
-    </section>`;
-  }
-  if(type==="gear"){
-    const setups=db.setups||[];
-    const profiles=setups.map(s=>gearPrecisionProfile(s));
-    const avg=profiles.length?profiles.reduce((a,p)=>a+p.score,0)/profiles.length:0;
-    const best=setups.map(s=>({s,p:gearPrecisionProfile(s),m:modelReadinessProfile(s.id)})).sort((a,b)=>(b.p.score+b.m.score)-(a.p.score+a.m.score))[0];
-    return `<section class="pageHero">
-      <div class="kicker">用具</div>
-      <h2>いつものセッティングを残す</h2>
-      <p>ハンドル、リム、矢、サイト値をまとめて保存します。分かる範囲だけで始めて、必要な時だけ細かい実測値を足せます。</p>
-      <div class="heroMetrics">
-        ${heroMetricHtml("登録",`${setups.length}件`,`${db.sessions.filter(s=>s.setupId).length}回の練習に接続`)}
-        ${heroMetricHtml("入力材料",pct(avg),"用具データの平均充実度")}
-        ${heroMetricHtml("主戦用具",best?best.s.name:"—",best?`入力 ${best.p.level} / 履歴 ${best.m.level}`:"初回セットアップ待ち")}
-      </div>
+      <h2 class="pageHeroLead">いまの提案</h2>
+      ${body}
     </section>`;
   }
   return "";
 }
+function analysisFilterBarHtml(allRows,f){
+  const dists=[...new Set(allRows.map(r=>r.dist).filter(Boolean))].sort((a,b)=>b-a);
+  const periods=[["all","全期間"],["3m","3ヶ月"],["1m","1ヶ月"]];
+  return `<div class="card analysisFilterCard">
+    <div class="row">
+      <div><label class="f">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId==="__none"?"selected":""}>未指定</option>${db.setups.map(s=>`<option value="${s.id}" ${f.setupId===s.id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map(d=>`<option value="${d}" ${String(f.dist)===String(d)?"selected":""}>${d}m</option>`).join("")}</select></div>
+    </div>
+    <label class="f">期間</label>
+    <div class="chips" id="anPeriods">${periods.map(([id,lb])=>`<button type="button" class="chip ${f.period===id?"on":""}" aria-pressed="${f.period===id}" data-period="${id}">${lb}</button>`).join("")}</div>
+  </div>`;
+}
+function analysisKpiHtml(rows){
+  const scored=rows.filter(r=>r.n);
+  if(!scored.length) return "";
+  const sorted=[...scored].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  const arrows=scored.reduce((a,r)=>a+r.n,0);
+  const avg=arrows?scored.reduce((a,r)=>a+r.total,0)/arrows:0;
+  const ma=movingAverage(sorted.map(r=>r.avg),5);
+  const latestMa=ma.length?ma[ma.length-1]:null;
+  const prevMa=ma.length>1?ma[ma.length-2]:null;
+  const delta=latestMa!=null&&prevMa!=null?latestMa-prevMa:null;
+  const trend=delta==null?"—":delta>0.02?`↑ +${delta.toFixed(2)}`:delta<-0.02?`↓ ${delta.toFixed(2)}`:"→ 横ばい";
+  const rrRows=sorted.filter(r=>r.st&&Number.isFinite(r.st.rr));
+  const latestRr=rrRows.length?rrRows[rrRows.length-1].st.rr:null;
+  const bestRr=rrRows.length?Math.min(...rrRows.map(r=>r.st.rr)):null;
+  const best=[...scored].sort((a,b)=>b.total-a.total||(b.date||"").localeCompare(a.date||""))[0];
+  return `<div class="insightStrip">
+    <div class="insightTile"><div class="k">平均点</div><b>${avg.toFixed(2)}</b><span>${scored.length}回 ${arrows}本 / 移動平均 ${trend}</span></div>
+    <div class="insightTile"><div class="k">矢の集まり具合（グルーピング）</div><b>${latestRr!=null?latestRr.toFixed(1)+"cm":"—"}</b><span>最新の半径(RMS) / 最小 ${bestRr!=null?bestRr.toFixed(1)+"cm":"—"}</span></div>
+    <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${best?[fmtD(best.date),best.dist?`${best.dist}m`:"",`${best.n}本`].filter(Boolean).join(" / "):"記録待ち"}</span></div>
+  </div>`;
+}
+function analysisTrendChartHtml(rows){
+  const sorted=rows.filter(r=>r.n).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  if(sorted.length<3) return "";
+  const avgs=sorted.map(r=>r.avg);
+  const ma=movingAverage(avgs,5).map((v,i)=>v==null?avgs[i]:v);
+  const W=320,H=96;
+  const min=Math.min(...avgs,...ma), max=Math.max(...avgs,...ma), span=(max-min)||1;
+  const px=i=>(i/(sorted.length-1))*W;
+  const py=v=>H-10-((v-min)/span)*(H-22);
+  const maPath=ma.map((v,i)=>`${i?"L":"M"}${px(i).toFixed(1)},${py(v).toFixed(1)}`).join("");
+  return `<div class="card"><h2>得点の推移 <span class="mini">${sorted.length}回 / 線は直近5回の移動平均</span></h2>
+    <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H+20}px" role="img" aria-label="平均点（点/本）の推移">
+      <text x="2" y="10" font-size="9" fill="var(--sub)">${max.toFixed(1)}点</text>
+      <text x="2" y="${H-2}" font-size="9" fill="var(--sub)">${min.toFixed(1)}点</text>
+      ${sorted.map((r,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(r.avg).toFixed(1)}" r="3" fill="var(--green)" opacity=".5"/>`).join("")}
+      <path d="${maPath}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
+    </svg>
+    <div class="hint">丸は各練習の平均点（1本あたり）、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。</div>
+  </div>`;
+}
+/* 多距離ラウンドの「ラウンド合計ベスト」行（IMP-09）: complete なグループのみ対象。
+   roundGroup 付きの行が無ければ空文字（従来の自己ベスト表示は不変） */
+function roundGroupBestRowsHtml(rows){
+  const bests=roundGroupBests(aggregateRoundGroups(rows));
+  if(!bests.length) return "";
+  return bests.sort((a,b)=>b.total-a.total).map(b=>`<div class="listItem recordReadOnlyItem">
+    <div><div class="t">${esc(roundLabel(b.roundId))} 合計</div><div class="d">完了ラウンドのベスト / ${fmtD(b.date)}</div></div>
+    <div class="big">${b.total}<small> / ${b.arrows}射</small></div>
+  </div>`).join("");
+}
+function personalBestCard(rows){
+  const pbs=personalBests(rows).slice(0,6);
+  const groupRows=roundGroupBestRowsHtml(rows);
+  if(!pbs.length && !groupRows) return "";
+  const body=pbs.map(g=>{
+    const lb=[g.dist?`${g.dist}m`:"距離未設定",g.round!=="free"?roundLabel(g.round):"自由練習"].join(" ・ ");
+    return `<div class="listItem recordReadOnlyItem">
+      <div><div class="t">${esc(lb)}</div><div class="d">${g.sessions}回 / ベスト日 ${g.bestTotal?fmtD(g.bestTotal.date):"—"}${g.bestTotal?` / ${g.bestTotal.arrows}本`:""}</div></div>
+      <div class="big">${g.bestTotal?g.bestTotal.total:"—"}<small> / 平均ベスト${g.bestAvg?g.bestAvg.avg.toFixed(2):"—"}</small></div>
+    </div>`;
+  }).join("");
+  return `<div class="card"><h2>自己ベスト <span class="mini">距離×ラウンド別</span></h2>${body}${groupRows}</div>`;
+}
+function conditionSplitCard(rows){
+  const cs=conditionSplit(rows,isWindy);
+  if(cs.windy.sessions<2 || cs.calm.sessions<2) return "";
+  const line=g=>`<div class="listItem recordReadOnlyItem">
+    <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本${g.biasX!=null&&Math.abs(g.biasX)>=.3?` / 平均中心 ${cmOffsetText(g.biasX,"x")}`:""}</div></div>
+    <div class="big">${g.avg!=null?g.avg.toFixed(2):"—"}<small> / 矢の集まり半径(RMS) ${g.avgRms!=null?g.avgRms.toFixed(1)+"cm":"—"}</small></div>
+  </div>`;
+  return `<div class="card"><h2>風の有無で比べる <span class="mini">風あり vs 風なし</span></h2>${line(cs.calm)}${line(cs.windy)}
+    <div class="hint">風の有無で平均点と矢の集まり方がどれだけ変わるかの俯瞰です。風ありの平均中心が横へ流れていれば、風待ちやエイムオフの効果を検討できます。</div></div>`;
+}
+function reasonBreakdownCard(rows){
+  const rb=reasonBreakdown(rows);
+  if(rb.tagged<5) return "";
+  const body=rb.items.slice(0,6).map(g=>`<div class="listItem recordReadOnlyItem">
+    <div><div class="t">${esc(g.reason)}</div><div class="d">${g.count}本${(Math.abs(g.mx||0)>=.3||Math.abs(g.my||0)>=.3)?` / 平均ズレ ${driftText(g.mx||0,g.my||0)}`:""}</div></div>
+    <div class="big">${g.avg!=null?g.avg.toFixed(2):"—"}<small> / 平均点</small></div>
+  </div>`).join("");
+  return `<div class="card"><h2>外れた理由の傾向 <span class="mini">${rb.tagged}本にタグ</span></h2>${body}
+  <div class="hint">記録中に付けた理由タグ別の平均点と平均ズレ方向です。特定のタグが同じ方向へ寄っていれば、次の練習の重点候補になります。</div></div>`;
+}
+/* 「今日の結論」カード: 初心者文法の入口。既存の todayConclusion() の言い換え文をそのまま大きく出す。
+   新しい統計計算はしない — 表示だけの薄いラッパー */
+function todayConclusionCardHtml(rows){
+  const c=todayConclusion(rows);
+  if(!c) return "";
+  return `<div class="card todayConclusionCard" data-testid="today-conclusion">
+    <div class="todayConclusionKicker">今日の結論</div>
+    <p class="todayConclusionText">${esc(c.text)}</p>
+  </div>`;
+}
 function renderAnalysis(m){
-  const ss=[...db.sessions].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
+  const f=ui.analysisFilter;
+  const allRows=buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
+  const rows=filterAnalysisRows(allRows, {setupId:f.setupId, dist:f.dist, round:f.round, period:f.period, today:today()});
+  const ss=rows.map(r=>r.s).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1));
+  const sessionRows=historySessionRows(ss);
+  /* 全体構成（正本 5節）: 結論 → 得点の推移 → ばらつき(グルーピング) → サイト → 条件比較 → 月間 → その他。
+     ロジックは変えず、既存カード関数の呼び出し順だけを並べ替える */
   const cards=[
-    historySummaryDetailsHtml(historySessionRows(ss),{setupId:"",dist:""}),
+    // 得点の推移
+    analysisKpiHtml(rows),
+    analysisTrendChartHtml(rows),
     scoreTrendCard(ss),
-    setupPerformanceCard(ss),
-    sightHistoryCard(ss),
+    // 矢の集まり具合（グルーピング＝ばらつき）
     groupingTrendCard(ss),
+    groupingSummaryHtml(sessionRows),
+    // サイト
+    sightHistoryCard(ss),
+    sightSummaryHtml(sessionRows,{setupId:"",dist:""}),
+    // 条件比較
+    conditionSplitCard(rows),
+    reasonBreakdownCard(rows),
+    // 月間
+    monthlyCard(ss),
     distTrendCard(ss),
     scoreDistCard(ss),
-    monthlyCard(ss)
+    // その他
+    formTrackingCard(),
+    personalBestCard(rows),
+    setupPerformanceCard(ss),
+    distanceSummaryHtml(sessionRows)
   ].filter(Boolean).join("");
-  m.innerHTML=`${pageHeroHtml("analysis")}
-  ${cards||`<div class="card"><h2>分析</h2><div class="empty">記録が増えると、グルーピング推移や月間サマリーがここに表示されます。</div></div>`}`;
+  m.innerHTML=`${todayConclusionCardHtml(rows)}
+  ${allRows.length?analysisFilterBarHtml(allRows,f):""}
+  ${cards||`<div class="card"><h2>分析</h2><div class="empty">${allRows.length?"この絞り込みに合う記録がありません。フィルタを広げてください。":"記録が増えると、矢の集まり具合や月間まとめがここに表示されます。"}</div></div>`}`;
+  const anSetup=$("#anSetup");
+  if(anSetup) anSetup.onchange=e=>{ f.setupId=e.target.value; render(); };
+  const anDist=$("#anDist");
+  if(anDist) anDist.onchange=e=>{ f.dist=e.target.value; render(); };
+  document.querySelectorAll("#anPeriods .chip[data-period]").forEach(c=>c.onclick=()=>{
+    const hadFocus=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#anPeriods"));
+    f.period=c.dataset.period; render();
+    if(hadFocus){ const chip=document.querySelector(`#anPeriods [data-period="${c.dataset.period}"]`); if(chip) chip.focus({preventScroll:true}); }
+  });
+  bindFormTrackingCard();
 }
-function liveSessionHeroHtml(s,setup){
+/* HUD が使う3値（エンドn・合計・残り）と、折りたたみに回す詳細値をまとめて計算する。
+   refreshActive() 側の状態モーション（数値ティック）も同じ計算を使う */
+function liveHudMetrics(s){
   const all=sessionArrows(s);
   const total=all.reduce((a,x)=>a+x.s,0);
   const avg=all.length?(total/all.length).toFixed(2):"—";
   const remain=Math.max(0,(s.perEnd||6)-(s.cur||[]).length);
   const r=ROUND_TYPES.find(x=>x.id===s.round);
-  const roundRemain=r&&r.arrows?Math.max(0,r.arrows-all.length):null;
-  return `<section class="liveHud compactHud">
-    <div class="liveContext">${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}<span>${setup?esc(setup.name):"用具未指定"}</span></div>
-    <div class="liveGrid">
-      <div class="liveCell"><div class="k">合計</div><b>${total}</b></div>
-      <div class="liveCell"><div class="k">平均</div><b>${avg}</b></div>
-      <div class="liveCell"><div class="k">現在エンド</div><b>${(s.cur||[]).length}/${s.perEnd||6}</b></div>
-      <div class="liveCell"><div class="k">残り</div><b>${roundRemain==null?`${remain}本`:roundRemain+"本"}</b></div>
+  /* 多距離ラウンド中は「残り」をステージ規定射数（arrows）基準にする */
+  const stageDef=sessionStageDef(s);
+  const quota=stageDef&&stageDef.arrows?stageDef.arrows:(r&&r.arrows?r.arrows:null);
+  const roundRemain=quota?Math.max(0,quota-all.length):null;
+  return {total, avg, endNo:s.ends.length+1, remainText:roundRemain==null?`${remain}`:String(roundRemain)};
+}
+function liveSessionHeroHtml(s,setup){
+  const hm=liveHudMetrics(s);
+  const rg=s.roundGroup;
+  /* 射場モードの「いま必要な3つ」= エンドn・合計・残り。用具名・平均・ステージ詳細は details へ畳む */
+  return `<section class="liveHud compactHud" data-testid="active-hud">
+    <div class="liveContext">
+      <span>${s._edit?"過去記録の編集":`${s.dist}m / ${faceLabel(s)}`}</span>
+      <details class="liveHudMore"><summary>詳細</summary>
+        <div class="liveHudMoreBody">
+          <span>${setup?esc(setup.name):"用具未指定"}</span>
+          <span>平均 ${hm.avg}</span>
+          ${rg?`<span>ステージ ${(+rg.stage||0)+1}/${rg.stageCount}・${s.dist}m</span>`:""}
+        </div>
+      </details>
+    </div>
+    <div class="liveGrid liveGrid3">
+      <div class="liveCell"><div class="k">エンド</div><b class="tnum" id="hudEndNo">${hm.endNo}</b></div>
+      <div class="liveCell"><div class="k">合計</div><b class="tnum" id="hudTotal">${hm.total}</b></div>
+      <div class="liveCell"><div class="k">残り</div><b class="tnum" id="hudRemain">${hm.remainText}<small>本</small></b></div>
     </div>
   </section>`;
 }
@@ -441,49 +656,62 @@ function activeGuideHtml(){
     <button class="btn sm ghost activeGuideDone" id="activeGuideDone">次から表示しない</button>
   </details>`;
 }
+/* 多距離ラウンドの次ステージ定義。最終ステージ・編集モード・単一距離では null */
+function nextStageDef(s){
+  const rg=s&&s.roundGroup;
+  if(!rg || s._edit) return null;
+  const stage=Number(rg.stage)||0;
+  if(stage>=rg.stageCount-1) return null;
+  const def=findRoundDef(rg.roundId);
+  return def&&Array.isArray(def.stages)?def.stages[stage+1]||null:null;
+}
 function renderActive(m){
   const s=db.active;
   const setup=db.setups.find(x=>x.id===s.setupId);
+  const nextStage=nextStageDef(s);
+  m.classList.add("hasActiveDock"); /* 固定操作列の高さ分、下部に呼吸を確保する（style.css: main.hasActiveDock） */
   m.innerHTML=`
   ${liveSessionHeroHtml(s,setup)}
-  <div class="card targetFocusCard">
+  <div class="card targetFocusCard targetFocusWide">
     <div class="targetTools">
       <h2>記録中${s._edit?"（過去記録の編集）":""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup?esc(setup.name):"セッティング未指定"}</span></h2>
       ${s.faceType==="triple"?"":`<div class="chips" id="zoomChips">
-        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<div class="chip ${(ui.zoom||1)===z?"on":""}" data-z="${z}">${lb}</div>`).join("")}
+        ${[[1,"全体"],[2,"×2"],[3,"×3"]].map(([z,lb])=>`<button type="button" class="chip ${(ui.zoom||1)===z?"on":""}" aria-pressed="${(ui.zoom||1)===z}" data-z="${z}">${lb}</button>`).join("")}
       </div>`}
     </div>
-    <div class="tgWrap" id="tgWrap">
+    <div class="tgWrap tgWrapWide" id="tgWrap" data-testid="active-target">
       ${targetMarkup(s.faceD,"tg",s.faceType)}
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
-    <div class="targetHint">タップで記録。矢チップで修正。</div>
     ${activeGuideHtml()}
-    <div class="scoreChips" id="curChips"></div>
+    <div class="scoreChips" id="curChips" data-testid="active-arrow-chips"></div>
     <div class="nudge" id="nudge">
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD/200).toFixed(1)}cm）</div>
       <div class="npad">
         <span class="blank"></span><button data-n="u">▲</button><span class="blank"></span>
-        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">🗑</button><button data-n="r">▶</button>
+        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">${icon("trash")}</button><button data-n="r">▶</button>
         <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
       </div>
       <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
     </div>
-    <div class="statbar" id="statbar"></div>
-    <div class="btnrow">
-      <button class="btn ghost" id="bUndo">↩ 1本取消</button>
-      <button class="btn sec" id="bEnd">エンド確定</button>
-    </div>
-    <div class="btnrow"><button class="btn danger" id="bFinish">セッション終了</button></div>
+    <details class="adv activeStatsMore"><summary>この練習の詳細</summary>
+      <div class="statbar" id="statbar"></div>
+    </details>
+    ${nextStage?`<div class="btnrow activeNextStageRow"><button class="btn sec" id="bNextStage">次の距離へ（${nextStage.dist}m）</button></div>`:""}
   </div>
-  <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>`;
+  <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>
+  <div class="activeActionDock" id="activeActionDock" data-testid="active-action-dock">
+    <button class="btn ghost" id="bUndo" data-testid="active-undo">1本取消</button>
+    <button class="btn sec" id="bEnd" data-testid="active-end">エンド確定</button>
+    <button class="btn activeFinishBtn" id="bFinish" data-testid="active-finish">終了</button>
+  </div>`;
   attachTargetInput(s);
   function applyZoom(){ if(s.faceType==="triple") return; const M=s.faceD/2*1.18/(ui.zoom||1); $("#tgsvg").setAttribute("viewBox", `${-M} ${-M} ${2*M} ${2*M}`); }
   document.querySelectorAll("#zoomChips .chip").forEach(c=>c.onclick=()=>{
     ui.zoom=+c.dataset.z;
-    document.querySelectorAll("#zoomChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+    document.querySelectorAll("#zoomChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
     applyZoom();
   });
   applyZoom();
@@ -499,6 +727,8 @@ function renderActive(m){
     s.cur=[]; ui.selArrow=-1; nativePulse("success"); save(); refreshActive();
   };
   $("#bFinish").onclick=()=>finishSession();
+  const bNext=$("#bNextStage");
+  if(bNext) bNext.onclick=()=>advanceRoundStage();
   const guideDone=$("#activeGuideDone");
   if(guideDone) guideDone.onclick=()=>{ db.settings.activeGuideSeen=true; save("active-guide"); render(); };
   document.querySelectorAll("#nudge .npad button").forEach(b=>b.onclick=()=>nudgeArrow(b.dataset.n));
@@ -506,7 +736,7 @@ function renderActive(m){
   refreshActive();
 }
 function shotMetaHtml(a,index){
-  const tags=SHOT_REASON_TAGS.map(tag=>`<button class="reasonTag ${a.reason===tag?"on":""}" data-reason="${esc(tag)}">${esc(tag)}</button>`).join("");
+  const tags=SHOT_REASON_TAGS.map(tag=>`<button type="button" class="reasonTag ${a.reason===tag?"on":""}" aria-pressed="${a.reason===tag}" data-reason="${esc(tag)}">${esc(tag)}</button>`).join("");
   return `<div class="shotMetaGrid">
     <div>
       <label class="metaLabel" for="shotArrowNo">矢番号</label>
@@ -524,16 +754,54 @@ function bindShotMeta(){
   const no=$("#shotArrowNo");
   if(no) no.oninput=e=>{
     a.no=e.target.value.trim();
-    save("shot-meta");
+    scheduleSave("shot-meta"); /* キーストロークごとの全量書き込みを避ける（flush は pagehide 等で保証） */
   };
   if(no) no.onchange=()=>refreshActive();
   document.querySelectorAll("#shotReasonTags .reasonTag").forEach(btn=>btn.onclick=()=>{
     const reason=btn.dataset.reason;
+    /* refreshActive() が #shotMeta を innerHTML で作り直すため、フォーカス中のタグを data-reason で復元する */
+    const hadFocus=!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#shotReasonTags"));
     a.reason=a.reason===reason?"":reason;
     nativePulse("light");
-    save("shot-meta");
+    scheduleSave("shot-meta");
     refreshActive();
+    if(hadFocus){ const back=document.querySelector(`#shotReasonTags .reasonTag[data-reason="${reason}"]`); if(back) back.focus({preventScroll:true}); }
   });
+}
+/* motion:因果 — 矢の着弾座標（SVG座標系、yは上向き正）から4象限のどこから来たかを判定するだけの表示用ヘルパー。
+   attachTargetInput の座標計算・当たり判定には一切関与しない */
+function impactQuadrantClass(a){
+  const x=a&&a.x||0, y=a&&a.y||0;
+  return `impactFrom-${y>=0?"n":"s"}${x>=0?"e":"w"}`;
+}
+/* motion:状態 — HUD の3値（エンド・合計・残り）が前回描画時と変わっていたら短いティッククラスを付ける。
+   render() を跨いだ状態は #main の dataset に載せて持ち回す（DOM 再構築に強い） */
+function updateHudMetrics(s){
+  const hud=$('[data-testid="active-hud"]');
+  if(!hud) return;
+  const hm=liveHudMetrics(s);
+  const fields=[["hudEndNo",String(hm.endNo)],["hudTotal",String(hm.total)],["hudRemain",hm.remainText]];
+  fields.forEach(([id,val])=>{
+    const el=$("#"+id);
+    if(!el) return;
+    const prev=el.dataset.v;
+    const textNode=el.firstChild;
+    if(textNode&&textNode.nodeType===3) textNode.textContent=val; else el.textContent=val;
+    if(prev!=null && prev!==val){
+      el.classList.remove("tick"); void el.offsetWidth; el.classList.add("tick");
+    }
+    el.dataset.v=val;
+  });
+}
+/* 矢チップ列が固定操作列（activeActionDock）の裏に隠れていたら見える位置まで押し上げる。
+   ドックは position:fixed のため通常の scrollIntoView はドックの高さを考慮しないので手計算する */
+function revealChipsAboveDock(chipsBox,behavior){
+  const dock=$("#activeActionDock");
+  if(!dock || !chipsBox) return;
+  const dockTop=dock.getBoundingClientRect().top;
+  const chipsBottom=chipsBox.getBoundingClientRect().bottom;
+  const overlap=chipsBottom-dockTop;
+  if(overlap>0) window.scrollBy({top:overlap+12, behavior});
 }
 function refreshActive(){
   const s=db.active; if(!s) return;
@@ -543,17 +811,31 @@ function refreshActive(){
   s.ends.forEach((end,ei)=>end.forEach(a=>{ html+=markCircle(gp(a),s.faceD,"rgba(60,60,60,.45)"); }));
   s.cur.forEach((a,i)=>{ html+=markCircle(gp(a),s.faceD, i===ui.selArrow?"#111":"var(--green-l)", scoreLabel(a), i===ui.freshArrow?"shotNew":""); });
   $("#tgmarks").innerHTML=html;
-  // chips
-  $("#curChips").innerHTML = s.cur.map((a,i)=>{
+  // chips（innerHTML 全置換でフォーカス中のチップが消えるため、置換前に data-i を控えて復元する）
+  const chipsBox=$("#curChips");
+  const focused=document.activeElement;
+  const focusI=(focused && focused.classList && focused.classList.contains("sc") && chipsBox.contains(focused))?focused.dataset.i:null;
+  chipsBox.innerHTML = s.cur.map((a,i)=>{
     const z=zoneStyle(a.s,a.X,s.faceType);
-    return `<div class="sc ${i===ui.selArrow?"sel":""} ${i===ui.freshArrow?"fresh":""}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</div>`;
+    /* motion:因果 — 的タップの着弾象限から得点チップが現れる方向を決める（表示のみ。当たり判定・座標計算は不変） */
+    const fromCls=i===ui.freshArrow?`fresh ${impactQuadrantClass(a)}`:"";
+    return `<button type="button" class="sc ${i===ui.selArrow?"sel":""} ${fromCls}" aria-pressed="${i===ui.selArrow}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no?`<small>#${esc(a.no)}</small>`:""}</button>`;
   }).join("") || `<span class="recordCurEmpty">エンド${s.ends.length+1}：的をタップして記録</span>`;
+  if(focusI!=null){
+    const back=chipsBox.querySelector(`.sc[data-i="${focusI}"]`);
+    if(back) back.focus({preventScroll:true});
+  }
   if(ui.freshArrow>=0){
     clearTimeout(ui.freshTimer);
     ui.freshTimer=setTimeout(()=>{
       ui.freshArrow=-1;
       document.querySelectorAll(".shotNew,.sc.fresh").forEach(el=>el.classList.remove("shotNew","fresh"));
     },640);
+    /* 記録直後は結果が動いたことが分かるよう滑らかに押し上げる */
+    revealChipsAboveDock(chipsBox,"smooth");
+  }else{
+    /* 初期表示（再描画・タブ復帰含む）でもチップ行がドックの裏に隠れていたら、無演出で即座に押し上げる */
+    revealChipsAboveDock(chipsBox,"instant");
   }
   document.querySelectorAll("#curChips .sc").forEach(c=>c.onclick=()=>{
     ui.selArrow = (ui.selArrow===+c.dataset.i)? -1 : +c.dataset.i; nativePulse("light"); refreshActive();
@@ -573,6 +855,8 @@ function refreshActive(){
     <div class="stat"><b>${all.length?(total/all.length).toFixed(2):"-"}</b><span>平均/本</span></div>
     <div class="stat"><b>${perfectScoreCount(all,s)}</b><span>${perfectScoreLabel(s)}</span></div>
     <div class="stat"><b>${secondaryScoreCount(all,s)}</b><span>${secondaryScoreLabel(s)}</span></div>`;
+  /* motion:状態 — HUD の合計・残りが変わった時だけ短いティックを掛ける（値が同じなら再アニメしない） */
+  updateHudMetrics(s);
   // ends table
   $("#endsTbl").innerHTML = s.ends.length? `<table class="tbl"><tr><th>#</th><th>得点</th><th class="right">計</th><th></th></tr>`+
     s.ends.map((end,i)=>{
@@ -580,7 +864,7 @@ function refreshActive(){
       return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i%ENDCOLORS.length]}"></span>${i+1}</td>
         <td>${sorted.map(scoreLabel).join("・")}</td>
         <td class="right"><b>${end.reduce((a,x)=>a+x.s,0)}</b></td>
-        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">✏</button></td></tr>`;
+        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">${icon("pencil")}</button></td></tr>`;
     }).join("")+`</table>` : `<div class="empty">確定したエンドはまだありません</div>`;
   document.querySelectorAll("#endsTbl [data-open]").forEach(b=>b.onclick=()=>{
     if(s.cur.length){ toast("先に現在のエンドを確定（または取消）してください"); return; }
@@ -596,7 +880,7 @@ function nudgeArrow(dirKey){
   const a=s.cur[ui.selArrow], step=s.faceD/200;
   if(dirKey==="u")a.y+=step; if(dirKey==="d")a.y-=step; if(dirKey==="l")a.x-=step; if(dirKey==="r")a.x+=step;
   Object.assign(a, scoreAt(a.x,a.y,s.faceD,s.faceType,lineCutRadius(s.faceD,s.faceType)));
-  nativePulse("light"); save(); refreshActive();
+  nativePulse("light"); scheduleSave("nudge"); refreshActive();
 }
 
 /* target pointer input with long-press fine mode + lens */
@@ -698,7 +982,7 @@ function attachTargetInput(s){
     s.cur.push(rec);
     ui.freshArrow=s.cur.length-1;
     nativePulse(isLineCuttingFromGlobal(p.x,p.y,s.faceD,s.faceType)?"success":"light");
-    save(); refreshActive();
+    scheduleSave("arrow-add"); refreshActive();
     toast(`${scoreLabel(hit)} 点を記録`);
   }
   function cancel(e){
@@ -721,10 +1005,59 @@ function attachTargetInput(s){
   }
 }
 
-function finishSession(){
+/* 多距離ラウンド: 現ステージを db.sessions へ確定し、次ステージの active を自動生成する（IMP-09）。
+   ステージ確定は重要操作なので scheduleSave ではなく同期 save() を使う。サマリは挟まず toast のみ */
+async function advanceRoundStage(){
+  const s=db.active;
+  const next=s?nextStageDef(s):null;
+  if(!next){ toast("次のステージ定義が見つかりません"); return; }
+  const shot=s.ends.flat().length + s.cur.length;
+  if(!shot){ toast("このステージの矢がまだありません"); return; }
+  const stageDef=sessionStageDef(s);
+  if(stageDef&&stageDef.arrows&&shot<stageDef.arrows && !await appConfirm(`このステージは ${shot}/${stageDef.arrows} 射です。確定して次の距離へ進みますか？`,{okLabel:"次の距離へ"})) return;
+  if(s.cur.length){
+    if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
+    else s.ends.push(s.cur);
+    s.cur=[];
+  }
+  delete s.cur; delete s.editIndex;
+  db.sessions.push(s);
+  const rg=s.roundGroup;
+  const nextFaceType=next.faceType||"single";
+  /* サイト値は次距離の台帳最新値からプリフィル（latestMark を再利用） */
+  const mk=s.setupId?latestMark(s.setupId,next.dist):null;
+  db.active={
+    id:uid(), date:s.date, setupId:s.setupId,
+    dist:next.dist, faceD:next.faceD, faceType:nextFaceType, perEnd:next.perEnd||6,
+    shaft:+lineCutRadius(next.faceD,nextFaceType).toFixed(3),
+    sightV:mk&&mk.v!=null?String(mk.v).trim():"", sightH:mk&&mk.h!=null?String(mk.h).trim():"",
+    wx:s.wx, note:s.note, windDir:s.windDir, windSpeed:s.windSpeed,
+    round:s.round,
+    roundGroup:{gid:rg.gid, roundId:rg.roundId, stage:(Number(rg.stage)||0)+1, stageCount:rg.stageCount},
+    purpose:s.purpose,
+    ends:[], cur:[]
+  };
+  ui.selArrow=-1;
+  nativePulse("success");
+  save();
+  toast(`${next.dist}m を開始（ステージ ${(Number(rg.stage)||0)+2}/${rg.stageCount}）`);
+  render();
+}
+
+async function finishSession(){
   const s=db.active;
   const shot=s.ends.flat().length + s.cur.length;
-  if(!shot){ if(confirm("矢が0本です。このセッションを破棄しますか？")){ db.active=null; nativePulse("heavy"); save(); render(); } return; }
+  const rg=s.roundGroup;
+  if(!shot){
+    /* 多距離ラウンドで確定済みステージがあれば、破棄されるのが現ステージだけと分かる文言にする */
+    const doneStages=rg&&rg.gid?db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid).length:0;
+    const msg=doneStages?`このステージを破棄しますか？（確定済みの ${doneStages} ステージは履歴に残ります）`:"矢が0本です。このセッションを破棄しますか？";
+    if(await appConfirm(msg,{danger:true,okLabel:"破棄"})){ db.active=null; nativePulse("heavy"); save(); render(); }
+    return;
+  }
+  /* 多距離ラウンド途中（最終ステージ以外）の終了は appConfirm を挟む。編集モード・単一距離は従来どおり */
+  if(rg && !s._edit && (Number(rg.stage)||0)<rg.stageCount-1 &&
+     !await appConfirm(`ラウンド途中です（${(Number(rg.stage)||0)+1}/${rg.stageCount}）。ここで終了すると残りのステージは記録できません。終了しますか？`,{okLabel:"終了する"})) return;
   if(s.cur.length){
     if(s.editIndex!=null) s.ends.splice(Math.min(s.editIndex,s.ends.length),0,s.cur);
     else s.ends.push(s.cur);
@@ -745,11 +1078,24 @@ function finishSession(){
 }
 
 /* ---------- summary modal ---------- */
+/* 多距離ラウンドのラウンド合計ブロック: 同 gid の全ステージを aggregateRoundGroups で束ねる。
+   roundGroup の無い単一距離セッションでは空文字（サマリ不変） */
+function roundGroupSummaryHtml(sess){
+  const rg=sess&&sess.roundGroup;
+  if(!rg||!rg.gid) return "";
+  const rows=buildAnalysisRows(db.sessions.filter(x=>x&&x.roundGroup&&x.roundGroup.gid===rg.gid), db.setups, sessionMetrics);
+  const g=aggregateRoundGroups(rows)[0];
+  if(!g||!g.stages.length) return "";
+  const breakdown=g.stages.map(st=>`${st.dist}m ${st.total}点`).join(" / ");
+  return `<div class="advice recordNeutralAdvice">
+    <div class="note"><b>${esc(roundLabel(rg.roundId))} 合計 ${g.total}</b> / ${g.arrows}射${g.complete?"":`（${g.stages.length}/${rg.stageCount}ステージ）`}</div>
+    <div class="note">${esc(breakdown)}</div>
+  </div>`;
+}
 function openSummary(sess, isNew){
   const setup=db.setups.find(x=>x.id===sess.setupId);
-  const all=sess.ends.flat();
-  const total=all.reduce((a,x)=>a+x.s,0);
-  const st=robustStats(all);
+  const m=sessionMetrics(sess);
+  const all=m.all, total=m.total, st=m.st;
   const adv=adviceFor(sess, setup);
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet">
@@ -761,12 +1107,14 @@ function openSummary(sess, isNew){
       <div class="stat"><b>${perfectScoreCount(all,sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all,sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
+    ${roundGroupSummaryHtml(sess)}
     <div id="sumPlot" class="recordSummaryPlot"></div>
     ${groupSummaryHtml(st)}
     ${summarySightDialHtml(sess,adv)}
     ${nextActionHtml(sess,adv,setup)}
     <details class="adv summaryDetails">
       <summary>詳しい根拠を見る</summary>
+      ${confidenceNoteHtml("calc")}
       ${trustHtml(sess,setup,st)}
       ${roundProgressHtml(sess)}
       ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
@@ -779,10 +1127,10 @@ function openSummary(sess, isNew){
       ${personalModelHtml(adv,sess,setup)}
       ${conditionHtml(sess,st,setup)}
     </details>
-    ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">📒 このサイト値を台帳に記録</button></div>`:""}
+    ${sess.setupId&&(sess.sightV||sess.sightH)?`<div class="btnrow"><button class="btn sec" id="sumMark">${icon("ledger")} このサイト値を台帳に記録</button></div>`:""}
     <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
   </div>`;
-  document.body.appendChild(ovl);
+  openModal(ovl,{escapeTarget:"#sumClose"});
   plotSession(sess, ovl.querySelector("#sumPlot"));
   const mk=ovl.querySelector("#sumMark");
   if(mk) mk.onclick=()=>{
@@ -792,7 +1140,7 @@ function openSummary(sess, isNew){
     save(); toast("サイト台帳に記録しました"); mk.disabled=true;
   };
   ovl.querySelector("#sumCard").onclick=()=>exportScorecardImage(sess);
-  ovl.querySelector("#sumClose").onclick=()=>{ ovl.remove(); render(); };
+  ovl.querySelector("#sumClose").onclick=()=>{ closeModal(ovl); render(); };
 }
 
 /* ---------- 履歴 ---------- */
@@ -823,7 +1171,7 @@ function scoreTrendCard(ss){
       <div class="big">${avgText}<small> / 合計${totalText}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>スコア推移 <span class="mini">直近${rows.length}回</span></h2>${body}</div>`;
+  return `<div class="card"><h2>直近の得点 <span class="mini">直近${rows.length}回</span></h2>${body}</div>`;
 }
 function setupPerformanceLabel(setupId){
   if(!setupId) return {key:"setup:none",label:"セットアップ未設定"};
@@ -873,7 +1221,7 @@ function setupPerformanceCard(ss){
       <div class="big">${avgText}<small> / 最高${bestText}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>セットアップ別成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
+  return `<div class="card"><h2>用具ごとの成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
 }
 function sightHistoryCard(ss){
   const markRows=(Array.isArray(db.sightMarks)?db.sightMarks:[])
@@ -908,36 +1256,10 @@ function sightHistoryCard(ss){
       <div class="big">上下 ${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>サイト履歴 <span class="mini">直近${rows.length}件</span></h2>${body}</div>`;
+  return `<div class="card"><h2>サイト値の記録 <span class="mini">直近${rows.length}件</span></h2>${body}</div>`;
 }
-function historyOverviewHtml(allSs,ss){
-  const src=Array.isArray(ss)?ss:allSs;
-  if(!allSs.length) return "";
-  const sessionRows=historySessionRows(src);
-  const arrows=sessionRows.flatMap(r=>r.arrows);
-  const total=sessionRows.reduce((a,r)=>a+r.total,0);
-  const avg=arrows.length?total/arrows.length:0;
-  const recent=[...src].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id<a.id?-1:1)).slice(0,5);
-  const recentSet=new Set(recent);
-  const recentRows=sessionRows.filter(r=>recentSet.has(r.s));
-  const recentArrows=recentRows.flatMap(r=>r.arrows);
-  const recentTotal=recentRows.reduce((a,r)=>a+r.total,0);
-  const recentAvg=recentArrows.length?recentTotal/recentArrows.length:0;
-  const setupCount=new Set(src.map(s=>s.setupId||"none")).size;
-  const distCount=new Set(src.map(s=>s.dist).filter(Boolean)).size;
-  const quality=src.map(s=>sessionQuality(s,db.setups.find(x=>x.id===s.setupId))).filter(Boolean);
-  const qualityScores=quality.map(q=>Number(q.score)).filter(Number.isFinite);
-  const qAvg=qualityScores.length?qualityScores.reduce((a,s)=>a+s,0)/qualityScores.length:0;
-  const latest=recent[0]||null;
-  const latestLabel=latest?[fmtD(latest.date),distanceLabel(latest.dist)].filter(Boolean).join(" "):"—";
-  const best=sessionRows.filter(r=>r.arrows.length).sort((a,b)=>b.total-a.total || b.arrows.length-a.arrows.length || (b.s.date||"").localeCompare(a.s.date||""))[0];
-  const bestMeta=best?[fmtD(best.s.date),distanceLabel(best.s.dist),`${best.arrows.length}本`].filter(Boolean).join(" / "):"記録待ち";
-  return `<div class="insightStrip">
-    <div class="insightTile"><div class="k">記録サマリー</div><b>${src.length}回</b><span>${arrows.length}本 / 最新 ${esc(latestLabel)}</span></div>
-    <div class="insightTile"><div class="k">平均点</div><b>${avg?avg.toFixed(2):"—"}</b><span>直近${recent.length}回 ${recentAvg?recentAvg.toFixed(2):"—"} / 判断材料 ${pct(qAvg)}</span></div>
-    <div class="insightTile"><div class="k">最高合計</div><b>${best?best.total:"—"}</b><span>${esc(bestMeta)} / ${distCount}距離・${setupCount}用具</span></div>
-  </div>`;
-}
+/* 旧 historyOverviewHtml（記録サマリー insightStrip）は履歴ヒーローへ統合済み（UI-P3 差し戻し対応）。
+   同種数値の二重掲示（練習回数・平均点の重複）を避けるため、履歴一覧の集計数値はヒーロー1箇所のみ */
 function distanceLabel(dist){
   return distanceBucketInfo(dist).label;
 }
@@ -981,7 +1303,7 @@ function distanceSummaryHtml(sessionRows){
         <div class="big">${avg}<small> / 最高${g.best?g.best.total:"—"}</small></div>
       </div>`;
     }).join("");
-  return historyAnalysisDetailsHtml("距離別サマリー",`${rows.length}距離`,body);
+  return historyAnalysisDetailsHtml("距離ごとのまとめ",`${rows.length}距離`,body);
 }
 function sightValueText(v){
   const raw=String(v==null?"":v).trim();
@@ -1044,7 +1366,7 @@ function sightSummaryHtml(sessionRows,filter){
         <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
       </div>`;
     }).join("");
-  return historyAnalysisDetailsHtml("サイトサマリー",`台帳${totalMarks}件 / 練習入力${totalSessions}回`,body);
+  return historyAnalysisDetailsHtml("サイト値のまとめ",`台帳${totalMarks}件 / 練習入力${totalSessions}回`,body);
 }
 function groupingMetricNumber(v){
   const n=Number(v);
@@ -1055,13 +1377,11 @@ function groupingMetricText(v){
   return n==null?"—":`${n.toFixed(1)}cm`;
 }
 function groupingSessionRow(row){
-  const arrows=(row&&Array.isArray(row.arrows)?row.arrows:[])
-    .map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)}))
-    .filter(a=>Number.isFinite(a.x) && Number.isFinite(a.y));
-  if(arrows.length<3) return null;
-  const st=robustStats(arrows);
-  const rr=st&&groupingMetricNumber(st.rr);
-  if(!st || st.n<3 || rr==null) return null;
+  /* robustStats 直呼びはやめ、同じ Number 化＋有限フィルタ済みの sessionMetrics キャッシュを経由する */
+  const st=row&&row.s?sessionMetrics(row.s).st:null;
+  if(!st || st.total<3 || st.n<3) return null;
+  const rr=groupingMetricNumber(st.rr);
+  if(rr==null) return null;
   return {
     session:row.s,
     distInfo:distanceBucketInfo(row.s&&row.s.dist),
@@ -1090,9 +1410,9 @@ function groupingSummaryHtml(sessionRows){
   const groups=[...byDist.values()].sort((a,b)=>b.sort-a.sort || b.sessions-a.sessions || a.label.localeCompare(b.label));
   const meta=r=>[r.distInfo.label,r.date.label].filter(x=>x&&x!=="—").join(" / ")||"—";
   const body=`<div class="insightStrip">
-      <div class="insightTile"><div class="k">平均RMS</div><b>${groupingMetricText(avg)}</b><span>${rows.length}セッションから集計</span></div>
-      <div class="insightTile"><div class="k">最小RMS</div><b>${groupingMetricText(best&&best.rr)}</b><span>${esc(best?meta(best):"—")}</span></div>
-      <div class="insightTile"><div class="k">最新RMS</div><b>${groupingMetricText(latest&&latest.rr)}</b><span>${esc(latest?meta(latest):"—")}</span></div>
+      <div class="insightTile"><div class="k">平均の集まり半径(RMS)</div><b>${groupingMetricText(avg)}</b><span>${rows.length}セッションから集計</span></div>
+      <div class="insightTile"><div class="k">最小の集まり半径(RMS)</div><b>${groupingMetricText(best&&best.rr)}</b><span>${esc(best?meta(best):"—")}</span></div>
+      <div class="insightTile"><div class="k">最新の集まり半径(RMS)</div><b>${groupingMetricText(latest&&latest.rr)}</b><span>${esc(latest?meta(latest):"—")}</span></div>
     </div>
     ${groups.map(g=>{
       const distAvg=g.sessions?g.total/g.sessions:null;
@@ -1102,5 +1422,5 @@ function groupingSummaryHtml(sessionRows){
         <div class="big">${groupingMetricText(distAvg)}<small> / 最小${groupingMetricText(g.best&&g.best.rr)}</small></div>
       </div>`;
     }).join("")}`;
-  return historyAnalysisDetailsHtml("グルーピングサマリー",`対象${rows.length}回`,body);
+  return historyAnalysisDetailsHtml("矢の集まり具合のまとめ（グルーピングサマリー）",`対象${rows.length}回`,body);
 }

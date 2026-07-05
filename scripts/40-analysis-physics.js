@@ -5,18 +5,25 @@ function shapeNote(st){
   if(!st || st.n<6) return "";
   const tilt=Math.abs(st.angleDeg||0);
   const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&tilt>15&&tilt<75;
-  if(tilted) return `<div class="note">📊 <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
-  if(st.sy>st.sx*1.3) return `<div class="note">📊 <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
-  if(st.sx>st.sy*1.3) return `<div class="note">📊 <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
+  if(tilted) return `<div class="note">${icon("ruler")} <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
+  if(st.sy>st.sx*1.3) return `<div class="note">${icon("ruler")} <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
+  if(st.sx>st.sy*1.3) return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
   return "";
 }
-function groupSummaryHtml(st){
+/* 信頼度の算出根拠1行注記。v2の説明文禁止に抵触しないよう「詳しく」details 内でのみ表示する */
+function confidenceNoteHtml(kind){
+  return kind==="calc"
+    ? `<div class="subNoteSm">演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出しています。</div>`
+    : `<div class="subNoteSm">判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出しています。</div>`;
+}
+function groupSummaryHtml(st, opts){
   if(!st) return "";
   return `<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
     <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
     <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
     ${st.major!=null?`<div class="kv"><span>グルーピング楕円</span><span>長軸 ${st.major.toFixed(1)}cm ・ 短軸 ${st.minor.toFixed(1)}cm ・ 角度 ${st.angleDeg.toFixed(0)}°</span></div>`:""}
     <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / ${st.method}</span></div>
+    ${opts&&opts.withConfidenceNote?confidenceNoteHtml("calc"):""}
     ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`;
 }
 function cmOffsetText(v, axis){
@@ -242,17 +249,27 @@ const LEVELS={
   calibration:[{min:.72,label:"高"},{min:.42,label:"中"},{min:0,label:"データ蓄積中"}],
   system:[{min:.72,label:"提案安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"準備中"}]
 };
+const PCAL_CACHE=new Map();
+/* 校正はセッション横断のRK4連鎖を含み重いので、db更新時刻をキーにメモ化する */
 function personalPhysicsCalibration(setupId){
   if(!setupId) return null;
+  const key=[setupId,db.updatedAt||"",db.sessions.length,db.sightMarks.length].join("|");
+  if(PCAL_CACHE.has(key)) return PCAL_CACHE.get(key);
+  const out=computePersonalPhysicsCalibration(setupId);
+  PCAL_CACHE.set(key,out);
+  if(PCAL_CACHE.size>8) PCAL_CACHE.delete(PCAL_CACHE.keys().next().value);
+  return out;
+}
+function computePersonalPhysicsCalibration(setupId){
   const setup=db.setups.find(s=>s.id===setupId);
   if(!setup) return null;
   const eye=db.settings.eyeSight||850;
   const sessions=db.sessions.filter(s=>s.setupId===setupId)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
   const usable=sessions.map((s,i)=>{
-    const st=robustStats(s.ends.flat());
+    const q=sessionQuality(s,setup);
+    const st=q&&q.metrics?q.metrics.st:null;
     if(!st || st.n<6) return null;
-    const q=sessionQuality(s,setup,st);
     const recency=.72+(i+1)/Math.max(1,sessions.length)*.28;
     return {s,st,q,w:clamp(q.score*recency,.05,1)};
   }).filter(Boolean);
@@ -299,7 +316,7 @@ function physicsCalibrationHtml(setupId){
   const c=personalPhysicsCalibration(setupId);
   if(!c) return "";
   const color=c.level==="校正安定"?"#0f9d58":c.level==="未校正"?"#8a6d1d":"#1e6fd9";
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  return `<div class="advice analysisAdviceCard">
     <div class="note"><b style="color:${color}">物理校正: ${c.level}</b>（${pct(c.score)}）</div>
     <div class="kv"><span>校正材料</span><span>有効練習 ${c.usable}回 / 風 ${c.wind.sample}回 / サイト値 ${c.sight.n}点</span></div>
     ${c.notes.map(n=>`<div class="note">・${esc(n)}</div>`).join("")}
@@ -365,7 +382,7 @@ function adviceModel(sess, setup, st){
   return {confidence,vFactor:clamp(vFactor,.45,1.1),hFactor:clamp(hFactor,.45,1.05),notes,traj,pcal};
 }
 function adviceFor(sess, setup){
-  const all=sess.ends.flat(); const st=robustStats(all);
+  const st=sessionMetrics(sess).st;
   if(!st || st.n<3) return null;
   const dist=sess.dist;
   const eye=(db.settings.eyeSight||850);
@@ -383,7 +400,7 @@ function adviceFor(sess, setup){
     let l=`サイトを<b>${st.my>0?"上":"下"}</b>へ（中心は${cmOffsetText(st.my,"y")}、補正 ${pct(model.vFactor)}） — 目安 ${mm.toFixed(1)}mm`;
     if(setup && setup.calibV70){ const cpc=setup.calibV70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
     else if(model.pcal && model.pcal.click.v70){ const cpc=model.pcal.click.v70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
-    if(sess.sightV) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightV)}</span>`;
+    if(sess.sightV) l+=` <span class="subNoteSm">現在 ${esc(sess.sightV)}</span>`;
     out.lines.push({axis:"v", html:l});
   }
   // 左右
@@ -393,11 +410,35 @@ function adviceFor(sess, setup){
     let l=`サイトを<b>${st.mx>0?"右":"左"}</b>へ（中心は${cmOffsetText(st.mx,"x")}、補正 ${pct(model.hFactor)}） — 目安 ${mm.toFixed(1)}mm`;
     if(setup && setup.calibH70){ const cpc=setup.calibH70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}クリック`; }
     else if(model.pcal && model.pcal.click.h70){ const cpc=model.pcal.click.h70*dist/70; l+=` ≒ ${(adj/cpc).toFixed(1)}目盛り（履歴推定）`; }
-    if(sess.sightH) l+=` <span style="font-size:11px;color:var(--sub)">現在 ${esc(sess.sightH)}</span>`;
+    if(sess.sightH) l+=` <span class="subNoteSm">現在 ${esc(sess.sightH)}</span>`;
     out.lines.push({axis:"h", html:l});
   }
-  if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です 👏"});
+  if(!out.lines.length) out.lines.push({axis:"-", html:"グルーピング中心はほぼセンター。<b>サイト調整は不要</b>です。"});
   return out;
+}
+/* サイトタブの「いまの提案」表示専用の整形（表示のみ・計算はadviceForと同じ入力を再利用）。
+   上下と左右の両方に動きがある場合はズレの大きい軸を主提案に選ぶ。ロジック（量・方向の算出）は変えない */
+function primarySightSuggestion(sess, setup, adv){
+  if(!adv) return null;
+  const moves=adv.lines.filter(l=>l.axis!=="-");
+  if(!moves.length) return {axis:"-", none:true};
+  const st=adv.st, dist=sess.dist;
+  const model=adviceModel(sess, setup, st);
+  const axis=moves.length>1 ? (Math.abs(st.my)*model.vFactor>=Math.abs(st.mx)*model.hFactor?"v":"h") : moves[0].axis;
+  if(axis==="v"){
+    const adj=Math.abs(st.my)*model.vFactor;
+    const mm=adj*model.traj.mmPerCmV;
+    let clicks=null, clickLabel=null;
+    if(setup && setup.calibV70){ clicks=adj/(setup.calibV70*dist/70); clickLabel="クリック"; }
+    else if(model.pcal && model.pcal.click.v70){ clicks=adj/(model.pcal.click.v70*dist/70); clickLabel="目盛り（推定）"; }
+    return {axis, dir:st.my>0?"up":"down", dirLabel:st.my>0?"上":"下", mm, clicks, clickLabel, other:moves.length>1};
+  }
+  const adj=Math.abs(st.mx)*model.hFactor;
+  const mm=adj*model.traj.mmPerCmH;
+  let clicks=null, clickLabel=null;
+  if(setup && setup.calibH70){ clicks=adj/(setup.calibH70*dist/70); clickLabel="クリック"; }
+  else if(model.pcal && model.pcal.click.h70){ clicks=adj/(model.pcal.click.h70*dist/70); clickLabel="目盛り（推定）"; }
+  return {axis, dir:st.mx>0?"right":"left", dirLabel:st.mx>0?"右":"左", mm, clicks, clickLabel, other:moves.length>1};
 }
 function summarySightDialHtml(sess, adv){
   if(!adv || !adv.st) return "";
@@ -411,7 +452,7 @@ function summarySightDialHtml(sess, adv){
     <div class="dialGrid">
       <svg viewBox="0 0 110 110" aria-hidden="true">
         <circle class="ring" cx="55" cy="55" r="48"/>
-        <circle class="ring" cx="55" cy="55" r="30" style="opacity:.55"/>
+        <circle class="ring dialRingInner" cx="55" cy="55" r="30"/>
         <line class="axis" x1="10" y1="55" x2="100" y2="55"/>
         <line class="axis" x1="55" y1="10" x2="55" y2="100"/>
         <line class="vector" x1="55" y1="55" x2="${(55+dx).toFixed(1)}" y2="${(55+dy).toFixed(1)}"/>
@@ -453,7 +494,7 @@ function judgementHtml(adv,sess){
   const j=judgementFor(adv,sess);
   if(!j) return "";
   const color=j.tone==="ok"?"#0f9d58":j.tone==="warn"?"#c62828":"#8a6d1d";
-  return `<div class="note" style="margin-top:6px"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
+  return `<div class="note analysisMt6"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
 }
 function summaryDecisionHtml(adv,sess){
   const j=judgementFor(adv,sess);
@@ -500,17 +541,19 @@ function conditionInsights(sess,st,setup){
 }
 function conditionHtml(sess,st,setup){
   const notes=conditionInsights(sess,st,setup).slice(0,4);
-  return notes.length?`<div class="advice" style="background:var(--card);border-color:var(--line)">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
+  return notes.length?`<div class="advice analysisAdviceCard">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
 }
 const SESSION_METRIC_CACHE=new Map();
 function sessionMetricSignature(sess){
   const ends=(sess&&sess.ends)||[];
-  let n=0,total=0,last="";
+  let n=0,total=0,xs=0,ys=0,last="";
   ends.forEach((end,ei)=>end.forEach((a,ai)=>{
-    n++; total+=a.s||0;
+    /* 入力防御: 文字列座標/点数が混じっても文字列連結で署名生成が壊れないよう Number 化 */
+    n++; total+=Number(a&&a.s)||0; xs+=Number(a&&a.x)||0; ys+=Number(a&&a.y)||0;
     if(ei===ends.length-1 && ai===end.length-1) last=[a.x,a.y,a.s,a.X?1:0,a.spot==null?"":a.spot].join(":");
   }));
-  return [sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,last].join("|");
+  /* DB_REV: db変異（save/scheduleSave）ごとに増える世代カウンタ。署名衝突（例: 2本を逆方向に同距離ナッジ）でも編集保存後に必ず再計算させる */
+  return [typeof DB_REV==="number"?DB_REV:0,sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,xs.toFixed(2),ys.toFixed(2),last].join("|");
 }
 function sessionMetrics(sess){
   const sig=sessionMetricSignature(sess||{});
@@ -518,7 +561,9 @@ function sessionMetrics(sess){
   if(cached) return cached;
   const all=(sess.ends||[]).flat();
   const total=all.reduce((a,x)=>a+x.s,0);
-  const st=robustStats(all);
+  /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
+  const pts=all.map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
+  const st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st};
   SESSION_METRIC_CACHE.set(sig,metrics);
   if(SESSION_METRIC_CACHE.size>240) SESSION_METRIC_CACHE.delete(SESSION_METRIC_CACHE.keys().next().value);
@@ -590,8 +635,8 @@ function personalModelHtml(adv,sess,setup){
   if(!adv || !adv.personal) return "";
   const p=adv.personal;
   const tone=p.state==="過去と一致"?"#0f9d58":p.state==="今回だけの可能性"?"#c62828":"#8a6d1d";
-  if(p.sample<2) return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  if(p.sample<2) return `<div class="advice analysisAdviceCard"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
+  return `<div class="advice analysisAdviceCard">
     <div class="note"><b style="color:${tone}">個人モデル: ${p.state}</b> — ${esc(p.text)}</div>
     <div class="kv"><span>過去の加重中心</span><span>${cmOffsetText(p.mx,"x")} / ${cmOffsetText(p.my,"y")}</span></div>
     <div class="kv"><span>同条件データ</span><span>${p.sample}回 / 安定度 ${pct(p.stability)}</span></div>
@@ -600,7 +645,9 @@ function personalModelHtml(adv,sess,setup){
 function trustHtml(sess,setup,st){
   const q=sessionQuality(sess,setup,st);
   const color=q.tone==="ok"?"#0f9d58":q.tone==="warn"?"#c62828":"#8a6d1d";
-  return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>`;
+  /* trustHtml は全呼び出し箇所が details（詳しく/詳しい根拠/判断の根拠）内のため、注記を常設できる */
+  return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>
+    ${confidenceNoteHtml("judge")}`;
 }
 function nextActionPlan(sess,adv,setup){
   const plan=[];
@@ -625,21 +672,26 @@ function nextActionPlan(sess,adv,setup){
 }
 function nextActionHtml(sess,adv,setup){
   const plan=nextActionPlan(sess,adv,setup);
-  return plan.length?`<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>次のアクション</b></div>${plan.map((p,i)=>`<div class="note">${i+1}. ${p}</div>`).join("")}</div>`:"";
+  return plan.length?`<div class="advice analysisAdviceCard"><div class="note"><b>次のアクション</b></div>${plan.map((p,i)=>`<div class="note">${i+1}. ${p}</div>`).join("")}</div>`:"";
 }
 function roundProgressHtml(sess){
   const r=ROUND_TYPES.find(x=>x.id===sess.round);
-  if(!r || !r.arrows) return "";
+  /* ROUND_TYPES に無い id は多距離ラウンド: 現在ステージ定義の arrows で進捗を出す（IMP-09） */
+  const stage=r?null:sessionStageDef(sess);
+  const arrows=r&&r.arrows?r.arrows:(stage&&stage.arrows?stage.arrows:null);
+  if(!arrows) return "";
+  const rg=sess.roundGroup;
+  const stageInfo=stage&&rg?` ステージ${(Number(rg.stage)||0)+1}/${rg.stageCount}`:"";
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0);
-  const shot=all.length, remain=Math.max(0,r.arrows-shot);
-  const pace=shot?total/shot*r.arrows:0;
-  return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)} / ${shot}/${r.arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
+  const shot=all.length, remain=Math.max(0,arrows-shot);
+  const pace=shot?total/shot*arrows:0;
+  return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)}${stageInfo} / ${shot}/${arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
 }
 function sessionsCsv(){
   const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
   const rows=[head];
   db.sessions.forEach(s=>{
-    const all=s.ends.flat(), st=robustStats(all), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===s.setupId);
+    const m=sessionMetrics(s), all=m.all, st=m.st, total=m.total, setup=db.setups.find(x=>x.id===s.setupId);
     const q=sessionQuality(s,setup,st);
     const p=personalModel(s,setup,st);
     rows.push([s.date,setup?setup.name:"",s.dist,roundLabel(s.round),faceLabel(s),all.length,total,all.length?(total/all.length).toFixed(3):"",
@@ -690,15 +742,22 @@ function backupReminderHtml(){
   const t=db.settings.lastBackupAt?Date.parse(db.settings.lastBackupAt):0;
   const days=t?Math.floor((Date.now()-t)/(24*60*60*1000)):999;
   if(days<30) return `<div class="hint">最終バックアップ/CSV出力: ${new Date(t).toLocaleDateString()}。月1回の保存ペースは良好です。</div>`;
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
+  return `<div class="advice analysisAdviceCard"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
 }
+/* ゴミ箱の一覧+復元は「データ」節、全消去ボタンは危険域へ分離して表示する（表示のみの分割。
+   #trashClear の挙動・確認ダイアログの有無は変えない） */
 function trashSettingsHtml(){
   const items=(db.trash||[]).slice(0,8);
-  if(!items.length) return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
-  return `<h3 style="margin-top:18px;font-size:14px">ゴミ箱 <span style="font-size:11px;color:var(--sub)">最新${items.length}/${(db.trash||[]).length}件</span></h3>
+  if(!items.length) return `<h3 class="trashH3">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
+  return `<h3 class="trashH3">ゴミ箱 <span class="subNoteSm">最新${items.length}/${(db.trash||[]).length}件</span></h3>
     <table class="tbl"><tr><th>種類</th><th>内容</th><th>削除日</th><th></th></tr>
-    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost" data-restore-trash="${it.id}" style="padding:4px 8px">復元</button></td></tr>`).join("")}</table>
-    <div class="btnrow"><button class="btn danger" id="trashClear">ゴミ箱を空にする</button></div>`;
+    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost trashRestoreBtn" data-restore-trash="${it.id}">復元</button></td></tr>`).join("")}</table>`;
+}
+function trashClearButtonHtml(){
+  const items=(db.trash||[]).slice(0,8);
+  if(!items.length) return "";
+  return `<div class="settingsActionHint">ゴミ箱の中身を完全に削除します。元に戻せません。</div>
+    <div class="btnrow"><button class="btn danger" id="trashClear" data-testid="settings-trash-clear">ゴミ箱を空にする</button></div>`;
 }
 function regress(pts){
   const n=pts.length; if(n<2) return null;
@@ -789,9 +848,10 @@ function regressionAdvice(setupId, dist){
   [["sightV","my","v"],["sightH","mx","h"]].forEach(([key,axis,tag])=>{
     const pts=[];
     ss.forEach((s,i)=>{
-      const v=parseFloat(s[key]); const st=robustStats(s.ends.flat());
+      const v=parseFloat(s[key]);
+      const q=sessionQuality(s,setup);
+      const st=q&&q.metrics?q.metrics.st:null;
       if(isFinite(v) && st && st.n>=6){
-        const q=sessionQuality(s,setup,st);
         const recency=.72 + (i+1)/Math.max(1,ss.length)*.28;
         const sample=clamp((st.n-4)/14,.55,1);
         const windFactor=isWindy(s)?.82:1;
@@ -867,7 +927,7 @@ function modelReadinessProfile(setupId){
 function modelReadinessHtml(setupId){
   if(!setupId) return "";
   const p=modelReadinessProfile(setupId);
-  return `<div class="advice" style="background:var(--card);border-color:var(--line)">
+  return `<div class="advice analysisAdviceCard">
     <div class="note"><b>個人データ準備度: ${p.level}</b>（${pct(p.score)}）</div>
     <div class="kv"><span>使える練習</span><span>${p.good}回 / 同条件反復 ${p.repeatGroups}組</span></div>
     <div class="kv"><span>サイト校正材料</span><span>サイト値つき練習 ${p.withSight}回 / 台帳 ${p.sightDists}距離</span></div>

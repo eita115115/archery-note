@@ -36,6 +36,8 @@ function checkUpdate(){
 }
 function freshReload(){
   if(isUpdateReloadBlocked()){ syncUpdateBarVisibility(); return; }
+  /* 未flushのデバウンス保存をリロードで失わないよう、スナップショットより先に本体を書き切る */
+  if(typeof flushPendingSave==="function") flushPendingSave();
   if(typeof flushSafetySnapshot==="function") flushSafetySnapshot();
   const bar=$("#updBar");
   if(bar) bar.textContent="更新中...";
@@ -51,7 +53,10 @@ function freshReload(){
   }
 }
 $("#updBar").onclick=freshReload;
-document.addEventListener("visibilitychange",()=>{ if(document.hidden) flushSafetySnapshot(); else checkUpdate(); });
-window.addEventListener("pagehide",()=>flushSafetySnapshot());
+/* 高頻度記録操作のデバウンス保存（scheduleSave）は離脱時に必ず同期 flush する。
+ * iOS Safari では pagehide が最も信頼できる。順序は本体（flushPendingSave）→ スナップショット。 */
+document.addEventListener("visibilitychange",()=>{ if(document.hidden){ flushPendingSave(); flushSafetySnapshot(); } else checkUpdate(); });
+window.addEventListener("pagehide",()=>{ flushPendingSave(); flushSafetySnapshot(); });
+window.addEventListener("beforeunload",()=>{ flushPendingSave(); flushSafetySnapshot(); });
 checkUpdate();
 render();

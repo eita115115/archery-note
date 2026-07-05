@@ -1,9 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#1a5c3a"/>
-  <circle cx="50" cy="50" r="40" fill="#ffffff"/>
-  <circle cx="50" cy="50" r="32" fill="#1c1e1c"/>
-  <circle cx="50" cy="50" r="24" fill="#37a6e0"/>
-  <circle cx="50" cy="50" r="16" fill="#f23b3b"/>
-  <circle cx="50" cy="50" r="8" fill="#ffe14d"/>
-  <circle cx="50" cy="50" r="1.6" fill="#1c1e1c"/>
+  <!-- レティクル意匠（タブ「記録」と同系）: カーボン墨の地・紙白レティクル・中心ドットだけ金。
+       maskable セーフエリア（中心80% = r40）内に全要素を収める -->
+  <rect width="100" height="100" rx="22" fill="#141613"/>
+  <g stroke="#f2f0e8" stroke-width="6" stroke-linecap="butt" fill="none">
+    <circle cx="50" cy="50" r="29"/>
+    <path d="M50 11.6V24M50 76V88.4M11.6 50H24M76 50H88.4"/>
+  </g>
+  <circle cx="50" cy="50" r="5.5" fill="#d9b25a"/>
 </svg>

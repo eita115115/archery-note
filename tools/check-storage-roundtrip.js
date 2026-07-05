@@ -19,6 +19,8 @@ const fixtureFiles = {
   partialLegacy: "archery-note-v1-partial-legacy.json",
   danglingSetup: "archery-note-v1-dangling-setup.json",
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
+  missingSessions: "archery-note-v1-missing-sessions.json",
+  formAnalyses: "archery-note-v1-form-analyses.json",
 };
 const expectedCsvHeader = [
   "date",
@@ -98,6 +100,12 @@ function loadStorageApi() {
     "localStorage",
     `${storageScript}\nreturn {KEY, SNAP_KEY, normalizeDb, blankDb, dataCounts};`,
   )(makeLocalStorageShim());
+}
+
+function loadDbFromRaw(raw) {
+  const shim = makeLocalStorageShim();
+  shim.setItem("archeryNote.v1", raw);
+  return new Function("localStorage", `${storageScript}\nreturn db;`)(shim);
 }
 
 function createImportSnapshot(db) {
@@ -194,7 +202,7 @@ function assertHasOwn(object, key, label) {
 }
 
 function checkBaseShape(name, db) {
-  assertEqual(db.schema, 3, `[${name}] schema`);
+  assertEqual(db.schema, 5, `[${name}] schema`);
   assertArray(db.setups, `[${name}] setups`);
   assertArray(db.sightMarks, `[${name}] sightMarks`);
   assertArray(db.sessions, `[${name}] sessions`);
@@ -358,6 +366,30 @@ function checkSightMarksCompatibilityRoundTrip(db) {
   );
 }
 
+function checkMissingSessionsLoad(fixture) {
+  // sessions キーを欠く正当なバックアップでも load() が setups を破棄しないこと
+  const db = loadDbFromRaw(JSON.stringify(fixture));
+  checkBaseShape("missing-sessions load", db);
+  assert(
+    db.setups.some((setup) => setup.id === "fixture-missing-sessions-setup"),
+    "[missing-sessions load] setups should survive load()",
+  );
+  assert(
+    db.sightMarks.some((mark) => mark.id === "fixture-missing-sessions-mark"),
+    "[missing-sessions load] sight marks should survive load()",
+  );
+  assertEqual(db.sessions.length, 0, "[missing-sessions load] sessions normalize to empty");
+  assertEqual(db.settings.eyeSight, 850, "[missing-sessions load] settings survive load()");
+
+  // 壊れた入力・非オブジェクトは従来どおり blankDb になること
+  ["null", "[1,2]", '"text"', "42", "{broken json"].forEach((raw) => {
+    const blank = loadDbFromRaw(raw);
+    checkBaseShape(`invalid load (${raw})`, blank);
+    assertEqual(blank.setups.length, 0, `[invalid load (${raw})] setups`);
+    assertEqual(blank.sessions.length, 0, `[invalid load (${raw})] sessions`);
+  });
+}
+
 function checkSnapshot(storageApi, representative) {
   const normalized = storageApi.normalizeDb(clone(representative));
   const result = createImportSnapshot(normalized);
@@ -368,7 +400,7 @@ function checkSnapshot(storageApi, representative) {
   const latest = result.snapshots[0];
   assertEqual(latest.reason, "import-before", "[snapshot] reason");
   assertObject(latest.data, "[snapshot] payload data");
-  assertEqual(latest.data.schema, 3, "[snapshot] payload schema");
+  assertEqual(latest.data.schema, 5, "[snapshot] payload schema");
   assertEqual(latest.counts.sessions, 2, "[snapshot] representative session count");
   assertEqual(latest.counts.setups, 1, "[snapshot] representative setup count");
   assertEqual(latest.counts.marks, 2, "[snapshot] representative sight mark count");
@@ -466,8 +498,21 @@ function main() {
   checkPartialLegacyRoundTrip(normalized.partialLegacy);
   checkDanglingSetupRoundTrip(normalized.danglingSetup);
   checkSightMarksCompatibilityRoundTrip(normalized.sightMarksCompatibility);
+  checkMissingSessionsLoad(fixtures.missingSessions);
   checkSnapshot(storageApi, fixtures.representative);
   checkCsvForAllFixtures(normalized);
+  checkCsvRows("missing-sessions", normalized.missingSessions, 1);
+
+  // schema 4 前方互換: JSON 往復で formAnalyses が保持され、CSV には影響しない
+  const fa = normalized.formAnalyses;
+  assertArray(fa.formAnalyses, "[form-analyses] formAnalyses after round trip");
+  assertEqual(fa.formAnalyses.length, 1, "[form-analyses] record survives round trip");
+  assertEqual(
+    fa.formAnalyses[0].features[1].release.drawHandSpeed,
+    2.1,
+    "[form-analyses] nested feature survives round trip",
+  );
+  checkCsvRows("form-analyses", fa, 2);
 
   console.log("Storage round-trip checks OK");
 }

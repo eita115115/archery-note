@@ -15,6 +15,9 @@ const fixtureFiles = {
   partialLegacy: "archery-note-v1-partial-legacy.json",
   danglingSetup: "archery-note-v1-dangling-setup.json",
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
+  missingSessions: "archery-note-v1-missing-sessions.json",
+  formAnalyses: "archery-note-v1-form-analyses.json",
+  customRounds: "archery-note-v1-custom-rounds.json",
 };
 
 function assert(ok, message) {
@@ -52,6 +55,14 @@ function loadStorageApi() {
   return new Function(
     `${section("const KEY=", "function uid")}\nreturn {normalizeDb, blankDb, dataCounts};`,
   )();
+}
+
+function loadRoundApi(db) {
+  return new Function(
+    "db",
+    `${storageScript.slice(storageScript.indexOf("const ROUND_TYPES"))}
+return {ROUND_TYPES, MULTI_ROUND_PRESETS, multiRoundDefs, findRoundDef, roundLabel};`,
+  )(db);
 }
 
 function loadTrashApi(db, save) {
@@ -94,7 +105,7 @@ function assertHasOwn(object, key, label) {
 }
 
 function checkBaseShape(name, db) {
-  assertEqual(db.schema, 3, `[${name}] schema`);
+  assertEqual(db.schema, 5, `[${name}] schema`);
   assertArray(db.setups, `[${name}] setups`);
   assertArray(db.sightMarks, `[${name}] sightMarks`);
   assertArray(db.sessions, `[${name}] sessions`);
@@ -415,9 +426,229 @@ function checkSightMarksCompatibility(storageApi, fixtures) {
   assertObject(db.legacyTopLevelField, "[sight-marks-compatibility] legacy top-level field");
 }
 
+function checkFormAnalysesCompatibility(storageApi, fixtures) {
+  // schema 4 前方互換: 現行(schema 3)実装は formAnalyses を未知フィールドとして
+  // 破棄せず保持しなければならない（docs/storage-schema4-design.md）
+  const db = storageApi.normalizeDb(clone(fixtures.formAnalyses));
+  checkBaseShape("form-analyses", db);
+  assertArray(db.formAnalyses, "[form-analyses] formAnalyses");
+  assertEqual(db.formAnalyses.length, 1, "[form-analyses] record count");
+  const rec = db.formAnalyses[0];
+  assertEqual(rec.id, "fixture-form-analysis-1", "[form-analyses] record id");
+  assertEqual(rec.sessionId, "fixture-form-session", "[form-analyses] session link");
+  assertArray(rec.features, "[form-analyses] features");
+  assertEqual(rec.features.length, 2, "[form-analyses] feature count");
+  assertEqual(rec.features[0].angles.bowElbow, 171, "[form-analyses] nested angle survives");
+  assertEqual(rec.features[0].phase.anchorMs, 1800, "[form-analyses] nested phase survives");
+  assert(
+    db.sessions.some((session) => session.id === "fixture-form-session"),
+    "[form-analyses] linked session survives",
+  );
+}
+
+function checkFormAnalysisTrashRestore(storageApi, fixtures) {
+  const db = storageApi.normalizeDb(clone(fixtures.formAnalyses));
+  const rec = db.formAnalyses[0];
+  const trashApi = loadTrashApi(db, () => {});
+  const item = trashApi.trashItem("formAnalysis", "射形記録", rec);
+  db.formAnalyses = db.formAnalyses.filter((f) => f.id !== rec.id);
+  assert(trashApi.restoreTrash(item.id), "[form-analyses trash] restore should succeed");
+  assert(
+    db.formAnalyses.some((f) => f.id === rec.id),
+    "[form-analyses trash] record should return to formAnalyses",
+  );
+  assert(
+    !trashApi.restoreTrash(item.id),
+    "[form-analyses trash] second restore of same id should fail",
+  );
+}
+
+function checkCustomRoundsCompatibility(storageApi, fixtures) {
+  // schema 5: customRounds は配列補完のみで migration 不要。roundGroup 付きセッションも
+  // 従来どおりの単一距離セッションとして無変更で保持されること（IMP-09 多距離ラウンド）。
+  const source = fixtures.customRounds;
+  const db = storageApi.normalizeDb(clone(source));
+  checkBaseShape("custom-rounds", db);
+  assertArray(db.customRounds, "[custom-rounds] customRounds");
+  try {
+    assertStrict.deepStrictEqual(db.customRounds, source.customRounds);
+  } catch (error) {
+    throw new Error(`[custom-rounds] customRounds must survive normalizeDb unchanged: ${error.message}`, {
+      cause: error,
+    });
+  }
+  try {
+    assertStrict.deepStrictEqual(db.sessions, source.sessions);
+  } catch (error) {
+    throw new Error(`[custom-rounds] sessions (incl. roundGroup) must stay unchanged: ${error.message}`, {
+      cause: error,
+    });
+  }
+  const stage = db.sessions.find((session) => session.id === "fixture-round-stage-1");
+  assertObject(stage, "[custom-rounds] stage session");
+  assertObject(stage.roundGroup, "[custom-rounds] stage roundGroup");
+  assertEqual(stage.roundGroup.gid, "fixture-round-group-1", "[custom-rounds] roundGroup gid");
+  assertEqual(stage.roundGroup.roundId, "custom-6030", "[custom-rounds] roundGroup roundId");
+  assertEqual(stage.roundGroup.stage, 0, "[custom-rounds] roundGroup stage");
+  assertEqual(stage.roundGroup.stageCount, 2, "[custom-rounds] roundGroup stageCount");
+  const plain = db.sessions.find((session) => session.id === "fixture-round-plain-session");
+  assertObject(plain, "[custom-rounds] plain session survives");
+  assert(
+    !Object.hasOwn(plain, "roundGroup"),
+    "[custom-rounds] plain session must not grow a roundGroup property",
+  );
+
+  // customRounds を持たない既存データは空配列に補完される（migration なし）
+  const legacy = storageApi.normalizeDb(clone(fixtures.representative));
+  assertArray(legacy.customRounds, "[custom-rounds] legacy db customRounds");
+  assertEqual(legacy.customRounds.length, 0, "[custom-rounds] legacy db customRounds count");
+}
+
+function checkMultiRoundDefs(fixtures) {
+  // プリセットのみ（customRounds 空）
+  const presetApi = loadRoundApi({ customRounds: [] });
+  const presets = presetApi.multiRoundDefs();
+  assertEqual(presets.length, 2, "[round-defs] preset count");
+  const men = presetApi.findRoundDef("wa1440_men");
+  assertObject(men, "[round-defs] WA1440 men preset");
+  assertEqual(men.label, "WA1440 男子", "[round-defs] WA1440 men label");
+  assertStrict.deepStrictEqual(
+    men.stages.map((st) => [st.dist, st.faceD, st.arrows, st.perEnd]),
+    [
+      [90, 122, 36, 6],
+      [70, 122, 36, 6],
+      [50, 80, 36, 3],
+      [30, 80, 36, 3],
+    ],
+    "[round-defs] WA1440 men stages (50/30m は3本エンド)",
+  );
+  const women = presetApi.findRoundDef("wa1440_women");
+  assertObject(women, "[round-defs] WA1440 women preset");
+  assertStrict.deepStrictEqual(
+    women.stages.map((st) => [st.dist, st.faceD, st.arrows, st.perEnd]),
+    [
+      [70, 122, 36, 6],
+      [60, 122, 36, 6],
+      [50, 80, 36, 3],
+      [30, 80, 36, 3],
+    ],
+    "[round-defs] WA1440 women stages",
+  );
+  men.stages.forEach((st, i) => {
+    assertEqual(st.faceType, "single", `[round-defs] men stage ${i} faceType`);
+  });
+  assertEqual(presetApi.findRoundDef("no-such-round"), null, "[round-defs] unknown id gives null");
+
+  // カスタム定義: 追加と id 重複時のカスタム優先
+  const customApi = loadRoundApi({ customRounds: clone(fixtures.customRounds.customRounds) });
+  const defs = customApi.multiRoundDefs();
+  assertEqual(defs.length, 3, "[round-defs] presets + custom count (duplicate id merges)");
+  assertEqual(
+    customApi.findRoundDef("wa1440_men").label,
+    "WA1440 男子（カスタム上書き）",
+    "[round-defs] custom definition wins on id collision",
+  );
+  assertEqual(
+    customApi.findRoundDef("custom-6030").stages.length,
+    2,
+    "[round-defs] custom round stage count",
+  );
+
+  // roundLabel: 既存6種の返値は不変、多距離ラウンド id はその label、未知 id は先頭フォールバック
+  const legacyLabels = [
+    ["free", "自由練習"],
+    ["70m72", "70m 72射"],
+    ["50m72", "50m 72射"],
+    ["30m36", "30m 36射"],
+    ["18m60", "18m 60射"],
+    ["field72", "フィールド 24標的/72射"],
+  ];
+  legacyLabels.forEach(([id, label]) => {
+    assertEqual(customApi.roundLabel(id), label, `[round-defs] legacy roundLabel(${id})`);
+  });
+  assertEqual(customApi.roundLabel(""), "自由練習", "[round-defs] empty id falls back to free");
+  assertEqual(customApi.roundLabel("wa1440_women"), "WA1440 女子", "[round-defs] multi-round label");
+  assertEqual(
+    customApi.roundLabel("custom-6030"),
+    "カスタム 60/30m",
+    "[round-defs] custom round label",
+  );
+  assertEqual(
+    customApi.roundLabel("unknown-round"),
+    "自由練習",
+    "[round-defs] unknown id falls back to the first round type",
+  );
+}
+
+function checkArrowCoordinateSanitize(storageApi) {
+  // インポート経路（normalizeDb）で数値文字列座標が数値化されること。
+  // 変換できない値は矢を削除せず値をそのまま残す（既存データ保全）。
+  const db = storageApi.normalizeDb({
+    sessions: [
+      {
+        id: "sanitize-session",
+        ends: [
+          [
+            { x: "1.2", y: "-0.5", s: "9" },
+            { x: "abc", y: null, s: 10 },
+            { x: 0.4, y: 0.2, s: 10, X: true },
+          ],
+        ],
+      },
+    ],
+    active: {
+      ends: [[{ x: "2.5", y: "0", s: "8" }]],
+      cur: [{ x: "-1.5", y: "3.25", s: "7" }],
+    },
+  });
+  const end = db.sessions[0].ends[0];
+  assertEqual(end.length, 3, "[arrow-sanitize] no arrow is dropped");
+  assertEqual(end[0].x, 1.2, "[arrow-sanitize] string x becomes number");
+  assertEqual(end[0].y, -0.5, "[arrow-sanitize] string y becomes number");
+  assertEqual(end[0].s, 9, "[arrow-sanitize] string s becomes number");
+  assertEqual(end[1].x, "abc", "[arrow-sanitize] unconvertible x is kept as-is");
+  assertEqual(end[1].y, null, "[arrow-sanitize] null y is kept as-is");
+  assertEqual(end[1].s, 10, "[arrow-sanitize] numeric s stays untouched");
+  assertEqual(end[2].x, 0.4, "[arrow-sanitize] numeric x stays untouched");
+  assertEqual(end[2].X, true, "[arrow-sanitize] other arrow fields survive");
+  assertEqual(db.active.ends[0][0].x, 2.5, "[arrow-sanitize] active end arrow x becomes number");
+  assertEqual(db.active.cur[0].x, -1.5, "[arrow-sanitize] active cur arrow x becomes number");
+  assertEqual(db.active.cur[0].s, 7, "[arrow-sanitize] active cur arrow s becomes number");
+
+  // ゴミ箱内セッションも同じサニタイズを通ること（restoreTrash は normalizeDb を通らないため）。
+  const trashDb = storageApi.normalizeDb({
+    trash: [
+      { id: "t1", type: "session", data: { id: "s1", ends: [[{ x: "3.5", y: "1", s: "6" }]] } },
+      { id: "t2", type: "setup", data: { id: "g1" } },
+    ],
+  });
+  assertEqual(trashDb.trash[0].data.ends[0][0].x, 3.5, "[arrow-sanitize] trashed session arrow x becomes number");
+  assertEqual(trashDb.trash[0].data.ends[0][0].s, 6, "[arrow-sanitize] trashed session arrow s becomes number");
+  assertEqual(trashDb.trash.length, 2, "[arrow-sanitize] non-session trash entries pass through untouched");
+
+  // キーを持たない矢に own property を生やさないこと（変化時のみ代入）。
+  const bare = storageApi.normalizeDb({ sessions: [{ id: "b", ends: [[{ x: 1, y: 2 }]] }] });
+  assert(
+    !Object.hasOwn(bare.sessions[0].ends[0][0], "s"),
+    "[arrow-sanitize] missing s must not become an own undefined property",
+  );
+}
+
+function checkDbRevContract() {
+  assert(/^let DB_REV\s*=\s*0/m.test(storageScript), "[db-rev] storage script should declare let DB_REV");
+  const saveBody = section("function save(", "function uid");
+  assert(
+    saveBody.includes("DB_REV++"),
+    "[db-rev] save() should bump DB_REV so session metric caches invalidate",
+  );
+}
+
 function main() {
   const fixtures = loadFixtures();
   const storageApi = loadStorageApi();
+
+  checkDbRevContract();
+  checkArrowCoordinateSanitize(storageApi);
 
   checkNormalizeIdempotency(storageApi, fixtures);
   checkBlank(storageApi, fixtures);
@@ -428,6 +659,10 @@ function main() {
   checkPartialLegacy(storageApi, fixtures);
   checkDanglingSetup(storageApi, fixtures);
   checkSightMarksCompatibility(storageApi, fixtures);
+  checkFormAnalysesCompatibility(storageApi, fixtures);
+  checkFormAnalysisTrashRestore(storageApi, fixtures);
+  checkCustomRoundsCompatibility(storageApi, fixtures);
+  checkMultiRoundDefs(fixtures);
 
   console.log("Storage contract checks OK");
 }
