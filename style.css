@@ -206,7 +206,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 }
 html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .missionTop{display:grid; grid-template-columns:minmax(0,1fr) 84px; gap:12px; align-items:start; min-width:0;}
-.eyebrow{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.72; font-weight:var(--fw-label);}
+.eyebrow{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label);}
 /* 見出しラベル化: 大見出し＋説明文をやめ、ラベル様式（11-12px・字間0.08em・淡色）1行に */
 .missionPanel h2{margin:3px 0 0; font-size:12px; letter-spacing:.02em; font-weight:var(--fw-label); line-height:1.4; color:rgba(255,255,255,.92);}
 .readinessDial{
@@ -215,13 +215,13 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
   box-shadow:inset 0 0 0 8px rgba(255,255,255,.05);
 }
 .readinessDial b{font-size:22px; line-height:1;}
-.readinessDial span{font-size:10px; opacity:.78; margin-top:3px;}
+.readinessDial span{font-size:11px; color:var(--sub); margin-top:3px;}
 .readinessRail{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px;}
 .readinessCell{
   min-height:62px; border-radius:8px; padding:8px; background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.16); min-width:0;
 }
-.readinessCell .k{font-size:10.5px; opacity:.72;}
+.readinessCell .k{font-size:11px; color:var(--sub);}
 .readinessCell b{display:block; font-size:13px; margin-top:2px;}
 .readinessCell .bar{height:4px; border-radius:2px; margin-top:7px; background:rgba(255,255,255,.22); overflow:hidden;}
 .readinessCell .bar i{display:block; height:100%; border-radius:2px; background:var(--green);}
@@ -238,7 +238,7 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 }
 .flowBtn b{display:block; font-size:12.5px; color:#fff; margin-bottom:3px;}
 .flowBtn .flowText{min-width:0;}
-.flowBtn .flowText span{display:block; font-size:10.5px; color:rgba(255,255,255,.72); line-height:1.35; overflow-wrap:anywhere;}
+.flowBtn .flowText span{display:block; font-size:11px; color:rgba(255,255,255,.78); line-height:1.35; overflow-wrap:anywhere;}
 /* 選択状態は金の面ではなく反転（この墨面パネル上では白面＋墨文字）で示す */
 .flowBtn.on{border-color:rgba(255,255,255,.85); background:#f2f0e8; color:#1b1b18; box-shadow:none;}
 .flowBtn.on b,.flowBtn.on .flowText span{color:#1b1b18;}
@@ -283,17 +283,17 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
   width:64px; height:64px; border-radius:8px; padding:10px; background:var(--paper);
   border:1px solid var(--line); box-shadow:none;
 }
-.convergeMission .eyebrow{color:var(--title); opacity:.72;}
+.convergeMission .eyebrow{color:var(--sub);}
 .missionPanel.convergeMission h2{color:var(--sub); font-size:12px; letter-spacing:.02em; font-weight:var(--fw-label); line-height:1.4; margin:3px 0 0;}
 .convergeMission .readinessDial{
   background:var(--soft); border-color:var(--line); color:var(--title); box-shadow:none;
 }
 .convergeMission .readinessDial b{font-size:19px;}
-.convergeMission .readinessDial span{font-size:9.5px; color:var(--sub);}
+.convergeMission .readinessDial span{font-size:10.5px; color:var(--sub);}
 .convergeMission .readinessCell{
   background:var(--paper); border-color:var(--line); min-height:56px;
 }
-.convergeMission .readinessCell .k{color:var(--sub); opacity:1;}
+.convergeMission .readinessCell .k{color:var(--sub);}
 .convergeMission .readinessCell b{color:var(--ink);}
 .convergeMission .readinessCell .bar{background:var(--line2);}
 .convergeMission .readinessCell .bar i{background:var(--green);}
@@ -357,7 +357,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .repeatMain::before{
   content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:2px; background:var(--accent);
 }
-.repeatEyebrow{display:block; font-size:10px; letter-spacing:.06em; color:rgba(242,240,232,.68); font-weight:var(--fw-label);}
+.repeatEyebrow{display:block; font-size:11px; letter-spacing:.06em; color:rgba(242,240,232,.72); font-weight:var(--fw-label);}
 .repeatMain b{font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums;}
 .repeatSub{color:rgba(242,240,232,.6)!important;}
 .repeatHistory{min-height:64px;}
@@ -451,7 +451,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .sessionCondition .setupLens{margin:0; opacity:.86;}
 .sessionCondition .lensCard{padding:7px 9px; min-height:44px;}
 .sessionCondition .lensCard b{font-size:11.5px;}
-.sessionCondition .lensCard span{font-size:9.5px;}
+.sessionCondition .lensCard span{font-size:10.5px;}
 /* セッション票内の罫線区切り（スコアカードの紙の文法: hairlineで距離／的・本数／開始 を分ける） */
 .sessionCardRule{height:1px; background:var(--line2); margin:12px 0;}
 .quickDists{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:7px; margin-top:6px;}
@@ -466,7 +466,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .stageGaugeTick{display:flex; flex-direction:column; align-items:center; min-width:0;}
 .stageGaugeMark{width:2px; background:var(--accent); border-radius:1px; margin-bottom:4px;}
 .stageGaugeTick b{font-size:12px; color:var(--title); font-variant-numeric:tabular-nums; white-space:nowrap;}
-.stageGaugeTick span{font-size:9.5px; color:var(--sub); margin-top:1px; white-space:nowrap;}
+.stageGaugeTick span{font-size:10.5px; color:var(--sub); margin-top:1px; white-space:nowrap;}
 .stageGaugeRail{flex:1; height:1px; background:var(--line); margin-bottom:16px; min-width:8px;}
 .recordDetails{margin-top:10px; border:none!important; background:transparent!important; padding:0!important;}
 .recordDetails summary{
@@ -520,7 +520,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .pageHero h2.pageHeroLead{font-size:17px; line-height:1.45; font-weight:var(--fw-figure); color:var(--ink); letter-spacing:0;}
 .heroMetrics{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px;}
 .heroMetric{border:1px solid var(--line); border-radius:8px; background:var(--glass); padding:8px; min-width:0;}
-.heroMetric .k{font-size:10px; color:var(--sub);}
+.heroMetric .k{font-size:11px; color:var(--sub);}
 .heroMetric b{display:block; color:var(--title); font-size:14px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:var(--fw-emphasis);}
 /* サイトタブ「いまの提案」: 方向（SVG矢印＋言葉）＋量（tabular-nums大型）を主役にする単一ブロック */
 .sightNow{margin-top:10px;}
@@ -561,7 +561,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 /* HUDセル: 枠・面なし。ラベルは小さく淡く、数値だけ大型 tabular-nums で地に置く */
 .liveGrid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:7px; margin-top:10px;}
 .liveCell{border:none; border-radius:0; background:transparent; padding:8px 0; min-width:0;}
-.liveCell .k{font-size:10px; color:var(--sub); opacity:1;}
+.liveCell .k{font-size:11px; color:var(--sub);}
 .liveCell b{display:block; font-size:15px; margin-top:2px; color:var(--title); font-variant-numeric:tabular-nums;}
 .compactHud .liveGrid{margin-top:8px;}
 .compactHud .liveCell{background:transparent; border:none; color:var(--ink); padding:7px 4px; text-align:center;}
@@ -570,7 +570,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 /* 記録中HUDの「いま必要な3つ」: エンド・合計・残りだけを大型 tabular-nums で並べる */
 .liveGrid3{grid-template-columns:repeat(3,minmax(0,1fr));}
 .liveGrid3 .liveCell b{font-size:22px; font-weight:var(--fw-figure);}
-.liveGrid3 .liveCell b small{font-size:11px; font-weight:var(--fw-body); margin-left:1px; opacity:.75;}
+.liveGrid3 .liveCell b small{font-size:11px; font-weight:var(--fw-body); margin-left:1px; color:var(--sub);}
 /* motion:状態 — HUD数値が変わった瞬間だけ知覚できる短いティック */
 .liveCell b.tick{animation:hudTick var(--motion-fast) var(--ease-app);}
 @keyframes hudTick{
@@ -732,8 +732,8 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 }
 /* 選択状態は反転トークンへ統一（v2再監査: 旧 green の選択色は退役済みのため使わない） */
 .reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);}
-.sc small{display:block; font-size:9.5px; line-height:1; opacity:.85; margin-top:1px;}
-.npad{display:grid; grid-template-columns:48px 48px 48px; gap:6px; justify-content:center; margin:6px 0;}
+.sc small{display:block; font-size:10.5px; line-height:1; color:var(--sub); margin-top:1px;}
+.npad{display:grid; grid-template-columns:52px 52px 52px; gap:6px; justify-content:center; margin:6px 0;}
 .npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums;}
 .npad .blank{visibility:hidden;}
 table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
@@ -798,7 +798,7 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .histTrendLabel{width:72px; font-weight:var(--fw-label);}
 .histTrendChart{flex:1;}
 .histTrendValue{width:54px; text-align:right; font-size:var(--font-size-sm);}
-.histTrendSub{color:var(--sub); font-size:10px;}
+.histTrendSub{color:var(--sub); font-size:11px;}
 .histAdviceCard{background:var(--card); border-color:var(--line);}
 /* 多距離ラウンドのステージ一覧: P1 の目盛り表現（距離に応じた棒の長さ）をテーブル行に揃える */
 .stageTable td,.stageTable th{font-variant-numeric:tabular-nums;}
@@ -825,7 +825,7 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .settingsDangerHint{color:var(--danger);}
 .settingsVersionFooter{text-align:center; margin-top:var(--space-5);}
 .sheet .gearHistoryH3{margin-top:14px; font-size:13px;}
-.gearHistoryRow{font-size:var(--font-size-sm); padding:6px 0; border-bottom:1px solid #eef0eb;}
+.gearHistoryRow{font-size:var(--font-size-sm); padding:6px 0; border-bottom:1px solid var(--line2);}
 /* 機材台帳: セッティング名を主役に、諸元は罫線ラベルなしの整列行で並べる */
 .gearLedgerItem{position:relative; padding-left:14px;}
 .gearLedgerItem .t{display:flex; align-items:center; gap:7px;}

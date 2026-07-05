@@ -21,7 +21,7 @@ foreach ($ring in $rings) {
   $brush.Dispose()
 }
 $g.Dispose()
-$out = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "apple-touch-icon.png"
+$out = Join-Path (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)) "apple-touch-icon.png"
 $bmp.Save($out, [System.Drawing.Imaging.ImageFormat]::Png)
 $bmp.Dispose()
 Write-Output "saved: $out"

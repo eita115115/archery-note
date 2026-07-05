@@ -428,7 +428,7 @@ function checkSightMarksCompatibility(storageApi, fixtures) {
 
 function checkFormAnalysesCompatibility(storageApi, fixtures) {
   // schema 4 前方互換: 現行(schema 3)実装は formAnalyses を未知フィールドとして
-  // 破棄せず保持しなければならない（docs/storage-schema4-design.md）
+  // 破棄せず保持しなければならない（docs/infra/storage-schema4-design.md）
   const db = storageApi.normalizeDb(clone(fixtures.formAnalyses));
   checkBaseShape("form-analyses", db);
   assertArray(db.formAnalyses, "[form-analyses] formAnalyses");

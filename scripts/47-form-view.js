@@ -98,6 +98,7 @@ function formTrendMiniHtml(){
   const path=series.map((p,i)=>`${i?"L":"M"}${px(i).toFixed(1)},${py(p.bowArm).toFixed(1)}`).join("");
   return `<div class="note"><b>弓手肘の推移</b>（自分の記録の変化。基準値との比較ではありません）</div>
   <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H}px" role="img" aria-label="弓手肘角度の推移">
+    <title>弓手肘角度の推移: ${series.length}回、${min.toFixed(0)}〜${max.toFixed(0)}°</title>
     <path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
     ${series.map((p,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(p.bowArm).toFixed(1)}" r="3" fill="var(--green)"/>`).join("")}
   </svg>`;

@@ -3,7 +3,10 @@
   "short_name": "ArcheryNote",
   "description": "アーチェリーの得点・着弾位置・サイト値・風・用具を記録し、練習傾向とサイト調整の目安を確認できます。",
   "start_url": "./index.html",
+  "scope": ".",
   "display": "standalone",
+  "display_override": ["standalone","minimal-ui"],
+  "orientation": "portrait",
   "background_color": "#f4f5f2",
   "theme_color": "#1a5c3a",
   "icons": [

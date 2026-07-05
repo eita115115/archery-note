@@ -129,9 +129,9 @@ Do not add them to a PR unless the user explicitly says to do so.
 ```text
 AGENTS.md
 CLAUDE.md
-docs/codex-continue-prompt.md
-docs/codex-progress.md
-docs/integration-plan.md
+docs/codex/codex-continue-prompt.md
+docs/codex/codex-progress.md
+docs/codex/integration-plan.md
 ```
 
 There may also be a local preserve branch:

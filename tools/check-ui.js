@@ -21,7 +21,7 @@ const appScripts = [
   "scripts/70-gear-settings.js",
   "scripts/90-init.js",
 ];
-const appJs = appScripts.map(file => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
+const appJs = appScripts.map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 const surface = `${html}\n${css}\n${appJs}`;
 const appUrl = `file:///${htmlPath.replace(/\\/g, "/")}`;
 const outDir = path.join(root, "artifacts", "ui-smoke");
@@ -47,14 +47,17 @@ function browserCandidates() {
 }
 
 function findBrowser() {
-  const found = browserCandidates().find(p => fs.existsSync(p));
+  const found = browserCandidates().find((p) => fs.existsSync(p));
   assert(found, "Chrome/Edge was not found. Set CHROME_PATH or EDGE_PATH.");
   return found;
 }
 
 function ensureInsideRoot(p) {
   const full = path.resolve(p);
-  assert(full === root || full.startsWith(root + path.sep), `Refusing path outside workspace: ${full}`);
+  assert(
+    full === root || full.startsWith(root + path.sep),
+    `Refusing path outside workspace: ${full}`,
+  );
   return full;
 }
 
@@ -71,58 +74,302 @@ function pngSize(file) {
 }
 
 function staticUiChecks() {
-  const gearList = name => {
+  const gearList = (name) => {
     const match = new RegExp(`\\n  ${name}:\\[([\\s\\S]*?)\\n  \\],`).exec(appJs);
     assert(match, `${name} gear list missing`);
     return match[1];
   };
-  assert(!/<meta name="viewport"[^>]*user-scalable\s*=\s*no/i.test(html), "Viewport must not disable user scaling");
-  assert(!/<meta name="viewport"[^>]*maximum-scale\s*=\s*1/i.test(html), "Viewport must not lock maximum scale to 1");
-  assert(/id="updBar" hidden[^>]*aria-live="polite"/.test(html), "Update banner live region missing");
-  assert(/id="toast" role="status" aria-live="polite" aria-atomic="true"/.test(html), "Toast status live region missing");
-  assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"), "External stylesheet missing");
-  assert(appScripts.every(file => html.includes(`<script src="${file}"></script>`)) && !/<script>([\s\S]*?)<\/script>/.test(html), "External app scripts missing");
-  assert(!fs.existsSync(path.join(root, "app.js")), "Legacy app.js should not remain after script split");
-  assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
+  assert(
+    !/<meta name="viewport"[^>]*user-scalable\s*=\s*no/i.test(html),
+    "Viewport must not disable user scaling",
+  );
+  assert(
+    !/<meta name="viewport"[^>]*maximum-scale\s*=\s*1/i.test(html),
+    "Viewport must not lock maximum scale to 1",
+  );
+  assert(
+    /id="updBar" hidden[^>]*aria-live="polite"/.test(html),
+    "Update banner live region missing",
+  );
+  assert(
+    /id="toast" role="status" aria-live="polite" aria-atomic="true"/.test(html),
+    "Toast status live region missing",
+  );
+  assert(
+    html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"),
+    "External stylesheet missing",
+  );
+  assert(
+    appScripts.every((file) => html.includes(`<script src="${file}"></script>`)) &&
+      !/<script>([\s\S]*?)<\/script>/.test(html),
+    "External app scripts missing",
+  );
+  assert(
+    !fs.existsSync(path.join(root, "app.js")),
+    "Legacy app.js should not remain after script split",
+  );
+  assert(
+    html.includes('name="description"') && html.includes('property="og:description"'),
+    "Share/SEO metadata missing",
+  );
   assert(/<nav class="tabs" id="tabs"[^>]*>/.test(html), "Tab bar missing");
-  const tabMatches = [...html.matchAll(/<button data-v="([^"]+)"[^>]*>[\s\S]*?<\/button>/g)].map(m => m[1]);
-  assert(tabMatches.join(",") === "record,history,analysis,sight,gear", `Unexpected tabs: ${tabMatches.join(",")}`);
-  assert(surface.includes("記録") && surface.includes("履歴") && surface.includes("分析") && surface.includes("サイト調整") && surface.includes("用具"), "Tab labels missing");
+  const tabMatches = [...html.matchAll(/<button data-v="([^"]+)"[^>]*>[\s\S]*?<\/button>/g)].map(
+    (m) => m[1],
+  );
+  assert(
+    tabMatches.join(",") === "record,history,analysis,sight,gear",
+    `Unexpected tabs: ${tabMatches.join(",")}`,
+  );
+  assert(
+    surface.includes("記録") &&
+      surface.includes("履歴") &&
+      surface.includes("分析") &&
+      surface.includes("サイト調整") &&
+      surface.includes("用具"),
+    "Tab labels missing",
+  );
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
-  assert(surface.includes("content-visibility:auto") && surface.includes("contain-intrinsic-size"), "offscreen rendering guard missing");
-  assert(css.includes("touch-action:manipulation") && css.includes("--chrome-bg") && css.includes("min-height:48px"), "native-feel touch/chrome styling missing");
-  assert(surface.includes("@keyframes appRise") && !surface.includes("primaryPulse") && surface.includes("scorePop") && surface.includes("markPop") && surface.includes("impactFlash") && surface.includes("shotNew") && surface.includes("freshArrow") && surface.includes("prefers-reduced-motion") && surface.includes("ic-record") && surface.includes("ic-analysis") && surface.includes("ic-sight"), "minimal recording feedback, tab icons, and reduced-motion guard missing");
+  assert(
+    surface.includes("content-visibility:auto") && surface.includes("contain-intrinsic-size"),
+    "offscreen rendering guard missing",
+  );
+  assert(
+    css.includes("touch-action:manipulation") &&
+      css.includes("--chrome-bg") &&
+      css.includes("min-height:48px"),
+    "native-feel touch/chrome styling missing",
+  );
+  assert(
+    /\.mt10\{margin-top:var\(--space-4\);\}/.test(css),
+    ".mt10 must preserve 10px spacing via --space-4",
+  );
+  assert(
+    /\.subNote\{font-size:var\(--font-size-sm\);/.test(css),
+    ".subNote must preserve 12px text size",
+  );
+  assert(
+    /\.subNoteSm\{font-size:var\(--font-size-xs\);/.test(css),
+    ".subNoteSm must preserve 11px text size",
+  );
+  assert(
+    /\.histScoreLabel\{[^}]*font-size:var\(--font-size-sm\);/.test(css),
+    ".histScoreLabel must preserve 12px text size",
+  );
+  assert(
+    /\.histScoreCount\{[^}]*font-size:var\(--font-size-xs\);/.test(css),
+    ".histScoreCount must preserve 11px text size",
+  );
+  assert(
+    /\.histTrendRow\{[^}]*gap:var\(--space-4\);/.test(css),
+    ".histTrendRow must preserve 10px gap",
+  );
+  assert(
+    /\.histTrendValue\{[^}]*font-size:var\(--font-size-sm\);/.test(css),
+    ".histTrendValue must preserve 12px text size",
+  );
+  /* .histSightVal was removed during v2 design-language migration; check retired */
+  assert(
+    surface.includes("@keyframes appRise") &&
+      !surface.includes("primaryPulse") &&
+      surface.includes("scorePop") &&
+      surface.includes("markPop") &&
+      surface.includes("impactFlash") &&
+      surface.includes("shotNew") &&
+      surface.includes("freshArrow") &&
+      surface.includes("prefers-reduced-motion") &&
+      surface.includes("ic-record") &&
+      surface.includes("ic-analysis") &&
+      surface.includes("ic-sight"),
+    "minimal recording feedback, tab icons, and reduced-motion guard missing",
+  );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
-  assert(html.includes('class="ic ic-record"') && html.includes('viewBox="0 0 24 24"') && html.includes('stroke-linecap="butt"') && !css.includes(".ic-record::before"), "tab icons must be inline 24px-grid SVGs with butt caps (no CSS pseudo icons)");
-  assert(appJs.includes('class="icoInline" viewBox="0 0 24 24"') && !/class="icoInline"[^>]*stroke-linecap="round"/.test(appJs), "icon() set must use the 24px grid with butt caps");
-  assert(surface.includes("--active-tab") && surface.includes("nav.tabs::before") && surface.includes('setProperty("--active-tab"'), "smooth state-following tab motion missing");
-  assert(!surface.includes("targetImpact") && !surface.includes("screenIn") && !surface.includes("triggerReleaseMotion") && !surface.includes("arrowFlight"), "overdone transition/target animation should not return");
-  assert(surface.includes("今日のズレを、次の一射へ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "systematic onboarding UI missing");
-  assert(surface.includes("読み込みに時間がかかっています") && surface.includes("bootFallback") && surface.includes("bootFallbackDelay") && html.includes('id="updBar" hidden'), "startup/update fallback should be calm and initially hidden");
-  assert(surface.includes("サイト値を残す") && surface.includes("足りないデータを見る") && !surface.includes("校正用") && !surface.includes("状態確認"), "record mode labels should stay user-facing");
-  assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "field target setup UI missing");
-  assert(surface.includes("perfectScoreLabel") && surface.includes("secondaryScoreLabel") && surface.includes("5点以上"), "field-aware score labels missing");
-  assert(surface.includes("初回の操作ガイド") && surface.includes("次から表示しない") && surface.includes("activeGuideSeen"), "first-run active guide missing");
-  assert(surface.includes("この条件で開始") && surface.includes("前回と同じ") && surface.includes("recordRepeatBand") && surface.includes("homeActions") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("actionFaceLabel") && !surface.includes("今の条件で開始") && surface.includes("今日のズレを、次の一射へ。") && surface.includes("アーチェリー練習ノート") && surface.includes("missionPanel") && surface.includes("convergeMission") && surface.includes("phaseArc") && surface.includes("simplePromise") && surface.includes("ズレを見る") && surface.includes("詳しく使う") && surface.includes("quickSelects") && surface.includes("missionMore") && surface.includes("summaryDecisionHtml") && surface.includes("setupLens") && surface.includes("insightStrip"), "lightweight record flow composition missing");
-  assert(surface.includes("compactHud") && !surface.includes("まず今日の記録を始める。詳しい材料") && !surface.includes("距離・的サイズはこの画面で変更できます") && !surface.includes("タップ＆ドラッグで確定"), "record screen should stay compact and low-noise");
-  assert(surface.includes("pageHero") && surface.includes("pageHeroLead") && surface.includes("history-hero-trend") && surface.includes("いまの提案") && surface.includes("いつものセッティングを残す") && surface.includes("liveHud"), "reborn workspace surfaces missing");
-  assert(surface.includes("nativeSignal") && surface.includes("触感") && surface.includes("共有") && surface.includes("freshReload") && !html.includes("statusPill"), "native-feel UI should not crowd the header");
-  assert(surface.includes("SHOT_REASON_TAGS") && surface.includes("外れ理由") && surface.includes("矢番号") && surface.includes("arrowMetaSummaryHtml"), "shot reason and arrow-number note UI missing");
-  assert(surface.includes("判断信頼度") && surface.includes("個人モデル") && surface.includes("次のアクション") && surface.includes("個人データ準備度") && surface.includes("スパイン初期候補") && surface.includes("RK4-3D") && surface.includes("物理校正"), "analysis cards missing");
+  assert(
+    html.includes('class="ic ic-record"') &&
+      html.includes('viewBox="0 0 24 24"') &&
+      html.includes('stroke-linecap="butt"') &&
+      !css.includes(".ic-record::before"),
+    "tab icons must be inline 24px-grid SVGs with butt caps (no CSS pseudo icons)",
+  );
+  assert(
+    appJs.includes('class="icoInline" viewBox="0 0 24 24"') &&
+      !/class="icoInline"[^>]*stroke-linecap="round"/.test(appJs),
+    "icon() set must use the 24px grid with butt caps",
+  );
+  assert(
+    surface.includes("--active-tab") &&
+      surface.includes("nav.tabs::before") &&
+      surface.includes('setProperty("--active-tab"'),
+    "smooth state-following tab motion missing",
+  );
+  assert(
+    !surface.includes("targetImpact") &&
+      !surface.includes("screenIn") &&
+      !surface.includes("triggerReleaseMotion") &&
+      !surface.includes("arrowFlight"),
+    "overdone transition/target animation should not return",
+  );
+  assert(
+    surface.includes("今日のズレを、次の一射へ") &&
+      surface.includes("点取りから調整提案へ") &&
+      surface.includes("足りないデータを見る"),
+    "systematic onboarding UI missing",
+  );
+  assert(
+    surface.includes("読み込みに時間がかかっています") &&
+      surface.includes("bootFallback") &&
+      surface.includes("bootFallbackDelay") &&
+      html.includes('id="updBar" hidden'),
+    "startup/update fallback should be calm and initially hidden",
+  );
+  assert(
+    surface.includes("サイト値を残す") &&
+      surface.includes("足りないデータを見る") &&
+      !surface.includes("校正用") &&
+      !surface.includes("状態確認"),
+    "record mode labels should stay user-facing",
+  );
+  assert(
+    surface.includes("FIELD_FACE_SIZES") &&
+      surface.includes("cm フィールド") &&
+      surface.includes("フィールド 24標的/72射"),
+    "field target setup UI missing",
+  );
+  assert(
+    surface.includes("perfectScoreLabel") &&
+      surface.includes("secondaryScoreLabel") &&
+      surface.includes("5点以上"),
+    "field-aware score labels missing",
+  );
+  assert(
+    surface.includes("初回の操作ガイド") &&
+      surface.includes("次から表示しない") &&
+      surface.includes("activeGuideSeen"),
+    "first-run active guide missing",
+  );
+  assert(
+    surface.includes("この条件で開始") &&
+      surface.includes("前回と同じ") &&
+      surface.includes("recordRepeatBand") &&
+      surface.includes("homeActions") &&
+      surface.includes("quickStart") &&
+      surface.includes("quickStartMeta") &&
+      surface.includes("actionFaceLabel") &&
+      !surface.includes("今の条件で開始") &&
+      surface.includes("今日のズレを、次の一射へ。") &&
+      surface.includes("アーチェリー練習ノート") &&
+      surface.includes("missionPanel") &&
+      surface.includes("convergeMission") &&
+      surface.includes("phaseArc") &&
+      surface.includes("simplePromise") &&
+      surface.includes("ズレを見る") &&
+      surface.includes("詳しく使う") &&
+      surface.includes("quickSelects") &&
+      surface.includes("missionMore") &&
+      surface.includes("summaryDecisionHtml") &&
+      surface.includes("setupLens") &&
+      surface.includes("insightStrip"),
+    "lightweight record flow composition missing",
+  );
+  assert(
+    surface.includes("compactHud") &&
+      !surface.includes("まず今日の記録を始める。詳しい材料") &&
+      !surface.includes("距離・的サイズはこの画面で変更できます") &&
+      !surface.includes("タップ＆ドラッグで確定"),
+    "record screen should stay compact and low-noise",
+  );
+  assert(
+    surface.includes("pageHero") &&
+      surface.includes("pageHeroLead") &&
+      surface.includes("history-hero-trend") &&
+      surface.includes("いまの提案") &&
+      surface.includes("いつものセッティングを残す") &&
+      surface.includes("liveHud"),
+    "reborn workspace surfaces missing",
+  );
+  assert(
+    surface.includes("nativeSignal") &&
+      surface.includes("触感") &&
+      surface.includes("共有") &&
+      surface.includes("freshReload") &&
+      !html.includes("statusPill"),
+    "native-feel UI should not crowd the header",
+  );
+  assert(
+    surface.includes("SHOT_REASON_TAGS") &&
+      surface.includes("外れ理由") &&
+      surface.includes("矢番号") &&
+      surface.includes("arrowMetaSummaryHtml"),
+    "shot reason and arrow-number note UI missing",
+  );
+  assert(
+    surface.includes("判断信頼度") &&
+      surface.includes("個人モデル") &&
+      surface.includes("次のアクション") &&
+      surface.includes("個人データ準備度") &&
+      surface.includes("スパイン初期候補") &&
+      surface.includes("RK4-3D") &&
+      surface.includes("物理校正"),
+    "analysis cards missing",
+  );
   // 「信頼度」の語の分離（監査 High/Medium 対応）: 射形側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
-  assert(surface.includes("検出の鮮明さ") && !appJs.includes("・ 信頼度"), "form-tracking must say 検出の鮮明さ, not bare 信頼度, in the capture HUD");
-  assert(surface.includes("カメラの角度による測定誤差は反映されません") && surface.includes("毎回同じ位置・角度で撮ると比較の精度が上がります"), "form-tracking measurement-error and camera-position hints missing");
-  assert(surface.includes("演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出") && surface.includes("判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出"), "confidence derivation notes missing");
-  assert(surface.includes("アプリ情報・保存状態") && surface.includes("nativeStack") && surface.includes("PWA + Capacitor-ready") && surface.includes("ブラウザ保存"), "native readiness UI missing");
-  assert(surface.includes("自動バックアップ") && surface.includes("今すぐバックアップ") && surface.includes("バックアップデータを復元しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "backup settings copy should be user-facing");
-  assert(surface.includes("シャフト銘柄") && surface.includes("番手/スパイン") && surface.includes("ハンドル/弓本体") && surface.includes("HOYT Grand Prix XCEED 2 H25") && surface.includes("HOYT Formula RCRV PODIUM Limbs"), "separated gear fields missing");
-  assert(surface.includes("EASTON X10 ProTour") && surface.includes("SHIBUYA ULTIMA RC IV 520 Carbon") && surface.includes("RAMRODS VEKTOR") && surface.includes("GAS Bowstrings Ghost XV"), "expanded gear knowledge missing");
-  assert(surface.includes("choicePick") && surface.includes("候補にないので手入力") && surface.includes("確認したチューニング"), "gear dropdown/tuning UI missing");
+  assert(
+    surface.includes("検出の鮮明さ") && !appJs.includes("・ 信頼度"),
+    "form-tracking must say 検出の鮮明さ, not bare 信頼度, in the capture HUD",
+  );
+  assert(
+    surface.includes("カメラの角度による測定誤差は反映されません") &&
+      surface.includes("毎回同じ位置・角度で撮ると比較の精度が上がります"),
+    "form-tracking measurement-error and camera-position hints missing",
+  );
+  assert(
+    surface.includes("演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出") &&
+      surface.includes("判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出"),
+    "confidence derivation notes missing",
+  );
+  assert(
+    surface.includes("アプリ情報・保存状態") &&
+      surface.includes("nativeStack") &&
+      surface.includes("PWA + Capacitor-ready") &&
+      surface.includes("ブラウザ保存"),
+    "native readiness UI missing",
+  );
+  assert(
+    surface.includes("自動バックアップ") &&
+      surface.includes("今すぐバックアップ") &&
+      surface.includes("バックアップデータを復元しました") &&
+      !surface.includes("\u81ea\u52d5\u9000\u907f") &&
+      !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"),
+    "backup settings copy should be user-facing",
+  );
+  assert(
+    surface.includes("シャフト銘柄") &&
+      surface.includes("番手/スパイン") &&
+      surface.includes("ハンドル/弓本体") &&
+      surface.includes("HOYT Grand Prix XCEED 2 H25") &&
+      surface.includes("HOYT Formula RCRV PODIUM Limbs"),
+    "separated gear fields missing",
+  );
+  assert(
+    surface.includes("EASTON X10 ProTour") &&
+      surface.includes("SHIBUYA ULTIMA RC IV 520 Carbon") &&
+      surface.includes("RAMRODS VEKTOR") &&
+      surface.includes("GAS Bowstrings Ghost XV"),
+    "expanded gear knowledge missing",
+  );
+  assert(
+    surface.includes("choicePick") &&
+      surface.includes("候補にないので手入力") &&
+      surface.includes("確認したチューニング"),
+    "gear dropdown/tuning UI missing",
+  );
   const bowList = gearList("bow");
   const limbList = gearList("limbs");
   assert(!/Formula SR|Formula XD/.test(limbList), "handle names leaked into limb dropdown");
-  assert(!/MK KOREA ZEST Limbs|MK XD Limbs/.test(bowList), "limb names leaked into handle dropdown");
+  assert(
+    !/MK KOREA ZEST Limbs|MK XD Limbs/.test(bowList),
+    "limb names leaked into handle dropdown",
+  );
 }
 
 function freePort() {
@@ -138,12 +385,12 @@ function freePort() {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function stopProcess(proc) {
   if (proc.exitCode !== null) return;
-  const closed = new Promise(resolve => proc.once("close", resolve));
+  const closed = new Promise((resolve) => proc.once("close", resolve));
   proc.kill();
   await Promise.race([closed, sleep(1500)]);
 }
@@ -178,14 +425,16 @@ async function waitForPageTarget(port) {
   while (Date.now() < deadline) {
     try {
       const targets = await fetchJson(`http://127.0.0.1:${port}/json/list`, 1000);
-      const page = targets.find(t => t.type === "page" && t.webSocketDebuggerUrl);
+      const page = targets.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
       if (page) return page.webSocketDebuggerUrl;
     } catch (err) {
       lastError = err.message;
     }
     await sleep(120);
   }
-  throw new Error(`Timed out waiting for Chrome DevTools page target${lastError ? `: ${lastError}` : ""}`);
+  throw new Error(
+    `Timed out waiting for Chrome DevTools page target${lastError ? `: ${lastError}` : ""}`,
+  );
 }
 
 function createCdpClient(wsUrl) {
@@ -194,7 +443,10 @@ function createCdpClient(wsUrl) {
     let nextId = 1;
     const pending = new Map();
     const eventWaiters = [];
-    const openTimer = setTimeout(() => reject(new Error("Timed out opening DevTools websocket")), 8000);
+    const openTimer = setTimeout(
+      () => reject(new Error("Timed out opening DevTools websocket")),
+      8000,
+    );
 
     ws.addEventListener("open", () => {
       clearTimeout(openTimer);
@@ -207,7 +459,7 @@ function createCdpClient(wsUrl) {
         waitEvent(method, timeoutMs = 5000) {
           return new Promise((res, rej) => {
             const timer = setTimeout(() => {
-              const idx = eventWaiters.findIndex(w => w.res === res);
+              const idx = eventWaiters.findIndex((w) => w.res === res);
               if (idx >= 0) eventWaiters.splice(idx, 1);
               rej(new Error(`Timed out waiting for ${method}`));
             }, timeoutMs);
@@ -220,7 +472,7 @@ function createCdpClient(wsUrl) {
       });
     });
 
-    ws.addEventListener("message", ev => {
+    ws.addEventListener("message", (ev) => {
       const raw = typeof ev.data === "string" ? ev.data : Buffer.from(ev.data).toString("utf8");
       const msg = JSON.parse(raw);
       if (msg.id && pending.has(msg.id)) {
@@ -242,7 +494,9 @@ function createCdpClient(wsUrl) {
       }
     });
 
-    ws.addEventListener("error", err => reject(new Error(`DevTools websocket error: ${err.message || err.type || err}`)));
+    ws.addEventListener("error", (err) =>
+      reject(new Error(`DevTools websocket error: ${err.message || err.type || err}`)),
+    );
   });
 }
 
@@ -286,7 +540,8 @@ async function screenshot(browser, view) {
     await client.send("Page.navigate", { url: `${appUrl}?uiSmoke=${Date.now()}-${view.name}` });
     await load;
     await client.send("Runtime.evaluate", {
-      expression: "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))",
+      expression:
+        "new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))",
       awaitPromise: true,
     });
     const metrics = await client.send("Runtime.evaluate", {
@@ -306,13 +561,27 @@ async function screenshot(browser, view) {
     });
     const value = metrics.result.value;
     assert(value.overflow <= 1, `${view.name} has horizontal overflow: ${JSON.stringify(value)}`);
-    assert(value.gear && value.gear.left >= 0 && value.gear.right <= value.vw + 1, `${view.name} settings button is clipped: ${JSON.stringify(value.gear)}`);
-    assert(value.tabs.length === 5 && value.tabs.every(t => t.left >= -1 && t.right <= value.vw + 1 && t.width > 44), `${view.name} tab bar is clipped: ${JSON.stringify(value.tabs)}`);
-    const capture = await client.send("Page.captureScreenshot", { format: "png", fromSurface: true, captureBeyondViewport: false });
+    assert(
+      value.gear && value.gear.left >= 0 && value.gear.right <= value.vw + 1,
+      `${view.name} settings button is clipped: ${JSON.stringify(value.gear)}`,
+    );
+    assert(
+      value.tabs.length === 5 &&
+        value.tabs.every((t) => t.left >= -1 && t.right <= value.vw + 1 && t.width > 44),
+      `${view.name} tab bar is clipped: ${JSON.stringify(value.tabs)}`,
+    );
+    const capture = await client.send("Page.captureScreenshot", {
+      format: "png",
+      fromSurface: true,
+      captureBeyondViewport: false,
+    });
     fs.writeFileSync(shot, Buffer.from(capture.data, "base64"));
     assert(fs.existsSync(shot), `Screenshot was not created: ${shot}`);
     const size = pngSize(shot);
-    assert(size.width === view.width && size.height === view.height, `Unexpected screenshot size for ${view.name}: ${size.width}x${size.height}`);
+    assert(
+      size.width === view.width && size.height === view.height,
+      `Unexpected screenshot size for ${view.name}: ${size.width}x${size.height}`,
+    );
     assert(size.bytes > 12000, `Screenshot too small for ${view.name}: ${size.bytes} bytes`);
     return { file: shot, ...size };
   } finally {
@@ -337,10 +606,12 @@ async function main() {
     shots.push(await screenshot(browser, view));
   }
   console.log(`UI smoke checks OK (${path.basename(browser)})`);
-  shots.forEach(s => console.log(`${path.relative(root, s.file)} ${s.width}x${s.height} ${s.bytes} bytes`));
+  shots.forEach((s) =>
+    console.log(`${path.relative(root, s.file)} ${s.width}x${s.height} ${s.bytes} bytes`),
+  );
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err.stack || err.message);
   process.exit(1);
 });

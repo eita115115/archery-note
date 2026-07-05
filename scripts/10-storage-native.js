@@ -6,6 +6,7 @@ const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
 const APP_VER=75;
 const TRASH_LIMIT=50;
+const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
@@ -39,6 +40,11 @@ function normalizeDb(d){
   const out=Object.assign(base,src);
   out.settings=Object.assign(base.settings,src.settings||{});
   ["setups","sightMarks","sessions","trash","formAnalyses","customRounds"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  out.sessions=out.sessions.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sessions);
+  out.setups=out.setups.filter(x=>x&&typeof x==="object"&&x.id&&x.name).slice(0,IMPORT_LIMITS.setups);
+  out.sightMarks=out.sightMarks.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sightMarks);
+  out.formAnalyses=out.formAnalyses.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.formAnalyses);
+  out.customRounds=out.customRounds.filter(x=>x&&typeof x==="object"&&x.id&&x.label&&Array.isArray(x.stages)).slice(0,IMPORT_LIMITS.customRounds);
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
@@ -49,6 +55,23 @@ function normalizeDb(d){
     sanitizeArrowList(out.active.cur);
   }
   return out;
+}
+function validateImportData(d){
+  if(!d||typeof d!=="object"||Array.isArray(d)) return {ok:false,reason:"不正なデータ形式です"};
+  if(!Array.isArray(d.sessions)) return {ok:false,reason:"sessions 配列が見つかりません"};
+  if(!Array.isArray(d.setups)) return {ok:false,reason:"setups 配列が見つかりません"};
+  const warnings=[];
+  for(const [k,limit] of Object.entries(IMPORT_LIMITS)){
+    if(Array.isArray(d[k])&&d[k].length>limit) warnings.push(`${k} が ${d[k].length} 件（上限 ${limit}）`);
+  }
+  return {ok:true,warnings};
+}
+function storageUsage(){
+  try{
+    const raw=storageGetItem(KEY), snap=storageGetItem(SNAP_KEY);
+    const bytes=(raw?raw.length*2:0)+(snap?snap.length*2:0);
+    return {bytes,mb:+(bytes/1048576).toFixed(2)};
+  }catch(e){ return {bytes:0,mb:0}; }
 }
 function load(){
   /* sessions キー欠落でも setups 等を持つ正当なデータは normalizeDb が補完して保持する */
@@ -81,8 +104,7 @@ function storageSetItem(key,value){
     }
   }catch(e){}
   if(typeof localStorage==="undefined") return false;
-  localStorage.setItem(key,value);
-  return true;
+  try{ localStorage.setItem(key,value); return true; }catch(e){ return false; }
 }
 function storageDriverProfile(){
   const bridge=storageBridge();
@@ -266,11 +288,13 @@ function writeDbNow(o){
   db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
   try{
     const raw=JSON.stringify(db);
-    storageSetItem(KEY, raw);
+    if(!storageSetItem(KEY, raw)) throw new Error("storage write failed");
     scheduleSafetySnapshot(o.reason||"auto", raw, !!o.forceSnapshot);
+    return true;
   }catch(e){
     console.error(e);
     try{ toast("保存容量が足りません。設定からバックアップ保存してください"); }catch(_){}
+    return false;
   }
 }
 function hasPendingSave(){ return pendingSaveTimer!=null; }
@@ -305,7 +329,7 @@ function save(opts){
   const o=typeof opts==="string"?{reason:opts}:opts||{};
   /* 即時書き込みは db 全体の最新状態を書くので、保留中のデバウンス書き込みはここで吸収される */
   if(pendingSaveTimer!=null){ clearTimeout(pendingSaveTimer); pendingSaveTimer=null; pendingSaveOpts=null; }
-  writeDbNow(o);
+  return writeDbNow(o);
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 const $=s=>document.querySelector(s);

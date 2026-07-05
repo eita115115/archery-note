@@ -1,8 +1,8 @@
 # Storage schema 4 設計 (formAnalyses) — Task F2 (2026-07-03)
 
-`docs/form-tracking-plan.md` Task F2 の成果。**設計とテスト固定のみで、
+`docs/features/form-tracking-plan.md` Task F2 の成果。**設計とテスト固定のみで、
 本ドキュメントに対応する schema 4 の実装はまだ行わない**（実装は F5、
-着手前にユーザー承認が必要）。`docs/storage-migration-safety-checklist.md`
+着手前にユーザー承認が必要）。`docs/infra/storage-migration-safety-checklist.md`
 の各ゲートに 1 対 1 で答える。
 
 ## 変更内容（実装時）
@@ -15,7 +15,7 @@ schema 3 → 4 は**追加のみ**の移行とする:
    （`["setups","sightMarks","sessions","trash","formAnalyses"]`）
 4. 変更はこの 3 点だけ。既存フィールドの形状・意味・削除は一切なし
 
-レコード形状は `docs/form-tracking-plan.md` の formAnalysis データ設計に従う
+レコード形状は `docs/features/form-tracking-plan.md` の formAnalysis データ設計に従う
 （派生特徴量のみ・動画/生ランドマーク列は保存しない・1 記録 ~2KB 目安）。
 
 ## 安全チェックリストへの回答
