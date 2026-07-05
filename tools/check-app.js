@@ -51,6 +51,9 @@ assert(/id="updBar" hidden[^>]*aria-live="polite"/.test(html), "Update banner sh
 assert(/id="toast" role="status" aria-live="polite" aria-atomic="true"/.test(html), "Toast should be exposed as a polite status live region");
 assert(css.includes("touch-action:manipulation") && css.includes("--chrome-bg") && css.includes("min-height:48px"), "Native-feel touch/chrome styling missing");
 assert(surface.includes("@keyframes appRise") && !surface.includes("primaryPulse") && surface.includes("scorePop") && surface.includes("markPop") && surface.includes("impactFlash") && surface.includes("shotNew") && surface.includes("freshArrow") && surface.includes("prefers-reduced-motion") && surface.includes("ic-record") && surface.includes("ic-sight"), "Minimal recording feedback, tab icons, and reduced-motion guard missing");
+// アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
+assert(html.includes('class="ic ic-record"') && html.includes('viewBox="0 0 24 24"') && html.includes('stroke-linecap="butt"') && !css.includes(".ic-record::before"), "Tab icons must be inline 24px-grid SVGs with butt caps (no CSS pseudo icons)");
+assert(scripts.includes('class="icoInline" viewBox="0 0 24 24"') && !/class="icoInline"[^>]*stroke-linecap="round"/.test(scripts), "icon() set must use the 24px grid with butt caps");
 assert(surface.includes("--active-tab") && surface.includes("nav.tabs::before") && surface.includes('setProperty("--active-tab"'), "Smooth state-following tab motion missing");
 assert(!surface.includes("targetImpact") && !surface.includes("screenIn") && !surface.includes("triggerReleaseMotion") && !surface.includes("arrowFlight"), "Overdone transition/target animation should not return");
 assert(surface.includes("今日のズレを、次の一射へ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "onboarding UI missing");

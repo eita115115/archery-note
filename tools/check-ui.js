@@ -93,6 +93,9 @@ function staticUiChecks() {
   assert(surface.includes("content-visibility:auto") && surface.includes("contain-intrinsic-size"), "offscreen rendering guard missing");
   assert(css.includes("touch-action:manipulation") && css.includes("--chrome-bg") && css.includes("min-height:48px"), "native-feel touch/chrome styling missing");
   assert(surface.includes("@keyframes appRise") && !surface.includes("primaryPulse") && surface.includes("scorePop") && surface.includes("markPop") && surface.includes("impactFlash") && surface.includes("shotNew") && surface.includes("freshArrow") && surface.includes("prefers-reduced-motion") && surface.includes("ic-record") && surface.includes("ic-analysis") && surface.includes("ic-sight"), "minimal recording feedback, tab icons, and reduced-motion guard missing");
+  // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
+  assert(html.includes('class="ic ic-record"') && html.includes('viewBox="0 0 24 24"') && html.includes('stroke-linecap="butt"') && !css.includes(".ic-record::before"), "tab icons must be inline 24px-grid SVGs with butt caps (no CSS pseudo icons)");
+  assert(appJs.includes('class="icoInline" viewBox="0 0 24 24"') && !/class="icoInline"[^>]*stroke-linecap="round"/.test(appJs), "icon() set must use the 24px grid with butt caps");
   assert(surface.includes("--active-tab") && surface.includes("nav.tabs::before") && surface.includes('setProperty("--active-tab"'), "smooth state-following tab motion missing");
   assert(!surface.includes("targetImpact") && !surface.includes("screenIn") && !surface.includes("triggerReleaseMotion") && !surface.includes("arrowFlight"), "overdone transition/target animation should not return");
   assert(surface.includes("今日のズレを、次の一射へ") && surface.includes("点取りから調整提案へ") && surface.includes("足りないデータを見る"), "systematic onboarding UI missing");

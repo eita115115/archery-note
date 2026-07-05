@@ -21,11 +21,11 @@
 <header class="app">
   <div class="appLogo" aria-hidden="true"><img src="icon.svg" alt=""></div>
   <div class="appIdentity"><h1>Archery Note</h1></div>
-  <button class="gear" id="btnSettings" aria-label="設定"><svg viewBox="0 0 20 20" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="2.6"/><path d="M10 2.6v2.1M10 15.3v2.1M17.4 10h-2.1M4.7 10H2.6M15.1 4.9l-1.5 1.5M6.4 13.6l-1.5 1.5M15.1 15.1l-1.5-1.5M6.4 6.4L4.9 4.9"/></svg></button>
+  <button class="gear" id="btnSettings" aria-label="設定"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.7v2.6M12 18.7v2.6M21.3 12h-2.6M5.3 12H2.7M17.7 6.3l-1.85 1.85M8.15 15.85 6.3 17.7M17.7 17.7l-1.85-1.85M8.15 8.15 6.3 6.3"/></svg></button>
 </header>
 <main id="main">
   <section class="bootFallback" id="bootFallback" aria-live="polite">
-    <div class="bootIcon" aria-hidden="true"><svg viewBox="0 0 20 20" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.2v15.6M6.6 6.6 13.4 13.4M13.4 6.6 6.6 13.4"/><circle cx="10" cy="10" r="7.6"/></svg></div>
+    <div class="bootIcon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="butt"><circle cx="12" cy="12" r="7.25"/><path d="M12 2.4v3.1M12 18.5v3.1M2.4 12h3.1M18.5 12h3.1"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></div>
     <h2>読み込みに時間がかかっています</h2>
     <p>通信が不安定な場合は再読み込みしてください。記録は端末内に保存されます。</p>
     <a class="btn bootReload" href="./index.html">再読み込み</a>
@@ -33,11 +33,12 @@
 </main>
 <nav class="tabs" id="tabs" aria-label="主な画面">
   <!-- aria-current="page" は初期ビュー=record と同期。既定ビューを変えるときは render() 側と合わせること -->
-  <button data-v="record" aria-label="記録" aria-current="page"><span class="ic ic-record" aria-hidden="true"></span>記録</button>
-  <button data-v="history" aria-label="履歴"><span class="ic ic-history" aria-hidden="true"></span>履歴</button>
-  <button data-v="analysis" aria-label="分析"><span class="ic ic-analysis" aria-hidden="true"></span>分析</button>
-  <button data-v="sight" aria-label="サイト調整"><span class="ic ic-sight" aria-hidden="true"></span>サイト調整</button>
-  <button data-v="gear" aria-label="用具"><span class="ic ic-gear" aria-hidden="true"></span>用具</button>
+  <!-- タブアイコン: 24pxグリッド・stroke1.5・butt cap（デザイン言語v2 5節「計器の刻印」） -->
+  <button data-v="record" aria-label="記録" aria-current="page"><span class="ic ic-record" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><circle cx="12" cy="12" r="7.25"/><path d="M12 2.4v3.1M12 18.5v3.1M2.4 12h3.1M18.5 12h3.1"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span>記録</button>
+  <button data-v="history" aria-label="履歴"><span class="ic ic-history" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M3 6h1.6M3 12h1.6M3 18h1.6"/><path d="M8 6h13M8 12h13M8 18h9"/></svg></span>履歴</button>
+  <button data-v="analysis" aria-label="分析"><span class="ic ic-analysis" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 16.5 9 10l4.5 4L21 6"/><circle cx="21" cy="6" r="1.4" fill="currentColor" stroke="none"/></svg></span>分析</button>
+  <button data-v="sight" aria-label="サイト調整"><span class="ic ic-sight" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M8 2.5v19M8 5.5h5.5M8 12h5.5M8 18.5h5.5"/><path d="M15.2 12 19 8.2 22.8 12 19 15.8z" fill="currentColor" stroke="none"/></svg></span>サイト調整</button>
+  <button data-v="gear" aria-label="用具"><span class="ic ic-gear" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M7 4C18.5 5.2 18.5 18.8 7 20"/><path d="M7 4v16"/></svg></span>用具</button>
 </nav>
 <button type="button" class="updbar" id="updBar" hidden aria-live="polite">新しい版があります。タップで更新</button>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
