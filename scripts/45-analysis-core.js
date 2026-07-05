@@ -203,7 +203,7 @@ function todayConclusion(rows){
   // しきい値1: 判定に十分なセッション数（2回未満は傾向を語れない = データ不足扱い）
   const MIN_SESSIONS=2;
   if(scored.length<MIN_SESSIONS){
-    return {kind:"few", text:"記録が増えると、ここに今日いちばん大事な一言が出ます。まずは数回続けてみましょう。"};
+    return {kind:"few", text:"記録を数回続けると、今日の一言がここに出ます。"};
   }
   const sorted=[...scored].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
   const latest=sorted[sorted.length-1];
@@ -223,7 +223,7 @@ function todayConclusion(rows){
   if(groupingTight && offCenter){
     const dir=Math.abs(my)>=Math.abs(mx)?(my>0?"上":"下"):(mx>0?"右":"左");
     const axisWord=Math.abs(my)>=Math.abs(mx)?"上下":"左右";
-    return {kind:"grouping-tight-offcenter", text:`グルーピング（矢の集まり）は安定しています。${axisWord}のズレ（${dir}寄り）だけ直すと、次はもっと10点が増えそうです。`};
+    return {kind:"grouping-tight-offcenter", text:`グルーピング安定、${axisWord}のズレ（${dir}寄り）だけ直しましょう。`};
   }
 
   // 平均点の調子判定: analysisKpiHtml と同じ移動平均（直近5回）と同じ横ばいしきい値(0.02)を使う
@@ -233,15 +233,15 @@ function todayConclusion(rows){
   const delta=latestMa!=null&&prevMa!=null?latestMa-prevMa:null;
   const TREND_FLAT=0.02;
   if(delta!=null && delta>TREND_FLAT){
-    return {kind:"trend-up", text:`平均点が上向きです。この調子で同じ距離・用具の練習を続けると良さそうです。`};
+    return {kind:"trend-up", text:`平均点が上向き、この調子を続けましょう。`};
   }
   if(delta!=null && delta<-TREND_FLAT){
-    return {kind:"trend-down", text:`平均点がやや下がり気味のようです。本数を安定させてから、グルーピングと中心のどちらがズレているかを見るとよさそうです。`};
+    return {kind:"trend-down", text:`平均点がやや下がり気味、本数を安定させましょう。`};
   }
   if(groupingTight){
-    return {kind:"grouping-tight", text:"グルーピング（矢の集まり）は安定しています。この調子を保てば点数もついてきそうです。"};
+    return {kind:"grouping-tight", text:"グルーピングは安定、この調子を保ちましょう。"};
   }
-  return {kind:"steady", text:"大きな崩れはなく、安定して練習できているようです。"};
+  return {kind:"steady", text:"崩れなく安定して練習できています。"};
 }
 
 /* arrow.reason タグ別の本数・平均点・平均ズレ方向(cm) */

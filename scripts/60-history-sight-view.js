@@ -62,7 +62,6 @@ function renderHistory(m){
         <p>まだ記録がありません。最初の1回を記録すると、ここに合計点とグルーピングの推移が並びます。</p>
         <button type="button" class="btn" id="histEmptyCta">記録タブへ</button>
       </div>`)}
-    ${ss.length?`<div class="hint">詳しい傾向は「分析」タブで確認できます。</div>`:""}
   </div></div>`;
   $("#histSetup").onchange=e=>{ ui.histFilter.setupId=e.target.value; render(); };
   $("#histDist").onchange=e=>{ ui.histFilter.dist=e.target.value; render(); };
