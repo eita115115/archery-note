@@ -32,6 +32,8 @@
   --font-size-xs:11px; --font-size-sm:12px; --font-size-md:14px;
   --font-size-lg:16px; --font-size-xl:20px;
   --line-height-tight:1.25; --line-height-normal:1.5; --line-height-relaxed:1.7;
+  /* design tokens — font-weight（全画面で段階を統一。ラベル/見出し=500、本文=400、主役数値=700） */
+  --fw-body:400; --fw-label:500; --fw-emphasis:600; --fw-figure:700;
   /* design tokens — shadow / tap / layout */
   --shadow-card:var(--shadow-none);
   --shadow-floating:var(--shadow-raised);
@@ -53,10 +55,11 @@ body{
 }
 input, textarea{-webkit-user-select:auto; user-select:auto;}
 button,.chip,.listItem,summary,.btn,.tinyAction,.sc,.npad button{touch-action:manipulation;}
-/* 桁揃え: 統計・スコア系の数値表示に継承させる共通クラス */
+/* 桁揃え: 統計・スコア系の数値表示に継承させる共通クラス。主役数値のweight段階もここで統一する */
 .tnum,.stat b,.insightTile b,.heroMetric b,.liveCell b,.readinessDial b,.readinessCell b,
 .decisionCard b,.histTrendValue,.listItem .big,.kv,.lensCard b,.nativePill b{
   font-variant-numeric:tabular-nums;
+  font-weight:var(--fw-figure);
 }
 button:focus-visible,.chip:focus-visible,.listItem:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{
   outline:2px solid var(--accent); outline-offset:2px;
@@ -71,7 +74,7 @@ header.app{
   border-bottom:1px solid var(--chrome-border);
   backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
 }
-header.app h1{font-size:13px; margin:0; font-weight:700; letter-spacing:.09em; color:var(--sub);}
+header.app h1{font-size:13px; margin:0; font-weight:var(--fw-label); letter-spacing:.09em; color:var(--sub);}
 header.app .sub{display:none; font-size:11px; opacity:.9;}
 header.app .appLogo{
   width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
@@ -139,7 +142,7 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px 10px 
   }
 }
 /* ラベル様式に統一（v2 0節の再監査）: セクション見出しは本文より控えめな刻印風ラベルにする */
-.card h2{font-size:12px; letter-spacing:.04em; font-weight:700; margin:0 0 10px; color:var(--sub); display:flex; align-items:center; justify-content:space-between;}
+.card h2{font-size:12px; letter-spacing:.04em; font-weight:var(--fw-label); margin:0 0 10px; color:var(--sub); display:flex; align-items:center; justify-content:space-between;}
 .card h2 .mini{font-size:11px; color:var(--sub); font-weight:normal; letter-spacing:0;}
 /* アイコン付き見出し共通: アイコン＋テキストを1つの左詰めブロックにまとめ、.mini 等の右側要素とだけ両端寄せする */
 .h2Icon{display:inline-flex; align-items:center; gap:5px; min-width:0;}
@@ -178,12 +181,12 @@ html.dark select.inp,html.auto select.inp{
 /* motion:因果 — 押下で沈む（共通の縮小フィードバック。.btn はさらに下の個別ルールで沈み込みを強調） */
 .chip:active,.btn:active,nav.tabs button:active,.listItem:active,.tinyAction:active,.sc:active,.npad button:active{transform:scale(.975);}
 /* 選択状態は金の面ではなく反転（墨面/紙面）で示す */
-.chip.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg); font-weight:700; box-shadow:none;}
+.chip.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg); font-weight:var(--fw-emphasis); box-shadow:none;}
 /* button タグ化したチップの UA デフォルト打ち消し（見た目は従来の div と同一に保つ） */
 button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:inherit; font-weight:inherit; line-height:inherit; text-align:inherit; -webkit-appearance:none; appearance:none;}
 .btn{
   display:inline-flex; align-items:center; justify-content:center; gap:6px;
-  min-height:48px; padding:12px 16px; border-radius:8px; border:none; font-size:15px; font-weight:700;
+  min-height:48px; padding:12px 16px; border-radius:8px; border:none; font-size:15px; font-weight:var(--fw-emphasis);
   background:var(--invert-bg); color:var(--invert-fg); cursor:pointer; width:100%;
   box-shadow:none;
   transition:transform var(--motion-fast), filter var(--motion-fast), background var(--motion-fast), box-shadow var(--motion-fast);
@@ -203,9 +206,9 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 }
 html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .missionTop{display:grid; grid-template-columns:minmax(0,1fr) 84px; gap:12px; align-items:start; min-width:0;}
-.eyebrow{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.72; font-weight:800;}
+.eyebrow{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; opacity:.72; font-weight:var(--fw-label);}
 /* 見出しラベル化: 大見出し＋説明文をやめ、ラベル様式（11-12px・字間0.08em・淡色）1行に */
-.missionPanel h2{margin:3px 0 0; font-size:12px; letter-spacing:.02em; font-weight:700; line-height:1.4; color:rgba(255,255,255,.92);}
+.missionPanel h2{margin:3px 0 0; font-size:12px; letter-spacing:.02em; font-weight:var(--fw-label); line-height:1.4; color:rgba(255,255,255,.92);}
 .readinessDial{
   aspect-ratio:1; border-radius:50%; background:rgba(255,255,255,.10);
   border:1px solid rgba(255,255,255,.24); display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -247,7 +250,7 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 }
 .nativeSignal span{
   border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.10); color:rgba(255,255,255,.86);
-  border-radius:6px; padding:4px 8px; font-size:10.5px; font-weight:800;
+  border-radius:6px; padding:4px 8px; font-size:10.5px; font-weight:var(--fw-label);
 }
 .nativeSignal .on{background:rgba(115,230,168,.18); color:#fff; border-color:rgba(115,230,168,.35);}
 .phaseArc{
@@ -266,7 +269,7 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .phaseArc .node.on{fill:var(--green); stroke:var(--green);}
 .phaseArc .node.cur{fill:var(--amber); stroke:var(--amber);}
 .phaseArc .nodeCore{fill:#fff; opacity:.92;}
-.phaseArc text{font-size:11px; fill:var(--sub); font-weight:700;}
+.phaseArc text{font-size:11px; fill:var(--sub); font-weight:var(--fw-label);}
 .phaseArc text.on{fill:var(--title);}
 .phaseSub{font-size:11.5px; color:var(--sub); text-align:center; line-height:1.4; margin-top:-2px;}
 .missionPanel.convergeMission{
@@ -281,7 +284,7 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
   border:1px solid var(--line); box-shadow:none;
 }
 .convergeMission .eyebrow{color:var(--title); opacity:.72;}
-.missionPanel.convergeMission h2{color:var(--sub); font-size:12px; letter-spacing:.02em; font-weight:700; line-height:1.4; margin:3px 0 0;}
+.missionPanel.convergeMission h2{color:var(--sub); font-size:12px; letter-spacing:.02em; font-weight:var(--fw-label); line-height:1.4; margin:3px 0 0;}
 .convergeMission .readinessDial{
   background:var(--soft); border-color:var(--line); color:var(--title); box-shadow:none;
 }
@@ -311,13 +314,13 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .simplePromise{
   display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;
   border:1px solid var(--advLine); border-radius:8px; padding:9px 10px; margin-top:10px;
-  background:var(--advBg); color:var(--title); font-size:12px; font-weight:800; text-align:center;
+  background:var(--advBg); color:var(--title); font-size:12px; font-weight:var(--fw-label); text-align:center;
 }
-.simplePromise span{color:var(--sub); font-weight:700;}
+.simplePromise span{color:var(--sub); font-weight:var(--fw-body);}
 .missionMore{margin-top:10px;}
 .missionMore summary{
   border:1px solid var(--line); border-radius:8px; padding:9px 10px;
-  background:var(--paper); color:var(--title); font-size:12px; font-weight:800;
+  background:var(--paper); color:var(--title); font-size:12px; font-weight:var(--fw-label);
 }
 .missionMore[open] summary{margin-bottom:10px;}
 .coachCard{
@@ -354,7 +357,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .repeatMain::before{
   content:""; position:absolute; left:0; top:10px; bottom:10px; width:3px; border-radius:2px; background:var(--accent);
 }
-.repeatEyebrow{display:block; font-size:10px; letter-spacing:.06em; color:rgba(242,240,232,.68); font-weight:700;}
+.repeatEyebrow{display:block; font-size:10px; letter-spacing:.06em; color:rgba(242,240,232,.68); font-weight:var(--fw-label);}
 .repeatMain b{font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums;}
 .repeatSub{color:rgba(242,240,232,.6)!important;}
 .repeatHistory{min-height:64px;}
@@ -379,7 +382,8 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   background:var(--invert-bg); color:var(--invert-fg);
   box-shadow:none;
 }
-.targetFocusCard{padding:12px; border-radius:8px;}
+/* 記録中カード全体: 連続タップでのダブルタップズーム誤爆を防ぐ（pan は許可、拡大操作だけ抑止） */
+.targetFocusCard{padding:12px; border-radius:8px; touch-action:manipulation;}
 .targetFocusCard h2{font-size:13px;}
 .targetFocusCard .tgWrap svg.main{border-radius:8px; background:var(--target-surface-a); box-shadow:none;}
 /* 記録中: 的を主役にするため左右 padding を切り詰め、的の実効幅を画面幅いっぱいに近づける（現行より拡大方向）。
@@ -409,7 +413,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   /* motion:因果 — セッション終了の結果として判断カードがサマリー内で最初に現れる */
   animation:decisionSlide .34s ease-out both;
 }
-.decisionCard .k{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--sub); font-weight:900;}
+.decisionCard .k{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label);}
 .decisionCard b{display:block; color:var(--title); font-size:24px; line-height:1.15; margin:3px 0; font-variant-numeric:tabular-nums;}
 .decisionCard p{margin:0; color:var(--ink); font-size:12.5px; line-height:1.55;}
 .decisionCard span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:6px;}
@@ -428,7 +432,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .launchHead h2{font-size:15px; margin:0; color:var(--title);}
 .stepBadge{
   width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;
-  background:var(--ink2); color:#fff; font-size:12px; font-weight:800; flex:0 0 auto;
+  background:var(--ink2); color:#fff; font-size:12px; font-weight:var(--fw-figure); flex:0 0 auto;
 }
 .launchTitle{display:flex; align-items:center; gap:9px; min-width:0;}
 .launchBody{padding:14px;}
@@ -457,7 +461,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 }
 /* 多距離ラウンドのステージ行程表（計器の目盛り風）。ロジックは fRoundStages の JS 側で組み立て済み */
 .stageGaugeWrap{border:1px solid var(--advLine); border-radius:8px; background:var(--advBg); padding:10px 10px 8px;}
-.stageGaugeLabel{font-size:11.5px; font-weight:800; color:var(--title); margin-bottom:6px;}
+.stageGaugeLabel{font-size:11.5px; font-weight:var(--fw-label); color:var(--title); margin-bottom:6px;}
 .stageGauge{display:flex; align-items:flex-end; gap:0;}
 .stageGaugeTick{display:flex; flex-direction:column; align-items:center; min-width:0;}
 .stageGaugeMark{width:2px; background:var(--accent); border-radius:1px; margin-bottom:4px;}
@@ -482,7 +486,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .recordReadOnlyItem{cursor:default;}
 .tinyAction{
   border:1px solid var(--line); background:var(--card); color:var(--title); border-radius:8px;
-  padding:7px 10px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;
+  padding:7px 10px; font-size:12px; font-weight:var(--fw-label); cursor:pointer; white-space:nowrap;
   max-width:92px; overflow:hidden; text-overflow:ellipsis;
 }
 /* 分析タブ「今日の結論」: 机上モードの入口カード。金面は使わず、hairlineの罫線と大きめの本文だけで目立たせる */
@@ -490,8 +494,8 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   border-top:2px solid var(--accent);
   animation:appRise .36s var(--ease-app) both; /* motion:因果 — タブを開いた結果として最初に読む一言が現れる */
 }
-.todayConclusionKicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--sub); font-weight:900;}
-.todayConclusionText{margin:6px 0 0; font-size:17px; font-weight:700; line-height:1.5; color:var(--title);}
+.todayConclusionKicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label);}
+.todayConclusionText{margin:6px 0 0; font-size:17px; font-weight:var(--fw-figure); line-height:1.5; color:var(--title);}
 .insightStrip{
   display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-bottom:12px;
 }
@@ -501,29 +505,29 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 }
 .insightTile .k{font-size:10.5px; color:var(--sub);}
 /* 結論(todayConclusionText)より視覚的に勝たない太さに抑える（v2 0節: 主役は結論、KPIは根拠） */
-.insightTile b{display:block; font-size:17px; font-weight:600; color:var(--title); margin-top:2px; font-variant-numeric:tabular-nums;}
+.insightTile b{display:block; font-size:17px; font-weight:var(--fw-emphasis); color:var(--title); margin-top:2px; font-variant-numeric:tabular-nums;}
 .insightTile span{display:block; font-size:10.5px; color:var(--sub); margin-top:2px; line-height:1.35;}
 .pageHero{
   border:1px solid var(--line); border-radius:var(--radius-panel); padding:14px; margin-bottom:12px;
   background:var(--card);
   box-shadow:none; overflow:hidden;
 }
-.pageHero .kicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--title); font-weight:900;}
+.pageHero .kicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--title); font-weight:var(--fw-label);}
 /* 見出しラベル化: 大見出しをやめ、ラベル様式（11-12px・字間0.08em・淡色）に統一 */
-.pageHero h2{margin:4px 0 0; font-size:12px; letter-spacing:.02em; font-weight:700; color:var(--sub); line-height:1.4;}
+.pageHero h2{margin:4px 0 0; font-size:12px; letter-spacing:.02em; font-weight:var(--fw-label); color:var(--sub); line-height:1.4;}
 .pageHero p{margin:0; color:var(--sub); font-size:12px; line-height:1.55;}
 /* 履歴ヒーロー: 見出しではなく todayConclusion() の1文（結論）。唯一の例外として本文サイズを保つ */
-.pageHero h2.pageHeroLead{font-size:17px; line-height:1.45; font-weight:800; color:var(--ink); letter-spacing:0;}
+.pageHero h2.pageHeroLead{font-size:17px; line-height:1.45; font-weight:var(--fw-figure); color:var(--ink); letter-spacing:0;}
 .heroMetrics{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px;}
 .heroMetric{border:1px solid var(--line); border-radius:8px; background:var(--glass); padding:8px; min-width:0;}
 .heroMetric .k{font-size:10px; color:var(--sub);}
-.heroMetric b{display:block; color:var(--title); font-size:14px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums;}
+.heroMetric b{display:block; color:var(--title); font-size:14px; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-variant-numeric:tabular-nums; font-weight:var(--fw-emphasis);}
 /* サイトタブ「いまの提案」: 方向（SVG矢印＋言葉）＋量（tabular-nums大型）を主役にする単一ブロック */
 .sightNow{margin-top:10px;}
-.sightNowDir{display:flex; align-items:center; gap:6px; font-size:15px; font-weight:800; color:var(--title);}
+.sightNowDir{display:flex; align-items:center; gap:6px; font-size:15px; font-weight:var(--fw-emphasis); color:var(--title);}
 .sightNowDir .icoInline{width:22px; height:22px; color:var(--title);}
-.sightNowAmount{font-size:38px; font-weight:800; color:var(--title); line-height:1.05; margin-top:2px; font-variant-numeric:tabular-nums;}
-.sightNowAmount small{font-size:15px; font-weight:600; color:var(--sub); margin-left:4px;}
+.sightNowAmount{font-size:38px; font-weight:var(--fw-figure); color:var(--title); line-height:1.05; margin-top:2px; font-variant-numeric:tabular-nums;}
+.sightNowAmount small{font-size:15px; font-weight:var(--fw-body); color:var(--sub); margin-left:4px;}
 .sightNowNote{margin:6px 0 0; color:var(--sub); font-size:12px; line-height:1.55;}
 .sightNowNeutral .sightNowDir .icoInline{color:var(--green);}
 .heroMetric span{display:block; color:var(--sub); font-size:10.5px; margin-top:2px; line-height:1.35;}
@@ -536,15 +540,15 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   background:transparent; color:var(--ink); padding:8px 2px; margin-bottom:8px;
   box-shadow:none; border:none;
 }
-.liveHud .kicker{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--sub); font-weight:900;}
+.liveHud .kicker{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label);}
 /* ライブ中の主役数値だけ金の文字色を残す（面ではなく文字色としての金） */
-.liveHud h2{font-size:20px;margin:3px 0;color:var(--accent); font-variant-numeric:tabular-nums;}
-.liveContext{display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--title); font-size:12px; font-weight:800; line-height:1.35;}
+.liveHud h2{font-size:20px;margin:3px 0;color:var(--accent); font-variant-numeric:tabular-nums; font-weight:var(--fw-figure);}
+.liveContext{display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--title); font-size:12px; font-weight:var(--fw-label); line-height:1.35;}
 .liveContext>span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 /* HUD の「詳細」折りたたみ: 射場モードで畳んでおく用具名・平均・ステージ情報 */
 .liveHudMore{position:relative; flex:0 0 auto;}
 .liveHudMore summary{
-  list-style:none; cursor:pointer; font-size:10.5px; font-weight:700; color:var(--sub);
+  list-style:none; cursor:pointer; font-size:10.5px; font-weight:var(--fw-label); color:var(--sub);
   padding:2px 6px; border:1px solid var(--line); border-radius:6px; background:var(--soft);
 }
 .liveHudMore summary::-webkit-details-marker{display:none;}
@@ -565,8 +569,8 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .compactHud .liveCell b{color:var(--title);}
 /* 記録中HUDの「いま必要な3つ」: エンド・合計・残りだけを大型 tabular-nums で並べる */
 .liveGrid3{grid-template-columns:repeat(3,minmax(0,1fr));}
-.liveGrid3 .liveCell b{font-size:22px; font-weight:800;}
-.liveGrid3 .liveCell b small{font-size:11px; font-weight:600; margin-left:1px; opacity:.75;}
+.liveGrid3 .liveCell b{font-size:22px; font-weight:var(--fw-figure);}
+.liveGrid3 .liveCell b small{font-size:11px; font-weight:var(--fw-body); margin-left:1px; opacity:.75;}
 /* motion:状態 — HUD数値が変わった瞬間だけ知覚できる短いティック */
 .liveCell b.tick{animation:hudTick var(--motion-fast) var(--ease-app);}
 @keyframes hudTick{
@@ -595,10 +599,12 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   background:var(--chrome-bg); border:1px solid var(--chrome-border); border-radius:8px;
   padding:10px 12px; box-shadow:var(--shadow-raised);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  /* ドック連打でのダブルタップズーム誤爆を防ぐ（ボタン間の余白部分にも明示が必要） */
+  touch-action:manipulation;
 }
 .activeActionDock .btn{min-height:48px; width:auto;}
 /* 終了: 誤タップ防止のため視覚を控えめに（本体の appConfirm 確認は不変） */
-.activeFinishBtn{background:transparent; color:var(--sub); border:1px solid var(--line); font-weight:700;}
+.activeFinishBtn{background:transparent; color:var(--sub); border:1px solid var(--line); font-weight:var(--fw-label);}
 .activeStatsMore{margin-top:10px;}
 .activeNextStageRow{margin-bottom:0;}
 /* ドックの高さ分、記録中カードの下に呼吸を確保（endsTbl カードが隠れないように） */
@@ -613,6 +619,8 @@ nav.tabs{
   display:flex; padding:6px 4px; overflow:hidden; isolation:isolate;
   box-shadow:var(--shadow-raised);
   backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  /* タブ連打でのダブルタップズーム誤爆を防ぐ（ボタン間の余白部分にも明示が必要） */
+  touch-action:manipulation;
 }
 /* motion:方向 — アクティブタブの位置移動を実際の並びと一致させて示す（金の面ではなく2pxの下線） */
 nav.tabs::before{
@@ -622,10 +630,11 @@ nav.tabs::before{
   transform:translate3d(calc(var(--active-tab,0) * 100%),0,0);
   transition:transform var(--motion-fluid) var(--ease-fluid);
 }
-/* motion:状態 — 選択中タブはラベル墨強調のみで示す（下線移動と同時に知覚させる） */
+/* motion:状態 — 選択中タブは色のみで示す（weight は全ラベル同一。強調は下線移動＋色にのみ担わせる） */
 nav.tabs button{
   position:relative; z-index:1;
   flex:1 1 0; min-width:0; min-height:56px; background:none; border:none; border-radius:8px; padding:7px 0 6px; font-size:10.5px; color:var(--sub);
+  font-weight:var(--fw-label);
   display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;
   transition:color var(--motion-fast), transform var(--motion-fast);
 }
@@ -638,7 +647,7 @@ nav.tabs button .ic{
 }
 nav.tabs button .ic svg{display:block; width:24px; height:24px;}
 nav.tabs button.on .ic{transform:translateY(-1px); color:var(--title);}
-nav.tabs button.on{color:var(--title); font-weight:700;}
+nav.tabs button.on{color:var(--title);}
 /* target */
 .tgWrap{position:relative; width:100%; touch-action:none; border-radius:8px;}
 /* motion:状態 — ズーム段階の切り替え（拡大率変更）を滑らかにする */
@@ -652,7 +661,7 @@ nav.tabs button.on{color:var(--title); font-weight:700;}
 .lens.fine.cut{border-color:#0f9d58;}
 .lens.fine.miss{border-color:var(--red);}
 .lensTag{
-  position:absolute; top:140px; font-size:11px; font-weight:700; color:#fff; background:var(--green);
+  position:absolute; top:140px; font-size:11px; font-weight:var(--fw-label); color:#fff; background:var(--green);
   padding:2px 8px; border-radius:6px; display:none; pointer-events:none;
 }
 .lensTag.fine{background:var(--red);}
@@ -663,7 +672,7 @@ nav.tabs button.on{color:var(--title); font-weight:700;}
 .scoreChips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; min-height:36px;}
 .sc{
   position:relative; width:40px; height:40px; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  font-weight:700; font-size:15px; border:2px solid transparent; cursor:pointer;
+  font-weight:var(--fw-figure); font-size:15px; border:2px solid transparent; cursor:pointer;
   /* motion:状態 — 選択中の矢チップの枠強調を滑らかにする */
   transform-origin:center; transition:transform var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast);
   font-variant-numeric:tabular-nums;
@@ -719,7 +728,7 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 .reasonTag{
   border:1px solid var(--line); background:var(--card); color:var(--ink);
   min-width:var(--tap-target-min); min-height:var(--tap-target-min);
-  border-radius:6px; padding:7px 9px; font-size:11.5px; font-weight:700; cursor:pointer;
+  border-radius:6px; padding:7px 9px; font-size:11.5px; font-weight:var(--fw-label); cursor:pointer;
 }
 /* 選択状態は反転トークンへ統一（v2再監査: 旧 green の選択色は退役済みのため使わない） */
 .reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);}
@@ -728,7 +737,7 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 .npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums;}
 .npad .blank{visibility:hidden;}
 table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
-table.tbl th{font-size:11px; color:var(--sub); text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); font-weight:600;}
+table.tbl th{font-size:11px; color:var(--sub); text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); font-weight:var(--fw-label);}
 table.tbl td{padding:7px 6px; border-bottom:1px solid var(--line2);}
 table.tbl tr:last-child td{border-bottom:none;}
 table.tbl td,table.tbl th{font-variant-numeric:tabular-nums;}
@@ -741,9 +750,9 @@ table.tbl td,table.tbl th{font-variant-numeric:tabular-nums;}
   min-height:54px; padding:13px 4px; border-bottom:1px solid var(--line2); cursor:pointer;
 }
 .listItem:last-child{border-bottom:none;}
-.listItem .t{font-weight:600;} .listItem .d{font-size:12px; color:var(--sub); margin-top:2px;}
-.listItem .big{font-size:20px; font-weight:800; color:var(--green); white-space:nowrap;}
-.listItem .big small{font-size:11px; color:var(--sub); font-weight:normal;}
+.listItem .t{font-weight:var(--fw-emphasis);} .listItem .d{font-size:12px; color:var(--sub); margin-top:2px;}
+.listItem .big{font-size:20px; color:var(--green); white-space:nowrap;}
+.listItem .big small{font-size:11px; color:var(--sub); font-weight:var(--fw-body);}
 /* button タグ化した listItem の UA デフォルト打ち消し（見た目は従来の div と同一に保つ） */
 button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1px solid var(--line2); background:none; color:inherit; font:inherit; text-align:inherit; -webkit-appearance:none; appearance:none;}
 .badge{display:inline-block; font-size:10.5px; background:var(--soft); color:var(--sub); border-radius:6px; padding:2px 6px; margin-right:4px;}
@@ -752,7 +761,7 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .empty .btn{width:auto; min-width:200px; margin:0 auto;}
 /* advice */
 .advice{background:var(--advBg); border:1px solid var(--advLine); border-radius:8px; padding:12px; margin-top:10px;}
-.advice .dir{font-size:17px; font-weight:800; color:var(--title); margin:4px 0; font-variant-numeric:tabular-nums;}
+.advice .dir{font-size:17px; font-weight:var(--fw-figure); color:var(--title); margin:4px 0; font-variant-numeric:tabular-nums;}
 .advice .note{font-size:11.5px; color:var(--sub); line-height:1.5;}
 .kv{display:flex; justify-content:space-between; font-size:13px; padding:4px 0;}
 .kv span:first-child{color:var(--sub);}
@@ -764,11 +773,11 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .histFilterEnd{display:flex; align-items:flex-end;}
 /* 履歴一覧: 月ラベル・日付見出しは hairline のみで区切る（白カード段組は使わない） */
 .historyMonthLabel{
-  font-size:10.5px; letter-spacing:.08em; color:var(--sub); font-weight:800;
+  font-size:10.5px; letter-spacing:.08em; color:var(--sub); font-weight:var(--fw-label);
   margin:14px 0 2px; padding-top:10px; border-top:1px solid var(--line);
 }
 .historyMonthLabel:first-child{margin-top:0; padding-top:0; border-top:none;}
-.historyDateHead{font-size:11px; color:var(--sub); font-weight:700; margin:8px 0 2px;}
+.historyDateHead{font-size:11px; color:var(--sub); font-weight:var(--fw-label); margin:8px 0 2px;}
 .historyRow{align-items:flex-start;}
 .historyRowMain{min-width:0;}
 .historyRowTotal{font-size:24px;}
@@ -779,14 +788,14 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .histRecentHead{display:flex; align-items:flex-start; gap:10px;}
 .histRecentTarget{width:128px; max-width:38%; aspect-ratio:1; border:1px solid var(--line); border-radius:8px; background:var(--inpBg); flex:0 0 auto;}
 .histRecentBody{flex:1; min-width:0;}
-.histRecentTitle{font-weight:800;}
+.histRecentTitle{font-weight:var(--fw-emphasis);}
 .histScoreRow{display:flex; align-items:center; gap:8px; padding:2px 0;}
-.histScoreLabel{width:28px; text-align:center; font-weight:700; font-size:var(--font-size-sm); border-radius:6px; padding:2px 0;}
+.histScoreLabel{width:28px; text-align:center; font-weight:var(--fw-figure); font-size:var(--font-size-sm); border-radius:6px; padding:2px 0;}
 .histScoreTrack{flex:1; background:var(--line); border-radius:5px; height:14px; overflow:hidden;}
 .histScoreFill{height:100%; background:var(--green-l);}
 .histScoreCount{width:70px; font-size:var(--font-size-xs); color:var(--sub); text-align:right;}
 .histTrendRow{display:flex; align-items:center; gap:var(--space-4); padding:6px 0;}
-.histTrendLabel{width:72px; font-weight:700;}
+.histTrendLabel{width:72px; font-weight:var(--fw-label);}
 .histTrendChart{flex:1;}
 .histTrendValue{width:54px; text-align:right; font-size:var(--font-size-sm);}
 .histTrendSub{color:var(--sub); font-size:10px;}
@@ -794,7 +803,7 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 /* 多距離ラウンドのステージ一覧: P1 の目盛り表現（距離に応じた棒の長さ）をテーブル行に揃える */
 .stageTable td,.stageTable th{font-variant-numeric:tabular-nums;}
 .stageTick{display:inline-block; height:3px; background:var(--accent); border-radius:1px; margin-right:6px; vertical-align:middle;}
-.stageRowCur td{color:var(--title); font-weight:700;}
+.stageRowCur td{color:var(--title); font-weight:var(--fw-emphasis);}
 .stageTotalRow td{border-top:1px solid var(--line); padding-top:9px;}
 .histDelBtn{padding:4px var(--space-3); min-width:var(--tap-target-min);}
 .histEndTable td,.histEndTable th{font-variant-numeric:tabular-nums;}
@@ -822,7 +831,7 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .gearLedgerItem .t{display:flex; align-items:center; gap:7px;}
 .gearLedgerSpecs{display:flex; flex-wrap:wrap; gap:2px 12px; margin-top:4px;}
 .gearSpecCell{font-size:11.5px; color:var(--sub); white-space:nowrap;}
-.gearSpecCell b{color:var(--ink); font-weight:700; margin-left:4px; font-variant-numeric:tabular-nums;}
+.gearSpecCell b{color:var(--ink); font-weight:var(--fw-figure); margin-left:4px; font-variant-numeric:tabular-nums;}
 /* motion:状態 — 使用中セッティングは面ではなく小さな金ドットで示す（金面はCTA1つに限定） */
 .gearActiveDot{width:7px; height:7px; border-radius:50%; background:var(--accent); flex:0 0 auto; box-shadow:0 0 0 3px rgba(176,138,46,.16);}
 html.dark .gearActiveDot,html.auto .gearActiveDot{box-shadow:0 0 0 3px rgba(217,178,90,.2);}
@@ -831,7 +840,7 @@ html.dark .gearActiveDot,html.auto .gearActiveDot{box-shadow:0 0 0 3px rgba(217,
 .specRow{display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid var(--line2); font-size:13px;}
 .specRow:last-child{border-bottom:none;}
 .specRow span:first-child{color:var(--sub); flex:0 0 auto;}
-.specRow b{font-weight:700; text-align:right; font-variant-numeric:tabular-nums;}
+.specRow b{font-weight:var(--fw-figure); text-align:right; font-variant-numeric:tabular-nums;}
 /* フォーム内の単位固定表示（ラベル上・入力下、単位は入力欄右に固定） */
 .fieldUnit{position:relative;}
 .fieldUnit .inp{padding-right:44px;}
@@ -839,7 +848,7 @@ html.dark .gearActiveDot,html.auto .gearActiveDot{box-shadow:0 0 0 3px rgba(217,
 /* 設定シート: 4群構成の節見出しと説明文 */
 .settingsGroup{margin-top:20px;}
 .settingsGroup:first-child{margin-top:0;}
-.settingsGroupTitle{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--sub); font-weight:800; margin:0 0 8px;}
+.settingsGroupTitle{font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label); margin:0 0 8px;}
 .settingsActionHint{font-size:11px; color:var(--sub); margin:4px 0 8px; line-height:1.5;}
 /* 危険域: 赤 hairline で隔離し最下部へ */
 .settingsDangerZone{margin-top:24px; padding-top:14px; border-top:1px solid var(--danger);}
@@ -884,7 +893,7 @@ html.dark .toast,html.auto .toast{background:#0e100d;}
   position:fixed; left:50%; transform:translateX(-50%); bottom:102px;
   bottom:calc(98px + env(safe-area-inset-bottom));
   z-index:40; background:var(--card); color:var(--title); border:1px solid var(--advLine); padding:9px 14px; border-radius:8px;
-  font-family:inherit; font-size:12px; font-weight:800; box-shadow:var(--shadow-raised); cursor:pointer; display:none; max-width:calc(100vw - 24px); text-align:center;
+  font-family:inherit; font-size:12px; font-weight:var(--fw-emphasis); box-shadow:var(--shadow-raised); cursor:pointer; display:none; max-width:calc(100vw - 24px); text-align:center;
 }
 .updbar:not([hidden]){display:block;}
 .updbar[hidden]{display:none!important;}
@@ -930,7 +939,7 @@ html.dark{
 }
 details.adv{border:1px solid var(--line); border-radius:8px; padding:2px 12px 8px; margin-top:12px; background:var(--card);}
 details.adv summary{
-  cursor:pointer; font-size:13px; color:var(--sub); padding:9px 0 9px 18px; list-style:none; font-weight:600;
+  cursor:pointer; font-size:13px; color:var(--sub); padding:9px 0 9px 18px; list-style:none; font-weight:var(--fw-label);
   position:relative;
 }
 details.adv summary::-webkit-details-marker{display:none;}
@@ -997,6 +1006,6 @@ header.app .gear{
 .formCamWrap{position:relative;width:100%;border-radius:8px;overflow:hidden;background:#0f1412;min-height:120px}
 .formCamWrap video{width:100%;display:block;opacity:.9}
 .formCamWrap canvas{position:absolute;inset:0;width:100%;height:100%}
-.formPhaseTag{position:absolute;top:8px;right:8px;background:rgba(13,59,36,.85);color:#eafff2;border-radius:8px;padding:2px 10px;font-size:12px;font-weight:700}
+.formPhaseTag{position:absolute;top:8px;right:8px;background:rgba(13,59,36,.85);color:#eafff2;border-radius:8px;padding:2px 10px;font-size:12px;font-weight:var(--fw-label)}
 .formPhaseTag.release{background:rgba(198,40,40,.9)}
 .formPhaseTag.fulldraw{background:rgba(184,134,11,.9)}
