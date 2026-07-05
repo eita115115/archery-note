@@ -123,16 +123,14 @@ function setupSystemSummary(setupId){
 function recordSetupSnapshot(setupId,dist){
   const setup=db.setups.find(s=>s.id===setupId);
   if(!setup) return `<div class="setupLens" id="setupLens">
-    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b><span>用具登録で調整提案が強くなります</span></div>
-    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b><span>距離を選ぶと実測値を呼び出します</span></div>
+    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b></div>
+    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b></div>
   </div>`;
-  const gp=gearPrecisionProfile(setup);
-  const mp=modelReadinessProfile(setupId);
   const mk=dist?latestMark(setupId,dist):null;
   const markText=mk?`上下 ${esc(mk.v||"—")} / 左右 ${esc(mk.h||"—")}`:"記録なし";
   return `<div class="setupLens" id="setupLens">
-    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b><span>${[setup.bow,setup.limbs,setup.poundage?setup.poundage+"lbs":""].filter(Boolean).map(esc).join(" / ")||"詳細入力待ち"}</span></div>
-    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b><span>入力材料 ${gp.level} / 履歴 ${mp.level}</span></div>
+    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b></div>
+    <div class="lensCard"><div class="k">${dist?dist+"m サイト":"サイト台帳"}</div><b>${markText}</b></div>
   </div>`;
 }
 function faceChoiceValue(sess){
