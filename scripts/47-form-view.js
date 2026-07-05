@@ -31,8 +31,30 @@ function formFeatureFromShot(shot){
     anchorNorm:shot.anchorNorm,
     release:shot.pre?{bowMove:+shot.pre.bowMove.toFixed(3),drawMove:+shot.pre.drawMove.toFixed(3),stable:!shot.pre.bowDrift&&!shot.pre.drawDrift}:null,
     confidence:shot.confidence==null?null:+shot.confidence.toFixed(2),
-    score:shot.score==null?null:Math.round(shot.score)
+    score:shot.score==null?null:Math.round(shot.score),
+    /* シャドー: 矢プレゼンス検出による発射/レットダウン一致判定（取消動作には未使用、注釈のみ）。
+       前方互換: formAnalyses.features[].arrowCheck は既存レコードに存在しない追加フィールド */
+    arrowCheck:shot.arrowCheck?{
+      judgment:shot.arrowCheck.judgment,
+      preScore:shot.arrowCheck.preScore==null?null:+shot.arrowCheck.preScore.toFixed(2),
+      confirmScore:shot.arrowCheck.confirmScore==null?null:+shot.arrowCheck.confirmScore.toFixed(2)
+    }:null
   };
+}
+
+/* シャドー判定のショット一覧タグ（撮影画面）。judgment を利用者向けの短い日本語に変換する。
+   あくまで参考表示（ベータ）で、既存のリリース検出結果を変えるものではない旨は撮影画面のhintで案内。 */
+function formArrowCheckLabel(judgment){
+  if(judgment==="shot-match") return "矢: 発射と一致";
+  if(judgment==="letdown-mismatch") return "矢: 引き戻しの疑い（要確認）";
+  return null; // unclear は表示しない（判定材料不足を煽らない）
+}
+function formArrowCheckTagHtml(arrowCheck){
+  if(!arrowCheck) return "";
+  const label=formArrowCheckLabel(arrowCheck.judgment);
+  if(!label) return "";
+  const mismatch=arrowCheck.judgment==="letdown-mismatch";
+  return ` / ${mismatch?icon("warn")+" ":""}${esc(label)}`;
 }
 
 function formRecordSummary(r){
@@ -214,10 +236,20 @@ function openFormCapture(){
   let running=true, raf=0, stream=null, landmarker=null;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   let anchorStartTs=0, shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  /* 矢プレゼンスのシャドー判定（ベータ）: releasedの取消動作には一切使わない。
+     ROI サンプルはフルドロー中と確定猶予窓のみ実行し、常時のフレーム負荷を避ける。
+     roiCanvas は ROI 帯の外接矩形だけを video から切り出す小さいオフスクリーンキャンバス
+    （getImageData をフル解像度で呼ばないための軽量化）。 */
+  const roiCanvas=document.createElement("canvas");
+  const roiCtx=roiCanvas.getContext("2d",{willReadFrequently:true});
+  let presenceRing=[]; // {ts, score} フルドロー中の直近スコア（最大約1.5秒分）
+  let pendingCheck=null; // {shotId, preScores, confirmScores, startTs} 確定猶予窓の計測中
+  let samplePerfMs=[]; // 実測処理時間(ms/frame)。報告用に先頭数十件だけ保持
 
   function stop(){
     running=false;
     if(raf) cancelAnimationFrame(raf);
+    if(pendingCheck) finalizeArrowCheck(); // 閉じる前に計測途中のシャドー判定を確定させる
     try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){}
     endActiveWorkflow();
     closeModal(ovl);
@@ -240,16 +272,38 @@ function openFormCapture(){
       if(t) t.textContent=`第${idx+1}射`;
     });
   }
+  /* ROI 帯の外接矩形だけを video から roiCanvas へ切り出し、そこで矢プレゼンスを測る
+     （getImageData をフル解像度で呼ばない軽量化）。呼び出し側で performance.now() 差分を
+     とって処理時間を記録できるよう、実測はここでは行わない（loop側で計測）。 */
+  function sampleArrowPresence(raw){
+    if(!raw||!raw.bW||!raw.dW||!video.videoWidth) return null;
+    const vw=video.videoWidth, vh=video.videoHeight;
+    const pad=0.06; // ROI外接矩形にわずかに余白（帯の走査幅ぶん）
+    const minX=Math.min(raw.bW.x,raw.dW.x)-pad, maxX=Math.max(raw.bW.x,raw.dW.x)+pad;
+    const minY=Math.min(raw.bW.y,raw.dW.y)-pad, maxY=Math.max(raw.bW.y,raw.dW.y)+pad;
+    const sx=Math.max(0,Math.floor(minX*vw)), sy=Math.max(0,Math.floor(minY*vh));
+    const ex=Math.min(vw,Math.ceil(maxX*vw)), ey=Math.min(vh,Math.ceil(maxY*vh));
+    const rw=ex-sx, rh=ey-sy;
+    if(rw<=1||rh<=1) return 0;
+    roiCanvas.width=rw; roiCanvas.height=rh;
+    roiCtx.drawImage(video,sx,sy,rw,rh,0,0,rw,rh);
+    let img;
+    try{ img=roiCtx.getImageData(0,0,rw,rh); }catch(e){ return null; }
+    // p1/p2 を ROI 局所座標(0-1)へ変換
+    const toLocal=(p)=>({x:(p.x*vw-sx)/rw, y:(p.y*vh-sy)/rh});
+    return arrowPresence(img,toLocal(raw.bW),toLocal(raw.dW));
+  }
   function onShot(now){
     const shot=summarizeFormShot(history,anchorStartTs,now);
-    if(!shot) return;
+    if(!shot) return null;
     shot.id=uid();
+    shot.arrowCheck=null; // 確定猶予窓の計測後に judgeArrowCheck の結果を書き込む（シャドー）
     shots.push(shot);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem";
     div.dataset.shotId=shot.id;
     div.innerHTML=`<div><div class="t">第${shots.length}射</div>
-      <div class="d">保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?` / ${icon("warn")} リリース前ドリフト`:""}</div></div>
+      <div class="d" data-shot-desc>保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?` / ${icon("warn")} リリース前ドリフト`:""}</div></div>
       <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>
       <button class="btn sm ghost" data-rm-shot="${shot.id}" aria-label="この射を取り消す">${icon("del")}</button>`;
     div.querySelector("[data-rm-shot]").onclick=()=>{
@@ -262,6 +316,20 @@ function openFormCapture(){
     ovl.querySelector("#fcShots").prepend(div);
     refreshShotsHint();
     nativePulse("light");
+    return shot.id;
+  }
+  /* 確定猶予窓の計測が終わったら、シャドー判定結果を該当ショットに書き込み、
+     ショット一覧の表示も更新する。released 判定自体（released/canceled）は一切変えない。 */
+  function finalizeArrowCheck(){
+    if(!pendingCheck) return;
+    const {shotId,preScores,confirmScores}=pendingCheck;
+    pendingCheck=null;
+    const shot=shots.find(s=>s.id===shotId);
+    if(!shot) return; // canceled で既に取り消し済み
+    const result=judgeArrowCheck(preScores,confirmScores);
+    shot.arrowCheck=result;
+    const desc=ovl.querySelector(`#fcShots [data-shot-id="${shotId}"] [data-shot-desc]`);
+    if(desc) desc.innerHTML=desc.innerHTML+formArrowCheckTagHtml(result);
   }
   function loop(){
     if(!running) return;
@@ -280,7 +348,7 @@ function openFormCapture(){
       if(history.length>200) history.shift();
       const {phase,released,canceled}=stepFormPhase(detector,raw,history,1.0,now);
       if(canceled){
-        /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す */
+        /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
         const last=shots[shots.length-1];
         if(last){
           shots=shots.filter(s=>s.id!==last.id);
@@ -289,9 +357,33 @@ function openFormCapture(){
           renumberShots();
           refreshShotsHint();
         }
+        if(pendingCheck&&pendingCheck.shotId===(last&&last.id)) pendingCheck=null;
+      }
+      /* 矢プレゼンスのシャドー計測: フルドロー中と確定猶予窓のみ ROI を処理する
+        （常時処理しないことでモバイル負荷を抑える）。1フレームあたりの処理時間を
+        report用に実測・記録する（先頭200件のみ保持）。 */
+      if(phase==="FULL_DRAW"||pendingCheck){
+        const t0=performance.now();
+        const presenceScore=raw?sampleArrowPresence(raw):null;
+        const dt=performance.now()-t0;
+        if(samplePerfMs.length<200) samplePerfMs.push(dt);
+        if(phase==="FULL_DRAW"&&presenceScore!=null){
+          presenceRing.push({ts:now,score:presenceScore});
+          const cutoff=now-1500;
+          while(presenceRing.length&&presenceRing[0].ts<cutoff) presenceRing.shift();
+        }
+        if(pendingCheck){
+          if(presenceScore!=null) pendingCheck.confirmScores.push(presenceScore);
+          if(now-pendingCheck.startTs>=FORM_PH.CONFIRM_MS) finalizeArrowCheck();
+        }
       }
       if((phase==="ANCHORING"||phase==="FULL_DRAW")&&!anchorStartTs) anchorStartTs=now;
-      if(released){ onShot(now); anchorStartTs=0; }
+      if(released){
+        const preScores=presenceRing.map(p=>p.score);
+        const shotId=onShot(now);
+        anchorStartTs=0;
+        if(shotId) pendingCheck={shotId,preScores,confirmScores:[],startTs:now};
+      }
       if(phase==="SETUP"||phase==="IDLE") anchorStartTs=0;
       phaseEl.textContent=phase;
       phaseEl.classList.toggle("release",phase==="RELEASE");
