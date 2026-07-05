@@ -589,8 +589,10 @@ function openSettings(){
     const r=new FileReader();
     r.onload=async()=>{ try{
       const d=JSON.parse(r.result);
-      if(!d.sessions||!d.setups) throw 0;
-      if(await appConfirm(`読み込むと現在のデータは置き換わります。\n（練習${d.sessions.length}回 / セッティング${d.setups.length}件）よろしいですか？`,{danger:true,okLabel:"読み込む"})){
+      const vr=validateImportData(d);
+      if(!vr.ok){ toast(vr.reason); return; }
+      const warnText=vr.warnings.length?`\n注意: ${vr.warnings.join("、")}`:"";
+      if(await appConfirm(`読み込むと現在のデータは置き換わります。\n（練習${(d.sessions||[]).length}回 / セッティング${(d.setups||[]).length}件）${warnText}よろしいですか？`,{danger:true,okLabel:"読み込む"})){
         writeSafetySnapshot("import-before",true);
         db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); closeModal(ovl); render(); toast("読み込みました");
       }
