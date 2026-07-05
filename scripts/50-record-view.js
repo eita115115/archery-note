@@ -78,9 +78,8 @@ function recordIntroHtml(sys, mode){
     <div class="missionTop">
       <img class="startLogoMark" src="icon.svg" alt="">
       <div>
-        <div class="eyebrow">Archery Note</div>
+        <div class="eyebrow">アーチェリー練習ノート</div>
         <h2>${mode==="calibration"?"サイト値も残す":"今日のズレを、次の一射へ。"}</h2>
-        <p>得点・着弾・用具をまとめて残せる、アーチェリー練習ノート。結果で、サイトを動かすか・保留するかを見ます。</p>
       </div>
       <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
     </div>
@@ -436,9 +435,9 @@ function pageHeroHtml(type,ctx){
     const sug=lastSess?primarySightSuggestion(lastSess,setup,adv):null;
     let body;
     if(!setup){
-      body=`<p class="pageHeroLead sightNowNote">先に「用具」タブでセッティングを登録すると、ここに提案が出ます。</p>`;
+      body=`<p class="pageHeroLead sightNowNote">用具セッティング未登録</p>`;
     }else if(!adv){
-      body=`<p class="pageHeroLead sightNowNote">この距離・用具の練習記録がまだありません。練習を1回記録すると、ここに提案が出ます。</p>`;
+      body=`<p class="pageHeroLead sightNowNote">この距離・用具の練習記録なし</p>`;
     }else if(!sug || sug.none){
       body=`<div class="sightNow sightNowNeutral" data-testid="sight-now-suggestion">
         <div class="sightNowDir">${icon("target")}<span>調整不要</span></div>
@@ -450,7 +449,7 @@ function pageHeroHtml(type,ctx){
       body=`<div class="sightNow" data-testid="sight-now-suggestion">
         <div class="sightNowDir">${arrowIcon}<span>${sug.dirLabel}へ</span></div>
         <div class="sightNowAmount">${sug.clicks!=null?`${Math.abs(sug.clicks).toFixed(1)}<small>${esc(sug.clickLabel)}</small>`:`${sug.mm.toFixed(1)}<small>mm</small>`}</div>
-        <p class="sightNowNote">${sug.clicks!=null?`目安 ${sug.mm.toFixed(1)}mm相当。`:"クリック換算を登録すると回数でも表示できます。"}${sug.other?" 上下・左右の両方に動きがあります（詳細は下）。":""} 信頼度 ${q.label}。</p>
+        <p class="sightNowNote">${sug.clicks!=null?`目安 ${sug.mm.toFixed(1)}mm相当。`:""}${sug.other?" 上下・左右の両方に動きがあります（詳細は下）。":""} 信頼度 ${q.label}。</p>
       </div>`;
     }
     return `<section class="pageHero" data-testid="sight-hero">

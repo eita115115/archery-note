@@ -292,7 +292,7 @@ function spineGuidance(s){
 }
 function spineGuidanceHtml(s){
   const g=spineGuidance(s);
-  if(!g.ready) return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}を入れると、候補レンジを表示できます。</div>`;
+  if(!g.ready) return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}未入力</div>`;
   const color=g.tone==="ok"?"#0f9d58":g.tone==="warn"?"#c62828":"#8a6d1d";
   return `<div class="note"><b>スパイン初期候補</b>: ${g.candidates.join(" / ")}（動的負荷 ${g.eff.toFixed(1)}lbs相当、矢尺${g.len.toFixed(1)}in、ポイント${g.point}gr）</div>
     <div class="note"><b style="color:${color}">${g.state}</b> — ${esc(g.text)}</div>`;
@@ -508,7 +508,7 @@ function openSettings(){
         <button type="button" class="chip ${db.settings.formTrackingEnabled?"":"on"}" aria-pressed="${!db.settings.formTrackingEnabled}" data-ft="0">OFF</button>
         <button type="button" class="chip ${db.settings.formTrackingEnabled?"on":""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
       </div>
-      <div class="hint">ONにすると分析タブにカメラでの射形解析が出ます。解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
+      <div class="hint">解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
       <h3 class="settingsH3">カスタムラウンド</h3>
       <div class="settingsActionHint">距離ごとのステージを持つ自分用ラウンドを増減・編集します。</div>
       ${customRoundsSettingsHtml()}
