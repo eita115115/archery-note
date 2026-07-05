@@ -110,6 +110,10 @@ function staticUiChecks() {
   assert(surface.includes("nativeSignal") && surface.includes("触感") && surface.includes("共有") && surface.includes("freshReload") && !html.includes("statusPill"), "native-feel UI should not crowd the header");
   assert(surface.includes("SHOT_REASON_TAGS") && surface.includes("外れ理由") && surface.includes("矢番号") && surface.includes("arrowMetaSummaryHtml"), "shot reason and arrow-number note UI missing");
   assert(surface.includes("判断信頼度") && surface.includes("個人モデル") && surface.includes("次のアクション") && surface.includes("個人データ準備度") && surface.includes("スパイン初期候補") && surface.includes("RK4-3D") && surface.includes("物理校正"), "analysis cards missing");
+  // 「信頼度」の語の分離（監査 High/Medium 対応）: 射形側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
+  assert(surface.includes("検出の鮮明さ") && !appJs.includes("・ 信頼度"), "form-tracking must say 検出の鮮明さ, not bare 信頼度, in the capture HUD");
+  assert(surface.includes("カメラの角度による測定誤差は反映されません") && surface.includes("毎回同じ位置・角度で撮ると比較の精度が上がります"), "form-tracking measurement-error and camera-position hints missing");
+  assert(surface.includes("演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出") && surface.includes("判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出"), "confidence derivation notes missing");
   assert(surface.includes("アプリ情報・保存状態") && surface.includes("nativeStack") && surface.includes("PWA + Capacitor-ready") && surface.includes("ブラウザ保存"), "native readiness UI missing");
   assert(surface.includes("自動バックアップ") && surface.includes("今すぐバックアップ") && surface.includes("バックアップデータを復元しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "backup settings copy should be user-facing");
   assert(surface.includes("シャフト銘柄") && surface.includes("番手/スパイン") && surface.includes("ハンドル/弓本体") && surface.includes("HOYT Grand Prix XCEED 2 H25") && surface.includes("HOYT Formula RCRV PODIUM Limbs"), "separated gear fields missing");

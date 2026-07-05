@@ -1114,6 +1114,7 @@ function openSummary(sess, isNew){
     ${nextActionHtml(sess,adv,setup)}
     <details class="adv summaryDetails">
       <summary>詳しい根拠を見る</summary>
+      ${confidenceNoteHtml("calc")}
       ${trustHtml(sess,setup,st)}
       ${roundProgressHtml(sess)}
       ${(sess.sightV||sess.sightH)?`<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV||"—")} / 左右 ${esc(sess.sightH||"—")}</span></div>`:""}
