@@ -327,6 +327,16 @@ function makeFormRecord(id, date, opts) {
   assert(ins.causes.some((t) => t.includes("前回より") && t.includes("長く")), "hold delta vs previous reported");
 }
 {
+  // 2026-07-05: エリート基準（172°等）との比較表示は撤去。自分基準（前回比）のみ言及する
+  const prev = makeFormRecord("p2", "2026-07-01", { bowArm: 168 });
+  const cur = makeFormRecord("c2", "2026-07-02", { bowArm: 180 });
+  const ins = core.formRecordInsights(cur, prev);
+  const allText = [...ins.facts, ...ins.causes, ...ins.checks, ...ins.next].join(" ");
+  assert(!allText.includes("エリート基準"), "no elite-reference wording in insights");
+  assert(!allText.includes(String(core.FORM_REF.bowArmAngle.ideal)), "no elite ideal-angle number leaks into insights");
+  assert(ins.facts.some((t) => t.includes("前回比") && t.includes("+12")), "bow-arm self-baseline delta reported");
+}
+{
   // 3射未満（中央値が出るまで）は formRecordStats 自体は計算できるが、
   // 呼び出し側（47-form-view.js）は生値表示に切り替える前提。ここではコア側が
   // 単純に中央値を返すだけであることを確認する（表示切替はビュー側の責務）。

@@ -275,38 +275,43 @@ function formRecordStats(record){
 
 /* 構造化コーチングコメント（archery-master buildStructuredFormComment を
    本アプリの formAnalysis 形状へ再構成）。観測→原因候補→確認点→次の練習の
-   4 区分で、断定を避けた日本語文を返す。prevRecord があれば前回比も述べる */
+   4 区分で、断定を避けた日本語文を返す。prevRecord があれば前回比も述べる。
+   2026-07-05: エリート基準（FORM_REF.ideal/sigma）との比較表示を停止した。
+   カメラ yaw 角 ±30° で引き手肘が基準 sigma の 1.1 倍相当ずれることが判明し、
+   採点の物差しが撮影角度に飲まれるため（妥当性監査で確認）。FORM_REF・
+   formGaussScore は削除せず未使用化のみ（出典が追跡できないため表示停止、
+   将来根拠が得られたら復活可能）。代わりに「自分の直近中央値との差」で
+   自分基準の変化を伝える。撮影角度が毎回同じであることが前提になるため、
+   その旨の注記は呼び出し側（47-form-view.js）で行う。 */
 function formRecordInsights(record, prevRecord){
   const st=formRecordStats(record);
   if(!st) return null;
   const prev=prevRecord?formRecordStats(prevRecord):null;
   const facts=[], causes=[], checks=[], next=[];
   if(st.holdMs!=null) facts.push(`フルドロー保持は中央値 ${(st.holdMs/1000).toFixed(1)} 秒でした。`);
-  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°（エリート基準 ${FORM_REF.bowArmAngle.ideal}°±${FORM_REF.bowArmAngle.sigma}°）です。`);
-  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°（基準 ${FORM_REF.drawArmAngle.ideal}°）です。`);
+  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°${prev&&prev.bowArm!=null?`（前回比 ${st.bowArm-prev.bowArm>=0?"+":""}${(st.bowArm-prev.bowArm).toFixed(0)}°）`:""}です。`);
+  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°${prev&&prev.drawArm!=null?`（前回比 ${st.drawArm-prev.drawArm>=0?"+":""}${(st.drawArm-prev.drawArm).toFixed(0)}°）`:""}です。`);
   if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカー位置ばらつきは σ=${st.anchorStd.toFixed(3)}（${st.anchorLabel}）です。`);
   if(st.driftRate!=null&&st.driftRate>0) facts.push(`${Math.round(st.driftRate*100)}% の射で、リリース前 0.5 秒に弓手/引き手のドリフトを観測しました。`);
   if(st.confidence!=null) facts.push(`骨格検出の鮮明さは平均 ${(st.confidence*100).toFixed(0)}% です（カメラの角度による測定誤差は反映されません）。`);
 
   if(st.driftRate!=null&&st.driftRate>=0.5) causes.push("保持中に押し引きの張り合いが緩んでいる可能性があります（断定ではありません）。");
-  if(st.bowArm!=null&&st.bowArm<FORM_REF.bowArmAngle.ideal-FORM_REF.bowArmAngle.sigma) causes.push("弓手肘が曲がり気味で、押しが的方向へ届いていない可能性があります。");
-  if(st.drawArm!=null&&st.drawArm<FORM_REF.drawArmAngle.ideal-FORM_REF.drawArmAngle.sigma) causes.push("引き手肘の張りが浅く、力線から外れやすい姿勢の可能性があります。");
   if(st.anchorStd!=null&&st.anchorStd>0.045) causes.push("アンカー位置の再現性が不足している可能性があります。");
   if(prev&&st.holdMs!=null&&prev.holdMs!=null){
     const d=(st.holdMs-prev.holdMs)/1000;
     if(d>=0.4) causes.push(`保持時間が前回より ${d.toFixed(1)} 秒長くなっています。`);
     else if(d<=-0.4) causes.push(`保持時間が前回より ${(-d).toFixed(1)} 秒短くなっています。`);
   }
+  if(prev&&st.bowArm!=null&&prev.bowArm!=null&&Math.abs(st.bowArm-prev.bowArm)>=6) causes.push(`弓手肘が前回より ${Math.abs(st.bowArm-prev.bowArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`);
+  if(prev&&st.drawArm!=null&&prev.drawArm!=null&&Math.abs(st.drawArm-prev.drawArm)>=6) causes.push(`引き手肘が前回より ${Math.abs(st.drawArm-prev.drawArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`);
   if(prev&&st.anchorStd!=null&&prev.anchorStd!=null&&st.anchorStd>prev.anchorStd*1.5&&st.anchorStd>0.03) causes.push("アンカーの再現性が前回より不安定になっています。");
 
   if(st.driftRate!=null&&st.driftRate>0) checks.push("リリース直前に弓手のグリップ位置が下がっていないか、横からの映像で確認してください。");
   if(st.anchorStd!=null&&st.anchorStd>0.045) checks.push("アンカーの接触点（顎の位置）が射ごとにずれていないか確認してください。");
-  if(st.bowArm!=null&&Math.abs(st.bowArm-FORM_REF.bowArmAngle.ideal)>FORM_REF.bowArmAngle.sigma) checks.push("セットアップの時点で弓手肘の向きが決まっているかを確認してください。");
   if(st.holdMs!=null&&st.holdMs>4500) checks.push("保持が長め（4.5秒超）です。狙い直しの回数が増えていないか振り返ってください。");
 
   if(st.driftRate!=null&&st.driftRate>=0.5) next.push("次の練習ではリリース前 0.5 秒の弓手固定を意識ポイントに入れてください。");
   if(st.anchorStd!=null&&st.anchorStd>0.045) next.push("同じ接触点で止まる練習（ミラー・ゴム弓）を数本足してください。");
-  if(st.bowArm!=null&&st.bowArm<FORM_REF.bowArmAngle.ideal-FORM_REF.bowArmAngle.sigma) next.push("押し手の伸びを1項目だけ意識して、次の記録で弓手肘の中央値の変化を見てください。");
   if(!next.length) next.push("同じ撮影角度で記録を重ね、前回比の変化量で確認を続けてください。");
   return {facts,causes,checks,next,stats:st,prev};
 }

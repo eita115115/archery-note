@@ -50,20 +50,32 @@ function formRecordSummary(r){
   };
 }
 
+/* 自分基準の表示ラベルを作る。2026-07-05: エリート基準（172°等）との比較は
+   撮影角度に飲まれるため停止し、直近の自分の記録との差で表す。
+   直近3件未満（中央値の元になる記録がまだ少ない）場合は生値のみ返す。 */
+function formSelfBaselineLabel(value, key, priorRecords){
+  if(!Number.isFinite(value)) return "—";
+  const priorVals=(priorRecords||[]).map(r=>formRecordStats(r)).filter(Boolean)
+    .map(st=>st[key]).filter(Number.isFinite);
+  if(priorVals.length<3) return `${value.toFixed(0)}°`;
+  const base=formMedian(priorVals);
+  const d=value-base;
+  if(Math.abs(d)<1) return `${value.toFixed(0)}°（いつも通り）`;
+  return `${value.toFixed(0)}°（いつもより ${d>=0?"+":""}${d.toFixed(0)}°）`;
+}
+
 function formTrendMiniHtml(){
   const series=formTrendSeries(db.formAnalyses||[]).filter(p=>Number.isFinite(p.bowArm));
   if(series.length<3) return "";
   const W=300,H=54;
   const vals=series.map(p=>p.bowArm);
-  const min=Math.min(...vals,FORM_REF.bowArmAngle.ideal-10), max=Math.max(...vals,FORM_REF.bowArmAngle.ideal+4);
+  const min=Math.min(...vals), max=Math.max(...vals);
   const span=(max-min)||1;
   const px=i=>(i/(series.length-1))*W;
   const py=v=>H-6-((v-min)/span)*(H-12);
-  const idealY=py(FORM_REF.bowArmAngle.ideal);
   const path=series.map((p,i)=>`${i?"L":"M"}${px(i).toFixed(1)},${py(p.bowArm).toFixed(1)}`).join("");
-  return `<div class="note"><b>弓手肘の推移</b>（点線 = 基準 ${FORM_REF.bowArmAngle.ideal}°）</div>
+  return `<div class="note"><b>弓手肘の推移</b>（自分の記録の変化。基準値との比較ではありません）</div>
   <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H}px" role="img" aria-label="弓手肘角度の推移">
-    <line x1="0" y1="${idealY.toFixed(1)}" x2="${W}" y2="${idealY.toFixed(1)}" stroke="var(--sub)" stroke-dasharray="5 4" stroke-width="1"/>
     <path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
     ${series.map((p,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(p.bowArm).toFixed(1)}" r="3" fill="var(--green)"/>`).join("")}
   </svg>`;
@@ -82,13 +94,15 @@ function formScoreLinkHtml(){
 }
 function formTrackingCard(){
   if(!formTrackingEnabled()) return "";
-  const recs=[...(db.formAnalyses||[])].sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,5);
-  const rows=recs.map(r=>{
+  const allRecs=[...(db.formAnalyses||[])].sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const recs=allRecs.slice(0,5);
+  const rows=recs.map((r,i)=>{
     const s=formRecordSummary(r);
+    const prior=allRecs.slice(i+1); // このカードより古い記録＝自分基準の母集団
     return `<div class="listItem recordReadOnlyItem" data-form-id="${r.id}">
       <div><div class="t">${fmtD(r.date)} ・ ${s.shots}射${r.sessionId?" ・ 練習に紐付け":""}</div>
       <div class="d">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} / アンカー ${esc(s.anchorLabel)} / タップで詳細</div></div>
-      <div class="big">${s.bowArm!=null?s.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</small></div>
+      <div class="big">${formSelfBaselineLabel(s.bowArm,"bowArm",prior)}<small> / 引き手${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</small></div>
       <button class="btn sm ghost histDelBtn" data-del-form="${r.id}">${icon("del")}</button>
     </div>`;
   }).join("");
@@ -97,7 +111,7 @@ function formTrackingCard(){
     ${formTrendMiniHtml()}
     ${rows||`<div class="empty">まだ射形記録がありません。カメラを横に置いて数射解析してみましょう。</div>`}
     ${formScoreLinkHtml()}
-    <div class="hint">数値は弓手肘の中央値（エリート基準 172°）。記録をタップすると、観測にもとづくコーチングコメントが見られます。</div>
+    <div class="hint">数値は弓手肘の中央値（直近の自分の記録と比較）。毎回同じ位置・角度で撮ると比較が正確になります。記録をタップすると、観測にもとづくコーチングコメントが見られます。</div>
   </div>`;
 }
 
