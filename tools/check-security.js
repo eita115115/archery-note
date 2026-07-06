@@ -22,14 +22,14 @@ function assert(ok, msg) {
 const sandbox = new Function(
   "window", "document", "navigator", "localStorage",
   scripts +
-  "\nreturn {esc,fmtD,sanitizeArrowList,normalizeDb,scoreLabel,csvCell,markCircle};"
+  "\nreturn {esc,fmtD,sanitizeArrowList,normalizeDb,scoreLabel,csvCell,markCircle,faceLabel};"
 )(
   {matchMedia:()=>({matches:false}),ArcheryNativeStorage:null},
   {querySelector:()=>null},
   {},
   {getItem:()=>null,setItem:()=>true}
 );
-const {esc,fmtD,sanitizeArrowList,normalizeDb,scoreLabel,csvCell,markCircle} = sandbox;
+const {esc,fmtD,sanitizeArrowList,normalizeDb,scoreLabel,csvCell,markCircle,faceLabel} = sandbox;
 
 /* ==== 1. esc() covers HTML-sensitive characters ==== */
 assert(esc('<img src=x onerror=alert(1)>') === '&lt;img src=x onerror=alert(1)&gt;', "esc must escape angle brackets");
@@ -86,13 +86,15 @@ assert(csvCell("normal text") === '"normal text"', "csvCell must not prefix norm
 assert(csvCell(42) === '"42"', "csvCell must handle numbers");
 assert(csvCell(null) === '""', "csvCell must handle null");
 assert(csvCell('has "quotes"') === '"has ""quotes"""', "csvCell must double-escape quotes");
+assert(csvCell(" =1+1").startsWith("\"'"), "csvCell must catch leading-space formula");
+assert(csvCell("\t@evil").startsWith("\"'"), "csvCell must catch leading-tab formula");
 
-/* ==== 7. normalizeDb sanitizes imported arrows ==== */
+/* ==== 7. normalizeDb sanitizes imported data ==== */
 const evilDb = {
   sessions: [{
     id: "test1",
     date: "2026-01-01",
-    ends: [[{s: '<img onerror=alert(1)>', x: 0, y: 0}]],
+    ends: [[{s: '<img onerror=alert(1)>', x: '<script>', y: 'evil'}]],
     dist: 70, faceD: 122, faceType: "single", round: "free",
   }],
   setups: [{id: "s1", name: "test"}],
@@ -101,6 +103,32 @@ const cleaned = normalizeDb(evilDb);
 const cleanedArrow = cleaned.sessions[0].ends[0][0];
 assert(typeof cleanedArrow.s === "number" && cleanedArrow.s === 0,
   "normalizeDb must sanitize malicious arrow scores to 0");
+assert(typeof cleanedArrow.x === "number" && cleanedArrow.x === 0,
+  "normalizeDb must sanitize malicious arrow x to 0");
+assert(typeof cleanedArrow.y === "number" && cleanedArrow.y === 0,
+  "normalizeDb must sanitize malicious arrow y to 0");
+
+/* ==== 8. normalizeDb validates session metadata ==== */
+const metaDb = {
+  sessions: [{
+    id: "m1", date: "2026-01-01", ends: [],
+    faceD: '<script>alert(1)</script>', faceType: "evil", dist: "not-a-number",
+  }],
+  setups: [{id: "s1", name: "test"}],
+};
+const metaCleaned = normalizeDb(metaDb);
+const sess = metaCleaned.sessions[0];
+assert(typeof sess.faceD === "number" && Number.isFinite(sess.faceD),
+  "normalizeDb must force faceD to finite number");
+assert(["single","triple","field"].includes(sess.faceType),
+  "normalizeDb must force faceType to known value");
+assert(typeof sess.dist === "number" && Number.isFinite(sess.dist),
+  "normalizeDb must force dist to finite number");
+
+/* ==== 9. faceLabel() is safe with coerced values ==== */
+const safeLabel = faceLabel({faceD: '<script>', faceType: "single"});
+assert(!safeLabel.includes("<script>"), "faceLabel must not pass through HTML");
+assert(safeLabel.includes("0cm"), "faceLabel must coerce non-numeric faceD to 0");
 
 /* ==== Summary ==== */
 if (fail > 0) {

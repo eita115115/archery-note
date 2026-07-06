@@ -606,7 +606,7 @@ function checkArrowCoordinateSanitize(storageApi) {
   assertEqual(end[0].x, 1.2, "[arrow-sanitize] string x becomes number");
   assertEqual(end[0].y, -0.5, "[arrow-sanitize] string y becomes number");
   assertEqual(end[0].s, 9, "[arrow-sanitize] string s becomes number");
-  assertEqual(end[1].x, "abc", "[arrow-sanitize] unconvertible x is kept as-is");
+  assertEqual(end[1].x, 0, "[arrow-sanitize] unconvertible x is forced to 0");
   assertEqual(end[1].y, null, "[arrow-sanitize] null y is kept as-is");
   assertEqual(end[1].s, 10, "[arrow-sanitize] numeric s stays untouched");
   assertEqual(end[2].x, 0.4, "[arrow-sanitize] numeric x stays untouched");

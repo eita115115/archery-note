@@ -536,7 +536,7 @@ function conditionInsights(sess,st,setup){
     const sp=setup?spineGuidance(setup):null;
     if(sp && sp.ready && (sp.state==="柔らかめ寄り" || sp.state==="硬め寄り")) out.push(`用具確認: スパインが${sp.state}です。候補 ${sp.candidates.slice(0,3).join(" / ")} と矢飛びを比較してください。`);
   }
-  if(sess.round && sess.round!=="free") out.push(`ラウンド: ${roundLabel(sess.round)} の途中/結果として扱っています。`);
+  if(sess.round && sess.round!=="free") out.push(`ラウンド: ${esc(roundLabel(sess.round))} の途中/結果として扱っています。`);
   return out;
 }
 function conditionHtml(sess,st,setup){
@@ -685,7 +685,7 @@ function roundProgressHtml(sess){
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0);
   const shot=all.length, remain=Math.max(0,arrows-shot);
   const pace=shot?total/shot*arrows:0;
-  return `<div class="kv"><span>ラウンド進捗</span><span>${roundLabel(sess.round)}${stageInfo} / ${shot}/${arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
+  return `<div class="kv"><span>ラウンド進捗</span><span>${esc(roundLabel(sess.round))}${stageInfo} / ${shot}/${arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
 }
 function sessionsCsv(){
   const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
@@ -711,7 +711,7 @@ function scorecardSvg(sess){
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);
   const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(scoreLabel).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
   const h=210+rows.length*34;
-  const title=`${fmtD(sess.date)} ${sess.dist}m ${roundLabel(sess.round)}`;
+  const title=`${fmtD(sess.date)} ${sess.dist}m ${esc(roundLabel(sess.round))}`;
   const bg="#f7f8f4", ink="#1c1e1c", green="#1a5c3a";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="${h}" viewBox="0 0 900 ${h}">
   <rect width="900" height="${h}" fill="${bg}"/>
