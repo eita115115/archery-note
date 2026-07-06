@@ -395,6 +395,27 @@ async function stopProcess(proc) {
   await Promise.race([closed, sleep(1500)]);
 }
 
+function makeStderrTail(maxLines) {
+  let buf = "";
+  const lines = [];
+  return {
+    feed(chunk) {
+      buf += chunk.toString("utf8");
+      let idx;
+      while ((idx = buf.indexOf("\n")) !== -1) {
+        lines.push(buf.slice(0, idx));
+        if (lines.length > maxLines) lines.shift();
+        buf = buf.slice(idx + 1);
+      }
+    },
+    tail() {
+      const rest = lines.slice();
+      if (buf) rest.push(buf);
+      return rest.slice(-maxLines).join("\n");
+    },
+  };
+}
+
 async function rmDirWithRetry(dir) {
   for (let attempt = 0; attempt < 8; attempt++) {
     try {
@@ -419,10 +440,15 @@ async function fetchJson(url, timeoutMs = 5000) {
   }
 }
 
-async function waitForPageTarget(port) {
-  const deadline = Date.now() + 10000;
+async function waitForPageTarget(port, isProcAlive) {
+  const deadline = Date.now() + 30000;
   let lastError = "";
   while (Date.now() < deadline) {
+    if (isProcAlive && !isProcAlive()) {
+      throw new Error(
+        `Chrome process exited before DevTools became reachable${lastError ? `: ${lastError}` : ""}`,
+      );
+    }
     try {
       const targets = await fetchJson(`http://127.0.0.1:${port}/json/list`, 1000);
       const page = targets.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
@@ -500,9 +526,10 @@ function createCdpClient(wsUrl) {
   });
 }
 
-async function screenshot(browser, view) {
-  const profile = path.join(outDir, `.profile-${view.name}`);
-  const shot = path.join(outDir, `${view.name}.png`);
+const LAUNCH_ATTEMPTS = 3;
+
+async function launchBrowserOnce(browser, profile) {
+  await rmDirWithRetry(profile);
   fs.mkdirSync(profile, { recursive: true });
   const port = await freePort();
   const args = [
@@ -522,11 +549,55 @@ async function screenshot(browser, view) {
     `--user-data-dir=${profile}`,
     "about:blank",
   ];
-  const proc = spawn(browser, args, { stdio: ["ignore", "ignore", "ignore"] });
-  let client;
+  const proc = spawn(browser, args, { stdio: ["ignore", "ignore", "pipe"] });
+  const stderrTail = makeStderrTail(20);
+  proc.stderr.on("data", (chunk) => stderrTail.feed(chunk));
+
+  let exited = false;
+  let spawnError = null;
+  proc.on("error", (err) => {
+    exited = true;
+    spawnError = err;
+  });
+  proc.on("exit", () => {
+    exited = true;
+  });
+  const isProcAlive = () => !exited;
+
   try {
-    const wsUrl = await waitForPageTarget(port);
-    client = await createCdpClient(wsUrl);
+    if (spawnError) throw spawnError;
+    const wsUrl = await waitForPageTarget(port, isProcAlive);
+    const client = await createCdpClient(wsUrl);
+    return { proc, client, stderrTail };
+  } catch (err) {
+    const tail = stderrTail.tail();
+    const detail = tail ? `\n--- chrome stderr (tail) ---\n${tail}` : "";
+    await stopProcess(proc);
+    await rmDirWithRetry(profile);
+    throw new Error(`${err.message}${detail}`, { cause: err });
+  }
+}
+
+async function launchBrowserWithRetry(browser, profile) {
+  let lastErr;
+  for (let attempt = 1; attempt <= LAUNCH_ATTEMPTS; attempt++) {
+    try {
+      return await launchBrowserOnce(browser, profile);
+    } catch (err) {
+      lastErr = err;
+      if (attempt < LAUNCH_ATTEMPTS) {
+        await sleep(250);
+      }
+    }
+  }
+  throw new Error(`Chrome launch failed after ${LAUNCH_ATTEMPTS} attempts: ${lastErr.message}`);
+}
+
+async function screenshot(browser, view) {
+  const profile = path.join(outDir, `.profile-${view.name}`);
+  const shot = path.join(outDir, `${view.name}.png`);
+  const { proc, client } = await launchBrowserWithRetry(browser, profile);
+  try {
     await client.send("Page.enable");
     await client.send("Runtime.enable");
     await client.send("Emulation.setDeviceMetricsOverride", {
