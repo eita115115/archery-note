@@ -584,7 +584,7 @@ function pageHeroHtml(type, ctx) {
        新しい統計は作らない — 分析タブの「今日の結論」と同じ入力（buildAnalysisRows）を使う。
        数値枠は 練習・平均・最高合計 の3つに一本化（旧「記録サマリー」カードはここへ統合。
        「直近」はリスト先頭行が直近そのものなので数値枠には置かない） */
-    const rows = buildAnalysisRows(src, db.setups, sessionMetrics);
+    const rows = ctx.rows || buildAnalysisRows(src, db.setups, sessionMetrics);
     const conclusion = todayConclusion(rows);
     const best = sessionRows
       .filter((r) => r.arrows.length)
@@ -1180,7 +1180,7 @@ function refreshActive() {
         const z = zoneStyle(a.s, a.X, s.faceType);
         /* motion:因果 — 的タップの着弾象限から得点チップが現れる方向を決める（表示のみ。当たり判定・座標計算は不変） */
         const fromCls = i === ui.freshArrow ? `fresh ${impactQuadrantClass(a)}` : "";
-        return `<button type="button" class="sc ${i === ui.selArrow ? "sel" : ""} ${fromCls}" aria-pressed="${i === ui.selArrow}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${scoreLabel(a)}</span>${a.no ? `<small>#${esc(a.no)}</small>` : ""}</button>`;
+        return `<button type="button" class="sc ${i === ui.selArrow ? "sel" : ""} ${fromCls}" aria-pressed="${i === ui.selArrow}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${esc(scoreLabel(a))}</span>${a.no ? `<small>#${esc(a.no)}</small>` : ""}</button>`;
       })
       .join("") ||
     `<span class="recordCurEmpty">エンド${s.ends.length + 1}：的をタップして記録</span>`;

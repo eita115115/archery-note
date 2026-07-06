@@ -6,11 +6,9 @@ function historyRowHtml(s) {
   const all = s.ends.flat();
   const total = all.reduce((a, x) => a + x.s, 0);
   const setup = db.setups.find((x) => x.id === s.setupId);
-  const q = sessionQuality(s, setup);
   const badges = [
     `<span class="badge">${faceLabel(s)}</span>`,
     setup ? `<span class="badge">${esc(setup.name)}</span>` : "",
-    `<span class="badge">信頼 ${q.label}</span>`,
     s.round && s.round !== "free"
       ? `<span class="badge">${roundLabel(s.round)}${s.roundGroup ? ` ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}` : ""}</span>`
       : "",
@@ -18,7 +16,7 @@ function historyRowHtml(s) {
   ]
     .filter(Boolean)
     .join("");
-  return `<button type="button" class="listItem historyRow" data-id="${s.id}" data-testid="history-row">
+  return `<button type="button" class="listItem historyRow" data-id="${esc(s.id)}" data-testid="history-row">
     <div class="historyRowMain"><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
     <div class="d">${badges}${all.length}本</div></div>
     <div class="big historyRowTotal">${total}<small> / 平均${(total / all.length).toFixed(2)}</small></div></button>`;
@@ -57,7 +55,8 @@ function renderHistory(m) {
       (!hf.dist || String(s.dist) === String(hf.dist)) &&
       (!hf.round || (s.round || "free") === hf.round),
   );
-  m.innerHTML = `${pageHeroHtml("history", { ss })}
+  const _heroRows = buildAnalysisRows(ss, db.setups, sessionMetrics);
+  m.innerHTML = `${pageHeroHtml("history", { ss, rows: _heroRows })}
   <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
       <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${s.id}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
@@ -70,7 +69,7 @@ function renderHistory(m) {
     <div id="histList">
     ${
       ss.length
-        ? historyGroupedListHtml(ss)
+        ? historyGroupedListHtml(ss.slice(0, ui._histLimit || 50)) + (ss.length > (ui._histLimit || 50) ? `<div class="btnrow"><button class="btn ghost" id="histMore">さらに表示（残り${ss.length - (ui._histLimit || 50)}件）</button></div>` : "")
         : allSs.length
           ? `<div class="empty">この絞り込みに合う記録がありません。フィルタを広げてください。</div>`
           : `<div class="empty historyEmpty" data-testid="history-empty">
@@ -81,20 +80,26 @@ function renderHistory(m) {
   </div></div>`;
   $("#histSetup").onchange = (e) => {
     ui.histFilter.setupId = e.target.value;
+    ui._histLimit = 0;
     render();
   };
   $("#histDist").onchange = (e) => {
     ui.histFilter.dist = e.target.value;
+    ui._histLimit = 0;
     render();
   };
   $("#histRound").onchange = (e) => {
     ui.histFilter.round = e.target.value;
+    ui._histLimit = 0;
     render();
   };
   $("#histClear").onclick = () => {
     ui.histFilter = { setupId: "", dist: "", round: "" };
+    ui._histLimit = 0;
     render();
   };
+  const more = $("#histMore");
+  if (more) more.onclick = () => { ui._histLimit = (ui._histLimit || 50) + 50; render(); };
   document
     .querySelectorAll("#histList .listItem")
     .forEach((li) => (li.onclick = () => openHistDetail(li.dataset.id)));
@@ -145,7 +150,8 @@ function driftText(dx, dy) {
 }
 function groupingTrendCard(ss) {
   const by = {};
-  [...ss].reverse().forEach((s) => {
+  const recent = ss.slice(0, 120);
+  [...recent].reverse().forEach((s) => {
     const p = sessionGroupPoint(s);
     if (!p) return;
     const key = [p.setupId, p.dist, p.faceD, p.faceType].join("|");
@@ -347,7 +353,7 @@ function histRoundGroupHtml(sess) {
       <td><span class="stageTick" style="width:${8 + Math.round((d / maxDist) * 22)}px"></span>ステージ${(Number(x.roundGroup.stage) || 0) + 1} ・ ${historyDistanceLabel(x.dist)}</td>
       <td class="right">${all.length}射</td>
       <td class="right"><b>${t}</b></td>
-      <td class="right">${cur ? `<span class="mini">（表示中）</span>` : `<button type="button" class="btn sm ghost" data-stage-jump="${x.id}">開く</button>`}</td>
+      <td class="right">${cur ? `<span class="mini">（表示中）</span>` : `<button type="button" class="btn sm ghost" data-stage-jump="${esc(x.id)}">開く</button>`}</td>
     </tr>`;
     })
     .join("");
@@ -513,7 +519,7 @@ function renderSight(m) {
             i,
           ) => `<tr class="${i === 0 ? "ledgerCurrent" : ""}"><td>${i === 0 ? `<span class="ledgerDot" title="使用中"></span>` : ""}${fmtD(mk.date)}</td><td><b>${esc(mk.v || "—")}</b></td><td><b>${esc(mk.h || "—")}</b></td>
       <td class="subNoteSm">${esc(mk.note || "")}</td>
-      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${mk.id}">${icon("del")}</button></td></tr>`,
+      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}">${icon("del")}</button></td></tr>`,
         )
         .join("")}</table>`
         : `<div class="empty">この距離の記録はまだありません</div>`
