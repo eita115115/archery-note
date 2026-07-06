@@ -122,11 +122,11 @@ function formTrackingCard(){
   const rows=recs.map((r,i)=>{
     const s=formRecordSummary(r);
     const prior=allRecs.slice(i+1); // このカードより古い記録＝自分基準の母集団
-    return `<div class="listItem recordReadOnlyItem" data-form-id="${r.id}">
+    return `<div class="listItem recordReadOnlyItem" data-form-id="${esc(r.id)}">
       <div><div class="t">${fmtD(r.date)} ・ ${s.shots}射${r.sessionId?" ・ 練習に紐付け":""}</div>
       <div class="d">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} / アンカー ${esc(s.anchorLabel)} / タップで詳細</div></div>
       <div class="big">${formSelfBaselineLabel(s.bowArm,"bowArm",prior)}<small> / 引き手${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</small></div>
-      <button class="btn sm ghost histDelBtn" data-del-form="${r.id}">${icon("del")}</button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}">${icon("del")}</button>
     </div>`;
   }).join("");
   return `<div class="card"><h2>射形トラッキング <span class="mini">ベータ / 端末内解析</span></h2>
@@ -306,7 +306,7 @@ function openFormCapture(){
     div.innerHTML=`<div><div class="t">第${shots.length}射</div>
       <div class="d" data-shot-desc>保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?` / ${icon("warn")} リリース前ドリフト`:""}</div></div>
       <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>
-      <button class="btn sm ghost" data-rm-shot="${shot.id}" aria-label="この射を取り消す">${icon("del")}</button>`;
+      <button class="btn sm ghost" data-rm-shot="${esc(shot.id)}" aria-label="この射を取り消す">${icon("del")}</button>`;
     div.querySelector("[data-rm-shot]").onclick=()=>{
       shots=shots.filter(s=>s.id!==shot.id);
       div.remove();

@@ -359,7 +359,7 @@ function renderGear(m){
       const gp=gearPrecisionProfile(s);
       const mp=modelReadinessProfile(s.id);
       const active=activeId===s.id;
-      return `<div class="listItem gearLedgerItem" data-id="${s.id}" data-testid="gear-ledger-item"><div>
+      return `<div class="listItem gearLedgerItem" data-id="${esc(s.id)}" data-testid="gear-ledger-item"><div>
         <div class="t">${active?`<span class="gearActiveDot" title="使用中" aria-hidden="true"></span>`:""}${esc(s.name)}</div>
         <div class="gearLedgerSpecs">
           <span class="gearSpecCell">弓<b>${s.bow?esc(s.bow):"—"}</b></span>
@@ -393,7 +393,7 @@ function customRoundsSettingsHtml(){
   const list=db.customRounds||[];
   return `<details class="adv" data-testid="settings-custom-rounds"><summary>多距離ラウンドの定義を管理</summary>
     <div class="hint">保存すると記録タブのラウンド選択（多距離ラウンド）に表示されます。</div>
-    ${list.length?list.map(r=>`<button type="button" class="listItem" data-cr="${r.id}"><div>
+    ${list.length?list.map(r=>`<button type="button" class="listItem" data-cr="${esc(r.id)}"><div>
       <div class="t">${esc(r.label)}</div>
       <div class="d">${esc(customRoundStagesText(r))}</div>
     </div><div class="gearChevron">${icon("chevron")}</div></button>`).join(""):`<div class="empty">カスタムラウンドはまだありません。</div>`}

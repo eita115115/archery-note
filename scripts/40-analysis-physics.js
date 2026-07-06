@@ -751,7 +751,7 @@ function trashSettingsHtml(){
   if(!items.length) return `<h3 class="trashH3">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
   return `<h3 class="trashH3">ゴミ箱 <span class="subNoteSm">最新${items.length}/${(db.trash||[]).length}件</span></h3>
     <table class="tbl"><tr><th>種類</th><th>内容</th><th>削除日</th><th></th></tr>
-    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost trashRestoreBtn" data-restore-trash="${it.id}">復元</button></td></tr>`).join("")}</table>`;
+    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost trashRestoreBtn" data-restore-trash="${esc(it.id)}">復元</button></td></tr>`).join("")}</table>`;
 }
 function trashClearButtonHtml(){
   const items=(db.trash||[]).slice(0,8);

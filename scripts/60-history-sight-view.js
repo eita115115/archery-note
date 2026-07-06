@@ -16,7 +16,7 @@ function historyRowHtml(s) {
   ]
     .filter(Boolean)
     .join("");
-  return `<button type="button" class="listItem historyRow" data-id="${s.id}" data-testid="history-row">
+  return `<button type="button" class="listItem historyRow" data-id="${esc(s.id)}" data-testid="history-row">
     <div class="historyRowMain"><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
     <div class="d">${badges}${all.length}本</div></div>
     <div class="big historyRowTotal">${total}<small> / 平均${(total / all.length).toFixed(2)}</small></div></button>`;
@@ -353,7 +353,7 @@ function histRoundGroupHtml(sess) {
       <td><span class="stageTick" style="width:${8 + Math.round((d / maxDist) * 22)}px"></span>ステージ${(Number(x.roundGroup.stage) || 0) + 1} ・ ${historyDistanceLabel(x.dist)}</td>
       <td class="right">${all.length}射</td>
       <td class="right"><b>${t}</b></td>
-      <td class="right">${cur ? `<span class="mini">（表示中）</span>` : `<button type="button" class="btn sm ghost" data-stage-jump="${x.id}">開く</button>`}</td>
+      <td class="right">${cur ? `<span class="mini">（表示中）</span>` : `<button type="button" class="btn sm ghost" data-stage-jump="${esc(x.id)}">開く</button>`}</td>
     </tr>`;
     })
     .join("");
@@ -519,7 +519,7 @@ function renderSight(m) {
             i,
           ) => `<tr class="${i === 0 ? "ledgerCurrent" : ""}"><td>${i === 0 ? `<span class="ledgerDot" title="使用中"></span>` : ""}${fmtD(mk.date)}</td><td><b>${esc(mk.v || "—")}</b></td><td><b>${esc(mk.h || "—")}</b></td>
       <td class="subNoteSm">${esc(mk.note || "")}</td>
-      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${mk.id}">${icon("del")}</button></td></tr>`,
+      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}">${icon("del")}</button></td></tr>`,
         )
         .join("")}</table>`
         : `<div class="empty">この距離の記録はまだありません</div>`
