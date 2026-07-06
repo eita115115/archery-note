@@ -121,8 +121,14 @@ function checkDebounceCoalescing() {
 
 function checkMaxWait() {
   /* 連続入力（600ms未満間隔）でも SAVE_MAX_WAIT_MS で先送りが打ち切られ途中書き込みされること */
-  assert(/const SAVE_DEBOUNCE_MS=600;/.test(storageScript), "[max-wait] SAVE_DEBOUNCE_MS should stay 600");
-  assert(/const SAVE_MAX_WAIT_MS=3000;/.test(storageScript), "[max-wait] SAVE_MAX_WAIT_MS should stay 3000");
+  assert(
+    /const SAVE_DEBOUNCE_MS=600;/.test(storageScript),
+    "[max-wait] SAVE_DEBOUNCE_MS should stay 600",
+  );
+  assert(
+    /const SAVE_MAX_WAIT_MS=3000;/.test(storageScript),
+    "[max-wait] SAVE_MAX_WAIT_MS should stay 3000",
+  );
   const { timers, keyWrites, api, clock } = loadApi();
   for (let i = 0; i < 10; i += 1) {
     api.getDb().settings.eyeSight = 900 + i;
@@ -201,10 +207,10 @@ function checkCallSiteClassification() {
     "[call-site] shot-meta (arrow number / reason tag) should use scheduleSave",
   );
   const immediatePatterns = [
-    [/save\(\{reason:"import",forceSnapshot:true\}\)/, "import"],
-    [/save\(\{reason:"restore",forceSnapshot:true\}\)/, "snapshot restore"],
-    [/save\(\{reason:"restore-trash",forceSnapshot:true\}\)/, "trash restore"],
-    [/save\(\{reason:"delete-session",forceSnapshot:true\}\)/, "session delete"],
+    [/save\(\{\s*reason:\s*"import",\s*forceSnapshot:\s*true\s*\}\)/, "import"],
+    [/save\(\{\s*reason:\s*"restore",\s*forceSnapshot:\s*true\s*\}\)/, "snapshot restore"],
+    [/save\(\{\s*reason:\s*"restore-trash",\s*forceSnapshot:\s*true\s*\}\)/, "trash restore"],
+    [/save\(\{\s*reason:\s*"delete-session",\s*forceSnapshot:\s*true\s*\}\)/, "session delete"],
   ];
   const gearScript = fs.readFileSync(path.join(root, "scripts", "70-gear-settings.js"), "utf8");
   const historyScript = fs.readFileSync(
@@ -222,9 +228,18 @@ function checkLifecycleFlushContract() {
      [^\n]* で addEventListener と同一行に限定する（境界を越えて隣のハンドラにマッチすると検査が空文化する）。
      ハンドラを複数行に書き換えた場合はこの検査も合わせて更新すること。 */
   [
-    [/window\.addEventListener\(\s*["']pagehide["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "pagehide"],
-    [/document\.addEventListener\(\s*["']visibilitychange["'][^\n]*document\.hidden\)\s*\{[^}]*flushPendingSave\(\);[^}]*flushSafetySnapshot\(\)/, "visibilitychange(hidden): flush must live inside the hidden branch"],
-    [/window\.addEventListener\(\s*["']beforeunload["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/, "beforeunload"],
+    [
+      /window\.addEventListener\(\s*["']pagehide["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/,
+      "pagehide",
+    ],
+    [
+      /document\.addEventListener\(\s*["']visibilitychange["'][^\n]*document\.hidden\)\s*\{[^}]*flushPendingSave\(\);[^}]*flushSafetySnapshot\(\)/,
+      "visibilitychange(hidden): flush must live inside the hidden branch",
+    ],
+    [
+      /window\.addEventListener\(\s*["']beforeunload["'][^\n]*flushPendingSave\(\)[^\n]*flushSafetySnapshot\(\)/,
+      "beforeunload",
+    ],
   ].forEach(([pattern, label]) => {
     assert(
       pattern.test(initScript),
