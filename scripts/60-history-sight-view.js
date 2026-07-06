@@ -7,10 +7,10 @@ function historyRowHtml(s) {
   const total = all.reduce((a, x) => a + x.s, 0);
   const setup = db.setups.find((x) => x.id === s.setupId);
   const badges = [
-    `<span class="badge">${faceLabel(s)}</span>`,
+    `<span class="badge">${esc(faceLabel(s))}</span>`,
     setup ? `<span class="badge">${esc(setup.name)}</span>` : "",
     s.round && s.round !== "free"
-      ? `<span class="badge">${roundLabel(s.round)}${s.roundGroup ? ` ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}` : ""}</span>`
+      ? `<span class="badge">${esc(roundLabel(s.round))}${s.roundGroup ? ` ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}` : ""}</span>`
       : "",
     s.wx ? `<span class="badge">${esc(s.wx)}</span>` : "",
   ]
@@ -59,11 +59,11 @@ function renderHistory(m) {
   m.innerHTML = `${pageHeroHtml("history", { ss, rows: _heroRows })}
   <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
-      <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${s.id}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
       <div><label class="f">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(hf.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <div class="row">
-      <div><label class="f">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${r}" ${hf.round === r ? "selected" : ""}>${roundLabel(r)}</option>`).join("")}</select></div>
+      <div><label class="f">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${esc(r)}" ${hf.round === r ? "selected" : ""}>${esc(roundLabel(r))}</option>`).join("")}</select></div>
       <div class="histFilterEnd"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
     </div>
     <div id="histList">
@@ -210,7 +210,7 @@ function groupingTrendItem(g) {
           .join("")}
       </svg>
       <div class="histRecentBody">
-        <div class="t histRecentTitle">${setup} ・ ${historyDistanceLabel(latest.dist)} ・ ${faceLabel(latest)}</div>
+        <div class="t histRecentTitle">${setup} ・ ${historyDistanceLabel(latest.dist)} ・ ${esc(faceLabel(latest))}</div>
         <div class="d">${g.length}回 / ${fmtD(first.date)}〜${fmtD(latest.date)} / 平均の集まり半径(RMS) ${avgRr.toFixed(1)}cm</div>
         <div class="kv"><span>最新の中心</span><span>${cmOffsetText(latest.mx, "x")} / ${cmOffsetText(latest.my, "y")}（${biasState}）</span></div>
         <div class="kv"><span>前回から</span><span>${driftText(recentDx, recentDy)}</span></div>
@@ -408,8 +408,8 @@ function openHistDetail(id) {
       ${detailNumbersHtml}
     </details>`;
   ovl.innerHTML = `<div class="sheet histDetailSheet">
-    <h3>${fmtD(sess.date)} ・ ${historyDistanceLabel(sess.dist)} ・ ${faceLabel(sess)}</h3>
-    <div class="subNote">${setup ? esc(setup.name) : "セッティング未指定"}${sess.round && sess.round !== "free" ? " ・ " + roundLabel(sess.round) : ""}${windText(sess) ? " ・ " + esc(windText(sess)) : ""}${sess.note ? " ・ " + esc(sess.note) : ""}</div>
+    <h3>${fmtD(sess.date)} ・ ${historyDistanceLabel(sess.dist)} ・ ${esc(faceLabel(sess))}</h3>
+    <div class="subNote">${setup ? esc(setup.name) : "セッティング未指定"}${sess.round && sess.round !== "free" ? " ・ " + esc(roundLabel(sess.round)) : ""}${windText(sess) ? " ・ " + esc(windText(sess)) : ""}${sess.note ? " ・ " + esc(sess.note) : ""}</div>
     <div class="statbar" data-testid="history-detail-stats">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total / all.length).toFixed(2)}</b><span>平均/本</span></div>
@@ -505,7 +505,7 @@ function renderSight(m) {
     ${
       db.setups.length
         ? `
-    <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map((s) => `<option value="${s.id}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
+    <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map((s) => `<option value="${esc(s.id)}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
     <div class="chips" id="sgDistChips">${dists.map((d) => `<button type="button" class="chip ${d === dist ? "on" : ""}" aria-pressed="${d === dist}" data-d="${d}">${d}m</button>`).join("")}</div>
     <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>

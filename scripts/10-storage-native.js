@@ -30,6 +30,8 @@ function sanitizeArrowList(arrows){
     const y=arrowNumberOrKeep(a.y); if(y!==a.y) a.y=y;
     const s=arrowNumberOrKeep(a.s); if(s!==a.s) a.s=s;
     if(a.s!=null && typeof a.s!=="number") a.s=0;
+    if(a.x!=null && typeof a.x!=="number") a.x=0;
+    if(a.y!=null && typeof a.y!=="number") a.y=0;
   });
 }
 function sanitizeSessionArrows(sess){
@@ -49,7 +51,13 @@ function normalizeDb(d){
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
-  out.sessions.forEach(sanitizeSessionArrows);
+  const VALID_FACE_TYPES=["single","triple","field"];
+  out.sessions.forEach(s=>{
+    if(typeof s.faceD!=="number"||!Number.isFinite(s.faceD)) s.faceD=122;
+    if(!VALID_FACE_TYPES.includes(s.faceType)) s.faceType="single";
+    if(s.dist!=null&&(typeof s.dist!=="number"||!Number.isFinite(s.dist))) s.dist=18;
+    sanitizeSessionArrows(s);
+  });
   out.trash.forEach(t=>{ if(t.type==="session") sanitizeSessionArrows(t.data); });
   if(out.active && typeof out.active==="object"){
     sanitizeSessionArrows(out.active);
@@ -440,8 +448,9 @@ function parseFaceChoice(value){
 }
 function faceLabel(s){
   if(s.faceType==="triple") return "40cm三つ目";
-  if(s.faceType==="field") return `${s.faceD}cmフィールド`;
-  return `${s.faceD}cm的`;
+  const d=+s.faceD||0;
+  if(s.faceType==="field") return `${d}cmフィールド`;
+  return `${d}cm的`;
 }
 function perfectScoreValue(sess){ return sess&&sess.faceType==="field" ? 6 : 10; }
 function perfectScoreLabel(sess){ return `${perfectScoreValue(sess)}点`; }
@@ -510,7 +519,7 @@ async function shareOrDownloadText(filename,text,type,title){
   nativePulse("light");
   return false;
 }
-function csvCell(v){ const s=String(v==null?"":v).replace(/"/g,'""'); return `"${"=+-@\t\r".includes(s[0])?"'"+s:s}"`; }
+function csvCell(v){ const s=String(v==null?"":v).replace(/"/g,'""'); const t=s.trimStart(); return `"${"=+-@".includes(t[0])?"'"+s:s}"`; }
 const ROUND_TYPES=[
   {id:"free",label:"自由練習",arrows:null},
   {id:"70m72",label:"70m 72射",arrows:72,dist:70},

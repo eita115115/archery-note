@@ -56,7 +56,7 @@ function setupOptions(sel) {
     `<option value="">（セッティング未指定）</option>` +
     db.setups
       .map(
-        (s) => `<option value="${s.id}" ${s.id === sel ? "selected" : ""}>${esc(s.name)}</option>`,
+        (s) => `<option value="${esc(s.id)}" ${s.id === sel ? "selected" : ""}>${esc(s.name)}</option>`,
       )
       .join("")
   );
@@ -318,7 +318,7 @@ function renderRecord(m) {
         ${ROUND_TYPES.map((r) => `<option value="${r.id}">${r.label}</option>`).join("")}
         <optgroup label="多距離ラウンド">
           ${multiRoundDefs()
-            .map((r) => `<option value="${r.id}">${esc(r.label)}</option>`)
+            .map((r) => `<option value="${esc(r.id)}">${esc(r.label)}</option>`)
             .join("")}
         </optgroup>
       </select>
@@ -651,7 +651,7 @@ function analysisFilterBarHtml(allRows, f) {
   ];
   return `<div class="card analysisFilterCard">
     <div class="row">
-      <div><label class="f">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${s.id}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
       <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <label class="f">期間</label>
@@ -744,7 +744,7 @@ function personalBestCard(rows) {
     .map((g) => {
       const lb = [
         g.dist ? `${g.dist}m` : "距離未設定",
-        g.round !== "free" ? roundLabel(g.round) : "自由練習",
+        g.round !== "free" ? esc(roundLabel(g.round)) : "自由練習",
       ].join(" ・ ");
       return `<div class="listItem recordReadOnlyItem">
       <div><div class="t">${esc(lb)}</div><div class="d">${g.sessions}回 / ベスト日 ${g.bestTotal ? fmtD(g.bestTotal.date) : "—"}${g.bestTotal ? ` / ${g.bestTotal.arrows}本` : ""}</div></div>
@@ -891,7 +891,7 @@ function liveSessionHeroHtml(s, setup) {
   /* 射場モードの「いま必要な3つ」= エンドn・合計・残り。用具名・平均・ステージ詳細は details へ畳む */
   return `<section class="liveHud compactHud" data-testid="active-hud" aria-label="記録中のスコア">
     <div class="liveContext">
-      <span>${s._edit ? "過去記録の編集" : `${s.dist}m / ${faceLabel(s)}`}</span>
+      <span>${s._edit ? "過去記録の編集" : `${s.dist}m / ${esc(faceLabel(s))}`}</span>
       <details class="liveHudMore"><summary>詳細</summary>
         <div class="liveHudMoreBody">
           <span>${setup ? esc(setup.name) : "用具未指定"}</span>
@@ -938,7 +938,7 @@ function renderActive(m) {
   ${liveSessionHeroHtml(s, setup)}
   <div class="card targetFocusCard targetFocusWide">
     <div class="targetTools">
-      <h2>記録中${s._edit ? "（過去記録の編集）" : ""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${faceLabel(s)} ・ ${setup ? esc(setup.name) : "セッティング未指定"}</span></h2>
+      <h2>記録中${s._edit ? "（過去記録の編集）" : ""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${esc(faceLabel(s))} ・ ${setup ? esc(setup.name) : "セッティング未指定"}</span></h2>
       ${
         s.faceType === "triple"
           ? ""
