@@ -1106,8 +1106,7 @@ function refreshActive() {
         .querySelectorAll(".shotNew,.sc.fresh")
         .forEach((el) => el.classList.remove("shotNew", "fresh"));
     }, 640);
-    /* 記録直後は結果が動いたことが分かるよう滑らかに押し上げる */
-    revealChipsAboveDock(chipsBox, "smooth");
+    revealChipsAboveDock(chipsBox, "instant");
   } else {
     /* 初期表示（再描画・タブ復帰含む）でもチップ行がドックの裏に隠れていたら、無演出で即座に押し上げる */
     revealChipsAboveDock(chipsBox, "instant");

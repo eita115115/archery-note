@@ -345,8 +345,8 @@ function openFormCapture(){
       const raw=lms?computeFormMetrics(lms,handedness):null;
       const disp=ema(raw);
       let vel=0;
-      const last=history[history.length-1];
-      if(raw&&last&&last.m){ const dt=(now-last.ts)/1000; if(dt>0) vel=formDist(raw.dW,last.m.dW)/dt/raw.bodyScale; }
+      if(raw){let lv=null;for(let i=history.length-1;i>=0&&!lv;i--)if(history[i].m)lv=history[i];
+      if(lv){const dt=(now-lv.ts)/1000;if(dt>0&&dt<0.5)vel=formDist(raw.dW,lv.m.dW)/dt/raw.bodyScale;}}
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
       const {phase,released,canceled}=stepFormPhase(detector,raw,history,1.0,now);
@@ -416,7 +416,7 @@ function openFormCapture(){
       appVer:APP_VER, fps:+fps.toFixed(1),
       features:shots.map(formFeatureFromShot), note:""
     });
-    save({reason:"form-analysis",forceSnapshot:true});
+    save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
     nativePulse("success");
     stop(); render();

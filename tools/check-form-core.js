@@ -199,6 +199,23 @@ function shotSequence(dt) {
   });
 }
 {
+  // null フレームブリッジ: リリース中に MediaPipe がトラッキングを見失っても検出できる
+  const dt = 20;
+  const seq = [];
+  for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
+  // リリース開始: 2フレーム分の速度スパイク
+  seq.push([mkRaw(0.35, 140), 6, dt]);
+  seq.push([mkRaw(0.50, 130), 8, dt]);
+  // MediaPipe ドロップアウト: null フレームが3つ
+  seq.push([null, 0, dt]);
+  seq.push([null, 0, dt]);
+  seq.push([null, 0, dt]);
+  // 復帰: アンカーから離れた位置
+  seq.push([mkRaw(1.0, 90), 0.2, dt]);
+  for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
+  assertEqual(runSequence(seq).releases, 1, "null-frame bridged release detected");
+}
+{
   // 連続2射: 不応期を挟んで両方検出
   const seq = [...shotSequence()];
   for (let i = 0; i < 10; i++) seq.push([mkRaw(1.5, 90), 0.05, 66]);

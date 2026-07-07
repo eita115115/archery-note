@@ -253,7 +253,10 @@ function makeFormPhaseDetector() {
    場合、直前に追加したショットを取り消すこと（誤検出の自己修復）。 */
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
-  if (!raw) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; return { phase: st.cur, released: false }; }
+  if (!raw) {
+    if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; }
+    return { phase: st.cur, released: false };
+  }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
     if (raw.anchorNorm < FORM_PH.CLOSE_IN) {
       // アンカー圏へ即座に戻った = 離脱ではなく一時的な検出ノイズ/引き戻しだった。取消
@@ -266,14 +269,18 @@ function stepFormPhase(st, raw, history, sens, now) {
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) { st.cur = FORM_PHASES.RELEASE; return { phase: st.cur, released: false }; }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) { st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0; return { phase: st.cur, released: false }; }
   const close = raw.anchorNorm < FORM_PH.CLOSE_IN;
-  const win = history.filter((h) => h.m && h.ts >= now - FORM_PH.RISE_WINDOW_MS);
+  const winAll = history.filter(h => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
+  const win = winAll.filter(h => h.m);
   const closeFrames = win.filter((h) => h.m.anchorNorm < FORM_PH.CLOSE_IN);
   const minAnchor = win.length ? Math.min(...win.map((h) => h.m.anchorNorm)) : raw.anchorNorm;
   const rise = raw.anchorNorm - minAnchor;
   st.lastRise = rise;
   const maxV = win.length ? Math.max(...win.map((h) => h.vel || 0)) : 0;
+  const hasNullGap = winAll.length > win.length;
+  const velOk = maxV > FORM_PH.RELEASE_TH / s;
+  const nullBridged = hasNullGap && rise > 0.25 && maxV > 2;
   if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
-    && maxV > FORM_PH.RELEASE_TH / s) {
+    && (velOk || nullBridged)) {
     st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;
     st.pendingRelease = { ts: now };
     return { phase: st.cur, released: true };

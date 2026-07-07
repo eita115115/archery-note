@@ -307,7 +307,7 @@ function writeDbNow(o){
     return true;
   }catch(e){
     console.error(e);
-    try{ toast("保存容量が足りません。設定からバックアップ保存してください"); }catch(_){}
+    try{ toast("保存容量が足りません。設定からバックアップ保存してください",6000); }catch(_){}
     return false;
   }
 }
@@ -348,7 +348,7 @@ function save(opts){
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),1700); }
+function toast(msg,ms){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),ms||1700); }
 function today(){ return new Date().toISOString().slice(0,10); }
 /* ---------- モーダル共通（dialog 化とフォーカス管理） ---------- */
 const MODAL_FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
