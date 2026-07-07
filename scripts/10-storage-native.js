@@ -357,6 +357,8 @@ function openModal(ovl,opts){
   const sheet=ovl.querySelector(".sheet")||ovl;
   ovl.setAttribute("role","dialog");
   ovl.setAttribute("aria-modal","true");
+  const h3=sheet.querySelector("h3");
+  if(h3){if(!h3.id) h3.id="dlg-title-"+(Date.now()%1e5); ovl.setAttribute("aria-labelledby",h3.id);}
   ovl._modalPrevFocus=document.activeElement;
   ovl._modalKeydown=e=>{
     if(!document.body.contains(ovl)) return;

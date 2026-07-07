@@ -199,12 +199,12 @@ function groupingTrendItem(g) {
         <circle cx="0" cy="0" r="${w}" fill="none" stroke="var(--line)" stroke-width="${M / 160}"/>
         <line x1="${-M}" y1="0" x2="${M}" y2="0" stroke="var(--line)" stroke-width="${M / 150}"/>
         <line x1="0" y1="${-M}" x2="0" y2="${M}" stroke="var(--line)" stroke-width="${M / 150}"/>
-        ${cst && cst.major != null ? `<ellipse cx="${cst.mx}" cy="${-cst.my}" rx="${Math.max(cst.major, 0.18)}" ry="${Math.max(cst.minor, 0.18)}" transform="rotate(${-cst.angleDeg} ${cst.mx} ${-cst.my})" fill="rgba(15,157,88,.10)" stroke="#0f9d58" stroke-width="${M / 95}"/>` : ""}
-        <path d="${path}" fill="none" stroke="#1e6fd9" stroke-width="${M / 75}" stroke-linecap="round" stroke-linejoin="round"/>
+        ${cst && cst.major != null ? `<ellipse cx="${cst.mx}" cy="${-cst.my}" rx="${Math.max(cst.major, 0.18)}" ry="${Math.max(cst.minor, 0.18)}" transform="rotate(${-cst.angleDeg} ${cst.mx} ${-cst.my})" fill="var(--status-ok)" fill-opacity="0.10" stroke="var(--status-ok)" stroke-width="${M / 95}"/>` : ""}
+        <path d="${path}" fill="none" stroke="var(--blue)" stroke-width="${M / 75}" stroke-linecap="round" stroke-linejoin="round"/>
         ${g
           .map((p, i) => {
             const r = i === g.length - 1 ? M / 18 : M / 25;
-            const fill = i === g.length - 1 ? "#0f9d58" : "#1e6fd9";
+            const fill = i === g.length - 1 ? "var(--status-ok)" : "var(--blue)";
             return `<circle cx="${p.mx}" cy="${-p.my}" r="${r}" fill="${fill}" opacity="${0.35 + (i / g.length) * 0.55}" stroke="#fff" stroke-width="${M / 120}"/>`;
           })
           .join("")}

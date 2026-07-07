@@ -315,7 +315,7 @@ function computePersonalPhysicsCalibration(setupId){
 function physicsCalibrationHtml(setupId){
   const c=personalPhysicsCalibration(setupId);
   if(!c) return "";
-  const color=c.level==="校正安定"?"#0f9d58":c.level==="未校正"?"#8a6d1d":"#1e6fd9";
+  const color=c.level==="校正安定"?"var(--status-ok)":c.level==="未校正"?"var(--status-hold)":"var(--blue)";
   return `<div class="advice analysisAdviceCard">
     <div class="note"><b style="color:${color}">物理校正: ${c.level}</b>（${pct(c.score)}）</div>
     <div class="kv"><span>校正材料</span><span>有効練習 ${c.usable}回 / 風 ${c.wind.sample}回 / サイト値 ${c.sight.n}点</span></div>
@@ -493,7 +493,7 @@ function judgementFor(adv,sess){
 function judgementHtml(adv,sess){
   const j=judgementFor(adv,sess);
   if(!j) return "";
-  const color=j.tone==="ok"?"#0f9d58":j.tone==="warn"?"#c62828":"#8a6d1d";
+  const color=j.tone==="ok"?"var(--status-ok)":j.tone==="warn"?"var(--status-warn)":"var(--status-hold)";
   return `<div class="note analysisMt6"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
 }
 function summaryDecisionHtml(adv,sess){
@@ -634,7 +634,7 @@ function personalModel(sess,setup,currentSt){
 function personalModelHtml(adv,sess,setup){
   if(!adv || !adv.personal) return "";
   const p=adv.personal;
-  const tone=p.state==="過去と一致"?"#0f9d58":p.state==="今回だけの可能性"?"#c62828":"#8a6d1d";
+  const tone=p.state==="過去と一致"?"var(--status-ok)":p.state==="今回だけの可能性"?"var(--status-warn)":"var(--status-hold)";
   if(p.sample<2) return `<div class="advice analysisAdviceCard"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
   return `<div class="advice analysisAdviceCard">
     <div class="note"><b style="color:${tone}">個人モデル: ${p.state}</b> — ${esc(p.text)}</div>
@@ -644,7 +644,7 @@ function personalModelHtml(adv,sess,setup){
 }
 function trustHtml(sess,setup,st){
   const q=sessionQuality(sess,setup,st);
-  const color=q.tone==="ok"?"#0f9d58":q.tone==="warn"?"#c62828":"#8a6d1d";
+  const color=q.tone==="ok"?"var(--status-ok)":q.tone==="warn"?"var(--status-warn)":"var(--status-hold)";
   /* trustHtml は全呼び出し箇所が details（詳しく/詳しい根拠/判断の根拠）内のため、注記を常設できる */
   return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>
     ${confidenceNoteHtml("judge")}`;

@@ -1233,7 +1233,7 @@ function attachTargetInput(s) {
     const w = ringW(s.faceD, s.faceType);
     const fine = !!(drag && drag.fine);
     const cutting = fine && isLineCuttingFromGlobal(p.x, p.y, s.faceD, s.faceType);
-    const c = fine ? (cutting ? "#0f9d58" : "#c62828") : "#111";
+    const c = fine ? (cutting ? "var(--status-ok)" : "var(--status-warn)") : "#111";
     lens.classList.toggle("cut", cutting);
     lens.classList.toggle("miss", fine && !cutting);
     lensTag.classList.toggle("cut", cutting);
