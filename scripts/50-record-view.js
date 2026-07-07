@@ -65,17 +65,6 @@ function setupOptions(sel) {
       .join("")
   );
 }
-const RECORD_FLOW_MODES = [
-  { id: "practice", icon: icon("target"), title: "練習記録", desc: "点取りから調整提案へ" },
-  {
-    id: "calibration",
-    icon: icon("updown"),
-    title: "サイト値を残す",
-    desc: "サイト値・風メモも一緒に",
-  },
-  { id: "diagnosis", icon: icon("help"), title: "足りないデータを見る", desc: "提案の材料を確認" },
-];
-const RECORD_PHASES = ["準備", "記録", "確認", "蓄積"];
 const SHOT_REASON_TAGS = [
   "良射",
   "押し手",
@@ -86,78 +75,6 @@ const SHOT_REASON_TAGS = [
   "矢が怪しい",
   "不明",
 ];
-function scorePct(v) {
-  return Math.round(clamp(v || 0, 0, 1) * 100);
-}
-function readinessCellHtml(label, level, score) {
-  return `<div class="readinessCell"><div class="k">${label}</div><b>${esc(level)}</b><div class="bar"><i style="width:${scorePct(score)}%"></i></div></div>`;
-}
-function recordPhaseArcHtml(step, subtitle) {
-  const cur = Math.max(0, Math.min(RECORD_PHASES.length - 1, Math.round(step || 0)));
-  const xs = [32, 130, 228, 326];
-  const rails = xs
-    .slice(0, -1)
-    .map(
-      (x, i) =>
-        `<line class="seg ${i < cur ? "on" : ""} ${i === cur - 1 ? "cur" : ""}" x1="${x}" y1="18" x2="${xs[i + 1]}" y2="18"/>`,
-    )
-    .join("");
-  const nodes = RECORD_PHASES.map(
-    (label, i) => `<g>
-      <circle class="node ${i <= cur ? "on" : ""} ${i === cur ? "cur" : ""}" cx="${xs[i]}" cy="18" r="10"/>
-      <circle class="nodeCore" cx="${xs[i]}" cy="18" r="3.2"/>
-      <text class="${i <= cur ? "on" : ""}" x="${xs[i]}" y="44" text-anchor="middle">${esc(label)}</text>
-    </g>`,
-  ).join("");
-  return `<section class="phaseArc" aria-label="記録フロー">
-    <svg viewBox="0 0 360 50" role="img" aria-hidden="true">
-      <line class="rail" x1="32" y1="18" x2="326" y2="18"/>
-      ${rails}
-      ${nodes}
-    </svg>
-    ${subtitle ? `<div class="phaseSub">${esc(subtitle)}</div>` : ""}
-  </section>`;
-}
-function recordCoachCardHtml() {
-  return `<div class="coachCard">
-    <img src="icon.svg" alt="">
-    <div><b>3ステップで使います</b><span>条件を決める → 的でタップ → 結果で次の調整を見る</span></div>
-  </div>`;
-}
-function recordIntroHtml(sys, mode) {
-  const flow = RECORD_FLOW_MODES.map(
-    (f) => `
-      <button class="flowBtn ${mode === f.id ? "on" : ""}" data-mode="${f.id}"><span class="flowIcon">${f.icon}</span><span class="flowText"><b>${f.title}</b><span>${f.desc}</span></span></button>`,
-  ).join("");
-  const p = sys.profiles || {};
-  const nf = nativeFeatureProfile();
-  return `<section class="missionPanel convergeMission">
-    <div class="missionTop">
-      <img class="startLogoMark" src="icon.svg" alt="">
-      <div>
-        <div class="eyebrow">アーチェリー練習ノート</div>
-        <h2>${mode === "calibration" ? "サイト値も残す" : "今日のズレを、次の一射へ。"}</h2>
-      </div>
-      <div class="readinessDial"><b>${scorePct(sys.score)}</b><span>${esc(sys.level)}</span></div>
-    </div>
-    <div class="simplePromise">記録する <span>→</span> ズレを見る <span>→</span> 次を決める</div>
-    <details class="adv missionMore" ${mode === "calibration" ? "open" : ""}>
-      <summary>詳しく使う</summary>
-      <div class="readinessRail">
-        ${readinessCellHtml("用具", p.gear ? p.gear.level : "低", p.gear ? p.gear.score : 0)}
-        ${readinessCellHtml("履歴", p.model ? p.model.level : "データ蓄積中", p.model ? p.model.score : 0)}
-        ${readinessCellHtml("物理校正", p.physics ? p.physics.level : "未校正", p.physics ? p.physics.score : 0)}
-      </div>
-      <div class="nativeSignal">
-        <span class="on">${esc(nf.runtime.label)}</span>
-        <span class="${nf.haptics ? "on" : ""}">触感${nf.haptics ? "ON" : "待ち"}</span>
-        <span class="${nf.share ? "on" : ""}">共有${nf.share ? "ON" : "待ち"}</span>
-      </div>
-      <div class="missionFlow" id="flowMode">${flow}</div>
-      <div class="missionNext"><b>次の材料</b><span>${esc(sys.next)} / ${sys.lines.map(esc).join(" / ")}</span></div>
-    </details>
-  </section>`;
-}
 function setupSystemSummary(setupId) {
   const setup = db.setups.find((s) => s.id === setupId);
   if (!setup)
@@ -427,17 +344,6 @@ function renderRecord(m) {
       $("#fStart").click();
     };
   }
-  document.querySelectorAll("#flowMode .flowBtn").forEach(
-    (b) =>
-      (b.onclick = () => {
-        if (b.dataset.mode === "diagnosis") {
-          showView("sight");
-          return;
-        }
-        ui.recordMode = b.dataset.mode;
-        render();
-      }),
-  );
   function refreshLens() {
     const old = $("#setupLens");
     if (old) old.outerHTML = recordSetupSnapshot($("#fSetup").value, distState.d);
