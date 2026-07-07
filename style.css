@@ -224,7 +224,7 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .readinessCell .k{font-size:11px; color:var(--sub);}
 .readinessCell b{display:block; font-size:13px; margin-top:2px;}
 .readinessCell .bar{height:4px; border-radius:2px; margin-top:7px; background:rgba(255,255,255,.22); overflow:hidden;}
-.readinessCell .bar i{display:block; height:100%; border-radius:2px; background:var(--green);}
+.readinessCell .bar i{display:block; height:100%; border-radius:2px; background:var(--green); transform-origin:left; animation:barFill .6s var(--ease-fluid) both;}
 .missionFlow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px;}
 .flowBtn{
   display:grid; grid-template-columns:34px 1fr; align-items:center; gap:8px;
@@ -473,8 +473,8 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   display:flex; align-items:center; justify-content:flex-start; gap:4px;
   width:max-content; margin-left:auto; padding:7px 0 0!important;
 }
-.recordDetails summary::before{content:"＋ "!important; font-size:10px;}
-.recordDetails[open] summary::before{content:"− "!important;}
+.recordDetails summary::before{content:"＋ "!important; font-size:10px; position:static!important; border:none!important; width:auto!important; height:auto!important; transform:none!important; transition:none!important;}
+.recordDetails[open] summary::before{content:"− "!important; transform:none!important;}
 .recordDistCustomWrap{display:none;}
 .recordNeutralAdvice{background:var(--card); border-color:var(--line);}
 .recordNudgeHint{font-size:var(--font-size-sm); color:var(--sub);}
@@ -719,7 +719,8 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 .stat b{display:block; font-size:17px; font-variant-numeric:tabular-nums;} .stat span{font-size:10.5px; color:var(--sub);}
 /* nudge pad */
 .nudge{display:none; margin-top:10px; background:var(--soft); border-radius:8px; padding:10px; text-align:center;}
-.nudge.on{display:block;}
+/* motion:状態 — ナッジパネルが表示されたとき滑らかに出現 */
+.nudge.on{display:block; animation:nudgeReveal .24s var(--ease-app) both;}
 .shotMeta{
   margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
   text-align:left;
@@ -733,7 +734,8 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
   border-radius:6px; padding:7px 9px; font-size:11.5px; font-weight:var(--fw-label); cursor:pointer;
 }
 /* 選択状態は反転トークンへ統一（v2再監査: 旧 green の選択色は退役済みのため使わない） */
-.reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);}
+.reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg); animation:chipPop .2s var(--ease-app);}
+.reasonTag{transition:transform var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);}
 .sc small{display:block; font-size:10.5px; line-height:1; color:var(--sub); margin-top:1px;}
 .npad{display:grid; grid-template-columns:52px 52px 52px; gap:6px; justify-content:center; margin:6px 0;}
 .npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums; transition:transform .06s, background .06s, color .06s, border-color .06s;}
@@ -1025,6 +1027,20 @@ main.viewEnter > :nth-child(2){animation-delay:.03s;}
 main.viewEnter > :nth-child(3){animation-delay:.06s;}
 main.viewEnter > :nth-child(4){animation-delay:.08s;}
 main.viewEnter > :nth-child(5){animation-delay:.10s;}
+/* motion:因果 — ナッジパネルの出現（矢選択に応じて現れるヒント） */
+@keyframes nudgeReveal{from{opacity:0; transform:translateY(-6px);}to{opacity:1; transform:translateY(0);}}
+/* motion:状態 — レディネスバーが左から伸びてスコアの充足度を示す */
+@keyframes barFill{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+/* motion:因果 — タブ切替でアイコンが弾む（どのタブに着地したか触覚的に示す） */
+@keyframes tabPop{0%{transform:translateY(0) scale(.92);}50%{transform:translateY(-3px) scale(1.06);}100%{transform:translateY(-1px) scale(1);}}
+nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
+/* motion:因果 — チップ選択が受理されたことを示す軽い弾み */
+@keyframes chipPop{0%{transform:scale(.93);}50%{transform:scale(1.04);}100%{transform:scale(1);}}
+.chip.on{animation:chipPop .2s var(--ease-app);}
+/* motion:因果 — 開始ボタン押下を深い手応えで返す（行射開始の意思決定の重みを表現） */
+.startPrimary:active{transform:translateY(2px) scale(.968)!important; filter:brightness(.86)!important; box-shadow:inset 0 3px 6px rgba(0,0,0,.18)!important;}
+/* motion:状態 — トースト登場はスプリングで弾み、退場は速く消える */
+.toast.show{transition:opacity .24s, transform .3s cubic-bezier(.22,1.15,.36,1);}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
