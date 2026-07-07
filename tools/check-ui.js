@@ -96,7 +96,7 @@ function staticUiChecks() {
     "Toast status live region missing",
   );
   assert(
-    html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".missionPanel"),
+    html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".launchPanel"),
     "External stylesheet missing",
   );
   assert(
@@ -210,10 +210,10 @@ function staticUiChecks() {
     "overdone transition/target animation should not return",
   );
   assert(
-    surface.includes("今日のズレを、次の一射へ") &&
-      surface.includes("点取りから調整提案へ") &&
-      surface.includes("足りないデータを見る"),
-    "systematic onboarding UI missing",
+    surface.includes("この条件で開始") &&
+      surface.includes("条件を選ぶ") &&
+      surface.includes("詳しく残す"),
+    "record launch UI missing",
   );
   assert(
     surface.includes("読み込みに時間がかかっています") &&
@@ -224,7 +224,7 @@ function staticUiChecks() {
   );
   assert(
     surface.includes("サイト値を残す") &&
-      surface.includes("足りないデータを見る") &&
+      surface.includes("サイト値つきで開始") &&
       !surface.includes("校正用") &&
       !surface.includes("状態確認"),
     "record mode labels should stay user-facing",
@@ -256,16 +256,7 @@ function staticUiChecks() {
       surface.includes("quickStartMeta") &&
       surface.includes("actionFaceLabel") &&
       !surface.includes("今の条件で開始") &&
-      surface.includes("今日のズレを、次の一射へ。") &&
-      surface.includes("アーチェリー練習ノート") &&
-      surface.includes("missionPanel") &&
-      surface.includes("convergeMission") &&
-      surface.includes("phaseArc") &&
-      surface.includes("simplePromise") &&
-      surface.includes("ズレを見る") &&
-      surface.includes("詳しく使う") &&
       surface.includes("quickSelects") &&
-      surface.includes("missionMore") &&
       surface.includes("summaryDecisionHtml") &&
       surface.includes("setupLens") &&
       surface.includes("insightStrip"),
@@ -288,7 +279,7 @@ function staticUiChecks() {
     "reborn workspace surfaces missing",
   );
   assert(
-    surface.includes("nativeSignal") &&
+    surface.includes("nativePill") &&
       surface.includes("触感") &&
       surface.includes("共有") &&
       surface.includes("freshReload") &&

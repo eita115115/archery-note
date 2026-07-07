@@ -245,14 +245,17 @@ function cancelIdleTask(job){
   if(job.kind==="idle" && typeof w.cancelIdleCallback==="function") w.cancelIdleCallback(job.id);
   else clearTimeout(job.id);
 }
+let _lastSnapTs=0;
 function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
   try{
-    const raw=rawOverride||JSON.stringify(db), h=hashText(raw), now=Date.now();
+    const now=Date.now();
+    if(!force && _lastSnapTs && now-_lastSnapTs<30*60*1000) return;
+    const raw=rawOverride||JSON.stringify(db), h=hashText(raw);
     const current=readSnapshots();
     let snaps=current.filter(s=>s&&s.hash!==h);
     const latest=current[0];
-    if(!force && latest && latest.hash===h) return;
-    if(!force && latest && now-(latest.ts||0)<30*60*1000) return;
+    if(!force && latest && latest.hash===h){ _lastSnapTs=latest.ts||now; return; }
+    if(!force && latest && now-(latest.ts||0)<30*60*1000){ _lastSnapTs=latest.ts||now; return; }
     snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
     snaps=snaps.slice(0,6);
     for(;;){
@@ -260,6 +263,7 @@ function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
       if(snaps.length<=1) throw new Error("snapshot storage full");
       snaps.pop();
     }
+    _lastSnapTs=now;
   }catch(e){ console.warn("snapshot failed",e); }
 }
 function flushSafetySnapshot(){

@@ -56,7 +56,7 @@ body{
 input, textarea{-webkit-user-select:auto; user-select:auto;}
 button,.chip,.listItem,summary,.btn,.tinyAction,.sc,.npad button{touch-action:manipulation;}
 /* 桁揃え: 統計・スコア系の数値表示に継承させる共通クラス。主役数値のweight段階もここで統一する */
-.tnum,.stat b,.insightTile b,.heroMetric b,.liveCell b,.readinessDial b,.readinessCell b,
+.tnum,.stat b,.insightTile b,.heroMetric b,.liveCell b,
 .decisionCard b,.histTrendValue,.listItem .big,.kv,.lensCard b,.nativePill b{
   font-variant-numeric:tabular-nums;
   font-weight:var(--fw-figure);
@@ -133,8 +133,6 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px 10px 
 @supports (content-visibility:auto){
   main > .card,
   main > .launchPanel,
-  main > .missionPanel,
-  main > .phaseArc,
   main > .pageHero,
   main > .insightStrip{
     content-visibility:auto;
@@ -199,137 +197,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 .btn.sm{padding:8px 12px; font-size:13px; width:auto; border-radius:8px;}
 .btn:disabled{opacity:.4;}
 .btnrow{display:flex; gap:8px; margin-top:10px;} .btnrow .btn{flex:1;}
-.missionPanel{
-  color:#f2f0e8; background:var(--ink); background:#1b1b18;
-  border-radius:var(--radius-panel); padding:15px; margin-bottom:12px; box-shadow:var(--shadow-raised);
-  border:1px solid rgba(255,255,255,.10); overflow:hidden; min-width:0; width:100%;
 }
-html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
-.missionTop{display:grid; grid-template-columns:minmax(0,1fr) 84px; gap:12px; align-items:start; min-width:0;}
-.eyebrow{font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label);}
-/* 見出しラベル化: 大見出し＋説明文をやめ、ラベル様式（11-12px・字間0.08em・淡色）1行に */
-.missionPanel h2{margin:3px 0 0; font-size:12px; letter-spacing:.02em; font-weight:var(--fw-label); line-height:1.4; color:rgba(255,255,255,.92);}
-.readinessDial{
-  aspect-ratio:1; border-radius:50%; background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.24); display:flex; flex-direction:column; align-items:center; justify-content:center;
-  box-shadow:inset 0 0 0 8px rgba(255,255,255,.05);
-}
-.readinessDial b{font-size:22px; line-height:1;}
-.readinessDial span{font-size:11px; color:var(--sub); margin-top:3px;}
-.readinessRail{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; margin-top:12px;}
-.readinessCell{
-  min-height:62px; border-radius:8px; padding:8px; background:rgba(255,255,255,.10);
-  border:1px solid rgba(255,255,255,.16); min-width:0;
-}
-.readinessCell .k{font-size:11px; color:var(--sub);}
-.readinessCell b{display:block; font-size:13px; margin-top:2px;}
-.readinessCell .bar{height:4px; border-radius:2px; margin-top:7px; background:rgba(255,255,255,.22); overflow:hidden;}
-.readinessCell .bar i{display:block; height:100%; border-radius:2px; background:var(--green); transform-origin:left; animation:barFill .6s var(--ease-fluid) both;}
-.missionFlow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px;}
-.flowBtn{
-  display:grid; grid-template-columns:34px 1fr; align-items:center; gap:8px;
-  border:1px solid rgba(255,255,255,.18); border-radius:8px; background:rgba(255,255,255,.10); color:#fff;
-  min-width:0; padding:9px 8px; min-height:70px; text-align:left; cursor:pointer;
-  box-shadow:none; position:relative; overflow:hidden; min-width:0;
-}
-.flowIcon{
-  width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-  font-size:16px; background:rgba(255,255,255,.16);
-}
-.flowBtn b{display:block; font-size:12.5px; color:#fff; margin-bottom:3px;}
-.flowBtn .flowText{min-width:0;}
-.flowBtn .flowText span{display:block; font-size:11px; color:rgba(255,255,255,.78); line-height:1.35; overflow-wrap:anywhere;}
-/* 選択状態は金の面ではなく反転（この墨面パネル上では白面＋墨文字）で示す */
-.flowBtn.on{border-color:rgba(255,255,255,.85); background:#f2f0e8; color:#1b1b18; box-shadow:none;}
-.flowBtn.on b,.flowBtn.on .flowText span{color:#1b1b18;}
-.missionNext{margin-top:10px; display:flex; gap:8px; align-items:flex-start; color:rgba(255,255,255,.84); font-size:12px; line-height:1.45;}
-.missionNext b{color:#fff; white-space:nowrap;}
-.missionNext span{min-width:0; overflow-wrap:anywhere;}
-.nativeSignal{
-  display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;
-}
-.nativeSignal span{
-  border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.10); color:rgba(255,255,255,.86);
-  border-radius:6px; padding:4px 8px; font-size:10.5px; font-weight:var(--fw-label);
-}
-.nativeSignal .on{background:rgba(115,230,168,.18); color:#fff; border-color:rgba(115,230,168,.35);}
-.phaseArc{
-  border:0; border-radius:8px; padding:7px 8px 4px; margin-bottom:8px;
-  background:transparent; box-shadow:none;
-  /* motion:因果 — 記録ホームを開いた結果として進行アークが最初に現れる */
-  animation:appRise .36s cubic-bezier(.2,.8,.2,1) both;
-}
-.phaseArc svg{width:100%; height:50px; display:block; overflow:visible;}
-.phaseArc .rail{fill:none; stroke:var(--line2); stroke-width:6; stroke-linecap:round;}
-/* motion:状態 — 通過済みステージの区間色が変わったことを知覚させる */
-.phaseArc .seg{fill:none; stroke:var(--line); stroke-width:6; stroke-linecap:round; transition:stroke .18s;}
-.phaseArc .seg.on{stroke:var(--green);}
-.phaseArc .seg.cur{stroke:var(--amber);}
-.phaseArc .node{fill:var(--card); stroke:var(--line); stroke-width:3;}
-.phaseArc .node.on{fill:var(--green); stroke:var(--green);}
-.phaseArc .node.cur{fill:var(--amber); stroke:var(--amber);}
-.phaseArc .nodeCore{fill:#fff; opacity:.92;}
-.phaseArc text{font-size:11px; fill:var(--sub); font-weight:var(--fw-label);}
-.phaseArc text.on{fill:var(--title);}
-.phaseSub{font-size:11.5px; color:var(--sub); text-align:center; line-height:1.4; margin-top:-2px;}
-.missionPanel.convergeMission{
-  color:var(--ink); background:var(--soft); border:1px solid var(--line);
-  border-radius:var(--radius-panel); padding:15px; box-shadow:none;
-  /* motion:因果 — 記録ホームを開いた結果として提案パネルが少し遅れて現れる（アークの後に続く） */
-  animation:appRise .42s cubic-bezier(.2,.8,.2,1) .16s both;
-}
-.convergeMission .missionTop{grid-template-columns:68px minmax(0,1fr) 62px; align-items:center;}
-.startLogoMark{
-  width:64px; height:64px; border-radius:8px; padding:10px; background:var(--paper);
-  border:1px solid var(--line); box-shadow:none;
-}
-.convergeMission .eyebrow{color:var(--sub);}
-.missionPanel.convergeMission h2{color:var(--sub); font-size:12px; letter-spacing:.02em; font-weight:var(--fw-label); line-height:1.4; margin:3px 0 0;}
-.convergeMission .readinessDial{
-  background:var(--soft); border-color:var(--line); color:var(--title); box-shadow:none;
-}
-.convergeMission .readinessDial b{font-size:19px;}
-.convergeMission .readinessDial span{font-size:10.5px; color:var(--sub);}
-.convergeMission .readinessCell{
-  background:var(--paper); border-color:var(--line); min-height:56px;
-}
-.convergeMission .readinessCell .k{color:var(--sub);}
-.convergeMission .readinessCell b{color:var(--ink);}
-.convergeMission .readinessCell .bar{background:var(--line2);}
-.convergeMission .readinessCell .bar i{background:var(--green);}
-.convergeMission .nativeSignal span{
-  border-color:var(--line); background:var(--paper); color:var(--sub);
-}
-.convergeMission .nativeSignal .on{background:var(--advBg); color:var(--title); border-color:var(--advLine);}
-.convergeMission .flowBtn{
-  color:var(--ink); background:var(--paper); border-color:var(--line); min-height:64px;
-}
-.convergeMission .flowIcon{background:var(--soft); color:var(--title);}
-.convergeMission .flowBtn b{color:var(--ink);}
-.convergeMission .flowBtn .flowText span{color:var(--sub);}
-/* 選択状態は反転トークンへ統一（v2再監査: 旧 green の選択色は退役済みのため使わない） */
-.convergeMission .flowBtn.on{border-color:var(--invert-bg); background:var(--advBg); box-shadow:inset 0 0 0 1px var(--invert-bg);}
-.convergeMission .missionNext{color:var(--sub); border-top:1px solid var(--line2); padding-top:10px;}
-.convergeMission .missionNext b{color:var(--title);}
-.simplePromise{
-  display:flex; align-items:center; justify-content:center; gap:7px; flex-wrap:wrap;
-  border:1px solid var(--advLine); border-radius:8px; padding:9px 10px; margin-top:10px;
-  background:var(--advBg); color:var(--title); font-size:12px; font-weight:var(--fw-label); text-align:center;
-}
-.simplePromise span{color:var(--sub); font-weight:var(--fw-body);}
-.missionMore{margin-top:10px;}
-.missionMore summary{
-  border:1px solid var(--line); border-radius:8px; padding:9px 10px;
-  background:var(--paper); color:var(--title); font-size:12px; font-weight:var(--fw-label);
-}
-.missionMore[open] summary{margin-bottom:10px;}
-.coachCard{
-  display:grid; grid-template-columns:40px minmax(0,1fr); gap:10px; align-items:center;
-  border:1px solid var(--advLine); border-radius:8px; padding:10px; background:var(--advBg); margin-top:10px;
-}
-.coachCard img{width:40px; height:40px; border-radius:50%; padding:6px; background:var(--card); border:1px solid var(--advLine);}
-.coachCard b{display:block; color:var(--title); font-size:13px;}
-.coachCard span{display:block; color:var(--sub); font-size:11.5px; line-height:1.45; margin-top:2px;}
 .homeActions{
   display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:4px 0 12px;
   /* motion:因果 — 記録ホームを開いた結果として主要導線ボタンが現れる */
@@ -658,14 +526,14 @@ nav.tabs button.on{color:var(--title);}
   display:none; pointer-events:none; overflow:hidden;
 }
 .lens.fine{border-color:var(--red);}
-.lens.fine.cut{border-color:#0f9d58;}
+.lens.fine.cut{border-color:var(--green);}
 .lens.fine.miss{border-color:var(--red);}
 .lensTag{
   position:absolute; top:140px; font-size:11px; font-weight:var(--fw-label); color:#fff; background:var(--green);
   padding:2px 8px; border-radius:6px; display:none; pointer-events:none;
 }
 .lensTag.fine{background:var(--red);}
-.lensTag.fine.cut{background:#0f9d58;}
+.lensTag.fine.cut{background:var(--green);}
 .lensTag.fine.miss{background:var(--red);}
 .hint{font-size:11.5px; color:var(--sub); margin-top:8px; line-height:1.5;}
 /* score chips */
@@ -983,17 +851,7 @@ header.app .gear{
   header.app{gap:7px; padding-left:12px; padding-right:52px;}
 }
 @media (max-width:520px){
-  .missionTop{grid-template-columns:1fr;}
-  .convergeMission .missionTop{grid-template-columns:1fr; text-align:center;}
-  .startLogoMark{justify-self:center;}
-  .readinessDial{display:none;}
-  .readinessRail,.missionFlow{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .readinessRail>*:last-child,.missionFlow>*:last-child{grid-column:1/-1;}
   .heroMetrics,.liveGrid{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .flowBtn{grid-template-columns:1fr; justify-items:center; text-align:center; min-height:84px; padding:8px 5px;}
-  .flowIcon{width:30px;height:30px;}
-  .flowBtn b{font-size:12px;}
-  .flowBtn .flowText span{font-size:9.8px;}
   .quickDists{grid-template-columns:repeat(4,minmax(0,1fr));}
   .targetTools{align-items:stretch; flex-direction:column;}
   .targetTools .chips{justify-content:flex-start;}
@@ -1004,8 +862,7 @@ header.app .gear{
   .btnrow{flex-direction:column;}
   .statbar{flex-wrap:wrap;}
   .stat{min-width:46%;}
-  .missionTop,.setupLens,.insightStrip,.nativeStack,.heroMetrics,.liveGrid{grid-template-columns:1fr;}
-  .phaseArc text{font-size:10px;}
+  .setupLens,.insightStrip,.nativeStack,.heroMetrics,.liveGrid{grid-template-columns:1fr;}
   .sightMiniDial .dialGrid{grid-template-columns:1fr;}
   .sightMiniDial svg{justify-self:center;}
   .quickSelects{grid-template-columns:1fr;}
