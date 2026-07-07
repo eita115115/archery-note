@@ -681,7 +681,9 @@ nav.tabs button.on{color:var(--title);}
 /* absolute の基準は padding box（36px）なので -4px で外形40px+2px=44px になる */
 .sc::before{content:""; position:absolute; inset:-4px; border-radius:inherit;}
 button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-align:inherit; -webkit-appearance:none; appearance:none;}
-.sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px var(--card) inset;}
+/* motion:状態 — 選択中のスコアチップにリング＋微細な浮上で視線誘導 */
+@keyframes chipSelect{0%{transform:scale(.92);}50%{transform:scale(1.06);}100%{transform:scale(1);}}
+.sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px var(--card) inset; animation:chipSelect .2s var(--ease-app);}
 /* motion:因果 — タップ結果を的から得点チップへ視覚的に反映。
    着弾象限（impactFrom-*）ごとに開始オフセットを変え、「的の着弾方向からチップが来た」感触にする。
    座標計算・当たり判定には無関係の表示専用クラス */
@@ -893,6 +895,15 @@ body.modalOpen{overflow:hidden;}
   box-shadow:var(--shadow-raised);
 }
 html.dark .toast,html.auto .toast{background:#0e100d;}
+/* dark: オーバーレイを濃くして暗背景とのコントラストを確保 */
+html.dark .ovl,html.auto .ovl{background:rgba(0,0,0,.58);}
+/* dark: 矢の着弾フラッシュを明るい緑に変えて暗背景で映えるようにする */
+@keyframes impactFlashDark{
+  0%{filter:drop-shadow(0 0 0 rgba(99,176,136,0)); opacity:.58;}
+  48%{filter:drop-shadow(0 0 7px rgba(99,176,136,.55)); opacity:1;}
+  100%{filter:drop-shadow(0 0 0 rgba(99,176,136,0)); opacity:.92;}
+}
+html.dark .shotNew circle,html.auto .shotNew circle{animation-name:impactFlashDark;}
 .toast.show{opacity:.98; transform:translateX(-50%) translateY(0) scale(1);}
 .histChip{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:baseline;}
 .tgWrap svg.main.triple{width:58%; margin:0 auto;}
@@ -945,6 +956,9 @@ html.dark{
   }
 }
 details.adv{border:1px solid var(--line); border-radius:8px; padding:2px 12px 8px; margin-top:12px; background:var(--card);}
+/* motion:因果 — アコーディオンの内容が開閉時に滑らかに現れる */
+@keyframes detailReveal{from{opacity:0; transform:translateY(-4px);}to{opacity:1; transform:translateY(0);}}
+details.adv[open] > :not(summary){animation:detailReveal .24s var(--ease-app) both;}
 details.adv summary{
   cursor:pointer; font-size:13px; color:var(--sub); padding:9px 0 9px 18px; list-style:none; font-weight:var(--fw-label);
   position:relative;
@@ -998,6 +1012,19 @@ header.app .gear{
 /* motion:因果 — タブ切替の結果として画面内容が入れ替わったことを示す微細フェード */
 @keyframes viewEnter{from{opacity:.88; transform:translateY(5px);}to{opacity:1; transform:translateY(0);}}
 main.viewEnter{animation:viewEnter .22s var(--ease-app) both;}
+/* motion:因果 — ビュー内のリスト要素が時差で出現し、画面にリズムを与える */
+@keyframes itemReveal{from{opacity:0; transform:translateY(8px);}to{opacity:1; transform:translateY(0);}}
+main.viewEnter .listItem,
+main.viewEnter .historyMonthLabel,
+main.viewEnter .histRecentBlock,
+main.viewEnter .card{
+  animation:itemReveal .28s var(--ease-app) both;
+}
+main.viewEnter > :nth-child(1){animation-delay:0s;}
+main.viewEnter > :nth-child(2){animation-delay:.03s;}
+main.viewEnter > :nth-child(3){animation-delay:.06s;}
+main.viewEnter > :nth-child(4){animation-delay:.08s;}
+main.viewEnter > :nth-child(5){animation-delay:.10s;}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
