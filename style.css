@@ -629,6 +629,9 @@ table.tbl td,table.tbl th{font-variant-numeric:tabular-nums;}
 .listItem .big small{font-size:11px; color:var(--sub); font-weight:var(--fw-body);}
 /* button タグ化した listItem の UA デフォルト打ち消し（見た目は従来の div と同一に保つ） */
 button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1px solid var(--line2); background:none; color:inherit; font:inherit; text-align:inherit; -webkit-appearance:none; appearance:none;}
+.formAnalysisRow{display:flex; align-items:center; border-bottom:1px solid var(--line2);}
+.formAnalysisRow:last-child{border-bottom:none;}
+.formAnalysisRow button.listItem{flex:1; border-bottom:none; min-width:0;}
 .badge{display:inline-block; font-size:10.5px; background:var(--soft); color:var(--sub); border-radius:6px; padding:2px 6px; margin-right:4px;}
 .empty{color:var(--sub); font-size:13px; text-align:center; padding:18px 6px;}
 .empty p{margin:0 0 12px;}

@@ -122,11 +122,13 @@ function formTrackingCard(){
   const rows=recs.map((r,i)=>{
     const s=formRecordSummary(r);
     const prior=allRecs.slice(i+1); // このカードより古い記録＝自分基準の母集団
-    return `<div class="listItem recordReadOnlyItem" data-form-id="${esc(r.id)}">
+    return `<div class="formAnalysisRow">
+      <button class="listItem recordReadOnlyItem" data-form-id="${esc(r.id)}" type="button">
       <div><div class="t">${fmtD(r.date)} ・ ${s.shots}射${r.sessionId?" ・ 練習に紐付け":""}</div>
       <div class="d">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} / アンカー ${esc(s.anchorLabel)} / タップで詳細</div></div>
       <div class="big">${formSelfBaselineLabel(s.bowArm,"bowArm",prior)}<small> / 引き手${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</small></div>
-      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}">${icon("del")}</button>
+      </button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button">${icon("del")}</button>
     </div>`;
   }).join("");
   return `<div class="card"><h2>射形トラッキング <span class="mini">ベータ / 端末内解析</span></h2>
