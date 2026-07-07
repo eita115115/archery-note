@@ -179,7 +179,7 @@ html.dark select.inp,html.auto select.inp{
   transition:transform var(--motion-fast), background var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast);
 }
 /* motion:因果 — 押下で沈む（共通の縮小フィードバック。.btn はさらに下の個別ルールで沈み込みを強調） */
-.chip:active,.btn:active,nav.tabs button:active,.listItem:active,.tinyAction:active,.sc:active,.npad button:active{transform:scale(.975);}
+.chip:active,.btn:active,nav.tabs button:active,.listItem:active,.tinyAction:active,.sc:active{transform:scale(.975);}
 /* 選択状態は金の面ではなく反転（墨面/紙面）で示す */
 .chip.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg); font-weight:var(--fw-emphasis); box-shadow:none;}
 /* button タグ化したチップの UA デフォルト打ち消し（見た目は従来の div と同一に保つ） */
@@ -224,7 +224,7 @@ html.dark .missionPanel,html.auto .missionPanel{background:#0e100d;}
 .readinessCell .k{font-size:11px; color:var(--sub);}
 .readinessCell b{display:block; font-size:13px; margin-top:2px;}
 .readinessCell .bar{height:4px; border-radius:2px; margin-top:7px; background:rgba(255,255,255,.22); overflow:hidden;}
-.readinessCell .bar i{display:block; height:100%; border-radius:2px; background:var(--green);}
+.readinessCell .bar i{display:block; height:100%; border-radius:2px; background:var(--green); transform-origin:left; animation:barFill .6s var(--ease-fluid) both;}
 .missionFlow{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin-top:12px;}
 .flowBtn{
   display:grid; grid-template-columns:34px 1fr; align-items:center; gap:8px;
@@ -473,8 +473,8 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   display:flex; align-items:center; justify-content:flex-start; gap:4px;
   width:max-content; margin-left:auto; padding:7px 0 0!important;
 }
-.recordDetails summary::before{content:"＋ "!important; font-size:10px;}
-.recordDetails[open] summary::before{content:"− "!important;}
+.recordDetails summary::before{content:"＋ "!important; font-size:10px; position:static!important; border:none!important; width:auto!important; height:auto!important; transform:none!important; transition:none!important;}
+.recordDetails[open] summary::before{content:"− "!important; transform:none!important;}
 .recordDistCustomWrap{display:none;}
 .recordNeutralAdvice{background:var(--card); border-color:var(--line);}
 .recordNudgeHint{font-size:var(--font-size-sm); color:var(--sub);}
@@ -681,7 +681,9 @@ nav.tabs button.on{color:var(--title);}
 /* absolute の基準は padding box（36px）なので -4px で外形40px+2px=44px になる */
 .sc::before{content:""; position:absolute; inset:-4px; border-radius:inherit;}
 button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-align:inherit; -webkit-appearance:none; appearance:none;}
-.sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px var(--card) inset;}
+/* motion:状態 — 選択中のスコアチップにリング＋微細な浮上で視線誘導 */
+@keyframes chipSelect{0%{transform:scale(.92);}50%{transform:scale(1.06);}100%{transform:scale(1);}}
+.sc.sel{border-color:var(--ink); box-shadow:0 0 0 2px var(--card) inset; animation:chipSelect .2s var(--ease-app);}
 /* motion:因果 — タップ結果を的から得点チップへ視覚的に反映。
    着弾象限（impactFrom-*）ごとに開始オフセットを変え、「的の着弾方向からチップが来た」感触にする。
    座標計算・当たり判定には無関係の表示専用クラス */
@@ -717,7 +719,8 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 .stat b{display:block; font-size:17px; font-variant-numeric:tabular-nums;} .stat span{font-size:10.5px; color:var(--sub);}
 /* nudge pad */
 .nudge{display:none; margin-top:10px; background:var(--soft); border-radius:8px; padding:10px; text-align:center;}
-.nudge.on{display:block;}
+/* motion:状態 — ナッジパネルが表示されたとき滑らかに出現 */
+.nudge.on{display:block; animation:nudgeReveal .24s var(--ease-app) both;}
 .shotMeta{
   margin-top:10px; padding-top:10px; border-top:1px solid var(--line);
   text-align:left;
@@ -731,10 +734,13 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
   border-radius:6px; padding:7px 9px; font-size:11.5px; font-weight:var(--fw-label); cursor:pointer;
 }
 /* 選択状態は反転トークンへ統一（v2再監査: 旧 green の選択色は退役済みのため使わない） */
-.reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);}
+.reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg); animation:chipPop .2s var(--ease-app);}
+.reasonTag{transition:transform var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);}
 .sc small{display:block; font-size:10.5px; line-height:1; color:var(--sub); margin-top:1px;}
 .npad{display:grid; grid-template-columns:52px 52px 52px; gap:6px; justify-content:center; margin:6px 0;}
-.npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums;}
+.npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums; transition:transform .06s, background .06s, color .06s, border-color .06s;}
+/* motion:因果 — ナンバーパッドの押下で反転色フラッシュ＋深い沈み込み。スコア入力の手応えを強調 */
+.npad button:active{background:var(--invert-bg); color:var(--invert-fg); border-color:var(--invert-bg); transform:scale(.92);}
 .npad .blank{visibility:hidden;}
 table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
 table.tbl th{font-size:11px; color:var(--sub); text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); font-weight:var(--fw-label);}
@@ -860,14 +866,19 @@ html.dark .gearActiveDot,html.auto .gearActiveDot{box-shadow:0 0 0 3px rgba(217,
 .sheet .trashH3{margin-top:18px; font-size:var(--font-size-md);}
 .btn.trashRestoreBtn{padding:4px var(--space-3);}
 /* modal */
-.ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
+/* motion:因果 — アクション操作の結果としてオーバーレイが暗転する */
+@keyframes overlayFade{from{opacity:0;}to{opacity:1;}}
+.ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center; animation:overlayFade .2s ease-out;}
 body.modalOpen{overflow:hidden;}
 .sheet:focus{outline:none;} /* dialog コンテナへの初期フォーカスでリングを出さない */
+/* motion:因果 — アクション操作の結果としてシートが下から登場する */
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
 .sheet{
   background:var(--card); width:100%; max-width:520px; border-radius:16px 16px 0 0; padding:16px;
   max-height:88vh; overflow-y:auto; padding-bottom:16px;
   padding-bottom:calc(16px + env(safe-area-inset-bottom));
   box-shadow:var(--shadow-raised);
+  animation:sheetUp .32s var(--ease-fluid);
 }
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--title);}
 /* 確認ダイアログ（appConfirm）: .sheet より小さい面。破壊的操作の直前だけ登場モーションを持つ */
@@ -886,6 +897,15 @@ body.modalOpen{overflow:hidden;}
   box-shadow:var(--shadow-raised);
 }
 html.dark .toast,html.auto .toast{background:#0e100d;}
+/* dark: オーバーレイを濃くして暗背景とのコントラストを確保 */
+html.dark .ovl,html.auto .ovl{background:rgba(0,0,0,.58);}
+/* dark: 矢の着弾フラッシュを明るい緑に変えて暗背景で映えるようにする */
+@keyframes impactFlashDark{
+  0%{filter:drop-shadow(0 0 0 rgba(99,176,136,0)); opacity:.58;}
+  48%{filter:drop-shadow(0 0 7px rgba(99,176,136,.55)); opacity:1;}
+  100%{filter:drop-shadow(0 0 0 rgba(99,176,136,0)); opacity:.92;}
+}
+html.dark .shotNew circle,html.auto .shotNew circle{animation-name:impactFlashDark;}
 .toast.show{opacity:.98; transform:translateX(-50%) translateY(0) scale(1);}
 .histChip{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:baseline;}
 .tgWrap svg.main.triple{width:58%; margin:0 auto;}
@@ -938,6 +958,9 @@ html.dark{
   }
 }
 details.adv{border:1px solid var(--line); border-radius:8px; padding:2px 12px 8px; margin-top:12px; background:var(--card);}
+/* motion:因果 — アコーディオンの内容が開閉時に滑らかに現れる */
+@keyframes detailReveal{from{opacity:0; transform:translateY(-4px);}to{opacity:1; transform:translateY(0);}}
+details.adv[open] > :not(summary){animation:detailReveal .24s var(--ease-app) both;}
 details.adv summary{
   cursor:pointer; font-size:13px; color:var(--sub); padding:9px 0 9px 18px; list-style:none; font-weight:var(--fw-label);
   position:relative;
@@ -988,6 +1011,37 @@ header.app .gear{
   .quickSelects{grid-template-columns:1fr;}
   .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
+/* motion:因果 — タブ切替の結果として画面内容が入れ替わったことを示す微細フェード */
+@keyframes viewEnter{from{opacity:.88; transform:translateY(5px);}to{opacity:1; transform:translateY(0);}}
+main.viewEnter{animation:viewEnter .22s var(--ease-app) both;}
+/* motion:因果 — ビュー内のリスト要素が時差で出現し、画面にリズムを与える */
+@keyframes itemReveal{from{opacity:0; transform:translateY(8px);}to{opacity:1; transform:translateY(0);}}
+main.viewEnter .listItem,
+main.viewEnter .historyMonthLabel,
+main.viewEnter .histRecentBlock,
+main.viewEnter .card{
+  animation:itemReveal .28s var(--ease-app) both;
+}
+main.viewEnter > :nth-child(1){animation-delay:0s;}
+main.viewEnter > :nth-child(2){animation-delay:.03s;}
+main.viewEnter > :nth-child(3){animation-delay:.06s;}
+main.viewEnter > :nth-child(4){animation-delay:.08s;}
+main.viewEnter > :nth-child(5){animation-delay:.10s;}
+/* motion:因果 — ナッジパネルの出現（矢選択に応じて現れるヒント） */
+@keyframes nudgeReveal{from{opacity:0; transform:translateY(-6px);}to{opacity:1; transform:translateY(0);}}
+/* motion:状態 — レディネスバーが左から伸びてスコアの充足度を示す */
+@keyframes barFill{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+/* motion:因果 — タブ切替でアイコンが弾む（どのタブに着地したか触覚的に示す） */
+@keyframes tabPop{0%{transform:translateY(0) scale(.92);}50%{transform:translateY(-3px) scale(1.06);}100%{transform:translateY(-1px) scale(1);}}
+nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
+/* motion:因果 — チップ選択が受理されたことを示す軽い弾み */
+@keyframes chipPop{0%{transform:scale(.93);}50%{transform:scale(1.04);}100%{transform:scale(1);}}
+.chip.on{animation:chipPop .2s var(--ease-app);}
+/* motion:因果 — 開始ボタン押下を深い手応えで返す（行射開始の意思決定の重みを表現） */
+.startPrimary:active{transform:translateY(2px) scale(.968)!important; filter:brightness(.86)!important; box-shadow:inset 0 3px 6px rgba(0,0,0,.18)!important;}
+/* motion:状態 — トースト登場はスプリングで弾み、退場は速く消える */
+.toast.show{transition:opacity .24s, transform .3s cubic-bezier(.22,1.15,.36,1);}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
   .bootFallback{opacity:1; visibility:visible; pointer-events:auto;}

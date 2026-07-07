@@ -15,10 +15,14 @@ let ui = {
 };
 function showView(v) {
   if (view === v) return;
+  const m = $("#main");
   view = v;
   ui.selArrow = -1;
   nativePulse("light");
   render();
+  m.classList.remove("viewEnter");
+  void m.offsetWidth;
+  m.classList.add("viewEnter");
 }
 document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));
 
