@@ -9,7 +9,8 @@
   --accent:#b08a2e; --accent-strong:#8a6508;
   /* 反転 CTA・選択状態: light = 墨面＋白文字 */
   --invert-bg:#1b1b18; --invert-fg:#f2f0e8;
-  --danger:#c62828; --paper:#faf9f6; --paper2:#ece8dc; --ink2:#1b1b18;
+  --danger:#c62828; --status-ok:#0f9d58; --status-warn:#c62828; --status-hold:#8a6d1d;
+  --paper:#faf9f6; --paper2:#ece8dc; --ink2:#1b1b18;
   --teal:#0f766e; --amber:#b56b1f; --navy:#24537b; --mint:#ece8dc;
   --shadow-raised:0 8px 24px rgba(27,27,24,.14);
   --shadow-none:none;
@@ -165,7 +166,7 @@ select.inp{
 html.dark select.inp,html.auto select.inp{
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%239aa396' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-.inp:focus{background:var(--card); border-color:var(--accent); box-shadow:0 0 0 3px rgba(176,138,46,.16); outline:none;}
+.inp:focus:not(:focus-visible){background:var(--card); border-color:var(--accent); box-shadow:0 0 0 3px rgba(176,138,46,.16); outline:none;}
 .choiceManual{margin-top:6px;}
 .choiceManual.is-hidden{display:none;}
 .row{display:flex; gap:8px;} .row>*{flex:1; min-width:0;}
@@ -218,7 +219,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
    ここは面ではなくアクセントバー1本にとどめる） */
 .recordRepeatBand{grid-template-columns:minmax(0,1fr) 74px;}
 .repeatMain{
-  grid-column:auto; text-align:left; background:#1b1b18; color:#f2f0e8; border-color:rgba(255,255,255,.10);
+  grid-column:auto; text-align:left; background:var(--invert-bg); color:var(--invert-fg); border-color:rgba(255,255,255,.10);
   position:relative; padding-left:16px; min-height:64px;
 }
 html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
@@ -519,10 +520,10 @@ nav.tabs button.on{color:var(--title);}
 /* target */
 .tgWrap{position:relative; width:100%; touch-action:none; border-radius:8px;}
 /* motion:状態 — ズーム段階の切り替え（拡大率変更）を滑らかにする */
-.tgWrap svg.main{width:100%; display:block; border-radius:8px; background:#e9ebe6; touch-action:none; transform-origin:center; transition:transform var(--motion-fast), filter var(--motion-fast);}
+.tgWrap svg.main{width:100%; display:block; border-radius:8px; background:var(--target-surface-a); touch-action:none; transform-origin:center; transition:transform var(--motion-fast), filter var(--motion-fast);}
 .lens{
   position:absolute; top:8px; width:128px; height:128px; border-radius:50%;
-  border:3px solid var(--green); background:#e9ebe6; box-shadow:0 2px 10px rgba(0,0,0,.25);
+  border:3px solid var(--green); background:var(--target-surface-a); box-shadow:0 2px 10px rgba(0,0,0,.25);
   display:none; pointer-events:none; overflow:hidden;
 }
 .lens.fine{border-color:var(--red);}
@@ -763,7 +764,7 @@ body.modalOpen{overflow:hidden;}
 /* motion:状態 — 直前の操作（エンド確定・保存など）がアプリに受理されたことを短く知らせる */
 .toast{
   position:fixed; bottom:96px; bottom:calc(92px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(12px) scale(.98); z-index:60;
-  background:#1b1b18; color:#f2f0e8; border:1px solid rgba(255,255,255,.14); padding:9px 18px; border-radius:8px; font-size:13.5px;
+  background:var(--invert-bg); color:var(--invert-fg); border:1px solid rgba(255,255,255,.14); padding:9px 18px; border-radius:8px; font-size:13.5px;
   opacity:0; transition:opacity .22s, transform .22s var(--ease-app); pointer-events:none; max-width:calc(100vw - 24px); text-align:center;
   box-shadow:var(--shadow-raised);
 }
@@ -793,6 +794,7 @@ html.dark{
   --bg:#101110; --card:#101110; --ink:#e7eae5; --sub:#9aa396; --line:#33362f; --line2:#2a2d28;
   --soft:#1e211c; --inpBg:#1e211c; --hdr:#e7eae5; --title:#e7eae5; --advBg:#1e211c; --advLine:#33362f;
   --green:#63b088; --green-l:#63b088; --accent:#d9b25a; --accent-strong:#f0c04a; --danger:#ff8a80;
+  --status-ok:#4ade80; --status-warn:#ff8a80; --status-hold:#d9b25a;
   /* 反転 CTA・選択状態: dark = 紙面＋墨文字 */
   --invert-bg:#f2f0e8; --invert-fg:#1b1b18;
   --paper:#101110; --paper2:#1e211c; --ink2:#e7eae5; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1e211c;
@@ -813,6 +815,7 @@ html.dark{
     --bg:#101110; --card:#101110; --ink:#e7eae5; --sub:#9aa396; --line:#33362f; --line2:#2a2d28;
     --soft:#1e211c; --inpBg:#1e211c; --hdr:#e7eae5; --title:#e7eae5; --advBg:#1e211c; --advLine:#33362f;
     --green:#63b088; --green-l:#63b088; --accent:#d9b25a; --accent-strong:#f0c04a; --danger:#ff8a80;
+    --status-ok:#4ade80; --status-warn:#ff8a80; --status-hold:#d9b25a;
     --invert-bg:#f2f0e8; --invert-fg:#1b1b18;
     --paper:#101110; --paper2:#1e211c; --ink2:#e7eae5; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1e211c;
     --shadow-raised:0 10px 28px rgba(0,0,0,.4);

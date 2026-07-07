@@ -293,7 +293,7 @@ function spineGuidance(s){
 function spineGuidanceHtml(s){
   const g=spineGuidance(s);
   if(!g.ready) return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}未入力</div>`;
-  const color=g.tone==="ok"?"#0f9d58":g.tone==="warn"?"#c62828":"#8a6d1d";
+  const color=g.tone==="ok"?"var(--status-ok)":g.tone==="warn"?"var(--status-warn)":"var(--status-hold)";
   return `<div class="note"><b>スパイン初期候補</b>: ${g.candidates.join(" / ")}（動的負荷 ${g.eff.toFixed(1)}lbs相当、矢尺${g.len.toFixed(1)}in、ポイント${g.point}gr）</div>
     <div class="note"><b style="color:${color}">${g.state}</b> — ${esc(g.text)}</div>`;
 }
@@ -319,7 +319,7 @@ function setupComparisonHtml(setupId){
   const delta=(x,unit="",goodLow=false)=>{
     const sign=x>0?"+":"";
     const good=goodLow?x<0:x>0;
-    const color=Math.abs(x)<.01?"var(--sub)":good?"#0f9d58":"#c62828";
+    const color=Math.abs(x)<.01?"var(--sub)":good?"var(--status-ok)":"var(--status-warn)";
     return `<b style="color:${color}">${sign}${x.toFixed(2)}${unit}</b>`;
   };
   return `<div class="advice gearAdviceCard">
@@ -359,7 +359,7 @@ function renderGear(m){
       const gp=gearPrecisionProfile(s);
       const mp=modelReadinessProfile(s.id);
       const active=activeId===s.id;
-      return `<div class="listItem gearLedgerItem" data-id="${esc(s.id)}" data-testid="gear-ledger-item"><div>
+      return `<button type="button" class="listItem gearLedgerItem" data-id="${esc(s.id)}" data-testid="gear-ledger-item"><div>
         <div class="t">${active?`<span class="gearActiveDot" title="使用中" aria-hidden="true"></span>`:""}${esc(s.name)}</div>
         <div class="gearLedgerSpecs">
           <span class="gearSpecCell">弓<b>${s.bow?esc(s.bow):"—"}</b></span>
@@ -367,7 +367,7 @@ function renderGear(m){
           <span class="gearSpecCell">ポンド<b>${s.poundage?esc(s.poundage)+"lbs":"—"}</b></span>
         </div>
         <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level}</div>
-      </div><div class="gearChevron">${icon("chevron")}</div></div>`;
+      </div><div class="gearChevron">${icon("chevron")}</div></button>`;
     }).join(""):`<div class="empty">
       <p>セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</p>
       <button class="btn" id="gWizardEmpty" data-testid="gear-wizard-start">初回セットアップを始める</button>
