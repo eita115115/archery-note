@@ -919,10 +919,25 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
   *::-webkit-scrollbar-thumb:hover{background:var(--sub); background-clip:padding-box;}
 }
 
-/* form tracking (beta) */
-.formCamWrap{position:relative;width:100%;border-radius:8px;overflow:hidden;background:#0f1412;min-height:120px}
+/* form tracking (beta) — full-viewport camera UI */
+.sheet.formCapture{max-height:100dvh;height:100dvh;max-width:none;border-radius:0;display:flex;flex-direction:column;padding:0;padding-bottom:env(safe-area-inset-bottom);background:#0a0a0a;overflow:hidden;animation:none}
+.formCamWrap{position:relative;width:100%;overflow:hidden;background:#0f1412;min-height:120px}
+.formCapture .formCamWrap{flex:1 1 0;min-height:0;border-radius:0}
 .formCamWrap video{width:100%;display:block;opacity:.9}
+.formCapture .formCamWrap video{height:100%;object-fit:contain}
 .formCamWrap canvas{position:absolute;inset:0;width:100%;height:100%}
-.formPhaseTag{position:absolute;top:8px;right:8px;background:rgba(13,59,36,.85);color:#eafff2;border-radius:8px;padding:2px 10px;font-size:12px;font-weight:var(--fw-label)}
+.formPhaseTag{position:absolute;top:8px;right:8px;background:rgba(13,59,36,.85);color:#eafff2;border-radius:8px;padding:2px 10px;font-size:12px;font-weight:var(--fw-label);z-index:2}
 .formPhaseTag.release{background:rgba(198,40,40,.9)}
 .formPhaseTag.fulldraw{background:rgba(184,134,11,.9)}
+.formCloseBtn,.formCropBtn{position:absolute;top:calc(8px + env(safe-area-inset-top));width:40px;height:40px;min-height:40px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.formCloseBtn{left:8px}
+.formCropBtn{left:56px;opacity:.7}
+.formCropBtn.active{background:rgba(15,157,88,.75);opacity:1}
+.formRecBtn{left:104px;opacity:.7}
+.formRecBtn.active{background:rgba(198,40,40,.85);opacity:1;animation:recPulse 1.5s ease-in-out infinite}
+@keyframes recPulse{0%,100%{opacity:1}50%{opacity:.6}}
+.formHud{position:absolute;bottom:8px;left:8px;right:8px;font-size:11px;line-height:1.5;color:#ddd;background:rgba(0,0,0,.55);border-radius:6px;padding:4px 10px;z-index:2;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.formShotScroll{max-height:96px;overflow-y:auto;flex:0 0 auto;padding:0 10px}
+.formShotScroll:empty{display:none}
+.formBar{display:flex;gap:8px;padding:8px 12px;flex:0 0 auto;align-items:center;justify-content:center}
+.formFootnote{flex:0 0 auto;padding:2px 12px 4px;font-size:10px;color:#888;line-height:1.4;text-align:center}

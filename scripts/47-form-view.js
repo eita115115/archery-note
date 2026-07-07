@@ -132,7 +132,7 @@ function formTrackingCard(){
     </div>`;
   }).join("");
   return `<div class="card"><h2>射形トラッキング <span class="mini">ベータ / 端末内解析</span></h2>
-    <div class="btnrow"><button class="btn" id="formStart">${icon("camera")} 射形を解析する</button></div>
+    <div class="btnrow"><button class="btn" id="formStart">${icon("camera")} 射形を解析する</button><button class="btn sec sm" id="formReplay">保存済み動画を解析</button></div>
     ${formTrendMiniHtml()}
     ${rows||`<div class="empty">まだ射形記録がありません。カメラを横に置いて数射解析してみましょう。</div>`}
     ${formScoreLinkHtml()}
@@ -143,6 +143,8 @@ function formTrackingCard(){
 function bindFormTrackingCard(){
   const start=$("#formStart");
   if(start) start.onclick=openFormCapture;
+  const replay=$("#formReplay");
+  if(replay) replay.onclick=openFormReplay;
   document.querySelectorAll("[data-form-id]").forEach(li=>li.onclick=()=>{
     const rec=(db.formAnalyses||[]).find(r=>r.id===li.dataset.formId);
     if(rec) openFormDetail(rec);
@@ -213,21 +215,21 @@ function drawFormSkeleton(ctx,l,w,h){
 
 function openFormCapture(){
   const ovl=document.createElement("div"); ovl.className="ovl";
-  ovl.innerHTML=`<div class="sheet">
-    <h3>射形トラッキング <span class="mini">ベータ</span></h3>
-    <div class="formCamWrap"><video id="fcVideo" playsinline muted></video><canvas id="fcCanvas"></canvas><div class="formPhaseTag" id="fcPhase">準備中</div></div>
-    <div class="note" id="fcHud">解析モデルを読み込んでいます…（初回のみ約15MB）</div>
-    <div class="hint">検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。</div>
-    <div id="fcShots"></div>
-    <div class="btnrow">
+  ovl.innerHTML=`<div class="sheet formCapture">
+    <div class="formCamWrap"><video id="fcVideo" playsinline muted></video><canvas id="fcCanvas"></canvas>
+      <div class="formPhaseTag" id="fcPhase">準備中</div>
+      <button class="formCloseBtn" id="fcClose" aria-label="閉じる">${icon("del")}</button>
+      <button class="formCropBtn" id="fcCrop" aria-label="中央固定" aria-pressed="false">${icon("target")}</button>
+      <button class="formRecBtn" id="fcRec" aria-label="録画" aria-pressed="false">${icon("camera")}</button>
+      <div class="formHud" id="fcHud">解析モデルを読み込んでいます…（初回のみ約15MB）</div>
+    </div>
+    <div class="formShotScroll" id="fcShots"></div>
+    <div class="formBar">
       <button class="btn sec sm" id="fcSwap">前/背面</button>
       <button class="btn sec sm" id="fcHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
-    </div>
-    <div class="btnrow">
       <button class="btn" id="fcSave" disabled>保存して終了</button>
-      <button class="btn ghost" id="fcClose">保存せず閉じる</button>
     </div>
-    <div class="hint">リリースは自動検出されます。映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです。毎回同じ位置・角度で撮ると比較の精度が上がります。</div>
+    <div class="formFootnote">検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです。</div>
   </div>`;
   openModal(ovl,{escapeTarget:"#fcClose"});
   beginActiveWorkflow();
@@ -239,6 +241,10 @@ function openFormCapture(){
   let running=true, raf=0, stream=null, landmarker=null;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   let anchorStartTs=0, shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  const CROP_FRAC=0.7, CROP_OFF=(1-0.7)/2;
+  let cropActive=false;
+  const cropCvs=document.createElement("canvas");
+  const cropCx=cropCvs.getContext("2d");
   /* 矢プレゼンスのシャドー判定（ベータ）: releasedの取消動作には一切使わない。
      ROI サンプルはフルドロー中と確定猶予窓のみ実行し、常時のフレーム負荷を避ける。
      roiCanvas は ROI 帯の外接矩形だけを video から切り出す小さいオフスクリーンキャンバス
@@ -248,11 +254,35 @@ function openFormCapture(){
   let presenceRing=[]; // {ts, score} フルドロー中の直近スコア（最大約1.5秒分）
   let pendingCheck=null; // {shotId, preScores, confirmScores, startTs} 確定猶予窓の計測中
   let samplePerfMs=[]; // 実測処理時間(ms/frame)。報告用に先頭数十件だけ保持
+  let recorder=null, recChunks=[], recBlob=null;
+  function startRec(){
+    if(!stream||recorder) return;
+    recChunks=[]; recBlob=null;
+    const mime=typeof MediaRecorder!=="undefined"&&MediaRecorder.isTypeSupported("video/mp4")?"video/mp4":"video/webm";
+    try{
+      recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:1_500_000});
+      recorder.ondataavailable=e=>{ if(e.data.size>0) recChunks.push(e.data); };
+      recorder.onstop=()=>{ recBlob=new Blob(recChunks,{type:mime}); recChunks=[]; };
+      recorder.start(1000);
+    }catch(e){ recorder=null; }
+  }
+  function stopRec(){ if(recorder&&recorder.state!=="inactive"){ recorder.stop(); recorder=null; } }
+  async function shareRec(){
+    if(!recBlob) return;
+    const ext=recBlob.type.includes("mp4")?"mp4":"webm";
+    const file=new File([recBlob],`form-tracking-${today()}.${ext}`,{type:recBlob.type});
+    try{
+      if(navigator.canShare&&navigator.canShare({files:[file]})) await navigator.share({files:[file]});
+      else{ const u=URL.createObjectURL(recBlob); const a=document.createElement("a"); a.href=u; a.download=file.name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u); }
+    }catch(e){ if(e.name!=="AbortError") toast("動画の保存に失敗しました"); }
+    recBlob=null;
+  }
 
   function stop(){
     running=false;
     if(raf) cancelAnimationFrame(raf);
-    if(pendingCheck) finalizeArrowCheck(); // 閉じる前に計測途中のシャドー判定を確定させる
+    if(pendingCheck) finalizeArrowCheck();
+    stopRec();
     try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){}
     endActiveWorkflow();
     closeModal(ovl);
@@ -338,7 +368,16 @@ function openFormCapture(){
     if(!running) return;
     if(landmarker && video.readyState>=2){
       const now=performance.now();
-      const res=landmarker.detectForVideo(video,now);
+      let res;
+      if(cropActive&&video.videoWidth){
+        const cw=Math.round(video.videoWidth*CROP_FRAC), cx=Math.round(video.videoWidth*CROP_OFF);
+        cropCvs.width=cw; cropCvs.height=video.videoHeight;
+        cropCx.drawImage(video,cx,0,cw,video.videoHeight,0,0,cw,video.videoHeight);
+        res=landmarker.detectForVideo(cropCvs,now);
+        if(res.landmarks&&res.landmarks[0]) res.landmarks[0].forEach(l=>{l.x=l.x*CROP_FRAC+CROP_OFF;});
+      }else{
+        res=landmarker.detectForVideo(video,now);
+      }
       frames++;
       if(now-lastFpsAt>=1000){ fps=frames*1000/(now-lastFpsAt); frames=0; lastFpsAt=now; }
       const lms=res.landmarks&&res.landmarks[0];
@@ -392,6 +431,12 @@ function openFormCapture(){
       phaseEl.classList.toggle("release",phase==="RELEASE");
       phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
       ctx.clearRect(0,0,canvas.width,canvas.height);
+      if(cropActive){
+        ctx.fillStyle="rgba(0,0,0,0.45)";
+        const cx=canvas.width*CROP_OFF;
+        ctx.fillRect(0,0,cx,canvas.height);
+        ctx.fillRect(canvas.width-cx,0,cx,canvas.height);
+      }
       if(lms) drawFormSkeleton(ctx,lms,canvas.width,canvas.height);
       if(raw&&disp){
         hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 検出の鮮明さ <b>${Math.round(disp.conf*100)}%</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>${raw.occluded.length?`<br>${icon("warn")} 検出低下: ${raw.occluded.map(esc).join("・")}`:""}`;
@@ -404,9 +449,9 @@ function openFormCapture(){
   ovl.querySelector("#fcClose").onclick=async()=>{
     if(!shots.length || await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})) stop();
   };
-  ovl.querySelector("#fcSave").onclick=()=>{
+  ovl.querySelector("#fcSave").onclick=async()=>{
     if(!shots.length) return;
-    /* 同日の練習セッションがあれば自動で紐付ける（射形×得点の関係分析に使う） */
+    const hadRec=!!recorder;
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];
@@ -420,6 +465,11 @@ function openFormCapture(){
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
     nativePulse("success");
     stop(); render();
+    if(hadRec&&recBlob){
+      await new Promise(r=>setTimeout(r,200));
+      if(await appConfirm("トラッキング動画をカメラロールに保存しますか？",{okLabel:"保存する"})) await shareRec();
+      else recBlob=null;
+    }
   };
   ovl.querySelector("#fcSwap").onclick=async()=>{
     facing=facing==="environment"?"user":"environment";
@@ -432,6 +482,18 @@ function openFormCapture(){
     e.target.textContent="利き手: "+(handedness==="right"?"右":"左");
     detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[]; anchorStartTs=0;
   };
+  ovl.querySelector("#fcCrop").onclick=e=>{
+    cropActive=!cropActive;
+    e.currentTarget.setAttribute("aria-pressed",String(cropActive));
+    e.currentTarget.classList.toggle("active",cropActive);
+    nativePulse("light");
+  };
+  ovl.querySelector("#fcRec").onclick=e=>{
+    const btn=e.currentTarget;
+    if(recorder){ stopRec(); btn.setAttribute("aria-pressed","false"); btn.classList.remove("active"); toast("録画を停止しました"); }
+    else{ startRec(); btn.setAttribute("aria-pressed","true"); btn.classList.add("active"); toast("録画中…保存時にカメラロールへ保存できます"); }
+    nativePulse("light");
+  };
   loadFormPose().then(async lm=>{
     landmarker=lm;
     hud.textContent="カメラを起動しています…";
@@ -440,5 +502,135 @@ function openFormCapture(){
     loop();
   }).catch(e=>{
     hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e)+"（カメラ許可と、iOS 16.4以降/最新ブラウザをご確認ください）";
+  });
+}
+
+function openFormReplay(){
+  const input=document.createElement("input");
+  input.type="file"; input.accept="video/*";
+  input.onchange=()=>{ const f=input.files[0]; if(f) startFormReplay(URL.createObjectURL(f)); };
+  input.click();
+}
+function startFormReplay(videoUrl){
+  const ovl=document.createElement("div"); ovl.className="ovl";
+  ovl.innerHTML=`<div class="sheet formCapture">
+    <div class="formCamWrap"><video id="frVideo" playsinline muted></video><canvas id="frCanvas"></canvas>
+      <div class="formPhaseTag" id="frPhase">読込中</div>
+      <button class="formCloseBtn" id="frClose" aria-label="閉じる">${icon("del")}</button>
+      <div class="formHud" id="frHud">動画を読み込んでいます…</div>
+    </div>
+    <div class="formShotScroll" id="frShots"></div>
+    <div class="formBar">
+      <button class="btn sec sm" id="frHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
+      <button class="btn" id="frSave" disabled>保存して終了</button>
+    </div>
+    <div class="formFootnote">保存済み動画からの射形解析。検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。</div>
+  </div>`;
+  openModal(ovl,{escapeTarget:"#frClose"});
+  beginActiveWorkflow();
+  const video=ovl.querySelector("#frVideo"), canvas=ovl.querySelector("#frCanvas");
+  const ctx=canvas.getContext("2d");
+  const hud=ovl.querySelector("#frHud"), phaseEl=ovl.querySelector("#frPhase");
+  let handedness=db.settings.formHandedness==="left"?"left":"right";
+  let running=true, raf=0, landmarker=null;
+  let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
+  let anchorStartTs=0, shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  function stop(){
+    running=false; if(raf) cancelAnimationFrame(raf);
+    try{ video.pause(); }catch(e){}
+    URL.revokeObjectURL(videoUrl);
+    endActiveWorkflow(); closeModal(ovl);
+  }
+  function refreshSave(){
+    const b=ovl.querySelector("#frSave");
+    b.disabled=!shots.length;
+    b.textContent=shots.length?`保存して終了（${shots.length}射）`:"保存して終了";
+  }
+  function onShot(now){
+    const shot=summarizeFormShot(history,anchorStartTs,now);
+    if(!shot) return;
+    shot.id=uid(); shot.arrowCheck=null; shots.push(shot);
+    const div=document.createElement("div");
+    div.className="listItem recordReadOnlyItem"; div.dataset.shotId=shot.id;
+    div.innerHTML=`<div><div class="t">第${shots.length}射</div>
+      <div class="d">保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?` / ${icon("warn")} リリース前ドリフト`:""}</div></div>
+      <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>`;
+    ovl.querySelector("#frShots").prepend(div);
+    refreshSave(); nativePulse("light");
+  }
+  function loop(){
+    if(!running) return;
+    if(landmarker&&video.readyState>=2&&!video.paused&&!video.ended){
+      const now=video.currentTime*1000;
+      const res=landmarker.detectForVideo(video,now);
+      frames++;
+      const wallNow=performance.now();
+      if(wallNow-lastFpsAt>=1000){ fps=frames*1000/(wallNow-lastFpsAt); frames=0; lastFpsAt=wallNow; }
+      const lms=res.landmarks&&res.landmarks[0];
+      const raw=lms?computeFormMetrics(lms,handedness):null;
+      const disp=ema(raw);
+      let vel=0;
+      if(raw){let lv=null;for(let i=history.length-1;i>=0&&!lv;i--)if(history[i].m)lv=history[i];
+      if(lv){const dt=(now-lv.ts)/1000;if(dt>0&&dt<0.5)vel=formDist(raw.dW,lv.m.dW)/dt/raw.bodyScale;}}
+      history.push({ts:now,m:raw,vel});
+      if(history.length>200) history.shift();
+      const {phase,released}=stepFormPhase(detector,raw,history,1.0,now);
+      if((phase==="ANCHORING"||phase==="FULL_DRAW")&&!anchorStartTs) anchorStartTs=now;
+      if(released){ onShot(now); anchorStartTs=0; }
+      if(phase==="SETUP"||phase==="IDLE") anchorStartTs=0;
+      phaseEl.textContent=phase;
+      phaseEl.classList.toggle("release",phase==="RELEASE");
+      phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      if(lms) drawFormSkeleton(ctx,lms,canvas.width,canvas.height);
+      if(raw&&disp){
+        const pct=video.duration?(video.currentTime/video.duration*100).toFixed(0):0;
+        hud.innerHTML=`${pct}% ・ FPS <b>${fps.toFixed(0)}</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>`;
+      }else{
+        hud.innerHTML=`解析中… 人物を検出中`;
+      }
+    }
+    if(video.ended&&running){
+      phaseEl.textContent="完了";
+      hud.innerHTML=`解析完了 ・ ${shots.length}射を検出しました`;
+      running=false; return;
+    }
+    raf=requestAnimationFrame(loop);
+  }
+  ovl.querySelector("#frClose").onclick=async()=>{
+    if(!shots.length||await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})) stop();
+  };
+  ovl.querySelector("#frSave").onclick=()=>{
+    if(!shots.length) return;
+    const todays=db.sessions.filter(s=>s.date===today());
+    const linked=todays.length?todays[todays.length-1]:null;
+    db.formAnalyses=db.formAnalyses||[];
+    db.formAnalyses.push({
+      id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
+      shots:shots.length, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+      appVer:APP_VER, fps:+fps.toFixed(1),
+      features:shots.map(formFeatureFromShot), note:"(保存済み動画から解析)"
+    });
+    save({reason:"form-analysis"});
+    toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
+    nativePulse("success"); stop(); render();
+  };
+  ovl.querySelector("#frHand").onclick=e=>{
+    handedness=handedness==="right"?"left":"right";
+    db.settings.formHandedness=handedness; save();
+    e.target.textContent="利き手: "+(handedness==="right"?"右":"左");
+    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[]; anchorStartTs=0;
+  };
+  loadFormPose().then(async lm=>{
+    landmarker=lm;
+    hud.textContent="動画を読み込んでいます…";
+    video.src=videoUrl;
+    video.onloadeddata=()=>{
+      canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+      hud.textContent="解析を開始します…";
+      video.play(); loop();
+    };
+  }).catch(e=>{
+    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);
   });
 }

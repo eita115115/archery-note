@@ -94,6 +94,7 @@ const BROWSER_GLOBALS = new Set([
   "URLSearchParams",
   "Blob",
   "File",
+  "MediaRecorder",
   "FileReader",
   "FormData",
   "Image",
