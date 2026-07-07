@@ -179,7 +179,7 @@ html.dark select.inp,html.auto select.inp{
   transition:transform var(--motion-fast), background var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast);
 }
 /* motion:因果 — 押下で沈む（共通の縮小フィードバック。.btn はさらに下の個別ルールで沈み込みを強調） */
-.chip:active,.btn:active,nav.tabs button:active,.listItem:active,.tinyAction:active,.sc:active,.npad button:active{transform:scale(.975);}
+.chip:active,.btn:active,nav.tabs button:active,.listItem:active,.tinyAction:active,.sc:active{transform:scale(.975);}
 /* 選択状態は金の面ではなく反転（墨面/紙面）で示す */
 .chip.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg); font-weight:var(--fw-emphasis); box-shadow:none;}
 /* button タグ化したチップの UA デフォルト打ち消し（見た目は従来の div と同一に保つ） */
@@ -734,7 +734,9 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 .reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);}
 .sc small{display:block; font-size:10.5px; line-height:1; color:var(--sub); margin-top:1px;}
 .npad{display:grid; grid-template-columns:52px 52px 52px; gap:6px; justify-content:center; margin:6px 0;}
-.npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums;}
+.npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums; transition:transform .06s, background .06s, color .06s, border-color .06s;}
+/* motion:因果 — ナンバーパッドの押下で反転色フラッシュ＋深い沈み込み。スコア入力の手応えを強調 */
+.npad button:active{background:var(--invert-bg); color:var(--invert-fg); border-color:var(--invert-bg); transform:scale(.92);}
 .npad .blank{visibility:hidden;}
 table.tbl{width:100%; border-collapse:collapse; font-size:13px;}
 table.tbl th{font-size:11px; color:var(--sub); text-align:left; padding:6px 6px; border-bottom:1px solid var(--line); font-weight:var(--fw-label);}
@@ -860,14 +862,19 @@ html.dark .gearActiveDot,html.auto .gearActiveDot{box-shadow:0 0 0 3px rgba(217,
 .sheet .trashH3{margin-top:18px; font-size:var(--font-size-md);}
 .btn.trashRestoreBtn{padding:4px var(--space-3);}
 /* modal */
-.ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center;}
+/* motion:因果 — アクション操作の結果としてオーバーレイが暗転する */
+@keyframes overlayFade{from{opacity:0;}to{opacity:1;}}
+.ovl{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:50; display:flex; align-items:flex-end; justify-content:center; animation:overlayFade .2s ease-out;}
 body.modalOpen{overflow:hidden;}
 .sheet:focus{outline:none;} /* dialog コンテナへの初期フォーカスでリングを出さない */
+/* motion:因果 — アクション操作の結果としてシートが下から登場する */
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
 .sheet{
   background:var(--card); width:100%; max-width:520px; border-radius:16px 16px 0 0; padding:16px;
   max-height:88vh; overflow-y:auto; padding-bottom:16px;
   padding-bottom:calc(16px + env(safe-area-inset-bottom));
   box-shadow:var(--shadow-raised);
+  animation:sheetUp .32s var(--ease-fluid);
 }
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--title);}
 /* 確認ダイアログ（appConfirm）: .sheet より小さい面。破壊的操作の直前だけ登場モーションを持つ */
@@ -988,6 +995,10 @@ header.app .gear{
   .quickSelects{grid-template-columns:1fr;}
   .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
+/* motion:因果 — タブ切替の結果として画面内容が入れ替わったことを示す微細フェード */
+@keyframes viewEnter{from{opacity:.88; transform:translateY(5px);}to{opacity:1; transform:translateY(0);}}
+main.viewEnter{animation:viewEnter .22s var(--ease-app) both;}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
   .bootFallback{opacity:1; visibility:visible; pointer-events:auto;}
