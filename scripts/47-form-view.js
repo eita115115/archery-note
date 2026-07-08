@@ -624,12 +624,15 @@ function startFormReplay(videoUrl){
   loadFormPose().then(async lm=>{
     landmarker=lm;
     hud.textContent="動画を読み込んでいます…";
-    video.src=videoUrl;
+    video.preload="auto";
+    video.onerror=()=>{ hud.textContent="動画の読み込みに失敗しました。対応していない形式の可能性があります。"; };
     video.onloadeddata=()=>{
       canvas.width=video.videoWidth; canvas.height=video.videoHeight;
       hud.textContent="解析を開始します…";
       video.play(); loop();
     };
+    video.src=videoUrl;
+    video.load();
   }).catch(e=>{
     hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);
   });
