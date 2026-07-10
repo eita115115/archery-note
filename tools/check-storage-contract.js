@@ -274,17 +274,23 @@ function checkPartialLegacy(storageApi, fixtures) {
   );
   assertEqual(db.trash.length, 0, "[partial-legacy] missing trash should normalize to empty array");
   assertEqual(db.settings.eyeSight, 820, "[partial-legacy] existing setting eyeSight");
-  assert(
-    !Object.hasOwn(db.settings, "theme"),
-    "[partial-legacy] current compatibility behavior leaves missing setting theme absent",
+  // 欠落している settings キーは blankDb() の既定値で補完される。
+  // 既定値が補完されないと、新機能が settings に追加した既定値が既存ユーザーに届かない
+  // （旧 normalizeDb は Object.assign(base,src) で base.settings ごと置換されるバグがあった）。
+  assertEqual(
+    db.settings.theme,
+    "auto",
+    "[partial-legacy] missing setting theme is backfilled with default",
   );
-  assert(
-    !Object.hasOwn(db.settings, "lastBackupAt"),
-    "[partial-legacy] current compatibility behavior leaves missing setting lastBackupAt absent",
+  assertEqual(
+    db.settings.lastBackupAt,
+    null,
+    "[partial-legacy] missing setting lastBackupAt is backfilled with default",
   );
-  assert(
-    !Object.hasOwn(db.settings, "activeGuideSeen"),
-    "[partial-legacy] current compatibility behavior leaves missing setting activeGuideSeen absent",
+  assertEqual(
+    db.settings.activeGuideSeen,
+    false,
+    "[partial-legacy] missing setting activeGuideSeen is backfilled with default",
   );
   assertEqual(
     db.sessions[0].id,
