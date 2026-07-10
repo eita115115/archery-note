@@ -57,7 +57,7 @@ function targetMarkup(faceD, idPrefix, faceType){
 function markCircle(a, faceD, color, label, cls){
   const r=arrowMarkRadius(faceD);
   const klass=cls?` class="${cls}"`:"";
-  return `<g${klass}><circle cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/4}" opacity="0.92"/>`+
+  return `<g${klass}><circle cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/3}" opacity="1"/>`+
     (label?`<text x="${a.x}" y="${-a.y}" font-size="${r*1.2}" fill="#fff" text-anchor="middle" dominant-baseline="central" font-weight="bold">${esc(label)}</text>`:"")+`</g>`;
 }
 /* static plot for history/summary */

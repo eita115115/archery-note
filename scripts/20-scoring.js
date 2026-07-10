@@ -52,14 +52,14 @@ function zoneStyle(s,X,faceType){
   if(isFieldFace(faceType)){
     if(s>=5) return {bg:"var(--gold)",fg:"#1c1e1c"};
     if(s>=1) return {bg:"#222",fg:"#fff"};
-    return {bg:"#c9cec6",fg:"#555"};
+    return {bg:"#888b85",fg:"#fff"};
   }
   if(s>=9) return {bg:"var(--gold)",fg:"#1c1e1c"};
   if(s>=7) return {bg:"var(--red)",fg:"#fff"};
   if(s>=5) return {bg:"var(--blue)",fg:"#fff"};
   if(s>=3) return {bg:"#222",fg:"#fff"};
   if(s>=1) return {bg:"#fff",fg:"#1c1e1c"};
-  return {bg:"#c9cec6",fg:"#555"};
+  return {bg:"#888b85",fg:"#fff"};
 }
 function scoreLabel(a){ return a.s===0?"M":(a.X?"X":String(a.s)); }
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }

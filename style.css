@@ -4,7 +4,7 @@
   --ink:#1b1b18; --sub:#5f6359; --line:#dcd7c8; --line2:#e8e4d8;
   --soft:#ece8dc; --inpBg:#eeeade; --hdr:#1b1b18; --title:#1b1b18;
   --advBg:#ece8dc; --advLine:#dcd7c8;
-  --gold:#fdd835; --red:#e53935; --blue:#1e88e5;
+  --gold:#fdd835; --red:#c62828; --blue:#1565c0;
   /* 金は糸（線・ドット・ライブ数値の文字色）専用。面（背景）には使わない */
   --accent:#b08a2e; --accent-strong:#8a6508;
   /* 反転 CTA・選択状態: light = 墨面＋白文字 */
@@ -411,7 +411,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 }
 .liveHud .kicker{font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label);}
 /* ライブ中の主役数値だけ金の文字色を残す（面ではなく文字色としての金） */
-.liveHud h2{font-size:20px;margin:3px 0;color:var(--accent); font-variant-numeric:tabular-nums; font-weight:var(--fw-figure);}
+.liveHud h2{font-size:20px;margin:3px 0;color:var(--ink); font-variant-numeric:tabular-nums; font-weight:var(--fw-figure);}
 .liveContext{display:flex; align-items:center; justify-content:space-between; gap:8px; color:var(--title); font-size:12px; font-weight:var(--fw-label); line-height:1.35;}
 .liveContext>span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 /* HUD の「詳細」折りたたみ: 射場モードで畳んでおく用具名・平均・ステージ情報 */
@@ -605,7 +605,7 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 /* 選択状態は反転トークンへ統一（v2再監査: 旧 green の選択色は退役済みのため使わない） */
 .reasonTag.on{background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg); animation:chipPop .2s var(--ease-app);}
 .reasonTag{transition:transform var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);}
-.sc small{display:block; font-size:10.5px; line-height:1; color:var(--sub); margin-top:1px;}
+.sc small{display:block; font-size:10.5px; line-height:1; color:inherit; opacity:.88; margin-top:1px;}
 .npad{display:grid; grid-template-columns:52px 52px 52px; gap:6px; justify-content:center; margin:6px 0;}
 .npad button{width:52px; height:46px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:17px; cursor:pointer; font-variant-numeric:tabular-nums; transition:transform .06s, background .06s, color .06s, border-color .06s;}
 /* motion:因果 — ナンバーパッドの押下で反転色フラッシュ＋深い沈み込み。スコア入力の手応えを強調 */
