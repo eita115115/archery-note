@@ -445,10 +445,11 @@ function openFormCapture(){
         ctx.fillRect(canvas.width-cx,0,cx,canvas.height);
       }
       if(lms) drawFormSkeleton(ctx,lms,canvas.width,canvas.height);
+      const lowFpsHtml=(fps>0&&fps<15)?`<br>${icon("warn")} フレームレート低下中（${fps.toFixed(0)}fps）: この端末では検出精度が落ちます`:""; // 提案G2
       if(raw&&disp){
-        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 検出の鮮明さ <b>${Math.round(disp.conf*100)}%</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>${raw.occluded.length?`<br>${icon("warn")} 検出低下: ${raw.occluded.map(esc).join("・")}`:""}`;
+        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 検出の鮮明さ <b>${Math.round(disp.conf*100)}%</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>${raw.occluded.length?`<br>${icon("warn")} 検出低下: ${raw.occluded.map(esc).join("・")}`:""}${lowFpsHtml}`;
       }else{
-        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 人物を検出中…（横向き全身が写る位置に置いてください）`;
+        hud.innerHTML=`FPS <b>${fps.toFixed(0)}</b> ・ 人物を検出中…（横向き全身が写る位置に置いてください）${lowFpsHtml}`;
       }
     }
     raf=requestAnimationFrame(loop);
