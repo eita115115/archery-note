@@ -234,6 +234,20 @@ function makeFormEma(alpha) {
   };
 }
 
+/* 現在フレーム raw と history 内の最後の有効フレームから引き手手首の
+   瞬間速度（胴体長/秒）を求める。47-form-view.js の撮影/リプレイ両 loop の
+   重複実装を置換する（Stage 0 A1: 挙動完全一致のリファクタ、フィルタ等は入れない）。
+   dt<=0 または dt>=0.5秒（基準フレームが古すぎる）は 0 を返す。 */
+function computeFormVelocity(history, raw, now) {
+  if (!raw) return 0;
+  let lv = null;
+  for (let i = history.length - 1; i >= 0 && !lv; i--) if (history[i].m) lv = history[i];
+  if (!lv) return 0;
+  const dt = (now - lv.ts) / 1000;
+  if (dt <= 0 || dt >= 0.5) return 0;
+  return formDist(raw.dW, lv.m.dW) / dt / raw.bodyScale;
+}
+
 function makeFormPhaseDetector() {
   return { cur: FORM_PHASES.SETUP, anchorSince: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null };
 }

@@ -23,7 +23,7 @@ function assertClose(actual, expected, eps, label) {
 const core = new Function(
   `${coreScript}
 return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
-  formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase,
+  formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
   formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
   formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
   ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
@@ -247,6 +247,42 @@ function shotSequence(dt) {
   // 人物未検出は IDLE
   const st = core.makeFormPhaseDetector();
   assertEqual(core.stepFormPhase(st, null, [], 1.0, 100).phase, "IDLE", "null metrics is IDLE");
+}
+
+/* ---------- computeFormVelocity（Stage 0 A1: 47の旧インライン実装と同値であること） ---------- */
+
+{
+  const mkM = (x, y) => ({ dW: { x, y }, bodyScale: 0.25 });
+  // 通常系: 旧インライン実装 formDist(raw.dW, lv.m.dW)/dt/raw.bodyScale と同値
+  const hist = [
+    { ts: 100, m: mkM(0.5, 0.3), vel: 0 },
+    { ts: 150, m: null, vel: 0 },
+    { ts: 200, m: mkM(0.6, 0.3), vel: 1 },
+  ];
+  const raw = mkM(0.7, 0.3);
+  const expected = core.formDist(raw.dW, hist[2].m.dW) / 0.05 / raw.bodyScale;
+  assertClose(core.computeFormVelocity(hist, raw, 250), expected, 1e-9, "velocity matches legacy inline computation");
+  assertClose(core.computeFormVelocity(hist, raw, 250), 8, 1e-9, "velocity value (0.1 / 0.05s / 0.25 torso)");
+  // 末尾が null フレームでも直近の有効フレームまで遡って基準にする
+  const histNullTail = [
+    { ts: 100, m: mkM(0.5, 0.3), vel: 0 },
+    { ts: 200, m: null, vel: 0 },
+  ];
+  const expected2 = core.formDist(raw.dW, histNullTail[0].m.dW) / 0.15 / raw.bodyScale;
+  assertClose(core.computeFormVelocity(histNullTail, raw, 250), expected2, 1e-9, "trailing null frames are skipped");
+}
+{
+  const mkM = (x, y) => ({ dW: { x, y }, bodyScale: 0.25 });
+  const raw = mkM(0.7, 0.3);
+  // dt 境界: 0 以下と 0.5秒以上は 0（旧実装の dt>0 && dt<0.5 と同一）
+  assertEqual(core.computeFormVelocity([{ ts: 250, m: mkM(0.5, 0.3), vel: 0 }], raw, 250), 0, "dt=0 returns 0");
+  assertEqual(core.computeFormVelocity([{ ts: 300, m: mkM(0.5, 0.3), vel: 0 }], raw, 250), 0, "negative dt returns 0");
+  assertEqual(core.computeFormVelocity([{ ts: 0, m: mkM(0.5, 0.3), vel: 0 }], raw, 500), 0, "dt=0.5s boundary returns 0");
+  assert(core.computeFormVelocity([{ ts: 1, m: mkM(0.5, 0.3), vel: 0 }], raw, 500) > 0, "dt just under 0.5s is computed");
+  // 有効フレーム無し・raw 無しは 0
+  assertEqual(core.computeFormVelocity([{ ts: 100, m: null, vel: 0 }, { ts: 200, m: null, vel: 0 }], raw, 250), 0, "all-null history returns 0");
+  assertEqual(core.computeFormVelocity([], raw, 250), 0, "empty history returns 0");
+  assertEqual(core.computeFormVelocity([{ ts: 100, m: mkM(0.5, 0.3), vel: 0 }], null, 250), 0, "null raw returns 0");
 }
 
 /* ---------- リリース前ドリフト・アンカー再現性・1射要約 ---------- */

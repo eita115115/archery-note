@@ -390,9 +390,7 @@ function openFormCapture(){
       const lms=res.landmarks&&res.landmarks[0];
       const raw=lms?computeFormMetrics(lms,handedness):null;
       const disp=ema(raw);
-      let vel=0;
-      if(raw){let lv=null;for(let i=history.length-1;i>=0&&!lv;i--)if(history[i].m)lv=history[i];
-      if(lv){const dt=(now-lv.ts)/1000;if(dt>0&&dt<0.5)vel=formDist(raw.dW,lv.m.dW)/dt/raw.bodyScale;}}
+      const vel=computeFormVelocity(history,raw,now);
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
       const {phase,released,canceled,debug}=stepFormPhase(detector,raw,history,1.0,now);
@@ -589,9 +587,7 @@ function startFormReplay(videoUrl){
       const lms=res.landmarks&&res.landmarks[0];
       const raw=lms?computeFormMetrics(lms,handedness):null;
       const disp=ema(raw);
-      let vel=0;
-      if(raw){let lv=null;for(let i=history.length-1;i>=0&&!lv;i--)if(history[i].m)lv=history[i];
-      if(lv){const dt=(now-lv.ts)/1000;if(dt>0&&dt<0.5)vel=formDist(raw.dW,lv.m.dW)/dt/raw.bodyScale;}}
+      const vel=computeFormVelocity(history,raw,now);
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
       const {phase,released,canceled}=stepFormPhase(detector,raw,history,1.0,now);
