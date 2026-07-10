@@ -428,6 +428,71 @@ function anchorHistory(releaseTs, drift) {
   assertEqual(core.summarizeFormShot([], 0, 10000), null, "no history no summary");
 }
 
+/* ---------- T-Anchor（Stage 1 §12.3）: pre-release 窓の anchorStartTs クランプ ---------- */
+
+/* 短ホールド射の合成履歴（60ms間隔）。anchorStartTs より前は DRAWING 相当
+   （手首が大きく移動・アンカー圏外）、以降は完全に静止したホールド。 */
+function shortHoldHistory(releaseTs, anchorStartTs) {
+  const hist = [];
+  for (let ts = releaseTs - 900; ts <= releaseTs; ts += 60) {
+    const drawing = ts < anchorStartTs;
+    const k = drawing ? (anchorStartTs - ts) / 1000 : 0; // 遡るほどアンカーから遠い位置
+    hist.push({
+      ts,
+      m: {
+        anchorNorm: drawing ? 0.8 : 0.22,
+        bowArm: 171, drawArm: 150, shoulderDrop: 0.07, headOffset: 0.09, forceLine: 0.07,
+        score: 80, conf: 0.9, bodyScale: 0.25,
+        bW: { x: 0.2 + k * 0.5, y: 0.4 }, dW: { x: 0.6 + k * 0.5, y: 0.31 },
+      },
+      vel: drawing ? 3 : 0.05,
+    });
+  }
+  return hist;
+}
+
+{
+  // ホールド300ms（<FULLDRAW_MS=350ms）の射: クランプ無しでは固定500ms窓の前半が
+  // DRAWING 区間へ食い込み、静止ホールドなのにドリフト扱いになる（実射で確認した症状）
+  const hist = shortHoldHistory(10000, 9700);
+  const unclamped = core.formPreReleaseWindow(hist, 10000);
+  assert(unclamped && unclamped.bowDrift && unclamped.drawDrift,
+    "short-hold shot without clamp is contaminated by DRAWING frames (documents the symptom)");
+  // クランプあり: 窓が anchorStartTs 以降に限定され、静止ホールドが正しく stable 判定になる
+  const clamped = core.formPreReleaseWindow(hist, 10000, null, 9700);
+  assert(clamped, "clamped window still has enough frames");
+  assertEqual(clamped.frames, 4, "clamped window contains only frames at/after anchorStartTs");
+  assert(!clamped.bowDrift && !clamped.drawDrift && !clamped.headDrift,
+    `clamped short-hold window is stable, got bowMove=${clamped.bowMove} drawMove=${clamped.drawMove}`);
+  assert(unclamped.frames > clamped.frames, "clamp strictly narrows the window");
+}
+{
+  // アンカー未保持（anchorStartTs が 0/null/未指定）は現行と同値
+  const hist = shortHoldHistory(10000, 9700);
+  const legacy = core.formPreReleaseWindow(hist, 10000);
+  assertEqual(JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, 0)), JSON.stringify(legacy),
+    "anchorStartTs=0 behaves exactly like current code");
+  assertEqual(JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, null)), JSON.stringify(legacy),
+    "anchorStartTs=null behaves exactly like current code");
+  // ホールドが窓より長い（anchorStartTs が releaseTs-500ms より前）ならクランプは no-op
+  assertEqual(JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, 9000)), JSON.stringify(legacy),
+    "anchorStartTs earlier than the 500ms window is a no-op");
+  // ホールドが極端に短く窓内に2フレーム残らない場合は汚染値でなく null
+  assertEqual(core.formPreReleaseWindow(hist, 10000, null, 9860), null,
+    "ultra-short hold yields null instead of DRAWING-contaminated values");
+}
+{
+  // summarizeFormShot 経由（エンドツーエンド）: ホールド300msの射でも pre が stable になる
+  const hist = shortHoldHistory(10000, 9700);
+  const shot = core.summarizeFormShot(hist, 9700, 10000);
+  assert(shot && shot.pre, "short-hold shot summary has a pre-release window");
+  assertEqual(shot.holdMs, 300, "short hold time");
+  assert(!shot.pre.bowDrift && !shot.pre.drawDrift, "short-hold pre window is stable via summarizeFormShot");
+  // アンカー未保持の射は現行と同値（クランプ不発）
+  const noAnchor = core.summarizeFormShot(hist, null, 10000);
+  assertEqual(JSON.stringify(noAnchor && noAnchor.pre), JSON.stringify(core.formPreReleaseWindow(hist, 10000)),
+    "summary without anchorStartTs keeps the legacy unclamped window");
+}
 
 /* ---------- 記録統計・コーチングコメント・トレンド・得点との関係 ---------- */
 

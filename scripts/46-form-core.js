@@ -329,10 +329,17 @@ function stepFormPhase(st, raw, history, sens, now) {
 }
 
 /* リリース前 windowSec 秒の安定性（ドリフト、胴体長比）。
-   リリース直前 120ms は離れ動作そのものなので除外する */
-function formPreReleaseWindow(history, releaseTs, windowSec) {
+   リリース直前 120ms は離れ動作そのものなので除外する。
+   anchorStartTs が渡された場合、遡り窓の開始点を max(releaseTs-windowSec, anchorStartTs) に
+   クランプする（Stage 1 T-Anchor, §12.3）。ホールドが windowSec より短い射では、
+   クランプ無しだと窓の前半が DRAWING 区間（まだ手首が高速移動中）まで食い込み、
+   bowMove/drawMove が異常値化して stable が恒常的に false になる問題への対処
+   （arrowcheck-investigation-2026-07-10.md 観点3）。anchorStartTs が falsy
+   （0/null/未指定）ならクランプなし＝現行動作と同一。 */
+function formPreReleaseWindow(history, releaseTs, windowSec, anchorStartTs) {
   const w = windowSec == null ? 0.5 : windowSec;
-  const frames = (history || []).filter((h) => h.m && h.ts >= releaseTs - w * 1000 && h.ts <= releaseTs - 120);
+  const earliest = anchorStartTs ? Math.max(releaseTs - w * 1000, anchorStartTs) : releaseTs - w * 1000;
+  const frames = (history || []).filter((h) => h.m && h.ts >= earliest && h.ts <= releaseTs - 120);
   if (frames.length < 2) return null;
   const f = frames[0].m, l = frames[frames.length - 1].m;
   const scale = (f.bodyScale + l.bodyScale) / 2;
@@ -424,7 +431,7 @@ function summarizeFormShot(history, anchorStartTs, releaseTs) {
     anchorNorm: md("anchorNorm"),
     score: md("score"),
     confidence: md("conf"),
-    pre: formPreReleaseWindow(history, releaseTs),
+    pre: formPreReleaseWindow(history, releaseTs, null, anchorStartTs),
     frames: win.length,
   };
 }

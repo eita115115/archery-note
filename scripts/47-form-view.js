@@ -394,7 +394,7 @@ function openFormCapture(){
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
       const r=stepFormPhase(detector,raw,history,1.0,now);
-      const {phase,released,canceled,debug}=r;
+      const {phase,released,canceled,debug,anchorStartTs}=r;
       if(canceled){
         /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
         const last=shots[shots.length-1];
@@ -407,15 +407,22 @@ function openFormCapture(){
         }
         if(pendingCheck&&pendingCheck.shotId===(last&&last.id)) pendingCheck=null;
       }
-      /* 矢プレゼンスのシャドー計測: フルドロー中と確定猶予窓のみ ROI を処理する
-        （常時処理しないことでモバイル負荷を抑える）。1フレームあたりの処理時間を
-        report用に実測・記録する（先頭200件のみ保持）。 */
-      if(phase==="FULL_DRAW"||pendingCheck){
+      /* 矢プレゼンスのシャドー計測: アンカー保持中（anchorStartTs非null、T-Anchor §12.3）と
+        確定猶予窓のみ ROI を処理する（常時処理しないことでモバイル負荷を抑える）。
+        以前は phase==="FULL_DRAW" を条件にしていたが、FULL_DRAW 昇格は FULLDRAW_MS(350ms)
+        連続保持を要求する一方、RELEASE 発火はそれより大幅に緩い条件で起こり得るため、
+        ホールドが短い射では presenceRing が一度も積まれず preScore が恒常的に null に
+        なっていた（arrowcheck-investigation-2026-07-10.md 観点1）。released フレーム自体は
+        除外する（返り値の anchorStartTs はクリア前の値だが、検出器内部では保持は終了しており、
+        離れ動作中のフレームを preScores に混ぜない。旧 FULL_DRAW 条件でも RELEASE フレームは
+        蓄積対象外だった）。1フレームあたりの処理時間を report用に実測・記録する（先頭200件のみ保持）。 */
+      const anchorHeld=!!anchorStartTs&&!released;
+      if(anchorHeld||pendingCheck){
         const t0=performance.now();
         const presenceScore=raw?sampleArrowPresence(raw):null;
         const dt=performance.now()-t0;
         if(samplePerfMs.length<200) samplePerfMs.push(dt);
-        if(phase==="FULL_DRAW"&&presenceScore!=null){
+        if(anchorHeld&&presenceScore!=null){
           presenceRing.push({ts:now,score:presenceScore});
           const cutoff=now-1500;
           while(presenceRing.length&&presenceRing[0].ts<cutoff) presenceRing.shift();
@@ -427,7 +434,7 @@ function openFormCapture(){
       }
       if(released){
         const preScores=presenceRing.map(p=>p.score);
-        const shotId=onShot(now,r.anchorStartTs,debug);
+        const shotId=onShot(now,anchorStartTs,debug);
         if(shotId) pendingCheck={shotId,preScores,confirmScores:[],startTs:now};
       }
       phaseEl.textContent=phase;
