@@ -285,6 +285,82 @@ function shotSequence(dt) {
   assertEqual(core.computeFormVelocity([{ ts: 100, m: mkM(0.5, 0.3), vel: 0 }], null, 250), 0, "null raw returns 0");
 }
 
+/* ---------- anchorStartTs のコア内包化（Stage 0 C: sticky 仕様） ---------- */
+
+function makeStepper(dt) {
+  const st = core.makeFormPhaseDetector();
+  const hist = [];
+  let t = 0;
+  return {
+    push(m, vel) {
+      t += dt;
+      hist.push({ ts: t, m, vel });
+      if (hist.length > 150) hist.shift();
+      return { r: core.stepFormPhase(st, m, hist, 1.0, t), t };
+    },
+  };
+}
+
+{
+  // sticky: ANCHORING → DRAWING（約200msの一時離脱・ジッター相当の微小トレンド）→ ANCHORING → release
+  // で anchorStartTs（= hold の起点）が通しで保持される
+  const s = makeStepper(66);
+  let firstAnchorTs = 0;
+  for (let i = 0; i < 10; i++) {
+    const { r, t } = s.push(mkRaw(0.33, 150), 0.05);
+    if (!firstAnchorTs && (r.phase === "ANCHORING" || r.phase === "FULL_DRAW")) {
+      firstAnchorTs = t;
+      assertEqual(r.anchorStartTs, t, "anchorStartTs set on first anchoring frame");
+    }
+  }
+  assert(firstAnchorTs > 0, "anchoring reached in sticky scenario");
+  for (let i = 0; i < 3; i++) {
+    const { r } = s.push(mkRaw(0.37, 150), 0.5); // アンカー圏外だが微小トレンド → DRAWING
+    assertEqual(r.phase, "DRAWING", "brief excursion is DRAWING");
+    assertEqual(r.anchorStartTs, firstAnchorTs, "anchorStartTs sticky through DRAWING excursion");
+  }
+  for (let i = 0; i < 5; i++) {
+    const { r } = s.push(mkRaw(0.33, 150), 0.05);
+    assertEqual(r.anchorStartTs, firstAnchorTs, "anchorStartTs unchanged after re-anchoring");
+  }
+  const rel = s.push(mkRaw(0.6, 140), 10); // 速度スパイクでリリース
+  assertEqual(rel.r.released, true, "release fires after sticky excursion");
+  assertEqual(rel.r.anchorStartTs, firstAnchorTs, "released frame returns pre-clear anchorStartTs (hold spans excursion)");
+  const after = s.push(mkRaw(1.0, 90), 0.2);
+  assertEqual(after.r.anchorStartTs, 0, "anchorStartTs cleared after release");
+}
+{
+  // リセット: ANCHORING → SETUP（完全離脱・低速）で anchorStartTs=0、再アンカーで新しい値
+  const s = makeStepper(66);
+  let firstAnchorTs = 0;
+  for (let i = 0; i < 10; i++) {
+    const { r, t } = s.push(mkRaw(0.30, 150), 0.05);
+    if (!firstAnchorTs && (r.phase === "ANCHORING" || r.phase === "FULL_DRAW")) firstAnchorTs = t;
+  }
+  assert(firstAnchorTs > 0, "anchoring reached in reset scenario");
+  let last = null;
+  for (let i = 0; i < 6; i++) last = s.push(mkRaw(1.5, 90), 0.05);
+  assertEqual(last.r.phase, "SETUP", "slow full withdrawal is SETUP");
+  assertEqual(last.r.anchorStartTs, 0, "anchorStartTs reset on SETUP");
+  let secondAnchorTs = 0;
+  for (let i = 0; i < 5; i++) {
+    const { r, t } = s.push(mkRaw(0.30, 150), 0.05);
+    if (!secondAnchorTs && (r.phase === "ANCHORING" || r.phase === "FULL_DRAW")) secondAnchorTs = t;
+  }
+  assert(secondAnchorTs > firstAnchorTs, "re-anchor starts a new anchorStartTs");
+}
+{
+  // canceled: 取消フレームで anchorStartTs=now（アンカー継続として仕切り直し）
+  const s = makeStepper(20);
+  for (let i = 0; i < 60; i++) s.push(mkRaw(0.22, 150), 0.02);
+  const rel = s.push(mkRaw(0.6, 140), 10); // 瞬間ノイズで released
+  assertEqual(rel.r.released, true, "noise spike releases before cancel");
+  assert(rel.r.anchorStartTs > 0, "released frame carries pre-clear anchorStartTs");
+  const cancel = s.push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS 以内にアンカー圏へ復帰 → 取消
+  assertEqual(cancel.r.canceled, true, "return to anchor cancels");
+  assertEqual(cancel.r.anchorStartTs, cancel.t, "canceled frame restarts anchorStartTs at now");
+}
+
 /* ---------- リリース前ドリフト・アンカー再現性・1射要約 ---------- */
 
 function anchorHistory(releaseTs, drift) {

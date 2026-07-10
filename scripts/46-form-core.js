@@ -248,8 +248,13 @@ function computeFormVelocity(history, raw, now) {
   return formDist(raw.dW, lv.m.dW) / dt / raw.bodyScale;
 }
 
+/* anchorStartTs は anchorSince と意味が異なる別フィールド（Stage 0 C）。
+   anchorSince はアンカー圏を離れた全フレームでリセットされる（FULL_DRAW 昇格判定用）が、
+   anchorStartTs は sticky: ANCHORING/FULL_DRAW で記録を開始し、DRAWING への一時離脱では
+   保持し続け、SETUP/IDLE へ落ちたときのみリセットする。holdMs = releaseTs - anchorStartTs
+   （summarizeFormShot）はこの sticky 仕様の上に成立している。 */
 function makeFormPhaseDetector() {
-  return { cur: FORM_PHASES.SETUP, anchorSince: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null };
+  return { cur: FORM_PHASES.SETUP, anchorSince: 0, anchorStartTs: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null };
 }
 
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
@@ -268,20 +273,21 @@ function makeFormPhaseDetector() {
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
   if (!raw) {
-    if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; }
-    return { phase: st.cur, released: false };
+    if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; st.anchorStartTs = 0; }
+    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs };
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
     if (raw.anchorNorm < FORM_PH.CLOSE_IN) {
       // アンカー圏へ即座に戻った = 離脱ではなく一時的な検出ノイズ/引き戻しだった。取消
       st.pendingRelease = null; st.lastReleaseTs = 0; st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
-      return { phase: st.cur, released: false, canceled: true };
+      st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
+      return { phase: st.cur, released: false, canceled: true, anchorStartTs: st.anchorStartTs };
     }
   } else if (st.pendingRelease) {
     st.pendingRelease = null; // 猶予終了、確定（取消なし）
   }
-  if (st.lastReleaseTs && now - st.lastReleaseTs < 250) { st.cur = FORM_PHASES.RELEASE; return { phase: st.cur, released: false }; }
-  if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) { st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0; return { phase: st.cur, released: false }; }
+  if (st.lastReleaseTs && now - st.lastReleaseTs < 250) { st.cur = FORM_PHASES.RELEASE; return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs }; }
+  if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) { st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0; return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs }; }
   const close = raw.anchorNorm < FORM_PH.CLOSE_IN;
   const winAll = history.filter(h => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
   const win = winAll.filter(h => h.m);
@@ -298,7 +304,9 @@ function stepFormPhase(st, raw, history, sens, now) {
     && (velOk || nullBridged)) {
     st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;
     st.pendingRelease = { ts: now };
-    return { phase: st.cur, released: true, debug };
+    const anchorStartTs = st.anchorStartTs; // クリア前の値を返す（呼び出し側が summarizeFormShot へ渡す）
+    st.anchorStartTs = 0;
+    return { phase: st.cur, released: true, anchorStartTs, debug };
   }
   if (close) {
     if (!st.anchorSince) st.anchorSince = now;
@@ -308,7 +316,10 @@ function stepFormPhase(st, raw, history, sens, now) {
     st.anchorSince = 0;
     st.cur = (maxV > FORM_PH.DRAW_SPEED && raw.anchorNorm < 1.2) ? FORM_PHASES.DRAWING : FORM_PHASES.SETUP;
   }
-  return { phase: st.cur, released: false, debug };
+  // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット
+  if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs) st.anchorStartTs = now;
+  else if (st.cur === FORM_PHASES.SETUP || st.cur === FORM_PHASES.IDLE) st.anchorStartTs = 0;
+  return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
 }
 
 /* リリース前 windowSec 秒の安定性（ドリフト、胴体長比）。

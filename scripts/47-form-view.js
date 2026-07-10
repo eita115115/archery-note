@@ -244,7 +244,7 @@ function openFormCapture(){
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, stream=null, landmarker=null;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
-  let anchorStartTs=0, shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
   const CROP_FRAC=0.7, CROP_OFF=(1-0.7)/2;
   let cropActive=false;
   const cropCvs=document.createElement("canvas");
@@ -332,7 +332,7 @@ function openFormCapture(){
     const toLocal=(p)=>({x:(p.x*vw-sx)/rw, y:(p.y*vh-sy)/rh});
     return arrowPresence(img,toLocal(raw.bW),toLocal(raw.dW));
   }
-  function onShot(now,debug){
+  function onShot(now,anchorStartTs,debug){
     const shot=summarizeFormShot(history,anchorStartTs,now);
     if(!shot) return null;
     shot.id=uid();
@@ -393,7 +393,8 @@ function openFormCapture(){
       const vel=computeFormVelocity(history,raw,now);
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
-      const {phase,released,canceled,debug}=stepFormPhase(detector,raw,history,1.0,now);
+      const r=stepFormPhase(detector,raw,history,1.0,now);
+      const {phase,released,canceled,debug}=r;
       if(canceled){
         /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
         const last=shots[shots.length-1];
@@ -424,14 +425,11 @@ function openFormCapture(){
           if(now-pendingCheck.startTs>=FORM_PH.CONFIRM_MS) finalizeArrowCheck();
         }
       }
-      if((phase==="ANCHORING"||phase==="FULL_DRAW")&&!anchorStartTs) anchorStartTs=now;
       if(released){
         const preScores=presenceRing.map(p=>p.score);
-        const shotId=onShot(now,debug);
-        anchorStartTs=0;
+        const shotId=onShot(now,r.anchorStartTs,debug);
         if(shotId) pendingCheck={shotId,preScores,confirmScores:[],startTs:now};
       }
-      if(phase==="SETUP"||phase==="IDLE") anchorStartTs=0;
       phaseEl.textContent=phase;
       phaseEl.classList.toggle("release",phase==="RELEASE");
       phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
@@ -490,7 +488,7 @@ function openFormCapture(){
     handedness=handedness==="right"?"left":"right";
     db.settings.formHandedness=handedness; save();
     e.target.textContent="利き手: "+(handedness==="right"?"右":"左");
-    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[]; anchorStartTs=0;
+    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[];
   };
   ovl.querySelector("#fcCrop").onclick=e=>{
     cropActive=!cropActive;
@@ -545,7 +543,7 @@ function startFormReplay(videoUrl){
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, landmarker=null;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
-  let anchorStartTs=0, shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
   function stop(){
     running=false; if(raf) cancelAnimationFrame(raf);
     try{ video.pause(); }catch(e){}
@@ -564,7 +562,7 @@ function startFormReplay(videoUrl){
       if(t) t.textContent=`第${idx+1}射`;
     });
   }
-  function onShot(now){
+  function onShot(now,anchorStartTs){
     const shot=summarizeFormShot(history,anchorStartTs,now);
     if(!shot) return;
     shot.id=uid(); shot.arrowCheck=null; shots.push(shot);
@@ -590,7 +588,8 @@ function startFormReplay(videoUrl){
       const vel=computeFormVelocity(history,raw,now);
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
-      const {phase,released,canceled}=stepFormPhase(detector,raw,history,1.0,now);
+      const r=stepFormPhase(detector,raw,history,1.0,now);
+      const {phase,released,canceled}=r;
       if(canceled){
         /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
         const last=shots[shots.length-1];
@@ -602,9 +601,7 @@ function startFormReplay(videoUrl){
           refreshSave();
         }
       }
-      if((phase==="ANCHORING"||phase==="FULL_DRAW")&&!anchorStartTs) anchorStartTs=now;
-      if(released){ onShot(now); anchorStartTs=0; }
-      if(phase==="SETUP"||phase==="IDLE") anchorStartTs=0;
+      if(released) onShot(now,r.anchorStartTs);
       phaseEl.textContent=phase;
       phaseEl.classList.toggle("release",phase==="RELEASE");
       phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
@@ -646,7 +643,7 @@ function startFormReplay(videoUrl){
     handedness=handedness==="right"?"left":"right";
     db.settings.formHandedness=handedness; save();
     e.target.textContent="利き手: "+(handedness==="right"?"右":"左");
-    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[]; anchorStartTs=0;
+    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[];
   };
   loadFormPose().then(async lm=>{
     landmarker=lm;
