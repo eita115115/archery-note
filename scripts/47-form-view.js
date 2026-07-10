@@ -284,6 +284,8 @@ function openFormCapture(){
     if(pendingCheck) finalizeArrowCheck();
     stopRec();
     try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+    /* 記録セッションが継続中なら wake lock を維持（wanted を立て直す）、なければ解放 */
+    if(db.active) wakeLock.acquire(); else wakeLock.release();
     endActiveWorkflow();
     closeModal(ovl);
   }
@@ -498,6 +500,7 @@ function openFormCapture(){
     landmarker=lm;
     hud.textContent="カメラを起動しています…";
     await startCamera();
+    wakeLock.acquire();
     hud.textContent="準備完了。横向き全身が写る位置で数射どうぞ。";
     loop();
   }).catch(e=>{
