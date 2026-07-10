@@ -509,6 +509,12 @@ function openSettings(){
         <button type="button" class="chip ${db.settings.formTrackingEnabled?"on":""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
       </div>
       <div class="hint">解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
+      <label class="f">検証用の診断データ保存</label>
+      <div class="chips" id="fdChips">
+        <button type="button" class="chip ${db.settings.formDebug?"":"on"}" aria-pressed="${!db.settings.formDebug}" data-fd="0">OFF</button>
+        <button type="button" class="chip ${db.settings.formDebug?"on":""}" aria-pressed="${!!db.settings.formDebug}" data-fd="1">ON</button>
+      </div>
+      <div class="hint">実射検証用に、各射の内部診断値（速度・確度など）も記録へあわせて保存します。通常はOFFのままで構いません。</div>
       <h3 class="settingsH3">カスタムラウンド</h3>
       <div class="settingsActionHint">距離ごとのステージを持つ自分用ラウンドを増減・編集します。</div>
       ${customRoundsSettingsHtml()}
@@ -555,6 +561,11 @@ function openSettings(){
     db.settings.formTrackingEnabled=c.dataset.ft==="1"; save();
     ovl.querySelectorAll("#ftChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
     toast(db.settings.formTrackingEnabled?"射形トラッキングを有効にしました（分析タブ）":"射形トラッキングを無効にしました");
+  });
+  ovl.querySelectorAll("#fdChips .chip").forEach(c=>c.onclick=()=>{
+    db.settings.formDebug=c.dataset.fd==="1"; save();
+    ovl.querySelectorAll("#fdChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+    toast(db.settings.formDebug?"検証用の診断データ保存を有効にしました":"検証用の診断データ保存を無効にしました");
   });
   ovl.querySelector("#setClose").onclick=()=>{ closeModal(ovl); render(); };
   ovl.querySelectorAll("[data-cr]").forEach(li=>li.onclick=()=>{ closeModal(ovl); openCustomRoundForm(li.dataset.cr); });

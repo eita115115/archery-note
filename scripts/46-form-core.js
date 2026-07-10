@@ -279,11 +279,12 @@ function stepFormPhase(st, raw, history, sens, now) {
   const hasNullGap = winAll.length > win.length;
   const velOk = maxV > FORM_PH.RELEASE_TH / s;
   const nullBridged = hasNullGap && rise > 0.25 && maxV > 2;
+  const debug = { maxV, rise, nullFrames: winAll.length - win.length, conf: raw.conf }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
   if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
     && (velOk || nullBridged)) {
     st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;
     st.pendingRelease = { ts: now };
-    return { phase: st.cur, released: true };
+    return { phase: st.cur, released: true, debug };
   }
   if (close) {
     if (!st.anchorSince) st.anchorSince = now;
@@ -293,7 +294,7 @@ function stepFormPhase(st, raw, history, sens, now) {
     st.anchorSince = 0;
     st.cur = (maxV > FORM_PH.DRAW_SPEED && raw.anchorNorm < 1.2) ? FORM_PHASES.DRAWING : FORM_PHASES.SETUP;
   }
-  return { phase: st.cur, released: false };
+  return { phase: st.cur, released: false, debug };
 }
 
 /* リリース前 windowSec 秒の安定性（ドリフト、胴体長比）。
@@ -342,6 +343,25 @@ function judgeArrowCheck(preScores, confirmScores) {
   else if (confirmScore >= ARROW_CHECK.STILL_TH) judgment = "letdown-mismatch";
   else judgment = "unclear";
   return { judgment, preScore, confirmScore, pre: pre.length, confirm: confirm.length };
+}
+
+/* 検証計装（H）: 撮影セッション終了時に shots(arrowCheck付与済み) と samplePerfMs
+   計測列から、保存レコードへ添える診断サマリを作る。db.settings.formDebug===true
+   のときのみ呼び出し側が保存する（既定OFF）。判定ロジックには一切使わない。 */
+function formDiagSummary(shots, samplePerfMs) {
+  const counts = { shotMatch: 0, letdownMismatch: 0, unclear: 0, none: 0 };
+  (shots || []).forEach((sh) => {
+    const j = sh && sh.arrowCheck && sh.arrowCheck.judgment;
+    if (j === "shot-match") counts.shotMatch++;
+    else if (j === "letdown-mismatch") counts.letdownMismatch++;
+    else if (j === "unclear") counts.unclear++;
+    else counts.none++;
+  });
+  const perf = (samplePerfMs || []).filter(Number.isFinite);
+  return {
+    arrowCheckCounts: counts,
+    samplePerfMs: perf.length ? { median: +formMedian(perf).toFixed(2), max: +Math.max(...perf).toFixed(2), n: perf.length } : null,
+  };
 }
 
 /* 複数射のアンカー位置再現性（胴体長比の標準偏差） */

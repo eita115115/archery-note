@@ -25,7 +25,7 @@ function loadFormPose(){
 }
 
 function formFeatureFromShot(shot){
-  return {
+  const f={
     phase:{anchorMs:shot.holdMs},
     angles:shot.angles,
     anchorNorm:shot.anchorNorm,
@@ -40,6 +40,10 @@ function formFeatureFromShot(shot){
       confirmScore:shot.arrowCheck.confirmScore==null?null:+shot.arrowCheck.confirmScore.toFixed(2)
     }:null
   };
+  /* 検証計装（H）: db.settings.formDebug===true のときだけ shot.diag を持つ（既定OFF、ストレージ肥大防止）。
+     前方互換: formAnalyses.features[].diag は既存レコードに存在しない追加フィールド */
+  if(shot.diag) f.diag={maxV:+shot.diag.maxV.toFixed(2),rise:+shot.diag.rise.toFixed(3),nullFrames:shot.diag.nullFrames,conf:shot.diag.conf==null?null:+shot.diag.conf.toFixed(2)};
+  return f;
 }
 
 /* シャドー判定のショット一覧タグ（撮影画面）。judgment を利用者向けの短い日本語に変換する。
@@ -328,11 +332,12 @@ function openFormCapture(){
     const toLocal=(p)=>({x:(p.x*vw-sx)/rw, y:(p.y*vh-sy)/rh});
     return arrowPresence(img,toLocal(raw.bW),toLocal(raw.dW));
   }
-  function onShot(now){
+  function onShot(now,debug){
     const shot=summarizeFormShot(history,anchorStartTs,now);
     if(!shot) return null;
     shot.id=uid();
     shot.arrowCheck=null; // 確定猶予窓の計測後に judgeArrowCheck の結果を書き込む（シャドー）
+    shot.diag=(db.settings.formDebug===true&&debug)?debug:null; // 検証計装（H）: 既定OFF
     shots.push(shot);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem";
@@ -390,7 +395,7 @@ function openFormCapture(){
       if(lv){const dt=(now-lv.ts)/1000;if(dt>0&&dt<0.5)vel=formDist(raw.dW,lv.m.dW)/dt/raw.bodyScale;}}
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
-      const {phase,released,canceled}=stepFormPhase(detector,raw,history,1.0,now);
+      const {phase,released,canceled,debug}=stepFormPhase(detector,raw,history,1.0,now);
       if(canceled){
         /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
         const last=shots[shots.length-1];
@@ -424,7 +429,7 @@ function openFormCapture(){
       if((phase==="ANCHORING"||phase==="FULL_DRAW")&&!anchorStartTs) anchorStartTs=now;
       if(released){
         const preScores=presenceRing.map(p=>p.score);
-        const shotId=onShot(now);
+        const shotId=onShot(now,debug);
         anchorStartTs=0;
         if(shotId) pendingCheck={shotId,preScores,confirmScores:[],startTs:now};
       }
@@ -457,12 +462,16 @@ function openFormCapture(){
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];
-    db.formAnalyses.push({
+    const rec={
       id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
       shots:shots.length, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
       appVer:APP_VER, fps:+fps.toFixed(1),
       features:shots.map(formFeatureFromShot), note:""
-    });
+    };
+    /* 検証計装（H）: db.settings.formDebug===true のときだけ arrowCheck分布とsamplePerfMsの
+       中央値/最大値をレコードへ添える（既定OFF、ストレージ肥大防止）。前方互換の追加フィールド */
+    if(db.settings.formDebug===true) rec.diag=formDiagSummary(shots,samplePerfMs);
+    db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
     nativePulse("success");
