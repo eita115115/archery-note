@@ -100,15 +100,16 @@ function fullDrawLandmarks() {
 
 const mkRaw = (anchorNorm, drawArm) => ({ anchorNorm, drawArm, bodyScale: 0.25, dW: { x: 0, y: 0 } });
 
-function runSequence(seq) {
-  const st = core.makeFormPhaseDetector();
+function runSequence(seq, coreObj) {
+  const c = coreObj || core;
+  const st = c.makeFormPhaseDetector();
   const hist = [];
   let t = 0, phases = [], releases = 0;
   for (const [m, vel, dt] of seq) {
     t += dt;
     hist.push({ ts: t, m, vel });
     if (hist.length > 150) hist.shift();
-    const r = core.stepFormPhase(st, m, hist, 1.0, t);
+    const r = c.stepFormPhase(st, m, hist, 1.0, t);
     phases.push(r.phase);
     if (r.released) releases++;
   }
@@ -214,6 +215,33 @@ function shotSequence(dt) {
   seq.push([mkRaw(1.0, 90), 0.2, dt]);
   for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
   assertEqual(runSequence(seq).releases, 1, "null-frame bridged release detected");
+}
+{
+  /* D'（Stage 1）: nullBridged の時間ベースギャップ上限 NB_MAX_GAP_MS=150 の両側境界。
+     ギャップ span = 窓内の最初のnullフレーム→最後のnullフレームの経過時間（実装と同定義）。
+     140ms は検出 / 200ms は非検出。復帰フレームの vel=8 は NB_MAXV(2) 超・RELEASE_TH(9) 未満
+     に置き、velOk でなく nullBridged 経路が判定を決めることを保証する。 */
+  function gapBridgedSequence(nullCount) {
+    const seq = [];
+    // アンカー保持（10ms間隔）。110フレーム=1100ms: REFRACTORY_MS(1000ms、起点 lastReleaseTs=0)を
+    // 追い越しつつ、窓内に十分な closeFrames を残す
+    for (let i = 0; i < 110; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
+    for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]); // 姿勢ロス: span=(nullCount-1)*20ms
+    seq.push([mkRaw(1.0, 90), 8, 10]); // 復帰: アンカー圏外・大きめの見かけ速度
+    for (let i = 0; i < 10; i++) seq.push([mkRaw(1.0, 90), 0.2, 20]);
+    return seq;
+  }
+  assertEqual(runSequence(gapBridgedSequence(8)).releases, 1, "140ms null gap is bridged (fires)");
+  assertEqual(runSequence(gapBridgedSequence(11)).releases, 0, "200ms null gap is not bridged (does not fire)");
+  // 定数を無効値（∞）へ戻すと現行（導入前）と同値 = 200ms ギャップでも発火する。
+  // これは同時に「上の非検出テストが NB_MAX_GAP_MS によって落ちている」ことの証明でもある
+  assert(coreScript.includes("NB_MAX_GAP_MS: 150,"), "NB_MAX_GAP_MS constant present for ∞-substitution test");
+  const coreInfGap = new Function(
+    `${coreScript.replace("NB_MAX_GAP_MS: 150,", "NB_MAX_GAP_MS: Infinity,")}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  assertEqual(runSequence(gapBridgedSequence(11), coreInfGap).releases, 1,
+    "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' behavior on the 200ms gap");
 }
 {
   // 連続2射: 不応期を挟んで両方検出

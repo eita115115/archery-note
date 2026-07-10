@@ -41,6 +41,15 @@ const FORM_PH = Object.freeze({
   DRAW_SPEED: 0.25,
   DRAW_DIR_EPS: 0.05, // DRAWING 方向チェックの許容幅（Stage 0 E'）。トレンドがこの値未満（=顔へ近づく方向）のみ DRAWING。ジッター誤差での取りこぼし防止に正側へ少し許す
   CONFIRM_MS: 400, // リリース確定猶予: この間にアンカー圏へ戻ったら取消（自己修復）
+  /* nullBridged（velOk の代替経路）の条件定数（Stage 1 D'）。NB_RISE / NB_MAXV は
+     従来ハードコードされていた現行値のまま（0.30 / 4 への切替は第2回実射データ後）。
+     NB_MAX_GAP_MS は時間ベースの最大連続nullギャップ上限（新設・発動済み）:
+     フレーム数上限は fps 依存で意味が変わるため時間で制限する。これを超える姿勢ロスは
+     「リリースの瞬間を橋渡しした」とは言えず、遮蔽＋緩慢な引き戻しでの誤発火源になる
+     （arrowcheck-investigation-2026-07-10.md 観点4）。 */
+  NB_RISE: 0.25,
+  NB_MAXV: 2,
+  NB_MAX_GAP_MS: 150,
 });
 
 const FORM_PHASES = Object.freeze({
@@ -299,7 +308,15 @@ function stepFormPhase(st, raw, history, sens, now) {
   const maxV = win.length ? Math.max(...win.map((h) => h.vel || 0)) : 0;
   const hasNullGap = winAll.length > win.length;
   const velOk = maxV > FORM_PH.RELEASE_TH / s;
-  const nullBridged = hasNullGap && rise > 0.25 && maxV > 2;
+  /* 窓内の最大連続nullギャップ（最初のnullフレーム→最後のnullフレームの経過時間）。
+     NB_MAX_GAP_MS 超の姿勢ロスは nullBridged の根拠にしない（Stage 1 D'） */
+  let maxGapMs = 0, gapStart = null;
+  for (const h of winAll) {
+    if (!h.m) { if (gapStart == null) gapStart = h.ts; maxGapMs = Math.max(maxGapMs, h.ts - gapStart); }
+    else gapStart = null;
+  }
+  const nullBridged = hasNullGap && rise > FORM_PH.NB_RISE && maxV > FORM_PH.NB_MAXV
+    && maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
   const debug = { maxV, rise, nullFrames: winAll.length - win.length, conf: raw.conf }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
   if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
     && (velOk || nullBridged)) {
