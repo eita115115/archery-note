@@ -349,7 +349,8 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function toast(msg,ms){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),ms||1700); }
-function today(){ return new Date().toISOString().slice(0,10); }
+/* ローカル日付の YYYY-MM-DD。toISOString はUTC変換のため JST 00:00-08:59 が前日になる（朝練が前日扱いになる実害） */
+function today(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 /* ---------- モーダル共通（dialog 化とフォーカス管理） ---------- */
 const MODAL_FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
 function openModal(ovl,opts){
