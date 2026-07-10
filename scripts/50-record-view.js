@@ -431,6 +431,7 @@ function renderRecord(m) {
     if (st0)
       db.active.roundGroup = { gid: uid(), roundId, stage: 0, stageCount: mdef.stages.length };
     nativePulse("success");
+    wakeLock.acquire();
     save();
     render();
   };
@@ -1454,6 +1455,7 @@ async function finishSession() {
       : "矢が0本です。このセッションを破棄しますか？";
     if (await appConfirm(msg, { danger: true, okLabel: "破棄" })) {
       db.active = null;
+      wakeLock.release();
       nativePulse("heavy");
       save();
       render();
@@ -1481,6 +1483,7 @@ async function finishSession() {
   const isEdit = !!s._edit;
   delete s._edit;
   db.active = null;
+  wakeLock.release();
   if (isEdit) {
     const i = db.sessions.findIndex((x) => x.id === s.id);
     if (i >= 0) db.sessions[i] = s;

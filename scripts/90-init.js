@@ -55,8 +55,9 @@ function freshReload(){
 $("#updBar").onclick=freshReload;
 /* 高頻度記録操作のデバウンス保存（scheduleSave）は離脱時に必ず同期 flush する。
  * iOS Safari では pagehide が最も信頼できる。順序は本体（flushPendingSave）→ スナップショット。 */
-document.addEventListener("visibilitychange",()=>{ if(document.hidden){ flushPendingSave(); flushSafetySnapshot(); } else checkUpdate(); });
+document.addEventListener("visibilitychange",()=>{ if(document.hidden){ flushPendingSave(); flushSafetySnapshot(); } else{ checkUpdate(); wakeLock.reacquire(); } });
 window.addEventListener("pagehide",()=>{ flushPendingSave(); flushSafetySnapshot(); });
 window.addEventListener("beforeunload",()=>{ flushPendingSave(); flushSafetySnapshot(); });
 checkUpdate();
+if(db.active) wakeLock.acquire();
 render();

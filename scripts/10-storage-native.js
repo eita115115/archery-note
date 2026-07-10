@@ -574,3 +574,25 @@ function sessionStageDef(sess){
   const stage=def&&Array.isArray(def.stages)?def.stages[Number(rg.stage)||0]:null;
   return stage||null;
 }
+/* 記録セッション中の画面消灯を防止。API非対応ブラウザでは acquire() が即returnし何もしない */
+const wakeLock=(function(){
+  let sentinel=null,wanted=false;
+  async function acquire(){
+    wanted=true;
+    if(sentinel||!("wakeLock" in navigator)) return;
+    try{
+      sentinel=await navigator.wakeLock.request("screen");
+      sentinel.addEventListener("release",()=>{ sentinel=null; });
+    }catch(e){ console.warn("[wakelock]",e); }
+  }
+  function release(){
+    wanted=false;
+    if(!sentinel) return;
+    sentinel.release().catch(()=>{});
+    sentinel=null;
+  }
+  function reacquire(){
+    if(wanted&&!sentinel&&!document.hidden) acquire();
+  }
+  return {acquire,release,reacquire};
+})();
