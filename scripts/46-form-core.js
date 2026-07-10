@@ -39,6 +39,7 @@ const FORM_PH = Object.freeze({
   RISE_WINDOW_MS: 250, // 速度スパイクの短窓（maxV 算出用に流用）
   REFRACTORY_MS: 1000,
   DRAW_SPEED: 0.25,
+  DRAW_DIR_EPS: 0.05, // DRAWING 方向チェックの許容幅（Stage 0 E'）。トレンドがこの値未満（=顔へ近づく方向）のみ DRAWING。ジッター誤差での取りこぼし防止に正側へ少し許す
   CONFIRM_MS: 400, // リリース確定猶予: この間にアンカー圏へ戻ったら取消（自己修復）
 });
 
@@ -314,7 +315,12 @@ function stepFormPhase(st, raw, history, sens, now) {
       ? FORM_PHASES.FULL_DRAW : FORM_PHASES.ANCHORING;
   } else {
     st.anchorSince = 0;
-    st.cur = (maxV > FORM_PH.DRAW_SPEED && raw.anchorNorm < 1.2) ? FORM_PHASES.DRAWING : FORM_PHASES.SETUP;
+    // 方向チェック（Stage 0 E'）: anchorNorm の減少方向（手首が顔へ近づく）のみ DRAWING。
+    // 増加方向（レットダウン等）を DRAWING と誤分類すると sticky な anchorStartTs が
+    // 保持されて hold にレットダウン前の時間が混入するため、SETUP へ落とす
+    const anchorTrend = win.length ? raw.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
+    st.cur = (maxV > FORM_PH.DRAW_SPEED && raw.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS)
+      ? FORM_PHASES.DRAWING : FORM_PHASES.SETUP;
   }
   // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット
   if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs) st.anchorStartTs = now;

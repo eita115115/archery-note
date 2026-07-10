@@ -248,6 +248,28 @@ function shotSequence(dt) {
   const st = core.makeFormPhaseDetector();
   assertEqual(core.stepFormPhase(st, null, [], 1.0, 100).phase, "IDLE", "null metrics is IDLE");
 }
+{
+  // DRAWING 方向チェック（Stage 0 E'）: anchorNorm 増加方向（レットダウン等）は DRAWING に遷移しない。
+  // trend +0.1/フレーム、vel 0.5〜7.8 の範囲のレットダウン系列で DRAWING が一度も出ないこと
+  [20, 66].forEach((dt) => {
+    const seq = [];
+    for (let i = 0; i < 30; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
+    for (let i = 1; i <= 9; i++) seq.push([mkRaw(0.22 + i * 0.1, 140), 0.1 / (dt / 1000), dt]); // 0.32→1.12
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.5, 90), 0.02, dt]);
+    const r = runSequence(seq);
+    assert(!r.phases.includes("DRAWING"), `let-down (dt=${dt}) never classified as DRAWING, got ${r.phases}`);
+    assertEqual(r.releases, 0, `let-down (dt=${dt}) direction-check sequence does not fire`);
+  });
+}
+{
+  // ゆっくりしたドロー（vel 0.3-0.5、trend 負）は引き続き DRAWING に到達する
+  const dt = 66;
+  const seq = [];
+  for (let i = 0; i < 10; i++) seq.push([mkRaw(1.5, 90), 0.05, dt]);
+  for (let i = 0; i < 25; i++) seq.push([mkRaw(1.15 - i * 0.03, 110), 0.45, dt]);
+  const r = runSequence(seq);
+  assert(r.phases.includes("DRAWING"), `slow draw with negative trend reaches DRAWING, got ${r.phases}`);
+}
 
 /* ---------- computeFormVelocity（Stage 0 A1: 47の旧インライン実装と同値であること） ---------- */
 
