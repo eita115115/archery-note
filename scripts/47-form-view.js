@@ -559,6 +559,13 @@ function startFormReplay(videoUrl){
     b.disabled=!shots.length;
     b.textContent=shots.length?`保存して終了（${shots.length}射）`:"保存して終了";
   }
+  function renumberShots(){
+    ovl.querySelectorAll("#frShots [data-shot-id]").forEach((div,i)=>{
+      const idx=shots.length-1-i; // 一覧は新しい射が先頭（prepend）
+      const t=div.querySelector(".t");
+      if(t) t.textContent=`第${idx+1}射`;
+    });
+  }
   function onShot(now){
     const shot=summarizeFormShot(history,anchorStartTs,now);
     if(!shot) return;
@@ -587,7 +594,18 @@ function startFormReplay(videoUrl){
       if(lv){const dt=(now-lv.ts)/1000;if(dt>0&&dt<0.5)vel=formDist(raw.dW,lv.m.dW)/dt/raw.bodyScale;}}
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
-      const {phase,released}=stepFormPhase(detector,raw,history,1.0,now);
+      const {phase,released,canceled}=stepFormPhase(detector,raw,history,1.0,now);
+      if(canceled){
+        /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
+        const last=shots[shots.length-1];
+        if(last){
+          shots=shots.filter(s=>s.id!==last.id);
+          const div=ovl.querySelector(`#frShots [data-shot-id="${last.id}"]`);
+          if(div) div.remove();
+          renumberShots();
+          refreshSave();
+        }
+      }
       if((phase==="ANCHORING"||phase==="FULL_DRAW")&&!anchorStartTs) anchorStartTs=now;
       if(released){ onShot(now); anchorStartTs=0; }
       if(phase==="SETUP"||phase==="IDLE") anchorStartTs=0;
