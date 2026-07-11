@@ -86,8 +86,16 @@ function normalizeDb(d){
   if(!out.gamification||typeof out.gamification!=="object") out.gamification={badges:[]};
   if(!Array.isArray(out.gamification.badges)) out.gamification.badges=[];
   out.gamification.badges=out.gamification.badges.filter(b=>b&&typeof b==="object"&&typeof b.id==="string");
+  /* unlockedAt の型強制（strict-review minor③）: 手編集・破損バックアップで欠落/非文字列だと
+     分析タブの u.unlockedAt.slice(...) が TypeError で renderAnalysis 全体を落とす */
+  out.gamification.badges.forEach(b=>{ if(typeof b.unlockedAt!=="string") b.unlockedAt=String(b.unlockedAt||""); });
   const VALID_FACE_TYPES=["single","triple","field"];
   out.sessions.forEach(s=>{
+    /* date の型強制（strict-review major①根本原因）: 手編集・破損バックアップの数値/非文字列
+       date が素通りすると、backfillBadges/calcGoalProgress/checkBadges の s.date.slice(...) が
+       TypeError で起動を含む複数経路をクラッシュさせる。fmtD/gamIsoWeek は非ISO文字列や空文字を
+       安全に扱える（該当セッションは日付関連の集計・表示から静かに除外される） */
+    if(typeof s.date!=="string") s.date=s.date==null?"":String(s.date);
     if(typeof s.faceD!=="number"||!Number.isFinite(s.faceD)) s.faceD=122;
     if(!VALID_FACE_TYPES.includes(s.faceType)) s.faceType="single";
     if(s.dist!=null&&(typeof s.dist!=="number"||!Number.isFinite(s.dist))) s.dist=18;

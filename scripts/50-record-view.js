@@ -977,13 +977,22 @@ const BADGE_ICONS = {
 function gamificationBadgesCardHtml() {
   const g = db.settings.gamification;
   if (!g || !g.enabled) return "";
-  const unlocked = new Map((db.gamification.badges || []).map((b) => [b.id, b]));
+  /* BADGE_DEFS に存在する id のみを解除数として数える（strict-review minor③付随）。
+     未来バージョンの未知バッジ id が破損/旧バージョン混在インポートで混入しても「13/12」のような
+     数え違いにならない */
+  const knownIds = new Set(BADGE_DEFS.map((b) => b.id));
+  const unlocked = new Map(
+    (db.gamification.badges || []).filter((b) => knownIds.has(b.id)).map((b) => [b.id, b]),
+  );
   const cards = BADGE_DEFS.map((b) => {
     const u = unlocked.get(b.id);
+    /* 解除日はローカル日で表示する（strict-review minor④）。unlockedAt は ISO のまま保存し、
+       表示だけを today() と同じローカル日基準に揃える（UTC slice だと朝練の解除が前日表示になる）。
+       Invalid Date は gamFmtDate→fmtD の正規表現ガードで自動的に空表示になる */
     return `<div class="badgeCard ${u ? "" : "locked"}" data-testid="badge-card" data-badge="${b.id}">
       <span class="ico" aria-hidden="true">${BADGE_ICONS[b.id] || ""}</span>
       <span class="nm">${esc(b.name)}</span>
-      <span class="dt">${u ? esc(fmtD(u.unlockedAt.slice(0, 10))) : ""}</span>
+      <span class="dt">${u ? esc(fmtD(gamFmtDate(new Date(u.unlockedAt)))) : ""}</span>
     </div>`;
   }).join("");
   const total = BADGE_DEFS.length;
@@ -1847,7 +1856,12 @@ function summaryGamificationHtml(gam) {
   let streakPart;
   if (streakAfter.configured) {
     const grew = streakAfter.current > streakBefore.current;
-    const freezeUsed = streakAfter.freezeUsedDates.filter((d) => !streakBefore.freezeUsedDates.includes(d));
+    /* 前回練習日より後に消費されたフリーズだけを今回分として表示する（strict-review major②）。
+       同日2回の computeStreak（before/after は「今回のセッションの有無」だけが違う）を単純に
+       差集合すると、過去の欠席日はどちらの走査にも同一に現れるため常に空になり通知が出ない */
+    const freezeUsed = streakAfter.freezeUsedDates.filter(
+      (d) => streakBefore.lastPracticeDate && d > streakBefore.lastPracticeDate,
+    );
     const msg = grew
       ? "連続記録が伸びました"
       : streakAfter.current > 0

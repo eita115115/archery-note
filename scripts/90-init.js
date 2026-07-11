@@ -69,11 +69,18 @@ if((db.settings.launchCount||0)<9){ db.settings.launchCount=(db.settings.launchC
    backfilledAt が既にあれば二度と走らない。演出なし（justUnlocked を付けず、分析タブの一覧に
    静かに現れるだけ）。gamification-final-design.md §5 移行バックフィル 準拠 */
 if(db.settings.gamification && db.settings.gamification.enabled && !db.settings.gamification.backfilledAt){
-  const nowIso=new Date().toISOString();
-  const have=new Set((db.gamification.badges||[]).map(b=>b.id));
-  const got=backfillBadges(db.sessions, nowIso).filter(b=>!have.has(b.id));
-  if(got.length) db.gamification.badges.push(...got);
-  db.settings.gamification.backfilledAt=nowIso;
-  save({reason:"gamification-backfill"});
+  /* 起動経路のクラッシュループ防止（strict-review major①）: バックフィル対象データが
+     壊れていて例外を投げても render() には必ず到達させる。根本原因（非文字列 date）は
+     normalizeDb 側で潰しているが、ここは移行処理全般に対する最後の防波堤 */
+  try{
+    const nowIso=new Date().toISOString();
+    const have=new Set((db.gamification.badges||[]).map(b=>b.id));
+    const got=backfillBadges(db.sessions, nowIso).filter(b=>!have.has(b.id));
+    if(got.length) db.gamification.badges.push(...got);
+    db.settings.gamification.backfilledAt=nowIso;
+    save({reason:"gamification-backfill"});
+  }catch(e){
+    console.warn("[gamification] backfill failed, skipping this launch",e);
+  }
 }
 render();

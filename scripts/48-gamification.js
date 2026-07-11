@@ -69,8 +69,14 @@ function computeStreak(sessions, practiceDays, todayStr){
   out.lastPracticeDate = dates[dates.length-1];
   if(!configured) return out;               /* 未設定: 判定停止（UIはCTA表示） */
   const pd = new Set(practiceDays);
-  const cur = new Date(dates[0]+"T00:00:00");
   const end = new Date(todayStr+"T00:00:00");
+  /* 日ループの開始点は直近5年にクランプする（strict-review minor⑤）。date は type="date" の
+     自由入力で年4桁を誤入力でき（例: "0202-07-11"）、最古練習日をそのまま起点にすると無関係な
+     大昔まで1日単位で走査してしまう。ストリーク/ベストはどのみち直近の連続にしか意味がないため、
+     クランプより前の best を遡及しなくても実害はない */
+  const earliestScan = new Date(end); earliestScan.setFullYear(earliestScan.getFullYear()-5);
+  const firstPractice = new Date(dates[0]+"T00:00:00");
+  const cur = firstPractice < earliestScan ? earliestScan : firstPractice;
   while(cur <= end){
     const iso = gamFmtDate(cur);
     if(sd.has(iso)){                        /* 練習した日は曜日を問わず +1 */

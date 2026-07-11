@@ -661,6 +661,62 @@ function checkArrowCoordinateSanitize(storageApi) {
   );
 }
 
+function checkSessionDateCoercion(storageApi) {
+  // strict-review (2026-07-11) major①根本原因: 手編集・破損バックアップの非文字列 date が
+  // normalizeDb を素通りすると、次回起動のゲーミフィケーション・バックフィル（backfillBadges の
+  // month_master 判定など）が cur.date.slice(...) で TypeError を投げ、起動が恒久的に
+  // 「読み込み失敗」画面になる（scripts/90-init.js の render() に到達しない）。
+  const db = storageApi.normalizeDb({
+    sessions: [
+      { id: "numeric-date", date: 20260702, ends: [] },
+      { id: "null-date", date: null, ends: [] },
+      { id: "string-date", date: "2026-07-02", ends: [] },
+    ],
+  });
+  assertEqual(typeof db.sessions[0].date, "string", "[date-coercion] numeric date becomes a string");
+  assertEqual(db.sessions[0].date, "20260702", "[date-coercion] numeric date is stringified as-is");
+  assertEqual(typeof db.sessions[1].date, "string", "[date-coercion] null date becomes a string");
+  assertEqual(db.sessions[1].date, "", "[date-coercion] null date becomes empty string (not the literal 'null')");
+  assertEqual(
+    db.sessions[2].date,
+    "2026-07-02",
+    "[date-coercion] already-string date passes through unchanged",
+  );
+}
+
+function checkBadgeUnlockedAtCoercion(storageApi) {
+  // strict-review (2026-07-11) minor③: 破損バッジ（unlockedAt 欠落/非文字列）が normalizeDb を
+  // 素通りすると、分析タブの実績グリッド（u.unlockedAt.slice(...)）が TypeError で
+  // renderAnalysis 全体を落とす。
+  const db = storageApi.normalizeDb({
+    gamification: {
+      badges: [
+        { id: "century" }, // unlockedAt 欠落
+        { id: "millennium", unlockedAt: 42 }, // 非文字列
+        { id: "first_arrow", unlockedAt: "2026-07-01T00:00:00.000Z" }, // 正常
+      ],
+    },
+  });
+  db.gamification.badges.forEach((b) => {
+    assertEqual(typeof b.unlockedAt, "string", `[badge-coercion] ${b.id} unlockedAt must be a string`);
+  });
+  assertEqual(
+    db.gamification.badges[0].unlockedAt,
+    "",
+    "[badge-coercion] missing unlockedAt becomes empty string",
+  );
+  assertEqual(
+    db.gamification.badges[1].unlockedAt,
+    "42",
+    "[badge-coercion] non-string unlockedAt is stringified",
+  );
+  assertEqual(
+    db.gamification.badges[2].unlockedAt,
+    "2026-07-01T00:00:00.000Z",
+    "[badge-coercion] already-string unlockedAt passes through unchanged",
+  );
+}
+
 function checkDbRevContract() {
   assert(/^let DB_REV\s*=\s*0/m.test(storageScript), "[db-rev] storage script should declare let DB_REV");
   const saveBody = section("function save(", "function uid");
@@ -676,6 +732,8 @@ function main() {
 
   checkDbRevContract();
   checkArrowCoordinateSanitize(storageApi);
+  checkSessionDateCoercion(storageApi);
+  checkBadgeUnlockedAtCoercion(storageApi);
 
   checkNormalizeIdempotency(storageApi, fixtures);
   checkBlank(storageApi, fixtures);

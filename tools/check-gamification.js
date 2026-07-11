@@ -163,6 +163,29 @@ function sess(id, date, o) {
   assertDeepEqual(st.freezeUsedDates, ["2026-06-29"], "consumed date recorded");
 }
 
+// 日ループの5年クランプ（strict-review 2026-07-11 minor⑤・年タイポ耐性）:
+// date は type="date" の自由入力で年4桁を誤入力できる（例: "0202-07-11"）。最古練習日を
+// そのまま走査起点にすると無関係な大昔まで1日ずつ走査してしまうため、直近5年にクランプする。
+// クランプは走査「範囲」だけを変えるので、クランプ内に収まる直近の current/best/freeze の
+// 結果は、タイポ入り・タイポなしのどちらでも同じでなければならない。
+{
+  const typo = sess("typo", "0202-07-11");
+  const ss = [sess("a", "2026-07-06"), sess("b", "2026-07-08")]; // 月・水
+  const withTypo = gam.computeStreak([typo, ...ss], [1, 3, 5], "2026-07-10");
+  const withoutTypo = gam.computeStreak(ss, [1, 3, 5], "2026-07-10");
+  assertEqual(withTypo.current, withoutTypo.current, "clamp: wildly old date does not change current");
+  assertEqual(withTypo.best, withoutTypo.best, "clamp: wildly old date does not change best");
+  assertEqual(withTypo.freezeTokens, withoutTypo.freezeTokens, "clamp: wildly old date does not change freezeTokens");
+  assertDeepEqual(
+    withTypo.freezeUsedDates,
+    withoutTypo.freezeUsedDates,
+    "clamp: wildly old date does not change freezeUsedDates",
+  );
+  // lastPracticeDate は日ループとは無関係な別集合（sd）から出るため、クランプの影響を受けない
+  // （このバッジは「最も新しい練習日」であって最古ではない点に注意）
+  assertEqual(withTypo.lastPracticeDate, "2026-07-08", "typo date does not become lastPracticeDate");
+}
+
 /* ---------- BADGE_DEFS 全体 ---------- */
 
 {
