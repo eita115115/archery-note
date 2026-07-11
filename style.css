@@ -198,7 +198,6 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 .btn.sm{padding:8px 12px; font-size:13px; width:auto; border-radius:8px;}
 .btn:disabled{opacity:.4;}
 .btnrow{display:flex; gap:8px; margin-top:10px;} .btnrow .btn{flex:1;}
-}
 .homeActions{
   display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:4px 0 12px;
   /* motion:因果 — 記録ホームを開いた結果として主要導線ボタンが現れる */
