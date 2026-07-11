@@ -1,5 +1,97 @@
 "use strict";
 /* Archery Note: history and sight-adjustment views */
+
+/* ============ gamification: 履歴タブ pageHero 内のストリーク+目標リング ============
+   最終設計書 gamification-final-design.md §5 画面別配置 / ui-specs-fable-adjudication.md
+   「3. 2a 履歴タブ ストリークヒーロー」準拠。enabled=false では何も描画しない。
+   ストリーク・目標は永続値ではなく毎回 sessions から導出する（db.gamification.streak は存在しない）。
+   practiceDays 未設定時は数字の代わりに設定CTAを出す（既定曜日の押し付け禁止） */
+function gamGoalRingHtml(cls, current, target, caption, rest) {
+  const r = 20, c = 2 * Math.PI * r;
+  const off = goalRingOffset(current, target, c);
+  return `<div class="goalRing ${rest ? "rest" : ""}">
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle class="goalRingBg" cx="24" cy="24" r="${r}"/>
+      <circle class="goalRingFill ${cls}" cx="24" cy="24" r="${r}" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" transform="rotate(-90 24 24)"/>
+      <text class="goalRingLabel" x="24" y="24">${current}</text>
+    </svg>
+    <span class="goalRingCaption">${caption}</span>
+  </div>`;
+}
+function gamificationHeroHtml() {
+  const g = db.settings.gamification;
+  if (!g || !g.enabled) return "";
+  const streak = computeStreak(db.sessions, g.practiceDays, today());
+  const goals = calcGoalProgress(db.sessions, g.goals, today());
+  const restDay = streak.configured && !g.practiceDays.includes(new Date().getDay());
+  const mainHtml = streak.configured
+    ? `<div class="streakRow">
+        <span class="streakFire" aria-hidden="true">${icon("fire")}</span>
+        <span class="streakNum" data-testid="streak-current">${streak.current}</span><span class="streakUnit">日連続</span>
+      </div>
+      <div class="streakBest">ベスト <b>${streak.best}</b>日</div>
+      <div class="freezeDots" aria-hidden="true" data-testid="freeze-dots">
+        ${[0, 1, 2].map((i) => `<span class="freezeDot ${i < streak.freezeTokens ? "full" : ""}"></span>`).join("")}
+      </div>`
+    : `<div class="streakRow streakRowUnset">
+        <span class="streakFire" aria-hidden="true">${icon("fire")}</span>
+        <span class="streakNum" data-testid="streak-current">—</span><span class="streakUnit">日連続</span>
+      </div>
+      <p>練習曜日を設定するとストリークが始まります</p>
+      <button type="button" class="btn sm sec" id="heroStreakSetup" data-testid="hero-streak-setup">練習曜日を設定</button>`;
+  return `<div class="streakHero" data-testid="gamification-hero">
+    <div class="streakMain">
+      <div class="kicker">継続</div>
+      ${mainHtml}
+    </div>
+    <div class="streakDivider" aria-hidden="true"></div>
+    <div class="streakGoals">
+      ${gamGoalRingHtml("daily", goals.daily.current, goals.daily.target, "今日", restDay)}
+      ${gamGoalRingHtml("weekly", goals.weekly.current, goals.weekly.target, "今週")}
+      ${gamGoalRingHtml("monthly", goals.monthly.current, goals.monthly.target, "今月")}
+    </div>
+  </div>`;
+}
+/* 練習曜日のクイック設定シート。record タブの feature hint（practiceDays）と
+   履歴Heroの設定CTAの両方から呼ばれる。月水金土をプリセレクトするが、あくまで
+   タップで開いた時だけの提案であり自動ポップアップはしない（既定曜日の押し付け禁止）。
+   スキップも設定も同じ重みのボタンとして扱う */
+function openPracticeDaysSheet() {
+  const DOW = ["日", "月", "火", "水", "木", "金", "土"];
+  const sel = new Set([1, 3, 5, 6]);
+  const ovl = document.createElement("div");
+  ovl.className = "ovl";
+  ovl.innerHTML = `<div class="sheet">
+    <h3>${icon("fire")} 練習曜日を設定</h3>
+    <p class="note">練習する曜日を選ぶと、ストリーク（連続記録）が始まります。あとで設定タブでも変更できます。</p>
+    <div class="gamifyDayChips" id="pdChips" data-testid="practice-days-sheet-chips">
+      ${DOW.map((lb, i) => `<button type="button" class="gamifyDayChip ${sel.has(i) ? "on" : ""}" aria-pressed="${sel.has(i)}" data-d="${i}">${lb}</button>`).join("")}
+    </div>
+    <div class="btnrow"><button type="button" class="btn" id="pdSave">設定する</button></div>
+    <button type="button" class="onboardSkip" id="pdSkip">あとで</button>
+  </div>`;
+  openModal(ovl, { escapeTarget: "#pdSkip" });
+  ovl.querySelectorAll("#pdChips .gamifyDayChip").forEach(
+    (c) =>
+      (c.onclick = () => {
+        const d = +c.dataset.d;
+        if (sel.has(d)) sel.delete(d);
+        else sel.add(d);
+        const on = sel.has(d);
+        c.classList.toggle("on", on);
+        c.setAttribute("aria-pressed", String(on));
+      }),
+  );
+  ovl.querySelector("#pdSave").onclick = () => {
+    db.settings.gamification.practiceDays = sel.size ? [...sel].sort((a, b) => a - b) : null;
+    save({ reason: "gamification-practice-days" });
+    closeModal(ovl);
+    toast(sel.size ? "練習曜日を設定しました" : "練習曜日を未設定に戻しました");
+    render();
+  };
+  ovl.querySelector("#pdSkip").onclick = () => closeModal(ovl);
+}
+
 /* 履歴一覧の行: 「スコアカードの記録行」。合計点を主役数値（tabular-nums・大型）にし、
    ラウンド/ステージ・天気は小さいバッジへ格下げする。ロジック（集計）は不変・表示のみ */
 function historyRowHtml(s) {
@@ -105,6 +197,8 @@ function renderHistory(m) {
     .forEach((li) => (li.onclick = () => openHistDetail(li.dataset.id)));
   const cta = $("#histEmptyCta");
   if (cta) cta.onclick = () => showView("record");
+  const heroStreakSetup = $("#heroStreakSetup");
+  if (heroStreakSetup) heroStreakSetup.onclick = () => openPracticeDaysSheet();
 }
 function sessionGroupPoint(s) {
   const m = sessionMetrics(s);

@@ -747,6 +747,7 @@ function pageHeroHtml(type, ctx) {
         ${heroMetricHtml("平均", arrows.length ? (total / arrows.length).toFixed(2) : "—", "フィルター後の平均点")}
         ${heroMetricHtml("最高合計", best ? `${best.total}` : "—", bestMeta)}
       </div>
+      ${gamificationHeroHtml()}
     </section>`;
   }
   if (type === "sight") {
