@@ -223,6 +223,31 @@ function updateAppChrome(){
     if(sb && typeof sb.setStyle==="function") sb.setStyle({style:"DARK"}).catch(()=>{});
   }catch(e){}
 }
+/* S1（ストレージ守りタスク・OPFS移行裁定 §4）: navigator.storage.persist() を起動時に1回要求する
+   （90-init.js から呼ばれる）。ユーザーへの確認プロンプトは出ない仕様（ブラウザ内部のヒューリスティック
+   判断）。対応環境のみで実行し、失敗・非対応は静かに無視する。保存の可否・挙動は一切変えない。
+   結果は「アプリ情報・保存状態」パネルに「保護された保存: 有効/未確定」として控えめに表示するだけ。 */
+let _storagePersist={supported:false,checked:false,persisted:null};
+async function requestStoragePersistence(){
+  try{
+    if(typeof navigator==="undefined"||!navigator.storage||typeof navigator.storage.persist!=="function") return;
+    _storagePersist.supported=true;
+    let persisted=null;
+    if(typeof navigator.storage.persisted==="function"){
+      try{ persisted=await navigator.storage.persisted(); }catch(e){ persisted=null; }
+    }
+    if(!persisted){
+      try{ persisted=await navigator.storage.persist(); }catch(e){ persisted=false; }
+    }
+    _storagePersist.persisted=!!persisted;
+  }catch(e){ /* 対応環境のみの機能。失敗しても既存の保存経路には一切影響しない */ }
+  finally{ _storagePersist.checked=true; }
+}
+function storagePersistNoteHtml(){
+  if(!_storagePersist.supported) return "";
+  const label=!_storagePersist.checked?"確認中":(_storagePersist.persisted?"有効":"未確定");
+  return `<div class="note">保護された保存: ${label}</div>`;
+}
 function nativeReadinessProfile(){
   const counts=dataCounts();
   const runtime=runtimeKind();
@@ -254,6 +279,7 @@ function nativeReadinessHtml(){
     <summary>アプリ情報・保存状態</summary>
     <div class="advice" style="background:var(--card);border-color:var(--line)">
     <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER} / ${esc(p.storage.label)}</div>
+    ${storagePersistNoteHtml()}
     <div class="nativeStack">
       <div class="nativePill"><div class="k">保存</div><b>${pct(p.storageScore)}</b><span>バックアップと復元を維持</span></div>
       <div class="nativePill"><div class="k">演算</div><b>${pct(p.engineScore)}</b><span>物理コア分離へ移行中</span></div>
@@ -288,6 +314,28 @@ function cancelIdleTask(job){
   if(job.kind==="idle" && typeof w.cancelIdleCallback==="function") w.cancelIdleCallback(job.id);
   else clearTimeout(job.id);
 }
+/* S2（ストレージ守りタスク・OPFS移行裁定 §4／ユーザー判断メモ1-イの簡易版）: 保持世代数を6→4に
+   減らし、実効容量を約1.5倍にする。単純な件数カット（先頭4件だけ残す）ではなく、時刻が最も近い
+   隣接ペアを1件ずつ間引く選別にする。理由: 復元・インポートなどの重要操作が短時間に連続すると
+   近接した世代が固まって生まれやすく、単純カットだと最新寄りの数世代で4枠を使い切ってしまう。
+   このロジックは常に「最新」と「最古」の両端を（i の走査範囲が 1..length-2 のため）暗黙に保護し、
+   間引き後は必ずちょうど maxGenerations 件に収まる（取りこぼしなし。指数的な時間分散の理想形には
+   達しないケースもあるが、単純カットより悪化することはない）。
+   縮退リトライループ（storageSetItem 失敗時に末尾から pop する下のループ）はこの間引き後の配列に
+   対してそのまま動作し、ロジック自体は変更していない。 */
+const SNAP_MAX_GENERATIONS=4;
+function thinSnapshots(list,maxGenerations){
+  const snaps=list.slice();
+  while(snaps.length>maxGenerations){
+    let dropIdx=1,minGap=Infinity;
+    for(let i=1;i<snaps.length-1;i++){
+      const gap=(snaps[i-1].ts||0)-(snaps[i].ts||0);
+      if(gap<minGap){ minGap=gap; dropIdx=i; }
+    }
+    snaps.splice(dropIdx,1);
+  }
+  return snaps;
+}
 let _lastSnapTs=0;
 function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
   try{
@@ -300,7 +348,7 @@ function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
     if(!force && latest && latest.hash===h){ _lastSnapTs=latest.ts||now; return; }
     if(!force && latest && now-(latest.ts||0)<30*60*1000){ _lastSnapTs=latest.ts||now; return; }
     snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
-    snaps=snaps.slice(0,6);
+    snaps=thinSnapshots(snaps,SNAP_MAX_GENERATIONS);
     for(;;){
       if(storageSetItem(SNAP_KEY,JSON.stringify(snaps))) break;
       if(snaps.length<=1) throw new Error("snapshot storage full");
