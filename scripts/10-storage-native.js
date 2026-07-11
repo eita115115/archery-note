@@ -11,7 +11,7 @@ const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false}},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:true,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -56,12 +56,36 @@ function normalizeDb(d){
      浅いマージだけでは新キーが古い保存データ・破損インポートに行き渡らない */
   if(typeof out.settings.onboardingSeen!=="boolean") out.settings.onboardingSeen=false;
   if(typeof out.settings.launchCount!=="number"||!Number.isFinite(out.settings.launchCount)) out.settings.launchCount=0;
-  const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false};
+  const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false};
   if(!out.settings.featureHints||typeof out.settings.featureHints!=="object"||Array.isArray(out.settings.featureHints)){
     out.settings.featureHints={...FH_DEFS};
   }else{
     Object.keys(FH_DEFS).forEach(k=>{ if(typeof out.settings.featureHints[k]!=="boolean") out.settings.featureHints[k]=FH_DEFS[k]; });
   }
+  /* ゲーミフィケーション設定・データのキー単位の明示補完。
+     最終設計書 gamification-final-design.md §3 準拠。practiceDays 既定は null（未設定=判定停止）、
+     空配列も未設定と同義。SCHEMA_VER は据え置き（フィールド補完のみ） */
+  if(!out.settings.gamification||typeof out.settings.gamification!=="object"){
+    out.settings.gamification={enabled:true,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null};
+  }else{
+    const gs=out.settings.gamification;
+    if(typeof gs.enabled!=="boolean") gs.enabled=true;
+    if(gs.practiceDays!==null&&!Array.isArray(gs.practiceDays)) gs.practiceDays=null;
+    if(Array.isArray(gs.practiceDays)){
+      gs.practiceDays=gs.practiceDays.filter(d=>Number.isInteger(d)&&d>=0&&d<=6);
+      if(!gs.practiceDays.length) gs.practiceDays=null;
+    }
+    if(!gs.goals||typeof gs.goals!=="object") gs.goals={dailyArrows:36,weeklySessions:3,monthlyArrows:300};
+    else{
+      if(!Number.isFinite(gs.goals.dailyArrows)||gs.goals.dailyArrows<1||gs.goals.dailyArrows>600) gs.goals.dailyArrows=36;
+      if(!Number.isFinite(gs.goals.weeklySessions)||gs.goals.weeklySessions<1||gs.goals.weeklySessions>14) gs.goals.weeklySessions=3;
+      if(!Number.isFinite(gs.goals.monthlyArrows)||gs.goals.monthlyArrows<1||gs.goals.monthlyArrows>5000) gs.goals.monthlyArrows=300;
+    }
+    if(typeof gs.backfilledAt!=="string") gs.backfilledAt=null;
+  }
+  if(!out.gamification||typeof out.gamification!=="object") out.gamification={badges:[]};
+  if(!Array.isArray(out.gamification.badges)) out.gamification.badges=[];
+  out.gamification.badges=out.gamification.badges.filter(b=>b&&typeof b==="object"&&typeof b.id==="string");
   const VALID_FACE_TYPES=["single","triple","field"];
   out.sessions.forEach(s=>{
     if(typeof s.faceD!=="number"||!Number.isFinite(s.faceD)) s.faceD=122;
@@ -452,7 +476,8 @@ const ICONS={
   target:'<svg class="icoInline" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.3"/><circle cx="12" cy="12" r="0.5" fill="currentColor" stroke="none"/></svg>',
   updown:'<svg class="icoInline" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt" stroke-linejoin="miter"><path d="M8 7.2 12 3.4l4 3.8M8 16.8l4 3.8 4-3.8"/><path d="M12 3.4v17.2"/></svg>',
   help:'<svg class="icoInline" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><circle cx="12" cy="12" r="8.4"/><path d="M9.4 9.4a2.7 2.7 0 1 1 4 2.3c-.85.5-1.35 1.05-1.35 2v.5"/><circle cx="12" cy="16.9" r="0.5" fill="currentColor" stroke="none"/></svg>',
-  chevron:'<svg class="icoInline" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="butt" stroke-linejoin="miter"><path d="M9 4.8 15.6 12 9 19.2"/></svg>'
+  chevron:'<svg class="icoInline" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="butt" stroke-linejoin="miter"><path d="M9 4.8 15.6 12 9 19.2"/></svg>',
+  fire:'<svg class="icoInline" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M12 21c-3.6 0-6-2.4-6-5.7 0-2.6 1.5-4.4 2.6-6.2.4 1.6 1 2.6 1.9 3.1-.5-2.8.4-5.6 3-7.7.4 2.9 2.1 4.4 3.4 6.2.9 1.3 1.1 2.6 1.1 4.6 0 3.3-2.4 5.7-6 5.7z"/></svg>'
 };
 function icon(name){ return ICONS[name]||""; }
 function fmtD(iso){ if(!iso||typeof iso!=="string"||!/^\d{4}-\d{2}-\d{2}/.test(iso))return""; const [y,m,d]=iso.split("-"); return `${+y}/${+m}/${+d}`; }

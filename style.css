@@ -1026,3 +1026,68 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
   .hintBanner{flex-wrap:wrap;}
   .hintBannerText{flex-basis:100%; order:-1;}
 }
+
+/* ============ gamification（ゲーミフィケーション） ============
+   最終設計書 gamification-final-design.md / ui-specs-fable-adjudication.md 準拠。
+   新規カスタムプロパティは追加しない（既存トークンのみ）。演出上限:
+   opacity/transform のみ・単発 ≤.45s・新規keyframeは streakLand の1つだけ。
+   prefers-reduced-motion は既存の一括無効化ルール(line 908)でカバー済み。 */
+
+/* gamifySettings — 設定シート GAMIFICATION セクション（表示グループの直後に配置） */
+.gamifySettings{margin-top:20px;}
+.gamifyToggleRow{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  min-height:var(--tap-target-comfortable); padding:4px 0;
+}
+.gamifyToggleRow span{font-size:14px; color:var(--ink);}
+.gamifyToggle{
+  position:relative; width:44px; height:26px; border-radius:13px;
+  background:var(--line); border:1px solid var(--line2); cursor:pointer;
+  flex:0 0 auto; -webkit-appearance:none; appearance:none;
+  transition:background var(--motion-fast), border-color var(--motion-fast);
+}
+.gamifyToggle::after{
+  content:""; position:absolute; top:2px; left:2px; width:20px; height:20px;
+  border-radius:50%; background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,.14);
+  transition:transform var(--motion-fast) var(--ease-app);
+}
+/* 選択状態（ON）は反転トークンで示す。--green は指標達成量（リング・解除率バー）に予約するため使わない */
+.gamifyToggle:checked{background:var(--invert-bg); border-color:var(--invert-bg);}
+.gamifyToggle:checked::after{transform:translateX(18px);}
+.gamifyToggle:active::after{width:24px;}
+.gamifyToggle:checked:active::after{transform:translateX(14px);}
+.gamifyDayLabel{font-size:12px; color:var(--sub); margin:14px 0 6px; display:block;}
+.gamifyDayChips{display:grid; grid-template-columns:repeat(7,1fr); gap:6px;}
+.gamifyDayChip{
+  width:36px; height:36px; border-radius:var(--radius-control); border:1px solid var(--line);
+  background:var(--soft); color:var(--ink); font-size:12px; font-weight:var(--fw-label);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; user-select:none; padding:0;
+  font-family:inherit; -webkit-appearance:none; appearance:none;
+  transition:transform var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);
+}
+.gamifyDayChip:active{transform:scale(.93);}
+.gamifyDayChip.on{
+  background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);
+  font-weight:var(--fw-emphasis); animation:chipPop .2s var(--ease-app);
+}
+.gamifyGoalLabel{font-size:12px; color:var(--sub); margin:14px 0 6px; display:block;}
+.gamifyGoalRows{display:flex; flex-direction:column; gap:8px;}
+.gamifyGoalRow{
+  display:grid; grid-template-columns:minmax(0,1fr) 100px; gap:8px; align-items:center;
+}
+.gamifyGoalRow span{font-size:13px; color:var(--ink);}
+.gamifyGoalRow .inp{
+  min-height:40px; padding:8px 10px; font-size:14px; text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+.gamifyInfo{
+  margin-top:14px; padding:10px 12px; border-radius:var(--radius-card);
+  background:var(--soft); border:1px solid var(--line);
+  font-size:11px; color:var(--sub); line-height:var(--line-height-relaxed);
+}
+@media (max-width:360px){
+  .gamifyDayChips{gap:4px;}
+  .gamifyDayChip{width:auto; min-width:0;}
+  .gamifyGoalRow{grid-template-columns:1fr;}
+}

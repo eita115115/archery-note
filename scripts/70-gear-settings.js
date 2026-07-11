@@ -484,6 +484,36 @@ function applyTheme(){
   const t=db.settings.theme||"auto";
   document.documentElement.className=t;
 }
+/* GAMIFICATION 設定セクション: テーマ選択の下（表示グループの直後）に独立配置。
+   最終設計書 gamification-final-design.md §5 画面別配置・ui-specs-fable-adjudication.md 2d 準拠。
+   enabled=false では曜日チップ・目標入力・説明文を隠し、トグルだけを残す（全UI非表示・全計算スキップ）。
+   曜日チップは既定で .on を付けない（practiceDays 既定 null。既定曜日の押し付け禁止） */
+function gamifySettingsHtml(){
+  const g=db.settings.gamification||{};
+  const pd=Array.isArray(g.practiceDays)?g.practiceDays:[];
+  const goals=g.goals||{dailyArrows:36,weeklySessions:3,monthlyArrows:300};
+  const DOW=["日","月","火","水","木","金","土"];
+  return `<div class="settingsGroup gamifySettings" data-testid="settings-group-gamification">
+      <div class="settingsGroupTitle">ゲーミフィケーション</div>
+      <div class="gamifyToggleRow">
+        <span>ストリーク・バッジ・目標を表示</span>
+        <input type="checkbox" class="gamifyToggle" id="gamEnabled" data-testid="gamify-toggle" ${g.enabled?"checked":""}>
+      </div>
+      ${g.enabled?`
+      <label class="f gamifyDayLabel">練習曜日 — 未選択のままならストリーク判定は停止します</label>
+      <div class="gamifyDayChips" id="gamDayChips" data-testid="gamify-day-chips">
+        ${DOW.map((lb,i)=>`<button type="button" class="gamifyDayChip ${pd.includes(i)?"on":""}" aria-pressed="${pd.includes(i)}" data-d="${i}">${lb}</button>`).join("")}
+      </div>
+      <label class="f gamifyGoalLabel">練習目標</label>
+      <div class="gamifyGoalRows">
+        <div class="gamifyGoalRow"><span>1日の本数</span><input class="inp" id="gamGoalDaily" inputmode="numeric" data-testid="gamify-goal-daily" value="${goals.dailyArrows}"></div>
+        <div class="gamifyGoalRow"><span>週のセッション数</span><input class="inp" id="gamGoalWeekly" inputmode="numeric" data-testid="gamify-goal-weekly" value="${goals.weeklySessions}"></div>
+        <div class="gamifyGoalRow"><span>月の本数</span><input class="inp" id="gamGoalMonthly" inputmode="numeric" data-testid="gamify-goal-monthly" value="${goals.monthlyArrows}"></div>
+      </div>
+      <div class="gamifyInfo">練習した日は曜日を問わず+1。練習曜日に記録がない日だけフリーズを消費（またはリセット、当日はまだ判定しません）。ストリークが7増えるごとにフリーズ+1（最大3）。</div>
+      `:""}
+    </div>`;
+}
 function openSettings(){
   const ovl=document.createElement("div"); ovl.className="ovl";
   const th=db.settings.theme||"auto";
@@ -519,6 +549,8 @@ function openSettings(){
       <div class="settingsActionHint">距離ごとのステージを持つ自分用ラウンドを増減・編集します。</div>
       ${customRoundsSettingsHtml()}
     </div>
+
+    ${gamifySettingsHtml()}
 
     <div class="settingsGroup" data-testid="settings-group-data">
       <div class="settingsGroupTitle">データ</div>
@@ -567,6 +599,37 @@ function openSettings(){
     ovl.querySelectorAll("#fdChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
     toast(db.settings.formDebug?"検証用の診断データ保存を有効にしました":"検証用の診断データ保存を無効にしました");
   });
+  const gamEnabled=ovl.querySelector("#gamEnabled");
+  if(gamEnabled) gamEnabled.onchange=e=>{
+    db.settings.gamification.enabled=e.target.checked;
+    save({reason:"gamification-toggle"});
+    closeModal(ovl); openSettings();
+  };
+  ovl.querySelectorAll("#gamDayChips .gamifyDayChip").forEach(c=>c.onclick=()=>{
+    const d=+c.dataset.d;
+    const g=db.settings.gamification;
+    const pd=new Set(Array.isArray(g.practiceDays)?g.practiceDays:[]);
+    if(pd.has(d)) pd.delete(d); else pd.add(d);
+    g.practiceDays=pd.size?[...pd].sort((a,b)=>a-b):null;
+    save({reason:"gamification-practice-days"});
+    const on=pd.has(d);
+    c.classList.toggle("on",on); c.setAttribute("aria-pressed",String(on));
+  });
+  const gamGoalDaily=ovl.querySelector("#gamGoalDaily");
+  if(gamGoalDaily) gamGoalDaily.onchange=e=>{
+    const v=clamp(Math.round(+e.target.value||36),1,600);
+    db.settings.gamification.goals.dailyArrows=v; e.target.value=v; save();
+  };
+  const gamGoalWeekly=ovl.querySelector("#gamGoalWeekly");
+  if(gamGoalWeekly) gamGoalWeekly.onchange=e=>{
+    const v=clamp(Math.round(+e.target.value||3),1,14);
+    db.settings.gamification.goals.weeklySessions=v; e.target.value=v; save();
+  };
+  const gamGoalMonthly=ovl.querySelector("#gamGoalMonthly");
+  if(gamGoalMonthly) gamGoalMonthly.onchange=e=>{
+    const v=clamp(Math.round(+e.target.value||300),1,5000);
+    db.settings.gamification.goals.monthlyArrows=v; e.target.value=v; save();
+  };
   ovl.querySelector("#setClose").onclick=()=>{ closeModal(ovl); render(); };
   ovl.querySelectorAll("[data-cr]").forEach(li=>li.onclick=()=>{ closeModal(ovl); openCustomRoundForm(li.dataset.cr); });
   const crAdd=ovl.querySelector("#crAdd");
