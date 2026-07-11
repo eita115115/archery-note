@@ -1191,3 +1191,55 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 @media (max-width:420px){
   .badgeGrid{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
+
+/* motion:因果 — セッション終了サマリーでストリーク数値が伸びたときだけ着地する。
+   演出上限規約（gamification-final-design.md 観点5(d)-3）で唯一許された新規keyframe。
+   opacity/transformのみ・単発.38s・prefers-reduced-motionは既存の一括無効化ルールでカバー済み */
+@keyframes streakLand{
+  0%{opacity:0; transform:translateY(-5px) scale(.9);}
+  55%{opacity:1; transform:translateY(1px) scale(1.05);}
+  100%{opacity:1; transform:translateY(0) scale(1);}
+}
+
+/* summaryGamification — セッション終了サマリーの拡張（.statbar 直後）。
+   openFeedback別画面・バッジ逐次モーダルは却下済みのため、この一箇所にのみ存在する
+   （gamification-final-design.md 観点4(d)・ui-specs-fable-adjudication.md 裁定10）。 */
+.summaryGamification{margin-top:10px; display:flex; flex-direction:column; gap:8px;}
+.summaryStreak{
+  display:flex; align-items:flex-start; gap:10px;
+  background:var(--soft); border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+}
+.summaryStreakIcon{color:var(--accent); line-height:1; flex:0 0 auto; padding-top:1px;}
+.summaryStreakIcon svg{width:22px; height:22px; display:block;}
+.summaryStreakBody{flex:1; min-width:0;}
+.summaryStreakRow{display:flex; align-items:baseline; gap:6px;}
+.summaryStreakBefore{font-size:15px; color:var(--sub); font-variant-numeric:tabular-nums;}
+.summaryStreakArrow{font-size:12px; color:var(--sub);}
+.summaryStreakNum{
+  font-size:20px; font-weight:var(--fw-figure); color:var(--title);
+  font-variant-numeric:tabular-nums; line-height:1.1;
+}
+.summaryStreakNum.landed{animation:streakLand .38s var(--ease-app) both;}
+.summaryStreakMsg{margin:3px 0 0; font-size:12px; color:var(--sub); line-height:1.5;}
+.summaryStreakUnset .summaryStreakIcon{opacity:.55;}
+.summaryStreak .btn.sm{width:auto; min-width:0; padding:7px 12px; margin-top:6px;}
+
+/* summaryBadges — 新規解除バッジの縦積み（上限3件+「ほか{n}件」）。scorePop を 0.14s ずつ stagger */
+.summaryBadges{
+  background:var(--soft); border:1px solid var(--line); border-radius:8px; padding:10px 12px;
+}
+.summaryBadgesKicker{
+  font-size:10.5px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--title); font-weight:var(--fw-label); margin-bottom:6px;
+}
+.summaryBadgeRow{
+  display:flex; align-items:center; gap:10px; padding:6px 0;
+  animation:scorePop .3s var(--ease-app) both;
+}
+.summaryBadgeRow + .summaryBadgeRow{border-top:1px solid var(--line2);}
+.summaryBadgeIcon{color:var(--accent); flex:0 0 auto; line-height:1;}
+.summaryBadgeIcon svg{width:40px; height:40px; display:block;}
+.summaryBadgeText{flex:1; min-width:0; display:flex; flex-direction:column; gap:1px;}
+.summaryBadgeText b{font-size:13px; color:var(--title); font-weight:var(--fw-emphasis);}
+.summaryBadgeText span{font-size:11px; color:var(--sub); line-height:1.4;}
+.summaryBadgeMore{font-size:11px; color:var(--sub); margin-top:4px; text-align:right;}

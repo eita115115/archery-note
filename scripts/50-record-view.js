@@ -329,6 +329,17 @@ const FEATURE_HINTS = [
     go: () => showView("gear"),
   },
   {
+    key: "practiceDays",
+    ico: "fire",
+    html: "<strong>練習曜日</strong>を設定すると、連続記録（ストリーク）が始まります",
+    act: "設定する",
+    when: () => {
+      const g = db.settings.gamification;
+      return !!(g && g.enabled && g.practiceDays === null && db.sessions.length >= 1);
+    },
+    go: () => openPracticeDaysSheet(),
+  },
+  {
     key: "analysis",
     ico: "book",
     html: "3回分たまりました。<strong>分析タブ</strong>で傾向が見えます",
@@ -1780,7 +1791,30 @@ async function finishSession() {
   }
   nativePulse("success");
   save();
-  openSummary(s, !isEdit);
+  /* ゲーミフィケーション: セッション終了の表出点（gamification-final-design.md §5）。
+     ストリーク・目標は導出値なので保存前後の2回 computeStreak を呼ぶだけで済む。
+     編集モード（isEdit）は対象外——過去記録の書き換えでストリークや実績を騒がせない */
+  const g = db.settings.gamification;
+  if (g && g.enabled && !isEdit) {
+    const streakBefore = computeStreak(
+      db.sessions.filter((x) => x.id !== s.id),
+      g.practiceDays,
+      today(),
+    );
+    const streakAfter = computeStreak(db.sessions, g.practiceDays, today());
+    const nowIso = new Date().toISOString();
+    const newBadges = checkBadges(db.sessions, (db.gamification.badges || []).map((b) => b.id), s, {
+      streak: streakAfter,
+      nowIso,
+    });
+    if (newBadges.length) {
+      db.gamification.badges.push(...newBadges);
+      save({ reason: "gamification-badges" });
+    }
+    openSummary(s, !isEdit, { streakBefore, streakAfter, newBadges });
+  } else {
+    openSummary(s, !isEdit);
+  }
 }
 
 /* ---------- summary modal ---------- */
@@ -1802,7 +1836,64 @@ function roundGroupSummaryHtml(sess) {
     <div class="note">${esc(breakdown)}</div>
   </div>`;
 }
-function openSummary(sess, isNew) {
+/* セッション終了サマリー拡張: openSummary の第3引数（省略可）で受けた {streakBefore, streakAfter,
+   newBadges} を .statbar 直後にインラインで描く。gamification-final-design.md 観点4(d) 確定仕様:
+   別画面(openFeedback)・バッジ逐次モーダルは却下済みのため、ここでの一本化のみが正。
+   isNew && gam が真のときだけ呼ばれる（finishSession 側で isEdit を既に弾いている） */
+function summaryGamificationHtml(gam) {
+  const streakBefore = gam.streakBefore,
+    streakAfter = gam.streakAfter,
+    newBadges = gam.newBadges || [];
+  let streakPart;
+  if (streakAfter.configured) {
+    const grew = streakAfter.current > streakBefore.current;
+    const freezeUsed = streakAfter.freezeUsedDates.filter((d) => !streakBefore.freezeUsedDates.includes(d));
+    const msg = grew
+      ? "連続記録が伸びました"
+      : streakAfter.current > 0
+        ? "今日も練習できました"
+        : "今日から始めましょう";
+    streakPart = `<div class="summaryStreak">
+      <span class="summaryStreakIcon" aria-hidden="true">${icon("fire")}</span>
+      <div class="summaryStreakBody">
+        <div class="summaryStreakRow">
+          ${grew ? `<span class="summaryStreakBefore">${streakBefore.current}</span><span class="summaryStreakArrow" aria-hidden="true">→</span>` : ""}
+          <span class="summaryStreakNum${grew ? " landed" : ""}" data-testid="summary-streak-num">${streakAfter.current}</span><span class="streakUnit">日連続</span>
+        </div>
+        <p class="summaryStreakMsg">${msg}</p>
+        ${freezeUsed.length ? `<p class="summaryStreakMsg">フリーズを${freezeUsed.length}個使用</p>` : ""}
+      </div>
+    </div>`;
+  } else {
+    streakPart = `<div class="summaryStreak summaryStreakUnset">
+      <span class="summaryStreakIcon" aria-hidden="true">${icon("fire")}</span>
+      <div class="summaryStreakBody">
+        <p class="summaryStreakMsg">練習曜日を設定するとストリークが始まります</p>
+        <button type="button" class="btn sm sec" id="sumStreakSetup" data-testid="summary-streak-setup">練習曜日を設定</button>
+      </div>
+    </div>`;
+  }
+  let badgesPart = "";
+  if (newBadges.length) {
+    const shown = newBadges.slice(0, 3);
+    const restCount = newBadges.length - shown.length;
+    badgesPart = `<div class="summaryBadges" data-testid="summary-badges">
+      <div class="summaryBadgesKicker">新しく解除</div>
+      ${shown
+        .map((nb, i) => {
+          const def = BADGE_DEFS.find((b) => b.id === nb.id);
+          return `<div class="summaryBadgeRow" style="animation-delay:${(i * 0.14).toFixed(2)}s">
+        <span class="summaryBadgeIcon" aria-hidden="true">${BADGE_ICONS[nb.id] || ""}</span>
+        <div class="summaryBadgeText"><b>${esc(def ? def.name : "")}</b><span>${esc(def ? def.reason : "")}</span></div>
+      </div>`;
+        })
+        .join("")}
+      ${restCount > 0 ? `<div class="summaryBadgeMore">ほか${restCount}件</div>` : ""}
+    </div>`;
+  }
+  return `<div class="summaryGamification" data-testid="summary-gamification">${streakPart}${badgesPart}</div>`;
+}
+function openSummary(sess, isNew, gam) {
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const m = sessionMetrics(sess);
   const all = m.all,
@@ -1820,6 +1911,7 @@ function openSummary(sess, isNew) {
       <div class="stat"><b>${perfectScoreCount(all, sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
+    ${isNew && gam ? summaryGamificationHtml(gam) : ""}
     ${roundGroupSummaryHtml(sess)}
     <div id="sumPlot" class="recordSummaryPlot"></div>
     ${groupSummaryHtml(st)}
@@ -1871,6 +1963,8 @@ function openSummary(sess, isNew) {
     closeModal(ovl);
     render();
   };
+  const sumStreakSetup = ovl.querySelector("#sumStreakSetup");
+  if (sumStreakSetup) sumStreakSetup.onclick = () => openPracticeDaysSheet();
 }
 
 /* ---------- 履歴 ---------- */

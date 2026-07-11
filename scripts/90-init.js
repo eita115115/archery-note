@@ -65,4 +65,15 @@ if(db.active) wakeLock.acquire();
    判定は launchCount>=2 のみなので上限で打ち止め: 閲覧だけの起動で db を変化させず、
    安全スナップショットのリング（6枠）を無駄に回転させない */
 if((db.settings.launchCount||0)<9){ db.settings.launchCount=(db.settings.launchCount||0)+1; scheduleSave("launch-count"); }
+/* ゲーミフィケーション移行バックフィル: 起動時に一度だけ、既存履歴から一括でバッジを付与する。
+   backfilledAt が既にあれば二度と走らない。演出なし（justUnlocked を付けず、分析タブの一覧に
+   静かに現れるだけ）。gamification-final-design.md §5 移行バックフィル 準拠 */
+if(db.settings.gamification && db.settings.gamification.enabled && !db.settings.gamification.backfilledAt){
+  const nowIso=new Date().toISOString();
+  const have=new Set((db.gamification.badges||[]).map(b=>b.id));
+  const got=backfillBadges(db.sessions, nowIso).filter(b=>!have.has(b.id));
+  if(got.length) db.gamification.badges.push(...got);
+  db.settings.gamification.backfilledAt=nowIso;
+  save({reason:"gamification-backfill"});
+}
 render();
