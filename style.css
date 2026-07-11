@@ -848,8 +848,24 @@ html.field {
   --blue: #1050a0;          /* →7.84:1 AAA */
 }
 
-html.dark.field, html.auto.field {
+/* dark×field: base html.field は light 前提の値なので、dark bg 上で悪化する
+   accent 系トークンをダークテーマの元値（AAA相当）に戻し、--sub のみ 9.49:1 の
+   field 用に上書きする。設計書 outdoor-contrast-design.md 「射場モードCSS」の
+   dark分岐が unset で残っていた欠落を実測（accent-strong 5.06→2.08 悪化）で
+   検知し補完。https://github.com/eita115115/archery-note/pull/... 参照 */
+html.dark.field {
   --sub: #b4baa8;           /* 7.26→9.49:1 */
+  --accent: #d9b25a;        /* dark 元値を維持（field 用 #594608 は dark bg で不可視） */
+  --accent-strong: #f0c04a; /* dark 元値を維持（11.12:1 でそのまま AAA） */
+}
+/* auto×field: システム設定が dark のときのみ dark 用値を適用。
+   light システムに漏らすと --sub #b4baa8 が light bg 上で 1.89:1 に悪化する */
+@media (prefers-color-scheme: dark) {
+  html.auto.field {
+    --sub: #b4baa8;
+    --accent: #d9b25a;
+    --accent-strong: #f0c04a;
+  }
 }
 
 html.field nav.tabs::before { height: 3px; }
