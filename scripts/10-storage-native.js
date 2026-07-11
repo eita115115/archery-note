@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
-const APP_VER=78;
+const APP_VER=79;
 const TRASH_LIMIT=50;
 const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
