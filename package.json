@@ -26,7 +26,8 @@
     "native:open:android": "npm run native:sync:android && npx cap open android",
     "native:build:android": "npm run native:sync:android && cd android && gradlew.bat assembleDebug",
     "native:add:android": "npm run build:native-web && npx cap add android",
-    "native:add:ios": "npm run build:native-web && npx cap add ios"
+    "native:add:ios": "npm run build:native-web && npx cap add ios",
+    "golden:replay": "python tools/golden-replay/run-golden-replay.py"
   },
   "devDependencies": {
     "@capacitor/android": "^8.4.0",

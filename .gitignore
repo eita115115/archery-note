@@ -11,3 +11,5 @@ dist/
 node_modules/
 playwright-report/
 test-results/
+tools/golden-replay/videos/
+tools/golden-replay/out/

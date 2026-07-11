@@ -1,0 +1,518 @@
+{
+  "video": "mixkit-34710-female-archer.mp4",
+  "videoBytes": 3370232,
+  "handedness": "right",
+  "playbackRate": 0.25,
+  "delegate": "CPU",
+  "startedAt": "2026-07-11T02:47:00.334220+00:00",
+  "status": "ok-no-shots",
+  "consoleErrors": [
+    {
+      "type": "warning",
+      "text": "W0711 02:47:01.104000 1880752 gl_context.cc:1060] OpenGL error checking is disabled"
+    },
+    {
+      "type": "error",
+      "text": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:47:01.503000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:47:01.551000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    }
+  ],
+  "pageErrors": [],
+  "hudTimeline": [
+    {
+      "t": "after-load",
+      "hud": "2% ・ FPS 4 ・ 弓手肘 151° ・ 引き手肘 17°"
+    },
+    {
+      "t": "after-analysis",
+      "hud": "解析完了 ・ 0射を検出しました"
+    }
+  ],
+  "videoMeta": {
+    "duration": 10.52,
+    "width": 1280,
+    "height": 720
+  },
+  "detectedShots": 0,
+  "detectStats": {
+    "calls": 290,
+    "landmarkFrames": 290,
+    "dupTs": 0
+  },
+  "trace": [
+    {
+      "t": 0,
+      "v": 0,
+      "an": 0.274,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 273,
+      "v": 0.12,
+      "an": 0.268,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 419,
+      "v": 0.4,
+      "an": 0.266,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 607,
+      "v": 0.25,
+      "an": 0.254,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 789,
+      "v": 0.05,
+      "an": 0.264,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 976,
+      "v": 0.05,
+      "an": 0.23,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1163,
+      "v": 0.41,
+      "an": 0.228,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1349,
+      "v": 0.38,
+      "an": 0.251,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1532,
+      "v": 0.1,
+      "an": 0.244,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1712,
+      "v": 0.02,
+      "an": 0.263,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1900,
+      "v": 0.08,
+      "an": 0.228,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2083,
+      "v": 0.02,
+      "an": 0.211,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2262,
+      "v": 0.08,
+      "an": 0.221,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2450,
+      "v": 0.05,
+      "an": 0.219,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2635,
+      "v": 0.09,
+      "an": 0.229,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2825,
+      "v": 0.13,
+      "an": 0.233,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3013,
+      "v": 0.12,
+      "an": 0.239,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3198,
+      "v": 0.23,
+      "an": 0.24,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3381,
+      "v": 0.02,
+      "an": 0.245,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3568,
+      "v": 0.11,
+      "an": 0.273,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3749,
+      "v": 0.05,
+      "an": 0.294,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3940,
+      "v": 0.23,
+      "an": 0.292,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4117,
+      "v": 0.08,
+      "an": 0.29,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4300,
+      "v": 0.05,
+      "an": 0.285,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4488,
+      "v": 0.02,
+      "an": 0.276,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4669,
+      "v": 0.19,
+      "an": 0.278,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4860,
+      "v": 0.13,
+      "an": 0.263,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5043,
+      "v": 0.03,
+      "an": 0.269,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5228,
+      "v": 0.18,
+      "an": 0.263,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5414,
+      "v": 0.02,
+      "an": 0.269,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5604,
+      "v": 0.03,
+      "an": 0.278,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5785,
+      "v": 0.03,
+      "an": 0.253,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5971,
+      "v": 0.08,
+      "an": 0.288,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6097,
+      "v": 0.25,
+      "an": 0.279,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6232,
+      "v": 0.36,
+      "an": 0.29,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6373,
+      "v": 0.24,
+      "an": 0.272,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6532,
+      "v": 0.85,
+      "an": 0.276,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6700,
+      "v": 0.09,
+      "an": 0.264,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6884,
+      "v": 0.06,
+      "an": 0.285,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7063,
+      "v": 0.29,
+      "an": 0.269,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7244,
+      "v": 0.32,
+      "an": 0.26,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7431,
+      "v": 0.3,
+      "an": 0.266,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7621,
+      "v": 0.2,
+      "an": 0.292,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7799,
+      "v": 0.1,
+      "an": 0.289,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7959,
+      "v": 0.2,
+      "an": 0.294,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8141,
+      "v": 0.08,
+      "an": 0.293,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8325,
+      "v": 0.26,
+      "an": 0.287,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8508,
+      "v": 0.01,
+      "an": 0.299,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8694,
+      "v": 0.07,
+      "an": 0.319,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8865,
+      "v": 0.53,
+      "an": 0.316,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9048,
+      "v": 0.3,
+      "an": 0.313,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9233,
+      "v": 0.18,
+      "an": 0.33,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9421,
+      "v": 0.1,
+      "an": 0.351,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9605,
+      "v": 0.09,
+      "an": 0.353,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9791,
+      "v": 0.15,
+      "an": 0.368,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9973,
+      "v": 0.24,
+      "an": 0.39,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10158,
+      "v": 0.11,
+      "an": 0.398,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10343,
+      "v": 0.07,
+      "an": 0.389,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    }
+  ],
+  "formAnalysis": null,
+  "finishedAt": "2026-07-11T02:47:44.858274+00:00",
+  "wallSeconds": 44.5
+}

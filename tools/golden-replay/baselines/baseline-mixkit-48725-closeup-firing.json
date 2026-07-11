@@ -1,0 +1,334 @@
+{
+  "video": "mixkit-48725-closeup-firing.mp4",
+  "videoBytes": 2285776,
+  "handedness": "right",
+  "playbackRate": 0.25,
+  "delegate": "CPU",
+  "startedAt": "2026-07-11T02:47:45.381656+00:00",
+  "status": "ok-no-shots",
+  "consoleErrors": [
+    {
+      "type": "warning",
+      "text": "W0711 02:47:46.110000 1880752 gl_context.cc:1060] OpenGL error checking is disabled"
+    },
+    {
+      "type": "error",
+      "text": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:47:46.486000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:47:46.527000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    }
+  ],
+  "pageErrors": [],
+  "hudTimeline": [
+    {
+      "t": "after-load",
+      "hud": "4% ・ FPS 4 ・ 弓手肘 107° ・ 引き手肘 117°"
+    },
+    {
+      "t": "after-analysis",
+      "hud": "解析完了 ・ 0射を検出しました"
+    }
+  ],
+  "videoMeta": {
+    "duration": 6.36,
+    "width": 1280,
+    "height": 720
+  },
+  "detectedShots": 0,
+  "detectStats": {
+    "calls": 168,
+    "landmarkFrames": 141,
+    "dupTs": 0
+  },
+  "trace": [
+    {
+      "t": 0,
+      "v": 0,
+      "an": 0.576,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 288,
+      "v": 6.97,
+      "an": 0.762,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 459,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 673,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 883,
+      "v": 8.96,
+      "an": 0.396,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1088,
+      "v": 0,
+      "an": null,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1316,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1542,
+      "v": 2.69,
+      "an": 0.532,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1728,
+      "v": 5.05,
+      "an": 0.658,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1914,
+      "v": 0.98,
+      "an": 0.178,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2104,
+      "v": 3,
+      "an": 0.143,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2269,
+      "v": 3.4,
+      "an": 0.081,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2400,
+      "v": 1.44,
+      "an": 0.368,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2519,
+      "v": 0.68,
+      "an": 0.269,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2685,
+      "v": 3.29,
+      "an": 0.374,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2852,
+      "v": 5.66,
+      "an": 0.504,
+      "ph": "RELEASE",
+      "rel": true,
+      "cancel": null
+    },
+    {
+      "t": 3072,
+      "v": 0,
+      "an": null,
+      "ph": "RELEASE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3168,
+      "v": 3.8,
+      "an": 0.323,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": true
+    },
+    {
+      "t": 3277,
+      "v": 7.11,
+      "an": 0.706,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3485,
+      "v": 25.01,
+      "an": 0.402,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3683,
+      "v": 3.2,
+      "an": 0.57,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3866,
+      "v": 1.64,
+      "an": 0.924,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4049,
+      "v": 1.4,
+      "an": 0.67,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4236,
+      "v": 0.48,
+      "an": 0.653,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4426,
+      "v": 2.87,
+      "an": 0.624,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4617,
+      "v": 9.15,
+      "an": 0.776,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4802,
+      "v": 8.26,
+      "an": 1.15,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4989,
+      "v": 1.94,
+      "an": 0.742,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5181,
+      "v": 10.63,
+      "an": 1.301,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5365,
+      "v": 4.49,
+      "an": 1.265,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5551,
+      "v": 1.52,
+      "an": 0.716,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5738,
+      "v": 7.34,
+      "an": 0.352,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5922,
+      "v": 3.33,
+      "an": 0.633,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6105,
+      "v": 17.7,
+      "an": 0.419,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6284,
+      "v": 9.96,
+      "an": 0.699,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    }
+  ],
+  "formAnalysis": null,
+  "finishedAt": "2026-07-11T02:48:13.481993+00:00",
+  "wallSeconds": 28.1
+}

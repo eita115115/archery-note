@@ -1,0 +1,782 @@
+{
+  "video": "pixabay-40769-archer.mp4",
+  "videoBytes": 7033886,
+  "handedness": "right",
+  "playbackRate": 0.25,
+  "delegate": "CPU",
+  "startedAt": "2026-07-11T02:45:26.189320+00:00",
+  "status": "ok-no-shots",
+  "consoleErrors": [
+    {
+      "type": "warning",
+      "text": "W0711 02:45:26.910000 1880752 gl_context.cc:1060] OpenGL error checking is disabled"
+    },
+    {
+      "type": "error",
+      "text": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:45:27.315000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:45:27.363000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    }
+  ],
+  "pageErrors": [],
+  "hudTimeline": [
+    {
+      "t": "after-load",
+      "hud": "解析中… 人物を検出中"
+    },
+    {
+      "t": "after-analysis",
+      "hud": "解析完了 ・ 0射を検出しました"
+    }
+  ],
+  "videoMeta": {
+    "duration": 10.88,
+    "width": 1920,
+    "height": 1080
+  },
+  "detectedShots": 0,
+  "detectStats": {
+    "calls": 414,
+    "landmarkFrames": 374,
+    "dupTs": 0
+  },
+  "trace": [
+    {
+      "t": 0,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 179,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 377,
+      "v": 4.19,
+      "an": 0.505,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 504,
+      "v": 3.95,
+      "an": 0.389,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 648,
+      "v": 4.74,
+      "an": 0.147,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 773,
+      "v": 0.36,
+      "an": 0.022,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 896,
+      "v": 0.18,
+      "an": 0.072,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1033,
+      "v": 1.71,
+      "an": 0.089,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1166,
+      "v": 1.46,
+      "an": 0.199,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1311,
+      "v": 1.19,
+      "an": 0.332,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1451,
+      "v": 1.84,
+      "an": 0.354,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1502,
+      "v": 9.67,
+      "an": 0.424,
+      "ph": "RELEASE",
+      "rel": true,
+      "cancel": null
+    },
+    {
+      "t": 1568,
+      "v": 4.5,
+      "an": 0.341,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": true
+    },
+    {
+      "t": 1593,
+      "v": 1.02,
+      "an": 0.348,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1628,
+      "v": 0.42,
+      "an": 0.361,
+      "ph": "RELEASE",
+      "rel": true,
+      "cancel": null
+    },
+    {
+      "t": 1742,
+      "v": 2.2,
+      "an": 0.379,
+      "ph": "RELEASE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1874,
+      "v": 3.66,
+      "an": 0.465,
+      "ph": "RELEASE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2013,
+      "v": 0.77,
+      "an": 0.448,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2155,
+      "v": 0.44,
+      "an": 0.331,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2277,
+      "v": 0.36,
+      "an": 0.291,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2407,
+      "v": 0.19,
+      "an": 0.267,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2537,
+      "v": 1.37,
+      "an": 0.27,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2669,
+      "v": 3.86,
+      "an": 0.312,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2804,
+      "v": 2.37,
+      "an": 0.194,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2952,
+      "v": 8.57,
+      "an": 0.262,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3091,
+      "v": 0.06,
+      "an": 0.146,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3243,
+      "v": 0.14,
+      "an": 0.148,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3367,
+      "v": 0.03,
+      "an": 0.143,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3479,
+      "v": 0.18,
+      "an": 0.146,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3588,
+      "v": 0.24,
+      "an": 0.145,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3691,
+      "v": 0.03,
+      "an": 0.143,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3786,
+      "v": 0.21,
+      "an": 0.146,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3916,
+      "v": 0.14,
+      "an": 0.139,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4062,
+      "v": 0.99,
+      "an": 0.129,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4178,
+      "v": 7.83,
+      "an": 0.441,
+      "ph": "RELEASE",
+      "rel": true,
+      "cancel": null
+    },
+    {
+      "t": 4213,
+      "v": 14.08,
+      "an": 0.269,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": true
+    },
+    {
+      "t": 4236,
+      "v": 23.95,
+      "an": 0.573,
+      "ph": "RELEASE",
+      "rel": true,
+      "cancel": null
+    },
+    {
+      "t": 4322,
+      "v": 7.27,
+      "an": 0.304,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": true
+    },
+    {
+      "t": 4348,
+      "v": 6.16,
+      "an": 0.2,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4485,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4593,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4709,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4843,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4982,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5097,
+      "v": 0,
+      "an": null,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5227,
+      "v": 11.81,
+      "an": 0.986,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5367,
+      "v": 2.14,
+      "an": 0.443,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5496,
+      "v": 2.03,
+      "an": 0.335,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5638,
+      "v": 0.27,
+      "an": 0.278,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5760,
+      "v": 1.18,
+      "an": 0.294,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5884,
+      "v": 0.54,
+      "an": 0.2,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6032,
+      "v": 1.98,
+      "an": 0.174,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6162,
+      "v": 0.4,
+      "an": 0.247,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6287,
+      "v": 0.57,
+      "an": 0.264,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6411,
+      "v": 1.08,
+      "an": 0.31,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6549,
+      "v": 1.65,
+      "an": 0.382,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6678,
+      "v": 0.42,
+      "an": 0.427,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6811,
+      "v": 0.22,
+      "an": 0.445,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6949,
+      "v": 0.63,
+      "an": 0.504,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7043,
+      "v": 0.2,
+      "an": 0.499,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7143,
+      "v": 2.21,
+      "an": 0.526,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7243,
+      "v": 0.97,
+      "an": 0.474,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7367,
+      "v": 2.07,
+      "an": 0.501,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7490,
+      "v": 0.29,
+      "an": 0.504,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7632,
+      "v": 0.74,
+      "an": 0.435,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7771,
+      "v": 0.27,
+      "an": 0.42,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7904,
+      "v": 0.86,
+      "an": 0.562,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8030,
+      "v": 2.21,
+      "an": 0.654,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8186,
+      "v": 1.03,
+      "an": 0.828,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8327,
+      "v": 0.92,
+      "an": 0.887,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8462,
+      "v": 0.34,
+      "an": 0.904,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8602,
+      "v": 0.21,
+      "an": 0.971,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8728,
+      "v": 0.13,
+      "an": 0.958,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8846,
+      "v": 0.29,
+      "an": 0.996,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8992,
+      "v": 0.25,
+      "an": 0.912,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9142,
+      "v": 1.33,
+      "an": 0.922,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9282,
+      "v": 1.37,
+      "an": 0.968,
+      "ph": "SETUP",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9414,
+      "v": 7.79,
+      "an": 0.592,
+      "ph": "DRAWING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9500,
+      "v": 1.82,
+      "an": 0.502,
+      "ph": "RELEASE",
+      "rel": true,
+      "cancel": null
+    },
+    {
+      "t": 9558,
+      "v": 1.3,
+      "an": 0.591,
+      "ph": "RELEASE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9674,
+      "v": 2.58,
+      "an": 0.412,
+      "ph": "RELEASE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9796,
+      "v": 1.48,
+      "an": 0.493,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9926,
+      "v": 1.43,
+      "an": 0.437,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10051,
+      "v": 0.86,
+      "an": 0.538,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10203,
+      "v": 0.91,
+      "an": 0.539,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10332,
+      "v": 1.11,
+      "an": 0.642,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10459,
+      "v": 1.14,
+      "an": 0.664,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10589,
+      "v": 0.85,
+      "an": 0.478,
+      "ph": "FOLLOW",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10688,
+      "v": 12.81,
+      "an": 0.333,
+      "ph": "ANCHORING",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10746,
+      "v": 1.41,
+      "an": 0.442,
+      "ph": "RELEASE",
+      "rel": true,
+      "cancel": null
+    },
+    {
+      "t": 10772,
+      "v": 3.7,
+      "an": 0.529,
+      "ph": "RELEASE",
+      "rel": null,
+      "cancel": null
+    }
+  ],
+  "formAnalysis": null,
+  "finishedAt": "2026-07-11T02:46:59.831470+00:00",
+  "wallSeconds": 93.7
+}

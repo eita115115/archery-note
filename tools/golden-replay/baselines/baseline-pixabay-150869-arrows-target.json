@@ -1,0 +1,1790 @@
+{
+  "video": "pixabay-150869-arrows-target.mp4",
+  "videoBytes": 13800300,
+  "handedness": "right",
+  "playbackRate": 0.25,
+  "delegate": "CPU",
+  "startedAt": "2026-07-11T02:48:13.980139+00:00",
+  "status": "ok-no-shots",
+  "consoleErrors": [
+    {
+      "type": "warning",
+      "text": "W0711 02:48:14.708000 1880752 gl_context.cc:1060] OpenGL error checking is disabled"
+    },
+    {
+      "type": "error",
+      "text": "INFO: Created TensorFlow Lite XNNPACK delegate for CPU."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:48:15.133000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    },
+    {
+      "type": "warning",
+      "text": "W0711 02:48:15.177000 1880752 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors."
+    }
+  ],
+  "pageErrors": [],
+  "hudTimeline": [
+    {
+      "t": "after-load",
+      "hud": "解析中… 人物を検出中"
+    },
+    {
+      "t": "after-analysis",
+      "hud": "解析完了 ・ 0射を検出しました"
+    }
+  ],
+  "videoMeta": {
+    "duration": 23.401667,
+    "width": 1920,
+    "height": 1080
+  },
+  "detectedShots": 0,
+  "detectStats": {
+    "calls": 1083,
+    "landmarkFrames": 0,
+    "dupTs": 0
+  },
+  "trace": [
+    {
+      "t": 0,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 194,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 287,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 410,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 517,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 633,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 748,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 867,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 965,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1079,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1167,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1240,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1321,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1387,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1490,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1590,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1677,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1797,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 1913,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2018,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2121,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2232,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2368,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2481,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2584,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2687,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2810,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 2925,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3027,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3140,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3268,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3358,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3467,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3576,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3680,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3790,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 3904,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4008,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4133,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4268,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4382,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4456,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4536,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4617,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4733,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4827,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 4932,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5042,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5149,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5255,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5360,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5462,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5572,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5675,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5755,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5870,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 5998,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6120,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6215,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6327,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6448,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6557,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6662,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6773,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 6900,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7003,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7134,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7238,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7347,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7464,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7569,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7663,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7741,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7804,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 7889,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8016,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8139,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8263,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8395,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8532,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8650,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8762,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 8906,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9027,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9159,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9281,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9387,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9492,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9601,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9713,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9821,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 9933,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10037,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10151,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10251,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10363,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10477,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10596,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10699,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10802,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10905,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 10996,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11080,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11150,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11258,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11342,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11459,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11562,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11682,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11790,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11892,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 11995,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12115,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12226,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12336,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12442,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12560,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12667,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12762,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12867,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 12979,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13085,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13190,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13287,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13391,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13511,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13620,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13731,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13856,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 13975,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14071,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14170,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14252,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14338,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14438,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14547,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14670,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14782,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14896,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 14997,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15096,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15183,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15292,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15400,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15530,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15651,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15787,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 15899,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16007,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16097,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16206,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16316,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16416,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16516,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16622,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16718,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16811,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 16926,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17027,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17140,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17246,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17356,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17436,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17535,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17622,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17717,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17810,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 17918,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18051,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18177,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18295,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18416,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18522,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18643,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18747,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18865,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 18971,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19078,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19199,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19315,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19444,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19575,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19692,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19808,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 19909,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20010,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20114,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20213,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20316,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20436,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20552,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20662,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20716,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20798,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20856,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 20951,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21053,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21172,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21306,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21438,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21583,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21687,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21791,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 21900,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22009,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22116,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22227,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22326,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22425,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22522,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22651,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22761,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22854,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 22961,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 23068,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 23166,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    },
+    {
+      "t": 23288,
+      "v": 0,
+      "an": null,
+      "ph": "IDLE",
+      "rel": null,
+      "cancel": null
+    }
+  ],
+  "formAnalysis": null,
+  "finishedAt": "2026-07-11T02:51:52.712787+00:00",
+  "wallSeconds": 218.7
+}
