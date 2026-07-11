@@ -292,6 +292,27 @@ function checkPartialLegacy(storageApi, fixtures) {
     false,
     "[partial-legacy] missing setting activeGuideSeen is backfilled with default",
   );
+  // オンボーディング3フィールドの補完（フィールド単位・型検証つき）
+  assertEqual(
+    db.settings.onboardingSeen,
+    false,
+    "[partial-legacy] missing setting onboardingSeen is backfilled with default",
+  );
+  assertEqual(
+    db.settings.launchCount,
+    0,
+    "[partial-legacy] missing setting launchCount is backfilled with default",
+  );
+  assert(
+    db.settings.featureHints &&
+      typeof db.settings.featureHints === "object" &&
+      db.settings.featureHints.gearSetup === false &&
+      db.settings.featureHints.analysis === false &&
+      db.settings.featureHints.sightAdjust === false &&
+      db.settings.featureHints.formTracking === false &&
+      db.settings.featureHints.addToHome === false,
+    "[partial-legacy] missing featureHints is backfilled with all-false defaults",
+  );
   assertEqual(
     db.sessions[0].id,
     "fixture-legacy-session",

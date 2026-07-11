@@ -61,6 +61,8 @@ window.addEventListener("beforeunload",()=>{ flushPendingSave(); flushSafetySnap
 checkUpdate();
 if(db.active) wakeLock.acquire();
 /* addToHome ヒント判定用の起動カウンタ。起動パスに同期書き込みを増やさないため scheduleSave
-   （flush は pagehide/visibilitychange 等の既存機構で保証済み） */
-db.settings.launchCount=(db.settings.launchCount||0)+1; scheduleSave("launch-count");
+   （flush は pagehide/visibilitychange 等の既存機構で保証済み）。
+   判定は launchCount>=2 のみなので上限で打ち止め: 閲覧だけの起動で db を変化させず、
+   安全スナップショットのリング（6枠）を無駄に回転させない */
+if((db.settings.launchCount||0)<9){ db.settings.launchCount=(db.settings.launchCount||0)+1; scheduleSave("launch-count"); }
 render();

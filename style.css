@@ -1002,8 +1002,9 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .hintBannerText strong{font-weight:var(--fw-emphasis); color:var(--title);}
 .hintBannerAction{
   flex:0 0 auto; font-size:12px; font-weight:var(--fw-label); color:var(--accent-strong);
-  background:none; border:none; cursor:pointer; padding:2px 0;
-  min-height:var(--tap-target-min); display:flex; align-items:center;
+  background:none; border:none; cursor:pointer; padding:2px 10px;
+  min-height:var(--tap-target-min); min-width:var(--tap-target-min);
+  display:flex; align-items:center; justify-content:center;
   font-family:inherit; white-space:nowrap;
 }
 .hintBannerAction:active{opacity:.7;}
