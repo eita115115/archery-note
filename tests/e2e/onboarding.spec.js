@@ -260,7 +260,16 @@ test("clearing all data and reloading shows onboarding again", async ({ page }) 
   await expect(page.getByTestId("onboard-welcome")).toHaveCount(0);
   await expect(page.getByTestId("record-start")).toBeVisible();
 
-  await page.evaluate(() => globalThis.localStorage.clear());
+  // 手動のフルリセットを模擬。localStorage.clear() だけだと、page.reload() 時の
+  // pagehide → flushPendingSave が、保留中の scheduleSave（例: launchCount++）を
+  // 使ってメモリ上の db を localStorage に書き戻し、リセットが無効化されうる。
+  // reload 前に localStorage.setItem を no-op にして、pagehide の書き戻しを封じる。
+  // reload 後は JS コンテキストが刷新され setItem は正常に戻るが、addInitScript の
+  // __e2eSeeded ガード（sessionStorage 保持）で seed 再走行はされない。
+  await page.evaluate(() => {
+    globalThis.localStorage.setItem = () => {};
+    globalThis.localStorage.clear();
+  });
   await page.reload();
 
   await expect(page.locator("#bootFallback")).toBeHidden();
