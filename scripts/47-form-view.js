@@ -552,7 +552,7 @@ function startFormReplay(videoUrl){
   let running=true, raf=0, landmarker=null;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
-  let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  let shots=[], frames=0, lastFpsAt=performance.now(), fps=0, lastDetectTs=-1;
   function stop(){
     running=false; if(raf) cancelAnimationFrame(raf);
     try{ video.pause(); }catch(e){}
@@ -587,40 +587,56 @@ function startFormReplay(videoUrl){
     if(!running) return;
     if(landmarker&&video.readyState>=2&&!video.paused&&!video.ended){
       const now=video.currentTime*1000;
-      const res=landmarker.detectForVideo(video,now);
-      frames++;
-      const wallNow=performance.now();
-      if(wallNow-lastFpsAt>=1000){ fps=frames*1000/(wallNow-lastFpsAt); frames=0; lastFpsAt=wallNow; }
-      const lms=res.landmarks&&res.landmarks[0];
-      const raw=lms?computeFormMetrics(lms,handedness):null;
-      const disp=ema(raw);
-      const vel=velSrc.step(history,raw,now);
-      history.push({ts:now,m:raw,vel});
-      if(history.length>200) history.shift();
-      const r=stepFormPhase(detector,raw,history,1.0,now);
-      const {phase,released,canceled}=r;
-      if(canceled){
-        /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
-        const last=shots[shots.length-1];
-        if(last){
-          shots=shots.filter(s=>s.id!==last.id);
-          const div=ovl.querySelector(`#frShots [data-shot-id="${last.id}"]`);
-          if(div) div.remove();
-          renumberShots();
-          refreshSave();
+      if(now>lastDetectTs){
+        /* video.currentTime が前フレームから進まない（60fps rAF vs 30fps 動画などで容易に起こる）
+           と同一/逆行タイムスタンプが MediaPipe の CalculatorGraph に渡り、
+           "Packet timestamp mismatch"（単調増加違反）で以後の detectForVideo が
+           恒久的に失敗し続ける。単調増加を保証してスキップすることで重複回避と
+           無駄な推論の削減を両立する。 */
+        lastDetectTs=now;
+        let res;
+        try{
+          res=landmarker.detectForVideo(video,now);
+        }catch(e){
+          running=false;
+          phaseEl.textContent="エラー";
+          hud.textContent="解析に失敗しました。動画を閉じてやり直してください（"+(e&&e.message||String(e))+"）";
+          return;
         }
-      }
-      if(released) onShot(now,r.anchorStartTs);
-      phaseEl.textContent=phase;
-      phaseEl.classList.toggle("release",phase==="RELEASE");
-      phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      if(lms) drawFormSkeleton(ctx,lms,canvas.width,canvas.height);
-      if(raw&&disp){
-        const pct=video.duration?(video.currentTime/video.duration*100).toFixed(0):0;
-        hud.innerHTML=`${pct}% ・ FPS <b>${fps.toFixed(0)}</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>`;
-      }else{
-        hud.innerHTML=`解析中… 人物を検出中`;
+        frames++;
+        const wallNow=performance.now();
+        if(wallNow-lastFpsAt>=1000){ fps=frames*1000/(wallNow-lastFpsAt); frames=0; lastFpsAt=wallNow; }
+        const lms=res.landmarks&&res.landmarks[0];
+        const raw=lms?computeFormMetrics(lms,handedness):null;
+        const disp=ema(raw);
+        const vel=velSrc.step(history,raw,now);
+        history.push({ts:now,m:raw,vel});
+        if(history.length>200) history.shift();
+        const r=stepFormPhase(detector,raw,history,1.0,now);
+        const {phase,released,canceled}=r;
+        if(canceled){
+          /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
+          const last=shots[shots.length-1];
+          if(last){
+            shots=shots.filter(s=>s.id!==last.id);
+            const div=ovl.querySelector(`#frShots [data-shot-id="${last.id}"]`);
+            if(div) div.remove();
+            renumberShots();
+            refreshSave();
+          }
+        }
+        if(released) onShot(now,r.anchorStartTs);
+        phaseEl.textContent=phase;
+        phaseEl.classList.toggle("release",phase==="RELEASE");
+        phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if(lms) drawFormSkeleton(ctx,lms,canvas.width,canvas.height);
+        if(raw&&disp){
+          const pct=video.duration?(video.currentTime/video.duration*100).toFixed(0):0;
+          hud.innerHTML=`${pct}% ・ FPS <b>${fps.toFixed(0)}</b> ・ 弓手肘 <b>${disp.bowArm.toFixed(0)}°</b> ・ 引き手肘 <b>${disp.drawArm.toFixed(0)}°</b>`;
+        }else{
+          hud.innerHTML=`解析中… 人物を検出中`;
+        }
       }
     }
     if(video.ended&&running){
