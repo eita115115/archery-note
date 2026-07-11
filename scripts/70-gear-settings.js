@@ -653,6 +653,12 @@ function openSettings(){
       try{
         writeSafetySnapshot("restore-before",true);
         db=normalizeDb(snap.data);
+        /* cross-feature audit finding②対応: 古いスナップショット復元は backfilledAt も
+           復元時点の値のまま引き継がれ、以後バッジのバックフィルが二度と走らなくなる
+           （復元時点で未解除の新しいバッジが恒久的に欠落する）。null に戻して
+           次回起動のバックフィル（90-init.js）を再保証する。enabled:false でも無害
+           （backfill 自体が enabled ゲートで no-op になるだけ） */
+        if(db.settings.gamification) db.settings.gamification.backfilledAt=null;
         save({reason:"restore",forceSnapshot:true});
         applyTheme(); closeModal(ovl); render(); toast("バックアップデータを復元しました");
       }finally{ endActiveWorkflow(); }
@@ -670,7 +676,24 @@ function openSettings(){
       const warnText=vr.warnings.length?`\n注意: ${vr.warnings.join("、")}`:"";
       if(await appConfirm(`読み込むと現在のデータは置き換わります。\n（練習${(d.sessions||[]).length}回 / セッティング${(d.setups||[]).length}件）${warnText}よろしいですか？`,{danger:true,okLabel:"読み込む"})){
         writeSafetySnapshot("import-before",true);
-        db=normalizeDb(d); save({reason:"import",forceSnapshot:true}); applyTheme(); closeModal(ovl); render(); toast("読み込みました");
+        db=normalizeDb(d);
+        /* cross-feature audit finding①対応: インポートは起動時バックフィル（90-init.js）を
+           経由しないため、ここでリロードせず記録すると checkBadges が輸入済み履歴を無視して
+           "新規解除"演出を誤発火する。enabled 時はその場で同期バックフィルし、失敗時は
+           backfilledAt=null のままにして次回起動のバックフィルに委ねる */
+        if(db.settings.gamification && db.settings.gamification.enabled){
+          try{
+            const nowIso=new Date().toISOString();
+            const have=new Set((db.gamification.badges||[]).map(b=>b.id));
+            const got=backfillBadges(db.sessions, nowIso).filter(b=>!have.has(b.id));
+            if(got.length) db.gamification.badges.push(...got);
+            db.settings.gamification.backfilledAt=nowIso;
+          }catch(e){
+            db.settings.gamification.backfilledAt=null;
+            console.warn("[gamification] backfill on import failed, will retry on next launch",e);
+          }
+        }
+        save({reason:"import",forceSnapshot:true}); applyTheme(); closeModal(ovl); render(); toast("読み込みました");
       }
     }catch(_){ toast("ファイルを読み込めませんでした"); } finally{ endActiveWorkflow(); } };
     r.onerror=()=>{ endActiveWorkflow(); toast("ファイルを読み込めませんでした"); };
