@@ -11,7 +11,7 @@ const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",fieldMode:false,lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:true,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",fieldMode:false,lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -72,7 +72,10 @@ function normalizeDb(d){
     out.settings.gamification={enabled:true,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null};
   }else{
     const gs=out.settings.gamification;
-    if(typeof gs.enabled!=="boolean") gs.enabled=true;
+    /* v1.7.0 は enabled 既定 true で出荷されたが、CHANGELOG/リリースノートで「既定 OFF」と
+       告知しており不整合だった。v1.7.1 で既定を false に修正。v1.7.0 で既に true になった
+       ユーザーの選択は尊重するため、新規/欠落キーのみ false 補完 */
+    if(typeof gs.enabled!=="boolean") gs.enabled=false;
     if(gs.practiceDays!==null&&!Array.isArray(gs.practiceDays)) gs.practiceDays=null;
     if(Array.isArray(gs.practiceDays)){
       gs.practiceDays=gs.practiceDays.filter(d=>Number.isInteger(d)&&d>=0&&d<=6);
