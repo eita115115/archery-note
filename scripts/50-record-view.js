@@ -12,6 +12,8 @@ let ui = {
   recordMode: "practice",
   freshArrow: -1,
   freshTimer: 0,
+  onboardStep: 1,
+  onboardDist: null,
 };
 function showView(v) {
   if (view === v) return;
@@ -188,9 +190,138 @@ function multiRoundStageGaugeHtml(def) {
     .join("");
   return `<div class="stageGauge" aria-label="${esc(def.label)}のステージ行程">${ticks}</div>`;
 }
+/* ---------- オンボーディング（初回起動。onboarding-final-design.md） ----------
+   専用画面は2枚（ウェルカム／クイック設定）。3枚目は既存 activeGuideHtml() が
+   「文脈内ステップ3」を担うため追加実装しない。db.active の生成形は既存 fStart
+   ハンドラ（このファイル内の renderRecord）と完全同形にする。 */
+function shouldShowOnboarding() {
+  return (
+    !db.settings.onboardingSeen &&
+    !db.active &&
+    db.sessions.length === 0 &&
+    db.setups.length === 0
+  ); // 用具だけ登録済みの既存ユーザーには出さない
+}
+/* 距離から的サイズ・1エンド本数を自動決定（suggestedFaceValue と同ロジック。
+   18mのみ3本/エンド＝WAインドア標準。通常の記録フォームの既定6本は不変） */
+function onboardDerived(d) {
+  const faceD = d >= 60 ? 122 : d <= 18 ? 40 : 80;
+  const perEnd = d <= 18 ? 3 : 6;
+  return { faceD, perEnd };
+}
+function finishOnboarding() {
+  db.settings.onboardingSeen = true;
+  ui.onboardStep = 1;
+  ui.onboardDist = null;
+  nativePulse("light");
+  save({ reason: "onboarding-skip" }); // 即時 save: 直後にアプリを閉じられても失われない
+  render();
+}
+function onboardWelcomeHtml() {
+  return `<section class="onboard onboardWelcome" data-testid="onboard-welcome">
+    <div class="onboardLogo" aria-hidden="true">
+      <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke-linecap="butt">
+        <circle cx="32" cy="32" r="19" stroke="var(--ink)" stroke-width="1.5"/>
+        <path class="reticleAccent" d="M32 6v10M32 48v10M6 32h10M48 32h10" stroke-width="1.5"/>
+      </svg>
+    </div>
+    <h2>Archery Note</h2>
+    <p>的をタップするだけで得点を記録。サイト調整の提案まで、この一冊で。</p>
+    <div class="onboardPrivacy">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><rect x="5" y="10.5" width="14" height="9.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
+      <span>データはこの端末の中だけに保存されます</span>
+    </div>
+    <button type="button" class="btn" id="obStart">はじめる</button>
+    <button type="button" class="onboardSkip" id="obSkip">スキップして記録へ →</button>
+  </section>`;
+}
+function onboardSetupHtml() {
+  return `<section class="onboard onboardSetup" data-testid="onboard-setup">
+    <h2>いつも練習する距離は？</h2>
+    <p>的のサイズと1エンドの本数は距離から自動で決まります。</p>
+    <div class="onboardChips" id="obDistChips">
+      ${[70, 50, 30, 18]
+        .map(
+          (d) =>
+            `<button type="button" class="onboardChip" data-d="${d}" aria-pressed="false">${d}m</button>`,
+        )
+        .join("")}
+    </div>
+    <div class="onboardAutoHint" id="obAutoHint" aria-live="polite">距離を選んでください</div>
+    <button type="button" class="btn" id="obGo" disabled>この条件で1本目を記録する</button>
+    <button type="button" class="onboardSkip" id="obSkip2">あとで設定する</button>
+  </section>`;
+}
+function renderOnboarding(m) {
+  const step = ui.onboardStep || 1;
+  if (step === 1) {
+    m.innerHTML = onboardWelcomeHtml();
+    $("#obStart").onclick = () => {
+      ui.onboardStep = 2;
+      nativePulse("light");
+      render();
+    };
+    $("#obSkip").onclick = finishOnboarding;
+    return;
+  }
+  m.innerHTML = onboardSetupHtml();
+  document.querySelectorAll("#obDistChips .onboardChip").forEach(
+    (c) =>
+      (c.onclick = () => {
+        ui.onboardDist = +c.dataset.d;
+        document.querySelectorAll("#obDistChips .onboardChip").forEach((x) => {
+          const on = x === c;
+          x.classList.toggle("on", on);
+          x.setAttribute("aria-pressed", String(on));
+        });
+        const { faceD, perEnd } = onboardDerived(ui.onboardDist);
+        $("#obAutoHint").textContent =
+          `${ui.onboardDist}m → ${faceD}cm的・${perEnd}本/エンド（あとで変更できます）`;
+        $("#obGo").disabled = false;
+        nativePulse("light");
+      }),
+  );
+  $("#obGo").onclick = () => {
+    const d = ui.onboardDist;
+    if (!d) return;
+    const { faceD, perEnd } = onboardDerived(d);
+    db.settings.onboardingSeen = true;
+    db.active = {
+      id: uid(),
+      date: today(),
+      setupId: null,
+      dist: d,
+      faceD,
+      faceType: "single",
+      perEnd,
+      shaft: +lineCutRadius(faceD, "single").toFixed(3),
+      sightV: "",
+      sightH: "",
+      wx: "",
+      note: "",
+      windDir: "",
+      windSpeed: "",
+      round: "free",
+      purpose: "practice",
+      ends: [],
+      cur: [],
+    };
+    nativePulse("success");
+    wakeLock.acquire(); // 通常の fStart 開始と同じく記録中の画面消灯を防ぐ
+    ui.onboardStep = 1;
+    ui.onboardDist = null;
+    save({ reason: "onboarding-start" });
+    render();
+  };
+  $("#obSkip2").onclick = finishOnboarding;
+}
 function renderRecord(m) {
   if (db.active) {
     renderActive(m);
+    return;
+  }
+  if (shouldShowOnboarding()) {
+    renderOnboarding(m);
     return;
   }
   const last = db.sessions[db.sessions.length - 1];

@@ -941,3 +941,53 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .formShotScroll:empty{display:none}
 .formBar{display:flex;gap:8px;padding:8px 12px;flex:0 0 auto;align-items:center;justify-content:center}
 .formFootnote{flex:0 0 auto;padding:2px 12px 4px;font-size:10px;color:#888;line-height:1.4;text-align:center}
+
+/* onboard — 初回ユーザー向けオンボーディング（ウェルカム＋クイック設定の2画面。onboarding-final-design.md） */
+.onboard{
+  display:flex; flex-direction:column; align-items:center;
+  min-height:72vh; min-height:72dvh; padding:0 16px; text-align:center;
+  animation:appRise .42s var(--ease-app) both;
+}
+.onboard.onboardWelcome{justify-content:center; gap:10px;}
+.onboard.onboardSetup{
+  justify-content:flex-start; padding-top:32px; gap:12px;
+  text-align:left; align-items:stretch;
+}
+.onboardLogo{width:64px; height:64px; display:flex; align-items:center; justify-content:center; margin:0 auto;}
+.onboardLogo svg{width:64px; height:64px; display:block;}
+.onboardLogo .reticleAccent{stroke:var(--accent);}
+.onboard h2{font-size:22px; font-weight:var(--fw-figure); color:var(--title); margin:0; line-height:var(--line-height-tight);}
+.onboardSetup h2{font-size:18px;}
+.onboard p{font-size:14px; color:var(--sub); margin:0; line-height:var(--line-height-relaxed); max-width:320px;}
+.onboardSetup p{max-width:none;}
+.onboardPrivacy{
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  font-size:12px; color:var(--sub); margin-top:4px;
+}
+.onboardPrivacy svg{width:14px; height:14px; flex:0 0 auto; color:var(--sub);}
+/* タップターゲット規約（--tap-target-min:44px）準拠。ドラフトの36pxから是正（ui-specs-fable-adjudication.md #1） */
+.onboardSkip{
+  background:none; border:none; color:var(--sub); font-size:14px; cursor:pointer;
+  padding:8px 12px; min-height:var(--tap-target-min); font-family:inherit;
+  transition:color var(--motion-fast);
+}
+.onboardSkip:active{color:var(--ink);}
+.onboardAutoHint{font-size:11px; color:var(--sub); margin-top:2px; line-height:var(--line-height-normal);}
+.onboardChips{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:100%;}
+.onboardChip{
+  min-height:var(--tap-target-min); padding:9px 4px; border-radius:var(--radius-control); border:1px solid var(--line);
+  background:var(--soft); color:var(--ink); font-size:14px; cursor:pointer; user-select:none;
+  display:flex; align-items:center; justify-content:center;
+  font-family:inherit; font-weight:inherit; -webkit-appearance:none; appearance:none;
+  transition:transform var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);
+}
+.onboardChip:active{transform:scale(.975);}
+.onboardChip.on{
+  background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);
+  font-weight:var(--fw-emphasis); animation:chipPop .2s var(--ease-app);
+}
+.onboard .btn{width:100%; max-width:320px; min-height:var(--tap-target-comfortable); font-size:16px;}
+.onboard .btn[disabled]{opacity:.4;}
+@media (max-width:520px){
+  .onboardChips{grid-template-columns:repeat(2,1fr);}
+}
