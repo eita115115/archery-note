@@ -930,6 +930,62 @@ function todayConclusionCardHtml(rows) {
     <p class="todayConclusionText">${esc(c.text)}</p>
   </div>`;
 }
+
+/* ============ gamification: バッジ12種の線画SVG + 分析タブ末尾のバッジ一覧 ============
+   ICONS規約準拠（10-storage-native.js ICONS 同様: 24pxグリッド・currentColor・視覚的に3要素以内）。
+   絵文字は使わない（gamification-final-design.md 観点5 確定）。48-gamification.js の
+   BADGE_DEFS と id を1対1対応させる。ここは表示専用データなので純関数ファイルには置かない。 */
+const BADGE_ICONS = {
+  first_arrow:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M5 19 17 7"/><path d="M11.5 7H17v5.5"/></svg>',
+  century:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M8 6.5v11M12 5.5v13M16 6.5v11"/><path d="M6 9.5h12"/></svg>',
+  millennium:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M8 5.5v9M12 4.5v11M16 5.5v9"/><path d="M6 8.5h12"/><circle cx="12" cy="18.2" r="1.7"/></svg>',
+  gold_end:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.3"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  perfect_end:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="7.4"/><circle cx="10.3" cy="11.1" r="0.9" fill="currentColor" stroke="none"/><circle cx="13.7" cy="13.1" r="0.9" fill="currentColor" stroke="none"/></svg>',
+  tight_group:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8"/><circle cx="11.2" cy="11.5" r="0.85" fill="currentColor" stroke="none"/><circle cx="13" cy="11.8" r="0.85" fill="currentColor" stroke="none"/><circle cx="12" cy="13.1" r="0.85" fill="currentColor" stroke="none"/></svg>',
+  pb_breaker:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter"><path d="M4.5 19h15"/><path d="M7 19v-6M12 19V8.5M17 19v-3.5"/><path d="M14.3 4.7 17 2l2.5 2.6"/></svg>',
+  week_warrior:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="miter"><rect x="3.5" y="5" width="17" height="15"/><path d="M3.5 9.5h17"/><circle cx="8.2" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.8" cy="14.5" r="1" fill="currentColor" stroke="none"/></svg>',
+  month_master:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="miter"><rect x="3.5" y="5" width="17" height="15"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/></svg>',
+  streak_7:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M12 21c-3.6 0-6-2.4-6-5.7 0-2.6 1.5-4.4 2.6-6.2.4 1.6 1 2.6 1.9 3.1-.5-2.8.4-5.6 3-7.7.4 2.9 2.1 4.4 3.4 6.2.9 1.3 1.1 2.6 1.1 4.6 0 3.3-2.4 5.7-6 5.7z"/></svg>',
+  distance_explorer:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3.5 19 12 4.5 20.5 19"/><path d="M7.2 19h9.6"/></svg>',
+  all_weather:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M7.5 17.5a4 4 0 0 1 .3-8 5 5 0 0 1 9.6 1.4A3.3 3.3 0 0 1 17 17.5z"/><path d="M9 8.2A4.4 4.4 0 0 1 12.6 3"/></svg>',
+};
+/* 分析タブ末尾のバッジ一覧（実績グリッド）。enabled=false では何も描画しない。
+   解除済み=accent 1px枠+アイコンaccent色、未解除=line2枠+opacity.45（絵文字前提のgrayscaleフィルタは使わない） */
+function gamificationBadgesCardHtml() {
+  const g = db.settings.gamification;
+  if (!g || !g.enabled) return "";
+  const unlocked = new Map((db.gamification.badges || []).map((b) => [b.id, b]));
+  const cards = BADGE_DEFS.map((b) => {
+    const u = unlocked.get(b.id);
+    return `<div class="badgeCard ${u ? "" : "locked"}" data-testid="badge-card" data-badge="${b.id}">
+      <span class="ico" aria-hidden="true">${BADGE_ICONS[b.id] || ""}</span>
+      <span class="nm">${esc(b.name)}</span>
+      <span class="dt">${u ? esc(fmtD(u.unlockedAt.slice(0, 10))) : ""}</span>
+    </div>`;
+  }).join("");
+  const total = BADGE_DEFS.length;
+  const rate = total ? Math.round((unlocked.size / total) * 100) : 0;
+  return `<section class="badgeSection" data-testid="badge-section">
+    <h2>実績 <span class="mini">${unlocked.size}/${total}</span></h2>
+    <div class="badgeGrid">${cards}</div>
+    <div class="badgeRate">
+      <div class="badgeRateTrack"><div class="badgeRateFill" style="width:${rate}%"></div></div>
+      <div class="badgeRateLabel">${unlocked.size}/${total}</div>
+    </div>
+  </section>`;
+}
 function renderAnalysis(m) {
   const f = ui.analysisFilter;
   const allRows = buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
@@ -974,7 +1030,8 @@ function renderAnalysis(m) {
     .join("");
   m.innerHTML = `${todayConclusionCardHtml(rows)}
   ${allRows.length ? analysisFilterBarHtml(allRows, f) : ""}
-  ${cards || `<div class="card"><h2>分析</h2><div class="empty">${allRows.length ? "この絞り込みに合う記録がありません。フィルタを広げてください。" : `<p>記録が増えると、矢の集まり具合や月間まとめがここに表示されます。</p><button type="button" class="btn" id="anEmptyCta">記録タブへ</button>`}</div></div>`}`;
+  ${cards || `<div class="card"><h2>分析</h2><div class="empty">${allRows.length ? "この絞り込みに合う記録がありません。フィルタを広げてください。" : `<p>記録が増えると、矢の集まり具合や月間まとめがここに表示されます。</p><button type="button" class="btn" id="anEmptyCta">記録タブへ</button>`}</div></div>`}
+  ${gamificationBadgesCardHtml()}`;
   const anSetup = $("#anSetup");
   if (anSetup)
     anSetup.onchange = (e) => {

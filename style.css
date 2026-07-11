@@ -1155,3 +1155,39 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
   .streakGoals{width:100%; justify-content:center;}
   .streakGoals .goalRing:last-child{display:flex;}
 }
+
+/* badgeSection / badgeGrid — 分析タブ末尾のバッジ一覧（実績）。カードとは別に独自の hairline を持つ */
+.badgeSection{border-top:2px solid var(--line); padding-top:14px; margin-top:14px; margin-bottom:12px;}
+.badgeGrid{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px;}
+.badgeCard{
+  border:1px solid var(--accent); border-radius:var(--radius-card); padding:10px 6px;
+  background:var(--card); text-align:center; min-width:0;
+  transition:transform var(--motion-fast), opacity var(--motion-fast);
+}
+.badgeCard .ico{display:block; color:var(--accent);}
+.badgeCard .ico svg{width:24px; height:24px; display:block; margin:0 auto;}
+.badgeCard .nm{
+  display:block; font-size:10px; font-weight:var(--fw-label); color:var(--title);
+  margin-top:4px; line-height:var(--line-height-tight);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.badgeCard .dt{display:block; font-size:9px; color:var(--sub); margin-top:2px; font-variant-numeric:tabular-nums; min-height:12px;}
+/* 未解除: line2枠+opacity.45（絵文字前提の grayscale フィルタは使わない。currentColor の線画は不要） */
+.badgeCard.locked{border-color:var(--line2); opacity:.45;}
+.badgeCard.locked .ico{color:var(--sub);}
+/* 新規解除の強調。移行バックフィル分（retro）には付与しない — 起動時の一括解除は演出なしで一覧に現れるだけ */
+.badgeCard.justUnlocked{animation:chipPop .2s var(--ease-app);}
+.badgeRate{
+  display:flex; align-items:center; gap:8px; margin-top:10px;
+  font-size:11px; color:var(--sub); font-variant-numeric:tabular-nums;
+}
+.badgeRateTrack{flex:1; height:6px; background:var(--line); border-radius:3px; overflow:hidden;}
+/* animation:barFill は既存 keyframe（"motion:状態 — レディネスバー" コメント付近）の参照。再定義しない */
+.badgeRateFill{height:100%; background:var(--green); border-radius:3px; transform-origin:left; animation:barFill var(--motion-fluid) var(--ease-fluid) both;}
+.badgeRateLabel{flex:0 0 auto; font-weight:var(--fw-label);}
+@supports (content-visibility:auto){
+  main > .badgeSection{content-visibility:auto; contain-intrinsic-size:auto 220px;}
+}
+@media (max-width:420px){
+  .badgeGrid{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
