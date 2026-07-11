@@ -554,6 +554,7 @@ function openSettings(){
 
     <div class="settingsGroup" data-testid="settings-group-data">
       <div class="settingsGroupTitle">データ</div>
+      ${storageMeterHtml()}
       ${backupReminderHtml()}
       <div class="settingsActionHint">練習記録・セッティングをまとめて1つのJSONファイルに書き出します。</div>
       <div class="btnrow">

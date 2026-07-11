@@ -1800,6 +1800,9 @@ async function finishSession() {
   }
   nativePulse("success");
   save();
+  /* S3（ストレージ守りタスク・OPFS移行裁定 §4）: 満杯後にしか出ない既存の「保存容量が足りません」
+     トーストより手前で、練習終了のたびに一度だけ早期警告する。ratio<0.8 のときは何もしない */
+  maybeWarnStorageNearFull();
   /* ゲーミフィケーション: セッション終了の表出点（gamification-final-design.md §5）。
      ストリーク・目標は導出値なので保存前後の2回 computeStreak を呼ぶだけで済む。
      編集モード（isEdit）は対象外——過去記録の書き換えでストリークや実績を騒がせない */

@@ -125,6 +125,45 @@ function storageUsage(){
     return {bytes,mb:+(bytes/1048576).toFixed(2)};
   }catch(e){ return {bytes:0,mb:0}; }
 }
+/* S3（ストレージ守りタスク・OPFS移行裁定 §4）: 容量メーターと早期警告の基礎値。
+   分母は実測クォータではなく「localStorage の実用上限（多くのブラウザで約5MB）」の想定値を使う。
+   navigator.storage.estimate() はオリジン全体（IndexedDB/CacheStorage等を含む共有プール）のクォータで
+   あり localStorage 個別の上限とは別物のため、こちらは参考表示にのみ使う（storageMeterHtml 内）。 */
+const STORAGE_SOFT_CAP_MB=5;
+const STORAGE_WARN_RATIO=0.8;
+function storageUsageRatio(){
+  const u=storageUsage();
+  const ratio=u.mb/STORAGE_SOFT_CAP_MB;
+  return {mb:u.mb,capMb:STORAGE_SOFT_CAP_MB,ratio,percent:Math.round(Math.min(ratio,1)*100)};
+}
+/* navigator.storage.estimate() は非同期のため起動時に一度だけ先読みしてキャッシュする（90-init.js）。
+   対応環境のみ。失敗・非対応時は null のままで、参考表示を省くだけで主指標には一切影響しない。 */
+let _storageEstimate=null;
+async function prefetchStorageEstimate(){
+  try{
+    if(typeof navigator==="undefined"||!navigator.storage||typeof navigator.storage.estimate!=="function") return;
+    const r=await navigator.storage.estimate();
+    if(r && typeof r.quota==="number" && r.quota>0) _storageEstimate={quotaMb:+(r.quota/1048576).toFixed(1)};
+  }catch(e){ /* 参考表示のみの機能。取得失敗は静かに無視する */ }
+}
+/* 設定＞データ管理の容量メーター本体。Field Instrument流儀: 金は細い線のみ、見出しは控えめ。
+   80%以上で警告色に切り替える（トースト警告 maybeWarnStorageNearFull と同じ閾値）。 */
+function storageMeterHtml(){
+  const u=storageUsageRatio();
+  const warn=u.ratio>=STORAGE_WARN_RATIO;
+  const est=_storageEstimate?`<div class="hint">参考: ブラウザ全体の割当 約${_storageEstimate.quotaMb}MB（他機能と共有の目安であり、この上限そのものではありません）</div>`:"";
+  return `<div class="storageMeterBlock" data-testid="settings-storage-meter">
+    <div class="storageMeterHead"><span>使用容量</span><span>${u.mb.toFixed(2)} / 約${u.capMb}MB（${u.percent}%）</span></div>
+    <div class="storageMeter" role="img" aria-label="保存容量使用率 約${u.percent}%"><div class="storageMeterFill${warn?" warn":""}" style="width:${Math.min(u.percent,100)}%"></div></div>
+    ${warn?`<div class="note">容量が残り少なくなっています。バックアップ保存をおすすめします。</div>`:""}
+    ${est}
+  </div>`;
+}
+/* 練習終了時に一度だけ呼ぶ早期警告（現行の「保存容量が足りません」トーストは満杯後の事後警告のため、
+   その手前で気づけるようにする）。50-record-view.js の finishSession() から呼ばれる。 */
+function maybeWarnStorageNearFull(){
+  if(storageUsageRatio().ratio>=STORAGE_WARN_RATIO) toast("容量が残り少なくなっています。バックアップ保存をおすすめします",5000);
+}
 function load(){
   /* sessions キー欠落でも setups 等を持つ正当なデータは normalizeDb が補完して保持する */
   try{ const d=JSON.parse(storageGetItem(KEY)); if(d && typeof d==="object" && !Array.isArray(d)) return normalizeDb(d); }catch(e){}

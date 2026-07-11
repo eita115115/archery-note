@@ -59,10 +59,12 @@ document.addEventListener("visibilitychange",()=>{ if(document.hidden){ flushPen
 window.addEventListener("pagehide",()=>{ flushPendingSave(); flushSafetySnapshot(); });
 window.addEventListener("beforeunload",()=>{ flushPendingSave(); flushSafetySnapshot(); });
 checkUpdate();
-/* S1（ストレージ守りタスク・OPFS移行裁定 §4）: 起動時に一度だけ非同期で要求する。対応環境のみで動き、
-   失敗しても既存の保存・起動経路には一切影響しない（fire-and-forget）。設定パネルを開く頃には解決
-   済みなことが多いが、間に合わなくても storagePersistNoteHtml 側が未確定状態を安全に表示するだけ */
+/* S1/S3（ストレージ守りタスク・OPFS移行裁定 §4）: 起動時に一度だけ非同期で先読みする。
+   どちらも対応環境のみで動き、失敗しても既存の保存・起動経路には一切影響しない（fire-and-forget）。
+   設定パネルを開く頃には解決済みなことが多いが、間に合わなくても storagePersistNoteHtml /
+   storageMeterHtml 側が未確定・未取得の状態を安全に表示するだけ */
 requestStoragePersistence();
+prefetchStorageEstimate();
 if(db.active) wakeLock.acquire();
 /* addToHome ヒント判定用の起動カウンタ。起動パスに同期書き込みを増やさないため scheduleSave
    （flush は pagehide/visibilitychange 等の既存機構で保証済み）。

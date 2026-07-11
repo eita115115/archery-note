@@ -454,6 +454,12 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .nativePill .k{font-size:10.5px; color:var(--sub);}
 .nativePill b{display:block; font-size:13px; color:var(--title); margin-top:2px;}
 .nativePill span{display:block; font-size:10.5px; color:var(--sub); line-height:1.35; margin-top:2px;}
+/* S3 容量メーター（設定＞データ管理）。Field Instrument流儀: 金は細い線のみ、見出しは控えめ */
+.storageMeterBlock{margin:2px 0 10px;}
+.storageMeterHead{display:flex; justify-content:space-between; gap:8px; font-size:11.5px; color:var(--sub); margin-bottom:4px;}
+.storageMeter{height:3px; background:var(--line2); border-radius:2px; overflow:hidden;}
+.storageMeterFill{height:100%; background:var(--accent); border-radius:2px;}
+.storageMeterFill.warn{background:var(--status-warn);}
 .guideLine{display:flex; gap:8px; align-items:flex-start; font-size:12px; color:var(--sub); line-height:1.45; margin-top:8px;}
 .guideLine b{color:var(--title); white-space:nowrap; flex:0 0 auto;}
 .activeGuide{margin-top:8px;}
