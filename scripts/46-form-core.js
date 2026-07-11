@@ -388,12 +388,18 @@ function stepFormPhase(st, raw, history, sens, now) {
   const maxV = velWin.length ? Math.max(...velWin.map((h) => h.vel || 0)) : 0;
   const hasNullGap = winAll.length > win.length;
   const velOk = maxV > FORM_PH.RELEASE_TH / s;
-  /* 窓内の最大連続nullギャップ（最初のnullフレーム→最後のnullフレームの経過時間）。
+  /* 窓内の最大連続ギャップ（win に入らなかった最初のフレーム→最後のフレームの経過時間）。
+     hasNullGap と同じ「win 基準」（実null ∪ conf ゲート除外）で数える。2026-07-11
+     strict-review 修正: 旧実装は `!h.m` のみで数えていたため、CONF_GATE 発動時に
+     conf 除外フレーム（実nullではない「仮想null」）が hasNullGap は増やすのに
+     maxGapMs には数えられず、D' の時間上限を素通りしていた（B' との単独切替禁止の
+     根拠どおり、両ゲート発動後にのみ影響。CONF_GATE=0 の出荷状態では formConfOk が
+     常に true を返すため本行の意味は `!h.m` と完全に同値＝挙動不変）。
      NB_MAX_GAP_MS 超の姿勢ロスは nullBridged の根拠にしない（Stage 1 D'） */
   let maxGapMs = 0, gapStart = null;
   for (const h of winAll) {
-    if (!h.m) { if (gapStart == null) gapStart = h.ts; maxGapMs = Math.max(maxGapMs, h.ts - gapStart); }
-    else gapStart = null;
+    if (h.m && formConfOk(h.m)) { gapStart = null; }
+    else { if (gapStart == null) gapStart = h.ts; maxGapMs = Math.max(maxGapMs, h.ts - gapStart); }
   }
   const nullBridged = hasNullGap && rise > FORM_PH.NB_RISE && maxV > FORM_PH.NB_MAXV
     && maxGapMs <= FORM_PH.NB_MAX_GAP_MS;

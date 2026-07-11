@@ -244,6 +244,22 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   assertEqual(runSequence(gapBridgedSequence(11), coreInfGap).releases, 1,
     "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' behavior on the 200ms gap");
 }
+/* [既知の制約・文書化のみ、strict-review 2026-07-11 finding]: 上の140/200ms境界テストが
+   計測するギャップ span は「窓内に現れた最初のnullフレームts→最後のnullフレームts」であり、
+   ギャップが250ms窓(RISE_WINDOW_MS)の左端に接している場合（＝本当のロス区間が窓外へ続いて
+   いる可能性がある場合）、実際の姿勢ロス時間を過小評価しうる。合成再現で確認済みの経路:
+   アンカー保持 → 実スパン220msの姿勢ロス（null 12フレーム, dt=20ms）→ 復帰close 2フレーム
+   → vel=3 の緩慢な引き戻し、という系列が released=1（発火）になる。理由は releaseTs 直前の
+   250ms窓にギャップの先頭部分が入らず、在窓の計測値が 140ms ≤ NB_MAX_GAP_MS(150) に収まる
+   ため。加えてスパン定義そのものが「先頭null ts→末尾null ts」なので、真のロス時間（有効
+   フレーム→有効フレーム間隔）を約2フレーム間隔ぶん恒常的に過小評価する（低fpsほど誤差が
+   拡大: dt=66msでは null 3枚=132msの計測でも実ロスは約264ms）。
+   strict-reviewの総合判断はこれを「push可・T8前の必須修正ではない」と結論しており（次工程
+   条件は診断解釈時にこの経路を前提として読むことのみ）、本コミットではロジック変更をしない。
+   修正方向（案）: (a) ギャップを「直前の有効フレームts→直後の有効フレームts」で計測する、
+   (b) ギャップが窓左端に接している場合は上限超過側に倒す。実施する場合は設計書
+   form-phase-final-design.md §6-D' への差し戻しフィードバックとセットで、境界テスト
+   （140/200ms）の再導出込みの別タスクとする。 */
 {
   /* B'（Stage 1・中立スキャフォールド）: conf ゲート。出荷値 CONF_GATE=0 は完全無効＝現行同値。
      0.45 へ差し替えたコアでは conf<0.45 のフレームが窓から除外される（ロジック検証のみ、発動はしない）。 */
@@ -294,6 +310,61 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   )();
   assertEqual(runSequence(visMixedSeq, coreDwGate).releases, 0,
     "DW_VIS_GATE=0.5 removes the low-visibility spike from velocity evaluation (no fire)");
+}
+{
+  /* B'×D'相互作用（設計 form-phase-final-design.md §9-8、strict-review 2026-07-11
+     「T8前の必須解消事項」）: 低confフレーム混在（conf除外がhasNullGapを増やすが実nullでは
+     ない）系列で、CONF_GATE(0/0.45) × NB_MAX_GAP_MS(150/∞) の4通りの検出結果を固定する。
+     シナリオは strict-review の合成再現条件と同一: 高confアンカー保持 → conf=0.3 の遮蔽
+     180ms（実nullではない）→ NB_MAXV(2)超・RELEASE_TH(9)未満の vel=3 の緩慢な引き戻し。
+       - CONF_GATE=0（出荷値）: ゲート無効なので遮蔽フレームも通常フレームとして扱われ、
+         実nullが存在しない → hasNullGap 自体が立たず、NB_MAX_GAP_MS の値に関わらず非発火
+         （0/150, 0/∞ の2通り）。
+       - CONF_GATE=0.45 & NB_MAX_GAP_MS=150（両ゲートがT8で有効化される想定の組み合わせ）:
+         conf除外フレームが hasNullGap を立てる一方、maxGapMs も同じ「win 基準」で 180ms を
+         計測するため NB_MAX_GAP_MS(150) を超過し nullBridged は不成立＝非発火。ここが本コミット
+         で修正した maxGapMs のゲート非対称の直接の回帰対象（46-form-core.js のループが旧来の
+         `!h.m` 基準のままなら、conf除外フレームはここでカウントされず maxGapMs=0 のままとなり、
+         誤って発火していたはずの組み合わせ）。
+       - CONF_GATE=0.45 & NB_MAX_GAP_MS=∞: D' の時間上限そのものを無効化した組み合わせ。
+         conf除外による仮想ギャップが無制限に橋渡しされるため発火する（D'を切った結果であり
+         今回のfindingの対象外＝想定どおりの挙動）。 */
+  const mkRawG = (anchorNorm, drawArm, conf) => ({ anchorNorm, drawArm, conf, bodyScale: 0.25, dW: { x: 0, y: 0 } });
+  function confGapInteractionSequence() {
+    const seq = [];
+    // 高confアンカー保持（10ms間隔110フレーム=1100ms）: REFRACTORY_MS(1000ms)を追い越しつつ
+    // 250ms窓に十分な closeFrames を残す（gapBridgedSequence と同構成）
+    for (let i = 0; i < 110; i++) seq.push([mkRawG(0.22, 150, 0.9), 0.02, 10]);
+    // 遮蔽180ms: 実nullではなく conf=0.3 の低信頼フレーム（10フレーム×20ms、span=180ms）
+    for (let i = 0; i < 10; i++) seq.push([mkRawG(0.22, 150, 0.3), 0.02, 20]);
+    // 復帰: NB_MAXV(2)超・RELEASE_TH(9)未満の緩慢な引き戻し（velOkでなくnullBridged経路を狙う）
+    seq.push([mkRawG(1.0, 90, 0.9), 3, 10]);
+    for (let i = 0; i < 10; i++) seq.push([mkRawG(1.0, 90, 0.9), 0.2, 20]);
+    return seq;
+  }
+  assert(coreScript.includes("CONF_GATE: 0,"), "CONF_GATE constant present for interaction substitution");
+  assert(coreScript.includes("NB_MAX_GAP_MS: 150,"), "NB_MAX_GAP_MS constant present for interaction substitution");
+  const coreGateOffGapInf = new Function(
+    `${coreScript.replace("NB_MAX_GAP_MS: 150,", "NB_MAX_GAP_MS: Infinity,")}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  const coreGateOnGapOn = new Function(
+    `${coreScript.replace("CONF_GATE: 0,", "CONF_GATE: 0.45,")}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  const coreGateOnGapInf = new Function(
+    `${coreScript.replace("CONF_GATE: 0,", "CONF_GATE: 0.45,").replace("NB_MAX_GAP_MS: 150,", "NB_MAX_GAP_MS: Infinity,")}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  const interactionSeq = confGapInteractionSequence();
+  assertEqual(runSequence(interactionSeq, core).releases, 0,
+    "CONF_GATE=0 x NB_MAX_GAP_MS=150 (shipped): no real null frame, no fire");
+  assertEqual(runSequence(interactionSeq, coreGateOffGapInf).releases, 0,
+    "CONF_GATE=0 x NB_MAX_GAP_MS=Infinity: gate disabled, still no fire regardless of the gap cap");
+  assertEqual(runSequence(interactionSeq, coreGateOnGapOn).releases, 0,
+    "CONF_GATE=0.45 x NB_MAX_GAP_MS=150: conf-excluded 180ms gap exceeds the cap, correctly suppressed (maxGapMs fix under test)");
+  assertEqual(runSequence(interactionSeq, coreGateOnGapInf).releases, 1,
+    "CONF_GATE=0.45 x NB_MAX_GAP_MS=Infinity: D' time cap disabled, virtual gap bridges unconditionally (fires)");
 }
 {
   // 連続2射: 不応期を挟んで両方検出
