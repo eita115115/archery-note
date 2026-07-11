@@ -60,4 +60,7 @@ window.addEventListener("pagehide",()=>{ flushPendingSave(); flushSafetySnapshot
 window.addEventListener("beforeunload",()=>{ flushPendingSave(); flushSafetySnapshot(); });
 checkUpdate();
 if(db.active) wakeLock.acquire();
+/* addToHome ヒント判定用の起動カウンタ。起動パスに同期書き込みを増やさないため scheduleSave
+   （flush は pagehide/visibilitychange 等の既存機構で保証済み） */
+db.settings.launchCount=(db.settings.launchCount||0)+1; scheduleSave("launch-count");
 render();

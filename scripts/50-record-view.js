@@ -315,6 +315,102 @@ function renderOnboarding(m) {
   };
   $("#obSkip2").onclick = finishOnboarding;
 }
+
+/* ---------- 段階的機能発見ヒント（記録タブ上部のみ・常に最大1枚。onboarding-final-design.md 観点4） ----------
+   優先度順に評価し、最初に条件が成立した1件だけを表示する。オンボーディング表示中・
+   セッション記録中は renderRecord の早期 return により自然に非表示になる。 */
+const FEATURE_HINTS = [
+  {
+    key: "gearSetup",
+    ico: "tool",
+    html: "<strong>用具を登録</strong>するとサイト台帳と自動でつながります",
+    act: "設定する",
+    when: () => db.sessions.length >= 1 && db.setups.length === 0,
+    go: () => showView("gear"),
+  },
+  {
+    key: "analysis",
+    ico: "book",
+    html: "3回分たまりました。<strong>分析タブ</strong>で傾向が見えます",
+    act: "見る",
+    when: () => db.sessions.length >= 3,
+    go: () => showView("analysis"),
+  },
+  {
+    key: "sightAdjust",
+    ico: "target",
+    html: "2距離のサイト値が揃いました。<strong>サイト調整</strong>が使えます",
+    act: "開く",
+    when: () => new Set(db.sightMarks.map((x) => x.dist)).size >= 2,
+    go: () => showView("sight"),
+  },
+  {
+    key: "formTracking",
+    ico: "camera",
+    html: "カメラで<strong>射形トラッキング</strong>も記録できます",
+    act: "試す",
+    when: () => db.sessions.length >= 5,
+    go: () => showView("analysis"),
+  },
+  {
+    key: "addToHome",
+    ico: "down",
+    html: "<strong>ホーム画面に追加</strong>すると全画面で開けます",
+    act: "方法を見る",
+    when: () => db.settings.launchCount >= 2 && runtimeKind().kind === "Web",
+    go: () => openAddToHomeSheet(),
+  },
+];
+function pendingFeatureHint() {
+  const fh = db.settings.featureHints || {};
+  return FEATURE_HINTS.find((h) => !fh[h.key] && h.when()) || null;
+}
+function featureHintHtml() {
+  const h = pendingFeatureHint();
+  if (!h) return "";
+  return `<div class="hintBanner" data-testid="feature-hint" data-hint="${h.key}">
+    <span class="hintBannerIcon" aria-hidden="true">${icon(h.ico)}</span>
+    <span class="hintBannerText">${h.html}</span>
+    <button type="button" class="hintBannerAction" id="hintAction">${esc(h.act)}</button>
+    <button type="button" class="hintBannerClose" id="hintClose" aria-label="閉じる">${icon("del")}</button>
+  </div>`;
+}
+function dismissFeatureHint(key) {
+  db.settings.featureHints = db.settings.featureHints || {};
+  db.settings.featureHints[key] = true;
+  save("hint-dismiss"); // 閉じる/アクションとも同じ案内を二度見せないため即時保存
+}
+function bindFeatureHint() {
+  const h = pendingFeatureHint();
+  if (!h) return;
+  const actBtn = $("#hintAction");
+  if (actBtn)
+    actBtn.onclick = () => {
+      dismissFeatureHint(h.key);
+      h.go();
+      if (view === "record") render(); // go() がタブ遷移しない場合（addToHome）はここで消す
+    };
+  const closeBtn = $("#hintClose");
+  if (closeBtn)
+    closeBtn.onclick = () => {
+      dismissFeatureHint(h.key);
+      render();
+    };
+}
+/* ブラウザからのワンタップ追加はできないため、共有→ホーム画面に追加の手順を示すだけの小シート */
+function openAddToHomeSheet() {
+  const ovl = document.createElement("div");
+  ovl.className = "ovl";
+  ovl.innerHTML = `<div class="sheet">
+    <h3>ホーム画面に追加</h3>
+    <div class="note">1. 共有ボタン（またはブラウザメニュー）をタップ</div>
+    <div class="note">2. 「ホーム画面に追加」を選ぶ</div>
+    <div class="hint">ホーム画面から開くと、アドレスバーのない全画面表示になります。</div>
+    <div class="btnrow"><button type="button" class="btn" id="a2hClose">閉じる</button></div>
+  </div>`;
+  openModal(ovl, { escapeTarget: "#a2hClose" });
+  ovl.querySelector("#a2hClose").onclick = () => closeModal(ovl);
+}
 function renderRecord(m) {
   if (db.active) {
     renderActive(m);
@@ -331,6 +427,7 @@ function renderRecord(m) {
   const defFace = suggestedFaceValue(defDist, last);
   const defPerEnd = last && last.perEnd ? last.perEnd : 6;
   m.innerHTML = `
+  ${featureHintHtml()}
   ${recordFastActionsHtml(last, defDist, defFace)}
   <section class="launchPanel convergeLaunch startFirst">
     <div class="launchHead">
@@ -393,6 +490,7 @@ function renderRecord(m) {
     ${mode === "calibration" ? `<div class="advice recordNeutralAdvice"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>` : ""}
     </div>
   </section>`;
+  bindFeatureHint();
   const distState = { d: defDist };
   const faceSel = $("#fFace");
   const suggestFace = (d) => {

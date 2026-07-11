@@ -988,6 +988,40 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 }
 .onboard .btn{width:100%; max-width:320px; min-height:var(--tap-target-comfortable); font-size:16px;}
 .onboard .btn[disabled]{opacity:.4;}
+
+/* hintBanner — 段階的機能発見ヒント（記録タブ上部のみ・常に最大1枚。onboarding-final-design.md 観点4） */
+.hintBanner{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 14px; margin-bottom:12px; border-radius:var(--radius-card);
+  background:var(--soft); border:1px solid var(--line);
+  animation:nudgeReveal .24s var(--ease-app) both;
+}
+.hintBannerIcon{font-size:20px; line-height:1; flex:0 0 auto; padding-top:1px;}
+.hintBannerIcon svg{width:20px; height:20px;}
+.hintBannerText{flex:1; min-width:0; font-size:13px; color:var(--ink); line-height:var(--line-height-normal);}
+.hintBannerText strong{font-weight:var(--fw-emphasis); color:var(--title);}
+.hintBannerAction{
+  flex:0 0 auto; font-size:12px; font-weight:var(--fw-label); color:var(--accent-strong);
+  background:none; border:none; cursor:pointer; padding:2px 0;
+  min-height:var(--tap-target-min); display:flex; align-items:center;
+  font-family:inherit; white-space:nowrap;
+}
+.hintBannerAction:active{opacity:.7;}
+.hintBannerClose{
+  position:relative; flex:0 0 auto; width:24px; height:24px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  background:none; border:none; color:var(--sub); font-size:16px; cursor:pointer;
+  padding:0; min-height:var(--tap-target-min); font-family:inherit;
+}
+.hintBannerClose::before{content:""; position:absolute; inset:-10px; border-radius:inherit;}
+.hintBannerClose:active{color:var(--ink);}
+@supports (content-visibility:auto){
+  main > .hintBanner{content-visibility:auto; contain-intrinsic-size:auto 120px;}
+}
 @media (max-width:520px){
   .onboardChips{grid-template-columns:repeat(2,1fr);}
+}
+@media (max-width:420px){
+  .hintBanner{flex-wrap:wrap;}
+  .hintBannerText{flex-basis:100%; order:-1;}
 }
