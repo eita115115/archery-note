@@ -744,6 +744,17 @@ function backupReminderHtml(){
   if(days<30) return `<div class="hint">最終バックアップ/CSV出力: ${new Date(t).toLocaleDateString()}。月1回の保存ペースは良好です。</div>`;
   return `<div class="advice analysisAdviceCard"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
 }
+/* S4（ストレージ守りタスク・OPFS移行裁定 §4／§5-観点5）: 7日ITP対策の案内。
+   ブラウザのタブ・ブックマークのまま使い続ける（ホーム画面未追加の）利用者は、Safari の ITP により
+   7日間サイトを開かないと localStorage ごと消去される場合がある。これは OPFS へ移行しても解決しない
+   （裁定書§5参照）ため、バックアップ節で運用対策として案内する。runtimeKind() が "Web"（ネイティブ
+   でもホーム画面PWAでもない）のときだけ表示する。記録タブの featureHints.addToHome（一度見たら
+   消える発見ヒント）とは独立: こちらは「今も非standalone実行中」というライブ状態が理由なので、
+   既読フラグで恒久的に消してはいけない（ホーム画面に追加すれば runtimeKind() 自体が変わり自然に消える） */
+function webStorageRiskHtml(){
+  if(runtimeKind().kind!=="Web") return "";
+  return `<div class="hint">ブラウザで開いたままだと、7日間操作がないとデータが失われる場合があります。<b>ホーム画面に追加</b>すると安全性が上がります。</div>`;
+}
 /* ゴミ箱の一覧+復元は「データ」節、全消去ボタンは危険域へ分離して表示する（表示のみの分割。
    #trashClear の挙動・確認ダイアログの有無は変えない） */
 function trashSettingsHtml(){

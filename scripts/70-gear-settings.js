@@ -556,6 +556,7 @@ function openSettings(){
       <div class="settingsGroupTitle">データ</div>
       ${storageMeterHtml()}
       ${backupReminderHtml()}
+      ${webStorageRiskHtml()}
       <div class="settingsActionHint">練習記録・セッティングをまとめて1つのJSONファイルに書き出します。</div>
       <div class="btnrow">
         <button class="btn sec" id="dExp" data-testid="settings-export">${icon("down")} バックアップ保存</button>
