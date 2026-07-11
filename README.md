@@ -14,7 +14,13 @@
 
 </div>
 
-<!-- TODO: デモGIFを追加する（実機での記録〜サイト調整〜射形解析の一連の流れ） -->
+<div align="center">
+
+![得点入力からエンド確定、グルーピング分析、サイト調整提案までの操作デモ / Demo: score entry, end confirmation, grouping analysis, and sight adjustment](docs/screenshots/demo.gif)
+
+_的をタップして得点入力 → エンド確定 → グルーピング分析 → サイト調整の提案_
+
+</div>
 
 ## スクリーンショット / Screenshots
 
