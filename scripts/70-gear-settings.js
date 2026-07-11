@@ -484,6 +484,12 @@ function applyTheme(){
   const t=db.settings.theme||"auto";
   document.documentElement.className=t;
 }
+/* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。
+   applyTheme() は className を丸ごと置き換えるため独立関数として追加し（既存のテーマ切替ロジックは
+   無改造）、applyTheme() を呼ぶ全箇所の直後で本関数も呼び直して html.field クラスを再同期する */
+function applyFieldMode(){
+  document.documentElement.classList.toggle("field",db.settings.fieldMode===true);
+}
 /* GAMIFICATION 設定セクション: テーマ選択の下（表示グループの直後）に独立配置。
    最終設計書 gamification-final-design.md §5 画面別配置・ui-specs-fable-adjudication.md 2d 準拠。
    enabled=false では曜日チップ・目標入力・説明文を隠し、トグルだけを残す（全UI非表示・全計算スキップ）。
@@ -531,6 +537,12 @@ function openSettings(){
       <div class="chips" id="thChips" data-testid="settings-theme-chips">
         ${[["auto","自動（端末に合わせる）"],["light","ライト"],["dark","ダーク"]].map(([v,lb])=>`<button type="button" class="chip ${th===v?"on":""}" aria-pressed="${th===v}" data-th="${v}">${lb}</button>`).join("")}
       </div>
+      <label class="f">射場モード</label>
+      <div class="chips" id="fmChips" data-testid="settings-field-mode-chips">
+        <button type="button" class="chip ${db.settings.fieldMode?"":"on"}" aria-pressed="${!db.settings.fieldMode}" data-fm="0">OFF</button>
+        <button type="button" class="chip ${db.settings.fieldMode?"on":""}" aria-pressed="${!!db.settings.fieldMode}" data-fm="1">ON</button>
+      </div>
+      <div class="hint">直射日光下での記録用に、文字と数値のコントラストを高めます。</div>
       <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
       <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight||850}">
       <label class="f">射形トラッキング（ベータ）</label>
@@ -587,8 +599,13 @@ function openSettings(){
   </div>`;
   openModal(ovl,{escapeTarget:"#setClose"});
   ovl.querySelectorAll("#thChips .chip").forEach(c=>c.onclick=()=>{
-    db.settings.theme=c.dataset.th; save(); applyTheme();
+    db.settings.theme=c.dataset.th; save(); applyTheme(); applyFieldMode();
     ovl.querySelectorAll("#thChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+  });
+  ovl.querySelectorAll("#fmChips .chip").forEach(c=>c.onclick=()=>{
+    db.settings.fieldMode=c.dataset.fm==="1"; save(); applyFieldMode();
+    ovl.querySelectorAll("#fmChips .chip").forEach(x=>{ const on=x===c; x.classList.toggle("on",on); x.setAttribute("aria-pressed",String(on)); });
+    toast(db.settings.fieldMode?"射場モードを有効にしました":"射場モードを無効にしました");
   });
   ovl.querySelector("#setEye").onchange=e=>{ db.settings.eyeSight=+e.target.value||850; save(); };
   ovl.querySelectorAll("#ftChips .chip").forEach(c=>c.onclick=()=>{
@@ -660,7 +677,7 @@ function openSettings(){
            （backfill 自体が enabled ゲートで no-op になるだけ） */
         if(db.settings.gamification) db.settings.gamification.backfilledAt=null;
         save({reason:"restore",forceSnapshot:true});
-        applyTheme(); closeModal(ovl); render(); toast("バックアップデータを復元しました");
+        applyTheme(); applyFieldMode(); closeModal(ovl); render(); toast("バックアップデータを復元しました");
       }finally{ endActiveWorkflow(); }
     }
   };
@@ -693,7 +710,7 @@ function openSettings(){
             console.warn("[gamification] backfill on import failed, will retry on next launch",e);
           }
         }
-        save({reason:"import",forceSnapshot:true}); applyTheme(); closeModal(ovl); render(); toast("読み込みました");
+        save({reason:"import",forceSnapshot:true}); applyTheme(); applyFieldMode(); closeModal(ovl); render(); toast("読み込みました");
       }
     }catch(_){ toast("ファイルを読み込めませんでした"); } finally{ endActiveWorkflow(); } };
     r.onerror=()=>{ endActiveWorkflow(); toast("ファイルを読み込めませんでした"); };

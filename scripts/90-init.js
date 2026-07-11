@@ -5,6 +5,7 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
   navigator.serviceWorker.register("sw.js").catch(()=>{});
 }
 applyTheme();
+applyFieldMode();
 $("#btnSettings").onclick=openSettings;
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
 let updateAvailable=false;

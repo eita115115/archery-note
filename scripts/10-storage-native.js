@@ -11,7 +11,7 @@ const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:true,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",fieldMode:false,lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:true,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -55,6 +55,9 @@ function normalizeDb(d){
      settings 全体は浅いマージ済み（L44）だが、featureHints はネストオブジェクトのため
      浅いマージだけでは新キーが古い保存データ・破損インポートに行き渡らない */
   if(typeof out.settings.onboardingSeen!=="boolean") out.settings.onboardingSeen=false;
+  /* 射場モード（3.3 AAAトグル）: 既存データ・破損インポートでも型を boolean に強制する。
+     SCHEMA_VER は据え置き（他の featureHints/onboardingSeen 等と同じキー単位補完） */
+  if(typeof out.settings.fieldMode!=="boolean") out.settings.fieldMode=false;
   if(typeof out.settings.launchCount!=="number"||!Number.isFinite(out.settings.launchCount)) out.settings.launchCount=0;
   const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false};
   if(!out.settings.featureHints||typeof out.settings.featureHints!=="object"||Array.isArray(out.settings.featureHints)){

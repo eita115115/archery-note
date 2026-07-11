@@ -836,6 +836,24 @@ html.dark{
     --shadow-floating:var(--shadow-raised);
   }
 }
+/* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。
+   直射日光下でも読めるよう、必要トークンのみ AAA 相当まで上書きする（構造・レイアウトは変更しない） */
+html.field {
+  --sub: #484d42;           /* 5.84→8.26:1 */
+  --accent: #594608;        /* 3.06→8.66:1 */
+  --accent-strong: #594608; /* 5.06→8.66:1 */
+  --line: #c4bcaa;
+  --chrome-border: rgba(27,27,24,.22);
+  --red: #a01515;           /* →8.04:1 AAA */
+  --blue: #1050a0;          /* →7.84:1 AAA */
+}
+
+html.dark.field, html.auto.field {
+  --sub: #b4baa8;           /* 7.26→9.49:1 */
+}
+
+html.field nav.tabs::before { height: 3px; }
+html.field .lensTag { font-weight: 700; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
 details.adv{border:1px solid var(--line); border-radius:8px; padding:2px 12px 8px; margin-top:12px; background:var(--card);}
 /* motion:因果 — アコーディオンの内容が開閉時に滑らかに現れる */
 @keyframes detailReveal{from{opacity:0; transform:translateY(-4px);}to{opacity:1; transform:translateY(0);}}
