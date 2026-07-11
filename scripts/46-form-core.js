@@ -50,6 +50,12 @@ const FORM_PH = Object.freeze({
   NB_RISE: 0.25,
   NB_MAXV: 2,
   NB_MAX_GAP_MS: 150,
+  /* B'（Stage 1・中立スキャフォールド）: conf / dW可視性ゲート。0 = 完全無効（現行挙動と同一）。
+     発動候補（CONF_GATE 0.45 / DW_VIS_GATE 0.5）への切替は第2回実射データの判定表GO後のみ。
+     ゲートで無効化したフレームは hasNullGap を増やし nullBridged 経路（D'）と相互作用するため、
+     切替時は D' と同一セッションのデータで相互作用込みの検証が必須（単独切替禁止、設計§6-B'） */
+  CONF_GATE: 0,
+  DW_VIS_GATE: 0,
 });
 
 const FORM_PHASES = Object.freeze({
@@ -258,6 +264,75 @@ function computeFormVelocity(history, raw, now) {
   return formDist(raw.dW, lv.m.dW) / dt / raw.bodyScale;
 }
 
+/* A2（Stage 1・中立スキャフォールド）: 1-Euro フィルタ付き速度ソースの設定。
+   ENABLED: false の間は完全 pass-through（computeFormVelocity と同値）で、
+   発動は ENABLED の1行変更のみ。発動時は dW の正規化座標 (x,y) に各軸独立で
+   1-Euro を適用し、フィルタ後の位置から速度を導出する（速度に直接掛けない。
+   位置フィルタが 1-Euro の設計前提、設計§6-A2）。
+   発動の前提: tools/check-form-core.js のレットダウン境界表をフィルタ経由で
+   再導出し、新しい vel 上限に対して RELEASE_TH のマージンが 1.0 以上残ること
+   （TH=8 の先決めは却下済み、設計§10-1）。 */
+const FORM_VEL_FILTER = Object.freeze({
+  ENABLED: false,
+  MIN_CUTOFF: 1.5, // Hz。静止時の平滑化強度（小さいほど強く平滑化）
+  BETA: 0.007, // 速度適応係数。速い動きでカットオフを引き上げラグを抑える
+  D_CUTOFF: 1.0, // Hz。微分（速度推定）のローパスカットオフ
+  RESET_GAP_MS: 500, // 有効フレーム間隔がこれを超えたらフィルタ内部状態をリセット
+});
+
+/* 1-Euro フィルタ付き速度ソースのファクトリ。撮影/リプレイの各セッションで
+   1 つ生成し、フレームごとに step(history, raw, now) を呼ぶ。ENABLED: false の間は
+   状態を持たず computeFormVelocity へ委譲する（挙動完全一致）。
+   reset() はセッション条件の変更（利き手切替等、history を破棄する箇所）で呼ぶ。 */
+function makeFormVelocitySource(opts) {
+  const o = Object.assign({}, FORM_VEL_FILTER, opts || {});
+  const alpha = (cutoff, dt) => { const tau = 1 / (2 * Math.PI * cutoff); return 1 / (1 + tau / dt); };
+  // 各軸の 1-Euro 状態: {x: 前回のフィルタ後値, dx: 前回のフィルタ後微分}
+  let ax = null, ay = null, lastTs = 0, lastOut = null;
+  const stepAxis = (st2, v, dt) => {
+    const dxRaw = (v - st2.x) / dt;
+    const aD = alpha(o.D_CUTOFF, dt);
+    const dx = st2.dx + aD * (dxRaw - st2.dx);
+    const cutoff = o.MIN_CUTOFF + o.BETA * Math.abs(dx);
+    const a = alpha(cutoff, dt);
+    return { x: st2.x + a * (v - st2.x), dx };
+  };
+  return {
+    step(history, raw, now) {
+      if (!o.ENABLED) return computeFormVelocity(history, raw, now);
+      if (!raw) return 0; // null フレーム: 状態は保持（ギャップ超過は次の有効フレームで判定）
+      if (ax && now - lastTs > o.RESET_GAP_MS) { ax = null; ay = null; lastOut = null; }
+      const dt = ax ? (now - lastTs) / 1000 : 0;
+      if (!ax || dt <= 0) {
+        ax = { x: raw.dW.x, dx: 0 }; ay = { x: raw.dW.y, dx: 0 };
+        lastOut = { x: raw.dW.x, y: raw.dW.y }; lastTs = now;
+        return 0;
+      }
+      ax = stepAxis(ax, raw.dW.x, dt);
+      ay = stepAxis(ay, raw.dW.y, dt);
+      const out = { x: ax.x, y: ay.x };
+      const vel = formDist(out, lastOut) / dt / raw.bodyScale;
+      lastOut = out; lastTs = now;
+      return vel;
+    },
+    reset() { ax = null; ay = null; lastTs = 0; lastOut = null; },
+  };
+}
+
+/* B'（Stage 1・中立スキャフォールド）: stepFormPhase 内でのみ使う可視性ゲート。
+   history 自体は汚さない（summarizeFormShot 等の中央値系は現行のまま）。
+   ゲート値 0 は完全無効＝pass-through（conf/visibility 未設定のフレームも通す）。
+   ゲート有効時: conf 未設定または CONF_GATE 未満のフレームは null 扱い、
+   dW.visibility が DW_VIS_GATE 以下のフレームは速度評価（maxV）から除外する
+   （速度は dW のみから計算されるため、平均 conf では代用できない。設計§6-B'）。 */
+function formConfOk(m) {
+  return FORM_PH.CONF_GATE <= 0 || (m.conf != null && m.conf >= FORM_PH.CONF_GATE);
+}
+function formDwVisOk(m) {
+  return FORM_PH.DW_VIS_GATE <= 0 || m.dW == null || m.dW.visibility == null
+    || m.dW.visibility > FORM_PH.DW_VIS_GATE;
+}
+
 /* anchorStartTs は anchorSince と意味が異なる別フィールド（Stage 0 C）。
    anchorSince はアンカー圏を離れた全フレームでリセットされる（FULL_DRAW 昇格判定用）が、
    anchorStartTs は sticky: ANCHORING/FULL_DRAW で記録を開始し、DRAWING への一時離脱では
@@ -282,12 +357,15 @@ function makeFormPhaseDetector() {
    場合、直前に追加したショットを取り消すこと（誤検出の自己修復）。 */
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
-  if (!raw) {
+  // B'（Stage 1）: conf ゲート。CONF_GATE=0 の間は usable === raw（完全 pass-through）。
+  // ゲート有効時は低confの現在フレームを null フレームと同じ扱いにする
+  const usable = raw && formConfOk(raw) ? raw : null;
+  if (!usable) {
     if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; st.anchorStartTs = 0; }
     return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs };
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
-    if (raw.anchorNorm < FORM_PH.CLOSE_IN) {
+    if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
       // アンカー圏へ即座に戻った = 離脱ではなく一時的な検出ノイズ/引き戻しだった。取消
       st.pendingRelease = null; st.lastReleaseTs = 0; st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
       st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
@@ -298,14 +376,16 @@ function stepFormPhase(st, raw, history, sens, now) {
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) { st.cur = FORM_PHASES.RELEASE; return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs }; }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) { st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0; return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs }; }
-  const close = raw.anchorNorm < FORM_PH.CLOSE_IN;
+  const close = usable.anchorNorm < FORM_PH.CLOSE_IN;
   const winAll = history.filter(h => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
-  const win = winAll.filter(h => h.m);
+  const win = winAll.filter(h => h.m && formConfOk(h.m));
   const closeFrames = win.filter((h) => h.m.anchorNorm < FORM_PH.CLOSE_IN);
-  const minAnchor = win.length ? Math.min(...win.map((h) => h.m.anchorNorm)) : raw.anchorNorm;
-  const rise = raw.anchorNorm - minAnchor;
+  const minAnchor = win.length ? Math.min(...win.map((h) => h.m.anchorNorm)) : usable.anchorNorm;
+  const rise = usable.anchorNorm - minAnchor;
   st.lastRise = rise;
-  const maxV = win.length ? Math.max(...win.map((h) => h.vel || 0)) : 0;
+  // B'（Stage 1）: 速度信頼性は dW 個別可視性でゲート（DW_VIS_GATE=0 の間は velWin === win）
+  const velWin = win.filter((h) => formDwVisOk(h.m));
+  const maxV = velWin.length ? Math.max(...velWin.map((h) => h.vel || 0)) : 0;
   const hasNullGap = winAll.length > win.length;
   const velOk = maxV > FORM_PH.RELEASE_TH / s;
   /* 窓内の最大連続nullギャップ（最初のnullフレーム→最後のnullフレームの経過時間）。
@@ -317,7 +397,7 @@ function stepFormPhase(st, raw, history, sens, now) {
   }
   const nullBridged = hasNullGap && rise > FORM_PH.NB_RISE && maxV > FORM_PH.NB_MAXV
     && maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
-  const debug = { maxV, rise, nullFrames: winAll.length - win.length, conf: raw.conf }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
+  const debug = { maxV, rise, nullFrames: winAll.length - win.length, conf: usable.conf }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
   if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
     && (velOk || nullBridged)) {
     st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;
@@ -328,15 +408,15 @@ function stepFormPhase(st, raw, history, sens, now) {
   }
   if (close) {
     if (!st.anchorSince) st.anchorSince = now;
-    st.cur = (now - st.anchorSince >= FORM_PH.FULLDRAW_MS && raw.drawArm > 125)
+    st.cur = (now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125)
       ? FORM_PHASES.FULL_DRAW : FORM_PHASES.ANCHORING;
   } else {
     st.anchorSince = 0;
     // 方向チェック（Stage 0 E'）: anchorNorm の減少方向（手首が顔へ近づく）のみ DRAWING。
     // 増加方向（レットダウン等）を DRAWING と誤分類すると sticky な anchorStartTs が
     // 保持されて hold にレットダウン前の時間が混入するため、SETUP へ落とす
-    const anchorTrend = win.length ? raw.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
-    st.cur = (maxV > FORM_PH.DRAW_SPEED && raw.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS)
+    const anchorTrend = win.length ? usable.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
+    st.cur = (maxV > FORM_PH.DRAW_SPEED && usable.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS)
       ? FORM_PHASES.DRAWING : FORM_PHASES.SETUP;
   }
   // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット

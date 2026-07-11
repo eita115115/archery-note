@@ -244,6 +244,7 @@ function openFormCapture(){
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, stream=null, landmarker=null;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
+  const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
   const CROP_FRAC=0.7, CROP_OFF=(1-0.7)/2;
   let cropActive=false;
@@ -390,7 +391,7 @@ function openFormCapture(){
       const lms=res.landmarks&&res.landmarks[0];
       const raw=lms?computeFormMetrics(lms,handedness):null;
       const disp=ema(raw);
-      const vel=computeFormVelocity(history,raw,now);
+      const vel=velSrc.step(history,raw,now);
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
       const r=stepFormPhase(detector,raw,history,1.0,now);
@@ -495,7 +496,7 @@ function openFormCapture(){
     handedness=handedness==="right"?"left":"right";
     db.settings.formHandedness=handedness; save();
     e.target.textContent="利き手: "+(handedness==="right"?"右":"左");
-    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[];
+    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[]; velSrc.reset();
   };
   ovl.querySelector("#fcCrop").onclick=e=>{
     cropActive=!cropActive;
@@ -550,6 +551,7 @@ function startFormReplay(videoUrl){
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, landmarker=null;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
+  const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
   function stop(){
     running=false; if(raf) cancelAnimationFrame(raf);
@@ -592,7 +594,7 @@ function startFormReplay(videoUrl){
       const lms=res.landmarks&&res.landmarks[0];
       const raw=lms?computeFormMetrics(lms,handedness):null;
       const disp=ema(raw);
-      const vel=computeFormVelocity(history,raw,now);
+      const vel=velSrc.step(history,raw,now);
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
       const r=stepFormPhase(detector,raw,history,1.0,now);
@@ -650,7 +652,7 @@ function startFormReplay(videoUrl){
     handedness=handedness==="right"?"left":"right";
     db.settings.formHandedness=handedness; save();
     e.target.textContent="利き手: "+(handedness==="right"?"右":"左");
-    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[];
+    detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[]; velSrc.reset();
   };
   loadFormPose().then(async lm=>{
     landmarker=lm;

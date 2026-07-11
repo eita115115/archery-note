@@ -24,6 +24,7 @@ const core = new Function(
   `${coreScript}
 return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
   formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
+  FORM_VEL_FILTER, makeFormVelocitySource,
   formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
   formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
   ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
@@ -244,6 +245,57 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' behavior on the 200ms gap");
 }
 {
+  /* B'（Stage 1・中立スキャフォールド）: conf ゲート。出荷値 CONF_GATE=0 は完全無効＝現行同値。
+     0.45 へ差し替えたコアでは conf<0.45 のフレームが窓から除外される（ロジック検証のみ、発動はしない）。 */
+  assertEqual(core.FORM_PH.CONF_GATE, 0, "CONF_GATE ships disabled (0)");
+  assertEqual(core.FORM_PH.DW_VIS_GATE, 0, "DW_VIS_GATE ships disabled (0)");
+  const mkRawC = (anchorNorm, drawArm, conf) => ({ anchorNorm, drawArm, conf, bodyScale: 0.25, dW: { x: 0, y: 0 } });
+  const confMixedSeq = [];
+  for (let i = 0; i < 60; i++) confMixedSeq.push([mkRawC(0.22, 150, 0.4), 0.02, 20]); // 低conf(0.4)のアンカー保持
+  confMixedSeq.push([mkRawC(0.6, 140, 0.5), 10, 20]); // 高conf(0.5)の速度スパイク
+  for (let i = 0; i < 10; i++) confMixedSeq.push([mkRawC(1.0, 90, 0.5), 0.2, 20]);
+  assertEqual(runSequence(confMixedSeq).releases, 1, "conf-mixed release fires with CONF_GATE=0 (current behavior)");
+  assert(coreScript.includes("CONF_GATE: 0,"), "CONF_GATE constant present for substitution test");
+  const coreConfGate = new Function(
+    `${coreScript.replace("CONF_GATE: 0,", "CONF_GATE: 0.45,")}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  assertEqual(runSequence(confMixedSeq, coreConfGate).releases, 0,
+    "CONF_GATE=0.45 excludes conf-0.4 frames from the window (closeFrames starve, no fire)");
+  // 除外の観測: ゲート済みフレームは窓内で null 側に数えられる（debug.nullFrames）
+  const trace = (coreObj) => {
+    const st = coreObj.makeFormPhaseDetector();
+    const hist = [];
+    let t = 0, spikeDebug = null;
+    for (const [m, vel, dt] of confMixedSeq) {
+      t += dt; hist.push({ ts: t, m, vel });
+      const r = coreObj.stepFormPhase(st, m, hist, 1.0, t);
+      if (m && m.anchorNorm === 0.6 && r.debug) spikeDebug = r.debug;
+    }
+    return spikeDebug;
+  };
+  const gated = trace(coreConfGate), ungated = trace(core);
+  assert(gated && gated.nullFrames > 0, "gated low-conf frames counted as window gaps under CONF_GATE=0.45");
+  assert(ungated && ungated.nullFrames === 0, "no window gaps with CONF_GATE=0 on the same sequence");
+}
+{
+  /* B': dW 可視性ゲート。出荷値 DW_VIS_GATE=0 は完全無効＝現行同値。
+     0.5 へ差し替えたコアでは低可視性 dW フレームの vel が maxV 評価から除外される。 */
+  const mkRawV = (anchorNorm, drawArm, dwVis) => ({ anchorNorm, drawArm, bodyScale: 0.25, dW: { x: 0, y: 0, visibility: dwVis } });
+  const visMixedSeq = [];
+  for (let i = 0; i < 60; i++) visMixedSeq.push([mkRawV(0.22, 150, 0.9), 0.02, 20]);
+  visMixedSeq.push([mkRawV(0.6, 140, 0.4), 10, 20]); // 速度スパイクだが dW 可視性が低い（遮蔽由来の偽値を模擬）
+  for (let i = 0; i < 10; i++) visMixedSeq.push([mkRawV(1.0, 90, 0.9), 0.2, 20]);
+  assertEqual(runSequence(visMixedSeq).releases, 1, "low-dW-visibility spike fires with DW_VIS_GATE=0 (current behavior)");
+  assert(coreScript.includes("DW_VIS_GATE: 0,"), "DW_VIS_GATE constant present for substitution test");
+  const coreDwGate = new Function(
+    `${coreScript.replace("DW_VIS_GATE: 0,", "DW_VIS_GATE: 0.5,")}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  assertEqual(runSequence(visMixedSeq, coreDwGate).releases, 0,
+    "DW_VIS_GATE=0.5 removes the low-visibility spike from velocity evaluation (no fire)");
+}
+{
   // 連続2射: 不応期を挟んで両方検出
   const seq = [...shotSequence()];
   for (let i = 0; i < 10; i++) seq.push([mkRaw(1.5, 90), 0.05, 66]);
@@ -333,6 +385,57 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   assertEqual(core.computeFormVelocity([{ ts: 100, m: null, vel: 0 }, { ts: 200, m: null, vel: 0 }], raw, 250), 0, "all-null history returns 0");
   assertEqual(core.computeFormVelocity([], raw, 250), 0, "empty history returns 0");
   assertEqual(core.computeFormVelocity([{ ts: 100, m: mkM(0.5, 0.3), vel: 0 }], null, 250), 0, "null raw returns 0");
+}
+
+/* ---------- makeFormVelocitySource（Stage 1 A2: 中立スキャフォールド） ---------- */
+
+{
+  // 出荷値は無効（pass-through）。発動は FORM_VEL_FILTER.ENABLED の1行変更のみ
+  assertEqual(core.FORM_VEL_FILTER.ENABLED, false, "1-Euro velocity filter ships disabled");
+}
+{
+  // ENABLED:false は computeFormVelocity と完全同値（null フレーム・空 history 含む）
+  const mkM = (x, y) => ({ dW: { x, y }, bodyScale: 0.25 });
+  const src = core.makeFormVelocitySource();
+  const hist = [];
+  let t = 0;
+  [0.5, 0.51, 0.53, null, 0.56, 0.6, 0.6, 0.61].forEach((x) => {
+    t += 33;
+    const raw = x == null ? null : mkM(x, 0.3);
+    assertEqual(src.step(hist, raw, t), core.computeFormVelocity(hist, raw, t),
+      `disabled source matches computeFormVelocity at t=${t}`);
+    hist.push({ ts: t, m: raw, vel: 0 });
+  });
+  assertEqual(core.makeFormVelocitySource().step([], mkM(0.5, 0.3), 100), 0, "disabled source on empty history returns 0");
+}
+{
+  // ENABLED:true（オプトインのロジック検証のみ・出荷値では動かない）
+  const mkM = (x, y) => ({ dW: { x, y }, bodyScale: 0.25 });
+  // (1) 等速運動: 収束後の速度が真値（0.01/0.02s/0.25 = 2.0 胴体長/秒）に近い
+  const f1 = core.makeFormVelocitySource({ ENABLED: true });
+  let t = 0, vel = 0;
+  for (let i = 0; i < 60; i++) { t += 20; vel = f1.step([], mkM(0.3 + i * 0.01, 0.3), t); }
+  assertClose(vel, 2.0, 0.2, "enabled filter converges to true velocity on constant motion");
+  // (2) ジッター抑制: 交互±0.02ジッターの生速度は 8.0（RELEASE_TH級の偽スパイク）だが、フィルタ後は大幅減
+  const f2 = core.makeFormVelocitySource({ ENABLED: true });
+  t = 0;
+  let maxFiltered = 0;
+  for (let i = 0; i < 60; i++) {
+    t += 20;
+    const v = f2.step([], mkM(0.5 + (i % 2 ? 0.02 : -0.02), 0.3), t);
+    if (i > 10) maxFiltered = Math.max(maxFiltered, v);
+  }
+  assert(maxFiltered < 2, `jitter velocity suppressed well below raw 8.0, got ${maxFiltered}`);
+  // (3) RESET_GAP_MS 超のギャップで内部状態を作り直す（直後のフレームは vel 0）
+  const f3 = core.makeFormVelocitySource({ ENABLED: true });
+  f3.step([], mkM(0.5, 0.3), 100);
+  f3.step([], mkM(0.52, 0.3), 120);
+  assertEqual(f3.step([], mkM(0.9, 0.3), 800), 0, "gap over RESET_GAP_MS reseeds the filter (vel 0)");
+  // (4) reset() で明示リセット（利き手切替等、history 破棄と同時に呼ぶ想定）
+  const f4 = core.makeFormVelocitySource({ ENABLED: true });
+  f4.step([], mkM(0.5, 0.3), 100);
+  f4.reset();
+  assertEqual(f4.step([], mkM(0.9, 0.3), 200), 0, "explicit reset reseeds (vel 0)");
 }
 
 /* ---------- anchorStartTs のコア内包化（Stage 0 C: sticky 仕様） ---------- */
