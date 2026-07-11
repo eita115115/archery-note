@@ -11,7 +11,7 @@ const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false}},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -51,6 +51,17 @@ function normalizeDb(d){
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
   out.schema=SCHEMA_VER;
+  /* オンボーディング・機能発見ヒントのフィールド単位補完。
+     settings 全体は浅いマージ済み（L44）だが、featureHints はネストオブジェクトのため
+     浅いマージだけでは新キーが古い保存データ・破損インポートに行き渡らない */
+  if(typeof out.settings.onboardingSeen!=="boolean") out.settings.onboardingSeen=false;
+  if(typeof out.settings.launchCount!=="number"||!Number.isFinite(out.settings.launchCount)) out.settings.launchCount=0;
+  const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false};
+  if(!out.settings.featureHints||typeof out.settings.featureHints!=="object"||Array.isArray(out.settings.featureHints)){
+    out.settings.featureHints={...FH_DEFS};
+  }else{
+    Object.keys(FH_DEFS).forEach(k=>{ if(typeof out.settings.featureHints[k]!=="boolean") out.settings.featureHints[k]=FH_DEFS[k]; });
+  }
   const VALID_FACE_TYPES=["single","triple","field"];
   out.sessions.forEach(s=>{
     if(typeof s.faceD!=="number"||!Number.isFinite(s.faceD)) s.faceD=122;
