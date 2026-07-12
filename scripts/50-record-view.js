@@ -1806,6 +1806,15 @@ async function finishSession() {
   /* ゲーミフィケーション: セッション終了の表出点（gamification-final-design.md §5）。
      ストリーク・目標は導出値なので保存前後の2回 computeStreak を呼ぶだけで済む。
      編集モード（isEdit）は対象外——過去記録の書き換えでストリークや実績を騒がせない */
+  /* 「今日の結果」統合パネル（todays-result-integration-design.md §2・§9）:
+     gamification.enabled の値に一切依存せず常に計算する。編集モード（isEdit）は対象外
+     （過去記録の書き換えで「今日の結果」を騒がせない。既存 .summaryGamification と同じ扱い） */
+  let todaysResult = null;
+  let growthBefore = null;
+  if (!isEdit) {
+    todaysResult = computeTodaysResult(db.sessions, s.id, sessionMetrics, { formAnalyses: db.formAnalyses });
+    if (todaysResult.available) growthBefore = trGrowthBeforeFor(s, db.sessions, sessionMetrics);
+  }
   const g = db.settings.gamification;
   if (g && g.enabled && !isEdit) {
     const streakBefore = computeStreak(
@@ -1823,9 +1832,9 @@ async function finishSession() {
       db.gamification.badges.push(...newBadges);
       save({ reason: "gamification-badges" });
     }
-    openSummary(s, !isEdit, { streakBefore, streakAfter, newBadges });
+    openSummary(s, !isEdit, { streakBefore, streakAfter, newBadges }, todaysResult, growthBefore);
   } else {
-    openSummary(s, !isEdit);
+    openSummary(s, !isEdit, null, todaysResult, growthBefore);
   }
 }
 
@@ -1848,6 +1857,152 @@ function roundGroupSummaryHtml(sess) {
     <div class="note">${esc(breakdown)}</div>
   </div>`;
 }
+/* ---------- 「今日の結果」統合パネル ---------- */
+/* todays-result-integration-design.md §3.4 の「途切れました」検出に使う before/after パターン。
+   今回のセッションを除いた直前の練習日を基準にした computeGrowthStreaks を計算する
+   （finishSession では db.sessions＝今回分含む全体を渡す。60-history-sight-view.js の履歴詳細
+   シートでは当日以前に絞った集合を渡す。§12 ユーザー確定 T6 で再利用する） */
+function trGrowthBeforeFor(sess, allSessions, metricsFn) {
+  const priorSessions = (allSessions || []).filter((x) => x && x.id !== sess.id);
+  const priorLastDate = priorSessions.length
+    ? priorSessions
+        .map((x) => x.date)
+        .filter(Boolean)
+        .sort()
+        .slice(-1)[0]
+    : null;
+  if (!priorLastDate) return null;
+  return computeGrowthStreaks(priorSessions, priorLastDate, metricsFn);
+}
+
+const JA_WEEKDAY = ["日", "月", "火", "水", "木", "金", "土"];
+function todaysResultWeekdayJa(iso) {
+  const d = new Date(`${iso || ""}T00:00:00`);
+  return Number.isFinite(d.getTime()) ? JA_WEEKDAY[d.getDay()] : "";
+}
+/* 1行の骨格（既存 .summaryStreak パターンを一般化。§4） */
+function todaysResultRowHtml(kind, iconName, primaryHtml, detailText, sparkHtml) {
+  return `<div class="todaysResultRow" data-testid="todays-result-${kind}">
+    <span class="todaysResultIcon" aria-hidden="true">${icon(iconName)}</span>
+    <div class="todaysResultBody">
+      <p class="todaysResultPrimary">${primaryHtml}</p>
+      ${detailText ? `<p class="todaysResultDetail">${detailText}</p>` : ""}
+    </div>
+    ${sparkHtml || ""}
+  </div>`;
+}
+/* 安定性行の任意スパークライン（hairline SVGのみ。§4。direction="tight" のときだけ末尾にアクセントドット） */
+function todaysResultSparkHtml(sparkline, direction) {
+  if (!Array.isArray(sparkline) || sparkline.length < 2) return "";
+  const w = 60,
+    h = 20,
+    pad = 2;
+  const min = Math.min(...sparkline),
+    max = Math.max(...sparkline);
+  const range = max - min || 1;
+  const stepX = (w - pad * 2) / (sparkline.length - 1);
+  const pts = sparkline.map((v, i) => [pad + i * stepX, pad + (1 - (v - min) / range) * (h - pad * 2)]);
+  const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  const last = pts[pts.length - 1];
+  const dot =
+    direction === "tight" ? `<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2" fill="var(--accent)"/>` : "";
+  return `<svg class="todaysResultSpark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--line)" stroke-width="1"/>${dot}</svg>`;
+}
+/* 項目1: 前回・先週差（§5 コピー対応表） */
+function todaysResultWeeklyRowHtml(wd, dayLabel) {
+  const roundedToday = Math.round(wd.todayTotal);
+  const deltaSign = wd.deltaPoints > 0 ? "+" : wd.deltaPoints < 0 ? "-" : "";
+  const iconName = wd.deltaPoints > 0 ? "up" : wd.deltaPoints < 0 ? "down" : "updown";
+  const label =
+    wd.kind === "previous"
+      ? `前回（${fmtD(wd.compareDate)}）`
+      : `先週${todaysResultWeekdayJa(wd.compareDates[wd.compareDates.length - 1])}平均`;
+  const primary =
+    wd.deltaPoints === 0
+      ? `${label}と同じ ${roundedToday}点`
+      : `${label}より <b>${deltaSign}${Math.abs(Math.round(wd.deltaPoints))}点</b>`;
+  const detail =
+    wd.kind === "previous"
+      ? `${dayLabel} ${roundedToday}点 ・ ${fmtD(wd.compareDate)} ${Math.round(wd.compareValue)}点`
+      : `${dayLabel} ${roundedToday}点 ・ 先週平均 ${wd.compareValue.toFixed(1)}点（${wd.compareCount}回）`;
+  return todaysResultRowHtml("weekly", iconName, primary, detail);
+}
+/* 項目2: 安定性の変化（§5 コピー対応表） */
+function todaysResultStabilityRowHtml(st) {
+  const primary =
+    st.direction === "flat"
+      ? `RMSは横ばい（${st.latestValue.toFixed(1)}cm前後）`
+      : `RMSが ${st.baselineValue.toFixed(1)} → <b>${st.latestValue.toFixed(1)}cm</b> に`;
+  const detail = `直近${st.sampleCount}回の移動平均と比較`;
+  return todaysResultRowHtml("stability", "ruler", primary, detail, todaysResultSparkHtml(st.sparkline, st.direction));
+}
+/* 項目3: 自己ベストとの距離（§5 コピー対応表） */
+function todaysResultPersonalBestRowHtml(pb, sess, dayLabel) {
+  const distLbl = distanceLabel(sess.dist);
+  let primary;
+  if (pb.achieved) {
+    primary =
+      pb.remaining < 0
+        ? `${distLbl}自己ベストを <b>更新</b>（+${Math.abs(Math.round(pb.remaining))}点）`
+        : `${distLbl}自己ベストに <b>並びました</b>`;
+  } else {
+    const suffixParts = [];
+    if (pb.pace === "close") suffixParts.push("ペースは近い");
+    if (pb.method === "avg-projected") suffixParts.push("推定・本数換算");
+    const suffix = suffixParts.length ? `（${suffixParts.join("・")}）` : "";
+    primary = `${distLbl}自己ベストまで <b>あと${Math.round(pb.remaining)}点</b>${suffix}`;
+  }
+  const detail = `自己ベスト ${pb.bestTotal}点（${fmtD(pb.bestDate)}）・ ${dayLabel} ${pb.todayTotal}点`;
+  return todaysResultRowHtml("personal-best", "target", primary, detail);
+}
+/* 項目4: 伸びの継続日数。score/stability それぞれ独立に0〜1行（§5 コピー対応表） */
+const TODAYS_RESULT_METRIC_LABEL = { score: "得点", stability: "安定性" };
+function todaysResultGrowthRowsHtml(gs, growthBefore) {
+  if (!gs || !gs.available || !Array.isArray(gs.metrics)) return "";
+  return gs.metrics
+    .map((m) => {
+      if (!m.available) return "";
+      const label = TODAYS_RESULT_METRIC_LABEL[m.key] || m.key;
+      const beforeMetric =
+        growthBefore && growthBefore.available && Array.isArray(growthBefore.metrics)
+          ? growthBefore.metrics.find((x) => x.key === m.key)
+          : null;
+      const broke = beforeMetric && beforeMetric.available && beforeMetric.streakDays > 0 && m.streakDays === 0;
+      if (broke) {
+        return todaysResultRowHtml(
+          `streak-${m.key}`,
+          "updown",
+          `${label}の伸びが途切れました（<b>${beforeMetric.streakDays}日→0日</b>）`,
+          "",
+        );
+      }
+      if (m.streakDays >= 2) {
+        return todaysResultRowHtml(`streak-${m.key}`, "updown", `${label}の伸びが <b>${m.streakDays}日</b> 続いている`, "");
+      }
+      return "";
+    })
+    .join("");
+}
+/* オーケストレータ: computeTodaysResult() の結果を0〜4行の可変長パネルへ描く。0行なら
+   todaysResultEmpty の1行に縮退する（§2・§4）。dayLabel は openSummary からの呼び出しでは既定の
+   「今日」、履歴詳細シート（60-history-sight-view.js）からの再構成では opts.dayLabel="この日" を渡す */
+function todaysResultHtml(result, sess, opts) {
+  opts = opts || {};
+  if (!result || !result.available) return "";
+  const dayLabel = opts.dayLabel || "今日";
+  const rows = [];
+  if (result.weeklyDiff && result.weeklyDiff.available) rows.push(todaysResultWeeklyRowHtml(result.weeklyDiff, dayLabel));
+  if (result.stabilityTrend && result.stabilityTrend.available) rows.push(todaysResultStabilityRowHtml(result.stabilityTrend));
+  if (result.personalBestDistance && result.personalBestDistance.available)
+    rows.push(todaysResultPersonalBestRowHtml(result.personalBestDistance, sess, dayLabel));
+  rows.push(todaysResultGrowthRowsHtml(result.growthStreaks, opts.growthBefore));
+  const html = rows.join("");
+  if (!html) {
+    return `<div class="summaryTodaysResult todaysResultEmpty" data-testid="todays-result-empty">初回記録: 基準ができました。次回から比較が始まります。</div>`;
+  }
+  return `<div class="summaryTodaysResult" data-testid="todays-result">${html}</div>`;
+}
+
 /* セッション終了サマリー拡張: openSummary の第3引数（省略可）で受けた {streakBefore, streakAfter,
    newBadges} を .statbar 直後にインラインで描く。gamification-final-design.md 観点4(d) 確定仕様:
    別画面(openFeedback)・バッジ逐次モーダルは却下済みのため、ここでの一本化のみが正。
@@ -1910,7 +2065,7 @@ function summaryGamificationHtml(gam) {
   }
   return `<div class="summaryGamification" data-testid="summary-gamification">${streakPart}${badgesPart}</div>`;
 }
-function openSummary(sess, isNew, gam) {
+function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const m = sessionMetrics(sess);
   const all = m.all,
@@ -1928,6 +2083,7 @@ function openSummary(sess, isNew, gam) {
       <div class="stat"><b>${perfectScoreCount(all, sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
+    ${isNew && todaysResult ? todaysResultHtml(todaysResult, sess, { growthBefore }) : ""}
     ${isNew && gam ? summaryGamificationHtml(gam) : ""}
     ${roundGroupSummaryHtml(sess)}
     <div id="sumPlot" class="recordSummaryPlot"></div>

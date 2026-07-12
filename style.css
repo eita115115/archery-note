@@ -1240,6 +1240,24 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
   100%{opacity:1; transform:translateY(0) scale(1);}
 }
 
+/* summaryTodaysResult — 「今日の結果」統合パネル（.statbar 直後・.summaryGamification の直前）。
+   todays-result-integration-design.md §4: 既存 .summaryGamification とは統合せず並置。
+   新規カスタムプロパティは0（既存トークンのみ使用）。正負とも color:var(--ink) で統一し、
+   判断色（--status-ok/--status-warn）は使わない（今日の結果は判断ではなく事実の提示のため）。 */
+.summaryTodaysResult{margin-top:10px; display:flex; flex-direction:column;}
+.summaryTodaysResult.todaysResultEmpty{
+  font-size:12.5px; color:var(--sub); padding:8px 0; text-align:center;
+}
+.todaysResultRow{display:flex; gap:10px; align-items:flex-start; padding:8px 0;}
+.todaysResultRow + .todaysResultRow{border-top:1px solid var(--line2);}
+.todaysResultIcon{color:var(--sub); flex:0 0 auto; line-height:1; padding-top:1px;}
+.todaysResultIcon svg{width:18px; height:18px; display:block;}
+.todaysResultBody{flex:1; min-width:0;}
+.todaysResultPrimary{margin:0; font-size:14px; color:var(--ink); line-height:1.45;}
+.todaysResultPrimary b{font-weight:var(--fw-figure); font-variant-numeric:tabular-nums;}
+.todaysResultDetail{margin:2px 0 0; font-size:11px; color:var(--sub); line-height:1.4;}
+.todaysResultSpark{flex:0 0 auto; margin-left:auto; align-self:center;}
+
 /* summaryGamification — セッション終了サマリーの拡張（.statbar 直後）。
    openFeedback別画面・バッジ逐次モーダルは却下済みのため、この一箇所にのみ存在する
    （gamification-final-design.md 観点4(d)・ui-specs-fable-adjudication.md 裁定10）。 */
