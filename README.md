@@ -7,7 +7,7 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8.svg?logo=pwa)](https://eita115115.github.io/archery-note/)
-[![Version](https://img.shields.io/badge/version-v1.7.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.8.0-green.svg)](CHANGELOG.md)
 [![Offline](https://img.shields.io/badge/offline-supported-orange.svg)](#プライバシー--privacy)
 
 [**Demo**](https://eita115115.github.io/archery-note/) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)
