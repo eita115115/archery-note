@@ -67,14 +67,15 @@ function normalizeDb(d){
   }
   /* ゲーミフィケーション設定・データのキー単位の明示補完。
      最終設計書 gamification-final-design.md §3 準拠。practiceDays 既定は null（未設定=判定停止）、
-     空配列も未設定と同義。SCHEMA_VER は据え置き（フィールド補完のみ） */
+     空配列も未設定と同義。SCHEMA_VER は据え置き（フィールド補完のみ）。
+     enabled 既定は false: v1.7.0 は誤って true で出荷し CHANGELOG「既定 OFF」告知と矛盾した。
+     v1.7.1 で修正。v1.7.0 で明示的に true にしたユーザーの選択は L44 の浅いマージ経由で保持され、
+     ここではキーが欠落/非boolean のときのみ false を補う（両分岐で既定 false に一致させる: 破損
+     インポート等で src.settings.gamification=null になった場合の再発防止） */
   if(!out.settings.gamification||typeof out.settings.gamification!=="object"){
-    out.settings.gamification={enabled:true,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null};
+    out.settings.gamification={enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null};
   }else{
     const gs=out.settings.gamification;
-    /* v1.7.0 は enabled 既定 true で出荷されたが、CHANGELOG/リリースノートで「既定 OFF」と
-       告知しており不整合だった。v1.7.1 で既定を false に修正。v1.7.0 で既に true になった
-       ユーザーの選択は尊重するため、新規/欠落キーのみ false 補完 */
     if(typeof gs.enabled!=="boolean") gs.enabled=false;
     if(gs.practiceDays!==null&&!Array.isArray(gs.practiceDays)) gs.practiceDays=null;
     if(Array.isArray(gs.practiceDays)){

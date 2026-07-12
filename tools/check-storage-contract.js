@@ -717,6 +717,85 @@ function checkBadgeUnlockedAtCoercion(storageApi) {
   );
 }
 
+function checkGamificationEnabledDefault(storageApi) {
+  // v1.7.0 は gamification.enabled 既定 true で出荷され、CHANGELOG「既定 OFF」告知と矛盾。
+  // v1.7.1 で修正したが、L44 の浅いマージが正常に効いた場合のみで、
+  // src.settings.gamification=null / 非オブジェクトのときは古い分岐に落ちて再発する余地があった。
+  // 両分岐で enabled 既定が false に一致することと、既存の enabled:true が尊重されることを固定する。
+
+  // ケース1: settings 全体が欠落（純粋な pre-v1.7.0 データ）→ blankDb 経由で既定 false
+  const empty = storageApi.normalizeDb({});
+  assertEqual(
+    empty.settings.gamification.enabled,
+    false,
+    "[gam-default] missing settings defaults gamification.enabled=false",
+  );
+
+  // ケース2: settings は存在するが gamification キーは欠落 → 浅いマージで blankDb の既定 false
+  const noGam = storageApi.normalizeDb({ settings: { theme: "dark" } });
+  assertEqual(
+    noGam.settings.gamification.enabled,
+    false,
+    "[gam-default] missing settings.gamification defaults enabled=false",
+  );
+
+  // ケース3: settings.gamification=null（破損バックアップ・インポート想定）→ 補完で false
+  const nullGam = storageApi.normalizeDb({ settings: { gamification: null } });
+  assertEqual(
+    nullGam.settings.gamification.enabled,
+    false,
+    "[gam-default] null settings.gamification defaults enabled=false (broken import guard)",
+  );
+
+  // ケース4: settings.gamification が非オブジェクト（さらに破損）→ 補完で false
+  const strGam = storageApi.normalizeDb({ settings: { gamification: "corrupt" } });
+  assertEqual(
+    strGam.settings.gamification.enabled,
+    false,
+    "[gam-default] non-object settings.gamification defaults enabled=false (broken import guard)",
+  );
+
+  // ケース5: v1.7.0 で明示的に enabled:true にしたユーザーの選択は保持
+  const chosenOn = storageApi.normalizeDb({
+    settings: {
+      gamification: {
+        enabled: true,
+        practiceDays: [1, 3, 5],
+        goals: { dailyArrows: 36, weeklySessions: 3, monthlyArrows: 300 },
+        backfilledAt: null,
+      },
+    },
+  });
+  assertEqual(
+    chosenOn.settings.gamification.enabled,
+    true,
+    "[gam-default] explicit user choice enabled:true is preserved (respects v1.7.0 opt-in)",
+  );
+  assertStrict.deepEqual(
+    chosenOn.settings.gamification.practiceDays,
+    [1, 3, 5],
+    "[gam-default] preserving enabled:true also preserves practiceDays",
+  );
+
+  // ケース6: enabled が非boolean（欠落含む）→ 既定 false
+  const wrongType = storageApi.normalizeDb({
+    settings: { gamification: { practiceDays: null } },
+  });
+  assertEqual(
+    wrongType.settings.gamification.enabled,
+    false,
+    "[gam-default] missing enabled key defaults to false",
+  );
+  const stringEnabled = storageApi.normalizeDb({
+    settings: { gamification: { enabled: "yes" } },
+  });
+  assertEqual(
+    stringEnabled.settings.gamification.enabled,
+    false,
+    "[gam-default] non-boolean enabled defaults to false",
+  );
+}
+
 function checkDbRevContract() {
   assert(/^let DB_REV\s*=\s*0/m.test(storageScript), "[db-rev] storage script should declare let DB_REV");
   const saveBody = section("function save(", "function uid");
@@ -734,6 +813,7 @@ function main() {
   checkArrowCoordinateSanitize(storageApi);
   checkSessionDateCoercion(storageApi);
   checkBadgeUnlockedAtCoercion(storageApi);
+  checkGamificationEnabledDefault(storageApi);
 
   checkNormalizeIdempotency(storageApi, fixtures);
   checkBlank(storageApi, fixtures);
