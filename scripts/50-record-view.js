@@ -1808,12 +1808,16 @@ async function finishSession() {
      編集モード（isEdit）は対象外——過去記録の書き換えでストリークや実績を騒がせない */
   /* 「今日の結果」統合パネル（todays-result-integration-design.md §2・§9）:
      gamification.enabled の値に一切依存せず常に計算する。編集モード（isEdit）は対象外
-     （過去記録の書き換えで「今日の結果」を騒がせない。既存 .summaryGamification と同じ扱い） */
+     （過去記録の書き換えで「今日の結果」を騒がせない。既存 .summaryGamification と同じ扱い）。
+     母集団は履歴詳細シート（T6）と同じ「当日以前」フィルタで揃える（strict-review minor②）:
+     fDate バックデート記録時に未来のセッションが「前回」「自己ベスト」や growthBefore の
+     基準日へ混入するのを防ぎ、後日同じセッションを履歴から開いたときの再構成と一致させる */
   let todaysResult = null;
   let growthBefore = null;
   if (!isEdit) {
-    todaysResult = computeTodaysResult(db.sessions, s.id, sessionMetrics, { formAnalyses: db.formAnalyses });
-    if (todaysResult.available) growthBefore = trGrowthBeforeFor(s, db.sessions, sessionMetrics);
+    const trSessions = db.sessions.filter((x) => x && x.date && x.date <= s.date);
+    todaysResult = computeTodaysResult(trSessions, s.id, sessionMetrics, { formAnalyses: db.formAnalyses });
+    if (todaysResult.available) growthBefore = trGrowthBeforeFor(s, trSessions, sessionMetrics);
   }
   const g = db.settings.gamification;
   if (g && g.enabled && !isEdit) {
@@ -1859,9 +1863,10 @@ function roundGroupSummaryHtml(sess) {
 }
 /* ---------- 「今日の結果」統合パネル ---------- */
 /* todays-result-integration-design.md §3.4 の「途切れました」検出に使う before/after パターン。
-   今回のセッションを除いた直前の練習日を基準にした computeGrowthStreaks を計算する
-   （finishSession では db.sessions＝今回分含む全体を渡す。60-history-sight-view.js の履歴詳細
-   シートでは当日以前に絞った集合を渡す。§12 ユーザー確定 T6 で再利用する） */
+   今回のセッションを除いた直前の練習日を基準にした computeGrowthStreaks を計算する。
+   finishSession・履歴詳細シート（60-history-sight-view.js）の両方とも「当日以前」に絞った
+   同一定義の母集団を渡す（strict-review minor②: 経路間の非対称を禁止。バックデート記録でも
+   before/after が同じ as-of 母集団で比較され、偽の「途切れました」が出ない） */
 function trGrowthBeforeFor(sess, allSessions, metricsFn) {
   const priorSessions = (allSessions || []).filter((x) => x && x.id !== sess.id);
   const priorLastDate = priorSessions.length
@@ -1875,11 +1880,6 @@ function trGrowthBeforeFor(sess, allSessions, metricsFn) {
   return computeGrowthStreaks(priorSessions, priorLastDate, metricsFn);
 }
 
-const JA_WEEKDAY = ["日", "月", "火", "水", "木", "金", "土"];
-function todaysResultWeekdayJa(iso) {
-  const d = new Date(`${iso || ""}T00:00:00`);
-  return Number.isFinite(d.getTime()) ? JA_WEEKDAY[d.getDay()] : "";
-}
 /* 1行の骨格（既存 .summaryStreak パターンを一般化。§4） */
 function todaysResultRowHtml(kind, iconName, primaryHtml, detailText, sparkHtml) {
   return `<div class="todaysResultRow" data-testid="todays-result-${kind}">
@@ -1908,23 +1908,19 @@ function todaysResultSparkHtml(sparkline, direction) {
     direction === "tight" ? `<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2" fill="var(--accent)"/>` : "";
   return `<svg class="todaysResultSpark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--line)" stroke-width="1"/>${dot}</svg>`;
 }
-/* 項目1: 前回・先週差（§5 コピー対応表） */
+/* 項目1: 前回差（§5 コピー対応表）。「先週◯曜平均より」の分岐は削除済み——
+   computeWeeklyDiff のフォールバックが集合論的に到達不能なため（weekPeers ⊆ peers、
+   strict-review 2026-07-12 minor③）。kind は常に "previous" */
 function todaysResultWeeklyRowHtml(wd, dayLabel) {
   const roundedToday = Math.round(wd.todayTotal);
   const deltaSign = wd.deltaPoints > 0 ? "+" : wd.deltaPoints < 0 ? "-" : "";
   const iconName = wd.deltaPoints > 0 ? "up" : wd.deltaPoints < 0 ? "down" : "updown";
-  const label =
-    wd.kind === "previous"
-      ? `前回（${fmtD(wd.compareDate)}）`
-      : `先週${todaysResultWeekdayJa(wd.compareDates[wd.compareDates.length - 1])}平均`;
+  const label = `前回（${fmtD(wd.compareDate)}）`;
   const primary =
     wd.deltaPoints === 0
       ? `${label}と同じ ${roundedToday}点`
       : `${label}より <b>${deltaSign}${Math.abs(Math.round(wd.deltaPoints))}点</b>`;
-  const detail =
-    wd.kind === "previous"
-      ? `${dayLabel} ${roundedToday}点 ・ ${fmtD(wd.compareDate)} ${Math.round(wd.compareValue)}点`
-      : `${dayLabel} ${roundedToday}点 ・ 先週平均 ${wd.compareValue.toFixed(1)}点（${wd.compareCount}回）`;
+  const detail = `${dayLabel} ${roundedToday}点 ・ ${fmtD(wd.compareDate)} ${Math.round(wd.compareValue)}点`;
   return todaysResultRowHtml("weekly", iconName, primary, detail);
 }
 /* 項目2: 安定性の変化（§5 コピー対応表） */
@@ -1933,7 +1929,10 @@ function todaysResultStabilityRowHtml(st) {
     st.direction === "flat"
       ? `RMSは横ばい（${st.latestValue.toFixed(1)}cm前後）`
       : `RMSが ${st.baselineValue.toFixed(1)} → <b>${st.latestValue.toFixed(1)}cm</b> に`;
-  const detail = `直近${st.sampleCount}回の移動平均と比較`;
+  /* baseline は movingAverage(history, 5) の末尾値 = 直近 min(5, N) 件の単純平均。
+     文言を実際の比較基準に一致させる（strict-review minor④: sampleCount は履歴長で最大10のため、
+     「直近10回の移動平均」と書くと事実と異なる） */
+  const detail = `直近${Math.min(5, st.sampleCount)}回の平均と比較`;
   return todaysResultRowHtml("stability", "ruler", primary, detail, todaysResultSparkHtml(st.sparkline, st.direction));
 }
 /* 項目3: 自己ベストとの距離（§5 コピー対応表） */
@@ -1998,7 +1997,20 @@ function todaysResultHtml(result, sess, opts) {
   rows.push(todaysResultGrowthRowsHtml(result.growthStreaks, opts.growthBefore));
   const html = rows.join("");
   if (!html) {
-    return `<div class="summaryTodaysResult todaysResultEmpty" data-testid="todays-result-empty">初回記録: 基準ができました。次回から比較が始まります。</div>`;
+    /* 空欄縮退コピーは「真の初回」と「条件初回」を区別する（strict-review major①）:
+       4サブ結果の不成立は初めての距離・的サイズを試した日にも起こるため、「初回記録」と
+       書くと記録歴のあるユーザーに事実誤認の文言を出してしまう。firstEver（母集団に当該
+       セッション以外の有効セッションが無い）のときだけ「初回記録」、それ以外は条件初回。
+       履歴詳細シート（dayLabel="この日"）では回顧時制に切り替える（「次回」は既に過去） */
+    const retro = dayLabel !== "今日";
+    const msg = result.firstEver
+      ? retro
+        ? "初回記録: この日が基準になりました。"
+        : "初回記録: 基準ができました。次回から比較が始まります。"
+      : retro
+        ? "この条件では、この日が初記録でした。"
+        : "この条件では初記録。次回から比較が始まります。";
+    return `<div class="summaryTodaysResult todaysResultEmpty" data-testid="todays-result-empty">${msg}</div>`;
   }
   return `<div class="summaryTodaysResult" data-testid="todays-result">${html}</div>`;
 }

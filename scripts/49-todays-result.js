@@ -36,9 +36,13 @@ function trSameCondition(a, b, opts){
 
 /* ============ 3.1 前回・先週差 ============ */
 /* computeWeeklyDiff(sessions, currentSessionId, todayStr)
-   同条件（距離+的サイズ+本数=同一）セッションのうち「前回」を優先し、なければ「先週同曜日平均」
-   （todayStrの7日前・14日前）にフォールバックする（Fable裁定 §11-1で承認済み）。
-   両方とも無ければ available:false（=この条件での初回） */
+   同条件（距離+的サイズ+本数=同一）セッションのうち「前回」（直近1件）と比較する。
+   設計書 §3.1・Fable裁定 §11-1 の「先週同曜日平均フォールバック」は集合論的に空である
+   （weekPeers のフィルタは peers のフィルタに日付制約を追加しただけなので常に weekPeers ⊆ peers。
+   週平均が存在するとき「前回」も必ず存在し、フォールバック分岐は到達不能——strict-review
+   2026-07-12 minor③で確定し、対応するUIコードは削除済み）。weeklyAvg は表示しない参照値として
+   戻り値への同梱だけを維持する（第2回実射データ後の閾値再校正・v2でのフォールバック再裁定用）。
+   「前回」が無ければ available:false（=この条件での初回） */
 function computeWeeklyDiff(sessions, currentSessionId, todayStr){
   const all=(sessions||[]).filter(s=>s&&typeof s==="object");
   const cur=all.find(s=>s.id===currentSessionId);
@@ -60,16 +64,13 @@ function computeWeeklyDiff(sessions, currentSessionId, todayStr){
     dates: [...new Set(weekPeers.map(s=>s.date))].sort()
   } : null;
 
-  if(!prev && !weeklyAvg) return {available:false, reason:"no-history", todayTotal:curTotal};
+  /* weekPeers ⊆ peers のため !prev のとき weeklyAvg も必ず null（上記コメント参照） */
+  if(!prev) return {available:false, reason:"no-history", todayTotal:curTotal};
 
-  if(prev){
-    const prevTotal=trAllArrows(prev).reduce((a,x)=>a+(x.s||0),0);
-    return {available:true, kind:"previous", todayTotal:curTotal, compareValue:prevTotal,
-      deltaPoints:curTotal-prevTotal, compareDate:prev.date, compareArrows:trAllArrows(prev).length,
-      weeklyAvg /* 参照用。detail 行の併記に使ってよい */};
-  }
-  return {available:true, kind:"weekly-avg", todayTotal:curTotal, compareValue:weeklyAvg.value,
-    deltaPoints:curTotal-weeklyAvg.value, compareDates:weeklyAvg.dates, compareCount:weeklyAvg.n};
+  const prevTotal=trAllArrows(prev).reduce((a,x)=>a+(x.s||0),0);
+  return {available:true, kind:"previous", todayTotal:curTotal, compareValue:prevTotal,
+    deltaPoints:curTotal-prevTotal, compareDate:prev.date, compareArrows:trAllArrows(prev).length,
+    weeklyAvg /* 表示しない参照値（将来の再校正用）。UIでは使用しない */};
 }
 
 /* ============ 3.2 安定性の変化 ============ */
@@ -237,7 +238,11 @@ function computeGrowthStreaks(sessions, todayStr, metricsFn){
 /* ============ 3.5 オーケストレータ ============ */
 /* computeTodaysResult(sessions, currentSessionId, metricsFn, opts)
    opts = { formAnalyses } (任意)。todayStr はセッション自身の date から導出する
-   （new Date()/today() を関数内で呼ばない。過去日付編集でも矛盾なく動作する） */
+   （new Date()/today() を関数内で呼ばない。過去日付編集でも矛盾なく動作する）。
+   firstEver: 渡された母集団の中に当該セッション以外の有効セッション（矢1本以上）が
+   1件も無いとき true。UI の空欄縮退コピーが「初回記録」（真の初回）と「この条件では初記録」
+   （条件初回。他条件の記録歴はある）を区別するために使う（strict-review 2026-07-12 major①。
+   4サブ結果の不成立は「この条件での初回」でも起こるため、available だけでは区別できない） */
 function computeTodaysResult(sessions, currentSessionId, metricsFn, opts){
   opts=opts||{};
   const all=(sessions||[]).filter(s=>s&&typeof s==="object");
@@ -248,8 +253,9 @@ function computeTodaysResult(sessions, currentSessionId, metricsFn, opts){
       personalBestDistance:{available:false}, growthStreaks:{available:false}};
   }
   const todayStr=cur.date;
+  const firstEver=!all.some(s=>s.id!==cur.id && trAllArrows(s).length>0);
   return {
-    available:true, todayStr,
+    available:true, todayStr, firstEver,
     weeklyDiff: computeWeeklyDiff(all, currentSessionId, todayStr),
     stabilityTrend: computeStabilityTrend(all, currentSessionId, metricsFn, opts),
     personalBestDistance: computePersonalBestDistance(all, currentSessionId),

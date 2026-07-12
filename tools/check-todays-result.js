@@ -1,7 +1,8 @@
 "use strict";
 /* 「今日の結果」統合パネル純関数（scripts/49-todays-result.js）のテスト。
    設計書 .company/research/topics/todays-result-integration-design.md §6「テストスイート」の
-   17必須ケースを網羅する。tools/check-gamification.js / tools/check-analysis-core.js と同じ作法
+   17必須ケース + firstEver（真の初回/条件初回の区別、strict-review 2026-07-12 major①）を
+   網羅する。tools/check-gamification.js / tools/check-analysis-core.js と同じ作法
    （new Function + fs.readFileSync でスクリプト本文をそのまま評価、外部フレームワーク不使用）。
    モックではなく実際の robustStats（20-scoring.js）を使う（§3.2「表示値との一致」の担保）。
 
@@ -105,6 +106,7 @@ function sess(id, date, o) {
     assertEqual(m.available, false, `single session: growthStreaks.${m.key} unavailable (insufficient days)`);
     assertEqual(m.streakDays, 0, `single session: growthStreaks.${m.key} streakDays is 0`);
   });
+  assertEqual(r.firstEver, true, "single session: firstEver=true (no other valid session)");
 }
 
 /* ---------- 3. 2セッション・同条件 ---------- */
@@ -123,6 +125,28 @@ function sess(id, date, o) {
   r.growthStreaks.metrics.forEach((m) => {
     assertEqual(m.available, false, `2 sessions: growthStreaks.${m.key} still unavailable (<4 valid days)`);
   });
+  assertEqual(r.firstEver, false, "2 sessions: firstEver=false (history exists)");
+}
+
+/* ---------- 3b. 条件初回の区別（strict-review major①） ----------
+   30mで練習歴のあるユーザーが初めて70mを記録した日: weeklyDiff/personalBest/stability は
+   同条件ピア0件で不成立（=UIは0行縮退）だが、firstEver は false でなければならない
+   （「初回記録」ではなく「この条件では初記録」と表示するための区別） */
+{
+  const hist30 = sess("h30", "2026-07-01", { dist: 30, faceD: 80, ends: [plainEnd(6, 8)] });
+  const cur70 = sess("c70", "2026-07-10", { dist: 70, faceD: 122, ends: [plainEnd(6, 9)] });
+  const r = tr.computeTodaysResult([hist30, cur70], "c70", tr.metricsFn);
+  assertEqual(r.firstEver, false, "condition-first: firstEver=false (other-condition history exists)");
+  assertEqual(r.weeklyDiff.available, false, "condition-first: weeklyDiff unavailable (no same-condition peer)");
+  assertEqual(
+    r.personalBestDistance.available,
+    false,
+    "condition-first: personalBestDistance unavailable (no same-condition peer)",
+  );
+  /* 空セッション（矢0本）しか他に無い場合は真の初回扱い（「有効セッション」の定義） */
+  const emptyOther = sess("e", "2026-07-01", { ends: [[]] });
+  const r2 = tr.computeTodaysResult([emptyOther, cur70], "c70", tr.metricsFn);
+  assertEqual(r2.firstEver, true, "zero-arrow-only history still counts as firstEver");
 }
 
 /* ---------- 4. 10セッション・同条件・単調改善 ---------- */
