@@ -15,6 +15,7 @@ const APP_SCRIPTS = [
   "./scripts/46-form-core.js",
   "./scripts/47-form-view.js",
   "./scripts/48-gamification.js",
+  "./scripts/49-todays-result.js",
   "./scripts/50-record-view.js",
   "./scripts/60-history-sight-view.js",
   "./scripts/70-gear-settings.js",
