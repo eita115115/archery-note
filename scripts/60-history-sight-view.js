@@ -468,6 +468,15 @@ function openHistDetail(id) {
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const st = sessionMetrics(sess).st;
   const adv = adviceFor(sess, setup);
+  /* 「今日の結果」統合パネルの再構成（todays-result-integration-design.md §12 T6）:
+     この日の時点までのデータだけで computeTodaysResult を再現する（未来のセッションを
+     「前回」等に混入させないよう、当日以前に絞った母集団を渡す）。文言は「今日」→「この日」に切替 */
+  const histAsOfDate = sess.date || today();
+  const histSessions = db.sessions.filter((x) => x && x.date && x.date <= histAsOfDate);
+  const histTodaysResult = computeTodaysResult(histSessions, sess.id, sessionMetrics, {
+    formAnalyses: db.formAnalyses,
+  });
+  const histGrowthBefore = histTodaysResult.available ? trGrowthBeforeFor(sess, histSessions, sessionMetrics) : null;
   /* 構成（正本 B節）: 主役数値 → 着弾図 → エンド表 → 分析カード群 → 操作。
      ロジック（集計・adviceFor 等）は不変・呼び出し順と見た目だけを並べ替える */
   const endTableHtml = `<table class="tbl mt8 histEndTable" data-testid="history-end-table"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
@@ -510,6 +519,7 @@ function openHistDetail(id) {
       <div class="stat"><b>${perfectScoreCount(all, sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
+    ${todaysResultHtml(histTodaysResult, sess, { dayLabel: "この日", growthBefore: histGrowthBefore })}
     <div id="hPlot" class="mt10"></div>
     ${endTableHtml}
     ${analysisCardsHtml}
