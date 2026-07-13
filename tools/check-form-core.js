@@ -400,6 +400,63 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   assertEqual(core.stepFormPhase(st, null, [], 1.0, 100).phase, "IDLE", "null metrics is IDLE");
 }
 {
+  /* Plan-0（release-detection-triage-2026-07-13 §3.3/§5）: stepFormPhase の
+     非発火・取消 return パスでも debug が返ることを検証する。判定ロジック（phase/
+     released/canceled/anchorStartTs の値）は既存ケースが担保するのでここでは触らない。 */
+  const assertDebugShape = (debug, label) => {
+    assert(typeof debug === "object" && debug !== null, `${label}: debug returned on non-fire path`);
+    assert("maxV" in debug && "anchorNorm" in debug && "closeFrames" in debug && "hasNullGap" in debug,
+      `${label}: debug has maxV/anchorNorm/closeFrames/hasNullGap`);
+    ["rise", "nullFrames", "conf", "refractoryRemaining"].forEach((k) =>
+      assert(k in debug, `${label}: debug has key ${k}`));
+  };
+
+  // !usable（人物未検出）: win/closeFrames 未計算のため null で埋まるが debug 自体は必ず返る
+  const rU = core.stepFormPhase(core.makeFormPhaseDetector(), null, [], 1.0, 100);
+  assertDebugShape(rU.debug, "!usable path");
+  assertEqual(rU.debug.anchorNorm, null, "!usable path: anchorNorm unknown, filled with null (not fabricated)");
+
+  // release-fire → canceled（確定猶予内にアンカー圏へ復帰）
+  const dtC = 20;
+  const stC = core.makeFormPhaseDetector();
+  const histC = [];
+  let tC = 0;
+  const pushC = (m, vel) => { tC += dtC; histC.push({ ts: tC, m, vel }); return core.stepFormPhase(stC, m, histC, 1.0, tC); };
+  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 150), 0.02);
+  const rRelC = pushC(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え(released)
+  assertEqual(rRelC.released, true, "sanity: release fires before cancel scenario");
+  assertDebugShape(rRelC.debug, "release-fire path");
+  const rCancel = pushC(mkRaw(0.23, 150), 0.05); // CONFIRM_MS以内にアンカー圏へ復帰(canceled)
+  assertEqual(rCancel.canceled, true, "sanity: cancel path reached");
+  assertDebugShape(rCancel.debug, "canceled path");
+  assertClose(rCancel.debug.anchorNorm, 0.23, 1e-9, "canceled path: anchorNorm captured (not lost) before state reset");
+
+  // sticky RELEASE lock（<250ms）と FOLLOW（250-1100ms）: 発火が確定し取消されないシナリオ
+  const dtS = 20;
+  const stS = core.makeFormPhaseDetector();
+  const histS = [];
+  let tS = 0;
+  const pushS = (m, vel) => { tS += dtS; histS.push({ ts: tS, m, vel }); return core.stepFormPhase(stS, m, histS, 1.0, tS); };
+  for (let i = 0; i < 60; i++) pushS(mkRaw(0.22, 150), 0.02);
+  const rRelS = pushS(mkRaw(0.6, 140), 10); // TH超えでreleased
+  assertEqual(rRelS.released, true, "sanity: release fires before sticky/follow scenario");
+  const rSticky = pushS(mkRaw(1.0, 90), 0.2); // アンカー圏外へ離脱、250ms未満のsticky lock
+  assertEqual(rSticky.phase, "RELEASE", "sanity: sticky RELEASE lock active");
+  assertDebugShape(rSticky.debug, "sticky RELEASE-lock path");
+  for (let i = 0; i < 12; i++) pushS(mkRaw(1.0, 90), 0.2); // 250ms超過させる
+  const rFollow = pushS(mkRaw(1.0, 90), 0.2);
+  assertEqual(rFollow.phase, "FOLLOW", "sanity: FOLLOW window active");
+  assertDebugShape(rFollow.debug, "FOLLOW path");
+
+  // 通常の非発火パス（アンカー保持中、release条件未達）
+  const stN = core.makeFormPhaseDetector();
+  const histN = [];
+  let tN = 0, rNormal;
+  for (let i = 0; i < 5; i++) { tN += 20; histN.push({ ts: tN, m: mkRaw(0.22, 150), vel: 0.02 }); rNormal = core.stepFormPhase(stN, mkRaw(0.22, 150), histN, 1.0, tN); }
+  assertDebugShape(rNormal.debug, "normal non-fire path");
+  assert(rNormal.debug.closeFrames >= 0, "normal non-fire path: closeFrames is a real count, not null");
+}
+{
   // DRAWING 方向チェック（Stage 0 E'）: anchorNorm 増加方向（レットダウン等）は DRAWING に遷移しない。
   // trend +0.1/フレーム、vel 0.5〜7.8 の範囲のレットダウン系列で DRAWING が一度も出ないこと
   [20, 66].forEach((dt) => {

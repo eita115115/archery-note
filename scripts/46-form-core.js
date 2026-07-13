@@ -357,25 +357,38 @@ function makeFormPhaseDetector() {
    場合、直前に追加したショットを取り消すこと（誤検出の自己修復）。 */
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
+  // 検証計装（H-2, release-detection-triage-2026-07-13）: 早期return経路の共通項。判定には未使用
+  const refractoryRemainingMs = () => Math.max(0, FORM_PH.REFRACTORY_MS - (now - st.lastReleaseTs));
   // B'（Stage 1）: conf ゲート。CONF_GATE=0 の間は usable === raw（完全 pass-through）。
   // ゲート有効時は低confの現在フレームを null フレームと同じ扱いにする
   const usable = raw && formConfOk(raw) ? raw : null;
   if (!usable) {
     if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; st.anchorStartTs = 0; }
-    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs };
+    const debug = { maxV: null, rise: null, nullFrames: null, conf: raw ? raw.conf : null, anchorNorm: null, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
+    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
     if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
       // アンカー圏へ即座に戻った = 離脱ではなく一時的な検出ノイズ/引き戻しだった。取消
+      // 計装: st.lastReleaseTs をリセットする前に refractoryRemainingMs() を評価する（取消直前の値を残す）
+      const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
       st.pendingRelease = null; st.lastReleaseTs = 0; st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
       st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
-      return { phase: st.cur, released: false, canceled: true, anchorStartTs: st.anchorStartTs };
+      return { phase: st.cur, released: false, canceled: true, anchorStartTs: st.anchorStartTs, debug };
     }
   } else if (st.pendingRelease) {
     st.pendingRelease = null; // 猶予終了、確定（取消なし）
   }
-  if (st.lastReleaseTs && now - st.lastReleaseTs < 250) { st.cur = FORM_PHASES.RELEASE; return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs }; }
-  if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) { st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0; return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs }; }
+  if (st.lastReleaseTs && now - st.lastReleaseTs < 250) {
+    st.cur = FORM_PHASES.RELEASE;
+    const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
+    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+  }
+  if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) {
+    st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0;
+    const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
+    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+  }
   const close = usable.anchorNorm < FORM_PH.CLOSE_IN;
   const winAll = history.filter(h => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
   const win = winAll.filter(h => h.m && formConfOk(h.m));
@@ -403,7 +416,11 @@ function stepFormPhase(st, raw, history, sens, now) {
   }
   const nullBridged = hasNullGap && rise > FORM_PH.NB_RISE && maxV > FORM_PH.NB_MAXV
     && maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
-  const debug = { maxV, rise, nullFrames: winAll.length - win.length, conf: usable.conf }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
+  const debug = {
+    maxV, rise, nullFrames: winAll.length - win.length, conf: usable.conf,
+    anchorNorm: usable.anchorNorm, closeFrames: closeFrames.length, hasNullGap,
+    refractoryRemaining: refractoryRemainingMs(),
+  }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
   if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
     && (velOk || nullBridged)) {
     st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;

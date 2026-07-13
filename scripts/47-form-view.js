@@ -46,6 +46,13 @@ function formFeatureFromShot(shot){
   return f;
 }
 
+/* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: canceled/近接rejectedフレームの
+   ring buffer push（上限200件）。db.settings.formDebug===true のときだけ呼び出し側から呼ばれる想定。 */
+function formDiagPush(arr,item,cap){
+  arr.push(item);
+  if(arr.length>(cap||200)) arr.shift();
+}
+
 /* シャドー判定のショット一覧タグ（撮影画面）。judgment を利用者向けの短い日本語に変換する。
    あくまで参考表示（ベータ）で、既存のリリース検出結果を変えるものではない旨は撮影画面のhintで案内。 */
 function formArrowCheckLabel(judgment){
@@ -246,6 +253,8 @@ function openFormCapture(){
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[]}; // 検証計装(H-2): formDebug時のみ push・保存
+  let lastReleaseNow=0; // canceledEvents.tsAgo 算出用（release fire〜cancel の経過ms）
   const CROP_FRAC=0.7, CROP_OFF=(1-0.7)/2;
   let cropActive=false;
   const cropCvs=document.createElement("canvas");
@@ -399,6 +408,7 @@ function openFormCapture(){
       if(canceled){
         /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
         const last=shots[shots.length-1];
+        if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
         if(last){
           shots=shots.filter(s=>s.id!==last.id);
           const div=ovl.querySelector(`#fcShots [data-shot-id="${last.id}"]`);
@@ -407,6 +417,10 @@ function openFormCapture(){
           refreshShotsHint();
         }
         if(pendingCheck&&pendingCheck.shotId===(last&&last.id)) pendingCheck=null;
+      }
+      /* 検証計装(H-2): RELEASEを出しそうで出ていないフレーム（release momentの前後を捉える） */
+      if(db.settings.formDebug===true&&debug&&phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4)){
+        formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,...debug},200);
       }
       /* 矢プレゼンスのシャドー計測: アンカー保持中（anchorStartTs非null、T-Anchor §12.3）と
         確定猶予窓のみ ROI を処理する（常時処理しないことでモバイル負荷を抑える）。
@@ -434,6 +448,7 @@ function openFormCapture(){
         }
       }
       if(released){
+        lastReleaseNow=now; // canceledEvents.tsAgo 用
         const preScores=presenceRing.map(p=>p.score);
         const shotId=onShot(now,anchorStartTs,debug);
         if(shotId) pendingCheck={shotId,preScores,confirmScores:[],startTs:now};
@@ -476,6 +491,9 @@ function openFormCapture(){
     /* 検証計装（H）: db.settings.formDebug===true のときだけ arrowCheck分布とsamplePerfMsの
        中央値/最大値をレコードへ添える（既定OFF、ストレージ肥大防止）。前方互換の追加フィールド */
     if(db.settings.formDebug===true) rec.diag=formDiagSummary(shots,samplePerfMs);
+    /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: 非発火/取消フレームの集約。
+       同じ formDebug フラグでのみ保存（OFF時は既存と同一サイズ）。前方互換の追加フィールド */
+    if(db.settings.formDebug===true) rec.formPhaseDiag=formPhaseDiag;
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
@@ -553,6 +571,8 @@ function startFormReplay(videoUrl){
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0, lastDetectTs=-1;
+  const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[]}; // 検証計装(H-2): formDebug時のみ push・保存
+  let lastReleaseNow=0; // canceledEvents.tsAgo 算出用（release fire〜cancel の経過ms）
   function stop(){
     running=false; if(raf) cancelAnimationFrame(raf);
     try{ video.pause(); }catch(e){}
@@ -613,10 +633,11 @@ function startFormReplay(videoUrl){
         history.push({ts:now,m:raw,vel});
         if(history.length>200) history.shift();
         const r=stepFormPhase(detector,raw,history,1.0,now);
-        const {phase,released,canceled}=r;
+        const {phase,released,canceled,debug}=r;
         if(canceled){
           /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
           const last=shots[shots.length-1];
+          if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
           if(last){
             shots=shots.filter(s=>s.id!==last.id);
             const div=ovl.querySelector(`#frShots [data-shot-id="${last.id}"]`);
@@ -625,7 +646,11 @@ function startFormReplay(videoUrl){
             refreshSave();
           }
         }
-        if(released) onShot(now,r.anchorStartTs);
+        /* 検証計装(H-2): RELEASEを出しそうで出ていないフレーム（release momentの前後を捉える） */
+        if(db.settings.formDebug===true&&debug&&phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4)){
+          formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,...debug},200);
+        }
+        if(released){ lastReleaseNow=now; onShot(now,r.anchorStartTs); }
         phaseEl.textContent=phase;
         phaseEl.classList.toggle("release",phase==="RELEASE");
         phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
@@ -654,12 +679,16 @@ function startFormReplay(videoUrl){
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];
-    db.formAnalyses.push({
+    const rec={
       id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
       shots:shots.length, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
       appVer:APP_VER, fps:+fps.toFixed(1),
       features:shots.map(formFeatureFromShot), note:"(保存済み動画から解析)"
-    });
+    };
+    /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: 非発火/取消フレームの集約。
+       formDebug フラグでのみ保存（OFF時は既存と同一サイズ）。前方互換の追加フィールド */
+    if(db.settings.formDebug===true) rec.formPhaseDiag=formPhaseDiag;
+    db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
     nativePulse("success"); stop(); render();

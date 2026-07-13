@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **観測性**: form-phase 非発火・取消パスにも `debug` を返却、`rec.formPhaseDiag` に集約保存（diagnostics ON 時のみ）。判定ロジック非変更 — release detection triage 2026-07-13 Plan-0
+
 ## v1.8.0 - 2026-07-12
 
 ### Summary
