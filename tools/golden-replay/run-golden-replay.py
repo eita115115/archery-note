@@ -234,6 +234,11 @@ def analyze_video(page, httpd, video_path: Path, handedness: str,
                         ph: r.phase,
                         rel: r.released || undefined,
                         cancel: r.canceled || undefined,
+                        // Plan-0 (release-detection-triage-2026-07-13): 非発火/取消パスにも
+                        // 返るようになった debug をトレースに載せる。0射のケースでも
+                        // per-frame の maxV / anchorNorm / closeFrames / hasNullGap /
+                        // refractoryRemaining が取れて、支配的根因の判定に使う。
+                        dbg: r.debug || undefined,
                     });
                     return r;
                 };
