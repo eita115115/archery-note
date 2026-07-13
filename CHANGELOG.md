@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Changed
+
+- **開発者向け観測性（Plan-0.2, release-detection-triage-2026-07-13）**: 実射で6射中4射がFULL_DRAWフェーズにすら到達せず消失していた事例を受け、`rec.formPhaseDiag` の計装を拡張。判定ロジック（`scripts/46-form-core.js`）は無改変
+  - `rejectedFramesNear` を FULL_DRAW だけでなく ANCHORING フェーズにも拡張（100ms間引き、ring buffer上限 200→400）。ゴールデン再生検証: FULL_DRAW未到達動画で0件→87件など、既存実装では観測できなかったフェーズ滞留がすべて可視化された
+  - release fire（`released===true`）発生時、直前20フレームぶんのtraceを `releaseFires[]` に固定スナップショット保存（ring bufferの上書きを受けない）
+  - session全体のphase滞在時間ヒストグラム `phaseHistogram` を `rec.formPhaseDiag` に追加
+  - `shots:0` の解析セッションでも、設定 > 射形トラッキング > 検証用の診断データ保存 がONのときは閉じるボタンから診断専用レコード（0射・`formPhaseDiag`付き）を保存できるように変更（新規UIボタンは追加せず、既存の閉じるボタンの動作を切替）
+  - いずれも既定OFF（`db.settings.formDebug===true` 時のみ）で、既存の `rejectedFramesNear` / `canceledEvents` の構造・保存条件は完全に維持（phase情報が加わるのみ）
+
 ## v1.9.0 - 2026-07-13
 
 ### Summary

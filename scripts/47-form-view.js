@@ -253,8 +253,16 @@ function openFormCapture(){
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
-  const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[]}; // 検証計装(H-2): formDebug時のみ push・保存
+  const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[],releaseFires:[]}; // 検証計装(H-2/Plan-0.2): formDebug時のみ push・保存
   let lastReleaseNow=0; // canceledEvents.tsAgo 算出用（release fire〜cancel の経過ms）
+  /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: 広域計装。
+     lastAnchoringSampleAt=ANCHORINGフレーム間引き用、recentFrames=release fire時に
+     releaseFiresへsnapshot化する直近フレームバッファ、phaseCounts=セッション全体のphase滞在カウント。
+     いずれも db.settings.formDebug===true のときのみ蓄積・保存（判定ロジックには一切使わない）。 */
+  let lastAnchoringSampleAt=0;
+  let recentFrames=[]; // {ts, phase, ...debug}
+  const RECENT_MAX=40; // fire ±20フレーム相当のバッファ
+  const phaseCounts={SETUP:0,IDLE:0,ANCHORING:0,FULL_DRAW:0,RELEASE:0,FOLLOW:0};
   const CROP_FRAC=0.7, CROP_OFF=(1-0.7)/2;
   let cropActive=false;
   const cropCvs=document.createElement("canvas");
@@ -405,6 +413,14 @@ function openFormCapture(){
       if(history.length>200) history.shift();
       const r=stepFormPhase(detector,raw,history,1.0,now);
       const {phase,released,canceled,debug,anchorStartTs}=r;
+      /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: debugが返る全フレームで
+         recentFrames（release fire snapshot用バッファ）とphaseCounts（session全体の
+         phase滞在ヒストグラム）を更新する。判定ロジックには一切使わない。 */
+      if(db.settings.formDebug===true&&debug){
+        recentFrames.push({ts:now,phase,...debug});
+        if(recentFrames.length>RECENT_MAX) recentFrames.shift();
+        phaseCounts[phase]=(phaseCounts[phase]||0)+1;
+      }
       if(canceled){
         /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
         const last=shots[shots.length-1];
@@ -418,9 +434,17 @@ function openFormCapture(){
         }
         if(pendingCheck&&pendingCheck.shotId===(last&&last.id)) pendingCheck=null;
       }
-      /* 検証計装(H-2): RELEASEを出しそうで出ていないフレーム（release momentの前後を捉える） */
-      if(db.settings.formDebug===true&&debug&&phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4)){
-        formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,...debug},200);
+      /* 検証計装(H-2 → Plan-0.2, release-detection-triage-2026-07-13 §3.3): RELEASEを
+         出しそうで出ていないフレーム（release momentの前後を捉える）。実測
+         rejectedFramesNear:[]（FULL_DRAW未到達で4/6射が消失）を受け、FULL_DRAWだけでなく
+         ANCHORINGも対象にする。ANCHORINGは常時発生しうるため100ms毎に間引いてサイズを抑える。 */
+      if(db.settings.formDebug===true&&debug){
+        const isFullDraw=phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4);
+        const isAnchoring=phase==="ANCHORING"&&(now-(lastAnchoringSampleAt||0)>=100);
+        if(isFullDraw||isAnchoring){
+          if(isAnchoring) lastAnchoringSampleAt=now;
+          formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,phase,...debug},400);
+        }
       }
       /* 矢プレゼンスのシャドー計測: アンカー保持中（anchorStartTs非null、T-Anchor §12.3）と
         確定猶予窓のみ ROI を処理する（常時処理しないことでモバイル負荷を抑える）。
@@ -451,6 +475,16 @@ function openFormCapture(){
         lastReleaseNow=now; // canceledEvents.tsAgo 用
         const preScores=presenceRing.map(p=>p.score);
         const shotId=onShot(now,anchorStartTs,debug);
+        /* Plan-B strict-review Note #1 対応（Plan-0.2 Block B）: release fire直前20フレームの
+           trace を固定スナップショットとして残す（ring bufferと違い上書きされない）。
+           canceled になったショットの直前の姿勢推移を後から確認できるようにする。 */
+        if(db.settings.formDebug===true){
+          formPhaseDiag.releaseFires.push({
+            ts:now,
+            shotId:shotId||null,
+            framesBefore:recentFrames.slice(0,-1).slice(-20),
+          });
+        }
         if(shotId) pendingCheck={shotId,preScores,confirmScores:[],startTs:now};
       }
       phaseEl.textContent=phase;
@@ -473,8 +507,36 @@ function openFormCapture(){
     }
     raf=requestAnimationFrame(loop);
   }
+  /* Plan-0.2 D（release-detection-triage-2026-07-13 §8）: shots:0 でも診断保存できるように
+     する。UIボタンは増やさず、formDebug ON時のみ close ボタンの動作を「診断用に保存してから
+     閉じる」へ切替える（採用理由: 通常ユーザー(formDebug OFF)の close 挙動を完全に不変のまま
+     保ちつつ、UI追加コストを避ける。判断は完了報告に明記）。 */
+  function saveDiagOnlyRecord(){
+    const todays=db.sessions.filter(s=>s.date===today());
+    const linked=todays.length?todays[todays.length-1]:null;
+    db.formAnalyses=db.formAnalyses||[];
+    const rec={
+      id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
+      shots:0, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+      appVer:APP_VER, fps:+fps.toFixed(1),
+      features:[], note:"(診断用: 0射で保存)"
+    };
+    rec.diag=formDiagSummary([],samplePerfMs);
+    rec.formPhaseDiag=formPhaseDiag;
+    rec.formPhaseDiag.phaseHistogram={...phaseCounts};
+    db.formAnalyses.push(rec);
+    save({reason:"form-analysis-diag-only"});
+    toast("診断用に0射で保存しました");
+  }
   ovl.querySelector("#fcClose").onclick=async()=>{
-    if(!shots.length || await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})) stop();
+    if(!shots.length){
+      const diagSaved=db.settings.formDebug===true;
+      if(diagSaved) saveDiagOnlyRecord();
+      stop();
+      if(diagSaved) render();
+      return;
+    }
+    if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})) stop();
   };
   ovl.querySelector("#fcSave").onclick=async()=>{
     if(!shots.length) return;
@@ -493,7 +555,10 @@ function openFormCapture(){
     if(db.settings.formDebug===true) rec.diag=formDiagSummary(shots,samplePerfMs);
     /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: 非発火/取消フレームの集約。
        同じ formDebug フラグでのみ保存（OFF時は既存と同一サイズ）。前方互換の追加フィールド */
-    if(db.settings.formDebug===true) rec.formPhaseDiag=formPhaseDiag;
+    if(db.settings.formDebug===true){
+      rec.formPhaseDiag=formPhaseDiag;
+      rec.formPhaseDiag.phaseHistogram={...phaseCounts}; // Plan-0.2: session全体のphase滞在カウント
+    }
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
@@ -571,8 +636,13 @@ function startFormReplay(videoUrl){
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0, lastDetectTs=-1;
-  const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[]}; // 検証計装(H-2): formDebug時のみ push・保存
+  const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[],releaseFires:[]}; // 検証計装(H-2/Plan-0.2): formDebug時のみ push・保存
   let lastReleaseNow=0; // canceledEvents.tsAgo 算出用（release fire〜cancel の経過ms）
+  /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: 広域計装（capture側と同型）。 */
+  let lastAnchoringSampleAt=0;
+  let recentFrames=[]; // {ts, phase, ...debug}
+  const RECENT_MAX=40; // fire ±20フレーム相当のバッファ
+  const phaseCounts={SETUP:0,IDLE:0,ANCHORING:0,FULL_DRAW:0,RELEASE:0,FOLLOW:0};
   function stop(){
     running=false; if(raf) cancelAnimationFrame(raf);
     try{ video.pause(); }catch(e){}
@@ -593,7 +663,7 @@ function startFormReplay(videoUrl){
   }
   function onShot(now,anchorStartTs){
     const shot=summarizeFormShot(history,anchorStartTs,now);
-    if(!shot) return;
+    if(!shot) return null;
     shot.id=uid(); shot.arrowCheck=null; shots.push(shot);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem"; div.dataset.shotId=shot.id;
@@ -602,6 +672,7 @@ function startFormReplay(videoUrl){
       <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>`;
     ovl.querySelector("#frShots").prepend(div);
     refreshSave(); nativePulse("light");
+    return shot.id; // Plan-0.2 Block B: releaseFires への shotId 紐付けに使う（既存呼び出し側の挙動は不変）
   }
   function loop(){
     if(!running) return;
@@ -634,6 +705,14 @@ function startFormReplay(videoUrl){
         if(history.length>200) history.shift();
         const r=stepFormPhase(detector,raw,history,1.0,now);
         const {phase,released,canceled,debug}=r;
+        /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: debugが返る全フレームで
+           recentFrames（release fire snapshot用バッファ）とphaseCounts（session全体の
+           phase滞在ヒストグラム）を更新する。判定ロジックには一切使わない。 */
+        if(db.settings.formDebug===true&&debug){
+          recentFrames.push({ts:now,phase,...debug});
+          if(recentFrames.length>RECENT_MAX) recentFrames.shift();
+          phaseCounts[phase]=(phaseCounts[phase]||0)+1;
+        }
         if(canceled){
           /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
           const last=shots[shots.length-1];
@@ -646,11 +725,30 @@ function startFormReplay(videoUrl){
             refreshSave();
           }
         }
-        /* 検証計装(H-2): RELEASEを出しそうで出ていないフレーム（release momentの前後を捉える） */
-        if(db.settings.formDebug===true&&debug&&phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4)){
-          formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,...debug},200);
+        /* 検証計装(H-2 → Plan-0.2, release-detection-triage-2026-07-13 §3.3): RELEASEを
+           出しそうで出ていないフレーム。FULL_DRAWだけでなくANCHORINGも対象にし、ANCHORINGは
+           100ms毎に間引く（capture側と同型）。 */
+        if(db.settings.formDebug===true&&debug){
+          const isFullDraw=phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4);
+          const isAnchoring=phase==="ANCHORING"&&(now-(lastAnchoringSampleAt||0)>=100);
+          if(isFullDraw||isAnchoring){
+            if(isAnchoring) lastAnchoringSampleAt=now;
+            formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,phase,...debug},400);
+          }
         }
-        if(released){ lastReleaseNow=now; onShot(now,r.anchorStartTs); }
+        if(released){
+          lastReleaseNow=now;
+          const shotId=onShot(now,r.anchorStartTs);
+          /* Plan-B strict-review Note #1 対応（Plan-0.2 Block B）: release fire直前20フレームの
+             trace を固定スナップショットとして残す（capture側と同型）。 */
+          if(db.settings.formDebug===true){
+            formPhaseDiag.releaseFires.push({
+              ts:now,
+              shotId:shotId||null,
+              framesBefore:recentFrames.slice(0,-1).slice(-20),
+            });
+          }
+        }
         phaseEl.textContent=phase;
         phaseEl.classList.toggle("release",phase==="RELEASE");
         phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
@@ -671,8 +769,33 @@ function startFormReplay(videoUrl){
     }
     raf=requestAnimationFrame(loop);
   }
+  /* Plan-0.2 D（release-detection-triage-2026-07-13 §8）: shots:0 でも診断保存できるように
+     する（capture側と同型。採用理由は同関数のcapture側コメント参照）。 */
+  function saveDiagOnlyRecord(){
+    const todays=db.sessions.filter(s=>s.date===today());
+    const linked=todays.length?todays[todays.length-1]:null;
+    db.formAnalyses=db.formAnalyses||[];
+    const rec={
+      id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
+      shots:0, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+      appVer:APP_VER, fps:+fps.toFixed(1),
+      features:[], note:"(診断用: 0射で保存/保存済み動画)"
+    };
+    rec.formPhaseDiag=formPhaseDiag;
+    rec.formPhaseDiag.phaseHistogram={...phaseCounts};
+    db.formAnalyses.push(rec);
+    save({reason:"form-analysis-diag-only"});
+    toast("診断用に0射で保存しました");
+  }
   ovl.querySelector("#frClose").onclick=async()=>{
-    if(!shots.length||await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})) stop();
+    if(!shots.length){
+      const diagSaved=db.settings.formDebug===true;
+      if(diagSaved) saveDiagOnlyRecord();
+      stop();
+      if(diagSaved) render();
+      return;
+    }
+    if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})) stop();
   };
   ovl.querySelector("#frSave").onclick=()=>{
     if(!shots.length) return;
@@ -687,7 +810,10 @@ function startFormReplay(videoUrl){
     };
     /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: 非発火/取消フレームの集約。
        formDebug フラグでのみ保存（OFF時は既存と同一サイズ）。前方互換の追加フィールド */
-    if(db.settings.formDebug===true) rec.formPhaseDiag=formPhaseDiag;
+    if(db.settings.formDebug===true){
+      rec.formPhaseDiag=formPhaseDiag;
+      rec.formPhaseDiag.phaseHistogram={...phaseCounts}; // Plan-0.2: session全体のphase滞在カウント
+    }
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);

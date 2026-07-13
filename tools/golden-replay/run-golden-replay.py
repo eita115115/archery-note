@@ -246,11 +246,16 @@ def analyze_video(page, httpd, video_path: Path, handedness: str,
             delegate,
         )
 
-        # 利き手設定を反映してからリプレイ開始
+        # 利き手設定を反映してからリプレイ開始。
+        # formDebug=true: Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）で
+        # rec.formPhaseDiag（rejectedFramesNear/canceledEvents/releaseFires/phaseHistogram）
+        # を得るために必須（OFFのままだと診断データが一切保存されず検証できない）。
+        # ゴールデン再生はこの診断データそのものが検証対象の研究用ハーネスなので常時ONにする。
         page.evaluate(
             """([handedness, url]) => {
                 db.settings.formHandedness = handedness;
                 db.settings.formTrackingEnabled = true;
+                db.settings.formDebug = true;
                 startFormReplay(url);
             }""",
             [handedness, golden_url],
@@ -366,12 +371,20 @@ def analyze_video(page, httpd, video_path: Path, handedness: str,
             result["formAnalysis"] = record
             result["status"] = "ok"
         else:
-            # 0射: 保存ボタンは無効なので閉じる（確認ダイアログは0射なら出ない）
+            # 0射: 保存ボタンは無効。Plan-0.2 Block D（formDebug=true時）により #frClose は
+            # 診断専用レコード（shots:0, rec.formPhaseDiag 付き）を保存してから閉じるので、
+            # shots>0 と同様に db.formAnalyses から取得する（確認ダイアログは0射なら出ない）
             page.click("#frClose")
             page.wait_for_function(
                 "() => !document.querySelector('#frVideo')", timeout=10_000
             )
-            result["formAnalysis"] = None
+            record = page.evaluate(
+                """() => {
+                    const r = (db.formAnalyses || []).slice(-1)[0] || null;
+                    return r ? JSON.parse(JSON.stringify(r)) : null;
+                }"""
+            )
+            result["formAnalysis"] = record
             result["status"] = "ok-no-shots"
 
     except PWTimeout as e:
