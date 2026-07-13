@@ -3,6 +3,7 @@
 ## Unreleased
 
 - **観測性**: form-phase 非発火・取消パスにも `debug` を返却、`rec.formPhaseDiag` に集約保存（diagnostics ON 時のみ）。判定ロジック非変更 — release detection triage 2026-07-13 Plan-0
+- **検出**: form-phase self-cancel に 2連続フレーム要件を追加（`pendingCancelFrames >= 2`）。単発 blur artifact による誤取消を防ぐ — release detection triage 2026-07-13 Plan-B (§3.2, §7.5 実測 93.8%救済)
 
 ## v1.8.0 - 2026-07-12
 

@@ -426,7 +426,11 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const rRelC = pushC(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え(released)
   assertEqual(rRelC.released, true, "sanity: release fires before cancel scenario");
   assertDebugShape(rRelC.debug, "release-fire path");
-  const rCancel = pushC(mkRaw(0.23, 150), 0.05); // CONFIRM_MS以内にアンカー圏へ復帰(canceled)
+  // Plan-B（release-detection-triage-2026-07-13 §3.2）: 取消は連続2フレーム要件。
+  // 1フレーム目はまだ取消されず、2フレーム目でCONFIRM_MS以内にアンカー圏へ復帰(canceled)
+  const rDip1 = pushC(mkRaw(0.23, 150), 0.05);
+  assertEqual(rDip1.canceled, undefined, "sanity: 1st dip frame does not cancel yet (Plan-B)");
+  const rCancel = pushC(mkRaw(0.23, 150), 0.05);
   assertEqual(rCancel.canceled, true, "sanity: cancel path reached");
   assertDebugShape(rCancel.debug, "canceled path");
   assertClose(rCancel.debug.anchorNorm, 0.23, 1e-9, "canceled path: anchorNorm captured (not lost) before state reset");
@@ -455,6 +459,35 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   for (let i = 0; i < 5; i++) { tN += 20; histN.push({ ts: tN, m: mkRaw(0.22, 150), vel: 0.02 }); rNormal = core.stepFormPhase(stN, mkRaw(0.22, 150), histN, 1.0, tN); }
   assertDebugShape(rNormal.debug, "normal non-fire path");
   assert(rNormal.debug.closeFrames >= 0, "normal non-fire path: closeFrames is a real count, not null");
+}
+{
+  /* Plan-B (release-detection-triage-2026-07-13 §3.2): self-cancel は連続 2 フレームで発火する。
+     1 フレームだけ anchorNorm が dip して即戻るケースは cancel されない（single_frame_artifact 救済）。 */
+  // (a) 単発 dip → 取消されない: release fire → anchorNorm 1フレームだけ<CLOSE_IN → 復帰
+  const stA = core.makeFormPhaseDetector();
+  const histA = [];
+  let tA = 0;
+  const pushA = (m, vel) => { tA += 20; histA.push({ ts: tA, m, vel }); return core.stepFormPhase(stA, m, histA, 1.0, tA); };
+  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02);  // アンカー保持
+  const rFireA = pushA(mkRaw(0.6, 140), 10);  // release fire
+  assertEqual(rFireA.released, true, "Plan-B (a): release fires");
+  const rDipA = pushA(mkRaw(0.30, 150), 0.05);  // 1フレームだけ CLOSE_IN 未満
+  assertEqual(rDipA.canceled, undefined, "Plan-B (a): single frame dip does not cancel");
+  const rBackA = pushA(mkRaw(0.60, 150), 0.05);  // 復帰
+  assertEqual(rBackA.canceled, undefined, "Plan-B (a): recovery, still no cancel");
+
+  // (b) 2連続 dip → 取消される: release fire → anchorNorm 連続2フレーム<CLOSE_IN
+  const stB = core.makeFormPhaseDetector();
+  const histB = [];
+  let tB = 0;
+  const pushB = (m, vel) => { tB += 20; histB.push({ ts: tB, m, vel }); return core.stepFormPhase(stB, m, histB, 1.0, tB); };
+  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
+  const rFireB = pushB(mkRaw(0.6, 140), 10);
+  assertEqual(rFireB.released, true, "Plan-B (b): release fires");
+  const rDip1B = pushB(mkRaw(0.28, 150), 0.05);  // dip 1
+  assertEqual(rDip1B.canceled, undefined, "Plan-B (b): frame 1 does not cancel yet");
+  const rDip2B = pushB(mkRaw(0.28, 150), 0.05);  // dip 2 → 取消
+  assertEqual(rDip2B.canceled, true, "Plan-B (b): 2nd consecutive dip triggers cancel");
 }
 {
   // DRAWING 方向チェック（Stage 0 E'）: anchorNorm 増加方向（レットダウン等）は DRAWING に遷移しない。
@@ -637,7 +670,10 @@ function makeStepper(dt) {
   const rel = s.push(mkRaw(0.6, 140), 10); // 瞬間ノイズで released
   assertEqual(rel.r.released, true, "noise spike releases before cancel");
   assert(rel.r.anchorStartTs > 0, "released frame carries pre-clear anchorStartTs");
-  const cancel = s.push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS 以内にアンカー圏へ復帰 → 取消
+  // Plan-B（release-detection-triage-2026-07-13 §3.2）: 取消は連続2フレーム要件。1フレーム目は取消されない
+  const dip1 = s.push(mkRaw(0.23, 150), 0.05);
+  assertEqual(dip1.r.canceled, undefined, "1st dip frame does not cancel yet (Plan-B)");
+  const cancel = s.push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS 以内に2連続フレームでアンカー圏へ復帰 → 取消
   assertEqual(cancel.r.canceled, true, "return to anchor cancels");
   assertEqual(cancel.r.anchorStartTs, cancel.t, "canceled frame restarts anchorStartTs at now");
 }

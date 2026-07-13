@@ -339,7 +339,7 @@ function formDwVisOk(m) {
    保持し続け、SETUP/IDLE へ落ちたときのみリセットする。holdMs = releaseTs - anchorStartTs
    （summarizeFormShot）はこの sticky 仕様の上に成立している。 */
 function makeFormPhaseDetector() {
-  return { cur: FORM_PHASES.SETUP, anchorSince: 0, anchorStartTs: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null };
+  return { cur: FORM_PHASES.SETUP, anchorSince: 0, anchorStartTs: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null, pendingCancelFrames: 0 };
 }
 
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
@@ -369,15 +369,29 @@ function stepFormPhase(st, raw, history, sens, now) {
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
     if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
-      // アンカー圏へ即座に戻った = 離脱ではなく一時的な検出ノイズ/引き戻しだった。取消
-      // 計装: st.lastReleaseTs をリセットする前に refractoryRemainingMs() を評価する（取消直前の値を残す）
-      const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
-      st.pendingRelease = null; st.lastReleaseTs = 0; st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
-      st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
-      return { phase: st.cur, released: false, canceled: true, anchorStartTs: st.anchorStartTs, debug };
+      /* Plan-B（release-detection-triage-2026-07-13 §3.2, §7.5）: 単発 blur artifact
+         による誤取消を防ぐため、連続2フレームの dip を要求する（実測: cancel 16件中
+         15件・93.8%が single_frame_artifact、真のレットダウン系は0件 — 2フレーム要件は
+         実データで裏付け済み）。1フレーム目はカウントのみで取消せず、この if ブロックを
+         抜けて後続処理（sticky RELEASE lock 等）へ素通しする。cur / pendingRelease は
+         触らないため、次フレームで再びこの分岐に入り2フレーム目を判定できる。 */
+      st.pendingCancelFrames = (st.pendingCancelFrames || 0) + 1;
+      if (st.pendingCancelFrames >= 2) {
+        // アンカー圏へ2連続フレームで戻った = 離脱ではなく検出ノイズ/引き戻しだった。取消
+        // 計装: st.lastReleaseTs をリセットする前に refractoryRemainingMs() を評価する（取消直前の値を残す）
+        const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
+        st.pendingRelease = null; st.lastReleaseTs = 0; st.pendingCancelFrames = 0;
+        st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
+        st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
+        return { phase: st.cur, released: false, canceled: true, anchorStartTs: st.anchorStartTs, debug };
+      }
+      // 1フレーム目: まだ取消しない。pendingRelease を維持したまま次のチェック（sticky lock 等）へ進む
+    } else {
+      st.pendingCancelFrames = 0; // アンカー圏外に戻った = dip 解消。連続要件のためカウンタをリセット
     }
   } else if (st.pendingRelease) {
     st.pendingRelease = null; // 猶予終了、確定（取消なし）
+    st.pendingCancelFrames = 0;
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) {
     st.cur = FORM_PHASES.RELEASE;
