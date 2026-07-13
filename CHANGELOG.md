@@ -2,8 +2,30 @@
 
 ## Unreleased
 
-- **観測性**: form-phase 非発火・取消パスにも `debug` を返却、`rec.formPhaseDiag` に集約保存（diagnostics ON 時のみ）。判定ロジック非変更 — release detection triage 2026-07-13 Plan-0
-- **検出**: form-phase self-cancel に 2連続フレーム要件を追加（`pendingCancelFrames >= 2`）。単発 blur artifact による誤取消を防ぐ — release detection triage 2026-07-13 Plan-B (§3.2, §7.5 実測 93.8%救済)
+## v1.9.0 - 2026-07-13
+
+### Summary
+
+**射形トラッキングの検出精度を上げました**。撮影中に姿勢がほんの一瞬ぶれるだけで、直前に検出した射が沈黙のうちに取り消される問題を修正しました。実映像5本での検証で誤取消がおよそ半減し、これまで0射だった映像で新たに検出できるケースも出ました（誤検出の増加はゼロ）。開発者向けには、なぜ発火しなかったかを後から解析できる計装データを追加しました。
+
+### Fixed
+
+- **射形トラッキング — 誤取消の削減**: 発火直後に姿勢が1フレームだけアンカー圏に戻るケースを「一時的なブレ」と見なして取り消さないよう変更（2連続フレーム要件）。実映像5本での検証: 取消イベント総数 16→8（50%減）、検出射数 1→2（新規発火）、既存の検出成功動画での偽検出は発生せず
+
+### Changed
+
+- **開発者向け観測性**: `stepFormPhase` の非発火・取消・sticky/FOLLOW・！usable の全 return path に判定内部値（`maxV`/`rise`/`nullFrames`/`conf`/`anchorNorm`/`closeFrames`/`hasNullGap`/`refractoryRemaining`）を含む `debug` を返却。設定 > 射形トラッキング > 検証用の診断データ保存 が ON のとき、非発火近傍フレームと取消イベントを `rec.formPhaseDiag` に集約保存（既定 OFF、ストレージ肥大なし、判定ロジック非変更）
+
+### Not Changed
+
+- 得点入力・グルーピング・自己ベスト等の分析は非変更
+- 「今日の結果」・ゲーミフィケーション・射場モードの挙動は非変更
+- SCHEMA_VER=5、既存データは無改変
+
+### Under the hood
+
+- リリース検出の多角診断ワークフロー（23仮説→11確認）を実施し、支配根因を self-cancel に絞り込み。診断レポート: `.company/research/topics/release-detection-triage-2026-07-13.md`
+- ゴールデン再生ハーネスに `stepFormPhase` の `debug` を trace 経由で受け渡し、`db.settings.formDebug` OFF でも per-frame の判定内部値が実測できるように
 
 ## v1.8.0 - 2026-07-12
 
