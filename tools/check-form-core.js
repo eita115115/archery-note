@@ -14,10 +14,16 @@ function assert(ok, message) {
   if (!ok) throw new Error(message);
 }
 function assertEqual(actual, expected, label) {
-  assert(Object.is(actual, expected), `${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+  assert(
+    Object.is(actual, expected),
+    `${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
+  );
 }
 function assertClose(actual, expected, eps, label) {
-  assert(Number.isFinite(actual) && Math.abs(actual - expected) <= eps, `${label}: expected ${expected} (±${eps}), got ${actual}`);
+  assert(
+    Number.isFinite(actual) && Math.abs(actual - expected) <= eps,
+    `${label}: expected ${expected} (±${eps}), got ${actual}`,
+  );
 }
 
 const core = new Function(
@@ -32,27 +38,62 @@ return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, f
 
 /* ---------- 幾何ヘルパー ---------- */
 
-assertClose(core.formAngleDeg({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }), 180, 1e-9, "straight line angle");
-assertClose(core.formAngleDeg({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }), 90, 1e-9, "right angle");
-assertEqual(core.formAngleDeg({ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }), 180, "degenerate angle defaults to 180");
-assertClose(core.formLineDist({ x: 0.5, y: 1 }, { x: 0, y: 0 }, { x: 1, y: 0 }), 1, 1e-9, "point-segment distance");
-assertClose(core.formLineDist({ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }), 1, 1e-9, "distance clamps to segment end");
+assertClose(
+  core.formAngleDeg({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }),
+  180,
+  1e-9,
+  "straight line angle",
+);
+assertClose(
+  core.formAngleDeg({ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }),
+  90,
+  1e-9,
+  "right angle",
+);
+assertEqual(
+  core.formAngleDeg({ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }),
+  180,
+  "degenerate angle defaults to 180",
+);
+assertClose(
+  core.formLineDist({ x: 0.5, y: 1 }, { x: 0, y: 0 }, { x: 1, y: 0 }),
+  1,
+  1e-9,
+  "point-segment distance",
+);
+assertClose(
+  core.formLineDist({ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }),
+  1,
+  1e-9,
+  "distance clamps to segment end",
+);
 assertEqual(core.formMedian([]), null, "median of empty");
 assertClose(core.formMedian([3, 1, 2]), 2, 1e-9, "odd median");
 assertClose(core.formMedian([1, 2, 3, 4]), 2.5, 1e-9, "even median");
-assertEqual(core.formGaussScore(core.FORM_REF.bowArmAngle.ideal, core.FORM_REF.bowArmAngle), 100, "gauss peak at ideal");
-assert(core.formGaussScore(120, core.FORM_REF.bowArmAngle) < 5, "gauss far from ideal is near zero");
+assertEqual(
+  core.formGaussScore(core.FORM_REF.bowArmAngle.ideal, core.FORM_REF.bowArmAngle),
+  100,
+  "gauss peak at ideal",
+);
+assert(
+  core.formGaussScore(120, core.FORM_REF.bowArmAngle) < 5,
+  "gauss far from ideal is near zero",
+);
 
 /* ---------- computeFormMetrics（合成フルドロー姿勢・右利き） ---------- */
 
 function fullDrawLandmarks() {
   const P = (x, y, v) => ({ x, y, visibility: v == null ? 0.95 : v });
   const l = [];
-  l[0] = P(0.52, 0.30);                 // 鼻
-  l[11] = P(0.45, 0.40); l[12] = P(0.55, 0.42);   // 肩 L/R
-  l[13] = P(0.32, 0.41); l[14] = P(0.62, 0.40);   // 肘 L/R
-  l[15] = P(0.20, 0.40); l[16] = P(0.56, 0.32);   // 手首 L(弓手伸展)/R(顎アンカー: 鼻から約0.2胴体長)
-  l[23] = P(0.47, 0.62); l[24] = P(0.53, 0.62);   // 腰 L/R
+  l[0] = P(0.52, 0.3); // 鼻
+  l[11] = P(0.45, 0.4);
+  l[12] = P(0.55, 0.42); // 肩 L/R
+  l[13] = P(0.32, 0.41);
+  l[14] = P(0.62, 0.4); // 肘 L/R
+  l[15] = P(0.2, 0.4);
+  l[16] = P(0.56, 0.32); // 手首 L(弓手伸展)/R(顎アンカー: 鼻から約0.2胴体長)
+  l[23] = P(0.47, 0.62);
+  l[24] = P(0.53, 0.62); // 腰 L/R
   return l;
 }
 
@@ -60,7 +101,10 @@ function fullDrawLandmarks() {
   const m = core.computeFormMetrics(fullDrawLandmarks(), "right");
   assert(m, "metrics computed");
   assertClose(m.bowArm, 170.8, 0.5, "bow arm angle near extension");
-  assert(m.anchorNorm < core.FORM_PH.CLOSE_IN, `full draw is inside anchor zone, got ${m.anchorNorm}`);
+  assert(
+    m.anchorNorm < core.FORM_PH.CLOSE_IN,
+    `full draw is inside anchor zone, got ${m.anchorNorm}`,
+  );
   assert(m.bodyScale > 0.15 && m.bodyScale < 0.35, `plausible torso scale, got ${m.bodyScale}`);
   assert(m.sc.bow > 90, `bow arm score high, got ${m.sc.bow}`);
   assert(m.score > 0 && m.score <= 100, "composite score in range");
@@ -99,13 +143,20 @@ function fullDrawLandmarks() {
 
 /* ---------- フェーズ検出（F1 実射検証で確定した3ケース） ---------- */
 
-const mkRaw = (anchorNorm, drawArm) => ({ anchorNorm, drawArm, bodyScale: 0.25, dW: { x: 0, y: 0 } });
+const mkRaw = (anchorNorm, drawArm) => ({
+  anchorNorm,
+  drawArm,
+  bodyScale: 0.25,
+  dW: { x: 0, y: 0 },
+});
 
 function runSequence(seq, coreObj) {
   const c = coreObj || core;
   const st = c.makeFormPhaseDetector();
   const hist = [];
-  let t = 0, phases = [], releases = 0;
+  let t = 0,
+    phases = [],
+    releases = 0;
   for (const [m, vel, dt] of seq) {
     t += dt;
     hist.push({ ts: t, m, vel });
@@ -150,7 +201,8 @@ function shotSequence(dt) {
 {
   const r = runSequence(shotSequence());
   ["SETUP", "DRAWING", "ANCHORING", "FULL_DRAW", "RELEASE", "FOLLOW"].forEach((p) =>
-    assert(r.phases.includes(p), `phase ${p} reached`));
+    assert(r.phases.includes(p), `phase ${p} reached`),
+  );
   assertEqual(r.releases, 1, "low-fps (15fps) realistic release detected once");
 }
 {
@@ -159,17 +211,20 @@ function shotSequence(dt) {
   // （境界表は 46-form-core.js の RELEASE_TH コメント参照）。50ms は 1 フレームで
   // 完了する極限ケースで、20fps 相当では速度スパイクがリリースと数値上区別できず
   // 対象外（停止条件の対象は「50ms〜2s」のうち計測可能な範囲）。
-  [2000, 1500, 1200, 1100, 1000, 900, 800, 700, 600, 500, 400, 300, 250, 200, 150, 100].forEach((totalMs) => {
-    [20, 50].forEach((dt) => {
-      const seq = [];
-      for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
-      const frames = Math.max(1, Math.round(totalMs / dt));
-      const step = 0.78 / frames;
-      for (let i = 1; i <= frames; i++) seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
-      for (let i = 0; i < 30; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
-      assertEqual(runSequence(seq).releases, 0, `let-down ${totalMs}ms (dt=${dt}) does not fire`);
-    });
-  });
+  [2000, 1500, 1200, 1100, 1000, 900, 800, 700, 600, 500, 400, 300, 250, 200, 150, 100].forEach(
+    (totalMs) => {
+      [20, 50].forEach((dt) => {
+        const seq = [];
+        for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
+        const frames = Math.max(1, Math.round(totalMs / dt));
+        const step = 0.78 / frames;
+        for (let i = 1; i <= frames; i++)
+          seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
+        for (let i = 0; i < 30; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
+        assertEqual(runSequence(seq).releases, 0, `let-down ${totalMs}ms (dt=${dt}) does not fire`);
+      });
+    },
+  );
 }
 {
   // 現実的なリリース速度プロファイル（離脱 50-100ms で完了）は確実に検出する
@@ -179,7 +234,11 @@ function shotSequence(dt) {
       for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
       seq.push(...releaseFrames(totalMs, dt, 0.22));
       for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
-      assertEqual(runSequence(seq).releases, 1, `realistic release ${totalMs}ms (dt=${dt}) is detected`);
+      assertEqual(
+        runSequence(seq).releases,
+        1,
+        `realistic release ${totalMs}ms (dt=${dt}) is detected`,
+      );
     });
   });
 }
@@ -191,13 +250,18 @@ function shotSequence(dt) {
     for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
     const ldFrames = Math.max(1, Math.round(letdownMs / dt));
     const step = 0.78 / ldFrames;
-    for (let i = 1; i <= ldFrames; i++) seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
+    for (let i = 1; i <= ldFrames; i++)
+      seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
     for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
     for (let i = 1; i <= 12; i++) seq.push([mkRaw(1.0 - 0.78 * (i / 12), 110 + i), 0.5, dt]); // 再度ドロー
     for (let i = 0; i < 20; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
     seq.push(...releaseFrames(80, dt, 0.22));
     for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
-    assertEqual(runSequence(seq).releases, 1, `let-down(${letdownMs}ms) then real release counts as one shot`);
+    assertEqual(
+      runSequence(seq).releases,
+      1,
+      `let-down(${letdownMs}ms) then real release counts as one shot`,
+    );
   });
 }
 {
@@ -207,7 +271,7 @@ function shotSequence(dt) {
   for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 150), 0.02, dt]);
   // リリース開始: 2フレーム分の速度スパイク
   seq.push([mkRaw(0.35, 140), 6, dt]);
-  seq.push([mkRaw(0.50, 130), 8, dt]);
+  seq.push([mkRaw(0.5, 130), 8, dt]);
   // MediaPipe ドロップアウト: null フレームが3つ
   seq.push([null, 0, dt]);
   seq.push([null, 0, dt]);
@@ -233,16 +297,26 @@ function shotSequence(dt) {
     return seq;
   }
   assertEqual(runSequence(gapBridgedSequence(8)).releases, 1, "140ms null gap is bridged (fires)");
-  assertEqual(runSequence(gapBridgedSequence(11)).releases, 0, "200ms null gap is not bridged (does not fire)");
+  assertEqual(
+    runSequence(gapBridgedSequence(11)).releases,
+    0,
+    "200ms null gap is not bridged (does not fire)",
+  );
   // 定数を無効値（∞）へ戻すと現行（導入前）と同値 = 200ms ギャップでも発火する。
   // これは同時に「上の非検出テストが NB_MAX_GAP_MS によって落ちている」ことの証明でもある
-  assert(coreScript.includes("NB_MAX_GAP_MS: 150,"), "NB_MAX_GAP_MS constant present for ∞-substitution test");
+  assert(
+    coreScript.includes("NB_MAX_GAP_MS: 150,"),
+    "NB_MAX_GAP_MS constant present for ∞-substitution test",
+  );
   const coreInfGap = new Function(
     `${coreScript.replace("NB_MAX_GAP_MS: 150,", "NB_MAX_GAP_MS: Infinity,")}
 return {makeFormPhaseDetector, stepFormPhase};`,
   )();
-  assertEqual(runSequence(gapBridgedSequence(11), coreInfGap).releases, 1,
-    "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' behavior on the 200ms gap");
+  assertEqual(
+    runSequence(gapBridgedSequence(11), coreInfGap).releases,
+    1,
+    "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' behavior on the 200ms gap",
+  );
 }
 /* [既知の制約・文書化のみ、strict-review 2026-07-11 finding]: 上の140/200ms境界テストが
    計測するギャップ span は「窓内に現れた最初のnullフレームts→最後のnullフレームts」であり、
@@ -265,51 +339,88 @@ return {makeFormPhaseDetector, stepFormPhase};`,
      0.45 へ差し替えたコアでは conf<0.45 のフレームが窓から除外される（ロジック検証のみ、発動はしない）。 */
   assertEqual(core.FORM_PH.CONF_GATE, 0, "CONF_GATE ships disabled (0)");
   assertEqual(core.FORM_PH.DW_VIS_GATE, 0, "DW_VIS_GATE ships disabled (0)");
-  const mkRawC = (anchorNorm, drawArm, conf) => ({ anchorNorm, drawArm, conf, bodyScale: 0.25, dW: { x: 0, y: 0 } });
+  const mkRawC = (anchorNorm, drawArm, conf) => ({
+    anchorNorm,
+    drawArm,
+    conf,
+    bodyScale: 0.25,
+    dW: { x: 0, y: 0 },
+  });
   const confMixedSeq = [];
   for (let i = 0; i < 60; i++) confMixedSeq.push([mkRawC(0.22, 150, 0.4), 0.02, 20]); // 低conf(0.4)のアンカー保持
   confMixedSeq.push([mkRawC(0.6, 140, 0.5), 10, 20]); // 高conf(0.5)の速度スパイク
   for (let i = 0; i < 10; i++) confMixedSeq.push([mkRawC(1.0, 90, 0.5), 0.2, 20]);
-  assertEqual(runSequence(confMixedSeq).releases, 1, "conf-mixed release fires with CONF_GATE=0 (current behavior)");
+  assertEqual(
+    runSequence(confMixedSeq).releases,
+    1,
+    "conf-mixed release fires with CONF_GATE=0 (current behavior)",
+  );
   assert(coreScript.includes("CONF_GATE: 0,"), "CONF_GATE constant present for substitution test");
   const coreConfGate = new Function(
     `${coreScript.replace("CONF_GATE: 0,", "CONF_GATE: 0.45,")}
 return {makeFormPhaseDetector, stepFormPhase};`,
   )();
-  assertEqual(runSequence(confMixedSeq, coreConfGate).releases, 0,
-    "CONF_GATE=0.45 excludes conf-0.4 frames from the window (closeFrames starve, no fire)");
+  assertEqual(
+    runSequence(confMixedSeq, coreConfGate).releases,
+    0,
+    "CONF_GATE=0.45 excludes conf-0.4 frames from the window (closeFrames starve, no fire)",
+  );
   // 除外の観測: ゲート済みフレームは窓内で null 側に数えられる（debug.nullFrames）
   const trace = (coreObj) => {
     const st = coreObj.makeFormPhaseDetector();
     const hist = [];
-    let t = 0, spikeDebug = null;
+    let t = 0,
+      spikeDebug = null;
     for (const [m, vel, dt] of confMixedSeq) {
-      t += dt; hist.push({ ts: t, m, vel });
+      t += dt;
+      hist.push({ ts: t, m, vel });
       const r = coreObj.stepFormPhase(st, m, hist, 1.0, t);
       if (m && m.anchorNorm === 0.6 && r.debug) spikeDebug = r.debug;
     }
     return spikeDebug;
   };
-  const gated = trace(coreConfGate), ungated = trace(core);
-  assert(gated && gated.nullFrames > 0, "gated low-conf frames counted as window gaps under CONF_GATE=0.45");
-  assert(ungated && ungated.nullFrames === 0, "no window gaps with CONF_GATE=0 on the same sequence");
+  const gated = trace(coreConfGate),
+    ungated = trace(core);
+  assert(
+    gated && gated.nullFrames > 0,
+    "gated low-conf frames counted as window gaps under CONF_GATE=0.45",
+  );
+  assert(
+    ungated && ungated.nullFrames === 0,
+    "no window gaps with CONF_GATE=0 on the same sequence",
+  );
 }
 {
   /* B': dW 可視性ゲート。出荷値 DW_VIS_GATE=0 は完全無効＝現行同値。
      0.5 へ差し替えたコアでは低可視性 dW フレームの vel が maxV 評価から除外される。 */
-  const mkRawV = (anchorNorm, drawArm, dwVis) => ({ anchorNorm, drawArm, bodyScale: 0.25, dW: { x: 0, y: 0, visibility: dwVis } });
+  const mkRawV = (anchorNorm, drawArm, dwVis) => ({
+    anchorNorm,
+    drawArm,
+    bodyScale: 0.25,
+    dW: { x: 0, y: 0, visibility: dwVis },
+  });
   const visMixedSeq = [];
   for (let i = 0; i < 60; i++) visMixedSeq.push([mkRawV(0.22, 150, 0.9), 0.02, 20]);
   visMixedSeq.push([mkRawV(0.6, 140, 0.4), 10, 20]); // 速度スパイクだが dW 可視性が低い（遮蔽由来の偽値を模擬）
   for (let i = 0; i < 10; i++) visMixedSeq.push([mkRawV(1.0, 90, 0.9), 0.2, 20]);
-  assertEqual(runSequence(visMixedSeq).releases, 1, "low-dW-visibility spike fires with DW_VIS_GATE=0 (current behavior)");
-  assert(coreScript.includes("DW_VIS_GATE: 0,"), "DW_VIS_GATE constant present for substitution test");
+  assertEqual(
+    runSequence(visMixedSeq).releases,
+    1,
+    "low-dW-visibility spike fires with DW_VIS_GATE=0 (current behavior)",
+  );
+  assert(
+    coreScript.includes("DW_VIS_GATE: 0,"),
+    "DW_VIS_GATE constant present for substitution test",
+  );
   const coreDwGate = new Function(
     `${coreScript.replace("DW_VIS_GATE: 0,", "DW_VIS_GATE: 0.5,")}
 return {makeFormPhaseDetector, stepFormPhase};`,
   )();
-  assertEqual(runSequence(visMixedSeq, coreDwGate).releases, 0,
-    "DW_VIS_GATE=0.5 removes the low-visibility spike from velocity evaluation (no fire)");
+  assertEqual(
+    runSequence(visMixedSeq, coreDwGate).releases,
+    0,
+    "DW_VIS_GATE=0.5 removes the low-visibility spike from velocity evaluation (no fire)",
+  );
 }
 {
   /* B'×D'相互作用（設計 form-phase-final-design.md §9-8、strict-review 2026-07-11
@@ -329,7 +440,13 @@ return {makeFormPhaseDetector, stepFormPhase};`,
        - CONF_GATE=0.45 & NB_MAX_GAP_MS=∞: D' の時間上限そのものを無効化した組み合わせ。
          conf除外による仮想ギャップが無制限に橋渡しされるため発火する（D'を切った結果であり
          今回のfindingの対象外＝想定どおりの挙動）。 */
-  const mkRawG = (anchorNorm, drawArm, conf) => ({ anchorNorm, drawArm, conf, bodyScale: 0.25, dW: { x: 0, y: 0 } });
+  const mkRawG = (anchorNorm, drawArm, conf) => ({
+    anchorNorm,
+    drawArm,
+    conf,
+    bodyScale: 0.25,
+    dW: { x: 0, y: 0 },
+  });
   function confGapInteractionSequence() {
     const seq = [];
     // 高confアンカー保持（10ms間隔110フレーム=1100ms）: REFRACTORY_MS(1000ms)を追い越しつつ
@@ -342,8 +459,14 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     for (let i = 0; i < 10; i++) seq.push([mkRawG(1.0, 90, 0.9), 0.2, 20]);
     return seq;
   }
-  assert(coreScript.includes("CONF_GATE: 0,"), "CONF_GATE constant present for interaction substitution");
-  assert(coreScript.includes("NB_MAX_GAP_MS: 150,"), "NB_MAX_GAP_MS constant present for interaction substitution");
+  assert(
+    coreScript.includes("CONF_GATE: 0,"),
+    "CONF_GATE constant present for interaction substitution",
+  );
+  assert(
+    coreScript.includes("NB_MAX_GAP_MS: 150,"),
+    "NB_MAX_GAP_MS constant present for interaction substitution",
+  );
   const coreGateOffGapInf = new Function(
     `${coreScript.replace("NB_MAX_GAP_MS: 150,", "NB_MAX_GAP_MS: Infinity,")}
 return {makeFormPhaseDetector, stepFormPhase};`,
@@ -357,14 +480,26 @@ return {makeFormPhaseDetector, stepFormPhase};`,
 return {makeFormPhaseDetector, stepFormPhase};`,
   )();
   const interactionSeq = confGapInteractionSequence();
-  assertEqual(runSequence(interactionSeq, core).releases, 0,
-    "CONF_GATE=0 x NB_MAX_GAP_MS=150 (shipped): no real null frame, no fire");
-  assertEqual(runSequence(interactionSeq, coreGateOffGapInf).releases, 0,
-    "CONF_GATE=0 x NB_MAX_GAP_MS=Infinity: gate disabled, still no fire regardless of the gap cap");
-  assertEqual(runSequence(interactionSeq, coreGateOnGapOn).releases, 0,
-    "CONF_GATE=0.45 x NB_MAX_GAP_MS=150: conf-excluded 180ms gap exceeds the cap, correctly suppressed (maxGapMs fix under test)");
-  assertEqual(runSequence(interactionSeq, coreGateOnGapInf).releases, 1,
-    "CONF_GATE=0.45 x NB_MAX_GAP_MS=Infinity: D' time cap disabled, virtual gap bridges unconditionally (fires)");
+  assertEqual(
+    runSequence(interactionSeq, core).releases,
+    0,
+    "CONF_GATE=0 x NB_MAX_GAP_MS=150 (shipped): no real null frame, no fire",
+  );
+  assertEqual(
+    runSequence(interactionSeq, coreGateOffGapInf).releases,
+    0,
+    "CONF_GATE=0 x NB_MAX_GAP_MS=Infinity: gate disabled, still no fire regardless of the gap cap",
+  );
+  assertEqual(
+    runSequence(interactionSeq, coreGateOnGapOn).releases,
+    0,
+    "CONF_GATE=0.45 x NB_MAX_GAP_MS=150: conf-excluded 180ms gap exceeds the cap, correctly suppressed (maxGapMs fix under test)",
+  );
+  assertEqual(
+    runSequence(interactionSeq, coreGateOnGapInf).releases,
+    1,
+    "CONF_GATE=0.45 x NB_MAX_GAP_MS=Infinity: D' time cap disabled, virtual gap bridges unconditionally (fires)",
+  );
 }
 {
   // 連続2射: 不応期を挟んで両方検出
@@ -380,7 +515,9 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const dt = 20;
   const st = core.makeFormPhaseDetector();
   const hist = [];
-  let t = 0, releases = 0, canceled = 0;
+  let t = 0,
+    releases = 0,
+    canceled = 0;
   const push = (m, vel) => {
     t += dt;
     hist.push({ ts: t, m, vel });
@@ -404,24 +541,38 @@ return {makeFormPhaseDetector, stepFormPhase};`,
      非発火・取消 return パスでも debug が返ることを検証する。判定ロジック（phase/
      released/canceled/anchorStartTs の値）は既存ケースが担保するのでここでは触らない。 */
   const assertDebugShape = (debug, label) => {
-    assert(typeof debug === "object" && debug !== null, `${label}: debug returned on non-fire path`);
-    assert("maxV" in debug && "anchorNorm" in debug && "closeFrames" in debug && "hasNullGap" in debug,
-      `${label}: debug has maxV/anchorNorm/closeFrames/hasNullGap`);
+    assert(
+      typeof debug === "object" && debug !== null,
+      `${label}: debug returned on non-fire path`,
+    );
+    assert(
+      "maxV" in debug && "anchorNorm" in debug && "closeFrames" in debug && "hasNullGap" in debug,
+      `${label}: debug has maxV/anchorNorm/closeFrames/hasNullGap`,
+    );
     ["rise", "nullFrames", "conf", "refractoryRemaining"].forEach((k) =>
-      assert(k in debug, `${label}: debug has key ${k}`));
+      assert(k in debug, `${label}: debug has key ${k}`),
+    );
   };
 
   // !usable（人物未検出）: win/closeFrames 未計算のため null で埋まるが debug 自体は必ず返る
   const rU = core.stepFormPhase(core.makeFormPhaseDetector(), null, [], 1.0, 100);
   assertDebugShape(rU.debug, "!usable path");
-  assertEqual(rU.debug.anchorNorm, null, "!usable path: anchorNorm unknown, filled with null (not fabricated)");
+  assertEqual(
+    rU.debug.anchorNorm,
+    null,
+    "!usable path: anchorNorm unknown, filled with null (not fabricated)",
+  );
 
   // release-fire → canceled（確定猶予内にアンカー圏へ復帰）
   const dtC = 20;
   const stC = core.makeFormPhaseDetector();
   const histC = [];
   let tC = 0;
-  const pushC = (m, vel) => { tC += dtC; histC.push({ ts: tC, m, vel }); return core.stepFormPhase(stC, m, histC, 1.0, tC); };
+  const pushC = (m, vel) => {
+    tC += dtC;
+    histC.push({ ts: tC, m, vel });
+    return core.stepFormPhase(stC, m, histC, 1.0, tC);
+  };
   for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 150), 0.02);
   const rRelC = pushC(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え(released)
   assertEqual(rRelC.released, true, "sanity: release fires before cancel scenario");
@@ -433,14 +584,23 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const rCancel = pushC(mkRaw(0.23, 150), 0.05);
   assertEqual(rCancel.canceled, true, "sanity: cancel path reached");
   assertDebugShape(rCancel.debug, "canceled path");
-  assertClose(rCancel.debug.anchorNorm, 0.23, 1e-9, "canceled path: anchorNorm captured (not lost) before state reset");
+  assertClose(
+    rCancel.debug.anchorNorm,
+    0.23,
+    1e-9,
+    "canceled path: anchorNorm captured (not lost) before state reset",
+  );
 
   // sticky RELEASE lock（<250ms）と FOLLOW（250-1100ms）: 発火が確定し取消されないシナリオ
   const dtS = 20;
   const stS = core.makeFormPhaseDetector();
   const histS = [];
   let tS = 0;
-  const pushS = (m, vel) => { tS += dtS; histS.push({ ts: tS, m, vel }); return core.stepFormPhase(stS, m, histS, 1.0, tS); };
+  const pushS = (m, vel) => {
+    tS += dtS;
+    histS.push({ ts: tS, m, vel });
+    return core.stepFormPhase(stS, m, histS, 1.0, tS);
+  };
   for (let i = 0; i < 60; i++) pushS(mkRaw(0.22, 150), 0.02);
   const rRelS = pushS(mkRaw(0.6, 140), 10); // TH超えでreleased
   assertEqual(rRelS.released, true, "sanity: release fires before sticky/follow scenario");
@@ -455,10 +615,18 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   // 通常の非発火パス（アンカー保持中、release条件未達）
   const stN = core.makeFormPhaseDetector();
   const histN = [];
-  let tN = 0, rNormal;
-  for (let i = 0; i < 5; i++) { tN += 20; histN.push({ ts: tN, m: mkRaw(0.22, 150), vel: 0.02 }); rNormal = core.stepFormPhase(stN, mkRaw(0.22, 150), histN, 1.0, tN); }
+  let tN = 0,
+    rNormal;
+  for (let i = 0; i < 5; i++) {
+    tN += 20;
+    histN.push({ ts: tN, m: mkRaw(0.22, 150), vel: 0.02 });
+    rNormal = core.stepFormPhase(stN, mkRaw(0.22, 150), histN, 1.0, tN);
+  }
   assertDebugShape(rNormal.debug, "normal non-fire path");
-  assert(rNormal.debug.closeFrames >= 0, "normal non-fire path: closeFrames is a real count, not null");
+  assert(
+    rNormal.debug.closeFrames >= 0,
+    "normal non-fire path: closeFrames is a real count, not null",
+  );
 }
 {
   /* Plan-B (release-detection-triage-2026-07-13 §3.2): self-cancel は連続 2 フレームで発火する。
@@ -467,26 +635,34 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const stA = core.makeFormPhaseDetector();
   const histA = [];
   let tA = 0;
-  const pushA = (m, vel) => { tA += 20; histA.push({ ts: tA, m, vel }); return core.stepFormPhase(stA, m, histA, 1.0, tA); };
-  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02);  // アンカー保持
-  const rFireA = pushA(mkRaw(0.6, 140), 10);  // release fire
+  const pushA = (m, vel) => {
+    tA += 20;
+    histA.push({ ts: tA, m, vel });
+    return core.stepFormPhase(stA, m, histA, 1.0, tA);
+  };
+  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02); // アンカー保持
+  const rFireA = pushA(mkRaw(0.6, 140), 10); // release fire
   assertEqual(rFireA.released, true, "Plan-B (a): release fires");
-  const rDipA = pushA(mkRaw(0.30, 150), 0.05);  // 1フレームだけ CLOSE_IN 未満
+  const rDipA = pushA(mkRaw(0.3, 150), 0.05); // 1フレームだけ CLOSE_IN 未満
   assertEqual(rDipA.canceled, undefined, "Plan-B (a): single frame dip does not cancel");
-  const rBackA = pushA(mkRaw(0.60, 150), 0.05);  // 復帰
+  const rBackA = pushA(mkRaw(0.6, 150), 0.05); // 復帰
   assertEqual(rBackA.canceled, undefined, "Plan-B (a): recovery, still no cancel");
 
   // (b) 2連続 dip → 取消される: release fire → anchorNorm 連続2フレーム<CLOSE_IN
   const stB = core.makeFormPhaseDetector();
   const histB = [];
   let tB = 0;
-  const pushB = (m, vel) => { tB += 20; histB.push({ ts: tB, m, vel }); return core.stepFormPhase(stB, m, histB, 1.0, tB); };
+  const pushB = (m, vel) => {
+    tB += 20;
+    histB.push({ ts: tB, m, vel });
+    return core.stepFormPhase(stB, m, histB, 1.0, tB);
+  };
   for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
   const rFireB = pushB(mkRaw(0.6, 140), 10);
   assertEqual(rFireB.released, true, "Plan-B (b): release fires");
-  const rDip1B = pushB(mkRaw(0.28, 150), 0.05);  // dip 1
+  const rDip1B = pushB(mkRaw(0.28, 150), 0.05); // dip 1
   assertEqual(rDip1B.canceled, undefined, "Plan-B (b): frame 1 does not cancel yet");
-  const rDip2B = pushB(mkRaw(0.28, 150), 0.05);  // dip 2 → 取消
+  const rDip2B = pushB(mkRaw(0.28, 150), 0.05); // dip 2 → 取消
   assertEqual(rDip2B.canceled, true, "Plan-B (b): 2nd consecutive dip triggers cancel");
 }
 {
@@ -498,7 +674,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     for (let i = 1; i <= 9; i++) seq.push([mkRaw(0.22 + i * 0.1, 140), 0.1 / (dt / 1000), dt]); // 0.32→1.12
     for (let i = 0; i < 20; i++) seq.push([mkRaw(1.5, 90), 0.02, dt]);
     const r = runSequence(seq);
-    assert(!r.phases.includes("DRAWING"), `let-down (dt=${dt}) never classified as DRAWING, got ${r.phases}`);
+    assert(
+      !r.phases.includes("DRAWING"),
+      `let-down (dt=${dt}) never classified as DRAWING, got ${r.phases}`,
+    );
     assertEqual(r.releases, 0, `let-down (dt=${dt}) direction-check sequence does not fire`);
   });
 }
@@ -509,7 +688,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   for (let i = 0; i < 10; i++) seq.push([mkRaw(1.5, 90), 0.05, dt]);
   for (let i = 0; i < 25; i++) seq.push([mkRaw(1.15 - i * 0.03, 110), 0.45, dt]);
   const r = runSequence(seq);
-  assert(r.phases.includes("DRAWING"), `slow draw with negative trend reaches DRAWING, got ${r.phases}`);
+  assert(
+    r.phases.includes("DRAWING"),
+    `slow draw with negative trend reaches DRAWING, got ${r.phases}`,
+  );
 }
 
 /* ---------- computeFormVelocity（Stage 0 A1: 47の旧インライン実装と同値であること） ---------- */
@@ -524,28 +706,73 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   ];
   const raw = mkM(0.7, 0.3);
   const expected = core.formDist(raw.dW, hist[2].m.dW) / 0.05 / raw.bodyScale;
-  assertClose(core.computeFormVelocity(hist, raw, 250), expected, 1e-9, "velocity matches legacy inline computation");
-  assertClose(core.computeFormVelocity(hist, raw, 250), 8, 1e-9, "velocity value (0.1 / 0.05s / 0.25 torso)");
+  assertClose(
+    core.computeFormVelocity(hist, raw, 250),
+    expected,
+    1e-9,
+    "velocity matches legacy inline computation",
+  );
+  assertClose(
+    core.computeFormVelocity(hist, raw, 250),
+    8,
+    1e-9,
+    "velocity value (0.1 / 0.05s / 0.25 torso)",
+  );
   // 末尾が null フレームでも直近の有効フレームまで遡って基準にする
   const histNullTail = [
     { ts: 100, m: mkM(0.5, 0.3), vel: 0 },
     { ts: 200, m: null, vel: 0 },
   ];
   const expected2 = core.formDist(raw.dW, histNullTail[0].m.dW) / 0.15 / raw.bodyScale;
-  assertClose(core.computeFormVelocity(histNullTail, raw, 250), expected2, 1e-9, "trailing null frames are skipped");
+  assertClose(
+    core.computeFormVelocity(histNullTail, raw, 250),
+    expected2,
+    1e-9,
+    "trailing null frames are skipped",
+  );
 }
 {
   const mkM = (x, y) => ({ dW: { x, y }, bodyScale: 0.25 });
   const raw = mkM(0.7, 0.3);
   // dt 境界: 0 以下と 0.5秒以上は 0（旧実装の dt>0 && dt<0.5 と同一）
-  assertEqual(core.computeFormVelocity([{ ts: 250, m: mkM(0.5, 0.3), vel: 0 }], raw, 250), 0, "dt=0 returns 0");
-  assertEqual(core.computeFormVelocity([{ ts: 300, m: mkM(0.5, 0.3), vel: 0 }], raw, 250), 0, "negative dt returns 0");
-  assertEqual(core.computeFormVelocity([{ ts: 0, m: mkM(0.5, 0.3), vel: 0 }], raw, 500), 0, "dt=0.5s boundary returns 0");
-  assert(core.computeFormVelocity([{ ts: 1, m: mkM(0.5, 0.3), vel: 0 }], raw, 500) > 0, "dt just under 0.5s is computed");
+  assertEqual(
+    core.computeFormVelocity([{ ts: 250, m: mkM(0.5, 0.3), vel: 0 }], raw, 250),
+    0,
+    "dt=0 returns 0",
+  );
+  assertEqual(
+    core.computeFormVelocity([{ ts: 300, m: mkM(0.5, 0.3), vel: 0 }], raw, 250),
+    0,
+    "negative dt returns 0",
+  );
+  assertEqual(
+    core.computeFormVelocity([{ ts: 0, m: mkM(0.5, 0.3), vel: 0 }], raw, 500),
+    0,
+    "dt=0.5s boundary returns 0",
+  );
+  assert(
+    core.computeFormVelocity([{ ts: 1, m: mkM(0.5, 0.3), vel: 0 }], raw, 500) > 0,
+    "dt just under 0.5s is computed",
+  );
   // 有効フレーム無し・raw 無しは 0
-  assertEqual(core.computeFormVelocity([{ ts: 100, m: null, vel: 0 }, { ts: 200, m: null, vel: 0 }], raw, 250), 0, "all-null history returns 0");
+  assertEqual(
+    core.computeFormVelocity(
+      [
+        { ts: 100, m: null, vel: 0 },
+        { ts: 200, m: null, vel: 0 },
+      ],
+      raw,
+      250,
+    ),
+    0,
+    "all-null history returns 0",
+  );
   assertEqual(core.computeFormVelocity([], raw, 250), 0, "empty history returns 0");
-  assertEqual(core.computeFormVelocity([{ ts: 100, m: mkM(0.5, 0.3), vel: 0 }], null, 250), 0, "null raw returns 0");
+  assertEqual(
+    core.computeFormVelocity([{ ts: 100, m: mkM(0.5, 0.3), vel: 0 }], null, 250),
+    0,
+    "null raw returns 0",
+  );
 }
 
 /* ---------- makeFormVelocitySource（Stage 1 A2: 中立スキャフォールド） ---------- */
@@ -563,19 +790,30 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   [0.5, 0.51, 0.53, null, 0.56, 0.6, 0.6, 0.61].forEach((x) => {
     t += 33;
     const raw = x == null ? null : mkM(x, 0.3);
-    assertEqual(src.step(hist, raw, t), core.computeFormVelocity(hist, raw, t),
-      `disabled source matches computeFormVelocity at t=${t}`);
+    assertEqual(
+      src.step(hist, raw, t),
+      core.computeFormVelocity(hist, raw, t),
+      `disabled source matches computeFormVelocity at t=${t}`,
+    );
     hist.push({ ts: t, m: raw, vel: 0 });
   });
-  assertEqual(core.makeFormVelocitySource().step([], mkM(0.5, 0.3), 100), 0, "disabled source on empty history returns 0");
+  assertEqual(
+    core.makeFormVelocitySource().step([], mkM(0.5, 0.3), 100),
+    0,
+    "disabled source on empty history returns 0",
+  );
 }
 {
   // ENABLED:true（オプトインのロジック検証のみ・出荷値では動かない）
   const mkM = (x, y) => ({ dW: { x, y }, bodyScale: 0.25 });
   // (1) 等速運動: 収束後の速度が真値（0.01/0.02s/0.25 = 2.0 胴体長/秒）に近い
   const f1 = core.makeFormVelocitySource({ ENABLED: true });
-  let t = 0, vel = 0;
-  for (let i = 0; i < 60; i++) { t += 20; vel = f1.step([], mkM(0.3 + i * 0.01, 0.3), t); }
+  let t = 0,
+    vel = 0;
+  for (let i = 0; i < 60; i++) {
+    t += 20;
+    vel = f1.step([], mkM(0.3 + i * 0.01, 0.3), t);
+  }
   assertClose(vel, 2.0, 0.2, "enabled filter converges to true velocity on constant motion");
   // (2) ジッター抑制: 交互±0.02ジッターの生速度は 8.0（RELEASE_TH級の偽スパイク）だが、フィルタ後は大幅減
   const f2 = core.makeFormVelocitySource({ ENABLED: true });
@@ -591,7 +829,11 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const f3 = core.makeFormVelocitySource({ ENABLED: true });
   f3.step([], mkM(0.5, 0.3), 100);
   f3.step([], mkM(0.52, 0.3), 120);
-  assertEqual(f3.step([], mkM(0.9, 0.3), 800), 0, "gap over RESET_GAP_MS reseeds the filter (vel 0)");
+  assertEqual(
+    f3.step([], mkM(0.9, 0.3), 800),
+    0,
+    "gap over RESET_GAP_MS reseeds the filter (vel 0)",
+  );
   // (4) reset() で明示リセット（利き手切替等、history 破棄と同時に呼ぶ想定）
   const f4 = core.makeFormVelocitySource({ ENABLED: true });
   f4.step([], mkM(0.5, 0.3), 100);
@@ -639,7 +881,11 @@ function makeStepper(dt) {
   }
   const rel = s.push(mkRaw(0.6, 140), 10); // 速度スパイクでリリース
   assertEqual(rel.r.released, true, "release fires after sticky excursion");
-  assertEqual(rel.r.anchorStartTs, firstAnchorTs, "released frame returns pre-clear anchorStartTs (hold spans excursion)");
+  assertEqual(
+    rel.r.anchorStartTs,
+    firstAnchorTs,
+    "released frame returns pre-clear anchorStartTs (hold spans excursion)",
+  );
   const after = s.push(mkRaw(1.0, 90), 0.2);
   assertEqual(after.r.anchorStartTs, 0, "anchorStartTs cleared after release");
 }
@@ -648,7 +894,7 @@ function makeStepper(dt) {
   const s = makeStepper(66);
   let firstAnchorTs = 0;
   for (let i = 0; i < 10; i++) {
-    const { r, t } = s.push(mkRaw(0.30, 150), 0.05);
+    const { r, t } = s.push(mkRaw(0.3, 150), 0.05);
     if (!firstAnchorTs && (r.phase === "ANCHORING" || r.phase === "FULL_DRAW")) firstAnchorTs = t;
   }
   assert(firstAnchorTs > 0, "anchoring reached in reset scenario");
@@ -658,7 +904,7 @@ function makeStepper(dt) {
   assertEqual(last.r.anchorStartTs, 0, "anchorStartTs reset on SETUP");
   let secondAnchorTs = 0;
   for (let i = 0; i < 5; i++) {
-    const { r, t } = s.push(mkRaw(0.30, 150), 0.05);
+    const { r, t } = s.push(mkRaw(0.3, 150), 0.05);
     if (!secondAnchorTs && (r.phase === "ANCHORING" || r.phase === "FULL_DRAW")) secondAnchorTs = t;
   }
   assert(secondAnchorTs > firstAnchorTs, "re-anchor starts a new anchorStartTs");
@@ -688,9 +934,16 @@ function anchorHistory(releaseTs, drift) {
       ts,
       m: {
         anchorNorm: 0.22 + k * 0.02,
-        bowArm: 171, drawArm: 150, shoulderDrop: 0.07, headOffset: 0.09, forceLine: 0.07,
-        score: 80, conf: 0.9, bodyScale: 0.25,
-        bW: { x: 0.2 + k * 0.06, y: 0.4 }, dW: { x: 0.6, y: 0.31 },
+        bowArm: 171,
+        drawArm: 150,
+        shoulderDrop: 0.07,
+        headOffset: 0.09,
+        forceLine: 0.07,
+        score: 80,
+        conf: 0.9,
+        bodyScale: 0.25,
+        bW: { x: 0.2 + k * 0.06, y: 0.4 },
+        dW: { x: 0.6, y: 0.31 },
       },
       vel: 0.05,
     });
@@ -707,9 +960,13 @@ function anchorHistory(releaseTs, drift) {
   assertEqual(core.formPreReleaseWindow([], 10000), null, "empty history");
 }
 {
-  const av = core.formAnchorVariation([{ anchorNorm: 0.20 }, { anchorNorm: 0.21 }, { anchorNorm: 0.22 }]);
+  const av = core.formAnchorVariation([
+    { anchorNorm: 0.2 },
+    { anchorNorm: 0.21 },
+    { anchorNorm: 0.22 },
+  ]);
   assertEqual(av.label, "安定", "tight anchors are stable");
-  const loose = core.formAnchorVariation([{ anchorNorm: 0.15 }, { anchorNorm: 0.40 }]);
+  const loose = core.formAnchorVariation([{ anchorNorm: 0.15 }, { anchorNorm: 0.4 }]);
   assertEqual(loose.label, "ばらつき大", "loose anchors flagged");
   assertEqual(core.formAnchorVariation([]).std, null, "no shots no std");
 }
@@ -736,9 +993,16 @@ function shortHoldHistory(releaseTs, anchorStartTs) {
       ts,
       m: {
         anchorNorm: drawing ? 0.8 : 0.22,
-        bowArm: 171, drawArm: 150, shoulderDrop: 0.07, headOffset: 0.09, forceLine: 0.07,
-        score: 80, conf: 0.9, bodyScale: 0.25,
-        bW: { x: 0.2 + k * 0.5, y: 0.4 }, dW: { x: 0.6 + k * 0.5, y: 0.31 },
+        bowArm: 171,
+        drawArm: 150,
+        shoulderDrop: 0.07,
+        headOffset: 0.09,
+        forceLine: 0.07,
+        score: 80,
+        conf: 0.9,
+        bodyScale: 0.25,
+        bW: { x: 0.2 + k * 0.5, y: 0.4 },
+        dW: { x: 0.6 + k * 0.5, y: 0.31 },
       },
       vel: drawing ? 3 : 0.05,
     });
@@ -751,30 +1015,46 @@ function shortHoldHistory(releaseTs, anchorStartTs) {
   // DRAWING 区間へ食い込み、静止ホールドなのにドリフト扱いになる（実射で確認した症状）
   const hist = shortHoldHistory(10000, 9700);
   const unclamped = core.formPreReleaseWindow(hist, 10000);
-  assert(unclamped && unclamped.bowDrift && unclamped.drawDrift,
-    "short-hold shot without clamp is contaminated by DRAWING frames (documents the symptom)");
+  assert(
+    unclamped && unclamped.bowDrift && unclamped.drawDrift,
+    "short-hold shot without clamp is contaminated by DRAWING frames (documents the symptom)",
+  );
   // クランプあり: 窓が anchorStartTs 以降に限定され、静止ホールドが正しく stable 判定になる
   const clamped = core.formPreReleaseWindow(hist, 10000, null, 9700);
   assert(clamped, "clamped window still has enough frames");
   assertEqual(clamped.frames, 4, "clamped window contains only frames at/after anchorStartTs");
-  assert(!clamped.bowDrift && !clamped.drawDrift && !clamped.headDrift,
-    `clamped short-hold window is stable, got bowMove=${clamped.bowMove} drawMove=${clamped.drawMove}`);
+  assert(
+    !clamped.bowDrift && !clamped.drawDrift && !clamped.headDrift,
+    `clamped short-hold window is stable, got bowMove=${clamped.bowMove} drawMove=${clamped.drawMove}`,
+  );
   assert(unclamped.frames > clamped.frames, "clamp strictly narrows the window");
 }
 {
   // アンカー未保持（anchorStartTs が 0/null/未指定）は現行と同値
   const hist = shortHoldHistory(10000, 9700);
   const legacy = core.formPreReleaseWindow(hist, 10000);
-  assertEqual(JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, 0)), JSON.stringify(legacy),
-    "anchorStartTs=0 behaves exactly like current code");
-  assertEqual(JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, null)), JSON.stringify(legacy),
-    "anchorStartTs=null behaves exactly like current code");
+  assertEqual(
+    JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, 0)),
+    JSON.stringify(legacy),
+    "anchorStartTs=0 behaves exactly like current code",
+  );
+  assertEqual(
+    JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, null)),
+    JSON.stringify(legacy),
+    "anchorStartTs=null behaves exactly like current code",
+  );
   // ホールドが窓より長い（anchorStartTs が releaseTs-500ms より前）ならクランプは no-op
-  assertEqual(JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, 9000)), JSON.stringify(legacy),
-    "anchorStartTs earlier than the 500ms window is a no-op");
+  assertEqual(
+    JSON.stringify(core.formPreReleaseWindow(hist, 10000, null, 9000)),
+    JSON.stringify(legacy),
+    "anchorStartTs earlier than the 500ms window is a no-op",
+  );
   // ホールドが極端に短く窓内に2フレーム残らない場合は汚染値でなく null
-  assertEqual(core.formPreReleaseWindow(hist, 10000, null, 9860), null,
-    "ultra-short hold yields null instead of DRAWING-contaminated values");
+  assertEqual(
+    core.formPreReleaseWindow(hist, 10000, null, 9860),
+    null,
+    "ultra-short hold yields null instead of DRAWING-contaminated values",
+  );
 }
 {
   // summarizeFormShot 経由（エンドツーエンド）: ホールド300msの射でも pre が stable になる
@@ -782,11 +1062,17 @@ function shortHoldHistory(releaseTs, anchorStartTs) {
   const shot = core.summarizeFormShot(hist, 9700, 10000);
   assert(shot && shot.pre, "short-hold shot summary has a pre-release window");
   assertEqual(shot.holdMs, 300, "short hold time");
-  assert(!shot.pre.bowDrift && !shot.pre.drawDrift, "short-hold pre window is stable via summarizeFormShot");
+  assert(
+    !shot.pre.bowDrift && !shot.pre.drawDrift,
+    "short-hold pre window is stable via summarizeFormShot",
+  );
   // アンカー未保持の射は現行と同値（クランプ不発）
   const noAnchor = core.summarizeFormShot(hist, null, 10000);
-  assertEqual(JSON.stringify(noAnchor && noAnchor.pre), JSON.stringify(core.formPreReleaseWindow(hist, 10000)),
-    "summary without anchorStartTs keeps the legacy unclamped window");
+  assertEqual(
+    JSON.stringify(noAnchor && noAnchor.pre),
+    JSON.stringify(core.formPreReleaseWindow(hist, 10000)),
+    "summary without anchorStartTs keeps the legacy unclamped window",
+  );
 }
 
 /* ---------- 記録統計・コーチングコメント・トレンド・得点との関係 ---------- */
@@ -796,21 +1082,34 @@ function makeFormRecord(id, date, opts) {
   const stable = o.stable == null ? true : o.stable;
   const feature = (i) => ({
     phase: { anchorMs: o.holdMs == null ? 1800 : o.holdMs },
-    angles: { bowArm: o.bowArm == null ? 171 : o.bowArm, drawArm: o.drawArm == null ? 150 : o.drawArm },
+    angles: {
+      bowArm: o.bowArm == null ? 171 : o.bowArm,
+      drawArm: o.drawArm == null ? 150 : o.drawArm,
+    },
     anchorNorm: 0.2 + i * (o.anchorSpread || 0.002),
     release: { bowMove: 0.02, drawMove: 0.02, stable },
     confidence: 0.9,
     score: 80,
   });
   return {
-    id, date, ts: o.ts || 0, sessionId: o.sessionId || null, setupId: null,
-    shots: o.shots || 3, modelVer: "test", appVer: 66, fps: 20,
-    features: Array.from({ length: o.shots || 3 }, (_, i) => feature(i)), note: "",
+    id,
+    date,
+    ts: o.ts || 0,
+    sessionId: o.sessionId || null,
+    setupId: null,
+    shots: o.shots || 3,
+    modelVer: "test",
+    appVer: 66,
+    fps: 20,
+    features: Array.from({ length: o.shots || 3 }, (_, i) => feature(i)),
+    note: "",
   };
 }
 
 {
-  const st = core.formRecordStats(makeFormRecord("r1", "2026-07-01", { holdMs: 2000, bowArm: 168 }));
+  const st = core.formRecordStats(
+    makeFormRecord("r1", "2026-07-01", { holdMs: 2000, bowArm: 168 }),
+  );
   assertEqual(st.shots, 3, "record stats shot count");
   assertClose(st.bowArm, 168, 1e-9, "record stats bow arm median");
   assertClose(st.holdMs, 2000, 1e-9, "record stats hold median");
@@ -822,21 +1121,33 @@ function makeFormRecord(id, date, opts) {
   // ドリフトが多い記録: 原因候補と「次の練習」にドリフト対策が入る
   const drifty = makeFormRecord("r2", "2026-07-02", { stable: false });
   const ins = core.formRecordInsights(drifty);
-  assert(ins.facts.some((t) => t.includes("ドリフト")), "drift observed in facts");
+  assert(
+    ins.facts.some((t) => t.includes("ドリフト")),
+    "drift observed in facts",
+  );
   assert(ins.causes.length >= 1, "drifty record has causes");
-  assert(ins.next.some((t) => t.includes("弓手固定")), "drift countermeasure in next");
+  assert(
+    ins.next.some((t) => t.includes("弓手固定")),
+    "drift countermeasure in next",
+  );
 }
 {
   // 安定した記録: 既定の「次の練習」だけが出る
   const ins = core.formRecordInsights(makeFormRecord("r3", "2026-07-02", {}));
-  assert(ins.next.length === 1 && ins.next[0].includes("同じ撮影角度"), "stable record gets default next");
+  assert(
+    ins.next.length === 1 && ins.next[0].includes("同じ撮影角度"),
+    "stable record gets default next",
+  );
 }
 {
   // 前回比: 保持時間の変化が原因候補に載る
   const prev = makeFormRecord("p", "2026-07-01", { holdMs: 1500 });
   const cur = makeFormRecord("c", "2026-07-02", { holdMs: 2600 });
   const ins = core.formRecordInsights(cur, prev);
-  assert(ins.causes.some((t) => t.includes("前回より") && t.includes("長く")), "hold delta vs previous reported");
+  assert(
+    ins.causes.some((t) => t.includes("前回より") && t.includes("長く")),
+    "hold delta vs previous reported",
+  );
 }
 {
   // 2026-07-05: エリート基準（172°等）との比較表示は撤去。自分基準（前回比）のみ言及する
@@ -845,8 +1156,14 @@ function makeFormRecord(id, date, opts) {
   const ins = core.formRecordInsights(cur, prev);
   const allText = [...ins.facts, ...ins.causes, ...ins.checks, ...ins.next].join(" ");
   assert(!allText.includes("エリート基準"), "no elite-reference wording in insights");
-  assert(!allText.includes(String(core.FORM_REF.bowArmAngle.ideal)), "no elite ideal-angle number leaks into insights");
-  assert(ins.facts.some((t) => t.includes("前回比") && t.includes("+12")), "bow-arm self-baseline delta reported");
+  assert(
+    !allText.includes(String(core.FORM_REF.bowArmAngle.ideal)),
+    "no elite ideal-angle number leaks into insights",
+  );
+  assert(
+    ins.facts.some((t) => t.includes("前回比") && t.includes("+12")),
+    "bow-arm self-baseline delta reported",
+  );
 }
 {
   // 3射未満（中央値が出るまで）は formRecordStats 自体は計算できるが、
@@ -863,7 +1180,10 @@ function makeFormRecord(id, date, opts) {
   ]);
   assertEqual(series.length, 2, "trend series length");
   assertEqual(series[0].id, "a", "trend series sorted by date");
-  assert(Number.isFinite(series[0].bowArm) && Number.isFinite(series[0].holdS), "trend point fields");
+  assert(
+    Number.isFinite(series[0].bowArm) && Number.isFinite(series[0].holdS),
+    "trend point fields",
+  );
   assertEqual(core.formTrendSeries([]).length, 0, "empty trend series");
 }
 {
@@ -915,7 +1235,10 @@ function makeFrame(w, h, bg, noiseAmp, seed) {
   for (let i = 0; i < w * h; i++) {
     const n = noiseAmp ? (rnd() * 2 - 1) * noiseAmp : 0;
     const v = Math.max(0, Math.min(255, bg + n));
-    data[i * 4] = v; data[i * 4 + 1] = v; data[i * 4 + 2] = v; data[i * 4 + 3] = 255;
+    data[i * 4] = v;
+    data[i * 4 + 1] = v;
+    data[i * 4 + 2] = v;
+    data[i * 4 + 3] = 255;
   }
   return { data, width: w, height: h };
 }
@@ -924,20 +1247,27 @@ function makeFrame(w, h, bg, noiseAmp, seed) {
    与えられれば線分中央付近をその比率だけ背景輝度で塗り戻す（レスト付近の部分遮蔽を模擬）。 */
 function drawLine(frame, p1, p2, lineVal, lineW, occludeFrac) {
   const { data, width: w, height: h } = frame;
-  const x1 = p1.x * w, y1 = p1.y * h, x2 = p2.x * w, y2 = p2.y * h;
+  const x1 = p1.x * w,
+    y1 = p1.y * h,
+    x2 = p2.x * w,
+    y2 = p2.y * h;
   const len = Math.hypot(x2 - x1, y2 - y1);
   const steps = Math.ceil(len * 2);
   const halfW = lineW / 2;
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
     if (occludeFrac && Math.abs(t - 0.5) < occludeFrac / 2) continue; // 中央部を遮蔽
-    const cx = x1 + (x2 - x1) * t, cy = y1 + (y2 - y1) * t;
+    const cx = x1 + (x2 - x1) * t,
+      cy = y1 + (y2 - y1) * t;
     for (let ox = -halfW; ox <= halfW; ox++) {
       for (let oy = -halfW; oy <= halfW; oy++) {
-        const xi = Math.round(cx + ox), yi = Math.round(cy + oy);
+        const xi = Math.round(cx + ox),
+          yi = Math.round(cy + oy);
         if (xi < 0 || yi < 0 || xi >= w || yi >= h) continue;
         const i2 = (yi * w + xi) * 4;
-        data[i2] = lineVal; data[i2 + 1] = lineVal; data[i2 + 2] = lineVal;
+        data[i2] = lineVal;
+        data[i2 + 1] = lineVal;
+        data[i2 + 2] = lineVal;
       }
     }
   }
@@ -946,18 +1276,23 @@ function drawLine(frame, p1, p2, lineVal, lineW, occludeFrac) {
 
 /* p1-p2 を中点まわりに deg 度だけ回転させた新しい点対を返す（傾き検証用） */
 function rotatePts(p1, p2, deg) {
-  const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+  const mx = (p1.x + p2.x) / 2,
+    my = (p1.y + p2.y) / 2;
   const rad = (deg * Math.PI) / 180;
-  const cos = Math.cos(rad), sin = Math.sin(rad);
+  const cos = Math.cos(rad),
+    sin = Math.sin(rad);
   const rot = (p) => {
-    const dx = p.x - mx, dy = p.y - my;
+    const dx = p.x - mx,
+      dy = p.y - my;
     return { x: mx + dx * cos - dy * sin, y: my + dx * sin + dy * cos };
   };
   return [rot(p1), rot(p2)];
 }
 
-const AP_P1 = { x: 0.2, y: 0.5 }, AP_P2 = { x: 0.8, y: 0.5 };
-const AP_W = 200, AP_H = 200;
+const AP_P1 = { x: 0.2, y: 0.5 },
+  AP_P2 = { x: 0.8, y: 0.5 };
+const AP_W = 200,
+  AP_H = 200;
 
 {
   // (a) 黒地に細線あり → 高スコア
@@ -973,7 +1308,9 @@ const AP_W = 200, AP_H = 200;
 }
 
 const scoreTable = [];
-function recordCase(label, score) { scoreTable.push({ label, score: +score.toFixed(3) }); }
+function recordCase(label, score) {
+  scoreTable.push({ label, score: +score.toFixed(3) });
+}
 
 {
   // (c) ノイズ・背景テクスチャ・部分遮蔽・傾き±15° の合成条件下での分離性
@@ -984,50 +1321,59 @@ function recordCase(label, score) { scoreTable.push({ label, score: +score.toFix
   {
     const f = drawLine(makeFrame(AP_W, AP_H, 40, 12, 7), AP_P1, AP_P2, 220, 2);
     const s = core.arrowPresence(f, AP_P1, AP_P2);
-    recordCase("noisy bg + line", s); withLine.push(s);
+    recordCase("noisy bg + line", s);
+    withLine.push(s);
   }
   {
     const f = makeFrame(AP_W, AP_H, 40, 12, 7);
     const s = core.arrowPresence(f, AP_P1, AP_P2);
-    recordCase("noisy bg, no line", s); withoutLine.push(s);
+    recordCase("noisy bg, no line", s);
+    withoutLine.push(s);
   }
   // 背景テクスチャ（強めノイズ、線あり/なし）
   {
     const f = drawLine(makeFrame(AP_W, AP_H, 60, 25, 42), AP_P1, AP_P2, 210, 2);
     const s = core.arrowPresence(f, AP_P1, AP_P2);
-    recordCase("textured bg + line", s); withLine.push(s);
+    recordCase("textured bg + line", s);
+    withLine.push(s);
   }
   {
     const f = makeFrame(AP_W, AP_H, 60, 25, 42);
     const s = core.arrowPresence(f, AP_P1, AP_P2);
-    recordCase("textured bg, no line", s); withoutLine.push(s);
+    recordCase("textured bg, no line", s);
+    withoutLine.push(s);
   }
   // 部分遮蔽（レスト付近、線の中央20%を欠損させても検出できるか）
   {
     const f = drawLine(makeFrame(AP_W, AP_H, 30, 8, 3), AP_P1, AP_P2, 220, 2, 0.2);
     const s = core.arrowPresence(f, AP_P1, AP_P2);
-    recordCase("partially occluded line (rest area)", s); withLine.push(s);
+    recordCase("partially occluded line (rest area)", s);
+    withLine.push(s);
   }
   // 傾き ±15°（線あり/なし）
   [15, -15].forEach((deg) => {
     const [q1, q2] = rotatePts(AP_P1, AP_P2, deg);
     const f = drawLine(makeFrame(AP_W, AP_H, 35, 10, 11 + deg), q1, q2, 215, 2);
     const s = core.arrowPresence(f, q1, q2);
-    recordCase(`tilted ${deg}deg + line`, s); withLine.push(s);
+    recordCase(`tilted ${deg}deg + line`, s);
+    withLine.push(s);
     const fNo = makeFrame(AP_W, AP_H, 35, 10, 11 + deg);
     const sNo = core.arrowPresence(fNo, q1, q2);
-    recordCase(`tilted ${deg}deg, no line`, sNo); withoutLine.push(sNo);
+    recordCase(`tilted ${deg}deg, no line`, sNo);
+    withoutLine.push(sNo);
   });
   // (d) 明暗2条件（明るい背景+暗い線／暗い背景+明るい線）
   {
     const f = drawLine(makeFrame(AP_W, AP_H, 220, 6, 5), AP_P1, AP_P2, 30, 2);
     const s = core.arrowPresence(f, AP_P1, AP_P2);
-    recordCase("bright bg, dark line", s); withLine.push(s);
+    recordCase("bright bg, dark line", s);
+    withLine.push(s);
   }
   {
     const f = drawLine(makeFrame(AP_W, AP_H, 15, 6, 6), AP_P1, AP_P2, 200, 2);
     const s = core.arrowPresence(f, AP_P1, AP_P2);
-    recordCase("dark bg, bright line", s); withLine.push(s);
+    recordCase("dark bg, bright line", s);
+    withLine.push(s);
   }
 
   const minWith = Math.min(...withLine);
@@ -1036,17 +1382,36 @@ function recordCase(label, score) { scoreTable.push({ label, score: +score.toFix
   console.log("\n矢プレゼンス検出: 合成フレーム分離性テーブル");
   console.log("label".padEnd(36), "score");
   scoreTable.forEach((r) => console.log(r.label.padEnd(36), r.score));
-  console.log(`  min(あり)=${minWith.toFixed(3)}  max(なし)=${maxWithout.toFixed(3)}  分離しきい値候補=${core.ARROW_PRESENCE.PRESENT_TH}`);
+  console.log(
+    `  min(あり)=${minWith.toFixed(3)}  max(なし)=${maxWithout.toFixed(3)}  分離しきい値候補=${core.ARROW_PRESENCE.PRESENT_TH}`,
+  );
 
-  assert(minWith > maxWithout, `presence/absence score distributions must not overlap: min(with)=${minWith} <= max(without)=${maxWithout}`);
-  assert(minWith > core.ARROW_PRESENCE.PRESENT_TH, `weakest "present" case must clear PRESENT_TH, got ${minWith}`);
-  assert(maxWithout < core.ARROW_PRESENCE.PRESENT_TH, `strongest "absent" case must stay below PRESENT_TH, got ${maxWithout}`);
+  assert(
+    minWith > maxWithout,
+    `presence/absence score distributions must not overlap: min(with)=${minWith} <= max(without)=${maxWithout}`,
+  );
+  assert(
+    minWith > core.ARROW_PRESENCE.PRESENT_TH,
+    `weakest "present" case must clear PRESENT_TH, got ${minWith}`,
+  );
+  assert(
+    maxWithout < core.ARROW_PRESENCE.PRESENT_TH,
+    `strongest "absent" case must stay below PRESENT_TH, got ${maxWithout}`,
+  );
 }
 {
   // 境界: null 入力
   assertEqual(core.arrowPresence(null, AP_P1, AP_P2), 0, "null imageData scores zero");
-  assertEqual(core.arrowPresence(makeFrame(10, 10, 0, 0, 1), null, AP_P2), 0, "null p1 scores zero");
-  assertEqual(core.arrowPresence(makeFrame(10, 10, 0, 0, 1), AP_P1, AP_P1), 0, "degenerate zero-length segment scores zero");
+  assertEqual(
+    core.arrowPresence(makeFrame(10, 10, 0, 0, 1), null, AP_P2),
+    0,
+    "null p1 scores zero",
+  );
+  assertEqual(
+    core.arrowPresence(makeFrame(10, 10, 0, 0, 1), AP_P1, AP_P1),
+    0,
+    "degenerate zero-length segment scores zero",
+  );
 }
 
 /* ---------- 矢プレゼンス シャドー判定 (judgeArrowCheck) ---------- */
@@ -1059,7 +1424,11 @@ function recordCase(label, score) { scoreTable.push({ label, score: +score.toFix
 {
   // 矢がまだある（レットダウンの疑い）: 猶予窓のスコアが高いまま
   const r = core.judgeArrowCheck([0.9, 0.85, 0.95], [0.8, 0.75, 0.9]);
-  assertEqual(r.judgment, "letdown-mismatch", "arrow still present in confirm window flags mismatch");
+  assertEqual(
+    r.judgment,
+    "letdown-mismatch",
+    "arrow still present in confirm window flags mismatch",
+  );
 }
 {
   // グレーゾーン: しきい値の間

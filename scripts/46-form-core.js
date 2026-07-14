@@ -8,10 +8,14 @@
 
 const FORM_LM = Object.freeze({
   NOSE: 0,
-  LEFT_SHOULDER: 11, RIGHT_SHOULDER: 12,
-  LEFT_ELBOW: 13, RIGHT_ELBOW: 14,
-  LEFT_WRIST: 15, RIGHT_WRIST: 16,
-  LEFT_HIP: 23, RIGHT_HIP: 24,
+  LEFT_SHOULDER: 11,
+  RIGHT_SHOULDER: 12,
+  LEFT_ELBOW: 13,
+  RIGHT_ELBOW: 14,
+  LEFT_WRIST: 15,
+  RIGHT_WRIST: 16,
+  LEFT_HIP: 23,
+  RIGHT_HIP: 24,
 });
 
 /* エリートリカーブ基準（archery-master ELITE_FORM_REFERENCE 由来）。
@@ -59,9 +63,13 @@ const FORM_PH = Object.freeze({
 });
 
 const FORM_PHASES = Object.freeze({
-  IDLE: "IDLE", SETUP: "SETUP", DRAWING: "DRAWING",
-  ANCHORING: "ANCHORING", FULL_DRAW: "FULL_DRAW",
-  RELEASE: "RELEASE", FOLLOW: "FOLLOW",
+  IDLE: "IDLE",
+  SETUP: "SETUP",
+  DRAWING: "DRAWING",
+  ANCHORING: "ANCHORING",
+  FULL_DRAW: "FULL_DRAW",
+  RELEASE: "RELEASE",
+  FOLLOW: "FOLLOW",
 });
 
 function formGaussScore(value, ref) {
@@ -70,18 +78,26 @@ function formGaussScore(value, ref) {
 }
 
 function formAngleDeg(a, b, c) {
-  const v1x = a.x - b.x, v1y = a.y - b.y;
-  const v2x = c.x - b.x, v2y = c.y - b.y;
-  const m1 = Math.hypot(v1x, v1y), m2 = Math.hypot(v2x, v2y);
+  const v1x = a.x - b.x,
+    v1y = a.y - b.y;
+  const v2x = c.x - b.x,
+    v2y = c.y - b.y;
+  const m1 = Math.hypot(v1x, v1y),
+    m2 = Math.hypot(v2x, v2y);
   if (m1 < 1e-4 || m2 < 1e-4) return 180;
-  return (Math.acos(Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (m1 * m2)))) * 180) / Math.PI;
+  return (
+    (Math.acos(Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (m1 * m2)))) * 180) / Math.PI
+  );
 }
 
-function formDist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+function formDist(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
 
 /* 点 p と線分 a-b の距離（押し引き力線からの引き肘の乖離に使用） */
 function formLineDist(p, a, b) {
-  const dx = b.x - a.x, dy = b.y - a.y;
+  const dx = b.x - a.x,
+    dy = b.y - a.y;
   const len = Math.hypot(dx, dy);
   if (len < 1e-4) return formDist(p, a);
   const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (len * len)));
@@ -128,15 +144,23 @@ function formGray(data, w, h, x, y) {
 function arrowPresence(imageData, p1, p2, opts) {
   const o = Object.assign({}, ARROW_PRESENCE, opts || {});
   if (!imageData || !imageData.data || !p1 || !p2) return 0;
-  const w = imageData.width, h = imageData.height;
-  const x1 = p1.x * w, y1 = p1.y * h, x2 = p2.x * w, y2 = p2.y * h;
-  const dx = x2 - x1, dy = y2 - y1;
+  const w = imageData.width,
+    h = imageData.height;
+  const x1 = p1.x * w,
+    y1 = p1.y * h,
+    x2 = p2.x * w,
+    y2 = p2.y * h;
+  const dx = x2 - x1,
+    dy = y2 - y1;
   const len = Math.hypot(dx, dy);
   if (len < 1e-3) return 0;
-  const ux = dx / len, uy = dy / len; // 線方向単位ベクトル
-  const nx = -uy, ny = ux; // 直交単位ベクトル
+  const ux = dx / len,
+    uy = dy / len; // 線方向単位ベクトル
+  const nx = -uy,
+    ny = ux; // 直交単位ベクトル
   const margin = len * o.MARGIN_FRAC;
-  const start = margin, end = len - margin;
+  const start = margin,
+    end = len - margin;
   if (end <= start) return 0;
   const steps = Math.max(1, Math.floor((end - start) / o.SAMPLE_STEP_PX));
   const rh = o.RIDGE_HALF_PX;
@@ -147,16 +171,21 @@ function arrowPresence(imageData, p1, p2, opts) {
   const peakRidge = [];
   for (let i = 0; i <= steps; i++) {
     const t = start + (i / steps) * (end - start);
-    const cx = x1 + ux * t, cy = y1 + uy * t;
+    const cx = x1 + ux * t,
+      cy = y1 + uy * t;
     const prof = new Array(bandN);
     for (let b = -o.BAND_HALF_PX; b <= o.BAND_HALF_PX; b++) {
       prof[b + o.BAND_HALF_PX] = formGray(imageData.data, w, h, cx + nx * b, cy + ny * b);
     }
     profiles.push(prof);
-    let bestK = -1, bestRidge = 0;
+    let bestK = -1,
+      bestRidge = 0;
     for (let k = rh; k < bandN - rh; k++) {
       const ridge = Math.abs(2 * prof[k] - prof[k - rh] - prof[k + rh]);
-      if (ridge > bestRidge) { bestRidge = ridge; bestK = k; }
+      if (ridge > bestRidge) {
+        bestRidge = ridge;
+        bestK = k;
+      }
     }
     peakOffset.push(bestK);
     peakRidge.push(bestRidge);
@@ -168,19 +197,26 @@ function arrowPresence(imageData, p1, p2, opts) {
   // （単発〜2連続の強いリッジは背景テクスチャの偶然として除外する）。
   const POS_TOL = rh;
   const RUN = 3;
-  let hit = 0, total = 0;
+  let hit = 0,
+    total = 0;
   for (let i = 0; i < profiles.length; i++) {
     total++;
     if (peakRidge[i] <= o.RIDGE_TH || peakOffset[i] < 0) continue;
     let runLen = 1;
     for (let d = 1; d < RUN; d++) {
       const j = i - d;
-      if (j < 0 || peakRidge[j] <= o.RIDGE_TH || Math.abs(peakOffset[j] - peakOffset[i]) > POS_TOL) break;
+      if (j < 0 || peakRidge[j] <= o.RIDGE_TH || Math.abs(peakOffset[j] - peakOffset[i]) > POS_TOL)
+        break;
       runLen++;
     }
     for (let d = 1; d < RUN; d++) {
       const j = i + d;
-      if (j >= profiles.length || peakRidge[j] <= o.RIDGE_TH || Math.abs(peakOffset[j] - peakOffset[i]) > POS_TOL) break;
+      if (
+        j >= profiles.length ||
+        peakRidge[j] <= o.RIDGE_TH ||
+        Math.abs(peakOffset[j] - peakOffset[i]) > POS_TOL
+      )
+        break;
       runLen++;
     }
     if (runLen >= Math.min(RUN, profiles.length)) hit++;
@@ -201,7 +237,8 @@ function computeFormMetrics(landmarks, handedness) {
   const dE = l[righty ? FORM_LM.RIGHT_ELBOW : FORM_LM.LEFT_ELBOW];
   const dW = l[righty ? FORM_LM.RIGHT_WRIST : FORM_LM.LEFT_WRIST];
   const nose = l[FORM_LM.NOSE];
-  const lH = l[FORM_LM.LEFT_HIP], rH = l[FORM_LM.RIGHT_HIP];
+  const lH = l[FORM_LM.LEFT_HIP],
+    rH = l[FORM_LM.RIGHT_HIP];
   if (!bS || !bE || !bW || !dS || !dE || !dW || !nose || !lH || !rH) return null;
   const midSh = { x: (bS.x + dS.x) / 2, y: (bS.y + dS.y) / 2 };
   const midHip = { x: (lH.x + rH.x) / 2, y: (lH.y + rH.y) / 2 };
@@ -211,7 +248,8 @@ function computeFormMetrics(landmarks, handedness) {
   const shoulderDrop = Math.max(0, dS.y - bS.y) / bodyScale;
   const headOffset = Math.abs(nose.y - midSh.y) / bodyScale;
   const anchorNorm = formDist(dW, nose) / bodyScale;
-  const torsoLean = Math.abs(midSh.x - midHip.x) / bodyScale * 0.25 + Math.abs(midSh.y - midHip.y) * 0;
+  const torsoLean =
+    (Math.abs(midSh.x - midHip.x) / bodyScale) * 0.25 + Math.abs(midSh.y - midHip.y) * 0;
   const forceLine = formLineDist(dE, dS, dW) / bodyScale;
   const sc = {
     bow: formGaussScore(bowArm, FORM_REF.bowArmAngle),
@@ -223,16 +261,49 @@ function computeFormMetrics(landmarks, handedness) {
     force: formGaussScore(forceLine, FORM_REF.drawForceLine),
   };
   const score = Math.round(
-    sc.bow * 0.2 + sc.draw * 0.16 + sc.force * 0.18 + sc.shoulder * 0.14
-    + sc.head * 0.12 + sc.anchor * 0.12 + sc.lean * 0.08,
+    sc.bow * 0.2 +
+      sc.draw * 0.16 +
+      sc.force * 0.18 +
+      sc.shoulder * 0.14 +
+      sc.head * 0.12 +
+      sc.anchor * 0.12 +
+      sc.lean * 0.08,
   );
-  const visIdx = [FORM_LM.LEFT_SHOULDER, FORM_LM.RIGHT_SHOULDER, FORM_LM.LEFT_ELBOW,
-    FORM_LM.RIGHT_ELBOW, FORM_LM.LEFT_WRIST, FORM_LM.RIGHT_WRIST, FORM_LM.NOSE];
-  const conf = visIdx.reduce((a, i) => a + (l[i].visibility == null ? 0.55 : l[i].visibility), 0) / visIdx.length;
-  const occluded = [[bE, "弓側肘"], [bW, "弓側手首"], [dE, "引き手肘"], [dW, "引き手手首"]]
+  const visIdx = [
+    FORM_LM.LEFT_SHOULDER,
+    FORM_LM.RIGHT_SHOULDER,
+    FORM_LM.LEFT_ELBOW,
+    FORM_LM.RIGHT_ELBOW,
+    FORM_LM.LEFT_WRIST,
+    FORM_LM.RIGHT_WRIST,
+    FORM_LM.NOSE,
+  ];
+  const conf =
+    visIdx.reduce((a, i) => a + (l[i].visibility == null ? 0.55 : l[i].visibility), 0) /
+    visIdx.length;
+  const occluded = [
+    [bE, "弓側肘"],
+    [bW, "弓側手首"],
+    [dE, "引き手肘"],
+    [dW, "引き手手首"],
+  ]
     .filter(([p]) => p.visibility != null && p.visibility <= 0.5)
     .map(([, name]) => name);
-  return { bowArm, drawArm, anchorNorm, bodyScale, shoulderDrop, headOffset, forceLine, sc, score, conf, occluded, bW, dW };
+  return {
+    bowArm,
+    drawArm,
+    anchorNorm,
+    bodyScale,
+    shoulderDrop,
+    headOffset,
+    forceLine,
+    sc,
+    score,
+    conf,
+    occluded,
+    bW,
+    dW,
+  };
 }
 
 /* 表示用 EMA 平滑化。検出（stepFormPhase）には生値を使うこと */
@@ -240,8 +311,13 @@ function makeFormEma(alpha) {
   const a = alpha == null ? 0.38 : alpha;
   let s = null;
   return (m) => {
-    if (!m) { return null; }
-    if (!s) { s = { bowArm: m.bowArm, drawArm: m.drawArm, score: m.score, conf: m.conf }; return m; }
+    if (!m) {
+      return null;
+    }
+    if (!s) {
+      s = { bowArm: m.bowArm, drawArm: m.drawArm, score: m.score, conf: m.conf };
+      return m;
+    }
     s.bowArm = s.bowArm * (1 - a) + m.bowArm * a;
     s.drawArm = s.drawArm * (1 - a) + m.drawArm * a;
     s.score = s.score * (1 - a) + m.score * a;
@@ -286,9 +362,15 @@ const FORM_VEL_FILTER = Object.freeze({
    reset() はセッション条件の変更（利き手切替等、history を破棄する箇所）で呼ぶ。 */
 function makeFormVelocitySource(opts) {
   const o = Object.assign({}, FORM_VEL_FILTER, opts || {});
-  const alpha = (cutoff, dt) => { const tau = 1 / (2 * Math.PI * cutoff); return 1 / (1 + tau / dt); };
+  const alpha = (cutoff, dt) => {
+    const tau = 1 / (2 * Math.PI * cutoff);
+    return 1 / (1 + tau / dt);
+  };
   // 各軸の 1-Euro 状態: {x: 前回のフィルタ後値, dx: 前回のフィルタ後微分}
-  let ax = null, ay = null, lastTs = 0, lastOut = null;
+  let ax = null,
+    ay = null,
+    lastTs = 0,
+    lastOut = null;
   const stepAxis = (st2, v, dt) => {
     const dxRaw = (v - st2.x) / dt;
     const aD = alpha(o.D_CUTOFF, dt);
@@ -301,21 +383,33 @@ function makeFormVelocitySource(opts) {
     step(history, raw, now) {
       if (!o.ENABLED) return computeFormVelocity(history, raw, now);
       if (!raw) return 0; // null フレーム: 状態は保持（ギャップ超過は次の有効フレームで判定）
-      if (ax && now - lastTs > o.RESET_GAP_MS) { ax = null; ay = null; lastOut = null; }
+      if (ax && now - lastTs > o.RESET_GAP_MS) {
+        ax = null;
+        ay = null;
+        lastOut = null;
+      }
       const dt = ax ? (now - lastTs) / 1000 : 0;
       if (!ax || dt <= 0) {
-        ax = { x: raw.dW.x, dx: 0 }; ay = { x: raw.dW.y, dx: 0 };
-        lastOut = { x: raw.dW.x, y: raw.dW.y }; lastTs = now;
+        ax = { x: raw.dW.x, dx: 0 };
+        ay = { x: raw.dW.y, dx: 0 };
+        lastOut = { x: raw.dW.x, y: raw.dW.y };
+        lastTs = now;
         return 0;
       }
       ax = stepAxis(ax, raw.dW.x, dt);
       ay = stepAxis(ay, raw.dW.y, dt);
       const out = { x: ax.x, y: ay.x };
       const vel = formDist(out, lastOut) / dt / raw.bodyScale;
-      lastOut = out; lastTs = now;
+      lastOut = out;
+      lastTs = now;
       return vel;
     },
-    reset() { ax = null; ay = null; lastTs = 0; lastOut = null; },
+    reset() {
+      ax = null;
+      ay = null;
+      lastTs = 0;
+      lastOut = null;
+    },
   };
 }
 
@@ -329,8 +423,12 @@ function formConfOk(m) {
   return FORM_PH.CONF_GATE <= 0 || (m.conf != null && m.conf >= FORM_PH.CONF_GATE);
 }
 function formDwVisOk(m) {
-  return FORM_PH.DW_VIS_GATE <= 0 || m.dW == null || m.dW.visibility == null
-    || m.dW.visibility > FORM_PH.DW_VIS_GATE;
+  return (
+    FORM_PH.DW_VIS_GATE <= 0 ||
+    m.dW == null ||
+    m.dW.visibility == null ||
+    m.dW.visibility > FORM_PH.DW_VIS_GATE
+  );
 }
 
 /* anchorStartTs は anchorSince と意味が異なる別フィールド（Stage 0 C）。
@@ -339,7 +437,15 @@ function formDwVisOk(m) {
    保持し続け、SETUP/IDLE へ落ちたときのみリセットする。holdMs = releaseTs - anchorStartTs
    （summarizeFormShot）はこの sticky 仕様の上に成立している。 */
 function makeFormPhaseDetector() {
-  return { cur: FORM_PHASES.SETUP, anchorSince: 0, anchorStartTs: 0, lastReleaseTs: 0, lastRise: 0, pendingRelease: null, pendingCancelFrames: 0 };
+  return {
+    cur: FORM_PHASES.SETUP,
+    anchorSince: 0,
+    anchorStartTs: 0,
+    lastReleaseTs: 0,
+    lastRise: 0,
+    pendingRelease: null,
+    pendingCancelFrames: 0,
+  };
 }
 
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
@@ -363,8 +469,21 @@ function stepFormPhase(st, raw, history, sens, now) {
   // ゲート有効時は低confの現在フレームを null フレームと同じ扱いにする
   const usable = raw && formConfOk(raw) ? raw : null;
   if (!usable) {
-    if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) { st.cur = FORM_PHASES.IDLE; st.anchorSince = 0; st.anchorStartTs = 0; }
-    const debug = { maxV: null, rise: null, nullFrames: null, conf: raw ? raw.conf : null, anchorNorm: null, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
+    if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) {
+      st.cur = FORM_PHASES.IDLE;
+      st.anchorSince = 0;
+      st.anchorStartTs = 0;
+    }
+    const debug = {
+      maxV: null,
+      rise: null,
+      nullFrames: null,
+      conf: raw ? raw.conf : null,
+      anchorNorm: null,
+      closeFrames: null,
+      hasNullGap: null,
+      refractoryRemaining: refractoryRemainingMs(),
+    };
     return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
@@ -379,11 +498,29 @@ function stepFormPhase(st, raw, history, sens, now) {
       if (st.pendingCancelFrames >= 2) {
         // アンカー圏へ2連続フレームで戻った = 離脱ではなく検出ノイズ/引き戻しだった。取消
         // 計装: st.lastReleaseTs をリセットする前に refractoryRemainingMs() を評価する（取消直前の値を残す）
-        const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
-        st.pendingRelease = null; st.lastReleaseTs = 0; st.pendingCancelFrames = 0;
-        st.anchorSince = now; st.cur = FORM_PHASES.ANCHORING;
+        const debug = {
+          maxV: null,
+          rise: null,
+          nullFrames: null,
+          conf: usable.conf,
+          anchorNorm: usable.anchorNorm,
+          closeFrames: null,
+          hasNullGap: null,
+          refractoryRemaining: refractoryRemainingMs(),
+        };
+        st.pendingRelease = null;
+        st.lastReleaseTs = 0;
+        st.pendingCancelFrames = 0;
+        st.anchorSince = now;
+        st.cur = FORM_PHASES.ANCHORING;
         st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
-        return { phase: st.cur, released: false, canceled: true, anchorStartTs: st.anchorStartTs, debug };
+        return {
+          phase: st.cur,
+          released: false,
+          canceled: true,
+          anchorStartTs: st.anchorStartTs,
+          debug,
+        };
       }
       // 1フレーム目: まだ取消しない。pendingRelease を維持したまま次のチェック（sticky lock 等）へ進む
     } else {
@@ -395,17 +532,36 @@ function stepFormPhase(st, raw, history, sens, now) {
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) {
     st.cur = FORM_PHASES.RELEASE;
-    const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
+    const debug = {
+      maxV: null,
+      rise: null,
+      nullFrames: null,
+      conf: usable.conf,
+      anchorNorm: usable.anchorNorm,
+      closeFrames: null,
+      hasNullGap: null,
+      refractoryRemaining: refractoryRemainingMs(),
+    };
     return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) {
-    st.cur = FORM_PHASES.FOLLOW; st.anchorSince = 0;
-    const debug = { maxV: null, rise: null, nullFrames: null, conf: usable.conf, anchorNorm: usable.anchorNorm, closeFrames: null, hasNullGap: null, refractoryRemaining: refractoryRemainingMs() };
+    st.cur = FORM_PHASES.FOLLOW;
+    st.anchorSince = 0;
+    const debug = {
+      maxV: null,
+      rise: null,
+      nullFrames: null,
+      conf: usable.conf,
+      anchorNorm: usable.anchorNorm,
+      closeFrames: null,
+      hasNullGap: null,
+      refractoryRemaining: refractoryRemainingMs(),
+    };
     return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
   }
   const close = usable.anchorNorm < FORM_PH.CLOSE_IN;
-  const winAll = history.filter(h => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
-  const win = winAll.filter(h => h.m && formConfOk(h.m));
+  const winAll = history.filter((h) => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
+  const win = winAll.filter((h) => h.m && formConfOk(h.m));
   const closeFrames = win.filter((h) => h.m.anchorNorm < FORM_PH.CLOSE_IN);
   const minAnchor = win.length ? Math.min(...win.map((h) => h.m.anchorNorm)) : usable.anchorNorm;
   const rise = usable.anchorNorm - minAnchor;
@@ -423,21 +579,40 @@ function stepFormPhase(st, raw, history, sens, now) {
      根拠どおり、両ゲート発動後にのみ影響。CONF_GATE=0 の出荷状態では formConfOk が
      常に true を返すため本行の意味は `!h.m` と完全に同値＝挙動不変）。
      NB_MAX_GAP_MS 超の姿勢ロスは nullBridged の根拠にしない（Stage 1 D'） */
-  let maxGapMs = 0, gapStart = null;
+  let maxGapMs = 0,
+    gapStart = null;
   for (const h of winAll) {
-    if (h.m && formConfOk(h.m)) { gapStart = null; }
-    else { if (gapStart == null) gapStart = h.ts; maxGapMs = Math.max(maxGapMs, h.ts - gapStart); }
+    if (h.m && formConfOk(h.m)) {
+      gapStart = null;
+    } else {
+      if (gapStart == null) gapStart = h.ts;
+      maxGapMs = Math.max(maxGapMs, h.ts - gapStart);
+    }
   }
-  const nullBridged = hasNullGap && rise > FORM_PH.NB_RISE && maxV > FORM_PH.NB_MAXV
-    && maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
+  const nullBridged =
+    hasNullGap &&
+    rise > FORM_PH.NB_RISE &&
+    maxV > FORM_PH.NB_MAXV &&
+    maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
   const debug = {
-    maxV, rise, nullFrames: winAll.length - win.length, conf: usable.conf,
-    anchorNorm: usable.anchorNorm, closeFrames: closeFrames.length, hasNullGap,
+    maxV,
+    rise,
+    nullFrames: winAll.length - win.length,
+    conf: usable.conf,
+    anchorNorm: usable.anchorNorm,
+    closeFrames: closeFrames.length,
+    hasNullGap,
     refractoryRemaining: refractoryRemainingMs(),
   }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
-  if (closeFrames.length >= 2 && !close && now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS
-    && (velOk || nullBridged)) {
-    st.lastReleaseTs = now; st.cur = FORM_PHASES.RELEASE; st.anchorSince = 0;
+  if (
+    closeFrames.length >= 2 &&
+    !close &&
+    now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS &&
+    (velOk || nullBridged)
+  ) {
+    st.lastReleaseTs = now;
+    st.cur = FORM_PHASES.RELEASE;
+    st.anchorSince = 0;
     st.pendingRelease = { ts: now };
     const anchorStartTs = st.anchorStartTs; // クリア前の値を返す（呼び出し側が summarizeFormShot へ渡す）
     st.anchorStartTs = 0;
@@ -445,19 +620,24 @@ function stepFormPhase(st, raw, history, sens, now) {
   }
   if (close) {
     if (!st.anchorSince) st.anchorSince = now;
-    st.cur = (now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125)
-      ? FORM_PHASES.FULL_DRAW : FORM_PHASES.ANCHORING;
+    st.cur =
+      now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125
+        ? FORM_PHASES.FULL_DRAW
+        : FORM_PHASES.ANCHORING;
   } else {
     st.anchorSince = 0;
     // 方向チェック（Stage 0 E'）: anchorNorm の減少方向（手首が顔へ近づく）のみ DRAWING。
     // 増加方向（レットダウン等）を DRAWING と誤分類すると sticky な anchorStartTs が
     // 保持されて hold にレットダウン前の時間が混入するため、SETUP へ落とす
     const anchorTrend = win.length ? usable.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
-    st.cur = (maxV > FORM_PH.DRAW_SPEED && usable.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS)
-      ? FORM_PHASES.DRAWING : FORM_PHASES.SETUP;
+    st.cur =
+      maxV > FORM_PH.DRAW_SPEED && usable.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS
+        ? FORM_PHASES.DRAWING
+        : FORM_PHASES.SETUP;
   }
   // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット
-  if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs) st.anchorStartTs = now;
+  if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs)
+    st.anchorStartTs = now;
   else if (st.cur === FORM_PHASES.SETUP || st.cur === FORM_PHASES.IDLE) st.anchorStartTs = 0;
   return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
 }
@@ -472,17 +652,26 @@ function stepFormPhase(st, raw, history, sens, now) {
    （0/null/未指定）ならクランプなし＝現行動作と同一。 */
 function formPreReleaseWindow(history, releaseTs, windowSec, anchorStartTs) {
   const w = windowSec == null ? 0.5 : windowSec;
-  const earliest = anchorStartTs ? Math.max(releaseTs - w * 1000, anchorStartTs) : releaseTs - w * 1000;
+  const earliest = anchorStartTs
+    ? Math.max(releaseTs - w * 1000, anchorStartTs)
+    : releaseTs - w * 1000;
   const frames = (history || []).filter((h) => h.m && h.ts >= earliest && h.ts <= releaseTs - 120);
   if (frames.length < 2) return null;
-  const f = frames[0].m, l = frames[frames.length - 1].m;
+  const f = frames[0].m,
+    l = frames[frames.length - 1].m;
   const scale = (f.bodyScale + l.bodyScale) / 2;
   const bowMove = formDist(f.bW, l.bW) / scale;
   const drawMove = formDist(f.dW, l.dW) / scale;
   const headMove = Math.abs(l.anchorNorm - f.anchorNorm);
   return {
-    windowSec: w, frames: frames.length, bowMove, drawMove, headMove,
-    bowDrift: bowMove > 0.05, drawDrift: drawMove > 0.06, headDrift: headMove > 0.05,
+    windowSec: w,
+    frames: frames.length,
+    bowMove,
+    drawMove,
+    headMove,
+    bowDrift: bowMove > 0.05,
+    drawDrift: drawMove > 0.06,
+    headDrift: headMove > 0.05,
   };
 }
 
@@ -508,7 +697,13 @@ function judgeArrowCheck(preScores, confirmScores) {
   const preScore = pre.length ? formMedian(pre) : null;
   const confirmScore = confirm.length ? formMedian(confirm) : null;
   if (confirmScore == null) {
-    return { judgment: "unclear", preScore, confirmScore, pre: pre.length, confirm: confirm.length };
+    return {
+      judgment: "unclear",
+      preScore,
+      confirmScore,
+      pre: pre.length,
+      confirm: confirm.length,
+    };
   }
   let judgment;
   if (confirmScore < ARROW_CHECK.GONE_TH) judgment = "shot-match";
@@ -532,24 +727,34 @@ function formDiagSummary(shots, samplePerfMs) {
   const perf = (samplePerfMs || []).filter(Number.isFinite);
   return {
     arrowCheckCounts: counts,
-    samplePerfMs: perf.length ? { median: +formMedian(perf).toFixed(2), max: +Math.max(...perf).toFixed(2), n: perf.length } : null,
+    samplePerfMs: perf.length
+      ? { median: +formMedian(perf).toFixed(2), max: +Math.max(...perf).toFixed(2), n: perf.length }
+      : null,
   };
 }
 
 /* 複数射のアンカー位置再現性（胴体長比の標準偏差） */
 function formAnchorVariation(shots) {
   const vals = (shots || []).map((s) => s && s.anchorNorm).filter(Number.isFinite);
-  if (vals.length < 2) return { n: vals.length, std: null, mean: vals[0] == null ? null : vals[0], label: "初回" };
+  if (vals.length < 2)
+    return { n: vals.length, std: null, mean: vals[0] == null ? null : vals[0], label: "初回" };
   const mean = vals.reduce((a, x) => a + x, 0) / vals.length;
   const std = Math.sqrt(vals.reduce((a, x) => a + (x - mean) ** 2, 0) / vals.length);
-  return { n: vals.length, std, mean, label: std > 0.08 ? "ばらつき大" : std > 0.045 ? "ややばらつき" : "安定" };
+  return {
+    n: vals.length,
+    std,
+    mean,
+    label: std > 0.08 ? "ばらつき大" : std > 0.045 ? "ややばらつき" : "安定",
+  };
 }
 
 /* 1 射の要約（formAnalysis.features 1 件分）。
    anchorStartTs=アンカー圏に入った時刻, releaseTs=リリース時刻 */
 function summarizeFormShot(history, anchorStartTs, releaseTs) {
   if (!history || !history.length || !releaseTs) return null;
-  const win = history.filter((h) => h.m && h.ts >= (anchorStartTs || 0) && h.ts <= releaseTs - 120 && h.m.anchorNorm < 0.45);
+  const win = history.filter(
+    (h) => h.m && h.ts >= (anchorStartTs || 0) && h.ts <= releaseTs - 120 && h.m.anchorNorm < 0.45,
+  );
   if (win.length < 2) return null;
   const md = (key) => formMedian(win.map((h) => h.m[key]));
   const holdMs = anchorStartTs ? Math.max(0, releaseTs - anchorStartTs) : null;
@@ -573,26 +778,27 @@ function summarizeFormShot(history, anchorStartTs, releaseTs) {
 /* ---------- 分析結果の活用: 記録統計・コーチングコメント・トレンド・得点との関係 ---------- */
 
 /* 1 記録の要約統計。features 配列から中央値・ドリフト率・アンカー再現性を出す */
-function formRecordStats(record){
-  const feats=(record&&Array.isArray(record.features))?record.features:[];
-  if(!feats.length) return null;
-  const md=(key)=>formMedian(feats.map((f)=>f.angles&&f.angles[key]).filter(Number.isFinite));
-  const holds=feats.map((f)=>f.phase&&f.phase.anchorMs).filter(Number.isFinite);
-  const av=formAnchorVariation(feats.map((f)=>({anchorNorm:f.anchorNorm})));
-  const withRelease=feats.filter((f)=>f.release);
-  const drifted=withRelease.filter((f)=>f.release.stable===false).length;
-  const confs=feats.map((f)=>f.confidence).filter(Number.isFinite);
-  const scores=feats.map((f)=>f.score).filter(Number.isFinite);
+function formRecordStats(record) {
+  const feats = record && Array.isArray(record.features) ? record.features : [];
+  if (!feats.length) return null;
+  const md = (key) =>
+    formMedian(feats.map((f) => f.angles && f.angles[key]).filter(Number.isFinite));
+  const holds = feats.map((f) => f.phase && f.phase.anchorMs).filter(Number.isFinite);
+  const av = formAnchorVariation(feats.map((f) => ({ anchorNorm: f.anchorNorm })));
+  const withRelease = feats.filter((f) => f.release);
+  const drifted = withRelease.filter((f) => f.release.stable === false).length;
+  const confs = feats.map((f) => f.confidence).filter(Number.isFinite);
+  const scores = feats.map((f) => f.score).filter(Number.isFinite);
   return {
-    shots:feats.length,
-    bowArm:md("bowArm"),
-    drawArm:md("drawArm"),
-    holdMs:holds.length?formMedian(holds):null,
-    anchorStd:av.std,
-    anchorLabel:av.label,
-    driftRate:withRelease.length?drifted/withRelease.length:null,
-    confidence:confs.length?confs.reduce((a,x)=>a+x,0)/confs.length:null,
-    score:scores.length?formMedian(scores):null,
+    shots: feats.length,
+    bowArm: md("bowArm"),
+    drawArm: md("drawArm"),
+    holdMs: holds.length ? formMedian(holds) : null,
+    anchorStd: av.std,
+    anchorLabel: av.label,
+    driftRate: withRelease.length ? drifted / withRelease.length : null,
+    confidence: confs.length ? confs.reduce((a, x) => a + x, 0) / confs.length : null,
+    score: scores.length ? formMedian(scores) : null,
   };
 }
 
@@ -606,68 +812,143 @@ function formRecordStats(record){
    将来根拠が得られたら復活可能）。代わりに「自分の直近中央値との差」で
    自分基準の変化を伝える。撮影角度が毎回同じであることが前提になるため、
    その旨の注記は呼び出し側（47-form-view.js）で行う。 */
-function formRecordInsights(record, prevRecord){
-  const st=formRecordStats(record);
-  if(!st) return null;
-  const prev=prevRecord?formRecordStats(prevRecord):null;
-  const facts=[], causes=[], checks=[], next=[];
-  if(st.holdMs!=null) facts.push(`フルドロー保持は中央値 ${(st.holdMs/1000).toFixed(1)} 秒でした。`);
-  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°${prev&&prev.bowArm!=null?`（前回比 ${st.bowArm-prev.bowArm>=0?"+":""}${(st.bowArm-prev.bowArm).toFixed(0)}°）`:""}です。`);
-  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°${prev&&prev.drawArm!=null?`（前回比 ${st.drawArm-prev.drawArm>=0?"+":""}${(st.drawArm-prev.drawArm).toFixed(0)}°）`:""}です。`);
-  if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカー位置ばらつきは σ=${st.anchorStd.toFixed(3)}（${st.anchorLabel}）です。`);
-  if(st.driftRate!=null&&st.driftRate>0) facts.push(`${Math.round(st.driftRate*100)}% の射で、リリース前 0.5 秒に弓手/引き手のドリフトを観測しました。`);
-  if(st.confidence!=null) facts.push(`骨格検出の鮮明さは平均 ${(st.confidence*100).toFixed(0)}% です（カメラの角度による測定誤差は反映されません）。`);
+function formRecordInsights(record, prevRecord) {
+  const st = formRecordStats(record);
+  if (!st) return null;
+  const prev = prevRecord ? formRecordStats(prevRecord) : null;
+  const facts = [],
+    causes = [],
+    checks = [],
+    next = [];
+  if (st.holdMs != null)
+    facts.push(`フルドロー保持は中央値 ${(st.holdMs / 1000).toFixed(1)} 秒でした。`);
+  if (st.bowArm != null)
+    facts.push(
+      `弓手肘は中央値 ${st.bowArm.toFixed(0)}°${prev && prev.bowArm != null ? `（前回比 ${st.bowArm - prev.bowArm >= 0 ? "+" : ""}${(st.bowArm - prev.bowArm).toFixed(0)}°）` : ""}です。`,
+    );
+  if (st.drawArm != null)
+    facts.push(
+      `引き手肘は中央値 ${st.drawArm.toFixed(0)}°${prev && prev.drawArm != null ? `（前回比 ${st.drawArm - prev.drawArm >= 0 ? "+" : ""}${(st.drawArm - prev.drawArm).toFixed(0)}°）` : ""}です。`,
+    );
+  if (st.anchorStd != null)
+    facts.push(
+      `${st.shots}射のアンカー位置ばらつきは σ=${st.anchorStd.toFixed(3)}（${st.anchorLabel}）です。`,
+    );
+  if (st.driftRate != null && st.driftRate > 0)
+    facts.push(
+      `${Math.round(st.driftRate * 100)}% の射で、リリース前 0.5 秒に弓手/引き手のドリフトを観測しました。`,
+    );
+  if (st.confidence != null)
+    facts.push(
+      `骨格検出の鮮明さは平均 ${(st.confidence * 100).toFixed(0)}% です（カメラの角度による測定誤差は反映されません）。`,
+    );
 
-  if(st.driftRate!=null&&st.driftRate>=0.5) causes.push("保持中に押し引きの張り合いが緩んでいる可能性があります（断定ではありません）。");
-  if(st.anchorStd!=null&&st.anchorStd>0.045) causes.push("アンカー位置の再現性が不足している可能性があります。");
-  if(prev&&st.holdMs!=null&&prev.holdMs!=null){
-    const d=(st.holdMs-prev.holdMs)/1000;
-    if(d>=0.4) causes.push(`保持時間が前回より ${d.toFixed(1)} 秒長くなっています。`);
-    else if(d<=-0.4) causes.push(`保持時間が前回より ${(-d).toFixed(1)} 秒短くなっています。`);
+  if (st.driftRate != null && st.driftRate >= 0.5)
+    causes.push("保持中に押し引きの張り合いが緩んでいる可能性があります（断定ではありません）。");
+  if (st.anchorStd != null && st.anchorStd > 0.045)
+    causes.push("アンカー位置の再現性が不足している可能性があります。");
+  if (prev && st.holdMs != null && prev.holdMs != null) {
+    const d = (st.holdMs - prev.holdMs) / 1000;
+    if (d >= 0.4) causes.push(`保持時間が前回より ${d.toFixed(1)} 秒長くなっています。`);
+    else if (d <= -0.4) causes.push(`保持時間が前回より ${(-d).toFixed(1)} 秒短くなっています。`);
   }
-  if(prev&&st.bowArm!=null&&prev.bowArm!=null&&Math.abs(st.bowArm-prev.bowArm)>=6) causes.push(`弓手肘が前回より ${Math.abs(st.bowArm-prev.bowArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`);
-  if(prev&&st.drawArm!=null&&prev.drawArm!=null&&Math.abs(st.drawArm-prev.drawArm)>=6) causes.push(`引き手肘が前回より ${Math.abs(st.drawArm-prev.drawArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`);
-  if(prev&&st.anchorStd!=null&&prev.anchorStd!=null&&st.anchorStd>prev.anchorStd*1.5&&st.anchorStd>0.03) causes.push("アンカーの再現性が前回より不安定になっています。");
+  if (prev && st.bowArm != null && prev.bowArm != null && Math.abs(st.bowArm - prev.bowArm) >= 6)
+    causes.push(
+      `弓手肘が前回より ${Math.abs(st.bowArm - prev.bowArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`,
+    );
+  if (
+    prev &&
+    st.drawArm != null &&
+    prev.drawArm != null &&
+    Math.abs(st.drawArm - prev.drawArm) >= 6
+  )
+    causes.push(
+      `引き手肘が前回より ${Math.abs(st.drawArm - prev.drawArm).toFixed(0)}° 変化しています（撮影角度が前回と同じか確認してください）。`,
+    );
+  if (
+    prev &&
+    st.anchorStd != null &&
+    prev.anchorStd != null &&
+    st.anchorStd > prev.anchorStd * 1.5 &&
+    st.anchorStd > 0.03
+  )
+    causes.push("アンカーの再現性が前回より不安定になっています。");
 
-  if(st.driftRate!=null&&st.driftRate>0) checks.push("リリース直前に弓手のグリップ位置が下がっていないか、横からの映像で確認してください。");
-  if(st.anchorStd!=null&&st.anchorStd>0.045) checks.push("アンカーの接触点（顎の位置）が射ごとにずれていないか確認してください。");
-  if(st.holdMs!=null&&st.holdMs>4500) checks.push("保持が長め（4.5秒超）です。狙い直しの回数が増えていないか振り返ってください。");
+  if (st.driftRate != null && st.driftRate > 0)
+    checks.push(
+      "リリース直前に弓手のグリップ位置が下がっていないか、横からの映像で確認してください。",
+    );
+  if (st.anchorStd != null && st.anchorStd > 0.045)
+    checks.push("アンカーの接触点（顎の位置）が射ごとにずれていないか確認してください。");
+  if (st.holdMs != null && st.holdMs > 4500)
+    checks.push("保持が長め（4.5秒超）です。狙い直しの回数が増えていないか振り返ってください。");
 
-  if(st.driftRate!=null&&st.driftRate>=0.5) next.push("次の練習ではリリース前 0.5 秒の弓手固定を意識ポイントに入れてください。");
-  if(st.anchorStd!=null&&st.anchorStd>0.045) next.push("同じ接触点で止まる練習（ミラー・ゴム弓）を数本足してください。");
-  if(!next.length) next.push("同じ撮影角度で記録を重ね、前回比の変化量で確認を続けてください。");
-  return {facts,causes,checks,next,stats:st,prev};
+  if (st.driftRate != null && st.driftRate >= 0.5)
+    next.push("次の練習ではリリース前 0.5 秒の弓手固定を意識ポイントに入れてください。");
+  if (st.anchorStd != null && st.anchorStd > 0.045)
+    next.push("同じ接触点で止まる練習（ミラー・ゴム弓）を数本足してください。");
+  if (!next.length) next.push("同じ撮影角度で記録を重ね、前回比の変化量で確認を続けてください。");
+  return { facts, causes, checks, next, stats: st, prev };
 }
 
 /* 記録の時系列（トレンド表示用）。日付昇順 */
-function formTrendSeries(records){
-  return (records||[]).map((r)=>{
-    const st=formRecordStats(r);
-    if(!st) return null;
-    return {id:r.id,date:r.date||"",ts:r.ts||0,bowArm:st.bowArm,drawArm:st.drawArm,
-      holdS:st.holdMs!=null?st.holdMs/1000:null,anchorStd:st.anchorStd,driftRate:st.driftRate,score:st.score};
-  }).filter(Boolean).sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts-b.ts));
+function formTrendSeries(records) {
+  return (records || [])
+    .map((r) => {
+      const st = formRecordStats(r);
+      if (!st) return null;
+      return {
+        id: r.id,
+        date: r.date || "",
+        ts: r.ts || 0,
+        bowArm: st.bowArm,
+        drawArm: st.drawArm,
+        holdS: st.holdMs != null ? st.holdMs / 1000 : null,
+        anchorStd: st.anchorStd,
+        driftRate: st.driftRate,
+        score: st.score,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => (a.date || "").localeCompare(b.date || "") || a.ts - b.ts);
 }
 
 /* 射形×得点: sessionId で紐付いた記録から、リリース安定（ドリフト率<50%）の
    回とドリフトが多い回の平均点を比較する。metricsFn には sessionMetrics を渡す */
-function formScoreLink(records, sessions, metricsFn){
-  const byId={};
-  (sessions||[]).forEach((s)=>{ if(s&&s.id) byId[s.id]=s; });
-  const pairs=(records||[]).map((r)=>{
-    const s=r&&r.sessionId?byId[r.sessionId]:null;
-    if(!s) return null;
-    const st=formRecordStats(r);
-    if(!st) return null;
-    const m=metricsFn(s);
-    if(!m.all.length) return null;
-    return {recordId:r.id,date:r.date||"",avg:m.avg,driftRate:st.driftRate,formScore:st.score,anchorStd:st.anchorStd};
-  }).filter(Boolean);
-  const stable=pairs.filter((p)=>p.driftRate!=null&&p.driftRate<0.5);
-  const drifty=pairs.filter((p)=>p.driftRate!=null&&p.driftRate>=0.5);
-  const avgOf=(a)=>a.length?a.reduce((x,p)=>x+p.avg,0)/a.length:null;
-  const split=(stable.length&&drifty.length)
-    ?{stableAvg:avgOf(stable),driftAvg:avgOf(drifty),stableN:stable.length,driftN:drifty.length}
-    :null;
-  return {n:pairs.length,pairs,split};
+function formScoreLink(records, sessions, metricsFn) {
+  const byId = {};
+  (sessions || []).forEach((s) => {
+    if (s && s.id) byId[s.id] = s;
+  });
+  const pairs = (records || [])
+    .map((r) => {
+      const s = r && r.sessionId ? byId[r.sessionId] : null;
+      if (!s) return null;
+      const st = formRecordStats(r);
+      if (!st) return null;
+      const m = metricsFn(s);
+      if (!m.all.length) return null;
+      return {
+        recordId: r.id,
+        date: r.date || "",
+        avg: m.avg,
+        driftRate: st.driftRate,
+        formScore: st.score,
+        anchorStd: st.anchorStd,
+      };
+    })
+    .filter(Boolean);
+  const stable = pairs.filter((p) => p.driftRate != null && p.driftRate < 0.5);
+  const drifty = pairs.filter((p) => p.driftRate != null && p.driftRate >= 0.5);
+  const avgOf = (a) => (a.length ? a.reduce((x, p) => x + p.avg, 0) / a.length : null);
+  const split =
+    stable.length && drifty.length
+      ? {
+          stableAvg: avgOf(stable),
+          driftAvg: avgOf(drifty),
+          stableN: stable.length,
+          driftN: drifty.length,
+        }
+      : null;
+  return { n: pairs.length, pairs, split };
 }
