@@ -424,7 +424,7 @@ function openFormCapture(){
       if(canceled){
         /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
         const last=shots[shots.length-1];
-        if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
+        if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:debug&&debug.cancelReason||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
         if(last){
           shots=shots.filter(s=>s.id!==last.id);
           const div=ovl.querySelector(`#fcShots [data-shot-id="${last.id}"]`);
@@ -439,10 +439,14 @@ function openFormCapture(){
          rejectedFramesNear:[]（FULL_DRAW未到達で4/6射が消失）を受け、FULL_DRAWだけでなく
          ANCHORINGも対象にする。ANCHORINGは常時発生しうるため100ms毎に間引いてサイズを抑える。 */
       if(db.settings.formDebug===true&&debug){
-        const isFullDraw=phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4);
-        const isAnchoring=phase==="ANCHORING"&&(now-(lastAnchoringSampleAt||0)>=100);
-        if(isFullDraw||isAnchoring){
-          if(isAnchoring) lastAnchoringSampleAt=now;
+        /* 2026-07-15 拡張: 誤配置アンカーは DRAWING/SETUP とラベルされるためフェーズ限定の
+           捕捉では診断に写らない。フェーズ不問で (a) スパイク (maxV>4) と (b) 緩アンカー保持
+           (anchorNorm<CLOSE_LOOSE、100ms間引き) を捕捉する */
+        const isSpike=debug.maxV!=null&&debug.maxV>4;
+        const isCloseHold=phase==="FULL_DRAW"&&debug.closeFrames>=1;
+        const isHold=(phase==="ANCHORING"||(debug.anchorNorm!=null&&debug.anchorNorm<FORM_PH.CLOSE_LOOSE))&&(now-(lastAnchoringSampleAt||0)>=100);
+        if(isSpike||isCloseHold||isHold){
+          if(isHold) lastAnchoringSampleAt=now;
           formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,phase,...debug},400);
         }
       }
@@ -716,7 +720,7 @@ function startFormReplay(videoUrl){
         if(canceled){
           /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
           const last=shots[shots.length-1];
-          if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
+          if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:debug&&debug.cancelReason||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
           if(last){
             shots=shots.filter(s=>s.id!==last.id);
             const div=ovl.querySelector(`#frShots [data-shot-id="${last.id}"]`);
@@ -729,10 +733,14 @@ function startFormReplay(videoUrl){
            出しそうで出ていないフレーム。FULL_DRAWだけでなくANCHORINGも対象にし、ANCHORINGは
            100ms毎に間引く（capture側と同型）。 */
         if(db.settings.formDebug===true&&debug){
-          const isFullDraw=phase==="FULL_DRAW"&&(debug.closeFrames>=1||debug.maxV>4);
-          const isAnchoring=phase==="ANCHORING"&&(now-(lastAnchoringSampleAt||0)>=100);
-          if(isFullDraw||isAnchoring){
-            if(isAnchoring) lastAnchoringSampleAt=now;
+          /* 2026-07-15 拡張: 誤配置アンカーは DRAWING/SETUP とラベルされるためフェーズ限定の
+             捕捉では診断に写らない。フェーズ不問で (a) スパイク (maxV>4) と (b) 緩アンカー保持
+             (anchorNorm<CLOSE_LOOSE、100ms間引き) を捕捉する */
+          const isSpike=debug.maxV!=null&&debug.maxV>4;
+          const isCloseHold=phase==="FULL_DRAW"&&debug.closeFrames>=1;
+          const isHold=(phase==="ANCHORING"||(debug.anchorNorm!=null&&debug.anchorNorm<FORM_PH.CLOSE_LOOSE))&&(now-(lastAnchoringSampleAt||0)>=100);
+          if(isSpike||isCloseHold||isHold){
+            if(isHold) lastAnchoringSampleAt=now;
             formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,phase,...debug},400);
           }
         }

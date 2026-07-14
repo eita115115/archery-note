@@ -297,13 +297,32 @@ function shotSequence(dt) {
     return seq;
   }
   assertEqual(runSequence(gapBridgedSequence(8)).releases, 1, "140ms null gap is bridged (fires)");
+  /* 2026-07-15 アンカー証拠一般化（NB2）による意図的な仕様上書き:
+     旧設計はレットダウン判別手段を持たなかったため 150ms 超のギャップを一律非検出に
+     していた（このシーケンスはリリース形状: sticky アンカー生存・クロスギャップ速度8・
+     着地 1.0）。NB2 は着地位置ゲート＋速度下限で判別して発火させる。
+     緩慢な引き戻し（遮蔽込み）の安全性は下の「アンカー証拠の一般化」節で担保。 */
   assertEqual(
     runSequence(gapBridgedSequence(11)).releases,
-    0,
-    "200ms null gap is not bridged (does not fire)",
+    1,
+    "200ms null gap now bridged by NB2 (release-shaped)",
   );
-  // 定数を無効値（∞）へ戻すと現行（導入前）と同値 = 200ms ギャップでも発火する。
-  // これは同時に「上の非検出テストが NB_MAX_GAP_MS によって落ちている」ことの証明でもある
+  // NB_MAX_GAP_MS（tier-1 上限）が今も効いていることの証明は、NB2 の適用範囲外
+  // （着地 anchorNorm 1.3 > NB2_MAX_ARRIVE）のシーケンスで行う: 150 のままなら非発火、
+  // ∞ へ差し替えると tier-1 が解禁されて発火する
+  function gapFarArrivalSequence(nullCount) {
+    const seq = [];
+    for (let i = 0; i < 110; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
+    for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]);
+    seq.push([mkRaw(1.3, 90), 8, 10]); // 着地がレットダウン完了域（NB2 適用外）
+    for (let i = 0; i < 10; i++) seq.push([mkRaw(1.3, 90), 0.2, 20]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(gapFarArrivalSequence(11)).releases,
+    0,
+    "200ms gap with far arrival (1.3) stays capped by NB_MAX_GAP_MS and outside NB2",
+  );
   assert(
     coreScript.includes("NB_MAX_GAP_MS: 150,"),
     "NB_MAX_GAP_MS constant present for ∞-substitution test",
@@ -313,9 +332,9 @@ function shotSequence(dt) {
 return {makeFormPhaseDetector, stepFormPhase};`,
   )();
   assertEqual(
-    runSequence(gapBridgedSequence(11), coreInfGap).releases,
+    runSequence(gapFarArrivalSequence(11), coreInfGap).releases,
     1,
-    "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' behavior on the 200ms gap",
+    "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' tier-1 behavior on the same sequence",
   );
 }
 /* [既知の制約・文書化のみ、strict-review 2026-07-11 finding]: 上の140/200ms境界テストが
@@ -333,7 +352,202 @@ return {makeFormPhaseDetector, stepFormPhase};`,
    修正方向（案）: (a) ギャップを「直前の有効フレームts→直後の有効フレームts」で計測する、
    (b) ギャップが窓左端に接している場合は上限超過側に倒す。実施する場合は設計書
    form-phase-final-design.md §6-D' への差し戻しフィードバックとセットで、境界テスト
-   （140/200ms）の再導出込みの別タスクとする。 */
+   （140/200ms）の再導出込みの別タスクとする。
+   → 2026-07-15 追記: NB2 のギャップ計測は (a) 方式（now - 直前有効フレームts）を採用した。 */
+{
+  /* アンカー証拠の一般化（2026-07-15、実射 6射中4射消失の修正）
+     実座標 dW を動かし computeFormVelocity に速度を実計算させる（view ループ契約:
+     vel を push 前に計算、現在フレームを push してから stepFormPhase）。
+     60fps・bodyScale 0.25。検証対象:
+       NB2   — 150-350ms のトラッキング欠落を sticky アンカー＋着地位置ゲートで橋渡し
+       loose — 誤配置アンカー（closeFrames=0）でも緩ゾーン保持＋強スパイクで発火
+       安全  — レットダウン（隠れ遮蔽込み・誤配置込み）は引き続き一切発火しない */
+  const DT60 = 1000 / 60;
+  const FACE = { x: 0.52, y: 0.3 };
+  const A_DW = { x: 0.56, y: 0.32 }; // アンカー手首（anchorNorm≈0.18）
+  const S_DW = { x: 0.75, y: 0.55 }; // 構え位置
+  const R_DW = { x: 0.78, y: 0.36 }; // リリース後（後方伸展・落下小）
+  const anchorNormOf = (dw) => Math.hypot(dw.x - FACE.x, dw.y - FACE.y) / 0.25;
+  const mkDw = (dw, drawArm, anchorNormOverride) => ({
+    anchorNorm: anchorNormOverride != null ? anchorNormOverride : anchorNormOf(dw),
+    drawArm,
+    bodyScale: 0.25,
+    conf: 0.7,
+    dW: { x: dw.x, y: dw.y },
+  });
+  const lerp2 = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+  function runDw(frames) {
+    const st = core.makeFormPhaseDetector();
+    const hist = [];
+    let t = 0,
+      releases = 0,
+      lastFire = null;
+    for (const raw of frames) {
+      t += DT60;
+      const vel = core.computeFormVelocity(hist, raw, t);
+      hist.push({ ts: t, m: raw, vel });
+      if (hist.length > 200) hist.shift();
+      const r = core.stepFormPhase(st, raw, hist, 1.0, t);
+      if (r.released) {
+        releases++;
+        lastFire = r;
+      }
+      if (r.canceled) releases--;
+    }
+    return { releases, lastFire };
+  }
+  const seg = (frames, fn) =>
+    Array.from({ length: frames }, (_, i) => fn(i / Math.max(1, frames - 1), i));
+  function shotDw(o) {
+    const seq = [];
+    seq.push(...seg(30, () => mkDw(S_DW, 90)));
+    seq.push(...seg(24, (t) => mkDw(lerp2(S_DW, A_DW, t), 100 + 30 * t)));
+    seq.push(
+      ...seg(Math.round((o.anchorMs || 1200) / DT60), (t, i) =>
+        mkDw(
+          { x: A_DW.x + Math.sin(i) * 0.002, y: A_DW.y + Math.cos(i) * 0.002 },
+          115,
+          o.anchorNorm,
+        ),
+      ),
+    );
+    const rel = seg(6, (t) => mkDw(lerp2(A_DW, R_DW, 1 - Math.pow(1 - t, 2)), 120));
+    if (o.gapMs) {
+      seq.push(rel[0]);
+      for (let i = 0; i < Math.round(o.gapMs / DT60); i++) seq.push(null);
+      seq.push(mkDw(R_DW, 120));
+    } else seq.push(...rel);
+    seq.push(...seg(36, () => mkDw(R_DW, 110)));
+    return seq;
+  }
+  // NB2: 200ms / 300ms のリリース瞬間欠落は回復、400ms（NB2_MAX_GAP_MS 超）は対象外
+  assertEqual(runDw(shotDw({ gapMs: 200 })).releases, 1, "NB2: 200ms release-moment gap recovers");
+  assertEqual(runDw(shotDw({ gapMs: 300 })).releases, 1, "NB2: 300ms release-moment gap recovers");
+  assertEqual(
+    runDw(shotDw({ gapMs: 400 })).releases,
+    0,
+    "NB2: 400ms gap stays out of scope (documented limit)",
+  );
+  const nb2Fire = runDw(shotDw({ gapMs: 300 })).lastFire;
+  assertEqual(
+    nb2Fire.debug.fireEvidence,
+    "nb2",
+    "NB2 fire carries fireEvidence=nb2 for field audit",
+  );
+  /* 誤配置アンカー（anchorNorm が一度も CLOSE_IN を切らない保持）は発火対象外（意図的）。
+     2026-07-15 に loose 経路として検討したが、実射診断の全16発火は close 証拠を持ち、
+     このメカニズムは実データ未観測。一方ゴールデン 48725 の幻覚ランドマークシーンで
+     過検出3件を出したため撤去した。ここでは「発火しない」ことを仕様として固定する
+     （将来 field でこのメカニズムが観測されたら、そのデータで再設計する） */
+  assertEqual(
+    runDw(shotDw({ anchorNorm: 0.42 })).releases,
+    0,
+    "misregistered anchor 0.42 (never close) stays out of scope",
+  );
+  assertEqual(
+    runDw(shotDw({ anchorNorm: 0.55 })).releases,
+    0,
+    "misregistered anchor 0.55 (never close) stays out of scope",
+  );
+  // 従来経路の発火ラベル
+  const closeFire = runDw(shotDw({})).lastFire;
+  assertEqual(closeFire.debug.fireEvidence, "close", "normal fire carries fireEvidence=close");
+  // 安全1: レットダウンがギャップ内に完全に隠れる（sticky 生存の敵対ケース）→ 着地ゲートで非発火
+  function hiddenLetdownDw(gapMs, emergeAt) {
+    const seq = [];
+    seq.push(...seg(30, () => mkDw(S_DW, 90)));
+    seq.push(...seg(24, (t) => mkDw(lerp2(S_DW, A_DW, t), 100 + 30 * t)));
+    seq.push(...seg(72, () => mkDw(A_DW, 115)));
+    for (let i = 0; i < Math.round(gapMs / DT60); i++) seq.push(null);
+    const e = lerp2(A_DW, S_DW, emergeAt);
+    seq.push(mkDw(e, 95));
+    seq.push(...seg(18, (t) => mkDw(lerp2(e, S_DW, t), 92)));
+    seq.push(...seg(60, () => mkDw(S_DW, 90)));
+    return seq;
+  }
+  for (const g of [200, 300, 350]) {
+    assertEqual(
+      runDw(hiddenLetdownDw(g, 1.0)).releases,
+      0,
+      `safety: letdown fully hidden in ${g}ms gap does not fire`,
+    );
+    assertEqual(
+      runDw(hiddenLetdownDw(g, 0.4)).releases,
+      0,
+      `safety: letdown partially hidden in ${g}ms gap does not fire`,
+    );
+  }
+  // 安全2: 誤配置アンカー(0.45)からの緩慢な引き戻し → STRONG_TH 未達で非発火
+  function misregLetdownDw(downMs) {
+    const seq = [];
+    seq.push(...seg(30, () => mkDw(S_DW, 90)));
+    seq.push(...seg(24, (t) => mkDw(lerp2(S_DW, A_DW, t), 100 + 30 * t)));
+    seq.push(
+      ...seg(72, (t, i) =>
+        mkDw({ x: A_DW.x + Math.sin(i) * 0.002, y: A_DW.y + Math.cos(i) * 0.002 }, 115, 0.45),
+      ),
+    );
+    seq.push(...seg(Math.round(downMs / DT60) + 1, (t) => mkDw(lerp2(A_DW, S_DW, t), 100)));
+    seq.push(...seg(60, () => mkDw(S_DW, 90)));
+    return seq;
+  }
+  for (const d of [400, 800, 1500]) {
+    assertEqual(
+      runDw(misregLetdownDw(d)).releases,
+      0,
+      `safety: misregistered-anchor letdown ${d}ms does not fire`,
+    );
+  }
+  // 安全3: NB2 の落下ゲート — 着地位置は範囲内でも垂直落下が大きい再捕捉は非発火
+  function dropArrivalDw(gapMs) {
+    const seq = [];
+    seq.push(...seg(30, () => mkDw(S_DW, 90)));
+    seq.push(...seg(24, (t) => mkDw(lerp2(S_DW, A_DW, t), 100 + 30 * t)));
+    seq.push(...seg(72, () => mkDw(A_DW, 115)));
+    for (let i = 0; i < Math.round(gapMs / DT60); i++) seq.push(null);
+    // 着地 anchorNorm ≈ 0.9（NB2 範囲内）だが下方向へ 0.55 胴体長落下した位置
+    const drop = { x: A_DW.x + 0.09, y: A_DW.y + 0.55 * 0.25 + 0.04 };
+    seq.push(mkDw(drop, 95, 0.9));
+    seq.push(...seg(60, () => mkDw(drop, 90, 0.9)));
+    return seq;
+  }
+  assertEqual(
+    runDw(dropArrivalDw(250)).releases,
+    0,
+    "safety: NB2 drop gate rejects arrival that fell >0.5 body-lengths",
+  );
+  /* 安全4: NB2 着地後静止確認（drift-cancel）— 前方水平のレットダウンがギャップ内に隠れ、
+     着地位置・落下・速度の全ゲートをすり抜けても、着地後に手が弦と共に動き続けるため
+     CONFIRM_MS 窓内の drift-cancel で取消される（net 0）。
+     幾何: アンカー(0.56,0.32) → 250msギャップ → 前方(0.72,0.36)で再捕捉
+     （anchorNorm≈0.84∈[0.65,1.15]、落下0.16<0.5、クロスギャップ速度≈2.6>2.2 → NB2発火）
+     → その後も前方下方へ動き続ける → drift>0.55 が2連続 → 取消 */
+  function forwardLetdownHiddenDw(gapMs) {
+    const seq = [];
+    seq.push(...seg(30, () => mkDw(S_DW, 90)));
+    seq.push(...seg(24, (t) => mkDw(lerp2(S_DW, A_DW, t), 100 + 30 * t)));
+    seq.push(...seg(72, () => mkDw(A_DW, 115)));
+    for (let i = 0; i < Math.round(gapMs / DT60); i++) seq.push(null);
+    const emerge = { x: 0.72, y: 0.36 };
+    seq.push(mkDw(emerge, 95));
+    // 弦と共に動き続ける（前方下方へ 0.25norm=1胴体長を300msで）
+    seq.push(...seg(18, (t) => mkDw(lerp2(emerge, { x: 0.55, y: 0.55 }, t), 92)));
+    seq.push(...seg(60, () => mkDw({ x: 0.55, y: 0.55 }, 90)));
+    return seq;
+  }
+  const fwdHidden = runDw(forwardLetdownHiddenDw(250));
+  assertEqual(
+    fwdHidden.releases,
+    0,
+    "safety: forward letdown hidden in gap fires NB2 then drift-cancels (net 0)",
+  );
+  // 対照: 真のリリース（NB2経由）はフォロースルーで静止するため drift-cancel されない
+  assertEqual(
+    runDw(shotDw({ gapMs: 250 })).releases,
+    1,
+    "NB2 fire with static follow-through survives drift-cancel window",
+  );
+}
 {
   /* B'（Stage 1・中立スキャフォールド）: conf ゲート。出荷値 CONF_GATE=0 は完全無効＝現行同値。
      0.45 へ差し替えたコアでは conf<0.45 のフレームが窓から除外される（ロジック検証のみ、発動はしない）。 */
@@ -454,9 +668,15 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     for (let i = 0; i < 110; i++) seq.push([mkRawG(0.22, 150, 0.9), 0.02, 10]);
     // 遮蔽180ms: 実nullではなく conf=0.3 の低信頼フレーム（10フレーム×20ms、span=180ms）
     for (let i = 0; i < 10; i++) seq.push([mkRawG(0.22, 150, 0.3), 0.02, 20]);
-    // 復帰: NB_MAXV(2)超・RELEASE_TH(9)未満の緩慢な引き戻し（velOkでなくnullBridged経路を狙う）
-    seq.push([mkRawG(1.0, 90, 0.9), 3, 10]);
-    for (let i = 0; i < 10; i++) seq.push([mkRawG(1.0, 90, 0.9), 0.2, 20]);
+    /* 復帰: NB_MAXV(2)超・RELEASE_TH(9)未満の vel=3（velOkでなくnullBridged経路を狙う）。
+       2026-07-15 NB2 導入に伴い着地を 1.0 → 1.3 へ変更（NB2_MAX_ARRIVE=1.15 の適用外に
+       置き、本テストが tier-1 の D' 時間上限だけを計測し続けるようにする。旧来の 1.0 着地は
+       運動学的にリリース形状＝スナップして静止のため、NB2 が設計どおり発火してしまう）。
+       tier-1 の評価量（hasNullGap/rise/maxV/maxGapMs）は着地位置に依存しないため、
+       4組合せの意図は完全に保存される。瞬間ジャンプ構成は意図的（漸進引き戻しにすると
+       ギャップが窓左端からスライドして出て、既知の文書化済み制約=maxGapMs過小評価を踏む） */
+    seq.push([mkRawG(1.3, 90, 0.9), 3, 10]);
+    for (let i = 0; i < 10; i++) seq.push([mkRawG(1.3, 90, 0.9), 0.2, 20]);
     return seq;
   }
   assert(
@@ -577,12 +797,21 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const rRelC = pushC(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え(released)
   assertEqual(rRelC.released, true, "sanity: release fires before cancel scenario");
   assertDebugShape(rRelC.debug, "release-fire path");
-  // Plan-B（release-detection-triage-2026-07-13 §3.2）: 取消は連続2フレーム要件。
-  // 1フレーム目はまだ取消されず、2フレーム目でCONFIRM_MS以内にアンカー圏へ復帰(canceled)
-  const rDip1 = pushC(mkRaw(0.23, 150), 0.05);
-  assertEqual(rDip1.canceled, undefined, "sanity: 1st dip frame does not cancel yet (Plan-B)");
-  const rCancel = pushC(mkRaw(0.23, 150), 0.05);
-  assertEqual(rCancel.canceled, true, "sanity: cancel path reached");
+  /* アンカー復帰取消（Plan-B 2連続フレーム → 2026-07-15 時間ベース CANCEL_DIP_MS=100 へ更新。
+     実フィールド conf 0.5-0.7 のランドマーク幻出ランが 2 フレーム（33ms）を超え、実射への
+     誤取消が観測されたため。dt=20ms では初回ディップから 100ms 経過後のフレームで取消。 */
+  let rCancel = null;
+  for (let i = 0; i < 6; i++) {
+    const r = pushC(mkRaw(0.23, 150), 0.05);
+    if (i < 5)
+      assertEqual(
+        r.canceled,
+        undefined,
+        `dip frame ${i + 1} (${(i + 1) * dtC}ms span) does not cancel yet`,
+      );
+    else rCancel = r;
+  }
+  assertEqual(rCancel.canceled, true, "sanity: cancel path reached at >=100ms dip span");
   assertDebugShape(rCancel.debug, "canceled path");
   assertClose(
     rCancel.debug.anchorNorm,
@@ -629,9 +858,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   );
 }
 {
-  /* Plan-B (release-detection-triage-2026-07-13 §3.2): self-cancel は連続 2 フレームで発火する。
-     1 フレームだけ anchorNorm が dip して即戻るケースは cancel されない（single_frame_artifact 救済）。 */
-  // (a) 単発 dip → 取消されない: release fire → anchorNorm 1フレームだけ<CLOSE_IN → 復帰
+  /* アンカー復帰取消の境界（Plan-B 2連続フレーム → 2026-07-15 時間ベース CANCEL_DIP_MS=100）:
+     短い dip ラン（<100ms）は取消されない（実フィールドのランドマーク幻出ラン救済）。
+     100ms 以上の連続 dip = 真のアンカー駐留のみ取消。
+     復帰値は 1.0（実測のフォロースルー位置 1.3-1.7 に整合。0.6 は出発確認 DEPART_MIN=0.65
+     未満のため恒久ホバーだと猶予終了時に no-depart 取消される — 意図的な仕様） */
+  // (a) 80ms の dip ラン → 取消されない → 1.0 へ復帰して出発
   const stA = core.makeFormPhaseDetector();
   const histA = [];
   let tA = 0;
@@ -642,13 +874,21 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   };
   for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02); // アンカー保持
   const rFireA = pushA(mkRaw(0.6, 140), 10); // release fire
-  assertEqual(rFireA.released, true, "Plan-B (a): release fires");
-  const rDipA = pushA(mkRaw(0.3, 150), 0.05); // 1フレームだけ CLOSE_IN 未満
-  assertEqual(rDipA.canceled, undefined, "Plan-B (a): single frame dip does not cancel");
-  const rBackA = pushA(mkRaw(0.6, 150), 0.05); // 復帰
-  assertEqual(rBackA.canceled, undefined, "Plan-B (a): recovery, still no cancel");
+  assertEqual(rFireA.released, true, "cancel boundary (a): release fires");
+  for (let i = 0; i < 5; i++) {
+    const r = pushA(mkRaw(0.3, 150), 0.05); // dip ラン 80ms（5フレーム、span=80ms<100）
+    assertEqual(
+      r.canceled,
+      undefined,
+      `cancel boundary (a): ${(i + 1) * 20}ms dip span does not cancel`,
+    );
+  }
+  for (let i = 0; i < 10; i++) {
+    const r = pushA(mkRaw(1.0, 150), 0.05); // 復帰・出発（DEPART_MIN 以上）
+    assertEqual(r.canceled, undefined, "cancel boundary (a): recovery+depart, no cancel");
+  }
 
-  // (b) 2連続 dip → 取消される: release fire → anchorNorm 連続2フレーム<CLOSE_IN
+  // (b) 100ms 以上の連続 dip → 取消される
   const stB = core.makeFormPhaseDetector();
   const histB = [];
   let tB = 0;
@@ -659,11 +899,81 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   };
   for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
   const rFireB = pushB(mkRaw(0.6, 140), 10);
-  assertEqual(rFireB.released, true, "Plan-B (b): release fires");
-  const rDip1B = pushB(mkRaw(0.28, 150), 0.05); // dip 1
-  assertEqual(rDip1B.canceled, undefined, "Plan-B (b): frame 1 does not cancel yet");
-  const rDip2B = pushB(mkRaw(0.28, 150), 0.05); // dip 2 → 取消
-  assertEqual(rDip2B.canceled, true, "Plan-B (b): 2nd consecutive dip triggers cancel");
+  assertEqual(rFireB.released, true, "cancel boundary (b): release fires");
+  let canceledB = false;
+  for (let i = 0; i < 6 && !canceledB; i++) {
+    canceledB = pushB(mkRaw(0.28, 150), 0.05).canceled === true;
+  }
+  assertEqual(canceledB, true, "cancel boundary (b): >=100ms consecutive dip triggers cancel");
+}
+{
+  /* 出発確認（2026-07-15）: 発火後、確定猶予内に手が出発しない（anchorNorm < DEPART_MIN の
+     まま）発火はスプリアスとして猶予終了時に取消される。全null（姿勢ロス）の猶予は無罪推定 */
+  // (a) 発火後 0.5 でホバーし続ける → 猶予終了時に no-depart 取消
+  const stA = core.makeFormPhaseDetector();
+  const histA = [];
+  let tA = 0;
+  const pushA = (m, vel) => {
+    tA += 20;
+    histA.push({ ts: tA, m, vel });
+    return core.stepFormPhase(stA, m, histA, 1.0, tA);
+  };
+  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02);
+  assertEqual(pushA(mkRaw(0.6, 140), 10).released, true, "depart (a): fires");
+  let sawCancelA = false,
+    cancelReasonA = null;
+  for (let i = 0; i < 25; i++) {
+    const r = pushA(mkRaw(0.5, 140), 0.05); // 出発せずホバー（0.5 < DEPART_MIN=0.65）
+    if (r.canceled) {
+      sawCancelA = true;
+      cancelReasonA = r.debug && r.debug.cancelReason;
+      break;
+    }
+  }
+  assertEqual(sawCancelA, true, "depart (a): hovering fire is canceled at confirm expiry");
+  assertEqual(cancelReasonA, "no-depart", "depart (a): cancelReason=no-depart");
+  // (b) 発火後 1.0 へ出発 → 取消されない
+  const stB = core.makeFormPhaseDetector();
+  const histB = [];
+  let tB = 0;
+  const pushB = (m, vel) => {
+    tB += 20;
+    histB.push({ ts: tB, m, vel });
+    return core.stepFormPhase(stB, m, histB, 1.0, tB);
+  };
+  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
+  assertEqual(pushB(mkRaw(0.6, 140), 10).released, true, "depart (b): fires");
+  for (let i = 0; i < 25; i++) {
+    assertEqual(
+      pushB(mkRaw(1.0, 140), 0.05).canceled,
+      undefined,
+      "depart (b): departed fire is never canceled",
+    );
+  }
+  // (c) 発火後すべて姿勢ロス（null）→ 無罪推定でショット維持
+  const stC = core.makeFormPhaseDetector();
+  const histC = [];
+  let tC = 0;
+  const pushC = (m, vel) => {
+    tC += 20;
+    histC.push({ ts: tC, m, vel });
+    return core.stepFormPhase(stC, m, histC, 1.0, tC);
+  };
+  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 150), 0.02);
+  assertEqual(pushC(mkRaw(0.6, 140), 10).released, true, "depart (c): fires");
+  for (let i = 0; i < 25; i++) {
+    assertEqual(
+      pushC(null, 0).canceled,
+      undefined,
+      "depart (c): all-null confirm window never cancels",
+    );
+  }
+  // 猶予明けの最初の有効フレーム（手が下=SETUP位置でも departSeen=false なので無罪）
+  assertEqual(
+    pushC(mkRaw(1.4, 90), 0.2).canceled,
+    undefined,
+    "depart (c): first frame after blind window does not cancel",
+  );
 }
 {
   // DRAWING 方向チェック（Stage 0 E'）: anchorNorm 増加方向（レットダウン等）は DRAWING に遷移しない。
@@ -916,11 +1226,13 @@ function makeStepper(dt) {
   const rel = s.push(mkRaw(0.6, 140), 10); // 瞬間ノイズで released
   assertEqual(rel.r.released, true, "noise spike releases before cancel");
   assert(rel.r.anchorStartTs > 0, "released frame carries pre-clear anchorStartTs");
-  // Plan-B（release-detection-triage-2026-07-13 §3.2）: 取消は連続2フレーム要件。1フレーム目は取消されない
-  const dip1 = s.push(mkRaw(0.23, 150), 0.05);
-  assertEqual(dip1.r.canceled, undefined, "1st dip frame does not cancel yet (Plan-B)");
-  const cancel = s.push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS 以内に2連続フレームでアンカー圏へ復帰 → 取消
-  assertEqual(cancel.r.canceled, true, "return to anchor cancels");
+  // アンカー復帰取消は連続ディップのスパン >= CANCEL_DIP_MS(100ms) 要件（2026-07-15 時間ベース化）
+  let cancel = null;
+  for (let i = 0; i < 6 && !cancel; i++) {
+    const r = s.push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS 以内にアンカー圏へ復帰・駐留 → 取消
+    if (r.r.canceled) cancel = r;
+  }
+  assert(cancel, "return to anchor (>=100ms dip span) cancels");
   assertEqual(cancel.r.anchorStartTs, cancel.t, "canceled frame restarts anchorStartTs at now");
 }
 

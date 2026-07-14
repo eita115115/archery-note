@@ -54,6 +54,66 @@ const FORM_PH = Object.freeze({
   NB_RISE: 0.25,
   NB_MAXV: 2,
   NB_MAX_GAP_MS: 150,
+  /* アンカー証拠の一般化（2026-07-15 multi-shot repro 根拠、実射 6射中4射消失の対処）。
+     実射観測（v81, 60fps, conf 0.6-0.7）で確定した2つの欠落メカニズム:
+       A: リリース瞬間のトラッキング欠落 150-350ms → RISE_WINDOW 内の closeFrames が
+          時効し、クロスギャップ速度は希釈されて RELEASE_TH 未達 → 発火不能
+       B: アンカー保持中の手首ランドマーク誤配置（anchorNorm が CLOSE_IN 以上に浮く）→
+          closeFrames=0 のためスパイク(実測19-48tls/s)が完全に見えていても発火不能
+     A への対処 = NB2（tier-2 ギャップ橋渡し）。レットダウンとの判別は状態機械の非対称性
+     （レットダウンは E' 方向チェックが遮蔽前に anchorStartTs を SETUP でクリアするが、
+     リリースはアンカー圏から直接遮蔽に入るため sticky が生存する）＋着地位置ゲート
+     （レットダウン完了位置 anchorNorm≈1.3-1.5 / 垂直落下≈0.9胴体長 を上限で弾く）。
+     ギャップ>NB2_MAX_GAP_MS は端点情報だけでは物理的に判別不能なので対象外（既知の限界）。 */
+  NB2_MAX_GAP_MS: 350, // A: tier-2 橋渡しのギャップ上限
+  NB2_MIN_HOLD_MS: 200, // A: ギャップ前に実アンカー保持がこの時間以上あること
+  NB2_MIN_ARRIVE: 0.65, // A: 再捕捉位置の下限（明確にアンカー圏を離脱した位置）
+  NB2_MAX_ARRIVE: 1.15, // A: 再捕捉位置の上限（レットダウン完了位置を弾く）
+  NB2_MAX_DROP: 0.5, // A: 再捕捉時の垂直落下上限（胴体長比）
+  NB2_MAXV: 2.2, // A: クロスギャップ速度の下限（希釈後）
+  /* NB2 着地後静止確認: 着地位置ゲートだけでは「前方水平のレットダウンがギャップ内に
+     完全に隠れる」敵対幾何と判別しきれない（マージンが紙一重）。リリースの
+     フォロースルーは着地後に静止し、レットダウンは弦と共に動き続ける — この
+     運動学的差を CONFIRM_MS 窓内の自己取消として使う。NB2 発火に限り、着地位置から
+     NB2_SETTLE_MAX 胴体長を超えるドリフトが CANCEL_DIP_MS 以上持続したら取消。
+     0.35 は「緩慢な継続レットダウン（~0.9 tls/s × 400ms）を捕捉しつつ、実フォロー
+     スルーの静止（ドリフト実測 ~0.1-0.2）とノイズ（持続要件で除外）を残す」境界
+     （敵対レビュー 2026-07-15: 0.55 は 1.4 tls/s 未満の継続を素通りさせていた） */
+  NB2_SETTLE_MAX: 0.35,
+  /* CLOSE_LOOSE は診断計装（rejectedFramesNear の緩アンカー捕捉）と summarizeFormShot の
+     フォールバック窓が使う緩ゾーン境界。
+     注: 「緩ゾーン保持+強スパイクで発火する loose 経路」は2026-07-15に検討→撤去した。
+     実射診断の全16発火は close 証拠（閉ゾーン2フレーム）を持っており、loose 経路が救う
+     はずのメカニズム（anchorNorm が一度も 0.35 を切らない保持）は実データに存在しない一方、
+     ゴールデン 48725 の矢抜きシーン（幻覚ランドマーク）で過検出3件を出した。
+     将来 field 診断で当該メカニズムが観測されたら、そのデータで再設計する。 */
+  CLOSE_LOOSE: 0.6,
+  /* 出発確認（2026-07-15 実射診断 16発火→13が要約null破棄で消失、の置換設計）:
+     全ての発火は「確定猶予内に手が本当に離れた（anchorNorm >= DEPART_MIN が
+     DEPART_FRAMES 連続）」ことを要求する。実リリースは物理的に必ず手が去る
+     （実射観測: リリース直後 anchorNorm 1.3-1.7）。ドロー/保持中のスプリアス発火は
+     手がアンカー圏近傍に留まるため出発せず、猶予終了時に取消される。
+     従来この抑制は summarizeFormShot の null 破棄が偶然担っていた（そして実射の
+     正当なショットも 13/16 破棄していた）— それを運動学的原理で置換する。
+     無罪推定: 猶予中の有効フレーム観測が DEPART_OBSERVE_MIN 未満（姿勢ロス優勢）なら
+     有罪にできる材料が無いのでショットを残す（ゴールデン 43254 で実リリース直後に
+     トラッキングが失われ、観測1フレームで誤処刑された事例への対処）。 */
+  DEPART_MIN: 0.65, // 出発とみなす anchorNorm 下限
+  DEPART_FRAMES: 3, // 出発確認に要する連続フレーム数
+  DEPART_OBSERVE_MIN: 5, // 未出発を有罪にできる最小観測フレーム数（約83ms@60fps）
+  /* 取消ディップの時間ベース化（2026-07-15 実射診断: 実射に対する誤取消 3-4件の対処）:
+     Plan-B の2連続フレーム要件（60fpsで33ms）は、conf 0.5-0.7 の実フィールドの
+     ランドマーク幻出ラン長に対して不足だった。真のレットダウン復帰はアンカーに
+     駐留する（100msは自明に満たす）ため、時間下限の引き上げは真の取消に影響しない。 */
+  CANCEL_DIP_MS: 100, // アンカー復帰取消に要する連続ディップの最小スパン（従来は2フレーム=~33ms）
+  CANCEL_DIP_FRAMES: 3, // 同・最小ディップ観測数（nullギャップをまたぐ孤立2フレームでの誤取消防止）
+  /* 取消後クールダウン: 取消で lastReleaseTs を完全リセット(0)すると、RISE_WINDOW に残る
+     発火時の速度残滓で数十ms後に即再発火するループが起きる（ゴールデン 43254 実測）。
+     完全維持だと取消後 ~1秒は真のリリースも検出できない。折衷として残滓窓が確実に
+     時効する長さだけ再発火を塞ぐ（アンカー復帰取消・nb2-drift 取消に適用。
+     no-depart 取消は発火から 400ms 経過済みで残滓リスクが更に高いため refractory 完全維持） */
+  CANCEL_COOLDOWN_MS: 250,
+  SUMMARY_FALLBACK_MS: 600, // summarizeFormShot フォールバック窓（リリース前この時間まで遡る）
   /* B'（Stage 1・中立スキャフォールド）: conf / dW可視性ゲート。0 = 完全無効（現行挙動と同一）。
      発動候補（CONF_GATE 0.45 / DW_VIS_GATE 0.5）への切替は第2回実射データの判定表GO後のみ。
      ゲートで無効化したフレームは hasNullGap を増やし nullBridged 経路（D'）と相互作用するため、
@@ -444,7 +504,9 @@ function makeFormPhaseDetector() {
     lastReleaseTs: 0,
     lastRise: 0,
     pendingRelease: null,
-    pendingCancelFrames: 0,
+    pendingCancelSince: 0,
+    pendingCancelCount: 0,
+    nb2DriftSince: 0,
   };
 }
 
@@ -487,17 +549,80 @@ function stepFormPhase(st, raw, history, sens, now) {
     return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
+    /* 出発確認（2026-07-15）: 低来歴発火（発火時点で要約窓が空＝アンカー登録が遅い/無い）は、
+       確定猶予内に手が本当に離れた（anchorNorm >= DEPART_MIN が DEPART_FRAMES 連続）ことを
+       確認する。確認できたら departCheck を解除。観測できないまま猶予が切れたら下の
+       猶予終了ブロックで取消す（スプリアス発火＝手がアンカー圏に留まる、の抑制）。 */
+    if (st.pendingRelease.departCheck) {
+      st.pendingRelease.departSeen = (st.pendingRelease.departSeen || 0) + 1; // 観測できた有効フレーム数
+      if (usable.anchorNorm >= FORM_PH.DEPART_MIN) {
+        st.pendingRelease.departFrames = (st.pendingRelease.departFrames || 0) + 1;
+        if (st.pendingRelease.departFrames >= FORM_PH.DEPART_FRAMES)
+          st.pendingRelease.departCheck = false; // 出発確認済み
+      } else {
+        st.pendingRelease.departFrames = 0;
+      }
+    }
+    /* NB2 着地後静止確認（drift-cancel）: NB2 発火の pendingRelease に限り、着地位置
+       (refDw) からのドリフトが NB2_SETTLE_MAX 胴体長を超える状態が2連続フレーム続いたら
+       取消す（レットダウンが遮蔽内に隠れて NB2 の着地ゲートをすり抜けた場合、手は弦と
+       共に動き続けるため必ずここに入る。真のリリースはフォロースルーで静止するため
+       入らない）。単発 blur artifact 耐性は2連続フレーム要件で確保 */
+    if (st.pendingRelease.nb2Ref) {
+      const drift = formDist(usable.dW, st.pendingRelease.nb2Ref) / usable.bodyScale;
+      if (drift > FORM_PH.NB2_SETTLE_MAX) {
+        /* ドリフトも時間ベース（CANCEL_DIP_MS スパン）: 2フレーム要件はランドマークの
+           単発グリッチ（>0.55胴体長の跳びは実データで観測される）が真の NB2 射を
+           誤取消しうる。隠れレットダウンの継続移動はスパンを自明に満たす */
+        if (!st.nb2DriftSince) st.nb2DriftSince = now;
+        if (now - st.nb2DriftSince >= FORM_PH.CANCEL_DIP_MS) {
+          const debug = {
+            maxV: null,
+            rise: null,
+            nullFrames: null,
+            conf: usable.conf,
+            anchorNorm: usable.anchorNorm,
+            closeFrames: null,
+            hasNullGap: null,
+            refractoryRemaining: refractoryRemainingMs(),
+            cancelReason: "nb2-drift",
+          };
+          st.pendingRelease = null;
+          st.nb2DriftSince = 0;
+          st.pendingCancelSince = 0;
+          st.pendingCancelCount = 0;
+          st.lastReleaseTs = now - (FORM_PH.REFRACTORY_MS - FORM_PH.CANCEL_COOLDOWN_MS); // クールダウン: 残滓再発火の抑止
+          st.anchorSince = 0;
+          st.cur = FORM_PHASES.SETUP;
+          st.anchorStartTs = 0; // レットダウン確定: アンカー継続ではないので SETUP へ落とす
+          return {
+            phase: st.cur,
+            released: false,
+            canceled: true,
+            anchorStartTs: st.anchorStartTs,
+            debug,
+          };
+        }
+      } else {
+        st.nb2DriftSince = 0;
+      }
+    }
     if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
-      /* Plan-B（release-detection-triage-2026-07-13 §3.2, §7.5）: 単発 blur artifact
-         による誤取消を防ぐため、連続2フレームの dip を要求する（実測: cancel 16件中
-         15件・93.8%が single_frame_artifact、真のレットダウン系は0件 — 2フレーム要件は
-         実データで裏付け済み）。1フレーム目はカウントのみで取消せず、この if ブロックを
-         抜けて後続処理（sticky RELEASE lock 等）へ素通しする。cur / pendingRelease は
-         触らないため、次フレームで再びこの分岐に入り2フレーム目を判定できる。 */
-      st.pendingCancelFrames = (st.pendingCancelFrames || 0) + 1;
-      if (st.pendingCancelFrames >= 2) {
-        // アンカー圏へ2連続フレームで戻った = 離脱ではなく検出ノイズ/引き戻しだった。取消
-        // 計装: st.lastReleaseTs をリセットする前に refractoryRemainingMs() を評価する（取消直前の値を残す）
+      /* アンカー復帰取消（Plan-B 2026-07-13 → 時間ベース化 2026-07-15）: 実フィールド
+         （conf 0.5-0.7）のランドマーク幻出は2連続フレーム（60fpsで33ms）を超えるラン長を
+         持ち、実射への誤取消が観測された（2026-07-15 診断: 4セッションで3-4件）。真の
+         レットダウン復帰はアンカーに駐留する（CANCEL_DIP_MS は自明に満たす）ため、
+         連続ディップのスパンが CANCEL_DIP_MS 以上になったときのみ取消す。
+         非ディップフレームでスパンはリセット（Plan-B の連続要件の時間版） */
+      if (!st.pendingCancelSince) st.pendingCancelSince = now;
+      st.pendingCancelCount = (st.pendingCancelCount || 0) + 1;
+      /* スパン(CANCEL_DIP_MS)に加え観測数(CANCEL_DIP_FRAMES)も要求: null ギャップを
+         またいで孤立した2フレームのディップがスパンだけを満たして誤取消するのを防ぐ */
+      if (
+        now - st.pendingCancelSince >= FORM_PH.CANCEL_DIP_MS &&
+        st.pendingCancelCount >= FORM_PH.CANCEL_DIP_FRAMES
+      ) {
+        // 計装: st.lastReleaseTs を書き換える前に refractoryRemainingMs() を評価する（取消直前の値を残す）
         const debug = {
           maxV: null,
           rise: null,
@@ -507,10 +632,13 @@ function stepFormPhase(st, raw, history, sens, now) {
           closeFrames: null,
           hasNullGap: null,
           refractoryRemaining: refractoryRemainingMs(),
+          cancelReason: "anchor-return",
         };
         st.pendingRelease = null;
-        st.lastReleaseTs = 0;
-        st.pendingCancelFrames = 0;
+        st.pendingCancelSince = 0;
+        st.pendingCancelCount = 0;
+        st.nb2DriftSince = 0;
+        st.lastReleaseTs = now - (FORM_PH.REFRACTORY_MS - FORM_PH.CANCEL_COOLDOWN_MS); // クールダウン: 残滓再発火の抑止
         st.anchorSince = now;
         st.cur = FORM_PHASES.ANCHORING;
         st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
@@ -522,13 +650,84 @@ function stepFormPhase(st, raw, history, sens, now) {
           debug,
         };
       }
-      // 1フレーム目: まだ取消しない。pendingRelease を維持したまま次のチェック（sticky lock 等）へ進む
+      // スパン蓄積中: まだ取消しない。pendingRelease を維持したまま次のチェック（sticky lock 等）へ進む
     } else {
-      st.pendingCancelFrames = 0; // アンカー圏外に戻った = dip 解消。連続要件のためカウンタをリセット
+      st.pendingCancelSince = 0; // アンカー圏外に戻った = dip 解消。連続要件のためリセット
+      st.pendingCancelCount = 0;
     }
   } else if (st.pendingRelease) {
-    st.pendingRelease = null; // 猶予終了、確定（取消なし）
-    st.pendingCancelFrames = 0;
+    const pending = st.pendingRelease;
+    st.pendingRelease = null; // 猶予終了
+    st.pendingCancelSince = 0;
+    st.nb2DriftSince = 0;
+    if (
+      pending.nb2Ref &&
+      pending.departCheck &&
+      (pending.departSeen || 0) < FORM_PH.DEPART_OBSERVE_MIN
+    ) {
+      /* NB2 発火の肯定的確認要求（敵対レビュー 2026-07-15）: ギャップ由来の発火（NB2）で
+         出発が未確認（departCheck が立ったまま）かつフォロースルーの観測も不足している
+         場合、「1フレームのフリッカーが発火し、遮蔽が猶予を食い潰して幻ショットが確定する」
+         経路を塞ぐため取消す。発火の証拠自体がギャップ越しである以上、着地後の静止が
+         観測できないショットは主張できない。出発確認済み（departCheck=false、観測カウントは
+         確認時点で凍結する）なら無実。close 証拠の発火（実射の主経路）には適用しない */
+      const debug = {
+        maxV: null,
+        rise: null,
+        nullFrames: null,
+        conf: usable.conf,
+        anchorNorm: usable.anchorNorm,
+        closeFrames: null,
+        hasNullGap: null,
+        refractoryRemaining: refractoryRemainingMs(),
+        cancelReason: "nb2-unobserved",
+      };
+      st.anchorSince = 0;
+      st.cur = FORM_PHASES.SETUP;
+      st.anchorStartTs = 0;
+      return {
+        phase: st.cur,
+        released: false,
+        canceled: true,
+        anchorStartTs: st.anchorStartTs,
+        debug,
+      };
+    }
+    if (pending.departCheck && (pending.departSeen || 0) >= FORM_PH.DEPART_OBSERVE_MIN) {
+      /* 出発未確認のまま猶予終了（十分な有効フレームを観測できていた）→ スプリアス発火として
+         取消。手がアンカー圏/緩ゾーンに留まったままの発火＝ドロー/保持中の誤発火。
+         観測が DEPART_OBSERVE_MIN 未満（姿勢ロス優勢）なら無罪推定でショットを残す。
+         注: lastReleaseTs は意図的にリセットしない — リセットすると 250ms 窓に残る発火時の
+         速度残滓で数十ms後に即再発火するループが起きる（ゴールデン 43254 で実測）。
+         refractory を維持しても真の次射（数秒後）には影響しない。 */
+      const debug = {
+        maxV: null,
+        rise: null,
+        nullFrames: null,
+        conf: usable.conf,
+        anchorNorm: usable.anchorNorm,
+        closeFrames: null,
+        hasNullGap: null,
+        refractoryRemaining: refractoryRemainingMs(),
+        cancelReason: "no-depart",
+      };
+      if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
+        st.anchorSince = now;
+        st.cur = FORM_PHASES.ANCHORING;
+        st.anchorStartTs = now;
+      } else {
+        st.anchorSince = 0;
+        st.cur = FORM_PHASES.SETUP;
+        st.anchorStartTs = 0;
+      }
+      return {
+        phase: st.cur,
+        released: false,
+        canceled: true,
+        anchorStartTs: st.anchorStartTs,
+        debug,
+      };
+    }
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) {
     st.cur = FORM_PHASES.RELEASE;
@@ -594,6 +793,32 @@ function stepFormPhase(st, raw, history, sens, now) {
     rise > FORM_PH.NB_RISE &&
     maxV > FORM_PH.NB_MAXV &&
     maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
+  /* NB2（A: tier-2 ギャップ橋渡し）: RISE_WINDOW を超える遮蔽でアンカー証拠が時効した
+     リリースを、sticky アンカーの生存＋着地位置ゲートで発火させる。
+     history 契約: 現在フレームは呼び出し側が push 済みなので、直前の有効フレームは
+     末尾のひとつ手前から遡って探す。 */
+  let nb2LastValid = null;
+  for (let i = history.length - 2; i >= 0 && !nb2LastValid; i--) {
+    const h = history[i];
+    if (h.m && formConfOk(h.m)) nb2LastValid = h;
+  }
+  const nb2GapMs = nb2LastValid ? now - nb2LastValid.ts : Infinity;
+  const nb2DropBody = nb2LastValid
+    ? (usable.dW.y - nb2LastValid.m.dW.y) / usable.bodyScale
+    : Infinity;
+  const nullBridged2 =
+    st.anchorStartTs > 0 &&
+    (st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) &&
+    nb2LastValid != null &&
+    nb2GapMs > FORM_PH.NB_MAX_GAP_MS &&
+    nb2GapMs <= FORM_PH.NB2_MAX_GAP_MS &&
+    nb2LastValid.m.anchorNorm < FORM_PH.CLOSE_IN &&
+    nb2LastValid.ts - st.anchorStartTs >= FORM_PH.NB2_MIN_HOLD_MS &&
+    usable.anchorNorm >= FORM_PH.NB2_MIN_ARRIVE &&
+    usable.anchorNorm <= FORM_PH.NB2_MAX_ARRIVE &&
+    nb2DropBody <= FORM_PH.NB2_MAX_DROP &&
+    maxV > FORM_PH.NB2_MAXV / s;
+  const anchorEvidence = closeFrames.length >= 2 ? "close" : nullBridged2 ? "nb2" : null;
   const debug = {
     maxV,
     rise,
@@ -605,17 +830,32 @@ function stepFormPhase(st, raw, history, sens, now) {
     refractoryRemaining: refractoryRemainingMs(),
   }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
   if (
-    closeFrames.length >= 2 &&
+    anchorEvidence &&
     !close &&
     now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS &&
-    (velOk || nullBridged)
+    (velOk || nullBridged || nullBridged2)
   ) {
     st.lastReleaseTs = now;
     st.cur = FORM_PHASES.RELEASE;
     st.anchorSince = 0;
-    st.pendingRelease = { ts: now };
+    /* NB2 経由の発火（アンカー証拠が nb2 か、速度経路が nb2 のみ）には着地後静止確認用の
+       参照位置を持たせる（drift-cancel 対象化）。通常経路の発火には付けない。
+       出発確認（departCheck）は全ての発火に普遍適用する（2026-07-15） */
+    const viaNb2 = anchorEvidence === "nb2" || (!velOk && !nullBridged && nullBridged2);
+    st.pendingRelease = {
+      ts: now,
+      nb2Ref: viaNb2 ? { x: usable.dW.x, y: usable.dW.y } : null,
+      departCheck: true,
+      departFrames: 0,
+      departSeen: 0,
+    };
+    st.nb2DriftSince = 0;
+    st.pendingCancelSince = 0;
     const anchorStartTs = st.anchorStartTs; // クリア前の値を返す（呼び出し側が summarizeFormShot へ渡す）
     st.anchorStartTs = 0;
+    /* 発火経路の計装（フィールド監査用）: evidence=アンカー証拠の種別 / vel=速度経路の種別 */
+    debug.fireEvidence = anchorEvidence;
+    debug.fireVel = velOk ? "vel" : nullBridged ? "nb" : "nb2";
     return { phase: st.cur, released: true, anchorStartTs, debug };
   }
   if (close) {
@@ -752,14 +992,37 @@ function formAnchorVariation(shots) {
    anchorStartTs=アンカー圏に入った時刻, releaseTs=リリース時刻 */
 function summarizeFormShot(history, anchorStartTs, releaseTs) {
   if (!history || !history.length || !releaseTs) return null;
-  const win = history.filter(
+  let win = history.filter(
     (h) => h.m && h.ts >= (anchorStartTs || 0) && h.ts <= releaseTs - 120 && h.m.anchorNorm < 0.45,
   );
-  if (win.length < 2) return null;
-  const md = (key) => formMedian(win.map((h) => h.m[key]));
+  let degraded = false;
+  /* 段階フォールバック（2026-07-15）: 従来は win.length < 2 で null（ショット無言破棄）
+     だったが、実射診断で「アンカー登録が発火の50-70ms前」のとき要約窓が空になり
+     16発火中13が破棄されていた。ショットのカウントは要約品質に依存させない —
+     スプリアス発火の抑制は発火時の出発確認（stepFormPhase の departCheck）が担う。
+     フォールバック1: リリース前 SUMMARY_FALLBACK_MS の緩ゾーン（anchorNorm < CLOSE_LOOSE）
+     フォールバック2: 同窓の有効フレーム全部（角度は参考値、degraded マーク付き）
+     床: winが空でも null は返さず、角度 null（表示は「—」）のショットを返す */
+  if (win.length < 2) {
+    degraded = true;
+    win = history.filter(
+      (h) =>
+        h.m &&
+        h.ts >= releaseTs - FORM_PH.SUMMARY_FALLBACK_MS &&
+        h.ts <= releaseTs - 120 &&
+        h.m.anchorNorm < FORM_PH.CLOSE_LOOSE,
+    );
+  }
+  if (win.length < 2) {
+    win = history.filter(
+      (h) => h.m && h.ts >= releaseTs - FORM_PH.SUMMARY_FALLBACK_MS && h.ts <= releaseTs - 120,
+    );
+  }
+  const md = (key) => (win.length ? formMedian(win.map((h) => h.m[key])) : null);
   const holdMs = anchorStartTs ? Math.max(0, releaseTs - anchorStartTs) : null;
   return {
     holdMs,
+    degraded,
     angles: {
       bowArm: md("bowArm"),
       drawArm: md("drawArm"),
