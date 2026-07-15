@@ -86,19 +86,21 @@ This state exists only for the active capture or replay. It resets when capture 
 - Set `anchorEnter = clamp(floor + 0.12, 0.35, 0.65)`.
 - Before six samples exist, retain the current `0.35` threshold; do not fabricate calibration.
 - A hold candidate requires at least three usable samples spanning 150 ms inside `anchorEnter`, with an `anchorNorm` range no greater than `0.12`.
+- Holds shorter than 150 ms are outside the adaptive path because they do not provide enough evidence to separate a hold from draw-through motion. The legacy detector may still count them in a true side view, but short-hold oblique shooting is not part of this release's field acceptance matrix.
 - When the hold candidate qualifies, store `evidence = { ts, normAtHold, anchorEnter, strength }`, where `normAtHold` is the median of the qualifying samples and `strength` is their count capped at 12.
-- Evidence remains valid for 1.5 seconds through brief pose loss or phase-label changes. It expires on timeout, confirmed release, explicit reset, or a return to a new setup without a hold.
+- While qualifying hold frames continue, refresh `evidence.ts = now`; long holds therefore do not expire their own evidence.
+- Evidence remains valid for 1.5 seconds after the last qualifying hold frame through brief pose loss or phase-label changes. It expires on that timeout, confirmed release, explicit geometry reset, or `anchorNorm > 1.2` for 300 ms without a pending release.
 
 This allows an oblique capture with a stable hold near 0.47 to calibrate around 0.59 while preserving the stricter 0.35 floor for a true side view.
 
 ### Adaptive release threshold and candidate
 
 - Collect velocity samples only from the qualifying hold window.
-- With at least six hold samples, set `releaseSpeed = clamp(p90(holdVelocitySamples) + 1.0, 6, 9)`; otherwise use `6`.
+- With at least six hold samples, set `releaseSpeed = clamp(p90(holdVelocitySamples) + 1.0, 6, 8)`; otherwise use `6`. The upper bound stays below Record B's observed 8.518 so tracking noise cannot adapt the detector back to the failed fixed threshold of 9.
 - A release candidate requires all of the following:
   - valid anchor evidence no older than 1.5 seconds;
   - current `anchorNorm - evidence.normAtHold >= 0.18`;
-  - movement is away from the face;
+  - current `anchorNorm` is at least `0.04` greater than the median of the previous three usable frames, defining movement away from the face;
   - current short-window `maxV >= releaseSpeed`;
   - the one-second refractory period has elapsed.
 - A qualifying candidate is counted immediately and tagged `fireEvidence: "adaptive"`.
@@ -106,11 +108,24 @@ This allows an oblique capture with a stable hold near 0.47 to calibrate around 
 
 The fixed lower speed bound of 6 is intentionally recall-first. The stable-hold and relative-departure requirements replace the safety that the old fixed value of 9 attempted to provide by itself.
 
+Fast 100–150 ms let-downs can satisfy the same kinematics and may be counted. This is an explicit recall-first tradeoff already approved by the user: such rare false positives remain visible and removable with one tap. Existing let-down regressions are not silently weakened; cases with a qualified adaptive hold are re-derived to document which fast boundaries can produce a removable candidate, while slower let-downs remain zero-shot safety cases.
+
+### Phase and summary integration
+
+- Adaptive hold qualification drives the same state machine that the UI reads. On first qualification, set `anchorSince` and `anchorStartTs` to the first sample of the qualifying hold and enter `ANCHORING`.
+- Continue to use `FULLDRAW_MS=350`; once the adaptive hold has lasted that long and `drawArm > 125`, enter `FULL_DRAW`.
+- Return the active `anchorEnter` with every detector result so capture and replay use the same geometry.
+- Generalize the shot summary's primary anchor filter from `anchorNorm < 0.45` to `anchorNorm < max(0.45, activeAnchorEnter)`. Pass `activeAnchorEnter` into `summarizeFormShot`; do not read detector globals from the summarizer.
+- Generalize NB2's pre-gap anchor check from `CLOSE_IN` to the active adaptive `anchorEnter` when adaptive evidence exists. Legacy captures without adaptive evidence retain `CLOSE_IN`.
+- Adaptive and legacy/NB/NB2 candidates converge into one fire path before refractory and pending-release state are written, so one frame cannot count twice.
+
 ### Post-fire behavior
 
 - Preserve immediate UI insertion, haptic feedback, one-tap removal, and the one-second refractory period.
 - Adaptive fire already contains positive departure evidence, so it does not use `no-depart` cancellation.
-- Automatically cancel only when the hand clearly returns inside the learned `anchorEnter` for at least 150 ms and at least four usable frames.
+- Store the fire-time `anchorEnter` in `pendingRelease`; later calibration changes cannot move the cancellation boundary.
+- Automatically cancel only inside the existing `CONFIRM_MS=400` window when the hand clearly returns inside that stored `anchorEnter` for at least 150 ms and at least four usable frames.
+- After `CONFIRM_MS`, a later anchor—especially the next shot—cannot cancel the preceding shot.
 - Pose loss or insufficient follow-through observations do not cancel an adaptive shot.
 - Arrow presence remains a saved `shot-match` / `letdown-mismatch` / `unclear` annotation and never removes a shot in this iteration.
 
@@ -143,7 +158,7 @@ These values are small derived numbers inside the existing forward-compatible di
 - Add no new primary control.
 - Continue showing the existing phase label, shot list, FPS warning, and remove button.
 - The adaptive model runs automatically after capture begins.
-- Camera swap, handedness change, and crop change silently reset calibration so stale geometry cannot count a shot.
+- Camera swap, handedness change, and crop change call one new capture-only geometry reset helper. It recreates the detector and EMA, clears history and velocity state, clears presence samples, and closes any arrow-presence annotation window without removing an already counted shot. Replay has no camera-geometry control and is excluded from this UI reset path.
 - If calibration has not formed after several seconds of drawing, the existing HUD may show one compact hint: “カメラをできるだけ真横に置いてください”. Do not add a settings panel or expose numeric thresholds.
 
 ## Error handling
@@ -172,7 +187,14 @@ All production behavior changes follow red-green-refactor. Tests are added to `t
 - Camera/crop/handedness reset invalidates old evidence.
 - Clear return to the learned anchor for 150 ms and four samples cancels one false candidate.
 - Pose loss after an adaptive fire does not cancel the real shot.
-- All existing form-core, golden-replay, app, globals, lint, and E2E checks remain green.
+- A 3-second qualified hold continues refreshing evidence and counts one release when the hand departs.
+- Adaptive return inside the fire-time `anchorEnter` cancels only within 400 ms; the same return after 400 ms does not cancel.
+- A noisy hold with 10% velocity outliers near 7 still permits a Record B-style 8.5 release.
+- The oblique profile enters `ANCHORING`/`FULL_DRAW`, returns non-null `holdMs`, and uses the adaptive summary window.
+- At five anchor samples the adaptive threshold remains 0.35; calibration starts only at six.
+- A `+0.03` three-frame departure does not fire; `+0.04` is the inclusive direction boundary.
+- `anchorNorm > 1.2` for less than 300 ms preserves evidence; 300 ms invalidates it.
+- Existing form-core tests either stay unchanged or receive an explicit expectation re-derivation for the approved fast-let-down tradeoff. The final form-core, golden-replay, app, globals, lint, and E2E suites are green.
 
 The private backup is not committed. Regression fixtures use anonymous synthetic sequences derived from its aggregate ranges. A later privacy-safe compressed trace format may be added only if the first adaptive field run still cannot explain failures.
 
