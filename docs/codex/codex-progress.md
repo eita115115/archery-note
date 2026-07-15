@@ -243,16 +243,37 @@ at `18f3d532`); prettier checks on guidance docs pass (2026-07-03).
 Risk notes: wip branches created before `18f3d532` lack the token guard
 until rebased/merged; the Phase Ledger rows above are still stale.
 
+### 2026-07-15 - Adaptive release detection design and Fable 5 review
+
+- Analyzed a private diagnostic backup locally without committing it. Three
+  APP_VER 83 field records showed zero cancellations and two complementary
+  non-fire modes: velocity without fixed close evidence, and close evidence
+  without the fixed velocity threshold.
+- Wrote the recall-first, session-local calibration design in
+  `docs/superpowers/specs/2026-07-15-adaptive-release-detection-design.md`.
+- Fable 5 reviewed the draft as `DONE_WITH_CONCERNS`. The revision now refreshes
+  evidence through long holds, limits adaptive cancellation to the existing
+  400 ms window with the fire-time boundary, caps adaptive release speed at 8,
+  connects adaptive holds to phase/summary/NB2 state, defines geometry reset
+  behavior, and replaces vague direction/expiry rules with numeric conditions.
+- Independent verification verdict: **Accepted**. Commits `934431ec` and
+  `86aa8bb0` exist, contain only the design file, all required Fable corrections
+  are present, `git diff --check main..HEAD` passes, and the design file passes
+  Prettier.
+- No runtime code, storage schema, Service Worker, dependency, version marker,
+  release, or private practice record changed.
+
 ## Last Run Report
 
 - Changed files:
-  - `docs/codex/codex-progress.md` (this reconciliation)
-  - Five guidance docs committed to `main` on 2026-07-03
+  - `docs/superpowers/specs/2026-07-15-adaptive-release-detection-design.md`
+  - `docs/codex/codex-progress.md`
 - Validation:
-  - `git status --short` (in-flight analysis/physics work identified and
-    preserved; nothing outside guidance docs staged)
-  - `npx prettier --check` on the five guidance docs
-  - `git diff --check`
+  - `git status --short --branch`
+  - `git diff --check main..HEAD`
+  - `npx prettier --check docs/superpowers/specs/2026-07-15-adaptive-release-detection-design.md`
+  - Fable 5 bounded design review plus independent content spot-check
 - Next task:
-  - Reconcile the Phase Ledger rows and Next Task Detail with the current
-    repository state. Docs-only run; no app behavior changes.
+  - User reviews the written adaptive-release specification. After explicit
+    approval, create the implementation plan; do not change app behavior before
+    that gate.
