@@ -4,8 +4,10 @@
 - [ ] Repository URL verified
 - [ ] README and license reviewed
 - [ ] Setup and test instructions reproduced
-- [ ] Demo video recorded under three minutes
-- [ ] Video visibility confirmed
+- [ ] Category set to Apps for Your Life
+- [ ] Demo video recorded under three minutes with audio
+- [ ] Video explains how Codex and GPT-5.6 were used
+- [ ] Public YouTube visibility confirmed
 - [ ] English description pasted
 - [ ] Screenshots captured from fictional data
 - [ ] Codex Session ID obtained
@@ -15,6 +17,7 @@
 - [ ] Third-party asset licenses reviewed
 - [ ] Latest commit and clean working tree confirmed
 - [ ] Release tag created if desired
-- [ ] Official rules and judging criteria rechecked
+- [x] Official rules and judging criteria rechecked on 2026-07-15
+- [x] Pre-existing work and Build Week extension documented separately
 - [ ] Devpost/submission form completed by a human
 - [ ] Terms accepted by a human

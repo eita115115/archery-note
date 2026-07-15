@@ -8,5 +8,5 @@
 - **1:35–1:55 — Timeline:** Switch 7, 30, 90 days and all time. Point out text labels and chart title.
 - **1:55–2:15 — Next practice:** Read one suggestion and its recorded reason; explain that rules are local and reproducible.
 - **2:15–2:30 — Offline:** Enable offline mode, reload, and return to Analysis.
-- **2:30–2:45 — Codex:** Show tests and this development log; explain the inspect, test, implement, verify loop.
+- **2:30–2:45 — GPT-5.6 and Codex:** Show tests and the development log; explain how GPT-5.6 in Codex inspected the existing app, helped design pure functions, implemented the dashboard and tests, and verified the release while the human chose the product constraints.
 - **2:45–2:55 — Close:** “Archery Note turns private records into the next practice action.”

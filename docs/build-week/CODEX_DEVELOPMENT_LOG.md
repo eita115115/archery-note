@@ -11,6 +11,7 @@ README, package scripts, app HTML/CSS/JavaScript, analysis and storage cores, PW
 - Compared the athlete with their own immediately prior session.
 - Added fixed-day filters, dashboard metrics, confidence and evidence-bearing suggestions.
 - Added fictional demo records under a reserved ID prefix and demo-only removal.
+- Used GPT-5.6 in Codex for repository inspection, implementation, regression design, release verification and submission preparation; retained human control over product scope, privacy and final decisions.
 
 ## Tests and security
 
@@ -20,17 +21,16 @@ README, package scripts, app HTML/CSS/JavaScript, analysis and storage cores, PW
 ## Trade-offs and human checks
 
 - No cloud AI or opaque generated coaching was added.
-- Official judging criteria were not visible on the official page and remain to be checked in the submission portal.
-- Video capture, final public URLs, Codex Session ID, submission and terms acceptance require a human.
-- Final full-suite, Lighthouse and offline browser evidence must be recorded at the release checkpoint.
+- The official page and Devpost rules were checked on 2026-07-15; the judging mapping now uses their four equally weighted criteria.
+- Video narration, final public URLs, Codex Session ID, submission and terms acceptance still require release evidence or human confirmation.
+- iPhone and Android physical-device offline checks remain human release checks; automated mobile-sized and browser offline evidence supplements but does not replace them.
 
 ## Verification snapshot (2026-07-15)
 
-- `npm ci`: success; 302 packages installed. Development dependency audit reported 17 moderate issues.
-- `npm audit --omit=dev`: 0 vulnerabilities.
+- `npm audit`: 0 vulnerabilities after pinning the Lighthouse toolchain to a non-vulnerable compatible version.
 - `npm run check:all`: success, including 38 security regression checks.
 - `npm run format:check`: success.
 - `npm run lint`: success.
 - `npm run test:e2e`: 41 passed.
 - `npm run build:native-web`: success.
-- `npm run lighthouse:baseline`: Performance 0.82; Accessibility, Best Practices and SEO 1.00; PWA score unavailable in this runner. Chrome profile cleanup reported `EPERM` after report generation.
+- `npm run lighthouse:baseline`: Performance 0.84 after deferred scripts and minified CSS; Accessibility, Best Practices and SEO 1.00; PWA score unavailable in this runner.
