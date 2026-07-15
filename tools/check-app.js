@@ -326,7 +326,7 @@ assert(calibApi.physicsCalibrationHtml("main").includes("物理校正"), "Physic
 
 const gearApi = new Function(
   "clamp","num","esc",
-  section("const CATALOG_SHAFTS=", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS,GEAR_SUGGESTIONS};"
+  section("const CATALOG_SHAFTS", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS,GEAR_SUGGESTIONS};"
 )(
   (v,a,b)=>Math.max(a,Math.min(b,v)),
   v=>{ const n=parseFloat(v); return Number.isFinite(n)?n:null; },

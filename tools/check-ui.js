@@ -75,7 +75,7 @@ function pngSize(file) {
 
 function staticUiChecks() {
   const gearList = (name) => {
-    const match = new RegExp(`\\n  ${name}:\\[([\\s\\S]*?)\\n  \\],`).exec(appJs);
+    const match = new RegExp(`\\n\\s*${name}:\\s*\\[([\\s\\S]*?)\\n\\s*\\],`).exec(appJs);
     assert(match, `${name} gear list missing`);
     return match[1];
   };

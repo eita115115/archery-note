@@ -58,7 +58,12 @@ return {sessionWindSpeed, windModel, sessionMetricSignature, sessionMetrics, reg
 
 // 122cm単的: リング幅 6.1cm、矢円半径 122/85、的線半幅 122/1200
 assertClose(scoring.ringW(122, "single"), 6.1, 1e-9, "ringW 122 single");
-assertClose(scoring.lineCutRadius(122, "single"), 122 / 85 + 122 / 1200, 1e-9, "lineCutRadius 122 single");
+assertClose(
+  scoring.lineCutRadius(122, "single"),
+  122 / 85 + 122 / 1200,
+  1e-9,
+  "lineCutRadius 122 single",
+);
 
 // 中心は X
 {
@@ -99,46 +104,76 @@ assertEqual(scoring.scoreAt(0, 0, 40, "field", 0).X, false, "field has no X");
 
 // 5本未満は simple 法 + 低信頼度
 {
-  const st = scoring.robustStats([{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }]);
+  const st = scoring.robustStats([
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+  ]);
   assertEqual(st.method, "simple", "small sample uses simple method");
   assertClose(st.confidence, 0.55, 1e-9, "3-arrow confidence");
   assertEqual(st.total, 3, "small sample total");
 }
 {
-  const st = scoring.robustStats([{ x: 0, y: 0 }, { x: 1, y: 1 }]);
+  const st = scoring.robustStats([
+    { x: 0, y: 0 },
+    { x: 1, y: 1 },
+  ]);
   assertClose(st.confidence, 0.35, 1e-9, "2-arrow confidence");
 }
 
 // 明白な外れ値 1 本はクラスタ中心を保ったまま除外される
 {
   const cluster = [
-    { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: -1, y: 0 }, { x: 0, y: -1 },
-    { x: 1, y: 1 }, { x: -1, y: -1 }, { x: 1, y: -1 }, { x: -1, y: 1 },
+    { x: 0, y: 0 },
+    { x: 1, y: 0 },
+    { x: 0, y: 1 },
+    { x: -1, y: 0 },
+    { x: 0, y: -1 },
+    { x: 1, y: 1 },
+    { x: -1, y: -1 },
+    { x: 1, y: -1 },
+    { x: -1, y: 1 },
   ];
   const st = scoring.robustStats([...cluster, { x: 40, y: 40 }]);
   assertEqual(st.method, "ellipse-biweight", "large sample uses ellipse-biweight");
   assertEqual(st.excluded.length, 1, "one outlier excluded");
   assertEqual(st.excluded[0].x, 40, "the excluded arrow is the outlier");
-  assert(Math.abs(st.mx) < 0.5 && Math.abs(st.my) < 0.5, `center stays near origin, got (${st.mx}, ${st.my})`);
+  assert(
+    Math.abs(st.mx) < 0.5 && Math.abs(st.my) < 0.5,
+    `center stays near origin, got (${st.mx}, ${st.my})`,
+  );
   assert(st.confidence > 0.3 && st.confidence <= 1, `confidence in range, got ${st.confidence}`);
 }
 
 /* ---------- 回帰 ---------- */
 
 {
-  const r = analysis.regress([[0, 1], [1, 3], [2, 5]]);
+  const r = analysis.regress([
+    [0, 1],
+    [1, 3],
+    [2, 5],
+  ]);
   assertClose(r.b, 2, 1e-9, "regress slope");
   assertClose(r.a, 1, 1e-9, "regress intercept");
   assertClose(r.zero, -0.5, 1e-9, "regress zero");
   assertClose(r.r2, 1, 1e-9, "regress r2");
 }
 {
-  const r = analysis.robustLine([[0, 1], [1, 3], [2, 5]]);
+  const r = analysis.robustLine([
+    [0, 1],
+    [1, 3],
+    [2, 5],
+  ]);
   assertClose(r.b, 2, 1e-9, "robustLine slope");
   assertClose(r.zero, -0.5, 1e-9, "robustLine zero");
 }
 {
-  const r = analysis.robustWeightedLine([[0, 1, 1], [1, 3, 1], [2, 5, 1], [3, 7, 1]]);
+  const r = analysis.robustWeightedLine([
+    [0, 1, 1],
+    [1, 3, 1],
+    [2, 5, 1],
+    [3, 7, 1],
+  ]);
   assertEqual(r.kind, "weighted-robust", "robustWeightedLine kind");
   assertClose(r.zero, -0.5, 1e-6, "robustWeightedLine zero");
   assert(r.quality > 0.8, `clean-line quality should be high, got ${r.quality}`);
@@ -154,8 +189,16 @@ assertEqual(analysis.regress([[1, 2]]), null, "regress needs 2 points");
   assertEqual(w.label, "向かい風", "headwind label");
 }
 assertEqual(analysis.windModel({ windSpeed: "4", windDir: "追い" }).down, 4, "tailwind down");
-assertEqual(analysis.windModel({ windSpeed: "4", windDir: "左から" }).side, 4, "left crosswind side");
-assertEqual(analysis.windModel({ windSpeed: "4", windDir: "右から" }).side, -4, "right crosswind side");
+assertEqual(
+  analysis.windModel({ windSpeed: "4", windDir: "左から" }).side,
+  4,
+  "left crosswind side",
+);
+assertEqual(
+  analysis.windModel({ windSpeed: "4", windDir: "右から" }).side,
+  -4,
+  "right crosswind side",
+);
 {
   const w = analysis.windModel({ windSpeed: "4", windDir: "巻き" });
   assertClose(w.side, 2.2, 1e-9, "swirl side");
@@ -181,8 +224,14 @@ function sampleSession() {
     faceD: 122,
     faceType: "single",
     ends: [
-      [{ x: 0, y: 0, s: 10, X: true }, { x: 1, y: 2, s: 9 }],
-      [{ x: -1, y: 0, s: 10 }, { x: 2, y: -1, s: 9 }],
+      [
+        { x: 0, y: 0, s: 10, X: true },
+        { x: 1, y: 2, s: 9 },
+      ],
+      [
+        { x: -1, y: 0, s: 10 },
+        { x: 2, y: -1, s: 9 },
+      ],
     ],
   };
 }
@@ -203,7 +252,10 @@ function sampleSession() {
   // 途中の矢の位置だけ動かしても（点数不変でも）キャッシュキーが変わること
   const nudged = sampleSession();
   nudged.ends[0][1].x += 0.4;
-  assert(analysis.sessionMetricSignature(nudged) !== a, "mid-session position nudge changes signature");
+  assert(
+    analysis.sessionMetricSignature(nudged) !== a,
+    "mid-session position nudge changes signature",
+  );
 }
 
 {
@@ -229,14 +281,20 @@ function sampleSession() {
     sigBefore,
     "opposite equal nudges collide with the pre-save signature (documented limit)",
   );
-  assert(analysis.sessionMetrics(s) === m1, "before save the collision still returns cached metrics");
+  assert(
+    analysis.sessionMetrics(s) === m1,
+    "before save the collision still returns cached metrics",
+  );
   analysis.bumpDbRev(); // save() 相当
   assert(analysis.sessionMetricSignature(s) !== sigBefore, "DB_REV bump changes the signature");
   const m2 = analysis.sessionMetrics(s);
   assert(m2 !== m1, "post-save metrics are recomputed, not the stale cache entry");
   const fresh = scoring.robustStats(s.ends.flat());
   assertClose(m2.st.sx, fresh.sx, 1e-12, "recomputed stats reflect the nudged positions");
-  assert(m2.st.sx !== m1.st.sx, "nudge actually changes the spread, proving the old cache was stale");
+  assert(
+    m2.st.sx !== m1.st.sx,
+    "nudge actually changes the spread, proving the old cache was stale",
+  );
 }
 
 // 入力防御: 非有限座標（NaN/Infinity/null/undefined）が混ざっても sessionMetrics は
@@ -256,7 +314,9 @@ function sampleSession() {
     assert(Number.isFinite(st[k]), `st.${k} must be finite, got ${st[k]}`);
   });
   const expected = scoring.robustStats(
-    sampleSession().ends.flat().map((a) => ({ x: a.x, y: a.y })),
+    sampleSession()
+      .ends.flat()
+      .map((a) => ({ x: a.x, y: a.y })),
   );
   assertClose(st.rr, expected.rr, 1e-12, "stats match finite-only robustStats (rr)");
   assertClose(st.mx, expected.mx, 1e-12, "stats match finite-only robustStats (mx)");
@@ -302,25 +362,63 @@ return {groupingSessionRow};`,
   const fixtures = [
     // 文字列座標（インポート由来を想定）
     rowOf("eq-strings", [
-      [{ x: "1.2", y: "0.4", s: "9" }, { x: "-0.6", y: "1.1", s: "9" }, { x: "0.1", y: "-0.8", s: 10 }],
-      [{ x: "2.0", y: "0.0", s: 8 }, { x: "-1.4", y: "-0.9", s: 9 }, { x: "0.5", y: "0.7", s: 10 }],
+      [
+        { x: "1.2", y: "0.4", s: "9" },
+        { x: "-0.6", y: "1.1", s: "9" },
+        { x: "0.1", y: "-0.8", s: 10 },
+      ],
+      [
+        { x: "2.0", y: "0.0", s: 8 },
+        { x: "-1.4", y: "-0.9", s: 9 },
+        { x: "0.5", y: "0.7", s: 10 },
+      ],
     ]),
     // 非有限座標の混入
     rowOf("eq-nonfinite", [
-      [{ x: 0, y: 0, s: 10 }, { x: NaN, y: 1, s: 9 }, { x: 1, y: 0.5, s: 9 }],
-      [{ x: Infinity, y: null, s: 8 }, { x: -1, y: -0.5, s: 9 }, { x: 0.5, y: 1.2, s: 9 }, { x: -0.5, y: 0.8, s: 10 }],
+      [
+        { x: 0, y: 0, s: 10 },
+        { x: NaN, y: 1, s: 9 },
+        { x: 1, y: 0.5, s: 9 },
+      ],
+      [
+        { x: Infinity, y: null, s: 8 },
+        { x: -1, y: -0.5, s: 9 },
+        { x: 0.5, y: 1.2, s: 9 },
+        { x: -0.5, y: 0.8, s: 10 },
+      ],
     ]),
     // M（0点）混在: 座標付きミスと大外れ値
     rowOf("eq-miss", [
-      [{ x: 0.2, y: 0.1, s: 10, X: true }, { x: 58, y: -44, s: 0 }, { x: -0.8, y: 0.6, s: 9 }],
-      [{ x: 1.1, y: -0.3, s: 9 }, { x: -0.4, y: -1.0, s: 9 }, { x: 0.7, y: 0.9, s: 10 }],
+      [
+        { x: 0.2, y: 0.1, s: 10, X: true },
+        { x: 58, y: -44, s: 0 },
+        { x: -0.8, y: 0.6, s: 9 },
+      ],
+      [
+        { x: 1.1, y: -0.3, s: 9 },
+        { x: -0.4, y: -1.0, s: 9 },
+        { x: 0.7, y: 0.9, s: 10 },
+      ],
     ]),
     // 有限座標が3本未満 → 両者とも null
-    rowOf("eq-too-few", [[{ x: NaN, y: 0, s: 0 }, { x: 1, y: 1, s: 9 }, { x: 0, y: 1, s: 9 }]]),
+    rowOf("eq-too-few", [
+      [
+        { x: NaN, y: 0, s: 0 },
+        { x: 1, y: 1, s: 9 },
+        { x: 0, y: 1, s: 9 },
+      ],
+    ]),
     // 境界: 非有限混入で有限座標がちょうど3本 → 両者とも行が出る側
     rowOf("eq-exactly-three", [
-      [{ x: NaN, y: 2, s: 0 }, { x: "abc", y: 1, s: 8 }, { x: 0.3, y: -0.2, s: 10 }],
-      [{ x: -0.9, y: 0.4, s: 9 }, { x: 1.4, y: 1.1, s: 8 }],
+      [
+        { x: NaN, y: 2, s: 0 },
+        { x: "abc", y: 1, s: 8 },
+        { x: 0.3, y: -0.2, s: 10 },
+      ],
+      [
+        { x: -0.9, y: 0.4, s: 9 },
+        { x: 1.4, y: 1.1, s: 8 },
+      ],
     ]),
   ];
 
@@ -341,7 +439,9 @@ return {groupingSessionRow};`,
 
 // 実装側の署名が世代カウンタを参照していること（ハーネス外でも DB_REV が効く静的保証）
 assert(
-  section(analysisScript, "function sessionMetricSignature", "function sessionMetrics").includes("DB_REV"),
+  section(analysisScript, "function sessionMetricSignature", "function sessionMetrics").includes(
+    "DB_REV",
+  ),
   "sessionMetricSignature must include DB_REV in the cache key",
 );
 
@@ -350,7 +450,7 @@ assert(
 const coreScript = fs.readFileSync(path.join(root, "scripts", "45-analysis-core.js"), "utf8");
 const core = new Function(
   `${coreScript}
-return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown, aggregateRoundGroups, roundGroupBests, todayConclusion};`,
+return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown, aggregateRoundGroups, roundGroupBests, todayConclusion, growthDashboard, nextPracticeSuggestions};`,
 )();
 
 // テスト用の metricsFn: sessionMetrics 互換の形を robustStats から作る
@@ -362,20 +462,31 @@ const metricsFn = (s) => {
 
 function coreSession(id, date, dist, opts) {
   const o = opts || {};
-  return Object.assign({
-    id,
-    date,
-    dist,
-    setupId: o.setupId === undefined ? "setup-a" : o.setupId,
-    faceD: 122,
-    faceType: "single",
-    round: o.round || "free",
-    windSpeed: o.windSpeed || "",
-    ends: o.ends || [
-      [{ x: 1, y: 0, s: 9 }, { x: 0, y: 1, s: 10 }, { x: -1, y: 0, s: 9 }],
-      [{ x: 0, y: -1, s: 10 }, { x: 1, y: 1, s: 9 }, { x: -1, y: -1, s: 9 }],
-    ],
-  }, o.extra || {});
+  return Object.assign(
+    {
+      id,
+      date,
+      dist,
+      setupId: o.setupId === undefined ? "setup-a" : o.setupId,
+      faceD: 122,
+      faceType: "single",
+      round: o.round || "free",
+      windSpeed: o.windSpeed || "",
+      ends: o.ends || [
+        [
+          { x: 1, y: 0, s: 9 },
+          { x: 0, y: 1, s: 10 },
+          { x: -1, y: 0, s: 9 },
+        ],
+        [
+          { x: 0, y: -1, s: 10 },
+          { x: 1, y: 1, s: 9 },
+          { x: -1, y: -1, s: 9 },
+        ],
+      ],
+    },
+    o.extra || {},
+  );
 }
 
 const coreSessions = [
@@ -394,13 +505,21 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
   assertEqual(rows[0].total, 56, "row total");
   assertEqual(rows[2].dist, 30, "row numeric distance");
   assertEqual(rows[2].round, "30m36", "row round");
-  assertEqual(core.buildAnalysisRows([], [], metricsFn).length, 0, "empty sessions give empty rows");
+  assertEqual(
+    core.buildAnalysisRows([], [], metricsFn).length,
+    0,
+    "empty sessions give empty rows",
+  );
   assertEqual(
     core.buildAnalysisRows([{ id: "broken" }, null], [], metricsFn).length,
     0,
     "sessions without ends are dropped",
   );
-  const noDist = core.buildAnalysisRows([coreSession("nd", "2026-01-01", undefined)], [], metricsFn);
+  const noDist = core.buildAnalysisRows(
+    [coreSession("nd", "2026-01-01", undefined)],
+    [],
+    metricsFn,
+  );
   assertEqual(noDist[0].dist, null, "missing distance becomes null");
 }
 
@@ -465,12 +584,22 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
   const assertStrict = require("node:assert/strict");
   const rg = (gid, stage, stageCount) => ({ gid, roundId: "wa1440_men", stage, stageCount });
   const highEnds = [
-    [{ x: 0, y: 0, s: 10, X: true }, { x: 1, y: 0, s: 10 }, { x: 0, y: 1, s: 10 }],
+    [
+      { x: 0, y: 0, s: 10, X: true },
+      { x: 1, y: 0, s: 10 },
+      { x: 0, y: 1, s: 10 },
+    ],
   ];
   const groupSessions = [
     // グループ1（complete: 2/2 ステージ）。ステージ順と行順を逆にして stage 昇順ソートを確認
-    coreSession("g1-s2", "2026-06-10", 30, { round: "wa1440_men", extra: { roundGroup: rg("grp-1", 1, 2) } }),
-    coreSession("g1-s1", "2026-06-09", 70, { round: "wa1440_men", extra: { roundGroup: rg("grp-1", 0, 2) } }),
+    coreSession("g1-s2", "2026-06-10", 30, {
+      round: "wa1440_men",
+      extra: { roundGroup: rg("grp-1", 1, 2) },
+    }),
+    coreSession("g1-s1", "2026-06-09", 70, {
+      round: "wa1440_men",
+      extra: { roundGroup: rg("grp-1", 0, 2) },
+    }),
     // グループ2（不完全: 1/2 ステージ）
     coreSession("g2-s1", "2026-06-20", 70, {
       round: "wa1440_men",
@@ -505,10 +634,18 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
 
   // 同 stage の重複行（例: 破損データや二重取り込み）では stageCount と行数が一致しても complete にしない
   const dupSessions = [
-    coreSession("dup-a", "2026-06-25", 70, { round: "wa1440_men", extra: { roundGroup: rg("grp-dup", 0, 2) } }),
-    coreSession("dup-b", "2026-06-26", 70, { round: "wa1440_men", extra: { roundGroup: rg("grp-dup", 0, 2) } }),
+    coreSession("dup-a", "2026-06-25", 70, {
+      round: "wa1440_men",
+      extra: { roundGroup: rg("grp-dup", 0, 2) },
+    }),
+    coreSession("dup-b", "2026-06-26", 70, {
+      round: "wa1440_men",
+      extra: { roundGroup: rg("grp-dup", 0, 2) },
+    }),
   ];
-  const dupGroups = core.aggregateRoundGroups(core.buildAnalysisRows(dupSessions, coreSetups, metricsFn));
+  const dupGroups = core.aggregateRoundGroups(
+    core.buildAnalysisRows(dupSessions, coreSetups, metricsFn),
+  );
   assertEqual(dupGroups.length, 1, "duplicate-stage rows stay one group");
   assertEqual(dupGroups[0].complete, false, "duplicate stages do not count as complete");
 
@@ -527,7 +664,9 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
     return c;
   });
   const pbWith = core.personalBests(core.buildAnalysisRows(groupSessions, coreSetups, metricsFn));
-  const pbWithout = core.personalBests(core.buildAnalysisRows(noGroupSessions, coreSetups, metricsFn));
+  const pbWithout = core.personalBests(
+    core.buildAnalysisRows(noGroupSessions, coreSetups, metricsFn),
+  );
   assertStrict.deepStrictEqual(pbWith, pbWithout, "personalBests ignores roundGroup");
 }
 
@@ -545,12 +684,14 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
 // reasonBreakdown
 {
   const tagged = coreSession("rt", "2026-06-01", 70, {
-    ends: [[
-      { x: 2, y: 0, s: 8, reason: "リリース" },
-      { x: 2.4, y: 0.2, s: 8, reason: "リリース" },
-      { x: 0, y: -3, s: 8, reason: "風" },
-      { x: 0.1, y: 0, s: 10 },
-    ]],
+    ends: [
+      [
+        { x: 2, y: 0, s: 8, reason: "リリース" },
+        { x: 2.4, y: 0.2, s: 8, reason: "リリース" },
+        { x: 0, y: -3, s: 8, reason: "風" },
+        { x: 0.1, y: 0, s: 10 },
+      ],
+    ],
   });
   const rows = core.buildAnalysisRows([tagged], [], metricsFn);
   const rb = core.reasonBreakdown(rows);
@@ -570,7 +711,18 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
     return { id, date, n: 6, avg, total: avg * 6, st };
   }
   function stOf(rr, mx, my) {
-    return { rr, mx, my, sx: 1, sy: 1, n: 6, total: 6, method: "simple", confidence: 0.6, excluded: [] };
+    return {
+      rr,
+      mx,
+      my,
+      sx: 1,
+      sy: 1,
+      n: 6,
+      total: 6,
+      method: "simple",
+      confidence: 0.6,
+      excluded: [],
+    };
   }
 
   // データ不足: セッション1回だけ
@@ -591,7 +743,11 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
       conclusionRow("g3", "2026-06-01", 8.5, stOf(3.4, 0.1, 0.1)), // avgRr(3.73) - latestRr(3.4) >= 0.3
     ];
     const c = core.todayConclusion(rows);
-    assertEqual(c.kind, "grouping-tight", "tight grouping with centered shots gives grouping-tight");
+    assertEqual(
+      c.kind,
+      "grouping-tight",
+      "tight grouping with centered shots gives grouping-tight",
+    );
     assert(c.text.includes("安定"), "grouping-tight text mentions stability");
   }
 
@@ -604,9 +760,13 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
       conclusionRow("o3", "2026-06-01", 8.5, stOf(3.4, 0.1, 1.5)), // my=1.5cm >= OFFSET_THRESHOLD
     ];
     const c = core.todayConclusion(rows);
-    assertEqual(c.kind, "grouping-tight-offcenter", "tight grouping + off-center gives combined conclusion");
+    assertEqual(
+      c.kind,
+      "grouping-tight-offcenter",
+      "tight grouping + off-center gives combined conclusion",
+    );
     assert(c.text.includes("上下"), "off-center text names the axis (up/down)");
-    assert(c.text.includes("上") , "off-center text names the direction");
+    assert(c.text.includes("上"), "off-center text names the direction");
   }
 
   // 悪いケース: 平均点が下降トレンド（移動平均が下がり続けている）
@@ -648,6 +808,76 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
     const c = core.todayConclusion(rows);
     assert(c && typeof c.text === "string", "unscored rows are filtered out without throwing");
   }
+}
+
+// Build Week growth coach: fixed-day windows, explainable dashboard and suggestions
+{
+  const rows = [
+    {
+      id: "g1",
+      date: "2026-06-01",
+      n: 6,
+      total: 48,
+      avg: 8,
+      st: { rr: 5, sx: 2, sy: 4, confidence: 0.7 },
+    },
+    {
+      id: "g2",
+      date: "2026-06-25",
+      n: 12,
+      total: 102,
+      avg: 8.5,
+      st: { rr: 4, sx: 2, sy: 3, confidence: 0.8 },
+    },
+    {
+      id: "g3",
+      date: "2026-07-02",
+      n: 18,
+      total: 162,
+      avg: 9,
+      st: { rr: 3, sx: 1.5, sy: 3.5, confidence: 0.9 },
+    },
+  ];
+  assertEqual(
+    core.filterAnalysisRows(rows, { period: "7d", today: "2026-07-03" }).length,
+    1,
+    "7-day filter",
+  );
+  assertEqual(
+    core.filterAnalysisRows(rows, { period: "30d", today: "2026-07-03" }).length,
+    2,
+    "30-day filter",
+  );
+  assertEqual(
+    core.filterAnalysisRows(rows, { period: "90d", today: "2026-07-03" }).length,
+    3,
+    "90-day filter",
+  );
+  const dash = core.growthDashboard(rows, "2026-07-03");
+  assertEqual(dash.lastPracticeDate, "2026-07-02", "dashboard last practice");
+  assertEqual(dash.weekSessions, 1, "dashboard week sessions");
+  assertEqual(dash.weekArrows, 18, "dashboard week arrows");
+  assertClose(dash.scoreDelta, 0.5, 1e-9, "dashboard score delta");
+  assertClose(dash.groupingDelta, -1, 1e-9, "dashboard grouping delta; negative is tighter");
+  assert(
+    dash.confidence.value > 0 && dash.confidence.value <= 1,
+    "dashboard confidence is bounded",
+  );
+  const suggestions = core.nextPracticeSuggestions(rows, "2026-07-03");
+  assert(suggestions.length >= 1 && suggestions.length <= 3, "one to three suggestions");
+  assert(
+    suggestions.every((s) => s.title && s.reason),
+    "every suggestion explains its reason",
+  );
+  assert(
+    suggestions.some((s) => s.id === "vertical-spread"),
+    "vertical spread produces a reproducible suggestion",
+  );
+  assertEqual(
+    core.nextPracticeSuggestions([], "2026-07-03")[0].id,
+    "collect-baseline",
+    "empty data requests a baseline",
+  );
 }
 
 console.log("Analysis core characterization checks OK");
