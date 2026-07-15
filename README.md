@@ -2,6 +2,14 @@
 
 # Archery Note
 
+Archery Note is a mobile-first, offline practice notebook that turns scores, arrow groups, form and equipment records into an explainable next practice action. Practice data stays on the device; no analytics or account is required.
+
+## Build Week growth coach
+
+The Build Week branch adds a compact growth dashboard, 7/30/90-day and all-time views, evidence-bearing next-practice suggestions, and clearly fictional demo data that can be removed without touching personal records. See the [Build Week project description](docs/build-week/PROJECT_DESCRIPTION_EN.md), [Japanese description](docs/build-week/PROJECT_DESCRIPTION_JA.md), and [submission checklist](docs/build-week/SUBMISSION_CHECKLIST.md).
+
+Public demo: **TODO — verify the deployed URL contains the Build Week release before submission.**
+
 **プライバシー重視のアーチェリー練習ノート PWA**
 **Privacy-first archery practice notebook PWA**
 
