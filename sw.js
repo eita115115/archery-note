@@ -21,7 +21,7 @@ const APP_SCRIPTS = [
   "./scripts/70-gear-settings.js",
   "./scripts/90-init.js",
 ];
-const ASSETS = ["./index.html", "./style.css", ...APP_SCRIPTS, "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
+const ASSETS = ["./index.html", "./style.min.css", ...APP_SCRIPTS, "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
