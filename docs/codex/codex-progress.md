@@ -263,17 +263,31 @@ until rebased/merged; the Phase Ledger rows above are still stale.
 - No runtime code, storage schema, Service Worker, dependency, version marker,
   release, or private practice record changed.
 
+### 2026-07-15 - Approved adaptive release implementation plan
+
+- The user explicitly approved the Fable-reviewed adaptive-release design.
+- Converted the approved specification into the six-task TDD plan at
+  `docs/superpowers/plans/2026-07-15-adaptive-release-detection.md`.
+- The plan fixes the RED fixtures and delivery boundaries for adaptive math,
+  long-lived anchor evidence, A/B/C field profiles, a complete six-shot end,
+  adaptive cancellation, capture/replay geometry parity, repository gates,
+  and the final 18-shot phone acceptance matrix.
+- Each implementation task has exact files, assertions, expected RED/GREEN
+  results, validation commands, and a narrow commit boundary.
+- No runtime code, private practice record, storage schema, dependency, Service
+  Worker, version marker, deployment, or release asset changed.
+
 ## Last Run Report
 
 - Changed files:
-  - `docs/superpowers/specs/2026-07-15-adaptive-release-detection-design.md`
+  - `docs/superpowers/plans/2026-07-15-adaptive-release-detection.md`
   - `docs/codex/codex-progress.md`
 - Validation:
   - `git status --short --branch`
-  - `git diff --check main..HEAD`
-  - `npx prettier --check docs/superpowers/specs/2026-07-15-adaptive-release-detection-design.md`
-  - Fable 5 bounded design review plus independent content spot-check
+  - writing-plans unfinished-marker scan
+  - specification-to-plan coverage spot-check
+  - `git diff --check`
+  - `npx prettier --check docs/superpowers/plans/2026-07-15-adaptive-release-detection.md docs/codex/codex-progress.md`
 - Next task:
-  - User reviews the written adaptive-release specification. After explicit
-    approval, create the implementation plan; do not change app behavior before
-    that gate.
+  - Choose Subagent-Driven execution (recommended) or Inline Execution, then
+    execute Task 1 with its failing tests before changing detector behavior.
