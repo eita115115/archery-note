@@ -62,7 +62,8 @@ function setupOptions(sel) {
     `<option value="">（セッティング未指定）</option>` +
     db.setups
       .map(
-        (s) => `<option value="${esc(s.id)}" ${s.id === sel ? "selected" : ""}>${esc(s.name)}</option>`,
+        (s) =>
+          `<option value="${esc(s.id)}" ${s.id === sel ? "selected" : ""}>${esc(s.name)}</option>`,
       )
       .join("")
   );
@@ -196,10 +197,7 @@ function multiRoundStageGaugeHtml(def) {
    ハンドラ（このファイル内の renderRecord）と完全同形にする。 */
 function shouldShowOnboarding() {
   return (
-    !db.settings.onboardingSeen &&
-    !db.active &&
-    db.sessions.length === 0 &&
-    db.setups.length === 0
+    !db.settings.onboardingSeen && !db.active && db.sessions.length === 0 && db.setups.length === 0
   ); // 用具だけ登録済みの既存ユーザーには出さない
 }
 /* 距離から的サイズ・1エンド本数を自動決定（suggestedFaceValue と同ロジック。
@@ -217,6 +215,66 @@ function finishOnboarding() {
   save({ reason: "onboarding-skip" }); // 即時 save: 直後にアプリを閉じられても失われない
   render();
 }
+const DEMO_ID_PREFIX = "build-week-demo:";
+function demoSession(id, date, offset, spread, score) {
+  const pts = [
+    [-1, 0],
+    [1, 0],
+    [0, -1],
+    [0, 1],
+    [-0.7, 0.7],
+    [0.7, -0.7],
+  ];
+  return {
+    id: DEMO_ID_PREFIX + id,
+    date,
+    setupId: null,
+    dist: 18,
+    faceD: 40,
+    faceType: "single",
+    perEnd: 3,
+    round: "free",
+    purpose: "practice",
+    note: "架空のデモデータ",
+    ends: [
+      pts
+        .slice(0, 3)
+        .map((p, i) => ({
+          x: offset + p[0] * spread,
+          y: p[1] * spread,
+          s: score + (i === 1 ? -1 : 0),
+        })),
+      pts
+        .slice(3)
+        .map((p, i) => ({
+          x: offset + p[0] * spread,
+          y: p[1] * spread,
+          s: score + (i === 1 ? -1 : 0),
+        })),
+    ],
+  };
+}
+function installDemoData() {
+  const dates = [-20, -8, -1].map((n) => {
+    const d = new Date();
+    d.setDate(d.getDate() + n);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+  db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));
+  db.sessions.push(
+    demoSession("1", dates[0], 1.4, 3.2, 8),
+    demoSession("2", dates[1], 0.8, 2.4, 9),
+    demoSession("3", dates[2], 0.3, 1.7, 9),
+  );
+  db.settings.onboardingSeen = true;
+  save({ reason: "demo-install", forceSnapshot: true });
+}
+function removeDemoData() {
+  const before = db.sessions.length;
+  db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));
+  if (db.sessions.length !== before) save({ reason: "demo-remove", forceSnapshot: true });
+  return before - db.sessions.length;
+}
 function onboardWelcomeHtml() {
   return `<section class="onboard onboardWelcome" data-testid="onboard-welcome">
     <div class="onboardLogo" aria-hidden="true">
@@ -232,6 +290,7 @@ function onboardWelcomeHtml() {
       <span>データはこの端末の中だけに保存されます</span>
     </div>
     <button type="button" class="btn" id="obStart">はじめる</button>
+    <button type="button" class="btn sec" id="obDemo">架空のデモデータで試す</button>
     <button type="button" class="onboardSkip" id="obSkip">スキップして記録へ →</button>
   </section>`;
 }
@@ -262,6 +321,10 @@ function renderOnboarding(m) {
       render();
     };
     $("#obSkip").onclick = finishOnboarding;
+    $("#obDemo").onclick = () => {
+      installDemoData();
+      showView("analysis");
+    };
     return;
   }
   m.innerHTML = onboardSetupHtml();
@@ -798,8 +861,9 @@ function analysisFilterBarHtml(allRows, f) {
   const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))].sort((a, b) => b - a);
   const periods = [
     ["all", "全期間"],
-    ["3m", "3ヶ月"],
-    ["1m", "1ヶ月"],
+    ["7d", "7日"],
+    ["30d", "30日"],
+    ["90d", "90日"],
   ];
   return `<div class="card analysisFilterCard">
     <div class="row">
@@ -809,6 +873,30 @@ function analysisFilterBarHtml(allRows, f) {
     <label class="f">期間</label>
     <div class="chips" id="anPeriods">${periods.map(([id, lb]) => `<button type="button" class="chip ${f.period === id ? "on" : ""}" aria-pressed="${f.period === id}" data-period="${id}">${lb}</button>`).join("")}</div>
   </div>`;
+}
+function growthDashboardHtml(rows) {
+  const d = growthDashboard(rows, today());
+  const delta = (v, suffix) =>
+    v == null ? "比較待ち" : `${v > 0 ? "+" : ""}${v.toFixed(2)}${suffix}`;
+  const group =
+    d.groupingDelta == null
+      ? "比較待ち"
+      : `${d.groupingDelta < 0 ? "改善 " : d.groupingDelta > 0 ? "拡大 " : "横ばい "}${Math.abs(d.groupingDelta).toFixed(1)}cm`;
+  return `<section class="growthDashboard" data-testid="growth-dashboard" aria-labelledby="growth-title">
+    <div class="growthHead"><div><div class="kicker">練習ダッシュボード</div><h2 id="growth-title">いまの状態</h2></div><span class="growthConfidence">信頼度 ${esc(d.confidence.label)}</span></div>
+    <div class="growthMetrics">
+      <div><span>最終練習</span><b>${d.lastPracticeDate ? esc(fmtD(d.lastPracticeDate)) : "—"}</b></div>
+      <div><span>今週</span><b>${d.weekSessions}回 / ${d.weekArrows}射</b></div>
+      <div><span>直近平均</span><b>${d.recentAverage == null ? "—" : d.recentAverage.toFixed(2)}</b></div>
+      <div><span>前回から</span><b>${delta(d.scoreDelta, "点")}</b></div>
+      <div><span>グルーピング</span><b>${group}</b></div>
+      <div><span>フォーム</span><b>${d.formStability == null ? "記録待ち" : `${Math.round(d.formStability)}%`}</b></div>
+    </div>
+  </section>`;
+}
+function nextPracticeCardHtml(rows) {
+  const items = nextPracticeSuggestions(rows, today());
+  return `<section class="card nextPractice" data-testid="next-practice"><h2>次回試すこと</h2>${items.map((s, i) => `<div class="nextPracticeItem"><span aria-hidden="true">${i + 1}</span><div><b>${esc(s.title)}</b><p>${esc(s.reason)}</p></div></div>`).join("")}</section>`;
 }
 function analysisKpiHtml(rows) {
   const scored = rows.filter((r) => r.n);
@@ -1048,7 +1136,9 @@ function renderAnalysis(m) {
   ]
     .filter(Boolean)
     .join("");
-  m.innerHTML = `${todayConclusionCardHtml(rows)}
+  m.innerHTML = `${growthDashboardHtml(rows)}
+  ${todayConclusionCardHtml(rows)}
+  ${nextPracticeCardHtml(rows)}
   ${allRows.length ? analysisFilterBarHtml(allRows, f) : ""}
   ${cards || `<div class="card"><h2>分析</h2><div class="empty">${allRows.length ? "この絞り込みに合う記録がありません。フィルタを広げてください。" : `<p>記録が増えると、矢の集まり具合や月間まとめがここに表示されます。</p><button type="button" class="btn" id="anEmptyCta">記録タブへ</button>`}</div></div>`}
   ${gamificationBadgesCardHtml()}`;
@@ -1816,7 +1906,9 @@ async function finishSession() {
   let growthBefore = null;
   if (!isEdit) {
     const trSessions = db.sessions.filter((x) => x && x.date && x.date <= s.date);
-    todaysResult = computeTodaysResult(trSessions, s.id, sessionMetrics, { formAnalyses: db.formAnalyses });
+    todaysResult = computeTodaysResult(trSessions, s.id, sessionMetrics, {
+      formAnalyses: db.formAnalyses,
+    });
     if (todaysResult.available) growthBefore = trGrowthBeforeFor(s, trSessions, sessionMetrics);
   }
   const g = db.settings.gamification;
@@ -1828,10 +1920,15 @@ async function finishSession() {
     );
     const streakAfter = computeStreak(db.sessions, g.practiceDays, today());
     const nowIso = new Date().toISOString();
-    const newBadges = checkBadges(db.sessions, (db.gamification.badges || []).map((b) => b.id), s, {
-      streak: streakAfter,
-      nowIso,
-    });
+    const newBadges = checkBadges(
+      db.sessions,
+      (db.gamification.badges || []).map((b) => b.id),
+      s,
+      {
+        streak: streakAfter,
+        nowIso,
+      },
+    );
     if (newBadges.length) {
       db.gamification.badges.push(...newBadges);
       save({ reason: "gamification-badges" });
@@ -1901,11 +1998,18 @@ function todaysResultSparkHtml(sparkline, direction) {
     max = Math.max(...sparkline);
   const range = max - min || 1;
   const stepX = (w - pad * 2) / (sparkline.length - 1);
-  const pts = sparkline.map((v, i) => [pad + i * stepX, pad + (1 - (v - min) / range) * (h - pad * 2)]);
-  const d = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
+  const pts = sparkline.map((v, i) => [
+    pad + i * stepX,
+    pad + (1 - (v - min) / range) * (h - pad * 2),
+  ]);
+  const d = pts
+    .map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`)
+    .join(" ");
   const last = pts[pts.length - 1];
   const dot =
-    direction === "tight" ? `<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2" fill="var(--accent)"/>` : "";
+    direction === "tight"
+      ? `<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2" fill="var(--accent)"/>`
+      : "";
   return `<svg class="todaysResultSpark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--line)" stroke-width="1"/>${dot}</svg>`;
 }
 /* 項目1: 前回差（§5 コピー対応表）。「先週◯曜平均より」の分岐は削除済み——
@@ -1933,7 +2037,13 @@ function todaysResultStabilityRowHtml(st) {
      文言を実際の比較基準に一致させる（strict-review minor④: sampleCount は履歴長で最大10のため、
      「直近10回の移動平均」と書くと事実と異なる） */
   const detail = `直近${Math.min(5, st.sampleCount)}回の平均と比較`;
-  return todaysResultRowHtml("stability", "ruler", primary, detail, todaysResultSparkHtml(st.sparkline, st.direction));
+  return todaysResultRowHtml(
+    "stability",
+    "ruler",
+    primary,
+    detail,
+    todaysResultSparkHtml(st.sparkline, st.direction),
+  );
 }
 /* 項目3: 自己ベストとの距離（§5 コピー対応表） */
 function todaysResultPersonalBestRowHtml(pb, sess, dayLabel) {
@@ -1966,7 +2076,8 @@ function todaysResultGrowthRowsHtml(gs, growthBefore) {
         growthBefore && growthBefore.available && Array.isArray(growthBefore.metrics)
           ? growthBefore.metrics.find((x) => x.key === m.key)
           : null;
-      const broke = beforeMetric && beforeMetric.available && beforeMetric.streakDays > 0 && m.streakDays === 0;
+      const broke =
+        beforeMetric && beforeMetric.available && beforeMetric.streakDays > 0 && m.streakDays === 0;
       if (broke) {
         return todaysResultRowHtml(
           `streak-${m.key}`,
@@ -1976,7 +2087,12 @@ function todaysResultGrowthRowsHtml(gs, growthBefore) {
         );
       }
       if (m.streakDays >= 2) {
-        return todaysResultRowHtml(`streak-${m.key}`, "updown", `${label}の伸びが <b>${m.streakDays}日</b> 続いている`, "");
+        return todaysResultRowHtml(
+          `streak-${m.key}`,
+          "updown",
+          `${label}の伸びが <b>${m.streakDays}日</b> 続いている`,
+          "",
+        );
       }
       return "";
     })
@@ -1990,8 +2106,10 @@ function todaysResultHtml(result, sess, opts) {
   if (!result || !result.available) return "";
   const dayLabel = opts.dayLabel || "今日";
   const rows = [];
-  if (result.weeklyDiff && result.weeklyDiff.available) rows.push(todaysResultWeeklyRowHtml(result.weeklyDiff, dayLabel));
-  if (result.stabilityTrend && result.stabilityTrend.available) rows.push(todaysResultStabilityRowHtml(result.stabilityTrend));
+  if (result.weeklyDiff && result.weeklyDiff.available)
+    rows.push(todaysResultWeeklyRowHtml(result.weeklyDiff, dayLabel));
+  if (result.stabilityTrend && result.stabilityTrend.available)
+    rows.push(todaysResultStabilityRowHtml(result.stabilityTrend));
   if (result.personalBestDistance && result.personalBestDistance.available)
     rows.push(todaysResultPersonalBestRowHtml(result.personalBestDistance, sess, dayLabel));
   rows.push(todaysResultGrowthRowsHtml(result.growthStreaks, opts.growthBefore));

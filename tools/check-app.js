@@ -37,13 +37,13 @@ function section(start, end) {
 
 new Function(scripts);
 
-assert(appScripts.every(file => html.includes(`<script src="${file}"></script>`)) && inlineScripts.length === 0 && scripts.includes("const APP_VER="), "External app scripts missing");
+assert(appScripts.every(file => new RegExp(`<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`).test(html)) && inlineScripts.length === 0 && scripts.includes("const APP_VER="), "Deferred external app scripts missing");
 assert(!fs.existsSync(path.join(root, "app.js")), "Legacy app.js should not remain after script split");
 const appVer = /const APP_VER=(\d+)/.exec(scripts)?.[1];
 const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf8")).v;
 const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"), "utf8"))?.[1];
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
-assert(html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".launchPanel"), "External stylesheet missing");
+assert(html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".launchPanel"), "Minified production stylesheet missing");
 assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
 assert(!/user-scalable\s*=\s*no/i.test(html), "Viewport must not disable user scaling");
 assert(!/maximum-scale\s*=\s*1/i.test(html), "Viewport must not lock maximum scale to 1");
@@ -68,7 +68,7 @@ assert(surface.includes("createSVGPoint()"), "SVG coordinate fallback missing");
 assert(surface.includes("Array.prototype.flat") && surface.includes("Object.values") && surface.includes("Math.hypot"), "Compatibility polyfills missing");
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
 new Function(sw);
-assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match("./index.html")') && sw.includes("./style.css") && appScripts.every(file => sw.includes(`./${file}`)), "Service worker navigation fallback missing");
+assert(sw.includes('e.request.mode === "navigate"') && sw.includes('caches.match("./index.html")') && sw.includes("./style.min.css") && appScripts.every(file => sw.includes(`./${file}`)), "Service worker navigation fallback missing");
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const packageLock = JSON.parse(fs.readFileSync(path.join(root, "package-lock.json"), "utf8"));
 const cap = JSON.parse(fs.readFileSync(path.join(root, "capacitor.config.json"), "utf8"));
@@ -326,7 +326,7 @@ assert(calibApi.physicsCalibrationHtml("main").includes("物理校正"), "Physic
 
 const gearApi = new Function(
   "clamp","num","esc",
-  section("const CATALOG_SHAFTS=", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS,GEAR_SUGGESTIONS};"
+  section("const CATALOG_SHAFTS", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS,GEAR_SUGGESTIONS};"
 )(
   (v,a,b)=>Math.max(a,Math.min(b,v)),
   v=>{ const n=parseFloat(v); return Number.isFinite(n)?n:null; },

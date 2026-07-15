@@ -2,12 +2,24 @@
 
 # Archery Note
 
+Archery Note is a mobile-first, offline practice notebook that turns scores, arrow groups, form and equipment records into an explainable next practice action. Practice data stays on the device; no analytics or account is required.
+
+## Build Week growth coach
+
+The Build Week branch adds a compact growth dashboard, 7/30/90-day and all-time views, evidence-bearing next-practice suggestions, and clearly fictional demo data that can be removed without touching personal records. See the [Build Week project description](docs/build-week/PROJECT_DESCRIPTION_EN.md), [Japanese description](docs/build-week/PROJECT_DESCRIPTION_JA.md), and [submission checklist](docs/build-week/SUBMISSION_CHECKLIST.md).
+
+Public demo: **https://eita115115.github.io/archery-note/**
+
+### How GPT-5.6 and Codex were used
+
+Archery Note existed before the challenge. During the Build Week submission period, GPT-5.6 in Codex was used to inspect the existing architecture and Git history, challenge the product direction, design pure growth-analysis functions, implement the mobile dashboard, add deterministic and Playwright regression tests, review privacy and release boundaries, and prepare the submission evidence. The human product decisions were to keep the recording flow simple, compare each archer only with their own history, make every suggestion explainable, and preserve fully local processing. The dated commits and [development log](docs/build-week/CODEX_DEVELOPMENT_LOG.md) distinguish this extension from the pre-existing app.
+
 **プライバシー重視のアーチェリー練習ノート PWA**
 **Privacy-first archery practice notebook PWA**
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8.svg?logo=pwa)](https://eita115115.github.io/archery-note/)
-[![Version](https://img.shields.io/badge/version-v1.8.0-green.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v0.84.0-green.svg)](CHANGELOG.md)
 [![Offline](https://img.shields.io/badge/offline-supported-orange.svg)](#プライバシー--privacy)
 
 [**Demo**](https://eita115115.github.io/archery-note/) | [Contributing](CONTRIBUTING.md) | [Security](SECURITY.md)

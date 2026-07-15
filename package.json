@@ -1,6 +1,6 @@
 {
   "name": "archery-note",
-  "version": "0.83.0",
+  "version": "0.84.0",
   "private": true,
   "description": "Archery scoring, sight adjustment, and equipment notebook with a native-ready shell.",
   "scripts": {
@@ -22,6 +22,7 @@
     "lighthouse:baseline": "node tools/lighthouse-baseline.js",
     "version:bump": "node tools/bump-version.js",
     "build:native-web": "node tools/build-native-web.js",
+    "build:web-assets": "node tools/build-web-assets.js",
     "native:sync": "npm run build:native-web && npx cap sync",
     "native:sync:android": "npm run build:native-web && npx cap sync android",
     "native:open:android": "npm run native:sync:android && npx cap open android",
@@ -37,9 +38,10 @@
     "@capacitor/ios": "^8.4.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.61.1",
+    "clean-css": "5.3.3",
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
-    "lighthouse": "^13.4.0",
+    "lighthouse": "12.6.1",
     "prettier": "^3.9.0"
   },
   "dependencies": {

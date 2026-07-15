@@ -154,15 +154,19 @@ function fail(msg) {
 
 /* index.html のロード順を正とする（check-app.js と同じ扱い） */
 const html = fs.readFileSync(path.join(root, "index.html"), "utf8");
-const appScripts = [...html.matchAll(/<script src="(scripts\/[^"]+)"><\/script>/g)].map(m => m[1]);
+const appScripts = [
+  ...html.matchAll(/<script\b[^>]*\bsrc="(scripts\/[^"]+)"[^>]*><\/script>/g),
+].map((m) => m[1]);
 if (appScripts.length === 0) throw new Error("No scripts found in index.html");
 
 /* sw.js の APP_SCRIPTS と一致していること（順序含む）を確認 */
 const sw = fs.readFileSync(path.join(root, "sw.js"), "utf8");
 const swList = /const APP_SCRIPTS = \[([\s\S]*?)\]/.exec(sw);
-const swScripts = swList ? [...swList[1].matchAll(/"\.\/(scripts\/[^"]+)"/g)].map(m => m[1]) : [];
+const swScripts = swList ? [...swList[1].matchAll(/"\.\/(scripts\/[^"]+)"/g)].map((m) => m[1]) : [];
 if (swScripts.join(",") !== appScripts.join(",")) {
-  fail(`index.html と sw.js APP_SCRIPTS のスクリプト一覧が一致しません\n  index.html: ${appScripts.join(", ")}\n  sw.js:      ${swScripts.join(", ")}`);
+  fail(
+    `index.html と sw.js APP_SCRIPTS のスクリプト一覧が一致しません\n  index.html: ${appScripts.join(", ")}\n  sw.js:      ${swScripts.join(", ")}`,
+  );
   process.exit(1); // 前提が崩れているので以降の解析（と "OK" 出力）を行わない
 }
 
@@ -177,7 +181,12 @@ for (const file of appScripts) {
 }
 const combined = chunks.join("\n");
 
-const ast = espree.parse(combined, { ecmaVersion: "latest", sourceType: "script", loc: true, range: true });
+const ast = espree.parse(combined, {
+  ecmaVersion: "latest",
+  sourceType: "script",
+  loc: true,
+  range: true,
+});
 const scopeManager = eslintScope.analyze(ast, { ecmaVersion: 2022, sourceType: "script" });
 const globalScope = scopeManager.globalScope;
 
@@ -188,7 +197,11 @@ const globalScope = scopeManager.globalScope;
 const typeofGuarded = new Set();
 (function walk(node) {
   if (!node || typeof node.type !== "string") return;
-  if (node.type === "UnaryExpression" && node.operator === "typeof" && node.argument.type === "Identifier") {
+  if (
+    node.type === "UnaryExpression" &&
+    node.operator === "typeof" &&
+    node.argument.type === "Identifier"
+  ) {
     typeofGuarded.add(node.argument.range[0]);
   }
   for (const key of Object.keys(node)) {
@@ -203,7 +216,7 @@ const typeofGuarded = new Set();
  * 暗黙のグローバル（宣言なしで `foo = ...` と代入されて生える変数）は
  * 定義済み扱いにする。読み取り時点で ReferenceError にならないため。
  */
-const implicitGlobals = new Set(globalScope.implicit.variables.map(v => v.name));
+const implicitGlobals = new Set(globalScope.implicit.variables.map((v) => v.name));
 
 /* globalScope.through = どのスコープの宣言にも解決できなかった参照 */
 const problems = [];
@@ -227,7 +240,11 @@ if (problems.length > 0) {
   for (const [name, sites] of byName) {
     console.error(`  ${name}  →  ${sites.join(", ")}`);
   }
-  console.error("  本物のブラウザ API なら tools/check-globals.js の BROWSER_GLOBALS に追加してください。");
+  console.error(
+    "  本物のブラウザ API なら tools/check-globals.js の BROWSER_GLOBALS に追加してください。",
+  );
 } else {
-  console.log(`check-globals OK (${appScripts.length} files, ${globalScope.through.length} unresolved refs all accounted for)`);
+  console.log(
+    `check-globals OK (${appScripts.length} files, ${globalScope.through.length} unresolved refs all accounted for)`,
+  );
 }

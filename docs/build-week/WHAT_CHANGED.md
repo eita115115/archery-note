@@ -1,0 +1,27 @@
+# What Changed
+
+## Before
+
+Git history through `591f41e6` already contained tap scoring, line-cutter handling, history, grouping and physics analysis, sight/equipment records, form tracking, onboarding, local backups, JSON/CSV export, CSP, PWA caching, Node checks, Playwright, and CI.
+
+## Build Week branch
+
+- Added an explainable growth summary derived from existing sessions.
+- Added 7/30/90-day analysis filters alongside all-time view.
+- Added one-to-three deterministic next-practice suggestions with visible evidence.
+- Added clearly fictional demo sessions with a reserved ID prefix and demo-only deletion.
+- Added core regression and browser tests for these flows.
+- Added submission documents under `docs/build-week/`.
+- Deferred application scripts, generated minified CSS, and corrected the native asset list to reduce first-load blocking work.
+- Pinned the development Lighthouse toolchain to remove the previously reported transitive audit advisory.
+- Bumped all release markers to app version 84.
+
+Security, storage, scoring and Service Worker formats were deliberately not rewritten in this slice.
+
+## Commit and files
+
+- Runtime and tests: `b95bfaa1` (`feat: add explainable growth coach dashboard`)
+- Performance and dependency work: `6a747b73` (`perf: reduce first-load blocking assets`)
+- Release markers: `72841650` (`release: bump app version to 84`)
+- Primary files: `scripts/45-analysis-core.js`, `scripts/50-record-view.js`, `scripts/70-gear-settings.js`, `style.css`, `tools/check-analysis-core.js`, `tests/e2e/build-week-growth.spec.js`
+- Test-contract maintenance: `tools/check-app.js`, `tools/check-ui.js`, `tools/check-pwa-update-flow.js` were made whitespace-tolerant after production files were formatted.

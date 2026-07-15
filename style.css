@@ -1300,3 +1300,8 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .summaryBadgeText b{font-size:13px; color:var(--title); font-weight:var(--fw-emphasis);}
 .summaryBadgeText span{font-size:11px; color:var(--sub); line-height:1.4;}
 .summaryBadgeMore{font-size:11px; color:var(--sub); margin-top:4px; text-align:right;}
+.growthDashboard{margin:0 0 16px;padding:16px;border-top:2px solid var(--accent);border-bottom:1px solid var(--line);background:var(--paper)}
+.growthHead{display:flex;align-items:start;justify-content:space-between;gap:12px}.growthHead h2{margin:4px 0 0;font-size:20px}.growthConfidence{font-size:12px;color:var(--sub);white-space:nowrap}
+.growthMetrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:16px}.growthMetrics>div{padding:12px;border-top:1px solid var(--line)}.growthMetrics span{display:block;font-size:11px;letter-spacing:.08em;color:var(--sub)}.growthMetrics b{display:block;margin-top:6px;font-size:15px;font-variant-numeric:tabular-nums}
+.nextPracticeItem{display:grid;grid-template-columns:28px 1fr;gap:8px;padding:12px 0;border-top:1px solid var(--line)}.nextPracticeItem>span{display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--line);border-radius:6px;font-variant-numeric:tabular-nums}.nextPracticeItem b{font-size:14px}.nextPracticeItem p{margin:4px 0 0;color:var(--sub);font-size:12px;line-height:1.5}
+@media(max-width:520px){.growthMetrics{grid-template-columns:repeat(2,minmax(0,1fr))}}

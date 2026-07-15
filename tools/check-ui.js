@@ -16,6 +16,8 @@ const appScripts = [
   "scripts/45-analysis-core.js",
   "scripts/46-form-core.js",
   "scripts/47-form-view.js",
+  "scripts/48-gamification.js",
+  "scripts/49-todays-result.js",
   "scripts/50-record-view.js",
   "scripts/60-history-sight-view.js",
   "scripts/70-gear-settings.js",
@@ -23,6 +25,7 @@ const appScripts = [
 ];
 const appJs = appScripts.map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 const surface = `${html}\n${css}\n${appJs}`;
+const recordSurface = `${html}\n${css}\n${fs.readFileSync(path.join(root, "scripts", "50-record-view.js"), "utf8")}`;
 const appUrl = `file:///${htmlPath.replace(/\\/g, "/")}`;
 const outDir = path.join(root, "artifacts", "ui-smoke");
 
@@ -74,8 +77,16 @@ function pngSize(file) {
 }
 
 function staticUiChecks() {
+  const appScriptTags = [
+    ...html.matchAll(/<script\b([^>]*)\bsrc="scripts\/[^"]+"([^>]*)><\/script>/g),
+  ];
+  assert(appScriptTags.length === 14, `expected 14 app scripts, found ${appScriptTags.length}`);
+  assert(
+    appScriptTags.every((match) => /\bdefer\b/.test(`${match[1]} ${match[2]}`)),
+    "App scripts must use defer so first-load downloads can run in parallel while preserving order",
+  );
   const gearList = (name) => {
-    const match = new RegExp(`\\n  ${name}:\\[([\\s\\S]*?)\\n  \\],`).exec(appJs);
+    const match = new RegExp(`\\n\\s*${name}:\\s*\\[([\\s\\S]*?)\\n\\s*\\],`).exec(appJs);
     assert(match, `${name} gear list missing`);
     return match[1];
   };
@@ -96,11 +107,13 @@ function staticUiChecks() {
     "Toast status live region missing",
   );
   assert(
-    html.includes('<link rel="stylesheet" href="style.css">') && css.includes(".launchPanel"),
-    "External stylesheet missing",
+    html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".launchPanel"),
+    "Minified production stylesheet link missing",
   );
   assert(
-    appScripts.every((file) => html.includes(`<script src="${file}"></script>`)) &&
+    appScripts.every((file) =>
+      new RegExp(`<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`).test(html),
+    ) &&
       !/<script>([\s\S]*?)<\/script>/.test(html),
     "External app scripts missing",
   );
@@ -223,10 +236,10 @@ function staticUiChecks() {
     "startup/update fallback should be calm and initially hidden",
   );
   assert(
-    surface.includes("サイト値を残す") &&
-      surface.includes("サイト値つきで開始") &&
-      !surface.includes("校正用") &&
-      !surface.includes("状態確認"),
+    recordSurface.includes("サイト値を残す") &&
+      recordSurface.includes("サイト値つきで開始") &&
+      !recordSurface.includes("校正用") &&
+      !recordSurface.includes("状態確認"),
     "record mode labels should stay user-facing",
   );
   assert(

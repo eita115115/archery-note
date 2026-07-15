@@ -7,6 +7,8 @@ Primary brief: [integration-plan.md](integration-plan.md)
 
 ## Current Status
 
+- 2026-07-15 Build Week branch `feat/build-week-growth-coach`: growth dashboard, 7/30/90-day filters, explainable next-practice suggestions, isolated fictional demo data and regression tests implemented in `b95bfaa1`. Full checks and 41 E2E tests pass. Submission docs are under `docs/build-week/`; human video/publication work remains.
+
 - Status: UI inline-style extraction series landed on `main` (PRs #63–#67:
   design tokens, history/sight, record, gear-settings). A token-drift fix and
   a `check:ui` regression guard for utility/history CSS values are on `main`

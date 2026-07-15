@@ -1,0 +1,23 @@
+# Submission Checklist
+
+- [ ] Public app URL verified
+- [ ] Repository URL verified
+- [ ] README and license reviewed
+- [ ] Setup and test instructions reproduced
+- [ ] Category set to Apps for Your Life
+- [ ] Demo video recorded under three minutes with audio
+- [ ] Video explains how Codex and GPT-5.6 were used
+- [ ] Public YouTube visibility confirmed
+- [ ] English description pasted
+- [ ] Screenshots captured from fictional data
+- [ ] Codex Session ID obtained
+- [ ] Mobile, dark mode and offline checked
+- [ ] JSON backup/import and CSV checked
+- [ ] Personal information and browser notifications removed
+- [ ] Third-party asset licenses reviewed
+- [ ] Latest commit and clean working tree confirmed
+- [ ] Release tag created if desired
+- [x] Official rules and judging criteria rechecked on 2026-07-15
+- [x] Pre-existing work and Build Week extension documented separately
+- [ ] Devpost/submission form completed by a human
+- [ ] Terms accepted by a human
