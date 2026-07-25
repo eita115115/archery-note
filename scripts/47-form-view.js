@@ -250,6 +250,7 @@ function openFormCapture(){
   let facing="environment";
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, stream=null, landmarker=null;
+  let inFlightStream=null;
   let cameraSwapInProgress=false;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
@@ -301,12 +302,24 @@ function openFormCapture(){
     recBlob=null;
   }
 
+  function discardCameraStream(candidate){
+    try{ if(candidate) candidate.getTracks().forEach(t=>t.stop()); }catch(e){}
+    if(video.srcObject===candidate) video.srcObject=null;
+    if(inFlightStream===candidate) inFlightStream=null;
+  }
   function stop(){
     running=false;
     if(raf) cancelAnimationFrame(raf);
     if(pendingCheck) finalizeArrowCheck();
     stopRec();
-    try{ if(stream) stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+    const pendingStream=inFlightStream, activeStream=stream;
+    inFlightStream=null;
+    stream=null;
+    video.srcObject=null;
+    try{
+      if(pendingStream) pendingStream.getTracks().forEach(t=>t.stop());
+      if(activeStream&&activeStream!==pendingStream) activeStream.getTracks().forEach(t=>t.stop());
+    }catch(e){}
     /* 記録セッションが継続中なら wake lock を維持（wanted を立て直す）、なければ解放 */
     if(db.active) wakeLock.acquire(); else wakeLock.release();
     endActiveWorkflow();
@@ -316,13 +329,18 @@ function openFormCapture(){
     let nextStream=null;
     try{
       nextStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false});
+      inFlightStream=nextStream;
+      if(!running||inFlightStream!==nextStream){ discardCameraStream(nextStream); return false; }
       video.srcObject=nextStream;
       await video.play();
+      if(!running||inFlightStream!==nextStream){ discardCameraStream(nextStream); return false; }
       canvas.width=video.videoWidth; canvas.height=video.videoHeight;
       stream=nextStream;
+      inFlightStream=null;
+      return true;
     }catch(e){
-      if(nextStream) nextStream.getTracks().forEach(t=>t.stop());
-      if(video.srcObject===nextStream) video.srcObject=null;
+      discardCameraStream(nextStream);
+      if(!running) return false;
       throw e;
     }
   }
@@ -603,7 +621,11 @@ function openFormCapture(){
     const oldStream=stream;
     stream=null;
     video.srcObject=null;
-    try{ if(oldStream) oldStream.getTracks().forEach(t=>t.stop()); await startCamera(); }
+    try{
+      if(oldStream) oldStream.getTracks().forEach(t=>t.stop());
+      const cameraStarted=await startCamera();
+      if(!cameraStarted){ if(running) facing=previousFacing; return; }
+    }
     catch(e){ facing=previousFacing; hud.textContent="カメラを切り替えられませんでした: "+e.message; }
     finally{ cameraSwapInProgress=false; }
   };
@@ -629,7 +651,8 @@ function openFormCapture(){
   loadFormPose().then(async lm=>{
     landmarker=lm;
     hud.textContent="カメラを起動しています…";
-    await startCamera();
+    const cameraStarted=await startCamera();
+    if(!cameraStarted) return;
     wakeLock.acquire();
     hud.textContent="準備完了。横向き全身が写る位置で数射どうぞ。";
     loop();

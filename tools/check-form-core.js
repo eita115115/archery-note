@@ -2840,17 +2840,63 @@ function anchorHistory(releaseTs, drift) {
     "function refreshShotsHint(){",
     "startCamera section",
   );
+  const stopCapture = boundedSourceSection(
+    capture,
+    "function stop(){",
+    "async function startCamera(){",
+    "capture stop section",
+  );
+  const discardCamera = boundedSourceSection(
+    capture,
+    "function discardCameraStream(candidate){",
+    "function stop(){",
+    "discardCameraStream section",
+  );
   const startCameraCompact = compactSource(startCamera);
+  assert(
+    capture.includes("let inFlightStream=null;"),
+    "capture exposes an in-flight camera stream so close can stop it",
+  );
   assert(
     startCameraCompact.includes("letnextStream=null;") &&
       startCameraCompact.includes("nextStream=awaitnavigator.mediaDevices.getUserMedia(") &&
+      startCameraCompact.includes("inFlightStream=nextStream;") &&
       startCameraCompact.includes("video.srcObject=nextStream;") &&
       startCameraCompact.includes("awaitvideo.play();") &&
       startCameraCompact.includes("stream=nextStream;") &&
-      startCameraCompact.includes("if(nextStream)nextStream.getTracks().forEach(t=>t.stop());") &&
-      startCameraCompact.includes("if(video.srcObject===nextStream)video.srcObject=null;") &&
+      startCameraCompact.includes("discardCameraStream(nextStream);") &&
       startCameraCompact.includes("throwe;"),
     "camera startup cleans a newly acquired stream when startup or play fails",
+  );
+  const discardCameraCompact = compactSource(discardCamera);
+  assert(
+    discardCameraCompact.includes("if(candidate)candidate.getTracks().forEach(t=>t.stop());") &&
+      discardCameraCompact.includes("if(video.srcObject===candidate)video.srcObject=null;") &&
+      discardCameraCompact.includes("if(inFlightStream===candidate)inFlightStream=null;"),
+    "camera candidate cleanup stops tracks, detaches video, and clears ownership",
+  );
+  assertEqual(
+    (
+      startCameraCompact.match(
+        /if\(!running\|\|inFlightStream!==nextStream\)\{discardCameraStream\(nextStream\);returnfalse;\}/g,
+      ) || []
+    ).length,
+    2,
+    "camera startup revalidates its candidate after both async boundaries",
+  );
+  const stopCaptureCompact = compactSource(stopCapture);
+  assert(
+    stopCaptureCompact.includes("constpendingStream=inFlightStream,activeStream=stream;") &&
+      stopCaptureCompact.includes("inFlightStream=null;") &&
+      stopCaptureCompact.includes("stream=null;") &&
+      stopCaptureCompact.includes("video.srcObject=null;") &&
+      stopCaptureCompact.includes(
+        "if(pendingStream)pendingStream.getTracks().forEach(t=>t.stop());",
+      ) &&
+      stopCaptureCompact.includes(
+        "if(activeStream&&activeStream!==pendingStream)activeStream.getTracks().forEach(t=>t.stop());",
+      ),
+    "capture close detaches and stops both in-flight and promoted camera streams",
   );
   assertEqual(
     compactSource(reset),
@@ -2894,6 +2940,24 @@ function anchorHistory(releaseTs, drift) {
     ),
   );
   const swapCompact = compactSource(swap);
+  const initialLoad = boundedSourceSection(
+    capture,
+    "loadFormPose().then(async lm=>{",
+    "}).catch(e=>{",
+    "initial capture load section",
+  );
+  const initialLoadCompact = compactSource(initialLoad);
+  assert(
+    swapCompact.includes("constcameraStarted=awaitstartCamera();") &&
+      swapCompact.includes("if(!cameraStarted){if(running)facing=previousFacing;return;}") &&
+      initialLoadCompact.includes("constcameraStarted=awaitstartCamera();") &&
+      initialLoadCompact.includes("if(!cameraStarted)return;") &&
+      initialLoadCompact.indexOf("if(!cameraStarted)return;") <
+        initialLoadCompact.indexOf("wakeLock.acquire();") &&
+      initialLoadCompact.indexOf("if(!cameraStarted)return;") <
+        initialLoadCompact.indexOf("loop();"),
+    "camera callers stop before ready state, wake lock, or loop when startup aborts",
+  );
   const swapGuard = swapCompact.indexOf("if(cameraSwapInProgress)return;");
   const swapLock = swapCompact.indexOf("cameraSwapInProgress=true;");
   const swapFacing = swapCompact.indexOf("facing=");
@@ -2921,7 +2985,7 @@ function anchorHistory(releaseTs, drift) {
   const stopOldStream = swapCompact.indexOf(
     "if(oldStream)oldStream.getTracks().forEach(t=>t.stop());",
   );
-  const restoreFacing = swapCompact.indexOf("facing=previousFacing;");
+  const restoreFacing = swapCompact.lastIndexOf("facing=previousFacing;");
   const catchBlock = swapCompact.indexOf("catch(e){");
   assert(
     previousFacing >= 0 &&

@@ -711,3 +711,24 @@ Next task:
 
 - Task 6: perform mobile-sized and field acceptance of adaptive live capture
   and replay behavior.
+
+### 2026-07-26 - Task 5 re-review: stop in-flight camera streams
+
+- Added capture-owned in-flight camera state so close can detach and stop a
+  candidate while `video.play()` is pending. Acquisition and play
+  continuations now revalidate `running` and candidate ownership before
+  promotion; initial and swap callers stop before success-only work on abort.
+- `stop()` clears and detaches both pending and promoted streams, without
+  stopping the same stream twice. Prior failure cleanup, facing retry,
+  live-track gating, swap locking, recorder behavior, and Task 5 geometry
+  contracts remain intact.
+- RED: test-only `npm run check:form` exited 1 with
+  `capture exposes an in-flight camera stream so close can stop it`.
+- GREEN: `npm run check:form`, `npm run check:app`,
+  `npm run check:globals`, and `npm run lint -- --quiet` pass. Managed-file
+  Prettier passes; the compact view retains its documented baseline warning.
+
+Next task:
+
+- Task 6: perform mobile-sized and field acceptance of adaptive live capture
+  and replay behavior.
