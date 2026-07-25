@@ -603,3 +603,48 @@ Next task:
 
 - Task 5: validate the adaptive release and cancellation behavior against the
   approved phone/field acceptance matrix before any product-completion claim.
+
+### 2026-07-26 - Task 4 review remediation: exact window and legacy classification
+
+- Closed the reviewer's Important coverage gap without changing approved
+  production. A real adaptive fire now has a focused return sequence at
+  +250/+300/+350/+400 ms; the first three observations survive and the fourth
+  cancels exactly at fire +400 ms with one `anchor-return`, net zero, and
+  cleared pending state.
+- Added hand-built timeout fixtures with `fireEvidence` omitted and with
+  `fireEvidence="other"`. Both retain compatibility through the legacy
+  `no-depart` path at +401 ms, proving only exact `"adaptive"` selects adaptive
+  confirmation.
+- This is coverage of already-correct behavior, so no artificial RED was
+  claimed and `scripts/46-form-core.js` was not changed.
+
+Validation:
+
+- Post-assertion `npm run check:form`: pass (`Form core checks OK`).
+- Read-only in-memory `< CONFIRM_MS` mutant: exited 1 at
+  `adaptive return can cancel at exact fire+400: expected true, got undefined`.
+- Read-only in-memory missing/other-as-adaptive mutant: exited 1 at
+  `missing fireEvidence remains legacy-compatible: expected true, got undefined`.
+  Neither mutant changed a worktree file.
+- `npm run check:globals`: pass
+  (`check-globals OK (14 files, 1023 unresolved refs all accounted for)`).
+- `npm run lint -- --quiet`: pass with no lint findings.
+- `npx prettier --check tools/check-form-core.js
+docs/codex/codex-progress.md`: pass
+  (`All matched files use Prettier code style!`).
+- `git diff --check 3ae6700f5e71e30b8951e59ef8c3005a88421a76`: pass.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's-result, security, UI smoke, PWA, storage, and version
+  alignment.
+
+Risk notes:
+
+- Review remediation is synthetic test coverage only and does not establish
+  phone/product acceptance. Production behavior, timestamp preconditions,
+  storage/schema, UI/view, dependencies, Service Worker, versions, release,
+  deployment, and persisted user data remain unchanged.
+
+Next task:
+
+- Task 5: validate the adaptive release and cancellation behavior against the
+  approved phone/field acceptance matrix before any product-completion claim.

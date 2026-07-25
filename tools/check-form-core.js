@@ -971,6 +971,35 @@ return adaptiveReleaseCandidate;`,
 }
 {
   const fixture = adaptiveConfirmationFixture();
+  let atBoundary = null;
+  [250, 50, 50, 50].forEach((elapsed, index) => {
+    const current = fixture.push(mkRaw(0.47, 150), 0.1, elapsed);
+    if (index < 3)
+      assertEqual(
+        current.result.canceled,
+        undefined,
+        `adaptive fire+400 return frame ${index + 1} survives`,
+      );
+    else atBoundary = current;
+  });
+  assertEqual(atBoundary.now, fixture.fire.now + 400, "adaptive return completes at fire+400");
+  assertEqual(atBoundary.result.canceled, true, "adaptive return can cancel at exact fire+400");
+  assertEqual(
+    atBoundary.result.debug.cancelReason,
+    "anchor-return",
+    "fire+400 cancellation reason is anchor-return",
+  );
+  assertEqual(fixture.stats.cancellations, 1, "fire+400 return cancels exactly once");
+  assertEqual(fixture.stats.netReleases, 0, "fire+400 return removes the shown shot");
+  assertEqual(fixture.st.pendingRelease, null, "fire+400 cancellation clears pending");
+  assertEqual(
+    JSON.stringify(fixture.stats.cancelTimestamps),
+    JSON.stringify([fixture.fire.now + 400]),
+    "fire+400 cancellation timestamp is exact",
+  );
+}
+{
+  const fixture = adaptiveConfirmationFixture();
   fixture.st.adaptive.anchorSamples = Array.from({ length: 6 }, (_, i) => ({
     ts: fixture.now - i,
     norm: 0.2,
@@ -1069,6 +1098,31 @@ return adaptiveReleaseCandidate;`,
     "non-finite stored boundary fails safe without cancel",
   );
   assertEqual(nonFinite.stats.cancellations, 0, "non-finite boundary cannot auto-cancel");
+}
+{
+  [
+    { label: "missing", fireEvidence: undefined },
+    { label: "other", fireEvidence: "other" },
+  ].forEach(({ label, fireEvidence }) => {
+    const st = core.makeFormPhaseDetector();
+    st.lastReleaseTs = 1000;
+    st.pendingRelease = {
+      ts: 1000,
+      ...(fireEvidence === undefined ? {} : { fireEvidence }),
+      nb2Ref: null,
+      departCheck: true,
+      departFrames: 0,
+      departSeen: 5,
+    };
+    const hoverRaw = mkRaw(0.5, 140);
+    const result = core.stepFormPhase(st, hoverRaw, [{ ts: 1401, m: hoverRaw, vel: 0.2 }], 1, 1401);
+    assertEqual(result.canceled, true, `${label} fireEvidence remains legacy-compatible`);
+    assertEqual(
+      result.debug.cancelReason,
+      "no-depart",
+      `${label} fireEvidence uses legacy no-depart`,
+    );
+  });
 }
 
 /* ---------- Task 2: session-local adaptive anchor evidence ---------- */
