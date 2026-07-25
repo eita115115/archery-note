@@ -37,6 +37,28 @@ const FORM_REF = Object.freeze({
    RELEASE_RISE は未使用化のみ（表示・別ロジックからの参照除去は今回のスコープ外）。 */
 const FORM_PH = Object.freeze({
   CLOSE_IN: 0.35,
+  /* Session-local adaptive-release primitives (Task 1): these field-derived
+     thresholds are inert until the later evidence/candidate tasks wire them
+     into stepFormPhase. MediaPipe inputs have already been temporally filtered;
+     the helpers themselves have not had external phone acceptance validation. */
+  ADAPTIVE_SAMPLE_WINDOW_MS: 1500,
+  ADAPTIVE_EVIDENCE_WINDOW_MS: 1500,
+  ADAPTIVE_CALIBRATION_SAMPLES: 6,
+  ADAPTIVE_ANCHOR_PADDING: 0.12,
+  ADAPTIVE_ANCHOR_MIN: 0.35,
+  ADAPTIVE_ANCHOR_MAX: 0.65,
+  ADAPTIVE_HOLD_MIN_MS: 150,
+  ADAPTIVE_HOLD_MIN_FRAMES: 3,
+  ADAPTIVE_HOLD_RANGE: 0.12,
+  ADAPTIVE_STRENGTH_CAP: 12,
+  ADAPTIVE_RELEASE_PERCENTILE: 0.9,
+  ADAPTIVE_RELEASE_PADDING: 1,
+  ADAPTIVE_RELEASE_MIN: 6,
+  ADAPTIVE_RELEASE_MAX: 8,
+  ADAPTIVE_DEPARTURE: 0.18,
+  ADAPTIVE_DIRECTION_DELTA: 0.04,
+  ADAPTIVE_FAR_BOUNDARY: 1.2,
+  ADAPTIVE_FAR_INVALIDATION_MS: 300,
   FULLDRAW_MS: 350,
   RELEASE_RISE: 0.18, // 2026-07-05: リリース判定には使わない（下記 stepFormPhase 参照）。将来別用途で参照する可能性があるため残す
   RELEASE_TH: 9, // 瞬間速度スパイク（胴体長/秒）。単独主条件に昇格（2026-07-05）
@@ -169,6 +191,44 @@ function formMedian(vals) {
   if (!a.length) return null;
   const m = Math.floor(a.length / 2);
   return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+}
+
+function adaptivePercentile(values, q) {
+  const sorted = (Array.isArray(values) ? values : [])
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  if (!sorted.length) return null;
+  const position = (sorted.length - 1) * q;
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+}
+
+function adaptiveAnchorThreshold(anchorSamples) {
+  const usable = (Array.isArray(anchorSamples) ? anchorSamples : []).filter(Number.isFinite);
+  if (usable.length < FORM_PH.ADAPTIVE_CALIBRATION_SAMPLES) return FORM_PH.ADAPTIVE_ANCHOR_MIN;
+  return Math.max(
+    FORM_PH.ADAPTIVE_ANCHOR_MIN,
+    Math.min(
+      FORM_PH.ADAPTIVE_ANCHOR_MAX,
+      adaptivePercentile(usable, 0.1) + FORM_PH.ADAPTIVE_ANCHOR_PADDING,
+    ),
+  );
+}
+
+function adaptiveReleaseThreshold(holdVelocitySamples) {
+  const usable = (Array.isArray(holdVelocitySamples) ? holdVelocitySamples : []).filter(
+    Number.isFinite,
+  );
+  if (usable.length < FORM_PH.ADAPTIVE_CALIBRATION_SAMPLES) return FORM_PH.ADAPTIVE_RELEASE_MIN;
+  return Math.max(
+    FORM_PH.ADAPTIVE_RELEASE_MIN,
+    Math.min(
+      FORM_PH.ADAPTIVE_RELEASE_MAX,
+      adaptivePercentile(usable, FORM_PH.ADAPTIVE_RELEASE_PERCENTILE) +
+        FORM_PH.ADAPTIVE_RELEASE_PADDING,
+    ),
+  );
 }
 
 /* 矢プレゼンス検出しきい値。合成フレーム分離性テスト（tools/check-form-core.js）で
@@ -507,6 +567,17 @@ function makeFormPhaseDetector() {
     pendingCancelSince: 0,
     pendingCancelCount: 0,
     nb2DriftSince: 0,
+    adaptive: {
+      anchorSamples: [],
+      holdSamples: [],
+      holdVelocitySamples: [],
+      holdSince: 0,
+      farSince: 0,
+      evidence: null,
+      anchorFloor: null,
+      anchorEnter: 0.35,
+      releaseSpeed: 6,
+    },
   };
 }
 

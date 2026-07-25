@@ -29,7 +29,8 @@ function assertClose(actual, expected, eps, label) {
 const core = new Function(
   `${coreScript}
 return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
-  formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
+  formMedian, adaptiveAnchorThreshold, adaptiveReleaseThreshold,
+  computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
   FORM_VEL_FILTER, makeFormVelocitySource,
   formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
   formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
@@ -70,6 +71,92 @@ assertClose(
 assertEqual(core.formMedian([]), null, "median of empty");
 assertClose(core.formMedian([3, 1, 2]), 2, 1e-9, "odd median");
 assertClose(core.formMedian([1, 2, 3, 4]), 2.5, 1e-9, "even median");
+assertEqual(
+  core.adaptiveAnchorThreshold([0.47, 0.48, 0.49, 0.5, 0.51]),
+  0.35,
+  "five anchor samples keep cold start",
+);
+assertClose(
+  core.adaptiveAnchorThreshold([0.47, 0.48, 0.49, 0.5, 0.51, 0.52]),
+  0.595,
+  1e-9,
+  "six samples start p10 calibration",
+);
+assertEqual(
+  core.adaptiveAnchorThreshold([0.7, 0.71, 0.72, 0.73, 0.74, 0.75]),
+  0.65,
+  "anchor threshold is capped",
+);
+assertEqual(
+  core.adaptiveAnchorThreshold([0, 0.01, 0.02, 0.03, 0.04, 0.05]),
+  0.35,
+  "anchor threshold respects the calibrated lower clamp",
+);
+assertEqual(
+  core.adaptiveAnchorThreshold([0.47, NaN, 0.48, Infinity, 0.49, 0.5, 0.51, 0.52]),
+  0.595,
+  "anchor calibration filters non-finite samples and counts only finite values",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([0.1, 0.2, 0.3, 0.4, 0.5]),
+  6,
+  "five velocity samples keep cold start",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([7, 7, 7, 7, 7, 7]),
+  8,
+  "release speed is capped below legacy nine",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([0.1, 0.2, 0.2, 0.3, 0.3, 7]),
+  6,
+  "single velocity outlier does not raise the floor",
+);
+assertClose(
+  core.adaptiveReleaseThreshold([1, 2, 3, 4, 5, 6]),
+  6.5,
+  1e-9,
+  "release speed uses an unclamped p90 result",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([1, 2, 3, 4, 5, NaN, Infinity, 6]),
+  6.5,
+  "release calibration filters non-finite samples and counts only finite values",
+);
+{
+  const anchorSamples = [0.52, 0.47, 0.5, 0.48, 0.51, 0.49];
+  const velocitySamples = [6, 1, 5, 2, 4, 3];
+  core.adaptiveAnchorThreshold(anchorSamples);
+  core.adaptiveReleaseThreshold(velocitySamples);
+  assertEqual(
+    JSON.stringify(anchorSamples),
+    JSON.stringify([0.52, 0.47, 0.5, 0.48, 0.51, 0.49]),
+    "anchor calibration does not mutate unsorted input",
+  );
+  assertEqual(
+    JSON.stringify(velocitySamples),
+    JSON.stringify([6, 1, 5, 2, 4, 3]),
+    "release calibration does not mutate unsorted input",
+  );
+}
+{
+  const first = core.makeFormPhaseDetector();
+  const second = core.makeFormPhaseDetector();
+  assert(first.adaptive && second.adaptive, "detectors include adaptive state");
+  assert(first.adaptive !== second.adaptive, "detectors have distinct adaptive objects");
+  assert(
+    first.adaptive.anchorSamples !== second.adaptive.anchorSamples,
+    "anchor arrays are detector-local",
+  );
+  assert(
+    first.adaptive.holdSamples !== second.adaptive.holdSamples,
+    "hold arrays are detector-local",
+  );
+  assert(
+    first.adaptive.holdVelocitySamples !== second.adaptive.holdVelocitySamples,
+    "velocity arrays are detector-local",
+  );
+}
 assertEqual(
   core.formGaussScore(core.FORM_REF.bowArmAngle.ideal, core.FORM_REF.bowArmAngle),
   100,

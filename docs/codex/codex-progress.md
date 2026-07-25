@@ -291,3 +291,37 @@ until rebased/merged; the Phase Ledger rows above are still stale.
 - Next task:
   - Choose Subagent-Driven execution (recommended) or Inline Execution, then
     execute Task 1 with its failing tests before changing detector behavior.
+
+### 2026-07-25 - Adaptive release detector primitives (Task 1)
+
+- Added behavior-neutral, detector-local adaptive threshold primitives in
+  `scripts/46-form-core.js`: finite-only, linear-interpolated p10 anchor and
+  p90 velocity calibration with cold starts and bounded outputs.
+- Added the complete fresh `adaptive` state object to each form phase detector.
+  This task intentionally does not call the new helpers from `stepFormPhase` or
+  alter `summarizeFormShot`; later tasks add evidence and release-candidate use.
+- Added regression coverage for the six approved threshold fixtures, finite
+  filtering/counting, lower/upper clamps, an unclamped p90 result, non-mutating
+  unsorted inputs, and detector-local adaptive arrays.
+
+Validation:
+
+- RED: `npm run check:form` exited 1 with the intended loader failure:
+  `ReferenceError: adaptiveAnchorThreshold is not defined`.
+- GREEN: `npm run check:form` exited 0 and ended with `Form core checks OK`.
+- `npm run lint -- --quiet`: pass.
+- `npx prettier --check scripts/46-form-core.js tools/check-form-core.js
+  docs/codex/codex-progress.md`: pass after formatting the two edited JavaScript
+  files.
+
+Risk notes:
+
+- The exact thresholds are field-derived but have not received external phone
+  acceptance; they remain inert and gated by the later session-evidence and
+  phone-acceptance tasks.
+- No storage, persisted state, Service Worker, version marker, release, or
+  primary-phone-flow behavior changed.
+
+Next task:
+
+- Task 2: form and refresh session-local anchor evidence.
