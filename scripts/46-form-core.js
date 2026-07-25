@@ -1425,10 +1425,18 @@ function formAnchorVariation(shots) {
 
 /* 1 射の要約（formAnalysis.features 1 件分）。
    anchorStartTs=アンカー圏に入った時刻, releaseTs=リリース時刻 */
-function summarizeFormShot(history, anchorStartTs, releaseTs) {
+function summarizeFormShot(history, anchorStartTs, releaseTs, activeAnchorEnter) {
   if (!history || !history.length || !releaseTs) return null;
+  const activeAnchorLimit = Math.max(
+    0.45,
+    Number.isFinite(activeAnchorEnter) ? activeAnchorEnter : 0.35,
+  );
   let win = history.filter(
-    (h) => h.m && h.ts >= (anchorStartTs || 0) && h.ts <= releaseTs - 120 && h.m.anchorNorm < 0.45,
+    (h) =>
+      h.m &&
+      h.ts >= (anchorStartTs || 0) &&
+      h.ts <= releaseTs - 120 &&
+      h.m.anchorNorm < activeAnchorLimit,
   );
   let degraded = false;
   /* 段階フォールバック（2026-07-15）: 従来は win.length < 2 で null（ショット無言破棄）

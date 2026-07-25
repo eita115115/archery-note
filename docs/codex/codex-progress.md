@@ -651,3 +651,58 @@ Next task:
 
 - Task 5: wire active geometry through `summarizeFormShot`, live capture and
   replay, geometry reset, and diagnostics.
+
+### 2026-07-26 - Task 5: active capture/replay geometry integration
+
+- Generalized `summarizeFormShot` with an optional active anchor-entry
+  threshold. Four-argument adaptive calls now keep valid holds below the
+  active threshold in the primary window, while legacy three-argument calls
+  retain the existing `0.45` boundary and fallback order.
+- Threaded the detector result's top-level `r.anchorEnter` through live capture
+  and saved-video replay shot summaries. Debug-off behavior and the persisted
+  form-analysis shape remain unchanged.
+- Added the capture-only geometry reset for camera, handedness, and crop
+  changes. It finalizes a pending arrow annotation, then clears only detector,
+  EMA, history, velocity, presence, pending-annotation, and recent live
+  geometry state; counted shots, rendered rows, session diagnostics, timing,
+  performance samples, and recording state are preserved.
+- Guarded camera swaps so no frame is processed while the stream is being
+  replaced. The guard is released after either success or failure so the
+  control remains retryable. Replay keeps its independent local handedness
+  reset and never calls the capture helper.
+- Added bounded source-section contracts for capture and
+  `startFormReplay(videoUrl)`, including all reset callers, approved reset
+  order, camera-swap ordering/guarding, top-level handedness parity, and the
+  replay-local reset. Added adaptive summary-window and genuine adaptive-fire
+  diagnostic-shape regressions.
+
+Validation:
+
+- RED: test-only `npm run check:form` exited 1 with
+  `active anchor threshold keeps the primary summary window: expected false, got true`.
+- Focused GREEN: `npm run check:form` exited 0 and ended with
+  `Form core checks OK`.
+- `npm run check:app`: pass (`Archery Note checks OK (v84)`).
+- `npm run check:globals`: pass
+  (`check-globals OK (14 files, 1025 unresolved refs all accounted for)`).
+- `npm run lint -- --quiet`: pass with no lint findings.
+- `npx prettier --write scripts/46-form-core.js scripts/47-form-view.js
+tools/check-form-core.js docs/codex/codex-progress.md`: pass (all four files
+  formatted).
+- `git diff --check --cached`: pass after staging only the four Task 5 files.
+
+Risk notes:
+
+- Validation is synthetic/static and does not replace Task 6 mobile/field
+  acceptance. The camera replacement guard preserves the existing stream and
+  recorder flow but has not been exercised against physical iPhone cameras in
+  this task.
+- This slice does not alter detector fire semantics, shot cancellation,
+  diagnostic opt-in, privacy copy, storage/schema, dependencies, Service
+  Worker behavior, version markers, release/deployment, or persisted user
+  data.
+
+Next task:
+
+- Task 6: perform mobile-sized and field acceptance of adaptive live capture
+  and replay behavior.

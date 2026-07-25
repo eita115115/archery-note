@@ -9,6 +9,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const coreScript = fs.readFileSync(path.join(root, "scripts", "46-form-core.js"), "utf8");
+const viewScript = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
 
 function assert(ok, message) {
   if (!ok) throw new Error(message);
@@ -24,6 +25,17 @@ function assertClose(actual, expected, eps, label) {
     Number.isFinite(actual) && Math.abs(actual - expected) <= eps,
     `${label}: expected ${expected} (±${eps}), got ${actual}`,
   );
+}
+function boundedSourceSection(source, startMarker, endMarker, label) {
+  const start = source.indexOf(startMarker);
+  assert(start >= 0, `${label}: start marker exists`);
+  assertEqual(source.lastIndexOf(startMarker), start, `${label}: start marker is unique`);
+  const end = source.indexOf(endMarker, start + startMarker.length);
+  assert(end > start, `${label}: ordered end marker exists`);
+  return source.slice(start, end);
+}
+function compactSource(source) {
+  return source.replace(/\s+/g, "");
 }
 
 const core = new Function(
@@ -367,6 +379,25 @@ function adaptiveConfirmationFixture() {
       return now;
     },
   };
+}
+
+{
+  const adaptiveFire = adaptiveConfirmationFixture().fire.result;
+  assertEqual(
+    adaptiveFire.debug.fireEvidence,
+    "adaptive",
+    "genuine adaptive fire identifies its evidence route",
+  );
+  [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+  ].forEach((key) =>
+    assert(Number.isFinite(adaptiveFire.debug[key]), `genuine adaptive fire has finite ${key}`),
+  );
 }
 
 {
@@ -2750,6 +2781,165 @@ function anchorHistory(releaseTs, drift) {
   assertClose(shot.angles.bowArm, 171, 1e-9, "median bow arm");
   assert(shot.confidence > 0.8, "summary confidence");
   assertEqual(core.summarizeFormShot([], 0, 10000), null, "no history no summary");
+}
+{
+  const hist = [];
+  for (let ts = 9200; ts <= 9800; ts += 100) {
+    hist.push({
+      ts,
+      m: {
+        anchorNorm: 0.55,
+        bowArm: 171,
+        drawArm: 150,
+        shoulderDrop: 0.07,
+        headOffset: 0.09,
+        forceLine: 0.07,
+        score: 80,
+        conf: 0.9,
+        bodyScale: 0.25,
+        bW: { x: 0.2, y: 0.4 },
+        dW: { x: 0.6, y: 0.31 },
+      },
+      vel: 0.05,
+    });
+  }
+  const adaptive = core.summarizeFormShot(hist, 9100, 10000, 0.6);
+  assert(adaptive, "active anchor threshold produces a shot summary");
+  assertEqual(adaptive.degraded, false, "active anchor threshold keeps the primary summary window");
+  assertEqual(adaptive.frames, 7, "active anchor threshold uses all valid 0.55 hold frames");
+  const legacy = core.summarizeFormShot(hist, 9100, 10000);
+  assert(legacy, "three-argument summary remains available");
+  assertEqual(legacy.degraded, true, "three-argument summary preserves the legacy 0.45 window");
+  assertEqual(legacy.frames, 5, "three-argument summary preserves loose fallback selection");
+}
+
+/* ---------- Task 5: capture/replay active-geometry integration contracts ---------- */
+
+{
+  const capture = boundedSourceSection(
+    viewScript,
+    "function openFormCapture() {",
+    "function openFormReplay() {",
+    "openFormCapture section",
+  );
+  const replay = boundedSourceSection(
+    viewScript,
+    "function startFormReplay(videoUrl) {",
+    '      hud.textContent = "射形解析を開始できませんでした: " + ((e && e.message) || e);',
+    "startFormReplay section",
+  );
+  const reset = boundedSourceSection(
+    capture,
+    "function resetCaptureGeometry() {",
+    "function loop() {",
+    "resetCaptureGeometry section",
+  );
+  assertEqual(
+    compactSource(reset),
+    compactSource(`function resetCaptureGeometry() {
+      if (pendingCheck) finalizeArrowCheck();
+      detector = makeFormPhaseDetector();
+      ema = makeFormEma(0.38);
+      history = [];
+      velSrc.reset();
+      presenceRing = [];
+      pendingCheck = null;
+      recentFrames = [];
+      lastAnchoringSampleAt = 0;
+    }`),
+    "capture geometry reset keeps the approved ordered body",
+  );
+  assert(!/\bshots\s*=\s*\[\]/.test(reset), "capture geometry reset preserves counted shots");
+
+  const swap = boundedSourceSection(
+    capture,
+    'ovl.querySelector("#fcSwap").onclick = async () => {',
+    'ovl.querySelector("#fcHand").onclick = (e) => {',
+    "#fcSwap handler",
+  );
+  const hand = boundedSourceSection(
+    capture,
+    'ovl.querySelector("#fcHand").onclick = (e) => {',
+    'ovl.querySelector("#fcCrop").onclick = (e) => {',
+    "#fcHand handler",
+  );
+  const crop = boundedSourceSection(
+    capture,
+    'ovl.querySelector("#fcCrop").onclick = (e) => {',
+    'ovl.querySelector("#fcRec").onclick = (e) => {',
+    "#fcCrop handler",
+  );
+  [swap, hand, crop].forEach((handler, index) =>
+    assert(
+      handler.includes("resetCaptureGeometry();"),
+      ["camera swap", "live handedness", "crop toggle"][index] + " resets capture geometry",
+    ),
+  );
+  const swapGuard = swap.indexOf("if (cameraSwapInProgress) return;");
+  const swapLock = swap.indexOf("cameraSwapInProgress = true;");
+  const swapFacing = swap.indexOf("facing =");
+  const swapReset = swap.indexOf("resetCaptureGeometry();");
+  const swapAwait = swap.indexOf("await ");
+  assert(
+    swapGuard >= 0 &&
+      swapLock > swapGuard &&
+      swapFacing > swapLock &&
+      swapReset > swapFacing &&
+      swapAwait > swapReset,
+    "camera swap resets synchronously after facing changes and before its first await",
+  );
+  assert(
+    capture.includes("cameraSwapInProgress") &&
+      /if\s*\(\s*landmarker\s*&&\s*!cameraSwapInProgress/.test(capture) &&
+      swap.includes("finally {") &&
+      swap.indexOf("cameraSwapInProgress = false;") > swap.indexOf("finally {"),
+    "capture loop skips replacement frames and unlocks camera swap after failure",
+  );
+
+  assert(
+    /function\s+onShot\s*\(\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*,\s*debug\s*\)/.test(
+      capture,
+    ) &&
+      /summarizeFormShot\s*\(\s*history\s*,\s*anchorStartTs\s*,\s*now\s*,\s*activeAnchorEnter\s*\)/.test(
+        capture,
+      ) &&
+      /onShot\s*\(\s*now\s*,\s*anchorStartTs\s*,\s*r\.anchorEnter\s*,\s*debug\s*\)/.test(capture),
+    "capture passes the top-level active anchor threshold into shot summaries",
+  );
+  assert(
+    /function\s+onShot\s*\(\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*\)/.test(replay) &&
+      /summarizeFormShot\s*\(\s*history\s*,\s*anchorStartTs\s*,\s*now\s*,\s*activeAnchorEnter\s*\)/.test(
+        replay,
+      ) &&
+      /onShot\s*\(\s*now\s*,\s*r\.anchorStartTs\s*,\s*r\.anchorEnter\s*\)/.test(replay),
+    "replay passes the top-level active anchor threshold into shot summaries",
+  );
+  assert(
+    !capture.includes("debug.anchorEnter") && !replay.includes("debug.anchorEnter"),
+    "view integrations never substitute debug anchor geometry",
+  );
+  assert(
+    !replay.includes("resetCaptureGeometry"),
+    "replay does not call the capture-only geometry helper",
+  );
+  const replayHand = boundedSourceSection(
+    replay,
+    'ovl.querySelector("#frHand").onclick = (e) => {',
+    "  loadFormPose()",
+    "replay handedness handler",
+  );
+  const replayHandCompact = compactSource(replayHand);
+  [
+    "detector=makeFormPhaseDetector();",
+    "ema=makeFormEma(0.38);",
+    "history=[];",
+    "velSrc.reset();",
+  ].forEach((resetExpression) =>
+    assert(
+      replayHandCompact.includes(compactSource(resetExpression)),
+      `replay handedness locally resets ${resetExpression}`,
+    ),
+  );
 }
 
 /* ---------- T-Anchor（Stage 1 §12.3）: pre-release 窓の anchorStartTs クランプ ---------- */
