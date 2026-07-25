@@ -76,6 +76,11 @@ assertEqual(
   0.35,
   "five anchor samples keep cold start",
 );
+assertEqual(
+  core.adaptiveAnchorThreshold([0.47, NaN, 0.48, Infinity, 0.49, 0.5, 0.51]),
+  0.35,
+  "non-finite anchor samples do not satisfy the six-sample calibration gate",
+);
 assertClose(
   core.adaptiveAnchorThreshold([0.47, 0.48, 0.49, 0.5, 0.51, 0.52]),
   0.595,
@@ -101,6 +106,11 @@ assertEqual(
   core.adaptiveReleaseThreshold([0.1, 0.2, 0.3, 0.4, 0.5]),
   6,
   "five velocity samples keep cold start",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([0.1, NaN, 0.2, Infinity, 0.3, 0.4, 0.5]),
+  6,
+  "non-finite velocity samples do not satisfy the six-sample calibration gate",
 );
 assertEqual(
   core.adaptiveReleaseThreshold([7, 7, 7, 7, 7, 7]),

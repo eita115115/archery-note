@@ -311,7 +311,7 @@ Validation:
 - GREEN: `npm run check:form` exited 0 and ended with `Form core checks OK`.
 - `npm run lint -- --quiet`: pass.
 - `npx prettier --check scripts/46-form-core.js tools/check-form-core.js
-  docs/codex/codex-progress.md`: pass after formatting the two edited JavaScript
+docs/codex/codex-progress.md`: pass after formatting the two edited JavaScript
   files.
 
 Risk notes:
@@ -325,3 +325,23 @@ Risk notes:
 Next task:
 
 - Task 2: form and refresh session-local anchor evidence.
+
+### 2026-07-25 - Task 1 review remediation: finite calibration gate
+
+- Added explicit regression coverage for both adaptive threshold cold starts
+  with exactly five finite samples plus `NaN`/`Infinity`. This proves non-finite
+  entries cannot satisfy the six-usable-sample calibration gate.
+- This is review-added coverage of existing correct behavior, not a new RED or
+  production behavior change.
+
+Validation:
+
+- `npm run check:form`: pass (`Form core checks OK`).
+- `npm run lint -- --quiet`: pass.
+- `npx prettier --check tools/check-form-core.js docs/codex/codex-progress.md`:
+  pass.
+
+Risk notes:
+
+- Test-only remediation; adaptive production logic and later phone-acceptance
+  gate remain unchanged.
