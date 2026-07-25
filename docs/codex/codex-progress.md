@@ -592,8 +592,10 @@ docs/codex/codex-progress.md`: pass
 
 Risk notes:
 
-- This is synthetic core validation only; no phone/product acceptance is
-  claimed. Monotonic timestamps remain an existing runtime precondition.
+- This is synthetic core validation only. Task 5 active-geometry integration
+  and the later Task 6 phone/field acceptance remain pending; neither is
+  claimed complete. Monotonic timestamps remain an existing runtime
+  precondition.
 - The adaptive detector remains recall-first as recorded in Task 3. This task
   changes only post-fire confirmation and does not alter view/UI, immediate
   insertion, storage/schema, dependencies, Service Worker, version markers,
@@ -601,8 +603,8 @@ Risk notes:
 
 Next task:
 
-- Task 5: validate the adaptive release and cancellation behavior against the
-  approved phone/field acceptance matrix before any product-completion claim.
+- Task 5: wire active geometry through `summarizeFormShot`, live capture and
+  replay, geometry reset, and diagnostics.
 
 ### 2026-07-26 - Task 4 review remediation: exact window and legacy classification
 
@@ -639,12 +641,13 @@ docs/codex/codex-progress.md`: pass
 
 Risk notes:
 
-- Review remediation is synthetic test coverage only and does not establish
-  phone/product acceptance. Production behavior, timestamp preconditions,
-  storage/schema, UI/view, dependencies, Service Worker, versions, release,
-  deployment, and persisted user data remain unchanged.
+- Review remediation is synthetic test coverage only. Task 5 active-geometry
+  integration and the later Task 6 phone/field acceptance remain pending.
+  Production behavior, timestamp preconditions, storage/schema, UI/view,
+  dependencies, Service Worker, versions, release, deployment, and persisted
+  user data remain unchanged.
 
 Next task:
 
-- Task 5: validate the adaptive release and cancellation behavior against the
-  approved phone/field acceptance matrix before any product-completion claim.
+- Task 5: wire active geometry through `summarizeFormShot`, live capture and
+  replay, geometry reset, and diagnostics.
