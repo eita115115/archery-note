@@ -37,10 +37,10 @@ const FORM_REF = Object.freeze({
    RELEASE_RISE は未使用化のみ（表示・別ロジックからの参照除去は今回のスコープ外）。 */
 const FORM_PH = Object.freeze({
   CLOSE_IN: 0.35,
-  /* Session-local adaptive-release primitives (Task 1): these field-derived
-     thresholds are inert until the later evidence/candidate tasks wire them
-     into stepFormPhase. MediaPipe inputs have already been temporally filtered;
-     the helpers themselves have not had external phone acceptance validation. */
+  /* Session-local adaptive-release primitives: introduced as behavior-neutral
+     Task 1 math, then wired into evidence and candidate detection by Tasks 2-3.
+     MediaPipe inputs have already been temporally filtered; the helpers have
+     not yet received external phone acceptance validation. */
   ADAPTIVE_SAMPLE_WINDOW_MS: 1500,
   ADAPTIVE_EVIDENCE_WINDOW_MS: 1500,
   ADAPTIVE_CALIBRATION_SAMPLES: 6,
@@ -252,7 +252,8 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
     raw && formConfOk(raw) && Number.isFinite(raw.anchorNorm) && Number.isFinite(now),
   );
   if (evidenceValid && currentUsable) {
-    decision.departDelta = raw.anchorNorm - evidence.normAtHold;
+    const departDelta = raw.anchorNorm - evidence.normAtHold;
+    decision.departDelta = Number.isFinite(departDelta) ? departDelta : null;
   }
 
   const frames = Array.isArray(history) ? history : [];
@@ -272,15 +273,12 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
   if (currentUsable && previousNorms.length === 3) {
     const previousMedian = formMedian(previousNorms);
     const directionDelta = raw.anchorNorm - previousMedian;
-    const directionEpsilon =
-      Number.EPSILON *
-      Math.max(
-        1,
-        Math.abs(raw.anchorNorm),
-        Math.abs(previousMedian),
-        FORM_PH.ADAPTIVE_DIRECTION_DELTA,
-      );
-    decision.movingAway = directionDelta + directionEpsilon >= FORM_PH.ADAPTIVE_DIRECTION_DELTA;
+    if (Number.isFinite(directionDelta)) {
+      const directionEpsilon =
+        Number.EPSILON *
+        Math.max(1, Math.abs(directionDelta), Math.abs(FORM_PH.ADAPTIVE_DIRECTION_DELTA));
+      decision.movingAway = directionDelta + directionEpsilon >= FORM_PH.ADAPTIVE_DIRECTION_DELTA;
+    }
   }
 
   const velocities = frames
@@ -300,24 +298,28 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
   if (velocities.length) decision.maxV = Math.max(...velocities);
 
   const age = evidenceValid && Number.isFinite(now) ? now - evidence.ts : null;
-  const comparisonEpsilon =
+  const departureEpsilon =
+    Number.EPSILON *
+    Math.max(1, Math.abs(decision.departDelta || 0), Math.abs(FORM_PH.ADAPTIVE_DEPARTURE));
+  const speedEpsilon =
     Number.EPSILON *
     Math.max(
       1,
-      Math.abs(decision.departDelta == null ? 0 : decision.departDelta),
       Math.abs(decision.maxV == null ? 0 : decision.maxV),
       Math.abs(decision.releaseSpeed == null ? 0 : decision.releaseSpeed),
     );
   decision.matched =
     evidenceValid &&
     currentUsable &&
+    raw.anchorNorm <= FORM_PH.ADAPTIVE_FAR_BOUNDARY &&
     age >= 0 &&
     age <= FORM_PH.ADAPTIVE_EVIDENCE_WINDOW_MS &&
+    decision.departDelta != null &&
     decision.departDelta > 0 &&
-    decision.departDelta + comparisonEpsilon >= FORM_PH.ADAPTIVE_DEPARTURE &&
+    decision.departDelta + departureEpsilon >= FORM_PH.ADAPTIVE_DEPARTURE &&
     decision.movingAway &&
     decision.maxV != null &&
-    decision.maxV + comparisonEpsilon >= decision.releaseSpeed;
+    decision.maxV + speedEpsilon >= decision.releaseSpeed;
   return decision;
 }
 
@@ -838,8 +840,10 @@ function formPhaseResult(st, now, result, debug) {
    rise>0.18 が単独でも発火したため、1.1秒未満のどんな速さの引き戻し
    （レットダウン）も無条件にリリースとして誤検出していた
    （tools/check-form-core.js のレットダウン境界ケース参照）。
-   maxV 単独条件は 100ms〜2秒の線形レットダウンで発火せず、
-   50-100msで完了する現実的なリリース速度プロファイルは確実に検出する
+   legacy の maxV 単独条件は 100ms〜2秒の線形レットダウンで発火せず、
+   50-100msで完了する現実的なリリース速度プロファイルは確実に検出する。
+   adaptive 経路は recall-first の承認済み tradeoff として100ms線形レットダウンを
+   削除可能な候補にしうるが、150ms〜2秒は非発火を維持する
    （実測境界表は同ファイル）。
    加えて「確定猶予」(CONFIRM_MS) を設けた: released 判定後もアンカー圏へ
    即座に戻った場合は取消フラグ(canceled)を返す。呼び出し側は canceled=true の

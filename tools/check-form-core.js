@@ -420,6 +420,112 @@ function adaptiveCandidateFixture({
     true,
     "departure delta exactly +0.18 is included",
   );
+  const belowDeparture = adaptiveCandidateFixture({
+    currentNorm: 0.64,
+    priorNorms: [0.58, 0.6, 0.62],
+  });
+  const belowDepartureDecision = core.adaptiveReleaseCandidate(
+    belowDeparture.evidence,
+    belowDeparture.raw,
+    belowDeparture.history,
+    belowDeparture.now,
+  );
+  assertEqual(belowDepartureDecision.movingAway, true, "departure-negative control has direction");
+  assertEqual(belowDepartureDecision.maxV, 6, "departure-negative control has enough speed");
+  assertClose(
+    belowDepartureDecision.departDelta,
+    0.17,
+    1e-12,
+    "departure-negative control isolates delta 0.17",
+  );
+  assertEqual(belowDepartureDecision.matched, false, "departure delta 0.17 alone is insufficient");
+}
+{
+  const far = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: 1.03, releaseSpeed: 6 },
+    currentNorm: 1.21,
+    priorNorms: [1.15, 1.17, 1.19],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(far.evidence, far.raw, far.history, far.now).matched,
+    false,
+    "current frame above the far boundary cannot be an adaptive candidate",
+  );
+  const boundary = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: 1.02, releaseSpeed: 6 },
+    currentNorm: 1.2,
+    priorNorms: [1.14, 1.16, 1.18],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(boundary.evidence, boundary.raw, boundary.history, boundary.now)
+      .matched,
+    true,
+    "current frame exactly at the far boundary remains eligible",
+  );
+}
+{
+  const hugeVelocity = adaptiveCandidateFixture({
+    currentNorm: 0.57,
+    priorNorms: [0.51, 0.53, 0.55],
+    currentVel: 1e16,
+  });
+  const hugeVelocityDecision = core.adaptiveReleaseCandidate(
+    hugeVelocity.evidence,
+    hugeVelocity.raw,
+    hugeVelocity.history,
+    hugeVelocity.now,
+  );
+  assertEqual(hugeVelocityDecision.movingAway, true, "huge-velocity probe has enough direction");
+  assertClose(
+    hugeVelocityDecision.departDelta,
+    0.1,
+    1e-12,
+    "huge-velocity probe isolates insufficient departure",
+  );
+  assertEqual(
+    hugeVelocityDecision.matched,
+    false,
+    "unrelated huge maxV cannot loosen the departure comparison",
+  );
+
+  const hugeDeparture = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: -1e15, releaseSpeed: 6 },
+    currentNorm: 1.2,
+    priorNorms: [1.08, 1.1, 1.12],
+    currentVel: 5.9,
+  });
+  const hugeDepartureDecision = core.adaptiveReleaseCandidate(
+    hugeDeparture.evidence,
+    hugeDeparture.raw,
+    hugeDeparture.history,
+    hugeDeparture.now,
+  );
+  assert(
+    Number.isFinite(hugeDepartureDecision.departDelta) && hugeDepartureDecision.departDelta > 1e14,
+    "huge-departure probe has a finite passing departure",
+  );
+  assertEqual(hugeDepartureDecision.movingAway, true, "huge-departure probe has enough direction");
+  assertEqual(hugeDepartureDecision.maxV, 5.9, "huge-departure probe isolates speed 5.9");
+  assertEqual(hugeDepartureDecision.releaseSpeed, 6, "huge-departure probe requires speed six");
+  assertEqual(
+    hugeDepartureDecision.matched,
+    false,
+    "unrelated huge departure cannot loosen the speed comparison",
+  );
+
+  const overflow = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: -Number.MAX_VALUE, releaseSpeed: 6 },
+    currentNorm: Number.MAX_VALUE,
+    priorNorms: [0.61, 0.62, 0.63],
+  });
+  const overflowDecision = core.adaptiveReleaseCandidate(
+    overflow.evidence,
+    overflow.raw,
+    overflow.history,
+    overflow.now,
+  );
+  assertEqual(overflowDecision.departDelta, null, "overflowed departure diagnostic is unknown");
+  assertEqual(overflowDecision.matched, false, "overflowed finite-input subtraction is rejected");
 }
 {
   const atWindow = adaptiveCandidateFixture({ now: 1500 });
@@ -1291,8 +1397,8 @@ function shotSequence(dt) {
      に置き、velOk でなく nullBridged 経路が判定を決めることを保証する。 */
   function gapBridgedSequence(nullCount) {
     const seq = [];
-    // アンカー保持（10ms間隔）。110フレーム=1100ms: REFRACTORY_MS(1000ms、起点 lastReleaseTs=0)を
-    // 追い越しつつ、窓内に十分な closeFrames を残す
+    // アンカー保持（10ms間隔）。110フレーム=1100msの実シナリオを保ち、
+    // 窓内に十分な closeFrames と長時間保持の adaptive evidence を残す。
     for (let i = 0; i < 110; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
     for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]); // 姿勢ロス: span=(nullCount-1)*20ms
     seq.push([mkRaw(1.0, 90), 8, 10]); // 復帰: アンカー圏外・大きめの見かけ速度
@@ -1315,8 +1421,7 @@ function shotSequence(dt) {
   // ∞ へ差し替えると tier-1 が解禁されて発火する
   function gapFarArrivalSequence(nullCount) {
     const seq = [];
-    // Adaptive evidenceを形成しない100ms保持で、tier-1単独の境界を隔離する。
-    for (let i = 0; i < 10; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
+    for (let i = 0; i < 110; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
     for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]);
     seq.push([mkRaw(1.3, 90), 8, 10]); // 着地がレットダウン完了域（NB2 適用外）
     for (let i = 0; i < 10; i++) seq.push([mkRaw(1.3, 90), 0.2, 20]);

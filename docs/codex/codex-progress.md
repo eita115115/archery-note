@@ -404,57 +404,6 @@ Next task:
 
 - Task 3: count relative adaptive departures and the six-shot field profiles.
 
-### 2026-07-26 - Relative adaptive release receipts (Task 3)
-
-- Added the pure four-argument `adaptiveReleaseCandidate` helper with
-  structurally validated evidence, inclusive 1500 ms age / 250 ms velocity
-  windows, finite nonnegative confidence-gated velocities, and a chronological
-  previous-three direction suffix that excludes the current timestamp.
-- Converged adaptive, close, NB, and NB2 matches into one fire block. Adaptive
-  evidence has diagnostic precedence without disabling fallbacks; initial
-  detector state can fire before 1000 ms, while a real prior fire retains the
-  strict refractory comparison and existing FOLLOW lock.
-- Added fire-time pending snapshots for evidence type, anchor threshold, and
-  adaptive release speed. Committed fires clear only the short-lived evidence
-  after the returned diagnostics are built; calibration arrays and learning
-  barriers remain intact.
-- Added anonymous field profiles and focused boundary coverage. Profile receipts
-  are A/B/C = `1/1/1`, each labeled `adaptive`; the synthetic six-shot end is
-  `6`, with six adaptive labels. Profile B retains `releaseSpeed=6` despite the
-  hold outlier and fires with `maxV=8.5`.
-- Recorded the approved recall tradeoff explicitly: the 100 ms linear let-down
-  produces one removable adaptive receipt at both listed frame intervals.
-  Every listed 150-2000 ms linear let-down remains at zero.
-
-Validation:
-
-- RED: `npm run check:form` exited 1 with the exact intended aggregate:
-  `Error: adaptive field receipts A/B/C=0/0/0, six-shot=0`.
-- GREEN: `npm run check:form` exited 0 and ended with
-  `Form core checks OK`.
-- `npm run check:globals`: pass
-  (`check-globals OK (14 files, 1014 unresolved refs all accounted for)`).
-- `npm run lint -- --quiet`: pass with no lint findings.
-- `npx prettier --check scripts/46-form-core.js tools/check-form-core.js
-docs/codex/codex-progress.md`: pass
-  (`All matched files use Prettier code style!`).
-- `git diff --check`: pass.
-
-Risk notes:
-
-- The relative detector is intentionally recall-first. A 100 ms linear let-down
-  can now appear as a user-removable receipt; slower listed let-downs remain
-  suppressed.
-- Task 3 deliberately retains the existing `departCheck` confirmation and gross
-  receipt semantics. Adaptive-specific cancellation timing is not changed here.
-- No raw landmarks, video, private diagnostic path, storage/schema, UI,
-  dependency, Service Worker, version marker, release, or deployment changed.
-
-Next task:
-
-- Task 4: apply the approved adaptive cancellation semantics while preserving
-  the Task 3 relative receipt and pending snapshot contracts.
-
 ### 2026-07-26 - Task 2 review remediation: pending-history learning barrier
 
 - Added nullable detector-local `holdBreakTs` state. Every null, confidence
@@ -513,3 +462,71 @@ Risk notes:
 Next task:
 
 - Task 3: count relative adaptive departures and the six-shot field profiles.
+
+### 2026-07-26 - Relative adaptive release receipts (Task 3 + review remediation)
+
+- Added the pure four-argument `adaptiveReleaseCandidate` helper with
+  structurally validated evidence, inclusive 1500 ms age / 250 ms velocity
+  windows, finite nonnegative confidence-gated velocities, and a chronological
+  previous-three direction suffix that excludes the current timestamp.
+- Converged adaptive, close, NB, and NB2 matches into one fire block. Adaptive
+  evidence has diagnostic precedence without disabling fallbacks; initial
+  detector state can fire before 1000 ms, while a real prior fire retains the
+  strict refractory comparison and existing FOLLOW lock.
+- Added fire-time pending snapshots for evidence type, anchor threshold, and
+  adaptive release speed. Committed fires clear only the short-lived evidence
+  after the returned diagnostics are built; calibration arrays and learning
+  barriers remain intact.
+- Added anonymous field profiles and focused boundary coverage. Profile receipts
+  are A/B/C = `1/1/1`, each labeled `adaptive`; the synthetic six-shot end is
+  `6`, with six adaptive labels. Profile B retains `releaseSpeed=6` despite the
+  hold outlier and fires with `maxV=8.5`.
+- Recorded the approved recall tradeoff explicitly: the 100 ms linear let-down
+  produces one removable adaptive receipt at both listed frame intervals.
+  Every listed 150-2000 ms linear let-down remains at zero.
+- Review remediation keeps valid evidence through transient far input but
+  prevents a current `anchorNorm > 1.2` frame from matching. Exact `1.2`
+  remains inclusive, and the restored 1100 ms hold / 220 ms null-gap / far
+  arrival fixture remains at zero receipts.
+- Replaced the shared comparison epsilon with independent departure, direction,
+  and speed epsilons derived only from each comparison's operands. Non-finite
+  subtraction diagnostics become unknown and cannot match.
+- Added a standalone insufficient-departure regression (`0.17` with direction
+  and speed satisfied), plus huge-value cross-gate and overflow probes.
+
+Validation:
+
+- Task 3 RED: `npm run check:form` exited 1 with the exact intended aggregate:
+  `Error: adaptive field receipts A/B/C=0/0/0, six-shot=0`.
+- Task 3 GREEN: `npm run check:form` exited 0 and ended with
+  `Form core checks OK`.
+- Review remediation RED, before production changes:
+  `current frame above the far boundary cannot be an adaptive candidate:
+expected false, got true`.
+- Review remediation GREEN: `npm run check:form` exited 0 and ended with
+  `Form core checks OK`.
+- `npm run check:globals`: pass
+  (`check-globals OK (14 files, 1019 unresolved refs all accounted for)`).
+- `npm run lint -- --quiet`: pass with no lint findings.
+- `npx prettier --check scripts/46-form-core.js tools/check-form-core.js
+docs/codex/codex-progress.md`: pass
+  (`All matched files use Prettier code style!`).
+- `git diff --check 02a747d9`: pass.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's-result, security (38 checks), UI smoke, PWA, storage,
+  and version alignment.
+
+Risk notes:
+
+- The relative detector is intentionally recall-first. A 100 ms linear let-down
+  can now appear as a user-removable receipt; slower listed let-downs and the
+  restored long-hold far-arrival safety case remain suppressed.
+- Task 3 deliberately retains the existing `departCheck` confirmation and gross
+  receipt semantics. Adaptive-specific cancellation timing is not changed here.
+- No raw landmarks, video, private diagnostic path, storage/schema, UI,
+  dependency, Service Worker, version marker, release, or deployment changed.
+
+Next task:
+
+- Task 4: apply the approved adaptive cancellation semantics while preserving
+  the Task 3 relative receipt and pending snapshot contracts.
