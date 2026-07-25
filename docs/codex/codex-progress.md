@@ -345,3 +345,61 @@ Risk notes:
 
 - Test-only remediation; adaptive production logic and later phone-acceptance
   gate remain unchanged.
+
+### 2026-07-25 - Session-local adaptive anchor evidence (Task 2)
+
+- Added the exact four-argument `updateAdaptiveAnchorEvidence` helper and wired
+  it before the null-frame return. It learns only from usable non-pending
+  frames, derives a contiguous stable history suffix without duplicating the
+  current frame, refreshes complete evidence snapshots through long holds, and
+  ages or invalidates evidence without fabricating samples.
+- Generalized `ANCHORING` / `FULL_DRAW` classification to qualified adaptive
+  holds and backfilled `anchorStartTs` to the continuous hold's first sample.
+  NB2 now uses valid snapshotted `evidence.anchorEnter` for its pre-gap check,
+  while the legacy `CLOSE_IN` boundary remains the fallback.
+- Centralized all nine `stepFormPhase` result paths so top-level `anchorEnter`
+  and the five adaptive debug fields are always present. Unknown floor, age,
+  and strength values remain `null`; cold `anchorEnter=0.35` and
+  `releaseSpeed=6` remain numeric.
+- Added regression coverage for five/six-sample calibration, exact 150 ms
+  oblique holds, three-second refresh, inclusive 1500 ms evidence/sample
+  retention, 1501 ms expiry, far 1.2/299/300 ms boundaries, null and
+  confidence-unusable gaps, 125/1.3 eligibility boundaries, inclusive/exclusive
+  0.12 range, finite velocity backfill, capped strength, pending far exemption,
+  quick draws, learned-boundary NB2, and all nine decorated return paths.
+
+Validation:
+
+- RED: `npm run check:form` exited 1 with the intended behavioral failure:
+  `five usable frames retain cold anchor threshold: expected 0.35, got
+undefined`.
+- GREEN: `npm run check:form` exited 0 and ended with
+  `Form core checks OK`.
+- `npm run check:globals`: pass
+  (`check-globals OK (14 files, 990 unresolved refs all accounted for)`).
+- `npm run lint -- --quiet`: the first run found two
+  `no-useless-assignment` errors in new fixtures; after removing those
+  assignments, the final run passed with no output.
+- `npx prettier --check scripts/46-form-core.js tools/check-form-core.js
+docs/codex/codex-progress.md`: an intermediate run identified the test-file
+  formatting change after lint cleanup; after formatting, the final run passed
+  with `All matched files use Prettier code style!`.
+- Boundary evidence: five samples returned `anchorEnter=0.35`; the sixth
+  calibrated and backfilled the hold; exact 150 ms and range 0.12 qualified;
+  draw-arm 125, anchor 1.3, range above 0.12, and interrupted sub-150 ms holds
+  did not qualify; evidence was retained at age 1500 and cleared at 1501; far
+  evidence survived 299 ms and cleared at 300 ms, while equality 1.2 reset the
+  timer and pending confirmation accumulated no far duration.
+
+Risk notes:
+
+- This task forms and exposes adaptive evidence but intentionally does not add
+  the Task 3 relative-departure fire path. Existing legacy/NB/NB2 firing remains
+  active.
+- The learned thresholds still require the planned synthetic field-profile and
+  phone acceptance gates. No storage, UI/view, Service Worker, dependency,
+  version marker, release, or persisted user-data behavior changed.
+
+Next task:
+
+- Task 3: count relative adaptive departures and the six-shot field profiles.

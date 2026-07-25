@@ -231,6 +231,144 @@ function adaptiveReleaseThreshold(holdVelocitySamples) {
   );
 }
 
+function adaptiveAnchorFrameUsable(frame) {
+  return (
+    frame &&
+    formConfOk(frame) &&
+    Number.isFinite(frame.anchorNorm) &&
+    Number.isFinite(frame.drawArm) &&
+    frame.drawArm > 125 &&
+    frame.anchorNorm < 1.3
+  );
+}
+
+function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
+  const state = adaptiveState;
+  const sampleCutoff = now - FORM_PH.ADAPTIVE_SAMPLE_WINDOW_MS;
+  state.anchorSamples = state.anchorSamples.filter(
+    (sample) =>
+      sample &&
+      Number.isFinite(sample.ts) &&
+      Number.isFinite(sample.norm) &&
+      sample.ts >= sampleCutoff,
+  );
+  if (
+    state.evidence &&
+    (!Number.isFinite(state.evidence.ts) ||
+      now - state.evidence.ts > FORM_PH.ADAPTIVE_EVIDENCE_WINDOW_MS)
+  ) {
+    state.evidence = null;
+  }
+
+  if (raw && Number.isFinite(raw.anchorNorm) && raw.anchorNorm > FORM_PH.ADAPTIVE_FAR_BOUNDARY) {
+    if (!state.farSince) state.farSince = now;
+    if (now - state.farSince >= FORM_PH.ADAPTIVE_FAR_INVALIDATION_MS) state.evidence = null;
+  } else {
+    state.farSince = 0;
+  }
+
+  if (adaptiveAnchorFrameUsable(raw)) {
+    const sample = { ts: now, norm: raw.anchorNorm };
+    const latest = state.anchorSamples[state.anchorSamples.length - 1];
+    if (latest && latest.ts === now) state.anchorSamples[state.anchorSamples.length - 1] = sample;
+    else state.anchorSamples.push(sample);
+  }
+
+  const anchorNorms = state.anchorSamples.map((sample) => sample.norm);
+  state.anchorFloor =
+    anchorNorms.length >= FORM_PH.ADAPTIVE_CALIBRATION_SAMPLES
+      ? adaptivePercentile(anchorNorms, 0.1)
+      : null;
+  state.anchorEnter = adaptiveAnchorThreshold(anchorNorms);
+
+  if (!adaptiveAnchorFrameUsable(raw)) {
+    state.holdSamples = [];
+    state.holdVelocitySamples = [];
+    state.holdSince = 0;
+    return {
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: state.releaseSpeed,
+      holdQualified: false,
+      holdStartTs: 0,
+      evidence: state.evidence,
+    };
+  }
+
+  const frames = Array.isArray(history) ? history : [];
+  const suffix = [];
+  let minNorm = Infinity;
+  let maxNorm = -Infinity;
+  for (let i = frames.length - 1; i >= 0; i--) {
+    const frame = frames[i];
+    if (!frame || !Number.isFinite(frame.ts) || !adaptiveAnchorFrameUsable(frame.m)) break;
+    if (frame.m.anchorNorm > state.anchorEnter) break;
+    const nextMin = Math.min(minNorm, frame.m.anchorNorm);
+    const nextMax = Math.max(maxNorm, frame.m.anchorNorm);
+    if (nextMax - nextMin > FORM_PH.ADAPTIVE_HOLD_RANGE) break;
+    minNorm = nextMin;
+    maxNorm = nextMax;
+    suffix.unshift({ ts: frame.ts, norm: frame.m.anchorNorm, vel: frame.vel });
+  }
+
+  if (!suffix.length || suffix[suffix.length - 1].ts !== now) {
+    state.holdSamples = [];
+    state.holdVelocitySamples = [];
+    state.holdSince = 0;
+    return {
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: state.releaseSpeed,
+      holdQualified: false,
+      holdStartTs: 0,
+      evidence: state.evidence,
+    };
+  }
+
+  const previousFirst = state.holdSamples[0];
+  const previousLast = state.holdSamples[state.holdSamples.length - 1];
+  const earliestHistoryTs = frames.length && Number.isFinite(frames[0].ts) ? frames[0].ts : now;
+  const suffixTimestamps = new Set(suffix.map((sample) => sample.ts));
+  const continuesPrevious =
+    state.holdSince > 0 &&
+    previousLast &&
+    suffixTimestamps.has(previousLast.ts) &&
+    (!previousFirst ||
+      suffixTimestamps.has(previousFirst.ts) ||
+      previousFirst.ts < earliestHistoryTs);
+  state.holdSince = continuesPrevious ? state.holdSince : suffix[0].ts;
+  const retainedSuffix = suffix.filter((sample) => sample.ts >= sampleCutoff);
+  state.holdSamples = retainedSuffix.map((sample) => ({ ts: sample.ts, norm: sample.norm }));
+  state.holdVelocitySamples = retainedSuffix
+    .filter((sample) => Number.isFinite(sample.vel))
+    .map((sample) => ({ ts: sample.ts, value: sample.vel }));
+
+  const holdSpan =
+    state.holdSamples.length > 1
+      ? state.holdSamples[state.holdSamples.length - 1].ts - state.holdSamples[0].ts
+      : 0;
+  const holdQualified =
+    state.holdSamples.length >= FORM_PH.ADAPTIVE_HOLD_MIN_FRAMES &&
+    holdSpan >= FORM_PH.ADAPTIVE_HOLD_MIN_MS;
+  if (holdQualified) {
+    state.releaseSpeed = adaptiveReleaseThreshold(
+      state.holdVelocitySamples.map((sample) => sample.value),
+    );
+    state.evidence = {
+      ts: now,
+      normAtHold: formMedian(state.holdSamples.map((sample) => sample.norm)),
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: state.releaseSpeed,
+      strength: Math.min(state.holdSamples.length, FORM_PH.ADAPTIVE_STRENGTH_CAP),
+    };
+  }
+  return {
+    anchorEnter: state.anchorEnter,
+    releaseSpeed: state.releaseSpeed,
+    holdQualified,
+    holdStartTs: state.holdSince,
+    evidence: state.evidence,
+  };
+}
+
 /* 矢プレゼンス検出しきい値。合成フレーム分離性テスト（tools/check-form-core.js）で
    決定。古典 CV のみ（勾配ベースの「細い線」検出＝リッジ連続率）、ML モデル・
    外部依存は使わない。ROI は両手首を結ぶ帯（±BAND_HALF_PX）に限定し、全画面
@@ -581,6 +719,22 @@ function makeFormPhaseDetector() {
   };
 }
 
+function formPhaseResult(st, now, result, debug) {
+  const evidence = st.adaptive.evidence;
+  return {
+    ...result,
+    anchorEnter: st.adaptive.anchorEnter,
+    debug: {
+      ...debug,
+      anchorFloor: st.adaptive.anchorFloor,
+      anchorEnter: st.adaptive.anchorEnter,
+      releaseSpeed: st.adaptive.releaseSpeed,
+      evidenceAgeMs: evidence ? now - evidence.ts : null,
+      evidenceStrength: evidence ? evidence.strength : null,
+    },
+  };
+}
+
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
    sens>1 で検出されやすくなる（しきい値を除算）。
    2026-07-05: リリース判定を「250ms窓の累積離脱量(rise)」主体から
@@ -601,6 +755,12 @@ function stepFormPhase(st, raw, history, sens, now) {
   // B'（Stage 1）: conf ゲート。CONF_GATE=0 の間は usable === raw（完全 pass-through）。
   // ゲート有効時は低confの現在フレームを null フレームと同じ扱いにする
   const usable = raw && formConfOk(raw) ? raw : null;
+  const adaptive = updateAdaptiveAnchorEvidence(
+    st.adaptive,
+    st.pendingRelease ? null : usable,
+    history,
+    now,
+  );
   if (!usable) {
     if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) {
       st.cur = FORM_PHASES.IDLE;
@@ -617,7 +777,12 @@ function stepFormPhase(st, raw, history, sens, now) {
       hasNullGap: null,
       refractoryRemaining: refractoryRemainingMs(),
     };
-    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+    return formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+      debug,
+    );
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
     /* 出発確認（2026-07-15）: 低来歴発火（発火時点で要約窓が空＝アンカー登録が遅い/無い）は、
@@ -666,13 +831,17 @@ function stepFormPhase(st, raw, history, sens, now) {
           st.anchorSince = 0;
           st.cur = FORM_PHASES.SETUP;
           st.anchorStartTs = 0; // レットダウン確定: アンカー継続ではないので SETUP へ落とす
-          return {
-            phase: st.cur,
-            released: false,
-            canceled: true,
-            anchorStartTs: st.anchorStartTs,
+          return formPhaseResult(
+            st,
+            now,
+            {
+              phase: st.cur,
+              released: false,
+              canceled: true,
+              anchorStartTs: st.anchorStartTs,
+            },
             debug,
-          };
+          );
         }
       } else {
         st.nb2DriftSince = 0;
@@ -713,13 +882,17 @@ function stepFormPhase(st, raw, history, sens, now) {
         st.anchorSince = now;
         st.cur = FORM_PHASES.ANCHORING;
         st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
-        return {
-          phase: st.cur,
-          released: false,
-          canceled: true,
-          anchorStartTs: st.anchorStartTs,
+        return formPhaseResult(
+          st,
+          now,
+          {
+            phase: st.cur,
+            released: false,
+            canceled: true,
+            anchorStartTs: st.anchorStartTs,
+          },
           debug,
-        };
+        );
       }
       // スパン蓄積中: まだ取消しない。pendingRelease を維持したまま次のチェック（sticky lock 等）へ進む
     } else {
@@ -756,13 +929,17 @@ function stepFormPhase(st, raw, history, sens, now) {
       st.anchorSince = 0;
       st.cur = FORM_PHASES.SETUP;
       st.anchorStartTs = 0;
-      return {
-        phase: st.cur,
-        released: false,
-        canceled: true,
-        anchorStartTs: st.anchorStartTs,
+      return formPhaseResult(
+        st,
+        now,
+        {
+          phase: st.cur,
+          released: false,
+          canceled: true,
+          anchorStartTs: st.anchorStartTs,
+        },
         debug,
-      };
+      );
     }
     if (pending.departCheck && (pending.departSeen || 0) >= FORM_PH.DEPART_OBSERVE_MIN) {
       /* 出発未確認のまま猶予終了（十分な有効フレームを観測できていた）→ スプリアス発火として
@@ -791,13 +968,17 @@ function stepFormPhase(st, raw, history, sens, now) {
         st.cur = FORM_PHASES.SETUP;
         st.anchorStartTs = 0;
       }
-      return {
-        phase: st.cur,
-        released: false,
-        canceled: true,
-        anchorStartTs: st.anchorStartTs,
+      return formPhaseResult(
+        st,
+        now,
+        {
+          phase: st.cur,
+          released: false,
+          canceled: true,
+          anchorStartTs: st.anchorStartTs,
+        },
         debug,
-      };
+      );
     }
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) {
@@ -812,7 +993,12 @@ function stepFormPhase(st, raw, history, sens, now) {
       hasNullGap: null,
       refractoryRemaining: refractoryRemainingMs(),
     };
-    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+    return formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+      debug,
+    );
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) {
     st.cur = FORM_PHASES.FOLLOW;
@@ -827,7 +1013,12 @@ function stepFormPhase(st, raw, history, sens, now) {
       hasNullGap: null,
       refractoryRemaining: refractoryRemainingMs(),
     };
-    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+    return formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+      debug,
+    );
   }
   const close = usable.anchorNorm < FORM_PH.CLOSE_IN;
   const winAll = history.filter((h) => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
@@ -883,7 +1074,8 @@ function stepFormPhase(st, raw, history, sens, now) {
     nb2LastValid != null &&
     nb2GapMs > FORM_PH.NB_MAX_GAP_MS &&
     nb2GapMs <= FORM_PH.NB2_MAX_GAP_MS &&
-    nb2LastValid.m.anchorNorm < FORM_PH.CLOSE_IN &&
+    nb2LastValid.m.anchorNorm <
+      (st.adaptive.evidence ? st.adaptive.evidence.anchorEnter : FORM_PH.CLOSE_IN) &&
     nb2LastValid.ts - st.anchorStartTs >= FORM_PH.NB2_MIN_HOLD_MS &&
     usable.anchorNorm >= FORM_PH.NB2_MIN_ARRIVE &&
     usable.anchorNorm <= FORM_PH.NB2_MAX_ARRIVE &&
@@ -927,10 +1119,15 @@ function stepFormPhase(st, raw, history, sens, now) {
     /* 発火経路の計装（フィールド監査用）: evidence=アンカー証拠の種別 / vel=速度経路の種別 */
     debug.fireEvidence = anchorEvidence;
     debug.fireVel = velOk ? "vel" : nullBridged ? "nb" : "nb2";
-    return { phase: st.cur, released: true, anchorStartTs, debug };
+    return formPhaseResult(st, now, { phase: st.cur, released: true, anchorStartTs }, debug);
   }
-  if (close) {
-    if (!st.anchorSince) st.anchorSince = now;
+  if (close || adaptive.holdQualified) {
+    if (adaptive.holdQualified) {
+      st.anchorSince = adaptive.holdStartTs;
+      if (!st.anchorStartTs) st.anchorStartTs = adaptive.holdStartTs;
+    } else if (!st.anchorSince) {
+      st.anchorSince = now;
+    }
     st.cur =
       now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125
         ? FORM_PHASES.FULL_DRAW
@@ -950,7 +1147,12 @@ function stepFormPhase(st, raw, history, sens, now) {
   if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs)
     st.anchorStartTs = now;
   else if (st.cur === FORM_PHASES.SETUP || st.cur === FORM_PHASES.IDLE) st.anchorStartTs = 0;
-  return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+  return formPhaseResult(
+    st,
+    now,
+    { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+    debug,
+  );
 }
 
 /* リリース前 windowSec 秒の安定性（ドリフト、胴体長比）。

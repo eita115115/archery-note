@@ -30,6 +30,8 @@ const core = new Function(
   `${coreScript}
 return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
   formMedian, adaptiveAnchorThreshold, adaptiveReleaseThreshold,
+  updateAdaptiveAnchorEvidence:
+    typeof updateAdaptiveAnchorEvidence === "function" ? updateAdaptiveAnchorEvidence : null,
   computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
   FORM_VEL_FILTER, makeFormVelocitySource,
   formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
@@ -263,6 +265,245 @@ function runSequence(seq, coreObj) {
     if (r.released) releases++;
   }
   return { phases: [...new Set(phases)], releases, hist, lastTs: t };
+}
+
+function adaptiveStepper(dt, coreObj) {
+  const c = coreObj || core;
+  const st = c.makeFormPhaseDetector();
+  const hist = [];
+  let t = 0;
+  return {
+    st,
+    hist,
+    push(m, vel, elapsed) {
+      t += elapsed == null ? dt : elapsed;
+      hist.push({ ts: t, m, vel });
+      if (hist.length > 150) hist.shift();
+      return { r: c.stepFormPhase(st, m, hist, 1.0, t), t };
+    },
+  };
+}
+
+function assertAdaptiveResultShape(result, label) {
+  assert(Number.isFinite(result.anchorEnter), `${label}: top-level anchorEnter is numeric`);
+  assert(result.debug && typeof result.debug === "object", `${label}: debug exists`);
+  ["anchorFloor", "anchorEnter", "releaseSpeed", "evidenceAgeMs", "evidenceStrength"].forEach(
+    (key) => assert(key in result.debug, `${label}: debug has ${key}`),
+  );
+  assert(Number.isFinite(result.debug.anchorEnter), `${label}: debug anchorEnter is numeric`);
+  assert(Number.isFinite(result.debug.releaseSpeed), `${label}: debug releaseSpeed is numeric`);
+}
+
+/* ---------- Task 2: session-local adaptive anchor evidence ---------- */
+
+{
+  const s = adaptiveStepper(30);
+  let fifth;
+  for (let i = 0; i < 5; i++) fifth = s.push(mkRaw(0.47 + i * 0.002, 150), 0.2);
+  assertAdaptiveResultShape(fifth.r, "five-sample normal path");
+  assertEqual(fifth.r.anchorEnter, 0.35, "five usable frames retain cold anchor threshold");
+  assertEqual(fifth.r.debug.anchorFloor, null, "five usable frames have no learned floor");
+  const sixth = s.push(mkRaw(0.48, 150), 0.25);
+  assert(
+    sixth.r.anchorEnter > 0.47,
+    `sixth usable frame starts calibration, got ${sixth.r.anchorEnter}`,
+  );
+  assertAdaptiveResultShape(sixth.r, "six-sample calibrated path");
+  assert(Number.isFinite(sixth.r.debug.anchorFloor), "sixth usable frame exposes learned floor");
+}
+{
+  const s = adaptiveStepper(30);
+  const norms = [0.47, 0.48, 0.475, 0.485, 0.472, 0.478];
+  let last;
+  norms.forEach((norm, i) => {
+    last = s.push(mkRaw(norm, 150), 0.2 + i * 0.05);
+  });
+  assertEqual(last.r.phase, "ANCHORING", "exact-150ms oblique hold enters ANCHORING");
+  assertEqual(last.r.anchorStartTs, 30, "adaptive anchor starts at first qualifying hold sample");
+  assert(last.r.anchorEnter > 0.47, "oblique hold learns an entry threshold above its floor");
+  assert(last.r.debug.evidenceAgeMs === 0, "fresh oblique evidence has zero age");
+  assert(last.r.debug.evidenceStrength >= 3, "oblique hold exposes non-zero evidence strength");
+  assert(s.st.adaptive.evidence !== null, "oblique hold stores adaptive evidence");
+}
+{
+  const s = adaptiveStepper(50);
+  let last;
+  for (let i = 0; i < 61; i++) last = s.push(mkRaw(0.47 + (i % 3) * 0.002, 150), 0.3);
+  assertEqual(last.r.phase, "FULL_DRAW", "three-second qualified hold reaches FULL_DRAW");
+  assertEqual(last.r.debug.evidenceAgeMs, 0, "long hold refreshes evidence on its latest frame");
+  assertEqual(last.r.debug.evidenceStrength, 12, "long hold caps evidence strength at twelve");
+  assertEqual(s.st.adaptive.holdSince, 50, "sample-window sliding preserves original hold start");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47 + (i % 2) * 0.004, 150), 0.2);
+  const evidenceTs = s.st.adaptive.evidence.ts;
+  const atLimit = s.push(null, 0, 1500);
+  assertAdaptiveResultShape(atLimit.r, "null evidence-ageing path");
+  assert(s.st.adaptive.evidence !== null, "evidence is retained at exactly 1500ms");
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    1,
+    "sample exactly at the 1500ms cutoff is retained",
+  );
+  assertEqual(atLimit.r.debug.evidenceAgeMs, 1500, "debug reports inclusive evidence age boundary");
+  assertEqual(atLimit.r.phase, "ANCHORING", "null evidence ageing preserves current phase");
+  const expired = s.push(null, 0, 1);
+  assertEqual(s.st.adaptive.evidence, null, "evidence clears at age 1501ms");
+  assertEqual(s.st.adaptive.anchorSamples.length, 0, "sample older than 1500ms is pruned");
+  assertEqual(expired.r.debug.evidenceAgeMs, null, "expired evidence age becomes unknown");
+  assertEqual(
+    expired.r.phase,
+    "ANCHORING",
+    "expired null evidence does not redesign phase semantics",
+  );
+  assert(evidenceTs > 0, "expiry fixture starts at a positive evidence timestamp");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  s.push(mkRaw(1.21, 90), 0.1, 299);
+  assert(s.st.adaptive.evidence !== null, "299ms continuously far preserves evidence");
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  assertEqual(s.st.adaptive.evidence, null, "300ms continuously far clears evidence");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  s.push(mkRaw(1.2, 90), 0.1, 299);
+  assertEqual(s.st.adaptive.farSince, 0, "anchorNorm equality 1.2 resets the far timer");
+  assert(s.st.adaptive.evidence !== null, "anchorNorm equality 1.2 preserves evidence");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 8; i++) s.push(mkRaw(0.47 + (i % 2) * 0.004, 150), 0.2, i === 0 ? 1001 : 30);
+  assert(s.st.adaptive.evidence.anchorEnter > 0.47, "sanity: NB2 fixture has learned evidence");
+  s.push(null, 0, 200);
+  const arrival = s.push(mkRaw(0.8, 140), 3, 1);
+  assertEqual(arrival.r.released, true, "NB2 accepts pre-gap anchor under snapshotted anchorEnter");
+  assertEqual(arrival.r.debug.fireEvidence, "nb2", "learned-boundary NB2 remains auditable");
+  assertAdaptiveResultShape(arrival.r, "NB2 fire path");
+}
+{
+  const s = adaptiveStepper(40);
+  for (let i = 0; i < 5; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.push(null, 0, 40);
+  s.push(mkRaw(0.47, 150), 0.2, 40);
+  const last = s.push(mkRaw(0.47, 150), 0.2, 40);
+  assertEqual(s.st.adaptive.evidence, null, "null frame prevents calibration history bridging");
+  assertEqual(last.r.phase, "SETUP", "post-gap short suffix does not enter adaptive ANCHORING");
+}
+{
+  const gatedScript = coreScript.replace("CONF_GATE: 0,", "CONF_GATE: 0.5,");
+  assert(
+    gatedScript !== coreScript,
+    "confidence-gated fixture enables the existing usability gate",
+  );
+  const gatedCore = new Function(
+    `${gatedScript}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  const s = adaptiveStepper(40, gatedCore);
+  const confident = () => ({ ...mkRaw(0.47, 150), conf: 0.9 });
+  for (let i = 0; i < 5; i++) s.push(confident(), 0.2);
+  s.push({ ...mkRaw(0.47, 150), conf: 0.4 }, 0.2);
+  s.push(confident(), 0.2);
+  const afterGap = s.push(confident(), 0.2);
+  assertEqual(s.st.adaptive.evidence, null, "confidence-unusable frame prevents hold bridging");
+  assert(
+    afterGap.r.phase !== "ANCHORING" && afterGap.r.phase !== "FULL_DRAW",
+    "confidence-unusable gap cannot fabricate an adaptive anchor phase",
+  );
+}
+{
+  const state = core.makeFormPhaseDetector().adaptive;
+  const ineligible = (anchorNorm, drawArm, start) =>
+    Array.from({ length: 6 }, (_, i) => ({
+      ts: start + i * 30,
+      m: mkRaw(anchorNorm, drawArm),
+      vel: 0.2,
+    }));
+  let history = ineligible(0.47, 125, 10);
+  core.updateAdaptiveAnchorEvidence(state, history.at(-1).m, history, history.at(-1).ts);
+  assertEqual(state.anchorSamples.length, 0, "drawArm equality 125 is excluded");
+  history = ineligible(1.3, 150, 300);
+  core.updateAdaptiveAnchorEvidence(state, history.at(-1).m, history, history.at(-1).ts);
+  assertEqual(state.anchorSamples.length, 0, "anchorNorm equality 1.3 is excluded");
+}
+{
+  const exact = adaptiveStepper(30);
+  [0.47, 0.49, 0.51, 0.53, 0.55, 0.59].forEach((norm) => exact.push(mkRaw(norm, 150), 0.2));
+  assert(exact.st.adaptive.evidence !== null, "stable range equality 0.12 is included");
+  const over = adaptiveStepper(30);
+  [0.47, 0.49, 0.51, 0.53, 0.55, 0.5901].forEach((norm) => over.push(mkRaw(norm, 150), 0.2));
+  assertEqual(over.st.adaptive.evidence, null, "stable range above 0.12 is excluded");
+}
+{
+  const s = adaptiveStepper(30);
+  const velocities = [1, NaN, 3, 4, 5, 6];
+  velocities.forEach((velocity, i) => s.push(mkRaw(0.47 + (i % 2) * 0.01, 150), velocity));
+  const first = { ...s.st.adaptive.evidence };
+  assertEqual(s.st.adaptive.holdVelocitySamples.length, 5, "backfill keeps only finite velocities");
+  const originalHoldSince = s.st.adaptive.holdSince;
+  const next = s.push(mkRaw(0.49, 150), 8);
+  const refreshed = s.st.adaptive.evidence;
+  assertEqual(refreshed.ts, next.t, "continuing qualified frame refreshes evidence timestamp");
+  assertEqual(refreshed.anchorEnter, s.st.adaptive.anchorEnter, "evidence snapshots anchorEnter");
+  assertEqual(
+    refreshed.releaseSpeed,
+    s.st.adaptive.releaseSpeed,
+    "evidence snapshots releaseSpeed",
+  );
+  assert(
+    refreshed.releaseSpeed > first.releaseSpeed,
+    "finite hold velocities refresh releaseSpeed",
+  );
+  assert(refreshed.normAtHold !== first.normAtHold, "evidence refreshes median hold norm");
+  assertEqual(refreshed.strength, 7, "evidence refreshes capped strength");
+  assertEqual(s.st.adaptive.holdSince, originalHoldSince, "continuing hold keeps original start");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.st.pendingRelease = {
+    ts: s.st.adaptive.evidence.ts,
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  s.push(mkRaw(1.21, 90), 0.1, 299);
+  assert(s.st.adaptive.evidence !== null, "pending confirmation is exempt from far invalidation");
+  assertEqual(s.st.adaptive.farSince, 0, "pending confirmation cannot accumulate far duration");
+  assertEqual(s.st.adaptive.holdSamples.length, 0, "pending confirmation cannot extend a hold");
+}
+{
+  const quick = adaptiveStepper(50);
+  for (let i = 0; i < 6; i++) quick.push(mkRaw(0.47 + (i % 2) * 0.005, 150), 0.2);
+  assert(quick.st.adaptive.evidence !== null, "sanity: six stable frames can form evidence");
+  const short = adaptiveStepper(50);
+  for (let i = 0; i < 5; i++) short.push(mkRaw(0.47, 150), 0.2);
+  short.push(null, 0);
+  const last = short.push(mkRaw(0.47, 150), 0.2);
+  assertEqual(
+    short.st.adaptive.evidence,
+    null,
+    "quick draw without a continuous 150ms hold has no evidence",
+  );
+  assert(last.r.phase !== "ANCHORING", "quick draw does not enter adaptive ANCHORING");
+}
+{
+  const source = coreScript.slice(
+    coreScript.indexOf("function stepFormPhase"),
+    coreScript.indexOf("function formPreReleaseWindow"),
+  );
+  assertEqual(
+    (source.match(/return formPhaseResult\(/g) || []).length,
+    9,
+    "all nine stepFormPhase return paths use the adaptive result decorator",
+  );
 }
 
 /* 15fps(dt=66ms)で離脱が totalMs で完了する現実的なリリース区間を作る。
@@ -1265,8 +1506,8 @@ function makeStepper(dt) {
 }
 
 {
-  // sticky: ANCHORING → DRAWING（約200msの一時離脱・ジッター相当の微小トレンド）→ ANCHORING → release
-  // で anchorStartTs（= hold の起点）が通しで保持される
+  // sticky: learned anchorEnter 内の約200msの一時離脱・ジッターでも adaptive hold が継続し、
+  // anchorStartTs（= hold の起点）が通しで保持される
   const s = makeStepper(66);
   let firstAnchorTs = 0;
   for (let i = 0; i < 10; i++) {
@@ -1278,9 +1519,13 @@ function makeStepper(dt) {
   }
   assert(firstAnchorTs > 0, "anchoring reached in sticky scenario");
   for (let i = 0; i < 3; i++) {
-    const { r } = s.push(mkRaw(0.37, 150), 0.5); // アンカー圏外だが微小トレンド → DRAWING
-    assertEqual(r.phase, "DRAWING", "brief excursion is DRAWING");
-    assertEqual(r.anchorStartTs, firstAnchorTs, "anchorStartTs sticky through DRAWING excursion");
+    const { r } = s.push(mkRaw(0.37, 150), 0.5); // absolute close 外だが learned anchorEnter 内
+    assertEqual(r.phase, "FULL_DRAW", "brief learned-zone excursion remains adaptive FULL_DRAW");
+    assertEqual(
+      r.anchorStartTs,
+      firstAnchorTs,
+      "anchorStartTs sticky through learned-zone excursion",
+    );
   }
   for (let i = 0; i < 5; i++) {
     const { r } = s.push(mkRaw(0.33, 150), 0.05);
