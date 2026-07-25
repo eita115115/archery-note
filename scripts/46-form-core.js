@@ -285,6 +285,7 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
     state.holdSamples = [];
     state.holdVelocitySamples = [];
     state.holdSince = 0;
+    state.holdBreakTs = now;
     return {
       anchorEnter: state.anchorEnter,
       releaseSpeed: state.releaseSpeed,
@@ -298,15 +299,19 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
   const suffix = [];
   let minNorm = Infinity;
   let maxNorm = -Infinity;
+  let newerTs = null;
   for (let i = frames.length - 1; i >= 0; i--) {
     const frame = frames[i];
     if (!frame || !Number.isFinite(frame.ts) || !adaptiveAnchorFrameUsable(frame.m)) break;
+    if (state.holdBreakTs != null && frame.ts <= state.holdBreakTs) break;
+    if (newerTs != null && frame.ts >= newerTs) break;
     if (frame.m.anchorNorm > state.anchorEnter) break;
     const nextMin = Math.min(minNorm, frame.m.anchorNorm);
     const nextMax = Math.max(maxNorm, frame.m.anchorNorm);
     if (nextMax - nextMin > FORM_PH.ADAPTIVE_HOLD_RANGE) break;
     minNorm = nextMin;
     maxNorm = nextMax;
+    newerTs = frame.ts;
     suffix.unshift({ ts: frame.ts, norm: frame.m.anchorNorm, vel: frame.vel });
   }
 
@@ -710,6 +715,7 @@ function makeFormPhaseDetector() {
       holdSamples: [],
       holdVelocitySamples: [],
       holdSince: 0,
+      holdBreakTs: null,
       farSince: 0,
       evidence: null,
       anchorFloor: null,

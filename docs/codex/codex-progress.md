@@ -403,3 +403,62 @@ Risk notes:
 Next task:
 
 - Task 3: count relative adaptive departures and the six-shot field profiles.
+
+### 2026-07-26 - Task 2 review remediation: pending-history learning barrier
+
+- Added nullable detector-local `holdBreakTs` state. Every null, confidence
+  unusable, ineligible, or pending-suppressed adaptive input records an explicit
+  learning barrier without mutating browser history.
+- Stable-suffix backfill now stops at or before the latest barrier and treats a
+  duplicate or non-increasing timestamp as another hard barrier. Only strictly
+  increasing distinct observations can satisfy the three-sample gate.
+- Added RED regressions for both anchor-return cancellation and ordinary
+  confirmation timeout. In both paths, pending frames use high synthetic
+  velocities and the post-pending frames must form a new three-observation hold
+  spanning 150 ms before evidence refreshes.
+- Added dynamic adaptive result-shape assertions for all nine return kinds:
+  null, normal, RELEASE lock, FOLLOW, fire, anchor-return cancel, NB2 drift
+  cancel, NB2 unobserved cancel, and no-depart cancel. This coverage was added
+  to already-correct behavior and was not misrepresented as a failing RED.
+- Restored a separate dynamic regression for the legacy sticky `DRAWING` path:
+  an adaptive-ineligible brief excursion keeps the original `anchorStartTs`.
+
+Validation:
+
+- RED: `npm run check:form` exited 1 with the blocking reviewer reproduction:
+  `first post-cancel frame cannot backfill pending history into evidence:
+expected null, got
+{"ts":375,"normAtHold":0.22,"anchorEnter":0.35,"releaseSpeed":8,"strength":12}`.
+- Focused GREEN: `npm run check:form` exited 0 and ended with
+  `Form core checks OK`.
+- `npm run check:globals`: pass
+  (`check-globals OK (14 files, 990 unresolved refs all accounted for)`).
+- `npm run lint -- --quiet`: an intermediate run found one unused
+  coverage-fixture binding; after removing it, the final run passed with no
+  output.
+- `npx prettier --check scripts/46-form-core.js tools/check-form-core.js
+docs/codex/codex-progress.md`: pass
+  (`All matched files use Prettier code style!`).
+- `git diff --check`: pass.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's-result, security (38 checks), UI smoke, PWA, storage,
+  and version alignment.
+- Boundary evidence: neither pending path added anchor samples; the learning
+  barrier equaled the final pending timestamp; the first two fresh observations
+  left evidence null; the third distinct observation at exactly 150 ms formed
+  strength-three evidence; pending velocity 8 never raised `releaseSpeed`
+  above the cold floor 6.
+
+Risk notes:
+
+- The review's `now=0` sentinel concern remains intentionally unresolved for
+  legacy phase timestamps and `farSince`. This narrow remediation uses nullable
+  `holdBreakTs` and does not broaden Task 2 into legacy `anchorStartTs`
+  semantics or alter the Task 1 adaptive state contract beyond the new barrier.
+- Task 3 adaptive departure firing and the phone acceptance matrix remain
+  pending. No storage, UI/view, dependency, Service Worker, version, release,
+  deployment, or persisted user-data behavior changed.
+
+Next task:
+
+- Task 3: count relative adaptive departures and the six-shot field profiles.

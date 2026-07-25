@@ -168,6 +168,7 @@ assertEqual(
     first.adaptive.holdVelocitySamples !== second.adaptive.holdVelocitySamples,
     "velocity arrays are detector-local",
   );
+  assertEqual(first.adaptive.holdBreakTs, null, "adaptive learning barrier starts inactive");
 }
 assertEqual(
   core.formGaussScore(core.FORM_REF.bowArmAngle.ideal, core.FORM_REF.bowArmAngle),
@@ -480,6 +481,158 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   assertEqual(s.st.adaptive.holdSamples.length, 0, "pending confirmation cannot extend a hold");
 }
 {
+  /* Review remediation: pendingRelease raw frames are already in browser history.
+     A cancel must create a hard learning barrier so those frames cannot be
+     retroactively backfilled on the first post-cancel frame. */
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.22, 150), 0.2);
+  s.st.adaptive.evidence = null;
+  s.st.adaptive.holdSamples = [];
+  s.st.adaptive.holdVelocitySamples = [];
+  s.st.adaptive.holdSince = 0;
+  s.st.adaptive.releaseSpeed = 6;
+  s.st.pendingRelease = {
+    ts: 180,
+    nb2Ref: null,
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  let cancel = null;
+  for (let i = 0; i < 6; i++) {
+    const current = s.push(mkRaw(0.22, 150), 8, 20);
+    if (current.r.canceled) cancel = current;
+  }
+  assert(cancel, "review fixture reaches anchor-return cancel");
+  assertAdaptiveResultShape(cancel.r, "anchor-return cancel path");
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    6,
+    "pending cancel frames cannot teach anchor samples",
+  );
+  assertEqual(
+    s.st.adaptive.holdBreakTs,
+    cancel.t,
+    "cancel frame records the latest learning barrier",
+  );
+  const first = s.push(mkRaw(0.22, 150), 0.2, 75);
+  assertEqual(
+    s.st.adaptive.evidence,
+    null,
+    "first post-cancel frame cannot backfill pending history into evidence",
+  );
+  const second = s.push(mkRaw(0.22, 150), 0.2, 75);
+  assertEqual(
+    s.st.adaptive.evidence,
+    null,
+    "two post-cancel observations remain below the hold gate",
+  );
+  const third = s.push(mkRaw(0.22, 150), 0.2, 75);
+  assert(s.st.adaptive.evidence !== null, "three post-cancel observations spanning 150ms qualify");
+  assert(
+    s.st.adaptive.holdSamples.every((sample) => sample.ts > cancel.t),
+    "post-cancel hold samples exclude every pending timestamp",
+  );
+  assertEqual(s.st.adaptive.holdSince, first.t, "post-cancel hold starts after the barrier");
+  assertEqual(s.st.adaptive.releaseSpeed, 6, "pending high velocities cannot raise releaseSpeed");
+  assertEqual(
+    s.st.adaptive.evidence.strength,
+    3,
+    "post-cancel evidence counts only fresh observations",
+  );
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    9,
+    "only three post-cancel anchor samples are added",
+  );
+  assertAdaptiveResultShape(first.r, "first post-anchor-return-cancel path");
+  assertAdaptiveResultShape(second.r, "second post-anchor-return-cancel path");
+  assertAdaptiveResultShape(third.r, "qualified post-anchor-return-cancel path");
+}
+{
+  /* The ordinary CONFIRM_MS timeout path must impose the same history barrier,
+     even though no cancellation return resets phase state. */
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.st.adaptive.evidence = null;
+  s.st.adaptive.holdSamples = [];
+  s.st.adaptive.holdVelocitySamples = [];
+  s.st.adaptive.holdSince = 0;
+  s.st.adaptive.releaseSpeed = 6;
+  s.st.pendingRelease = {
+    ts: 180,
+    nb2Ref: null,
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  for (let i = 0; i < 4; i++) s.push(mkRaw(0.47, 150), 8, 100);
+  const timeout = s.push(mkRaw(0.47, 150), 8, 1);
+  assertEqual(s.st.pendingRelease, null, "review fixture reaches ordinary confirm timeout");
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    6,
+    "pending timeout frames cannot teach anchor samples",
+  );
+  assertEqual(
+    s.st.adaptive.holdBreakTs,
+    timeout.t,
+    "timeout frame records the latest learning barrier",
+  );
+  const first = s.push(mkRaw(0.47, 150), 0.2, 75);
+  assertEqual(
+    s.st.adaptive.evidence,
+    null,
+    "first post-timeout frame cannot backfill pending history into evidence",
+  );
+  s.push(mkRaw(0.47, 150), 0.2, 75);
+  s.push(mkRaw(0.47, 150), 0.2, 75);
+  assert(s.st.adaptive.evidence !== null, "new post-timeout hold qualifies only after 150ms");
+  assert(
+    s.st.adaptive.holdSamples.every((sample) => sample.ts > timeout.t),
+    "post-timeout hold samples exclude every pending timestamp",
+  );
+  assertEqual(s.st.adaptive.holdSince, first.t, "post-timeout hold starts after the barrier");
+  assertEqual(
+    s.st.adaptive.releaseSpeed,
+    6,
+    "timed-out pending velocities cannot raise releaseSpeed",
+  );
+  assertEqual(
+    s.st.adaptive.evidence.strength,
+    3,
+    "post-timeout evidence counts only fresh observations",
+  );
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    9,
+    "only three post-timeout anchor samples are added",
+  );
+}
+{
+  /* Duplicate timestamps are not distinct observations. Treat the invalid
+     ordering as a suffix barrier rather than letting it inflate the frame gate. */
+  const state = core.makeFormPhaseDetector().adaptive;
+  state.anchorSamples = Array.from({ length: 6 }, (_, i) => ({
+    ts: 10 + i,
+    norm: 0.47,
+  }));
+  const duplicateHistory = [
+    { ts: 100, m: mkRaw(0.47, 150), vel: 0.2 },
+    { ts: 100, m: mkRaw(0.47, 150), vel: 0.2 },
+    { ts: 250, m: mkRaw(0.47, 150), vel: 0.2 },
+  ];
+  const result = core.updateAdaptiveAnchorEvidence(
+    state,
+    duplicateHistory.at(-1).m,
+    duplicateHistory,
+    250,
+  );
+  assertEqual(result.holdQualified, false, "duplicate timestamp cannot satisfy three observations");
+  assertEqual(state.evidence, null, "duplicate timestamp cannot fabricate adaptive evidence");
+  assertEqual(state.holdSamples.length, 2, "duplicate timestamp is a stable-suffix barrier");
+}
+{
   const quick = adaptiveStepper(50);
   for (let i = 0; i < 6; i++) quick.push(mkRaw(0.47 + (i % 2) * 0.005, 150), 0.2);
   assert(quick.st.adaptive.evidence !== null, "sanity: six stable frames can form evidence");
@@ -504,6 +657,71 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     9,
     "all nine stepFormPhase return paths use the adaptive result decorator",
   );
+}
+{
+  /* Coverage remediation for early cancellation returns. These paths already
+     behaved correctly; reach them dynamically so result-shape coverage does
+     not rely only on source-string counting. */
+  const nb2Drift = core.makeFormPhaseDetector();
+  nb2Drift.lastReleaseTs = 1000;
+  nb2Drift.pendingRelease = {
+    ts: 1000,
+    nb2Ref: { x: 0, y: 0 },
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  const driftRaw = { ...mkRaw(1.0, 90), dW: { x: 0.2, y: 0 } };
+  const driftHistory = [{ ts: 1020, m: driftRaw, vel: 0.2 }];
+  core.stepFormPhase(nb2Drift, driftRaw, driftHistory, 1.0, 1020);
+  driftHistory.push({ ts: 1120, m: driftRaw, vel: 0.2 });
+  const driftCancel = core.stepFormPhase(nb2Drift, driftRaw, driftHistory, 1.0, 1120);
+  assertEqual(driftCancel.debug.cancelReason, "nb2-drift", "NB2 drift fixture reaches cancel");
+  assertAdaptiveResultShape(driftCancel, "NB2 drift cancel path");
+
+  const nb2Unobserved = core.makeFormPhaseDetector();
+  nb2Unobserved.lastReleaseTs = 1000;
+  nb2Unobserved.pendingRelease = {
+    ts: 1000,
+    nb2Ref: { x: 0, y: 0 },
+    departCheck: true,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  const unobservedRaw = mkRaw(1.0, 90);
+  const unobservedCancel = core.stepFormPhase(
+    nb2Unobserved,
+    unobservedRaw,
+    [{ ts: 1401, m: unobservedRaw, vel: 0.2 }],
+    1.0,
+    1401,
+  );
+  assertEqual(
+    unobservedCancel.debug.cancelReason,
+    "nb2-unobserved",
+    "NB2 unobserved fixture reaches cancel",
+  );
+  assertAdaptiveResultShape(unobservedCancel, "NB2 unobserved cancel path");
+
+  const noDepart = core.makeFormPhaseDetector();
+  noDepart.lastReleaseTs = 1000;
+  noDepart.pendingRelease = {
+    ts: 1000,
+    nb2Ref: null,
+    departCheck: true,
+    departFrames: 0,
+    departSeen: 5,
+  };
+  const hoverRaw = mkRaw(0.5, 140);
+  const noDepartCancel = core.stepFormPhase(
+    noDepart,
+    hoverRaw,
+    [{ ts: 1401, m: hoverRaw, vel: 0.2 }],
+    1.0,
+    1401,
+  );
+  assertEqual(noDepartCancel.debug.cancelReason, "no-depart", "no-depart fixture reaches cancel");
+  assertAdaptiveResultShape(noDepartCancel, "no-depart cancel path");
 }
 
 /* 15fps(dt=66ms)で離脱が totalMs で完了する現実的なリリース区間を作る。
@@ -719,7 +937,8 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     const hist = [];
     let t = 0,
       releases = 0,
-      lastFire = null;
+      lastFire = null,
+      lastCancel = null;
     for (const raw of frames) {
       t += DT60;
       const vel = core.computeFormVelocity(hist, raw, t);
@@ -730,9 +949,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
         releases++;
         lastFire = r;
       }
-      if (r.canceled) releases--;
+      if (r.canceled) {
+        releases--;
+        lastCancel = r;
+      }
     }
-    return { releases, lastFire };
+    return { releases, lastFire, lastCancel };
   }
   const seg = (frames, fn) =>
     Array.from({ length: frames }, (_, i) => fn(i / Math.max(1, frames - 1), i));
@@ -879,6 +1101,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     0,
     "safety: forward letdown hidden in gap fires NB2 then drift-cancels (net 0)",
   );
+  assertEqual(
+    fwdHidden.lastCancel.debug.cancelReason,
+    "nb2-drift",
+    "field-shape fixture reaches NB2 drift cancel",
+  );
+  assertAdaptiveResultShape(fwdHidden.lastCancel, "field-shape NB2 drift cancel path");
   // 対照: 真のリリース（NB2経由）はフォロースルーで静止するため drift-cancel されない
   assertEqual(
     runDw(shotDw({ gapMs: 250 })).releases,
@@ -1115,6 +1343,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   // !usable（人物未検出）: win/closeFrames 未計算のため null で埋まるが debug 自体は必ず返る
   const rU = core.stepFormPhase(core.makeFormPhaseDetector(), null, [], 1.0, 100);
   assertDebugShape(rU.debug, "!usable path");
+  assertAdaptiveResultShape(rU, "null path");
   assertEqual(
     rU.debug.anchorNorm,
     null,
@@ -1135,6 +1364,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const rRelC = pushC(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え(released)
   assertEqual(rRelC.released, true, "sanity: release fires before cancel scenario");
   assertDebugShape(rRelC.debug, "release-fire path");
+  assertAdaptiveResultShape(rRelC, "fire path");
   /* アンカー復帰取消（Plan-B 2連続フレーム → 2026-07-15 時間ベース CANCEL_DIP_MS=100 へ更新。
      実フィールド conf 0.5-0.7 のランドマーク幻出ランが 2 フレーム（33ms）を超え、実射への
      誤取消が観測されたため。dt=20ms では初回ディップから 100ms 経過後のフレームで取消。 */
@@ -1151,6 +1381,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   }
   assertEqual(rCancel.canceled, true, "sanity: cancel path reached at >=100ms dip span");
   assertDebugShape(rCancel.debug, "canceled path");
+  assertAdaptiveResultShape(rCancel, "anchor-return cancel path");
   assertClose(
     rCancel.debug.anchorNorm,
     0.23,
@@ -1174,10 +1405,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   const rSticky = pushS(mkRaw(1.0, 90), 0.2); // アンカー圏外へ離脱、250ms未満のsticky lock
   assertEqual(rSticky.phase, "RELEASE", "sanity: sticky RELEASE lock active");
   assertDebugShape(rSticky.debug, "sticky RELEASE-lock path");
+  assertAdaptiveResultShape(rSticky, "RELEASE lock path");
   for (let i = 0; i < 12; i++) pushS(mkRaw(1.0, 90), 0.2); // 250ms超過させる
   const rFollow = pushS(mkRaw(1.0, 90), 0.2);
   assertEqual(rFollow.phase, "FOLLOW", "sanity: FOLLOW window active");
   assertDebugShape(rFollow.debug, "FOLLOW path");
+  assertAdaptiveResultShape(rFollow, "FOLLOW path");
 
   // 通常の非発火パス（アンカー保持中、release条件未達）
   const stN = core.makeFormPhaseDetector();
@@ -1190,6 +1423,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     rNormal = core.stepFormPhase(stN, mkRaw(0.22, 150), histN, 1.0, tN);
   }
   assertDebugShape(rNormal.debug, "normal non-fire path");
+  assertAdaptiveResultShape(rNormal, "normal path");
   assert(
     rNormal.debug.closeFrames >= 0,
     "normal non-fire path: closeFrames is a real count, not null",
@@ -1505,6 +1739,28 @@ function makeStepper(dt) {
   };
 }
 
+{
+  /* Legacy sticky contract, separate from adaptive learned-zone coverage:
+     drawArm=125 is deliberately ineligible for an adaptive hold, so the small
+     outward trend exercises the original DRAWING path. */
+  const s = makeStepper(66);
+  let firstAnchorTs = 0;
+  for (let i = 0; i < 10; i++) {
+    const { r } = s.push(mkRaw(0.33, 150), 0.05);
+    if (!firstAnchorTs && (r.phase === "ANCHORING" || r.phase === "FULL_DRAW"))
+      firstAnchorTs = r.anchorStartTs;
+  }
+  assert(firstAnchorTs > 0, "legacy DRAWING sticky fixture reaches anchor first");
+  for (let i = 0; i < 3; i++) {
+    const { r } = s.push(mkRaw(0.37, 125), 0.5);
+    assertEqual(r.phase, "DRAWING", "adaptive-ineligible brief excursion uses legacy DRAWING");
+    assertEqual(
+      r.anchorStartTs,
+      firstAnchorTs,
+      "legacy DRAWING excursion preserves sticky anchorStartTs",
+    );
+  }
+}
 {
   // sticky: learned anchorEnter 内の約200msの一時離脱・ジッターでも adaptive hold が継続し、
   // anchorStartTs（= hold の起点）が通しで保持される
