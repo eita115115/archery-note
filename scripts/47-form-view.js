@@ -236,7 +236,7 @@ function openFormCapture(){
     </div>
     <div class="formShotScroll" id="fcShots"></div>
     <div class="formBar">
-      <button class="btn sec sm" id="fcSwap">前/背面</button>
+      <button class="btn sec sm" id="fcSwap" disabled>前/背面</button>
       <button class="btn sec sm" id="fcHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
       <button class="btn" id="fcSave" disabled>保存して終了</button>
     </div>
@@ -251,6 +251,7 @@ function openFormCapture(){
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, stream=null, landmarker=null;
   let inFlightStream=null;
+  let cameraSwapReady=false;
   let cameraSwapInProgress=false;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
@@ -326,6 +327,7 @@ function openFormCapture(){
     closeModal(ovl);
   }
   async function startCamera(){
+    if(!running) return false;
     let nextStream=null;
     try{
       nextStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false});
@@ -613,7 +615,7 @@ function openFormCapture(){
     }
   };
   ovl.querySelector("#fcSwap").onclick=async()=>{
-    if(cameraSwapInProgress) return;
+    if(!cameraSwapReady||cameraSwapInProgress) return;
     cameraSwapInProgress=true;
     const previousFacing=facing;
     facing=facing==="environment"?"user":"environment";
@@ -649,10 +651,13 @@ function openFormCapture(){
     nativePulse("light");
   };
   loadFormPose().then(async lm=>{
+    if(!running) return;
     landmarker=lm;
     hud.textContent="カメラを起動しています…";
     const cameraStarted=await startCamera();
     if(!cameraStarted) return;
+    cameraSwapReady=true;
+    ovl.querySelector("#fcSwap").disabled=false;
     wakeLock.acquire();
     hud.textContent="準備完了。横向き全身が写る位置で数射どうぞ。";
     loop();

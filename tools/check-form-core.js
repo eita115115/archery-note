@@ -2947,6 +2947,46 @@ function anchorHistory(releaseTs, drift) {
     "initial capture load section",
   );
   const initialLoadCompact = compactSource(initialLoad);
+  const captureCompact = compactSource(capture);
+  assert(
+    captureCompact.includes('<buttonclass="btnsecsm"id="fcSwap"disabled>') &&
+      captureCompact.includes("letcameraSwapReady=false;"),
+    "camera swap stays disabled and unready until initial startup succeeds",
+  );
+  const closedCameraGuard = startCameraCompact.indexOf("if(!running)returnfalse;");
+  const cameraAcquisition = startCameraCompact.indexOf(
+    "nextStream=awaitnavigator.mediaDevices.getUserMedia(",
+  );
+  assert(
+    closedCameraGuard >= 0 && closedCameraGuard < cameraAcquisition,
+    "closed capture returns before camera acquisition can start",
+  );
+  const initialClosedGuard = initialLoadCompact.indexOf("if(!running)return;");
+  const initialLandmarker = initialLoadCompact.indexOf("landmarker=lm;");
+  const initialStartup = initialLoadCompact.indexOf("constcameraStarted=awaitstartCamera();");
+  const initialStarted = initialLoadCompact.indexOf("if(!cameraStarted)return;");
+  const markSwapReady = initialLoadCompact.indexOf("cameraSwapReady=true;");
+  const enableSwap = initialLoadCompact.indexOf('ovl.querySelector("#fcSwap").disabled=false;');
+  const initialWake = initialLoadCompact.indexOf("wakeLock.acquire();");
+  const initialLoop = initialLoadCompact.indexOf("loop();");
+  assert(
+    initialClosedGuard >= 0 &&
+      initialClosedGuard < initialLandmarker &&
+      initialLandmarker < initialStartup &&
+      initialStartup < initialStarted &&
+      initialStarted < markSwapReady &&
+      markSwapReady < enableSwap &&
+      enableSwap < initialWake &&
+      initialWake < initialLoop,
+    "initial startup alone enables swap before wake lock and analysis loop",
+  );
+  assert(
+    swapCompact.includes("if(!cameraSwapReady||cameraSwapInProgress)return;") &&
+      (captureCompact.match(/cameraSwapReady=false;/g) || []).length === 1 &&
+      (captureCompact.match(/cameraSwapReady=true;/g) || []).length === 1 &&
+      !swapCompact.includes("cameraSwapReady="),
+    "swap handler independently requires readiness and preserves it across failures",
+  );
   assert(
     swapCompact.includes("constcameraStarted=awaitstartCamera();") &&
       swapCompact.includes("if(!cameraStarted){if(running)facing=previousFacing;return;}") &&
@@ -2958,7 +2998,7 @@ function anchorHistory(releaseTs, drift) {
         initialLoadCompact.indexOf("loop();"),
     "camera callers stop before ready state, wake lock, or loop when startup aborts",
   );
-  const swapGuard = swapCompact.indexOf("if(cameraSwapInProgress)return;");
+  const swapGuard = swapCompact.indexOf("if(!cameraSwapReady||cameraSwapInProgress)return;");
   const swapLock = swapCompact.indexOf("cameraSwapInProgress=true;");
   const swapFacing = swapCompact.indexOf("facing=");
   const swapReset = swapCompact.indexOf("resetCaptureGeometry();");

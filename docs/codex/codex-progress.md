@@ -732,3 +732,23 @@ Next task:
 
 - Task 6: perform mobile-sized and field acceptance of adaptive live capture
   and replay behavior.
+
+### 2026-07-26 - Task 5 re-review: gate early camera swaps
+
+- The swap button now starts disabled and a separate readiness guard blocks
+  programmatic calls until initial camera startup succeeds. Successful startup
+  marks readiness and enables swap before wake-lock/loop; later swap failures
+  preserve readiness for retry.
+- Initial model continuation and `startCamera()` both return on closed capture
+  before acquisition or success-only work. In-flight cleanup, facing retry,
+  live-track gating, swap locking, recorder behavior, and Task 5 geometry
+  contracts remain intact.
+- RED: `npm run check:form` exited 1 with
+  `camera swap stays disabled and unready until initial startup succeeds`.
+- GREEN: form, app, globals, and lint pass. Managed-file Prettier passes; the
+  compact view retains its documented baseline warning.
+
+Next task:
+
+- Task 6: perform mobile-sized and field acceptance of adaptive live capture
+  and replay behavior.
