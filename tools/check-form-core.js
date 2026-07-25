@@ -30,6 +30,8 @@ const core = new Function(
   `${coreScript}
 return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
   formMedian, adaptiveAnchorThreshold, adaptiveReleaseThreshold,
+  adaptiveReleaseCandidate:
+    typeof adaptiveReleaseCandidate === "function" ? adaptiveReleaseCandidate : null,
   updateAdaptiveAnchorEvidence:
     typeof updateAdaptiveAnchorEvidence === "function" ? updateAdaptiveAnchorEvidence : null,
   computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
@@ -169,6 +171,8 @@ assertEqual(
     "velocity arrays are detector-local",
   );
   assertEqual(first.adaptive.holdBreakTs, null, "adaptive learning barrier starts inactive");
+  const initial = core.stepFormPhase(first, null, [], 1, 100);
+  assertEqual(initial.debug.refractoryRemaining, 0, "no-prior-fire refractory starts at zero");
 }
 assertEqual(
   core.formGaussScore(core.FORM_REF.bowArmAngle.ideal, core.FORM_REF.bowArmAngle),
@@ -256,16 +260,20 @@ function runSequence(seq, coreObj) {
   const hist = [];
   let t = 0,
     phases = [],
-    releases = 0;
+    releases = 0,
+    fireEvidence = [];
   for (const [m, vel, dt] of seq) {
     t += dt;
     hist.push({ ts: t, m, vel });
     if (hist.length > 150) hist.shift();
     const r = c.stepFormPhase(st, m, hist, 1.0, t);
     phases.push(r.phase);
-    if (r.released) releases++;
+    if (r.released) {
+      releases++;
+      fireEvidence.push(r.debug.fireEvidence);
+    }
   }
-  return { phases: [...new Set(phases)], releases, hist, lastTs: t };
+  return { phases: [...new Set(phases)], releases, fireEvidence, hist, lastTs: t };
 }
 
 function adaptiveStepper(dt, coreObj) {
@@ -293,6 +301,440 @@ function assertAdaptiveResultShape(result, label) {
   );
   assert(Number.isFinite(result.debug.anchorEnter), `${label}: debug anchorEnter is numeric`);
   assert(Number.isFinite(result.debug.releaseSpeed), `${label}: debug releaseSpeed is numeric`);
+}
+
+/* ---------- Task 3: relative adaptive release candidates ---------- */
+
+function adaptiveFieldProfile({ anchor, releaseNorm, releaseVel }) {
+  const seq = [];
+  for (let i = 0; i < 12; i++) seq.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 30; i++)
+    seq.push([mkRaw(anchor + (i % 3) * 0.005, 150), i === 9 ? 7 : 0.2, 20]);
+  seq.push([mkRaw(releaseNorm, 140), releaseVel, 20]);
+  for (let i = 0; i < 60; i++) seq.push([mkRaw(1.0, 90), 0.1, 20]);
+  return seq;
+}
+
+{
+  const profileA = runSequence(
+    adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
+  );
+  const profileB = runSequence(
+    adaptiveFieldProfile({ anchor: 0.18, releaseNorm: 0.5, releaseVel: 8.5 }),
+  );
+  const profileC = runSequence(
+    adaptiveFieldProfile({ anchor: 0.46, releaseNorm: 0.74, releaseVel: 12.8 }),
+  );
+  const sixShot = runSequence(
+    Array.from({ length: 6 }, () =>
+      adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
+    ).flat(),
+  );
+  assert(
+    profileA.releases === 1 &&
+      profileB.releases === 1 &&
+      profileC.releases === 1 &&
+      sixShot.releases === 6,
+    `adaptive field receipts A/B/C=${profileA.releases}/${profileB.releases}/${profileC.releases}, six-shot=${sixShot.releases}`,
+  );
+  assertEqual(profileA.fireEvidence[0], "adaptive", "profile A uses adaptive evidence");
+  assertEqual(profileB.fireEvidence[0], "adaptive", "profile B uses adaptive evidence");
+  assertEqual(profileC.fireEvidence[0], "adaptive", "profile C uses adaptive evidence");
+  assertEqual(
+    JSON.stringify(sixShot.fireEvidence),
+    JSON.stringify(Array(6).fill("adaptive")),
+    "six-shot end reports six adaptive evidence labels",
+  );
+}
+
+assert(core.adaptiveReleaseCandidate, "adaptive release candidate helper is exported to tests");
+assertEqual(
+  core.adaptiveReleaseCandidate.length,
+  4,
+  "adaptive release candidate has exact arity four",
+);
+
+function adaptiveCandidateFixture({
+  evidence = {
+    ts: 0,
+    normAtHold: 0.47,
+    anchorEnter: 0.59,
+    releaseSpeed: 6,
+    strength: 12,
+  },
+  currentNorm = 0.66,
+  priorNorms = [0.61, 0.62, 0.63],
+  now = 1000,
+  currentVel = 6,
+} = {}) {
+  const raw = mkRaw(currentNorm, 140);
+  const history = priorNorms.map((norm, index) => ({
+    ts: now - (priorNorms.length - index) * 50,
+    m: mkRaw(norm, 140),
+    vel: 0.2,
+  }));
+  history.push({ ts: now, m: raw, vel: currentVel });
+  return { evidence, raw, history, now };
+}
+
+{
+  const below = adaptiveCandidateFixture({ currentNorm: 0.65, priorNorms: [0.61, 0.62, 0.63] });
+  const exact = adaptiveCandidateFixture({
+    currentNorm: 0.66,
+    priorNorms: [0.61, 0.62, 0.63],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(below.evidence, below.raw, below.history, below.now).matched,
+    false,
+    "direction delta +0.03 does not match",
+  );
+  const exactDecision = core.adaptiveReleaseCandidate(
+    exact.evidence,
+    exact.raw,
+    exact.history,
+    exact.now,
+  );
+  assertEqual(exactDecision.matched, true, "direction delta exactly +0.04 matches");
+  assertEqual(exactDecision.movingAway, true, "direction equality is moving away");
+  assertClose(exactDecision.departDelta, 0.19, 1e-12, "relative departure is reported");
+  assertEqual(exactDecision.maxV, 6, "speed equality is included");
+  assertEqual(exactDecision.releaseSpeed, 6, "snapshotted release speed is reported");
+  assertEqual(
+    JSON.stringify(Object.keys(exactDecision)),
+    JSON.stringify(["matched", "departDelta", "movingAway", "maxV", "releaseSpeed"]),
+    "candidate has the fixed decision shape",
+  );
+}
+{
+  const exactDeparture = adaptiveCandidateFixture({
+    currentNorm: 0.65,
+    priorNorms: [0.59, 0.61, 0.63],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      exactDeparture.evidence,
+      exactDeparture.raw,
+      exactDeparture.history,
+      exactDeparture.now,
+    ).matched,
+    true,
+    "departure delta exactly +0.18 is included",
+  );
+}
+{
+  const atWindow = adaptiveCandidateFixture({ now: 1500 });
+  atWindow.history[0].ts = 1250;
+  atWindow.history[0].vel = 6;
+  atWindow.history[atWindow.history.length - 1].vel = 0;
+  assertEqual(
+    core.adaptiveReleaseCandidate(atWindow.evidence, atWindow.raw, atWindow.history, atWindow.now)
+      .matched,
+    true,
+    "evidence age and velocity-window start are inclusive at 1500ms and 250ms",
+  );
+  const expired = adaptiveCandidateFixture({ now: 1501 });
+  assertEqual(
+    core.adaptiveReleaseCandidate(expired.evidence, expired.raw, expired.history, expired.now)
+      .matched,
+    false,
+    "evidence expires at 1501ms",
+  );
+  const future = adaptiveCandidateFixture({
+    evidence: { ts: 1001, normAtHold: 0.47, releaseSpeed: 6 },
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(future.evidence, future.raw, future.history, future.now).matched,
+    false,
+    "future evidence is rejected",
+  );
+}
+{
+  [
+    null,
+    {},
+    { ts: NaN, normAtHold: 0.47, releaseSpeed: 6 },
+    { ts: 0, normAtHold: Infinity, releaseSpeed: 6 },
+    { ts: 0, normAtHold: 0.47, releaseSpeed: 0 },
+    { ts: 0, normAtHold: 0.47, releaseSpeed: Infinity },
+  ].forEach((evidence, index) => {
+    const fixture = adaptiveCandidateFixture({ evidence });
+    const decision = core.adaptiveReleaseCandidate(
+      fixture.evidence,
+      fixture.raw,
+      fixture.history,
+      fixture.now,
+    );
+    assertEqual(decision.matched, false, `malformed evidence ${index} is rejected`);
+    assertEqual(
+      typeof decision.movingAway,
+      "boolean",
+      `malformed evidence ${index} has boolean direction`,
+    );
+  });
+  const missingCurrent = adaptiveCandidateFixture();
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      missingCurrent.evidence,
+      null,
+      missingCurrent.history,
+      missingCurrent.now,
+    ).matched,
+    false,
+    "null current frame cannot match",
+  );
+}
+{
+  const fewer = adaptiveCandidateFixture({ priorNorms: [0.61, 0.63] });
+  assertEqual(
+    core.adaptiveReleaseCandidate(fewer.evidence, fewer.raw, fewer.history, fewer.now).movingAway,
+    false,
+    "fewer than three prior observations cannot establish direction",
+  );
+
+  const currentExcluded = adaptiveCandidateFixture({ priorNorms: [0.61, 0.63] });
+  currentExcluded.history.splice(
+    2,
+    0,
+    { ts: currentExcluded.now, m: mkRaw(0.2, 140), vel: 20 },
+    { ts: currentExcluded.now, m: mkRaw(0.2, 140), vel: 20 },
+  );
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      currentExcluded.evidence,
+      currentExcluded.raw,
+      currentExcluded.history,
+      currentExcluded.now,
+    ).movingAway,
+    false,
+    "all current-timestamp entries are excluded from direction history",
+  );
+
+  const chronologyCases = [
+    [
+      { ts: 700, m: mkRaw(0.61, 140), vel: 6 },
+      { ts: 800, m: mkRaw(0.62, 140), vel: 0.2 },
+      { ts: 800, m: mkRaw(0.63, 140), vel: 0.2 },
+    ],
+    [
+      { ts: 850, m: mkRaw(0.61, 140), vel: 6 },
+      { ts: 800, m: mkRaw(0.62, 140), vel: 0.2 },
+      { ts: 900, m: mkRaw(0.63, 140), vel: 0.2 },
+    ],
+    [
+      { ts: 700, m: mkRaw(0.61, 140), vel: 6 },
+      { ts: 800, m: mkRaw(0.62, 140), vel: 0.2 },
+      { ts: 900, m: mkRaw(0.63, 140), vel: 0.2 },
+      { ts: 1100, m: mkRaw(0.64, 140), vel: 0.2 },
+    ],
+  ];
+  chronologyCases.forEach((history, index) => {
+    const fixture = adaptiveCandidateFixture();
+    history.push({ ts: fixture.now, m: fixture.raw, vel: 6 });
+    assertEqual(
+      core.adaptiveReleaseCandidate(fixture.evidence, fixture.raw, history, fixture.now).movingAway,
+      false,
+      `chronology barrier ${index} prevents direction evidence`,
+    );
+  });
+}
+{
+  const fixture = adaptiveCandidateFixture();
+  fixture.history[0].vel = NaN;
+  fixture.history[1].vel = Infinity;
+  fixture.history[2].vel = -1;
+  fixture.history[3].vel = 6;
+  const before = JSON.stringify({
+    evidence: fixture.evidence,
+    raw: fixture.raw,
+    history: fixture.history.map((entry) => ({
+      ts: entry.ts,
+      m: entry.m,
+      vel: Number.isFinite(entry.vel) ? entry.vel : String(entry.vel),
+    })),
+  });
+  const decision = core.adaptiveReleaseCandidate(
+    fixture.evidence,
+    fixture.raw,
+    fixture.history,
+    fixture.now,
+  );
+  assertEqual(decision.maxV, 6, "maxV ignores non-finite and negative velocities");
+  const after = JSON.stringify({
+    evidence: fixture.evidence,
+    raw: fixture.raw,
+    history: fixture.history.map((entry) => ({
+      ts: entry.ts,
+      m: entry.m,
+      vel: Number.isFinite(entry.vel) ? entry.vel : String(entry.vel),
+    })),
+  });
+  assertEqual(after, before, "candidate does not mutate its inputs");
+
+  fixture.history[fixture.history.length - 1].vel = -1;
+  assertEqual(
+    core.adaptiveReleaseCandidate(fixture.evidence, fixture.raw, fixture.history, fixture.now).maxV,
+    null,
+    "maxV is unknown when no finite nonnegative velocity exists",
+  );
+}
+{
+  const gatedCandidate = new Function(
+    `${coreScript
+      .replace("CONF_GATE: 0,", "CONF_GATE: 0.5,")
+      .replace("DW_VIS_GATE: 0,", "DW_VIS_GATE: 0.5,")}
+return adaptiveReleaseCandidate;`,
+  )();
+  const fixture = adaptiveCandidateFixture();
+  const lowConfidenceCurrent = {
+    ...fixture.raw,
+    conf: 0.4,
+  };
+  assertEqual(
+    gatedCandidate(fixture.evidence, lowConfidenceCurrent, fixture.history, fixture.now).matched,
+    false,
+    "confidence-unusable current frame cannot match",
+  );
+  const gatedHistory = [
+    { ts: 700, m: { ...mkRaw(0.61, 140), conf: 0.9 }, vel: 0.2 },
+    { ts: 750, m: { ...mkRaw(0.1, 140), conf: 0.4 }, vel: 20 },
+    { ts: 800, m: { ...mkRaw(0.62, 140), conf: 0.9 }, vel: 0.2 },
+    { ts: 850, m: null, vel: 20 },
+    { ts: 900, m: { ...mkRaw(0.63, 140), conf: 0.9 }, vel: 0.2 },
+    {
+      ts: 1000,
+      m: { ...fixture.raw, conf: 0.9, dW: { x: 0, y: 0, visibility: 0.9 } },
+      vel: 6,
+    },
+  ];
+  assertEqual(
+    gatedCandidate(fixture.evidence, gatedHistory[5].m, gatedHistory, fixture.now).matched,
+    true,
+    "direction skips null and confidence-unusable entries",
+  );
+  gatedHistory[5].m.dW.visibility = 0.5;
+  assertEqual(
+    gatedCandidate(fixture.evidence, gatedHistory[5].m, gatedHistory, fixture.now).maxV,
+    0.2,
+    "maxV applies the strict dW visibility gate",
+  );
+}
+{
+  const traceAdaptive = (seq) => {
+    const st = core.makeFormPhaseDetector();
+    const history = [];
+    let now = 0;
+    const fires = [];
+    for (const [raw, vel, elapsed] of seq) {
+      now += elapsed;
+      history.push({ ts: now, m: raw, vel });
+      if (history.length > 150) history.shift();
+      const result = core.stepFormPhase(st, raw, history, 1, now);
+      if (result.released) fires.push({ result, now, pending: { ...st.pendingRelease } });
+    }
+    return { st, history, now, fires };
+  };
+
+  const a = traceAdaptive(
+    adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
+  );
+  assertEqual(a.fires.length, 1, "initial detector state can fire profile A at t=860");
+  assertEqual(a.fires[0].now, 860, "first adaptive fire keeps the unoffset field timing");
+  assertEqual(a.fires[0].result.debug.fireEvidence, "adaptive", "adaptive fire wins diagnostics");
+  assertEqual(
+    a.fires[0].result.debug.fireVel,
+    null,
+    "adaptive-only fire has no legacy velocity route",
+  );
+  assertClose(a.fires[0].result.debug.departDelta, 0.275, 1e-12, "fire reports relative departure");
+  assert(
+    Number.isFinite(a.fires[0].result.debug.evidenceAgeMs),
+    "fire result retains evidence age after committed-state clear",
+  );
+  assert(
+    Number.isFinite(a.fires[0].result.debug.evidenceStrength),
+    "fire result retains evidence strength after committed-state clear",
+  );
+
+  const bSeq = adaptiveFieldProfile({ anchor: 0.18, releaseNorm: 0.5, releaseVel: 8.5 });
+  const b = traceAdaptive(bSeq);
+  assertEqual(b.fires.length, 1, "profile B fires below the legacy speed threshold");
+  assertEqual(b.fires[0].result.debug.releaseSpeed, 6, "hold outlier leaves release speed at six");
+  assertEqual(b.fires[0].result.debug.maxV, 8.5, "profile B fire observes maxV 8.5");
+
+  const slow = runSequence(
+    adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 5.9 }),
+  );
+  assertEqual(slow.releases, 0, "slow let-down below adaptive speed six does not fire");
+
+  const repeated = adaptiveFieldProfile({
+    anchor: 0.47,
+    releaseNorm: 0.75,
+    releaseVel: 18.4,
+  });
+  repeated.splice(
+    43,
+    0,
+    [mkRaw(0.8, 140), 18.4, 20],
+    [mkRaw(0.85, 140), 18.4, 20],
+    [mkRaw(0.9, 140), 18.4, 20],
+  );
+  assertEqual(
+    runSequence(repeated).releases,
+    1,
+    "repeated matching departure frames inside one second count once",
+  );
+
+  const precedence = traceAdaptive(
+    adaptiveFieldProfile({ anchor: 0.18, releaseNorm: 0.5, releaseVel: 10 }),
+  );
+  const precedenceFire = precedence.fires[0].result;
+  const precedencePending = precedence.fires[0].pending;
+  assertEqual(
+    precedenceFire.debug.fireEvidence,
+    "adaptive",
+    "adaptive match precedes legacy match",
+  );
+  assertEqual(precedenceFire.debug.fireVel, null, "adaptive precedence does not invent fireVel");
+  assertEqual(precedencePending.fireEvidence, "adaptive", "pending snapshots fire evidence");
+  assertEqual(
+    precedencePending.anchorEnter,
+    precedenceFire.anchorEnter,
+    "pending snapshots fire-time anchor threshold",
+  );
+  assertEqual(precedencePending.releaseSpeed, 6, "pending snapshots adaptive release speed");
+  assertEqual(precedencePending.nb2Ref, null, "adaptive-selected fire never gets NB2 ref");
+  assertEqual(precedencePending.departCheck, true, "Task 3 retains departure confirmation");
+  assertEqual(precedence.st.adaptive.evidence, null, "committed fire clears adaptive evidence");
+
+  const legacy = traceAdaptive([
+    ...Array.from({ length: 10 }, () => [mkRaw(1.2, 100), 0.1, 20]),
+    [mkRaw(0.22, 150), 0.2, 20],
+    [mkRaw(0.22, 150), 0.2, 20],
+    [mkRaw(0.6, 140), 10, 20],
+  ]);
+  assertEqual(
+    legacy.fires[0].pending.fireEvidence,
+    "close",
+    "legacy pending snapshots close evidence",
+  );
+  assertEqual(
+    legacy.fires[0].pending.releaseSpeed,
+    null,
+    "legacy pending release speed stays null",
+  );
+
+  const blocked = adaptiveStepper(20);
+  for (let i = 0; i < 55; i++) blocked.push(mkRaw(1.0, 90), 0.1);
+  for (let i = 0; i < 30; i++) blocked.push(mkRaw(0.47 + (i % 3) * 0.005, 150), 0.2);
+  const evidenceBefore = blocked.st.adaptive.evidence;
+  blocked.st.lastReleaseTs = 641;
+  const blockedDeparture = blocked.push(mkRaw(0.75, 140), 18.4);
+  assertEqual(blockedDeparture.r.released, false, "FOLLOW lock blocks a matching candidate");
+  assertEqual(
+    blocked.st.adaptive.evidence,
+    evidenceBefore,
+    "blocked matching candidate does not clear adaptive evidence",
+  );
 }
 
 /* ---------- Task 2: session-local adaptive anchor evidence ---------- */
@@ -653,7 +1095,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     coreScript.indexOf("function formPreReleaseWindow"),
   );
   assertEqual(
-    (source.match(/return formPhaseResult\(/g) || []).length,
+    (source.match(/formPhaseResult\(/g) || []).length,
     9,
     "all nine stepFormPhase return paths use the adaptive result decorator",
   );
@@ -763,8 +1205,9 @@ function shotSequence(dt) {
 }
 {
   // レットダウン誤検出境界の回帰テスト（2026-07-05 修理）。
-  // 実測: 100ms〜2000ms の線形レットダウンはいずれも誤検出しないことを確認済み
-  // （境界表は 46-form-core.js の RELEASE_TH コメント参照）。50ms は 1 フレームで
+  // 2026-07-26 承認済み recall tradeoff: 100ms の線形レットダウンは、見逃しを減らす
+  // relative adaptive path により「削除可能な候補」1件となりうる。150〜2000ms は従来どおり
+  // 0件を固定する（境界表は 46-form-core.js の RELEASE_TH コメント参照）。50ms は 1 フレームで
   // 完了する極限ケースで、20fps 相当では速度スパイクがリリースと数値上区別できず
   // 対象外（停止条件の対象は「50ms〜2s」のうち計測可能な範囲）。
   [2000, 1500, 1200, 1100, 1000, 900, 800, 700, 600, 500, 400, 300, 250, 200, 150, 100].forEach(
@@ -777,7 +1220,11 @@ function shotSequence(dt) {
         for (let i = 1; i <= frames; i++)
           seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
         for (let i = 0; i < 30; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
-        assertEqual(runSequence(seq).releases, 0, `let-down ${totalMs}ms (dt=${dt}) does not fire`);
+        assertEqual(
+          runSequence(seq).releases,
+          totalMs === 100 ? 1 : 0,
+          `let-down ${totalMs}ms (dt=${dt}) approved adaptive boundary`,
+        );
       });
     },
   );
@@ -868,7 +1315,8 @@ function shotSequence(dt) {
   // ∞ へ差し替えると tier-1 が解禁されて発火する
   function gapFarArrivalSequence(nullCount) {
     const seq = [];
-    for (let i = 0; i < 110; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
+    // Adaptive evidenceを形成しない100ms保持で、tier-1単独の境界を隔離する。
+    for (let i = 0; i < 10; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
     for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]);
     seq.push([mkRaw(1.3, 90), 8, 10]); // 着地がレットダウン完了域（NB2 適用外）
     for (let i = 0; i < 10; i++) seq.push([mkRaw(1.3, 90), 0.2, 20]);

@@ -231,6 +231,96 @@ function adaptiveReleaseThreshold(holdVelocitySamples) {
   );
 }
 
+function adaptiveReleaseCandidate(evidence, raw, history, now) {
+  const decision = {
+    matched: false,
+    departDelta: null,
+    movingAway: false,
+    maxV: null,
+    releaseSpeed: null,
+  };
+  const evidenceValid = Boolean(
+    evidence &&
+    Number.isFinite(evidence.ts) &&
+    Number.isFinite(evidence.normAtHold) &&
+    Number.isFinite(evidence.releaseSpeed) &&
+    evidence.releaseSpeed > 0,
+  );
+  if (evidenceValid) decision.releaseSpeed = evidence.releaseSpeed;
+
+  const currentUsable = Boolean(
+    raw && formConfOk(raw) && Number.isFinite(raw.anchorNorm) && Number.isFinite(now),
+  );
+  if (evidenceValid && currentUsable) {
+    decision.departDelta = raw.anchorNorm - evidence.normAtHold;
+  }
+
+  const frames = Array.isArray(history) ? history : [];
+  const previousNorms = [];
+  let newerTs = now;
+  if (currentUsable) {
+    for (let i = frames.length - 1; i >= 0 && previousNorms.length < 3; i--) {
+      const frame = frames[i];
+      if (!frame || !Number.isFinite(frame.ts)) break;
+      if (frame.ts === now) continue;
+      if (frame.ts > now || frame.ts >= newerTs) break;
+      newerTs = frame.ts;
+      if (!frame.m || !formConfOk(frame.m) || !Number.isFinite(frame.m.anchorNorm)) continue;
+      previousNorms.push(frame.m.anchorNorm);
+    }
+  }
+  if (currentUsable && previousNorms.length === 3) {
+    const previousMedian = formMedian(previousNorms);
+    const directionDelta = raw.anchorNorm - previousMedian;
+    const directionEpsilon =
+      Number.EPSILON *
+      Math.max(
+        1,
+        Math.abs(raw.anchorNorm),
+        Math.abs(previousMedian),
+        FORM_PH.ADAPTIVE_DIRECTION_DELTA,
+      );
+    decision.movingAway = directionDelta + directionEpsilon >= FORM_PH.ADAPTIVE_DIRECTION_DELTA;
+  }
+
+  const velocities = frames
+    .filter(
+      (frame) =>
+        frame &&
+        Number.isFinite(frame.ts) &&
+        frame.ts >= now - FORM_PH.RISE_WINDOW_MS &&
+        frame.ts <= now &&
+        frame.m &&
+        formConfOk(frame.m) &&
+        formDwVisOk(frame.m) &&
+        Number.isFinite(frame.vel) &&
+        frame.vel >= 0,
+    )
+    .map((frame) => frame.vel);
+  if (velocities.length) decision.maxV = Math.max(...velocities);
+
+  const age = evidenceValid && Number.isFinite(now) ? now - evidence.ts : null;
+  const comparisonEpsilon =
+    Number.EPSILON *
+    Math.max(
+      1,
+      Math.abs(decision.departDelta == null ? 0 : decision.departDelta),
+      Math.abs(decision.maxV == null ? 0 : decision.maxV),
+      Math.abs(decision.releaseSpeed == null ? 0 : decision.releaseSpeed),
+    );
+  decision.matched =
+    evidenceValid &&
+    currentUsable &&
+    age >= 0 &&
+    age <= FORM_PH.ADAPTIVE_EVIDENCE_WINDOW_MS &&
+    decision.departDelta > 0 &&
+    decision.departDelta + comparisonEpsilon >= FORM_PH.ADAPTIVE_DEPARTURE &&
+    decision.movingAway &&
+    decision.maxV != null &&
+    decision.maxV + comparisonEpsilon >= decision.releaseSpeed;
+  return decision;
+}
+
 function adaptiveAnchorFrameUsable(frame) {
   return (
     frame &&
@@ -757,7 +847,8 @@ function formPhaseResult(st, now, result, debug) {
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
   // 検証計装（H-2, release-detection-triage-2026-07-13）: 早期return経路の共通項。判定には未使用
-  const refractoryRemainingMs = () => Math.max(0, FORM_PH.REFRACTORY_MS - (now - st.lastReleaseTs));
+  const refractoryRemainingMs = () =>
+    st.lastReleaseTs === 0 ? 0 : Math.max(0, FORM_PH.REFRACTORY_MS - (now - st.lastReleaseTs));
   // B'（Stage 1）: conf ゲート。CONF_GATE=0 の間は usable === raw（完全 pass-through）。
   // ゲート有効時は低confの現在フレームを null フレームと同じ扱いにする
   const usable = raw && formConfOk(raw) ? raw : null;
@@ -1088,9 +1179,17 @@ function stepFormPhase(st, raw, history, sens, now) {
     nb2DropBody <= FORM_PH.NB2_MAX_DROP &&
     maxV > FORM_PH.NB2_MAXV / s;
   const anchorEvidence = closeFrames.length >= 2 ? "close" : nullBridged2 ? "nb2" : null;
+  const adaptiveDecision = adaptiveReleaseCandidate(adaptive.evidence, usable, history, now);
+  const legacyMatched = anchorEvidence && !close && (velOk || nullBridged || nullBridged2);
+  const fireEvidence = adaptiveDecision.matched
+    ? "adaptive"
+    : legacyMatched
+      ? anchorEvidence
+      : null;
   const debug = {
     maxV,
     rise,
+    departDelta: adaptiveDecision.departDelta,
     nullFrames: winAll.length - win.length,
     conf: usable.conf,
     anchorNorm: usable.anchorNorm,
@@ -1098,22 +1197,28 @@ function stepFormPhase(st, raw, history, sens, now) {
     hasNullGap,
     refractoryRemaining: refractoryRemainingMs(),
   }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
-  if (
-    anchorEvidence &&
-    !close &&
-    now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS &&
-    (velOk || nullBridged || nullBridged2)
-  ) {
+  if (fireEvidence && (st.lastReleaseTs === 0 || now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS)) {
+    const adaptiveEvidence = st.adaptive.evidence;
     st.lastReleaseTs = now;
     st.cur = FORM_PHASES.RELEASE;
     st.anchorSince = 0;
     /* NB2 経由の発火（アンカー証拠が nb2 か、速度経路が nb2 のみ）には着地後静止確認用の
        参照位置を持たせる（drift-cancel 対象化）。通常経路の発火には付けない。
        出発確認（departCheck）は全ての発火に普遍適用する（2026-07-15） */
-    const viaNb2 = anchorEvidence === "nb2" || (!velOk && !nullBridged && nullBridged2);
+    const viaNb2 =
+      fireEvidence !== "adaptive" &&
+      (fireEvidence === "nb2" || (!velOk && !nullBridged && nullBridged2));
     st.pendingRelease = {
       ts: now,
       nb2Ref: viaNb2 ? { x: usable.dW.x, y: usable.dW.y } : null,
+      fireEvidence,
+      anchorEnter:
+        fireEvidence === "adaptive" &&
+        adaptiveEvidence &&
+        Number.isFinite(adaptiveEvidence.anchorEnter)
+          ? adaptiveEvidence.anchorEnter
+          : st.adaptive.anchorEnter,
+      releaseSpeed: fireEvidence === "adaptive" ? adaptiveDecision.releaseSpeed : null,
       departCheck: true,
       departFrames: 0,
       departSeen: 0,
@@ -1123,9 +1228,16 @@ function stepFormPhase(st, raw, history, sens, now) {
     const anchorStartTs = st.anchorStartTs; // クリア前の値を返す（呼び出し側が summarizeFormShot へ渡す）
     st.anchorStartTs = 0;
     /* 発火経路の計装（フィールド監査用）: evidence=アンカー証拠の種別 / vel=速度経路の種別 */
-    debug.fireEvidence = anchorEvidence;
-    debug.fireVel = velOk ? "vel" : nullBridged ? "nb" : "nb2";
-    return formPhaseResult(st, now, { phase: st.cur, released: true, anchorStartTs }, debug);
+    debug.fireEvidence = fireEvidence;
+    debug.fireVel = fireEvidence === "adaptive" ? null : velOk ? "vel" : nullBridged ? "nb" : "nb2";
+    const result = formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: true, anchorStartTs },
+      debug,
+    );
+    st.adaptive.evidence = null;
+    return result;
   }
   if (close || adaptive.holdQualified) {
     if (adaptive.holdQualified) {
