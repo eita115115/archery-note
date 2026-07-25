@@ -315,6 +315,60 @@ function adaptiveFieldProfile({ anchor, releaseNorm, releaseVel }) {
   return seq;
 }
 
+function adaptiveConfirmationFixture() {
+  const st = core.makeFormPhaseDetector();
+  const history = [];
+  const stats = {
+    grossReleases: 0,
+    cancellations: 0,
+    netReleases: 0,
+    cancelReasons: [],
+    cancelTimestamps: [],
+  };
+  let now = 0;
+  let fire = null;
+  const push = (raw, vel, elapsed) => {
+    now += elapsed;
+    history.push({ ts: now, m: raw, vel });
+    if (history.length > 150) history.shift();
+    const result = core.stepFormPhase(st, raw, history, 1, now);
+    if (result.released) {
+      stats.grossReleases++;
+      stats.netReleases++;
+      fire = { result, now, pending: { ...st.pendingRelease } };
+    }
+    if (result.canceled) {
+      stats.cancellations++;
+      stats.netReleases--;
+      stats.cancelReasons.push(result.debug && result.debug.cancelReason);
+      stats.cancelTimestamps.push(now);
+    }
+    return { result, now };
+  };
+  adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 })
+    .slice(0, 43)
+    .forEach(([raw, vel, elapsed]) => push(raw, vel, elapsed));
+  assert(fire, "adaptive confirmation fixture starts from a real fire");
+  assertEqual(fire.now, 860, "adaptive confirmation fixture fires at t=860");
+  assertEqual(
+    fire.result.debug.fireEvidence,
+    "adaptive",
+    "confirmation fixture uses adaptive fire",
+  );
+  assertClose(fire.pending.anchorEnter, 0.59, 1e-12, "fixture stores fire-time anchorEnter=.59");
+  assertEqual(stats.grossReleases, 1, "fixture tracks the shown release as +1");
+  return {
+    st,
+    history,
+    stats,
+    fire,
+    push,
+    get now() {
+      return now;
+    },
+  };
+}
+
 {
   const profileA = runSequence(
     adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
@@ -809,7 +863,13 @@ return adaptiveReleaseCandidate;`,
   );
   assertEqual(precedencePending.releaseSpeed, 6, "pending snapshots adaptive release speed");
   assertEqual(precedencePending.nb2Ref, null, "adaptive-selected fire never gets NB2 ref");
-  assertEqual(precedencePending.departCheck, true, "Task 3 retains departure confirmation");
+  assertEqual(
+    precedencePending.departCheck,
+    false,
+    "adaptive pending skips departure confirmation",
+  );
+  assertEqual(precedencePending.returnSince, 0, "adaptive pending starts with no return timer");
+  assertEqual(precedencePending.returnCount, 0, "adaptive pending starts with no return frames");
   assertEqual(precedence.st.adaptive.evidence, null, "committed fire clears adaptive evidence");
 
   const legacy = traceAdaptive([
@@ -841,6 +901,174 @@ return adaptiveReleaseCandidate;`,
     evidenceBefore,
     "blocked matching candidate does not clear adaptive evidence",
   );
+}
+
+/* ---------- Task 4: adaptive-only post-fire cancellation ---------- */
+
+{
+  const fixture = adaptiveConfirmationFixture();
+  for (let elapsed = 50; elapsed <= 400; elapsed += 50) {
+    const current = fixture.push(null, 0, 50);
+    assertEqual(current.result.canceled, undefined, `null at +${elapsed}ms does not cancel`);
+    assertEqual(
+      fixture.st.pendingRelease.returnSince,
+      0,
+      "null does not start adaptive return time",
+    );
+    assertEqual(
+      fixture.st.pendingRelease.returnCount,
+      0,
+      "null does not add an adaptive return frame",
+    );
+  }
+  const afterWindow = fixture.push(mkRaw(1.0, 90), 0.1, 1);
+  assertEqual(afterWindow.now, 1261, "first usable frame arrives at fire+401ms");
+  assertEqual(fixture.st.pendingRelease, null, "first usable frame after +400 clears pending");
+  assertEqual(fixture.stats.netReleases, 1, "all-null confirmation keeps the shown shot");
+  assertEqual(fixture.stats.cancellations, 0, "all-null confirmation records no cancellation");
+  assertEqual(
+    fixture.stats.cancelReasons.includes("no-depart"),
+    false,
+    "all-null adaptive confirmation never produces no-depart",
+  );
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  let fourth = null;
+  for (let i = 0; i < 4; i++) {
+    const current = fixture.push(mkRaw(0.47, 150), 0.1, 50);
+    if (i < 3)
+      assertEqual(current.result.canceled, undefined, `adaptive return frame ${i + 1} survives`);
+    else fourth = current;
+  }
+  assertEqual(fourth.result.canceled, true, "fourth return frame at a 150ms span cancels");
+  assertEqual(
+    fourth.result.debug.cancelReason,
+    "anchor-return",
+    "adaptive return reason is auditable",
+  );
+  assertEqual(fixture.stats.grossReleases, 1, "valid return retains one gross receipt");
+  assertEqual(fixture.stats.cancellations, 1, "valid return cancels exactly once");
+  assertEqual(fixture.stats.netReleases, 0, "valid return removes the shown shot");
+  assertEqual(
+    JSON.stringify(fixture.stats.cancelTimestamps),
+    JSON.stringify([1060]),
+    "valid return cancellation occurs at t=1060",
+  );
+  assertEqual(
+    fourth.result.anchorStartTs,
+    fourth.now,
+    "adaptive cancel restarts sticky anchor time",
+  );
+  assertEqual(fixture.st.anchorStartTs, fourth.now, "adaptive cancel stores sticky anchor time");
+  assertEqual(fixture.st.anchorSince, fourth.now, "adaptive cancel restarts anchorSince");
+  assertEqual(fixture.st.lastReleaseTs, fourth.now - 750, "adaptive cancel applies 250ms cooldown");
+  assertEqual(
+    fourth.result.debug.refractoryRemaining,
+    800,
+    "adaptive cancel debug captures refractory before cooldown rewrite",
+  );
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  fixture.st.adaptive.anchorSamples = Array.from({ length: 6 }, (_, i) => ({
+    ts: fixture.now - i,
+    norm: 0.2,
+  }));
+  fixture.st.adaptive.anchorEnter = core.adaptiveAnchorThreshold(
+    fixture.st.adaptive.anchorSamples.map((sample) => sample.norm),
+  );
+  assertEqual(
+    fixture.st.adaptive.anchorEnter,
+    0.35,
+    "live threshold can recompute to .35 after fire",
+  );
+  for (let i = 0; i < 4; i++) fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  assertEqual(
+    fixture.stats.cancelReasons[0],
+    "anchor-return",
+    "return uses stored .59 boundary instead of live .35",
+  );
+  assertEqual(fixture.stats.netReleases, 0, "stored fire-time boundary cancels the return");
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  const first = fixture.push(mkRaw(0.47, 150), 0.1, 401);
+  assertEqual(
+    first.result.canceled,
+    undefined,
+    "return beginning at +401ms is outside confirmation",
+  );
+  for (let i = 0; i < 3; i++) fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  assertEqual(fixture.stats.netReleases, 1, "late four-frame return keeps the shown shot");
+  assertEqual(fixture.stats.cancellations, 0, "late return never cancels");
+}
+{
+  const threeFrames = adaptiveConfirmationFixture();
+  [50, 75, 75].forEach((elapsed) => threeFrames.push(mkRaw(0.47, 150), 0.1, elapsed));
+  assertEqual(threeFrames.st.pendingRelease.returnCount, 3, "three return frames are counted");
+  assertEqual(threeFrames.stats.netReleases, 1, "three frames spanning 150ms do not cancel");
+
+  const shortSpan = adaptiveConfirmationFixture();
+  [50, 49, 50, 50].forEach((elapsed) => shortSpan.push(mkRaw(0.47, 150), 0.1, elapsed));
+  assertEqual(
+    shortSpan.st.pendingRelease.returnCount,
+    4,
+    "four short-span return frames are counted",
+  );
+  assertEqual(shortSpan.stats.netReleases, 1, "four frames spanning 149ms do not cancel");
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  const beforeNull = { ...fixture.st.pendingRelease };
+  fixture.push(null, 0, 50);
+  assertEqual(
+    fixture.st.pendingRelease.returnSince,
+    beforeNull.returnSince,
+    "null keeps the adaptive return timestamp",
+  );
+  assertEqual(
+    fixture.st.pendingRelease.returnCount,
+    beforeNull.returnCount,
+    "null keeps the adaptive return count",
+  );
+  fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  fixture.push(mkRaw(0.62, 150), 0.1, 50);
+  assertEqual(fixture.st.pendingRelease.returnSince, 0, "usable outside frame resets return time");
+  assertEqual(fixture.st.pendingRelease.returnCount, 0, "usable outside frame resets return count");
+  assertEqual(fixture.stats.cancellations, 0, "reset sequence does not cancel");
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  fixture.st.pendingRelease.departCheck = true;
+  fixture.st.pendingRelease.departSeen = 99;
+  fixture.st.pendingRelease.departFrames = 0;
+  fixture.st.pendingRelease.nb2Ref = { x: 1, y: 1 };
+  for (let i = 0; i < 21; i++) fixture.push(mkRaw(0.62, 140), 0.1, 20);
+  assertEqual(fixture.st.pendingRelease, null, "adaptive no-depart guard clears after timeout");
+  assertEqual(fixture.stats.netReleases, 1, "adaptive .62 observations keep the shown shot");
+  assertEqual(fixture.stats.cancellations, 0, "adaptive guard skips every legacy cancellation");
+  assertEqual(
+    fixture.stats.cancelReasons.includes("no-depart"),
+    false,
+    "adaptive guard never reports no-depart",
+  );
+}
+{
+  const equality = adaptiveConfirmationFixture();
+  for (let i = 0; i < 4; i++) equality.push(mkRaw(0.59, 150), 0.1, 50);
+  assertEqual(equality.stats.netReleases, 0, "stored anchorEnter equality counts as inside");
+
+  const nonFinite = adaptiveConfirmationFixture();
+  nonFinite.st.pendingRelease.anchorEnter = NaN;
+  for (let i = 0; i < 4; i++) nonFinite.push(mkRaw(0.2, 150), 0.1, 50);
+  assertEqual(
+    nonFinite.stats.netReleases,
+    1,
+    "non-finite stored boundary fails safe without cancel",
+  );
+  assertEqual(nonFinite.stats.cancellations, 0, "non-finite boundary cannot auto-cancel");
 }
 
 /* ---------- Task 2: session-local adaptive anchor evidence ---------- */
@@ -1018,6 +1246,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
   s.st.pendingRelease = {
     ts: s.st.adaptive.evidence.ts,
+    fireEvidence: "close",
     departCheck: false,
     departFrames: 0,
     departSeen: 0,
@@ -1041,6 +1270,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   s.st.adaptive.releaseSpeed = 6;
   s.st.pendingRelease = {
     ts: 180,
+    fireEvidence: "close",
     nb2Ref: null,
     departCheck: false,
     departFrames: 0,
@@ -1109,6 +1339,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   s.st.adaptive.releaseSpeed = 6;
   s.st.pendingRelease = {
     ts: 180,
+    fireEvidence: "close",
     nb2Ref: null,
     departCheck: false,
     departFrames: 0,
@@ -1214,6 +1445,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   nb2Drift.lastReleaseTs = 1000;
   nb2Drift.pendingRelease = {
     ts: 1000,
+    fireEvidence: "nb2",
     nb2Ref: { x: 0, y: 0 },
     departCheck: false,
     departFrames: 0,
@@ -1231,6 +1463,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   nb2Unobserved.lastReleaseTs = 1000;
   nb2Unobserved.pendingRelease = {
     ts: 1000,
+    fireEvidence: "nb2",
     nb2Ref: { x: 0, y: 0 },
     departCheck: true,
     departFrames: 0,
@@ -1255,6 +1488,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   noDepart.lastReleaseTs = 1000;
   noDepart.pendingRelease = {
     ts: 1000,
+    fireEvidence: "close",
     nb2Ref: null,
     departCheck: true,
     departFrames: 0,
@@ -1863,9 +2097,11 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     const r = core.stepFormPhase(st, m, hist, 1.0, t);
     if (r.released) releases++;
     if (r.canceled) canceled++;
+    return r;
   };
-  for (let i = 0; i < 60; i++) push(mkRaw(0.22, 150), 0.02);
-  push(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え
+  for (let i = 0; i < 60; i++) push(mkRaw(0.22, 125), 0.02);
+  const fire = push(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え
+  assertEqual(fire.debug.fireEvidence, "close", "legacy cancel fixture fires from close evidence");
   for (let i = 0; i < 10; i++) push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS以内にアンカー圏へ復帰
   assertEqual(releases, 1, "noise spike still registers as released");
   assertEqual(canceled, 1, "but is canceled once anchor returns within confirm window");
@@ -1913,9 +2149,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histC.push({ ts: tC, m, vel });
     return core.stepFormPhase(stC, m, histC, 1.0, tC);
   };
-  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 125), 0.02);
   const rRelC = pushC(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え(released)
   assertEqual(rRelC.released, true, "sanity: release fires before cancel scenario");
+  assertEqual(rRelC.debug.fireEvidence, "close", "debug cancel fixture uses legacy close evidence");
   assertDebugShape(rRelC.debug, "release-fire path");
   assertAdaptiveResultShape(rRelC, "fire path");
   /* アンカー復帰取消（Plan-B 2連続フレーム → 2026-07-15 時間ベース CANCEL_DIP_MS=100 へ更新。
@@ -1952,9 +2189,14 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histS.push({ ts: tS, m, vel });
     return core.stepFormPhase(stS, m, histS, 1.0, tS);
   };
-  for (let i = 0; i < 60; i++) pushS(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) pushS(mkRaw(0.22, 125), 0.02);
   const rRelS = pushS(mkRaw(0.6, 140), 10); // TH超えでreleased
   assertEqual(rRelS.released, true, "sanity: release fires before sticky/follow scenario");
+  assertEqual(
+    rRelS.debug.fireEvidence,
+    "close",
+    "sticky/follow fixture uses legacy close evidence",
+  );
   const rSticky = pushS(mkRaw(1.0, 90), 0.2); // アンカー圏外へ離脱、250ms未満のsticky lock
   assertEqual(rSticky.phase, "RELEASE", "sanity: sticky RELEASE lock active");
   assertDebugShape(rSticky.debug, "sticky RELEASE-lock path");
@@ -1997,9 +2239,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histA.push({ ts: tA, m, vel });
     return core.stepFormPhase(stA, m, histA, 1.0, tA);
   };
-  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02); // アンカー保持
+  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 125), 0.02); // アンカー保持
   const rFireA = pushA(mkRaw(0.6, 140), 10); // release fire
   assertEqual(rFireA.released, true, "cancel boundary (a): release fires");
+  assertEqual(rFireA.debug.fireEvidence, "close", "cancel boundary (a) uses legacy close evidence");
   for (let i = 0; i < 5; i++) {
     const r = pushA(mkRaw(0.3, 150), 0.05); // dip ラン 80ms（5フレーム、span=80ms<100）
     assertEqual(
@@ -2022,9 +2265,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histB.push({ ts: tB, m, vel });
     return core.stepFormPhase(stB, m, histB, 1.0, tB);
   };
-  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 125), 0.02);
   const rFireB = pushB(mkRaw(0.6, 140), 10);
   assertEqual(rFireB.released, true, "cancel boundary (b): release fires");
+  assertEqual(rFireB.debug.fireEvidence, "close", "cancel boundary (b) uses legacy close evidence");
   let canceledB = false;
   for (let i = 0; i < 6 && !canceledB; i++) {
     canceledB = pushB(mkRaw(0.28, 150), 0.05).canceled === true;
@@ -2043,8 +2287,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histA.push({ ts: tA, m, vel });
     return core.stepFormPhase(stA, m, histA, 1.0, tA);
   };
-  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02);
-  assertEqual(pushA(mkRaw(0.6, 140), 10).released, true, "depart (a): fires");
+  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 125), 0.02);
+  const fireA = pushA(mkRaw(0.6, 140), 10);
+  assertEqual(fireA.released, true, "depart (a): fires");
+  assertEqual(fireA.debug.fireEvidence, "close", "depart (a) uses legacy close evidence");
   let sawCancelA = false,
     cancelReasonA = null;
   for (let i = 0; i < 25; i++) {
@@ -2066,8 +2312,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histB.push({ ts: tB, m, vel });
     return core.stepFormPhase(stB, m, histB, 1.0, tB);
   };
-  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
-  assertEqual(pushB(mkRaw(0.6, 140), 10).released, true, "depart (b): fires");
+  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 125), 0.02);
+  const fireB = pushB(mkRaw(0.6, 140), 10);
+  assertEqual(fireB.released, true, "depart (b): fires");
+  assertEqual(fireB.debug.fireEvidence, "close", "depart (b) uses legacy close evidence");
   for (let i = 0; i < 25; i++) {
     assertEqual(
       pushB(mkRaw(1.0, 140), 0.05).canceled,
@@ -2084,8 +2332,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histC.push({ ts: tC, m, vel });
     return core.stepFormPhase(stC, m, histC, 1.0, tC);
   };
-  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 150), 0.02);
-  assertEqual(pushC(mkRaw(0.6, 140), 10).released, true, "depart (c): fires");
+  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 125), 0.02);
+  const fireC = pushC(mkRaw(0.6, 140), 10);
+  assertEqual(fireC.released, true, "depart (c): fires");
+  assertEqual(fireC.debug.fireEvidence, "close", "depart (c) uses legacy close evidence");
   for (let i = 0; i < 25; i++) {
     assertEqual(
       pushC(null, 0).canceled,
@@ -2373,9 +2623,14 @@ function makeStepper(dt) {
 {
   // canceled: 取消フレームで anchorStartTs=now（アンカー継続として仕切り直し）
   const s = makeStepper(20);
-  for (let i = 0; i < 60; i++) s.push(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) s.push(mkRaw(0.22, 125), 0.02);
   const rel = s.push(mkRaw(0.6, 140), 10); // 瞬間ノイズで released
   assertEqual(rel.r.released, true, "noise spike releases before cancel");
+  assertEqual(
+    rel.r.debug.fireEvidence,
+    "close",
+    "sticky cancel fixture uses legacy close evidence",
+  );
   assert(rel.r.anchorStartTs > 0, "released frame carries pre-clear anchorStartTs");
   // アンカー復帰取消は連続ディップのスパン >= CANCEL_DIP_MS(100ms) 要件（2026-07-15 時間ベース化）
   let cancel = null;

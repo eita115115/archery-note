@@ -530,3 +530,76 @@ Next task:
 
 - Task 4: apply the approved adaptive cancellation semantics while preserving
   the Task 3 relative receipt and pending snapshot contracts.
+
+### 2026-07-26 - Adaptive-only post-fire cancellation (Task 4)
+
+- Split pending confirmation by exact `fireEvidence === "adaptive"`.
+  Adaptive pending now snapshots its finite fire-time `anchorEnter` and
+  `releaseSpeed`, disables departure confirmation, and owns `returnSince` /
+  `returnCount`; missing or other evidence labels continue through the legacy
+  depart, NB2, and global cancellation state.
+- Added separate adaptive return constants of 150 ms and four usable frames
+  without changing legacy `CANCEL_DIP_MS=100` or `CANCEL_DIP_FRAMES=3`.
+  Adaptive cancellation requires both conditions and remains inclusive through
+  fire +400 ms.
+- Adaptive return compares `anchorNorm <= pendingRelease.anchorEnter`. The
+  stored `.59` fire boundary remains authoritative after the live learned
+  threshold is recomputed to `.35`; a non-finite stored boundary fails safe
+  without automatic cancellation.
+- Null and confidence-unusable frames preserve the existing early return and
+  neither add nor reset return evidence. A usable outside frame resets both
+  pending-local fields. All-null input through +400 ms defers cleanup until the
+  first usable +401 ms frame and keeps the shown shot.
+- Reused the existing `anchor-return` cancellation receipt, sticky
+  `anchorStartTs`, debug-before-cooldown calculation, and 250 ms cooldown
+  mutation. The nine decorated `stepFormPhase` result paths remain intact.
+- Reconciled intended legacy fixtures with adaptive-ineligible
+  `drawArm=125` pre-fire holds and explicit `close` / `nb2` evidence. Their
+  100 ms/three-frame anchor-return, NB2 drift/unobserved, no-depart, all-null,
+  cooldown, and sticky-anchor expectations remain unchanged.
+
+Validation:
+
+- RED: test-only `npm run check:form` exited 1 with
+  `adaptive pending skips departure confirmation: expected false, got true`.
+- Focused GREEN: `npm run check:form` exited 0 and ended with
+  `Form core checks OK`.
+- Exact adaptive boundary evidence: a real adaptive fire occurs at `t=860`
+  with stored `anchorEnter=.59`; usable return frames at +50/+100/+150/+200
+  cancel exactly once on the fourth frame (first-to-fourth span 150 ms), while
+  three frames spanning 150 ms and four frames spanning 149 ms both survive.
+- Confirmation-window evidence: all-null frames through +400 ms keep pending
+  return state at zero and the first usable +401 ms frame clears pending
+  without `no-depart`; a four-frame return beginning at +401 ms also survives.
+- Stored-boundary/reset evidence: return `.47` cancels against stored `.59`
+  after live `.35` recalibration; equality `.59` is inside; usable `.62`
+  resets both fields; null changes neither; a non-finite stored boundary does
+  not cancel.
+- Legacy evidence: explicit `close` fixtures continue to cancel after the
+  original 100 ms/three-frame conjunction, and explicit `nb2` fixtures retain
+  drift and unobserved cancellation. Adaptive `.62` frames below legacy
+  `DEPART_MIN=.65` run through timeout with net one and no `no-depart`.
+- `npm run check:globals`: pass
+  (`check-globals OK (14 files, 1023 unresolved refs all accounted for)`).
+- `npm run lint -- --quiet`: pass with no lint findings.
+- `npx prettier --check scripts/46-form-core.js tools/check-form-core.js
+docs/codex/codex-progress.md`: pass
+  (`All matched files use Prettier code style!`).
+- `git diff --check 3ae6700f5e71e30b8951e59ef8c3005a88421a76`: pass.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's-result, security, UI smoke, PWA, storage, and version
+  alignment.
+
+Risk notes:
+
+- This is synthetic core validation only; no phone/product acceptance is
+  claimed. Monotonic timestamps remain an existing runtime precondition.
+- The adaptive detector remains recall-first as recorded in Task 3. This task
+  changes only post-fire confirmation and does not alter view/UI, immediate
+  insertion, storage/schema, dependencies, Service Worker, version markers,
+  release, deployment, or persisted user data.
+
+Next task:
+
+- Task 5: validate the adaptive release and cancellation behavior against the
+  approved phone/field acceptance matrix before any product-completion claim.

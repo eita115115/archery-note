@@ -123,6 +123,8 @@ const FORM_PH = Object.freeze({
   DEPART_MIN: 0.65, // 出発とみなす anchorNorm 下限
   DEPART_FRAMES: 3, // 出発確認に要する連続フレーム数
   DEPART_OBSERVE_MIN: 5, // 未出発を有罪にできる最小観測フレーム数（約83ms@60fps）
+  ADAPTIVE_RETURN_MS: 150, // adaptive 発火後のアンカー復帰取消に要する最小スパン
+  ADAPTIVE_RETURN_FRAMES: 4, // adaptive 発火後のアンカー復帰取消に要する有効観測数
   /* 取消ディップの時間ベース化（2026-07-15 実射診断: 実射に対する誤取消 3-4件の対処）:
      Plan-B の2連続フレーム要件（60fpsで33ms）は、conf 0.5-0.7 の実フィールドの
      ランドマーク幻出ラン長に対して不足だった。真のレットダウン復帰はアンカーに
@@ -886,11 +888,13 @@ function stepFormPhase(st, raw, history, sens, now) {
     );
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
-    /* 出発確認（2026-07-15）: 低来歴発火（発火時点で要約窓が空＝アンカー登録が遅い/無い）は、
+    const adaptivePending = st.pendingRelease.fireEvidence === "adaptive";
+    let anchorReturn = false;
+    /* legacy 出発確認（2026-07-15）: 低来歴発火（発火時点で要約窓が空＝アンカー登録が遅い/無い）は、
        確定猶予内に手が本当に離れた（anchorNorm >= DEPART_MIN が DEPART_FRAMES 連続）ことを
        確認する。確認できたら departCheck を解除。観測できないまま猶予が切れたら下の
-       猶予終了ブロックで取消す（スプリアス発火＝手がアンカー圏に留まる、の抑制）。 */
-    if (st.pendingRelease.departCheck) {
+       猶予終了ブロックで取消す（adaptive 発火は肯定的な離脱を発火前に確認済みなので対象外）。 */
+    if (!adaptivePending && st.pendingRelease.departCheck) {
       st.pendingRelease.departSeen = (st.pendingRelease.departSeen || 0) + 1; // 観測できた有効フレーム数
       if (usable.anchorNorm >= FORM_PH.DEPART_MIN) {
         st.pendingRelease.departFrames = (st.pendingRelease.departFrames || 0) + 1;
@@ -905,7 +909,7 @@ function stepFormPhase(st, raw, history, sens, now) {
        取消す（レットダウンが遮蔽内に隠れて NB2 の着地ゲートをすり抜けた場合、手は弦と
        共に動き続けるため必ずここに入る。真のリリースはフォロースルーで静止するため
        入らない）。単発 blur artifact 耐性は2連続フレーム要件で確保 */
-    if (st.pendingRelease.nb2Ref) {
+    if (!adaptivePending && st.pendingRelease.nb2Ref) {
       const drift = formDist(usable.dW, st.pendingRelease.nb2Ref) / usable.bodyScale;
       if (drift > FORM_PH.NB2_SETTLE_MAX) {
         /* ドリフトも時間ベース（CANCEL_DIP_MS スパン）: 2フレーム要件はランドマークの
@@ -948,7 +952,23 @@ function stepFormPhase(st, raw, history, sens, now) {
         st.nb2DriftSince = 0;
       }
     }
-    if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
+    if (adaptivePending) {
+      /* adaptive 発火は fire-time の learned 境界への復帰だけを見る。legacy の depart/NB2 と
+         global pendingCancel* は使わず、pending-local な時間と有効観測数の積で確認する。 */
+      const returnBoundary = st.pendingRelease.anchorEnter;
+      if (Number.isFinite(returnBoundary) && usable.anchorNorm <= returnBoundary) {
+        if (!Number.isFinite(st.pendingRelease.returnCount) || st.pendingRelease.returnCount < 0)
+          st.pendingRelease.returnCount = 0;
+        if (st.pendingRelease.returnCount === 0) st.pendingRelease.returnSince = now;
+        st.pendingRelease.returnCount += 1;
+        anchorReturn =
+          now - st.pendingRelease.returnSince >= FORM_PH.ADAPTIVE_RETURN_MS &&
+          st.pendingRelease.returnCount >= FORM_PH.ADAPTIVE_RETURN_FRAMES;
+      } else if (Number.isFinite(returnBoundary)) {
+        st.pendingRelease.returnSince = 0;
+        st.pendingRelease.returnCount = 0;
+      }
+    } else if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
       /* アンカー復帰取消（Plan-B 2026-07-13 → 時間ベース化 2026-07-15）: 実フィールド
          （conf 0.5-0.7）のランドマーク幻出は2連続フレーム（60fpsで33ms）を超えるラン長を
          持ち、実射への誤取消が観測された（2026-07-15 診断: 4セッションで3-4件）。真の
@@ -959,53 +979,55 @@ function stepFormPhase(st, raw, history, sens, now) {
       st.pendingCancelCount = (st.pendingCancelCount || 0) + 1;
       /* スパン(CANCEL_DIP_MS)に加え観測数(CANCEL_DIP_FRAMES)も要求: null ギャップを
          またいで孤立した2フレームのディップがスパンだけを満たして誤取消するのを防ぐ */
-      if (
+      anchorReturn =
         now - st.pendingCancelSince >= FORM_PH.CANCEL_DIP_MS &&
-        st.pendingCancelCount >= FORM_PH.CANCEL_DIP_FRAMES
-      ) {
-        // 計装: st.lastReleaseTs を書き換える前に refractoryRemainingMs() を評価する（取消直前の値を残す）
-        const debug = {
-          maxV: null,
-          rise: null,
-          nullFrames: null,
-          conf: usable.conf,
-          anchorNorm: usable.anchorNorm,
-          closeFrames: null,
-          hasNullGap: null,
-          refractoryRemaining: refractoryRemainingMs(),
-          cancelReason: "anchor-return",
-        };
-        st.pendingRelease = null;
-        st.pendingCancelSince = 0;
-        st.pendingCancelCount = 0;
-        st.nb2DriftSince = 0;
-        st.lastReleaseTs = now - (FORM_PH.REFRACTORY_MS - FORM_PH.CANCEL_COOLDOWN_MS); // クールダウン: 残滓再発火の抑止
-        st.anchorSince = now;
-        st.cur = FORM_PHASES.ANCHORING;
-        st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
-        return formPhaseResult(
-          st,
-          now,
-          {
-            phase: st.cur,
-            released: false,
-            canceled: true,
-            anchorStartTs: st.anchorStartTs,
-          },
-          debug,
-        );
-      }
+        st.pendingCancelCount >= FORM_PH.CANCEL_DIP_FRAMES;
       // スパン蓄積中: まだ取消しない。pendingRelease を維持したまま次のチェック（sticky lock 等）へ進む
     } else {
       st.pendingCancelSince = 0; // アンカー圏外に戻った = dip 解消。連続要件のためリセット
       st.pendingCancelCount = 0;
     }
+    if (anchorReturn) {
+      // 計装: st.lastReleaseTs を書き換える前に refractoryRemainingMs() を評価する（取消直前の値を残す）
+      const debug = {
+        maxV: null,
+        rise: null,
+        nullFrames: null,
+        conf: usable.conf,
+        anchorNorm: usable.anchorNorm,
+        closeFrames: null,
+        hasNullGap: null,
+        refractoryRemaining: refractoryRemainingMs(),
+        cancelReason: "anchor-return",
+      };
+      st.pendingRelease = null;
+      st.pendingCancelSince = 0;
+      st.pendingCancelCount = 0;
+      st.nb2DriftSince = 0;
+      st.lastReleaseTs = now - (FORM_PH.REFRACTORY_MS - FORM_PH.CANCEL_COOLDOWN_MS); // クールダウン: 残滓再発火の抑止
+      st.anchorSince = now;
+      st.cur = FORM_PHASES.ANCHORING;
+      st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
+      return formPhaseResult(
+        st,
+        now,
+        {
+          phase: st.cur,
+          released: false,
+          canceled: true,
+          anchorStartTs: st.anchorStartTs,
+        },
+        debug,
+      );
+    }
   } else if (st.pendingRelease) {
     const pending = st.pendingRelease;
+    const adaptivePending = pending.fireEvidence === "adaptive";
     st.pendingRelease = null; // 猶予終了
     st.pendingCancelSince = 0;
     st.nb2DriftSince = 0;
     if (
+      !adaptivePending &&
       pending.nb2Ref &&
       pending.departCheck &&
       (pending.departSeen || 0) < FORM_PH.DEPART_OBSERVE_MIN
@@ -1042,7 +1064,11 @@ function stepFormPhase(st, raw, history, sens, now) {
         debug,
       );
     }
-    if (pending.departCheck && (pending.departSeen || 0) >= FORM_PH.DEPART_OBSERVE_MIN) {
+    if (
+      !adaptivePending &&
+      pending.departCheck &&
+      (pending.departSeen || 0) >= FORM_PH.DEPART_OBSERVE_MIN
+    ) {
       /* 出発未確認のまま猶予終了（十分な有効フレームを観測できていた）→ スプリアス発火として
          取消。手がアンカー圏/緩ゾーンに留まったままの発火＝ドロー/保持中の誤発火。
          観測が DEPART_OBSERVE_MIN 未満（姿勢ロス優勢）なら無罪推定でショットを残す。
@@ -1206,27 +1232,41 @@ function stepFormPhase(st, raw, history, sens, now) {
     st.lastReleaseTs = now;
     st.cur = FORM_PHASES.RELEASE;
     st.anchorSince = 0;
-    /* NB2 経由の発火（アンカー証拠が nb2 か、速度経路が nb2 のみ）には着地後静止確認用の
-       参照位置を持たせる（drift-cancel 対象化）。通常経路の発火には付けない。
-       出発確認（departCheck）は全ての発火に普遍適用する（2026-07-15） */
+    /* legacy NB2 経由の発火（アンカー証拠が nb2 か、速度経路が nb2 のみ）には着地後静止確認用の
+       参照位置を持たせる（drift-cancel 対象化）。通常経路の発火には付けない。legacy 発火は
+       departCheck を維持し、肯定的な離脱を発火前に確認済みの adaptive 発火は別 pending を使う。 */
     const viaNb2 =
       fireEvidence !== "adaptive" &&
       (fireEvidence === "nb2" || (!velOk && !nullBridged && nullBridged2));
-    st.pendingRelease = {
-      ts: now,
-      nb2Ref: viaNb2 ? { x: usable.dW.x, y: usable.dW.y } : null,
-      fireEvidence,
-      anchorEnter:
-        fireEvidence === "adaptive" &&
-        adaptiveEvidence &&
-        Number.isFinite(adaptiveEvidence.anchorEnter)
+    if (fireEvidence === "adaptive") {
+      const anchorEnter =
+        adaptiveEvidence && Number.isFinite(adaptiveEvidence.anchorEnter)
           ? adaptiveEvidence.anchorEnter
-          : st.adaptive.anchorEnter,
-      releaseSpeed: fireEvidence === "adaptive" ? adaptiveDecision.releaseSpeed : null,
-      departCheck: true,
-      departFrames: 0,
-      departSeen: 0,
-    };
+          : Number.isFinite(st.adaptive.anchorEnter)
+            ? st.adaptive.anchorEnter
+            : FORM_PH.ADAPTIVE_ANCHOR_MIN;
+      st.pendingRelease = {
+        ts: now,
+        fireEvidence: "adaptive",
+        anchorEnter,
+        releaseSpeed: adaptiveDecision.releaseSpeed,
+        departCheck: false,
+        returnSince: 0,
+        returnCount: 0,
+        nb2Ref: null,
+      };
+    } else {
+      st.pendingRelease = {
+        ts: now,
+        nb2Ref: viaNb2 ? { x: usable.dW.x, y: usable.dW.y } : null,
+        fireEvidence,
+        anchorEnter: st.adaptive.anchorEnter,
+        releaseSpeed: null,
+        departCheck: true,
+        departFrames: 0,
+        departSeen: 0,
+      };
+    }
     st.nb2DriftSince = 0;
     st.pendingCancelSince = 0;
     const anchorStartTs = st.anchorStartTs; // クリア前の値を返す（呼び出し側が summarizeFormShot へ渡す）
