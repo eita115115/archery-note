@@ -2818,20 +2818,20 @@ function anchorHistory(releaseTs, drift) {
 {
   const capture = boundedSourceSection(
     viewScript,
-    "function openFormCapture() {",
-    "function openFormReplay() {",
+    "function openFormCapture(){",
+    "function openFormReplay(){",
     "openFormCapture section",
   );
   const replay = boundedSourceSection(
     viewScript,
-    "function startFormReplay(videoUrl) {",
-    '      hud.textContent = "射形解析を開始できませんでした: " + ((e && e.message) || e);',
+    "function startFormReplay(videoUrl){",
+    '    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);',
     "startFormReplay section",
   );
   const reset = boundedSourceSection(
     capture,
-    "function resetCaptureGeometry() {",
-    "function loop() {",
+    "function resetCaptureGeometry(){",
+    "function loop(){",
     "resetCaptureGeometry section",
   );
   assertEqual(
@@ -2853,20 +2853,20 @@ function anchorHistory(releaseTs, drift) {
 
   const swap = boundedSourceSection(
     capture,
-    'ovl.querySelector("#fcSwap").onclick = async () => {',
-    'ovl.querySelector("#fcHand").onclick = (e) => {',
+    'ovl.querySelector("#fcSwap").onclick=async()=>{',
+    'ovl.querySelector("#fcHand").onclick=e=>{',
     "#fcSwap handler",
   );
   const hand = boundedSourceSection(
     capture,
-    'ovl.querySelector("#fcHand").onclick = (e) => {',
-    'ovl.querySelector("#fcCrop").onclick = (e) => {',
+    'ovl.querySelector("#fcHand").onclick=e=>{',
+    'ovl.querySelector("#fcCrop").onclick=e=>{',
     "#fcHand handler",
   );
   const crop = boundedSourceSection(
     capture,
-    'ovl.querySelector("#fcCrop").onclick = (e) => {',
-    'ovl.querySelector("#fcRec").onclick = (e) => {',
+    'ovl.querySelector("#fcCrop").onclick=e=>{',
+    'ovl.querySelector("#fcRec").onclick=e=>{',
     "#fcCrop handler",
   );
   [swap, hand, crop].forEach((handler, index) =>
@@ -2875,11 +2875,12 @@ function anchorHistory(releaseTs, drift) {
       ["camera swap", "live handedness", "crop toggle"][index] + " resets capture geometry",
     ),
   );
-  const swapGuard = swap.indexOf("if (cameraSwapInProgress) return;");
-  const swapLock = swap.indexOf("cameraSwapInProgress = true;");
-  const swapFacing = swap.indexOf("facing =");
-  const swapReset = swap.indexOf("resetCaptureGeometry();");
-  const swapAwait = swap.indexOf("await ");
+  const swapCompact = compactSource(swap);
+  const swapGuard = swapCompact.indexOf("if(cameraSwapInProgress)return;");
+  const swapLock = swapCompact.indexOf("cameraSwapInProgress=true;");
+  const swapFacing = swapCompact.indexOf("facing=");
+  const swapReset = swapCompact.indexOf("resetCaptureGeometry();");
+  const swapAwait = swapCompact.indexOf("await");
   assert(
     swapGuard >= 0 &&
       swapLock > swapGuard &&
@@ -2891,8 +2892,8 @@ function anchorHistory(releaseTs, drift) {
   assert(
     capture.includes("cameraSwapInProgress") &&
       /if\s*\(\s*landmarker\s*&&\s*!cameraSwapInProgress/.test(capture) &&
-      swap.includes("finally {") &&
-      swap.indexOf("cameraSwapInProgress = false;") > swap.indexOf("finally {"),
+      swapCompact.includes("finally{") &&
+      swapCompact.indexOf("cameraSwapInProgress=false;") > swapCompact.indexOf("finally{"),
     "capture loop skips replacement frames and unlocks camera swap after failure",
   );
 
@@ -2924,8 +2925,8 @@ function anchorHistory(releaseTs, drift) {
   );
   const replayHand = boundedSourceSection(
     replay,
-    'ovl.querySelector("#frHand").onclick = (e) => {',
-    "  loadFormPose()",
+    'ovl.querySelector("#frHand").onclick=e=>{',
+    "loadFormPose().then(async lm=>{",
     "replay handedness handler",
   );
   const replayHandCompact = compactSource(replayHand);
