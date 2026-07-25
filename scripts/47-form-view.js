@@ -313,10 +313,18 @@ function openFormCapture(){
     closeModal(ovl);
   }
   async function startCamera(){
-    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false});
-    video.srcObject=stream;
-    await video.play();
-    canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+    let nextStream=null;
+    try{
+      nextStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:720}},audio:false});
+      video.srcObject=nextStream;
+      await video.play();
+      canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+      stream=nextStream;
+    }catch(e){
+      if(nextStream) nextStream.getTracks().forEach(t=>t.stop());
+      if(video.srcObject===nextStream) video.srcObject=null;
+      throw e;
+    }
   }
   function refreshShotsHint(){
     const saveBtn=ovl.querySelector("#fcSave");
@@ -403,7 +411,7 @@ function openFormCapture(){
   }
   function loop(){
     if(!running) return;
-    if(landmarker && !cameraSwapInProgress && video.readyState>=2){
+    if(landmarker && !cameraSwapInProgress && stream && stream.getVideoTracks().some(t=>t.readyState==="live") && video.srcObject===stream && video.readyState>=2){
       const now=performance.now();
       let res;
       if(cropActive&&video.videoWidth){
@@ -589,10 +597,14 @@ function openFormCapture(){
   ovl.querySelector("#fcSwap").onclick=async()=>{
     if(cameraSwapInProgress) return;
     cameraSwapInProgress=true;
+    const previousFacing=facing;
     facing=facing==="environment"?"user":"environment";
     resetCaptureGeometry();
-    try{ if(stream) stream.getTracks().forEach(t=>t.stop()); await startCamera(); }
-    catch(e){ hud.textContent="カメラを切り替えられませんでした: "+e.message; }
+    const oldStream=stream;
+    stream=null;
+    video.srcObject=null;
+    try{ if(oldStream) oldStream.getTracks().forEach(t=>t.stop()); await startCamera(); }
+    catch(e){ facing=previousFacing; hud.textContent="カメラを切り替えられませんでした: "+e.message; }
     finally{ cameraSwapInProgress=false; }
   };
   ovl.querySelector("#fcHand").onclick=e=>{

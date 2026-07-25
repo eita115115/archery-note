@@ -2834,6 +2834,24 @@ function anchorHistory(releaseTs, drift) {
     "function loop(){",
     "resetCaptureGeometry section",
   );
+  const startCamera = boundedSourceSection(
+    capture,
+    "async function startCamera(){",
+    "function refreshShotsHint(){",
+    "startCamera section",
+  );
+  const startCameraCompact = compactSource(startCamera);
+  assert(
+    startCameraCompact.includes("letnextStream=null;") &&
+      startCameraCompact.includes("nextStream=awaitnavigator.mediaDevices.getUserMedia(") &&
+      startCameraCompact.includes("video.srcObject=nextStream;") &&
+      startCameraCompact.includes("awaitvideo.play();") &&
+      startCameraCompact.includes("stream=nextStream;") &&
+      startCameraCompact.includes("if(nextStream)nextStream.getTracks().forEach(t=>t.stop());") &&
+      startCameraCompact.includes("if(video.srcObject===nextStream)video.srcObject=null;") &&
+      startCameraCompact.includes("throwe;"),
+    "camera startup cleans a newly acquired stream when startup or play fails",
+  );
   assertEqual(
     compactSource(reset),
     compactSource(`function resetCaptureGeometry() {
@@ -2895,6 +2913,33 @@ function anchorHistory(releaseTs, drift) {
       swapCompact.includes("finally{") &&
       swapCompact.indexOf("cameraSwapInProgress=false;") > swapCompact.indexOf("finally{"),
     "capture loop skips replacement frames and unlocks camera swap after failure",
+  );
+  const previousFacing = swapCompact.indexOf("constpreviousFacing=facing;");
+  const oldStream = swapCompact.indexOf("constoldStream=stream;");
+  const invalidateStream = swapCompact.indexOf("stream=null;");
+  const detachVideo = swapCompact.indexOf("video.srcObject=null;");
+  const stopOldStream = swapCompact.indexOf(
+    "if(oldStream)oldStream.getTracks().forEach(t=>t.stop());",
+  );
+  const restoreFacing = swapCompact.indexOf("facing=previousFacing;");
+  const catchBlock = swapCompact.indexOf("catch(e){");
+  assert(
+    previousFacing >= 0 &&
+      previousFacing < swapFacing &&
+      oldStream > swapReset &&
+      invalidateStream > oldStream &&
+      detachVideo > invalidateStream &&
+      stopOldStream > detachVideo &&
+      stopOldStream < swapAwait &&
+      catchBlock > swapAwait &&
+      restoreFacing > catchBlock,
+    "failed camera swap restores facing after invalidating and stopping the old stream",
+  );
+  assert(
+    compactSource(capture).includes(
+      'if(landmarker&&!cameraSwapInProgress&&stream&&stream.getVideoTracks().some(t=>t.readyState==="live")&&video.srcObject===stream&&video.readyState>=2)',
+    ),
+    "capture loop requires the attached stream to have a live video track",
   );
 
   assert(

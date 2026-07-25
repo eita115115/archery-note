@@ -686,9 +686,14 @@ Validation:
 - `npm run check:globals`: pass
   (`check-globals OK (14 files, 1025 unresolved refs all accounted for)`).
 - `npm run lint -- --quiet`: pass with no lint findings.
-- `npx prettier --write scripts/46-form-core.js scripts/47-form-view.js
-tools/check-form-core.js docs/codex/codex-progress.md`: pass (all four files
-  formatted).
+- The first implementation commit ran `npx prettier --write` on all four Task
+  5 files. Scope remediation then restored `scripts/47-form-view.js` to its
+  compact baseline style and reapplied only the Task 5 semantic changes.
+- Final cumulative formatting state: `npx prettier --check
+scripts/46-form-core.js tools/check-form-core.js
+docs/codex/codex-progress.md` passes; the explicit
+  `npx prettier --check scripts/47-form-view.js` emits its existing baseline
+  warning and the view is intentionally not whole-file reformatted.
 - `git diff --check --cached`: pass after staging only the four Task 5 files.
 
 Risk notes:
