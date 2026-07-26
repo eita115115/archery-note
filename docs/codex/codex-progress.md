@@ -756,9 +756,11 @@ Next task:
 ### 2026-07-26 - Task 6 local-beta gate checkpoint (incomplete)
 
 - Runtime-equivalent adaptive detector checkpoint: `1973b4c75ff61dc0632e0b7f9158a286ecf861fc`.
-  Current documentation checkpoint: `608c43c02bb8902ab87e5fbcd1b69a14cf0a1375`
-  on `feat/adaptive-release-detection`. The intervening privacy redaction
-  changes only `docs/superpowers/plans/2026-07-15-adaptive-release-detection.md`.
+  Pre-Task6 documentation baseline: `608c43c02bb8902ab87e5fbcd1b69a14cf0a1375`
+  on `feat/adaptive-release-detection`. The initial Task6 progress-entry commit
+  is `55d9745e59b09f70c0bac132a89a1cce6bbfc305`; it adds ledger documentation
+  only. The intervening privacy redaction changes only
+  `docs/superpowers/plans/2026-07-15-adaptive-release-detection.md`.
 - At the runtime-equivalent checkpoint, `npm run check:form` exited 0 with
   `Form core checks OK`. Its unconditional synthetic receipts were A/B/C =
   `1/1/1`, each labeled `adaptive` with finite genuine-fire adaptive
@@ -781,24 +783,30 @@ Next task:
 - `npm run golden:replay` returned exit 0 after all five public-stock videos,
   but this is not acceptance: the runner treats `ok` and `ok-no-shots` as
   success without enforcing baseline-count equivalence. Exact results were
-  `pixabay-43254-archery-woman: status=ok shots=2`,
-  `pixabay-40769-archer: status=ok shots=1`,
-  `mixkit-34710-female-archer: status=ok-no-shots shots=0`,
-  `mixkit-48725-closeup-firing: status=ok shots=1`, and
-  `pixabay-150869-arrows-target: status=ok-no-shots shots=0`. Expected /
+  `pixabay-43254-archery-woman: status=ok shots=2 wall=124.7s errors=8c/0p`,
+  `pixabay-40769-archer: status=ok shots=1 wall=47.0s errors=4c/0p`,
+  `mixkit-34710-female-archer: status=ok-no-shots shots=0 wall=45.0s errors=4c/0p`,
+  `mixkit-48725-closeup-firing: status=ok shots=1 wall=28.4s errors=4c/0p`, and
+  `pixabay-150869-arrows-target: status=ok-no-shots shots=0 wall=96.3s errors=4c/0p`;
+  `COMMAND_EXIT=0`. Expected /
   committed baseline / current counts are respectively: 43254 `1/1/2`, 40769
   `0/0/1`, 34710 `0/0/0`, 48725 `0/2/1`, and 150869 `0/0/0`. Thus three
   expected-count mismatches remain; 43254 has one documented real release but
   counted two, and the committed 48725 baseline conflicts with `sources.md`.
 - Cumulative branch verification at the runtime-equivalent checkpoint found
-  `git diff --check main..HEAD` clean. The 19-commit Tasks 1--5 release-candidate
+  `git diff --check main..HEAD` clean. At the pre-Task6 baseline
+  `608c43c0`, `git diff --stat main..HEAD` was exactly 7 files changed,
+  3512 insertions(+), 142 deletions(-); the following Task6 documentation
+  commit adds only this ledger entry. The 19-commit Tasks 1--5 release-candidate
   history is cumulative from local `main` / merge-base
   `3b4f3b22b562899ffef28bb6d64d7821eced4dde`, not Task-6-only. No package or
   lockfile, dependency, APP_VER storage file, `version.json`, `sw.js`, manifest,
   release/CHANGELOG, deployment, Android/Capacitor, binary, video, raw landmark
-  stream, private backup content, or secret is in scope. A reachable-history
-  identifying private-backup pathname was found in the plan and removed by
-  `608c43c0`; it must remain absent from reachable history going forward.
+  stream, private backup content, or secret is in scope. The identifying
+  private-backup pathname is absent from the current tree but remains in
+  reachable pre-redaction commit `4a0ff1ec`. This branch must not be pushed;
+  final publication requires a new sanitized branch/tree from `main` or a
+  separately approved history rewrite.
 
 Field handoff gaps:
 
