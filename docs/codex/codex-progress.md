@@ -752,3 +752,87 @@ Next task:
 
 - Task 6: perform mobile-sized and field acceptance of adaptive live capture
   and replay behavior.
+
+### 2026-07-26 - Task 6 local-beta gate checkpoint (incomplete)
+
+- Runtime-equivalent adaptive detector checkpoint: `1973b4c75ff61dc0632e0b7f9158a286ecf861fc`.
+  Current documentation checkpoint: `608c43c02bb8902ab87e5fbcd1b69a14cf0a1375`
+  on `feat/adaptive-release-detection`. The intervening privacy redaction
+  changes only `docs/superpowers/plans/2026-07-15-adaptive-release-detection.md`.
+- At the runtime-equivalent checkpoint, `npm run check:form` exited 0 with
+  `Form core checks OK`. Its unconditional synthetic receipts were A/B/C =
+  `1/1/1`, each labeled `adaptive` with finite genuine-fire adaptive
+  diagnostics, and the synthetic six-shot end was `6` (six adaptive labels).
+  The deliberate recall tradeoff remains: a 100 ms linear let-down can produce
+  one removable adaptive receipt at both listed frame intervals; every listed
+  150--2000 ms linear let-down remains at zero.
+- Recorded repository gate results at `1973b4c7`: `npm run check:app` exited 0
+  (`Archery Note checks OK (v84)`); `npm run check:globals` exited 0 (14 files,
+  1025 accounted references); `npm run lint` exited 0 with no findings;
+  `npm run format:check` exited 0; and `npm run check:all` exited 0, covering
+  app, globals, analysis, form, gamification, today's result, security (38
+  checks), UI smoke, PWA, storage, and version gates.
+- `npm run test:e2e` exited 0: 41 passed, 0 failed, 0 skipped in 34.3 seconds
+  with five workers. Its configured scope is headless Chromium at 390 x 844
+  with retries 0 (no WebKit/iPhone emulation); it covers the general mobile
+  shell and form-tracking settings chip only, not `getUserMedia`, capture,
+  replay, or the required 18-shot matrix. Fresh 390 px and 360 px smoke images
+  were inspected without onboarding clipping or overlap.
+- `npm run golden:replay` returned exit 0 after all five public-stock videos,
+  but this is not acceptance: the runner treats `ok` and `ok-no-shots` as
+  success without enforcing baseline-count equivalence. Exact results were
+  `pixabay-43254-archery-woman: status=ok shots=2`,
+  `pixabay-40769-archer: status=ok shots=1`,
+  `mixkit-34710-female-archer: status=ok-no-shots shots=0`,
+  `mixkit-48725-closeup-firing: status=ok shots=1`, and
+  `pixabay-150869-arrows-target: status=ok-no-shots shots=0`. Expected /
+  committed baseline / current counts are respectively: 43254 `1/1/2`, 40769
+  `0/0/1`, 34710 `0/0/0`, 48725 `0/2/1`, and 150869 `0/0/0`. Thus three
+  expected-count mismatches remain; 43254 has one documented real release but
+  counted two, and the committed 48725 baseline conflicts with `sources.md`.
+- Cumulative branch verification at the runtime-equivalent checkpoint found
+  `git diff --check main..HEAD` clean. The 19-commit Tasks 1--5 release-candidate
+  history is cumulative from local `main` / merge-base
+  `3b4f3b22b562899ffef28bb6d64d7821eced4dde`, not Task-6-only. No package or
+  lockfile, dependency, APP_VER storage file, `version.json`, `sw.js`, manifest,
+  release/CHANGELOG, deployment, Android/Capacitor, binary, video, raw landmark
+  stream, private backup content, or secret is in scope. A reachable-history
+  identifying private-backup pathname was found in the plan and removed by
+  `608c43c0`; it must remain absent from reachable history going forward.
+
+Field handoff gaps:
+
+- `tools/serve-iphone.ps1` is LAN HTTP, so an iPhone using the PC LAN address
+  cannot use live `getUserMedia()` as a secure context.
+- The existing full backup download serializes the full database; it is not a
+  privacy-minimized diagnostics-only export.
+- Persisted diagnostics cannot associate every kept shot with a complete
+  adaptive-fire snapshot: core fire-time debug has the values, but persisted
+  features omit the full snapshot, `releaseFires.framesBefore` excludes the
+  current fire frame, kept/manual-deleted identities are not mapped, and replay
+  does not populate `shot.diag`.
+
+Required human 18-shot matrix (not run):
+
+- true side view: 6/6 real shots;
+- slightly oblique view: 6/6 real shots;
+- normal range placement chosen without detector optimization: 6/6 real shots;
+- no more than one removable false positive per end;
+- no shown true shot is automatically removed; and
+- every counted shot has complete adaptive-fire diagnostics: `anchorFloor`,
+  `anchorEnter`, `releaseSpeed`, `evidenceAgeMs`, `evidenceStrength`,
+  `departDelta`, and `fireEvidence`.
+
+Risk notes:
+
+- Task 6 is incomplete. Automated repository and configured Chromium gates do
+  not establish phone acceptance, field acceptance, or production readiness.
+- The current branch must not be pushed. Do not make version, Service Worker,
+  dependency, storage, release, or deployment changes in this checkpoint.
+
+Next task:
+
+- Diagnose the golden corpus, reconcile authoritative expected counts, and add
+  an enforcing count-regression gate so `npm run golden:replay` fails on an
+  unreviewed mismatch before changing field thresholds or preparing the
+  diagnostics export.
