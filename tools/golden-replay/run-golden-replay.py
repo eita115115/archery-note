@@ -26,6 +26,7 @@
 """
 
 import argparse
+import hashlib
 import http.server
 import json
 import mimetypes
@@ -39,6 +40,15 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
+from golden_expectations import (
+    GoldenConfigurationError,
+    expand_video_arguments,
+    prepare_case,
+    validate_manifest,
+    validate_runtime_profile,
+    verification_outcome,
+)
+
 GOLDEN_PREFIX = "/__golden__/"
 
 # MediaPipe WASM 読み込み + モデル初期化の猶予
@@ -46,6 +56,14 @@ LANDMARKER_LOAD_TIMEOUT_MS = 120_000
 # 解析は実時間再生なので 動画長 * 係数 + 固定猶予 で待つ
 ANALYSIS_TIMEOUT_FACTOR = 3.0
 ANALYSIS_TIMEOUT_BASE_MS = 60_000
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def free_port() -> int:
@@ -434,9 +452,25 @@ def main() -> int:
                     help="再生速度（既定0.25。遅いほど動画時間あたりの推論サンプルが増える）")
     ap.add_argument("--delegate", choices=["CPU", "GPU"], default="CPU",
                     help="MediaPipe デリゲート（既定CPU。headless では GPU=SwiftShader が極端に遅い）")
+    ap.add_argument(
+        "--record-only",
+        action="store_true",
+        help="期待値照合を省略して観測結果だけを記録（検証は SKIPPED と表示）",
+    )
     ap.add_argument("--headed", action="store_true", help="ブラウザを表示して実行")
     ap.add_argument("--port", type=int, default=0, help="ローカルサーブのポート（0=自動）")
     args = ap.parse_args()
+
+    runtime_profile = {
+        "handedness": args.handedness,
+        "delegate": args.delegate,
+        "playbackRate": args.playback_rate,
+    }
+    try:
+        validate_runtime_profile(runtime_profile)
+    except GoldenConfigurationError as error:
+        print(f"ERROR: golden preflight failed: {error}", file=sys.stderr)
+        return 2
 
     repo = Path(args.repo).resolve()
     if not (repo / "index.html").exists():
@@ -445,12 +479,37 @@ def main() -> int:
     out_dir = Path(args.out_dir).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    videos = [Path(v).resolve() for v in args.videos]
+    videos = [
+        Path(video).resolve()
+        for video in expand_video_arguments(args.videos)
+    ]
     missing = [v for v in videos if not v.exists()]
     if missing:
         for v in missing:
             print(f"ERROR: 動画が見つかりません: {v}", file=sys.stderr)
         return 2
+
+    expected_cases = {}
+    if not args.record_only:
+        manifest_path = script_dir / "expectations.json"
+        try:
+            manifest = validate_manifest(
+                json.loads(manifest_path.read_text(encoding="utf-8"))
+            )
+            for video in videos:
+                expected_cases[video] = prepare_case(
+                    manifest,
+                    video_name=video.name,
+                    video_sha256=sha256_file(video),
+                    runtime_profile=runtime_profile,
+                )
+        except (
+            GoldenConfigurationError,
+            json.JSONDecodeError,
+            OSError,
+        ) as error:
+            print(f"ERROR: golden preflight failed: {error}", file=sys.stderr)
+            return 2
 
     port = args.port or free_port()
     httpd = serve_repo(repo, port)
@@ -493,8 +552,23 @@ def main() -> int:
                       f"wall={result['wallSeconds']}s errors="
                       f"{len(result['consoleErrors'])}c/{len(result['pageErrors'])}p")
                 print(f"-> {out_file}")
-                if result["status"] not in ("ok", "ok-no-shots"):
-                    exit_code = 1
+                outcome = verification_outcome(
+                    case=expected_cases.get(video),
+                    result=result,
+                    record_only=args.record_only,
+                )
+                if outcome.verification == "SKIPPED":
+                    print("verification=SKIPPED (--record-only)")
+                else:
+                    print(f"verification={outcome.verification}")
+                for error in outcome.errors:
+                    prefix = (
+                        "RUNTIME FAIL"
+                        if outcome.verification == "SKIPPED"
+                        else "VERIFY FAIL"
+                    )
+                    print(f"{prefix}: {error}", file=sys.stderr)
+                exit_code = max(exit_code, outcome.exit_code)
                 context.close()
             browser.close()
     finally:

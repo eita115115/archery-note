@@ -844,3 +844,81 @@ Next task:
   an enforcing count-regression gate so `npm run golden:replay` fails on an
   unreviewed mismatch before changing field thresholds or preparing the
   diagnostics export.
+
+### 2026-07-26 - Task 6 golden semantic regression gate
+
+- Added `tools/golden-replay/expectations.json` as the reviewed machine-readable
+  source of truth for the five public-stock videos. It pins the runtime profile,
+  source-video SHA-256, expected status and shot count, and the sole positive
+  case's retained-release window. The reviewed `43254` event must be the only
+  retained shot and occur within `4300--4600 ms`; count-only agreement no longer
+  passes.
+- Added a pure Python expectation validator and a 20-case standard-library test
+  suite. The validator fails closed on malformed manifests, profile or hash
+  mismatches, runtime failures, count mismatches, missing diagnostics, invalid
+  or duplicate fire identities, orphan cancellations, negative timestamps,
+  retained-count disagreement, and events outside their reviewed windows.
+- The runner now verifies by default. Runtime or semantic failure returns exit
+  `1`; configuration, profile, manifest, missing-video, or hash preflight failure
+  returns `2`. Explicit `--record-only` prints `verification=SKIPPED`, still
+  validates the runtime profile, and still returns `1` for runtime failure.
+- Added deterministic runner-side glob expansion so the documented
+  `tools/golden-replay/videos/*.mp4` form works in PowerShell as well as shells
+  that expand globs. An unmatched pattern is preserved for the existing clear
+  missing-video error.
+- Reclassified committed baselines as observational diagnostics rather than
+  truth. The source and harness documentation now distinguish reviewed
+  expectations from scheduler-sensitive snapshots and document the fast
+  no-video test and PowerShell-safe commands.
+
+Validation:
+
+- TDD RED: the initial test run exited `1` because
+  `golden_expectations` did not exist. Review remediation also captured a RED
+  for the missing `expand_video_arguments` contract.
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass,
+  `20 tests`, `OK`.
+- Targeted Prettier check for the harness README, source ledger, and expectation
+  manifest: pass.
+- Python syntax compilation with its cache redirected outside the repository:
+  pass. No `tools/golden-replay/__pycache__` or `.pyc` remains.
+- Runner `--help`: pass. Literal `*.mp4` plus a deliberately wrong handedness
+  reached profile validation and returned `2`, proving Windows-side expansion.
+  `--record-only --playback-rate NaN` returned `2`.
+- All five local source-video SHA-256 values match the reviewed manifest.
+- Applying the validator to committed observational baselines correctly fails
+  exactly two cases: `43254` retains the wrong `6748.548 ms` event outside the
+  reviewed window, and `48725` reports two shots instead of zero.
+- Applying it to the latest completed five-video run correctly fails exactly
+  three cases: `43254` reports two shots, `40769` reports one instead of zero,
+  and `48725` reports one instead of zero. The previously silent mismatch is
+  therefore now an enforcing RED.
+- `git diff --check`: pass. Independent Reviewer and fresh Verifier both
+  returned `ACCEPT`; the six harness files were the only implementation scope.
+
+Risk notes:
+
+- This task fixes the acceptance gate, not detector quality. A full video replay
+  was not repeated after the harness-only change; the latest complete results
+  remain the current detector evidence and are expected to exit `1`.
+- The replay still samples `video.currentTime` through
+  `requestAnimationFrame` while synchronous MediaPipe inference runs. Call
+  counts and frame spacing vary with load, so committed baselines cannot serve
+  as deterministic detector fixtures.
+- The three failures have different observed causes: `43254` retains a legacy
+  mid-draw false positive in addition to the real event, `40769` retains an
+  adaptive arrow-retrieval event at about `8.16 s`, and `48725` retains a
+  close-up legacy event near end-of-stream. Thresholds must not be changed from
+  count totals alone.
+- Storage/schema, dependencies, Service Worker behavior, app versions, deployed
+  UI, and user data remain unchanged. The current branch still contains the
+  previously documented identifying pathname in reachable history and must not
+  be pushed.
+
+Next task:
+
+- Capture privacy-safe derived form metrics from the public `43254`, `40769`,
+  and `48725` videos and add a deterministic Node replay fixture seam. Use those
+  fixed inputs to reproduce the true `43254` release and the three false-event
+  classes before changing legacy continuity, adaptive temporal coincidence, or
+  end-of-stream pending semantics.
