@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - Follow red-green-refactor: add the named failing assertion before each production change and preserve the observed failure output in the task log.
-- Never copy, commit, or read at test runtime `C:\Users\eita2\OneDrive\Documents\archery-note-2026-07-15 2.json`; use only anonymous synthetic values listed in the approved design.
+- Never copy, commit, or read at test runtime the private diagnostic backup; use only approved anonymous synthetic values listed in the design.
 - Add no dependency, network request, cloud inference, stored video, raw landmark persistence, schema migration, settings panel, or primary-screen control.
 - Preserve immediate shot insertion, haptic feedback, one-tap removal, one-second refractory behavior, and arrow-presence as annotation only.
 - Do not change `APP_VER`, package version, `version.json`, `sw.js`, `CHANGELOG.md`, release tags, or deployment assets before the human 18-shot acceptance gate.
