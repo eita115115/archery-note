@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """ゴールデン再生のレビュー済み期待値検証と CLI 補助。"""
 
+import hashlib
+import json
 import math
 import re
+import subprocess
 from dataclasses import dataclass
 from glob import glob, has_magic
 
@@ -10,10 +13,23 @@ from glob import glob, has_magic
 SCHEMA_VERSION = 1
 SUCCESS_STATUSES = {"ok", "ok-no-shots"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+DERIVED_CAPTURE_CASES = {
+    "oblique-single-release": (
+        "d2beecfa6cf924354212dd23e79a7540a2ee8c7fbf1c60cade342f6116843bfc"
+    ),
+    "scene-cut-arrow-retrieval": (
+        "1d80f5688fff8a1e90ad2cada188ce51f3a491978fe6bd1ed678f776135c243e"
+    ),
+}
+MAX_DERIVED_FIXTURE_BYTES = 262_144
 
 
 class GoldenConfigurationError(ValueError):
     """期待値 manifest または実行前条件が不正。"""
+
+
+class GoldenRuntimeError(RuntimeError):
+    """production replay または browser↔Node parity の実行時失敗。"""
 
 
 @dataclass(frozen=True)
@@ -60,6 +76,157 @@ def validate_runtime_profile(profile):
 
     _validate_profile(profile, "runtimeProfile")
     return profile
+
+
+def require_derived_capture_mode(*, capture_derived_fixtures, record_only):
+    """派生 fixture capture は明示的な record-only 実行に限定する。"""
+
+    if capture_derived_fixtures and not record_only:
+        raise GoldenConfigurationError(
+            "--capture-derived-fixtures is valid only with --record-only"
+        )
+
+
+def capture_case_for_expectation(expectation_case):
+    """レビュー済み source SHA を許可済み semantic case ID へ写像する。"""
+
+    _require(
+        isinstance(expectation_case, dict),
+        "derived capture expectation case must be an object",
+    )
+    video_hash = expectation_case.get("sha256")
+    for case_id, allowed_hash in DERIVED_CAPTURE_CASES.items():
+        if video_hash == allowed_hash:
+            return case_id
+    raise GoldenConfigurationError(
+        "source video is not allowed for derived fixture capture"
+    )
+
+
+def write_immutable_candidate(root, case_id, payload):
+    """検証済み payload を content-addressed 名で新規作成し、上書きしない。"""
+
+    _require(case_id in DERIVED_CAPTURE_CASES, "unknown derived fixture case")
+    _require(
+        isinstance(payload, bytes)
+        and 0 < len(payload) <= MAX_DERIVED_FIXTURE_BYTES,
+        "derived fixture payload has invalid size",
+    )
+    root.mkdir(parents=True, exist_ok=True)
+    digest = hashlib.sha256(payload).hexdigest()
+    target = root / f"{case_id}-{digest}.json"
+    if target.exists():
+        try:
+            existing = target.read_bytes()
+        except OSError as error:
+            raise GoldenConfigurationError(
+                f"cannot verify existing fixture candidate: {error}"
+            ) from error
+        if existing != payload:
+            raise GoldenConfigurationError(
+                f"content-addressed fixture candidate collision: {target.name}"
+            )
+        return target
+    try:
+        with target.open("xb") as stream:
+            stream.write(payload)
+    except FileExistsError:
+        return write_immutable_candidate(root, case_id, payload)
+    except OSError as error:
+        try:
+            target.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise GoldenConfigurationError(
+            f"cannot write fixture candidate: {error}"
+        ) from error
+    return target
+
+
+def replay_candidate_with_node(script_dir, payload):
+    """Node loader/replayを呼び、child exit taxonomyを保持して結果を返す。"""
+
+    try:
+        completed = subprocess.run(
+            [
+                "node",
+                str(script_dir / "replay-form-fixtures.js"),
+                "--replay-stdin",
+            ],
+            input=payload,
+            check=False,
+            capture_output=True,
+        )
+    except OSError as error:
+        raise GoldenConfigurationError(
+            f"cannot execute Node fixture dependency: {error}"
+        ) from error
+
+    detail = completed.stderr.decode("utf-8", errors="replace").strip()
+    if completed.returncode == 1:
+        raise GoldenRuntimeError(
+            f"Node fixture runtime/parity failed: {detail or 'no diagnostic'}"
+        )
+    if completed.returncode == 2:
+        raise GoldenConfigurationError(
+            f"Node fixture configuration failed: {detail or 'no diagnostic'}"
+        )
+    if completed.returncode != 0:
+        raise GoldenRuntimeError(
+            "Node fixture replay failed with unexpected "
+            f"exit {completed.returncode}: {detail or 'no diagnostic'}"
+        )
+    try:
+        replay = json.loads(completed.stdout.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise GoldenRuntimeError(
+            f"Node fixture replay returned invalid JSON: {error}"
+        ) from error
+    if not isinstance(replay, dict):
+        raise GoldenRuntimeError("Node fixture replay must return an object")
+    return replay
+
+
+def validate_browser_node_parity(
+    browser_replay,
+    node_replay,
+    *,
+    visible_shot_count,
+):
+    """browser core・Node replay・実画面の保持射数を完全一致で検査する。"""
+
+    keys = (
+        "events",
+        "retainedReleases",
+        "retainedCount",
+        "finalPhase",
+        "pendingAtEnd",
+    )
+    if not isinstance(browser_replay, dict) or not isinstance(node_replay, dict):
+        raise GoldenRuntimeError(
+            "browser/Node metric fixture parity values must be objects"
+        )
+    browser_shape = {key: browser_replay.get(key) for key in keys}
+    node_shape = {key: node_replay.get(key) for key in keys}
+    if browser_shape != node_shape:
+        raise GoldenRuntimeError(
+            "browser/Node metric fixture parity mismatch: "
+            f"browser={json.dumps(browser_shape, ensure_ascii=False)} "
+            f"node={json.dumps(node_shape, ensure_ascii=False)}"
+        )
+    if (
+        not isinstance(visible_shot_count, int)
+        or isinstance(visible_shot_count, bool)
+        or visible_shot_count < 0
+    ):
+        raise GoldenRuntimeError(
+            "actual visible shot count must be a non-negative integer"
+        )
+    if node_shape["retainedCount"] != visible_shot_count:
+        raise GoldenRuntimeError(
+            "Node retainedCount does not match actual visible shot count: "
+            f"node={node_shape['retainedCount']!r} visible={visible_shot_count}"
+        )
 
 
 def expand_video_arguments(arguments):

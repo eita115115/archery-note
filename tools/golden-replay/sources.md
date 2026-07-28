@@ -1,9 +1,14 @@
 # ゴールデン再生ハーネス用 映像ソース記録
 
 作成日: 2026-07-11
-方針: 映像ファイルはリポジトリにコミットしない。この記録の URL から `fetch-videos.py` で再取得する。
-すべてフリーライセンスのストック映像（Pixabay Content License / Mixkit License）。
-YouTube 等の利用規約で保護された映像は使用していない。
+方針: 映像ファイルはリポジトリにコミットしない。`fetch-videos.py`の既定実行は
+Pixabay sourceだけを再取得する。Mixkit sourceは`--include-restricted-personal`を
+明示したローカル個人診断時だけ取得する。
+ライセンス条件はsourceごとに異なる。Pixabay sourceはPixabay Content License。
+Mixkit 34710/48725の720p sourceは、公式ページを2026-07-26に再確認した結果、
+Restricted License / Personal Use onlyである。Mixkit sourceはローカルの個人診断にだけ使い、
+過去の別ライセンスgrantを立証できない限り、tracked/public派生fixtureへ昇格させない。
+YouTube 等の映像は使用していない。
 
 `expectations.json` は、この目視レビューを機械判定できる形にした合否の真値。
 `baselines/` は推論実行時の観測スナップショットであり、真値ではない。一次判定は
@@ -14,9 +19,12 @@ YouTube 等の利用規約で保護された映像は使用していない。
 - **Pixabay Content License**: 商用・非商用とも無償利用可、帰属表示不要。
   コンテンツ単体での再配布は不可（→ 映像ファイル自体をリポジトリに含めない理由）。
   https://pixabay.com/service/license-summary/
-- **Mixkit License (Free Items)**: 商用・非商用とも無償利用可、帰属表示不要。
-  素材そのものの再配布は不可。
-  https://mixkit.co/license/#videoFree
+- **Mixkit Restricted License**: 34710/48725の公式videoページで提供される720p版は
+  **Personal Use only**（2026-07-26確認）。ローカル個人診断にのみ使用し、
+  tracked/public派生fixtureには使用しない。過去にFree Licenseで取得したことを示す
+  historical grantは現時点で確認できていない。
+  取得には`fetch-videos.py --include-restricted-personal`の明示opt-inが必要。
+  https://mixkit.co/license/#videoRestricted
 
 ## 採用映像（ハーネス実行対象）
 
@@ -58,7 +66,10 @@ YouTube 等の利用規約で保護された映像は使用していない。
 
 - 出典ページ: https://mixkit.co/free-stock-video/female-archer-shooting-an-arrow-34710/
 - 直接URL: https://assets.mixkit.co/videos/34710/34710-720.mp4
-- ライセンス: Mixkit License (Free Items)
+- ライセンス: **Mixkit Restricted License — 720p Personal Use only**
+  （公式sourceページとlicenseページを2026-07-26確認）
+- 公開fixture適格性: **不可**。ローカル個人診断専用。historical grantを立証できない限り、
+  tracked/public派生fixtureへ含めない。
 - 内容: 女性がロングボウ（伝統弓）を正面〜斜め前方から撮影。頭部と両腕・胴体上部が写る
   （下半身は画面外）。引き分け→狙い→リリースが1回。1280x720 / 10.5秒。
 - 目視期待射数: **1射**（約1〜6秒で引き分け保持、6〜7秒でリリース）。
@@ -71,7 +82,10 @@ YouTube 等の利用規約で保護された映像は使用していない。
 
 - 出典ページ: https://mixkit.co/free-stock-video/close-up-of-a-person-firing-an-arrow-at-a-48725/
 - 直接URL: https://assets.mixkit.co/videos/48725/48725-720.mp4
-- ライセンス: Mixkit License (Free Items)
+- ライセンス: **Mixkit Restricted License — 720p Personal Use only**
+  （公式sourceページとlicenseページを2026-07-26確認）
+- 公開fixture適格性: **不可**。ローカル個人診断専用。historical grantを立証できない限り、
+  tracked/public派生fixtureへ含めない。
 - 内容: 手元（弓手・ロングボウのグリップ）の接写。顔・肩の一部のみで全身は写らない。
   リリース1回。1280x720 / 6.4秒。
 - 目視期待射数: **1射だが骨格不可視** → 検出期待値: **0射**。
@@ -118,3 +132,4 @@ YouTube 等の利用規約で保護された映像は使用していない。
   「側面・全身・単独射手」の理想条件を満たす実写はストック映像には少なく、
   実写3本＋接写1本＋ネガティブ1本の構成とした。
 - Mixkit 検索: `archery` で4本。うち2本（34710, 48725）が人物射撃シーン。
+  ただし現在の720p提供条件はRestricted / Personal Use onlyなので、公開fixture候補から除外。

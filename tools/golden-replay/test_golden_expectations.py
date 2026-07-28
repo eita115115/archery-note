@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
 """ゴールデン再生のレビュー済み期待値ゲートを検証する。"""
 
+import importlib.util
 import json
 import tempfile
 import unittest
 from pathlib import Path
 
 from golden_expectations import (
+    DERIVED_CAPTURE_CASES,
+    MAX_DERIVED_FIXTURE_BYTES,
     GoldenConfigurationError,
+    GoldenRuntimeError,
+    capture_case_for_expectation,
     expand_video_arguments,
     prepare_case,
+    replay_candidate_with_node,
+    require_derived_capture_mode,
+    validate_browser_node_parity,
     validate_manifest,
     validate_result,
     validate_runtime_profile,
     verification_outcome,
+    write_immutable_candidate,
 )
 
 
@@ -23,6 +32,16 @@ PROFILE = {
     "playbackRate": 0.25,
 }
 VIDEO_HASH = "a" * 64
+FIXTURE_COLUMNS = [
+    "tMs",
+    "anchorNorm",
+    "drawArm",
+    "bodyScale",
+    "conf",
+    "dWx",
+    "dWy",
+    "dWVisibility",
+]
 
 
 def manifest():
@@ -62,6 +81,34 @@ def result(
             "canceledEvents": canceled if canceled is not None else [],
         }
     return value
+
+
+def fixture_payload():
+    return (
+        json.dumps(
+            {
+                "schemaVersion": 1,
+                "caseId": "scene-cut-arrow-retrieval",
+                "videoSha256": (
+                    "1d80f5688fff8a1e90ad2cada188ce51f3a491978fe6bd1ed678f776135c243e"
+                ),
+                "coreSha256": "a" * 64,
+                "appBaseCommit": "b" * 40,
+                "poseModelSha256": "c" * 64,
+                "visionBundleSha256": "d" * 64,
+                "visionWasmJsSha256": "e" * 64,
+                "visionWasmSha256": "f" * 64,
+                "playwrightVersion": "1.61.1",
+                "chromiumVersion": "140.0.7339.16",
+                "runtimeProfile": dict(PROFILE),
+                "eosMs": 10,
+                "columns": FIXTURE_COLUMNS,
+                "frames": [[0, None, None, None, None, None, None, None]],
+            },
+            separators=(",", ":"),
+        )
+        + "\n"
+    ).encode("utf-8")
 
 
 class GoldenExpectationTests(unittest.TestCase):
@@ -307,6 +354,186 @@ class GoldenExpectationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp_dir:
             pattern = str(Path(temp_dir) / "*.missing")
             self.assertEqual(expand_video_arguments([pattern]), [pattern])
+
+    def test_fetch_selection_excludes_restricted_personal_sources_by_default(self):
+        fetch_path = Path(__file__).with_name("fetch-videos.py")
+        spec = importlib.util.spec_from_file_location(
+            "archery_note_fetch_videos",
+            fetch_path,
+        )
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        public_names = set(module.PUBLIC_VIDEOS)
+        restricted_names = set(module.RESTRICTED_PERSONAL_VIDEOS)
+        self.assertEqual(
+            public_names,
+            {
+                "pixabay-43254-archery-woman.mp4",
+                "pixabay-40769-archer.mp4",
+                "pixabay-150869-arrows-target.mp4",
+            },
+        )
+        self.assertEqual(
+            restricted_names,
+            {
+                "mixkit-34710-female-archer.mp4",
+                "mixkit-48725-closeup-firing.mp4",
+            },
+        )
+        self.assertEqual(set(module.select_videos(False)), public_names)
+        self.assertEqual(
+            set(module.select_videos(True)),
+            public_names | restricted_names,
+        )
+
+    def test_derived_capture_requires_record_only(self):
+        with self.assertRaises(GoldenConfigurationError):
+            require_derived_capture_mode(
+                capture_derived_fixtures=True,
+                record_only=False,
+            )
+        require_derived_capture_mode(
+            capture_derived_fixtures=True,
+            record_only=True,
+        )
+        require_derived_capture_mode(
+            capture_derived_fixtures=False,
+            record_only=False,
+        )
+
+    def test_derived_capture_allowlist_uses_semantic_case_ids_and_source_sha(self):
+        self.assertEqual(
+            set(DERIVED_CAPTURE_CASES),
+            {
+                "oblique-single-release",
+                "scene-cut-arrow-retrieval",
+            },
+        )
+        case = capture_case_for_expectation(
+            {
+                "video": "renamed-public-source.mp4",
+                "sha256": (
+                    "d2beecfa6cf924354212dd23e79a7540a2ee8c7fbf1c60cade342f6116843bfc"
+                ),
+            }
+        )
+        self.assertEqual(case, "oblique-single-release")
+        with self.assertRaises(GoldenConfigurationError):
+            capture_case_for_expectation(
+                {
+                    "video": "mixkit-34710-female-archer.mp4",
+                    "sha256": (
+                        "39ae04e9e07bc67d4ae7d1c1aadd10f2b60cad9eca46445a77522b9bea58f9e5"
+                    ),
+                }
+            )
+
+    def test_derived_fixture_size_limit_is_256_kib(self):
+        self.assertEqual(MAX_DERIVED_FIXTURE_BYTES, 262_144)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with self.assertRaises(GoldenConfigurationError):
+                write_immutable_candidate(
+                    Path(temp_dir),
+                    "oblique-single-release",
+                    b"x" * (MAX_DERIVED_FIXTURE_BYTES + 1),
+                )
+
+    def test_python_to_node_bridge_replays_a_valid_fixture(self):
+        replay = replay_candidate_with_node(
+            Path(__file__).resolve().parent,
+            fixture_payload(),
+        )
+        self.assertEqual(replay["caseId"], "scene-cut-arrow-retrieval")
+        self.assertEqual(replay["retainedCount"], 0)
+
+    def test_python_to_node_bridge_maps_child_one_to_runtime_and_two_to_config(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            script = root / "replay-form-fixtures.js"
+
+            script.write_text(
+                'process.stderr.write("RUNTIME ERROR: core failed\\n");'
+                "process.exitCode=1;\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(GoldenRuntimeError, "core failed"):
+                replay_candidate_with_node(root, b"{}\n")
+
+            script.write_text(
+                'process.stderr.write("CONFIG ERROR: bad fixture\\n");'
+                "process.exitCode=2;\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(GoldenConfigurationError, "bad fixture"):
+                replay_candidate_with_node(root, b"{}\n")
+
+            script.write_text(
+                'process.stdout.write("not-json\\n");\n',
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(GoldenRuntimeError, "invalid JSON"):
+                replay_candidate_with_node(root, b"{}\n")
+
+    def test_browser_node_parity_includes_actual_visible_shot_count(self):
+        replay = {
+            "events": [{"type": "release", "tMs": 10, "label": "close"}],
+            "retainedReleases": [{"tMs": 10, "label": "close"}],
+            "retainedCount": 1,
+            "finalPhase": "FOLLOW",
+            "pendingAtEnd": False,
+        }
+        validate_browser_node_parity(replay, dict(replay), visible_shot_count=1)
+
+        changed = dict(replay)
+        changed["pendingAtEnd"] = True
+        with self.assertRaisesRegex(GoldenRuntimeError, "parity mismatch"):
+            validate_browser_node_parity(
+                replay,
+                changed,
+                visible_shot_count=1,
+            )
+
+        with self.assertRaisesRegex(GoldenRuntimeError, "visible shot count"):
+            validate_browser_node_parity(
+                replay,
+                dict(replay),
+                visible_shot_count=0,
+            )
+
+    def test_candidate_write_is_content_addressed_and_never_overwrites(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            payload = b'{"schemaVersion":1}\n'
+            first = write_immutable_candidate(
+                root,
+                "oblique-single-release",
+                payload,
+            )
+            self.assertTrue(first.is_file())
+            self.assertEqual(first.read_bytes(), payload)
+            self.assertRegex(
+                first.name,
+                r"^oblique-single-release-[0-9a-f]{64}\.json$",
+            )
+            self.assertEqual(
+                write_immutable_candidate(
+                    root,
+                    "oblique-single-release",
+                    payload,
+                ),
+                first,
+            )
+
+            first.write_bytes(b"different")
+            with self.assertRaises(GoldenConfigurationError):
+                write_immutable_candidate(
+                    root,
+                    "oblique-single-release",
+                    payload,
+                )
 
 
 if __name__ == "__main__":

@@ -922,3 +922,87 @@ Next task:
   fixed inputs to reproduce the true `43254` release and the three false-event
   classes before changing legacy continuity, adaptive temporal coincidence, or
   end-of-stream pending semantics.
+
+### 2026-07-29 - Task 6 deterministic form-metric replay fixtures
+
+- Added a bounded, deterministic Node replay seam for the exact production
+  detector order: velocity calculation, current-frame history push, 200-frame
+  cap, then `stepFormPhase`. Each fixture gets fresh detector, velocity,
+  history, and retained-release state; cancellation is applied before release.
+  No synthetic EOF frame or shot summarization is added.
+- Added two reviewed, tracked sample schedules derived from license-compatible
+  public Pixabay videos: `oblique-single-release` (`43254`) and
+  `scene-cut-arrow-retrieval` (`40769`). The JSON contains scalar detector
+  inputs only, including one draw-wrist normalized x/y/visibility time series;
+  it contains no video, pixels, full 33-point landmark set, URL, path, device,
+  user identifier, or private-practice data.
+- The loader caps source size at 256 KiB and frames at 5,000, requires exact
+  keys/profile/columns and finite monotonic data, and rejects duplicate or
+  unknown raw JSON keys before parsing. Runtime/parity failures return `1`;
+  schema/config/dependency failures return `2`.
+- Extended the real-video harness with an explicitly gated
+  `--record-only --capture-derived-fixtures` path. It allowlists the two source
+  video hashes, records core/model/runtime hashes plus Playwright/Chromium
+  versions, and writes a content-addressed immutable candidate only after
+  browser-to-Node event parity and actual visible-shot-count parity pass.
+- Corrected the current Mixkit 34710/48725 license record to Restricted License
+  / Personal Use only. They are excluded from tracked/public metric fixtures,
+  capture allowlists, and default downloads. Local personal diagnostics require
+  the explicit `fetch-videos.py --include-restricted-personal` opt-in.
+- Added 13 stable Node infrastructure checks and eight Python tests for capture
+  gating, allowlists, immutable writes, the Python-to-Node bridge, parity,
+  error taxonomy, and default fetch selection. The stable Node suite now runs
+  through `check:form`; semantic acceptance remains separate while known
+  detector defects are RED.
+
+Validation:
+
+- TDD RED: the first Node run exited `1` because the fixture module did not
+  exist; the first Python run exited `1` because capture helpers did not exist.
+  The default-fetch boundary test also exited `1` before public and restricted
+  source maps were separated.
+- `npm run test:form-fixtures`: pass, 13 checks.
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass, 28 tests.
+- `npm run check:form`: pass.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's result, security, UI, PWA, storage, and version gates.
+  An earlier run hit a transient `EPERM` on the UI smoke-only browser profile;
+  `check:ui` and a clean full rerun both passed.
+- `npm run lint`, `npm run format:check`, Node syntax checks, Python AST parsing,
+  and `git diff --check`: pass.
+- `npm run golden:form-fixtures`: expected acceptance RED, exit `1`, with
+  exactly two known failures. `oblique-single-release` misses the reviewed
+  `4300--4600 ms` true window and retains a late `6742.088 ms / close` event;
+  `scene-cut-arrow-retrieval` retains an unwanted
+  `9157.544 ms / adaptive` event instead of zero shots.
+- Independent strict review and a separate verifier both returned PASS with no
+  blocker, major, or minor findings. No network download or real-video
+  recapture was required for the final review.
+
+Risk notes:
+
+- This task makes detector failures reproducible; it does not fix their
+  semantics. Product and iPhone field acceptance remain incomplete.
+- The captured MediaPipe sample schedule is scheduler-sensitive. Runtime asset
+  hashes and versions are recorded, but exact MediaPipe recapture is not
+  claimed; deterministic replay begins at the tracked scalar frames.
+- Mixkit `48725` can no longer supply a public EOS-pending fixture without
+  evidence of a compatible historical grant. EOS lifecycle behavior still
+  needs a license-compatible public sample or a separate synthetic lifecycle
+  contract.
+- The fixture JSON uses capture-generated numeric-array formatting and is not
+  part of the repository's Prettier glob; schema, privacy, replay, and JSON
+  parsing gates pass.
+- Storage/schema, dependencies, Service Worker behavior, version markers,
+  release/deployment, and persisted user data remain unchanged.
+- The current branch still has the previously documented identifying pathname
+  in reachable history and must not be pushed. Final publication requires a
+  sanitized branch/tree from `main` or a separately approved history rewrite.
+
+Next task:
+
+- Use `oblique-single-release` as a fixed diagnostic to identify and correct the
+  legacy continuity/evidence defect that misses the `4300--4600 ms` true release
+  and retains `6742.088 ms`. Keep `scene-cut-arrow-retrieval` and all synthetic
+  form checks as non-regression gates; defer a separate adaptive scene-cut
+  change unless the evidence proves the same root cause.

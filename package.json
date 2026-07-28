@@ -7,7 +7,7 @@
     "check:all": "npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version",
     "check:security": "node tools/check-security.js",
     "check:analysis": "node tools/check-analysis-core.js",
-    "check:form": "node tools/check-form-core.js",
+    "check:form": "node tools/check-form-core.js && node tools/golden-replay/test-form-metric-fixtures.js",
     "check:gamification": "node tools/check-gamification.js",
     "check:todays-result": "node tools/check-todays-result.js",
     "check:globals": "node tools/check-globals.js",
@@ -29,7 +29,9 @@
     "native:build:android": "npm run native:sync:android && cd android && gradlew.bat assembleDebug",
     "native:add:android": "npm run build:native-web && npx cap add android",
     "native:add:ios": "npm run build:native-web && npx cap add ios",
-    "golden:replay": "python tools/golden-replay/run-golden-replay.py"
+    "golden:replay": "python tools/golden-replay/run-golden-replay.py",
+    "test:form-fixtures": "node tools/golden-replay/test-form-metric-fixtures.js",
+    "golden:form-fixtures": "node tools/golden-replay/replay-form-fixtures.js"
   },
   "devDependencies": {
     "@capacitor/android": "^8.4.0",

@@ -28,9 +28,12 @@
 import argparse
 import hashlib
 import http.server
+import importlib.metadata
 import json
 import mimetypes
+import re
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -41,15 +44,31 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
 from golden_expectations import (
+    capture_case_for_expectation,
     GoldenConfigurationError,
+    GoldenRuntimeError,
     expand_video_arguments,
     prepare_case,
+    replay_candidate_with_node,
+    require_derived_capture_mode,
+    validate_browser_node_parity,
     validate_manifest,
     validate_runtime_profile,
     verification_outcome,
+    write_immutable_candidate,
 )
 
 GOLDEN_PREFIX = "/__golden__/"
+FIXTURE_COLUMNS = [
+    "tMs",
+    "anchorNorm",
+    "drawArm",
+    "bodyScale",
+    "conf",
+    "dWx",
+    "dWy",
+    "dWVisibility",
+]
 
 # MediaPipe WASM 読み込み + モデル初期化の猶予
 LANDMARKER_LOAD_TIMEOUT_MS = 120_000
@@ -64,6 +83,30 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def sha256_lf_normalized_text(path: Path) -> str:
+    """UTF-8 textをLFへ正規化してハッシュする（worktreeのCRLF差を除外）。"""
+
+    text = path.read_text(encoding="utf-8")
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
+def repository_commit(repo: Path) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(repo), "rev-parse", "HEAD"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    commit = completed.stdout.strip()
+    if completed.returncode != 0 or not re.fullmatch(r"[0-9a-f]{40}", commit):
+        detail = completed.stderr.strip() or "invalid git revision"
+        raise GoldenConfigurationError(
+            f"cannot resolve app base commit: {detail}"
+        )
+    return commit
 
 
 def free_port() -> int:
@@ -151,7 +194,8 @@ def serve_repo(repo: Path, port: int) -> http.server.ThreadingHTTPServer:
 
 
 def analyze_video(page, httpd, video_path: Path, handedness: str,
-                  playback_rate: float = 0.25, delegate: str = "CPU") -> dict:
+                  playback_rate: float = 0.25, delegate: str = "CPU",
+                  derived_capture_out=None) -> dict:
     """1本の動画をリプレイ解析し、結果 dict を返す。
 
     playback_rate: 再生速度。アプリの位相判定は video.currentTime 基準（動画時間軸）
@@ -204,7 +248,7 @@ def analyze_video(page, httpd, video_path: Path, handedness: str,
         #     （実バグ。ハーネス側では整数 ms + 厳密単調増加を保証し dupTs 計上）
         #   - 検出統計: 呼び出し数 / ランドマークが取れたフレーム数
         page.evaluate(
-            """async (delegate) => {
+            """async ([delegate, captureDerivedFixtures]) => {
                 const base = new URL('assets/pose/', location.href);
                 const mod = await import(new URL('vision_bundle.mjs', base).href);
                 const fileset = await mod.FilesetResolver.forVisionTasks(base.href.replace(/\\/$/, ''));
@@ -260,8 +304,67 @@ def analyze_video(page, httpd, video_path: Path, handedness: str,
                     });
                     return r;
                 };
+                if (captureDerivedFixtures) {
+                    const capture = window.__goldenMetricCapture = {
+                        columns: [
+                            'tMs', 'anchorNorm', 'drawArm', 'bodyScale',
+                            'conf', 'dWx', 'dWy', 'dWVisibility',
+                        ],
+                        frames: [],
+                        browserReplay: {
+                            events: [],
+                            retainedReleases: [],
+                            retainedCount: 0,
+                            finalPhase: null,
+                            pendingAtEnd: false,
+                        },
+                    };
+                    const tracedStep = stepFormPhase;
+                    stepFormPhase = (st, raw, history, sens, now) => {
+                        const current = history[history.length - 1];
+                        if (!current || current.ts !== now || current.m !== raw) {
+                            throw new Error('metric capture boundary history contract drifted');
+                        }
+                        capture.frames.push(raw ? [
+                            now,
+                            raw.anchorNorm,
+                            raw.drawArm,
+                            raw.bodyScale,
+                            raw.conf,
+                            raw.dW.x,
+                            raw.dW.y,
+                            raw.dW.visibility,
+                        ] : [now, null, null, null, null, null, null, null]);
+                        const r = tracedStep(st, raw, history, sens, now);
+                        const replay = capture.browserReplay;
+                        replay.finalPhase = r.phase;
+                        if (r.canceled) {
+                            replay.retainedReleases.pop();
+                            replay.events.push({
+                                type: 'cancel',
+                                tMs: now,
+                                label: r.debug && typeof r.debug.cancelReason === 'string'
+                                    ? r.debug.cancelReason
+                                    : null,
+                            });
+                        }
+                        if (r.released) {
+                            const release = {
+                                tMs: now,
+                                label: r.debug && typeof r.debug.fireEvidence === 'string'
+                                    ? r.debug.fireEvidence
+                                    : null,
+                            };
+                            replay.retainedReleases.push(release);
+                            replay.events.push({type: 'release', ...release});
+                        }
+                        replay.retainedCount = replay.retainedReleases.length;
+                        replay.pendingAtEnd = !!st.pendingRelease;
+                        return r;
+                    };
+                }
             }""",
-            delegate,
+            [delegate, derived_capture_out is not None],
         )
 
         # 利き手設定を反映してからリプレイ開始。
@@ -373,6 +476,19 @@ def analyze_video(page, httpd, video_path: Path, handedness: str,
         result["detectedShots"] = shots_on_screen
         result["detectStats"] = page.evaluate("() => window.__goldenStats || null")
         result["trace"] = page.evaluate("() => window.__goldenTrace || null")
+        if derived_capture_out is not None:
+            captured = page.evaluate(
+                """() => {
+                    const capture = window.__goldenMetricCapture;
+                    return capture ? JSON.parse(JSON.stringify(capture)) : null;
+                }"""
+            )
+            if not isinstance(captured, dict):
+                raise GoldenRuntimeError(
+                    "browser did not return a derived metric capture"
+                )
+            captured["eosMs"] = meta["duration"] * 1000
+            derived_capture_out.update(captured)
 
         if shots_on_screen > 0:
             # 保存して db.formAnalyses から特徴量一式を取得
@@ -457,9 +573,27 @@ def main() -> int:
         action="store_true",
         help="期待値照合を省略して観測結果だけを記録（検証は SKIPPED と表示）",
     )
+    ap.add_argument(
+        "--capture-derived-fixtures",
+        action="store_true",
+        help=(
+            "許可済みPixabay映像のprivacy-bounded派生metric候補を記録"
+            "（derived scalars + draw-wrist x/y/visibility）。"
+            "--record-onlyとの併用時のみ有効。private footageには使用禁止"
+        ),
+    )
     ap.add_argument("--headed", action="store_true", help="ブラウザを表示して実行")
     ap.add_argument("--port", type=int, default=0, help="ローカルサーブのポート（0=自動）")
     args = ap.parse_args()
+
+    try:
+        require_derived_capture_mode(
+            capture_derived_fixtures=args.capture_derived_fixtures,
+            record_only=args.record_only,
+        )
+    except GoldenConfigurationError as error:
+        print(f"ERROR: golden preflight failed: {error}", file=sys.stderr)
+        return 2
 
     runtime_profile = {
         "handedness": args.handedness,
@@ -490,7 +624,8 @@ def main() -> int:
         return 2
 
     expected_cases = {}
-    if not args.record_only:
+    capture_case_ids = {}
+    if not args.record_only or args.capture_derived_fixtures:
         manifest_path = script_dir / "expectations.json"
         try:
             manifest = validate_manifest(
@@ -503,10 +638,53 @@ def main() -> int:
                     video_sha256=sha256_file(video),
                     runtime_profile=runtime_profile,
                 )
+                if args.capture_derived_fixtures:
+                    capture_case_ids[video] = capture_case_for_expectation(
+                        expected_cases[video]
+                    )
         except (
             GoldenConfigurationError,
             json.JSONDecodeError,
             OSError,
+        ) as error:
+            print(f"ERROR: golden preflight failed: {error}", file=sys.stderr)
+            return 2
+
+    capture_metadata = None
+    if args.capture_derived_fixtures:
+        try:
+            core_path = repo / "scripts" / "46-form-core.js"
+            pose_asset_dir = repo / "assets" / "pose"
+            pose_model_path = pose_asset_dir / "pose_landmarker_lite.task"
+            vision_bundle_path = pose_asset_dir / "vision_bundle.mjs"
+            vision_wasm_js_path = pose_asset_dir / "vision_wasm_internal.js"
+            vision_wasm_path = pose_asset_dir / "vision_wasm_internal.wasm"
+            required_paths = (
+                core_path,
+                pose_model_path,
+                vision_bundle_path,
+                vision_wasm_js_path,
+                vision_wasm_path,
+            )
+            if not all(path.is_file() for path in required_paths):
+                raise GoldenConfigurationError(
+                    "core script or self-hosted pose runtime asset is missing "
+                    "for derived capture"
+                )
+            capture_metadata = {
+                "coreSha256": sha256_lf_normalized_text(core_path),
+                "appBaseCommit": repository_commit(repo),
+                "poseModelSha256": sha256_file(pose_model_path),
+                "visionBundleSha256": sha256_file(vision_bundle_path),
+                "visionWasmJsSha256": sha256_file(vision_wasm_js_path),
+                "visionWasmSha256": sha256_file(vision_wasm_path),
+                "playwrightVersion": importlib.metadata.version("playwright"),
+            }
+        except (
+            GoldenConfigurationError,
+            importlib.metadata.PackageNotFoundError,
+            OSError,
+            UnicodeError,
         ) as error:
             print(f"ERROR: golden preflight failed: {error}", file=sys.stderr)
             return 2
@@ -527,6 +705,8 @@ def main() -> int:
                     "--enable-unsafe-swiftshader",
                 ],
             )
+            if capture_metadata is not None:
+                capture_metadata["chromiumVersion"] = browser.version
             for video in videos:
                 name = video.stem
                 print(f"\n=== {name} ===")
@@ -538,9 +718,27 @@ def main() -> int:
                 page.wait_for_selector("nav.tabs", timeout=15_000)
 
                 t0 = time.monotonic()
-                result = analyze_video(page, httpd, video, args.handedness,
-                                       playback_rate=args.playback_rate,
-                                       delegate=args.delegate)
+                derived_capture = {} if args.capture_derived_fixtures else None
+                try:
+                    result = analyze_video(
+                        page,
+                        httpd,
+                        video,
+                        args.handedness,
+                        playback_rate=args.playback_rate,
+                        delegate=args.delegate,
+                        derived_capture_out=derived_capture,
+                    )
+                except GoldenRuntimeError as error:
+                    print(f"RUNTIME FAIL: {error}", file=sys.stderr)
+                    exit_code = max(exit_code, 1)
+                    context.close()
+                    continue
+                except GoldenConfigurationError as error:
+                    print(f"FIXTURE CONFIG FAIL: {error}", file=sys.stderr)
+                    exit_code = max(exit_code, 2)
+                    context.close()
+                    continue
                 result["wallSeconds"] = round(time.monotonic() - t0, 1)
 
                 out_file = out_dir / f"baseline-{name}.json"
@@ -569,6 +767,68 @@ def main() -> int:
                     )
                     print(f"{prefix}: {error}", file=sys.stderr)
                 exit_code = max(exit_code, outcome.exit_code)
+                if args.capture_derived_fixtures and outcome.exit_code == 0:
+                    try:
+                        case_id = capture_case_ids[video]
+                        if derived_capture.get("columns") != FIXTURE_COLUMNS:
+                            raise GoldenConfigurationError(
+                                "browser metric capture columns changed"
+                            )
+                        fixture = {
+                            "schemaVersion": 1,
+                            "caseId": case_id,
+                            "videoSha256": expected_cases[video]["sha256"],
+                            **capture_metadata,
+                            "runtimeProfile": dict(runtime_profile),
+                            "eosMs": derived_capture.get("eosMs"),
+                            "columns": list(FIXTURE_COLUMNS),
+                            "frames": derived_capture.get("frames"),
+                        }
+                        payload = (
+                            json.dumps(
+                                fixture,
+                                ensure_ascii=False,
+                                indent=2,
+                                allow_nan=False,
+                            )
+                            + "\n"
+                        ).encode("utf-8")
+                        node_replay = replay_candidate_with_node(
+                            script_dir,
+                            payload,
+                        )
+                        validate_browser_node_parity(
+                            derived_capture.get("browserReplay") or {},
+                            node_replay,
+                            visible_shot_count=result.get("detectedShots"),
+                        )
+                        candidate = write_immutable_candidate(
+                            script_dir / "out" / "metric-fixture-candidates",
+                            case_id,
+                            payload,
+                        )
+                        print(f"fixture-parity=PASS candidate={candidate}")
+                    except GoldenRuntimeError as error:
+                        print(
+                            f"FIXTURE RUNTIME/PARITY FAIL: {error}",
+                            file=sys.stderr,
+                        )
+                        exit_code = max(exit_code, 1)
+                    except (
+                        GoldenConfigurationError,
+                        OSError,
+                    ) as error:
+                        print(
+                            f"FIXTURE CONFIG FAIL: {error}",
+                            file=sys.stderr,
+                        )
+                        exit_code = max(exit_code, 2)
+                    except (TypeError, ValueError) as error:
+                        print(
+                            f"FIXTURE RUNTIME FAIL: captured result is invalid: {error}",
+                            file=sys.stderr,
+                        )
+                        exit_code = max(exit_code, 1)
                 context.close()
             browser.close()
     finally:
