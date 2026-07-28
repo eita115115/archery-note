@@ -1252,3 +1252,66 @@ Next task:
   a bounded diagnostics-only exporter in the default-off debug surface. After
   approval, write the design and implementation plan, then implement one small
   TDD task per run starting with the cancellation identity defect.
+
+### 2026-07-29 - Task 6 golden replay documentation reconciliation
+
+- Reconciled `tools/golden-replay/README.md` with the current deterministic
+  fixture behavior. The two tracked scalar schedules are now documented as
+  passing: `oblique-single-release` retains exactly
+  `4457.414 ms / close`, while `scene-cut-arrow-retrieval` retains zero shots
+  and emits zero gross adaptive releases.
+- Moved the old `6742.088 ms / close` and
+  `9157.544 ms / adaptive` results into explicit historical-regression context
+  instead of presenting them as current output. The README now states that a
+  passing scalar replay is not proof of current full-video or iPhone behavior.
+- Corrected the fast Node test count from 13 to 15 and clarified the validation
+  boundary: the standalone acceptance CLI is not a direct `check:all`
+  dependency, but the Node fixture suite included by `check:form` enforces both
+  tracked semantic contracts. The corresponding test label now names the
+  standalone CLI boundary instead of claiming that all semantic acceptance is
+  excluded.
+- Clarified that real-video baselines are observational snapshots rather than
+  truth, broadened the documented configuration/preflight exit-2 cases, and
+  limited the local-server no-write claim to source videos, app source, and
+  fixtures. The runner's documented gitignored `out/` artifacts remain
+  unchanged.
+
+Validation:
+
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass, 28 tests.
+- `npm run test:form-fixtures`: pass, 15 tests, including the assertion that
+  the scene-cut fixture emits zero adaptive release events.
+- `npm run golden:form-fixtures`: pass, exit `0`:
+  - oblique: retained `4457.414 ms / close`;
+  - scene-cut: retained `0`.
+- `npm run check:form`: pass, including the detector core and all 15 fixture
+  checks.
+- After the final evidence-attribution wording change, the first targeted and
+  repository-wide Prettier checks reported only
+  `docs/codex/codex-progress.md`; formatting that file resolved the drift.
+- Targeted Prettier check for all three changed files: pass.
+- `npm run format:check`: pass.
+- `npm run lint`: pass.
+- `git diff --check`: pass.
+- Two independent read-only audits agreed on the current output, command
+  taxonomy, test counts, provenance boundary, and exact README corrections.
+
+Risk notes:
+
+- The full-video runner and physical iPhone matrix were not run in this
+  documentation task. Scheduler-sensitive video replay and real camera
+  acceptance remain unproven.
+- No runtime behavior, fixture, expectation, source-license record, storage,
+  dependency, Service Worker, version, release, deployment, or user data
+  changed. The only JavaScript change is a test-description string.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Obtain design approval for the smallest three-part diagnostic handoff, then
+  write the design and implementation plan. Start implementation with a TDD
+  regression proving manual removal followed by detector cancellation cannot
+  remove the preceding retained shot.

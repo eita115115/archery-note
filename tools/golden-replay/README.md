@@ -2,13 +2,15 @@
 
 保存済み動画からの射形解析（`scripts/47-form-view.js` の `startFormReplay` /
 `scripts/46-form-core.js` の `stepFormPhase`）に、`sources.md`で利用条件を記録した映像を
-headless Chromium で流し込み、検出結果（射数・角度・保持時間など）が
-レビュー済み期待値（`expectations.json`）から回帰していないかを確認するツールです。
+headless Chromium で流し込み、検出結果（射数・角度・保持時間など）を記録します。
+一次合否は、レビュー済み期待値（`expectations.json`）のstatus・保持射数・
+release時間窓から回帰していないかで判定します。角度・保持時間などは診断用の観測値です。
 `baselines/` は過去の観測結果であり、合否の真値ではありません。
 
-実映像runnerとsemantic acceptanceは`npm run check:all`に含まれません
-（映像ファイルとPython環境、またはレビュー済み既知bugが前提のため）。
-動画不要のNode fixture infrastructure testだけは`check:form`経由で含まれます。
+実映像runnerとstandaloneの`npm run golden:form-fixtures`は
+`npm run check:all`へ直接含まれません。動画不要のNode fixture testは、
+schema・privacy・parityなどのinfrastructureに加え、現在追跡する2件の
+semantic期待値も検証し、`check:form`経由で`check:all`に含まれます。
 
 ## 前提
 
@@ -27,8 +29,9 @@ python -B tools/golden-replay/test_golden_expectations.py
 npm run test:form-fixtures
 ```
 
-現在はPython 28件、Node 13件の高速testです。Node fixture testは`npm run check:form`
-にも含まれます。実映像とsemantic acceptanceは含まれません。
+現在はPython 28件、Node 15件の高速testです。Node fixture testは
+`npm run check:form`にも含まれ、追跡中2件のscalar semantic回帰も固定します。
+実映像runnerとstandalone acceptance CLIは含まれません。
 
 ## 実行手順
 
@@ -56,9 +59,10 @@ PowerShell が `*.mp4` を展開しない場合も、runner が glob を安定�
 するため文字列のまま検査します。
 
 結果は既定で `tools/golden-replay/out/baseline-<動画名>.json` に書き出されます
-（この `out/` は `.gitignore` 対象で、確定した基準値だけを手動で `baselines/` に
-コピーする運用です）。通常実行は期待値不一致または解析失敗で終了コード `1`、
-manifest・実行 profile・動画 SHA-256 の不一致で `2` を返します。
+（この `out/` は `.gitignore` 対象で、残すと判断した観測スナップショットだけを
+手動で `baselines/` にコピーする運用です）。通常実行は期待値不一致または
+解析失敗で終了コード `1`、manifest・repository・実行profile・動画・SHA-256・
+capture設定やassetなどのpreflight/configuration不備で `2` を返します。
 
 主なオプション（`python tools/golden-replay/run-golden-replay.py --help` も参照）:
 
@@ -77,8 +81,9 @@ manifest・実行 profile・動画 SHA-256 の不一致で `2` を返します�
 関数なので、ハーネスはリポジトリを `http.server` でローカルサーブしつつ、動画も
 同じサーバの `/__golden__/<name>` から配信します（`<video>` の CSP
 `media-src 'self'` を満たすため。Playwright の `page.route` は `<video>` の
-メディア要求を横取りできないため、サーバ側配信が必須）。リポジトリへの書き込みは
-一切行いません。
+メディア要求を横取りできないため、サーバ側配信が必須）。この配信処理はsource映像を
+コピーせず、app sourceやfixtureも変更しません。runner自体は前述のgitignoredな
+`out/`へ観測結果や明示的なcapture候補を書き出します。
 
 ## レビュー済み期待値と baseline の意味
 
@@ -154,16 +159,19 @@ npm run test:form-fixtures
 npm run check:form
 ```
 
-レビュー済み真値に対するacceptance（現行の既知bugを固定している間はexit `1`がRED）:
+レビュー済み真値に対するstandalone acceptance（現行2件はGREEN）:
 
 ```powershell
-node tools/golden-replay/replay-form-fixtures.js
+npm run golden:form-fixtures
+# 詳細JSON:
+node tools/golden-replay/replay-form-fixtures.js --json
 ```
 
 終了コードは、真値一致のみ`0`、レビュー済みsemantic mismatchまたは
-production replay / parity runtime failureは`1`、fixture/expectations/schema/profile/
-allowlist/dependency/config不正は`2`です。このacceptanceは意図的に
-`check:form` / `check:all`へ含めません。
+production replay failureは`1`、fixture/expectations/schema/profile/
+allowlist/dependency/config不正は`2`です。standalone CLI自体は
+`check:form` / `check:all`へ直接含めませんが、Node fixture testが同じ2件の
+retained count・release窓・label・adaptive gross eventを回帰検証します。
 
 ### 公開映像からの候補capture
 
@@ -194,20 +202,22 @@ fixture metadataへbindされていません。したがってexact MediaPipe re
 browser↔Node parityをレビューした後、semantic名のtracked fixtureへ機械的にコピーします。
 過去候補やbaselineの観測値を自動で真値へ昇格させてはいけません。
 
-### 現在追跡する failing sample schedules
+### 現在追跡する決定論的 scalar schedules
 
-| Semantic case               | Frames | Retained release        | Final state              | レビュー済み真値との差                                                      |
-| --------------------------- | -----: | ----------------------- | ------------------------ | --------------------------------------------------------------------------- |
-| `oblique-single-release`    |    725 | `6742.088ms / close`    | `DRAWING`, pending=false | 真の1射は4300–4600ms。窓内を保持せず、後半のlegacy false positiveだけを保持 |
-| `scene-cut-arrow-retrieval` |    535 | `9157.544ms / adaptive` | `DRAWING`, pending=false | 期待0射。矢を取りに行く編集後sceneでadaptive false positiveを保持           |
+| Semantic case               | Frames | 現行の保持結果         | Final state              | レビュー済み真値との照合                                   |
+| --------------------------- | -----: | ---------------------- | ------------------------ | ---------------------------------------------------------- |
+| `oblique-single-release`    |    725 | `4457.414ms / close`   | `DRAWING`, pending=false | PASS: 1射、4300–4600ms内。旧`6742.088ms`誤発火は保持しない |
+| `scene-cut-arrow-retrieval` |    535 | 0射、adaptive grossも0 | `DRAWING`, pending=false | PASS: 期待0射。旧`9157.544ms / adaptive`誤発火は発生しない |
 
-これらはcapture時にbrowser↔Node parityが一致した正確な観測値です。一方、同じ実映像を
-繰り返したreal-video runnerの射数・event時刻はschedulerにより独立に変動しました。
-選択済み2runのstdoutはいずれもvisible shot count 1 / Node retained count 1でしたが、
-3-way parity gateは今後の候補生成へ適用するもので、過去captureを再実行したとは主張しません。
-特に`oblique-single-release`は、過去に観測した「約1895msと約4356msの2件保持」を
-このtracked fixtureが再現する、とは主張しません。固定するのは、同じレビュー済み真値に対する
-現在のsemantic failure（窓内真陽性の欠落と窓外false positive）です。
+この2件は、capture時点のcoreでbrowser↔Node parityが一致したsample scheduleを
+現行coreへ決定論的に再生する回帰fixtureです。capture時には両runとも
+visible shot count 1 / Node retained count 1で、上表の旧誤発火を再現していました。
+その値は修正前のhistorical observationであり、現行の期待値や出力ではありません。
+
+同じ実映像を繰り返すreal-video runnerの射数・event時刻はschedulerにより独立に
+変動します。このGREENは固定scalar入力に対するdetector回帰の合格であり、
+現行coreで実映像を再captureしたこと、real-video runnerやiPhone実機が
+合格したことは意味しません。
 
 ## 基準値の更新手順
 

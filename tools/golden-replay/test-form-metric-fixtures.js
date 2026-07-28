@@ -465,7 +465,7 @@ runTest("acceptance CLI maps synthetic truth and schema/config to exits 0 and 2"
   }
 });
 
-runTest("check:form includes infrastructure replay tests but excludes semantic acceptance", () => {
+runTest("check:form includes fixture tests but excludes the standalone acceptance CLI", () => {
   const packageJson = JSON.parse(
     fs.readFileSync(path.join(__dirname, "..", "..", "package.json"), "utf8"),
   );
