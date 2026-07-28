@@ -100,9 +100,12 @@ This allows an oblique capture with a stable hold near 0.47 to calibrate around 
 - A release candidate requires all of the following:
   - valid anchor evidence no older than 1.5 seconds;
   - current `anchorNorm - evidence.normAtHold >= 0.18`;
+  - a fresh departure origin below that `0.18` boundary: normally the start of the most recent below-boundary span inside the 250 ms rise window;
   - current `anchorNorm` is at least `0.04` greater than the median of the previous three usable frames, defining movement away from the face;
-  - current short-window `maxV >= releaseSpeed`;
+  - short-window `maxV >= releaseSpeed`, using only velocity samples at or after the same departure origin;
   - the one-second refractory period has elapsed.
+- If the current frame is the first usable observation after pose loss, the latest prior usable frame may serve as the departure origin outside the 250 ms rise window only when it is at or after `evidence.ts` and remains below the departure boundary. The existing 1.5-second evidence expiry still applies. This preserves recall when the hand is occluded immediately before release without allowing an older already-departed pose to absorb unrelated later motion.
+- Duplicate, future, or non-monotonic current-history timestamps fail closed. A speed spike before the qualifying departure origin cannot be combined with a later slow departure.
 - A qualifying candidate is counted immediately and tagged `fireEvidence: "adaptive"`.
 - Existing close-window and NB/NB2 paths remain available as fallback during the first implementation. They must feed the same pending-release and diagnostic contract.
 
@@ -193,6 +196,10 @@ All production behavior changes follow red-green-refactor. Tests are added to `t
 - The oblique profile enters `ANCHORING`/`FULL_DRAW`, returns non-null `holdMs`, and uses the adaptive summary window.
 - At five anchor samples the adaptive threshold remains 0.35; calibration starts only at six.
 - A `+0.03` three-frame departure does not fire; `+0.04` is the inclusive direction boundary.
+- A stale already-departed pose plus later speed or direction jitter does not fire.
+- A speed spike before a newer departure origin does not fire; speed at or after that origin remains eligible.
+- A first usable release frame after a null-only pose gap can use the latest pre-departure observation while active evidence remains valid.
+- Duplicate current timestamps and origins before `evidence.ts` fail closed.
 - `anchorNorm > 1.2` for less than 300 ms preserves evidence; 300 ms invalidates it.
 - Existing form-core tests either stay unchanged or receive an explicit expectation re-derivation for the approved fast-let-down tradeoff. The final form-core, golden-replay, app, globals, lint, and E2E suites are green.
 

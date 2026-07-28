@@ -430,6 +430,17 @@ runTest("reviewed oblique release is the only retained shot in its truth window"
   );
 });
 
+runTest("reviewed scene-cut retrieval retains no shot and emits no adaptive release", () => {
+  const expectations = JSON.parse(fs.readFileSync(expectationsPath, "utf8"));
+  const fixture = loadFixtureFile(path.join(fixtureDir, "scene-cut-arrow-retrieval.json"));
+  const replay = replayFixture(fixture);
+  assert.deepStrictEqual(verifyReplayAgainstExpectations(fixture, replay, expectations), []);
+  assert.deepStrictEqual(
+    replay.events.filter((event) => event.type === "release" && event.label === "adaptive"),
+    [],
+  );
+});
+
 runTest("acceptance CLI maps synthetic truth and schema/config to exits 0 and 2", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-metric-fixture-"));
   try {

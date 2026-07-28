@@ -527,6 +527,213 @@ function adaptiveCandidateFixture({
   assertEqual(belowDepartureDecision.matched, false, "departure delta 0.17 alone is insufficient");
 }
 {
+  /* Adaptive release は保持位置からの新しい離脱でなければならない。証拠から長時間
+     離れた後の速度・方向ジッターを、古い離脱量と合成して別の射にしない。 */
+  const staleDeparture = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.7, 0.71, 0.72],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      staleDeparture.evidence,
+      staleDeparture.raw,
+      staleDeparture.history,
+      staleDeparture.now,
+    ).matched,
+    false,
+    "adaptive candidate requires a fresh departure origin",
+  );
+
+  const exactWindowOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+  });
+  exactWindowOrigin.history[0].ts = exactWindowOrigin.now - core.FORM_PH.RISE_WINDOW_MS;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      exactWindowOrigin.evidence,
+      exactWindowOrigin.raw,
+      exactWindowOrigin.history,
+      exactWindowOrigin.now,
+    ).matched,
+    true,
+    "departure origin at the short-window boundary remains eligible",
+  );
+
+  const expiredOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+  });
+  expiredOrigin.history[0].ts = expiredOrigin.now - core.FORM_PH.RISE_WINDOW_MS - 0.001;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      expiredOrigin.evidence,
+      expiredOrigin.raw,
+      expiredOrigin.history,
+      expiredOrigin.now,
+    ).matched,
+    false,
+    "departure origin before the short window is stale",
+  );
+
+  const alreadyDepartedBoundary = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.65, 0.7, 0.71],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      alreadyDepartedBoundary.evidence,
+      alreadyDepartedBoundary.raw,
+      alreadyDepartedBoundary.history,
+      alreadyDepartedBoundary.now,
+    ).matched,
+    false,
+    "a frame already at the departure boundary is not a fresh origin",
+  );
+
+  const speedBeforeOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  speedBeforeOrigin.history.unshift({
+    ts: speedBeforeOrigin.now - 200,
+    m: mkRaw(0.7, 140),
+    vel: 6,
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      speedBeforeOrigin.evidence,
+      speedBeforeOrigin.raw,
+      speedBeforeOrigin.history,
+      speedBeforeOrigin.now,
+    ).matched,
+    false,
+    "velocity before the fresh departure origin cannot be reused",
+  );
+
+  const speedAtOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  speedAtOrigin.history[0].vel = 6;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      speedAtOrigin.evidence,
+      speedAtOrigin.raw,
+      speedAtOrigin.history,
+      speedAtOrigin.now,
+    ).matched,
+    true,
+    "velocity on the fresh departure origin remains eligible",
+  );
+
+  const speedAfterOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  speedAfterOrigin.history[1].vel = 6;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      speedAfterOrigin.evidence,
+      speedAfterOrigin.raw,
+      speedAfterOrigin.history,
+      speedAfterOrigin.now,
+    ).matched,
+    true,
+    "velocity after the fresh departure origin remains eligible",
+  );
+
+  const currentDuplicateSpeed = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  currentDuplicateSpeed.history.splice(-1, 0, {
+    ts: currentDuplicateSpeed.now,
+    m: mkRaw(0.75, 140),
+    vel: 20,
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      currentDuplicateSpeed.evidence,
+      currentDuplicateSpeed.raw,
+      currentDuplicateSpeed.history,
+      currentDuplicateSpeed.now,
+    ).matched,
+    false,
+    "duplicate current-timestamp velocity cannot qualify the real current frame",
+  );
+
+  const malformedChronologyRaw = mkRaw(0.75, 140);
+  const malformedChronologyEvidence = {
+    ts: 0,
+    normAtHold: 0.47,
+    anchorEnter: 0.59,
+    releaseSpeed: 6,
+    strength: 12,
+  };
+  const validChronologySuffix = () => [
+    { ts: 850, m: mkRaw(0.64, 140), vel: 0.2 },
+    { ts: 900, m: mkRaw(0.7, 140), vel: 0.2 },
+    { ts: 950, m: mkRaw(0.71, 140), vel: 0.2 },
+    { ts: 1000, m: malformedChronologyRaw, vel: 6 },
+  ];
+  [
+    { label: "future prefix", frame: { ts: 1100, m: mkRaw(0.63, 140), vel: 20 } },
+    { label: "duplicate prefix", frame: { ts: 850, m: mkRaw(0.63, 140), vel: 20 } },
+    { label: "non-monotonic prefix", frame: { ts: 875, m: mkRaw(0.63, 140), vel: 20 } },
+    { label: "non-finite prefix", frame: { ts: NaN, m: null, vel: 0 } },
+  ].forEach(({ label, frame }) => {
+    assertEqual(
+      core.adaptiveReleaseCandidate(
+        malformedChronologyEvidence,
+        malformedChronologyRaw,
+        [frame, ...validChronologySuffix()],
+        1000,
+      ).matched,
+      false,
+      `${label} invalidates the complete adaptive candidate history`,
+    );
+  });
+
+  const occludedRaw = mkRaw(0.75, 140);
+  const occludedHistory = [
+    { ts: 250, m: mkRaw(0.61, 140), vel: 0.2 },
+    { ts: 300, m: mkRaw(0.62, 140), vel: 0.2 },
+    { ts: 350, m: mkRaw(0.63, 140), vel: 0.2 },
+    { ts: 400, m: mkRaw(0.64, 140), vel: 0.2 },
+    { ts: 500, m: null, vel: 0 },
+    { ts: 700, m: null, vel: 0 },
+    { ts: 900, m: null, vel: 0 },
+    { ts: 1000, m: occludedRaw, vel: 6 },
+  ];
+  const occludedEvidence = {
+    ts: 400,
+    normAtHold: 0.47,
+    anchorEnter: 0.59,
+    releaseSpeed: 6,
+    strength: 12,
+  };
+  assertEqual(
+    core.adaptiveReleaseCandidate(occludedEvidence, occludedRaw, occludedHistory, 1000).matched,
+    true,
+    "first usable frame after pose loss can depart from the last observed origin",
+  );
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      { ...occludedEvidence, ts: 400.001 },
+      occludedRaw,
+      occludedHistory,
+      1000,
+    ).matched,
+    false,
+    "a departure origin before the active evidence cannot be reused across pose loss",
+  );
+}
+{
   const far = adaptiveCandidateFixture({
     evidence: { ts: 0, normAtHold: 1.03, releaseSpeed: 6 },
     currentNorm: 1.21,
@@ -577,7 +784,7 @@ function adaptiveCandidateFixture({
   const hugeDeparture = adaptiveCandidateFixture({
     evidence: { ts: 0, normAtHold: -1e15, releaseSpeed: 6 },
     currentNorm: 1.2,
-    priorNorms: [1.08, 1.1, 1.12],
+    priorNorms: [-1e15, 1.1, 1.12],
     currentVel: 5.9,
   });
   const hugeDepartureDecision = core.adaptiveReleaseCandidate(

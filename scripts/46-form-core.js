@@ -250,15 +250,34 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
   );
   if (evidenceValid) decision.releaseSpeed = evidence.releaseSpeed;
 
+  const frames = Array.isArray(history) ? history : [];
+  const currentFrame = frames.length ? frames[frames.length - 1] : null;
+  let historyChronologyValid = frames.length > 0 && Number.isFinite(now);
+  let previousHistoryTs = -Infinity;
+  if (historyChronologyValid) {
+    for (const frame of frames) {
+      if (!frame || !Number.isFinite(frame.ts) || frame.ts <= previousHistoryTs || frame.ts > now) {
+        historyChronologyValid = false;
+        break;
+      }
+      previousHistoryTs = frame.ts;
+    }
+  }
+  const currentHistoryMatches = Boolean(
+    historyChronologyValid && currentFrame && currentFrame.ts === now && currentFrame.m === raw,
+  );
   const currentUsable = Boolean(
-    raw && formConfOk(raw) && Number.isFinite(raw.anchorNorm) && Number.isFinite(now),
+    currentHistoryMatches &&
+    raw &&
+    formConfOk(raw) &&
+    Number.isFinite(raw.anchorNorm) &&
+    Number.isFinite(now),
   );
   if (evidenceValid && currentUsable) {
     const departDelta = raw.anchorNorm - evidence.normAtHold;
     decision.departDelta = Number.isFinite(departDelta) ? departDelta : null;
   }
 
-  const frames = Array.isArray(history) ? history : [];
   const previousNorms = [];
   let newerTs = now;
   if (currentUsable) {
@@ -283,13 +302,54 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
     }
   }
 
+  /* 保持証拠から既に離れ切った姿勢へ、別動作の速度・方向ジッターを合成しない。
+     通常は短窓内で現在へ続く直近の「離脱境界未満」区間の先頭を origin とする。
+     現在が遮蔽後最初の有効観測なら、直前の有効観測が origin の場合に限り evidence
+     の有効期限内で橋渡しする。maxV も同じ origin 以後だけに限定し、速度→origin→
+     緩慢離脱の逆順合成を防ぐ。 */
+  let departureOriginTs = null;
+  if (evidenceValid && currentUsable) {
+    let originNewerTs = now;
+    let sawPriorUsable = false;
+    for (let i = frames.length - 1; i >= 0; i--) {
+      const frame = frames[i];
+      if (!frame || !Number.isFinite(frame.ts)) break;
+      if (frame.ts === now) continue;
+      if (frame.ts > now || frame.ts >= originNewerTs) break;
+      originNewerTs = frame.ts;
+      if (frame.ts < evidence.ts) break;
+      if (!frame.m || !formConfOk(frame.m) || !Number.isFinite(frame.m.anchorNorm)) continue;
+      const priorDeparture = frame.m.anchorNorm - evidence.normAtHold;
+      const originEpsilon =
+        Number.EPSILON *
+        Math.max(1, Math.abs(priorDeparture), Math.abs(FORM_PH.ADAPTIVE_DEPARTURE));
+      const originMatched =
+        Number.isFinite(priorDeparture) &&
+        priorDeparture + originEpsilon < FORM_PH.ADAPTIVE_DEPARTURE;
+      const withinShortWindow = frame.ts >= now - FORM_PH.RISE_WINDOW_MS;
+      if (!withinShortWindow) {
+        if (!sawPriorUsable && originMatched) departureOriginTs = frame.ts;
+        break;
+      }
+      sawPriorUsable = true;
+      if (originMatched) {
+        departureOriginTs = frame.ts;
+        continue;
+      }
+      if (departureOriginTs != null) break;
+    }
+  }
+
   const velocities = frames
     .filter(
       (frame) =>
         frame &&
+        departureOriginTs != null &&
         Number.isFinite(frame.ts) &&
+        frame.ts >= departureOriginTs &&
         frame.ts >= now - FORM_PH.RISE_WINDOW_MS &&
         frame.ts <= now &&
+        (frame.ts < now || frame === currentFrame) &&
         frame.m &&
         formConfOk(frame.m) &&
         formDwVisOk(frame.m) &&
@@ -319,6 +379,7 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
     decision.departDelta != null &&
     decision.departDelta > 0 &&
     decision.departDelta + departureEpsilon >= FORM_PH.ADAPTIVE_DEPARTURE &&
+    departureOriginTs != null &&
     decision.movingAway &&
     decision.maxV != null &&
     decision.maxV + speedEpsilon >= decision.releaseSpeed;

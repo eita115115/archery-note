@@ -1087,3 +1087,100 @@ Next task:
   no-shot semantic regression first, preserve the now-green oblique fixture and
   all adaptive/legacy/NB/NB2 synthetic checks, and do not loosen the reviewed
   zero-shot expectation.
+
+### 2026-07-29 - Task 6 adaptive departure temporal coherence
+
+- Reproduced the remaining scene-cut false positive deterministically at
+  `9157.544 ms / adaptive`. The scene cut itself was not the cause: new hold
+  evidence formed after the cut at `7894.855 ms`, the wrist then remained
+  beyond the relative departure boundary for about `1129.586 ms`, and the old
+  candidate combined that stale departed pose with a later inward
+  `maxV=6.530` sample and a separate direction jitter.
+- Added a fresh departure-origin contract to `adaptiveReleaseCandidate`.
+  Normal candidates must contain the most recent below-departure span inside
+  the existing 250 ms rise window, and qualifying velocity is limited to that
+  span's origin or later. A speed spike before a newer origin can no longer be
+  combined with a slow later departure.
+- Preserved null-only occlusion recall. When the current frame is the first
+  usable observation after pose loss, the latest prior usable frame may bridge
+  the rise window only when it is at or after active evidence and still below
+  the departure boundary. The existing 1.5-second evidence expiry remains the
+  outer limit.
+- Made adaptive candidates fail closed unless the complete history has finite,
+  strictly increasing, non-future timestamps and the unique tail frame matches
+  the current raw-metric object. This prevents duplicate, out-of-order, future,
+  or non-finite prefix entries from preserving an origin or contributing
+  velocity.
+- Added synthetic regression coverage for stale already-departed poses, exact
+  250 ms and departure boundaries, speed before/at/after origin, duplicate
+  current timestamps, evidence-time boundaries, 500 ms null-only recovery, and
+  malformed timestamp prefixes. Existing direction, speed, floating-point,
+  malformed-input, FPS, let-down, NB/NB2, cancellation, and refractory
+  contracts remain green.
+- Promoted `scene-cut-arrow-retrieval` into the stable semantic form check. It
+  must match the reviewed zero-shot expectation and emit no gross adaptive
+  release, so a later cancellation cannot hide a false candidate. The
+  `oblique-single-release` result remains exactly one retained
+  `4457.414 ms / close` event.
+- Synchronized the adaptive design specification with the fresh-origin,
+  origin-bound velocity, null-only recovery, and timestamp fail-closed
+  contracts. Fixture JSON and reviewed expectations were not changed.
+
+Validation:
+
+- Initial TDD RED:
+  - `node tools/check-form-core.js` failed with
+    `adaptive candidate requires a fresh departure origin: expected false, got true`.
+  - `npm run test:form-fixtures` failed because scene-cut expected zero retained
+    shots but replay retained `9157.544 ms / adaptive`.
+- Review-remediation RED:
+  - speed-before-origin initially matched because `maxV` was collected
+    independently of the new origin;
+  - a short-window-only implementation lost the existing 260/500 ms null-only
+    release recovery;
+  - malformed future/duplicate/non-monotonic/non-finite history prefixes
+    initially left a previously found origin eligible.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's result, security, UI, PWA, storage, and version gates.
+- `npm run test:e2e`: pass, 41 tests.
+- `npm run lint`: pass.
+- `npm run format:check`: pass.
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass, 28 tests.
+- `npm run golden:form-fixtures`: pass:
+  - oblique: retained `4457.414 ms / close`;
+  - scene-cut: retained `0`, adaptive gross events `0`.
+- `git diff --check`: pass.
+- Independent trace research and mutation probing confirmed the root cause and
+  preserved 15/30/60 fps adaptive detection, A/B/C profiles, six-shot counting,
+  the approved 100 ms fast-let-down tradeoff, 200/230/260/500 ms null-only
+  recovery, and exact fixture event contracts. Final strict and adversarial
+  reviews returned ready-to-commit with zero blocker, major, or minor findings.
+
+Risk notes:
+
+- These deterministic public fixtures and synthetic boundaries do not replace
+  the required iPhone 18-shot field matrix. Real MediaPipe behavior still needs
+  side-view, oblique, and normal-range validation, including handedness and
+  camera-placement variation.
+- Motion and speed occurring within one continuous below-departure span remain
+  eligible by design. Crossing the boundary and forming a newer origin excludes
+  the older speed. The remaining within-span tradeoff requires field evidence,
+  not another blind threshold change.
+- A malformed old timestamp now disables the adaptive candidate until that
+  entry leaves the 200-frame history. Known production and replay callers
+  generate monotonic timestamps; this is an intentional fail-closed fallback.
+- Storage/schema, dependencies, Service Worker behavior, version markers,
+  release/deployment files, persisted user data, and fixture JSON remain
+  unchanged.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Audit the existing form-diagnostic save/export path against the 18-shot field
+  acceptance matrix and implement only the smallest missing privacy-safe
+  handoff needed for an iPhone field run. Keep video and full landmarks
+  ephemeral, avoid storage-schema changes without approval, and make every
+  retained shot's threshold/evidence path reviewable before any release task.
