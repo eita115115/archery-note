@@ -46,7 +46,8 @@ return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, f
     typeof adaptiveReleaseCandidate === "function" ? adaptiveReleaseCandidate : null,
   updateAdaptiveAnchorEvidence:
     typeof updateAdaptiveAnchorEvidence === "function" ? updateAdaptiveAnchorEvidence : null,
-  computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
+  computeFormMetrics, makeFormEma, makeFormPhaseDetector, legacyReleaseContinuity,
+  stepFormPhase, computeFormVelocity,
   FORM_VEL_FILTER, makeFormVelocitySource,
   formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
   formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
@@ -1608,6 +1609,122 @@ function releaseFrames(totalMs, dt, fromAnchor) {
     if (x >= 1) break;
   }
   return frames;
+}
+
+{
+  const closeFrames = [
+    { ts: 100, m: mkRaw(0.22, 100), vel: 0.02 },
+    { ts: 120, m: mkRaw(0.22, 100), vel: 0.02 },
+  ];
+  const continuityAt = (overrides = {}) => {
+    const raw = mkRaw(0.4, overrides.drawArm === undefined ? 145 : overrides.drawArm);
+    const previous = {
+      ts: 140,
+      m: overrides.previousNull ? null : mkRaw(overrides.previousAnchor ?? 0.36, 100),
+      vel: 1,
+    };
+    const current = {
+      ts: 160,
+      m: overrides.staleTail ? { ...raw } : raw,
+      vel: overrides.velocity ?? 6,
+    };
+    return core.legacyReleaseContinuity(
+      raw,
+      closeFrames,
+      [...closeFrames, previous, current],
+      0.22,
+      1,
+      6,
+      160,
+    );
+  };
+  const exact = continuityAt();
+  assertEqual(
+    exact.calibratedMatched,
+    true,
+    "legacy continuity includes exact calibrated boundary",
+  );
+  assertClose(exact.directionDelta, 0.04, 1e-12, "legacy continuity reports direction delta");
+  assertEqual(
+    continuityAt({ previousAnchor: 0.360001 }).calibratedMatched,
+    false,
+    "legacy continuity excludes direction below the calibrated boundary",
+  );
+  assertEqual(
+    continuityAt({ drawArm: Number.NaN }).calibratedMatched,
+    false,
+    "legacy continuity requires a finite draw-arm comparison",
+  );
+  assertEqual(
+    continuityAt({ staleTail: true }).calibratedMatched,
+    false,
+    "legacy continuity requires history tail identity with the current raw frame",
+  );
+  assertEqual(
+    continuityAt({ previousNull: true }).calibratedMatched,
+    false,
+    "legacy calibrated continuity does not cross a null frame",
+  );
+}
+
+{
+  /* Legacy の速度・アンカー証拠は同じ離脱動作に属していなければならない。
+     250ms 窓の古い速度スパイクと、後から現れたアンカー外フレームを別々に集計すると、
+     保持中の暫定候補が真のリリース窓を塞ぐ。 */
+  const staleSpike = [];
+  for (let i = 0; i < 60; i++) staleSpike.push([mkRaw(0.22, 15), 0.02, 20]);
+  staleSpike.push([mkRaw(0.22, 15), 32, 20]);
+  for (let i = 0; i < 3; i++) staleSpike.push([mkRaw(0.3, 15), 0.2, 20]);
+  staleSpike.push([mkRaw(0.46, 17), 3.7, 20]);
+  assertEqual(
+    runSequence(staleSpike).releases,
+    0,
+    "stale velocity and later anchor evidence do not form one legacy release",
+  );
+}
+{
+  /* 単発の高速ランドマーク跳びは、直前のアンカー姿勢と腕角度が連続しない限り
+     legacy release にしない。後続の有効観測が乏しい場面で幻ショットを残さないための
+     fire-time 精度契約。 */
+  const poseJump = [];
+  for (let i = 0; i < 60; i++) poseJump.push([mkRaw(0.22, 50), 0.02, 20]);
+  poseJump.push([mkRaw(0.49, 135), 21.2, 20]);
+  assertEqual(
+    runSequence(poseJump).releases,
+    0,
+    "single high-speed pose discontinuity does not fire a legacy release",
+  );
+}
+{
+  /* 瞬間速度が固定 legacy 閾値に届かなくても、校正速度を超えながら連続して
+     アンカーから離れる実射形の系列は検出する。drawArm<125 で adaptive evidence を
+     意図的に作らず、legacy continuity 経路だけを検証する。 */
+  const sustainedRelease = [];
+  for (let i = 0; i < 60; i++) sustainedRelease.push([mkRaw(0.22, 10), 0.02, 20]);
+  [
+    [0.5, 0.5],
+    [0.55, 2.5],
+    [0.61, 3.2],
+    [0.68, 6.5],
+  ].forEach(([anchorNorm, velocity]) =>
+    sustainedRelease.push([mkRaw(anchorNorm, 10), velocity, 20]),
+  );
+  assertEqual(
+    runSequence(sustainedRelease).releases,
+    1,
+    "calibrated continuous departure recovers a sub-threshold legacy release",
+  );
+
+  const lowFpsRelease = [];
+  const lowFpsDt = 1000 / 15;
+  for (let i = 0; i < 20; i++) lowFpsRelease.push([mkRaw(0.22, 10), 0.02, lowFpsDt]);
+  lowFpsRelease.push([mkRaw(0.4, 10), 0.5, lowFpsDt]);
+  lowFpsRelease.push([mkRaw(0.5, 10), 6.5, lowFpsDt]);
+  assertEqual(
+    runSequence(lowFpsRelease).releases,
+    1,
+    "calibrated continuous departure remains available at the 15fps accuracy boundary",
+  );
 }
 
 function shotSequence(dt) {

@@ -33,8 +33,7 @@ const FORM_REF = Object.freeze({
 /* フェーズ検出しきい値。2026-07-05 レットダウン誤検出の修理で再調整
    （tools/check-form-core.js の境界ケースを必ず通すこと。docs/form-tracking-feasibility.md
    の「短窓の離脱量を主条件」という旧設計は、250ms窓では1.1秒未満の引き戻しが
-   無条件に誤検出される欠陥があったため撤回した。実測境界は同ファイル冒頭コメント参照）。
-   RELEASE_RISE は未使用化のみ（表示・別ロジックからの参照除去は今回のスコープ外）。 */
+   無条件に誤検出される欠陥があったため撤回した。実測境界は同ファイル冒頭コメント参照）。 */
 const FORM_PH = Object.freeze({
   CLOSE_IN: 0.35,
   /* Session-local adaptive-release primitives: introduced as behavior-neutral
@@ -60,8 +59,9 @@ const FORM_PH = Object.freeze({
   ADAPTIVE_FAR_BOUNDARY: 1.2,
   ADAPTIVE_FAR_INVALIDATION_MS: 300,
   FULLDRAW_MS: 350,
-  RELEASE_RISE: 0.18, // 2026-07-05: リリース判定には使わない（下記 stepFormPhase 参照）。将来別用途で参照する可能性があるため残す
-  RELEASE_TH: 9, // 瞬間速度スパイク（胴体長/秒）。単独主条件に昇格（2026-07-05）
+  RELEASE_RISE: 0.18, // coherent legacy 経路で要求する、アンカー最小値からの最小離脱量（胴体長）
+  RELEASE_TH: 9, // coherent fast 経路の現在フレーム速度（胴体長/秒）
+  LEGACY_ARM_MAX_DELTA_DEG: 45, // coherent legacy 経路: アンカー姿勢中央値から許す引き腕角度差
   RISE_WINDOW_MS: 250, // 速度スパイクの短窓（maxV 算出用に流用）
   REFRACTORY_MS: 1000,
   DRAW_SPEED: 0.25,
@@ -788,6 +788,86 @@ function formDwVisOk(m) {
   );
 }
 
+/* Legacy close/velocity 候補の時間的整合性。
+   旧実装は250ms窓の maxV・closeFrames・現在位置を独立集計していたため、古い速度ノイズと
+   後続のアンカー外フレームを1回の離脱として合成できた。高速経路は「現在速度＋アンカー
+   姿勢から連続した腕角度」、校正経路はそれに直前区間の離脱方向を加えて要求する。
+   history末尾が現在フレーム本人でない場合や、null/conf/dWゲートをまたぐ系列は採用しない。
+   NB/NB2の遮蔽回復契約は別経路で維持する。 */
+function legacyReleaseContinuity(
+  raw,
+  closeFrames,
+  windowFrames,
+  minAnchor,
+  sens,
+  releaseSpeed,
+  now,
+) {
+  const currentFrame = windowFrames.length ? windowFrames[windowFrames.length - 1] : null;
+  const previousFrame = windowFrames.length > 1 ? windowFrames[windowFrames.length - 2] : null;
+  const currentMatches = Boolean(
+    currentFrame &&
+    currentFrame.ts === now &&
+    currentFrame.m === raw &&
+    Number.isFinite(currentFrame.vel),
+  );
+  const currentV =
+    currentMatches && Number.isFinite(raw.anchorNorm) && formConfOk(raw) && formDwVisOk(raw)
+      ? Math.max(0, currentFrame.vel)
+      : 0;
+  const closeArm = formMedian(
+    closeFrames.map((frame) => frame.m.drawArm).filter((drawArm) => Number.isFinite(drawArm)),
+  );
+  const armDelta =
+    closeArm != null && Number.isFinite(raw.drawArm) ? Math.abs(raw.drawArm - closeArm) : null;
+  const rise = Number.isFinite(raw.anchorNorm) ? raw.anchorNorm - minAnchor : -Infinity;
+  const riseEpsilon = Number.EPSILON * Math.max(1, Math.abs(rise), Math.abs(FORM_PH.RELEASE_RISE));
+  const riseMatched = rise + riseEpsilon >= FORM_PH.RELEASE_RISE;
+  const armMatched = armDelta != null && armDelta <= FORM_PH.LEGACY_ARM_MAX_DELTA_DEG;
+  const fastMatched =
+    currentMatches &&
+    riseMatched &&
+    armMatched &&
+    currentV > FORM_PH.RELEASE_TH / sens &&
+    Number.isFinite(currentV);
+  const directionDelta =
+    previousFrame &&
+    previousFrame.m &&
+    previousFrame.ts < now &&
+    formConfOk(previousFrame.m) &&
+    formDwVisOk(previousFrame.m) &&
+    Number.isFinite(previousFrame.m.anchorNorm)
+      ? raw.anchorNorm - previousFrame.m.anchorNorm
+      : null;
+  const directionEpsilon =
+    Number.EPSILON *
+    Math.max(
+      1,
+      Math.abs(directionDelta == null ? 0 : directionDelta),
+      Math.abs(FORM_PH.ADAPTIVE_DIRECTION_DELTA),
+    );
+  const directionMatched =
+    directionDelta != null && directionDelta + directionEpsilon >= FORM_PH.ADAPTIVE_DIRECTION_DELTA;
+  const calibratedSpeed = Number.isFinite(releaseSpeed) ? releaseSpeed / sens : Infinity;
+  const speedEpsilon = Number.EPSILON * Math.max(1, Math.abs(currentV), Math.abs(calibratedSpeed));
+  const calibratedMatched =
+    currentMatches &&
+    riseMatched &&
+    armMatched &&
+    directionMatched &&
+    Number.isFinite(releaseSpeed) &&
+    currentV + speedEpsilon >= calibratedSpeed;
+
+  return {
+    fastMatched,
+    calibratedMatched,
+    currentV,
+    armDelta,
+    directionFrames: directionMatched ? 2 : 0,
+    directionDelta,
+  };
+}
+
 /* anchorStartTs は anchorSince と意味が異なる別フィールド（Stage 0 C）。
    anchorSince はアンカー圏を離れた全フレームでリセットされる（FULL_DRAW 昇格判定用）が、
    anchorStartTs は sticky: ANCHORING/FULL_DRAW で記録を開始し、DRAWING への一時離脱では
@@ -838,12 +918,13 @@ function formPhaseResult(st, now, result, debug) {
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
    sens>1 で検出されやすくなる（しきい値を除算）。
    2026-07-05: リリース判定を「250ms窓の累積離脱量(rise)」主体から
-   「短窓内の瞬間速度スパイク(maxV)」単独主体へ変更した。旧ロジックは
+   「短窓内の瞬間速度スパイク」主体へ変更した。旧ロジックは
    rise>0.18 が単独でも発火したため、1.1秒未満のどんな速さの引き戻し
    （レットダウン）も無条件にリリースとして誤検出していた
    （tools/check-form-core.js のレットダウン境界ケース参照）。
-   legacy の maxV 単独条件は 100ms〜2秒の線形レットダウンで発火せず、
-   50-100msで完了する現実的なリリース速度プロファイルは確実に検出する。
+   legacy の高速経路は現在速度・離脱量・引き腕角度の連続性を同時に要求し、
+   校正経路はさらに直前区間の離脱方向を要求する。これにより古い速度スパイクと
+   後続位置を合成せず、50-100msの現実的なリリースを検出する。
    adaptive 経路は recall-first の承認済み tradeoff として100ms線形レットダウンを
    削除可能な候補にしうるが、150ms〜2秒は非発火を維持する
    （実測境界表は同ファイル）。
@@ -1157,8 +1238,16 @@ function stepFormPhase(st, raw, history, sens, now) {
   // B'（Stage 1）: 速度信頼性は dW 個別可視性でゲート（DW_VIS_GATE=0 の間は velWin === win）
   const velWin = win.filter((h) => formDwVisOk(h.m));
   const maxV = velWin.length ? Math.max(...velWin.map((h) => h.vel || 0)) : 0;
+  const legacyContinuity = legacyReleaseContinuity(
+    usable,
+    closeFrames,
+    winAll,
+    minAnchor,
+    s,
+    st.adaptive.releaseSpeed,
+    now,
+  );
   const hasNullGap = winAll.length > win.length;
-  const velOk = maxV > FORM_PH.RELEASE_TH / s;
   /* 窓内の最大連続ギャップ（win に入らなかった最初のフレーム→最後のフレームの経過時間）。
      hasNullGap と同じ「win 基準」（実null ∪ conf ゲート除外）で数える。2026-07-11
      strict-review 修正: 旧実装は `!h.m` のみで数えていたため、CONF_GATE 発動時に
@@ -1210,7 +1299,13 @@ function stepFormPhase(st, raw, history, sens, now) {
     maxV > FORM_PH.NB2_MAXV / s;
   const anchorEvidence = closeFrames.length >= 2 ? "close" : nullBridged2 ? "nb2" : null;
   const adaptiveDecision = adaptiveReleaseCandidate(adaptive.evidence, usable, history, now);
-  const legacyMatched = anchorEvidence && !close && (velOk || nullBridged || nullBridged2);
+  const legacyMatched =
+    anchorEvidence &&
+    !close &&
+    (legacyContinuity.fastMatched ||
+      legacyContinuity.calibratedMatched ||
+      nullBridged ||
+      nullBridged2);
   const fireEvidence = adaptiveDecision.matched
     ? "adaptive"
     : legacyMatched
@@ -1225,6 +1320,10 @@ function stepFormPhase(st, raw, history, sens, now) {
     anchorNorm: usable.anchorNorm,
     closeFrames: closeFrames.length,
     hasNullGap,
+    legacyCurrentV: legacyContinuity.currentV,
+    legacyArmDelta: legacyContinuity.armDelta,
+    legacyDirectionFrames: legacyContinuity.directionFrames,
+    legacyDirectionDelta: legacyContinuity.directionDelta,
     refractoryRemaining: refractoryRemainingMs(),
   }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
   if (fireEvidence && (st.lastReleaseTs === 0 || now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS)) {
@@ -1237,7 +1336,11 @@ function stepFormPhase(st, raw, history, sens, now) {
        departCheck を維持し、肯定的な離脱を発火前に確認済みの adaptive 発火は別 pending を使う。 */
     const viaNb2 =
       fireEvidence !== "adaptive" &&
-      (fireEvidence === "nb2" || (!velOk && !nullBridged && nullBridged2));
+      (fireEvidence === "nb2" ||
+        (!legacyContinuity.fastMatched &&
+          !legacyContinuity.calibratedMatched &&
+          !nullBridged &&
+          nullBridged2));
     if (fireEvidence === "adaptive") {
       const anchorEnter =
         adaptiveEvidence && Number.isFinite(adaptiveEvidence.anchorEnter)
@@ -1273,7 +1376,14 @@ function stepFormPhase(st, raw, history, sens, now) {
     st.anchorStartTs = 0;
     /* 発火経路の計装（フィールド監査用）: evidence=アンカー証拠の種別 / vel=速度経路の種別 */
     debug.fireEvidence = fireEvidence;
-    debug.fireVel = fireEvidence === "adaptive" ? null : velOk ? "vel" : nullBridged ? "nb" : "nb2";
+    debug.fireVel =
+      fireEvidence === "adaptive"
+        ? null
+        : legacyContinuity.fastMatched || legacyContinuity.calibratedMatched
+          ? "vel"
+          : nullBridged
+            ? "nb"
+            : "nb2";
     const result = formPhaseResult(
       st,
       now,

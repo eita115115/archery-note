@@ -419,6 +419,17 @@ runTest("both tracked public fixtures load and replay deterministically without 
   }
 });
 
+runTest("reviewed oblique release is the only retained shot in its truth window", () => {
+  const expectations = JSON.parse(fs.readFileSync(expectationsPath, "utf8"));
+  const fixture = loadFixtureFile(path.join(fixtureDir, "oblique-single-release.json"));
+  const replay = replayFixture(fixture);
+  assert.deepStrictEqual(verifyReplayAgainstExpectations(fixture, replay, expectations), []);
+  assert.deepStrictEqual(
+    replay.retainedReleases.map((release) => release.label),
+    ["close"],
+  );
+});
+
 runTest("acceptance CLI maps synthetic truth and schema/config to exits 0 and 2", () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-metric-fixture-"));
   try {

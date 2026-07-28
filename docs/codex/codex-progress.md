@@ -1006,3 +1006,84 @@ Next task:
   and retains `6742.088 ms`. Keep `scene-cut-arrow-retrieval` and all synthetic
   form checks as non-regression gates; defer a separate adaptive scene-cut
   change unless the evidence proves the same root cause.
+
+### 2026-07-29 - Task 6 legacy release continuity
+
+- Reproduced the oblique failure deterministically and traced two consequences
+  of the same legacy evidence defect. The old path combined a stale
+  `maxV=32.161` with later close/position evidence at `4061.929 ms`, then let
+  that provisional candidate occupy confirmation/refractory through the real
+  release. A separate low-quality pose jump at `6742.088 ms` reused the same
+  non-coherent window aggregation and was retained through a long null run.
+- Added `legacyReleaseContinuity` to require the current history tail, timestamp,
+  velocity, minimum departure, and draw-arm continuity to describe the same
+  frame. The calibrated fallback additionally requires motion away from the
+  immediately preceding usable frame and the session-local release speed. The
+  fixed high-speed path keeps its legacy speed threshold. NB/NB2/null-bridge,
+  pending cancellation, refractory, confidence, and dW-visibility policies are
+  unchanged.
+- Added synthetic regression coverage for stale velocity, a discontinuous pose
+  jump, calibrated sub-threshold departure, the 15 fps accuracy boundary, exact
+  floating-point boundaries, non-finite draw-arm input, stale history identity,
+  and a preceding null frame.
+- Promoted `oblique-single-release` into the stable form check. It must match the
+  reviewed count/window and retain the `close` legacy label. Production replay
+  now retains exactly `4457.414 ms / close`; the `6742.088 ms` event is absent.
+- Kept the separate scene-cut defect isolated. Its retained result remains
+  exactly `9157.544 ms / adaptive`; the first already-canceled legacy candidate
+  moves from `1241.174` to `1220.075 ms`, with the same
+  `1641.490 ms / no-depart` cancellation and no downstream state change.
+
+Validation:
+
+- TDD RED before production changes:
+  - `npm run test:form-fixtures` failed because the retained
+    `6742.088 ms / close` event was outside `[4300, 4600]`.
+  - `node tools/check-form-core.js` failed because stale velocity plus later
+    anchor evidence produced one release instead of zero.
+- `npm run check:form`: pass.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's result, security, UI, PWA, storage, and version gates.
+- `npm run test:e2e`: pass, 41 tests.
+- `npm run lint`: pass.
+- `npm run format:check`: pass.
+- Targeted Prettier check for the three changed JS files: pass.
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass, 28 tests.
+- `git diff --check`: pass.
+- `npm run golden:form-fixtures`: expected exit `1` with exactly the remaining
+  scene-cut semantic mismatch. The oblique case passes at
+  `4457.414 ms / close`.
+- Initial strict review found a missing legacy-label assertion and targeted
+  formatting drift; both were fixed. Adversarial review rejected an initial
+  fixed-four-frame implementation for FPS dependence and an arm-continuity
+  bypass. The implementation was redesigned, and the final adversarial review
+  and a separate fresh verifier both returned ready-to-commit with no blocker
+  or major finding.
+
+Risk notes:
+
+- The deterministic public fixture proves this sample schedule, not the
+  required iPhone 18-shot field matrix. The `45°` continuity bound and
+  calibrated path still need multiple real camera angles, handedness settings,
+  and range placements.
+- At 10 fps, one low-speed departure frame followed by a calibrated-speed frame
+  can still lose the two-close-frame evidence to the existing 250 ms window.
+  The UI already treats less than 15 fps as below the accuracy boundary; normal
+  10 fps ease-out profiles remained detected in the adversarial probe.
+- `scene-cut-arrow-retrieval` remains an enforcing RED and is the next detector
+  task. Do not hide it by weakening expectations.
+- Storage/schema, dependencies, Service Worker behavior, version markers,
+  release/deployment files, persisted user data, and fixture JSON are
+  unchanged.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Use `scene-cut-arrow-retrieval` to diagnose and correct the independent
+  adaptive temporal-coincidence false positive at `9157.544 ms`. Add a RED
+  no-shot semantic regression first, preserve the now-green oblique fixture and
+  all adaptive/legacy/NB/NB2 synthetic checks, and do not loosen the reviewed
+  zero-shot expectation.
