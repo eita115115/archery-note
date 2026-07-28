@@ -1184,3 +1184,71 @@ Next task:
   handoff needed for an iPhone field run. Keep video and full landmarks
   ephemeral, avoid storage-schema changes without approval, and make every
   retained shot's threshold/evidence path reviewable before any release task.
+
+### 2026-07-29 - Task 6 diagnostic handoff audit checkpoint
+
+- Completed four independent read-only audits of the detector-to-storage path,
+  iPhone field workflow, 18-shot acceptance contract, and privacy boundary.
+  This checkpoint changes documentation only; implementation remains behind
+  design approval.
+- Confirmed that the core already returns all seven required adaptive-fire
+  values: `anchorFloor`, `anchorEnter`, `releaseSpeed`, `evidenceAgeMs`,
+  `evidenceStrength`, `departDelta`, and `fireEvidence`. Live capture keeps the
+  complete object only transiently. Persisted `features[].diag` retains just
+  `maxV`, `rise`, `nullFrames`, and `conf`; replay does not attach per-shot
+  debug data; and `releaseFires.framesBefore` excludes the fire frame.
+- Confirmed an acceptance-critical identity defect. Automatic cancellation
+  removes the current `shots` array tail rather than the shot created by that
+  pending detector receipt. If the newest receipt is manually removed during
+  the confirmation window, a later cancellation can remove the preceding true
+  shot. Manual removal also leaves no diagnostic outcome event.
+- Confirmed that additive nested diagnostic fields are preserved by the current
+  schema-5 normalization path, so the missing evidence can be added without a
+  storage migration, key change, dependency, or Service Worker change.
+- Confirmed that the only transferable diagnostic-bearing artifact is the full
+  JSON database backup. It also contains unrelated sessions, equipment,
+  settings, notes, active state, and trash, so it is unsuitable for
+  privacy-minimized field evidence.
+- Confirmed that `tools/serve-iphone.ps1` is not a live-camera field path. It
+  serves a LAN IP over HTTP, which is not a secure context for
+  `getUserMedia()`, and its MIME table omits the `.mjs` and `.wasm` types needed
+  by the local pose model. A trusted HTTPS preview with correct MIME types, or
+  a separately approved sanitized HTTPS deployment, is required for the human
+  iPhone matrix.
+- Reconciled the remaining acceptance gap: synthetic and licensed scalar
+  fixtures are strong regression evidence, but they do not prove three real
+  six-shot ends, at most one removable false positive per end, no automatic
+  removal of a shown true shot, or complete evidence for every retained shot.
+- Confirmed documentation drift in `tools/golden-replay/README.md`: it still
+  describes the two tracked scalar fixtures as failing even though the current
+  enforcing checks and progress evidence show them passing. It must be updated
+  before GitHub preparation can be considered complete.
+
+Validation:
+
+- Four independent read-only audit reports completed at
+  `c31ca937a8392feffe60aca20e8fdb21f6a47c12`.
+- Repository and worktree were clean before this documentation update.
+- No runtime, storage, UI, dependency, Service Worker, version, release, or
+  deployment files changed in this checkpoint.
+
+Risk notes:
+
+- A field run on the current build cannot satisfy the evidence contract and can
+  trigger the manual-remove/auto-cancel race. Do not treat it as acceptance.
+- Diagnostics-only export must construct a fresh bounded allowlist object. It
+  must exclude database records, persisted/user IDs, dates, paths, URLs, video,
+  pixels, raw landmarks, free-form strings, and unbounded traces. Only
+  export-local receipt ordinals may correlate a fire with its outcome.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Obtain design approval for the smallest three-part handoff: exact pending
+  shot identity and outcome tracking; complete live/replay fire snapshots; and
+  a bounded diagnostics-only exporter in the default-off debug surface. After
+  approval, write the design and implementation plan, then implement one small
+  TDD task per run starting with the cancellation identity defect.
