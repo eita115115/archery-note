@@ -1589,3 +1589,95 @@ Next task:
   three-part diagnostic handoff: stable shot identity and outcome mapping,
   complete live/replay fire snapshots, and a default-off bounded
   diagnostics-only export.
+
+### 2026-07-29 - Production-velocity adaptive positive characterization
+
+- Added a detector characterization that accepts only normalized form metrics
+  and derives every velocity through the shipped
+  `makeFormVelocitySource().step(history, raw, now)` path. It does not inject
+  precomputed velocity into the detector.
+- Reproduced the capture/replay processing order in one end-to-end scenario:
+  compute velocity, push the identical current raw object, cap history at 200,
+  run `stepFormPhase`, and summarize the release immediately from that same
+  history using the returned `anchorStartTs` and top-level `anchorEnter`.
+- Used a 60 fps sequence with 12 setup/draw frames, 180 oblique hold frames
+  cycling through anchor norms `0.47/0.475/0.48`, and 25 follow-through frames.
+  Nine one-frame wrist displacements and their returns produce exactly 18 of
+  180 hold velocities at approximately 7 torso-lengths per second. The release
+  wrist displacement produces approximately 8.5 torso-lengths per second.
+- Proved the full positive outcome: the detector visits DRAWING, ANCHORING,
+  FULL_DRAW, RELEASE, and FOLLOW; emits exactly one adaptive release; emits no
+  cancellation; learns `anchorFloor=0.47`, `anchorEnter=0.59`, and the capped
+  noise-adapted `releaseSpeed=8`; and keeps no legacy velocity label.
+- Proved that the fire-time history is bounded and ends with the current
+  timestamp and identical raw object. The resulting summary is non-null,
+  non-degraded, uses 173 primary hold frames, reports a 3000 ms hold and
+  `anchorNorm=0.475`, and preserves the supplied angle and confidence medians.
+- Extended the capture/replay source contract through the complete production
+  handoff. Both loops must keep velocity, current push, cap, detection,
+  `released`, and a direct synchronous `onShot` call in that order, and each
+  `onShot` must begin by directly summarizing the same history.
+- Confirmed the adaptive candidate remains pending at the inclusive 400 ms
+  boundary, clears on the next 60 fps frame without cancellation, and leaves
+  history capped at 200.
+- This checkpoint changes tests only. Detector thresholds, runtime behavior,
+  UI, storage/schema, persisted data, Service Worker, dependencies, version
+  markers, model assets, and user data are unchanged.
+
+Validation:
+
+- Baseline disposable probe observed one adaptive release, zero cancellations,
+  18/180 computed hold outliers near 7, computed release velocity
+  `8.500000000000075`, `anchorEnter=0.59`, `releaseSpeed` approximately 8,
+  `holdMs=2999.999999999993`, and a non-degraded 173-frame summary.
+- Counterfactual probes proved the new seams are observable:
+  - zeroing the shipped velocity source produces zero releases;
+  - running detection before the current history push produces zero releases;
+  - omitting the adaptive summary boundary changes the summary to
+    `degraded=true` with 29 fallback frames;
+  - forcing long-hold calibration to retain the default speed 6 fails the new
+    exact learned-speed assertion;
+  - delaying the capture `onShot` call fails the synchronous production-order
+    contract.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's result, security, UI, PWA, storage, and version gates.
+- `npm run golden:form-fixtures`: pass:
+  - oblique retained one `4457.414 ms / close` release;
+  - scene-cut retrieval retained zero releases.
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass, 28 tests.
+- `npm run test:e2e`: pass, 43/43.
+- `npm run lint`: pass.
+- `npm run format:check`: pass.
+- `git diff --check`: pass.
+- The initial independent specification and strict reviews both returned the
+  diff for stronger evidence: one required exact learned-speed coverage and
+  direct history-tail assertions; the other demonstrated that a delayed live
+  summary mutation still passed. After remediation, both reviewers returned
+  ACCEPT with zero blocker, major, or minor findings. A third independent
+  verifier also returned ACCEPT after reproducing all numeric outcomes and the
+  zero-velocity and missing-summary-boundary mutations.
+
+Risk notes:
+
+- This begins at normalized form metrics. It does not exercise MediaPipe
+  landmark extraction, real video scheduling, camera permissions, or physical
+  iPhone motion, and it does not replace the 3-condition/18-shot field matrix.
+- The full five-video runner was not repeated because no product detector code
+  changed. Its last final-detector run remains four of five truth cases: the
+  reviewed positive passed, while the close-up negative retained one false
+  release at `6204.595 ms`.
+- The live manual-delete then delayed-cancel identity defect remains
+  reproducible and unfixed. Stable shot identity, complete fire snapshots, and
+  a privacy-minimized diagnostics-only export remain one approval-gated design
+  handoff and were not changed here.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Diagnose the remaining full-video close-up false release at `6204.595 ms`
+  frame by frame, read-only first. Compare its hold evidence, departure origin,
+  velocity timing, and confirmation lifecycle with the reviewed positive and
+  this production-velocity positive before proposing any detector change.

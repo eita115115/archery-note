@@ -3125,6 +3125,140 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   assertEqual(f4.step([], mkM(0.9, 0.3), 200), 0, "explicit reset reseeds (vel 0)");
 }
 
+/* ---------- production velocity → adaptive release → shot summary ---------- */
+
+{
+  /* 撮影/リプレイと同じ順序で、実座標から速度を計算してから current frame を
+     history へ追加し、検出と要約を同じ履歴で完結させる。従来の adaptive fixture は
+     vel を直接注入していたため、この統合経路を別途固定する。 */
+  const frameMs = 1000 / 60;
+  const bodyScale = 0.25;
+  const baseDrawWristX = 0.6;
+  const holdOutlierDx = (7 * bodyScale) / 60;
+  const releaseDx = (8.5 * bodyScale) / 60;
+  const detector = core.makeFormPhaseDetector();
+  const velocitySource = core.makeFormVelocitySource();
+  const history = [];
+  const phases = new Set();
+  const holdVelocities = [];
+  let now = 0;
+  let grossReleases = 0;
+  let cancellations = 0;
+  let fire = null;
+  let shot = null;
+
+  const productionRaw = (anchorNorm, drawArm, drawWristX = baseDrawWristX) => ({
+    anchorNorm,
+    drawArm,
+    bodyScale,
+    dW: { x: drawWristX, y: 0.31, visibility: 0.95 },
+    bW: { x: 0.2, y: 0.4, visibility: 0.95 },
+    bowArm: 171,
+    shoulderDrop: 0.07,
+    headOffset: 0.09,
+    forceLine: 0.07,
+    score: 82,
+    conf: 0.92,
+  });
+  const advance = (raw, segment) => {
+    now += frameMs;
+    const vel = velocitySource.step(history, raw, now);
+    history.push({ ts: now, m: raw, vel });
+    if (history.length > 200) history.shift();
+    const result = core.stepFormPhase(detector, raw, history, 1, now);
+    phases.add(result.phase);
+    if (segment === "hold") holdVelocities.push(vel);
+    if (result.released) {
+      grossReleases++;
+      fire = {
+        now,
+        vel,
+        raw,
+        result,
+        historyLength: history.length,
+        historyTail: history[history.length - 1],
+        pending: { ...detector.pendingRelease },
+      };
+      shot = core.summarizeFormShot(history, result.anchorStartTs, now, result.anchorEnter);
+    }
+    if (result.canceled) cancellations++;
+    return { now, vel, result };
+  };
+
+  // setup の末尾を0.65に留め、最初の hold frame より前を保持時間へ混ぜない。
+  for (let i = 0; i < 12; i++) {
+    advance(productionRaw(1.2 - i * 0.05, 110 + i * 3, baseDrawWristX - (11 - i) * 0.002), "setup");
+  }
+  // 180 frames中9回だけ手首を1 frameずらし、往復18 frames（10%）を約7 tlsにする。
+  for (let i = 0; i < 180; i++) {
+    advance(
+      productionRaw(
+        [0.47, 0.475, 0.48][i % 3],
+        150,
+        i % 20 === 10 ? baseDrawWristX + holdOutlierDx : baseDrawWristX,
+      ),
+      "hold",
+    );
+  }
+  advance(productionRaw(0.75, 140, baseDrawWristX + releaseDx), "release");
+  assert(fire, "production pipeline captures the release result");
+
+  let pendingAtConfirmBoundary = null;
+  let confirmBoundaryElapsed = null;
+  for (let i = 0; i < 25; i++) {
+    const follow = advance(productionRaw(1, 90, baseDrawWristX + releaseDx), "follow");
+    if (i === 23) {
+      confirmBoundaryElapsed = follow.now - fire.now;
+      pendingAtConfirmBoundary = detector.pendingRelease != null;
+    }
+  }
+
+  const holdOutliers = holdVelocities.filter((vel) => vel >= 6.9 && vel <= 7.1);
+  assertEqual(holdVelocities.length, 180, "production pipeline covers a three-second hold");
+  assertEqual(holdOutliers.length, 18, "production pipeline computes 10% hold outliers");
+  holdOutliers.forEach((vel, i) =>
+    assertClose(vel, 7, 1e-9, `production hold outlier ${i + 1} is computed from dW`),
+  );
+  assertEqual(grossReleases, 1, "production pipeline emits exactly one release");
+  assertEqual(cancellations, 0, "production pipeline retains the genuine release");
+  assertClose(fire.vel, 8.5, 1e-9, "production pipeline computes release velocity from dW");
+  assert(fire.historyLength <= 200, "release history respects the production cap");
+  assertEqual(fire.historyTail.ts, fire.now, "release history tail uses the current timestamp");
+  assertEqual(fire.historyTail.m, fire.raw, "release history tail keeps the current raw identity");
+  assertEqual(fire.result.debug.fireEvidence, "adaptive", "production shot uses adaptive evidence");
+  assertEqual(fire.result.debug.fireVel, null, "adaptive production shot has no legacy route");
+  assertClose(fire.result.anchorEnter, 0.59, 1e-12, "production shot learns anchorEnter=.59");
+  assertClose(fire.result.debug.anchorFloor, 0.47, 1e-12, "production shot learns anchor floor");
+  assertClose(
+    fire.result.debug.releaseSpeed,
+    8,
+    1e-9,
+    "production shot learns the capped p90 noise-adapted release speed",
+  );
+  assert(
+    fire.vel > fire.result.debug.releaseSpeed,
+    "computed 8.5 release clears the noise-adapted speed",
+  );
+  assertEqual(fire.pending.fireEvidence, "adaptive", "pending confirmation preserves route");
+  assertClose(fire.pending.anchorEnter, 0.59, 1e-12, "pending confirmation preserves geometry");
+  ["SETUP", "DRAWING", "ANCHORING", "FULL_DRAW", "RELEASE", "FOLLOW"].forEach((phase) =>
+    assert(phases.has(phase), `production pipeline reaches ${phase}`),
+  );
+
+  assert(shot, "production pipeline produces a non-null shot summary");
+  assertClose(shot.holdMs, 3000, 1e-6, "production summary measures the three-second hold");
+  assertEqual(shot.degraded, false, "adaptive geometry keeps the primary summary window");
+  assertEqual(shot.frames, 173, "production summary uses the expected hold frames");
+  assertClose(shot.anchorNorm, 0.475, 1e-12, "production summary keeps oblique anchor median");
+  assertClose(shot.angles.bowArm, 171, 1e-12, "production summary keeps bow-arm median");
+  assertClose(shot.angles.drawArm, 150, 1e-12, "production summary keeps draw-arm median");
+  assertClose(shot.confidence, 0.92, 1e-12, "production summary keeps confidence");
+  assertClose(confirmBoundaryElapsed, 400, 1e-6, "adaptive confirmation includes +400ms");
+  assertEqual(pendingAtConfirmBoundary, true, "adaptive release remains pending at +400ms");
+  assertEqual(detector.pendingRelease, null, "adaptive release confirms after +400ms");
+  assertEqual(history.length, 200, "production history remains capped after confirmation");
+}
+
 /* ---------- anchorStartTs のコア内包化（Stage 0 C: sticky 仕様） ---------- */
 
 function makeStepper(dt) {
@@ -3342,6 +3476,41 @@ function anchorHistory(releaseTs, drift) {
     '    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);',
     "startFormReplay section",
   );
+  [
+    {
+      label: "capture",
+      source: capture,
+      summary:
+        "functiononShot(now,anchorStartTs,activeAnchorEnter,debug){constshot=summarizeFormShot(history,anchorStartTs,now,activeAnchorEnter);",
+      onRelease: "constshotId=onShot(now,anchorStartTs,r.anchorEnter,debug);",
+    },
+    {
+      label: "replay",
+      source: replay,
+      summary:
+        "functiononShot(now,anchorStartTs,activeAnchorEnter){constshot=summarizeFormShot(history,anchorStartTs,now,activeAnchorEnter);",
+      onRelease: "constshotId=onShot(now,r.anchorStartTs,r.anchorEnter);",
+    },
+  ].forEach(({ label, source, summary, onRelease }) => {
+    const compact = compactSource(source);
+    const summaryAt = compact.indexOf(summary);
+    const velocityAt = compact.indexOf("constvel=velSrc.step(history,raw,now);");
+    const pushAt = compact.indexOf("history.push({ts:now,m:raw,vel});", velocityAt);
+    const capAt = compact.indexOf("if(history.length>200)history.shift();", pushAt);
+    const detectAt = compact.indexOf("constr=stepFormPhase(detector,raw,history,1.0,now);", capAt);
+    const releasedAt = compact.indexOf("if(released){", detectAt);
+    const onReleaseAt = compact.indexOf(onRelease, releasedAt);
+    assert(
+      summaryAt >= 0 &&
+        velocityAt >= 0 &&
+        pushAt > velocityAt &&
+        capAt > pushAt &&
+        detectAt > capAt &&
+        releasedAt > detectAt &&
+        onReleaseAt > releasedAt,
+      `${label} keeps velocity → current push → history cap → detection → synchronous summary order`,
+    );
+  });
   const secureGuardStart = capture.indexOf("if(window.isSecureContext!==true){");
   const captureDomStart = capture.indexOf('const ovl=document.createElement("div");');
   assert(
