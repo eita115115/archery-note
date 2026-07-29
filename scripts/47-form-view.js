@@ -225,6 +225,17 @@ function drawFormSkeleton(ctx,l,w,h){
 }
 
 function openFormCapture(){
+  if(window.isSecureContext!==true){
+    appConfirm(
+      "ライブ撮影には信頼済みのHTTPS接続が必要です。この接続では、保存済み動画の解析を利用できます。",
+      {
+        title:"ライブ撮影を開始できません",
+        cancelLabel:"閉じる",
+        okLabel:"保存動画を選ぶ"
+      }
+    ).then(useReplay=>{ if(useReplay) openFormReplay(); });
+    return;
+  }
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet formCapture">
     <div class="formCamWrap"><video id="fcVideo" playsinline muted></video><canvas id="fcCanvas"></canvas>

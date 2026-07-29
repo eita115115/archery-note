@@ -1397,3 +1397,84 @@ Next task:
   write the design and implementation plan. Start implementation with a TDD
   regression proving manual removal followed by detector cancellation cannot
   remove the preceding retained shot.
+
+### 2026-07-29 - Live form-capture secure-context preflight
+
+- Reproduced the current LAN-HTTP failure in a real Chromium origin with
+  `isSecureContext === false`: tapping live analysis opened the full capture
+  sheet, requested the pose module, and then showed generic camera/iOS advice.
+  The browser had no `navigator.mediaDevices`, so the advice did not identify
+  the actual HTTPS prerequisite.
+- Added a fail-closed guard at the first line of `openFormCapture()`, before
+  capture DOM creation, active-workflow state, the approximately 15 MB pose
+  load, or `getUserMedia()`. It uses the existing accessible `appConfirm`
+  dialog to explain the trusted-HTTPS requirement and offers only `閉じる` or
+  `保存動画を選ぶ`.
+- Kept saved-video replay independent of the secure-context guard. Choosing
+  the fallback opens the existing `video/*` file picker without touching the
+  pose loader or camera until a file is actually selected.
+- Kept trusted loopback HTTP eligible for live capture by checking
+  `window.isSecureContext`, not the URL protocol. The native HTTPS scheme and
+  future trusted HTTPS previews therefore remain on the normal live path.
+- Added a black-box Playwright regression for both insecure LAN-style HTTP and
+  trusted loopback HTTP, plus a fast source-order contract in `check:form`.
+  No detector threshold, count semantics, storage/schema, persisted data,
+  dependency, Service Worker, version marker, or release behavior changed.
+
+Validation:
+
+- E2E TDD RED: the new insecure-origin test timed out looking for the HTTPS
+  dialog because the unguarded implementation opened `.formCapture`.
+- Source-contract TDD RED: `npm run check:form` failed because no guard existed
+  before capture DOM creation.
+- Copy-fit TDD RED: after mobile visual review shortened the CTA, both the E2E
+  selector and source contract failed against the old longer label before the
+  product copy was updated.
+- Focused GREEN: the targeted Playwright run passed 2/2. The insecure case
+  proves zero pose loads, zero camera calls, no capture sheet, an accessible
+  explanatory dialog, and a working `video/*` fallback. After a synthetic file
+  selection, the replay sheet and pose seam start while the camera seam stays
+  untouched. The loopback case proves live startup remains eligible and
+  reaches both pose and camera seams.
+- `npm run check:form`: pass, including both tracked deterministic form
+  fixtures.
+- A 390 x 844 Chromium screenshot after the dialog animation confirmed that
+  the title, message, and both actions fit without clipping; shortening the
+  CTA keeps it on one line.
+- `npm run test:e2e`: pass, 43/43.
+- `npm run lint`: pass.
+- `npm run format:check`: pass.
+- `git diff --check`: pass.
+- The first parallel `npm run check:all` attempt reached `check:ui` and failed
+  with `EPERM` while cleaning its temporary Chrome profile. A standalone
+  `npm run check:ui` then passed, and a fresh sequential `npm run check:all`
+  passed every app, globals, analysis, form, gamification, today's-result,
+  security, UI, PWA, storage, and version gate.
+- Independent strict review returned zero blocker, major, or minor findings.
+  Its additional Playwright WebKit 2311 probe confirmed that transient user
+  activation remains active through the confirmation promise and opens the
+  single-select `video/*` picker.
+- An independent verifier initially found that the tracked E2E stopped at the
+  file chooser. After adding synthetic file selection and direct replay
+  assertions, its re-review returned zero findings and approved the
+  checkpoint.
+
+Risk notes:
+
+- Chromium proves the web-platform boundary and file-picker handoff, but the
+  dialog-to-picker user-activation path still needs confirmation in physical
+  iPhone Safari. This is not a substitute for the trusted-HTTPS 18-shot field
+  matrix.
+- The change gives an actionable refusal on insecure HTTP; it does not create
+  or claim a trusted HTTPS field endpoint.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Obtain design approval for the smallest three-part diagnostic handoff, then
+  write the design and implementation plan. Start implementation with a TDD
+  regression proving manual removal followed by detector cancellation cannot
+  remove the preceding retained shot.

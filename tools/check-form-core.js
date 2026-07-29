@@ -3152,6 +3152,19 @@ function anchorHistory(releaseTs, drift) {
     '    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);',
     "startFormReplay section",
   );
+  const secureGuardStart = capture.indexOf("if(window.isSecureContext!==true){");
+  const captureDomStart = capture.indexOf('const ovl=document.createElement("div");');
+  assert(
+    secureGuardStart >= 0 && secureGuardStart < captureDomStart,
+    "insecure live capture is rejected before capture DOM, pose, or camera startup",
+  );
+  const secureGuard = compactSource(capture.slice(secureGuardStart, captureDomStart));
+  assert(
+    secureGuard.includes(
+      'appConfirm("ライブ撮影には信頼済みのHTTPS接続が必要です。この接続では、保存済み動画の解析を利用できます。",{title:"ライブ撮影を開始できません",cancelLabel:"閉じる",okLabel:"保存動画を選ぶ"}).then(useReplay=>{if(useReplay)openFormReplay();});',
+    ) && secureGuard.endsWith("return;}"),
+    "insecure live-capture guidance offers only close or saved-video replay before returning",
+  );
   const reset = boundedSourceSection(
     capture,
     "function resetCaptureGeometry(){",
