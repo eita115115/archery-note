@@ -76,6 +76,7 @@ const FORM_PH = Object.freeze({
   NB_RISE: 0.25,
   NB_MAXV: 2,
   NB_MAX_GAP_MS: 150,
+  NB_GAP_EPSILON_MS: 1e-6, // 累積frame時刻の浮動小数誤差だけを吸収（1ns）
   /* アンカー証拠の一般化（2026-07-15 multi-shot repro 根拠、実射 6射中4射消失の対処）。
      実射観測（v81, 60fps, conf 0.6-0.7）で確定した2つの欠落メカニズム:
        A: リリース瞬間のトラッキング欠落 150-350ms → RISE_WINDOW 内の closeFrames が
@@ -1290,6 +1291,26 @@ function stepFormPhase(st, raw, history, sens, now) {
     );
   }
   const close = usable.anchorNorm < FORM_PH.CLOSE_IN;
+  /* live / replay 契約は「現在frameを末尾へpush後に判定」。時刻破損や未来frameを
+     gap/速度証拠へ混ぜると誤発火するため、legacy全経路をfail-closedにする。 */
+  let historyChronologyValid = history.length > 0 && Number.isFinite(now),
+    previousHistoryTs = -Infinity;
+  if (historyChronologyValid) {
+    for (const h of history) {
+      if (!h || !Number.isFinite(h.ts) || h.ts <= previousHistoryTs || h.ts > now) {
+        historyChronologyValid = false;
+        break;
+      }
+      previousHistoryTs = h.ts;
+    }
+  }
+  const currentHistoryFrame = history.length ? history[history.length - 1] : null;
+  historyChronologyValid = Boolean(
+    historyChronologyValid &&
+      currentHistoryFrame &&
+      currentHistoryFrame.ts === now &&
+      currentHistoryFrame.m === raw,
+  );
   const winAll = history.filter((h) => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
   const win = winAll.filter((h) => h.m && formConfOk(h.m));
   const closeFrames = win.filter((h) => h.m.anchorNorm < FORM_PH.CLOSE_IN);
@@ -1309,29 +1330,42 @@ function stepFormPhase(st, raw, history, sens, now) {
     now,
   );
   const hasNullGap = winAll.length > win.length;
-  /* 窓内の最大連続ギャップ（win に入らなかった最初のフレーム→最後のフレームの経過時間）。
-     hasNullGap と同じ「win 基準」（実null ∪ conf ゲート除外）で数える。2026-07-11
-     strict-review 修正: 旧実装は `!h.m` のみで数えていたため、CONF_GATE 発動時に
-     conf 除外フレーム（実nullではない「仮想null」）が hasNullGap は増やすのに
-     maxGapMs には数えられず、D' の時間上限を素通りしていた（B' との単独切替禁止の
-     根拠どおり、両ゲート発動後にのみ影響。CONF_GATE=0 の出荷状態では formConfOk が
-     常に true を返すため本行の意味は `!h.m` と完全に同値＝挙動不変）。
-     NB_MAX_GAP_MS 超の姿勢ロスは nullBridged の根拠にしない（Stage 1 D'） */
+  /* RISE_WINDOW と交差する最大連続ギャップを、最後に使えた姿勢→次に使えた姿勢の
+     観測不能時間として測る。null列内だけの時刻差では、窓左端より前から続くロスと
+     前後1フレーム間隔を切り落とし、低fpsほど150ms上限を大きく過小評価してしまう。
+     hasNullGap と同じ「実null ∪ confゲート除外」をギャップとして扱う。 */
+  const gapWindowStart = now - FORM_PH.RISE_WINDOW_MS;
   let maxGapMs = 0,
-    gapStart = null;
-  for (const h of winAll) {
-    if (h.m && formConfOk(h.m)) {
-      gapStart = null;
+    previousUsableTs = null,
+    gapStartTs = null,
+    gapOpen = false,
+    gapTouchesWindow = false;
+  for (const h of history) {
+    const observed = h && Number.isFinite(h.ts) && h.ts <= now;
+    const frameUsable = observed && h.m && formConfOk(h.m);
+    if (frameUsable) {
+      if (gapOpen && (gapTouchesWindow || h.ts >= gapWindowStart)) {
+        maxGapMs =
+          gapStartTs == null ? Infinity : Math.max(maxGapMs, h.ts - gapStartTs);
+      }
+      previousUsableTs = h.ts;
+      gapStartTs = null;
+      gapOpen = false;
+      gapTouchesWindow = false;
     } else {
-      if (gapStart == null) gapStart = h.ts;
-      maxGapMs = Math.max(maxGapMs, h.ts - gapStart);
+      if (!gapOpen) {
+        gapOpen = true;
+        gapStartTs = previousUsableTs;
+      }
+      if (!observed || h.ts >= gapWindowStart) gapTouchesWindow = true;
     }
   }
   const nullBridged =
+    historyChronologyValid &&
     hasNullGap &&
     rise > FORM_PH.NB_RISE &&
     maxV > FORM_PH.NB_MAXV &&
-    maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
+    maxGapMs <= FORM_PH.NB_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS;
   /* NB2（A: tier-2 ギャップ橋渡し）: RISE_WINDOW を超える遮蔽でアンカー証拠が時効した
      リリースを、sticky アンカーの生存＋着地位置ゲートで発火させる。
      history 契約: 現在フレームは呼び出し側が push 済みなので、直前の有効フレームは
@@ -1349,8 +1383,8 @@ function stepFormPhase(st, raw, history, sens, now) {
     st.anchorStartTs > 0 &&
     (st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) &&
     nb2LastValid != null &&
-    nb2GapMs > FORM_PH.NB_MAX_GAP_MS &&
-    nb2GapMs <= FORM_PH.NB2_MAX_GAP_MS &&
+    nb2GapMs > FORM_PH.NB_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS &&
+    nb2GapMs <= FORM_PH.NB2_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS &&
     nb2LastValid.m.anchorNorm <
       (st.adaptive.evidence ? st.adaptive.evidence.anchorEnter : FORM_PH.CLOSE_IN) &&
     nb2LastValid.ts - st.anchorStartTs >= FORM_PH.NB2_MIN_HOLD_MS &&
@@ -1361,6 +1395,7 @@ function stepFormPhase(st, raw, history, sens, now) {
   const anchorEvidence = closeFrames.length >= 2 ? "close" : nullBridged2 ? "nb2" : null;
   const adaptiveDecision = adaptiveReleaseCandidate(adaptive.evidence, usable, history, now);
   const legacyMatched =
+    historyChronologyValid &&
     anchorEvidence &&
     !close &&
     (legacyContinuity.fastMatched ||

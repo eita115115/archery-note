@@ -1478,3 +1478,114 @@ Next task:
   write the design and implementation plan. Start implementation with a TDD
   regression proving manual removal followed by detector cancellation cannot
   remove the preceding retained shot.
+
+### 2026-07-29 - Valid-to-valid pose-gap boundaries
+
+- Corrected the tier-1 null-bridge duration from the first unusable sample to
+  the last unusable sample to the actual interval between the last usable pose
+  and the next usable pose. The previous calculation omitted both endpoint
+  frame intervals and could also clip the start of a gap at the 250 ms rise
+  window, making slow departures look like releases, especially at low frame
+  rates.
+- Kept the shipped limits unchanged: tier-1 remains inclusive through 150 ms,
+  tier-2 remains greater than 150 ms and inclusive through 350 ms, and 151 ms
+  gaps remain outside tier-1.
+- Made a gap count whenever its interval intersects the rise window, including
+  when all unusable samples have just moved outside the window but the recovery
+  pose remains inside. Multiple gaps retain the longest intersecting interval.
+  A missing preceding usable pose is treated as an unbounded gap and therefore
+  fails closed.
+- Added a one-nanosecond timestamp tolerance to only the tier-1/tier-2 gap
+  boundaries. This absorbs accumulated fractional-frame rounding at 60 fps:
+  mathematically exact 150 ms and 350 ms remain inclusive, while two
+  nanoseconds above either boundary is classified on the correct outer side.
+- Required the legacy release paths to receive the production history
+  contract: finite, strictly increasing timestamps, no future frame, and the
+  identical current raw metrics object at the `now`-timestamped tail.
+  Future, duplicate, non-monotonic, stale-tail, or cloned-tail histories now
+  suppress release detection instead of contributing corrupted gap or velocity
+  evidence.
+- Re-derived the older D-prime fixtures in valid-to-valid units: seven 20 ms
+  null samples plus the 10 ms recovery interval are 150 ms; eleven such samples
+  plus recovery are 230 ms and remain recoverable through NB2.
+- Added direct regression coverage for integer and 60 fps 150 ms, 151 ms,
+  rise-window-left-edge multiple gaps, unknown gap starts, 60 fps NB2 lower
+  and 350 ms upper boundaries, two-nanosecond exclusions, and every chronology
+  contract clause.
+
+Validation:
+
+- Initial TDD RED: a 151 ms valid-to-valid gap produced one release instead of
+  zero. The exact 150 ms companion already produced one release.
+- Independent review RED: after the first correction, a 151 ms gap whose only
+  null sample had left the rise window was forgotten in favor of a later
+  100 ms gap and still produced one `close/nb` release.
+- Chronology RED: a future null history entry produced one release instead of
+  failing closed.
+- Fractional-frame RED:
+  - mathematically exact 150 ms at 60 fps evaluated as
+    `150.00000000000068 ms` and was rejected;
+  - mathematically exact 350 ms at 60 fps evaluated just above 350 ms and was
+    rejected.
+- Counterfactual mutation checks proved that every new seam is observable.
+  Reverting full-history interval scanning, the closure overlap condition,
+  chronology gating, current-tail timestamp, raw identity, the 1 ns tolerance,
+  or either NB2 tolerance bound makes its dedicated regression fail.
+- `npm run check:form`: pass, including the detector suite and all 15 metric
+  fixture infrastructure checks.
+- `npm run golden:form-fixtures`: pass:
+  - oblique retained one `4457.414 ms / close` release;
+  - scene-cut retrieval retained zero releases.
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass, 28 tests.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's result, security, UI, PWA, storage, and version gates.
+- `npm run lint`: pass.
+- `npm run format:check`: pass.
+- `git diff --check`: pass.
+- The first parallel `check:all` attempt encountered `EPERM` because UI smoke
+  and the full E2E run concurrently opened the same temporary Chromium profile.
+  No artifact was deleted; a fresh sequential `check:all` passed.
+- Final fresh `npm run test:e2e`: pass, 43/43, after the detector refinements
+  and ledger formatting.
+- The full scheduler-sensitive real-video runner completed all five local
+  sources on the final detector:
+  - the reviewed positive retained one release at `4315.630 ms` and passed its
+    `4300-4600 ms` truth window;
+  - three zero-shot sources retained zero releases and passed;
+  - the close-up negative retained one false release at `6204.595 ms` after
+    four earlier candidates were canceled, so the overall runner exited `1`.
+    This remains a real product-accuracy gap and was not reclassified as truth.
+- Independent boundary probe, independent verifier, and strict reviewer all
+  returned ACCEPT on the final diff. Strict review reported zero blocker,
+  major, or minor findings for this checkpoint.
+
+Risk notes:
+
+- The real-video runner is scheduler-sensitive. This run proves that the
+  reviewed positive can still be detected after the gap correction and exposes
+  one remaining negative false positive; it is not a substitute for the
+  physical iPhone 18-shot acceptance matrix.
+- A separate read-only Chromium probe reproduced a live-view identity defect
+  three times out of three: if the user manually removes a pending candidate,
+  its later automatic cancellation removes the preceding retained real shot.
+  Fixing it requires the still-unapproved stable shot-identity handoff.
+- Current diagnostics cannot prove every retained shot's fire-time evidence,
+  and the only shareable JSON path exports the full practice database. The
+  privacy-minimized diagnostic handoff remains approval-gated.
+- A production-velocity adaptive positive characterization and the physical
+  iPhone matrix remain missing. Existing scalar golden positive evidence uses
+  the `close` path.
+- No UI, persisted data, storage schema, dependency, Service Worker, version
+  marker, release, deployment, or user data changed in this checkpoint.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Add the production-velocity adaptive positive characterization as the next
+  safe detector checkpoint. In parallel, obtain explicit approval for the
+  three-part diagnostic handoff: stable shot identity and outcome mapping,
+  complete live/replay fire snapshots, and a default-off bounded
+  diagnostics-only export.

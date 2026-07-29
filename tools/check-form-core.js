@@ -2034,21 +2034,224 @@ function shotSequence(dt) {
   assertEqual(runSequence(seq).releases, 1, "null-frame bridged release detected");
 }
 {
+  /* tier-1 の姿勢ロス上限は、null 配列内の時刻差ではなく、最後に使えた姿勢から
+     次に使えた姿勢までの観測不能時間で判定する。低fpsや窓左端の切り落としでも
+     同じ150ms境界になるよう、adaptive（drawArm<=125）とNB2（arrival<0.65）を
+     無効化した物理整合のある緩い離脱系列で固定する。 */
+  function tierOneObservationGapSequence(observationGapMs) {
+    const seq = [];
+    const anchor = 0.22;
+    const arrival = 0.54;
+    for (let i = 0; i < 60; i++) seq.push([mkRaw(anchor, 10), 0.02, 20]);
+    const firstHalf = Math.floor(observationGapMs / 2);
+    seq.push([null, 0, firstHalf]);
+    seq.push([
+      mkRaw(arrival, 10),
+      (arrival - anchor) / (observationGapMs / 1000),
+      observationGapMs - firstHalf,
+    ]);
+    for (let i = 0; i < 3; i++) seq.push([mkRaw(0.7, 10), 0.1, 20]);
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 10), 0.1, 20]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneObservationGapSequence(150)).releases,
+    1,
+    "tier-1 includes an exact 150ms valid-to-valid observation gap",
+  );
+  assertEqual(
+    runSequence(tierOneObservationGapSequence(151)).releases,
+    0,
+    "tier-1 rejects a 151ms valid-to-valid observation gap",
+  );
+
+  function tierOneLeftEdgeGapSequence() {
+    const seq = [];
+    for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 10), 0.02, 20]);
+    // 151ms gap: its only null sample leaves the 250ms rise window before evaluation.
+    seq.push([null, 0, 75]);
+    seq.push([mkRaw(0.22, 10), 0.02, 76]);
+    seq.push([mkRaw(0.22, 10), 0.02, 20]);
+    // Keep hasNullGap true with a later 100ms gap, then make a tier-1-shaped departure.
+    seq.push([null, 0, 50]);
+    seq.push([mkRaw(0.54, 10), 3, 50]);
+    for (let i = 0; i < 3; i++) seq.push([mkRaw(0.7, 10), 0.1, 20]);
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 10), 0.1, 20]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneLeftEdgeGapSequence()).releases,
+    0,
+    "tier-1 accounts for a 151ms gap while its interval crosses the rise-window left edge",
+  );
+
+  function tierOneUnknownGapStartSequence() {
+    const seq = [
+      [null, 0, 10],
+      [mkRaw(0.22, 10), 0.02, 60],
+      [mkRaw(0.22, 10), 0.02, 40],
+      [null, 0, 50],
+      [mkRaw(0.54, 10), (0.54 - 0.22) / 0.13, 80],
+    ];
+    for (let i = 0; i < 10; i++) seq.push([mkRaw(1.0, 10), 0.1, 20]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneUnknownGapStartSequence()).releases,
+    0,
+    "tier-1 remains fail-closed when the prior usable observation is not retained",
+  );
+
+  function tierOneSixtyFpsBoundarySequence() {
+    const seq = [];
+    const frameMs = 1000 / 60;
+    const gapFrames = 9;
+    for (let i = 0; i < 72; i++) seq.push([mkRaw(0.22, 10), 0.02, frameMs]);
+    for (let i = 0; i < gapFrames - 1; i++) seq.push([null, 0, frameMs]);
+    seq.push([
+      mkRaw(0.54, 10),
+      (0.54 - 0.22) / ((gapFrames * frameMs) / 1000),
+      frameMs,
+    ]);
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 10), 0.1, frameMs]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneSixtyFpsBoundarySequence()).releases,
+    1,
+    "tier-1 includes a mathematically exact 150ms gap sampled at 60fps",
+  );
+
+  {
+    const frameMs = 1000 / 60;
+    const s = adaptiveStepper(frameMs);
+    for (let i = 0; i < 16; i++)
+      s.push(mkRaw(0.47, 150), 0.2, i === 0 ? 1001 : frameMs);
+    for (let i = 0; i < 20; i++) s.push(null, 0, frameMs);
+    const arrival = s.push(mkRaw(0.8, 140), 3, frameMs);
+    assertEqual(
+      arrival.r.released,
+      true,
+      "NB2 includes a mathematically exact 350ms gap sampled at 60fps",
+    );
+    assertEqual(arrival.r.debug.fireVel, "nb2", "exact-350ms boundary uses NB2 velocity");
+  }
+  {
+    const s = adaptiveStepper(30);
+    for (let i = 0; i < 16; i++) s.push(mkRaw(0.47, 150), 0.2, i === 0 ? 1001 : 30);
+    s.push(null, 0, 175);
+    const arrival = s.push(mkRaw(0.8, 140), 3, 175.000002);
+    assertEqual(
+      arrival.r.released,
+      false,
+      "NB2 rejects a gap two nanoseconds above its 350ms inclusive limit",
+    );
+  }
+  function nb2LowerBoundaryArrival(extraGapMs) {
+    const frameMs = 1000 / 60;
+    const s = adaptiveStepper(frameMs);
+    s.push(mkRaw(0.22, 150), 0.2, 1000);
+    s.push(mkRaw(0.22, 150), 0.2, 100);
+    s.push(mkRaw(0.22, 150), 0.2, 150);
+    for (let i = 0; i < 8; i++) s.push(null, 0, frameMs);
+    return s.push(mkRaw(0.8, 140), 3, frameMs + extraGapMs).r;
+  }
+  assertEqual(
+    nb2LowerBoundaryArrival(0).released,
+    false,
+    "NB2 excludes a mathematically exact 150ms gap sampled at 60fps",
+  );
+  {
+    const arrival = nb2LowerBoundaryArrival(0.000002);
+    assertEqual(arrival.released, true, "NB2 includes a gap two nanoseconds above 150ms");
+    assertEqual(arrival.debug.fireVel, "nb2", "above-150ms lower boundary uses NB2 velocity");
+  }
+
+  const current = mkRaw(0.54, 10);
+  const futureHistory = [
+    { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+    { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+    { ts: 1000, m: current, vel: 3 },
+    { ts: 1100, m: null, vel: 0 },
+  ];
+  assertEqual(
+    core.stepFormPhase(core.makeFormPhaseDetector(), current, futureHistory, 1, 1000).released,
+    false,
+    "tier-1 fails closed when history contains an observation after now",
+  );
+  [
+    {
+      label: "a duplicate timestamp",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: null, vel: 0 },
+        { ts: 1000, m: current, vel: 3 },
+      ],
+    },
+    {
+      label: "a non-monotonic timestamp",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 950, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: null, vel: 0 },
+        { ts: 1000, m: current, vel: 3 },
+      ],
+    },
+  ].forEach(({ label, history }) => {
+    assertEqual(
+      core.stepFormPhase(core.makeFormPhaseDetector(), current, history, 1, 1000).released,
+      false,
+      `tier-1 fails closed when history contains ${label}`,
+    );
+  });
+  [
+    {
+      label: "the current frame is not the history tail timestamp",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 950, m: null, vel: 0 },
+        { ts: 999, m: current, vel: 3 },
+      ],
+    },
+    {
+      label: "the history tail metrics are an equal but different object",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 950, m: null, vel: 0 },
+        { ts: 1000, m: { ...current, dW: { ...current.dW } }, vel: 3 },
+      ],
+    },
+  ].forEach(({ label, history }) => {
+    assertEqual(
+      core.stepFormPhase(core.makeFormPhaseDetector(), current, history, 1, 1000).released,
+      false,
+      `tier-1 fails closed when ${label}`,
+    );
+  });
+}
+{
   /* D'（Stage 1）: nullBridged の時間ベースギャップ上限 NB_MAX_GAP_MS=150 の両側境界。
-     ギャップ span = 窓内の最初のnullフレーム→最後のnullフレームの経過時間（実装と同定義）。
-     140ms は検出 / 200ms は非検出。復帰フレームの vel=8 は NB_MAXV(2) 超・RELEASE_TH(9) 未満
-     に置き、velOk でなく nullBridged 経路が判定を決めることを保証する。 */
+     ギャップは直前の有効フレーム→復帰フレームで測る。このfixtureではnull 1枚ごとに20ms、
+     復帰まで10msなので、nullCount*20+10ms が実際の観測不能時間になる。
+     復帰フレームの vel=8 は NB_MAXV(2) 超・RELEASE_TH(9) 未満に置く。 */
   function gapBridgedSequence(nullCount) {
     const seq = [];
     // アンカー保持（10ms間隔）。110フレーム=1100msの実シナリオを保ち、
     // 窓内に十分な closeFrames と長時間保持の adaptive evidence を残す。
     for (let i = 0; i < 110; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
-    for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]); // 姿勢ロス: span=(nullCount-1)*20ms
+    for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]);
     seq.push([mkRaw(1.0, 90), 8, 10]); // 復帰: アンカー圏外・大きめの見かけ速度
     for (let i = 0; i < 10; i++) seq.push([mkRaw(1.0, 90), 0.2, 20]);
     return seq;
   }
-  assertEqual(runSequence(gapBridgedSequence(8)).releases, 1, "140ms null gap is bridged (fires)");
+  assertEqual(
+    runSequence(gapBridgedSequence(7)).releases,
+    1,
+    "150ms valid-to-valid null gap is bridged (fires)",
+  );
   /* 2026-07-15 アンカー証拠一般化（NB2）による意図的な仕様上書き:
      旧設計はレットダウン判別手段を持たなかったため 150ms 超のギャップを一律非検出に
      していた（このシーケンスはリリース形状: sticky アンカー生存・クロスギャップ速度8・
@@ -2057,7 +2260,7 @@ function shotSequence(dt) {
   assertEqual(
     runSequence(gapBridgedSequence(11)).releases,
     1,
-    "200ms null gap now bridged by NB2 (release-shaped)",
+    "230ms valid-to-valid gap is bridged by NB2 (release-shaped)",
   );
   // NB_MAX_GAP_MS（tier-1 上限）が今も効いていることの証明は、NB2 の適用範囲外
   // （着地 anchorNorm 1.3 > NB2_MAX_ARRIVE）のシーケンスで行う: 150 のままなら非発火、
@@ -2073,7 +2276,7 @@ function shotSequence(dt) {
   assertEqual(
     runSequence(gapFarArrivalSequence(11)).releases,
     0,
-    "200ms gap with far arrival (1.3) stays capped by NB_MAX_GAP_MS and outside NB2",
+    "230ms gap with far arrival (1.3) stays capped by NB_MAX_GAP_MS and outside NB2",
   );
   assert(
     coreScript.includes("NB_MAX_GAP_MS: 150,"),
@@ -2089,23 +2292,9 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' tier-1 behavior on the same sequence",
   );
 }
-/* [既知の制約・文書化のみ、strict-review 2026-07-11 finding]: 上の140/200ms境界テストが
-   計測するギャップ span は「窓内に現れた最初のnullフレームts→最後のnullフレームts」であり、
-   ギャップが250ms窓(RISE_WINDOW_MS)の左端に接している場合（＝本当のロス区間が窓外へ続いて
-   いる可能性がある場合）、実際の姿勢ロス時間を過小評価しうる。合成再現で確認済みの経路:
-   アンカー保持 → 実スパン220msの姿勢ロス（null 12フレーム, dt=20ms）→ 復帰close 2フレーム
-   → vel=3 の緩慢な引き戻し、という系列が released=1（発火）になる。理由は releaseTs 直前の
-   250ms窓にギャップの先頭部分が入らず、在窓の計測値が 140ms ≤ NB_MAX_GAP_MS(150) に収まる
-   ため。加えてスパン定義そのものが「先頭null ts→末尾null ts」なので、真のロス時間（有効
-   フレーム→有効フレーム間隔）を約2フレーム間隔ぶん恒常的に過小評価する（低fpsほど誤差が
-   拡大: dt=66msでは null 3枚=132msの計測でも実ロスは約264ms）。
-   strict-reviewの総合判断はこれを「push可・T8前の必須修正ではない」と結論しており（次工程
-   条件は診断解釈時にこの経路を前提として読むことのみ）、本コミットではロジック変更をしない。
-   修正方向（案）: (a) ギャップを「直前の有効フレームts→直後の有効フレームts」で計測する、
-   (b) ギャップが窓左端に接している場合は上限超過側に倒す。実施する場合は設計書
-   form-phase-final-design.md §6-D' への差し戻しフィードバックとセットで、境界テスト
-   （140/200ms）の再導出込みの別タスクとする。
-   → 2026-07-15 追記: NB2 のギャップ計測は (a) 方式（now - 直前有効フレームts）を採用した。 */
+/* 2026-07-29: tier-1 も NB2 と同じく「直前の有効姿勢→復帰した有効姿勢」で
+   ギャップを測る。以前のnull列内だけの計測は窓左端と前後フレーム間隔を切り落とし、
+   151ms以上の姿勢ロスを150ms以下と誤認していた。上の専用境界fixtureが150/151msを固定する。 */
 {
   /* アンカー証拠の一般化（2026-07-15、実射 6射中4射消失の修正）
      実座標 dW を動かし computeFormVelocity に速度を実計算させる（view ループ契約:
@@ -2408,9 +2597,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
          実nullが存在しない → hasNullGap 自体が立たず、NB_MAX_GAP_MS の値に関わらず非発火
          （0/150, 0/∞ の2通り）。
        - CONF_GATE=0.45 & NB_MAX_GAP_MS=150（両ゲートがT8で有効化される想定の組み合わせ）:
-         conf除外フレームが hasNullGap を立てる一方、maxGapMs も同じ「win 基準」で 180ms を
-         計測するため NB_MAX_GAP_MS(150) を超過し nullBridged は不成立＝非発火。ここが本コミット
-         で修正した maxGapMs のゲート非対称の直接の回帰対象（46-form-core.js のループが旧来の
+         conf除外フレームが hasNullGap を立てる一方、maxGapMs は直前の有効姿勢→復帰姿勢の
+         210ms を計測するため NB_MAX_GAP_MS(150) を超過し nullBridged は不成立＝非発火。ここが
+         既存のconfゲート対称性と今回のvalid-to-valid計測を同時に固定する組み合わせ。
+         maxGapMs のゲート非対称の直接の回帰対象でもあり（46-form-core.js のループが旧来の
          `!h.m` 基準のままなら、conf除外フレームはここでカウントされず maxGapMs=0 のままとなり、
          誤って発火していたはずの組み合わせ）。
        - CONF_GATE=0.45 & NB_MAX_GAP_MS=∞: D' の時間上限そのものを無効化した組み合わせ。
@@ -2435,8 +2625,8 @@ return {makeFormPhaseDetector, stepFormPhase};`,
        置き、本テストが tier-1 の D' 時間上限だけを計測し続けるようにする。旧来の 1.0 着地は
        運動学的にリリース形状＝スナップして静止のため、NB2 が設計どおり発火してしまう）。
        tier-1 の評価量（hasNullGap/rise/maxV/maxGapMs）は着地位置に依存しないため、
-       4組合せの意図は完全に保存される。瞬間ジャンプ構成は意図的（漸進引き戻しにすると
-       ギャップが窓左端からスライドして出て、既知の文書化済み制約=maxGapMs過小評価を踏む） */
+       4組合せの意図は完全に保存される。瞬間ジャンプ構成は、confゲートとギャップ上限の
+       4組合せだけを分離して検証するために意図的に保つ。 */
     seq.push([mkRawG(1.3, 90, 0.9), 3, 10]);
     for (let i = 0; i < 10; i++) seq.push([mkRawG(1.3, 90, 0.9), 0.2, 20]);
     return seq;
