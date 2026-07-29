@@ -1315,3 +1315,85 @@ Next task:
   write the design and implementation plan. Start implementation with a TDD
   regression proving manual removal followed by detector cancellation cannot
   remove the preceding retained shot.
+
+### 2026-07-29 - Local preview model-asset MIME and LAN safety
+
+- Extended the existing cross-platform PWA asset gate to enforce the local
+  preview-server contracts needed by form tracking. Both PowerShell helpers
+  must serve `.mjs` as `text/javascript; charset=utf-8` and `.wasm` as
+  `application/wasm`.
+- Added separator-bound, case-insensitive repository-root containment to both
+  helpers. A sibling path that merely shares the `archery-note` prefix can no
+  longer pass the static-file boundary check.
+- Made the LAN helper describe its real scope at startup: HTTP supports app
+  preview and saved-video replay only, while iPhone live-camera capture
+  requires a trusted HTTPS origin. It also warns that the repository root is
+  exposed on all interfaces and must be used only on trusted private Wi-Fi.
+- Corrected the stale feasibility-plan instruction that said the LAN HTTP
+  helper could be reused for iPhone camera validation. The successful
+  prototype used trusted LAN HTTPS; the current helper is not that field path.
+
+Validation:
+
+- Baseline `npm run check:pwa`: pass before adding the new contract.
+- MIME TDD RED: `npm run check:pwa` exited `1` because `tools/serve.ps1` had no
+  `.mjs` mapping.
+- MIME and warning GREEN: `npm run check:pwa` passed after the two helper
+  updates.
+- Review-remediation RED: the strengthened gate exited `1` because
+  `tools/serve.ps1` still used the prefix-only root check.
+- Final focused GREEN: `npm run check:pwa` passed with MIME, warning, URL-label,
+  and separator-bound containment contracts enforced.
+- Windows runtime GET checks passed for both `tools/serve.ps1` on port 8741
+  and `tools/serve-iphone.ps1` on port 8742. Both returned the exact expected
+  Content-Type headers for the tracked MediaPipe `.mjs` and `.wasm` assets.
+  The temporary server processes were stopped by exact PID, and both ports
+  were confirmed free afterward.
+- A read-only PowerShell boundary probe accepted an actual repository child
+  and rejected a synthetic same-prefix sibling path.
+- `npm run check:all`: pass, including app, globals, analysis, form, fixture,
+  gamification, today's result, security, UI, PWA, storage, and version gates.
+- `npm run lint`: pass.
+- The first targeted and repository-wide Prettier checks after the final
+  ledger addition reported only this progress file; it was reformatted before
+  the final validation rerun.
+- Final targeted Prettier check and `npm run format:check`: pass.
+- `git diff --check`: pass. Both PowerShell helpers remain ASCII-only.
+- Independent strict review found one major recovery gap: an invalid MIME
+  response already stored in persistent `archery-note-pose-v1` could survive
+  the server fix. A test-first remediation now requires the localhost helper
+  to name that one-cache recovery and warn against clearing all site data.
+  Automatic cache repair remains behind the Service Worker approval gate.
+- Recovery TDD RED: `npm run check:pwa` exited `1` because
+  `tools/serve.ps1` did not explain how to remove only the stale pose cache.
+- Recovery GREEN: `npm run check:pwa` passed after adding the bounded recovery
+  and data-loss warnings.
+- Post-remediation strict re-review and a separate verifier both returned
+  ACCEPT with zero blocker, major, or minor findings. They confirmed the
+  Service Worker is unchanged and the remaining one-time manual recovery is
+  accurately approval-gated.
+
+Risk notes:
+
+- This task does not create or claim a trusted HTTPS iPhone live-camera path.
+  The physical 18-shot acceptance matrix remains unrun.
+- Existing localhost users with an old invalid pose response must remove only
+  `archery-note-pose-v1` once. The app does not yet self-heal that cache because
+  changing Service Worker cache behavior requires explicit user approval.
+- The LAN helper intentionally serves the repository root for local
+  development. Path escape is blocked, but trusted-network use is still
+  required because development files under that root are reachable.
+- No detector behavior, daily phone UI, storage/schema, persisted data,
+  dependency, Service Worker behavior, version marker, release, deployment,
+  or model asset changed.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Obtain design approval for the smallest three-part diagnostic handoff, then
+  write the design and implementation plan. Start implementation with a TDD
+  regression proving manual removal followed by detector cancellation cannot
+  remove the preceding retained shot.

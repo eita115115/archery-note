@@ -50,6 +50,9 @@ iPhone のカメラで射形を撮影し、オンデバイスの姿勢推定（M
    2026-07-04 更新: 専用 POSE_CACHE（`archery-note-pose-v1`、cache-first、
    activate の旧バージョン掃除を生存）に変更。資産差し替え時は
    `archery-note-pose-v2` へ世代を上げる運用。
+   開発用 localhost で MIME 修正前に射形解析を開いた環境は、開発者ツールの
+   Cache Storage から `archery-note-pose-v1` だけを削除して再読み込みする。
+   練習記録を失う恐れがあるため、サイトデータ全体は消去しない。
 3. **保存するデータ** — 派生特徴量のみ（下記 formAnalysis 形状）。生動画・
    全フレームランドマークは保存しない。localStorage 容量（A-8 監視項目）を
    悪化させないため、1 記録あたり上限 2KB 目安に設計。
@@ -120,7 +123,8 @@ F3 は資産追加のため、F5 はカメラ UI のため、それぞれ着手�
   隠れの影響）②実効 fps（15fps 以上か）③アンカー/リリースの識別可能性
   ④lite で足りるか full が要るか
 - 完了条件: 上記 4 点の実測結果と GO/NO-GO 判定がレポートに残る
-- 検証: iPhone 実機（LAN 経由、serve-iphone.ps1 の方式を流用）
+- 検証: iPhone 実機（信頼済み HTTPS origin）。`serve-iphone.ps1` は LAN HTTP
+  のため、画面確認・保存動画リプレイ専用であり、実写カメラ検証には使わない
 - Stop conditions: NO-GO（fps<10 または弓による隠れで肘/手首が取れない）なら
   以降のタスクを保留しユーザーへ報告
 - 依存: なし
