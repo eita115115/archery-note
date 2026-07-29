@@ -852,10 +852,11 @@ function formDwVisOk(m) {
 
 /* Legacy close/velocity 候補の時間的整合性。
    旧実装は250ms窓の maxV・closeFrames・現在位置を独立集計していたため、古い速度ノイズと
-   後続のアンカー外フレームを1回の離脱として合成できた。高速経路は「現在速度＋アンカー
-   姿勢から連続した腕角度」、校正経路はそれに直前区間の離脱方向を加えて要求する。
-   history末尾が現在フレーム本人でない場合や、null/conf/dWゲートをまたぐ系列は採用しない。
-   NB/NB2の遮蔽回復契約は別経路で維持する。 */
+   後続のアンカー外フレームを1回の離脱として合成できた。高速・校正の両経路で「現在速度＋
+   アンカー姿勢から連続した腕角度＋離脱方向」を要求する。高速経路は速度計算と同じ最新の
+   非null姿勢を tier-1 gap 上限内で選び、その姿勢が品質ゲートを通る場合だけ方向起点に
+   できる。校正経路は直前フレームとの連続方向を要求する。history末尾が現在フレーム本人で
+   ない系列は採用せず、より長い遮蔽の回復契約は NB/NB2で維持する。 */
 function legacyReleaseContinuity(
   raw,
   closeFrames,
@@ -866,7 +867,8 @@ function legacyReleaseContinuity(
   now,
 ) {
   const currentFrame = windowFrames.length ? windowFrames[windowFrames.length - 1] : null;
-  const previousFrame = windowFrames.length > 1 ? windowFrames[windowFrames.length - 2] : null;
+  const immediatePreviousFrame =
+    windowFrames.length > 1 ? windowFrames[windowFrames.length - 2] : null;
   const currentMatches = Boolean(
     currentFrame &&
     currentFrame.ts === now &&
@@ -886,21 +888,23 @@ function legacyReleaseContinuity(
   const riseEpsilon = Number.EPSILON * Math.max(1, Math.abs(rise), Math.abs(FORM_PH.RELEASE_RISE));
   const riseMatched = rise + riseEpsilon >= FORM_PH.RELEASE_RISE;
   const armMatched = armDelta != null && armDelta <= FORM_PH.LEGACY_ARM_MAX_DELTA_DEG;
-  const fastMatched =
-    currentMatches &&
-    riseMatched &&
-    armMatched &&
-    currentV > FORM_PH.RELEASE_TH / sens &&
-    Number.isFinite(currentV);
-  const directionDelta =
-    previousFrame &&
-    previousFrame.m &&
-    previousFrame.ts < now &&
-    formConfOk(previousFrame.m) &&
-    formDwVisOk(previousFrame.m) &&
-    Number.isFinite(previousFrame.m.anchorNorm)
-      ? raw.anchorNorm - previousFrame.m.anchorNorm
-      : null;
+  let directionFrame = null;
+  for (let i = windowFrames.length - 2; i >= 0 && !directionFrame; i--) {
+    const frame = windowFrames[i];
+    if (!frame || !Number.isFinite(frame.ts) || frame.ts >= now) break;
+    if (now - frame.ts > FORM_PH.NB_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS) break;
+    if (frame.m) {
+      if (
+        formConfOk(frame.m) &&
+        formDwVisOk(frame.m) &&
+        Number.isFinite(frame.m.anchorNorm)
+      ) {
+        directionFrame = frame;
+      }
+      break;
+    }
+  }
+  const directionDelta = directionFrame ? raw.anchorNorm - directionFrame.m.anchorNorm : null;
   const directionEpsilon =
     Number.EPSILON *
     Math.max(
@@ -910,6 +914,13 @@ function legacyReleaseContinuity(
     );
   const directionMatched =
     directionDelta != null && directionDelta + directionEpsilon >= FORM_PH.ADAPTIVE_DIRECTION_DELTA;
+  const fastMatched =
+    currentMatches &&
+    riseMatched &&
+    armMatched &&
+    directionMatched &&
+    currentV > FORM_PH.RELEASE_TH / sens &&
+    Number.isFinite(currentV);
   const calibratedSpeed = Number.isFinite(releaseSpeed) ? releaseSpeed / sens : Infinity;
   const speedEpsilon = Number.EPSILON * Math.max(1, Math.abs(currentV), Math.abs(calibratedSpeed));
   const calibratedMatched =
@@ -918,6 +929,7 @@ function legacyReleaseContinuity(
     armMatched &&
     directionMatched &&
     Number.isFinite(releaseSpeed) &&
+    directionFrame === immediatePreviousFrame &&
     currentV + speedEpsilon >= calibratedSpeed;
 
   return {
@@ -984,9 +996,10 @@ function formPhaseResult(st, now, result, debug) {
    rise>0.18 が単独でも発火したため、1.1秒未満のどんな速さの引き戻し
    （レットダウン）も無条件にリリースとして誤検出していた
    （tools/check-form-core.js のレットダウン境界ケース参照）。
-   legacy の高速経路は現在速度・離脱量・引き腕角度の連続性を同時に要求し、
-   校正経路はさらに直前区間の離脱方向を要求する。これにより古い速度スパイクと
-   後続位置を合成せず、50-100msの現実的なリリースを検出する。
+   legacy の高速・校正経路は現在速度・離脱量・引き腕角度・離脱方向を同時に要求する。
+   高速経路は tier-1 gap 内の最新非null姿勢が品質ゲートを通る場合に速度計算と同じ
+   方向起点を使い、校正経路は直前フレームとの連続方向を要求する。これにより短い姿勢欠落を
+   回復しつつ、古い速度スパイクと後続位置を合成せず、50-100msの現実的なリリースを検出する。
    adaptive 経路は recall-first の承認済み tradeoff として100ms線形レットダウンを
    削除可能な候補にしうるが、150ms〜2秒は非発火を維持する
    （実測境界表は同ファイル）。

@@ -1792,3 +1792,147 @@ Next task:
   direction-coherence correction, then require the complete deterministic
   suite to return GREEN. Keep end-of-stream shot mutation unchanged until
   stable pending-shot identity and outcome mapping are explicitly approved.
+
+### 2026-07-29 - Legacy-fast direction coherence
+
+- Added an anonymous, physically coherent synthetic pair that keeps anchor
+  evidence, total rise, current speed, arm continuity, and frame timing
+  equivalent while reversing only the final movement direction.
+- The outward companion remains one detected legacy release. The inward
+  rebound is now zero releases.
+- Added direct helper boundaries proving that the existing `+0.04` direction
+  threshold is inclusive for `fastMatched` and that a value immediately below
+  it is excluded.
+- Confirmed the intended RED before editing production code:
+  `legacy detection rejects an inward rebound` expected zero releases and
+  observed one.
+- Moved no threshold and added no new detector state. The production change
+  reuses the existing direction predicate in the fixed-speed `fastMatched`
+  branch.
+- A final strict review then reproduced a recall regression: production
+  velocity skips a transient null pose and measures from the latest non-null
+  wrist, while the first direction change inspected only the immediately
+  previous array element. A short outward shot after one missing pose therefore
+  had fast velocity but unknown direction and fell to zero releases.
+- Added a second anonymous production-path pair that derives velocity through
+  `computeFormVelocity`. It fixes three outcomes together: a bounded null gap
+  preserves one outward fast shot, the same computed speed with an inward
+  direction remains zero, and a gap beyond the tier-1 cap remains zero.
+- Confirmed this companion RED before remediation, then aligned only the fast
+  direction origin with the velocity origin: it may scan across actual null
+  frames to the latest non-null pose within the existing 150 ms tier-1 cap.
+  It does not skip a non-null low-confidence or low-visibility pose. The
+  calibrated path still requires the immediately adjacent usable frame.
+- The adaptive, NB, and NB2 implementations are unchanged. Updated both legacy
+  continuity comments to document the bounded fast origin and adjacent
+  calibrated origin.
+- End-of-stream handling, pending-shot mutation, UI, persisted data,
+  storage/schema, Service Worker, dependencies, version markers, model assets,
+  and user data were not changed.
+
+Validation:
+
+- `node tools/check-form-core.js`: expected RED for the inward rebound before
+  the first production edit; expected RED for the bounded-gap outward companion
+  after strict review; pass after the bounded origin correction.
+- `npm run check:form`: pass, including the bounded fixture contract and both
+  public scalar fixtures.
+- `npm run check:all`: pass, including app, globals, analysis, form,
+  gamification, today's result, security, UI, PWA, storage, and version gates.
+  An earlier parallel run collided with the simultaneous E2E Chromium profile
+  and failed UI cleanup with `EPERM`; the required serialized rerun passed.
+- `npm run lint`: pass.
+- `npm run test:e2e`: pass, 43/43.
+- `python -B tools/golden-replay/test_golden_expectations.py`: pass, 28/28.
+- `npm run format:check`: the first run identified wrapping in this appended
+  ledger section; after formatting this document only, pass.
+- An additional whole-file `npx prettier` check on the changed core and test
+  files reported pre-existing formatting differences in unchanged sections.
+  The changed hunks match Prettier output, so no unrelated bulk rewrite was
+  performed.
+- `git diff --check`: pass.
+- Direct public fixture replay remained event-equivalent:
+  - the oblique positive retained its single reviewed `close` release and
+    ended with no pending candidate;
+  - scene-cut retrieval retained zero releases and ended with no pending
+    candidate.
+- A full serialized five-video CPU/0.25x observation produced the expected zero
+  retained releases for all four negative cases, including the close-up target.
+  Its public positive retained one release but outside the reviewed timing
+  window, so that run was correctly recorded as four of five rather than a
+  pass.
+- Re-running the public positive alone retained one release inside its reviewed
+  window and passed. Landmark-frame counts differed materially between the two
+  runs, confirming that the real-video harness remains a scheduler-sensitive
+  observation rather than a deterministic gate.
+- Two additional serialized close-up observations each retained one false
+  release. Across the three new observations, only one passed. One failed run
+  retained its last provisional fire, while the other retained an earlier fire
+  and later canceled the final one. Direction coherence therefore removes the
+  diagnosed inward sample but does not solve the negative scene across
+  MediaPipe sampling schedules.
+- Three independent read-only reviews returned qualified ACCEPT for this
+  checkpoint. They confirmed the synthetic pair, exact boundary, public
+  fixtures, and legacy route isolation. They also agreed that this correction
+  is an in-scope bug fix, not a complete close-up or field-acceptance solution.
+- The first final verifier returned ACCEPT, but the first final strict review
+  returned the transient-null recall regression above. That RETURN was treated
+  as blocking and remediated before commit.
+- After remediation, the same strict reviewer and an independent verifier both
+  returned ACCEPT with zero blocker, major, or minor findings. Their fresh
+  probes covered low-confidence and low-visibility origins, the inclusive
+  150 ms gap boundary, the over-limit boundary, and in-memory reversions of
+  both the direction predicate and bounded origin.
+- After remediation, a second five-video observation passed three of five:
+  all three Mixkit/target negatives, including the close-up target, retained
+  zero; the public positive missed its reviewed shot and the public 40769
+  negative retained one. Their fire-time diagnostics showed no null gap, so
+  neither failure used the new bounded-gap fast route.
+- Re-running those two public videos retained one positive approximately one
+  frame before its strict review window and again retained one 40769 false
+  shot. A fresh privacy-bounded 40769 metric capture then retained zero, and
+  deterministic replay under current versus an in-memory direction-only core
+  produced identical release/cancel events. This isolates runner sampling from
+  the bounded-gap semantic change.
+- Two additional close-up repeats retained two and one false shots. The
+  retained candidates used ordinary no-gap velocity or the existing NB route,
+  never the new bounded-gap fast route. Real-video instability and the broader
+  false-fire gap therefore remain, but the recall remediation did not create
+  the observed retained candidates.
+
+Risk notes:
+
+- The fixed-speed branch can now bridge actual null poses only when its latest
+  non-null direction origin is within the existing 150 ms tier-1 cap. The
+  calibrated route still fails closed across any missing adjacent pose, and
+  gaps over the cap remain owned by NB2. The physical matrix must still include
+  15 fps and transient pose-loss shots before release.
+- In valid detector state, the learned legacy speed is bounded below the fixed
+  fast threshold. On contiguous observations, fast is normally a diagnostic
+  subset of calibrated; across a bounded null gap, fast remains the stricter
+  high-speed recall path while calibrated requires adjacency.
+- The real-video repeats prove that immediate direction alone cannot close the
+  target false-fire gap. No additional confidence, visibility, or movement
+  threshold should be activated from this evidence alone.
+- The restricted close-up source and its derived frame schedule remain local
+  and untracked. This ledger records only aggregate outcomes and lifecycle
+  shape.
+- The physical iPhone 3-condition/18-shot matrix remains incomplete, so the app
+  is not yet ready for a product-complete or publish-ready claim.
+- Stable pending-shot identity/outcome mapping, complete live/replay fire
+  snapshots, and a default-off bounded diagnostics-only export remain the
+  explicitly approval-gated diagnostic handoff. End-of-stream shot mutation
+  remains unsafe until the exact provisional shot can be targeted and a real
+  final shot can be distinguished from an unresolved false candidate.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Obtain explicit approval for the three-part diagnostic handoff. After
+  approval, implement stable provisional-shot identity and outcome mapping as
+  the first isolated TDD checkpoint. Keep complete snapshots, bounded export,
+  and end-of-stream resolution as later one-task checkpoints so storage and
+  privacy behavior remain reviewable.

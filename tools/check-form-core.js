@@ -1853,9 +1853,22 @@ function releaseFrames(totalMs, dt, fromAnchor) {
   );
   assertClose(exact.directionDelta, 0.04, 1e-12, "legacy continuity reports direction delta");
   assertEqual(
+    continuityAt({ velocity: core.FORM_PH.RELEASE_TH + 1 }).fastMatched,
+    true,
+    "legacy fast includes the exact direction boundary",
+  );
+  assertEqual(
     continuityAt({ previousAnchor: 0.360001 }).calibratedMatched,
     false,
     "legacy continuity excludes direction below the calibrated boundary",
+  );
+  assertEqual(
+    continuityAt({
+      previousAnchor: 0.360001,
+      velocity: core.FORM_PH.RELEASE_TH + 1,
+    }).fastMatched,
+    false,
+    "legacy fast excludes direction below the boundary",
   );
   assertEqual(
     continuityAt({ drawArm: Number.NaN }).calibratedMatched,
@@ -1872,6 +1885,109 @@ function releaseFrames(totalMs, dt, fromAnchor) {
     false,
     "legacy calibrated continuity does not cross a null frame",
   );
+  assertEqual(
+    continuityAt({
+      previousNull: true,
+      velocity: core.FORM_PH.RELEASE_TH + 1,
+    }).fastMatched,
+    true,
+    "legacy fast uses a bounded latest-usable direction across a null frame",
+  );
+}
+
+{
+  /* Anonymous synthetic pair: keep anchor evidence, total rise, current speed, and arm
+     continuity identical, then vary only the immediately preceding movement direction.
+     A coherent outward departure is a legacy-fast shot; an inward rebound is not. */
+  const holdAnchor = core.FORM_PH.CLOSE_IN - 0.06;
+  const releaseAnchor = holdAnchor + core.FORM_PH.RELEASE_RISE + 0.23;
+  const directionStep = core.FORM_PH.RELEASE_RISE + 0.02;
+  const precursorMs = 120;
+  const releaseMs = 20;
+  const directionSequence = (previousAnchor) => {
+    const seq = [];
+    for (let i = 0; i < 10; i++) seq.push([mkRaw(holdAnchor, 120), 0.02, 20]);
+    const precursorVelocity = Math.abs(previousAnchor - holdAnchor) / (precursorMs / 1000);
+    const releaseVelocity = Math.abs(releaseAnchor - previousAnchor) / (releaseMs / 1000);
+    assert(
+      precursorVelocity < core.FORM_PH.ADAPTIVE_RELEASE_MIN,
+      "synthetic precursor stays below every legacy velocity threshold",
+    );
+    seq.push([mkRaw(previousAnchor, 120), precursorVelocity, precursorMs]);
+    seq.push([mkRaw(releaseAnchor, 120), releaseVelocity, releaseMs]);
+    return seq;
+  };
+  const outward = runSequence(directionSequence(releaseAnchor - directionStep));
+  const inward = runSequence(directionSequence(releaseAnchor + directionStep));
+
+  assertEqual(outward.releases, 1, "legacy detection preserves a coherent outward departure");
+  assertEqual(inward.releases, 0, "legacy detection rejects an inward rebound");
+}
+
+{
+  /* Production velocity skips a transient null frame and measures from the latest usable
+     wrist. Legacy-fast direction must use the same bounded observation origin: preserve an
+     outward shot across one missing pose, but reject an inward return with identical speed. */
+  const holdAnchor = core.FORM_PH.CLOSE_IN - 0.06;
+  const releaseAnchor = holdAnchor + core.FORM_PH.RELEASE_RISE + 0.02;
+  const directionStep = core.FORM_PH.RELEASE_RISE + 0.02;
+  const frameMs = 20;
+  const bodyScale = 0.25;
+  const expectedVelocity = core.FORM_PH.RELEASE_TH + 1;
+  const rawAt = (anchorNorm, drawWristX = 0) => ({
+    ...mkRaw(anchorNorm, 120),
+    bodyScale,
+    dW: { x: drawWristX, y: 0 },
+  });
+  const runGapDirection = (previousAnchor, nullFrames = 1) => {
+    const st = core.makeFormPhaseDetector();
+    const history = [];
+    let now = 0;
+    let releases = 0;
+    const advance = (raw) => {
+      now += frameMs;
+      const velocity = core.computeFormVelocity(history, raw, now);
+      history.push({ ts: now, m: raw, vel: velocity });
+      const result = core.stepFormPhase(st, raw, history, 1, now);
+      if (result.released) releases++;
+      return { result, velocity };
+    };
+    for (let i = 0; i < 10; i++) advance(rawAt(holdAnchor));
+    if (previousAnchor != null) advance(rawAt(previousAnchor));
+    for (let i = 0; i < nullFrames; i++) advance(null);
+    const validToValidMs = (nullFrames + 1) * frameMs;
+    const releaseDx = expectedVelocity * (validToValidMs / 1000) * bodyScale;
+    const current = advance(rawAt(releaseAnchor, releaseDx));
+    return { current, releases };
+  };
+  const outward = runGapDirection(null);
+  const inward = runGapDirection(releaseAnchor + directionStep);
+  const excessiveGap = runGapDirection(
+    null,
+    Math.floor(core.FORM_PH.NB_MAX_GAP_MS / frameMs),
+  );
+
+  assertClose(
+    outward.current.velocity,
+    expectedVelocity,
+    1e-12,
+    "bounded-gap outward companion uses production fast velocity",
+  );
+  assertClose(
+    inward.current.velocity,
+    expectedVelocity,
+    1e-12,
+    "bounded-gap inward companion uses the same production fast velocity",
+  );
+  assertClose(
+    excessiveGap.current.velocity,
+    expectedVelocity,
+    1e-12,
+    "over-limit gap companion still presents the same computed speed",
+  );
+  assertEqual(inward.releases, 0, "bounded pose gap still rejects an inward rebound");
+  assertEqual(excessiveGap.releases, 0, "legacy-fast does not bridge beyond the tier-1 gap cap");
+  assertEqual(outward.releases, 1, "bounded pose gap preserves an outward legacy-fast shot");
 }
 
 {
