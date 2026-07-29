@@ -1681,3 +1681,114 @@ Next task:
   frame by frame, read-only first. Compare its hold evidence, departure origin,
   velocity timing, and confirmation lifecycle with the reviewed positive and
   this production-velocity positive before proposing any detector change.
+
+### 2026-07-29 - Close-up false-fire causal diagnosis
+
+- Kept the product detector, view, tests, storage, and release surface
+  unchanged while tracing the remaining reviewed close-up false fire from its
+  hold evidence through the end of the video.
+- Earlier `close/vel` candidates in the target observation were self-repaired
+  by the existing confirmation lifecycle. The final candidate was the only
+  retained result.
+- Reconstructed the final decision from transient unrounded diagnostics before
+  the local output was overwritten. A short fixed-close hold was followed by
+  an outward landmark jump, then a fast inward rebound. The rebound still met
+  the legacy rise, current-speed, and draw-arm predicates. Its immediate
+  direction was inward, so the direction predicate failed, but the legacy fast
+  route does not require positive departure direction and emitted `close/vel`.
+  No reusable restricted-video scalar schedule is copied into this tracked
+  ledger.
+- Confirmed a second necessary condition for retaining this false candidate.
+  After the fire, the trace did not sustain the required departure evidence
+  and then moved back below its boundary. Video end arrived well inside the
+  400 ms confirmation window, before the pending candidate could be resolved.
+- Confirmed that saved-video replay handles end-of-stream by stopping the loop
+  and reporting completion. It neither resolves `detector.pendingRelease` nor
+  removes the provisional item from `shots`, so the unresolved candidate
+  remains enabled for saving as a detected shot.
+- Compared the retained reviewed positive at `4315.630 ms`. It used the same
+  `close/vel` route, had the same qualifying close-frame count, no null gap,
+  and similar velocity and rise. Its discriminating observations were a
+  positive immediate direction and sustained post-fire departure; its pending
+  state cleared before video end.
+- The production-velocity synthetic positive remains a separate adaptive
+  route. It clears its pending state on the first frame after the inclusive
+  400 ms boundary, so neither the target direction predicate nor a correctly
+  modeled end-of-stream review state should alter that positive.
+- Falsified the simple alternatives:
+  - changing only the required close-frame count cannot distinguish this pair
+    because both decisions had the same qualifying count;
+  - changing the learned anchor boundary does not explain the target fire,
+    because it had no adaptive evidence and used the fixed `close` route;
+  - a simple global `CONF_GATE=.72` gate was unsafe for the current fixtures:
+    an independent probe removed the target false fire but caused the
+    scene-cut negative to retain a shot;
+  - resetting detector and adaptive state before the final scene did not
+    remove the false fire, so leaked prior cancellation state is not causal.
+
+Validation:
+
+- Several fresh serialized real-video observations completed successfully but
+  produced different retained counts and event schedules. This confirms that
+  the Python/MediaPipe runner is an observation tool, not a deterministic
+  regression fixture. Multiple runs again ended with a candidate still inside
+  its 400 ms confirmation window.
+- `node tools/golden-replay/replay-form-fixtures.js`: pass:
+  - the oblique scalar fixture retained one `4457.414 ms / close` release with
+    `pendingAtEnd=false`;
+  - the scene-cut fixture retained zero releases.
+- Applied the existing `+.04` direction predicate to the legacy fast route
+  only in memory, without editing a file. `node tools/check-form-core.js`
+  remained fully green, including the production adaptive characterization.
+  Both scalar fixtures preserved their exact release/cancel event sequences.
+  The predicate rejects the target inward decision and accepts the reviewed
+  positive outward decision.
+- An independent counterfactual verifier advanced the captured pending state
+  beyond 400 ms with continued low-anchor observations and reproduced the
+  expected `no-depart` cancellation. It also showed why an unconditional
+  end-of-stream cancellation is unsafe: truncating a real final shot before
+  enough follow-through evidence creates the same unresolved state.
+- Four read-only agents independently audited the target lifecycle,
+  positive/negative separation, fixture and runner limitations, and ranked
+  counterfactuals. They agreed that directionless fast matching and the
+  unresolved end-of-stream state explain this run. They also agreed that
+  direction alone is not a complete close-up-video fix because a different
+  MediaPipe sampling schedule can observe the same false scene with a positive
+  direction.
+
+Risk notes:
+
+- This is a diagnosis-only checkpoint. No detector behavior, user-facing UI,
+  persisted data, storage/schema, dependency, Service Worker, version marker,
+  model asset, or user data changed.
+- The restricted local close-up video and any scalar schedule derived from it
+  remain untracked and must not be published as fixtures or documentation.
+  The original target JSON was overwritten by a concurrent local replay after
+  its decision and post-fire lifecycle were captured transiently, so this
+  observation is not a durable release artifact.
+- A legacy-fast-only direction requirement is promising for the target event
+  and passed the targeted deterministic checks above, but its recall impact
+  still needs a synthetic RED regression and the physical iPhone matrix. A
+  separate sampling of the negative scene produced a positive direction, so it
+  cannot close the whole acceptance gap by itself.
+- End-of-stream must not silently leave an unresolved candidate saveable as a
+  detected shot, but discarding every pending candidate would silently lose a
+  genuine shot near the end of capture. A safe UI resolution also depends on
+  targeting the exact provisional shot rather than the current fragile
+  last-array-item behavior.
+- The exact pending-shot identity and outcome mapping, complete live/replay
+  fire snapshots, and default-off bounded diagnostics-only export remain the
+  same three-part approval-gated handoff. None was implemented here.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Add an anonymous synthetic regression for an inward legacy-fast rebound and
+  its outward true-positive companion, without copying restricted-video
+  scalars. Confirm that the new regression is RED, implement only the minimum
+  direction-coherence correction, then require the complete deterministic
+  suite to return GREEN. Keep end-of-stream shot mutation unchanged until
+  stable pending-shot identity and outcome mapping are explicitly approved.
