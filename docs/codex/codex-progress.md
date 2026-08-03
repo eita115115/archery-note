@@ -1936,3 +1936,77 @@ Next task:
   the first isolated TDD checkpoint. Keep complete snapshots, bounded export,
   and end-of-stream resolution as later one-task checkpoints so storage and
   privacy behavior remain reviewable.
+
+### 2026-08-03 - Approved form diagnostic handoff design
+
+- The user selected the view-owned receipt approach (option A) and explicitly
+  approved all three previously gated handoff slices: stable provisional-shot
+  identity/outcome mapping, complete live/replay fire snapshots, and a
+  default-off bounded diagnostics-only JSON export.
+- Added the written design at
+  `docs/superpowers/specs/2026-08-03-form-diagnostic-handoff-design.md`.
+- The design allocates an opaque receipt ID before shot summarization, uses the
+  same ID as `shot.id` when a visible shot exists, keeps manual and detector
+  outcomes on separate axes, and forbids every array-tail cancellation
+  fallback.
+- The design keeps `stepFormPhase()` independent of UI identity, preserves
+  unresolved EOS shots without adding an EOS keep/delete policy, and defines
+  exact fail-closed behavior for missing or mismatched identities. One active
+  operational receipt remains outside the 32-entry diagnostic archive, so
+  exact-ID cancellation still works after overflow. The unreachable-in-normal-
+  use receipt-sequence ceiling also fails closed: it clears deletion ownership,
+  latches desynchronization, creates no shot, and freezes that workflow instead
+  of risking a stale cancellation target.
+- The complete fire snapshot contains exactly the seven acceptance fields.
+  A diagnostics-only matrix coordinator selects three exact current-version
+  live records by ID and fixed condition slot; replay, array reordering,
+  duplicate IDs, restored substitutions, stale versions, overflow, invalid
+  outcomes, and incomplete evidence fail closed.
+- The export projects fresh allowlisted objects, remaps runtime IDs to local
+  ordinals, caps each run at 32 receipts and the pretty-printed UTF-8 artifact
+  at 65,536 bytes, and excludes practice records, dates, IDs, arbitrary
+  strings, media, raw landmarks, frame traces, settings, and device claims.
+  Share cancellation has no transport fallback, and native diagnostic cache
+  files have explicit stale-file and final cleanup contracts.
+- Current schema-5 nested-field preservation makes the diagnostic additions
+  additive. The design does not authorize or require a storage migration,
+  storage-key change, dependency, Service Worker change, version bump,
+  release, deployment, public push, PR, or history rewrite.
+- Matrix record/coordinator commits are specified as one synchronous save with
+  exact in-memory rollback and a frozen retry-or-close state on storage failure;
+  no failed write may advance the operator to the next condition.
+- No runtime, test, storage, UI, Service Worker, dependency, version, release,
+  deployment, or user-data behavior changed in this design checkpoint.
+
+Validation:
+
+- Self-review found and removed stale alternatives, undefined invariant
+  diagnostics, array-order source selection, ambiguous share fallback, save
+  rollback gaps, and the sequence-exhaustion stale-owner edge. Placeholder and
+  contradiction scans are clean.
+- Final design SHA-256
+  `3A549661C2E4129D4D836A0FD2D5081BF51971F7950FF2961FE2C72197688814`
+  received independent `ACCEPT` results for exact-ID lifecycle, privacy/source
+  selection, schema-5/storage rollback compatibility, and holistic consistency.
+- `npx prettier --check docs/superpowers/specs/2026-08-03-form-diagnostic-handoff-design.md docs/codex/codex-progress.md` - PASS.
+- `npm run format:check` - PASS.
+- `git diff --check` - PASS.
+- Runtime/app tests were not run because this checkpoint changes design and
+  progress documentation only; no production or test code changed.
+
+Risk notes:
+
+- The written design still requires the user's review before an implementation
+  plan or production code is written.
+- End-of-stream resolution and the physical iPhone 3-condition/18-shot matrix
+  remain separate later checkpoints.
+- The current branch still contains the previously documented identifying
+  pathname in reachable history and must not be pushed. Final publication
+  requires a sanitized branch/tree from `main` or an explicitly approved
+  history rewrite.
+
+Next task:
+
+- Obtain user review of the committed written design. After approval, invoke
+  the writing-plans workflow and create the detailed TDD implementation plan;
+  do not implement runtime behavior in that planning checkpoint.
