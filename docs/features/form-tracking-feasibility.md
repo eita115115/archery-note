@@ -1,7 +1,7 @@
 # 射形トラッキング実現可能性レポート (Task F1, 2026-07-03)
 
 `docs/features/form-tracking-plan.md` Task F1 の成果。プロトタイプは
-`C:\Users\eita2\Projects\pose-prototype`（リポジトリ外・使い捨て）。
+`<workspace>\pose-prototype`（リポジトリ外・使い捨て）。
 
 ## 判定: GO
 
