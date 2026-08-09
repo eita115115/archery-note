@@ -3865,7 +3865,66 @@ function anchorHistory(releaseTs, drift) {
   assertEqual(legacy.frames, 5, "three-argument summary preserves loose fallback selection");
 }
 
-/* ---------- Task 5: capture/replay active-geometry integration contracts ---------- */
+function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep, result, onShot) {
+  if (result.canceled) {
+    return { branch: "cancel", action: tracker.cancel(result.debug.cancelReason) };
+  }
+  if (result.released) {
+    const action = tracker.begin({ fireTs: result.fireTs, fire: null });
+    if (!action.fatal) onShot(action.id);
+    return { branch: "release", action };
+  }
+  if (hadPendingRelease && pendingAfterStep == null) {
+    return { branch: "confirm", action: tracker.confirm() };
+  }
+  return { branch: "none", action: null };
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const begun = tracker.begin({ fireTs: 1, fire: null });
+  tracker.markShotCreated(begun.id);
+  let onShotCalls = 0;
+  const resolved = resolveReceiptFrameForTest(
+    tracker,
+    true,
+    null,
+    { canceled: true, released: false, debug: { cancelReason: "anchor-return" } },
+    () => {
+      onShotCalls += 1;
+    },
+  );
+  assertEqual(resolved.branch, "cancel", "cancellation wins over implicit confirmation");
+  assertEqual(resolved.action.deletionTarget, begun.id, "cancel keeps exact ownership");
+  assertEqual(onShotCalls, 0, "cancel never summarizes a shot");
+}
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const order = [];
+  const originalBegin = tracker.begin;
+  tracker.begin = (input) => {
+    order.push("begin");
+    return originalBegin(input);
+  };
+  const resolved = resolveReceiptFrameForTest(
+    tracker,
+    true,
+    null,
+    { canceled: false, released: true, fireTs: 10, debug: {} },
+    (id) => {
+      order.push(`onShot:${id}`);
+    },
+  );
+  assertEqual(resolved.branch, "release", "release starts a new receipt");
+  assertJsonEqual(order, ["begin", "onShot:form-receipt-1"], "begin precedes onShot");
+  assertEqual(
+    tracker.current().detectorDisposition,
+    "pending",
+    "release is not confirmed same-frame",
+  );
+}
+
+/* ---------- Task 2: capture/replay receipt lifecycle integration contracts ---------- */
 
 {
   const capture = boundedSourceSection(
@@ -3880,39 +3939,87 @@ function anchorHistory(releaseTs, drift) {
     '    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);',
     "startFormReplay section",
   );
+  const liveRemove = boundedSourceSection(
+    capture,
+    'div.querySelector("[data-rm-shot]").onclick=()=>{',
+    'ovl.querySelector("#fcShots").prepend(div);',
+    "live shot removal handler",
+  );
+  const liveRemoveCompact = compactSource(liveRemove);
+  assert(
+    liveRemoveCompact.includes("receiptTracker.manualRemove(shot.id);") &&
+      liveRemoveCompact.includes("shots=shots.filter(candidate=>candidate.id!==shot.id);") &&
+      liveRemoveCompact.includes(
+        "if(pendingCheck&&pendingCheck.shotId===shot.id)pendingCheck=null;",
+      ),
+    "live manual removal audits and deletes only the clicked shot ID",
+  );
+  assert(
+    !liveRemoveCompact.includes("receiptTracker=") &&
+      !liveRemoveCompact.includes("detector.pendingRelease=") &&
+      !liveRemoveCompact.includes("shots["),
+    "live manual removal never clears or retargets detector ownership",
+  );
+  [capture, replay].forEach((source, index) => {
+    const label = index === 0 ? "capture" : "replay";
+    assert(
+      !/shots\s*\[\s*shots\.length\s*-\s*1\s*\]/.test(source),
+      `${label} cancellation never owns array tail`,
+    );
+    assert(!/\.pop\s*\(/.test(source), `${label} cancellation never pops a shot`);
+  });
   [
     {
       label: "capture",
       source: capture,
-      summary:
-        "functiononShot(now,anchorStartTs,activeAnchorEnter,debug){constshot=summarizeFormShot(history,anchorStartTs,now,activeAnchorEnter);",
-      onRelease: "constshotId=onShot(now,anchorStartTs,r.anchorEnter,debug);",
+      onShotSignature: "functiononShot(receiptId,now,anchorStartTs,activeAnchorEnter,debug){",
+      onShotCall: "constshotId=onShot(action.id,now,anchorStartTs,result.anchorEnter,debug);",
     },
     {
       label: "replay",
       source: replay,
-      summary:
-        "functiononShot(now,anchorStartTs,activeAnchorEnter){constshot=summarizeFormShot(history,anchorStartTs,now,activeAnchorEnter);",
-      onRelease: "constshotId=onShot(now,r.anchorStartTs,r.anchorEnter);",
+      onShotSignature: "functiononShot(receiptId,now,anchorStartTs,activeAnchorEnter,debug){",
+      onShotCall:
+        "constshotId=onShot(action.id,now,result.anchorStartTs,result.anchorEnter,debug);",
     },
-  ].forEach(({ label, source, summary, onRelease }) => {
+  ].forEach(({ label, source, onShotSignature, onShotCall }) => {
     const compact = compactSource(source);
-    const summaryAt = compact.indexOf(summary);
     const velocityAt = compact.indexOf("constvel=velSrc.step(history,raw,now);");
     const pushAt = compact.indexOf("history.push({ts:now,m:raw,vel});", velocityAt);
     const capAt = compact.indexOf("if(history.length>200)history.shift();", pushAt);
-    const detectAt = compact.indexOf("constr=stepFormPhase(detector,raw,history,1.0,now);", capAt);
-    const releasedAt = compact.indexOf("if(released){", detectAt);
-    const onReleaseAt = compact.indexOf(onRelease, releasedAt);
+    const pendingAt = compact.indexOf(
+      "consthadPendingRelease=detector.pendingRelease!=null;",
+      capAt,
+    );
+    const stepAt = compact.indexOf(
+      "constresult=stepFormPhase(detector,raw,history,1.0,now);",
+      pendingAt,
+    );
+    const cancelAt = compact.indexOf("if(result.canceled){", stepAt);
+    const releaseAt = compact.indexOf("elseif(result.released){", cancelAt);
+    const confirmAt = compact.indexOf(
+      "elseif(hadPendingRelease&&detector.pendingRelease==null){",
+      releaseAt,
+    );
+    const signatureAt = compact.indexOf(onShotSignature);
+    const callAt = compact.indexOf(onShotCall, releaseAt);
     assert(
-      summaryAt >= 0 &&
-        velocityAt >= 0 &&
+      velocityAt >= 0 &&
         pushAt > velocityAt &&
         capAt > pushAt &&
-        detectAt > capAt &&
-        releasedAt > detectAt &&
-        onReleaseAt > releasedAt,
-      `${label} keeps velocity → current push → history cap → detection → synchronous summary order`,
+        pendingAt > capAt &&
+        stepAt > pendingAt &&
+        cancelAt > stepAt &&
+        releaseAt > cancelAt &&
+        confirmAt > releaseAt &&
+        signatureAt >= 0 &&
+        callAt > releaseAt,
+      `${label} keeps velocity -> push -> cap -> pending snapshot -> one step -> cancel/release/confirm -> synchronous onShot`,
+    );
+    assertEqual(
+      (compact.slice(pendingAt, confirmAt).match(/stepFormPhase\(/g) || []).length,
+      1,
+      `${label} resolves exactly one detector step`,
     );
   });
   const secureGuardStart = capture.indexOf("if(window.isSecureContext!==true){");
@@ -4001,6 +4108,7 @@ function anchorHistory(releaseTs, drift) {
   assertEqual(
     compactSource(reset),
     compactSource(`function resetCaptureGeometry() {
+      abandonActiveReceipt("geometry-reset");
       if (pendingCheck) finalizeArrowCheck();
       detector = makeFormPhaseDetector();
       ema = makeFormEma(0.38);
@@ -4082,10 +4190,10 @@ function anchorHistory(releaseTs, drift) {
   );
   assert(
     swapCompact.includes("if(!cameraSwapReady||cameraSwapInProgress)return;") &&
-      (captureCompact.match(/cameraSwapReady=false;/g) || []).length === 1 &&
+      (captureCompact.match(/cameraSwapReady=false;/g) || []).length === 2 &&
       (captureCompact.match(/cameraSwapReady=true;/g) || []).length === 1 &&
       !swapCompact.includes("cameraSwapReady="),
-    "swap handler independently requires readiness and preserves it across failures",
+    "swap handler independently requires readiness while receipt failure disables future swaps",
   );
   assert(
     swapCompact.includes("constcameraStarted=awaitstartCamera();") &&
@@ -4147,22 +4255,28 @@ function anchorHistory(releaseTs, drift) {
   );
 
   assert(
-    /function\s+onShot\s*\(\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*,\s*debug\s*\)/.test(
+    /function\s+onShot\s*\(\s*receiptId\s*,\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*,\s*debug\s*\)/.test(
       capture,
     ) &&
       /summarizeFormShot\s*\(\s*history\s*,\s*anchorStartTs\s*,\s*now\s*,\s*activeAnchorEnter\s*\)/.test(
         capture,
       ) &&
-      /onShot\s*\(\s*now\s*,\s*anchorStartTs\s*,\s*r\.anchorEnter\s*,\s*debug\s*\)/.test(capture),
-    "capture passes the top-level active anchor threshold into shot summaries",
+      /onShot\s*\(\s*action\.id\s*,\s*now\s*,\s*anchorStartTs\s*,\s*result\.anchorEnter\s*,\s*debug\s*\)/.test(
+        capture,
+      ),
+    "capture passes receipt identity and top-level active anchor geometry into shot summaries",
   );
   assert(
-    /function\s+onShot\s*\(\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*\)/.test(replay) &&
+    /function\s+onShot\s*\(\s*receiptId\s*,\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*,\s*debug\s*\)/.test(
+      replay,
+    ) &&
       /summarizeFormShot\s*\(\s*history\s*,\s*anchorStartTs\s*,\s*now\s*,\s*activeAnchorEnter\s*\)/.test(
         replay,
       ) &&
-      /onShot\s*\(\s*now\s*,\s*r\.anchorStartTs\s*,\s*r\.anchorEnter\s*\)/.test(replay),
-    "replay passes the top-level active anchor threshold into shot summaries",
+      /onShot\s*\(\s*action\.id\s*,\s*now\s*,\s*result\.anchorStartTs\s*,\s*result\.anchorEnter\s*,\s*debug\s*\)/.test(
+        replay,
+      ),
+    "replay passes receipt identity and top-level active anchor geometry into shot summaries",
   );
   assert(
     !capture.includes("debug.anchorEnter") && !replay.includes("debug.anchorEnter"),
@@ -4190,6 +4304,75 @@ function anchorHistory(releaseTs, drift) {
       `replay handedness locally resets ${resetExpression}`,
     ),
   );
+  [capture, replay].forEach((source, index) => {
+    const label = index === 0 ? "capture" : "replay";
+    const compact = compactSource(source);
+    assertEqual(
+      (compact.match(/makeFormReleaseReceiptTracker\(\{maxDiagnosticReceipts:32\}\)/g) || [])
+        .length,
+      1,
+      `${label} creates exactly one workflow tracker`,
+    );
+    assert(
+      compact.includes('abandonActiveReceipt("geometry-reset");'),
+      `${label} geometry reset resolves only active ownership`,
+    );
+    assert(
+      compact.includes('abandonActiveReceipt("workflow-close");'),
+      `${label} close resolves only active ownership`,
+    );
+    assert(
+      compact.includes("shotId:action.id") || compact.includes("shotId:releaseAction.id"),
+      `${label} diagnostic IDs come from receipt actions`,
+    );
+    assert(!/shots\s*\[\s*shots\.length\s*-\s*1\s*\]/.test(source), `${label} has no tail owner`);
+    assert(!/\.pop\s*\(/.test(source), `${label} has no pop owner`);
+    assert(
+      !/uid\s*\(\s*\)/.test(
+        boundedSourceSection(source, "function onShot(", "function loop(", `${label} onShot`),
+      ),
+      `${label} onShot allocates no fallback ID`,
+    );
+  });
+  assert(
+    compactSource(replay).includes('abandonActiveReceipt("replay-eos");'),
+    "replay EOS is explicit",
+  );
+
+  function exerciseViewReceiptCap(label, debugEnabled) {
+    const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+    let shots = [];
+    const releaseFires = [];
+    for (let number = 1; number <= 33; number += 1) {
+      const action = tracker.begin({ fireTs: number, fire: null });
+      shots.push({ id: action.id });
+      tracker.markShotCreated(action.id);
+      if (debugEnabled) {
+        releaseFires.push({ shotId: action.id });
+        if (releaseFires.length > 32) releaseFires.shift();
+      }
+      tracker.confirm();
+    }
+    if (label === "capture") {
+      tracker.manualRemove("form-receipt-33");
+      shots = shots.filter((shot) => shot.id !== "form-receipt-33");
+    }
+    const action34 = tracker.begin({ fireTs: 34, fire: null });
+    shots.push({ id: action34.id });
+    tracker.markShotCreated(action34.id);
+    const canceled34 = tracker.cancel("anchor-return");
+    shots = shots.filter((shot) => shot.id !== canceled34.deletionTarget);
+    assertEqual(canceled34.deletionTarget, "form-receipt-34", `${label} receipt 34 exact cancel`);
+    assert(
+      shots.some((shot) => shot.id === "form-receipt-32"),
+      `${label} receipt 32 survives`,
+    );
+    assertEqual(releaseFires.length, debugEnabled ? 32 : 0, `${label} exact debug trace gate`);
+  }
+  ["capture", "replay"].forEach((label) => {
+    exerciseViewReceiptCap(label, false);
+    exerciseViewReceiptCap(label, true);
+  });
 }
 
 /* ---------- T-Anchor（Stage 1 §12.3）: pre-release 窓の anchorStartTs クランプ ---------- */

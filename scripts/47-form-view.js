@@ -260,11 +260,12 @@ function openFormCapture(){
   const hud=ovl.querySelector("#fcHud"), phaseEl=ovl.querySelector("#fcPhase");
   let facing="environment";
   let handedness=db.settings.formHandedness==="left"?"left":"right";
-  let running=true, raf=0, stream=null, landmarker=null;
+  let running=true, raf=0, stream=null, landmarker=null, receiptFailure=false;
   let inFlightStream=null;
   let cameraSwapReady=false;
   let cameraSwapInProgress=false;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
+  const receiptTracker=makeFormReleaseReceiptTracker({maxDiagnosticReceipts:32});
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
   const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[],releaseFires:[]}; // 検証計装(H-2/Plan-0.2): formDebug時のみ push・保存
@@ -303,6 +304,32 @@ function openFormCapture(){
     }catch(e){ recorder=null; }
   }
   function stopRec(){ if(recorder&&recorder.state!=="inactive"){ recorder.stop(); recorder=null; } }
+  function freezeForReceiptFailure(){
+    if(receiptFailure) return;
+    receiptFailure=true;
+    running=false;
+    cameraSwapReady=false;
+    if(raf){
+      cancelAnimationFrame(raf);
+      raf=0;
+    }
+    stopRec();
+    const pendingStream=inFlightStream, activeStream=stream;
+    inFlightStream=null;
+    stream=null;
+    video.srcObject=null;
+    try{
+      if(pendingStream) pendingStream.getTracks().forEach(track=>track.stop());
+      if(activeStream&&activeStream!==pendingStream){
+        activeStream.getTracks().forEach(track=>track.stop());
+      }
+    }catch(e){}
+    ["#fcSwap", "#fcHand", "#fcCrop", "#fcRec"].forEach(selector=>{
+      const control=ovl.querySelector(selector);
+      if(control) control.disabled=true;
+    });
+    hud.textContent="射の識別状態を継続できません。結果を保存するか、この画面を閉じて解析をやり直してください。";
+  }
   async function shareRec(){
     if(!recBlob) return;
     const ext=recBlob.type.includes("mp4")?"mp4":"webm";
@@ -320,6 +347,7 @@ function openFormCapture(){
     if(inFlightStream===candidate) inFlightStream=null;
   }
   function stop(){
+    abandonActiveReceipt("workflow-close");
     running=false;
     if(raf) cancelAnimationFrame(raf);
     if(pendingCheck) finalizeArrowCheck();
@@ -369,6 +397,19 @@ function openFormCapture(){
       if(t) t.textContent=`第${idx+1}射`;
     });
   }
+  function applyReceiptCancellation(action){
+    const target=action&&action.deletionTarget;
+    if(!target) return;
+    shots=shots.filter(shot=>shot.id!==target);
+    const div=ovl.querySelector(`#fcShots [data-shot-id="${target}"]`);
+    if(div) div.remove();
+    if(pendingCheck&&pendingCheck.shotId===target) pendingCheck=null;
+    renumberShots();
+    refreshShotsHint();
+  }
+  function abandonActiveReceipt(reason){
+    if(receiptTracker.current()) receiptTracker.abandon(reason);
+  }
   /* ROI 帯の外接矩形だけを video から roiCanvas へ切り出し、そこで矢プレゼンスを測る
      （getImageData をフル解像度で呼ばない軽量化）。呼び出し側で performance.now() 差分を
      とって処理時間を記録できるよう、実測はここでは行わない（loop側で計測）。 */
@@ -390,13 +431,14 @@ function openFormCapture(){
     const toLocal=(p)=>({x:(p.x*vw-sx)/rw, y:(p.y*vh-sy)/rh});
     return arrowPresence(img,toLocal(raw.bW),toLocal(raw.dW));
   }
-  function onShot(now,anchorStartTs,activeAnchorEnter,debug){
+  function onShot(receiptId,now,anchorStartTs,activeAnchorEnter,debug){
     const shot=summarizeFormShot(history,anchorStartTs,now,activeAnchorEnter);
     if(!shot) return null;
-    shot.id=uid();
+    shot.id=receiptId;
     shot.arrowCheck=null; // 確定猶予窓の計測後に judgeArrowCheck の結果を書き込む（シャドー）
     shot.diag=(db.settings.formDebug===true&&debug)?debug:null; // 検証計装（H）: 既定OFF
     shots.push(shot);
+    receiptTracker.markShotCreated(receiptId);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem";
     div.dataset.shotId=shot.id;
@@ -405,7 +447,9 @@ function openFormCapture(){
       <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>
       <button class="btn sm ghost" data-rm-shot="${esc(shot.id)}" aria-label="この射を取り消す">${icon("del")}</button>`;
     div.querySelector("[data-rm-shot]").onclick=()=>{
-      shots=shots.filter(s=>s.id!==shot.id);
+      receiptTracker.manualRemove(shot.id);
+      shots=shots.filter(candidate=>candidate.id!==shot.id);
+      if(pendingCheck&&pendingCheck.shotId===shot.id) pendingCheck=null;
       div.remove();
       renumberShots();
       refreshShotsHint();
@@ -430,6 +474,7 @@ function openFormCapture(){
     if(desc) desc.innerHTML=desc.innerHTML+formArrowCheckTagHtml(result);
   }
   function resetCaptureGeometry(){
+    abandonActiveReceipt("geometry-reset");
     if(pendingCheck) finalizeArrowCheck();
     detector=makeFormPhaseDetector();
     ema=makeFormEma(0.38);
@@ -462,8 +507,32 @@ function openFormCapture(){
       const vel=velSrc.step(history,raw,now);
       history.push({ts:now,m:raw,vel});
       if(history.length>200) history.shift();
-      const r=stepFormPhase(detector,raw,history,1.0,now);
-      const {phase,released,canceled,debug,anchorStartTs}=r;
+      const hadPendingRelease=detector.pendingRelease!=null;
+      const result=stepFormPhase(detector,raw,history,1.0,now);
+      const {phase,released,canceled,debug,anchorStartTs}=result;
+      let releaseAction=null;
+      let releasedShotId=null;
+      let releasedPreScores=null;
+      if(result.canceled){
+        const action=receiptTracker.cancel(debug&&debug.cancelReason);
+        if(db.settings.formDebug===true){
+          formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:(debug&&debug.cancelReason)||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:action.id},200);
+        }
+        applyReceiptCancellation(action);
+      }else if(result.released){
+        releaseAction=receiptTracker.begin({fireTs:now,fire:null});
+        if(releaseAction.fatal){
+          freezeForReceiptFailure();
+        }else{
+          lastReleaseNow=now;
+          releasedPreScores=presenceRing.map(point=>point.score);
+          const action=releaseAction;
+          const shotId=onShot(action.id,now,anchorStartTs,result.anchorEnter,debug);
+          releasedShotId=shotId;
+        }
+      }else if(hadPendingRelease&&detector.pendingRelease==null){
+        receiptTracker.confirm();
+      }
       /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: debugが返る全フレームで
          recentFrames（release fire snapshot用バッファ）とphaseCounts（session全体の
          phase滞在ヒストグラム）を更新する。判定ロジックには一切使わない。 */
@@ -471,19 +540,6 @@ function openFormCapture(){
         recentFrames.push({ts:now,phase,...debug});
         if(recentFrames.length>RECENT_MAX) recentFrames.shift();
         phaseCounts[phase]=(phaseCounts[phase]||0)+1;
-      }
-      if(canceled){
-        /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（シャドー判定も破棄） */
-        const last=shots[shots.length-1];
-        if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:debug&&debug.cancelReason||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
-        if(last){
-          shots=shots.filter(s=>s.id!==last.id);
-          const div=ovl.querySelector(`#fcShots [data-shot-id="${last.id}"]`);
-          if(div) div.remove();
-          renumberShots();
-          refreshShotsHint();
-        }
-        if(pendingCheck&&pendingCheck.shotId===(last&&last.id)) pendingCheck=null;
       }
       /* 検証計装(H-2 → Plan-0.2, release-detection-triage-2026-07-13 §3.3): RELEASEを
          出しそうで出ていないフレーム（release momentの前後を捉える）。実測
@@ -526,21 +582,13 @@ function openFormCapture(){
           if(now-pendingCheck.startTs>=FORM_PH.CONFIRM_MS) finalizeArrowCheck();
         }
       }
-      if(released){
-        lastReleaseNow=now; // canceledEvents.tsAgo 用
-        const preScores=presenceRing.map(p=>p.score);
-        const shotId=onShot(now,anchorStartTs,r.anchorEnter,debug);
-        /* Plan-B strict-review Note #1 対応（Plan-0.2 Block B）: release fire直前20フレームの
-           trace を固定スナップショットとして残す（ring bufferと違い上書きされない）。
-           canceled になったショットの直前の姿勢推移を後から確認できるようにする。 */
+      if(releaseAction&&!releaseAction.fatal){
         if(db.settings.formDebug===true){
-          formPhaseDiag.releaseFires.push({
-            ts:now,
-            shotId:shotId||null,
-            framesBefore:recentFrames.slice(0,-1).slice(-20),
-          });
+          formDiagPush(formPhaseDiag.releaseFires,{ts:now,shotId:releaseAction.id,framesBefore:recentFrames.slice(0,-1).slice(-20)},32);
         }
-        if(shotId) pendingCheck={shotId,preScores,confirmScores:[],startTs:now};
+        if(releasedShotId){
+          pendingCheck={shotId:releasedShotId,preScores:releasedPreScores,confirmScores:[],startTs:now};
+        }
       }
       phaseEl.textContent=phase;
       phaseEl.classList.toggle("release",phase==="RELEASE");
@@ -584,6 +632,10 @@ function openFormCapture(){
     toast("診断用に0射で保存しました");
   }
   ovl.querySelector("#fcClose").onclick=async()=>{
+    if(receiptFailure){
+      if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) stop();
+      return;
+    }
     if(!shots.length){
       const diagSaved=db.settings.formDebug===true;
       if(diagSaved) saveDiagOnlyRecord();
@@ -704,8 +756,9 @@ function startFormReplay(videoUrl){
   const ctx=canvas.getContext("2d");
   const hud=ovl.querySelector("#frHud"), phaseEl=ovl.querySelector("#frPhase");
   let handedness=db.settings.formHandedness==="left"?"left":"right";
-  let running=true, raf=0, landmarker=null;
+  let running=true, raf=0, landmarker=null, receiptFailure=false;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
+  const receiptTracker=makeFormReleaseReceiptTracker({maxDiagnosticReceipts:32});
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
   let shots=[], frames=0, lastFpsAt=performance.now(), fps=0, lastDetectTs=-1;
   const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[],releaseFires:[]}; // 検証計装(H-2/Plan-0.2): formDebug時のみ push・保存
@@ -716,10 +769,24 @@ function startFormReplay(videoUrl){
   const RECENT_MAX=40; // fire ±20フレーム相当のバッファ
   const phaseCounts={SETUP:0,IDLE:0,ANCHORING:0,FULL_DRAW:0,RELEASE:0,FOLLOW:0};
   function stop(){
+    abandonActiveReceipt("workflow-close");
     running=false; if(raf) cancelAnimationFrame(raf);
     try{ video.pause(); }catch(e){}
     URL.revokeObjectURL(videoUrl);
     endActiveWorkflow(); closeModal(ovl);
+  }
+  function freezeForReceiptFailure(){
+    if(receiptFailure) return;
+    receiptFailure=true;
+    running=false;
+    if(raf){
+      cancelAnimationFrame(raf);
+      raf=0;
+    }
+    try{ video.pause(); }catch(e){}
+    const hand=ovl.querySelector("#frHand");
+    if(hand) hand.disabled=true;
+    hud.textContent="射の識別状態を継続できません。結果を保存するか、この画面を閉じて解析をやり直してください。";
   }
   function refreshSave(){
     const b=ovl.querySelector("#frSave");
@@ -733,10 +800,23 @@ function startFormReplay(videoUrl){
       if(t) t.textContent=`第${idx+1}射`;
     });
   }
-  function onShot(now,anchorStartTs,activeAnchorEnter){
+  function applyReceiptCancellation(action){
+    const target=action&&action.deletionTarget;
+    if(!target) return;
+    shots=shots.filter(shot=>shot.id!==target);
+    const div=ovl.querySelector(`#frShots [data-shot-id="${target}"]`);
+    if(div) div.remove();
+    renumberShots();
+    refreshSave();
+  }
+  function abandonActiveReceipt(reason){
+    if(receiptTracker.current()) receiptTracker.abandon(reason);
+  }
+  function onShot(receiptId,now,anchorStartTs,activeAnchorEnter,debug){
     const shot=summarizeFormShot(history,anchorStartTs,now,activeAnchorEnter);
     if(!shot) return null;
-    shot.id=uid(); shot.arrowCheck=null; shots.push(shot);
+    shot.id=receiptId; shot.arrowCheck=null; shot.diag=(db.settings.formDebug===true&&debug)?debug:null; shots.push(shot);
+    receiptTracker.markShotCreated(receiptId);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem"; div.dataset.shotId=shot.id;
     div.innerHTML=`<div><div class="t">第${shots.length}射</div>
@@ -775,8 +855,29 @@ function startFormReplay(videoUrl){
         const vel=velSrc.step(history,raw,now);
         history.push({ts:now,m:raw,vel});
         if(history.length>200) history.shift();
-        const r=stepFormPhase(detector,raw,history,1.0,now);
-        const {phase,released,canceled,debug}=r;
+        const hadPendingRelease=detector.pendingRelease!=null;
+        const result=stepFormPhase(detector,raw,history,1.0,now);
+        const {phase,released,canceled,debug}=result;
+        if(result.canceled){
+          const action=receiptTracker.cancel(debug&&debug.cancelReason);
+          if(db.settings.formDebug===true){
+            formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:(debug&&debug.cancelReason)||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:action.id},200);
+          }
+          applyReceiptCancellation(action);
+        }else if(result.released){
+          const action=receiptTracker.begin({fireTs:now,fire:null});
+          if(action.fatal){
+            freezeForReceiptFailure();
+          }else{
+            lastReleaseNow=now;
+            const shotId=onShot(action.id,now,result.anchorStartTs,result.anchorEnter,debug);
+            if(db.settings.formDebug===true){
+              formDiagPush(formPhaseDiag.releaseFires,{ts:now,shotId:action.id,framesBefore:recentFrames.slice(0,-1).slice(-20)},32);
+            }
+          }
+        }else if(hadPendingRelease&&detector.pendingRelease==null){
+          receiptTracker.confirm();
+        }
         /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: debugが返る全フレームで
            recentFrames（release fire snapshot用バッファ）とphaseCounts（session全体の
            phase滞在ヒストグラム）を更新する。判定ロジックには一切使わない。 */
@@ -784,18 +885,6 @@ function startFormReplay(videoUrl){
           recentFrames.push({ts:now,phase,...debug});
           if(recentFrames.length>RECENT_MAX) recentFrames.shift();
           phaseCounts[phase]=(phaseCounts[phase]||0)+1;
-        }
-        if(canceled){
-          /* 確定猶予で自己修復: 直前に誤検出したショットをUIごと取り消す（撮影側と同型処理） */
-          const last=shots[shots.length-1];
-          if(db.settings.formDebug===true) formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:debug&&debug.cancelReason||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:last?last.id:null},200);
-          if(last){
-            shots=shots.filter(s=>s.id!==last.id);
-            const div=ovl.querySelector(`#frShots [data-shot-id="${last.id}"]`);
-            if(div) div.remove();
-            renumberShots();
-            refreshSave();
-          }
         }
         /* 検証計装(H-2 → Plan-0.2, release-detection-triage-2026-07-13 §3.3): RELEASEを
            出しそうで出ていないフレーム。FULL_DRAWだけでなくANCHORINGも対象にし、ANCHORINGは
@@ -812,19 +901,6 @@ function startFormReplay(videoUrl){
             formDiagPush(formPhaseDiag.rejectedFramesNear,{ts:now,phase,...debug},400);
           }
         }
-        if(released){
-          lastReleaseNow=now;
-          const shotId=onShot(now,r.anchorStartTs,r.anchorEnter);
-          /* Plan-B strict-review Note #1 対応（Plan-0.2 Block B）: release fire直前20フレームの
-             trace を固定スナップショットとして残す（capture側と同型）。 */
-          if(db.settings.formDebug===true){
-            formPhaseDiag.releaseFires.push({
-              ts:now,
-              shotId:shotId||null,
-              framesBefore:recentFrames.slice(0,-1).slice(-20),
-            });
-          }
-        }
         phaseEl.textContent=phase;
         phaseEl.classList.toggle("release",phase==="RELEASE");
         phaseEl.classList.toggle("fulldraw",phase==="FULL_DRAW");
@@ -839,6 +915,7 @@ function startFormReplay(videoUrl){
       }
     }
     if(video.ended&&running){
+      abandonActiveReceipt("replay-eos");
       phaseEl.textContent="完了";
       hud.innerHTML=`解析完了 ・ ${shots.length}射を検出しました`;
       running=false; return;
@@ -864,6 +941,10 @@ function startFormReplay(videoUrl){
     toast("診断用に0射で保存しました");
   }
   ovl.querySelector("#frClose").onclick=async()=>{
+    if(receiptFailure){
+      if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) stop();
+      return;
+    }
     if(!shots.length){
       const diagSaved=db.settings.formDebug===true;
       if(diagSaved) saveDiagOnlyRecord();
@@ -899,6 +980,7 @@ function startFormReplay(videoUrl){
     handedness=handedness==="right"?"left":"right";
     db.settings.formHandedness=handedness; save();
     e.target.textContent="利き手: "+(handedness==="right"?"右":"左");
+    abandonActiveReceipt("geometry-reset");
     detector=makeFormPhaseDetector(); ema=makeFormEma(0.38); history=[]; velSrc.reset();
   };
   loadFormPose().then(async lm=>{

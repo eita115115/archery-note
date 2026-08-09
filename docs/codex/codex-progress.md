@@ -2073,3 +2073,11 @@ Next task:
 - Risk: overflow intentionally makes a diagnostic run ineligible but does not block receipt 33+ identity, manual clicked-ID deletion, or exact cancellation.
 - Review: independent Task 1 review APPROVED; exact action/snapshot shapes, copy isolation, bounded overflow, counter saturation, sequence fail-closed behavior, and scope all passed. Reviewer also reran the focused checks and `git diff --check`.
 - Next: Task 2 wires exact receipt ownership into live capture and replay.
+
+## 2026-08-03 — Form diagnostic handoff Task 2
+
+- Changed: live capture and replay now preallocate workflow-local receipt IDs and remove only a receipt action’s exact deletion target.
+- RED: `node tools/check-form-core.js` reproduced `capture cancellation never owns array tail` before any source-order edit.
+- GREEN: retained A survives B fire -> manual remove B -> cancel B; receipt 33/34 remains exact with diagnostics OFF and ON.
+- Risk: replay EOS remains unresolved by design; this task adds no keep/delete policy.
+- Next: Task 3 copies and persists the exact seven fire fields additively.
