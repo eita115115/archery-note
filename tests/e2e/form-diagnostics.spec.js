@@ -756,6 +756,25 @@ test("side state uses fixed copy", async ({ page }) => {
   );
 });
 
+for (const [nextSlot, expected] of [
+  [1, "次は「やや斜め」を6射記録してください。"],
+  [2, "次は「通常設置」を6射記録してください。"],
+]) {
+  test(`matrix state ${nextSlot} keeps six-shot progression copy`, async ({ page }) => {
+    const database = makeTask9DiagnosticDb(true);
+    database.formAnalyses = database.formAnalyses.slice(0, nextSlot);
+    database.settings.formDiagnosticMatrixBatch.nextSlot = nextSlot;
+    database.settings.formDiagnosticMatrixBatch.recordIds = database.formAnalyses.map(
+      (record) => record.id,
+    );
+    await seedTask9Page(page, database);
+    expect(await page.evaluate(() => db.formAnalyses.every((record) => record.shots === 6))).toBe(
+      true,
+    );
+    await expect(page.getByTestId("form-diagnostic-status")).toHaveText(expected);
+  });
+}
+
 test("complete state uses fixed copy", async ({ page }) => {
   await seedTask9Page(page, makeTask9DiagnosticDb(true));
   await expect(page.getByTestId("form-diagnostic-status")).toHaveText("18射の診断がそろいました。");

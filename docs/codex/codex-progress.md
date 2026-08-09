@@ -2493,3 +2493,17 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   deferred.
 - Next: review and publish this coverage-only candidate update, then leave the
   field checklist pending until explicit user direction.
+
+## 2026-08-09 — Diagnostic matrix intermediate-state E2E coverage
+
+- Changed: `tests/e2e/form-diagnostics.spec.js` now covers the one-record and
+  two-record matrix states, asserting that each completed record contains six
+  shots and that the next copy is exactly 「やや斜め」 and 「通常設置」.
+  Existing 「真横」 and complete 18-shot cases remain unchanged.
+- Validation: the focused prestarted Chromium run passed 2/2. The full
+  `npm run check:all`, lint, `npm run format:check`, Node syntax check, and
+  `git diff --check` also pass.
+- Risk: E2E fixture/test-only coverage; no production behavior, storage data,
+  Service Worker, dependency, or physical acceptance status changed.
+- Next: review and publish this E2E coverage update; keep trusted-HTTPS field
+  acceptance pending until the user explicitly resumes it.
