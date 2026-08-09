@@ -2967,3 +2967,23 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   transport behavior changed. Physical 3×6 acceptance remains pending.
 - Next: commit/push this connectivity aid, verify CI, then rerun the current
   candidate on trusted private Wi-Fi and collect the validated artifact.
+
+## 2026-08-10 — Add non-CIM IPv4 fallback for HTTPS preview
+
+- RED evidence: a non-admin local probe reproduced `Get-NetIPAddress` access
+  denial before the HTTPS server could bind, which appeared as a connection
+  failure. The new static contract failed until the fallback was present.
+- Changed: the helper now falls back to
+  `[System.Net.NetworkInformation.NetworkInterface]` when the PowerShell CIM
+  query is unavailable, deduplicates IPv4 addresses, and warns which path was
+  used. It does not alter Firewall, certificate trust, or app data.
+- Validation: `npm run check:pwa`, `npm run check:all`, lint,
+  `npm run format:check`, and PowerShell parse checks pass. The restricted local
+  probe reached address discovery through the fallback, then stopped at the
+  host's unavailable `New-SelfSignedCertificate` provider; the user's earlier
+  manual run remains the certificate-generation evidence.
+- Risk: preview helper resilience only; no detector thresholds, storage,
+  Service Worker, dependency, or transport behavior changed. Physical 3×6
+  acceptance remains pending.
+- Next: commit/push this fallback, verify CI, then rerun the candidate on the
+  user's trusted private Wi-Fi and collect the validated artifact.

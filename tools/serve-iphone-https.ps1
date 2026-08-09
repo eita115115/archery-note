@@ -24,11 +24,33 @@ try {
   if (-not (Get-PSDrive -Name Cert -ErrorAction SilentlyContinue)) {
     New-PSDrive -Name Cert -PSProvider Certificate -Root "\\" -ErrorAction Stop | Out-Null
   }
-  $lanAddresses = @(
-    Get-NetIPAddress -AddressFamily IPv4 |
-      Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.IPAddress -notlike "169.254*" } |
-      Select-Object -ExpandProperty IPAddress
-  )
+  $usedNetworkFallback = $false
+  try {
+    $lanAddresses = @(
+      Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop |
+        Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.IPAddress -notlike "169.254*" } |
+        Select-Object -ExpandProperty IPAddress
+    )
+  } catch {
+    $usedNetworkFallback = $true
+    $lanAddresses = @(
+      [System.Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces() |
+        Where-Object { $_.OperationalStatus -eq "Up" -and $_.NetworkInterfaceType -ne "Loopback" } |
+        ForEach-Object {
+          $_.GetIPProperties().UnicastAddresses |
+            Where-Object {
+              $_.Address.AddressFamily -eq [System.Net.Sockets.AddressFamily]::InterNetwork -and
+                $_.Address.ToString() -ne "127.0.0.1" -and
+                $_.Address.ToString() -notlike "169.254*"
+            } |
+            ForEach-Object { $_.Address.ToString() }
+        }
+    )
+  }
+  $lanAddresses = @($lanAddresses | Sort-Object -Unique)
+  if ($usedNetworkFallback) {
+    Write-Warning "Get-NetIPAddress was unavailable; using the .NET network interface fallback."
+  }
   if ($lanAddresses.Count -eq 0) {
     throw "No usable IPv4 address was found. Connect this PC to the same trusted Wi-Fi as the iPhone."
   }

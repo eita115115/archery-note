@@ -43,6 +43,9 @@ Repository tests and JSON export do not establish physical acceptance.
   TCP test followed by a Safari warning means the certificate was not installed
   or full trust was not enabled yet.
 
+  If the helper says `Get-NetIPAddress` is unavailable, it has already switched
+  to a .NET network-interface fallback; continue with the printed address.
+
 - Use a dedicated test profile, keep production data out of the preview, and stop the server after the checklist. The helper removes its temporary certificate and private key on exit.
 
 ## Physical sequence
