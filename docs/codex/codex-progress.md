@@ -3054,3 +3054,21 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   Physical 3×6 acceptance remains pending.
 - Next: finish the cumulative check ladder, commit/push this count-ownership
   guard, verify CI, then continue toward the current-candidate field run.
+
+## 2026-08-10 — Guard shot counts on receipt ownership success
+
+- RED evidence: the new source contract failed because both `onShot` paths
+  pushed into `shots` before checking `markShotCreated`, and manual removal
+  ignored a failed `manualRemove` result.
+- Changed: live/replay now add a shot only after receipt ownership succeeds;
+  failed ownership leaves the visible and persisted count unchanged. Manual
+  removal follows the same fail-closed rule.
+- Validation: `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run check:all`, lint, format, syntax checks, and `git diff --check`
+  pass. Existing Chromium form-diagnostics evidence remains 46/46 test bodies
+  successful, with only the known parent teardown timeout.
+- Risk: count/receipt ordering only; no detector threshold, receipt schema,
+  storage, Service Worker, dependency, or transport behavior changed.
+  Physical 3×6 acceptance remains pending.
+- Next: commit/push this ownership guard, verify CI, then continue toward a
+  current-candidate trusted-HTTPS field run.

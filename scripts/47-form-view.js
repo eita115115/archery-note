@@ -627,8 +627,9 @@ function openFormCapture(){
     shot.id=receiptId;
     shot.arrowCheck=null; // 確定猶予窓の計測後に judgeArrowCheck の結果を書き込む（シャドー）
     shot.diag=(db.settings.formDebug===true&&debug)?debug:null; // 検証計装（H）: 既定OFF
+    const markAction=receiptTracker.markShotCreated(receiptId);
+    if(markAction.code) return null;
     shots.push(shot);
-    receiptTracker.markShotCreated(receiptId);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem";
     div.dataset.shotId=shot.id;
@@ -637,7 +638,8 @@ function openFormCapture(){
       <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>
       <button class="btn sm ghost" data-rm-shot="${esc(shot.id)}" aria-label="この射を取り消す">${icon("del")}</button>`;
     div.querySelector("[data-rm-shot]").onclick=()=>{
-      receiptTracker.manualRemove(shot.id);
+      const removeAction=receiptTracker.manualRemove(shot.id);
+      if(removeAction.code) return;
       shots=shots.filter(candidate=>candidate.id!==shot.id);
       if(pendingCheck&&pendingCheck.shotId===shot.id) pendingCheck=null;
       div.remove();
@@ -1002,8 +1004,10 @@ function startFormReplay(videoUrl){
   function onShot(receiptId,now,anchorStartTs,activeAnchorEnter,debug){
     const shot=summarizeFormShot(history,anchorStartTs,now,activeAnchorEnter);
     if(!shot) return null;
-    shot.id=receiptId; shot.arrowCheck=null; shot.diag=(db.settings.formDebug===true&&debug)?debug:null; shots.push(shot);
-    receiptTracker.markShotCreated(receiptId);
+    shot.id=receiptId; shot.arrowCheck=null; shot.diag=(db.settings.formDebug===true&&debug)?debug:null;
+    const markAction=receiptTracker.markShotCreated(receiptId);
+    if(markAction.code) return null;
+    shots.push(shot);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem"; div.dataset.shotId=shot.id;
     div.innerHTML=`<div><div class="t">第${shots.length}射</div>

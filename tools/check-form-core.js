@@ -4221,7 +4221,8 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
   );
   const liveRemoveCompact = compactSource(liveRemove);
   assert(
-    liveRemoveCompact.includes("receiptTracker.manualRemove(shot.id);") &&
+    liveRemoveCompact.includes("constremoveAction=receiptTracker.manualRemove(shot.id);") &&
+      liveRemoveCompact.includes("if(removeAction.code)return;") &&
       liveRemoveCompact.includes("shots=shots.filter(candidate=>candidate.id!==shot.id);") &&
       liveRemoveCompact.includes(
         "if(pendingCheck&&pendingCheck.shotId===shot.id)pendingCheck=null;",
@@ -4610,6 +4611,17 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
         boundedSourceSection(source, "function onShot(", "function loop(", `${label} onShot`),
       ),
       `${label} onShot allocates no fallback ID`,
+    );
+    const onShot = compactSource(
+      boundedSourceSection(source, "function onShot(", "function loop(", `${label} onShot`),
+    );
+    const markAt = onShot.indexOf("constmarkAction=receiptTracker.markShotCreated(receiptId);");
+    const pushAt = onShot.indexOf("shots.push(shot);");
+    assert(
+      markAt >= 0 &&
+        pushAt > markAt &&
+        onShot.includes("if(markAction.code)returnnull;"),
+      `${label} counts a shot only after receipt ownership succeeds`,
     );
   });
   assert(
