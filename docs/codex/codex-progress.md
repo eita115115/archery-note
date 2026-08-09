@@ -2756,3 +2756,20 @@ tools/check-form-core.js`, `npm run check:all`, lint, format, targeted syntax,
 - Next: keep the candidate ready for review and keep the physical 3×6 matrix
   pending; do not merge, deploy, or resume trusted-HTTPS field acceptance
   without direction.
+
+## 2026-08-10 — Clarify oversized backup refusal
+
+- Changed: the offline artifact checker now explains that an oversized file is
+  not a normal schema-5 backup artifact for this workflow, instead of showing
+  only the byte-limit error. This directly covers the supplied 593,874-byte
+  `archery-note-2026-08-09.json` without printing its contents.
+- TDD evidence: the new message assertion first failed with the old
+  `診断JSONが65536 bytesを超えています` text, then passed after the
+  bounded copy-only message change.
+- Validation: `node tools/check-form-diagnostic-artifact.js`, the supplied-file
+  CLI refusal check, targeted Node syntax, and `git diff --check` pass.
+- Risk: dependency-free CLI messaging only; no detector threshold, storage,
+  transport, Service Worker, user data, or physical acceptance behavior
+  changed. Trusted-HTTPS field acceptance remains deferred.
+- Next: commit/push this small diagnostic handoff clarification, verify CI,
+  and keep the physical 3×6 matrix pending.

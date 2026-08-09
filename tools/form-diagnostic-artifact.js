@@ -59,7 +59,11 @@ function inspectFormDiagnosticArtifact(text) {
     return failure("input", "診断JSONはUTF-8テキストで指定してください");
   const byteLength = Buffer.byteLength(text, "utf8");
   if (byteLength > MAX_BYTES)
-    return failure("size", `診断JSONが${MAX_BYTES} bytesを超えています`, byteLength);
+    return failure(
+      "size",
+      `診断JSONが${MAX_BYTES} bytesを超えています。通常のschema-5バックアップは対象外です`,
+      byteLength,
+    );
 
   let payload;
   try {

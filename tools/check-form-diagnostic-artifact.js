@@ -86,5 +86,10 @@ assert.equal(wrongCountResult.code, "run-count", "short run reports count failur
 const oversized = inspectFormDiagnosticArtifact("x".repeat(65537));
 assert.equal(oversized.ok, false, "oversized artifact is refused");
 assert.equal(oversized.code, "size", "oversized artifact reports size failure");
+assert.match(
+  oversized.message,
+  /通常のschema-5バックアップは対象外/,
+  "size refusal explains that normal backups are not diagnostic artifacts",
+);
 
 console.log("Form diagnostic artifact checks OK");
