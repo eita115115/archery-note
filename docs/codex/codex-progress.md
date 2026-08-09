@@ -2445,3 +2445,24 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   performed.
 - Next: run the trusted HTTPS physical iPhone checklist (three conditions,
   six real shots each) and record only aggregate results and safe metadata.
+
+## 2026-08-09 — Windows replay-contract validation fix
+
+- RED: the candidate worktree's `npm run check:all` failed on Windows at the
+  replay pose-continuation contract because the source file used CRLF while the
+  static assertion matched only LF. The same contract passed on the Linux CI
+  runner, so this was a local validation portability defect, not a runtime
+  detector failure.
+- Changed: `tools/check-form-core.js` now normalizes CRLF to LF only for that
+  bounded source assertion. No production form logic, threshold, storage, UI,
+  Service Worker, dependency, or user data changed.
+- GREEN: `node tools/check-form-core.js` and `npm run check:all` pass in the
+  Windows candidate worktree; lint and `git diff --check` pass. GitHub Actions
+  run `31318614719` also passed all checks, including format and E2E smoke.
+- Handoff: committed as `2a2794b2` and pushed to the sanitized draft PR branch.
+  The three pre-existing metadata documents on the sensitive root worktree
+  remain unstaged. Physical iPhone acceptance is still pending; the prior
+  attached file was a normal backup rather than a completed diagnostic export.
+- Next: use the candidate HTTPS URL directly in Safari, enable diagnostic
+  saving, start the 18-shot batch, and collect candidate-generated partial
+  backup evidence if the matrix does not complete.
