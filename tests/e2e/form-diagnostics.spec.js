@@ -1007,7 +1007,9 @@ for (const mode of ["web-success", "web-abort", "web-error"]) {
     expect(transport.nativeCalls).toHaveLength(0);
     expect(await task9PersistenceSnapshot(page)).toEqual(before);
     if (mode === "web-success")
-      await expect(page.locator("#toast")).toContainText("診断JSONを共有しました。");
+      await expect(page.locator("#toast")).toContainText(
+        "診断JSONを共有しました。共有先で「ファイルに保存」を選ぶと、ファイルとして残せます。",
+      );
     if (mode === "web-abort") await expect(page.locator("#toast")).not.toHaveClass(/show/);
     if (mode === "web-error")
       await expect(page.locator("#toast")).toContainText("診断JSONを書き出せませんでした。");

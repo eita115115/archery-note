@@ -2933,3 +2933,19 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   remains pending.
 - Next: commit/push this fallback, verify candidate CI, then obtain a current
   candidate diagnostics artifact or controlled field run.
+
+## 2026-08-10 — Clarify shared diagnostic file handoff
+
+- Changed: the successful `shared` result now tells iPhone/Web Share users to
+  choose 「ファイルに保存」 when they need a persistent JSON file. The share
+  transport, filename, privacy payload, cleanup, and no-fallback behavior are
+  unchanged.
+- TDD evidence: the web-share E2E first failed because the toast stopped at
+  「診断JSONを共有しました。」; after the copy-only change it passed 1/1.
+- Validation: full form diagnostics, `npm run check:all`, lint,
+  `npm run format:check`, targeted syntax checks, and `git diff --check` pass.
+- Risk: user-facing handoff guidance only; no detector thresholds, shot
+  retention, storage, transport state machine, or physical acceptance behavior
+  changed. Trusted-HTTPS field acceptance remains pending.
+- Next: commit/push this guidance, verify candidate CI, then obtain a current
+  candidate diagnostics artifact or controlled field run.
