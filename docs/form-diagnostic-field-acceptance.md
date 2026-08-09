@@ -46,6 +46,24 @@ Use ordinary archer placement; do not optimize placement after observing the det
 2. Record and save six real shots from やや斜め.
 3. Record and save six real shots from 通常設置.
 
+## Latest reported run (not accepted)
+
+The user-reported run served from tree `8c399209` produced the following
+aggregate result:
+
+| condition | retained | false positives | automatic deletion |
+| --------- | -------: | --------------: | -----------------: |
+| 真横      |      3/6 |               0 |                  0 |
+| やや斜め  |      0/6 |               0 |                  0 |
+| 通常設置  |      3/6 |               0 |                  0 |
+
+The export action reported success, but the diagnostic JSON could not be
+located afterward, so no artifact path or SHA-256 was available. This run is
+therefore a failed/incomplete acceptance result for the older served tree, not
+evidence that the current candidate passes. Do not change detector thresholds
+from this result alone; repeat the sequence on the current candidate and run
+the bounded artifact checker before drawing a conclusion.
+
 ## Pass criteria
 
 - 6/6 real shots are retained in each condition.
