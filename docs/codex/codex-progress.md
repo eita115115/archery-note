@@ -2568,3 +2568,16 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   certificate or diagnostic artifact is committed.
 - Next: publish this handoff clarification after CI, keeping the field matrix
   pending until explicit user direction.
+
+## 2026-08-10 — Latest candidate full Chromium E2E
+
+- Validation: the latest candidate worktree ran the complete Chromium suite
+  against a prestarted server on an isolated port with one worker; all 85/85
+  tests passed, including form save/retry/discard flows, 18-shot diagnostic
+  settings/export cases, exact tracking-flag cases, secure-context behavior,
+  onboarding, scoring, gamification, contrast, and wake-lock regressions.
+- Risk: this is browser automation evidence only. Trusted-HTTPS iPhone camera
+  accuracy and the three-condition/18-shot field matrix remain intentionally
+  deferred; no physical acceptance claim is made from this run.
+- Next: keep the draft handoff PR ready for review and wait for explicit
+  direction before resuming field acceptance or merging/deploying.
