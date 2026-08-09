@@ -1260,7 +1260,7 @@ const FORM_DIAGNOSTIC_UI_COPY = Object.freeze({
   "save-failed": "診断バッチを保存できませんでした。もう一度お試しください。",
   started: "18射の診断を開始しました。",
   shared: "診断JSONを共有しました。",
-  downloaded: "診断JSONを書き出しました。",
+  downloaded: "診断JSONを書き出しました（archery-note-form-diagnostics.json）。",
   canceled: null,
   failed: "診断JSONを書き出せませんでした。もう一度お試しください。",
   "cleanup-failed":

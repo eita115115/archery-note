@@ -2652,3 +2652,19 @@ check:all`, `npm run lint -- --quiet`, `npm run format:check`, both targeted
   behavior changed. Trusted-HTTPS field acceptance remains deferred.
 - Next: review the small capture-status change, then commit/push it and let the
   bounded candidate CI run the full suite.
+
+## 2026-08-10 — Clarify diagnostic download filename
+
+- Changed: `scripts/70-gear-settings.js` now includes the exact
+  `archery-note-form-diagnostics.json` filename in the successful download
+  toast. The existing transport still owns the download/share behavior.
+- TDD evidence: the no-share download E2E was RED because the toast omitted the
+  filename, then GREEN after the copy-only change; the focused test passed 1/1.
+- Validation: the full form-diagnostics Chromium suite passed 43/43;
+  `npm run check:all`, lint, format, targeted syntax checks, and
+  `git diff --check` pass after formatting the changed E2E assertion.
+- Risk: user-facing copy and regression coverage only; no transport, storage,
+  detector, Service Worker, dependency, or physical acceptance behavior
+  changed. Trusted-HTTPS field acceptance remains deferred.
+- Next: commit/push this small UX fix, inspect candidate CI, and continue
+  nonphysical quality work.

@@ -958,6 +958,9 @@ test("no-share environment downloads exact MIME/allowlist and revokes URL", asyn
   await page.locator("#fdMatrixExport").click();
   await task9Confirm(page, "書き出す");
   const download = await downloadPromise;
+  await expect(page.locator("#toast")).toContainText(
+    "診断JSONを書き出しました（archery-note-form-diagnostics.json）",
+  );
   expect(download.suggestedFilename()).toBe("archery-note-form-diagnostics.json");
   const filePath = await download.path();
   const text = fs.readFileSync(filePath, "utf8");
