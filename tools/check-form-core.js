@@ -202,33 +202,38 @@ const saveCapture = boundedSourceSection(
 );
 const saveReplay = viewScript.slice(viewScript.indexOf("function startFormReplay(videoUrl){"));
 assert(saveReplay.length > 0, "replay source exists");
-[saveCapture, saveReplay].forEach((source, index) => {
-  const label = index === 0 ? "live" : "replay";
+for (const [label, source, freezeName, finishName] of [
+  ["live", saveCapture, "freezeCaptureForSave", "finishCapture"],
+  ["replay", saveReplay, "freezeReplayForSave", "finishReplay"],
+]) {
+  assert(source.includes(`function ${freezeName}(`), `${label} has a separate freeze helper`);
+  assert(source.includes(`function ${finishName}(`), `${label} has a separate final teardown`);
+  assert(source.includes("保存を再試行"), `${label} save failure exposes retry`);
+  assert(
+    source.includes("保存できていない診断を破棄して閉じますか？"),
+    `${label} failed save requires discard confirmation`,
+  );
   const compact = compactSource(source);
-  assert(
-    compact.includes("constreceiptSnapshot=prepareReceiptSave();") &&
-      compact.includes("constincludeDiagnostics=db.settings.formDebug===true;"),
-    `${label} always resolves workflow-save before exact diagnostic gating`,
+  const freezeAt = compact.indexOf(`${freezeName}();`);
+  const activeAt = compact.indexOf(
+    'if(tracker.current())tracker.abandon("workflow-save");',
+    freezeAt,
   );
+  const snapshotAt = compact.indexOf("tracker.snapshot();", activeAt);
+  const createAt = compact.indexOf("createFrozenFormDiagnosticSave(", snapshotAt);
+  const attemptAt = compact.indexOf("attemptFrozenFormDiagnosticSave(", createAt);
   assert(
-    compact.includes("shots.map(shot=>formFeatureFromShot(shot,includeDiagnostics))"),
-    `${label} uses an explicit map lambda instead of the map index`,
+    freezeAt >= 0 &&
+      activeAt > freezeAt &&
+      snapshotAt > activeAt &&
+      createAt > snapshotAt &&
+      attemptAt > createAt,
+    `${label} keeps freeze -> abandon -> snapshot -> create -> attempt order`,
   );
-  assert(
-    compact.includes("if(includeDiagnostics){rec.formDiagnosticVersion=1;") &&
-      !compact.includes("if(db.settings.formDebug){"),
-    `${label} persists diagnostic markers only for exact true`,
-  );
-});
-assertEqual(
-  (compactSource(saveCapture).match(/prepareReceiptSave\(\);/g) || []).length,
-  2,
-  "live ordinary and zero-shot saves both transition workflow-save",
-);
-assertEqual(
-  (compactSource(saveReplay).match(/prepareReceiptSave\(\);/g) || []).length,
-  2,
-  "replay ordinary and zero-shot saves both transition workflow-save",
+}
+assert(
+  saveReplay.includes("loadFormPose().then(async lm=>{\n    if(!running) return;"),
+  "replay pose continuation cannot restart after freeze or close",
 );
 
 const deletionHandler = boundedSourceSection(
@@ -263,7 +268,7 @@ assert(
   "transactional form deletion does not pre-mutate trash",
 );
 assert(
-  deletionHandler.includes('reason:"delete-form-analysis",forceSnapshot:true'),
+  deletionCompact.includes('reason:"delete-form-analysis",forceSnapshot:true'),
   "form deletion preserves exact save options",
 );
 
@@ -4239,16 +4244,16 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
     "function refreshShotsHint(){",
     "startCamera section",
   );
-  const stopCapture = boundedSourceSection(
+  const freezeCapture = boundedSourceSection(
     capture,
-    "function stop(){",
-    "async function startCamera(){",
-    "capture stop section",
+    "function freezeCaptureForSave(){",
+    "function finishCapture(){",
+    "capture freeze section",
   );
   const discardCamera = boundedSourceSection(
     capture,
     "function discardCameraStream(candidate){",
-    "function stop(){",
+    "let captureFrozen=false",
     "discardCameraStream section",
   );
   const startCameraCompact = compactSource(startCamera);
@@ -4283,7 +4288,7 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
     2,
     "camera startup revalidates its candidate after both async boundaries",
   );
-  const stopCaptureCompact = compactSource(stopCapture);
+  const stopCaptureCompact = compactSource(freezeCapture);
   assert(
     stopCaptureCompact.includes("constpendingStream=inFlightStream,activeStream=stream;") &&
       stopCaptureCompact.includes("inFlightStream=null;") &&
@@ -4295,7 +4300,7 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
       stopCaptureCompact.includes(
         "if(activeStream&&activeStream!==pendingStream)activeStream.getTracks().forEach(t=>t.stop());",
       ),
-    "capture close detaches and stops both in-flight and promoted camera streams",
+    "capture freeze detaches and stops both in-flight and promoted camera streams",
   );
   assertEqual(
     compactSource(reset),
@@ -4382,7 +4387,7 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
   );
   assert(
     swapCompact.includes("if(!cameraSwapReady||cameraSwapInProgress)return;") &&
-      (captureCompact.match(/cameraSwapReady=false;/g) || []).length === 2 &&
+      (captureCompact.match(/cameraSwapReady=false;/g) || []).length === 3 &&
       (captureCompact.match(/cameraSwapReady=true;/g) || []).length === 1 &&
       !swapCompact.includes("cameraSwapReady="),
     "swap handler independently requires readiness while receipt failure disables future swaps",

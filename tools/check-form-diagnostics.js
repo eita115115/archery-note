@@ -43,6 +43,14 @@ return {
     typeof commitFormDiagnosticDbCandidate === "function"
       ? commitFormDiagnosticDbCandidate
       : null,
+  createFrozenFormDiagnosticSave:
+    typeof createFrozenFormDiagnosticSave === "function"
+      ? createFrozenFormDiagnosticSave
+      : null,
+  attemptFrozenFormDiagnosticSave:
+    typeof attemptFrozenFormDiagnosticSave === "function"
+      ? attemptFrozenFormDiagnosticSave
+      : null,
   planFormAnalysisDeletionCandidate:
     typeof planFormAnalysisDeletionCandidate === "function"
       ? planFormAnalysisDeletionCandidate
@@ -55,6 +63,14 @@ const viewTransactions = loadFormViewTransactions(viewScript);
 assert(
   typeof viewTransactions.commitFormDiagnosticDbCandidate === "function",
   "transaction helper is exported",
+);
+assert(
+  typeof viewTransactions.createFrozenFormDiagnosticSave === "function",
+  "frozen diagnostic save creator is exported",
+);
+assert(
+  typeof viewTransactions.attemptFrozenFormDiagnosticSave === "function",
+  "frozen diagnostic save attempt is exported",
 );
 
 for (const failure of ["false", "throw"]) {
@@ -409,6 +425,218 @@ function validRecord(id = "diagnostic-record-1", captureMode = "live") {
       receiptDesynchronized: false,
     },
   };
+}
+
+function makeFrozenDatabase() {
+  return {
+    settings: {
+      formDebug: true,
+      formDiagnosticMatrixBatch: {
+        version: 1,
+        batchId: "11111111-1111-4111-8111-111111111111",
+        appVer: 84,
+        nextSlot: 0,
+        recordIds: [],
+        invalidated: false,
+      },
+    },
+    formAnalyses: [],
+  };
+}
+
+for (const fixture of [
+  { mode: "live", shots: 0, plannerCalls: 0 },
+  { mode: "replay", shots: 6, plannerCalls: 0 },
+  { mode: "live", shots: 5, plannerCalls: 0 },
+  { mode: "live", shots: 6, plannerCalls: 1 },
+]) {
+  const database = makeFrozenDatabase();
+  const record = validRecord("diagnostic-record-1", fixture.mode);
+  record.shots = fixture.shots;
+  if (fixture.shots === 0) {
+    record.features = [];
+    record.formPhaseDiag.releaseReceipts = [];
+  }
+  let calls = 0;
+  const created = viewTransactions.createFrozenFormDiagnosticSave(database, record, {
+    appVer: 84,
+    saveOptions: { reason: "form-analysis" },
+    planMatrixRecord(source, coordinator) {
+      calls++;
+      return {
+        ok: true,
+        code: null,
+        record: {
+          ...source,
+          formDiagnosticMatrix: { version: 1, batchId: coordinator.batchId, slot: "side" },
+        },
+        coordinator: { ...coordinator, nextSlot: 1, recordIds: [source.id] },
+      };
+    },
+  });
+  assertEqual(created.ok, true, `${fixture.mode}/${fixture.shots} creates frozen save`);
+  assertEqual(calls, fixture.plannerCalls, `${fixture.mode}/${fixture.shots} planner calls`);
+  assertEqual(
+    Object.hasOwn(created.frozen.candidate, "formDiagnosticMatrixBatch"),
+    fixture.mode === "live" && fixture.shots === 6,
+    `${fixture.mode}/${fixture.shots} coordinator candidate boundary`,
+  );
+}
+
+{
+  const database = makeFrozenDatabase();
+  let plannerCalls = 0;
+  const created = viewTransactions.createFrozenFormDiagnosticSave(database, validRecord(), {
+    appVer: 84,
+    saveOptions: { reason: "form-analysis" },
+    planMatrixRecord(record, coordinator) {
+      plannerCalls++;
+      return {
+        ok: true,
+        code: null,
+        record: {
+          ...record,
+          formDiagnosticMatrix: { version: 1, batchId: coordinator.batchId, slot: "side" },
+        },
+        coordinator: { ...coordinator, nextSlot: 1, recordIds: [record.id] },
+      };
+    },
+  });
+  const frozen = created.frozen;
+  const candidate = frozen.candidate;
+  const candidateJson = JSON.stringify(candidate);
+  const originalCoordinator = database.settings.formDiagnosticMatrixBatch;
+  let saveCalls = 0;
+  const first = viewTransactions.attemptFrozenFormDiagnosticSave(database, frozen, () => {
+    saveCalls++;
+    database.updatedAt = "first-attempt";
+    return false;
+  });
+  assertEqual(first.ok, false, "first frozen attempt fails");
+  assertEqual(first.code, "save-failed", "false result code");
+  assertEqual(frozen.attempts, 1, "first attempt counted once");
+  assert(
+    database.settings.formDiagnosticMatrixBatch === originalCoordinator,
+    "false restores coordinator identity",
+  );
+  const second = viewTransactions.attemptFrozenFormDiagnosticSave(database, frozen, () => {
+    saveCalls++;
+    database.updatedAt = "second-attempt";
+    return true;
+  });
+  assertEqual(second.ok, true, "same frozen retry succeeds");
+  assertEqual(frozen.attempts, 2, "retry counted once");
+  assertEqual(saveCalls, 2, "one save call per attempt");
+  assertEqual(plannerCalls, 1, "retry never replans");
+  assert(frozen.candidate === candidate, "retry keeps candidate identity");
+  assertEqual(JSON.stringify(candidate), candidateJson, "retry keeps candidate bytes");
+  const third = viewTransactions.attemptFrozenFormDiagnosticSave(database, frozen, () => {
+    throw new Error("committed candidate must not save again");
+  });
+  assertEqual(third.code, "already-committed", "committed candidate is one-shot");
+}
+
+{
+  const database = makeFrozenDatabase();
+  const created = viewTransactions.createFrozenFormDiagnosticSave(
+    database,
+    validRecord("diagnostic-record-1", "replay"),
+    {
+      appVer: 84,
+      saveOptions: { reason: "form-analysis" },
+      planMatrixRecord() {
+        throw new Error("replay must not plan");
+      },
+    },
+  );
+  const records = database.formAnalyses;
+  const thrown = new Error("fixture write throw");
+  const attempted = viewTransactions.attemptFrozenFormDiagnosticSave(
+    database,
+    created.frozen,
+    () => {
+      database.updatedAt = "temporary";
+      throw thrown;
+    },
+  );
+  assertEqual(attempted.ok, false, "thrown save fails");
+  assertEqual(attempted.code, "save-failed", "thrown save uses fixed code");
+  assert(attempted.error === thrown, "thrown save returns the caught error");
+  assertEqual(created.frozen.attempts, 1, "thrown persistence is one attempt");
+  assert(database.formAnalyses === records, "thrown save restores records reference");
+  assertEqual(
+    Object.hasOwn(database, "updatedAt"),
+    false,
+    "thrown save restores updatedAt ownness",
+  );
+}
+
+{
+  const database = makeFrozenDatabase();
+  let plannerCalls = 0;
+  const created = viewTransactions.createFrozenFormDiagnosticSave(database, validRecord(), {
+    appVer: 84,
+    saveOptions: { reason: "form-analysis" },
+    planMatrixRecord() {
+      plannerCalls++;
+      return { ok: false, code: "record-ineligible", record: null, coordinator: null };
+    },
+  });
+  assertEqual(created.ok, true, "ineligible six-shot save still freezes");
+  assertEqual(plannerCalls, 1, "ineligible six-shot save plans once");
+  assertEqual(created.frozen.matrixAdvanced, false, "ineligible save does not advance");
+  assertEqual(created.frozen.matrixCode, "record-ineligible", "ineligible code is retained");
+  assertEqual(
+    Object.hasOwn(created.frozen.record, "formDiagnosticMatrix"),
+    false,
+    "ineligible record stays unmarked",
+  );
+  assertEqual(
+    Object.hasOwn(created.frozen.candidate, "formDiagnosticMatrixBatch"),
+    false,
+    "ineligible candidate omits coordinator",
+  );
+}
+
+for (const mutation of ["debug-off", "replace", "mutate-record-ids"]) {
+  const database = makeFrozenDatabase();
+  const created = viewTransactions.createFrozenFormDiagnosticSave(database, validRecord(), {
+    appVer: 84,
+    saveOptions: { reason: "form-analysis" },
+    planMatrixRecord(record, coordinator) {
+      return {
+        ok: true,
+        code: null,
+        record: {
+          ...record,
+          formDiagnosticMatrix: { version: 1, batchId: coordinator.batchId, slot: "side" },
+        },
+        coordinator: { ...coordinator, nextSlot: 1, recordIds: [record.id] },
+      };
+    },
+  });
+  if (mutation === "debug-off") database.settings.formDebug = false;
+  if (mutation === "replace") {
+    database.settings.formDiagnosticMatrixBatch = {
+      ...database.settings.formDiagnosticMatrixBatch,
+      recordIds: [],
+    };
+  }
+  if (mutation === "mutate-record-ids") {
+    database.settings.formDiagnosticMatrixBatch.recordIds.push("replacement");
+  }
+  let saves = 0;
+  const attempted = viewTransactions.attemptFrozenFormDiagnosticSave(
+    database,
+    created.frozen,
+    () => {
+      saves++;
+      return true;
+    },
+  );
+  assertEqual(attempted.ok, false, `${mutation} blocks attempt`);
+  assertEqual(saves, 0, `${mutation} performs zero saves`);
+  assertEqual(created.frozen.attempts, 0, `${mutation} performs zero persistence attempts`);
 }
 
 function validCoordinator(nextSlot = 0, recordIds = [], appVer = 84) {

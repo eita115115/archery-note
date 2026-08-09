@@ -2158,3 +2158,30 @@ check:globals`, `npm run lint -- --quiet`, syntax, and Prettier checks passed.
 - Scope boundary: rollback cannot undo `DB_REV`, an already absorbed debounce, schema writes, or arbitrary injected-save side effects; backup/share paths and generic trash behavior remain untouched.
 - Review: independent Task 6 review APPROVED; own-field allowlist, exactly-one synchronous save, false/throw rollback, selected-only invalidation, detached trash cap, generic-path preservation, and synthetic E2E behavior all passed. The CI-managed webServer teardown hang is documented as an environment constraint; the matching-port prestarted-server test passed 1/1.
 - Next: Task 7 adds only the approved native diagnostic export transport boundary.
+
+## 2026-08-09 — Form diagnostic handoff Task 7
+
+- Changed: live and replay diagnostic saves now freeze the capture exactly once,
+  resolve the active receipt as `workflow-save`, copy one diagnostic record, and
+  create one detached candidate before the first write. A failed write keeps that
+  candidate by identity; retry invokes only the attempt path and never allocates,
+  snapshots, or plans again. Closing a failed candidate requires an explicit
+  discard confirmation.
+- RED: `node tools/check-form-diagnostics.js` failed with `frozen diagnostic
+save creator is exported`. The new form-core source contract then failed with
+  `replay pose continuation cannot restart after freeze or close` before the
+  missing async guard was added.
+- GREEN: live six-shot planning occurs once, while zero-shot, replay, and
+  five-shot records do not plan or mutate a coordinator. False and thrown writes
+  restore the exact records/coordinator/`updatedAt`, retry reuses candidate
+  identity and bytes, and debug/coordinator changes block persistence before a
+  write.
+- Browser evidence: all four workers passed—deletion rollback plus live retry,
+  discard cancel/confirm, and replay retry. The shared Playwright parent process
+  did not terminate within the 60-second command cap after reporting the four
+  successful workers, matching the pre-existing shared-environment teardown
+  issue; each focused worker also reported `ok` independently.
+- Risk: diagnostics-off records remain on the legacy direct push/save path with
+  no retry UI. This task does not add native transport, settings, export, schema,
+  version, or Service Worker changes.
+- Next: Task 8 owns the diagnostics-specific native/Web transport boundary.

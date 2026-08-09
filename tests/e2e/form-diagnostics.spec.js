@@ -68,6 +68,12 @@ async function installPrimaryWriteGate(page) {
   });
 }
 
+async function stallFormPose(page) {
+  await page.evaluate(() => {
+    globalThis.loadFormPose = () => new Promise(() => {});
+  });
+}
+
 test("selected deletion rolls back when the primary write fails", async ({ page }) => {
   const coordinator = {
     version: 1,
@@ -150,5 +156,174 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
     trashRecordId: "selected-record",
     invalidated: true,
     attempts: 2,
+  });
+});
+
+test("zero-shot exact-debug live save freezes, rolls back, and retries once", async ({ page }) => {
+  const database = makeSyntheticDiagnosticDb({
+    updatedAt: "before-live-save",
+    settings: {
+      formDebug: true,
+      formDiagnosticMatrixBatch: {
+        version: 1,
+        batchId: "11111111-1111-4111-8111-111111111111",
+        appVer: 84,
+        nextSlot: 0,
+        recordIds: [],
+        invalidated: false,
+      },
+    },
+  });
+  await seedDiagnosticDb(page, database);
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await installPrimaryWriteGate(page);
+  await page.locator("#formStart").click();
+  const liveBaseline = await page.evaluate(() => {
+    globalThis.__formWriteProbe.attempts = [];
+    return db.updatedAt;
+  });
+  await page.locator("#fcClose").click();
+  await expect(page.locator(".formCapture")).toBeVisible();
+  await expect(page.locator("#fcSave")).toBeEnabled();
+  await expect(page.locator("#fcSave")).toHaveText("保存を再試行");
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      updatedAt: db.updatedAt,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+      blocked: isUpdateReloadBlocked(),
+    })),
+  ).toEqual({ records: 0, updatedAt: liveBaseline, attempts: 1, blocked: true });
+  await page.evaluate(() => {
+    globalThis.__formWriteProbe.fail = false;
+  });
+  await page.locator("#fcSave").click();
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      shots: db.formAnalyses[0].shots,
+      mode: db.formAnalyses[0].captureMode,
+      marker: Object.hasOwn(db.formAnalyses[0], "formDiagnosticMatrix"),
+      attempts: globalThis.__formWriteProbe.attempts.length,
+      blocked: isUpdateReloadBlocked(),
+    })),
+  ).toEqual({ records: 1, shots: 0, mode: "live", marker: false, attempts: 2, blocked: false });
+});
+
+test("failed diagnostic discard cancel retains the candidate and confirm closes without saving", async ({
+  page,
+}) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await installPrimaryWriteGate(page);
+  await page.locator("#formStart").click();
+  await page.evaluate(() => {
+    globalThis.__formWriteProbe.attempts = [];
+  });
+  await page.locator("#fcClose").click();
+  await page.locator("#fcClose").click();
+  await expect(page.locator(".confirmSheet")).toContainText(
+    "保存できていない診断を破棄して閉じますか？",
+  );
+  await page.locator(".confirmSheet #acCancel").click();
+  await expect(page.locator(".formCapture")).toBeVisible();
+  expect(await page.evaluate(() => globalThis.__formWriteProbe.attempts.length)).toBe(1);
+  await page.locator("#fcClose").click();
+  await page.locator(".confirmSheet #acOk").click();
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+      blocked: isUpdateReloadBlocked(),
+    })),
+  ).toEqual({ records: 0, attempts: 1, blocked: false });
+});
+
+test("zero-shot exact-debug replay save retries without matrix advancement", async ({ page }) => {
+  const coordinator = {
+    version: 1,
+    batchId: "11111111-1111-4111-8111-111111111111",
+    appVer: 84,
+    nextSlot: 0,
+    recordIds: [],
+    invalidated: false,
+  };
+  await seedDiagnosticDb(
+    page,
+    makeSyntheticDiagnosticDb({
+      updatedAt: "before-replay-save",
+      settings: { formDebug: true, formDiagnosticMatrixBatch: coordinator },
+    }),
+  );
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await installPrimaryWriteGate(page);
+  await page.evaluate(() => {
+    globalThis.__replayCoordinatorReference = db.settings.formDiagnosticMatrixBatch;
+  });
+  const chooserPromise = page.waitForEvent("filechooser");
+  await page.locator("#formReplay").click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({
+    name: "synthetic-form-replay.mp4",
+    mimeType: "video/mp4",
+    buffer: Buffer.from("synthetic replay fixture"),
+  });
+  await expect(page.locator("#frVideo")).toBeVisible();
+  const replayBaseline = await page.evaluate(() => {
+    globalThis.__formWriteProbe.attempts = [];
+    return db.updatedAt;
+  });
+  await page.locator("#frClose").click();
+  await expect(page.locator(".formCapture")).toBeVisible();
+  await expect(page.locator("#frSave")).toBeEnabled();
+  await expect(page.locator("#frSave")).toHaveText("保存を再試行");
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      sameCoordinator:
+        db.settings.formDiagnosticMatrixBatch === globalThis.__replayCoordinatorReference,
+      updatedAt: db.updatedAt,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+      blocked: isUpdateReloadBlocked(),
+    })),
+  ).toEqual({
+    records: 0,
+    sameCoordinator: true,
+    updatedAt: replayBaseline,
+    attempts: 1,
+    blocked: true,
+  });
+  await page.evaluate(() => {
+    globalThis.__formWriteProbe.fail = false;
+  });
+  await page.locator("#frSave").click();
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      shots: db.formAnalyses[0].shots,
+      mode: db.formAnalyses[0].captureMode,
+      marker: Object.hasOwn(db.formAnalyses[0], "formDiagnosticMatrix"),
+      sameCoordinator:
+        db.settings.formDiagnosticMatrixBatch === globalThis.__replayCoordinatorReference,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+      blocked: isUpdateReloadBlocked(),
+    })),
+  ).toEqual({
+    records: 1,
+    shots: 0,
+    mode: "replay",
+    marker: false,
+    sameCoordinator: true,
+    attempts: 2,
+    blocked: false,
   });
 });
