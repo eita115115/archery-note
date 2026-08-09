@@ -2371,14 +2371,14 @@ dist/native/native-readiness.json` exited `0`, and the scoped `dist` status
 ## 2026-08-09 — Sanitized handoff candidate checkpoint
 
 - Current implementation checkpoint: `feat/adaptive-release-detection` at
-  `ddb3d20744b3c76df0ccb4acf039c4f95852d429`, tree
-  `d7152f14bbc29e4090a4128e2533e14f61de5e44`. The fixture-only follow-up and
+  `9a733f240b9d7ec254d813e6ba8f51c89edeec45`, tree
+  `3a876a14d51ba2c76cc0849e6a6e19f08fe43349`. The fixture-only follow-up and
   exact-boolean tracking gate are included; the complete prestarted Chromium
   suite is 83/83 and all cumulative gates remain green.
 - Sanitized local handoff: `codex/form-diagnostic-handoff-release` is based
   directly on `origin/main` (`3b4f3b22b562899ffef28bb6d64d7821eced4dde`),
   carries the same tree, and currently resolves to
-  `bc0ed0140f7bb851292a9e4c84d0e3622dab9cd4`. The sensitive ancestor check
+  `0d11250be06028cf9853c5eb355396fc1fd31c20`. The sensitive ancestor check
   `git merge-base --is-ancestor 4a0ff1ec
 codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   branch remains local-only.
