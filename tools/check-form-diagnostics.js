@@ -6,6 +6,7 @@ const { isDeepStrictEqual } = require("util");
 
 const root = path.resolve(__dirname, "..");
 const coreScript = fs.readFileSync(path.join(root, "scripts", "46-form-core.js"), "utf8");
+const viewScript = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
 
 function assert(ok, message) {
   if (!ok) throw new Error(message);
@@ -24,6 +25,284 @@ function deepEqual(actual, expected, label) {
 
 function cloneFixture(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function loadFormViewTransactions(viewSource) {
+  const startMarker = "/* FORM_DIAGNOSTIC_TRANSACTION_START */";
+  const endMarker = "/* FORM_DIAGNOSTIC_TRANSACTION_END */";
+  const start = viewSource.indexOf(startMarker);
+  const end = viewSource.indexOf(endMarker, start + startMarker.length);
+  assert(start >= 0, "form transaction start marker exists");
+  assert(end > start, "form transaction end marker follows start marker");
+  assertEqual(viewSource.lastIndexOf(startMarker), start, "transaction start marker is unique");
+  assertEqual(viewSource.lastIndexOf(endMarker), end, "transaction end marker is unique");
+  return new Function(
+    `${viewSource.slice(start + startMarker.length, end)}
+return {
+  commitFormDiagnosticDbCandidate:
+    typeof commitFormDiagnosticDbCandidate === "function"
+      ? commitFormDiagnosticDbCandidate
+      : null,
+  planFormAnalysisDeletionCandidate:
+    typeof planFormAnalysisDeletionCandidate === "function"
+      ? planFormAnalysisDeletionCandidate
+      : null,
+};`,
+  )();
+}
+
+const viewTransactions = loadFormViewTransactions(viewScript);
+assert(
+  typeof viewTransactions.commitFormDiagnosticDbCandidate === "function",
+  "transaction helper is exported",
+);
+
+for (const failure of ["false", "throw"]) {
+  const database = {
+    settings: { formDiagnosticMatrixBatch: { version: 1, nextSlot: 0 } },
+    formAnalyses: [{ id: "original-record" }],
+    trash: [{ id: "original-trash" }],
+  };
+  const originalRecords = database.formAnalyses;
+  const originalTrash = database.trash;
+  const originalBatch = database.settings.formDiagnosticMatrixBatch;
+  const saveOptions = { reason: "form-diagnostic-fixture", forceSnapshot: true };
+  let calls = 0;
+  let receivedOptions = null;
+  const result = viewTransactions.commitFormDiagnosticDbCandidate(
+    database,
+    {
+      formAnalyses: [{ id: "candidate-record" }],
+      trash: [{ id: "candidate-trash" }],
+      formDiagnosticMatrixBatch: { version: 1, nextSlot: 1 },
+    },
+    saveOptions,
+    (options) => {
+      calls++;
+      receivedOptions = options;
+      database.updatedAt = "changed-by-save";
+      if (failure === "throw") throw new Error("fixture write failure");
+      return false;
+    },
+  );
+  assertEqual(result.ok, false, `${failure} save fails`);
+  assertEqual(result.error instanceof Error, failure === "throw", `${failure} error shape`);
+  assertEqual(calls, 1, `${failure} calls save once`);
+  assert(receivedOptions === saveOptions, `${failure} forwards the same options object`);
+  assert(database.formAnalyses === originalRecords, `${failure} restores records`);
+  assert(database.trash === originalTrash, `${failure} restores trash`);
+  assert(
+    database.settings.formDiagnosticMatrixBatch === originalBatch,
+    `${failure} restores coordinator`,
+  );
+  assertEqual(Object.hasOwn(database, "updatedAt"), false, `${failure} restores updatedAt ownness`);
+}
+
+{
+  const database = { settings: {}, formAnalyses: [], trash: [], updatedAt: "before" };
+  const candidate = { formAnalyses: [{ id: "saved" }] };
+  const options = { reason: "success" };
+  let calls = 0;
+  const result = viewTransactions.commitFormDiagnosticDbCandidate(
+    database,
+    candidate,
+    options,
+    (received) => {
+      calls++;
+      assert(received === options, "success keeps options identity");
+      database.updatedAt = "after";
+      return true;
+    },
+  );
+  assertEqual(result.ok, true, "true commits");
+  assertEqual(result.error, null, "success has null error");
+  assertEqual(calls, 1, "success saves once");
+  assert(
+    database.formAnalyses === candidate.formAnalyses,
+    "success installs exact candidate array",
+  );
+  assertEqual(database.updatedAt, "after", "success keeps save timestamp");
+}
+
+for (const candidate of [{}, { unknown: [] }, { formAnalyses: {} }, { trash: {} }]) {
+  let calls = 0;
+  const result = viewTransactions.commitFormDiagnosticDbCandidate(
+    { settings: {}, formAnalyses: [], trash: [] },
+    candidate,
+    { reason: "invalid" },
+    () => {
+      calls++;
+      return true;
+    },
+  );
+  assertEqual(result.ok, false, "invalid candidate fails");
+  assert(result.error instanceof TypeError, "invalid candidate returns TypeError");
+  assertEqual(calls, 0, "invalid candidate never saves");
+}
+
+{
+  const database = { settings: {}, formAnalyses: [], trash: [] };
+  const candidate = { formDiagnosticMatrixBatch: { version: 1 } };
+  const result = viewTransactions.commitFormDiagnosticDbCandidate(
+    database,
+    candidate,
+    { reason: "absent-properties" },
+    () => {
+      database.updatedAt = "temporary";
+      return false;
+    },
+  );
+  assertEqual(result.ok, false, "false rolls back absent properties");
+  assertEqual(
+    Object.hasOwn(database.settings, "formDiagnosticMatrixBatch"),
+    false,
+    "coordinator ownness restored",
+  );
+  assertEqual(Object.hasOwn(database, "updatedAt"), false, "updatedAt ownness restored");
+}
+
+assert(
+  typeof viewTransactions.planFormAnalysisDeletionCandidate === "function",
+  "deletion candidate planner is exported",
+);
+
+const duplicateDatabase = {
+  settings: { formDiagnosticMatrixBatch: { recordIds: ["selected"] } },
+  formAnalyses: [
+    { id: "selected", shots: 6 },
+    { id: "selected", shots: 6 },
+  ],
+  trash: [],
+};
+let invalidationCalls = 0;
+const duplicatePlan = viewTransactions.planFormAnalysisDeletionCandidate(
+  duplicateDatabase,
+  "selected",
+  { id: "trash-1", type: "formAnalysis", data: { id: "selected" } },
+  84,
+  50,
+  () => {
+    invalidationCalls++;
+    return { ok: true, code: null, coordinator: null, changed: false };
+  },
+);
+assertEqual(duplicatePlan.ok, false, "duplicate deletion fails closed");
+assertEqual(duplicatePlan.code, "ambiguous-record", "duplicate deletion code");
+assertEqual(duplicatePlan.record, null, "duplicate returns no record");
+assertEqual(duplicatePlan.candidate, null, "duplicate returns no candidate");
+assertEqual(invalidationCalls, 0, "duplicate does not invalidate");
+assertEqual(duplicateDatabase.formAnalyses.length, 2, "duplicate records remain");
+assertEqual(duplicateDatabase.trash.length, 0, "duplicate creates no trash");
+
+for (const records of [
+  [{ id: "selected" }, { id: "selected" }, { id: "other" }],
+  [{ id: "other" }, { id: "selected" }, { id: "selected" }],
+]) {
+  const database = { settings: {}, formAnalyses: records, trash: [] };
+  const plan = viewTransactions.planFormAnalysisDeletionCandidate(
+    database,
+    "selected",
+    { id: "trash", type: "formAnalysis", data: { id: "selected" } },
+    84,
+    50,
+    () => {
+      throw new Error("ambiguous deletion must not invalidate");
+    },
+  );
+  assertEqual(plan.code, "ambiguous-record", "both duplicate orders fail");
+}
+
+{
+  const coordinator = { version: 1, recordIds: ["selected"], invalidated: false };
+  const records = [{ id: "selected" }, { id: "other" }];
+  const trash = Array.from({ length: 50 }, (_, index) => ({ id: `old-${index}` }));
+  const database = {
+    settings: { formDiagnosticMatrixBatch: coordinator },
+    formAnalyses: records,
+    trash,
+  };
+  const copiedCoordinator = { ...coordinator, recordIds: ["selected"], invalidated: true };
+  let invalidationCalls = 0;
+  const plan = viewTransactions.planFormAnalysisDeletionCandidate(
+    database,
+    "selected",
+    { id: "new-trash", type: "formAnalysis", data: { id: "selected" } },
+    84,
+    50,
+    (received, id, appVer) => {
+      invalidationCalls++;
+      assert(received === coordinator, "planner passes current coordinator");
+      assertEqual(id, "selected", "planner passes selected ID");
+      assertEqual(appVer, 84, "planner passes current app version");
+      return { ok: true, code: null, coordinator: copiedCoordinator, changed: true };
+    },
+  );
+  assertEqual(plan.ok, true, "selected deletion plans");
+  assertEqual(invalidationCalls, 1, "selected deletion invalidates once");
+  assertEqual(plan.candidate.formAnalyses.length, 1, "selected record removed once");
+  assertEqual(plan.candidate.trash.length, 50, "trash remains capped");
+  assertEqual(plan.candidate.trash[0].id, "new-trash", "new trash entry is first");
+  assert(plan.candidate.formAnalyses !== records, "records array is detached");
+  assert(plan.candidate.trash !== trash, "trash array is detached");
+  assert(
+    plan.candidate.formDiagnosticMatrixBatch === copiedCoordinator,
+    "copied invalidation is selected",
+  );
+  assertEqual(coordinator.invalidated, false, "source coordinator is unchanged");
+}
+
+{
+  const database = {
+    settings: { formDiagnosticMatrixBatch: { recordIds: [] } },
+    formAnalyses: [{ id: "other" }],
+    trash: [],
+  };
+  const plan = viewTransactions.planFormAnalysisDeletionCandidate(
+    database,
+    "other",
+    { id: "trash", type: "formAnalysis", data: { id: "other" } },
+    84,
+    50,
+    (coordinator) => ({ ok: true, code: null, coordinator, changed: false }),
+  );
+  assertEqual(plan.ok, true, "unrelated deletion plans");
+  assertEqual(
+    Object.hasOwn(plan.candidate, "formDiagnosticMatrixBatch"),
+    false,
+    "unrelated deletion omits coordinator candidate",
+  );
+}
+
+{
+  const database = { settings: {}, formAnalyses: [{ id: "selected" }], trash: [] };
+  const failed = viewTransactions.planFormAnalysisDeletionCandidate(
+    database,
+    "selected",
+    { id: "trash", type: "formAnalysis", data: { id: "selected" } },
+    84,
+    50,
+    () => ({ ok: false, code: "record-invalid", coordinator: null, changed: false }),
+  );
+  assertEqual(failed.code, "invalidation-failed", "invalidation failure aborts deletion");
+  assertEqual(failed.candidate, null, "invalidation failure returns no candidate");
+  assertEqual(database.formAnalyses.length, 1, "invalidation failure preserves records");
+  assertEqual(database.trash.length, 0, "invalidation failure preserves trash");
+}
+
+{
+  const database = { settings: {}, formAnalyses: [{ id: "other" }], trash: [] };
+  const missing = viewTransactions.planFormAnalysisDeletionCandidate(
+    database,
+    "missing",
+    { id: "trash", type: "formAnalysis", data: { id: "missing" } },
+    84,
+    50,
+    () => {
+      throw new Error("missing deletion must not invalidate");
+    },
+  );
+  assertEqual(missing.code, "missing-record", "missing deletion fails closed");
+  assertEqual(missing.candidate, null, "missing deletion returns no candidate");
 }
 
 function loadFormDiagnosticApi() {

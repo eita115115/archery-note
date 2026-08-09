@@ -54,6 +54,68 @@ function formDiagPush(arr,item,cap){
   if(arr.length>(cap||200)) arr.shift();
 }
 
+/* FORM_DIAGNOSTIC_TRANSACTION_START */
+function commitFormDiagnosticDbCandidate(database,candidate,saveOptions,saveFn){
+  const invalid=message=>({ok:false,error:new TypeError(message)});
+  if(!database||typeof database!=="object"||!candidate||typeof candidate!=="object"||Array.isArray(candidate)||!saveOptions||typeof saveOptions!=="object"||typeof saveFn!=="function"){
+    return invalid("invalid form diagnostic transaction arguments");
+  }
+  const allowed=new Set(["formAnalyses","trash","formDiagnosticMatrixBatch"]);
+  const keys=Reflect.ownKeys(candidate);
+  if(!keys.length||keys.some(key=>typeof key!=="string"||!allowed.has(key))||(Object.hasOwn(candidate,"formAnalyses")&&!Array.isArray(candidate.formAnalyses))||(Object.hasOwn(candidate,"trash")&&!Array.isArray(candidate.trash))||(Object.hasOwn(candidate,"formDiagnosticMatrixBatch")&&(!database.settings||typeof database.settings!=="object"))){
+    return invalid("invalid form diagnostic transaction candidate");
+  }
+
+  const touched=[];
+  const assign=(target,key,value)=>{
+    touched.push({target,key,hadOwn:Object.hasOwn(target,key),value:target[key]});
+    target[key]=value;
+  };
+  const hadUpdatedAt=Object.hasOwn(database,"updatedAt");
+  const updatedAt=database.updatedAt;
+
+  if(Object.hasOwn(candidate,"formAnalyses")) assign(database,"formAnalyses",candidate.formAnalyses);
+  if(Object.hasOwn(candidate,"trash")) assign(database,"trash",candidate.trash);
+  if(Object.hasOwn(candidate,"formDiagnosticMatrixBatch")){
+    assign(database.settings,"formDiagnosticMatrixBatch",candidate.formDiagnosticMatrixBatch);
+  }
+
+  let saved=false;
+  let error=null;
+  try{ saved=saveFn(saveOptions)===true; }catch(caught){ error=caught; }
+  if(saved) return {ok:true,error:null};
+
+  for(let index=touched.length-1;index>=0;index--){
+    const prior=touched[index];
+    if(prior.hadOwn) prior.target[prior.key]=prior.value;
+    else delete prior.target[prior.key];
+  }
+  if(hadUpdatedAt) database.updatedAt=updatedAt;
+  else delete database.updatedAt;
+  return {ok:false,error};
+}
+
+function planFormAnalysisDeletionCandidate(database,recordId,trashEntry,appVer,trashLimit,invalidateFn){
+  const fail=code=>({ok:false,code,record:null,candidate:null});
+  if(!database||!Array.isArray(database.formAnalyses)||!Array.isArray(database.trash)||!database.settings||typeof database.settings!=="object"||typeof recordId!=="string"||!recordId||!trashEntry||typeof trashEntry!=="object"||trashEntry.type!=="formAnalysis"||!trashEntry.data||trashEntry.data.id!==recordId||!Number.isSafeInteger(appVer)||appVer<=0||!Number.isSafeInteger(trashLimit)||trashLimit<=0||typeof invalidateFn!=="function"){
+    return fail("invalid-input");
+  }
+  const matches=database.formAnalyses.filter(record=>record&&record.id===recordId);
+  if(matches.length===0) return fail("missing-record");
+  if(matches.length!==1) return fail("ambiguous-record");
+
+  const record=matches[0];
+  const candidate={
+    formAnalyses:database.formAnalyses.filter(item=>item!==record),
+    trash:[trashEntry,...database.trash].slice(0,trashLimit)
+  };
+  const invalidated=invalidateFn(database.settings.formDiagnosticMatrixBatch,recordId,appVer);
+  if(!invalidated||invalidated.ok!==true) return fail("invalidation-failed");
+  if(invalidated.changed) candidate.formDiagnosticMatrixBatch=invalidated.coordinator;
+  return {ok:true,code:null,record,candidate};
+}
+/* FORM_DIAGNOSTIC_TRANSACTION_END */
+
 function copyFormPhaseDiagnosticsForRecord(formPhaseDiag,phaseCounts,receiptSnapshot){
   return {
     rejectedFramesNear:formPhaseDiag.rejectedFramesNear.map(item=>({...item})),
@@ -176,15 +238,44 @@ function bindFormTrackingCard(){
   });
   document.querySelectorAll("[data-del-form]").forEach(b=>b.onclick=async e=>{
     e.stopPropagation();
-    const rec=(db.formAnalyses||[]).find(r=>r.id===b.dataset.delForm);
-    if(!rec) return;
-    if(await appConfirm("この射形記録を削除しますか？",{danger:true,okLabel:"削除"})){
-      trashItem("formAnalysis",`${fmtD(rec.date)} 射形${rec.shots||0}射`,rec);
-      db.formAnalyses=db.formAnalyses.filter(r=>r.id!==rec.id);
-      save({reason:"delete-form-analysis",forceSnapshot:true});
-      render();
-      toast("削除しました。設定から復元できます");
+    const recordId=b.dataset.delForm;
+    let matches=(db.formAnalyses||[]).filter(record=>record&&record.id===recordId);
+    if(matches.length!==1){
+      toast("削除対象を一意に特定できないため、削除していません",6000);
+      return;
     }
+    if(!(await appConfirm("この射形記録を削除しますか？",{danger:true,okLabel:"削除"}))) return;
+
+    matches=(db.formAnalyses||[]).filter(record=>record&&record.id===recordId);
+    if(matches.length!==1){
+      toast("削除対象を一意に特定できないため、削除していません",6000);
+      return;
+    }
+    const record=matches[0];
+    const trashEntry={
+      id:uid(),
+      type:"formAnalysis",
+      label:`${fmtD(record.date)} 射形${record.shots||0}射`,
+      data:cloneData(record),
+      date:today(),
+      ts:Date.now()
+    };
+    const planned=planFormAnalysisDeletionCandidate(
+      db,recordId,trashEntry,APP_VER,TRASH_LIMIT,invalidateFormDiagnosticMatrixForRecord
+    );
+    if(!planned.ok){
+      toast("削除対象を一意に特定できないため、削除していません",6000);
+      return;
+    }
+    const committed=commitFormDiagnosticDbCandidate(
+      db,planned.candidate,{reason:"delete-form-analysis",forceSnapshot:true},save
+    );
+    if(!committed.ok){
+      toast("射形記録を保存できなかったため、削除していません",6000);
+      return;
+    }
+    render();
+    toast("削除しました。設定から復元できます");
   });
 }
 

@@ -231,6 +231,42 @@ assertEqual(
   "replay ordinary and zero-shot saves both transition workflow-save",
 );
 
+const deletionHandler = boundedSourceSection(
+  viewScript,
+  'document.querySelectorAll("[data-del-form]").forEach',
+  "function formInsightBlockHtml",
+  "form deletion handler",
+);
+const deletionCompact = compactSource(deletionHandler);
+const firstResolve = deletionCompact.indexOf("matches=(db.formAnalyses||[]).filter(");
+const confirmAt = deletionCompact.indexOf("awaitappConfirm(", firstResolve);
+const secondResolve = deletionCompact.indexOf(
+  "matches=(db.formAnalyses||[]).filter(",
+  firstResolve + 1,
+);
+const planAt = deletionCompact.indexOf("planFormAnalysisDeletionCandidate(", secondResolve);
+const commitAt = deletionCompact.indexOf("commitFormDiagnosticDbCandidate(", planAt);
+const successGuard = deletionCompact.indexOf("if(!committed.ok)", commitAt);
+const renderAt = deletionCompact.indexOf("render();", successGuard);
+assert(
+  firstResolve >= 0 &&
+    confirmAt > firstResolve &&
+    secondResolve > confirmAt &&
+    planAt > secondResolve &&
+    commitAt > planAt &&
+    successGuard > commitAt &&
+    renderAt > successGuard,
+  "form deletion re-resolves, plans, commits, and renders only after success",
+);
+assert(
+  !deletionHandler.includes("trashItem("),
+  "transactional form deletion does not pre-mutate trash",
+);
+assert(
+  deletionHandler.includes('reason:"delete-form-analysis",forceSnapshot:true'),
+  "form deletion preserves exact save options",
+);
+
 /* ---------- 幾何ヘルパー ---------- */
 
 assertClose(
