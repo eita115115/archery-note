@@ -88,6 +88,18 @@ Before reporting the field result, run the bounded artifact checker from the
 candidate worktree. It prints only the schema, 3×6 aggregate counts, byte
 length, and SHA-256; it never prints receipt details or private source data:
 
+If the browser saved exactly one matching artifact in the current user's
+`Downloads` folder, the checker can locate it without copying or printing its
+full path. It scans only `%USERPROFILE%\Downloads` and refuses to guess when
+there are zero or multiple candidates:
+
+```powershell
+node tools/inspect-form-diagnostic-json.js --from-downloads
+```
+
+For a multiple-candidate result, rerun with the explicit path of the chosen
+file:
+
 ```powershell
 node tools/inspect-form-diagnostic-json.js 'C:\tmp\archery-note-form-diagnostics.json'
 ```

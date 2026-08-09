@@ -2891,3 +2891,24 @@ check:form`, lint, targeted Prettier, and `git diff --check` pass.
 - Next: commit/push this evidence-driven feedback, verify candidate CI, then
   request the next physical artifact or controlled field run before changing
   count thresholds.
+
+## 2026-08-10 — Make diagnostic artifact handoff discoverable
+
+- Changed: `tools/inspect-form-diagnostic-json.js --from-downloads` now scans
+  only the current user's Downloads folder for
+  `archery-note-form-diagnostics*.json`. It refuses zero or multiple matches
+  with Japanese next-step guidance and keeps explicit-path validation intact.
+  The field checklist now documents this safer invocation.
+- TDD evidence: the temporary Downloads contract first failed because the
+  discovery export was absent, then passed for zero, one, and multiple
+  candidates. A missing explicit path and a no-candidate Downloads run both
+  return exit 2 without printing artifact contents.
+- Validation: `node tools/check-form-diagnostic-artifact.js`, `npm run
+check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
+  syntax checks, and `git diff --check` pass.
+- Risk: diagnostics handoff tooling and documentation only; no app runtime,
+  detector thresholds, storage, transport, Service Worker, dependency, or
+  physical acceptance behavior changed. Trusted-HTTPS field acceptance and a
+  validated 3×6 artifact remain pending.
+- Next: commit/push this handoff tooling, verify candidate CI, then obtain a
+  valid diagnostics artifact or controlled field run.

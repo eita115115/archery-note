@@ -1,7 +1,11 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const { inspectFormDiagnosticArtifact } = require("./form-diagnostic-artifact");
+const { findDiagnosticFilesFromDownloads } = require("./inspect-form-diagnostic-json");
 
 const CONDITIONS = ["side", "oblique", "normal_range"];
 
@@ -133,5 +137,28 @@ assert.match(
   /通常のschema-5バックアップは対象外/,
   "size refusal explains that normal backups are not diagnostic artifacts",
 );
+
+const downloadsFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-downloads-"));
+try {
+  assert.deepEqual(
+    findDiagnosticFilesFromDownloads(downloadsFixture),
+    [],
+    "download search reports no diagnostic artifacts",
+  );
+  fs.writeFileSync(path.join(downloadsFixture, "archery-note-form-diagnostics-one.json"), "{}");
+  assert.deepEqual(
+    findDiagnosticFilesFromDownloads(downloadsFixture).map((file) => path.basename(file)),
+    ["archery-note-form-diagnostics-one.json"],
+    "download search returns the single diagnostic artifact",
+  );
+  fs.writeFileSync(path.join(downloadsFixture, "archery-note-form-diagnostics-two.json"), "{}");
+  assert.deepEqual(
+    findDiagnosticFilesFromDownloads(downloadsFixture).map((file) => path.basename(file)),
+    ["archery-note-form-diagnostics-one.json", "archery-note-form-diagnostics-two.json"],
+    "download search returns all candidates in stable order",
+  );
+} finally {
+  fs.rmSync(downloadsFixture, { recursive: true, force: true });
+}
 
 console.log("Form diagnostic artifact checks OK");
