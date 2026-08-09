@@ -2225,3 +2225,42 @@ save creator is exported`. The new form-core source contract then failed with
   against the pre-marker `HEAD` source after implementation rather than observed
   in a clean first run.
 - Next: Task 9 adds exact-boolean diagnostics settings and mobile E2E coverage.
+
+## 2026-08-09 — Form diagnostic handoff Task 9
+
+- Changed: added one secondary settings section for the 18-shot diagnostic matrix,
+  hidden and action-disabled unless `db.settings.formDebug === true`; the existing
+  toggle now persists only exact booleans and updates the section immediately.
+  Start/export actions consume Task-4 validators and slots, lock the workflow before
+  confirmation, re-check debug/workflow/coordinator tokens after confirmation, and
+  commit a fresh coordinator through the transactional candidate seam without
+  touching practice records or backup timestamps. Export uses only the Task-8
+  diagnostics transport and fixed result/copy tables.
+- RED: `npm run check:ui` first failed at the bounded missing copy contract before
+  the settings marker existed. The first browser run exposed that hidden sections
+  make Playwright role descendants inaccessible; the E2E assertions now locate the
+  disabled buttons directly while retaining the production `hidden`/`aria-hidden`
+  boundary. A Task-7 regression from the shared global coordinator-token symbol was
+  caught in browser evidence and fixed by preserving both the `(database, token)`
+  save seam and the `(token)` settings check.
+- GREEN: exact absent/false/string-`"true"` `formDebug` values stay hidden and
+  disabled; toggles are immediate without reopening settings; double-clicks create
+  one confirmation; allocation/save failures preserve coordinator and `updatedAt`;
+  post-confirm debug/workflow/token changes fail closed; fixed refusal codes and
+  privacy allowlist prevent transport; Web Share/native/download MIME, filename,
+  cleanup, and backup/database invariance pass; 360x780, 390x844, and 1280x800
+  viewport probes report no overflow, clipping, or overlap.
+- Validation: `npm run check:ui`, `npm run check:form`, `npm run check:storage`,
+  `npm run check:app`, `npm run check:globals`, `npm run lint -- --quiet`, three
+  `node --check` targets, and `git diff --check` pass. Prettier reports the same
+  pre-existing whole-file style drift in the touched legacy scripts/tests and the
+  progress ledger; no bulk reformat was applied. Prestarted-server Playwright run
+  (PORT 4182, Chromium) passed 29/29 Task-9 tests; the four Task-7 regression
+  workers also passed 4/4. The CI-managed Playwright parent teardown remains a
+  shared-environment hang, so worker results are recorded from the bounded
+  prestarted server.
+- Risk: settings are intentionally secondary and exact-debug gated; no storage
+  migration, Service Worker, dependency, version, or primary capture UI changes
+  were made. Legacy formDebug-off save paths remain unchanged.
+- Next: Task 10 performs cumulative verification and prepares the sanitized
+  GitHub handoff.

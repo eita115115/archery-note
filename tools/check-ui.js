@@ -374,6 +374,118 @@ function staticUiChecks() {
     !/MK KOREA ZEST Limbs|MK XD Limbs/.test(bowList),
     "limb names leaked into handle dropdown",
   );
+
+  const gearSettingsSource = fs.readFileSync(
+    path.join(root, "scripts", "70-gear-settings.js"),
+    "utf8",
+  );
+  const formViewSource = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
+
+  function sourceBetween(source, startMarker, endMarker) {
+    const start = source.indexOf(startMarker);
+    const end = source.indexOf(endMarker, start + startMarker.length);
+    assert(start >= 0, `missing source marker: ${startMarker}`);
+    assert(end > start, `missing source end marker: ${endMarker}`);
+    return source.slice(start, end);
+  }
+
+  const requiredFormDiagnosticCopy = [
+    "18射の診断JSON",
+    "18射の診断を開始",
+    "開始後、真横→やや斜め→通常設置の順に各6射を記録します。条件を満たさない記録は診断バッチに追加されません。",
+    "次は「真横」を6射記録してください。",
+    "次は「やや斜め」を6射記録してください。",
+    "次は「通常設置」を6射記録してください。",
+    "18射の診断がそろいました。",
+    "診断JSONを書き出す",
+    "現在の18射診断バッチの診断値だけを書き出します。練習記録、日付、メモ、端末内ID、映像、画像、ランドマークは含みません。診断値の共有先は自分で確認してください。",
+    "18射の診断が完了していません。開始後、表示された条件を各6射ずつ記録してください。",
+  ];
+  for (const copy of requiredFormDiagnosticCopy) {
+    assert(gearSettingsSource.includes(copy), `form diagnostic copy missing: ${copy}`);
+  }
+
+  const settingsHelpers = sourceBetween(
+    gearSettingsSource,
+    "/* FORM_DIAGNOSTIC_SETTINGS_START */",
+    "/* FORM_DIAGNOSTIC_SETTINGS_END */",
+  );
+  const startHandler = sourceBetween(
+    settingsHelpers,
+    "async function startFormDiagnosticMatrixFromSettings",
+    "async function exportFormDiagnosticMatrixFromSettings",
+  );
+  const exportHandler = sourceBetween(
+    settingsHelpers,
+    "async function exportFormDiagnosticMatrixFromSettings",
+    "function bindFormDiagnosticSettingsActions",
+  );
+
+  assert(
+    settingsHelpers.includes('data-testid="form-diagnostic-section"') &&
+      settingsHelpers.includes("data-form-diagnostic-section") &&
+      settingsHelpers.includes("hidden") &&
+      settingsHelpers.includes("disabled"),
+    "diagnostic section has hidden and disabled defaults",
+  );
+  assert(
+    settingsHelpers.includes("db.settings.formDebug===true") &&
+      settingsHelpers.includes("db.settings.formDebug!==true"),
+    "diagnostic settings use exact boolean gates",
+  );
+  assert(
+    settingsHelpers.includes("FORM_DIAGNOSTIC_SLOTS[") &&
+      !/const\s+FORM_DIAGNOSTIC_SLOTS\b/.test(gearSettingsSource),
+    "settings consume the Task-4 global slot list without redeclaration",
+  );
+  for (const code of [
+    "coordinator-missing",
+    "coordinator-incomplete",
+    "coordinator-invalid",
+    "coordinator-stale",
+    "source-missing",
+    "source-ambiguous",
+    "source-invalid",
+    "output-too-large",
+    "encoding-unavailable",
+  ]) {
+    assert(settingsHelpers.includes(`"${code}"`), `result map missing ${code}`);
+  }
+
+  assert(
+    startHandler.indexOf("beginActiveWorkflow()") < startHandler.indexOf("await appConfirm"),
+    "restart acquires workflow lock before awaiting confirmation",
+  );
+  assert(
+    exportHandler.indexOf("beginActiveWorkflow()") < exportHandler.indexOf("await appConfirm"),
+    "export acquires workflow lock before awaiting confirmation",
+  );
+  for (const source of [startHandler, exportHandler]) {
+    assert(source.includes("db.settings.formDebug!==true"), "post-confirm exact debug recheck exists");
+    assert(
+      source.includes("activeWorkflowCount!==1") && source.includes("db.active"),
+      "post-confirm workflow ownership recheck exists",
+    );
+    assert(
+      source.includes("formDiagnosticCoordinatorTokenMatches(token)"),
+      "post-confirm coordinator token recheck exists",
+    );
+  }
+  for (const forbidden of [
+    "shareOrDownloadText",
+    "lastBackupAt",
+    "writeSafetySnapshot",
+    "scheduleSafetySnapshot",
+    "JSON.stringify(db",
+    "save(",
+  ]) {
+    assert(!exportHandler.includes(forbidden), `diagnostic export excludes ${forbidden}`);
+  }
+  assert(
+    !formViewSource.includes("form-diagnostic-section") &&
+      !html.includes("form-diagnostic-section"),
+    "diagnostic matrix controls stay out of the primary capture surface",
+  );
 }
 
 function freePort() {
