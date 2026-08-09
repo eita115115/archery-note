@@ -62,6 +62,16 @@ function nullableEnum(value, allowed) {
   return value === null || allowed.has(value);
 }
 
+function validReceiptState(receipt) {
+  if (receipt.detectorOutcome === "confirmed") {
+    return receipt.cancelReason === null && receipt.unresolvedReason === null;
+  }
+  if (receipt.detectorOutcome === "auto-canceled") {
+    return CANCEL_REASONS.has(receipt.cancelReason) && receipt.unresolvedReason === null;
+  }
+  return receipt.cancelReason === null && UNRESOLVED_REASONS.has(receipt.unresolvedReason);
+}
+
 function inspectFormDiagnosticArtifact(text) {
   if (typeof text !== "string")
     return failure("input", "診断JSONはUTF-8テキストで指定してください");
@@ -142,7 +152,8 @@ function inspectFormDiagnosticArtifact(text) {
       if (
         !DETECTOR_OUTCOMES.has(receipt.detectorOutcome) ||
         !nullableEnum(receipt.cancelReason, CANCEL_REASONS) ||
-        !nullableEnum(receipt.unresolvedReason, UNRESOLVED_REASONS)
+        !nullableEnum(receipt.unresolvedReason, UNRESOLVED_REASONS) ||
+        !validReceiptState(receipt)
       ) {
         return failure(
           "receipt",

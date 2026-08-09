@@ -107,6 +107,18 @@ const unknownReasonResult = inspectFormDiagnosticArtifact(JSON.stringify(unknown
 assert.equal(unknownReasonResult.ok, false, "unknown receipt reasons are refused");
 assert.equal(unknownReasonResult.code, "receipt", "unknown receipt reasons report receipt failure");
 
+const contradictoryReason = validPayload();
+contradictoryReason.runs[0].receipts[0].cancelReason = "anchor-return";
+const contradictoryReasonResult = inspectFormDiagnosticArtifact(
+  JSON.stringify(contradictoryReason),
+);
+assert.equal(contradictoryReasonResult.ok, false, "contradictory receipt reasons are refused");
+assert.equal(
+  contradictoryReasonResult.code,
+  "receipt",
+  "contradictory receipt reasons report receipt failure",
+);
+
 const wrongCount = validPayload();
 wrongCount.runs[1].receipts.pop();
 const wrongCountResult = inspectFormDiagnosticArtifact(JSON.stringify(wrongCount));

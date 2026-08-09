@@ -2807,3 +2807,19 @@ check:form`, lint, targeted Prettier, and `git diff --check` pass.
   behavior changed. Trusted-HTTPS field acceptance remains deferred.
 - Next: finish the full local validation, commit/push this checker alignment,
   verify CI, and keep the physical 3×6 matrix pending.
+
+## 2026-08-10 — Enforce diagnostic receipt state consistency
+
+- Changed: the offline artifact checker now requires reason fields to match
+  `detectorOutcome`: confirmed receipts have no reason, auto-canceled receipts
+  have an allowed cancellation reason only, and unresolved receipts have an
+  allowed unresolved reason only.
+- TDD evidence: a synthetic `confirmed + anchor-return` receipt first passed,
+  then the new consistency assertion passed after the minimal state check.
+- Validation: `node tools/check-form-diagnostic-artifact.js`, `npm run
+check:form`, lint, targeted Prettier, and `git diff --check` pass.
+- Risk: bounded artifact-validator hardening only; no detector threshold,
+  storage, transport, Service Worker, user data, or physical acceptance
+  behavior changed. Trusted-HTTPS field acceptance remains deferred.
+- Next: finish the full local validation, commit/push this state hardening,
+  verify CI, and keep the physical 3×6 matrix pending.
