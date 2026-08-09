@@ -3349,3 +3349,19 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   unchanged. The current-candidate iPhone artifact is still missing.
 - Next: commit/push this isolated guard, verify its CI run, then resume the
   trusted-HTTPS 3×6 field checklist only when the user is ready.
+
+## 2026-08-10 — Complete the Windows E2E regression run
+
+- Evidence: the full Chromium suite completed `91 passed (2.1m)` with one
+  worker against a manually prestarted matching-port server on port 4196;
+  the wrapper exited 0 and the server PID was stopped afterward.
+- Diagnosis: the same suite with Playwright-managed `webServer` reached 91/91
+  successful workers but hung at `Terminating the WebServer`. A one-test
+  reproduction and a direct `taskkill /T /F` probe show the hang is in this
+  sandbox's Windows process-tree termination, not in an app test or the HTTP
+  server. GitHub Actions run `31338416159` remains green.
+- Validation: no source or persisted-data changes; this is additional
+  verification evidence only. The prestarted-server path is the authoritative
+  local Windows E2E command for this environment.
+- Next: keep the physical trusted-HTTPS 3×6 checklist pending until the user
+  can collect the current-candidate diagnostic artifact.
