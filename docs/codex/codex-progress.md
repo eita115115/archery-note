@@ -2477,3 +2477,19 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   not represented as complete by this change.
 - Next: choose another isolated non-physical quality task, or resume the
   trusted-HTTPS field checklist only after explicit user direction.
+
+## 2026-08-09 — Diagnostic record copy-isolation coverage
+
+- Changed: `tools/check-form-diagnostics.js` now mutates an individual receipt's
+  `userDisposition` and a generated `formDiagnosticMatrix` marker, and proves
+  that the source record and a second planned record remain unchanged. This
+  closes the previously noted non-blocking coverage gap without changing the
+  planner or persistence implementation.
+- Validation: `node tools/check-form-diagnostics.js`, `npm run check:form`,
+  `npm run check:all`, `npm run lint -- --quiet`, `npm run format:check`,
+  `node --check tools/check-form-diagnostics.js`, and `git diff --check` pass.
+- Risk: test-only coverage; no runtime, storage, Service Worker, dependency,
+  or user-data behavior changed. Physical trusted-HTTPS acceptance remains
+  deferred.
+- Next: review and publish this coverage-only candidate update, then leave the
+  field checklist pending until explicit user direction.

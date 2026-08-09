@@ -1060,13 +1060,36 @@ assert(
     isolationSourceRecord.formPhaseDiag.releaseReceipts[0].fire,
   "planned record owns receipt fire snapshots",
 );
+assert(
+  isolationPlanned.record.formPhaseDiag.releaseReceipts[0] !==
+    isolationSourceRecord.formPhaseDiag.releaseReceipts[0],
+  "planned record owns individual receipts",
+);
+const isolationPlannedAgain = api.planFormDiagnosticMatrixRecord(
+  isolationSourceRecord,
+  validCoordinator(0),
+  84,
+);
+assertEqual(isolationPlannedAgain.ok, true, "copy-isolation can plan the same source again");
+assert(
+  isolationPlannedAgain.record.formDiagnosticMatrix !==
+    isolationPlanned.record.formDiagnosticMatrix,
+  "each planned record owns a fresh matrix marker",
+);
 isolationPlanned.record.features[0].nested.label = "returned";
+isolationPlanned.record.formPhaseDiag.releaseReceipts[0].userDisposition = "canceled";
 isolationPlanned.record.formPhaseDiag.releaseReceipts[0].fire.releaseSpeed = 99;
 isolationPlanned.record.formPhaseDiag.receiptOverflow = 7;
+isolationPlanned.record.formDiagnosticMatrix.slot = "mutated";
 assertEqual(
   isolationSourceRecord.features[0].nested.label,
   "source",
   "returned nested feature mutation leaves source unchanged",
+);
+assertEqual(
+  isolationSourceRecord.formPhaseDiag.releaseReceipts[0].userDisposition,
+  "present",
+  "returned receipt mutation leaves source unchanged",
 );
 assertEqual(
   isolationSourceRecord.formPhaseDiag.releaseReceipts[0].fire.releaseSpeed,
@@ -1077,6 +1100,11 @@ assertEqual(
   isolationSourceRecord.formPhaseDiag.receiptOverflow,
   0,
   "returned diagnostic mutation leaves source unchanged",
+);
+assertEqual(
+  isolationPlannedAgain.record.formDiagnosticMatrix.slot,
+  "side",
+  "returned marker mutation leaves another plan unchanged",
 );
 
 const selectedCoordinator = validCoordinator(3, ["selected-a", "selected-b", "selected-c"]);
