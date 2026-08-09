@@ -35,6 +35,16 @@ try {
   if ($HostAddress -ne "0.0.0.0" -and $HostAddress -ne "127.0.0.1" -and $lanAddresses -notcontains $HostAddress) {
     throw "HostAddress must be 0.0.0.0, 127.0.0.1, or one of this PC's IPv4 addresses."
   }
+  if ($Port -lt 1024 -or $Port -gt 65535) {
+    throw "Port must be between 1024 and 65535."
+  }
+  $publicProfiles = @(
+    Get-NetConnectionProfile -ErrorAction SilentlyContinue |
+      Where-Object { $_.NetworkCategory -eq "Public" }
+  )
+  if ($publicProfiles.Count -gt 0) {
+    Write-Warning "The connected Windows network profile is Public. iPhone Safari may be blocked by Windows Firewall; use a trusted Private Wi-Fi profile or an explicitly approved firewall rule."
+  }
 
   $sanEntries = @("DNS=archery-note.local", "DNS=localhost")
   $sanEntries += @($lanAddresses | ForEach-Object { "IPAddress=" + $_ })
@@ -71,6 +81,7 @@ try {
     Write-Output ("HTTPS preview is bound only to " + $HostAddress + ".")
   }
   Write-Output "For safer LAN binding, pass -HostAddress with one IPv4 address from this PC."
+  Write-Output ("If Safari cannot connect, test from this PC: Test-NetConnection -ComputerName {0} -Port {1}" -f $HostAddress, $Port)
   Write-Warning "Use a dedicated test browser profile and do not enter production data."
   Write-Output "Press Ctrl+C to stop; the temporary certificate and private key are removed on exit."
 

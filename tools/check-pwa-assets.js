@@ -185,6 +185,8 @@ function assertIphoneHttpsPreviewContract(relativePath) {
     "HTTPS_PASSWORD",
     "HostAddress",
     "127.0.0.1",
+    "Get-NetConnectionProfile",
+    "Test-NetConnection",
     "Open trusted HTTPS preview from iPhone",
     "trusted private Wi-Fi",
   ];

@@ -2949,3 +2949,21 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   changed. Trusted-HTTPS field acceptance remains pending.
 - Next: commit/push this guidance, verify candidate CI, then obtain a current
   candidate diagnostics artifact or controlled field run.
+
+## 2026-08-10 — Add trusted-HTTPS connectivity diagnostics
+
+- Changed: `tools/serve-iphone-https.ps1` now warns when Windows reports a
+  `Public` network profile, validates the requested port range, and prints a
+  copyable `Test-NetConnection` command. The field checklist now distinguishes
+  a blocked TCP port from an untrusted certificate; it never changes Firewall,
+  Wi-Fi, certificate trust, or application data automatically.
+- TDD evidence: `npm run check:pwa` first failed because the helper lacked the
+  new connectivity markers; the source and contract were then aligned.
+- Validation: `npm run check:pwa`, `npm run check:all`, lint,
+  `npm run format:check`, targeted PowerShell/source checks, and
+  `git diff --check` pass.
+- Risk: preview diagnostics and operator guidance only; no app runtime,
+  detector thresholds, storage, Service Worker, dependency, or export
+  transport behavior changed. Physical 3×6 acceptance remains pending.
+- Next: commit/push this connectivity aid, verify CI, then rerun the current
+  candidate on trusted private Wi-Fi and collect the validated artifact.

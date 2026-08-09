@@ -29,6 +29,20 @@ Repository tests and JSON export do not establish physical acceptance.
 - Open the printed `https://...:8743/` URL in the iPhone's Safari address bar.
   Do not paste the URL into PowerShell; PowerShell treats it as a command.
   Binding to an explicit LAN IPv4 keeps the preview off unrelated interfaces.
+- If Safari reports that the server cannot be reached, keep the server running
+  and run this on the PC using the same address and port:
+
+  ```powershell
+  Test-NetConnection -ComputerName $lanIp -Port 8743
+  ```
+
+  `TcpTestSucceeded: False` means the PC/network firewall or Wi‑Fi isolation is
+  blocking the port; do not change the app or certificate until that is fixed.
+  If the helper warns that the Windows profile is `Public`, use a trusted
+  `Private` Wi‑Fi profile or an explicitly approved firewall rule. A successful
+  TCP test followed by a Safari warning means the certificate was not installed
+  or full trust was not enabled yet.
+
 - Use a dedicated test profile, keep production data out of the preview, and stop the server after the checklist. The helper removes its temporary certificate and private key on exit.
 
 ## Physical sequence
