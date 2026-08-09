@@ -3263,3 +3263,21 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   before physical acceptance can be marked complete.
 - Next: commit/push this isolated angle-coverage contract, verify CI, and keep
   the physical checklist pending until the user can collect current evidence.
+
+## 2026-08-10 — Clarify the saved filename after web sharing
+
+- RED evidence: the focused Chromium export case failed because the success
+  toast only said that sharing succeeded; it did not identify the filename to
+  choose in the share sheet.
+- Changed: the shared-result copy now names
+  `archery-note-form-diagnostics.json` while retaining the explicit
+  `ファイルに保存` instruction. No transport fallback or persistence behavior
+  changed.
+- Validation: the focused Chromium export case passed 1/1 after the change.
+  Full form-diagnostics, `npm run check:all`, lint, format, syntax, and
+  `git diff --check` remain the required follow-up ladder before commit.
+- Risk: export guidance copy only; physical 3×6 acceptance remains pending
+  because no current-candidate diagnostic artifact has been collected.
+- Next: run the cumulative validation, commit/push this copy-only handoff
+  improvement, verify CI, and continue non-physical quality work until the
+  user explicitly resumes the trusted-HTTPS field run.

@@ -1259,7 +1259,8 @@ const FORM_DIAGNOSTIC_UI_COPY = Object.freeze({
   "allocation-failed": "診断バッチを作成できませんでした。もう一度お試しください。",
   "save-failed": "診断バッチを保存できませんでした。もう一度お試しください。",
   started: "18射の診断を開始しました。",
-  shared: "診断JSONを共有しました。共有先で「ファイルに保存」を選ぶと、ファイルとして残せます。",
+  shared:
+    "診断JSONを共有しました（archery-note-form-diagnostics.json）。共有先で「ファイルに保存」を選ぶと、ファイルとして残せます。",
   downloaded: "診断JSONを書き出しました（archery-note-form-diagnostics.json）。",
   canceled: null,
   failed: "診断JSONを書き出せませんでした。もう一度お試しください。",

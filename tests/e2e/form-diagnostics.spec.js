@@ -1053,7 +1053,7 @@ for (const mode of ["web-success", "web-abort", "web-error"]) {
     expect(await task9PersistenceSnapshot(page)).toEqual(before);
     if (mode === "web-success")
       await expect(page.locator("#toast")).toContainText(
-        "診断JSONを共有しました。共有先で「ファイルに保存」を選ぶと、ファイルとして残せます。",
+        "診断JSONを共有しました（archery-note-form-diagnostics.json）。共有先で「ファイルに保存」を選ぶと、ファイルとして残せます。",
       );
     if (mode === "web-abort") await expect(page.locator("#toast")).not.toHaveClass(/show/);
     if (mode === "web-error")
