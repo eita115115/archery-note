@@ -24,6 +24,15 @@ function formDiagnosticLiveSaveToastText(shotCount,matrixNotice){
     : completion;
 }
 
+function formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot){
+  const captureMode=frozenDiagnosticSave&&frozenDiagnosticSave.record&&frozenDiagnosticSave.record.captureMode;
+  if(zeroShot===true||!['live','replay'].includes(captureMode)) return null;
+  if(frozenDiagnosticSave.matrixAdvanced===true) return "診断バッチに追加しました";
+  return ["coordinator-missing","coordinator-invalid","coordinator-stale","coordinator-complete"].includes(frozenDiagnosticSave.matrixCode)
+    ? "18射の診断を開始し直してください"
+    : "診断条件を満たさなかったため、同じ条件をもう一度記録してください";
+}
+
 function formZeroShotDiagnosticText(record){
   const generic="診断用に0射で保存しました。横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。";
   const diag=record&&record.shots===0&&record.formPhaseDiag;
@@ -836,8 +845,8 @@ function openFormCapture(){
   async function finishLiveDiagnosticAttempt(zeroShot){
     const {result}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
     if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
-    const matrixNotice=!zeroShot&&frozenDiagnosticSave.record.captureMode==="live"?(frozenDiagnosticSave.matrixAdvanced?"診断バッチに追加しました":["coordinator-missing","coordinator-invalid","coordinator-stale","coordinator-complete"].includes(frozenDiagnosticSave.matrixCode)?"18射の診断を開始し直してください":"診断条件を満たさなかったため、同じ条件をもう一度記録してください"):null;
-    toast(zeroShot?formZeroShotDiagnosticText(frozenDiagnosticSave.record):formDiagnosticLiveSaveToastText(shots.length,matrixNotice));
+    const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);
+    toast(zeroShot?formZeroShotDiagnosticText(frozenDiagnosticSave.record):formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice));
     nativePulse("success"); finishCapture(); render(); await offerRecordedVideoAfterSave(); return true;
   }
   ovl.querySelector("#fcClose").onclick=async()=>{
@@ -1170,9 +1179,10 @@ function startFormReplay(videoUrl){
     toast(formZeroShotDiagnosticText(rec));
   }
   function finishReplayDiagnosticAttempt(zeroShot){
-    const {result,linked}=attemptReplayDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#frSave");
+    const {result}=attemptReplayDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#frSave");
     if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
-    toast(zeroShot?formZeroShotDiagnosticText(frozenDiagnosticSave.record):linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
+    const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);
+    toast(zeroShot?formZeroShotDiagnosticText(frozenDiagnosticSave.record):formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice));
     nativePulse("success"); finishReplay(); render(); return true;
   }
   ovl.querySelector("#frClose").onclick=async()=>{

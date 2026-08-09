@@ -3151,3 +3151,22 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   3/6–0/6–3/6 notes and the ordinary schema-5 backup are not acceptance
   evidence; do not mark the product acceptance complete until a current
   diagnostic artifact exists.
+
+## 2026-08-10 — Align live/replay diagnostic completion notices
+
+- RED evidence: the new Chromium contract could not find a shared matrix
+  notice helper, so replay diagnostic saves had no target-aware partial-count or
+  matrix-condition message even though live saves did.
+- Changed: `scripts/47-form-view.js` now derives the matrix notice once for
+  both live and replay saves and renders the frozen candidate's shot count.
+  This keeps retry feedback stable after the save candidate is frozen and
+  leaves zero-shot guidance unchanged.
+- Validation: the focused worker passed; the prestarted full form-diagnostics
+  suite passed 47/47. `node tools/check-form-core.js`, `npm run check:all`,
+  lint, format, syntax checks, and `git diff --check` all pass.
+- Risk: user-facing diagnostic completion feedback only; no detector
+  thresholds, receipt ownership, storage schema, Service Worker, dependency,
+  or transport behavior changed. Physical 3×6 acceptance remains pending.
+- Next: commit/push this isolated notification parity fix, verify CI, and keep
+  the current-candidate trusted-HTTPS field run as the remaining acceptance
+  evidence task.

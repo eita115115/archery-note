@@ -448,6 +448,34 @@ test("live diagnostic save toast combines partial count and matrix notice", asyn
   expect(toastTexts.ineligible).toContain("診断条件を満たさなかったため");
 });
 
+test("live and replay diagnostic saves share matrix notices", async ({ page }) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  const notices = await page.evaluate(() => {
+    if (typeof globalThis.formDiagnosticMatrixNotice !== "function") return null;
+    const base = (captureMode) => ({
+      record: { captureMode },
+      matrixAdvanced: false,
+      matrixCode: "coordinator-ineligible",
+    });
+    return {
+      live: globalThis.formDiagnosticMatrixNotice(base("live"), false),
+      replay: globalThis.formDiagnosticMatrixNotice(base("replay"), false),
+      advanced: globalThis.formDiagnosticMatrixNotice(
+        { record: { captureMode: "replay" }, matrixAdvanced: true, matrixCode: null },
+        false,
+      ),
+      zeroShot: globalThis.formDiagnosticMatrixNotice(base("replay"), true),
+    };
+  });
+  expect(notices).toEqual({
+    live: "診断条件を満たさなかったため、同じ条件をもう一度記録してください",
+    replay: "診断条件を満たさなかったため、同じ条件をもう一度記録してください",
+    advanced: "診断バッチに追加しました",
+    zeroShot: null,
+  });
+});
+
 test("zero-shot diagnostic completion distinguishes release evidence", async ({ page }) => {
   await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
   await page.goto("/");
