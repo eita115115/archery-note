@@ -2125,4 +2125,5 @@ check:globals`, `npm run lint -- --quiet`, syntax, and Prettier checks passed.
 - Risk: this task is pure validation/projection only; save, delete, export,
   transport, settings, and physical-device workflow integration remain in later
   tasks.
+- Review: initial Task 4 review found an Important shallow-copy defect; fix `d2592580` added cycle-safe deep record isolation plus exact frozen-slot/progression checks. Re-review APPROVED with one non-blocking test-hardening Minor (direct marker/individual-receipt mutation coverage).
 - Next: Task 5 projects only the validated matrix diagnostics for review.
