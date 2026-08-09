@@ -2823,3 +2823,23 @@ check:form`, lint, targeted Prettier, and `git diff --check` pass.
   behavior changed. Trusted-HTTPS field acceptance remains deferred.
 - Next: finish the full local validation, commit/push this state hardening,
   verify CI, and keep the physical 3×6 matrix pending.
+
+## 2026-08-10 — Explain partial diagnostic shot counts
+
+- Changed: `scripts/47-form-view.js` now accepts a diagnostic target count for
+  replay completion. In diagnostic mode, a partial result such as 3/6 shows
+  the missing count and camera/body/bow-arm/drawing-arm guidance; ordinary
+  form tracking keeps its existing generic copy. Added a source contract and
+  E2E regression.
+- TDD evidence: the new partial-diagnostic E2E first reported a failure; after
+  the target-aware completion copy and replay call, the focused test passed
+  1/1. The complete form-diagnostics Chromium suite passed 44/44.
+- Validation: `npm run check:all`, `npm run lint -- --quiet`,
+  `npm run format:check`, targeted Node syntax checks, targeted Prettier, and
+  `git diff --check` pass.
+- Risk: user-facing guidance/observability only; no detector thresholds,
+  shot retention, storage, transport, Service Worker, dependency, or physical
+  acceptance behavior changed. Trusted-HTTPS field acceptance remains
+  deferred.
+- Next: commit/push this observability slice, verify candidate CI, then gather
+  diagnostic evidence before any threshold change.

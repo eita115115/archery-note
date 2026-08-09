@@ -6,10 +6,13 @@
 
 function formTrackingEnabled(){ return !!(db.settings&&db.settings.formTrackingEnabled===true); }
 
-function formShotCompletionText(shotCount){
+function formShotCompletionText(shotCount,diagnosticTarget){
   const count=Number.isSafeInteger(shotCount)&&shotCount>=0?shotCount:0;
+  const target=Number.isSafeInteger(diagnosticTarget)&&diagnosticTarget>0?diagnosticTarget:0;
   return count===0
     ? "解析完了 ・ 0射を検出しました。横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。"
+    : target>count
+      ? `解析完了 ・ ${count}/${target}射を検出しました。検出されなかった射がある場合は、横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。`
     : `解析完了 ・ ${count}射を検出しました`;
 }
 
@@ -1083,7 +1086,7 @@ function startFormReplay(videoUrl){
     if(video.ended&&running){
       abandonActiveReceipt("replay-eos");
       phaseEl.textContent="完了";
-      hud.textContent=formShotCompletionText(shots.length);
+      hud.textContent=formShotCompletionText(shots.length,db.settings.formDebug===true?6:0);
       running=false; return;
     }
     raf=requestAnimationFrame(loop);

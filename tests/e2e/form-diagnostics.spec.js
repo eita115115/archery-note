@@ -411,6 +411,15 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
   });
 });
 
+test("partial diagnostic completion names the missing shot count", async ({ page }) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  expect(await page.evaluate(() => globalThis.formShotCompletionText(3, 6))).toContain("3/6射");
+  expect(await page.evaluate(() => globalThis.formShotCompletionText(3, 6))).toContain(
+    "検出されなかった射がある場合",
+  );
+});
+
 test("zero-shot exact-debug live save freezes, rolls back, and retries once", async ({ page }) => {
   const database = makeSyntheticDiagnosticDb({
     updatedAt: "before-live-save",
