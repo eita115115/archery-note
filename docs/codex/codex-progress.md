@@ -3300,6 +3300,8 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   dependency, or user-data behavior changed.
 - Risk: trusted-preview provenance only; physical 3×6 acceptance remains
   pending because no current-candidate diagnostic artifact has been collected.
-- Next: run the cumulative checks, commit/push this acceptance-helper change,
-  verify CI, and keep the field run deferred until the user can exercise the
-  current candidate.
+- Handoff: commit `47ba1b11` is pushed to the draft PR candidate and GitHub
+  Actions run `31337422713` completed successfully. The current candidate tree
+  resolves to `23d1a19a249b276659de53d9d771aa74de90c69f` when checked with Git's
+  safe-directory allowance. Keep the field run deferred until the user can
+  exercise the current candidate and save the diagnostic artifact.
