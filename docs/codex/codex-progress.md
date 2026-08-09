@@ -2912,3 +2912,24 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   validated 3×6 artifact remain pending.
 - Next: commit/push this handoff tooling, verify candidate CI, then obtain a
   valid diagnostics artifact or controlled field run.
+
+## 2026-08-10 — Add privacy-safe normal-backup diagnostic fallback
+
+- Changed: added `tools/inspect-form-backup-diagnostics.js` and its pure
+  `summarizeFormBackupDiagnostics` boundary. It accepts only schema-5 normal
+  backups and reports aggregate shot counts, zero-shot release-candidate and
+  rejected-frame counts, canceled-event totals, and fixed phase buckets. It
+  never prints record IDs, dates, notes, features, receipts, or raw frames.
+- TDD evidence: the checker first failed because the new summary module was
+  absent, then passed synthetic schema-5, malformed-schema, malformed-record,
+  and unknown-phase cases. The supplied backup was inspected only through this
+  aggregate boundary; no user JSON was copied into the repository.
+- Validation: `node tools/check-form-backup-diagnostics.js`, `npm run
+check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
+  syntax checks, and `git diff --check` pass.
+- Risk: offline evidence tooling and documentation only. It does not claim a
+  3×6 pass, alter detector thresholds, change persistence or transport, or
+  replace the validated diagnostics artifact. Trusted-HTTPS field acceptance
+  remains pending.
+- Next: commit/push this fallback, verify candidate CI, then obtain a current
+  candidate diagnostics artifact or controlled field run.

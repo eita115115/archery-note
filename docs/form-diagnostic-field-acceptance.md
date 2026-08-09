@@ -125,4 +125,22 @@ node tools/inspect-form-diagnostic-json.js 'C:\tmp\archery-note-form-diagnostics
 The checker rejects a normal schema-5 backup, unknown keys, incomplete runs,
 missing fire fields, invalid fire ranges, and files over 65536 UTF-8 bytes.
 
+## Normal backup fallback (not a 3×6 pass)
+
+If the diagnostic export is unavailable but a normal schema-5 backup exists, run
+the separate privacy-safe aggregate inspector. It prints only record counts,
+shot-count histogram, release-candidate/rejected-frame counts, canceled-event
+count, and fixed phase buckets; it never prints IDs, dates, notes, features,
+receipt contents, or raw frame data:
+
+```powershell
+node tools/inspect-form-backup-diagnostics.js `
+  'C:\tmp\archery-note-backup.json'
+```
+
+This fallback can explain zero-shot tendencies, but it cannot prove a current
+candidate's 3×6 field result, retained receipt fire fields, or artifact privacy
+allowlist. Do not treat its output as acceptance evidence or tune thresholds
+from it alone.
+
 Record only commit/tree IDs, iOS/Safari versions without local identifiers, aggregate condition results, pass/fail, and artifact SHA-256.
