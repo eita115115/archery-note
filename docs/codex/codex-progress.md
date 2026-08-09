@@ -2711,3 +2711,17 @@ tools/check-form-core.js`, `npm run check:all`, lint, format, targeted syntax,
 - Next: keep the candidate ready for review and continue one isolated
   nonphysical product-quality task; do not merge, deploy, or resume field
   acceptance without direction.
+
+## 2026-08-10 — Clarify Windows diagnostic artifact handoff
+
+- Changed: `docs/form-diagnostic-field-acceptance.md` now gives copyable
+  PowerShell commands to locate `archery-note-form-diagnostics.json` in
+  Downloads, verify it is a file, copy it to `C:\tmp`, and list alternate
+  diagnostic filenames without treating a path as a command.
+- Validation: targeted Prettier and `git diff --check` pass. This is
+  documentation-only; no app, detector, storage, export, dependency, or
+  physical acceptance behavior changed.
+- Risk: the procedure intentionally stops with a clear error when the bounded
+  diagnostic export is absent; it does not inspect or commit user data.
+- Next: commit/push the handoff documentation, verify the candidate CI, and
+  keep the trusted-HTTPS field matrix pending.

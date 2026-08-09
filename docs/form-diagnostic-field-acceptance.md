@@ -58,6 +58,28 @@ Use ordinary archer placement; do not optimize placement after observing the det
 
 Keep `archery-note-form-diagnostics.json` outside the repository. Do not commit JSON, video, screenshots with private paths, device details, or raw diagnostics. If the artifact is transferred to the development PC, place it temporarily at `C:\tmp\archery-note-form-diagnostics.json` and record the output of:
 
+On Windows PowerShell, do not type the file path by itself (PowerShell treats
+that as a command). Locate the browser download, confirm it exists, and copy
+it with these commands instead:
+
+```powershell
+$downloadPath = Join-Path $env:USERPROFILE "Downloads\archery-note-form-diagnostics.json"
+if (-not (Test-Path -LiteralPath $downloadPath -PathType Leaf)) {
+  throw "診断JSONが見つかりません: $downloadPath"
+}
+New-Item -ItemType Directory -Path "C:\tmp" -Force | Out-Null
+Copy-Item -LiteralPath $downloadPath -Destination "C:\tmp\archery-note-form-diagnostics.json"
+```
+
+If the browser saved the file under a different name, inspect only the
+Downloads folder and choose the file whose name is
+`archery-note-form-diagnostics.json`:
+
+```powershell
+Get-ChildItem -LiteralPath (Join-Path $env:USERPROFILE "Downloads") -Filter "archery-note-form-diagnostics*.json" -File |
+  Select-Object Name, FullName, Length, LastWriteTime
+```
+
 ```powershell
 Get-FileHash -Algorithm SHA256 -LiteralPath 'C:\tmp\archery-note-form-diagnostics.json'
 ```
