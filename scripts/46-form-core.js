@@ -2503,9 +2503,21 @@ function invalidateFormDiagnosticMatrixForRecord(coordinator, recordId, appVer) 
 
 const FORM_DIAGNOSTIC_EXPORT_MAX_BYTES = 65536;
 const FORM_DIAGNOSTIC_EXPORT_FIRE_EVIDENCE = Object.freeze(["adaptive", "close", "nb2"]);
+const FORM_DIAGNOSTIC_EXPORT_COORDINATOR_CODES = Object.freeze([
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_MISSING,
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID,
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_STALE,
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INCOMPLETE,
+]);
 
 function formDiagnosticExportFailure(code) {
   return { ok: false, code, payload: null, json: null, byteLength: null };
+}
+
+function formDiagnosticExportCoordinatorCode(code) {
+  return FORM_DIAGNOSTIC_EXPORT_COORDINATOR_CODES.includes(code)
+    ? code
+    : FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID;
 }
 
 function formDiagnosticHasOnlyOwnDataProperties(source) {
@@ -2523,9 +2535,7 @@ function formDiagnosticExportSources(formAnalyses, coordinator, appVer) {
   const checkedCoordinator = validateFormDiagnosticMatrixCoordinator(coordinator, appVer, true);
   if (!checkedCoordinator.ok) {
     return formDiagnosticExportFailure(
-      checkedCoordinator.code === FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_COMPLETE
-        ? FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID
-        : checkedCoordinator.code,
+      formDiagnosticExportCoordinatorCode(checkedCoordinator.code),
     );
   }
 

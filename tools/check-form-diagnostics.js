@@ -662,6 +662,16 @@ expectExportFailure(
   "coordinator-stale",
   "stale coordinator refuses",
 );
+const invalidExportAppVersion = api.buildFormDiagnosticExport(
+  shuffledValidRecords,
+  completedCoordinator,
+  0,
+);
+deepEqual(
+  invalidExportAppVersion,
+  { ok: false, code: "coordinator-invalid", payload: null, json: null, byteLength: null },
+  "invalid export app version is normalized at the coordinator boundary",
+);
 
 const poison = markedRecord("diagnostic-poison", "side");
 Object.defineProperty(poison, "secretPath", {
