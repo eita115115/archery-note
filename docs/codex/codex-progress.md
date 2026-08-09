@@ -3216,3 +3216,19 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   pending because no current-candidate artifact has been collected.
 - Next: commit/push this helper aid, verify CI, then resume the trusted-HTTPS
   field run when available.
+
+## 2026-08-10 — Lock the six-shot summary and receipt pipeline
+
+- Changed: `tools/check-form-core.js` now drives six production-shaped release
+  sequences through `stepFormPhase`, `summarizeFormShot`, and receipt ownership.
+  The contract requires six non-null summaries, ordered `form-receipt-1` through
+  `form-receipt-6`, and six present receipt records. This catches silent count
+  loss between detector release and the visible shot list without changing any
+  detector threshold or storage behavior.
+- Validation: `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run lint -- --quiet`, and `git diff --check` pass.
+- Risk: test-only coverage; no production runtime or persisted data changed.
+  Physical 3×6 acceptance remains pending until a current trusted-HTTPS
+  diagnostic artifact is collected.
+- Next: run the current-candidate field acceptance when trusted HTTPS is
+  available, or continue with another isolated regression contract.

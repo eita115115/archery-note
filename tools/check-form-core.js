@@ -997,6 +997,81 @@ function adaptiveConfirmationFixture() {
     JSON.stringify(Array(6).fill("adaptive")),
     "six-shot end reports six adaptive evidence labels",
   );
+
+  /* 6射の検出数だけでなく、実際のビュー順序（release → summary →
+     receipt ownership）まで通し、要約nullによる無言のカウント欠落を固定する。 */
+  const productionDiagnosticRaw = (anchorNorm, drawArm) => ({
+    anchorNorm,
+    drawArm,
+    bodyScale: 0.25,
+    dW: { x: 0.6, y: 0.31 },
+    bW: { x: 0.2, y: 0.4 },
+    bowArm: 171,
+    shoulderDrop: 0.07,
+    headOffset: 0.09,
+    forceLine: 0.07,
+    score: 82,
+    conf: 0.92,
+  });
+  const diagnosticSixShot = Array.from({ length: 6 }, () => {
+    const shot = [];
+    for (let i = 0; i < 12; i++)
+      shot.push([productionDiagnosticRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+    for (let i = 0; i < 30; i++)
+      shot.push([productionDiagnosticRaw(0.47 + (i % 3) * 0.005, 150), i === 9 ? 7 : 0.2, 20]);
+    shot.push([productionDiagnosticRaw(0.75, 140), 18.4, 20]);
+    for (let i = 0; i < 60; i++) shot.push([productionDiagnosticRaw(1, 90), 0.1, 20]);
+    return shot;
+  }).flat();
+  const diagnosticDetector = core.makeFormPhaseDetector();
+  const diagnosticTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const diagnosticHistory = [];
+  const diagnosticIds = [];
+  let diagnosticNow = 0;
+  let diagnosticSummaries = 0;
+  for (const [raw, velocity, elapsed] of diagnosticSixShot) {
+    diagnosticNow += elapsed;
+    diagnosticHistory.push({ ts: diagnosticNow, m: raw, vel: velocity });
+    if (diagnosticHistory.length > 200) diagnosticHistory.shift();
+    const result = core.stepFormPhase(
+      diagnosticDetector,
+      raw,
+      diagnosticHistory,
+      1.0,
+      diagnosticNow,
+    );
+    if (!result.released) continue;
+    const action = diagnosticTracker.begin({ fireTs: diagnosticNow, fire: null });
+    assert(!action.fatal, "six-shot pipeline keeps every receipt allocatable");
+    const summary = core.summarizeFormShot(
+      diagnosticHistory,
+      result.anchorStartTs,
+      diagnosticNow,
+      result.anchorEnter,
+    );
+    assert(summary, `six-shot pipeline summary ${diagnosticIds.length + 1} is retained`);
+    assertEqual(
+      diagnosticTracker.markShotCreated(action.id).code,
+      null,
+      `six-shot pipeline receipt ${diagnosticIds.length + 1} owns its summary`,
+    );
+    diagnosticIds.push(action.id);
+    diagnosticSummaries += 1;
+    diagnosticTracker.confirm();
+  }
+  assertEqual(diagnosticSummaries, 6, "six-shot pipeline retains six non-null summaries");
+  assertJsonEqual(
+    diagnosticIds,
+    Array.from({ length: 6 }, (_, index) => `form-receipt-${index + 1}`),
+    "six-shot pipeline assigns ordered receipt IDs",
+  );
+  assertEqual(
+    diagnosticTracker
+      .snapshot()
+      .releaseReceipts.filter((receipt) => receipt.userDisposition === "present").length,
+    6,
+    "six-shot pipeline keeps six present receipt records",
+  );
 }
 
 assert(core.adaptiveReleaseCandidate, "adaptive release candidate helper is exported to tests");
