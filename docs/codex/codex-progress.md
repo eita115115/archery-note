@@ -2010,3 +2010,57 @@ Next task:
 - Obtain user review of the committed written design. After approval, invoke
   the writing-plans workflow and create the detailed TDD implementation plan;
   do not implement runtime behavior in that planning checkpoint.
+
+### 2026-08-09 - Executable form diagnostic implementation plan and safe WIP checkpoint
+
+- Continued from the approved design and expanded
+  `docs/superpowers/plans/2026-08-03-form-diagnostic-handoff.md` into an
+  executable ten-task TDD plan. The plan now has concrete file paths,
+  interfaces, conditional loaders, synthetic fixtures, exact RED/GREEN
+  commands, implementation code for the receipt tracker, live/replay identity
+  wiring, seven-field snapshots, matrix validation, bounded allowlist export,
+  transactional save/delete, frozen retry/discard, no-fallback transport, and
+  exact-boolean settings UI/E2E.
+- Corrected the plan's diagnostics-OFF wording to preserve record shape while
+  explicitly allowing the required preallocated `form-receipt-N` shot ID.
+  Clarified that the user-authorized planning WIP is a full sanitized current
+  tree snapshot on `origin/main`, not a release candidate or physical result.
+- Removed workstation-specific paths from `AGENTS.md` and three planning
+  documents in commit `32a0dc29` so the current tree has no workstation
+  absolute paths, user-name, or session-path hits before a GitHub snapshot is
+  considered.
+
+Plan evidence:
+
+- Plan SHA-256:
+  `C28D837FAB6E0FB6B32685C5FA96DD06C092CD43678CECE4ED2A278BFD5BC7E2`
+- Plan structure scan: 10 tasks, 10 interface blocks, 110 checkbox steps,
+  zero malformed step headings, zero empty function stubs, and zero
+  placeholder terms.
+- `npx prettier --check docs/superpowers/plans/2026-08-03-form-diagnostic-handoff.md` - PASS.
+- `git diff --check` - PASS.
+- Runtime/app tests were not run; this checkpoint changes documentation and
+  path-redaction docs only. No production behavior, schema, dependency,
+  Service Worker, version marker, release, or deployment changed.
+
+Risk notes:
+
+- The plan is not implementation evidence. The physical iPhone 3-condition /
+  18-shot matrix, trusted HTTPS preview, and all Task-1-to-Task-10 runtime
+  validation remain outstanding.
+- The source branch `feat/adaptive-release-detection` contains sensitive
+  ancestor `4a0ff1ec` and must never be pushed. A fresh `git fetch origin main`
+  was unavailable because the execution environment reached its usage limit;
+  the safe checkpoint must therefore use the already recorded local
+  `origin/main` ref and a non-force new branch. If the remote branch name is
+  already occupied, stop rather than overwrite it.
+- The next GitHub action is only the user-authorized WIP snapshot
+  `codex/form-diagnostic-handoff-plan-wip`; no PR, Pages update, release,
+  version bump, or final RC push is authorized by this checkpoint.
+
+Next task:
+
+- Commit this plan and ledger, prove the candidate tree equals the committed
+  current WIP tree, prove `4a0ff1ec` is not an ancestor, and push only the
+  sanitized WIP branch. Then resume implementation with the recommended
+  subagent-driven workflow, one task and review gate at a time.
