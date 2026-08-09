@@ -71,12 +71,16 @@ try {
   $sanEntries = @("DNS=archery-note.local", "DNS=localhost")
   $sanEntries += @($lanAddresses | ForEach-Object { "IPAddress=" + $_ })
   $sanExtension = "2.5.29.17={text}" + ($sanEntries -join "&")
-  $certificate = New-SelfSignedCertificate `
-    -Subject "CN=archery-note.local" `
-    -TextExtension @($sanExtension) `
-    -CertStoreLocation "Cert:\CurrentUser\My" `
-    -KeyExportPolicy Exportable `
-    -NotAfter (Get-Date).AddDays(7)
+  try {
+    $certificate = New-SelfSignedCertificate `
+      -Subject "CN=archery-note.local" `
+      -TextExtension @($sanExtension) `
+      -CertStoreLocation "Cert:\CurrentUser\My" `
+      -KeyExportPolicy Exportable `
+      -NotAfter (Get-Date).AddDays(7)
+  } catch {
+    throw ("Unable to create the temporary HTTPS certificate. Windows PowerShell's PKI certificate provider failed: " + $_.Exception.Message + " Confirm that the PKI provider is available before troubleshooting iPhone network access.")
+  }
 
   $passwordText = [Guid]::NewGuid().ToString("N")
   $password = ConvertTo-SecureString $passwordText -AsPlainText -Force

@@ -190,6 +190,7 @@ function assertIphoneHttpsPreviewContract(relativePath) {
     "Test-NetConnection",
     "Open trusted HTTPS preview from iPhone",
     "trusted private Wi-Fi",
+    "Unable to create the temporary HTTPS certificate",
   ];
   for (const marker of requiredMarkers) {
     if (!text.includes(marker)) {

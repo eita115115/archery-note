@@ -2987,3 +2987,20 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   acceptance remains pending.
 - Next: commit/push this fallback, verify CI, then rerun the candidate on the
   user's trusted private Wi-Fi and collect the validated artifact.
+
+## 2026-08-10 — Explain HTTPS certificate-provider failures
+
+- RED evidence: `npm run check:pwa` first failed because the HTTPS helper had
+  no contract for certificate creation failures.
+- Changed: `tools/serve-iphone-https.ps1` now catches
+  `New-SelfSignedCertificate` failures and reports that the Windows PKI
+  provider must be available before troubleshooting iPhone network access.
+  The temporary certificate is still short-lived and cleanup is unchanged.
+- Validation: `npm run check:pwa`, PowerShell parse, and `git diff --check`
+  pass. No app runtime, detector threshold, storage, Service Worker,
+  dependency, or transport behavior changed.
+- Risk: acceptance-helper diagnostics only. Physical 3×6 acceptance remains
+  pending because a current candidate diagnostics artifact has not been
+  collected.
+- Next: commit/push this helper diagnostic, verify CI, then continue one small
+  non-physical quality task while the trusted-HTTPS field run remains deferred.
