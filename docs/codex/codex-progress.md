@@ -2146,4 +2146,5 @@ check:globals`, `npm run lint -- --quiet`, syntax, and Prettier checks passed.
 - Risk: projection deliberately refuses any source object carrying an own
   accessor rather than reading it. Export transport, persistence, settings UI,
   and sharing remain later tasks.
+- Review: initial Task 5 review found an Important export-boundary leak of internal `invalid-app-version`; fix `280fa55a` normalizes unsupported coordinator errors to `coordinator-invalid`. Re-review APPROVED; existing `adaptive|close|nb2` fire evidence remains the authoritative persisted contract.
 - Next: Task 6 integrates export settings and save/delete workflow boundaries.
