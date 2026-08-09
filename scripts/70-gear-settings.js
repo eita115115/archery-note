@@ -1371,6 +1371,7 @@ function formDiagnosticSettingsHtml() {
       <div class="btnrow">
         <button type="button" class="btn sec" id="fdMatrixStart" data-testid="form-diagnostic-start" ${enabled ? "" : "disabled"}>18射の診断を開始</button>
         <button type="button" class="btn sec" id="fdMatrixExport" data-testid="form-diagnostic-export" ${enabled ? "" : "disabled"}>診断JSONを書き出す</button>
+        <button type="button" class="btn sec" id="fdMatrixDownload" data-testid="form-diagnostic-download" ${enabled ? "" : "disabled"}>端末に直接保存</button>
       </div>
       <div class="hint">${esc(FORM_DIAGNOSTIC_PRIVACY_CONFIRM)}</div>
     </section>`;
@@ -1445,7 +1446,7 @@ async function startFormDiagnosticMatrixFromSettings(settingsOverlay) {
     syncFormDiagnosticSettingsUi(settingsOverlay);
   }
 }
-async function exportFormDiagnosticMatrixFromSettings(settingsOverlay) {
+async function exportFormDiagnosticMatrixFromSettings(settingsOverlay, transport = "share") {
   syncFormDiagnosticSettingsUi(settingsOverlay);
   if (db.settings.formDebug!==true) {
     showFormDiagnosticResult("debug-disabled");
@@ -1461,7 +1462,9 @@ async function exportFormDiagnosticMatrixFromSettings(settingsOverlay) {
   section.dataset.busy = "true";
   syncFormDiagnosticSettingsUi(settingsOverlay);
   try {
-    const confirmed = await appConfirm(FORM_DIAGNOSTIC_PRIVACY_CONFIRM, { okLabel: "書き出す" });
+    const confirmed = await appConfirm(FORM_DIAGNOSTIC_PRIVACY_CONFIRM, {
+      okLabel: transport === "download" ? "保存" : "書き出す",
+    });
     if (!confirmed) return;
     if (db.settings.formDebug!==true) {
       showFormDiagnosticResult("debug-disabled");
@@ -1480,7 +1483,9 @@ async function exportFormDiagnosticMatrixFromSettings(settingsOverlay) {
       showFormDiagnosticResult(formDiagnosticUiResultForCode(built.code));
       return;
     }
-    const result = await shareFormDiagnosticsJson(built.json);
+    const result = transport === "download"
+      ? await downloadFormDiagnosticsJson(built.json)
+      : await shareFormDiagnosticsJson(built.json);
     if (result.cleanupFailed) {
       showFormDiagnosticResult("cleanup-failed");
       return;
@@ -1495,8 +1500,11 @@ async function exportFormDiagnosticMatrixFromSettings(settingsOverlay) {
 function bindFormDiagnosticSettingsActions(settingsOverlay) {
   const start = settingsOverlay.querySelector("#fdMatrixStart");
   const exportButton = settingsOverlay.querySelector("#fdMatrixExport");
+  const downloadButton = settingsOverlay.querySelector("#fdMatrixDownload");
   if (start) start.onclick = () => startFormDiagnosticMatrixFromSettings(settingsOverlay);
   if (exportButton) exportButton.onclick = () => exportFormDiagnosticMatrixFromSettings(settingsOverlay);
+  if (downloadButton)
+    downloadButton.onclick = () => exportFormDiagnosticMatrixFromSettings(settingsOverlay, "download");
 }
 /* FORM_DIAGNOSTIC_SETTINGS_END */
 function openSettings() {

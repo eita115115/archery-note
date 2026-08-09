@@ -3365,3 +3365,23 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   local Windows E2E command for this environment.
 - Next: keep the physical trusted-HTTPS 3×6 checklist pending until the user
   can collect the current-candidate diagnostic artifact.
+
+## 2026-08-10 — Add an explicit diagnostic-file save path
+
+- RED evidence: a focused Chromium acceptance test could not find the new
+  `#fdMatrixDownload` control and timed out before any download event. The
+  existing share path was not changed or weakened.
+- Changed: settings now expose `端末に直接保存`, which uses the bounded
+  diagnostic download transport directly and asks for `保存`. The existing
+  Web/native share action remains separate, so choosing a share destination is
+  no longer required when the operator needs a local JSON artifact.
+- Validation: focused RED→GREEN, full form-diagnostics Chromium `49 passed
+(1.3m)`, `npm run check:ui`, `npm run check:form`, lint, format, syntax, and
+  `git diff --check` pass. The direct-save test confirms the exact filename,
+  privacy-bounded payload, no share call, and a real browser download event.
+- Risk: additive settings control and transport helper only; no detector,
+  receipt, schema, backup, Service Worker, or existing share behavior changed.
+  Physical trusted-HTTPS 3×6 acceptance remains pending until a current JSON
+  artifact is collected.
+- Next: run the complete `check:all` ladder, commit/push this isolated fix,
+  verify CI, then keep the field artifact as the only physical acceptance gap.

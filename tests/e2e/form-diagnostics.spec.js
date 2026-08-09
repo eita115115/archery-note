@@ -717,6 +717,7 @@ for (const [label, value, own] of [
     await expect(section).toBeHidden();
     await expect(section.locator("#fdMatrixStart")).toBeDisabled();
     await expect(section.locator("#fdMatrixExport")).toBeDisabled();
+    await expect(section.locator("#fdMatrixDownload")).toBeDisabled();
   });
 }
 
@@ -1102,6 +1103,23 @@ test("no-share environment downloads exact MIME/allowlist and revokes URL", asyn
   expect(transport.objectUrls).toHaveLength(1);
   expect(transport.revokedUrls).toEqual(transport.objectUrls);
   expect(await task9PersistenceSnapshot(page)).toEqual(before);
+});
+
+test("explicit device save bypasses the share sheet and downloads the diagnostic artifact", async ({
+  page,
+}) => {
+  await seedTask9Page(page, makeTask9DiagnosticDb(true), "web-success");
+  const downloadPromise = page.waitForEvent("download");
+  await page.locator("#fdMatrixDownload").click();
+  await task9Confirm(page, "保存");
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe("archery-note-form-diagnostics.json");
+  expect(await page.evaluate(() => globalThis.__task9Transport.shareCalls)).toHaveLength(0);
+  await expect(page.locator("#toast")).toContainText(
+    "診断JSONを書き出しました（archery-note-form-diagnostics.json）",
+  );
+  const filePath = await download.path();
+  assertTask9Artifact(JSON.parse(fs.readFileSync(filePath, "utf8")));
 });
 
 for (const viewport of [

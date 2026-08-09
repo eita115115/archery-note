@@ -100,6 +100,9 @@ the bounded artifact checker before drawing a conclusion.
   handed to the share sheet, not that a file already exists on the development
   PC. Choose `ファイルに保存` (or another explicit file destination) in the
   share sheet, then verify the saved artifact before reporting acceptance.
+- If the share sheet is inconvenient, choose `端末に直接保存` in the same
+  settings section. This uses the browser download path and still produces the
+  exact `archery-note-form-diagnostics.json` artifact for the checker.
 - The separate offline checker below is authoritative for the transferred
   file. A share-sheet success without a saved file is not acceptance evidence.
 

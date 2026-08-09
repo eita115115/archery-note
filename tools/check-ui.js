@@ -412,6 +412,7 @@ function staticUiChecks() {
     "次は「通常設置」を6射記録してください。",
     "18射の診断がそろいました。",
     "診断JSONを書き出す",
+    "端末に直接保存",
     "現在の18射診断バッチの診断値だけを書き出します。練習記録、日付、メモ、端末内ID、映像、画像、ランドマークは含みません。診断値の共有先は自分で確認してください。",
     "18射の診断が完了していません。開始後、表示された条件を各6射ずつ記録してください。",
   ];
@@ -457,6 +458,11 @@ function staticUiChecks() {
     settingsHelpers.includes("FORM_DIAGNOSTIC_SLOTS[") &&
       !/const\s+FORM_DIAGNOSTIC_SLOTS\b/.test(gearSettingsSource),
     "settings consume the Task-4 global slot list without redeclaration",
+  );
+  assert(
+    settingsHelpers.includes("#fdMatrixDownload") &&
+      settingsHelpers.includes("downloadFormDiagnosticsJson"),
+    "diagnostic settings expose an explicit direct-download path",
   );
   for (const code of [
     "coordinator-missing",

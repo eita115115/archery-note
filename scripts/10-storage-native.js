@@ -766,6 +766,11 @@ async function shareFormDiagnosticsJson(json,environment){
     default: return runFormDiagnosticDownload(choice,json);
   }
 }
+async function downloadFormDiagnosticsJson(json,environment){
+  if(typeof json!=="string") return {status:"failed",cleanupFailed:false};
+  const completeEnvironment=environment===undefined?defaultFormDiagnosticTransportEnvironment():environment;
+  return runFormDiagnosticDownload({kind:"download",environment:completeEnvironment},json);
+}
 /* FORM_DIAGNOSTIC_TRANSPORT_END */
 function csvCell(v){ const s=String(v==null?"":v).replace(/"/g,'""'); const t=s.trimStart(); return `"${"=+-@".includes(t[0])?"'"+s:s}"`; }
 const ROUND_TYPES=[
