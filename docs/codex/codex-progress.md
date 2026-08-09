@@ -2749,5 +2749,10 @@ tools/check-form-core.js`, `npm run check:all`, lint, format, targeted syntax,
   storage schema, transport, Service Worker, user data, or physical
   acceptance behavior changed. Trusted-HTTPS field acceptance remains
   deferred.
-- Next: commit/push the artifact checker, verify candidate CI, and keep the
-  physical 3×6 matrix pending.
+- Validation: after push, GitHub Actions run `31324924271` completed
+  successfully; Run all checks, lint, format, Playwright installation, and
+  E2E smoke all passed. PR #134 remains OPEN, draft, and CLEAN at commit
+  `70ab059a`.
+- Next: keep the candidate ready for review and keep the physical 3×6 matrix
+  pending; do not merge, deploy, or resume trusted-HTTPS field acceptance
+  without direction.
