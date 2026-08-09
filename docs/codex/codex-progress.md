@@ -3383,5 +3383,10 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   receipt, schema, backup, Service Worker, or existing share behavior changed.
   Physical trusted-HTTPS 3×6 acceptance remains pending until a current JSON
   artifact is collected.
-- Next: run the complete `check:all` ladder, commit/push this isolated fix,
-  verify CI, then keep the field artifact as the only physical acceptance gap.
+- Handoff: `npm run check:all`, lint, format, syntax, native-web build, and
+  form-diagnostics `49/49` passed. Commit `fe5282d8` is pushed to the draft
+  PR; GitHub Actions run `31339965041` is `SUCCESS`, and PR #134 is
+  `OPEN`/Draft/CLEAN.
+- Next: keep the field artifact as the only physical acceptance gap. When the
+  user resumes, use `端末に直接保存`, verify the downloaded filename, and run
+  `node tools/inspect-form-diagnostic-json.js --from-downloads`.
