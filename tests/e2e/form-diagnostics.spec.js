@@ -451,6 +451,9 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   });
   await page.locator("#fcSave").click();
   await expect(page.locator(".formCapture")).toHaveCount(0);
+  await expect(page.locator("#toast")).toContainText(
+    "横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。",
+  );
   expect(
     await page.evaluate(() => ({
       records: db.formAnalyses.length,

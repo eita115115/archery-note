@@ -2686,3 +2686,24 @@ check:all`, `npm run lint -- --quiet`, `npm run format:check`, both targeted
 - Next: keep the handoff candidate ready for review and continue one isolated
   nonphysical product-quality task; do not merge, deploy, or resume field
   acceptance without direction.
+
+## 2026-08-10 — Add actionable zero-shot capture guidance
+
+- Changed: `scripts/47-form-view.js` now centralizes completion copy for replay
+  and zero-shot diagnostic saves. A 0射 result explicitly asks the user to
+  check that the full body, bow arm, and drawing arm are visible from the
+  camera position before retrying. Positive counts keep the existing concise
+  completion text.
+- TDD evidence: the new source contract first failed with
+  `zero-shot completion gives actionable camera-position guidance`; after the
+  helper and live retry toast were added, the focused zero-shot live E2E passed
+  1/1.
+- Validation: full form-diagnostics Chromium E2E passed 43/43; `node
+tools/check-form-core.js`, `npm run check:all`, lint, format, targeted syntax,
+  and `git diff --check` all pass.
+- Risk: user-facing guidance and regression coverage only; detector thresholds,
+  shot retention, storage, export schema, Service Worker, dependencies, and
+  physical acceptance behavior are unchanged. Trusted-HTTPS field acceptance
+  remains deferred.
+- Next: review and commit this isolated guidance, then push and verify the
+  candidate CI remains green.

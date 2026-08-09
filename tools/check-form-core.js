@@ -4177,6 +4177,13 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
     '    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);',
     "startFormReplay section",
   );
+  assert(
+    viewScript.includes("function formShotCompletionText(shotCount){") &&
+      viewScript.includes("function formZeroShotDiagnosticText(){") &&
+      viewScript.includes("横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。") &&
+      replay.includes("formShotCompletionText(shots.length)"),
+    "zero-shot completion gives actionable camera-position guidance",
+  );
   const liveRemove = boundedSourceSection(
     capture,
     'div.querySelector("[data-rm-shot]").onclick=()=>{',
