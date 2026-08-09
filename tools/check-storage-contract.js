@@ -17,6 +17,9 @@ const fixtureFiles = {
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
   missingSessions: "archery-note-v1-missing-sessions.json",
   formAnalyses: "archery-note-v1-form-analyses.json",
+  formDiagnostics: "archery-note-v1-form-diagnostics.json",
+  formDiagnosticsMalformedCoordinator:
+    "archery-note-v1-form-diagnostics-malformed-coordinator.json",
   customRounds: "archery-note-v1-custom-rounds.json",
 };
 
@@ -490,6 +493,37 @@ function checkFormAnalysisTrashRestore(storageApi, fixtures) {
   );
 }
 
+function checkFormDiagnosticsCompatibility(storageApi, fixtures) {
+  ["formDiagnostics", "formDiagnosticsMalformedCoordinator"].forEach((name) => {
+    const source = fixtures[name];
+    const once = storageApi.normalizeDb(clone(source));
+    const twice = storageApi.normalizeDb(clone(once));
+    assertStrict.deepStrictEqual(
+      twice.formAnalyses,
+      source.formAnalyses,
+      `[${name}] records survive normalization twice`,
+    );
+    assertStrict.deepStrictEqual(
+      twice.settings.formDiagnosticMatrixBatch,
+      source.settings.formDiagnosticMatrixBatch,
+      `[${name}] coordinator survives normalization twice`,
+    );
+  });
+
+  const source = fixtures.formDiagnostics;
+  const db = storageApi.normalizeDb(clone(source));
+  const record = db.formAnalyses[0];
+  const trashApi = loadTrashApi(db, () => {});
+  const item = trashApi.trashItem("formAnalysis", "synthetic diagnostic", record);
+  db.formAnalyses = [];
+  assert(trashApi.restoreTrash(item.id), "[formDiagnostics] trash restore succeeds");
+  assertStrict.deepStrictEqual(
+    db.formAnalyses[0],
+    source.formAnalyses[0],
+    "[formDiagnostics] trash restore preserves nested diagnostics",
+  );
+}
+
 function checkCustomRoundsCompatibility(storageApi, fixtures) {
   // schema 5: customRounds は配列補完のみで migration 不要。roundGroup 付きセッションも
   // 従来どおりの単一距離セッションとして無変更で保持されること（IMP-09 多距離ラウンド）。
@@ -500,16 +534,22 @@ function checkCustomRoundsCompatibility(storageApi, fixtures) {
   try {
     assertStrict.deepStrictEqual(db.customRounds, source.customRounds);
   } catch (error) {
-    throw new Error(`[custom-rounds] customRounds must survive normalizeDb unchanged: ${error.message}`, {
-      cause: error,
-    });
+    throw new Error(
+      `[custom-rounds] customRounds must survive normalizeDb unchanged: ${error.message}`,
+      {
+        cause: error,
+      },
+    );
   }
   try {
     assertStrict.deepStrictEqual(db.sessions, source.sessions);
   } catch (error) {
-    throw new Error(`[custom-rounds] sessions (incl. roundGroup) must stay unchanged: ${error.message}`, {
-      cause: error,
-    });
+    throw new Error(
+      `[custom-rounds] sessions (incl. roundGroup) must stay unchanged: ${error.message}`,
+      {
+        cause: error,
+      },
+    );
   }
   const stage = db.sessions.find((session) => session.id === "fixture-round-stage-1");
   assertObject(stage, "[custom-rounds] stage session");
@@ -594,7 +634,11 @@ function checkMultiRoundDefs(fixtures) {
     assertEqual(customApi.roundLabel(id), label, `[round-defs] legacy roundLabel(${id})`);
   });
   assertEqual(customApi.roundLabel(""), "自由練習", "[round-defs] empty id falls back to free");
-  assertEqual(customApi.roundLabel("wa1440_women"), "WA1440 女子", "[round-defs] multi-round label");
+  assertEqual(
+    customApi.roundLabel("wa1440_women"),
+    "WA1440 女子",
+    "[round-defs] multi-round label",
+  );
   assertEqual(
     customApi.roundLabel("custom-6030"),
     "カスタム 60/30m",
@@ -649,9 +693,21 @@ function checkArrowCoordinateSanitize(storageApi) {
       { id: "t2", type: "setup", data: { id: "g1" } },
     ],
   });
-  assertEqual(trashDb.trash[0].data.ends[0][0].x, 3.5, "[arrow-sanitize] trashed session arrow x becomes number");
-  assertEqual(trashDb.trash[0].data.ends[0][0].s, 6, "[arrow-sanitize] trashed session arrow s becomes number");
-  assertEqual(trashDb.trash.length, 2, "[arrow-sanitize] non-session trash entries pass through untouched");
+  assertEqual(
+    trashDb.trash[0].data.ends[0][0].x,
+    3.5,
+    "[arrow-sanitize] trashed session arrow x becomes number",
+  );
+  assertEqual(
+    trashDb.trash[0].data.ends[0][0].s,
+    6,
+    "[arrow-sanitize] trashed session arrow s becomes number",
+  );
+  assertEqual(
+    trashDb.trash.length,
+    2,
+    "[arrow-sanitize] non-session trash entries pass through untouched",
+  );
 
   // キーを持たない矢に own property を生やさないこと（変化時のみ代入）。
   const bare = storageApi.normalizeDb({ sessions: [{ id: "b", ends: [[{ x: 1, y: 2 }]] }] });
@@ -673,10 +729,18 @@ function checkSessionDateCoercion(storageApi) {
       { id: "string-date", date: "2026-07-02", ends: [] },
     ],
   });
-  assertEqual(typeof db.sessions[0].date, "string", "[date-coercion] numeric date becomes a string");
+  assertEqual(
+    typeof db.sessions[0].date,
+    "string",
+    "[date-coercion] numeric date becomes a string",
+  );
   assertEqual(db.sessions[0].date, "20260702", "[date-coercion] numeric date is stringified as-is");
   assertEqual(typeof db.sessions[1].date, "string", "[date-coercion] null date becomes a string");
-  assertEqual(db.sessions[1].date, "", "[date-coercion] null date becomes empty string (not the literal 'null')");
+  assertEqual(
+    db.sessions[1].date,
+    "",
+    "[date-coercion] null date becomes empty string (not the literal 'null')",
+  );
   assertEqual(
     db.sessions[2].date,
     "2026-07-02",
@@ -698,7 +762,11 @@ function checkBadgeUnlockedAtCoercion(storageApi) {
     },
   });
   db.gamification.badges.forEach((b) => {
-    assertEqual(typeof b.unlockedAt, "string", `[badge-coercion] ${b.id} unlockedAt must be a string`);
+    assertEqual(
+      typeof b.unlockedAt,
+      "string",
+      `[badge-coercion] ${b.id} unlockedAt must be a string`,
+    );
   });
   assertEqual(
     db.gamification.badges[0].unlockedAt,
@@ -797,7 +865,10 @@ function checkGamificationEnabledDefault(storageApi) {
 }
 
 function checkDbRevContract() {
-  assert(/^let DB_REV\s*=\s*0/m.test(storageScript), "[db-rev] storage script should declare let DB_REV");
+  assert(
+    /^let DB_REV\s*=\s*0/m.test(storageScript),
+    "[db-rev] storage script should declare let DB_REV",
+  );
   const saveBody = section("function save(", "function uid");
   assert(
     saveBody.includes("DB_REV++"),
@@ -826,6 +897,7 @@ function main() {
   checkSightMarksCompatibility(storageApi, fixtures);
   checkFormAnalysesCompatibility(storageApi, fixtures);
   checkFormAnalysisTrashRestore(storageApi, fixtures);
+  checkFormDiagnosticsCompatibility(storageApi, fixtures);
   checkCustomRoundsCompatibility(storageApi, fixtures);
   checkMultiRoundDefs(fixtures);
 

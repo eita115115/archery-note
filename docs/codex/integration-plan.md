@@ -1,6 +1,6 @@
 # Archery Note Integration Plan
 
-Source PDF: `C:\Users\eita2\Downloads\archery-note 統合実装の Codex 指図書.pdf`
+Source PDF: local-only `archery-note 統合実装の Codex 指図書.pdf` (not stored in this repository)
 Extracted on: 2026-06-29
 Pages: 24
 

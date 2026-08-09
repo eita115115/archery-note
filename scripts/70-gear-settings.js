@@ -1220,10 +1220,289 @@ function gamifySettingsHtml() {
       }
     </div>`;
 }
+
+/* FORM_DIAGNOSTIC_SETTINGS_START */
+const FORM_DIAGNOSTIC_PRIVACY_CONFIRM =
+  "現在の18射診断バッチの診断値だけを書き出します。練習記録、日付、メモ、端末内ID、映像、画像、ランドマークは含みません。診断値の共有先は自分で確認してください。";
+const FORM_DIAGNOSTIC_RESTART_CONFIRM =
+  "現在の未完了の診断バッチを新しく開始し直しますか？保存済みの射形記録は削除されません。";
+const FORM_DIAGNOSTIC_RESULT_COPY = Object.freeze({
+  "invalid-app-version": "restart-required",
+  "invalid-batch-id": "allocation-failed",
+  "crypto-unavailable": "allocation-failed",
+  "batch-id-collision": "allocation-failed",
+  "coordinator-missing": "incomplete",
+  "coordinator-invalid": "restart-required",
+  "coordinator-stale": "restart-required",
+  "coordinator-incomplete": "incomplete",
+  "coordinator-complete": "complete",
+  "record-invalid": "repeat-clean",
+  "record-ineligible": "repeat-clean",
+  "source-missing": "restart-required",
+  "source-ambiguous": "restart-required",
+  "source-invalid": "repeat-clean",
+  "output-too-large": "repeat-clean",
+  "encoding-unavailable": "failed",
+});
+const FORM_DIAGNOSTIC_UI_COPY = Object.freeze({
+  incomplete: "18射の診断が完了していません。開始後、表示された条件を各6射ずつ記録してください。",
+  "next-side": "次は「真横」を6射記録してください。",
+  "next-oblique": "次は「やや斜め」を6射記録してください。",
+  "next-normal_range": "次は「通常設置」を6射記録してください。",
+  complete: "18射の診断がそろいました。",
+  "restart-required": "現在の診断バッチは使用できません。新しく開始してください。",
+  "repeat-clean":
+    "診断データを安全に書き出せません。18射の診断を新しく開始し、3条件を各6射ずつ記録し直してください。",
+  "workflow-active": "ほかの操作中は18射の診断を開始・書き出しできません。",
+  "debug-disabled": "検証用の診断データ保存をONにしてください。",
+  "batch-changed": "診断バッチが変更されたため、操作を中止しました。",
+  "allocation-failed": "診断バッチを作成できませんでした。もう一度お試しください。",
+  "save-failed": "診断バッチを保存できませんでした。もう一度お試しください。",
+  started: "18射の診断を開始しました。",
+  shared: "診断JSONを共有しました。",
+  downloaded: "診断JSONを書き出しました。",
+  canceled: null,
+  failed: "診断JSONを書き出せませんでした。もう一度お試しください。",
+  "cleanup-failed":
+    "診断JSONの一時ファイルを削除できませんでした。端末のキャッシュに診断値が残っている可能性があります。",
+});
+
+function formDiagnosticUiResultForCode(code) {
+  return FORM_DIAGNOSTIC_RESULT_COPY[code] || "failed";
+}
+function formDiagnosticUiCopy(result) {
+  return Object.hasOwn(FORM_DIAGNOSTIC_UI_COPY, result)
+    ? FORM_DIAGNOSTIC_UI_COPY[result]
+    : FORM_DIAGNOSTIC_UI_COPY.failed;
+}
+function showFormDiagnosticResult(result) {
+  const copy = formDiagnosticUiCopy(result);
+  if (copy) toast(copy, result === "cleanup-failed" ? 6000 : 2600);
+}
+function formDiagnosticCoordinatorToken() {
+  const own = Object.hasOwn(db.settings, "formDiagnosticMatrixBatch");
+  const value = own ? db.settings.formDiagnosticMatrixBatch : undefined;
+  return {
+    own,
+    value,
+    version: value && value.version,
+    batchId: value && value.batchId,
+    appVer: value && value.appVer,
+    nextSlot: value && value.nextSlot,
+    invalidated: value && value.invalidated,
+    recordIds: value && Array.isArray(value.recordIds) ? value.recordIds.slice() : null,
+  };
+}
+function formDiagnosticCoordinatorTokenMatches(token, saveToken) {
+  /* Task-7's frozen save seam uses the same global symbol with (database, token).
+     Preserve that contract while keeping the settings token check exact. */
+  if (arguments.length === 2) {
+    if (saveToken === null) return true;
+    const database = token;
+    const current = database && database.settings && database.settings.formDiagnosticMatrixBatch;
+    return (
+      current === saveToken.reference &&
+      current.version === saveToken.version &&
+      current.batchId === saveToken.batchId &&
+      current.appVer === saveToken.appVer &&
+      current.nextSlot === saveToken.nextSlot &&
+      current.invalidated === saveToken.invalidated &&
+      Array.isArray(current.recordIds) &&
+      current.recordIds.length === saveToken.recordIds.length &&
+      current.recordIds.every((id, index) => id === saveToken.recordIds[index])
+    );
+  }
+  const own = Object.hasOwn(db.settings, "formDiagnosticMatrixBatch");
+  if (own !== token.own) return false;
+  if (!own) return true;
+  const value = db.settings.formDiagnosticMatrixBatch;
+  return (
+    value === token.value &&
+    value.version === token.version &&
+    value.batchId === token.batchId &&
+    value.appVer === token.appVer &&
+    value.nextSlot === token.nextSlot &&
+    value.invalidated === token.invalidated &&
+    Array.isArray(value.recordIds) &&
+    Array.isArray(token.recordIds) &&
+    value.recordIds.length === token.recordIds.length &&
+    value.recordIds.every((id, index) => id === token.recordIds[index])
+  );
+}
+function formDiagnosticSettingsStatusResult() {
+  const coordinator = Object.hasOwn(db.settings, "formDiagnosticMatrixBatch")
+    ? db.settings.formDiagnosticMatrixBatch
+    : null;
+  const checked = validateFormDiagnosticMatrixCoordinator(coordinator, APP_VER, false);
+  if (!checked.ok) return formDiagnosticUiResultForCode(checked.code);
+  const batch = checked.coordinator;
+  for (let index = 0; index < batch.recordIds.length; index++) {
+    const recordId = batch.recordIds[index];
+    const matches = (db.formAnalyses || []).filter((record) => record && record.id === recordId);
+    if (matches.length === 0) return formDiagnosticUiResultForCode("source-missing");
+    if (matches.length !== 1) return formDiagnosticUiResultForCode("source-ambiguous");
+    const record = matches[0];
+    const validRecord = validateFormDiagnosticRecord(record, APP_VER);
+    if (!validRecord.ok) return formDiagnosticUiResultForCode(validRecord.code);
+    const marker = record.formDiagnosticMatrix;
+    if (
+      !marker ||
+      marker.version !== 1 ||
+      marker.batchId !== batch.batchId ||
+      marker.slot !== FORM_DIAGNOSTIC_SLOTS[index]
+    ) {
+      return formDiagnosticUiResultForCode("source-invalid");
+    }
+  }
+  if (batch.nextSlot === 3) {
+    const built = buildFormDiagnosticExport(db.formAnalyses || [], batch, APP_VER);
+    return built.ok ? "complete" : formDiagnosticUiResultForCode(built.code);
+  }
+  return `next-${FORM_DIAGNOSTIC_SLOTS[batch.nextSlot]}`;
+}
+function formDiagnosticSettingsHtml() {
+  const enabled = db.settings.formDebug===true;
+  const status = formDiagnosticUiCopy(formDiagnosticSettingsStatusResult());
+  return `<section class="settingsGroup" data-form-diagnostic-section data-testid="form-diagnostic-section" aria-hidden="${enabled ? "false" : "true"}" ${enabled ? "" : "hidden"}>
+      <div class="settingsGroupTitle">18射の診断JSON</div>
+      <div class="hint">開始後、真横→やや斜め→通常設置の順に各6射を記録します。条件を満たさない記録は診断バッチに追加されません。</div>
+      <div class="settingsActionHint" data-form-diagnostic-status data-testid="form-diagnostic-status" role="status" aria-live="polite">${esc(status)}</div>
+      <div class="btnrow">
+        <button type="button" class="btn sec" id="fdMatrixStart" data-testid="form-diagnostic-start" ${enabled ? "" : "disabled"}>18射の診断を開始</button>
+        <button type="button" class="btn sec" id="fdMatrixExport" data-testid="form-diagnostic-export" ${enabled ? "" : "disabled"}>診断JSONを書き出す</button>
+      </div>
+      <div class="hint">${esc(FORM_DIAGNOSTIC_PRIVACY_CONFIRM)}</div>
+    </section>`;
+}
+function syncFormDiagnosticSettingsUi(settingsOverlay) {
+  const section = settingsOverlay.querySelector("[data-form-diagnostic-section]");
+  if (!section) return;
+  const enabled = db.settings.formDebug===true;
+  const busy = section.dataset.busy === "true";
+  section.hidden = !enabled;
+  section.setAttribute("aria-hidden", String(!enabled));
+  section.querySelectorAll("button").forEach((button) => {
+    button.disabled = !enabled || busy;
+  });
+  const status = section.querySelector("[data-form-diagnostic-status]");
+  if (status) status.textContent = formDiagnosticUiCopy(formDiagnosticSettingsStatusResult());
+}
+async function startFormDiagnosticMatrixFromSettings(settingsOverlay) {
+  syncFormDiagnosticSettingsUi(settingsOverlay);
+  if (db.settings.formDebug!==true) {
+    showFormDiagnosticResult("debug-disabled");
+    return;
+  }
+  if (isUpdateReloadBlocked()) {
+    showFormDiagnosticResult("workflow-active");
+    return;
+  }
+  const section = settingsOverlay.querySelector("[data-form-diagnostic-section]");
+  const token = formDiagnosticCoordinatorToken();
+  beginActiveWorkflow();
+  section.dataset.busy = "true";
+  syncFormDiagnosticSettingsUi(settingsOverlay);
+  try {
+    const current = token.own ? token.value : null;
+    const checked = validateFormDiagnosticMatrixCoordinator(current, APP_VER, false);
+    if (checked.ok && checked.coordinator.nextSlot < 3) {
+      const confirmed = await appConfirm(FORM_DIAGNOSTIC_RESTART_CONFIRM, { danger: true, okLabel: "開始し直す" });
+      if (!confirmed) return;
+    }
+    if (db.settings.formDebug!==true) {
+      showFormDiagnosticResult("debug-disabled");
+      return;
+    }
+    if (db.active || activeWorkflowCount!==1) {
+      showFormDiagnosticResult("workflow-active");
+      return;
+    }
+    if (!formDiagnosticCoordinatorTokenMatches(token)) {
+      showFormDiagnosticResult("batch-changed");
+      return;
+    }
+    const allocated = allocateFormDiagnosticBatchId(globalThis.crypto, token.own ? token.value : null, db.formAnalyses || [], db.trash || []);
+    if (!allocated.ok) {
+      showFormDiagnosticResult(formDiagnosticUiResultForCode(allocated.code));
+      return;
+    }
+    const created = createFormDiagnosticMatrixCoordinator(APP_VER, allocated.batchId);
+    if (!created.ok) {
+      showFormDiagnosticResult(formDiagnosticUiResultForCode(created.code));
+      return;
+    }
+    const committed = commitFormDiagnosticDbCandidate(db, { formDiagnosticMatrixBatch: created.coordinator }, { reason: "form-diagnostic-matrix-start" }, save);
+    if (!committed.ok) {
+      showFormDiagnosticResult("save-failed");
+      return;
+    }
+    syncFormDiagnosticSettingsUi(settingsOverlay);
+    showFormDiagnosticResult("started");
+  } finally {
+    section.dataset.busy = "false";
+    endActiveWorkflow();
+    syncFormDiagnosticSettingsUi(settingsOverlay);
+  }
+}
+async function exportFormDiagnosticMatrixFromSettings(settingsOverlay) {
+  syncFormDiagnosticSettingsUi(settingsOverlay);
+  if (db.settings.formDebug!==true) {
+    showFormDiagnosticResult("debug-disabled");
+    return;
+  }
+  if (isUpdateReloadBlocked()) {
+    showFormDiagnosticResult("workflow-active");
+    return;
+  }
+  const section = settingsOverlay.querySelector("[data-form-diagnostic-section]");
+  const token = formDiagnosticCoordinatorToken();
+  beginActiveWorkflow();
+  section.dataset.busy = "true";
+  syncFormDiagnosticSettingsUi(settingsOverlay);
+  try {
+    const confirmed = await appConfirm(FORM_DIAGNOSTIC_PRIVACY_CONFIRM, { okLabel: "書き出す" });
+    if (!confirmed) return;
+    if (db.settings.formDebug!==true) {
+      showFormDiagnosticResult("debug-disabled");
+      return;
+    }
+    if (db.active || activeWorkflowCount!==1) {
+      showFormDiagnosticResult("workflow-active");
+      return;
+    }
+    if (!formDiagnosticCoordinatorTokenMatches(token)) {
+      showFormDiagnosticResult("batch-changed");
+      return;
+    }
+    const built = buildFormDiagnosticExport(db.formAnalyses || [], db.settings.formDiagnosticMatrixBatch, APP_VER);
+    if (!built.ok) {
+      showFormDiagnosticResult(formDiagnosticUiResultForCode(built.code));
+      return;
+    }
+    const result = await shareFormDiagnosticsJson(built.json);
+    if (result.cleanupFailed) {
+      showFormDiagnosticResult("cleanup-failed");
+      return;
+    }
+    showFormDiagnosticResult(result.status);
+  } finally {
+    section.dataset.busy = "false";
+    endActiveWorkflow();
+    syncFormDiagnosticSettingsUi(settingsOverlay);
+  }
+}
+function bindFormDiagnosticSettingsActions(settingsOverlay) {
+  const start = settingsOverlay.querySelector("#fdMatrixStart");
+  const exportButton = settingsOverlay.querySelector("#fdMatrixExport");
+  if (start) start.onclick = () => startFormDiagnosticMatrixFromSettings(settingsOverlay);
+  if (exportButton) exportButton.onclick = () => exportFormDiagnosticMatrixFromSettings(settingsOverlay);
+}
+/* FORM_DIAGNOSTIC_SETTINGS_END */
 function openSettings() {
   const ovl = document.createElement("div");
   ovl.className = "ovl";
   const th = db.settings.theme || "auto";
+  const formTrackingOn = db.settings.formTrackingEnabled===true;
   const snaps = readSnapshots();
   ovl.innerHTML = `<div class="sheet"><h3>${icon("gear")} 設定</h3>
     <div class="settingsGroup" data-testid="settings-group-app">
@@ -1257,20 +1536,22 @@ function openSettings() {
       <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight || 850}">
       <label class="f">射形トラッキング（ベータ）</label>
       <div class="chips" id="ftChips">
-        <button type="button" class="chip ${db.settings.formTrackingEnabled ? "" : "on"}" aria-pressed="${!db.settings.formTrackingEnabled}" data-ft="0">OFF</button>
-        <button type="button" class="chip ${db.settings.formTrackingEnabled ? "on" : ""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
+        <button type="button" class="chip ${formTrackingOn ? "" : "on"}" aria-pressed="${!formTrackingOn}" data-ft="0">OFF</button>
+        <button type="button" class="chip ${formTrackingOn ? "on" : ""}" aria-pressed="${formTrackingOn}" data-ft="1">ON</button>
       </div>
       <div class="hint">解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
       <label class="f">検証用の診断データ保存</label>
       <div class="chips" id="fdChips">
-        <button type="button" class="chip ${db.settings.formDebug ? "" : "on"}" aria-pressed="${!db.settings.formDebug}" data-fd="0">OFF</button>
-        <button type="button" class="chip ${db.settings.formDebug ? "on" : ""}" aria-pressed="${!!db.settings.formDebug}" data-fd="1">ON</button>
+        <button type="button" class="chip ${db.settings.formDebug===true?"":"on"}" aria-pressed="${db.settings.formDebug!==true}" data-fd="0">OFF</button>
+        <button type="button" class="chip ${db.settings.formDebug===true?"on":""}" aria-pressed="${db.settings.formDebug===true}" data-fd="1">ON</button>
       </div>
       <div class="hint">実射検証用に、各射の内部診断値（速度・確度など）も記録へあわせて保存します。通常はOFFのままで構いません。</div>
       <h3 class="settingsH3">カスタムラウンド</h3>
       <div class="settingsActionHint">距離ごとのステージを持つ自分用ラウンドを増減・編集します。</div>
       ${customRoundsSettingsHtml()}
     </div>
+
+    ${formDiagnosticSettingsHtml()}
 
     ${gamifySettingsHtml()}
 
@@ -1309,6 +1590,8 @@ function openSettings() {
     <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#setClose" });
+  syncFormDiagnosticSettingsUi(ovl);
+  bindFormDiagnosticSettingsActions(ovl);
   ovl.querySelectorAll("#thChips .chip").forEach(
     (c) =>
       (c.onclick = () => {
@@ -1352,7 +1635,7 @@ function openSettings() {
           x.setAttribute("aria-pressed", String(on));
         });
         toast(
-          db.settings.formTrackingEnabled
+          db.settings.formTrackingEnabled===true
             ? "射形トラッキングを有効にしました（分析タブ）"
             : "射形トラッキングを無効にしました",
         );
@@ -1369,10 +1652,11 @@ function openSettings() {
           x.setAttribute("aria-pressed", String(on));
         });
         toast(
-          db.settings.formDebug
+          db.settings.formDebug === true
             ? "検証用の診断データ保存を有効にしました"
             : "検証用の診断データ保存を無効にしました",
         );
+        syncFormDiagnosticSettingsUi(ovl);
       }),
   );
   const gamEnabled = ovl.querySelector("#gamEnabled");

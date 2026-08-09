@@ -1,22 +1,35 @@
 # ゴールデン再生ハーネス用 映像ソース記録
 
 作成日: 2026-07-11
-方針: 映像ファイルはリポジトリにコミットしない。この記録の URL から `fetch-videos.py` で再取得する。
-すべてフリーライセンスのストック映像（Pixabay Content License / Mixkit License）。
-YouTube 等の利用規約で保護された映像は使用していない。
+方針: 映像ファイルはリポジトリにコミットしない。`fetch-videos.py`の既定実行は
+Pixabay sourceだけを再取得する。Mixkit sourceは`--include-restricted-personal`を
+明示したローカル個人診断時だけ取得する。
+ライセンス条件はsourceごとに異なる。Pixabay sourceはPixabay Content License。
+Mixkit 34710/48725の720p sourceは、公式ページを2026-07-26に再確認した結果、
+Restricted License / Personal Use onlyである。Mixkit sourceはローカルの個人診断にだけ使い、
+過去の別ライセンスgrantを立証できない限り、tracked/public派生fixtureへ昇格させない。
+YouTube 等の映像は使用していない。
+
+`expectations.json` は、この目視レビューを機械判定できる形にした合否の真値。
+`baselines/` は推論実行時の観測スナップショットであり、真値ではない。一次判定は
+期待 status・検出射数と、取消後に保持された release のレビュー済み時間窓で行う。
 
 ## ライセンス概要
 
 - **Pixabay Content License**: 商用・非商用とも無償利用可、帰属表示不要。
   コンテンツ単体での再配布は不可（→ 映像ファイル自体をリポジトリに含めない理由）。
   https://pixabay.com/service/license-summary/
-- **Mixkit License (Free Items)**: 商用・非商用とも無償利用可、帰属表示不要。
-  素材そのものの再配布は不可。
-  https://mixkit.co/license/#videoFree
+- **Mixkit Restricted License**: 34710/48725の公式videoページで提供される720p版は
+  **Personal Use only**（2026-07-26確認）。ローカル個人診断にのみ使用し、
+  tracked/public派生fixtureには使用しない。過去にFree Licenseで取得したことを示す
+  historical grantは現時点で確認できていない。
+  取得には`fetch-videos.py --include-restricted-personal`の明示opt-inが必要。
+  https://mixkit.co/license/#videoRestricted
 
 ## 採用映像（ハーネス実行対象）
 
 ### 1. pixabay-43254-archery-woman.mp4
+
 - 出典ページ: https://pixabay.com/videos/archery-woman-target-garden-nature-43254/
 - 直接URL: https://cdn.pixabay.com/video/2020/06/27/43254-435970559_large.mp4
 - ライセンス: Pixabay Content License
@@ -24,11 +37,16 @@ YouTube 等の利用規約で保護された映像は使用していない。
   カメラは高め・後半は無人の射場へパン）。1920x1080 / 13.6秒。
 - 目視期待射数: **1射**（約1〜4秒に打ち起こし→引き分け→リリース。5秒以降は弓を降ろして退場、
   9秒以降は無人）。
-- 検出期待値: **1射**（2026-07-11 実測で一致）。
+- 検出期待値: **1射**（目視レビュー済み。射数と下記保持 release 窓を一体で判定）。
+- 保持 release のレビュー済み許容窓: **4300〜4600ms**。目視上の手離れ
+  （約4.43〜4.44秒）と検出イベントの揺らぎを含む許容範囲で、射数が1でも
+  この窓を外れたイベントは不合格。
 - 想定用途: 「全身・単独射手・実射1射」の基本ゴールデンケース（正例）。
-  ただし後方斜め視点のため側面理想条件ではない（角度誤差は許容し、射数一致のみ検証）。
+  ただし後方斜め視点のため側面理想条件ではない（角度値は真値扱いせず、
+  射数と保持 release の時間窓を検証）。
 
 ### 2. pixabay-40769-archer.mp4
+
 - 出典ページ: https://pixabay.com/videos/archer-archery-bow-arrow-bowman-40769/
 - 直接URL: https://cdn.pixabay.com/video/2020/06/01/40769-426939441_large.mp4
 - ライセンス: Pixabay Content License
@@ -45,9 +63,13 @@ YouTube 等の利用規約で保護された映像は使用していない。
   フェーズ検出が部分骨格＋シーン切替でどう振る舞うかの回帰基準。
 
 ### 3. mixkit-34710-female-archer.mp4
+
 - 出典ページ: https://mixkit.co/free-stock-video/female-archer-shooting-an-arrow-34710/
 - 直接URL: https://assets.mixkit.co/videos/34710/34710-720.mp4
-- ライセンス: Mixkit License (Free Items)
+- ライセンス: **Mixkit Restricted License — 720p Personal Use only**
+  （公式sourceページとlicenseページを2026-07-26確認）
+- 公開fixture適格性: **不可**。ローカル個人診断専用。historical grantを立証できない限り、
+  tracked/public派生fixtureへ含めない。
 - 内容: 女性がロングボウ（伝統弓）を正面〜斜め前方から撮影。頭部と両腕・胴体上部が写る
   （下半身は画面外）。引き分け→狙い→リリースが1回。1280x720 / 10.5秒。
 - 目視期待射数: **1射**（約1〜6秒で引き分け保持、6〜7秒でリリース）。
@@ -57,9 +79,13 @@ YouTube 等の利用規約で保護された映像は使用していない。
 - 想定用途: 「前方斜め・上半身・伝統弓」= 設計対象外アングルのネガティブ寄りケース。
 
 ### 4. mixkit-48725-closeup-firing.mp4
+
 - 出典ページ: https://mixkit.co/free-stock-video/close-up-of-a-person-firing-an-arrow-at-a-48725/
 - 直接URL: https://assets.mixkit.co/videos/48725/48725-720.mp4
-- ライセンス: Mixkit License (Free Items)
+- ライセンス: **Mixkit Restricted License — 720p Personal Use only**
+  （公式sourceページとlicenseページを2026-07-26確認）
+- 公開fixture適格性: **不可**。ローカル個人診断専用。historical grantを立証できない限り、
+  tracked/public派生fixtureへ含めない。
 - 内容: 手元（弓手・ロングボウのグリップ）の接写。顔・肩の一部のみで全身は写らない。
   リリース1回。1280x720 / 6.4秒。
 - 目視期待射数: **1射だが骨格不可視** → 検出期待値: **0射**。
@@ -67,6 +93,7 @@ YouTube 等の利用規約で保護された映像は使用していない。
   — 実測 136/173 フレームでランドマーク出力あり — がリリース誤検出しないこと）。
 
 ### 5. pixabay-150869-arrows-target.mp4
+
 - 出典ページ: https://pixabay.com/videos/arrows-target-bow-and-arrow-sport-150869/
 - 直接URL: https://cdn.pixabay.com/video/2023/02/15/150869-799327585_large.mp4
 - ライセンス: Pixabay Content License
@@ -77,17 +104,20 @@ YouTube 等の利用規約で保護された映像は使用していない。
 ## 不採用（ダウンロード済みだが対象外）
 
 ### pixabay-176737-arch-sports.mp4
+
 - 出典: https://pixabay.com/videos/arch-archery-bow-archers-sports-176737/
   （https://cdn.pixabay.com/video/2023/08/19/176737-856049575_large.mp4）
 - 理由: グリーンバック上のCGコンパウンドボウのみで人物なし。姿勢検証に不適。
 
 ### pixabay-337261-target-archer.mp4
+
 - 出典: https://pixabay.com/videos/target-archer-resolution-strategy-337261/
   （https://cdn.pixabay.com/video/2026/02/28/337261_large.mp4）
 - 理由: 2Dアニメーション（イラスト調の人物）。実写でないため基準ケースに不適。
   ※イラスト人物にPoseが反応するかのファズケースとしては将来利用可。
 
 ### pixabay-55583-pikado.mp4
+
 - 出典: https://pixabay.com/videos/game-pikado-shoot-arrow-archery-55583/
   （https://cdn.pixabay.com/video/2020/11/07/55583-502340132_large.mp4）
 - 理由: ダーツボードのCGアニメーション。アーチェリーの実写ではない。
@@ -102,3 +132,4 @@ YouTube 等の利用規約で保護された映像は使用していない。
   「側面・全身・単独射手」の理想条件を満たす実写はストック映像には少なく、
   実写3本＋接写1本＋ネガティブ1本の構成とした。
 - Mixkit 検索: `archery` で4本。うち2本（34710, 48725）が人物射撃シーン。
+  ただし現在の720p提供条件はRestricted / Personal Use onlyなので、公開fixture候補から除外。
