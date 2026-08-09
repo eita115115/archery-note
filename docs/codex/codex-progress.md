@@ -2668,3 +2668,17 @@ check:all`, `npm run lint -- --quiet`, `npm run format:check`, both targeted
   changed. Trusted-HTTPS field acceptance remains deferred.
 - Next: commit/push this small UX fix, inspect candidate CI, and continue
   nonphysical quality work.
+
+## 2026-08-10 — Bound static CI checks
+
+- Changed: `.github/workflows/ci.yml` now gives the `Run all checks` step its
+  own five-minute timeout in addition to the job and E2E timeouts. The latest
+  candidate run remained in-progress inside that step despite the existing
+  job-level guard, so this makes the static-check boundary explicit.
+- Validation: local `npm run check:all`, lint, format, targeted syntax checks,
+  and `git diff --check` pass; no runtime or data-path code changed.
+- Risk: CI configuration only. A genuinely hung static check now reports a
+  bounded failure instead of leaving the PR indefinitely pending. Trusted-HTTPS
+  field acceptance remains deferred.
+- Next: push this CI guard, inspect the replacement PR run, then continue
+  nonphysical product-quality work.
