@@ -4180,10 +4180,14 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
   assert(
     viewScript.includes("function formShotCompletionText(shotCount,diagnosticTarget){") &&
       viewScript.includes("function formDiagnosticLiveSaveToastText(shotCount,matrixNotice){") &&
-      viewScript.includes("function formZeroShotDiagnosticText(){") &&
+      viewScript.includes("function formZeroShotDiagnosticText(record){") &&
       viewScript.includes("横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。") &&
       viewScript.includes("検出されなかった射がある場合は") &&
+      viewScript.includes("リリースを確認できませんでした。") &&
+      viewScript.includes("リリース候補は検出しましたが確定できませんでした。") &&
       capture.includes("formDiagnosticLiveSaveToastText(shots.length,matrixNotice)") &&
+      capture.includes("formZeroShotDiagnosticText(frozenDiagnosticSave.record)") &&
+      replay.includes("formZeroShotDiagnosticText(frozenDiagnosticSave.record)") &&
       replay.includes("formShotCompletionText(shots.length,db.settings.formDebug===true?6:0)"),
     "zero-shot completion gives actionable camera-position guidance",
   );

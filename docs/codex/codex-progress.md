@@ -2863,3 +2863,31 @@ check:form`, lint, targeted Prettier, and `git diff --check` pass.
   deferred.
 - Next: commit/push this feedback slice, verify candidate CI, then collect
   diagnostic evidence before any threshold change.
+
+## 2026-08-10 — Distinguish zero-shot diagnostic causes
+
+- Evidence audit: the supplied `schema:5` backup was inspected locally as an
+  aggregate only (593,874 bytes, 16 form records). It contained four non-zero
+  form records (1, 2, 1, and 3 shots) and twelve zero-shot records. Six
+  zero-shot records had no `releaseFires` but many `rejectedFramesNear`
+  samples, mostly in `DRAWING`/`SETUP`; other zero-shot records had release
+  candidates but no retained shot. No matrix marker or release-receipt archive
+  was present, so the file cannot prove the physical 3×6 result and was not
+  copied into the repository.
+- Changed: diagnostics-only zero-shot completion feedback now distinguishes
+  "release not observed" from "release candidate not confirmed" using the
+  already persisted `formPhaseDiag` summary. Generic/no-summary, non-zero-shot,
+  diagnostics-off, storage, and detector behavior remain unchanged.
+- TDD evidence: the focused public-copy E2E first returned the old generic
+  message, then passed 1/1 after the minimal branch-specific copy and live/
+  replay wiring. The complete form-diagnostics Chromium suite passed 46/46.
+- Validation: `node tools/check-form-core.js`, `npm run check:all`, lint,
+  `npm run format:check`, targeted Node syntax checks, and `git diff --check`
+  pass.
+- Risk: privacy-safe diagnostic feedback only; no detector thresholds, shot
+  retention, storage schema, transport, Service Worker, dependency, or
+  physical acceptance behavior changed. Trusted-HTTPS field acceptance and a
+  validated 3×6 artifact remain pending.
+- Next: commit/push this evidence-driven feedback, verify candidate CI, then
+  request the next physical artifact or controlled field run before changing
+  count thresholds.

@@ -448,6 +448,50 @@ test("live diagnostic save toast combines partial count and matrix notice", asyn
   expect(toastTexts.ineligible).toContain("診断条件を満たさなかったため");
 });
 
+test("zero-shot diagnostic completion distinguishes release evidence", async ({ page }) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  const copy = await page.evaluate(() => {
+    if (typeof globalThis.formZeroShotDiagnosticText !== "function") return null;
+    return {
+      noRelease: globalThis.formZeroShotDiagnosticText({
+        shots: 0,
+        formPhaseDiag: {
+          releaseFires: [],
+          rejectedFramesNear: [{ phase: "DRAWING" }, { phase: "SETUP" }],
+        },
+      }),
+      unconfirmedRelease: globalThis.formZeroShotDiagnosticText({
+        shots: 0,
+        formPhaseDiag: {
+          releaseFires: [{ ts: 10 }],
+          rejectedFramesNear: [],
+        },
+      }),
+      generic: globalThis.formZeroShotDiagnosticText(),
+      nonZero: globalThis.formZeroShotDiagnosticText({
+        shots: 1,
+        formPhaseDiag: {
+          releaseFires: [],
+          rejectedFramesNear: [{ phase: "SETUP" }],
+        },
+      }),
+    };
+  });
+  expect(copy).not.toBeNull();
+  expect(copy.noRelease).toContain("リリースを確認できませんでした");
+  expect(copy.noRelease).toContain(
+    "横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。",
+  );
+  expect(copy.unconfirmedRelease).toContain("リリース候補は検出しましたが確定できませんでした");
+  expect(copy.unconfirmedRelease).toContain(
+    "動作がフレーム内に収まる位置を確認して、もう一度お試しください。",
+  );
+  expect(copy.generic).toContain("診断用に0射で保存しました");
+  expect(copy.generic).toContain("横向き全身と弓手・引き手が写る位置");
+  expect(copy.nonZero).toBe(copy.generic);
+});
+
 test("zero-shot exact-debug live save freezes, rolls back, and retries once", async ({ page }) => {
   const database = makeSyntheticDiagnosticDb({
     updatedAt: "before-live-save",
