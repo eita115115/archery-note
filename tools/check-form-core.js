@@ -4179,9 +4179,11 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
   );
   assert(
     viewScript.includes("function formShotCompletionText(shotCount,diagnosticTarget){") &&
+      viewScript.includes("function formDiagnosticLiveSaveToastText(shotCount,matrixNotice){") &&
       viewScript.includes("function formZeroShotDiagnosticText(){") &&
       viewScript.includes("横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。") &&
       viewScript.includes("検出されなかった射がある場合は") &&
+      capture.includes("formDiagnosticLiveSaveToastText(shots.length,matrixNotice)") &&
       replay.includes("formShotCompletionText(shots.length,db.settings.formDebug===true?6:0)"),
     "zero-shot completion gives actionable camera-position guidance",
   );

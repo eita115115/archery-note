@@ -16,6 +16,14 @@ function formShotCompletionText(shotCount,diagnosticTarget){
     : `解析完了 ・ ${count}射を検出しました`;
 }
 
+function formDiagnosticLiveSaveToastText(shotCount,matrixNotice){
+  const count=Number.isSafeInteger(shotCount)&&shotCount>=0?shotCount:0;
+  const completion=formShotCompletionText(count,6);
+  return typeof matrixNotice==="string"&&matrixNotice
+    ? `${completion}。${matrixNotice}`
+    : completion;
+}
+
 function formZeroShotDiagnosticText(){
   return "診断用に0射で保存しました。横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。";
 }
@@ -806,10 +814,10 @@ function openFormCapture(){
      閉じる」へ切替える（採用理由: 通常ユーザー(formDebug OFF)の close 挙動を完全に不変のまま
      保ちつつ、UI追加コストを避ける。判断は完了報告に明記）。 */
   async function finishLiveDiagnosticAttempt(zeroShot){
-    const {result,linked}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
+    const {result}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
     if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
     const matrixNotice=!zeroShot&&frozenDiagnosticSave.record.captureMode==="live"?(frozenDiagnosticSave.matrixAdvanced?"診断バッチに追加しました":["coordinator-missing","coordinator-invalid","coordinator-stale","coordinator-complete"].includes(frozenDiagnosticSave.matrixCode)?"18射の診断を開始し直してください":"診断条件を満たさなかったため、同じ条件をもう一度記録してください"):null;
-    toast(matrixNotice||(zeroShot?formZeroShotDiagnosticText():linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`));
+    toast(zeroShot?formZeroShotDiagnosticText():formDiagnosticLiveSaveToastText(shots.length,matrixNotice));
     nativePulse("success"); finishCapture(); render(); await offerRecordedVideoAfterSave(); return true;
   }
   ovl.querySelector("#fcClose").onclick=async()=>{

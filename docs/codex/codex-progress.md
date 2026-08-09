@@ -2843,3 +2843,23 @@ check:form`, lint, targeted Prettier, and `git diff --check` pass.
   deferred.
 - Next: commit/push this observability slice, verify candidate CI, then gather
   diagnostic evidence before any threshold change.
+
+## 2026-08-10 — Align live diagnostic completion feedback
+
+- Changed: diagnostic live-save feedback now uses the same target-aware
+  completion copy as replay. A partial result such as 3/6 shows the missing
+  shot count, camera/body/bow-arm/drawing-arm guidance, and the existing
+  matrix retry notice; a valid 6/6 result keeps the matrix-added notice.
+  Diagnostics-off save behavior and all persistence paths remain unchanged.
+- TDD evidence: the focused live-save notification test first failed because
+  the partial result dropped the matrix notice, then passed after the minimal
+  shared helper change. The complete form-diagnostics Chromium suite passed
+  45/45.
+- Validation: `npm run check:all`, lint, `npm run format:check`, targeted
+  Node syntax checks, targeted Prettier, and `git diff --check` pass.
+- Risk: user-facing diagnostic feedback only; no detector thresholds, shot
+  retention, storage, transport, Service Worker, dependency, or physical
+  acceptance behavior changed. Trusted-HTTPS field acceptance remains
+  deferred.
+- Next: commit/push this feedback slice, verify candidate CI, then collect
+  diagnostic evidence before any threshold change.

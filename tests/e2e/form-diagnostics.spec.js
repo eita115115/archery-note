@@ -420,6 +420,34 @@ test("partial diagnostic completion names the missing shot count", async ({ page
   );
 });
 
+test("live diagnostic save toast combines partial count and matrix notice", async ({ page }) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  const toastTexts = await page.evaluate(() => {
+    if (typeof globalThis.formDiagnosticLiveSaveToastText !== "function") return null;
+    return {
+      partial: globalThis.formDiagnosticLiveSaveToastText(
+        3,
+        "診断条件を満たさなかったため、同じ条件をもう一度記録してください",
+      ),
+      complete: globalThis.formDiagnosticLiveSaveToastText(6, "診断バッチに追加しました"),
+      ineligible: globalThis.formDiagnosticLiveSaveToastText(
+        6,
+        "診断条件を満たさなかったため、同じ条件をもう一度記録してください",
+      ),
+    };
+  });
+  expect(toastTexts).not.toBeNull();
+  expect(toastTexts.partial).toContain("3/6射");
+  expect(toastTexts.partial).toContain(
+    "横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。",
+  );
+  expect(toastTexts.partial).toContain("診断条件を満たさなかったため");
+  expect(toastTexts.complete).toContain("6射");
+  expect(toastTexts.complete).toContain("診断バッチに追加しました");
+  expect(toastTexts.ineligible).toContain("診断条件を満たさなかったため");
+});
+
 test("zero-shot exact-debug live save freezes, rolls back, and retries once", async ({ page }) => {
   const database = makeSyntheticDiagnosticDb({
     updatedAt: "before-live-save",
