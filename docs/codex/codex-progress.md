@@ -2520,3 +2520,17 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   dependency, or physical acceptance behavior changed.
 - Next: publish the coverage-only candidate update after CI; keep the physical
   trusted-HTTPS checklist pending until explicit user direction.
+
+## 2026-08-10 — Fail-closed malformed settings compatibility
+
+- Changed: `tools/check-storage-contract.js` now proves that imported
+  `formDebug: "true"` and `formTrackingEnabled: 1` values remain metadata rather
+  than being coerced into enabled booleans. Runtime exact-boolean gates can
+  therefore fail closed while the original user data remains preserved.
+- Validation: `npm run check:storage`, `npm run check:all`, lint,
+  `npm run format:check`, Node syntax check, and `git diff --check` pass.
+- Risk: regression coverage only; `normalizeDb()` and all stored values are
+  unchanged. No migration, deletion, Service Worker, dependency, or physical
+  acceptance behavior changed.
+- Next: publish this storage-safety coverage update after CI; keep the field
+  acceptance checklist pending until explicit user direction.

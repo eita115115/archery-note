@@ -306,6 +306,19 @@ function checkPartialLegacy(storageApi, fixtures) {
     0,
     "[partial-legacy] missing setting launchCount is backfilled with default",
   );
+  const malformedFlags = storageApi.normalizeDb({
+    settings: { formDebug: "true", formTrackingEnabled: 1 },
+  });
+  assertEqual(
+    malformedFlags.settings.formDebug,
+    "true",
+    "[partial-legacy] malformed formDebug remains fail-closed metadata",
+  );
+  assertEqual(
+    malformedFlags.settings.formTrackingEnabled,
+    1,
+    "[partial-legacy] malformed formTrackingEnabled remains fail-closed metadata",
+  );
   assert(
     db.settings.featureHints &&
       typeof db.settings.featureHints === "object" &&
