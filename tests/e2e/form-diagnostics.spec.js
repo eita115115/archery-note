@@ -206,7 +206,9 @@ async function seedTask9Page(page, database, mode = "web-success") {
       Object.defineProperty(navigator, "canShare", {
         configurable: true,
         value(data) {
-          return transportMode.startsWith("web-") && Array.isArray(data.files) && data.files.length === 1;
+          return (
+            transportMode.startsWith("web-") && Array.isArray(data.files) && data.files.length === 1
+          );
         },
       });
       Object.defineProperty(navigator, "share", {
@@ -218,7 +220,8 @@ async function seedTask9Page(page, database, mode = "web-success") {
             type: file.type,
             text: await file.text(),
           });
-          if (transportMode === "web-abort") throw new DOMException("fixture canceled", "AbortError");
+          if (transportMode === "web-abort")
+            throw new DOMException("fixture canceled", "AbortError");
           if (transportMode === "web-error") throw new Error("fixture web failure");
         },
       });
@@ -237,7 +240,9 @@ async function seedTask9Page(page, database, mode = "web-success") {
       if (transportMode === "native-cleanup-error") {
         let deletes = 0;
         globalThis.Capacitor = {
-          getPlatform() { return "ios"; },
+          getPlatform() {
+            return "ios";
+          },
           Plugins: {
             Filesystem: {
               async deleteFile(options) {
@@ -251,7 +256,9 @@ async function seedTask9Page(page, database, mode = "web-success") {
               },
             },
             Share: {
-              async share(options) { globalThis.__task9Transport.nativeCalls.push({ op: "share", options }); },
+              async share(options) {
+                globalThis.__task9Transport.nativeCalls.push({ op: "share", options });
+              },
             },
           },
         };
@@ -278,7 +285,11 @@ async function task9PersistenceSnapshot(page) {
 }
 
 async function task9Confirm(page, label) {
-  await page.locator("body > .ovl").last().getByRole("button", { name: label, exact: true }).click();
+  await page
+    .locator("body > .ovl")
+    .last()
+    .getByRole("button", { name: label, exact: true })
+    .click();
 }
 
 function assertTask9Artifact(payload) {
@@ -296,7 +307,21 @@ function assertTask9Artifact(payload) {
     expect(run.receipts).toHaveLength(6);
   });
   const serialized = JSON.stringify(payload);
-  for (const forbidden of [TASK9_SENTINEL, "synthetic-task9-record-", "form-receipt-", "synthetic-private-session", "synthetic-private-setup", "2099-01-01", "framesBefore", "rejectedFramesNear", "settings", "trash", "path", "url", "unknownFutureKey"]) {
+  for (const forbidden of [
+    TASK9_SENTINEL,
+    "synthetic-task9-record-",
+    "form-receipt-",
+    "synthetic-private-session",
+    "synthetic-private-setup",
+    "2099-01-01",
+    "framesBefore",
+    "rejectedFramesNear",
+    "settings",
+    "trash",
+    "path",
+    "url",
+    "unknownFutureKey",
+  ]) {
     expect(serialized).not.toContain(forbidden);
   }
 }
@@ -573,7 +598,9 @@ test("diagnostic controls follow exact formDebug without reopening settings", as
   await expect(section.getByRole("button", { name: "18射の診断を開始" })).toBeEnabled();
   await page.locator('#fdChips [data-fd="0"]').click();
   await expect(section).toBeHidden();
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(TASK9_BATCH_ID);
+  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
+    TASK9_BATCH_ID,
+  );
 });
 
 test("action-time exact gate rejects a value changed after render", async ({ page }) => {
@@ -583,7 +610,9 @@ test("action-time exact gate rejects a value changed after render", async ({ pag
     globalThis.document.querySelector("#fdMatrixStart").click();
   });
   await expect(page.getByTestId("form-diagnostic-section")).toBeHidden();
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(TASK9_BATCH_ID);
+  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
+    TASK9_BATCH_ID,
+  );
 });
 
 test("another workflow blocks both actions before confirmation", async ({ page }) => {
@@ -593,7 +622,9 @@ test("another workflow blocks both actions before confirmation", async ({ page }
     await page.locator("#fdMatrixStart").click();
     await page.locator("#fdMatrixExport").click();
     await expect(page.locator(".confirmSheet")).toHaveCount(0);
-    await expect(page.locator("#toast")).toContainText("ほかの操作中は18射の診断を開始・書き出しできません。");
+    await expect(page.locator("#toast")).toContainText(
+      "ほかの操作中は18射の診断を開始・書き出しできません。",
+    );
   } finally {
     await page.evaluate(() => globalThis.endActiveWorkflow());
   }
@@ -607,19 +638,26 @@ test("first start commits one fresh coordinator", async ({ page }) => {
   const batch = await page.evaluate(() => db.settings.formDiagnosticMatrixBatch);
   expect(batch).toEqual({
     version: 1,
-    batchId: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/),
+    batchId: expect.stringMatching(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    ),
     appVer: TASK9_APP_VER,
     nextSlot: 0,
     recordIds: [],
     invalidated: false,
   });
-  await expect(page.getByTestId("form-diagnostic-status")).toHaveText("次は「真横」を6射記録してください。");
+  await expect(page.getByTestId("form-diagnostic-status")).toHaveText(
+    "次は「真横」を6射記録してください。",
+  );
 });
 
-test("restart double click opens one confirmation; cancel preserves and confirm replaces", async ({ page }) => {
+test("restart double click opens one confirmation; cancel preserves and confirm replaces", async ({
+  page,
+}) => {
   const database = makeTask9DiagnosticDb(true);
   database.settings.formDiagnosticMatrixBatch.nextSlot = 1;
-  database.settings.formDiagnosticMatrixBatch.recordIds = database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 1);
+  database.settings.formDiagnosticMatrixBatch.recordIds =
+    database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 1);
   database.formAnalyses = database.formAnalyses.slice(0, 1);
   await seedTask9Page(page, database);
   await page.evaluate(() => {
@@ -629,28 +667,46 @@ test("restart double click opens one confirmation; cancel preserves and confirm 
   });
   await expect(page.locator(".confirmSheet")).toHaveCount(1);
   await task9Confirm(page, "キャンセル");
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(TASK9_BATCH_ID);
+  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
+    TASK9_BATCH_ID,
+  );
   await page.locator("#fdMatrixStart").click();
   await task9Confirm(page, "開始し直す");
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).not.toBe(TASK9_BATCH_ID);
+  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).not.toBe(
+    TASK9_BATCH_ID,
+  );
 });
 
 test("restart post-confirm token change fails closed", async ({ page }) => {
   const database = makeTask9DiagnosticDb(true);
   database.settings.formDiagnosticMatrixBatch.nextSlot = 1;
-  database.settings.formDiagnosticMatrixBatch.recordIds = database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 1);
+  database.settings.formDiagnosticMatrixBatch.recordIds =
+    database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 1);
   database.formAnalyses = database.formAnalyses.slice(0, 1);
   await seedTask9Page(page, database);
   await page.locator("#fdMatrixStart").click();
   await page.evaluate(() => {
-    db.settings.formDiagnosticMatrixBatch = { version: 1, batchId: "22222222-2222-4222-8222-222222222222", appVer: 84, nextSlot: 0, recordIds: [], invalidated: false };
+    db.settings.formDiagnosticMatrixBatch = {
+      version: 1,
+      batchId: "22222222-2222-4222-8222-222222222222",
+      appVer: 84,
+      nextSlot: 0,
+      recordIds: [],
+      invalidated: false,
+    };
   });
   await task9Confirm(page, "開始し直す");
-  await expect(page.locator("#toast")).toContainText("診断バッチが変更されたため、操作を中止しました。");
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe("22222222-2222-4222-8222-222222222222");
+  await expect(page.locator("#toast")).toContainText(
+    "診断バッチが変更されたため、操作を中止しました。",
+  );
+  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
+    "22222222-2222-4222-8222-222222222222",
+  );
 });
 
-test("allocation failure and save false both preserve prior coordinator and updatedAt", async ({ page }) => {
+test("allocation failure and save false both preserve prior coordinator and updatedAt", async ({
+  page,
+}) => {
   const database = makeTask9DiagnosticDb(true);
   delete database.settings.formDiagnosticMatrixBatch;
   delete database.updatedAt;
@@ -659,15 +715,31 @@ test("allocation failure and save false both preserve prior coordinator and upda
     delete db.updatedAt;
   });
   await page.evaluate(() => {
-    globalThis.allocateFormDiagnosticBatchId = () => ({ ok: false, code: "crypto-unavailable", batchId: null });
+    globalThis.allocateFormDiagnosticBatchId = () => ({
+      ok: false,
+      code: "crypto-unavailable",
+      batchId: null,
+    });
   });
   await page.locator("#fdMatrixStart").click();
-  expect(await page.evaluate(() => ({ hasBatch: Object.hasOwn(db.settings, "formDiagnosticMatrixBatch"), hasUpdatedAt: Object.hasOwn(db, "updatedAt") }))).toEqual({ hasBatch: false, hasUpdatedAt: false });
+  expect(
+    await page.evaluate(() => ({
+      hasBatch: Object.hasOwn(db.settings, "formDiagnosticMatrixBatch"),
+      hasUpdatedAt: Object.hasOwn(db, "updatedAt"),
+    })),
+  ).toEqual({ hasBatch: false, hasUpdatedAt: false });
   await page.reload();
   await page.locator("#btnSettings").click();
-  await page.evaluate(() => { globalThis.save = () => false; });
+  await page.evaluate(() => {
+    globalThis.save = () => false;
+  });
   await page.locator("#fdMatrixStart").click();
-  expect(await page.evaluate(() => ({ hasBatch: Object.hasOwn(db.settings, "formDiagnosticMatrixBatch"), hasUpdatedAt: Object.hasOwn(db, "updatedAt") }))).toEqual({ hasBatch: false, hasUpdatedAt: false });
+  expect(
+    await page.evaluate(() => ({
+      hasBatch: Object.hasOwn(db.settings, "formDiagnosticMatrixBatch"),
+      hasUpdatedAt: Object.hasOwn(db, "updatedAt"),
+    })),
+  ).toEqual({ hasBatch: false, hasUpdatedAt: false });
   await expect(page.locator("#toast")).toContainText("診断バッチを保存できませんでした。");
 });
 
@@ -677,7 +749,9 @@ test("side state uses fixed copy", async ({ page }) => {
   side.settings.formDiagnosticMatrixBatch.recordIds = [];
   side.formAnalyses = [];
   await seedTask9Page(page, side);
-  await expect(page.getByTestId("form-diagnostic-status")).toHaveText("次は「真横」を6射記録してください。");
+  await expect(page.getByTestId("form-diagnostic-status")).toHaveText(
+    "次は「真横」を6射記録してください。",
+  );
 });
 
 test("complete state uses fixed copy", async ({ page }) => {
@@ -685,10 +759,14 @@ test("complete state uses fixed copy", async ({ page }) => {
   await expect(page.getByTestId("form-diagnostic-status")).toHaveText("18射の診断がそろいました。");
 });
 
-test("export post-confirm exact-debug and workflow rechecks prevent transport", async ({ page }) => {
+test("export post-confirm exact-debug and workflow rechecks prevent transport", async ({
+  page,
+}) => {
   await seedTask9Page(page, makeTask9DiagnosticDb(true));
   await page.locator("#fdMatrixExport").click();
-  await page.evaluate(() => { db.settings.formDebug = false; });
+  await page.evaluate(() => {
+    db.settings.formDebug = false;
+  });
   await task9Confirm(page, "書き出す");
   expect(await page.evaluate(() => globalThis.__task9Transport.shareCalls.length)).toBe(0);
   await page.reload();
@@ -704,12 +782,51 @@ test("export post-confirm exact-debug and workflow rechecks prevent transport", 
 });
 
 for (const [label, mutate, expectedCopy] of [
-  ["incomplete", (database) => { database.settings.formDiagnosticMatrixBatch.nextSlot = 2; database.settings.formDiagnosticMatrixBatch.recordIds = database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 2); database.formAnalyses = database.formAnalyses.slice(0, 2); }, "18射の診断が完了していません。"],
-  ["stale", (database) => { database.settings.formDiagnosticMatrixBatch.appVer = TASK9_APP_VER - 1; }, "現在の診断バッチは使用できません。"],
-  ["malformed", (database) => { database.settings.formDiagnosticMatrixBatch.extra = true; }, "現在の診断バッチは使用できません。"],
-  ["replay", (database) => { database.formAnalyses[0].captureMode = "replay"; }, "診断データを安全に書き出せません。"],
-  ["duplicate selected ID", (database) => { database.formAnalyses.push(structuredClone(database.formAnalyses[0])); }, "現在の診断バッチは使用できません。"],
-  ["overflow", (database) => { database.formAnalyses[0].formPhaseDiag.receiptOverflow = 1; }, "診断データを安全に書き出せません。"],
+  [
+    "incomplete",
+    (database) => {
+      database.settings.formDiagnosticMatrixBatch.nextSlot = 2;
+      database.settings.formDiagnosticMatrixBatch.recordIds =
+        database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 2);
+      database.formAnalyses = database.formAnalyses.slice(0, 2);
+    },
+    "18射の診断が完了していません。",
+  ],
+  [
+    "stale",
+    (database) => {
+      database.settings.formDiagnosticMatrixBatch.appVer = TASK9_APP_VER - 1;
+    },
+    "現在の診断バッチは使用できません。",
+  ],
+  [
+    "malformed",
+    (database) => {
+      database.settings.formDiagnosticMatrixBatch.extra = true;
+    },
+    "現在の診断バッチは使用できません。",
+  ],
+  [
+    "replay",
+    (database) => {
+      database.formAnalyses[0].captureMode = "replay";
+    },
+    "診断データを安全に書き出せません。",
+  ],
+  [
+    "duplicate selected ID",
+    (database) => {
+      database.formAnalyses.push(structuredClone(database.formAnalyses[0]));
+    },
+    "現在の診断バッチは使用できません。",
+  ],
+  [
+    "overflow",
+    (database) => {
+      database.formAnalyses[0].formPhaseDiag.receiptOverflow = 1;
+    },
+    "診断データを安全に書き出せません。",
+  ],
 ]) {
   test(`${label} refuses export without transport`, async ({ page }) => {
     const database = makeTask9DiagnosticDb(true);
@@ -718,22 +835,42 @@ for (const [label, mutate, expectedCopy] of [
     await page.locator("#fdMatrixExport").click();
     await task9Confirm(page, "書き出す");
     await expect(page.locator("#toast")).toContainText(expectedCopy);
-    expect(await page.evaluate(() => ({ shares: globalThis.__task9Transport.shareCalls.length, urls: globalThis.__task9Transport.objectUrls.length, native: globalThis.__task9Transport.nativeCalls.length }))).toEqual({ shares: 0, urls: 0, native: 0 });
+    expect(
+      await page.evaluate(() => ({
+        shares: globalThis.__task9Transport.shareCalls.length,
+        urls: globalThis.__task9Transport.objectUrls.length,
+        native: globalThis.__task9Transport.nativeCalls.length,
+      })),
+    ).toEqual({ shares: 0, urls: 0, native: 0 });
   });
 }
 
 test("output-too-large uses the fixed repeat copy", async ({ page }) => {
   await seedTask9Page(page, makeTask9DiagnosticDb(true));
-  await page.evaluate(() => { globalThis.buildFormDiagnosticExport = () => ({ ok: false, code: "output-too-large", payload: null, json: null, byteLength: null }); });
+  await page.evaluate(() => {
+    globalThis.buildFormDiagnosticExport = () => ({
+      ok: false,
+      code: "output-too-large",
+      payload: null,
+      json: null,
+      byteLength: null,
+    });
+  });
   await page.locator("#fdMatrixExport").click();
   await task9Confirm(page, "書き出す");
   await expect(page.locator("#toast")).toContainText("診断データを安全に書き出せません。");
 });
 
-test("export double click opens one confirmation and cancel preserves all state", async ({ page }) => {
+test("export double click opens one confirmation and cancel preserves all state", async ({
+  page,
+}) => {
   await seedTask9Page(page, makeTask9DiagnosticDb(true));
   const before = await task9PersistenceSnapshot(page);
-  await page.evaluate(() => { const button = globalThis.document.querySelector("#fdMatrixExport"); button.click(); button.click(); });
+  await page.evaluate(() => {
+    const button = globalThis.document.querySelector("#fdMatrixExport");
+    button.click();
+    button.click();
+  });
   await expect(page.locator(".confirmSheet")).toHaveCount(1);
   await task9Confirm(page, "キャンセル");
   expect(await task9PersistenceSnapshot(page)).toEqual(before);
@@ -746,27 +883,40 @@ for (const mode of ["web-success", "web-abort", "web-error"]) {
     const before = await task9PersistenceSnapshot(page);
     await page.locator("#fdMatrixExport").click();
     await task9Confirm(page, "書き出す");
-    await expect.poll(() => page.evaluate(() => globalThis.__task9Transport.shareCalls.length)).toBe(1);
+    await expect
+      .poll(() => page.evaluate(() => globalThis.__task9Transport.shareCalls.length))
+      .toBe(1);
     const transport = await page.evaluate(() => globalThis.__task9Transport);
     expect(transport.shareCalls[0].name).toBe("archery-note-form-diagnostics.json");
     expect(transport.shareCalls[0].type).toBe("application/json;charset=utf-8");
     expect(transport.objectUrls).toHaveLength(0);
     expect(transport.nativeCalls).toHaveLength(0);
     expect(await task9PersistenceSnapshot(page)).toEqual(before);
-    if (mode === "web-success") await expect(page.locator("#toast")).toContainText("診断JSONを共有しました。");
+    if (mode === "web-success")
+      await expect(page.locator("#toast")).toContainText("診断JSONを共有しました。");
     if (mode === "web-abort") await expect(page.locator("#toast")).not.toHaveClass(/show/);
-    if (mode === "web-error") await expect(page.locator("#toast")).toContainText("診断JSONを書き出せませんでした。");
+    if (mode === "web-error")
+      await expect(page.locator("#toast")).toContainText("診断JSONを書き出せませんでした。");
   });
 }
 
-test("native final cleanup warning has no download fallback and preserves state", async ({ page }) => {
+test("native final cleanup warning has no download fallback and preserves state", async ({
+  page,
+}) => {
   await seedTask9Page(page, makeTask9DiagnosticDb(true), "native-cleanup-error");
   const before = await task9PersistenceSnapshot(page);
   await page.locator("#fdMatrixExport").click();
   await task9Confirm(page, "書き出す");
-  await expect(page.locator("#toast")).toContainText("診断JSONの一時ファイルを削除できませんでした。");
+  await expect(page.locator("#toast")).toContainText(
+    "診断JSONの一時ファイルを削除できませんでした。",
+  );
   const transport = await page.evaluate(() => globalThis.__task9Transport);
-  expect(transport.nativeCalls.map((call) => call.op)).toEqual(["delete", "write", "share", "delete"]);
+  expect(transport.nativeCalls.map((call) => call.op)).toEqual([
+    "delete",
+    "write",
+    "share",
+    "delete",
+  ]);
   expect(transport.objectUrls).toHaveLength(0);
   expect(await task9PersistenceSnapshot(page)).toEqual(before);
 });
@@ -790,7 +940,11 @@ test("no-share environment downloads exact MIME/allowlist and revokes URL", asyn
   expect(await task9PersistenceSnapshot(page)).toEqual(before);
 });
 
-for (const viewport of [{ width: 360, height: 780 }, { width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+for (const viewport of [
+  { width: 360, height: 780 },
+  { width: 390, height: 844 },
+  { width: 1280, height: 800 },
+]) {
   test(`diagnostic settings fit ${viewport.width}x${viewport.height}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await seedTask9Page(page, makeTask9DiagnosticDb(true));
@@ -799,17 +953,38 @@ for (const viewport of [{ width: 360, height: 780 }, { width: 390, height: 844 }
       const sheet = globalThis.document.querySelector(".sheet");
       const section = globalThis.document.querySelector("[data-form-diagnostic-section]");
       const start = globalThis.document.querySelector("#fdMatrixStart").getBoundingClientRect();
-      const exportButton = globalThis.document.querySelector("#fdMatrixExport").getBoundingClientRect();
+      const exportButton = globalThis.document
+        .querySelector("#fdMatrixExport")
+        .getBoundingClientRect();
       const sheetRect = sheet.getBoundingClientRect();
-      const overlap = !(start.right <= exportButton.left || exportButton.right <= start.left || start.bottom <= exportButton.top || exportButton.bottom <= start.top);
+      const overlap = !(
+        start.right <= exportButton.left ||
+        exportButton.right <= start.left ||
+        start.bottom <= exportButton.top ||
+        exportButton.bottom <= start.top
+      );
       return {
-        documentOverflow: globalThis.document.documentElement.scrollWidth > globalThis.document.documentElement.clientWidth,
+        documentOverflow:
+          globalThis.document.documentElement.scrollWidth >
+          globalThis.document.documentElement.clientWidth,
         sheetOverflow: sheet.scrollWidth > sheet.clientWidth,
         sectionOverflow: section.scrollWidth > section.clientWidth,
-        clipped: [start, exportButton].some((rect) => rect.width < 44 || rect.height < 44 || rect.left < sheetRect.left || rect.right > sheetRect.right),
+        clipped: [start, exportButton].some(
+          (rect) =>
+            rect.width < 44 ||
+            rect.height < 44 ||
+            rect.left < sheetRect.left ||
+            rect.right > sheetRect.right,
+        ),
         overlap,
       };
     });
-    expect(layout).toEqual({ documentOverflow: false, sheetOverflow: false, sectionOverflow: false, clipped: false, overlap: false });
+    expect(layout).toEqual({
+      documentOverflow: false,
+      sheetOverflow: false,
+      sectionOverflow: false,
+      clipped: false,
+      overlap: false,
+    });
   });
 }
