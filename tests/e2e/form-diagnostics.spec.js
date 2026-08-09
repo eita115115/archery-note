@@ -74,6 +74,14 @@ async function stallFormPose(page) {
   });
 }
 
+async function resetWriteProbeAfterStartup(page) {
+  await page.waitForTimeout(750);
+  return page.evaluate(() => {
+    globalThis.__formWriteProbe.attempts = [];
+    return db.updatedAt;
+  });
+}
+
 test("selected deletion rolls back when the primary write fails", async ({ page }) => {
   const coordinator = {
     version: 1,
@@ -180,10 +188,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
-  const liveBaseline = await page.evaluate(() => {
-    globalThis.__formWriteProbe.attempts = [];
-    return db.updatedAt;
-  });
+  const liveBaseline = await resetWriteProbeAfterStartup(page);
   await page.locator("#fcClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#fcSave")).toBeEnabled();
@@ -222,9 +227,7 @@ test("failed diagnostic discard cancel retains the candidate and confirm closes 
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
-  await page.evaluate(() => {
-    globalThis.__formWriteProbe.attempts = [];
-  });
+  await resetWriteProbeAfterStartup(page);
   await page.locator("#fcClose").click();
   await page.locator("#fcClose").click();
   await expect(page.locator(".confirmSheet")).toContainText(
@@ -277,10 +280,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
     buffer: Buffer.from("synthetic replay fixture"),
   });
   await expect(page.locator("#frVideo")).toBeVisible();
-  const replayBaseline = await page.evaluate(() => {
-    globalThis.__formWriteProbe.attempts = [];
-    return db.updatedAt;
-  });
+  const replayBaseline = await resetWriteProbeAfterStartup(page);
   await page.locator("#frClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#frSave")).toBeEnabled();

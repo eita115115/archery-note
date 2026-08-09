@@ -791,10 +791,12 @@ function openFormCapture(){
   async function finishLiveDiagnosticAttempt(zeroShot){
     const {result,linked}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
     if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
-    toast(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
+    const matrixNotice=!zeroShot&&frozenDiagnosticSave.record.captureMode==="live"?(frozenDiagnosticSave.matrixAdvanced?"診断バッチに追加しました":["coordinator-missing","coordinator-invalid","coordinator-stale","coordinator-complete"].includes(frozenDiagnosticSave.matrixCode)?"18射の診断を開始し直してください":"診断条件を満たさなかったため、同じ条件をもう一度記録してください"):null;
+    toast(matrixNotice||(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`));
     nativePulse("success"); finishCapture(); render(); await offerRecordedVideoAfterSave(); return true;
   }
   ovl.querySelector("#fcClose").onclick=async()=>{
+    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishCapture(); return; }
     if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; finishCapture(); return; }
     if(!shots.length&&db.settings.formDebug===true){ await finishLiveDiagnosticAttempt(true); return; }
     if(!shots.length){ abandonActiveReceipt("workflow-close"); finishCapture(); return; }
@@ -1117,6 +1119,7 @@ function startFormReplay(videoUrl){
     nativePulse("success"); finishReplay(); render(); return true;
   }
   ovl.querySelector("#frClose").onclick=async()=>{
+    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishReplay(); return; }
     if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; finishReplay(); return; }
     if(!shots.length&&db.settings.formDebug===true){ finishReplayDiagnosticAttempt(true); return; }
     if(!shots.length){ abandonActiveReceipt("workflow-close"); finishReplay(); return; }
@@ -1126,6 +1129,7 @@ function startFormReplay(videoUrl){
     if(frozenDiagnosticSave){ finishReplayDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
     if(db.settings.formDebug===true){ finishReplayDiagnosticAttempt(shots.length===0); return; }
     if(!shots.length) return;
+    if(tracker.current()) tracker.abandon("workflow-save");
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];

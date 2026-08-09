@@ -235,6 +235,20 @@ assert(
   saveReplay.includes("loadFormPose().then(async lm=>{\n    if(!running) return;"),
   "replay pose continuation cannot restart after freeze or close",
 );
+for (const [label, source, finishName] of [
+  ["live", saveCapture, "finishCapture"],
+  ["replay", saveReplay, "finishReplay"],
+]) {
+  const compact = compactSource(source);
+  const failureAt = compact.indexOf("if(receiptFailure){");
+  const frozenAt = compact.indexOf("if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){");
+  assert(
+    failureAt >= 0 &&
+      failureAt < frozenAt &&
+      compact.slice(failureAt, frozenAt).includes(`${finishName}();return;`),
+    `${label} receipt failure confirms and exits before diagnostic retry/discard`,
+  );
+}
 
 const deletionHandler = boundedSourceSection(
   viewScript,
