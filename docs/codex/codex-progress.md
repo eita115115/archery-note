@@ -3247,3 +3247,19 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   diagnostic artifact.
 - Next: commit/push this contract-only review fix, verify CI, then keep the
   physical checklist pending until the user can collect the artifact.
+
+## 2026-08-10 — Cover camera-angle variants in release detection
+
+- Changed: `tools/check-form-core.js` adds rotation/translation variants for
+  side, oblique, and normal-range camera geometry. Each production-shaped
+  sequence must retain exactly one genuine release. This is a detector
+  regression contract only; it does not tune thresholds or infer a field result
+  from the older 3/6–0/6–3/6 report.
+- Validation: `node tools/check-form-core.js`, `npm run check:all`,
+  `npm run lint -- --quiet`, `npm run format:check`,
+  `npm run golden:form-fixtures`, and `git diff --check` pass.
+- Risk: synthetic geometry coverage cannot replace trusted-HTTPS iPhone
+  evidence. The current candidate still requires a bounded diagnostic JSON
+  before physical acceptance can be marked complete.
+- Next: commit/push this isolated angle-coverage contract, verify CI, and keep
+  the physical checklist pending until the user can collect current evidence.

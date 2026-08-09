@@ -3121,6 +3121,41 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     seq.push(...seg(36, () => mkDw(R_DW, 110)));
     return seq;
   }
+  function transformedShotDw(angleDeg, tx, ty) {
+    const rad = (angleDeg * Math.PI) / 180;
+    const transform = (point) => {
+      const dx = point.x - FACE.x;
+      const dy = point.y - FACE.y;
+      return {
+        x: FACE.x + dx * Math.cos(rad) - dy * Math.sin(rad) + tx,
+        y: FACE.y + dx * Math.sin(rad) + dy * Math.cos(rad) + ty,
+      };
+    };
+    const face = transform(FACE);
+    const anchor = transform(A_DW);
+    const setup = transform(S_DW);
+    const release = transform(R_DW);
+    const norm = (point) => Math.hypot(point.x - face.x, point.y - face.y) / 0.25;
+    const make = (point, drawArm) => mkDw(point, drawArm, norm(point));
+    const seq = [];
+    seq.push(...seg(30, () => make(setup, 90)));
+    seq.push(...seg(24, (t) => make(lerp2(setup, anchor, t), 100 + 30 * t)));
+    seq.push(...seg(72, () => make(anchor, 115)));
+    seq.push(...seg(6, (t) => make(lerp2(anchor, release, 1 - Math.pow(1 - t, 2)), 120)));
+    seq.push(...seg(36, () => make(release, 110)));
+    return seq;
+  }
+  [
+    [0, 0, 0, "side camera"],
+    [18, 0.02, -0.01, "oblique camera"],
+    [-22, -0.015, 0.018, "normal-range camera"],
+  ].forEach(([angle, tx, ty, label]) => {
+    assertEqual(
+      runDw(transformedShotDw(angle, tx, ty)).releases,
+      1,
+      `${label} preserves one genuine release`,
+    );
+  });
   // NB2: 200ms / 300ms のリリース瞬間欠落は回復、400ms（NB2_MAX_GAP_MS 超）は対象外
   assertEqual(runDw(shotDw({ gapMs: 200 })).releases, 1, "NB2: 200ms release-moment gap recovers");
   assertEqual(runDw(shotDw({ gapMs: 300 })).releases, 1, "NB2: 300ms release-moment gap recovers");
