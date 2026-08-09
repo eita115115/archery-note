@@ -159,6 +159,12 @@ assert(
   typeof api.invalidateFormDiagnosticMatrixForRecord === "function",
   "diagnostic matrix invalidator API is exported",
 );
+deepEqual(
+  api.FORM_DIAGNOSTIC_SLOTS,
+  ["side", "oblique", "normal_range"],
+  "diagnostic slot constant has the fixed sequence",
+);
+assert(Object.isFrozen(api.FORM_DIAGNOSTIC_SLOTS), "diagnostic slot constant is frozen");
 
 function assertCoordinatorFailure(result, code, label) {
   deepEqual(result, { ok: false, code, coordinator: null }, label);
@@ -383,10 +389,70 @@ assertEqual(planned.ok, true, "eligible live record advances the matrix");
 assertEqual(planned.record.formDiagnosticMatrix.slot, "side", "first fixed slot");
 assertEqual(planned.coordinator.nextSlot, 1, "coordinator advances one slot");
 assertEqual(planned.coordinator.recordIds[0], planned.record.id, "exact record ID selected");
+const plannedSecond = api.planFormDiagnosticMatrixRecord(
+  validRecord("second-slot"),
+  planned.coordinator,
+  84,
+);
+assertEqual(plannedSecond.ok, true, "eligible second record advances the matrix");
+assertEqual(plannedSecond.record.formDiagnosticMatrix.slot, "oblique", "second fixed slot");
+const plannedThird = api.planFormDiagnosticMatrixRecord(
+  validRecord("third-slot"),
+  plannedSecond.coordinator,
+  84,
+);
+assertEqual(plannedThird.ok, true, "eligible third record advances the matrix");
+assertEqual(plannedThird.record.formDiagnosticMatrix.slot, "normal_range", "third fixed slot");
+assertEqual(plannedThird.coordinator.nextSlot, 3, "three plans complete the matrix");
 assertEqual(
   Object.hasOwn(sourceRecord, "formDiagnosticMatrix"),
   false,
   "source record is unchanged",
+);
+
+const isolationSourceRecord = validRecord("copy-isolation");
+isolationSourceRecord.features[0].nested = { label: "source" };
+const isolationPlanned = api.planFormDiagnosticMatrixRecord(
+  isolationSourceRecord,
+  validCoordinator(0),
+  84,
+);
+assertEqual(isolationPlanned.ok, true, "copy-isolation record plans");
+assert(
+  isolationPlanned.record.features !== isolationSourceRecord.features,
+  "planned record owns the feature array",
+);
+assert(
+  isolationPlanned.record.formPhaseDiag !== isolationSourceRecord.formPhaseDiag,
+  "planned record owns form diagnostics",
+);
+assert(
+  isolationPlanned.record.formPhaseDiag.releaseReceipts !==
+    isolationSourceRecord.formPhaseDiag.releaseReceipts,
+  "planned record owns release receipts",
+);
+assert(
+  isolationPlanned.record.formPhaseDiag.releaseReceipts[0].fire !==
+    isolationSourceRecord.formPhaseDiag.releaseReceipts[0].fire,
+  "planned record owns receipt fire snapshots",
+);
+isolationPlanned.record.features[0].nested.label = "returned";
+isolationPlanned.record.formPhaseDiag.releaseReceipts[0].fire.releaseSpeed = 99;
+isolationPlanned.record.formPhaseDiag.receiptOverflow = 7;
+assertEqual(
+  isolationSourceRecord.features[0].nested.label,
+  "source",
+  "returned nested feature mutation leaves source unchanged",
+);
+assertEqual(
+  isolationSourceRecord.formPhaseDiag.releaseReceipts[0].fire.releaseSpeed,
+  7,
+  "returned nested fire mutation leaves source unchanged",
+);
+assertEqual(
+  isolationSourceRecord.formPhaseDiag.receiptOverflow,
+  0,
+  "returned diagnostic mutation leaves source unchanged",
 );
 
 const selectedCoordinator = validCoordinator(3, ["selected-a", "selected-b", "selected-c"]);

@@ -2110,6 +2110,18 @@ matrix coordinator API is exported`; the valid first-slot case then failed
   a letter for that case. The planner immutability assertion now verifies the
   source coordinator after mutating the returned result rather than expecting a
   mutated result array to retain its pre-mutation length.
+- Review remediation: planner output now deep-copies JSON-shaped own data before
+  adding the matrix marker. A focused RED proved that the former descriptor-only
+  copy shared the feature array; mutating returned nested features, diagnostics,
+  receipt arrays, and fire snapshots now leaves the source record unchanged.
+  Accessor, callable, proxy-failing, and non-plain nested values fail closed as
+  `record-invalid` instead of leaking a shared mutable reference.
+- Coverage: the diagnostics harness now locks the frozen slot constant and the
+  exact `side` → `oblique` → `normal_range` progression through a completed
+  three-record coordinator.
+- Remediation GREEN: `node tools/check-form-diagnostics.js`, `npm run
+check:form`, `npm run check:storage`, `npm run check:app`, `npm run
+check:globals`, `npm run lint -- --quiet`, syntax, and Prettier checks passed.
 - Risk: this task is pure validation/projection only; save, delete, export,
   transport, settings, and physical-device workflow integration remain in later
   tasks.

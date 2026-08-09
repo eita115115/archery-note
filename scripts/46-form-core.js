@@ -2359,9 +2359,58 @@ function formDiagnosticPlanningFailure(code) {
   return { ok: false, code, record: null, coordinator: null };
 }
 
+const FORM_DIAGNOSTIC_COPY_FAILED = Symbol("form-diagnostic-copy-failed");
+
+function formDiagnosticCopyRecordValue(value, copies = new Map()) {
+  if (value === null || (typeof value !== "object" && typeof value !== "function")) return value;
+  if (typeof value === "function") return FORM_DIAGNOSTIC_COPY_FAILED;
+  if (copies.has(value)) return copies.get(value);
+
+  let prototype;
+  try {
+    prototype = Object.getPrototypeOf(value);
+  } catch (_) {
+    return FORM_DIAGNOSTIC_COPY_FAILED;
+  }
+  if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
+    return FORM_DIAGNOSTIC_COPY_FAILED;
+  }
+
+  let descriptors;
+  try {
+    descriptors = Object.getOwnPropertyDescriptors(value);
+  } catch (_) {
+    return FORM_DIAGNOSTIC_COPY_FAILED;
+  }
+
+  const copied = Array.isArray(value) ? [] : Object.create(prototype);
+  copies.set(value, copied);
+  for (const key of Reflect.ownKeys(descriptors)) {
+    if (Array.isArray(value) && key === "length") continue;
+    const descriptor = descriptors[key];
+    if (!Object.hasOwn(descriptor, "value")) return FORM_DIAGNOSTIC_COPY_FAILED;
+    const copiedValue = formDiagnosticCopyRecordValue(descriptor.value, copies);
+    if (copiedValue === FORM_DIAGNOSTIC_COPY_FAILED) return FORM_DIAGNOSTIC_COPY_FAILED;
+    try {
+      Object.defineProperty(copied, key, { ...descriptor, value: copiedValue });
+    } catch (_) {
+      return FORM_DIAGNOSTIC_COPY_FAILED;
+    }
+  }
+  if (Array.isArray(value)) {
+    try {
+      Object.defineProperty(copied, "length", descriptors.length);
+    } catch (_) {
+      return FORM_DIAGNOSTIC_COPY_FAILED;
+    }
+  }
+  return copied;
+}
+
 function formDiagnosticCopyRecordWithMarker(record, marker) {
   try {
-    const copied = Object.create(Object.getPrototypeOf(record), Object.getOwnPropertyDescriptors(record));
+    const copied = formDiagnosticCopyRecordValue(record);
+    if (copied === FORM_DIAGNOSTIC_COPY_FAILED) return null;
     Object.defineProperty(copied, "formDiagnosticMatrix", {
       value: marker,
       enumerable: true,
