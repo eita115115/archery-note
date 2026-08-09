@@ -2064,3 +2064,11 @@ Next task:
   current WIP tree, prove `4a0ff1ec` is not an ancestor, and push only the
   sanitized WIP branch. Then resume implementation with the recommended
   subagent-driven workflow, one task and review gate at a time.
+
+## 2026-08-03 — Form diagnostic handoff Task 1
+
+- Changed: added the pure release-receipt tracker with deterministic workflow-local IDs, independent user/detector outcomes, bounded diagnostic retention, and fixed saturated invariant counters.
+- RED: `node tools/check-form-core.js` first failed at `release receipt tracker factory is exported`; the injected ceiling test then failed by allocating `form-receipt-3`.
+- GREEN: `node tools/check-form-core.js`, `npm run check:form`, and `npm run lint -- --quiet` passed.
+- Risk: overflow intentionally makes a diagnostic run ineligible but does not block receipt 33+ identity, manual clicked-ID deletion, or exact cancellation.
+- Next: Task 2 wires exact receipt ownership into live capture and replay.

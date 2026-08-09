@@ -20,6 +20,9 @@ function assertEqual(actual, expected, label) {
     `${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
   );
 }
+function assertJsonEqual(actual, expected, label) {
+  assertEqual(JSON.stringify(actual), JSON.stringify(expected), label);
+}
 function assertClose(actual, expected, eps, label) {
   assert(
     Number.isFinite(actual) && Math.abs(actual - expected) <= eps,
@@ -40,19 +43,57 @@ function compactSource(source) {
 
 const core = new Function(
   `${coreScript}
-return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
-  formMedian, adaptiveAnchorThreshold, adaptiveReleaseThreshold,
-  adaptiveReleaseCandidate:
-    typeof adaptiveReleaseCandidate === "function" ? adaptiveReleaseCandidate : null,
-  updateAdaptiveAnchorEvidence:
-    typeof updateAdaptiveAnchorEvidence === "function" ? updateAdaptiveAnchorEvidence : null,
-  computeFormMetrics, makeFormEma, makeFormPhaseDetector, legacyReleaseContinuity,
-  stepFormPhase, computeFormVelocity,
-  FORM_VEL_FILTER, makeFormVelocitySource,
-  formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
-  formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
-  ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
+  return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
+    formMedian, adaptiveAnchorThreshold, adaptiveReleaseThreshold,
+    adaptiveReleaseCandidate:
+      typeof adaptiveReleaseCandidate === "function" ? adaptiveReleaseCandidate : null,
+    updateAdaptiveAnchorEvidence:
+      typeof updateAdaptiveAnchorEvidence === "function" ? updateAdaptiveAnchorEvidence : null,
+    makeFormReleaseReceiptTracker:
+      typeof makeFormReleaseReceiptTracker === "function"
+        ? makeFormReleaseReceiptTracker
+        : null,
+    computeFormMetrics, makeFormEma, makeFormPhaseDetector, legacyReleaseContinuity,
+    stepFormPhase, computeFormVelocity,
+    FORM_VEL_FILTER, makeFormVelocitySource,
+    formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
+    formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
+    ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
 )();
+
+function replaceSourceExactlyOnce(source, marker, replacement, label) {
+  assertEqual(source.split(marker).length - 1, 1, `${label} marker count`);
+  return source.replace(marker, replacement);
+}
+
+function loadReceiptTrackerCore(options = {}) {
+  let source = coreScript;
+  if (options.sequenceMax != null) {
+    source = replaceSourceExactlyOnce(
+      source,
+      "const FORM_RELEASE_RECEIPT_SEQUENCE_MAX = 999999;",
+      `const FORM_RELEASE_RECEIPT_SEQUENCE_MAX = ${options.sequenceMax};`,
+      "receipt sequence ceiling",
+    );
+  }
+  if (options.inconsistentSequence === true) {
+    source = replaceSourceExactlyOnce(
+      source,
+      "let receiptSequence = 0;",
+      "let receiptSequence = 0.5;",
+      "receipt sequence initial value",
+    );
+  }
+  return new Function(
+    `${source}
+  return {
+    makeFormReleaseReceiptTracker:
+      typeof makeFormReleaseReceiptTracker === "function"
+        ? makeFormReleaseReceiptTracker
+        : null
+  };`,
+  )();
+}
 
 /* ---------- 幾何ヘルパー ---------- */
 
@@ -256,6 +297,261 @@ function fullDrawLandmarks() {
   assertEqual(ema(m1).bowArm, 100, "EMA first value passes through");
   assertClose(ema(m2).bowArm, 150, 1e-9, "EMA smooths");
   assertEqual(ema(null), null, "EMA of null");
+}
+
+assert(
+  typeof core.makeFormReleaseReceiptTracker === "function",
+  "release receipt tracker factory is exported",
+);
+const firstReceiptTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+const secondReceiptTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+const firstReceiptAction = firstReceiptTracker.begin({ fireTs: 10, fire: null });
+assertJsonEqual(
+  Object.keys(firstReceiptAction),
+  ["id", "deletionTarget", "fatal", "code"],
+  "action has exact keys",
+);
+assertEqual(firstReceiptAction.id, "form-receipt-1", "first tracker ID");
+assertEqual(
+  secondReceiptTracker.begin({ fireTs: 20, fire: null }).id,
+  "form-receipt-1",
+  "workflow-local ID",
+);
+
+/* ---------- release-receipt tracker ---------- */
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const begun = tracker.begin({ fireTs: 10, fire: null });
+  assertJsonEqual(
+    tracker.markShotCreated(begun.id),
+    { id: begun.id, deletionTarget: null, fatal: false, code: null },
+    "mark-created action",
+  );
+  assertJsonEqual(
+    tracker.confirm(),
+    { id: begun.id, deletionTarget: null, fatal: false, code: null },
+    "confirm action",
+  );
+  assertEqual(
+    tracker.snapshot().releaseReceipts[0].detectorDisposition,
+    "confirmed",
+    "confirmed receipt is archived",
+  );
+  assertJsonEqual(
+    tracker.manualRemove(begun.id),
+    { id: begun.id, deletionTarget: null, fatal: false, code: null },
+    "confirmed archived receipt can be manually removed",
+  );
+  assertEqual(
+    tracker.snapshot().releaseReceipts[0].userDisposition,
+    "manual-removed",
+    "post-confirm archive removal is retained",
+  );
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const failedSummary = tracker.begin({ fireTs: 20, fire: null });
+  const canceled = tracker.cancel("no-depart");
+  assertEqual(
+    canceled.deletionTarget,
+    failedSummary.id,
+    "summary-failed cancellation returns only its own exact ID",
+  );
+  const receipt = tracker.snapshot().releaseReceipts[0];
+  assertEqual(receipt.shotCreated, false, "failed summary keeps a tombstone");
+  assertEqual(receipt.userDisposition, "not-created", "failed summary is not-created");
+  assertEqual(receipt.detectorDisposition, "auto-canceled", "failed summary still resolves");
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const a = tracker.begin({ fireTs: 100, fire: null });
+  tracker.markShotCreated(a.id);
+  tracker.confirm();
+  const b = tracker.begin({ fireTs: 200, fire: null });
+  tracker.markShotCreated(b.id);
+  tracker.manualRemove(b.id);
+  const canceled = tracker.cancel("anchor-return");
+  assertJsonEqual(
+    canceled,
+    { id: b.id, deletionTarget: b.id, fatal: false, code: null },
+    "cancel action targets only B",
+  );
+  const receipts = tracker.snapshot().releaseReceipts;
+  assertEqual(receipts[0].userDisposition, "present", "A remains present");
+  assertEqual(receipts[0].detectorDisposition, "confirmed", "A remains confirmed");
+  assertEqual(receipts[1].userDisposition, "manual-removed", "B keeps manual outcome");
+  assertEqual(receipts[1].detectorDisposition, "auto-canceled", "B keeps detector outcome");
+}
+
+{
+  const fire = { fireEvidence: "adaptive", sentinel: 1 };
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const first = tracker.begin({ fireTs: 1, fire });
+  fire.sentinel = 999;
+  tracker.markShotCreated(first.id);
+  const currentCopy = tracker.current();
+  currentCopy.fire.sentinel = 888;
+  assertEqual(tracker.current().fire.sentinel, 1, "current returns a detached fire copy");
+
+  const second = tracker.begin({ fireTs: 2, fire: null });
+  assertEqual(second.code, "supersededActive", "second begin reports supersession");
+  assertEqual(
+    tracker.snapshot().releaseReceipts[0].unresolvedReason,
+    "superseded-fire",
+    "superseded receipt is unresolved",
+  );
+  tracker.markShotCreated(second.id);
+  assertEqual(
+    tracker.cancel("anchor-return").deletionTarget,
+    second.id,
+    "new receipt alone owns later cancellation",
+  );
+
+  const snapshotCopy = tracker.snapshot();
+  snapshotCopy.releaseReceipts[0].fire.sentinel = 777;
+  snapshotCopy.receiptInvariantCounts.supersededActive = 0;
+  const fresh = tracker.snapshot();
+  assertEqual(fresh.releaseReceipts[0].fire.sentinel, 1, "snapshot fire is detached");
+  assertEqual(fresh.receiptInvariantCounts.supersededActive, 1, "snapshot counters are detached");
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  assertEqual(tracker.confirm().code, "missingActive", "orphan confirm is classified");
+  const begun = tracker.begin({ fireTs: 1, fire: null });
+  assertEqual(
+    tracker.markShotCreated("form-receipt-999").code,
+    "identityMismatch",
+    "wrong ID is classified",
+  );
+  assertEqual(
+    tracker.cancel("not-a-reason").code,
+    "invalidTransition",
+    "bad cancel reason is classified",
+  );
+  tracker.markShotCreated(begun.id);
+  tracker.confirm();
+  assertEqual(tracker.confirm().code, "missingActive", "double terminal call is classified");
+  for (let i = 0; i < 300; i += 1) tracker.confirm();
+  const counts = tracker.snapshot().receiptInvariantCounts;
+  assertEqual(counts.missingActive, 255, "missingActive saturates at 255");
+  assertEqual(counts.identityMismatch, 1, "identityMismatch increments alone");
+  assertEqual(counts.invalidTransition, 1, "invalidTransition increments alone");
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  for (let i = 1; i <= 32; i += 1) {
+    const receipt = tracker.begin({ fireTs: i, fire: null });
+    tracker.markShotCreated(receipt.id);
+    tracker.confirm();
+  }
+  const r33 = tracker.begin({ fireTs: 33, fire: null });
+  tracker.markShotCreated(r33.id);
+  assertEqual(tracker.cancel("anchor-return").deletionTarget, r33.id, "receipt 33 cancels exactly");
+  const r34 = tracker.begin({ fireTs: 34, fire: null });
+  tracker.markShotCreated(r34.id);
+  tracker.confirm();
+  const snapshot = tracker.snapshot();
+  assertEqual(snapshot.releaseReceipts.length, 32, "archive remains bounded");
+  assertEqual(snapshot.receiptOverflow, 2, "each overflowed terminal receipt counts once");
+  assertJsonEqual(
+    Object.keys(snapshot),
+    ["releaseReceipts", "receiptOverflow", "receiptInvariantCounts", "desynchronized"],
+    "snapshot has exact keys",
+  );
+  assertJsonEqual(
+    Object.keys(snapshot.receiptInvariantCounts),
+    [
+      "supersededActive",
+      "missingActive",
+      "identityMismatch",
+      "invalidTransition",
+      "sequenceExhausted",
+    ],
+    "snapshot counters have exact keys",
+  );
+  assertJsonEqual(
+    Object.keys(snapshot.releaseReceipts[0]),
+    [
+      "id",
+      "fireTs",
+      "shotCreated",
+      "userDisposition",
+      "detectorDisposition",
+      "cancelReason",
+      "unresolvedReason",
+      "fire",
+    ],
+    "snapshot receipt has exact keys",
+  );
+}
+
+{
+  const injected = loadReceiptTrackerCore({ sequenceMax: 2 });
+  const tracker = injected.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  tracker.begin({ fireTs: 1, fire: null });
+  tracker.confirm();
+  tracker.begin({ fireTs: 2, fire: null });
+  tracker.confirm();
+  assertJsonEqual(
+    tracker.begin({ fireTs: 3, fire: null }),
+    { id: null, deletionTarget: null, fatal: true, code: "sequenceExhausted" },
+    "ceiling without active receipt",
+  );
+  assertEqual(tracker.current(), null, "ceiling without active clears current");
+  assertEqual(tracker.snapshot().desynchronized, true, "ceiling latches desynchronization");
+}
+
+{
+  const injected = loadReceiptTrackerCore({ sequenceMax: 2 });
+  const tracker = injected.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const first = tracker.begin({ fireTs: 1, fire: null });
+  tracker.markShotCreated(first.id);
+  tracker.confirm();
+  const second = tracker.begin({ fireTs: 2, fire: null });
+  tracker.markShotCreated(second.id);
+  assertJsonEqual(
+    tracker.begin({ fireTs: 3, fire: null }),
+    { id: null, deletionTarget: null, fatal: true, code: "sequenceExhausted" },
+    "ceiling with active receipt",
+  );
+  const state = tracker.snapshot();
+  assertEqual(
+    state.releaseReceipts[1].unresolvedReason,
+    "superseded-fire",
+    "active receipt is finalized before latching",
+  );
+  assertEqual(
+    state.receiptInvariantCounts.supersededActive,
+    0,
+    "fatal allocation is not supersession",
+  );
+  assertEqual(state.receiptInvariantCounts.sequenceExhausted, 1, "ceiling increments once");
+  assertJsonEqual(
+    tracker.cancel("anchor-return"),
+    { id: null, deletionTarget: null, fatal: true, code: null },
+    "latched cancel is deletion-free",
+  );
+}
+
+{
+  const injected = loadReceiptTrackerCore({ inconsistentSequence: true });
+  const tracker = injected.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  assertJsonEqual(
+    tracker.begin({ fireTs: 1, fire: null }),
+    { id: null, deletionTarget: null, fatal: true, code: "invalidTransition" },
+    "inconsistent sequence fails closed",
+  );
+  const healthy = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  assertEqual(
+    healthy.begin({ fireTs: 1, fire: null }).id,
+    "form-receipt-1",
+    "new tracker is healthy",
+  );
 }
 
 /* ---------- フェーズ検出（F1 実射検証で確定した3ケース） ---------- */
@@ -1962,10 +2258,7 @@ function releaseFrames(totalMs, dt, fromAnchor) {
   };
   const outward = runGapDirection(null);
   const inward = runGapDirection(releaseAnchor + directionStep);
-  const excessiveGap = runGapDirection(
-    null,
-    Math.floor(core.FORM_PH.NB_MAX_GAP_MS / frameMs),
-  );
+  const excessiveGap = runGapDirection(null, Math.floor(core.FORM_PH.NB_MAX_GAP_MS / frameMs));
 
   assertClose(
     outward.current.velocity,
@@ -2224,11 +2517,7 @@ function shotSequence(dt) {
     const gapFrames = 9;
     for (let i = 0; i < 72; i++) seq.push([mkRaw(0.22, 10), 0.02, frameMs]);
     for (let i = 0; i < gapFrames - 1; i++) seq.push([null, 0, frameMs]);
-    seq.push([
-      mkRaw(0.54, 10),
-      (0.54 - 0.22) / ((gapFrames * frameMs) / 1000),
-      frameMs,
-    ]);
+    seq.push([mkRaw(0.54, 10), (0.54 - 0.22) / ((gapFrames * frameMs) / 1000), frameMs]);
     for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 10), 0.1, frameMs]);
     return seq;
   }
@@ -2241,8 +2530,7 @@ function shotSequence(dt) {
   {
     const frameMs = 1000 / 60;
     const s = adaptiveStepper(frameMs);
-    for (let i = 0; i < 16; i++)
-      s.push(mkRaw(0.47, 150), 0.2, i === 0 ? 1001 : frameMs);
+    for (let i = 0; i < 16; i++) s.push(mkRaw(0.47, 150), 0.2, i === 0 ? 1001 : frameMs);
     for (let i = 0; i < 20; i++) s.push(null, 0, frameMs);
     const arrival = s.push(mkRaw(0.8, 140), 3, frameMs);
     assertEqual(

@@ -942,6 +942,183 @@ function legacyReleaseContinuity(
   };
 }
 
+const FORM_RELEASE_RECEIPT_SEQUENCE_MAX = 999999;
+const FORM_RELEASE_CANCEL_REASONS = new Set([
+  "anchor-return",
+  "nb2-drift",
+  "nb2-unobserved",
+  "no-depart",
+]);
+const FORM_RELEASE_UNRESOLVED_REASONS = new Set([
+  "geometry-reset",
+  "workflow-save",
+  "workflow-close",
+  "replay-eos",
+  "superseded-fire",
+]);
+
+function makeFormReleaseReceiptTracker(options) {
+  const requestedCap = options && options.maxDiagnosticReceipts;
+  const maxDiagnosticReceipts =
+    Number.isSafeInteger(requestedCap) && requestedCap >= 0 ? requestedCap : 32;
+  let receiptSequence = 0;
+  let activeReceipt = null;
+  let receiptOverflow = 0;
+  let desynchronized = false;
+  const releaseReceipts = [];
+  const receiptInvariantCounts = {
+    supersededActive: 0,
+    missingActive: 0,
+    identityMismatch: 0,
+    invalidTransition: 0,
+    sequenceExhausted: 0,
+  };
+
+  const makeAction = (id, deletionTarget, fatal, code) => ({
+    id,
+    deletionTarget,
+    fatal,
+    code,
+  });
+  const copyFire = (fire) => (fire == null ? null : { ...fire });
+  const copyReceipt = (receipt) => ({ ...receipt, fire: copyFire(receipt.fire) });
+  const increment = (code) => {
+    receiptInvariantCounts[code] = Math.min(255, receiptInvariantCounts[code] + 1);
+  };
+  const failure = (code) => {
+    increment(code);
+    return makeAction(null, null, false, code);
+  };
+  const archive = (receipt) => {
+    if (releaseReceipts.length < maxDiagnosticReceipts) {
+      releaseReceipts.push(copyReceipt(receipt));
+    } else {
+      receiptOverflow = Math.min(Number.MAX_SAFE_INTEGER, receiptOverflow + 1);
+    }
+  };
+  const finalizeActive = (detectorDisposition, cancelReason, unresolvedReason) => {
+    const receipt = activeReceipt;
+    receipt.detectorDisposition = detectorDisposition;
+    receipt.cancelReason = cancelReason;
+    receipt.unresolvedReason = unresolvedReason;
+    activeReceipt = null;
+    archive(receipt);
+    return receipt;
+  };
+  const latchedAction = () => makeAction(null, null, true, null);
+  const sequenceFailureCode = () => {
+    if (
+      !Number.isSafeInteger(receiptSequence) ||
+      receiptSequence < 0 ||
+      receiptSequence > FORM_RELEASE_RECEIPT_SEQUENCE_MAX
+    ) {
+      return "invalidTransition";
+    }
+    return receiptSequence === FORM_RELEASE_RECEIPT_SEQUENCE_MAX ? "sequenceExhausted" : null;
+  };
+  const latchDesynchronized = (code) => {
+    if (activeReceipt) finalizeActive("unresolved", null, "superseded-fire");
+    increment(code);
+    desynchronized = true;
+    activeReceipt = null;
+    return makeAction(null, null, true, code);
+  };
+
+  function begin(input) {
+    if (desynchronized) return latchedAction();
+    if (
+      !input ||
+      !Number.isFinite(input.fireTs) ||
+      !(input.fire == null || (typeof input.fire === "object" && !Array.isArray(input.fire)))
+    ) {
+      return failure("invalidTransition");
+    }
+    const allocationFailure = sequenceFailureCode();
+    if (allocationFailure) return latchDesynchronized(allocationFailure);
+    let code = null;
+    if (activeReceipt) {
+      finalizeActive("unresolved", null, "superseded-fire");
+      increment("supersededActive");
+      code = "supersededActive";
+    }
+    receiptSequence += 1;
+    const id = `form-receipt-${receiptSequence}`;
+    activeReceipt = {
+      id,
+      fireTs: input.fireTs,
+      shotCreated: false,
+      userDisposition: "not-created",
+      detectorDisposition: "pending",
+      cancelReason: null,
+      unresolvedReason: null,
+      fire: copyFire(input.fire),
+    };
+    return makeAction(id, null, false, code);
+  }
+
+  function markShotCreated(id) {
+    if (!activeReceipt || activeReceipt.id !== id) return failure("identityMismatch");
+    if (activeReceipt.shotCreated || activeReceipt.detectorDisposition !== "pending") {
+      return failure("invalidTransition");
+    }
+    activeReceipt.shotCreated = true;
+    activeReceipt.userDisposition = "present";
+    return makeAction(id, null, false, null);
+  }
+
+  function manualRemove(id) {
+    const receipt =
+      (activeReceipt && activeReceipt.id === id ? activeReceipt : null) ||
+      releaseReceipts.find((candidate) => candidate.id === id);
+    if (!receipt) return failure("identityMismatch");
+    if (!receipt.shotCreated || receipt.userDisposition !== "present") {
+      return failure("invalidTransition");
+    }
+    receipt.userDisposition = "manual-removed";
+    return makeAction(id, null, false, null);
+  }
+
+  function confirm() {
+    if (desynchronized) return latchedAction();
+    if (!activeReceipt) return failure("missingActive");
+    const receipt = finalizeActive("confirmed", null, null);
+    return makeAction(receipt.id, null, false, null);
+  }
+
+  function cancel(reason) {
+    if (desynchronized) return latchedAction();
+    if (!activeReceipt) return failure("missingActive");
+    if (!FORM_RELEASE_CANCEL_REASONS.has(reason)) return failure("invalidTransition");
+    const receipt = finalizeActive("auto-canceled", reason, null);
+    return makeAction(receipt.id, receipt.id, false, null);
+  }
+
+  function abandon(reason) {
+    if (desynchronized) return latchedAction();
+    if (!activeReceipt) return failure("missingActive");
+    if (!FORM_RELEASE_UNRESOLVED_REASONS.has(reason)) {
+      return failure("invalidTransition");
+    }
+    const receipt = finalizeActive("unresolved", null, reason);
+    return makeAction(receipt.id, null, false, null);
+  }
+
+  function current() {
+    return activeReceipt ? copyReceipt(activeReceipt) : null;
+  }
+
+  function snapshot() {
+    return {
+      releaseReceipts: releaseReceipts.map(copyReceipt),
+      receiptOverflow,
+      receiptInvariantCounts: { ...receiptInvariantCounts },
+      desynchronized,
+    };
+  }
+
+  return { begin, markShotCreated, manualRemove, confirm, cancel, abandon, current, snapshot };
+}
+
 /* anchorStartTs は anchorSince と意味が異なる別フィールド（Stage 0 C）。
    anchorSince はアンカー圏を離れた全フレームでリセットされる（FULL_DRAW 昇格判定用）が、
    anchorStartTs は sticky: ANCHORING/FULL_DRAW で記録を開始し、DRAWING への一時離脱では
