@@ -32,6 +32,14 @@ const OUTCOMES = new Set([
 ]);
 const DETECTOR_OUTCOMES = new Set(["confirmed", "auto-canceled", "unresolved"]);
 const FIRE_EVIDENCE = new Set(["adaptive", "close", "nb2"]);
+const CANCEL_REASONS = new Set(["anchor-return", "nb2-drift", "nb2-unobserved", "no-depart"]);
+const UNRESOLVED_REASONS = new Set([
+  "geometry-reset",
+  "workflow-save",
+  "workflow-close",
+  "replay-eos",
+  "superseded-fire",
+]);
 
 function failure(code, message, byteLength = null) {
   return { ok: false, code, message, summary: null, sha256: null, byteLength };
@@ -50,8 +58,8 @@ function finiteInRange(value, minimum, maximum, nullable = false) {
   );
 }
 
-function nullableString(value) {
-  return value === null || typeof value === "string";
+function nullableEnum(value, allowed) {
+  return value === null || allowed.has(value);
 }
 
 function inspectFormDiagnosticArtifact(text) {
@@ -128,8 +136,8 @@ function inspectFormDiagnosticArtifact(text) {
       }
       if (
         !DETECTOR_OUTCOMES.has(receipt.detectorOutcome) ||
-        !nullableString(receipt.cancelReason) ||
-        !nullableString(receipt.unresolvedReason)
+        !nullableEnum(receipt.cancelReason, CANCEL_REASONS) ||
+        !nullableEnum(receipt.unresolvedReason, UNRESOLVED_REASONS)
       ) {
         return failure(
           "receipt",

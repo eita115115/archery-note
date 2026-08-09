@@ -77,6 +77,12 @@ assert.equal(
   "missing fire field reports fire allowlist failure",
 );
 
+const unknownReason = validPayload();
+unknownReason.runs[0].receipts[0].cancelReason = "private-sentinel";
+const unknownReasonResult = inspectFormDiagnosticArtifact(JSON.stringify(unknownReason));
+assert.equal(unknownReasonResult.ok, false, "unknown receipt reasons are refused");
+assert.equal(unknownReasonResult.code, "receipt", "unknown receipt reasons report receipt failure");
+
 const wrongCount = validPayload();
 wrongCount.runs[1].receipts.pop();
 const wrongCountResult = inspectFormDiagnosticArtifact(JSON.stringify(wrongCount));

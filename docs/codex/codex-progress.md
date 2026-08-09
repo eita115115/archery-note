@@ -2773,3 +2773,19 @@ tools/check-form-core.js`, `npm run check:all`, lint, format, targeted syntax,
   changed. Trusted-HTTPS field acceptance remains deferred.
 - Next: commit/push this small diagnostic handoff clarification, verify CI,
   and keep the physical 3×6 matrix pending.
+
+## 2026-08-10 — Enforce diagnostic receipt reason allowlists
+
+- Changed: the offline artifact checker now accepts only the production
+  `cancelReason` and `unresolvedReason` enums; arbitrary strings are refused.
+  This mirrors the source exporter and keeps tampered receipt explanations
+  from passing offline validation.
+- TDD evidence: a `private-sentinel` receipt reason first passed the checker,
+  then the new allowlist assertion passed after the minimal validator change.
+- Validation: `node tools/check-form-diagnostic-artifact.js`, `npm run
+check:form`, lint, targeted Prettier, and `git diff --check` pass.
+- Risk: bounded validator/test-only hardening; no detector threshold, storage,
+  transport, Service Worker, user data, or physical acceptance behavior
+  changed. Trusted-HTTPS field acceptance remains deferred.
+- Next: commit/push this validator hardening, verify CI, and keep the physical
+  3×6 matrix pending.
