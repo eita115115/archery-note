@@ -2391,3 +2391,15 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   Physical iPhone Safari acceptance also remains open; execute the trusted
   HTTPS three-condition/18-shot checklist before calling field acceptance
   complete.
+
+## 2026-08-09 — Public HTTPS parity check
+
+- Read-only check of `https://eita115115.github.io/archery-note/` reports
+  `version.json` v84, but the served `scripts/47-form-view.js` is not the
+  verified handoff tree: its SHA-256 is
+  `3233EA697098105D1041AD0B4D232D8DCCD9FCD223E05AA76AC4F5FE3124EA1E` and it
+  contains neither the exact tracking-gate marker nor the frozen-save marker.
+- Decision: the public site is not an acceptable physical-test target for this
+  handoff. Do not record iPhone results against it; first publish or otherwise
+  provide a trusted HTTPS preview pinned to the candidate commit/tree, then
+  run the three-condition/18-shot checklist.
