@@ -2080,4 +2080,5 @@ Next task:
 - RED: `node tools/check-form-core.js` reproduced `capture cancellation never owns array tail` before any source-order edit.
 - GREEN: retained A survives B fire -> manual remove B -> cancel B; receipt 33/34 remains exact with diagnostics OFF and ON.
 - Risk: replay EOS remains unresolved by design; this task adds no keep/delete policy.
+- Review: independent Task 2 review APPROVED; live/replay parity, exact-ID ownership, frame priority, active-only abandon, fatal freeze, and diagnostics OFF/ON cap behavior all passed. Reviewer reran focused app/form/globals/lint/syntax/diff checks.
 - Next: Task 3 copies and persists the exact seven fire fields additively.
