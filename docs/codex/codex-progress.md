@@ -2090,4 +2090,5 @@ Next task:
 - GREEN: form checks plus normalize-twice, save/load, JSON import, safety restore, and trash restore preservation passed for both synthetic fixtures.
 - Compatibility: false, absent, truthy-string, numeric, and object diagnostic settings persist neither existing `features[].diag` nor new receipt fields; the legacy fixture remains valid.
 - Risk: missing or invalid fire snapshots make a run exporter-ineligible instead of inventing evidence.
+- Review: independent Task 3 review APPROVED; exact seven-key validation, exact-true gating, diagnostics-off shape, deep-copy isolation, schema-5 normalize/import/save-load/safety/trash preservation, and synthetic fixtures all passed. Browser/iPhone exercise remains a later validation gate.
 - Next: Task 4 adds pure matrix coordination and record eligibility.
