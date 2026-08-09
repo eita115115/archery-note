@@ -2323,3 +2323,29 @@ dist/native/native-readiness.json` exited `0`, and the scoped `dist` status
   tree, retain the privacy-safe artifact hash, and construct a fresh sanitized
   release branch only after those physical criteria pass. Do not push this
   sensitive source branch or treat this field handoff as physical acceptance.
+
+## 2026-08-09 — Task 11 exact form-tracking boolean boundary
+
+- Changed: `formTrackingEnabled()` and the settings tracking chips now accept
+  only the literal boolean `true`. Missing, `false`, `0`, `1`, `"true"`, and
+  `"false"` all render the tracking card hidden and the settings chips as OFF;
+  clicking either chip still persists an actual boolean and keeps `aria-pressed`,
+  class state, and the toast aligned. Existing `formDebug===true` gates,
+  diagnostic transport, and persisted diagnostic record fields are untouched.
+- RED: `npm run check:ui` failed at the new exact-gate source assertion. A
+  prestarted Chromium run of the seven new cases failed exactly for `1`,
+  `"true"`, and `"false"` because the truthy runtime rendered the card; the
+  missing/false/0 and literal-true cases passed before the fix.
+- GREEN: `node tools/check-form-core.js`, `node tools/check-form-diagnostics.js`,
+  `npm run check:all`, `npm run lint`, `npm run format:check`, four
+  `node --check` targets, and `git diff --check` passed. The focused form
+  diagnostics suite passed 40/40 (Task 7/9 plus the seven new cases) on a
+  manually prestarted matching-port server; the existing app-smoke settings
+  regression passed 1/1. The CI-managed Playwright teardown constraint remains
+  unchanged and is avoided only by the documented prestarted-server run.
+- Risk: this is a fail-closed flag/UI boundary only. It does not normalize or
+  delete legacy setting values, change storage schema, migrate data, alter the
+  Service Worker, add dependencies, or change native transport behavior.
+- Next: independent review of this small diff, then fold it into the sanitized
+  GitHub handoff only after the physical trusted-HTTPS 3-condition/18-shot
+  acceptance remains addressed.

@@ -1502,6 +1502,7 @@ function openSettings() {
   const ovl = document.createElement("div");
   ovl.className = "ovl";
   const th = db.settings.theme || "auto";
+  const formTrackingOn = db.settings.formTrackingEnabled===true;
   const snaps = readSnapshots();
   ovl.innerHTML = `<div class="sheet"><h3>${icon("gear")} 設定</h3>
     <div class="settingsGroup" data-testid="settings-group-app">
@@ -1535,8 +1536,8 @@ function openSettings() {
       <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight || 850}">
       <label class="f">射形トラッキング（ベータ）</label>
       <div class="chips" id="ftChips">
-        <button type="button" class="chip ${db.settings.formTrackingEnabled ? "" : "on"}" aria-pressed="${!db.settings.formTrackingEnabled}" data-ft="0">OFF</button>
-        <button type="button" class="chip ${db.settings.formTrackingEnabled ? "on" : ""}" aria-pressed="${!!db.settings.formTrackingEnabled}" data-ft="1">ON</button>
+        <button type="button" class="chip ${formTrackingOn ? "" : "on"}" aria-pressed="${!formTrackingOn}" data-ft="0">OFF</button>
+        <button type="button" class="chip ${formTrackingOn ? "on" : ""}" aria-pressed="${formTrackingOn}" data-ft="1">ON</button>
       </div>
       <div class="hint">解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
       <label class="f">検証用の診断データ保存</label>
@@ -1634,7 +1635,7 @@ function openSettings() {
           x.setAttribute("aria-pressed", String(on));
         });
         toast(
-          db.settings.formTrackingEnabled
+          db.settings.formTrackingEnabled===true
             ? "射形トラッキングを有効にしました（分析タブ）"
             : "射形トラッキングを無効にしました",
         );

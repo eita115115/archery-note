@@ -4,7 +4,7 @@
    資産は assets/pose/（自己ホスト・機能有効時のみ遅延ロード）。
    映像・生ランドマークは保存しない。保存は formAnalyses の派生特徴量のみ。 */
 
-function formTrackingEnabled(){ return !!(db.settings&&db.settings.formTrackingEnabled); }
+function formTrackingEnabled(){ return !!(db.settings&&db.settings.formTrackingEnabled===true); }
 
 let formPosePromise=null;
 function loadFormPose(){

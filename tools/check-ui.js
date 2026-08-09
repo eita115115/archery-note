@@ -381,6 +381,13 @@ function staticUiChecks() {
   );
   const formViewSource = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
 
+  assert(
+    /function\s+formTrackingEnabled\(\)\s*\{\s*return\s+!!\(db\.settings&&db\.settings\.formTrackingEnabled===true\);?\s*\}/.test(
+      formViewSource,
+    ),
+    "form tracking runtime gate must accept only the literal boolean true",
+  );
+
   function sourceBetween(source, startMarker, endMarker) {
     const start = source.indexOf(startMarker);
     const end = source.indexOf(endMarker, start + startMarker.length);
@@ -432,6 +439,12 @@ function staticUiChecks() {
     settingsHelpers.includes("db.settings.formDebug===true") &&
       settingsHelpers.includes("db.settings.formDebug!==true"),
     "diagnostic settings use exact boolean gates",
+  );
+  assert(
+    /db\.settings\.formTrackingEnabled===true/.test(gearSettingsSource) &&
+      !/db\.settings\.formTrackingEnabled\s*\?/.test(gearSettingsSource) &&
+      !/!!\s*db\.settings\.formTrackingEnabled/.test(gearSettingsSource),
+    "form tracking chips use exact boolean gates",
   );
   assert(
     settingsHelpers.includes("FORM_DIAGNOSTIC_SLOTS[") &&

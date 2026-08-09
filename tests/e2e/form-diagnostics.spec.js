@@ -988,3 +988,41 @@ for (const viewport of [
     });
   });
 }
+
+for (const [label, value, enabled] of [
+  ["missing", undefined, false],
+  ["false", false, false],
+  ["zero", 0, false],
+  ["one", 1, false],
+  ['string "true"', "true", false],
+  ['string "false"', "false", false],
+  ["literal true", true, true],
+]) {
+  test(`form tracking ${label} is ${enabled ? "enabled" : "disabled"} everywhere`, async ({
+    page,
+  }) => {
+    const database = makeSyntheticDiagnosticDb();
+    if (label === "missing") delete database.settings.formTrackingEnabled;
+    else database.settings.formTrackingEnabled = value;
+
+    await seedDiagnosticDb(page, database);
+    await page.goto("/");
+    await page.locator('#tabs [data-v="analysis"]').click();
+
+    const card = page.locator(".card").filter({ hasText: "射形トラッキング" });
+    if (enabled) await expect(card).toHaveCount(1);
+    else await expect(card).toHaveCount(0);
+
+    await page.locator("#btnSettings").click();
+    const pressed = page.locator('#ftChips .chip[aria-pressed="true"]');
+    await expect(pressed).toHaveCount(1);
+    await expect(pressed).toHaveAttribute("data-ft", enabled ? "1" : "0");
+
+    await page.locator('#ftChips .chip[data-ft="1"]').click();
+    await expect(pressed).toHaveAttribute("data-ft", "1");
+    expect(await page.evaluate(() => db.settings.formTrackingEnabled)).toBe(true);
+    await page.locator('#ftChips .chip[data-ft="0"]').click();
+    await expect(pressed).toHaveAttribute("data-ft", "0");
+    expect(await page.evaluate(() => db.settings.formTrackingEnabled)).toBe(false);
+  });
+}
