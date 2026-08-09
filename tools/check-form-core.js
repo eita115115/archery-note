@@ -53,6 +53,8 @@ const core = new Function(
       typeof makeFormReleaseReceiptTracker === "function"
         ? makeFormReleaseReceiptTracker
         : null,
+    formRemoveShotByReceiptId:
+      typeof formRemoveShotByReceiptId === "function" ? formRemoveShotByReceiptId : null,
     copyFormReleaseFireSnapshot:
       typeof copyFormReleaseFireSnapshot === "function"
         ? copyFormReleaseFireSnapshot
@@ -523,6 +525,26 @@ assert(
 );
 const firstReceiptTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
 const secondReceiptTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+assert(
+  typeof core.formRemoveShotByReceiptId === "function",
+  "receipt-owned shot removal helper is exported",
+);
+{
+  const sourceShots = [{ id: "form-receipt-1" }, { id: "form-receipt-2" }];
+  const removed = core.formRemoveShotByReceiptId(sourceShots, "form-receipt-1");
+  assertJsonEqual(removed, [{ id: "form-receipt-2" }], "removal targets the exact receipt ID");
+  assert(removed !== sourceShots, "receipt-owned removal returns a detached array");
+  assertJsonEqual(
+    core.formRemoveShotByReceiptId(sourceShots, "form-receipt-unknown"),
+    sourceShots,
+    "unknown receipt ID preserves every shot",
+  );
+  assertJsonEqual(
+    core.formRemoveShotByReceiptId(sourceShots, null),
+    sourceShots,
+    "missing receipt ID preserves every shot",
+  );
+}
 const firstReceiptAction = firstReceiptTracker.begin({ fireTs: 10, fire: null });
 assertJsonEqual(
   Object.keys(firstReceiptAction),
@@ -4219,6 +4241,10 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
       `${label} cancellation never owns array tail`,
     );
     assert(!/\.pop\s*\(/.test(source), `${label} cancellation never pops a shot`);
+    assert(
+      compactSource(source).includes("shots=formRemoveShotByReceiptId(shots,target);"),
+      `${label} cancellation uses the shared receipt-owned removal helper`,
+    );
   });
   [
     {

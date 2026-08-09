@@ -957,6 +957,14 @@ const FORM_RELEASE_UNRESOLVED_REASONS = new Set([
   "superseded-fire",
 ]);
 
+/* Receipt cancellation owns exactly one shot ID. Keep this pure so live and
+   replay cannot drift into tail-based deletion or mutate the source array. */
+function formRemoveShotByReceiptId(shots, receiptId) {
+  if (!Array.isArray(shots)) return [];
+  if (receiptId == null) return shots.slice();
+  return shots.filter((shot) => !shot || shot.id !== receiptId);
+}
+
 function makeFormReleaseReceiptTracker(options) {
   const requestedCap = options && options.maxDiagnosticReceipts;
   const maxDiagnosticReceipts =

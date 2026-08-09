@@ -590,7 +590,7 @@ function openFormCapture(){
   function applyReceiptCancellation(action){
     const target=action&&action.deletionTarget;
     if(!target) return;
-    shots=shots.filter(shot=>shot.id!==target);
+    shots=formRemoveShotByReceiptId(shots,target);
     const div=ovl.querySelector(`#fcShots [data-shot-id="${target}"]`);
     if(div) div.remove();
     if(pendingCheck&&pendingCheck.shotId===target) pendingCheck=null;
@@ -990,7 +990,7 @@ function startFormReplay(videoUrl){
   function applyReceiptCancellation(action){
     const target=action&&action.deletionTarget;
     if(!target) return;
-    shots=shots.filter(shot=>shot.id!==target);
+    shots=formRemoveShotByReceiptId(shots,target);
     const div=ovl.querySelector(`#frShots [data-shot-id="${target}"]`);
     if(div) div.remove();
     renumberShots();

@@ -3037,3 +3037,20 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   remains pending and still requires a current candidate artifact.
 - Next: commit/push this copy correction, verify CI, then continue with a
   narrowly scoped count/acceptance quality task.
+
+## 2026-08-10 — Centralize receipt-owned shot removal
+
+- RED evidence: `node tools/check-form-core.js` failed because the shared
+  receipt-owned shot removal helper was not exported; live/replay each still
+  held their own array-filter implementation.
+- Changed: added pure `formRemoveShotByReceiptId`, which returns a detached
+  array, removes only the exact receipt ID, and preserves all shots for an
+  unknown or missing ID. Both live and replay cancellation paths now use it.
+- Validation: core/form contracts passed, syntax checks passed, and Chromium
+  form-diagnostics E2E reported all 46/46 workers/tests `ok`; the Playwright
+  parent hit the known web-server teardown timeout after the test run.
+- Risk: shot-array ownership only; no detector thresholds, receipt state
+  transitions, storage schema, Service Worker, dependency, or transport change.
+  Physical 3×6 acceptance remains pending.
+- Next: finish the cumulative check ladder, commit/push this count-ownership
+  guard, verify CI, then continue toward the current-candidate field run.
