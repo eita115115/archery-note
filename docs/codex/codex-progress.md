@@ -2406,3 +2406,20 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   handoff. Do not record iPhone results against it; first publish or otherwise
   provide a trusted HTTPS preview pinned to the candidate commit/tree, then
   run the three-condition/18-shot checklist.
+
+## 2026-08-09 — Development dependency security remediation
+
+- GitHub CLI is now installed and authenticated as `eita115115` (v2.97.0).
+  The sanitized candidate branch was pushed only after confirming it is based
+  on `origin/main` and excludes the sensitive ancestor and the three unrelated
+  worktree documents.
+- GitHub Dependabot and `npm audit` identified three vulnerable development
+  transitive packages: `tar`, `ip-address`, and `brace-expansion`. Production
+  dependencies had zero findings. `npm audit fix --package-lock-only
+--ignore-scripts` updated only those lockfile entries to `7.5.22`, `10.4.0`,
+  and `5.0.9`; no dependency was added and no runtime code changed.
+- After `npm ci --ignore-scripts`, full dependency audit, `npm run check:all`,
+  lint, format, and the complete prestarted Chromium suite all passed. The
+  browser suite completed 83/83; the generated transient `debug.log` was
+  removed. The dependency-remediation commit must be reflected in the pushed
+  candidate before opening the draft PR.
