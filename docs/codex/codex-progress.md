@@ -3232,3 +3232,18 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   diagnostic artifact is collected.
 - Next: run the current-candidate field acceptance when trusted HTTPS is
   available, or continue with another isolated regression contract.
+
+## 2026-08-10 — Require confirmed receipt state in the six-shot contract
+
+- Changed: the six-shot regression now asserts that every retained receipt
+  confirms cleanly and ends as `userDisposition: "present"` plus
+  `detectorDisposition: "confirmed"`, not merely that six IDs were allocated.
+- Validation: `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run lint -- --quiet`, and `git diff --check` pass. The focused
+  Prettier check reports the same pre-existing whole-file formatting drift in
+  `tools/check-form-core.js`; the new diff itself has no whitespace errors.
+- Risk: test-only coverage; no production runtime, storage, or detector
+  behavior changed. Physical 3×6 acceptance still requires a current bounded
+  diagnostic artifact.
+- Next: commit/push this contract-only review fix, verify CI, then keep the
+  physical checklist pending until the user can collect the artifact.

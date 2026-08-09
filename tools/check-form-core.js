@@ -1057,7 +1057,11 @@ function adaptiveConfirmationFixture() {
     );
     diagnosticIds.push(action.id);
     diagnosticSummaries += 1;
-    diagnosticTracker.confirm();
+    assertEqual(
+      diagnosticTracker.confirm().code,
+      null,
+      `six-shot pipeline receipt ${diagnosticIds.length} confirms cleanly`,
+    );
   }
   assertEqual(diagnosticSummaries, 6, "six-shot pipeline retains six non-null summaries");
   assertJsonEqual(
@@ -1068,9 +1072,12 @@ function adaptiveConfirmationFixture() {
   assertEqual(
     diagnosticTracker
       .snapshot()
-      .releaseReceipts.filter((receipt) => receipt.userDisposition === "present").length,
+      .releaseReceipts.filter(
+        (receipt) =>
+          receipt.userDisposition === "present" && receipt.detectorDisposition === "confirmed",
+      ).length,
     6,
-    "six-shot pipeline keeps six present receipt records",
+    "six-shot pipeline keeps six confirmed present receipt records",
   );
 }
 
