@@ -231,8 +231,9 @@ for (const [label, source, freezeName, finishName] of [
     `${label} keeps freeze -> abandon -> snapshot -> create -> attempt order`,
   );
 }
+const replayPoseLoadSource = saveReplay.replace(/\r\n/g, "\n");
 assert(
-  saveReplay.includes("loadFormPose().then(async lm=>{\n    if(!running) return;"),
+  replayPoseLoadSource.includes("loadFormPose().then(async lm=>{\n    if(!running) return;"),
   "replay pose continuation cannot restart after freeze or close",
 );
 for (const [label, source, finishName] of [
