@@ -2789,3 +2789,21 @@ check:form`, lint, targeted Prettier, and `git diff --check` pass.
   changed. Trusted-HTTPS field acceptance remains deferred.
 - Next: commit/push this validator hardening, verify CI, and keep the physical
   3×6 matrix pending.
+
+## 2026-08-10 — Accept bounded false-positive receipts
+
+- Changed: the offline artifact checker now accepts 1–32 receipts per run
+  while still requiring exactly six retained shots. This matches the exporter
+  and field contract: a manually removed false positive may accompany the six
+  retained shots; more than 32 receipts is refused.
+- TDD evidence: a synthetic run with six retained receipts plus one
+  `manual-removed` receipt first failed at the old exact-six check, then passed
+  after the bounded count change. A 33-receipt run remains rejected.
+- Validation: `node tools/check-form-diagnostic-artifact.js` passes; the full
+  `npm run check:all`, lint, targeted Prettier, and `git diff --check` remain
+  required before commit.
+- Risk: offline artifact-validator alignment only; no detector threshold,
+  storage, transport, Service Worker, user data, or physical acceptance
+  behavior changed. Trusted-HTTPS field acceptance remains deferred.
+- Next: finish the full local validation, commit/push this checker alignment,
+  verify CI, and keep the physical 3×6 matrix pending.

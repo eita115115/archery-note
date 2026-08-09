@@ -113,7 +113,12 @@ function inspectFormDiagnosticArtifact(text) {
     if (run.runOrdinal !== index + 1 || run.condition !== CONDITIONS[index]) {
       return failure("run-order", `run ${index + 1} の順序またはconditionが不正です`, byteLength);
     }
-    if (run.retainedShotCount !== 6 || !Array.isArray(run.receipts) || run.receipts.length !== 6) {
+    if (
+      run.retainedShotCount !== 6 ||
+      !Array.isArray(run.receipts) ||
+      run.receipts.length < 1 ||
+      run.receipts.length > 32
+    ) {
       return failure("run-count", `${run.condition} は6射を保持している必要があります`, byteLength);
     }
 

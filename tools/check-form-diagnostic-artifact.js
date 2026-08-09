@@ -5,10 +5,10 @@ const { inspectFormDiagnosticArtifact } = require("./form-diagnostic-artifact");
 
 const CONDITIONS = ["side", "oblique", "normal_range"];
 
-function receipt(receiptOrdinal) {
+function receipt(receiptOrdinal, outcome = "retained") {
   return {
     receiptOrdinal,
-    outcome: "retained",
+    outcome,
     detectorOutcome: "confirmed",
     cancelReason: null,
     unresolvedReason: null,
@@ -44,6 +44,30 @@ assert.equal(valid.ok, true, "valid artifact is accepted");
 assert.equal(valid.summary.runs[0].retainedShotCount, 6, "summary exposes retained count");
 assert.equal(valid.summary.runs[2].condition, "normal_range", "summary preserves condition order");
 assert.equal(valid.sha256.length, 64, "accepted artifact has SHA-256");
+
+const removableFalsePositive = validPayload();
+removableFalsePositive.runs[0].receipts.push(receipt(7, "manual-removed"));
+const removableFalsePositiveResult = inspectFormDiagnosticArtifact(
+  JSON.stringify(removableFalsePositive),
+);
+assert.equal(
+  removableFalsePositiveResult.ok,
+  true,
+  "artifact accepts a manually removed false positive alongside six retained shots",
+);
+assert.equal(
+  removableFalsePositiveResult.summary.runs[0].retainedShotCount,
+  6,
+  "manual removal does not change retained-shot count",
+);
+
+const tooManyReceipts = validPayload();
+for (let ordinal = 7; ordinal <= 33; ordinal += 1) {
+  tooManyReceipts.runs[0].receipts.push(receipt(ordinal, "manual-removed"));
+}
+const tooManyReceiptsResult = inspectFormDiagnosticArtifact(JSON.stringify(tooManyReceipts));
+assert.equal(tooManyReceiptsResult.ok, false, "artifact refuses more than 32 receipts per run");
+assert.equal(tooManyReceiptsResult.code, "run-count", "receipt overflow reports count failure");
 
 const reorderedPayload = validPayload();
 const reorderedText = JSON.stringify({
