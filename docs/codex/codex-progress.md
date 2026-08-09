@@ -2219,4 +2219,9 @@ save creator is exported`. The new form-core source contract then failed with
   and `git diff --check` pass.
 - Risk: this is a pure transport boundary; no existing generic share/download,
   storage, schema, settings, Service Worker, or version behavior is changed.
+- Review: independent Task 8 review APPROVED with no Critical/Important findings.
+  Focused transport matrix, cumulative `check:all`, lint, format, and diff checks
+  all passed. Minor TDD evidence note: the missing-function RED was reconstructed
+  against the pre-marker `HEAD` source after implementation rather than observed
+  in a clean first run.
 - Next: Task 9 adds exact-boolean diagnostics settings and mobile E2E coverage.
