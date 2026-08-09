@@ -3004,3 +3004,20 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   collected.
 - Next: commit/push this helper diagnostic, verify CI, then continue one small
   non-physical quality task while the trusted-HTTPS field run remains deferred.
+
+## 2026-08-10 — Permit explicit loopback HTTPS diagnostics
+
+- RED evidence: `npm run check:pwa` failed because the helper rejected an
+  explicit `-HostAddress 127.0.0.1` whenever no non-loopback address was
+  discoverable, even though loopback validation does not need a LAN address.
+- Changed: the LAN-address requirement now applies to the default/all-interface
+  and LAN-bound paths only; explicit loopback remains available for local
+  certificate/server diagnostics. LAN binding validation and trusted-network
+  warnings are unchanged.
+- Validation: `npm run check:pwa`, PowerShell parse, and `git diff --check`
+  pass. No app runtime, detector threshold, storage, Service Worker,
+  dependency, or transport behavior changed.
+- Risk: acceptance-helper boundary only. Physical 3×6 acceptance remains
+  pending and still requires the current candidate plus a validated artifact.
+- Next: commit/push this loopback boundary fix, verify CI, then keep physical
+  acceptance deferred until the user can complete the trusted-HTTPS run.

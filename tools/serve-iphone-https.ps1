@@ -51,7 +51,7 @@ try {
   if ($usedNetworkFallback) {
     Write-Warning "Get-NetIPAddress was unavailable; using the .NET network interface fallback."
   }
-  if ($lanAddresses.Count -eq 0) {
+  if ($lanAddresses.Count -eq 0 -and $HostAddress -ne "127.0.0.1") {
     throw "No usable IPv4 address was found. Connect this PC to the same trusted Wi-Fi as the iPhone."
   }
   if ($HostAddress -ne "0.0.0.0" -and $HostAddress -ne "127.0.0.1" -and $lanAddresses -notcontains $HostAddress) {

@@ -200,6 +200,13 @@ function assertIphoneHttpsPreviewContract(relativePath) {
   if (!/Remove-Item\s+-LiteralPath\s+\$tempRoot\s+-Recurse\s+-Force/.test(text)) {
     fail(`${relativePath} must clean its temporary certificate directory`);
   }
+  if (
+    !/if\s*\(\$lanAddresses\.Count\s*-eq\s*0\s*-and\s*\$HostAddress\s*-ne\s*"127\.0\.0\.1"\)/.test(
+      text,
+    )
+  ) {
+    fail(`${relativePath} must allow explicit loopback previews without a LAN address`);
+  }
 }
 
 const swText = readText("sw.js");
