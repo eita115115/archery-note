@@ -3307,3 +3307,25 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   `47ba1b11` (tree `23d1a19a249b276659de53d9d771aa74de90c69f`). Keep the field
   run deferred until the user can exercise the current candidate and save the
   diagnostic artifact.
+
+## 2026-08-10 — Audit the current acceptance path
+
+- Scope reviewed: the trusted-HTTPS helper and its PWA contracts, the exact
+  diagnostic export gate, the Web/native/download transport boundary, the
+  bounded artifact checker, and the live/replay completion feedback.
+- Findings: no blocker or major data-loss/spec-breakage finding. Existing
+  user-data preservation, diagnostics-off behavior, receipt ownership, and
+  artifact privacy boundaries remain intact. The review did not change runtime
+  code or persisted data.
+- Validation: `npm run check:all`, `npm run lint -- --quiet`,
+  `npm run format:check`, and `git diff --check` all pass on candidate
+  `adce530be5f8994059044f230dfc7a4de9285a2c`. GitHub Actions validate run
+  `31337695777` also passed, including the E2E smoke test.
+- Not covered: Windows PKI certificate creation could not be exercised in this
+  sandbox (`ERROR_FILE_NOT_FOUND` from the provider), and no current-candidate
+  iPhone 3×6 diagnostic artifact exists. Those are evidence gaps, not grounds
+  to infer a detector result from the older 3/6–0/6–3/6 report.
+- Next: when the user resumes the field run, serve this exact candidate, record
+  the printed commit/tree, save `archery-note-form-diagnostics.json`, and run
+  `node tools/inspect-form-diagnostic-json.js --from-downloads` before making
+  the physical acceptance decision.
