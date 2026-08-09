@@ -780,6 +780,13 @@ test("complete state uses fixed copy", async ({ page }) => {
   await expect(page.getByTestId("form-diagnostic-status")).toHaveText("18射の診断がそろいました。");
 });
 
+test("form-history delete controls expose an accessible name", async ({ page }) => {
+  await seedTask9Page(page, makeTask9DiagnosticDb(true));
+  await page.keyboard.press("Escape");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await expect(page.getByRole("button", { name: "射形記録を削除" })).toHaveCount(3);
+});
+
 test("export post-confirm exact-debug and workflow rechecks prevent transport", async ({
   page,
 }) => {

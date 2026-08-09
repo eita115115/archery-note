@@ -254,7 +254,7 @@ function formTrackingCard(){
       <div class="d">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} / アンカー ${esc(s.anchorLabel)} / タップで詳細</div></div>
       <div class="big">${formSelfBaselineLabel(s.bowArm,"bowArm",prior)}<small> / 引き手${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</small></div>
       </button>
-      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button">${icon("del")}</button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="射形記録を削除">${icon("del")}</button>
     </div>`;
   }).join("");
   return `<div class="card"><h2>射形トラッキング <span class="mini">ベータ / 端末内解析</span></h2>

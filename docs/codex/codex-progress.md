@@ -2581,3 +2581,20 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   deferred; no physical acceptance claim is made from this run.
 - Next: keep the draft handoff PR ready for review and wait for explicit
   direction before resuming field acceptance or merging/deploying.
+
+## 2026-08-10 — Accessible form-history deletion control
+
+- Changed: `scripts/47-form-view.js` now gives each icon-only射形記録削除 button
+  the explicit accessible name `射形記録を削除`. Added a focused E2E contract in
+  `tests/e2e/form-diagnostics.spec.js` so the three visible matrix records can
+  be identified by role without relying on the icon markup.
+- TDD evidence: the new test was RED with zero matching named buttons, then
+  GREEN after the one-attribute runtime change; the focused test passed 1/1.
+- Validation: the full form-diagnostics Chromium suite passed 43/43; `npm run
+check:all`, `npm run lint -- --quiet`, `npm run format:check`, both targeted
+  `node --check` commands, and `git diff --check` passed.
+- Risk: additive accessibility metadata and test coverage only; no scoring,
+  detector, storage, Service Worker, dependency, or physical acceptance
+  behavior changed. Trusted-HTTPS iPhone acceptance remains deferred.
+- Next: review this isolated UI-quality change and keep the candidate PR
+  draft; do not merge, deploy, or resume field testing without direction.
