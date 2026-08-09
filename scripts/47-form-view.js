@@ -628,7 +628,7 @@ function openFormCapture(){
     shot.arrowCheck=null; // 確定猶予窓の計測後に judgeArrowCheck の結果を書き込む（シャドー）
     shot.diag=(db.settings.formDebug===true&&debug)?debug:null; // 検証計装（H）: 既定OFF
     const markAction=receiptTracker.markShotCreated(receiptId);
-    if(markAction.code) return null;
+    if(markAction.code){ freezeForReceiptFailure(); return null; }
     shots.push(shot);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem";
@@ -1006,7 +1006,7 @@ function startFormReplay(videoUrl){
     if(!shot) return null;
     shot.id=receiptId; shot.arrowCheck=null; shot.diag=(db.settings.formDebug===true&&debug)?debug:null;
     const markAction=receiptTracker.markShotCreated(receiptId);
-    if(markAction.code) return null;
+    if(markAction.code){ freezeForReceiptFailure(); return null; }
     shots.push(shot);
     const div=document.createElement("div");
     div.className="listItem recordReadOnlyItem"; div.dataset.shotId=shot.id;

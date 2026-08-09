@@ -3091,3 +3091,20 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Next: commit/push this validator hardening and verify CI; keep field
   acceptance deferred until the user can produce the current candidate's
   diagnostic artifact.
+
+## 2026-08-10 — Freeze on receipt ownership failure
+
+- RED evidence: `node tools/check-form-core.js` failed because both live and
+  replay `onShot` paths returned without a shot but allowed the workflow to
+  continue after `markShotCreated` reported an ownership error.
+- Changed: a receipt ownership error now freezes the active capture/replay
+  workflow immediately, while preserving the fail-closed count guard. The
+  existing save/close recovery path remains available for the user.
+- Validation: `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run check:all`, lint, format, syntax, and `git diff --check` pass.
+  No detector thresholds, receipt schema, storage, Service Worker,
+  dependency, or transport behavior changed.
+- Risk: receipt-error recovery only; physical 3×6 acceptance remains pending
+  because no current-candidate trusted-HTTPS artifact has been collected.
+- Next: commit/push this workflow-safety guard and verify CI; continue using
+  the current candidate for the deferred trusted-HTTPS field run.

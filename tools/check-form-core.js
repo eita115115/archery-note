@@ -4620,8 +4620,13 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
     assert(
       markAt >= 0 &&
         pushAt > markAt &&
-        onShot.includes("if(markAction.code)returnnull;"),
+        (onShot.includes("if(markAction.code)returnnull;") ||
+          onShot.includes("if(markAction.code){freezeForReceiptFailure();returnnull;}")),
       `${label} counts a shot only after receipt ownership succeeds`,
+    );
+    assert(
+      onShot.includes("if(markAction.code){freezeForReceiptFailure();returnnull;}"),
+      `${label} freezes the workflow when receipt ownership fails`,
     );
   });
   assert(
