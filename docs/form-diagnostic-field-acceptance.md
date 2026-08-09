@@ -87,7 +87,14 @@ the bounded artifact checker before drawing a conclusion.
 - Each condition has at most one false positive, removable without deleting another shot.
 - No shown true shot is automatically removed.
 - Every retained receipt has anchorFloor, anchorEnter, releaseSpeed, evidenceAgeMs, evidenceStrength, departDelta, and fireEvidence.
-- 診断JSONを書き出す succeeds only after the app's `buildFormDiagnosticExport(...)` gate returns `ok: true`. No separate artifact validator is claimed.
+- 診断JSONを書き出す succeeds only after the app's
+  `buildFormDiagnosticExport(...)` gate returns `ok: true`.
+- On iPhone Web Share, a `診断JSONを共有しました` toast means the file was
+  handed to the share sheet, not that a file already exists on the development
+  PC. Choose `ファイルに保存` (or another explicit file destination) in the
+  share sheet, then verify the saved artifact before reporting acceptance.
+- The separate offline checker below is authoritative for the transferred
+  file. A share-sheet success without a saved file is not acceptance evidence.
 
 ## Privacy
 

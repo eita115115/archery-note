@@ -3187,3 +3187,16 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   changed. Physical 3×6 acceptance remains pending.
 - Next: commit/push this count-visibility slice, verify CI, then resume the
   current-candidate trusted-HTTPS field run when available.
+
+## 2026-08-10 — Clarify share success versus saved diagnostic artifact
+
+- Changed: `docs/form-diagnostic-field-acceptance.md` now distinguishes the
+  iPhone share-sheet success toast from an artifact actually saved to Files or
+  transferred to the development PC. It explicitly requires choosing
+  `ファイルに保存` and then running the bounded offline checker.
+- Validation: targeted Prettier and `git diff --check` pass. No application,
+  storage, detector, transport, Service Worker, or dependency code changed.
+- Risk: acceptance-operator guidance only; physical 3×6 acceptance remains
+  pending because no current-candidate artifact has been collected.
+- Next: commit/push this documentation-only clarification and keep the field
+  run deferred until the current candidate can be exercised on trusted HTTPS.
