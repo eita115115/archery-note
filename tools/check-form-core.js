@@ -4229,6 +4229,7 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
   );
   assert(
     viewScript.includes("function formShotCompletionText(shotCount,diagnosticTarget){") &&
+      viewScript.includes("function formShotCountText(shotCount,diagnosticsEnabled){") &&
       viewScript.includes("function formDiagnosticLiveSaveToastText(shotCount,matrixNotice){") &&
       viewScript.includes("function formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot){") &&
       viewScript.includes("function formZeroShotDiagnosticText(record){") &&
@@ -4236,9 +4237,13 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
       viewScript.includes("検出されなかった射がある場合は") &&
       viewScript.includes("リリースを確認できませんでした。") &&
       viewScript.includes("リリース候補は検出しましたが確定できませんでした。") &&
+      capture.includes("formShotCountText(0,db.settings.formDebug===true)") &&
+      capture.includes("formShotCountText(shots.length,db.settings.formDebug===true)") &&
       capture.includes("const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);") &&
       capture.includes("formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice)") &&
       capture.includes("formZeroShotDiagnosticText(frozenDiagnosticSave.record)") &&
+      replay.includes("formShotCountText(0,db.settings.formDebug===true)") &&
+      replay.includes("formShotCountText(shots.length,db.settings.formDebug===true)") &&
       replay.includes("const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);") &&
       replay.includes("formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice)") &&
       replay.includes("formZeroShotDiagnosticText(frozenDiagnosticSave.record)") &&

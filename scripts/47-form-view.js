@@ -16,6 +16,11 @@ function formShotCompletionText(shotCount,diagnosticTarget){
     : `解析完了 ・ ${count}射を検出しました`;
 }
 
+function formShotCountText(shotCount,diagnosticsEnabled){
+  const count=Number.isSafeInteger(shotCount)&&shotCount>=0?shotCount:0;
+  return diagnosticsEnabled===true?`検出 ${count}/6射`:`検出 ${count}射`;
+}
+
 function formDiagnosticLiveSaveToastText(shotCount,matrixNotice){
   const count=Number.isSafeInteger(shotCount)&&shotCount>=0?shotCount:0;
   const completion=formShotCompletionText(count,6);
@@ -433,7 +438,7 @@ function openFormCapture(){
     </div>
     <div class="formShotScroll" id="fcShots"></div>
     <div class="formBar">
-      <span class="subNoteSm" id="fcShotCount" role="status" aria-live="polite" aria-atomic="true">検出 0射</span>
+      <span class="subNoteSm" id="fcShotCount" role="status" aria-live="polite" aria-atomic="true">${formShotCountText(0,db.settings.formDebug===true)}</span>
       <button class="btn sec sm" id="fcSwap" disabled>前/背面</button>
       <button class="btn sec sm" id="fcHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
       <button class="btn" id="fcSave" disabled>保存して終了</button>
@@ -590,7 +595,7 @@ function openFormCapture(){
   function refreshShotsHint(){
     const saveBtn=ovl.querySelector("#fcSave");
     const shotCount=ovl.querySelector("#fcShotCount");
-    if(shotCount) shotCount.textContent=`検出 ${shots.length}射`;
+    if(shotCount) shotCount.textContent=formShotCountText(shots.length,db.settings.formDebug===true);
     saveBtn.disabled=!shots.length;
     saveBtn.textContent=shots.length?`保存して終了（${shots.length}射）`:"保存して終了";
   }
@@ -939,7 +944,7 @@ function startFormReplay(videoUrl){
     </div>
     <div class="formShotScroll" id="frShots"></div>
     <div class="formBar">
-      <span class="subNoteSm" id="frShotCount" role="status" aria-live="polite" aria-atomic="true">検出 0射</span>
+      <span class="subNoteSm" id="frShotCount" role="status" aria-live="polite" aria-atomic="true">${formShotCountText(0,db.settings.formDebug===true)}</span>
       <button class="btn sec sm" id="frHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
       <button class="btn" id="frSave" disabled>保存して終了</button>
     </div>
@@ -999,7 +1004,7 @@ function startFormReplay(videoUrl){
   function refreshSave(){
     const b=ovl.querySelector("#frSave");
     const shotCount=ovl.querySelector("#frShotCount");
-    if(shotCount) shotCount.textContent=`検出 ${shots.length}射`;
+    if(shotCount) shotCount.textContent=formShotCountText(shots.length,db.settings.formDebug===true);
     b.disabled=!shots.length;
     b.textContent=shots.length?`保存して終了（${shots.length}射）`:"保存して終了";
   }

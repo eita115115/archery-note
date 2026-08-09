@@ -3170,3 +3170,20 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Next: commit/push this isolated notification parity fix, verify CI, and keep
   the current-candidate trusted-HTTPS field run as the remaining acceptance
   evidence task.
+
+## 2026-08-10 — Show the diagnostic shot target during capture
+
+- RED evidence: the exact-debug live and replay E2E cases still showed
+  `検出 0射` at capture start, so a field operator could not tell that the
+  current diagnostic run is targeting six retained shots.
+- Changed: `scripts/47-form-view.js` now shows `検出 X/6射` in exact-debug mode
+  for both live and replay workflows. Normal tracking remains `検出 X射`, and
+  malformed truthy settings do not activate the diagnostic target.
+- Validation: the focused RED→GREEN cases passed; the full form-diagnostics
+  suite passed 48/48. `node tools/check-form-core.js`, `npm run check:all`,
+  lint, format, syntax checks, and `git diff --check` all pass.
+- Risk: diagnostics-only count guidance; no detector thresholds, receipt
+  ownership, storage schema, Service Worker, dependency, or transport behavior
+  changed. Physical 3×6 acceptance remains pending.
+- Next: commit/push this count-visibility slice, verify CI, then resume the
+  current-candidate trusted-HTTPS field run when available.

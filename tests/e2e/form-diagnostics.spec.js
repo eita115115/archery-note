@@ -420,6 +420,23 @@ test("partial diagnostic completion names the missing shot count", async ({ page
   );
 });
 
+test("diagnostic shot count label requires the literal boolean gate", async ({ page }) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  const labels = await page.evaluate(() => ({
+    on: globalThis.formShotCountText(3, true),
+    off: globalThis.formShotCountText(3, false),
+    numeric: globalThis.formShotCountText(3, 1),
+    string: globalThis.formShotCountText(3, "true"),
+  }));
+  expect(labels).toEqual({
+    on: "検出 3/6射",
+    off: "検出 3射",
+    numeric: "検出 3射",
+    string: "検出 3射",
+  });
+});
+
 test("live diagnostic save toast combines partial count and matrix notice", async ({ page }) => {
   await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
   await page.goto("/");
@@ -542,7 +559,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
   const liveBaseline = await resetWriteProbeAfterStartup(page);
-  await expect(page.locator("#fcShotCount")).toHaveText("検出 0射");
+  await expect(page.locator("#fcShotCount")).toHaveText("検出 0/6射");
   await page.locator("#fcClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#fcSave")).toBeEnabled();
@@ -638,7 +655,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   });
   await expect(page.locator("#frVideo")).toBeVisible();
   const replayBaseline = await resetWriteProbeAfterStartup(page);
-  await expect(page.locator("#frShotCount")).toHaveText("検出 0射");
+  await expect(page.locator("#frShotCount")).toHaveText("検出 0/6射");
   await page.locator("#frClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#frSave")).toBeEnabled();
