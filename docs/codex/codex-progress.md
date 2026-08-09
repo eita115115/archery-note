@@ -7,30 +7,23 @@ Primary brief: [integration-plan.md](integration-plan.md)
 
 ## Current Status
 
-- 2026-07-15 Build Week branch `feat/build-week-growth-coach`: growth dashboard, 7/30/90-day filters, explainable next-practice suggestions, isolated fictional demo data and regression tests implemented in `b95bfaa1`. Full checks and 41 E2E tests pass. Submission docs are under `docs/build-week/`; human video/publication work remains.
-
-- Status: UI inline-style extraction series landed on `main` (PRs #63–#67:
-  design tokens, history/sight, record, gear-settings). A token-drift fix and
-  a `check:ui` regression guard for utility/history CSS values are on `main`
-  as `18f3d532`. The Phase Ledger below still needs full reconciliation.
-- Last updated: 2026-07-03
-- Current main baseline:
-  `18f3d532` (`test(ui): guard utility/history CSS token values against drift`)
-- Latest release: `v1.0.0`
-- Package/app version: `0.64.0` / `APP_VER 64` (`APP_VER` lives in
-  `scripts/10-storage-native.js`; bump all markers via `npm run version:bump`)
-- Current storage contract: `archeryNote.v1`, `schema: 3` (verified 2026-07-02)
-- Working-branch note: short-lived `wip/ui-*-inline-styles` branches are the
-  active pattern; verify `git branch --show-current` and in-flight changes
-  with `git status --short` at the start of every run instead of trusting
-  this ledger. Branches created before `18f3d532` do not contain the
-  `check:ui` token guard until merged/rebased onto current `main`.
-- Guidance docs (`AGENTS.md`, `CLAUDE.md`, this ledger,
-  `docs/codex/integration-plan.md`, `docs/codex/codex-continue-prompt.md`) are committed
-  on `main` as of 2026-07-03.
-- Next task: reconcile the Phase Ledger rows and Next Task Detail against the
-  current repository (releases through `v1.0.0`, UI extraction series).
-  Docs-only run; do not change app behavior.
+- 2026-08-09 sanitized handoff candidate `codex/form-diagnostic-handoff-release`
+  is at the verified v84 tree. It is based on `origin/main`, excludes the
+  sensitive adaptive-release ancestor, and is the only branch eligible for
+  GitHub handoff. The sensitive root worktree still has three unrelated
+  metadata documents modified; they remain unstaged and outside this candidate.
+- Runtime markers are aligned at `APP_VER=84`, package `0.84.0`, Service Worker
+  cache `archery-note-v84`, and storage `schema: 5`.
+- Form diagnostic handoff Tasks 1–11, dependency-lock remediation, trusted
+  HTTPS preview tooling, and the Windows replay-contract validation fix are
+  implemented. Candidate PR #134 is draft/clean with green CI; no merge or
+  deployment has been performed.
+- Physical trusted-HTTPS iPhone acceptance is explicitly deferred. The previous
+  user-supplied JSON was a normal backup, not a completed bounded diagnostic
+  export, so field acceptance must not be marked complete.
+- Next task: continue one small non-physical product-quality improvement while
+  keeping the physical checklist pending and preserving the candidate's green
+  validation state.
 
 ## Run Rules
 
@@ -52,39 +45,40 @@ Primary brief: [integration-plan.md](integration-plan.md)
 Use these states: `not-started`, `in-progress`, `blocked`, `needs-review`,
 `done`.
 
-| Phase                                                | State        | Notes                                                                                  |
-| ---------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------- |
-| 0. Plan import and runbook setup                     | needs-review | Planning files exist locally and remain untracked until reviewed.                      |
-| 1. Repository inventory and phase reconciliation     | done         | Current repo compared with the integration brief on 2026-06-29.                        |
-| 2. OSS health docs and community files               | done         | Public OSS health baseline released in `v0.1.0-oss-readiness`.                         |
-| 3. Brand cleanup                                     | done         | Public app branding is Archery Note; remaining old-name hits are planning references.  |
-| 4. CI and quality gates                              | done         | CI runs app, UI, lint, format, and E2E; `check:all` runs app/UI/storage/version.       |
-| 5. Accessibility and shell polish                    | done         | Viewport zoom lock is guarded by checks; current shell uses five bottom tabs.          |
-| 6. Service Worker and update strategy                | in-progress  | Strategy doc exists; runtime still uses immediate `skipWaiting()` / `clients.claim()`. |
-| 7. Storage migration and rollback                    | in-progress  | Safety fixtures/checkers exist; schema migration implementation has not started.       |
-| 8. Analysis and stats integration                    | in-progress  | Analysis details moved from History to Analysis locally; review before version bump.   |
-| 9. Third-party asset and experimental feature review | in-progress  | Current release has no OCR/pose/AI/model files; future assets require review first.    |
-| 10. Final acceptance and report                      | in-progress  | Releases exist through `v0.5.0`; final integration acceptance is not complete.         |
+| Phase                                                | State        | Notes                                                                                           |
+| ---------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------- |
+| 0. Plan import and runbook setup                     | needs-review | Planning files exist locally and remain untracked until reviewed.                               |
+| 1. Repository inventory and phase reconciliation     | done         | Current repo compared with the integration brief on 2026-06-29.                                 |
+| 2. OSS health docs and community files               | done         | Public OSS health baseline released in `v0.1.0-oss-readiness`.                                  |
+| 3. Brand cleanup                                     | done         | Public app branding is Archery Note; remaining old-name hits are planning references.           |
+| 4. CI and quality gates                              | done         | CI runs app, UI, lint, format, and E2E; `check:all` runs app/UI/storage/version.                |
+| 5. Accessibility and shell polish                    | done         | Viewport zoom lock is guarded by checks; current shell uses five bottom tabs.                   |
+| 6. Service Worker and update strategy                | in-progress  | Update safety gates and cache contracts pass; runtime intentionally keeps immediate activation. |
+| 7. Storage migration and rollback                    | done         | Schema 5 normalization, import/save-load round trips, and rollback safety checks pass.          |
+| 8. Analysis and stats integration                    | done         | Analysis/statistics views and characterization checks are in the verified candidate.            |
+| 9. Third-party asset and experimental feature review | in-progress  | Current release has no OCR/pose/AI/model files; future assets require review first.             |
+| 10. Final acceptance and report                      | in-progress  | Code/CI handoff is green; physical trusted-HTTPS acceptance is deferred by the user.            |
 
 ## Next Task Detail
 
-Task: reconcile this ledger with the current repository state.
+Task: continue non-physical product-quality work after the field-acceptance pause.
 
 Goal:
 
-- The Phase Ledger, status lines, and next task must describe the repository
-  as it is (releases through `v1.0.0`, `APP_VER 64`), not as it was on
-  2026-06-29.
-- Docs-only run: no app behavior, storage, scoring, Service Worker, or
-  version-marker changes.
+- Keep the handoff candidate based on `origin/main`, CI-green, and free of the
+  three unrelated root-worktree metadata documents.
+- Prefer one isolated regression or quality improvement that does not require
+  physical HTTPS access, storage migration, Service Worker activation changes,
+  dependency additions, or a broad UI rewrite.
+- Physical acceptance remains a later explicit checkpoint, not a prerequisite
+  for this code-side task.
 
 Steps:
 
-1. `git status --short`, `git log --oneline -20`,
-   `git tag --sort=-creatordate`.
-2. Read `CHANGELOG.md` and compare it against the Phase Ledger rows.
-3. Rewrite stale rows, the Current Status block, and this Next Task Detail
-   with the real next implementation task.
+1. Start with `git status --short` and inspect the candidate tree.
+2. Select one narrow product-quality invariant from the existing app surface.
+3. Add the smallest regression or implementation change, then update this
+   ledger with the exact validation and deferred physical acceptance.
 
 Expected validation:
 
@@ -2466,3 +2460,20 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
 - Next: use the candidate HTTPS URL directly in Safari, enable diagnostic
   saving, start the 18-shot batch, and collect candidate-generated partial
   backup evidence if the matrix does not complete.
+
+## 2026-08-09 — Scoring/display radius parity regression
+
+- Changed: `tools/check-app.js` now extracts `markCircle()` and asserts that
+  the rendered SVG arrow-circle radius is exactly the same value returned by
+  `arrowMarkRadius()`. This keeps the visible mark and the line-cutter scoring
+  geometry tied to one radius source without changing runtime scoring.
+- RED/GREEN scope: this is a regression-only hardening task; no production
+  scoring, storage, Service Worker, dependency, or user-data behavior changed.
+- Validation: `node tools/check-app.js`, `npm run check:all`,
+  `npm run lint -- --quiet`, and `git diff --check` pass. The focused Prettier
+  check reports the pre-existing legacy formatting drift in `tools/check-app.js`;
+  no broad reformat was applied.
+- Risk: test-only coverage. Physical HTTPS acceptance remains deferred and is
+  not represented as complete by this change.
+- Next: choose another isolated non-physical quality task, or resume the
+  trusted-HTTPS field checklist only after explicit user direction.

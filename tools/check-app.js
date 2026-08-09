@@ -223,6 +223,19 @@ const targetApi = new Function(
 const fieldSvg = targetApi.targetMarkup(80, "tf", "field");
 assert(fieldSvg.includes('class="main field"') && fieldSvg.includes("#ffe14d") && fieldSvg.includes("#1c1e1c"), "Field target SVG failed");
 
+const markApi = new Function(
+  "arrowMarkRadius",
+  "esc",
+  section("function markCircle", "/* static plot for history/summary */") +
+    "\nreturn {markCircle};",
+)(scoreApi.arrowMarkRadius, value => String(value));
+const renderedMark = markApi.markCircle({x:0,y:0}, 80, "#000", "", "");
+const renderedRadius = /<circle[^>]*\br="([^"]+)"/.exec(renderedMark)?.[1];
+assert(
+  renderedRadius === String(scoreApi.arrowMarkRadius(80)),
+  "Rendered arrow circle radius must match arrowMarkRadius",
+);
+
 const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats};")();
 const arrows = [
   {x:1,y:1},{x:2,y:1.5},{x:0,y:.5},{x:1.2,y:1.7},{x:.8,y:.9},{x:1.5,y:1.1},
