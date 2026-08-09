@@ -2730,3 +2730,24 @@ tools/check-form-core.js`, `npm run check:all`, lint, format, targeted syntax,
 - Next: keep the candidate ready for review and continue one isolated
   nonphysical product-quality task; the trusted-HTTPS field matrix remains
   pending.
+
+## 2026-08-10 — Add offline diagnostic artifact checker
+
+- Changed: added `tools/form-diagnostic-artifact.js` and
+  `tools/inspect-form-diagnostic-json.js`; `check:form` now runs the
+  synthetic contract test. The checker distinguishes the bounded
+  `archery-note-form-diagnostics` export from a normal schema-5 backup,
+  validates the exact 3×6/receipt/fire allowlists and limits, and prints only
+  aggregate counts plus SHA-256.
+- TDD evidence: the new contract first failed with
+  `Cannot find module './form-diagnostic-artifact'`; after implementation,
+  `node tools/check-form-diagnostic-artifact.js` and `npm run check:form`
+  pass. CLI no-argument usage exits 2 as expected.
+- Validation: `npm run check:all`, lint, format, targeted Prettier,
+  targeted Node syntax checks, and `git diff --check` pass.
+- Risk: dependency-free offline validation only; no detector thresholds,
+  storage schema, transport, Service Worker, user data, or physical
+  acceptance behavior changed. Trusted-HTTPS field acceptance remains
+  deferred.
+- Next: commit/push the artifact checker, verify candidate CI, and keep the
+  physical 3×6 matrix pending.

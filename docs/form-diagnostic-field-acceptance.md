@@ -84,4 +84,15 @@ Get-ChildItem -LiteralPath (Join-Path $env:USERPROFILE "Downloads") -Filter "arc
 Get-FileHash -Algorithm SHA256 -LiteralPath 'C:\tmp\archery-note-form-diagnostics.json'
 ```
 
+Before reporting the field result, run the bounded artifact checker from the
+candidate worktree. It prints only the schema, 3×6 aggregate counts, byte
+length, and SHA-256; it never prints receipt details or private source data:
+
+```powershell
+node tools/inspect-form-diagnostic-json.js 'C:\tmp\archery-note-form-diagnostics.json'
+```
+
+The checker rejects a normal schema-5 backup, unknown keys, incomplete runs,
+missing fire fields, invalid fire ranges, and files over 65536 UTF-8 bytes.
+
 Record only commit/tree IDs, iOS/Safari versions without local identifiers, aggregate condition results, pass/fail, and artifact SHA-256.
