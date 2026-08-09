@@ -2092,3 +2092,25 @@ Next task:
 - Risk: missing or invalid fire snapshots make a run exporter-ineligible instead of inventing evidence.
 - Review: independent Task 3 review APPROVED; exact seven-key validation, exact-true gating, diagnostics-off shape, deep-copy isolation, schema-5 normalize/import/save-load/safety/trash preservation, and synthetic fixtures all passed. Browser/iPhone exercise remains a later validation gate.
 - Next: Task 4 adds pure matrix coordination and record eligibility.
+
+## 2026-08-09 — Form diagnostic handoff Task 4
+
+- Changed: added DOM-free matrix diagnostics, a three-slot (`side`, `oblique`,
+  `normal_range`) coordinator, Web-Crypto-only UUID allocation, fail-closed
+  record eligibility validation, immutable slot planning, and copy-only
+  coordinator invalidation.
+- RED: `node tools/check-form-diagnostics.js` first failed with `diagnostic
+matrix coordinator API is exported`; the valid first-slot case then failed
+  with `eligible live record advances the matrix: expected true, got false`.
+- GREEN: `node tools/check-form-diagnostics.js`, `npm run check:form`,
+  `npm run check:storage`, `npm run check:app`, and `npm run lint -- --quiet`
+  passed.
+- Test correction: the supplied numeric-only UUID fixture could not exercise
+  uppercase rejection, so the harness uses a separate canonical UUID containing
+  a letter for that case. The planner immutability assertion now verifies the
+  source coordinator after mutating the returned result rather than expecting a
+  mutated result array to retain its pre-mutation length.
+- Risk: this task is pure validation/projection only; save, delete, export,
+  transport, settings, and physical-device workflow integration remain in later
+  tasks.
+- Next: Task 5 projects only the validated matrix diagnostics for review.

@@ -1814,6 +1814,644 @@ function copyFormReleaseFireSnapshot(debug) {
   };
 }
 
+const FORM_DIAGNOSTIC_SLOTS = Object.freeze(["side", "oblique", "normal_range"]);
+const FORM_DIAGNOSTIC_RESULT_CODES = Object.freeze({
+  INVALID_APP_VERSION: "invalid-app-version",
+  INVALID_BATCH_ID: "invalid-batch-id",
+  CRYPTO_UNAVAILABLE: "crypto-unavailable",
+  BATCH_ID_COLLISION: "batch-id-collision",
+  COORDINATOR_MISSING: "coordinator-missing",
+  COORDINATOR_INVALID: "coordinator-invalid",
+  COORDINATOR_STALE: "coordinator-stale",
+  COORDINATOR_INCOMPLETE: "coordinator-incomplete",
+  COORDINATOR_COMPLETE: "coordinator-complete",
+  RECORD_INVALID: "record-invalid",
+  RECORD_INELIGIBLE: "record-ineligible",
+});
+const FORM_DIAGNOSTIC_COORDINATOR_KEYS = Object.freeze([
+  "version",
+  "batchId",
+  "appVer",
+  "nextSlot",
+  "recordIds",
+  "invalidated",
+]);
+const FORM_DIAGNOSTIC_UUID_V4 =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const FORM_DIAGNOSTIC_MISSING = Symbol("form-diagnostic-missing");
+
+function formDiagnosticReadOwnData(source, key) {
+  if (source == null || (typeof source !== "object" && typeof source !== "function")) {
+    return FORM_DIAGNOSTIC_MISSING;
+  }
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(source, key);
+    return descriptor && Object.hasOwn(descriptor, "value")
+      ? descriptor.value
+      : FORM_DIAGNOSTIC_MISSING;
+  } catch (_) {
+    return FORM_DIAGNOSTIC_MISSING;
+  }
+}
+
+function formDiagnosticHasExactOwnDataKeys(source, keys) {
+  if (!source || typeof source !== "object") return false;
+  let actual;
+  try {
+    actual = Object.keys(source);
+  } catch (_) {
+    return false;
+  }
+  return (
+    actual.length === keys.length &&
+    keys.every(
+      (key) =>
+        actual.includes(key) &&
+        formDiagnosticReadOwnData(source, key) !== FORM_DIAGNOSTIC_MISSING,
+    )
+  );
+}
+
+function formDiagnosticReadOwnArray(source) {
+  if (!Array.isArray(source)) return null;
+  const copied = [];
+  for (let index = 0; index < source.length; index++) {
+    const value = formDiagnosticReadOwnData(source, String(index));
+    if (value === FORM_DIAGNOSTIC_MISSING) return null;
+    copied.push(value);
+  }
+  return copied;
+}
+
+function formDiagnosticRecordIdIsValid(value) {
+  return typeof value === "string" && value.length >= 1 && value.length <= 128;
+}
+
+function formDiagnosticCoordinatorFailure(code) {
+  return { ok: false, code, coordinator: null };
+}
+
+function validateFormDiagnosticMatrixCoordinator(coordinator, appVer, requireComplete = false) {
+  if (!Number.isSafeInteger(appVer) || appVer <= 0) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.INVALID_APP_VERSION);
+  }
+  if (coordinator == null) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_MISSING);
+  }
+  if (
+    typeof requireComplete !== "boolean" ||
+    !formDiagnosticHasExactOwnDataKeys(coordinator, FORM_DIAGNOSTIC_COORDINATOR_KEYS)
+  ) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID);
+  }
+
+  const version = formDiagnosticReadOwnData(coordinator, "version");
+  const batchId = formDiagnosticReadOwnData(coordinator, "batchId");
+  const coordinatorAppVer = formDiagnosticReadOwnData(coordinator, "appVer");
+  const nextSlot = formDiagnosticReadOwnData(coordinator, "nextSlot");
+  const sourceRecordIds = formDiagnosticReadOwnData(coordinator, "recordIds");
+  const invalidated = formDiagnosticReadOwnData(coordinator, "invalidated");
+  const recordIds = formDiagnosticReadOwnArray(sourceRecordIds);
+
+  if (
+    version !== 1 ||
+    typeof batchId !== "string" ||
+    !FORM_DIAGNOSTIC_UUID_V4.test(batchId) ||
+    !Number.isSafeInteger(coordinatorAppVer) ||
+    coordinatorAppVer <= 0 ||
+    !Number.isSafeInteger(nextSlot) ||
+    nextSlot < 0 ||
+    nextSlot > FORM_DIAGNOSTIC_SLOTS.length ||
+    !recordIds ||
+    recordIds.length !== nextSlot ||
+    new Set(recordIds).size !== recordIds.length ||
+    !recordIds.every(formDiagnosticRecordIdIsValid) ||
+    invalidated !== false
+  ) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID);
+  }
+  if (coordinatorAppVer !== appVer) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_STALE);
+  }
+  if (requireComplete && nextSlot !== FORM_DIAGNOSTIC_SLOTS.length) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INCOMPLETE);
+  }
+
+  return {
+    ok: true,
+    code: null,
+    coordinator: {
+      version: 1,
+      batchId,
+      appVer: coordinatorAppVer,
+      nextSlot,
+      recordIds: recordIds.slice(),
+      invalidated: false,
+    },
+  };
+}
+
+function createFormDiagnosticMatrixCoordinator(appVer, batchId) {
+  if (!Number.isSafeInteger(appVer) || appVer <= 0) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.INVALID_APP_VERSION);
+  }
+  if (typeof batchId !== "string" || !FORM_DIAGNOSTIC_UUID_V4.test(batchId)) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.INVALID_BATCH_ID);
+  }
+  return {
+    ok: true,
+    code: null,
+    coordinator: {
+      version: 1,
+      batchId,
+      appVer,
+      nextSlot: 0,
+      recordIds: [],
+      invalidated: false,
+    },
+  };
+}
+
+function formDiagnosticReadCollisionBatchId(record) {
+  const marker = formDiagnosticReadOwnData(record, "formDiagnosticMatrix");
+  const batchId = formDiagnosticReadOwnData(marker, "batchId");
+  return typeof batchId === "string" && FORM_DIAGNOSTIC_UUID_V4.test(batchId) ? batchId : null;
+}
+
+function formDiagnosticCollectBatchIds(coordinator, formAnalyses, trash) {
+  const records = formDiagnosticReadOwnArray(formAnalyses);
+  const trashItems = formDiagnosticReadOwnArray(trash);
+  if (!records || !trashItems) return null;
+
+  const used = new Set();
+  const activeBatchId = formDiagnosticReadOwnData(coordinator, "batchId");
+  if (typeof activeBatchId === "string" && FORM_DIAGNOSTIC_UUID_V4.test(activeBatchId)) {
+    used.add(activeBatchId);
+  }
+  records.forEach((record) => {
+    const batchId = formDiagnosticReadCollisionBatchId(record);
+    if (batchId) used.add(batchId);
+  });
+  trashItems.forEach((item) => {
+    if (formDiagnosticReadOwnData(item, "type") !== "formAnalysis") return;
+    const batchId = formDiagnosticReadCollisionBatchId(formDiagnosticReadOwnData(item, "data"));
+    if (batchId) used.add(batchId);
+  });
+  return used;
+}
+
+function formDiagnosticFormatUuidV4(bytes) {
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (value) => value.toString(16).padStart(2, "0"));
+  return (
+    hex.slice(0, 4).join("") +
+    "-" +
+    hex.slice(4, 6).join("") +
+    "-" +
+    hex.slice(6, 8).join("") +
+    "-" +
+    hex.slice(8, 10).join("") +
+    "-" +
+    hex.slice(10, 16).join("")
+  );
+}
+
+function formDiagnosticReadCryptoMethod(source, key) {
+  if (!source) return null;
+  try {
+    const method = source[key];
+    return typeof method === "function" ? method.bind(source) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function allocateFormDiagnosticBatchId(cryptoSource, coordinator, formAnalyses, trash) {
+  const randomUUID = formDiagnosticReadCryptoMethod(cryptoSource, "randomUUID");
+  const getRandomValues = formDiagnosticReadCryptoMethod(cryptoSource, "getRandomValues");
+  if (!randomUUID && !getRandomValues) {
+    return {
+      ok: false,
+      code: FORM_DIAGNOSTIC_RESULT_CODES.CRYPTO_UNAVAILABLE,
+      batchId: null,
+    };
+  }
+
+  const used = formDiagnosticCollectBatchIds(coordinator, formAnalyses, trash);
+  if (!used) {
+    return {
+      ok: false,
+      code: FORM_DIAGNOSTIC_RESULT_CODES.BATCH_ID_COLLISION,
+      batchId: null,
+    };
+  }
+
+  let malformedCandidate = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let candidate = null;
+    if (randomUUID) {
+      try {
+        candidate = randomUUID();
+      } catch (_) {
+        if (getRandomValues) {
+          try {
+            const bytes = new Uint8Array(16);
+            getRandomValues(bytes);
+            candidate = formDiagnosticFormatUuidV4(bytes);
+          } catch (_) {
+            candidate = null;
+          }
+        }
+      }
+    } else {
+      try {
+        const bytes = new Uint8Array(16);
+        getRandomValues(bytes);
+        candidate = formDiagnosticFormatUuidV4(bytes);
+      } catch (_) {
+        candidate = null;
+      }
+    }
+
+    if (typeof candidate !== "string" || !FORM_DIAGNOSTIC_UUID_V4.test(candidate)) {
+      malformedCandidate = true;
+      continue;
+    }
+    if (!used.has(candidate)) {
+      return { ok: true, code: null, batchId: candidate };
+    }
+  }
+
+  return {
+    ok: false,
+    code: malformedCandidate
+      ? FORM_DIAGNOSTIC_RESULT_CODES.INVALID_BATCH_ID
+      : FORM_DIAGNOSTIC_RESULT_CODES.BATCH_ID_COLLISION,
+    batchId: null,
+  };
+}
+
+const FORM_DIAGNOSTIC_FIRE_KEYS = Object.freeze([
+  "anchorFloor",
+  "anchorEnter",
+  "releaseSpeed",
+  "evidenceAgeMs",
+  "evidenceStrength",
+  "departDelta",
+  "fireEvidence",
+]);
+const FORM_DIAGNOSTIC_COUNTER_KEYS = Object.freeze([
+  "supersededActive",
+  "missingActive",
+  "identityMismatch",
+  "invalidTransition",
+  "sequenceExhausted",
+]);
+const FORM_DIAGNOSTIC_CANCEL_REASONS = new Set([
+  "anchor-return",
+  "nb2-drift",
+  "nb2-unobserved",
+  "no-depart",
+]);
+const FORM_DIAGNOSTIC_UNRESOLVED_REASONS = new Set([
+  "geometry-reset",
+  "workflow-save",
+  "workflow-close",
+  "replay-eos",
+  "superseded-fire",
+]);
+const FORM_DIAGNOSTIC_RECEIPT_ID = /^form-receipt-([1-9][0-9]{0,5})$/;
+
+function formDiagnosticRecordResultFailure(code) {
+  return { ok: false, code, retainedReceiptIds: null };
+}
+
+function formDiagnosticInspectReceipt(receipt) {
+  const id = formDiagnosticReadOwnData(receipt, "id");
+  const idMatch = typeof id === "string" ? FORM_DIAGNOSTIC_RECEIPT_ID.exec(id) : null;
+  const shotCreated = formDiagnosticReadOwnData(receipt, "shotCreated");
+  const userDisposition = formDiagnosticReadOwnData(receipt, "userDisposition");
+  const detectorDisposition = formDiagnosticReadOwnData(receipt, "detectorDisposition");
+  const cancelReason = formDiagnosticReadOwnData(receipt, "cancelReason");
+  const unresolvedReason = formDiagnosticReadOwnData(receipt, "unresolvedReason");
+  const sourceFire = formDiagnosticReadOwnData(receipt, "fire");
+
+  if (
+    !idMatch ||
+    typeof shotCreated !== "boolean" ||
+    !formDiagnosticHasExactOwnDataKeys(sourceFire, FORM_DIAGNOSTIC_FIRE_KEYS)
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  const fire = copyFormReleaseFireSnapshot(sourceFire);
+  if (!fire) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  let detectorOutcome;
+  if (detectorDisposition === "pending") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (detectorDisposition === "confirmed" && cancelReason === null && unresolvedReason === null) {
+    detectorOutcome = "confirmed";
+  } else if (
+    detectorDisposition === "auto-canceled" &&
+    FORM_DIAGNOSTIC_CANCEL_REASONS.has(cancelReason) &&
+    unresolvedReason === null
+  ) {
+    detectorOutcome = "auto-canceled";
+  } else if (
+    detectorDisposition === "unresolved" &&
+    cancelReason === null &&
+    FORM_DIAGNOSTIC_UNRESOLVED_REASONS.has(unresolvedReason)
+  ) {
+    detectorOutcome = "unresolved";
+  } else {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  let outcome;
+  if (userDisposition === "not-created" && shotCreated === false) {
+    outcome = "summary-failed";
+  } else if (userDisposition === "manual-removed" && shotCreated === true) {
+    outcome = "manual-removed";
+  } else if (userDisposition === "present" && shotCreated === true) {
+    if (detectorOutcome === "confirmed") outcome = "retained";
+    else if (detectorOutcome === "auto-canceled") outcome = "auto-canceled";
+    else {
+      return {
+        ok: false,
+        code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE,
+      };
+    }
+  } else {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  return {
+    ok: true,
+    code: null,
+    receipt: {
+      id,
+      numericId: Number(idMatch[1]),
+      outcome,
+      detectorOutcome,
+      cancelReason,
+      unresolvedReason,
+      fire,
+    },
+  };
+}
+
+function formDiagnosticInspectRecord(record, appVer) {
+  if (!Number.isSafeInteger(appVer) || appVer <= 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.INVALID_APP_VERSION };
+  }
+  if (!record || typeof record !== "object") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  const diagnosticVersion = formDiagnosticReadOwnData(record, "formDiagnosticVersion");
+  const captureMode = formDiagnosticReadOwnData(record, "captureMode");
+  const recordAppVer = formDiagnosticReadOwnData(record, "appVer");
+  if (diagnosticVersion === FORM_DIAGNOSTIC_MISSING || captureMode === FORM_DIAGNOSTIC_MISSING) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (diagnosticVersion !== 1 || captureMode !== "live") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (!Number.isSafeInteger(recordAppVer) || recordAppVer <= 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (recordAppVer !== appVer) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const recordId = formDiagnosticReadOwnData(record, "id");
+  const shots = formDiagnosticReadOwnData(record, "shots");
+  const sourceFeatures = formDiagnosticReadOwnData(record, "features");
+  const formPhaseDiag = formDiagnosticReadOwnData(record, "formPhaseDiag");
+  if (!formDiagnosticRecordIdIsValid(recordId)) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (!Number.isSafeInteger(shots) || shots < 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (shots !== 6) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const features = formDiagnosticReadOwnArray(sourceFeatures);
+  if (!features) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (features.length !== 6) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (
+    formPhaseDiag === FORM_DIAGNOSTIC_MISSING ||
+    !formPhaseDiag ||
+    typeof formPhaseDiag !== "object"
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const overflow = formDiagnosticReadOwnData(formPhaseDiag, "receiptOverflow");
+  const counters = formDiagnosticReadOwnData(formPhaseDiag, "receiptInvariantCounts");
+  const desynchronized = formDiagnosticReadOwnData(formPhaseDiag, "receiptDesynchronized");
+  const sourceReceipts = formDiagnosticReadOwnData(formPhaseDiag, "releaseReceipts");
+
+  if (!Number.isSafeInteger(overflow) || overflow < 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (overflow !== 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (!formDiagnosticHasExactOwnDataKeys(counters, FORM_DIAGNOSTIC_COUNTER_KEYS)) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  let hasInvariantFailure = false;
+  for (const key of FORM_DIAGNOSTIC_COUNTER_KEYS) {
+    const value = formDiagnosticReadOwnData(counters, key);
+    if (!Number.isSafeInteger(value) || value < 0 || value > 255) {
+      return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+    }
+    if (value !== 0) hasInvariantFailure = true;
+  }
+  if (hasInvariantFailure) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (typeof desynchronized !== "boolean") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (desynchronized) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const receiptValues = formDiagnosticReadOwnArray(sourceReceipts);
+  if (!receiptValues) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (receiptValues.length < 1 || receiptValues.length > 32) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const receipts = [];
+  for (const sourceReceipt of receiptValues) {
+    const inspectedReceipt = formDiagnosticInspectReceipt(sourceReceipt);
+    if (!inspectedReceipt.ok) return inspectedReceipt;
+    receipts.push(inspectedReceipt.receipt);
+  }
+  receipts.sort((left, right) => left.numericId - right.numericId);
+  if (
+    new Set(receipts.map((receipt) => receipt.id)).size !== receipts.length ||
+    !receipts.every((receipt, index) => receipt.numericId === index + 1)
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  const retainedReceiptIds = receipts
+    .filter((receipt) => receipt.outcome === "retained")
+    .map((receipt) => receipt.id);
+  if (retainedReceiptIds.length !== 6) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const featureReceiptIds = [];
+  for (const feature of features) {
+    const receiptId = formDiagnosticReadOwnData(feature, "receiptId");
+    if (typeof receiptId !== "string") {
+      return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+    }
+    featureReceiptIds.push(receiptId);
+  }
+  if (
+    new Set(featureReceiptIds).size !== featureReceiptIds.length ||
+    featureReceiptIds.some((receiptId) => !retainedReceiptIds.includes(receiptId)) ||
+    retainedReceiptIds.some((receiptId) => !featureReceiptIds.includes(receiptId))
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  return {
+    ok: true,
+    code: null,
+    recordId,
+    receipts,
+    retainedReceiptIds: retainedReceiptIds.slice(),
+  };
+}
+
+function validateFormDiagnosticRecord(record, appVer) {
+  const inspected = formDiagnosticInspectRecord(record, appVer);
+  return inspected.ok
+    ? {
+        ok: true,
+        code: null,
+        retainedReceiptIds: inspected.retainedReceiptIds.slice(),
+      }
+    : formDiagnosticRecordResultFailure(inspected.code);
+}
+
+function formDiagnosticPlanningFailure(code) {
+  return { ok: false, code, record: null, coordinator: null };
+}
+
+function formDiagnosticCopyRecordWithMarker(record, marker) {
+  try {
+    const copied = Object.create(Object.getPrototypeOf(record), Object.getOwnPropertyDescriptors(record));
+    Object.defineProperty(copied, "formDiagnosticMatrix", {
+      value: marker,
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+    return copied;
+  } catch (_) {
+    return null;
+  }
+}
+
+function planFormDiagnosticMatrixRecord(record, coordinator, appVer) {
+  const checkedCoordinator = validateFormDiagnosticMatrixCoordinator(coordinator, appVer);
+  if (!checkedCoordinator.ok) {
+    return formDiagnosticPlanningFailure(checkedCoordinator.code);
+  }
+  if (checkedCoordinator.coordinator.nextSlot === FORM_DIAGNOSTIC_SLOTS.length) {
+    return formDiagnosticPlanningFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_COMPLETE);
+  }
+
+  const inspectedRecord = formDiagnosticInspectRecord(record, appVer);
+  if (!inspectedRecord.ok) {
+    return formDiagnosticPlanningFailure(inspectedRecord.code);
+  }
+  if (
+    Object.hasOwn(record, "formDiagnosticMatrix") ||
+    checkedCoordinator.coordinator.recordIds.includes(inspectedRecord.recordId)
+  ) {
+    return formDiagnosticPlanningFailure(FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE);
+  }
+
+  const marker = {
+    version: 1,
+    batchId: checkedCoordinator.coordinator.batchId,
+    slot: FORM_DIAGNOSTIC_SLOTS[checkedCoordinator.coordinator.nextSlot],
+  };
+  const plannedRecord = formDiagnosticCopyRecordWithMarker(record, marker);
+  if (!plannedRecord) {
+    return formDiagnosticPlanningFailure(FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID);
+  }
+
+  return {
+    ok: true,
+    code: null,
+    record: plannedRecord,
+    coordinator: {
+      version: 1,
+      batchId: checkedCoordinator.coordinator.batchId,
+      appVer: checkedCoordinator.coordinator.appVer,
+      nextSlot: checkedCoordinator.coordinator.nextSlot + 1,
+      recordIds: checkedCoordinator.coordinator.recordIds.concat(inspectedRecord.recordId),
+      invalidated: false,
+    },
+  };
+}
+
+function invalidateFormDiagnosticMatrixForRecord(coordinator, recordId, appVer) {
+  if (!formDiagnosticRecordIdIsValid(recordId)) {
+    return {
+      ok: false,
+      code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID,
+      coordinator: null,
+      changed: false,
+    };
+  }
+
+  const checked = validateFormDiagnosticMatrixCoordinator(coordinator, appVer);
+  if (!checked.ok) {
+    return { ok: true, code: null, coordinator, changed: false };
+  }
+  if (!checked.coordinator.recordIds.includes(recordId)) {
+    return { ok: true, code: null, coordinator, changed: false };
+  }
+
+  return {
+    ok: true,
+    code: null,
+    coordinator: {
+      version: 1,
+      batchId: checked.coordinator.batchId,
+      appVer: checked.coordinator.appVer,
+      nextSlot: checked.coordinator.nextSlot,
+      recordIds: checked.coordinator.recordIds.slice(),
+      invalidated: true,
+    },
+    changed: true,
+  };
+}
+
 /* 検証計装（H）: 撮影セッション終了時に shots(arrowCheck付与済み) と samplePerfMs
    計測列から、保存レコードへ添える診断サマリを作る。db.settings.formDebug===true
    のときのみ呼び出し側が保存する（既定OFF）。判定ロジックには一切使わない。 */
