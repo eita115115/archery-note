@@ -2534,3 +2534,22 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   acceptance behavior changed.
 - Next: publish this storage-safety coverage update after CI; keep the field
   acceptance checklist pending until explicit user direction.
+
+## 2026-08-10 — Sanitized candidate strict review
+
+- Scope: reviewed the candidate branch against `origin/main`, including every
+  form save/delete write path, receipt ownership and cancellation paths,
+  matrix eligibility/export, exact-boolean settings, native/Web transport,
+  storage normalization/round trips, dependency-lock changes, and Service
+  Worker boundaries.
+- Findings: no blocker, major, or actionable minor defect was found. The
+  visible mark radius and scoring radius share one source; transactional
+  failures restore array/coordinator/timestamp state; diagnostics-off paths
+  retain legacy behavior; and no Service Worker activation change or
+  production dependency addition is present.
+- Validation evidence: latest candidate CI is green; local `npm run check:all`,
+  lint, format, storage checks, focused form checks, and diff checks pass.
+- Not covered: physical iPhone camera accuracy and the trusted-HTTPS
+  three-condition/18-shot field matrix remain intentionally unexecuted.
+- Next: keep the draft handoff candidate ready, and resume field acceptance
+  only after explicit user direction.
