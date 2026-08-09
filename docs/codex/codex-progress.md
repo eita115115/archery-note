@@ -2262,5 +2262,11 @@ save creator is exported`. The new form-core source contract then failed with
 - Risk: settings are intentionally secondary and exact-debug gated; no storage
   migration, Service Worker, dependency, version, or primary capture UI changes
   were made. Legacy formDebug-off save paths remain unchanged.
+- Review: independent Task 9 review APPROVED on latest implementation/style
+  HEAD (`d827a2db` + `8d591eca`). Three-shard Playwright evidence passed 29/29;
+  cumulative `check:all`, lint, format, and diff checks passed. The reviewer
+  confirmed exact-boolean gating, secondary-only UI placement, lock/token
+  rechecks, fixed result-copy tables, transport/privacy invariance, and the
+  dual-signature coordinator-token compatibility with Task 7.
 - Next: Task 10 performs cumulative verification and prepares the sanitized
   GitHub handoff.
