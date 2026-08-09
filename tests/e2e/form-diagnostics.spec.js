@@ -1138,6 +1138,9 @@ for (const viewport of [
       const exportButton = globalThis.document
         .querySelector("#fdMatrixExport")
         .getBoundingClientRect();
+      const downloadButton = globalThis.document
+        .querySelector("#fdMatrixDownload")
+        .getBoundingClientRect();
       const sheetRect = sheet.getBoundingClientRect();
       const overlap = !(
         start.right <= exportButton.left ||
@@ -1151,7 +1154,7 @@ for (const viewport of [
           globalThis.document.documentElement.clientWidth,
         sheetOverflow: sheet.scrollWidth > sheet.clientWidth,
         sectionOverflow: section.scrollWidth > section.clientWidth,
-        clipped: [start, exportButton].some(
+        clipped: [start, exportButton, downloadButton].some(
           (rect) =>
             rect.width < 44 ||
             rect.height < 44 ||

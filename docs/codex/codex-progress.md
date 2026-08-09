@@ -3390,3 +3390,15 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Next: keep the field artifact as the only physical acceptance gap. When the
   user resumes, use `端末に直接保存`, verify the downloaded filename, and run
   `node tools/inspect-form-diagnostic-json.js --from-downloads`.
+
+## 2026-08-10 — Lock the direct-save mobile layout contract
+
+- Changed: the existing 360/390/1280px diagnostic-settings layout check now
+  includes the new `端末に直接保存` button in its clipping/overflow guard.
+- Validation: the focused three-viewport Chromium checks passed `3/3`; lint,
+  format, and `git diff --check` also pass. No production code or persisted
+  data changed.
+- Risk: test-only coverage; the physical trusted-HTTPS artifact remains the
+  only acceptance gap.
+- Next: wait for the current-candidate 3×6 JSON, then run the bounded checker
+  and record its aggregate result without exposing raw receipt data.
