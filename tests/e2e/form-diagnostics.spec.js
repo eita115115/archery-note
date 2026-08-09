@@ -730,7 +730,9 @@ test("allocation failure and save false both preserve prior coordinator and upda
   ).toEqual({ hasBatch: false, hasUpdatedAt: false });
   await page.reload();
   await page.locator("#btnSettings").click();
+  await page.waitForTimeout(750);
   await page.evaluate(() => {
+    delete db.updatedAt;
     globalThis.save = () => false;
   });
   await page.locator("#fdMatrixStart").click();

@@ -2349,3 +2349,21 @@ dist/native/native-readiness.json` exited `0`, and the scoped `dist` status
 - Next: independent review of this small diff, then fold it into the sanitized
   GitHub handoff only after the physical trusted-HTTPS 3-condition/18-shot
   acceptance remains addressed.
+
+## 2026-08-09 — Form diagnostic E2E startup-quiescence follow-up
+
+- Changed: the allocation-failure/save-false E2E fixture now waits 750 ms after
+  reload and removes the startup `updatedAt` before installing the failing save
+  seam. This isolates the assertion from the normal launch-count debounce and
+  does not change production code or persisted-data behavior.
+- Evidence: the focused regression passed 1/1, and the complete prestarted
+  Chromium suite passed 83/83. The prior full-suite-only failure (`updatedAt`
+  being recreated by startup save) did not recur.
+- Scope: only `tests/e2e/form-diagnostics.spec.js` and this ledger are intended
+  for the follow-up commit; the three pre-existing metadata documents remain
+  unstaged. The generated root `debug.log` contained one Chromium ffmpeg
+  warning and was removed.
+- Next: independently review this fixture-only change, regenerate the sanitized
+  release candidate from the verified tree, and stop at the GitHub `gh`
+  installation/authentication boundary plus the still-unexecuted physical
+  trusted-HTTPS 3-condition/18-shot acceptance.
