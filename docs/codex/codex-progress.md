@@ -2553,3 +2553,18 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   three-condition/18-shot field matrix remain intentionally unexecuted.
 - Next: keep the draft handoff candidate ready, and resume field acceptance
   only after explicit user direction.
+
+## 2026-08-10 — Windows trusted-preview instructions clarified
+
+- Changed: `docs/form-diagnostic-field-acceptance.md` now gives copyable
+  PowerShell commands that discover one local IPv4 address, passes it through
+  `-HostAddress $lanIp`, warns not to type angle-bracket placeholders, and
+  explicitly tells the operator to open the printed URL in iPhone Safari rather
+  than PowerShell.
+- Validation: `npm run format:check`, `npm run check:pwa`, and
+  `git diff --check` pass. No helper, runtime, storage, or deployment code
+  changed.
+- Risk: documentation-only; physical acceptance remains unexecuted and no
+  certificate or diagnostic artifact is committed.
+- Next: publish this handoff clarification after CI, keeping the field matrix
+  pending until explicit user direction.

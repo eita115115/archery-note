@@ -11,9 +11,24 @@ Repository tests and JSON export do not establish physical acceptance.
 
 ### Local candidate preview (Windows)
 
-- From the candidate worktree, run `powershell -ExecutionPolicy Bypass -File tools/serve-iphone-https.ps1 -HostAddress <LAN IPv4>`.
+- First change directory to the candidate worktree root. Run these commands
+  there; do not type angle brackets as PowerShell syntax:
+
+  ```powershell
+  $lanIp = Get-NetIPAddress -AddressFamily IPv4 |
+    Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.IPAddress -notlike "169.254*" } |
+    Select-Object -First 1 -ExpandProperty IPAddress
+  powershell -ExecutionPolicy Bypass -File ".\tools\serve-iphone-https.ps1" -HostAddress $lanIp
+  ```
+
+  The helper itself rejects an address that is not assigned to this PC. If the
+  command prints no address, connect the PC to the same private Wi-Fi as the
+  iPhone and run it again.
+
 - Use the printed `.cer` path to install the temporary certificate on the iPhone, then enable full trust under Settings > General > About > Certificate Trust Settings.
-- Open the printed `https://<LAN IPv4>:8743/` URL from Safari on the same trusted private Wi-Fi. Binding to an explicit LAN IPv4 keeps the preview off unrelated interfaces.
+- Open the printed `https://...:8743/` URL in the iPhone's Safari address bar.
+  Do not paste the URL into PowerShell; PowerShell treats it as a command.
+  Binding to an explicit LAN IPv4 keeps the preview off unrelated interfaces.
 - Use a dedicated test profile, keep production data out of the preview, and stop the server after the checklist. The helper removes its temporary certificate and private key on exit.
 
 ## Physical sequence
