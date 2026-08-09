@@ -2705,5 +2705,9 @@ tools/check-form-core.js`, `npm run check:all`, lint, format, targeted syntax,
   shot retention, storage, export schema, Service Worker, dependencies, and
   physical acceptance behavior are unchanged. Trusted-HTTPS field acceptance
   remains deferred.
-- Next: review and commit this isolated guidance, then push and verify the
-  candidate CI remains green.
+- Validation: after push, GitHub Actions run `31323727790` completed
+  successfully; all static checks, Playwright installation, and E2E smoke
+  passed. PR #134 remains OPEN, draft, and CLEAN at the new HEAD.
+- Next: keep the candidate ready for review and continue one isolated
+  nonphysical product-quality task; do not merge, deploy, or resume field
+  acceptance without direction.
