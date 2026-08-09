@@ -4300,6 +4300,20 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
       1,
       `${label} resolves exactly one detector step`,
     );
+    const cancelSlice = compact.slice(cancelAt, releaseAt);
+    assert(
+      cancelSlice.includes(
+        "constaction=receiptTracker.cancel(debug&&debug.cancelReason);if(action.code){freezeForReceiptFailure();return;}",
+      ),
+      `${label} freezes when cancellation ownership cannot be resolved`,
+    );
+    const confirmSlice = compact.slice(confirmAt, confirmAt + 320);
+    assert(
+      confirmSlice.includes(
+        "constconfirmAction=receiptTracker.confirm();if(confirmAction.code){freezeForReceiptFailure();return;}",
+      ),
+      `${label} freezes when pending receipt confirmation cannot be resolved`,
+    );
   });
   const secureGuardStart = capture.indexOf("if(window.isSecureContext!==true){");
   const captureDomStart = capture.indexOf('const ovl=document.createElement("div");');

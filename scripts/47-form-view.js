@@ -708,6 +708,7 @@ function openFormCapture(){
       let releasedPreScores=null;
       if(result.canceled){
         const action=receiptTracker.cancel(debug&&debug.cancelReason);
+        if(action.code){ freezeForReceiptFailure(); return; }
         if(db.settings.formDebug===true){
           formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:(debug&&debug.cancelReason)||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:action.id},200);
         }
@@ -724,7 +725,8 @@ function openFormCapture(){
           releasedShotId=shotId;
         }
       }else if(hadPendingRelease&&detector.pendingRelease==null){
-        receiptTracker.confirm();
+        const confirmAction=receiptTracker.confirm();
+        if(confirmAction.code){ freezeForReceiptFailure(); return; }
       }
       /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: debugが返る全フレームで
          recentFrames（release fire snapshot用バッファ）とphaseCounts（session全体の
@@ -1052,6 +1054,7 @@ function startFormReplay(videoUrl){
         const releaseFire=result.released&&db.settings.formDebug===true?copyFormReleaseFireSnapshot(result.debug):null;
         if(result.canceled){
           const action=receiptTracker.cancel(debug&&debug.cancelReason);
+          if(action.code){ freezeForReceiptFailure(); return; }
           if(db.settings.formDebug===true){
             formDiagPush(formPhaseDiag.canceledEvents,{ts:now,reason:(debug&&debug.cancelReason)||null,anchorNorm:debug?debug.anchorNorm:null,tsAgo:now-lastReleaseNow,shotId:action.id},200);
           }
@@ -1068,7 +1071,8 @@ function startFormReplay(videoUrl){
             }
           }
         }else if(hadPendingRelease&&detector.pendingRelease==null){
-          receiptTracker.confirm();
+          const confirmAction=receiptTracker.confirm();
+          if(confirmAction.code){ freezeForReceiptFailure(); return; }
         }
         /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: debugが返る全フレームで
            recentFrames（release fire snapshot用バッファ）とphaseCounts（session全体の

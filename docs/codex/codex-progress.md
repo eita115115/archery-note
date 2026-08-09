@@ -3108,3 +3108,20 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   because no current-candidate trusted-HTTPS artifact has been collected.
 - Next: commit/push this workflow-safety guard and verify CI; continue using
   the current candidate for the deferred trusted-HTTPS field run.
+
+## 2026-08-10 — Freeze unresolved cancel/confirm transitions
+
+- RED evidence: the new source contract failed because live/replay ignored
+  error results from `receiptTracker.cancel()` and `receiptTracker.confirm()`
+  after the ownership guard had been added.
+- Changed: unexpected cancellation or pending-confirmation failures now freeze
+  the workflow before diagnostics or count updates continue. Normal user
+  cancellation and close paths remain unchanged.
+- Validation: `npm run check:form`, `npm run check:all`, lint, format,
+  syntax, and `git diff --check` pass. No detector thresholds, receipt schema,
+  storage, Service Worker, dependency, or transport behavior changed.
+- Risk: receipt transition recovery only; physical 3×6 acceptance remains
+  pending because no current-candidate trusted-HTTPS artifact has been
+  collected.
+- Next: commit/push this transition guard and verify CI; keep the field run
+  deferred until the current candidate can be exercised on trusted HTTPS.
