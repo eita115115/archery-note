@@ -2507,3 +2507,16 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   Service Worker, dependency, or physical acceptance status changed.
 - Next: review and publish this E2E coverage update; keep trusted-HTTPS field
   acceptance pending until the user explicitly resumes it.
+
+## 2026-08-10 — Legacy form-save branch ordering contract
+
+- Changed: `tools/check-form-core.js` now bounds both live and replay
+  diagnostics-off save handlers and asserts the order
+  `formDebug` gate → active receipt resolution → record push → `save()`.
+  This protects the legacy path while frozen diagnostics saves remain separate.
+- Validation: `node tools/check-form-core.js`, `npm run check:all`, lint,
+  `npm run format:check`, Node syntax check, and `git diff --check` pass.
+- Risk: static test-only coverage; no production, storage, Service Worker,
+  dependency, or physical acceptance behavior changed.
+- Next: publish the coverage-only candidate update after CI; keep the physical
+  trusted-HTTPS checklist pending until explicit user direction.

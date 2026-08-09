@@ -236,6 +236,32 @@ assert(
   replayPoseLoadSource.includes("loadFormPose().then(async lm=>{\n    if(!running) return;"),
   "replay pose continuation cannot restart after freeze or close",
 );
+for (const [label, source, saveMarker, endMarker] of [
+  [
+    "live",
+    saveCapture,
+    'ovl.querySelector("#fcSave").onclick=async()=>{',
+    'ovl.querySelector("#fcSwap").onclick=async()=>{',
+  ],
+  [
+    "replay",
+    saveReplay,
+    'ovl.querySelector("#frSave").onclick=()=>{',
+    'ovl.querySelector("#frHand").onclick=e=>{',
+  ],
+]) {
+  const legacySave = compactSource(
+    boundedSourceSection(source, saveMarker, endMarker, `${label} legacy save handler`),
+  );
+  const debugGate = legacySave.indexOf("if(db.settings.formDebug===true){");
+  const abandon = legacySave.indexOf('if(tracker.current())tracker.abandon("workflow-save");');
+  const push = legacySave.indexOf("db.formAnalyses.push(rec);");
+  const save = legacySave.indexOf('save({reason:"form-analysis"});');
+  assert(
+    debugGate >= 0 && abandon > debugGate && push > abandon && save > push,
+    `${label} legacy save keeps debug gate -> active receipt resolution -> record push -> save order`,
+  );
+}
 for (const [label, source, finishName] of [
   ["live", saveCapture, "finishCapture"],
   ["replay", saveReplay, "finishReplay"],
