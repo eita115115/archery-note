@@ -193,7 +193,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
       records: db.formAnalyses.length,
       updatedAt: db.updatedAt,
       attempts: globalThis.__formWriteProbe.attempts.length,
-      blocked: isUpdateReloadBlocked(),
+      blocked: globalThis.isUpdateReloadBlocked(),
     })),
   ).toEqual({ records: 0, updatedAt: liveBaseline, attempts: 1, blocked: true });
   await page.evaluate(() => {
@@ -208,7 +208,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
       mode: db.formAnalyses[0].captureMode,
       marker: Object.hasOwn(db.formAnalyses[0], "formDiagnosticMatrix"),
       attempts: globalThis.__formWriteProbe.attempts.length,
-      blocked: isUpdateReloadBlocked(),
+      blocked: globalThis.isUpdateReloadBlocked(),
     })),
   ).toEqual({ records: 1, shots: 0, mode: "live", marker: false, attempts: 2, blocked: false });
 });
@@ -240,7 +240,7 @@ test("failed diagnostic discard cancel retains the candidate and confirm closes 
     await page.evaluate(() => ({
       records: db.formAnalyses.length,
       attempts: globalThis.__formWriteProbe.attempts.length,
-      blocked: isUpdateReloadBlocked(),
+      blocked: globalThis.isUpdateReloadBlocked(),
     })),
   ).toEqual({ records: 0, attempts: 1, blocked: false });
 });
@@ -292,7 +292,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
         db.settings.formDiagnosticMatrixBatch === globalThis.__replayCoordinatorReference,
       updatedAt: db.updatedAt,
       attempts: globalThis.__formWriteProbe.attempts.length,
-      blocked: isUpdateReloadBlocked(),
+      blocked: globalThis.isUpdateReloadBlocked(),
     })),
   ).toEqual({
     records: 0,
@@ -315,7 +315,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
       sameCoordinator:
         db.settings.formDiagnosticMatrixBatch === globalThis.__replayCoordinatorReference,
       attempts: globalThis.__formWriteProbe.attempts.length,
-      blocked: isUpdateReloadBlocked(),
+      blocked: globalThis.isUpdateReloadBlocked(),
     })),
   ).toEqual({
     records: 1,
