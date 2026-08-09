@@ -3021,3 +3021,19 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   pending and still requires the current candidate plus a validated artifact.
 - Next: commit/push this loopback boundary fix, verify CI, then keep physical
   acceptance deferred until the user can complete the trusted-HTTPS run.
+
+## 2026-08-10 — Clarify optional form-tracking recording
+
+- RED evidence: `npm run check:ui` failed because the live capture footnote
+  said video is never saved while the optional recording control offers camera
+  roll saving.
+- Changed: the live capture copy now explains that pose analysis normally
+  stores only summaries, and that enabling recording allows the stopped clip
+  to be saved to the camera roll. The recording behavior itself is unchanged.
+- Validation: `npm run check:ui`, `npm run check:app`, and the generated
+  360/390/1280 smoke screenshots pass. No detector, shot-count, storage,
+  Service Worker, dependency, or transport behavior changed.
+- Risk: user-facing privacy/capability wording only. Physical 3×6 acceptance
+  remains pending and still requires a current candidate artifact.
+- Next: commit/push this copy correction, verify CI, then continue with a
+  narrowly scoped count/acceptance quality task.

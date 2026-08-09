@@ -327,6 +327,13 @@ function staticUiChecks() {
     "form-tracking measurement-error and camera-position hints missing",
   );
   assert(
+    surface.includes("通常保存・送信されず") &&
+      surface.includes("録画をオンにした場合のみ") &&
+      surface.includes("カメラロールへ保存できます") &&
+      !surface.includes("映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです"),
+    "form-tracking recording privacy copy must distinguish optional recording",
+  );
+  assert(
     surface.includes("演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出") &&
       surface.includes("判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出"),
     "confidence derivation notes missing",

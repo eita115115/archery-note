@@ -429,7 +429,7 @@ function openFormCapture(){
       <button class="btn sec sm" id="fcHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
       <button class="btn" id="fcSave" disabled>保存して終了</button>
     </div>
-    <div class="formFootnote">検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです。</div>
+    <div class="formFootnote">検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。映像は通常保存・送信されず、保存されるのは角度・保持時間などの要約だけです。録画をオンにした場合のみ、停止後にカメラロールへ保存できます。</div>
   </div>`;
   openModal(ovl,{escapeTarget:"#fcClose"});
   beginActiveWorkflow();
