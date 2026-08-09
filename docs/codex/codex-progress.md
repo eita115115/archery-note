@@ -3072,3 +3072,22 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   Physical 3×6 acceptance remains pending.
 - Next: commit/push this ownership guard, verify CI, then continue toward a
   current-candidate trusted-HTTPS field run.
+
+## 2026-08-10 — Reject contradictory diagnostic receipt outcomes
+
+- RED evidence: `node tools/check-form-diagnostic-artifact.js` accepted a
+  synthetic receipt marked `outcome: "retained"` while its detector result was
+  `auto-canceled`.
+- Changed: the bounded artifact validator now requires retained/auto-canceled/
+  unresolved outcomes to agree with their corresponding detector outcome;
+  manual-removed and summary-failed remain valid across a finalized detector
+  state because they describe user/summary disposition separately.
+- Validation: artifact checks, `npm run check:form`, `npm run check:all`, lint,
+  format, and `git diff --check` pass. No detector thresholds, storage schema,
+  Service Worker, dependency, or transport behavior changed.
+- Risk: acceptance-artifact consistency only. Physical 3×6 acceptance remains
+  pending because no current-candidate trusted-HTTPS artifact has been
+  collected.
+- Next: commit/push this validator hardening and verify CI; keep field
+  acceptance deferred until the user can produce the current candidate's
+  diagnostic artifact.

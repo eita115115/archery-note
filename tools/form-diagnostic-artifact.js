@@ -72,6 +72,13 @@ function validReceiptState(receipt) {
   return receipt.cancelReason === null && UNRESOLVED_REASONS.has(receipt.unresolvedReason);
 }
 
+function validReceiptOutcome(receipt) {
+  if (receipt.outcome === "retained") return receipt.detectorOutcome === "confirmed";
+  if (receipt.outcome === "auto-canceled") return receipt.detectorOutcome === "auto-canceled";
+  if (receipt.outcome === "unresolved") return receipt.detectorOutcome === "unresolved";
+  return true;
+}
+
 function inspectFormDiagnosticArtifact(text) {
   if (typeof text !== "string")
     return failure("input", "診断JSONはUTF-8テキストで指定してください");
@@ -153,7 +160,8 @@ function inspectFormDiagnosticArtifact(text) {
         !DETECTOR_OUTCOMES.has(receipt.detectorOutcome) ||
         !nullableEnum(receipt.cancelReason, CANCEL_REASONS) ||
         !nullableEnum(receipt.unresolvedReason, UNRESOLVED_REASONS) ||
-        !validReceiptState(receipt)
+        !validReceiptState(receipt) ||
+        !validReceiptOutcome(receipt)
       ) {
         return failure(
           "receipt",

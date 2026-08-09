@@ -123,6 +123,23 @@ assert.equal(
   "contradictory receipt reasons report receipt failure",
 );
 
+const contradictoryOutcome = validPayload();
+contradictoryOutcome.runs[0].receipts[0].detectorOutcome = "auto-canceled";
+contradictoryOutcome.runs[0].receipts[0].cancelReason = "anchor-return";
+const contradictoryOutcomeResult = inspectFormDiagnosticArtifact(
+  JSON.stringify(contradictoryOutcome),
+);
+assert.equal(
+  contradictoryOutcomeResult.ok,
+  false,
+  "retained outcome cannot claim an auto-canceled detector result",
+);
+assert.equal(
+  contradictoryOutcomeResult.code,
+  "receipt",
+  "contradictory outcome reports receipt failure",
+);
+
 const wrongCount = validPayload();
 wrongCount.runs[1].receipts.pop();
 const wrongCountResult = inspectFormDiagnosticArtifact(JSON.stringify(wrongCount));
