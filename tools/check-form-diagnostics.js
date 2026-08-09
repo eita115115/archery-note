@@ -60,6 +60,14 @@ function loadFormDiagnosticApi() {
       typeof invalidateFormDiagnosticMatrixForRecord === "function"
         ? invalidateFormDiagnosticMatrixForRecord
         : null,
+    buildFormDiagnosticExport:
+      typeof buildFormDiagnosticExport === "function" ? buildFormDiagnosticExport : null,
+    formDiagnosticUtf8ByteLength:
+      typeof formDiagnosticUtf8ByteLength === "function" ? formDiagnosticUtf8ByteLength : null,
+    isFormDiagnosticJsonSizeAllowed:
+      typeof isFormDiagnosticJsonSizeAllowed === "function"
+        ? isFormDiagnosticJsonSizeAllowed
+        : null,
   };`,
   )();
 }
@@ -589,6 +597,187 @@ assertEqual(
   sourcePlanningCoordinator.recordIds.length,
   0,
   "planner result keeps source recordIds isolated",
+);
+
+function markedRecord(id, slot) {
+  const record = validRecord(id, "live");
+  record.formDiagnosticMatrix = { version: 1, batchId: BATCH_ID, slot };
+  return record;
+}
+
+const sideRecord = markedRecord("diagnostic-side", "side");
+const obliqueRecord = markedRecord("diagnostic-oblique", "oblique");
+const normalRecord = markedRecord("diagnostic-normal", "normal_range");
+const completedCoordinator = validCoordinator(3, [
+  sideRecord.id,
+  obliqueRecord.id,
+  normalRecord.id,
+]);
+const shuffledValidRecords = [normalRecord, sideRecord, obliqueRecord];
+const syntheticFixtureLabel = "synthetic-only-no-real-user-or-device-data";
+assertEqual(
+  shuffledValidRecords.every((record) => record.id.startsWith("diagnostic-")),
+  true,
+  syntheticFixtureLabel,
+);
+
+const result = api.buildFormDiagnosticExport(shuffledValidRecords, completedCoordinator, 84);
+assertEqual(result.ok, true, "valid 3x6 diagnostics export is accepted");
+assertEqual(result.payload.runs.length, 3, "export has exactly three runs");
+assertEqual(result.json.endsWith("\n"), true, "pretty JSON ends with one newline");
+
+function expectExportFailure(inputRecords, inputCoordinator, code, label) {
+  const actual = api.buildFormDiagnosticExport(inputRecords, inputCoordinator, 84);
+  deepEqual(actual, { ok: false, code, payload: null, json: null, byteLength: null }, label);
+}
+
+expectExportFailure([], completedCoordinator, "source-missing", "empty source refuses");
+expectExportFailure(
+  [sideRecord, obliqueRecord, normalRecord, { ...sideRecord }],
+  completedCoordinator,
+  "source-ambiguous",
+  "duplicate selected ID refuses",
+);
+expectExportFailure(
+  [sideRecord, obliqueRecord],
+  completedCoordinator,
+  "source-missing",
+  "missing selected ID refuses",
+);
+expectExportFailure(
+  shuffledValidRecords,
+  { ...completedCoordinator, recordIds: [normalRecord.id, sideRecord.id, obliqueRecord.id] },
+  "source-invalid",
+  "marker-slot substitution refuses",
+);
+expectExportFailure(
+  shuffledValidRecords,
+  { ...completedCoordinator, nextSlot: 2, recordIds: completedCoordinator.recordIds.slice(0, 2) },
+  "coordinator-incomplete",
+  "incomplete coordinator refuses",
+);
+expectExportFailure(
+  shuffledValidRecords,
+  { ...completedCoordinator, appVer: 83 },
+  "coordinator-stale",
+  "stale coordinator refuses",
+);
+
+const poison = markedRecord("diagnostic-poison", "side");
+Object.defineProperty(poison, "secretPath", {
+  enumerable: true,
+  get() {
+    throw new Error("excluded source getter was read");
+  },
+});
+poison.notes = "SENTINEL_NOT_ALLOWED";
+poison.features[0].landmarks = "SENTINEL_NOT_ALLOWED";
+const poisonCoordinator = validCoordinator(3, [poison.id, obliqueRecord.id, normalRecord.id]);
+expectExportFailure(
+  [poison, obliqueRecord, normalRecord],
+  poisonCoordinator,
+  "source-invalid",
+  "poison source refuses without reading excluded getter",
+);
+
+const malformedFire = markedRecord("diagnostic-fire", "side");
+malformedFire.formPhaseDiag.releaseReceipts[0].fire = {
+  anchorFloor: null,
+  anchorEnter: 9,
+  releaseSpeed: 7,
+  evidenceAgeMs: null,
+  evidenceStrength: null,
+  departDelta: 0,
+  fireEvidence: "unknown",
+};
+expectExportFailure(
+  [malformedFire, obliqueRecord, normalRecord],
+  validCoordinator(3, [malformedFire.id, obliqueRecord.id, normalRecord.id]),
+  "source-invalid",
+  "out-of-range fire refuses",
+);
+
+const accepted = api.buildFormDiagnosticExport(shuffledValidRecords, completedCoordinator, 84);
+assertEqual(accepted.payload.format, "archery-note-form-diagnostics", "format");
+assertEqual(accepted.payload.schemaVersion, 1, "schema version");
+assertEqual(accepted.payload.appVersion, 84, "app version");
+assertEqual(accepted.payload.matrix, "field-3x6", "matrix name");
+deepEqual(
+  accepted.payload.runs.map((run) => [run.runOrdinal, run.condition, run.retainedShotCount]),
+  [
+    [1, "side", 6],
+    [2, "oblique", 6],
+    [3, "normal_range", 6],
+  ],
+  "fixed run order",
+);
+accepted.payload.runs.forEach((run) => {
+  assertEqual(run.receipts.length, 6, `${run.condition} receipt count`);
+  run.receipts.forEach((receipt, index) => {
+    assertEqual(receipt.receiptOrdinal, index + 1, `${run.condition} ordinal`);
+    deepEqual(
+      Object.keys(receipt),
+      ["receiptOrdinal", "outcome", "detectorOutcome", "cancelReason", "unresolvedReason", "fire"],
+      "receipt allowlist",
+    );
+    deepEqual(
+      Object.keys(receipt.fire),
+      [
+        "anchorFloor",
+        "anchorEnter",
+        "releaseSpeed",
+        "evidenceAgeMs",
+        "evidenceStrength",
+        "departDelta",
+        "fireEvidence",
+      ],
+      "fire allowlist",
+    );
+  });
+});
+assertEqual(accepted.json.includes("diagnostic-side"), false, "runtime IDs excluded");
+assertEqual(accepted.json.includes("SENTINEL_NOT_ALLOWED"), false, "sentinels excluded");
+assertEqual(api.formDiagnosticUtf8ByteLength("射"), 3, "UTF-8 helper counts bytes");
+assertEqual(api.isFormDiagnosticJsonSizeAllowed("x".repeat(65536)), true, "65536 bytes accepted");
+assertEqual(api.isFormDiagnosticJsonSizeAllowed("x".repeat(65537)), false, "65537 bytes refused");
+const exact65536Encoder = class {
+  encode() {
+    return { byteLength: 65536 };
+  }
+};
+const exact65537Encoder = class {
+  encode() {
+    return { byteLength: 65537 };
+  }
+};
+assertEqual(
+  api.buildFormDiagnosticExport(shuffledValidRecords, completedCoordinator, 84, exact65536Encoder)
+    .ok,
+  true,
+  "builder accepts exact 65536 bytes",
+);
+deepEqual(
+  api.buildFormDiagnosticExport(shuffledValidRecords, completedCoordinator, 84, exact65537Encoder),
+  { ok: false, code: "output-too-large", payload: null, json: null, byteLength: null },
+  "builder refuses exact 65537 bytes",
+);
+class ThrowingEncoder {
+  encode() {
+    throw new Error("encoder unavailable");
+  }
+}
+deepEqual(
+  api.buildFormDiagnosticExport(shuffledValidRecords, completedCoordinator, 84, ThrowingEncoder),
+  { ok: false, code: "encoding-unavailable", payload: null, json: null, byteLength: null },
+  "builder fails closed when encoding is unavailable",
+);
+
+const sourceBeforeProjection = cloneFixture(shuffledValidRecords);
+api.buildFormDiagnosticExport(shuffledValidRecords, completedCoordinator, 84);
+deepEqual(
+  shuffledValidRecords,
+  sourceBeforeProjection,
+  "projection leaves source diagnostics unchanged",
 );
 
 console.log("Form diagnostic checks OK");

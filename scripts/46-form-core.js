@@ -2501,6 +2501,192 @@ function invalidateFormDiagnosticMatrixForRecord(coordinator, recordId, appVer) 
   };
 }
 
+const FORM_DIAGNOSTIC_EXPORT_MAX_BYTES = 65536;
+const FORM_DIAGNOSTIC_EXPORT_FIRE_EVIDENCE = Object.freeze(["adaptive", "close", "nb2"]);
+
+function formDiagnosticExportFailure(code) {
+  return { ok: false, code, payload: null, json: null, byteLength: null };
+}
+
+function formDiagnosticHasOnlyOwnDataProperties(source) {
+  if (!source || typeof source !== "object") return false;
+  try {
+    return Reflect.ownKeys(Object.getOwnPropertyDescriptors(source)).every((key) =>
+      Object.hasOwn(Object.getOwnPropertyDescriptor(source, key), "value"),
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
+function formDiagnosticExportSources(formAnalyses, coordinator, appVer) {
+  const checkedCoordinator = validateFormDiagnosticMatrixCoordinator(coordinator, appVer, true);
+  if (!checkedCoordinator.ok) {
+    return formDiagnosticExportFailure(
+      checkedCoordinator.code === FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_COMPLETE
+        ? FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID
+        : checkedCoordinator.code,
+    );
+  }
+
+  const records = formDiagnosticReadOwnArray(formAnalyses);
+  if (!records) return formDiagnosticExportFailure("source-invalid");
+
+  const selected = [];
+  for (const recordId of checkedCoordinator.coordinator.recordIds) {
+    const matches = records.filter(
+      (record) => formDiagnosticReadOwnData(record, "id") === recordId,
+    );
+    if (matches.length === 0) return formDiagnosticExportFailure("source-missing");
+    if (matches.length !== 1) return formDiagnosticExportFailure("source-ambiguous");
+    selected.push(matches[0]);
+  }
+  return { ok: true, code: null, selected, coordinator: checkedCoordinator.coordinator };
+}
+
+function formDiagnosticNumberInRange(value, minimum, maximum, nullable = false) {
+  if (nullable && value === null) return true;
+  return Number.isFinite(value) && value >= minimum && value <= maximum;
+}
+
+function formDiagnosticRound(value) {
+  return value === null ? null : Number(value.toFixed(3));
+}
+
+function formDiagnosticProjectFire(fire) {
+  if (!formDiagnosticHasExactOwnDataKeys(fire, FORM_DIAGNOSTIC_FIRE_KEYS)) return null;
+  const anchorFloor = formDiagnosticReadOwnData(fire, "anchorFloor");
+  const anchorEnter = formDiagnosticReadOwnData(fire, "anchorEnter");
+  const releaseSpeed = formDiagnosticReadOwnData(fire, "releaseSpeed");
+  const evidenceAgeMs = formDiagnosticReadOwnData(fire, "evidenceAgeMs");
+  const evidenceStrength = formDiagnosticReadOwnData(fire, "evidenceStrength");
+  const departDelta = formDiagnosticReadOwnData(fire, "departDelta");
+  const fireEvidence = formDiagnosticReadOwnData(fire, "fireEvidence");
+  if (
+    !formDiagnosticNumberInRange(anchorFloor, 0, 1.3, true) ||
+    !formDiagnosticNumberInRange(anchorEnter, 0.35, 0.65) ||
+    !formDiagnosticNumberInRange(releaseSpeed, 6, 8) ||
+    !formDiagnosticNumberInRange(evidenceAgeMs, 0, 1500, true) ||
+    (evidenceStrength !== null &&
+      (!Number.isSafeInteger(evidenceStrength) || evidenceStrength < 3 || evidenceStrength > 12)) ||
+    !formDiagnosticNumberInRange(departDelta, -1.3, 1.3, true) ||
+    !FORM_DIAGNOSTIC_EXPORT_FIRE_EVIDENCE.includes(fireEvidence)
+  ) {
+    return null;
+  }
+  return {
+    anchorFloor: formDiagnosticRound(anchorFloor),
+    anchorEnter: formDiagnosticRound(anchorEnter),
+    releaseSpeed: formDiagnosticRound(releaseSpeed),
+    evidenceAgeMs: evidenceAgeMs === null ? null : formDiagnosticRound(evidenceAgeMs),
+    evidenceStrength,
+    departDelta: formDiagnosticRound(departDelta),
+    fireEvidence,
+  };
+}
+
+function formDiagnosticProjectReceipt(receipt, ordinal) {
+  if (!receipt || typeof receipt !== "object" || !Number.isSafeInteger(receipt.numericId))
+    return null;
+  if (
+    !["retained", "manual-removed", "auto-canceled", "summary-failed", "unresolved"].includes(
+      receipt.outcome,
+    ) ||
+    !["confirmed", "auto-canceled", "unresolved"].includes(receipt.detectorOutcome)
+  ) {
+    return null;
+  }
+  const fire = formDiagnosticProjectFire(receipt.fire);
+  if (!fire) return null;
+  return {
+    receiptOrdinal: ordinal,
+    outcome: receipt.outcome,
+    detectorOutcome: receipt.detectorOutcome,
+    cancelReason: receipt.cancelReason,
+    unresolvedReason: receipt.unresolvedReason,
+    fire,
+  };
+}
+
+function formDiagnosticProjectRun(record, coordinator, runOrdinal, appVer) {
+  if (!formDiagnosticHasOnlyOwnDataProperties(record)) return null;
+  const marker = formDiagnosticReadOwnData(record, "formDiagnosticMatrix");
+  if (!formDiagnosticHasExactOwnDataKeys(marker, ["version", "batchId", "slot"])) return null;
+  if (
+    formDiagnosticReadOwnData(marker, "version") !== 1 ||
+    formDiagnosticReadOwnData(marker, "batchId") !== coordinator.batchId ||
+    formDiagnosticReadOwnData(marker, "slot") !== FORM_DIAGNOSTIC_SLOTS[runOrdinal - 1]
+  ) {
+    return null;
+  }
+
+  const inspected = formDiagnosticInspectRecord(record, appVer);
+  if (!inspected.ok) return null;
+  const receipts = inspected.receipts
+    .slice()
+    .sort((left, right) => left.numericId - right.numericId);
+  const projected = receipts.map((receipt, index) =>
+    formDiagnosticProjectReceipt(receipt, index + 1),
+  );
+  if (
+    projected.some((receipt) => receipt === null) ||
+    projected.filter((receipt) => receipt.outcome === "retained").length !== 6
+  ) {
+    return null;
+  }
+  return {
+    runOrdinal,
+    condition: formDiagnosticReadOwnData(marker, "slot"),
+    retainedShotCount: 6,
+    receipts: projected,
+  };
+}
+
+function formDiagnosticUtf8ByteLength(text, TextEncoderCtor = globalThis.TextEncoder) {
+  try {
+    if (typeof TextEncoderCtor !== "function") return null;
+    const encoded = new TextEncoderCtor().encode(text);
+    return encoded && Number.isSafeInteger(encoded.byteLength) ? encoded.byteLength : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function isFormDiagnosticJsonSizeAllowed(text, TextEncoderCtor = globalThis.TextEncoder) {
+  const byteLength = formDiagnosticUtf8ByteLength(text, TextEncoderCtor);
+  return byteLength !== null && byteLength <= FORM_DIAGNOSTIC_EXPORT_MAX_BYTES;
+}
+
+function buildFormDiagnosticExport(
+  formAnalyses,
+  coordinator,
+  appVer,
+  TextEncoderCtor = globalThis.TextEncoder,
+) {
+  const source = formDiagnosticExportSources(formAnalyses, coordinator, appVer);
+  if (!source.ok) return source;
+  const runs = source.selected.map((record, index) =>
+    formDiagnosticProjectRun(record, source.coordinator, index + 1, appVer),
+  );
+  if (runs.length !== FORM_DIAGNOSTIC_SLOTS.length || runs.some((run) => run === null)) {
+    return formDiagnosticExportFailure("source-invalid");
+  }
+  const payload = {
+    format: "archery-note-form-diagnostics",
+    schemaVersion: 1,
+    appVersion: appVer,
+    matrix: "field-3x6",
+    runs,
+  };
+  const json = `${JSON.stringify(payload, null, 2)}\n`;
+  const byteLength = formDiagnosticUtf8ByteLength(json, TextEncoderCtor);
+  if (byteLength === null) return formDiagnosticExportFailure("encoding-unavailable");
+  if (byteLength > FORM_DIAGNOSTIC_EXPORT_MAX_BYTES) {
+    return formDiagnosticExportFailure("output-too-large");
+  }
+  return { ok: true, code: null, payload, json, byteLength };
+}
+
 /* 検証計装（H）: 撮影セッション終了時に shots(arrowCheck付与済み) と samplePerfMs
    計測列から、保存レコードへ添える診断サマリを作る。db.settings.formDebug===true
    のときのみ呼び出し側が保存する（既定OFF）。判定ロジックには一切使わない。 */

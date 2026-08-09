@@ -2127,3 +2127,23 @@ check:globals`, `npm run lint -- --quiet`, syntax, and Prettier checks passed.
   tasks.
 - Review: initial Task 4 review found an Important shallow-copy defect; fix `d2592580` added cycle-safe deep record isolation plus exact frozen-slot/progression checks. Re-review APPROVED with one non-blocking test-hardening Minor (direct marker/individual-receipt mutation coverage).
 - Next: Task 5 projects only the validated matrix diagnostics for review.
+
+## 2026-08-09 — Form diagnostic handoff Task 5
+
+- Changed: added a pure, fail-closed 3×6 diagnostic export projection. It resolves
+  only the coordinator's exact three record IDs, fixes the output order to
+  `side` → `oblique` → `normal_range`, emits fresh allowlisted literals, and
+  excludes runtime IDs, notes, landmarks, and all other source fields.
+- RED: `node tools/check-form-diagnostics.js` failed at the first new exporter
+  call because `buildFormDiagnosticExport` was absent.
+- GREEN: synthetic shuffled fixtures, missing/duplicate/slot-substitution
+  refusals, accessor poison protection, fire-range validation, source
+  immutability, exact UTF-8 65,536/65,537-byte boundaries, and unavailable
+  encoder handling pass.
+- Validation: `node tools/check-form-diagnostics.js`, `npm run check:form`,
+  `npm run check:storage`, `npm run check:app`, and `npm run lint -- --quiet`
+  passed.
+- Risk: projection deliberately refuses any source object carrying an own
+  accessor rather than reading it. Export transport, persistence, settings UI,
+  and sharing remain later tasks.
+- Next: Task 6 integrates export settings and save/delete workflow boundaries.
