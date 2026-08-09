@@ -23,7 +23,9 @@ Repository tests and JSON export do not establish physical acceptance.
 
   The helper itself rejects an address that is not assigned to this PC. If the
   command prints no address, connect the PC to the same private Wi-Fi as the
-  iPhone and run it again.
+  iPhone and run it again. The helper also prints `Preview Git commit:` and
+  `Preview Git tree:` before the URL; record both values with the field result
+  so the evidence is tied to the exact served tree.
 
 - Use the printed `.cer` path to install the temporary certificate on the iPhone, then enable full trust under Settings > General > About > Certificate Trust Settings.
 - If locating the certificate on Windows is inconvenient, append

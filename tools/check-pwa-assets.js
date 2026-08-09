@@ -188,6 +188,8 @@ function assertIphoneHttpsPreviewContract(relativePath) {
     "Get-NetConnectionProfile",
     "NetworkInterface",
     "Test-NetConnection",
+    "Preview Git commit:",
+    "Preview Git tree:",
     "Open trusted HTTPS preview from iPhone",
     "OpenCertificate",
     "Start-Process -FilePath $cerPath",

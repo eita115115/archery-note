@@ -98,12 +98,23 @@ try {
     }
   }
 
+  $previewCommit = [string]((& git -C $repoRoot rev-parse HEAD 2>$null) | Select-Object -First 1)
+  $previewTree = [string]((& git -C $repoRoot rev-parse "HEAD^{tree}" 2>$null) | Select-Object -First 1)
+  $previewCommit = $previewCommit.Trim()
+  $previewTree = $previewTree.Trim()
+
   $env:HOST = $HostAddress
   $env:PORT = [string]$Port
   $env:HTTPS_PFX = $pfxPath
   $env:HTTPS_PASSWORD = $passwordText
 
   Write-Output "Temporary trusted HTTPS preview prepared from: $repoRoot"
+  if ($previewCommit -match "^[0-9a-fA-F]{40}$" -and $previewTree -match "^[0-9a-fA-F]{40}$") {
+    Write-Output ("Preview Git commit: " + $previewCommit)
+    Write-Output ("Preview Git tree: " + $previewTree)
+  } else {
+    Write-Warning "Could not resolve the preview Git commit/tree. Record the serving worktree HEAD manually before field acceptance."
+  }
   Write-Output "Install this certificate on the iPhone before opening the preview: $cerPath"
   Write-Output "After installing it, enable full trust in Settings > General > About > Certificate Trust Settings."
   $previewAddresses = if ($HostAddress -eq "0.0.0.0") { $lanAddresses } else { @($HostAddress) }

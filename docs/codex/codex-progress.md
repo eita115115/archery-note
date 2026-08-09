@@ -3282,3 +3282,24 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Handoff: commit `65a8f822` is pushed to the draft PR candidate and its CI is
   green. Continue non-physical quality work while the user keeps the
   trusted-HTTPS field run deferred.
+
+## 2026-08-10 — Print the trusted preview commit and tree
+
+- RED evidence: `npm run check:pwa` failed because the HTTPS acceptance helper
+  did not expose the exact Git commit/tree that it was serving, even though
+  the field checklist required those identities.
+- Changed: `tools/serve-iphone-https.ps1` now resolves and prints
+  `Preview Git commit:` and `Preview Git tree:` before the iPhone URL, with a
+  warning if Git identity resolution is unavailable. The field checklist now
+  tells the operator to record both values.
+- Validation: `npm run check:pwa`, `npm run check:all`, lint, format, syntax,
+  diff-check, and PowerShell parsing pass. Direct helper execution reached the
+  existing temporary-certificate step but this Windows environment's PKI
+  provider returned `ERROR_FILE_NOT_FOUND`; the server output itself could not
+  be exercised here. No app runtime, storage, detector, Service Worker,
+  dependency, or user-data behavior changed.
+- Risk: trusted-preview provenance only; physical 3×6 acceptance remains
+  pending because no current-candidate diagnostic artifact has been collected.
+- Next: run the cumulative checks, commit/push this acceptance-helper change,
+  verify CI, and keep the field run deferred until the user can exercise the
+  current candidate.
