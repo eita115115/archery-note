@@ -3125,3 +3125,21 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   collected.
 - Next: commit/push this transition guard and verify CI; keep the field run
   deferred until the current candidate can be exercised on trusted HTTPS.
+
+## 2026-08-10 — Keep diagnostic recovery save enabled after receipt failure
+
+- RED evidence: the new source contract found that a first-shot receipt
+  failure left `#fcSave`/`#frSave` disabled even though the error message told
+  the user that the result could be saved.
+- Changed: in exact-debug mode, live and replay receipt-failure freezes now
+  enable a clearly labeled diagnostic save action, including the zero-shot
+  recovery path. Ordinary non-debug behavior remains unchanged.
+- Validation: `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run check:all`, lint, format, syntax, and `git diff --check` pass.
+  No detector thresholds, receipt schema, storage, Service Worker,
+  dependency, or transport behavior changed.
+- Risk: receipt-error recovery UX only; physical 3×6 acceptance remains
+  pending because no current-candidate trusted-HTTPS artifact has been
+  collected.
+- Next: commit/push this recovery affordance and verify CI; continue toward
+  the current-candidate trusted-HTTPS field run when available.

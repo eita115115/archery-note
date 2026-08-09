@@ -278,6 +278,34 @@ for (const [label, source, finishName] of [
     `${label} receipt failure confirms and exits before diagnostic retry/discard`,
   );
 }
+const captureReceiptFailureFreeze = compactSource(
+  boundedSourceSection(
+    saveCapture,
+    "function freezeForReceiptFailure(){",
+    "async function shareRec(){",
+    "capture receipt failure freeze",
+  ),
+);
+const replayReceiptFailureFreeze = compactSource(
+  boundedSourceSection(
+    saveReplay,
+    "function freezeForReceiptFailure(){",
+    "function refreshSave(){",
+    "replay receipt failure freeze",
+  ),
+);
+[
+  ["live", captureReceiptFailureFreeze, "#fcSave"],
+  ["replay", replayReceiptFailureFreeze, "#frSave"],
+].forEach(([label, source, saveSelector]) => {
+  assert(
+    source.includes("db.settings.formDebug===true") &&
+      source.includes(`ovl.querySelector("${saveSelector}")`) &&
+      source.includes("saveButton.disabled=false") &&
+      source.includes("診断を保存して終了"),
+    `${label} receipt failure keeps the diagnostic recovery save enabled`,
+  );
+});
 
 const deletionHandler = boundedSourceSection(
   viewScript,

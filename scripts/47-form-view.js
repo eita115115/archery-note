@@ -507,6 +507,11 @@ function openFormCapture(){
       const control=ovl.querySelector(selector);
       if(control) control.disabled=true;
     });
+    const saveButton=ovl.querySelector("#fcSave");
+    if(saveButton&&db.settings.formDebug===true){
+      saveButton.disabled=false;
+      saveButton.textContent=shots.length?`診断を保存して終了（${shots.length}射）`:"診断を保存して終了";
+    }
     hud.textContent="射の識別状態を継続できません。結果を保存するか、この画面を閉じて解析をやり直してください。";
   }
   async function shareRec(){
@@ -975,6 +980,11 @@ function startFormReplay(videoUrl){
     try{ video.pause(); }catch(e){}
     const hand=ovl.querySelector("#frHand");
     if(hand) hand.disabled=true;
+    const saveButton=ovl.querySelector("#frSave");
+    if(saveButton&&db.settings.formDebug===true){
+      saveButton.disabled=false;
+      saveButton.textContent=shots.length?`診断を保存して終了（${shots.length}射）`:"診断を保存して終了";
+    }
     hud.textContent="射の識別状態を継続できません。結果を保存するか、この画面を閉じて解析をやり直してください。";
   }
   function refreshSave(){
