@@ -623,7 +623,7 @@ function renderSight(m) {
             i,
           ) => `<tr class="${i === 0 ? "ledgerCurrent" : ""}"><td>${i === 0 ? `<span class="ledgerDot" title="使用中"></span>` : ""}${fmtD(mk.date)}</td><td><b>${esc(mk.v || "—")}</b></td><td><b>${esc(mk.h || "—")}</b></td>
       <td class="subNoteSm">${esc(mk.note || "")}</td>
-      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}">${icon("del")}</button></td></tr>`,
+      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}" aria-label="サイト値を削除">${icon("del")}</button></td></tr>`,
         )
         .join("")}</table>`
         : `<div class="empty">この距離の記録はまだありません</div>`

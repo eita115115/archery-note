@@ -2614,3 +2614,22 @@ check:all`, `npm run lint -- --quiet`, `npm run format:check`, both targeted
   bounded CI failure and does not claim E2E success.
 - Next: push this CI guard, inspect the fresh PR run, and keep physical
   trusted-HTTPS acceptance deferred.
+
+## 2026-08-10 — Accessible sight-ledger deletion control
+
+- Changed: `scripts/60-history-sight-view.js` now gives the icon-only site-ledger
+  deletion button the explicit accessible name `サイト値を削除`. The existing
+  app-smoke E2E now asserts the named button is present for the seeded ledger.
+- TDD evidence: the assertion was RED with zero matching named buttons, then
+  GREEN after the one-attribute runtime change; the full app-smoke suite passed
+  8/8.
+- Validation: `npm run check:all`, `npm run lint -- --quiet`,
+  `npm run format:check`, targeted Node syntax checks, `git diff --check`, and
+  the full Chromium app-smoke suite passed.
+- Risk: additive accessibility metadata and regression coverage only; no
+  scoring, detector, storage, Service Worker, dependency, or physical
+  acceptance behavior changed. Trusted-HTTPS field acceptance remains
+  deferred.
+- Next: commit this isolated UI-quality change, verify the candidate CI, and
+  continue non-physical quality work until field acceptance is explicitly
+  resumed.

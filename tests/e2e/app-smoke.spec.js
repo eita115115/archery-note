@@ -185,6 +185,7 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await expect(page.locator(".ovl")).toHaveCount(0);
 
   await mainTab(page, "サイト調整").click();
+  await expect(page.getByRole("button", { name: "サイト値を削除" })).toHaveCount(1);
   const chips = page.locator("#sgDistChips .chip");
   await expect(chips.first()).toBeVisible();
   const chipCount = await chips.count();
