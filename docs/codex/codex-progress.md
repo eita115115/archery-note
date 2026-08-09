@@ -3141,5 +3141,13 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Risk: receipt-error recovery UX only; physical 3×6 acceptance remains
   pending because no current-candidate trusted-HTTPS artifact has been
   collected.
-- Next: commit/push this recovery affordance and verify CI; continue toward
-  the current-candidate trusted-HTTPS field run when available.
+- Handoff: candidate `codex/form-diagnostic-handoff-release` is at
+  `4177aa1544020bf86aaf09bc7ab178872c5aa6f1`; its worktree and origin are
+  clean and synchronized. Draft PR #134 is `CLEAN`, and the latest GitHub
+  validate run succeeded.
+- Next: resume the field run only with this current candidate over trusted
+  HTTPS, then inspect the bounded artifact with
+  `node tools/inspect-form-diagnostic-json.js --from-downloads`. The earlier
+  3/6–0/6–3/6 notes and the ordinary schema-5 backup are not acceptance
+  evidence; do not mark the product acceptance complete until a current
+  diagnostic artifact exists.
