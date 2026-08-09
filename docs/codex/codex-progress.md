@@ -2423,3 +2423,25 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   browser suite completed 83/83; the generated transient `debug.log` was
   removed. The dependency-remediation commit must be reflected in the pushed
   candidate before opening the draft PR.
+
+## 2026-08-09 — Trusted HTTPS field-preview handoff
+
+- Changed: added `tools/serve-iphone-https.ps1` for a short-lived, manually
+  trusted HTTPS preview; extended `tools/e2e-server.js` with an opt-in PFX
+  transport; added PWA contract checks and documented the iPhone acceptance
+  procedure in `docs/form-diagnostic-field-acceptance.md`.
+- TDD evidence: the new PWA contract first failed with the expected missing
+  helper (`ENOENT`), then passed after the helper and HTTPS server branch were
+  added. The helper supports an explicit `-HostAddress` so local smoke tests
+  can bind to `127.0.0.1`; physical use should pass the selected LAN IPv4.
+- Validation: `npm run check:all`, `npm run lint -- --quiet`,
+  `npm run format:check`, Node/PowerShell syntax checks, localhost HTTPS smoke
+  with certificate cleanup, Chromium E2E 83/83, and WebKit secure-context 2/2
+  plus form-diagnostics 40/40 all passed. No certificate, private key, raw
+  media, or debug log remains in the worktree.
+- Handoff: commit `12f06cf5` is pushed to
+  `codex/form-diagnostic-handoff-release`; draft PR #134 is `CLEAN` and its
+  latest GitHub `validate` run passed. No main merge or public deployment was
+  performed.
+- Next: run the trusted HTTPS physical iPhone checklist (three conditions,
+  six real shots each) and record only aggregate results and safe metadata.
