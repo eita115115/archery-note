@@ -2157,7 +2157,7 @@ check:globals`, `npm run lint -- --quiet`, syntax, and Prettier checks passed.
 - Validation: `node tools/check-form-diagnostics.js`, `node tools/check-form-core.js`, `npm run check:form`, `npm run check:storage`, `npm run check:app`, `npm run lint -- --quiet`, `npx prettier --check tools/check-form-diagnostics.js tools/check-form-core.js tests/e2e/form-diagnostics.spec.js docs/codex/codex-progress.md`, and the Playwright rollback test passed. The browser command uses a manually prestarted matching-port server because Playwright's CI-managed `webServer` teardown hangs in this shared process environment; the test itself completed `1 passed (3.2s)` and the exact server PID was stopped afterward.
 - Scope boundary: rollback cannot undo `DB_REV`, an already absorbed debounce, schema writes, or arbitrary injected-save side effects; backup/share paths and generic trash behavior remain untouched.
 - Review: independent Task 6 review APPROVED; own-field allowlist, exactly-one synchronous save, false/throw rollback, selected-only invalidation, detached trash cap, generic-path preservation, and synthetic E2E behavior all passed. The CI-managed webServer teardown hang is documented as an environment constraint; the matching-port prestarted-server test passed 1/1.
-- Next: Task 7 adds only the approved native diagnostic export transport boundary.
+- Next: Task 7 makes live/replay diagnostic saves frozen, retryable, and matrix-aware.
 
 ## 2026-08-09 — Form diagnostic handoff Task 7
 
@@ -2270,3 +2270,56 @@ save creator is exported`. The new form-core source contract then failed with
   dual-signature coordinator-token compatibility with Task 7.
 - Next: Task 10 performs cumulative verification and prepares the sanitized
   GitHub handoff.
+
+## 2026-08-09 — Form diagnostic handoff Task 10
+
+- Checkpoint: the implementation under review is `feat/adaptive-release-detection`
+  at commit `d3e09e2f17ca5d0eae794aad65f70ad26986c11b`, tree
+  `8d591ecabea6f077e62fccec4fc5dacc0801049d`. The sensitive ancestor check
+  `git merge-base --is-ancestor 4a0ff1ec HEAD` exited `0`; this branch is local
+  verification only and must not be pushed. The initial status contained only
+  the three pre-existing metadata documents (`docs/codex/integration-plan.md`,
+  `docs/features/form-tracking-feasibility.md`, and
+  `docs/features/tracking-analysis-plan.md`); none is staged by Task 10.
+- Added: `docs/form-diagnostic-field-acceptance.md`, an English physical
+  iPhone checklist retaining the required Japanese UI labels and explicit
+  trusted-HTTPS, privacy, and non-deployment boundaries. No physical device,
+  trusted HTTPS preview, version bump, deployment, PR, or push occurred.
+- Focused contracts: `node tools/check-form-core.js` and
+  `node tools/check-form-diagnostics.js` both exited `0`, ending with
+  `Form core checks OK` and `Form diagnostic checks OK`. These suites cover
+  schema/storage compatibility, matrix eligibility, privacy projection,
+  UTF-8 65,536/65,537-byte boundaries, transport no-fallback behavior, and
+  exact-boolean settings/source contracts.
+- Cumulative gates: `npm run check:storage`, `npm run check:app`,
+  `npm run check:ui`, and `npm run check:all` all exited `0`. The app and
+  aligned markers report v84 (`APP_VER=84`, package `0.84.0`, `version.json`
+  `v=84`, and Service Worker cache `archery-note-v84`). `npm run lint` exited
+  `0`. The first format check reported only the existing mixed line-ending
+  state of the progress ledger; after normalizing that ledger with Prettier,
+  `npm run format:check` and the focused field/progress check both exited `0`.
+- Browser and deterministic evidence: a manually prestarted matching-port
+  Chromium run completed `76 passed (1.1m)`, including all Task 7 save retry/
+  discard/replay cases and all 29 Task 9 settings/transport cases. The
+  CI-managed Playwright parent teardown still hangs in this shared process
+  environment after workers finish, so the bounded prestarted-server result is
+  recorded. `python -B tools/golden-replay/test_golden_expectations.py` ran 28
+  tests and ended `OK`; `npm run golden:form-fixtures` retained one oblique
+  `close` release and zero scene-cut releases without semantic mismatch.
+- Native mirror: `npm run build:native-web` exited `0`, generated the ignored
+  `dist/native` mirror at v84, `git check-ignore -q
+dist/native/native-readiness.json` exited `0`, and the scoped `dist` status
+  was empty. Chromium's transient root `debug.log` (one ffmpeg warning) was
+  removed before the handoff commit; it is not a product artifact.
+- Independent reviews: Reviewer A found and corrected the stale Task 6 next-
+  task sentence so it now points to Task 7 frozen/retryable saves; after that
+  correction the review is APPROVED with no Critical/Important findings.
+  Reviewer B independently reran the cumulative evidence and approved with no
+  Critical/Important findings. Both reviewers confirmed the physical iPhone /
+  trusted-HTTPS matrix remains unexecuted and that the sensitive branch stays
+  non-push.
+- Remaining gap and next action: run the three-condition 6/6 physical matrix
+  only on a trusted HTTPS preview pinned to the exact implementation commit and
+  tree, retain the privacy-safe artifact hash, and construct a fresh sanitized
+  release branch only after those physical criteria pass. Do not push this
+  sensitive source branch or treat this field handoff as physical acceptance.
