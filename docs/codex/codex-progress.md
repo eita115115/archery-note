@@ -3402,3 +3402,16 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   only acceptance gap.
 - Next: wait for the current-candidate 3×6 JSON, then run the bounded checker
   and record its aggregate result without exposing raw receipt data.
+
+## 2026-08-10 — Lock the explicit download transport seam
+
+- Changed: the Node transport contract now exports and directly exercises
+  `downloadFormDiagnosticsJson(...)`, proving that the settings button skips
+  Web Share/native negotiation and performs the bounded blob cleanup sequence.
+- Validation: `node tools/check-form-diagnostics.js`, `npm run check:form`,
+  lint, format, and `git diff --check` pass. No production runtime or
+  persisted data changed in this coverage-only task.
+- Risk: test-only coverage; physical trusted-HTTPS 3×6 acceptance remains
+  pending a current diagnostic artifact.
+- Next: continue waiting for the field artifact, then verify the checker output
+  against the printed candidate commit/tree.

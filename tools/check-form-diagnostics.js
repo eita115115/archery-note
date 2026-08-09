@@ -339,7 +339,8 @@ return {
   FORM_DIAGNOSTIC_NATIVE_DIRECTORY,
   FORM_DIAGNOSTIC_NATIVE_ENCODING,
   defaultFormDiagnosticTransportEnvironment,
-  shareFormDiagnosticsJson
+  shareFormDiagnosticsJson,
+  downloadFormDiagnosticsJson
 };`,
   )(() => null);
   return { api, source };
@@ -1440,6 +1441,10 @@ async function checkFormDiagnosticTransport() {
     typeof transportApi.shareFormDiagnosticsJson === "function",
     "shareFormDiagnosticsJson is a function",
   );
+  assert(
+    typeof transportApi.downloadFormDiagnosticsJson === "function",
+    "downloadFormDiagnosticsJson is a function",
+  );
   const json = '{"format":"archery-note-form-diagnostics"}\n';
 
   {
@@ -1789,6 +1794,30 @@ async function checkFormDiagnosticTransport() {
         "url-revoke",
       ]),
       "direct download cleanup order",
+    );
+  }
+
+  {
+    const fixture = makeTransportFixture();
+    const result = await transportApi.downloadFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "downloaded", false, "explicit direct download");
+    assertEqual(
+      JSON.stringify(callOps(fixture.calls)),
+      JSON.stringify([
+        "blob",
+        "url-create",
+        "anchor-create",
+        "anchor-append",
+        "anchor-click",
+        "anchor-remove",
+        "url-revoke",
+      ]),
+      "explicit direct download skips share negotiation",
+    );
+    assertEqual(
+      fixture.anchor.download,
+      transportApi.FORM_DIAGNOSTIC_FILENAME,
+      "explicit direct download filename",
     );
   }
 
