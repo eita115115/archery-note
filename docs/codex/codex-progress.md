@@ -2184,4 +2184,10 @@ save creator is exported`. The new form-core source contract then failed with
 - Risk: diagnostics-off records remain on the legacy direct push/save path with
   no retry UI. This task does not add native transport, settings, export, schema,
   version, or Service Worker changes.
+- Review: APPROVED after remediation. The follow-up preserved the replay
+  diagnostics-off receipt resolution, kept fatal receipt failures outside the
+  retry/discard flow, exposed matrix-success/ineligible notices, and stabilized
+  the browser write probe after startup. Minor remaining coverage: explicit
+  source assertions for every legacy branch and a browser six-shot matrix case;
+  no production change is needed for either.
 - Next: Task 8 owns the diagnostics-specific native/Web transport boundary.
