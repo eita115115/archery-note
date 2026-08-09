@@ -433,6 +433,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
   const liveBaseline = await resetWriteProbeAfterStartup(page);
+  await expect(page.locator("#fcShotCount")).toHaveText("検出 0射");
   await page.locator("#fcClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#fcSave")).toBeEnabled();
@@ -525,6 +526,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   });
   await expect(page.locator("#frVideo")).toBeVisible();
   const replayBaseline = await resetWriteProbeAfterStartup(page);
+  await expect(page.locator("#frShotCount")).toHaveText("検出 0射");
   await page.locator("#frClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#frSave")).toBeEnabled();

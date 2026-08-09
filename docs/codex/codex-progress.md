@@ -2633,3 +2633,22 @@ check:all`, `npm run lint -- --quiet`, `npm run format:check`, both targeted
 - Next: commit this isolated UI-quality change, verify the candidate CI, and
   continue non-physical quality work until field acceptance is explicitly
   resumed.
+
+## 2026-08-10 — Explicit live/replay shot-count status
+
+- Changed: `scripts/47-form-view.js` now exposes `検出 n射` in both live capture
+  and saved-video replay as an atomic polite status region. The count is updated
+  through the same add/remove refresh paths that control the save button, so the
+  displayed count cannot drift from the candidate shot list.
+- TDD evidence: live and replay zero-shot tests were RED because the status
+  elements did not exist, then GREEN after the shared refresh-path update; the
+  focused pair passed 2/2.
+- Validation: the full form-diagnostics Chromium suite passed 43/43 after the
+  status addition. `npm run check:all`, `npm run lint -- --quiet`,
+  `npm run format:check`, targeted Node syntax checks, and `git diff --check`
+  also passed.
+- Risk: additive status text and accessibility metadata only; no detector,
+  retention, storage, Service Worker, dependency, or physical acceptance
+  behavior changed. Trusted-HTTPS field acceptance remains deferred.
+- Next: review the small capture-status change, then commit/push it and let the
+  bounded candidate CI run the full suite.
