@@ -53,6 +53,10 @@ const core = new Function(
       typeof makeFormReleaseReceiptTracker === "function"
         ? makeFormReleaseReceiptTracker
         : null,
+    copyFormReleaseFireSnapshot:
+      typeof copyFormReleaseFireSnapshot === "function"
+        ? copyFormReleaseFireSnapshot
+        : null,
     computeFormMetrics, makeFormEma, makeFormPhaseDetector, legacyReleaseContinuity,
     stepFormPhase, computeFormVelocity,
     FORM_VEL_FILTER, makeFormVelocitySource,
@@ -94,6 +98,138 @@ function loadReceiptTrackerCore(options = {}) {
   };`,
   )();
 }
+
+/* ---------- fire snapshot ---------- */
+
+assert(typeof core.copyFormReleaseFireSnapshot === "function", "fire snapshot copier is exported");
+const validFireDebug = {
+  anchorFloor: 0.47,
+  anchorEnter: 0.59,
+  releaseSpeed: 8,
+  evidenceAgeMs: 0,
+  evidenceStrength: 12,
+  departDelta: 0.28,
+  fireEvidence: "adaptive",
+};
+const fire = core.copyFormReleaseFireSnapshot(validFireDebug);
+assertJsonEqual(
+  Object.keys(fire),
+  [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+    "fireEvidence",
+  ],
+  "fire snapshot has the exact seven keys",
+);
+{
+  const numericKeys = [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+  ];
+  Object.keys(validFireDebug).forEach((key) => {
+    const missing = { ...validFireDebug };
+    delete missing[key];
+    assertEqual(core.copyFormReleaseFireSnapshot(missing), null, `missing ${key} is invalid`);
+  });
+  numericKeys.forEach((key) => {
+    [undefined, NaN, Infinity, -Infinity].forEach((value) => {
+      assertEqual(
+        core.copyFormReleaseFireSnapshot({ ...validFireDebug, [key]: value }),
+        null,
+        `${key} rejects ${String(value)}`,
+      );
+    });
+    assert(
+      core.copyFormReleaseFireSnapshot({ ...validFireDebug, [key]: null }),
+      `${key} accepts explicit null`,
+    );
+  });
+  ["nb", "unknown", null, undefined].forEach((fireEvidence) => {
+    assertEqual(
+      core.copyFormReleaseFireSnapshot({ ...validFireDebug, fireEvidence }),
+      null,
+      `fireEvidence rejects ${String(fireEvidence)}`,
+    );
+  });
+  const mutable = { ...validFireDebug };
+  const copied = core.copyFormReleaseFireSnapshot(mutable);
+  mutable.anchorEnter = 999;
+  assertEqual(copied.anchorEnter, 0.59, "snapshot is detached from debug input");
+}
+
+const featureProjectionSource = boundedSourceSection(
+  viewScript,
+  "function formFeatureFromShot(",
+  "function formDiagPush(",
+  "formFeatureFromShot source",
+);
+const featureApi = new Function(
+  `${featureProjectionSource}
+  return {formFeatureFromShot};`,
+)();
+const featureShot = {
+  id: "form-receipt-1",
+  holdMs: 900,
+  angles: { bowArm: 171, drawArm: 150 },
+  anchorNorm: 0.47,
+  pre: null,
+  confidence: 0.92,
+  score: 82,
+  arrowCheck: null,
+  diag: { maxV: 8, rise: 0.2, nullFrames: 0, conf: 0.92 },
+};
+[false, undefined, "true", 1, {}].forEach((setting) => {
+  const feature = featureApi.formFeatureFromShot(featureShot, setting === true);
+  assert(!Object.hasOwn(feature, "diag"), `diagnostics ${String(setting)} excludes existing diag`);
+  assert(!Object.hasOwn(feature, "receiptId"), `diagnostics ${String(setting)} excludes receiptId`);
+});
+const enabledFeature = featureApi.formFeatureFromShot(featureShot, true);
+assert(Object.hasOwn(enabledFeature, "diag"), "exact true retains existing diag");
+assertEqual(enabledFeature.receiptId, featureShot.id, "exact true retains receipt ID");
+const saveCapture = boundedSourceSection(
+  viewScript,
+  "function openFormCapture(){",
+  "function startFormReplay(videoUrl){",
+  "live capture source",
+);
+const saveReplay = viewScript.slice(viewScript.indexOf("function startFormReplay(videoUrl){"));
+assert(saveReplay.length > 0, "replay source exists");
+[saveCapture, saveReplay].forEach((source, index) => {
+  const label = index === 0 ? "live" : "replay";
+  const compact = compactSource(source);
+  assert(
+    compact.includes("constreceiptSnapshot=prepareReceiptSave();") &&
+      compact.includes("constincludeDiagnostics=db.settings.formDebug===true;"),
+    `${label} always resolves workflow-save before exact diagnostic gating`,
+  );
+  assert(
+    compact.includes("shots.map(shot=>formFeatureFromShot(shot,includeDiagnostics))"),
+    `${label} uses an explicit map lambda instead of the map index`,
+  );
+  assert(
+    compact.includes("if(includeDiagnostics){rec.formDiagnosticVersion=1;") &&
+      !compact.includes("if(db.settings.formDebug){"),
+    `${label} persists diagnostic markers only for exact true`,
+  );
+});
+assertEqual(
+  (compactSource(saveCapture).match(/prepareReceiptSave\(\);/g) || []).length,
+  2,
+  "live ordinary and zero-shot saves both transition workflow-save",
+);
+assertEqual(
+  (compactSource(saveReplay).match(/prepareReceiptSave\(\);/g) || []).length,
+  2,
+  "replay ordinary and zero-shot saves both transition workflow-save",
+);
 
 /* ---------- 幾何ヘルパー ---------- */
 
@@ -695,6 +831,8 @@ function adaptiveConfirmationFixture() {
   ].forEach((key) =>
     assert(Number.isFinite(adaptiveFire.debug[key]), `genuine adaptive fire has finite ${key}`),
   );
+  const adaptiveSnapshot = core.copyFormReleaseFireSnapshot(adaptiveFire.debug);
+  assertEqual(adaptiveSnapshot.fireEvidence, "adaptive", "adaptive snapshot keeps its route");
 }
 
 {
@@ -2801,6 +2939,24 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   // 従来経路の発火ラベル
   const closeFire = runDw(shotDw({})).lastFire;
   assertEqual(closeFire.debug.fireEvidence, "close", "normal fire carries fireEvidence=close");
+  const nbVelocityFire = runDw(shotDw({ gapMs: 100 })).lastFire;
+  assert(nbVelocityFire, "NB-velocity fixture produces a fire");
+  assertEqual(nbVelocityFire.debug.fireVel, "nb", "fixture uses NB velocity");
+  assertEqual(
+    core.copyFormReleaseFireSnapshot(nbVelocityFire.debug).fireEvidence,
+    "close",
+    "NB velocity keeps the real close evidence label",
+  );
+  assertEqual(
+    core.copyFormReleaseFireSnapshot(closeFire.debug).fireEvidence,
+    "close",
+    "ordinary close snapshot keeps close evidence",
+  );
+  assertEqual(
+    core.copyFormReleaseFireSnapshot(nb2Fire.debug).fireEvidence,
+    "nb2",
+    "NB2 snapshot keeps nb2 evidence",
+  );
   // 安全1: レットダウンがギャップ内に完全に隠れる（sticky 生存の敵対ケース）→ 着地ゲートで非発火
   function hiddenLetdownDw(gapMs, emergeAt) {
     const seq = [];

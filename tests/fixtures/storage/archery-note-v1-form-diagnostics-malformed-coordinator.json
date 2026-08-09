@@ -1,0 +1,32 @@
+{
+  "schema": 5,
+  "setups": [],
+  "sightMarks": [],
+  "sessions": [],
+  "trash": [],
+  "active": null,
+  "customRounds": [],
+  "settings": {
+    "eyeSight": 850,
+    "formDebug": true,
+    "formDiagnosticMatrixBatch": {
+      "version": "future",
+      "batchId": ["malformed"],
+      "appVer": -1,
+      "nextSlot": 99,
+      "recordIds": "not-an-array",
+      "invalidated": "false",
+      "futureKey": {
+        "note": "SYNTHETIC FIXTURE ONLY - NO REAL USER OR DEVICE DATA"
+      }
+    }
+  },
+  "formAnalyses": [
+    {
+      "id": "fixture-form-diagnostic-malformed",
+      "shots": 0,
+      "features": [],
+      "note": "SYNTHETIC FIXTURE ONLY - NO REAL USER OR DEVICE DATA"
+    }
+  ]
+}

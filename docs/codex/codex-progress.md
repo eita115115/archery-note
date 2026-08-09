@@ -2082,3 +2082,12 @@ Next task:
 - Risk: replay EOS remains unresolved by design; this task adds no keep/delete policy.
 - Review: independent Task 2 review APPROVED; live/replay parity, exact-ID ownership, frame priority, active-only abandon, fatal freeze, and diagnostics OFF/ON cap behavior all passed. Reviewer reran focused app/form/globals/lint/syntax/diff checks.
 - Next: Task 3 copies and persists the exact seven fire fields additively.
+
+## 2026-08-03 — Form diagnostic handoff Task 3
+
+- Changed: live and replay now copy the exact seven fire fields from the current release result and persist copied receipt diagnostics only when `formDebug === true`.
+- RED: the conditional fire copier export and exact diagnostic feature projection assertions failed before production edits.
+- GREEN: form checks plus normalize-twice, save/load, JSON import, safety restore, and trash restore preservation passed for both synthetic fixtures.
+- Compatibility: false, absent, truthy-string, numeric, and object diagnostic settings persist neither existing `features[].diag` nor new receipt fields; the legacy fixture remains valid.
+- Risk: missing or invalid fire snapshots make a run exporter-ineligible instead of inventing evidence.
+- Next: Task 4 adds pure matrix coordination and record eligibility.

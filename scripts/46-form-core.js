@@ -1783,6 +1783,37 @@ function judgeArrowCheck(preScores, confirmScores) {
   return { judgment, preScore, confirmScore, pre: pre.length, confirm: confirm.length };
 }
 
+function copyFormReleaseFireSnapshot(debug) {
+  if (!debug || typeof debug !== "object" || Array.isArray(debug)) return null;
+  const numericKeys = [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+  ];
+  for (const key of numericKeys) {
+    if (!Object.hasOwn(debug, key)) return null;
+    if (!(debug[key] === null || Number.isFinite(debug[key]))) return null;
+  }
+  if (
+    !Object.hasOwn(debug, "fireEvidence") ||
+    !["adaptive", "close", "nb2"].includes(debug.fireEvidence)
+  ) {
+    return null;
+  }
+  return {
+    anchorFloor: debug.anchorFloor,
+    anchorEnter: debug.anchorEnter,
+    releaseSpeed: debug.releaseSpeed,
+    evidenceAgeMs: debug.evidenceAgeMs,
+    evidenceStrength: debug.evidenceStrength,
+    departDelta: debug.departDelta,
+    fireEvidence: debug.fireEvidence,
+  };
+}
+
 /* 検証計装（H）: 撮影セッション終了時に shots(arrowCheck付与済み) と samplePerfMs
    計測列から、保存レコードへ添える診断サマリを作る。db.settings.formDebug===true
    のときのみ呼び出し側が保存する（既定OFF）。判定ロジックには一切使わない。 */

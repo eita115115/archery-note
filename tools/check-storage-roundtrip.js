@@ -1,5 +1,6 @@
 "use strict";
 
+const assertStrict = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
 
@@ -21,6 +22,9 @@ const fixtureFiles = {
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
   missingSessions: "archery-note-v1-missing-sessions.json",
   formAnalyses: "archery-note-v1-form-analyses.json",
+  formDiagnostics: "archery-note-v1-form-diagnostics.json",
+  formDiagnosticsMalformedCoordinator:
+    "archery-note-v1-form-diagnostics-malformed-coordinator.json",
 };
 const expectedCsvHeader = [
   "date",
@@ -407,6 +411,53 @@ function checkSnapshot(storageApi, representative) {
   assert(latest.hash, "[snapshot] hash should be recorded");
 }
 
+function saveAndReloadFixture(fixture) {
+  const shim = makeLocalStorageShim();
+  const raw = new Function(
+    "localStorage",
+    "fixture",
+    `${storageScript}
+  db = normalizeDb(fixture);
+  save({reason:"synthetic-form-diagnostics"});
+  return localStorage.getItem(KEY);`,
+  )(shim, clone(fixture));
+  return loadDbFromRaw(raw);
+}
+
+function checkFormDiagnosticsRoundTrip(storageApi, fixtures, normalized) {
+  ["formDiagnostics", "formDiagnosticsMalformedCoordinator"].forEach((name) => {
+    const source = fixtures[name];
+    assertStrict.deepStrictEqual(
+      normalized[name].formAnalyses,
+      source.formAnalyses,
+      `[${name}] JSON import preserves records`,
+    );
+    const loaded = saveAndReloadFixture(source);
+    assertStrict.deepStrictEqual(
+      loaded.formAnalyses,
+      source.formAnalyses,
+      `[${name}] save/load preserves records`,
+    );
+    assertStrict.deepStrictEqual(
+      loaded.settings.formDiagnosticMatrixBatch,
+      source.settings.formDiagnosticMatrixBatch,
+      `[${name}] save/load preserves coordinator`,
+    );
+    const snapshot = createImportSnapshot(storageApi.normalizeDb(clone(source)));
+    const restored = storageApi.normalizeDb(clone(snapshot.snapshots[0].data));
+    assertStrict.deepStrictEqual(
+      restored.formAnalyses,
+      source.formAnalyses,
+      `[${name}] safety restore preserves records`,
+    );
+    assertStrict.deepStrictEqual(
+      restored.settings.formDiagnosticMatrixBatch,
+      source.settings.formDiagnosticMatrixBatch,
+      `[${name}] safety restore preserves coordinator`,
+    );
+  });
+}
+
 function checkCsvHeader(name, rows) {
   assert(rows.length >= 1, `[${name}] CSV should include a header row`);
   assertEqual(rows[0].join("|"), expectedCsvHeader.join("|"), `[${name}] CSV header`);
@@ -500,6 +551,7 @@ function main() {
   checkSightMarksCompatibilityRoundTrip(normalized.sightMarksCompatibility);
   checkMissingSessionsLoad(fixtures.missingSessions);
   checkSnapshot(storageApi, fixtures.representative);
+  checkFormDiagnosticsRoundTrip(storageApi, fixtures, normalized);
   checkCsvForAllFixtures(normalized);
   checkCsvRows("missing-sessions", normalized.missingSessions, 1);
 

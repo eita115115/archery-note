@@ -1,0 +1,174 @@
+{
+  "schema": 5,
+  "setups": [],
+  "sightMarks": [],
+  "sessions": [],
+  "trash": [],
+  "active": null,
+  "customRounds": [],
+  "settings": {
+    "eyeSight": 850,
+    "formDebug": true,
+    "formDiagnosticMatrixBatch": {
+      "version": 1,
+      "batchId": "11111111-1111-4111-8111-111111111111",
+      "appVer": 84,
+      "nextSlot": 1,
+      "recordIds": ["fixture-form-diagnostic-live"],
+      "invalidated": false
+    }
+  },
+  "formAnalyses": [
+    {
+      "id": "fixture-form-diagnostic-live",
+      "date": "2026-08-03",
+      "ts": 1785682800000,
+      "sessionId": null,
+      "setupId": null,
+      "shots": 1,
+      "modelVer": "synthetic-pose-fixture",
+      "appVer": 84,
+      "fps": 30,
+      "features": [
+        {
+          "phase": { "anchorMs": 900 },
+          "angles": { "bowArm": 171, "drawArm": 150 },
+          "anchorNorm": 0.47,
+          "release": null,
+          "confidence": 0.92,
+          "score": 82,
+          "arrowCheck": null,
+          "receiptId": "form-receipt-1"
+        }
+      ],
+      "note": "SYNTHETIC FIXTURE ONLY - NO REAL USER OR DEVICE DATA",
+      "formDiagnosticVersion": 1,
+      "captureMode": "live",
+      "formPhaseDiag": {
+        "rejectedFramesNear": [],
+        "canceledEvents": [{ "ts": 3000, "reason": "anchor-return", "shotId": "form-receipt-3" }],
+        "releaseFires": [
+          { "ts": 1000, "shotId": "form-receipt-1", "framesBefore": [] },
+          { "ts": 2000, "shotId": "form-receipt-2", "framesBefore": [] },
+          { "ts": 3000, "shotId": "form-receipt-3", "framesBefore": [] },
+          { "ts": 4000, "shotId": "form-receipt-4", "framesBefore": [] },
+          { "ts": 5000, "shotId": "form-receipt-5", "framesBefore": [] }
+        ],
+        "phaseHistogram": {
+          "SETUP": 1,
+          "IDLE": 1,
+          "ANCHORING": 1,
+          "FULL_DRAW": 1,
+          "RELEASE": 5,
+          "FOLLOW": 1
+        },
+        "releaseReceipts": [
+          {
+            "id": "form-receipt-1",
+            "fireTs": 1000,
+            "shotCreated": true,
+            "userDisposition": "present",
+            "detectorDisposition": "confirmed",
+            "cancelReason": null,
+            "unresolvedReason": null,
+            "fire": {
+              "anchorFloor": 0.47,
+              "anchorEnter": 0.59,
+              "releaseSpeed": 8,
+              "evidenceAgeMs": 0,
+              "evidenceStrength": 12,
+              "departDelta": 0.28,
+              "fireEvidence": "adaptive"
+            }
+          },
+          {
+            "id": "form-receipt-2",
+            "fireTs": 2000,
+            "shotCreated": true,
+            "userDisposition": "manual-removed",
+            "detectorDisposition": "confirmed",
+            "cancelReason": null,
+            "unresolvedReason": null,
+            "fire": {
+              "anchorFloor": null,
+              "anchorEnter": 0.35,
+              "releaseSpeed": 6,
+              "evidenceAgeMs": null,
+              "evidenceStrength": null,
+              "departDelta": null,
+              "fireEvidence": "close"
+            }
+          },
+          {
+            "id": "form-receipt-3",
+            "fireTs": 3000,
+            "shotCreated": true,
+            "userDisposition": "present",
+            "detectorDisposition": "auto-canceled",
+            "cancelReason": "anchor-return",
+            "unresolvedReason": null,
+            "fire": {
+              "anchorFloor": null,
+              "anchorEnter": 0.35,
+              "releaseSpeed": 6,
+              "evidenceAgeMs": null,
+              "evidenceStrength": null,
+              "departDelta": null,
+              "fireEvidence": "close"
+            }
+          },
+          {
+            "id": "form-receipt-4",
+            "fireTs": 4000,
+            "shotCreated": false,
+            "userDisposition": "not-created",
+            "detectorDisposition": "confirmed",
+            "cancelReason": null,
+            "unresolvedReason": null,
+            "fire": {
+              "anchorFloor": null,
+              "anchorEnter": 0.35,
+              "releaseSpeed": 6,
+              "evidenceAgeMs": null,
+              "evidenceStrength": null,
+              "departDelta": null,
+              "fireEvidence": "nb2"
+            }
+          },
+          {
+            "id": "form-receipt-5",
+            "fireTs": 5000,
+            "shotCreated": true,
+            "userDisposition": "present",
+            "detectorDisposition": "unresolved",
+            "cancelReason": null,
+            "unresolvedReason": "workflow-save",
+            "fire": {
+              "anchorFloor": 0.47,
+              "anchorEnter": 0.59,
+              "releaseSpeed": 8,
+              "evidenceAgeMs": 10,
+              "evidenceStrength": 9,
+              "departDelta": 0.2,
+              "fireEvidence": "adaptive"
+            }
+          }
+        ],
+        "receiptOverflow": 0,
+        "receiptInvariantCounts": {
+          "supersededActive": 0,
+          "missingActive": 0,
+          "identityMismatch": 0,
+          "invalidTransition": 0,
+          "sequenceExhausted": 0
+        },
+        "receiptDesynchronized": false
+      },
+      "formDiagnosticMatrix": {
+        "version": 1,
+        "batchId": "11111111-1111-4111-8111-111111111111",
+        "slot": "side"
+      }
+    }
+  ]
+}

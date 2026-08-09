@@ -24,7 +24,7 @@ function loadFormPose(){
   return formPosePromise;
 }
 
-function formFeatureFromShot(shot){
+function formFeatureFromShot(shot,includeDiagnostics){
   const f={
     phase:{anchorMs:shot.holdMs},
     angles:shot.angles,
@@ -40,9 +40,10 @@ function formFeatureFromShot(shot){
       confirmScore:shot.arrowCheck.confirmScore==null?null:+shot.arrowCheck.confirmScore.toFixed(2)
     }:null
   };
-  /* 検証計装（H）: db.settings.formDebug===true のときだけ shot.diag を持つ（既定OFF、ストレージ肥大防止）。
-     前方互換: formAnalyses.features[].diag は既存レコードに存在しない追加フィールド */
-  if(shot.diag) f.diag={maxV:+shot.diag.maxV.toFixed(2),rise:+shot.diag.rise.toFixed(3),nullFrames:shot.diag.nullFrames,conf:shot.diag.conf==null?null:+shot.diag.conf.toFixed(2)};
+  if(includeDiagnostics===true){
+    if(shot.diag) f.diag={maxV:+shot.diag.maxV.toFixed(2),rise:+shot.diag.rise.toFixed(3),nullFrames:shot.diag.nullFrames,conf:shot.diag.conf==null?null:+shot.diag.conf.toFixed(2)};
+    f.receiptId=shot.id;
+  }
   return f;
 }
 
@@ -51,6 +52,19 @@ function formFeatureFromShot(shot){
 function formDiagPush(arr,item,cap){
   arr.push(item);
   if(arr.length>(cap||200)) arr.shift();
+}
+
+function copyFormPhaseDiagnosticsForRecord(formPhaseDiag,phaseCounts,receiptSnapshot){
+  return {
+    rejectedFramesNear:formPhaseDiag.rejectedFramesNear.map(item=>({...item})),
+    canceledEvents:formPhaseDiag.canceledEvents.map(item=>({...item})),
+    releaseFires:formPhaseDiag.releaseFires.map(item=>({...item,framesBefore:(item.framesBefore||[]).map(frame=>({...frame}))})),
+    phaseHistogram:{...phaseCounts},
+    releaseReceipts:receiptSnapshot.releaseReceipts.map(receipt=>({...receipt,fire:receipt.fire?{...receipt.fire}:null})),
+    receiptOverflow:receiptSnapshot.receiptOverflow,
+    receiptInvariantCounts:{...receiptSnapshot.receiptInvariantCounts},
+    receiptDesynchronized:receiptSnapshot.desynchronized
+  };
 }
 
 /* シャドー判定のショット一覧タグ（撮影画面）。judgment を利用者向けの短い日本語に変換する。
@@ -510,6 +524,7 @@ function openFormCapture(){
       const hadPendingRelease=detector.pendingRelease!=null;
       const result=stepFormPhase(detector,raw,history,1.0,now);
       const {phase,released,canceled,debug,anchorStartTs}=result;
+      const releaseFire=result.released&&db.settings.formDebug===true?copyFormReleaseFireSnapshot(result.debug):null;
       let releaseAction=null;
       let releasedShotId=null;
       let releasedPreScores=null;
@@ -520,7 +535,7 @@ function openFormCapture(){
         }
         applyReceiptCancellation(action);
       }else if(result.released){
-        releaseAction=receiptTracker.begin({fireTs:now,fire:null});
+        releaseAction=receiptTracker.begin({fireTs:now,fire:releaseFire});
         if(releaseAction.fatal){
           freezeForReceiptFailure();
         }else{
@@ -610,6 +625,10 @@ function openFormCapture(){
     }
     raf=requestAnimationFrame(loop);
   }
+  function prepareReceiptSave(){
+    if(receiptTracker.current()) receiptTracker.abandon("workflow-save");
+    return receiptTracker.snapshot();
+  }
   /* Plan-0.2 D（release-detection-triage-2026-07-13 §8）: shots:0 でも診断保存できるように
      する。UIボタンは増やさず、formDebug ON時のみ close ボタンの動作を「診断用に保存してから
      閉じる」へ切替える（採用理由: 通常ユーザー(formDebug OFF)の close 挙動を完全に不変のまま
@@ -618,15 +637,20 @@ function openFormCapture(){
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];
+    const receiptSnapshot=prepareReceiptSave();
+    const includeDiagnostics=db.settings.formDebug===true;
     const rec={
       id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
       shots:0, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
       appVer:APP_VER, fps:+fps.toFixed(1),
       features:[], note:"(診断用: 0射で保存)"
     };
-    rec.diag=formDiagSummary([],samplePerfMs);
-    rec.formPhaseDiag=formPhaseDiag;
-    rec.formPhaseDiag.phaseHistogram={...phaseCounts};
+    if(includeDiagnostics){
+      rec.formDiagnosticVersion=1;
+      rec.captureMode="live";
+      rec.diag=formDiagSummary([],samplePerfMs);
+      rec.formPhaseDiag=copyFormPhaseDiagnosticsForRecord(formPhaseDiag,phaseCounts,receiptSnapshot);
+    }
     db.formAnalyses.push(rec);
     save({reason:"form-analysis-diag-only"});
     toast("診断用に0射で保存しました");
@@ -651,20 +675,21 @@ function openFormCapture(){
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];
+    const receiptSnapshot=prepareReceiptSave();
+    const includeDiagnostics=db.settings.formDebug===true;
     const rec={
       id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
       shots:shots.length, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
       appVer:APP_VER, fps:+fps.toFixed(1),
-      features:shots.map(formFeatureFromShot), note:""
+      features:shots.map(shot=>formFeatureFromShot(shot,includeDiagnostics)), note:""
     };
     /* 検証計装（H）: db.settings.formDebug===true のときだけ arrowCheck分布とsamplePerfMsの
        中央値/最大値をレコードへ添える（既定OFF、ストレージ肥大防止）。前方互換の追加フィールド */
-    if(db.settings.formDebug===true) rec.diag=formDiagSummary(shots,samplePerfMs);
-    /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: 非発火/取消フレームの集約。
-       同じ formDebug フラグでのみ保存（OFF時は既存と同一サイズ）。前方互換の追加フィールド */
-    if(db.settings.formDebug===true){
-      rec.formPhaseDiag=formPhaseDiag;
-      rec.formPhaseDiag.phaseHistogram={...phaseCounts}; // Plan-0.2: session全体のphase滞在カウント
+    if(includeDiagnostics){
+      rec.formDiagnosticVersion=1;
+      rec.captureMode="live";
+      rec.diag=formDiagSummary(shots,samplePerfMs);
+      rec.formPhaseDiag=copyFormPhaseDiagnosticsForRecord(formPhaseDiag,phaseCounts,receiptSnapshot);
     }
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
@@ -858,6 +883,7 @@ function startFormReplay(videoUrl){
         const hadPendingRelease=detector.pendingRelease!=null;
         const result=stepFormPhase(detector,raw,history,1.0,now);
         const {phase,released,canceled,debug}=result;
+        const releaseFire=result.released&&db.settings.formDebug===true?copyFormReleaseFireSnapshot(result.debug):null;
         if(result.canceled){
           const action=receiptTracker.cancel(debug&&debug.cancelReason);
           if(db.settings.formDebug===true){
@@ -865,7 +891,7 @@ function startFormReplay(videoUrl){
           }
           applyReceiptCancellation(action);
         }else if(result.released){
-          const action=receiptTracker.begin({fireTs:now,fire:null});
+          const action=receiptTracker.begin({fireTs:now,fire:releaseFire});
           if(action.fatal){
             freezeForReceiptFailure();
           }else{
@@ -922,20 +948,29 @@ function startFormReplay(videoUrl){
     }
     raf=requestAnimationFrame(loop);
   }
+  function prepareReceiptSave(){
+    if(receiptTracker.current()) receiptTracker.abandon("workflow-save");
+    return receiptTracker.snapshot();
+  }
   /* Plan-0.2 D（release-detection-triage-2026-07-13 §8）: shots:0 でも診断保存できるように
      する（capture側と同型。採用理由は同関数のcapture側コメント参照）。 */
   function saveDiagOnlyRecord(){
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];
+    const receiptSnapshot=prepareReceiptSave();
+    const includeDiagnostics=db.settings.formDebug===true;
     const rec={
       id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
       shots:0, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
       appVer:APP_VER, fps:+fps.toFixed(1),
       features:[], note:"(診断用: 0射で保存/保存済み動画)"
     };
-    rec.formPhaseDiag=formPhaseDiag;
-    rec.formPhaseDiag.phaseHistogram={...phaseCounts};
+    if(includeDiagnostics){
+      rec.formDiagnosticVersion=1;
+      rec.captureMode="replay";
+      rec.formPhaseDiag=copyFormPhaseDiagnosticsForRecord(formPhaseDiag,phaseCounts,receiptSnapshot);
+    }
     db.formAnalyses.push(rec);
     save({reason:"form-analysis-diag-only"});
     toast("診断用に0射で保存しました");
@@ -959,17 +994,20 @@ function startFormReplay(videoUrl){
     const todays=db.sessions.filter(s=>s.date===today());
     const linked=todays.length?todays[todays.length-1]:null;
     db.formAnalyses=db.formAnalyses||[];
+    const receiptSnapshot=prepareReceiptSave();
+    const includeDiagnostics=db.settings.formDebug===true;
     const rec={
       id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
       shots:shots.length, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
       appVer:APP_VER, fps:+fps.toFixed(1),
-      features:shots.map(formFeatureFromShot), note:"(保存済み動画から解析)"
+      features:shots.map(shot=>formFeatureFromShot(shot,includeDiagnostics)), note:"(保存済み動画から解析)"
     };
     /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: 非発火/取消フレームの集約。
        formDebug フラグでのみ保存（OFF時は既存と同一サイズ）。前方互換の追加フィールド */
-    if(db.settings.formDebug===true){
-      rec.formPhaseDiag=formPhaseDiag;
-      rec.formPhaseDiag.phaseHistogram={...phaseCounts}; // Plan-0.2: session全体のphase滞在カウント
+    if(includeDiagnostics){
+      rec.formDiagnosticVersion=1;
+      rec.captureMode="replay";
+      rec.formPhaseDiag=copyFormPhaseDiagnosticsForRecord(formPhaseDiag,phaseCounts,receiptSnapshot);
     }
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
