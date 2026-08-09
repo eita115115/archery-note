@@ -2598,3 +2598,19 @@ check:all`, `npm run lint -- --quiet`, `npm run format:check`, both targeted
   behavior changed. Trusted-HTTPS iPhone acceptance remains deferred.
 - Next: review this isolated UI-quality change and keep the candidate PR
   draft; do not merge, deploy, or resume field testing without direction.
+
+## 2026-08-10 — Bound CI E2E execution time
+
+- Changed: `.github/workflows/ci.yml` now caps the validation job at 10 minutes
+  and the Playwright E2E step at 5 minutes. The latest candidate run had
+  already completed all static checks but remained indefinitely `in_progress`
+  during E2E, so the CI gate now fails boundedly instead of hanging without a
+  result.
+- Validation: `npm run check:all`, `npm run lint -- --quiet`,
+  `npm run format:check`, targeted Prettier for the workflow, and
+  `git diff --check` passed.
+- Risk: CI configuration only; no runtime, storage, detector, Service Worker,
+  dependency, or physical acceptance behavior changed. A timeout reports a
+  bounded CI failure and does not claim E2E success.
+- Next: push this CI guard, inspect the fresh PR run, and keep physical
+  trusted-HTTPS acceptance deferred.

@@ -8,6 +8,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,4 +37,5 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E smoke test
+        timeout-minutes: 5
         run: npm run test:e2e
