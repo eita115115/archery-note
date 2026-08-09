@@ -3329,3 +3329,23 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   the printed commit/tree, save `archery-note-form-diagnostics.json`, and run
   `node tools/inspect-form-diagnostic-json.js --from-downloads` before making
   the physical acceptance decision.
+
+## 2026-08-10 — Guard patched dependency floors in CI
+
+- RED evidence: the new dependency-floor check initially failed with
+  `Cannot find module './dependency-floor'`, proving the contract was not
+  satisfied before the helper existed.
+- Changed: added a local, offline lockfile check for the three currently
+  reported Dependabot packages (`ip-address >=10.3.1`, `tar >=7.5.18`, and
+  `brace-expansion >=5.0.7`) and included it in `check:all`. The current lock
+  resolves to 10.4.0, 7.5.22, and 5.0.9 respectively; no dependency was
+  added or upgraded by this task.
+- Validation: the focused check, malformed/nested-floor cases, syntax, lint,
+  `npm run check:all`, `npm run format:check`, and `git diff --check` pass.
+  The guard is static and does not claim that GitHub Dependabot alerts have
+  been administratively closed.
+- Risk: this is development/release tooling only; runtime behavior, storage,
+  Service Worker, detector thresholds, and the physical acceptance result are
+  unchanged. The current-candidate iPhone artifact is still missing.
+- Next: commit/push this isolated guard, verify its CI run, then resume the
+  trusted-HTTPS 3×6 field checklist only when the user is ready.
