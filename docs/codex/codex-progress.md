@@ -2367,3 +2367,27 @@ dist/native/native-readiness.json` exited `0`, and the scoped `dist` status
   release candidate from the verified tree, and stop at the GitHub `gh`
   installation/authentication boundary plus the still-unexecuted physical
   trusted-HTTPS 3-condition/18-shot acceptance.
+
+## 2026-08-09 — Sanitized handoff candidate checkpoint
+
+- Current implementation checkpoint: `feat/adaptive-release-detection` at
+  `ddb3d20744b3c76df0ccb4acf039c4f95852d429`, tree
+  `d7152f14bbc29e4090a4128e2533e14f61de5e44`. The fixture-only follow-up and
+  exact-boolean tracking gate are included; the complete prestarted Chromium
+  suite is 83/83 and all cumulative gates remain green.
+- Sanitized local handoff: `codex/form-diagnostic-handoff-release` is based
+  directly on `origin/main` (`3b4f3b22b562899ffef28bb6d64d7821eced4dde`),
+  carries the same tree, and currently resolves to
+  `bc0ed0140f7bb851292a9e4c84d0e3622dab9cd4`. The sensitive ancestor check
+  `git merge-base --is-ancestor 4a0ff1ec
+codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
+  branch remains local-only.
+- Scope hygiene: the three pre-existing metadata documents are still the only
+  worktree entries and remain unstaged. No raw diagnostic artifact, video,
+  screenshot, generated `debug.log`, or user-specific path is part of the
+  candidate tree.
+- Publish boundary: `gh --version` is unavailable in this environment, so no
+  push or PR was attempted. Install/authenticate GitHub CLI before publishing.
+  Physical iPhone Safari acceptance also remains open; execute the trusted
+  HTTPS three-condition/18-shot checklist before calling field acceptance
+  complete.
