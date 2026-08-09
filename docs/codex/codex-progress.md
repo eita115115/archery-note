@@ -2368,17 +2368,17 @@ dist/native/native-readiness.json` exited `0`, and the scoped `dist` status
   installation/authentication boundary plus the still-unexecuted physical
   trusted-HTTPS 3-condition/18-shot acceptance.
 
-## 2026-08-09 — Sanitized handoff candidate checkpoint
+## 2026-08-09 — Sanitized handoff candidate checkpoint (initial)
 
-- Current implementation checkpoint: `feat/adaptive-release-detection` at
+- Initial implementation checkpoint: `feat/adaptive-release-detection` at
   `9a733f240b9d7ec254d813e6ba8f51c89edeec45`, tree
   `3a876a14d51ba2c76cc0849e6a6e19f08fe43349`. The fixture-only follow-up and
   exact-boolean tracking gate are included; the complete prestarted Chromium
   suite is 83/83 and all cumulative gates remain green.
-- Sanitized local handoff: `codex/form-diagnostic-handoff-release` is based
-  directly on `origin/main` (`3b4f3b22b562899ffef28bb6d64d7821eced4dde`),
-  carries the same tree, and currently resolves to
-  `0d11250be06028cf9853c5eb355396fc1fd31c20`. The sensitive ancestor check
+- Initial sanitized local handoff: `codex/form-diagnostic-handoff-release` was
+  based directly on `origin/main`
+  (`3b4f3b22b562899ffef28bb6d64d7821eced4dde`) and carried the same tree at
+  that checkpoint. The sensitive ancestor check
   `git merge-base --is-ancestor 4a0ff1ec
 codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   branch remains local-only.
@@ -2391,6 +2391,9 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   Physical iPhone Safari acceptance also remains open; execute the trusted
   HTTPS three-condition/18-shot checklist before calling field acceptance
   complete.
+- The candidate ref is regenerated after each committed handoff-ledger update;
+  its final SHA and tree are reported from the authoritative verification
+  command rather than embedded self-referentially in this ledger.
 
 ## 2026-08-09 — Public HTTPS parity check
 
