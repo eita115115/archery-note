@@ -9,6 +9,13 @@ Repository tests and JSON export do not establish physical acceptance.
 - Use an `https://` Safari origin on the physical iPhone. Do not use the local HTTP helpers for live camera capture.
 - If a trusted preview pinned to the implementation tree is unavailable, stop; this checklist does not authorize deployment.
 
+### Local candidate preview (Windows)
+
+- From the candidate worktree, run `powershell -ExecutionPolicy Bypass -File tools/serve-iphone-https.ps1 -HostAddress <LAN IPv4>`.
+- Use the printed `.cer` path to install the temporary certificate on the iPhone, then enable full trust under Settings > General > About > Certificate Trust Settings.
+- Open the printed `https://<LAN IPv4>:8743/` URL from Safari on the same trusted private Wi-Fi. Binding to an explicit LAN IPv4 keeps the preview off unrelated interfaces.
+- Use a dedicated test profile, keep production data out of the preview, and stop the server after the checklist. The helper removes its temporary certificate and private key on exit.
+
 ## Physical sequence
 
 ## Data preparation

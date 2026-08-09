@@ -2,11 +2,14 @@
 
 const fs = require("fs");
 const http = require("http");
+const https = require("https");
 const path = require("path");
 
 const rootDir = path.resolve(__dirname, "..");
 const host = process.env.HOST || "127.0.0.1";
 const port = Number(process.env.PORT || 4173);
+const httpsPfxPath = process.env.HTTPS_PFX || "";
+const protocol = httpsPfxPath ? "https" : "http";
 
 const contentTypes = new Map([
   [".css", "text/css; charset=utf-8"],
@@ -24,7 +27,7 @@ const contentTypes = new Map([
 function resolveRequestPath(requestUrl) {
   let pathname;
   try {
-    pathname = decodeURIComponent(new URL(requestUrl, `http://${host}:${port}`).pathname);
+    pathname = decodeURIComponent(new URL(requestUrl, `${protocol}://${host}:${port}`).pathname);
   } catch {
     return null;
   }
@@ -35,7 +38,7 @@ function resolveRequestPath(requestUrl) {
   return fullPath;
 }
 
-const server = http.createServer((request, response) => {
+function handleRequest(request, response) {
   const fullPath = resolveRequestPath(request.url || "/");
   if (!fullPath) {
     response.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
@@ -57,8 +60,18 @@ const server = http.createServer((request, response) => {
     });
     fs.createReadStream(fullPath).pipe(response);
   });
-});
+}
+
+const server = httpsPfxPath
+  ? https.createServer(
+      {
+        pfx: fs.readFileSync(httpsPfxPath),
+        passphrase: process.env.HTTPS_PASSWORD || "",
+      },
+      handleRequest,
+    )
+  : http.createServer(handleRequest);
 
 server.listen(port, host, () => {
-  console.log(`E2E server listening at http://${host}:${port}`);
+  console.log(`E2E server listening at ${protocol}://${host}:${port}`);
 });

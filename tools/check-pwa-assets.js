@@ -176,12 +176,35 @@ function assertPreviewServerContracts(
   }
 }
 
+function assertIphoneHttpsPreviewContract(relativePath) {
+  const text = readText(relativePath);
+  const requiredMarkers = [
+    "New-SelfSignedCertificate",
+    "Export-Certificate",
+    "HTTPS_PFX",
+    "HTTPS_PASSWORD",
+    "HostAddress",
+    "127.0.0.1",
+    "Open trusted HTTPS preview from iPhone",
+    "trusted private Wi-Fi",
+  ];
+  for (const marker of requiredMarkers) {
+    if (!text.includes(marker)) {
+      fail(`${relativePath} is missing the trusted HTTPS preview marker: ${marker}`);
+    }
+  }
+  if (!/Remove-Item\s+-LiteralPath\s+\$tempRoot\s+-Recurse\s+-Force/.test(text)) {
+    fail(`${relativePath} must clean its temporary certificate directory`);
+  }
+}
+
 const swText = readText("sw.js");
 const html = readText("index.html");
 
 assertCacheCleanupScope(swText);
 assertPreviewServerContracts("tools/serve.ps1", { localhostPoseRecovery: true });
 assertPreviewServerContracts("tools/serve-iphone.ps1", { iphoneLan: true });
+assertIphoneHttpsPreviewContract("tools/serve-iphone-https.ps1");
 
 const rawAssets = extractSwArray(swText, "ASSETS");
 const assets = rawAssets.map(normalizeAsset);
