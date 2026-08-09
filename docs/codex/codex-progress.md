@@ -3200,3 +3200,19 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   pending because no current-candidate artifact has been collected.
 - Next: commit/push this documentation-only clarification and keep the field
   run deferred until the current candidate can be exercised on trusted HTTPS.
+
+## 2026-08-10 — Add optional certificate opening aid
+
+- RED evidence: `npm run check:pwa` rejected the new HTTPS helper contract
+  before the helper exposed a way to open its temporary `.cer` file.
+- Changed: `tools/serve-iphone-https.ps1` accepts optional `-OpenCertificate`
+  and opens the temporary certificate on the Windows PC when requested;
+  `docs/form-diagnostic-field-acceptance.md` explains that transfer and iPhone
+  trust still require explicit user action. Default helper behavior is unchanged.
+- Validation: `npm run check:pwa` and `git diff --check` pass. No app runtime,
+  storage, detector, Service Worker, dependency, or production network behavior
+  changed.
+- Risk: acceptance-helper convenience only; physical 3×6 acceptance remains
+  pending because no current-candidate artifact has been collected.
+- Next: commit/push this helper aid, verify CI, then resume the trusted-HTTPS
+  field run when available.

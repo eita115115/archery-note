@@ -26,6 +26,11 @@ Repository tests and JSON export do not establish physical acceptance.
   iPhone and run it again.
 
 - Use the printed `.cer` path to install the temporary certificate on the iPhone, then enable full trust under Settings > General > About > Certificate Trust Settings.
+- If locating the certificate on Windows is inconvenient, append
+  `-OpenCertificate` to the helper command. This opens the `.cer` on the PC;
+  transfer that file to the iPhone (for example with AirDrop, iCloud Drive, or
+  Files) before installing and trusting it. The switch does not install or
+  trust the certificate automatically.
 - Open the printed `https://...:8743/` URL in the iPhone's Safari address bar.
   Do not paste the URL into PowerShell; PowerShell treats it as a command.
   Binding to an explicit LAN IPv4 keeps the preview off unrelated interfaces.

@@ -2,7 +2,8 @@
 # ASCII only: Windows PowerShell 5.1 can misread UTF-8 without a BOM.
 param(
   [string]$HostAddress = "0.0.0.0",
-  [int]$Port = 8743
+  [int]$Port = 8743,
+  [switch]$OpenCertificate
 )
 
 $repoRoot = [System.IO.Path]::GetFullPath((Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)))
@@ -88,6 +89,14 @@ try {
   $cerPath = Join-Path $tempRoot "archery-note-preview.cer"
   Export-PfxCertificate -Cert $certificate -FilePath $pfxPath -Password $password | Out-Null
   Export-Certificate -Cert $certificate -FilePath $cerPath | Out-Null
+  if ($OpenCertificate) {
+    try {
+      Start-Process -FilePath $cerPath -ErrorAction Stop | Out-Null
+      Write-Output "Opened the temporary certificate on this PC: $cerPath"
+    } catch {
+      Write-Warning ("Could not open the temporary certificate automatically. Open it manually: " + $cerPath)
+    }
+  }
 
   $env:HOST = $HostAddress
   $env:PORT = [string]$Port

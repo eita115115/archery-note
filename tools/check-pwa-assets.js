@@ -189,6 +189,8 @@ function assertIphoneHttpsPreviewContract(relativePath) {
     "NetworkInterface",
     "Test-NetConnection",
     "Open trusted HTTPS preview from iPhone",
+    "OpenCertificate",
+    "Start-Process -FilePath $cerPath",
     "trusted private Wi-Fi",
     "Unable to create the temporary HTTPS certificate",
   ];
