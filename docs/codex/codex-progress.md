@@ -2191,3 +2191,32 @@ save creator is exported`. The new form-core source contract then failed with
   source assertions for every legacy branch and a browser six-shot matrix case;
   no production change is needed for either.
 - Next: Task 8 owns the diagnostics-specific native/Web transport boundary.
+
+## 2026-08-09 — Form diagnostic handoff Task 8
+
+- Changed: added a diagnostics-only `shareFormDiagnosticsJson` transport seam
+  after the unchanged generic share helper. It validates string input, builds
+  one JSON `File`, chooses Web Share → Capacitor native share → direct download
+  exactly once, and never falls back after a transport is selected.
+- Native transport writes only the fixed cache path and UTF-8 MIME/payload,
+  removes stale and final files with not-found tolerance, classifies only the
+  exact cancellation signals, and reports `{status, cleanupFailed}` with no
+  extra keys. Direct download owns its anchor/object URL cleanup independently.
+  Supplied environments are used as complete adapters without filling missing
+  fields from browser globals or plugins.
+- RED: the task brief's conditional loader is designed to fail at
+  `shareFormDiagnosticsJson is a function` before the production marker exists;
+  this run proceeded with the implementation marker in place before executing
+  the harness. No parser or unawaited-rejection failure was observed.
+- GREEN: transport fixtures cover Web priority and cancellation, native
+  cancellation/write/URI/cleanup failures, stale-file tolerance, exact
+  filename/MIME/path/encoding/payload, direct-download cleanup failures,
+  partial-native fallback, supplied-environment isolation, non-string refusal,
+  and forbidden side effects. `node tools/check-form-diagnostics.js` passes.
+- Validation: `npm run check:form`, `npm run check:storage`, `npm run check:app`,
+  `npm run check:globals`, `npm run lint -- --quiet`,
+  `npx prettier --check tools/check-form-diagnostics.js docs/codex/codex-progress.md`,
+  and `git diff --check` pass.
+- Risk: this is a pure transport boundary; no existing generic share/download,
+  storage, schema, settings, Service Worker, or version behavior is changed.
+- Next: Task 9 adds exact-boolean diagnostics settings and mobile E2E coverage.

@@ -321,6 +321,115 @@ for (const records of [
   assertEqual(missing.candidate, null, "missing deletion returns no candidate");
 }
 
+function loadFormDiagnosticTransportApi() {
+  const storageSource = fs.readFileSync(path.join(root, "scripts", "10-storage-native.js"), "utf8");
+  const startMarker = "/* FORM_DIAGNOSTIC_TRANSPORT_START */";
+  const endMarker = "/* FORM_DIAGNOSTIC_TRANSPORT_END */";
+  const start = storageSource.indexOf(startMarker);
+  const end = storageSource.indexOf(endMarker);
+  if (start < 0 || end <= start) return { api: { shareFormDiagnosticsJson: null }, source: "" };
+  const source = storageSource.slice(start, end + endMarker.length);
+  const api = new Function(
+    "capPlugin",
+    `${source}
+return {
+  FORM_DIAGNOSTIC_FILENAME,
+  FORM_DIAGNOSTIC_MIME,
+  FORM_DIAGNOSTIC_NATIVE_PATH,
+  FORM_DIAGNOSTIC_NATIVE_DIRECTORY,
+  FORM_DIAGNOSTIC_NATIVE_ENCODING,
+  defaultFormDiagnosticTransportEnvironment,
+  shareFormDiagnosticsJson
+};`,
+  )(() => null);
+  return { api, source };
+}
+
+function makeTransportFixture() {
+  const calls = [];
+  class FixtureFile {
+    constructor(parts, name, options) {
+      this.parts = parts.slice();
+      this.name = name;
+      this.type = options.type;
+      calls.push({ op: "file", value: this });
+    }
+  }
+  class FixtureBlob {
+    constructor(parts, options) {
+      this.parts = parts.slice();
+      this.type = options.type;
+      calls.push({ op: "blob", value: this });
+    }
+  }
+  const anchor = {
+    href: "",
+    download: "",
+    click() {
+      calls.push({ op: "anchor-click", value: this });
+    },
+    remove() {
+      calls.push({ op: "anchor-remove", value: this });
+    },
+  };
+  const environment = {
+    navigator: {
+      canShare(data) {
+        calls.push({ op: "can-share", data });
+        return false;
+      },
+      async share(data) {
+        calls.push({ op: "web-share", data });
+      },
+    },
+    FileCtor: FixtureFile,
+    BlobCtor: FixtureBlob,
+    document: {
+      body: {
+        appendChild(value) {
+          calls.push({ op: "anchor-append", value });
+        },
+      },
+      createElement(tag) {
+        calls.push({ op: "anchor-create", tag });
+        return anchor;
+      },
+    },
+    urlApi: {
+      createObjectURL(value) {
+        calls.push({ op: "url-create", value });
+        return "blob:form-diagnostic-fixture";
+      },
+      revokeObjectURL(value) {
+        calls.push({ op: "url-revoke", value });
+      },
+    },
+    filesystem: null,
+    nativeShare: null,
+  };
+  return { calls, environment, anchor };
+}
+
+function callOps(calls) {
+  return calls.map((call) => call.op);
+}
+
+function exactResult(result, status, cleanupFailed, label) {
+  assertEqual(
+    JSON.stringify(Object.keys(result)),
+    JSON.stringify(["status", "cleanupFailed"]),
+    label + " exact result keys",
+  );
+  assertEqual(result.status, status, label + " status");
+  assertEqual(result.cleanupFailed, cleanupFailed, label + " cleanup flag");
+}
+
+function nativeNotFound() {
+  const error = new Error("fixture not found");
+  error.code = "OS-PLUG-FILE-0008";
+  return error;
+}
+
 function loadFormDiagnosticApi() {
   return new Function(
     `${coreScript}
@@ -1297,4 +1406,455 @@ deepEqual(
   "projection leaves source diagnostics unchanged",
 );
 
-console.log("Form diagnostic checks OK");
+async function checkFormDiagnosticTransport() {
+  const { api: transportApi, source } = loadFormDiagnosticTransportApi();
+  assert(
+    typeof transportApi.shareFormDiagnosticsJson === "function",
+    "shareFormDiagnosticsJson is a function",
+  );
+  const json = '{"format":"archery-note-form-diagnostics"}\n';
+
+  {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = (data) => {
+      fixture.calls.push({ op: "can-share", data });
+      return true;
+    };
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        fixture.calls.push({ op: "native-delete" });
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        return { uri: "cache://unused" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "shared", false, "web priority");
+    assertEqual(
+      JSON.stringify(callOps(fixture.calls)),
+      JSON.stringify(["file", "can-share", "web-share"]),
+      "web priority locks one transport",
+    );
+    const file = fixture.calls[0].value;
+    assertEqual(file.name, transportApi.FORM_DIAGNOSTIC_FILENAME, "web filename");
+    assertEqual(file.type, transportApi.FORM_DIAGNOSTIC_MIME, "web MIME");
+    assertEqual(file.parts[0], json, "web content");
+    assert(
+      fixture.calls[1].data.files[0] === file && fixture.calls[2].data.files[0] === file,
+      "canShare and share reuse the same File",
+    );
+  }
+
+  for (const [label, error, status] of [
+    ["web AbortError", Object.assign(new Error("abort"), { name: "AbortError" }), "canceled"],
+    ["web Share canceled message", new Error("Share canceled"), "failed"],
+    ["web generic rejection", new Error("fixture web failure"), "failed"],
+  ]) {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = () => true;
+    fixture.environment.navigator.share = async (data) => {
+      fixture.calls.push({ op: "web-share", data });
+      throw error;
+    };
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        fixture.calls.push({ op: "native-delete" });
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        return { uri: "cache://unused" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, status, false, label);
+    assertEqual(
+      JSON.stringify(callOps(fixture.calls)),
+      JSON.stringify(["file", "web-share"]),
+      label + " has no native/download fallback",
+    );
+  }
+
+  for (const probe of [false, "true", new Error("probe failure")]) {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = (data) => {
+      fixture.calls.push({ op: "can-share", data });
+      if (probe instanceof Error) throw probe;
+      return probe;
+    };
+    fixture.environment.filesystem = {
+      async deleteFile(options) {
+        fixture.calls.push({ op: "native-delete", options });
+      },
+      async writeFile(options) {
+        fixture.calls.push({ op: "native-write", options });
+        return { uri: "cache://selected-native" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share(options) {
+        fixture.calls.push({ op: "native-share", options });
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "shared", false, "web probe refusal");
+    assert(
+      callOps(fixture.calls).includes("native-share"),
+      "native selected after web probe refusal",
+    );
+    assert(!callOps(fixture.calls).includes("url-create"), "native selection skips download");
+  }
+
+  {
+    const fixture = makeTransportFixture();
+    fixture.environment.FileCtor = class ThrowingFile {
+      constructor() {
+        fixture.calls.push({ op: "file-throw" });
+        throw new Error("file construction failed");
+      }
+    };
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        fixture.calls.push({ op: "native-delete" });
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        return { uri: "cache://selected-native" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "shared", false, "File construction refusal");
+    assert(
+      callOps(fixture.calls).includes("native-share"),
+      "File construction failure occurs before selection",
+    );
+  }
+
+  for (const [label, shareError, status] of [
+    ["native AbortError", Object.assign(new Error("abort"), { name: "AbortError" }), "canceled"],
+    ["native exact message", new Error("Share canceled"), "canceled"],
+    ["native message case mismatch", new Error("share canceled"), "failed"],
+    ["native message suffix", new Error("Share canceled by fixture"), "failed"],
+    ["native generic error", new Error("native failed"), "failed"],
+  ]) {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = () => false;
+    let deletes = 0;
+    fixture.environment.filesystem = {
+      async deleteFile(options) {
+        deletes++;
+        fixture.calls.push({ op: "native-delete", options });
+        if (deletes === 1) throw nativeNotFound();
+      },
+      async writeFile(options) {
+        fixture.calls.push({ op: "native-write", options });
+        return { uri: "cache://diagnostic-result" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share(options) {
+        fixture.calls.push({ op: "native-share", options });
+        throw shareError;
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, status, false, label);
+    assertEqual(deletes, 2, label + " performs stale and final deletion");
+    assert(!callOps(fixture.calls).includes("url-create"), label + " never downloads");
+    const write = fixture.calls.find((call) => call.op === "native-write").options;
+    assertEqual(
+      JSON.stringify(write),
+      JSON.stringify({
+        path: "archery-note-form-diagnostics.json",
+        data: json,
+        directory: "CACHE",
+        encoding: "utf8",
+      }),
+      label + " exact write options",
+    );
+    const share = fixture.calls.find((call) => call.op === "native-share").options;
+    assertEqual(
+      JSON.stringify(share),
+      JSON.stringify({ url: "cache://diagnostic-result" }),
+      label + " shares only the returned URI",
+    );
+  }
+
+  for (const writeFailure of [
+    new Error("write failed"),
+    Object.assign(new Error("write abort"), { name: "AbortError" }),
+    new Error("Share canceled"),
+  ]) {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = () => false;
+    let deletes = 0;
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        deletes++;
+        fixture.calls.push({ op: "native-delete" });
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        throw writeFailure;
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "failed", false, "native write failure");
+    assertEqual(deletes, 2, "write failure still final-cleans");
+    assert(!callOps(fixture.calls).includes("native-share"), "write failure never shares");
+    assert(!callOps(fixture.calls).includes("url-create"), "write failure never downloads");
+  }
+
+  for (const uri of [undefined, null, "", "   "]) {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = () => false;
+    let deletes = 0;
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        deletes++;
+        fixture.calls.push({ op: "native-delete" });
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        return { uri };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "failed", false, "invalid native URI");
+    assertEqual(deletes, 2, "invalid URI still final-cleans");
+    assert(!callOps(fixture.calls).includes("native-share"), "invalid URI never shares");
+  }
+
+  {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = () => false;
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        fixture.calls.push({ op: "native-delete" });
+        throw new Error("stale delete failed");
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        return { uri: "cache://unused" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "failed", true, "stale delete failure");
+    assertEqual(
+      JSON.stringify(callOps(fixture.calls)),
+      JSON.stringify(["file", "native-delete"]),
+      "stale delete failure prevents write/share/download",
+    );
+  }
+
+  for (const primary of ["success", "cancel", "share-error", "write-error"]) {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = () => false;
+    let deletes = 0;
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        deletes++;
+        fixture.calls.push({ op: "native-delete" });
+        if (deletes === 2) throw new Error("final cleanup failed");
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        if (primary === "write-error") throw new Error("write failed");
+        return { uri: "cache://diagnostic-result" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+        if (primary === "cancel") throw Object.assign(new Error("abort"), { name: "AbortError" });
+        if (primary === "share-error") throw new Error("share failed");
+      },
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(
+      result,
+      primary === "success" ? "shared" : primary === "cancel" ? "canceled" : "failed",
+      true,
+      primary + " with final cleanup failure",
+    );
+    assert(!callOps(fixture.calls).includes("url-create"), "cleanup failure has no fallback");
+  }
+
+  for (const missing of ["deleteFile", "writeFile", "share"]) {
+    const fixture = makeTransportFixture();
+    fixture.environment.navigator.canShare = () => false;
+    fixture.environment.filesystem = {
+      async deleteFile() {
+        fixture.calls.push({ op: "native-delete" });
+      },
+      async writeFile() {
+        fixture.calls.push({ op: "native-write" });
+        return { uri: "cache://unused" };
+      },
+    };
+    fixture.environment.nativeShare = {
+      async share() {
+        fixture.calls.push({ op: "native-share" });
+      },
+    };
+    if (missing === "share") fixture.environment.nativeShare.share = null;
+    else fixture.environment.filesystem[missing] = null;
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "downloaded", false, "missing native " + missing);
+    assert(!callOps(fixture.calls).includes("native-delete"), "partial native is never entered");
+  }
+
+  {
+    const fixture = makeTransportFixture();
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "downloaded", false, "direct download");
+    assertEqual(
+      fixture.anchor.download,
+      transportApi.FORM_DIAGNOSTIC_FILENAME,
+      "download filename",
+    );
+    assertEqual(fixture.anchor.href, "blob:form-diagnostic-fixture", "download URL");
+    const blob = fixture.calls.find((call) => call.op === "blob").value;
+    assertEqual(blob.type, transportApi.FORM_DIAGNOSTIC_MIME, "download MIME");
+    assertEqual(blob.parts[0], json, "download content");
+    assertEqual(
+      JSON.stringify(callOps(fixture.calls)),
+      JSON.stringify([
+        "file",
+        "can-share",
+        "blob",
+        "url-create",
+        "anchor-create",
+        "anchor-append",
+        "anchor-click",
+        "anchor-remove",
+        "url-revoke",
+      ]),
+      "direct download cleanup order",
+    );
+  }
+
+  for (const failingOp of [
+    "blob",
+    "url-create",
+    "anchor-create",
+    "anchor-append",
+    "anchor-click",
+    "anchor-remove",
+    "url-revoke",
+  ]) {
+    const fixture = makeTransportFixture();
+    if (failingOp === "blob")
+      fixture.environment.BlobCtor = class ThrowingBlob {
+        constructor() {
+          throw new Error("blob failed");
+        }
+      };
+    if (failingOp === "url-create")
+      fixture.environment.urlApi.createObjectURL = () => {
+        throw new Error("URL failed");
+      };
+    if (failingOp === "anchor-create")
+      fixture.environment.document.createElement = () => {
+        throw new Error("anchor failed");
+      };
+    if (failingOp === "anchor-append")
+      fixture.environment.document.body.appendChild = () => {
+        throw new Error("append failed");
+      };
+    if (failingOp === "anchor-click")
+      fixture.anchor.click = () => {
+        throw new Error("click failed");
+      };
+    if (failingOp === "anchor-remove")
+      fixture.anchor.remove = () => {
+        throw new Error("remove failed");
+      };
+    if (failingOp === "url-revoke")
+      fixture.environment.urlApi.revokeObjectURL = () => {
+        throw new Error("revoke failed");
+      };
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "failed", false, "direct " + failingOp + " failure");
+  }
+
+  {
+    const fixture = makeTransportFixture();
+    fixture.environment.BlobCtor = null;
+    fixture.environment.document = null;
+    fixture.environment.urlApi = null;
+    const result = await transportApi.shareFormDiagnosticsJson(json, fixture.environment);
+    exactResult(result, "failed", false, "missing direct primitives");
+  }
+  {
+    const supplied = {
+      navigator: null,
+      FileCtor: null,
+      BlobCtor: null,
+      document: null,
+      urlApi: null,
+      filesystem: null,
+      nativeShare: null,
+    };
+    const result = await transportApi.shareFormDiagnosticsJson(json, supplied);
+    exactResult(result, "failed", false, "supplied environment is isolated");
+  }
+  {
+    const fixture = makeTransportFixture();
+    const result = await transportApi.shareFormDiagnosticsJson(null, fixture.environment);
+    exactResult(result, "failed", false, "non-string input");
+    assertEqual(fixture.calls.length, 0, "non-string input performs no transport work");
+  }
+  for (const forbidden of [
+    "shareOrDownloadText",
+    "toast(",
+    "nativePulse",
+    "lastBackupAt",
+    "writeSafetySnapshot",
+    "scheduleSafetySnapshot",
+    "JSON.stringify(db",
+    "save(",
+  ]) {
+    assert(!source.includes(forbidden), "transport source excludes " + forbidden);
+  }
+}
+
+async function main() {
+  await checkFormDiagnosticTransport();
+  console.log("Form diagnostic checks OK");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
