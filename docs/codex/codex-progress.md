@@ -4127,3 +4127,19 @@ the minimum touch target` after the focused static contract was added.
   acceptance evidence. No artifact contents were copied into the repository.
 - Next: serve exactly candidate `0900d4e7`, repeat the trusted HTTPS 3×6 run,
   and write the sidecar from the printed commit/tree before final PR/release audit.
+
+## 2026-08-11 — Clarify diagnostic download location
+
+- RED evidence: focused no-share and explicit device-save E2E contracts expected
+  a terminal download-location hint after the existing filename toast; both
+  failed before the UI-copy change.
+- Changed: the downloaded diagnostic toast now adds
+  `端末の「ダウンロード」を確認してください。` after the unchanged filename.
+  JSON payload, filename, transport, persistence, and database behavior are
+  unchanged.
+- GREEN evidence: focused Chromium no-share/direct-save tests passed 2/2 on a
+  prestarted server. `check-form-diagnostics`, `check-ui`, `check-all`, lint,
+  format, Node syntax checks, and `git diff --check` all pass.
+- Scope/risk: downloaded diagnostic copy plus its two E2E assertions and this
+  ledger entry only; no storage, receipt, schema, detector, or user-data path
+  changed.

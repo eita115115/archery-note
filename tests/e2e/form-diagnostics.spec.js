@@ -1093,6 +1093,7 @@ test("no-share environment downloads exact MIME/allowlist and revokes URL", asyn
   await expect(page.locator("#toast")).toContainText(
     "診断JSONを書き出しました（archery-note-form-diagnostics.json）",
   );
+  await expect(page.locator("#toast")).toContainText("端末の「ダウンロード」を確認してください。");
   expect(download.suggestedFilename()).toBe("archery-note-form-diagnostics.json");
   const filePath = await download.path();
   const text = fs.readFileSync(filePath, "utf8");
@@ -1118,6 +1119,7 @@ test("explicit device save bypasses the share sheet and downloads the diagnostic
   await expect(page.locator("#toast")).toContainText(
     "診断JSONを書き出しました（archery-note-form-diagnostics.json）",
   );
+  await expect(page.locator("#toast")).toContainText("端末の「ダウンロード」を確認してください。");
   const filePath = await download.path();
   assertTask9Artifact(JSON.parse(fs.readFileSync(filePath, "utf8")));
 });
