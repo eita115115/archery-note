@@ -1513,7 +1513,7 @@ function openSettings() {
   const th = db.settings.theme || "auto";
   const formTrackingOn = db.settings.formTrackingEnabled===true;
   const snaps = readSnapshots();
-  ovl.innerHTML = `<div class="sheet"><h3>${icon("gear")} 設定</h3>
+  ovl.innerHTML = `<div class="sheet"><div class="sheetHeader"><h3>${icon("gear")} 設定</h3><button type="button" class="sheetClose" id="setCloseTop" aria-label="設定を閉じる">×</button></div>
     <div class="settingsGroup" data-testid="settings-group-app">
       <div class="settingsGroupTitle">アプリ情報</div>
       ${nativeReadinessHtml()}
@@ -1715,10 +1715,12 @@ function openSettings() {
       e.target.value = v;
       save();
     };
-  ovl.querySelector("#setClose").onclick = () => {
+  const closeSettings = () => {
     closeModal(ovl);
     render();
   };
+  ovl.querySelector("#setCloseTop").onclick = closeSettings;
+  ovl.querySelector("#setClose").onclick = closeSettings;
   ovl.querySelectorAll("[data-cr]").forEach(
     (li) =>
       (li.onclick = () => {

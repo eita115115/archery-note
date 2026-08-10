@@ -230,6 +230,25 @@ test("opens settings as a dialog, closes on Escape, and restores focus", async (
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("settings exposes a visible header close control without scrolling", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  await page.locator("#btnSettings").click();
+  const topClose = page.getByRole("button", { name: "設定を閉じる", exact: true });
+  await expect(topClose).toBeVisible();
+  await expect(topClose).toBeEnabled();
+  await topClose.click();
+  await expect(page.locator(".ovl")).toHaveCount(0);
+  await expect(page.locator("#btnSettings")).toBeFocused();
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore", async ({
   page,
 }) => {

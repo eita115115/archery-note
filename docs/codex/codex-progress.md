@@ -3768,3 +3768,23 @@ the minimum touch target` after the focused static contract was added.
   worker behavior changed.
 - Risk/next: the physical iPhone 3-condition / 18-shot run is still pending;
   the generated certificate must be installed and fully trusted on the phone.
+
+## 2026-08-10 — Keep the settings exit action visible on mobile
+
+- UX evidence: the fresh 390×844 settings audit showed a long bottom sheet with
+  its only visible close action at the very bottom. On an iPhone, a user had to
+  scroll through data and danger settings just to leave the sheet.
+- RED evidence: the new `check-ui` contract failed with
+  `settings sheet needs an always-visible close control`, and the focused
+  Playwright case failed because `設定を閉じる` did not exist.
+- Changed: settings now have a sticky header close button with the shared
+  44px touch-target token, an explicit Japanese accessible name, focus styling,
+  and the same close/render path as the existing bottom action. The bottom
+  action remains for long-form scanning and keyboard/assistive navigation.
+- GREEN evidence: `node tools/check-ui.js` passed, the focused settings E2E
+  passed 1/1, and the in-app 390×844 recheck showed the close control visible
+  in the first viewport and returning focus to `設定`. Generated CSS was
+  rebuilt; no detector, storage, transport, schema, Service Worker, or user
+  data behavior changed.
+- Risk/next: run the cumulative CI ladder, then keep the candidate pinned for
+  the trusted-HTTPS physical 3-condition / 18-shot acceptance.

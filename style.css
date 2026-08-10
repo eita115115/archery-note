@@ -757,6 +757,11 @@ body.modalOpen{overflow:hidden;}
   box-shadow:var(--shadow-raised);
   animation:sheetUp .32s var(--ease-fluid);
 }
+.sheetHeader{position:sticky; top:-16px; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); margin:-16px -16px 12px; padding:12px 12px 8px 16px; background:var(--card);}
+.sheetHeader h3{margin:0;}
+.sheetClose{appearance:none; min-width:var(--tap-target-min); min-height:var(--tap-target-min); padding:0; border:1px solid transparent; border-radius:var(--radius-sm); background:transparent; color:var(--sub); font-size:24px; line-height:1;}
+.sheetClose:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.sheetClose:hover{background:var(--card2); color:var(--ink);}
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--title);}
 /* 確認ダイアログ（appConfirm）: .sheet より小さい面。破壊的操作の直前だけ登場モーションを持つ */
 .confirmSheet{max-width:360px; border-radius:8px;}

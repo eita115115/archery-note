@@ -114,6 +114,16 @@ function staticUiChecks() {
     /header\.app \.gear\s*\{[^}]*min-width\s*:\s*var\(--tap-target-min\)[^}]*min-height\s*:\s*var\(--tap-target-min\)/.test(css),
     "settings button must use the minimum touch target",
   );
+  const settingsSourceForClose = fs.readFileSync(
+    path.join(root, "scripts", "70-gear-settings.js"),
+    "utf8",
+  );
+  assert(
+    settingsSourceForClose.includes('id="setCloseTop"') &&
+      settingsSourceForClose.includes('aria-label="設定を閉じる"') &&
+      settingsSourceForClose.includes("setCloseTop"),
+    "settings sheet needs an always-visible close control",
+  );
   assert(
     appScripts.every((file) =>
       new RegExp(`<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`).test(html),
