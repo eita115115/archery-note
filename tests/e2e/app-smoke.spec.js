@@ -114,6 +114,25 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to the history filters", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "履歴").click();
+  const history = page.locator("#main");
+  await history.getByLabel("用具", { exact: true }).selectOption("__none");
+  await history.getByLabel("距離", { exact: true }).selectOption("70");
+  await history.getByLabel("ラウンド", { exact: true }).selectOption("free");
+  await expect(history.getByLabel("用具", { exact: true })).toHaveValue("__none");
+  await expect(history.getByLabel("距離", { exact: true })).toHaveValue("70");
+  await expect(history.getByLabel("ラウンド", { exact: true })).toHaveValue("free");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("moves exactly one aria-current marker when switching tabs", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

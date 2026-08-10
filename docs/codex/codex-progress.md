@@ -3812,3 +3812,25 @@ the minimum touch target` after the focused static contract was added.
   or user-data behavior changed. After this small commit/CI check, the only
   remaining product gate is the trusted-HTTPS physical 3-condition / 18-shot
   acceptance artifact.
+
+## 2026-08-10 — Give history filters explicit accessible names
+
+- UX evidence: the history tab's three filter selects were announced only by
+  nearby visual text, not an associated label. This made the filter workflow
+  less reliable for VoiceOver and label-based interaction, while the lower
+  navigation also contains a same-named `用具` button.
+- RED evidence: `node tools/check-ui.js` failed with
+  `history filter histSetup needs an associated label` before the production
+  change. The first focused E2E also exposed the expected same-name ambiguity;
+  the final test scopes lookups to `#main`.
+- Changed: `histSetup`, `histDist`, and `histRound` now have explicit `for`
+  associations. The static contract checks all three IDs and the focused E2E
+  exercises each filter by its accessible name.
+- GREEN evidence: `node tools/check-ui.js` passed with all three viewport
+  screenshots, the focused Playwright worker reported 1/1 (the Windows parent
+  still hit its known teardown timeout), lint, formatting, app checks, syntax,
+  and `git diff --check` passed.
+- Risk/next: no scoring, detector, storage, receipt, transport, schema,
+  Service Worker, or user-data behavior changed. Commit this scoped UI fix,
+  then return to the provenance-bound trusted-HTTPS 3-condition / 18-shot
+  field artifact.

@@ -26,6 +26,7 @@ const appScripts = [
 const appJs = appScripts.map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 const surface = `${html}\n${css}\n${appJs}`;
 const recordSurface = `${html}\n${css}\n${fs.readFileSync(path.join(root, "scripts", "50-record-view.js"), "utf8")}`;
+const historySurface = `${html}\n${css}\n${fs.readFileSync(path.join(root, "scripts", "60-history-sight-view.js"), "utf8")}`;
 const appUrl = `file:///${htmlPath.replace(/\\/g, "/")}`;
 const outDir = path.join(root, "artifacts", "ui-smoke");
 
@@ -171,6 +172,12 @@ function staticUiChecks() {
     assert(
       new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(recordSurface),
       `record setup control ${controlId} needs an associated label`,
+    );
+  }
+  for (const controlId of ["histSetup", "histDist", "histRound"]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(historySurface),
+      `history filter ${controlId} needs an associated label`,
     );
   }
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
