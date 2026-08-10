@@ -233,6 +233,12 @@ const saveCapture = boundedSourceSection(
   "function startFormReplay(videoUrl){",
   "live capture source",
 );
+assert(
+  compactSource(saveCapture).includes(
+    "constnow=nextFormVideoTimestampMs(performance.now(),lastDetectTs);",
+  ),
+  "live capture passes normalized timestamps to MediaPipe",
+);
 const saveReplay = viewScript.slice(viewScript.indexOf("function startFormReplay(videoUrl){"));
 assert(saveReplay.length > 0, "replay source exists");
 assert(

@@ -466,7 +466,7 @@ function openFormCapture(){
   const receiptTracker=makeFormReleaseReceiptTracker({maxDiagnosticReceipts:32});
   const tracker=receiptTracker;
   const velSrc=makeFormVelocitySource(); // A2 中立スキャフォールド: 既定は computeFormVelocity への pass-through
-  let shots=[], frames=0, lastFpsAt=performance.now(), fps=0;
+  let shots=[], frames=0, lastFpsAt=performance.now(), lastDetectTs=-1, fps=0;
   const formPhaseDiag={rejectedFramesNear:[],canceledEvents:[],releaseFires:[]}; // 検証計装(H-2/Plan-0.2): formDebug時のみ push・保存
   let lastReleaseNow=0; // canceledEvents.tsAgo 算出用（release fire〜cancel の経過ms）
   /* Plan-0.2（release-detection-triage-2026-07-13 §3.3/§8）: 広域計装。
@@ -705,7 +705,9 @@ function openFormCapture(){
   function loop(){
     if(!running) return;
     if(landmarker && !cameraSwapInProgress && stream && stream.getVideoTracks().some(t=>t.readyState==="live") && video.srcObject===stream && video.readyState>=2){
-      const now=performance.now();
+      const now=nextFormVideoTimestampMs(performance.now(),lastDetectTs);
+      if(now==null){ raf=requestAnimationFrame(loop); return; }
+      lastDetectTs=now;
       let res;
       if(cropActive&&video.videoWidth){
         const cw=Math.round(video.videoWidth*CROP_FRAC), cx=Math.round(video.videoWidth*CROP_OFF);

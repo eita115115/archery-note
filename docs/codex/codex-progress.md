@@ -3948,6 +3948,24 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this replay reliability fix, then continue one bounded
   non-physical quality task while waiting for the current field artifact.
 
+## 2026-08-10 — Share normalized timestamps with live capture
+
+- RED evidence: the source contract failed because live capture still passed
+  raw `performance.now()` values directly to MediaPipe while replay used the
+  normalized timestamp helper.
+- Changed: live capture now keeps its own monotonic timestamp cursor and uses
+  `nextFormVideoTimestampMs` for both camera and cropped-camera inference. A
+  duplicate or non-finite wall-clock sample only schedules the next frame; it
+  never reaches `detectForVideo`.
+- GREEN evidence: `node tools/check-form-core.js` passes with the live wiring
+  contract, and the preceding `check:all`, lint, format, syntax, diff, and
+  form-diagnostics 49/49 browser run remain green. No camera permission,
+  detector threshold, receipt, storage, or schema behavior changed.
+- Scope/risk: timestamp normalization only, shared by live/replay inference;
+  physical trusted-HTTPS 3-condition / 18-shot evidence is still pending.
+- Next: commit/push this small live parity fix, then return to field-artifact
+  collection and final release audit.
+
 ## 2026-08-10 — Name active record adjustment controls
 
 - UX evidence: the active record nudge pad used arrow glyphs and a trash icon
