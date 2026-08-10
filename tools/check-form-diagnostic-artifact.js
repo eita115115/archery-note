@@ -10,7 +10,10 @@ const {
   inspectFormDiagnosticArtifact,
 } = require("./form-diagnostic-artifact");
 const { findDiagnosticFilesFromDownloads } = require("./inspect-form-diagnostic-json");
-const { parseArgs: parseHandoffArgs } = require("./write-form-diagnostic-handoff");
+const {
+  parseArgs: parseHandoffArgs,
+  resolvePreview,
+} = require("./write-form-diagnostic-handoff");
 
 const CONDITIONS = ["side", "oblique", "normal_range"];
 
@@ -198,7 +201,6 @@ const handoffFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-hando
 try {
   const artifactPath = path.join(handoffFixture, "artifact.json");
   const outputPath = path.join(handoffFixture, "handoff.json");
-  const currentPreviewOutput = path.join(handoffFixture, "handoff-current-preview.json");
   fs.writeFileSync(artifactPath, `${JSON.stringify(validPayload(), null, 2)}\n`, "utf8");
   const cliOutput = execFileSync(
     process.execPath,
@@ -224,36 +226,42 @@ try {
     "CLI handoff remains aggregate-only",
   );
 
-  const currentPreviewCliOutput = execFileSync(
-    process.execPath,
+  const cleanPreviewFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-preview-"));
+  execFileSync("git", ["init", "-q", "-b", "main"], {
+    cwd: cleanPreviewFixture,
+    encoding: "utf8",
+  });
+  execFileSync(
+    "git",
     [
-      path.join(__dirname, "write-form-diagnostic-handoff.js"),
-      artifactPath,
-      "--preview-current",
-      "--output",
-      currentPreviewOutput,
+      "-c",
+      "user.name=Archery Note Test",
+      "-c",
+      "user.email=archery-note-test@example.invalid",
+      "commit",
+      "--allow-empty",
+      "-m",
+      "fixture",
     ],
-    { cwd: path.join(__dirname, ".."), encoding: "utf8" },
+    { cwd: cleanPreviewFixture, encoding: "utf8" },
   );
-  assert.match(
-    currentPreviewCliOutput,
-    /Form diagnostic handoff written:/,
-    "current preview handoff reports its output",
-  );
-  const currentPreviewHandoff = JSON.parse(fs.readFileSync(currentPreviewOutput, "utf8"));
-  const expectedPreviewCommit = execFileSync("git", ["rev-parse", "HEAD"], {
-    cwd: path.join(__dirname, ".."),
-    encoding: "utf8",
-  }).trim();
-  const expectedPreviewTree = execFileSync("git", ["rev-parse", "HEAD^{tree}"], {
-    cwd: path.join(__dirname, ".."),
-    encoding: "utf8",
-  }).trim();
+  const currentPreview = resolvePreview({
+    previewCurrent: true,
+    repositoryRoot: cleanPreviewFixture,
+  });
   assert.deepEqual(
-    currentPreviewHandoff.preview,
-    { commit: expectedPreviewCommit, tree: expectedPreviewTree },
-    "current preview handoff binds the checked-out commit and tree",
+    currentPreview,
+    {
+      commit: execFileSync("git", ["-C", cleanPreviewFixture, "rev-parse", "HEAD"], {
+        encoding: "utf8",
+      }).trim(),
+      tree: execFileSync("git", ["-C", cleanPreviewFixture, "rev-parse", "HEAD^{tree}"], {
+        encoding: "utf8",
+      }).trim(),
+    },
+    "current preview helper binds the checked-out commit and tree",
   );
+  fs.rmSync(cleanPreviewFixture, { recursive: true, force: true });
   assert.throws(
     () =>
       parseHandoffArgs([
@@ -269,6 +277,45 @@ try {
     /同時に指定できません/,
     "current preview mode rejects conflicting explicit provenance",
   );
+
+  const dirtyPreviewMarker = path.join(
+    path.join(__dirname, ".."),
+    ".form-diagnostic-preview-dirty-marker",
+  );
+  const dirtyPreviewOutput = path.join(handoffFixture, "handoff-dirty-preview.json");
+  fs.writeFileSync(dirtyPreviewMarker, "dirty preview marker\n", "utf8");
+  try {
+    let dirtyPreviewError;
+    try {
+      execFileSync(
+        process.execPath,
+        [
+          path.join(__dirname, "write-form-diagnostic-handoff.js"),
+          artifactPath,
+          "--preview-current",
+          "--output",
+          dirtyPreviewOutput,
+        ],
+        { cwd: path.join(__dirname, ".."), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+    } catch (error) {
+      dirtyPreviewError = error;
+    }
+    assert.ok(dirtyPreviewError, "dirty current preview handoff must fail");
+    assert.equal(dirtyPreviewError.status, 2, "dirty current preview handoff exits with status 2");
+    assert.match(
+      String(dirtyPreviewError.stderr),
+      /clean|未コミット|変更/,
+      "dirty current preview handoff explains the clean-worktree requirement",
+    );
+    assert.equal(
+      fs.existsSync(dirtyPreviewOutput),
+      false,
+      "dirty current preview handoff does not write a misleading sidecar",
+    );
+  } finally {
+    fs.rmSync(dirtyPreviewMarker, { force: true });
+  }
 } finally {
   fs.rmSync(handoffFixture, { recursive: true, force: true });
 }

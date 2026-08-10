@@ -4226,3 +4226,19 @@ the minimum touch target` after the focused static contract was added.
   artifact schema, raw receipt, or user-data behavior changed. Manual handoff
   remains the fallback when a physical artifact with trusted preview
   provenance is collected.
+
+## 2026-08-11 — Refuse dirty previews during current handoff
+
+- RED evidence: a focused checker created an untracked marker in the candidate
+  worktree, then `--preview-current` still wrote a sidecar from `HEAD`; this
+  could misattribute a physical run made from uncommitted files.
+- Changed: current-preview provenance now requires a clean worktree, including
+  untracked files. Dirty candidates fail before any sidecar is written. The
+  helper accepts an explicit repository root for its isolated clean-repository
+  contract fixture; manual commit/tree provenance remains unchanged.
+- GREEN evidence: `node tools/check-form-diagnostic-artifact.js`,
+  `npm run check:form`, lint, format, Node syntax, and `git diff --check` pass.
+- Scope/risk: handoff safety and focused tooling only. No app, storage,
+  Service Worker, detector, threshold, artifact schema, raw receipt, or
+  user-data behavior changed. The current candidate must remain clean before
+  collecting the trusted HTTPS 3×6 artifact.

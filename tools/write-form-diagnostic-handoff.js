@@ -71,8 +71,16 @@ function resolvePreview(options) {
   if (!options.previewCurrent) {
     return { commit: options.previewCommit, tree: options.previewTree };
   }
-  const repositoryRoot = path.resolve(__dirname, "..");
+  const repositoryRoot = path.resolve(options.repositoryRoot || path.join(__dirname, ".."));
   try {
+    const status = execFileSync(
+      "git",
+      ["-C", repositoryRoot, "status", "--porcelain=v1", "--untracked-files=all"],
+      { encoding: "utf8" },
+    ).trim();
+    if (status) {
+      throw new Error("preview worktree is not clean; commit or remove local changes first");
+    }
     const commit = execFileSync("git", ["-C", repositoryRoot, "rev-parse", "HEAD"], {
       encoding: "utf8",
     }).trim();
