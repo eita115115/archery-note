@@ -3499,3 +3499,18 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   without reducing recall.
 - Next: review this isolated three-file change, commit/push it, then inspect the
   resulting CI run before the user performs the trusted 3×6 artifact run.
+
+## 2026-08-10 — Record post-push form diagnostics E2E evidence
+
+- Evidence: the prestarted Chromium command
+  `tests/e2e/form-diagnostics.spec.js --project=chromium --workers=1`
+  completed `49 passed (1.3m)`. The only local harness caveat is the known
+  Playwright-managed server teardown delay after the workers finish; no test
+  failure occurred.
+- Handoff: CI run `31352507219` completed successfully for commit
+  `a4177b3d943ae070d2921418e5da54f6f3cc24bd`. The candidate branch
+  `codex/form-diagnostic-handoff-release` and its remote ref both resolve to
+  that SHA; the worktree is clean.
+- Scope: docs-only evidence update. No runtime, detector, storage, receipt,
+  transport, threshold, or user-data behavior changed. The trusted-HTTPS field
+  A/B artifact remains the only physical acceptance gap.
