@@ -889,7 +889,8 @@ details.adv[open] summary::before{transform:translateY(-35%) rotate(45deg);}
 details.adv summary::-moz-list-bullet{display:none;}
 header.app .gear{
   position:absolute; right:12px; top:8px; top:calc(8px + env(safe-area-inset-top));
-  width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  width:36px; height:36px; min-width:var(--tap-target-min); min-height:var(--tap-target-min);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
   background:var(--soft); border:1px solid var(--line); color:var(--title); font-size:20px; cursor:pointer; padding:0; flex:0 0 auto;
 }
 @media (max-width:420px){

@@ -3728,3 +3728,23 @@ got 1`. The same sequence represented the user report that a forced release
   a value near `10`; this is a deliberate recall boundary, not field acceptance.
   Run the trusted-HTTPS 3-condition/18-shot matrix against the resulting
   candidate before further lowering it.
+
+## 2026-08-10 — Restore the settings touch target on the phone header
+
+- UX evidence: a fresh 390×844 mobile audit of the current candidate showed the
+  header `設定` control at 36×36px even though the app's minimum touch token is
+  44px. The control was visible and not clipped, but its hit area was smaller
+  than the rest of the phone-first controls.
+- RED evidence: `node tools/check-ui.js` failed with `settings button must use
+the minimum touch target` after the focused static contract was added.
+- Changed: `style.css` and generated `style.min.css` now enforce the existing
+  `--tap-target-min` on `header.app .gear`; the smoke contract keeps the
+  minimum explicit and does not change the icon's visual styling or layout.
+- GREEN evidence: the focused static contract and browser recheck at 390×844
+  report `#btnSettings` as 44×44px with no clipping or horizontal overflow. A
+  later full `check:all` retry reached the UI smoke step but hit the known
+  Windows EPERM cleanup on the generated Chrome profile; no application
+  assertion failed. No detector, storage, receipt, transport, schema,
+  service-worker, dependency, or user-data behavior changed.
+- Next: keep the current candidate fixed for the trusted-HTTPS 3-condition /
+  18-shot field run and its provenance-bound diagnostic artifact.

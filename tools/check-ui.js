@@ -111,6 +111,10 @@ function staticUiChecks() {
     "Minified production stylesheet link missing",
   );
   assert(
+    /header\.app \.gear\s*\{[^}]*min-width\s*:\s*var\(--tap-target-min\)[^}]*min-height\s*:\s*var\(--tap-target-min\)/.test(css),
+    "settings button must use the minimum touch target",
+  );
+  assert(
     appScripts.every((file) =>
       new RegExp(`<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`).test(html),
     ) &&
