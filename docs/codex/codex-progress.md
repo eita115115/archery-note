@@ -3659,5 +3659,10 @@ got 1`. The same sequence represented the user report that a forced release
   transport, Service Worker, dependency, or user-data behavior changed. The
   operator must provide commit/tree from the same trusted HTTPS run; the sidecar
   cannot make an older artifact current by itself.
-- Next: review and push this handoff-tooling change, then collect a fresh
-  current-candidate trusted HTTPS 3×6 artifact and sidecar.
+- Handoff commit: `5229be8109fc4c898ccb53226b90dea252dcd206` contains only the
+  tooling/docs change described above. It is pushed to
+  `codex/form-diagnostic-handoff-release`; PR #134 remains draft/open/mergeable,
+  and CI run `31360253269` completed successfully.
+- Next: collect a fresh current-candidate trusted HTTPS 3×6 artifact and
+  provenance sidecar. The existing external JSON remains provisional until it
+  is regenerated from the helper run that prints this candidate's commit/tree.
