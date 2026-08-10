@@ -3909,3 +3909,24 @@ the minimum touch target` after the focused static contract was added.
   or user-data behavior changed.
 - Next: commit/push this isolated UI improvement, then continue one
   non-physical quality task while the trusted-HTTPS field matrix remains open.
+
+## 2026-08-10 — Associate first-setup wizard labels
+
+- UX evidence: the empty-state setup wizard exposed name, draw-weight, draw
+  length, arrow, point, and measured sight fields with visual-only labels.
+  This made first-time equipment setup less reliable for VoiceOver and
+  label-based automation.
+- RED evidence: `node tools/check-ui.js` failed at the new `wName` label marker
+  before the production change.
+- Changed: the wizard now associates all direct inputs, including the generated
+  70/50/30/18m vertical and horizontal sight fields, with stable IDs. Existing
+  catalog choice fields and save/inference behavior are unchanged.
+- GREEN evidence: `node tools/check-ui.js`, `npm run check:all`, lint, format,
+  Node syntax checks, and `git diff --check` pass. The focused Chromium worker
+  passed 1/1; its parent again timed out only while tearing down the Windows
+  test server after the successful worker.
+- Scope/risk: setup-wizard labels, static contract, and app-smoke coverage only;
+  no storage, detector, receipt, transport, schema, Service Worker, dependency,
+  or user-data behavior changed.
+- Next: commit/push this isolated UI improvement, then continue one
+  non-physical quality task while the trusted-HTTPS field matrix remains open.

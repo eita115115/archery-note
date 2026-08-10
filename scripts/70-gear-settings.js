@@ -1905,27 +1905,27 @@ function openSetupWizard() {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet"><h3>初回セットアップ</h3>
     <div class="hint">最初は分かる範囲だけで大丈夫です。矢とサイト値が入るほど、調整提案の精度が上がります。</div>
-    <label class="f">名前 *</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
+    <label class="f" for="wName">名前 *</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
     ${choiceFieldHtml("wBow", "ハンドル/弓本体", choiceOpts("bow"), "", "", "")}
     ${choiceFieldHtml("wLimbs", "リム", choiceOpts("limbs"), "", "", "")}
     <div class="row">
-      <div><label class="f">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
-      <div><label class="f">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
+      <div><label class="f" for="wPound">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
+      <div><label class="f" for="wDraw">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
     </div>
     ${choiceFieldHtml("wArrow", "シャフト銘柄", choiceOpts("arrow"), "", "例: EASTON X10", "")}
     <div class="row">
-      <div><label class="f">番手/スパイン</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
-      <div><label class="f">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
+      <div><label class="f" for="wSpine">番手/スパイン</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
+      <div><label class="f" for="wArrowLength">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
     </div>
-    <label class="f">ポイント重量 (gr)</label><input class="inp" id="wPoint" inputmode="decimal" list="wPointList" placeholder="例: 110"><datalist id="wPointList">${opts("pointWeight")}</datalist>
+    <label class="f" for="wPoint">ポイント重量 (gr)</label><input class="inp" id="wPoint" inputmode="decimal" list="wPointList" placeholder="例: 110"><datalist id="wPointList">${opts("pointWeight")}</datalist>
     ${choiceFieldHtml("wSight", "サイト", choiceOpts("sight"), "", "", "")}
     <details class="adv" open>
       <summary>実測サイト値（分かる距離だけ）</summary>
       ${[70, 50, 30, 18]
         .map(
           (d) => `<div class="row">
-        <div><label class="f">${d}m 上下</label><input class="inp" id="wV_${d}" inputmode="decimal"></div>
-        <div><label class="f">${d}m 左右</label><input class="inp" id="wH_${d}" inputmode="decimal"></div>
+        <div><label class="f" for="wV_${d}">${d}m 上下</label><input class="inp" id="wV_${d}" inputmode="decimal"></div>
+        <div><label class="f" for="wH_${d}">${d}m 左右</label><input class="inp" id="wH_${d}" inputmode="decimal"></div>
       </div>`,
         )
         .join("")}

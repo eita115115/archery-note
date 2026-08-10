@@ -331,6 +331,32 @@ test("gives accessible names to custom round editor controls", async ({ page }) 
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to the first setup wizard controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  const emptyGearDatabase = { ...sampleDb, setups: [], sightMarks: [] };
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, emptyGearDatabase);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "用具").click();
+  await page.getByTestId("gear-wizard-start").click();
+
+  const wizard = page.locator("body > .ovl");
+  await expect(wizard.getByLabel("名前 *", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("実測ポンド", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("引き尺 (inch)", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("番手/スパイン", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("矢尺 (inch)", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("ポイント重量 (gr)", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("70m 上下", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("70m 左右", { exact: true })).toBeEditable();
+  await wizard.locator("#wCancel").click();
+  await expect(page.locator("body > .ovl")).toHaveCount(0);
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore", async ({
   page,
 }) => {

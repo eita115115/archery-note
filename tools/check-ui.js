@@ -445,6 +445,21 @@ function staticUiChecks() {
       `custom round editor label marker missing: ${controlMarker}`,
     );
   }
+  for (const controlMarker of [
+    '<label class="f" for="wName">',
+    '<label class="f" for="wPound">',
+    '<label class="f" for="wDraw">',
+    '<label class="f" for="wSpine">',
+    '<label class="f" for="wArrowLength">',
+    '<label class="f" for="wPoint">',
+    '<label class="f" for="wV_${d}">',
+    '<label class="f" for="wH_${d}">',
+  ]) {
+    assert(
+      gearSettingsSource.includes(controlMarker),
+      `setup wizard label marker missing: ${controlMarker}`,
+    );
+  }
 
   assert(
     /function\s+formTrackingEnabled\(\)\s*\{\s*return\s+!!\(db\.settings&&db\.settings\.formTrackingEnabled===true\);?\s*\}/.test(
