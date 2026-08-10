@@ -3534,3 +3534,18 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Scope/risk: docs-only audit record; no app, detector, receipt, storage,
   transport, threshold, or user-data behavior changed. Physical acceptance
   remains pending provenance-bound field evidence.
+
+## 2026-08-10 — Record the full Chromium E2E regression
+
+- Evidence: against current HEAD `1a02d962b041befd572df87551e8fc467734cf83`,
+  the prestarted-server command `npm run test:e2e -- --project=chromium
+--workers=1` completed `92 passed (2.0m)`. The known Playwright-managed
+  server teardown delay remains a harness issue after all workers pass; no
+  test failure or app regression was observed.
+- Validation: the run covers the full Chromium suite, including the form
+  diagnostics flows. The generated local `debug.log` was removed and remains
+  untracked; no user JSON or private artifact entered the repository.
+- Handoff: this is verification-only documentation. Runtime, detector,
+  storage, receipt, transport, threshold, and user-data behavior are unchanged.
+  The trusted HTTPS 3×6 artifact with current preview provenance remains the
+  only physical acceptance gap.
