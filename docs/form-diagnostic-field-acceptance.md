@@ -88,6 +88,27 @@ evidence that the current candidate passes. Do not change detector thresholds
 from this result alone; repeat the sequence on the current candidate and run
 the bounded artifact checker before drawing a conclusion.
 
+## Current artifact (provisional)
+
+The current external diagnostic artifact passes the bounded checker with
+schema 1, app version 84, matrix `field-3x6`, 9,869 UTF-8 bytes, and SHA-256
+`7452e0bdf3ad87e4735447e024e791da5ef123f2c85642f685ccc9b871c82114`.
+
+Privacy-safe aggregate from the artifact:
+
+| condition    | retained | receipt count | auto-canceled | unresolved |
+| ------------ | -------: | ------------: | ------------: | ---------: |
+| side         |      6/6 |             8 |             2 |          0 |
+| oblique      |      6/6 |             6 |             0 |          0 |
+| normal_range |      6/6 |             6 |             0 |          0 |
+
+All retained receipts are `confirmed`; the artifact contains no unresolved
+receipt. This is still provisional until the operator confirms that the
+preview printed candidate commit `85e10538d7374b17a47c7366d19514acbd6f7677`
+and tree `069c5d5aed5e611a7b78bc6a7d5bcbaecd508132`, and that the two side
+auto-canceled receipts did not remove a real shown shot. The JSON remains
+outside the repository.
+
 ## Pass criteria
 
 - 6/6 real shots are retained in each condition.

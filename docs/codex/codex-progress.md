@@ -3415,3 +3415,22 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   pending a current diagnostic artifact.
 - Next: continue waiting for the field artifact, then verify the checker output
   against the printed candidate commit/tree.
+
+## 2026-08-10 — Verify the current diagnostic artifact (provisional)
+
+- Evidence: the external `archery-note-form-diagnostics.json` passes
+  `node tools/inspect-form-diagnostic-json.js` with schema 1, app version 84,
+  matrix `field-3x6`, 9,869 bytes, and SHA-256
+  `7452e0bdf3ad87e4735447e024e791da5ef123f2c85642f685ccc9b871c82114`.
+- Privacy-safe aggregate: side `6/6` retained from 8 receipts with 2
+  auto-canceled and 0 unresolved; oblique `6/6` from 6 with 0 auto-canceled;
+  normal_range `6/6` from 6 with 0 auto-canceled. All retained receipts are
+  confirmed. Raw JSON remains outside the repository.
+- Provisional boundary: the artifact schema has no preview provenance. Final
+  acceptance still requires the operator to confirm the helper printed commit
+  `85e10538d7374b17a47c7366d19514acbd6f7677` and tree
+  `069c5d5aed5e611a7b78bc6a7d5bcbaecd508132`, and that the two side
+  auto-canceled receipts did not remove a real shown shot.
+- Next: obtain that provenance/visual confirmation, then mark the field result
+  accepted or record the concrete discrepancy without changing thresholds from
+  aggregate data alone.
