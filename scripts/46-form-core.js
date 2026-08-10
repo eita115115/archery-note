@@ -1673,9 +1673,46 @@ function stepFormPhase(st, raw, history, sens, now) {
       adaptiveDecision.maxV != null &&
       adaptiveDecision.maxV >= adaptiveDecision.releaseSpeed,
   );
+  /* close/velocity の legacy 経路も、ドローイング中の一瞬の close 姿勢を
+     リリースへ昇格させない。短いアンカーでも adaptive brief と同じ 80ms
+     の安定保持を先に要求し、既存の速度・方向・離脱ゲートは維持する。 */
+  const closeHoldStartTs =
+    st.anchorStartTs > 0
+      ? st.anchorStartTs
+      : closeFrames.length > 0
+        ? closeFrames[0].ts
+        : 0;
+  let firstDepartureTs = now;
+  if (closeHoldStartTs > 0) {
+    const departure = history.find(
+      (frame) =>
+        frame &&
+        Number.isFinite(frame.ts) &&
+        frame.ts >= closeHoldStartTs &&
+        frame.m &&
+        formConfOk(frame.m) &&
+        frame.m.anchorNorm >= FORM_PH.CLOSE_IN,
+    );
+    if (departure) firstDepartureTs = departure.ts;
+  }
+  const closeHoldSpan = Math.max(0, firstDepartureTs - closeHoldStartTs);
+  /* 高 drawArm の close 姿勢は、ドローイングからの一瞬の引き抜きで現れる。
+     この姿勢だけは安定保持を要求し、低 drawArm の既存実射/斜め設置のレガシー証拠は
+     従来の速度・方向ゲートで維持する。 */
+  const DRAWING_POSTURE_ARM_MIN = 125;
+  const closeDrawArm = formMedian(
+    closeFrames.map((frame) => frame.m.drawArm).filter((drawArm) => Number.isFinite(drawArm)),
+  );
+  const drawingPostureNeedsStableClose =
+    closeDrawArm != null && closeDrawArm >= DRAWING_POSTURE_ARM_MIN;
+  const legacyHoldQualified =
+    anchorEvidence !== "close" ||
+    !drawingPostureNeedsStableClose ||
+    closeHoldSpan >= FORM_PH.ADAPTIVE_BRIEF_HOLD_MIN_MS;
   const legacyMatched =
     historyChronologyValid &&
     anchorEvidence &&
+    legacyHoldQualified &&
     !close &&
     !adaptiveDeparturePending &&
     (legacyContinuity.fastMatched ||

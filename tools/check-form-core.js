@@ -1761,9 +1761,15 @@ return adaptiveReleaseCandidate;`,
 
   const legacy = traceAdaptive([
     ...Array.from({ length: 10 }, () => [mkRaw(1.2, 100), 0.1, 20]),
-    [mkRaw(0.22, 150), 0.2, 20],
-    [mkRaw(0.22, 150), 0.2, 20],
-    [mkRaw(0.6, 140), 10, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.5, 10), 0.5, 20],
+    [mkRaw(0.55, 10), 2.5, 20],
+    [mkRaw(0.61, 10), 3.2, 20],
+    [mkRaw(0.68, 10), 6.5, 20],
   ]);
   assertEqual(
     legacy.fires[0].pending.fireEvidence,
@@ -2692,6 +2698,39 @@ function releaseFrames(totalMs, dt, fromAnchor) {
     runSequence(lowFpsRelease).releases,
     1,
     "calibrated continuous departure remains available at the 15fps accuracy boundary",
+  );
+}
+{
+  /* ドローイングから直接引き抜く短い close 保持は、アンカー保持として扱わない。
+     実機で「アンカーに入ると認識せず、ドローイングから直接射つと全て反応する」
+     という誤カウントを再現する境界で、brief adaptive の最小保持(80ms)を
+     legacy close 経路にも共有する。80ms以上の短い保持は従来どおり検出する。 */
+  const directDrawing = [];
+  for (let i = 0; i < 3; i++) directDrawing.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) directDrawing.push([mkRaw(0.22, 150), 0.02, 20]);
+  directDrawing.push(
+    [mkRaw(0.6, 150), 10, 20],
+    [mkRaw(0.8, 140), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(directDrawing).releases,
+    0,
+    "drawing-to-release with only 40ms close hold does not count a shot",
+  );
+
+  const briefClose = [];
+  for (let i = 0; i < 3; i++) briefClose.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 4; i++) briefClose.push([mkRaw(0.22, 150), 0.02, 20]);
+  briefClose.push(
+    [mkRaw(0.6, 150), 10, 20],
+    [mkRaw(0.8, 140), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(briefClose).releases,
+    1,
+    "drawing-to-release with an 80ms close hold remains detectable",
   );
 }
 

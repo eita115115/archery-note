@@ -3570,3 +3570,28 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   detector, storage, receipt, transport, threshold, or user-data behavior
   changed. The trusted HTTPS 3×6 artifact with current preview provenance is
   still required for physical acceptance.
+
+## 2026-08-10 — Require stable close evidence for direct-drawing releases
+
+- RED evidence: the new synthetic video-shaped sequence (three drawing frames,
+  two 20ms close frames, then a high-speed departure) reproduced the reported
+  false positive: `node tools/check-form-core.js` failed with `expected 0,
+got 1`. The same sequence represented the user report that a forced release
+  from drawing caused every shot to react.
+- Changed: the legacy close/velocity route now measures the first departure
+  from the sticky anchor start and, for the high-drawArm drawing posture,
+  requires at least `FORM_PH.ADAPTIVE_BRIEF_HOLD_MIN_MS` (80ms) of close
+  evidence. NB/NB2 gap bridges and low-drawArm reviewed traces retain their
+  existing contracts. Adaptive release still requires its sustained departure
+  confirmation and is not thresholded by this legacy guard.
+- GREEN evidence: short 40ms direct-drawing sequence is rejected; an 80ms
+  close hold remains detectable; low-FPS, NB2, reviewed oblique replay, core,
+  diagnostics, app, storage, UI, PWA, security, dependency, version, lint,
+  format, syntax, and diff checks pass.
+- Scope/risk: `scripts/46-form-core.js` and its focused core regression fixture
+  only; no storage/schema, receipt, transport, service-worker, or user-data
+  changes. The guard may delay an ultra-short high-drawArm release, so the
+  trusted HTTPS 3×6 field artifact must still be repeated on the current
+  candidate before physical acceptance.
+- Next: review and push this isolated detector fix, then collect a
+  provenance-bound trusted HTTPS 3×6 artifact from the resulting candidate.
