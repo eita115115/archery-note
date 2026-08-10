@@ -210,7 +210,7 @@ function staticUiChecks() {
       `sight ledger control ${controlId} needs an associated label`,
     );
   }
-  for (const controlId of ["hEdit", "hCard", "hClose", "hDel"]) {
+  for (const controlId of ["histClear", "histMore", "hEdit", "hCard", "hClose", "hDel"]) {
     assert(
       new RegExp(
         `<button\\b(?=[^>]*\\bid=["']${controlId}["'])(?=[^>]*\\btype=["']button["'])[^>]*>`,

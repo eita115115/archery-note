@@ -156,12 +156,12 @@ function renderHistory(m) {
     </div>
     <div class="row">
       <div><label class="f" for="histRound">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${esc(r)}" ${hf.round === r ? "selected" : ""}>${esc(roundLabel(r))}</option>`).join("")}</select></div>
-      <div class="histFilterEnd"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
+      <div class="histFilterEnd"><button type="button" class="btn ghost" id="histClear">絞り込み解除</button></div>
     </div>
     <div id="histList">
     ${
       ss.length
-        ? historyGroupedListHtml(ss.slice(0, ui._histLimit || 50)) + (ss.length > (ui._histLimit || 50) ? `<div class="btnrow"><button class="btn ghost" id="histMore">さらに表示（残り${ss.length - (ui._histLimit || 50)}件）</button></div>` : "")
+        ? historyGroupedListHtml(ss.slice(0, ui._histLimit || 50)) + (ss.length > (ui._histLimit || 50) ? `<div class="btnrow"><button type="button" class="btn ghost" id="histMore">さらに表示（残り${ss.length - (ui._histLimit || 50)}件）</button></div>` : "")
         : allSs.length
           ? `<div class="empty">この絞り込みに合う記録がありません。フィルタを広げてください。</div>`
           : `<div class="empty historyEmpty" data-testid="history-empty">

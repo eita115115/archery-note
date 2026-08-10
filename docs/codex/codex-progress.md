@@ -4158,3 +4158,20 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: history-detail button markup, static UI contract, and this ledger
   entry only; no scoring, storage, receipt, transport, or user-data behavior
   changed.
+
+## 2026-08-11 — Make history list actions explicit
+
+- RED evidence: `node tools/check-ui.js` failed at the new `histClear`
+  contract because the history filter-reset button had no explicit
+  `type="button"`.
+- Changed: `histClear` and the dynamically rendered `histMore` button now
+  declare `type="button"`; filtering, paging, and history data behavior are
+  unchanged. The app-smoke history test also asserts the runtime attribute on
+  `histClear`.
+- GREEN evidence: `node tools/check-ui.js`, `node tools/check-app.js`, lint,
+  format, Node syntax checks, and `git diff --check` pass. Focused Chromium
+  worker passed 1/1; the parent command timed out only during the known
+  Windows web-server teardown.
+- Scope/risk: history-list button markup and accessibility contract only; no
+  scoring, tracking, storage, receipt, transport, schema, Service Worker, or
+  user-data behavior changed.

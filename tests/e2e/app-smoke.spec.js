@@ -299,6 +299,7 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await mainTab(page, "履歴").click();
+  await expect(page.locator("#histClear")).toHaveAttribute("type", "button");
   const row = page.locator("#histList .listItem").first();
   await expect(row).toBeVisible();
   await expect(row).toHaveJSProperty("tagName", "BUTTON");
