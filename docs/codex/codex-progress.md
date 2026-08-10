@@ -3910,6 +3910,31 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this isolated UI improvement, then continue one
   non-physical quality task while the trusted-HTTPS field matrix remains open.
 
+## 2026-08-10 — Prevent replay timestamp collisions
+
+- Reproduction: the supplied local MP4 (`ScreenRecording_08-10-2026 11-17-56_1のコピー.mp4`, 70.04s, 1170×2532) was loaded through the real Chrome replay path. Before this change, the run stopped around 17.375s with MediaPipe `Packet timestamp mismatch` after two detected shots.
+- RED evidence: `node tools/check-form-core.js` failed because the replay
+  timestamp helper and its source wiring were absent.
+- Root cause: `video.currentTime * 1000` can advance as fractional values that
+  collapse to the same integer timestamp inside MediaPipe. A JavaScript `>`
+  comparison therefore did not guarantee strictly increasing graph timestamps.
+- Changed: `nextFormVideoTimestampMs` floors finite media time to integer
+  milliseconds and returns `null` for duplicate/non-increasing values. The
+  replay loop now skips `null` and passes only normalized timestamps to
+  `detectForVideo`; capture timing and detector thresholds are unchanged.
+- GREEN evidence: core timestamp boundary tests, `npm run check:form`,
+  `npm run check:all`, app/globals/UI/storage/PWA/version checks, lint, format,
+  syntax, and `git diff --check` all pass. The same MP4 completed at normal
+  playback with no console or MediaPipe errors and displayed `3/6射`; a 2×
+  diagnostic run also completed without timestamp failure (its accelerated
+  sampling displayed `7/6射`, so it is not treated as field evidence).
+- Scope/risk: replay timestamp normalization plus focused core contracts only;
+  no MP4, raw landmarks, schema, storage, receipt policy, transport, Service
+  Worker, or user data was added. The physical trusted-HTTPS 3-condition /
+  18-shot artifact remains the release gate.
+- Next: commit/push this replay reliability fix, then continue one bounded
+  non-physical quality task while waiting for the current field artifact.
+
 ## 2026-08-10 — Name active record adjustment controls
 
 - UX evidence: the active record nudge pad used arrow glyphs and a trash icon

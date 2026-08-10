@@ -38,6 +38,12 @@ function formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot){
     : "診断条件を満たさなかったため、同じ条件をもう一度記録してください";
 }
 
+function nextFormVideoTimestampMs(mediaTimeMs,lastTimestamp){
+  const candidate=Number.isFinite(mediaTimeMs)?Math.floor(mediaTimeMs):null;
+  const previous=Number.isFinite(lastTimestamp)?Math.floor(lastTimestamp):-1;
+  return candidate!=null&&candidate>previous?candidate:null;
+}
+
 function formZeroShotDiagnosticText(record){
   const generic="診断用に0射で保存しました。横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。";
   const diag=record&&record.shots===0&&record.formPhaseDiag;
@@ -1046,8 +1052,8 @@ function startFormReplay(videoUrl){
   function loop(){
     if(!running) return;
     if(landmarker&&video.readyState>=2&&!video.paused&&!video.ended){
-      const now=video.currentTime*1000;
-      if(now>lastDetectTs){
+      const now=nextFormVideoTimestampMs(video.currentTime*1000,lastDetectTs);
+      if(now!=null){
         /* video.currentTime が前フレームから進まない（60fps rAF vs 30fps 動画などで容易に起こる）
            と同一/逆行タイムスタンプが MediaPipe の CalculatorGraph に渡り、
            "Packet timestamp mismatch"（単調増加違反）で以後の detectForVideo が

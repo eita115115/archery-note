@@ -196,6 +196,37 @@ const featureShot = {
 const enabledFeature = featureApi.formFeatureFromShot(featureShot, true);
 assert(Object.hasOwn(enabledFeature, "diag"), "exact true retains existing diag");
 assertEqual(enabledFeature.receiptId, featureShot.id, "exact true retains receipt ID");
+const videoTimestampSource = boundedSourceSection(
+  viewScript,
+  "function nextFormVideoTimestampMs(",
+  "function formFeatureFromShot(",
+  "video timestamp helper source",
+);
+const videoTimestampApi = new Function(
+  `${videoTimestampSource}
+  return {nextFormVideoTimestampMs};`,
+)();
+{
+  let last = -1;
+  const accepted = videoTimestampApi.nextFormVideoTimestampMs(17375000.1, last);
+  assertEqual(accepted, 17375000, "video timestamp floors fractional milliseconds");
+  last = accepted;
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17375000.9, last),
+    null,
+    "video timestamp rejects a fractional duplicate millisecond",
+  );
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17375001.1, last),
+    17375001,
+    "video timestamp accepts the next integer millisecond",
+  );
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(Number.NaN, last),
+    null,
+    "video timestamp rejects nonfinite media time",
+  );
+}
 const saveCapture = boundedSourceSection(
   viewScript,
   "function openFormCapture(){",
@@ -204,6 +235,12 @@ const saveCapture = boundedSourceSection(
 );
 const saveReplay = viewScript.slice(viewScript.indexOf("function startFormReplay(videoUrl){"));
 assert(saveReplay.length > 0, "replay source exists");
+assert(
+  compactSource(saveReplay).includes(
+    "constnow=nextFormVideoTimestampMs(video.currentTime*1000,lastDetectTs);",
+  ),
+  "replay passes normalized video timestamps to MediaPipe",
+);
 for (const [label, source, freezeName, finishName] of [
   ["live", saveCapture, "freezeCaptureForSave", "finishCapture"],
   ["replay", saveReplay, "freezeReplayForSave", "finishReplay"],
