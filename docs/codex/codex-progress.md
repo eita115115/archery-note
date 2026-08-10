@@ -3966,6 +3966,27 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this small live parity fix, then return to field-artifact
   collection and final release audit.
 
+## 2026-08-10 — Make form toolbar actions explicit buttons
+
+- RED evidence: the new live/replay source contract failed at
+  `live toolbar fcSwap must declare type=button`; the three live toolbar
+  actions and replay's analogous hand/save actions had no explicit button
+  type.
+- Changed: `fcSwap`, `fcHand`, and `fcSave` now declare `type="button"`; the
+  replay `frHand` and `frSave` controls receive the same safe default. No
+  click handler, save path, detector, storage, or transport logic changed.
+- GREEN evidence: `node tools/check-form-core.js`, `npm run check:form`,
+  `node tools/check-ui.js`, `node tools/check-app.js`, lint, Node syntax, and
+  `git diff --check` pass. Prettier passes for this ledger; the existing
+  repository style in `scripts/47-form-view.js` and `tools/check-form-core.js`
+  still reports unrelated whole-file warnings, so no broad reformat was
+  included.
+- Scope/risk: button type attributes plus pure source contracts only; no
+  scoring, threshold, receipt, storage, schema, Service Worker, or user data
+  behavior changed.
+- Next: commit/push this scoped UI safety fix, then continue the bounded
+  non-physical release audit.
+
 ## 2026-08-10 — Lock timestamp monotonicity boundaries
 
 - RED contract gap: the existing timestamp checker covered fractional

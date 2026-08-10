@@ -4987,8 +4987,19 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
   );
   const initialLoadCompact = compactSource(initialLoad);
   const captureCompact = compactSource(capture);
+  for (const [label, source, controlIds] of [
+    ["live", captureCompact, ["fcSwap", "fcHand", "fcSave"]],
+    ["replay", compactSource(saveReplay), ["frHand", "frSave"]],
+  ]) {
+    for (const controlId of controlIds) {
+      assert(
+        new RegExp(`<buttontype=["']button["'][^>]*id=["']${controlId}["']`).test(source),
+        `${label} toolbar ${controlId} must declare type=button`,
+      );
+    }
+  }
   assert(
-    captureCompact.includes('<buttonclass="btnsecsm"id="fcSwap"disabled>') &&
+    captureCompact.includes('<buttontype="button"class="btnsecsm"id="fcSwap"disabled>') &&
       captureCompact.includes("letcameraSwapReady=false;"),
     "camera swap stays disabled and unready until initial startup succeeds",
   );

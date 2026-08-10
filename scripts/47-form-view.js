@@ -445,9 +445,9 @@ function openFormCapture(){
     <div class="formShotScroll" id="fcShots"></div>
     <div class="formBar">
       <span class="subNoteSm" id="fcShotCount" role="status" aria-live="polite" aria-atomic="true">${formShotCountText(0,db.settings.formDebug===true)}</span>
-      <button class="btn sec sm" id="fcSwap" disabled>前/背面</button>
-      <button class="btn sec sm" id="fcHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
-      <button class="btn" id="fcSave" disabled>保存して終了</button>
+      <button type="button" class="btn sec sm" id="fcSwap" disabled>前/背面</button>
+      <button type="button" class="btn sec sm" id="fcHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
+      <button type="button" class="btn" id="fcSave" disabled>保存して終了</button>
     </div>
     <div class="formFootnote">検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。映像は通常保存・送信されず、保存されるのは角度・保持時間などの要約だけです。録画をオンにした場合のみ、停止後にカメラロールへ保存できます。</div>
   </div>`;
@@ -953,8 +953,8 @@ function startFormReplay(videoUrl){
     <div class="formShotScroll" id="frShots"></div>
     <div class="formBar">
       <span class="subNoteSm" id="frShotCount" role="status" aria-live="polite" aria-atomic="true">${formShotCountText(0,db.settings.formDebug===true)}</span>
-      <button class="btn sec sm" id="frHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
-      <button class="btn" id="frSave" disabled>保存して終了</button>
+      <button type="button" class="btn sec sm" id="frHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
+      <button type="button" class="btn" id="frSave" disabled>保存して終了</button>
     </div>
     <div class="formFootnote">保存済み動画からの射形解析。検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。</div>
   </div>`;
