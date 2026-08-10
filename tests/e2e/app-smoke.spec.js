@@ -270,6 +270,25 @@ test("gives accessible names to the analysis filters", async ({ page }) => {
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to active record nudge controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await page.getByTestId("record-start").click();
+  await page.getByTestId("active-target").locator("#tgsvg").click();
+  await page.getByTestId("active-arrow-chips").locator(".sc").first().click();
+
+  for (const label of ["上へ", "左へ", "選択中の矢を削除", "右へ", "下へ"]) {
+    await expect(page.getByRole("button", { name: label, exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: label, exact: true })).toBeEnabled();
+  }
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("exposes history rows and sight distance chips as buttons", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

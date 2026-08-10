@@ -1274,9 +1274,9 @@ function renderActive(m) {
     <div class="nudge" id="nudge">
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD / 200).toFixed(1)}cm）</div>
       <div class="npad">
-        <span class="blank"></span><button data-n="u">▲</button><span class="blank"></span>
-        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">${icon("trash")}</button><button data-n="r">▶</button>
-        <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
+        <span class="blank"></span><button type="button" data-n="u" aria-label="上へ">▲</button><span class="blank"></span>
+        <button type="button" data-n="l" aria-label="左へ">◀</button><button type="button" class="recordNudgeDelete" data-n="del" aria-label="選択中の矢を削除">${icon("trash")}</button><button type="button" data-n="r" aria-label="右へ">▶</button>
+        <span class="blank"></span><button type="button" data-n="d" aria-label="下へ">▼</button><span class="blank"></span>
       </div>
       <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
@@ -1543,7 +1543,7 @@ function refreshActive() {
           return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i % ENDCOLORS.length]}"></span>${i + 1}</td>
         <td>${sorted.map(scoreLabel).join("・")}</td>
         <td class="right"><b>${end.reduce((a, x) => a + x.s, 0)}</b></td>
-        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">${icon("pencil")}</button></td></tr>`;
+        <td class="right"><button type="button" class="btn sm ghost recordEndEditBtn" data-open="${i}" aria-label="${i + 1}エンドを編集">${icon("pencil")}</button></td></tr>`;
         })
         .join("") +
       `</table>`

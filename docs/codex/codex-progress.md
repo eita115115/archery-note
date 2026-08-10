@@ -3910,6 +3910,28 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this isolated UI improvement, then continue one
   non-physical quality task while the trusted-HTTPS field matrix remains open.
 
+## 2026-08-10 — Name active record adjustment controls
+
+- UX evidence: the active record nudge pad used arrow glyphs and a trash icon
+  without accessible names. The end-edit pencil was also icon-only, making
+  one-handed correction and VoiceOver navigation ambiguous during practice.
+- RED evidence: `node tools/check-ui.js` failed at the new `上へ` control
+  contract before the production change.
+- Changed: the five nudge controls now have explicit Japanese `aria-label`s,
+  are explicit buttons, and the generated end editor uses a dynamic
+  `${i + 1}エンドを編集` label. No nudge, deletion, scoring, or save behavior
+  changed.
+- GREEN evidence: the focused Chromium worker passed 1/1 after selecting a
+  live arrow; `node tools/check-ui.js`, `npm run check:all`, lint, format,
+  Node syntax checks, and `git diff --check` all pass. The initial UI smoke
+  attempt hit the known Windows profile-cleanup EPERM and the bounded retry
+  passed.
+- Scope/risk: active-record labels, static UI contract, and app-smoke coverage
+  only; no scoring, detector, storage, receipt, transport, schema, Service
+  Worker, dependency, or user-data behavior changed.
+- Next: commit/push this isolated UI improvement, then continue one
+  non-physical quality task while the trusted-HTTPS field matrix remains open.
+
 ## 2026-08-10 — Associate analysis filter labels
 
 - UX evidence: the growth-analysis filter selects for equipment and distance

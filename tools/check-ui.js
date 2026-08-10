@@ -180,6 +180,24 @@ function staticUiChecks() {
       `analysis filter ${controlId} needs an associated label`,
     );
   }
+  for (const [marker, label] of [
+    ['data-n="u"', "上へ"],
+    ['data-n="l"', "左へ"],
+    ['data-n="del"', "選択中の矢を削除"],
+    ['data-n="r"', "右へ"],
+    ['data-n="d"', "下へ"],
+  ]) {
+    assert(
+      new RegExp(`<button\\b[^>]*${marker}[^>]*aria-label=["']${label}["']`).test(
+        recordSurface,
+      ),
+      `active record control ${label} needs an accessible name`,
+    );
+  }
+  assert(
+    /recordEndEditBtn[\s\S]*aria-label=/.test(recordSurface),
+    "active record end edit control needs an accessible name",
+  );
   for (const controlId of ["histSetup", "histDist", "histRound"]) {
     assert(
       new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(historySurface),
