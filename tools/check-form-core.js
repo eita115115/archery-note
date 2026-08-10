@@ -2762,7 +2762,7 @@ function releaseFrames(totalMs, dt, fromAnchor) {
     );
     return seq;
   };
-  [80, 90].forEach((drawArm) => {
+  [10, 20, 32, 63, 79, 80, 90].forEach((drawArm) => {
     assertEqual(
       runSequence(lowArmBoundarySequence(drawArm, 2)).releases,
       0,

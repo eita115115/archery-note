@@ -1699,12 +1699,21 @@ function stepFormPhase(st, raw, history, sens, now) {
   const closeDrawArm = formMedian(
     closeFrames.map((frame) => frame.m.drawArm).filter((drawArm) => Number.isFinite(drawArm)),
   );
-  const DIRECT_DRAWING_ARM_MIN = 80;
+  const DIRECT_DRAWING_ARM_MIN = 20;
+  const DIRECT_DRAWING_CADENCE_MAX_MS = 50;
+  const closeEvidenceCadenceMs = formMedian(
+    closeFrames
+      .slice(1)
+      .map((frame, index) => frame.ts - closeFrames[index].ts)
+      .filter((delta) => Number.isFinite(delta) && delta > 0),
+  );
+  const fastDirectCadence =
+    closeEvidenceCadenceMs != null && closeEvidenceCadenceMs <= DIRECT_DRAWING_CADENCE_MAX_MS;
   /* NB2/tier-1 far arrivals are outside the short direct-drawing geometry and
      retain their existing gap-bridge contract. */
   const drawingPostureNeedsStableClose =
     closeDrawArm != null &&
-    closeDrawArm >= DIRECT_DRAWING_ARM_MIN &&
+    (closeDrawArm >= DIRECT_DRAWING_ARM_MIN || fastDirectCadence) &&
     !nullBridged2 &&
     usable.anchorNorm <= FORM_PH.NB2_MAX_ARRIVE;
   const legacyHoldQualified =

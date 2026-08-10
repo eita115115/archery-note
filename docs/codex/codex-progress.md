@@ -3701,3 +3701,30 @@ got 1`. The same sequence represented the user report that a forced release
   current candidate tree and record the diagnostic JSON plus provenance
   sidecar. The prior external JSON remains provisional because it was generated
   from an older candidate.
+
+## 2026-08-10 — Extend stable close evidence to observed drawArm 20–79
+
+- RED evidence: the current floor `80` still allowed a synthetic 40ms
+  drawing-to-release false positive at drawArm `20`; the same boundary was
+  reproduced at `32`, `63`, and `79`. These values overlap the privacy-safe
+  aggregate of the supplied backup (release-marked drawArm samples included
+  approximately `24.97`, `32.47`, and `63.06`), so leaving the bypass unchanged
+  was not a sufficient product boundary.
+- Changed: the named stable-close gate floor is now `20`. Raw direct-drawing
+  holds at drawArm `20`, `32`, `63`, `79`, `80`, and `90` reject 40ms-equivalent
+  holds while retaining 80/150ms positives and one-vs-three 15fps behavior.
+  A cadence guard also applies the same hold requirement to finite drawArm
+  values below `20` when close evidence arrives at a fast (≤50ms) cadence.
+  Oblique transformed short-hold coverage remains explicit for the previously
+  qualified `80`/`90` boundary; no unverified low-arm oblique positive was
+  invented.
+- GREEN evidence: `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run check:all`, `npm run lint -- --quiet`, `npm run format:check`, Node
+  syntax checks, and `git diff --check` pass. Existing low-FPS calibrated
+  release, NB2 200/300ms recovery, 400ms exclusion, D' / far-arrival, and both
+  golden fixtures remain green.
+- Risk/next: drawArm below `20` with slower-than-50ms close evidence intentionally
+  retains the legacy bypass because the existing 15fps calibrated positive uses
+  a value near `10`; this is a deliberate recall boundary, not field acceptance.
+  Run the trusted-HTTPS 3-condition/18-shot matrix against the resulting
+  candidate before further lowering it.
