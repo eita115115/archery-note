@@ -3690,5 +3690,11 @@ got 1`. The same sequence represented the user report that a forced release
   changed.
 - Risk/next: backup observations below drawArm `80` (including low samples in
   the 20–60 range) remain outside this gate by design and need separate
-  provenance-bound field evidence before any further floor reduction. This
-  change is uncommitted pending review.
+  provenance-bound field evidence before any further floor reduction. The
+  isolated detector change was reviewed, committed as `4215d47e512a616d32fe71fa773ea8625b668fe9`,
+  pushed to `codex/form-diagnostic-handoff-release`, and its CI run
+  `31361456807` completed successfully. The candidate worktree is clean.
+- Next: run the trusted-HTTPS 3-condition/18-shot acceptance against this exact
+  commit and record the diagnostic JSON plus provenance sidecar. The prior
+  external JSON remains provisional because it was generated from an older
+  candidate.
