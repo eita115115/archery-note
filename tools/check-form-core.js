@@ -2732,6 +2732,127 @@ function releaseFrames(totalMs, dt, fromAnchor) {
     1,
     "drawing-to-release with an 80ms close hold remains detectable",
   );
+
+  const lowArmDirectDrawing = [];
+  for (let i = 0; i < 3; i++) lowArmDirectDrawing.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) lowArmDirectDrawing.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmDirectDrawing.push(
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmDirectDrawing).releases,
+    0,
+    "low-drawArm drawing-to-release with only 40ms close hold does not count a shot",
+  );
+
+  const mkObliqueRaw = (anchorNorm, drawArm) => ({
+    ...mkRaw(anchorNorm, drawArm),
+    dW: { x: 0.18, y: 0.04, visibility: 0.95 },
+  });
+  const lowArmObliqueDirect = [];
+  for (let i = 0; i < 3; i++) lowArmObliqueDirect.push([mkObliqueRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) lowArmObliqueDirect.push([mkObliqueRaw(0.22, 110), 0.02, 20]);
+  lowArmObliqueDirect.push(
+    [mkObliqueRaw(0.6, 110), 10, 20],
+    [mkObliqueRaw(0.8, 110), 10, 20],
+    [mkObliqueRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmObliqueDirect).releases,
+    0,
+    "low-drawArm oblique direct drawing with only 40ms close hold does not count a shot",
+  );
+
+  const lowArmNullGap = [];
+  for (let i = 0; i < 3; i++) lowArmNullGap.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 4; i++) lowArmNullGap.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmNullGap.push(
+    [null, 0, 20],
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmNullGap).releases,
+    0,
+    "low-drawArm close hold followed by a pose gap does not count a shot",
+  );
+
+  const lowArmJitter = [];
+  for (let i = 0; i < 3; i++) lowArmJitter.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) lowArmJitter.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmJitter.push(
+    [mkRaw(0.5, 110), 10, 20],
+    [mkRaw(0.22, 110), 0.02, 20],
+    [mkRaw(0.22, 110), 0.02, 20],
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmJitter).releases,
+    0,
+    "low-drawArm close hold followed by a non-null jitter does not count a shot",
+  );
+
+  const lowArmBriefClose = [];
+  for (let i = 0; i < 3; i++) lowArmBriefClose.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 4; i++) lowArmBriefClose.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmBriefClose.push(
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmBriefClose).releases,
+    1,
+    "low-drawArm drawing-to-release with an 80ms close hold remains detectable",
+  );
+
+  const lowArmQualifiedClose = [];
+  for (let i = 0; i < 3; i++) lowArmQualifiedClose.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 8; i++) lowArmQualifiedClose.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmQualifiedClose.push(
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmQualifiedClose).releases,
+    1,
+    "low-drawArm drawing-to-release with a 150ms close hold remains detectable",
+  );
+
+  const dt15 = 1000 / 15;
+  const lowArm15FpsBrief = [];
+  for (let i = 0; i < 3; i++) lowArm15FpsBrief.push([mkRaw(1.2, 110), 0.5, dt15]);
+  lowArm15FpsBrief.push([mkRaw(0.22, 110), 0.02, dt15]);
+  lowArm15FpsBrief.push(
+    [mkRaw(0.6, 110), 10, dt15],
+    [mkRaw(0.8, 110), 10, dt15],
+    [mkRaw(1.0, 90), 0.1, dt15],
+  );
+  assertEqual(
+    runSequence(lowArm15FpsBrief).releases,
+    0,
+    "low-drawArm drawing-to-release with one 15fps close frame does not count a shot",
+  );
+
+  const lowArm15FpsStable = [];
+  for (let i = 0; i < 3; i++) lowArm15FpsStable.push([mkRaw(1.2, 110), 0.5, dt15]);
+  for (let i = 0; i < 3; i++) lowArm15FpsStable.push([mkRaw(0.22, 110), 0.02, dt15]);
+  lowArm15FpsStable.push(
+    [mkRaw(0.6, 110), 10, dt15],
+    [mkRaw(0.8, 110), 10, dt15],
+    [mkRaw(1.0, 90), 0.1, dt15],
+  );
+  assertEqual(
+    runSequence(lowArm15FpsStable).releases,
+    1,
+    "low-drawArm drawing-to-release with a 15fps stable close hold remains detectable",
+  );
 }
 
 function shotSequence(dt) {

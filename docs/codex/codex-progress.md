@@ -3607,3 +3607,32 @@ got 1`. The same sequence represented the user report that a forced release
   committing this documentation-only handoff correction.
 - Next: serve exactly this candidate over trusted HTTPS and collect the
   provenance-bound 3×6 JSON; keep the existing unproven artifact provisional.
+
+## 2026-08-10 — Require stable low-drawArm close evidence
+
+- RED evidence: a synthetic direct-drawing sequence with drawArm `110`, three
+  setup frames, only two 20ms close frames, and a high-speed departure returned
+  one legacy `close` release instead of zero. This reproduces the video-shaped
+  false-positive boundary without using the source video or user data.
+- Changed: the legacy close/velocity guard now measures the contiguous close
+  run immediately before departure. Observed drawArm values at or above `100`
+  require the existing 80ms brief-hold minimum; a bounded fallback is retained
+  only for five or more close frames. NB2 gap bridges and far-arrival tier-1
+  behavior remain explicit exceptions (`NB2_MAX_ARRIVE` and `nullBridged2`).
+- GREEN evidence: low-arm direct 40ms and oblique-offset 40ms cases stay at
+  `0`; stable 80ms/150ms holds remain `1`; a 15fps stable-close case remains
+  `1`; one 15fps close frame, a null gap, and an interrupted non-null jitter
+  remain `0`. Existing D' 150ms, NB2 200/300ms, 400ms out-of-scope, far-arrival
+  cap/Infinity substitution, and reviewed oblique/scene-cut golden cases all
+  retain their expected outcomes.
+- Validation: `npm run check:form`, `npm run check:all`, `npm run lint`,
+  `npm run format:check`, Node syntax check, and `git diff --check` pass.
+- Scope/risk: only `scripts/46-form-core.js` and `tools/check-form-core.js`
+  changed for detector/test behavior; no storage, schema, receipt, transport,
+  threshold, service-worker, or user-data contract changed. A monotonic
+  high-speed departure after an already qualified hold remains a valid release;
+  the new jitter regression specifically includes a return to close before
+  departure. Physical trusted-HTTPS 3×6 acceptance remains outstanding.
+- Next: review the isolated detector diff and push the three-file handoff with
+  this ledger entry, then collect provenance-bound field evidence on that
+  resulting candidate.
