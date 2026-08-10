@@ -152,6 +152,37 @@ test("gives accessible names to the sight ledger controls", async ({ page }) => 
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to sight mark and calibration modal controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "サイト調整").click();
+
+  await page.locator("#sgAdd").click();
+  const markEditor = page.locator("body > .ovl");
+  await expect(markEditor.getByLabel("日付", { exact: true })).toBeEditable();
+  await expect(markEditor.getByLabel("上下", { exact: true })).toBeEditable();
+  await expect(markEditor.getByLabel("左右", { exact: true })).toBeEditable();
+  await expect(markEditor.getByLabel("メモ", { exact: true })).toBeEditable();
+  await markEditor.locator("#mkCancel").click();
+
+  await page.locator("#sgCalMode").click();
+  const calibration = page.locator("body > .ovl");
+  await expect(calibration.getByLabel("日付", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("70m 上下", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("70m 左右", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("18m 上下", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("18m 左右", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("メモ", { exact: true })).toBeEditable();
+  await calibration.locator("#calCancel").click();
+  await expect(page.locator("body > .ovl")).toHaveCount(0);
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("moves exactly one aria-current marker when switching tabs", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

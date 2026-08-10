@@ -758,12 +758,12 @@ function openMarkForm(setupId, dist) {
   const ovl = document.createElement("div");
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet"><h3>サイト値を記録（${dist}m）</h3>
-    <label class="f">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
+    <label class="f" for="mkDate">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
     <div class="row">
-      <div><label class="f">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
-      <div><label class="f">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
+      <div><label class="f" for="mkV">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
+      <div><label class="f" for="mkH">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
     </div>
-    <label class="f">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・ベスト調整">
+    <label class="f" for="mkNote">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・ベスト調整">
     <div class="btnrow"><button class="btn ghost" id="mkCancel">キャンセル</button><button class="btn" id="mkSave">保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#mkCancel" });
@@ -796,17 +796,17 @@ function openCalibrationWizard(setupId) {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet"><h3>校正モード — ${esc(setup.name)}</h3>
     <div class="hint">実測できている距離だけ入力してください。複数距離が揃うほど、距離別サイト予測と個人補正が強くなります。</div>
-    <label class="f">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
+    <label class="f" for="calDate">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
     ${dists
       .map((d) => {
         const mk = latestMark(setupId, d) || {};
         return `<div class="row">
-        <div><label class="f">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v || "")}"></div>
-        <div><label class="f">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h || "")}"></div>
+        <div><label class="f" for="calV_${d}">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v || "")}"></div>
+        <div><label class="f" for="calH_${d}">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h || "")}"></div>
       </div>`;
       })
       .join("")}
-    <label class="f">メモ</label><input class="inp" id="calNote" placeholder="例: 校正日 / 無風 / ベスト確認">
+    <label class="f" for="calNote">メモ</label><input class="inp" id="calNote" placeholder="例: 校正日 / 無風 / ベスト確認">
     <div class="btnrow"><button class="btn ghost" id="calCancel">キャンセル</button><button class="btn" id="calSave">校正値を保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#calCancel" });

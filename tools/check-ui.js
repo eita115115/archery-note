@@ -186,6 +186,21 @@ function staticUiChecks() {
       `sight ledger control ${controlId} needs an associated label`,
     );
   }
+  for (const controlMarker of [
+    '<label class="f" for="mkDate">',
+    '<label class="f" for="mkV">',
+    '<label class="f" for="mkH">',
+    '<label class="f" for="mkNote">',
+    '<label class="f" for="calDate">',
+    '<label class="f" for="calV_${d}">',
+    '<label class="f" for="calH_${d}">',
+    '<label class="f" for="calNote">',
+  ]) {
+    assert(
+      historySurface.includes(controlMarker),
+      `sight modal label marker missing: ${controlMarker}`,
+    );
+  }
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
   assert(
