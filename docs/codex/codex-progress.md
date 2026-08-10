@@ -8,7 +8,7 @@ Primary brief: [integration-plan.md](integration-plan.md)
 ## Current Status
 
 - 2026-08-10 sanitized handoff candidate `codex/form-diagnostic-handoff-release`
-  is at the verified v84 tree (`798c0ebd`). It is based on `origin/main`, excludes the
+  is at the verified v84 tree (`0160574a`). It is based on `origin/main`, excludes the
   sensitive adaptive-release ancestor, and is the only branch eligible for
   GitHub handoff. The sensitive root worktree still has three unrelated
   metadata documents modified; they remain unstaged and outside this candidate.
@@ -3595,3 +3595,16 @@ got 1`. The same sequence represented the user report that a forced release
   candidate before physical acceptance.
 - Next: review and push this isolated detector fix, then collect a
   provenance-bound trusted HTTPS 3×6 artifact from the resulting candidate.
+
+## 2026-08-10 — Synchronize field acceptance to the current candidate
+
+- Audit: the acceptance checklist still named older preview commit/tree IDs,
+  which could cause a physical run to be attributed to the wrong implementation.
+- Changed: the current candidate is now recorded as commit
+  `0160574ae396a024f22660d8b78c219e516a968c`, tree
+  `f7ae775edc37ed9dbcb535f6a5f69fec8cda1637` in both the status ledger and
+  field checklist. No runtime or artifact schema changed.
+- Validation: targeted Prettier and `git diff --check` are required before
+  committing this documentation-only handoff correction.
+- Next: serve exactly this candidate over trusted HTTPS and collect the
+  provenance-bound 3×6 JSON; keep the existing unproven artifact provisional.

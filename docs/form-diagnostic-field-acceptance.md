@@ -110,8 +110,8 @@ Privacy-safe aggregate from the artifact:
 
 All retained receipts are `confirmed`; the artifact contains no unresolved
 receipt. This is still provisional until the operator confirms that the
-preview printed candidate commit `85e10538d7374b17a47c7366d19514acbd6f7677`
-and tree `069c5d5aed5e611a7b78bc6a7d5bcbaecd508132`, and that the two side
+preview printed candidate commit `0160574ae396a024f22660d8b78c219e516a968c`
+and tree `f7ae775edc37ed9dbcb535f6a5f69fec8cda1637`, and that the two side
 auto-canceled receipts did not remove a real shown shot. The JSON remains
 outside the repository.
 
@@ -219,6 +219,6 @@ This artifact is valid but remains provisional: schema 1 does not contain
 preview provenance, so it cannot be bound to the current candidate. The old
 video report (真横 3/6, やや斜め 0/6, 通常設置 3/6) is therefore not contradicted
 or replaced by this file. Repeat the trusted HTTPS 3×6 sequence on the current
-preview and confirm commit `7f8de41e401eb95bcc57166d7d238ca4a68374e9`, tree
-`28c3daa21da1dac3391b7f8848f2ce111b6cb0ba`, before accepting the artifact.
+preview and confirm commit `0160574ae396a024f22660d8b78c219e516a968c`, tree
+`f7ae775edc37ed9dbcb535f6a5f69fec8cda1637`, before accepting the artifact.
 Keep the JSON outside the repository.
