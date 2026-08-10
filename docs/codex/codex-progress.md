@@ -4110,3 +4110,20 @@ the minimum touch target` after the focused static contract was added.
   or user-data behavior changed.
 - Next: commit/push this isolated UI improvement, then continue one
   non-physical quality task while the trusted-HTTPS field matrix remains open.
+
+## 2026-08-11 — Revalidate current release gates
+
+- Current candidate: `0900d4e7a3b648b661f0f1f5cb5c21106552301a`; local and remote
+  `codex/form-diagnostic-handoff-release` match and the candidate worktree is clean.
+- GREEN evidence: current `npm run check:all`, `npm run lint -- --quiet`,
+  `npm run format:check`, and `git diff --check` all pass. GitHub Actions runs
+  `31399611918` and `31400513776` both completed successfully.
+- Artifact evidence: `inspect-form-diagnostic-json.js --from-downloads` validates
+  schema 1 / app v84 / `field-3x6`, 9,869 bytes, SHA-256
+  `7452e0bdf3ad87e4735447e024e791da5ef123f2c85642f685ccc9b871c82114`, with
+  side / oblique / normal_range each retained at 6/6.
+- Acceptance boundary: this external JSON has no preview commit/tree provenance,
+  so it remains valid but provisional and is not counted as current-preview
+  acceptance evidence. No artifact contents were copied into the repository.
+- Next: serve exactly candidate `0900d4e7`, repeat the trusted HTTPS 3×6 run,
+  and write the sidecar from the printed commit/tree before final PR/release audit.
