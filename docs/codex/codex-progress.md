@@ -3694,7 +3694,10 @@ got 1`. The same sequence represented the user report that a forced release
   isolated detector change was reviewed, committed as `4215d47e512a616d32fe71fa773ea8625b668fe9`,
   pushed to `codex/form-diagnostic-handoff-release`, and its CI run
   `31361456807` completed successfully. The candidate worktree is clean.
-- Next: run the trusted-HTTPS 3-condition/18-shot acceptance against this exact
-  commit and record the diagnostic JSON plus provenance sidecar. The prior
-  external JSON remains provisional because it was generated from an older
-  candidate.
+- Candidate handoff status: the ledger synchronization commit is
+  `c21b66512e823e7a506cdbc6af2c32b4dbbd010d`; CI run `31361802455` also
+  completed successfully and the local/remote candidate refs match.
+- Next: run the trusted-HTTPS 3-condition/18-shot acceptance against the exact
+  current candidate tree and record the diagnostic JSON plus provenance
+  sidecar. The prior external JSON remains provisional because it was generated
+  from an older candidate.
