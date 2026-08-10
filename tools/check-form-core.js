@@ -2756,6 +2756,33 @@ function shotSequence(dt) {
   });
 }
 {
+  /* 現場再現: アンカー値が CLOSE_IN より緩い撮影角度では、短い保持後の
+     明確な離脱が closeFrames を作らず、adaptive の最小保持(150ms)にも届かない。
+     ドローイングから直接離れたときだけ反応する回帰を、実射として1射に固定する。 */
+  const briefLooseAnchor = [];
+  for (let i = 0; i < 12; i++)
+    briefLooseAnchor.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 5; i++) briefLooseAnchor.push([mkRaw(0.45, 150), 0.02, 20]);
+  briefLooseAnchor.push(...releaseFrames(80, 20, 0.45));
+  for (let i = 0; i < 20; i++) briefLooseAnchor.push([mkRaw(1.0, 90), 0.02, 20]);
+  assertEqual(
+    runSequence(briefLooseAnchor).releases,
+    1,
+    "brief loose-anchor hold followed by a clear release is detected",
+  );
+  const slowLooseLetdown = [];
+  for (let i = 0; i < 12; i++)
+    slowLooseLetdown.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 5; i++) slowLooseLetdown.push([mkRaw(0.45, 150), 0.02, 20]);
+  slowLooseLetdown.push(...releaseFrames(200, 20, 0.45));
+  for (let i = 0; i < 20; i++) slowLooseLetdown.push([mkRaw(1.0, 90), 0.02, 20]);
+  assertEqual(
+    runSequence(slowLooseLetdown).releases,
+    0,
+    "brief loose-anchor slow let-down stays below the high-speed recovery gate",
+  );
+}
+{
   // レットダウン → 本物のリリース の複合シナリオ: 1 射のみ検出（レットダウンが余分な射にならない）
   [2000, 1000, 500, 150].forEach((letdownMs) => {
     const dt = 20;

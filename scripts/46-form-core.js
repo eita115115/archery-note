@@ -48,6 +48,12 @@ const FORM_PH = Object.freeze({
   ADAPTIVE_ANCHOR_MAX: 0.65,
   ADAPTIVE_HOLD_MIN_MS: 150,
   ADAPTIVE_HOLD_MIN_FRAMES: 3,
+  /* 緩いアンカー値（撮影角度差）でも、短い安定保持から明確に離れた
+     実射を拾うための狭い回復経路。通常adaptiveの150msゲートは維持し、
+     4フレーム/80msと高い離脱速度を同時に要求してドロー途中の単発ノイズを避ける。 */
+  ADAPTIVE_BRIEF_HOLD_MIN_MS: 80,
+  ADAPTIVE_BRIEF_HOLD_MIN_FRAMES: 4,
+  ADAPTIVE_BRIEF_RELEASE_MIN: 8,
   ADAPTIVE_HOLD_RANGE: 0.12,
   ADAPTIVE_STRENGTH_CAP: 12,
   ADAPTIVE_RELEASE_PERCENTILE: 0.9,
@@ -415,10 +421,20 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
   ) {
     state.evidence = null;
   }
+  if (
+    state.briefEvidence &&
+    (!Number.isFinite(state.briefEvidence.ts) ||
+      now - state.briefEvidence.ts > FORM_PH.ADAPTIVE_EVIDENCE_WINDOW_MS)
+  ) {
+    state.briefEvidence = null;
+  }
 
   if (raw && Number.isFinite(raw.anchorNorm) && raw.anchorNorm > FORM_PH.ADAPTIVE_FAR_BOUNDARY) {
     if (!state.farSince) state.farSince = now;
-    if (now - state.farSince >= FORM_PH.ADAPTIVE_FAR_INVALIDATION_MS) state.evidence = null;
+    if (now - state.farSince >= FORM_PH.ADAPTIVE_FAR_INVALIDATION_MS) {
+      state.evidence = null;
+      state.briefEvidence = null;
+    }
   } else {
     state.farSince = 0;
   }
@@ -446,8 +462,10 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
       anchorEnter: state.anchorEnter,
       releaseSpeed: state.releaseSpeed,
       holdQualified: false,
+      briefHoldQualified: false,
       holdStartTs: 0,
       evidence: state.evidence,
+      briefEvidence: state.briefEvidence,
     };
   }
 
@@ -479,8 +497,10 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
       anchorEnter: state.anchorEnter,
       releaseSpeed: state.releaseSpeed,
       holdQualified: false,
+      briefHoldQualified: false,
       holdStartTs: 0,
       evidence: state.evidence,
+      briefEvidence: state.briefEvidence,
     };
   }
 
@@ -509,6 +529,9 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
   const holdQualified =
     state.holdSamples.length >= FORM_PH.ADAPTIVE_HOLD_MIN_FRAMES &&
     holdSpan >= FORM_PH.ADAPTIVE_HOLD_MIN_MS;
+  const briefHoldQualified =
+    state.holdSamples.length >= FORM_PH.ADAPTIVE_BRIEF_HOLD_MIN_FRAMES &&
+    holdSpan >= FORM_PH.ADAPTIVE_BRIEF_HOLD_MIN_MS;
   if (holdQualified) {
     state.releaseSpeed = adaptiveReleaseThreshold(
       state.holdVelocitySamples.map((sample) => sample.value),
@@ -521,12 +544,26 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
       strength: Math.min(state.holdSamples.length, FORM_PH.ADAPTIVE_STRENGTH_CAP),
     };
   }
+  if (briefHoldQualified) {
+    state.briefEvidence = {
+      ts: now,
+      normAtHold: formMedian(state.holdSamples.map((sample) => sample.norm)),
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: Math.max(
+        FORM_PH.ADAPTIVE_BRIEF_RELEASE_MIN,
+        adaptiveReleaseThreshold(state.holdVelocitySamples.map((sample) => sample.value)),
+      ),
+      strength: Math.min(state.holdSamples.length, FORM_PH.ADAPTIVE_STRENGTH_CAP),
+    };
+  }
   return {
     anchorEnter: state.anchorEnter,
     releaseSpeed: state.releaseSpeed,
     holdQualified,
+    briefHoldQualified,
     holdStartTs: state.holdSince,
     evidence: state.evidence,
+    briefEvidence: state.briefEvidence,
   };
 }
 
@@ -1151,6 +1188,7 @@ function makeFormPhaseDetector() {
       holdBreakTs: null,
       farSince: 0,
       evidence: null,
+      briefEvidence: null,
       anchorFloor: null,
       anchorEnter: 0.35,
       releaseSpeed: 6,
@@ -1159,7 +1197,7 @@ function makeFormPhaseDetector() {
 }
 
 function formPhaseResult(st, now, result, debug) {
-  const evidence = st.adaptive.evidence;
+  const evidence = st.adaptive.evidence || st.adaptive.briefEvidence;
   return {
     ...result,
     anchorEnter: st.adaptive.anchorEnter,
@@ -1167,7 +1205,7 @@ function formPhaseResult(st, now, result, debug) {
       ...debug,
       anchorFloor: st.adaptive.anchorFloor,
       anchorEnter: st.adaptive.anchorEnter,
-      releaseSpeed: st.adaptive.releaseSpeed,
+      releaseSpeed: evidence ? evidence.releaseSpeed : st.adaptive.releaseSpeed,
       evidenceAgeMs: evidence ? now - evidence.ts : null,
       evidenceStrength: evidence ? evidence.strength : null,
     },
@@ -1591,7 +1629,8 @@ function stepFormPhase(st, raw, history, sens, now) {
     nb2DropBody <= FORM_PH.NB2_MAX_DROP &&
     maxV > FORM_PH.NB2_MAXV / s;
   const anchorEvidence = closeFrames.length >= 2 ? "close" : nullBridged2 ? "nb2" : null;
-  const adaptiveDecision = adaptiveReleaseCandidate(adaptive.evidence, usable, history, now);
+  const adaptiveEvidence = adaptive.evidence || adaptive.briefEvidence;
+  const adaptiveDecision = adaptiveReleaseCandidate(adaptiveEvidence, usable, history, now);
   const legacyMatched =
     historyChronologyValid &&
     anchorEvidence &&
@@ -1621,7 +1660,7 @@ function stepFormPhase(st, raw, history, sens, now) {
     refractoryRemaining: refractoryRemainingMs(),
   }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
   if (fireEvidence && (st.lastReleaseTs === 0 || now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS)) {
-    const adaptiveEvidence = st.adaptive.evidence;
+    const adaptiveEvidence = st.adaptive.evidence || st.adaptive.briefEvidence;
     st.lastReleaseTs = now;
     st.cur = FORM_PHASES.RELEASE;
     st.anchorSince = 0;
@@ -1685,10 +1724,11 @@ function stepFormPhase(st, raw, history, sens, now) {
       debug,
     );
     st.adaptive.evidence = null;
+    st.adaptive.briefEvidence = null;
     return result;
   }
-  if (close || adaptive.holdQualified) {
-    if (adaptive.holdQualified) {
+  if (close || adaptive.holdQualified || adaptive.briefHoldQualified) {
+    if (adaptive.holdQualified || adaptive.briefHoldQualified) {
       st.anchorSince = adaptive.holdStartTs;
       if (!st.anchorStartTs) st.anchorStartTs = adaptive.holdStartTs;
     } else if (!st.anchorSince) {

@@ -3434,3 +3434,30 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Next: obtain that provenance/visual confirmation, then mark the field result
   accepted or record the concrete discrepancy without changing thresholds from
   aggregate data alone.
+
+## 2026-08-10 — Recover releases after a brief loose-anchor hold
+
+- RED: a synthetic field-shaped sequence with a calibrated draw, five 20ms
+  loose-anchor frames (`anchorNorm=0.45`), and an 80ms clear departure produced
+  zero releases on the candidate baseline. The same baseline close-anchor or
+  direct high-speed path did not exercise this missing route.
+- Root cause: the loose camera geometry produced no `closeFrames`, while the
+  adaptive path required a continuous 150ms/three-frame hold before creating
+  release evidence. A short real anchor therefore had neither a legacy nor an
+  adaptive candidate.
+- Changed: add a narrow brief-hold evidence path requiring four stable frames
+  spanning at least 80ms and a minimum departure speed of 8. The standard
+  150ms adaptive gate, close evidence, receipt ownership, cancellation, and
+  storage contracts remain unchanged. Brief evidence expires with the existing
+  evidence window and is cleared on far invalidation or committed fire.
+- Validation: baseline replay of the RED sequence returned `0`; the new test
+  returns `1`. `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run check:all`, lint, format, syntax checks, and `git diff --check` pass.
+- Risk: this is a recall-oriented candidate for short holds in loose camera
+  geometry; it still needs a trusted-HTTPS A/B field run including a deliberate
+  100ms let-down control before final acceptance. No release threshold was
+  lowered globally, and no data/schema/transport changes were made.
+- Next: repeat three conditions on the current candidate with a brief anchor,
+  a normal hold, and a 100ms let-down control; export the diagnostic artifact
+  and inspect release evidence/cancellation counts before changing any further
+  thresholds.
