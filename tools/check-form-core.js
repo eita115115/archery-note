@@ -2751,6 +2751,49 @@ function releaseFrames(totalMs, dt, fromAnchor) {
     ...mkRaw(anchorNorm, drawArm),
     dW: { x: 0.18, y: 0.04, visibility: 0.95 },
   });
+  const lowArmBoundarySequence = (drawArm, closeCount, dt = 20, makeRaw = mkRaw) => {
+    const seq = [];
+    for (let i = 0; i < 3; i++) seq.push([makeRaw(1.2, drawArm), 0.5, dt]);
+    for (let i = 0; i < closeCount; i++) seq.push([makeRaw(0.22, drawArm), 0.02, dt]);
+    seq.push(
+      [makeRaw(0.6, drawArm), 10, dt],
+      [makeRaw(0.8, drawArm), 10, dt],
+      [makeRaw(1.0, 90), 0.1, dt],
+    );
+    return seq;
+  };
+  [80, 90].forEach((drawArm) => {
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 2)).releases,
+      0,
+      `drawArm ${drawArm} direct 40ms close hold is rejected`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 4)).releases,
+      1,
+      `drawArm ${drawArm} direct 80ms close hold remains detectable`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 8)).releases,
+      1,
+      `drawArm ${drawArm} direct 150ms close hold remains detectable`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 1, 1000 / 15)).releases,
+      0,
+      `drawArm ${drawArm} at 15fps with one close frame is rejected`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 3, 1000 / 15)).releases,
+      1,
+      `drawArm ${drawArm} at 15fps with a stable close hold remains detectable`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 2, 20, mkObliqueRaw)).releases,
+      0,
+      `drawArm ${drawArm} oblique-offset direct 40ms close hold is rejected`,
+    );
+  });
   const lowArmObliqueDirect = [];
   for (let i = 0; i < 3; i++) lowArmObliqueDirect.push([mkObliqueRaw(1.2, 110), 0.5, 20]);
   for (let i = 0; i < 2; i++) lowArmObliqueDirect.push([mkObliqueRaw(0.22, 110), 0.02, 20]);
@@ -3352,7 +3395,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     seq.push(...seg(36, () => mkDw(R_DW, 110)));
     return seq;
   }
-  function transformedShotDw(angleDeg, tx, ty) {
+  function transformedShotDw(angleDeg, tx, ty, options = null) {
+    const direct = options && options.direct === true;
+    const holdFrames = direct ? options.holdFrames : 72;
+    const holdDrawArm = direct ? options.drawArm : 115;
     const rad = (angleDeg * Math.PI) / 180;
     const transform = (point) => {
       const dx = point.x - FACE.x;
@@ -3367,12 +3413,17 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     const setup = transform(S_DW);
     const release = transform(R_DW);
     const norm = (point) => Math.hypot(point.x - face.x, point.y - face.y) / 0.25;
-    const make = (point, drawArm) => mkDw(point, drawArm, norm(point));
+    const make = (point, drawArm, anchorNormOverride) =>
+      mkDw(point, drawArm, anchorNormOverride == null ? norm(point) : anchorNormOverride);
     const seq = [];
-    seq.push(...seg(30, () => make(setup, 90)));
-    seq.push(...seg(24, (t) => make(lerp2(setup, anchor, t), 100 + 30 * t)));
-    seq.push(...seg(72, () => make(anchor, 115)));
-    seq.push(...seg(6, (t) => make(lerp2(anchor, release, 1 - Math.pow(1 - t, 2)), 120)));
+    seq.push(...seg(30, () => make(setup, 90, direct ? 0.8 : null)));
+    seq.push(...seg(24, (t) => make(lerp2(setup, anchor, t), 100 + 30 * t, direct ? 0.5 : null)));
+    seq.push(...seg(holdFrames, () => make(anchor, holdDrawArm, direct ? 0.22 : null)));
+    seq.push(
+      ...seg(6, (t) =>
+        make(lerp2(anchor, release, direct ? 0.2 + 0.8 * t : 1 - Math.pow(1 - t, 2)), 120),
+      ),
+    );
     seq.push(...seg(36, () => make(release, 110)));
     return seq;
   }
@@ -3385,6 +3436,41 @@ return {makeFormPhaseDetector, stepFormPhase};`,
       runDw(transformedShotDw(angle, tx, ty)).releases,
       1,
       `${label} preserves one genuine release`,
+    );
+  });
+  [80, 90].forEach((drawArm) => {
+    assertEqual(
+      runDw(
+        transformedShotDw(18, 0.02, -0.01, {
+          direct: true,
+          drawArm,
+          holdFrames: 2,
+        }),
+      ).releases,
+      0,
+      `oblique drawArm ${drawArm} direct short hold is rejected`,
+    );
+    assertEqual(
+      runDw(
+        transformedShotDw(18, 0.02, -0.01, {
+          direct: true,
+          drawArm,
+          holdFrames: 5,
+        }),
+      ).releases,
+      1,
+      `oblique drawArm ${drawArm} direct 80ms hold remains detectable`,
+    );
+    assertEqual(
+      runDw(
+        transformedShotDw(18, 0.02, -0.01, {
+          direct: true,
+          drawArm,
+          holdFrames: 9,
+        }),
+      ).releases,
+      1,
+      `oblique drawArm ${drawArm} direct 150ms hold remains detectable`,
     );
   });
   // NB2: 200ms / 300ms のリリース瞬間欠落は回復、400ms（NB2_MAX_GAP_MS 超）は対象外

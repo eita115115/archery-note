@@ -3666,3 +3666,29 @@ got 1`. The same sequence represented the user report that a forced release
 - Next: collect a fresh current-candidate trusted HTTPS 3×6 artifact and
   provenance sidecar. The existing external JSON remains provisional until it
   is regenerated from the helper run that prints this candidate's commit/tree.
+
+## 2026-08-10 — Extend stable close evidence to drawArm 80–90
+
+- RED evidence: with the c350-era `DIRECT_DRAWING_ARM_MIN=100`, synthetic
+  low-arm `80` and `90` direct-drawing sequences (three setup frames, two 20ms
+  close frames, then departure) each produced one `close` release instead of
+  the required zero.
+- Changed: the detector's stable-close gate floor is now `80`; values below
+  `80` intentionally retain the existing low-confidence bypass. Focused tests
+  cover arm `80`/`90` at 40/80/150ms-equivalent holds, one-vs-three 15fps close
+  frames, and an actual +18° transformed dW oblique sequence (short rejected,
+  qualified 80ms/150ms retained).
+- GREEN evidence: `node tools/check-form-core.js`, `npm run check:form`,
+  `npm run golden:form-fixtures`, and the focused low-FPS/NB2/golden checks
+  pass. Reviewed NB2 200/300ms recovery, 400ms exclusion, D' and far-arrival
+  boundaries, existing low-FPS cases, and both tracked golden fixtures remain
+  unchanged.
+- Validation: lint, format, Node syntax, and `git diff --check` pass. One
+  earlier `npm run check:all` attempt encountered a transient UI smoke EPERM;
+  no process was killed, and a bounded retry completed `check:all` successfully.
+  No storage, receipt, transport, schema, service-worker, or user-data behavior
+  changed.
+- Risk/next: backup observations below drawArm `80` (including low samples in
+  the 20–60 range) remain outside this gate by design and need separate
+  provenance-bound field evidence before any further floor reduction. This
+  change is uncommitted pending review.

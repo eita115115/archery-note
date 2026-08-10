@@ -1699,7 +1699,7 @@ function stepFormPhase(st, raw, history, sens, now) {
   const closeDrawArm = formMedian(
     closeFrames.map((frame) => frame.m.drawArm).filter((drawArm) => Number.isFinite(drawArm)),
   );
-  const DIRECT_DRAWING_ARM_MIN = 100;
+  const DIRECT_DRAWING_ARM_MIN = 80;
   /* NB2/tier-1 far arrivals are outside the short direct-drawing geometry and
      retain their existing gap-bridge contract. */
   const drawingPostureNeedsStableClose =
