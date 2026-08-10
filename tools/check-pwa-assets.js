@@ -195,6 +195,8 @@ function assertIphoneHttpsPreviewContract(relativePath) {
     "Start-Process -FilePath $cerPath",
     "trusted private Wi-Fi",
     "Unable to create the temporary HTTPS certificate",
+    "Port $Port is already in use",
+    "TcpClient",
   ];
   for (const marker of requiredMarkers) {
     if (!text.includes(marker)) {

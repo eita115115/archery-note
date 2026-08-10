@@ -61,6 +61,55 @@ try {
   if ($Port -lt 1024 -or $Port -gt 65535) {
     throw "Port must be between 1024 and 65535."
   }
+  $occupiedListeners = @()
+  try {
+    $occupiedListeners = @(
+      Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction Stop
+    )
+  } catch {
+    $portProbe = $null
+    try {
+      $portProbe = New-Object System.Net.Sockets.TcpListener ([System.Net.IPAddress]::Any, $Port)
+      $portProbe.Start()
+      $portProbe.Stop()
+      $portProbe = $null
+    } catch {
+      if ($null -ne $portProbe) {
+        try { $portProbe.Stop() } catch {}
+      }
+      throw "Port $Port is already in use or unavailable. Stop the previous preview or choose another -Port value."
+    }
+  }
+  if ($occupiedListeners.Count -gt 0) {
+    $listenerPids = @($occupiedListeners | Select-Object -ExpandProperty OwningProcess -Unique)
+    $pidText = if ($listenerPids.Count -gt 0) { " PID(s): " + ($listenerPids -join ",") } else { "" }
+    throw "Port $Port is already in use.$pidText Stop the previous preview or choose another -Port value."
+  }
+  $portReachable = $false
+  $probeAddresses = if ($HostAddress -eq "0.0.0.0") {
+    @("127.0.0.1") + $lanAddresses
+  } else {
+    @($HostAddress)
+  }
+  foreach ($probeAddress in @($probeAddresses | Sort-Object -Unique)) {
+    $portClient = $null
+    try {
+      $portClient = New-Object System.Net.Sockets.TcpClient
+      $portClient.Connect($probeAddress, $Port)
+      $portReachable = $true
+      break
+    } catch {
+      # A refused connection means this address is free; continue probing the
+      # remaining bound addresses when HostAddress is 0.0.0.0.
+    } finally {
+      if ($null -ne $portClient) {
+        $portClient.Close()
+      }
+    }
+  }
+  if ($portReachable) {
+    throw "Port $Port is already in use. Stop the previous preview or choose another -Port value."
+  }
   $publicProfiles = @(
     Get-NetConnectionProfile -ErrorAction SilentlyContinue |
       Where-Object { $_.NetworkCategory -eq "Public" }

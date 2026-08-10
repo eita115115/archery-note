@@ -3549,3 +3549,22 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   storage, receipt, transport, threshold, and user-data behavior are unchanged.
   The trusted HTTPS 3×6 artifact with current preview provenance remains the
   only physical acceptance gap.
+
+## 2026-08-10 — Fail fast when the HTTPS preview port is occupied
+
+- RED evidence: `npm run check:pwa` initially failed because the HTTPS helper
+  did not expose a required occupied-port marker in its contract.
+- Changed: `tools/serve-iphone-https.ps1` now probes the requested listener
+  before certificate generation, using `Get-NetTCPConnection` with a
+  `TcpClient` fallback and a bound-address reachability check. An occupied
+  port fails explicitly, including listener PIDs when available. The PWA
+  contract checker now freezes the `Port $Port is already in use` and
+  `TcpClient` markers.
+- GREEN evidence: `npm run check:pwa`, `npm run check:all`, lint, format,
+  syntax, and `git diff --check` pass. A live process occupying port 8743 was
+  reproduced and the helper stopped before certificate generation with
+  `Port 8743 is already in use`.
+- Scope/risk: helper/checker and acceptance documentation only; no app,
+  detector, storage, receipt, transport, threshold, or user-data behavior
+  changed. The trusted HTTPS 3×6 artifact with current preview provenance is
+  still required for physical acceptance.

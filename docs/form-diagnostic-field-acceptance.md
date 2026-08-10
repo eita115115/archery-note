@@ -33,6 +33,12 @@ Repository tests and JSON export do not establish physical acceptance.
   transfer that file to the iPhone (for example with AirDrop, iCloud Drive, or
   Files) before installing and trusting it. The switch does not install or
   trust the certificate automatically.
+- The helper preflights the requested port before creating a certificate. If a
+  previous preview is still listening, it stops with an explicit `Port 8743 is
+already in use` error (including listener PIDs when Windows exposes them).
+  Stop that preview or choose a deliberate alternate port; do not create a new
+  certificate while the old server is still running. The check uses
+  `Get-NetTCPConnection` when available and a `TcpClient` fallback otherwise.
 - Open the printed `https://...:8743/` URL in the iPhone's Safari address bar.
   Do not paste the URL into PowerShell; PowerShell treats it as a command.
   Binding to an explicit LAN IPv4 keeps the preview off unrelated interfaces.
