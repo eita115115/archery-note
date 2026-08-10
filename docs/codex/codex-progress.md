@@ -3636,3 +3636,28 @@ got 1`. The same sequence represented the user report that a forced release
 - Next: review the isolated detector diff and push the three-file handoff with
   this ledger entry, then collect provenance-bound field evidence on that
   resulting candidate.
+
+## 2026-08-10 — Add a provenance-safe diagnostic handoff sidecar
+
+- RED evidence: `node tools/check-form-diagnostic-artifact.js` failed at the
+  missing `diagnostic handoff creator is exported` contract before the new
+  sidecar API existed.
+- Changed: `tools/form-diagnostic-artifact.js` now creates a bounded handoff
+  object from a validated artifact inspection plus exact 40-character preview
+  commit/tree SHAs. `tools/write-form-diagnostic-handoff.js` writes that object
+  to a caller-selected external path, refuses ambiguous Downloads candidates,
+  and never copies receipts or raw pose data. The original schema-1 diagnostic
+  JSON remains unchanged.
+- GREEN evidence: artifact contract and CLI tests pass; an external-path smoke
+  run produced a 793-byte aggregate-only sidecar from the existing provisional
+  JSON, then removed the temporary sidecar. The smoke is tooling evidence only,
+  not current-candidate physical acceptance.
+- Validation: artifact checker, Node syntax, lint, and `git diff --check` pass;
+  the full cumulative ladder remains green at candidate `c350ce11` with CI run
+  `31359164266` successful.
+- Scope/risk: tooling/docs only; no runtime detector, storage, schema, receipt,
+  transport, Service Worker, dependency, or user-data behavior changed. The
+  operator must provide commit/tree from the same trusted HTTPS run; the sidecar
+  cannot make an older artifact current by itself.
+- Next: review and push this handoff-tooling change, then collect a fresh
+  current-candidate trusted HTTPS 3×6 artifact and sidecar.

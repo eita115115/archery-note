@@ -1,10 +1,14 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const { execFileSync } = require("node:child_process");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { inspectFormDiagnosticArtifact } = require("./form-diagnostic-artifact");
+const {
+  createFormDiagnosticHandoff,
+  inspectFormDiagnosticArtifact,
+} = require("./form-diagnostic-artifact");
 const { findDiagnosticFilesFromDownloads } = require("./inspect-form-diagnostic-json");
 
 const CONDITIONS = ["side", "oblique", "normal_range"];
@@ -48,6 +52,40 @@ assert.equal(valid.ok, true, "valid artifact is accepted");
 assert.equal(valid.summary.runs[0].retainedShotCount, 6, "summary exposes retained count");
 assert.equal(valid.summary.runs[2].condition, "normal_range", "summary preserves condition order");
 assert.equal(valid.sha256.length, 64, "accepted artifact has SHA-256");
+
+assert.equal(
+  typeof createFormDiagnosticHandoff,
+  "function",
+  "diagnostic handoff creator is exported",
+);
+const handoff = createFormDiagnosticHandoff(valid, "a".repeat(40), "b".repeat(40));
+assert.deepEqual(
+  Object.keys(handoff),
+  ["format", "schemaVersion", "preview", "artifact"],
+  "handoff has a bounded top-level shape",
+);
+assert.deepEqual(
+  handoff.preview,
+  { commit: "a".repeat(40), tree: "b".repeat(40) },
+  "handoff binds the exact preview commit and tree",
+);
+assert.equal(handoff.artifact.sha256, valid.sha256, "handoff preserves artifact SHA");
+assert.equal(handoff.artifact.byteLength, valid.byteLength, "handoff preserves artifact bytes");
+assert.deepEqual(
+  handoff.artifact.runs,
+  valid.summary.runs,
+  "handoff preserves only the aggregate run summary",
+);
+assert.equal(
+  JSON.stringify(handoff).includes("receipts"),
+  false,
+  "handoff does not include receipt or raw diagnostic data",
+);
+assert.throws(
+  () => createFormDiagnosticHandoff(valid, "not-a-commit", "b".repeat(40)),
+  /preview commit/i,
+  "handoff rejects malformed preview provenance",
+);
 
 const removableFalsePositive = validPayload();
 removableFalsePositive.runs[0].receipts.push(receipt(7, "manual-removed"));
@@ -154,6 +192,38 @@ assert.match(
   /通常のschema-5バックアップは対象外/,
   "size refusal explains that normal backups are not diagnostic artifacts",
 );
+
+const handoffFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-handoff-"));
+try {
+  const artifactPath = path.join(handoffFixture, "artifact.json");
+  const outputPath = path.join(handoffFixture, "handoff.json");
+  fs.writeFileSync(artifactPath, `${JSON.stringify(validPayload(), null, 2)}\n`, "utf8");
+  const cliOutput = execFileSync(
+    process.execPath,
+    [
+      path.join(__dirname, "write-form-diagnostic-handoff.js"),
+      artifactPath,
+      "--preview-commit",
+      "A".repeat(40),
+      "--preview-tree",
+      "b".repeat(40),
+      "--output",
+      outputPath,
+    ],
+    { cwd: path.join(__dirname, ".."), encoding: "utf8" },
+  );
+  assert.match(cliOutput, /Form diagnostic handoff written:/, "handoff CLI reports its output");
+  const writtenHandoff = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(writtenHandoff.preview.commit, "a".repeat(40), "CLI normalizes commit case");
+  assert.equal(writtenHandoff.preview.tree, "b".repeat(40), "CLI preserves tree binding");
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(writtenHandoff.artifact, "receipts"),
+    false,
+    "CLI handoff remains aggregate-only",
+  );
+} finally {
+  fs.rmSync(handoffFixture, { recursive: true, force: true });
+}
 
 const downloadsFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-downloads-"));
 try {

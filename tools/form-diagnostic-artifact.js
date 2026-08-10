@@ -225,4 +225,33 @@ function inspectFormDiagnosticArtifact(text) {
   };
 }
 
-module.exports = { inspectFormDiagnosticArtifact, MAX_BYTES };
+function previewSha(value, label) {
+  if (typeof value !== "string" || !/^[0-9a-f]{40}$/i.test(value)) {
+    throw new TypeError(`${label} must be a 40-character preview commit/tree SHA`);
+  }
+  return value.toLowerCase();
+}
+
+function createFormDiagnosticHandoff(inspection, previewCommit, previewTree) {
+  if (!inspection || inspection.ok !== true || !inspection.summary) {
+    throw new TypeError("a valid diagnostic artifact inspection is required");
+  }
+  const commit = previewSha(previewCommit, "preview commit");
+  const tree = previewSha(previewTree, "preview tree");
+  return {
+    format: "archery-note-form-diagnostic-handoff",
+    schemaVersion: 1,
+    preview: { commit, tree },
+    artifact: {
+      format: inspection.summary.format,
+      schemaVersion: inspection.summary.schemaVersion,
+      appVersion: inspection.summary.appVersion,
+      matrix: inspection.summary.matrix,
+      byteLength: inspection.byteLength,
+      sha256: inspection.sha256,
+      runs: inspection.summary.runs.map((run) => ({ ...run })),
+    },
+  };
+}
+
+module.exports = { createFormDiagnosticHandoff, inspectFormDiagnosticArtifact, MAX_BYTES };

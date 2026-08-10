@@ -183,6 +183,27 @@ file:
 node tools/inspect-form-diagnostic-json.js 'C:\tmp\archery-note-form-diagnostics.json'
 ```
 
+To bind the validated artifact to the exact preview without changing the
+diagnostic JSON schema, write a separate privacy-safe handoff sidecar. Use the
+commit and tree printed by the helper for the same run; do not reuse IDs from
+an older preview:
+
+```powershell
+$previewCommit = "PASTE_THE_PREVIEW_GIT_COMMIT_HERE"
+$previewTree = "PASTE_THE_PREVIEW_GIT_TREE_HERE"
+node tools/write-form-diagnostic-handoff.js `
+  --from-downloads `
+  --preview-commit $previewCommit `
+  --preview-tree $previewTree `
+  --output 'C:\tmp\archery-note-form-diagnostics.handoff.json'
+```
+
+If Downloads contains more than one matching JSON, replace
+`--from-downloads` with the explicit artifact path. The sidecar contains only
+the preview commit/tree, artifact SHA-256/size, app/schema/matrix, and the
+three aggregate retained counts; it never copies receipts or raw pose data.
+Keep both files outside the repository and report both hashes together.
+
 The checker rejects a normal schema-5 backup, unknown keys, incomplete runs,
 missing fire fields, invalid fire ranges, and files over 65536 UTF-8 bytes.
 
