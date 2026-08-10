@@ -174,6 +174,12 @@ function staticUiChecks() {
       `record setup control ${controlId} needs an associated label`,
     );
   }
+  for (const controlId of ["anSetup", "anDist"]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(recordSurface),
+      `analysis filter ${controlId} needs an associated label`,
+    );
+  }
   for (const controlId of ["histSetup", "histDist", "histRound"]) {
     assert(
       new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(historySurface),

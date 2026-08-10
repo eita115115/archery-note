@@ -3910,6 +3910,26 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this isolated UI improvement, then continue one
   non-physical quality task while the trusted-HTTPS field matrix remains open.
 
+## 2026-08-10 — Associate analysis filter labels
+
+- UX evidence: the growth-analysis filter selects for equipment and distance
+  still relied on nearby visual text. This made the daily progress view less
+  reliable for VoiceOver and label-based filtering.
+- RED evidence: `node tools/check-ui.js` failed at the new `anSetup` label
+  contract before the production change.
+- Changed: the analysis filter now associates `anSetup` and `anDist` with their
+  visible labels. Existing period chips and filter state behavior are intact.
+- GREEN evidence: `node tools/check-ui.js`, `npm run check:all`, lint, format,
+  Node syntax checks, and `git diff --check` pass. The focused Chromium worker
+  passed 1/1; the known Windows parent teardown timeout occurred only after the
+  worker completed. A standalone UI rerun also passed after a transient profile
+  cleanup EPERM during parallel checks.
+- Scope/risk: analysis filter labels, static contract, and app-smoke coverage
+  only; no scoring, storage, detector, receipt, transport, schema, Service
+  Worker, dependency, or user-data behavior changed.
+- Next: commit/push this isolated UI improvement, then continue one
+  non-physical quality task while the trusted-HTTPS field matrix remains open.
+
 ## 2026-08-10 — Associate sight adjustment dialog labels
 
 - UX evidence: the site-value entry and calibration dialogs still exposed

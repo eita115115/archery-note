@@ -867,8 +867,8 @@ function analysisFilterBarHtml(allRows, f) {
   ];
   return `<div class="card analysisFilterCard">
     <div class="row">
-      <div><label class="f">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
-      <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
+      <div><label class="f" for="anSetup">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f" for="anDist">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <label class="f">期間</label>
     <div class="chips" id="anPeriods">${periods.map(([id, lb]) => `<button type="button" class="chip ${f.period === id ? "on" : ""}" aria-pressed="${f.period === id}" data-period="${id}">${lb}</button>`).join("")}</div>

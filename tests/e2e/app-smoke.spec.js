@@ -253,6 +253,23 @@ test("gives accessible names to the record setup controls", async ({ page }) => 
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to the analysis filters", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "分析").click();
+  const analysis = page.locator("#main");
+  await analysis.getByLabel("用具", { exact: true }).selectOption("e2e-setup");
+  await analysis.getByLabel("距離", { exact: true }).selectOption("70");
+  await expect(analysis.getByLabel("用具", { exact: true })).toHaveValue("e2e-setup");
+  await expect(analysis.getByLabel("距離", { exact: true })).toHaveValue("70");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("exposes history rows and sight distance chips as buttons", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {
