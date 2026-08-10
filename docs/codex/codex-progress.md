@@ -3748,3 +3748,23 @@ the minimum touch target` after the focused static contract was added.
   service-worker, dependency, or user-data behavior changed.
 - Next: keep the current candidate fixed for the trusted-HTTPS 3-condition /
   18-shot field run and its provenance-bound diagnostic artifact.
+
+## 2026-08-10 — Make the trusted HTTPS preview certificate fallback portable
+
+- RED evidence: `node tools/check-pwa-assets.js` rejected the preview helper
+  because it had no managed `CertificateRequest` fallback. A first manual run
+  also exposed a Windows PowerShell 5.1 array-to-PowerShell 7 argument
+  boundary (`localhost` was parsed as an unexpected positional argument).
+- Changed: `tools/serve-iphone-https.ps1` now falls back to PowerShell 7's
+  `.NET CertificateRequest` and `SubjectAlternativeNameBuilder` when the local
+  Windows PKI provider fails. DNS/IP SAN values cross the process boundary as
+  semicolon-delimited strings, and preview commit/tree lookup explicitly opts
+  into the serving worktree as a Git safe directory.
+- GREEN evidence: `node tools/check-pwa-assets.js` passes. A bounded local
+  helper smoke run generated the temporary PFX/CER, printed the preview
+  provenance, and reached `E2E server listening` on the requested LAN port.
+  The temporary certificate/key remains owned by the helper's cleanup path;
+  no app data, storage, detector, receipt, transport, schema, or service
+  worker behavior changed.
+- Risk/next: the physical iPhone 3-condition / 18-shot run is still pending;
+  the generated certificate must be installed and fully trusted on the phone.

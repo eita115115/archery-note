@@ -195,6 +195,10 @@ function assertIphoneHttpsPreviewContract(relativePath) {
     "Start-Process -FilePath $cerPath",
     "trusted private Wi-Fi",
     "Unable to create the temporary HTTPS certificate",
+    "CertificateRequest",
+    "SubjectAlternativeNameBuilder",
+    "create-preview-certificate.ps1",
+    "PowerShell 7 CertificateRequest fallback",
     "Port $Port is already in use",
     "TcpClient",
   ];

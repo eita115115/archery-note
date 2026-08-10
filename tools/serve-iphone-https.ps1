@@ -12,6 +12,77 @@ $certificate = $null
 
 New-Item -ItemType Directory -Path $tempRoot -Force | Out-Null
 
+function New-ManagedHttpsCertificateFiles {
+  param(
+    [Parameter(Mandatory = $true)][string]$PfxPath,
+    [Parameter(Mandatory = $true)][string]$CerPath,
+    [Parameter(Mandatory = $true)][string]$PasswordText,
+    [string[]]$DnsNames = @(),
+    [string[]]$IpAddresses = @()
+  )
+
+  $pwshCommand = Get-Command pwsh.exe -ErrorAction SilentlyContinue
+  $pwshPath = if ($pwshCommand) { $pwshCommand.Path } else { $null }
+  if (-not $pwshPath) {
+    $pwshCandidates = @()
+    if ($env:ProgramFiles) { $pwshCandidates += (Join-Path $env:ProgramFiles "PowerShell\7\pwsh.exe") }
+    if ($env:ProgramW6432) { $pwshCandidates += (Join-Path $env:ProgramW6432 "PowerShell\7\pwsh.exe") }
+    $pwshPath = $pwshCandidates | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+  }
+  if (-not $pwshPath) {
+    throw "Unable to create the temporary HTTPS certificate: PowerShell 7 CertificateRequest fallback is unavailable. Install PowerShell 7 or restore the Windows PKI provider."
+  }
+
+  $fallbackScriptPath = Join-Path $tempRoot "create-preview-certificate.ps1"
+  @'
+param(
+  [Parameter(Mandatory = $true)][string]$PfxPath,
+  [Parameter(Mandatory = $true)][string]$CerPath,
+  [Parameter(Mandatory = $true)][string]$PasswordText,
+  [string]$DnsNamesText = "",
+  [string]$IpAddressesText = ""
+)
+$DnsNames = @($DnsNamesText -split ";" | Where-Object { $_ })
+$IpAddresses = @($IpAddressesText -split ";" | Where-Object { $_ })
+$rsa = [System.Security.Cryptography.RSA]::Create(2048)
+$request = [System.Security.Cryptography.X509Certificates.CertificateRequest]::new(
+  "CN=archery-note.local",
+  $rsa,
+  [System.Security.Cryptography.HashAlgorithmName]::SHA256,
+  [System.Security.Cryptography.RSASignaturePadding]::Pkcs1
+)
+$san = [System.Security.Cryptography.X509Certificates.SubjectAlternativeNameBuilder]::new()
+foreach ($dnsName in $DnsNames) {
+  if ($dnsName) { $san.AddDnsName($dnsName) }
+}
+foreach ($ipAddress in $IpAddresses) {
+  if ($ipAddress) { $san.AddIpAddress([System.Net.IPAddress]::Parse($ipAddress)) }
+}
+$request.CertificateExtensions.Add($san.Build($false))
+$certificate = $request.CreateSelfSigned(
+  [DateTimeOffset]::Now.AddMinutes(-5),
+  [DateTimeOffset]::Now.AddDays(7)
+)
+[System.IO.File]::WriteAllBytes(
+  $PfxPath,
+  $certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Pfx, $PasswordText)
+)
+[System.IO.File]::WriteAllBytes(
+  $CerPath,
+  $certificate.Export([System.Security.Cryptography.X509Certificates.X509ContentType]::Cert)
+)
+'@ | Set-Content -LiteralPath $fallbackScriptPath -Encoding UTF8
+
+  $dnsNamesText = $DnsNames -join ";"
+  $ipAddressesText = $IpAddresses -join ";"
+  & $pwshPath -NoProfile -ExecutionPolicy Bypass -File $fallbackScriptPath `
+    -PfxPath $PfxPath -CerPath $CerPath -PasswordText $PasswordText `
+    -DnsNamesText $dnsNamesText -IpAddressesText $ipAddressesText
+  if ($LASTEXITCODE -ne 0 -or -not (Test-Path -LiteralPath $PfxPath) -or -not (Test-Path -LiteralPath $CerPath)) {
+    throw "PowerShell 7 CertificateRequest fallback did not create the temporary HTTPS certificate files."
+  }
+}
+
 try {
   $windowsPowerShellRoot = Join-Path $env:WINDIR "System32\WindowsPowerShell\v1.0\Modules"
   $securityModule = Join-Path $windowsPowerShellRoot "Microsoft.PowerShell.Security\Microsoft.PowerShell.Security.psd1"
@@ -121,6 +192,10 @@ try {
   $sanEntries = @("DNS=archery-note.local", "DNS=localhost")
   $sanEntries += @($lanAddresses | ForEach-Object { "IPAddress=" + $_ })
   $sanExtension = "2.5.29.17={text}" + ($sanEntries -join "&")
+  $passwordText = [Guid]::NewGuid().ToString("N")
+  $password = ConvertTo-SecureString $passwordText -AsPlainText -Force
+  $pfxPath = Join-Path $tempRoot "archery-note-preview.pfx"
+  $cerPath = Join-Path $tempRoot "archery-note-preview.cer"
   try {
     $certificate = New-SelfSignedCertificate `
       -Subject "CN=archery-note.local" `
@@ -128,16 +203,17 @@ try {
       -CertStoreLocation "Cert:\CurrentUser\My" `
       -KeyExportPolicy Exportable `
       -NotAfter (Get-Date).AddDays(7)
+    Export-PfxCertificate -Cert $certificate -FilePath $pfxPath -Password $password | Out-Null
+    Export-Certificate -Cert $certificate -FilePath $cerPath | Out-Null
   } catch {
-    throw ("Unable to create the temporary HTTPS certificate. Windows PowerShell's PKI certificate provider failed: " + $_.Exception.Message + " Confirm that the PKI provider is available before troubleshooting iPhone network access.")
+    Write-Warning "Windows PKI certificate provider failed; using the PowerShell 7 CertificateRequest fallback."
+    New-ManagedHttpsCertificateFiles `
+      -PfxPath $pfxPath `
+      -CerPath $cerPath `
+      -PasswordText $passwordText `
+      -DnsNames @("archery-note.local", "localhost") `
+      -IpAddresses $lanAddresses
   }
-
-  $passwordText = [Guid]::NewGuid().ToString("N")
-  $password = ConvertTo-SecureString $passwordText -AsPlainText -Force
-  $pfxPath = Join-Path $tempRoot "archery-note-preview.pfx"
-  $cerPath = Join-Path $tempRoot "archery-note-preview.cer"
-  Export-PfxCertificate -Cert $certificate -FilePath $pfxPath -Password $password | Out-Null
-  Export-Certificate -Cert $certificate -FilePath $cerPath | Out-Null
   if ($OpenCertificate) {
     try {
       Start-Process -FilePath $cerPath -ErrorAction Stop | Out-Null
@@ -147,8 +223,8 @@ try {
     }
   }
 
-  $previewCommit = [string]((& git -C $repoRoot rev-parse HEAD 2>$null) | Select-Object -First 1)
-  $previewTree = [string]((& git -C $repoRoot rev-parse "HEAD^{tree}" 2>$null) | Select-Object -First 1)
+  $previewCommit = [string]((& git -c ("safe.directory=" + $repoRoot) -C $repoRoot rev-parse HEAD 2>$null) | Select-Object -First 1)
+  $previewTree = [string]((& git -c ("safe.directory=" + $repoRoot) -C $repoRoot rev-parse "HEAD^{tree}" 2>$null) | Select-Object -First 1)
   $previewCommit = $previewCommit.Trim()
   $previewTree = $previewTree.Trim()
 
