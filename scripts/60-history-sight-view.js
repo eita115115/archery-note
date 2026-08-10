@@ -525,12 +525,12 @@ function openHistDetail(id) {
     ${analysisCardsHtml}
     <div class="histDetailActions">
       <div class="btnrow">
-        <button class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
-        <button class="btn sec" id="hCard">画像保存</button>
+        <button type="button" class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
+        <button type="button" class="btn sec" id="hCard">画像保存</button>
       </div>
       <div class="btnrow">
-        <button class="btn ghost" id="hClose">閉じる</button>
-        <button class="btn danger" id="hDel">削除</button>
+        <button type="button" class="btn ghost" id="hClose">閉じる</button>
+        <button type="button" class="btn danger" id="hDel">削除</button>
       </div>
     </div>
   </div>`;

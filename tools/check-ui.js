@@ -210,6 +210,14 @@ function staticUiChecks() {
       `sight ledger control ${controlId} needs an associated label`,
     );
   }
+  for (const controlId of ["hEdit", "hCard", "hClose", "hDel"]) {
+    assert(
+      new RegExp(
+        `<button\\b(?=[^>]*\\bid=["']${controlId}["'])(?=[^>]*\\btype=["']button["'])[^>]*>`,
+      ).test(historySurface),
+      `history detail control ${controlId} needs an explicit button type`,
+    );
+  }
   for (const controlMarker of [
     '<label class="f" for="mkDate">',
     '<label class="f" for="mkV">',

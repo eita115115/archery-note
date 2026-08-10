@@ -4143,3 +4143,18 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: downloaded diagnostic copy plus its two E2E assertions and this
   ledger entry only; no storage, receipt, schema, detector, or user-data path
   changed.
+
+## 2026-08-11 — Make history detail actions explicit
+
+- RED evidence: the new `check-ui` source contract failed at `hEdit` because
+  the history-detail action buttons had no explicit `type="button"`.
+- Changed: `hEdit`, `hCard`, `hClose`, and `hDel` now declare
+  `type="button"`; click handlers and history display/edit/delete behavior are
+  unchanged.
+- GREEN evidence: `node tools/check-ui.js` passed after clearing only its stale
+  generated Chromium profile; `node tools/check-app.js`, lint, format, Node
+  syntax checks, and `git diff --check` pass. Focused Chromium history E2E
+  passed 2/2 (`exposes history rows`, `appConfirm dialog`).
+- Scope/risk: history-detail button markup, static UI contract, and this ledger
+  entry only; no scoring, storage, receipt, transport, or user-data behavior
+  changed.
