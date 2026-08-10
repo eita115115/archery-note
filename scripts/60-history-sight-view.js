@@ -612,7 +612,7 @@ function renderSight(m) {
     <label class="f" for="sgSetup">セッティング</label><select class="inp" id="sgSetup">${db.setups.map((s) => `<option value="${esc(s.id)}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
     <div class="chips" id="sgDistChips">${dists.map((d) => `<button type="button" class="chip ${d === dist ? "on" : ""}" aria-pressed="${d === dist}" data-d="${d}">${d}m</button>`).join("")}</div>
-    <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
+    <div class="btnrow"><button type="button" class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button type="button" class="btn sec sm" id="sgCalMode">校正モード</button></div>
     ${
       marks.length
         ? `<table class="tbl ledgerTbl mt10" data-testid="sight-ledger"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
@@ -623,7 +623,7 @@ function renderSight(m) {
             i,
           ) => `<tr class="${i === 0 ? "ledgerCurrent" : ""}"><td>${i === 0 ? `<span class="ledgerDot" title="使用中"></span>` : ""}${fmtD(mk.date)}</td><td><b>${esc(mk.v || "—")}</b></td><td><b>${esc(mk.h || "—")}</b></td>
       <td class="subNoteSm">${esc(mk.note || "")}</td>
-      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}" aria-label="サイト値を削除">${icon("del")}</button></td></tr>`,
+      <td class="right"><button type="button" class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}" aria-label="サイト値を削除">${icon("del")}</button></td></tr>`,
         )
         .join("")}</table>`
         : `<div class="empty">この距離の記録はまだありません</div>`
@@ -764,7 +764,7 @@ function openMarkForm(setupId, dist) {
       <div><label class="f" for="mkH">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
     </div>
     <label class="f" for="mkNote">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・ベスト調整">
-    <div class="btnrow"><button class="btn ghost" id="mkCancel">キャンセル</button><button class="btn" id="mkSave">保存</button></div>
+    <div class="btnrow"><button type="button" class="btn ghost" id="mkCancel">キャンセル</button><button type="button" class="btn" id="mkSave">保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#mkCancel" });
   ovl.querySelector("#mkCancel").onclick = () => closeModal(ovl);
@@ -807,7 +807,7 @@ function openCalibrationWizard(setupId) {
       })
       .join("")}
     <label class="f" for="calNote">メモ</label><input class="inp" id="calNote" placeholder="例: 校正日 / 無風 / ベスト確認">
-    <div class="btnrow"><button class="btn ghost" id="calCancel">キャンセル</button><button class="btn" id="calSave">校正値を保存</button></div>
+    <div class="btnrow"><button type="button" class="btn ghost" id="calCancel">キャンセル</button><button type="button" class="btn" id="calSave">校正値を保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#calCancel" });
   ovl.querySelector("#calCancel").onclick = () => closeModal(ovl);

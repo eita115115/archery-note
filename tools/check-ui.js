@@ -218,6 +218,20 @@ function staticUiChecks() {
       `history detail control ${controlId} needs an explicit button type`,
     );
   }
+  for (const controlId of ["sgAdd", "sgCalMode", "mkCancel", "mkSave", "calCancel", "calSave"]) {
+    assert(
+      new RegExp(
+        `<button\\b(?=[^>]*\\bid=["']${controlId}["'])(?=[^>]*\\btype=["']button["'])[^>]*>`,
+      ).test(historySurface),
+      `sight adjustment control ${controlId} needs an explicit button type`,
+    );
+  }
+  assert(
+    /<button\b(?=[^>]*\bclass=["'][^"']*\bhistDelBtn\b)(?=[^>]*\btype=["']button["'])[^>]*>/.test(
+      historySurface,
+    ),
+    "sight ledger deletion control needs an explicit button type",
+  );
   for (const controlMarker of [
     '<label class="f" for="mkDate">',
     '<label class="f" for="mkV">',

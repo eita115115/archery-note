@@ -4175,3 +4175,19 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: history-list button markup and accessibility contract only; no
   scoring, tracking, storage, receipt, transport, schema, Service Worker, or
   user-data behavior changed.
+
+## 2026-08-11 — Make sight adjustment actions explicit
+
+- RED evidence: `node tools/check-ui.js` failed at the new `sgAdd` contract
+  because the sight-ledger action button did not declare `type="button"`.
+- Changed: sight-ledger add/calibration/delete controls and both sight-value
+  modal action pairs now declare `type="button"`; sight values, deletion
+  confirmation, and calibration behavior are unchanged. App-smoke also checks
+  the runtime type on the visible ledger actions.
+- GREEN evidence: `node tools/check-ui.js`, `node tools/check-app.js`, lint,
+  format, Node syntax checks, and `git diff --check` pass. The existing
+  history/sight smoke path remains covered; the browser worker teardown issue
+  is unchanged and bounded to the parent process.
+- Scope/risk: sight-adjustment button markup and accessibility contract only;
+  no scoring, tracking, storage, receipt, transport, schema, Service Worker,
+  or user-data behavior changed.
