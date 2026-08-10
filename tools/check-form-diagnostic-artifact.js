@@ -10,6 +10,7 @@ const {
   inspectFormDiagnosticArtifact,
 } = require("./form-diagnostic-artifact");
 const { findDiagnosticFilesFromDownloads } = require("./inspect-form-diagnostic-json");
+const { parseArgs: parseHandoffArgs } = require("./write-form-diagnostic-handoff");
 
 const CONDITIONS = ["side", "oblique", "normal_range"];
 
@@ -197,6 +198,7 @@ const handoffFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-hando
 try {
   const artifactPath = path.join(handoffFixture, "artifact.json");
   const outputPath = path.join(handoffFixture, "handoff.json");
+  const currentPreviewOutput = path.join(handoffFixture, "handoff-current-preview.json");
   fs.writeFileSync(artifactPath, `${JSON.stringify(validPayload(), null, 2)}\n`, "utf8");
   const cliOutput = execFileSync(
     process.execPath,
@@ -220,6 +222,52 @@ try {
     Object.prototype.hasOwnProperty.call(writtenHandoff.artifact, "receipts"),
     false,
     "CLI handoff remains aggregate-only",
+  );
+
+  const currentPreviewCliOutput = execFileSync(
+    process.execPath,
+    [
+      path.join(__dirname, "write-form-diagnostic-handoff.js"),
+      artifactPath,
+      "--preview-current",
+      "--output",
+      currentPreviewOutput,
+    ],
+    { cwd: path.join(__dirname, ".."), encoding: "utf8" },
+  );
+  assert.match(
+    currentPreviewCliOutput,
+    /Form diagnostic handoff written:/,
+    "current preview handoff reports its output",
+  );
+  const currentPreviewHandoff = JSON.parse(fs.readFileSync(currentPreviewOutput, "utf8"));
+  const expectedPreviewCommit = execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: path.join(__dirname, ".."),
+    encoding: "utf8",
+  }).trim();
+  const expectedPreviewTree = execFileSync("git", ["rev-parse", "HEAD^{tree}"], {
+    cwd: path.join(__dirname, ".."),
+    encoding: "utf8",
+  }).trim();
+  assert.deepEqual(
+    currentPreviewHandoff.preview,
+    { commit: expectedPreviewCommit, tree: expectedPreviewTree },
+    "current preview handoff binds the checked-out commit and tree",
+  );
+  assert.throws(
+    () =>
+      parseHandoffArgs([
+        artifactPath,
+        "--preview-current",
+        "--preview-commit",
+        "a".repeat(40),
+        "--preview-tree",
+        "b".repeat(40),
+        "--output",
+        path.join(handoffFixture, "conflicting-handoff.json"),
+      ]),
+    /同時に指定できません/,
+    "current preview mode rejects conflicting explicit provenance",
   );
 } finally {
   fs.rmSync(handoffFixture, { recursive: true, force: true });

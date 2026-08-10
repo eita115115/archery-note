@@ -4208,3 +4208,21 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: form-capture markup and static/runtime accessibility contracts
   only; no detector, receipt, save, transport, schema, Service Worker, or
   user-data behavior changed.
+
+## 2026-08-11 — Bind handoff to the current preview
+
+- RED evidence: the new artifact-checker contract failed because the handoff
+  CLI rejected `--preview-current` as an unknown option.
+- Changed: `tools/write-form-diagnostic-handoff.js` can now derive the checked
+  out commit and tree with `git rev-parse` when `--preview-current` is used.
+  Explicit artifact paths, Downloads discovery, and manual
+  `--preview-commit`/`--preview-tree` handoff remain supported; mixed modes are
+  rejected. The sidecar remains aggregate-only and overwrite-protected.
+- GREEN evidence: the artifact checker now verifies current commit/tree
+  binding and mixed-option refusal; focused checker and Node syntax checks pass.
+  Full check-all, lint, format, Node syntax, and diff checks pass.
+- Scope/risk: release-handoff CLI, its focused checker contract, and this
+  ledger entry only. No app, storage, Service Worker, detector, threshold,
+  artifact schema, raw receipt, or user-data behavior changed. Manual handoff
+  remains the fallback when a physical artifact with trusted preview
+  provenance is collected.
