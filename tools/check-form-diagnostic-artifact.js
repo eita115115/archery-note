@@ -244,6 +244,53 @@ try {
     ["archery-note-form-diagnostics-one.json", "archery-note-form-diagnostics-two.json"],
     "download search returns all candidates in stable order",
   );
+
+  const cliHome = path.join(downloadsFixture, "cli-home");
+  const cliDownloads = path.join(cliHome, "Downloads");
+  fs.mkdirSync(cliDownloads, { recursive: true });
+  const ambiguousNames = [
+    "archery-note-form-diagnostics-cli-one.json",
+    "archery-note-form-diagnostics-cli-two.json",
+  ];
+  ambiguousNames.forEach((fileName) => {
+    fs.writeFileSync(path.join(cliDownloads, fileName), "{}");
+  });
+  const ambiguousOutput = path.join(downloadsFixture, "ambiguous-handoff.json");
+  let ambiguousCliError;
+  try {
+    execFileSync(
+      process.execPath,
+      [
+        path.join(__dirname, "write-form-diagnostic-handoff.js"),
+        "--from-downloads",
+        "--preview-commit",
+        "A".repeat(40),
+        "--preview-tree",
+        "b".repeat(40),
+        "--output",
+        ambiguousOutput,
+      ],
+      {
+        cwd: path.join(__dirname, ".."),
+        env: { ...process.env, HOME: cliHome, USERPROFILE: cliHome },
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      },
+    );
+  } catch (error) {
+    ambiguousCliError = error;
+  }
+  assert.ok(ambiguousCliError, "ambiguous Downloads handoff must fail");
+  assert.equal(ambiguousCliError.status, 2, "ambiguous Downloads handoff exits with status 2");
+  const ambiguousStderr = String(ambiguousCliError.stderr);
+  ambiguousNames.forEach((fileName) => {
+    assert.match(
+      ambiguousStderr,
+      new RegExp(fileName),
+      `ambiguous handoff lists candidate ${fileName}`,
+    );
+  });
+  assert.match(ambiguousStderr, /明示パスを指定/, "ambiguous handoff requests an explicit path");
 } finally {
   fs.rmSync(downloadsFixture, { recursive: true, force: true });
 }

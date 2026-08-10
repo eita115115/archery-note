@@ -62,7 +62,13 @@ function resolveArtifactPath(options) {
     throw new Error("Downloads に診断JSONが1件もありません");
   }
   if (candidates.length > 1) {
-    throw new Error("Downloads に診断JSONが複数あります。明示パスを指定してください");
+    throw new Error(
+      [
+        "Downloads に診断JSONの候補が複数あります。候補名:",
+        ...candidates.map((candidate) => `- ${path.basename(candidate)}`),
+        "候補から1つを選び、明示パスを指定して再実行してください。",
+      ].join("\n"),
+    );
   }
   return candidates[0];
 }

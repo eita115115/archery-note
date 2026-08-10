@@ -3856,3 +3856,24 @@ the minimum touch target` after the focused static contract was added.
   Service Worker, or user-data behavior changed. Commit this final scoped UI
   fix, then restart the HTTPS preview on the resulting commit for the physical
   3-condition / 18-shot artifact.
+
+## 2026-08-10 — List ambiguous diagnostic handoff Downloads candidates
+
+- RED evidence: the artifact checker now runs the handoff CLI against a
+  temporary `USERPROFILE/Downloads` containing two matching diagnostic JSON
+  files. Before the fix, the CLI exited 2 but reported only a generic multiple
+  candidate error, so neither basename was available for operator selection.
+- Changed: `tools/write-form-diagnostic-handoff.js` now lists every candidate
+  basename and asks the operator to choose one and rerun with an explicit path.
+  `tools/check-form-diagnostic-artifact.js` locks this CLI contract while
+  retaining the existing zero-candidate, explicit-path, overwrite, invalid
+  provenance, and schema-5 refusal checks.
+- GREEN evidence: `node tools/check-form-diagnostic-artifact.js` passed; the
+  standalone CLI regression harness passed zero-candidate, explicit-path,
+  overwrite refusal, invalid preview SHA, and normal schema-5 refusal cases.
+  Target syntax, lint, formatting, and `git diff --check` remain required
+  before commit. No app scripts, storage, receipt, transport, schema, or user
+  data behavior changed.
+- Risk/next: tooling-only and independent of physical iPhone acceptance. Run
+  the cumulative form/check-all ladder, then commit and push this scoped CLI
+  improvement before returning to the trusted-HTTPS artifact gate.
