@@ -109,10 +109,10 @@ Privacy-safe aggregate from the artifact:
 | normal_range |      6/6 |             6 |             0 |          0 |
 
 All retained receipts are `confirmed`; the artifact contains no unresolved
-receipt. This is still provisional until the operator confirms that the
-preview printed candidate commit `5e55238030265b4b82e1ba22717b9caac17bb1dd`
-and tree `3ad834cb39f4dca258e65c513a924e0445384130`, and that the two side
-auto-canceled receipts did not remove a real shown shot. The JSON remains
+receipt. This is still provisional until the operator records the exact
+`Preview Git commit` and `Preview Git tree` printed by the helper for the same
+run, and confirms that the two side auto-canceled receipts did not remove a
+real shown shot. Do not reuse IDs from an earlier run. The JSON remains
 outside the repository.
 
 ## Pass criteria
@@ -219,6 +219,6 @@ This artifact is valid but remains provisional: schema 1 does not contain
 preview provenance, so it cannot be bound to the current candidate. The old
 video report (真横 3/6, やや斜め 0/6, 通常設置 3/6) is therefore not contradicted
 or replaced by this file. Repeat the trusted HTTPS 3×6 sequence on the current
-preview and confirm commit `5e55238030265b4b82e1ba22717b9caac17bb1dd`, tree
-`3ad834cb39f4dca258e65c513a924e0445384130`, before accepting the artifact.
+preview, record the helper's printed commit/tree beside the artifact SHA, and
+accept it only when those values identify the exact served run.
 Keep the JSON outside the repository.
