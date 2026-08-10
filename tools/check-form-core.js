@@ -217,6 +217,16 @@ const videoTimestampApi = new Function(
     "video timestamp rejects a fractional duplicate millisecond",
   );
   assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17375000, 17375000),
+    null,
+    "video timestamp rejects an exact duplicate integer millisecond",
+  );
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17374999, 17375000),
+    null,
+    "video timestamp rejects a backward integer millisecond",
+  );
+  assertEqual(
     videoTimestampApi.nextFormVideoTimestampMs(17375001.1, last),
     17375001,
     "video timestamp accepts the next integer millisecond",

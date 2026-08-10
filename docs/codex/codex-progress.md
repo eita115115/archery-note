@@ -3966,6 +3966,23 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this small live parity fix, then return to field-artifact
   collection and final release audit.
 
+## 2026-08-10 — Lock timestamp monotonicity boundaries
+
+- RED contract gap: the existing timestamp checker covered fractional
+  duplicates but had no explicit exact-integer duplicate or backward-integer
+  assertions. A read-only probe showed the already-shipped helper returned
+  `null` for both cases, so no production defect or threshold change was
+  introduced.
+- Changed: `tools/check-form-core.js` now freezes both boundary contracts:
+  same integer milliseconds and regressing integer milliseconds are rejected
+  before MediaPipe receives them. `scripts/47-form-view.js` is unchanged.
+- GREEN evidence: `node tools/check-form-core.js` passes with the new cases;
+  the previously passing `npm run check:form`, lint, format, syntax, and
+  `git diff --check` ladder remains applicable. No storage, transport, receipt,
+  detector, threshold, schema, or user-data behavior changed.
+- Risk/next: pure regression coverage only; keep the candidate pinned for the
+  replay/live timestamp CI and the pending trusted-HTTPS field artifact.
+
 ## 2026-08-10 — Name active record adjustment controls
 
 - UX evidence: the active record nudge pad used arrow glyphs and a trash icon
