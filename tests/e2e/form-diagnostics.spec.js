@@ -557,9 +557,14 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await page.locator('#tabs [data-v="analysis"]').click();
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
+  await expect(page.locator("#formStart")).toHaveAttribute("type", "button");
+  await expect(page.locator("#formReplay")).toHaveAttribute("type", "button");
   await page.locator("#formStart").click();
   const liveBaseline = await resetWriteProbeAfterStartup(page);
   await expect(page.locator("#fcShotCount")).toHaveText("検出 0/6射");
+  for (const controlId of ["fcClose", "fcCrop", "fcRec"]) {
+    await expect(page.locator(`#${controlId}`)).toHaveAttribute("type", "button");
+  }
   await page.locator("#fcClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#fcSave")).toBeEnabled();
@@ -600,6 +605,8 @@ test("failed diagnostic discard cancel retains the candidate and confirm closes 
   await page.locator('#tabs [data-v="analysis"]').click();
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
+  await expect(page.locator("#formStart")).toHaveAttribute("type", "button");
+  await expect(page.locator("#formReplay")).toHaveAttribute("type", "button");
   await page.locator("#formStart").click();
   await resetWriteProbeAfterStartup(page);
   await page.locator("#fcClose").click();
@@ -654,6 +661,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
     buffer: Buffer.from("synthetic replay fixture"),
   });
   await expect(page.locator("#frVideo")).toBeVisible();
+  await expect(page.locator("#frClose")).toHaveAttribute("type", "button");
   const replayBaseline = await resetWriteProbeAfterStartup(page);
   await expect(page.locator("#frShotCount")).toHaveText("検出 0/6射");
   await page.locator("#frClose").click();

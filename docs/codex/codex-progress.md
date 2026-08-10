@@ -4191,3 +4191,20 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: sight-adjustment button markup and accessibility contract only;
   no scoring, tracking, storage, receipt, transport, schema, Service Worker,
   or user-data behavior changed.
+
+## 2026-08-11 — Make form capture actions explicit
+
+- RED evidence: `node tools/check-form-core.js` failed at the new `formStart`
+  contract because the live/replay entry and capture controls had no explicit
+  `type="button"`.
+- Changed: form start/replay, capture close/crop/record, replay close, and
+  per-shot removal controls now declare `type="button"`. Existing toolbar
+  controls already covered by the form contract are unchanged. Focused form
+  E2E assertions cover the live/replay runtime controls.
+- GREEN evidence: `node tools/check-form-core.js`, `npm run check:form`, lint,
+  format, Node syntax checks, and `git diff --check` pass.
+- Focused Chromium live/replay diagnostic workers passed 2/2; the bounded
+  parent command timed out only during the known Windows web-server teardown.
+- Scope/risk: form-capture markup and static/runtime accessibility contracts
+  only; no detector, receipt, save, transport, schema, Service Worker, or
+  user-data behavior changed.

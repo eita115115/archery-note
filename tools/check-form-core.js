@@ -257,6 +257,26 @@ assert(
   ),
   "replay passes normalized video timestamps to MediaPipe",
 );
+for (const controlId of [
+  "formStart",
+  "formReplay",
+  "fdClose",
+  "fcClose",
+  "fcCrop",
+  "fcRec",
+  "frClose",
+]) {
+  assert(
+    new RegExp(
+      `<button\\b(?=[^>]*\\bid=["']${controlId}["'])(?=[^>]*\\btype=["']button["'])[^>]*>`,
+    ).test(viewScript),
+    `form control ${controlId} must declare type=button`,
+  );
+}
+assert(
+  /<button\b(?=[^>]*\bdata-rm-shot=)(?=[^>]*\btype=["']button["'])[^>]*>/.test(viewScript),
+  "form shot removal control must declare type=button",
+);
 for (const [label, source, freezeName, finishName] of [
   ["live", saveCapture, "freezeCaptureForSave", "finishCapture"],
   ["replay", saveReplay, "freezeReplayForSave", "finishReplay"],

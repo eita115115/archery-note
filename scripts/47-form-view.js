@@ -311,7 +311,7 @@ function formTrackingCard(){
     </div>`;
   }).join("");
   return `<div class="card"><h2>射形トラッキング <span class="mini">ベータ / 端末内解析</span></h2>
-    <div class="btnrow"><button class="btn" id="formStart">${icon("camera")} 射形を解析する</button><button class="btn sec sm" id="formReplay">保存済み動画を解析</button></div>
+    <div class="btnrow"><button type="button" class="btn" id="formStart">${icon("camera")} 射形を解析する</button><button type="button" class="btn sec sm" id="formReplay">保存済み動画を解析</button></div>
     ${formTrendMiniHtml()}
     ${rows||`<div class="empty">まだ射形記録がありません。カメラを横に置いて数射解析してみましょう。</div>`}
     ${formScoreLinkHtml()}
@@ -397,7 +397,7 @@ function openFormDetail(rec){
     <table class="tbl mt8"><tr><th>射</th><th>弓手肘</th><th>引き手肘</th><th class="right">保持</th></tr>
     ${(rec.features||[]).map((f,i)=>`<tr><td>${i+1}</td><td>${f.angles&&Number.isFinite(f.angles.bowArm)?f.angles.bowArm.toFixed(0)+"°":"—"}${f.release&&f.release.stable===false?` ${icon("warn")}`:""}</td><td>${f.angles&&Number.isFinite(f.angles.drawArm)?f.angles.drawArm.toFixed(0)+"°":"—"}</td><td class="right">${f.phase&&Number.isFinite(f.phase.anchorMs)?(f.phase.anchorMs/1000).toFixed(1)+"s":"—"}</td></tr>`).join("")}</table>
     <div class="hint">${icon("warn")} = リリース前0.5秒にドリフトを観測した射。コメントは観測にもとづく候補で、断定ではありません。</div>
-    <div class="btnrow"><button class="btn ghost" id="fdClose">閉じる</button></div>
+    <div class="btnrow"><button type="button" class="btn ghost" id="fdClose">閉じる</button></div>
   </div>`;
   openModal(ovl,{escapeTarget:"#fdClose"});
   ovl.querySelector("#fdClose").onclick=()=>closeModal(ovl);
@@ -437,9 +437,9 @@ function openFormCapture(){
   ovl.innerHTML=`<div class="sheet formCapture">
     <div class="formCamWrap"><video id="fcVideo" playsinline muted></video><canvas id="fcCanvas"></canvas>
       <div class="formPhaseTag" id="fcPhase">準備中</div>
-      <button class="formCloseBtn" id="fcClose" aria-label="閉じる">${icon("del")}</button>
-      <button class="formCropBtn" id="fcCrop" aria-label="中央固定" aria-pressed="false">${icon("target")}</button>
-      <button class="formRecBtn" id="fcRec" aria-label="録画" aria-pressed="false">${icon("camera")}</button>
+      <button type="button" class="formCloseBtn" id="fcClose" aria-label="閉じる">${icon("del")}</button>
+      <button type="button" class="formCropBtn" id="fcCrop" aria-label="中央固定" aria-pressed="false">${icon("target")}</button>
+      <button type="button" class="formRecBtn" id="fcRec" aria-label="録画" aria-pressed="false">${icon("camera")}</button>
       <div class="formHud" id="fcHud">解析モデルを読み込んでいます…（初回のみ約15MB）</div>
     </div>
     <div class="formShotScroll" id="fcShots"></div>
@@ -661,7 +661,7 @@ function openFormCapture(){
     div.innerHTML=`<div><div class="t">第${shots.length}射</div>
       <div class="d" data-shot-desc>保持 ${(shot.holdMs/1000).toFixed(1)}秒${shot.pre&&(shot.pre.bowDrift||shot.pre.drawDrift)?` / ${icon("warn")} リリース前ドリフト`:""}</div></div>
       <div class="big">${shot.angles.bowArm!=null?shot.angles.bowArm.toFixed(0)+"°":"—"}<small> / 引き手${shot.angles.drawArm!=null?shot.angles.drawArm.toFixed(0)+"°":"—"}</small></div>
-      <button class="btn sm ghost" data-rm-shot="${esc(shot.id)}" aria-label="この射を取り消す">${icon("del")}</button>`;
+      <button type="button" class="btn sm ghost" data-rm-shot="${esc(shot.id)}" aria-label="この射を取り消す">${icon("del")}</button>`;
     div.querySelector("[data-rm-shot]").onclick=()=>{
       const removeAction=receiptTracker.manualRemove(shot.id);
       if(removeAction.code) return;
@@ -947,7 +947,7 @@ function startFormReplay(videoUrl){
   ovl.innerHTML=`<div class="sheet formCapture">
     <div class="formCamWrap"><video id="frVideo" playsinline muted></video><canvas id="frCanvas"></canvas>
       <div class="formPhaseTag" id="frPhase">読込中</div>
-      <button class="formCloseBtn" id="frClose" aria-label="閉じる">${icon("del")}</button>
+      <button type="button" class="formCloseBtn" id="frClose" aria-label="閉じる">${icon("del")}</button>
       <div class="formHud" id="frHud">動画を読み込んでいます…</div>
     </div>
     <div class="formShotScroll" id="frShots"></div>
