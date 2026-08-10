@@ -3910,6 +3910,28 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this isolated UI improvement, then continue one
   non-physical quality task while the trusted-HTTPS field matrix remains open.
 
+## 2026-08-10 — Associate sight adjustment dialog labels
+
+- UX evidence: the site-value entry and calibration dialogs still exposed
+  date, vertical, horizontal, and memo fields with visual-only labels. This
+  weakened the one-handed adjustment workflow for VoiceOver and label-based
+  input even though the main ledger controls were already associated.
+- RED evidence: `node tools/check-ui.js` failed at the new `mkDate` modal label
+  marker before the production change.
+- Changed: mark entry now associates `mkDate`, `mkV`, `mkH`, and `mkNote`.
+  Calibration associates `calDate`, `calV_${d}`, `calH_${d}`, and `calNote`
+  for all four generated distances. Save and calculation behavior is
+  unchanged.
+- GREEN evidence: `node tools/check-ui.js`, `npm run check:all`, lint, format,
+  Node syntax checks, and `git diff --check` pass. The focused Chromium worker
+  passed 1/1 for both dialogs; the parent timeout remains the known Windows
+  teardown-only issue after the worker completed.
+- Scope/risk: site-adjustment modal labels, static contract, and app-smoke
+  coverage only; no scoring, storage, detector, receipt, transport, schema,
+  Service Worker, dependency, or user-data behavior changed.
+- Next: commit/push this isolated UI improvement, then continue one
+  non-physical quality task while the trusted-HTTPS field matrix remains open.
+
 ## 2026-08-10 — Associate sight mark modal labels
 
 - UX evidence: the site-value entry and calibration dialogs still exposed
