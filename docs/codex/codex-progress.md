@@ -3910,6 +3910,19 @@ the minimum touch target` after the focused static contract was added.
 - Next: commit/push this isolated UI improvement, then continue one
   non-physical quality task while the trusted-HTTPS field matrix remains open.
 
+## 2026-08-10 — Confirm replay timestamp E2E stability
+
+- GREEN evidence: after `c2f08a72`, the prestarted Chromium
+  `tests/e2e/form-diagnostics.spec.js --project=chromium --workers=1` run
+  completed 49/49 in 1.2 minutes on port 4201. The replay timestamp fix was
+  exercised without a MediaPipe packet-timestamp error; the managed server
+  teardown caveat remains separate from worker assertions.
+- CI handoff: run `31397591622` is still being polled for the c2f08a72 head.
+  This docs-only record does not change detector, storage, receipt, transport,
+  schema, or user-data behavior.
+- Next: keep the replay fix and its 49/49 evidence pinned while the remaining
+  trusted-HTTPS field artifact gate is completed.
+
 ## 2026-08-10 — Prevent replay timestamp collisions
 
 - Reproduction: the supplied local MP4 (`ScreenRecording_08-10-2026 11-17-56_1のコピー.mp4`, 70.04s, 1170×2532) was loaded through the real Chrome replay path. Before this change, the run stopped around 17.375s with MediaPipe `Packet timestamp mismatch` after two detected shots.
