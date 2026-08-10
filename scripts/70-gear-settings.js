@@ -1032,7 +1032,7 @@ function openCustomRoundForm(id) {
   const ovl = document.createElement("div");
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet"><h3>${src ? "カスタムラウンド編集" : "新しいカスタムラウンド"}</h3>
-    <label class="f">名前 *</label><input class="inp" id="crName" value="${esc(src ? src.label : "")}" placeholder="例: 60m/30m 各36射">
+    <label class="f" for="crName">名前 *</label><input class="inp" id="crName" value="${esc(src ? src.label : "")}" placeholder="例: 60m/30m 各36射">
     <div id="crStages"></div>
     <div class="btnrow"><button class="btn sec" id="crAddStage">＋ ステージを追加</button></div>
     ${src ? `<div class="btnrow"><button class="btn danger" id="crDel">この定義を削除</button></div>` : ""}
@@ -1043,12 +1043,12 @@ function openCustomRoundForm(id) {
     return `<div class="advice recordNeutralAdvice">
       <div class="kv"><span><b>ステージ${i + 1}</b></span><span>${stages.length > 1 ? `<button type="button" class="btn sm ghost" data-del-stage="${i}">${icon("del")} 削除</button>` : ""}</span></div>
       <div class="row">
-        <div><label class="f">距離 (m)</label><input class="inp" data-st-dist="${i}" inputmode="numeric" value="${esc(st.dist == null ? "" : st.dist)}" placeholder="例: 60"></div>
-        <div><label class="f">的</label><select class="inp" data-st-face="${i}">${CUSTOM_ROUND_FACES.map(([v, lb]) => `<option value="${v}" ${String(st.face) === v ? "selected" : ""}>${lb}</option>`).join("")}</select></div>
+        <div><label class="f" for="crStage${i}Dist">距離 (m)</label><input class="inp" id="crStage${i}Dist" data-st-dist="${i}" inputmode="numeric" value="${esc(st.dist == null ? "" : st.dist)}" placeholder="例: 60"></div>
+        <div><label class="f" for="crStage${i}Face">的</label><select class="inp" id="crStage${i}Face" data-st-face="${i}">${CUSTOM_ROUND_FACES.map(([v, lb]) => `<option value="${v}" ${String(st.face) === v ? "selected" : ""}>${lb}</option>`).join("")}</select></div>
       </div>
       <div class="row">
-        <div><label class="f">射数</label><input class="inp" data-st-arrows="${i}" inputmode="numeric" value="${esc(st.arrows == null ? "" : st.arrows)}" placeholder="例: 36"></div>
-        <div><label class="f">1エンドの本数</label><select class="inp" data-st-perend="${i}">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === (+st.perEnd || 6) ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+        <div><label class="f" for="crStage${i}Arrows">射数</label><input class="inp" id="crStage${i}Arrows" data-st-arrows="${i}" inputmode="numeric" value="${esc(st.arrows == null ? "" : st.arrows)}" placeholder="例: 36"></div>
+        <div><label class="f" for="crStage${i}PerEnd">1エンドの本数</label><select class="inp" id="crStage${i}PerEnd" data-st-perend="${i}">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === (+st.perEnd || 6) ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
       </div>
     </div>`;
   }

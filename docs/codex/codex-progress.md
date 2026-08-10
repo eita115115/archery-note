@@ -3889,3 +3889,23 @@ the minimum touch target` after the focused static contract was added.
   trusted-HTTPS 3-condition / 18-shot artifact remains the only field gate.
 - Next: continue one isolated non-physical quality task while keeping the
   candidate pinned for the provenance-bound field run.
+
+## 2026-08-10 — Associate custom round editor labels
+
+- UX evidence: the custom multi-distance round editor rendered visible labels
+  without `for` associations. This made stage distance, target, arrow-count,
+  and end-size controls harder to use with VoiceOver and label-based input.
+- RED evidence: `node tools/check-ui.js` failed at the new custom-round label
+  marker before the production change.
+- Changed: the editor now gives the round name and every generated stage field
+  stable IDs (`crStage${i}Dist`, `Face`, `Arrows`, and `PerEnd`) with matching
+  labels. The existing `data-st-*` hooks and save behavior remain unchanged.
+- GREEN evidence: `node tools/check-ui.js`, `npm run check:all`, lint, format,
+  Node syntax checks, and `git diff --check` pass. The focused Chromium worker
+  passed 1/1; the parent process again exceeded the Windows teardown timeout
+  after the worker completed, with no application assertion failure.
+- Scope/risk: UI labels, static contract, and app-smoke coverage only. No
+  detector, storage, receipt, transport, schema, Service Worker, dependency,
+  or user-data behavior changed.
+- Next: commit/push this isolated UI improvement, then continue one
+  non-physical quality task while the trusted-HTTPS field matrix remains open.

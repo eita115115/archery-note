@@ -433,6 +433,19 @@ function staticUiChecks() {
   );
   const formViewSource = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
 
+  for (const controlMarker of [
+    '<label class="f" for="crName">',
+    '<label class="f" for="crStage${i}Dist">',
+    '<label class="f" for="crStage${i}Face">',
+    '<label class="f" for="crStage${i}Arrows">',
+    '<label class="f" for="crStage${i}PerEnd">',
+  ]) {
+    assert(
+      gearSettingsSource.includes(controlMarker),
+      `custom round editor label marker missing: ${controlMarker}`,
+    );
+  }
+
   assert(
     /function\s+formTrackingEnabled\(\)\s*\{\s*return\s+!!\(db\.settings&&db\.settings\.formTrackingEnabled===true\);?\s*\}/.test(
       formViewSource,

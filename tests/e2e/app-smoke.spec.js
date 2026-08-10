@@ -305,6 +305,32 @@ test("settings exposes a visible header close control without scrolling", async 
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to custom round editor controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await page.locator("#btnSettings").click();
+  const settings = page.locator("body > .ovl");
+  await settings.getByTestId("settings-custom-rounds").locator("summary").click();
+  await settings.getByTestId("settings-custom-round-add").click();
+
+  const editor = page.locator("body > .ovl");
+  await expect(editor.getByLabel("名前 *", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("距離 (m)", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("的", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("射数", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("1エンドの本数", { exact: true })).toBeEditable();
+  await editor.locator("#crCancel").click();
+  await expect(page.getByRole("button", { name: "設定を閉じる", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "設定を閉じる", exact: true }).click();
+  await expect(page.locator("body > .ovl")).toHaveCount(0);
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore", async ({
   page,
 }) => {
