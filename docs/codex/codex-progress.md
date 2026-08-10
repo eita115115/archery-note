@@ -7,8 +7,8 @@ Primary brief: [integration-plan.md](integration-plan.md)
 
 ## Current Status
 
-- 2026-08-09 sanitized handoff candidate `codex/form-diagnostic-handoff-release`
-  is at the verified v84 tree. It is based on `origin/main`, excludes the
+- 2026-08-10 sanitized handoff candidate `codex/form-diagnostic-handoff-release`
+  is at the verified v84 tree (`798c0ebd`). It is based on `origin/main`, excludes the
   sensitive adaptive-release ancestor, and is the only branch eligible for
   GitHub handoff. The sensitive root worktree still has three unrelated
   metadata documents modified; they remain unstaged and outside this candidate.
@@ -18,12 +18,14 @@ Primary brief: [integration-plan.md](integration-plan.md)
   HTTPS preview tooling, and the Windows replay-contract validation fix are
   implemented. Candidate PR #134 is draft/clean with green CI; no merge or
   deployment has been performed.
-- Physical trusted-HTTPS iPhone acceptance is explicitly deferred. The previous
-  user-supplied JSON was a normal backup, not a completed bounded diagnostic
-  export, so field acceptance must not be marked complete.
-- Next task: continue one small non-physical product-quality improvement while
-  keeping the physical checklist pending and preserving the candidate's green
-  validation state.
+- Physical trusted-HTTPS iPhone acceptance is explicitly deferred. The current
+  `archery-note-form-diagnostics.json` is a valid bounded schema-1 `field-3x6`
+  artifact, but it has no preview commit/tree provenance and therefore cannot
+  be attributed to this candidate. The earlier normal backup remains separate.
+- The HTTPS helper now fails before certificate generation when the requested
+  port is occupied, which avoids the stale-8743 “page cannot open” ambiguity.
+- Next task: keep the physical checklist pending until a current-candidate
+  artifact is collected, while preserving the candidate's green validation state.
 
 ## Run Rules
 
