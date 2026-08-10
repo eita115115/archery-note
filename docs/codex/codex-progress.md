@@ -3877,3 +3877,15 @@ the minimum touch target` after the focused static contract was added.
 - Risk/next: tooling-only and independent of physical iPhone acceptance. Run
   the cumulative form/check-all ladder, then commit and push this scoped CLI
   improvement before returning to the trusted-HTTPS artifact gate.
+
+## 2026-08-10 — Complete the ambiguous diagnostic handoff update
+
+- Handoff: commit `e216b3371a314443758418e59a4dbee825cec3e3` contains only the
+  candidate-listing CLI, its focused checker contract, and this ledger update.
+  It is pushed to `codex/form-diagnostic-handoff-release`; GitHub Actions run
+  `31390644073` completed successfully and the remote ref matches the commit.
+- Scope: no app scripts, detector, storage, receipt, transport, schema,
+  Service Worker, dependency, or user-data behavior changed. The physical
+  trusted-HTTPS 3-condition / 18-shot artifact remains the only field gate.
+- Next: continue one isolated non-physical quality task while keeping the
+  candidate pinned for the provenance-bound field run.
