@@ -199,3 +199,20 @@ allowlist. Do not treat its output as acceptance evidence or tune thresholds
 from it alone.
 
 Record only commit/tree IDs, iOS/Safari versions without local identifiers, aggregate condition results, pass/fail, and artifact SHA-256.
+
+## Latest artifact audit (valid but provisional)
+
+The Downloads artifact was revalidated without modifying or importing the JSON:
+schema 1, app version 84, matrix `field-3x6`, 9,869 UTF-8 bytes, and SHA-256
+`7452e0bdf3ad87e4735447e024e791da5ef123f2c85642f685ccc9b871c82114`.
+The privacy-safe aggregate is side `6/6` from 8 receipts with 2 automatic
+cancellations and 0 unresolved, oblique `6/6` from 6, and normal_range `6/6`
+from 6; all retained receipts are confirmed.
+
+This artifact is valid but remains provisional: schema 1 does not contain
+preview provenance, so it cannot be bound to the current candidate. The old
+video report (真横 3/6, やや斜め 0/6, 通常設置 3/6) is therefore not contradicted
+or replaced by this file. Repeat the trusted HTTPS 3×6 sequence on the current
+preview and confirm commit `7f8de41e401eb95bcc57166d7d238ca4a68374e9`, tree
+`28c3daa21da1dac3391b7f8848f2ce111b6cb0ba`, before accepting the artifact.
+Keep the JSON outside the repository.

@@ -3514,3 +3514,23 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
 - Scope: docs-only evidence update. No runtime, detector, storage, receipt,
   transport, threshold, or user-data behavior changed. The trusted-HTTPS field
   A/B artifact remains the only physical acceptance gap.
+
+## 2026-08-10 — Re-audit the downloaded diagnostic artifact
+
+- Evidence: the external Downloads artifact revalidates as schema 1, app
+  version 84, matrix `field-3x6`, 9,869 UTF-8 bytes, SHA-256
+  `7452e0bdf3ad87e4735447e024e791da5ef123f2c85642f685ccc9b871c82114`.
+  Privacy-safe aggregate: side `6/6` from 8 receipts with 2 automatic
+  cancellations and 0 unresolved; oblique `6/6` from 6; normal_range `6/6`
+  from 6. All retained receipts are confirmed.
+- Boundary: schema 1 has no preview provenance, so this valid artifact cannot
+  be attributed to the current candidate. The older video report (真横 3/6,
+  やや斜め 0/6, 通常設置 3/6) remains a separate, unaccepted result rather
+  than being overwritten by this aggregate.
+- Required repeat: run the trusted HTTPS 3×6 sequence against preview commit
+  `7f8de41e401eb95bcc57166d7d238ca4a68374e9`, tree
+  `28c3daa21da1dac3391b7f8848f2ce111b6cb0ba`, then save and re-check the JSON.
+  Raw JSON stays outside the repository.
+- Scope/risk: docs-only audit record; no app, detector, receipt, storage,
+  transport, threshold, or user-data behavior changed. Physical acceptance
+  remains pending provenance-bound field evidence.
