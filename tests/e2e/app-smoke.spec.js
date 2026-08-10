@@ -166,6 +166,24 @@ test("exposes distance chips as buttons with synced aria-pressed", async ({ page
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to the record setup controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await page.locator("details.recordDetails summary").click();
+  await page.getByLabel("的", { exact: true }).selectOption("80");
+  await page.getByLabel("1エンドの本数", { exact: true }).selectOption("3");
+  await page.getByLabel("サイト 上下（目盛り）", { exact: true }).fill("5.4");
+  await page.getByLabel("風向", { exact: true }).selectOption({ label: "追い風" });
+  await expect(page.getByLabel("的", { exact: true })).toHaveValue("80");
+  await expect(page.getByLabel("1エンドの本数", { exact: true })).toHaveValue("3");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("exposes history rows and sight distance chips as buttons", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

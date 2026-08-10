@@ -514,10 +514,10 @@ function renderRecord(m) {
       ${[70, 50, 30, 18].map((d) => `<button type="button" class="chip ${d === defDist ? "on" : ""}" aria-pressed="${d === defDist}" data-d="${d}">${d}m</button>`).join("")}
       <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
     </div>
-    <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+    <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f" for="fDistCustom">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
     <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="quickSelects">
-      <div><label class="f">的</label><select class="inp" id="fFace">
+      <div><label class="f" for="fFace">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
           ${[122, 80, 60, 40].map((f) => `<option value="${f}" ${String(defFace) === String(f) ? "selected" : ""}>${f}cm</option>`).join("")}
           <option value="T40" ${defFace === "T40" ? "selected" : ""}>40cm 三つ目（縦）</option>
@@ -526,7 +526,7 @@ function renderRecord(m) {
           ${FIELD_FACE_SIZES.map((f) => `<option value="F${f}" ${defFace === `F${f}` ? "selected" : ""}>${f}cm フィールド</option>`).join("")}
         </optgroup>
       </select></div>
-      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+      <div><label class="f" for="fArrows">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
     </div>
     <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="btnrow"><button class="btn startPrimary" id="fStart" data-testid="record-start">${mode === "calibration" ? "サイト値つきで開始" : "この条件で開始"}</button></div>
@@ -534,10 +534,10 @@ function renderRecord(m) {
     <details class="adv recordDetails" ${mode === "calibration" ? "open" : ""}>
       <summary>詳しく残す</summary>
       <div class="fieldBand">
-        <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
+        <div><label class="f" for="fSetup">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
       </div>
-      <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
-      <label class="f">ラウンド</label><select class="inp" id="fRound">
+      <label class="f" for="fDate">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
+      <label class="f" for="fRound">ラウンド</label><select class="inp" id="fRound">
         ${ROUND_TYPES.map((r) => `<option value="${r.id}">${r.label}</option>`).join("")}
         <optgroup label="多距離ラウンド">
           ${multiRoundDefs()
@@ -547,18 +547,18 @@ function renderRecord(m) {
       </select>
       <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
       <div class="row">
-        <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
-        <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
+        <div><label class="f" for="fSightV">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
+        <div><label class="f" for="fSightH">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
       </div>
       <div class="hint">サイトの目盛りをそのまま記入（左右は<b>右なら 2、左なら -2</b>）。台帳に記録があれば自動入力されます。</div>
-      <label class="f">天候・コンディション</label>
+      <label class="f" for="fWx">天候・コンディション</label>
       <div class="row">
         <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
         <input class="inp" id="fNote" placeholder="${mode === "calibration" ? "例: サイト1目盛り確認" : "メモ（任意）"}" value="${mode === "calibration" ? "サイト値確認" : ""}">
       </div>
       <div class="row">
-        <div><label class="f">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
-        <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
+        <div><label class="f" for="fWindDir">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
+        <div><label class="f" for="fWindSpeed">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
     ${mode === "calibration" ? `<div class="advice recordNeutralAdvice"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>` : ""}

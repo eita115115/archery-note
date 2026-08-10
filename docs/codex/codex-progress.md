@@ -3788,3 +3788,27 @@ the minimum touch target` after the focused static contract was added.
   data behavior changed.
 - Risk/next: run the cumulative CI ladder, then keep the candidate pinned for
   the trusted-HTTPS physical 3-condition / 18-shot acceptance.
+
+## 2026-08-10 — Give record setup fields explicit accessible names
+
+- UX evidence: the record setup surface rendered visible text labels without
+  `for` associations, so screen readers and automated interaction could not
+  reliably name the controls. Advanced fields remain inside the existing
+  collapsible section; the primary phone flow is unchanged.
+- RED evidence: `node tools/check-ui.js` failed at
+  `record setup control fDistCustom needs an associated label`; the focused
+  Playwright case also failed before production changes because the contract
+  was absent.
+- Changed: the 11 record setup labels now point to their matching input or
+  select IDs. The focused E2E opens the advanced section before exercising
+  hidden-by-default fields and verifies the distance, arrow-count, sight, and
+  wind controls by accessible name.
+- GREEN evidence: the focused worker reported 1/1; `npm run check:app`,
+  formatting, Node syntax checks, and `git diff --check` pass. `check:ui`
+  previously passed after the static contract; a later rerun hit the known
+  Windows EPERM cleanup on a locked generated Chrome profile, not an app
+  assertion.
+- Risk/next: no detector, storage, receipt, transport, schema, Service Worker,
+  or user-data behavior changed. After this small commit/CI check, the only
+  remaining product gate is the trusted-HTTPS physical 3-condition / 18-shot
+  acceptance artifact.

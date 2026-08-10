@@ -155,6 +155,24 @@ function staticUiChecks() {
       surface.includes("用具"),
     "Tab labels missing",
   );
+  for (const controlId of [
+    "fDistCustom",
+    "fFace",
+    "fArrows",
+    "fSetup",
+    "fDate",
+    "fRound",
+    "fSightV",
+    "fSightH",
+    "fWx",
+    "fWindDir",
+    "fWindSpeed",
+  ]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(recordSurface),
+      `record setup control ${controlId} needs an associated label`,
+    );
+  }
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
   assert(
