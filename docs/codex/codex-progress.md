@@ -3461,3 +3461,41 @@ check:form`, `npm run check:all`, lint, `npm run format:check`, targeted Node
   a normal hold, and a 100ms let-down control; export the diagnostic artifact
   and inspect release evidence/cancellation counts before changing any further
   thresholds.
+
+## 2026-08-10 — Require sustained departure after the loose-anchor false positive
+
+- Field observation: in the supplied video, frames sampled every 100ms from
+  8.8–10.4s keep the draw hand, bow hand, and bow nearly stationary while the
+  UI still shows `RELEASE → FOLLOW → DRAWING` and advances the shot count. No
+  physical hand departure is visible in those frames.
+- RED evidence: the new short-hold replay (five 20ms loose-anchor frames,
+  one high-speed `.65` spike, a null pose, then return) failed with
+  `expected 0, got 1 (evidence=["adaptive"])`. A 10-frame/200ms loose-anchor
+  hold failed the same way after the brief-only guard, proving that the normal
+  adaptive route also accepted the transient as a release.
+- Root cause: adaptive evidence treated a single boundary-crossing frame as a
+  complete departure; the legacy fallback could then expose that gross match
+  before the next valid pose. A broad pending gate also suppressed the existing
+  far-arrival NB2/tier-1 contract, so the guard must remain limited to the loose
+  near-anchor geometry used by the video route.
+- Changed: brief and standard adaptive evidence now require two consecutive
+  valid departure frames. A pending candidate keeps the first crossing debug
+  (including `departDelta=.275`) and sticky anchor timing, suppresses only the
+  loose near-anchor legacy fallback, and clears on invalid/far input or commit.
+  The candidate scan walks the current departure run to recover a fresh origin;
+  existing far-arrival NB2/D’ behavior remains unchanged.
+- GREEN evidence: short and long loose-anchor jitter fixtures now return zero
+  releases; genuine adaptive/production fixtures include two departure frames,
+  explicitly retain the first-crossing `departDelta`, and still produce one
+  confirmed six-shot summary. Existing close, NB2, D’, cancellation, and sticky
+  anchor checks pass.
+- Validation: `node tools/check-form-core.js`, diagnostic/app/globals/storage
+  checks, `npm run check:all`, lint, format, syntax, and `git diff --check` all
+  pass. No storage schema, receipt ownership, transport, threshold constants,
+  or user data were changed.
+- Risk: confirmed adaptive releases are delayed by one valid frame by design;
+  first-crossing diagnostics remain stable. Trusted-HTTPS field A/B evidence is
+  still required to confirm that the video-shaped false-positive path is closed
+  without reducing recall.
+- Next: review this isolated three-file change, commit/push it, then inspect the
+  resulting CI run before the user performs the trusted 3×6 artifact run.

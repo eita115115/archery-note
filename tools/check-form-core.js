@@ -923,10 +923,10 @@ function adaptiveConfirmationFixture() {
     return { result, now };
   };
   adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 })
-    .slice(0, 43)
+    .slice(0, 44)
     .forEach(([raw, vel, elapsed]) => push(raw, vel, elapsed));
   assert(fire, "adaptive confirmation fixture starts from a real fire");
-  assertEqual(fire.now, 860, "adaptive confirmation fixture fires at t=860");
+  assertEqual(fire.now, 880, "adaptive confirmation fixture fires after two departure frames");
   assertEqual(
     fire.result.debug.fireEvidence,
     "adaptive",
@@ -1685,7 +1685,7 @@ return adaptiveReleaseCandidate;`,
     adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
   );
   assertEqual(a.fires.length, 1, "initial detector state can fire profile A at t=860");
-  assertEqual(a.fires[0].now, 860, "first adaptive fire keeps the unoffset field timing");
+  assertEqual(a.fires[0].now, 880, "first adaptive fire waits for two departure frames");
   assertEqual(a.fires[0].result.debug.fireEvidence, "adaptive", "adaptive fire wins diagnostics");
   assertEqual(
     a.fires[0].result.debug.fireVel,
@@ -1809,7 +1809,7 @@ return adaptiveReleaseCandidate;`,
     );
   }
   const afterWindow = fixture.push(mkRaw(1.0, 90), 0.1, 1);
-  assertEqual(afterWindow.now, 1261, "first usable frame arrives at fire+401ms");
+  assertEqual(afterWindow.now, fixture.fire.now + 401, "first usable frame arrives at fire+401ms");
   assertEqual(fixture.st.pendingRelease, null, "first usable frame after +400 clears pending");
   assertEqual(fixture.stats.netReleases, 1, "all-null confirmation keeps the shown shot");
   assertEqual(fixture.stats.cancellations, 0, "all-null confirmation records no cancellation");
@@ -1839,8 +1839,8 @@ return adaptiveReleaseCandidate;`,
   assertEqual(fixture.stats.netReleases, 0, "valid return removes the shown shot");
   assertEqual(
     JSON.stringify(fixture.stats.cancelTimestamps),
-    JSON.stringify([1060]),
-    "valid return cancellation occurs at t=1060",
+    JSON.stringify([fixture.fire.now + 200]),
+    "valid return cancellation occurs at fire+200ms",
   );
   assertEqual(
     fourth.result.anchorStartTs,
@@ -2780,6 +2780,50 @@ function shotSequence(dt) {
     runSequence(slowLooseLetdown).releases,
     0,
     "brief loose-anchor slow let-down stays below the high-speed recovery gate",
+  );
+
+  /* 現場動画の再現: 緩いアンカー保持中にランドマークが一時的に浮き、
+     高速度を伴う1フレームと短い欠損を挟んでも、実際の離脱が無ければ
+     RELEASE を出してはならない。9afe65e3 の brief 経路がこのスパイクを
+     離脱として合成しないことを固定する（まず baseline RED を観測する）。 */
+  const looseAnchorJitter = [];
+  for (let i = 0; i < 12; i++)
+    looseAnchorJitter.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 5; i++) looseAnchorJitter.push([mkRaw(0.45, 150), 0.02, 20]);
+  looseAnchorJitter.push(
+    [mkRaw(0.46, 150), 0.2, 20],
+    [mkRaw(0.47, 150), 0.2, 20],
+    [mkRaw(0.65, 150), 12, 20],
+    [null, 0, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+  );
+  const looseAnchorJitterResult = runSequence(looseAnchorJitter);
+  assertEqual(
+    looseAnchorJitterResult.releases,
+    0,
+    `loose-anchor jitter and a transient pose gap do not fire without sustained departure (evidence=${JSON.stringify(looseAnchorJitterResult.fireEvidence)})`,
+  );
+
+  const looseAnchorLongHold = [];
+  for (let i = 0; i < 12; i++)
+    looseAnchorLongHold.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 10; i++) looseAnchorLongHold.push([mkRaw(0.45, 150), 0.02, 20]);
+  looseAnchorLongHold.push(
+    [mkRaw(0.46, 150), 0.2, 20],
+    [mkRaw(0.47, 150), 0.2, 20],
+    [mkRaw(0.65, 150), 12, 20],
+    [null, 0, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+  );
+  const looseAnchorLongHoldResult = runSequence(looseAnchorLongHold);
+  assertEqual(
+    looseAnchorLongHoldResult.releases,
+    0,
+    `loose-anchor long hold and a transient pose gap do not fire without sustained departure (evidence=${JSON.stringify(looseAnchorLongHoldResult.fireEvidence)})`,
   );
 }
 {
@@ -4037,6 +4081,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     );
   }
   advance(productionRaw(0.75, 140, baseDrawWristX + releaseDx), "release");
+  advance(productionRaw(0.9, 130, baseDrawWristX + releaseDx * 2), "release");
   assert(fire, "production pipeline captures the release result");
 
   let pendingAtConfirmBoundary = null;
@@ -4062,6 +4107,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   assertEqual(fire.historyTail.ts, fire.now, "release history tail uses the current timestamp");
   assertEqual(fire.historyTail.m, fire.raw, "release history tail keeps the current raw identity");
   assertEqual(fire.result.debug.fireEvidence, "adaptive", "production shot uses adaptive evidence");
+  assertClose(
+    fire.result.debug.departDelta,
+    0.75 - 0.475,
+    1e-12,
+    "production shot preserves the first departure crossing while confirmation waits",
+  );
   assertEqual(fire.result.debug.fireVel, null, "adaptive production shot has no legacy route");
   assertClose(fire.result.anchorEnter, 0.59, 1e-12, "production shot learns anchorEnter=.59");
   assertClose(fire.result.debug.anchorFloor, 0.47, 1e-12, "production shot learns anchor floor");
@@ -4082,9 +4133,14 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   );
 
   assert(shot, "production pipeline produces a non-null shot summary");
-  assertClose(shot.holdMs, 3000, 1e-6, "production summary measures the three-second hold");
+  assertClose(
+    shot.holdMs,
+    3016.6666666666665,
+    1e-6,
+    "production summary includes the second departure frame",
+  );
   assertEqual(shot.degraded, false, "adaptive geometry keeps the primary summary window");
-  assertEqual(shot.frames, 173, "production summary uses the expected hold frames");
+  assertEqual(shot.frames, 174, "production summary includes the second departure frame");
   assertClose(shot.anchorNorm, 0.475, 1e-12, "production summary keeps oblique anchor median");
   assertClose(shot.angles.bowArm, 171, 1e-12, "production summary keeps bow-arm median");
   assertClose(shot.angles.drawArm, 150, 1e-12, "production summary keeps draw-arm median");
@@ -4159,7 +4215,9 @@ function makeStepper(dt) {
     const { r } = s.push(mkRaw(0.33, 150), 0.05);
     assertEqual(r.anchorStartTs, firstAnchorTs, "anchorStartTs unchanged after re-anchoring");
   }
-  const rel = s.push(mkRaw(0.6, 140), 10); // 速度スパイクでリリース
+  const firstRel = s.push(mkRaw(0.6, 140), 10); // 速度スパイクの最初の離脱フレーム
+  assertEqual(firstRel.r.released, false, "single departure frame waits for persistence");
+  const rel = s.push(mkRaw(0.8, 130), 10); // 2フレーム目でリリース確定
   assertEqual(rel.r.released, true, "release fires after sticky excursion");
   assertEqual(
     rel.r.anchorStartTs,

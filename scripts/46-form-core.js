@@ -248,6 +248,7 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
     maxV: null,
     releaseSpeed: null,
   };
+  const requireSustainedDeparture = Boolean(evidence && evidence.sustainedDeparture === true);
   const evidenceValid = Boolean(
     evidence &&
     Number.isFinite(evidence.ts) &&
@@ -344,6 +345,10 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
         continue;
       }
       if (departureOriginTs != null) break;
+      // A sustained departure may already have crossed the boundary on the
+      // immediately previous frame. Keep walking through that departure run
+      // to recover its fresh origin; stale sequences with no origin still
+      // return null after the scan completes.
     }
   }
 
@@ -377,6 +382,27 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
       Math.abs(decision.maxV == null ? 0 : decision.maxV),
       Math.abs(decision.releaseSpeed == null ? 0 : decision.releaseSpeed),
     );
+  let sustainedDepartureFrames = 0;
+  if (requireSustainedDeparture && departureOriginTs != null) {
+    for (let i = frames.length - 1; i >= 0; i--) {
+      const frame = frames[i];
+      if (
+        !frame ||
+        !Number.isFinite(frame.ts) ||
+        frame.ts > now ||
+        frame.ts < departureOriginTs ||
+        !frame.m ||
+        !formConfOk(frame.m) ||
+        !Number.isFinite(frame.m.anchorNorm)
+      )
+        break;
+      const departure = frame.m.anchorNorm - evidence.normAtHold;
+      const departureFrameEpsilon =
+        Number.EPSILON * Math.max(1, Math.abs(departure), Math.abs(FORM_PH.ADAPTIVE_DEPARTURE));
+      if (departure + departureFrameEpsilon < FORM_PH.ADAPTIVE_DEPARTURE) break;
+      sustainedDepartureFrames += 1;
+    }
+  }
   decision.matched =
     evidenceValid &&
     currentUsable &&
@@ -389,7 +415,8 @@ function adaptiveReleaseCandidate(evidence, raw, history, now) {
     departureOriginTs != null &&
     decision.movingAway &&
     decision.maxV != null &&
-    decision.maxV + speedEpsilon >= decision.releaseSpeed;
+    decision.maxV + speedEpsilon >= decision.releaseSpeed &&
+    (!requireSustainedDeparture || sustainedDepartureFrames >= 2);
   return decision;
 }
 
@@ -542,6 +569,7 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
       anchorEnter: state.anchorEnter,
       releaseSpeed: state.releaseSpeed,
       strength: Math.min(state.holdSamples.length, FORM_PH.ADAPTIVE_STRENGTH_CAP),
+      sustainedDeparture: true,
     };
   }
   if (briefHoldQualified) {
@@ -554,6 +582,7 @@ function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
         adaptiveReleaseThreshold(state.holdVelocitySamples.map((sample) => sample.value)),
       ),
       strength: Math.min(state.holdSamples.length, FORM_PH.ADAPTIVE_STRENGTH_CAP),
+      sustainedDeparture: true,
     };
   }
   return {
@@ -1189,6 +1218,7 @@ function makeFormPhaseDetector() {
       farSince: 0,
       evidence: null,
       briefEvidence: null,
+      pendingDeparture: null,
       anchorFloor: null,
       anchorEnter: 0.35,
       releaseSpeed: 6,
@@ -1244,6 +1274,7 @@ function stepFormPhase(st, raw, history, sens, now) {
     now,
   );
   if (!usable) {
+    st.adaptive.pendingDeparture = null;
     if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) {
       st.cur = FORM_PHASES.IDLE;
       st.anchorSince = 0;
@@ -1631,10 +1662,22 @@ function stepFormPhase(st, raw, history, sens, now) {
   const anchorEvidence = closeFrames.length >= 2 ? "close" : nullBridged2 ? "nb2" : null;
   const adaptiveEvidence = adaptive.evidence || adaptive.briefEvidence;
   const adaptiveDecision = adaptiveReleaseCandidate(adaptiveEvidence, usable, history, now);
+  const adaptiveDeparturePending = Boolean(
+    adaptiveEvidence &&
+      adaptiveEvidence.sustainedDeparture === true &&
+      !adaptiveDecision.matched &&
+      adaptiveDecision.departDelta != null &&
+      adaptiveDecision.departDelta >= FORM_PH.ADAPTIVE_DEPARTURE &&
+      usable.anchorNorm <= FORM_PH.ADAPTIVE_FAR_BOUNDARY &&
+      adaptiveDecision.movingAway &&
+      adaptiveDecision.maxV != null &&
+      adaptiveDecision.maxV >= adaptiveDecision.releaseSpeed,
+  );
   const legacyMatched =
     historyChronologyValid &&
     anchorEvidence &&
     !close &&
+    !adaptiveDeparturePending &&
     (legacyContinuity.fastMatched ||
       legacyContinuity.calibratedMatched ||
       nullBridged ||
@@ -1659,7 +1702,22 @@ function stepFormPhase(st, raw, history, sens, now) {
     legacyDirectionDelta: legacyContinuity.directionDelta,
     refractoryRemaining: refractoryRemainingMs(),
   }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
+  if (adaptiveDeparturePending) {
+    const previousFrame = history.length > 1 ? history[history.length - 2] : null;
+    const pending = st.adaptive.pendingDeparture;
+    if (!pending || !previousFrame || previousFrame.ts !== pending.ts) {
+      st.adaptive.pendingDeparture = {
+        ts: now,
+        debug: { ...debug },
+      };
+    }
+    st.cur = FORM_PHASES.DRAWING;
+  }
   if (fireEvidence && (st.lastReleaseTs === 0 || now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS)) {
+    if (fireEvidence === "adaptive" && st.adaptive.pendingDeparture) {
+      Object.assign(debug, st.adaptive.pendingDeparture.debug);
+    }
+    st.adaptive.pendingDeparture = null;
     const adaptiveEvidence = st.adaptive.evidence || st.adaptive.briefEvidence;
     st.lastReleaseTs = now;
     st.cur = FORM_PHASES.RELEASE;
@@ -1725,34 +1783,38 @@ function stepFormPhase(st, raw, history, sens, now) {
     );
     st.adaptive.evidence = null;
     st.adaptive.briefEvidence = null;
+    st.adaptive.pendingDeparture = null;
     return result;
   }
-  if (close || adaptive.holdQualified || adaptive.briefHoldQualified) {
-    if (adaptive.holdQualified || adaptive.briefHoldQualified) {
-      st.anchorSince = adaptive.holdStartTs;
-      if (!st.anchorStartTs) st.anchorStartTs = adaptive.holdStartTs;
-    } else if (!st.anchorSince) {
-      st.anchorSince = now;
+  if (!adaptiveDeparturePending) {
+    st.adaptive.pendingDeparture = null;
+    if (close || adaptive.holdQualified || adaptive.briefHoldQualified) {
+      if (adaptive.holdQualified || adaptive.briefHoldQualified) {
+        st.anchorSince = adaptive.holdStartTs;
+        if (!st.anchorStartTs) st.anchorStartTs = adaptive.holdStartTs;
+      } else if (!st.anchorSince) {
+        st.anchorSince = now;
+      }
+      st.cur =
+        now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125
+          ? FORM_PHASES.FULL_DRAW
+          : FORM_PHASES.ANCHORING;
+    } else {
+      st.anchorSince = 0;
+      // 方向チェック（Stage 0 E'）: anchorNorm の減少方向（手首が顔へ近づく）のみ DRAWING。
+      // 増加方向（レットダウン等）を DRAWING と誤分類すると sticky な anchorStartTs が
+      // 保持されて hold にレットダウン前の時間が混入するため、SETUP へ落とす
+      const anchorTrend = win.length ? usable.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
+      st.cur =
+        maxV > FORM_PH.DRAW_SPEED && usable.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS
+          ? FORM_PHASES.DRAWING
+          : FORM_PHASES.SETUP;
     }
-    st.cur =
-      now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125
-        ? FORM_PHASES.FULL_DRAW
-        : FORM_PHASES.ANCHORING;
-  } else {
-    st.anchorSince = 0;
-    // 方向チェック（Stage 0 E'）: anchorNorm の減少方向（手首が顔へ近づく）のみ DRAWING。
-    // 増加方向（レットダウン等）を DRAWING と誤分類すると sticky な anchorStartTs が
-    // 保持されて hold にレットダウン前の時間が混入するため、SETUP へ落とす
-    const anchorTrend = win.length ? usable.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
-    st.cur =
-      maxV > FORM_PH.DRAW_SPEED && usable.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS
-        ? FORM_PHASES.DRAWING
-        : FORM_PHASES.SETUP;
+    // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット
+    if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs)
+      st.anchorStartTs = now;
+    else if (st.cur === FORM_PHASES.SETUP || st.cur === FORM_PHASES.IDLE) st.anchorStartTs = 0;
   }
-  // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット
-  if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs)
-    st.anchorStartTs = now;
-  else if (st.cur === FORM_PHASES.SETUP || st.cur === FORM_PHASES.IDLE) st.anchorStartTs = 0;
   return formPhaseResult(
     st,
     now,
