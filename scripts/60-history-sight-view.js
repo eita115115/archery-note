@@ -609,7 +609,7 @@ function renderSight(m) {
     ${
       db.setups.length
         ? `
-    <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map((s) => `<option value="${esc(s.id)}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
+    <label class="f" for="sgSetup">セッティング</label><select class="inp" id="sgSetup">${db.setups.map((s) => `<option value="${esc(s.id)}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
     <div class="chips" id="sgDistChips">${dists.map((d) => `<button type="button" class="chip ${d === dist ? "on" : ""}" aria-pressed="${d === dist}" data-d="${d}">${d}m</button>`).join("")}</div>
     <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
@@ -692,8 +692,8 @@ function renderSight(m) {
     <details class="adv">
       <summary>クリック換算の設定（任意）</summary>
       <div class="row">
-        <div><label class="f">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70 || ""}" placeholder="例: 4"></div>
-        <div><label class="f">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70 || ""}" placeholder="例: 4"></div>
+        <div><label class="f" for="sgCalV">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70 || ""}" placeholder="例: 4"></div>
+        <div><label class="f" for="sgCalH">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70 || ""}" placeholder="例: 4"></div>
       </div>
       <div class="hint">「サイトを1クリック動かすと70mで着弾が何cm動くか」。一度測って登録すると提案がクリック数でも出ます（他の距離へは自動換算）。アイ〜サイト距離は右上の設定から。</div>
     </details>

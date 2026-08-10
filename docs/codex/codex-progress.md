@@ -3834,3 +3834,25 @@ the minimum touch target` after the focused static contract was added.
   Service Worker, or user-data behavior changed. Commit this scoped UI fix,
   then return to the provenance-bound trusted-HTTPS 3-condition / 18-shot
   field artifact.
+
+## 2026-08-10 — Give sight ledger controls explicit accessible names
+
+- UX evidence: the sight ledger's setup select and optional click-conversion
+  inputs used visual labels without explicit associations. This weakened the
+  one-handed adjustment workflow for VoiceOver and label-based navigation.
+- RED evidence: `node tools/check-ui.js` failed with
+  `sight ledger control sgSetup needs an associated label` before production
+  changes. The focused E2E also required the optional conversion section to be
+  opened before checking its controls.
+- Changed: `sgSetup`, `sgCalV`, and `sgCalH` now have explicit `for`
+  associations. The static contract covers all three IDs; the focused E2E
+  verifies the setup select and both optional inputs are visible and editable
+  by their accessible names.
+- GREEN evidence: `node tools/check-ui.js` passed with all three viewport
+  screenshots; the focused Playwright worker reported 1/1 (with the known
+  Windows parent teardown timeout); `check:all`, lint, formatting, syntax, and
+  `git diff --check` passed.
+- Risk/next: no scoring, detector, storage, receipt, transport, schema,
+  Service Worker, or user-data behavior changed. Commit this final scoped UI
+  fix, then restart the HTTPS preview on the resulting commit for the physical
+  3-condition / 18-shot artifact.

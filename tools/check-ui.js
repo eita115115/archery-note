@@ -180,6 +180,12 @@ function staticUiChecks() {
       `history filter ${controlId} needs an associated label`,
     );
   }
+  for (const controlId of ["sgSetup", "sgCalV", "sgCalH"]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(historySurface),
+      `sight ledger control ${controlId} needs an associated label`,
+    );
+  }
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
   assert(

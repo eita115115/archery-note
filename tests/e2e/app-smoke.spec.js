@@ -133,6 +133,25 @@ test("gives accessible names to the history filters", async ({ page }) => {
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to the sight ledger controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "サイト調整").click();
+  const sight = page.locator("#main");
+  await expect(sight.getByLabel("セッティング", { exact: true })).toHaveValue("e2e-setup");
+  await sight.getByText("クリック換算の設定（任意）", { exact: true }).click();
+  await expect(sight.getByLabel("上下 1クリック=cm @70m", { exact: true })).toBeVisible();
+  await expect(sight.getByLabel("左右 1クリック=cm @70m", { exact: true })).toBeVisible();
+  await expect(sight.getByLabel("上下 1クリック=cm @70m", { exact: true })).toBeEditable();
+  await expect(sight.getByLabel("左右 1クリック=cm @70m", { exact: true })).toBeEditable();
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("moves exactly one aria-current marker when switching tabs", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {
