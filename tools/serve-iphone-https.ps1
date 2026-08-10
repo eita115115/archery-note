@@ -187,6 +187,9 @@ try {
   )
   if ($publicProfiles.Count -gt 0) {
     Write-Warning "The connected Windows network profile is Public. iPhone Safari may be blocked by Windows Firewall; use a trusted Private Wi-Fi profile or an explicitly approved firewall rule."
+    Write-Output "If Safari cannot connect on this Public profile, run the following in an elevated PowerShell (LAN-only, port $Port):"
+    Write-Output ('New-NetFirewallRule -DisplayName "Archery Note HTTPS Preview {0} (LAN)" -Direction Inbound -Action Allow -Protocol TCP -LocalPort {0} -RemoteAddress LocalSubnet -Profile Public' -f $Port)
+    Write-Output ('Remove-NetFirewallRule -DisplayName "Archery Note HTTPS Preview {0} (LAN)"' -f $Port)
   }
 
   $sanEntries = @("DNS=archery-note.local", "DNS=localhost")

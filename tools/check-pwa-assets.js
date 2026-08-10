@@ -201,6 +201,9 @@ function assertIphoneHttpsPreviewContract(relativePath) {
     "PowerShell 7 CertificateRequest fallback",
     "Port $Port is already in use",
     "TcpClient",
+    "New-NetFirewallRule",
+    "RemoteAddress LocalSubnet",
+    "Remove-NetFirewallRule",
   ];
   for (const marker of requiredMarkers) {
     if (!text.includes(marker)) {

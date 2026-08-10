@@ -4242,3 +4242,18 @@ the minimum touch target` after the focused static contract was added.
   Service Worker, detector, threshold, artifact schema, raw receipt, or
   user-data behavior changed. The current candidate must remain clean before
   collecting the trusted HTTPS 3×6 artifact.
+
+## 2026-08-11 — Print a scoped Public-profile firewall recovery command
+
+- RED evidence: `node tools/check-pwa-assets.js` rejected the new recovery
+  contract because the HTTPS helper only warned that a Public Windows profile
+  might block Safari; it did not print a copyable remedy or cleanup command.
+- Changed: when a Public profile is detected, `serve-iphone-https.ps1` prints
+  an elevated `New-NetFirewallRule` command limited to TCP `$Port` and
+  `LocalSubnet`, plus the matching `Remove-NetFirewallRule` cleanup command.
+  The helper never changes Firewall state automatically.
+- GREEN evidence: PWA asset checks, form/artifact checks, full `check:all`,
+  lint, format, PowerShell syntax, and `git diff --check` pass.
+- Scope/risk: acceptance-helper output and its static contract only; no app,
+  storage, Service Worker, detector, dependency, or user-data behavior
+  changed. Physical 3×6 artifact provenance remains the release gate.
