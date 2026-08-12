@@ -514,10 +514,10 @@ function renderRecord(m) {
       ${[70, 50, 30, 18].map((d) => `<button type="button" class="chip ${d === defDist ? "on" : ""}" aria-pressed="${d === defDist}" data-d="${d}">${d}m</button>`).join("")}
       <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
     </div>
-    <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+    <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f" for="fDistCustom">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
     <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="quickSelects">
-      <div><label class="f">的</label><select class="inp" id="fFace">
+      <div><label class="f" for="fFace">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
           ${[122, 80, 60, 40].map((f) => `<option value="${f}" ${String(defFace) === String(f) ? "selected" : ""}>${f}cm</option>`).join("")}
           <option value="T40" ${defFace === "T40" ? "selected" : ""}>40cm 三つ目（縦）</option>
@@ -526,7 +526,7 @@ function renderRecord(m) {
           ${FIELD_FACE_SIZES.map((f) => `<option value="F${f}" ${defFace === `F${f}` ? "selected" : ""}>${f}cm フィールド</option>`).join("")}
         </optgroup>
       </select></div>
-      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+      <div><label class="f" for="fArrows">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
     </div>
     <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="btnrow"><button class="btn startPrimary" id="fStart" data-testid="record-start">${mode === "calibration" ? "サイト値つきで開始" : "この条件で開始"}</button></div>
@@ -534,10 +534,10 @@ function renderRecord(m) {
     <details class="adv recordDetails" ${mode === "calibration" ? "open" : ""}>
       <summary>詳しく残す</summary>
       <div class="fieldBand">
-        <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
+        <div><label class="f" for="fSetup">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
       </div>
-      <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
-      <label class="f">ラウンド</label><select class="inp" id="fRound">
+      <label class="f" for="fDate">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
+      <label class="f" for="fRound">ラウンド</label><select class="inp" id="fRound">
         ${ROUND_TYPES.map((r) => `<option value="${r.id}">${r.label}</option>`).join("")}
         <optgroup label="多距離ラウンド">
           ${multiRoundDefs()
@@ -547,18 +547,18 @@ function renderRecord(m) {
       </select>
       <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
       <div class="row">
-        <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
-        <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
+        <div><label class="f" for="fSightV">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
+        <div><label class="f" for="fSightH">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
       </div>
       <div class="hint">サイトの目盛りをそのまま記入（左右は<b>右なら 2、左なら -2</b>）。台帳に記録があれば自動入力されます。</div>
-      <label class="f">天候・コンディション</label>
+      <label class="f" for="fWx">天候・コンディション</label>
       <div class="row">
         <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
         <input class="inp" id="fNote" placeholder="${mode === "calibration" ? "例: サイト1目盛り確認" : "メモ（任意）"}" value="${mode === "calibration" ? "サイト値確認" : ""}">
       </div>
       <div class="row">
-        <div><label class="f">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
-        <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
+        <div><label class="f" for="fWindDir">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
+        <div><label class="f" for="fWindSpeed">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
     ${mode === "calibration" ? `<div class="advice recordNeutralAdvice"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>` : ""}
@@ -867,8 +867,8 @@ function analysisFilterBarHtml(allRows, f) {
   ];
   return `<div class="card analysisFilterCard">
     <div class="row">
-      <div><label class="f">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
-      <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
+      <div><label class="f" for="anSetup">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f" for="anDist">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <label class="f">期間</label>
     <div class="chips" id="anPeriods">${periods.map(([id, lb]) => `<button type="button" class="chip ${f.period === id ? "on" : ""}" aria-pressed="${f.period === id}" data-period="${id}">${lb}</button>`).join("")}</div>
@@ -1274,9 +1274,9 @@ function renderActive(m) {
     <div class="nudge" id="nudge">
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD / 200).toFixed(1)}cm）</div>
       <div class="npad">
-        <span class="blank"></span><button data-n="u">▲</button><span class="blank"></span>
-        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">${icon("trash")}</button><button data-n="r">▶</button>
-        <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
+        <span class="blank"></span><button type="button" data-n="u" aria-label="上へ">▲</button><span class="blank"></span>
+        <button type="button" data-n="l" aria-label="左へ">◀</button><button type="button" class="recordNudgeDelete" data-n="del" aria-label="選択中の矢を削除">${icon("trash")}</button><button type="button" data-n="r" aria-label="右へ">▶</button>
+        <span class="blank"></span><button type="button" data-n="d" aria-label="下へ">▼</button><span class="blank"></span>
       </div>
       <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
@@ -1466,13 +1466,17 @@ function refreshActive() {
     }),
   );
   s.cur.forEach((a, i) => {
-    html += markCircle(
-      gp(a),
+    const fresh = i === ui.freshArrow;
+    const pos = gp(a);
+    const marker = markCircle(
+      pos,
       s.faceD,
       i === ui.selArrow ? "#111" : "var(--green-l)",
       scoreLabel(a),
-      i === ui.freshArrow ? "shotNew" : "",
+      fresh ? "shotNew" : "",
     );
+    const impact = `<g class="impactOverlay" aria-hidden="true"><circle class="impactRing" cx="${pos.x}" cy="${-pos.y}" r="${Math.max(0.7, s.faceD / 34)}"/><path class="impactRay" d="M ${pos.x - s.faceD / 22} ${-pos.y} H ${pos.x + s.faceD / 22}"/></g>`;
+    html += fresh ? marker.replace(/<\/g>$/, `${impact}</g>`) : marker;
   });
   $("#tgmarks").innerHTML = html;
   // chips（innerHTML 全置換でフォーカス中のチップが消えるため、置換前に data-i を控えて復元する）
@@ -1503,6 +1507,9 @@ function refreshActive() {
       document
         .querySelectorAll(".shotNew,.sc.fresh")
         .forEach((el) => el.classList.remove("shotNew", "fresh"));
+      document
+        .querySelectorAll("#tgmarks .impactOverlay")
+        .forEach((el) => el.remove());
     }, 640);
     revealChipsAboveDock(chipsBox, "instant");
   } else {
@@ -1543,7 +1550,7 @@ function refreshActive() {
           return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i % ENDCOLORS.length]}"></span>${i + 1}</td>
         <td>${sorted.map(scoreLabel).join("・")}</td>
         <td class="right"><b>${end.reduce((a, x) => a + x.s, 0)}</b></td>
-        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">${icon("pencil")}</button></td></tr>`;
+        <td class="right"><button type="button" class="btn sm ghost recordEndEditBtn" data-open="${i}" aria-label="${i + 1}エンドを編集">${icon("pencil")}</button></td></tr>`;
         })
         .join("") +
       `</table>`

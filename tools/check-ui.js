@@ -26,6 +26,7 @@ const appScripts = [
 const appJs = appScripts.map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 const surface = `${html}\n${css}\n${appJs}`;
 const recordSurface = `${html}\n${css}\n${fs.readFileSync(path.join(root, "scripts", "50-record-view.js"), "utf8")}`;
+const historySurface = `${html}\n${css}\n${fs.readFileSync(path.join(root, "scripts", "60-history-sight-view.js"), "utf8")}`;
 const appUrl = `file:///${htmlPath.replace(/\\/g, "/")}`;
 const outDir = path.join(root, "artifacts", "ui-smoke");
 
@@ -111,6 +112,20 @@ function staticUiChecks() {
     "Minified production stylesheet link missing",
   );
   assert(
+    /header\.app \.gear\s*\{[^}]*min-width\s*:\s*var\(--tap-target-min\)[^}]*min-height\s*:\s*var\(--tap-target-min\)/.test(css),
+    "settings button must use the minimum touch target",
+  );
+  const settingsSourceForClose = fs.readFileSync(
+    path.join(root, "scripts", "70-gear-settings.js"),
+    "utf8",
+  );
+  assert(
+    settingsSourceForClose.includes('id="setCloseTop"') &&
+      settingsSourceForClose.includes('aria-label="設定を閉じる"') &&
+      settingsSourceForClose.includes("setCloseTop"),
+    "settings sheet needs an always-visible close control",
+  );
+  assert(
     appScripts.every((file) =>
       new RegExp(`<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`).test(html),
     ) &&
@@ -141,6 +156,97 @@ function staticUiChecks() {
       surface.includes("用具"),
     "Tab labels missing",
   );
+  for (const controlId of [
+    "fDistCustom",
+    "fFace",
+    "fArrows",
+    "fSetup",
+    "fDate",
+    "fRound",
+    "fSightV",
+    "fSightH",
+    "fWx",
+    "fWindDir",
+    "fWindSpeed",
+  ]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(recordSurface),
+      `record setup control ${controlId} needs an associated label`,
+    );
+  }
+  for (const controlId of ["anSetup", "anDist"]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(recordSurface),
+      `analysis filter ${controlId} needs an associated label`,
+    );
+  }
+  for (const [marker, label] of [
+    ['data-n="u"', "上へ"],
+    ['data-n="l"', "左へ"],
+    ['data-n="del"', "選択中の矢を削除"],
+    ['data-n="r"', "右へ"],
+    ['data-n="d"', "下へ"],
+  ]) {
+    assert(
+      new RegExp(`<button\\b[^>]*${marker}[^>]*aria-label=["']${label}["']`).test(
+        recordSurface,
+      ),
+      `active record control ${label} needs an accessible name`,
+    );
+  }
+  assert(
+    /recordEndEditBtn[\s\S]*aria-label=/.test(recordSurface),
+    "active record end edit control needs an accessible name",
+  );
+  for (const controlId of ["histSetup", "histDist", "histRound"]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(historySurface),
+      `history filter ${controlId} needs an associated label`,
+    );
+  }
+  for (const controlId of ["sgSetup", "sgCalV", "sgCalH"]) {
+    assert(
+      new RegExp(`<label\\b[^>]*\\bfor=["']${controlId}["']`).test(historySurface),
+      `sight ledger control ${controlId} needs an associated label`,
+    );
+  }
+  for (const controlId of ["histClear", "histMore", "hEdit", "hCard", "hClose", "hDel"]) {
+    assert(
+      new RegExp(
+        `<button\\b(?=[^>]*\\bid=["']${controlId}["'])(?=[^>]*\\btype=["']button["'])[^>]*>`,
+      ).test(historySurface),
+      `history detail control ${controlId} needs an explicit button type`,
+    );
+  }
+  for (const controlId of ["sgAdd", "sgCalMode", "mkCancel", "mkSave", "calCancel", "calSave"]) {
+    assert(
+      new RegExp(
+        `<button\\b(?=[^>]*\\bid=["']${controlId}["'])(?=[^>]*\\btype=["']button["'])[^>]*>`,
+      ).test(historySurface),
+      `sight adjustment control ${controlId} needs an explicit button type`,
+    );
+  }
+  assert(
+    /<button\b(?=[^>]*\bclass=["'][^"']*\bhistDelBtn\b)(?=[^>]*\btype=["']button["'])[^>]*>/.test(
+      historySurface,
+    ),
+    "sight ledger deletion control needs an explicit button type",
+  );
+  for (const controlMarker of [
+    '<label class="f" for="mkDate">',
+    '<label class="f" for="mkV">',
+    '<label class="f" for="mkH">',
+    '<label class="f" for="mkNote">',
+    '<label class="f" for="calDate">',
+    '<label class="f" for="calV_${d}">',
+    '<label class="f" for="calH_${d}">',
+    '<label class="f" for="calNote">',
+  ]) {
+    assert(
+      historySurface.includes(controlMarker),
+      `sight modal label marker missing: ${controlMarker}`,
+    );
+  }
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
   assert(
@@ -195,6 +301,39 @@ function staticUiChecks() {
       surface.includes("ic-analysis") &&
       surface.includes("ic-sight"),
     "minimal recording feedback, tab icons, and reduced-motion guard missing",
+  );
+  assert(
+    css.includes(".shotNew .impactRing") &&
+      css.includes("@keyframes impactRing") &&
+      css.includes("@media (prefers-reduced-motion: reduce)") &&
+      css.includes(".shotNew .impactRay") &&
+      surface.includes('querySelectorAll("#tgmarks .impactOverlay")') &&
+      surface.includes("forEach((el) => el.remove())"),
+    "arrow impact motion, cleanup, and reduced-motion guard missing",
+  );
+  assert(
+    css.includes('.formCapture[data-motion-state="analyzing"]') &&
+      css.includes("@keyframes formScan") &&
+      css.includes('.formCapture[data-motion-state="saved"]') &&
+      css.includes('.formCapture[data-motion-state="failed"]'),
+    "form motion states are incomplete",
+  );
+  assert(
+    css.includes("--motion-fast") &&
+      css.includes("--motion-fluid") &&
+      css.includes("main.viewEnter") &&
+      css.includes("@media (prefers-reduced-motion: reduce)"),
+    "shared view motion contract missing",
+  );
+  assert(
+    /--motion-fast:\.18s;\s*--motion-med:\.28s;\s*--motion-fluid:\.42s;/.test(css) &&
+      /main\.viewEnter\{animation:viewEnter var\(--motion-med\) var\(--ease-app\) both;\}/.test(
+        css,
+      ) &&
+      /\.todayConclusionCard\{[\s\S]*?animation:appRise var\(--motion-fluid\) var\(--ease-app\) both;/.test(
+        css,
+      ),
+    "shared view motion timings are not aligned",
   );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
   assert(
@@ -327,6 +466,13 @@ function staticUiChecks() {
     "form-tracking measurement-error and camera-position hints missing",
   );
   assert(
+    surface.includes("通常保存・送信されず") &&
+      surface.includes("録画をオンにした場合のみ") &&
+      surface.includes("カメラロールへ保存できます") &&
+      !surface.includes("映像は保存・送信されず、保存されるのは角度・保持時間などの要約だけです"),
+    "form-tracking recording privacy copy must distinguish optional recording",
+  );
+  assert(
     surface.includes("演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出") &&
       surface.includes("判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出"),
     "confidence derivation notes missing",
@@ -373,6 +519,165 @@ function staticUiChecks() {
   assert(
     !/MK KOREA ZEST Limbs|MK XD Limbs/.test(bowList),
     "limb names leaked into handle dropdown",
+  );
+
+  const gearSettingsSource = fs.readFileSync(
+    path.join(root, "scripts", "70-gear-settings.js"),
+    "utf8",
+  );
+  const formViewSource = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
+
+  for (const controlMarker of [
+    '<label class="f" for="crName">',
+    '<label class="f" for="crStage${i}Dist">',
+    '<label class="f" for="crStage${i}Face">',
+    '<label class="f" for="crStage${i}Arrows">',
+    '<label class="f" for="crStage${i}PerEnd">',
+  ]) {
+    assert(
+      gearSettingsSource.includes(controlMarker),
+      `custom round editor label marker missing: ${controlMarker}`,
+    );
+  }
+  for (const controlMarker of [
+    '<label class="f" for="wName">',
+    '<label class="f" for="wPound">',
+    '<label class="f" for="wDraw">',
+    '<label class="f" for="wSpine">',
+    '<label class="f" for="wArrowLength">',
+    '<label class="f" for="wPoint">',
+    '<label class="f" for="wV_${d}">',
+    '<label class="f" for="wH_${d}">',
+  ]) {
+    assert(
+      gearSettingsSource.includes(controlMarker),
+      `setup wizard label marker missing: ${controlMarker}`,
+    );
+  }
+
+  assert(
+    /function\s+formTrackingEnabled\(\)\s*\{\s*return\s+!!\(db\.settings&&db\.settings\.formTrackingEnabled===true\);?\s*\}/.test(
+      formViewSource,
+    ),
+    "form tracking runtime gate must accept only the literal boolean true",
+  );
+
+  function sourceBetween(source, startMarker, endMarker) {
+    const start = source.indexOf(startMarker);
+    const end = source.indexOf(endMarker, start + startMarker.length);
+    assert(start >= 0, `missing source marker: ${startMarker}`);
+    assert(end > start, `missing source end marker: ${endMarker}`);
+    return source.slice(start, end);
+  }
+
+  const requiredFormDiagnosticCopy = [
+    "18射の診断JSON",
+    "18射の診断を開始",
+    "開始後、真横→やや斜め→通常設置の順に各6射を記録します。条件を満たさない記録は診断バッチに追加されません。",
+    "次は「真横」を6射記録してください。",
+    "次は「やや斜め」を6射記録してください。",
+    "次は「通常設置」を6射記録してください。",
+    "18射の診断がそろいました。",
+    "診断JSONを書き出す",
+    "端末に直接保存",
+    "現在の18射診断バッチの診断値だけを書き出します。練習記録、日付、メモ、端末内ID、映像、画像、ランドマークは含みません。診断値の共有先は自分で確認してください。",
+    "18射の診断が完了していません。開始後、表示された条件を各6射ずつ記録してください。",
+  ];
+  for (const copy of requiredFormDiagnosticCopy) {
+    assert(gearSettingsSource.includes(copy), `form diagnostic copy missing: ${copy}`);
+  }
+
+  const settingsHelpers = sourceBetween(
+    gearSettingsSource,
+    "/* FORM_DIAGNOSTIC_SETTINGS_START */",
+    "/* FORM_DIAGNOSTIC_SETTINGS_END */",
+  );
+  const startHandler = sourceBetween(
+    settingsHelpers,
+    "async function startFormDiagnosticMatrixFromSettings",
+    "async function exportFormDiagnosticMatrixFromSettings",
+  );
+  const exportHandler = sourceBetween(
+    settingsHelpers,
+    "async function exportFormDiagnosticMatrixFromSettings",
+    "function bindFormDiagnosticSettingsActions",
+  );
+
+  assert(
+    settingsHelpers.includes('data-testid="form-diagnostic-section"') &&
+      settingsHelpers.includes("data-form-diagnostic-section") &&
+      settingsHelpers.includes("hidden") &&
+      settingsHelpers.includes("disabled"),
+    "diagnostic section has hidden and disabled defaults",
+  );
+  assert(
+    settingsHelpers.includes("db.settings.formDebug===true") &&
+      settingsHelpers.includes("db.settings.formDebug!==true"),
+    "diagnostic settings use exact boolean gates",
+  );
+  assert(
+    /db\.settings\.formTrackingEnabled===true/.test(gearSettingsSource) &&
+      !/db\.settings\.formTrackingEnabled\s*\?/.test(gearSettingsSource) &&
+      !/!!\s*db\.settings\.formTrackingEnabled/.test(gearSettingsSource),
+    "form tracking chips use exact boolean gates",
+  );
+  assert(
+    settingsHelpers.includes("FORM_DIAGNOSTIC_SLOTS[") &&
+      !/const\s+FORM_DIAGNOSTIC_SLOTS\b/.test(gearSettingsSource),
+    "settings consume the Task-4 global slot list without redeclaration",
+  );
+  assert(
+    settingsHelpers.includes("#fdMatrixDownload") &&
+      settingsHelpers.includes("downloadFormDiagnosticsJson"),
+    "diagnostic settings expose an explicit direct-download path",
+  );
+  for (const code of [
+    "coordinator-missing",
+    "coordinator-incomplete",
+    "coordinator-invalid",
+    "coordinator-stale",
+    "source-missing",
+    "source-ambiguous",
+    "source-invalid",
+    "output-too-large",
+    "encoding-unavailable",
+  ]) {
+    assert(settingsHelpers.includes(`"${code}"`), `result map missing ${code}`);
+  }
+
+  assert(
+    startHandler.indexOf("beginActiveWorkflow()") < startHandler.indexOf("await appConfirm"),
+    "restart acquires workflow lock before awaiting confirmation",
+  );
+  assert(
+    exportHandler.indexOf("beginActiveWorkflow()") < exportHandler.indexOf("await appConfirm"),
+    "export acquires workflow lock before awaiting confirmation",
+  );
+  for (const source of [startHandler, exportHandler]) {
+    assert(source.includes("db.settings.formDebug!==true"), "post-confirm exact debug recheck exists");
+    assert(
+      source.includes("activeWorkflowCount!==1") && source.includes("db.active"),
+      "post-confirm workflow ownership recheck exists",
+    );
+    assert(
+      source.includes("formDiagnosticCoordinatorTokenMatches(token)"),
+      "post-confirm coordinator token recheck exists",
+    );
+  }
+  for (const forbidden of [
+    "shareOrDownloadText",
+    "lastBackupAt",
+    "writeSafetySnapshot",
+    "scheduleSafetySnapshot",
+    "JSON.stringify(db",
+    "save(",
+  ]) {
+    assert(!exportHandler.includes(forbidden), `diagnostic export excludes ${forbidden}`);
+  }
+  assert(
+    !formViewSource.includes("form-diagnostic-section") &&
+      !html.includes("form-diagnostic-section"),
+    "diagnostic matrix controls stay out of the primary capture surface",
   );
 }
 

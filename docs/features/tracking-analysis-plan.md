@@ -358,7 +358,7 @@ setupId + `db.updatedAt` でメモ化する。
 /goal
 Task 0: docs/codex/codex-progress.md を現リポジトリ状態へ再整合する
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。AGENTS.md、docs/codex/codex-progress.md、
 docs/features/tracking-analysis-plan.md（本プラン）、git log --oneline -10 の結果。
 
@@ -395,7 +395,7 @@ Rules:
 /goal
 Task 1: 数理コアの特性テスト tools/check-analysis-core.js を追加する
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。docs/features/tracking-analysis-plan.md の Task 1、
 scripts/20-scoring.js、scripts/40-analysis-physics.js、
 tools/check-storage-roundtrip.js（スクリプトの Node ロード方式の参考）。
@@ -438,7 +438,7 @@ Rules:
 /goal
 Task 2: scripts/45-analysis-core.js を作成し全マニフェストへ登録する（ロジックなし）
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。docs/features/tracking-analysis-plan.md の Task 2、
 index.html、sw.js、tools/check-app.js、tools/check-ui.js、tools/build-native-web.js。
 
@@ -479,7 +479,7 @@ Rules:
 /goal
 Task 3: 分析コア純関数を scripts/45-analysis-core.js に実装する（UI 変更なし）
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。docs/features/tracking-analysis-plan.md の設計図 Layer 1 と
 Task 3、scripts/40-analysis-physics.js（sessionMetrics / isWindy / regress）、
 scripts/20-scoring.js（robustStats）。
@@ -522,7 +522,7 @@ Rules:
 /goal
 Task 4: 分析タブをフィルタ帯 + KPI + スコア推移チャートへ再構成する
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note と $frontend-design を使用。
 docs/features/tracking-analysis-plan.md の設計図 Layer 2 と Task 4、
 scripts/50-record-view.js の renderAnalysis / pageHeroHtml("analysis") /
@@ -570,7 +570,7 @@ Rules:
 /goal
 Task 5: 自己ベスト・条件比較・外れ理由タグの分析カードを追加する
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。docs/features/tracking-analysis-plan.md の Task 5、
 scripts/45-analysis-core.js（personalBests / conditionSplit / reasonBreakdown）、
 scripts/50-record-view.js の renderAnalysis（Task 4 適用済みであること）。
@@ -613,7 +613,7 @@ Rules:
 /goal
 Task 6: 統計計算を sessionMetrics キャッシュへ一本化しメモ化する（出力不変）
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。docs/features/tracking-analysis-plan.md の A-2 と Task 6、
 scripts/40-analysis-physics.js（SESSION_METRIC_CACHE / sessionMetrics /
 personalPhysicsCalibration / regressionAdvice / adviceFor / sessionsCsv）、
@@ -657,7 +657,7 @@ Rules:
 /goal
 Task 7: サイトタブのヒーロー提案テキスト（存在しない .text 参照）を修正する
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。scripts/50-record-view.js の pageHeroHtml("sight")
 （380 行付近）と scripts/40-analysis-physics.js の adviceFor（lines の形状確認）。
 
@@ -695,7 +695,7 @@ Rules:
 /goal
 Task 8【着手前にユーザー承認必須】: sw.js のキャッシュ無制限肥大を最小修正する
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。docs/features/tracking-analysis-plan.md の A-1 と Task 8、
 sw.js、scripts/90-init.js（version.json?ts= と index.html?appv= の生成箇所)、
 tools/check-pwa-update-flow.js、docs/infra/pwa-update-safety-checklist.md。
@@ -741,7 +741,7 @@ Rules:
 Task 9【着手前にユーザー承認必須・任意】: load() のガードを緩和し欠損キー
 バックアップの取り込みを保護する
 
-Repo: C:\Users\eita2\Projects\archery-note
+Repo: `<repo-root>`
 Read first: $archery-note を使用。docs/features/tracking-analysis-plan.md の A-6 と Task 9、
 scripts/10-storage-native.js の load / normalizeDb、tests/fixtures/storage/、
 tools/check-storage-roundtrip.js、docs/infra/storage-migration-safety-checklist.md。

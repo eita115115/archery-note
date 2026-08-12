@@ -67,6 +67,14 @@ function mainTab(page, name) {
   return page.locator("#tabs").getByRole("button", { name });
 }
 
+async function seedRecordPage(page) {
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+}
+
 function collectUnexpectedErrors(page) {
   const unexpectedErrors = [];
   page.on("console", (message) => {
@@ -111,6 +119,97 @@ test("loads core tabs and seeded history without console errors", async ({ page 
 
   await mainTab(page, "記録").click();
   await expect(page.getByTestId("record-start")).toBeVisible();
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("new arrow exposes one bounded impact state", async ({ page }) => {
+  await seedRecordPage(page);
+  await page.getByTestId("record-start").click();
+  await page.locator("#tgsvg").click({ position: { x: 150, y: 150 } });
+  await expect(page.locator("#tgmarks .shotNew")).toHaveCount(1);
+  await expect(page.locator("#tgmarks .shotNew .impactRing")).toHaveCount(1);
+  await page.waitForTimeout(750);
+  await expect(page.locator("#tgmarks .shotNew")).toHaveCount(0);
+  await expect(page.locator("#tgmarks .impactOverlay")).toHaveCount(0);
+});
+
+test("tab changes keep the main content visible and bounded", async ({ page }) => {
+  await seedRecordPage(page);
+  await page.locator("#tabs").getByRole("button", { name: "分析" }).click();
+  await expect(page.locator("main.viewEnter")).toHaveCount(1);
+  await expect(page.locator("main")).toBeVisible();
+  const overflow = await page
+    .locator("body")
+    .evaluate(() => globalThis.document.documentElement.scrollWidth > globalThis.innerWidth + 1);
+  expect(overflow).toBe(false);
+});
+
+test("gives accessible names to the history filters", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "履歴").click();
+  const history = page.locator("#main");
+  await history.getByLabel("用具", { exact: true }).selectOption("__none");
+  await history.getByLabel("距離", { exact: true }).selectOption("70");
+  await history.getByLabel("ラウンド", { exact: true }).selectOption("free");
+  await expect(history.getByLabel("用具", { exact: true })).toHaveValue("__none");
+  await expect(history.getByLabel("距離", { exact: true })).toHaveValue("70");
+  await expect(history.getByLabel("ラウンド", { exact: true })).toHaveValue("free");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("gives accessible names to the sight ledger controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "サイト調整").click();
+  const sight = page.locator("#main");
+  await expect(sight.getByLabel("セッティング", { exact: true })).toHaveValue("e2e-setup");
+  await sight.getByText("クリック換算の設定（任意）", { exact: true }).click();
+  await expect(sight.getByLabel("上下 1クリック=cm @70m", { exact: true })).toBeVisible();
+  await expect(sight.getByLabel("左右 1クリック=cm @70m", { exact: true })).toBeVisible();
+  await expect(sight.getByLabel("上下 1クリック=cm @70m", { exact: true })).toBeEditable();
+  await expect(sight.getByLabel("左右 1クリック=cm @70m", { exact: true })).toBeEditable();
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("gives accessible names to sight mark and calibration modal controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "サイト調整").click();
+
+  await page.locator("#sgAdd").click();
+  const markEditor = page.locator("body > .ovl");
+  await expect(markEditor.getByLabel("日付", { exact: true })).toBeEditable();
+  await expect(markEditor.getByLabel("上下", { exact: true })).toBeEditable();
+  await expect(markEditor.getByLabel("左右", { exact: true })).toBeEditable();
+  await expect(markEditor.getByLabel("メモ", { exact: true })).toBeEditable();
+  await markEditor.locator("#mkCancel").click();
+
+  await page.locator("#sgCalMode").click();
+  const calibration = page.locator("body > .ovl");
+  await expect(calibration.getByLabel("日付", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("70m 上下", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("70m 左右", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("18m 上下", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("18m 左右", { exact: true })).toBeEditable();
+  await expect(calibration.getByLabel("メモ", { exact: true })).toBeEditable();
+  await calibration.locator("#calCancel").click();
+  await expect(page.locator("body > .ovl")).toHaveCount(0);
   await expect(unexpectedErrors).toEqual([]);
 });
 
@@ -166,6 +265,60 @@ test("exposes distance chips as buttons with synced aria-pressed", async ({ page
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("gives accessible names to the record setup controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await page.locator("details.recordDetails summary").click();
+  await page.getByLabel("的", { exact: true }).selectOption("80");
+  await page.getByLabel("1エンドの本数", { exact: true }).selectOption("3");
+  await page.getByLabel("サイト 上下（目盛り）", { exact: true }).fill("5.4");
+  await page.getByLabel("風向", { exact: true }).selectOption({ label: "追い風" });
+  await expect(page.getByLabel("的", { exact: true })).toHaveValue("80");
+  await expect(page.getByLabel("1エンドの本数", { exact: true })).toHaveValue("3");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("gives accessible names to the analysis filters", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "分析").click();
+  const analysis = page.locator("#main");
+  await analysis.getByLabel("用具", { exact: true }).selectOption("e2e-setup");
+  await analysis.getByLabel("距離", { exact: true }).selectOption("70");
+  await expect(analysis.getByLabel("用具", { exact: true })).toHaveValue("e2e-setup");
+  await expect(analysis.getByLabel("距離", { exact: true })).toHaveValue("70");
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("gives accessible names to active record nudge controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await page.getByTestId("record-start").click();
+  await page.getByTestId("active-target").locator("#tgsvg").click();
+  await page.getByTestId("active-arrow-chips").locator(".sc").first().click();
+
+  for (const label of ["上へ", "左へ", "選択中の矢を削除", "右へ", "下へ"]) {
+    await expect(page.getByRole("button", { name: label, exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: label, exact: true })).toBeEnabled();
+  }
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("exposes history rows and sight distance chips as buttons", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {
@@ -176,6 +329,7 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await mainTab(page, "履歴").click();
+  await expect(page.locator("#histClear")).toHaveAttribute("type", "button");
   const row = page.locator("#histList .listItem").first();
   await expect(row).toBeVisible();
   await expect(row).toHaveJSProperty("tagName", "BUTTON");
@@ -185,6 +339,13 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await expect(page.locator(".ovl")).toHaveCount(0);
 
   await mainTab(page, "サイト調整").click();
+  await expect(page.locator("#sgAdd")).toHaveAttribute("type", "button");
+  await expect(page.locator("#sgCalMode")).toHaveAttribute("type", "button");
+  await expect(page.getByRole("button", { name: "サイト値を削除" })).toHaveCount(1);
+  await expect(page.getByRole("button", { name: "サイト値を削除" })).toHaveAttribute(
+    "type",
+    "button",
+  );
   const chips = page.locator("#sgDistChips .chip");
   await expect(chips.first()).toBeVisible();
   const chipCount = await chips.count();
@@ -226,6 +387,77 @@ test("opens settings as a dialog, closes on Escape, and restores focus", async (
   await expect(ovl).toHaveCount(0);
   await expect(page.locator("body")).not.toHaveClass(/modalOpen/);
   await expect(page.locator("#btnSettings")).toBeFocused();
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("settings exposes a visible header close control without scrolling", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+
+  await page.locator("#btnSettings").click();
+  const topClose = page.getByRole("button", { name: "設定を閉じる", exact: true });
+  await expect(topClose).toBeVisible();
+  await expect(topClose).toBeEnabled();
+  await topClose.click();
+  await expect(page.locator(".ovl")).toHaveCount(0);
+  await expect(page.locator("#btnSettings")).toBeFocused();
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("gives accessible names to custom round editor controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await page.locator("#btnSettings").click();
+  const settings = page.locator("body > .ovl");
+  await settings.getByTestId("settings-custom-rounds").locator("summary").click();
+  await settings.getByTestId("settings-custom-round-add").click();
+
+  const editor = page.locator("body > .ovl");
+  await expect(editor.getByLabel("名前 *", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("距離 (m)", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("的", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("射数", { exact: true })).toBeEditable();
+  await expect(editor.getByLabel("1エンドの本数", { exact: true })).toBeEditable();
+  await editor.locator("#crCancel").click();
+  await expect(page.getByRole("button", { name: "設定を閉じる", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "設定を閉じる", exact: true }).click();
+  await expect(page.locator("body > .ovl")).toHaveCount(0);
+  await expect(unexpectedErrors).toEqual([]);
+});
+
+test("gives accessible names to the first setup wizard controls", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  const emptyGearDatabase = { ...sampleDb, setups: [], sightMarks: [] };
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, emptyGearDatabase);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await mainTab(page, "用具").click();
+  await page.getByTestId("gear-wizard-start").click();
+
+  const wizard = page.locator("body > .ovl");
+  await expect(wizard.getByLabel("名前 *", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("実測ポンド", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("引き尺 (inch)", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("番手/スパイン", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("矢尺 (inch)", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("ポイント重量 (gr)", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("70m 上下", { exact: true })).toBeEditable();
+  await expect(wizard.getByLabel("70m 左右", { exact: true })).toBeEditable();
+  await wizard.locator("#wCancel").click();
+  await expect(page.locator("body > .ovl")).toHaveCount(0);
   await expect(unexpectedErrors).toEqual([]);
 });
 

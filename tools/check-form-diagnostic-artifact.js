@@ -1,0 +1,393 @@
+"use strict";
+
+const assert = require("node:assert/strict");
+const { execFileSync } = require("node:child_process");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const {
+  createFormDiagnosticHandoff,
+  inspectFormDiagnosticArtifact,
+} = require("./form-diagnostic-artifact");
+const { findDiagnosticFilesFromDownloads } = require("./inspect-form-diagnostic-json");
+const {
+  parseArgs: parseHandoffArgs,
+  resolvePreview,
+} = require("./write-form-diagnostic-handoff");
+
+const CONDITIONS = ["side", "oblique", "normal_range"];
+
+function receipt(receiptOrdinal, outcome = "retained") {
+  return {
+    receiptOrdinal,
+    outcome,
+    detectorOutcome: "confirmed",
+    cancelReason: null,
+    unresolvedReason: null,
+    fire: {
+      anchorFloor: 0.42,
+      anchorEnter: 0.47,
+      releaseSpeed: 6.8,
+      evidenceAgeMs: 33,
+      evidenceStrength: 5,
+      departDelta: 0.72,
+      fireEvidence: "adaptive",
+    },
+  };
+}
+
+function validPayload() {
+  return {
+    format: "archery-note-form-diagnostics",
+    schemaVersion: 1,
+    appVersion: 84,
+    matrix: "field-3x6",
+    runs: CONDITIONS.map((condition, index) => ({
+      runOrdinal: index + 1,
+      condition,
+      retainedShotCount: 6,
+      receipts: Array.from({ length: 6 }, (_, receiptIndex) => receipt(receiptIndex + 1)),
+    })),
+  };
+}
+
+const valid = inspectFormDiagnosticArtifact(`${JSON.stringify(validPayload(), null, 2)}\n`);
+assert.equal(valid.ok, true, "valid artifact is accepted");
+assert.equal(valid.summary.runs[0].retainedShotCount, 6, "summary exposes retained count");
+assert.equal(valid.summary.runs[2].condition, "normal_range", "summary preserves condition order");
+assert.equal(valid.sha256.length, 64, "accepted artifact has SHA-256");
+
+assert.equal(
+  typeof createFormDiagnosticHandoff,
+  "function",
+  "diagnostic handoff creator is exported",
+);
+const handoff = createFormDiagnosticHandoff(valid, "a".repeat(40), "b".repeat(40));
+assert.deepEqual(
+  Object.keys(handoff),
+  ["format", "schemaVersion", "preview", "artifact"],
+  "handoff has a bounded top-level shape",
+);
+assert.deepEqual(
+  handoff.preview,
+  { commit: "a".repeat(40), tree: "b".repeat(40) },
+  "handoff binds the exact preview commit and tree",
+);
+assert.equal(handoff.artifact.sha256, valid.sha256, "handoff preserves artifact SHA");
+assert.equal(handoff.artifact.byteLength, valid.byteLength, "handoff preserves artifact bytes");
+assert.deepEqual(
+  handoff.artifact.runs,
+  valid.summary.runs,
+  "handoff preserves only the aggregate run summary",
+);
+assert.equal(
+  JSON.stringify(handoff).includes("receipts"),
+  false,
+  "handoff does not include receipt or raw diagnostic data",
+);
+assert.throws(
+  () => createFormDiagnosticHandoff(valid, "not-a-commit", "b".repeat(40)),
+  /preview commit/i,
+  "handoff rejects malformed preview provenance",
+);
+
+const removableFalsePositive = validPayload();
+removableFalsePositive.runs[0].receipts.push(receipt(7, "manual-removed"));
+const removableFalsePositiveResult = inspectFormDiagnosticArtifact(
+  JSON.stringify(removableFalsePositive),
+);
+assert.equal(
+  removableFalsePositiveResult.ok,
+  true,
+  "artifact accepts a manually removed false positive alongside six retained shots",
+);
+assert.equal(
+  removableFalsePositiveResult.summary.runs[0].retainedShotCount,
+  6,
+  "manual removal does not change retained-shot count",
+);
+
+const tooManyReceipts = validPayload();
+for (let ordinal = 7; ordinal <= 33; ordinal += 1) {
+  tooManyReceipts.runs[0].receipts.push(receipt(ordinal, "manual-removed"));
+}
+const tooManyReceiptsResult = inspectFormDiagnosticArtifact(JSON.stringify(tooManyReceipts));
+assert.equal(tooManyReceiptsResult.ok, false, "artifact refuses more than 32 receipts per run");
+assert.equal(tooManyReceiptsResult.code, "run-count", "receipt overflow reports count failure");
+
+const reorderedPayload = validPayload();
+const reorderedText = JSON.stringify({
+  runs: reorderedPayload.runs,
+  matrix: reorderedPayload.matrix,
+  appVersion: reorderedPayload.appVersion,
+  format: reorderedPayload.format,
+  schemaVersion: reorderedPayload.schemaVersion,
+});
+assert.equal(inspectFormDiagnosticArtifact(reorderedText).ok, true, "JSON key order is irrelevant");
+
+const normalBackup = inspectFormDiagnosticArtifact(
+  JSON.stringify({ schema: 5, sessions: [], formAnalyses: [] }),
+);
+assert.equal(normalBackup.ok, false, "normal backup is refused");
+assert.equal(normalBackup.code, "format", "normal backup reports format refusal");
+
+const unknownKey = validPayload();
+unknownKey.privacySentinel = "must-not-pass";
+const unknownKeyResult = inspectFormDiagnosticArtifact(JSON.stringify(unknownKey));
+assert.equal(unknownKeyResult.ok, false, "unknown top-level keys are refused");
+assert.equal(unknownKeyResult.code, "top-level-keys", "unknown key reports allowlist failure");
+
+const missingFire = validPayload();
+delete missingFire.runs[0].receipts[0].fire.releaseSpeed;
+const missingFireResult = inspectFormDiagnosticArtifact(JSON.stringify(missingFire));
+assert.equal(missingFireResult.ok, false, "missing fire field is refused");
+assert.equal(
+  missingFireResult.code,
+  "fire-keys",
+  "missing fire field reports fire allowlist failure",
+);
+
+const unknownReason = validPayload();
+unknownReason.runs[0].receipts[0].cancelReason = "private-sentinel";
+const unknownReasonResult = inspectFormDiagnosticArtifact(JSON.stringify(unknownReason));
+assert.equal(unknownReasonResult.ok, false, "unknown receipt reasons are refused");
+assert.equal(unknownReasonResult.code, "receipt", "unknown receipt reasons report receipt failure");
+
+const contradictoryReason = validPayload();
+contradictoryReason.runs[0].receipts[0].cancelReason = "anchor-return";
+const contradictoryReasonResult = inspectFormDiagnosticArtifact(
+  JSON.stringify(contradictoryReason),
+);
+assert.equal(contradictoryReasonResult.ok, false, "contradictory receipt reasons are refused");
+assert.equal(
+  contradictoryReasonResult.code,
+  "receipt",
+  "contradictory receipt reasons report receipt failure",
+);
+
+const contradictoryOutcome = validPayload();
+contradictoryOutcome.runs[0].receipts[0].detectorOutcome = "auto-canceled";
+contradictoryOutcome.runs[0].receipts[0].cancelReason = "anchor-return";
+const contradictoryOutcomeResult = inspectFormDiagnosticArtifact(
+  JSON.stringify(contradictoryOutcome),
+);
+assert.equal(
+  contradictoryOutcomeResult.ok,
+  false,
+  "retained outcome cannot claim an auto-canceled detector result",
+);
+assert.equal(
+  contradictoryOutcomeResult.code,
+  "receipt",
+  "contradictory outcome reports receipt failure",
+);
+
+const wrongCount = validPayload();
+wrongCount.runs[1].receipts.pop();
+const wrongCountResult = inspectFormDiagnosticArtifact(JSON.stringify(wrongCount));
+assert.equal(wrongCountResult.ok, false, "short run is refused");
+assert.equal(wrongCountResult.code, "run-count", "short run reports count failure");
+
+const oversized = inspectFormDiagnosticArtifact("x".repeat(65537));
+assert.equal(oversized.ok, false, "oversized artifact is refused");
+assert.equal(oversized.code, "size", "oversized artifact reports size failure");
+assert.match(
+  oversized.message,
+  /通常のschema-5バックアップは対象外/,
+  "size refusal explains that normal backups are not diagnostic artifacts",
+);
+
+const handoffFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-handoff-"));
+try {
+  const artifactPath = path.join(handoffFixture, "artifact.json");
+  const outputPath = path.join(handoffFixture, "handoff.json");
+  fs.writeFileSync(artifactPath, `${JSON.stringify(validPayload(), null, 2)}\n`, "utf8");
+  const cliOutput = execFileSync(
+    process.execPath,
+    [
+      path.join(__dirname, "write-form-diagnostic-handoff.js"),
+      artifactPath,
+      "--preview-commit",
+      "A".repeat(40),
+      "--preview-tree",
+      "b".repeat(40),
+      "--output",
+      outputPath,
+    ],
+    { cwd: path.join(__dirname, ".."), encoding: "utf8" },
+  );
+  assert.match(cliOutput, /Form diagnostic handoff written:/, "handoff CLI reports its output");
+  const writtenHandoff = JSON.parse(fs.readFileSync(outputPath, "utf8"));
+  assert.equal(writtenHandoff.preview.commit, "a".repeat(40), "CLI normalizes commit case");
+  assert.equal(writtenHandoff.preview.tree, "b".repeat(40), "CLI preserves tree binding");
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(writtenHandoff.artifact, "receipts"),
+    false,
+    "CLI handoff remains aggregate-only",
+  );
+
+  const cleanPreviewFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-preview-"));
+  execFileSync("git", ["init", "-q", "-b", "main"], {
+    cwd: cleanPreviewFixture,
+    encoding: "utf8",
+  });
+  execFileSync(
+    "git",
+    [
+      "-c",
+      "user.name=Archery Note Test",
+      "-c",
+      "user.email=archery-note-test@example.invalid",
+      "commit",
+      "--allow-empty",
+      "-m",
+      "fixture",
+    ],
+    { cwd: cleanPreviewFixture, encoding: "utf8" },
+  );
+  const currentPreview = resolvePreview({
+    previewCurrent: true,
+    repositoryRoot: cleanPreviewFixture,
+  });
+  assert.deepEqual(
+    currentPreview,
+    {
+      commit: execFileSync("git", ["-C", cleanPreviewFixture, "rev-parse", "HEAD"], {
+        encoding: "utf8",
+      }).trim(),
+      tree: execFileSync("git", ["-C", cleanPreviewFixture, "rev-parse", "HEAD^{tree}"], {
+        encoding: "utf8",
+      }).trim(),
+    },
+    "current preview helper binds the checked-out commit and tree",
+  );
+  fs.rmSync(cleanPreviewFixture, { recursive: true, force: true });
+  assert.throws(
+    () =>
+      parseHandoffArgs([
+        artifactPath,
+        "--preview-current",
+        "--preview-commit",
+        "a".repeat(40),
+        "--preview-tree",
+        "b".repeat(40),
+        "--output",
+        path.join(handoffFixture, "conflicting-handoff.json"),
+      ]),
+    /同時に指定できません/,
+    "current preview mode rejects conflicting explicit provenance",
+  );
+
+  const dirtyPreviewMarker = path.join(
+    path.join(__dirname, ".."),
+    ".form-diagnostic-preview-dirty-marker",
+  );
+  const dirtyPreviewOutput = path.join(handoffFixture, "handoff-dirty-preview.json");
+  fs.writeFileSync(dirtyPreviewMarker, "dirty preview marker\n", "utf8");
+  try {
+    let dirtyPreviewError;
+    try {
+      execFileSync(
+        process.execPath,
+        [
+          path.join(__dirname, "write-form-diagnostic-handoff.js"),
+          artifactPath,
+          "--preview-current",
+          "--output",
+          dirtyPreviewOutput,
+        ],
+        { cwd: path.join(__dirname, ".."), encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
+      );
+    } catch (error) {
+      dirtyPreviewError = error;
+    }
+    assert.ok(dirtyPreviewError, "dirty current preview handoff must fail");
+    assert.equal(dirtyPreviewError.status, 2, "dirty current preview handoff exits with status 2");
+    assert.match(
+      String(dirtyPreviewError.stderr),
+      /clean|未コミット|変更/,
+      "dirty current preview handoff explains the clean-worktree requirement",
+    );
+    assert.equal(
+      fs.existsSync(dirtyPreviewOutput),
+      false,
+      "dirty current preview handoff does not write a misleading sidecar",
+    );
+  } finally {
+    fs.rmSync(dirtyPreviewMarker, { force: true });
+  }
+} finally {
+  fs.rmSync(handoffFixture, { recursive: true, force: true });
+}
+
+const downloadsFixture = fs.mkdtempSync(path.join(os.tmpdir(), "archery-note-downloads-"));
+try {
+  assert.deepEqual(
+    findDiagnosticFilesFromDownloads(downloadsFixture),
+    [],
+    "download search reports no diagnostic artifacts",
+  );
+  fs.writeFileSync(path.join(downloadsFixture, "archery-note-form-diagnostics-one.json"), "{}");
+  assert.deepEqual(
+    findDiagnosticFilesFromDownloads(downloadsFixture).map((file) => path.basename(file)),
+    ["archery-note-form-diagnostics-one.json"],
+    "download search returns the single diagnostic artifact",
+  );
+  fs.writeFileSync(path.join(downloadsFixture, "archery-note-form-diagnostics-two.json"), "{}");
+  assert.deepEqual(
+    findDiagnosticFilesFromDownloads(downloadsFixture).map((file) => path.basename(file)),
+    ["archery-note-form-diagnostics-one.json", "archery-note-form-diagnostics-two.json"],
+    "download search returns all candidates in stable order",
+  );
+
+  const cliHome = path.join(downloadsFixture, "cli-home");
+  const cliDownloads = path.join(cliHome, "Downloads");
+  fs.mkdirSync(cliDownloads, { recursive: true });
+  const ambiguousNames = [
+    "archery-note-form-diagnostics-cli-one.json",
+    "archery-note-form-diagnostics-cli-two.json",
+  ];
+  ambiguousNames.forEach((fileName) => {
+    fs.writeFileSync(path.join(cliDownloads, fileName), "{}");
+  });
+  const ambiguousOutput = path.join(downloadsFixture, "ambiguous-handoff.json");
+  let ambiguousCliError;
+  try {
+    execFileSync(
+      process.execPath,
+      [
+        path.join(__dirname, "write-form-diagnostic-handoff.js"),
+        "--from-downloads",
+        "--preview-commit",
+        "A".repeat(40),
+        "--preview-tree",
+        "b".repeat(40),
+        "--output",
+        ambiguousOutput,
+      ],
+      {
+        cwd: path.join(__dirname, ".."),
+        env: { ...process.env, HOME: cliHome, USERPROFILE: cliHome },
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      },
+    );
+  } catch (error) {
+    ambiguousCliError = error;
+  }
+  assert.ok(ambiguousCliError, "ambiguous Downloads handoff must fail");
+  assert.equal(ambiguousCliError.status, 2, "ambiguous Downloads handoff exits with status 2");
+  const ambiguousStderr = String(ambiguousCliError.stderr);
+  ambiguousNames.forEach((fileName) => {
+    assert.match(
+      ambiguousStderr,
+      new RegExp(fileName),
+      `ambiguous handoff lists candidate ${fileName}`,
+    );
+  });
+  assert.match(ambiguousStderr, /明示パスを指定/, "ambiguous handoff requests an explicit path");
+} finally {
+  fs.rmSync(downloadsFixture, { recursive: true, force: true });
+}
+
+console.log("Form diagnostic artifact checks OK");

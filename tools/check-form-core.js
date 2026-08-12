@@ -9,6 +9,7 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const coreScript = fs.readFileSync(path.join(root, "scripts", "46-form-core.js"), "utf8");
+const viewScript = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
 
 function assert(ok, message) {
   if (!ok) throw new Error(message);
@@ -19,22 +20,403 @@ function assertEqual(actual, expected, label) {
     `${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`,
   );
 }
+function assertJsonEqual(actual, expected, label) {
+  assertEqual(JSON.stringify(actual), JSON.stringify(expected), label);
+}
 function assertClose(actual, expected, eps, label) {
   assert(
     Number.isFinite(actual) && Math.abs(actual - expected) <= eps,
     `${label}: expected ${expected} (±${eps}), got ${actual}`,
   );
 }
+function boundedSourceSection(source, startMarker, endMarker, label) {
+  const start = source.indexOf(startMarker);
+  assert(start >= 0, `${label}: start marker exists`);
+  assertEqual(source.lastIndexOf(startMarker), start, `${label}: start marker is unique`);
+  const end = source.indexOf(endMarker, start + startMarker.length);
+  assert(end > start, `${label}: ordered end marker exists`);
+  return source.slice(start, end);
+}
+function compactSource(source) {
+  return source.replace(/\s+/g, "");
+}
 
 const core = new Function(
   `${coreScript}
-return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
-  formMedian, computeFormMetrics, makeFormEma, makeFormPhaseDetector, stepFormPhase, computeFormVelocity,
-  FORM_VEL_FILTER, makeFormVelocitySource,
-  formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
-  formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
-  ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
+  return {FORM_LM, FORM_REF, FORM_PH, FORM_PHASES, formGaussScore, formAngleDeg, formDist, formLineDist,
+    formMedian, adaptiveAnchorThreshold, adaptiveReleaseThreshold,
+    adaptiveReleaseCandidate:
+      typeof adaptiveReleaseCandidate === "function" ? adaptiveReleaseCandidate : null,
+    updateAdaptiveAnchorEvidence:
+      typeof updateAdaptiveAnchorEvidence === "function" ? updateAdaptiveAnchorEvidence : null,
+    makeFormReleaseReceiptTracker:
+      typeof makeFormReleaseReceiptTracker === "function"
+        ? makeFormReleaseReceiptTracker
+        : null,
+    formRemoveShotByReceiptId:
+      typeof formRemoveShotByReceiptId === "function" ? formRemoveShotByReceiptId : null,
+    copyFormReleaseFireSnapshot:
+      typeof copyFormReleaseFireSnapshot === "function"
+        ? copyFormReleaseFireSnapshot
+        : null,
+    computeFormMetrics, makeFormEma, makeFormPhaseDetector, legacyReleaseContinuity,
+    stepFormPhase, computeFormVelocity,
+    FORM_VEL_FILTER, makeFormVelocitySource,
+    formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
+    formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
+    ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
 )();
+
+function replaceSourceExactlyOnce(source, marker, replacement, label) {
+  assertEqual(source.split(marker).length - 1, 1, `${label} marker count`);
+  return source.replace(marker, replacement);
+}
+
+function loadReceiptTrackerCore(options = {}) {
+  let source = coreScript;
+  if (options.sequenceMax != null) {
+    source = replaceSourceExactlyOnce(
+      source,
+      "const FORM_RELEASE_RECEIPT_SEQUENCE_MAX = 999999;",
+      `const FORM_RELEASE_RECEIPT_SEQUENCE_MAX = ${options.sequenceMax};`,
+      "receipt sequence ceiling",
+    );
+  }
+  if (options.inconsistentSequence === true) {
+    source = replaceSourceExactlyOnce(
+      source,
+      "let receiptSequence = 0;",
+      "let receiptSequence = 0.5;",
+      "receipt sequence initial value",
+    );
+  }
+  return new Function(
+    `${source}
+  return {
+    makeFormReleaseReceiptTracker:
+      typeof makeFormReleaseReceiptTracker === "function"
+        ? makeFormReleaseReceiptTracker
+        : null
+  };`,
+  )();
+}
+
+/* ---------- fire snapshot ---------- */
+
+assert(typeof core.copyFormReleaseFireSnapshot === "function", "fire snapshot copier is exported");
+const validFireDebug = {
+  anchorFloor: 0.47,
+  anchorEnter: 0.59,
+  releaseSpeed: 8,
+  evidenceAgeMs: 0,
+  evidenceStrength: 12,
+  departDelta: 0.28,
+  fireEvidence: "adaptive",
+};
+const fire = core.copyFormReleaseFireSnapshot(validFireDebug);
+assertJsonEqual(
+  Object.keys(fire),
+  [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+    "fireEvidence",
+  ],
+  "fire snapshot has the exact seven keys",
+);
+{
+  const numericKeys = [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+  ];
+  Object.keys(validFireDebug).forEach((key) => {
+    const missing = { ...validFireDebug };
+    delete missing[key];
+    assertEqual(core.copyFormReleaseFireSnapshot(missing), null, `missing ${key} is invalid`);
+  });
+  numericKeys.forEach((key) => {
+    [undefined, NaN, Infinity, -Infinity].forEach((value) => {
+      assertEqual(
+        core.copyFormReleaseFireSnapshot({ ...validFireDebug, [key]: value }),
+        null,
+        `${key} rejects ${String(value)}`,
+      );
+    });
+    assert(
+      core.copyFormReleaseFireSnapshot({ ...validFireDebug, [key]: null }),
+      `${key} accepts explicit null`,
+    );
+  });
+  ["nb", "unknown", null, undefined].forEach((fireEvidence) => {
+    assertEqual(
+      core.copyFormReleaseFireSnapshot({ ...validFireDebug, fireEvidence }),
+      null,
+      `fireEvidence rejects ${String(fireEvidence)}`,
+    );
+  });
+  const mutable = { ...validFireDebug };
+  const copied = core.copyFormReleaseFireSnapshot(mutable);
+  mutable.anchorEnter = 999;
+  assertEqual(copied.anchorEnter, 0.59, "snapshot is detached from debug input");
+}
+
+const featureProjectionSource = boundedSourceSection(
+  viewScript,
+  "function formFeatureFromShot(",
+  "function formDiagPush(",
+  "formFeatureFromShot source",
+);
+const featureApi = new Function(
+  `${featureProjectionSource}
+  return {formFeatureFromShot};`,
+)();
+const featureShot = {
+  id: "form-receipt-1",
+  holdMs: 900,
+  angles: { bowArm: 171, drawArm: 150 },
+  anchorNorm: 0.47,
+  pre: null,
+  confidence: 0.92,
+  score: 82,
+  arrowCheck: null,
+  diag: { maxV: 8, rise: 0.2, nullFrames: 0, conf: 0.92 },
+};
+[false, undefined, "true", 1, {}].forEach((setting) => {
+  const feature = featureApi.formFeatureFromShot(featureShot, setting === true);
+  assert(!Object.hasOwn(feature, "diag"), `diagnostics ${String(setting)} excludes existing diag`);
+  assert(!Object.hasOwn(feature, "receiptId"), `diagnostics ${String(setting)} excludes receiptId`);
+});
+const enabledFeature = featureApi.formFeatureFromShot(featureShot, true);
+assert(Object.hasOwn(enabledFeature, "diag"), "exact true retains existing diag");
+assertEqual(enabledFeature.receiptId, featureShot.id, "exact true retains receipt ID");
+const videoTimestampSource = boundedSourceSection(
+  viewScript,
+  "function nextFormVideoTimestampMs(",
+  "function formFeatureFromShot(",
+  "video timestamp helper source",
+);
+const videoTimestampApi = new Function(
+  `${videoTimestampSource}
+  return {nextFormVideoTimestampMs};`,
+)();
+{
+  let last = -1;
+  const accepted = videoTimestampApi.nextFormVideoTimestampMs(17375000.1, last);
+  assertEqual(accepted, 17375000, "video timestamp floors fractional milliseconds");
+  last = accepted;
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17375000.9, last),
+    null,
+    "video timestamp rejects a fractional duplicate millisecond",
+  );
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17375000, 17375000),
+    null,
+    "video timestamp rejects an exact duplicate integer millisecond",
+  );
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17374999, 17375000),
+    null,
+    "video timestamp rejects a backward integer millisecond",
+  );
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(17375001.1, last),
+    17375001,
+    "video timestamp accepts the next integer millisecond",
+  );
+  assertEqual(
+    videoTimestampApi.nextFormVideoTimestampMs(Number.NaN, last),
+    null,
+    "video timestamp rejects nonfinite media time",
+  );
+}
+const saveCapture = boundedSourceSection(
+  viewScript,
+  "function openFormCapture(){",
+  "function startFormReplay(videoUrl){",
+  "live capture source",
+);
+assert(
+  compactSource(saveCapture).includes(
+    "constnow=nextFormVideoTimestampMs(performance.now(),lastDetectTs);",
+  ),
+  "live capture passes normalized timestamps to MediaPipe",
+);
+const saveReplay = viewScript.slice(viewScript.indexOf("function startFormReplay(videoUrl){"));
+assert(saveReplay.length > 0, "replay source exists");
+assert(
+  compactSource(saveReplay).includes(
+    "constnow=nextFormVideoTimestampMs(video.currentTime*1000,lastDetectTs);",
+  ),
+  "replay passes normalized video timestamps to MediaPipe",
+);
+for (const controlId of [
+  "formStart",
+  "formReplay",
+  "fdClose",
+  "fcClose",
+  "fcCrop",
+  "fcRec",
+  "frClose",
+]) {
+  assert(
+    new RegExp(
+      `<button\\b(?=[^>]*\\bid=["']${controlId}["'])(?=[^>]*\\btype=["']button["'])[^>]*>`,
+    ).test(viewScript),
+    `form control ${controlId} must declare type=button`,
+  );
+}
+assert(
+  /<button\b(?=[^>]*\bdata-rm-shot=)(?=[^>]*\btype=["']button["'])[^>]*>/.test(viewScript),
+  "form shot removal control must declare type=button",
+);
+for (const [label, source, freezeName, finishName] of [
+  ["live", saveCapture, "freezeCaptureForSave", "finishCapture"],
+  ["replay", saveReplay, "freezeReplayForSave", "finishReplay"],
+]) {
+  assert(source.includes(`function ${freezeName}(`), `${label} has a separate freeze helper`);
+  assert(source.includes(`function ${finishName}(`), `${label} has a separate final teardown`);
+  assert(source.includes("保存を再試行"), `${label} save failure exposes retry`);
+  assert(
+    source.includes("保存できていない診断を破棄して閉じますか？"),
+    `${label} failed save requires discard confirmation`,
+  );
+  const compact = compactSource(source);
+  const freezeAt = compact.indexOf(`${freezeName}();`);
+  const activeAt = compact.indexOf(
+    'if(tracker.current())tracker.abandon("workflow-save");',
+    freezeAt,
+  );
+  const snapshotAt = compact.indexOf("tracker.snapshot();", activeAt);
+  const createAt = compact.indexOf("createFrozenFormDiagnosticSave(", snapshotAt);
+  const attemptAt = compact.indexOf("attemptFrozenFormDiagnosticSave(", createAt);
+  assert(
+    freezeAt >= 0 &&
+      activeAt > freezeAt &&
+      snapshotAt > activeAt &&
+      createAt > snapshotAt &&
+      attemptAt > createAt,
+    `${label} keeps freeze -> abandon -> snapshot -> create -> attempt order`,
+  );
+}
+const replayPoseLoadSource = saveReplay.replace(/\r\n/g, "\n");
+assert(
+  replayPoseLoadSource.includes("loadFormPose().then(async lm=>{\n    if(!running) return;"),
+  "replay pose continuation cannot restart after freeze or close",
+);
+for (const [label, source, saveMarker, endMarker] of [
+  [
+    "live",
+    saveCapture,
+    'ovl.querySelector("#fcSave").onclick=async()=>{',
+    'ovl.querySelector("#fcSwap").onclick=async()=>{',
+  ],
+  [
+    "replay",
+    saveReplay,
+    'ovl.querySelector("#frSave").onclick=()=>{',
+    'ovl.querySelector("#frHand").onclick=e=>{',
+  ],
+]) {
+  const legacySave = compactSource(
+    boundedSourceSection(source, saveMarker, endMarker, `${label} legacy save handler`),
+  );
+  const debugGate = legacySave.indexOf("if(db.settings.formDebug===true){");
+  const abandon = legacySave.indexOf('if(tracker.current())tracker.abandon("workflow-save");');
+  const push = legacySave.indexOf("db.formAnalyses.push(rec);");
+  const save = legacySave.indexOf('save({reason:"form-analysis"});');
+  assert(
+    debugGate >= 0 && abandon > debugGate && push > abandon && save > push,
+    `${label} legacy save keeps debug gate -> active receipt resolution -> record push -> save order`,
+  );
+}
+for (const [label, source, finishName] of [
+  ["live", saveCapture, "finishCapture"],
+  ["replay", saveReplay, "finishReplay"],
+]) {
+  const compact = compactSource(source);
+  const failureAt = compact.indexOf("if(receiptFailure){");
+  const frozenAt = compact.indexOf("if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){");
+  const confirmedExit = compact.slice(failureAt, frozenAt);
+  assert(
+    failureAt >= 0 &&
+      failureAt < frozenAt &&
+      (confirmedExit.includes(`${finishName}();return;`) ||
+        confirmedExit.includes(`${finishName}AfterMotion();return;`)),
+    `${label} receipt failure confirms and exits before diagnostic retry/discard`,
+  );
+}
+const captureReceiptFailureFreeze = compactSource(
+  boundedSourceSection(
+    saveCapture,
+    "function freezeForReceiptFailure(){",
+    "async function shareRec(){",
+    "capture receipt failure freeze",
+  ),
+);
+const replayReceiptFailureFreeze = compactSource(
+  boundedSourceSection(
+    saveReplay,
+    "function freezeForReceiptFailure(){",
+    "function refreshSave(){",
+    "replay receipt failure freeze",
+  ),
+);
+[
+  ["live", captureReceiptFailureFreeze, "#fcSave"],
+  ["replay", replayReceiptFailureFreeze, "#frSave"],
+].forEach(([label, source, saveSelector]) => {
+  assert(
+    source.includes("db.settings.formDebug===true") &&
+      source.includes(`ovl.querySelector("${saveSelector}")`) &&
+      source.includes("saveButton.disabled=false") &&
+      source.includes("診断を保存して終了"),
+    `${label} receipt failure keeps the diagnostic recovery save enabled`,
+  );
+});
+
+const deletionHandler = boundedSourceSection(
+  viewScript,
+  'document.querySelectorAll("[data-del-form]").forEach',
+  "function formInsightBlockHtml",
+  "form deletion handler",
+);
+const deletionCompact = compactSource(deletionHandler);
+const firstResolve = deletionCompact.indexOf("matches=(db.formAnalyses||[]).filter(");
+const confirmAt = deletionCompact.indexOf("awaitappConfirm(", firstResolve);
+const secondResolve = deletionCompact.indexOf(
+  "matches=(db.formAnalyses||[]).filter(",
+  firstResolve + 1,
+);
+const planAt = deletionCompact.indexOf("planFormAnalysisDeletionCandidate(", secondResolve);
+const commitAt = deletionCompact.indexOf("commitFormDiagnosticDbCandidate(", planAt);
+const successGuard = deletionCompact.indexOf("if(!committed.ok)", commitAt);
+const renderAt = deletionCompact.indexOf("render();", successGuard);
+assert(
+  firstResolve >= 0 &&
+    confirmAt > firstResolve &&
+    secondResolve > confirmAt &&
+    planAt > secondResolve &&
+    commitAt > planAt &&
+    successGuard > commitAt &&
+    renderAt > successGuard,
+  "form deletion re-resolves, plans, commits, and renders only after success",
+);
+assert(
+  !deletionHandler.includes("trashItem("),
+  "transactional form deletion does not pre-mutate trash",
+);
+assert(
+  deletionCompact.includes('reason:"delete-form-analysis",forceSnapshot:true'),
+  "form deletion preserves exact save options",
+);
 
 /* ---------- 幾何ヘルパー ---------- */
 
@@ -70,6 +452,105 @@ assertClose(
 assertEqual(core.formMedian([]), null, "median of empty");
 assertClose(core.formMedian([3, 1, 2]), 2, 1e-9, "odd median");
 assertClose(core.formMedian([1, 2, 3, 4]), 2.5, 1e-9, "even median");
+assertEqual(
+  core.adaptiveAnchorThreshold([0.47, 0.48, 0.49, 0.5, 0.51]),
+  0.35,
+  "five anchor samples keep cold start",
+);
+assertEqual(
+  core.adaptiveAnchorThreshold([0.47, NaN, 0.48, Infinity, 0.49, 0.5, 0.51]),
+  0.35,
+  "non-finite anchor samples do not satisfy the six-sample calibration gate",
+);
+assertClose(
+  core.adaptiveAnchorThreshold([0.47, 0.48, 0.49, 0.5, 0.51, 0.52]),
+  0.595,
+  1e-9,
+  "six samples start p10 calibration",
+);
+assertEqual(
+  core.adaptiveAnchorThreshold([0.7, 0.71, 0.72, 0.73, 0.74, 0.75]),
+  0.65,
+  "anchor threshold is capped",
+);
+assertEqual(
+  core.adaptiveAnchorThreshold([0, 0.01, 0.02, 0.03, 0.04, 0.05]),
+  0.35,
+  "anchor threshold respects the calibrated lower clamp",
+);
+assertEqual(
+  core.adaptiveAnchorThreshold([0.47, NaN, 0.48, Infinity, 0.49, 0.5, 0.51, 0.52]),
+  0.595,
+  "anchor calibration filters non-finite samples and counts only finite values",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([0.1, 0.2, 0.3, 0.4, 0.5]),
+  6,
+  "five velocity samples keep cold start",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([0.1, NaN, 0.2, Infinity, 0.3, 0.4, 0.5]),
+  6,
+  "non-finite velocity samples do not satisfy the six-sample calibration gate",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([7, 7, 7, 7, 7, 7]),
+  8,
+  "release speed is capped below legacy nine",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([0.1, 0.2, 0.2, 0.3, 0.3, 7]),
+  6,
+  "single velocity outlier does not raise the floor",
+);
+assertClose(
+  core.adaptiveReleaseThreshold([1, 2, 3, 4, 5, 6]),
+  6.5,
+  1e-9,
+  "release speed uses an unclamped p90 result",
+);
+assertEqual(
+  core.adaptiveReleaseThreshold([1, 2, 3, 4, 5, NaN, Infinity, 6]),
+  6.5,
+  "release calibration filters non-finite samples and counts only finite values",
+);
+{
+  const anchorSamples = [0.52, 0.47, 0.5, 0.48, 0.51, 0.49];
+  const velocitySamples = [6, 1, 5, 2, 4, 3];
+  core.adaptiveAnchorThreshold(anchorSamples);
+  core.adaptiveReleaseThreshold(velocitySamples);
+  assertEqual(
+    JSON.stringify(anchorSamples),
+    JSON.stringify([0.52, 0.47, 0.5, 0.48, 0.51, 0.49]),
+    "anchor calibration does not mutate unsorted input",
+  );
+  assertEqual(
+    JSON.stringify(velocitySamples),
+    JSON.stringify([6, 1, 5, 2, 4, 3]),
+    "release calibration does not mutate unsorted input",
+  );
+}
+{
+  const first = core.makeFormPhaseDetector();
+  const second = core.makeFormPhaseDetector();
+  assert(first.adaptive && second.adaptive, "detectors include adaptive state");
+  assert(first.adaptive !== second.adaptive, "detectors have distinct adaptive objects");
+  assert(
+    first.adaptive.anchorSamples !== second.adaptive.anchorSamples,
+    "anchor arrays are detector-local",
+  );
+  assert(
+    first.adaptive.holdSamples !== second.adaptive.holdSamples,
+    "hold arrays are detector-local",
+  );
+  assert(
+    first.adaptive.holdVelocitySamples !== second.adaptive.holdVelocitySamples,
+    "velocity arrays are detector-local",
+  );
+  assertEqual(first.adaptive.holdBreakTs, null, "adaptive learning barrier starts inactive");
+  const initial = core.stepFormPhase(first, null, [], 1, 100);
+  assertEqual(initial.debug.refractoryRemaining, 0, "no-prior-fire refractory starts at zero");
+}
 assertEqual(
   core.formGaussScore(core.FORM_REF.bowArmAngle.ideal, core.FORM_REF.bowArmAngle),
   100,
@@ -141,6 +622,281 @@ function fullDrawLandmarks() {
   assertEqual(ema(null), null, "EMA of null");
 }
 
+assert(
+  typeof core.makeFormReleaseReceiptTracker === "function",
+  "release receipt tracker factory is exported",
+);
+const firstReceiptTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+const secondReceiptTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+assert(
+  typeof core.formRemoveShotByReceiptId === "function",
+  "receipt-owned shot removal helper is exported",
+);
+{
+  const sourceShots = [{ id: "form-receipt-1" }, { id: "form-receipt-2" }];
+  const removed = core.formRemoveShotByReceiptId(sourceShots, "form-receipt-1");
+  assertJsonEqual(removed, [{ id: "form-receipt-2" }], "removal targets the exact receipt ID");
+  assert(removed !== sourceShots, "receipt-owned removal returns a detached array");
+  assertJsonEqual(
+    core.formRemoveShotByReceiptId(sourceShots, "form-receipt-unknown"),
+    sourceShots,
+    "unknown receipt ID preserves every shot",
+  );
+  assertJsonEqual(
+    core.formRemoveShotByReceiptId(sourceShots, null),
+    sourceShots,
+    "missing receipt ID preserves every shot",
+  );
+}
+const firstReceiptAction = firstReceiptTracker.begin({ fireTs: 10, fire: null });
+assertJsonEqual(
+  Object.keys(firstReceiptAction),
+  ["id", "deletionTarget", "fatal", "code"],
+  "action has exact keys",
+);
+assertEqual(firstReceiptAction.id, "form-receipt-1", "first tracker ID");
+assertEqual(
+  secondReceiptTracker.begin({ fireTs: 20, fire: null }).id,
+  "form-receipt-1",
+  "workflow-local ID",
+);
+
+/* ---------- release-receipt tracker ---------- */
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const begun = tracker.begin({ fireTs: 10, fire: null });
+  assertJsonEqual(
+    tracker.markShotCreated(begun.id),
+    { id: begun.id, deletionTarget: null, fatal: false, code: null },
+    "mark-created action",
+  );
+  assertJsonEqual(
+    tracker.confirm(),
+    { id: begun.id, deletionTarget: null, fatal: false, code: null },
+    "confirm action",
+  );
+  assertEqual(
+    tracker.snapshot().releaseReceipts[0].detectorDisposition,
+    "confirmed",
+    "confirmed receipt is archived",
+  );
+  assertJsonEqual(
+    tracker.manualRemove(begun.id),
+    { id: begun.id, deletionTarget: null, fatal: false, code: null },
+    "confirmed archived receipt can be manually removed",
+  );
+  assertEqual(
+    tracker.snapshot().releaseReceipts[0].userDisposition,
+    "manual-removed",
+    "post-confirm archive removal is retained",
+  );
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const failedSummary = tracker.begin({ fireTs: 20, fire: null });
+  const canceled = tracker.cancel("no-depart");
+  assertEqual(
+    canceled.deletionTarget,
+    failedSummary.id,
+    "summary-failed cancellation returns only its own exact ID",
+  );
+  const receipt = tracker.snapshot().releaseReceipts[0];
+  assertEqual(receipt.shotCreated, false, "failed summary keeps a tombstone");
+  assertEqual(receipt.userDisposition, "not-created", "failed summary is not-created");
+  assertEqual(receipt.detectorDisposition, "auto-canceled", "failed summary still resolves");
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const a = tracker.begin({ fireTs: 100, fire: null });
+  tracker.markShotCreated(a.id);
+  tracker.confirm();
+  const b = tracker.begin({ fireTs: 200, fire: null });
+  tracker.markShotCreated(b.id);
+  tracker.manualRemove(b.id);
+  const canceled = tracker.cancel("anchor-return");
+  assertJsonEqual(
+    canceled,
+    { id: b.id, deletionTarget: b.id, fatal: false, code: null },
+    "cancel action targets only B",
+  );
+  const receipts = tracker.snapshot().releaseReceipts;
+  assertEqual(receipts[0].userDisposition, "present", "A remains present");
+  assertEqual(receipts[0].detectorDisposition, "confirmed", "A remains confirmed");
+  assertEqual(receipts[1].userDisposition, "manual-removed", "B keeps manual outcome");
+  assertEqual(receipts[1].detectorDisposition, "auto-canceled", "B keeps detector outcome");
+}
+
+{
+  const fire = { fireEvidence: "adaptive", sentinel: 1 };
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const first = tracker.begin({ fireTs: 1, fire });
+  fire.sentinel = 999;
+  tracker.markShotCreated(first.id);
+  const currentCopy = tracker.current();
+  currentCopy.fire.sentinel = 888;
+  assertEqual(tracker.current().fire.sentinel, 1, "current returns a detached fire copy");
+
+  const second = tracker.begin({ fireTs: 2, fire: null });
+  assertEqual(second.code, "supersededActive", "second begin reports supersession");
+  assertEqual(
+    tracker.snapshot().releaseReceipts[0].unresolvedReason,
+    "superseded-fire",
+    "superseded receipt is unresolved",
+  );
+  tracker.markShotCreated(second.id);
+  assertEqual(
+    tracker.cancel("anchor-return").deletionTarget,
+    second.id,
+    "new receipt alone owns later cancellation",
+  );
+
+  const snapshotCopy = tracker.snapshot();
+  snapshotCopy.releaseReceipts[0].fire.sentinel = 777;
+  snapshotCopy.receiptInvariantCounts.supersededActive = 0;
+  const fresh = tracker.snapshot();
+  assertEqual(fresh.releaseReceipts[0].fire.sentinel, 1, "snapshot fire is detached");
+  assertEqual(fresh.receiptInvariantCounts.supersededActive, 1, "snapshot counters are detached");
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  assertEqual(tracker.confirm().code, "missingActive", "orphan confirm is classified");
+  const begun = tracker.begin({ fireTs: 1, fire: null });
+  assertEqual(
+    tracker.markShotCreated("form-receipt-999").code,
+    "identityMismatch",
+    "wrong ID is classified",
+  );
+  assertEqual(
+    tracker.cancel("not-a-reason").code,
+    "invalidTransition",
+    "bad cancel reason is classified",
+  );
+  tracker.markShotCreated(begun.id);
+  tracker.confirm();
+  assertEqual(tracker.confirm().code, "missingActive", "double terminal call is classified");
+  for (let i = 0; i < 300; i += 1) tracker.confirm();
+  const counts = tracker.snapshot().receiptInvariantCounts;
+  assertEqual(counts.missingActive, 255, "missingActive saturates at 255");
+  assertEqual(counts.identityMismatch, 1, "identityMismatch increments alone");
+  assertEqual(counts.invalidTransition, 1, "invalidTransition increments alone");
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  for (let i = 1; i <= 32; i += 1) {
+    const receipt = tracker.begin({ fireTs: i, fire: null });
+    tracker.markShotCreated(receipt.id);
+    tracker.confirm();
+  }
+  const r33 = tracker.begin({ fireTs: 33, fire: null });
+  tracker.markShotCreated(r33.id);
+  assertEqual(tracker.cancel("anchor-return").deletionTarget, r33.id, "receipt 33 cancels exactly");
+  const r34 = tracker.begin({ fireTs: 34, fire: null });
+  tracker.markShotCreated(r34.id);
+  tracker.confirm();
+  const snapshot = tracker.snapshot();
+  assertEqual(snapshot.releaseReceipts.length, 32, "archive remains bounded");
+  assertEqual(snapshot.receiptOverflow, 2, "each overflowed terminal receipt counts once");
+  assertJsonEqual(
+    Object.keys(snapshot),
+    ["releaseReceipts", "receiptOverflow", "receiptInvariantCounts", "desynchronized"],
+    "snapshot has exact keys",
+  );
+  assertJsonEqual(
+    Object.keys(snapshot.receiptInvariantCounts),
+    [
+      "supersededActive",
+      "missingActive",
+      "identityMismatch",
+      "invalidTransition",
+      "sequenceExhausted",
+    ],
+    "snapshot counters have exact keys",
+  );
+  assertJsonEqual(
+    Object.keys(snapshot.releaseReceipts[0]),
+    [
+      "id",
+      "fireTs",
+      "shotCreated",
+      "userDisposition",
+      "detectorDisposition",
+      "cancelReason",
+      "unresolvedReason",
+      "fire",
+    ],
+    "snapshot receipt has exact keys",
+  );
+}
+
+{
+  const injected = loadReceiptTrackerCore({ sequenceMax: 2 });
+  const tracker = injected.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  tracker.begin({ fireTs: 1, fire: null });
+  tracker.confirm();
+  tracker.begin({ fireTs: 2, fire: null });
+  tracker.confirm();
+  assertJsonEqual(
+    tracker.begin({ fireTs: 3, fire: null }),
+    { id: null, deletionTarget: null, fatal: true, code: "sequenceExhausted" },
+    "ceiling without active receipt",
+  );
+  assertEqual(tracker.current(), null, "ceiling without active clears current");
+  assertEqual(tracker.snapshot().desynchronized, true, "ceiling latches desynchronization");
+}
+
+{
+  const injected = loadReceiptTrackerCore({ sequenceMax: 2 });
+  const tracker = injected.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const first = tracker.begin({ fireTs: 1, fire: null });
+  tracker.markShotCreated(first.id);
+  tracker.confirm();
+  const second = tracker.begin({ fireTs: 2, fire: null });
+  tracker.markShotCreated(second.id);
+  assertJsonEqual(
+    tracker.begin({ fireTs: 3, fire: null }),
+    { id: null, deletionTarget: null, fatal: true, code: "sequenceExhausted" },
+    "ceiling with active receipt",
+  );
+  const state = tracker.snapshot();
+  assertEqual(
+    state.releaseReceipts[1].unresolvedReason,
+    "superseded-fire",
+    "active receipt is finalized before latching",
+  );
+  assertEqual(
+    state.receiptInvariantCounts.supersededActive,
+    0,
+    "fatal allocation is not supersession",
+  );
+  assertEqual(state.receiptInvariantCounts.sequenceExhausted, 1, "ceiling increments once");
+  assertJsonEqual(
+    tracker.cancel("anchor-return"),
+    { id: null, deletionTarget: null, fatal: true, code: null },
+    "latched cancel is deletion-free",
+  );
+}
+
+{
+  const injected = loadReceiptTrackerCore({ inconsistentSequence: true });
+  const tracker = injected.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  assertJsonEqual(
+    tracker.begin({ fireTs: 1, fire: null }),
+    { id: null, deletionTarget: null, fatal: true, code: "invalidTransition" },
+    "inconsistent sequence fails closed",
+  );
+  const healthy = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  assertEqual(
+    healthy.begin({ fireTs: 1, fire: null }).id,
+    "form-receipt-1",
+    "new tracker is healthy",
+  );
+}
+
 /* ---------- フェーズ検出（F1 実射検証で確定した3ケース） ---------- */
 
 const mkRaw = (anchorNorm, drawArm) => ({
@@ -156,16 +912,1620 @@ function runSequence(seq, coreObj) {
   const hist = [];
   let t = 0,
     phases = [],
-    releases = 0;
+    releases = 0,
+    fireEvidence = [];
   for (const [m, vel, dt] of seq) {
     t += dt;
     hist.push({ ts: t, m, vel });
     if (hist.length > 150) hist.shift();
     const r = c.stepFormPhase(st, m, hist, 1.0, t);
     phases.push(r.phase);
-    if (r.released) releases++;
+    if (r.released) {
+      releases++;
+      fireEvidence.push(r.debug.fireEvidence);
+    }
   }
-  return { phases: [...new Set(phases)], releases, hist, lastTs: t };
+  return { phases: [...new Set(phases)], releases, fireEvidence, hist, lastTs: t };
+}
+
+function adaptiveStepper(dt, coreObj) {
+  const c = coreObj || core;
+  const st = c.makeFormPhaseDetector();
+  const hist = [];
+  let t = 0;
+  return {
+    st,
+    hist,
+    push(m, vel, elapsed) {
+      t += elapsed == null ? dt : elapsed;
+      hist.push({ ts: t, m, vel });
+      if (hist.length > 150) hist.shift();
+      return { r: c.stepFormPhase(st, m, hist, 1.0, t), t };
+    },
+  };
+}
+
+function assertAdaptiveResultShape(result, label) {
+  assert(Number.isFinite(result.anchorEnter), `${label}: top-level anchorEnter is numeric`);
+  assert(result.debug && typeof result.debug === "object", `${label}: debug exists`);
+  ["anchorFloor", "anchorEnter", "releaseSpeed", "evidenceAgeMs", "evidenceStrength"].forEach(
+    (key) => assert(key in result.debug, `${label}: debug has ${key}`),
+  );
+  assert(Number.isFinite(result.debug.anchorEnter), `${label}: debug anchorEnter is numeric`);
+  assert(Number.isFinite(result.debug.releaseSpeed), `${label}: debug releaseSpeed is numeric`);
+}
+
+/* ---------- Task 3: relative adaptive release candidates ---------- */
+
+function adaptiveFieldProfile({ anchor, releaseNorm, releaseVel }) {
+  const seq = [];
+  for (let i = 0; i < 12; i++) seq.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 30; i++)
+    seq.push([mkRaw(anchor + (i % 3) * 0.005, 150), i === 9 ? 7 : 0.2, 20]);
+  seq.push([mkRaw(releaseNorm, 140), releaseVel, 20]);
+  for (let i = 0; i < 60; i++) seq.push([mkRaw(1.0, 90), 0.1, 20]);
+  return seq;
+}
+
+function adaptiveConfirmationFixture() {
+  const st = core.makeFormPhaseDetector();
+  const history = [];
+  const stats = {
+    grossReleases: 0,
+    cancellations: 0,
+    netReleases: 0,
+    cancelReasons: [],
+    cancelTimestamps: [],
+  };
+  let now = 0;
+  let fire = null;
+  const push = (raw, vel, elapsed) => {
+    now += elapsed;
+    history.push({ ts: now, m: raw, vel });
+    if (history.length > 150) history.shift();
+    const result = core.stepFormPhase(st, raw, history, 1, now);
+    if (result.released) {
+      stats.grossReleases++;
+      stats.netReleases++;
+      fire = { result, now, pending: { ...st.pendingRelease } };
+    }
+    if (result.canceled) {
+      stats.cancellations++;
+      stats.netReleases--;
+      stats.cancelReasons.push(result.debug && result.debug.cancelReason);
+      stats.cancelTimestamps.push(now);
+    }
+    return { result, now };
+  };
+  adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 })
+    .slice(0, 44)
+    .forEach(([raw, vel, elapsed]) => push(raw, vel, elapsed));
+  assert(fire, "adaptive confirmation fixture starts from a real fire");
+  assertEqual(fire.now, 880, "adaptive confirmation fixture fires after two departure frames");
+  assertEqual(
+    fire.result.debug.fireEvidence,
+    "adaptive",
+    "confirmation fixture uses adaptive fire",
+  );
+  assertClose(fire.pending.anchorEnter, 0.59, 1e-12, "fixture stores fire-time anchorEnter=.59");
+  assertEqual(stats.grossReleases, 1, "fixture tracks the shown release as +1");
+  return {
+    st,
+    history,
+    stats,
+    fire,
+    push,
+    get now() {
+      return now;
+    },
+  };
+}
+
+{
+  const adaptiveFire = adaptiveConfirmationFixture().fire.result;
+  assertEqual(
+    adaptiveFire.debug.fireEvidence,
+    "adaptive",
+    "genuine adaptive fire identifies its evidence route",
+  );
+  [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+  ].forEach((key) =>
+    assert(Number.isFinite(adaptiveFire.debug[key]), `genuine adaptive fire has finite ${key}`),
+  );
+  const adaptiveSnapshot = core.copyFormReleaseFireSnapshot(adaptiveFire.debug);
+  assertEqual(adaptiveSnapshot.fireEvidence, "adaptive", "adaptive snapshot keeps its route");
+}
+
+{
+  const profileA = runSequence(
+    adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
+  );
+  const profileB = runSequence(
+    adaptiveFieldProfile({ anchor: 0.18, releaseNorm: 0.5, releaseVel: 8.5 }),
+  );
+  const profileC = runSequence(
+    adaptiveFieldProfile({ anchor: 0.46, releaseNorm: 0.74, releaseVel: 12.8 }),
+  );
+  const sixShot = runSequence(
+    Array.from({ length: 6 }, () =>
+      adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
+    ).flat(),
+  );
+  assert(
+    profileA.releases === 1 &&
+      profileB.releases === 1 &&
+      profileC.releases === 1 &&
+      sixShot.releases === 6,
+    `adaptive field receipts A/B/C=${profileA.releases}/${profileB.releases}/${profileC.releases}, six-shot=${sixShot.releases}`,
+  );
+  assertEqual(profileA.fireEvidence[0], "adaptive", "profile A uses adaptive evidence");
+  assertEqual(profileB.fireEvidence[0], "adaptive", "profile B uses adaptive evidence");
+  assertEqual(profileC.fireEvidence[0], "adaptive", "profile C uses adaptive evidence");
+  assertEqual(
+    JSON.stringify(sixShot.fireEvidence),
+    JSON.stringify(Array(6).fill("adaptive")),
+    "six-shot end reports six adaptive evidence labels",
+  );
+
+  /* 6射の検出数だけでなく、実際のビュー順序（release → summary →
+     receipt ownership）まで通し、要約nullによる無言のカウント欠落を固定する。 */
+  const productionDiagnosticRaw = (anchorNorm, drawArm) => ({
+    anchorNorm,
+    drawArm,
+    bodyScale: 0.25,
+    dW: { x: 0.6, y: 0.31 },
+    bW: { x: 0.2, y: 0.4 },
+    bowArm: 171,
+    shoulderDrop: 0.07,
+    headOffset: 0.09,
+    forceLine: 0.07,
+    score: 82,
+    conf: 0.92,
+  });
+  const diagnosticSixShot = Array.from({ length: 6 }, () => {
+    const shot = [];
+    for (let i = 0; i < 12; i++)
+      shot.push([productionDiagnosticRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+    for (let i = 0; i < 30; i++)
+      shot.push([productionDiagnosticRaw(0.47 + (i % 3) * 0.005, 150), i === 9 ? 7 : 0.2, 20]);
+    shot.push([productionDiagnosticRaw(0.75, 140), 18.4, 20]);
+    for (let i = 0; i < 60; i++) shot.push([productionDiagnosticRaw(1, 90), 0.1, 20]);
+    return shot;
+  }).flat();
+  const diagnosticDetector = core.makeFormPhaseDetector();
+  const diagnosticTracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const diagnosticHistory = [];
+  const diagnosticIds = [];
+  let diagnosticNow = 0;
+  let diagnosticSummaries = 0;
+  for (const [raw, velocity, elapsed] of diagnosticSixShot) {
+    diagnosticNow += elapsed;
+    diagnosticHistory.push({ ts: diagnosticNow, m: raw, vel: velocity });
+    if (diagnosticHistory.length > 200) diagnosticHistory.shift();
+    const result = core.stepFormPhase(
+      diagnosticDetector,
+      raw,
+      diagnosticHistory,
+      1.0,
+      diagnosticNow,
+    );
+    if (!result.released) continue;
+    const action = diagnosticTracker.begin({ fireTs: diagnosticNow, fire: null });
+    assert(!action.fatal, "six-shot pipeline keeps every receipt allocatable");
+    const summary = core.summarizeFormShot(
+      diagnosticHistory,
+      result.anchorStartTs,
+      diagnosticNow,
+      result.anchorEnter,
+    );
+    assert(summary, `six-shot pipeline summary ${diagnosticIds.length + 1} is retained`);
+    assertEqual(
+      diagnosticTracker.markShotCreated(action.id).code,
+      null,
+      `six-shot pipeline receipt ${diagnosticIds.length + 1} owns its summary`,
+    );
+    diagnosticIds.push(action.id);
+    diagnosticSummaries += 1;
+    assertEqual(
+      diagnosticTracker.confirm().code,
+      null,
+      `six-shot pipeline receipt ${diagnosticIds.length} confirms cleanly`,
+    );
+  }
+  assertEqual(diagnosticSummaries, 6, "six-shot pipeline retains six non-null summaries");
+  assertJsonEqual(
+    diagnosticIds,
+    Array.from({ length: 6 }, (_, index) => `form-receipt-${index + 1}`),
+    "six-shot pipeline assigns ordered receipt IDs",
+  );
+  assertEqual(
+    diagnosticTracker
+      .snapshot()
+      .releaseReceipts.filter(
+        (receipt) =>
+          receipt.userDisposition === "present" && receipt.detectorDisposition === "confirmed",
+      ).length,
+    6,
+    "six-shot pipeline keeps six confirmed present receipt records",
+  );
+}
+
+assert(core.adaptiveReleaseCandidate, "adaptive release candidate helper is exported to tests");
+assertEqual(
+  core.adaptiveReleaseCandidate.length,
+  4,
+  "adaptive release candidate has exact arity four",
+);
+
+function adaptiveCandidateFixture({
+  evidence = {
+    ts: 0,
+    normAtHold: 0.47,
+    anchorEnter: 0.59,
+    releaseSpeed: 6,
+    strength: 12,
+  },
+  currentNorm = 0.66,
+  priorNorms = [0.61, 0.62, 0.63],
+  now = 1000,
+  currentVel = 6,
+} = {}) {
+  const raw = mkRaw(currentNorm, 140);
+  const history = priorNorms.map((norm, index) => ({
+    ts: now - (priorNorms.length - index) * 50,
+    m: mkRaw(norm, 140),
+    vel: 0.2,
+  }));
+  history.push({ ts: now, m: raw, vel: currentVel });
+  return { evidence, raw, history, now };
+}
+
+{
+  const below = adaptiveCandidateFixture({ currentNorm: 0.65, priorNorms: [0.61, 0.62, 0.63] });
+  const exact = adaptiveCandidateFixture({
+    currentNorm: 0.66,
+    priorNorms: [0.61, 0.62, 0.63],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(below.evidence, below.raw, below.history, below.now).matched,
+    false,
+    "direction delta +0.03 does not match",
+  );
+  const exactDecision = core.adaptiveReleaseCandidate(
+    exact.evidence,
+    exact.raw,
+    exact.history,
+    exact.now,
+  );
+  assertEqual(exactDecision.matched, true, "direction delta exactly +0.04 matches");
+  assertEqual(exactDecision.movingAway, true, "direction equality is moving away");
+  assertClose(exactDecision.departDelta, 0.19, 1e-12, "relative departure is reported");
+  assertEqual(exactDecision.maxV, 6, "speed equality is included");
+  assertEqual(exactDecision.releaseSpeed, 6, "snapshotted release speed is reported");
+  assertEqual(
+    JSON.stringify(Object.keys(exactDecision)),
+    JSON.stringify(["matched", "departDelta", "movingAway", "maxV", "releaseSpeed"]),
+    "candidate has the fixed decision shape",
+  );
+}
+{
+  const exactDeparture = adaptiveCandidateFixture({
+    currentNorm: 0.65,
+    priorNorms: [0.59, 0.61, 0.63],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      exactDeparture.evidence,
+      exactDeparture.raw,
+      exactDeparture.history,
+      exactDeparture.now,
+    ).matched,
+    true,
+    "departure delta exactly +0.18 is included",
+  );
+  const belowDeparture = adaptiveCandidateFixture({
+    currentNorm: 0.64,
+    priorNorms: [0.58, 0.6, 0.62],
+  });
+  const belowDepartureDecision = core.adaptiveReleaseCandidate(
+    belowDeparture.evidence,
+    belowDeparture.raw,
+    belowDeparture.history,
+    belowDeparture.now,
+  );
+  assertEqual(belowDepartureDecision.movingAway, true, "departure-negative control has direction");
+  assertEqual(belowDepartureDecision.maxV, 6, "departure-negative control has enough speed");
+  assertClose(
+    belowDepartureDecision.departDelta,
+    0.17,
+    1e-12,
+    "departure-negative control isolates delta 0.17",
+  );
+  assertEqual(belowDepartureDecision.matched, false, "departure delta 0.17 alone is insufficient");
+}
+{
+  /* Adaptive release は保持位置からの新しい離脱でなければならない。証拠から長時間
+     離れた後の速度・方向ジッターを、古い離脱量と合成して別の射にしない。 */
+  const staleDeparture = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.7, 0.71, 0.72],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      staleDeparture.evidence,
+      staleDeparture.raw,
+      staleDeparture.history,
+      staleDeparture.now,
+    ).matched,
+    false,
+    "adaptive candidate requires a fresh departure origin",
+  );
+
+  const exactWindowOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+  });
+  exactWindowOrigin.history[0].ts = exactWindowOrigin.now - core.FORM_PH.RISE_WINDOW_MS;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      exactWindowOrigin.evidence,
+      exactWindowOrigin.raw,
+      exactWindowOrigin.history,
+      exactWindowOrigin.now,
+    ).matched,
+    true,
+    "departure origin at the short-window boundary remains eligible",
+  );
+
+  const expiredOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+  });
+  expiredOrigin.history[0].ts = expiredOrigin.now - core.FORM_PH.RISE_WINDOW_MS - 0.001;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      expiredOrigin.evidence,
+      expiredOrigin.raw,
+      expiredOrigin.history,
+      expiredOrigin.now,
+    ).matched,
+    false,
+    "departure origin before the short window is stale",
+  );
+
+  const alreadyDepartedBoundary = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.65, 0.7, 0.71],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      alreadyDepartedBoundary.evidence,
+      alreadyDepartedBoundary.raw,
+      alreadyDepartedBoundary.history,
+      alreadyDepartedBoundary.now,
+    ).matched,
+    false,
+    "a frame already at the departure boundary is not a fresh origin",
+  );
+
+  const speedBeforeOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  speedBeforeOrigin.history.unshift({
+    ts: speedBeforeOrigin.now - 200,
+    m: mkRaw(0.7, 140),
+    vel: 6,
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      speedBeforeOrigin.evidence,
+      speedBeforeOrigin.raw,
+      speedBeforeOrigin.history,
+      speedBeforeOrigin.now,
+    ).matched,
+    false,
+    "velocity before the fresh departure origin cannot be reused",
+  );
+
+  const speedAtOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  speedAtOrigin.history[0].vel = 6;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      speedAtOrigin.evidence,
+      speedAtOrigin.raw,
+      speedAtOrigin.history,
+      speedAtOrigin.now,
+    ).matched,
+    true,
+    "velocity on the fresh departure origin remains eligible",
+  );
+
+  const speedAfterOrigin = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  speedAfterOrigin.history[1].vel = 6;
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      speedAfterOrigin.evidence,
+      speedAfterOrigin.raw,
+      speedAfterOrigin.history,
+      speedAfterOrigin.now,
+    ).matched,
+    true,
+    "velocity after the fresh departure origin remains eligible",
+  );
+
+  const currentDuplicateSpeed = adaptiveCandidateFixture({
+    currentNorm: 0.75,
+    priorNorms: [0.64, 0.7, 0.71],
+    currentVel: 0.2,
+  });
+  currentDuplicateSpeed.history.splice(-1, 0, {
+    ts: currentDuplicateSpeed.now,
+    m: mkRaw(0.75, 140),
+    vel: 20,
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      currentDuplicateSpeed.evidence,
+      currentDuplicateSpeed.raw,
+      currentDuplicateSpeed.history,
+      currentDuplicateSpeed.now,
+    ).matched,
+    false,
+    "duplicate current-timestamp velocity cannot qualify the real current frame",
+  );
+
+  const malformedChronologyRaw = mkRaw(0.75, 140);
+  const malformedChronologyEvidence = {
+    ts: 0,
+    normAtHold: 0.47,
+    anchorEnter: 0.59,
+    releaseSpeed: 6,
+    strength: 12,
+  };
+  const validChronologySuffix = () => [
+    { ts: 850, m: mkRaw(0.64, 140), vel: 0.2 },
+    { ts: 900, m: mkRaw(0.7, 140), vel: 0.2 },
+    { ts: 950, m: mkRaw(0.71, 140), vel: 0.2 },
+    { ts: 1000, m: malformedChronologyRaw, vel: 6 },
+  ];
+  [
+    { label: "future prefix", frame: { ts: 1100, m: mkRaw(0.63, 140), vel: 20 } },
+    { label: "duplicate prefix", frame: { ts: 850, m: mkRaw(0.63, 140), vel: 20 } },
+    { label: "non-monotonic prefix", frame: { ts: 875, m: mkRaw(0.63, 140), vel: 20 } },
+    { label: "non-finite prefix", frame: { ts: NaN, m: null, vel: 0 } },
+  ].forEach(({ label, frame }) => {
+    assertEqual(
+      core.adaptiveReleaseCandidate(
+        malformedChronologyEvidence,
+        malformedChronologyRaw,
+        [frame, ...validChronologySuffix()],
+        1000,
+      ).matched,
+      false,
+      `${label} invalidates the complete adaptive candidate history`,
+    );
+  });
+
+  const occludedRaw = mkRaw(0.75, 140);
+  const occludedHistory = [
+    { ts: 250, m: mkRaw(0.61, 140), vel: 0.2 },
+    { ts: 300, m: mkRaw(0.62, 140), vel: 0.2 },
+    { ts: 350, m: mkRaw(0.63, 140), vel: 0.2 },
+    { ts: 400, m: mkRaw(0.64, 140), vel: 0.2 },
+    { ts: 500, m: null, vel: 0 },
+    { ts: 700, m: null, vel: 0 },
+    { ts: 900, m: null, vel: 0 },
+    { ts: 1000, m: occludedRaw, vel: 6 },
+  ];
+  const occludedEvidence = {
+    ts: 400,
+    normAtHold: 0.47,
+    anchorEnter: 0.59,
+    releaseSpeed: 6,
+    strength: 12,
+  };
+  assertEqual(
+    core.adaptiveReleaseCandidate(occludedEvidence, occludedRaw, occludedHistory, 1000).matched,
+    true,
+    "first usable frame after pose loss can depart from the last observed origin",
+  );
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      { ...occludedEvidence, ts: 400.001 },
+      occludedRaw,
+      occludedHistory,
+      1000,
+    ).matched,
+    false,
+    "a departure origin before the active evidence cannot be reused across pose loss",
+  );
+}
+{
+  const far = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: 1.03, releaseSpeed: 6 },
+    currentNorm: 1.21,
+    priorNorms: [1.15, 1.17, 1.19],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(far.evidence, far.raw, far.history, far.now).matched,
+    false,
+    "current frame above the far boundary cannot be an adaptive candidate",
+  );
+  const boundary = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: 1.02, releaseSpeed: 6 },
+    currentNorm: 1.2,
+    priorNorms: [1.14, 1.16, 1.18],
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(boundary.evidence, boundary.raw, boundary.history, boundary.now)
+      .matched,
+    true,
+    "current frame exactly at the far boundary remains eligible",
+  );
+}
+{
+  const hugeVelocity = adaptiveCandidateFixture({
+    currentNorm: 0.57,
+    priorNorms: [0.51, 0.53, 0.55],
+    currentVel: 1e16,
+  });
+  const hugeVelocityDecision = core.adaptiveReleaseCandidate(
+    hugeVelocity.evidence,
+    hugeVelocity.raw,
+    hugeVelocity.history,
+    hugeVelocity.now,
+  );
+  assertEqual(hugeVelocityDecision.movingAway, true, "huge-velocity probe has enough direction");
+  assertClose(
+    hugeVelocityDecision.departDelta,
+    0.1,
+    1e-12,
+    "huge-velocity probe isolates insufficient departure",
+  );
+  assertEqual(
+    hugeVelocityDecision.matched,
+    false,
+    "unrelated huge maxV cannot loosen the departure comparison",
+  );
+
+  const hugeDeparture = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: -1e15, releaseSpeed: 6 },
+    currentNorm: 1.2,
+    priorNorms: [-1e15, 1.1, 1.12],
+    currentVel: 5.9,
+  });
+  const hugeDepartureDecision = core.adaptiveReleaseCandidate(
+    hugeDeparture.evidence,
+    hugeDeparture.raw,
+    hugeDeparture.history,
+    hugeDeparture.now,
+  );
+  assert(
+    Number.isFinite(hugeDepartureDecision.departDelta) && hugeDepartureDecision.departDelta > 1e14,
+    "huge-departure probe has a finite passing departure",
+  );
+  assertEqual(hugeDepartureDecision.movingAway, true, "huge-departure probe has enough direction");
+  assertEqual(hugeDepartureDecision.maxV, 5.9, "huge-departure probe isolates speed 5.9");
+  assertEqual(hugeDepartureDecision.releaseSpeed, 6, "huge-departure probe requires speed six");
+  assertEqual(
+    hugeDepartureDecision.matched,
+    false,
+    "unrelated huge departure cannot loosen the speed comparison",
+  );
+
+  const overflow = adaptiveCandidateFixture({
+    evidence: { ts: 0, normAtHold: -Number.MAX_VALUE, releaseSpeed: 6 },
+    currentNorm: Number.MAX_VALUE,
+    priorNorms: [0.61, 0.62, 0.63],
+  });
+  const overflowDecision = core.adaptiveReleaseCandidate(
+    overflow.evidence,
+    overflow.raw,
+    overflow.history,
+    overflow.now,
+  );
+  assertEqual(overflowDecision.departDelta, null, "overflowed departure diagnostic is unknown");
+  assertEqual(overflowDecision.matched, false, "overflowed finite-input subtraction is rejected");
+}
+{
+  const atWindow = adaptiveCandidateFixture({ now: 1500 });
+  atWindow.history[0].ts = 1250;
+  atWindow.history[0].vel = 6;
+  atWindow.history[atWindow.history.length - 1].vel = 0;
+  assertEqual(
+    core.adaptiveReleaseCandidate(atWindow.evidence, atWindow.raw, atWindow.history, atWindow.now)
+      .matched,
+    true,
+    "evidence age and velocity-window start are inclusive at 1500ms and 250ms",
+  );
+  const expired = adaptiveCandidateFixture({ now: 1501 });
+  assertEqual(
+    core.adaptiveReleaseCandidate(expired.evidence, expired.raw, expired.history, expired.now)
+      .matched,
+    false,
+    "evidence expires at 1501ms",
+  );
+  const future = adaptiveCandidateFixture({
+    evidence: { ts: 1001, normAtHold: 0.47, releaseSpeed: 6 },
+  });
+  assertEqual(
+    core.adaptiveReleaseCandidate(future.evidence, future.raw, future.history, future.now).matched,
+    false,
+    "future evidence is rejected",
+  );
+}
+{
+  [
+    null,
+    {},
+    { ts: NaN, normAtHold: 0.47, releaseSpeed: 6 },
+    { ts: 0, normAtHold: Infinity, releaseSpeed: 6 },
+    { ts: 0, normAtHold: 0.47, releaseSpeed: 0 },
+    { ts: 0, normAtHold: 0.47, releaseSpeed: Infinity },
+  ].forEach((evidence, index) => {
+    const fixture = adaptiveCandidateFixture({ evidence });
+    const decision = core.adaptiveReleaseCandidate(
+      fixture.evidence,
+      fixture.raw,
+      fixture.history,
+      fixture.now,
+    );
+    assertEqual(decision.matched, false, `malformed evidence ${index} is rejected`);
+    assertEqual(
+      typeof decision.movingAway,
+      "boolean",
+      `malformed evidence ${index} has boolean direction`,
+    );
+  });
+  const missingCurrent = adaptiveCandidateFixture();
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      missingCurrent.evidence,
+      null,
+      missingCurrent.history,
+      missingCurrent.now,
+    ).matched,
+    false,
+    "null current frame cannot match",
+  );
+}
+{
+  const fewer = adaptiveCandidateFixture({ priorNorms: [0.61, 0.63] });
+  assertEqual(
+    core.adaptiveReleaseCandidate(fewer.evidence, fewer.raw, fewer.history, fewer.now).movingAway,
+    false,
+    "fewer than three prior observations cannot establish direction",
+  );
+
+  const currentExcluded = adaptiveCandidateFixture({ priorNorms: [0.61, 0.63] });
+  currentExcluded.history.splice(
+    2,
+    0,
+    { ts: currentExcluded.now, m: mkRaw(0.2, 140), vel: 20 },
+    { ts: currentExcluded.now, m: mkRaw(0.2, 140), vel: 20 },
+  );
+  assertEqual(
+    core.adaptiveReleaseCandidate(
+      currentExcluded.evidence,
+      currentExcluded.raw,
+      currentExcluded.history,
+      currentExcluded.now,
+    ).movingAway,
+    false,
+    "all current-timestamp entries are excluded from direction history",
+  );
+
+  const chronologyCases = [
+    [
+      { ts: 700, m: mkRaw(0.61, 140), vel: 6 },
+      { ts: 800, m: mkRaw(0.62, 140), vel: 0.2 },
+      { ts: 800, m: mkRaw(0.63, 140), vel: 0.2 },
+    ],
+    [
+      { ts: 850, m: mkRaw(0.61, 140), vel: 6 },
+      { ts: 800, m: mkRaw(0.62, 140), vel: 0.2 },
+      { ts: 900, m: mkRaw(0.63, 140), vel: 0.2 },
+    ],
+    [
+      { ts: 700, m: mkRaw(0.61, 140), vel: 6 },
+      { ts: 800, m: mkRaw(0.62, 140), vel: 0.2 },
+      { ts: 900, m: mkRaw(0.63, 140), vel: 0.2 },
+      { ts: 1100, m: mkRaw(0.64, 140), vel: 0.2 },
+    ],
+  ];
+  chronologyCases.forEach((history, index) => {
+    const fixture = adaptiveCandidateFixture();
+    history.push({ ts: fixture.now, m: fixture.raw, vel: 6 });
+    assertEqual(
+      core.adaptiveReleaseCandidate(fixture.evidence, fixture.raw, history, fixture.now).movingAway,
+      false,
+      `chronology barrier ${index} prevents direction evidence`,
+    );
+  });
+}
+{
+  const fixture = adaptiveCandidateFixture();
+  fixture.history[0].vel = NaN;
+  fixture.history[1].vel = Infinity;
+  fixture.history[2].vel = -1;
+  fixture.history[3].vel = 6;
+  const before = JSON.stringify({
+    evidence: fixture.evidence,
+    raw: fixture.raw,
+    history: fixture.history.map((entry) => ({
+      ts: entry.ts,
+      m: entry.m,
+      vel: Number.isFinite(entry.vel) ? entry.vel : String(entry.vel),
+    })),
+  });
+  const decision = core.adaptiveReleaseCandidate(
+    fixture.evidence,
+    fixture.raw,
+    fixture.history,
+    fixture.now,
+  );
+  assertEqual(decision.maxV, 6, "maxV ignores non-finite and negative velocities");
+  const after = JSON.stringify({
+    evidence: fixture.evidence,
+    raw: fixture.raw,
+    history: fixture.history.map((entry) => ({
+      ts: entry.ts,
+      m: entry.m,
+      vel: Number.isFinite(entry.vel) ? entry.vel : String(entry.vel),
+    })),
+  });
+  assertEqual(after, before, "candidate does not mutate its inputs");
+
+  fixture.history[fixture.history.length - 1].vel = -1;
+  assertEqual(
+    core.adaptiveReleaseCandidate(fixture.evidence, fixture.raw, fixture.history, fixture.now).maxV,
+    null,
+    "maxV is unknown when no finite nonnegative velocity exists",
+  );
+}
+{
+  const gatedCandidate = new Function(
+    `${coreScript
+      .replace("CONF_GATE: 0,", "CONF_GATE: 0.5,")
+      .replace("DW_VIS_GATE: 0,", "DW_VIS_GATE: 0.5,")}
+return adaptiveReleaseCandidate;`,
+  )();
+  const fixture = adaptiveCandidateFixture();
+  const lowConfidenceCurrent = {
+    ...fixture.raw,
+    conf: 0.4,
+  };
+  assertEqual(
+    gatedCandidate(fixture.evidence, lowConfidenceCurrent, fixture.history, fixture.now).matched,
+    false,
+    "confidence-unusable current frame cannot match",
+  );
+  const gatedHistory = [
+    { ts: 700, m: { ...mkRaw(0.61, 140), conf: 0.9 }, vel: 0.2 },
+    { ts: 750, m: { ...mkRaw(0.1, 140), conf: 0.4 }, vel: 20 },
+    { ts: 800, m: { ...mkRaw(0.62, 140), conf: 0.9 }, vel: 0.2 },
+    { ts: 850, m: null, vel: 20 },
+    { ts: 900, m: { ...mkRaw(0.63, 140), conf: 0.9 }, vel: 0.2 },
+    {
+      ts: 1000,
+      m: { ...fixture.raw, conf: 0.9, dW: { x: 0, y: 0, visibility: 0.9 } },
+      vel: 6,
+    },
+  ];
+  assertEqual(
+    gatedCandidate(fixture.evidence, gatedHistory[5].m, gatedHistory, fixture.now).matched,
+    true,
+    "direction skips null and confidence-unusable entries",
+  );
+  gatedHistory[5].m.dW.visibility = 0.5;
+  assertEqual(
+    gatedCandidate(fixture.evidence, gatedHistory[5].m, gatedHistory, fixture.now).maxV,
+    0.2,
+    "maxV applies the strict dW visibility gate",
+  );
+}
+{
+  const traceAdaptive = (seq) => {
+    const st = core.makeFormPhaseDetector();
+    const history = [];
+    let now = 0;
+    const fires = [];
+    for (const [raw, vel, elapsed] of seq) {
+      now += elapsed;
+      history.push({ ts: now, m: raw, vel });
+      if (history.length > 150) history.shift();
+      const result = core.stepFormPhase(st, raw, history, 1, now);
+      if (result.released) fires.push({ result, now, pending: { ...st.pendingRelease } });
+    }
+    return { st, history, now, fires };
+  };
+
+  const a = traceAdaptive(
+    adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 18.4 }),
+  );
+  assertEqual(a.fires.length, 1, "initial detector state can fire profile A at t=860");
+  assertEqual(a.fires[0].now, 880, "first adaptive fire waits for two departure frames");
+  assertEqual(a.fires[0].result.debug.fireEvidence, "adaptive", "adaptive fire wins diagnostics");
+  assertEqual(
+    a.fires[0].result.debug.fireVel,
+    null,
+    "adaptive-only fire has no legacy velocity route",
+  );
+  assertClose(a.fires[0].result.debug.departDelta, 0.275, 1e-12, "fire reports relative departure");
+  assert(
+    Number.isFinite(a.fires[0].result.debug.evidenceAgeMs),
+    "fire result retains evidence age after committed-state clear",
+  );
+  assert(
+    Number.isFinite(a.fires[0].result.debug.evidenceStrength),
+    "fire result retains evidence strength after committed-state clear",
+  );
+
+  const bSeq = adaptiveFieldProfile({ anchor: 0.18, releaseNorm: 0.5, releaseVel: 8.5 });
+  const b = traceAdaptive(bSeq);
+  assertEqual(b.fires.length, 1, "profile B fires below the legacy speed threshold");
+  assertEqual(b.fires[0].result.debug.releaseSpeed, 6, "hold outlier leaves release speed at six");
+  assertEqual(b.fires[0].result.debug.maxV, 8.5, "profile B fire observes maxV 8.5");
+
+  const slow = runSequence(
+    adaptiveFieldProfile({ anchor: 0.47, releaseNorm: 0.75, releaseVel: 5.9 }),
+  );
+  assertEqual(slow.releases, 0, "slow let-down below adaptive speed six does not fire");
+
+  const repeated = adaptiveFieldProfile({
+    anchor: 0.47,
+    releaseNorm: 0.75,
+    releaseVel: 18.4,
+  });
+  repeated.splice(
+    43,
+    0,
+    [mkRaw(0.8, 140), 18.4, 20],
+    [mkRaw(0.85, 140), 18.4, 20],
+    [mkRaw(0.9, 140), 18.4, 20],
+  );
+  assertEqual(
+    runSequence(repeated).releases,
+    1,
+    "repeated matching departure frames inside one second count once",
+  );
+
+  const precedence = traceAdaptive(
+    adaptiveFieldProfile({ anchor: 0.18, releaseNorm: 0.5, releaseVel: 10 }),
+  );
+  const precedenceFire = precedence.fires[0].result;
+  const precedencePending = precedence.fires[0].pending;
+  assertEqual(
+    precedenceFire.debug.fireEvidence,
+    "adaptive",
+    "adaptive match precedes legacy match",
+  );
+  assertEqual(precedenceFire.debug.fireVel, null, "adaptive precedence does not invent fireVel");
+  assertEqual(precedencePending.fireEvidence, "adaptive", "pending snapshots fire evidence");
+  assertEqual(
+    precedencePending.anchorEnter,
+    precedenceFire.anchorEnter,
+    "pending snapshots fire-time anchor threshold",
+  );
+  assertEqual(precedencePending.releaseSpeed, 6, "pending snapshots adaptive release speed");
+  assertEqual(precedencePending.nb2Ref, null, "adaptive-selected fire never gets NB2 ref");
+  assertEqual(
+    precedencePending.departCheck,
+    false,
+    "adaptive pending skips departure confirmation",
+  );
+  assertEqual(precedencePending.returnSince, 0, "adaptive pending starts with no return timer");
+  assertEqual(precedencePending.returnCount, 0, "adaptive pending starts with no return frames");
+  assertEqual(precedence.st.adaptive.evidence, null, "committed fire clears adaptive evidence");
+
+  const legacy = traceAdaptive([
+    ...Array.from({ length: 10 }, () => [mkRaw(1.2, 100), 0.1, 20]),
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.22, 10), 0.2, 20],
+    [mkRaw(0.5, 10), 0.5, 20],
+    [mkRaw(0.55, 10), 2.5, 20],
+    [mkRaw(0.61, 10), 3.2, 20],
+    [mkRaw(0.68, 10), 6.5, 20],
+  ]);
+  assertEqual(
+    legacy.fires[0].pending.fireEvidence,
+    "close",
+    "legacy pending snapshots close evidence",
+  );
+  assertEqual(
+    legacy.fires[0].pending.releaseSpeed,
+    null,
+    "legacy pending release speed stays null",
+  );
+
+  const blocked = adaptiveStepper(20);
+  for (let i = 0; i < 55; i++) blocked.push(mkRaw(1.0, 90), 0.1);
+  for (let i = 0; i < 30; i++) blocked.push(mkRaw(0.47 + (i % 3) * 0.005, 150), 0.2);
+  const evidenceBefore = blocked.st.adaptive.evidence;
+  blocked.st.lastReleaseTs = 641;
+  const blockedDeparture = blocked.push(mkRaw(0.75, 140), 18.4);
+  assertEqual(blockedDeparture.r.released, false, "FOLLOW lock blocks a matching candidate");
+  assertEqual(
+    blocked.st.adaptive.evidence,
+    evidenceBefore,
+    "blocked matching candidate does not clear adaptive evidence",
+  );
+}
+
+/* ---------- Task 4: adaptive-only post-fire cancellation ---------- */
+
+{
+  const fixture = adaptiveConfirmationFixture();
+  for (let elapsed = 50; elapsed <= 400; elapsed += 50) {
+    const current = fixture.push(null, 0, 50);
+    assertEqual(current.result.canceled, undefined, `null at +${elapsed}ms does not cancel`);
+    assertEqual(
+      fixture.st.pendingRelease.returnSince,
+      0,
+      "null does not start adaptive return time",
+    );
+    assertEqual(
+      fixture.st.pendingRelease.returnCount,
+      0,
+      "null does not add an adaptive return frame",
+    );
+  }
+  const afterWindow = fixture.push(mkRaw(1.0, 90), 0.1, 1);
+  assertEqual(afterWindow.now, fixture.fire.now + 401, "first usable frame arrives at fire+401ms");
+  assertEqual(fixture.st.pendingRelease, null, "first usable frame after +400 clears pending");
+  assertEqual(fixture.stats.netReleases, 1, "all-null confirmation keeps the shown shot");
+  assertEqual(fixture.stats.cancellations, 0, "all-null confirmation records no cancellation");
+  assertEqual(
+    fixture.stats.cancelReasons.includes("no-depart"),
+    false,
+    "all-null adaptive confirmation never produces no-depart",
+  );
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  let fourth = null;
+  for (let i = 0; i < 4; i++) {
+    const current = fixture.push(mkRaw(0.47, 150), 0.1, 50);
+    if (i < 3)
+      assertEqual(current.result.canceled, undefined, `adaptive return frame ${i + 1} survives`);
+    else fourth = current;
+  }
+  assertEqual(fourth.result.canceled, true, "fourth return frame at a 150ms span cancels");
+  assertEqual(
+    fourth.result.debug.cancelReason,
+    "anchor-return",
+    "adaptive return reason is auditable",
+  );
+  assertEqual(fixture.stats.grossReleases, 1, "valid return retains one gross receipt");
+  assertEqual(fixture.stats.cancellations, 1, "valid return cancels exactly once");
+  assertEqual(fixture.stats.netReleases, 0, "valid return removes the shown shot");
+  assertEqual(
+    JSON.stringify(fixture.stats.cancelTimestamps),
+    JSON.stringify([fixture.fire.now + 200]),
+    "valid return cancellation occurs at fire+200ms",
+  );
+  assertEqual(
+    fourth.result.anchorStartTs,
+    fourth.now,
+    "adaptive cancel restarts sticky anchor time",
+  );
+  assertEqual(fixture.st.anchorStartTs, fourth.now, "adaptive cancel stores sticky anchor time");
+  assertEqual(fixture.st.anchorSince, fourth.now, "adaptive cancel restarts anchorSince");
+  assertEqual(fixture.st.lastReleaseTs, fourth.now - 750, "adaptive cancel applies 250ms cooldown");
+  assertEqual(
+    fourth.result.debug.refractoryRemaining,
+    800,
+    "adaptive cancel debug captures refractory before cooldown rewrite",
+  );
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  let atBoundary = null;
+  [250, 50, 50, 50].forEach((elapsed, index) => {
+    const current = fixture.push(mkRaw(0.47, 150), 0.1, elapsed);
+    if (index < 3)
+      assertEqual(
+        current.result.canceled,
+        undefined,
+        `adaptive fire+400 return frame ${index + 1} survives`,
+      );
+    else atBoundary = current;
+  });
+  assertEqual(atBoundary.now, fixture.fire.now + 400, "adaptive return completes at fire+400");
+  assertEqual(atBoundary.result.canceled, true, "adaptive return can cancel at exact fire+400");
+  assertEqual(
+    atBoundary.result.debug.cancelReason,
+    "anchor-return",
+    "fire+400 cancellation reason is anchor-return",
+  );
+  assertEqual(fixture.stats.cancellations, 1, "fire+400 return cancels exactly once");
+  assertEqual(fixture.stats.netReleases, 0, "fire+400 return removes the shown shot");
+  assertEqual(fixture.st.pendingRelease, null, "fire+400 cancellation clears pending");
+  assertEqual(
+    JSON.stringify(fixture.stats.cancelTimestamps),
+    JSON.stringify([fixture.fire.now + 400]),
+    "fire+400 cancellation timestamp is exact",
+  );
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  fixture.st.adaptive.anchorSamples = Array.from({ length: 6 }, (_, i) => ({
+    ts: fixture.now - i,
+    norm: 0.2,
+  }));
+  fixture.st.adaptive.anchorEnter = core.adaptiveAnchorThreshold(
+    fixture.st.adaptive.anchorSamples.map((sample) => sample.norm),
+  );
+  assertEqual(
+    fixture.st.adaptive.anchorEnter,
+    0.35,
+    "live threshold can recompute to .35 after fire",
+  );
+  for (let i = 0; i < 4; i++) fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  assertEqual(
+    fixture.stats.cancelReasons[0],
+    "anchor-return",
+    "return uses stored .59 boundary instead of live .35",
+  );
+  assertEqual(fixture.stats.netReleases, 0, "stored fire-time boundary cancels the return");
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  const first = fixture.push(mkRaw(0.47, 150), 0.1, 401);
+  assertEqual(
+    first.result.canceled,
+    undefined,
+    "return beginning at +401ms is outside confirmation",
+  );
+  for (let i = 0; i < 3; i++) fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  assertEqual(fixture.stats.netReleases, 1, "late four-frame return keeps the shown shot");
+  assertEqual(fixture.stats.cancellations, 0, "late return never cancels");
+}
+{
+  const threeFrames = adaptiveConfirmationFixture();
+  [50, 75, 75].forEach((elapsed) => threeFrames.push(mkRaw(0.47, 150), 0.1, elapsed));
+  assertEqual(threeFrames.st.pendingRelease.returnCount, 3, "three return frames are counted");
+  assertEqual(threeFrames.stats.netReleases, 1, "three frames spanning 150ms do not cancel");
+
+  const shortSpan = adaptiveConfirmationFixture();
+  [50, 49, 50, 50].forEach((elapsed) => shortSpan.push(mkRaw(0.47, 150), 0.1, elapsed));
+  assertEqual(
+    shortSpan.st.pendingRelease.returnCount,
+    4,
+    "four short-span return frames are counted",
+  );
+  assertEqual(shortSpan.stats.netReleases, 1, "four frames spanning 149ms do not cancel");
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  const beforeNull = { ...fixture.st.pendingRelease };
+  fixture.push(null, 0, 50);
+  assertEqual(
+    fixture.st.pendingRelease.returnSince,
+    beforeNull.returnSince,
+    "null keeps the adaptive return timestamp",
+  );
+  assertEqual(
+    fixture.st.pendingRelease.returnCount,
+    beforeNull.returnCount,
+    "null keeps the adaptive return count",
+  );
+  fixture.push(mkRaw(0.47, 150), 0.1, 50);
+  fixture.push(mkRaw(0.62, 150), 0.1, 50);
+  assertEqual(fixture.st.pendingRelease.returnSince, 0, "usable outside frame resets return time");
+  assertEqual(fixture.st.pendingRelease.returnCount, 0, "usable outside frame resets return count");
+  assertEqual(fixture.stats.cancellations, 0, "reset sequence does not cancel");
+}
+{
+  const fixture = adaptiveConfirmationFixture();
+  fixture.st.pendingRelease.departCheck = true;
+  fixture.st.pendingRelease.departSeen = 99;
+  fixture.st.pendingRelease.departFrames = 0;
+  fixture.st.pendingRelease.nb2Ref = { x: 1, y: 1 };
+  for (let i = 0; i < 21; i++) fixture.push(mkRaw(0.62, 140), 0.1, 20);
+  assertEqual(fixture.st.pendingRelease, null, "adaptive no-depart guard clears after timeout");
+  assertEqual(fixture.stats.netReleases, 1, "adaptive .62 observations keep the shown shot");
+  assertEqual(fixture.stats.cancellations, 0, "adaptive guard skips every legacy cancellation");
+  assertEqual(
+    fixture.stats.cancelReasons.includes("no-depart"),
+    false,
+    "adaptive guard never reports no-depart",
+  );
+}
+{
+  const equality = adaptiveConfirmationFixture();
+  for (let i = 0; i < 4; i++) equality.push(mkRaw(0.59, 150), 0.1, 50);
+  assertEqual(equality.stats.netReleases, 0, "stored anchorEnter equality counts as inside");
+
+  const nonFinite = adaptiveConfirmationFixture();
+  nonFinite.st.pendingRelease.anchorEnter = NaN;
+  for (let i = 0; i < 4; i++) nonFinite.push(mkRaw(0.2, 150), 0.1, 50);
+  assertEqual(
+    nonFinite.stats.netReleases,
+    1,
+    "non-finite stored boundary fails safe without cancel",
+  );
+  assertEqual(nonFinite.stats.cancellations, 0, "non-finite boundary cannot auto-cancel");
+}
+{
+  [
+    { label: "missing", fireEvidence: undefined },
+    { label: "other", fireEvidence: "other" },
+  ].forEach(({ label, fireEvidence }) => {
+    const st = core.makeFormPhaseDetector();
+    st.lastReleaseTs = 1000;
+    st.pendingRelease = {
+      ts: 1000,
+      ...(fireEvidence === undefined ? {} : { fireEvidence }),
+      nb2Ref: null,
+      departCheck: true,
+      departFrames: 0,
+      departSeen: 5,
+    };
+    const hoverRaw = mkRaw(0.5, 140);
+    const result = core.stepFormPhase(st, hoverRaw, [{ ts: 1401, m: hoverRaw, vel: 0.2 }], 1, 1401);
+    assertEqual(result.canceled, true, `${label} fireEvidence remains legacy-compatible`);
+    assertEqual(
+      result.debug.cancelReason,
+      "no-depart",
+      `${label} fireEvidence uses legacy no-depart`,
+    );
+  });
+}
+
+/* ---------- Task 2: session-local adaptive anchor evidence ---------- */
+
+{
+  const s = adaptiveStepper(30);
+  let fifth;
+  for (let i = 0; i < 5; i++) fifth = s.push(mkRaw(0.47 + i * 0.002, 150), 0.2);
+  assertAdaptiveResultShape(fifth.r, "five-sample normal path");
+  assertEqual(fifth.r.anchorEnter, 0.35, "five usable frames retain cold anchor threshold");
+  assertEqual(fifth.r.debug.anchorFloor, null, "five usable frames have no learned floor");
+  const sixth = s.push(mkRaw(0.48, 150), 0.25);
+  assert(
+    sixth.r.anchorEnter > 0.47,
+    `sixth usable frame starts calibration, got ${sixth.r.anchorEnter}`,
+  );
+  assertAdaptiveResultShape(sixth.r, "six-sample calibrated path");
+  assert(Number.isFinite(sixth.r.debug.anchorFloor), "sixth usable frame exposes learned floor");
+}
+{
+  const s = adaptiveStepper(30);
+  const norms = [0.47, 0.48, 0.475, 0.485, 0.472, 0.478];
+  let last;
+  norms.forEach((norm, i) => {
+    last = s.push(mkRaw(norm, 150), 0.2 + i * 0.05);
+  });
+  assertEqual(last.r.phase, "ANCHORING", "exact-150ms oblique hold enters ANCHORING");
+  assertEqual(last.r.anchorStartTs, 30, "adaptive anchor starts at first qualifying hold sample");
+  assert(last.r.anchorEnter > 0.47, "oblique hold learns an entry threshold above its floor");
+  assert(last.r.debug.evidenceAgeMs === 0, "fresh oblique evidence has zero age");
+  assert(last.r.debug.evidenceStrength >= 3, "oblique hold exposes non-zero evidence strength");
+  assert(s.st.adaptive.evidence !== null, "oblique hold stores adaptive evidence");
+}
+{
+  const s = adaptiveStepper(50);
+  let last;
+  for (let i = 0; i < 61; i++) last = s.push(mkRaw(0.47 + (i % 3) * 0.002, 150), 0.3);
+  assertEqual(last.r.phase, "FULL_DRAW", "three-second qualified hold reaches FULL_DRAW");
+  assertEqual(last.r.debug.evidenceAgeMs, 0, "long hold refreshes evidence on its latest frame");
+  assertEqual(last.r.debug.evidenceStrength, 12, "long hold caps evidence strength at twelve");
+  assertEqual(s.st.adaptive.holdSince, 50, "sample-window sliding preserves original hold start");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47 + (i % 2) * 0.004, 150), 0.2);
+  const evidenceTs = s.st.adaptive.evidence.ts;
+  const atLimit = s.push(null, 0, 1500);
+  assertAdaptiveResultShape(atLimit.r, "null evidence-ageing path");
+  assert(s.st.adaptive.evidence !== null, "evidence is retained at exactly 1500ms");
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    1,
+    "sample exactly at the 1500ms cutoff is retained",
+  );
+  assertEqual(atLimit.r.debug.evidenceAgeMs, 1500, "debug reports inclusive evidence age boundary");
+  assertEqual(atLimit.r.phase, "ANCHORING", "null evidence ageing preserves current phase");
+  const expired = s.push(null, 0, 1);
+  assertEqual(s.st.adaptive.evidence, null, "evidence clears at age 1501ms");
+  assertEqual(s.st.adaptive.anchorSamples.length, 0, "sample older than 1500ms is pruned");
+  assertEqual(expired.r.debug.evidenceAgeMs, null, "expired evidence age becomes unknown");
+  assertEqual(
+    expired.r.phase,
+    "ANCHORING",
+    "expired null evidence does not redesign phase semantics",
+  );
+  assert(evidenceTs > 0, "expiry fixture starts at a positive evidence timestamp");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  s.push(mkRaw(1.21, 90), 0.1, 299);
+  assert(s.st.adaptive.evidence !== null, "299ms continuously far preserves evidence");
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  assertEqual(s.st.adaptive.evidence, null, "300ms continuously far clears evidence");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  s.push(mkRaw(1.2, 90), 0.1, 299);
+  assertEqual(s.st.adaptive.farSince, 0, "anchorNorm equality 1.2 resets the far timer");
+  assert(s.st.adaptive.evidence !== null, "anchorNorm equality 1.2 preserves evidence");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 8; i++) s.push(mkRaw(0.47 + (i % 2) * 0.004, 150), 0.2, i === 0 ? 1001 : 30);
+  assert(s.st.adaptive.evidence.anchorEnter > 0.47, "sanity: NB2 fixture has learned evidence");
+  s.push(null, 0, 200);
+  const arrival = s.push(mkRaw(0.8, 140), 3, 1);
+  assertEqual(arrival.r.released, true, "NB2 accepts pre-gap anchor under snapshotted anchorEnter");
+  assertEqual(arrival.r.debug.fireEvidence, "nb2", "learned-boundary NB2 remains auditable");
+  assertAdaptiveResultShape(arrival.r, "NB2 fire path");
+}
+{
+  const s = adaptiveStepper(40);
+  for (let i = 0; i < 5; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.push(null, 0, 40);
+  s.push(mkRaw(0.47, 150), 0.2, 40);
+  const last = s.push(mkRaw(0.47, 150), 0.2, 40);
+  assertEqual(s.st.adaptive.evidence, null, "null frame prevents calibration history bridging");
+  assertEqual(last.r.phase, "SETUP", "post-gap short suffix does not enter adaptive ANCHORING");
+}
+{
+  const gatedScript = coreScript.replace("CONF_GATE: 0,", "CONF_GATE: 0.5,");
+  assert(
+    gatedScript !== coreScript,
+    "confidence-gated fixture enables the existing usability gate",
+  );
+  const gatedCore = new Function(
+    `${gatedScript}
+return {makeFormPhaseDetector, stepFormPhase};`,
+  )();
+  const s = adaptiveStepper(40, gatedCore);
+  const confident = () => ({ ...mkRaw(0.47, 150), conf: 0.9 });
+  for (let i = 0; i < 5; i++) s.push(confident(), 0.2);
+  s.push({ ...mkRaw(0.47, 150), conf: 0.4 }, 0.2);
+  s.push(confident(), 0.2);
+  const afterGap = s.push(confident(), 0.2);
+  assertEqual(s.st.adaptive.evidence, null, "confidence-unusable frame prevents hold bridging");
+  assert(
+    afterGap.r.phase !== "ANCHORING" && afterGap.r.phase !== "FULL_DRAW",
+    "confidence-unusable gap cannot fabricate an adaptive anchor phase",
+  );
+}
+{
+  const state = core.makeFormPhaseDetector().adaptive;
+  const ineligible = (anchorNorm, drawArm, start) =>
+    Array.from({ length: 6 }, (_, i) => ({
+      ts: start + i * 30,
+      m: mkRaw(anchorNorm, drawArm),
+      vel: 0.2,
+    }));
+  let history = ineligible(0.47, 125, 10);
+  core.updateAdaptiveAnchorEvidence(state, history.at(-1).m, history, history.at(-1).ts);
+  assertEqual(state.anchorSamples.length, 0, "drawArm equality 125 is excluded");
+  history = ineligible(1.3, 150, 300);
+  core.updateAdaptiveAnchorEvidence(state, history.at(-1).m, history, history.at(-1).ts);
+  assertEqual(state.anchorSamples.length, 0, "anchorNorm equality 1.3 is excluded");
+}
+{
+  const exact = adaptiveStepper(30);
+  [0.47, 0.49, 0.51, 0.53, 0.55, 0.59].forEach((norm) => exact.push(mkRaw(norm, 150), 0.2));
+  assert(exact.st.adaptive.evidence !== null, "stable range equality 0.12 is included");
+  const over = adaptiveStepper(30);
+  [0.47, 0.49, 0.51, 0.53, 0.55, 0.5901].forEach((norm) => over.push(mkRaw(norm, 150), 0.2));
+  assertEqual(over.st.adaptive.evidence, null, "stable range above 0.12 is excluded");
+}
+{
+  const s = adaptiveStepper(30);
+  const velocities = [1, NaN, 3, 4, 5, 6];
+  velocities.forEach((velocity, i) => s.push(mkRaw(0.47 + (i % 2) * 0.01, 150), velocity));
+  const first = { ...s.st.adaptive.evidence };
+  assertEqual(s.st.adaptive.holdVelocitySamples.length, 5, "backfill keeps only finite velocities");
+  const originalHoldSince = s.st.adaptive.holdSince;
+  const next = s.push(mkRaw(0.49, 150), 8);
+  const refreshed = s.st.adaptive.evidence;
+  assertEqual(refreshed.ts, next.t, "continuing qualified frame refreshes evidence timestamp");
+  assertEqual(refreshed.anchorEnter, s.st.adaptive.anchorEnter, "evidence snapshots anchorEnter");
+  assertEqual(
+    refreshed.releaseSpeed,
+    s.st.adaptive.releaseSpeed,
+    "evidence snapshots releaseSpeed",
+  );
+  assert(
+    refreshed.releaseSpeed > first.releaseSpeed,
+    "finite hold velocities refresh releaseSpeed",
+  );
+  assert(refreshed.normAtHold !== first.normAtHold, "evidence refreshes median hold norm");
+  assertEqual(refreshed.strength, 7, "evidence refreshes capped strength");
+  assertEqual(s.st.adaptive.holdSince, originalHoldSince, "continuing hold keeps original start");
+}
+{
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.st.pendingRelease = {
+    ts: s.st.adaptive.evidence.ts,
+    fireEvidence: "close",
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  s.push(mkRaw(1.21, 90), 0.1, 1);
+  s.push(mkRaw(1.21, 90), 0.1, 299);
+  assert(s.st.adaptive.evidence !== null, "pending confirmation is exempt from far invalidation");
+  assertEqual(s.st.adaptive.farSince, 0, "pending confirmation cannot accumulate far duration");
+  assertEqual(s.st.adaptive.holdSamples.length, 0, "pending confirmation cannot extend a hold");
+}
+{
+  /* Review remediation: pendingRelease raw frames are already in browser history.
+     A cancel must create a hard learning barrier so those frames cannot be
+     retroactively backfilled on the first post-cancel frame. */
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.22, 150), 0.2);
+  s.st.adaptive.evidence = null;
+  s.st.adaptive.holdSamples = [];
+  s.st.adaptive.holdVelocitySamples = [];
+  s.st.adaptive.holdSince = 0;
+  s.st.adaptive.releaseSpeed = 6;
+  s.st.pendingRelease = {
+    ts: 180,
+    fireEvidence: "close",
+    nb2Ref: null,
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  let cancel = null;
+  for (let i = 0; i < 6; i++) {
+    const current = s.push(mkRaw(0.22, 150), 8, 20);
+    if (current.r.canceled) cancel = current;
+  }
+  assert(cancel, "review fixture reaches anchor-return cancel");
+  assertAdaptiveResultShape(cancel.r, "anchor-return cancel path");
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    6,
+    "pending cancel frames cannot teach anchor samples",
+  );
+  assertEqual(
+    s.st.adaptive.holdBreakTs,
+    cancel.t,
+    "cancel frame records the latest learning barrier",
+  );
+  const first = s.push(mkRaw(0.22, 150), 0.2, 75);
+  assertEqual(
+    s.st.adaptive.evidence,
+    null,
+    "first post-cancel frame cannot backfill pending history into evidence",
+  );
+  const second = s.push(mkRaw(0.22, 150), 0.2, 75);
+  assertEqual(
+    s.st.adaptive.evidence,
+    null,
+    "two post-cancel observations remain below the hold gate",
+  );
+  const third = s.push(mkRaw(0.22, 150), 0.2, 75);
+  assert(s.st.adaptive.evidence !== null, "three post-cancel observations spanning 150ms qualify");
+  assert(
+    s.st.adaptive.holdSamples.every((sample) => sample.ts > cancel.t),
+    "post-cancel hold samples exclude every pending timestamp",
+  );
+  assertEqual(s.st.adaptive.holdSince, first.t, "post-cancel hold starts after the barrier");
+  assertEqual(s.st.adaptive.releaseSpeed, 6, "pending high velocities cannot raise releaseSpeed");
+  assertEqual(
+    s.st.adaptive.evidence.strength,
+    3,
+    "post-cancel evidence counts only fresh observations",
+  );
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    9,
+    "only three post-cancel anchor samples are added",
+  );
+  assertAdaptiveResultShape(first.r, "first post-anchor-return-cancel path");
+  assertAdaptiveResultShape(second.r, "second post-anchor-return-cancel path");
+  assertAdaptiveResultShape(third.r, "qualified post-anchor-return-cancel path");
+}
+{
+  /* The ordinary CONFIRM_MS timeout path must impose the same history barrier,
+     even though no cancellation return resets phase state. */
+  const s = adaptiveStepper(30);
+  for (let i = 0; i < 6; i++) s.push(mkRaw(0.47, 150), 0.2);
+  s.st.adaptive.evidence = null;
+  s.st.adaptive.holdSamples = [];
+  s.st.adaptive.holdVelocitySamples = [];
+  s.st.adaptive.holdSince = 0;
+  s.st.adaptive.releaseSpeed = 6;
+  s.st.pendingRelease = {
+    ts: 180,
+    fireEvidence: "close",
+    nb2Ref: null,
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  for (let i = 0; i < 4; i++) s.push(mkRaw(0.47, 150), 8, 100);
+  const timeout = s.push(mkRaw(0.47, 150), 8, 1);
+  assertEqual(s.st.pendingRelease, null, "review fixture reaches ordinary confirm timeout");
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    6,
+    "pending timeout frames cannot teach anchor samples",
+  );
+  assertEqual(
+    s.st.adaptive.holdBreakTs,
+    timeout.t,
+    "timeout frame records the latest learning barrier",
+  );
+  const first = s.push(mkRaw(0.47, 150), 0.2, 75);
+  assertEqual(
+    s.st.adaptive.evidence,
+    null,
+    "first post-timeout frame cannot backfill pending history into evidence",
+  );
+  s.push(mkRaw(0.47, 150), 0.2, 75);
+  s.push(mkRaw(0.47, 150), 0.2, 75);
+  assert(s.st.adaptive.evidence !== null, "new post-timeout hold qualifies only after 150ms");
+  assert(
+    s.st.adaptive.holdSamples.every((sample) => sample.ts > timeout.t),
+    "post-timeout hold samples exclude every pending timestamp",
+  );
+  assertEqual(s.st.adaptive.holdSince, first.t, "post-timeout hold starts after the barrier");
+  assertEqual(
+    s.st.adaptive.releaseSpeed,
+    6,
+    "timed-out pending velocities cannot raise releaseSpeed",
+  );
+  assertEqual(
+    s.st.adaptive.evidence.strength,
+    3,
+    "post-timeout evidence counts only fresh observations",
+  );
+  assertEqual(
+    s.st.adaptive.anchorSamples.length,
+    9,
+    "only three post-timeout anchor samples are added",
+  );
+}
+{
+  /* Duplicate timestamps are not distinct observations. Treat the invalid
+     ordering as a suffix barrier rather than letting it inflate the frame gate. */
+  const state = core.makeFormPhaseDetector().adaptive;
+  state.anchorSamples = Array.from({ length: 6 }, (_, i) => ({
+    ts: 10 + i,
+    norm: 0.47,
+  }));
+  const duplicateHistory = [
+    { ts: 100, m: mkRaw(0.47, 150), vel: 0.2 },
+    { ts: 100, m: mkRaw(0.47, 150), vel: 0.2 },
+    { ts: 250, m: mkRaw(0.47, 150), vel: 0.2 },
+  ];
+  const result = core.updateAdaptiveAnchorEvidence(
+    state,
+    duplicateHistory.at(-1).m,
+    duplicateHistory,
+    250,
+  );
+  assertEqual(result.holdQualified, false, "duplicate timestamp cannot satisfy three observations");
+  assertEqual(state.evidence, null, "duplicate timestamp cannot fabricate adaptive evidence");
+  assertEqual(state.holdSamples.length, 2, "duplicate timestamp is a stable-suffix barrier");
+}
+{
+  const quick = adaptiveStepper(50);
+  for (let i = 0; i < 6; i++) quick.push(mkRaw(0.47 + (i % 2) * 0.005, 150), 0.2);
+  assert(quick.st.adaptive.evidence !== null, "sanity: six stable frames can form evidence");
+  const short = adaptiveStepper(50);
+  for (let i = 0; i < 5; i++) short.push(mkRaw(0.47, 150), 0.2);
+  short.push(null, 0);
+  const last = short.push(mkRaw(0.47, 150), 0.2);
+  assertEqual(
+    short.st.adaptive.evidence,
+    null,
+    "quick draw without a continuous 150ms hold has no evidence",
+  );
+  assert(last.r.phase !== "ANCHORING", "quick draw does not enter adaptive ANCHORING");
+}
+{
+  const source = coreScript.slice(
+    coreScript.indexOf("function stepFormPhase"),
+    coreScript.indexOf("function formPreReleaseWindow"),
+  );
+  assertEqual(
+    (source.match(/formPhaseResult\(/g) || []).length,
+    9,
+    "all nine stepFormPhase return paths use the adaptive result decorator",
+  );
+}
+{
+  /* Coverage remediation for early cancellation returns. These paths already
+     behaved correctly; reach them dynamically so result-shape coverage does
+     not rely only on source-string counting. */
+  const nb2Drift = core.makeFormPhaseDetector();
+  nb2Drift.lastReleaseTs = 1000;
+  nb2Drift.pendingRelease = {
+    ts: 1000,
+    fireEvidence: "nb2",
+    nb2Ref: { x: 0, y: 0 },
+    departCheck: false,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  const driftRaw = { ...mkRaw(1.0, 90), dW: { x: 0.2, y: 0 } };
+  const driftHistory = [{ ts: 1020, m: driftRaw, vel: 0.2 }];
+  core.stepFormPhase(nb2Drift, driftRaw, driftHistory, 1.0, 1020);
+  driftHistory.push({ ts: 1120, m: driftRaw, vel: 0.2 });
+  const driftCancel = core.stepFormPhase(nb2Drift, driftRaw, driftHistory, 1.0, 1120);
+  assertEqual(driftCancel.debug.cancelReason, "nb2-drift", "NB2 drift fixture reaches cancel");
+  assertAdaptiveResultShape(driftCancel, "NB2 drift cancel path");
+
+  const nb2Unobserved = core.makeFormPhaseDetector();
+  nb2Unobserved.lastReleaseTs = 1000;
+  nb2Unobserved.pendingRelease = {
+    ts: 1000,
+    fireEvidence: "nb2",
+    nb2Ref: { x: 0, y: 0 },
+    departCheck: true,
+    departFrames: 0,
+    departSeen: 0,
+  };
+  const unobservedRaw = mkRaw(1.0, 90);
+  const unobservedCancel = core.stepFormPhase(
+    nb2Unobserved,
+    unobservedRaw,
+    [{ ts: 1401, m: unobservedRaw, vel: 0.2 }],
+    1.0,
+    1401,
+  );
+  assertEqual(
+    unobservedCancel.debug.cancelReason,
+    "nb2-unobserved",
+    "NB2 unobserved fixture reaches cancel",
+  );
+  assertAdaptiveResultShape(unobservedCancel, "NB2 unobserved cancel path");
+
+  const noDepart = core.makeFormPhaseDetector();
+  noDepart.lastReleaseTs = 1000;
+  noDepart.pendingRelease = {
+    ts: 1000,
+    fireEvidence: "close",
+    nb2Ref: null,
+    departCheck: true,
+    departFrames: 0,
+    departSeen: 5,
+  };
+  const hoverRaw = mkRaw(0.5, 140);
+  const noDepartCancel = core.stepFormPhase(
+    noDepart,
+    hoverRaw,
+    [{ ts: 1401, m: hoverRaw, vel: 0.2 }],
+    1.0,
+    1401,
+  );
+  assertEqual(noDepartCancel.debug.cancelReason, "no-depart", "no-depart fixture reaches cancel");
+  assertAdaptiveResultShape(noDepartCancel, "no-depart cancel path");
 }
 
 /* 15fps(dt=66ms)で離脱が totalMs で完了する現実的なリリース区間を作る。
@@ -185,6 +2545,432 @@ function releaseFrames(totalMs, dt, fromAnchor) {
     if (x >= 1) break;
   }
   return frames;
+}
+
+{
+  const closeFrames = [
+    { ts: 100, m: mkRaw(0.22, 100), vel: 0.02 },
+    { ts: 120, m: mkRaw(0.22, 100), vel: 0.02 },
+  ];
+  const continuityAt = (overrides = {}) => {
+    const raw = mkRaw(0.4, overrides.drawArm === undefined ? 145 : overrides.drawArm);
+    const previous = {
+      ts: 140,
+      m: overrides.previousNull ? null : mkRaw(overrides.previousAnchor ?? 0.36, 100),
+      vel: 1,
+    };
+    const current = {
+      ts: 160,
+      m: overrides.staleTail ? { ...raw } : raw,
+      vel: overrides.velocity ?? 6,
+    };
+    return core.legacyReleaseContinuity(
+      raw,
+      closeFrames,
+      [...closeFrames, previous, current],
+      0.22,
+      1,
+      6,
+      160,
+    );
+  };
+  const exact = continuityAt();
+  assertEqual(
+    exact.calibratedMatched,
+    true,
+    "legacy continuity includes exact calibrated boundary",
+  );
+  assertClose(exact.directionDelta, 0.04, 1e-12, "legacy continuity reports direction delta");
+  assertEqual(
+    continuityAt({ velocity: core.FORM_PH.RELEASE_TH + 1 }).fastMatched,
+    true,
+    "legacy fast includes the exact direction boundary",
+  );
+  assertEqual(
+    continuityAt({ previousAnchor: 0.360001 }).calibratedMatched,
+    false,
+    "legacy continuity excludes direction below the calibrated boundary",
+  );
+  assertEqual(
+    continuityAt({
+      previousAnchor: 0.360001,
+      velocity: core.FORM_PH.RELEASE_TH + 1,
+    }).fastMatched,
+    false,
+    "legacy fast excludes direction below the boundary",
+  );
+  assertEqual(
+    continuityAt({ drawArm: Number.NaN }).calibratedMatched,
+    false,
+    "legacy continuity requires a finite draw-arm comparison",
+  );
+  assertEqual(
+    continuityAt({ staleTail: true }).calibratedMatched,
+    false,
+    "legacy continuity requires history tail identity with the current raw frame",
+  );
+  assertEqual(
+    continuityAt({ previousNull: true }).calibratedMatched,
+    false,
+    "legacy calibrated continuity does not cross a null frame",
+  );
+  assertEqual(
+    continuityAt({
+      previousNull: true,
+      velocity: core.FORM_PH.RELEASE_TH + 1,
+    }).fastMatched,
+    true,
+    "legacy fast uses a bounded latest-usable direction across a null frame",
+  );
+}
+
+{
+  /* Anonymous synthetic pair: keep anchor evidence, total rise, current speed, and arm
+     continuity identical, then vary only the immediately preceding movement direction.
+     A coherent outward departure is a legacy-fast shot; an inward rebound is not. */
+  const holdAnchor = core.FORM_PH.CLOSE_IN - 0.06;
+  const releaseAnchor = holdAnchor + core.FORM_PH.RELEASE_RISE + 0.23;
+  const directionStep = core.FORM_PH.RELEASE_RISE + 0.02;
+  const precursorMs = 120;
+  const releaseMs = 20;
+  const directionSequence = (previousAnchor) => {
+    const seq = [];
+    for (let i = 0; i < 10; i++) seq.push([mkRaw(holdAnchor, 120), 0.02, 20]);
+    const precursorVelocity = Math.abs(previousAnchor - holdAnchor) / (precursorMs / 1000);
+    const releaseVelocity = Math.abs(releaseAnchor - previousAnchor) / (releaseMs / 1000);
+    assert(
+      precursorVelocity < core.FORM_PH.ADAPTIVE_RELEASE_MIN,
+      "synthetic precursor stays below every legacy velocity threshold",
+    );
+    seq.push([mkRaw(previousAnchor, 120), precursorVelocity, precursorMs]);
+    seq.push([mkRaw(releaseAnchor, 120), releaseVelocity, releaseMs]);
+    return seq;
+  };
+  const outward = runSequence(directionSequence(releaseAnchor - directionStep));
+  const inward = runSequence(directionSequence(releaseAnchor + directionStep));
+
+  assertEqual(outward.releases, 1, "legacy detection preserves a coherent outward departure");
+  assertEqual(inward.releases, 0, "legacy detection rejects an inward rebound");
+}
+
+{
+  /* Production velocity skips a transient null frame and measures from the latest usable
+     wrist. Legacy-fast direction must use the same bounded observation origin: preserve an
+     outward shot across one missing pose, but reject an inward return with identical speed. */
+  const holdAnchor = core.FORM_PH.CLOSE_IN - 0.06;
+  const releaseAnchor = holdAnchor + core.FORM_PH.RELEASE_RISE + 0.02;
+  const directionStep = core.FORM_PH.RELEASE_RISE + 0.02;
+  const frameMs = 20;
+  const bodyScale = 0.25;
+  const expectedVelocity = core.FORM_PH.RELEASE_TH + 1;
+  const rawAt = (anchorNorm, drawWristX = 0) => ({
+    ...mkRaw(anchorNorm, 120),
+    bodyScale,
+    dW: { x: drawWristX, y: 0 },
+  });
+  const runGapDirection = (previousAnchor, nullFrames = 1) => {
+    const st = core.makeFormPhaseDetector();
+    const history = [];
+    let now = 0;
+    let releases = 0;
+    const advance = (raw) => {
+      now += frameMs;
+      const velocity = core.computeFormVelocity(history, raw, now);
+      history.push({ ts: now, m: raw, vel: velocity });
+      const result = core.stepFormPhase(st, raw, history, 1, now);
+      if (result.released) releases++;
+      return { result, velocity };
+    };
+    for (let i = 0; i < 10; i++) advance(rawAt(holdAnchor));
+    if (previousAnchor != null) advance(rawAt(previousAnchor));
+    for (let i = 0; i < nullFrames; i++) advance(null);
+    const validToValidMs = (nullFrames + 1) * frameMs;
+    const releaseDx = expectedVelocity * (validToValidMs / 1000) * bodyScale;
+    const current = advance(rawAt(releaseAnchor, releaseDx));
+    return { current, releases };
+  };
+  const outward = runGapDirection(null);
+  const inward = runGapDirection(releaseAnchor + directionStep);
+  const excessiveGap = runGapDirection(null, Math.floor(core.FORM_PH.NB_MAX_GAP_MS / frameMs));
+
+  assertClose(
+    outward.current.velocity,
+    expectedVelocity,
+    1e-12,
+    "bounded-gap outward companion uses production fast velocity",
+  );
+  assertClose(
+    inward.current.velocity,
+    expectedVelocity,
+    1e-12,
+    "bounded-gap inward companion uses the same production fast velocity",
+  );
+  assertClose(
+    excessiveGap.current.velocity,
+    expectedVelocity,
+    1e-12,
+    "over-limit gap companion still presents the same computed speed",
+  );
+  assertEqual(inward.releases, 0, "bounded pose gap still rejects an inward rebound");
+  assertEqual(excessiveGap.releases, 0, "legacy-fast does not bridge beyond the tier-1 gap cap");
+  assertEqual(outward.releases, 1, "bounded pose gap preserves an outward legacy-fast shot");
+}
+
+{
+  /* Legacy の速度・アンカー証拠は同じ離脱動作に属していなければならない。
+     250ms 窓の古い速度スパイクと、後から現れたアンカー外フレームを別々に集計すると、
+     保持中の暫定候補が真のリリース窓を塞ぐ。 */
+  const staleSpike = [];
+  for (let i = 0; i < 60; i++) staleSpike.push([mkRaw(0.22, 15), 0.02, 20]);
+  staleSpike.push([mkRaw(0.22, 15), 32, 20]);
+  for (let i = 0; i < 3; i++) staleSpike.push([mkRaw(0.3, 15), 0.2, 20]);
+  staleSpike.push([mkRaw(0.46, 17), 3.7, 20]);
+  assertEqual(
+    runSequence(staleSpike).releases,
+    0,
+    "stale velocity and later anchor evidence do not form one legacy release",
+  );
+}
+{
+  /* 単発の高速ランドマーク跳びは、直前のアンカー姿勢と腕角度が連続しない限り
+     legacy release にしない。後続の有効観測が乏しい場面で幻ショットを残さないための
+     fire-time 精度契約。 */
+  const poseJump = [];
+  for (let i = 0; i < 60; i++) poseJump.push([mkRaw(0.22, 50), 0.02, 20]);
+  poseJump.push([mkRaw(0.49, 135), 21.2, 20]);
+  assertEqual(
+    runSequence(poseJump).releases,
+    0,
+    "single high-speed pose discontinuity does not fire a legacy release",
+  );
+}
+{
+  /* 瞬間速度が固定 legacy 閾値に届かなくても、校正速度を超えながら連続して
+     アンカーから離れる実射形の系列は検出する。drawArm<125 で adaptive evidence を
+     意図的に作らず、legacy continuity 経路だけを検証する。 */
+  const sustainedRelease = [];
+  for (let i = 0; i < 60; i++) sustainedRelease.push([mkRaw(0.22, 10), 0.02, 20]);
+  [
+    [0.5, 0.5],
+    [0.55, 2.5],
+    [0.61, 3.2],
+    [0.68, 6.5],
+  ].forEach(([anchorNorm, velocity]) =>
+    sustainedRelease.push([mkRaw(anchorNorm, 10), velocity, 20]),
+  );
+  assertEqual(
+    runSequence(sustainedRelease).releases,
+    1,
+    "calibrated continuous departure recovers a sub-threshold legacy release",
+  );
+
+  const lowFpsRelease = [];
+  const lowFpsDt = 1000 / 15;
+  for (let i = 0; i < 20; i++) lowFpsRelease.push([mkRaw(0.22, 10), 0.02, lowFpsDt]);
+  lowFpsRelease.push([mkRaw(0.4, 10), 0.5, lowFpsDt]);
+  lowFpsRelease.push([mkRaw(0.5, 10), 6.5, lowFpsDt]);
+  assertEqual(
+    runSequence(lowFpsRelease).releases,
+    1,
+    "calibrated continuous departure remains available at the 15fps accuracy boundary",
+  );
+}
+{
+  /* ドローイングから直接引き抜く短い close 保持は、アンカー保持として扱わない。
+     実機で「アンカーに入ると認識せず、ドローイングから直接射つと全て反応する」
+     という誤カウントを再現する境界で、brief adaptive の最小保持(80ms)を
+     legacy close 経路にも共有する。80ms以上の短い保持は従来どおり検出する。 */
+  const directDrawing = [];
+  for (let i = 0; i < 3; i++) directDrawing.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) directDrawing.push([mkRaw(0.22, 150), 0.02, 20]);
+  directDrawing.push(
+    [mkRaw(0.6, 150), 10, 20],
+    [mkRaw(0.8, 140), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(directDrawing).releases,
+    0,
+    "drawing-to-release with only 40ms close hold does not count a shot",
+  );
+
+  const briefClose = [];
+  for (let i = 0; i < 3; i++) briefClose.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 4; i++) briefClose.push([mkRaw(0.22, 150), 0.02, 20]);
+  briefClose.push(
+    [mkRaw(0.6, 150), 10, 20],
+    [mkRaw(0.8, 140), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(briefClose).releases,
+    1,
+    "drawing-to-release with an 80ms close hold remains detectable",
+  );
+
+  const lowArmDirectDrawing = [];
+  for (let i = 0; i < 3; i++) lowArmDirectDrawing.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) lowArmDirectDrawing.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmDirectDrawing.push(
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmDirectDrawing).releases,
+    0,
+    "low-drawArm drawing-to-release with only 40ms close hold does not count a shot",
+  );
+
+  const mkObliqueRaw = (anchorNorm, drawArm) => ({
+    ...mkRaw(anchorNorm, drawArm),
+    dW: { x: 0.18, y: 0.04, visibility: 0.95 },
+  });
+  const lowArmBoundarySequence = (drawArm, closeCount, dt = 20, makeRaw = mkRaw) => {
+    const seq = [];
+    for (let i = 0; i < 3; i++) seq.push([makeRaw(1.2, drawArm), 0.5, dt]);
+    for (let i = 0; i < closeCount; i++) seq.push([makeRaw(0.22, drawArm), 0.02, dt]);
+    seq.push(
+      [makeRaw(0.6, drawArm), 10, dt],
+      [makeRaw(0.8, drawArm), 10, dt],
+      [makeRaw(1.0, 90), 0.1, dt],
+    );
+    return seq;
+  };
+  [10, 20, 32, 63, 79, 80, 90].forEach((drawArm) => {
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 2)).releases,
+      0,
+      `drawArm ${drawArm} direct 40ms close hold is rejected`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 4)).releases,
+      1,
+      `drawArm ${drawArm} direct 80ms close hold remains detectable`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 8)).releases,
+      1,
+      `drawArm ${drawArm} direct 150ms close hold remains detectable`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 1, 1000 / 15)).releases,
+      0,
+      `drawArm ${drawArm} at 15fps with one close frame is rejected`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 3, 1000 / 15)).releases,
+      1,
+      `drawArm ${drawArm} at 15fps with a stable close hold remains detectable`,
+    );
+    assertEqual(
+      runSequence(lowArmBoundarySequence(drawArm, 2, 20, mkObliqueRaw)).releases,
+      0,
+      `drawArm ${drawArm} oblique-offset direct 40ms close hold is rejected`,
+    );
+  });
+  const lowArmObliqueDirect = [];
+  for (let i = 0; i < 3; i++) lowArmObliqueDirect.push([mkObliqueRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) lowArmObliqueDirect.push([mkObliqueRaw(0.22, 110), 0.02, 20]);
+  lowArmObliqueDirect.push(
+    [mkObliqueRaw(0.6, 110), 10, 20],
+    [mkObliqueRaw(0.8, 110), 10, 20],
+    [mkObliqueRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmObliqueDirect).releases,
+    0,
+    "low-drawArm oblique direct drawing with only 40ms close hold does not count a shot",
+  );
+
+  const lowArmNullGap = [];
+  for (let i = 0; i < 3; i++) lowArmNullGap.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 4; i++) lowArmNullGap.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmNullGap.push(
+    [null, 0, 20],
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmNullGap).releases,
+    0,
+    "low-drawArm close hold followed by a pose gap does not count a shot",
+  );
+
+  const lowArmJitter = [];
+  for (let i = 0; i < 3; i++) lowArmJitter.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 2; i++) lowArmJitter.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmJitter.push(
+    [mkRaw(0.5, 110), 10, 20],
+    [mkRaw(0.22, 110), 0.02, 20],
+    [mkRaw(0.22, 110), 0.02, 20],
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmJitter).releases,
+    0,
+    "low-drawArm close hold followed by a non-null jitter does not count a shot",
+  );
+
+  const lowArmBriefClose = [];
+  for (let i = 0; i < 3; i++) lowArmBriefClose.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 4; i++) lowArmBriefClose.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmBriefClose.push(
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmBriefClose).releases,
+    1,
+    "low-drawArm drawing-to-release with an 80ms close hold remains detectable",
+  );
+
+  const lowArmQualifiedClose = [];
+  for (let i = 0; i < 3; i++) lowArmQualifiedClose.push([mkRaw(1.2, 110), 0.5, 20]);
+  for (let i = 0; i < 8; i++) lowArmQualifiedClose.push([mkRaw(0.22, 110), 0.02, 20]);
+  lowArmQualifiedClose.push(
+    [mkRaw(0.6, 110), 10, 20],
+    [mkRaw(0.8, 110), 10, 20],
+    [mkRaw(1.0, 90), 0.1, 20],
+  );
+  assertEqual(
+    runSequence(lowArmQualifiedClose).releases,
+    1,
+    "low-drawArm drawing-to-release with a 150ms close hold remains detectable",
+  );
+
+  const dt15 = 1000 / 15;
+  const lowArm15FpsBrief = [];
+  for (let i = 0; i < 3; i++) lowArm15FpsBrief.push([mkRaw(1.2, 110), 0.5, dt15]);
+  lowArm15FpsBrief.push([mkRaw(0.22, 110), 0.02, dt15]);
+  lowArm15FpsBrief.push(
+    [mkRaw(0.6, 110), 10, dt15],
+    [mkRaw(0.8, 110), 10, dt15],
+    [mkRaw(1.0, 90), 0.1, dt15],
+  );
+  assertEqual(
+    runSequence(lowArm15FpsBrief).releases,
+    0,
+    "low-drawArm drawing-to-release with one 15fps close frame does not count a shot",
+  );
+
+  const lowArm15FpsStable = [];
+  for (let i = 0; i < 3; i++) lowArm15FpsStable.push([mkRaw(1.2, 110), 0.5, dt15]);
+  for (let i = 0; i < 3; i++) lowArm15FpsStable.push([mkRaw(0.22, 110), 0.02, dt15]);
+  lowArm15FpsStable.push(
+    [mkRaw(0.6, 110), 10, dt15],
+    [mkRaw(0.8, 110), 10, dt15],
+    [mkRaw(1.0, 90), 0.1, dt15],
+  );
+  assertEqual(
+    runSequence(lowArm15FpsStable).releases,
+    1,
+    "low-drawArm drawing-to-release with a 15fps stable close hold remains detectable",
+  );
 }
 
 function shotSequence(dt) {
@@ -207,8 +2993,9 @@ function shotSequence(dt) {
 }
 {
   // レットダウン誤検出境界の回帰テスト（2026-07-05 修理）。
-  // 実測: 100ms〜2000ms の線形レットダウンはいずれも誤検出しないことを確認済み
-  // （境界表は 46-form-core.js の RELEASE_TH コメント参照）。50ms は 1 フレームで
+  // 2026-07-26 承認済み recall tradeoff: 100ms の線形レットダウンは、見逃しを減らす
+  // relative adaptive path により「削除可能な候補」1件となりうる。150〜2000ms は従来どおり
+  // 0件を固定する（境界表は 46-form-core.js の RELEASE_TH コメント参照）。50ms は 1 フレームで
   // 完了する極限ケースで、20fps 相当では速度スパイクがリリースと数値上区別できず
   // 対象外（停止条件の対象は「50ms〜2s」のうち計測可能な範囲）。
   [2000, 1500, 1200, 1100, 1000, 900, 800, 700, 600, 500, 400, 300, 250, 200, 150, 100].forEach(
@@ -221,7 +3008,11 @@ function shotSequence(dt) {
         for (let i = 1; i <= frames; i++)
           seq.push([mkRaw(0.22 + i * step, 140), step / (dt / 1000), dt]);
         for (let i = 0; i < 30; i++) seq.push([mkRaw(1.0, 90), 0.02, dt]);
-        assertEqual(runSequence(seq).releases, 0, `let-down ${totalMs}ms (dt=${dt}) does not fire`);
+        assertEqual(
+          runSequence(seq).releases,
+          totalMs === 100 ? 1 : 0,
+          `let-down ${totalMs}ms (dt=${dt}) approved adaptive boundary`,
+        );
       });
     },
   );
@@ -241,6 +3032,77 @@ function shotSequence(dt) {
       );
     });
   });
+}
+{
+  /* 現場再現: アンカー値が CLOSE_IN より緩い撮影角度では、短い保持後の
+     明確な離脱が closeFrames を作らず、adaptive の最小保持(150ms)にも届かない。
+     ドローイングから直接離れたときだけ反応する回帰を、実射として1射に固定する。 */
+  const briefLooseAnchor = [];
+  for (let i = 0; i < 12; i++)
+    briefLooseAnchor.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 5; i++) briefLooseAnchor.push([mkRaw(0.45, 150), 0.02, 20]);
+  briefLooseAnchor.push(...releaseFrames(80, 20, 0.45));
+  for (let i = 0; i < 20; i++) briefLooseAnchor.push([mkRaw(1.0, 90), 0.02, 20]);
+  assertEqual(
+    runSequence(briefLooseAnchor).releases,
+    1,
+    "brief loose-anchor hold followed by a clear release is detected",
+  );
+  const slowLooseLetdown = [];
+  for (let i = 0; i < 12; i++)
+    slowLooseLetdown.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 5; i++) slowLooseLetdown.push([mkRaw(0.45, 150), 0.02, 20]);
+  slowLooseLetdown.push(...releaseFrames(200, 20, 0.45));
+  for (let i = 0; i < 20; i++) slowLooseLetdown.push([mkRaw(1.0, 90), 0.02, 20]);
+  assertEqual(
+    runSequence(slowLooseLetdown).releases,
+    0,
+    "brief loose-anchor slow let-down stays below the high-speed recovery gate",
+  );
+
+  /* 現場動画の再現: 緩いアンカー保持中にランドマークが一時的に浮き、
+     高速度を伴う1フレームと短い欠損を挟んでも、実際の離脱が無ければ
+     RELEASE を出してはならない。9afe65e3 の brief 経路がこのスパイクを
+     離脱として合成しないことを固定する（まず baseline RED を観測する）。 */
+  const looseAnchorJitter = [];
+  for (let i = 0; i < 12; i++)
+    looseAnchorJitter.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 5; i++) looseAnchorJitter.push([mkRaw(0.45, 150), 0.02, 20]);
+  looseAnchorJitter.push(
+    [mkRaw(0.46, 150), 0.2, 20],
+    [mkRaw(0.47, 150), 0.2, 20],
+    [mkRaw(0.65, 150), 12, 20],
+    [null, 0, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+  );
+  const looseAnchorJitterResult = runSequence(looseAnchorJitter);
+  assertEqual(
+    looseAnchorJitterResult.releases,
+    0,
+    `loose-anchor jitter and a transient pose gap do not fire without sustained departure (evidence=${JSON.stringify(looseAnchorJitterResult.fireEvidence)})`,
+  );
+
+  const looseAnchorLongHold = [];
+  for (let i = 0; i < 12; i++)
+    looseAnchorLongHold.push([mkRaw(1.35 - i * 0.07, 110 + i * 3), 0.5, 20]);
+  for (let i = 0; i < 10; i++) looseAnchorLongHold.push([mkRaw(0.45, 150), 0.02, 20]);
+  looseAnchorLongHold.push(
+    [mkRaw(0.46, 150), 0.2, 20],
+    [mkRaw(0.47, 150), 0.2, 20],
+    [mkRaw(0.65, 150), 12, 20],
+    [null, 0, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+    [mkRaw(0.45, 150), 0.02, 20],
+  );
+  const looseAnchorLongHoldResult = runSequence(looseAnchorLongHold);
+  assertEqual(
+    looseAnchorLongHoldResult.releases,
+    0,
+    `loose-anchor long hold and a transient pose gap do not fire without sustained departure (evidence=${JSON.stringify(looseAnchorLongHoldResult.fireEvidence)})`,
+  );
 }
 {
   // レットダウン → 本物のリリース の複合シナリオ: 1 射のみ検出（レットダウンが余分な射にならない）
@@ -282,21 +3144,219 @@ function shotSequence(dt) {
   assertEqual(runSequence(seq).releases, 1, "null-frame bridged release detected");
 }
 {
+  /* tier-1 の姿勢ロス上限は、null 配列内の時刻差ではなく、最後に使えた姿勢から
+     次に使えた姿勢までの観測不能時間で判定する。低fpsや窓左端の切り落としでも
+     同じ150ms境界になるよう、adaptive（drawArm<=125）とNB2（arrival<0.65）を
+     無効化した物理整合のある緩い離脱系列で固定する。 */
+  function tierOneObservationGapSequence(observationGapMs) {
+    const seq = [];
+    const anchor = 0.22;
+    const arrival = 0.54;
+    for (let i = 0; i < 60; i++) seq.push([mkRaw(anchor, 10), 0.02, 20]);
+    const firstHalf = Math.floor(observationGapMs / 2);
+    seq.push([null, 0, firstHalf]);
+    seq.push([
+      mkRaw(arrival, 10),
+      (arrival - anchor) / (observationGapMs / 1000),
+      observationGapMs - firstHalf,
+    ]);
+    for (let i = 0; i < 3; i++) seq.push([mkRaw(0.7, 10), 0.1, 20]);
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 10), 0.1, 20]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneObservationGapSequence(150)).releases,
+    1,
+    "tier-1 includes an exact 150ms valid-to-valid observation gap",
+  );
+  assertEqual(
+    runSequence(tierOneObservationGapSequence(151)).releases,
+    0,
+    "tier-1 rejects a 151ms valid-to-valid observation gap",
+  );
+
+  function tierOneLeftEdgeGapSequence() {
+    const seq = [];
+    for (let i = 0; i < 60; i++) seq.push([mkRaw(0.22, 10), 0.02, 20]);
+    // 151ms gap: its only null sample leaves the 250ms rise window before evaluation.
+    seq.push([null, 0, 75]);
+    seq.push([mkRaw(0.22, 10), 0.02, 76]);
+    seq.push([mkRaw(0.22, 10), 0.02, 20]);
+    // Keep hasNullGap true with a later 100ms gap, then make a tier-1-shaped departure.
+    seq.push([null, 0, 50]);
+    seq.push([mkRaw(0.54, 10), 3, 50]);
+    for (let i = 0; i < 3; i++) seq.push([mkRaw(0.7, 10), 0.1, 20]);
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 10), 0.1, 20]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneLeftEdgeGapSequence()).releases,
+    0,
+    "tier-1 accounts for a 151ms gap while its interval crosses the rise-window left edge",
+  );
+
+  function tierOneUnknownGapStartSequence() {
+    const seq = [
+      [null, 0, 10],
+      [mkRaw(0.22, 10), 0.02, 60],
+      [mkRaw(0.22, 10), 0.02, 40],
+      [null, 0, 50],
+      [mkRaw(0.54, 10), (0.54 - 0.22) / 0.13, 80],
+    ];
+    for (let i = 0; i < 10; i++) seq.push([mkRaw(1.0, 10), 0.1, 20]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneUnknownGapStartSequence()).releases,
+    0,
+    "tier-1 remains fail-closed when the prior usable observation is not retained",
+  );
+
+  function tierOneSixtyFpsBoundarySequence() {
+    const seq = [];
+    const frameMs = 1000 / 60;
+    const gapFrames = 9;
+    for (let i = 0; i < 72; i++) seq.push([mkRaw(0.22, 10), 0.02, frameMs]);
+    for (let i = 0; i < gapFrames - 1; i++) seq.push([null, 0, frameMs]);
+    seq.push([mkRaw(0.54, 10), (0.54 - 0.22) / ((gapFrames * frameMs) / 1000), frameMs]);
+    for (let i = 0; i < 20; i++) seq.push([mkRaw(1.0, 10), 0.1, frameMs]);
+    return seq;
+  }
+  assertEqual(
+    runSequence(tierOneSixtyFpsBoundarySequence()).releases,
+    1,
+    "tier-1 includes a mathematically exact 150ms gap sampled at 60fps",
+  );
+
+  {
+    const frameMs = 1000 / 60;
+    const s = adaptiveStepper(frameMs);
+    for (let i = 0; i < 16; i++) s.push(mkRaw(0.47, 150), 0.2, i === 0 ? 1001 : frameMs);
+    for (let i = 0; i < 20; i++) s.push(null, 0, frameMs);
+    const arrival = s.push(mkRaw(0.8, 140), 3, frameMs);
+    assertEqual(
+      arrival.r.released,
+      true,
+      "NB2 includes a mathematically exact 350ms gap sampled at 60fps",
+    );
+    assertEqual(arrival.r.debug.fireVel, "nb2", "exact-350ms boundary uses NB2 velocity");
+  }
+  {
+    const s = adaptiveStepper(30);
+    for (let i = 0; i < 16; i++) s.push(mkRaw(0.47, 150), 0.2, i === 0 ? 1001 : 30);
+    s.push(null, 0, 175);
+    const arrival = s.push(mkRaw(0.8, 140), 3, 175.000002);
+    assertEqual(
+      arrival.r.released,
+      false,
+      "NB2 rejects a gap two nanoseconds above its 350ms inclusive limit",
+    );
+  }
+  function nb2LowerBoundaryArrival(extraGapMs) {
+    const frameMs = 1000 / 60;
+    const s = adaptiveStepper(frameMs);
+    s.push(mkRaw(0.22, 150), 0.2, 1000);
+    s.push(mkRaw(0.22, 150), 0.2, 100);
+    s.push(mkRaw(0.22, 150), 0.2, 150);
+    for (let i = 0; i < 8; i++) s.push(null, 0, frameMs);
+    return s.push(mkRaw(0.8, 140), 3, frameMs + extraGapMs).r;
+  }
+  assertEqual(
+    nb2LowerBoundaryArrival(0).released,
+    false,
+    "NB2 excludes a mathematically exact 150ms gap sampled at 60fps",
+  );
+  {
+    const arrival = nb2LowerBoundaryArrival(0.000002);
+    assertEqual(arrival.released, true, "NB2 includes a gap two nanoseconds above 150ms");
+    assertEqual(arrival.debug.fireVel, "nb2", "above-150ms lower boundary uses NB2 velocity");
+  }
+
+  const current = mkRaw(0.54, 10);
+  const futureHistory = [
+    { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+    { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+    { ts: 1000, m: current, vel: 3 },
+    { ts: 1100, m: null, vel: 0 },
+  ];
+  assertEqual(
+    core.stepFormPhase(core.makeFormPhaseDetector(), current, futureHistory, 1, 1000).released,
+    false,
+    "tier-1 fails closed when history contains an observation after now",
+  );
+  [
+    {
+      label: "a duplicate timestamp",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: null, vel: 0 },
+        { ts: 1000, m: current, vel: 3 },
+      ],
+    },
+    {
+      label: "a non-monotonic timestamp",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 950, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: null, vel: 0 },
+        { ts: 1000, m: current, vel: 3 },
+      ],
+    },
+  ].forEach(({ label, history }) => {
+    assertEqual(
+      core.stepFormPhase(core.makeFormPhaseDetector(), current, history, 1, 1000).released,
+      false,
+      `tier-1 fails closed when history contains ${label}`,
+    );
+  });
+  [
+    {
+      label: "the current frame is not the history tail timestamp",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 950, m: null, vel: 0 },
+        { ts: 999, m: current, vel: 3 },
+      ],
+    },
+    {
+      label: "the history tail metrics are an equal but different object",
+      history: [
+        { ts: 880, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 900, m: mkRaw(0.22, 10), vel: 0.02 },
+        { ts: 950, m: null, vel: 0 },
+        { ts: 1000, m: { ...current, dW: { ...current.dW } }, vel: 3 },
+      ],
+    },
+  ].forEach(({ label, history }) => {
+    assertEqual(
+      core.stepFormPhase(core.makeFormPhaseDetector(), current, history, 1, 1000).released,
+      false,
+      `tier-1 fails closed when ${label}`,
+    );
+  });
+}
+{
   /* D'（Stage 1）: nullBridged の時間ベースギャップ上限 NB_MAX_GAP_MS=150 の両側境界。
-     ギャップ span = 窓内の最初のnullフレーム→最後のnullフレームの経過時間（実装と同定義）。
-     140ms は検出 / 200ms は非検出。復帰フレームの vel=8 は NB_MAXV(2) 超・RELEASE_TH(9) 未満
-     に置き、velOk でなく nullBridged 経路が判定を決めることを保証する。 */
+     ギャップは直前の有効フレーム→復帰フレームで測る。このfixtureではnull 1枚ごとに20ms、
+     復帰まで10msなので、nullCount*20+10ms が実際の観測不能時間になる。
+     復帰フレームの vel=8 は NB_MAXV(2) 超・RELEASE_TH(9) 未満に置く。 */
   function gapBridgedSequence(nullCount) {
     const seq = [];
-    // アンカー保持（10ms間隔）。110フレーム=1100ms: REFRACTORY_MS(1000ms、起点 lastReleaseTs=0)を
-    // 追い越しつつ、窓内に十分な closeFrames を残す
+    // アンカー保持（10ms間隔）。110フレーム=1100msの実シナリオを保ち、
+    // 窓内に十分な closeFrames と長時間保持の adaptive evidence を残す。
     for (let i = 0; i < 110; i++) seq.push([mkRaw(0.22, 150), 0.02, 10]);
-    for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]); // 姿勢ロス: span=(nullCount-1)*20ms
+    for (let i = 0; i < nullCount; i++) seq.push([null, 0, 20]);
     seq.push([mkRaw(1.0, 90), 8, 10]); // 復帰: アンカー圏外・大きめの見かけ速度
     for (let i = 0; i < 10; i++) seq.push([mkRaw(1.0, 90), 0.2, 20]);
     return seq;
   }
-  assertEqual(runSequence(gapBridgedSequence(8)).releases, 1, "140ms null gap is bridged (fires)");
+  assertEqual(
+    runSequence(gapBridgedSequence(7)).releases,
+    1,
+    "150ms valid-to-valid null gap is bridged (fires)",
+  );
   /* 2026-07-15 アンカー証拠一般化（NB2）による意図的な仕様上書き:
      旧設計はレットダウン判別手段を持たなかったため 150ms 超のギャップを一律非検出に
      していた（このシーケンスはリリース形状: sticky アンカー生存・クロスギャップ速度8・
@@ -305,7 +3365,7 @@ function shotSequence(dt) {
   assertEqual(
     runSequence(gapBridgedSequence(11)).releases,
     1,
-    "200ms null gap now bridged by NB2 (release-shaped)",
+    "230ms valid-to-valid gap is bridged by NB2 (release-shaped)",
   );
   // NB_MAX_GAP_MS（tier-1 上限）が今も効いていることの証明は、NB2 の適用範囲外
   // （着地 anchorNorm 1.3 > NB2_MAX_ARRIVE）のシーケンスで行う: 150 のままなら非発火、
@@ -321,7 +3381,7 @@ function shotSequence(dt) {
   assertEqual(
     runSequence(gapFarArrivalSequence(11)).releases,
     0,
-    "200ms gap with far arrival (1.3) stays capped by NB_MAX_GAP_MS and outside NB2",
+    "230ms gap with far arrival (1.3) stays capped by NB_MAX_GAP_MS and outside NB2",
   );
   assert(
     coreScript.includes("NB_MAX_GAP_MS: 150,"),
@@ -337,23 +3397,9 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     "disabling NB_MAX_GAP_MS (Infinity) restores pre-D' tier-1 behavior on the same sequence",
   );
 }
-/* [既知の制約・文書化のみ、strict-review 2026-07-11 finding]: 上の140/200ms境界テストが
-   計測するギャップ span は「窓内に現れた最初のnullフレームts→最後のnullフレームts」であり、
-   ギャップが250ms窓(RISE_WINDOW_MS)の左端に接している場合（＝本当のロス区間が窓外へ続いて
-   いる可能性がある場合）、実際の姿勢ロス時間を過小評価しうる。合成再現で確認済みの経路:
-   アンカー保持 → 実スパン220msの姿勢ロス（null 12フレーム, dt=20ms）→ 復帰close 2フレーム
-   → vel=3 の緩慢な引き戻し、という系列が released=1（発火）になる。理由は releaseTs 直前の
-   250ms窓にギャップの先頭部分が入らず、在窓の計測値が 140ms ≤ NB_MAX_GAP_MS(150) に収まる
-   ため。加えてスパン定義そのものが「先頭null ts→末尾null ts」なので、真のロス時間（有効
-   フレーム→有効フレーム間隔）を約2フレーム間隔ぶん恒常的に過小評価する（低fpsほど誤差が
-   拡大: dt=66msでは null 3枚=132msの計測でも実ロスは約264ms）。
-   strict-reviewの総合判断はこれを「push可・T8前の必須修正ではない」と結論しており（次工程
-   条件は診断解釈時にこの経路を前提として読むことのみ）、本コミットではロジック変更をしない。
-   修正方向（案）: (a) ギャップを「直前の有効フレームts→直後の有効フレームts」で計測する、
-   (b) ギャップが窓左端に接している場合は上限超過側に倒す。実施する場合は設計書
-   form-phase-final-design.md §6-D' への差し戻しフィードバックとセットで、境界テスト
-   （140/200ms）の再導出込みの別タスクとする。
-   → 2026-07-15 追記: NB2 のギャップ計測は (a) 方式（now - 直前有効フレームts）を採用した。 */
+/* 2026-07-29: tier-1 も NB2 と同じく「直前の有効姿勢→復帰した有効姿勢」で
+   ギャップを測る。以前のnull列内だけの計測は窓左端と前後フレーム間隔を切り落とし、
+   151ms以上の姿勢ロスを150ms以下と誤認していた。上の専用境界fixtureが150/151msを固定する。 */
 {
   /* アンカー証拠の一般化（2026-07-15、実射 6射中4射消失の修正）
      実座標 dW を動かし computeFormVelocity に速度を実計算させる（view ループ契約:
@@ -381,7 +3427,8 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     const hist = [];
     let t = 0,
       releases = 0,
-      lastFire = null;
+      lastFire = null,
+      lastCancel = null;
     for (const raw of frames) {
       t += DT60;
       const vel = core.computeFormVelocity(hist, raw, t);
@@ -392,9 +3439,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
         releases++;
         lastFire = r;
       }
-      if (r.canceled) releases--;
+      if (r.canceled) {
+        releases--;
+        lastCancel = r;
+      }
     }
-    return { releases, lastFire };
+    return { releases, lastFire, lastCancel };
   }
   const seg = (frames, fn) =>
     Array.from({ length: frames }, (_, i) => fn(i / Math.max(1, frames - 1), i));
@@ -420,6 +3470,84 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     seq.push(...seg(36, () => mkDw(R_DW, 110)));
     return seq;
   }
+  function transformedShotDw(angleDeg, tx, ty, options = null) {
+    const direct = options && options.direct === true;
+    const holdFrames = direct ? options.holdFrames : 72;
+    const holdDrawArm = direct ? options.drawArm : 115;
+    const rad = (angleDeg * Math.PI) / 180;
+    const transform = (point) => {
+      const dx = point.x - FACE.x;
+      const dy = point.y - FACE.y;
+      return {
+        x: FACE.x + dx * Math.cos(rad) - dy * Math.sin(rad) + tx,
+        y: FACE.y + dx * Math.sin(rad) + dy * Math.cos(rad) + ty,
+      };
+    };
+    const face = transform(FACE);
+    const anchor = transform(A_DW);
+    const setup = transform(S_DW);
+    const release = transform(R_DW);
+    const norm = (point) => Math.hypot(point.x - face.x, point.y - face.y) / 0.25;
+    const make = (point, drawArm, anchorNormOverride) =>
+      mkDw(point, drawArm, anchorNormOverride == null ? norm(point) : anchorNormOverride);
+    const seq = [];
+    seq.push(...seg(30, () => make(setup, 90, direct ? 0.8 : null)));
+    seq.push(...seg(24, (t) => make(lerp2(setup, anchor, t), 100 + 30 * t, direct ? 0.5 : null)));
+    seq.push(...seg(holdFrames, () => make(anchor, holdDrawArm, direct ? 0.22 : null)));
+    seq.push(
+      ...seg(6, (t) =>
+        make(lerp2(anchor, release, direct ? 0.2 + 0.8 * t : 1 - Math.pow(1 - t, 2)), 120),
+      ),
+    );
+    seq.push(...seg(36, () => make(release, 110)));
+    return seq;
+  }
+  [
+    [0, 0, 0, "side camera"],
+    [18, 0.02, -0.01, "oblique camera"],
+    [-22, -0.015, 0.018, "normal-range camera"],
+  ].forEach(([angle, tx, ty, label]) => {
+    assertEqual(
+      runDw(transformedShotDw(angle, tx, ty)).releases,
+      1,
+      `${label} preserves one genuine release`,
+    );
+  });
+  [80, 90].forEach((drawArm) => {
+    assertEqual(
+      runDw(
+        transformedShotDw(18, 0.02, -0.01, {
+          direct: true,
+          drawArm,
+          holdFrames: 2,
+        }),
+      ).releases,
+      0,
+      `oblique drawArm ${drawArm} direct short hold is rejected`,
+    );
+    assertEqual(
+      runDw(
+        transformedShotDw(18, 0.02, -0.01, {
+          direct: true,
+          drawArm,
+          holdFrames: 5,
+        }),
+      ).releases,
+      1,
+      `oblique drawArm ${drawArm} direct 80ms hold remains detectable`,
+    );
+    assertEqual(
+      runDw(
+        transformedShotDw(18, 0.02, -0.01, {
+          direct: true,
+          drawArm,
+          holdFrames: 9,
+        }),
+      ).releases,
+      1,
+      `oblique drawArm ${drawArm} direct 150ms hold remains detectable`,
+    );
+  });
   // NB2: 200ms / 300ms のリリース瞬間欠落は回復、400ms（NB2_MAX_GAP_MS 超）は対象外
   assertEqual(runDw(shotDw({ gapMs: 200 })).releases, 1, "NB2: 200ms release-moment gap recovers");
   assertEqual(runDw(shotDw({ gapMs: 300 })).releases, 1, "NB2: 300ms release-moment gap recovers");
@@ -452,6 +3580,24 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   // 従来経路の発火ラベル
   const closeFire = runDw(shotDw({})).lastFire;
   assertEqual(closeFire.debug.fireEvidence, "close", "normal fire carries fireEvidence=close");
+  const nbVelocityFire = runDw(shotDw({ gapMs: 100 })).lastFire;
+  assert(nbVelocityFire, "NB-velocity fixture produces a fire");
+  assertEqual(nbVelocityFire.debug.fireVel, "nb", "fixture uses NB velocity");
+  assertEqual(
+    core.copyFormReleaseFireSnapshot(nbVelocityFire.debug).fireEvidence,
+    "close",
+    "NB velocity keeps the real close evidence label",
+  );
+  assertEqual(
+    core.copyFormReleaseFireSnapshot(closeFire.debug).fireEvidence,
+    "close",
+    "ordinary close snapshot keeps close evidence",
+  );
+  assertEqual(
+    core.copyFormReleaseFireSnapshot(nb2Fire.debug).fireEvidence,
+    "nb2",
+    "NB2 snapshot keeps nb2 evidence",
+  );
   // 安全1: レットダウンがギャップ内に完全に隠れる（sticky 生存の敵対ケース）→ 着地ゲートで非発火
   function hiddenLetdownDw(gapMs, emergeAt) {
     const seq = [];
@@ -541,6 +3687,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     0,
     "safety: forward letdown hidden in gap fires NB2 then drift-cancels (net 0)",
   );
+  assertEqual(
+    fwdHidden.lastCancel.debug.cancelReason,
+    "nb2-drift",
+    "field-shape fixture reaches NB2 drift cancel",
+  );
+  assertAdaptiveResultShape(fwdHidden.lastCancel, "field-shape NB2 drift cancel path");
   // 対照: 真のリリース（NB2経由）はフォロースルーで静止するため drift-cancel されない
   assertEqual(
     runDw(shotDw({ gapMs: 250 })).releases,
@@ -646,9 +3798,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
          実nullが存在しない → hasNullGap 自体が立たず、NB_MAX_GAP_MS の値に関わらず非発火
          （0/150, 0/∞ の2通り）。
        - CONF_GATE=0.45 & NB_MAX_GAP_MS=150（両ゲートがT8で有効化される想定の組み合わせ）:
-         conf除外フレームが hasNullGap を立てる一方、maxGapMs も同じ「win 基準」で 180ms を
-         計測するため NB_MAX_GAP_MS(150) を超過し nullBridged は不成立＝非発火。ここが本コミット
-         で修正した maxGapMs のゲート非対称の直接の回帰対象（46-form-core.js のループが旧来の
+         conf除外フレームが hasNullGap を立てる一方、maxGapMs は直前の有効姿勢→復帰姿勢の
+         210ms を計測するため NB_MAX_GAP_MS(150) を超過し nullBridged は不成立＝非発火。ここが
+         既存のconfゲート対称性と今回のvalid-to-valid計測を同時に固定する組み合わせ。
+         maxGapMs のゲート非対称の直接の回帰対象でもあり（46-form-core.js のループが旧来の
          `!h.m` 基準のままなら、conf除外フレームはここでカウントされず maxGapMs=0 のままとなり、
          誤って発火していたはずの組み合わせ）。
        - CONF_GATE=0.45 & NB_MAX_GAP_MS=∞: D' の時間上限そのものを無効化した組み合わせ。
@@ -673,8 +3826,8 @@ return {makeFormPhaseDetector, stepFormPhase};`,
        置き、本テストが tier-1 の D' 時間上限だけを計測し続けるようにする。旧来の 1.0 着地は
        運動学的にリリース形状＝スナップして静止のため、NB2 が設計どおり発火してしまう）。
        tier-1 の評価量（hasNullGap/rise/maxV/maxGapMs）は着地位置に依存しないため、
-       4組合せの意図は完全に保存される。瞬間ジャンプ構成は意図的（漸進引き戻しにすると
-       ギャップが窓左端からスライドして出て、既知の文書化済み制約=maxGapMs過小評価を踏む） */
+       4組合せの意図は完全に保存される。瞬間ジャンプ構成は、confゲートとギャップ上限の
+       4組合せだけを分離して検証するために意図的に保つ。 */
     seq.push([mkRawG(1.3, 90, 0.9), 3, 10]);
     for (let i = 0; i < 10; i++) seq.push([mkRawG(1.3, 90, 0.9), 0.2, 20]);
     return seq;
@@ -744,9 +3897,11 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     const r = core.stepFormPhase(st, m, hist, 1.0, t);
     if (r.released) releases++;
     if (r.canceled) canceled++;
+    return r;
   };
-  for (let i = 0; i < 60; i++) push(mkRaw(0.22, 150), 0.02);
-  push(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え
+  for (let i = 0; i < 60; i++) push(mkRaw(0.22, 125), 0.02);
+  const fire = push(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え
+  assertEqual(fire.debug.fireEvidence, "close", "legacy cancel fixture fires from close evidence");
   for (let i = 0; i < 10; i++) push(mkRaw(0.23, 150), 0.05); // CONFIRM_MS以内にアンカー圏へ復帰
   assertEqual(releases, 1, "noise spike still registers as released");
   assertEqual(canceled, 1, "but is canceled once anchor returns within confirm window");
@@ -777,6 +3932,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   // !usable（人物未検出）: win/closeFrames 未計算のため null で埋まるが debug 自体は必ず返る
   const rU = core.stepFormPhase(core.makeFormPhaseDetector(), null, [], 1.0, 100);
   assertDebugShape(rU.debug, "!usable path");
+  assertAdaptiveResultShape(rU, "null path");
   assertEqual(
     rU.debug.anchorNorm,
     null,
@@ -793,10 +3949,12 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histC.push({ ts: tC, m, vel });
     return core.stepFormPhase(stC, m, histC, 1.0, tC);
   };
-  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 125), 0.02);
   const rRelC = pushC(mkRaw(0.6, 140), 10); // 瞬間的な検出ノイズでTH超え(released)
   assertEqual(rRelC.released, true, "sanity: release fires before cancel scenario");
+  assertEqual(rRelC.debug.fireEvidence, "close", "debug cancel fixture uses legacy close evidence");
   assertDebugShape(rRelC.debug, "release-fire path");
+  assertAdaptiveResultShape(rRelC, "fire path");
   /* アンカー復帰取消（Plan-B 2連続フレーム → 2026-07-15 時間ベース CANCEL_DIP_MS=100 へ更新。
      実フィールド conf 0.5-0.7 のランドマーク幻出ランが 2 フレーム（33ms）を超え、実射への
      誤取消が観測されたため。dt=20ms では初回ディップから 100ms 経過後のフレームで取消。 */
@@ -813,6 +3971,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   }
   assertEqual(rCancel.canceled, true, "sanity: cancel path reached at >=100ms dip span");
   assertDebugShape(rCancel.debug, "canceled path");
+  assertAdaptiveResultShape(rCancel, "anchor-return cancel path");
   assertClose(
     rCancel.debug.anchorNorm,
     0.23,
@@ -830,16 +3989,23 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histS.push({ ts: tS, m, vel });
     return core.stepFormPhase(stS, m, histS, 1.0, tS);
   };
-  for (let i = 0; i < 60; i++) pushS(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) pushS(mkRaw(0.22, 125), 0.02);
   const rRelS = pushS(mkRaw(0.6, 140), 10); // TH超えでreleased
   assertEqual(rRelS.released, true, "sanity: release fires before sticky/follow scenario");
+  assertEqual(
+    rRelS.debug.fireEvidence,
+    "close",
+    "sticky/follow fixture uses legacy close evidence",
+  );
   const rSticky = pushS(mkRaw(1.0, 90), 0.2); // アンカー圏外へ離脱、250ms未満のsticky lock
   assertEqual(rSticky.phase, "RELEASE", "sanity: sticky RELEASE lock active");
   assertDebugShape(rSticky.debug, "sticky RELEASE-lock path");
+  assertAdaptiveResultShape(rSticky, "RELEASE lock path");
   for (let i = 0; i < 12; i++) pushS(mkRaw(1.0, 90), 0.2); // 250ms超過させる
   const rFollow = pushS(mkRaw(1.0, 90), 0.2);
   assertEqual(rFollow.phase, "FOLLOW", "sanity: FOLLOW window active");
   assertDebugShape(rFollow.debug, "FOLLOW path");
+  assertAdaptiveResultShape(rFollow, "FOLLOW path");
 
   // 通常の非発火パス（アンカー保持中、release条件未達）
   const stN = core.makeFormPhaseDetector();
@@ -852,6 +4018,7 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     rNormal = core.stepFormPhase(stN, mkRaw(0.22, 150), histN, 1.0, tN);
   }
   assertDebugShape(rNormal.debug, "normal non-fire path");
+  assertAdaptiveResultShape(rNormal, "normal path");
   assert(
     rNormal.debug.closeFrames >= 0,
     "normal non-fire path: closeFrames is a real count, not null",
@@ -872,9 +4039,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histA.push({ ts: tA, m, vel });
     return core.stepFormPhase(stA, m, histA, 1.0, tA);
   };
-  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02); // アンカー保持
+  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 125), 0.02); // アンカー保持
   const rFireA = pushA(mkRaw(0.6, 140), 10); // release fire
   assertEqual(rFireA.released, true, "cancel boundary (a): release fires");
+  assertEqual(rFireA.debug.fireEvidence, "close", "cancel boundary (a) uses legacy close evidence");
   for (let i = 0; i < 5; i++) {
     const r = pushA(mkRaw(0.3, 150), 0.05); // dip ラン 80ms（5フレーム、span=80ms<100）
     assertEqual(
@@ -897,9 +4065,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histB.push({ ts: tB, m, vel });
     return core.stepFormPhase(stB, m, histB, 1.0, tB);
   };
-  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 125), 0.02);
   const rFireB = pushB(mkRaw(0.6, 140), 10);
   assertEqual(rFireB.released, true, "cancel boundary (b): release fires");
+  assertEqual(rFireB.debug.fireEvidence, "close", "cancel boundary (b) uses legacy close evidence");
   let canceledB = false;
   for (let i = 0; i < 6 && !canceledB; i++) {
     canceledB = pushB(mkRaw(0.28, 150), 0.05).canceled === true;
@@ -918,8 +4087,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histA.push({ ts: tA, m, vel });
     return core.stepFormPhase(stA, m, histA, 1.0, tA);
   };
-  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 150), 0.02);
-  assertEqual(pushA(mkRaw(0.6, 140), 10).released, true, "depart (a): fires");
+  for (let i = 0; i < 60; i++) pushA(mkRaw(0.22, 125), 0.02);
+  const fireA = pushA(mkRaw(0.6, 140), 10);
+  assertEqual(fireA.released, true, "depart (a): fires");
+  assertEqual(fireA.debug.fireEvidence, "close", "depart (a) uses legacy close evidence");
   let sawCancelA = false,
     cancelReasonA = null;
   for (let i = 0; i < 25; i++) {
@@ -941,8 +4112,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histB.push({ ts: tB, m, vel });
     return core.stepFormPhase(stB, m, histB, 1.0, tB);
   };
-  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 150), 0.02);
-  assertEqual(pushB(mkRaw(0.6, 140), 10).released, true, "depart (b): fires");
+  for (let i = 0; i < 60; i++) pushB(mkRaw(0.22, 125), 0.02);
+  const fireB = pushB(mkRaw(0.6, 140), 10);
+  assertEqual(fireB.released, true, "depart (b): fires");
+  assertEqual(fireB.debug.fireEvidence, "close", "depart (b) uses legacy close evidence");
   for (let i = 0; i < 25; i++) {
     assertEqual(
       pushB(mkRaw(1.0, 140), 0.05).canceled,
@@ -959,8 +4132,10 @@ return {makeFormPhaseDetector, stepFormPhase};`,
     histC.push({ ts: tC, m, vel });
     return core.stepFormPhase(stC, m, histC, 1.0, tC);
   };
-  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 150), 0.02);
-  assertEqual(pushC(mkRaw(0.6, 140), 10).released, true, "depart (c): fires");
+  for (let i = 0; i < 60; i++) pushC(mkRaw(0.22, 125), 0.02);
+  const fireC = pushC(mkRaw(0.6, 140), 10);
+  assertEqual(fireC.released, true, "depart (c): fires");
+  assertEqual(fireC.debug.fireEvidence, "close", "depart (c) uses legacy close evidence");
   for (let i = 0; i < 25; i++) {
     assertEqual(
       pushC(null, 0).canceled,
@@ -1151,6 +4326,152 @@ return {makeFormPhaseDetector, stepFormPhase};`,
   assertEqual(f4.step([], mkM(0.9, 0.3), 200), 0, "explicit reset reseeds (vel 0)");
 }
 
+/* ---------- production velocity → adaptive release → shot summary ---------- */
+
+{
+  /* 撮影/リプレイと同じ順序で、実座標から速度を計算してから current frame を
+     history へ追加し、検出と要約を同じ履歴で完結させる。従来の adaptive fixture は
+     vel を直接注入していたため、この統合経路を別途固定する。 */
+  const frameMs = 1000 / 60;
+  const bodyScale = 0.25;
+  const baseDrawWristX = 0.6;
+  const holdOutlierDx = (7 * bodyScale) / 60;
+  const releaseDx = (8.5 * bodyScale) / 60;
+  const detector = core.makeFormPhaseDetector();
+  const velocitySource = core.makeFormVelocitySource();
+  const history = [];
+  const phases = new Set();
+  const holdVelocities = [];
+  let now = 0;
+  let grossReleases = 0;
+  let cancellations = 0;
+  let fire = null;
+  let shot = null;
+
+  const productionRaw = (anchorNorm, drawArm, drawWristX = baseDrawWristX) => ({
+    anchorNorm,
+    drawArm,
+    bodyScale,
+    dW: { x: drawWristX, y: 0.31, visibility: 0.95 },
+    bW: { x: 0.2, y: 0.4, visibility: 0.95 },
+    bowArm: 171,
+    shoulderDrop: 0.07,
+    headOffset: 0.09,
+    forceLine: 0.07,
+    score: 82,
+    conf: 0.92,
+  });
+  const advance = (raw, segment) => {
+    now += frameMs;
+    const vel = velocitySource.step(history, raw, now);
+    history.push({ ts: now, m: raw, vel });
+    if (history.length > 200) history.shift();
+    const result = core.stepFormPhase(detector, raw, history, 1, now);
+    phases.add(result.phase);
+    if (segment === "hold") holdVelocities.push(vel);
+    if (result.released) {
+      grossReleases++;
+      fire = {
+        now,
+        vel,
+        raw,
+        result,
+        historyLength: history.length,
+        historyTail: history[history.length - 1],
+        pending: { ...detector.pendingRelease },
+      };
+      shot = core.summarizeFormShot(history, result.anchorStartTs, now, result.anchorEnter);
+    }
+    if (result.canceled) cancellations++;
+    return { now, vel, result };
+  };
+
+  // setup の末尾を0.65に留め、最初の hold frame より前を保持時間へ混ぜない。
+  for (let i = 0; i < 12; i++) {
+    advance(productionRaw(1.2 - i * 0.05, 110 + i * 3, baseDrawWristX - (11 - i) * 0.002), "setup");
+  }
+  // 180 frames中9回だけ手首を1 frameずらし、往復18 frames（10%）を約7 tlsにする。
+  for (let i = 0; i < 180; i++) {
+    advance(
+      productionRaw(
+        [0.47, 0.475, 0.48][i % 3],
+        150,
+        i % 20 === 10 ? baseDrawWristX + holdOutlierDx : baseDrawWristX,
+      ),
+      "hold",
+    );
+  }
+  advance(productionRaw(0.75, 140, baseDrawWristX + releaseDx), "release");
+  advance(productionRaw(0.9, 130, baseDrawWristX + releaseDx * 2), "release");
+  assert(fire, "production pipeline captures the release result");
+
+  let pendingAtConfirmBoundary = null;
+  let confirmBoundaryElapsed = null;
+  for (let i = 0; i < 25; i++) {
+    const follow = advance(productionRaw(1, 90, baseDrawWristX + releaseDx), "follow");
+    if (i === 23) {
+      confirmBoundaryElapsed = follow.now - fire.now;
+      pendingAtConfirmBoundary = detector.pendingRelease != null;
+    }
+  }
+
+  const holdOutliers = holdVelocities.filter((vel) => vel >= 6.9 && vel <= 7.1);
+  assertEqual(holdVelocities.length, 180, "production pipeline covers a three-second hold");
+  assertEqual(holdOutliers.length, 18, "production pipeline computes 10% hold outliers");
+  holdOutliers.forEach((vel, i) =>
+    assertClose(vel, 7, 1e-9, `production hold outlier ${i + 1} is computed from dW`),
+  );
+  assertEqual(grossReleases, 1, "production pipeline emits exactly one release");
+  assertEqual(cancellations, 0, "production pipeline retains the genuine release");
+  assertClose(fire.vel, 8.5, 1e-9, "production pipeline computes release velocity from dW");
+  assert(fire.historyLength <= 200, "release history respects the production cap");
+  assertEqual(fire.historyTail.ts, fire.now, "release history tail uses the current timestamp");
+  assertEqual(fire.historyTail.m, fire.raw, "release history tail keeps the current raw identity");
+  assertEqual(fire.result.debug.fireEvidence, "adaptive", "production shot uses adaptive evidence");
+  assertClose(
+    fire.result.debug.departDelta,
+    0.75 - 0.475,
+    1e-12,
+    "production shot preserves the first departure crossing while confirmation waits",
+  );
+  assertEqual(fire.result.debug.fireVel, null, "adaptive production shot has no legacy route");
+  assertClose(fire.result.anchorEnter, 0.59, 1e-12, "production shot learns anchorEnter=.59");
+  assertClose(fire.result.debug.anchorFloor, 0.47, 1e-12, "production shot learns anchor floor");
+  assertClose(
+    fire.result.debug.releaseSpeed,
+    8,
+    1e-9,
+    "production shot learns the capped p90 noise-adapted release speed",
+  );
+  assert(
+    fire.vel > fire.result.debug.releaseSpeed,
+    "computed 8.5 release clears the noise-adapted speed",
+  );
+  assertEqual(fire.pending.fireEvidence, "adaptive", "pending confirmation preserves route");
+  assertClose(fire.pending.anchorEnter, 0.59, 1e-12, "pending confirmation preserves geometry");
+  ["SETUP", "DRAWING", "ANCHORING", "FULL_DRAW", "RELEASE", "FOLLOW"].forEach((phase) =>
+    assert(phases.has(phase), `production pipeline reaches ${phase}`),
+  );
+
+  assert(shot, "production pipeline produces a non-null shot summary");
+  assertClose(
+    shot.holdMs,
+    3016.6666666666665,
+    1e-6,
+    "production summary includes the second departure frame",
+  );
+  assertEqual(shot.degraded, false, "adaptive geometry keeps the primary summary window");
+  assertEqual(shot.frames, 174, "production summary includes the second departure frame");
+  assertClose(shot.anchorNorm, 0.475, 1e-12, "production summary keeps oblique anchor median");
+  assertClose(shot.angles.bowArm, 171, 1e-12, "production summary keeps bow-arm median");
+  assertClose(shot.angles.drawArm, 150, 1e-12, "production summary keeps draw-arm median");
+  assertClose(shot.confidence, 0.92, 1e-12, "production summary keeps confidence");
+  assertClose(confirmBoundaryElapsed, 400, 1e-6, "adaptive confirmation includes +400ms");
+  assertEqual(pendingAtConfirmBoundary, true, "adaptive release remains pending at +400ms");
+  assertEqual(detector.pendingRelease, null, "adaptive release confirms after +400ms");
+  assertEqual(history.length, 200, "production history remains capped after confirmation");
+}
+
 /* ---------- anchorStartTs のコア内包化（Stage 0 C: sticky 仕様） ---------- */
 
 function makeStepper(dt) {
@@ -1168,8 +4489,30 @@ function makeStepper(dt) {
 }
 
 {
-  // sticky: ANCHORING → DRAWING（約200msの一時離脱・ジッター相当の微小トレンド）→ ANCHORING → release
-  // で anchorStartTs（= hold の起点）が通しで保持される
+  /* Legacy sticky contract, separate from adaptive learned-zone coverage:
+     drawArm=125 is deliberately ineligible for an adaptive hold, so the small
+     outward trend exercises the original DRAWING path. */
+  const s = makeStepper(66);
+  let firstAnchorTs = 0;
+  for (let i = 0; i < 10; i++) {
+    const { r } = s.push(mkRaw(0.33, 150), 0.05);
+    if (!firstAnchorTs && (r.phase === "ANCHORING" || r.phase === "FULL_DRAW"))
+      firstAnchorTs = r.anchorStartTs;
+  }
+  assert(firstAnchorTs > 0, "legacy DRAWING sticky fixture reaches anchor first");
+  for (let i = 0; i < 3; i++) {
+    const { r } = s.push(mkRaw(0.37, 125), 0.5);
+    assertEqual(r.phase, "DRAWING", "adaptive-ineligible brief excursion uses legacy DRAWING");
+    assertEqual(
+      r.anchorStartTs,
+      firstAnchorTs,
+      "legacy DRAWING excursion preserves sticky anchorStartTs",
+    );
+  }
+}
+{
+  // sticky: learned anchorEnter 内の約200msの一時離脱・ジッターでも adaptive hold が継続し、
+  // anchorStartTs（= hold の起点）が通しで保持される
   const s = makeStepper(66);
   let firstAnchorTs = 0;
   for (let i = 0; i < 10; i++) {
@@ -1181,15 +4524,21 @@ function makeStepper(dt) {
   }
   assert(firstAnchorTs > 0, "anchoring reached in sticky scenario");
   for (let i = 0; i < 3; i++) {
-    const { r } = s.push(mkRaw(0.37, 150), 0.5); // アンカー圏外だが微小トレンド → DRAWING
-    assertEqual(r.phase, "DRAWING", "brief excursion is DRAWING");
-    assertEqual(r.anchorStartTs, firstAnchorTs, "anchorStartTs sticky through DRAWING excursion");
+    const { r } = s.push(mkRaw(0.37, 150), 0.5); // absolute close 外だが learned anchorEnter 内
+    assertEqual(r.phase, "FULL_DRAW", "brief learned-zone excursion remains adaptive FULL_DRAW");
+    assertEqual(
+      r.anchorStartTs,
+      firstAnchorTs,
+      "anchorStartTs sticky through learned-zone excursion",
+    );
   }
   for (let i = 0; i < 5; i++) {
     const { r } = s.push(mkRaw(0.33, 150), 0.05);
     assertEqual(r.anchorStartTs, firstAnchorTs, "anchorStartTs unchanged after re-anchoring");
   }
-  const rel = s.push(mkRaw(0.6, 140), 10); // 速度スパイクでリリース
+  const firstRel = s.push(mkRaw(0.6, 140), 10); // 速度スパイクの最初の離脱フレーム
+  assertEqual(firstRel.r.released, false, "single departure frame waits for persistence");
+  const rel = s.push(mkRaw(0.8, 130), 10); // 2フレーム目でリリース確定
   assertEqual(rel.r.released, true, "release fires after sticky excursion");
   assertEqual(
     rel.r.anchorStartTs,
@@ -1222,9 +4571,14 @@ function makeStepper(dt) {
 {
   // canceled: 取消フレームで anchorStartTs=now（アンカー継続として仕切り直し）
   const s = makeStepper(20);
-  for (let i = 0; i < 60; i++) s.push(mkRaw(0.22, 150), 0.02);
+  for (let i = 0; i < 60; i++) s.push(mkRaw(0.22, 125), 0.02);
   const rel = s.push(mkRaw(0.6, 140), 10); // 瞬間ノイズで released
   assertEqual(rel.r.released, true, "noise spike releases before cancel");
+  assertEqual(
+    rel.r.debug.fireEvidence,
+    "close",
+    "sticky cancel fixture uses legacy close evidence",
+  );
   assert(rel.r.anchorStartTs > 0, "released frame carries pre-clear anchorStartTs");
   // アンカー復帰取消は連続ディップのスパン >= CANCEL_DIP_MS(100ms) 要件（2026-07-15 時間ベース化）
   let cancel = null;
@@ -1290,6 +4644,615 @@ function anchorHistory(releaseTs, drift) {
   assertClose(shot.angles.bowArm, 171, 1e-9, "median bow arm");
   assert(shot.confidence > 0.8, "summary confidence");
   assertEqual(core.summarizeFormShot([], 0, 10000), null, "no history no summary");
+}
+{
+  const hist = [];
+  for (let ts = 9200; ts <= 9800; ts += 100) {
+    hist.push({
+      ts,
+      m: {
+        anchorNorm: 0.55,
+        bowArm: 171,
+        drawArm: 150,
+        shoulderDrop: 0.07,
+        headOffset: 0.09,
+        forceLine: 0.07,
+        score: 80,
+        conf: 0.9,
+        bodyScale: 0.25,
+        bW: { x: 0.2, y: 0.4 },
+        dW: { x: 0.6, y: 0.31 },
+      },
+      vel: 0.05,
+    });
+  }
+  const adaptive = core.summarizeFormShot(hist, 9100, 10000, 0.6);
+  assert(adaptive, "active anchor threshold produces a shot summary");
+  assertEqual(adaptive.degraded, false, "active anchor threshold keeps the primary summary window");
+  assertEqual(adaptive.frames, 7, "active anchor threshold uses all valid 0.55 hold frames");
+  const legacy = core.summarizeFormShot(hist, 9100, 10000);
+  assert(legacy, "three-argument summary remains available");
+  assertEqual(legacy.degraded, true, "three-argument summary preserves the legacy 0.45 window");
+  assertEqual(legacy.frames, 5, "three-argument summary preserves loose fallback selection");
+}
+
+function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep, result, onShot) {
+  if (result.canceled) {
+    return { branch: "cancel", action: tracker.cancel(result.debug.cancelReason) };
+  }
+  if (result.released) {
+    const action = tracker.begin({ fireTs: result.fireTs, fire: null });
+    if (!action.fatal) onShot(action.id);
+    return { branch: "release", action };
+  }
+  if (hadPendingRelease && pendingAfterStep == null) {
+    return { branch: "confirm", action: tracker.confirm() };
+  }
+  return { branch: "none", action: null };
+}
+
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const begun = tracker.begin({ fireTs: 1, fire: null });
+  tracker.markShotCreated(begun.id);
+  let onShotCalls = 0;
+  const resolved = resolveReceiptFrameForTest(
+    tracker,
+    true,
+    null,
+    { canceled: true, released: false, debug: { cancelReason: "anchor-return" } },
+    () => {
+      onShotCalls += 1;
+    },
+  );
+  assertEqual(resolved.branch, "cancel", "cancellation wins over implicit confirmation");
+  assertEqual(resolved.action.deletionTarget, begun.id, "cancel keeps exact ownership");
+  assertEqual(onShotCalls, 0, "cancel never summarizes a shot");
+}
+{
+  const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+  const order = [];
+  const originalBegin = tracker.begin;
+  tracker.begin = (input) => {
+    order.push("begin");
+    return originalBegin(input);
+  };
+  const resolved = resolveReceiptFrameForTest(
+    tracker,
+    true,
+    null,
+    { canceled: false, released: true, fireTs: 10, debug: {} },
+    (id) => {
+      order.push(`onShot:${id}`);
+    },
+  );
+  assertEqual(resolved.branch, "release", "release starts a new receipt");
+  assertJsonEqual(order, ["begin", "onShot:form-receipt-1"], "begin precedes onShot");
+  assertEqual(
+    tracker.current().detectorDisposition,
+    "pending",
+    "release is not confirmed same-frame",
+  );
+}
+
+/* ---------- Task 2: capture/replay receipt lifecycle integration contracts ---------- */
+
+{
+  const capture = boundedSourceSection(
+    viewScript,
+    "function openFormCapture(){",
+    "function openFormReplay(){",
+    "openFormCapture section",
+  );
+  const replay = boundedSourceSection(
+    viewScript,
+    "function startFormReplay(videoUrl){",
+    '    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);',
+    "startFormReplay section",
+  );
+  assert(
+    viewScript.includes("function formShotCompletionText(shotCount,diagnosticTarget){") &&
+      viewScript.includes("function formShotCountText(shotCount,diagnosticsEnabled){") &&
+      viewScript.includes("function formDiagnosticLiveSaveToastText(shotCount,matrixNotice){") &&
+      viewScript.includes("function formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot){") &&
+      viewScript.includes("function formZeroShotDiagnosticText(record){") &&
+      viewScript.includes("横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。") &&
+      viewScript.includes("検出されなかった射がある場合は") &&
+      viewScript.includes("リリースを確認できませんでした。") &&
+      viewScript.includes("リリース候補は検出しましたが確定できませんでした。") &&
+      capture.includes("formShotCountText(0,db.settings.formDebug===true)") &&
+      capture.includes("formShotCountText(shots.length,db.settings.formDebug===true)") &&
+      capture.includes("const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);") &&
+      capture.includes("formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice)") &&
+      capture.includes("formZeroShotDiagnosticText(frozenDiagnosticSave.record)") &&
+      replay.includes("formShotCountText(0,db.settings.formDebug===true)") &&
+      replay.includes("formShotCountText(shots.length,db.settings.formDebug===true)") &&
+      replay.includes("const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);") &&
+      replay.includes("formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice)") &&
+      replay.includes("formZeroShotDiagnosticText(frozenDiagnosticSave.record)") &&
+      replay.includes("formShotCompletionText(shots.length,db.settings.formDebug===true?6:0)"),
+    "zero-shot completion gives actionable camera-position guidance",
+  );
+  const liveRemove = boundedSourceSection(
+    capture,
+    'div.querySelector("[data-rm-shot]").onclick=()=>{',
+    'ovl.querySelector("#fcShots").prepend(div);',
+    "live shot removal handler",
+  );
+  const liveRemoveCompact = compactSource(liveRemove);
+  assert(
+    liveRemoveCompact.includes("constremoveAction=receiptTracker.manualRemove(shot.id);") &&
+      liveRemoveCompact.includes("if(removeAction.code)return;") &&
+      liveRemoveCompact.includes("shots=shots.filter(candidate=>candidate.id!==shot.id);") &&
+      liveRemoveCompact.includes(
+        "if(pendingCheck&&pendingCheck.shotId===shot.id)pendingCheck=null;",
+      ),
+    "live manual removal audits and deletes only the clicked shot ID",
+  );
+  assert(
+    !liveRemoveCompact.includes("receiptTracker=") &&
+      !liveRemoveCompact.includes("detector.pendingRelease=") &&
+      !liveRemoveCompact.includes("shots["),
+    "live manual removal never clears or retargets detector ownership",
+  );
+  [capture, replay].forEach((source, index) => {
+    const label = index === 0 ? "capture" : "replay";
+    assert(
+      !/shots\s*\[\s*shots\.length\s*-\s*1\s*\]/.test(source),
+      `${label} cancellation never owns array tail`,
+    );
+    assert(!/\.pop\s*\(/.test(source), `${label} cancellation never pops a shot`);
+    assert(
+      compactSource(source).includes("shots=formRemoveShotByReceiptId(shots,target);"),
+      `${label} cancellation uses the shared receipt-owned removal helper`,
+    );
+  });
+  [
+    {
+      label: "capture",
+      source: capture,
+      onShotSignature: "functiononShot(receiptId,now,anchorStartTs,activeAnchorEnter,debug){",
+      onShotCall: "constshotId=onShot(action.id,now,anchorStartTs,result.anchorEnter,debug);",
+    },
+    {
+      label: "replay",
+      source: replay,
+      onShotSignature: "functiononShot(receiptId,now,anchorStartTs,activeAnchorEnter,debug){",
+      onShotCall:
+        "constshotId=onShot(action.id,now,result.anchorStartTs,result.anchorEnter,debug);",
+    },
+  ].forEach(({ label, source, onShotSignature, onShotCall }) => {
+    const compact = compactSource(source);
+    const velocityAt = compact.indexOf("constvel=velSrc.step(history,raw,now);");
+    const pushAt = compact.indexOf("history.push({ts:now,m:raw,vel});", velocityAt);
+    const capAt = compact.indexOf("if(history.length>200)history.shift();", pushAt);
+    const pendingAt = compact.indexOf(
+      "consthadPendingRelease=detector.pendingRelease!=null;",
+      capAt,
+    );
+    const stepAt = compact.indexOf(
+      "constresult=stepFormPhase(detector,raw,history,1.0,now);",
+      pendingAt,
+    );
+    const cancelAt = compact.indexOf("if(result.canceled){", stepAt);
+    const releaseAt = compact.indexOf("elseif(result.released){", cancelAt);
+    const confirmAt = compact.indexOf(
+      "elseif(hadPendingRelease&&detector.pendingRelease==null){",
+      releaseAt,
+    );
+    const signatureAt = compact.indexOf(onShotSignature);
+    const callAt = compact.indexOf(onShotCall, releaseAt);
+    assert(
+      velocityAt >= 0 &&
+        pushAt > velocityAt &&
+        capAt > pushAt &&
+        pendingAt > capAt &&
+        stepAt > pendingAt &&
+        cancelAt > stepAt &&
+        releaseAt > cancelAt &&
+        confirmAt > releaseAt &&
+        signatureAt >= 0 &&
+        callAt > releaseAt,
+      `${label} keeps velocity -> push -> cap -> pending snapshot -> one step -> cancel/release/confirm -> synchronous onShot`,
+    );
+    assertEqual(
+      (compact.slice(pendingAt, confirmAt).match(/stepFormPhase\(/g) || []).length,
+      1,
+      `${label} resolves exactly one detector step`,
+    );
+    const cancelSlice = compact.slice(cancelAt, releaseAt);
+    assert(
+      cancelSlice.includes(
+        "constaction=receiptTracker.cancel(debug&&debug.cancelReason);if(action.code){freezeForReceiptFailure();return;}",
+      ),
+      `${label} freezes when cancellation ownership cannot be resolved`,
+    );
+    const confirmSlice = compact.slice(confirmAt, confirmAt + 320);
+    assert(
+      confirmSlice.includes(
+        "constconfirmAction=receiptTracker.confirm();if(confirmAction.code){freezeForReceiptFailure();return;}",
+      ),
+      `${label} freezes when pending receipt confirmation cannot be resolved`,
+    );
+  });
+  const secureGuardStart = capture.indexOf("if(window.isSecureContext!==true){");
+  const captureDomStart = capture.indexOf('const ovl=document.createElement("div");');
+  assert(
+    secureGuardStart >= 0 && secureGuardStart < captureDomStart,
+    "insecure live capture is rejected before capture DOM, pose, or camera startup",
+  );
+  const secureGuard = compactSource(capture.slice(secureGuardStart, captureDomStart));
+  assert(
+    secureGuard.includes(
+      'appConfirm("ライブ撮影には信頼済みのHTTPS接続が必要です。この接続では、保存済み動画の解析を利用できます。",{title:"ライブ撮影を開始できません",cancelLabel:"閉じる",okLabel:"保存動画を選ぶ"}).then(useReplay=>{if(useReplay)openFormReplay();});',
+    ) && secureGuard.endsWith("return;}"),
+    "insecure live-capture guidance offers only close or saved-video replay before returning",
+  );
+  const reset = boundedSourceSection(
+    capture,
+    "function resetCaptureGeometry(){",
+    "function loop(){",
+    "resetCaptureGeometry section",
+  );
+  const startCamera = boundedSourceSection(
+    capture,
+    "async function startCamera(){",
+    "function refreshShotsHint(){",
+    "startCamera section",
+  );
+  const freezeCapture = boundedSourceSection(
+    capture,
+    "function freezeCaptureForSave(){",
+    "function finishCapture(){",
+    "capture freeze section",
+  );
+  const discardCamera = boundedSourceSection(
+    capture,
+    "function discardCameraStream(candidate){",
+    "let captureFrozen=false",
+    "discardCameraStream section",
+  );
+  const startCameraCompact = compactSource(startCamera);
+  assert(
+    capture.includes("let inFlightStream=null;"),
+    "capture exposes an in-flight camera stream so close can stop it",
+  );
+  assert(
+    startCameraCompact.includes("letnextStream=null;") &&
+      startCameraCompact.includes("nextStream=awaitnavigator.mediaDevices.getUserMedia(") &&
+      startCameraCompact.includes("inFlightStream=nextStream;") &&
+      startCameraCompact.includes("video.srcObject=nextStream;") &&
+      startCameraCompact.includes("awaitvideo.play();") &&
+      startCameraCompact.includes("stream=nextStream;") &&
+      startCameraCompact.includes("discardCameraStream(nextStream);") &&
+      startCameraCompact.includes("throwe;"),
+    "camera startup cleans a newly acquired stream when startup or play fails",
+  );
+  const discardCameraCompact = compactSource(discardCamera);
+  assert(
+    discardCameraCompact.includes("if(candidate)candidate.getTracks().forEach(t=>t.stop());") &&
+      discardCameraCompact.includes("if(video.srcObject===candidate)video.srcObject=null;") &&
+      discardCameraCompact.includes("if(inFlightStream===candidate)inFlightStream=null;"),
+    "camera candidate cleanup stops tracks, detaches video, and clears ownership",
+  );
+  assertEqual(
+    (
+      startCameraCompact.match(
+        /if\(!running\|\|inFlightStream!==nextStream\)\{discardCameraStream\(nextStream\);returnfalse;\}/g,
+      ) || []
+    ).length,
+    2,
+    "camera startup revalidates its candidate after both async boundaries",
+  );
+  const stopCaptureCompact = compactSource(freezeCapture);
+  assert(
+    stopCaptureCompact.includes("constpendingStream=inFlightStream,activeStream=stream;") &&
+      stopCaptureCompact.includes("inFlightStream=null;") &&
+      stopCaptureCompact.includes("stream=null;") &&
+      stopCaptureCompact.includes("video.srcObject=null;") &&
+      stopCaptureCompact.includes(
+        "if(pendingStream)pendingStream.getTracks().forEach(t=>t.stop());",
+      ) &&
+      stopCaptureCompact.includes(
+        "if(activeStream&&activeStream!==pendingStream)activeStream.getTracks().forEach(t=>t.stop());",
+      ),
+    "capture freeze detaches and stops both in-flight and promoted camera streams",
+  );
+  assertEqual(
+    compactSource(reset),
+    compactSource(`function resetCaptureGeometry() {
+      abandonActiveReceipt("geometry-reset");
+      if (pendingCheck) finalizeArrowCheck();
+      detector = makeFormPhaseDetector();
+      ema = makeFormEma(0.38);
+      history = [];
+      velSrc.reset();
+      presenceRing = [];
+      pendingCheck = null;
+      recentFrames = [];
+      lastAnchoringSampleAt = 0;
+    }`),
+    "capture geometry reset keeps the approved ordered body",
+  );
+  assert(!/\bshots\s*=\s*\[\]/.test(reset), "capture geometry reset preserves counted shots");
+
+  const swap = boundedSourceSection(
+    capture,
+    'ovl.querySelector("#fcSwap").onclick=async()=>{',
+    'ovl.querySelector("#fcHand").onclick=e=>{',
+    "#fcSwap handler",
+  );
+  const hand = boundedSourceSection(
+    capture,
+    'ovl.querySelector("#fcHand").onclick=e=>{',
+    'ovl.querySelector("#fcCrop").onclick=e=>{',
+    "#fcHand handler",
+  );
+  const crop = boundedSourceSection(
+    capture,
+    'ovl.querySelector("#fcCrop").onclick=e=>{',
+    'ovl.querySelector("#fcRec").onclick=e=>{',
+    "#fcCrop handler",
+  );
+  [swap, hand, crop].forEach((handler, index) =>
+    assert(
+      handler.includes("resetCaptureGeometry();"),
+      ["camera swap", "live handedness", "crop toggle"][index] + " resets capture geometry",
+    ),
+  );
+  const swapCompact = compactSource(swap);
+  const initialLoad = boundedSourceSection(
+    capture,
+    "loadFormPose().then(async lm=>{",
+    "}).catch(e=>{",
+    "initial capture load section",
+  );
+  const initialLoadCompact = compactSource(initialLoad);
+  const captureCompact = compactSource(capture);
+  for (const [label, source, controlIds] of [
+    ["live", captureCompact, ["fcSwap", "fcHand", "fcSave"]],
+    ["replay", compactSource(saveReplay), ["frHand", "frSave"]],
+  ]) {
+    for (const controlId of controlIds) {
+      assert(
+        new RegExp(`<buttontype=["']button["'][^>]*id=["']${controlId}["']`).test(source),
+        `${label} toolbar ${controlId} must declare type=button`,
+      );
+    }
+  }
+  assert(
+    captureCompact.includes('<buttontype="button"class="btnsecsm"id="fcSwap"disabled>') &&
+      captureCompact.includes("letcameraSwapReady=false;"),
+    "camera swap stays disabled and unready until initial startup succeeds",
+  );
+  const closedCameraGuard = startCameraCompact.indexOf("if(!running)returnfalse;");
+  const cameraAcquisition = startCameraCompact.indexOf(
+    "nextStream=awaitnavigator.mediaDevices.getUserMedia(",
+  );
+  assert(
+    closedCameraGuard >= 0 && closedCameraGuard < cameraAcquisition,
+    "closed capture returns before camera acquisition can start",
+  );
+  const initialClosedGuard = initialLoadCompact.indexOf("if(!running)return;");
+  const initialLandmarker = initialLoadCompact.indexOf("landmarker=lm;");
+  const initialStartup = initialLoadCompact.indexOf("constcameraStarted=awaitstartCamera();");
+  const initialStarted = initialLoadCompact.indexOf("if(!cameraStarted)return;");
+  const markSwapReady = initialLoadCompact.indexOf("cameraSwapReady=true;");
+  const enableSwap = initialLoadCompact.indexOf('ovl.querySelector("#fcSwap").disabled=false;');
+  const initialWake = initialLoadCompact.indexOf("wakeLock.acquire();");
+  const initialLoop = initialLoadCompact.indexOf("loop();");
+  assert(
+    initialClosedGuard >= 0 &&
+      initialClosedGuard < initialLandmarker &&
+      initialLandmarker < initialStartup &&
+      initialStartup < initialStarted &&
+      initialStarted < markSwapReady &&
+      markSwapReady < enableSwap &&
+      enableSwap < initialWake &&
+      initialWake < initialLoop,
+    "initial startup alone enables swap before wake lock and analysis loop",
+  );
+  assert(
+    swapCompact.includes("if(!cameraSwapReady||cameraSwapInProgress)return;") &&
+      (captureCompact.match(/cameraSwapReady=false;/g) || []).length === 3 &&
+      (captureCompact.match(/cameraSwapReady=true;/g) || []).length === 1 &&
+      !swapCompact.includes("cameraSwapReady="),
+    "swap handler independently requires readiness while receipt failure disables future swaps",
+  );
+  assert(
+    swapCompact.includes("constcameraStarted=awaitstartCamera();") &&
+      swapCompact.includes("if(!cameraStarted){if(running)facing=previousFacing;return;}") &&
+      initialLoadCompact.includes("constcameraStarted=awaitstartCamera();") &&
+      initialLoadCompact.includes("if(!cameraStarted)return;") &&
+      initialLoadCompact.indexOf("if(!cameraStarted)return;") <
+        initialLoadCompact.indexOf("wakeLock.acquire();") &&
+      initialLoadCompact.indexOf("if(!cameraStarted)return;") <
+        initialLoadCompact.indexOf("loop();"),
+    "camera callers stop before ready state, wake lock, or loop when startup aborts",
+  );
+  const swapGuard = swapCompact.indexOf("if(!cameraSwapReady||cameraSwapInProgress)return;");
+  const swapLock = swapCompact.indexOf("cameraSwapInProgress=true;");
+  const swapFacing = swapCompact.indexOf("facing=");
+  const swapReset = swapCompact.indexOf("resetCaptureGeometry();");
+  const swapAwait = swapCompact.indexOf("await");
+  assert(
+    swapGuard >= 0 &&
+      swapLock > swapGuard &&
+      swapFacing > swapLock &&
+      swapReset > swapFacing &&
+      swapAwait > swapReset,
+    "camera swap resets synchronously after facing changes and before its first await",
+  );
+  assert(
+    capture.includes("cameraSwapInProgress") &&
+      /if\s*\(\s*landmarker\s*&&\s*!cameraSwapInProgress/.test(capture) &&
+      swapCompact.includes("finally{") &&
+      swapCompact.indexOf("cameraSwapInProgress=false;") > swapCompact.indexOf("finally{"),
+    "capture loop skips replacement frames and unlocks camera swap after failure",
+  );
+  const previousFacing = swapCompact.indexOf("constpreviousFacing=facing;");
+  const oldStream = swapCompact.indexOf("constoldStream=stream;");
+  const invalidateStream = swapCompact.indexOf("stream=null;");
+  const detachVideo = swapCompact.indexOf("video.srcObject=null;");
+  const stopOldStream = swapCompact.indexOf(
+    "if(oldStream)oldStream.getTracks().forEach(t=>t.stop());",
+  );
+  const restoreFacing = swapCompact.lastIndexOf("facing=previousFacing;");
+  const catchBlock = swapCompact.indexOf("catch(e){");
+  assert(
+    previousFacing >= 0 &&
+      previousFacing < swapFacing &&
+      oldStream > swapReset &&
+      invalidateStream > oldStream &&
+      detachVideo > invalidateStream &&
+      stopOldStream > detachVideo &&
+      stopOldStream < swapAwait &&
+      catchBlock > swapAwait &&
+      restoreFacing > catchBlock,
+    "failed camera swap restores facing after invalidating and stopping the old stream",
+  );
+  assert(
+    compactSource(capture).includes(
+      'if(landmarker&&!cameraSwapInProgress&&stream&&stream.getVideoTracks().some(t=>t.readyState==="live")&&video.srcObject===stream&&video.readyState>=2)',
+    ),
+    "capture loop requires the attached stream to have a live video track",
+  );
+
+  assert(
+    /function\s+onShot\s*\(\s*receiptId\s*,\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*,\s*debug\s*\)/.test(
+      capture,
+    ) &&
+      /summarizeFormShot\s*\(\s*history\s*,\s*anchorStartTs\s*,\s*now\s*,\s*activeAnchorEnter\s*\)/.test(
+        capture,
+      ) &&
+      /onShot\s*\(\s*action\.id\s*,\s*now\s*,\s*anchorStartTs\s*,\s*result\.anchorEnter\s*,\s*debug\s*\)/.test(
+        capture,
+      ),
+    "capture passes receipt identity and top-level active anchor geometry into shot summaries",
+  );
+  assert(
+    /function\s+onShot\s*\(\s*receiptId\s*,\s*now\s*,\s*anchorStartTs\s*,\s*activeAnchorEnter\s*,\s*debug\s*\)/.test(
+      replay,
+    ) &&
+      /summarizeFormShot\s*\(\s*history\s*,\s*anchorStartTs\s*,\s*now\s*,\s*activeAnchorEnter\s*\)/.test(
+        replay,
+      ) &&
+      /onShot\s*\(\s*action\.id\s*,\s*now\s*,\s*result\.anchorStartTs\s*,\s*result\.anchorEnter\s*,\s*debug\s*\)/.test(
+        replay,
+      ),
+    "replay passes receipt identity and top-level active anchor geometry into shot summaries",
+  );
+  assert(
+    !capture.includes("debug.anchorEnter") && !replay.includes("debug.anchorEnter"),
+    "view integrations never substitute debug anchor geometry",
+  );
+  assert(
+    !replay.includes("resetCaptureGeometry"),
+    "replay does not call the capture-only geometry helper",
+  );
+  const replayHand = boundedSourceSection(
+    replay,
+    'ovl.querySelector("#frHand").onclick=e=>{',
+    "loadFormPose().then(async lm=>{",
+    "replay handedness handler",
+  );
+  const replayHandCompact = compactSource(replayHand);
+  [
+    "detector=makeFormPhaseDetector();",
+    "ema=makeFormEma(0.38);",
+    "history=[];",
+    "velSrc.reset();",
+  ].forEach((resetExpression) =>
+    assert(
+      replayHandCompact.includes(compactSource(resetExpression)),
+      `replay handedness locally resets ${resetExpression}`,
+    ),
+  );
+  [capture, replay].forEach((source, index) => {
+    const label = index === 0 ? "capture" : "replay";
+    const compact = compactSource(source);
+    assertEqual(
+      (compact.match(/makeFormReleaseReceiptTracker\(\{maxDiagnosticReceipts:32\}\)/g) || [])
+        .length,
+      1,
+      `${label} creates exactly one workflow tracker`,
+    );
+    assert(
+      compact.includes('abandonActiveReceipt("geometry-reset");'),
+      `${label} geometry reset resolves only active ownership`,
+    );
+    assert(
+      compact.includes('abandonActiveReceipt("workflow-close");'),
+      `${label} close resolves only active ownership`,
+    );
+    assert(
+      compact.includes("shotId:action.id") || compact.includes("shotId:releaseAction.id"),
+      `${label} diagnostic IDs come from receipt actions`,
+    );
+    assert(!/shots\s*\[\s*shots\.length\s*-\s*1\s*\]/.test(source), `${label} has no tail owner`);
+    assert(!/\.pop\s*\(/.test(source), `${label} has no pop owner`);
+    assert(
+      !/uid\s*\(\s*\)/.test(
+        boundedSourceSection(source, "function onShot(", "function loop(", `${label} onShot`),
+      ),
+      `${label} onShot allocates no fallback ID`,
+    );
+    const onShot = compactSource(
+      boundedSourceSection(source, "function onShot(", "function loop(", `${label} onShot`),
+    );
+    const markAt = onShot.indexOf("constmarkAction=receiptTracker.markShotCreated(receiptId);");
+    const pushAt = onShot.indexOf("shots.push(shot);");
+    assert(
+      markAt >= 0 &&
+        pushAt > markAt &&
+        (onShot.includes("if(markAction.code)returnnull;") ||
+          onShot.includes("if(markAction.code){freezeForReceiptFailure();returnnull;}")),
+      `${label} counts a shot only after receipt ownership succeeds`,
+    );
+    assert(
+      onShot.includes("if(markAction.code){freezeForReceiptFailure();returnnull;}"),
+      `${label} freezes the workflow when receipt ownership fails`,
+    );
+  });
+  assert(
+    compactSource(replay).includes('abandonActiveReceipt("replay-eos");'),
+    "replay EOS is explicit",
+  );
+
+  function exerciseViewReceiptCap(label, debugEnabled) {
+    const tracker = core.makeFormReleaseReceiptTracker({ maxDiagnosticReceipts: 32 });
+    let shots = [];
+    const releaseFires = [];
+    for (let number = 1; number <= 33; number += 1) {
+      const action = tracker.begin({ fireTs: number, fire: null });
+      shots.push({ id: action.id });
+      tracker.markShotCreated(action.id);
+      if (debugEnabled) {
+        releaseFires.push({ shotId: action.id });
+        if (releaseFires.length > 32) releaseFires.shift();
+      }
+      tracker.confirm();
+    }
+    if (label === "capture") {
+      tracker.manualRemove("form-receipt-33");
+      shots = shots.filter((shot) => shot.id !== "form-receipt-33");
+    }
+    const action34 = tracker.begin({ fireTs: 34, fire: null });
+    shots.push({ id: action34.id });
+    tracker.markShotCreated(action34.id);
+    const canceled34 = tracker.cancel("anchor-return");
+    shots = shots.filter((shot) => shot.id !== canceled34.deletionTarget);
+    assertEqual(canceled34.deletionTarget, "form-receipt-34", `${label} receipt 34 exact cancel`);
+    assert(
+      shots.some((shot) => shot.id === "form-receipt-32"),
+      `${label} receipt 32 survives`,
+    );
+    assertEqual(releaseFires.length, debugEnabled ? 32 : 0, `${label} exact debug trace gate`);
+  }
+  ["capture", "replay"].forEach((label) => {
+    exerciseViewReceiptCap(label, false);
+    exerciseViewReceiptCap(label, true);
+  });
 }
 
 /* ---------- T-Anchor（Stage 1 §12.3）: pre-release 窓の anchorStartTs クランプ ---------- */

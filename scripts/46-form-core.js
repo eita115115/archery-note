@@ -33,13 +33,41 @@ const FORM_REF = Object.freeze({
 /* フェーズ検出しきい値。2026-07-05 レットダウン誤検出の修理で再調整
    （tools/check-form-core.js の境界ケースを必ず通すこと。docs/form-tracking-feasibility.md
    の「短窓の離脱量を主条件」という旧設計は、250ms窓では1.1秒未満の引き戻しが
-   無条件に誤検出される欠陥があったため撤回した。実測境界は同ファイル冒頭コメント参照）。
-   RELEASE_RISE は未使用化のみ（表示・別ロジックからの参照除去は今回のスコープ外）。 */
+   無条件に誤検出される欠陥があったため撤回した。実測境界は同ファイル冒頭コメント参照）。 */
 const FORM_PH = Object.freeze({
   CLOSE_IN: 0.35,
+  /* Session-local adaptive-release primitives: introduced as behavior-neutral
+     Task 1 math, then wired into evidence and candidate detection by Tasks 2-3.
+     MediaPipe inputs have already been temporally filtered; the helpers have
+     not yet received external phone acceptance validation. */
+  ADAPTIVE_SAMPLE_WINDOW_MS: 1500,
+  ADAPTIVE_EVIDENCE_WINDOW_MS: 1500,
+  ADAPTIVE_CALIBRATION_SAMPLES: 6,
+  ADAPTIVE_ANCHOR_PADDING: 0.12,
+  ADAPTIVE_ANCHOR_MIN: 0.35,
+  ADAPTIVE_ANCHOR_MAX: 0.65,
+  ADAPTIVE_HOLD_MIN_MS: 150,
+  ADAPTIVE_HOLD_MIN_FRAMES: 3,
+  /* 緩いアンカー値（撮影角度差）でも、短い安定保持から明確に離れた
+     実射を拾うための狭い回復経路。通常adaptiveの150msゲートは維持し、
+     4フレーム/80msと高い離脱速度を同時に要求してドロー途中の単発ノイズを避ける。 */
+  ADAPTIVE_BRIEF_HOLD_MIN_MS: 80,
+  ADAPTIVE_BRIEF_HOLD_MIN_FRAMES: 4,
+  ADAPTIVE_BRIEF_RELEASE_MIN: 8,
+  ADAPTIVE_HOLD_RANGE: 0.12,
+  ADAPTIVE_STRENGTH_CAP: 12,
+  ADAPTIVE_RELEASE_PERCENTILE: 0.9,
+  ADAPTIVE_RELEASE_PADDING: 1,
+  ADAPTIVE_RELEASE_MIN: 6,
+  ADAPTIVE_RELEASE_MAX: 8,
+  ADAPTIVE_DEPARTURE: 0.18,
+  ADAPTIVE_DIRECTION_DELTA: 0.04,
+  ADAPTIVE_FAR_BOUNDARY: 1.2,
+  ADAPTIVE_FAR_INVALIDATION_MS: 300,
   FULLDRAW_MS: 350,
-  RELEASE_RISE: 0.18, // 2026-07-05: リリース判定には使わない（下記 stepFormPhase 参照）。将来別用途で参照する可能性があるため残す
-  RELEASE_TH: 9, // 瞬間速度スパイク（胴体長/秒）。単独主条件に昇格（2026-07-05）
+  RELEASE_RISE: 0.18, // coherent legacy 経路で要求する、アンカー最小値からの最小離脱量（胴体長）
+  RELEASE_TH: 9, // coherent fast 経路の現在フレーム速度（胴体長/秒）
+  LEGACY_ARM_MAX_DELTA_DEG: 45, // coherent legacy 経路: アンカー姿勢中央値から許す引き腕角度差
   RISE_WINDOW_MS: 250, // 速度スパイクの短窓（maxV 算出用に流用）
   REFRACTORY_MS: 1000,
   DRAW_SPEED: 0.25,
@@ -54,6 +82,7 @@ const FORM_PH = Object.freeze({
   NB_RISE: 0.25,
   NB_MAXV: 2,
   NB_MAX_GAP_MS: 150,
+  NB_GAP_EPSILON_MS: 1e-6, // 累積frame時刻の浮動小数誤差だけを吸収（1ns）
   /* アンカー証拠の一般化（2026-07-15 multi-shot repro 根拠、実射 6射中4射消失の対処）。
      実射観測（v81, 60fps, conf 0.6-0.7）で確定した2つの欠落メカニズム:
        A: リリース瞬間のトラッキング欠落 150-350ms → RISE_WINDOW 内の closeFrames が
@@ -101,6 +130,8 @@ const FORM_PH = Object.freeze({
   DEPART_MIN: 0.65, // 出発とみなす anchorNorm 下限
   DEPART_FRAMES: 3, // 出発確認に要する連続フレーム数
   DEPART_OBSERVE_MIN: 5, // 未出発を有罪にできる最小観測フレーム数（約83ms@60fps）
+  ADAPTIVE_RETURN_MS: 150, // adaptive 発火後のアンカー復帰取消に要する最小スパン
+  ADAPTIVE_RETURN_FRAMES: 4, // adaptive 発火後のアンカー復帰取消に要する有効観測数
   /* 取消ディップの時間ベース化（2026-07-15 実射診断: 実射に対する誤取消 3-4件の対処）:
      Plan-B の2連続フレーム要件（60fpsで33ms）は、conf 0.5-0.7 の実フィールドの
      ランドマーク幻出ラン長に対して不足だった。真のレットダウン復帰はアンカーに
@@ -169,6 +200,400 @@ function formMedian(vals) {
   if (!a.length) return null;
   const m = Math.floor(a.length / 2);
   return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+}
+
+function adaptivePercentile(values, q) {
+  const sorted = (Array.isArray(values) ? values : [])
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  if (!sorted.length) return null;
+  const position = (sorted.length - 1) * q;
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+}
+
+function adaptiveAnchorThreshold(anchorSamples) {
+  const usable = (Array.isArray(anchorSamples) ? anchorSamples : []).filter(Number.isFinite);
+  if (usable.length < FORM_PH.ADAPTIVE_CALIBRATION_SAMPLES) return FORM_PH.ADAPTIVE_ANCHOR_MIN;
+  return Math.max(
+    FORM_PH.ADAPTIVE_ANCHOR_MIN,
+    Math.min(
+      FORM_PH.ADAPTIVE_ANCHOR_MAX,
+      adaptivePercentile(usable, 0.1) + FORM_PH.ADAPTIVE_ANCHOR_PADDING,
+    ),
+  );
+}
+
+function adaptiveReleaseThreshold(holdVelocitySamples) {
+  const usable = (Array.isArray(holdVelocitySamples) ? holdVelocitySamples : []).filter(
+    Number.isFinite,
+  );
+  if (usable.length < FORM_PH.ADAPTIVE_CALIBRATION_SAMPLES) return FORM_PH.ADAPTIVE_RELEASE_MIN;
+  return Math.max(
+    FORM_PH.ADAPTIVE_RELEASE_MIN,
+    Math.min(
+      FORM_PH.ADAPTIVE_RELEASE_MAX,
+      adaptivePercentile(usable, FORM_PH.ADAPTIVE_RELEASE_PERCENTILE) +
+        FORM_PH.ADAPTIVE_RELEASE_PADDING,
+    ),
+  );
+}
+
+function adaptiveReleaseCandidate(evidence, raw, history, now) {
+  const decision = {
+    matched: false,
+    departDelta: null,
+    movingAway: false,
+    maxV: null,
+    releaseSpeed: null,
+  };
+  const requireSustainedDeparture = Boolean(evidence && evidence.sustainedDeparture === true);
+  const evidenceValid = Boolean(
+    evidence &&
+    Number.isFinite(evidence.ts) &&
+    Number.isFinite(evidence.normAtHold) &&
+    Number.isFinite(evidence.releaseSpeed) &&
+    evidence.releaseSpeed > 0,
+  );
+  if (evidenceValid) decision.releaseSpeed = evidence.releaseSpeed;
+
+  const frames = Array.isArray(history) ? history : [];
+  const currentFrame = frames.length ? frames[frames.length - 1] : null;
+  let historyChronologyValid = frames.length > 0 && Number.isFinite(now);
+  let previousHistoryTs = -Infinity;
+  if (historyChronologyValid) {
+    for (const frame of frames) {
+      if (!frame || !Number.isFinite(frame.ts) || frame.ts <= previousHistoryTs || frame.ts > now) {
+        historyChronologyValid = false;
+        break;
+      }
+      previousHistoryTs = frame.ts;
+    }
+  }
+  const currentHistoryMatches = Boolean(
+    historyChronologyValid && currentFrame && currentFrame.ts === now && currentFrame.m === raw,
+  );
+  const currentUsable = Boolean(
+    currentHistoryMatches &&
+    raw &&
+    formConfOk(raw) &&
+    Number.isFinite(raw.anchorNorm) &&
+    Number.isFinite(now),
+  );
+  if (evidenceValid && currentUsable) {
+    const departDelta = raw.anchorNorm - evidence.normAtHold;
+    decision.departDelta = Number.isFinite(departDelta) ? departDelta : null;
+  }
+
+  const previousNorms = [];
+  let newerTs = now;
+  if (currentUsable) {
+    for (let i = frames.length - 1; i >= 0 && previousNorms.length < 3; i--) {
+      const frame = frames[i];
+      if (!frame || !Number.isFinite(frame.ts)) break;
+      if (frame.ts === now) continue;
+      if (frame.ts > now || frame.ts >= newerTs) break;
+      newerTs = frame.ts;
+      if (!frame.m || !formConfOk(frame.m) || !Number.isFinite(frame.m.anchorNorm)) continue;
+      previousNorms.push(frame.m.anchorNorm);
+    }
+  }
+  if (currentUsable && previousNorms.length === 3) {
+    const previousMedian = formMedian(previousNorms);
+    const directionDelta = raw.anchorNorm - previousMedian;
+    if (Number.isFinite(directionDelta)) {
+      const directionEpsilon =
+        Number.EPSILON *
+        Math.max(1, Math.abs(directionDelta), Math.abs(FORM_PH.ADAPTIVE_DIRECTION_DELTA));
+      decision.movingAway = directionDelta + directionEpsilon >= FORM_PH.ADAPTIVE_DIRECTION_DELTA;
+    }
+  }
+
+  /* 保持証拠から既に離れ切った姿勢へ、別動作の速度・方向ジッターを合成しない。
+     通常は短窓内で現在へ続く直近の「離脱境界未満」区間の先頭を origin とする。
+     現在が遮蔽後最初の有効観測なら、直前の有効観測が origin の場合に限り evidence
+     の有効期限内で橋渡しする。maxV も同じ origin 以後だけに限定し、速度→origin→
+     緩慢離脱の逆順合成を防ぐ。 */
+  let departureOriginTs = null;
+  if (evidenceValid && currentUsable) {
+    let originNewerTs = now;
+    let sawPriorUsable = false;
+    for (let i = frames.length - 1; i >= 0; i--) {
+      const frame = frames[i];
+      if (!frame || !Number.isFinite(frame.ts)) break;
+      if (frame.ts === now) continue;
+      if (frame.ts > now || frame.ts >= originNewerTs) break;
+      originNewerTs = frame.ts;
+      if (frame.ts < evidence.ts) break;
+      if (!frame.m || !formConfOk(frame.m) || !Number.isFinite(frame.m.anchorNorm)) continue;
+      const priorDeparture = frame.m.anchorNorm - evidence.normAtHold;
+      const originEpsilon =
+        Number.EPSILON *
+        Math.max(1, Math.abs(priorDeparture), Math.abs(FORM_PH.ADAPTIVE_DEPARTURE));
+      const originMatched =
+        Number.isFinite(priorDeparture) &&
+        priorDeparture + originEpsilon < FORM_PH.ADAPTIVE_DEPARTURE;
+      const withinShortWindow = frame.ts >= now - FORM_PH.RISE_WINDOW_MS;
+      if (!withinShortWindow) {
+        if (!sawPriorUsable && originMatched) departureOriginTs = frame.ts;
+        break;
+      }
+      sawPriorUsable = true;
+      if (originMatched) {
+        departureOriginTs = frame.ts;
+        continue;
+      }
+      if (departureOriginTs != null) break;
+      // A sustained departure may already have crossed the boundary on the
+      // immediately previous frame. Keep walking through that departure run
+      // to recover its fresh origin; stale sequences with no origin still
+      // return null after the scan completes.
+    }
+  }
+
+  const velocities = frames
+    .filter(
+      (frame) =>
+        frame &&
+        departureOriginTs != null &&
+        Number.isFinite(frame.ts) &&
+        frame.ts >= departureOriginTs &&
+        frame.ts >= now - FORM_PH.RISE_WINDOW_MS &&
+        frame.ts <= now &&
+        (frame.ts < now || frame === currentFrame) &&
+        frame.m &&
+        formConfOk(frame.m) &&
+        formDwVisOk(frame.m) &&
+        Number.isFinite(frame.vel) &&
+        frame.vel >= 0,
+    )
+    .map((frame) => frame.vel);
+  if (velocities.length) decision.maxV = Math.max(...velocities);
+
+  const age = evidenceValid && Number.isFinite(now) ? now - evidence.ts : null;
+  const departureEpsilon =
+    Number.EPSILON *
+    Math.max(1, Math.abs(decision.departDelta || 0), Math.abs(FORM_PH.ADAPTIVE_DEPARTURE));
+  const speedEpsilon =
+    Number.EPSILON *
+    Math.max(
+      1,
+      Math.abs(decision.maxV == null ? 0 : decision.maxV),
+      Math.abs(decision.releaseSpeed == null ? 0 : decision.releaseSpeed),
+    );
+  let sustainedDepartureFrames = 0;
+  if (requireSustainedDeparture && departureOriginTs != null) {
+    for (let i = frames.length - 1; i >= 0; i--) {
+      const frame = frames[i];
+      if (
+        !frame ||
+        !Number.isFinite(frame.ts) ||
+        frame.ts > now ||
+        frame.ts < departureOriginTs ||
+        !frame.m ||
+        !formConfOk(frame.m) ||
+        !Number.isFinite(frame.m.anchorNorm)
+      )
+        break;
+      const departure = frame.m.anchorNorm - evidence.normAtHold;
+      const departureFrameEpsilon =
+        Number.EPSILON * Math.max(1, Math.abs(departure), Math.abs(FORM_PH.ADAPTIVE_DEPARTURE));
+      if (departure + departureFrameEpsilon < FORM_PH.ADAPTIVE_DEPARTURE) break;
+      sustainedDepartureFrames += 1;
+    }
+  }
+  decision.matched =
+    evidenceValid &&
+    currentUsable &&
+    raw.anchorNorm <= FORM_PH.ADAPTIVE_FAR_BOUNDARY &&
+    age >= 0 &&
+    age <= FORM_PH.ADAPTIVE_EVIDENCE_WINDOW_MS &&
+    decision.departDelta != null &&
+    decision.departDelta > 0 &&
+    decision.departDelta + departureEpsilon >= FORM_PH.ADAPTIVE_DEPARTURE &&
+    departureOriginTs != null &&
+    decision.movingAway &&
+    decision.maxV != null &&
+    decision.maxV + speedEpsilon >= decision.releaseSpeed &&
+    (!requireSustainedDeparture || sustainedDepartureFrames >= 2);
+  return decision;
+}
+
+function adaptiveAnchorFrameUsable(frame) {
+  return (
+    frame &&
+    formConfOk(frame) &&
+    Number.isFinite(frame.anchorNorm) &&
+    Number.isFinite(frame.drawArm) &&
+    frame.drawArm > 125 &&
+    frame.anchorNorm < 1.3
+  );
+}
+
+function updateAdaptiveAnchorEvidence(adaptiveState, raw, history, now) {
+  const state = adaptiveState;
+  const sampleCutoff = now - FORM_PH.ADAPTIVE_SAMPLE_WINDOW_MS;
+  state.anchorSamples = state.anchorSamples.filter(
+    (sample) =>
+      sample &&
+      Number.isFinite(sample.ts) &&
+      Number.isFinite(sample.norm) &&
+      sample.ts >= sampleCutoff,
+  );
+  if (
+    state.evidence &&
+    (!Number.isFinite(state.evidence.ts) ||
+      now - state.evidence.ts > FORM_PH.ADAPTIVE_EVIDENCE_WINDOW_MS)
+  ) {
+    state.evidence = null;
+  }
+  if (
+    state.briefEvidence &&
+    (!Number.isFinite(state.briefEvidence.ts) ||
+      now - state.briefEvidence.ts > FORM_PH.ADAPTIVE_EVIDENCE_WINDOW_MS)
+  ) {
+    state.briefEvidence = null;
+  }
+
+  if (raw && Number.isFinite(raw.anchorNorm) && raw.anchorNorm > FORM_PH.ADAPTIVE_FAR_BOUNDARY) {
+    if (!state.farSince) state.farSince = now;
+    if (now - state.farSince >= FORM_PH.ADAPTIVE_FAR_INVALIDATION_MS) {
+      state.evidence = null;
+      state.briefEvidence = null;
+    }
+  } else {
+    state.farSince = 0;
+  }
+
+  if (adaptiveAnchorFrameUsable(raw)) {
+    const sample = { ts: now, norm: raw.anchorNorm };
+    const latest = state.anchorSamples[state.anchorSamples.length - 1];
+    if (latest && latest.ts === now) state.anchorSamples[state.anchorSamples.length - 1] = sample;
+    else state.anchorSamples.push(sample);
+  }
+
+  const anchorNorms = state.anchorSamples.map((sample) => sample.norm);
+  state.anchorFloor =
+    anchorNorms.length >= FORM_PH.ADAPTIVE_CALIBRATION_SAMPLES
+      ? adaptivePercentile(anchorNorms, 0.1)
+      : null;
+  state.anchorEnter = adaptiveAnchorThreshold(anchorNorms);
+
+  if (!adaptiveAnchorFrameUsable(raw)) {
+    state.holdSamples = [];
+    state.holdVelocitySamples = [];
+    state.holdSince = 0;
+    state.holdBreakTs = now;
+    return {
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: state.releaseSpeed,
+      holdQualified: false,
+      briefHoldQualified: false,
+      holdStartTs: 0,
+      evidence: state.evidence,
+      briefEvidence: state.briefEvidence,
+    };
+  }
+
+  const frames = Array.isArray(history) ? history : [];
+  const suffix = [];
+  let minNorm = Infinity;
+  let maxNorm = -Infinity;
+  let newerTs = null;
+  for (let i = frames.length - 1; i >= 0; i--) {
+    const frame = frames[i];
+    if (!frame || !Number.isFinite(frame.ts) || !adaptiveAnchorFrameUsable(frame.m)) break;
+    if (state.holdBreakTs != null && frame.ts <= state.holdBreakTs) break;
+    if (newerTs != null && frame.ts >= newerTs) break;
+    if (frame.m.anchorNorm > state.anchorEnter) break;
+    const nextMin = Math.min(minNorm, frame.m.anchorNorm);
+    const nextMax = Math.max(maxNorm, frame.m.anchorNorm);
+    if (nextMax - nextMin > FORM_PH.ADAPTIVE_HOLD_RANGE) break;
+    minNorm = nextMin;
+    maxNorm = nextMax;
+    newerTs = frame.ts;
+    suffix.unshift({ ts: frame.ts, norm: frame.m.anchorNorm, vel: frame.vel });
+  }
+
+  if (!suffix.length || suffix[suffix.length - 1].ts !== now) {
+    state.holdSamples = [];
+    state.holdVelocitySamples = [];
+    state.holdSince = 0;
+    return {
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: state.releaseSpeed,
+      holdQualified: false,
+      briefHoldQualified: false,
+      holdStartTs: 0,
+      evidence: state.evidence,
+      briefEvidence: state.briefEvidence,
+    };
+  }
+
+  const previousFirst = state.holdSamples[0];
+  const previousLast = state.holdSamples[state.holdSamples.length - 1];
+  const earliestHistoryTs = frames.length && Number.isFinite(frames[0].ts) ? frames[0].ts : now;
+  const suffixTimestamps = new Set(suffix.map((sample) => sample.ts));
+  const continuesPrevious =
+    state.holdSince > 0 &&
+    previousLast &&
+    suffixTimestamps.has(previousLast.ts) &&
+    (!previousFirst ||
+      suffixTimestamps.has(previousFirst.ts) ||
+      previousFirst.ts < earliestHistoryTs);
+  state.holdSince = continuesPrevious ? state.holdSince : suffix[0].ts;
+  const retainedSuffix = suffix.filter((sample) => sample.ts >= sampleCutoff);
+  state.holdSamples = retainedSuffix.map((sample) => ({ ts: sample.ts, norm: sample.norm }));
+  state.holdVelocitySamples = retainedSuffix
+    .filter((sample) => Number.isFinite(sample.vel))
+    .map((sample) => ({ ts: sample.ts, value: sample.vel }));
+
+  const holdSpan =
+    state.holdSamples.length > 1
+      ? state.holdSamples[state.holdSamples.length - 1].ts - state.holdSamples[0].ts
+      : 0;
+  const holdQualified =
+    state.holdSamples.length >= FORM_PH.ADAPTIVE_HOLD_MIN_FRAMES &&
+    holdSpan >= FORM_PH.ADAPTIVE_HOLD_MIN_MS;
+  const briefHoldQualified =
+    state.holdSamples.length >= FORM_PH.ADAPTIVE_BRIEF_HOLD_MIN_FRAMES &&
+    holdSpan >= FORM_PH.ADAPTIVE_BRIEF_HOLD_MIN_MS;
+  if (holdQualified) {
+    state.releaseSpeed = adaptiveReleaseThreshold(
+      state.holdVelocitySamples.map((sample) => sample.value),
+    );
+    state.evidence = {
+      ts: now,
+      normAtHold: formMedian(state.holdSamples.map((sample) => sample.norm)),
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: state.releaseSpeed,
+      strength: Math.min(state.holdSamples.length, FORM_PH.ADAPTIVE_STRENGTH_CAP),
+      sustainedDeparture: true,
+    };
+  }
+  if (briefHoldQualified) {
+    state.briefEvidence = {
+      ts: now,
+      normAtHold: formMedian(state.holdSamples.map((sample) => sample.norm)),
+      anchorEnter: state.anchorEnter,
+      releaseSpeed: Math.max(
+        FORM_PH.ADAPTIVE_BRIEF_RELEASE_MIN,
+        adaptiveReleaseThreshold(state.holdVelocitySamples.map((sample) => sample.value)),
+      ),
+      strength: Math.min(state.holdSamples.length, FORM_PH.ADAPTIVE_STRENGTH_CAP),
+      sustainedDeparture: true,
+    };
+  }
+  return {
+    anchorEnter: state.anchorEnter,
+    releaseSpeed: state.releaseSpeed,
+    holdQualified,
+    briefHoldQualified,
+    holdStartTs: state.holdSince,
+    evidence: state.evidence,
+    briefEvidence: state.briefEvidence,
+  };
 }
 
 /* 矢プレゼンス検出しきい値。合成フレーム分離性テスト（tools/check-form-core.js）で
@@ -491,6 +916,283 @@ function formDwVisOk(m) {
   );
 }
 
+/* Legacy close/velocity 候補の時間的整合性。
+   旧実装は250ms窓の maxV・closeFrames・現在位置を独立集計していたため、古い速度ノイズと
+   後続のアンカー外フレームを1回の離脱として合成できた。高速・校正の両経路で「現在速度＋
+   アンカー姿勢から連続した腕角度＋離脱方向」を要求する。高速経路は速度計算と同じ最新の
+   非null姿勢を tier-1 gap 上限内で選び、その姿勢が品質ゲートを通る場合だけ方向起点に
+   できる。校正経路は直前フレームとの連続方向を要求する。history末尾が現在フレーム本人で
+   ない系列は採用せず、より長い遮蔽の回復契約は NB/NB2で維持する。 */
+function legacyReleaseContinuity(
+  raw,
+  closeFrames,
+  windowFrames,
+  minAnchor,
+  sens,
+  releaseSpeed,
+  now,
+) {
+  const currentFrame = windowFrames.length ? windowFrames[windowFrames.length - 1] : null;
+  const immediatePreviousFrame =
+    windowFrames.length > 1 ? windowFrames[windowFrames.length - 2] : null;
+  const currentMatches = Boolean(
+    currentFrame &&
+    currentFrame.ts === now &&
+    currentFrame.m === raw &&
+    Number.isFinite(currentFrame.vel),
+  );
+  const currentV =
+    currentMatches && Number.isFinite(raw.anchorNorm) && formConfOk(raw) && formDwVisOk(raw)
+      ? Math.max(0, currentFrame.vel)
+      : 0;
+  const closeArm = formMedian(
+    closeFrames.map((frame) => frame.m.drawArm).filter((drawArm) => Number.isFinite(drawArm)),
+  );
+  const armDelta =
+    closeArm != null && Number.isFinite(raw.drawArm) ? Math.abs(raw.drawArm - closeArm) : null;
+  const rise = Number.isFinite(raw.anchorNorm) ? raw.anchorNorm - minAnchor : -Infinity;
+  const riseEpsilon = Number.EPSILON * Math.max(1, Math.abs(rise), Math.abs(FORM_PH.RELEASE_RISE));
+  const riseMatched = rise + riseEpsilon >= FORM_PH.RELEASE_RISE;
+  const armMatched = armDelta != null && armDelta <= FORM_PH.LEGACY_ARM_MAX_DELTA_DEG;
+  let directionFrame = null;
+  for (let i = windowFrames.length - 2; i >= 0 && !directionFrame; i--) {
+    const frame = windowFrames[i];
+    if (!frame || !Number.isFinite(frame.ts) || frame.ts >= now) break;
+    if (now - frame.ts > FORM_PH.NB_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS) break;
+    if (frame.m) {
+      if (
+        formConfOk(frame.m) &&
+        formDwVisOk(frame.m) &&
+        Number.isFinite(frame.m.anchorNorm)
+      ) {
+        directionFrame = frame;
+      }
+      break;
+    }
+  }
+  const directionDelta = directionFrame ? raw.anchorNorm - directionFrame.m.anchorNorm : null;
+  const directionEpsilon =
+    Number.EPSILON *
+    Math.max(
+      1,
+      Math.abs(directionDelta == null ? 0 : directionDelta),
+      Math.abs(FORM_PH.ADAPTIVE_DIRECTION_DELTA),
+    );
+  const directionMatched =
+    directionDelta != null && directionDelta + directionEpsilon >= FORM_PH.ADAPTIVE_DIRECTION_DELTA;
+  const fastMatched =
+    currentMatches &&
+    riseMatched &&
+    armMatched &&
+    directionMatched &&
+    currentV > FORM_PH.RELEASE_TH / sens &&
+    Number.isFinite(currentV);
+  const calibratedSpeed = Number.isFinite(releaseSpeed) ? releaseSpeed / sens : Infinity;
+  const speedEpsilon = Number.EPSILON * Math.max(1, Math.abs(currentV), Math.abs(calibratedSpeed));
+  const calibratedMatched =
+    currentMatches &&
+    riseMatched &&
+    armMatched &&
+    directionMatched &&
+    Number.isFinite(releaseSpeed) &&
+    directionFrame === immediatePreviousFrame &&
+    currentV + speedEpsilon >= calibratedSpeed;
+
+  return {
+    fastMatched,
+    calibratedMatched,
+    currentV,
+    armDelta,
+    directionFrames: directionMatched ? 2 : 0,
+    directionDelta,
+  };
+}
+
+const FORM_RELEASE_RECEIPT_SEQUENCE_MAX = 999999;
+const FORM_RELEASE_CANCEL_REASONS = new Set([
+  "anchor-return",
+  "nb2-drift",
+  "nb2-unobserved",
+  "no-depart",
+]);
+const FORM_RELEASE_UNRESOLVED_REASONS = new Set([
+  "geometry-reset",
+  "workflow-save",
+  "workflow-close",
+  "replay-eos",
+  "superseded-fire",
+]);
+
+/* Receipt cancellation owns exactly one shot ID. Keep this pure so live and
+   replay cannot drift into tail-based deletion or mutate the source array. */
+function formRemoveShotByReceiptId(shots, receiptId) {
+  if (!Array.isArray(shots)) return [];
+  if (receiptId == null) return shots.slice();
+  return shots.filter((shot) => !shot || shot.id !== receiptId);
+}
+
+function makeFormReleaseReceiptTracker(options) {
+  const requestedCap = options && options.maxDiagnosticReceipts;
+  const maxDiagnosticReceipts =
+    Number.isSafeInteger(requestedCap) && requestedCap >= 0 ? requestedCap : 32;
+  let receiptSequence = 0;
+  let activeReceipt = null;
+  let receiptOverflow = 0;
+  let desynchronized = false;
+  const releaseReceipts = [];
+  const receiptInvariantCounts = {
+    supersededActive: 0,
+    missingActive: 0,
+    identityMismatch: 0,
+    invalidTransition: 0,
+    sequenceExhausted: 0,
+  };
+
+  const makeAction = (id, deletionTarget, fatal, code) => ({
+    id,
+    deletionTarget,
+    fatal,
+    code,
+  });
+  const copyFire = (fire) => (fire == null ? null : { ...fire });
+  const copyReceipt = (receipt) => ({ ...receipt, fire: copyFire(receipt.fire) });
+  const increment = (code) => {
+    receiptInvariantCounts[code] = Math.min(255, receiptInvariantCounts[code] + 1);
+  };
+  const failure = (code) => {
+    increment(code);
+    return makeAction(null, null, false, code);
+  };
+  const archive = (receipt) => {
+    if (releaseReceipts.length < maxDiagnosticReceipts) {
+      releaseReceipts.push(copyReceipt(receipt));
+    } else {
+      receiptOverflow = Math.min(Number.MAX_SAFE_INTEGER, receiptOverflow + 1);
+    }
+  };
+  const finalizeActive = (detectorDisposition, cancelReason, unresolvedReason) => {
+    const receipt = activeReceipt;
+    receipt.detectorDisposition = detectorDisposition;
+    receipt.cancelReason = cancelReason;
+    receipt.unresolvedReason = unresolvedReason;
+    activeReceipt = null;
+    archive(receipt);
+    return receipt;
+  };
+  const latchedAction = () => makeAction(null, null, true, null);
+  const sequenceFailureCode = () => {
+    if (
+      !Number.isSafeInteger(receiptSequence) ||
+      receiptSequence < 0 ||
+      receiptSequence > FORM_RELEASE_RECEIPT_SEQUENCE_MAX
+    ) {
+      return "invalidTransition";
+    }
+    return receiptSequence === FORM_RELEASE_RECEIPT_SEQUENCE_MAX ? "sequenceExhausted" : null;
+  };
+  const latchDesynchronized = (code) => {
+    if (activeReceipt) finalizeActive("unresolved", null, "superseded-fire");
+    increment(code);
+    desynchronized = true;
+    activeReceipt = null;
+    return makeAction(null, null, true, code);
+  };
+
+  function begin(input) {
+    if (desynchronized) return latchedAction();
+    if (
+      !input ||
+      !Number.isFinite(input.fireTs) ||
+      !(input.fire == null || (typeof input.fire === "object" && !Array.isArray(input.fire)))
+    ) {
+      return failure("invalidTransition");
+    }
+    const allocationFailure = sequenceFailureCode();
+    if (allocationFailure) return latchDesynchronized(allocationFailure);
+    let code = null;
+    if (activeReceipt) {
+      finalizeActive("unresolved", null, "superseded-fire");
+      increment("supersededActive");
+      code = "supersededActive";
+    }
+    receiptSequence += 1;
+    const id = `form-receipt-${receiptSequence}`;
+    activeReceipt = {
+      id,
+      fireTs: input.fireTs,
+      shotCreated: false,
+      userDisposition: "not-created",
+      detectorDisposition: "pending",
+      cancelReason: null,
+      unresolvedReason: null,
+      fire: copyFire(input.fire),
+    };
+    return makeAction(id, null, false, code);
+  }
+
+  function markShotCreated(id) {
+    if (!activeReceipt || activeReceipt.id !== id) return failure("identityMismatch");
+    if (activeReceipt.shotCreated || activeReceipt.detectorDisposition !== "pending") {
+      return failure("invalidTransition");
+    }
+    activeReceipt.shotCreated = true;
+    activeReceipt.userDisposition = "present";
+    return makeAction(id, null, false, null);
+  }
+
+  function manualRemove(id) {
+    const receipt =
+      (activeReceipt && activeReceipt.id === id ? activeReceipt : null) ||
+      releaseReceipts.find((candidate) => candidate.id === id);
+    if (!receipt) return failure("identityMismatch");
+    if (!receipt.shotCreated || receipt.userDisposition !== "present") {
+      return failure("invalidTransition");
+    }
+    receipt.userDisposition = "manual-removed";
+    return makeAction(id, null, false, null);
+  }
+
+  function confirm() {
+    if (desynchronized) return latchedAction();
+    if (!activeReceipt) return failure("missingActive");
+    const receipt = finalizeActive("confirmed", null, null);
+    return makeAction(receipt.id, null, false, null);
+  }
+
+  function cancel(reason) {
+    if (desynchronized) return latchedAction();
+    if (!activeReceipt) return failure("missingActive");
+    if (!FORM_RELEASE_CANCEL_REASONS.has(reason)) return failure("invalidTransition");
+    const receipt = finalizeActive("auto-canceled", reason, null);
+    return makeAction(receipt.id, receipt.id, false, null);
+  }
+
+  function abandon(reason) {
+    if (desynchronized) return latchedAction();
+    if (!activeReceipt) return failure("missingActive");
+    if (!FORM_RELEASE_UNRESOLVED_REASONS.has(reason)) {
+      return failure("invalidTransition");
+    }
+    const receipt = finalizeActive("unresolved", null, reason);
+    return makeAction(receipt.id, null, false, null);
+  }
+
+  function current() {
+    return activeReceipt ? copyReceipt(activeReceipt) : null;
+  }
+
+  function snapshot() {
+    return {
+      releaseReceipts: releaseReceipts.map(copyReceipt),
+      receiptOverflow,
+      receiptInvariantCounts: { ...receiptInvariantCounts },
+      desynchronized,
+    };
+  }
+
+  return { begin, markShotCreated, manualRemove, confirm, cancel, abandon, current, snapshot };
+}
+
 /* anchorStartTs は anchorSince と意味が異なる別フィールド（Stage 0 C）。
    anchorSince はアンカー圏を離れた全フレームでリセットされる（FULL_DRAW 昇格判定用）が、
    anchorStartTs は sticky: ANCHORING/FULL_DRAW で記録を開始し、DRAWING への一時離脱では
@@ -507,18 +1209,52 @@ function makeFormPhaseDetector() {
     pendingCancelSince: 0,
     pendingCancelCount: 0,
     nb2DriftSince: 0,
+    adaptive: {
+      anchorSamples: [],
+      holdSamples: [],
+      holdVelocitySamples: [],
+      holdSince: 0,
+      holdBreakTs: null,
+      farSince: 0,
+      evidence: null,
+      briefEvidence: null,
+      pendingDeparture: null,
+      anchorFloor: null,
+      anchorEnter: 0.35,
+      releaseSpeed: 6,
+    },
+  };
+}
+
+function formPhaseResult(st, now, result, debug) {
+  const evidence = st.adaptive.evidence || st.adaptive.briefEvidence;
+  return {
+    ...result,
+    anchorEnter: st.adaptive.anchorEnter,
+    debug: {
+      ...debug,
+      anchorFloor: st.adaptive.anchorFloor,
+      anchorEnter: st.adaptive.anchorEnter,
+      releaseSpeed: evidence ? evidence.releaseSpeed : st.adaptive.releaseSpeed,
+      evidenceAgeMs: evidence ? now - evidence.ts : null,
+      evidenceStrength: evidence ? evidence.strength : null,
+    },
   };
 }
 
 /* フェーズ 1 ステップ。history は {ts, m(生メトリクス), vel(胴体長/秒)} の時系列。
    sens>1 で検出されやすくなる（しきい値を除算）。
    2026-07-05: リリース判定を「250ms窓の累積離脱量(rise)」主体から
-   「短窓内の瞬間速度スパイク(maxV)」単独主体へ変更した。旧ロジックは
+   「短窓内の瞬間速度スパイク」主体へ変更した。旧ロジックは
    rise>0.18 が単独でも発火したため、1.1秒未満のどんな速さの引き戻し
    （レットダウン）も無条件にリリースとして誤検出していた
    （tools/check-form-core.js のレットダウン境界ケース参照）。
-   maxV 単独条件は 100ms〜2秒の線形レットダウンで発火せず、
-   50-100msで完了する現実的なリリース速度プロファイルは確実に検出する
+   legacy の高速・校正経路は現在速度・離脱量・引き腕角度・離脱方向を同時に要求する。
+   高速経路は tier-1 gap 内の最新非null姿勢が品質ゲートを通る場合に速度計算と同じ
+   方向起点を使い、校正経路は直前フレームとの連続方向を要求する。これにより短い姿勢欠落を
+   回復しつつ、古い速度スパイクと後続位置を合成せず、50-100msの現実的なリリースを検出する。
+   adaptive 経路は recall-first の承認済み tradeoff として100ms線形レットダウンを
+   削除可能な候補にしうるが、150ms〜2秒は非発火を維持する
    （実測境界表は同ファイル）。
    加えて「確定猶予」(CONFIRM_MS) を設けた: released 判定後もアンカー圏へ
    即座に戻った場合は取消フラグ(canceled)を返す。呼び出し側は canceled=true の
@@ -526,11 +1262,19 @@ function makeFormPhaseDetector() {
 function stepFormPhase(st, raw, history, sens, now) {
   const s = Math.max(0.2, sens || 1);
   // 検証計装（H-2, release-detection-triage-2026-07-13）: 早期return経路の共通項。判定には未使用
-  const refractoryRemainingMs = () => Math.max(0, FORM_PH.REFRACTORY_MS - (now - st.lastReleaseTs));
+  const refractoryRemainingMs = () =>
+    st.lastReleaseTs === 0 ? 0 : Math.max(0, FORM_PH.REFRACTORY_MS - (now - st.lastReleaseTs));
   // B'（Stage 1）: conf ゲート。CONF_GATE=0 の間は usable === raw（完全 pass-through）。
   // ゲート有効時は低confの現在フレームを null フレームと同じ扱いにする
   const usable = raw && formConfOk(raw) ? raw : null;
+  const adaptive = updateAdaptiveAnchorEvidence(
+    st.adaptive,
+    st.pendingRelease ? null : usable,
+    history,
+    now,
+  );
   if (!usable) {
+    st.adaptive.pendingDeparture = null;
     if (st.cur === FORM_PHASES.IDLE || st.cur === FORM_PHASES.SETUP) {
       st.cur = FORM_PHASES.IDLE;
       st.anchorSince = 0;
@@ -546,14 +1290,21 @@ function stepFormPhase(st, raw, history, sens, now) {
       hasNullGap: null,
       refractoryRemaining: refractoryRemainingMs(),
     };
-    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+    return formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+      debug,
+    );
   }
   if (st.pendingRelease && now - st.pendingRelease.ts <= FORM_PH.CONFIRM_MS) {
-    /* 出発確認（2026-07-15）: 低来歴発火（発火時点で要約窓が空＝アンカー登録が遅い/無い）は、
+    const adaptivePending = st.pendingRelease.fireEvidence === "adaptive";
+    let anchorReturn = false;
+    /* legacy 出発確認（2026-07-15）: 低来歴発火（発火時点で要約窓が空＝アンカー登録が遅い/無い）は、
        確定猶予内に手が本当に離れた（anchorNorm >= DEPART_MIN が DEPART_FRAMES 連続）ことを
        確認する。確認できたら departCheck を解除。観測できないまま猶予が切れたら下の
-       猶予終了ブロックで取消す（スプリアス発火＝手がアンカー圏に留まる、の抑制）。 */
-    if (st.pendingRelease.departCheck) {
+       猶予終了ブロックで取消す（adaptive 発火は肯定的な離脱を発火前に確認済みなので対象外）。 */
+    if (!adaptivePending && st.pendingRelease.departCheck) {
       st.pendingRelease.departSeen = (st.pendingRelease.departSeen || 0) + 1; // 観測できた有効フレーム数
       if (usable.anchorNorm >= FORM_PH.DEPART_MIN) {
         st.pendingRelease.departFrames = (st.pendingRelease.departFrames || 0) + 1;
@@ -568,7 +1319,7 @@ function stepFormPhase(st, raw, history, sens, now) {
        取消す（レットダウンが遮蔽内に隠れて NB2 の着地ゲートをすり抜けた場合、手は弦と
        共に動き続けるため必ずここに入る。真のリリースはフォロースルーで静止するため
        入らない）。単発 blur artifact 耐性は2連続フレーム要件で確保 */
-    if (st.pendingRelease.nb2Ref) {
+    if (!adaptivePending && st.pendingRelease.nb2Ref) {
       const drift = formDist(usable.dW, st.pendingRelease.nb2Ref) / usable.bodyScale;
       if (drift > FORM_PH.NB2_SETTLE_MAX) {
         /* ドリフトも時間ベース（CANCEL_DIP_MS スパン）: 2フレーム要件はランドマークの
@@ -595,19 +1346,39 @@ function stepFormPhase(st, raw, history, sens, now) {
           st.anchorSince = 0;
           st.cur = FORM_PHASES.SETUP;
           st.anchorStartTs = 0; // レットダウン確定: アンカー継続ではないので SETUP へ落とす
-          return {
-            phase: st.cur,
-            released: false,
-            canceled: true,
-            anchorStartTs: st.anchorStartTs,
+          return formPhaseResult(
+            st,
+            now,
+            {
+              phase: st.cur,
+              released: false,
+              canceled: true,
+              anchorStartTs: st.anchorStartTs,
+            },
             debug,
-          };
+          );
         }
       } else {
         st.nb2DriftSince = 0;
       }
     }
-    if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
+    if (adaptivePending) {
+      /* adaptive 発火は fire-time の learned 境界への復帰だけを見る。legacy の depart/NB2 と
+         global pendingCancel* は使わず、pending-local な時間と有効観測数の積で確認する。 */
+      const returnBoundary = st.pendingRelease.anchorEnter;
+      if (Number.isFinite(returnBoundary) && usable.anchorNorm <= returnBoundary) {
+        if (!Number.isFinite(st.pendingRelease.returnCount) || st.pendingRelease.returnCount < 0)
+          st.pendingRelease.returnCount = 0;
+        if (st.pendingRelease.returnCount === 0) st.pendingRelease.returnSince = now;
+        st.pendingRelease.returnCount += 1;
+        anchorReturn =
+          now - st.pendingRelease.returnSince >= FORM_PH.ADAPTIVE_RETURN_MS &&
+          st.pendingRelease.returnCount >= FORM_PH.ADAPTIVE_RETURN_FRAMES;
+      } else if (Number.isFinite(returnBoundary)) {
+        st.pendingRelease.returnSince = 0;
+        st.pendingRelease.returnCount = 0;
+      }
+    } else if (usable.anchorNorm < FORM_PH.CLOSE_IN) {
       /* アンカー復帰取消（Plan-B 2026-07-13 → 時間ベース化 2026-07-15）: 実フィールド
          （conf 0.5-0.7）のランドマーク幻出は2連続フレーム（60fpsで33ms）を超えるラン長を
          持ち、実射への誤取消が観測された（2026-07-15 診断: 4セッションで3-4件）。真の
@@ -618,49 +1389,55 @@ function stepFormPhase(st, raw, history, sens, now) {
       st.pendingCancelCount = (st.pendingCancelCount || 0) + 1;
       /* スパン(CANCEL_DIP_MS)に加え観測数(CANCEL_DIP_FRAMES)も要求: null ギャップを
          またいで孤立した2フレームのディップがスパンだけを満たして誤取消するのを防ぐ */
-      if (
+      anchorReturn =
         now - st.pendingCancelSince >= FORM_PH.CANCEL_DIP_MS &&
-        st.pendingCancelCount >= FORM_PH.CANCEL_DIP_FRAMES
-      ) {
-        // 計装: st.lastReleaseTs を書き換える前に refractoryRemainingMs() を評価する（取消直前の値を残す）
-        const debug = {
-          maxV: null,
-          rise: null,
-          nullFrames: null,
-          conf: usable.conf,
-          anchorNorm: usable.anchorNorm,
-          closeFrames: null,
-          hasNullGap: null,
-          refractoryRemaining: refractoryRemainingMs(),
-          cancelReason: "anchor-return",
-        };
-        st.pendingRelease = null;
-        st.pendingCancelSince = 0;
-        st.pendingCancelCount = 0;
-        st.nb2DriftSince = 0;
-        st.lastReleaseTs = now - (FORM_PH.REFRACTORY_MS - FORM_PH.CANCEL_COOLDOWN_MS); // クールダウン: 残滓再発火の抑止
-        st.anchorSince = now;
-        st.cur = FORM_PHASES.ANCHORING;
-        st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
-        return {
-          phase: st.cur,
-          released: false,
-          canceled: true,
-          anchorStartTs: st.anchorStartTs,
-          debug,
-        };
-      }
+        st.pendingCancelCount >= FORM_PH.CANCEL_DIP_FRAMES;
       // スパン蓄積中: まだ取消しない。pendingRelease を維持したまま次のチェック（sticky lock 等）へ進む
     } else {
       st.pendingCancelSince = 0; // アンカー圏外に戻った = dip 解消。連続要件のためリセット
       st.pendingCancelCount = 0;
     }
+    if (anchorReturn) {
+      // 計装: st.lastReleaseTs を書き換える前に refractoryRemainingMs() を評価する（取消直前の値を残す）
+      const debug = {
+        maxV: null,
+        rise: null,
+        nullFrames: null,
+        conf: usable.conf,
+        anchorNorm: usable.anchorNorm,
+        closeFrames: null,
+        hasNullGap: null,
+        refractoryRemaining: refractoryRemainingMs(),
+        cancelReason: "anchor-return",
+      };
+      st.pendingRelease = null;
+      st.pendingCancelSince = 0;
+      st.pendingCancelCount = 0;
+      st.nb2DriftSince = 0;
+      st.lastReleaseTs = now - (FORM_PH.REFRACTORY_MS - FORM_PH.CANCEL_COOLDOWN_MS); // クールダウン: 残滓再発火の抑止
+      st.anchorSince = now;
+      st.cur = FORM_PHASES.ANCHORING;
+      st.anchorStartTs = now; // 取消＝アンカー継続。旧ビュー実装も同フレームで now を入れていた
+      return formPhaseResult(
+        st,
+        now,
+        {
+          phase: st.cur,
+          released: false,
+          canceled: true,
+          anchorStartTs: st.anchorStartTs,
+        },
+        debug,
+      );
+    }
   } else if (st.pendingRelease) {
     const pending = st.pendingRelease;
+    const adaptivePending = pending.fireEvidence === "adaptive";
     st.pendingRelease = null; // 猶予終了
     st.pendingCancelSince = 0;
     st.nb2DriftSince = 0;
     if (
+      !adaptivePending &&
       pending.nb2Ref &&
       pending.departCheck &&
       (pending.departSeen || 0) < FORM_PH.DEPART_OBSERVE_MIN
@@ -685,15 +1462,23 @@ function stepFormPhase(st, raw, history, sens, now) {
       st.anchorSince = 0;
       st.cur = FORM_PHASES.SETUP;
       st.anchorStartTs = 0;
-      return {
-        phase: st.cur,
-        released: false,
-        canceled: true,
-        anchorStartTs: st.anchorStartTs,
+      return formPhaseResult(
+        st,
+        now,
+        {
+          phase: st.cur,
+          released: false,
+          canceled: true,
+          anchorStartTs: st.anchorStartTs,
+        },
         debug,
-      };
+      );
     }
-    if (pending.departCheck && (pending.departSeen || 0) >= FORM_PH.DEPART_OBSERVE_MIN) {
+    if (
+      !adaptivePending &&
+      pending.departCheck &&
+      (pending.departSeen || 0) >= FORM_PH.DEPART_OBSERVE_MIN
+    ) {
       /* 出発未確認のまま猶予終了（十分な有効フレームを観測できていた）→ スプリアス発火として
          取消。手がアンカー圏/緩ゾーンに留まったままの発火＝ドロー/保持中の誤発火。
          観測が DEPART_OBSERVE_MIN 未満（姿勢ロス優勢）なら無罪推定でショットを残す。
@@ -720,13 +1505,17 @@ function stepFormPhase(st, raw, history, sens, now) {
         st.cur = FORM_PHASES.SETUP;
         st.anchorStartTs = 0;
       }
-      return {
-        phase: st.cur,
-        released: false,
-        canceled: true,
-        anchorStartTs: st.anchorStartTs,
+      return formPhaseResult(
+        st,
+        now,
+        {
+          phase: st.cur,
+          released: false,
+          canceled: true,
+          anchorStartTs: st.anchorStartTs,
+        },
         debug,
-      };
+      );
     }
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 250) {
@@ -741,7 +1530,12 @@ function stepFormPhase(st, raw, history, sens, now) {
       hasNullGap: null,
       refractoryRemaining: refractoryRemainingMs(),
     };
-    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+    return formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+      debug,
+    );
   }
   if (st.lastReleaseTs && now - st.lastReleaseTs < 1100) {
     st.cur = FORM_PHASES.FOLLOW;
@@ -756,9 +1550,34 @@ function stepFormPhase(st, raw, history, sens, now) {
       hasNullGap: null,
       refractoryRemaining: refractoryRemainingMs(),
     };
-    return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+    return formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+      debug,
+    );
   }
   const close = usable.anchorNorm < FORM_PH.CLOSE_IN;
+  /* live / replay 契約は「現在frameを末尾へpush後に判定」。時刻破損や未来frameを
+     gap/速度証拠へ混ぜると誤発火するため、legacy全経路をfail-closedにする。 */
+  let historyChronologyValid = history.length > 0 && Number.isFinite(now),
+    previousHistoryTs = -Infinity;
+  if (historyChronologyValid) {
+    for (const h of history) {
+      if (!h || !Number.isFinite(h.ts) || h.ts <= previousHistoryTs || h.ts > now) {
+        historyChronologyValid = false;
+        break;
+      }
+      previousHistoryTs = h.ts;
+    }
+  }
+  const currentHistoryFrame = history.length ? history[history.length - 1] : null;
+  historyChronologyValid = Boolean(
+    historyChronologyValid &&
+      currentHistoryFrame &&
+      currentHistoryFrame.ts === now &&
+      currentHistoryFrame.m === raw,
+  );
   const winAll = history.filter((h) => h.ts >= now - FORM_PH.RISE_WINDOW_MS);
   const win = winAll.filter((h) => h.m && formConfOk(h.m));
   const closeFrames = win.filter((h) => h.m.anchorNorm < FORM_PH.CLOSE_IN);
@@ -768,31 +1587,52 @@ function stepFormPhase(st, raw, history, sens, now) {
   // B'（Stage 1）: 速度信頼性は dW 個別可視性でゲート（DW_VIS_GATE=0 の間は velWin === win）
   const velWin = win.filter((h) => formDwVisOk(h.m));
   const maxV = velWin.length ? Math.max(...velWin.map((h) => h.vel || 0)) : 0;
+  const legacyContinuity = legacyReleaseContinuity(
+    usable,
+    closeFrames,
+    winAll,
+    minAnchor,
+    s,
+    st.adaptive.releaseSpeed,
+    now,
+  );
   const hasNullGap = winAll.length > win.length;
-  const velOk = maxV > FORM_PH.RELEASE_TH / s;
-  /* 窓内の最大連続ギャップ（win に入らなかった最初のフレーム→最後のフレームの経過時間）。
-     hasNullGap と同じ「win 基準」（実null ∪ conf ゲート除外）で数える。2026-07-11
-     strict-review 修正: 旧実装は `!h.m` のみで数えていたため、CONF_GATE 発動時に
-     conf 除外フレーム（実nullではない「仮想null」）が hasNullGap は増やすのに
-     maxGapMs には数えられず、D' の時間上限を素通りしていた（B' との単独切替禁止の
-     根拠どおり、両ゲート発動後にのみ影響。CONF_GATE=0 の出荷状態では formConfOk が
-     常に true を返すため本行の意味は `!h.m` と完全に同値＝挙動不変）。
-     NB_MAX_GAP_MS 超の姿勢ロスは nullBridged の根拠にしない（Stage 1 D'） */
+  /* RISE_WINDOW と交差する最大連続ギャップを、最後に使えた姿勢→次に使えた姿勢の
+     観測不能時間として測る。null列内だけの時刻差では、窓左端より前から続くロスと
+     前後1フレーム間隔を切り落とし、低fpsほど150ms上限を大きく過小評価してしまう。
+     hasNullGap と同じ「実null ∪ confゲート除外」をギャップとして扱う。 */
+  const gapWindowStart = now - FORM_PH.RISE_WINDOW_MS;
   let maxGapMs = 0,
-    gapStart = null;
-  for (const h of winAll) {
-    if (h.m && formConfOk(h.m)) {
-      gapStart = null;
+    previousUsableTs = null,
+    gapStartTs = null,
+    gapOpen = false,
+    gapTouchesWindow = false;
+  for (const h of history) {
+    const observed = h && Number.isFinite(h.ts) && h.ts <= now;
+    const frameUsable = observed && h.m && formConfOk(h.m);
+    if (frameUsable) {
+      if (gapOpen && (gapTouchesWindow || h.ts >= gapWindowStart)) {
+        maxGapMs =
+          gapStartTs == null ? Infinity : Math.max(maxGapMs, h.ts - gapStartTs);
+      }
+      previousUsableTs = h.ts;
+      gapStartTs = null;
+      gapOpen = false;
+      gapTouchesWindow = false;
     } else {
-      if (gapStart == null) gapStart = h.ts;
-      maxGapMs = Math.max(maxGapMs, h.ts - gapStart);
+      if (!gapOpen) {
+        gapOpen = true;
+        gapStartTs = previousUsableTs;
+      }
+      if (!observed || h.ts >= gapWindowStart) gapTouchesWindow = true;
     }
   }
   const nullBridged =
+    historyChronologyValid &&
     hasNullGap &&
     rise > FORM_PH.NB_RISE &&
     maxV > FORM_PH.NB_MAXV &&
-    maxGapMs <= FORM_PH.NB_MAX_GAP_MS;
+    maxGapMs <= FORM_PH.NB_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS;
   /* NB2（A: tier-2 ギャップ橋渡し）: RISE_WINDOW を超える遮蔽でアンカー証拠が時効した
      リリースを、sticky アンカーの生存＋着地位置ゲートで発火させる。
      history 契約: 現在フレームは呼び出し側が push 済みなので、直前の有効フレームは
@@ -810,76 +1650,226 @@ function stepFormPhase(st, raw, history, sens, now) {
     st.anchorStartTs > 0 &&
     (st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) &&
     nb2LastValid != null &&
-    nb2GapMs > FORM_PH.NB_MAX_GAP_MS &&
-    nb2GapMs <= FORM_PH.NB2_MAX_GAP_MS &&
-    nb2LastValid.m.anchorNorm < FORM_PH.CLOSE_IN &&
+    nb2GapMs > FORM_PH.NB_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS &&
+    nb2GapMs <= FORM_PH.NB2_MAX_GAP_MS + FORM_PH.NB_GAP_EPSILON_MS &&
+    nb2LastValid.m.anchorNorm <
+      (st.adaptive.evidence ? st.adaptive.evidence.anchorEnter : FORM_PH.CLOSE_IN) &&
     nb2LastValid.ts - st.anchorStartTs >= FORM_PH.NB2_MIN_HOLD_MS &&
     usable.anchorNorm >= FORM_PH.NB2_MIN_ARRIVE &&
     usable.anchorNorm <= FORM_PH.NB2_MAX_ARRIVE &&
     nb2DropBody <= FORM_PH.NB2_MAX_DROP &&
     maxV > FORM_PH.NB2_MAXV / s;
   const anchorEvidence = closeFrames.length >= 2 ? "close" : nullBridged2 ? "nb2" : null;
+  const adaptiveEvidence = adaptive.evidence || adaptive.briefEvidence;
+  const adaptiveDecision = adaptiveReleaseCandidate(adaptiveEvidence, usable, history, now);
+  const adaptiveDeparturePending = Boolean(
+    adaptiveEvidence &&
+      adaptiveEvidence.sustainedDeparture === true &&
+      !adaptiveDecision.matched &&
+      adaptiveDecision.departDelta != null &&
+      adaptiveDecision.departDelta >= FORM_PH.ADAPTIVE_DEPARTURE &&
+      usable.anchorNorm <= FORM_PH.ADAPTIVE_FAR_BOUNDARY &&
+      adaptiveDecision.movingAway &&
+      adaptiveDecision.maxV != null &&
+      adaptiveDecision.maxV >= adaptiveDecision.releaseSpeed,
+  );
+  /* close/velocity の legacy 経路も、ドローイング中の一瞬の close 姿勢を
+     リリースへ昇格させない。短いアンカーでも adaptive brief と同じ 80ms
+     の安定保持を先に要求し、既存の速度・方向・離脱ゲートは維持する。 */
+  /* drawArm が観測できる close 姿勢は、ドローイングからの一瞬の引き抜きでも現れる。
+     撮影角度で drawArm が低く見える場合も同じ短hold誤検出を防ぐ。gate の時間源は
+     sticky anchorStartTs ではなく、現在の離脱直前に連続して観測できた close ゾーンの run とする。
+     null / 非close / conf除外で run を切り、旧入力で drawArm が無い場合は従来経路へ残す。 */
+  const closeRun = [];
+  let closeRunIndex = history.length - 1;
+  if (!(usable.anchorNorm < FORM_PH.CLOSE_IN)) closeRunIndex -= 1;
+  for (; closeRunIndex >= 0; closeRunIndex -= 1) {
+    const frame = history[closeRunIndex];
+    if (!frame || !frame.m || !formConfOk(frame.m) || frame.m.anchorNorm >= FORM_PH.CLOSE_IN)
+      break;
+    closeRun.unshift(frame);
+  }
+  const closeRunStartTs = closeRun.length ? closeRun[0].ts : 0;
+  const closeEvidenceStartTs = closeFrames.length ? closeFrames[0].ts : 0;
+  const closeHoldSpan = closeRunStartTs > 0
+    ? Math.max(0, now - closeRunStartTs)
+    : closeFrames.length >= 5 && closeEvidenceStartTs > 0
+      ? Math.max(0, now - closeEvidenceStartTs)
+      : 0;
+  const closeDrawArm = formMedian(
+    closeFrames.map((frame) => frame.m.drawArm).filter((drawArm) => Number.isFinite(drawArm)),
+  );
+  const DIRECT_DRAWING_ARM_MIN = 20;
+  const DIRECT_DRAWING_CADENCE_MAX_MS = 50;
+  const closeEvidenceCadenceMs = formMedian(
+    closeFrames
+      .slice(1)
+      .map((frame, index) => frame.ts - closeFrames[index].ts)
+      .filter((delta) => Number.isFinite(delta) && delta > 0),
+  );
+  const fastDirectCadence =
+    closeEvidenceCadenceMs != null && closeEvidenceCadenceMs <= DIRECT_DRAWING_CADENCE_MAX_MS;
+  /* NB2/tier-1 far arrivals are outside the short direct-drawing geometry and
+     retain their existing gap-bridge contract. */
+  const drawingPostureNeedsStableClose =
+    closeDrawArm != null &&
+    (closeDrawArm >= DIRECT_DRAWING_ARM_MIN || fastDirectCadence) &&
+    !nullBridged2 &&
+    usable.anchorNorm <= FORM_PH.NB2_MAX_ARRIVE;
+  const legacyHoldQualified =
+    anchorEvidence !== "close" ||
+    !drawingPostureNeedsStableClose ||
+    ((!hasNullGap || closeFrames.length >= 5) &&
+      closeHoldSpan >= FORM_PH.ADAPTIVE_BRIEF_HOLD_MIN_MS);
+  const legacyMatched =
+    historyChronologyValid &&
+    anchorEvidence &&
+    legacyHoldQualified &&
+    !close &&
+    !adaptiveDeparturePending &&
+    (legacyContinuity.fastMatched ||
+      legacyContinuity.calibratedMatched ||
+      nullBridged ||
+      nullBridged2);
+  const fireEvidence = adaptiveDecision.matched
+    ? "adaptive"
+    : legacyMatched
+      ? anchorEvidence
+      : null;
   const debug = {
     maxV,
     rise,
+    departDelta: adaptiveDecision.departDelta,
     nullFrames: winAll.length - win.length,
     conf: usable.conf,
     anchorNorm: usable.anchorNorm,
     closeFrames: closeFrames.length,
     hasNullGap,
+    legacyCurrentV: legacyContinuity.currentV,
+    legacyArmDelta: legacyContinuity.armDelta,
+    legacyDirectionFrames: legacyContinuity.directionFrames,
+    legacyDirectionDelta: legacyContinuity.directionDelta,
     refractoryRemaining: refractoryRemainingMs(),
   }; // 検証計装（H）: 判定ロジックには使わない、保存用の内部量そのまま
-  if (
-    anchorEvidence &&
-    !close &&
-    now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS &&
-    (velOk || nullBridged || nullBridged2)
-  ) {
+  if (adaptiveDeparturePending) {
+    const previousFrame = history.length > 1 ? history[history.length - 2] : null;
+    const pending = st.adaptive.pendingDeparture;
+    if (!pending || !previousFrame || previousFrame.ts !== pending.ts) {
+      st.adaptive.pendingDeparture = {
+        ts: now,
+        debug: { ...debug },
+      };
+    }
+    st.cur = FORM_PHASES.DRAWING;
+  }
+  if (fireEvidence && (st.lastReleaseTs === 0 || now - st.lastReleaseTs > FORM_PH.REFRACTORY_MS)) {
+    if (fireEvidence === "adaptive" && st.adaptive.pendingDeparture) {
+      Object.assign(debug, st.adaptive.pendingDeparture.debug);
+    }
+    st.adaptive.pendingDeparture = null;
+    const adaptiveEvidence = st.adaptive.evidence || st.adaptive.briefEvidence;
     st.lastReleaseTs = now;
     st.cur = FORM_PHASES.RELEASE;
     st.anchorSince = 0;
-    /* NB2 経由の発火（アンカー証拠が nb2 か、速度経路が nb2 のみ）には着地後静止確認用の
-       参照位置を持たせる（drift-cancel 対象化）。通常経路の発火には付けない。
-       出発確認（departCheck）は全ての発火に普遍適用する（2026-07-15） */
-    const viaNb2 = anchorEvidence === "nb2" || (!velOk && !nullBridged && nullBridged2);
-    st.pendingRelease = {
-      ts: now,
-      nb2Ref: viaNb2 ? { x: usable.dW.x, y: usable.dW.y } : null,
-      departCheck: true,
-      departFrames: 0,
-      departSeen: 0,
-    };
+    /* legacy NB2 経由の発火（アンカー証拠が nb2 か、速度経路が nb2 のみ）には着地後静止確認用の
+       参照位置を持たせる（drift-cancel 対象化）。通常経路の発火には付けない。legacy 発火は
+       departCheck を維持し、肯定的な離脱を発火前に確認済みの adaptive 発火は別 pending を使う。 */
+    const viaNb2 =
+      fireEvidence !== "adaptive" &&
+      (fireEvidence === "nb2" ||
+        (!legacyContinuity.fastMatched &&
+          !legacyContinuity.calibratedMatched &&
+          !nullBridged &&
+          nullBridged2));
+    if (fireEvidence === "adaptive") {
+      const anchorEnter =
+        adaptiveEvidence && Number.isFinite(adaptiveEvidence.anchorEnter)
+          ? adaptiveEvidence.anchorEnter
+          : Number.isFinite(st.adaptive.anchorEnter)
+            ? st.adaptive.anchorEnter
+            : FORM_PH.ADAPTIVE_ANCHOR_MIN;
+      st.pendingRelease = {
+        ts: now,
+        fireEvidence: "adaptive",
+        anchorEnter,
+        releaseSpeed: adaptiveDecision.releaseSpeed,
+        departCheck: false,
+        returnSince: 0,
+        returnCount: 0,
+        nb2Ref: null,
+      };
+    } else {
+      st.pendingRelease = {
+        ts: now,
+        nb2Ref: viaNb2 ? { x: usable.dW.x, y: usable.dW.y } : null,
+        fireEvidence,
+        anchorEnter: st.adaptive.anchorEnter,
+        releaseSpeed: null,
+        departCheck: true,
+        departFrames: 0,
+        departSeen: 0,
+      };
+    }
     st.nb2DriftSince = 0;
     st.pendingCancelSince = 0;
     const anchorStartTs = st.anchorStartTs; // クリア前の値を返す（呼び出し側が summarizeFormShot へ渡す）
     st.anchorStartTs = 0;
     /* 発火経路の計装（フィールド監査用）: evidence=アンカー証拠の種別 / vel=速度経路の種別 */
-    debug.fireEvidence = anchorEvidence;
-    debug.fireVel = velOk ? "vel" : nullBridged ? "nb" : "nb2";
-    return { phase: st.cur, released: true, anchorStartTs, debug };
+    debug.fireEvidence = fireEvidence;
+    debug.fireVel =
+      fireEvidence === "adaptive"
+        ? null
+        : legacyContinuity.fastMatched || legacyContinuity.calibratedMatched
+          ? "vel"
+          : nullBridged
+            ? "nb"
+            : "nb2";
+    const result = formPhaseResult(
+      st,
+      now,
+      { phase: st.cur, released: true, anchorStartTs },
+      debug,
+    );
+    st.adaptive.evidence = null;
+    st.adaptive.briefEvidence = null;
+    st.adaptive.pendingDeparture = null;
+    return result;
   }
-  if (close) {
-    if (!st.anchorSince) st.anchorSince = now;
-    st.cur =
-      now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125
-        ? FORM_PHASES.FULL_DRAW
-        : FORM_PHASES.ANCHORING;
-  } else {
-    st.anchorSince = 0;
-    // 方向チェック（Stage 0 E'）: anchorNorm の減少方向（手首が顔へ近づく）のみ DRAWING。
-    // 増加方向（レットダウン等）を DRAWING と誤分類すると sticky な anchorStartTs が
-    // 保持されて hold にレットダウン前の時間が混入するため、SETUP へ落とす
-    const anchorTrend = win.length ? usable.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
-    st.cur =
-      maxV > FORM_PH.DRAW_SPEED && usable.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS
-        ? FORM_PHASES.DRAWING
-        : FORM_PHASES.SETUP;
+  if (!adaptiveDeparturePending) {
+    st.adaptive.pendingDeparture = null;
+    if (close || adaptive.holdQualified || adaptive.briefHoldQualified) {
+      if (adaptive.holdQualified || adaptive.briefHoldQualified) {
+        st.anchorSince = adaptive.holdStartTs;
+        if (!st.anchorStartTs) st.anchorStartTs = adaptive.holdStartTs;
+      } else if (!st.anchorSince) {
+        st.anchorSince = now;
+      }
+      st.cur =
+        now - st.anchorSince >= FORM_PH.FULLDRAW_MS && usable.drawArm > 125
+          ? FORM_PHASES.FULL_DRAW
+          : FORM_PHASES.ANCHORING;
+    } else {
+      st.anchorSince = 0;
+      // 方向チェック（Stage 0 E'）: anchorNorm の減少方向（手首が顔へ近づく）のみ DRAWING。
+      // 増加方向（レットダウン等）を DRAWING と誤分類すると sticky な anchorStartTs が
+      // 保持されて hold にレットダウン前の時間が混入するため、SETUP へ落とす
+      const anchorTrend = win.length ? usable.anchorNorm - win[0].m.anchorNorm : 0; // 負=顔へ近づく
+      st.cur =
+        maxV > FORM_PH.DRAW_SPEED && usable.anchorNorm < 1.2 && anchorTrend < FORM_PH.DRAW_DIR_EPS
+          ? FORM_PHASES.DRAWING
+          : FORM_PHASES.SETUP;
+    }
+    // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット
+    if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs)
+      st.anchorStartTs = now;
+    else if (st.cur === FORM_PHASES.SETUP || st.cur === FORM_PHASES.IDLE) st.anchorStartTs = 0;
   }
-  // sticky 更新: ANCHORING/FULL_DRAW で記録開始、DRAWING 一時離脱は保持、SETUP/IDLE でリセット
-  if ((st.cur === FORM_PHASES.ANCHORING || st.cur === FORM_PHASES.FULL_DRAW) && !st.anchorStartTs)
-    st.anchorStartTs = now;
-  else if (st.cur === FORM_PHASES.SETUP || st.cur === FORM_PHASES.IDLE) st.anchorStartTs = 0;
-  return { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs, debug };
+  return formPhaseResult(
+    st,
+    now,
+    { phase: st.cur, released: false, anchorStartTs: st.anchorStartTs },
+    debug,
+  );
 }
 
 /* リリース前 windowSec 秒の安定性（ドリフト、胴体長比）。
@@ -952,6 +1942,920 @@ function judgeArrowCheck(preScores, confirmScores) {
   return { judgment, preScore, confirmScore, pre: pre.length, confirm: confirm.length };
 }
 
+function copyFormReleaseFireSnapshot(debug) {
+  if (!debug || typeof debug !== "object" || Array.isArray(debug)) return null;
+  const numericKeys = [
+    "anchorFloor",
+    "anchorEnter",
+    "releaseSpeed",
+    "evidenceAgeMs",
+    "evidenceStrength",
+    "departDelta",
+  ];
+  for (const key of numericKeys) {
+    if (!Object.hasOwn(debug, key)) return null;
+    if (!(debug[key] === null || Number.isFinite(debug[key]))) return null;
+  }
+  if (
+    !Object.hasOwn(debug, "fireEvidence") ||
+    !["adaptive", "close", "nb2"].includes(debug.fireEvidence)
+  ) {
+    return null;
+  }
+  return {
+    anchorFloor: debug.anchorFloor,
+    anchorEnter: debug.anchorEnter,
+    releaseSpeed: debug.releaseSpeed,
+    evidenceAgeMs: debug.evidenceAgeMs,
+    evidenceStrength: debug.evidenceStrength,
+    departDelta: debug.departDelta,
+    fireEvidence: debug.fireEvidence,
+  };
+}
+
+const FORM_DIAGNOSTIC_SLOTS = Object.freeze(["side", "oblique", "normal_range"]);
+const FORM_DIAGNOSTIC_RESULT_CODES = Object.freeze({
+  INVALID_APP_VERSION: "invalid-app-version",
+  INVALID_BATCH_ID: "invalid-batch-id",
+  CRYPTO_UNAVAILABLE: "crypto-unavailable",
+  BATCH_ID_COLLISION: "batch-id-collision",
+  COORDINATOR_MISSING: "coordinator-missing",
+  COORDINATOR_INVALID: "coordinator-invalid",
+  COORDINATOR_STALE: "coordinator-stale",
+  COORDINATOR_INCOMPLETE: "coordinator-incomplete",
+  COORDINATOR_COMPLETE: "coordinator-complete",
+  RECORD_INVALID: "record-invalid",
+  RECORD_INELIGIBLE: "record-ineligible",
+});
+const FORM_DIAGNOSTIC_COORDINATOR_KEYS = Object.freeze([
+  "version",
+  "batchId",
+  "appVer",
+  "nextSlot",
+  "recordIds",
+  "invalidated",
+]);
+const FORM_DIAGNOSTIC_UUID_V4 =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const FORM_DIAGNOSTIC_MISSING = Symbol("form-diagnostic-missing");
+
+function formDiagnosticReadOwnData(source, key) {
+  if (source == null || (typeof source !== "object" && typeof source !== "function")) {
+    return FORM_DIAGNOSTIC_MISSING;
+  }
+  try {
+    const descriptor = Object.getOwnPropertyDescriptor(source, key);
+    return descriptor && Object.hasOwn(descriptor, "value")
+      ? descriptor.value
+      : FORM_DIAGNOSTIC_MISSING;
+  } catch (_) {
+    return FORM_DIAGNOSTIC_MISSING;
+  }
+}
+
+function formDiagnosticHasExactOwnDataKeys(source, keys) {
+  if (!source || typeof source !== "object") return false;
+  let actual;
+  try {
+    actual = Object.keys(source);
+  } catch (_) {
+    return false;
+  }
+  return (
+    actual.length === keys.length &&
+    keys.every(
+      (key) =>
+        actual.includes(key) &&
+        formDiagnosticReadOwnData(source, key) !== FORM_DIAGNOSTIC_MISSING,
+    )
+  );
+}
+
+function formDiagnosticReadOwnArray(source) {
+  if (!Array.isArray(source)) return null;
+  const copied = [];
+  for (let index = 0; index < source.length; index++) {
+    const value = formDiagnosticReadOwnData(source, String(index));
+    if (value === FORM_DIAGNOSTIC_MISSING) return null;
+    copied.push(value);
+  }
+  return copied;
+}
+
+function formDiagnosticRecordIdIsValid(value) {
+  return typeof value === "string" && value.length >= 1 && value.length <= 128;
+}
+
+function formDiagnosticCoordinatorFailure(code) {
+  return { ok: false, code, coordinator: null };
+}
+
+function validateFormDiagnosticMatrixCoordinator(coordinator, appVer, requireComplete = false) {
+  if (!Number.isSafeInteger(appVer) || appVer <= 0) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.INVALID_APP_VERSION);
+  }
+  if (coordinator == null) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_MISSING);
+  }
+  if (
+    typeof requireComplete !== "boolean" ||
+    !formDiagnosticHasExactOwnDataKeys(coordinator, FORM_DIAGNOSTIC_COORDINATOR_KEYS)
+  ) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID);
+  }
+
+  const version = formDiagnosticReadOwnData(coordinator, "version");
+  const batchId = formDiagnosticReadOwnData(coordinator, "batchId");
+  const coordinatorAppVer = formDiagnosticReadOwnData(coordinator, "appVer");
+  const nextSlot = formDiagnosticReadOwnData(coordinator, "nextSlot");
+  const sourceRecordIds = formDiagnosticReadOwnData(coordinator, "recordIds");
+  const invalidated = formDiagnosticReadOwnData(coordinator, "invalidated");
+  const recordIds = formDiagnosticReadOwnArray(sourceRecordIds);
+
+  if (
+    version !== 1 ||
+    typeof batchId !== "string" ||
+    !FORM_DIAGNOSTIC_UUID_V4.test(batchId) ||
+    !Number.isSafeInteger(coordinatorAppVer) ||
+    coordinatorAppVer <= 0 ||
+    !Number.isSafeInteger(nextSlot) ||
+    nextSlot < 0 ||
+    nextSlot > FORM_DIAGNOSTIC_SLOTS.length ||
+    !recordIds ||
+    recordIds.length !== nextSlot ||
+    new Set(recordIds).size !== recordIds.length ||
+    !recordIds.every(formDiagnosticRecordIdIsValid) ||
+    invalidated !== false
+  ) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID);
+  }
+  if (coordinatorAppVer !== appVer) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_STALE);
+  }
+  if (requireComplete && nextSlot !== FORM_DIAGNOSTIC_SLOTS.length) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INCOMPLETE);
+  }
+
+  return {
+    ok: true,
+    code: null,
+    coordinator: {
+      version: 1,
+      batchId,
+      appVer: coordinatorAppVer,
+      nextSlot,
+      recordIds: recordIds.slice(),
+      invalidated: false,
+    },
+  };
+}
+
+function createFormDiagnosticMatrixCoordinator(appVer, batchId) {
+  if (!Number.isSafeInteger(appVer) || appVer <= 0) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.INVALID_APP_VERSION);
+  }
+  if (typeof batchId !== "string" || !FORM_DIAGNOSTIC_UUID_V4.test(batchId)) {
+    return formDiagnosticCoordinatorFailure(FORM_DIAGNOSTIC_RESULT_CODES.INVALID_BATCH_ID);
+  }
+  return {
+    ok: true,
+    code: null,
+    coordinator: {
+      version: 1,
+      batchId,
+      appVer,
+      nextSlot: 0,
+      recordIds: [],
+      invalidated: false,
+    },
+  };
+}
+
+function formDiagnosticReadCollisionBatchId(record) {
+  const marker = formDiagnosticReadOwnData(record, "formDiagnosticMatrix");
+  const batchId = formDiagnosticReadOwnData(marker, "batchId");
+  return typeof batchId === "string" && FORM_DIAGNOSTIC_UUID_V4.test(batchId) ? batchId : null;
+}
+
+function formDiagnosticCollectBatchIds(coordinator, formAnalyses, trash) {
+  const records = formDiagnosticReadOwnArray(formAnalyses);
+  const trashItems = formDiagnosticReadOwnArray(trash);
+  if (!records || !trashItems) return null;
+
+  const used = new Set();
+  const activeBatchId = formDiagnosticReadOwnData(coordinator, "batchId");
+  if (typeof activeBatchId === "string" && FORM_DIAGNOSTIC_UUID_V4.test(activeBatchId)) {
+    used.add(activeBatchId);
+  }
+  records.forEach((record) => {
+    const batchId = formDiagnosticReadCollisionBatchId(record);
+    if (batchId) used.add(batchId);
+  });
+  trashItems.forEach((item) => {
+    if (formDiagnosticReadOwnData(item, "type") !== "formAnalysis") return;
+    const batchId = formDiagnosticReadCollisionBatchId(formDiagnosticReadOwnData(item, "data"));
+    if (batchId) used.add(batchId);
+  });
+  return used;
+}
+
+function formDiagnosticFormatUuidV4(bytes) {
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (value) => value.toString(16).padStart(2, "0"));
+  return (
+    hex.slice(0, 4).join("") +
+    "-" +
+    hex.slice(4, 6).join("") +
+    "-" +
+    hex.slice(6, 8).join("") +
+    "-" +
+    hex.slice(8, 10).join("") +
+    "-" +
+    hex.slice(10, 16).join("")
+  );
+}
+
+function formDiagnosticReadCryptoMethod(source, key) {
+  if (!source) return null;
+  try {
+    const method = source[key];
+    return typeof method === "function" ? method.bind(source) : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function allocateFormDiagnosticBatchId(cryptoSource, coordinator, formAnalyses, trash) {
+  const randomUUID = formDiagnosticReadCryptoMethod(cryptoSource, "randomUUID");
+  const getRandomValues = formDiagnosticReadCryptoMethod(cryptoSource, "getRandomValues");
+  if (!randomUUID && !getRandomValues) {
+    return {
+      ok: false,
+      code: FORM_DIAGNOSTIC_RESULT_CODES.CRYPTO_UNAVAILABLE,
+      batchId: null,
+    };
+  }
+
+  const used = formDiagnosticCollectBatchIds(coordinator, formAnalyses, trash);
+  if (!used) {
+    return {
+      ok: false,
+      code: FORM_DIAGNOSTIC_RESULT_CODES.BATCH_ID_COLLISION,
+      batchId: null,
+    };
+  }
+
+  let malformedCandidate = false;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let candidate = null;
+    if (randomUUID) {
+      try {
+        candidate = randomUUID();
+      } catch (_) {
+        if (getRandomValues) {
+          try {
+            const bytes = new Uint8Array(16);
+            getRandomValues(bytes);
+            candidate = formDiagnosticFormatUuidV4(bytes);
+          } catch (_) {
+            candidate = null;
+          }
+        }
+      }
+    } else {
+      try {
+        const bytes = new Uint8Array(16);
+        getRandomValues(bytes);
+        candidate = formDiagnosticFormatUuidV4(bytes);
+      } catch (_) {
+        candidate = null;
+      }
+    }
+
+    if (typeof candidate !== "string" || !FORM_DIAGNOSTIC_UUID_V4.test(candidate)) {
+      malformedCandidate = true;
+      continue;
+    }
+    if (!used.has(candidate)) {
+      return { ok: true, code: null, batchId: candidate };
+    }
+  }
+
+  return {
+    ok: false,
+    code: malformedCandidate
+      ? FORM_DIAGNOSTIC_RESULT_CODES.INVALID_BATCH_ID
+      : FORM_DIAGNOSTIC_RESULT_CODES.BATCH_ID_COLLISION,
+    batchId: null,
+  };
+}
+
+const FORM_DIAGNOSTIC_FIRE_KEYS = Object.freeze([
+  "anchorFloor",
+  "anchorEnter",
+  "releaseSpeed",
+  "evidenceAgeMs",
+  "evidenceStrength",
+  "departDelta",
+  "fireEvidence",
+]);
+const FORM_DIAGNOSTIC_COUNTER_KEYS = Object.freeze([
+  "supersededActive",
+  "missingActive",
+  "identityMismatch",
+  "invalidTransition",
+  "sequenceExhausted",
+]);
+const FORM_DIAGNOSTIC_CANCEL_REASONS = new Set([
+  "anchor-return",
+  "nb2-drift",
+  "nb2-unobserved",
+  "no-depart",
+]);
+const FORM_DIAGNOSTIC_UNRESOLVED_REASONS = new Set([
+  "geometry-reset",
+  "workflow-save",
+  "workflow-close",
+  "replay-eos",
+  "superseded-fire",
+]);
+const FORM_DIAGNOSTIC_RECEIPT_ID = /^form-receipt-([1-9][0-9]{0,5})$/;
+
+function formDiagnosticRecordResultFailure(code) {
+  return { ok: false, code, retainedReceiptIds: null };
+}
+
+function formDiagnosticInspectReceipt(receipt) {
+  const id = formDiagnosticReadOwnData(receipt, "id");
+  const idMatch = typeof id === "string" ? FORM_DIAGNOSTIC_RECEIPT_ID.exec(id) : null;
+  const shotCreated = formDiagnosticReadOwnData(receipt, "shotCreated");
+  const userDisposition = formDiagnosticReadOwnData(receipt, "userDisposition");
+  const detectorDisposition = formDiagnosticReadOwnData(receipt, "detectorDisposition");
+  const cancelReason = formDiagnosticReadOwnData(receipt, "cancelReason");
+  const unresolvedReason = formDiagnosticReadOwnData(receipt, "unresolvedReason");
+  const sourceFire = formDiagnosticReadOwnData(receipt, "fire");
+
+  if (
+    !idMatch ||
+    typeof shotCreated !== "boolean" ||
+    !formDiagnosticHasExactOwnDataKeys(sourceFire, FORM_DIAGNOSTIC_FIRE_KEYS)
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  const fire = copyFormReleaseFireSnapshot(sourceFire);
+  if (!fire) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  let detectorOutcome;
+  if (detectorDisposition === "pending") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (detectorDisposition === "confirmed" && cancelReason === null && unresolvedReason === null) {
+    detectorOutcome = "confirmed";
+  } else if (
+    detectorDisposition === "auto-canceled" &&
+    FORM_DIAGNOSTIC_CANCEL_REASONS.has(cancelReason) &&
+    unresolvedReason === null
+  ) {
+    detectorOutcome = "auto-canceled";
+  } else if (
+    detectorDisposition === "unresolved" &&
+    cancelReason === null &&
+    FORM_DIAGNOSTIC_UNRESOLVED_REASONS.has(unresolvedReason)
+  ) {
+    detectorOutcome = "unresolved";
+  } else {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  let outcome;
+  if (userDisposition === "not-created" && shotCreated === false) {
+    outcome = "summary-failed";
+  } else if (userDisposition === "manual-removed" && shotCreated === true) {
+    outcome = "manual-removed";
+  } else if (userDisposition === "present" && shotCreated === true) {
+    if (detectorOutcome === "confirmed") outcome = "retained";
+    else if (detectorOutcome === "auto-canceled") outcome = "auto-canceled";
+    else {
+      return {
+        ok: false,
+        code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE,
+      };
+    }
+  } else {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  return {
+    ok: true,
+    code: null,
+    receipt: {
+      id,
+      numericId: Number(idMatch[1]),
+      outcome,
+      detectorOutcome,
+      cancelReason,
+      unresolvedReason,
+      fire,
+    },
+  };
+}
+
+function formDiagnosticInspectRecord(record, appVer) {
+  if (!Number.isSafeInteger(appVer) || appVer <= 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.INVALID_APP_VERSION };
+  }
+  if (!record || typeof record !== "object") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  const diagnosticVersion = formDiagnosticReadOwnData(record, "formDiagnosticVersion");
+  const captureMode = formDiagnosticReadOwnData(record, "captureMode");
+  const recordAppVer = formDiagnosticReadOwnData(record, "appVer");
+  if (diagnosticVersion === FORM_DIAGNOSTIC_MISSING || captureMode === FORM_DIAGNOSTIC_MISSING) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (diagnosticVersion !== 1 || captureMode !== "live") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (!Number.isSafeInteger(recordAppVer) || recordAppVer <= 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (recordAppVer !== appVer) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const recordId = formDiagnosticReadOwnData(record, "id");
+  const shots = formDiagnosticReadOwnData(record, "shots");
+  const sourceFeatures = formDiagnosticReadOwnData(record, "features");
+  const formPhaseDiag = formDiagnosticReadOwnData(record, "formPhaseDiag");
+  if (!formDiagnosticRecordIdIsValid(recordId)) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (!Number.isSafeInteger(shots) || shots < 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (shots !== 6) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const features = formDiagnosticReadOwnArray(sourceFeatures);
+  if (!features) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (features.length !== 6) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (
+    formPhaseDiag === FORM_DIAGNOSTIC_MISSING ||
+    !formPhaseDiag ||
+    typeof formPhaseDiag !== "object"
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const overflow = formDiagnosticReadOwnData(formPhaseDiag, "receiptOverflow");
+  const counters = formDiagnosticReadOwnData(formPhaseDiag, "receiptInvariantCounts");
+  const desynchronized = formDiagnosticReadOwnData(formPhaseDiag, "receiptDesynchronized");
+  const sourceReceipts = formDiagnosticReadOwnData(formPhaseDiag, "releaseReceipts");
+
+  if (!Number.isSafeInteger(overflow) || overflow < 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (overflow !== 0) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (!formDiagnosticHasExactOwnDataKeys(counters, FORM_DIAGNOSTIC_COUNTER_KEYS)) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  let hasInvariantFailure = false;
+  for (const key of FORM_DIAGNOSTIC_COUNTER_KEYS) {
+    const value = formDiagnosticReadOwnData(counters, key);
+    if (!Number.isSafeInteger(value) || value < 0 || value > 255) {
+      return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+    }
+    if (value !== 0) hasInvariantFailure = true;
+  }
+  if (hasInvariantFailure) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+  if (typeof desynchronized !== "boolean") {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (desynchronized) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const receiptValues = formDiagnosticReadOwnArray(sourceReceipts);
+  if (!receiptValues) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+  if (receiptValues.length < 1 || receiptValues.length > 32) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const receipts = [];
+  for (const sourceReceipt of receiptValues) {
+    const inspectedReceipt = formDiagnosticInspectReceipt(sourceReceipt);
+    if (!inspectedReceipt.ok) return inspectedReceipt;
+    receipts.push(inspectedReceipt.receipt);
+  }
+  receipts.sort((left, right) => left.numericId - right.numericId);
+  if (
+    new Set(receipts.map((receipt) => receipt.id)).size !== receipts.length ||
+    !receipts.every((receipt, index) => receipt.numericId === index + 1)
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  const retainedReceiptIds = receipts
+    .filter((receipt) => receipt.outcome === "retained")
+    .map((receipt) => receipt.id);
+  if (retainedReceiptIds.length !== 6) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE };
+  }
+
+  const featureReceiptIds = [];
+  for (const feature of features) {
+    const receiptId = formDiagnosticReadOwnData(feature, "receiptId");
+    if (typeof receiptId !== "string") {
+      return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+    }
+    featureReceiptIds.push(receiptId);
+  }
+  if (
+    new Set(featureReceiptIds).size !== featureReceiptIds.length ||
+    featureReceiptIds.some((receiptId) => !retainedReceiptIds.includes(receiptId)) ||
+    retainedReceiptIds.some((receiptId) => !featureReceiptIds.includes(receiptId))
+  ) {
+    return { ok: false, code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID };
+  }
+
+  return {
+    ok: true,
+    code: null,
+    recordId,
+    receipts,
+    retainedReceiptIds: retainedReceiptIds.slice(),
+  };
+}
+
+function validateFormDiagnosticRecord(record, appVer) {
+  const inspected = formDiagnosticInspectRecord(record, appVer);
+  return inspected.ok
+    ? {
+        ok: true,
+        code: null,
+        retainedReceiptIds: inspected.retainedReceiptIds.slice(),
+      }
+    : formDiagnosticRecordResultFailure(inspected.code);
+}
+
+function formDiagnosticPlanningFailure(code) {
+  return { ok: false, code, record: null, coordinator: null };
+}
+
+const FORM_DIAGNOSTIC_COPY_FAILED = Symbol("form-diagnostic-copy-failed");
+
+function formDiagnosticCopyRecordValue(value, copies = new Map()) {
+  if (value === null || (typeof value !== "object" && typeof value !== "function")) return value;
+  if (typeof value === "function") return FORM_DIAGNOSTIC_COPY_FAILED;
+  if (copies.has(value)) return copies.get(value);
+
+  let prototype;
+  try {
+    prototype = Object.getPrototypeOf(value);
+  } catch (_) {
+    return FORM_DIAGNOSTIC_COPY_FAILED;
+  }
+  if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
+    return FORM_DIAGNOSTIC_COPY_FAILED;
+  }
+
+  let descriptors;
+  try {
+    descriptors = Object.getOwnPropertyDescriptors(value);
+  } catch (_) {
+    return FORM_DIAGNOSTIC_COPY_FAILED;
+  }
+
+  const copied = Array.isArray(value) ? [] : Object.create(prototype);
+  copies.set(value, copied);
+  for (const key of Reflect.ownKeys(descriptors)) {
+    if (Array.isArray(value) && key === "length") continue;
+    const descriptor = descriptors[key];
+    if (!Object.hasOwn(descriptor, "value")) return FORM_DIAGNOSTIC_COPY_FAILED;
+    const copiedValue = formDiagnosticCopyRecordValue(descriptor.value, copies);
+    if (copiedValue === FORM_DIAGNOSTIC_COPY_FAILED) return FORM_DIAGNOSTIC_COPY_FAILED;
+    try {
+      Object.defineProperty(copied, key, { ...descriptor, value: copiedValue });
+    } catch (_) {
+      return FORM_DIAGNOSTIC_COPY_FAILED;
+    }
+  }
+  if (Array.isArray(value)) {
+    try {
+      Object.defineProperty(copied, "length", descriptors.length);
+    } catch (_) {
+      return FORM_DIAGNOSTIC_COPY_FAILED;
+    }
+  }
+  return copied;
+}
+
+function formDiagnosticCopyRecordWithMarker(record, marker) {
+  try {
+    const copied = formDiagnosticCopyRecordValue(record);
+    if (copied === FORM_DIAGNOSTIC_COPY_FAILED) return null;
+    Object.defineProperty(copied, "formDiagnosticMatrix", {
+      value: marker,
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+    return copied;
+  } catch (_) {
+    return null;
+  }
+}
+
+function planFormDiagnosticMatrixRecord(record, coordinator, appVer) {
+  const checkedCoordinator = validateFormDiagnosticMatrixCoordinator(coordinator, appVer);
+  if (!checkedCoordinator.ok) {
+    return formDiagnosticPlanningFailure(checkedCoordinator.code);
+  }
+  if (checkedCoordinator.coordinator.nextSlot === FORM_DIAGNOSTIC_SLOTS.length) {
+    return formDiagnosticPlanningFailure(FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_COMPLETE);
+  }
+
+  const inspectedRecord = formDiagnosticInspectRecord(record, appVer);
+  if (!inspectedRecord.ok) {
+    return formDiagnosticPlanningFailure(inspectedRecord.code);
+  }
+  if (
+    Object.hasOwn(record, "formDiagnosticMatrix") ||
+    checkedCoordinator.coordinator.recordIds.includes(inspectedRecord.recordId)
+  ) {
+    return formDiagnosticPlanningFailure(FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INELIGIBLE);
+  }
+
+  const marker = {
+    version: 1,
+    batchId: checkedCoordinator.coordinator.batchId,
+    slot: FORM_DIAGNOSTIC_SLOTS[checkedCoordinator.coordinator.nextSlot],
+  };
+  const plannedRecord = formDiagnosticCopyRecordWithMarker(record, marker);
+  if (!plannedRecord) {
+    return formDiagnosticPlanningFailure(FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID);
+  }
+
+  return {
+    ok: true,
+    code: null,
+    record: plannedRecord,
+    coordinator: {
+      version: 1,
+      batchId: checkedCoordinator.coordinator.batchId,
+      appVer: checkedCoordinator.coordinator.appVer,
+      nextSlot: checkedCoordinator.coordinator.nextSlot + 1,
+      recordIds: checkedCoordinator.coordinator.recordIds.concat(inspectedRecord.recordId),
+      invalidated: false,
+    },
+  };
+}
+
+function invalidateFormDiagnosticMatrixForRecord(coordinator, recordId, appVer) {
+  if (!formDiagnosticRecordIdIsValid(recordId)) {
+    return {
+      ok: false,
+      code: FORM_DIAGNOSTIC_RESULT_CODES.RECORD_INVALID,
+      coordinator: null,
+      changed: false,
+    };
+  }
+
+  const checked = validateFormDiagnosticMatrixCoordinator(coordinator, appVer);
+  if (!checked.ok) {
+    return { ok: true, code: null, coordinator, changed: false };
+  }
+  if (!checked.coordinator.recordIds.includes(recordId)) {
+    return { ok: true, code: null, coordinator, changed: false };
+  }
+
+  return {
+    ok: true,
+    code: null,
+    coordinator: {
+      version: 1,
+      batchId: checked.coordinator.batchId,
+      appVer: checked.coordinator.appVer,
+      nextSlot: checked.coordinator.nextSlot,
+      recordIds: checked.coordinator.recordIds.slice(),
+      invalidated: true,
+    },
+    changed: true,
+  };
+}
+
+const FORM_DIAGNOSTIC_EXPORT_MAX_BYTES = 65536;
+const FORM_DIAGNOSTIC_EXPORT_FIRE_EVIDENCE = Object.freeze(["adaptive", "close", "nb2"]);
+const FORM_DIAGNOSTIC_EXPORT_COORDINATOR_CODES = Object.freeze([
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_MISSING,
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID,
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_STALE,
+  FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INCOMPLETE,
+]);
+
+function formDiagnosticExportFailure(code) {
+  return { ok: false, code, payload: null, json: null, byteLength: null };
+}
+
+function formDiagnosticExportCoordinatorCode(code) {
+  return FORM_DIAGNOSTIC_EXPORT_COORDINATOR_CODES.includes(code)
+    ? code
+    : FORM_DIAGNOSTIC_RESULT_CODES.COORDINATOR_INVALID;
+}
+
+function formDiagnosticHasOnlyOwnDataProperties(source) {
+  if (!source || typeof source !== "object") return false;
+  try {
+    return Reflect.ownKeys(Object.getOwnPropertyDescriptors(source)).every((key) =>
+      Object.hasOwn(Object.getOwnPropertyDescriptor(source, key), "value"),
+    );
+  } catch (_) {
+    return false;
+  }
+}
+
+function formDiagnosticExportSources(formAnalyses, coordinator, appVer) {
+  const checkedCoordinator = validateFormDiagnosticMatrixCoordinator(coordinator, appVer, true);
+  if (!checkedCoordinator.ok) {
+    return formDiagnosticExportFailure(
+      formDiagnosticExportCoordinatorCode(checkedCoordinator.code),
+    );
+  }
+
+  const records = formDiagnosticReadOwnArray(formAnalyses);
+  if (!records) return formDiagnosticExportFailure("source-invalid");
+
+  const selected = [];
+  for (const recordId of checkedCoordinator.coordinator.recordIds) {
+    const matches = records.filter(
+      (record) => formDiagnosticReadOwnData(record, "id") === recordId,
+    );
+    if (matches.length === 0) return formDiagnosticExportFailure("source-missing");
+    if (matches.length !== 1) return formDiagnosticExportFailure("source-ambiguous");
+    selected.push(matches[0]);
+  }
+  return { ok: true, code: null, selected, coordinator: checkedCoordinator.coordinator };
+}
+
+function formDiagnosticNumberInRange(value, minimum, maximum, nullable = false) {
+  if (nullable && value === null) return true;
+  return Number.isFinite(value) && value >= minimum && value <= maximum;
+}
+
+function formDiagnosticRound(value) {
+  return value === null ? null : Number(value.toFixed(3));
+}
+
+function formDiagnosticProjectFire(fire) {
+  if (!formDiagnosticHasExactOwnDataKeys(fire, FORM_DIAGNOSTIC_FIRE_KEYS)) return null;
+  const anchorFloor = formDiagnosticReadOwnData(fire, "anchorFloor");
+  const anchorEnter = formDiagnosticReadOwnData(fire, "anchorEnter");
+  const releaseSpeed = formDiagnosticReadOwnData(fire, "releaseSpeed");
+  const evidenceAgeMs = formDiagnosticReadOwnData(fire, "evidenceAgeMs");
+  const evidenceStrength = formDiagnosticReadOwnData(fire, "evidenceStrength");
+  const departDelta = formDiagnosticReadOwnData(fire, "departDelta");
+  const fireEvidence = formDiagnosticReadOwnData(fire, "fireEvidence");
+  if (
+    !formDiagnosticNumberInRange(anchorFloor, 0, 1.3, true) ||
+    !formDiagnosticNumberInRange(anchorEnter, 0.35, 0.65) ||
+    !formDiagnosticNumberInRange(releaseSpeed, 6, 8) ||
+    !formDiagnosticNumberInRange(evidenceAgeMs, 0, 1500, true) ||
+    (evidenceStrength !== null &&
+      (!Number.isSafeInteger(evidenceStrength) || evidenceStrength < 3 || evidenceStrength > 12)) ||
+    !formDiagnosticNumberInRange(departDelta, -1.3, 1.3, true) ||
+    !FORM_DIAGNOSTIC_EXPORT_FIRE_EVIDENCE.includes(fireEvidence)
+  ) {
+    return null;
+  }
+  return {
+    anchorFloor: formDiagnosticRound(anchorFloor),
+    anchorEnter: formDiagnosticRound(anchorEnter),
+    releaseSpeed: formDiagnosticRound(releaseSpeed),
+    evidenceAgeMs: evidenceAgeMs === null ? null : formDiagnosticRound(evidenceAgeMs),
+    evidenceStrength,
+    departDelta: formDiagnosticRound(departDelta),
+    fireEvidence,
+  };
+}
+
+function formDiagnosticProjectReceipt(receipt, ordinal) {
+  if (!receipt || typeof receipt !== "object" || !Number.isSafeInteger(receipt.numericId))
+    return null;
+  if (
+    !["retained", "manual-removed", "auto-canceled", "summary-failed", "unresolved"].includes(
+      receipt.outcome,
+    ) ||
+    !["confirmed", "auto-canceled", "unresolved"].includes(receipt.detectorOutcome)
+  ) {
+    return null;
+  }
+  const fire = formDiagnosticProjectFire(receipt.fire);
+  if (!fire) return null;
+  return {
+    receiptOrdinal: ordinal,
+    outcome: receipt.outcome,
+    detectorOutcome: receipt.detectorOutcome,
+    cancelReason: receipt.cancelReason,
+    unresolvedReason: receipt.unresolvedReason,
+    fire,
+  };
+}
+
+function formDiagnosticProjectRun(record, coordinator, runOrdinal, appVer) {
+  if (!formDiagnosticHasOnlyOwnDataProperties(record)) return null;
+  const marker = formDiagnosticReadOwnData(record, "formDiagnosticMatrix");
+  if (!formDiagnosticHasExactOwnDataKeys(marker, ["version", "batchId", "slot"])) return null;
+  if (
+    formDiagnosticReadOwnData(marker, "version") !== 1 ||
+    formDiagnosticReadOwnData(marker, "batchId") !== coordinator.batchId ||
+    formDiagnosticReadOwnData(marker, "slot") !== FORM_DIAGNOSTIC_SLOTS[runOrdinal - 1]
+  ) {
+    return null;
+  }
+
+  const inspected = formDiagnosticInspectRecord(record, appVer);
+  if (!inspected.ok) return null;
+  const receipts = inspected.receipts
+    .slice()
+    .sort((left, right) => left.numericId - right.numericId);
+  const projected = receipts.map((receipt, index) =>
+    formDiagnosticProjectReceipt(receipt, index + 1),
+  );
+  if (
+    projected.some((receipt) => receipt === null) ||
+    projected.filter((receipt) => receipt.outcome === "retained").length !== 6
+  ) {
+    return null;
+  }
+  return {
+    runOrdinal,
+    condition: formDiagnosticReadOwnData(marker, "slot"),
+    retainedShotCount: 6,
+    receipts: projected,
+  };
+}
+
+function formDiagnosticUtf8ByteLength(text, TextEncoderCtor = globalThis.TextEncoder) {
+  try {
+    if (typeof TextEncoderCtor !== "function") return null;
+    const encoded = new TextEncoderCtor().encode(text);
+    return encoded && Number.isSafeInteger(encoded.byteLength) ? encoded.byteLength : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function isFormDiagnosticJsonSizeAllowed(text, TextEncoderCtor = globalThis.TextEncoder) {
+  const byteLength = formDiagnosticUtf8ByteLength(text, TextEncoderCtor);
+  return byteLength !== null && byteLength <= FORM_DIAGNOSTIC_EXPORT_MAX_BYTES;
+}
+
+function buildFormDiagnosticExport(
+  formAnalyses,
+  coordinator,
+  appVer,
+  TextEncoderCtor = globalThis.TextEncoder,
+) {
+  const source = formDiagnosticExportSources(formAnalyses, coordinator, appVer);
+  if (!source.ok) return source;
+  const runs = source.selected.map((record, index) =>
+    formDiagnosticProjectRun(record, source.coordinator, index + 1, appVer),
+  );
+  if (runs.length !== FORM_DIAGNOSTIC_SLOTS.length || runs.some((run) => run === null)) {
+    return formDiagnosticExportFailure("source-invalid");
+  }
+  const payload = {
+    format: "archery-note-form-diagnostics",
+    schemaVersion: 1,
+    appVersion: appVer,
+    matrix: "field-3x6",
+    runs,
+  };
+  const json = `${JSON.stringify(payload, null, 2)}\n`;
+  const byteLength = formDiagnosticUtf8ByteLength(json, TextEncoderCtor);
+  if (byteLength === null) return formDiagnosticExportFailure("encoding-unavailable");
+  if (byteLength > FORM_DIAGNOSTIC_EXPORT_MAX_BYTES) {
+    return formDiagnosticExportFailure("output-too-large");
+  }
+  return { ok: true, code: null, payload, json, byteLength };
+}
+
 /* 検証計装（H）: 撮影セッション終了時に shots(arrowCheck付与済み) と samplePerfMs
    計測列から、保存レコードへ添える診断サマリを作る。db.settings.formDebug===true
    のときのみ呼び出し側が保存する（既定OFF）。判定ロジックには一切使わない。 */
@@ -990,10 +2894,18 @@ function formAnchorVariation(shots) {
 
 /* 1 射の要約（formAnalysis.features 1 件分）。
    anchorStartTs=アンカー圏に入った時刻, releaseTs=リリース時刻 */
-function summarizeFormShot(history, anchorStartTs, releaseTs) {
+function summarizeFormShot(history, anchorStartTs, releaseTs, activeAnchorEnter) {
   if (!history || !history.length || !releaseTs) return null;
+  const activeAnchorLimit = Math.max(
+    0.45,
+    Number.isFinite(activeAnchorEnter) ? activeAnchorEnter : 0.35,
+  );
   let win = history.filter(
-    (h) => h.m && h.ts >= (anchorStartTs || 0) && h.ts <= releaseTs - 120 && h.m.anchorNorm < 0.45,
+    (h) =>
+      h.m &&
+      h.ts >= (anchorStartTs || 0) &&
+      h.ts <= releaseTs - 120 &&
+      h.m.anchorNorm < activeAnchorLimit,
   );
   let degraded = false;
   /* 段階フォールバック（2026-07-15）: 従来は win.length < 2 で null（ショット無言破棄）

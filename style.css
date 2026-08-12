@@ -22,9 +22,9 @@
   --logo-surface-a:#faf9f6; --logo-surface-b:#faf9f6;
   --target-surface-a:#eeeade; --target-surface-b:#e6e2d4;
   --radius-card:8px; --radius-panel:8px; --radius-control:6px;
+  --motion-fast:.18s; --motion-med:.28s; --motion-fluid:.42s;
   --ease-app:cubic-bezier(.2,.8,.2,1);
   --ease-fluid:cubic-bezier(.22,1,.36,1);
-  --motion-fast:.16s; --motion-med:.34s; --motion-fluid:.42s;
   /* design tokens — spacing */
   --space-1:4px; --space-2:6px; --space-3:8px; --space-4:10px;
   --space-5:12px; --space-6:14px; --space-7:16px; --space-8:20px;
@@ -116,6 +116,15 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px 10px 
   0%{opacity:.4; transform:scale(.72);}
   62%{opacity:1; transform:scale(1.08);}
   100%{opacity:1; transform:scale(1);}
+}
+@keyframes impactRing{
+  0%{opacity:.72; transform:scale(.55);}
+  68%{opacity:.32; transform:scale(1.08);}
+  100%{opacity:0; transform:scale(1.28);}
+}
+@keyframes impactRay{
+  0%{opacity:.72; transform:scaleX(.35);}
+  100%{opacity:0; transform:scaleX(1);}
 }
 @keyframes impactFlash{
   0%{filter:drop-shadow(0 0 0 rgba(23,100,61,0)); opacity:.58;}
@@ -360,7 +369,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 /* 分析タブ「今日の結論」: 机上モードの入口カード。金面は使わず、hairlineの罫線と大きめの本文だけで目立たせる */
 .todayConclusionCard{
   border-top:2px solid var(--accent);
-  animation:appRise .36s var(--ease-app) both; /* motion:因果 — タブを開いた結果として最初に読む一言が現れる */
+  animation:appRise var(--motion-fluid) var(--ease-app) both; /* motion:因果 — タブを開いた結果として最初に読む一言が現れる */
 }
 .todayConclusionKicker{font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--sub); font-weight:var(--fw-label);}
 .todayConclusionText{margin:6px 0 0; font-size:17px; font-weight:var(--fw-figure); line-height:1.5; color:var(--title);}
@@ -588,6 +597,9 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 }
 .shotNew{transform-box:fill-box; transform-origin:center; animation:markPop .42s cubic-bezier(.2,1.15,.2,1) both;}
 .shotNew circle{animation:impactFlash .42s ease-out both;}
+.shotNew .impactOverlay{pointer-events:none; transform-box:fill-box; transform-origin:center;}
+.shotNew .impactRing{fill:none; stroke:var(--accent); stroke-width:1.2; transform-box:fill-box; transform-origin:center; animation:impactRing .42s var(--ease-app) both;}
+.shotNew .impactRay{fill:none; stroke:var(--accent); stroke-width:1; stroke-linecap:butt; transform-box:fill-box; transform-origin:center; animation:impactRay .28s var(--ease-app) .04s both;}
 .statbar{display:flex; gap:6px; margin-top:10px;}
 .stat{flex:1; background:var(--soft); border-radius:8px; padding:9px 4px; text-align:center;}
 .stat b{display:block; font-size:17px; font-variant-numeric:tabular-nums;} .stat span{font-size:10.5px; color:var(--sub);}
@@ -757,6 +769,11 @@ body.modalOpen{overflow:hidden;}
   box-shadow:var(--shadow-raised);
   animation:sheetUp .32s var(--ease-fluid);
 }
+.sheetHeader{position:sticky; top:-16px; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); margin:-16px -16px 12px; padding:12px 12px 8px 16px; background:var(--card);}
+.sheetHeader h3{margin:0;}
+.sheetClose{appearance:none; min-width:var(--tap-target-min); min-height:var(--tap-target-min); padding:0; border:1px solid transparent; border-radius:var(--radius-sm); background:transparent; color:var(--sub); font-size:24px; line-height:1;}
+.sheetClose:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.sheetClose:hover{background:var(--card2); color:var(--ink);}
 .sheet h3{margin:0 0 8px; font-size:16px; color:var(--title);}
 /* 確認ダイアログ（appConfirm）: .sheet より小さい面。破壊的操作の直前だけ登場モーションを持つ */
 .confirmSheet{max-width:360px; border-radius:8px;}
@@ -889,7 +906,8 @@ details.adv[open] summary::before{transform:translateY(-35%) rotate(45deg);}
 details.adv summary::-moz-list-bullet{display:none;}
 header.app .gear{
   position:absolute; right:12px; top:8px; top:calc(8px + env(safe-area-inset-top));
-  width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  width:36px; height:36px; min-width:var(--tap-target-min); min-height:var(--tap-target-min);
+  border-radius:8px; display:flex; align-items:center; justify-content:center;
   background:var(--soft); border:1px solid var(--line); color:var(--title); font-size:20px; cursor:pointer; padding:0; flex:0 0 auto;
 }
 @media (max-width:420px){
@@ -915,14 +933,14 @@ header.app .gear{
 }
 /* motion:因果 — タブ切替の結果として画面内容が入れ替わったことを示す微細フェード */
 @keyframes viewEnter{from{opacity:.88; transform:translateY(5px);}to{opacity:1; transform:translateY(0);}}
-main.viewEnter{animation:viewEnter .22s var(--ease-app) both;}
+main.viewEnter{animation:viewEnter var(--motion-med) var(--ease-app) both;}
 /* motion:因果 — ビュー内のリスト要素が時差で出現し、画面にリズムを与える */
 @keyframes itemReveal{from{opacity:0; transform:translateY(8px);}to{opacity:1; transform:translateY(0);}}
 main.viewEnter .listItem,
 main.viewEnter .historyMonthLabel,
 main.viewEnter .histRecentBlock,
 main.viewEnter .card{
-  animation:itemReveal .28s var(--ease-app) both;
+  animation:itemReveal var(--motion-med) var(--ease-app) both;
 }
 main.viewEnter > :nth-child(1){animation-delay:0s;}
 main.viewEnter > :nth-child(2){animation-delay:.03s;}
@@ -942,7 +960,7 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 /* motion:因果 — 開始ボタン押下を深い手応えで返す（行射開始の意思決定の重みを表現） */
 .startPrimary:active{transform:translateY(2px) scale(.968)!important; filter:brightness(.86)!important; box-shadow:inset 0 3px 6px rgba(0,0,0,.18)!important;}
 /* motion:状態 — トースト登場はスプリングで弾み、退場は速く消える */
-.toast.show{transition:opacity .24s, transform .3s cubic-bezier(.22,1.15,.36,1);}
+.toast.show{transition:opacity var(--motion-fast), transform var(--motion-med) var(--ease-fluid);}
 
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{scroll-behavior:auto!important; transition:none!important; animation:none!important;}
@@ -968,6 +986,14 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .formPhaseTag{position:absolute;top:8px;right:8px;background:rgba(13,59,36,.85);color:#eafff2;border-radius:8px;padding:2px 10px;font-size:12px;font-weight:var(--fw-label);z-index:2}
 .formPhaseTag.release{background:rgba(198,40,40,.9)}
 .formPhaseTag.fulldraw{background:rgba(184,134,11,.9)}
+/* motion:状態 — 射形解析の進行と保存結果を、映像操作を妨げない細線で示す。 */
+@keyframes formScan{0%{opacity:0;transform:translateX(-18%)}18%{opacity:.58}82%{opacity:.58}100%{opacity:0;transform:translateX(118%)}}
+@keyframes formSavedRing{from{opacity:.15;transform:scale(.78) rotate(-18deg)}to{opacity:.8;transform:scale(1) rotate(0)}}
+.formCapture{--form-motion-line:rgba(232,245,237,.52)}
+.formCapture[data-motion-state="ready"] .formCamWrap::after,.formCapture[data-motion-state="analyzing"] .formCamWrap::after{content:"";position:absolute;inset:18% 8%;border:1px solid var(--form-motion-line);pointer-events:none;opacity:.28}
+.formCapture[data-motion-state="analyzing"] .formCamWrap::before{content:"";position:absolute;top:18%;bottom:18%;left:8%;width:1px;background:var(--accent);pointer-events:none;animation:formScan .9s var(--ease-fluid) both}
+.formCapture[data-motion-state="saved"] .formCamWrap::after{content:"✓";position:absolute;inset:50% auto auto 50%;color:var(--accent);font-size:28px;line-height:1;transform:translate(-50%,-50%);animation:formSavedRing .28s var(--ease-app) both;pointer-events:none}
+.formCapture[data-motion-state="failed"] .formCamWrap::after,.formCapture[data-motion-state="canceled"] .formCamWrap::after{content:"";position:absolute;inset:18% 8%;border:1px solid rgba(255,255,255,.24);pointer-events:none}
 .formCloseBtn,.formCropBtn{position:absolute;top:calc(8px + env(safe-area-inset-top));width:40px;height:40px;min-height:40px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .formCloseBtn{left:8px}
 .formCropBtn{left:56px;opacity:.7}

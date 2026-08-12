@@ -151,17 +151,17 @@ function renderHistory(m) {
   m.innerHTML = `${pageHeroHtml("history", { ss, rows: _heroRows })}
   <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <div class="row">
-      <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
-      <div><label class="f">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(hf.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
+      <div><label class="f" for="histSetup">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f" for="histDist">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(hf.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <div class="row">
-      <div><label class="f">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${esc(r)}" ${hf.round === r ? "selected" : ""}>${esc(roundLabel(r))}</option>`).join("")}</select></div>
-      <div class="histFilterEnd"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
+      <div><label class="f" for="histRound">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${esc(r)}" ${hf.round === r ? "selected" : ""}>${esc(roundLabel(r))}</option>`).join("")}</select></div>
+      <div class="histFilterEnd"><button type="button" class="btn ghost" id="histClear">絞り込み解除</button></div>
     </div>
     <div id="histList">
     ${
       ss.length
-        ? historyGroupedListHtml(ss.slice(0, ui._histLimit || 50)) + (ss.length > (ui._histLimit || 50) ? `<div class="btnrow"><button class="btn ghost" id="histMore">さらに表示（残り${ss.length - (ui._histLimit || 50)}件）</button></div>` : "")
+        ? historyGroupedListHtml(ss.slice(0, ui._histLimit || 50)) + (ss.length > (ui._histLimit || 50) ? `<div class="btnrow"><button type="button" class="btn ghost" id="histMore">さらに表示（残り${ss.length - (ui._histLimit || 50)}件）</button></div>` : "")
         : allSs.length
           ? `<div class="empty">この絞り込みに合う記録がありません。フィルタを広げてください。</div>`
           : `<div class="empty historyEmpty" data-testid="history-empty">
@@ -525,12 +525,12 @@ function openHistDetail(id) {
     ${analysisCardsHtml}
     <div class="histDetailActions">
       <div class="btnrow">
-        <button class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
-        <button class="btn sec" id="hCard">画像保存</button>
+        <button type="button" class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
+        <button type="button" class="btn sec" id="hCard">画像保存</button>
       </div>
       <div class="btnrow">
-        <button class="btn ghost" id="hClose">閉じる</button>
-        <button class="btn danger" id="hDel">削除</button>
+        <button type="button" class="btn ghost" id="hClose">閉じる</button>
+        <button type="button" class="btn danger" id="hDel">削除</button>
       </div>
     </div>
   </div>`;
@@ -609,10 +609,10 @@ function renderSight(m) {
     ${
       db.setups.length
         ? `
-    <label class="f">セッティング</label><select class="inp" id="sgSetup">${db.setups.map((s) => `<option value="${esc(s.id)}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
+    <label class="f" for="sgSetup">セッティング</label><select class="inp" id="sgSetup">${db.setups.map((s) => `<option value="${esc(s.id)}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select>
     <label class="f">距離</label>
     <div class="chips" id="sgDistChips">${dists.map((d) => `<button type="button" class="chip ${d === dist ? "on" : ""}" aria-pressed="${d === dist}" data-d="${d}">${d}m</button>`).join("")}</div>
-    <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
+    <div class="btnrow"><button type="button" class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button type="button" class="btn sec sm" id="sgCalMode">校正モード</button></div>
     ${
       marks.length
         ? `<table class="tbl ledgerTbl mt10" data-testid="sight-ledger"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
@@ -623,7 +623,7 @@ function renderSight(m) {
             i,
           ) => `<tr class="${i === 0 ? "ledgerCurrent" : ""}"><td>${i === 0 ? `<span class="ledgerDot" title="使用中"></span>` : ""}${fmtD(mk.date)}</td><td><b>${esc(mk.v || "—")}</b></td><td><b>${esc(mk.h || "—")}</b></td>
       <td class="subNoteSm">${esc(mk.note || "")}</td>
-      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}">${icon("del")}</button></td></tr>`,
+      <td class="right"><button type="button" class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}" aria-label="サイト値を削除">${icon("del")}</button></td></tr>`,
         )
         .join("")}</table>`
         : `<div class="empty">この距離の記録はまだありません</div>`
@@ -692,8 +692,8 @@ function renderSight(m) {
     <details class="adv">
       <summary>クリック換算の設定（任意）</summary>
       <div class="row">
-        <div><label class="f">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70 || ""}" placeholder="例: 4"></div>
-        <div><label class="f">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70 || ""}" placeholder="例: 4"></div>
+        <div><label class="f" for="sgCalV">上下 1クリック=cm @70m</label><input class="inp" id="sgCalV" inputmode="decimal" value="${setup.calibV70 || ""}" placeholder="例: 4"></div>
+        <div><label class="f" for="sgCalH">左右 1クリック=cm @70m</label><input class="inp" id="sgCalH" inputmode="decimal" value="${setup.calibH70 || ""}" placeholder="例: 4"></div>
       </div>
       <div class="hint">「サイトを1クリック動かすと70mで着弾が何cm動くか」。一度測って登録すると提案がクリック数でも出ます（他の距離へは自動換算）。アイ〜サイト距離は右上の設定から。</div>
     </details>
@@ -758,13 +758,13 @@ function openMarkForm(setupId, dist) {
   const ovl = document.createElement("div");
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet"><h3>サイト値を記録（${dist}m）</h3>
-    <label class="f">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
+    <label class="f" for="mkDate">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
     <div class="row">
-      <div><label class="f">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
-      <div><label class="f">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
+      <div><label class="f" for="mkV">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
+      <div><label class="f" for="mkH">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
     </div>
-    <label class="f">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・ベスト調整">
-    <div class="btnrow"><button class="btn ghost" id="mkCancel">キャンセル</button><button class="btn" id="mkSave">保存</button></div>
+    <label class="f" for="mkNote">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・ベスト調整">
+    <div class="btnrow"><button type="button" class="btn ghost" id="mkCancel">キャンセル</button><button type="button" class="btn" id="mkSave">保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#mkCancel" });
   ovl.querySelector("#mkCancel").onclick = () => closeModal(ovl);
@@ -796,18 +796,18 @@ function openCalibrationWizard(setupId) {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet"><h3>校正モード — ${esc(setup.name)}</h3>
     <div class="hint">実測できている距離だけ入力してください。複数距離が揃うほど、距離別サイト予測と個人補正が強くなります。</div>
-    <label class="f">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
+    <label class="f" for="calDate">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
     ${dists
       .map((d) => {
         const mk = latestMark(setupId, d) || {};
         return `<div class="row">
-        <div><label class="f">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v || "")}"></div>
-        <div><label class="f">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h || "")}"></div>
+        <div><label class="f" for="calV_${d}">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v || "")}"></div>
+        <div><label class="f" for="calH_${d}">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h || "")}"></div>
       </div>`;
       })
       .join("")}
-    <label class="f">メモ</label><input class="inp" id="calNote" placeholder="例: 校正日 / 無風 / ベスト確認">
-    <div class="btnrow"><button class="btn ghost" id="calCancel">キャンセル</button><button class="btn" id="calSave">校正値を保存</button></div>
+    <label class="f" for="calNote">メモ</label><input class="inp" id="calNote" placeholder="例: 校正日 / 無風 / ベスト確認">
+    <div class="btnrow"><button type="button" class="btn ghost" id="calCancel">キャンセル</button><button type="button" class="btn" id="calSave">校正値を保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#calCancel" });
   ovl.querySelector("#calCancel").onclick = () => closeModal(ovl);

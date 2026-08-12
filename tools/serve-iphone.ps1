@@ -1,14 +1,18 @@
-# LAN server: open http://<PC-IP>:8742/ from iPhone on the same Wi-Fi
+# LAN HTTP server for desktop/iPhone preview and saved-video replay.
+# iPhone live camera capture requires a trusted HTTPS origin.
 # (ASCII only in this file: PowerShell 5.1 misreads UTF-8 .ps1 without BOM)
 $Port = 8742
-$root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
-$mime = @{ ".html"="text/html; charset=utf-8"; ".js"="text/javascript; charset=utf-8"; ".json"="application/json"; ".svg"="image/svg+xml"; ".png"="image/png"; ".css"="text/css" }
+$root = [System.IO.Path]::GetFullPath((Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)))
+$rootPrefix = $root.TrimEnd([char[]]"\/") + [System.IO.Path]::DirectorySeparatorChar
+$mime = @{ ".html"="text/html; charset=utf-8"; ".js"="text/javascript; charset=utf-8"; ".mjs"="text/javascript; charset=utf-8"; ".json"="application/json"; ".svg"="image/svg+xml"; ".png"="image/png"; ".css"="text/css"; ".wasm"="application/wasm" }
 $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Any, $Port)
 $listener.Start()
 Write-Output "Serving $root on port $Port (all interfaces)"
+Write-Warning "LAN HTTP preview/replay only: iPhone live camera requires a trusted HTTPS origin."
+Write-Warning "This server exposes the repository root on all interfaces. Use only on trusted private Wi-Fi."
 Get-NetIPAddress -AddressFamily IPv4 |
   Where-Object { $_.IPAddress -ne "127.0.0.1" -and $_.IPAddress -notlike "169.254*" } |
-  ForEach-Object { Write-Output ("  Open from iPhone (same Wi-Fi): http://" + $_.IPAddress + ":" + $Port + "/") }
+  ForEach-Object { Write-Output ("  Open preview/replay from iPhone (same Wi-Fi): http://" + $_.IPAddress + ":" + $Port + "/") }
 while ($true) {
   $client = $listener.AcceptTcpClient()
   try {
@@ -23,7 +27,7 @@ while ($true) {
       if ($path -eq "/") { $path = "/index.html" }
       $file = Join-Path $root ($path.TrimStart("/") -replace "/", "\")
       $full = [System.IO.Path]::GetFullPath($file)
-      if ($full.StartsWith($root) -and (Test-Path $full -PathType Leaf)) {
+      if ($full.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase) -and (Test-Path -LiteralPath $full -PathType Leaf)) {
         $body = [System.IO.File]::ReadAllBytes($full)
         $ext = [System.IO.Path]::GetExtension($full).ToLower()
         $ctype = "application/octet-stream"
