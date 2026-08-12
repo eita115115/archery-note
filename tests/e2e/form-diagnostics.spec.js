@@ -79,6 +79,18 @@ async function formMotionState(page) {
   return page.locator(".formCapture").getAttribute("data-motion-state");
 }
 
+async function expectFormMotionFrame(page, state) {
+  const overlay = page.locator(`.formCapture[data-motion-state="${state}"]`);
+  await expect(overlay).toHaveCount(1);
+  await page.evaluate(
+    () =>
+      new Promise((resolve) =>
+        globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
+      ),
+  );
+  await expect(overlay).toHaveCount(1);
+}
+
 async function resetWriteProbeAfterStartup(page) {
   await page.waitForTimeout(750);
   return page.evaluate(() => {
@@ -588,6 +600,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
     globalThis.__formWriteProbe.fail = false;
   });
   await page.locator("#fcSave").click();
+  await expectFormMotionFrame(page, "saved");
   await expect(page.locator(".formCapture")).toHaveCount(0);
   await expect(page.locator("#toast")).toContainText(
     "横向き全身と弓手・引き手が写る位置を確認して、もう一度お試しください。",
@@ -626,6 +639,7 @@ test("failed diagnostic discard cancel retains the candidate and confirm closes 
   expect(await page.evaluate(() => globalThis.__formWriteProbe.attempts.length)).toBe(1);
   await page.locator("#fcClose").click();
   await page.locator(".confirmSheet #acOk").click();
+  await expectFormMotionFrame(page, "canceled");
   await expect(page.locator(".formCapture")).toHaveCount(0);
   expect(
     await page.evaluate(() => ({
@@ -698,6 +712,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
     globalThis.__formWriteProbe.fail = false;
   });
   await page.locator("#frSave").click();
+  await expectFormMotionFrame(page, "saved");
   await expect(page.locator(".formCapture")).toHaveCount(0);
   expect(
     await page.evaluate(() => ({

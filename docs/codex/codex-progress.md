@@ -4294,3 +4294,21 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: form-overlay presentation and its static/runtime contracts only;
   frozen saves, retry eligibility, receipts, diagnostics gates, persistence,
   transport, schema, Service Worker, and user-data behavior are unchanged.
+
+## 2026-08-12 — Keep form-analysis completion states visible
+
+- RED evidence: focused live-save, confirmed-discard, and replay-save E2E
+  assertions all found zero `saved` or `canceled` overlays because the prior
+  state update and overlay teardown happened in the same task.
+- Changed: successful saves and confirmed discards now retain their existing
+  overlay for a bounded 280ms visual window (or one next frame with reduced
+  motion), then use the same teardown. Direct close/teardown clears the
+  pending window. The receipt-lifecycle source contract accepts this bounded
+  teardown in addition to the original immediate form.
+- GREEN evidence: focused Chromium lifecycle E2E passed 3/3. `check:form`,
+  `check:ui` (three viewport smoke), `check:app`, lint, format, Node syntax,
+  and `git diff --check` pass.
+- Scope/risk: ephemeral presentation timing and its static contract only; no
+  save candidate, database, receipt, retry, coordinator, diagnostics gate,
+  transport, schema, Service Worker, dependency, or user-data behavior
+  changed.

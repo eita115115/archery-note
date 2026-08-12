@@ -344,10 +344,12 @@ for (const [label, source, finishName] of [
   const compact = compactSource(source);
   const failureAt = compact.indexOf("if(receiptFailure){");
   const frozenAt = compact.indexOf("if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){");
+  const confirmedExit = compact.slice(failureAt, frozenAt);
   assert(
     failureAt >= 0 &&
       failureAt < frozenAt &&
-      compact.slice(failureAt, frozenAt).includes(`${finishName}();return;`),
+      (confirmedExit.includes(`${finishName}();return;`) ||
+        confirmedExit.includes(`${finishName}AfterMotion();return;`)),
     `${label} receipt failure confirms and exits before diagnostic retry/discard`,
   );
 }
