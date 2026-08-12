@@ -587,6 +587,7 @@ function openFormCapture(){
   function finishCaptureAfterMotion(){
     clearFormMotionFinish();
     formMotionFinishing=true;
+    freezeCaptureForSave();
     return new Promise(resolve=>{
       formMotionResolve=resolve;
       const finish=()=>{
@@ -897,6 +898,7 @@ function openFormCapture(){
     if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); setFormMotionState("canceled"); await finishCaptureAfterMotion(); }
   };
   ovl.querySelector("#fcSave").onclick=async()=>{
+    if(formMotionFinishing) return;
     if(frozenDiagnosticSave){ await finishLiveDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
     if(db.settings.formDebug===true){ await finishLiveDiagnosticAttempt(shots.length===0); return; }
     if(!shots.length) return;
@@ -1034,6 +1036,7 @@ function startFormReplay(videoUrl){
   function finishReplayAfterMotion(){
     clearFormMotionFinish();
     formMotionFinishing=true;
+    freezeReplayForSave();
     return new Promise(resolve=>{
       formMotionResolve=resolve;
       const finish=()=>{
@@ -1261,6 +1264,7 @@ function startFormReplay(videoUrl){
     if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); setFormMotionState("canceled"); await finishReplayAfterMotion(); }
   };
   ovl.querySelector("#frSave").onclick=()=>{
+    if(formMotionFinishing) return;
     if(frozenDiagnosticSave){ finishReplayDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
     if(db.settings.formDebug===true){ finishReplayDiagnosticAttempt(shots.length===0); return; }
     if(!shots.length) return;

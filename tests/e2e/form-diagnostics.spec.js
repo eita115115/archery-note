@@ -99,6 +99,89 @@ async function resetWriteProbeAfterStartup(page) {
   });
 }
 
+async function installOrdinaryFormShotSeam(page) {
+  await page.evaluate(() => {
+    let released = false;
+    let mediaTime = 0;
+    globalThis.loadFormPose = async () => ({
+      detectForVideo: () => ({ landmarks: [[{}]] }),
+    });
+    globalThis.computeFormMetrics = () => null;
+    globalThis.summarizeFormShot = () => ({
+      angles: { bowArm: 160, drawArm: 145 },
+      holdMs: 450,
+      pre: null,
+    });
+    globalThis.stepFormPhase = () => {
+      if (!released) {
+        released = true;
+        return {
+          phase: "RELEASE",
+          released: true,
+          canceled: false,
+          debug: null,
+          anchorStartTs: 1,
+          anchorEnter: null,
+        };
+      }
+      return {
+        phase: "IDLE",
+        released: false,
+        canceled: false,
+        debug: null,
+        anchorStartTs: 0,
+        anchorEnter: null,
+      };
+    };
+    navigator.mediaDevices.getUserMedia = async () => {
+      const stream = new globalThis.MediaStream();
+      stream.getVideoTracks = () => [{ readyState: "live" }];
+      stream.getTracks = () => [{ stop() {} }];
+      return stream;
+    };
+    Object.defineProperties(globalThis.HTMLMediaElement.prototype, {
+      readyState: { configurable: true, get: () => 4 },
+      videoWidth: { configurable: true, get: () => 1280 },
+      videoHeight: { configurable: true, get: () => 720 },
+      currentTime: {
+        configurable: true,
+        get: () => {
+          mediaTime += 0.05;
+          return mediaTime;
+        },
+      },
+      ended: { configurable: true, get: () => false },
+      paused: { configurable: true, get: () => false },
+    });
+    globalThis.HTMLMediaElement.prototype.play = async () => {};
+    globalThis.HTMLMediaElement.prototype.load = function () {
+      setTimeout(() => this.dispatchEvent(new Event("loadeddata")), 0);
+    };
+  });
+}
+
+async function enableOrdinaryFormSave(page, captureMode) {
+  if (captureMode === "live") {
+    await page.locator("#formStart").click();
+    await expect(page.locator("#fcShotCount")).toHaveText("検出 1射");
+    await expect(page.locator("#fcSave")).toBeEnabled();
+    return "#fcSave";
+  }
+  const chooserPromise = page.waitForEvent("filechooser");
+  await page.locator("#formReplay").click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({
+    name: "ordinary-save-seam.mp4",
+    mimeType: "video/mp4",
+    buffer: Buffer.from("ordinary save seam"),
+  });
+  await page.waitForTimeout(50);
+  await page.locator("#frVideo").evaluate((video) => video.dispatchEvent(new Event("loadeddata")));
+  await expect(page.locator("#frShotCount")).toHaveText("検出 1射");
+  await expect(page.locator("#frSave")).toBeEnabled();
+  return "#frSave";
+}
+
 const TASK9_APP_VER = 84;
 const TASK9_KEY = "archeryNote.v1";
 const TASK9_SNAPSHOT_KEY = "archeryNote.snapshots.v1";
@@ -735,6 +818,36 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
     blocked: false,
   });
 });
+
+for (const captureMode of ["live", "replay"]) {
+  test(`ordinary ${captureMode} save ignores double activation during completion motion`, async ({
+    page,
+  }) => {
+    await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+    await page.goto("/");
+    await page.locator('#tabs [data-v="analysis"]').click();
+    await installOrdinaryFormShotSeam(page);
+    await installPrimaryWriteGate(page);
+    await page.evaluate(() => {
+      globalThis.__formWriteProbe.fail = false;
+      globalThis.__formWriteProbe.attempts = [];
+    });
+    const saveSelector = await enableOrdinaryFormSave(page, captureMode);
+    await page.evaluate(() => {
+      globalThis.__formWriteProbe.attempts = [];
+    });
+    await page.locator(saveSelector).click();
+    await page.locator(saveSelector).click({ force: true });
+    await expectFormMotionFrame(page, "saved");
+    expect(
+      await page.evaluate(() => ({
+        records: db.formAnalyses.length,
+        attempts: globalThis.__formWriteProbe.attempts.length,
+      })),
+    ).toEqual({ records: 1, attempts: 1 });
+    await expect(page.locator(".formCapture")).toHaveCount(0);
+  });
+}
 
 for (const [label, value, own] of [
   ["absent", undefined, false],

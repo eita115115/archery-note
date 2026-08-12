@@ -4312,3 +4312,19 @@ the minimum touch target` after the focused static contract was added.
   save candidate, database, receipt, retry, coordinator, diagnostics gate,
   transport, schema, Service Worker, dependency, or user-data behavior
   changed.
+
+## 2026-08-12 — Make form completion motion one-shot
+
+- RED evidence: new ordinary-save E2E seams for both live and replay created
+  two form records and two primary-store writes when the save control was
+  activated twice during the completion window.
+- Changed: the live and replay save handlers return immediately once a
+  completion motion is active. Starting that motion now immediately runs the
+  existing idempotent freeze operation, disabling the save control and
+  stopping capture/replay processing while keeping the visual state visible.
+- GREEN evidence: focused Chromium lifecycle and ordinary double-save tests
+  passed 5/5. `check:form`, `check:ui` (three viewport smoke), `check:app`,
+  lint, format, Node syntax, and `git diff --check` pass.
+- Scope/risk: one-shot completion presentation only; frozen saves, retry and
+  receipt paths, diagnostics gates, coordinator, database, transport, schema,
+  Service Worker, dependency, scoring, and user-data behavior are unchanged.
