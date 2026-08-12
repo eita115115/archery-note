@@ -75,6 +75,10 @@ async function stallFormPose(page) {
   });
 }
 
+async function formMotionState(page) {
+  return page.locator(".formCapture").getAttribute("data-motion-state");
+}
+
 async function resetWriteProbeAfterStartup(page) {
   await page.waitForTimeout(750);
   return page.evaluate(() => {
@@ -561,6 +565,8 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await expect(page.locator("#formReplay")).toHaveAttribute("type", "button");
   await page.locator("#formStart").click();
   const liveBaseline = await resetWriteProbeAfterStartup(page);
+  await expect.poll(() => formMotionState(page)).toBe("ready");
+  await expect(page.locator('.formCapture[data-motion-state="analyzing"]')).toHaveCount(0);
   await expect(page.locator("#fcShotCount")).toHaveText("検出 0/6射");
   for (const controlId of ["fcClose", "fcCrop", "fcRec"]) {
     await expect(page.locator(`#${controlId}`)).toHaveAttribute("type", "button");
@@ -569,6 +575,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#fcSave")).toBeEnabled();
   await expect(page.locator("#fcSave")).toHaveText("保存を再試行");
+  await expect(page.locator('.formCapture[data-motion-state="failed"]')).toHaveCount(1);
   expect(
     await page.evaluate(() => ({
       records: db.formAnalyses.length,
@@ -663,11 +670,14 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   await expect(page.locator("#frVideo")).toBeVisible();
   await expect(page.locator("#frClose")).toHaveAttribute("type", "button");
   const replayBaseline = await resetWriteProbeAfterStartup(page);
+  await expect.poll(() => formMotionState(page)).toBe("ready");
+  await expect(page.locator('.formCapture[data-motion-state="analyzing"]')).toHaveCount(0);
   await expect(page.locator("#frShotCount")).toHaveText("検出 0/6射");
   await page.locator("#frClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
   await expect(page.locator("#frSave")).toBeEnabled();
   await expect(page.locator("#frSave")).toHaveText("保存を再試行");
+  await expect(page.locator('.formCapture[data-motion-state="failed"]')).toHaveCount(1);
   expect(
     await page.evaluate(() => ({
       records: db.formAnalyses.length,

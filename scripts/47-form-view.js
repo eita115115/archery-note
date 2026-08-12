@@ -456,6 +456,11 @@ function openFormCapture(){
   const video=ovl.querySelector("#fcVideo"), canvas=ovl.querySelector("#fcCanvas");
   const ctx=canvas.getContext("2d");
   const hud=ovl.querySelector("#fcHud"), phaseEl=ovl.querySelector("#fcPhase");
+  function setFormMotionState(state){
+    if(!ovl.isConnected) return;
+    ovl.querySelector(".formCapture")?.setAttribute("data-motion-state",state);
+  }
+  setFormMotionState("ready");
   let facing="environment";
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, stream=null, landmarker=null, receiptFailure=false;
@@ -857,17 +862,17 @@ function openFormCapture(){
      保ちつつ、UI追加コストを避ける。判断は完了報告に明記）。 */
   async function finishLiveDiagnosticAttempt(zeroShot){
     const {result}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
-    if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
+    if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; setFormMotionState("failed"); saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
     const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);
     toast(zeroShot?formZeroShotDiagnosticText(frozenDiagnosticSave.record):formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice));
-    nativePulse("success"); finishCapture(); render(); await offerRecordedVideoAfterSave(); return true;
+    nativePulse("success"); setFormMotionState("saved"); finishCapture(); render(); await offerRecordedVideoAfterSave(); return true;
   }
   ovl.querySelector("#fcClose").onclick=async()=>{
-    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishCapture(); return; }
-    if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; finishCapture(); return; }
+    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})){ setFormMotionState("canceled"); finishCapture(); return; } return; }
+    if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; setFormMotionState("canceled"); finishCapture(); return; }
     if(!shots.length&&db.settings.formDebug===true){ await finishLiveDiagnosticAttempt(true); return; }
-    if(!shots.length){ abandonActiveReceipt("workflow-close"); finishCapture(); return; }
-    if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); finishCapture(); }
+    if(!shots.length){ abandonActiveReceipt("workflow-close"); setFormMotionState("canceled"); finishCapture(); return; }
+    if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); setFormMotionState("canceled"); finishCapture(); }
   };
   ovl.querySelector("#fcSave").onclick=async()=>{
     if(frozenDiagnosticSave){ await finishLiveDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
@@ -882,7 +887,7 @@ function openFormCapture(){
     save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
     nativePulse("success");
-    finishCapture(); render(); await offerRecordedVideoAfterSave();
+    setFormMotionState("saved"); finishCapture(); render(); await offerRecordedVideoAfterSave();
   };
   ovl.querySelector("#fcSwap").onclick=async()=>{
     if(!cameraSwapReady||cameraSwapInProgress) return;
@@ -923,6 +928,7 @@ function openFormCapture(){
   loadFormPose().then(async lm=>{
     if(!running) return;
     landmarker=lm;
+    setFormMotionState("analyzing");
     hud.textContent="カメラを起動しています…";
     const cameraStarted=await startCamera();
     if(!cameraStarted) return;
@@ -963,6 +969,11 @@ function startFormReplay(videoUrl){
   const video=ovl.querySelector("#frVideo"), canvas=ovl.querySelector("#frCanvas");
   const ctx=canvas.getContext("2d");
   const hud=ovl.querySelector("#frHud"), phaseEl=ovl.querySelector("#frPhase");
+  function setFormMotionState(state){
+    if(!ovl.isConnected) return;
+    ovl.querySelector(".formCapture")?.setAttribute("data-motion-state",state);
+  }
+  setFormMotionState("ready");
   let handedness=db.settings.formHandedness==="left"?"left":"right";
   let running=true, raf=0, landmarker=null, receiptFailure=false;
   let history=[], detector=makeFormPhaseDetector(), ema=makeFormEma(0.38);
@@ -1193,17 +1204,17 @@ function startFormReplay(videoUrl){
   }
   function finishReplayDiagnosticAttempt(zeroShot){
     const {result}=attemptReplayDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#frSave");
-    if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
+    if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; setFormMotionState("failed"); saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
     const matrixNotice=formDiagnosticMatrixNotice(frozenDiagnosticSave,zeroShot);
     toast(zeroShot?formZeroShotDiagnosticText(frozenDiagnosticSave.record):formDiagnosticLiveSaveToastText(frozenDiagnosticSave.record.shots,matrixNotice));
-    nativePulse("success"); finishReplay(); render(); return true;
+    nativePulse("success"); setFormMotionState("saved"); finishReplay(); render(); return true;
   }
   ovl.querySelector("#frClose").onclick=async()=>{
-    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishReplay(); return; }
-    if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; finishReplay(); return; }
+    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})){ setFormMotionState("canceled"); finishReplay(); return; } return; }
+    if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; setFormMotionState("canceled"); finishReplay(); return; }
     if(!shots.length&&db.settings.formDebug===true){ finishReplayDiagnosticAttempt(true); return; }
-    if(!shots.length){ abandonActiveReceipt("workflow-close"); finishReplay(); return; }
-    if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); finishReplay(); }
+    if(!shots.length){ abandonActiveReceipt("workflow-close"); setFormMotionState("canceled"); finishReplay(); return; }
+    if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); setFormMotionState("canceled"); finishReplay(); }
   };
   ovl.querySelector("#frSave").onclick=()=>{
     if(frozenDiagnosticSave){ finishReplayDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
@@ -1225,7 +1236,7 @@ function startFormReplay(videoUrl){
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
-    nativePulse("success"); finishReplay(); render();
+    nativePulse("success"); setFormMotionState("saved"); finishReplay(); render();
   };
   ovl.querySelector("#frHand").onclick=e=>{
     handedness=handedness==="right"?"left":"right";
@@ -1237,6 +1248,7 @@ function startFormReplay(videoUrl){
   loadFormPose().then(async lm=>{
     if(!running) return;
     landmarker=lm;
+    setFormMotionState("analyzing");
     hud.textContent="動画を読み込んでいます…";
     video.preload="auto";
     video.onerror=()=>{ hud.textContent="動画の読み込みに失敗しました。対応していない形式の可能性があります。"; };

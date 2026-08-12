@@ -4277,3 +4277,20 @@ the minimum touch target` after the focused static contract was added.
   target. Reduced-motion remains covered by the existing global media query;
   no scoring, radius, storage, transport, Service Worker, or user-data
   behavior changed.
+
+## 2026-08-12 — Animate form-analysis lifecycle states
+
+- RED evidence: `node tools/check-ui.js` rejected the missing form-motion CSS
+  contract; focused Chromium live and replay zero-shot retry tests both found
+  no initial `data-motion-state` attribute.
+- Changed: live and replay form overlays now set an ephemeral
+  `data-motion-state` of `ready`, `analyzing`, `saved`, `failed`, or
+  `canceled` only at existing overlay lifecycle boundaries. The camera/video
+  surface uses non-blocking scan, completion, and failure outlines; the global
+  reduced-motion rule disables both animations.
+- GREEN evidence: `check-ui`, `check-form`, `check-app`, the focused Chromium
+  live/replay retry and discard tests, lint, format, Node syntax, and
+  `git diff --check` pass.
+- Scope/risk: form-overlay presentation and its static/runtime contracts only;
+  frozen saves, retry eligibility, receipts, diagnostics gates, persistence,
+  transport, schema, Service Worker, and user-data behavior are unchanged.

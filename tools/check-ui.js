@@ -309,6 +309,13 @@ function staticUiChecks() {
       css.includes(".shotNew .impactRay"),
     "arrow impact motion and reduced-motion guard missing",
   );
+  assert(
+    css.includes('.formCapture[data-motion-state="analyzing"]') &&
+      css.includes("@keyframes formScan") &&
+      css.includes('.formCapture[data-motion-state="saved"]') &&
+      css.includes('.formCapture[data-motion-state="failed"]'),
+    "form motion states are incomplete",
+  );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
   assert(
     html.includes('class="ic ic-record"') &&
