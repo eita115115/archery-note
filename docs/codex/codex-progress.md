@@ -4257,3 +4257,23 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: acceptance-helper output and its static contract only; no app,
   storage, Service Worker, detector, dependency, or user-data behavior
   changed. Physical 3×6 artifact provenance remains the release gate.
+
+## 2026-08-12 — Animate newly recorded arrow impacts
+
+- RED evidence: `node tools/check-ui.js` rejected the missing impact-motion
+  contract, and the focused Chromium smoke test found no `.impactRing` inside
+  the fresh arrow marker.
+- Changed: the existing fresh-arrow SVG group now receives a non-interactive
+  ring and horizontal ray at the transformed target position. The existing
+  `freshTimer` remains the only cleanup boundary; `markCircle` arguments,
+  score calculation, hit input, target dimensions, storage, and detector
+  behavior are unchanged.
+- GREEN evidence: static UI checks and the focused bounded-impact Chromium
+  test pass; the latter confirms one overlay appears and the fresh marker is
+  removed after the existing window. App checks, formatting, lint, and
+  `git diff --check` pass. 360×780 and 390×844 smoke screenshots show no
+  baseline layout regression.
+- Scope/risk: visual-only SVG markup and CSS animation within the record
+  target. Reduced-motion remains covered by the existing global media query;
+  no scoring, radius, storage, transport, Service Worker, or user-data
+  behavior changed.

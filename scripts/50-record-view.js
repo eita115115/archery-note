@@ -1466,13 +1466,17 @@ function refreshActive() {
     }),
   );
   s.cur.forEach((a, i) => {
-    html += markCircle(
-      gp(a),
+    const fresh = i === ui.freshArrow;
+    const pos = gp(a);
+    const marker = markCircle(
+      pos,
       s.faceD,
       i === ui.selArrow ? "#111" : "var(--green-l)",
       scoreLabel(a),
-      i === ui.freshArrow ? "shotNew" : "",
+      fresh ? "shotNew" : "",
     );
+    const impact = `<g class="impactOverlay" aria-hidden="true"><circle class="impactRing" cx="${pos.x}" cy="${-pos.y}" r="${Math.max(0.7, s.faceD / 34)}"/><path class="impactRay" d="M ${pos.x - s.faceD / 22} ${-pos.y} H ${pos.x + s.faceD / 22}"/></g>`;
+    html += fresh ? marker.replace(/<\/g>$/, `${impact}</g>`) : marker;
   });
   $("#tgmarks").innerHTML = html;
   // chips（innerHTML 全置換でフォーカス中のチップが消えるため、置換前に data-i を控えて復元する）

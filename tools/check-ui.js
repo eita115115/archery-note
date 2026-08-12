@@ -302,6 +302,13 @@ function staticUiChecks() {
       surface.includes("ic-sight"),
     "minimal recording feedback, tab icons, and reduced-motion guard missing",
   );
+  assert(
+    css.includes(".shotNew .impactRing") &&
+      css.includes("@keyframes impactRing") &&
+      css.includes("@media (prefers-reduced-motion: reduce)") &&
+      css.includes(".shotNew .impactRay"),
+    "arrow impact motion and reduced-motion guard missing",
+  );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
   assert(
     html.includes('class="ic ic-record"') &&

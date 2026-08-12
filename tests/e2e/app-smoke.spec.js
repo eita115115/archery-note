@@ -67,6 +67,14 @@ function mainTab(page, name) {
   return page.locator("#tabs").getByRole("button", { name });
 }
 
+async function seedRecordPage(page) {
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+}
+
 function collectUnexpectedErrors(page) {
   const unexpectedErrors = [];
   page.on("console", (message) => {
@@ -112,6 +120,16 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await mainTab(page, "記録").click();
   await expect(page.getByTestId("record-start")).toBeVisible();
   await expect(unexpectedErrors).toEqual([]);
+});
+
+test("new arrow exposes one bounded impact state", async ({ page }) => {
+  await seedRecordPage(page);
+  await page.getByTestId("record-start").click();
+  await page.locator("#tgsvg").click({ position: { x: 150, y: 150 } });
+  await expect(page.locator("#tgmarks .shotNew")).toHaveCount(1);
+  await expect(page.locator("#tgmarks .shotNew .impactRing")).toHaveCount(1);
+  await page.waitForTimeout(750);
+  await expect(page.locator("#tgmarks .shotNew")).toHaveCount(0);
 });
 
 test("gives accessible names to the history filters", async ({ page }) => {
