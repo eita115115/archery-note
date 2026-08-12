@@ -132,6 +132,17 @@ test("new arrow exposes one bounded impact state", async ({ page }) => {
   await expect(page.locator("#tgmarks .shotNew")).toHaveCount(0);
 });
 
+test("tab changes keep the main content visible and bounded", async ({ page }) => {
+  await seedRecordPage(page);
+  await page.locator("#tabs").getByRole("button", { name: "分析" }).click();
+  await expect(page.locator("main.viewEnter")).toHaveCount(1);
+  await expect(page.locator("main")).toBeVisible();
+  const overflow = await page
+    .locator("body")
+    .evaluate(() => globalThis.document.documentElement.scrollWidth > globalThis.innerWidth + 1);
+  expect(overflow).toBe(false);
+});
+
 test("gives accessible names to the history filters", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

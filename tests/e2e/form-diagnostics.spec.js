@@ -53,6 +53,21 @@ async function seedDiagnosticDb(page, database) {
   }, database);
 }
 
+test("reduced motion keeps form content immediate", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator("#formStart").click();
+  await expect(page.locator(".formCapture")).toBeVisible();
+  await expect(page.locator("#fcHud")).toBeVisible();
+  const animation = await page.locator(".formCapture").evaluate((el) => {
+    el.setAttribute("data-motion-state", "analyzing");
+    return globalThis.getComputedStyle(el.querySelector(".formCamWrap"), "::before").animationName;
+  });
+  expect(animation).toBe("none");
+});
+
 async function installPrimaryWriteGate(page) {
   await page.evaluate(() => {
     const original = Storage.prototype.setItem;

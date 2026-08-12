@@ -316,6 +316,23 @@ function staticUiChecks() {
       css.includes('.formCapture[data-motion-state="failed"]'),
     "form motion states are incomplete",
   );
+  assert(
+    css.includes("--motion-fast") &&
+      css.includes("--motion-fluid") &&
+      css.includes("main.viewEnter") &&
+      css.includes("@media (prefers-reduced-motion: reduce)"),
+    "shared view motion contract missing",
+  );
+  assert(
+    /--motion-fast:\.18s;\s*--motion-med:\.28s;\s*--motion-fluid:\.42s;/.test(css) &&
+      /main\.viewEnter\{animation:viewEnter var\(--motion-med\) var\(--ease-app\) both;\}/.test(
+        css,
+      ) &&
+      /\.todayConclusionCard\{[\s\S]*?animation:appRise var\(--motion-fluid\) var\(--ease-app\) both;/.test(
+        css,
+      ),
+    "shared view motion timings are not aligned",
+  );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
   assert(
     html.includes('class="ic ic-record"') &&

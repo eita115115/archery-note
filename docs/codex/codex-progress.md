@@ -4328,3 +4328,25 @@ the minimum touch target` after the focused static contract was added.
 - Scope/risk: one-shot completion presentation only; frozen saves, retry and
   receipt paths, diagnostics gates, coordinator, database, transport, schema,
   Service Worker, dependency, scoring, and user-data behavior are unchanged.
+
+## 2026-08-12 — Unify field-instrument view motion
+
+- RED evidence: the new shared-timing contract rejected the prior `.16s` /
+  `.34s` timing values and literal view/result durations as unaligned. Initial
+  focused E2E setup also exposed an ambiguous analysis button and a missing
+  analysis-tab navigation; both were corrected in the test harness before the
+  behavioral checks.
+- Changed: shared motion tokens are now `.18s`, `.28s`, and `.42s`; existing
+  view entry, list stagger, toast, and today's-conclusion selectors consume
+  those tokens. `showView()` keeps its render → remove → reflow → add sequence.
+  New Chromium coverage verifies tab content remains visible without horizontal
+  overflow and that reduced motion disables the form scan while keeping the
+  capture HUD available.
+- GREEN evidence: `check:ui` passed at 360×780, 390×844, and 1280×800 with
+  bounded tabs/settings controls; both focused Chromium tests, `check:app`,
+  `check:form`, lint, format, and `git diff --check` pass.
+- Scope/risk: shared presentation timing and test contracts only. No layout,
+  navigation state, scoring, detector, save/retry, receipt, coordinator,
+  storage, transport, Service Worker, dependency, or user-data behavior
+  changed. The trusted HTTPS physical 3×6 acceptance remains a separate
+  release gate.
