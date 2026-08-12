@@ -130,6 +130,7 @@ test("new arrow exposes one bounded impact state", async ({ page }) => {
   await expect(page.locator("#tgmarks .shotNew .impactRing")).toHaveCount(1);
   await page.waitForTimeout(750);
   await expect(page.locator("#tgmarks .shotNew")).toHaveCount(0);
+  await expect(page.locator("#tgmarks .impactOverlay")).toHaveCount(0);
 });
 
 test("tab changes keep the main content visible and bounded", async ({ page }) => {

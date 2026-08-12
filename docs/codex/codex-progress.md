@@ -4350,3 +4350,19 @@ the minimum touch target` after the focused static contract was added.
   storage, transport, Service Worker, dependency, or user-data behavior
   changed. The trusted HTTPS physical 3×6 acceptance remains a separate
   release gate.
+
+## 2026-08-12 — Remove expired arrow-impact overlays
+
+- RED evidence: the bounded-impact Chromium test found one `.impactOverlay`
+  still present after the existing 640ms fresh-arrow window, even though its
+  `shotNew` class had been removed.
+- Changed: the existing `freshTimer` now removes target-local impact overlays
+  as it clears the fresh marker classes. The arrow circle, `markCircle`
+  arguments, scoring, input handling, and timer duration are unchanged.
+- GREEN evidence: focused Chromium impact regression, `check:app`,
+  `check:form`, lint, format, Node syntax, and `git diff --check` pass. The
+  UI static/viewport checker reaches its screenshot cleanup but is currently
+  blocked by a Windows `EPERM` lock on its generated browser profile.
+- Scope/risk: stale SVG cleanup and static/runtime regression coverage only;
+  no scoring, target geometry, storage, detector, Service Worker, dependency,
+  or user-data behavior changed.

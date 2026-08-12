@@ -1507,6 +1507,9 @@ function refreshActive() {
       document
         .querySelectorAll(".shotNew,.sc.fresh")
         .forEach((el) => el.classList.remove("shotNew", "fresh"));
+      document
+        .querySelectorAll("#tgmarks .impactOverlay")
+        .forEach((el) => el.remove());
     }, 640);
     revealChipsAboveDock(chipsBox, "instant");
   } else {

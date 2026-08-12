@@ -306,8 +306,10 @@ function staticUiChecks() {
     css.includes(".shotNew .impactRing") &&
       css.includes("@keyframes impactRing") &&
       css.includes("@media (prefers-reduced-motion: reduce)") &&
-      css.includes(".shotNew .impactRay"),
-    "arrow impact motion and reduced-motion guard missing",
+      css.includes(".shotNew .impactRay") &&
+      surface.includes('querySelectorAll("#tgmarks .impactOverlay")') &&
+      surface.includes("forEach((el) => el.remove())"),
+    "arrow impact motion, cleanup, and reduced-motion guard missing",
   );
   assert(
     css.includes('.formCapture[data-motion-state="analyzing"]') &&
