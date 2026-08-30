@@ -432,9 +432,11 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
+  await expect(page.locator('.formCapture[data-motion-state="ready"]')).toHaveCount(1);
   const liveBaseline = await resetWriteProbeAfterStartup(page);
   await page.locator("#fcClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
+  await expect(page.locator('.formCapture[data-motion-state="failed"]')).toHaveCount(1);
   await expect(page.locator("#fcSave")).toBeEnabled();
   await expect(page.locator("#fcSave")).toHaveText("保存を再試行");
   expect(
@@ -449,6 +451,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
     globalThis.__formWriteProbe.fail = false;
   });
   await page.locator("#fcSave").click();
+  await expect(page.locator('.formCapture[data-motion-state="saved"]')).toHaveCount(1);
   await expect(page.locator(".formCapture")).toHaveCount(0);
   expect(
     await page.evaluate(() => ({
@@ -460,6 +463,51 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
       blocked: globalThis.isUpdateReloadBlocked(),
     })),
   ).toEqual({ records: 1, shots: 0, mode: "live", marker: false, attempts: 2, blocked: false });
+});
+
+test("form capture discard leaves a canceled frame before teardown", async ({ page }) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await page.locator("#formStart").click();
+  await expect(page.locator('.formCapture[data-motion-state="ready"]')).toHaveCount(1);
+  await page.locator("#fcClose").click();
+  await expect(page.locator('.formCapture[data-motion-state="canceled"]')).toHaveCount(1);
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+});
+
+test("reduced motion completes a form discard on the next frame", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await page.locator("#formStart").click();
+  await page.locator("#fcClose").click();
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+});
+
+test("rapid diagnostic save clicks commit one record and one primary write", async ({ page }) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await installPrimaryWriteGate(page);
+  await page.locator("#formStart").click();
+  await resetWriteProbeAfterStartup(page);
+  await page.evaluate(() => {
+    globalThis.__formWriteProbe.fail = false;
+  });
+  await page.locator("#fcClose").dblclick({ force: true });
+  await expect(page.locator('.formCapture[data-motion-state="saved"]')).toHaveCount(1);
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+    })),
+  ).toEqual({ records: 1, attempts: 1 });
 });
 
 test("failed diagnostic discard cancel retains the candidate and confirm closes without saving", async ({

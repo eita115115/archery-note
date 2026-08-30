@@ -204,6 +204,15 @@ function staticUiChecks() {
     "fresh target markers must expose a bounded, disposable impact overlay",
   );
   assert(
+    /\.formCapture\[data-motion-state="analyzing"\][^}]*\.formCamWrap/.test(css) &&
+      css.includes('.formCapture[data-motion-state="saved"]') &&
+      css.includes('.formCapture[data-motion-state="canceled"]') &&
+      css.includes('.formCapture[data-motion-state="failed"]') &&
+      css.includes("@keyframes formAnalysisSweep") &&
+      css.includes("@keyframes formCompletionFrame"),
+    "form analysis motion states and their bounded frames missing",
+  );
+  assert(
     /\.impactOverlay\{[^}]*pointer-events:none;/.test(css) &&
       /\.impactRing\{[^}]*transform-box:fill-box;[^}]*transform-origin:center;/.test(css) &&
       !/html\.dark \.shotNew circle,html\.auto \.shotNew circle/.test(css) &&

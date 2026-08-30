@@ -2444,3 +2444,29 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   lifecycle, and is not persisted. Reduced motion uses the existing global
   animation-disable rule.
 - Next: Task 1 review, then Task 2 form-analysis state feedback.
+
+## 2026-08-30 — OSS motion Task 2: form-analysis state feedback
+
+- Changed: live capture and saved-video replay now begin at transient
+  `data-motion-state="ready"`, show `analyzing` while a save is frozen, then
+  hold `saved` or `canceled` for 280 ms before teardown (one animation frame
+  when reduced motion is requested). Failed writes render `failed`, retain the
+  existing diagnostic candidate or ordinary in-memory candidate, and restore
+  only the retry/close controls needed to continue safely.
+- Guard: completion sets a local `formMotionFinishing` latch before freezing
+  the stream/video and disabling save/close. Repeated clicks cannot append a
+  second record or issue a second primary write; ordinary save failures remove
+  the unpersisted record and restore its previous `updatedAt` before retry.
+- RED: `node tools/check-form-core.js` failed on the missing ready/state
+  setters and `node tools/check-ui.js` failed on missing form-motion CSS. The
+  focused Playwright cases also failed before the state selectors existed.
+- GREEN: `npm run check:form`, `npm run check:app`, `npm run lint`,
+  `node tools/check-ui.js`, `node --check scripts/47-form-view.js`, and
+  `git diff --check` pass. Focused Chromium evidence passed 9/9, including
+  failed-save retry, saved/canceled frames, a rapid double save with one
+  record/one write, and reduced-motion teardown.
+- Risk: no storage schema, scoring, detector thresholds, transport, native
+  plugin, dependency, or Service Worker behavior changed. The full format
+  check remains blocked only by the pre-existing unformatted OSS-motion design
+  document; the touched Playwright test is formatted.
+- Next: Task 2 review, then Task 3 view rhythm and reduced-motion behavior.

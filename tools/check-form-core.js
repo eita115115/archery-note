@@ -232,9 +232,35 @@ for (const [label, source, freezeName, finishName] of [
   );
 }
 assert(
-  saveReplay.includes("loadFormPose().then(async lm=>{\n    if(!running) return;"),
+  /loadFormPose\(\)\.then\(async lm=>\{\s*if\(!running\) return;/.test(saveReplay),
   "replay pose continuation cannot restart after freeze or close",
 );
+for (const [label, source, rootId] of [
+  ["live", saveCapture, "fc"],
+  ["replay", saveReplay, "fr"],
+]) {
+  const compact = compactSource(source);
+  assert(
+    source.includes(`class="sheet formCapture" data-motion-state="ready"`) &&
+      source.includes(`function set${label === "live" ? "Capture" : "Replay"}MotionState(state){`),
+    `${label} starts ready and owns a transient form motion-state setter`,
+  );
+  for (const state of ["analyzing", "saved", "canceled", "failed"]) {
+    const motionName = label === "live" ? "Capture" : "Replay";
+    assert(
+      source.includes(`set${motionName}MotionState("${state}")`) ||
+        (state === "canceled" && source.includes(`finish${motionName}WithMotion("canceled")`)),
+      `${label} renders ${state} before completion`,
+    );
+  }
+  assert(
+    source.includes(`#${rootId}Save`) &&
+      compact.includes("formMotionFinishing=true") &&
+      compact.includes("requestAnimationFrame(complete)") &&
+      compact.includes("setTimeout(complete,280)"),
+    `${label} freezes once and keeps a bounded completion frame`,
+  );
+}
 for (const [label, source, finishName] of [
   ["live", saveCapture, "finishCapture"],
   ["replay", saveReplay, "finishReplay"],
@@ -245,7 +271,8 @@ for (const [label, source, finishName] of [
   assert(
     failureAt >= 0 &&
       failureAt < frozenAt &&
-      compact.slice(failureAt, frozenAt).includes(`${finishName}();return;`),
+      (compact.slice(failureAt, frozenAt).includes(`${finishName}();return;`) ||
+        compact.slice(failureAt, frozenAt).includes(`finish${label === "live" ? "Capture" : "Replay"}WithMotion("canceled");return;`)),
     `${label} receipt failure confirms and exits before diagnostic retry/discard`,
   );
 }
