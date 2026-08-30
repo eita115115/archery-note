@@ -590,7 +590,7 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
 .shotNew>circle{animation:impactFlash .42s ease-out both;}
 /* motion:因果 — 矢の位置から短いリングとレイを出し、着弾を示す。SVGマーカーと同じ座標を使う表示専用レイヤー。 */
 .impactOverlay{pointer-events:none; transform-box:fill-box; transform-origin:center;}
-.impactRing{fill:none; stroke:var(--green); stroke-width:1.1; vector-effect:non-scaling-stroke; animation:impactRing .42s var(--ease-app) both;}
+.impactRing{fill:none; stroke:var(--green); stroke-width:1.1; vector-effect:non-scaling-stroke; transform-box:fill-box; transform-origin:center; animation:impactRing .42s var(--ease-app) both;}
 .impactRay{fill:none; stroke:var(--green); stroke-width:1.1; stroke-linecap:butt; vector-effect:non-scaling-stroke; animation:impactRay .42s var(--ease-app) both;}
 @keyframes impactRing{
   0%{opacity:.76; transform:scale(.38);}
@@ -796,7 +796,7 @@ html.dark .ovl,html.auto .ovl{background:rgba(0,0,0,.58);}
   48%{filter:drop-shadow(0 0 7px rgba(99,176,136,.55)); opacity:1;}
   100%{filter:drop-shadow(0 0 0 rgba(99,176,136,0)); opacity:.92;}
 }
-html.dark .shotNew circle,html.auto .shotNew circle{animation-name:impactFlashDark;}
+html.dark .shotNew>circle,html.auto .shotNew>circle{animation-name:impactFlashDark;}
 .toast.show{opacity:.98; transform:translateX(-50%) translateY(0) scale(1);}
 .histChip{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:baseline;}
 .tgWrap svg.main.triple{width:58%; margin:0 auto;}

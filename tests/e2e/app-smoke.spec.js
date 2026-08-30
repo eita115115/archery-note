@@ -283,12 +283,19 @@ test("new arrow exposes bounded target impact feedback, then removes it", async 
   await expect(page.locator("#bootFallback")).toBeHidden();
   await page.getByTestId("record-start").click();
 
-  await page.getByTestId("active-target").locator("#tgsvg").click();
+  const target = page.getByTestId("active-target").locator("#tgsvg");
+  await expect(page.locator("html")).toHaveClass(/auto/);
+  const targetBox = await target.boundingBox();
+  expect(targetBox).not.toBeNull();
+  await target.click({
+    position: { x: targetBox.width * 0.72, y: targetBox.height * 0.28 },
+  });
   const impact = page.locator("#tgmarks .shotNew .impactOverlay");
   await expect(impact).toHaveCount(1);
   await expect(impact).toHaveAttribute("aria-hidden", "true");
   await expect(impact.locator(".impactRing")).toHaveCount(1);
   await expect(impact.locator(".impactRay")).toHaveCount(1);
+  await expect(impact.locator(".impactRing")).toHaveCSS("animation-name", "impactRing");
 
   await page.waitForTimeout(750);
   await expect(page.locator("#tgmarks .impactOverlay")).toHaveCount(0);

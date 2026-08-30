@@ -205,9 +205,12 @@ function staticUiChecks() {
   );
   assert(
     /\.impactOverlay\{[^}]*pointer-events:none;/.test(css) &&
+      /\.impactRing\{[^}]*transform-box:fill-box;[^}]*transform-origin:center;/.test(css) &&
+      !/html\.dark \.shotNew circle,html\.auto \.shotNew circle/.test(css) &&
+      /html\.dark \.shotNew>circle,html\.auto \.shotNew>circle/.test(css) &&
       css.includes("@keyframes impactRing") &&
       css.includes("@keyframes impactRay"),
-    "impact overlay must stay display-only and use bounded SVG feedback",
+    "impact overlay must retain its own transform origin and auto/dark themes must not override nested ring animation",
   );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
   assert(
