@@ -7,6 +7,7 @@ const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
 const html = fs.readFileSync(htmlPath, "utf8");
 const css = fs.readFileSync(path.join(root, "style.css"), "utf8");
+const deployedCss = fs.readFileSync(path.join(root, "style.min.css"), "utf8");
 const appScripts = [
   "scripts/00-compat.js",
   "scripts/10-storage-native.js",
@@ -249,6 +250,20 @@ function staticUiChecks() {
         css,
       ),
     "shared field-instrument motion tokens or view/result reveal timing missing",
+  );
+  assert(
+    html.includes('<link rel="stylesheet" href="style.min.css">') &&
+      /--motion-fast:\.18s(?:;|})/.test(deployedCss) &&
+      /--motion-med:\.28s(?:;|})/.test(deployedCss) &&
+      /--motion-fluid:\.42s(?:;|})/.test(deployedCss) &&
+      deployedCss.includes(".formCapture[data-motion-state=analyzing] .formCamWrap::after") &&
+      deployedCss.includes(".formCapture[data-motion-state=saved] .formCamWrap::after") &&
+      deployedCss.includes(".formCapture[data-motion-state=canceled] .formCamWrap::after") &&
+      deployedCss.includes(".formCapture[data-motion-state=failed] .formCamWrap::after") &&
+      /@media \(prefers-reduced-motion:reduce\)\{[\s\S]*?\.formCapture \.formCamWrap::after,[^{]*\{animation:none!important;/.test(
+        deployedCss,
+      ),
+    "deployed style.min.css must include shared motion tokens and form/reduced-motion selectors",
   );
   assert(
     !/main\.viewEnter\{[^}]*\b(?:width|height|margin|padding|top|left)\s*:/.test(css) &&
