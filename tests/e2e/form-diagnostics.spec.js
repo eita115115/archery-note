@@ -660,6 +660,96 @@ test("ordinary live save shows analyzing before one persisted nonzero-shot recor
   ).toEqual({ records: 1, shots: 1, attempts: 1 });
 });
 
+test("live save flushes one deferred record on pagehide before animation frames resume", async ({
+  page,
+}) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await installOrdinaryLiveShotFixture(page);
+  await installPrimaryWriteGate(page);
+  await page.locator("#formStart").click();
+  await expect(page.locator("#fcSave")).toHaveText("保存して終了（1射）");
+  await resetWriteProbeAfterStartup(page);
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames = [];
+    globalThis.__formMotionRequest = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = (callback) => {
+      globalThis.__formMotionFrames.push(callback);
+      return globalThis.__formMotionFrames.length;
+    };
+    globalThis.__formWriteProbe.fail = false;
+  });
+  await page.locator("#fcSave").click();
+  await expect(page.locator('.formCapture[data-motion-state="analyzing"]')).toHaveCount(1);
+  await page.evaluate(() => globalThis.dispatchEvent(new Event("pagehide")));
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      shots: db.formAnalyses[0].shots,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+    })),
+  ).toEqual({ records: 1, shots: 1, attempts: 1 });
+  await page.evaluate(() => {
+    while (globalThis.__formMotionFrames.length) {
+      globalThis.__formMotionFrames.shift()(performance.now());
+    }
+    globalThis.requestAnimationFrame = globalThis.__formMotionRequest;
+  });
+  expect(await page.evaluate(() => globalThis.__formWriteProbe.attempts.length)).toBe(1);
+});
+
+test("replay diagnostic save flushes one deferred record when the document becomes hidden", async ({
+  page,
+}) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await installPrimaryWriteGate(page);
+  const chooserPromise = page.waitForEvent("filechooser");
+  await page.locator("#formReplay").click();
+  const chooser = await chooserPromise;
+  await chooser.setFiles({
+    name: "synthetic-form-replay.mp4",
+    mimeType: "video/mp4",
+    buffer: Buffer.from("synthetic replay fixture"),
+  });
+  await expect(page.locator("#frVideo")).toBeVisible();
+  await resetWriteProbeAfterStartup(page);
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames = [];
+    globalThis.__formMotionRequest = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = (callback) => {
+      globalThis.__formMotionFrames.push(callback);
+      return globalThis.__formMotionFrames.length;
+    };
+    globalThis.__formWriteProbe.fail = false;
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "hidden",
+    });
+  });
+  await page.locator("#frClose").click();
+  await expect(page.locator('.formCapture[data-motion-state="analyzing"]')).toHaveCount(1);
+  await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      shots: db.formAnalyses[0].shots,
+      mode: db.formAnalyses[0].captureMode,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+    })),
+  ).toEqual({ records: 1, shots: 0, mode: "replay", attempts: 1 });
+  await page.evaluate(() => {
+    while (globalThis.__formMotionFrames.length) {
+      globalThis.__formMotionFrames.shift()(performance.now());
+    }
+    globalThis.requestAnimationFrame = globalThis.__formMotionRequest;
+  });
+  expect(await page.evaluate(() => globalThis.__formWriteProbe.attempts.length)).toBe(1);
+});
+
 test("reduced motion keeps analyzing and saved form frames through paints before teardown", async ({
   page,
 }) => {

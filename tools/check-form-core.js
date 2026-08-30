@@ -266,9 +266,21 @@ for (const [label, source, rootId, continuationName, persistName] of [
   ["replay", saveReplay, "fr", "continueReplayAfterAnalyzing", "persistReplaySave"],
 ]) {
   const compact = compactSource(source);
+  const motionName = label === "live" ? "Capture" : "Replay";
   assert(
-    compact.includes(`function${continuationName}(work){constafterVisibleFrame=()=>requestAnimationFrame(work);requestAnimationFrame(afterVisibleFrame);}`),
-    `${label} waits through an observable analyzing frame before persistence, including reduced motion`,
+    compact.includes(`pending${motionName}SaveRunner=null;`) &&
+      compact.includes(`functionclear${motionName}PendingSave(){`) &&
+      compact.includes(`functionrun${motionName}PendingSave(){`) &&
+      compact.includes(`function${continuationName}(work){`) &&
+      compact.includes('document.addEventListener("visibilitychange",flush') &&
+      compact.includes('window.addEventListener("pagehide",run') &&
+      compact.includes(
+        `requestAnimationFrame(()=>requestAnimationFrame(run${motionName}PendingSave));`,
+      ) &&
+      compact.includes(`functionfail${motionName}Motion(){clear${motionName}PendingSave();`) &&
+      compact.includes(`functionfinish${motionName}(){if(`) &&
+      compact.includes(`clear${motionName}PendingSave();`),
+    `${label} flushes one deferred analyzing save on hidden/pagehide while retaining two paint frames`,
   );
   const saveHandlerAt = compact.indexOf(`ovl.querySelector("#${rootId}Save").onclick=`);
   const persistAt = compact.indexOf(`function${persistName}(){`);
@@ -278,7 +290,9 @@ for (const [label, source, rootId, continuationName, persistName] of [
       persistAt >= 0 &&
       persistAt < saveHandlerAt &&
       continuationAt > saveHandlerAt &&
-      !compact.slice(saveHandlerAt, continuationAt).includes('save({reason:"form-analysis"})===true'),
+      !compact
+        .slice(saveHandlerAt, continuationAt)
+        .includes('save({reason:"form-analysis"})===true'),
     `${label} normal save handler schedules exactly one deferred persistence boundary`,
   );
 }
@@ -293,7 +307,11 @@ for (const [label, source, finishName] of [
     failureAt >= 0 &&
       failureAt < frozenAt &&
       (compact.slice(failureAt, frozenAt).includes(`${finishName}();return;`) ||
-        compact.slice(failureAt, frozenAt).includes(`finish${label === "live" ? "Capture" : "Replay"}WithMotion("canceled");return;`)),
+        compact
+          .slice(failureAt, frozenAt)
+          .includes(
+            `finish${label === "live" ? "Capture" : "Replay"}WithMotion("canceled");return;`,
+          )),
     `${label} receipt failure confirms and exits before diagnostic retry/discard`,
   );
 }

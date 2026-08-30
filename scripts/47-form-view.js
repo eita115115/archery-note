@@ -492,12 +492,30 @@ function openFormCapture(){
     if(inFlightStream===candidate) inFlightStream=null;
   }
   let captureFrozen=false,captureTornDown=false,hadRecorderAtFreeze=false;
-  let formMotionFinishing=false,captureMotionTimer=0;
+  let formMotionFinishing=false,captureMotionTimer=0,pendingCaptureSaveRunner=null;
   function setCaptureMotionState(state){ ovl.querySelector(".formCapture")?.setAttribute("data-motion-state",state); }
   function formMotionReduced(){ return typeof window.matchMedia==="function"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  function clearCapturePendingSave(){
+    pendingCaptureSaveRunner=null;
+    document.removeEventListener("visibilitychange",flushCapturePendingSaveOnExit);
+    window.removeEventListener("pagehide",runCapturePendingSave);
+  }
+  function runCapturePendingSave(){
+    const runner=pendingCaptureSaveRunner;
+    if(!runner) return false;
+    clearCapturePendingSave();
+    runner();
+    return true;
+  }
+  function flushCapturePendingSaveOnExit(){
+    if(document.visibilityState==="hidden") runCapturePendingSave();
+  }
   function continueCaptureAfterAnalyzing(work){
-    const afterVisibleFrame=()=>requestAnimationFrame(work);
-    requestAnimationFrame(afterVisibleFrame);
+    clearCapturePendingSave();
+    pendingCaptureSaveRunner=work;
+    document.addEventListener("visibilitychange",flushCapturePendingSaveOnExit);
+    window.addEventListener("pagehide",runCapturePendingSave);
+    requestAnimationFrame(()=>requestAnimationFrame(runCapturePendingSave));
   }
   function beginCaptureMotion(){
     if(formMotionFinishing) return false;
@@ -508,6 +526,7 @@ function openFormCapture(){
     return true;
   }
   function failCaptureMotion(){
+    clearCapturePendingSave();
     setCaptureMotionState("failed");
     formMotionFinishing=false;
     const saveButton=ovl.querySelector("#fcSave"),closeButton=ovl.querySelector("#fcClose");
@@ -516,6 +535,7 @@ function openFormCapture(){
   }
   function finishCaptureWithMotion(state,after){
     if(formMotionFinishing) return false;
+    clearCapturePendingSave();
     formMotionFinishing=true;
     freezeCaptureForSave();
     setCaptureMotionState(state);
@@ -540,6 +560,7 @@ function openFormCapture(){
   }
   function finishCapture(){
     if(captureTornDown) return false;
+    clearCapturePendingSave();
     captureTornDown=true; freezeCaptureForSave();
     if(db.active) wakeLock.acquire(); else wakeLock.release();
     endActiveWorkflow(); closeModal(ovl); return true;
@@ -966,12 +987,30 @@ function startFormReplay(videoUrl){
   const RECENT_MAX=40; // fire ±20フレーム相当のバッファ
   const phaseCounts={SETUP:0,IDLE:0,ANCHORING:0,FULL_DRAW:0,RELEASE:0,FOLLOW:0};
   let replayFrozen=false,replayTornDown=false;
-  let formMotionFinishing=false,replayMotionTimer=0;
+  let formMotionFinishing=false,replayMotionTimer=0,pendingReplaySaveRunner=null;
   function setReplayMotionState(state){ ovl.querySelector(".formCapture")?.setAttribute("data-motion-state",state); }
   function formMotionReduced(){ return typeof window.matchMedia==="function"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  function clearReplayPendingSave(){
+    pendingReplaySaveRunner=null;
+    document.removeEventListener("visibilitychange",flushReplayPendingSaveOnExit);
+    window.removeEventListener("pagehide",runReplayPendingSave);
+  }
+  function runReplayPendingSave(){
+    const runner=pendingReplaySaveRunner;
+    if(!runner) return false;
+    clearReplayPendingSave();
+    runner();
+    return true;
+  }
+  function flushReplayPendingSaveOnExit(){
+    if(document.visibilityState==="hidden") runReplayPendingSave();
+  }
   function continueReplayAfterAnalyzing(work){
-    const afterVisibleFrame=()=>requestAnimationFrame(work);
-    requestAnimationFrame(afterVisibleFrame);
+    clearReplayPendingSave();
+    pendingReplaySaveRunner=work;
+    document.addEventListener("visibilitychange",flushReplayPendingSaveOnExit);
+    window.addEventListener("pagehide",runReplayPendingSave);
+    requestAnimationFrame(()=>requestAnimationFrame(runReplayPendingSave));
   }
   function beginReplayMotion(){
     if(formMotionFinishing) return false;
@@ -982,6 +1021,7 @@ function startFormReplay(videoUrl){
     return true;
   }
   function failReplayMotion(){
+    clearReplayPendingSave();
     setReplayMotionState("failed");
     formMotionFinishing=false;
     const saveButton=ovl.querySelector("#frSave"),closeButton=ovl.querySelector("#frClose");
@@ -990,6 +1030,7 @@ function startFormReplay(videoUrl){
   }
   function finishReplayWithMotion(state,after){
     if(formMotionFinishing) return false;
+    clearReplayPendingSave();
     formMotionFinishing=true;
     freezeReplayForSave();
     setReplayMotionState(state);
@@ -1008,6 +1049,7 @@ function startFormReplay(videoUrl){
   }
   function finishReplay(){
     if(replayTornDown) return false;
+    clearReplayPendingSave();
     replayTornDown=true; freezeReplayForSave(); URL.revokeObjectURL(videoUrl); endActiveWorkflow(); closeModal(ovl); return true;
   }
   function freezeForReceiptFailure(){

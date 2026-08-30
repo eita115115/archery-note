@@ -989,6 +989,7 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .formCamWrap video{width:100%;display:block;opacity:.9}
 .formCapture .formCamWrap video{height:100%;object-fit:contain}
 .formCamWrap::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;z-index:1}
+/* motion:状態 — 解析・保存・取消・失敗をカメラ面で一瞬だけ示す。 */
 .formCapture[data-motion-state="analyzing"] .formCamWrap::after{background:linear-gradient(112deg,transparent 38%,rgba(234,255,242,.22) 50%,transparent 62%);animation:formAnalysisSweep var(--motion-med) var(--ease-fluid) both}
 .formCapture[data-motion-state="saved"] .formCamWrap::after{background:rgba(15,157,88,.26);animation:formCompletionFrame var(--motion-med) var(--ease-app) both}
 .formCapture[data-motion-state="canceled"] .formCamWrap::after{background:rgba(255,255,255,.14);animation:formCompletionFrame var(--motion-med) var(--ease-app) both}
