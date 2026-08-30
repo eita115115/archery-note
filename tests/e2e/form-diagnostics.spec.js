@@ -544,6 +544,34 @@ test("reduced motion completes a form discard on the next frame", async ({ page 
   await expect(page.locator(".formCapture")).toHaveCount(0);
 });
 
+test("reduced motion keeps a canceled form frame through one paint before teardown", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await page.locator("#formStart").click();
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames = [];
+    globalThis.__formMotionRequest = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = (callback) => {
+      globalThis.__formMotionFrames.push(callback);
+      return globalThis.__formMotionFrames.length;
+    };
+  });
+  await page.locator("#fcClose").click();
+  await expect(page.locator('.formCapture[data-motion-state="canceled"]')).toHaveCount(1);
+  await page.evaluate(() => globalThis.__formMotionFrames.shift()(performance.now()));
+  await expect(page.locator('.formCapture[data-motion-state="canceled"]')).toHaveCount(1);
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames.shift()(performance.now());
+    globalThis.requestAnimationFrame = globalThis.__formMotionRequest;
+  });
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+});
+
 test("rapid diagnostic save clicks commit one record and one primary write", async ({ page }) => {
   await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
   await page.goto("/");
@@ -602,6 +630,50 @@ test("ordinary live save shows analyzing before one persisted nonzero-shot recor
     globalThis.requestAnimationFrame = globalThis.__formMotionRequest;
   });
   await expect(page.locator('.formCapture[data-motion-state="saved"]')).toHaveCount(1);
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      shots: db.formAnalyses[0].shots,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+    })),
+  ).toEqual({ records: 1, shots: 1, attempts: 1 });
+});
+
+test("reduced motion keeps analyzing and saved form frames through paints before teardown", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await installOrdinaryLiveShotFixture(page);
+  await installPrimaryWriteGate(page);
+  await page.locator("#formStart").click();
+  await expect(page.locator("#fcSave")).toHaveText("保存して終了（1射）");
+  await resetWriteProbeAfterStartup(page);
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames = [];
+    globalThis.__formMotionRequest = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = (callback) => {
+      globalThis.__formMotionFrames.push(callback);
+      return globalThis.__formMotionFrames.length;
+    };
+    globalThis.__formWriteProbe.fail = false;
+    document.querySelector("#fcSave").dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  await expect(page.locator('.formCapture[data-motion-state="analyzing"]')).toHaveCount(1);
+  await page.evaluate(() => globalThis.__formMotionFrames.shift()(performance.now()));
+  await expect(page.locator('.formCapture[data-motion-state="analyzing"]')).toHaveCount(1);
+  expect(await page.evaluate(() => db.formAnalyses.length)).toBe(0);
+  await page.evaluate(() => globalThis.__formMotionFrames.shift()(performance.now()));
+  await expect(page.locator('.formCapture[data-motion-state="saved"]')).toHaveCount(1);
+  await page.evaluate(() => globalThis.__formMotionFrames.shift()(performance.now()));
+  await expect(page.locator('.formCapture[data-motion-state="saved"]')).toHaveCount(1);
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames.shift()(performance.now());
+    globalThis.requestAnimationFrame = globalThis.__formMotionRequest;
+  });
   await expect(page.locator(".formCapture")).toHaveCount(0);
   expect(
     await page.evaluate(() => ({

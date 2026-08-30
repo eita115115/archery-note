@@ -256,9 +256,9 @@ for (const [label, source, rootId] of [
   assert(
     source.includes(`#${rootId}Save`) &&
       compact.includes("formMotionFinishing=true") &&
-      compact.includes("requestAnimationFrame(complete)") &&
+      compact.includes("requestAnimationFrame(()=>requestAnimationFrame(complete))") &&
       compact.includes("setTimeout(complete,280)"),
-    `${label} freezes once and keeps a bounded completion frame`,
+    `${label} freezes once and keeps a bounded completion frame after a reduced-motion paint`,
   );
 }
 for (const [label, source, rootId, continuationName, persistName] of [
@@ -267,8 +267,8 @@ for (const [label, source, rootId, continuationName, persistName] of [
 ]) {
   const compact = compactSource(source);
   assert(
-    compact.includes(`function${continuationName}(work){constafterVisibleFrame=()=>requestAnimationFrame(work);requestAnimationFrame(formMotionReduced()?work:afterVisibleFrame);}`),
-    `${label} waits through an observable analyzing frame before normal persistence`,
+    compact.includes(`function${continuationName}(work){constafterVisibleFrame=()=>requestAnimationFrame(work);requestAnimationFrame(afterVisibleFrame);}`),
+    `${label} waits through an observable analyzing frame before persistence, including reduced motion`,
   );
   const saveHandlerAt = compact.indexOf(`ovl.querySelector("#${rootId}Save").onclick=`);
   const persistAt = compact.indexOf(`function${persistName}(){`);

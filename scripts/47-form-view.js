@@ -497,7 +497,7 @@ function openFormCapture(){
   function formMotionReduced(){ return typeof window.matchMedia==="function"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
   function continueCaptureAfterAnalyzing(work){
     const afterVisibleFrame=()=>requestAnimationFrame(work);
-    requestAnimationFrame(formMotionReduced()?work:afterVisibleFrame);
+    requestAnimationFrame(afterVisibleFrame);
   }
   function beginCaptureMotion(){
     if(formMotionFinishing) return false;
@@ -520,7 +520,7 @@ function openFormCapture(){
     freezeCaptureForSave();
     setCaptureMotionState(state);
     const complete=()=>{ captureMotionTimer=0; if(finishCapture()&&after) after(); };
-    if(formMotionReduced()) requestAnimationFrame(complete); else captureMotionTimer=setTimeout(complete,280);
+    if(formMotionReduced()) requestAnimationFrame(()=>requestAnimationFrame(complete)); else captureMotionTimer=setTimeout(complete,280);
     return true;
   }
   function freezeCaptureForSave(){
@@ -828,7 +828,7 @@ function openFormCapture(){
       toast(matrixNotice||(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`));
       nativePulse("success"); setCaptureMotionState("saved");
       const complete=async()=>{ captureMotionTimer=0; if(finishCapture()){ render(); await offerRecordedVideoAfterSave(); } };
-      if(formMotionReduced()) requestAnimationFrame(complete); else captureMotionTimer=setTimeout(complete,280);
+      if(formMotionReduced()) requestAnimationFrame(()=>requestAnimationFrame(complete)); else captureMotionTimer=setTimeout(complete,280);
     });
     return true;
   }
@@ -861,7 +861,7 @@ function openFormCapture(){
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
     nativePulse("success"); setCaptureMotionState("saved");
     const complete=async()=>{ captureMotionTimer=0; if(finishCapture()){ render(); await offerRecordedVideoAfterSave(); } };
-    if(formMotionReduced()) requestAnimationFrame(complete); else captureMotionTimer=setTimeout(complete,280);
+    if(formMotionReduced()) requestAnimationFrame(()=>requestAnimationFrame(complete)); else captureMotionTimer=setTimeout(complete,280);
   }
   ovl.querySelector("#fcSave").onclick=async()=>{
     if(frozenDiagnosticSave){ await finishLiveDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
@@ -971,7 +971,7 @@ function startFormReplay(videoUrl){
   function formMotionReduced(){ return typeof window.matchMedia==="function"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
   function continueReplayAfterAnalyzing(work){
     const afterVisibleFrame=()=>requestAnimationFrame(work);
-    requestAnimationFrame(formMotionReduced()?work:afterVisibleFrame);
+    requestAnimationFrame(afterVisibleFrame);
   }
   function beginReplayMotion(){
     if(formMotionFinishing) return false;
@@ -994,7 +994,7 @@ function startFormReplay(videoUrl){
     freezeReplayForSave();
     setReplayMotionState(state);
     const complete=()=>{ replayMotionTimer=0; if(finishReplay()&&after) after(); };
-    if(formMotionReduced()) requestAnimationFrame(complete); else replayMotionTimer=setTimeout(complete,280);
+    if(formMotionReduced()) requestAnimationFrame(()=>requestAnimationFrame(complete)); else replayMotionTimer=setTimeout(complete,280);
     return true;
   }
   function freezeReplayForSave(){
@@ -1207,7 +1207,7 @@ function startFormReplay(videoUrl){
       toast(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
       nativePulse("success"); setReplayMotionState("saved");
       const complete=()=>{ replayMotionTimer=0; if(finishReplay()) render(); };
-      if(formMotionReduced()) requestAnimationFrame(complete); else replayMotionTimer=setTimeout(complete,280);
+      if(formMotionReduced()) requestAnimationFrame(()=>requestAnimationFrame(complete)); else replayMotionTimer=setTimeout(complete,280);
     });
     return true;
   }
@@ -1240,7 +1240,7 @@ function startFormReplay(videoUrl){
     toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
     nativePulse("success"); setReplayMotionState("saved");
     const complete=()=>{ replayMotionTimer=0; if(finishReplay()) render(); };
-    if(formMotionReduced()) requestAnimationFrame(complete); else replayMotionTimer=setTimeout(complete,280);
+    if(formMotionReduced()) requestAnimationFrame(()=>requestAnimationFrame(complete)); else replayMotionTimer=setTimeout(complete,280);
   }
   ovl.querySelector("#frSave").onclick=()=>{
     if(frozenDiagnosticSave){ finishReplayDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
