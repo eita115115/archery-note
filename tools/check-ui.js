@@ -241,6 +241,29 @@ function staticUiChecks() {
     "smooth state-following tab motion missing",
   );
   assert(
+    /--motion-fast:\s*\.18s;/.test(css) &&
+      /--motion-med:\s*\.28s;/.test(css) &&
+      /--motion-fluid:\s*\.42s;/.test(css) &&
+      /main\.viewEnter\{animation:viewEnter var\(--motion-med\) var\(--ease-app\) both;\}/.test(css) &&
+      /\.todayConclusionCard\{[\s\S]*?animation:appRise var\(--motion-fluid\) var\(--ease-app\) both;/.test(
+        css,
+      ),
+    "shared field-instrument motion tokens or view/result reveal timing missing",
+  );
+  assert(
+    !/main\.viewEnter\{[^}]*\b(?:width|height|margin|padding|top|left)\s*:/.test(css) &&
+      /@media \(prefers-reduced-motion: reduce\)\{[\s\S]*?\.formCapture \.formCamWrap::after\{[\s\S]*?animation:none!important;/.test(
+        css,
+      ) &&
+      /@media \(prefers-reduced-motion: reduce\)\{[\s\S]*?\.formCapture \.formHud,[\s\S]*?\.formCapture \.formBar,[\s\S]*?\.formCapture \.formFootnote\{[\s\S]*?visibility:visible!important;/.test(
+        css,
+      ) &&
+      /render\(\);\s*m\.classList\.remove\("viewEnter"\);\s*void m\.offsetWidth;\s*m\.classList\.add\("viewEnter"\);/.test(
+        appJs,
+      ),
+    "view motion must avoid layout properties, keep reduced-motion form content visible, and preserve showView restart order",
+  );
+  assert(
     !surface.includes("targetImpact") &&
       !surface.includes("screenIn") &&
       !surface.includes("triggerReleaseMotion") &&

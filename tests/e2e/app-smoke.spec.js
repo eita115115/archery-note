@@ -137,6 +137,27 @@ test("moves exactly one aria-current marker when switching tabs", async ({ page 
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("tab changes keep the phone viewport free of horizontal overflow", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await mainTab(page, "分析").click();
+  await expect(page.locator("#main")).toContainText("今日の結論");
+
+  expect(
+    await page.evaluate(
+      () =>
+        Math.max(
+          globalThis.document.documentElement.scrollWidth,
+          globalThis.document.body.scrollWidth,
+        ) - globalThis.window.innerWidth,
+    ),
+  ).toBeLessThanOrEqual(1);
+});
+
 test("exposes distance chips as buttons with synced aria-pressed", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

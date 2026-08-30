@@ -2470,3 +2470,28 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   check remains blocked only by the pre-existing unformatted OSS-motion design
   document; the touched Playwright test is formatted.
 - Next: Task 2 review, then Task 3 view rhythm and reduced-motion behavior.
+
+## 2026-08-30 — OSS motion Task 3: field-instrument view rhythm
+
+- Changed: shared motion tokens now use `.18s`, `.28s`, and `.42s` for fast,
+  medium, and fluid feedback. Tab view entry, the analysis conclusion, list
+  reveals, and toast transitions consume those tokens without changing any
+  layout property. The existing `showView()` render/remove/reflow/add sequence
+  is protected by a static contract and remains unchanged.
+- Reduced motion: view/form pseudo-element animation is explicitly immediate;
+  the form HUD, controls, and explanatory content are explicitly kept visible.
+  No motion state suppresses feedback content or changes the capture lifecycle.
+- RED: `node tools/check-ui.js` failed with the missing shared field-instrument
+  timing contract. The new narrow-tab and reduced-motion browser cases passed
+  against the previous behavior, confirming they target regressions rather than
+  requiring a layout or lifecycle rewrite.
+- GREEN: `node tools/check-ui.js` passed with 390x844, 360x780, and 1280x800
+  screenshots in bounds. Focused Chromium checks passed: tab overflow 1/1 and
+  reduced-motion HUD/content 1/1. The form run shared port 4173 with the other
+  parallel browser run and logged `EADDRINUSE`, but its selected test still
+  completed successfully (1/1); subsequent validation is run serially.
+- Risk: no scoring, arrow coordinates, storage, detector, transport, native
+  plugin, dependency, Service Worker, or physical iPhone HTTPS acceptance
+  behavior changed.
+- Next: Task 3 review, then the independent final review over this motion-only
+  range.

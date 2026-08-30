@@ -544,6 +544,26 @@ test("reduced motion completes a form discard on the next frame", async ({ page 
   await expect(page.locator(".formCapture")).toHaveCount(0);
 });
 
+test("reduced motion keeps the form HUD and immediate content visible", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await stallFormPose(page);
+  await page.locator("#formStart").click();
+
+  const capture = page.locator(".formCapture");
+  await expect(capture).toHaveCount(1);
+  await expect(capture.locator(".formHud")).toBeVisible();
+  await expect(capture.locator(".formBar")).toBeVisible();
+  await expect(capture.locator(".formFootnote")).toBeVisible();
+  const animationName = await capture.evaluate((el) => {
+    el.setAttribute("data-motion-state", "analyzing");
+    return globalThis.getComputedStyle(el.querySelector(".formCamWrap"), "::after").animationName;
+  });
+  expect(animationName).toBe("none");
+});
+
 test("reduced motion keeps a canceled form frame through one paint before teardown", async ({
   page,
 }) => {
