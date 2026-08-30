@@ -1,5 +1,5 @@
 "use strict";
-/* global db */
+/* global db, document, HTMLMediaElement, MediaStream, MouseEvent */
 
 const fs = require("fs");
 const { expect, test } = require("@playwright/test");
@@ -72,6 +72,62 @@ async function installPrimaryWriteGate(page) {
 async function stallFormPose(page) {
   await page.evaluate(() => {
     globalThis.loadFormPose = () => new Promise(() => {});
+  });
+}
+
+async function installOrdinaryLiveShotFixture(page) {
+  await page.evaluate(() => {
+    let released = false;
+    const track = { readyState: "live", stop() {} };
+    const stream = new MediaStream();
+    Object.defineProperties(stream, {
+      getTracks: { value: () => [track] },
+      getVideoTracks: { value: () => [track] },
+    });
+    Object.defineProperty(navigator, "mediaDevices", {
+      configurable: true,
+      value: { getUserMedia: async () => stream },
+    });
+    Object.defineProperty(HTMLMediaElement.prototype, "readyState", {
+      configurable: true,
+      get: () => 4,
+    });
+    HTMLMediaElement.prototype.play = () => Promise.resolve();
+    globalThis.loadFormPose = () =>
+      Promise.resolve({ detectForVideo: () => ({ landmarks: [[{}]] }) });
+    globalThis.computeFormMetrics = () => ({ conf: 1, occluded: [] });
+    globalThis.makeFormEma = () => (value) => value;
+    globalThis.makeFormVelocitySource = () => ({ step: () => 0, reset() {} });
+    globalThis.makeFormPhaseDetector = () => ({ pendingRelease: null });
+    globalThis.stepFormPhase = () => {
+      if (!released) {
+        released = true;
+        return {
+          phase: "RELEASE",
+          released: true,
+          canceled: false,
+          debug: null,
+          anchorStartTs: performance.now() - 1000,
+          anchorEnter: 0.5,
+        };
+      }
+      return {
+        phase: "FOLLOW",
+        released: false,
+        canceled: false,
+        debug: null,
+        anchorStartTs: null,
+      };
+    };
+    globalThis.summarizeFormShot = () => ({
+      holdMs: 1000,
+      angles: { bowArm: 90, drawArm: 90 },
+      pre: null,
+      anchorNorm: null,
+      confidence: 1,
+      score: null,
+    });
+    globalThis.drawFormSkeleton = () => {};
   });
 }
 
@@ -508,6 +564,52 @@ test("rapid diagnostic save clicks commit one record and one primary write", asy
       attempts: globalThis.__formWriteProbe.attempts.length,
     })),
   ).toEqual({ records: 1, attempts: 1 });
+});
+
+test("ordinary live save shows analyzing before one persisted nonzero-shot record", async ({
+  page,
+}) => {
+  await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: false } }));
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await installOrdinaryLiveShotFixture(page);
+  await installPrimaryWriteGate(page);
+  await page.locator("#formStart").click();
+  await expect(page.locator("#fcSave")).toHaveText("保存して終了（1射）");
+  await resetWriteProbeAfterStartup(page);
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames = [];
+    globalThis.__formMotionRequest = globalThis.requestAnimationFrame;
+    globalThis.requestAnimationFrame = (callback) => {
+      globalThis.__formMotionFrames.push(callback);
+      return globalThis.__formMotionFrames.length;
+    };
+    globalThis.__formWriteProbe.fail = false;
+    const saveButton = document.querySelector("#fcSave");
+    saveButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    saveButton.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  await expect(page.locator('.formCapture[data-motion-state="analyzing"]')).toHaveCount(1);
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+    })),
+  ).toEqual({ records: 0, attempts: 0 });
+  await page.evaluate(() => {
+    globalThis.__formMotionFrames.shift()(performance.now());
+    globalThis.__formMotionFrames.shift()(performance.now());
+    globalThis.requestAnimationFrame = globalThis.__formMotionRequest;
+  });
+  await expect(page.locator('.formCapture[data-motion-state="saved"]')).toHaveCount(1);
+  await expect(page.locator(".formCapture")).toHaveCount(0);
+  expect(
+    await page.evaluate(() => ({
+      records: db.formAnalyses.length,
+      shots: db.formAnalyses[0].shots,
+      attempts: globalThis.__formWriteProbe.attempts.length,
+    })),
+  ).toEqual({ records: 1, shots: 1, attempts: 1 });
 });
 
 test("failed diagnostic discard cancel retains the candidate and confirm closes without saving", async ({

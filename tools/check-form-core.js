@@ -261,6 +261,27 @@ for (const [label, source, rootId] of [
     `${label} freezes once and keeps a bounded completion frame`,
   );
 }
+for (const [label, source, rootId, continuationName, persistName] of [
+  ["live", saveCapture, "fc", "continueCaptureAfterAnalyzing", "persistLiveSave"],
+  ["replay", saveReplay, "fr", "continueReplayAfterAnalyzing", "persistReplaySave"],
+]) {
+  const compact = compactSource(source);
+  assert(
+    compact.includes(`function${continuationName}(work){constafterVisibleFrame=()=>requestAnimationFrame(work);requestAnimationFrame(formMotionReduced()?work:afterVisibleFrame);}`),
+    `${label} waits through an observable analyzing frame before normal persistence`,
+  );
+  const saveHandlerAt = compact.indexOf(`ovl.querySelector("#${rootId}Save").onclick=`);
+  const persistAt = compact.indexOf(`function${persistName}(){`);
+  const continuationAt = compact.indexOf(`${continuationName}(${persistName});`, saveHandlerAt);
+  assert(
+    saveHandlerAt >= 0 &&
+      persistAt >= 0 &&
+      persistAt < saveHandlerAt &&
+      continuationAt > saveHandlerAt &&
+      !compact.slice(saveHandlerAt, continuationAt).includes('save({reason:"form-analysis"})===true'),
+    `${label} normal save handler schedules exactly one deferred persistence boundary`,
+  );
+}
 for (const [label, source, finishName] of [
   ["live", saveCapture, "finishCapture"],
   ["replay", saveReplay, "finishReplay"],

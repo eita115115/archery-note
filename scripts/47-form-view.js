@@ -495,6 +495,10 @@ function openFormCapture(){
   let formMotionFinishing=false,captureMotionTimer=0;
   function setCaptureMotionState(state){ ovl.querySelector(".formCapture")?.setAttribute("data-motion-state",state); }
   function formMotionReduced(){ return typeof window.matchMedia==="function"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  function continueCaptureAfterAnalyzing(work){
+    const afterVisibleFrame=()=>requestAnimationFrame(work);
+    requestAnimationFrame(formMotionReduced()?work:afterVisibleFrame);
+  }
   function beginCaptureMotion(){
     if(formMotionFinishing) return false;
     formMotionFinishing=true;
@@ -815,15 +819,17 @@ function openFormCapture(){
      する。UIボタンは増やさず、formDebug ON時のみ close ボタンの動作を「診断用に保存してから
      閉じる」へ切替える（採用理由: 通常ユーザー(formDebug OFF)の close 挙動を完全に不変のまま
      保ちつつ、UI追加コストを避ける。判断は完了報告に明記）。 */
-  async function finishLiveDiagnosticAttempt(zeroShot){
+  function finishLiveDiagnosticAttempt(zeroShot){
     if(!beginCaptureMotion()) return false;
-    const {result,linked}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
-    if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; failCaptureMotion(); saveButton.textContent="保存を再試行"; return false; }
-    const matrixNotice=!zeroShot&&frozenDiagnosticSave.record.captureMode==="live"?(frozenDiagnosticSave.matrixAdvanced?"診断バッチに追加しました":["coordinator-missing","coordinator-invalid","coordinator-stale","coordinator-complete"].includes(frozenDiagnosticSave.matrixCode)?"18射の診断を開始し直してください":"診断条件を満たさなかったため、同じ条件をもう一度記録してください"):null;
-    toast(matrixNotice||(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`));
-    nativePulse("success"); setCaptureMotionState("saved");
-    const complete=async()=>{ captureMotionTimer=0; if(finishCapture()){ render(); await offerRecordedVideoAfterSave(); } };
-    if(formMotionReduced()) requestAnimationFrame(complete); else captureMotionTimer=setTimeout(complete,280);
+    continueCaptureAfterAnalyzing(()=>{
+      const {result,linked}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
+      if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; failCaptureMotion(); saveButton.textContent="保存を再試行"; return; }
+      const matrixNotice=!zeroShot&&frozenDiagnosticSave.record.captureMode==="live"?(frozenDiagnosticSave.matrixAdvanced?"診断バッチに追加しました":["coordinator-missing","coordinator-invalid","coordinator-stale","coordinator-complete"].includes(frozenDiagnosticSave.matrixCode)?"18射の診断を開始し直してください":"診断条件を満たさなかったため、同じ条件をもう一度記録してください"):null;
+      toast(matrixNotice||(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`));
+      nativePulse("success"); setCaptureMotionState("saved");
+      const complete=async()=>{ captureMotionTimer=0; if(finishCapture()){ render(); await offerRecordedVideoAfterSave(); } };
+      if(formMotionReduced()) requestAnimationFrame(complete); else captureMotionTimer=setTimeout(complete,280);
+    });
     return true;
   }
   ovl.querySelector("#fcClose").onclick=async()=>{
@@ -835,14 +841,7 @@ function openFormCapture(){
     if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); finishCaptureWithMotion("canceled"); }
   };
   let pendingLiveSave=null;
-  ovl.querySelector("#fcSave").onclick=async()=>{
-    if(frozenDiagnosticSave){ await finishLiveDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
-    if(db.settings.formDebug===true){ await finishLiveDiagnosticAttempt(shots.length===0); return; }
-    if(!shots.length||!beginCaptureMotion()) return;
-    if(!pendingLiveSave){
-      if(tracker.current()) tracker.abandon("workflow-save");
-      pendingLiveSave=buildLiveFormRecord(false,null,false);
-    }
+  function persistLiveSave(){
     const {record:rec,linked}=pendingLiveSave;
     db.formAnalyses=db.formAnalyses||[];
     /* 検証計装（H）: db.settings.formDebug===true のときだけ arrowCheck分布とsamplePerfMsの
@@ -863,6 +862,16 @@ function openFormCapture(){
     nativePulse("success"); setCaptureMotionState("saved");
     const complete=async()=>{ captureMotionTimer=0; if(finishCapture()){ render(); await offerRecordedVideoAfterSave(); } };
     if(formMotionReduced()) requestAnimationFrame(complete); else captureMotionTimer=setTimeout(complete,280);
+  }
+  ovl.querySelector("#fcSave").onclick=async()=>{
+    if(frozenDiagnosticSave){ await finishLiveDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
+    if(db.settings.formDebug===true){ await finishLiveDiagnosticAttempt(shots.length===0); return; }
+    if(!shots.length||!beginCaptureMotion()) return;
+    if(!pendingLiveSave){
+      if(tracker.current()) tracker.abandon("workflow-save");
+      pendingLiveSave=buildLiveFormRecord(false,null,false);
+    }
+    continueCaptureAfterAnalyzing(persistLiveSave);
   };
   ovl.querySelector("#fcSwap").onclick=async()=>{
     if(!cameraSwapReady||cameraSwapInProgress) return;
@@ -960,6 +969,10 @@ function startFormReplay(videoUrl){
   let formMotionFinishing=false,replayMotionTimer=0;
   function setReplayMotionState(state){ ovl.querySelector(".formCapture")?.setAttribute("data-motion-state",state); }
   function formMotionReduced(){ return typeof window.matchMedia==="function"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  function continueReplayAfterAnalyzing(work){
+    const afterVisibleFrame=()=>requestAnimationFrame(work);
+    requestAnimationFrame(formMotionReduced()?work:afterVisibleFrame);
+  }
   function beginReplayMotion(){
     if(formMotionFinishing) return false;
     formMotionFinishing=true;
@@ -1188,12 +1201,14 @@ function startFormReplay(videoUrl){
   }
   function finishReplayDiagnosticAttempt(zeroShot){
     if(!beginReplayMotion()) return false;
-    const {result,linked}=attemptReplayDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#frSave");
-    if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; failReplayMotion(); saveButton.textContent="保存を再試行"; return false; }
-    toast(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
-    nativePulse("success"); setReplayMotionState("saved");
-    const complete=()=>{ replayMotionTimer=0; if(finishReplay()) render(); };
-    if(formMotionReduced()) requestAnimationFrame(complete); else replayMotionTimer=setTimeout(complete,280);
+    continueReplayAfterAnalyzing(()=>{
+      const {result,linked}=attemptReplayDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#frSave");
+      if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; failReplayMotion(); saveButton.textContent="保存を再試行"; return; }
+      toast(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
+      nativePulse("success"); setReplayMotionState("saved");
+      const complete=()=>{ replayMotionTimer=0; if(finishReplay()) render(); };
+      if(formMotionReduced()) requestAnimationFrame(complete); else replayMotionTimer=setTimeout(complete,280);
+    });
     return true;
   }
   ovl.querySelector("#frClose").onclick=async()=>{
@@ -1205,25 +1220,7 @@ function startFormReplay(videoUrl){
     if(await appConfirm(`${shots.length}射の解析結果を保存せずに閉じますか？`,{danger:true,okLabel:"閉じる"})){ abandonActiveReceipt("workflow-close"); finishReplayWithMotion("canceled"); }
   };
   let pendingReplaySave=null;
-  ovl.querySelector("#frSave").onclick=()=>{
-    if(frozenDiagnosticSave){ finishReplayDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
-    if(db.settings.formDebug===true){ finishReplayDiagnosticAttempt(shots.length===0); return; }
-    if(!shots.length||!beginReplayMotion()) return;
-    if(!pendingReplaySave){
-      if(tracker.current()) tracker.abandon("workflow-save");
-      const todays=db.sessions.filter(s=>s.date===today());
-      const linked=todays.length?todays[todays.length-1]:null;
-      const includeDiagnostics=false;
-      pendingReplaySave={
-        linked,
-        record:{
-          id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
-          shots:shots.length, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
-          appVer:APP_VER, fps:+fps.toFixed(1),
-          features:shots.map(shot=>formFeatureFromShot(shot,includeDiagnostics)), note:"(保存済み動画から解析)"
-        }
-      };
-    }
+  function persistReplaySave(){
     const {record:rec,linked}=pendingReplaySave;
     db.formAnalyses=db.formAnalyses||[];
     /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: 非発火/取消フレームの集約。
@@ -1244,6 +1241,27 @@ function startFormReplay(videoUrl){
     nativePulse("success"); setReplayMotionState("saved");
     const complete=()=>{ replayMotionTimer=0; if(finishReplay()) render(); };
     if(formMotionReduced()) requestAnimationFrame(complete); else replayMotionTimer=setTimeout(complete,280);
+  }
+  ovl.querySelector("#frSave").onclick=()=>{
+    if(frozenDiagnosticSave){ finishReplayDiagnosticAttempt(frozenDiagnosticSave.record.shots===0); return; }
+    if(db.settings.formDebug===true){ finishReplayDiagnosticAttempt(shots.length===0); return; }
+    if(!shots.length||!beginReplayMotion()) return;
+    if(!pendingReplaySave){
+      if(tracker.current()) tracker.abandon("workflow-save");
+      const todays=db.sessions.filter(s=>s.date===today());
+      const linked=todays.length?todays[todays.length-1]:null;
+      const includeDiagnostics=false;
+      pendingReplaySave={
+        linked,
+        record:{
+          id:uid(), date:today(), ts:Date.now(), sessionId:linked?linked.id:null, setupId:linked?linked.setupId||null:null,
+          shots:shots.length, modelVer:"pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+          appVer:APP_VER, fps:+fps.toFixed(1),
+          features:shots.map(shot=>formFeatureFromShot(shot,includeDiagnostics)), note:"(保存済み動画から解析)"
+        }
+      };
+    }
+    continueReplayAfterAnalyzing(persistReplaySave);
   };
   ovl.querySelector("#frHand").onclick=e=>{
     handedness=handedness==="right"?"left":"right";
