@@ -2495,3 +2495,21 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   behavior changed.
 - Next: Task 3 review, then the independent final review over this motion-only
   range.
+
+## 2026-08-30 — Final review fix: flush deferred form saves on exit
+
+- Changed: live and replay form-save continuations now register one-shot local
+  pending runners. Normal operation keeps the two-frame `analyzing` paint;
+  `pagehide` and `visibilitychange(hidden)` synchronously flush the pending
+  write before an iPhone/PWA exit. Success, failure, cancel, and teardown clear
+  the callback and listeners before invoking work, preventing duplicate writes.
+- Added: deferred-flush E2E coverage for live `pagehide` and replay hidden
+  visibility, each requiring one record and one primary write; the required
+  form-motion purpose comment was also added.
+- GREEN: `npm run check:all`, `npm run lint`, focused motion/save Playwright
+  coverage (15/15), syntax, scoped Prettier, and `git diff --check` pass. The
+  only remaining full-format warning is the unchanged OSS-motion design doc.
+- Risk: no storage schema, scoring, detector, transport, native plugin,
+  dependency, Service Worker, or physical iPhone HTTPS acceptance behavior
+  changed.
+- Next: final whole-branch review, then integration/publish decision.
