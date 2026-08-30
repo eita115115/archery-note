@@ -2513,3 +2513,22 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   dependency, Service Worker, or physical iPhone HTTPS acceptance behavior
   changed.
 - Next: final whole-branch review, then integration/publish decision.
+
+## 2026-08-31 — Startup motion design and implementation plan
+
+- Added the approved startup-motion specification and converted it into the
+  two-task TDD plan at
+  `docs/superpowers/plans/2026-08-31-startup-motion.md`. The plan covers the
+  transient `bootSplash` lifecycle, the existing slow-init fallback, reduced
+  motion, synchronized production CSS, static contracts, and focused Chromium
+  checks.
+- Clarified the accessibility boundary: the opaque splash owns pointer input
+  while present, has no actionable controls, and releases input on exit;
+  underlying record controls and hit areas remain unchanged after removal.
+- Validation: both startup spec/plan files pass focused Prettier checks;
+  placeholder scan and plan/spec coverage review found no unfinished markers.
+- Risk: docs and planning only. No runtime, storage, scoring, detector,
+  Service Worker, dependency, version, native, or physical iPhone behavior
+  changed.
+- Next: choose Subagent-Driven or Inline execution, then run Task 1 RED before
+  implementing the startup lifecycle.

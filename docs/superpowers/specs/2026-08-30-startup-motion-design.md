@@ -59,9 +59,9 @@ clear launch boundary.
   the HUD, controls, and explanatory text visible.
 - The splash is decorative except for a short `aria-live` status; the existing
   page heading and controls remain the accessible source of truth.
-- `pointer-events` is disabled while the splash is present and restored only
-  when the initial view is ready. It must not change the target or form hit
-  areas after removal.
+- Underlying page content cannot receive pointer input while the splash is
+  present; the splash itself has no actionable controls. It must not change
+  the target or form hit areas after removal.
 - If initialization is delayed or fails, the existing fallback text and reload
   action win over decorative motion. No blank or permanently blocked state is
   acceptable.
