@@ -273,6 +273,28 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await expect(unexpectedErrors).toEqual([]);
 });
 
+test("new arrow exposes bounded target impact feedback, then removes it", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+
+  await page.goto("/");
+  await expect(page.locator("#bootFallback")).toBeHidden();
+  await page.getByTestId("record-start").click();
+
+  await page.getByTestId("active-target").locator("#tgsvg").click();
+  const impact = page.locator("#tgmarks .shotNew .impactOverlay");
+  await expect(impact).toHaveCount(1);
+  await expect(impact).toHaveAttribute("aria-hidden", "true");
+  await expect(impact.locator(".impactRing")).toHaveCount(1);
+  await expect(impact.locator(".impactRay")).toHaveCount(1);
+
+  await page.waitForTimeout(750);
+  await expect(page.locator("#tgmarks .impactOverlay")).toHaveCount(0);
+  await expect(unexpectedErrors).toEqual([]);
+});
+
 test("records a multi-distance round with stage advance and history badges", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

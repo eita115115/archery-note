@@ -2423,3 +2423,24 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   browser suite completed 83/83; the generated transient `debug.log` was
   removed. The dependency-remediation commit must be reflected in the pushed
   candidate before opening the draft PR.
+
+## 2026-08-30 — OSS motion Task 1: bounded arrow impact feedback
+
+- Changed: new-arrow SVG markers now add an ephemeral, `aria-hidden` impact
+  ring and ray at the existing `gp(a)` position. The existing 640ms
+  `freshTimer` removes the display-only overlay with the fresh marker/chip
+  state. The marker's arguments, arrow coordinates, score calculation,
+  storage, detector, transport, and Service Worker are unchanged.
+- RED: `node tools/check-ui.js` failed with the new missing-overlay contract;
+  the focused Playwright case also failed because the expected overlay count
+  was zero before implementation.
+- GREEN: `node tools/check-ui.js`, the focused Chromium new-arrow lifecycle
+  case (1/1), `npm run check:app`, `npm run lint`, the changed-test Prettier
+  check, and `git diff --check` passed. The 390x844 UI smoke screenshot stayed
+  in bounds. The full `npm run format:check` remains blocked by the unchanged,
+  pre-existing `docs/superpowers/specs/2026-08-29-oss-motion-adoption-design.md`
+  formatting warning; this task does not modify that design document.
+- Risk: the overlay has `pointer-events:none`, is removed by the existing
+  lifecycle, and is not persisted. Reduced motion uses the existing global
+  animation-disable rule.
+- Next: Task 1 review, then Task 2 form-analysis state feedback.

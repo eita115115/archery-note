@@ -1466,13 +1466,18 @@ function refreshActive() {
     }),
   );
   s.cur.forEach((a, i) => {
-    html += markCircle(
-      gp(a),
+    const pos = gp(a);
+    const fresh = i === ui.freshArrow;
+    const marker = markCircle(
+      pos,
       s.faceD,
       i === ui.selArrow ? "#111" : "var(--green-l)",
       scoreLabel(a),
-      i === ui.freshArrow ? "shotNew" : "",
+      fresh ? "shotNew" : "",
     );
+    const r = arrowMarkRadius(s.faceD);
+    const impact = `<g class="impactOverlay" aria-hidden="true"><circle class="impactRing" cx="${pos.x}" cy="${-pos.y}" r="${r * 2.5}"/><path class="impactRay" d="M ${pos.x + r * 3.1} ${-pos.y}h ${r * 2.4}"/></g>`;
+    html += fresh ? marker.replace(/<\/g>$/, `${impact}</g>`) : marker;
   });
   $("#tgmarks").innerHTML = html;
   // chips（innerHTML 全置換でフォーカス中のチップが消えるため、置換前に data-i を控えて復元する）
@@ -1503,6 +1508,7 @@ function refreshActive() {
       document
         .querySelectorAll(".shotNew,.sc.fresh")
         .forEach((el) => el.classList.remove("shotNew", "fresh"));
+      document.querySelectorAll("#tgmarks .impactOverlay").forEach((el) => el.remove());
     }, 640);
     revealChipsAboveDock(chipsBox, "instant");
   } else {

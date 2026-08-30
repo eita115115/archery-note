@@ -587,7 +587,21 @@ button.sc{margin:0; padding:0; font-family:inherit; line-height:inherit; text-al
   100%{opacity:1; transform:translate(0,0) scale(1);}
 }
 .shotNew{transform-box:fill-box; transform-origin:center; animation:markPop .42s cubic-bezier(.2,1.15,.2,1) both;}
-.shotNew circle{animation:impactFlash .42s ease-out both;}
+.shotNew>circle{animation:impactFlash .42s ease-out both;}
+/* motion:因果 — 矢の位置から短いリングとレイを出し、着弾を示す。SVGマーカーと同じ座標を使う表示専用レイヤー。 */
+.impactOverlay{pointer-events:none; transform-box:fill-box; transform-origin:center;}
+.impactRing{fill:none; stroke:var(--green); stroke-width:1.1; vector-effect:non-scaling-stroke; animation:impactRing .42s var(--ease-app) both;}
+.impactRay{fill:none; stroke:var(--green); stroke-width:1.1; stroke-linecap:butt; vector-effect:non-scaling-stroke; animation:impactRay .42s var(--ease-app) both;}
+@keyframes impactRing{
+  0%{opacity:.76; transform:scale(.38);}
+  68%{opacity:.24; transform:scale(1);}
+  100%{opacity:0; transform:scale(1.08);}
+}
+@keyframes impactRay{
+  0%{opacity:0; transform:translateX(-3px);}
+  32%{opacity:.72; transform:translateX(0);}
+  100%{opacity:0; transform:translateX(4px);}
+}
 .statbar{display:flex; gap:6px; margin-top:10px;}
 .stat{flex:1; background:var(--soft); border-radius:8px; padding:9px 4px; text-align:center;}
 .stat b{display:block; font-size:17px; font-variant-numeric:tabular-nums;} .stat span{font-size:10.5px; color:var(--sub);}

@@ -196,6 +196,19 @@ function staticUiChecks() {
       surface.includes("ic-sight"),
     "minimal recording feedback, tab icons, and reduced-motion guard missing",
   );
+  assert(
+    recordSurface.includes('class="impactOverlay" aria-hidden="true"') &&
+      recordSurface.includes('class="impactRing"') &&
+      recordSurface.includes('class="impactRay"') &&
+      recordSurface.includes("#tgmarks .impactOverlay"),
+    "fresh target markers must expose a bounded, disposable impact overlay",
+  );
+  assert(
+    /\.impactOverlay\{[^}]*pointer-events:none;/.test(css) &&
+      css.includes("@keyframes impactRing") &&
+      css.includes("@keyframes impactRay"),
+    "impact overlay must stay display-only and use bounded SVG feedback",
+  );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
   assert(
     html.includes('class="ic ic-record"') &&
