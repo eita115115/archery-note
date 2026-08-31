@@ -2684,3 +2684,20 @@ existing icon asset`. The lifecycle browser test now holds `90-init.js` at
   CSS fallback has already won. It leaves CSS, persisted data, scoring, render
   order, Service Worker behavior, and reduced-motion handling unchanged.
 - Next: integrate this final review-fix commit with the startup-motion range.
+
+## 2026-08-31 — Startup motion final review: approved
+
+- Independent re-review of `d5e5d307..e1eecf8b` found no Critical, Important,
+  or Minor issues and returned a Ready verdict. The prior late-init/background
+  RAF replay finding is covered by the dedicated two-frame regression.
+- Fresh root verification rebuilt `style.min.css` without a diff, passed all
+  five focused startup Chromium cases on port 42971, and passed
+  `npm run check:all`, `npm run lint`, `node --check scripts/90-init.js`, scoped
+  Prettier for the new test/progress files, and `git diff --check`.
+- The iPhone 390 px UI-smoke artifact was inspected without clipping or
+  horizontal overflow. Physical iPhone behavior remains unverified.
+- `npm run format:check` still reports only the unchanged pre-existing warning
+  in `docs/superpowers/specs/2026-08-29-oss-motion-adoption-design.md`.
+- Next: push the approved startup-motion increment to
+  `origin/codex/oss-motion-pattern-adoption` and preserve the worktree for the
+  later integration decision.
