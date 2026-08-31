@@ -78,6 +78,19 @@ function collectUnexpectedErrors(page) {
   return unexpectedErrors;
 }
 
+test("startup splash hands off once to the ready record screen", async ({ page }) => {
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+  await page.goto("/");
+  await expect(page.getByTestId("record-start")).toBeVisible();
+  await expect(page.locator("#bootSplash")).toHaveCount(0);
+  await expect(page.locator("header.app")).not.toHaveClass(/bootReady/);
+  await expect(page.locator("#main")).not.toHaveClass(/bootReady/);
+  await mainTab(page, "履歴").click();
+  await expect(page.locator("#bootSplash")).toHaveCount(0);
+});
+
 test("loads core tabs and seeded history without console errors", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

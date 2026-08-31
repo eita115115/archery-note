@@ -2537,3 +2537,24 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   changed.
 - Next: choose Subagent-Driven or Inline execution, then run Task 1 RED before
   implementing the startup lifecycle.
+
+## 2026-08-31 — Startup motion Task 1: splash lifecycle
+
+- Changed: added the transient `#bootSplash` markup using the existing
+  `icon.svg`, plus a local, idempotent `releaseBootSplash()` immediately after
+  the initial `render()`. It adds temporary `bootReady` classes, removes the
+  splash after its animation event or 240 ms fallback, and clears the classes
+  after 320 ms (or on the next frame for reduced motion). The existing
+  `showView()` transition order is unchanged.
+- RED: `node tools/check-ui.js` failed with `startup splash must use the
+existing icon asset`. The focused Chromium settled-state browser check passed
+  before implementation because its assertions only observe the already-absent
+  splash and cleared classes, so it cannot independently establish RED.
+- GREEN: `node tools/check-ui.js`, the focused Chromium startup handoff case
+  (1/1), `node --check scripts/90-init.js`, `npm run check:app`, and
+  `git diff --check` passed.
+- Risk: no CSS or `style.min.css` changes are included in this lifecycle-only
+  slice; Task 2 owns styling, slow-init fallback coverage, and reduced-motion
+  styling. No storage, scoring, detector, Service Worker, dependency, version,
+  native, or physical-iPhone behavior changed.
+- Next: Task 1 review, then Task 2 splash styles and fallback coverage.

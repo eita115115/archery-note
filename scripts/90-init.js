@@ -90,4 +90,51 @@ if(db.settings.gamification && db.settings.gamification.enabled && !db.settings.
     console.warn("[gamification] backfill failed, skipping this launch",e);
   }
 }
+let bootSplashReleased = false;
+function releaseBootSplash() {
+  if (bootSplashReleased) return;
+  bootSplashReleased = true;
+  const splash = $("#bootSplash");
+  const main = $("#main");
+  const header = document.querySelector("header.app");
+  if (main) main.classList.add("bootReady");
+  if (header) header.classList.add("bootReady");
+  const reduced =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let splashRemoved = false;
+  const removeSplash = () => {
+    if (splashRemoved) return;
+    splashRemoved = true;
+    if (splash?.isConnected) splash.remove();
+    if (reduced) {
+      main?.classList.remove("bootReady");
+      header?.classList.remove("bootReady");
+      return;
+    }
+    window.setTimeout(() => {
+      main?.classList.remove("bootReady");
+      header?.classList.remove("bootReady");
+    }, 320);
+  };
+  if (!splash) {
+    removeSplash();
+    return;
+  }
+  if (reduced) {
+    requestAnimationFrame(removeSplash);
+    return;
+  }
+  requestAnimationFrame(() => {
+    splash.classList.add("is-exiting");
+    const onExitEnd = (event) => {
+      if (event.target !== splash || event.animationName !== "bootSplashExit") return;
+      splash.removeEventListener("animationend", onExitEnd);
+      removeSplash();
+    };
+    splash.addEventListener("animationend", onExitEnd);
+    window.setTimeout(removeSplash, 240);
+  });
+}
 render();
+releaseBootSplash();

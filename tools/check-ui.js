@@ -299,6 +299,19 @@ function staticUiChecks() {
     "startup/update fallback should be calm and initially hidden",
   );
   assert(
+    html.includes('id="bootSplash"') &&
+      html.includes('class="bootSplashMark"') &&
+      html.includes('src="icon.svg"'),
+    "startup splash must use the existing icon asset",
+  );
+  assert(
+    appJs.includes("function releaseBootSplash()") &&
+      appJs.includes("releaseBootSplash();") &&
+      appJs.includes("bootSplash") &&
+      appJs.includes("bootReady"),
+    "startup splash release hook missing",
+  );
+  assert(
     recordSurface.includes("サイト値を残す") &&
       recordSurface.includes("サイト値つきで開始") &&
       !recordSurface.includes("校正用") &&
