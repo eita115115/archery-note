@@ -2612,3 +2612,24 @@ existing icon asset`. The lifecycle browser test now holds `90-init.js` at
   changed. The known out-of-scope design-document formatting warning remains.
 - Next: independent Task 2 review, then the whole startup-motion range can move
   to the integration/publish decision.
+
+## 2026-08-31 — Startup motion review fix: reduced-motion fallback reachability
+
+- Changed only the reduced-motion `.bootSplash` rule in `style.css` and the
+  regenerated `style.min.css`: the decorative splash is immediately
+  `opacity:0`, `visibility:hidden`, and `pointer-events:none`. Animation,
+  transform, and transition disabling remains unchanged; no JavaScript or
+  other startup behavior changed.
+- RED: on fresh port 42837, the focused Chromium test failed as expected at
+  `expect(locator('#bootSplash')).toBeHidden()`: expected hidden, received
+  visible.
+- GREEN: on fresh port 42841, all four startup cases passed serially (4/4):
+  normal handoff, slow-init reload fallback, reduced-motion slow-init
+  reachability, and reduced-motion immediate content.
+- Validation: `node tools/check-ui.js`, `npm run check:all`, and `npm run lint`
+  pass. Scoped Prettier and `git diff --check` pass. `npm run format:check`
+  retains only the documented pre-existing design-document warning.
+- Risk: CSS-only accessibility guard; no storage, scoring, detector, form,
+  transport, Service Worker, dependency, version, native, release, or
+  persisted user-data behavior changed.
+- Next: integrate this review-fix commit with the startup-motion range.

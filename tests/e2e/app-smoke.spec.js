@@ -113,6 +113,51 @@ test("slow initialization yields to the reload fallback", async ({ page }) => {
   await expect(page.locator("#bootSplash")).toHaveCSS("pointer-events", "none");
 });
 
+test("reduced motion keeps the slow-init reload fallback reachable", async ({ page }) => {
+  let releaseInit;
+  const initReleased = new Promise((resolve) => {
+    releaseInit = resolve;
+  });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/scripts/90-init.js", async (route) => {
+    await initReleased;
+    await route.continue();
+  });
+  await page.goto("/", { waitUntil: "commit" });
+
+  try {
+    const fallback = page.locator("#bootFallback");
+    const reload = page.locator(".bootReload");
+    const splash = page.locator("#bootSplash");
+    await expect(fallback).toBeVisible();
+    await expect(reload).toBeVisible();
+    await expect(splash).toBeHidden({ timeout: 1000 });
+    await expect(splash).toHaveCSS("pointer-events", "none");
+
+    const reloadBox = await reload.boundingBox();
+    expect(reloadBox).not.toBeNull();
+    const hit = await page.evaluate(
+      ({ x, y }) => {
+        const topmost = globalThis.document.elementFromPoint(x, y);
+        const reloadLink = globalThis.document.querySelector(".bootReload");
+        return {
+          className: topmost?.className || "",
+          isReload: topmost === reloadLink || reloadLink?.contains(topmost) || false,
+          tagName: topmost?.tagName || "",
+        };
+      },
+      {
+        x: reloadBox.x + reloadBox.width / 2,
+        y: reloadBox.y + reloadBox.height / 2,
+      },
+    );
+    expect(hit).toMatchObject({ isReload: true, tagName: "A" });
+  } finally {
+    releaseInit();
+    await page.waitForLoadState("load");
+  }
+});
+
 test("reduced motion makes startup content immediate", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript((database) => {

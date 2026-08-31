@@ -1003,7 +1003,7 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
   .bootSplashMark,
   header.app.bootReady,
   main.bootReady{animation:none!important; transform:none!important; transition:none!important;}
-  .bootSplash{opacity:1; visibility:visible; pointer-events:auto;}
+  .bootSplash{opacity:0; visibility:hidden; pointer-events:none;}
   .bootFallback{opacity:1; visibility:visible; pointer-events:auto;}
 }
 
