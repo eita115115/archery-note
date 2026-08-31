@@ -2525,6 +2525,11 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
 - Clarified the accessibility boundary: the opaque splash owns pointer input
   while present, has no actionable controls, and releases input on exit;
   underlying record controls and hit areas remain unchanged after removal.
+- Execution preflight: the user chose Subagent-Driven execution and approved
+  `docs/design/ui-design-language.md` as authoritative over the plan example.
+  The plan now uses the 8px card radius, 8px spacing, motion-purpose comment,
+  tokenized CSS timing, and moves the slow-init browser contract into the CSS
+  task that can make it pass.
 - Validation: both startup spec/plan files pass focused Prettier checks;
   placeholder scan and plan/spec coverage review found no unfinished markers.
 - Risk: docs and planning only. No runtime, storage, scoring, detector,

@@ -16,6 +16,7 @@
 - Keep all startup state ephemeral. No `db` fields, timers in persistence, scoring calls, detector calls, camera calls, or transport calls are added.
 - `prefers-reduced-motion: reduce` disables scale/translate and transition timing, makes the splash and initial content immediately visible, and keeps the HUD, controls, and explanatory text visible.
 - The splash overlay owns pointer input while present so hidden controls cannot be activated; the splash itself has no actionable controls. Its exit state sets `pointer-events:none`, and removal restores the page without changing hit areas.
+- Follow `docs/design/ui-design-language.md`: use the existing 8px card radius and 8px spacing token, declare the motion purpose in a CSS comment, and express every new duration and easing through motion tokens.
 - If initialization is delayed or fails, the existing fallback text and reload action win over decorative motion. No blank or permanently blocked state is acceptable.
 - No changes to scoring, release detection, form analysis, storage schema, backups, transport, Service Worker, native shells, or physical iPhone acceptance behavior.
 
@@ -28,7 +29,7 @@
 - Modify: `index.html` near the existing `<main id="main">` and `#bootFallback` markup.
 - Modify: `scripts/90-init.js` after the existing initial `render()` call.
 - Modify: `tools/check-ui.js` static startup contracts.
-- Test: `tests/e2e/app-smoke.spec.js` startup lifecycle and fallback cases.
+- Test: `tests/e2e/app-smoke.spec.js` startup lifecycle case.
 - Modify: `docs/codex/codex-progress.md` with Task 1 evidence.
 
 **Interfaces:**
@@ -74,35 +75,18 @@ test("startup splash hands off once to the ready record screen", async ({ page }
 });
 ```
 
-Add a delayed-init case that holds `scripts/90-init.js` long enough for the
-existing fallback to become visible, then releases the route and confirms the
-splash is no longer blocking the reload action:
-
-```js
-test("slow initialization yields to the reload fallback", async ({ page }) => {
-  await page.route("**/scripts/90-init.js", async (route) => {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await route.continue();
-  });
-  await page.goto("/");
-  await expect(page.locator("#bootFallback")).toBeVisible({ timeout: 3500 });
-  await expect(page.locator(".bootReload")).toBeVisible();
-  await expect(page.locator("#bootSplash")).toHaveCSS("pointer-events", "none");
-});
-```
-
 - [ ] **Step 2: Run contracts to capture RED.**
 
 Run:
 
 ```powershell
 node tools/check-ui.js
-npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "startup splash|slow initialization" --workers=1
+npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "startup splash hands off" --workers=1
 ```
 
 Expected: the static contract fails because `bootSplash` and
-`releaseBootSplash()` do not exist, and the focused browser cases cannot find
-the startup elements or fallback handoff.
+`releaseBootSplash()` do not exist, and the focused browser case cannot find
+the startup lifecycle.
 
 - [ ] **Step 3: Add the minimal startup markup.**
 
@@ -139,7 +123,10 @@ function releaseBootSplash() {
   const reduced =
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let splashRemoved = false;
   const removeSplash = () => {
+    if (splashRemoved) return;
+    splashRemoved = true;
     if (splash?.isConnected) splash.remove();
     if (reduced) {
       main?.classList.remove("bootReady");
@@ -161,7 +148,12 @@ function releaseBootSplash() {
   }
   requestAnimationFrame(() => {
     splash.classList.add("is-exiting");
-    splash.addEventListener("animationend", removeSplash, { once: true });
+    const onExitEnd = (event) => {
+      if (event.target !== splash || event.animationName !== "bootSplashExit") return;
+      splash.removeEventListener("animationend", onExitEnd);
+      removeSplash();
+    };
+    splash.addEventListener("animationend", onExitEnd);
     window.setTimeout(removeSplash, 240);
   });
 }
@@ -179,7 +171,7 @@ Run:
 
 ```powershell
 node tools/check-ui.js
-npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "startup splash|slow initialization" --workers=1
+npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "startup splash hands off" --workers=1
 node --check scripts/90-init.js
 git diff --check
 ```
@@ -219,6 +211,8 @@ assert(
     css.includes("@keyframes bootSplashExit") &&
     css.includes("@keyframes bootContentEnter") &&
     css.includes("bootSplashFailsafe") &&
+    css.includes("--motion-boot-failsafe-delay") &&
+    css.includes("motion:状態 — 起動完了をロゴから記録画面へ一度だけ引き継ぐ") &&
     css.includes("prefers-reduced-motion"),
   "startup splash motion and fallback guard missing",
 );
@@ -228,6 +222,23 @@ assert(
     deployedCss.includes("bootContentEnter"),
   "deployed stylesheet is missing startup motion",
 );
+```
+
+Add a delayed-init case that returns from navigation at response commit, holds
+`scripts/90-init.js` beyond both existing fallback delays, and verifies that
+the reload fallback is reachable before initialization resumes:
+
+```js
+test("slow initialization yields to the reload fallback", async ({ page }) => {
+  await page.route("**/scripts/90-init.js", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+    await route.continue();
+  });
+  await page.goto("/", { waitUntil: "commit" });
+  await expect(page.locator("#bootFallback")).toBeVisible({ timeout: 3500 });
+  await expect(page.locator(".bootReload")).toBeVisible();
+  await expect(page.locator("#bootSplash")).toHaveCSS("pointer-events", "none");
+});
 ```
 
 Add a reduced-motion browser case:
@@ -254,31 +265,41 @@ Run:
 
 ```powershell
 node tools/check-ui.js
-npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "reduced motion makes startup" --workers=1
+npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "slow initialization|reduced motion makes startup" --workers=1
 ```
 
 Expected: the CSS contract fails because the startup selectors/keyframes do
-not exist; the reduced-motion case remains a reachable behavior check.
+not exist; the delayed-init case also proves the unstyled splash still blocks
+the existing fallback.
 
 - [ ] **Step 3: Add bounded startup CSS.**
+
+Extend the existing root motion-token group with the startup failsafe tokens:
+
+```css
+--motion-instant: 0.01s;
+--motion-boot-failsafe-delay: 2.6s;
+```
 
 Add the following near `.bootFallback` in `style.css`:
 
 ```css
+/* motion:状態 — 起動完了をロゴから記録画面へ一度だけ引き継ぐ */
 .bootSplash {
   position: fixed;
   inset: 0;
   z-index: 60;
   display: grid;
   place-items: center;
-  gap: 10px;
+  gap: var(--space-3);
   align-content: center;
   background: var(--bg);
   color: var(--ink);
   pointer-events: auto;
   opacity: 1;
   visibility: visible;
-  animation: bootSplashFailsafe 0.01s steps(1, end) 2.6s forwards;
+  animation: bootSplashFailsafe var(--motion-instant) steps(1, end)
+    var(--motion-boot-failsafe-delay) forwards;
 }
 .bootSplashMark {
   width: 64px;
@@ -286,13 +307,13 @@ Add the following near `.bootFallback` in `style.css`:
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: var(--card);
-  animation: bootSplashEnter 0.24s var(--ease-fluid) both;
+  animation: bootSplashEnter var(--motion-med) var(--ease-fluid) both;
 }
 .bootSplashMark img {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   display: block;
 }
 .bootSplashLabel {
@@ -302,7 +323,7 @@ Add the following near `.bootFallback` in `style.css`:
   letter-spacing: 0.1em;
 }
 .bootSplash.is-exiting {
-  animation: bootSplashExit 0.18s var(--ease-app) both;
+  animation: bootSplashExit var(--motion-fast) var(--ease-app) both;
   pointer-events: none;
 }
 @keyframes bootSplashEnter {
@@ -380,7 +401,7 @@ Run:
 ```powershell
 npm run build:web-assets
 node tools/check-ui.js
-npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "startup splash|reduced motion makes startup" --workers=1
+npx playwright test tests/e2e/app-smoke.spec.js --project=chromium --grep "startup splash|slow initialization|reduced motion makes startup" --workers=1
 npm run check:all
 npm run lint
 npx prettier style.css tools/check-ui.js tests/e2e/app-smoke.spec.js --check
