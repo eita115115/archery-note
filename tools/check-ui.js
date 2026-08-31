@@ -312,6 +312,23 @@ function staticUiChecks() {
     "startup splash release hook missing",
   );
   assert(
+    css.includes(".bootSplash") &&
+      css.includes("@keyframes bootSplashEnter") &&
+      css.includes("@keyframes bootSplashExit") &&
+      css.includes("@keyframes bootContentEnter") &&
+      css.includes("bootSplashFailsafe") &&
+      css.includes("--motion-boot-failsafe-delay") &&
+      css.includes("motion:状態 — 起動完了をロゴから記録画面へ一度だけ引き継ぐ") &&
+      css.includes("prefers-reduced-motion"),
+    "startup splash motion and fallback guard missing",
+  );
+  assert(
+    deployedCss.includes(".bootSplash") &&
+      deployedCss.includes("@keyframes bootSplashExit") &&
+      deployedCss.includes("bootContentEnter"),
+    "deployed stylesheet is missing startup motion",
+  );
+  assert(
     recordSurface.includes("サイト値を残す") &&
       recordSurface.includes("サイト値つきで開始") &&
       !recordSurface.includes("校正用") &&

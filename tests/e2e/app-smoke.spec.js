@@ -102,6 +102,38 @@ test("startup splash hands off once to the ready record screen", async ({ page }
   await expect(page.locator("#bootSplash")).toHaveCount(0);
 });
 
+test("slow initialization yields to the reload fallback", async ({ page }) => {
+  await page.route("**/scripts/90-init.js", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 4000));
+    await route.continue();
+  });
+  await page.goto("/", { waitUntil: "commit" });
+  await expect(page.locator("#bootFallback")).toBeVisible({ timeout: 3500 });
+  await expect(page.locator(".bootReload")).toBeVisible();
+  await expect(page.locator("#bootSplash")).toHaveCSS("pointer-events", "none");
+});
+
+test("reduced motion makes startup content immediate", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+  await page.goto("/");
+  await expect(page.getByTestId("record-start")).toBeVisible();
+  await expect(page.locator("#bootSplash")).toHaveCount(0);
+  await expect(page.locator("header.app")).toHaveCSS("animation-name", "none");
+  await expect(page.locator("#main")).toHaveCSS("animation-name", "none");
+  expect(
+    await page.evaluate(
+      () =>
+        Math.max(
+          globalThis.document.documentElement.scrollWidth,
+          globalThis.document.body.scrollWidth,
+        ) - globalThis.innerWidth,
+    ),
+  ).toBeLessThanOrEqual(1);
+});
+
 test("loads core tabs and seeded history without console errors", async ({ page }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
   await page.addInitScript((database) => {

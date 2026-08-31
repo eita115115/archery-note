@@ -2574,3 +2574,41 @@ existing icon asset`. The lifecycle browser test now holds `90-init.js` at
 - Risk: test and evidence only; no production JavaScript, CSS, storage,
   scoring, detector, Service Worker, dependency, version, native, or physical
   iPhone behavior changed.
+
+## 2026-08-31 — Startup motion Task 2: styled handoff and reachable fallback
+
+- Changed: added tokenized startup enter/exit/failsafe CSS, reduced-motion
+  overrides, generated `style.min.css`, source/generated static contracts, and
+  focused slow-init/reduced-motion Chromium coverage. The existing icon, 8 px
+  card radius, 8 px spacing token, Task 1 one-shot release, and `showView()`
+  order remain unchanged.
+- RED: on confirmed-unused port 42117, the focused slow-init test consistently
+  failed because `#bootFallback` was still hidden after 3.5 seconds while
+  `scripts/90-init.js` was held for four seconds.
+- Root cause: the exact served generated CSS matched the worktree, the document
+  was visible/interactive with reduced motion off, and init was still
+  unexecuted; nevertheless both delayed animations finished at Chromium
+  computed progress `0.9999999999999787`, so `steps(1,end)` continued selecting
+  the initial keyframe. A minimal delayed-animation page and a
+  timing-function-only live override proved `steps(1,start)` selects the final
+  state at the same rounded endpoint.
+- Fix: changed only the existing fallback delay and new splash failsafe from
+  `steps(1,end)` to `steps(1,start)`. The delays stay 2.8 seconds and the
+  tokenized 2.6 seconds respectively; no JavaScript lifecycle change was
+  required.
+- GREEN: the unchanged focused regression passed 3/3 on fresh port 42121. At
+  the same rounded endpoint before init, the splash was hidden/non-blocking and
+  fallback visible/actionable. `node tools/check-ui.js`, `npm run check:all`,
+  and `npm run lint` passed; scoped Prettier for the changed test/docs/report
+  and `git diff --check` passed. The source CSS/static checker retain their
+  pre-existing whole-file Prettier drift and were not bulk reformatted.
+  The full format command reports only the unchanged pre-existing
+  `docs/superpowers/specs/2026-08-29-oss-motion-adoption-design.md` warning.
+- Visual evidence: 390×844 and 360×780 normal UI smoke screenshots plus
+  390×844 initial-splash and failed-init fallback screenshots were inspected
+  without clipping or horizontal overflow.
+- Risk: no scoring, storage/schema, form/detector, transport, Service Worker,
+  dependency, version, native, release, or persisted user-data behavior
+  changed. The known out-of-scope design-document formatting warning remains.
+- Next: independent Task 2 review, then the whole startup-motion range can move
+  to the integration/publish decision.

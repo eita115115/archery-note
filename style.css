@@ -24,7 +24,8 @@
   --radius-card:8px; --radius-panel:8px; --radius-control:6px;
   --ease-app:cubic-bezier(.2,.8,.2,1);
   --ease-fluid:cubic-bezier(.22,1,.36,1);
-  --motion-fast:.18s; --motion-med:.28s; --motion-fluid:.42s;
+  --motion-instant:.01s; --motion-fast:.18s; --motion-med:.28s; --motion-fluid:.42s;
+  --motion-boot-failsafe-delay:2.6s;
   /* design tokens — spacing */
   --space-1:4px; --space-2:6px; --space-3:8px; --space-4:10px;
   --space-5:12px; --space-6:14px; --space-7:16px; --space-8:20px;
@@ -93,7 +94,7 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px 10px 
   text-align:center; color:var(--ink); padding:28px 14px;
   opacity:0; visibility:hidden; pointer-events:none;
   /* motion:注意 — 起動が既定より遅い場合のみ、フォールバック文言を遅延表示して誤操作を防ぐ */
-  animation:bootFallbackDelay .01s steps(1,end) 2.8s forwards;
+  animation:bootFallbackDelay .01s steps(1,start) 2.8s forwards;
 }
 @keyframes bootFallbackDelay{to{opacity:1; visibility:visible; pointer-events:auto;}}
 .bootFallback .bootIcon{
@@ -103,6 +104,33 @@ main{width:100%; max-width:560px; min-width:0; margin:0 auto; padding:12px 10px 
 .bootFallback h2{font-size:18px; margin:4px 0 0; color:var(--title);}
 .bootFallback p{font-size:12px; color:var(--sub); line-height:1.65; margin:0; max-width:320px;}
 .bootFallback .bootReload{width:auto; min-width:148px; text-decoration:none; margin-top:4px;}
+/* motion:状態 — 起動完了をロゴから記録画面へ一度だけ引き継ぐ */
+.bootSplash{
+  position:fixed; inset:0; z-index:60; display:grid; place-items:center; gap:var(--space-3); align-content:center;
+  background:var(--bg); color:var(--ink); pointer-events:auto; opacity:1; visibility:visible;
+  animation:bootSplashFailsafe var(--motion-instant) steps(1,start) var(--motion-boot-failsafe-delay) forwards;
+}
+.bootSplashMark{
+  width:64px; height:64px; display:grid; place-items:center; border:1px solid var(--line); border-radius:var(--radius-card); background:var(--card);
+  animation:bootSplashEnter var(--motion-med) var(--ease-fluid) both;
+}
+.bootSplashMark img{width:40px; height:40px; display:block;}
+.bootSplashLabel{margin:0; color:var(--sub); font-size:12px; letter-spacing:.1em;}
+.bootSplash.is-exiting{animation:bootSplashExit var(--motion-fast) var(--ease-app) both; pointer-events:none;}
+@keyframes bootSplashEnter{
+  from{opacity:0; transform:scale(.94);}
+  to{opacity:1; transform:scale(1);}
+}
+@keyframes bootSplashExit{
+  from{opacity:1; transform:scale(1); visibility:visible;}
+  to{opacity:0; transform:scale(1.02); visibility:hidden;}
+}
+@keyframes bootSplashFailsafe{to{opacity:0; visibility:hidden; pointer-events:none;}}
+@keyframes bootContentEnter{
+  from{opacity:.88; transform:translateY(4px);}
+  to{opacity:1; transform:translateY(0);}
+}
+header.app.bootReady,main.bootReady{animation:bootContentEnter var(--motion-med) var(--ease-app) both;}
 @keyframes appRise{
   from{opacity:.96; transform:translateY(6px) scale(.992);}
   to{opacity:1; transform:translateY(0) scale(1);}
@@ -970,6 +998,12 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
   .formCapture .formHud,
   .formCapture .formBar,
   .formCapture .formFootnote{opacity:1!important; visibility:visible!important;}
+  .bootSplash,
+  .bootSplash.is-exiting,
+  .bootSplashMark,
+  header.app.bootReady,
+  main.bootReady{animation:none!important; transform:none!important; transition:none!important;}
+  .bootSplash{opacity:1; visibility:visible; pointer-events:auto;}
   .bootFallback{opacity:1; visibility:visible; pointer-events:auto;}
 }
 
