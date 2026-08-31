@@ -79,10 +79,21 @@ function collectUnexpectedErrors(page) {
 }
 
 test("startup splash hands off once to the ready record screen", async ({ page }) => {
+  let releaseInit;
+  const initReleased = new Promise((resolve) => {
+    releaseInit = resolve;
+  });
+  await page.route("**/scripts/90-init.js", async (route) => {
+    await initReleased;
+    await route.continue();
+  });
   await page.addInitScript((database) => {
     globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
   }, sampleDb);
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "commit" });
+  await expect(page.locator("#bootSplash")).toHaveCount(1);
+  releaseInit();
+  await page.waitForLoadState("load");
   await expect(page.getByTestId("record-start")).toBeVisible();
   await expect(page.locator("#bootSplash")).toHaveCount(0);
   await expect(page.locator("header.app")).not.toHaveClass(/bootReady/);

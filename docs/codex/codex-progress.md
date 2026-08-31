@@ -2547,9 +2547,9 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   after 320 ms (or on the next frame for reduced motion). The existing
   `showView()` transition order is unchanged.
 - RED: `node tools/check-ui.js` failed with `startup splash must use the
-existing icon asset`. The focused Chromium settled-state browser check passed
-  before implementation because its assertions only observe the already-absent
-  splash and cleared classes, so it cannot independently establish RED.
+existing icon asset`. The lifecycle browser test now holds `90-init.js` at
+  response commit and requires an attached `#bootSplash` before release; with
+  the splash markup temporarily removed it failed at the required count of one.
 - GREEN: `node tools/check-ui.js`, the focused Chromium startup handoff case
   (1/1), `node --check scripts/90-init.js`, `npm run check:app`, and
   `git diff --check` passed.
@@ -2558,3 +2558,19 @@ existing icon asset`. The focused Chromium settled-state browser check passed
   styling. No storage, scoring, detector, Service Worker, dependency, version,
   native, or physical-iPhone behavior changed.
 - Next: Task 1 review, then Task 2 splash styles and fallback coverage.
+
+## 2026-08-31 — Startup motion Task 1: lifecycle test remediation
+
+- Strengthened the startup Chromium test by holding `scripts/90-init.js` with
+  a route promise, navigating at response commit, and requiring the initial
+  splash before allowing initialization to continue. The existing settled
+  handoff assertions remain unchanged.
+- RED: temporarily removing only `#bootSplash` caused the test to fail after
+  five seconds with expected count `1`, received `0`, at the pre-release
+  assertion. The markup was restored before final verification.
+- GREEN: the focused Chromium test passed 1/1 after restoring the committed
+  markup. `node tools/check-ui.js`, `npm run lint`, and `git diff --check` also
+  passed.
+- Risk: test and evidence only; no production JavaScript, CSS, storage,
+  scoring, detector, Service Worker, dependency, version, native, or physical
+  iPhone behavior changed.
