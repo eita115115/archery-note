@@ -126,6 +126,11 @@ function releaseBootSplash() {
     return;
   }
   requestAnimationFrame(() => {
+    const splashState = window.getComputedStyle(splash);
+    if (splashState.visibility === "hidden" || splashState.pointerEvents === "none") {
+      removeSplash();
+      return;
+    }
     splash.classList.add("is-exiting");
     const onExitEnd = (event) => {
       if (event.target !== splash || event.animationName !== "bootSplashExit") return;

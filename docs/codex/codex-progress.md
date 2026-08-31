@@ -2652,3 +2652,35 @@ existing icon asset`. The lifecycle browser test now holds `90-init.js` at
   detector, form, transport, Service Worker, dependency, version, native,
   release, or persisted user-data behavior changed.
 - Next: integrate this separate review-fix commit with the startup-motion range.
+
+## 2026-08-31 — Startup motion final review fix: failsafe wins a late release
+
+- Changed only `scripts/90-init.js` and the focused startup Playwright coverage.
+  At the queued normal-motion release frame, the initializer now reads the
+  splash's computed state. If the 2.6 s CSS failsafe has already made it hidden
+  or non-interactive, the existing idempotent `removeSplash()` removes it
+  immediately rather than adding `.is-exiting` and replaying the splash.
+- Regression: the browser test holds `scripts/90-init.js` until the failsafe
+  has hidden and made the splash non-interactive while exposing the reload
+  fallback, captures the release RAF, then executes it and two further native
+  animation frames.
+  It requires the ready record start to be reachable, the splash node to be
+  removed, and no observed `.is-exiting` mutation.
+- RED: fresh port 42911, the focused test failed as intended at
+  `expect(releaseState.replayStates).toEqual([])`: received
+  `["is-exiting"]` from the old unconditional release path.
+- GREEN: fresh port 42913, the focused case passed (1/1, 5.1 s); after the
+  lint-only test global fix it passed again on fresh port 42923 (1/1, 5.0 s).
+  All five startup cases then passed serially on fresh port 42929 (5/5, 13.5 s).
+- Validation after the final startup rerun: `node --check scripts/90-init.js`
+  passed; `node tools/check-ui.js` passed; `npm run check:all` passed (app, globals,
+  analysis, form, gamification, today's result, security, UI, PWA, storage,
+  version); and `npm run lint` passed after replacing the test's bare
+  `MutationObserver` with `globalThis.MutationObserver`.
+- Formatting: scoped Prettier passes for the new test and progress entry.
+  `scripts/90-init.js` retains its verified pre-existing Prettier warning from
+  the base revision; `git diff --check` passes.
+- Risk: the guard changes only the stale normal-motion release path after its
+  CSS fallback has already won. It leaves CSS, persisted data, scoring, render
+  order, Service Worker behavior, and reduced-motion handling unchanged.
+- Next: integrate this final review-fix commit with the startup-motion range.

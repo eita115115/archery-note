@@ -113,6 +113,77 @@ test("slow initialization yields to the reload fallback", async ({ page }) => {
   await expect(page.locator("#bootSplash")).toHaveCSS("pointer-events", "none");
 });
 
+test("late initialization lets the failsafe win without replaying the splash", async ({ page }) => {
+  let releaseInit;
+  const initReleased = new Promise((resolve) => {
+    releaseInit = resolve;
+  });
+  await page.route("**/scripts/90-init.js", async (route) => {
+    await initReleased;
+    await route.continue();
+  });
+  await page.addInitScript((database) => {
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
+  }, sampleDb);
+  await page.goto("/", { waitUntil: "commit" });
+
+  const splash = page.locator("#bootSplash");
+  await expect(splash).toBeHidden({ timeout: 3500 });
+  await expect(splash).toHaveCSS("pointer-events", "none");
+  await expect(page.locator("#bootFallback")).toBeVisible();
+  await page.evaluate(() => {
+    const splashNode = globalThis.document.querySelector("#bootSplash");
+    const state = {
+      nativeRaf: globalThis.requestAnimationFrame.bind(globalThis),
+      queued: [],
+      replayStates: [],
+    };
+    state.observer = new globalThis.MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.target.classList.contains("is-exiting")) {
+          state.replayStates.push("is-exiting");
+        }
+      }
+    });
+    state.observer.observe(splashNode, { attributes: true, attributeFilter: ["class"] });
+    globalThis.__bootSplashTest = state;
+    globalThis.requestAnimationFrame = (callback) => {
+      state.queued.push(callback);
+      return state.queued.length;
+    };
+  });
+
+  releaseInit();
+  await page.waitForLoadState("load");
+  await expect(page.getByTestId("record-start")).toBeVisible();
+  await expect.poll(() => page.evaluate(() => globalThis.__bootSplashTest.queued.length)).toBe(1);
+  const releaseState = await page.evaluate(async () => {
+    const state = globalThis.__bootSplashTest;
+    const releaseFrame = state.queued.shift();
+    await new Promise((resolve) => {
+      state.nativeRaf((timestamp) => {
+        releaseFrame(timestamp);
+        resolve();
+      });
+    });
+    await new Promise((resolve) => state.nativeRaf(resolve));
+    await new Promise((resolve) => state.nativeRaf(resolve));
+    await Promise.resolve();
+    state.observer.disconnect();
+    globalThis.requestAnimationFrame = state.nativeRaf;
+    const currentSplash = globalThis.document.querySelector("#bootSplash");
+    return {
+      replayStates: state.replayStates,
+      splashStillConnected: currentSplash?.isConnected || false,
+      hasExitingClass: currentSplash?.classList.contains("is-exiting") || false,
+    };
+  });
+
+  expect(releaseState.replayStates).toEqual([]);
+  expect(releaseState.hasExitingClass).toBe(false);
+  expect(releaseState.splashStillConnected).toBe(false);
+});
+
 test("reduced motion keeps the slow-init reload fallback reachable", async ({ page }) => {
   let releaseInit;
   const initReleased = new Promise((resolve) => {
