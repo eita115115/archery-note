@@ -129,10 +129,13 @@ test("reduced motion keeps the slow-init reload fallback reachable", async ({ pa
     const fallback = page.locator("#bootFallback");
     const reload = page.locator(".bootReload");
     const splash = page.locator("#bootSplash");
+    await expect(splash).toBeVisible({ timeout: 1000 });
+    await expect(splash).toHaveCSS("pointer-events", "auto");
+    await expect(splash).toHaveCSS("transform", "none");
+    await expect(splash).toBeHidden({ timeout: 3500 });
+    await expect(splash).toHaveCSS("pointer-events", "none");
     await expect(fallback).toBeVisible();
     await expect(reload).toBeVisible();
-    await expect(splash).toBeHidden({ timeout: 1000 });
-    await expect(splash).toHaveCSS("pointer-events", "none");
 
     const reloadBox = await reload.boundingBox();
     expect(reloadBox).not.toBeNull();

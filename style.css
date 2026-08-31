@@ -1003,7 +1003,13 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
   .bootSplashMark,
   header.app.bootReady,
   main.bootReady{animation:none!important; transform:none!important; transition:none!important;}
-  .bootSplash{opacity:0; visibility:hidden; pointer-events:none;}
+  /* motion:注意 — reduced motionでも静的スプラッシュを先に示し、初期化失敗時だけ遅延ガードで解放する */
+  .bootSplash{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+    animation:bootSplashFailsafe var(--motion-instant) steps(1,start) var(--motion-boot-failsafe-delay) forwards!important;
+  }
   .bootFallback{opacity:1; visibility:visible; pointer-events:auto;}
 }
 

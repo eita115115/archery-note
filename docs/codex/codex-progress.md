@@ -2633,3 +2633,22 @@ existing icon asset`. The lifecycle browser test now holds `90-init.js` at
   transport, Service Worker, dependency, version, native, release, or
   persisted user-data behavior changed.
 - Next: integrate this review-fix commit with the startup-motion range.
+
+## 2026-08-31 — Startup motion review fix: preserve reduced-motion static splash
+
+- Corrected the prior over-fix: reduced motion now keeps the splash visible,
+  pointer-active, and transform-free for first paint, while allowing only the
+  discrete `bootSplashFailsafe` guard (2.6 s, `steps(1,start)`) to override
+  the global animation disable. Successful init still removes it on Task 1's
+  next-frame path; held/failed init releases it to the fallback.
+- RED: on fresh port 42843, the updated combined test failed at the first
+  assertion (`#bootSplash` expected visible, received hidden).
+- GREEN: the updated combined test passed on fresh port 42847 (1/1, 3.5 s);
+  all four startup cases passed serially on fresh port 42851 (4/4, 9.8 s).
+- Validation: `node tools/check-ui.js`, `npm run check:all`, `npm run lint`,
+  scoped Prettier, and `git diff --check` pass. Full format retains only the
+  documented pre-existing design-document warning.
+- Risk: CSS/test-only reduced-motion startup behavior; no storage, scoring,
+  detector, form, transport, Service Worker, dependency, version, native,
+  release, or persisted user-data behavior changed.
+- Next: integrate this separate review-fix commit with the startup-motion range.
