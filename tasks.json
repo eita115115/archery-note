@@ -21,12 +21,23 @@
   },
   {
     "id": "AN-003",
-    "task": "feat/adaptive-release-detection（main より 72 コミット先行）を main へ統合するか判断する",
-    "status": "needs-user",
+    "task": "feat/adaptive-release-detection（73コミット）を main へ統合し v85 として公開する",
+    "status": "done",
+    "passes": true,
+    "evidence": "merge 81553241 → bump 0eac3d3d → prettier 68f12457 → e2e 修正 e4816524。CI success、pages build and deployment success、https://eita115115.github.io/archery-note/version.json = {\"v\": 85} を実測",
+    "dependencies": [],
+    "owner": "opus",
+    "acceptance": "main の CI が緑で、デプロイ済み version.json が v85 を返すこと"
+  },
+  {
+    "id": "AN-004",
+    "task": "tools/check-form-diagnostics.js の appVer 固定値（84）を version.json 由来にするか判断する",
+    "status": "open",
     "passes": false,
     "evidence": "",
     "dependencies": [],
-    "owner": "user",
-    "acceptance": "マージする／このまま進める／分割する のいずれかが決まっている"
+    "owner": "opus",
+    "acceptance": "coordinator と現行 appVer の両方に同じ固定値を渡す現状を『意図した単体テストの閉じた世界』として明文化するか、version.json 由来に変えるかが決まっている",
+    "note": "現状は自己完結のため CI は緑。ただし e2e 側で同じ固定値が v85 bump により14件の失敗を生んだ（e4816524）ので、同型の罠として記録しておく"
   }
 ]
