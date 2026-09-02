@@ -4,6 +4,22 @@ This repository is the real Archery Note app. The Claude/Codex session folder
 under `%USERPROFILE%\.claude\sessions` is only conversation/work history and is
 not the application source. Do not move session files into this repo.
 
+## Source Of Truth
+
+This file is a map, not an encyclopedia. Write detail in the target document and
+add one row here.
+
+| 知りたいこと | 正本 |
+|---|---|
+| 現在地・次の一手 | `progress.md` |
+| 未完タスク | `tasks.json` |
+| 完了と言ってよい条件 | `evals/acceptance.md` |
+| 実装規約（ファイル構成・グローバル） | `CONVENTIONS.md` |
+| ロードマップ | `docs/roadmap.md` |
+| Codex 統合ループの経緯（履歴台帳） | `docs/codex/codex-progress.md` |
+| 統合作業の durable brief | `docs/codex/integration-plan.md` |
+| 役割ごとの担当 | `.claude/agents/an-*.md` |
+
 ## Project Shape
 
 - Repo root: the directory containing this `AGENTS.md`
@@ -95,7 +111,8 @@ scoring, storage, or release decisions.
 ## Long-Running Integration Loop
 
 - The durable integration brief lives in `docs/codex/integration-plan.md`.
-- Progress and next-task state live in `docs/codex/codex-progress.md`.
+- Current state lives in `progress.md` at the repo root. `docs/codex/codex-progress.md`
+  is the long-form **history ledger** for this loop, not the current-state file.
 - A ready-to-paste continuation prompt lives in
   `docs/codex/codex-continue-prompt.md`.
 - For integration work, read all three files before editing.
@@ -105,3 +122,33 @@ scoring, storage, or release decisions.
   ledger before implementing new behavior.
 - Stop for user confirmation before risky storage migration, Service Worker
   activation changes, dependency additions, or broad UI rewrites.
+
+## Acceptance
+
+Do not call work done on your own say-so. `evals/acceptance.md` maps each kind of
+change to the commands that must pass and the evidence that must be kept. Read the
+matching row before you start, and paste the command output when you report.
+
+The three invariants never break, whatever the task:
+
+1. The visible arrow circle and line-cutter scoring agree.
+2. Existing practice data is never deleted.
+3. The primary iPhone flow stays simple.
+
+## Safety
+
+Permission level: **L3 (execute with approval)**.
+
+- Local edits and local commits: proceed.
+- `git push`, GitHub Pages deploy, releases, tags, dependency additions:
+  **ask the user first.**
+- Never write API keys, passwords, or tokens into files in this repo.
+- Do not guess dates, version numbers, or line numbers. Read the file.
+
+## Handoff
+
+At the end of a run, update `progress.md` with: what was completed, which files
+changed, validation results, what to do next, and open problems. Update the matching
+row in `tasks.json` — `passes: true` may only be written together with non-empty
+`evidence`. Do not delete tasks or rewrite their `acceptance`; set
+`status: "needs-user"` and stop instead.
