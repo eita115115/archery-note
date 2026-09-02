@@ -2,6 +2,7 @@
 /* global db */
 
 const fs = require("fs");
+const path = require("path");
 const { expect, test } = require("@playwright/test");
 
 function makeSyntheticDiagnosticDb(overrides = {}) {
@@ -83,7 +84,12 @@ async function resetWriteProbeAfterStartup(page) {
   });
 }
 
-const TASK9_APP_VER = 84;
+/* アプリの現行バージョンを唯一の情報源から読む。
+   ここを固定値にすると npm run version:bump のたびにフィクスチャが陳腐化し、
+   coordinatorAppVer !== appVer (scripts/46-form-core.js) の無効化パスへ落ちる。 */
+const TASK9_APP_VER = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "..", "..", "version.json"), "utf8"),
+).v;
 const TASK9_KEY = "archeryNote.v1";
 const TASK9_SNAPSHOT_KEY = "archeryNote.snapshots.v1";
 const TASK9_BATCH_ID = "11111111-1111-4111-8111-111111111111";
@@ -330,7 +336,7 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
   const coordinator = {
     version: 1,
     batchId: "11111111-1111-4111-8111-111111111111",
-    appVer: 84,
+    appVer: TASK9_APP_VER,
     nextSlot: 1,
     recordIds: ["selected-record"],
     invalidated: false,
@@ -419,7 +425,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
       formDiagnosticMatrixBatch: {
         version: 1,
         batchId: "11111111-1111-4111-8111-111111111111",
-        appVer: 84,
+        appVer: TASK9_APP_VER,
         nextSlot: 0,
         recordIds: [],
         invalidated: false,
@@ -496,7 +502,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   const coordinator = {
     version: 1,
     batchId: "11111111-1111-4111-8111-111111111111",
-    appVer: 84,
+    appVer: TASK9_APP_VER,
     nextSlot: 0,
     recordIds: [],
     invalidated: false,
@@ -685,16 +691,17 @@ test("restart post-confirm token change fails closed", async ({ page }) => {
   database.formAnalyses = database.formAnalyses.slice(0, 1);
   await seedTask9Page(page, database);
   await page.locator("#fdMatrixStart").click();
-  await page.evaluate(() => {
+  /* コールバックはブラウザ側で走るので、Node 側の定数は引数で渡す。 */
+  await page.evaluate((appVer) => {
     db.settings.formDiagnosticMatrixBatch = {
       version: 1,
       batchId: "22222222-2222-4222-8222-222222222222",
-      appVer: 84,
+      appVer,
       nextSlot: 0,
       recordIds: [],
       invalidated: false,
     };
-  });
+  }, TASK9_APP_VER);
   await task9Confirm(page, "開始し直す");
   await expect(page.locator("#toast")).toContainText(
     "診断バッチが変更されたため、操作を中止しました。",
