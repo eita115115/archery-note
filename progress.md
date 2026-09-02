@@ -7,7 +7,8 @@
 
 ## 現在地
 
-- `main`: `feat/adaptive-release-detection`（73コミット）を統合済み。作業ブランチは役目を終えた
+- `main`: `feat/adaptive-release-detection`（73コミット）を統合し、**v85 として公開**
+  （`APP_VER` / `version.json` / `sw.js` の `archery-note-v85` / `package.json 0.85.0` の4箇所を bump）
 - 中身は射形診断まわりが中心（fix 20 / feat 10 / test 7 / docs 33、51ファイル）
 
 ## 完了したこと
