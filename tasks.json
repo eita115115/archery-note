@@ -1,0 +1,32 @@
+[
+  {
+    "id": "AN-001",
+    "task": "射形フェーズ判定の実射体感検証（v1.10.0 の根本修正が実機で効いているか）",
+    "status": "open",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [],
+    "owner": "user",
+    "acceptance": "実射でフェーズ判定を確認し、結果を docs/form-diagnostic-field-acceptance.md へ記録する"
+  },
+  {
+    "id": "AN-002",
+    "task": "docs/roadmap.md（2026-07-08 で停止）を現在地に合わせて更新する",
+    "status": "open",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [],
+    "owner": "opus",
+    "acceptance": "ロードマップ上の各項目が『完了 / 進行中 / 未着手 / 取り下げ』のいずれかに分類されている"
+  },
+  {
+    "id": "AN-003",
+    "task": "feat/adaptive-release-detection（main より 72 コミット先行）を main へ統合するか判断する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [],
+    "owner": "user",
+    "acceptance": "マージする／このまま進める／分割する のいずれかが決まっている"
+  }
+]

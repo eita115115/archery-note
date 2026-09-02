@@ -1,7 +1,12 @@
-# Codex Integration Progress
+# Codex Integration Progress (history ledger)
 
-This file is the state ledger for the Archery Note integration work. Keep it
-short, current, and honest. Update it after every Codex step.
+> **2026-09-02: this file is now the long-form HISTORY LEDGER, not the current state.**
+> Current state lives in [`progress.md`](../../progress.md) at the repo root — read that
+> first. The "Current Status" section below was last accurate on 2026-07-03 and is kept
+> for provenance. Append new history here; write the current state in `progress.md`.
+
+This file records what the Archery Note integration work has done, step by step.
+Keep entries honest. Append after every Codex step.
 
 Primary brief: [integration-plan.md](integration-plan.md)
 
