@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "profile": {
+    "handedness": "right",
+    "delegate": "CPU",
+    "playbackRate": 0.25
+  },
+  "cases": [
+    {
+      "video": "pixabay-43254-archery-woman.mp4",
+      "sha256": "d2beecfa6cf924354212dd23e79a7540a2ee8c7fbf1c60cade342f6116843bfc",
+      "expectedStatus": "ok",
+      "expectedDetectedShots": 1,
+      "retainedReleaseWindowsMs": [[4300, 4600]]
+    },
+    {
+      "video": "pixabay-40769-archer.mp4",
+      "sha256": "1d80f5688fff8a1e90ad2cada188ce51f3a491978fe6bd1ed678f776135c243e",
+      "expectedStatus": "ok-no-shots",
+      "expectedDetectedShots": 0,
+      "retainedReleaseWindowsMs": []
+    },
+    {
+      "video": "mixkit-34710-female-archer.mp4",
+      "sha256": "39ae04e9e07bc67d4ae7d1c1aadd10f2b60cad9eca46445a77522b9bea58f9e5",
+      "expectedStatus": "ok-no-shots",
+      "expectedDetectedShots": 0,
+      "retainedReleaseWindowsMs": []
+    },
+    {
+      "video": "mixkit-48725-closeup-firing.mp4",
+      "sha256": "b2f87dd0a9f2e8923d7586a154642013782d7488c282b1a7f10069d179cef9fc",
+      "expectedStatus": "ok-no-shots",
+      "expectedDetectedShots": 0,
+      "retainedReleaseWindowsMs": []
+    },
+    {
+      "video": "pixabay-150869-arrows-target.mp4",
+      "sha256": "54e26bb6472f4a5afcb9df4cda8bff2ccca0b700f3b6f2e8866c194e7272b12a",
+      "expectedStatus": "ok-no-shots",
+      "expectedDetectedShots": 0,
+      "retainedReleaseWindowsMs": []
+    }
+  ]
+}

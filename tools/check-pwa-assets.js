@@ -103,7 +103,76 @@ function assertCacheCleanupScope(text) {
   const scopedCleanupPattern =
     /\.filter\(\s*([A-Za-z_$][\w$]*)\s*=>\s*\1\.startsWith\(CACHE_PREFIX\)\s*&&\s*\1\s*!==\s*CACHE\s*\)/;
   if (!scopedCleanupPattern.test(text)) {
-    fail("Service Worker cache cleanup must require key.startsWith(CACHE_PREFIX) and key !== CACHE");
+    fail(
+      "Service Worker cache cleanup must require key.startsWith(CACHE_PREFIX) and key !== CACHE",
+    );
+  }
+}
+
+function assertPreviewServerContracts(
+  relativePath,
+  { iphoneLan = false, localhostPoseRecovery = false } = {},
+) {
+  const text = readText(relativePath);
+  const mimeEntries = new Map(
+    [...text.matchAll(/["'](\.[a-z0-9]+)["']\s*=\s*["']([^"']+)["']/gi)].map(
+      ([, extension, contentType]) => [extension.toLowerCase(), contentType.toLowerCase()],
+    ),
+  );
+  const requiredMimeTypes = new Map([
+    [".mjs", "text/javascript; charset=utf-8"],
+    [".wasm", "application/wasm"],
+  ]);
+
+  for (const [extension, expected] of requiredMimeTypes) {
+    const actual = mimeEntries.get(extension);
+    if (actual !== expected) {
+      fail(`${relativePath} must serve ${extension} as ${expected}; got ${actual || "missing"}`);
+    }
+  }
+
+  const hasSeparatorBoundRoot =
+    /\$rootPrefix\s*=[^\r\n]*DirectorySeparatorChar/.test(text) &&
+    /\.StartsWith\(\$rootPrefix,\s*\[System\.StringComparison\]::OrdinalIgnoreCase\)/.test(text);
+  if (!hasSeparatorBoundRoot) {
+    fail(`${relativePath} must use a separator-bound, case-insensitive root containment check`);
+  }
+
+  if (localhostPoseRecovery) {
+    if (
+      !/Write-Warning\s+["']If form tracking was opened here before the MIME fix, delete only Cache Storage entry archery-note-pose-v1, then reload\.["']/.test(
+        text,
+      )
+    ) {
+      fail(`${relativePath} must explain how to remove only the stale pose cache`);
+    }
+    if (
+      !/Write-Warning\s+["']Do not clear all site data; that can remove local practice records\.["']/.test(
+        text,
+      )
+    ) {
+      fail(`${relativePath} must warn against clearing user practice data`);
+    }
+  }
+
+  if (!iphoneLan) return;
+
+  if (
+    !/Write-Warning\s+["']LAN HTTP preview\/replay only: iPhone live camera requires a trusted HTTPS origin\.["']/.test(
+      text,
+    )
+  ) {
+    fail(`${relativePath} must warn that iPhone live camera requires a trusted HTTPS origin`);
+  }
+  if (
+    !/Write-Warning\s+["']This server exposes the repository root on all interfaces\. Use only on trusted private Wi-Fi\.["']/.test(
+      text,
+    )
+  ) {
+    fail(`${relativePath} must warn that the repository root is exposed on the LAN`);
+  }
+  if (!text.includes("Open preview/replay from iPhone")) {
+    fail(`${relativePath} must label its iPhone URL as preview/replay only`);
   }
 }
 
@@ -111,6 +180,8 @@ const swText = readText("sw.js");
 const html = readText("index.html");
 
 assertCacheCleanupScope(swText);
+assertPreviewServerContracts("tools/serve.ps1", { localhostPoseRecovery: true });
+assertPreviewServerContracts("tools/serve-iphone.ps1", { iphoneLan: true });
 
 const rawAssets = extractSwArray(swText, "ASSETS");
 const assets = rawAssets.map(normalizeAsset);

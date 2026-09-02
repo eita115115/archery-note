@@ -664,6 +664,109 @@ async function shareOrDownloadText(filename,text,type,title){
   nativePulse("light");
   return false;
 }
+/* FORM_DIAGNOSTIC_TRANSPORT_START */
+const FORM_DIAGNOSTIC_FILENAME = "archery-note-form-diagnostics.json";
+const FORM_DIAGNOSTIC_MIME = "application/json;charset=utf-8";
+const FORM_DIAGNOSTIC_NATIVE_PATH = "archery-note-form-diagnostics.json";
+const FORM_DIAGNOSTIC_NATIVE_DIRECTORY = "CACHE";
+const FORM_DIAGNOSTIC_NATIVE_ENCODING = "utf8";
+const FORM_DIAGNOSTIC_NATIVE_NOT_FOUND = "OS-PLUG-FILE-0008";
+
+function defaultFormDiagnosticTransportEnvironment(){
+  return {
+    navigator:typeof navigator!=="undefined"?navigator:null,
+    FileCtor:typeof File==="function"?File:null,
+    BlobCtor:typeof Blob==="function"?Blob:null,
+    document:typeof document!=="undefined"?document:null,
+    urlApi:typeof URL!=="undefined"?URL:null,
+    filesystem:capPlugin("Filesystem"),
+    nativeShare:capPlugin("Share")
+  };
+}
+function formDiagnosticNativeNotFound(error){ return !!error && error.code===FORM_DIAGNOSTIC_NATIVE_NOT_FOUND; }
+function formDiagnosticWebCanceled(error){ return !!error && error.name==="AbortError"; }
+function formDiagnosticNativeCanceled(error){
+  return formDiagnosticWebCanceled(error) || (!!error && error.message==="Share canceled");
+}
+function selectFormDiagnosticTransport(json,environment){
+  const nav=environment&&environment.navigator;
+  if(environment && typeof environment.FileCtor==="function" && nav && typeof nav.canShare==="function" && typeof nav.share==="function"){
+    try{
+      const file=new environment.FileCtor([json],FORM_DIAGNOSTIC_FILENAME,{type:FORM_DIAGNOSTIC_MIME});
+      if(nav.canShare({files:[file]})===true) return {kind:"web",environment,file};
+    }catch(error){}
+  }
+  const fs=environment&&environment.filesystem, sh=environment&&environment.nativeShare;
+  if(fs && sh && typeof fs.deleteFile==="function" && typeof fs.writeFile==="function" && typeof sh.share==="function"){
+    return {kind:"native",environment};
+  }
+  return {kind:"download",environment};
+}
+async function runFormDiagnosticWebShare(choice){
+  try{
+    await choice.environment.navigator.share({files:[choice.file]});
+    return {status:"shared",cleanupFailed:false};
+  }catch(error){
+    return {status:formDiagnosticWebCanceled(error)?"canceled":"failed",cleanupFailed:false};
+  }
+}
+async function runFormDiagnosticNativeShare(choice,json){
+  const fs=choice.environment.filesystem, sh=choice.environment.nativeShare;
+  const deleteOptions={path:FORM_DIAGNOSTIC_NATIVE_PATH,directory:FORM_DIAGNOSTIC_NATIVE_DIRECTORY};
+  try{
+    await fs.deleteFile(deleteOptions);
+  }catch(error){
+    if(!formDiagnosticNativeNotFound(error)) return {status:"failed",cleanupFailed:true};
+  }
+  let status="failed", cleanupFailed=false;
+  try{
+    const written=await fs.writeFile({path:FORM_DIAGNOSTIC_NATIVE_PATH,data:json,directory:FORM_DIAGNOSTIC_NATIVE_DIRECTORY,encoding:FORM_DIAGNOSTIC_NATIVE_ENCODING});
+    const uri=written&&written.uri;
+    if(typeof uri==="string"&&uri.trim()!==""){
+      try{
+        await sh.share({url:uri});
+        status="shared";
+      }catch(error){ status=formDiagnosticNativeCanceled(error)?"canceled":"failed"; }
+    }
+  }catch(error){ status="failed"; }
+  finally{
+    try{ await fs.deleteFile(deleteOptions); }
+    catch(error){ if(!formDiagnosticNativeNotFound(error)) cleanupFailed=true; }
+  }
+  return {status,cleanupFailed};
+}
+async function runFormDiagnosticDownload(choice,json){
+  const environment=choice.environment, doc=environment&&environment.document, urlApi=environment&&environment.urlApi;
+  if(!environment||typeof environment.BlobCtor!=="function"||!doc||!doc.body||typeof doc.createElement!=="function"||typeof doc.body.appendChild!=="function"||!urlApi||typeof urlApi.createObjectURL!=="function"||typeof urlApi.revokeObjectURL!=="function"){
+    return {status:"failed",cleanupFailed:false};
+  }
+  let anchor=null, objectUrl=null, failed=false;
+  try{
+    const blob=new environment.BlobCtor([json],{type:FORM_DIAGNOSTIC_MIME});
+    objectUrl=urlApi.createObjectURL(blob);
+    anchor=doc.createElement("a");
+    anchor.href=objectUrl;
+    anchor.download=FORM_DIAGNOSTIC_FILENAME;
+    doc.body.appendChild(anchor);
+    anchor.click();
+  }catch(error){ failed=true; }
+  finally{
+    if(anchor){ try{ anchor.remove(); }catch(error){ failed=true; } }
+    if(objectUrl!==null){ try{ urlApi.revokeObjectURL(objectUrl); }catch(error){ failed=true; } }
+  }
+  return {status:failed?"failed":"downloaded",cleanupFailed:false};
+}
+async function shareFormDiagnosticsJson(json,environment){
+  if(typeof json!=="string") return {status:"failed",cleanupFailed:false};
+  const completeEnvironment=environment===undefined?defaultFormDiagnosticTransportEnvironment():environment;
+  const choice=selectFormDiagnosticTransport(json,completeEnvironment);
+  switch(choice.kind){
+    case "web": return runFormDiagnosticWebShare(choice);
+    case "native": return runFormDiagnosticNativeShare(choice,json);
+    default: return runFormDiagnosticDownload(choice,json);
+  }
+}
+/* FORM_DIAGNOSTIC_TRANSPORT_END */
 function csvCell(v){ const s=String(v==null?"":v).replace(/"/g,'""'); const t=s.trimStart(); return `"${"=+-@".includes(t[0])?"'"+s:s}"`; }
 const ROUND_TYPES=[
   {id:"free",label:"自由練習",arrows:null},

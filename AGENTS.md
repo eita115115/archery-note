@@ -1,7 +1,7 @@
 # Archery Note Agent Guide
 
 This repository is the real Archery Note app. The Claude/Codex session folder
-under `C:\Users\eita2\.claude\sessions` is only conversation/work history and is
+under `%USERPROFILE%\.claude\sessions` is only conversation/work history and is
 not the application source. Do not move session files into this repo.
 
 ## Source Of Truth
@@ -22,7 +22,7 @@ add one row here.
 
 ## Project Shape
 
-- Repo root: `C:\Users\eita2\Projects\archery-note`
+- Repo root: the directory containing this `AGENTS.md`
 - Main app surface: web/PWA first, in `index.html`
 - Native shell: Capacitor/Android exists, but use it only when requested
 - Preview helper: `.claude/launch.json` serves the repo on port `8741`
