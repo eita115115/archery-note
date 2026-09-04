@@ -257,6 +257,45 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .repeatMain b{font-size:17px; margin-top:2px; font-variant-numeric:tabular-nums;}
 .repeatSub{color:rgba(242,240,232,.6)!important;}
 .repeatHistory{min-height:64px;}
+/* 記録開始: 前回操作は強い墨帯ではなく、開始条件へ静かにつなぐ罫線バーにする */
+.recordQuickBar{
+  display:flex; align-items:center; gap:12px; margin:0 0 16px;
+  border-bottom:1px solid var(--line2); padding:0 0 10px;
+}
+.recordQuickRepeat{
+  min-height:48px; flex:1; min-width:0; padding:7px 0; border:0;
+  background:transparent; color:var(--ink); text-align:left; cursor:pointer;
+}
+.recordQuickRepeat .repeatEyebrow{display:block; color:var(--sub); font-size:11px; letter-spacing:.08em;}
+.recordQuickRepeat b{display:block; margin-top:2px; color:var(--ink); font-size:15px; font-variant-numeric:tabular-nums;}
+.recordQuickRepeat .repeatSub{display:block; margin-top:2px; color:var(--sub); font-size:11px;}
+.recordQuickHistory{
+  min-height:44px; padding:8px 0; border:0; background:transparent;
+  color:var(--sub); font-size:12px; white-space:nowrap; cursor:pointer;
+}
+.recordQuickRepeat:focus-visible,.recordQuickHistory:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
+/* 記録開始: 的を視覚アンカーにし、条件とCTAを一筆書きの流れへ置く */
+.recordStartSurface{border-top:2px solid var(--accent); padding-top:16px; margin-bottom:24px;}
+.recordStartKicker{font-size:11px; letter-spacing:.12em; color:var(--sub);}
+.recordStartTitleRow{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px;}
+.recordStartTitleRow h2{margin:0; color:var(--ink); font-size:20px; line-height:1.25; font-weight:var(--fw-emphasis);}
+.recordTargetPreview{display:grid; place-items:center; min-height:214px; margin:16px 0; background:var(--target-surface-a); border:1px solid var(--line2); border-radius:8px; overflow:hidden;}
+.recordTargetPreview svg.main{width:min(100%,210px); height:210px; display:block;}
+.recordConditionRail{border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:12px 0;}
+.recordConditionField .f,.recordConditionPair .f{margin-top:0;}
+.recordConditionPair{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;}
+.recordStartAction{margin-top:16px;}
+.recordStartAction .startPrimary{min-height:56px;}
+.recordStartSurface .sessionCondition{margin-top:12px;}
+@media (max-width:360px){
+  .recordStartTitleRow h2{font-size:18px;}
+  .recordTargetPreview{min-height:184px; margin:12px 0;}
+  .recordTargetPreview svg.main{width:180px; height:180px;}
+  .recordConditionPair{grid-template-columns:1fr;}
+  .recordQuickBar{gap:8px;}
+  .recordQuickHistory{font-size:11px;}
+}
+html.dark .recordTargetPreview,html.auto .recordTargetPreview{background:var(--target-surface-b);}
 .launchPanel.convergeLaunch{border-radius:var(--radius-panel); overflow:hidden;}
 .convergeLaunch .launchHead{background:var(--card);}
 .convergeLaunch .launchBody{padding:12px 13px 13px;}
