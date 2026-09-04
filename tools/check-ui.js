@@ -287,7 +287,7 @@ function staticUiChecks() {
   );
   assert(
     surface.includes("この条件で開始") &&
-      surface.includes("条件を選ぶ") &&
+      surface.includes("今日の射ちを記録する") &&
       surface.includes("詳しく残す"),
     "record launch UI missing",
   );

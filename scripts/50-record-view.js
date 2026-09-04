@@ -116,6 +116,13 @@ function setupSystemSummary(setupId) {
     next: next.slice(0, 2).join("・") || "同条件で記録を重ねる",
   };
 }
+function recordTargetPreviewHtml(faceValue, dist) {
+  const face = parseFaceChoice(faceValue);
+  const label = `${dist || "—"}m・${actionFaceLabel(faceValue)}の的`;
+  return `<div class="recordTargetPreview" id="recordTargetPreview" data-testid="record-target-preview" role="img" aria-label="${esc(label)}">
+    ${targetMarkup(face.faceD, "recordPreview", face.faceType)}
+  </div>`;
+}
 function recordSetupSnapshot(setupId, dist) {
   const setup = db.setups.find((s) => s.id === setupId);
   if (!setup)
@@ -156,17 +163,14 @@ function recordFastActionsHtml(last, dist, faceValue) {
       ? "最初の距離から"
       : `${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`
     : "なし";
-  /* 金面はセッション票の「この条件で開始」1つだけに絞る（design-language: 金面は1画面1つ）。
-     このバンドは墨面＋左に金アクセントバーの控えめな面。last が無い初回はセッション票の
-     fStart だけが唯一のCTAになるようバンド自体を出さない */
   if (!last) return "";
-  return `<section class="homeActions recordRepeatBand" aria-label="すぐ使う">
-    <button class="homeAction repeatMain" id="quickStart" type="button">
+  return `<section class="recordQuickBar" aria-label="すぐ使う">
+    <button class="recordQuickRepeat" id="quickStart" type="button">
       <span class="repeatEyebrow">${esc(lastTitle)}</span>
       <b id="quickStartMeta">${esc(currentLabel)}</b>
       <span class="repeatSub">${esc(lastLabel)}</span>
     </button>
-    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b><span>分析</span></button>
+    <button class="recordQuickHistory" id="quickHistory" type="button" aria-label="履歴と分析を開く">履歴・分析&nbsp;→</button>
   </section>`;
 }
 /* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
@@ -501,35 +505,39 @@ function renderRecord(m) {
   const defFace = suggestedFaceValue(defDist, last);
   const defPerEnd = last && last.perEnd ? last.perEnd : 6;
   m.innerHTML = `
-  ${featureHintHtml()}
   ${recordFastActionsHtml(last, defDist, defFace)}
-  <section class="launchPanel convergeLaunch startFirst">
-    <div class="launchHead">
-      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode === "calibration" ? "サイト値を残す練習" : "条件を選ぶ"}</h2></div>
-      <button class="tinyAction" id="jumpGear">用具</button>
+  <section class="recordStartSurface" data-testid="record-start-surface">
+    <div class="recordStartKicker">${mode === "calibration" ? "サイト値を残す" : "記録を開始"}</div>
+    <div class="recordStartTitleRow">
+      <h2>${mode === "calibration" ? "サイト値つきで始める" : "今日の射ちを記録する"}</h2>
+      <button class="tinyAction" id="jumpGear" type="button">用具</button>
     </div>
-    <div class="launchBody">
-    <label class="f">距離</label>
-    <div class="chips quickDists" id="fDistChips">
-      ${[70, 50, 30, 18].map((d) => `<button type="button" class="chip ${d === defDist ? "on" : ""}" aria-pressed="${d === defDist}" data-d="${d}">${d}m</button>`).join("")}
-      <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
+    ${recordTargetPreviewHtml(defFace, defDist)}
+    <div class="recordConditionRail" data-testid="record-condition-rail" aria-label="開始条件">
+      <div class="recordConditionField">
+        <label class="f" for="fDistChips">距離</label>
+        <div class="chips quickDists" id="fDistChips">
+          ${[70, 50, 30, 18].map((d) => `<button type="button" class="chip ${d === defDist ? "on" : ""}" aria-pressed="${d === defDist}" data-d="${d}">${d}m</button>`).join("")}
+          <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
+        </div>
+        <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
+      </div>
+      <div class="recordConditionPair">
+        <div><label class="f" for="fFace">的</label><select class="inp" id="fFace">
+          <optgroup label="ターゲット">
+            ${[122, 80, 60, 40].map((f) => `<option value="${f}" ${String(defFace) === String(f) ? "selected" : ""}>${f}cm</option>`).join("")}
+            <option value="T40" ${defFace === "T40" ? "selected" : ""}>40cm 三つ目（縦）</option>
+          </optgroup>
+          <optgroup label="フィールド">
+            ${FIELD_FACE_SIZES.map((f) => `<option value="F${f}" ${defFace === `F${f}` ? "selected" : ""}>${f}cm フィールド</option>`).join("")}
+          </optgroup>
+        </select></div>
+        <div><label class="f" for="fArrows">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+      </div>
     </div>
-    <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
-    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
-    <div class="quickSelects">
-      <div><label class="f">的</label><select class="inp" id="fFace">
-        <optgroup label="ターゲット">
-          ${[122, 80, 60, 40].map((f) => `<option value="${f}" ${String(defFace) === String(f) ? "selected" : ""}>${f}cm</option>`).join("")}
-          <option value="T40" ${defFace === "T40" ? "selected" : ""}>40cm 三つ目（縦）</option>
-        </optgroup>
-        <optgroup label="フィールド">
-          ${FIELD_FACE_SIZES.map((f) => `<option value="F${f}" ${defFace === `F${f}` ? "selected" : ""}>${f}cm フィールド</option>`).join("")}
-        </optgroup>
-      </select></div>
-      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+    <div class="recordStartAction">
+      <button class="btn startPrimary" id="fStart" data-testid="record-start">${mode === "calibration" ? "サイト値つきで開始" : "この条件で開始"}</button>
     </div>
-    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
-    <div class="btnrow"><button class="btn startPrimary" id="fStart" data-testid="record-start">${mode === "calibration" ? "サイト値つきで開始" : "この条件で開始"}</button></div>
     <div class="sessionCondition">${recordSetupSnapshot(defSetup, defDist)}</div>
     <details class="adv recordDetails" ${mode === "calibration" ? "open" : ""}>
       <summary>詳しく残す</summary>
@@ -561,9 +569,8 @@ function renderRecord(m) {
         <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
-    ${mode === "calibration" ? `<div class="advice recordNeutralAdvice"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>` : ""}
-    </div>
-  </section>`;
+  </section>
+  ${featureHintHtml()}`;
   bindFeatureHint();
   const distState = { d: defDist };
   const faceSel = $("#fFace");
@@ -571,6 +578,13 @@ function renderRecord(m) {
     if (String(faceSel.value).startsWith("F")) return;
     faceSel.value = d >= 60 ? 122 : d <= 18 ? 40 : 80;
   };
+  function updateRecordTargetPreview() {
+    const host = $("#recordTargetPreview");
+    if (!host || !faceSel) return;
+    const face = parseFaceChoice(faceSel.value);
+    host.setAttribute("aria-label", `${distState.d || "—"}m・${actionFaceLabel(faceSel.value)}の的`);
+    host.innerHTML = targetMarkup(face.faceD, "recordPreview", face.faceType);
+  }
   function updateQuickStartMeta() {
     const meta = $("#quickStartMeta");
     if (meta && distState.d)
@@ -580,6 +594,7 @@ function renderRecord(m) {
     if (String(faceSel.value).startsWith("F") && $("#fArrows").value === "6")
       $("#fArrows").value = "3";
     updateQuickStartMeta();
+    updateRecordTargetPreview();
   };
   /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
   function applyMultiRoundStage0(def) {
@@ -603,6 +618,7 @@ function renderRecord(m) {
     $("#fArrows").value = st0.perEnd || 6;
     fillSight();
     refreshLens();
+    updateRecordTargetPreview();
   }
   $("#fRound").onchange = (e) => {
     const def = selectedMultiRound(e.target.value);
@@ -620,6 +636,7 @@ function renderRecord(m) {
       }
     }
     updateQuickStartMeta();
+    updateRecordTargetPreview();
   };
   $("#jumpGear").onclick = () => showView("gear");
   const quickHistory = $("#quickHistory");
@@ -644,6 +661,7 @@ function renderRecord(m) {
       $("#fRound").value = last.round || "free";
       fillSight();
       refreshLens();
+      updateRecordTargetPreview();
       $("#fStart").click();
     };
   }
@@ -671,6 +689,7 @@ function renderRecord(m) {
         }
         updateQuickStartMeta();
         refreshLens();
+        updateRecordTargetPreview();
       }),
   );
   $("#fDistCustom").oninput = (e) => {
@@ -681,6 +700,7 @@ function renderRecord(m) {
     }
     updateQuickStartMeta();
     refreshLens();
+    updateRecordTargetPreview();
   };
   function fillSight() {
     const sid = $("#fSetup").value,
