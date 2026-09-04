@@ -292,6 +292,20 @@ function staticUiChecks() {
     "record launch UI missing",
   );
   assert(
+    recordSurface.includes('data-testid="record-target-preview"') &&
+      recordSurface.includes('role="img"') &&
+      recordSurface.includes('id="recordTargetPreview"') &&
+      recordSurface.includes('id="record-start"') &&
+      recordSurface.includes('data-testid="record-condition-rail"'),
+    "record start surface must expose a named target preview, one primary start CTA, and a condition rail",
+  );
+  assert(
+    (recordSurface.match(/data-testid="record-start"/g) || []).length === 1 &&
+      recordSurface.includes('id="quickStart"') &&
+      recordSurface.includes('id="quickHistory"'),
+    "record start surface must have exactly one primary start CTA while preserving quick actions",
+  );
+  assert(
     surface.includes("読み込みに時間がかかっています") &&
       surface.includes("bootFallback") &&
       surface.includes("bootFallbackDelay") &&
