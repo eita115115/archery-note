@@ -288,19 +288,24 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .recordStartAction .startPrimary{min-height:56px;}
 .recordStartSurface .sessionCondition{margin-top:12px;}
 @media (max-width:390px){
-  .recordTargetPreview{min-height:190px;}
-  .recordTargetPreview svg.main{width:186px; height:186px;}
+  .recordStartSurface{padding-top:12px;}
+  .recordStartTitleRow{margin-top:4px;}
+  .recordTargetPreview{margin:12px 0;}
+  .recordQuickBar{margin-bottom:8px; padding-bottom:8px;}
 }
 @media (max-width:360px){
   .recordStartTitleRow h2{font-size:18px;}
-  .recordStartSurface{padding-top:12px;}
-  .recordStartTitleRow{margin-top:6px;}
-  .recordTargetPreview{min-height:96px; margin:8px 0;}
-  .recordTargetPreview svg.main{width:92px; height:92px;}
-  .recordConditionRail{padding:8px 0;}
-  .recordConditionPair{grid-template-columns:1fr; gap:6px; margin-top:8px;}
-  .recordStartAction{margin-top:12px;}
-  .recordQuickBar{gap:8px; margin-bottom:8px; padding-bottom:6px;}
+  .recordStartSurface{padding-top:0;}
+  .recordStartTitleRow{margin-top:0;}
+  .recordTargetPreview{min-height:184px; margin:12px 0;}
+  .recordTargetPreview svg.main{width:180px; height:180px;}
+  .recordConditionRail{padding:0;}
+  .recordConditionField .f,.recordConditionPair .f{margin-bottom:0; line-height:1;}
+  .recordConditionPair{grid-template-columns:1fr; gap:0; margin-top:0;}
+  .recordStartAction{margin-top:0;}
+  .recordQuickBar{gap:8px; margin-bottom:0; padding-bottom:0;}
+  .recordQuickRepeat{padding:0;}
+  .recordQuickRepeat .repeatEyebrow,.recordQuickRepeat b,.recordQuickRepeat .repeatSub{line-height:1;}
   .recordQuickHistory{font-size:11px;}
 }
 html.dark .recordTargetPreview,html.auto .recordTargetPreview{background:var(--target-surface-b);}
