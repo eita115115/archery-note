@@ -569,6 +569,7 @@ function renderRecord(m) {
         <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
       </div>
     </details>
+    ${mode === "calibration" ? `<div class="advice recordNeutralAdvice"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>` : ""}
   </section>
   ${featureHintHtml()}`;
   bindFeatureHint();
