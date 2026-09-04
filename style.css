@@ -264,14 +264,14 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 }
 .recordQuickRepeat{
   min-height:48px; flex:1; min-width:0; padding:7px 0; border:0;
-  background:transparent; color:var(--ink); text-align:left; cursor:pointer;
+  background:transparent; color:var(--ink); text-align:left; cursor:pointer; font-family:inherit;
 }
 .recordQuickRepeat .repeatEyebrow{display:block; color:var(--sub); font-size:11px; letter-spacing:.08em;}
 .recordQuickRepeat b{display:block; margin-top:2px; color:var(--ink); font-size:15px; font-variant-numeric:tabular-nums;}
-.recordQuickRepeat .repeatSub{display:block; margin-top:2px; color:var(--sub); font-size:11px;}
+.recordQuickRepeat .repeatSub{display:block; margin-top:2px; color:var(--sub)!important; font-size:11px;}
 .recordQuickHistory{
   min-height:44px; padding:8px 0; border:0; background:transparent;
-  color:var(--sub); font-size:12px; white-space:nowrap; cursor:pointer;
+  color:var(--sub); font-size:12px; white-space:nowrap; cursor:pointer; font-family:inherit;
 }
 .recordQuickRepeat:focus-visible,.recordQuickHistory:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
 /* 記録開始: 的を視覚アンカーにし、条件とCTAを一筆書きの流れへ置く */
@@ -287,12 +287,20 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .recordStartAction{margin-top:16px;}
 .recordStartAction .startPrimary{min-height:56px;}
 .recordStartSurface .sessionCondition{margin-top:12px;}
+@media (max-width:390px){
+  .recordTargetPreview{min-height:190px;}
+  .recordTargetPreview svg.main{width:186px; height:186px;}
+}
 @media (max-width:360px){
   .recordStartTitleRow h2{font-size:18px;}
-  .recordTargetPreview{min-height:184px; margin:12px 0;}
-  .recordTargetPreview svg.main{width:180px; height:180px;}
-  .recordConditionPair{grid-template-columns:1fr;}
-  .recordQuickBar{gap:8px;}
+  .recordStartSurface{padding-top:12px;}
+  .recordStartTitleRow{margin-top:6px;}
+  .recordTargetPreview{min-height:96px; margin:8px 0;}
+  .recordTargetPreview svg.main{width:92px; height:92px;}
+  .recordConditionRail{padding:8px 0;}
+  .recordConditionPair{grid-template-columns:1fr; gap:6px; margin-top:8px;}
+  .recordStartAction{margin-top:12px;}
+  .recordQuickBar{gap:8px; margin-bottom:8px; padding-bottom:6px;}
   .recordQuickHistory{font-size:11px;}
 }
 html.dark .recordTargetPreview,html.auto .recordTargetPreview{background:var(--target-surface-b);}
