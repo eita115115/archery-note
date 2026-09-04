@@ -29,10 +29,12 @@
 ## Task 1: 回帰ガードを先に追加する
 
 **Files:**
+
 - Modify: \`tools/check-ui.js\`（\`recordSurface\` に対する静的チェックの近く）
 - Test: \`npm run check:ui\`
 
 **Interfaces:**
+
 - Consumes: \`scripts/50-record-view.js\` のRecord開始HTML文字列。
 - Produces: 実装前には失敗し、実装後にはターゲットプレビュー、主CTA、条件レールの契約を固定するチェック。
 
@@ -50,20 +52,20 @@ Expected: 現行ブランチの \`UI smoke checks OK\`。この時点では新�
 \`staticUiChecks()\` 内のRecord面チェック付近に、次のアサーションを追加する。
 
 \`\`\`js
-  assert(
-    recordSurface.includes('data-testid="record-target-preview"') &&
-      recordSurface.includes('role="img"') &&
-      recordSurface.includes('id="recordTargetPreview"') &&
-      recordSurface.includes('id="record-start"') &&
-      recordSurface.includes('data-testid="record-condition-rail"'),
-    "record start surface must expose a named target preview, one primary start CTA, and a condition rail",
-  );
-  assert(
-    (recordSurface.match(/data-testid="record-start"/g) || []).length === 1 &&
-      recordSurface.includes('id="quickStart"') &&
-      recordSurface.includes('id="quickHistory"'),
-    "record start surface must have exactly one primary start CTA while preserving quick actions",
-  );
+assert(
+recordSurface.includes('data-testid="record-target-preview"') &&
+recordSurface.includes('role="img"') &&
+recordSurface.includes('id="recordTargetPreview"') &&
+recordSurface.includes('id="record-start"') &&
+recordSurface.includes('data-testid="record-condition-rail"'),
+"record start surface must expose a named target preview, one primary start CTA, and a condition rail",
+);
+assert(
+(recordSurface.match(/data-testid="record-start"/g) || []).length === 1 &&
+recordSurface.includes('id="quickStart"') &&
+recordSurface.includes('id="quickHistory"'),
+"record start surface must have exactly one primary start CTA while preserving quick actions",
+);
 \`\`\`
 
 - [ ] **Step 3: 新しいチェックが現行コードで失敗することを確認する**
@@ -84,11 +86,13 @@ git commit -m "test(ui): guard field instrument record start structure"
 ## Task 2: Record開始HTMLを3方向の統合構造へ置き換える
 
 **Files:**
+
 - Modify: \`scripts/50-record-view.js:118-175\` — 表示専用ヘルパーと前回操作。
 - Modify: \`scripts/50-record-view.js:495-570\` — \`renderRecord()\` の開始面。
 - Test: \`tools/check-ui.js\` のTask 1アサーション、既存Recordイベント。
 
 **Interfaces:**
+
 - Consumes: \`last\`、\`defSetup\`、\`defDist\`、\`defFace\`、\`defPerEnd\`、\`mode\`、\`targetMarkup()\`、\`recordSetupSnapshot()\`、既存のDOM ID。
 - Produces: \`data-testid="record-target-preview"\` を持つ表示専用ターゲット、\`data-testid="record-condition-rail"\` の条件値、\`#fStart\`だけが主CTAの開始面、既存イベントに再接続された \`updateRecordTargetPreview()\`。
 
@@ -98,10 +102,10 @@ git commit -m "test(ui): guard field instrument record start structure"
 
 \`\`\`js
 function recordTargetPreviewHtml(faceValue, dist) {
-  const face = parseFaceChoice(faceValue);
-  const label = \`\${dist || "—"}m・\${actionFaceLabel(faceValue)}の的\`;
-  return \`<div class="recordTargetPreview" id="recordTargetPreview" data-testid="record-target-preview" role="img" aria-label="\${esc(label)}">
-    \${targetMarkup(face.faceD, "recordPreview", face.faceType)}
+const face = parseFaceChoice(faceValue);
+const label = \`\${dist || "—"}m・\${actionFaceLabel(faceValue)}の的\`;
+return \`<div class="recordTargetPreview" id="recordTargetPreview" data-testid="record-target-preview" role="img" aria-label="\${esc(label)}">
+\${targetMarkup(face.faceD, "recordPreview", face.faceType)}
   </div>\`;
 }
 \`\`\`
@@ -113,13 +117,13 @@ function recordTargetPreviewHtml(faceValue, dist) {
 \`recordFastActionsHtml()\` の返却HTMLを次の契約にする。 \`#quickStart\` と \`#quickHistory\` は残し、黒い2分割CTAは作らない。
 
 \`\`\`js
-  return \`<section class="recordQuickBar" aria-label="すぐ使う">
-    <button class="recordQuickRepeat" id="quickStart" type="button">
-      <span class="repeatEyebrow">\${esc(lastTitle)}</span>
-      <b id="quickStartMeta">\${esc(currentLabel)}</b>
-      <span class="repeatSub">\${esc(lastLabel)}</span>
-    </button>
-    <button class="recordQuickHistory" id="quickHistory" type="button" aria-label="履歴と分析を開く">履歴・分析&nbsp;→</button>
+return \`<section class="recordQuickBar" aria-label="すぐ使う">
+<button class="recordQuickRepeat" id="quickStart" type="button">
+<span class="repeatEyebrow">\${esc(lastTitle)}</span>
+<b id="quickStartMeta">\${esc(currentLabel)}</b>
+<span class="repeatSub">\${esc(lastLabel)}</span>
+</button>
+<button class="recordQuickHistory" id="quickHistory" type="button" aria-label="履歴と分析を開く">履歴・分析&nbsp;→</button>
   </section>\`;
 \`\`\`
 
@@ -130,8 +134,8 @@ function recordTargetPreviewHtml(faceValue, dist) {
 \`m.innerHTML\` を次の順序にする。フォームの各ID、選択肢、詳細項目、校正モードの文言は現行をそのまま引き継ぐ。
 
 \`\`\`js
-  m.innerHTML = \`
-  \${recordFastActionsHtml(last, defDist, defFace)}
+m.innerHTML = \`
+\${recordFastActionsHtml(last, defDist, defFace)}
   <section class="recordStartSurface" data-testid="record-start-surface">
     <div class="recordStartKicker">\${mode === "calibration" ? "サイト値を残す" : "記録を開始"}</div>
     <div class="recordStartTitleRow">
@@ -202,13 +206,13 @@ function recordTargetPreviewHtml(faceValue, dist) {
 \`renderRecord()\` 内に次の関数を追加し、\`faceSel.onchange\`、距離チップのクリック処理、カスタム距離入力の変更処理の末尾から呼び出す。
 
 \`\`\`js
-  function updateRecordTargetPreview() {
-    const host = $("#recordTargetPreview");
+function updateRecordTargetPreview() {
+const host = $("#recordTargetPreview");
     if (!host || !faceSel) return;
     const face = parseFaceChoice(faceSel.value);
     host.setAttribute("aria-label", \`\${distState.d || "—"}m・\${actionFaceLabel(faceSel.value)}の的\`);
-    host.innerHTML = targetMarkup(face.faceD, "recordPreview", face.faceType);
-  }
+host.innerHTML = targetMarkup(face.faceD, "recordPreview", face.faceType);
+}
 \`\`\`
 
 距離チップの既存処理で \`distState.d\` を更新した後に \`updateRecordTargetPreview()\` を呼ぶ。 \`#fStart\` の作成、\`db.active\`、\`save()\`、採点関数は変更しない。
@@ -232,11 +236,13 @@ git commit -m "feat(ui): unify record start around target and conditions"
 ## Task 3: Field Instrumentの静的CSSと鮮やかさを実装する
 
 **Files:**
+
 - Modify: \`style.css\`（Record開始用の既存セレクタと近接する範囲）
 - Generate: \`style.min.css\`
 - Test: \`npm run build:web-assets\`、\`npm run check:ui\`
 
 **Interfaces:**
+
 - Consumes: Task 2の \`.recordStartSurface\`、\`.recordTargetPreview\`、\`.recordConditionRail\`、\`.recordQuickBar\`、\`.recordQuickRepeat\`、\`.recordQuickHistory\`、\`.recordStartAction\`。
 - Produces: 390px／360px／デスクトップで同じ視線順になる静的レイアウト。色と角丸を既存トークンに限定する。
 
@@ -246,19 +252,19 @@ git commit -m "feat(ui): unify record start around target and conditions"
 
 \`\`\`css
 .recordQuickBar{
-  display:flex; align-items:center; gap:12px; margin:0 0 16px;
-  border-bottom:1px solid var(--line2); padding:0 0 10px;
+display:flex; align-items:center; gap:12px; margin:0 0 16px;
+border-bottom:1px solid var(--line2); padding:0 0 10px;
 }
 .recordQuickRepeat{
-  min-height:48px; flex:1; min-width:0; padding:7px 0; border:0;
-  background:transparent; color:var(--ink); text-align:left; cursor:pointer;
+min-height:48px; flex:1; min-width:0; padding:7px 0; border:0;
+background:transparent; color:var(--ink); text-align:left; cursor:pointer;
 }
 .recordQuickRepeat .repeatEyebrow{display:block; color:var(--sub); font-size:11px; letter-spacing:.08em;}
 .recordQuickRepeat b{display:block; margin-top:2px; color:var(--ink); font-size:15px; font-variant-numeric:tabular-nums;}
 .recordQuickRepeat .repeatSub{display:block; margin-top:2px; color:var(--sub); font-size:11px;}
 .recordQuickHistory{
-  min-height:44px; padding:8px 0; border:0; background:transparent;
-  color:var(--sub); font-size:12px; white-space:nowrap; cursor:pointer;
+min-height:44px; padding:8px 0; border:0; background:transparent;
+color:var(--sub); font-size:12px; white-space:nowrap; cursor:pointer;
 }
 .recordQuickRepeat:focus-visible,.recordQuickHistory:focus-visible{outline:2px solid var(--accent); outline-offset:3px;}
 \`\`\`
@@ -286,12 +292,12 @@ git commit -m "feat(ui): unify record start around target and conditions"
 
 \`\`\`css
 @media (max-width:360px){
-  .recordStartTitleRow h2{font-size:18px;}
-  .recordTargetPreview{min-height:184px; margin:12px 0;}
-  .recordTargetPreview svg.main{width:180px; height:180px;}
-  .recordConditionPair{grid-template-columns:1fr;}
-  .recordQuickBar{gap:8px;}
-  .recordQuickHistory{font-size:11px;}
+.recordStartTitleRow h2{font-size:18px;}
+.recordTargetPreview{min-height:184px; margin:12px 0;}
+.recordTargetPreview svg.main{width:180px; height:180px;}
+.recordConditionPair{grid-template-columns:1fr;}
+.recordQuickBar{gap:8px;}
+.recordQuickHistory{font-size:11px;}
 }
 html.dark .recordTargetPreview,html.auto .recordTargetPreview{background:var(--target-surface-b);}
 \`\`\`
@@ -318,10 +324,12 @@ git commit -m "style(ui): sharpen field instrument record surface"
 ## Task 4: 実機に近い幅で検証する
 
 **Files:**
+
 - Verify: \`scripts/50-record-view.js\`, \`style.css\`, \`style.min.css\`
 - Artifacts: \`artifacts/ui-smoke/iphone-390.png\`, \`artifacts/ui-smoke/small-360.png\`, \`artifacts/ui-smoke/desktop-1280.png\`
 
 **Interfaces:**
+
 - Consumes: Task 2–3のRecord開始面。
 - Produces: レイアウト崩れ、CTA競合、既存イベント破壊がないことの証拠。
 
@@ -348,6 +356,7 @@ Expected: 既存E2E、全チェック、lintがすべてPASS。失敗時はRecor
 390pxと360pxで次を確認する。
 
 \`\`\`text
+
 - 初回（履歴なし）: 主CTAが1つ、ターゲット名が読み上げ可能
 - 履歴あり: 前回と同じ／履歴・分析が補助行として静かに表示される
 - 距離変更: ターゲットプレビューのサイズ・aria-label・距離表示が更新される
@@ -357,7 +366,7 @@ Expected: 既存E2E、全チェック、lintがすべてPASS。失敗時はRecor
 - 開始: #fStartから記録中へ遷移し、既存の保存・採点フローが変わらない
 - dark / auto: 墨・紙・ターゲット色のコントラストが保たれる
 - reduced motion: 既存の静止表示が保たれる
-\`\`\`
+  \`\`\`
 
 - [ ] **Step 4: 最終状態を確認する**
 
