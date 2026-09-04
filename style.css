@@ -288,7 +288,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .recordStartAction{margin-top:16px;}
 .recordStartAction .startPrimary{min-height:56px;}
 .recordStartSurface .sessionCondition{margin-top:12px;}
-@media (max-width:390px){
+@media (max-width:420px){
   .recordStartSurface{padding-top:8px;}
   .recordStartTitleRow{margin-top:0;}
   .recordTargetPreview{margin:12px 0;}
