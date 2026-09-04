@@ -295,7 +295,8 @@ function staticUiChecks() {
     recordSurface.includes('data-testid="record-target-preview"') &&
       recordSurface.includes('role="img"') &&
       recordSurface.includes('id="recordTargetPreview"') &&
-      recordSurface.includes('id="record-start"') &&
+      recordSurface.includes('id="fStart"') &&
+      recordSurface.includes('data-testid="record-start"') &&
       recordSurface.includes('data-testid="record-condition-rail"'),
     "record start surface must expose a named target preview, one primary start CTA, and a condition rail",
   );

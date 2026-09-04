@@ -279,6 +279,7 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .recordStartKicker{font-size:11px; letter-spacing:.12em; color:var(--sub);}
 .recordStartTitleRow{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:8px;}
 .recordStartTitleRow h2{margin:0; color:var(--ink); font-size:20px; line-height:1.25; font-weight:var(--fw-emphasis);}
+.recordStartTitleRow .tinyAction{min-height:44px;}
 .recordTargetPreview{display:grid; place-items:center; min-height:214px; margin:16px 0; background:var(--target-surface-a); border:1px solid var(--line2); border-radius:8px; overflow:hidden;}
 .recordTargetPreview svg.main{width:min(100%,210px); height:210px; display:block;}
 .recordConditionRail{border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:12px 0;}
@@ -288,10 +289,12 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
 .recordStartAction .startPrimary{min-height:56px;}
 .recordStartSurface .sessionCondition{margin-top:12px;}
 @media (max-width:390px){
-  .recordStartSurface{padding-top:12px;}
-  .recordStartTitleRow{margin-top:4px;}
+  .recordStartSurface{padding-top:8px;}
+  .recordStartTitleRow{margin-top:0;}
   .recordTargetPreview{margin:12px 0;}
-  .recordQuickBar{margin-bottom:8px; padding-bottom:8px;}
+  .recordConditionRail{padding:4px 0;}
+  .recordStartAction{margin-top:8px;}
+  .recordQuickBar{margin-bottom:4px; padding-bottom:4px;}
 }
 @media (max-width:360px){
   .recordStartTitleRow h2{font-size:18px;}
@@ -307,6 +310,8 @@ html.dark .repeatMain,html.auto .repeatMain{background:#0e100d;}
   .recordQuickRepeat{padding:0;}
   .recordQuickRepeat .repeatEyebrow,.recordQuickRepeat b,.recordQuickRepeat .repeatSub{line-height:1;}
   .recordQuickHistory{font-size:11px;}
+  .recordConditionRail .quickDists{grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px;}
+  .recordConditionRail .quickDists .chip{min-width:0; padding:9px 4px; font-size:12px;}
 }
 html.dark .recordTargetPreview,html.auto .recordTargetPreview{background:var(--target-surface-b);}
 .launchPanel.convergeLaunch{border-radius:var(--radius-panel); overflow:hidden;}
@@ -419,7 +424,7 @@ html.dark .recordTargetPreview,html.auto .recordTargetPreview{background:var(--t
 .recordDetails{margin-top:10px; border:none!important; background:transparent!important; padding:0!important;}
 .recordDetails summary{
   display:flex; align-items:center; justify-content:flex-start; gap:4px;
-  width:max-content; margin-left:auto; padding:7px 0 0!important;
+  width:max-content; min-height:44px; margin-left:auto; padding:7px 0!important;
 }
 .recordDetails summary::before{content:"＋ "!important; font-size:10px; position:static!important; border:none!important; width:auto!important; height:auto!important; transform:none!important; transition:none!important;}
 .recordDetails[open] summary::before{content:"− "!important; transform:none!important;}
