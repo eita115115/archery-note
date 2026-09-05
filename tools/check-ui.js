@@ -287,9 +287,24 @@ function staticUiChecks() {
   );
   assert(
     surface.includes("この条件で開始") &&
-      surface.includes("条件を選ぶ") &&
+      surface.includes("今日の射ちを記録する") &&
       surface.includes("詳しく残す"),
     "record launch UI missing",
+  );
+  assert(
+    recordSurface.includes('data-testid="record-target-preview"') &&
+      recordSurface.includes('role="img"') &&
+      recordSurface.includes('id="recordTargetPreview"') &&
+      recordSurface.includes('id="fStart"') &&
+      recordSurface.includes('data-testid="record-start"') &&
+      recordSurface.includes('data-testid="record-condition-rail"'),
+    "record start surface must expose a named target preview, one primary start CTA, and a condition rail",
+  );
+  assert(
+    (recordSurface.match(/data-testid="record-start"/g) || []).length === 1 &&
+      recordSurface.includes('id="quickStart"') &&
+      recordSurface.includes('id="quickHistory"'),
+    "record start surface must have exactly one primary start CTA while preserving quick actions",
   );
   assert(
     surface.includes("読み込みに時間がかかっています") &&

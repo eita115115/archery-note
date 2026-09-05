@@ -2701,3 +2701,27 @@ existing icon asset`. The lifecycle browser test now holds `90-init.js` at
 - Next: push the approved startup-motion increment to
   `origin/codex/oss-motion-pattern-adoption` and preserve the worktree for the
   later integration decision.
+
+## 2026-09-05 — Field Instrument Record start UI: implementation and verification complete
+
+- Implemented the approved Record start surface in the isolated branch
+  `codex/ui-field-instrument`: target preview anchor, compact distance/face/
+  arrow-count condition rail, single start CTA, quieter quick actions, and
+  safe-area/tap-target spacing for 360–420 px iPhone widths. Restored the
+  calibration-only site-value guidance and kept existing record/session,
+  scoring, storage, PWA, and version behavior unchanged.
+- Changed files: `scripts/50-record-view.js`, `style.css`, `style.min.css`,
+  `tools/check-app.js`, `tools/check-ui.js`, and the Field Instrument design /
+  implementation-plan documents.
+- Validation: `npm run check:all`, `npm run lint`, `npm run check:ui`, the
+  focused Record validator, 99 E2E tests, `node --check
+scripts/50-record-view.js`, and `git diff --check` pass. Boundary checks at
+  360/390/393/402/420 px show no CTA/navigation overlap, no horizontal
+  overflow, 44 px auxiliary targets, and the intended target dimensions.
+- Formatting: the scoped implementation-plan check passes; full
+  `npm run format:check` still reports only the unchanged pre-existing warning
+  in `docs/superpowers/specs/2026-08-29-oss-motion-adoption-design.md`.
+- Risk: this is a UI-only increment; physical iPhone behavior and the later
+  History/Analysis/Sight/Gear screen unification remain outside this slice.
+- Next: choose whether to merge locally, push/open a PR, keep the branch for
+  later integration, or discard it. No push has been performed.
