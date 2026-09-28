@@ -148,16 +148,20 @@ function renderHistory(m) {
       (!hf.round || (s.round || "free") === hf.round),
   );
   const _heroRows = buildAnalysisRows(ss, db.setups, sessionMetrics);
+  const filterCount = [hf.setupId, hf.dist, hf.round].filter(Boolean).length;
   m.innerHTML = `${pageHeroHtml("history", { ss, rows: _heroRows })}
-  <div class="card"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
+  <div class="card historyRecords"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
+    <details class="historyFilters" data-testid="history-filters" ${filterCount ? "open" : ""}>
+    <summary data-testid="history-filter-toggle">絞り込み <span>${filterCount ? `${filterCount}条件` : "すべて"}</span></summary>
     <div class="row">
-      <div><label class="f">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
-      <div><label class="f">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(hf.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
+      <div><label class="f" for="histSetup">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f" for="histDist">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(hf.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <div class="row">
-      <div><label class="f">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${esc(r)}" ${hf.round === r ? "selected" : ""}>${esc(roundLabel(r))}</option>`).join("")}</select></div>
+      <div><label class="f" for="histRound">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${esc(r)}" ${hf.round === r ? "selected" : ""}>${esc(roundLabel(r))}</option>`).join("")}</select></div>
       <div class="histFilterEnd"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
     </div>
+    </details>
     <div id="histList">
     ${
       ss.length
@@ -174,21 +178,28 @@ function renderHistory(m) {
     ui.histFilter.setupId = e.target.value;
     ui._histLimit = 0;
     render();
+    if (e.target.value) $("#histSetup").focus({ preventScroll: true });
+    else $(".historyFilters summary").focus({ preventScroll: true });
   };
   $("#histDist").onchange = (e) => {
     ui.histFilter.dist = e.target.value;
     ui._histLimit = 0;
     render();
+    if (e.target.value) $("#histDist").focus({ preventScroll: true });
+    else $(".historyFilters summary").focus({ preventScroll: true });
   };
   $("#histRound").onchange = (e) => {
     ui.histFilter.round = e.target.value;
     ui._histLimit = 0;
     render();
+    if (e.target.value) $("#histRound").focus({ preventScroll: true });
+    else $(".historyFilters summary").focus({ preventScroll: true });
   };
   $("#histClear").onclick = () => {
     ui.histFilter = { setupId: "", dist: "", round: "" };
     ui._histLimit = 0;
     render();
+    $(".historyFilters summary").focus({ preventScroll: true });
   };
   const more = $("#histMore");
   if (more) more.onclick = () => { ui._histLimit = (ui._histLimit || 50) + 50; render(); };

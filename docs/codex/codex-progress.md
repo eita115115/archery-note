@@ -2494,3 +2494,24 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   the latest result per session; removed objects can be collected. No scoring,
   storage format, visible layout, payment or personal-data change. Not released.
 - Next: AN-008 mobile visual/interaction refinement, using before/after evidence.
+
+## 2026-09-29 — History mobile hierarchy (AN-008)
+
+- Audited record/history/analysis at 375px; refined history first. Summary is
+  now three unfilled columns, with a quieter trend sentence. Existing totals,
+  average and best-score context remain. Filters use a native disclosure,
+  active condition count and restored keyboard focus after changes/reset.
+- Runtime changes: `scripts/50-record-view.js`, `scripts/60-history-sight-view.js`,
+  `style.css`, regenerated `style.min.css`. Added `tests/e2e/history-layout.spec.js`.
+- Durable design/evidence: `docs/codex/history-mobile-polish.md`, three before/after
+  light/dark screenshots in `docs/screenshots/history-quality/`. Additional
+  360px/1280px captures in `artifacts/mobile-polish/`.
+- Validation: build:web-assets succeeded; check:ui `UI smoke checks OK`;
+  check:app `Archery Note checks OK (v85)`; lint exit 0; full E2E
+  `85 passed (1.0m)`. Two added tests verify actual filtering from three records
+  to one, clearing, focus, keyboard access, overflow and opening record details.
+- Independent review: no blocking findings. Updated progress and tasks.
+- Risk: opening filters adds a step from unfiltered history, while keeping the record
+  list immediately visible. No scoring/storage changes. No paid or personal
+  information use; screenshots contain only fictional demo data. Not released.
+- Next: AN-009 record-start visual hierarchy and repeated condition text.

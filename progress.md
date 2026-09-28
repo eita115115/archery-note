@@ -2,7 +2,7 @@
 
 > 現在地の正本。長い経緯は `docs/codex/codex-progress.md`。
 
-最終更新: 2026-09-28
+最終更新: 2026-09-29
 
 ## 現在地
 
@@ -15,20 +15,20 @@
 
 - Windows新規checkoutの改行依存テストを修正（37398f8）。
 - 統計キャッシュを記録単位に変更し、800件超での再計算の繰り返しを解消。
-- 変更: scripts/40-analysis-physics.js、tools/check-analysis-core.js、性能測定ツールと台帳。
+- 履歴の集計を枠なし3列に整理し、絞り込みを折りたたみ化。記録を画面上部で読めるよう改善。
 - 1,000件/CPU4倍制限の再訪中央値: 履歴434→49ms、分析998→208ms。
-- 詳細・再現手順: `docs/codex/session-cache-performance.md`。
+- 詳細: `docs/codex/session-cache-performance.md` / `docs/codex/history-mobile-polish.md`。
 
 ## 検証
 
-- `check:analysis` / `check:all` / `lint` 成功、E2E `83 passed (1.1m)`。
+- 性能変更: check:all成功。履歴変更: check:ui / check:app / lint成功、E2E `85 passed (1.0m)`。
 - 1,001件・編集・置換の回帰検証成功。独立レビューに要修正指摘なし。
-- 全ログ: `artifacts/improvement-baseline/performance-*.txt`。
+- 375pxの変更前後画像: `docs/screenshots/history-quality/`。360/1280pxとdarkも確認。
 - 実機での速度は未測定。初回の統計計算時間は今回の改善対象外。
 
 ## 次にやること
 
-- 375pxの記録・履歴・分析画面を確認し、見やすさと操作の反応を改善する。
+- 記録開始画面の条件重複と2つの強い開始ボタンを整理し、迷いを減らす。
 - 起動時の射形コード読込と、初回統計計算の待ち時間は別途検討。
 
 ## 未解決

@@ -73,11 +73,21 @@
   {
     "id": "AN-008",
     "task": "375px幅の記録・振り返り画面を評価し見やすさを改善する",
-    "status": "open",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/history-mobile-polish.md と docs/screenshots/history-quality/ の375px変更前後画像。check:ui / check:app / lint成功、E2E 85 passed (1.0m)。360/1280px・light/darkも確認。",
     "dependencies": ["AN-007"],
     "owner": "codex",
     "acceptance": "Field Instrumentの原則に沿った改善を実装し、375pxの変更前後画像、check:uiとlint成功、主要操作の回帰確認を残す"
+  },
+  {
+    "id": "AN-009",
+    "task": "記録開始画面の重複表示と開始操作の視覚的な優先順位を整理する",
+    "status": "open",
+    "passes": false,
+    "evidence": "",
+    "dependencies": ["AN-008"],
+    "owner": "codex",
+    "acceptance": "既存の開始条件と記録動作を保ち、375pxの変更前後画像とcheck:ui / lint / 関連E2E成功を残す"
   }
 ]

@@ -813,12 +813,12 @@ function pageHeroHtml(type, ctx) {
           .filter(Boolean)
           .join(" / ")
       : "記録待ち";
-    return `<section class="pageHero" data-testid="history-hero">
+    return `<section class="pageHero historyHero" data-testid="history-hero">
       <div class="kicker">履歴</div>
       <h2 class="pageHeroLead" data-testid="history-hero-trend">${esc(conclusion ? conclusion.text : "")}</h2>
       <div class="heroMetrics">
         ${heroMetricHtml("練習", `${src.length}回`, `${arrows.length}本を集計`)}
-        ${heroMetricHtml("平均", arrows.length ? (total / arrows.length).toFixed(2) : "—", "フィルター後の平均点")}
+        ${heroMetricHtml("平均", arrows.length ? (total / arrows.length).toFixed(2) : "—", "1本あたり")}
         ${heroMetricHtml("最高合計", best ? `${best.total}` : "—", bestMeta)}
       </div>
       ${gamificationHeroHtml()}
