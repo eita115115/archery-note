@@ -53,11 +53,21 @@
   {
     "id": "AN-006",
     "task": "新規Windows checkoutの射形検証の改行依存を修正する",
-    "status": "open",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "tools/check-form-core.js 読込時のCRLF正規化。check:all / lint成功。artifacts/improvement-baseline/newline-matrix.txt: LF/CRLF valid source passed、inverted stop guard rejected。修正前のcheck:form失敗はform-before.txt。",
     "dependencies": ["AN-005"],
     "owner": "codex",
     "acceptance": "LFとCRLFの両方で射形チェックが成功し、不正な制御順序は引き続き失敗する"
+  },
+  {
+    "id": "AN-007",
+    "task": "架空履歴で起動・画面切替の性能を測定し最も大きい待ち時間を改善する",
+    "status": "open",
+    "passes": false,
+    "evidence": "",
+    "dependencies": ["AN-006"],
+    "owner": "codex",
+    "acceptance": "再現可能な変更前後の測定を残し、対象操作の性能改善と関連する既存検証の成功を確認する"
   }
 ]

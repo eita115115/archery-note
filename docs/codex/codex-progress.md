@@ -2448,3 +2448,28 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Risk: documentation only. No runtime, storage, dependency, publication,
   payment or personal-data change. Next task: reproduce and fix newline-sensitive
   validation, then measure performance and refine mobile visual hierarchy.
+
+## 2026-09-28 — Windows source-contract newline fix (AN-006)
+
+- Changed `tools/check-form-core.js` to normalize CRLF to LF when reading the
+  form view source. The actual assertion and runtime code remain unchanged.
+- Reproduced before changing: `rawMatches:false`, `normalizedMatches:true`,
+  1173 CRLF sequences. `npm run check:form` failed with
+  `Error: replay pose continuation cannot restart after freeze or close`.
+- After: `npm run check:form` and `npm run check:all` exit 0; final output includes
+  `Form metric fixture checks OK`, `Form diagnostic checks OK`,
+  `Storage round-trip checks OK`, and `Version alignment checks OK`.
+- `npm run lint` exit 0. A temporary child-process read interceptor tested the
+  entire core checker against LF and CRLF sources, then inverted the replay's
+  stop guard in memory. Output: `LF: valid source passed`,
+  `LF: inverted stop guard rejected`, `CRLF: valid source passed`,
+  `CRLF: inverted stop guard rejected`.
+- The first mutation experiment hit the live guard and was rejected by another
+  existing assertion. Scoped the experiment to replay, then obtained the exact
+  intended rejection in both newline modes. No on-disk app source was mutated.
+- Logs and the reproducible local experiment are under
+  `artifacts/improvement-baseline/` (`form-before.txt`, `form-after.txt`,
+  `check-all-after.txt`, `lint.txt`, `check-newlines.cjs`, `newline-matrix.txt`).
+- Risk: tooling only; no scoring, storage, UI, personal-data or release change.
+  Updated `progress.md` and `tasks.json`. Next: AN-007 performance measurement
+  and a concrete runtime improvement, followed by narrow mobile visual polish.

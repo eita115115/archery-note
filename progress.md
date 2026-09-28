@@ -16,13 +16,13 @@
 - 実装と古い進捗表を照合し、改善順序を整理。
 - 変更: `docs/codex/app-quality-baseline.md`、本書、`tasks.json`、履歴台帳。
 - 元のv84では `check:all` 成功、375pxの初期画面を保存。
-- 新規v85では `check:form` の改行依存の疑いを発見。未修正。
+- `tools/check-form-core.js` の読み込み時に改行を正規化し、新規Windows環境の誤検知を修正。
 
 ## 検証
 
-- v85: app / globals / analysis 成功。form以降は未完了。
-- 失敗: `Error: replay pose continuation cannot restart after freeze or close`
-- 全出力: `artifacts/improvement-baseline/check-all.txt`
+- v85: `check:all` / `lint` 成功。LF・CRLFの正常ソースは成功、壊した停止判定は両方拒否。
+- 修正前の失敗: `Error: replay pose continuation cannot restart after freeze or close`
+- 証拠: `artifacts/improvement-baseline/check-all-after.txt`、`newline-matrix.txt`、`lint.txt`
 - アプリの挙動・保存形式・バージョンは変更していない。
 
 ## 次にやること

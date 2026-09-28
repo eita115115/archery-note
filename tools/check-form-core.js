@@ -9,7 +9,10 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const coreScript = fs.readFileSync(path.join(root, "scripts", "46-form-core.js"), "utf8");
-const viewScript = fs.readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8");
+// Git may check out CRLF on Windows; source contracts use canonical LF.
+const viewScript = fs
+  .readFileSync(path.join(root, "scripts", "47-form-view.js"), "utf8")
+  .replace(/\r\n/g, "\n");
 
 function assert(ok, message) {
   if (!ok) throw new Error(message);
