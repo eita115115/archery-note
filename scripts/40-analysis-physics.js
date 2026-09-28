@@ -543,7 +543,9 @@ function conditionHtml(sess,st,setup){
   const notes=conditionInsights(sess,st,setup).slice(0,4);
   return notes.length?`<div class="advice analysisAdviceCard">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
 }
-const SESSION_METRIC_CACHE=new Map();
+/* 記録ごとに最新結果だけを保持。長い履歴の巡回で固定件数キャッシュが全件ミスに
+   なるのを防ぎ、削除・置換された記録は WeakMap により回収可能にする。 */
+const SESSION_METRIC_CACHE=new WeakMap();
 function sessionMetricSignature(sess){
   const ends=(sess&&sess.ends)||[];
   let n=0,total=0,xs=0,ys=0,last="";
@@ -557,16 +559,15 @@ function sessionMetricSignature(sess){
 }
 function sessionMetrics(sess){
   const sig=sessionMetricSignature(sess||{});
-  const cached=SESSION_METRIC_CACHE.get(sig);
-  if(cached) return cached;
+  const cached=SESSION_METRIC_CACHE.get(sess);
+  if(cached && cached.signature===sig) return cached.metrics;
   const all=(sess.ends||[]).flat();
   const total=all.reduce((a,x)=>a+x.s,0);
   /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
   const pts=all.map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
   const st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st};
-  SESSION_METRIC_CACHE.set(sig,metrics);
-  if(SESSION_METRIC_CACHE.size>800) SESSION_METRIC_CACHE.delete(SESSION_METRIC_CACHE.keys().next().value);
+  SESSION_METRIC_CACHE.set(sess,{signature:sig,metrics});
   return metrics;
 }
 function sessionQuality(sess, setup, st){

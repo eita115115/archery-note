@@ -268,6 +268,46 @@ function sampleSession() {
   assert(m1 === m2, "identical session hits the metrics cache");
 }
 
+// 長い履歴を往復しても、変更のない記録の統計を再計算しない。
+{
+  const sessions = Array.from({ length: 1001 }, (_, i) => ({
+    ...sampleSession(),
+    id: `long-history-${i}`,
+  }));
+  const firstPass = sessions.map((s) => analysis.sessionMetrics(s));
+  sessions.forEach((s, i) => {
+    assert(
+      analysis.sessionMetrics(s) === firstPass[i],
+      `long history retains unchanged metrics for session ${i}`,
+    );
+  });
+  sessions[0].ends[0][0].s = 8;
+  const edited = analysis.sessionMetrics(sessions[0]);
+  assertEqual(edited.total, 36, "long history reflects an edited score");
+  assert(edited !== firstPass[0], "edited session does not reuse old metrics");
+  assert(
+    analysis.sessionMetrics(sessions[1000]) === firstPass[1000],
+    "editing one session does not evict another unchanged session",
+  );
+}
+
+// 同じID・同じ集計署名でも、置換された記録は別の矢配列を持つ。
+{
+  const original = sampleSession();
+  const m1 = analysis.sessionMetrics(original);
+  const replacement = sampleSession();
+  replacement.ends[0][0].x += 0.4;
+  replacement.ends[0][1].x -= 0.4;
+  assertEqual(
+    analysis.sessionMetricSignature(original),
+    analysis.sessionMetricSignature(replacement),
+    "replacement fixture has a colliding aggregate signature",
+  );
+  const m2 = analysis.sessionMetrics(replacement);
+  assert(m2.all[0] === replacement.ends[0][0], "metrics reference the replacement arrows");
+  assert(m2.st.sx !== m1.st.sx, "replacement grouping is recomputed");
+}
+
 // DB世代カウンタ: 署名が衝突するナッジ編集でも save 相当の DB_REV++ で再計算されること
 {
   const s = sampleSession();

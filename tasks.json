@@ -63,11 +63,21 @@
   {
     "id": "AN-007",
     "task": "架空履歴で起動・画面切替の性能を測定し最も大きい待ち時間を改善する",
-    "status": "open",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/session-cache-performance.md: 1000件再訪中央値 履歴434.2→48.6ms、分析998.3→207.7ms、再計算1000/2000→0。check:all / lint成功、E2E 83 passed (1.1m)。",
     "dependencies": ["AN-006"],
     "owner": "codex",
     "acceptance": "再現可能な変更前後の測定を残し、対象操作の性能改善と関連する既存検証の成功を確認する"
+  },
+  {
+    "id": "AN-008",
+    "task": "375px幅の記録・振り返り画面を評価し見やすさを改善する",
+    "status": "open",
+    "passes": false,
+    "evidence": "",
+    "dependencies": ["AN-007"],
+    "owner": "codex",
+    "acceptance": "Field Instrumentの原則に沿った改善を実装し、375pxの変更前後画像、check:uiとlint成功、主要操作の回帰確認を残す"
   }
 ]

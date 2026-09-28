@@ -2473,3 +2473,24 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Risk: tooling only; no scoring, storage, UI, personal-data or release change.
   Updated `progress.md` and `tasks.json`. Next: AN-007 performance measurement
   and a concrete runtime improvement, followed by narrow mobile visual polish.
+
+## 2026-09-28 — Long-history statistics performance (AN-007)
+
+- Reproduced 800-entry cache thrashing with 1,000 synthetic 36-arrow sessions.
+  Warm history/analysis switches performed 1,000/2,000 robust calculations.
+- Changed `scripts/40-analysis-physics.js` to a session-keyed WeakMap holding
+  the latest signature/result. Kept all signature/DB_REV invalidation and math.
+- Added regression cases in `tools/check-analysis-core.js` (1,001 sessions,
+  score edit, colliding replacement object). The long-history test failed before
+  the fix and passed afterward. Existing nudge invalidation tests also passed.
+- Added `tools/measure-view-performance.js` and the durable evidence report
+  `docs/codex/session-cache-performance.md`. Updated progress and tasks.
+- CPU4×/375px Chromium warm median: history 434.2→48.6ms, analysis 998.3→207.7ms.
+  Repeat: 46.6/206.9ms. Robust recomputations after warmup: zero. These are local
+  synchronous render/layout measurements, not physical-device latency claims.
+- Validation: check:all exit 0, lint exit 0, E2E `83 passed (1.1m)`.
+  Independent read-only review found no actionable defects.
+- Risk/tradeoff: metrics for every reachable session remain cached, with only
+  the latest result per session; removed objects can be collected. No scoring,
+  storage format, visible layout, payment or personal-data change. Not released.
+- Next: AN-008 mobile visual/interaction refinement, using before/after evidence.
