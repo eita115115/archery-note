@@ -146,27 +146,24 @@ function actionFaceLabel(value) {
   if (f.faceType === "field") return `${f.faceD}cmフィールド`;
   return `${f.faceD}cm`;
 }
-function recordFastActionsHtml(last, dist, faceValue) {
-  const currentLabel = `${dist}m / ${actionFaceLabel(faceValue)}`;
+function recordFastActionsHtml(last) {
   /* 直前が多距離ラウンドのステージなら、押下時の挙動（ラウンドをステージ1から再開）に合わせたラベルにする */
   const lastRound = last && last.roundGroup ? roundLabel(last.roundGroup.roundId) : null;
-  const lastTitle = lastRound ? `${lastRound}をもう一度` : "前回と同じ";
+  const lastTitle = lastRound ? `${lastRound}をもう一度` : "前回と同じ条件で開始";
   const lastLabel = last
     ? lastRound
       ? "最初の距離から"
       : `${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`
     : "なし";
-  /* 金面はセッション票の「この条件で開始」1つだけに絞る（design-language: 金面は1画面1つ）。
-     このバンドは墨面＋左に金アクセントバーの控えめな面。last が無い初回はセッション票の
-     fStart だけが唯一のCTAになるようバンド自体を出さない */
+  /* 前回条件は固定表示。フォームの編集中の条件は fStart のみが使う。
+     再開ショートカットは控えめにし、主操作はセッション票の「この条件で開始」にする。 */
   if (!last) return "";
   return `<section class="homeActions recordRepeatBand" aria-label="すぐ使う">
     <button class="homeAction repeatMain" id="quickStart" type="button">
       <span class="repeatEyebrow">${esc(lastTitle)}</span>
-      <b id="quickStartMeta">${esc(currentLabel)}</b>
-      <span class="repeatSub">${esc(lastLabel)}</span>
+      <b id="quickStartMeta">${esc(lastLabel)}</b>
     </button>
-    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b><span>分析</span></button>
+    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b></button>
   </section>`;
 }
 /* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
@@ -502,10 +499,10 @@ function renderRecord(m) {
   const defPerEnd = last && last.perEnd ? last.perEnd : 6;
   m.innerHTML = `
   ${featureHintHtml()}
-  ${recordFastActionsHtml(last, defDist, defFace)}
+  ${recordFastActionsHtml(last)}
   <section class="launchPanel convergeLaunch startFirst">
     <div class="launchHead">
-      <div class="launchTitle"><div class="stepBadge">01</div><h2>${mode === "calibration" ? "サイト値を残す練習" : "条件を選ぶ"}</h2></div>
+      <div class="launchTitle"><h2>${mode === "calibration" ? "サイト値を残す練習" : "条件を選ぶ"}</h2></div>
       <button class="tinyAction" id="jumpGear">用具</button>
     </div>
     <div class="launchBody">
@@ -571,15 +568,9 @@ function renderRecord(m) {
     if (String(faceSel.value).startsWith("F")) return;
     faceSel.value = d >= 60 ? 122 : d <= 18 ? 40 : 80;
   };
-  function updateQuickStartMeta() {
-    const meta = $("#quickStartMeta");
-    if (meta && distState.d)
-      meta.textContent = `${distState.d}m / ${actionFaceLabel(faceSel.value)}`;
-  }
   faceSel.onchange = () => {
     if (String(faceSel.value).startsWith("F") && $("#fArrows").value === "6")
       $("#fArrows").value = "3";
-    updateQuickStartMeta();
   };
   /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
   function applyMultiRoundStage0(def) {
@@ -619,14 +610,12 @@ function renderRecord(m) {
         $("#fArrows").value = "3";
       }
     }
-    updateQuickStartMeta();
   };
   $("#jumpGear").onclick = () => showView("gear");
   const quickHistory = $("#quickHistory");
   if (quickHistory) quickHistory.onclick = () => showView("history");
   if (last) {
-    /* 「前回と同じ」帯（quickStart, 元 quickRepeat）: 前回条件をフォームへ復元してから即開始する。
-       金面は下のセッション票の fStart 1つだけに絞ったため、このボタン自体は墨面のまま */
+    /* 「前回と同じ」: 表示している前回条件をフォームへ復元してから即開始する。 */
     $("#quickStart").onclick = () => {
       distState.d = last.dist || defDist;
       const known = [70, 50, 30, 18].includes(+distState.d);
@@ -669,7 +658,6 @@ function renderRecord(m) {
           suggestFace(distState.d);
           fillSight();
         }
-        updateQuickStartMeta();
         refreshLens();
       }),
   );
@@ -679,7 +667,6 @@ function renderRecord(m) {
       suggestFace(distState.d);
       fillSight();
     }
-    updateQuickStartMeta();
     refreshLens();
   };
   function fillSight() {

@@ -2515,3 +2515,21 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   list immediately visible. No scoring/storage changes. No paid or personal
   information use; screenshots contain only fictional demo data. Not released.
 - Next: AN-009 record-start visual hierarchy and repeated condition text.
+
+## 2026-09-29 — Record-start clarity (AN-009)
+
+- Fixed misleading repeat-start label: editing current distance/face no longer
+  changes the previous-session label. Removed duplicate conditions and the
+  history button's inaccurate analysis caption. Actual start handlers unchanged.
+- Repeat is now an unfilled secondary button; primary start stays inverted.
+  Removed decorative step numbering and quieted the heading, including dark mode.
+- Changed `scripts/50-record-view.js`, `style.css`, generated `style.min.css`.
+  Added `tests/e2e/record-start.spec.js` (four light/dark repeat/current cases).
+- The new tests failed before the fix, then passed: label stays 18m/40cm after
+  selecting 70m/80cm; each action starts its stated conditions.
+- Validation: check:all and lint exit 0; E2E `89 passed (1.0m)`.
+  Independent review: no actionable findings. Visuals inspected at 360/375/1280px
+  in light/dark. Evidence and screenshots: `docs/codex/record-start-polish.md`,
+  `docs/screenshots/record-quality/`, `artifacts/record-polish/`.
+- No data format, scoring, paid service or personal-data use. Not released.
+  Updated progress/tasks. Next: AN-010 release candidate and update/offline gates.

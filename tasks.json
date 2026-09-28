@@ -83,11 +83,21 @@
   {
     "id": "AN-009",
     "task": "記録開始画面の重複表示と開始操作の視覚的な優先順位を整理する",
-    "status": "open",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/record-start-polish.md と docs/screenshots/record-quality/。フォーム編集後の前回/現条件開始4ケースが修正前失敗→成功。check:all / lint成功、E2E 89 passed (1.0m)。",
     "dependencies": ["AN-008"],
     "owner": "codex",
     "acceptance": "既存の開始条件と記録動作を保ち、375pxの変更前後画像とcheck:ui / lint / 関連E2E成功を残す"
+  },
+  {
+    "id": "AN-010",
+    "task": "性能とモバイルUI改善をリリース候補にまとめ、配信物と更新経路を検証する",
+    "status": "open",
+    "passes": false,
+    "evidence": "",
+    "dependencies": ["AN-009"],
+    "owner": "codex",
+    "acceptance": "4箇所の版マーカー、配信ビルド、check:all・lint・format・E2E、更新/オフラインの証拠を揃え、公開状態を正確に記録する"
   }
 ]
