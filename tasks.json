@@ -39,5 +39,25 @@
     "owner": "opus",
     "acceptance": "coordinator と現行 appVer の両方に同じ固定値を渡す現状を『意図した単体テストの閉じた世界』として明文化するか、version.json 由来に変えるかが決まっている",
     "note": "現状は自己完結のため CI は緑。ただし e2e 側で同じ固定値が v85 bump により14件の失敗を生んだ（e4816524）ので、同型の罠として記録しておく"
+  },
+  {
+    "id": "AN-005",
+    "task": "性能・見た目改善の現状照合と基準確認",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/app-quality-baseline.md にmain 66eb29bf、375px基準画像、v84 check:all成功とv85 check:form失敗を記録。アプリ改善完了の意味ではない。",
+    "dependencies": [],
+    "owner": "codex",
+    "acceptance": "実装と台帳の差分、検証の成功・失敗、改善順序を証拠付きで記録する"
+  },
+  {
+    "id": "AN-006",
+    "task": "新規Windows checkoutの射形検証の改行依存を修正する",
+    "status": "open",
+    "passes": false,
+    "evidence": "",
+    "dependencies": ["AN-005"],
+    "owner": "codex",
+    "acceptance": "LFとCRLFの両方で射形チェックが成功し、不正な制御順序は引き続き失敗する"
   }
 ]

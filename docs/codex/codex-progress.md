@@ -2428,3 +2428,23 @@ codex/form-diagnostic-handoff-release` exits `1`; the sensitive working
   browser suite completed 83/83; the generated transient `debug.log` was
   removed. The dependency-remediation commit must be reflected in the pushed
   candidate before opening the draft PR.
+
+## 2026-09-28 — Quality improvement inventory checkpoint
+
+- Started from local main `66eb29bf` (v85) in managed worktree `app-quality`,
+  branch `codex/app-quality`. Original v84 checkout, its three modified
+  documents, `debug.log` and stale index lock were preserved.
+- Reconciled historical phases in `docs/codex/app-quality-baseline.md`.
+  Updated `progress.md` and added inventory/follow-up tasks in `tasks.json`.
+- Original v84 `npm run check:all` passed. Fresh v85 checkout passed app,
+  globals and analysis, then failed form: `Error: replay pose continuation
+cannot restart after freeze or close`. Source assertion matches literal LF
+  while fresh Windows source has CRLF. Fix remains to be validated.
+- Captured original initial screen at 375px and inspected local resource sizes.
+  Form scripts transfer about 197KB combined; this is a candidate, not a speed
+  improvement claim. See baseline report for artifact paths and limitations.
+- Initial format check identified only the new baseline report; formatted the
+  touched documents before rerunning the required check.
+- Risk: documentation only. No runtime, storage, dependency, publication,
+  payment or personal-data change. Next task: reproduce and fix newline-sensitive
+  validation, then measure performance and refine mobile visual hierarchy.

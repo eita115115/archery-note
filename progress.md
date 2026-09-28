@@ -1,39 +1,37 @@
 # 現在の状態
 
-> **このファイルが現在地の正本。** 40行以内に保つ。
-> 長い経緯は `docs/codex/codex-progress.md`（履歴台帳）へ。
+> 現在地の正本。長い経緯は `docs/codex/codex-progress.md`。
 
-最終更新: 2026-09-02
+最終更新: 2026-09-28
 
 ## 現在地
 
-- `main`: `feat/adaptive-release-detection`（73コミット）を統合し、**v85 として公開**
-  （`APP_VER` / `version.json` / `sw.js` の `archery-note-v85` / `package.json 0.85.0` の4箇所を bump）
-- 中身は射形診断まわりが中心（fix 20 / feat 10 / test 7 / docs 33、51ファイル）
+- 性能・見た目改善の委任を受け、`main` の `66eb29bf`（v85）から開始。
+- 管理worktree: `C:/Users/eita2/.codex/worktrees/app-quality/archery-note`
+- ブランチ: `codex/app-quality`。元の作業フォルダの変更は保全。
+- 金銭・個人情報は明示承認なしに使用しない。確認用データは架空のみ。
 
 ## 完了したこと
 
-- 射形診断ハンドオフ・適応的リリース検出・フィールド計測モーションの一連の作業を main へ統合
-- ハーネス整備（2026-09-02）: `CLAUDE.md` を `@AGENTS.md` 形式へ、`AGENTS.md` に
-  Source Of Truth / Acceptance / Safety / Handoff を追加、`evals/acceptance.md` 新設、
-  現在地の正本を本ファイルへ移設、`docs/codex/codex-progress.md` を履歴台帳へ降格
-- 統合前の検証: `npm run check:all` 全緑 / `npm run test:e2e` 83 passed
-- v85 公開後の CI 赤（e2e 14件）は、診断フィクスチャの `appVer: 84` 固定値が原因。`version.json` 由来にして解消（`e4816524`、CI 緑）
+- 実装と古い進捗表を照合し、改善順序を整理。
+- 変更: `docs/codex/app-quality-baseline.md`、本書、`tasks.json`、履歴台帳。
+- 元のv84では `check:all` 成功、375pxの初期画面を保存。
+- 新規v85では `check:form` の改行依存の疑いを発見。未修正。
+
+## 検証
+
+- v85: app / globals / analysis 成功。form以降は未完了。
+- 失敗: `Error: replay pose continuation cannot restart after freeze or close`
+- 全出力: `artifacts/improvement-baseline/check-all.txt`
+- アプリの挙動・保存形式・バージョンは変更していない。
 
 ## 次にやること
 
-- `tasks.json` の `status:"open"` を参照
-- 統合済みブランチ `feat/adaptive-release-detection` をローカルで削除するか判断する
+- LF/CRLFで失敗を再現し、検証コードの改行依存を修正する。
+- その後、起動・タブ切替を測定し、375pxの実画面を改善する。
 
 ## 未解決
 
-- 射形トラッキングの実使用フィードバック（検出率50%・分析データ消失・記録画面の自動スクロール）が未クローズ
-- `docs/roadmap.md` が 2026-07-08 で停止しており、ゴールの正本が古い
-
-## 注意
-
-- `settings` マージバグ（`normalizeDb()` L44）は全新機能の前提条件
-- このリポジトリは **PUBLIC**。`main` への push は **GitHub Pages への公開＝リリース**。
-  コードを変えたら `npm run version:bump` で4箇所のマーカーを同時に上げる
-- **テストにアプリのバージョンを固定値で書かない。** `version.json` から読む
-  （固定値は次の bump で必ず腐る。実例: `e4816524`）
+- 実射での射形判定・保存・自動スクロールの受入確認。
+- ロードマップ全面更新（AN-002）、診断テストの版固定値（AN-004）。
+- 元checkoutには9月4日付のGitロックが残る。削除していない。
