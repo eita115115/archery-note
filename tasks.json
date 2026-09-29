@@ -159,5 +159,17 @@
     ],
     "owner": "codex",
     "acceptance": "各アラートの依存経路と入力境界を確認し、根拠・未確認点・対応順位を個別に記録する"
+  },
+  {
+    "id": "AN-015",
+    "task": "主要画面の小さな副操作をスマートフォンで押しやすくする",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/mobile-touch-controls.md: 44px押下領域、375px変更前後、check:ui/lint成功、360/375 light/dark端タップ含む10 passed (4.1s)。",
+    "dependencies": [
+      "AN-013"
+    ],
+    "owner": "codex",
+    "acceptance": "設定・詳細・用具移動の押下領域を広げ、狭幅とテーマ両方で開閉と表示を確認する"
   }
 ]

@@ -2634,3 +2634,14 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   dependency modifications, alert dismissal, publication or external reporting.
 - Updated progress/tasks. Next maintenance should assess compatible dependency
   updates separately; real-world safety remains unproven by this first pass.
+
+## 2026-09-30 — Mobile secondary touch controls (AN-015)
+
+- User prioritized UX. Expanded settings, equipment, record/live disclosures and
+  advanced summary targets; preserved existing hint-close pseudo-element hit area.
+- Changed style.css and generated style.min.css; added touch-controls.spec.js.
+- check:ui and lint passed; focused E2E 10 passed (4.1s), 360/375px light/dark
+  edge clicks and no horizontal overflow. Inspected 375px screenshots.
+- Evidence: docs/codex/mobile-touch-controls.md, docs/screenshots/touch-quality/.
+- No data/scoring changes. Local only; v86 remains the published version.
+  Updated progress/tasks. Next: active practice information density and flow.

@@ -330,7 +330,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 .recordDetails{margin-top:10px; border:none!important; background:transparent!important; padding:0!important;}
 .recordDetails summary{
   display:flex; align-items:center; justify-content:flex-start; gap:4px;
-  width:max-content; margin-left:auto; padding:7px 0 0!important;
+  width:max-content; min-height:var(--tap-target-min); margin-left:auto; padding:7px 0!important;
 }
 .recordDetails summary::before{content:"＋ "!important; font-size:10px; position:static!important; border:none!important; width:auto!important; height:auto!important; transform:none!important; transition:none!important;}
 .recordDetails[open] summary::before{content:"− "!important; transform:none!important;}
@@ -346,7 +346,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 .tinyAction{
   border:1px solid var(--line); background:var(--card); color:var(--title); border-radius:8px;
   padding:7px 10px; font-size:12px; font-weight:var(--fw-label); cursor:pointer; white-space:nowrap;
-  max-width:92px; overflow:hidden; text-overflow:ellipsis;
+  min-height:var(--tap-target-min); max-width:92px; overflow:hidden; text-overflow:ellipsis;
 }
 /* 分析タブ「今日の結論」: 机上モードの入口カード。金面は使わず、hairlineの罫線と大きめの本文だけで目立たせる */
 .todayConclusionCard{
@@ -420,6 +420,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 .liveHudMore{position:relative; flex:0 0 auto;}
 .liveHudMore summary{
   list-style:none; cursor:pointer; font-size:10.5px; font-weight:var(--fw-label); color:var(--sub);
+  min-width:var(--tap-target-min); min-height:var(--tap-target-min); display:flex; align-items:center; justify-content:center;
   padding:2px 6px; border:1px solid var(--line); border-radius:6px; background:var(--soft);
 }
 .liveHudMore summary::-webkit-details-marker{display:none;}
@@ -878,7 +879,8 @@ details.adv{border:1px solid var(--line); border-radius:8px; padding:2px 12px 8p
 @keyframes detailReveal{from{opacity:0; transform:translateY(-4px);}to{opacity:1; transform:translateY(0);}}
 details.adv[open] > :not(summary){animation:detailReveal .24s var(--ease-app) both;}
 details.adv summary{
-  cursor:pointer; font-size:13px; color:var(--sub); padding:9px 0 9px 18px; list-style:none; font-weight:var(--fw-label);
+  min-height:var(--tap-target-min);
+  cursor:pointer; font-size:13px; color:var(--sub); padding:12px 0 12px 18px; list-style:none; font-weight:var(--fw-label);
   position:relative;
 }
 details.adv summary::-webkit-details-marker{display:none;}
@@ -892,11 +894,11 @@ details.adv[open] summary::before{transform:translateY(-35%) rotate(45deg);}
 details.adv summary::-moz-list-bullet{display:none;}
 header.app .gear{
   position:absolute; right:12px; top:8px; top:calc(8px + env(safe-area-inset-top));
-  width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  width:44px; height:44px; border-radius:8px; display:flex; align-items:center; justify-content:center;
   background:var(--soft); border:1px solid var(--line); color:var(--title); font-size:20px; cursor:pointer; padding:0; flex:0 0 auto;
 }
 @media (max-width:420px){
-  header.app{gap:7px; padding-left:12px; padding-right:52px;}
+  header.app{gap:7px; padding-left:12px; padding-right:60px;}
 }
 @media (max-width:520px){
   .heroMetrics,.liveGrid{grid-template-columns:repeat(2,minmax(0,1fr));}
