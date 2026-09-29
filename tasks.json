@@ -121,5 +121,17 @@
     ],
     "owner": "codex",
     "acceptance": "旧版から新版への更新通知とreload、cache切替、架空履歴の保持と更新後offline起動を実SWで確認する"
+  },
+  {
+    "id": "AN-012",
+    "task": "大量履歴の初回表示をプロファイルし不要な計算の削減方針を決める",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "artifacts/release-v86/profile-cold.json: 1000件 history初回801.8ms、robustStats1000回/549ms。renderHistory→buildAnalysisRows→sessionMetricsが呼出元。未修正。",
+    "dependencies": [
+      "AN-011"
+    ],
+    "owner": "codex",
+    "acceptance": "初回表示のボトルネックを測定し、表示値を保持する改善を実装して変更前後と回帰検証を記録する"
   }
 ]

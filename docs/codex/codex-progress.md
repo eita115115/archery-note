@@ -2556,3 +2556,18 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   verify-transition.cjs, real-update-banner.png. No app source changes.
 - Updated progress/tasks. Publication approval remains pending; no push performed.
   Deployed-site and physical iPhone verification remain outstanding.
+
+## 2026-09-29 — Cold history profile (AN-012, in progress)
+
+- Fresh Chromium contexts, 375px, 4x CPU throttling, synthetic records only.
+  Uninstrumented 1000-session first history: 743.6ms / 1000 robustStats calls.
+  Instrumented: 801.8ms total, 549ms inside robustStats, 1000 calls.
+- Stack: renderHistory -> buildAnalysisRows -> sessionMetrics -> robustStats.
+  History list only displays 50 records, but summary preparation computes all
+  session spatial statistics. Warm cache optimization cannot eliminate this cost.
+- Evidence: artifacts/release-v86/views-current.json and profile-cold.json;
+  instrumented harness profile-cold.cjs. Profiling overhead affects timings.
+- Next: inspect every history summary consumer before separating score-only
+  aggregation from spatial metrics; preserve displayed trends and all records.
+- No app changes in this checkpoint, no new release validation claim. Updated
+  progress/tasks. Publication remains pending approval; no push or personal data.
