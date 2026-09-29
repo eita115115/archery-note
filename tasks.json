@@ -125,9 +125,9 @@
   {
     "id": "AN-012",
     "task": "大量履歴の初回表示をプロファイルし不要な計算の削減方針を決める",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "artifacts/release-v86/profile-cold.json: 1000件 history初回801.8ms、robustStats1000回/549ms。renderHistory→buildAnalysisRows→sessionMetricsが呼出元。未修正。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/cold-history-performance.md: 重複median4回削減。2000例で旧実装と完全一致。check:all/lint成功、E2E91 passed (1.0m)。初回1000件743.6→665.5ms（単回）。",
     "dependencies": [
       "AN-011"
     ],

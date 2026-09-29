@@ -127,12 +127,13 @@ function robustStats(arrows){
   if(used.length<Math.max(3,total-excluded.length)){
     used=arrows.slice(); excluded=[];
   }
-  const ux=median(used.map(a=>a.x)), uy=median(used.map(a=>a.y));
-  const uds=used.map(a=>Math.hypot(a.x-ux,a.y-uy));
-  const udm=median(uds);
+  const unchanged=excluded.length===0;
+  const ux=unchanged?cx:median(used.map(a=>a.x)), uy=unchanged?cy:median(used.map(a=>a.y));
+  const uds=unchanged?ds:used.map(a=>Math.hypot(a.x-ux,a.y-uy));
+  const udm=unchanged?md:median(uds);
   const xScale=robustScale(used.map(a=>a.x), ux, base.sx*.55);
   const yScale=robustScale(used.map(a=>a.y), uy, base.sy*.55);
-  const scale=Math.max(udm+3*median(uds.map(d=>Math.abs(d-udm))), base.rr, 0.01);
+  const scale=Math.max(udm+3*(unchanged?mad:median(uds.map(d=>Math.abs(d-udm)))), base.rr, 0.01);
   const weights=used.map(a=>{
     const radialU=Math.hypot(a.x-ux,a.y-uy)/scale;
     const ellU=Math.hypot((a.x-ux)/xScale,(a.y-uy)/yScale)/3;

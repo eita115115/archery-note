@@ -921,3 +921,13 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
 }
 
 console.log("Analysis core characterization checks OK");
+// No exclusions: reuse identical median/distance inputs instead of sorting twice.
+const counted = new Function(`${scoringScript.replace('function median(', 'function originalMedian(')}
+let medianCalls=0;
+function median(values){ medianCalls++; return originalMedian(values); }
+return { robustStats, calls:()=>medianCalls };`)();
+const regularPoints = Array.from({length:36},(_,i)=>({x:i%6-2.5,y:Math.floor(i/6)-2.5}));
+const reused = counted.robustStats(regularPoints);
+assertEqual(reused.excluded.length,0,'regular grid has no exclusions');
+assert(counted.calls()<=10,'no-exclusion statistics must reuse the four identical medians');
+console.log('Robust median reuse checks OK');

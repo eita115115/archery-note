@@ -2571,3 +2571,15 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   aggregation from spatial metrics; preserve displayed trends and all records.
 - No app changes in this checkpoint, no new release validation claim. Updated
   progress/tasks. Publication remains pending approval; no push or personal data.
+
+## 2026-09-29 — Reuse unchanged medians (AN-012 completed)
+
+- History conclusion requires all-session grouping; preserved this meaning.
+  Changed scripts/20-scoring.js to reuse identical median inputs when no points
+  are excluded. Added median-count regression in tools/check-analysis-core.js.
+- Regression failed before / passes after. 2,000 deterministic datasets match old
+  outputs exactly. Independent review: no actionable issues.
+- check:all and lint passed; E2E 91 passed (1.0m). Details and timing limitations:
+  docs/codex/cold-history-performance.md. No storage, score assignment or UI change.
+- Updated progress/tasks. v86 remains unpublished; release bundle predates this
+  final optimization and must be rebuilt before publication. Approval still pending.
