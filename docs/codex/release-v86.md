@@ -8,6 +8,9 @@ Status: local candidate, not published. Remote main was confirmed as
 - Reuse session statistics when revisiting large histories. Synthetic 1,000-session
   Chromium measurements with 4x CPU throttling: history 434→49ms, analysis 998→208ms.
   These are warm view measurements, not physical iPhone launch measurements.
+- Reuse identical robust-statistics medians when no arrows are excluded.
+  2,000 deterministic datasets matched the previous output exactly; details in
+  `cold-history-performance.md`.
 - Quieter history summary and collapsible filters, with active conditions visible.
 - Clear primary practice-start action; repeat-start conditions stay accurate when
   the current form is edited.
@@ -46,6 +49,14 @@ it does not substitute for deployed-site or physical iPhone verification.
 
 No storage schema, scoring algorithm, worker activation policy, dependencies,
 paid service or personal data were changed or used. All test records are fictional.
+
+## Final candidate verification
+
+The update transition was rerun against `4d53abd8`, including the final median
+reuse optimization, and passed (`artifacts/release-v86/final-transition.txt`).
+All 21 bundled assets matched working-tree source bytes. Final format check passed.
+Latest application validation: check:all and lint passed; E2E `91 passed (1.0m)`.
+The release remains local; no remote push or deployment has been performed.
 
 ## Publication gate
 

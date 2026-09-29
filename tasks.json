@@ -103,7 +103,7 @@
     "task": "性能とモバイルUI改善をリリース候補にまとめ、配信物と更新経路を検証する",
     "status": "done",
     "passes": true,
-    "evidence": "docs/codex/release-v86.md: v86版整合、配信物ビルド、check:all/lint/format成功、E2E 91 passed (1.0m)。実SWオフライン保持と模擬更新バナー検証成功。ローカル候補のみ、公開未実施。",
+    "evidence": "docs/codex/release-v86.md: v86版整合、配信物ビルド、check:all/lint/format成功、E2E 91 passed (1.0m)。実SWオフライン保持と模擬更新バナー検証成功。ローカル候補のみ、公開未実施。 最終候補4d53abd8で実SW更新再検証成功、配信21ファイルとsourceのbyte一致確認。",
     "dependencies": [
       "AN-009"
     ],

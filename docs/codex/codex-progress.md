@@ -2583,3 +2583,13 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   docs/codex/cold-history-performance.md. No storage, score assignment or UI change.
 - Updated progress/tasks. v86 remains unpublished; release bundle predates this
   final optimization and must be rebuilt before publication. Approval still pending.
+
+## 2026-09-29 — Final candidate alignment
+
+- Repeated actual v85-to-v86 local worker transition against 4d53abd8, including
+  median reuse. PASS: cache turnover, fictional session retention, offline reload.
+- Verified all 21 bundled assets byte-for-byte against source. format:check passed.
+- Updated release-v86.md, progress.md and AN-010 evidence in tasks.json.
+- Candidate is ready for publication approval. No push/deployment performed.
+  Next requires that approval; deployed-site and real iPhone acceptance are not
+  implied by local Chromium success. No further feature expansion in this candidate.
