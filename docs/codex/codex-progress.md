@@ -2622,3 +2622,15 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - docs/codex/dependency-alert-intake.md records evidence and proof gaps. No claim
   of confirmed exploitability or absence of risk. No dependency changes or tests.
 - Updated progress/tasks. Next: policy resolution and static caller/input tracing.
+
+## 2026-09-29 — Dependency static first pass (AN-014)
+
+- Completed one initial static result per imported alert, all needs_review with
+  explicit input-boundary/reachability gaps; no claim of confirmed exploitability.
+- Individual results retained via Codex Security artifact tool at
+  artifacts/triage/dependabot-v86.json in the target-bound managed collection.
+  Digest: ec7ec016a041c3c4bf74b1fbcde1e4e00e5028a02f50c0adde95f9911d528cd6.
+- Recorded callers, counterevidence and unique review queue ranks. No tests,
+  dependency modifications, alert dismissal, publication or external reporting.
+- Updated progress/tasks. Next maintenance should assess compatible dependency
+  updates separately; real-world safety remains unproven by this first pass.

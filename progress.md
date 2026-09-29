@@ -30,7 +30,7 @@
 
 - AN-013: 承認を受けv86公開済み。配信ファイル・記録・履歴・オフライン保持を確認。
 
-- AN-014: Dependabot14件の入力到達性を静的調査。取込結果はdocs/codex/dependency-alert-intake.md。
+- AN-014初回静的確認済み: 14件needs_review。XML解析の開発入力経路を優先確認。個別結果はCodex Security管理artifact。
 - 公開版を実機・実射で確認し、使い勝手のフィードバックを得る。
 - AN-012完了: 外れ値なしの重複統計計算を削減。2000例完全一致、check:all/lint/E2E91件成功。
 
