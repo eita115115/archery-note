@@ -2645,3 +2645,14 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Evidence: docs/codex/mobile-touch-controls.md, docs/screenshots/touch-quality/.
 - No data/scoring changes. Local only; v86 remains the published version.
   Updated progress/tasks. Next: active practice information density and flow.
+
+## 2026-09-30 — Active HUD mobile layout (AN-016)
+
+- Generic responsive grid rules overrode the explicit three-value HUD layout.
+  Increased selector specificity only; all three metrics stay in one row.
+- Updated style.css/min.css and touch-controls.spec.js; new assertion failed in
+  four theme/width cases before fix. Focused E2E 12 passed (13.1s), UI/lint passed.
+- Inspected 375px before/after light/dark images; target moves upward about 71px.
+  Evidence: docs/codex/live-hud-layout.md and screenshots/live-hud-quality/.
+- No storage/scoring changes, no publication. Updated progress/tasks. Next:
+  consolidate the two UX fixes into a tested release candidate.

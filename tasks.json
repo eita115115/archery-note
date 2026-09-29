@@ -171,5 +171,17 @@
     ],
     "owner": "codex",
     "acceptance": "設定・詳細・用具移動の押下領域を広げ、狭幅とテーマ両方で開閉と表示を確認する"
+  },
+  {
+    "id": "AN-016",
+    "task": "練習中の3数値が狭幅で折り返して的を押し下げる問題を直す",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/live-hud-layout.md: 360/375 light/dark同一行テスト4件が失敗→成功、操作含む12 passed (13.1s)、check:ui/lint成功、375px前後画像。",
+    "dependencies": [
+      "AN-015"
+    ],
+    "owner": "codex",
+    "acceptance": "エンド・合計・残りを狭幅でも一行に保ち、的と主要操作の表示および記録フローを確認する"
   }
 ]

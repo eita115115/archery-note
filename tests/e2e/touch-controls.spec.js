@@ -15,15 +15,21 @@ for (const width of [360, 375])
       await page.locator(".recordDetails summary").click({ position: { x: 3, y: 3 } });
       await expect(page.locator(".recordDetails")).toHaveAttribute("open", "");
       await page.locator("#quickStart").click();
+      const cells = await page
+        .locator(".liveGrid3 .liveCell")
+        .evaluateAll((nodes) => nodes.map((node) => node.getBoundingClientRect().top));
+      expect(Math.max(...cells) - Math.min(...cells)).toBeLessThan(1);
       const more = page.locator(".liveHudMore summary");
       const rect = await more.boundingBox();
       expect(rect.width).toBeGreaterThanOrEqual(44);
       expect(rect.height).toBeGreaterThanOrEqual(44);
       await more.click({ position: { x: 3, y: 3 } });
       await expect(page.locator(".liveHudMore")).toHaveAttribute("open", "");
-      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(
-        false,
-      );
+      expect(
+        await page.evaluate(
+          () => globalThis.document.documentElement.scrollWidth > globalThis.innerWidth,
+        ),
+      ).toBe(false);
       await page.locator("#btnSettings").click({ position: { x: 3, y: 3 } });
       await expect(page.locator(".ovl")).toBeVisible();
     });
