@@ -2602,3 +2602,13 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   validation cannot proceed without approval. Added AN-013 as needs-user.
 - Goal is not achieved: adoption, real practice and physical iPhone evidence are
   still absent. No further speculative features added to this release candidate.
+
+## 2026-09-29 — Approved v86 publication (AN-013)
+
+- User explicitly approved. Remote main unchanged at 66eb29bf; fast-forwarded to
+  15aa7fb5. Pages build/deployment run 36524673727 succeeded.
+- Live version 86, six changed runtime assets match source. Fresh deployed-site
+  Chromium demo test passed history/start/offline reload/data retention; no page errors.
+- Updated progress/tasks/release notes. Physical iPhone and real practice remain.
+- GitHub push reported existing dependency alerts (10 high, 2 moderate); no
+  dependency changes or paid services introduced by this release.

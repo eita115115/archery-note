@@ -137,9 +137,9 @@
   {
     "id": "AN-013",
     "task": "承認後にv86候補を公開し配信環境で確認する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "ユーザーの「承認します」を受領。remote main 66eb29bf、Pages main /root配信を確認。公開・配信後検証を実施中。",
+    "status": "done",
+    "passes": true,
+    "evidence": "承認後15aa7fb5をmainへpush。Pages run36524673727成功。公開v86と変更6asset一致、架空履歴3件・開始・offline reload・保持・pageerror0を確認。artifacts/release-v86/deployed-check.txt",
     "dependencies": [
       "AN-010",
       "AN-011",

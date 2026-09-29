@@ -1,6 +1,6 @@
 # v86 release candidate — 2026-09-29
 
-Status: local candidate, not published. Remote main was confirmed as
+Status: published after explicit user approval. Remote main was confirmed as
 `66eb29bfa3624fe67c3e26373654194cc7654ec1` before preparing this candidate.
 
 ## User-visible changes
@@ -64,3 +64,18 @@ AGENTS.md requires user approval before push/deployment. No push has occurred.
 After approval, check remote main again, integrate and publish, then verify the
 served version and a clean browser's update/offline behavior. Physical iPhone
 and real practice acceptance remain outstanding.
+
+## Publication result
+
+User approved publication. Pushed `15aa7fb5` to main; Pages run
+[36524673727](https://github.com/eita115115/archery-note/actions/runs/36524673727)
+succeeded. The live version.json reports 86. Six changed runtime assets match
+local source (normalized line endings). Fresh Chromium on the deployed site
+passed demo history, practice start, offline reload, retained sessions/active
+practice, and zero page errors. Evidence: artifacts/release-v86/deployed-check.txt.
+
+Earlier local-only statements above describe the pre-publication checkpoint.
+Physical iPhone and real practice acceptance remain outstanding.
+
+CI run [36524674397](https://github.com/eita115115/archery-note/actions/runs/36524674397)
+also completed successfully, including check:all, lint, format and E2E.
