@@ -2593,3 +2593,12 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Candidate is ready for publication approval. No push/deployment performed.
   Next requires that approval; deployed-site and real iPhone acceptance are not
   implied by local Chromium success. No further feature expansion in this candidate.
+
+## 2026-09-29 — Publication approval blocker
+
+- Reconfirmed clean candidate at 7f316081 and explicit AGENTS.md push/deploy
+  approval rule. No user approval has arrived across repeated continuations.
+- Local release work and verification are complete; publication and deployed
+  validation cannot proceed without approval. Added AN-013 as needs-user.
+- Goal is not achieved: adoption, real practice and physical iPhone evidence are
+  still absent. No further speculative features added to this release candidate.

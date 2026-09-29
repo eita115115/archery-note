@@ -133,5 +133,19 @@
     ],
     "owner": "codex",
     "acceptance": "初回表示のボトルネックを測定し、表示値を保持する改善を実装して変更前後と回帰検証を記録する"
+  },
+  {
+    "id": "AN-013",
+    "task": "承認後にv86候補を公開し配信環境で確認する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "ローカル候補7f316081は検証済み。AGENTS.mdのpush/deploy事前確認に従い公開承認待ち。公開操作なし。",
+    "dependencies": [
+      "AN-010",
+      "AN-011",
+      "AN-012"
+    ],
+    "owner": "codex",
+    "acceptance": "公開承認を得てremoteを再確認し、候補の配信成功と公開版番号、更新後の基本動作を確認する"
   }
 ]
