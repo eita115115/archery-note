@@ -196,5 +196,17 @@
     ],
     "owner": "codex",
     "acceptance": "版整合・ビルド・全体検証・更新とデータ保持の証拠を揃え公開状態を記録する"
+  },
+  {
+    "id": "AN-018",
+    "task": "承認後にv87 UX改善を公開して配信を確認する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "ローカル候補6ba0bff5はclean。remote mainは1fe998b6（v86）。v87公開承認待ち。",
+    "dependencies": [
+      "AN-017"
+    ],
+    "owner": "codex",
+    "acceptance": "公開承認後にremoteを再確認し、公開v87と主要操作・配信成功を確認する"
   }
 ]

@@ -2674,3 +2674,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Touch suite 6 passed (6.7s); lint passed. No runtime code changes needed.
 - Updated release notes, progress and AN-017 evidence. This closes the specific
   review coverage note; physical iPhone remains unverified. v87 approval pending.
+
+## 2026-09-30 — v87 publication approval blocker
+
+- Reconfirmed clean candidate 6ba0bff5, remote main still 1fe998b6 (v86).
+- Same publication approval blocker remains across three consecutive goal turns.
+  Local implementation and targeted follow-up verification are complete.
+- Added AN-018 needs-user and updated progress. No push/deployment performed.
+  Goal remains unachieved: publication and real-user/physical-device evidence remain.
