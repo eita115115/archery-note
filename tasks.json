@@ -56,7 +56,9 @@
     "status": "done",
     "passes": true,
     "evidence": "tools/check-form-core.js 読込時のCRLF正規化。check:all / lint成功。artifacts/improvement-baseline/newline-matrix.txt: LF/CRLF valid source passed、inverted stop guard rejected。修正前のcheck:form失敗はform-before.txt。",
-    "dependencies": ["AN-005"],
+    "dependencies": [
+      "AN-005"
+    ],
     "owner": "codex",
     "acceptance": "LFとCRLFの両方で射形チェックが成功し、不正な制御順序は引き続き失敗する"
   },
@@ -66,7 +68,9 @@
     "status": "done",
     "passes": true,
     "evidence": "docs/codex/session-cache-performance.md: 1000件再訪中央値 履歴434.2→48.6ms、分析998.3→207.7ms、再計算1000/2000→0。check:all / lint成功、E2E 83 passed (1.1m)。",
-    "dependencies": ["AN-006"],
+    "dependencies": [
+      "AN-006"
+    ],
     "owner": "codex",
     "acceptance": "再現可能な変更前後の測定を残し、対象操作の性能改善と関連する既存検証の成功を確認する"
   },
@@ -76,7 +80,9 @@
     "status": "done",
     "passes": true,
     "evidence": "docs/codex/history-mobile-polish.md と docs/screenshots/history-quality/ の375px変更前後画像。check:ui / check:app / lint成功、E2E 85 passed (1.0m)。360/1280px・light/darkも確認。",
-    "dependencies": ["AN-007"],
+    "dependencies": [
+      "AN-007"
+    ],
     "owner": "codex",
     "acceptance": "Field Instrumentの原則に沿った改善を実装し、375pxの変更前後画像、check:uiとlint成功、主要操作の回帰確認を残す"
   },
@@ -86,17 +92,21 @@
     "status": "done",
     "passes": true,
     "evidence": "docs/codex/record-start-polish.md と docs/screenshots/record-quality/。フォーム編集後の前回/現条件開始4ケースが修正前失敗→成功。check:all / lint成功、E2E 89 passed (1.0m)。",
-    "dependencies": ["AN-008"],
+    "dependencies": [
+      "AN-008"
+    ],
     "owner": "codex",
     "acceptance": "既存の開始条件と記録動作を保ち、375pxの変更前後画像とcheck:ui / lint / 関連E2E成功を残す"
   },
   {
     "id": "AN-010",
     "task": "性能とモバイルUI改善をリリース候補にまとめ、配信物と更新経路を検証する",
-    "status": "open",
-    "passes": false,
-    "evidence": "",
-    "dependencies": ["AN-009"],
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v86.md: v86版整合、配信物ビルド、check:all/lint/format成功、E2E 91 passed (1.0m)。実SWオフライン保持と模擬更新バナー検証成功。ローカル候補のみ、公開未実施。",
+    "dependencies": [
+      "AN-009"
+    ],
     "owner": "codex",
     "acceptance": "4箇所の版マーカー、配信ビルド、check:all・lint・format・E2E、更新/オフラインの証拠を揃え、公開状態を正確に記録する"
   }

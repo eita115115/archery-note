@@ -2533,3 +2533,15 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   `docs/screenshots/record-quality/`, `artifacts/record-polish/`.
 - No data format, scoring, paid service or personal-data use. Not released.
   Updated progress/tasks. Next: AN-010 release candidate and update/offline gates.
+
+## 2026-09-29 — v86 candidate (AN-010)
+
+- Prepared v86 markers with version:bump; package lock agrees. Built minified CSS
+  and isolated web bundle. Remote main still 66eb29bf at preparation time.
+- Added tests/e2e/pwa-release.spec.js: real cached offline practice/reload retains
+  demo data; simulated newer-version banner reload also preserves demo history.
+- check:all, lint, format passed; focused PWA tests 2 passed (4.8s); full E2E 91 passed (1.0m).
+- Evidence and limitations: docs/codex/release-v86.md, artifacts/release-v86/.
+- No worker activation policy or storage schema changes. No personal data/cost.
+- Not published. Actual deployed worker transition and physical iPhone remain
+  unverified. Next: publication approval, remote recheck and deployed verification.
