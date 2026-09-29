@@ -25,3 +25,12 @@ Physical iPhone validation remains outstanding.
 
 No scoring/storage/worker activation changes, dependency additions, money or
 personal data use. The prior approval applied to v86; v87 publication awaits approval.
+
+## Fixed action dock follow-up
+
+Closed the review coverage gap with actual screen-coordinate clicks, avoiding
+Playwright locator auto-scroll: 360/375×640 viewports, target point 12px above the
+fixed action dock, hit-test confirms the target receives the click. Exactly one
+arrow is stored, then the visible dock undo removes it. `6 passed (6.7s)` across
+the touch suite, lint passed. No app change needed. Logs: dock-e2e.txt and
+dock-lint.txt under artifacts/release-v87/. Publication approval remains pending.

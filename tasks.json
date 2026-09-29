@@ -189,7 +189,7 @@
     "task": "UX改善をv87候補にまとめ公開前の全体検証を行う",
     "status": "done",
     "passes": true,
-    "evidence": "docs/codex/release-v87.md: check:all/lint/format成功、E2E95 passed (1.0m)、v86→87実SW更新・履歴保持・offline成功。候補ca09791、未公開。",
+    "evidence": "docs/codex/release-v87.md: check:all/lint/format成功、E2E95 passed (1.0m)、v86→87実SW更新・履歴保持・offline成功。候補ca09791、未公開。 追加の固定dock境界操作: 360/375×640で矢1本追加/取消成功、touch suite6 passed (6.7s)。",
     "dependencies": [
       "AN-015",
       "AN-016"

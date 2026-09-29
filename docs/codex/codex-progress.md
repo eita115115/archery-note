@@ -2666,3 +2666,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Evidence: docs/codex/release-v87.md, artifacts/release-v87/. Updated progress/tasks.
 - Current published version remains v86. Next: v87 publication approval and live
   verification. No money/personal data use, no dependency modifications.
+
+## 2026-09-30 — v87 fixed-dock coverage follow-up
+
+- Added actual screen-coordinate target clicks 12px above fixed dock at
+  360/375×640, verifies target hit receiver, exactly one stored arrow and undo.
+- Touch suite 6 passed (6.7s); lint passed. No runtime code changes needed.
+- Updated release notes, progress and AN-017 evidence. This closes the specific
+  review coverage note; physical iPhone remains unverified. v87 approval pending.

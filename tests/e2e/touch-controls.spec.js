@@ -34,3 +34,43 @@ for (const width of [360, 375])
       await expect(page.locator(".ovl")).toBeVisible();
     });
   }
+for (const width of [360, 375]) {
+  test(`visible target above fixed actions accepts one arrow (${width})`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 640 });
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+    await page.locator('#tabs [data-v="record"]').click();
+    await page.locator("#quickStart").click();
+    await page.evaluate(() => globalThis.scrollTo(0, 0));
+    const target = page.locator("#tgWrap svg").first();
+    const box = await target.boundingBox();
+    const dock = await page.locator("#activeActionDock").boundingBox();
+    const x = box.x + box.width / 2;
+    const y = dock.y - 12;
+    expect(y).toBeGreaterThan(box.y);
+    expect(y).toBeLessThan(box.y + box.height);
+    expect(
+      await page.evaluate(
+        ({ x, y }) => !!globalThis.document.elementFromPoint(x, y)?.closest("#tgWrap"),
+        { x, y },
+      ),
+    ).toBe(true);
+    await page.mouse.click(x, y);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")).active.cur.length,
+        ),
+      )
+      .toBe(1);
+    await page.locator("#activeActionDock").getByRole("button", { name: "1本取消" }).click();
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")).active.cur.length,
+        ),
+      )
+      .toBe(0);
+  });
+}
