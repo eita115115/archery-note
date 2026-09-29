@@ -2612,3 +2612,13 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Updated progress/tasks/release notes. Physical iPhone and real practice remain.
 - GitHub push reported existing dependency alerts (10 high, 2 moderate); no
   dependency changes or paid services introduced by this release.
+
+## 2026-09-29 — Dependency alert intake (AN-014)
+
+- Retrieved 14 open Dependabot alerts read-only; preserved one normalized item per
+  alert in artifacts/dependency-triage/intake.json, without deduplication/verdicts.
+- Lockfile routes: xmldom via Capacitor CLI/plist; extract-zip and ip-address via
+  Lighthouse browser tooling. All source items mark development scope.
+- docs/codex/dependency-alert-intake.md records evidence and proof gaps. No claim
+  of confirmed exploitability or absence of risk. No dependency changes or tests.
+- Updated progress/tasks. Next: policy resolution and static caller/input tracing.

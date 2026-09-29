@@ -147,5 +147,17 @@
     ],
     "owner": "codex",
     "acceptance": "公開承認を得てremoteを再確認し、候補の配信成功と公開版番号、更新後の基本動作を確認する"
+  },
+  {
+    "id": "AN-014",
+    "task": "Dependabot既存14件の開発・配信影響を静的に確認する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "docs/codex/dependency-alert-intake.md: 14件取得、3パッケージと依存経路を確認。最終判定は未実施。",
+    "dependencies": [
+      "AN-013"
+    ],
+    "owner": "codex",
+    "acceptance": "各アラートの依存経路と入力境界を確認し、根拠・未確認点・対応順位を個別に記録する"
   }
 ]
