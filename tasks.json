@@ -137,9 +137,9 @@
   {
     "id": "AN-013",
     "task": "承認後にv86候補を公開し配信環境で確認する",
-    "status": "needs-user",
+    "status": "in-progress",
     "passes": false,
-    "evidence": "ローカル候補7f316081は検証済み。AGENTS.mdのpush/deploy事前確認に従い公開承認待ち。公開操作なし。",
+    "evidence": "ユーザーの「承認します」を受領。remote main 66eb29bf、Pages main /root配信を確認。公開・配信後検証を実施中。",
     "dependencies": [
       "AN-010",
       "AN-011",
