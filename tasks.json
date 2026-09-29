@@ -183,5 +183,18 @@
     ],
     "owner": "codex",
     "acceptance": "エンド・合計・残りを狭幅でも一行に保ち、的と主要操作の表示および記録フローを確認する"
+  },
+  {
+    "id": "AN-017",
+    "task": "UX改善をv87候補にまとめ公開前の全体検証を行う",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v87.md: check:all/lint/format成功、E2E95 passed (1.0m)、v86→87実SW更新・履歴保持・offline成功。候補ca09791、未公開。",
+    "dependencies": [
+      "AN-015",
+      "AN-016"
+    ],
+    "owner": "codex",
+    "acceptance": "版整合・ビルド・全体検証・更新とデータ保持の証拠を揃え公開状態を記録する"
   }
 ]

@@ -2656,3 +2656,13 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   Evidence: docs/codex/live-hud-layout.md and screenshots/live-hud-quality/.
 - No storage/scoring changes, no publication. Updated progress/tasks. Next:
   consolidate the two UX fixes into a tested release candidate.
+
+## 2026-09-30 — v87 candidate (AN-017)
+
+- Bumped markers using version:bump and rebuilt assets. Candidate ca09791.
+- check:all/lint/format passed, full E2E 95 passed (1.0m). Actual local v86→87
+  worker transition retains all demo sessions and supports offline v87 reload.
+- Independent review: no actionable regressions; physical iPhone still untested.
+- Evidence: docs/codex/release-v87.md, artifacts/release-v87/. Updated progress/tasks.
+- Current published version remains v86. Next: v87 publication approval and live
+  verification. No money/personal data use, no dependency modifications.
