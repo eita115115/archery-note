@@ -2545,3 +2545,14 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - No worker activation policy or storage schema changes. No personal data/cost.
 - Not published. Actual deployed worker transition and physical iPhone remain
   unverified. Next: publication approval, remote recheck and deployed verification.
+
+## 2026-09-29 — Real local worker transition (AN-011)
+
+- Served immutable v85 (66eb29bf) and v86 (0c32d5a) Git trees on the same local
+  origin in sequence, with real Chromium Service Workers enabled.
+- PASS: banner, APP_VER 86, v86 cache creation/v85 cache removal, exact retention
+  of three fictional sessions, offline reload into v86 with sessions unchanged.
+- Evidence: docs/codex/release-v86.md and artifacts/release-v86/real-transition.txt,
+  verify-transition.cjs, real-update-banner.png. No app source changes.
+- Updated progress/tasks. Publication approval remains pending; no push performed.
+  Deployed-site and physical iPhone verification remain outstanding.

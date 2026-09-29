@@ -109,5 +109,17 @@
     ],
     "owner": "codex",
     "acceptance": "4箇所の版マーカー、配信ビルド、check:all・lint・format・E2E、更新/オフラインの証拠を揃え、公開状態を正確に記録する"
+  },
+  {
+    "id": "AN-011",
+    "task": "ローカルの実Service Workerでv85からv86への更新を検証する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v86.md: 実Git treeを切替え、APP_VER86、旧cache削除、履歴3件一致、offline再読込を確認。artifacts/release-v86/real-transition.txt",
+    "dependencies": [
+      "AN-010"
+    ],
+    "owner": "codex",
+    "acceptance": "旧版から新版への更新通知とreload、cache切替、架空履歴の保持と更新後offline起動を実SWで確認する"
   }
 ]

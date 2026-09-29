@@ -22,7 +22,7 @@
 ## 検証
 
 - v86候補: check:all / lint / format成功、E2E `91 passed (1.0m)`。
-- 1,001件・編集・置換の回帰検証成功。独立レビューに要修正指摘なし。
+- 実SWでv85→v86更新・旧cache削除・架空履歴3件保持・オフライン再表示を確認。
 - 375px比較画像: `docs/screenshots/history-quality/` と `record-quality/`。360/1280px・darkも確認。
 - 実機での速度は未測定。初回の統計計算時間は今回の改善対象外。
 

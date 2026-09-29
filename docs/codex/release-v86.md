@@ -29,6 +29,21 @@ active practice remain identical. The update-banner test supplies a simulated
 higher version with Service Workers blocked and checks the actual banner/reload
 path preserves sessions. It does not prove a deployed v85→v86 worker transition.
 
+A separate local HTTP server then served the actual Git trees at `66eb29bf`
+(v85) and `0c32d5a` (v86) on the same origin, with real Service Workers enabled.
+The banner appeared after switching trees. Clicking it loaded APP_VER 86,
+created archery-note-v86 and removed archery-note-v85. All three fictional
+sessions remained identical, including after an offline reload into v86.
+Command: `node artifacts/release-v86/verify-transition.cjs`. Output:
+
+```text
+PASS: real v85 → v86 worker transition, old cache removal, 3 demo sessions retained, offline v86 reload
+```
+
+Evidence: `artifacts/release-v86/real-transition.txt` and
+`artifacts/release-v86/real-update-banner.png`. This is Chromium on localhost;
+it does not substitute for deployed-site or physical iPhone verification.
+
 No storage schema, scoring algorithm, worker activation policy, dependencies,
 paid service or personal data were changed or used. All test records are fictional.
 
