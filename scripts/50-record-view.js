@@ -3,6 +3,7 @@
 /* ============ views ============ */
 let view = "record";
 let ui = {
+  scrollByView: {},
   selArrow: -1,
   sightSel: { setupId: null, dist: 70 },
   histOpen: null,
@@ -18,6 +19,7 @@ let ui = {
 function showView(v) {
   if (view === v) return;
   const m = $("#main");
+  ui.scrollByView[view] = Math.max(0, window.scrollY);
   view = v;
   ui.selArrow = -1;
   nativePulse("light");
@@ -25,6 +27,11 @@ function showView(v) {
   m.classList.remove("viewEnter");
   void m.offsetWidth;
   m.classList.add("viewEnter");
+  const top = ui.scrollByView[v] || 0;
+  // A restored view needs real card heights, not content-visibility placeholders.
+  // Keep these nodes laid out until the next render; no delayed scroll can fight input.
+  if (top > 0) Array.from(m.children).forEach((card) => { card.style.contentVisibility = "visible"; });
+  window.scrollTo({ top, left: 0, behavior: "instant" });
 }
 document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));
 

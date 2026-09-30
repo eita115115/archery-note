@@ -236,9 +236,9 @@
   {
     "id": "AN-021",
     "task": "履歴と分析の往復でタブごとの閲覧位置を保持する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "docs/codex/tab-scroll-investigation.md: Chromium/WebKitで位置混入と復帰消失を再現。試作3案不合格、runtime撤回済み。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/tab-scroll-investigation.md: 仮高さ272px→3678pxを観測し復帰時layout確定で修正。Chromium2 passed (3.3s)、WebKit2 passed (3.9s)、通常/減少motion・データ保持成功。check:ui/check:app/lint/書式成功。前後375px画像あり。ローカルのみ。",
     "dependencies": [
       "AN-020"
     ],

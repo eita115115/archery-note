@@ -28,7 +28,7 @@
 
 ## 次にやること
 
-- 次: タブ移動で履歴位置が失われる問題のレイアウト原因を切り分ける。docs/codex/tab-scroll-investigation.md参照。
+- 次: タブ別閲覧位置の修正をリリース候補にまとめ、全体検証と更新確認を行う。
 - 実機でハンドルを引く操作と、実際の練習での使い勝手を確認。
 
 ## 未解決
@@ -49,3 +49,9 @@
 - Chromium/WebKitで履歴1400px→分析初回1400px→履歴0pxを再現。
 - 復帰候補3案は検証不合格のためアプリ側変更を撤回。公開v89維持。
 - 再現手順・失敗と次の調査を docs/codex/tab-scroll-investigation.md に保存。
+
+## 閲覧位置の修正（ローカル）
+
+- scripts/50-record-view.js: タブ別に位置をメモリ保持し、復帰時の仮カード高さによる位置消失を修正。
+- tests/e2e/tab-scroll.spec.js追加。Chromium2件/WebKit2件成功、check:ui/check:app/lint/書式成功。
+- 375px前後画像と検証詳細: docs/codex/tab-scroll-investigation.md。公開はv89のまま。

@@ -2738,3 +2738,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Immediate restore, delayed restore, and temporary direct-card visibility experiments all failed. Runtime changes reverted; no claimed fix or release.
 - Recorded exact scope and failures in docs/codex/tab-scroll-investigation.md; progress/tasks updated. Evidence and failing regression retained in artifacts/tab-scroll/.
 - Next: isolate document height clamp before choosing another implementation. No storage or personal-data changes.
+
+## 2026-09-30 — Tab scroll restoration fixed locally (AN-021)
+
+- Isolated content-visibility placeholders (272px vs actual3678px). Keep restored view direct cards laid out until rerender; per-view offsets in ui memory and synchronous restoration.
+- Changed scripts/50-record-view.js; tests/e2e/tab-scroll.spec.js covers normal/reduced motion and unchanged sessions.
+- Chromium2 passed (3.3s), WebKit2 passed (3.9s). UI/app/lint/format passed; initial test readiness and lint failures corrected and documented.
+- Before/after screenshots and synthetic 1000-session measurement retained; warm return adds roughly 2ms locally. No mobile performance claim.
+- Updated progress/tasks and investigation. No storage/scoring/dependency changes. Next: release-wide checks, bump and update transition before publication approval.
