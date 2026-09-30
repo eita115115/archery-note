@@ -34,3 +34,20 @@ fixed action dock, hit-test confirms the target receives the click. Exactly one
 arrow is stored, then the visible dock undo removes it. `6 passed (6.7s)` across
 the touch suite, lint passed. No app change needed. Logs: dock-e2e.txt and
 dock-lint.txt under artifacts/release-v87/. Publication approval remains pending.
+
+## Publication result
+
+Explicit user approval received. Pushed `40524d63` to main. Live version 87 and
+six runtime assets match local source. Fresh deployed-site Chromium verifies
+44px settings control, same-row HUD metrics, demo history/practice start, offline
+reload, retained session/active data and zero page errors. Evidence:
+`artifacts/release-v87/deployed-check.txt` and `deployed-active.png`.
+Earlier approval-pending statements above are historical candidate checkpoints.
+
+## CI portability correction
+
+CI 36596832332 failed four touch-width cases (40px instead of 44px), while 93
+other tests passed. The equipment shortcut had a minimum height but no minimum
+width, so its width depended on installed font metrics. Added explicit minimum
+width to .tinyAction. Bumped to v88 so clients that already received v87 can update.
+This is a corrective follow-up within the approved UX publication.

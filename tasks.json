@@ -200,9 +200,9 @@
   {
     "id": "AN-018",
     "task": "承認後にv87 UX改善を公開して配信を確認する",
-    "status": "needs-user",
-    "passes": false,
-    "evidence": "ローカル候補6ba0bff5はclean。remote mainは1fe998b6（v86）。v87公開承認待ち。",
+    "status": "done",
+    "passes": true,
+    "evidence": "ユーザー承認後40524d63をmainへpush。公開v87と配信6ファイル一致、44px設定とHUD3列、記録開始/履歴/オフライン保持/pageerror0を確認。artifacts/release-v87/deployed-check.txt",
     "dependencies": [
       "AN-017"
     ],

@@ -346,7 +346,7 @@ button.chip{display:inline-flex; align-items:flex-start; margin:0; font-family:i
 .tinyAction{
   border:1px solid var(--line); background:var(--card); color:var(--title); border-radius:8px;
   padding:7px 10px; font-size:12px; font-weight:var(--fw-label); cursor:pointer; white-space:nowrap;
-  min-height:var(--tap-target-min); max-width:92px; overflow:hidden; text-overflow:ellipsis;
+  min-width:var(--tap-target-min); min-height:var(--tap-target-min); max-width:92px; overflow:hidden; text-overflow:ellipsis;
 }
 /* 分析タブ「今日の結論」: 机上モードの入口カード。金面は使わず、hairlineの罫線と大きめの本文だけで目立たせる */
 .todayConclusionCard{

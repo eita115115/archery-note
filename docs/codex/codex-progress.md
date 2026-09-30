@@ -2682,3 +2682,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   Local implementation and targeted follow-up verification are complete.
 - Added AN-018 needs-user and updated progress. No push/deployment performed.
   Goal remains unachieved: publication and real-user/physical-device evidence remain.
+
+## 2026-09-30 — Approved v87 publication (AN-018)
+
+- User approved. Rechecked remote main 1fe998b6 and fast-forwarded to 40524d63.
+- Public version 87 and six runtime files match source. Fresh Chromium validates
+  settings 44px, HUD one-row, demo start/history, offline data retention, no page errors.
+- Updated progress/tasks/release notes. No personal data or additional paid service.
+- Physical iPhone and actual practice acceptance remain outstanding.
