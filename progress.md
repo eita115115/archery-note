@@ -28,7 +28,7 @@
 
 ## 次にやること
 
-- 次のローカル調査: 375pxで記録→履歴→分析の導線とスクロール復帰を確認。
+- 次: タブ移動で履歴位置が失われる問題のレイアウト原因を切り分ける。docs/codex/tab-scroll-investigation.md参照。
 - 実機でハンドルを引く操作と、実際の練習での使い勝手を確認。
 
 ## 未解決
@@ -43,3 +43,9 @@
 - tests/e2e/app-smoke.spec.js: フォーカス復帰をキーボードで開く操作に統一。
 - WebKit `22 passed (16.7s)` / Chromium smoke `8 passed (11.9s)`、lint成功。
 - 初回の書式検証失敗は改行整形後に解消。ローカルのみ、公開版v89の動作変更なし。
+
+## タブ移動の調査
+
+- Chromium/WebKitで履歴1400px→分析初回1400px→履歴0pxを再現。
+- 復帰候補3案は検証不合格のためアプリ側変更を撤回。公開v89維持。
+- 再現手順・失敗と次の調査を docs/codex/tab-scroll-investigation.md に保存。

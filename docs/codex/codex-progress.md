@@ -2731,3 +2731,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - WebKit UX: `22 passed (16.7s)`, one CDP-only skip. Chromium smoke: `8 passed (11.9s)`. Lint passed. Initial Prettier check failed on line endings, then formatting and recheck passed.
 - Updated progress.md and tasks.json. No runtime, storage or deployed version changes; local commit only.
 - Next: inspect 375px record/history/analysis navigation and scroll restoration. Physical iPhone validation still outstanding.
+
+## 2026-09-30 — Tab scroll investigation (AN-021)
+
+- Both engines reproduce history1400 → first analysis1400 → history0 at 375px with synthetic records.
+- Immediate restore, delayed restore, and temporary direct-card visibility experiments all failed. Runtime changes reverted; no claimed fix or release.
+- Recorded exact scope and failures in docs/codex/tab-scroll-investigation.md; progress/tasks updated. Evidence and failing regression retained in artifacts/tab-scroll/.
+- Next: isolate document height clamp before choosing another implementation. No storage or personal-data changes.

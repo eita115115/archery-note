@@ -232,5 +232,17 @@
     ],
     "owner": "codex",
     "acceptance": "ブラウザごとのクリック時フォーカスを観測し、キーボード起点の設定・確認ダイアログ復帰と既存ポインター操作を両エンジンで検証する"
+  },
+  {
+    "id": "AN-021",
+    "task": "履歴と分析の往復でタブごとの閲覧位置を保持する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "docs/codex/tab-scroll-investigation.md: Chromium/WebKitで位置混入と復帰消失を再現。試作3案不合格、runtime撤回済み。",
+    "dependencies": [
+      "AN-020"
+    ],
+    "owner": "codex",
+    "acceptance": "初回は先頭、往復時は各タブの閲覧位置を復帰し、ユーザーのスクロールと競合せず記録データを変更しないことを両エンジンで確認する"
   }
 ]
