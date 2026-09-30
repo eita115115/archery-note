@@ -61,3 +61,8 @@
 - check:all/lint/format成功、Chromium `102 passed (1.0m)`。
 - 実SW v89→90の更新・履歴保持・offline成功。独立レビュー指摘なし。
 - 詳細: docs/codex/release-v90.md。未公開、費用・個人情報の使用なし。
+
+## 公開待ちの案内整備
+
+- CHANGELOG.md の Unreleased にv90の閲覧位置保持と再読み込み時の挙動を記載。実機未確認・未公開を明記。
+- アプリ変更なし。次はv90の公開承認後に配信確認。

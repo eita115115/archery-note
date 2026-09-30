@@ -2755,3 +2755,9 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Independent review found no actionable issues; isolated-port targeted test2 passed (3.5s).
 - Updated release-v90.md, progress/tasks. No new app behavior beyond AN-021.
 - Next: publication approval then main push, Pages/CI/live checks. Physical iPhone remains unverified.
+
+## 2026-09-30 — v90 release notes prepared
+
+- Added user-facing Unreleased notes to CHANGELOG.md: per-tab position, memory-only lifetime, validation and physical-device limitation.
+- Updated progress/tasks; runtime candidate unchanged and publication approval still pending.
+- Validation: targeted Prettier check passed after formatting. Next: approved publication and live checks.
