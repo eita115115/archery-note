@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
-const APP_VER=88;
+const APP_VER=89;
 const TRASH_LIMIT=50;
 const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
@@ -490,9 +490,43 @@ function toast(msg,ms){ const t=$("#toast"); t.textContent=msg; t.classList.add(
 function today(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 /* ---------- モーダル共通（dialog 化とフォーカス管理） ---------- */
 const MODAL_FOCUSABLE='a[href],button:not([disabled]),input:not([disabled]):not([type="hidden"]),select:not([disabled]),textarea:not([disabled]),summary,[tabindex]:not([tabindex="-1"])';
+function addModalSwipeHandle(ovl,sheet,dismiss){
+  if(sheet===ovl || sheet.classList.contains("formCapture")) return;
+  const handle=document.createElement("button");
+  handle.type="button"; handle.className="modalSwipeHandle";
+  handle.setAttribute("aria-label","閉じる（下にスワイプ）");
+  const topmost=()=>[...document.querySelectorAll("body > .ovl")].pop()===ovl;
+  let gesture=null, suppressClick=false;
+  const reset=()=>{ sheet.style.transform=""; sheet.classList.remove("isDragging"); gesture=null; };
+  handle.onpointerdown=e=>{
+    if(!e.isPrimary || e.button!==0 || !topmost()) return;
+    suppressClick=false; gesture={id:e.pointerId,x:e.clientX,y:e.clientY,dy:0,vertical:false};
+    handle.setPointerCapture(e.pointerId);
+  };
+  handle.onpointermove=e=>{
+    if(!gesture || e.pointerId!==gesture.id) return;
+    const dx=e.clientX-gesture.x, dy=e.clientY-gesture.y;
+    if(Math.hypot(dx,dy)>8) suppressClick=true;
+    gesture.dy=Math.max(0,dy); gesture.vertical=dy>Math.abs(dx)*1.25;
+    if(gesture.vertical && topmost()){
+      sheet.style.animation="none"; sheet.classList.add("isDragging"); sheet.style.transform="translateY("+Math.min(gesture.dy,240)+"px)";
+    }else{ sheet.style.transform=""; sheet.classList.remove("isDragging"); }
+  };
+  handle.onpointerup=e=>{
+    if(!gesture || e.pointerId!==gesture.id) return;
+    const close=gesture.vertical && gesture.dy>=80 && topmost();
+    reset(); if(close) dismiss();
+  };
+  handle.onpointercancel=()=>{ suppressClick=true; reset(); };
+  handle.onlostpointercapture=()=>{ if(gesture){ suppressClick=true; reset(); } };
+  handle.onclick=e=>{ if(e.detail===0 || !suppressClick){ if(topmost()) dismiss(); } };
+  sheet.prepend(handle);
+}
 function openModal(ovl,opts){
   const o=opts||{};
   const sheet=ovl.querySelector(".sheet")||ovl;
+  const dismiss=()=>{ const btn=o.escapeTarget?ovl.querySelector(o.escapeTarget):null; if(btn) btn.click(); else closeModal(ovl); };
+  addModalSwipeHandle(ovl,sheet,dismiss);
   ovl.setAttribute("role","dialog");
   ovl.setAttribute("aria-modal","true");
   const h3=sheet.querySelector("h3");
