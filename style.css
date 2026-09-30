@@ -42,7 +42,7 @@
   --content-max-width:760px;
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0; overflow-x:hidden;}
+html,body{margin:0;padding:0; overflow-x:hidden; touch-action:pan-x pan-y;}
 html{background:var(--bg);}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
@@ -920,7 +920,8 @@ header.app .gear{
   .quickDists{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 /* motion:因果 — タブ切替の結果として画面内容が入れ替わったことを示す微細フェード */
-@keyframes viewEnter{from{opacity:.88; transform:translateY(5px);}to{opacity:1; transform:translateY(0);}}
+/* main must not transform: its fixed action dock must stay relative to the viewport. */
+@keyframes viewEnter{from{opacity:.88;}to{opacity:1;}}
 main.viewEnter{animation:viewEnter .22s var(--ease-app) both;}
 /* motion:因果 — ビュー内のリスト要素が時差で出現し、画面にリズムを与える */
 @keyframes itemReveal{from{opacity:0; transform:translateY(8px);}to{opacity:1; transform:translateY(0);}}
