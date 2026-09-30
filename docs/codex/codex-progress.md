@@ -2782,3 +2782,9 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Live v90 and seven assets match. History1400/analysis600 restored; touch dismiss/start/offline/synthetic data retention passed without page errors.
 - Updated release-v90, CHANGELOG, progress and AN-022 evidence. App source unchanged.
 - Next: physical iPhone UX and real-practice acceptance remain unverified. No personal data or money used.
+
+## 2026-10-01 — Field acceptance version prerequisite
+
+- Found obsolete v84 requirement in physical checklist; replaced with actual verified served version plus commit/tree identity. Linked v90 publication evidence; no acceptance thresholds weakened.
+- Asked user for v90 gesture/navigation feel without personal data. Awaiting response; physical shooting remains unverified.
+- Updated field checklist, progress and AN-001 evidence only. Documentation format check passed; runtime unchanged.

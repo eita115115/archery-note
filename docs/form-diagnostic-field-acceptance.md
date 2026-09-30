@@ -5,7 +5,8 @@ Repository tests and JSON export do not establish physical acceptance.
 ## Trusted HTTPS prerequisite
 
 - Record the exact implementation commit and tree IDs served by the preview.
-- Confirm the app reports Archery Note v84; the version alone is not proof of tree identity.
+- Confirm the app version matches the verified release or pinned preview being tested; record that version with the implementation commit and tree IDs. Do not use a hard-coded historical version as the acceptance target. The version alone is not proof of tree identity.
+- Current reference (2026-10-01): v90 was published from implementation commit 012e6ac1; see [release evidence](codex/release-v90.md). Reconfirm the served version before a later field run.
 - Use an `https://` Safari origin on the physical iPhone. Do not use the local HTTP helpers for live camera capture.
 - If a trusted preview pinned to the implementation tree is unavailable, stop; this checklist does not authorize deployment.
 

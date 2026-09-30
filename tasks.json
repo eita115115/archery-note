@@ -4,7 +4,7 @@
     "task": "射形フェーズ判定の実射体感検証（v1.10.0 の根本修正が実機で効いているか）",
     "status": "open",
     "passes": false,
-    "evidence": "",
+    "evidence": " 2026-10-01: 実機手順の旧v84固定条件を実配信版・commit/tree記録へ更新。v90公開記録を参照。実射結果は未取得、passes未変更。",
     "dependencies": [],
     "owner": "user",
     "acceptance": "実射でフェーズ判定を確認し、結果を docs/form-diagnostic-field-acceptance.md へ記録する"
