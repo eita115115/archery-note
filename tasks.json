@@ -208,5 +208,17 @@
     ],
     "owner": "codex",
     "acceptance": "公開承認後にremoteを再確認し、公開v87と主要操作・配信成功を確認する"
+  },
+  {
+    "id": "AN-019",
+    "task": "設定などのシートを下向きスワイプで閉じられるようにする",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/modal-swipe.md: sticky handle、既存cancel経路、短い/横/中断/重層検証。Chromium100 passed (1.0m)、WebKit2 passed、check:all/lint/format成功。v88→89更新保持成功。候補cb7e091未公開。",
+    "dependencies": [
+      "AN-018"
+    ],
+    "owner": "codex",
+    "acceptance": "本文スクロール・入力を妨げずスワイプで閉じ、短い操作と中断では保持し、確認画面ではキャンセルし、既存データと操作を検証する"
   }
 ]

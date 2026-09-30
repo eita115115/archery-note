@@ -2700,3 +2700,18 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Public dimensions, same-row HUD, asset equality, demo start/history/offline data
   retention verified. Live probe now waits for finite entrance animations.
 - Updated progress and AN-018 evidence. Physical iPhone acceptance remains open.
+
+## 2026-09-30 — User-requested swipe dismissal (AN-019)
+
+- Added sticky 44px handle to ordinary sheets, preserving formCapture. Pointer
+  capture/downward threshold, cancel/reset, topmost guard and drag-click suppression.
+  Calls existing Escape target for save/cancel semantics; no data migration.
+- Source: scripts/10-storage-native.js, style.css/min.css. Tests and screenshots:
+  tests/e2e/modal-swipe.spec.js and docs/screenshots/modal-swipe/.
+- New tests failed before. Final Chromium 100 passed (1.0m); check:all/lint/format
+  passed. WebKit swipe 2 passed/1 CDP-only skip. Chromium actual touch/cancel passed.
+- Earlier WebKit baseline: 18 passed, 2 pre-existing mouse-open focus restoration
+  failures; kept evidence. Does not establish physical iPhone acceptance.
+- Candidate v89 cb7e091. Local real v88→89 worker transition/data/offline passed.
+  Independent review found no actionable issues. User data/money not used.
+- Updated progress/tasks. Next: v89 publication approval and deployed checks.

@@ -33,3 +33,7 @@ change does not claim to fix them. Physical iPhone touch behavior remains untest
 
 No storage schema, scoring, dependency or personal data changes. v89 is local;
 current published version remains v88 until publication is approved.
+
+Final candidate: `cb7e091` (v89). check:all/lint/format passed, full Chromium E2E
+`100 passed (1.0m)`. Actual v88→89 worker update retained three fictional sessions
+and supported offline v89 reload. Logs in artifacts/modal-swipe/.
