@@ -36,3 +36,10 @@
 
 - v90のスワイプ・閲覧位置復帰についてユーザーへ操作感を質問済み、回答待ち。
 - docs/form-diagnostic-field-acceptance.mdの旧v84固定条件を配信確認済みの版・commit/tree記録へ修正。合格基準は維持、実射未確認。
+
+## v91修正候補（未公開）
+
+- ユーザー報告のエンド確定が画面外に出る問題を再現・修正。mainのtransformが固定配置を壊していた。
+- ページのピンチ/連続タップ拡大を抑制し、スクロール・的専用倍率は維持。
+- 候補f5650aa。104 E2E成功、check:all/lint/format成功、v90→91更新保持成功。
+- docs/codex/release-v91.md参照。次は公開承認。実機Safariは未確認。

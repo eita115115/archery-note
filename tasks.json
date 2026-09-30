@@ -256,5 +256,17 @@
     ],
     "owner": "codex",
     "acceptance": "版整合・全体E2E・更新とデータ保持・レビューを確認し公開可否の判断材料を記録する"
+  },
+  {
+    "id": "AN-023",
+    "task": "エンド確定を画面内へ固定しページ全体のズームを抑える",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v91.md: dock底1053px/画面640pxの失敗を再現→修正。Chromium/WebKit各2件、全体104 passed (1.0m)、check:all/lint/format、v90→91保持成功。候補f5650aa未公開。",
+    "dependencies": [
+      "AN-022"
+    ],
+    "owner": "codex",
+    "acceptance": "通常アニメーション後もエンド確定が画面内にあり記録直後に押せ、スクロールと的操作を保ちながらページ拡大を抑え、既存データ保持を確認する"
   }
 ]

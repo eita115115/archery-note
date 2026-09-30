@@ -2788,3 +2788,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Found obsolete v84 requirement in physical checklist; replaced with actual verified served version plus commit/tree identity. Linked v90 publication evidence; no acceptance thresholds weakened.
 - Asked user for v90 gesture/navigation feel without personal data. Awaiting response; physical shooting remains unverified.
 - Updated field checklist, progress and AN-001 evidence only. Documentation format check passed; runtime unchanged.
+
+## 2026-10-01 — User feedback: end action and zoom (AN-023)
+
+- Reproduced main animation transform trapping fixed dock below viewport; removed main translation. Added root pan-x/pan-y gesture policy.
+- Updated CSS/minCSS, focused regression, 375px screenshots and v91 version markers.
+- Full104 passed (1.0m); check:all/lint/format, two-engine focused checks, native Chromium pinch and v90→91 update retention passed. Independent review found no actionable issues.
+- Candidatef5650aa unpushed. Updated progress/tasks/release-v91. Next publication approval; physical Safari gesture confirmation outstanding.
