@@ -1,4 +1,4 @@
-# Swipe-to-close sheets — v89 candidate
+# Swipe-to-close sheets — v89 published
 
 Requested UX: close settings and similar sheets by swiping. Implemented a sticky,
 44px-high handle at the top of ordinary sheets. It can be pulled downward or
@@ -31,9 +31,19 @@ UX tests, failing two existing mouse-opened focus restoration expectations.
 These baseline failures are retained in artifacts/webkit-ux/results.txt. This
 change does not claim to fix them. Physical iPhone touch behavior remains untested.
 
-No storage schema, scoring, dependency or personal data changes. v89 is local;
-current published version remains v88 until publication is approved.
+No storage schema, scoring, dependency or personal data changes. v89 is published after explicit user approval.
 
 Final candidate: `cb7e091` (v89). check:all/lint/format passed, full Chromium E2E
 `100 passed (1.0m)`. Actual v88→89 worker update retained three fictional sessions
 and supported offline v89 reload. Logs in artifacts/modal-swipe/.
+
+## Publication — 2026-09-30
+
+User approved publication; ca31b8e3 was pushed to main.
+Pages run 36707080253 and CI run 36707081098 succeeded.
+Linux Chromium output: `100 passed (55.6s)`.
+Live version.json and APP_VER report 89; seven served assets match local sources.
+Live CDP touch swipe dismissed settings. Fictional sessions survived dismissal
+and offline reload; active practice was retained and no page errors occurred.
+Evidence: artifacts/release-v89/deployed-check.txt and deployed screenshots.
+Physical iPhone validation remains outstanding.

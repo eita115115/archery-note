@@ -6,7 +6,7 @@
 
 ## 現在地
 
-- 公開版はv88（b7783989）。ローカルはv89スワイプ候補cb7e091。
+- 公開版はv89（実装cb7e091、公開承認後ca31b8e3をmainへpush）。
 - 作業場所: `C:/Users/eita2/.codex/worktrees/app-quality/archery-note`
 - ブランチ: `codex/app-quality`。元の作業場所の未コミット変更は保全。
 - 費用・個人情報は明示承認なしに使用しない。検証は架空データのみ。
@@ -20,14 +20,15 @@
 
 ## 検証
 
-- v89候補: check:all / lint / format成功、Chromium E2E100件成功。
+- v89: check:all / lint / format成功、Chromium E2E100件成功。
 - WebKitスワイプ2件成功、CDPタッチ1件は対象外。Chromiumは実タッチ中断/完了も成功。
 - 実SW v88→89更新、架空履歴3件保持、オフライン再表示成功。
+- 公開確認: Pages36707080253 / CI36707081098成功、Linux E2E `100 passed (55.6s)`。公開7ファイル一致、タッチスワイプ・データ保持・offline成功。
 - 詳細: `docs/codex/modal-swipe.md`、比較画像: `docs/screenshots/modal-swipe/`。
 
 ## 次にやること
 
-- v89公開承認後、公開サイトとLinux CIを確認。
+- v89公開済み。次は実機での操作感を確認。
 - 実機でハンドルを引く操作と、実際の練習での使い勝手を確認。
 
 ## 未解決

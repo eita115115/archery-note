@@ -214,7 +214,7 @@
     "task": "設定などのシートを下向きスワイプで閉じられるようにする",
     "status": "done",
     "passes": true,
-    "evidence": "docs/codex/modal-swipe.md: sticky handle、既存cancel経路、短い/横/中断/重層検証。Chromium100 passed (1.0m)、WebKit2 passed、check:all/lint/format成功。v88→89更新保持成功。候補cb7e091未公開。",
+    "evidence": "docs/codex/modal-swipe.md: sticky handle、既存cancel経路、短い/横/中断/重層検証。Chromium100 passed (1.0m)、WebKit2 passed、check:all/lint/format成功。v88→89更新保持成功。候補cb7e091未公開。 公開承認後ca31b8e3をmainへpushしv89公開。Pages36707080253/CI36707081098成功、100 passed (55.6s)。公開タッチスワイプ・7ファイル一致・offlineデータ保持成功。",
     "dependencies": [
       "AN-018"
     ],

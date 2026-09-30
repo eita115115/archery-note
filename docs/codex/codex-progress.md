@@ -2715,3 +2715,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Candidate v89 cb7e091. Local real v88→89 worker transition/data/offline passed.
   Independent review found no actionable issues. User data/money not used.
 - Updated progress/tasks. Next: v89 publication approval and deployed checks.
+
+## 2026-09-30 — v89 approved publication
+
+- User explicitly approved; pushed ca31b8e3 to main.
+- Pages36707080253 and CI36707081098 succeeded; `100 passed (55.6s)`.
+- Public v89 / seven asset matches / native CDP touch dismissal / synthetic sessions and active-practice retention / offline reload / zero page errors passed. Evidence: artifacts/release-v89/deployed-check.txt.
+- Updated progress.md, tasks.json AN-019 and docs/codex/modal-swipe.md. No app changes in this record update.
+- Risk/next: physical iPhone gesture feel and actual-practice acceptance remain unverified; no money or personal data used.
