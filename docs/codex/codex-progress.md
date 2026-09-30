@@ -2690,3 +2690,13 @@ cannot restart after freeze or close`. Source assertion matches literal LF
   settings 44px, HUD one-row, demo start/history, offline data retention, no page errors.
 - Updated progress/tasks/release notes. No personal data or additional paid service.
 - Physical iPhone and actual practice acceptance remain outstanding.
+
+## 2026-09-30 — v88 corrective publication verified
+
+- v87 CI exposed platform-font-dependent shortcut width (40px). Added explicit
+  min-width, rebuilt and version-bumped to v88 for already-updated clients.
+- b7783989 published. Pages 36674413781 and Linux CI 36674414490 succeeded;
+  E2E 97 passed (1.1m). Local all/lint/format and v87→88 worker transition passed.
+- Public dimensions, same-row HUD, asset equality, demo start/history/offline data
+  retention verified. Live probe now waits for finite entrance animations.
+- Updated progress and AN-018 evidence. Physical iPhone acceptance remains open.

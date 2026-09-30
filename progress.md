@@ -21,6 +21,8 @@
 
 ## 検証
 
+- 最新v88: Linux CI全成功、E2E97件。公開配信一致・44px操作・offline保持確認。
+
 - v86候補: check:all / lint / format成功、E2E `91 passed (1.0m)`。
 - 実SWでv85→v86更新・旧cache削除・架空履歴3件保持・オフライン再表示を確認。
 - 375px比較画像: `docs/screenshots/history-quality/` と `record-quality/`。360/1280px・darkも確認。
@@ -28,9 +30,9 @@
 
 ## 次にやること
 
-- AN-018完了: 承認後v87公開。配信一致、44px操作/HUD3列、記録/履歴/offline保持を確認。
+- AN-018完了: 承認後v88公開。配信一致、44px操作/HUD3列、記録/履歴/offline保持を確認。
 
-- v87候補ca09791: 副操作44px・HUD3列維持。check:all/lint/format、E2E95件、更新保持が成功。固定dock付近の矢追加/取消も成功。v87公開済み。
+- v87候補ca09791: 副操作44px・HUD3列維持。check:all/lint/format、E2E95件、更新保持が成功。固定dock付近の矢追加/取消も成功。v88公開済み。
 
 - AN-013: 承認を受けv86公開済み。配信ファイル・記録・履歴・オフライン保持を確認。
 
@@ -42,4 +44,4 @@
 
 - 実射での射形判定・保存・自動スクロールの受入確認。
 - ロードマップ全面更新（AN-002）、診断テストの版固定値（AN-004）。
-- v86公開済み（15aa7fb5）。詳細: `docs/codex/release-v86.md`。
+- v88公開済み（b7783989）。詳細: `docs/codex/release-v86.md`。

@@ -51,3 +51,19 @@ other tests passed. The equipment shortcut had a minimum height but no minimum
 width, so its width depended on installed font metrics. Added explicit minimum
 width to .tinyAction. Bumped to v88 so clients that already received v87 can update.
 This is a corrective follow-up within the approved UX publication.
+
+## Final corrective publication: v88
+
+v88 `b7783989` is live. Pages run 36674413781 succeeded. Linux CI run
+[36674414490](https://github.com/eita115115/archery-note/actions/runs/36674414490)
+succeeded with `97 passed (1.1m)`, including the four width checks that failed on v87.
+Local check:all/lint/format passed; refreshed web bundle built successfully.
+Actual local v87→88 worker transition preserves demo data and offline startup.
+Fresh live-site verification confirms six assets match, settings/shortcut minimum
+sizes, same-row metrics, demo history/start, offline reload and zero page errors.
+
+The first live dimension probe measured 43.648px during the 0.992-scale entrance
+animation; after awaiting finite animations it measured 46×44px and passed.
+This probe timing issue is separate from the original Linux 40px width defect.
+Failure and final evidence: artifacts/release-v87/ci-failed.txt and
+artifacts/release-v88/{deployed-debug.txt,deployed-check.txt,transition.txt,ci.txt}.
