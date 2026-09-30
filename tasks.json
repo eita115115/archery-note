@@ -32,9 +32,9 @@
   {
     "id": "AN-004",
     "task": "tools/check-form-diagnostics.js の appVer 固定値（84）を version.json 由来にするか判断する",
-    "status": "open",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "tools/check-form-diagnostics.js冒頭で84=合成の現行版、83=旧版拒否条件として固定する意図を明記。version.json連動はtests/e2e/form-diagnostics.spec.jsのTASK9_APP_VERが担当。node tools/check-form-diagnostics.js成功、対象eslint成功。",
     "dependencies": [],
     "owner": "opus",
     "acceptance": "coordinator と現行 appVer の両方に同じ固定値を渡す現状を『意図した単体テストの閉じた世界』として明文化するか、version.json 由来に変えるかが決まっている",

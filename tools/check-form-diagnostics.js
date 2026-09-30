@@ -1,5 +1,10 @@
 "use strict";
 
+// Version 84 is the synthetic current version for this isolated unit-test world.
+// Coordinators, records and API arguments deliberately agree on 84; 83 exercises
+// stale-version rejection. Do not bump these fixtures with the deployed app.
+// tests/e2e/form-diagnostics.spec.js reads version.json for current-release coverage.
+
 const fs = require("fs");
 const path = require("path");
 const { isDeepStrictEqual } = require("util");

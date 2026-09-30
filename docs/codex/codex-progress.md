@@ -2761,3 +2761,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Added user-facing Unreleased notes to CHANGELOG.md: per-tab position, memory-only lifetime, validation and physical-device limitation.
 - Updated progress/tasks; runtime candidate unchanged and publication approval still pending.
 - Validation: targeted Prettier check passed after formatting. Next: approved publication and live checks.
+
+## 2026-09-30 — Diagnostic fixture version decision (AN-004)
+
+- Confirmed84 is internally consistent synthetic current version and83 tests stale coordinator rejection. E2E reads actual version.json through TASK9_APP_VER.
+- Documented fixed-version intent in tools/check-form-diagnostics.js; no logic changes. Updated tasks/progress.
+- node tools/check-form-diagnostics.js and targeted eslint passed.
+- v90 runtime remains unchanged and publication awaits approval.
