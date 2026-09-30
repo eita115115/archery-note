@@ -2768,3 +2768,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Documented fixed-version intent in tools/check-form-diagnostics.js; no logic changes. Updated tasks/progress.
 - node tools/check-form-diagnostics.js and targeted eslint passed.
 - v90 runtime remains unchanged and publication awaits approval.
+
+## 2026-10-01 — Roadmap reconciliation (AN-002)
+
+- Classified existing backlog in docs/roadmap.md with source evidence; kept July decisions as historical context.
+- Distinguished implemented CSV round column from unimplemented grouped-history collapse, current multi-path form detector from outdated D-4, and published v89 from local v90.
+- Updated progress/tasks. Docs only, format:check passed. No new feature decision, release or real-data use.
+- Next: v90 publication approval and physical practice acceptance; deferred items retain their existing prerequisites.

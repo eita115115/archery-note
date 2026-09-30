@@ -12,9 +12,9 @@
   {
     "id": "AN-002",
     "task": "docs/roadmap.md（2026-07-08 で停止）を現在地に合わせて更新する",
-    "status": "open",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/roadmap.mdを2026-10-01時点へ照合。既存各項目を完了/進行中/未着手/取り下げに分類し、コード・受入文書の根拠を付記。旧D-4と現行複数経路、実装済みCSV列、v89公開/v90未公開を区別。format:check成功。",
     "dependencies": [],
     "owner": "opus",
     "acceptance": "ロードマップ上の各項目が『完了 / 進行中 / 未着手 / 取り下げ』のいずれかに分類されている"
