@@ -28,7 +28,7 @@
 
 ## 次にやること
 
-- 次: タブ別閲覧位置の修正をリリース候補にまとめ、全体検証と更新確認を行う。
+- 次: 検証済みv90（21a8d73）の公開承認後、push・Pages/CI・公開サイト確認。
 - 実機でハンドルを引く操作と、実際の練習での使い勝手を確認。
 
 ## 未解決
@@ -55,3 +55,9 @@
 - scripts/50-record-view.js: タブ別に位置をメモリ保持し、復帰時の仮カード高さによる位置消失を修正。
 - tests/e2e/tab-scroll.spec.js追加。Chromium2件/WebKit2件成功、check:ui/check:app/lint/書式成功。
 - 375px前後画像と検証詳細: docs/codex/tab-scroll-investigation.md。公開はv89のまま。
+
+## v90公開候補
+
+- check:all/lint/format成功、Chromium `102 passed (1.0m)`。
+- 実SW v89→90の更新・履歴保持・offline成功。独立レビュー指摘なし。
+- 詳細: docs/codex/release-v90.md。未公開、費用・個人情報の使用なし。

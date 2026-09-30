@@ -2746,3 +2746,12 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Chromium2 passed (3.3s), WebKit2 passed (3.9s). UI/app/lint/format passed; initial test readiness and lint failures corrected and documented.
 - Before/after screenshots and synthetic 1000-session measurement retained; warm return adds roughly 2ms locally. No mobile performance claim.
 - Updated progress/tasks and investigation. No storage/scoring/dependency changes. Next: release-wide checks, bump and update transition before publication approval.
+
+## 2026-09-30 — v90 release candidate (AN-022)
+
+- Bumped markers/lock to90, built native bundle, committed21a8d73.
+- check:all/lint/format passed; Chromium102 passed (1.0m).
+- Real v89→90 update/offline/history retention passed after correcting a harness source-hash substitution error.
+- Independent review found no actionable issues; isolated-port targeted test2 passed (3.5s).
+- Updated release-v90.md, progress/tasks. No new app behavior beyond AN-021.
+- Next: publication approval then main push, Pages/CI/live checks. Physical iPhone remains unverified.

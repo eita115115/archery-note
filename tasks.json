@@ -244,5 +244,17 @@
     ],
     "owner": "codex",
     "acceptance": "初回は先頭、往復時は各タブの閲覧位置を復帰し、ユーザーのスクロールと競合せず記録データを変更しないことを両エンジンで確認する"
+  },
+  {
+    "id": "AN-022",
+    "task": "閲覧位置保持の修正をv90公開候補として検証する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v90.md: check:all/lint/format成功、102 passed (1.0m)、実SW v89→90更新と架空履歴保持/オフライン成功。独立レビュー指摘なし。候補21a8d73、未公開。",
+    "dependencies": [
+      "AN-021"
+    ],
+    "owner": "codex",
+    "acceptance": "版整合・全体E2E・更新とデータ保持・レビューを確認し公開可否の判断材料を記録する"
   }
 ]
