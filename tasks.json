@@ -220,5 +220,17 @@
     ],
     "owner": "codex",
     "acceptance": "本文スクロール・入力を妨げずスワイプで閉じ、短い操作と中断では保持し、確認画面ではキャンセルし、既存データと操作を検証する"
+  },
+  {
+    "id": "AN-020",
+    "task": "WebKitのフォーカス復帰検証を実際のキーボード操作に合わせる",
+    "status": "done",
+    "passes": true,
+    "evidence": "マウス起点ではChromium BUTTON#btnSettings、WebKit BODY、キーボード起点では両方BUTTONを観測。WebKit22 passed (16.7s)、CDP1 skip、Chromium smoke8 passed (11.9s)。lintと修正後Prettier成功。artifacts/webkit-ux/corrected-focus.txt、chromium-focus.txt。",
+    "dependencies": [
+      "AN-019"
+    ],
+    "owner": "codex",
+    "acceptance": "ブラウザごとのクリック時フォーカスを観測し、キーボード起点の設定・確認ダイアログ復帰と既存ポインター操作を両エンジンで検証する"
   }
 ]

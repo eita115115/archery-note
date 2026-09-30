@@ -2723,3 +2723,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Public v89 / seven asset matches / native CDP touch dismissal / synthetic sessions and active-practice retention / offline reload / zero page errors passed. Evidence: artifacts/release-v89/deployed-check.txt.
 - Updated progress.md, tasks.json AN-019 and docs/codex/modal-swipe.md. No app changes in this record update.
 - Risk/next: physical iPhone gesture feel and actual-practice acceptance remain unverified; no money or personal data used.
+
+## 2026-09-30 — WebKit keyboard focus verification (AN-020)
+
+- Observed click-time focus: Chromium BUTTON#btnSettings, WebKit BODY; keyboard activation focuses and restores the opener in both. Existing failures came from a pointer-focus assumption.
+- Changed only tests/e2e/app-smoke.spec.js to focus and press Enter before keyboard restoration checks. Pointer cancel/confirm checks remain.
+- WebKit UX: `22 passed (16.7s)`, one CDP-only skip. Chromium smoke: `8 passed (11.9s)`. Lint passed. Initial Prettier check failed on line endings, then formatting and recheck passed.
+- Updated progress.md and tasks.json. No runtime, storage or deployed version changes; local commit only.
+- Next: inspect 375px record/history/analysis navigation and scroll restoration. Physical iPhone validation still outstanding.

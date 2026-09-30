@@ -214,7 +214,10 @@ test("opens settings as a dialog, closes on Escape, and restores focus", async (
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await page.locator("#btnSettings").click();
+  // Focus restoration is a keyboard contract; pointer clicks need not focus in WebKit.
+  await page.locator("#btnSettings").focus();
+  await expect(page.locator("#btnSettings")).toBeFocused();
+  await page.keyboard.press("Enter");
   const ovl = page.locator(".ovl");
   await expect(ovl).toBeVisible();
   await expect(ovl).toHaveAttribute("role", "dialog");
@@ -257,8 +260,10 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await expect(detailSheet).toBeVisible();
   await expect(detailSheet).toContainText("2026/6/27");
 
-  // Escape でもキャンセル扱い。フォーカスは削除ボタンへ復帰する
-  await delBtn.click();
+  // Escape でもキャンセル扱い。キーボードで開いた削除ボタンへ復帰する
+  await delBtn.focus();
+  await expect(delBtn).toBeFocused();
+  await page.keyboard.press("Enter");
   await expect(confirmSheet).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(confirmSheet).toHaveCount(0);
