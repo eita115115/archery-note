@@ -2775,3 +2775,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Distinguished implemented CSV round column from unimplemented grouped-history collapse, current multi-path form detector from outdated D-4, and published v89 from local v90.
 - Updated progress/tasks. Docs only, format:check passed. No new feature decision, release or real-data use.
 - Next: v90 publication approval and physical practice acceptance; deferred items retain their existing prerequisites.
+
+## 2026-10-01 — v90 approved publication
+
+- User approved. Pushed012e6ac1 to main; Pages36790778468 and CI36790779831 succeeded. Linux102 passed (1.0m).
+- Live v90 and seven assets match. History1400/analysis600 restored; touch dismiss/start/offline/synthetic data retention passed without page errors.
+- Updated release-v90, CHANGELOG, progress and AN-022 evidence. App source unchanged.
+- Next: physical iPhone UX and real-practice acceptance remain unverified. No personal data or money used.

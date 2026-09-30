@@ -1,6 +1,6 @@
-# v90 release candidate
+# v90 release
 
-Candidate: 21a8d73; scroll fix: 907536f. Published version remains v89.
+Candidate: 21a8d73; scroll fix: 907536f. Published v90 after explicit user approval on 2026-10-01.
 
 Tabs retain their own reading position, so history/analysis comparison does not
 lose the place. First visits start at the top. Positions live in memory only.
@@ -21,5 +21,13 @@ Validation:
 
 Evidence: artifacts/release-v90/ and docs/screenshots/tab-scroll/.
 Physical iPhone acceptance remains outstanding. Restored views have a small local
-layout cost, detailed in tab-scroll-investigation.md. Nothing published yet.
-Next: explicit publication approval, then push and verify Pages/CI/live behavior.
+layout cost, detailed in tab-scroll-investigation.md. Published source: 012e6ac1.
+Publication completed. Physical iPhone feedback remains outstanding.
+
+## Publication evidence
+
+- Pages36790778468 and Linux CI36790779831 succeeded. E2E: `102 passed (1.0m)`.
+- Public APP_VER/version.json90 and seven asset contents match the local sources.
+- Public tab navigation: first analysis0px, history returns1400px, analysis returns600px; synthetic sessions unchanged.
+- Public settings touch swipe, 44px controls, three-column HUD, practice start, offline reload and data retention passed; no page errors.
+- Logs: artifacts/release-v90/deployed-check.txt and deployed-scroll.txt.
