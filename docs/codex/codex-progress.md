@@ -2880,3 +2880,12 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Immutable actualv93 server stopped, API ECONNREFUSED confirmed: Chromium/WebKit320/375px all four reloads from SW retain three demo sessions and active arrow, target visible, pageerror0.
 - Local result matches Playwright official repository issue42775; no dependency update or application/SW rewrite needed. Exact internal implementation cause and physical iPhone behavior are not claimed verified.
 - Updated diagnosis/release93/CHANGELOG/progress/tasks. Documentation format passed; runtime/publication unchanged and no personal data/money used. Next actual-device UX/AN-001 acceptance; use stopped-origin checks for future WebKit offline coverage.
+
+## 2026-10-01 — History round collapse (AN-031)
+
+- Previous turn resolved WebKit emulation diagnosis. Audited remaining roadmap and selected IMP-09 history collapse as one safe UX improvement under the broad user delegation, while physical-device feedback remains pending.
+- Added display-only grouping by existing gid before pagination, native details with total/arrows/stage count/distances, stage-order detail rows and memory-only expansion retention. Filtered totals explicitly say visible subtotal. No storage/scoring/SW/dependency changes.
+- Changed scripts/60-history-sight-view.js, CSS/minCSS, new history-round-collapse E2E and existing multi-stage smoke's expansion step. Saved and inspected375px before/after/dark and expanded images.
+- Initial two tests failed as intended before implementation. First broader test run28 pass/4 fail: old test clicked collapsed rows and new fixture replacement was not reflected. Corrected fixture initialization and user expansion step, then32 passed (31.5s). Final focused8 passed (11.2s) also verifies desktop width; UI/app/globals/lint/format success. Initial document lint error corrected, raw failure logs retained.
+- Independent static review found no actionable issues. Updated progress/tasks/roadmap and history-round-collapse.md. Local only; public93 unchanged, no personal data/money use.
+- Next: version/update/full-release validation for this change before requesting publication approval. Physical iPhone feedback/AN-001 remain open; goal aspiration is not claimed complete.

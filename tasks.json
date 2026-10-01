@@ -352,5 +352,17 @@
     ],
     "owner": "codex",
     "acceptance": "最小のSW/HTMLと実アプリで同じオフライン再読み込みを比較し、再現条件・原因の根拠・未確認点を記録して次に必要な対応を決める"
+  },
+  {
+    "id": "AN-031",
+    "task": "履歴の多距離ラウンドを合計が見える折りたたみにする",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/history-round-collapse.md: 実装前2件が要素不存在で失敗、両エンジン32 passed (31.5s)、最終狭幅/dark/PC確認8 passed (11.2s)。UI/app/globals/lint/format成功、375px前後画像、独立レビュー指摘なし。同gid集計・stage順・フィルタ部分合計・ページ分割なし・開閉保持・途中ラウンド詳細・架空保存不変を確認。ローカルのみ、公開前検証は次。",
+    "dependencies": [
+      "AN-030"
+    ],
+    "owner": "codex",
+    "acceptance": "同gid表示記録を合計と距離が読める折りたたみにし、ステージ順・フィルタ部分合計・ページ境界・開閉保持・詳細遷移を狭幅と両エンジンで検証し、既存保存データ不変と375px前後画像を記録する"
   }
 ]

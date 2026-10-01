@@ -11,26 +11,26 @@
 日々の現在地は [progress.md](../progress.md)、実行タスクは [tasks.json](../tasks.json) が正本です。
 以下は既存バックログの照合結果です。「進行中」には実機受入・公開承認待ちを含みます。
 
-| 項目                                      | 状態     | 根拠・残り                                                                          |
-| ----------------------------------------- | -------- | ----------------------------------------------------------------------------------- |
-| check:ui 起動堅牢化                       | 完了     | tools/check-ui.js の launchBrowserWithRetry。v90 check:ui成功                       |
-| PWAホームアイコン                         | 完了     | 旧記録でv1.6.1対応済み。v90 check:pwa成功                                           |
-| ラインカッター色のトークン化              | 完了     | style.css の .lens.fine.cut は var(--green)                                         |
-| snapshot時刻キャッシュ                    | 完了     | scripts/10-storage-native.js の _lastSnapTs と早期return                            |
-| 旧記録画面コードの整理                    | 完了     | recordIntroHtml / recordCoachCardHtml / RECORD_FLOW_MODES は現行scriptsに存在しない |
-| 射形一覧のキーボード到達性                | 完了     | scripts/47-form-view.js の formAnalysisRow 内button                                 |
-| CSVのラウンド列                           | 完了     | scripts/40-analysis-physics.js の exportSessionsCsv、round列とroundLabel            |
-| 履歴のラウンドグループ折りたたみ          | 未着手   | 現行は段階バッジと詳細の関連ステージ表。グループ折りたたみの受入証拠なし            |
-| arrowCheckの自動取消への昇格              | 進行中   | 注釈のみの実装あり。実射G1〜G3未確認、自動取消は有効化しない                        |
-| 射形判定・保存の実射受入                  | 進行中   | AN-001、docs/form-diagnostic-field-acceptance.md の実機基準が未完了                 |
-| 50msレットダウン識別                      | 未着手   | 旧D-3の保留を維持。arrowCheck昇格で解決したとは未証明                               |
-| 弓の向き・クリッカー音など追加センシング  | 未着手   | 既存P3。追加方針・実射根拠なし                                                      |
-| エリート比較採点の復活                    | 取り下げ | D-1の根拠条件が満たされるまで復活しない                                             |
-| 重いMLモデルの追加                        | 取り下げ | 旧方針維持。新規資産・依存なし                                                      |
-| 大量履歴の再表示高速化、記録開始・HUD改善 | 完了     | v86〜88公開。docs/codex/codex-progress.md / release-v87.md                          |
-| 設定などの下向きスワイプ閉じる            | 完了     | v89公開、docs/codex/modal-swipe.md。実機の操作感は別途未確認                        |
-| タブごとの閲覧位置保持                    | 進行中   | v90ローカル候補、102 E2E成功・更新保持確認済み。公開承認待ち                        |
-| 診断テストの版固定値の整理                | 完了     | AN-004。84は単体テスト用、E2Eはversion.json参照                                     |
+| 項目                                      | 状態     | 根拠・残り                                                                           |
+| ----------------------------------------- | -------- | ------------------------------------------------------------------------------------ |
+| check:ui 起動堅牢化                       | 完了     | tools/check-ui.js の launchBrowserWithRetry。v90 check:ui成功                        |
+| PWAホームアイコン                         | 完了     | 旧記録でv1.6.1対応済み。v90 check:pwa成功                                            |
+| ラインカッター色のトークン化              | 完了     | style.css の .lens.fine.cut は var(--green)                                          |
+| snapshot時刻キャッシュ                    | 完了     | scripts/10-storage-native.js の _lastSnapTs と早期return                             |
+| 旧記録画面コードの整理                    | 完了     | recordIntroHtml / recordCoachCardHtml / RECORD_FLOW_MODES は現行scriptsに存在しない  |
+| 射形一覧のキーボード到達性                | 完了     | scripts/47-form-view.js の formAnalysisRow 内button                                  |
+| CSVのラウンド列                           | 完了     | scripts/40-analysis-physics.js の exportSessionsCsv、round列とroundLabel             |
+| 履歴のラウンドグループ折りたたみ          | 進行中   | AN-031ローカル実装・32 E2E成功。docs/codex/history-round-collapse.md。公開前検証は次 |
+| arrowCheckの自動取消への昇格              | 進行中   | 注釈のみの実装あり。実射G1〜G3未確認、自動取消は有効化しない                         |
+| 射形判定・保存の実射受入                  | 進行中   | AN-001、docs/form-diagnostic-field-acceptance.md の実機基準が未完了                  |
+| 50msレットダウン識別                      | 未着手   | 旧D-3の保留を維持。arrowCheck昇格で解決したとは未証明                                |
+| 弓の向き・クリッカー音など追加センシング  | 未着手   | 既存P3。追加方針・実射根拠なし                                                       |
+| エリート比較採点の復活                    | 取り下げ | D-1の根拠条件が満たされるまで復活しない                                              |
+| 重いMLモデルの追加                        | 取り下げ | 旧方針維持。新規資産・依存なし                                                       |
+| 大量履歴の再表示高速化、記録開始・HUD改善 | 完了     | v86〜88公開。docs/codex/codex-progress.md / release-v87.md                           |
+| 設定などの下向きスワイプ閉じる            | 完了     | v89公開、docs/codex/modal-swipe.md。実機の操作感は別途未確認                         |
+| タブごとの閲覧位置保持                    | 進行中   | v90ローカル候補、102 E2E成功・更新保持確認済み。公開承認待ち                         |
+| 診断テストの版固定値の整理                | 完了     | AN-004。84は単体テスト用、E2Eはversion.json参照                                      |
 
 現行の射形判定は scripts/46-form-core.js の複数の発火経路・姿勢整合・出発確認を含みます。
 旧D-4の「瞬間速度スパイク単独」という記述は現在の実装仕様ではありません。
@@ -123,7 +123,7 @@ v1.6.0 で `RELEASE_TH` を body-lengths/sec 単位に再チューン（1.2→9�
 
 **P2（自律可・小〜中）** — ✅ 全完了（PR #119, #120）4. `.lens.fine.cut` の直書き `#0f9d58` → `var(--green)` トークン化 ✅ 5. `writeSafetySnapshot` の idle 毎 JSON.parse → `_lastSnapTs` キャッシュで早期 return ✅ 6. デッドコード掃除（`recordIntroHtml`/`recordCoachCardHtml`/`RECORD_FLOW_MODES` + CSS ~150行 + check 更新）✅ 7. 射形一覧 listItem のキーボード到達性（`.formAnalysisRow` ラッパー + button 化）✅
 
-**P3（要ユーザー判断 / 大）** 8. 履歴のラウンドグループ折りたたみ・CSV へのラウンド列（IMP-09 フェーズ2）。9. arrowCheck 昇格後の「弓の向き/クリッカー音」等の追加センシング — 新規機能なので発案時に要相談。
+**P3（要ユーザー判断 / 大）** 8. IMP-09フェーズ2: CSVのラウンド列は対応済み。広いUX改善委任に沿った履歴折りたたみの小変更はAN-031でローカル検証済み、公開前検証は次。9. arrowCheck 昇格後の「弓の向き/クリッカー音」等の追加センシング — 新規機能なので発案時に要相談。
 
 **却下 / 保留**
 

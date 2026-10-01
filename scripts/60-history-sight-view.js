@@ -113,12 +113,52 @@ function historyRowHtml(s) {
     <div class="d">${badges}${all.length}本</div></div>
     <div class="big historyRowTotal">${total}<small> / 平均${(total / all.length).toFixed(2)}</small></div></button>`;
 }
-/* 同日複数セッションを hairline 見出しでまとめ、月替わりに月ラベルを出す。集計・並び順は不変 */
-function historyGroupedListHtml(ss) {
+/* ページ分割前に同 gid の記録をまとめる。元配列・保存レコードは変更しない。 */
+function historyListEntries(ss) {
+  const groups = new Map();
+  const entries = [];
+  ss.forEach((s) => {
+    const gid = s.roundGroup && s.roundGroup.gid;
+    if (typeof gid !== "string" || !gid) {
+      entries.push({ sessions: [s], gid: "" });
+      return;
+    }
+    let entry = groups.get(gid);
+    if (!entry) {
+      entry = { sessions: [], gid };
+      groups.set(gid, entry);
+      entries.push(entry);
+    }
+    entry.sessions.push(s);
+  });
+  return entries;
+}
+function historyRoundHtml(entry, filtered) {
+  const stages = [...entry.sessions].sort(
+    (a, b) => (Number(a.roundGroup.stage) || 0) - (Number(b.roundGroup.stage) || 0),
+  );
+  let total = 0, arrows = 0;
+  stages.forEach((s) => s.ends.forEach((end) => end.forEach((a) => { total += a.s; arrows++; })));
+  const rg = stages[0].roundGroup;
+  const count = Number(rg.stageCount);
+  const stageLabel = Number.isInteger(count) && count > 0 ? `${stages.length}/${count}ステージ` : `${stages.length}ステージ`;
+  const distances = stages.map((s) => historyDistanceLabel(s.dist)).join(" ・ ");
+  return `<details class="historyRound" data-testid="history-round" data-gid="${esc(entry.gid)}" ${ui.histRoundOpen && ui.histRoundOpen.has(entry.gid) ? "open" : ""}>
+    <summary class="historyRoundSummary">
+      <span class="historyRoundMain"><span class="historyRoundTitle">${esc(roundLabel(rg.roundId))}</span>
+      <span class="historyRoundMeta">${stageLabel} ・ ${arrows}本</span><span class="historyRoundMeta">${distances}</span></span>
+      <span class="historyRoundTotal">${total}<small>${filtered ? "表示分合計" : "合計"}</small></span>
+    </summary>
+    <div class="historyRoundStages">${stages.map(historyRowHtml).join("")}</div>
+  </details>`;
+}
+/* 同日複数記録を hairline 見出しでまとめ、月替わりに月ラベルを出す。 */
+function historyGroupedListHtml(entries, filtered) {
   let prevMonth = "",
     prevDate = "";
   const parts = [];
-  ss.forEach((s) => {
+  entries.forEach((entry) => {
+    const s = entry.sessions[0];
     const iso = s.date || "";
     const month = iso.slice(0, 7);
     if (month && month !== prevMonth) {
@@ -130,7 +170,7 @@ function historyGroupedListHtml(ss) {
       parts.push(`<div class="historyDateHead">${fmtD(iso)}</div>`);
       prevDate = iso;
     }
-    parts.push(historyRowHtml(s));
+    parts.push(entry.sessions.length > 1 ? historyRoundHtml(entry, filtered) : historyRowHtml(s));
   });
   return parts.join("");
 }
@@ -149,6 +189,8 @@ function renderHistory(m) {
   );
   const _heroRows = buildAnalysisRows(ss, db.setups, sessionMetrics);
   const filterCount = [hf.setupId, hf.dist, hf.round].filter(Boolean).length;
+  const entries = historyListEntries(ss);
+  const limit = ui._histLimit || 50;
   m.innerHTML = `${pageHeroHtml("history", { ss, rows: _heroRows })}
   <div class="card historyRecords"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
     <details class="historyFilters" data-testid="history-filters" ${filterCount ? "open" : ""}>
@@ -165,7 +207,7 @@ function renderHistory(m) {
     <div id="histList">
     ${
       ss.length
-        ? historyGroupedListHtml(ss.slice(0, ui._histLimit || 50)) + (ss.length > (ui._histLimit || 50) ? `<div class="btnrow"><button class="btn ghost" id="histMore">さらに表示（残り${ss.length - (ui._histLimit || 50)}件）</button></div>` : "")
+        ? historyGroupedListHtml(entries.slice(0, limit), filterCount > 0) + (entries.length > limit ? `<div class="btnrow"><button class="btn ghost" id="histMore">さらに表示（残り${entries.length - limit}件）</button></div>` : "")
         : allSs.length
           ? `<div class="empty">この絞り込みに合う記録がありません。フィルタを広げてください。</div>`
           : `<div class="empty historyEmpty" data-testid="history-empty">
@@ -203,6 +245,14 @@ function renderHistory(m) {
   };
   const more = $("#histMore");
   if (more) more.onclick = () => { ui._histLimit = (ui._histLimit || 50) + 50; render(); };
+  if (!ui.histRoundOpen) ui.histRoundOpen = new Set();
+  document.querySelectorAll("#histList .historyRound").forEach((group) => {
+    group.ontoggle = () => {
+      if (!group.isConnected) return;
+      if (group.open) ui.histRoundOpen.add(group.dataset.gid);
+      else ui.histRoundOpen.delete(group.dataset.gid);
+    };
+  });
   document
     .querySelectorAll("#histList .listItem")
     .forEach((li) => (li.onclick = () => openHistDetail(li.dataset.id)));

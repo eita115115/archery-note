@@ -669,6 +669,17 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .historyRow{align-items:flex-start;}
 .historyRowMain{min-width:0;}
 .historyRowTotal{font-size:24px;}
+.historyRound{border-bottom:1px solid var(--line2);}
+.historyRoundSummary{display:flex; align-items:flex-start; gap:var(--space-4); min-height:var(--tap-target-min); padding:var(--space-5) 0; cursor:pointer; list-style:none;}
+.historyRoundSummary::-webkit-details-marker{display:none;}
+.historyRoundSummary::before{content:"＋"; flex:0 0 12px; color:var(--sub); font-size:var(--font-size-sm); padding-top:2px;}
+.historyRound[open] > .historyRoundSummary::before{content:"−";}
+.historyRoundMain{flex:1; min-width:0;}
+.historyRoundTitle{display:block; font-weight:var(--fw-emphasis); overflow-wrap:anywhere;}
+.historyRoundMeta{display:block; font-size:var(--font-size-xs); color:var(--sub); margin-top:var(--space-1); overflow-wrap:anywhere;}
+.historyRoundTotal{font-size:24px; font-variant-numeric:tabular-nums; color:var(--green); text-align:right; flex:0 0 auto;}
+.historyRoundTotal small{display:block; font-size:var(--font-size-xs); color:var(--sub); font-weight:var(--fw-body);}
+.historyRoundStages{padding-left:var(--space-5); border-left:1px solid var(--line); margin:0 0 var(--space-5) var(--space-2);}
 .historyEmpty{display:flex; flex-direction:column; align-items:center; gap:10px; padding:24px 12px;}
 .historyEmpty p{margin:0; max-width:32em;}
 .historyEmpty .btn{width:auto; padding-left:22px; padding-right:22px;}

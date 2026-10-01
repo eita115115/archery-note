@@ -317,8 +317,10 @@ test("records a multi-distance round with stage advance and history badges", asy
   await expect(page.locator(".ovl .sheet")).toContainText("WA1440 男子 合計");
   await page.locator("#sumClose").click();
 
-  // 履歴: 各ステージにグループバッジ、詳細にステージ一覧とラウンド合計
+  // 履歴: 途中ラウンドを展開し、各ステージの詳細から別ステージへ移動
   await mainTab(page, "履歴").click();
+  await expect(page.getByTestId("history-round").locator("summary")).toContainText("2/4ステージ");
+  await page.getByTestId("history-round").locator("summary").click();
   await expect(page.locator("#histList")).toContainText("WA1440 男子 1/4");
   await expect(page.locator("#histList")).toContainText("WA1440 男子 2/4");
   await page.locator("#histList .listItem", { hasText: "90m" }).first().click();
