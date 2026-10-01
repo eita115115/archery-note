@@ -24,13 +24,13 @@
 - Pages36821315831成功。公開93と7candidate asset一致。
 - 公開Chromium: 得点分布・架空履歴/記録開始・設定タッチスワイプ・offline/データ保持・pageerror0成功。
 - 公開WebKit320/375px: 分析の全件/距離絞込/解除の矢数・保存不変・オンラインpageerror0成功。
-- WebKit offline reloadは内部エラーで失敗。immutable旧92でも同条件で再現し、controllerとshell cacheを確認。原因未確定、AN-030へ記録。
+- WebKit setOffline模擬では最小のliteral SWでも内部エラー、配信サーバー停止では成功。AN-030で切り分け完了。実アプリ93も両ブラウザ320/375pxの4ケースでoffline再表示・架空3件と記録中1本保持・pageerror0成功。詳細docs/codex/webkit-offline-diagnosis.md。
 - 実SW v92→93更新/データ保持成功。21配信物byte一致。独立レビュー指摘なし。
 - 詳細: docs/codex/release-v93.md、score-distribution-performance.md。
 
 ## 次と未解決
 
-- 次: AN-030でWebKit内部エラーを最小SW/HTMLと比較して切り分ける。証拠なくSW動作は変更しない。
+- 次: 実機iPhoneのUXと実射AN-001の受入。AN-030の切り分けは完了し、アプリ/SWや依存の変更は不要と判断。WebKitの今後のoffline確認は配信サーバー停止方式を使う。
 - v93公開承認の停止条件は解消。目標はactive、完了扱いにしない。
 - 実機iPhoneの記録・確定・拡大抑制・設定スワイプ・offline操作感は未確認。v92のエンド確定について質問済み、回答待ち。
 - 実射の射形判定・保存の受入AN-001は未完了。

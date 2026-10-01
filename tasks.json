@@ -344,9 +344,9 @@
   {
     "id": "AN-030",
     "task": "WebKitオフライン再読み込みの内部エラーを最小再現で切り分ける",
-    "status": "open",
-    "passes": false,
-    "evidence": "docs/codex/release-v93.md: 公開93とimmutable92で320/375px同一のpage.reload内部エラー。オンライン分析操作・保存不変は成功。controllerとcache shell全件は存在。アプリ/SW・ブラウザport・自動化の原因は未確定。Chromium offlineは成功。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/webkit-offline-diagnosis.md: 最小12-case比較でliteral workerでもWebKit setOffline模擬だけ内部エラー、server-stopは成功、no-worker対照は全失敗。実アプリimmutable93のserver-stopはChromium/WebKit320/375の4ケースすべてSW再表示・架空3件/記録中1本保持・pageerror0成功。Playwright既報42775と一致。アプリ/SW変更不要、実機iPhoneは未確認。",
     "dependencies": [
       "AN-029"
     ],

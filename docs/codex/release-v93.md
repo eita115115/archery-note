@@ -104,5 +104,10 @@ the browser port, automation or an existing application issue.
 Evidence: deployed-webkit-first.txt, deployed-webkit.txt, webkit-baseline.txt and
 rehearse-webkit.cjs. Do not claim WebKit offline success or actual iPhone coverage.
 Tracked asAN-030 for minimal reproduction; no speculative Service Worker changes.
+Subsequent diagnosis reproduced the error even with a literal worker response,
+while stopped-origin navigation succeeded for both the minimal worker and actual
+v93 app in Chromium/WebKit320/375px. Completed sessions and active arrow retained.
+See [diagnosis and controls](webkit-offline-diagnosis.md). This resolves the local
+emulation classification; it does not verify physical iPhone offline behavior.
 
-Next: investigateAN-030 and obtain real-device UX/actual-shooting acceptanceAN-001.
+Next: obtain real-device UX/actual-shooting acceptanceAN-001.

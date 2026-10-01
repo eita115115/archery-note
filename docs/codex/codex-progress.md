@@ -2872,3 +2872,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Optional WebKit offline reload failed with internal error, exact rerun reproduced. Same error against immutablev92 at both widths with controller/cache present. Root cause unproven; recorded failures and AN-030 for minimal reproduction. No app fix guessed, no WebKit/iPhone offline claim.
 - Updated release-v93/performance doc/CHANGELOG/progress/tasks. Publication approval blocker cleared. Runtime unchanged after publish; no money/personal data used.
 - Next: AN-030 offline diagnosis and actual-device feedback/AN-001. Goal remains active and broader product aspiration is not claimed complete.
+
+## 2026-10-01 — WebKit offline emulation isolated (AN-030)
+
+- Previous goal turn progressed through approvedv93 publication and identified a repeatable WebKit probe failure. Read current worker and release evidence before diagnosing.
+- Minimal12-case matrix on installed Playwright1.61.1: Chromium worker positives pass in both modes; WebKit literal/network-fallback workers fail only setOffline emulation and pass after real server stop. All four no-worker controls fail as expected. Diagnostic exits0 with raw failures preserved.
+- Immutable actualv93 server stopped, API ECONNREFUSED confirmed: Chromium/WebKit320/375px all four reloads from SW retain three demo sessions and active arrow, target visible, pageerror0.
+- Local result matches Playwright official repository issue42775; no dependency update or application/SW rewrite needed. Exact internal implementation cause and physical iPhone behavior are not claimed verified.
+- Updated diagnosis/release93/CHANGELOG/progress/tasks. Documentation format passed; runtime/publication unchanged and no personal data/money used. Next actual-device UX/AN-001 acceptance; use stopped-origin checks for future WebKit offline coverage.
