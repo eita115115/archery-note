@@ -334,7 +334,7 @@
     "task": "承認後にv93得点分布高速化を公開し配信を確認する",
     "status": "needs-user",
     "passes": false,
-    "evidence": "docs/codex/release-v93.md: 候補42ff185と公開確認手順を準備。実Pages相当の/archery-note/配下でlocal rehearsal成功、得点分布・7asset一致・設定スワイプ・offline保持・pageerror0。remote main1c1c2af0/公開v92を確認。v93公開承認は未回答、push未実施。",
+    "evidence": "docs/codex/release-v93.md: 候補42ff185と公開確認手順を準備。実Pages相当の/archery-note/配下でlocal rehearsal成功、得点分布・7asset一致・設定スワイプ・offline保持・pageerror0。remote main1c1c2af0/公開v92を確認。v93公開承認は未回答、push未実施。3連続goal turnで同じ承認待ちを再確認、公開準備は完了。",
     "dependencies": [
       "AN-028"
     ],

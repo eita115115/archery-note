@@ -2857,3 +2857,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Prepared live verifier with fixed candidate asset comparison and added score-distribution interaction. Loopback serves immutable candidate under the actual Pages subdirectory/archery-note/.
 - `node artifacts/release-v93/rehearse.cjs` exit0: seven candidate assets match, demo history/analysis/start, settings native touch swipe, offline/data retention and zero page errors. Output explicitly says local rehearsal; no live93 claim.
 - Updated release-v93, progress/tasks. Added AN-029 needs-user for publication. Runtime unchanged; no money/personal data use. Independent preparation is complete; next action requires publication approval.
+
+## 2026-10-01 — Publication blocker audit
+
+- Previous goal turn progressed through publication-verifier rehearsal. Current worktree clean at7ec294cf; remote main remains1c1c2af0/public version92. Latest three Actions runs are completed/success, so no release process requires a live wait.
+- Publication approval is absent in three consecutive goal turns: candidate preparation/request, rehearsal, and this state audit. AN-029 stays needs-user/passesfalse. The only other open task is user-owned actual-shooting acceptanceAN-001; no result has been supplied.
+- Candidate verification and independent release preparation are complete. Further live publication requires the AGENTS.md explicit approval gate; field/user-preference evidence cannot be manufactured from synthetic browser tests.
+- Recorded the stop condition in progress.md and keep the full aspiration uncompleted. Mark goal blocked pending approval or actionable real-device feedback; resume from the verified candidate when the user replies. No push, runtime change, money or personal-data use.
