@@ -416,9 +416,9 @@
   {
     "id": "AN-036",
     "task": "承認後に既存3間接依存更新をmainへ反映しCIと警告を確認する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "2026-10-01人間が既存3件main反映を承認。remote d734ea21を確認、codex/app-qualityのみ公開し分析修正/major追加は除外。隔離再検証とCI/Pages/警告確認中。",
+    "status": "done",
+    "passes": true,
+    "evidence": "承認後de1e3a95b29abc1e96690f2fd4d3f9662700c646をmainへ反映。docs/codex/dependency-publication.md。Pages36856785707/CI36856786262成功、110 passed (1.2m)、check:all/lint/format成功。公開v94全21asset byte一致、設定touch/履歴/分析/offline架空記録保持/pageerror0。fresh GitHub14警告fixed、ZIP13/27だけopen、dismissなし。共有hidden lock不変、分析fix/major追加は除外。",
     "dependencies": [
       "AN-035"
     ],
