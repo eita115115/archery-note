@@ -124,3 +124,13 @@ Actual iPhone/VoiceOver and AN-001 shooting acceptance remain unverified. No pai
 API, telemetry, cloud inference, new package or personal information was used.
 The two extract-zip development alerts remain open; this release does not resolve
 them. The broad community goal stays active.
+
+## Publication authorization and performance follow-up
+
+A new human approval authorizes AN-042 publication of this candidate. Remote main
+was rechecked at e1ec1fe6; final runtime remains7039fcea. Approval does not include
+AN-038 dependency additions. Public verification is pending until recorded below.
+
+The completed [synthetic performance audit](analysis-filter-performance.md) records
+large-history latency and its limits. It changes no runtime and does not claim
+a speedup from the focus fix. A separate AN-044 optimization is queued.

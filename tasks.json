@@ -488,9 +488,9 @@
   {
     "id": "AN-042",
     "task": "承認後にv95分析フィルタ修正を公開して配信と操作を確認する",
-    "status": "needs-user",
+    "status": "in-progress",
     "passes": false,
-    "evidence": "AN-041で候補7039fceaを検証済み。AGENTS.mdのgit push/Pages事前承認が必要。既存3依存の公開承認はv95の公開を含まない。",
+    "evidence": "人間の承認しますを受領。候補7039fcea/v95への公開承認としてremote main=e1ec1fe6を照合、runtime変更なし。CI/Pages/公開確認は進行中。AN-038の新規依存は承認範囲外。",
     "dependencies": [
       "AN-041"
     ],
@@ -500,13 +500,25 @@
   {
     "id": "AN-043",
     "task": "大量の架空履歴で分析フィルタの応答時間を測定する",
-    "status": "open",
-    "passes": false,
-    "evidence": "公開待ちでも実行可能な読取専用performance確認。最終focus helperは先行カードだけをlayoutするが、大量記録での実応答は未測定。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/analysis-filter-performance.md。固定v94/e1ec1fe6とv95/7039fcea、14contexts/420samples、入力hash一致・期待件数・candidate focus/visible bounds・memory/demo保存不変・overflow/pageerror0。5000件全距離median Chromium172.8ms/WebKit295ms、1000件CPU4×204.7ms。独立review数値一致/指摘なし。人工同期event+layout/in-memory/reduced-motionの限界と初期seed再測定を記録。",
     "dependencies": [
       "AN-041"
     ],
     "owner": "codex",
     "acceptance": "既存公開版と修正版を架空履歴の固定条件で比較し、両engineの再描画/可視性/保存不変と代表的な応答時間・測定限界を記録して次の改善を根拠から選ぶ"
+  },
+  {
+    "id": "AN-044",
+    "task": "直近8件の分析カードで全履歴の矢集計を避ける",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-043でscoreTrendCardの全履歴集計後slice8を確認。空記録を飛ばした先頭8件という表示仕様を保持する局所改善、効果は未測定。v95候補と分離して実装する。",
+    "dependencies": [
+      "AN-043"
+    ],
+    "owner": "codex",
+    "acceptance": "先頭8つの非空記録のHTMLと数値変換を保持し、空/不正/疎な記録を含む旧新比較と入力不変・矢の読取上限を確認し、両engineの代表測定と関連app/UI/lint検証を記録する"
   }
 ]

@@ -2981,3 +2981,17 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Local publication-verifier rehearsal also passes7assets/labels/visible focus/history/distribution/start/44px/settings touch/offline data/pageerror0. Normal-motion4cases pass setup/distance/period bounds after their own animations finish. First normal probe waited on offscreen animations; live PID identified, stopped, helper narrowed, no app change.
 - Static review7039fcea found no actionable issue; no rerun/physical-device guarantee. Added release-v95.md, final375control image, focus-doc follow-up, CHANGELOG/progress/tasks/ledger. Actual iPhone/VoiceOver/AN-001 remain open, no fee/private records/new packages.
 - Next AN-042 needs-user for newv95 main push under AGENTS.md. AN-043 read-only synthetic large-history response measurement can progress while approval is absent. AN-038 major/new28-package approval remains separate; goal stays active.
+
+## 2026-10-01 — Analysis performance audit recorded (AN-043)
+
+- Completed read-only immutablev94/e1ec1fe6 versusv95/7039fcea measurement:14 contexts,420 samples, identical input hashes, expected filtered counts, candidate focused controls within visible bounds, unchanged memory/persisted demo and overflow/pageerrors0.
+- Candidate all-distance median at5000 sessions: Chromium172.8ms/WebKit295ms; Chromium1000 CPU4×204.7ms. No claim of speedup, real iPhone/INP or5000-session storage round trip. Synthetic data is in-memory, reduced-motion, near-centre single-face geometry.
+- Corrected initial seed shortcut (analysis view already selected) and reran entire matrix. Console caption ordering error corrected only in reproduction helper; named JSON fields are authoritative. Initial artifacts preserved. Independent read-only review recomputed all medians and found no actionable issue.
+- Added analysis-filter-performance.md and AN-044: restrict scoreTrendCard aggregation to the first eight nonempty records, preserving HTML/coercion/immutability. Effect and largest bottleneck remain unproven; implementation is a separate task.
+- New human approval now authorizes AN-042/v95 publication previously requested. Remote main remains e1ec1fe6, candidate runtime unchanged. AN-038 additions remain unapproved. No installs, private records or costs.
+
+## 2026-10-01 — Approved v95 publication started (AN-042)
+
+- Human approval received for the specifically requestedv95 release. Remote main=e1ec1fe6747e03bac11b41baeba55c1668ad51d5 is an ancestor of the candidate; tested runtime7039fcea is unchanged. Existing dependency tree only; no AN-038 additions.
+- Before push, owned-sandbox check:all/lint exit0; root documentation format:check reports All matched files use Prettier code style! Source/test/dependency99 files match owned sandbox, shared hidden lock hash unchanged, original task acceptance retained and completed rows have evidence.
+- Full116-test release acceptance and actual-worker94→95 update evidence remain the same immutable runtime recorded in release-v95.md. No redundant full rerun after documentation-only audit records. Next: push reviewed candidate, source-specific CI/Pages, all21 public assets and live synthetic interaction/offline checks.
