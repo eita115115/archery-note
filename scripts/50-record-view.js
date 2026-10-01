@@ -2307,9 +2307,12 @@ function historySummaryDetailsHtml(sessionRows, filter) {
   return `${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows, filter)}${groupingSummaryHtml(sessionRows)}`;
 }
 function scoreTrendCard(ss) {
-  const rows = historySessionRows(ss)
-    .filter((r) => r.arrows.length)
-    .slice(0, 8);
+  const rows = [];
+  for (const session of Array.isArray(ss) ? ss : []) {
+    const row = historySessionRows([session])[0];
+    if (row.arrows.length) rows.push(row);
+    if (rows.length === 8) break;
+  }
   if (!rows.length) return "";
   const body = rows
     .map((r) => {

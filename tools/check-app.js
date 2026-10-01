@@ -402,6 +402,7 @@ const fieldWithEmptySingle = historyApi.scoreDistCard([{faceType:"single",ends:[
 assert(fieldWithEmptySingle.includes(">6</div>") && !fieldWithEmptySingle.includes(">X</div>"), "Empty sessions changed field-only score buckets");
 console.log(`Score distribution: 36000 arrows, ${distributionScoreReads} score reads`);
 
+require("./check-score-trend.js");
 console.log(`Archery Note checks OK (v${version})`);
 console.log(`Robust grouping: used=${st.n}, excluded=${st.excluded.length}, confidence=${Math.round(st.confidence*100)}%`);
 console.log(`Physics: ${phys.speedFps.toFixed(0)}fps, rho=${phys.rho.toFixed(2)}, Cd=${phys.cd.toFixed(2)}`);
