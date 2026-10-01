@@ -262,7 +262,7 @@
     "task": "エンド確定を画面内へ固定しページ全体のズームを抑える",
     "status": "done",
     "passes": true,
-    "evidence": "docs/codex/release-v91.md: dock底1053px/画面640pxの失敗を再現→修正。Chromium/WebKit各2件、全体104 passed (1.0m)、check:all/lint/format、v90→91保持成功。候補f5650aa未公開。",
+    "evidence": "docs/codex/release-v91.md: dock底1053px/画面640pxの失敗を再現→修正。Chromium/WebKit各2件、全体104 passed (1.0m)、check:all/lint/format、v90→91保持成功。候補f5650aa未公開。 2026-10-01承認後v91公開。初回CI履歴描画待ち不足をテストのみ9071e564で修正しCI36794033791成功、104 passed (1.1m)。Pages36794033346成功。公開2engine4件・pinch scale1・7asset一致・offline保持成功。",
     "dependencies": [
       "AN-022"
     ],

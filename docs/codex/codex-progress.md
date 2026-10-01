@@ -2795,3 +2795,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Updated CSS/minCSS, focused regression, 375px screenshots and v91 version markers.
 - Full104 passed (1.0m); check:all/lint/format, two-engine focused checks, native Chromium pinch and v90→91 update retention passed. Independent review found no actionable issues.
 - Candidatef5650aa unpushed. Updated progress/tasks/release-v91. Next publication approval; physical Safari gesture confirmation outstanding.
+
+## 2026-10-01 — v91 approved publication
+
+- User approved; pusheddbcb99f0. Pages36793723110 succeeded. Public v91/seven assets match; live two-engine4 passed (5.7s), pinch scale1, settings swipe/offline retention/pageerror0 passed.
+- Initial Linux CI36793723675:103 pass/1 fail due test scrolling before initial lazy layout. Added card-height readiness in test-only9071e564; local Chromium6/WebKit2 passed. Replacement CI36794033791:104 passed (1.1m); Pages36794033346 success.
+- Initial live test URL root mistake corrected; no app regression inferred from the harness failure.
+- Updated CHANGELOG, release-v91, progress/tasks. Runtime unchanged after initial publish.
+- Next: physical iPhone feel and AN-001 real-practice acceptance. No money or personal data used.
