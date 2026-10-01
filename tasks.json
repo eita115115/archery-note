@@ -316,5 +316,17 @@
     ],
     "owner": "codex",
     "acceptance": "得点分布の件数・割合・的種別の色を保ち、変更前後の性能証拠と関連回帰検証、既存データ不変を記録する"
+  },
+  {
+    "id": "AN-028",
+    "task": "得点分布高速化をv93公開候補として全体検証する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v93.md、42ff185。check:all/lint/format成功、106 passed (1.0m)、21配信物byte一致。実SW v92→93更新・架空履歴3件保持・offline93成功。独立レビュー指摘なし、版整合/PWAチェック再確認。未公開、承認待ち。",
+    "dependencies": [
+      "AN-027"
+    ],
+    "owner": "codex",
+    "acceptance": "版整合・配信物・全体回帰・実更新とデータ保持・レビューの証拠を揃え、公開状態と未確認条件を正確に記録する"
   }
 ]

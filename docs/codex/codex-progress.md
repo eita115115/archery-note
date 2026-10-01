@@ -2842,3 +2842,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Alternating20-pair Chromium CPU4x card median25.8→8.0ms; whole-view samples207.7→191.7ms are noisy, not a device speed claim. First server absence and generated harness syntax error corrected before evidence collection.
 - Independent review found no actionable issues. Fixed comparison helper's baseline tocd02425 after commit so future reproduction does not silently compare HEAD with itself.
 - Updated progress/tasks/score-distribution-performance.md. Publicv92 unchanged; no money, personal data, storage/scoring changes. Next release-wide verification and version/update checks before publication approval.
+
+## 2026-10-01 — v93 release candidate (AN-028)
+
+- Previous goal turn made progress through585ea8d performance implementation and260c2d5 evidence. Prepared version93/native bundle42ff185; no additional application behavior.
+- check:all/lint/format passed; full Chromium `106 passed (1.0m)`. All21 copied bundle assets byte-match source.
+- Real worker v92→93 update banner/cache switch retained three demo sessions and offline93 reload. Harness pins both old/new revisions.
+- Independent candidate review found no actionable issues and independently passed check:version/check:pwa. Initial staging named nonexistentwww and failed; corrected to actual five marker files before commit.
+- Updated release-v93, CHANGELOG, progress/tasks. Publicv92 unchanged. No money/personal data used. Next publication approval then remote recheck, main push, CI/Pages/live verification; physical feedback pending.
