@@ -2850,3 +2850,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Real worker v92→93 update banner/cache switch retained three demo sessions and offline93 reload. Harness pins both old/new revisions.
 - Independent candidate review found no actionable issues and independently passed check:version/check:pwa. Initial staging named nonexistentwww and failed; corrected to actual five marker files before commit.
 - Updated release-v93, CHANGELOG, progress/tasks. Publicv92 unchanged. No money/personal data used. Next publication approval then remote recheck, main push, CI/Pages/live verification; physical feedback pending.
+
+## 2026-10-01 — v93 publication verifier rehearsal
+
+- Previous goal turn progressed by preparing/verifying candidate42ff185. Publication approval first requested there remains unanswered; remote main1c1c2af0/public92 confirmed unchanged here.
+- Prepared live verifier with fixed candidate asset comparison and added score-distribution interaction. Loopback serves immutable candidate under the actual Pages subdirectory/archery-note/.
+- `node artifacts/release-v93/rehearse.cjs` exit0: seven candidate assets match, demo history/analysis/start, settings native touch swipe, offline/data retention and zero page errors. Output explicitly says local rehearsal; no live93 claim.
+- Updated release-v93, progress/tasks. Added AN-029 needs-user for publication. Runtime unchanged; no money/personal data use. Independent preparation is complete; next action requires publication approval.

@@ -55,3 +55,22 @@ native-assets.txt, transition.txt, verify-transition.cjs and real-update-banner.
 Next after explicit publication approval: recheck remote main, push candidate,
 wait for CI/Pages, confirm live version/assets and scoring-analysis/history/offline
 behavior using synthetic data. Do not treat local verification as live deployment.
+
+## Publication verifier rehearsal
+
+Prepared artifacts/release-v93/verify-deployed.cjs with immutable42ff185 asset
+comparison and an added analysis-score-distribution check. Rehearse.cjs serves
+that candidate under/archery-note/ on loopback, matching the Pages subdirectory.
+The verifier labels local results explicitly, rather than claiming deployment.
+
+```text
+PASS: local candidate rehearsal touch swipe dismisses settings and retains sessions
+PASS: local candidate rehearsal v93, seven candidate assets match, analysis score distribution, demo history/start, offline reload, data retention, no page errors
+```
+
+Command: `node artifacts/release-v93/rehearse.cjs`, exit0. Evidence: rehearsal.txt
+and screenshots in the same artifact directory. For live verification after
+approved publication, run verify-deployed.cjs without VERIFY_URL.
+
+Rechecked remote main1c1c2af0 and public version92 on2026-10-01. Publication
+approval was requested in the preceding goal turn and remains unanswered.

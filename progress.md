@@ -33,6 +33,7 @@
 - 次のローカル改善AN-027は585ea8dで実装・検証済み、未公開。得点分布カードの中央値25.8→8.0ms、得点読み取り360002→72000。HTML1000例一致、check:all/lint/format・両ブラウザ16件成功、独立レビュー指摘なし。詳細docs/codex/score-distribution-performance.md。
 - v93候補AN-028は42ff185で準備済み、未公開。版整合・check:all/lint/format・106 passed (1.0m)・実SW v92→93更新/架空履歴保持/offline・21配信物byte一致・独立レビュー成功。詳細docs/codex/release-v93.md。
 - 次: v93公開承認後、remote照合・push・CI/Pages/公開動作確認。公開版はv92。
+- AN-029公開作業はneeds-user。候補を/archery-note/配下に配信したローカルリハーサルで、得点分布・7asset一致・設定タッチスワイプ・offline保持成功。公開サイト確認手順は準備済み。remote main1c1c2af0/公開92を再確認、公開承認は未回答。
 
 - 実機iPhoneで連続記録・エンド確定位置・ズーム抑止・設定スワイプの操作感を確認。v92のエンド確定が解消したか質問済み、回答待ち。
 - 実射の射形判定・保存の受入AN-001は未完了。

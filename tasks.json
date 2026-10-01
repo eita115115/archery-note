@@ -328,5 +328,17 @@
     ],
     "owner": "codex",
     "acceptance": "版整合・配信物・全体回帰・実更新とデータ保持・レビューの証拠を揃え、公開状態と未確認条件を正確に記録する"
+  },
+  {
+    "id": "AN-029",
+    "task": "承認後にv93得点分布高速化を公開し配信を確認する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "docs/codex/release-v93.md: 候補42ff185と公開確認手順を準備。実Pages相当の/archery-note/配下でlocal rehearsal成功、得点分布・7asset一致・設定スワイプ・offline保持・pageerror0。remote main1c1c2af0/公開v92を確認。v93公開承認は未回答、push未実施。",
+    "dependencies": [
+      "AN-028"
+    ],
+    "owner": "codex",
+    "acceptance": "公開承認後にremoteを照合してpushし、CIとPages成功・公開v93と配信物一致・分析と記録の基本操作・データ保持とオフライン動作を確認する"
   }
 ]
