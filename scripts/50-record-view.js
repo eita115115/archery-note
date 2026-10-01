@@ -851,6 +851,24 @@ function pageHeroHtml(type, ctx) {
   }
   return "";
 }
+function focusAnalysisFilterControl(control) {
+  if (!control) return;
+  const card = control.closest(".analysisFilterCard");
+  // Replacement cards lose their measured content-visibility heights. Lay out
+  // the cards above this control before restoring focus or measuring its position.
+  for (const child of Array.from($("#main").children)) {
+    child.style.contentVisibility = "visible";
+    if (child === card) break;
+  }
+  control.focus({ preventScroll: true });
+  const rect = control.getBoundingClientRect();
+  const header = $("header.app");
+  const tabs = $("#tabs");
+  const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 12;
+  const bottom = (tabs ? tabs.getBoundingClientRect().top : window.innerHeight) - 12;
+  if (rect.bottom > bottom) window.scrollBy({ top: rect.bottom - bottom, behavior: "instant" });
+  else if (rect.top < top) window.scrollBy({ top: rect.top - top, behavior: "instant" });
+}
 function analysisFilterBarHtml(allRows, f) {
   const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))].sort((a, b) => b - a);
   const periods = [
@@ -1143,7 +1161,7 @@ function renderAnalysis(m) {
       f.setupId = e.target.value;
       render();
       const next = $("#anSetup");
-      if (hadFocus && next) next.focus({ preventScroll: true });
+      if (hadFocus) focusAnalysisFilterControl(next);
     };
   const anDist = $("#anDist");
   if (anDist)
@@ -1152,7 +1170,7 @@ function renderAnalysis(m) {
       f.dist = e.target.value;
       render();
       const next = $("#anDist");
-      if (hadFocus && next) next.focus({ preventScroll: true });
+      if (hadFocus) focusAnalysisFilterControl(next);
     };
   document.querySelectorAll("#anPeriods .chip[data-period]").forEach(
     (c) =>
@@ -1166,7 +1184,7 @@ function renderAnalysis(m) {
         render();
         if (hadFocus) {
           const chip = document.querySelector(`#anPeriods [data-period="${c.dataset.period}"]`);
-          if (chip) chip.focus({ preventScroll: true });
+          focusAnalysisFilterControl(chip);
         }
       }),
   );

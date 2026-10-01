@@ -34,10 +34,74 @@ async function practiceData(page) {
   });
 }
 
+async function expectWithinAppChrome(control) {
+  await control.evaluate(
+    () =>
+      new Promise((resolve) =>
+        globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
+      ),
+  );
+  await expect
+    .poll(() =>
+      control.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const header = globalThis.document.querySelector("header.app").getBoundingClientRect();
+        const tabs = globalThis.document.querySelector("#tabs").getBoundingClientRect();
+        return rect.top >= Math.max(0, header.bottom) + 4 && rect.bottom <= tabs.top - 4;
+      }),
+    )
+    .toBe(true);
+}
+
 for (const [width, height, colorScheme] of [
   [320, 568, "light"],
   [375, 812, "dark"],
 ]) {
+  test(`changed analysis filters remain visible above fixed navigation (${width}/${colorScheme})`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+    await page.evaluate(() => {
+      const data = JSON.parse(localStorage.getItem("archeryNote.v1"));
+      const base = data.sessions[0];
+      for (let stage = 0; stage < 2; stage++) {
+        data.sessions.push({
+          ...base,
+          id: `filter-visible-${stage}`,
+          dist: stage ? 70 : 90,
+          ends: [[{ ...base.ends[0][0], s: stage ? 9 : 10, X: false }]],
+        });
+      }
+      localStorage.setItem("archeryNote.v1", JSON.stringify(data));
+    });
+    await page.reload();
+    const before = await practiceData(page);
+    await page.locator('#tabs [data-v="analysis"]').click();
+    const setup = page.getByRole("combobox", { name: "用具", exact: true });
+    const distance = page.getByRole("combobox", { name: "距離", exact: true });
+    await setup.focus();
+    await setup.selectOption("__none");
+    await expect(setup).toBeFocused();
+    await expectWithinAppChrome(setup);
+    await setup.selectOption("");
+    await expectWithinAppChrome(setup);
+    await distance.focus();
+    await distance.selectOption("70");
+    await expect(distance).toBeFocused();
+    await expectWithinAppChrome(distance);
+    await distance.selectOption("");
+    await expectWithinAppChrome(distance);
+    const sevenDays = page.locator('[data-period="7d"]');
+    await sevenDays.focus();
+    await sevenDays.press("Enter");
+    await expect(sevenDays).toBeFocused();
+    await expectWithinAppChrome(sevenDays);
+    expect(await practiceData(page)).toEqual(before);
+  });
+
   test(`analysis filters are reachable by their visible labels (${width}/${colorScheme})`, async ({
     page,
   }) => {
