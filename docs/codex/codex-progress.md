@@ -2955,3 +2955,18 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Independent static review found no actionable issue. Saved/inspected375px before/after synthetic screenshots; original shared installed/hidden lock unchanged. Actual iPhone remains unverified.
 - Changed scripts/50-record-view.js, focused regression, analysis-filter-focus.md, screenshot, CHANGELOG/progress/tasks/ledger. Local fix only, publicv94 unchanged, no money or private records.
 - Next: AN-041 version/full release verification before asking to publish the UI fix. A new human approval arrived for AN-036 existing three dependencies; complete that separate publication without including this UI fix or AN-038 additions. Goal remains active.
+
+## 2026-10-01 — Approved dependency publication started (AN-036)
+
+- New human approval authorizes the previously asked existing-three-package main push. Rechecked remote d734ea210acc6f2f30761da6e1a5c36954630e25, which is an ancestor of protected codex/app-quality1d9c9ad1. Runtime diff is empty; no version bump for a development-only change.
+- Analysis fix268b7967 and evidence15e2292 are preserved on codex/analysis-filter-focus and excluded from publication. AN-040 completion is recorded there; this branch still carries its older open task. No Lighthouse major/new28 packages approved or installed.
+- Resynchronized tracked sandbox source to dependency-only branch and removed only the known extra fix test. No root install. Consumer recheck passes3 compatible entries,14 nonmatching saved advisories,2 plist/6 SOCKS/3920 glob/6 brace cases; changed glob count reflects additional tracked docs.
+- Next within this publication: required checks, immutable candidate commit/push, source-specific CI/Pages, unchanged public assets and fresh alert state. No fees or personal data used.
+
+## 2026-10-01 — Dependency publication verified (AN-036)
+
+- Approved candidate de1e3a95 pushed to main. Pages36856785707 and CI36856786262 both succeeded for that source: Linux clean npm ci/check:all/lint/format and110 passed (1.2m). Local110 passed (1.3m) recorded separately.
+- All21 livev94 assets byte-identical; browser history round/distribution/start/44px/settings touch swipe/offline synthetic history retention/pageerror0 passed. Live history screenshot inspected. Shared hidden lock hash unchanged. No new application version or UI behavior deployed.
+- Fresh open/fixed GitHub API confirms14 former open IDs fixed, only development extract-zip high13/27 remain open. No dismissal, forced fix, new dependency, telemetry, payment or private records. Existing high4-package npm audit is not misreported as zero.
+- Publication doc/progress/tasks/CHANGELOG updated. Initial asset helper read a nonexistent manifest; corrected to actual21-file native inventory, setup error retained separately. Workflow inventory read error also documented; no application failure inferred.
+- Next: reconcile publication records onto preserved codex/analysis-filter-focus (268b7967 implementation,15e2292 evidence), then AN-041 full/version/update verification before requesting UI publication. Major28-package approval remains separate. Actual-device/AN-001 open; goal active.

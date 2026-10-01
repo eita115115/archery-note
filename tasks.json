@@ -416,9 +416,9 @@
   {
     "id": "AN-036",
     "task": "承認後に既存3間接依存更新をmainへ反映しCIと警告を確認する",
-    "status": "needs-user",
-    "passes": false,
-    "evidence": "AN-035のローカル候補は検証済み。AGENTS.md Safetyのgit push/Pages deploy事前承認を待つ。アプリv94/runtime不変、新しい公開への承認は未取得。",
+    "status": "done",
+    "passes": true,
+    "evidence": "承認後de1e3a95b29abc1e96690f2fd4d3f9662700c646をmainへ反映。docs/codex/dependency-publication.md。Pages36856785707/CI36856786262成功、110 passed (1.2m)、check:all/lint/format成功。公開v94全21asset byte一致、設定touch/履歴/分析/offline架空記録保持/pageerror0。fresh GitHub14警告fixed、ZIP13/27だけopen、dismissなし。共有hidden lock不変、分析fix/major追加は除外。",
     "dependencies": [
       "AN-035"
     ],
@@ -476,9 +476,9 @@
   {
     "id": "AN-041",
     "task": "分析フィルタ修正を次版の公開候補として検証する",
-    "status": "open",
+    "status": "in-progress",
     "passes": false,
-    "evidence": "AN-040局所検証済み。依存3件の公開承認とは分離し、版更新と全体検証を先に行う。",
+    "evidence": "公開済み依存記録を分析修正branchへ合流。版更新/全体回帰/実SW更新/保持/配信物/reviewを検証中、未公開。",
     "dependencies": [
       "AN-040"
     ],
