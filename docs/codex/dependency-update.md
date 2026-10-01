@@ -128,3 +128,8 @@ Next: after explicit approval, recheck remote state, push this dependency-only
 change, inspect CI/Pages and fetch fresh alert state. Preserve the two no-patch ZIP
 alerts and the original checkout. Physical iPhone UX/AN-001 evidence remains open;
 no money or personal information was used.
+
+Follow-up: [major-upgrade feasibility review](lighthouse-upgrade-review.md) finds
+that a hypothetical13.5.0 tree removes extract-zip, but adds28 new package names.
+It has not been installed or applied and requires separate addition approval.
+The three-package candidate above and its remaining full-audit findings are unchanged.

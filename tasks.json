@@ -424,5 +424,29 @@
     ],
     "owner": "codex",
     "acceptance": "承認後にremoteを再照合してpushし、CI/Pages成功と公開v94の配信物不変・fresh依存アラート状態を確認し、ZIP残存警告を正確に記録する"
+  },
+  {
+    "id": "AN-037",
+    "task": "残るZIP警告へのLighthouse major更新案の依存範囲を調査する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/lighthouse-upgrade-review.md。baseline4f81bb0c、仮lock解決のみでinstallなし。13.5.0 graphからextract-zip消失、audit0/exit0、43entry追加/61削除/21変更・28新package名。Node>=22.19、CLI/source互換とerror-reporting明示抑制の要点を確認。root manifest/lock・shared hidden hash不変、major適用/公開なし。独立レビュー指摘なし、All matched files use Prettier code style!、diff check成功。",
+    "dependencies": [
+      "AN-035"
+    ],
+    "owner": "codex",
+    "acceptance": "既存ZIP警告へのparent更新提案を実metadata解決と公式sourceで確認し、新規依存数・互換/未検証条件・プライバシー・承認境界を記録して実候補と元環境を変えない"
+  },
+  {
+    "id": "AN-038",
+    "task": "専用承認後にLighthouse majorと新規間接依存を隔離して検証する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "AN-037は仮解決の調査のみ。AGENTS.mdのdependency additions事前承認が必要。28新package名を含むmajor更新への承認は未取得。AN-036の既存3件push承認とは別範囲。",
+    "dependencies": [
+      "AN-037"
+    ],
+    "owner": "codex",
+    "acceptance": "新規依存追加への明示承認後に隔離適用・インストールし、error reportingを明示無効化したbaseline helper実行・Node最低版本・audit/全体check/lint/format/E2E/配信物を検証し未確認点と公開状態を記録する"
   }
 ]
