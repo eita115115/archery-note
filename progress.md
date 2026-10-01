@@ -6,23 +6,25 @@
 
 ## 現在地
 
-- 公開アプリv95、公開source0618b37bf5d1af0222c7d23b2fa7eb4a236a6989、runtime7039fcea。AN-042は人間承認後の公開・CI/Pages・配信・操作確認まで完了。
-- 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/analysis-filter-focus。
+- 公開v95、main97945e17。公開runtime7039fcea、AN-042完了。公開記録CI36864216210/Pages36864214685も成功。
+- 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/score-trend-performance。元v95 branchを保持して別branchで局所改善。
+- AN-044完了、実装bd36e8cb60db4367dc58aab59d94832841593bc9。ローカルのみ・版95のまま、AN-045公開候補準備が次。
 - 元checkout/共有node_modules保全、費用・個人情報の使用なし。
 
 ## 今回完了
 
-- v95の分析用具/距離を名前で操作でき、選択/解除/期間変更後もfocusを保って固定ナビに隠れない位置へ最小調整。検証済みruntimeを公開。
-- CI36863682859/Pages36863680921が公開sourceで成功。Linux/Node22 clean npm ci/check:all/lint/format、116 passed (1.1m)。公開前のowned sandbox check:all/lint、formatも成功。
-- 公開95全21asset byte一致。fresh375px Chromiumで用具/距離/期間7dのfocus/両可視境界、履歴group/分布/開始/44px/settings実touch swipe、実SW offline再表示で架空履歴5件とactive保持、pageerror0。分析画像を確認。詳細・出力はdocs/codex/release-v95.md。
-- source/test/dependency99filesとowned sandbox一致、共有hidden lock不変。実SW94→95の両engine320/375更新・保存証拠は候補runtimeと同一。
-- AN-043性能調査完了: 固定v94/v95、14contexts/420samples、候補5000件全距離median Chromium172.8ms/WebKit295ms。入力hash/期待件数/可視性/保存不変、独立review指摘なし。高速化の証拠ではない。詳細はdocs/codex/analysis-filter-performance.md。
-- 変更: release-v95/performance-doc、progress/tasks/台帳、公開履歴。アプリコード・版・依存は検証済み候補から変更なし。
+- 直近得点は既存集計関数を使い、空記録を飛ばした8件が揃った時点で停止。formatter/score coercion/orderは変更なし。
+- red36000!==288/exit1→green288reads、1000seeded/empty/sparse/coercion/overflowでHTML同一・入力不変・8非空後tail未読。check:appに恒久回帰checkを接続。
+- app/analysis/UI/globals/lint成功、両engine分析focus/履歴layout/タブ20 passed (8.8s)。375px前後画像保存/確認・PNG bytes同一。
+- 固定v95/修正ref、14contexts420filter samples、七card batches×20calls。5000card median Chromium4.475→0.030ms/WebKit4.350→0.050ms。全分析の差は小さく、遅くなる条件もあり一律高速化を主張しない。
+- inputhash/serialized size/HTML同一、期待件数/両ref focus/visible bounds/memory/demo保存不変、overflow/pageerror0。独立code/evidence review指摘なし。詳細/出力/限界はdocs/codex/score-trend-performance.md。
+- 変更: scripts/50-record-view.js、tools/check-app.js/check-score-trend.js、性能doc、375前後画像、CHANGELOG/progress/tasks/台帳。
 
 ## 次と未解決
 
-- AN-044: scoreTrendCardの空記録を飛ばした先頭8件だけを集計する。別branchでHTML互換/数値変換/入力不変/読取上限、代表性能と関連app/UI/lintを確認。効果は未測定。
+- AN-045: 次版markers/全体E2E/check/lint/format/実SW更新と記録保持/配信物・主要操作を検証して公開前候補を作る。v95承認は次版公開を含まない。
+- 原則publish前は別の人間承認。現在公開v95、今回の局所改善は未公開・SW/version/依存変更なし。
 - AN-038 Lighthouse major/28新packageには専用承認なし。ZIP13/27未解決、fullaudit high4packages/exit1を0と扱わない。
-- root node_modulesは元checkoutへのjunction、install/update/ci禁止。owned sandboxは検証済み95候補sourceと公開済み3依存更新。
-- 実機iPhone操作感/VoiceOver、AN-001実射判定は未検証。大量履歴はmemoryのみ、5000件実保存/INP/実機性能は未検証。
-- arrowCheck昇格/追加センシング条件未達。目標はactive、界隈で最も愛されるアプリを達成済みとは扱わない。
+- root node_modulesは元checkoutへのjunction、install/update/ci禁止。owned sandbox sourceは今回候補、installedは公開済み3依存更新。
+- 実機iPhone/VoiceOver、AN-001実射判定未検証。大量fixtureはmemoryのみ、5000件実保存/INP/normal-motion performance/少数非空の大量履歴は未測定。
+- arrowCheck昇格/追加センシング条件未達。目標active、界隈で最も愛されるアプリを達成済みとは扱わない。

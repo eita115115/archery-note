@@ -512,13 +512,25 @@
   {
     "id": "AN-044",
     "task": "直近8件の分析カードで全履歴の矢集計を避ける",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-043でscoreTrendCardの全履歴集計後slice8を確認。空記録を飛ばした先頭8件という表示仕様を保持する局所改善、効果は未測定。v95候補と分離して実装する。",
+    "status": "done",
+    "passes": true,
+    "evidence": "bd36e8cb60db4367dc58aab59d94832841593bc9、docs/codex/score-trend-performance.md。red36000!==288/exit1→green288reads・8非空後tail未読。1000seeded/empty/sparse/coercion/overflow HTML同一・input不変。app/analysis/UI/globals/lint成功、両engine関連20 passed (8.8s)、375前後PNG byte同一。14contexts420samples/inputhash/HTML/可視性/期待件数/memory/demo保持/pageerror0。5000card medianChromium4.475→0.030ms/WebKit4.350→0.050ms、wholeapp一律高速化は未証明。独立code/evidence review指摘なし。未公開。",
     "dependencies": [
       "AN-043"
     ],
     "owner": "codex",
     "acceptance": "先頭8つの非空記録のHTMLと数値変換を保持し、空/不正/疎な記録を含む旧新比較と入力不変・矢の読取上限を確認し、両engineの代表測定と関連app/UI/lint検証を記録する"
+  },
+  {
+    "id": "AN-045",
+    "task": "直近得点の集計改善を次版公開候補として検証する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-044は局所実装と関連検証完了、公開はv95のまま。新versionの全体/E2E/実SW更新/配信物・記録保持検証が必要。既存v95公開承認は次版を含まない。",
+    "dependencies": [
+      "AN-044"
+    ],
+    "owner": "codex",
+    "acceptance": "局所集計改善の版マーカー・配信物・全体check/E2E/lint/formatを整合させ、実更新バナーと架空記録保持/offline・主要操作/表示同一・レビューを確認し、次版候補と未確認条件を公開前に記録する"
   }
 ]
