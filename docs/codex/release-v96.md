@@ -1,11 +1,11 @@
-# v96 preparation evidence — AN-045, not release-ready
+# v96 release candidate evidence — AN-045
 
 Public baseline:97945e17dd1529a527be5f0750372378818b2a57/v95.
 Local candidate:a877c4337cfcae4e4b9da52058a44c1ca8c58a6f, branch
-codex/score-trend-performance. No push or deployment. AN-045 remains in progress
-pending corrected normal-route cache polling and the final candidate record audit.
-AN-046 has since identified an asynchronous readiness-wait defect in the helpers;
-the corrected active-session route passes all four engine/width cases. See
+codex/score-trend-performance. No push or deployment. The corrected normal and
+active-session update routes now pass all four engine/width cases each. AN-045's
+candidate acceptance is complete; v96 publication requires separate user approval.
+AN-046 identified an asynchronous readiness-wait defect in the helpers. See
 [the diagnosis and historical regression](offline-worker-update-diagnosis.md).
 
 ## Scope and passing evidence
@@ -43,9 +43,8 @@ v95→96 loaded app, five synthetic saved histories
 unchanged, exact scoreTrendCard HTML, named focused setup/distance visible bounds,
 round subtotal19, then one newly entered active arrow. Origin server is stopped,
 ECONNREFUSED asserted, and actual-worker offline reload retains records and that
-arrow. Their async cache wait did not assert readiness: old-cache absence must be
-rechecked with explicit asynchronous polling before candidate acceptance. These
-initial four results also do not establish the additional active-session route.
+arrow. Their initial async cache wait did not assert readiness; that gap is now
+covered by the corrected normal-route run below. Keep the initial logs separately.
 
 ```text
 PASS: all four actual-worker update/offline cases
@@ -58,6 +57,37 @@ Rehearsal serves this immutable candidate at an owned local server and additiona
 checks7d period focus/bounds. It is not a livev96 result. The unchanged375px score
 trend images and AN-044 comparison remain in score-trend-performance.md; no new
 timing or physical-device speedup is claimed from version metadata.
+
+## Final corrected update acceptance
+
+`verify-transition-normal-corrected.cjs` replaces the async wait with explicit
+expect.poll of the evaluated boolean. Four fresh Chromium/WebKit320light/375dark
+contexts click the real update banner. In each, the gate and a separate state
+assertion establish cache96 only, active registration state activated, and controller
+equality with the active worker before proceeding. All remaining original assertions
+are retained: five histories, exact score-trend HTML, named filter focus/visible
+bounds, round subtotal19, and then an active arrow retained across stopped-origin
+offline reload. Direct transport returns ECONNREFUSED and navigation comes from
+the actual worker; page errors remain zero.
+
+```text
+PASS: all four corrected actual-worker banner/cache-readiness/update/offline cases
+PASS: four immutable v95→v96 active-update/offline regressions
+```
+
+The second result is the tracked AN-046 regression: practice already active on95,
+update guard keeps the banner hidden and freshReload suppressed, registered-worker
+update plus manual browser reload preserves the existing arrow, and two arrows are
+retained offline. Eight route/configuration cases are accepted across these two
+paths; the earlier corrected exploratory active run separately repeated those four
+active cases. This is not an actual-iPhone or arbitrary-timing stress guarantee.
+
+Raw final normal output/JSON/screenshots are separately named
+`transition-normal-corrected.txt/json`, `corrected-normal-update-*.png`, and
+`corrected-normal-analysis-*.png`; the original normal and failed probes remain.
+Final source comparison establishes that candidate application/test/dependency
+bytes are unchanged. Only the historical QA tool and records were added afterward,
+so the candidate's successful full116-test/check:all/lint result remains applicable.
 
 ## Additional route: prior failures retained, readiness defect now identified
 
@@ -121,19 +151,21 @@ These are helper defects, not application failures.
 
 ## Review, next action and evidence inventory
 
-Independent release review confirmed aligned/scoped runtime markers and identified
+Initial independent release review confirmed aligned/scoped runtime markers and identified
 the initial banner guard mismatch. Additional read-only diagnostic review confirmed
-normal four-case validity, corrected baseline labels and unresolved material risk.
-It does not approve all update paths or publication.
+normal four-case observations, corrected baseline labels and the then-unresolved
+material risk. That investigation is superseded by the corrected acceptance below;
+it did not approve all update paths or publication.
 
 AN-046 completed: a minimal always-false async predicate returned false after one
 call in installed Playwright1.61.1, and a controller-version message answered95
 after the original gate. Explicit expect.poll of the evaluated boolean resolves
 the unchanged immutable active route in four cases, independently repeated by the
 durable regression. No application fix was needed or inferred from a hypothesis.
-Next AN-045: correct and rerun the equivalent normal-route cache wait, then complete
-candidate records. Publication approval is not yet requested. Worker activation
-changes/new dependencies still have their own approval
+The equivalent normal-route cache gate is now corrected and all four cases pass.
+The candidate records are complete. Ask for v96 publication approval after final
+record/source verification; do not treat a previousv95 approval as a new push grant.
+Worker activation changes/new dependencies still have their own approval
 boundary. Actual iPhone/VoiceOver/large real storage and AN-001 remain unverified.
 
 Raw artifacts in artifacts/release-v96: check-all.txt, lint.txt, format.txt,
@@ -155,6 +187,48 @@ PASS:existing task acceptance/evidence preserved; candidatea877 runtime unchange
 ```
 
 At that checkpoint only records had changed and AN-045/046 were incomplete.
-AN-046 now adds a diagnostic regression and supersedes the readiness conclusion;
-its corrected active-route evidence is in the diagnosis document. AN-045 remains
-incomplete until the equivalent normal-route wait is corrected and rechecked.
+AN-046 added a diagnostic regression and superseded the readiness conclusion;
+its corrected active-route evidence is in the diagnosis document. AN-045 has now
+rechecked the normal route as well; the historical incomplete record is retained.
+
+## Publication plan and limits
+
+Remote main was read-only verified as97945e17, the expected publicv95 baseline.
+On explicit v96 approval, verify main again, push the reviewed branch without force,
+and check CI and GitHub Pages for the exact publication source. Verify public96
+and all21 asset bytes against that source, then run the prepared375px publication
+helper for analysis focus/visibility, history, settings touch swipe and offline
+synthetic practice retention. That helper's earlier local rehearsal is not live96
+evidence. Report failures and do not mark publication complete early.
+
+The package tree is identical to published95 after removing root version metadata;
+no new packages, telemetry, paid service or personal records are involved. Existing
+ZIP development dependency warnings remain open. Physical iPhone/VoiceOver,
+5000-record actual persistence and INP are unverified. The measured benefit is
+reduced work in the eight-record card; whole-app speedup is not uniformly proved.
+
+## Final record/source audit and review
+
+```text
+PASS: existing task acceptance preserved; candidate runtime/test/dependency unchanged; corrected normal4 readiness and active4 data/offline scopes verified; full116 evidence retained; AN-045 complete and AN-047 awaits approval
+PASS:21 native assets byte-identical/readiness96; dependency tree unchanged; shared hidden lock unchanged
+PASS: 101 candidate source/test/dependency files match owned sandbox; shared hidden lock unchanged
+All matched files use Prettier code style!
+```
+
+The101-file comparison includes the unchanged100 candidate source/test/dependency
+files and the historical QA helper added aftera877. It is not a claim that the QA
+helper belonged to the immutable runtime candidate. Current runtime/tests/dependency
+files remain unchanged froma877. The full116-test/check:all/lint result is retained
+for those same bytes; only corrected update verification and record formatting are
+new results. Staged diff checks pass, owned normal helper is no longer live.
+
+Final independent read-only review confirmed the normal gate and state assertions,
+four JSON rows/completion log, prior active-route evidence, preserved task acceptance
+and candidate/public distinction. No P1/P2 findings. Existing AN-046's interrupted
+document review is historical; this AN-045 record review completed successfully.
+Initial missing Pages/native-helper read paths were corrected from actual inventory
+to ci.yml/verify-native.cjs; those reads were not application check failures.
+
+AN-045 is done with evidence. AN-047 is needs-user/passesfalse for explicit v96
+publication approval. No push, deployment, fee or actual private practice was used.

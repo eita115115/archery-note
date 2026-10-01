@@ -524,9 +524,9 @@
   {
     "id": "AN-045",
     "task": "直近得点の集計改善を次版公開候補として検証する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "a877c4337cfcae4e4b9da52058a44c1ca8c58a6f、docs/codex/release-v96.md。版96整合、check:all/lint/format成功、116 passed (1.1m)、native21 byte/依存tree/shared lock一致。旧normal4のoffline/架空記録保持・preview予行成功。AN-046でasync readiness wait不備を特定し、corrected active4+regression4が成功。normalの同種cache waitをcorrected pollへ直して4cases再検証・最終候補記録が残る。公開準備完了とは扱わない。",
+    "status": "done",
+    "passes": true,
+    "evidence": "a877c4337cfcae4e4b9da52058a44c1ca8c58a6f、docs/codex/release-v96.md。版96/全check/lint/format成功、116 passed (1.1m)、native21 bytes/readiness96・依存tree/shared lock一致。candidate runtime不変。normalのasync gateをexplicit expect.pollへ修正し両engine320/375の4実banner更新・cache96のみ/activated/controller一致・履歴5/HTML/focus bounds/round19・active1/server-stop/ECONNREFUSED/fromSW保持/pageerror0成功。AN-046 tracked regressionのactive route4も成功。予行/同一375表示/既存レビュー・失敗保持と未検証条件を記録。未公開。",
     "dependencies": [
       "AN-044"
     ],
@@ -544,5 +544,17 @@
     ],
     "owner": "codex",
     "acceptance": "現在の失敗を最小再現し、worker/通信/cache/保持データを観測してbaselineとcandidate・browser差を比較し原因または検証制約を根拠から確定する。失敗routeや既存記録を削除せず、必要な修正と未確認条件・AN-045への復帰条件を記録する"
+  },
+  {
+    "id": "AN-047",
+    "task": "承認後にv96直近得点の集計改善を公開して配信と主要操作を確認する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "AN-045候補受入完了。公開baseline95/97945e17をread-only照合、今回pushなし。AGENTS.mdはgit push/GitHub Pages deploy前の人間承認を要求する。新しいv96公開承認待ち。",
+    "dependencies": [
+      "AN-045"
+    ],
+    "owner": "codex",
+    "acceptance": "v96候補への公開承認後にremoteを照合して反映し、source指定CI/Pages成功・公開96全21配信物一致・分析focus/可視性と履歴/設定swipe/主要操作・オフライン架空記録保持を検証して未確認条件も記録する"
   }
 ]
