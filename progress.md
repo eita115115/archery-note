@@ -13,13 +13,17 @@
 
 ## 今回完了
 
-- AN-037: 残るZIP2警告へのLighthouse13.5.0案を仮lock解決/公式sourceで調査。仮graphにextract-zipなし、監査0。
-- ただし43entry追加/61削除/21変更、28新package名を含むmajor更新。Node>=22.19、CLI/reportingの実行検証が必要。承認前の適用・installはしていない。
-- 変更: lighthouse-upgrade-review.md、dependency-updateへの追記、progress/tasks、履歴台帳のみ。実候補4f81bb0cのpackage*.json・shared環境・公開v94は不変。
+- AN-039: 履歴・分析フィルタの狭幅操作を点検。分析の用具/距離で名前付きラベル不在・選択後BODYへのfocus脱落を4ケースで確認。
+- 履歴のラベル/距離focusと分析期間chip focusは保持。選択値は適用、架空保存データ不変、overflow/pageerror0。実機/VoiceOverそのものは未検証。
+- 変更: analysis-filter-audit.md、375/320画像、progress/tasks、履歴台帳のみ。実候補4f81bb0cのpackage*.json・shared環境・公開v94は不変。
 - 実候補はAN-035の既存3件だけ。隔離installedはartifacts/dependency-update/sandbox、rootのshared installedは旧lockのまま。
 
 ## 検証
 
+- Chromium/WebKit320×568light/375×812darkの4ケース成功。分析ラベルの関連付けなし・role name到達0、focused変更後BODYを確認し、履歴の正常な関連付け/保持と比較。
+- selected70/期間7dを適用、session/setup/sight/active不変。画像を保存・目視確認。結果: docs/codex/analysis-filter-audit.md、artifacts/analysis-ux-audit/。
+- 次の局所修正はAN-040。現在の確認は不具合再現であり、分析操作が受入済みとする証拠ではない。
+- 今回の独立レビューはaccount利用上限で未実施。primaryが保存結果と現行sourceを自己確認、課金なし。書式チェック成功、修正後のmerge前reviewは別途必要。
 - 仮13.5.0解決はextract-zip不在、audit0/exit0、28新nameと43/61/21entry差分を確認。仮dirにnode_modulesなし、actual lock/shared hidden hash不変。
 - 公式sourceでは現helperのCLI flagsとreport filenameを維持。13.5.0でのChrome起動・レポート・cleanup・最低Node実行は未検証。reportingは明示無効化が必要。
 - 詳細: docs/codex/lighthouse-upgrade-review.md、artifacts/lighthouse-review/。書式・独立レビュー結果を同文書に記録。
@@ -35,7 +39,8 @@
 
 ## 次と未解決
 
-- 次: AN-036。既存3件の依存更新をmainへpushする承認待ち。質問済み、返答なし。承認後remote再照合・CI/Pages・配信物不変・fresh警告状態を確認する。
+- 次: AN-040。pending依存公開と分離した適切なworktreeで、既存履歴方式を使い分析2selectorのlabel/focusを局所修正・回帰検証する。新規機能や広いdashboard改修ではない。
+- AN-036: 既存3件の依存更新をmainへpushする承認待ち。質問済み、返答なし。承認後remote再照合・CI/Pages・配信物不変・fresh警告状態を確認する。
 - AN-038: major/28新dependency案は別の専用承認が必要。AN-036のpush承認をこの追加承認へ拡張しない。
 - このworktreeのnode_modulesは元checkoutへのjunction。ここでinstall/update/ciを実行して共有先を変更しない。新規依存追加・新しい公開は承認条件を維持。
 - 記録・確定・ページ拡大抑制・設定スワイプ・offlineの実機操作感は未確認。エンド確定について質問済み、回答待ち。

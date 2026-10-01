@@ -448,5 +448,29 @@
     ],
     "owner": "codex",
     "acceptance": "新規依存追加への明示承認後に隔離適用・インストールし、error reportingを明示無効化したbaseline helper実行・Node最低版本・audit/全体check/lint/format/E2E/配信物を検証し未確認点と公開状態を記録する"
+  },
+  {
+    "id": "AN-039",
+    "task": "狭幅の履歴・分析フィルタ操作を読み取り専用で点検する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/analysis-filter-audit.md、baseline0e3ea942。Chromium/WebKit320light/375darkの4ケースで分析用具/距離のaccessible label不在と選択後BODYへのfocus脱落を確認。履歴のラベル/距離focusと分析期間chip focusは保持。値70適用、架空session/setup/sight/active不変、overflow/pageerror0。375/320画像を保存・確認。All matched files use Prettier code style!、diff check成功。独立reviewは利用上限で未実施、primary自己確認のみ。アプリ変更なし。",
+    "dependencies": [
+      "AN-033"
+    ],
+    "owner": "codex",
+    "acceptance": "狭幅の両engineで既存履歴と分析フィルタのラベル・focus・値適用・保存不変を比較し、確認した問題と限界を証拠として残す"
+  },
+  {
+    "id": "AN-040",
+    "task": "分析用具・距離フィルタのラベルと選択後focusを修正する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-039が4ブラウザケースで現行不具合を再現。pending依存公開候補と分離した適切なworktreeで局所修正する。",
+    "dependencies": [
+      "AN-039"
+    ],
+    "owner": "codex",
+    "acceptance": "分析の用具・距離selectorを名前で到達可能にし、focused選択/すべてへ戻す操作後もfocusを保って実filter/期間操作/記録不変を両engine狭幅で確認し、UI/lint・関連app検証と375px前後証拠を記録する"
   }
 ]
