@@ -326,33 +326,36 @@ function groupingTrendItem(g) {
   </div>`;
 }
 function scoreDistCard(ss) {
-  const records = (ss || db.sessions).flatMap((s) =>
-    s.ends.flat().map((a) => ({ a, faceType: s.faceType || "single" })),
-  );
-  const all = records.map((x) => x.a);
-  if (all.length < 12) return "";
-  const fieldOnly = records.length && records.every((x) => (x.faceType || "single") === "field");
+  /* 各得点の件数と最初の的種を一度で集計。空の得点行の色探しで全矢を再走査しない。 */
+  const cnt = Object.create(null), firstFace = Object.create(null);
+  let count = 0, fieldOnly = true;
+  (ss || db.sessions).forEach((s) => {
+    const faceType = s.faceType || "single";
+    s.ends.flat().forEach((a) => {
+      count++;
+      if (faceType !== "field") fieldOnly = false;
+      const key = a.s === 0 ? "M" : a.X ? "X" : String(a.s);
+      cnt[key] = (cnt[key] || 0) + 1;
+      if (firstFace[key] === undefined) firstFace[key] = faceType;
+    });
+  });
+  if (count < 12) return "";
   const keys = fieldOnly
     ? ["6", "5", "4", "3", "2", "1", "M"]
     : ["X", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "M"];
-  const cnt = {};
-  keys.forEach((k) => (cnt[k] = 0));
-  records.forEach(({ a }) => {
-    cnt[a.s === 0 ? "M" : a.X ? "X" : String(a.s)]++;
-  });
-  const max = Math.max(...keys.map((k) => cnt[k])) || 1;
+  const max = Math.max(...keys.map((k) => cnt[k] || 0)) || 1;
   return (
-    `<div class="card"><h2>得点の内訳 <span class="mini">全${all.length}本</span></h2>` +
+    `<div class="card"><h2>得点の内訳 <span class="mini">全${count}本</span></h2>` +
     keys
       .filter((k) => cnt[k] > 0 || (!fieldOnly && ["X", "10", "9", "8", "7"].includes(k)))
       .map((k) => {
         const sNum = k === "X" ? 10 : k === "M" ? 0 : +k;
-        const rec = records.find((x) => (x.a.s === 0 ? "M" : x.a.X ? "X" : String(x.a.s)) === k);
-        const z = zoneStyle(sNum, k === "X", rec && rec.faceType);
+        const z = zoneStyle(sNum, k === "X", firstFace[k]);
+        const n = cnt[k] || 0;
         return `<div class="histScoreRow">
         <div class="histScoreLabel" style="background:${z.bg};color:${z.fg}">${k}</div>
-        <div class="histScoreTrack"><div class="histScoreFill" style="width:${((cnt[k] / max) * 100).toFixed(1)}%"></div></div>
-        <div class="histScoreCount">${cnt[k]}本 (${((cnt[k] / all.length) * 100).toFixed(0)}%)</div>
+        <div class="histScoreTrack"><div class="histScoreFill" style="width:${((n / max) * 100).toFixed(1)}%"></div></div>
+        <div class="histScoreCount">${n}本 (${((n / count) * 100).toFixed(0)}%)</div>
       </div>`;
       })
       .join("") +

@@ -389,6 +389,19 @@ const fieldDistHtml = historyApi.scoreDistCard([{id:"field",date:"2026-03-01",di
 ]]}]);
 assert(fieldDistHtml.includes("得点の内訳") && fieldDistHtml.includes(">6</div>") && !fieldDistHtml.includes(">10</div>") && !fieldDistHtml.includes(">X</div>"), "Field score distribution failed");
 
+/* 得点分布は矢を何度も走査しない。時間の揺れによらず大量履歴での読み取り量を検証する。 */
+let distributionScoreReads = 0;
+const distributionSessions = Array.from({length:1000}, () => ({
+  faceType:"single",
+  ends:[Array.from({length:36}, () => ({get s(){ distributionScoreReads++; return 9; }, X:false}))]
+}));
+const largeDistributionHtml = historyApi.scoreDistCard(distributionSessions);
+assert(largeDistributionHtml.includes("全36000本") && largeDistributionHtml.includes("36000本 (100%)"), "Large score distribution totals changed");
+assert(distributionScoreReads <= 36000 * 2 + 128, `Score distribution repeatedly scans arrows: ${distributionScoreReads} reads`);
+const fieldWithEmptySingle = historyApi.scoreDistCard([{faceType:"single",ends:[]}, {faceType:"field",ends:[Array.from({length:12},()=>({s:6}))]}]);
+assert(fieldWithEmptySingle.includes(">6</div>") && !fieldWithEmptySingle.includes(">X</div>"), "Empty sessions changed field-only score buckets");
+console.log(`Score distribution: 36000 arrows, ${distributionScoreReads} score reads`);
+
 console.log(`Archery Note checks OK (v${version})`);
 console.log(`Robust grouping: used=${st.n}, excluded=${st.excluded.length}, confidence=${Math.round(st.confidence*100)}%`);
 console.log(`Physics: ${phys.speedFps.toFixed(0)}fps, rho=${phys.rho.toFixed(2)}, Cd=${phys.cd.toFixed(2)}`);
