@@ -23,3 +23,7 @@ Next: resolve security policy and trace actual CLI/browser-tooling entrypoints a
 untrusted input boundaries, retaining one verdict per alert. No dependency install,
 update, native build, exploit test, external report or publication was performed.
 Do not dismiss alerts on the basis of development scope alone.
+
+Follow-up on2026-10-01: [bounded exposure check](dependency-alert-exposure.md)
+retains the now16 open alerts, traces actual callers and proposes compatible patch
+preparation. It does not claim a completed repository-wide audit or dismiss alerts.

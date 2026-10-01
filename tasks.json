@@ -388,5 +388,17 @@
     ],
     "owner": "codex",
     "acceptance": "承認後remoteを照合してpushし、CI/Pages成功・公開94とcandidate配信物一致・履歴ラウンド開閉/詳細/フィルタと記録基本操作・データ保持を確認して未確認点も記録する"
+  },
+  {
+    "id": "AN-034",
+    "task": "公開時の依存16アラートをPWAと開発callerの範囲で確認する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/dependency-alert-exposure.md、baseline d734ea210acc6f2f30761da6e1a5c36954630e25。16件すべてdevelopment、4パッケージinstalled/lock一致、PWA14script参照なし・node_modules追跡なし。prod audit0/exit0、Security regression: all 38 checks passed、All matched files use Prettier code style!、diff check成功。16行の処置と実caller・検証限界を独立レビュー、指摘なし。3互換更新候補14件/未修正版ZIP2件を記録、依存更新・dismiss・公開はしていない。",
+    "dependencies": [
+      "AN-033"
+    ],
+    "owner": "codex",
+    "acceptance": "全openアラートを個別に残し、ロック/installedと配信・実callerの範囲を照合して限定的結論・未確認点・次の対応を記録し、既存security回帰と書式を確認する"
   }
 ]
