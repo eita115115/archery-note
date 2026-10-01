@@ -488,9 +488,9 @@
   {
     "id": "AN-042",
     "task": "承認後にv95分析フィルタ修正を公開して配信と操作を確認する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "人間の承認しますを受領。候補7039fcea/v95への公開承認としてremote main=e1ec1fe6を照合、runtime変更なし。CI/Pages/公開確認は進行中。AN-038の新規依存は承認範囲外。",
+    "status": "done",
+    "passes": true,
+    "evidence": "人間承認後0618b37bf5d1af0222c7d23b2fa7eb4a236a6989をmainへ反映。docs/codex/release-v95.md。CI36863682859/Pages36863680921成功、116 passed (1.1m)、check:all/lint/format成功。公開95全21asset byte一致、用具/距離/期間focus/可視性・設定touch swipe・履歴group/分析分布/開始44px/offline架空記録保持/pageerror0。source99files一致、共有hidden lock不変。実iPhone/VoiceOver未検証、AN-038追加なし。",
     "dependencies": [
       "AN-041"
     ],

@@ -1,8 +1,9 @@
-# App v95 candidate — 2026-10-01
+# App v95 release and candidate evidence — 2026-10-01
 
 Public baseline:e1ec1fe6747e03bac11b41baeba55c1668ad51d5/v94. Local final runtime
 candidate:7039fcea9e84806b2c6aa852b9a90aa1e438e295, branch codex/analysis-filter-focus.
-This prepares AN-041; it is not publication approval or a claim thatv95 is live.
+AN-041 preparation is recorded below; the approved AN-042 publication is now
+verified in the final section.
 
 ## Resulting behavior
 
@@ -114,7 +115,8 @@ filter-visibility*.txt/json. No application/dependency install failures occurred
 
 ## Publication boundary
 
-Local candidate only. AGENTS.md requires explicit approval before git push/Pages
+At candidate preparation this was local only. AGENTS.md requires explicit
+approval before git push/Pages
 deployment. The previous approval covered existing three dependencies, which
 are already published; it does not authorize this UI release or AN-038 additions.
 After approval, recheck remote, publish this immutable runtime with its records,
@@ -129,8 +131,51 @@ them. The broad community goal stays active.
 
 A new human approval authorizes AN-042 publication of this candidate. Remote main
 was rechecked at e1ec1fe6; final runtime remains7039fcea. Approval does not include
-AN-038 dependency additions. Public verification is pending until recorded below.
+AN-038 dependency additions. Public verification succeeded as recorded below.
 
 The completed [synthetic performance audit](analysis-filter-performance.md) records
 large-history latency and its limits. It changes no runtime and does not claim
 a speedup from the focus fix. A separate AN-044 optimization is queued.
+
+## Approved publication verified — AN-042
+
+Human approval covered this v95 release. Publication source:
+0618b37bf5d1af0222c7d23b2fa7eb4a236a6989; runtime remains7039fcea.
+[CI36863682859](https://github.com/eita115115/archery-note/actions/runs/36863682859)
+and [Pages36863680921](https://github.com/eita115115/archery-note/actions/runs/36863680921)
+both succeeded for that exact source. Linux/Node22 CI used clean npm ci, all
+checks, lint, format and the complete116-test suite.
+
+```text
+Archery Note checks OK (v95)
+Security regression: all 38 checks passed
+UI smoke checks OK (google-chrome)
+PWA asset checks OK
+PWA update flow checks OK
+Storage contract checks OK
+Storage round-trip checks OK
+Save debounce checks OK
+Version alignment checks OK
+All matched files use Prettier code style!
+116 passed (1.1m)
+PASS: all21 deployed v95 assets byte-identical to approved publication 0618b37bf5d1af0222c7d23b2fa7eb4a236a6989
+PASS: deployed touch swipe dismisses settings and retains sessions
+PASS: deployed v95, seven candidate assets match, round collapse/expansion and score distribution, synthetic history/start, offline reload, data retention, no page errors
+```
+
+The fresh375px Chromium context additionally checks focused named equipment and
+distance controls and period7d, with both visible bounds above fixed navigation.
+Five synthetic histories survive filtering and touch dismissal, and records plus
+an active practice survive actual-worker offline reload. Live analysis screenshot
+was inspected. This uses a fresh synthetic profile, not private practice data;
+it does not prove physical iPhone/VoiceOver or upgrade retention for all real users.
+
+Raw evidence: artifacts/release-v95/ci-log.txt, ci-status-final.json,
+pages-status-final.json, live-assets.json/txt, live-browser.txt,
+verify-live-assets.cjs and verify-deployed-publication.cjs. Pre-push check:all/lint
+exit0, format-publication-final.txt passed;99 source/test/dependency files match
+owned sandbox and the original shared hidden lock remains unchanged.
+
+No dependency addition, paid service or personal information use. The two existing
+development ZIP alerts remain outside this UI release. Next: AN-044, the bounded
+first-eight-nonempty score-trend aggregation optimization on a separate branch.
