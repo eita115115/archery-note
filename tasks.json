@@ -556,5 +556,53 @@
     ],
     "owner": "codex",
     "acceptance": "v96候補への公開承認後にremoteを照合して反映し、source指定CI/Pages成功・公開96全21配信物一致・分析focus/可視性と履歴/設定swipe/主要操作・オフライン架空記録保持を検証して未確認条件も記録する"
+  },
+  {
+    "id": "AN-048",
+    "task": "6本エンドのスマートフォン記録・修正・終了フローを読み取り専用で点検する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/phone-six-arrow-flow-audit.md。immutable85a52fcのChrome/WK320/375 normal-motion headless touch4cases、70m122cm/6本undo+nudge/2end保存・既存3件不変・reload保持/pageerror0。fFace/fArrows名欠落とtoast/end文字の重なりを4cases確認。WK375は微調整後の第1end確定→第2end0本でtargetY=-309/height292.3125/visible0、manual recovery必要。95/97945対照1caseも同じ問題。画像/ARIA/失敗helper保持・独立review scope確認。公開候補85固定、アプリ変更なし。",
+    "dependencies": [
+      "AN-046"
+    ],
+    "owner": "codex",
+    "acceptance": "両engine320/375で6本記録と取消・微調整・エンド確定・終了を観測し、表示/操作/名前/戻り位置と架空既存記録保持の証拠・検証限界を残し、公開承認待ち候補を変更しない"
+  },
+  {
+    "id": "AN-049",
+    "task": "微調整から戻った後に次エンドの的が画面外へ残る問題を修正する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-048: WK375で微調整/選択解除/第1end確定後、targetY=-309/height292.3125/visible0。95対照も再現。source原因未確定、まず実際の手動scrollを含む戻り経路の失敗テストを固定する。",
+    "dependencies": [
+      "AN-048"
+    ],
+    "owner": "codex",
+    "acceptance": "微調整のscrollを含む戻り経路を再現して原因を確定し、次エンドの的を手動の戻りscrollなしで操作可能にし、両engine狭幅の関連記録/選択/タブ位置と点数・保存保持、UI/app/lint・375前後画像を確認する"
+  },
+  {
+    "id": "AN-050",
+    "task": "記録直後の通知がエンド確定の文字に重なる問題を修正する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-048全4casesのshown0.98-opacity score toastがbEndに3157〜3408px²重なる。pointer-events:noneでありクリック阻害とは別。",
+    "dependencies": [
+      "AN-048"
+    ],
+    "owner": "codex",
+    "acceptance": "記録中の通知とエンドactionの視覚重なりを防ぎ、通知内容/読み上げと主操作を維持し、両engine320/375・通常/縮小motion・結果/設定overlayを確認してUI/lintと375前後証拠を残す"
+  },
+  {
+    "id": "AN-051",
+    "task": "記録開始の的・1エンド本数の入力を名前で操作できるようにする",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-048全4cases: fFace/fArrowsはlabels=[]・ARIA名なし、snapshotのcomboboxも無名。見た目のラベルは表示されている。",
+    "dependencies": [
+      "AN-048"
+    ],
+    "owner": "codex",
+    "acceptance": "既存表示ラベルを対応するselectorに結び付け、名前で的/1エンド本数を選んで表示と開始条件が一致することを確認し、両engine狭幅の関連record/keyboard・UI/lintと375表示証拠を残す"
   }
 ]
