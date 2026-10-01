@@ -292,5 +292,17 @@
     ],
     "owner": "codex",
     "acceptance": "全体検証・版整合・更新時のデータ保持・レビューを確認して公開可否の材料を揃える"
+  },
+  {
+    "id": "AN-026",
+    "task": "v92の練習終了・結果画面・履歴再確認を狭幅で点検する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/finish-flow-audit.md: Chromium/WebKit320/375pxの4ケース成功、2エンドと未確定1本を[3,3,1]で保存、結果閉じ・履歴7本・reload保持、既存架空履歴不変、pageerror0。アニメーション待ち修正後の画像を確認。実装変更なし。",
+    "dependencies": [
+      "AN-025"
+    ],
+    "owner": "codex",
+    "acceptance": "未確定矢を含む終了、結果画面の表示と閉じる操作、履歴と再読み込み後保持、既存架空履歴不変を両エンジン狭幅で確認し限界も記録する"
   }
 ]

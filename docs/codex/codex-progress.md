@@ -2825,3 +2825,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Live Chromium/WebKit at320x568 and375x812: `4 passed (20.5s)`, six arrows/two ends with the initial guide open and no scrolling. Evidence in artifacts/release-v92/.
 - Updated release-v92, CHANGELOG, progress and AN-025 evidence. App source unchanged after candidate publication. No money or personal data used.
 - Next: physical iPhone feel and AN-001 real-practice acceptance remain unverified.
+
+## 2026-10-01 — Finish and history audit (AN-026)
+
+- Previous goal turn made progress by publishing and verifying v92; no running job required waiting.
+- Fresh local Chromium/WebKit320x568/375x812, two ends plus a partial end: all four saved [3,3,1], active cleared, result dismissed, history/reload retained seven arrows, prior synthetic sessions unchanged, zero page errors.
+- Initial screenshots were mid-animation; corrected harness to wait for completion and repeated the four cases. Inspected settled375px result; no dock overlap. No runtime defect found in this scope.
+- Added finish-flow-audit.md, progress/tasks evidence. Documentation only, local commit; no new publication, money or personal-data use.
+- Asked user whether v92 resolves the end action. Next concrete improvement depends on remaining real-device friction; AN-001 still requires actual shooting.
