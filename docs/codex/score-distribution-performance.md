@@ -1,7 +1,7 @@
 # Score distribution performance
 
 2026-10-01, baselinecd02425 and implementation585ea8d.
-Public app remainsv92; this optimization is local and not published.
+Published asv93 after user approval; see [release record](release-v93.md).
 
 ## Cause and change
 
@@ -75,5 +75,5 @@ confirmed the missing handle and started a new server. The first generated paire
 harness had a syntax error, corrected before collecting the20 pairs. Neither
 failure is treated as evidence of an application regression.
 
-Next: release-wide checks and version/update verification before publication
-approval. Real-device feedback and AN-001 actual-shooting acceptance remain open.
+Release-wide checks, update verification and publication completed asv93.
+Real-device feedback and AN-001 actual-shooting acceptance remain open.

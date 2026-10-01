@@ -2864,3 +2864,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Publication approval is absent in three consecutive goal turns: candidate preparation/request, rehearsal, and this state audit. AN-029 stays needs-user/passesfalse. The only other open task is user-owned actual-shooting acceptanceAN-001; no result has been supplied.
 - Candidate verification and independent release preparation are complete. Further live publication requires the AGENTS.md explicit approval gate; field/user-preference evidence cannot be manufactured from synthetic browser tests.
 - Recorded the stop condition in progress.md and keep the full aspiration uncompleted. Mark goal blocked pending approval or actionable real-device feedback; resume from the verified candidate when the user replies. No push, runtime change, money or personal-data use.
+
+## 2026-10-01 — v93 approved publication (AN-029)
+
+- User approved and resumed the goal. Worktree clean/runtime identical to42ff185; remote unchanged1c1c2af0. Pushed5c6ecea9; Pages36821315831 and CI36821316579 succeeded, `106 passed (59.0s)`.
+- Live93/seven immutable candidate assets match. Chromium analysis/history/start, native touch dismissal, offline retention and zero page errors passed. Live WebKit320/375 score distribution all/filter/reset and session retention passed online.
+- Optional WebKit offline reload failed with internal error, exact rerun reproduced. Same error against immutablev92 at both widths with controller/cache present. Root cause unproven; recorded failures and AN-030 for minimal reproduction. No app fix guessed, no WebKit/iPhone offline claim.
+- Updated release-v93/performance doc/CHANGELOG/progress/tasks. Publication approval blocker cleared. Runtime unchanged after publish; no money/personal data used.
+- Next: AN-030 offline diagnosis and actual-device feedback/AN-001. Goal remains active and broader product aspiration is not claimed complete.

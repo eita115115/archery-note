@@ -6,37 +6,33 @@
 
 ## 現在地
 
-- v92公開済み。ユーザー承認後ae97bf617da289998ab395946476cb5f671cde92をmainへpush。
+- v93公開済み。承認後5c6ecea9e51cb932a0dbbfe17f4e0ba07811fc97をmainへpush。
 - 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/app-quality。
 - 元の作業場所の未コミット変更は保全。費用・個人情報の使用なし。
 
 ## 完了
 
 - 大量履歴高速化、履歴・記録開始・44px操作領域・HUD改善。
-- v89: シートをスワイプで閉じる。v90: タブ別閲覧位置保持。
-- v91: エンド確定を画面下部に固定。ページ全体の拡大を抑制し、スクロールと的の倍率操作を維持。
-- v92: 初回ガイドをチップ・微調整操作の下へ移動。短い画面で連続記録時に的が画面外へ押し出される問題を修正。
-- 変更: scripts/50-record-view.js、tests/e2e/end-sequence.spec.js、版マーカー・生成物、375px前後画像、作業記録。
+- v89: シートのスワイプ閉じ。v90: タブ別閲覧位置保持。
+- v91: エンド確定固定・ページ拡大抑制。v92: 初回ガイドを記録操作の下へ移動。
+- v93: 得点分布を一度で集計。カード中央値25.8→8.0ms（架空1000件・CPU4倍減速）、HTML1000例完全一致。
+- 変更: scripts/60-history-sight-view.js、tools/check-app.js、版マーカー5ファイル、作業記録。
 
 ## 検証
 
-- check:all/lint/format成功。Linux CI36796668313: `106 passed (1.1m)`。
-- Pages36796667134成功。公開版92と7ファイル一致。
-- 公開Chromium/WebKit320×568・375×812: `4 passed (20.5s)`。初回ガイドを開いたまま、画面座標操作で6本記録・2エンド確定。
-- 公開設定タッチスワイプ、架空履歴保持、offline再読込、pageerror0確認。
-- 実SW v91→92更新保持成功。独立レビュー指摘なし。
-- 詳細: docs/codex/release-v92.md。画像: docs/screenshots/end-sequence/。
-- 追加の終了フロー点検AN-026: Chromium/WebKit320/375pxの4ケース成功。未確定1本も保存し、結果を閉じて履歴確認・再読み込み後保持。詳細docs/codex/finish-flow-audit.md。実装変更なし。
+- CI36821316579成功: `106 passed (59.0s)`、check:all/lint/format成功。
+- Pages36821315831成功。公開93と7candidate asset一致。
+- 公開Chromium: 得点分布・架空履歴/記録開始・設定タッチスワイプ・offline/データ保持・pageerror0成功。
+- 公開WebKit320/375px: 分析の全件/距離絞込/解除の矢数・保存不変・オンラインpageerror0成功。
+- WebKit offline reloadは内部エラーで失敗。immutable旧92でも同条件で再現し、controllerとshell cacheを確認。原因未確定、AN-030へ記録。
+- 実SW v92→93更新/データ保持成功。21配信物byte一致。独立レビュー指摘なし。
+- 詳細: docs/codex/release-v93.md、score-distribution-performance.md。
 
 ## 次と未解決
 
-- 次のローカル改善AN-027は585ea8dで実装・検証済み、未公開。得点分布カードの中央値25.8→8.0ms、得点読み取り360002→72000。HTML1000例一致、check:all/lint/format・両ブラウザ16件成功、独立レビュー指摘なし。詳細docs/codex/score-distribution-performance.md。
-- v93候補AN-028は42ff185で準備済み、未公開。版整合・check:all/lint/format・106 passed (1.0m)・実SW v92→93更新/架空履歴保持/offline・21配信物byte一致・独立レビュー成功。詳細docs/codex/release-v93.md。
-- 次: v93公開承認後、remote照合・push・CI/Pages/公開動作確認。公開版はv92。
-- AN-029公開作業はneeds-user。候補を/archery-note/配下に配信したローカルリハーサルで、得点分布・7asset一致・設定タッチスワイプ・offline保持成功。公開サイト確認手順は準備済み。remote main1c1c2af0/公開92を再確認、公開承認は未回答。
-- 自律作業の現在の停止条件: v93公開承認待ち。候補準備・リハーサル・今回の照合の3連続goal turnで同じ条件を確認。残タスクは公開AN-029と実射AN-001のみ、必要な独立準備は完了。承認または実機の具体的なフィードバックを受けたら再開する。
-
-- 実機iPhoneで連続記録・エンド確定位置・ズーム抑止・設定スワイプの操作感を確認。v92のエンド確定が解消したか質問済み、回答待ち。
+- 次: AN-030でWebKit内部エラーを最小SW/HTMLと比較して切り分ける。証拠なくSW動作は変更しない。
+- v93公開承認の停止条件は解消。目標はactive、完了扱いにしない。
+- 実機iPhoneの記録・確定・拡大抑制・設定スワイプ・offline操作感は未確認。v92のエンド確定について質問済み、回答待ち。
 - 実射の射形判定・保存の受入AN-001は未完了。
-- arrowCheck昇格と追加センシングはロードマップの条件未達。
+- arrowCheck昇格・追加センシングはロードマップの条件未達。
 - 依存アラートは初回静的確認のみ、実害確定・更新は未実施。

@@ -332,13 +332,25 @@
   {
     "id": "AN-029",
     "task": "承認後にv93得点分布高速化を公開し配信を確認する",
-    "status": "needs-user",
-    "passes": false,
-    "evidence": "docs/codex/release-v93.md: 候補42ff185と公開確認手順を準備。実Pages相当の/archery-note/配下でlocal rehearsal成功、得点分布・7asset一致・設定スワイプ・offline保持・pageerror0。remote main1c1c2af0/公開v92を確認。v93公開承認は未回答、push未実施。3連続goal turnで同じ承認待ちを再確認、公開準備は完了。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v93.md: 承認後5c6ecea9公開、Pages36821315831/CI36821316579成功、106 passed (59.0s)。公開93/7asset一致、Chromium分析・設定タッチスワイプ・offline保持・pageerror0。WebKit320/375分析全件/絞込/解除と記録不変は成功。WebKit offline内部エラーは旧v92でも再現、未確定原因をAN-030へ記録。",
     "dependencies": [
       "AN-028"
     ],
     "owner": "codex",
     "acceptance": "公開承認後にremoteを照合してpushし、CIとPages成功・公開v93と配信物一致・分析と記録の基本操作・データ保持とオフライン動作を確認する"
+  },
+  {
+    "id": "AN-030",
+    "task": "WebKitオフライン再読み込みの内部エラーを最小再現で切り分ける",
+    "status": "open",
+    "passes": false,
+    "evidence": "docs/codex/release-v93.md: 公開93とimmutable92で320/375px同一のpage.reload内部エラー。オンライン分析操作・保存不変は成功。controllerとcache shell全件は存在。アプリ/SW・ブラウザport・自動化の原因は未確定。Chromium offlineは成功。",
+    "dependencies": [
+      "AN-029"
+    ],
+    "owner": "codex",
+    "acceptance": "最小のSW/HTMLと実アプリで同じオフライン再読み込みを比較し、再現条件・原因の根拠・未確認点を記録して次に必要な対応を決める"
   }
 ]
