@@ -2898,3 +2898,12 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Independent review found no actionable issues and independently passed version/PWA checks. Prepared and rehearsed the live verifier against fixedcandidate: seven assets match, round disclosure/analysis/start,44px controls/HUD, real touch sheet dismissal and offline data retention pass.
 - Updated release-v94, history evidence, CHANGELOG, roadmap, progress/tasks. No validation failures in this preparation; implementation's earlier test failures remain recorded. No push, new dependencies, money or personal-data use.
 - Next: request explicit approval forv94 publication, then recheck remote and push, wait CI/Pages and live-verify. Public93 unchanged. Physical iPhone feel/AN-001 remain unverified; goal remains active.
+
+## 2026-10-01 — v94 approved publication (AN-033)
+
+- Previous turn progressed through verifiedcandidate5abc0ba and c2df3c0 evidence. Started a fresh approval-state audit, confirmed remote8d4bafb/public93 and completed previous jobs. User then explicitly approvedv94 during the turn, resolving the publication gate; no blocked status was set.
+- Confirmed clean runtime identical to candidate; recorded approval in e4ec1abe and pushed to main. Pages36825162385 and CI36825163421 succeeded; Linux110 passed (1.2m), check:all/lint/format success.
+- Live94/seven candidate assets match. Chromium disclosure/analysis/start/HUD/44px, actual touch sheet dismissal, offline retention/pageerror0 succeeded. Public Chromium/WebKit320/375px four cases verify total34, stage order/detail, filter subtotal17, expansion retention/collapse, no overflow and seven synthetic records plus active-arrow reload retention.
+- Inspected public screenshot and preserved exact logs. Initial deploy-pages.yml read failed because no such tracked workflow exists; inspected actual ci.yml inventory and source-specific Pages run. Documentation patch whitespace mismatch rejected without writes, inspected and corrected. No application/verification failure or post-candidate runtime change.
+- Updated release94/history evidence/CHANGELOG/roadmap/progress/tasks. No personal data, money, new dependency, scoring or storage changes. Original worktree changes preserved.
+- Next: actual-device UX feedback and AN-001 real-shooting acceptance remain open. Publication approval blocker is resolved; the goal remains active and the full community aspiration is not claimed complete.

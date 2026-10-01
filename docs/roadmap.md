@@ -4,7 +4,7 @@
 迷ったらまずここを見る。ここで既に決めてある判断は再度ユーザーに聞かない。
 ここに無い**新規の**重大判断（機能の追加/廃止・schema 変更・破壊的変更）だけユーザーに確認する。
 
-最終更新: 2026-10-01（公開v93 / ローカルv94候補）
+最終更新: 2026-10-01（公開v94）
 
 ## 現在の状態と根拠
 
@@ -20,7 +20,7 @@
 | 旧記録画面コードの整理                    | 完了     | recordIntroHtml / recordCoachCardHtml / RECORD_FLOW_MODES は現行scriptsに存在しない |
 | 射形一覧のキーボード到達性                | 完了     | scripts/47-form-view.js の formAnalysisRow 内button                                 |
 | CSVのラウンド列                           | 完了     | scripts/40-analysis-physics.js の exportSessionsCsv、round列とroundLabel            |
-| 履歴のラウンドグループ折りたたみ          | 進行中   | AN-031実装、AN-032 v94候補全体110 E2E・更新保持成功。release-v94.md、公開承認待ち   |
+| 履歴のラウンドグループ折りたたみ          | 完了     | AN-033 v94公開、CI110 E2E・公開両ブラウザ320/375確認成功。release-v94.md            |
 | arrowCheckの自動取消への昇格              | 進行中   | 注釈のみの実装あり。実射G1〜G3未確認、自動取消は有効化しない                        |
 | 射形判定・保存の実射受入                  | 進行中   | AN-001、docs/form-diagnostic-field-acceptance.md の実機基準が未完了                 |
 | 50msレットダウン識別                      | 未着手   | 旧D-3の保留を維持。arrowCheck昇格で解決したとは未証明                               |
@@ -123,7 +123,7 @@ v1.6.0 で `RELEASE_TH` を body-lengths/sec 単位に再チューン（1.2→9�
 
 **P2（自律可・小〜中）** — ✅ 全完了（PR #119, #120）4. `.lens.fine.cut` の直書き `#0f9d58` → `var(--green)` トークン化 ✅ 5. `writeSafetySnapshot` の idle 毎 JSON.parse → `_lastSnapTs` キャッシュで早期 return ✅ 6. デッドコード掃除（`recordIntroHtml`/`recordCoachCardHtml`/`RECORD_FLOW_MODES` + CSS ~150行 + check 更新）✅ 7. 射形一覧 listItem のキーボード到達性（`.formAnalysisRow` ラッパー + button 化）✅
 
-**P3（要ユーザー判断 / 大）** 8. IMP-09フェーズ2: CSVのラウンド列は対応済み。広いUX改善委任に沿った履歴折りたたみの小変更はAN-031でローカル検証済み、公開前検証は次。9. arrowCheck 昇格後の「弓の向き/クリッカー音」等の追加センシング — 新規機能なので発案時に要相談。
+**P3（要ユーザー判断 / 大）** 8. IMP-09フェーズ2: CSVのラウンド列は対応済み。広いUX改善委任に沿った履歴折りたたみの小変更はAN-033でv94公開・検証済み。9. arrowCheck 昇格後の「弓の向き/クリッカー音」等の追加センシング — 新規機能なので発案時に要相談。
 
 **却下 / 保留**
 

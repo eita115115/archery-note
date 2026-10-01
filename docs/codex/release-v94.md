@@ -1,10 +1,10 @@
-# v94 release candidate
+# v94 release
 
 Prepared on2026-10-01. Candidate5abc0ba008eb0f42d12d455cc177caafe8a7f0e2;
 history implementation1e95918f4273dfb06db7ae49e96cc48121a19016.
-Public version remains93 and remote main remains8d4bafb187feff1f27023cd3f1c3323633ddf74b.
-User approved publication on2026-10-01. Publication is in progress; success must
-still be confirmed by CI/Pages and live verification.
+Published on2026-10-01 after explicit user approval, from
+e4ec1abe6dd78aa18ccae703be2beee65988c2f5. CI/Pages succeeded and public version94
+and candidate asset identity were verified.
 
 ## Change
 
@@ -92,10 +92,40 @@ native-assets.txt, transition.txt/json, rehearsal.txt and associated scripts/ima
 No validation failures occurred in this preparation. Implementation-stage test
 failures remain documented in history-round-collapse.md.
 
-## Approved publication in progress
+## Approved publication
 
-Local commits and tests are complete. The user explicitly approved thisv94
-candidate, satisfying AGENTS.md's push/deployment gate. Remote main was rechecked
-at8d4bafb; runtime still exactly matches candidate5abc0ba. Next intentionally push
-the candidate and supporting records, wait for CI/Pages, then perform live checks.
-The public app is not claimedv94 until those checks succeed.
+The user explicitly approved thisv94 candidate, satisfying AGENTS.md's
+push/deployment gate. Rechecked remote8d4bafb and the unchanged candidate runtime,
+recorded approval, then pushed e4ec1abe to main.
+
+- [Pages36825162385](https://github.com/eita115115/archery-note/actions/runs/36825162385)
+  succeeded for e4ec1abe.
+- [CI36825163421](https://github.com/eita115115/archery-note/actions/runs/36825163421)
+  succeeded:check:all/lint/format plus `110 passed (1.2m)` on Linux.
+- Live version94 and seven immutable candidate assets match.
+- Public Chromium verifier passed round disclosure, distribution, start/HUD/44px
+  controls, actual touch settings dismissal, offline reload, record retention and
+  zero page errors.
+- Additional live Chromium/WebKit320/375px cases passed group total34, stage
+  order/detail, filter subtotal17, expansion across tabs/filters, collapse, no
+  horizontal overflow and reload retention of seven synthetic records and one
+  active arrow. No real user data was loaded.
+
+```text
+PASS: deployed touch swipe dismisses settings and retains sessions
+PASS: deployed v94, seven candidate assets match, round collapse/expansion and score distribution, synthetic history/start, offline reload, data retention, no page errors
+PASS: all four live round-history cases
+```
+
+Evidence: artifacts/release-v94/deployed-check.txt, live-rounds.txt/json,
+verify-live-rounds.cjs, live-history-_.png, deployed-_.png, ci-log.txt and pages.json.
+Public history screenshot was inspected. Actual-device Safari feel and AN-001
+shooting acceptance remain open. The live WebKit checks are online; its offline
+evidence remains the four immutable candidate origin-stop cases above.
+
+Initial inspection referenced a nonexistent deploy-pages.yml; the repo contains
+ci.yml and Pages uses GitHub's deployment workflow. Corrected by inspecting the
+actual workflow inventory and source-specific run IDs. A documentation patch also
+failed on table whitespace before changing files; inspected and corrected it.
+No application failure or additional runtime change was inferred. Publication and
+live checks had no failures.

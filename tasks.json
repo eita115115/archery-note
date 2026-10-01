@@ -380,9 +380,9 @@
   {
     "id": "AN-033",
     "task": "承認後にv94履歴ラウンド折りたたみを公開し検証する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "2026-10-01: ユーザーがv94公開を承認。remote main8d4bafb/public93を再確認、runtimeはcandidate5abc0baと同一。CI/Pagesと公開動作確認はこれから。docs/codex/release-v94.md。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/release-v94.md。承認後e4ec1abe公開。Pages36825162385/CI36825163421成功、110 passed (1.2m)。公開94/7candidate assets一致。Chromium設定タッチスワイプ・得点分布・開始/HUD/44px・offline保持/pageerror0成功。公開Chromium/WebKit320/375の4ケースでラウンド34点/stage順/詳細/絞込17点/開閉保持/横はみ出しなし/架空7件と記録中1本reload保持成功。実機iPhoneは未確認。",
     "dependencies": [
       "AN-032"
     ],

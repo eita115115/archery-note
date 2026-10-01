@@ -6,30 +6,30 @@
 
 ## 現在地
 
-- 公開v93、remote main8d4bafbを再確認。ユーザーがv94公開を承認、AN-033公開作業中。
-- 履歴ラウンド折りたたみ実装1e95918、公開候補5abc0ba008eb0f42d12d455cc177caafe8a7f0e2。
+- v94公開済み。承認後e4ec1abe6dd78aa18ccae703be2beee65988c2f5をmainへpush。
+- 履歴ラウンド折りたたみ実装1e95918、公開候補5abc0baとruntime同一。
 - 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/app-quality。
 - 元の作業場所の未コミット変更を保全。費用・個人情報の使用なし。
 
 ## 今回完了
 
-- AN-032: v94公開候補を作成し全体回帰・配信物・実更新・オフライン保持・独立レビューを検証。
-- 変更は5版マーカーファイルと作業記録。履歴の実装内容はAN-031から変更していない。
-- 公開確認helperも固定candidateで予行済み。保存・採点・SW戦略・依存は変更していない。
+- AN-033: v94公開とCI/Pages/公開配信・実ブラウザ動作を確認。
+- 同じ多距離ラウンドをまとめ、合計・本数・距離を表示。開くと各stageの詳細へ移動。絞り込みは表示分合計、ページ境界で分割せず開閉をメモリ保持。
+- 変更: 公開承認・結果の作業記録、CHANGELOG、roadmap、progress/tasks。公開候補の実装は変更していない。
+- 保存・採点・SW戦略・依存は変更していない。
 
 ## 検証
 
-- check:all/lint/format成功。全体Chromium `110 passed (1.3m)`。コピー21ファイルのbyte一致。
-- 実SW v93→94更新: Chromium/WebKit320/375pxの4ケースでバナー・cache切替と旧cache削除・架空5記録/用具/サイト/カスタムラウンド保持成功。
-- 更新後のラウンド合計19・各stage表示を確認。記録中1本を置いて配信server停止、ECONNREFUSEDを確認し、SWからoffline再表示・矢/履歴保持・pageerror0成功。
-- 公開確認のローカル予行: 7asset一致、ラウンド開閉・得点分布・開始・44px操作領域/HUD・設定タッチスワイプ・offline保持成功。公開サイトのv94確認と混同しない。
-- 独立レビュー指摘なし、版整合/PWAチェック独立再確認。前の実装検証は両エンジン32成功＋最終focused8成功、375px前後/dark画像あり。
+- Pages36825162385/CI36825163421成功。Linux全体 `110 passed (1.2m)`、check:all/lint/format成功。
+- 公開94/7candidate asset一致。Chromiumのラウンド開閉・得点分布・開始・44px/HUD・設定タッチスワイプ・offline保持/pageerror0成功。
+- 公開Chromium/WebKit320/375pxの4ケースで合計34/stage順/詳細/絞込17/開閉保持/横はみ出しなし・架空7件と記録中1本のreload保持成功。公開画像を確認。
+- 事前の実SW v93→94更新と配信server停止offlineは両ブラウザ320/375の4ケース成功。コピー21ファイルbyte一致、独立レビュー指摘なし。
 - 詳細: docs/codex/release-v94.md、history-round-collapse.md、artifacts/release-v94/。
 
 ## 次と未解決
 
-- 次: 承認されたv94をpush、CI/Pages完了を待ち公開94/配信物/動作を確認。
-- v94公開承認の条件は解消。配信完了・公開確認とAN-001実射受入は未完了。
-- 実機iPhoneの記録・確定・拡大抑制・設定スワイプ・offline操作感は未確認。エンド確定について質問済み、回答待ち。
-- arrowCheck昇格・追加センシングは条件未達。依存アラートは初回静的確認のみ、実害確定・更新は未実施。
+- 次: 実機iPhoneのUXとAN-001実射の受入。公開承認・配信確認の条件は解消。
+- 記録・確定・ページ拡大抑制・設定スワイプ・offlineの実機操作感は未確認。エンド確定について質問済み、回答待ち。
+- 実射の射形判定・保存のAN-001は未完了。arrowCheck昇格・追加センシングは条件未達。
+- 依存アラートは初回静的確認のみ。今回push時も16件(10 high/6 moderate)の通知あり、実害確定・更新は未実施。
 - 目標はactive。「界隈で最も愛されるアプリ」を達成したとは判定しない。
