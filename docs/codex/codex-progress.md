@@ -2817,3 +2817,11 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - v91→92 real worker/cache transition retained synthetic sessions and offline reload passed.
 - Independent review found no actionable issues; isolated4 passed (17.5s).
 - Updated release-v92, progress/tasks. Public app stillv91. Next publication approval and deployed checks. User physical-device feedback pending.
+
+## 2026-10-01 — v92 approved publication
+
+- User approved; pushed ae97bf617da289998ab395946476cb5f671cde92 to main. Pages36796667134 and CI36796668313 succeeded. Linux `106 passed (1.1m)`; check:all/lint/format passed.
+- Live version92/seven assets match. Settings touch swipe, synthetic history/start/offline retention and zero page errors confirmed.
+- Live Chromium/WebKit at320x568 and375x812: `4 passed (20.5s)`, six arrows/two ends with the initial guide open and no scrolling. Evidence in artifacts/release-v92/.
+- Updated release-v92, CHANGELOG, progress and AN-025 evidence. App source unchanged after candidate publication. No money or personal data used.
+- Next: physical iPhone feel and AN-001 real-practice acceptance remain unverified.

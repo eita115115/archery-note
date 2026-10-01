@@ -6,7 +6,7 @@
 
 ## 現在地
 
-- v91公開済み。ユーザー承認後dbcb99f0をmainへpush。テスト調整9071e564も公開。
+- v92公開済み。ユーザー承認後ae97bf617da289998ab395946476cb5f671cde92をmainへpush。
 - 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/app-quality。
 - 元の作業場所の未コミット変更は保全。費用・個人情報の使用なし。
 
@@ -14,36 +14,22 @@
 
 - 大量履歴高速化、履歴・記録開始・44px操作領域・HUD改善。
 - v89: シートをスワイプで閉じる。v90: タブ別閲覧位置保持。
-- v91: タブ切り替え後もエンド確定を画面下部に固定。記録直後にスクロールせず確定できる。
-- ページ全体のピンチ/連続タップ拡大を抑制。スクロールと的の倍率操作を維持。
-- ロードマップ・診断テスト固定版・実機確認の版条件を整理。
+- v91: エンド確定を画面下部に固定。ページ全体の拡大を抑制し、スクロールと的の倍率操作を維持。
+- v92: 初回ガイドをチップ・微調整操作の下へ移動。短い画面で連続記録時に的が画面外へ押し出される問題を修正。
+- 変更: scripts/50-record-view.js、tests/e2e/end-sequence.spec.js、版マーカー・生成物、375px前後画像、作業記録。
 
 ## 検証
 
-- check:all/lint/format成功。Linux CI36794033791:104 passed (1.1m)。
-- 初回CI36793723675の履歴テスト描画待ち不足を修正。Chromium6回/WebKit2回成功後、CI全緑。
-- Pages36793723110/36794033346成功。公開版91と7ファイル一致。
-- 公開Chromium/WebKit操作4 passed (5.7s)。画面座標で矢記録/エンド確定、固定位置を確認。
-- Chromium2本指拡大操作でscale1、設定スワイプ・offline保持・pageerror0確認。
-- 実SW v90→91更新保持成功。独立レビュー指摘なし。
-- 詳細: docs/codex/release-v91.md。画像: docs/screenshots/end-dock/。
+- check:all/lint/format成功。Linux CI36796668313: `106 passed (1.1m)`。
+- Pages36796667134成功。公開版92と7ファイル一致。
+- 公開Chromium/WebKit320×568・375×812: `4 passed (20.5s)`。初回ガイドを開いたまま、画面座標操作で6本記録・2エンド確定。
+- 公開設定タッチスワイプ、架空履歴保持、offline再読込、pageerror0確認。
+- 実SW v91→92更新保持成功。独立レビュー指摘なし。
+- 詳細: docs/codex/release-v92.md。画像: docs/screenshots/end-sequence/。
 
 ## 次と未解決
 
-- 実機iPhoneでエンド確定位置とズーム抑止の操作感を確認。
+- 実機iPhoneで連続記録・エンド確定位置・ズーム抑止・設定スワイプの操作感を確認。v91の体感回答待ち。
 - 実射の射形判定・保存の受入AN-001は未完了。
 - arrowCheck昇格と追加センシングはロードマップの条件未達。
 - 依存アラートは初回静的確認のみ、実害確定・更新は未実施。
-
-## 次のローカル改善
-
-- 320×568で初回ガイドが的とチップ間に入り、連続記録時に的を画面外へ押し出す問題を再現。
-- scripts/50-record-view.jsでガイドを記録操作の下へ移動。初回表示・次回非表示設定は維持。
-- tests/e2e/end-sequence.spec.js: 2エンド6本をスクロールなしで確定、Chromium2件/WebKit2件成功。check:ui/check:app/lint成功。
-- 詳細docs/codex/end-sequence.md。次: リリース全体検証。公開はv91、ユーザーの操作感回答待ち。
-
-## v92公開候補
-
-- 初回ガイドの配置修正を候補3394f67へまとめた。公開はv91のまま。
-- check:all/lint/format成功、106 passed (1.1m)。v91→92更新・架空履歴保持・offline成功。
-- 独立レビュー指摘なし。詳細docs/codex/release-v92.md。次は公開承認後に配信確認。

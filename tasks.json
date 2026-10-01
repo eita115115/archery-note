@@ -286,7 +286,7 @@
     "task": "連続記録を妨げないガイド配置をv92公開候補として検証する",
     "status": "done",
     "passes": true,
-    "evidence": "docs/codex/release-v92.md: check:all/lint/format成功、106 passed (1.1m)、独立レビュー指摘なし、v91→92実更新と架空履歴保持/オフライン成功。候補3394f67、未公開。",
+    "evidence": "docs/codex/release-v92.md: check:all/lint/format成功、106 passed (1.1m)、独立レビュー指摘なし、v91→92実更新と架空履歴保持/オフライン成功。候補3394f67。2026-10-01承認後ae97bf61をmainへ公開。Pages36796667134/CI36796668313成功、106 passed (1.1m)。公開Chromium/WebKit320/375pxで6本2エンド4 passed (20.5s)、7asset一致・設定スワイプ・offline保持・pageerror0成功。",
     "dependencies": [
       "AN-024"
     ],

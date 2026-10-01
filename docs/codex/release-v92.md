@@ -1,6 +1,7 @@
-# v92 release candidate
+# v92 release
 
-Candidate3394f67; implementationac1b1c8. Public app remainsv91.
+Candidate3394f67; implementationac1b1c8. Published on 2026-10-01 after user
+approval, from ae97bf617da289998ab395946476cb5f671cde92.
 Initial guide now follows score chips and nudge controls so revealing recorded
 arrows does not scroll the target out on short screens. Guide remains open by
 default and its next-time dismissal preference is preserved.
@@ -19,4 +20,17 @@ Validation:
 No scoring, storage schema, dependency or personal-data changes. Physical iPhone
 experience remains unverified. Userv91 feedback request still unanswered.
 Evidence:artifacts/release-v92/ and docs/codex/end-sequence.md.
-Next: publication approval, then push and deployed CI/interaction verification.
+Publication verification:
+
+- [Pages36796667134](https://github.com/eita115115/archery-note/actions/runs/36796667134)
+  succeeded for ae97bf61.
+- [CI36796668313](https://github.com/eita115115/archery-note/actions/runs/36796668313)
+  succeeded: `106 passed (1.1m)`. check:all, lint and format passed.
+- Live version92 and seven assets match the candidate. Touch dismissal of settings,
+  synthetic session retention, offline reload and zero page errors confirmed.
+- Live Chromium/WebKit, 320x568 and375x812: `4 passed (20.5s)` for six-arrow/two-end
+  recording with the initial guide open, using screen coordinates without scrolling.
+- Output: artifacts/release-v92/deployed-check.txt and deployed-sequence.txt.
+
+Next: physical iPhone feel and real-practice acceptance (AN-001). These remain
+unverified; browser tests do not substitute for actual shooting.
