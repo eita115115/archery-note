@@ -53,4 +53,4 @@ check-globals OK (14 files, 1215 unresolved refs all accounted for)
 - 375pxの変更前後とdark画像: docs/screenshots/history-round-before-375.png、history-round-after-375.png、history-round-after-dark-375.png。Chromium同幅で撮影し、展開状態の画像も目視確認。
 - 詳細ログ: artifacts/history-round/e2e.txt（初回失敗を保持）、e2e-fixed.txt、focused-final.txt、lint-final.txt、format.txt。
 
-公開v93は変更していない。次は版更新・全体回帰・更新時保持のリリース検証。その後、AGENTS.mdの公開承認条件を満たしてからpushする。実機iPhoneの操作感とAN-001実射受入は未確認。費用・個人情報の使用なし。
+公開v93は変更していない。版更新・全体回帰・更新時保持のリリース検証は [v94候補](release-v94.md) で完了。次はAGENTS.mdの公開承認条件を満たしてからpushする。実機iPhoneの操作感とAN-001実射受入は未確認。費用・個人情報の使用なし。

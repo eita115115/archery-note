@@ -364,5 +364,17 @@
     ],
     "owner": "codex",
     "acceptance": "同gid表示記録を合計と距離が読める折りたたみにし、ステージ順・フィルタ部分合計・ページ境界・開閉保持・詳細遷移を狭幅と両エンジンで検証し、既存保存データ不変と375px前後画像を記録する"
+  },
+  {
+    "id": "AN-032",
+    "task": "履歴ラウンド折りたたみをv94公開候補として検証する",
+    "status": "done",
+    "passes": true,
+    "evidence": "5abc0ba008eb0f42d12d455cc177caafe8a7f0e2、docs/codex/release-v94.md。check:all/lint/format成功、110 passed (1.3m)、21配信物byte一致。実SW v93→94更新・旧cache削除・架空5記録不変・記録中1本offline保持がChromium/WebKit320/375の4ケース成功。公開確認helperのcandidate予行も7assets一致/折りたたみ/設定タッチ/分析/offline保持/pageerror0成功。独立レビュー指摘なし。未公開、承認待ち。",
+    "dependencies": [
+      "AN-031"
+    ],
+    "owner": "codex",
+    "acceptance": "版整合・配信物・全体回帰・実更新と記録保持・レビューを検証し、公開候補の根拠と未確認点を記録する"
   }
 ]

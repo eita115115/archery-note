@@ -2889,3 +2889,12 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Initial two tests failed as intended before implementation. First broader test run28 pass/4 fail: old test clicked collapsed rows and new fixture replacement was not reflected. Corrected fixture initialization and user expansion step, then32 passed (31.5s). Final focused8 passed (11.2s) also verifies desktop width; UI/app/globals/lint/format success. Initial document lint error corrected, raw failure logs retained.
 - Independent static review found no actionable issues. Updated progress/tasks/roadmap and history-round-collapse.md. Local only; public93 unchanged, no personal data/money use.
 - Next: version/update/full-release validation for this change before requesting publication approval. Physical iPhone feedback/AN-001 remain open; goal aspiration is not claimed complete.
+
+## 2026-10-01 — v94 release candidate (AN-032)
+
+- Previous turn made progress through1e95918 history-collapse implementation and related tests. Confirmed clean worktree and remote main8d4bafb/public93 before preparing one release task.
+- Bumped five markers with version:bump, built local bundle, committed candidate5abc0ba. check:all/lint/format success; full Chromium110 passed (1.3m),21 copied assets byte-identical.
+- Immutable93→94 real-worker update under/archery-note/ passes Chromium/WebKit320/375px: banner/cache switch/old cache cleanup,5 synthetic records and setup/sight/custom-round data unchanged, new round subtotal19. Origin shutdown proves offline reload preserves records and an active arrow, target/history visible, zero page errors.
+- Independent review found no actionable issues and independently passed version/PWA checks. Prepared and rehearsed the live verifier against fixedcandidate: seven assets match, round disclosure/analysis/start,44px controls/HUD, real touch sheet dismissal and offline data retention pass.
+- Updated release-v94, history evidence, CHANGELOG, roadmap, progress/tasks. No validation failures in this preparation; implementation's earlier test failures remain recorded. No push, new dependencies, money or personal-data use.
+- Next: request explicit approval forv94 publication, then recheck remote and push, wait CI/Pages and live-verify. Public93 unchanged. Physical iPhone feel/AN-001 remain unverified; goal remains active.
