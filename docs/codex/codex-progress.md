@@ -2946,3 +2946,12 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Added analysis-filter-audit.md, two screenshots, progress/tasks and ledger. Final format/diff/review evidence recorded in the audit document. Local only, no dependencies/publication/fee/personal records used.
 - Requested independent review ended with an account usage-limit error and no review result. No purchase or independent-pass claim; primary self-checked saved results against current source. Format check passed, preview stopped. Subsequent correction still needs patch review before merge when available.
 - Next: AN-040 focused labels and conditional focus restoration using existing history pattern, with meaningful regression/data invariance/UI/lint verification in a separate suitable worktree. Keep pending AN-036 dependency publication independently reviewable; AN-038 additions need separate approval. Goal remains active; actual-device/AN-001 evidence still open.
+
+## 2026-10-01 — Analysis filter correction (AN-040)
+
+- Implemented268b7967 on codex/analysis-filter-focus, reusing existing isolated checkout. Protected codex/app-quality remains1d9c9ad1 for dependency-only publication. No new worktree; narrowed isolation choice preserves both candidates.
+- Existing labels now associate with selectors; synchronous render restores focus only if the changed selector previously held it. No layout, calculation, storage, scoring, dependency or worker changes.
+- Regression red4failed; Chromium/WebKit related20 passed (15.0s), record/end/settings/touch32 passed (42.9s). App/UI/lint/storage passed in owned dependency sandbox; source/test bytes agree. Initial runner/cwd/lint setup failures are retained and explained in analysis-filter-focus.md.
+- Independent static review found no actionable issue. Saved/inspected375px before/after synthetic screenshots; original shared installed/hidden lock unchanged. Actual iPhone remains unverified.
+- Changed scripts/50-record-view.js, focused regression, analysis-filter-focus.md, screenshot, CHANGELOG/progress/tasks/ledger. Local fix only, publicv94 unchanged, no money or private records.
+- Next: AN-041 version/full release verification before asking to publish the UI fix. A new human approval arrived for AN-036 existing three dependencies; complete that separate publication without including this UI fix or AN-038 additions. Goal remains active.

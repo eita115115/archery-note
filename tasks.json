@@ -464,13 +464,25 @@
   {
     "id": "AN-040",
     "task": "分析用具・距離フィルタのラベルと選択後focusを修正する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-039が4ブラウザケースで現行不具合を再現。pending依存公開候補と分離した適切なworktreeで局所修正する。",
+    "status": "done",
+    "passes": true,
+    "evidence": "268b79679525bf8f9baf87a67e27db2711d7a7d9、docs/codex/analysis-filter-focus.md。修正前4failed、両engine関連20 passed (15.0s)、記録/設定/タッチ32 passed (42.9s)。app/UI/lint/storage成功、375px前後画像、独立静的review指摘なし。名前/選択解除/focus/実件数/外部変更非奪取/架空保存不変を検証。ローカル未公開。",
     "dependencies": [
       "AN-039"
     ],
     "owner": "codex",
     "acceptance": "分析の用具・距離selectorを名前で到達可能にし、focused選択/すべてへ戻す操作後もfocusを保って実filter/期間操作/記録不変を両engine狭幅で確認し、UI/lint・関連app検証と375px前後証拠を記録する"
+  },
+  {
+    "id": "AN-041",
+    "task": "分析フィルタ修正を次版の公開候補として検証する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-040局所検証済み。依存3件の公開承認とは分離し、版更新と全体検証を先に行う。",
+    "dependencies": [
+      "AN-040"
+    ],
+    "owner": "codex",
+    "acceptance": "版整合・配信物・全体check/E2E/lint/format・実更新と架空記録保持・レビューを確認し、公開前候補と未確認点を記録する"
   }
 ]
