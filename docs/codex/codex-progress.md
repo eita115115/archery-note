@@ -2810,3 +2810,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Moved guide below chips/nudge. Changed only markup order; guide default and persisted preference preserved. Added two-size six-arrow/two-end screen-coordinate regression.
 - Chromium2 passed (17.2s), WebKit2 passed (16.9s), UI/app/lint passed. 375px before/after screenshots inspected.
 - Updated progress/tasks/end-sequence.md. Publicv91 unchanged. Next release checks/update before publication request; user v91 feedback still pending.
+
+## 2026-10-01 — v92 release candidate (AN-025)
+
+- Version bump/native bundle3394f67 prepared. Full106 passed (1.1m), check:all/lint/format success.
+- v91→92 real worker/cache transition retained synthetic sessions and offline reload passed.
+- Independent review found no actionable issues; isolated4 passed (17.5s).
+- Updated release-v92, progress/tasks. Public app stillv91. Next publication approval and deployed checks. User physical-device feedback pending.

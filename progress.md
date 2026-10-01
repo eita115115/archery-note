@@ -41,3 +41,9 @@
 - scripts/50-record-view.jsでガイドを記録操作の下へ移動。初回表示・次回非表示設定は維持。
 - tests/e2e/end-sequence.spec.js: 2エンド6本をスクロールなしで確定、Chromium2件/WebKit2件成功。check:ui/check:app/lint成功。
 - 詳細docs/codex/end-sequence.md。次: リリース全体検証。公開はv91、ユーザーの操作感回答待ち。
+
+## v92公開候補
+
+- 初回ガイドの配置修正を候補3394f67へまとめた。公開はv91のまま。
+- check:all/lint/format成功、106 passed (1.1m)。v91→92更新・架空履歴保持・offline成功。
+- 独立レビュー指摘なし。詳細docs/codex/release-v92.md。次は公開承認後に配信確認。
