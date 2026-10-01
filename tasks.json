@@ -526,7 +526,7 @@
     "task": "直近得点の集計改善を次版公開候補として検証する",
     "status": "in-progress",
     "passes": false,
-    "evidence": "a877c4337cfcae4e4b9da52058a44c1ca8c58a6f、docs/codex/release-v96.md。版96整合、check:all/lint/format成功、116 passed (1.1m)、native21 byte/依存tree/shared lock一致。normal両engine320/375の4実SW95→96更新+offline/架空記録保持・preview予行成功。追加active-update/browser-reload後offlineはChromium320で15s timeout再現、原因未確定。AN-046で最小再現/因果調査が必要、公開準備完了とは扱わない。",
+    "evidence": "a877c4337cfcae4e4b9da52058a44c1ca8c58a6f、docs/codex/release-v96.md。版96整合、check:all/lint/format成功、116 passed (1.1m)、native21 byte/依存tree/shared lock一致。旧normal4のoffline/架空記録保持・preview予行成功。AN-046でasync readiness wait不備を特定し、corrected active4+regression4が成功。normalの同種cache waitをcorrected pollへ直して4cases再検証・最終候補記録が残る。公開準備完了とは扱わない。",
     "dependencies": [
       "AN-044"
     ],
@@ -536,9 +536,9 @@
   {
     "id": "AN-046",
     "task": "練習中のworker更新後オフライン再読み込みの待機を最小再現して原因を特定する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-045追加routeでactive1は95→96 browser reload後も保持されるが、active2/server-stop/offline reloadがChromium320でtimeout。normal4casesとbaseline-only95 controlは成功。activation待ち/旧worker fetch cache-write無効化でも解消せず、原因未確定。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/offline-worker-update-diagnosis.md、tools/diagnostics/verify-v96-worker-update.cjs。Playwright1.61.1のasync waitForFunctionがfalse1callで終了するseamを両engineで再現、expect.pollは3callsでtrue。controller CACHE95応答も旧gateの不成立を確認。corrected-active4とdurable regression4の両engine320/375で元のimmutable95→96/guard/active1→2・履歴5・HTML同一・focus bounds/round19・server-stop/ECONNREFUSED/fromSW保持/pageerror0が成功。アプリ/worker変更なし。旧失敗保持、normal gateの修正再検証をAN-045復帰条件として記録。",
     "dependencies": [
       "AN-044"
     ],

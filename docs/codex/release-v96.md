@@ -3,7 +3,10 @@
 Public baseline:97945e17dd1529a527be5f0750372378818b2a57/v95.
 Local candidate:a877c4337cfcae4e4b9da52058a44c1ca8c58a6f, branch
 codex/score-trend-performance. No push or deployment. AN-045 remains in progress
-because the additional active-session update/offline route below is unresolved.
+pending corrected normal-route cache polling and the final candidate record audit.
+AN-046 has since identified an asynchronous readiness-wait defect in the helpers;
+the corrected active-session route passes all four engine/width cases. See
+[the diagnosis and historical regression](offline-worker-update-diagnosis.md).
 
 ## Scope and passing evidence
 
@@ -36,11 +39,13 @@ PASS:21 native assets byte-identical/readiness96; dependency tree unchanged; sha
 
 Four immutable same-origin worker transitions, Chromium/WebKit320×568light and
 375×812dark, use no active session when clicking the update banner. They verify
-v95→96 cache switch/old-cache absence at the check, five synthetic saved histories
+v95→96 loaded app, five synthetic saved histories
 unchanged, exact scoreTrendCard HTML, named focused setup/distance visible bounds,
 round subtotal19, then one newly entered active arrow. Origin server is stopped,
 ECONNREFUSED asserted, and actual-worker offline reload retains records and that
-arrow. These four results do not establish the additional active-session route.
+arrow. Their async cache wait did not assert readiness: old-cache absence must be
+rechecked with explicit asynchronous polling before candidate acceptance. These
+initial four results also do not establish the additional active-session route.
 
 ```text
 PASS: all four actual-worker update/offline cases
@@ -54,7 +59,13 @@ checks7d period focus/bounds. It is not a livev96 result. The unchanged375px sco
 trend images and AN-044 comparison remain in score-trend-performance.md; no new
 timing or physical-device speedup is claimed from version metadata.
 
-## Additional route: unresolved, failures retained
+## Additional route: prior failures retained, readiness defect now identified
+
+The following is the original investigation record, not the latest acceptance
+status. AN-046's corrected verifier and durable regression each pass all four
+Chromium/WebKit320/375 cases. Application/worker source was unchanged. The failure
+was reached after a helper wait that did not actually poll its async condition;
+the old “activation/controller wait” below had the same defect.
 
 The first verifier incorrectly waited for a clickable banner while db.active held
 one arrow. scripts/90-init.js hides the banner and blocks freshReload during active
@@ -67,10 +78,11 @@ navigation or data change; explicitly update the real registered worker; browser
 reload into v96 with the pre-update arrow and exact card HTML retained. Add another
 arrow, stop the origin, and attempt another browser reload at the same URL.
 
-The last reload times out in Chromium320 before completion. No success row was
-written for this route; WebKit/375 cases were not reached and must not be counted.
-Waiting for worker activation/controller equality before the first browser reload
-did not resolve it. Before offline, diagnostics show v96 loaded, document complete,
+The original last reload timed out in Chromium320 before completion. No success row
+was written in that run; WebKit/375 cases were not reached and must not be counted
+as passes for that failed probe. The attempted worker activation/controller wait
+did not resolve it because its async predicate was not polled. Before offline,
+those diagnostics showed v96 loaded, document complete,
 active/controller activated and equal, two arrows persisted, index cache present,
 and both v95/v96 caches. Both cache storage scripts contain APP_VER96. Server logs
 confirm sw.js95 then96; worker inspection sees both global CACHE versions. This
@@ -114,12 +126,14 @@ the initial banner guard mismatch. Additional read-only diagnostic review confir
 normal four-case validity, corrected baseline labels and unresolved material risk.
 It does not approve all update paths or publication.
 
-AN-046 next: minimize the active registered-worker/browser-reload sequence, trace
-worker navigation/fetch promises and compare actual browser engines against baseline
-and candidate. Determine whether this is app behavior, lifecycle/test timing or a
-browser/tool issue before applying a fix. Do not delete the failing route to obtain
-a release-ready label. Return to AN-045 afterward; publication approval is not yet
-requested. Worker activation changes/new dependencies still have their own approval
+AN-046 completed: a minimal always-false async predicate returned false after one
+call in installed Playwright1.61.1, and a controller-version message answered95
+after the original gate. Explicit expect.poll of the evaluated boolean resolves
+the unchanged immutable active route in four cases, independently repeated by the
+durable regression. No application fix was needed or inferred from a hypothesis.
+Next AN-045: correct and rerun the equivalent normal-route cache wait, then complete
+candidate records. Publication approval is not yet requested. Worker activation
+changes/new dependencies still have their own approval
 boundary. Actual iPhone/VoiceOver/large real storage and AN-001 remain unverified.
 
 Raw artifacts in artifacts/release-v96: check-all.txt, lint.txt, format.txt,
@@ -132,7 +146,7 @@ baseline-root-reload-final.txt/json and verify-baseline-root-reload-final.cjs,
 experimental-no-old-writes.txt/verify-experimental-no-old-writes.cjs,
 diagnostic-helper-syntax-error.txt and diagnostic-native-request-error.txt.
 
-## Final record checks
+## Original AN-045 record checks (historical)
 
 ```text
 All matched files use Prettier code style!
@@ -140,5 +154,7 @@ PASS: 100 candidate source/test/dependency files match owned sandbox; shared hid
 PASS:existing task acceptance/evidence preserved; candidatea877 runtime unchanged; normal4 and baseline-only1 scopes verified; AN-045/046 not falsely passed
 ```
 
-Only records changed after the tested candidate. AN-045/046 remain incomplete;
-these checks do not convert the extra-route timeout into a pass.
+At that checkpoint only records had changed and AN-045/046 were incomplete.
+AN-046 now adds a diagnostic regression and supersedes the readiness conclusion;
+its corrected active-route evidence is in the diagnosis document. AN-045 remains
+incomplete until the equivalent normal-route wait is corrected and rechecked.
