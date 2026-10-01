@@ -400,5 +400,29 @@
     ],
     "owner": "codex",
     "acceptance": "全openアラートを個別に残し、ロック/installedと配信・実callerの範囲を照合して限定的結論・未確認点・次の対応を記録し、既存security回帰と書式を確認する"
+  },
+  {
+    "id": "AN-035",
+    "task": "既存3間接依存の互換更新を隔離環境で準備・検証する",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/dependency-update.md、baseline41155afe。差分3entriesのversion/resolved/integrityのみ、追加削除0、parent範囲/registry integrity/installed一致。隔離npm ci成功、plist2/SOCKS6/glob3850/brace6一致。隔離check:all/lint成功、110 passed (1.1m)、native-web21ファイルbyte一致、All matched files use Prettier code style!、diff check成功。元shared versions/hidden-lock hash不変、独立レビュー指摘なし。保存16advisoryの14件非該当、ZIP2件残りfullauditはhigh4package/exit1。ローカル未公開。",
+    "dependencies": [
+      "AN-034"
+    ],
+    "owner": "codex",
+    "acceptance": "既存対象3パッケージだけを互換範囲で更新し、共有node_modulesを保全して隔離インストールと実consumer比較・全体check/E2E/lint/formatを検証し、残存警告と限定的結論を記録する"
+  },
+  {
+    "id": "AN-036",
+    "task": "承認後に既存3間接依存更新をmainへ反映しCIと警告を確認する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "AN-035のローカル候補は検証済み。AGENTS.md Safetyのgit push/Pages deploy事前承認を待つ。アプリv94/runtime不変、新しい公開への承認は未取得。",
+    "dependencies": [
+      "AN-035"
+    ],
+    "owner": "codex",
+    "acceptance": "承認後にremoteを再照合してpushし、CI/Pages成功と公開v94の配信物不変・fresh依存アラート状態を確認し、ZIP残存警告を正確に記録する"
   }
 ]

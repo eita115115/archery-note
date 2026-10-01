@@ -134,3 +134,7 @@ Check literal lint globs, benign plist parsing and SOCKS address conversion agai
 old/new versions, then required app/security/lint/format checks. Do not replace a
 no-patch ZIP package with an unreviewed dependency just to make alert counts green.
 This local preparation is separate from any new publication approval.
+
+Follow-up: [compatible update verification](dependency-update.md) prepares only
+those three existing entries in an isolated installation, retains both ZIP alerts
+and records the full audit's nonzero exit. Remote alert closure is not claimed.
