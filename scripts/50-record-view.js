@@ -861,8 +861,8 @@ function analysisFilterBarHtml(allRows, f) {
   ];
   return `<div class="card analysisFilterCard">
     <div class="row">
-      <div><label class="f">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
-      <div><label class="f">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
+      <div><label class="f" for="anSetup">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+      <div><label class="f" for="anDist">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <label class="f">期間</label>
     <div class="chips" id="anPeriods">${periods.map(([id, lb]) => `<button type="button" class="chip ${f.period === id ? "on" : ""}" aria-pressed="${f.period === id}" data-period="${id}">${lb}</button>`).join("")}</div>
@@ -1139,14 +1139,20 @@ function renderAnalysis(m) {
   const anSetup = $("#anSetup");
   if (anSetup)
     anSetup.onchange = (e) => {
+      const hadFocus = document.activeElement === e.target;
       f.setupId = e.target.value;
       render();
+      const next = $("#anSetup");
+      if (hadFocus && next) next.focus({ preventScroll: true });
     };
   const anDist = $("#anDist");
   if (anDist)
     anDist.onchange = (e) => {
+      const hadFocus = document.activeElement === e.target;
       f.dist = e.target.value;
       render();
+      const next = $("#anDist");
+      if (hadFocus && next) next.focus({ preventScroll: true });
     };
   document.querySelectorAll("#anPeriods .chip[data-period]").forEach(
     (c) =>
