@@ -304,5 +304,17 @@
     ],
     "owner": "codex",
     "acceptance": "未確定矢を含む終了、結果画面の表示と閉じる操作、履歴と再読み込み後保持、既存架空履歴不変を両エンジン狭幅で確認し限界も記録する"
+  },
+  {
+    "id": "AN-027",
+    "task": "大量履歴の得点分布を表示内容を保って高速化する",
+    "status": "done",
+    "passes": true,
+    "evidence": "585ea8d、docs/codex/score-distribution-performance.md。回帰check:appは変更前360002 readsで失敗、変更後72000 reads成功。カード20交互ペア中央値25.8→8.0ms、1000例HTML完全一致・入力不変。check:all/lint/format成功、Chromium/WebKit16 passed (16.4s)、独立レビュー指摘なし。未公開。",
+    "dependencies": [
+      "AN-026"
+    ],
+    "owner": "codex",
+    "acceptance": "得点分布の件数・割合・的種別の色を保ち、変更前後の性能証拠と関連回帰検証、既存データ不変を記録する"
   }
 ]

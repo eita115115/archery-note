@@ -2833,3 +2833,12 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Initial screenshots were mid-animation; corrected harness to wait for completion and repeated the four cases. Inspected settled375px result; no dock overlap. No runtime defect found in this scope.
 - Added finish-flow-audit.md, progress/tasks evidence. Documentation only, local commit; no new publication, money or personal-data use.
 - Asked user whether v92 resolves the end action. Next concrete improvement depends on remaining real-device friction; AN-001 still requires actual shooting.
+
+## 2026-10-01 — Score distribution aggregation (AN-027)
+
+- Previous goal turn made progress through finish-flow evidence. Safe independent next action: investigate remaining large-history analysis latency while awaiting device feedback.
+- Profiled1,000 synthetic sessions. scoreDistCard repeated searches for absent score buckets; new one-pass count/first-face aggregation in585ea8d reduces score reads360002→72000.
+- Before regression intentionally failed on the reading budget; after check:all/lint/format passed. Exact HTML/input equality across1,000 seeded datasets, two-engine smoke `16 passed (16.4s)`.
+- Alternating20-pair Chromium CPU4x card median25.8→8.0ms; whole-view samples207.7→191.7ms are noisy, not a device speed claim. First server absence and generated harness syntax error corrected before evidence collection.
+- Independent review found no actionable issues. Fixed comparison helper's baseline tocd02425 after commit so future reproduction does not silently compare HEAD with itself.
+- Updated progress/tasks/score-distribution-performance.md. Publicv92 unchanged; no money, personal data, storage/scoring changes. Next release-wide verification and version/update checks before publication approval.
