@@ -65,3 +65,9 @@ styles, scoring, storage, worker and index files match baseline1d9c9ad1. No mone
 or personal information was used. Full release checks/version update/publication
 for this UI fix are a separate next task; do not publish it with approval scoped
 to the existing three dependency updates.
+
+Follow-up AN-041: release validation found that focus identity alone did not
+prove the selector was visible.7039fcea adds prefix layout and minimal reveal
+for focused selectors/period chips; a meaningful visibility regression and final
+release checks are recorded in [v95 preparation](release-v95.md). The original
+268b7967 evidence above remains historical, not final visibility acceptance.

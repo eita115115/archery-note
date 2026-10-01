@@ -476,13 +476,37 @@
   {
     "id": "AN-041",
     "task": "分析フィルタ修正を次版の公開候補として検証する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "公開済み依存記録を分析修正branchへ合流。版更新/全体回帰/実SW更新/保持/配信物/reviewを検証中、未公開。",
+    "status": "done",
+    "passes": true,
+    "evidence": "7039fcea9e84806b2c6aa852b9a90aa1e438e295、docs/codex/release-v95.md。最初の114緑後に可視性不具合を検出、修正前3failed/1passed、prefix layout/revealで修正。最終check:all/lint/format成功、116 passed (1.4m)、両engine関連16 passed (15.9s)、通常motion4ケース成功。21asset byte一致、実SW94→95更新と履歴5件保持・更新後active1本offline保持/名前/focus/visible boundsを両engine320/375の4ケースで検証。静的review指摘なし、共有hidden lock不変。未公開、承認待ち。",
     "dependencies": [
       "AN-040"
     ],
     "owner": "codex",
     "acceptance": "版整合・配信物・全体check/E2E/lint/format・実更新と架空記録保持・レビューを確認し、公開前候補と未確認点を記録する"
+  },
+  {
+    "id": "AN-042",
+    "task": "承認後にv95分析フィルタ修正を公開して配信と操作を確認する",
+    "status": "needs-user",
+    "passes": false,
+    "evidence": "AN-041で候補7039fceaを検証済み。AGENTS.mdのgit push/Pages事前承認が必要。既存3依存の公開承認はv95の公開を含まない。",
+    "dependencies": [
+      "AN-041"
+    ],
+    "owner": "codex",
+    "acceptance": "v95候補への公開承認後にremoteを照合して反映し、source指定CI/Pages成功・公開95と配信物一致・分析ラベル/focus/可視性と主要操作・記録保持を検証し未確認条件も記録する"
+  },
+  {
+    "id": "AN-043",
+    "task": "大量の架空履歴で分析フィルタの応答時間を測定する",
+    "status": "open",
+    "passes": false,
+    "evidence": "公開待ちでも実行可能な読取専用performance確認。最終focus helperは先行カードだけをlayoutするが、大量記録での実応答は未測定。",
+    "dependencies": [
+      "AN-041"
+    ],
+    "owner": "codex",
+    "acceptance": "既存公開版と修正版を架空履歴の固定条件で比較し、両engineの再描画/可視性/保存不変と代表的な応答時間・測定限界を記録して次の改善を根拠から選ぶ"
   }
 ]
