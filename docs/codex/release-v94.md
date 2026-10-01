@@ -3,7 +3,8 @@
 Prepared on2026-10-01. Candidate5abc0ba008eb0f42d12d455cc177caafe8a7f0e2;
 history implementation1e95918f4273dfb06db7ae49e96cc48121a19016.
 Public version remains93 and remote main remains8d4bafb187feff1f27023cd3f1c3323633ddf74b.
-Publication approval has not been given for this candidate.
+User approved publication on2026-10-01. Publication is in progress; success must
+still be confirmed by CI/Pages and live verification.
 
 ## Change
 
@@ -91,10 +92,10 @@ native-assets.txt, transition.txt/json, rehearsal.txt and associated scripts/ima
 No validation failures occurred in this preparation. Implementation-stage test
 failures remain documented in history-round-collapse.md.
 
-## Pending publication
+## Approved publication in progress
 
-Local commits and tests are complete. AGENTS.md requires user approval for
-git push/GitHub Pages deployment. The priorv93 approval does not authorize this
-new candidate. After approval, recheck the remote, intentionally push the candidate
-and supporting records, wait for CI/Pages, then perform live checks. Until then the
-public app staysv93.
+Local commits and tests are complete. The user explicitly approved thisv94
+candidate, satisfying AGENTS.md's push/deployment gate. Remote main was rechecked
+at8d4bafb; runtime still exactly matches candidate5abc0ba. Next intentionally push
+the candidate and supporting records, wait for CI/Pages, then perform live checks.
+The public app is not claimedv94 until those checks succeed.
