@@ -2946,3 +2946,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Added analysis-filter-audit.md, two screenshots, progress/tasks and ledger. Final format/diff/review evidence recorded in the audit document. Local only, no dependencies/publication/fee/personal records used.
 - Requested independent review ended with an account usage-limit error and no review result. No purchase or independent-pass claim; primary self-checked saved results against current source. Format check passed, preview stopped. Subsequent correction still needs patch review before merge when available.
 - Next: AN-040 focused labels and conditional focus restoration using existing history pattern, with meaningful regression/data invariance/UI/lint verification in a separate suitable worktree. Keep pending AN-036 dependency publication independently reviewable; AN-038 additions need separate approval. Goal remains active; actual-device/AN-001 evidence still open.
+
+## 2026-10-01 — Approved dependency publication started (AN-036)
+
+- New human approval authorizes the previously asked existing-three-package main push. Rechecked remote d734ea210acc6f2f30761da6e1a5c36954630e25, which is an ancestor of protected codex/app-quality1d9c9ad1. Runtime diff is empty; no version bump for a development-only change.
+- Analysis fix268b7967 and evidence15e2292 are preserved on codex/analysis-filter-focus and excluded from publication. AN-040 completion is recorded there; this branch still carries its older open task. No Lighthouse major/new28 packages approved or installed.
+- Resynchronized tracked sandbox source to dependency-only branch and removed only the known extra fix test. No root install. Consumer recheck passes3 compatible entries,14 nonmatching saved advisories,2 plist/6 SOCKS/3920 glob/6 brace cases; changed glob count reflects additional tracked docs.
+- Next within this publication: required checks, immutable candidate commit/push, source-specific CI/Pages, unchanged public assets and fresh alert state. No fees or personal data used.

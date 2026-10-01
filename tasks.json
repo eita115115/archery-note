@@ -416,9 +416,9 @@
   {
     "id": "AN-036",
     "task": "承認後に既存3間接依存更新をmainへ反映しCIと警告を確認する",
-    "status": "needs-user",
+    "status": "in-progress",
     "passes": false,
-    "evidence": "AN-035のローカル候補は検証済み。AGENTS.md Safetyのgit push/Pages deploy事前承認を待つ。アプリv94/runtime不変、新しい公開への承認は未取得。",
+    "evidence": "2026-10-01人間が既存3件main反映を承認。remote d734ea21を確認、codex/app-qualityのみ公開し分析修正/major追加は除外。隔離再検証とCI/Pages/警告確認中。",
     "dependencies": [
       "AN-035"
     ],
