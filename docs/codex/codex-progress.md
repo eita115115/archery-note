@@ -2803,3 +2803,10 @@ cannot restart after freeze or close`. Source assertion matches literal LF
 - Initial live test URL root mistake corrected; no app regression inferred from the harness failure.
 - Updated CHANGELOG, release-v91, progress/tasks. Runtime unchanged after initial publish.
 - Next: physical iPhone feel and AN-001 real-practice acceptance. No money or personal data used.
+
+## 2026-10-01 — Consecutive ends on short screens (AN-024)
+
+- Discovered open initial guide between target/chips caused reveal helper to scroll the target out after one arrow on Chromium320×568.
+- Moved guide below chips/nudge. Changed only markup order; guide default and persisted preference preserved. Added two-size six-arrow/two-end screen-coordinate regression.
+- Chromium2 passed (17.2s), WebKit2 passed (16.9s), UI/app/lint passed. 375px before/after screenshots inspected.
+- Updated progress/tasks/end-sequence.md. Publicv91 unchanged. Next release checks/update before publication request; user v91 feedback still pending.

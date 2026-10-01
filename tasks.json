@@ -268,5 +268,17 @@
     ],
     "owner": "codex",
     "acceptance": "通常アニメーション後もエンド確定が画面内にあり記録直後に押せ、スクロールと的操作を保ちながらページ拡大を抑え、既存データ保持を確認する"
+  },
+  {
+    "id": "AN-024",
+    "task": "初回ガイドが短い画面で連続記録を妨げないようにする",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/end-sequence.md: Chromium320×568で1本後の的可視高2.47pxを再現。ガイド移動後、2エンド6本をスクロールなしで記録確定。Chromium2 passed (17.2s)、WebKit2 passed (16.9s)、check:ui/check:app/lint成功、375px前後画像。ローカルのみ。",
+    "dependencies": [
+      "AN-023"
+    ],
+    "owner": "codex",
+    "acceptance": "初回ガイドを残しつつ短い画面で連続記録とエンド確定ができ、矢数と確定したエンドの内容が保存されることを確認する"
   }
 ]

@@ -1263,7 +1263,6 @@ function renderActive(m) {
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
-    ${activeGuideHtml()}
     <div class="scoreChips" id="curChips" data-testid="active-arrow-chips"></div>
     <div class="nudge" id="nudge">
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD / 200).toFixed(1)}cm）</div>
@@ -1275,6 +1274,7 @@ function renderActive(m) {
       <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
     </div>
+    ${activeGuideHtml()}
     <details class="adv activeStatsMore"><summary>この練習の詳細</summary>
       <div class="statbar" id="statbar"></div>
     </details>
