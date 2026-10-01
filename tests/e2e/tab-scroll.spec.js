@@ -21,6 +21,11 @@ for (const motion of ["reduce", "no-preference"]) {
     );
     const tab = (v) => page.locator(`#tabs [data-v="${v}"]`).click();
     await tab("history");
+    await expect
+      .poll(() =>
+        page.locator(".historyRecords").evaluate((el) => el.getBoundingClientRect().height),
+      )
+      .toBeGreaterThan(2000);
     await page.evaluate(() => globalThis.scrollTo(0, 1400));
     await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(1400);
     await tab("analysis");
