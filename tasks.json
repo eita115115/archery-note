@@ -633,9 +633,9 @@
   {
     "id": "AN-054",
     "task": "承認済みLighthouse13開発依存を公開しCIと警告状態を確認する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-038local2218a1bで最小Node22.19隔離全検証済み。人間すべて承認は依存更新公開へ継続。publicv98/0db83455、root共有installは禁止。",
+    "status": "done",
+    "passes": true,
+    "evidence": "通常pushでpublic main29979e261e93ffdfcdce224293283764e5641b7b。source指定CI36997200642/Pages36997199129成功、LinuxNode22.23.3/clean npmci found0 vulnerabilities/全check/lint/format/129 passed (2.8m)。全21public98bytesと3toolfilesが承認sourceとbyte一致。GitHubopen0、ZIP13/27はfixed_at2026-10-02T10:45:08Z/ dismissed_at=null。71sandbox source parity/shared lock保存、前minimumNode22.19/full129/review再利用。docs/codex/lighthouse-upgrade-publication.md。版98/app採点保存不変、費用/個人情報不使用、速度改善/実iPhone/INPは未確認。",
     "dependencies": [
       "AN-038"
     ],

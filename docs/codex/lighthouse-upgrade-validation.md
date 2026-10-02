@@ -133,3 +133,11 @@ CI/Pages, unchanged publicv98 assets and GitHub alert state. No app version bump
 needed for this development-only change. AN-055 then repeats the same-version
 cold-start measurement and diagnoses the critical loading path before modifying
 app code. Real iPhone/VoiceOver/keyboard/5000storage/AN-001 remain open; goal active.
+
+## Publication follow-up — 2026-10-02
+
+AN-054 now publishes this exact candidate and confirms LinuxCI/full129, unchanged
+publicv98 assets and GitHub ZIP13/27 fixed/open0. See
+[publication evidence](lighthouse-upgrade-publication.md). Earlier local-only
+statements above describe the pre-publication checkpoint. Linux Lighthouse
+benchmark and actual-device performance remain unverified.
