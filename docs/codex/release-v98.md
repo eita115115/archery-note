@@ -87,3 +87,41 @@ rehearsal.txt and publication/helper sources. No app source changed after checks
 Physical iPhone/VoiceOver/native picker/keyboard/INP/5000 real-storage/AN-001
 remain unverified. Existing ZIP development alerts and approved, unimplemented
 AN-038 dependency-major work remain separate. Broad goal stays active.
+
+## Approved publication verified — 2026-10-02
+
+Published 0db834550a49352e21f420af7037d4c832e4b4e6 (runtime candidate181ad544). Remote publicdd3 ancestor
+checked before ordinary push without force. Exact-source
+[CI36995025215](https://github.com/eita115115/archery-note/actions/runs/36995025215)
+and [Pages36995023628](https://github.com/eita115115/archery-note/actions/runs/36995023628)
+completed successfully. Remote Linux/Node22 CI uses clean dependencies; local
+root junction remains untouched. Existing two high ZIP development alerts remain.
+
+```text
+129 passed (2.7m)
+PASS: all21 deployed v98 assets byte-identical to approved publication 181ad544e7dcfbfa3ef31d318ff874bb9e0d284e
+PASS: deployed touch swipe dismisses settings and retains sessions
+PASS: deployed v98, seven candidate assets match, round collapse/expansion and score distribution, synthetic history/start, offline reload, data retention, no page errors
+```
+
+Fresh mobile375 Chromium public-site operations use the named target/arrows
+selectors,70m/122cm/six arrows. Corrected end1 retains six, next current arrow1.
+After deselect/end, whole target y18/height292.3125
+fits top0 and dock653. Genuine end notification
+bottom637 is16px above dock653, paired computed contrast15.128:1.
+Live current-arrow notification/action text are separate in inspected375 image.
+Settings touch swipe/offline worker reload preserve five synthetic sessions/active
+with no page errors. live-correction.json/deployed images now originate from the
+public site; rehearsal-correction.json retains the prior local output.
+
+Raw ci-log.txt/ci-status.json/pages-status.json/live-assets.txt/JSON/live.txt retain
+publication evidence. AN-053done/pass is written only after all acceptance.
+Follow-up documentation remains a local commit; deployed main is0db834550a49352e21f420af7037d4c832e4b4e6.
+Next approved AN-038 isolated dependency-major verification; real-device/INP/
+large-storage/AN-001 limitations stay open. Goal remains active.
+
+Final documentation format:check passes. audit-final.txt confirms identical
+runtime, matching publication/CI/live records, all other task records and every
+acceptance unchanged, shared hidden lock preserved. native-final.txt reconfirms
+21 identical assets/readiness98 and dependency tree. All owned verification
+handles ended successfully; no release-v98 Node helper remains running.

@@ -620,9 +620,9 @@
   {
     "id": "AN-053",
     "task": "承認済みの記録通知と開始入力名の改善を次版候補で全体検証して公開する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "v98候補181ad544、docs/codex/release-v98.md。check:all/lint/format成功、129 passed (1.7m)、native21/readiness98/source104/shared lock/依存tree一致。実SW active4とnormal/mobile banner4で架空history5/active/offline保持/error0、通知16px分離/contrast15.128、375予行と画像確認成功。独立レビュー/remote/公開CI/Pages/live待ち、未公開。人間すべて承認は継続、費用/個人情報使用禁止。",
+    "status": "done",
+    "passes": true,
+    "evidence": "v98公開0db834550a49352e21f420af7037d4c832e4b4e6/runtime181ad544。CI36995025215/Pages36995023628成功、129 passed (2.7m)。check:all/lint/format/markers/native21/source104/依存tree/shared lock成功。実SW active4+normal/mobile banner4でhistory5/active/offline保持、全21公開bytes一致、fresh375 named selector/6矢修正/解除/確定後的全体/次矢/通知16px分離とcontrast15.128/設定touch swipe/offline架空記録保持/pageerror0、公開画像確認。docs/codex/release-v98.md。実iPhone/VoiceOver/INP等未確認。",
     "dependencies": [
       "AN-050",
       "AN-051"
