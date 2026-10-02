@@ -4,6 +4,11 @@ Archery Noteへの貢献ありがとうございます。このアプリは、�
 
 ## Development Setup
 
+開発ツールにはNode.js 22.19以降が必要です。`npm run lighthouse:baseline` は
+ローカルの新規ブラウザ環境で測定し、エラー送信を明示的に無効化します。
+測定結果にはLighthouseの版も表示します。版が違うスコアだけで、アプリが
+速くなったとは判断しないでください。
+
 ```bash
 npm install
 npm run check:app

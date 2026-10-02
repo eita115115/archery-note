@@ -43,7 +43,7 @@
     "clean-css": "5.3.3",
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
-    "lighthouse": "12.6.1",
+    "lighthouse": "13.5.0",
     "prettier": "^3.9.0"
   },
   "dependencies": {

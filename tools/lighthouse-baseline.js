@@ -77,6 +77,7 @@ function formatScore(category) {
 function printSummary(lhr) {
   const categories = lhr.categories || {};
   console.log("Lighthouse baseline complete");
+  console.log(`Lighthouse version: ${lhr.lighthouseVersion}`);
   console.log(`URL: ${lhr.finalDisplayedUrl || lhr.finalUrl || url}`);
   console.log(`Performance: ${formatScore(categories.performance)}`);
   console.log(`Accessibility: ${formatScore(categories.accessibility)}`);
@@ -120,6 +121,7 @@ async function main() {
           lighthouseCli,
           url,
           "--quiet",
+          "--no-enable-error-reporting",
           "--output=json",
           "--output=html",
           `--output-path=${reportBase}`,
