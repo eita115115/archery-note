@@ -620,9 +620,9 @@
   {
     "id": "AN-053",
     "task": "承認済みの記録通知と開始入力名の改善を次版候補で全体検証して公開する",
-    "status": "open",
+    "status": "in-progress",
     "passes": false,
-    "evidence": "人間すべて承認は継続。AN-050通知とAN-051入力名の局所修正は検証済みローカル。次版全体検証/実更新/offline保持→承認済み公開/CI/Pages/live確認。費用/個人情報使用は禁止。",
+    "evidence": "v98候補181ad544、docs/codex/release-v98.md。check:all/lint/format成功、129 passed (1.7m)、native21/readiness98/source104/shared lock/依存tree一致。実SW active4とnormal/mobile banner4で架空history5/active/offline保持/error0、通知16px分離/contrast15.128、375予行と画像確認成功。独立レビュー/remote/公開CI/Pages/live待ち、未公開。人間すべて承認は継続、費用/個人情報使用禁止。",
     "dependencies": [
       "AN-050",
       "AN-051"
