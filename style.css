@@ -789,7 +789,6 @@ body.modalOpen{overflow:hidden;}
   opacity:0; transition:opacity .22s, transform .22s var(--ease-app); pointer-events:none; max-width:calc(100vw - 24px); text-align:center;
   box-shadow:var(--shadow-raised);
 }
-html.dark .toast,html.auto .toast{background:#0e100d;}
 /* dark: オーバーレイを濃くして暗背景とのコントラストを確保 */
 html.dark .ovl,html.auto .ovl{background:rgba(0,0,0,.58);}
 /* dark: 矢の着弾フラッシュを明るい緑に変えて暗背景で映えるようにする */
@@ -800,6 +799,8 @@ html.dark .ovl,html.auto .ovl{background:rgba(0,0,0,.58);}
 }
 html.dark .shotNew circle,html.auto .shotNew circle{animation-name:impactFlashDark;}
 .toast.show{opacity:.98; transform:translateX(-50%) translateY(0) scale(1);}
+/* 記録中だけ実寸の操作列から16px空ける。シート内の通知は通常位置を保つ。 */
+body:not(.modalOpen) main.hasActiveDock ~ .toast{bottom:var(--record-toast-bottom,calc(92px + env(safe-area-inset-bottom)));}
 .histChip{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:baseline;}
 .tgWrap svg.main.triple{width:58%; margin:0 auto;}
 .updbar{

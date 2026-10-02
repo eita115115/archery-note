@@ -485,7 +485,15 @@ function save(opts){
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function toast(msg,ms){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),ms||1700); }
+/* 記録中は通知を固定操作列の上へ。位置だけを測り、点数・保存・通知の寿命には触れない。 */
+function positionToast(t){
+  const dock=$("#activeActionDock");
+  if(dock){
+    const rect=dock.getBoundingClientRect();
+    t.style.setProperty("--record-toast-bottom",`${window.innerHeight-rect.top+16}px`);
+  }else t.style.removeProperty("--record-toast-bottom");
+}
+function toast(msg,ms){ const t=$("#toast"); t.textContent=msg; positionToast(t); t.classList.add("show"); clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove("show"),ms||1700); }
 /* ローカル日付の YYYY-MM-DD。toISOString はUTC変換のため JST 00:00-08:59 が前日になる（朝練が前日扱いになる実害） */
 function today(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 /* ---------- モーダル共通（dialog 化とフォーカス管理） ---------- */

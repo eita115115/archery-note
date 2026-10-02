@@ -584,9 +584,9 @@
   {
     "id": "AN-050",
     "task": "記録直後の通知がエンド確定の文字に重なる問題を修正する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-048全4casesのshown0.98-opacity score toastがbEndに3157〜3408px²重なる。pointer-events:noneでありクリック阻害とは別。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/record-toast.md。重なりred12→初期green12、contrastred2(1.107:1)、review復帰red2→最終12 passed (2.5m)/10 passed (1.9m)。Chrome/WK320/375/900×normal/reduce、実矢/capacity/end/undo/finish・通知role/contrast≥4.5/寿命・overlay/tab新通知なし復帰/resize/架空保存保持。UI/app/globals/lint/format/storage成功、375前後画像目視・review P2解消。ローカル未公開、版97維持。",
     "dependencies": [
       "AN-048"
     ],
@@ -616,5 +616,18 @@
     ],
     "owner": "codex",
     "acceptance": "版markersを揃えて全体check/lint/format/E2Eと実更新/offline架空記録保持を確認し、remote照合後に承認済み候補を公開、source指定CI/Pagesと全21配信物・375復帰操作/保存保持を検証して実機等の限界も記録する"
+  },
+  {
+    "id": "AN-053",
+    "task": "承認済みの記録通知と開始入力名の改善を次版候補で全体検証して公開する",
+    "status": "open",
+    "passes": false,
+    "evidence": "人間すべて承認は継続。AN-050の局所修正は検証済みローカル、AN-051完了後に次版の全体検証。費用/個人情報使用は禁止。",
+    "dependencies": [
+      "AN-050",
+      "AN-051"
+    ],
+    "owner": "codex",
+    "acceptance": "版markersを揃えて全体check/lint/format/E2Eと実更新/offline架空記録保持を確認し、remote照合後に承認済み候補を公開、source指定CI/Pagesと全21配信物・375通知/selector操作/保存保持を検証して実機等の限界を記録する"
   }
 ]

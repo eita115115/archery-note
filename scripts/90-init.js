@@ -7,6 +7,11 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 applyFieldMode();
 $("#btnSettings").onclick=openSettings;
+/* 表示中の通知だけ、画面幅変更後の操作列の実寸に追従する。 */
+window.addEventListener("resize",()=>{
+  const t=$("#toast");
+  if(t && t.classList.contains("show")) positionToast(t);
+});
 /* 更新通知: version.json と比較（公開時は APP_VER と version.json の v を同時に上げる） */
 let updateAvailable=false;
 let activeWorkflowCount=0;

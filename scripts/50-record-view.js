@@ -1310,6 +1310,8 @@ function renderActive(m) {
     <button class="btn sec" id="bEnd" data-testid="active-end">エンド確定</button>
     <button class="btn activeFinishBtn" id="bFinish" data-testid="active-finish">終了</button>
   </div>`;
+  const liveToast = $("#toast");
+  if (liveToast && liveToast.classList.contains("show")) positionToast(liveToast);
   attachTargetInput(s);
   function applyZoom() {
     if (s.faceType === "triple") return;
