@@ -5,7 +5,7 @@
 ## 現在地
 
 - 公開v96、main85a52fc5、runtimea877c433。公開CI36943369425/Pages36943368347・116 passed (1.3m)と全21配信一致/主要操作/offline架空保持は完了。
-- 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/correction-return。AN-049の的への復帰改善はローカル検証完了、未公開。markersは96のまま。公開branch85は保持。
+- 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/correction-return。AN-049完了、AN-052の候補58c411e/markers97は全体検証中、未公開。公開branch85は保持。
 - 人間「すべて承認します」を受領済み。継続する局所改善/次版公開と既存AN-038追加依存も承認済み、費用/個人情報使用は禁止。元checkout/共有node_modules保全。
 
 ## 今回完了 — AN-049
@@ -19,7 +19,7 @@
 
 ## 次と未解決
 
-- AN-052: 次版markers/全check/E2E/実更新・offline保持→承認済み公開/CI/Pages/21bytes/375live復帰。検証前に公開しない。新しい承認質問は不要。
+- AN-052: markers97/全check/lint/format・120passed(1.2m)、active更新4casesとmobile375予行/native21が成功。normal-motion banner/correction4casesと独立reviewも成功、承認済み公開/CI/Pages/21bytes/375live復帰。docs/codex/release-v97.md。検証前に公開しない、新しい承認質問不要。
 - AN-050通知重なり、AN-051開始selector名は別の小task。AN-038major隔離検証は承認済み未実装、既存ZIP13/27とaudit high4packagesは未解決。
 - root node_modulesは元checkoutへのjunction、install/update/ci禁止。owned sandboxを使用。
 - 実iPhone/keyboard/VoiceOver/5000実保存/INP、AN-001実射未確認。headless touch・programmatic correction scrollであり実gesture保証ではない。目標active。

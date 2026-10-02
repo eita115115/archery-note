@@ -608,9 +608,9 @@
   {
     "id": "AN-052",
     "task": "承認済みの的への復帰改善を次版候補で全体検証して公開する",
-    "status": "open",
+    "status": "in-progress",
     "passes": false,
-    "evidence": "AN-049ローカル改善完了。人間「すべて承認します」は継続、追加承認は不要。次版markersは未変更、公表v96のまま。全体/更新/配信検証前にpushしない。",
+    "evidence": "docs/codex/release-v97.md。候補58c411e markers97、check:all/lint/format、120passed(1.2m)、native21/readiness97/tree/shared lock/source102一致。実SW active96→97両engine320/375の4cases保持/offline成功、mobile375公開helper予行成功。normal-motion banner/correction4casesは待機診断中、候補変更/公開なし。人間すべて承認は継続。 通常motion/mobile実SW banner4casesも全成功、捕捉finished Promiseと観測状態の待機問題はhelperのみ修正。独立review P1/P2なし。公開/CI/Pages/live確認はこれから。",
     "dependencies": [
       "AN-049"
     ],
