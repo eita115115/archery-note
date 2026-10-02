@@ -596,9 +596,9 @@
   {
     "id": "AN-051",
     "task": "記録開始の的・1エンド本数の入力を名前で操作できるようにする",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-048全4cases: fFace/fArrowsはlabels=[]・ARIA名なし、snapshotのcomboboxも無名。見た目のラベルは表示されている。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/record-labels.md。既存labelにfor追加2属性だけ。red6無名→14 passed (13.4s)(new6/related8)、Chrome/WK320field40/per4・375triple40/per3・900single80/per12、role/label名・Tab/ShiftTab/Enter開始・値/架空history/active再読込保持/pageerror0。UI/app/lint/format成功、375前後PNGbyte一致と目視、独立review P1/P2なし。ローカル未公開、版97維持。",
     "dependencies": [
       "AN-048"
     ],
@@ -622,7 +622,7 @@
     "task": "承認済みの記録通知と開始入力名の改善を次版候補で全体検証して公開する",
     "status": "open",
     "passes": false,
-    "evidence": "人間すべて承認は継続。AN-050の局所修正は検証済みローカル、AN-051完了後に次版の全体検証。費用/個人情報使用は禁止。",
+    "evidence": "人間すべて承認は継続。AN-050通知とAN-051入力名の局所修正は検証済みローカル。次版全体検証/実更新/offline保持→承認済み公開/CI/Pages/live確認。費用/個人情報使用は禁止。",
     "dependencies": [
       "AN-050",
       "AN-051"

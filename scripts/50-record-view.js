@@ -521,7 +521,7 @@ function renderRecord(m) {
     <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
     <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="quickSelects">
-      <div><label class="f">的</label><select class="inp" id="fFace">
+      <div><label class="f" for="fFace">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
           ${[122, 80, 60, 40].map((f) => `<option value="${f}" ${String(defFace) === String(f) ? "selected" : ""}>${f}cm</option>`).join("")}
           <option value="T40" ${defFace === "T40" ? "selected" : ""}>40cm 三つ目（縦）</option>
@@ -530,7 +530,7 @@ function renderRecord(m) {
           ${FIELD_FACE_SIZES.map((f) => `<option value="F${f}" ${defFace === `F${f}` ? "selected" : ""}>${f}cm フィールド</option>`).join("")}
         </optgroup>
       </select></div>
-      <div><label class="f">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+      <div><label class="f" for="fArrows">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
     </div>
     <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
     <div class="btnrow"><button class="btn startPrimary" id="fStart" data-testid="record-start">${mode === "calibration" ? "サイト値つきで開始" : "この条件で開始"}</button></div>
