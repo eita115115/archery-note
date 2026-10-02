@@ -440,9 +440,9 @@
   {
     "id": "AN-038",
     "task": "専用承認後にLighthouse majorと新規間接依存を隔離して検証する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-037は仮解決の調査のみ。AGENTS.mdのdependency additions事前承認が必要。28新package名を含むmajor更新への承認は未取得。AN-036の既存3件push承認とは別範囲。 今回の人間「すべて承認します」により既存の専用承認待ち範囲も承認受領。隔離適用/検証は未着手、このv96公開に追加依存を混ぜていない。",
+    "status": "done",
+    "passes": true,
+    "evidence": "人間すべて承認の専用major/addition許可後、2218a1b58e5fd2f25cc999f5e9f99d37fa30af6bでLighthouse13.5.0 reviewed graphを適用。fresh owned install259、43add/61remove/21change/28newnames、extract-zipなし/audit0、CLI reportingfalse、officialSHA確認Node22.19で全check/lint/format、129 passed (1.8m)、実baseline13.5 mobile perf81・runtimeErrorなし、21v98内容/native実bytes/readiness98/shared lock保持。docs/codex/lighthouse-upgrade-validation.md。未公開/public98のまま、Linux更新CI/alertclosure/実iPhone/INP/旧版比性能改善未確認。",
     "dependencies": [
       "AN-037"
     ],
@@ -629,5 +629,29 @@
     ],
     "owner": "codex",
     "acceptance": "版markersを揃えて全体check/lint/format/E2Eと実更新/offline架空記録保持を確認し、remote照合後に承認済み候補を公開、source指定CI/Pagesと全21配信物・375通知/selector操作/保存保持を検証して実機等の限界を記録する"
+  },
+  {
+    "id": "AN-054",
+    "task": "承認済みLighthouse13開発依存を公開しCIと警告状態を確認する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-038local2218a1bで最小Node22.19隔離全検証済み。人間すべて承認は依存更新公開へ継続。publicv98/0db83455、root共有installは禁止。",
+    "dependencies": [
+      "AN-038"
+    ],
+    "owner": "codex",
+    "acceptance": "remote ancestryを照合して検証済み候補を承認済み通常pushし、source指定LinuxCI/Pagesの全check/E2E/Node版本、publicv98全21bytesとGitHub依存警告の状態を確認して未確認点も記録する"
+  },
+  {
+    "id": "AN-055",
+    "task": "同じLighthouse版の初回表示を反復測定して重い読み込み経路を診断する",
+    "status": "open",
+    "passes": false,
+    "evidence": "Lighthouse13.5.0単発fresh mobile/simulatedでperf81、LCP5.1648s/observed132ms、onboarding paragraph。原因未確定。実ユーザーデータは使用しない。",
+    "dependencies": [
+      "AN-054"
+    ],
+    "owner": "codex",
+    "acceptance": "同一source/tool/条件の架空ローカルcold-startを反復し、分布とobserved/simulatedの区別・critical requestsの根拠を記録し、実INPや旧版比の改善を未計測のまま主張せず、次の局所改善を証拠から選ぶ"
   }
 ]

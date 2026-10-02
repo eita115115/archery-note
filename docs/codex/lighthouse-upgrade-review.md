@@ -100,3 +100,12 @@ in an isolated checkout, explicitly disable error reporting, run the current
 baseline helper against synthetic local data, check Node22 minimum compatibility,
 audit, app/security/lint/format/E2E and output assets, then obtain publication
 approval if needed. No fee or personal information was used in this review.
+
+## Later approval and execution — 2026-10-02
+
+Human “すべて承認します” subsequently covers AN-038's major/addition scope.
+The exact reviewed graph is now applied and verified locally in a fresh isolated
+environment, with reporting disabled and minimum Node22.19 execution. See
+[actual validation](lighthouse-upgrade-validation.md) for results and limits.
+Public GitHub alert closure is still pending publication; the original section
+above describes this earlier hypothetical review checkpoint.

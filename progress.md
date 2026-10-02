@@ -4,14 +4,15 @@
 
 ## 現在地
 
-- 公開v98、main 0db834550a49352e21f420af7037d4c832e4b4e6、runtime181ad544。CI36995025215/Pages36995023628成功、129 passed (2.7m)。全21bytes/375操作/offline架空記録保持済み。
-- 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/record-feedback-release。前のgoal turnはAN-051local35cc6b38でprogress。今回AN-053公開受入完了。公開記録のfollow-upはローカルcommit、mainは上記SHA。
-- AN-050通知を実dockの16px上へ配置、dark配色/resize/tab復帰計測。AN-051は既存的/本数labelのfor2属性。版98全5markersと公開証拠/doc/progress/tasks/台帳/CHANGELOGを更新。採点/保存schema/worker activation/依存tree不変。
-- check:all/lint/format、129 passed (1.7m)、native21/source104/shared lock一致。実SW active4+normal/mobile banner4保持成功。独立review P1/P2なし。fresh375liveで通知/selector/6矢修正/解除/確定/次矢/設定touch swipe/offline保持/error0、画像目視。詳細docs/codex/release-v98.md。
-- 人間「すべて承認します」は局所改善/次版公開/既存AN-038依存に継続。費用/個人情報使用は禁止。元checkout/共有node_modulesを保全。
+- 公開v98、main0db834550a49352e21f420af7037d4c832e4b4e6、CI36995025215/Pages36995023628成功。今回開発ツール変更は未公開。
+- 作業場所 C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/lighthouse-upgrade-validation。前goal turnはAN-053公開でprogress。今回AN-038完了、local2218a1b58e5fd2f25cc999f5e9f99d37fa30af6b。
+- Lighthouse13.5.0 reviewed graph適用、fresh隔離install259/Node22.19 officialSHA検証、CLI reporting明示false/版表示。全check/lint/format、129 passed (1.8m)、audit0、21v98内容/native実bytes/readiness98/shared lock一致。独立review P1/P2なし。
+- 実baseline単発mobile/simulated初回welcomeでperf81、LCP5.1648s/observed132ms。実iPhone/INPや旧版比改善の証拠ではない。CRLF検証helper失敗/修正と限界はdocs/codex/lighthouse-upgrade-validation.md。
+- 変更: package/lock開発依存、baseline helper、CONTRIBUTING、改善doc/review追記、progress/tasks/台帳。採点/保存schema/画面/版markers/worker不変。
+- 人間すべて承認は局所改善/依存更新/公開に継続。費用/個人情報不使用。root node_modulesは元checkoutjunction・旧Lighthouse12、install/update/ci禁止。owned新sandboxだけ使用。
 
 ## 次と未解決
 
-- 次AN-038major依存の承認済み隔離適用/検証、未実装。既存ZIP13/27とaudit high4packages未解決。
-- root node_modulesは元checkoutjunction、install/update/ci禁止。owned sandboxだけ使用。
-- 実iPhone/keyboard/VoiceOver/nativepicker/5000実保存/INP、AN-001実射は未確認。headless/browser geometryの証拠と区別。大目標active。
+- 次AN-054: 承認済み開発ツール候補を普通pushしLinuxCI/Pages/Node22/全21public98bytes/警告状態確認。追加版bump不要。publicZIP13/27は未解決、候補audit0と区別。
+- 続くAN-055: 同じLH13版/sourceでcold-start反復しcritical loading経路を診断。単発スコアから原因断定せず局所改善へ。
+- 実iPhone/keyboard/VoiceOver/5000実保存/INP、AN-001実射は未確認。大目標active。
