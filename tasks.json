@@ -572,9 +572,9 @@
   {
     "id": "AN-049",
     "task": "微調整から戻った後に次エンドの的が画面外へ残る問題を修正する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-048: WK375で微調整/選択解除/第1end確定後、targetY=-309/height292.3125/visible0。95対照も再現。source原因未確定、まず実際の手動scrollを含む戻り経路の失敗テストを固定する。",
+    "status": "done",
+    "passes": true,
+    "evidence": "docs/codex/correction-return.md。immutablev96 trace: nudge閉じるscroll727→623/targettop-313、確定後-309、アプリの戻り処理欠落。red6failed/2passed(1.2m)、初期green8passed(1.3m)。final 8 passed (1.7m) のChrome/WK320/375 normal/reduceで解除/chip toggle/delete/選択中確定・継続nudge/reason非移動・active tab120復帰・修正矢/旧3件/reload保持/pageerror0。関連20passed(2.5mログ内)とapp/UI/globals/lint/format成功。失敗helper/保存待機race2箇所保持、375前後画像目視、read-only review P2待機を全placement gateで修正。ローカル未公開。",
     "dependencies": [
       "AN-048"
     ],
@@ -604,5 +604,17 @@
     ],
     "owner": "codex",
     "acceptance": "既存表示ラベルを対応するselectorに結び付け、名前で的/1エンド本数を選んで表示と開始条件が一致することを確認し、両engine狭幅の関連record/keyboard・UI/lintと375表示証拠を残す"
+  },
+  {
+    "id": "AN-052",
+    "task": "承認済みの的への復帰改善を次版候補で全体検証して公開する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-049ローカル改善完了。人間「すべて承認します」は継続、追加承認は不要。次版markersは未変更、公表v96のまま。全体/更新/配信検証前にpushしない。",
+    "dependencies": [
+      "AN-049"
+    ],
+    "owner": "codex",
+    "acceptance": "版markersを揃えて全体check/lint/format/E2Eと実更新/offline架空記録保持を確認し、remote照合後に承認済み候補を公開、source指定CI/Pagesと全21配信物・375復帰操作/保存保持を検証して実機等の限界も記録する"
   }
 ]

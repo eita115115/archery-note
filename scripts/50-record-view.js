@@ -1357,6 +1357,7 @@ function renderActive(m) {
     nativePulse("success");
     save();
     refreshActive();
+    revealActiveTarget();
   };
   $("#bFinish").onclick = () => finishSession();
   const bNext = $("#bNextStage");
@@ -1472,9 +1473,27 @@ function revealChipsAboveDock(chipsBox, behavior) {
   const overlap = chipsBottom - dockTop;
   if (overlap > 0) window.scrollBy({ top: overlap + 12, behavior });
 }
+/* 微調整を閉じた後とエンド確定後だけ、的を操作できる位置へ戻す。
+   通常の再描画・タグ入力・タブ復帰のスクロール位置には介入しない。 */
+function revealActiveTarget() {
+  const target = $("#tgsvg"), dock = $("#activeActionDock");
+  if (!target || !dock) return;
+  // Offscreen content-visibility placeholders must not shift after measuring.
+  const card = target.closest(".card");
+  if (card) card.style.contentVisibility = "visible";
+  const rect = target.getBoundingClientRect();
+  const header = $("header.app");
+  const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 8;
+  const bottom = dock.getBoundingClientRect().top - 8;
+  let delta = 0;
+  if (rect.top < top || rect.height > bottom - top) delta = rect.top - top;
+  else if (rect.bottom > bottom) delta = rect.bottom - bottom;
+  if (delta) window.scrollBy({ top: delta, behavior: "instant" });
+}
 function refreshActive() {
   const s = db.active;
   if (!s) return;
+  const leavingCorrection = $("#nudge").classList.contains("on") && ui.selArrow < 0;
   // markers
   let html = "";
   const gp = (a) => (s.faceType === "triple" ? { x: a.x, y: a.y + SPOT_Y[a.spot || 0] } : a);
@@ -1581,6 +1600,7 @@ function refreshActive() {
         toast(`エンド${s.editIndex + 1}を編集中（確定で戻ります）`);
       }),
   );
+  if (leavingCorrection) revealActiveTarget();
 }
 function nudgeArrow(dirKey) {
   const s = db.active;
