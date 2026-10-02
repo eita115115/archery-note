@@ -608,9 +608,9 @@
   {
     "id": "AN-052",
     "task": "承認済みの的への復帰改善を次版候補で全体検証して公開する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "docs/codex/release-v97.md。候補58c411e markers97、check:all/lint/format、120passed(1.2m)、native21/readiness97/tree/shared lock/source102一致。実SW active96→97両engine320/375の4cases保持/offline成功、mobile375公開helper予行成功。normal-motion banner/correction4casesは待機診断中、候補変更/公開なし。人間すべて承認は継続。 通常motion/mobile実SW banner4casesも全成功、捕捉finished Promiseと観測状態の待機問題はhelperのみ修正。独立review P1/P2なし。公開/CI/Pages/live確認はこれから。",
+    "status": "done",
+    "passes": true,
+    "evidence": "v97公開dd3cda12/runtime58c411e。CI36947646285/Pages36947645601成功、120 passed (1.5m)。check:all/lint/format/markers/native/source/shared lock成功、実SW active4+normal/mobile banner4保持/offline成功。全21公開bytes一致、fresh375で6矢修正/解除/確定後的全体と次矢・設定touch swipe・架空history5/offline保持/pageerror0。docs/codex/release-v97.md、実iPhone/VoiceOver等未確認。",
     "dependencies": [
       "AN-049"
     ],
