@@ -440,9 +440,9 @@
   {
     "id": "AN-038",
     "task": "専用承認後にLighthouse majorと新規間接依存を隔離して検証する",
-    "status": "needs-user",
+    "status": "open",
     "passes": false,
-    "evidence": "AN-037は仮解決の調査のみ。AGENTS.mdのdependency additions事前承認が必要。28新package名を含むmajor更新への承認は未取得。AN-036の既存3件push承認とは別範囲。",
+    "evidence": "AN-037は仮解決の調査のみ。AGENTS.mdのdependency additions事前承認が必要。28新package名を含むmajor更新への承認は未取得。AN-036の既存3件push承認とは別範囲。 今回の人間「すべて承認します」により既存の専用承認待ち範囲も承認受領。隔離適用/検証は未着手、このv96公開に追加依存を混ぜていない。",
     "dependencies": [
       "AN-037"
     ],
@@ -548,9 +548,9 @@
   {
     "id": "AN-047",
     "task": "承認後にv96直近得点の集計改善を公開して配信と主要操作を確認する",
-    "status": "needs-user",
-    "passes": false,
-    "evidence": "AN-045候補受入完了。公開baseline95/97945e17をread-only照合、今回pushなし。AGENTS.mdはgit push/GitHub Pages deploy前の人間承認を要求する。新しいv96公開承認待ち。",
+    "status": "done",
+    "passes": true,
+    "evidence": "人間承認後85a52fc5b6f2300fbf46436e0c10b5a1bcf5e8c3をmainへ反映。docs/codex/release-v96.md。CI36943369425/Pages36943368347成功、116 passed (1.3m)、check:all/lint/format成功。公開96全21asset bytes一致、fresh375分析focus/可視境界・履歴round19/分布/開始44px/settings touch swipe・実SW offline架空履歴5件/active保持/pageerror0。共有source101/hidden lock不変。実iPhone/VoiceOver未確認、調査branchは初回公開に混ぜず保持。",
     "dependencies": [
       "AN-045"
     ],

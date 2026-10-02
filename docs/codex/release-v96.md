@@ -1,10 +1,11 @@
-# v96 release candidate evidence — AN-045
+# v96 candidate and approved publication — AN-045 / AN-047
 
 Public baseline:97945e17dd1529a527be5f0750372378818b2a57/v95.
 Local candidate:a877c4337cfcae4e4b9da52058a44c1ca8c58a6f, branch
-codex/score-trend-performance. No push or deployment. The corrected normal and
+codex/score-trend-performance. Candidate preparation is preserved below; approved
+publication is verified in the final section. The corrected normal and
 active-session update routes now pass all four engine/width cases each. AN-045's
-candidate acceptance is complete; v96 publication requires separate user approval.
+candidate acceptance is complete; separate human approval was later received.
 AN-046 identified an asynchronous readiness-wait defect in the helpers. See
 [the diagnosis and historical regression](offline-worker-update-diagnosis.md).
 
@@ -232,3 +233,53 @@ to ci.yml/verify-native.cjs; those reads were not application check failures.
 
 AN-045 is done with evidence. AN-047 is needs-user/passesfalse for explicit v96
 publication approval. No push, deployment, fee or actual private practice was used.
+
+## Approved publication verified — AN-047
+
+Human approval, including “すべて承認します”, authorized this release. The
+frozen candidate was pushed without force: 85a52fc5b6f2300fbf46436e0c10b5a1bcf5e8c3. Runtime remainsa877c433.
+[CI36943369425](https://github.com/eita115115/archery-note/actions/runs/36943369425)
+and [Pages36943368347](https://github.com/eita115115/archery-note/actions/runs/36943368347)
+succeeded for that exact source. CI used Linux/Node22 clean npm ci, check:all,
+lint, format and the full116-test suite.
+
+```text
+Archery Note checks OK (v96)
+Security regression: all 38 checks passed
+PWA asset checks OK
+PWA update flow checks OK
+Storage round-trip checks OK
+Version alignment checks OK
+All matched files use Prettier code style!
+116 passed (1.3m)
+PASS: all21 deployed v96 assets byte-identical to approved publication 85a52fc5b6f2300fbf46436e0c10b5a1bcf5e8c3
+PASS: deployed touch swipe dismisses settings and retains sessions
+PASS: deployed v96, seven candidate assets match, round collapse/expansion and score distribution, synthetic history/start, offline reload, data retention, no page errors
+```
+
+Fresh375px Chromium checks named equipment/distance selectors and period7d,
+focus retained and both visible bounds above fixed navigation; history round19,
+score distribution, start/44px controls and CDP touch swipe closing settings.
+Five synthetic saved sessions and active practice survive actual-worker offline
+reload, pageerrors0. Current live analysis screenshot inspected. This does not
+prove physical iPhone/VoiceOver or every real-user update timing. Initial worker
+readiness uses a bounded explicit boolean poll; no async waitForFunction gate.
+
+Local pre-push owned-sandbox check:all/lint and documentation format also pass;
+101 source/test/dependency files match the owned sandbox and shared hidden lock
+is unchanged. Audit branch54dad74 was preserved separately and not included in
+the initial runtime publication. AN-048 findings are existing v95/v96 UX issues,
+not fixes included here. No scoring/storage strategy, new dependencies, fee or
+private record use. GitHub still reports the two existing development ZIP alerts.
+
+Raw evidence: artifacts/release-v96/ci-status-final.json, pages-status-final.json,
+ci-log.txt, check-all-publication.txt, lint-publication.txt, live-assets.json/txt,
+live-browser.txt, verify-live-assets.cjs and verify-deployed-publication.cjs.
+The premature CI-log request while the run was active returned “logs will be
+available when it is complete”; final logs were retrieved after completion. The
+source-helper wrong-working-directory error is retained in the audit record.
+
+AN-047 is done with evidence. Next AN-049: diagnose and fix the correction-return
+target visibility case separately; AN-050 toast placement and AN-051 field labels
+remain open. Broad approval also covers queued dependency work, which remains
+unimplemented and separate from this release. Overall goal remains active.

@@ -4,7 +4,7 @@
 
 ## 現在地
 
-- 公開v95、main97945e17、runtime7039fcea。v96の人間承認を受領、AN-047で確認済み候補85a52fcを公開する。
+- 公開v96、初回公開source85a52fc5、runtimea877c433。AN-047公開確認完了。CI36943369425/Pages36943368347成功、116 passed (1.3m)。全21配信物byte一致、fresh375主要操作/実SW offline架空履歴5件+active保持/pageerror0。
 - 作業場所: C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/phone-end-flow-audit。公開branch codex/score-trend-performanceは85a52fcで固定。
 - AN-044/045/046完了。候補runtime a877c433、全check/lint/format・116 passed (1.1m)、両engine320/375のnormal4/active4実SW95→96更新と架空記録/offline保持の証拠を再利用できる同一source。詳細docs/codex/release-v96.md。
 - 元checkout/共有node_modules保全。費用・個人情報の使用なし。
@@ -18,7 +18,7 @@
 
 ## 次と未解決
 
-- AN-047: 承認済み85a52fcをmainへ反映し、exact-source CI/Pages・全21公開asset bytes・375主要操作/offline架空保存を確認。調査branchを代わりにpushしない。
+- AN-047完了。公開記録と調査記録を保管し、次はAN-049の小さな修正。実機の確認は引き続き未確認。
 - AN-049: 微調整後の次の的への戻りを原因確定・失敗regressionから修正。通知配置AN-050、入力label AN-051は別task。
 - 「すべて承認」を受領。既存AN-038 major依存も実行可能だが、この公開に混ぜず別taskで互換性/監査を確認する。ZIP13/27とfullaudit high4packagesは未解決。
 - root node_modulesは元checkoutへのjunction、install/update/ci禁止。owned sandboxのみ使用。
