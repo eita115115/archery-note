@@ -645,13 +645,25 @@
   {
     "id": "AN-055",
     "task": "同じLighthouse版の初回表示を反復測定して重い読み込み経路を診断する",
-    "status": "open",
-    "passes": false,
-    "evidence": "Lighthouse13.5.0単発fresh mobile/simulatedでperf81、LCP5.1648s/observed132ms、onboarding paragraph。原因未確定。実ユーザーデータは使用しない。",
+    "status": "done",
+    "passes": true,
+    "evidence": "同一source691f1cd7/Lighthouse13.5/Node22.19/Chrome149のcold24reports(3baseline+9simulate+6DevToolsblocked+6interleaved)全CLI0。PASS:24 cold reports; per-matrix tool/settings/host,14 script requests, no Lighthouse runtime errors/warnings。21input/Git appcontent/hash/sharedlock、14prototype AST/size照合成功。元modeledmedian5173.879ms/observed117ms、gzip→compact model448.669msとDevToolsinterleaved98.489ms差を区別。JSgzipbody50887bytes/25.97%減、public既にgzip。n3/順序/host/AST限界、実iPhone/公開速度/INP未確認。独立read-only review noP1/P2、format:check All matched files use Prettier code style!。docs/codex/cold-start-diagnosis.md、artifacts/cold-start/verify.txt/verified-summary.json。app/cache/版/依存不変、診断のみ。",
     "dependencies": [
       "AN-054"
     ],
     "owner": "codex",
     "acceptance": "同一source/tool/条件の架空ローカルcold-startを反復し、分布とobserved/simulatedの区別・critical requestsの根拠を記録し、実INPや旧版比の改善を未計測のまま主張せず、次の局所改善を証拠から選ぶ"
+  },
+  {
+    "id": "AN-056",
+    "task": "元sourceと14scriptsの順序を保つ配信用JavaScript軽量化を生成物で検証する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-055診断試作でgzipbody50887bytes/25.97%減、DevToolsinterleaved3pairs98.489–109.508ms短縮。maintainable生成方式と実app回帰は未実装・未確認。実iPhone/公開改善幅を保証しない。",
+    "dependencies": [
+      "AN-055"
+    ],
+    "owner": "codex",
+    "acceptance": "編集可能な元sourceを保持して同じ14配信path/global名/実行順の決定的軽量JS生成を実装し、再生成整合性と構造・契約を検証する。実生成物で全check/lint/format/E2E・mobile主要操作・採点/架空保存保持・実SW更新/offlineを確認し、同条件gzip比較を記録する。依存追加は隔離所有sandboxのみで共有junctionを保全し、試作ASTだけで回帰や実機速度改善を主張しない。公開受入は別の小タスクとする"
   }
 ]
