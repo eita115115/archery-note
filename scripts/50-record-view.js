@@ -1492,6 +1492,22 @@ function revealActiveTarget() {
   else if (rect.bottom > bottom) delta = rect.bottom - bottom;
   if (delta) window.scrollBy({ top: delta, behavior: "instant" });
 }
+/* 矢チップを選んだ時だけ、微調整パッドを操作列の上へ出す。
+   入場モーション中にも余白を残し、連続微調整やメタ入力の位置は変えない。 */
+function revealActiveCorrection() {
+  const pad = $("#nudge .npad"), dock = $("#activeActionDock");
+  if (!pad || !dock) return;
+  const card = pad.closest(".card");
+  if (card) card.style.contentVisibility = "visible";
+  const rect = pad.getBoundingClientRect();
+  const header = $("header.app");
+  const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 16;
+  const bottom = dock.getBoundingClientRect().top - 16;
+  let delta = 0;
+  if (rect.top < top || rect.height > bottom - top) delta = rect.top - top;
+  else if (rect.bottom > bottom) delta = rect.bottom - bottom;
+  if (delta) window.scrollBy({ top: delta, behavior: "instant" });
+}
 function refreshActive() {
   const s = db.active;
   if (!s) return;
@@ -1554,6 +1570,7 @@ function refreshActive() {
         ui.selArrow = ui.selArrow === +c.dataset.i ? -1 : +c.dataset.i;
         nativePulse("light");
         refreshActive();
+        if (ui.selArrow >= 0) revealActiveCorrection();
       }),
   );
   $("#nudge").classList.toggle("on", ui.selArrow >= 0);
