@@ -1,4 +1,4 @@
-const CACHE = "archery-note-v99";
+const CACHE = "archery-note-v100";
 const CACHE_PREFIX = "archery-note-v";
 /* 射形トラッキングの pose 資産（assets/pose/ の wasm+モデル、約15MB・内容固定）専用キャッシュ。
    名前を CACHE_PREFIX("archery-note-v") に前方一致させないことで、activate の
@@ -24,7 +24,9 @@ const APP_SCRIPTS = [
 const ASSETS = ["./index.html", "./style.min.css", ...APP_SCRIPTS, "./manifest.json", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  // A new cache name must also contain new bytes, even while old HTTP entries
+  // remain fresh. Keep canonical keys for offline navigation/script fallback.
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(asset => new Request(asset, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", e => {
   // 掃除対象は CACHE_PREFIX 前方一致のみ。POSE_CACHE("archery-note-pose-v1") は

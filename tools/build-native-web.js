@@ -65,7 +65,18 @@ async function main() {
     if (!fs.existsSync(src)) throw new Error(`Missing native asset: ${file}`);
     const dest = path.join(outDir, file);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
-    if (appScripts.includes(file)) {
+    if (file === "index.html") {
+      let html = fs.readFileSync(src, "utf8");
+      // Existing pages only refresh the document URL. Release-specific URLs also
+      // bypass their still-fresh HTTP script/CSS entries on the first navigation.
+      for (const asset of [...appScripts, "style.min.css"]) {
+        const attr = asset.endsWith(".css") ? "href" : "src";
+        const reference = `${attr}="${asset}"`;
+        if (!html.includes(reference)) throw new Error(`Missing release asset: ${asset}`);
+        html = html.replace(reference, `${attr}="${asset}?v=${version}"`);
+      }
+      fs.writeFileSync(dest, html);
+    } else if (appScripts.includes(file)) {
       fs.writeFileSync(dest, await compactScript(fs.readFileSync(src, "utf8")));
     } else {
       fs.copyFileSync(src, dest);

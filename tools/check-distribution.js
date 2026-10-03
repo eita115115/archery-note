@@ -73,10 +73,16 @@ async function main() {
     deliveredBytes += zlib.gzipSync(delivered, { level: 9 }).length;
   }
   assert.ok(deliveredBytes < originalBytes * 0.8, "gzip JS payload must shrink by at least20%");
+  const deliveredHtml = fs.readFileSync(path.join(root, "dist/native/index.html"), "utf8");
+  const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"))).v;
+  const releaseReferences = [...deliveredHtml.matchAll(/src="(scripts\/[^"?]+\.js)\?v=(\d+)"/g)];
+  assert.deepEqual(releaseReferences.map(match => match[1]), scripts, "script paths/order preserved");
+  releaseReferences.forEach(match => assert.equal(Number(match[2]), version, "script release version"));
+  assert.ok(deliveredHtml.includes(`href="style.min.css?v=${version}"`), "CSS release version");
   assert.equal(
-    fs.readFileSync(path.join(root, "dist/native/index.html"), "utf8"),
+    deliveredHtml.replace(/((?:src="scripts\/[^"?]+\.js|href="style\.min\.css))\?v=\d+(?=")/g, "$1"),
     html,
-    "script paths/order preserved",
+    "only script/CSS release queries change the original HTML",
   );
   for (const file of [
     "style.min.css",
