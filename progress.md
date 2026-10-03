@@ -4,13 +4,14 @@
 
 ## 現在地
 
-- 公開v99/main6ea08744cbef6f9fa51cb487a22579f3e1bd2454、Pagesworkflow配信。source指定CI37131360394 validate/deploy成功、UbuntuNode22.23.3/clean npmci0/全check/lint/format/130 passed (2.7m)。実Linuxartifact11276573236全25livebytes exact。Linux JSgzip195178→138825bytes(28.87%減)、実機速度/INP保証なし。
-- AN-057総合受入未完。保持した実public98画面はbannerクリック/appv遷移後APP99待ち30s timeout。finallyでownedprofile閉じ、元失敗状態未採取/未復旧。新規375画面の設定touchswipe/pinchscale/filterfocus/6矢修正確定/次矢/架空history5+active1/networkoffline/fromSW/pageerror0は成功。これを旧profile更新成功と混同しない。
-- 同一URL/max-age600隔離再現はAPP98/activated worker99/controlleractive/cache99内code98。HTTPcacheだけ無効化すると99へ進む。診断条件での成功は通常更新の受入でない。初期local4caseはno-storeで暖まったHTTPcacheを検証していなかった。元公開失敗への整合する仮説、直接証明ではない。
-- 作業場所 C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/compact-pages-release。AN-056軽量化受入済み、実99の5markers一致。今回公開source6eaの後、変更は記録のみ。採点/保存/activationstrategy変更なし、費用/個人情報不使用。
-- ownedcompact-js sandboxのみ利用。root/original node_modules junction install/ci/update禁止、共有hiddenlockSHA16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309保持。
+- 公開v100/main5d6e16b319b958b0aadc9b63eade0200cbde9b4e。sourceCI37157320925 validate/deploy成功、UbuntuNode22.23.3/clean npmci0/全check/lint/format/131 passed (2.6m)。実Linuxartifact11285924613全25publicbytes exact/14prebuiltJSもLinux一致。Pagesworkflow/HTTPS維持。
+- AN058源修正: 生成HTML14script+CSS版query、worker19正規URLのRequestreload。元source/global/順序/activationflags/pose/採点/保存/依存保持、実100markers一致。warm600 regression修正前99期待99/実98失敗→100成功、実98四strict/実99四first-document functional Chrome/WK320/375、15loaded/offline+14canonicalコード/架空history5/6矢修正確定/active1/最終offlineactivated保持成功。
+- 即時WKactivating/identity strict15/60s失敗は未解明、記録を消さず初回functional検証と分ける。helperclosure/UTF8headers不足は修正済み、最終native15body全ケース取得。fresh公開375設定touchswipe/pinch/filterfocus/修正確定/次矢/5history+active1/browseroffline/fromSW/errors0成功。
+- 実public99→100の別warmprofile: 15旧assethash一致/maxage600Age2/warmwindow600以内、realbannerクリックAPP100/activatedworker-controller/cache100まで成功。その後未DLのlocalLinuxfile待ち30sで失敗、finallyprofileclosed。canonical/postupdate練習保持/後続offlineは未到達で未受入。元98→99実更新失敗も歴史として未復旧を保持。最初の100未公開45min待ちprofileはterminalsetupwait、更新失敗でない。
+- ownedhelper案は遅いartifact依存を除去し事前candidate14hash/即時practice比較の保存へ変更、syntax/current100prebuiltLinuxhashだけ確認、futurelive未試験。appは公開5d6の後不変、現在変更は記録のみ。作業場所 C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/warm-cache-update。
+- ownedcompact-js sandbox/isolatedNode22.19のみ。root/original node_modules junction install/ci/update禁止、共有hiddenlockSHA16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309保持。費用/個人情報不使用。
 
 ## 次と未解決
 
-- 次の一小タスクAN-058: 正常HTTPcacheの失敗回帰を追加し、配信HTMLの版付きassetURLとworker precache再検証を局所比較/修正する。保存削除/activationflags変更禁止。既存承認内で実候補98/99→新版のcode/cache一致とofflineを両engine320/375確認し、全check/生成E2Eを通し、公開旧profileを閉じず失敗時も状態証拠を保持する。揃えた新版公開/CI/全25bytes/実更新受入まで進める。
-- AN-057in-progress/false、AN-058open。詳細 docs/codex/release-v99.md。実iPhone/keyboard/VoiceOver/5000実保存/実INP、posecamera/GPU、AN-001実射は未確認。大目標active、追加承認不要。
+- 次一小タスクAN059: 検証の全依存/失敗snapshot/context保持を先に整備し、実public100profileを公開直前にwarm、次alignedversion(現100なら101)へ実更新。即時コード/14cachehash/practice比較を先に保存し、後続correction/end/next/settingsswipe/networkoffline保持、正確CI/実Linuxartifact全25publicbytesとcache保存hashを確認する。未DLartifact待ちを旧profile保持検証へ混ぜない。
+- AN057/058in-progress false、AN059open。詳細 docs/codex/warm-cache-update.md。実iPhone/keyboard/VoiceOver/5000実保存/実INP、posecamera/GPU、AN001実射は未確認。大目標active、既存全承認の範囲で次を進める。
