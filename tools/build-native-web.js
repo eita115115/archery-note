@@ -29,6 +29,11 @@ const files = [
   "icon.svg",
   "apple-touch-icon.png",
   "version.json",
+  // Existing lazily loaded form runtime/model; copied unchanged, never preloaded.
+  "assets/pose/vision_bundle.mjs",
+  "assets/pose/vision_wasm_internal.js",
+  "assets/pose/vision_wasm_internal.wasm",
+  "assets/pose/pose_landmarker_lite.task",
 ];
 
 function assertInsideRoot(target) {

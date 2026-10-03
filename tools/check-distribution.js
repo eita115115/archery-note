@@ -85,6 +85,10 @@ async function main() {
     "icon.svg",
     "apple-touch-icon.png",
     "version.json",
+    "assets/pose/vision_bundle.mjs",
+    "assets/pose/vision_wasm_internal.js",
+    "assets/pose/vision_wasm_internal.wasm",
+    "assets/pose/pose_landmarker_lite.task",
   ]) {
     assert.deepEqual(
       fs.readFileSync(path.join(root, "dist/native", file)),
