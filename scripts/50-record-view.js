@@ -1636,7 +1636,9 @@ function attachTargetInput(s) {
     cur = $("#tgcur");
   let drag = null,
     cursorFrame = 0,
-    cursorPoint = null;
+    cursorPoint = null,
+    touchBlocked = false,
+    touchGuard = false;
   const raf =
     window.requestAnimationFrame ||
     function (cb) {
@@ -1711,17 +1713,55 @@ function attachTargetInput(s) {
     lens.classList.remove("fine", "cut", "miss");
     lensTag.classList.remove("fine", "cut", "miss");
     lensTag.style.display = "none";
+    if (!touchBlocked) stopTouchGuard();
+  }
+  function stopTouchGuard() {
+    if (!touchGuard) return;
+    touchGuard = false;
+    document.removeEventListener("touchstart", touchStart, true);
+    document.removeEventListener("touchend", touchEnd, true);
+    document.removeEventListener("touchcancel", touchEnd, true);
+  }
+  function watchTouch() {
+    if (touchGuard) return;
+    touchGuard = true;
+    // Watch only this gesture, including a second finger outside the SVG.
+    document.addEventListener("touchstart", touchStart, true);
+    document.addEventListener("touchend", touchEnd, true);
+    document.addEventListener("touchcancel", touchEnd, true);
+  }
+  function blockTouch() {
+    touchBlocked = true;
+    resetDrag();
+    watchTouch();
+  }
+  function touchStart(e) {
+    if (e.touches.length > 1) blockTouch();
+  }
+  function touchEnd(e) {
+    if (e.touches.length) return;
+    touchBlocked = false;
+    stopTouchGuard();
+    if (!svg.isConnected) resetDrag();
   }
   svg.addEventListener("contextmenu", (e) => e.preventDefault());
   svg.addEventListener("selectstart", (e) => e.preventDefault());
   function down(e) {
+    const cp = clientPoint(e);
+    if (!cp) return;
+    const touching = e.pointerType === "touch" || !!e.touches;
+    if (touchBlocked || (touching && (e.isPrimary === false || e.touches?.length > 1 || (drag && cp.id !== drag.id)))) {
+      e.preventDefault();
+      blockTouch();
+      return;
+    }
     if (s.cur.length >= s.perEnd) {
       toast(`1エンド${s.perEnd}本です。「エンド確定」を押してください`);
       return;
     }
-    const cp = clientPoint(e);
-    if (!cp) return;
     e.preventDefault();
+    resetDrag();
+    if (touching) watchTouch();
     if (e.pointerId != null && svg.setPointerCapture) {
       try {
         svg.setPointerCapture(e.pointerId);
