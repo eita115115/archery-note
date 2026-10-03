@@ -713,5 +713,29 @@
     ],
     "owner": "codex",
     "acceptance": "実二本指の同時/途中追加で余分な矢や途中dragの矢が保存される失敗を回帰として保持し、単指tap/drag/長押しfine/取消と採点円の一致を保つ局所入力保護で直す。保存schemaや既存practiceを変更せず、check:app/ui/all/lint/format/生成E2Eと320/375主要記録操作/確定/次矢/設定swipe/offlineを確認し、承認済み揃えた版の公開CI・25資産・実保持旧profile更新/記録再開を検証する。"
+  },
+  {
+    "id": "AN-061",
+    "task": "公開版の記録から履歴までを画面で監査し次のUX改善を具体化する",
+    "status": "done",
+    "passes": true,
+    "evidence": "Actual public102/source d6689654 in fresh owned IAB: 10 accepted same-run screenshots; 375 entry/start/tap/chip/correction/3-arrow end/finish/history4/21 arrows, 320 selected nudge top623.45 below dock601.33. Docs/screenshots/ux-flow-v102 and artifacts/ux-flow-v102/evidence.json SHA/byte copies. No app change/private data/fee; native iPhone/dark/VoiceOver/offline/INP not audited. docs/codex/record-flow-ux-audit.md.",
+    "dependencies": [
+      "AN-060"
+    ],
+    "owner": "codex",
+    "acceptance": "実公開で開始→記録→修正→確定→終了→履歴を所有架空データで操作し、同一runの各画面画像を保存・表示して監査する。問題を画像と観察に結びつけ、320/375の範囲と実機/アクセシビリティ/性能未確認を区別し、次の一小タスクを具体的な摩擦から選ぶ。アプリ変更の合格や速度改善を監査だけで主張しない。"
+  },
+  {
+    "id": "AN-062",
+    "task": "矢を選んだ直後に微調整ボタンをドックの上へ出す",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN061 current public102 steps4/10: selected-arrow nudge buttons hidden behind active dock; 320px upper arrow top623.45px vs dock601.33px. Current refreshActive reveals chips before opening nudge; no entry reveal. No implementation yet.",
+    "dependencies": [
+      "AN-061"
+    ],
+    "owner": "codex",
+    "acceptance": "320/375で矢を選んだ直後、微調整パッドの矢印と削除が固定ドックに隠れず押せることを回帰red→greenで示す。選択開始以外のタグ/矢番号/連続nudgeでは不要なscrollを起こさず、解除/確定後の的復帰・単指/二本指保護・採点円/保存/既存practiceを保つ。全check/lint/format/実生成物E2E、mobile前後画像と操作、承認済み揃えた版の公開CI/25資産/実保持旧profile更新・offline記録再開を確認する。"
   }
 ]
