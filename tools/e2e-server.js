@@ -4,7 +4,10 @@ const fs = require("fs");
 const http = require("http");
 const path = require("path");
 
-const rootDir = path.resolve(__dirname, "..");
+const rootDir =
+  process.env.E2E_DISTRIBUTION === "1"
+    ? path.resolve(__dirname, "../dist/native")
+    : path.resolve(__dirname, "..");
 const host = process.env.HOST || "127.0.0.1";
 const port = Number(process.env.PORT || 4173);
 
@@ -60,5 +63,7 @@ const server = http.createServer((request, response) => {
 });
 
 server.listen(port, host, () => {
-  console.log(`E2E server listening at http://${host}:${port}`);
+  console.log(
+    `E2E server listening at http://${host}:${port} (${process.env.E2E_DISTRIBUTION === "1" ? "distribution" : "source"})`,
+  );
 });

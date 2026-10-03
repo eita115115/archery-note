@@ -36,4 +36,4 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E smoke test
-        run: npm run test:e2e
+        run: npm run test:e2e:dist

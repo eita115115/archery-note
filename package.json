@@ -4,7 +4,7 @@
   "private": true,
   "description": "Archery scoring, sight adjustment, and equipment notebook with a native-ready shell.",
   "scripts": {
-    "check:all": "npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version",
+    "check:all": "npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version && npm run check:distribution",
     "check:security": "node tools/check-security.js",
     "check:analysis": "node tools/check-analysis-core.js",
     "check:form": "node tools/check-form-core.js && node tools/golden-replay/test-form-metric-fixtures.js && node tools/check-form-diagnostics.js",
@@ -31,7 +31,9 @@
     "native:add:ios": "npm run build:native-web && npx cap add ios",
     "golden:replay": "python tools/golden-replay/run-golden-replay.py",
     "test:form-fixtures": "node tools/golden-replay/test-form-metric-fixtures.js",
-    "golden:form-fixtures": "node tools/golden-replay/replay-form-fixtures.js"
+    "golden:form-fixtures": "node tools/golden-replay/replay-form-fixtures.js",
+    "check:distribution": "node tools/check-distribution.js",
+    "test:e2e:dist": "node tools/test-distribution.js"
   },
   "devDependencies": {
     "@capacitor/android": "^8.4.0",
@@ -44,7 +46,8 @@
     "eslint": "^10.6.0",
     "globals": "^17.7.0",
     "lighthouse": "13.5.0",
-    "prettier": "^3.9.0"
+    "prettier": "^3.9.0",
+    "terser": "5.51.2"
   },
   "dependencies": {
     "@capacitor/filesystem": "^8.1.2",

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const { compactScript } = require("./compact-script.js");
 
 const root = path.resolve(__dirname, "..");
 const outDir = path.join(root, "dist", "native");
@@ -48,7 +49,7 @@ function readVersion() {
   return +appVer;
 }
 
-function main() {
+async function main() {
   const version = readVersion();
   assertInsideRoot(outDir);
   fs.rmSync(outDir, { recursive: true, force: true });
@@ -59,7 +60,11 @@ function main() {
     if (!fs.existsSync(src)) throw new Error(`Missing native asset: ${file}`);
     const dest = path.join(outDir, file);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.copyFileSync(src, dest);
+    if (appScripts.includes(file)) {
+      fs.writeFileSync(dest, await compactScript(fs.readFileSync(src, "utf8")));
+    } else {
+      fs.copyFileSync(src, dest);
+    }
   }
 
   fs.writeFileSync(
@@ -80,4 +85,7 @@ function main() {
   console.log(`Native web assets ready: ${path.relative(root, outDir)} (v${version})`);
 }
 
-main();
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});
