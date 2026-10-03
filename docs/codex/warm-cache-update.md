@@ -52,3 +52,7 @@ PASS: deployed touch swipe dismisses settings and retains sessions
 PASS: deployed v100, actual checked compact distribution, round collapse/expansion and score distribution, synthetic history/start, offline reload, data retention, no page errors
 - Timeout 30000ms exceeded while waiting on the predicate
 ```
+
+## AN-059による公開更新の総合受入
+
+修正済み実public100を保持した別profileで101へのrealbanner更新を確認した。元98→99/99→100の失敗profile自体は復旧していない。初回15body/canonical14hash/practice equalityを先に保存し、記録修正/確定/次矢/設定touch swipe/networkoffline再開とLinux25publicbytes一致まで完了した。版101はmarkersだけでアプリロジック不変。CI37159445088/131 passed (2.7m)、artifact11287052421。AN057/058の総合受入はこの修正済み公開実証と既存98/99互換functional証拠を合わせて判定した。詳細は[公開更新の受入記録](live-update-acceptance.md)。初期WKstrict lifecycleと的上二本指P2(AN060)は未解決として残す。

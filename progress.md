@@ -4,14 +4,13 @@
 
 ## 現在地
 
-- 公開v100/main5d6e16b319b958b0aadc9b63eade0200cbde9b4e。sourceCI37157320925 validate/deploy成功、UbuntuNode22.23.3/clean npmci0/全check/lint/format/131 passed (2.6m)。実Linuxartifact11285924613全25publicbytes exact/14prebuiltJSもLinux一致。Pagesworkflow/HTTPS維持。
-- AN058源修正: 生成HTML14script+CSS版query、worker19正規URLのRequestreload。元source/global/順序/activationflags/pose/採点/保存/依存保持、実100markers一致。warm600 regression修正前99期待99/実98失敗→100成功、実98四strict/実99四first-document functional Chrome/WK320/375、15loaded/offline+14canonicalコード/架空history5/6矢修正確定/active1/最終offlineactivated保持成功。
-- 即時WKactivating/identity strict15/60s失敗は未解明、記録を消さず初回functional検証と分ける。helperclosure/UTF8headers不足は修正済み、最終native15body全ケース取得。fresh公開375設定touchswipe/pinch/filterfocus/修正確定/次矢/5history+active1/browseroffline/fromSW/errors0成功。
-- 実public99→100の別warmprofile: 15旧assethash一致/maxage600Age2/warmwindow600以内、realbannerクリックAPP100/activatedworker-controller/cache100まで成功。その後未DLのlocalLinuxfile待ち30sで失敗、finallyprofileclosed。canonical/postupdate練習保持/後続offlineは未到達で未受入。元98→99実更新失敗も歴史として未復旧を保持。最初の100未公開45min待ちprofileはterminalsetupwait、更新失敗でない。
-- ownedhelper案は遅いartifact依存を除去し事前candidate14hash/即時practice比較の保存へ変更、syntax/current100prebuiltLinuxhashだけ確認、futurelive未試験。appは公開5d6の後不変、現在変更は記録のみ。作業場所 C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/warm-cache-update。
-- ownedcompact-js sandbox/isolatedNode22.19のみ。root/original node_modules junction install/ci/update禁止、共有hiddenlockSHA16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309保持。費用/個人情報不使用。
+- 公開v101/main f8c9d5037f6b01c95e80d1546a8678be904b8c8b。CI37159445088 validate/deploy成功、UbuntuNode22.23.3/clean npmci0/全check/lint/format/131 passed (2.7m)。実Linuxartifact11287052421全25publicbytes一致、実更新の初回15body/canonical14hashもLinux一致。Pages workflow/HTTPS維持。
+- AN059完了: 公開100を開いた所有375profileをpush直前warm、15旧hash/maxage600Age最大2、264728ms後realbannerで101。初回文書のAPP/15body/cache101のみ/14hash/activatedcontroller/practice5exactを即時保存し、6矢修正/確定/次矢・group19/filterfocus・設定CDPtouchswipe・履歴倍率不変・実networkoffline/fromSWreload/history5/確定6/active1保持/errors0成功。fresh公開375も主要操作/offline成功、active画像を目視。
+- 遅い未DLartifact依存を除去、本文Promise即時catch、全段階failure snapshot/context保持。warmthrow/bodyerror注入で生きた元profileを確認してから明示abort。旧readiness predicate早期合格とfreshpath/Shellquote失敗をrawで保持し修正、最終scoped rehearsal成功。
+- app変更は100→101markersのみ、元100修正/採点/保存schema/activationflags/UI/依存graph不変。local全check/lint/format/生成131 passed (1.9m)、source/sandbox323/候補25hash/sharedlock照合成功。AN057/058は旧98/99→100の8functional互換証拠と修正済み実公開更新を合わせてdone、元失敗profileを復旧したとは言わない。詳細 docs/codex/live-update-acceptance.md。
+- 所有worktree C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/warm-cache-update。ownedcompact-js sandbox/isolatedNode22.19のみ、root/original node_modules junction install/ci/update禁止。共有hiddenlockSHA16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309保持。費用/個人情報不使用。
 
 ## 次と未解決
 
-- 次一小タスクAN059: 検証の全依存/失敗snapshot/context保持を先に整備し、実public100profileを公開直前にwarm、次alignedversion(現100なら101)へ実更新。即時コード/14cachehash/practice比較を先に保存し、後続correction/end/next/settingsswipe/networkoffline保持、正確CI/実Linuxartifact全25publicbytesとcache保存hashを確認する。未DLartifact待ちを旧profile保持検証へ混ぜない。
-- AN057/058in-progress false、AN059open。詳細 docs/codex/warm-cache-update.md。実iPhone/keyboard/VoiceOver/5000実保存/実INP、posecamera/GPU、AN001実射は未確認。大目標active、既存全承認の範囲で次を進める。
+- 次一小タスクAN060: 的上二本指でcur2/期待1となる既知P2を入力保護で直す。今回の履歴画面の倍率成功で解消扱いにしない。単指/fine/drag/取消/採点円/保存を保全し、回帰と公開保持更新を検証する。
+- 元public98→99失敗/99→100localfile待ち失敗profileは歴史として未復旧を保持、初期WKstrict lifecycle未解明も継続。実iPhone/keyboard/VoiceOver/5000実保存/実INP、posecamera/GPU、AN001実射は未確認。大目標active、既存全承認の範囲で次を進める。

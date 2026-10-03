@@ -669,9 +669,9 @@
   {
     "id": "AN-057",
     "task": "検証済み軽量生成物をGitHub Pagesで配信し実更新と全25資産を公開確認する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "Published main6ea08744/v99, Pagesworkflow/CI37131360394 validate+deploy success UbuntuNode22.23.3/clean npmci0/allcheck/lint/format/130 passed (2.7m). ActualLinuxartifact11276573236/all25livebytes exact, gzip195178→138825(28.87%); fresh375 settingsCDPtouchswipe/pinchscale/filterfocus/6arrowcorrection/end/next/5syntheticrecords+active1/offlinefromSW/errors0. Heldactualpublic98→99 timed out after appv at APP99 check, originalcontext closed; NOT passed. Separate max-age600 reproduction observed APP98/activated worker99/cache99 with code98; HTTP-cache-only disabled probe reached99, diagnostic not acceptance. AN058 corrective regression/freshness next, source app unchanged after6ea, overallacceptance pending; docs/codex/release-v99.md.",
+    "status": "done",
+    "passes": true,
+    "evidence": "実public100→101の保持profileでnormalcache600/Age2/264728ms以内、realbanner初回文書15body+canonical14hash/cache101only/activatedcontroller/practice5exactを即時保存し、6矢修正/確定/次矢/filterfocus/group19/設定CDPtouchswipe/履歴倍率不変/networkofflinefromSW/active1保持/errors0成功。sourcef8c9d503、CI37159445088 LinuxNode22.23.3/clean npmci0/全check/lint/format/131 passed (2.7m)。実Linuxartifact11287052421全25publicbytes+保存15/14hash一致、fresh375主要操作/offline成功。docs/codex/live-update-acceptance.md。軽量配信の受入を修正済み公開更新まで確認。元98→99profileは未復旧の歴史として保持。",
     "dependencies": [
       "AN-056"
     ],
@@ -681,9 +681,9 @@
   {
     "id": "AN-058",
     "task": "HTTPキャッシュが温かい旧版でも更新後のコードとオフライン保存が一致するよう修正する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "Source5d6e16b actual100 published/CI37157320925 validate+deploy success UbuntuNode22.23.3/clean npmci0/allcheck/lint/format/131 passed (2.6m), actualLinuxartifact11285924613/all25publicbytes exact. Warm600 regressionred→green, local8 real98/99 first-document code/canonical/offline+records verified; initialWKstrict lifecycle15/60fail retained separately. Freshpublic375 settingsswipe/pinch/filter/6correction/end/next/5syntheticrecords+active1/offline/errors0 pass. Heldwarmedpublic99 firstclickAPP100/activatedworker+controller/cache100 passed, then localLinuxfile wait30s failed andfinallyclosed context beforecanonical/postupdatepractice checks; those NOT accepted, not actualAPPupdatefailure. Futurehelperlate dependency removed/prebuilt14 Linuxmatch/immediateproof persistence, not live-tested. AN059 next realheld100→alignednext fullupdate/data/CI/publicbytes acceptance. docs/codex/warm-cache-update.md.",
+    "status": "done",
+    "passes": true,
+    "evidence": "実public100→101の保持profileでnormalcache600/Age2/264728ms以内、realbanner初回文書15body+canonical14hash/cache101only/activatedcontroller/practice5exactを即時保存し、6矢修正/確定/次矢/filterfocus/group19/設定CDPtouchswipe/履歴倍率不変/networkofflinefromSW/active1保持/errors0成功。sourcef8c9d503、CI37159445088 LinuxNode22.23.3/clean npmci0/全check/lint/format/131 passed (2.7m)。実Linuxartifact11287052421全25publicbytes+保存15/14hash一致、fresh375主要操作/offline成功。docs/codex/live-update-acceptance.md。98/99→100の既存8functionalケースとwarm600回帰red→greenを維持、101はmarkersだけ。初期WKstrict不明/元99→100localfile待ち失敗は消さない。",
     "dependencies": [
       "AN-056"
     ],
@@ -693,13 +693,25 @@
   {
     "id": "AN-059",
     "task": "公開更新検証の遅いファイル依存を除いて旧版からの記録保持を実公開で受入する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN058修正100公開/131CI/25bytes/fresh375/8localケース受入済みだが実99→100はAPP100/worker/cache成功後のローカルartifact待ちがtimeoutしprofileclosed、postupdate記録確認未到達。事前candidate14hashは実Linux100artifact一致、遅い依存を除くownedhelper案を作成。次は実public100保持profileから揃えた次版へ、即時コード/練習比較/14cachehashを先に保存し、全失敗段階でcontextを残して後続UI/offlineとLinuxparityを検証する。",
+    "status": "done",
+    "passes": true,
+    "evidence": "実public100→101の保持profileでnormalcache600/Age2/264728ms以内、realbanner初回文書15body+canonical14hash/cache101only/activatedcontroller/practice5exactを即時保存し、6矢修正/確定/次矢/filterfocus/group19/設定CDPtouchswipe/履歴倍率不変/networkofflinefromSW/active1保持/errors0成功。sourcef8c9d503、CI37159445088 LinuxNode22.23.3/clean npmci0/全check/lint/format/131 passed (2.7m)。実Linuxartifact11287052421全25publicbytes+保存15/14hash一致、fresh375主要操作/offline成功。docs/codex/live-update-acceptance.md。事前candidate/driver依存、本文Promise即時catch、全段階outercatch/snapshot/context保持を注入で検証。古いsetup/driver失敗を保持し、閉じたprofileを復旧扱いにしない。",
     "dependencies": [
       "AN-056"
     ],
     "owner": "codex",
     "acceptance": "生きた公開旧版profileを候補公開の直前に温めて保持し、必要な候補hash/driverを先に確定して未入手artifactを更新判定の前提にしない。全失敗段階でURL/版/worker/cache/bodyhash/架空practiceと元contextを保持し、閉じたprofileを復旧済み扱いにしない。揃えた版の実banner更新後、初回文書のコード・canonical14hash・練習保持を即時に証明保存し、修正/確定/次矢/設定swipe/実offline再開を確認する。正確source全check/lint/format/生成E2E/LinuxCI/全25publicassetbytesと保存hashを照合し、過去失敗やWK即時lifecycle未解明を残したままAN057/058の受入を判定する。"
+  },
+  {
+    "id": "AN-060",
+    "task": "的の二本指操作を誤った矢として保存しないよう入力を保護する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN059の実Linux100→101 rehearsal-finalで的上pinchの倍率は不変だがdebounced save/offline reload後cur2/期待1を確認、failure snapshotと元context保持後明示abort。downが二本目pointerでdragを置換する現行sourceを確認。既知P2、今回の版変更で解決したとは言わない。",
+    "dependencies": [
+      "AN-059"
+    ],
+    "owner": "codex",
+    "acceptance": "実二本指の同時/途中追加で余分な矢や途中dragの矢が保存される失敗を回帰として保持し、単指tap/drag/長押しfine/取消と採点円の一致を保つ局所入力保護で直す。保存schemaや既存practiceを変更せず、check:app/ui/all/lint/format/生成E2Eと320/375主要記録操作/確定/次矢/設定swipe/offlineを確認し、承認済み揃えた版の公開CI・25資産・実保持旧profile更新/記録再開を検証する。"
   }
 ]
