@@ -669,13 +669,25 @@
   {
     "id": "AN-057",
     "task": "検証済み軽量生成物をGitHub Pagesで配信し実更新と全25資産を公開確認する",
-    "status": "open",
+    "status": "in-progress",
     "passes": false,
-    "evidence": "AN-056source912ac284/全check/lint/format/実生成130/更新fixture4/gzip比較6受入済み。PagesAPI legacy/main/root確認、現public98は元source配信。生成artifact workflow/config/realversion/remote/LinuxCI/全25livebytes検証は未実施。",
+    "evidence": "Published main6ea08744/v99, Pagesworkflow/CI37131360394 validate+deploy success UbuntuNode22.23.3/clean npmci0/allcheck/lint/format/130 passed (2.7m). ActualLinuxartifact11276573236/all25livebytes exact, gzip195178→138825(28.87%); fresh375 settingsCDPtouchswipe/pinchscale/filterfocus/6arrowcorrection/end/next/5syntheticrecords+active1/offlinefromSW/errors0. Heldactualpublic98→99 timed out after appv at APP99 check, originalcontext closed; NOT passed. Separate max-age600 reproduction observed APP98/activated worker99/cache99 with code98; HTTP-cache-only disabled probe reached99, diagnostic not acceptance. AN058 corrective regression/freshness next, source app unchanged after6ea, overallacceptance pending; docs/codex/release-v99.md.",
     "dependencies": [
       "AN-056"
     ],
     "owner": "codex",
     "acceptance": "既存remote/Pages設定と全配信資産を照合し、局所生成artifact workflow/config候補を作って全25assets(遅延pose4含む)を保全する。版markersを揃え、全check/lint/format/実生成物E2Eとrealworker更新/offline架空記録保持を検証する。承認済み通常push/Pages配信切替後、正確sourceLinuxCI/Pagesと全25livebytes/fresh375記録修正確定/設定swipe/offline保存保持を確認し、実機/INP等未確認点を記録する"
+  },
+  {
+    "id": "AN-058",
+    "task": "HTTPキャッシュが温かい旧版でも更新後のコードとオフライン保存が一致するよう修正する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN057公開後heldprofile更新失敗、同一URL/max-age600隔離再現でAPP98/worker99/cache99のコード98を観測。HTTPcacheのみ無効化で99到達。元公開失敗は未復旧・原因状態未採取。生成HTMLの版付きassetURLとworker installのasset再検証等を比較し、小さい修正を正常cacheで検証する。",
+    "dependencies": [
+      "AN-056"
+    ],
+    "owner": "codex",
+    "acceptance": "温かい600s HTTPキャッシュで旧コードが残る失敗を自動回帰として保持し、既存の保存・採点・activation flagsを維持した局所修正で98/99→実候補のコード/worker/precacheが一致することを通常cache条件で証明する。全check/lint/format/生成物E2Eと320/375両browser修正確定/架空保存/offlineを確認し、揃えた版を承認済み公開して正確sourceCI/全25livebytes/保持した公開旧版profileの更新と保存再開を受入する。HTTPcache無効化や架空markersだけで通常公開更新成功としない。"
   }
 ]
