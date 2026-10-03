@@ -657,13 +657,25 @@
   {
     "id": "AN-056",
     "task": "元sourceと14scriptsの順序を保つ配信用JavaScript軽量化を生成物で検証する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN-055診断試作でgzipbody50887bytes/25.97%減、DevToolsinterleaved3pairs98.489–109.508ms短縮。maintainable生成方式と実app回帰は未実装・未確認。実iPhone/公開改善幅を保証しない。",
+    "status": "done",
+    "passes": true,
+    "evidence": "source d63904dd/posefix912ac284。Terser5.51.2devpin/9addedlockpaths/audit0、ownedonly/sharedhiddenlock保持。全check/lint/format成功、14canonicalstructures/names/order/source/regeneration/VMfixtures。実生成物130 passed (1.8m)、pose4HTTP200/MIME/SHA/起動時遅延。Chrome/WK320/375 realworker test-only98→99 marker3fixturesでbanner/6矢correction/end/next/架空history5/active1/stoppedoriginoffline/errors0。6同条件DevTools cold interleaved CLI0、JSgzip195931→138825bytes(57106/29.15%減)、LCPmed3066.327→2921.299ms、n3/順序/host/実機公開INP未確認を明記。21測定更新corebytes不変/25assetcopies/hash/375image同一、read-only2review noP1P2、docs/codex/compact-distribution-js.mdとartifacts/compact-js/verified.txt。public98未変更、Pageslegacyrootなので生成artifact公開はAN-057。",
     "dependencies": [
       "AN-055"
     ],
     "owner": "codex",
     "acceptance": "編集可能な元sourceを保持して同じ14配信path/global名/実行順の決定的軽量JS生成を実装し、再生成整合性と構造・契約を検証する。実生成物で全check/lint/format/E2E・mobile主要操作・採点/架空保存保持・実SW更新/offlineを確認し、同条件gzip比較を記録する。依存追加は隔離所有sandboxのみで共有junctionを保全し、試作ASTだけで回帰や実機速度改善を主張しない。公開受入は別の小タスクとする"
+  },
+  {
+    "id": "AN-057",
+    "task": "検証済み軽量生成物をGitHub Pagesで配信し実更新と全25資産を公開確認する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN-056source912ac284/全check/lint/format/実生成130/更新fixture4/gzip比較6受入済み。PagesAPI legacy/main/root確認、現public98は元source配信。生成artifact workflow/config/realversion/remote/LinuxCI/全25livebytes検証は未実施。",
+    "dependencies": [
+      "AN-056"
+    ],
+    "owner": "codex",
+    "acceptance": "既存remote/Pages設定と全配信資産を照合し、局所生成artifact workflow/config候補を作って全25assets(遅延pose4含む)を保全する。版markersを揃え、全check/lint/format/実生成物E2Eとrealworker更新/offline架空記録保持を検証する。承認済み通常push/Pages配信切替後、正確sourceLinuxCI/Pagesと全25livebytes/fresh375記録修正確定/設定swipe/offline保存保持を確認し、実機/INP等未確認点を記録する"
   }
 ]
