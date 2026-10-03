@@ -705,9 +705,9 @@
   {
     "id": "AN-060",
     "task": "的の二本指操作を誤った矢として保存しないよう入力を保護する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN059の実Linux100→101 rehearsal-finalで的上pinchの倍率は不変だがdebounced save/offline reload後cur2/期待1を確認、failure snapshotと元context保持後明示abort。downが二本目pointerでdragを置換する現行sourceを確認。既知P2、今回の版変更で解決したとは言わない。",
+    "status": "done",
+    "passes": true,
+    "evidence": "source d668965470070262c239e58752ed461fbd5e6d44; CI37161897520 validate/deploy success, actual Linux github-pages artifact11288286391, all25 public bytes/held first-document15/canonical14 match. Owned local check:all/lint/format success, focused native regression red expected0/got1 then 8 passed (27.7s), generated139 passed (1.7m). Actual held public101→102 realbanner within 424855ms normal HTTPcache600, first-document102/cache102only/practice5 exact, native target multitouch partial/all-end no arrow, single tap recovery/undo, 6-arrow correction/end/next/settings CDPswipe/history scale unchanged/browser offline SWreload/history5/active1/errors0. Fresh public375 same guard/record/offline success. Chrome native and WebKit synthetic multitouch+native single tap at320/375; WebKit actual-origin-stop offline succeeds, setOffline internal error on both101/102 retained. Scoring/schema/dependency graph/activation flags unchanged. docs/codex/multitouch-input.md; artifacts/release-v102. Physical iPhone multitouch/VoiceOver/INP not verified.",
     "dependencies": [
       "AN-059"
     ],
