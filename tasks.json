@@ -785,5 +785,17 @@
     ],
     "owner": "codex",
     "acceptance": "固定した旧104/現105資産と所有架空profileで元の複合失敗経路を再現し、touch/click/取消/focusの証拠を残す。単一変数の縮小と対照により原因を分類し、根拠ある修正が必要なら適切な回帰seamでred→greenと元経路のEscapeなし再実行を示す。元失敗contextを無断reset/recreateして回復扱いしない。アプリ不変なら資産25/採点/保存schema/依存/共有lockの保持を確認し、docs/progress/tasks/ledgerとmatching検証出力を保存。実機成功や未再現経路の解決と混同しない。"
+  },
+  {
+    "id": "AN-067",
+    "task": "初回記録ガイドから矢入力・微調整・確定・終了までを公開画面で監査する",
+    "status": "done",
+    "passes": true,
+    "evidence": "Public105 owned IAB existing synthetic profile/guide-shown, DOM14scripts105;22 same-run saved/readback/displayed/inspected JPEGs logical375x812/320x568, encoded365x790/310x550. 375 start/guide/3 arrows30/correction/selection-release/confirm/finish;320 normal condition-start/manual targetscroll/1 arrow10/correction/selection-release/partialconfirm/finish. Reload visiblehistory7/28/list exact, taberrorlogs empty; no reset/delete/guide-dismiss, tabclosed/viewportreset. Normal320 start retains scroll416.67/targetSVGtop-91.33,height204.48; manual recovery distinct from fix/Home/resizeframes. Source fStart save-render/no start positioning; existing revealActiveTarget confirms/releases, next task start-boundary diagnosis/red→green before helper decision. Guide-name/return/partial gaps, adjusted320 dock overlap and one-arrow RMS improvement display recorded as secondary risks. AXcheckbox/DOMbutton no-match retained as tool mismatch. docs/codex/first-record-guide-audit.md, docs/screenshots/first-guide-v105, artifacts/first-guide-v105/evidence.json and notes. Four product gates considered, source/schema/scoring/dependencies/version105/SW activation unchanged;67 acceptance/prior66 tasks preserved. Notes-only format/source/image/task verification. Physical phone/VoiceOver/longpress/INP/full storage/physics/offline not audited.",
+    "dependencies": [
+      "AN-066"
+    ],
+    "owner": "codex",
+    "acceptance": "所有架空データで公開v105の320/375記録開始→初回ガイド→矢入力→微調整→エンド確定→終了の重要stepを操作し、同じrunの各画像を保存・表示してから監査する。DOM/AXと現sourceを結びつけ、各stepの良い点/UX・アクセシビリティ上のリスク/証拠の限界を記す。既存データをreset/deleteせず、根拠ある次の一件を選び4つのproduct gatesを示す。監査だけで実装/実機/性能/採点の改善を完了扱いしない。全acceptance/既存66task保持、docs/progress/tasks/ledgerとmatching書式検証を保存する。"
   }
 ]
