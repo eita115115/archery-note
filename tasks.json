@@ -837,9 +837,9 @@
   {
     "id": "AN-071",
     "task": "小画面の履歴操作列を2段に保ち比較結果の重なりをなくす",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "sourceea175f16fe01a216641a886ea15ed04909955985/v109; CI37227457676 validate/deploy success/Linux198passed3.7m/artifact11313315036; actualLinux-public25bytes/heldfirst15/canonical14exact. Sole CSS <=360 history-row direction, footer243->129/y325->439, pending376.859375..431.546875 all5hitsclear. Actualold108 inputtrace+synth controls0/bare0/rawbare125/sameold108raw125clear; previous closedAN070profile not recovered. Initialred14failed includes SVG start; neutralred5failed9passed37.3s; two staleCSSattempts5failed9passed37.4/36.9 retained; builtfocused14passed39.2s/fullv109198passed2.4m/checkall/lint/format green. 320/375/1024 light-dark normal-reduce plus long6: targets>=48/no textoverflow/native touchscroll/lastresultclear/deletecancel/close/edit/reload/old5exact/errors0. Reviewer noactionableblocking; 15 original-viewed exact imagecopies incl375beforeafter byte-identical and realpublic320 clear row. Realheld108->109 warm15 normal600/publication316712ms/update321676ms withinfreshness/activeblock/nativefinish4exact/cache109only/old4exact/320firsttargettap1/offlineold4+active1exact/nativefinish5old4/newarrowexact/summary+historypending/reload/errors0/noreset-retry. Prior70tasks/all71acceptance, scoring/math/allhandlers/schema/deps/SWactivation/sharedhiddenlock unchanged. docs/codex/history-detail-actions.md/artifacts/history-actions-v109. Physicalphone/VoiceOver/imageexport/fullendtable/WKoffline/closedoldprofile recovery unverified; broadergoalactive/next320adjusteddock.",
     "dependencies": [
       "AN-070"
     ],
