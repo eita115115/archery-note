@@ -49,3 +49,49 @@ content-visibilityによる仮の位置を測らないよう、対象カード�
 
 採点の円とscore、既存practice、保存schema、依存graph、SW activationは変更しない。
 共有hiddenlock SHA256 `16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309` を保持する。
+
+## 実受入 — 公開v103 / 2026-10-04
+
+source e3f1e2e4ac5e1e80a1a8a137f1010b74074c6a20; CI37164343275 validate/deploy success, actual Linux github-pages artifact11288562755, all25 public bytes/held first-document15/canonical14 match. Owned check:all/lint/format success; second-selection regression red and visible-toast overlap red retained, final focused8 passed (1.2m), generated 147 passed (2.0m); Linux 147 passed (3.3m). Chrome/WebKit native single-touch320/375 correction pad five buttons visible above dock/toast with no manual scroll, 3 nudges preserve scroll and score circle, deselect restores target, normal debounced save completes; correction/end/next/offline retains3 histories/end6/active1/errors0. Actual held public102→103 realbanner within 292782ms normalHTTPcache600, initialAPP103/cache103only/practice5exact, native multitouch protection, correction entry/end/next/settings touch-swipe/browser offline SWreload/history5/end6/active1/errors0. Fresh public375 same entry/record/offline success. Matched375 before/after images retained. Scoring/storage schema/dependency graph/SW activation unchanged. docs/codex/correction-entry.md; artifacts/release-v103. WebKit multitouch synthetic; real iPhone/keyboard/VoiceOver/INP and all animation frames unverified.
+
+公開CI: [37164343275](https://github.com/eita115115/archery-note/actions/runs/37164343275)。正確sourceのci-linux.txt/ci-status.jsonとartifactを保存。所有sandboxのnpm scriptsは次の実出力。
+
+```text
+Archery Note checks OK (v103)
+check-globals OK (14 files, 1240 unresolved refs all accounted for)
+Analysis core characterization checks OK
+Robust median reuse checks OK
+Form core checks OK
+Form metric fixture checks OK
+Form diagnostic checks OK
+Gamification pure-function checks OK (streak / 12 badges / backfill / goals)
+Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)
+Security regression: all 38 checks passed
+UI smoke checks OK (chrome.exe)
+PWA asset checks OK
+PWA update flow checks OK
+Storage contract checks OK
+Storage round-trip checks OK
+Save debounce checks OK
+Version alignment checks OK
+Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 196600→139260 bytes; cross-script fixtures
+147 passed (2.0m)
+147 passed (3.3m) (Linux CI)
+All matched files use Prettier code style!
+lint: exit 0 (lint-final.txt)
+PASS:all25 public103 assets byte-identical to actual Linux artifact; saved actual held102→103 first-document15 and canonical14 hashes match Linux
+```
+
+UI受入の375px前後は同じ70m/122cm/6本条件と二本の架空矢でnativeチップ選択直後を撮った。旧版は実Linux102、新版は凍結source103。追加manual scrollなし。両画像を表示して確認した。
+
+![変更前375px](../screenshots/correction-entry-v103/before-375.png)
+
+![変更後375px](../screenshots/correction-entry-v103/after-375.png)
+
+![実公開375pxの微調整](../screenshots/correction-entry-v103/public-375.png)
+
+失敗と限界は保持: regression-red.txt/regression-red-confirmed.txtは二回目の選択の下端403.47>379（before-320画像は初回選択なので失敗の唯一の証拠にはしない）。初候補244c263の8/147成功でも375画像の通知が▼を覆い、pointer-events:noneでhit-testだけが通っていた。notice-red.txtはprobe変数scopeのReferenceError、notice-red-confirmed.txtは実重なり355.47>323を検出。最終notice-green.txtは8 passed (1.2m)。initial候補/画像/ログを残した。
+
+prepare-failure.txt/rehearsal.txt/mobile-transport.txtは所有helperパスの二重置換によるENOENTで、修正後に再実行。mobile-transport-confirmed.txtのWK320失敗は新しい3nudgeの通常debounce保存を待たずに旧localStorage.activeを比較したprobe問題で、保存完了pollを足した最終mobile-transport-final.txt/matrix4行は成功。手動save/flushで合格にしていない。比較serverのSVG MIMEを正した再撮影はapp source変更なし。
+
+localリハーサルrehearsal-final/complete-update.jsonはpublic:false。実公開はlive/immediate-update.json/complete-update.json、fresh-deployed.json、live-parity.json。後者だけを公開受入とする。read-only reviewはP1/P2なし。normal motionの全フレームや実iPhone keyboard/VoiceOver/INPは未確認。旧offline/lifecycle/profile失敗はprogress/旧受入に維持する。

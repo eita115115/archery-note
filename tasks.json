@@ -729,9 +729,9 @@
   {
     "id": "AN-062",
     "task": "矢を選んだ直後に微調整ボタンをドックの上へ出す",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN061 current public102 steps4/10: selected-arrow nudge buttons hidden behind active dock; 320px upper arrow top623.45px vs dock601.33px. Current refreshActive reveals chips before opening nudge; no entry reveal. No implementation yet.",
+    "status": "done",
+    "passes": true,
+    "evidence": "source e3f1e2e4ac5e1e80a1a8a137f1010b74074c6a20; CI37164343275 validate/deploy success, actual Linux github-pages artifact11288562755, all25 public bytes/held first-document15/canonical14 match. Owned check:all/lint/format success; second-selection regression red and visible-toast overlap red retained, final focused8 passed (1.2m), generated 147 passed (2.0m); Linux 147 passed (3.3m). Chrome/WebKit native single-touch320/375 correction pad five buttons visible above dock/toast with no manual scroll, 3 nudges preserve scroll and score circle, deselect restores target, normal debounced save completes; correction/end/next/offline retains3 histories/end6/active1/errors0. Actual held public102→103 realbanner within 292782ms normalHTTPcache600, initialAPP103/cache103only/practice5exact, native multitouch protection, correction entry/end/next/settings touch-swipe/browser offline SWreload/history5/end6/active1/errors0. Fresh public375 same entry/record/offline success. Matched375 before/after images retained. Scoring/storage schema/dependency graph/SW activation unchanged. docs/codex/correction-entry.md; artifacts/release-v103. WebKit multitouch synthetic; real iPhone/keyboard/VoiceOver/INP and all animation frames unverified.",
     "dependencies": [
       "AN-061"
     ],
