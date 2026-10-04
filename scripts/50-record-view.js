@@ -2309,7 +2309,6 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet">
     <h3>${isNew ? "おつかれさまでした！" : ""} ${fmtD(sess.date)} ・ ${sess.dist}m</h3>
-    ${summaryDecisionHtml(adv, sess)}
     <div class="statbar">
       <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
       <div class="stat"><b>${(total / all.length).toFixed(2)}</b><span>平均/本</span></div>
@@ -2319,6 +2318,7 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
     ${isNew && todaysResult ? todaysResultHtml(todaysResult, sess, { growthBefore }) : ""}
     ${isNew && gam ? summaryGamificationHtml(gam) : ""}
     ${roundGroupSummaryHtml(sess)}
+    ${summaryDecisionHtml(adv, sess)}
     <div id="sumPlot" class="recordSummaryPlot"></div>
     ${groupSummaryHtml(st)}
     ${summarySightDialHtml(sess, adv)}
