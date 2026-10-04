@@ -36,3 +36,58 @@ native開始clickのcapture/bubble観測で、320条件指定の開始前後と�
 ![375 修正後](../screenshots/record-start-v106/375-green.png)
 
 実iPhone/VoiceOver/実INP、旧公開更新profile失敗、ガイドcopy/320微調整下端/RMS少数矢の表示信頼性はこの修正の証拠範囲に含めない。
+
+## 公開版と受入結果
+
+source `74f1a22d641d91a76ca3c22eb955f12df581637b`、公開v106。CI [37220268127](https://github.com/eita115115/archery-note/actions/runs/37220268127) validate/deploy成功、実Linux artifact11309998454。公開/実Linux25資産は全byte exact一致。採点・schema・依存graph・SW activationは不変で、SW変更はcache版のみ。共有hiddenlockも保持。read-only reviewはP1/P2なし。
+
+保存した実コマンド出力の抜粋（全出力はartifacts/record-start-v106）:
+
+```text
+npm run check:all
+Archery Note checks OK (v106)
+UI smoke checks OK (chrome.exe)
+PWA asset checks OK
+PWA update flow checks OK
+Storage contract checks OK
+Storage round-trip checks OK
+Save debounce checks OK
+Version alignment checks OK
+Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 196667→139341 bytes; cross-script fixtures
+
+npm run lint
+> eslint "*.js" "scripts/**/*.js" "tools/**/*.js" "tests/**/*.js" "eslint.config.mjs"
+(exit 0)
+
+npm run format:check
+All matched files use Prettier code style!
+
+npm run test:e2e:dist
+170 passed (2.1m)
+
+Generated WebKit / new-start matrix
+12 passed (32.6s)
+
+Actual Linux CI
+170 passed (3.4m)
+
+PASS:all25 actual Linux/public106 assets byte-identical; all15 held-update first-document warm bodies match Linux
+```
+
+### 実保持した公開105→106の検証
+
+公開105で架空デモ3件＋native1矢を作り、15資産を通常HTTP cache600秒でwarm。記録中は更新を止める既存仕様を確認してnative終了→4履歴。その後に更新bannerを押した。warm後325784msのclickはCDN Ageを差し引いた残存freshness597000ms以内。
+
+新documentのdeferred scriptより前に検証側の`waitForFunction(()=>APP_VER===106)`が実行され、ReferenceErrorが一件出た。失敗stackは検証側predicateを指す。failure.json / failure-state.json / 元process出力を保持し、エラーなしのrunへ置き換えていない。所有Node processのdebuggerから**既存Playwright Pageと元response/error listenerの参照**を回収した。同じappv URL・fixture IDs・contextで、再作成やresetなしに106/cache106only/旧4履歴全field・元first-document15body・canonical14scriptを実Linuxと照合。
+
+同じcontextを320へ変更し、条件指定開始後に全的表示をassert・画像保存してから中心へnative tap一回。保存直後の同期読取で0と判断する検証側のassertも失敗したが、再tapしていない。後のreadでmemory1/stored1を確認し、debounceを待つ検証へ進めた。オフラインSWreload後の旧4＋active1は全field一致、追加pageerrorなし。元の一件はerrorsに残す。`complete.json` / recover-read・scope-recovery・recover-complete・recover-arrow-read・recover-finish / parity.json / freshness.jsonに回復経路を残した。元公開processは回復後にcontext/browserを閉じ、元失敗exit1は保持。
+
+公開前のlocal harnessでは、記録中にbannerを待つ誤った一試行と、存在しないsummaryPlotを待つ一試行があった。後者の実保存active nullと終了シート画像は保持・表示。local-harness-abort.jsonに対象process/理由を記し、明示abortしてアプリ不具合の回復とは扱わない。正しいsumPlot/sumCloseと記録終了後更新のlocal予行は成功した。freshness計算の単発shell regexエスケープミスはfixture scriptへ移して再検証した。
+
+以下の公開画像2枚も保存bytesを原寸で表示・目視し、byte同一copy。最初はnative入力前、二枚目は唯一の矢入力後のオフライン再読込。
+
+![公開320 開始直後](../screenshots/record-start-v106/public320-start.png)
+
+![公開320 オフライン再読込](../screenshots/record-start-v106/public320-offline.png)
+
+次の一件は初回ガイドの案内と実際のラベル/操作（終了、選択解除、途中エンド確定）を揃える候補。ガイドcopy以外の微調整下端/少数矢RMS表示は別に原因確認して扱う。大目標はactiveのまま。

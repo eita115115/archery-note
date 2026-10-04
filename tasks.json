@@ -801,9 +801,9 @@
   {
     "id": "AN-068",
     "task": "新規記録開始直後に的を操作できる位置へ表示する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "source74f1a22d641d91a76ca3c22eb955f12df581637b/v106; CI37220268127 validate/deploy success/Linux170passed(3.4m), artifact11309998454, all25Linux/public bytes exact plus original held first-document15/canonical14. Start trace320 before/after417/target-92 identifies inherited scroll; correct red2failed/10passed(33.2s), helper-only intermediate1failed/19passed(1.5m) y8→0 identifies existing card itemReveal8px; new-start-only remove viewEnter + revealActiveTarget four lines, final12passed(33.4s), generated170passed(2.1m), WebKit generated12passed(32.6s), checkall/lint/format success. All current/repeat/onboarding320/375 normal/reduce first native arrow/no recovery scroll/old sessions/reload active exact. Six actual saved/displayed images copied byte-identically. Original public105 profile native1/old3/update-blocked/native finish4, warm15 with normal600/Age3, update click325784ms<fresh597000ms. Original waitForFunction unguarded APP_VER throws at new-document load and one error retained; existing owned Page/listener arrays recovered via Node inspector, same URL/fixture IDs/no new context/no retry tap. Public106 cacheonly/old4 exact/first15/canonical14 verified, first native320 arrow once; immediate stored0 assertion fails before debounce, later memory1/stored1 then same-context offline SWreload exact, no additional pageerrors. Two earlier local harness attempts active-update-block/nonexistent summaryPlot retained and explicitly aborted, final corrected local update passes; no app bug recovery claimed. Source changes limited to two new-start boundaries; scoring/schema/dependencies/SW activation/sharedlock unchanged. Read-only review noP1P2. docs/codex/record-start-viewport.md; artifacts/record-start-v106. Prior67 tasks/all68 acceptance retained; physical iPhone/VoiceOver/all motion frames/INP/older failures unverified.",
     "dependencies": [
       "AN-067"
     ],
