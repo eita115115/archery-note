@@ -52,6 +52,10 @@ async function pad(page) {
   return page.locator("#nudge .npad button").evaluateAll((buttons) => {
     const header = globalThis.document.querySelector("header.app").getBoundingClientRect();
     const dock = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
+    const notice = globalThis.document.querySelector("#toast");
+    const noticeTop = notice.classList.contains("show")
+      ? notice.getBoundingClientRect().top
+      : dock.top;
     return buttons.map((el) => {
       const r = el.getBoundingClientRect();
       return {
@@ -59,7 +63,7 @@ async function pad(page) {
         top: r.top,
         bottom: r.bottom,
         above: Math.max(0, header.bottom),
-        below: dock.top,
+        below: Math.min(dock.top, noticeTop),
         hit:
           globalThis.document
             .elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)

@@ -1502,7 +1502,13 @@ function revealActiveCorrection() {
   const rect = pad.getBoundingClientRect();
   const header = $("header.app");
   const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 16;
-  const bottom = dock.getBoundingClientRect().top - 16;
+  let bottom = dock.getBoundingClientRect().top - 16;
+  const notice = $("#toast");
+  if (notice && notice.classList.contains("show")) {
+    // Fixed-layout position avoids measuring the notice's entrance transform.
+    const noticeTop = window.innerHeight - parseFloat(getComputedStyle(notice).bottom) - notice.offsetHeight;
+    if (Number.isFinite(noticeTop)) bottom = Math.min(bottom, noticeTop - 16);
+  }
   let delta = 0;
   if (rect.top < top || rect.height > bottom - top) delta = rect.top - top;
   else if (rect.bottom > bottom) delta = rect.bottom - bottom;
