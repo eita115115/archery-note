@@ -749,5 +749,29 @@
     ],
     "owner": "codex",
     "acceptance": "320/375の微調整groupと五ボタンに操作の意味を表す名前があり、名前によるlocator/keyboard Enter・Spaceで四方向の座標/採点と選択矢の削除が一致することをred→greenで示す。パッド配置/矢円/scroll/既存practice/保存schemaを保ち、375前後画像/AX、全check/lint/format/生成E2E、mobile主要操作/offline、承認済み揃えた公開版のCI/25資産/実保持旧profile更新と記録再開を確認する。実VoiceOver成功とは扱わない。"
+  },
+  {
+    "id": "AN-064",
+    "task": "公開版の終了結果と履歴詳細の情報順序を画面で監査する",
+    "status": "done",
+    "passes": true,
+    "evidence": "Actual public104 DOM14script tags v104; same-run owned IAB6 accepted JPEGs375/320 with SHA/bytes in artifacts/result-flow-v104/evidence.json and docs/screenshots/result-flow-v104. Synthetic18m40cm3arrows/end30/finish/history5sessions24arrows/history detail. Finish decision182.78–335.07 then stats345.07, comparison419.07; history stats208.29/comparison282.29. 320 comparison bottom662.19>viewport568. Current source openSummary/histDetailSheet agrees. Audit only; native phone/dark/VoiceOver/keyboard/offline/INP/physics not checked. docs/codex/result-sheet-ux-audit.md.",
+    "dependencies": [
+      "AN-063"
+    ],
+    "owner": "codex",
+    "acceptance": "実公開の所有架空データで記録→確定→終了→履歴詳細を操作し、同じrunの各画面を保存・表示して監査する。375/320の結果とAX/DOM順序を現sourceに結びつけ、具体的な一件を次タスクに選ぶ。未確認の実機/アクセシビリティ/性能/計算を区別し、アプリ変更や改善の完了を監査だけで主張しない。"
+  },
+  {
+    "id": "AN-065",
+    "task": "練習終了後は得点と比較をサイト判断より先に見せる",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN064 public104 steps3/4/6 show decision before stats/comparison in finished summary, while same session history places results first. Current openSummary emits decision→statbar→todaysResult. Implementation not started.",
+    "dependencies": [
+      "AN-064"
+    ],
+    "owner": "codex",
+    "acceptance": "終了シートで見出し後の得点/本数/平均/既存比較がサイト判断より先に読めることを320/375のred→greenと前後画像で示す。判断・注意・比較・gamification/roundGroup/編集/比較なし分岐を消さず、計算/内容/矢円/保存/plot/close/swipeを保つ。全check/lint/format/生成E2E/mobile主要操作/offline、承認済み揃えた公開版のCI/25資産/実保持旧profile更新と記録再開を確認する。"
   }
 ]
