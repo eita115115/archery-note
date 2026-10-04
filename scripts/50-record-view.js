@@ -1290,10 +1290,10 @@ function renderActive(m) {
     <div class="scoreChips" id="curChips" data-testid="active-arrow-chips"></div>
     <div class="nudge" id="nudge">
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD / 200).toFixed(1)}cm）</div>
-      <div class="npad">
-        <span class="blank"></span><button data-n="u">▲</button><span class="blank"></span>
-        <button data-n="l">◀</button><button class="recordNudgeDelete" data-n="del">${icon("trash")}</button><button data-n="r">▶</button>
-        <span class="blank"></span><button data-n="d">▼</button><span class="blank"></span>
+      <div class="npad" role="group" aria-label="選択中の矢の微調整">
+        <span class="blank"></span><button type="button" data-n="u" aria-label="選択中の矢を上に微調整">▲</button><span class="blank"></span>
+        <button type="button" data-n="l" aria-label="選択中の矢を左に微調整">◀</button><button type="button" class="recordNudgeDelete" data-n="del" aria-label="選択中の矢を削除">${icon("trash")}</button><button type="button" data-n="r" aria-label="選択中の矢を右に微調整">▶</button>
+        <span class="blank"></span><button type="button" data-n="d" aria-label="選択中の矢を下に微調整">▼</button><span class="blank"></span>
       </div>
       <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
