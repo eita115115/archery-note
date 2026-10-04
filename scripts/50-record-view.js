@@ -378,7 +378,9 @@ function renderOnboarding(m) {
     ui.onboardStep = 1;
     ui.onboardDist = null;
     save({ reason: "onboarding-start" });
+    m.classList.remove("viewEnter");
     render();
+    revealActiveTarget();
   };
   $("#obSkip2").onclick = finishOnboarding;
 }
@@ -730,7 +732,9 @@ function renderRecord(m) {
     nativePulse("success");
     wakeLock.acquire();
     save();
+    m.classList.remove("viewEnter");
     render();
+    revealActiveTarget();
   };
 }
 

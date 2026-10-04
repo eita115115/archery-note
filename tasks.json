@@ -797,5 +797,17 @@
     ],
     "owner": "codex",
     "acceptance": "所有架空データで公開v105の320/375記録開始→初回ガイド→矢入力→微調整→エンド確定→終了の重要stepを操作し、同じrunの各画像を保存・表示してから監査する。DOM/AXと現sourceを結びつけ、各stepの良い点/UX・アクセシビリティ上のリスク/証拠の限界を記す。既存データをreset/deleteせず、根拠ある次の一件を選び4つのproduct gatesを示す。監査だけで実装/実機/性能/採点の改善を完了扱いしない。全acceptance/既存66task保持、docs/progress/tasks/ledgerとmatching書式検証を保存する。"
+  },
+  {
+    "id": "AN-068",
+    "task": "新規記録開始直後に的を操作できる位置へ表示する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-067"
+    ],
+    "owner": "codex",
+    "acceptance": "開始境界のscroll/target/dockを観測して原因を確認し、条件指定/前回条件/onboardingの320/375・通常/抑制motionでred→greenを保存する。開始後の回復scrollやlocator自動scrollなしで的全体が見え、最初のnative tapで矢が記録され、旧履歴とreload後のactiveが保持される。375前後画像、既存の通常更新/タブ復帰/解除/確定チェック、check:all/lint/format/生成dist全E2E、read-only reviewを残す。承認済み公開版の版整合/CI/公開資産一致/旧架空profile更新保持を確認する。採点/schema/依存/SW activationを変えず、既存67task/全acceptance保持、docs/progress/ledgerを更新する。"
   }
 ]
