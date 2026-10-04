@@ -777,9 +777,9 @@
   {
     "id": "AN-066",
     "task": "自動検証の複合経路でnative touchからclickが出ない原因を縮小再現する",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN065 four owned local rehearsal snapshots show missing click before finish handler/native tab, Escape-completed paths accepted but cause unresolved. Reproduction/diagnosis not started.",
+    "status": "done",
+    "passes": true,
+    "evidence": "source06e27752a79ec28841dc5a4f03f0672b3dfb34a6; CI37192326992 validate/deploy success/Linux158passed(3.4m), artifact11299646439/currentLinux/public/previous105 all25bytes exact. Raw native swipe reproduces no-click on104/105; full no-Escape original failure held and same-context secondtap recovery recorded, old5exact/new7/6histories/active null; prior4aborted profiles not recovered. Bare current handler Chromium149 trace GestureFlingStart/Cancel/FilterTapSuppression; paced/dwell/no-swipe/secondtap-alone controls classify synthetic-input suppression, not focus-only/app bug. Native touch helper preventFling plus first-followup-touch regression320/375 red2→green5(4.9s), old3exact/new7coordinates/active null/reload4/errors0. Full104→105 local controlled-pull-only original path noEscape/first native finish passes; update15body/canonical14/practice5exact/native recording/targetguard/settings/offline/focus-select/7arrowfinish/summaryswipe/SWreload6histories/active null/old5exact/errors0, public:false. Ownedcheckall/lint/format pass; first E2E1failed/157passed retained, sequential158passed(2.0m); concurrent build cause not proven. Source/scoring/schema/SW activation/dependencies/markers105/sharedlock preserved, viewed375 images byte-identical, reviewer noP1P2. docs/codex/touch-click-diagnosis.md; artifacts/touch-click-v105. Chromium/reduced-motion only; physical iPhone/WK/oldpublic failures not resolved.",
     "dependencies": [
       "AN-065"
     ],
