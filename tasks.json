@@ -773,5 +773,17 @@
     ],
     "owner": "codex",
     "acceptance": "終了シートで見出し後の得点/本数/平均/既存比較がサイト判断より先に読めることを320/375のred→greenと前後画像で示す。判断・注意・比較・gamification/roundGroup/編集/比較なし分岐を消さず、計算/内容/矢円/保存/plot/close/swipeを保つ。全check/lint/format/生成E2E/mobile主要操作/offline、承認済み揃えた公開版のCI/25資産/実保持旧profile更新と記録再開を確認する。"
+  },
+  {
+    "id": "AN-066",
+    "task": "自動検証の複合経路でnative touchからclickが出ない原因を縮小再現する",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN065 four owned local rehearsal snapshots show missing click before finish handler/native tab, Escape-completed paths accepted but cause unresolved. Reproduction/diagnosis not started.",
+    "dependencies": [
+      "AN-065"
+    ],
+    "owner": "codex",
+    "acceptance": "固定した旧104/現105資産と所有架空profileで元の複合失敗経路を再現し、touch/click/取消/focusの証拠を残す。単一変数の縮小と対照により原因を分類し、根拠ある修正が必要なら適切な回帰seamでred→greenと元経路のEscapeなし再実行を示す。元失敗contextを無断reset/recreateして回復扱いしない。アプリ不変なら資産25/採点/保存schema/依存/共有lockの保持を確認し、docs/progress/tasks/ledgerとmatching検証出力を保存。実機成功や未再現経路の解決と混同しない。"
   }
 ]
