@@ -56,3 +56,65 @@
 | 320/dark  | [before](../screenshots/grouping-evidence-v108/before-320-dark-1.png)  | [after](../screenshots/grouping-evidence-v108/after-320-dark-1.png)  |
 
 他のRMS面（growthDashboard/todayConclusion/analysisKpi/period集計など）は今回の結果パネルと別のconsumerである。少数や比較条件による解釈の監査はまだ残る。自己ベストの本数換算も本件で変更しない。実射/用具/風条件を用いた統計的有意性、身体フォームの診断、速度改善をこの修正の成果として扱わない。
+
+## v108候補の検証
+
+source `95c2141c19518384c1fa3a8004a9a71a17aa2d3e`。版107→108をbump toolで揃え、既存69task objects/acceptance、採点/数学RMS/physics/style/保存schema/依存graph/SW activation/共有hiddenlockを確認。純関数の最初のredだけroot Node24.18、最終check/E2Eは所有sandboxのNode22.19。root/original node_modulesへのinstall/ci/updateは行っていない。
+
+```text
+Archery Note checks OK (v108)
+Analysis core characterization checks OK
+Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)
+Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)
+UI smoke checks OK (chrome.exe)
+PWA asset checks OK
+PWA update flow checks OK
+Storage contract checks OK
+Storage round-trip checks OK
+Save debounce checks OK
+Version alignment checks OK
+Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 197003→139525 bytes; cross-script fixtures
+All matched files use Prettier code style!
+184 passed (2.2m)
+PASS:prior69 tasks/acceptances exact; scoring/math/style/schema/dependencies/SW activation/sharedlock unchanged; eight viewed PNG copies exact
+PASS: same local107→108 context, active update blocked/native finish/old4 retained, 320 newstart first native arrow, offline SWreload exact / one-arrow pending in summary+history / old4 and finish5 exact
+```
+
+`check:all`、`lint`、`format:check` exit0。生成dist全E2E184（既存170+今回14）成功。元のfocused red/green/前後画像とは別に最終test-resultsも保存。gzipはbuildminificationの結果であり本件の速度改善ではない。
+
+読み取り専用review `/root/review_grouping_evidence` は上記immutable sourceを確認し、blocking/actionable指摘なし、Ready to merge Yes。独立unit/verifier/diffcheck成功、320dark画像の保留行も確認。公開/Linuxと完了記録はreview時点でpending。`artifacts/grouping-evidence-v108/review.md`。
+
+補助verifier初回は存在しない旧 `app-scripts.json` 名を読んでENOENT（exit1）。実SWが固定APP_SCRIPTS/ASSETS配列であることを確認し、不要な架空manifest検査を除いて再実行が成功。アプリの不具合や旧失敗profileの回復とは扱わない。skillのデザイン正本旧パスも検索で現行へ解決した。
+
+公開CI37224600130は開始を確認済み。107の元public contextを保持して更新を待つ。実公開/実Linuxの確認は次に記録する。
+
+## 公開v108と実配信の確認
+
+CI37224600130のvalidate/deployはsuccess、Linux全E2E `184 passed (3.4m)`。実Pages artifact11310714054の26 regular filesを所有folder内へ検査して展開（linksなし）。全25資産が実Linux/公開とbyte exact一致。source/mainは95c2141c19518384c1fa3a8004a9a71a17aa2d3e。
+
+元public107 contextの架空3履歴＋native1矢を保持し、記録中更新block、native終了で4履歴、旧3と新矢の全field一致。14script＋cssの旧15bodyをnormal max-age600でwarmし、freshness内の公開470578ms/更新後checkpoint475032ms、APP108/cache108only、practice4 exact、最初のdocument15body/canonical14を実Linux資産と照合した。320新規開始の的全体/最初のnative中心tap1回、offline SWreloadの旧4＋active1 allfield exact。再度native終了で5履歴、旧4全field/今回の矢exact、結果と履歴のpending本文一致、reload後もexact/errors0。reset/recreate/retrytapなし、完了後にcontext/browserを閉じた。正しいlocal予行も成功。
+
+```text
+184 passed (3.4m)
+PASS:actual Linux26 regular files extracted within owned proof directory/no links
+PASS:all25 actual Linux/public108 assets byte-identical; all15 held-update first-document warm bodies match Linux
+PASS: same real public107→108 context, active update blocked/native finish/old4 retained, 320 newstart first native arrow, offline SWreload exact / one-arrow pending in summary+history / old4 and finish5 exact
+```
+
+[公開終了時の保留](../screenshots/grouping-evidence-v108/public320-pending-summary.png)は原寸表示・目視し、実native矢10点と保留理由が読める。追加4公開画像も元PNGと同一copyで表示し、計12コピーを照合した。
+
+### 320履歴の実画像で判明した限界
+
+元公開runの[履歴画像](../screenshots/grouping-evidence-v108/public320-pending-history.png)には保留行が写っていなかった。DOMの本文一致だけでは読みやすさを証明しない。追加の別fresh public108 contextもanimation完了/bounds/opacity/toBeVisibleは成功したが、[保存画像](../screenshots/grouping-evidence-v108/public320-history-settled.png)は依然として行を隠す。この最初の「fully visible」補助結果は不十分なverifierだった。
+
+center hitと操作列のrectを調べ、pending y376.8594〜431.5469がsticky `.histDetailActions` に覆われることを確認した。320では既存 `.btnrow` がcolumnになり、4ボタンが大きな下部固定領域を占める。新しい文章の横overflowではない。追加native touch scrollの検証はpredicate timeout5000ms/exit1、finallyで閉じた。この試行のgesture原因/回復は未解決で、別fixtureを元contextの回復として扱わない。
+
+別fresh contextで**controlled reading scroll**を行うと[保留行全体が読める位置](../screenshots/grouping-evidence-v108/public320-history-reading.png)へ移り、center hit/操作列との非重複/旧5件全field/errors0を確認した。実fixture/失敗出力/画像はすべて保持。native gestureの成功、初期320履歴の読みやすさ、実iPhoneをこれで証明したとはしない。
+
+```text
+PASS:additional fresh public108 initial pending occluded by sticky actions / controlled reading scroll reveals whole row (native gesture not proven) / all5 exact/errors0
+```
+
+今回のAN070は少数RMSの解釈条件と結果/履歴の文言を修正した。小画面履歴の初期読解を完成扱いしない。次の一件はこの実測したfooter重なりとscroll入力の診断・修正を優先する。その他のdashboardRMS、換算自己ベスト、実iPhone/VoiceOver/実射/有意性、古い失敗profilesも残る。
+
+公開proofのPython補助読取りも最初は既定cp932でUnicodeDecodeError（exit1）。UTF-8を明示して再読了し、ASCII metadataとして照合。保存JSON/元公開browser動作には影響しない。CI annotationのaction runtime/runner予定は本件の実行成功と区別し、ここでworkflowを変更しない。

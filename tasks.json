@@ -825,9 +825,9 @@
   {
     "id": "AN-070",
     "task": "少数矢で今日の結果にRMS改善・安定性の伸びを断定しない",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "source95c2141c19518384c1fa3a8004a9a71a17aa2d3e/v108; CI37224600130 validate/deploy success/Linux184passed(3.4m), actual artifact11310714054. all25Linux/public bytes exact/heldfirst15/canonical14. Result49 eligibility total/n>=3+finite RMS shared current/peers/daily; latest ineligible day suppresses stale stability or fake break. Renderer quiet pending count/reason, including first1/2; raw mathRMS/scoring/score/PB unchanged. Unitred1coordinate expectedfalse gottrue then actualrobustStats0/1/2/3/missing coords/low peers/baseline/lastday/sameday/data pure checks green; generatedred8failed/4passed59.1s, focused12passed12.1s, final184passed2.2m. checkall/lint/format green, independent immutable review no blocking/actionable findings.40 before/after PNGs saved, representative8 original-viewed/byte-identical; total12 viewed copies including4 public images. Original same real107→108 context old3+active1/update blocked/nativefinish4/warm15normal600/publication470578ms/update475032ms within freshness/cache108only/practice4exact/320nativefirstarrow/offline4+active1exact/nativefinish5+old4exact/pending DOM in summary andhistory/errors0. Actual summary pending visible; initial320history images omit row because sticky4-button footer occludes it. Additional fresh bounds/opacity/toBeVisible passed misleadingly, center-hit inspection proves occlusion; native touch scroll attempt timed out/exit1/closed by finally, not recovered. Separate controlled reading scroll reveals whole pending row and preserves5exact/errors0; not claimed native recovery or initial visibility fix. Missing old manifest verifier ENOENT and Python cp932 read error corrected in harness, no appfailure claimed. Prior69task objects/acceptances, scoring/physics/style/schema/dependencygraph/SW activation/sharedlock preserved. docs/codex/grouping-comparison-evidence.md; artifacts/grouping-evidence-v108. Physicalphone/VoiceOver/significance/otherdashboardRMS/PBprojection not verified/fixed; next diagnose320historyfooter/real gesture.",
     "dependencies": [
       "AN-069"
     ],
