@@ -833,5 +833,17 @@
     ],
     "owner": "codex",
     "acceptance": "実統計と所有生成fixtureで1/2本のRMS改善誤読を再現し、既存3本境界を今回/比較元/日別安定性へ適用する。0/1/2/3座標・欠損/少数履歴混入・最新日不足/同日混在・得点不変・入力非破壊の回帰red→greenを残す。320/375 light/darkで終了と履歴の保留理由/本数、3本の従来比較、375前後画像と旧記録/reload保持を確認する。check:all/lint/format/生成dist全E2E/read-only review、公開版整合/CI/実配信資産/所有旧profile更新・offline保持を確認する。採点/数学RMS/保存schema/依存/SW activation/既存69taskとacceptanceを保持しdocs/progress/ledgerへ結果と限界を保存する。"
+  },
+  {
+    "id": "AN-071",
+    "task": "小画面の履歴操作列を2段に保ち比較結果の重なりをなくす",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-070"
+    ],
+    "owner": "codex",
+    "acceptance": "実旧108の初期footer occlusionとscroll入力を対照・入力trace/rect/hit/保存pixelで診断し、元閉鎖profileを別freshの成功で回復扱いしない。320/375 light/dark通常/抑制motionとdesktopで回帰red→green、375前後画像を残す。代表比較行が初期操作列に覆われず4ボタン48px以上/文字overflowなし、長条件と通常6本もnative touch scrollで読み、close/削除cancel/edit entry/reloadの旧記録保持を確認。履歴CSSのrow方向だけに実装を限定し採点/統計/保存schema/handler/依存/SW activationを保つ。check:all/lint/format/生成dist全E2E/read-only reviewと公開版整合/CI/実Linux-public資産/所有旧profile更新offline/公開履歴hitとpixelを確認し、既存70task/全acceptance保持、docs/progress/ledgerに出力・限界を残す。"
   }
 ]

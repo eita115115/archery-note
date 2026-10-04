@@ -923,6 +923,7 @@ header.app .gear{
   main{padding:8px;}
   .row{flex-direction:column;}
   .btnrow{flex-direction:column;}
+  .histDetailActions .btnrow{flex-direction:row;}
   .statbar{flex-wrap:wrap;}
   .stat{min-width:46%;}
   .setupLens,.insightStrip,.nativeStack,.heroMetrics,.liveGrid{grid-template-columns:1fr;}

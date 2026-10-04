@@ -4,6 +4,8 @@
 
 ## 現在地
 
+- AN071進行中。所有branch codex/history-detail-actions、基点514a59b8。小画面の履歴sticky操作列だけrow指定1宣言で2段を維持。候補v109、旧108公開中。生成focused14passed39.2s、checkall/lint/format成功。全体E2E/独立レビュー/元保持公開108→109を検証してから受入。tasks AN-071はpassesfalse、公開/完了未主張。詳しい診断・失敗・画像はdocs/codex/history-detail-actions.md、artifacts/history-actions-v109。全承認継続。
+
 - AN070完了、公開v108。source/main `95c2141c19518384c1fa3a8004a9a71a17aa2d3e`、CI37224600130 validate/deploy成功、Linux184passed(3.4m)、実artifact11310714054。実Linux/公開25資産、元保持更新first-document15body/canonical14一致。
 - 今日の結果のRMS比較を既存履歴の最低資格（total/n3以上、有限RMS）へ揃えた。今回1/2座標は静かな保留行と本数/理由を表示。比較元にも適用し、日別安定性の最終練習日が材料不足なら古い伸びや偽の終了を出さない。原数学RMS/採点/得点/PB/schema/依存/SW activation/style/主要操作は不変。3本は統計的有意性の保証ではない。
 - ActualrobustStats unitred1coords expectedfalse gottrue→green0/1/2/3/欠損/少数履歴/日別/データ非破壊。生成red8failed/4passed59.1s、focused12passed12.1s、final184passed2.2m、checkall/lint/format成功。独立immutable review blocking/actionableなし。40前後画像保存、代表8＋公開4を原寸表示・目視/12copy一致。補助verifier旧manifestENOENT/Pythoncp932読取りエラーは検証側を訂正、app失敗と扱わない。

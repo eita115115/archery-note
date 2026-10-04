@@ -8,7 +8,7 @@
 
 実v108の320×568履歴詳細では、pending行がy376.8594〜431.5469、sticky操作列がy325〜568（高さ243）。幅360以下の汎用`.btnrow{flex-direction:column}`で4ボタンが縦に並び、比較行を覆う。DOM/toBeVisible/viewport内の条件では見逃すため、保存画像と要素のcenter/四隅hit、操作列rectも見る。
 
-前回のsynthesizeScrollGesture失敗は旧contextを閉じており未回復。新しい独立診断で実Linux108・同じ架空5件/同じcontextを使い、元の開始座標、上部開始、逆方向の対照を記録した。いずれもpointermoveは来るがscrollTop0。アプリのないbare scrollerでも同入力は0、raw dispatchTouchEventは125px動く。アプリのgesture不具合と決めつけず、入力方式の限界と扱い、同じ旧108診断contextのraw touchをさらに確認する。以前閉じた失敗profileの回復とはしない。
+前回のsynthesizeScrollGesture失敗は旧contextを閉じており未回復。新しい独立診断で実Linux108・同じ架空5件/同じcontextを使い、元の開始座標、上部開始、逆方向の対照を記録した。いずれもpointermoveは来るがscrollTop0。アプリのないbare scrollerでも同入力は0、raw dispatchTouchEventは125px動く。アプリのgesture不具合と決めつけず、入力方式の限界と扱い、同じ旧108診断contextでraw touchはscrollTop125px、pending中心hitはclearとなった。以前閉じた失敗profileの回復とはしない。
 
 ### 3案
 
@@ -29,3 +29,17 @@
 3. `style.css`の履歴操作列のrow方向だけ修正し、greenと375前後画像を残す。長い条件文/通常6本の履歴もスクロールして読めることを確認する。
 4. check:all/lint/format/生成dist全E2E、read-onlyレビュー。公開版markersを一括bumpし、CI/実Linux-public25資産/旧所有profile更新とoffline、実public履歴の保存pixelとhitも確認する。
 5. tasks/progress/ledgerへ結果・失敗・限界を保存。大目標active、実iPhone/VoiceOver/WKoffline/旧閉鎖失敗の回復、全分析のRMS解釈を証明したとはしない。
+
+### 実装とローカル証拠
+
+実装は`@media(max-width:360px)`内に`.histDetailActions .btnrow{flex-direction:row;}`の1宣言だけ。生成CSSを更新し、version markersを108→109へ一括更新。アプリの全JS、操作handler、採点/統計/保存schema、依存、Service Worker activationは不変（APP_VER/cache名のみ更新）。所有共有hiddenlockも不変。
+
+生成distの14ケースを先に追加。初回は320のfooter高さと他幅のnative scroll開始位置で14failed。開始位置が`touch-action:none`の的に掛かっていたため、アプリを変更せずstatbar起点へ訂正すると5failed/9passed(37.3s)、失敗は320の高さ243のみになった。CSS候補の2回の試行も5failed/9passed。後で配布ビルドが圧縮CSSをコピーするだけと分かり、再生成不足を訂正した。source specificity/gestureの不具合を証明した試行ではない。全失敗logと画像を保持し、省略しない。
+
+`build:web-assets`後のfocused14passed(39.2s)。320のfooter高さは243→129px、y325→439。pending行はy376.8594〜431.5469のままで全5hit点clear、footerより上。4ボタンは48px以上/横文字overflowなし。375の前後は同じ2段、明暗それぞれの320/375前後8画像とlong native reading2画像を原寸目視し、コピー一致を確認した。
+
+14ケースは320/375/1024×明暗×通常/抑制motionと320/375長文条件+6本。実得点/座標の一致する架空fixtureのみ、native tap/raw native touch、close/削除cancel/edit/reload、旧5件exact保存、pageerror0を検証。画像保存ボタンは寸法とhitのみで、画像exportを実行したとはしない。比較の最後の行もnative scrollで確認する回帰を加え、公開候補全体を実行中。
+
+`check:all`成功（UI/PWA/storage/version/distributionを含む）、`lint`exit0、`format:check`は`All matched files use Prettier code style!`。raw証拠は`artifacts/history-actions-v109`、所有sandbox+Node22.19。元AN070閉鎖profileの回復を主張しない。新独立108診断は同context対照として完了後に閉じた。
+
+公開検証と全体回帰・独立レビューはまだ完了していない。task passesはfalse。
