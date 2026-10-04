@@ -765,9 +765,9 @@
   {
     "id": "AN-065",
     "task": "練習終了後は得点と比較をサイト判断より先に見せる",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN064 public104 steps3/4/6 show decision before stats/comparison in finished summary, while same session history places results first. Current openSummary emits decision→statbar→todaysResult. Implementation not started.",
+    "status": "done",
+    "passes": true,
+    "evidence": "source 052d1358cf1a8cb3e8ff2e469353d585aa76fbbf; CI37189600851 validate/deploy success, actual Linux artifact11297768814, all25 public assets and actual held first-document15/canonical14 match. Owned check:all/lint/format success, ordering red7 failed then green7 passed (8.0s); final generated 156 passed (2.0m), Linux 156 passed (3.2m). 320/375 light/dark order/stat visibility, first/gam-round/edit branches, plot/close/store/reload retained. Native Chrome/WebKit320/375 correction/end/next/offline checkpoint3histories/end6/cur1 then native finish7 arrows, results before decision, close/swipe, SWreload4histories/active null, other records exact/errors0. Actual held public104→105 normalcache600 banner in 301607ms, firstAPP105/cache105only/practice5 exact, recording/settings swipe/offline checkpoint5histories/end6/cur1, then native7-arrow finish/result/summary swipe/SWreload6histories/active null/old5 exact/errors0; fresh public375 same success. Held/fresh probes explicitly use native Escape before native navigation; held starts focused anDist in analysis, fresh starts record with no focused control; four original local rehearsal touch/no-click failures retained and explicitly aborted after snapshot/liveness review, NOT recovered. Fresh minimal4 select/focus controls all click; complex-path suppression cause unresolved, no source fix claimed. Template call position only; conditions/calculations/scoring/storage schema/dependency graph/SW activation unchanged. docs/codex/summary-order.md; artifacts/release-v105. WK multitouch synthetic/origin-stop offline; physical iPhone/VoiceOver/INP/all motion frames unverified.",
     "dependencies": [
       "AN-064"
     ],

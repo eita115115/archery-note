@@ -4,16 +4,14 @@
 
 ## 現在地
 
-- 公開v104/main 88b33445cfdcd99f54db6fd390ef32b8ee75ffd9。CI37186782681 validate/deploy成功、実Linux artifact11297261198の全25publicbytesと実保持更新の初回15body/canonical14hash一致。既存Pages workflow/HTTPS維持。
-- AN063完了: 微調整groupと上/左/右/下/削除に選択中の矢の操作を示す日本語名を付けた。見える記号/配置/handler/採点/保存/scroll不変。source scripts/50-record-view.js、回帰 tests/e2e/correction-names.spec.js、markers104。AN062のパッド可視化を保全。
-- 所有checkall/lint/format成功、生成物 149 passed (2.0m)、Linux 149 passed (3.2m)。Chrome/WebKit320/375五ボタン名前/可視/native選択/3nudge/解除/保存/6矢確定/次矢/offline/errors0。keyboard Enter/Space四方向/選択削除/他矢/保存/reloadは320/375で確認。Tab順序や実VoiceOverではない。
-- 実public103→104 normalcache600を287551ms保持してrealbanner更新。初回APP104/15body/cache104のみ/canonical14/activatedcontroller/practice5exact保存。実AX五名前・修正・確定・次矢・設定swipe・実offline/history5/end6/active1/errors0。fresh公開375成功、前後画像目視。docs/codex/correction-control-names.md。
-- 所有worktree C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/result-sheet-audit。owned compact-js sandbox/isolatedNode22.19。root/original node_modules junction install/ci/update禁止。共有hiddenlock SHA16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309保持。費用/個人情報不使用。
-
-- AN064完了: 実公開104の所有IABで375記録/確定/終了/履歴/詳細と320終了を監査。6枚保存/表示、架空history5/24本。終了はサイト判断が先、同じ履歴は得点/比較が先。終了のstats345.07pxに対し履歴208.29px。source順序と整合し、次AN065を選んだ。アプリ/版/公開変更なし。docs/codex/result-sheet-ux-audit.md。
+- 公開v105/main 052d1358cf1a8cb3e8ff2e469353d585aa76fbbf。CI37189600851 validate/deploy成功、実Linux artifact11297768814の全25publicbytes/実保持初回15body/canonical14hash一致。既存Pages workflow/HTTPS維持。
+- AN065完了: 終了シートは見出し→数値/既存比較・任意内容→サイト判断→plot。summaryDecisionHtmlの位置だけ変更、条件/計算/採点/保存/handler不変。source scripts/50-record-view.js、回帰 tests/e2e/summary-order.spec.js、markers105。docs/codex/summary-order.mdと前後明暗320/375・公開375画像。
+- 所有checkall/lint/format成功、生成 156 passed (2.0m)、Linux 156 passed (3.2m)。ordering red7→green7。初回/gam-round/編集、plot/閉じる/保存reload、Chrome/WK320/375修正/6矢確定/次矢/offline/7本終了→結果順序→閉じる→SWreload、旧3件exact/新4件/active null/errors0。WK複数指synthetic、閉じるnative tap、offline実origin停止。
+- 実public104→105 normalcache600 301607ms realbanner、firstAPP105/cache105only/practice5exact。offline checkpoint旧5件/end6/cur1の後にnative7本終了/結果先/summary native swipe/SWreload/6件/active null/旧5exact/errors0。fresh公開375同操作成功。
+- 所有worktree C:/Users/eita2/.codex/worktrees/app-quality/archery-note、codex/summary-order。owned sandbox/isolatedNode22.19。root/original node_modules junction install/ci/update禁止。共有hiddenlock SHA16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309保持。費用/個人情報不使用。
 
 ## 次と未解決
 
-- 次の一小タスクAN065: openSummaryの見出し後にstatbar/既存比較を置き、summaryDecisionHtmlはその後へ残す。判断/注意/計算/保存/plot/閉じるを保ち、320/375回帰と実公開更新で検証する。広いUI書き換えや新機能追加にしない。初回ガイド表記は別検討。
-- WK context.setOffline reload内部エラーはactual101/102双方で再現。実origin停止では保持できるが、uncached browser fetchのReturned response is null旧probeは未解決。WK複数指synthetic/単指native、offlineはorigin停止で、実iPhone同等とは断定しない。
-- 元public98→99/99→100失敗profile未復旧、WK初期strict lifecycle不明を保持。実iPhone二本指/keyboard/VoiceOver/Tab順序/5000実保存/実INP、全normal-motionフレーム、posecamera/GPU、AN001実射は未確認。大目標active、既存全承認で継続。
+- 次の一小タスク候補: 終了probe前の分析select→native tabでclick欠落する複合経路を、旧104/105の所有profileで縮小し原因を特定する。4失敗local rehearsalはsnapshot/liveness後明示abort、回復扱いしない。最小fresh4条件は全成功、単独focus原因は未確定。native Escapeで先行select操作を完了したrehearsal/実held/fresh経路は成功だが、元失敗経路の修正とはしない。アプリ修正なし。
+- WK context.setOffline reload内部エラーはactual101/102双方で再現。実origin停止保持は確認、uncached browser fetch Returned response is null旧probe未解決。実iPhone同等と断定しない。
+- 元public98→99/99→100失敗profile未復旧、WK初期strict lifecycle不明。実iPhone二本指/keyboard/VoiceOver/Tab順序/5000実保存/実INP、全normal-motionフレーム、posecamera/GPU、AN001実射未確認。大目標active、既存全承認で継続。
