@@ -741,9 +741,9 @@
   {
     "id": "AN-063",
     "task": "微調整の方向と削除を名前で識別して操作できるようにする",
-    "status": "open",
-    "passes": false,
-    "evidence": "AN061 observed symbolic direction controls and unnamed deletion; current npad markup still has no accessible names. Runtime AX/red evidence to follow.",
+    "status": "done",
+    "passes": true,
+    "evidence": "source 88b33445cfdcd99f54db6fd390ef32b8ee75ffd9; CI37186782681 validate/deploy success, actual Linux artifact11297261198, all25 public assets and saved held first-document15/canonical14 match. Owned check:all/lint/format success; raw AX old symbolic directions/unnamed delete and named group red2 failed retained, focused2 passed (5.9s), final generated 149 passed (2.0m), Linux 149 passed (3.2m). Named group/five controls in native Chrome/WebKit320/375 AX; keyboard Enter/Space checks direction vectors/score/other-arrow retention/selected deletion/save/reload on320/375. Pad geometry/native touch/scroll retained; six-arrow correction/end/next/offline/history3/active1/errors0. Actual held public103→104 normalcache600 realbanner in 287551ms, firstAPP104/cache104only/practice5 exact, settings touch swipe/target native pinch guard/offline/history5/end6/active1/errors0; fresh public375 same operation success. Markup only names/group/type; scoring/schema/dependency graph/SW activation/visual arrangement unchanged. docs/codex/correction-control-names.md; artifacts/release-v104. Real iPhone/VoiceOver/Tab order/intermediate keyboard-save/performance unverified; WK multitouch synthetic and offline via actual origin stop.",
     "dependencies": [
       "AN-062"
     ],
