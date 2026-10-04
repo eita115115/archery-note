@@ -737,5 +737,17 @@
     ],
     "owner": "codex",
     "acceptance": "320/375で矢を選んだ直後、微調整パッドの矢印と削除が固定ドックに隠れず押せることを回帰red→greenで示す。選択開始以外のタグ/矢番号/連続nudgeでは不要なscrollを起こさず、解除/確定後の的復帰・単指/二本指保護・採点円/保存/既存practiceを保つ。全check/lint/format/実生成物E2E、mobile前後画像と操作、承認済み揃えた版の公開CI/25資産/実保持旧profile更新・offline記録再開を確認する。"
+  },
+  {
+    "id": "AN-063",
+    "task": "微調整の方向と削除を名前で識別して操作できるようにする",
+    "status": "open",
+    "passes": false,
+    "evidence": "AN061 observed symbolic direction controls and unnamed deletion; current npad markup still has no accessible names. Runtime AX/red evidence to follow.",
+    "dependencies": [
+      "AN-062"
+    ],
+    "owner": "codex",
+    "acceptance": "320/375の微調整groupと五ボタンに操作の意味を表す名前があり、名前によるlocator/keyboard Enter・Spaceで四方向の座標/採点と選択矢の削除が一致することをred→greenで示す。パッド配置/矢円/scroll/既存practice/保存schemaを保ち、375前後画像/AX、全check/lint/format/生成E2E、mobile主要操作/offline、承認済み揃えた公開版のCI/25資産/実保持旧profile更新と記録再開を確認する。実VoiceOver成功とは扱わない。"
   }
 ]
