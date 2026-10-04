@@ -821,5 +821,17 @@
     ],
     "owner": "codex",
     "acceptance": "案内文だけを現sourceの操作/ラベルと合わせ、精密モードの0.4秒/1/4/ルーペを保つ。320/375 light/dark・3/6本の生成プレビューで前後画像を保存/表示し、overflow/得点選択/微調整/選択解除/partial確定/終了/表示抑制/reload・旧履歴保持を確認する。check:all/lint/format/生成dist全E2E/read-only review、承認済み揃えた公開版CI/25資産/所有旧profile更新とoffline保持を証拠に残す。採点/保存schema/依存/SW activation/通常操作を変えず、既存68task/全69acceptance保持、docs/progress/ledgerを更新する。"
+  },
+  {
+    "id": "AN-070",
+    "task": "少数矢で今日の結果にRMS改善・安定性の伸びを断定しない",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-069"
+    ],
+    "owner": "codex",
+    "acceptance": "実統計と所有生成fixtureで1/2本のRMS改善誤読を再現し、既存3本境界を今回/比較元/日別安定性へ適用する。0/1/2/3座標・欠損/少数履歴混入・最新日不足/同日混在・得点不変・入力非破壊の回帰red→greenを残す。320/375 light/darkで終了と履歴の保留理由/本数、3本の従来比較、375前後画像と旧記録/reload保持を確認する。check:all/lint/format/生成dist全E2E/read-only review、公開版整合/CI/実配信資産/所有旧profile更新・offline保持を確認する。採点/数学RMS/保存schema/依存/SW activation/既存69taskとacceptanceを保持しdocs/progress/ledgerへ結果と限界を保存する。"
   }
 ]

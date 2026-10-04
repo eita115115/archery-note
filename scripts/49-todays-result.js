@@ -34,6 +34,11 @@ function trSameCondition(a, b, opts){
   return true;
 }
 
+/* 履歴の groupingSessionRow と同じ最低資格。少数矢の数学的RMSを上達と解釈しない。 */
+function trHasGroupingEvidence(st){
+  return !!st && st.total>=3 && st.n>=3 && Number.isFinite(st.rr);
+}
+
 /* ============ 3.1 前回・先週差 ============ */
 /* computeWeeklyDiff(sessions, currentSessionId, todayStr)
    同条件（距離+的サイズ+本数=同一）セッションのうち「前回」（直近1件）と比較する。
@@ -88,11 +93,12 @@ function computeStabilityTrend(sessions, currentSessionId, metricsFn, opts){
   if(!cur) return {available:false, reason:"no-current-session"};
   const curM=metricsFn(cur);
   if(!curM || !curM.st || !Number.isFinite(curM.st.rr)) return {available:false, reason:"no-coords"};
+  if(!trHasGroupingEvidence(curM.st)) return {available:false, reason:"insufficient-arrows", coordinateCount:curM.st.n};
 
   const peers=all.filter(s=>s.id!==cur.id && trSameCondition(s,cur,{matchArrows:false}))
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1))
     .map(s=>({s,m:metricsFn(s)}))
-    .filter(x=>x.m && x.m.st && Number.isFinite(x.m.st.rr));
+    .filter(x=>x.m && trHasGroupingEvidence(x.m.st));
 
   if(peers.length<MIN_HISTORY) return {available:false, reason:"insufficient-history", sampleCount:peers.length};
 
@@ -204,7 +210,7 @@ function computeGrowthStreaks(sessions, todayStr, metricsFn){
     const g=byDate.get(s.date)||{date:s.date,arrows:0,total:0,rmsSum:0,rmsW:0};
     g.arrows+=arrs.length; g.total+=arrs.reduce((a,x)=>a+(x.s||0),0);
     const m=metricsFn(s);
-    if(m && m.st && Number.isFinite(m.st.rr)){ g.rmsSum+=m.st.rr*arrs.length; g.rmsW+=arrs.length; }
+    if(m && trHasGroupingEvidence(m.st)){ g.rmsSum+=m.st.rr*arrs.length; g.rmsW+=arrs.length; }
     byDate.set(s.date,g);
   });
   const days=[...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date)).map(g=>({
@@ -217,6 +223,8 @@ function computeGrowthStreaks(sessions, todayStr, metricsFn){
   ];
 
   const metrics=METRICS.map(spec=>{
+    /* 最新練習日の材料不足を、古い日の伸びの継続や終了として表示しない。 */
+    if(spec.key==="stability" && !Number.isFinite(spec.valueOf(days[days.length-1]))) return {key:spec.key, available:false, streakDays:0};
     const validDays=days.filter(d=>Number.isFinite(spec.valueOf(d)));
     if(validDays.length<MIN_BASELINE+1) return {key:spec.key, available:false, streakDays:0};
     const improved=validDays.map((d,i)=>{

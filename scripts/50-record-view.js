@@ -2217,6 +2217,13 @@ function todaysResultHtml(result, sess, opts) {
     rows.push(todaysResultWeeklyRowHtml(result.weeklyDiff, dayLabel));
   if (result.stabilityTrend && result.stabilityTrend.available)
     rows.push(todaysResultStabilityRowHtml(result.stabilityTrend));
+  else if (result.stabilityTrend && result.stabilityTrend.reason === "insufficient-arrows")
+    rows.push(todaysResultRowHtml(
+      "stability-pending",
+      "ruler",
+      "グルーピングの比較は保留",
+      `${result.stabilityTrend.coordinateCount}本の座標 / 比較には3本以上必要です。`,
+    ));
   if (result.personalBestDistance && result.personalBestDistance.available)
     rows.push(todaysResultPersonalBestRowHtml(result.personalBestDistance, sess, dayLabel));
   rows.push(todaysResultGrowthRowsHtml(result.growthStreaks, opts.growthBefore));

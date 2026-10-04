@@ -39,3 +39,20 @@
 5. tasks/progress/ledgerへ実際の出力、失敗、限界と次の一件を記録。
 
 大目標はactive。実iPhone/VoiceOverや統計的有意性、他のRMS面の改善をこの一件から主張しない。
+
+## 実行済みの診断と前後確認
+
+- 実robustStatsの純関数red: `1 coordinates cannot imply stability improvement: expected false, got true`（exit1）。生成v107の操作回帰redは `8 failed / 4 passed (59.1s)`。1/2本の8件は比較行が残るため失敗、3本の4件は成功。元出力と画像を保存した。
+- 修正後の純関数は0/1/2/3座標、得点だけの矢が多くても座標不足、少数履歴混入のbaseline/sparkline不変、最新日不足/同日混在、得点の集計維持、入力非破壊を確認。`Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)`。
+- 生成v107のfocused greenは `12 passed (12.1s)`。320/375 light/darkで1/2/3本のnative終了、同じ保留/比較の履歴再構成、旧3件と確定した矢の全field保持、reload保持、横overflowなし/errors0。
+- 今回の座標が1/2本なら初回でも保留理由を示す。通常6本の初回コピーはそのまま。初回1/2の追加2caseを最終suiteに含める。
+- 前後画像40枚（beforeのsummary12/history4、afterのsummary12/history12）を所有test-resultsから保存。うち1本の代表8枚を原寸表示・目視、以下のdocsコピーは元のPNGと同一。320/375双方で短い保留行が収まり、旧改善sparklineが消える。全40枚の目視、実iPhoneを確認したとはしない。
+
+| 幅/theme  | 修正前                                                                 | 修正後                                                               |
+| --------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 375/light | [before](../screenshots/grouping-evidence-v108/before-375-light-1.png) | [after](../screenshots/grouping-evidence-v108/after-375-light-1.png) |
+| 375/dark  | [before](../screenshots/grouping-evidence-v108/before-375-dark-1.png)  | [after](../screenshots/grouping-evidence-v108/after-375-dark-1.png)  |
+| 320/light | [before](../screenshots/grouping-evidence-v108/before-320-light-1.png) | [after](../screenshots/grouping-evidence-v108/after-320-light-1.png) |
+| 320/dark  | [before](../screenshots/grouping-evidence-v108/before-320-dark-1.png)  | [after](../screenshots/grouping-evidence-v108/after-320-dark-1.png)  |
+
+他のRMS面（growthDashboard/todayConclusion/analysisKpi/period集計など）は今回の結果パネルと別のconsumerである。少数や比較条件による解釈の監査はまだ残る。自己ベストの本数換算も本件で変更しない。実射/用具/風条件を用いた統計的有意性、身体フォームの診断、速度改善をこの修正の成果として扱わない。

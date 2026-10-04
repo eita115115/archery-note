@@ -336,4 +336,56 @@ function sess(id, date, o) {
   assertEqual(rWithOpt.secondary, null, "linked record with <3 prior comparables: trAnchorSecondary returns null");
 }
 
+/* ---------- 少数の座標を成長と解釈しない（実 robustStats、既存3本境界） ---------- */
+{
+  const peers = [1, 2, 3].map(i => sess(`eligible-${i}`, `2026-07-0${i}`, {ends:[coordEnd(6,9,2)]}));
+  const current = n => sess("current", "2026-07-10", {ends:[coordEnd(n,9,.5)]});
+  for (const n of [1,2]) {
+    const cur = current(n), input = [...peers,cur], original = JSON.stringify(input);
+    const r = tr.computeTodaysResult(input,cur.id,tr.metricsFn);
+    assertEqual(r.stabilityTrend.available,false,`${n} coordinates cannot imply stability improvement`);
+    assertEqual(r.stabilityTrend.reason,"insufficient-arrows",`${n} coordinates explain missing evidence`);
+    assertEqual(r.stabilityTrend.coordinateCount,n,`${n} coordinates are reported`);
+    assertEqual(r.stabilityTrend.sparkline,undefined,"pending comparison has no improvement sparkline");
+    assertEqual(r.personalBestDistance.todayTotal,9*n,"few-arrow total remains available");
+    assertEqual(JSON.stringify(input),original,"result calculation never mutates practice data");
+  }
+  const three = current(3);
+  assertEqual(tr.computeStabilityTrend([...peers,three],three.id,tr.metricsFn).available,true,"three valid coordinates retain comparison");
+  const none = sess("none","2026-07-10",{ends:[plainEnd(6,9)]});
+  assertEqual(tr.computeStabilityTrend([...peers,none],none.id,tr.metricsFn).reason,"no-coords","zero coordinates retain no-coords reason");
+  const mixed = sess("mixed","2026-07-10",{ends:[[...coordEnd(2,9,.5),...plainEnd(8,9),{x:"bad",y:0,s:9}]]});
+  const mixedTrend = tr.computeStabilityTrend([...peers,mixed],mixed.id,tr.metricsFn);
+  assertEqual(mixedTrend.available,false,"total arrow count cannot hide missing coordinates");
+  assertEqual(mixedTrend.coordinateCount,2,"only finite coordinates count");
+  const fewPeers = [1,2,3].map(i => sess(`few-${i}`,`2026-07-0${i}`,{ends:[coordEnd(2,9,.1)]}));
+  const excluded = tr.computeStabilityTrend([...fewPeers,three],three.id,tr.metricsFn);
+  assertEqual(excluded.available,false,"three low-count sessions cannot form a comparison baseline");
+  assertEqual(excluded.sampleCount,0,"low-count peers do not count as history samples");
+  const clean = tr.computeStabilityTrend([...peers,three],three.id,tr.metricsFn);
+  const dirty = tr.computeStabilityTrend([...peers,...fewPeers,three],three.id,tr.metricsFn);
+  assertEqual(JSON.stringify(dirty),JSON.stringify(clean),"few-arrow history cannot bias baseline/sparkline");
+  const trimmed = tr.computeStabilityTrend([...peers,three],three.id,s => {
+    const m=tr.metricsFn(s); if(s.id===three.id) m.st.n=2; return m;
+  });
+  assertEqual(trimmed.available,false,"used coordinates must also satisfy the minimum");
+}
+{
+  const days = Array.from({length:6},(_,i)=>sess(`growth-${i}`,`2026-07-0${i+1}`,{ends:[coordEnd(6,8+i*.1,3-i*.4)]}));
+  const metric = r => r.metrics.find(m=>m.key==="stability");
+  const original = JSON.stringify(days), before = tr.computeGrowthStreaks(days,"2026-07-06",tr.metricsFn);
+  assert(metric(before).streakDays>=2,"qualified stability growth has a real prior streak");
+  for(const n of [1,2]) {
+    const latest=sess(`low-${n}`,"2026-07-07",{ends:[coordEnd(n,9,.01)]});
+    const after=tr.computeGrowthStreaks([...days,latest],latest.date,tr.metricsFn);
+    assertEqual(metric(after).available,false,"latest few-arrow-only day cannot extend or break a stability streak");
+    assertEqual(after.metrics.find(m=>m.key==="score").available,true,"score growth continues to include recorded arrows");
+    const sameDay=sess(`same-${n}`,days[5].date,{ends:[coordEnd(n,9,.01)]});
+    const mixed=tr.computeGrowthStreaks([...days,sameDay],sameDay.date,tr.metricsFn);
+    assertEqual(JSON.stringify(metric(mixed)),JSON.stringify(metric(before)),"few-arrow same-day session cannot bias eligible stability evidence");
+  }
+  assertEqual(JSON.stringify(days),original,"streak calculation leaves input sessions untouched");
+}
+console.log("Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)");
+
 console.log("Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)");
