@@ -35,4 +35,52 @@ old/currentの320/375明暗・18m・抑制motionの8代表画像を保存・原�
 
 実画像には別のUX課題がある。`選択解除`は`shotMeta`（矢番号/理由）より下で、320/375とも初期の調整状態に見えない。既存testが`revealSecondary`で手動scrollして解除することも一致。得点chipの再tapで解除できるが、操作名のある戻りbuttonが下に隠れる負担は残る。次の小タスクは`選択解除`を調整button直下に出す案を評価する。今taskでその新UXを完了/修正扱いしない。
 
-公開/CI/全体受入は未完了、task passesfalse。全app/markers109保持、新依存なし。
+全体/独立review/CI/公開資産一致を受入済み。AN072だけpass/evidenceを更新。全app/markers109保持、新依存なし。
+
+## 全体検証・反映
+
+source/main `f8ce47f6f7fffecf97a24e7baceb9596f3a2e911`。CI[37244716809](https://github.com/eita115115/archery-note/actions/runs/37244716809)validate/deploy成功、Linux`206 passed (4.0m)`。実Pages artifact11318871625の26regularfilesを安全な所有dirへ抽出（no links）。実Linux/public/前回受入109の25app資産がbyte-identical。採点・数学・UI・保存schema・handler・依存graph・SW activation・versionmarkersの変更なし。公開v109維持、更新通知を新たに出した検証ではない。
+
+独立immutable reviewはblocking/Critical/Importantなし。reviewerはパラメータ/faceD200の単位、各nudge後五点hit、旧asserts保持、旧/現在32matrixずつ/112sample/score/scroll/errors/28pair一致を独立確認。閉鎖IABcontext/元rootcause/fullrawframeの未証明を保つ。全E2Eが完了後に承認済みpush、CI/byte一致後にだけ受入を記録した。
+
+コマンド出力（所有Node22.19/sandbox、rawはartifacts/correction-followup-v109）:
+
+```text
+# diagnose.txt / legacy.txt (each exit0)
+PASS:32 actualLinux109 native/locator correction diagnoses; fixture only, source unchanged
+PASS:32 actualLinux105 native/locator correction diagnoses; fixture only, source unchanged
+# focused.txt / exit0
+16 passed (2.4m)
+# e2e.txt / exit0
+206 passed (3.7m)
+# ci.log
+206 passed (4.0m)
+# check-all.txt / exit0
+UI smoke checks OK (chrome.exe)
+PWA asset checks OK
+PWA update flow checks OK
+Storage round-trip checks OK
+Version alignment checks OK
+# lint.txt / exit0
+# format.txt / exit0
+All matched files use Prettier code style!
+# parity.txt / exit0
+PASS:all25 actual Linux/public/prior accepted109 app assets byte-identical; no app/version change
+```
+
+一時的なshell process作成Access denied(Windows5)をtoolに記録。再pollで同じlive E2E28372を維持し、読取りretryだけで復旧。test/app失敗やE2E restartとはしない。今回の回帰は既にpassするのでredを捏造せず、未再現の重なりに根拠ないapp変更を行わなかった。局所結果だけを大目標の完成にしない。
+
+代表画像: [旧105/375](../screenshots/correction-followup-v109/old105-375-light.png)、[現在109/375](../screenshots/correction-followup-v109/current109-375-light.png)。320/375明暗のold/current8画像を原寸表示しbyte-copy一致。current4は診断のrawを先に表示したものと同byte。4normal差分のnav領域以外は同pixel、差分原因は断定しない。
+
+### 次の操作改善の根拠
+
+追加fresh109の18/40/3 native経路（Chrome/light/reduce、別owned context）で`#nudgeDone`を実測:
+
+| viewport | 選択解除 y〜bottom   | dock y〜bottom | center hit |
+| -------- | -------------------- | -------------- | ---------- |
+| 320×568  | 549.46875〜597.46875 | 386〜480       | false      |
+| 375×812  | 766.3125〜814.3125   | 653〜724       | false      |
+
+raw `exit-read/matrix.json`/画像/trace保存、成功後閉鎖。新観測は旧閉鎖IAB回復ではない。ボタンはmeta後の配置のためdock/nav/viewport下に隠れ、既存testもmanual revealSecondaryが必要。次は`選択解除`をパッドの直下・metaより前に出し、selection-entryのreveal対象に含めて追加scrollなしで次の矢へ戻れる案を確認する。geometry/hit/native解除→的→次矢/座標/保存で証明する。
+
+実iPhone/VoiceOver/全motionframes/原IABsource105閉鎖context/古い失敗profilesは未確認。費用/個人情報不使用、root共有lockと元workspace不変更、既存71task/全72acceptance保持。大目標active。

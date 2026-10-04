@@ -850,9 +850,9 @@
   {
     "id": "AN-072",
     "task": "微調整後の操作性を旧公開版と対照診断し回帰で守る",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "sourcef8ce47f6f7fffecf97a24e7baceb9596f3a2e911/CI37244716809 validate-deploy success/Linux206passed4.0m/artifact11318871625; actualLinux-public-prior109 all25bytes exact/v109 unchanged. Actualold105/current109 each32 cases Chrome-WebKit320375 lightdark normalreduce18/40/3+70/122/6; native2arrows/chip/3upnudges/locator fourth: fivehits+rect above dock,scroll0,scoreagree/errors0;112samples each bad0reported (matrixcounts/badframes,onlylatest lastcasefull112,notfull7168raw). Old/current nativearrowsexact;28of32stagePNG byteidentical,4diffonlynavbounds/no causal inference. ClosedIAB105frame19 original-viewed butunreproduced/rootcauseunknown/notrecovered.8 representative old/current reduced18m images original-viewed/copiedexact. Test-only:40cm8cases added to70m8,fivepoint initial/each3/secondselection/after3PNG-JSON;allold scoring/meta/deselect/end/next/storage-legacy3/reload assertionsretained. No fabricatedred:focused16passed2.4m/full206passed3.7m/checkall-lint-format green/read-onlyreview noblocking. App/math/scoring/handlers/schema/deps/markers109/SWactivation/prior71tasks/allacceptance/sharedlock unchanged. TransienttoolCreateProcess access5 recovered bysamehandle28372poll/readretry,no testrestart. Freshowned109exit-read2cases reveals nudgeDone y549.46875..597.46875 at320 and766.3125..814.3125 at375,centerhitfalse;nextactualUXtarget exitaboveMeta/revealwithout manualscroll—notfixedhere. docs/codex/correction-followup-diagnosis.md/artifacts/correction-followup-v109. Physicalphone/VoiceOver/fullmotion/rawallframes/closedoldprofiles unproven;broadgoalactive.",
     "dependencies": [
       "AN-071"
     ],
