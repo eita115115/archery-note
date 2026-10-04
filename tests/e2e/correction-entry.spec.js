@@ -1,4 +1,5 @@
 /* global db, scoreAt, lineCutRadius */
+const fs = require("node:fs");
 const { test, expect } = require("@playwright/test");
 
 test.use({ hasTouch: true, isMobile: true });
@@ -58,16 +59,22 @@ async function pad(page) {
       : dock.top;
     return buttons.map((el) => {
       const r = el.getBoundingClientRect();
+      const points = [
+        [r.x + r.width / 2, r.y + r.height / 2],
+        [r.left + 8, r.top + 8],
+        [r.right - 8, r.top + 8],
+        [r.left + 8, r.bottom - 8],
+        [r.right - 8, r.bottom - 8],
+      ];
       return {
         direction: el.dataset.n,
         top: r.top,
         bottom: r.bottom,
         above: Math.max(0, header.bottom),
         below: Math.min(dock.top, noticeTop),
-        hit:
-          globalThis.document
-            .elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
-            ?.closest("button") === el,
+        hit: points.every(
+          ([x, y]) => globalThis.document.elementFromPoint(x, y)?.closest("button") === el,
+        ),
       };
     });
   });
@@ -106,86 +113,108 @@ async function expectTarget(page) {
   expect(r.bottom).toBeLessThanOrEqual(r.below - 7);
 }
 
-for (const width of [320, 375]) {
-  for (const colorScheme of ["light", "dark"]) {
-    for (const reducedMotion of ["no-preference", "reduce"]) {
-      test(`correction buttons need no extra scroll (${width}, ${colorScheme}, ${reducedMotion})`, async ({
-        page,
-      }, testInfo) => {
-        await page.setViewportSize({ width, height: width === 320 ? 568 : 812 });
-        await page.emulateMedia({ colorScheme, reducedMotion });
-        const errors = [];
-        page.on("pageerror", (error) => errors.push(error.message));
-        await page.goto("/");
-        await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
-        await page.locator('#tabs [data-v="record"]').click();
-        await page.getByRole("button", { name: "70m", exact: true }).click();
-        await page.getByRole("combobox", { name: "的", exact: true }).selectOption("122");
-        await page.getByRole("combobox", { name: "1エンドの本数", exact: true }).selectOption("6");
-        await page.getByTestId("record-start").click();
-        const sessions = (await state(page)).sessions;
-        await record(page);
-        await record(page);
-        await tap(page, page.locator('#curChips [data-i="0"]'));
-        await settle(page);
-        await page.screenshot({
-          path: testInfo.outputPath("correction-entry.png"),
-          animations: "disabled",
+for (const config of [
+  { dist: 18, faceD: 40, perEnd: 3 },
+  { dist: 70, faceD: 122, perEnd: 6 },
+]) {
+  for (const width of [320, 375]) {
+    for (const colorScheme of ["light", "dark"]) {
+      for (const reducedMotion of ["no-preference", "reduce"]) {
+        test(`correction buttons need no extra scroll (${width}, ${colorScheme}, ${reducedMotion}, ${config.dist}m/${config.faceD}cm/${config.perEnd})`, async ({
+          page,
+        }, testInfo) => {
+          await page.setViewportSize({ width, height: width === 320 ? 568 : 812 });
+          await page.emulateMedia({ colorScheme, reducedMotion });
+          const errors = [];
+          page.on("pageerror", (error) => errors.push(error.message));
+          await page.goto("/");
+          await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+          await page.locator('#tabs [data-v="record"]').click();
+          await page.getByRole("button", { name: `${config.dist}m`, exact: true }).click();
+          await page
+            .getByRole("combobox", { name: "的", exact: true })
+            .selectOption(String(config.faceD));
+          await page
+            .getByRole("combobox", { name: "1エンドの本数", exact: true })
+            .selectOption(String(config.perEnd));
+          await page.getByTestId("record-start").click();
+          const sessions = (await state(page)).sessions;
+          await record(page);
+          await record(page);
+          await tap(page, page.locator('#curChips [data-i="0"]'));
+          await settle(page);
+          await page.screenshot({
+            path: testInfo.outputPath("correction-entry.png"),
+            animations: "disabled",
+          });
+          await expectPad(page);
+          const before = (await state(page)).active.cur[0];
+          const top = await page.evaluate(() => globalThis.scrollY);
+          const right = page.locator('#nudge [data-n="r"]');
+          const samples = [];
+          for (let i = 0; i < 3; i++) {
+            await tap(page, right);
+            await expectPad(page);
+            samples.push({
+              scrollY: await page.evaluate(() => globalThis.scrollY),
+              buttons: await pad(page),
+            });
+          }
+          await page.screenshot({ path: testInfo.outputPath("correction-after-three.png") });
+          fs.writeFileSync(
+            testInfo.outputPath("correction-followup.json"),
+            JSON.stringify(samples, null, 2),
+          );
+          await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(top);
+          await expect
+            .poll(async () => (await state(page)).active.cur[0].x)
+            .toBeCloseTo(before.x + (3 * config.faceD) / 200);
+          const agreement = await page.evaluate(() => {
+            const s = db.active,
+              a = s.cur[0];
+            return {
+              arrow: a,
+              hit: scoreAt(a.x, a.y, s.faceD, s.faceType, lineCutRadius(s.faceD, s.faceType)),
+            };
+          });
+          expect(agreement.arrow.s).toBe(agreement.hit.s);
+          expect(agreement.arrow.X).toBe(agreement.hit.X);
+          const reason = page.getByRole("button", { name: "風", exact: true });
+          await revealSecondary(page, reason);
+          const reasonTop = await page.evaluate(() => globalThis.scrollY);
+          await tap(page, reason);
+          await expect.poll(async () => (await state(page)).active.cur[0].reason).toBe("風");
+          expect(await page.evaluate(() => globalThis.scrollY)).toBe(reasonTop);
+          const number = page.getByRole("textbox", { name: "矢番号", exact: true });
+          await revealSecondary(page, number);
+          const numberTop = await page.evaluate(() => globalThis.scrollY);
+          await number.fill("7");
+          await number.press("Tab");
+          await expect.poll(async () => (await state(page)).active.cur[0].no).toBe("7");
+          expect(await page.evaluate(() => globalThis.scrollY)).toBe(numberTop);
+          await revealSecondary(page, page.locator("#nudgeDone"));
+          const corrected = (await state(page)).active.cur;
+          await tap(page, page.locator("#nudgeDone"));
+          await settle(page);
+          await expectTarget(page);
+          expect((await state(page)).active.cur).toEqual(corrected);
+          // A second arrow can enter correction too; confirm while correction is open.
+          await tap(page, page.locator('#curChips [data-i="1"]'));
+          await expectPad(page);
+          await tap(page, page.getByTestId("active-end"));
+          await expect.poll(async () => (await state(page)).active.ends.length).toBe(1);
+          expect((await state(page)).active.ends[0]).toEqual(corrected);
+          await settle(page);
+          await expectTarget(page);
+          await record(page);
+          await expect.poll(async () => (await state(page)).active.cur.length).toBe(1);
+          const stored = await state(page);
+          await page.reload();
+          expect((await state(page)).active).toEqual(stored.active);
+          expect((await state(page)).sessions).toEqual(sessions);
+          expect(errors).toEqual([]);
         });
-        await expectPad(page);
-        const before = (await state(page)).active.cur[0];
-        const top = await page.evaluate(() => globalThis.scrollY);
-        const right = page.locator('#nudge [data-n="r"]');
-        for (let i = 0; i < 3; i++) await tap(page, right);
-        await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(top);
-        await expect
-          .poll(async () => (await state(page)).active.cur[0].x)
-          .toBeCloseTo(before.x + (3 * 122) / 200);
-        const agreement = await page.evaluate(() => {
-          const s = db.active,
-            a = s.cur[0];
-          return {
-            arrow: a,
-            hit: scoreAt(a.x, a.y, s.faceD, s.faceType, lineCutRadius(s.faceD, s.faceType)),
-          };
-        });
-        expect(agreement.arrow.s).toBe(agreement.hit.s);
-        expect(agreement.arrow.X).toBe(agreement.hit.X);
-        const reason = page.getByRole("button", { name: "風", exact: true });
-        await revealSecondary(page, reason);
-        const reasonTop = await page.evaluate(() => globalThis.scrollY);
-        await tap(page, reason);
-        await expect.poll(async () => (await state(page)).active.cur[0].reason).toBe("風");
-        expect(await page.evaluate(() => globalThis.scrollY)).toBe(reasonTop);
-        const number = page.getByRole("textbox", { name: "矢番号", exact: true });
-        await revealSecondary(page, number);
-        const numberTop = await page.evaluate(() => globalThis.scrollY);
-        await number.fill("7");
-        await number.press("Tab");
-        await expect.poll(async () => (await state(page)).active.cur[0].no).toBe("7");
-        expect(await page.evaluate(() => globalThis.scrollY)).toBe(numberTop);
-        await revealSecondary(page, page.locator("#nudgeDone"));
-        const corrected = (await state(page)).active.cur;
-        await tap(page, page.locator("#nudgeDone"));
-        await settle(page);
-        await expectTarget(page);
-        expect((await state(page)).active.cur).toEqual(corrected);
-        // A second arrow can enter correction too; confirm while correction is open.
-        await tap(page, page.locator('#curChips [data-i="1"]'));
-        await expectPad(page);
-        await tap(page, page.getByTestId("active-end"));
-        await expect.poll(async () => (await state(page)).active.ends.length).toBe(1);
-        expect((await state(page)).active.ends[0]).toEqual(corrected);
-        await settle(page);
-        await expectTarget(page);
-        await record(page);
-        await expect.poll(async () => (await state(page)).active.cur.length).toBe(1);
-        const stored = await state(page);
-        await page.reload();
-        expect((await state(page)).active).toEqual(stored.active);
-        expect((await state(page)).sessions).toEqual(sessions);
-        expect(errors).toEqual([]);
-      });
+      }
     }
   }
 }

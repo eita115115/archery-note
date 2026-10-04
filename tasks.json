@@ -846,4 +846,17 @@
     "owner": "codex",
     "acceptance": "実旧108の初期footer occlusionとscroll入力を対照・入力trace/rect/hit/保存pixelで診断し、元閉鎖profileを別freshの成功で回復扱いしない。320/375 light/dark通常/抑制motionとdesktopで回帰red→green、375前後画像を残す。代表比較行が初期操作列に覆われず4ボタン48px以上/文字overflowなし、長条件と通常6本もnative touch scrollで読み、close/削除cancel/edit entry/reloadの旧記録保持を確認。履歴CSSのrow方向だけに実装を限定し採点/統計/保存schema/handler/依存/SW activationを保つ。check:all/lint/format/生成dist全E2E/read-only reviewと公開版整合/CI/実Linux-public資産/所有旧profile更新offline/公開履歴hitとpixelを確認し、既存70task/全acceptance保持、docs/progress/ledgerに出力・限界を残す。"
   }
+,
+  {
+    "id": "AN-072",
+    "task": "微調整後の操作性を旧公開版と対照診断し回帰で守る",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-071"
+    ],
+    "owner": "codex",
+    "acceptance": "実Linux105/109の320/375明暗/通常抑制motion・18m40cm3本/70m122cm6本をChrome/WebKitの所有架空fixtureで対照。native選択→3回nudgeのscroll/ボタンrect・五点hit/得点と座標/入力trace/保存pixel、locator click対照とsampled motionを記録し、旧IAB閉鎖contextの回復や再現していないrootcauseを主張しない。旧case画像と代表375現在画像を保存表示する。現在の小caseが既に通るなら根拠ないapp変更を避け、既存回帰へ40cm条件と反復後pad/五点hit/記録保持を加え実行する。checkall/lint/format/生成全E2E/独立review/承認済みCIと実Linux-public25bytes、既存71task/全acceptance/全app・採点・schema・依存・SWactivation・version保持を確認し、docs/progress/ledgerへ出力/限界と次の実UX改善対象を残す。"
+  }
 ]
