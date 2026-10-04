@@ -49,3 +49,50 @@ activeGuideHtmlの四行を具体的にする。的の下の得点を選んで�
 ![375 dark 6本・修正後](../screenshots/first-guide-v107/after-375-dark-6.png)
 
 これは案内文の修正なので、新規literal回帰テストやred失敗を作らない。元の操作は前後とも成功する対照であり、操作の新機能や速度改善を示すものではない。公開受入は次に追記する。
+
+## 公開と検証
+
+公開v107/source `4eeecf634e9fae977f112685d6bb7f803783518a`。[CI37222538203](https://github.com/eita115115/archery-note/actions/runs/37222538203) validate/deploy成功、実Linux artifact11310289226。公開/実Linux25資産、実保持更新のfirst-document15body/canonical14scriptはbyte exact一致。read-only reviewでP1/P2指摘なし。全出力はartifacts/first-guide-v107、抜粋は以下。
+
+```text
+npm run check:all
+Archery Note checks OK (v107)
+UI smoke checks OK (chrome.exe)
+PWA asset checks OK
+PWA update flow checks OK
+Storage contract checks OK
+Storage round-trip checks OK
+Save debounce checks OK
+Version alignment checks OK
+Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 196671→139328 bytes; cross-script fixtures
+
+npm run lint
+> eslint "*.js" "scripts/**/*.js" "tools/**/*.js" "tests/**/*.js" "eslint.config.mjs"
+(exit 0)
+
+npm run format:check
+All matched files use Prettier code style!
+
+npm run test:e2e:dist
+170 passed (2.1m)
+
+Actual Linux CI
+170 passed (3.2m)
+
+PASS:before eight generated mobile guide flows
+PASS:after eight generated mobile guide flows
+PASS: same real public106→107 context, active update blocked/native finish/old4 retained, 320 newstart first native arrow, offline SWreload exact
+PASS:all25 actual Linux/public107 assets byte-identical; all15 held-update first-document warm bodies match Linux
+```
+
+公開106で架空3履歴＋native1矢を持った元contextを維持。記録中の更新block→native終了→4履歴の全fieldを保持。15資産を通常600秒cacheでwarmし、残freshness内の公開反映288314ms、更新完了後のcheckpointまで292527ms。banner更新後107/cache107only、practice4全field exact。続けて320でnative開始→全的表示→中心tap一回、旧4＋active1のoffline SWreload一致。errors空、context/browserは完了後に閉じた。local予行も同じ保護/操作/保持に成功。
+
+AN068のpredicateが新documentでAPP_VERを早く読む検証側失敗を踏まえ、今回の検証predicateはtypeof確認後に版を比較する。保存読取はpollで待ち、元fixture参照は失敗時の診断用に保持する。アプリのupdate/保存/activation処理は変えない。今回のrunに失敗/context再作成/再tapはなく、AN068の失敗証拠は別に保持する。
+
+公開の二枚も原寸で保存・表示・目視してbyte同一copy（代表guide8枚と合わせ10枚）。初期画面の主役は的のためガイドの下半分はfold外。全ガイドの文字と横overflowは上記owned生成プレビューの読み位置で確認した。公開画面で全guideを表示したとの主張はしない。
+
+![公開320 入力前](../screenshots/first-guide-v107/public320-start.png)
+
+![公開320 オフライン再読込](../screenshots/first-guide-v107/public320-offline.png)
+
+次の一件候補: 少数矢でRMS改善を強調する表示を診断する。AN067の1本RMS0の観測と現sourceを照合し、本数/比較条件/既存confidenceの境界を確認してから対処を選ぶ。数学の値と改善の解釈を混同しない。実機iPhone/VoiceOver/INP、微調整下端や古い公開失敗profile/WKofflineの受入は未確認、大目標はactive。

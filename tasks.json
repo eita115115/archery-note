@@ -813,9 +813,9 @@
   {
     "id": "AN-069",
     "task": "初回ガイドを実際の矢選択・選択解除・途中確定・終了操作に合わせる",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "source4eeecf634e9fae977f112685d6bb7f803783518a/v107; CI37222538203 validate/deploy success/Linux170passed(3.2m), actual artifact11310289226. all25Linux/public bytes exact; original held first-document15/canonical14 match. activeGuideHtml four text bodies only; actual labels/score chip selection/deselect/partial confirm/finish aligned, false npad held-button claim removed; precision0.4s/0.25/loupe retained. Generated106 before8/after8 native320/375 light/dark3/6 flows: initial target full/guide no overflow/arrow/score select/right nudge/deselect/partial1arrowconfirm/dismiss/reload/finish/nextstart/reload, old3 and corrected coordinates exact/errors0.32 same-run images captured, eight representative guide images saved/original-viewed/byte-identical docs copies; full32 visual inspection not claimed.375guide292.5156 unchanged;320309.9063→327.2969. Ownedcheckall/lint/format success/generated170passed(2.1m), no new literal test/red for prose. Reviewer noP1P2. Corrected guarded predicate update harness local106→107 and actualpublic106→107 pass original context/no reset/retry/error: native1+old3/update blocked/finish4 exact/warm15 normal600/freshness assertion/publication288314ms/update292527ms/cache107only/native first320 arrow/offline SWreload checkpoint old4+active1 exact/errors0. Public320 input-before/offline-after images saved/displayed/byte-identical copies (10 total viewed). Source/scoring/style/schema/handlers/dependency graph/SW activation/shared hiddenlock preserved, all prior68task objects/all69acceptance unchanged. docs/codex/first-guide-copy.md; artifacts/first-guide-v107. PhysicaliPhone/VoiceOver/all motion frames/INP/older failed profiles/WKoffline not verified; RMS few-arrow improvement display and prior correction-bottom candidate remain separate.",
     "dependencies": [
       "AN-068"
     ],
