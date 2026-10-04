@@ -1241,10 +1241,10 @@ function activeGuideHtml() {
   if (db.settings.activeGuideSeen) return "";
   return `<details class="adv activeGuide" open>
     <summary>初回の操作ガイド</summary>
-    <div class="guideLine"><b>記録</b><span>的をタップすると、その場所に1本入ります。少しずれたら矢チップを選びます。</span></div>
-    <div class="guideLine"><b>精密モード</b><span>的を長押し（0.4秒）すると精密モードに切り替わり、指の移動量の1/4だけ矢が動きます。ルーペも表示されます。</span></div>
-    <div class="guideLine"><b>微調整</b><span>選んだ矢だけ下の矢印で動かせます。押したままでも細かく合わせられます。</span></div>
-    <div class="guideLine"><b>進行</b><span>${db.active && db.active.perEnd ? db.active.perEnd : 6}本入れたらエンド確定。最後はセッション終了で結果を見ます。</span></div>
+    <div class="guideLine"><b>記録</b><span>的をタップして矢を記録します。位置を直すときは、的の下の得点を選びます。</span></div>
+    <div class="guideLine"><b>精密モード</b><span>的を0.4秒長押しすると精密モードになります。指の移動量の1/4で矢が動き、ルーペで確認できます。</span></div>
+    <div class="guideLine"><b>微調整</b><span>選んだ矢を下の矢印で動かします。「選択解除」で的に戻り、次の矢を記録できます。</span></div>
+    <div class="guideLine"><b>進行</b><span>${db.active && db.active.perEnd ? db.active.perEnd : 6}本入れたら「エンド確定」。途中の本数でも確定できます。練習の最後は「終了」で結果を見ます。</span></div>
     <button class="btn sm ghost activeGuideDone" id="activeGuideDone">次から表示しない</button>
   </details>`;
 }

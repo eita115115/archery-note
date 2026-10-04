@@ -25,3 +25,27 @@ activeGuideHtmlの四行を具体的にする。的の下の得点を選んで�
 5. 証拠をこの文書とartifacts/first-guide-v107へ保存し、progress/tasks/ledgerを更新。既存68task/全69acceptanceを保つ。
 
 設計のself-review: 未定のラベル/APIなし。sourceの0.4秒/0.25、nudgeDone、bEnd、bFinish/finishSessionを読取済み。bEndはcur.lengthが1以上なら確定できる。実機iPhone/VoiceOver/全motion frame/INP、微調整下端の別候補やRMS少数矢表示はこのタスクで解決したとしない。承認済み実行としてwriting-plansの短い計画から継続する。
+
+## 生成プレビューの前後確認
+
+版bump前の生成v106で各8ケースを実行。320/375・light/dark・3/6本、フォントreadyとanimation完了を待って採取。横overflowなし、的の初期表示を保持。native入力→得点選択→右微調整→選択解除→1本だけのエンド確定→次から表示しない→reload→終了→次の開始とreloadまで成功。各ケースで旧架空3件を全field保持、新しい確定1本の座標も保持。非表示flagはreloadと次の開始でも保持、pageerror空。
+
+各phaseのDOM/geometry/架空保存状態はartifacts/first-guide-v107/{before,after}/evidence.json、出力はbefore.txt/after.txt。画像32枚（top/bottom各8×前後）は同run実ファイル。以下の代表8枚を原寸で表示・目視し、byte同一copy。320のガイドもボタンまでdock上で読める。375の高さは変わらず、320は一行分増える範囲で折り返す。全32枚を目視したとは扱わない。
+
+![320 light 3本・修正前](../screenshots/first-guide-v107/before-320-light-3.png)
+
+![320 light 3本・修正後](../screenshots/first-guide-v107/after-320-light-3.png)
+
+![320 dark 6本・修正前](../screenshots/first-guide-v107/before-320-dark-6.png)
+
+![320 dark 6本・修正後](../screenshots/first-guide-v107/after-320-dark-6.png)
+
+![375 light 3本・修正前](../screenshots/first-guide-v107/before-375-light-3.png)
+
+![375 light 3本・修正後](../screenshots/first-guide-v107/after-375-light-3.png)
+
+![375 dark 6本・修正前](../screenshots/first-guide-v107/before-375-dark-6.png)
+
+![375 dark 6本・修正後](../screenshots/first-guide-v107/after-375-dark-6.png)
+
+これは案内文の修正なので、新規literal回帰テストやred失敗を作らない。元の操作は前後とも成功する対照であり、操作の新機能や速度改善を示すものではない。公開受入は次に追記する。
