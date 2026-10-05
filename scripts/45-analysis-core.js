@@ -90,7 +90,7 @@ function growthDashboard(rows, todayIso) {
   const recentAverage = recentArrows
     ? recent.reduce((n, r) => n + r.total, 0) / recentArrows
     : null;
-  const grouping = recent.filter((r) => r.st && Number.isFinite(r.st.rr));
+  const grouping = recent.filter((r) => analysisHasGroupingEvidence(r.st));
   const confidenceValue = Math.min(
     1,
     Math.max(0, (recent.length / 5) * 0.55 + (Math.min(recentArrows, 60) / 60) * 0.45),
@@ -107,10 +107,8 @@ function growthDashboard(rows, todayIso) {
     groupingDelta:
       latest &&
       prev &&
-      latest.st &&
-      prev.st &&
-      Number.isFinite(latest.st.rr) &&
-      Number.isFinite(prev.st.rr)
+      analysisHasGroupingEvidence(latest.st) &&
+      analysisHasGroupingEvidence(prev.st)
         ? latest.st.rr - prev.st.rr
         : null,
     formStability:
@@ -140,13 +138,20 @@ function nextPracticeSuggestions(rows, todayIso) {
     ];
   const out = [],
     st = latest.st || {};
-  if (Number.isFinite(st.sy) && Number.isFinite(st.sx) && st.sy >= st.sx * 1.3) {
+  const direction = analysisSpreadDirection(st, 1.3);
+  if (!analysisHasGroupingEvidence(st)) {
+    out.push({
+      id: "collect-coordinates",
+      title: "座標を3本以上記録する",
+      reason: `最新記録は${Number.isFinite(st.total) ? st.total : 0}本の座標です。グルーピングの比較は3本以上から行います。`,
+    });
+  } else if (direction === "vertical") {
     out.push({
       id: "vertical-spread",
       title: "上下のまとまりを確認",
       reason: `最新記録は上下±${st.sy.toFixed(1)}cmで、左右±${st.sx.toFixed(1)}cmより広がっています。`,
     });
-  } else if (Number.isFinite(st.sx) && Number.isFinite(st.sy) && st.sx >= st.sy * 1.3) {
+  } else if (direction === "horizontal") {
     out.push({
       id: "horizontal-spread",
       title: "左右のまとまりを確認",
@@ -213,7 +218,7 @@ function aggregateByPeriod(rows, unit) {
     g.total += r.total || 0;
     if (r.n && (!g.best || r.total > g.best.total))
       g.best = { total: r.total, date: r.date, arrows: r.n };
-    if (r.st && Number.isFinite(r.st.rr)) {
+    if (analysisHasGroupingEvidence(r.st)) {
       g.rrSum += r.st.rr;
       g.rrCount++;
     }
@@ -361,11 +366,11 @@ function conditionSplit(rows, isWindyFn) {
     g.sessions++;
     g.arrows += r.n || 0;
     g.total += r.total || 0;
-    if (r.st && Number.isFinite(r.st.rr)) {
+    if (analysisHasGroupingEvidence(r.st)) {
       g.rrSum += r.st.rr;
       g.rrCount++;
     }
-    if (r.st && Number.isFinite(r.st.mx)) {
+    if (analysisHasGroupingEvidence(r.st) && Number.isFinite(r.st.mx)) {
       g.mxSum += r.st.mx;
       g.mxCount++;
     }
@@ -386,7 +391,7 @@ function conditionSplit(rows, isWindyFn) {
    意味を日本語1文へ言い換えるだけの純関数。db/DOM 非依存、rows は buildAnalysisRows の出力。
    戻り値: {kind, text} kind は表示側の見た目分岐用（テストでも確認する） */
 function todayConclusion(rows) {
-  const scored = (rows || []).filter((r) => r && r.n && r.st);
+  const scored = (rows || []).filter((r) => r && r.n);
   // しきい値1: 判定に十分なセッション数（2回未満は傾向を語れない = データ不足扱い）
   const MIN_SESSIONS = 2;
   if (scored.length < MIN_SESSIONS) {
@@ -398,8 +403,8 @@ function todayConclusion(rows) {
   const latest = sorted[sorted.length - 1];
 
   // グルーピング（矢の集まり）判定: 最新RMSと全体平均RMSを比較する
-  const rrRows = sorted.filter((r) => r.st && Number.isFinite(r.st.rr));
-  const latestRr = latest.st && Number.isFinite(latest.st.rr) ? latest.st.rr : null;
+  const rrRows = sorted.filter((r) => analysisHasGroupingEvidence(r.st));
+  const latestRr = analysisHasGroupingEvidence(latest.st) ? latest.st.rr : null;
   const avgRr = rrRows.length ? rrRows.reduce((a, r) => a + r.st.rr, 0) / rrRows.length : null;
   // しきい値2: 最新RMSが全体平均より 0.3cm 以上締まっていれば「安定/締まってきた」扱い
   const RR_TIGHT_DELTA = 0.3;
@@ -432,6 +437,9 @@ function todayConclusion(rows) {
   }
   if (delta != null && delta < -TREND_FLAT) {
     return { kind: "trend-down", text: `平均点がやや下がり気味、本数を安定させましょう。` };
+  }
+  if (!analysisHasGroupingEvidence(latest.st)) {
+    return { kind: "grouping-pending", text: "グルーピングの比較は保留。座標を3本以上記録すると、まとまりを比較できます。" };
   }
   if (groupingTight) {
     return { kind: "grouping-tight", text: "グルーピングは安定、この調子を保ちましょう。" };

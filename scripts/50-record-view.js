@@ -937,15 +937,16 @@ function analysisKpiHtml(rows) {
         : delta < -0.02
           ? `↓ ${delta.toFixed(2)}`
           : "→ 横ばい";
-  const rrRows = sorted.filter((r) => r.st && Number.isFinite(r.st.rr));
-  const latestRr = rrRows.length ? rrRows[rrRows.length - 1].st.rr : null;
+  const rrRows = sorted.filter((r) => analysisHasGroupingEvidence(r.st));
+  const latestStats = sorted[sorted.length - 1].st;
+  const latestRr = analysisHasGroupingEvidence(latestStats) ? latestStats.rr : null;
   const bestRr = rrRows.length ? Math.min(...rrRows.map((r) => r.st.rr)) : null;
   const best = [...scored].sort(
     (a, b) => b.total - a.total || (b.date || "").localeCompare(a.date || ""),
   )[0];
   return `<div class="insightStrip">
     <div class="insightTile"><div class="k">平均点</div><b>${avg.toFixed(2)}</b><span>${scored.length}回 ${arrows}本 / 移動平均 ${trend}</span></div>
-    <div class="insightTile"><div class="k">矢の集まり具合（グルーピング）</div><b>${latestRr != null ? latestRr.toFixed(1) + "cm" : "—"}</b><span>最新の半径(RMS) / 最小 ${bestRr != null ? bestRr.toFixed(1) + "cm" : "—"}</span></div>
+    <div class="insightTile"><div class="k">矢の集まり具合（グルーピング）</div><b>${latestRr != null ? latestRr.toFixed(1) + "cm" : "比較待ち"}</b><span>${latestRr != null ? "最新の半径(RMS)" : "最新は座標3本以上で比較"} / 最小 ${bestRr != null ? bestRr.toFixed(1) + "cm" : "—"}</span></div>
     <div class="insightTile"><div class="k">最高合計</div><b>${best ? best.total : "—"}</b><span>${best ? [fmtD(best.date), best.dist ? `${best.dist}m` : "", `${best.n}本`].filter(Boolean).join(" / ") : "記録待ち"}</span></div>
   </div>`;
 }
@@ -2712,7 +2713,7 @@ function groupingMetricText(v) {
 function groupingSessionRow(row) {
   /* robustStats 直呼びはやめ、同じ Number 化＋有限フィルタ済みの sessionMetrics キャッシュを経由する */
   const st = row && row.s ? sessionMetrics(row.s).st : null;
-  if (!st || st.total < 3 || st.n < 3) return null;
+  if (!analysisHasGroupingEvidence(st)) return null;
   const rr = groupingMetricNumber(st.rr);
   if (rr == null) return null;
   return {

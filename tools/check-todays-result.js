@@ -15,6 +15,7 @@ const root = path.resolve(__dirname, "..");
 const scoringScript = fs.readFileSync(path.join(root, "scripts", "20-scoring.js"), "utf8");
 const analysisScript = fs.readFileSync(path.join(root, "scripts", "45-analysis-core.js"), "utf8");
 const trScript = fs.readFileSync(path.join(root, "scripts", "49-todays-result.js"), "utf8");
+const physicsScript = fs.readFileSync(path.join(root, "scripts", "40-analysis-physics.js"), "utf8");
 
 function assert(ok, message) {
   if (!ok) throw new Error(message);
@@ -28,6 +29,7 @@ function assertEqual(actual, expected, label) {
 
 const tr = new Function(
   `${scoringScript}
+${physicsScript.slice(0, physicsScript.indexOf("/* ============ sight advice"))}
 ${analysisScript}
 ${trScript}
 /* テスト用 metricsFn: 本番の sessionMetrics と同じ契約（{all,total,avg,st}）を、

@@ -374,7 +374,8 @@ function sampleSession() {
     "robustStats",
     "distanceBucketInfo",
     "sightDateInfo",
-    `${section(recordScript, "function groupingMetricNumber", "function groupingSummaryHtml")}
+    `${analysisScript.slice(0, analysisScript.indexOf("/* ============ sight advice"))}
+${section(recordScript, "function groupingMetricNumber", "function groupingSummaryHtml")}
 return {groupingSessionRow};`,
   )(
     analysis.sessionMetrics,
@@ -489,7 +490,8 @@ assert(
 
 const coreScript = fs.readFileSync(path.join(root, "scripts", "45-analysis-core.js"), "utf8");
 const core = new Function(
-  `${coreScript}
+  `${analysisScript.slice(0, analysisScript.indexOf("/* ============ sight advice"))}
+${coreScript}
 return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown, aggregateRoundGroups, roundGroupBests, todayConclusion, growthDashboard, nextPracticeSuggestions};`,
 )();
 
@@ -859,7 +861,7 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
       n: 6,
       total: 48,
       avg: 8,
-      st: { rr: 5, sx: 2, sy: 4, confidence: 0.7 },
+      st: { total: 18, n: 18, rr: 5, sx: 2, sy: 4, confidence: 0.7 },
     },
     {
       id: "g2",
@@ -867,7 +869,7 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
       n: 12,
       total: 102,
       avg: 8.5,
-      st: { rr: 4, sx: 2, sy: 3, confidence: 0.8 },
+      st: { total: 18, n: 18, rr: 4, sx: 2, sy: 3, confidence: 0.8 },
     },
     {
       id: "g3",
@@ -875,7 +877,7 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
       n: 18,
       total: 162,
       avg: 9,
-      st: { rr: 3, sx: 1.5, sy: 3.5, confidence: 0.9 },
+      st: { total: 18, n: 18, rr: 3, sx: 1.5, sy: 3.5, confidence: 0.9 },
     },
   ];
   assertEqual(

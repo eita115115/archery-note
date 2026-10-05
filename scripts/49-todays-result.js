@@ -36,7 +36,7 @@ function trSameCondition(a, b, opts){
 
 /* 履歴の groupingSessionRow と同じ最低資格。少数矢の数学的RMSを上達と解釈しない。 */
 function trHasGroupingEvidence(st){
-  return !!st && st.total>=3 && st.n>=3 && Number.isFinite(st.rr);
+  return analysisHasGroupingEvidence(st);
 }
 
 /* ============ 3.1 前回・先週差 ============ */

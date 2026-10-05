@@ -6,7 +6,7 @@
   "scripts": {
     "check:all": "npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version && npm run check:distribution",
     "check:security": "node tools/check-security.js",
-    "check:analysis": "node tools/check-analysis-core.js",
+    "check:analysis": "node tools/check-analysis-core.js && node tools/check-grouping-interpretation.js",
     "check:form": "node tools/check-form-core.js && node tools/golden-replay/test-form-metric-fixtures.js && node tools/check-form-diagnostics.js",
     "check:gamification": "node tools/check-gamification.js",
     "check:todays-result": "node tools/check-todays-result.js",

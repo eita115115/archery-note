@@ -1,13 +1,25 @@
 "use strict";
 /* Archery Note: sight advice, physics, summaries */
+/* Interpretation qualification only; retain raw statistics and scored arrows. */
+function analysisHasGroupingEvidence(st){
+  return !!st && st.total>=3 && st.n>=3 && Number.isFinite(st.rr);
+}
+/* A direction must remain distinguishable at the displayed 0.1cm precision. */
+function analysisSpreadDirection(st,ratio,strict){
+  if(!analysisHasGroupingEvidence(st) || !Number.isFinite(st.sx) || !Number.isFinite(st.sy) || st.sx<0 || st.sy<0) return null;
+  const x=Number(st.sx.toFixed(1)), y=Number(st.sy.toFixed(1));
+  if(y>x && (strict ? st.sy>st.sx*ratio : st.sy>=st.sx*ratio)) return "vertical";
+  if(x>y && (strict ? st.sx>st.sy*ratio : st.sx>=st.sy*ratio)) return "horizontal";
+  return null;
+}
 /* ============ sight advice ============ */
 function shapeNote(st){
-  if(!st || st.n<6) return "";
+  if(!analysisHasGroupingEvidence(st) || st.n<6) return "";
   const tilt=Math.abs(st.angleDeg||0);
-  const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&tilt>15&&tilt<75;
+  const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&Number(st.major.toFixed(1))>Number(st.minor.toFixed(1))&&tilt>15&&tilt<75;
   if(tilted) return `<div class="note">${icon("ruler")} <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
-  if(st.sy>st.sx*1.3) return `<div class="note">${icon("ruler")} <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
-  if(st.sx>st.sy*1.3) return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
+  if(analysisSpreadDirection(st,1.3,true)==="vertical") return `<div class="note">${icon("ruler")} <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
+  if(analysisSpreadDirection(st,1.3,true)==="horizontal") return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
   return "";
 }
 /* 信頼度の算出根拠1行注記。v2の説明文禁止に抵触しないよう「詳しく」details 内でのみ表示する */
@@ -527,10 +539,13 @@ function conditionInsights(sess,st,setup){
       const wf=pc&&pc.wind.sample?pc.wind.factor:1;
       out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm*wf)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm${wf!==1?` / 個人係数${wf.toFixed(2)}倍`:""}）として扱います。`);
     }
-    if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD,sess.faceType)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
-    if(st.sy>st.sx*1.35) out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
-    else if(st.sx>st.sy*1.35) out.push("次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。");
-    else if(st.rr<ringW(sess.faceD,sess.faceType)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
+    if(analysisHasGroupingEvidence(st)){
+      if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD,sess.faceType)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
+      const direction=analysisSpreadDirection(st,1.35,true);
+      if(direction==="vertical") out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
+      else if(direction==="horizontal") out.push("次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。");
+      else if(st.rr<ringW(sess.faceD,sess.faceType)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
+    }
     if(setup && !setup.arrowSpeed) out.push("精度向上: 実測初速を入れると、上下サイトのmm換算と距離別予測が安定します。");
     if(setup && !setup.shaftSetWeightSpread) out.push("精度向上: 矢セット重量差を入れると、上下散りの信頼度判定が強くなります。");
     const sp=setup?spineGuidance(setup):null;
