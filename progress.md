@@ -4,10 +4,10 @@
 
 ## 現在地
 
-- AN074監査candidate、独立review/最終format待ち。公開はv110/sourcef967d12e96bdb113c8e1747236dcd3394d53f42dのまま。実Linux110/public25byte再一致、runtime/数学/採点/保存/schema/依存/SW/markers/tests不変。branch codex/analysis-evidence-audit、所有worktreeは下記と同じ。
+- AN074監査完了。公開はv110/sourcef967d12e96bdb113c8e1747236dcd3394d53f42dのまま。実Linux110/public25byte再一致、runtime/数学/採点/保存/schema/依存/SW/markers/tests不変。branch codex/analysis-evidence-audit、所有worktreeは下記と同じ。local監査notes、今回docsを公開deployしたとはしない。
 - 実Linux110のChrome/WebKit320375明暗×0/1/2/3/6本40UI、PB12+座標4補助probe、native375開始→1本9点→終了→結果→分析→保存reload旧3/座標exact/errors0。1〜2本の結果/履歴は比較保留、分析は改善4.2/4.3cm・安定と断定、KPI/period/conditionへRMS0を混ぜる。方向提案は±0.0対±0.0。PB換算到達時の注記消失も再現。監査だけであり未修正。
 - 初回auditのunconditional seedがreloadで架空新記録を上書きしexit1。元contextでinitializer.dispose後の別新native→reloadはexact、消えた最初の記録は未復元。訂正guardの別40+native再検証exit0。元WK375dark2のKPI空白画像も保持、別fresh probe可読を元case回復と扱わない。旧RMSのengine差約0.0639cmは観測だけで原因未確定。
-- docs/codex/analysis-evidence-audit.md/evidenceJSON/代表11PNG原寸表示copyexact。旧73taskobject/全acceptance/sharedhiddenlock保持。費用/個人情報不使用、大目標active。今回release/banner/versionbumpなし、前回同sourceのCI/全225E2Eを明示して再利用。
+- docs/codex/analysis-evidence-audit.md/evidenceJSON/代表11PNG原寸表示copyexact。旧73taskobject/全acceptance/sharedhiddenlock保持。独立readonly9033252 review Critical/Importantなし、履歴助言のminor範囲追記、formatcheck/invariants成功。AN074done/pass/evidence。費用/個人情報不使用、大目標active。今回release/banner/versionbumpなし、前回同sourceのCI/全225E2Eを明示して再利用。
 
 ### 前回の公開確認（AN073、今回の新実行ではない）
 
@@ -21,7 +21,7 @@
 
 ## 次と未解決
 
-- 次の一小タスクAN075: 分析のRMS/結論/方向提案/period/condition/KPIの座標資格を結果/履歴と揃える。score/allrows/rawstats/座標/数学/保存保持、少数最新を過去の改善で代用しない。今回実110redから最小修正/回帰/UI/保存/レビュー/承認済み公開へ。PB換算の達成注記は次の別修正。参照docs/codex/analysis-evidence-audit.md。
+- 次の一小タスクAN075: 分析のRMS/結論/方向提案/period/condition/KPIと履歴conditionInsightsの良好/方向助言の座標資格を結果/履歴の比較欄と揃える。score/allrows/rawstats/座標/数学/保存保持、少数最新を過去の改善で代用しない。独立reviewは履歴1/2本の比較保留と別助言「良好」の矛盾も確認。今回実110redから最小修正/回帰/UI/保存/レビュー/承認済み公開へ。PB換算の達成注記は次の別修正。参照docs/codex/analysis-evidence-audit.md。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。
 - 元AN065fourabort/AN066fling/AN070閉鎖native-scroll/IABAN067閉鎖/公開98→99/99→100失敗profilesは別未回復。AN068元ReferenceError/debounceは同context/no-retap回復済み。

@@ -38,7 +38,9 @@ brainstorming/writing-plans/archery-note/diagnose/verificationを適用。Produc
 | period/condition    | 最新1本のRMS0が平均へ混ざる。Chromeは旧4.203173404306163から3.1523800532296224へ低下                         | RMSの母集団だけ資格を揃える。回数/射数/得点の母集団は減らさない                                             |
 | PBの本数換算        | 54点/6本を9点/1本に換算し、今回9点で「並びました」、10点で「更新(+1点)」。到達時に「推定・本数換算」が消える | 別タスクの表示修正。`avg-projected`の達成前後で比較方法と換算値を明示。`exact-count`と計算/同条件定義は維持 |
 
-結果・履歴は既存`trHasGroupingEvidence`/`groupingSessionRow`により1〜2本を「比較は保留」とする。分析のfiniteチェックだけがこれと一致しない。n0は最新の有効得点記録から除外され、旧3の差0/横ばいになる。n3/n6は資格trueで、同一点のRMSは約4.44e−16。これらでも微小な左右ばらつきから「左右±0.0cmが上下±0.0cmより広い」と提案するため、丸め後ゼロの方向指示は本数不足と別の問題として残す。3本は既存最低資格との整合であり統計的有意性を保証しない。
+結果・履歴の**比較欄**は既存`trHasGroupingEvidence`/`groupingSessionRow`により1〜2本を「比較は保留」とする。一方、独立reviewで同じ履歴本文の別助言も対照し、1/2本で「次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。」と断定することを確認した。`conditionInsights`が`if(st)`だけで助言を出すため、比較欄の保留は全説明文に及んでいない。次回はこの助言も最低座標資格を揃える。
+
+n0は最新の有効得点記録から除外され、旧3の差0/横ばいになる。n3/n6は資格trueで、同一点のRMSは約4.44e−16。これらでも微小な左右ばらつきから分析は「左右±0.0cmが上下±0.0cmより広い」、履歴は「次の重点: 左右の再現性」と提案するため、丸め後ゼロの方向指示は本数不足と別の問題として残す。3本は既存最低資格との整合であり統計的有意性を保証しない。
 
 実関数/rendererだけの補助probeはPB12件、座標4件。PBは1本と6本のbelow/tie/aboveを両engineで確認した。以下の表示は両engineで同じ。
 
@@ -58,7 +60,7 @@ brainstorming/writing-plans/archery-note/diagnose/verificationを適用。Produc
 - `scripts/45-analysis-core.js`: growthDashboard77、nextPracticeSuggestions130、aggregateByPeriod196、conditionSplit345、todayConclusion388。RMSは有限値だけで採用、方向は比率だけで採用。
 - `scripts/50-record-view.js`: analysisKpiHtml917/rrRows940、todaysResultPersonalBestRowHtml2170、groupingSessionRow2712。
 - `scripts/49-todays-result.js`: trHasGroupingEvidence38、computePersonalBestDistance154。PBの`Math.round(bestAvg * curN)`、roundを除く同条件定義は今回変更しない。
-- `scripts/40-analysis-physics.js`: sessionMetrics560。全得点と有限座標入力を分ける現処理は維持。
+- `scripts/40-analysis-physics.js`: conditionInsights515/助言531〜533は存在するstatsだけで方向/良好を断定。sessionMetrics560の全得点と有限座標入力を分ける現処理は維持。
 
 同じfixture/配布物の旧RMSはChrome4.203173404306163、WebKit4.267097959972327だった。約0.0639cmの差を観測したが、root cause/数学のバグを断定しない。本数不足の解釈不整合は両engineで再現しており、この差を直さなくても次の資格修正を検証できる。
 
@@ -97,11 +99,24 @@ PASS: runtime/scoring/math/style/handlers/schema/deps/SW/markers110/tests unchan
 
 preserve初回のacceptance比較は、AN074が未commitのためplan08b855aの末尾AN073を誤参照してassert失敗した。実AN074の元acceptanceを固定し比較対象を訂正、旧73object/全acceptanceを確認。taskの条件は書き換えていない。
 
-runtime不変なのでAN073の同source CI37247118554/Linux225passed(5.3m)/artifact11319403251を再利用する。今回fullE2E/checkall/lintを再実行したとはしない。今回の必須確認は監査・コピー/不変性・formatcheck・独立readonly review。formatとreviewの最終結果は確定後に記録する。
+runtime不変なのでAN073の同source CI37247118554/Linux225passed(5.3m)/artifact11319403251を再利用する。今回fullE2E/checkall/lintを再実行したとはしない。今回の必須確認は監査・コピー/不変性・formatcheck・独立readonly review。
+
+独立readonly reviewerはimmutable candidate`9033252fd64e73e2e16b308f09ae334576e86c45`を基点9c6fc088と対照しCritical/Importantなし。実行/変更/ネットワーク操作をせず、20コピーSHA・旧73task・runtime/published diff・共有lock・全観測/失敗の区別を確認した。minorの履歴助言範囲を上記へ追記済み。初回preserve-output.txtの失敗を保ち、最終不変性チェックの成功は別preserve-final-output.txtへ保存する。
+
+```text
+package.json format:checkと同じ全対象を所有Node22.19/Prettier CLIで実行、exit0:
+Checking formatting...
+All matched files use Prettier code style!
+immutable候補の追加確認、exit0:
+PASS: immutable candidate evidence copies20 SHA+bytes still exact
+PASS: all40 engine/width/theme/count/qualification cells exact
+```
+
+監査・レビュー・最終format/invariantsの確認後にだけAN074done/pass/evidenceを記入する。local notesの完了であり、今回のdocsを公開deployしたとはしない。
 
 ### 次の一小タスク
 
-AN075候補: 分析でグルーピングを語るconsumerの最低座標資格を結果/履歴と揃える。rawstats、score/allrows、座標/採点/物理/保存cache/schemaを保ち、少数最新は比較保留。丸め後ゼロの方向提案も同じ根拠確認の対象。PB達成時の換算表示はその次の別修正。
+AN075候補: 分析と履歴の説明/助言でグルーピングを語るconsumerの最低座標資格を結果/履歴の比較欄と揃える。rawstats、score/allrows、座標/採点/物理/保存cache/schemaを保ち、少数最新は比較保留。丸め後ゼロの方向提案も同じ根拠確認の対象。PB達成時の換算表示はその次の別修正。
 
 回帰は0/1/2/3/6本、3得点/2座標、数値文字列、欠損/finite不備、同条件旧3、少数最新/少数前回、score-only変化、valid3+の従来値、正の方向差/丸めゼロ、period/conditionのscore母集団を含める。次回は今回の実110をred証拠にし、最小修正→green→320/375明暗Chrome/WebKit実UI/native保存→匹配する受入/checkall/lint/format/E2E/review→承認済み公開の順で行う。
 

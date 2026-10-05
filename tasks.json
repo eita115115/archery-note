@@ -874,9 +874,9 @@
   {
     "id": "AN-074",
     "task": "少数座標と本数換算の分析表示を実110で監査する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "audit only, published sourcef967d12e96bdb113c8e1747236dcd3394d53f42d/v110 runtime unchanged; actualLinux110/public25bytes exact; corrected Chrome-WebKit320375lightdark0/1/2/3/6 matrix40 score/Xagree/old3+coords/reloadexact/errors0 + native375start/one9/finish/result-hold/analysis/reloadexact; PB12+coordinate4 probes; 1/2 finiteRMS0 misread improvement/stable/KPI/period/condition and historyconditionInsights good, valid3/6roundedzero direction; avgprojected achieved annotation missing vs exact6 preserved; initial unconditional-seed failed exit1 retained/lostrecord NOT restored/sameoriginalcontext SECOND native saved exact, independent corrected40+native exit0; WKoriginalblankKPI retained/freshprobe separate; engineRMSdifference observed not causal; docs/codex/analysis-evidence-audit.md/evidenceJSON/11original-viewedPNG20copiesSHAexact; immutable9033252 readonlyreview noCriticalImportant/minorhistoryscope documented; formatcheck/invariants pass/prior73objects/allacceptance/sharedlock exact; reused matchingAN073CI37247118554/Linux225passed5.3m/artifact11319403251—not rerun fullE2E; no appfix/versionbump/release; nextAN075consumerqualification, PBdisplay separate; broadgoalactive/phone-fullmotion-INP-WKstrictOffline-oldclosedprofiles unproven",
     "dependencies": [
       "AN-073"
     ],
