@@ -1,0 +1,9 @@
+{
+  "stage": "native375",
+  "message": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  {\n    active: null,\n+   customRounds: undefined,\n-   customRounds: [],\n    sessions: [\n      {\n        date: '2026-10-02',\n        dist: 18,\n        ends: [\n...\n      },\n-     {\n-       date: '2026-10-05',\n-       dist: 18,\n-       ends: [\n-         [\n-           {\n-             X: false,\n-             s: 9,\n-             x: 3.2,\n-             y: 0\n-           }\n-         ]\n-       ],\n-       faceD: 40,\n-       faceType: 'single',\n-       id: 'muuixfr8mjdnz',\n-       note: '',\n-       perEnd: 6,\n-       purpose: 'practice',\n-       round: 'free',\n-       setupId: null,\n-       shaft: 0.504,\n-       sightH: '',\n-       sightV: '',\n-       windDir: '',\n-       windSpeed: '',\n-       wx: ''\n-     }\n    ],\n+   setups: undefined,\n+   sightMarks: undefined\n-   setups: [],\n-   sightMarks: []\n  }\n\n    at C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\analysis-evidence-v110\\audit.cjs:27:1824",
+  "rowsObserved": 40,
+  "errors": [],
+  "originalAuditExit": 1,
+  "originalMatrixReloadMasked": true,
+  "originalLostRecordRestored": false
+}

@@ -1,0 +1,102 @@
+[
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\matrix.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\matrix.json",
+    "sha256": "1f64577988ff775b822a367353da674c6625e284e1b98199f579ed86e23dde0a"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\fixtures.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\fixtures.json",
+    "sha256": "5293c7036241863e90d2cb875b7b80759d6a4d4adc2be908aab4f81375a21237"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\native375.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\native375.json",
+    "sha256": "e43225b84536ea12806b9a2eb91f057584e78f08d321e001132f275f76fd455e"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\supplement.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\supplement.json",
+    "sha256": "e158349b21e7b891956f14e9b41e5ac6321f12b36a6607c3f2bc75d83a19b19b"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\public25-parity.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\public25-parity.json",
+    "sha256": "2450c0e987a0eccde51e61c90ae8a0ead1d008b0d81fb56480773c3d34afc2ba"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\kpi-read.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\kpi-read.json",
+    "sha256": "fa43ab7388dc2c934a93666945af6e81788076b9ee4b48a3096af855d2ca3f5b"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\native375-corrected.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\retained-context-new-native.json",
+    "sha256": "5f4c4193ec5cbe23604ed56e02e25d6e4db2c560e0b5eaf0bdecd7e513fa61a6"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\native375-continuation-result.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\retained-context-continuation.json",
+    "sha256": "320609393ac47ab7a2998ac912620b0a65790cac45e7e77da73b4c9001269842"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\initial-native-not-recovered.json",
+    "target": "docs\\codex\\evidence\\analysis-evidence-v110\\initial-native-not-recovered.json",
+    "sha256": "01afc03eb1628e7ea1997c7b9105e94e1d3daa40de3a382e7411412b8d396777"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\chrome-320-light-1\\dashboard.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\chrome320-light-one-dashboard.png",
+    "sha256": "8b480795b29085ac77da21344130b9b224d370110129b9c9c854791f08c3a3e6"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\chrome-320-dark-2\\dashboard.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\chrome320-dark-two-dashboard.png",
+    "sha256": "ae9c9ab5deae887e7a879542be1b42b553411e97dde7d4ac5e63bcfd6ed5334e"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\webkit-375-light-1\\dashboard.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\webkit375-light-one-dashboard.png",
+    "sha256": "59f0551777c32a79e3e86d943c6d7b3c24fa5194db20e66212206fb483fa0ed5"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\webkit-375-dark-2\\dashboard.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\webkit375-dark-two-dashboard.png",
+    "sha256": "78d7af0c76c3459d91d81657e94c88f670d9658bb01fc4f3b1e16084c9b38b90"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\chrome-320-light-1\\kpi.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\chrome320-light-one-kpi.png",
+    "sha256": "4cb4c7295eaf7fd62e9513bcd8c8f6cd259d02f91d0b87a5cc65e5c34e26cdbb"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\webkit-375-dark-2\\kpi.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\webkit375-dark-two-kpi-original-blank.png",
+    "sha256": "1f037dd37877b316f38e306415126693f4e82fccd14e6a4f709d9e625fe5de43"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\chrome-320-dark-2\\history.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\chrome320-dark-two-history.png",
+    "sha256": "6edfbb58eab2d3581f3b70fa84e4d1e318126793c87df105e484d5a2dfe72dd4"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\webkit-375-light-1\\history.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\webkit375-light-one-history.png",
+    "sha256": "2ce4aaa795ba1b595b3fc08de5804384cf5369322211168d6855e94825907f1b"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\native375-summary.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\native375-one-summary.png",
+    "sha256": "42a7e7860b45f0eac6eba5a9a0126a41db222da34b7e825c1ff8c323a5c283fa"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\corrected\\native375-dashboard.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\native375-one-dashboard.png",
+    "sha256": "0724e9d3738077185557baa71e004a1f00bdd7f305c5bde8f0975fc83aa6c213"
+  },
+  {
+    "source": "artifacts\\analysis-evidence-v110\\webkit375-dark-kpi-read-settled.png",
+    "target": "docs\\screenshots\\analysis-evidence-v110\\webkit375-dark-two-kpi-fresh-probe.png",
+    "sha256": "6ca709f4d1ef8796b094f4e4958e3258a9c9e806995dd2ec853e2bede9370add"
+  }
+]

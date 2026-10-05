@@ -1,0 +1,12 @@
+{
+  "reason": "fixture initializer unconditionally overwrote KEY on reload",
+  "lostSessionId": "muuixfr8mjdnz",
+  "sessionIds": [
+    "owned-analysis-prior-0",
+    "owned-analysis-prior-1",
+    "owned-analysis-prior-2"
+  ],
+  "originalFailureKept": true,
+  "sameOriginalContext": true,
+  "initializerDisposed": true
+}

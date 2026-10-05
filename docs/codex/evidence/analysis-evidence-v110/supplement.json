@@ -1,0 +1,836 @@
+[
+  {
+    "engine": "chrome",
+    "pb": [
+      {
+        "n": 1,
+        "relation": "below",
+        "point": {
+          "x": 8,
+          "y": 0,
+          "s": 7,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 9,
+          "bestDate": "2026-10-02",
+          "todayTotal": 7,
+          "todayArrows": 1,
+          "remaining": 2,
+          "achieved": false,
+          "pace": "tracking",
+          "paceRatio": 0.7777777777777778,
+          "requiredAvg": 9,
+          "todayAvg": 7
+        },
+        "text": "18m自己ベストまで あと2点（推定・本数換算） 自己ベスト 9点（2026/10/2）・ 今回 7点"
+      },
+      {
+        "n": 1,
+        "relation": "tie",
+        "point": {
+          "x": 3.2,
+          "y": 0,
+          "s": 9,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 9,
+          "bestDate": "2026-10-02",
+          "todayTotal": 9,
+          "todayArrows": 1,
+          "remaining": 0,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1,
+          "requiredAvg": 9,
+          "todayAvg": 9
+        },
+        "text": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点"
+      },
+      {
+        "n": 1,
+        "relation": "above",
+        "point": {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 9,
+          "bestDate": "2026-10-02",
+          "todayTotal": 10,
+          "todayArrows": 1,
+          "remaining": -1,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1.1111111111111112,
+          "requiredAvg": 9,
+          "todayAvg": 10
+        },
+        "text": "18m自己ベストを 更新（+1点） 自己ベスト 9点（2026/10/2）・ 今回 10点"
+      },
+      {
+        "n": 6,
+        "relation": "below",
+        "point": {
+          "x": 8,
+          "y": 0,
+          "s": 7,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "exact-count",
+          "bestTotal": 54,
+          "bestDate": "2026-10-02",
+          "todayTotal": 42,
+          "todayArrows": 6,
+          "remaining": 12,
+          "achieved": false,
+          "pace": "tracking",
+          "paceRatio": 0.7777777777777778,
+          "requiredAvg": 9,
+          "todayAvg": 7
+        },
+        "text": "18m自己ベストまで あと12点 自己ベスト 54点（2026/10/2）・ 今回 42点"
+      },
+      {
+        "n": 6,
+        "relation": "tie",
+        "point": {
+          "x": 3.2,
+          "y": 0,
+          "s": 9,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "exact-count",
+          "bestTotal": 54,
+          "bestDate": "2026-10-02",
+          "todayTotal": 54,
+          "todayArrows": 6,
+          "remaining": 0,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1,
+          "requiredAvg": 9,
+          "todayAvg": 9
+        },
+        "text": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点"
+      },
+      {
+        "n": 6,
+        "relation": "above",
+        "point": {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "exact-count",
+          "bestTotal": 54,
+          "bestDate": "2026-10-02",
+          "todayTotal": 60,
+          "todayArrows": 6,
+          "remaining": -6,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1.1111111111111112,
+          "requiredAvg": 9,
+          "todayAvg": 10
+        },
+        "text": "18m自己ベストを 更新（+6点） 自己ベスト 54点（2026/10/2）・ 今回 60点"
+      }
+    ],
+    "coordinates": [
+      {
+        "kind": "two-finite-one-missing",
+        "arrows": [
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "s": 9,
+            "X": false
+          }
+        ],
+        "allScoreRows": 3,
+        "total": 27,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        },
+        "eligible": false,
+        "history": false,
+        "dashboard": {
+          "lastPracticeDate": "2026-10-05",
+          "weekSessions": 1,
+          "weekArrows": 3,
+          "recentAverage": 9,
+          "scoreDelta": 0,
+          "groupingDelta": -4.203173404306163,
+          "formStability": null,
+          "confidence": {
+            "value": 0.5975,
+            "label": "中"
+          },
+          "groupingSamples": 4
+        },
+        "conclusion": {
+          "kind": "grouping-tight-offcenter",
+          "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+        },
+        "suggestions": [
+          {
+            "id": "vertical-spread",
+            "title": "上下のまとまりを確認",
+            "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+          }
+        ],
+        "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+        "period": [
+          {
+            "key": "2026-10",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.1523800532296224,
+            "best": {
+              "total": 54,
+              "date": "2026-10-02",
+              "arrows": 6
+            }
+          }
+        ],
+        "condition": {
+          "windy": {
+            "label": "風あり",
+            "sessions": 0,
+            "arrows": 0,
+            "avg": null,
+            "avgRms": null,
+            "biasX": null
+          },
+          "calm": {
+            "label": "風なし・弱風",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.1523800532296224,
+            "biasX": 1.925
+          }
+        }
+      },
+      {
+        "kind": "three-numeric-strings",
+        "arrows": [
+          {
+            "x": "3.2",
+            "y": "0",
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": "3.2",
+            "y": "0",
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": "3.2",
+            "y": "0",
+            "s": 9,
+            "X": false
+          }
+        ],
+        "allScoreRows": 3,
+        "total": 27,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        },
+        "eligible": true,
+        "history": true,
+        "dashboard": {
+          "lastPracticeDate": "2026-10-05",
+          "weekSessions": 1,
+          "weekArrows": 3,
+          "recentAverage": 9,
+          "scoreDelta": 0,
+          "groupingDelta": -4.203173404306163,
+          "formStability": null,
+          "confidence": {
+            "value": 0.5975,
+            "label": "中"
+          },
+          "groupingSamples": 4
+        },
+        "conclusion": {
+          "kind": "grouping-tight-offcenter",
+          "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+        },
+        "suggestions": [
+          {
+            "id": "horizontal-spread",
+            "title": "左右のまとまりを確認",
+            "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+          }
+        ],
+        "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+        "period": [
+          {
+            "key": "2026-10",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.1523800532296224,
+            "best": {
+              "total": 54,
+              "date": "2026-10-02",
+              "arrows": 6
+            }
+          }
+        ],
+        "condition": {
+          "windy": {
+            "label": "風あり",
+            "sessions": 0,
+            "arrows": 0,
+            "avg": null,
+            "avgRms": null,
+            "biasX": null
+          },
+          "calm": {
+            "label": "風なし・弱風",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.1523800532296224,
+            "biasX": 1.9250000000000003
+          }
+        }
+      }
+    ],
+    "probeOnly": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "pb": [
+      {
+        "n": 1,
+        "relation": "below",
+        "point": {
+          "x": 8,
+          "y": 0,
+          "s": 7,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 9,
+          "bestDate": "2026-10-02",
+          "todayTotal": 7,
+          "todayArrows": 1,
+          "remaining": 2,
+          "achieved": false,
+          "pace": "tracking",
+          "paceRatio": 0.7777777777777778,
+          "requiredAvg": 9,
+          "todayAvg": 7
+        },
+        "text": "18m自己ベストまで あと2点（推定・本数換算） 自己ベスト 9点（2026/10/2）・ 今回 7点"
+      },
+      {
+        "n": 1,
+        "relation": "tie",
+        "point": {
+          "x": 3.2,
+          "y": 0,
+          "s": 9,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 9,
+          "bestDate": "2026-10-02",
+          "todayTotal": 9,
+          "todayArrows": 1,
+          "remaining": 0,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1,
+          "requiredAvg": 9,
+          "todayAvg": 9
+        },
+        "text": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点"
+      },
+      {
+        "n": 1,
+        "relation": "above",
+        "point": {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 9,
+          "bestDate": "2026-10-02",
+          "todayTotal": 10,
+          "todayArrows": 1,
+          "remaining": -1,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1.1111111111111112,
+          "requiredAvg": 9,
+          "todayAvg": 10
+        },
+        "text": "18m自己ベストを 更新（+1点） 自己ベスト 9点（2026/10/2）・ 今回 10点"
+      },
+      {
+        "n": 6,
+        "relation": "below",
+        "point": {
+          "x": 8,
+          "y": 0,
+          "s": 7,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "exact-count",
+          "bestTotal": 54,
+          "bestDate": "2026-10-02",
+          "todayTotal": 42,
+          "todayArrows": 6,
+          "remaining": 12,
+          "achieved": false,
+          "pace": "tracking",
+          "paceRatio": 0.7777777777777778,
+          "requiredAvg": 9,
+          "todayAvg": 7
+        },
+        "text": "18m自己ベストまで あと12点 自己ベスト 54点（2026/10/2）・ 今回 42点"
+      },
+      {
+        "n": 6,
+        "relation": "tie",
+        "point": {
+          "x": 3.2,
+          "y": 0,
+          "s": 9,
+          "X": false
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "exact-count",
+          "bestTotal": 54,
+          "bestDate": "2026-10-02",
+          "todayTotal": 54,
+          "todayArrows": 6,
+          "remaining": 0,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1,
+          "requiredAvg": 9,
+          "todayAvg": 9
+        },
+        "text": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点"
+      },
+      {
+        "n": 6,
+        "relation": "above",
+        "point": {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        },
+        "referenceTotals": [
+          54,
+          54,
+          54
+        ],
+        "pb": {
+          "available": true,
+          "method": "exact-count",
+          "bestTotal": 54,
+          "bestDate": "2026-10-02",
+          "todayTotal": 60,
+          "todayArrows": 6,
+          "remaining": -6,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1.1111111111111112,
+          "requiredAvg": 9,
+          "todayAvg": 10
+        },
+        "text": "18m自己ベストを 更新（+6点） 自己ベスト 54点（2026/10/2）・ 今回 60点"
+      }
+    ],
+    "coordinates": [
+      {
+        "kind": "two-finite-one-missing",
+        "arrows": [
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "s": 9,
+            "X": false
+          }
+        ],
+        "allScoreRows": 3,
+        "total": 27,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        },
+        "eligible": false,
+        "history": false,
+        "dashboard": {
+          "lastPracticeDate": "2026-10-05",
+          "weekSessions": 1,
+          "weekArrows": 3,
+          "recentAverage": 9,
+          "scoreDelta": 0,
+          "groupingDelta": -4.267097959972327,
+          "formStability": null,
+          "confidence": {
+            "value": 0.5975,
+            "label": "中"
+          },
+          "groupingSamples": 4
+        },
+        "conclusion": {
+          "kind": "grouping-tight-offcenter",
+          "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+        },
+        "suggestions": [
+          {
+            "id": "vertical-spread",
+            "title": "上下のまとまりを確認",
+            "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+          }
+        ],
+        "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+        "period": [
+          {
+            "key": "2026-10",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.2003234699792453,
+            "best": {
+              "total": 54,
+              "date": "2026-10-02",
+              "arrows": 6
+            }
+          }
+        ],
+        "condition": {
+          "windy": {
+            "label": "風あり",
+            "sessions": 0,
+            "arrows": 0,
+            "avg": null,
+            "avgRms": null,
+            "biasX": null
+          },
+          "calm": {
+            "label": "風なし・弱風",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.2003234699792453,
+            "biasX": 1.7281250000000001
+          }
+        }
+      },
+      {
+        "kind": "three-numeric-strings",
+        "arrows": [
+          {
+            "x": "3.2",
+            "y": "0",
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": "3.2",
+            "y": "0",
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": "3.2",
+            "y": "0",
+            "s": 9,
+            "X": false
+          }
+        ],
+        "allScoreRows": 3,
+        "total": 27,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        },
+        "eligible": true,
+        "history": true,
+        "dashboard": {
+          "lastPracticeDate": "2026-10-05",
+          "weekSessions": 1,
+          "weekArrows": 3,
+          "recentAverage": 9,
+          "scoreDelta": 0,
+          "groupingDelta": -4.267097959972327,
+          "formStability": null,
+          "confidence": {
+            "value": 0.5975,
+            "label": "中"
+          },
+          "groupingSamples": 4
+        },
+        "conclusion": {
+          "kind": "grouping-tight-offcenter",
+          "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+        },
+        "suggestions": [
+          {
+            "id": "horizontal-spread",
+            "title": "左右のまとまりを確認",
+            "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+          }
+        ],
+        "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+        "period": [
+          {
+            "key": "2026-10",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.2003234699792453,
+            "best": {
+              "total": 54,
+              "date": "2026-10-02",
+              "arrows": 6
+            }
+          }
+        ],
+        "condition": {
+          "windy": {
+            "label": "風あり",
+            "sessions": 0,
+            "arrows": 0,
+            "avg": null,
+            "avgRms": null,
+            "biasX": null
+          },
+          "calm": {
+            "label": "風なし・弱風",
+            "sessions": 4,
+            "arrows": 21,
+            "avg": 9,
+            "avgRms": 3.2003234699792453,
+            "biasX": 1.7281250000000004
+          }
+        }
+      }
+    ],
+    "probeOnly": true,
+    "errors": []
+  }
+]

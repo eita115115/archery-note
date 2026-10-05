@@ -1,0 +1,132 @@
+{
+  "source": "f967d12e96bdb113c8e1747236dcd3394d53f42d",
+  "version": 110,
+  "files": [
+    {
+      "file": "index.html",
+      "bytes": 6014,
+      "sha256": "656fc4bd5b3d1b9243e92bdc2ada7097161723649ac82b4e148d441a089becce"
+    },
+    {
+      "file": "style.min.css",
+      "bytes": 66102,
+      "sha256": "3086ca81230b54f6dba4b824372ee65053df3a32bb20a060d556589795c5caf6"
+    },
+    {
+      "file": "manifest.json",
+      "bytes": 584,
+      "sha256": "15c82058a427d52cf51ab2b0ba55cb7dff45a2a0b9266dd5a5128e9da798c1e8"
+    },
+    {
+      "file": "sw.js",
+      "bytes": 4630,
+      "sha256": "c0818777953a48b17e300a5f09a50aeaf4d0af99f7b24b2ad1100227fdb47667"
+    },
+    {
+      "file": "icon.svg",
+      "bytes": 584,
+      "sha256": "3d8139a5fea8d992bbba05fc70ec40e3eecfaa7b4a4170c602dd0cdd19542ac7"
+    },
+    {
+      "file": "apple-touch-icon.png",
+      "bytes": 5001,
+      "sha256": "c46f061814e0afd68d86fd58a2cdd795768abc927c2de238e2853899573dc144"
+    },
+    {
+      "file": "version.json",
+      "bytes": 13,
+      "sha256": "690dcd6bec4184824ba8e8812aeec78087a9c0f6cab17d2432afe122e3290c52"
+    },
+    {
+      "file": "scripts/00-compat.js",
+      "bytes": 679,
+      "sha256": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f"
+    },
+    {
+      "file": "scripts/10-storage-native.js",
+      "bytes": 38970,
+      "sha256": "6e788a153980f418c35ed7efd005152c4ed929072db31d0eb337d2708f209d52"
+    },
+    {
+      "file": "scripts/20-scoring.js",
+      "bytes": 5906,
+      "sha256": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4"
+    },
+    {
+      "file": "scripts/30-target-svg.js",
+      "bytes": 4902,
+      "sha256": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e"
+    },
+    {
+      "file": "scripts/40-analysis-physics.js",
+      "bytes": 52067,
+      "sha256": "4652603b1fd50c21556d203bc815d751b3cb9a375ab9f874a6b1f511a510acd4"
+    },
+    {
+      "file": "scripts/45-analysis-core.js",
+      "bytes": 11190,
+      "sha256": "6cc89ac6f34685bc4731886b34cbdb8d80d76d64a9ece6925c0a6d42ee17d93a"
+    },
+    {
+      "file": "scripts/46-form-core.js",
+      "bytes": 71651,
+      "sha256": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35"
+    },
+    {
+      "file": "scripts/47-form-view.js",
+      "bytes": 56077,
+      "sha256": "77d70efa70a146065a669cb13683860239d58775e171d5fa90a58a8c645b52c2"
+    },
+    {
+      "file": "scripts/48-gamification.js",
+      "bytes": 7051,
+      "sha256": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526"
+    },
+    {
+      "file": "scripts/49-todays-result.js",
+      "bytes": 8716,
+      "sha256": "cf787e89fffc79b2b1f6461bde8e910f1eedf37cd258ce390870388407b3b12a"
+    },
+    {
+      "file": "scripts/50-record-view.js",
+      "bytes": 92854,
+      "sha256": "fd33657324a736d3d1963d8973df1980449c85b527a58288160fe6c2cb4b4d6c"
+    },
+    {
+      "file": "scripts/60-history-sight-view.js",
+      "bytes": 38037,
+      "sha256": "89778a3154d83669b9828df30a0fad36fbd96c59a231a959e624b8ec7d596c5b"
+    },
+    {
+      "file": "scripts/70-gear-settings.js",
+      "bytes": 68152,
+      "sha256": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a"
+    },
+    {
+      "file": "scripts/90-init.js",
+      "bytes": 2840,
+      "sha256": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26"
+    },
+    {
+      "file": "assets/pose/vision_bundle.mjs",
+      "bytes": 136870,
+      "sha256": "e77f281f9619150d937023c355bae170e9120e3b9e43f1e23a2a7bee07197669"
+    },
+    {
+      "file": "assets/pose/vision_wasm_internal.js",
+      "bytes": 209826,
+      "sha256": "9440cf0cc0cea21800e31581ec32aeedcc5fbf9df4509796bbc7d3f99e52ab9c"
+    },
+    {
+      "file": "assets/pose/vision_wasm_internal.wasm",
+      "bytes": 9423986,
+      "sha256": "f82a8e6c05e08a44cc9f9e7ec5f845935bcbb1b1500ebe8c2f4812fb4e2917dc"
+    },
+    {
+      "file": "assets/pose/pose_landmarker_lite.task",
+      "bytes": 5777746,
+      "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a"
+    }
+  ],
+  "allExact": true
+}

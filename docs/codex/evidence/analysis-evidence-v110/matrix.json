@@ -1,0 +1,5958 @@
+{
+  "version": 110,
+  "source": "f967d12e96bdb113c8e1747236dcd3394d53f42d",
+  "rows": [
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.2cm最新の半径(RMS) / 最小 4.2cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "biasX": 1.5
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "平均点\n9.00\n3回 18本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n4.2cm\n最新の半径(RMS) / 最小 4.2cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-light-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 19本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-light-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 20本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-light-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9250000000000003
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 21本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-light-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9249999999999998
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 24本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/5 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-light-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.2cm最新の半径(RMS) / 最小 4.2cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "biasX": 1.5
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "平均点\n9.00\n3回 18本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n4.2cm\n最新の半径(RMS) / 最小 4.2cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-dark-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 19本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-dark-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 20本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-dark-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9250000000000003
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 21本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-dark-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9249999999999998
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 24本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/5 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-320-dark-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.2cm最新の半径(RMS) / 最小 4.2cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "biasX": 1.5
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "平均点\n9.00\n3回 18本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n4.2cm\n最新の半径(RMS) / 最小 4.2cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-light-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 19本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-light-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 20本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-light-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9250000000000003
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 21本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-light-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9249999999999998
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 24本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/5 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-light-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.2cm最新の半径(RMS) / 最小 4.2cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.203173404306163,
+          "biasX": 1.5
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "平均点\n9.00\n3回 18本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n4.2cm\n最新の半径(RMS) / 最小 4.2cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-dark-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 19本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-dark-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.925
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 20本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-dark-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9250000000000003
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 21本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-dark-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.203173404306163,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.1523800532296224,
+          "biasX": 1.9249999999999998
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "平均点\n9.00\n4回 24本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/5 / 18m / 6本",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.2 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.5cm / 上に 0.6cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "chrome-375-dark-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.3cm最新の半径(RMS) / 最小 4.3cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "biasX": 1.2375
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-light-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-light-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-light-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000004
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-light-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.728125
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-light-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.3cm最新の半径(RMS) / 最小 4.3cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "biasX": 1.2375
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-dark-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-dark-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-dark-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000004
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-dark-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.728125
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-320-dark-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.3cm最新の半径(RMS) / 最小 4.3cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "biasX": 1.2375
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-light-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-light-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-light-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000004
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-light-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.728125
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-light-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-0",
+        "date": "2026-10-05",
+        "n": 0,
+        "total": 0,
+        "avg": 0,
+        "stats": null
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-04",
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "steady",
+        "text": "崩れなく安定して練習できています。"
+      },
+      "suggestions": [
+        {
+          "id": "repeat-baseline",
+          "title": "同じ条件でもう1回記録",
+          "reason": "大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        }
+      ],
+      "kpi": "平均点9.003回 18本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）4.3cm最新の半径(RMS) / 最小 4.3cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 18,
+          "avg": 9,
+          "avgRms": 4.267097959972327,
+          "biasX": 1.2375
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": false,
+        "reason": "empty-session"
+      },
+      "pbText": "",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/4\n今週\n0回 / 0射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち",
+        "conclusion": "崩れなく安定して練習できています。",
+        "suggestions": [
+          "1\n同じ条件でもう1回記録\n\n大きな変化は未検出です。同条件の記録を増やすと比較の信頼度が上がります。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n0\n合計 (0本)\nNaN\n平均/本\n0\n10点\n0\nX\nこの条件では、この日が初記録でした。\nエンド\t得点\t計\n1\t\t0\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-dark-0",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-1",
+        "date": "2026-10-05",
+        "n": 1,
+        "total": 9,
+        "avg": 9,
+        "stats": {
+          "n": 1,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 1,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 1,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 1,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5825,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 19,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ この日 9点\n\nエンド\t得点\t計\n1\t9\t9\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-dark-1",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-2",
+        "date": "2026-10-05",
+        "n": 2,
+        "total": 18,
+        "avg": 9,
+        "stats": {
+          "n": 2,
+          "mx": 3.2,
+          "my": 0,
+          "rr": 0,
+          "sx": 0,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 0,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 2,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 2,
+          "method": "simple",
+          "confidence": 0.35
+        }
+      },
+      "qualification": {
+        "result": false,
+        "history": false
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 2,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5900000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 20本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 20,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000001
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.3cm3セッションから集計 最小の集まり半径(RMS)4.3cm18m / 2026/10/4 最新の集まり半径(RMS)4.3cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.3cm / 最小4.3cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 18,
+        "bestDate": "2026-10-02",
+        "todayTotal": 18,
+        "todayArrows": 2,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 18点（2026/10/2）・ 今回 18点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 2射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n上下のまとまりを確認\n\n最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n18\n合計 (2本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n2本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 18点（2026/10/2）・ この日 18点\n\nエンド\t得点\t計\n1\t9・9\t18\n・次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-dark-2",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-3",
+        "date": "2026-10-05",
+        "n": 3,
+        "total": 27,
+        "avg": 9,
+        "stats": {
+          "n": 3,
+          "mx": 3.2000000000000006,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 3,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 3,
+          "method": "simple",
+          "confidence": 0.55
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 3,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.5975,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 21本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 21,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.7281250000000004
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 27,
+        "bestDate": "2026-10-02",
+        "todayTotal": 27,
+        "todayArrows": 3,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 27点（2026/10/2）・ 今回 27点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 3射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n27\n合計 (3本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 27点（2026/10/2）・ この日 27点\n\nエンド\t得点\t計\n1\t9・9・9\t27\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 75%） — 目安 1.1mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 55%（3本使用）。初回補正率は 75% です。\n・物理エンジン: RK4-3D（3D空気抵抗/RK4）。初速 203fps（推定）、矢重量 330gr、Cd 1.22、空気密度 1.22kg/m³、飛翔 0.29秒、入射速度 60.9m/s、入力充実度 38%。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-dark-3",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    },
+    {
+      "version": 110,
+      "current": {
+        "id": "owned-analysis-current-6",
+        "date": "2026-10-05",
+        "n": 6,
+        "total": 54,
+        "avg": 9,
+        "stats": {
+          "n": 6,
+          "mx": 3.1999999999999997,
+          "my": 0,
+          "rr": 4.440892098500626e-16,
+          "sx": 4.440892098500626e-16,
+          "sy": 0,
+          "cov": 0,
+          "corr": 0,
+          "major": 4.440892098500626e-16,
+          "minor": 0,
+          "angleDeg": 0,
+          "effN": 6,
+          "used": [
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            },
+            {
+              "x": 3.2,
+              "y": 0
+            }
+          ],
+          "excluded": [],
+          "total": 6,
+          "method": "ellipse-biweight",
+          "confidence": 0.27999999999999997
+        }
+      },
+      "qualification": {
+        "result": true,
+        "history": true
+      },
+      "pointScores": [
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": 9,
+          "X": false,
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "dashboard": {
+        "lastPracticeDate": "2026-10-05",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9,
+        "scoreDelta": 0,
+        "groupingDelta": -4.267097959972327,
+        "formStability": null,
+        "confidence": {
+          "value": 0.6200000000000001,
+          "label": "中"
+        },
+        "groupingSamples": 4
+      },
+      "conclusion": {
+        "kind": "grouping-tight-offcenter",
+        "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+      },
+      "suggestions": [
+        {
+          "id": "horizontal-spread",
+          "title": "左右のまとまりを確認",
+          "reason": "最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        }
+      ],
+      "kpi": "平均点9.004回 24本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/5 / 18m / 6本",
+      "period": [
+        {
+          "key": "2026-10",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "best": {
+            "total": 54,
+            "date": "2026-10-02",
+            "arrows": 6
+          }
+        }
+      ],
+      "condition": {
+        "windy": {
+          "label": "風あり",
+          "sessions": 0,
+          "arrows": 0,
+          "avg": null,
+          "avgRms": null,
+          "biasX": null
+        },
+        "calm": {
+          "label": "風なし・弱風",
+          "sessions": 4,
+          "arrows": 24,
+          "avg": 9,
+          "avgRms": 3.2003234699792453,
+          "biasX": 1.728125
+        }
+      },
+      "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象4回 平均の集まり半径(RMS)3.2cm4セッションから集計 最小の集まり半径(RMS)0.0cm18m / 2026/10/5 最新の集まり半径(RMS)0.0cm18m / 2026/10/5 18m4回 / 最新 2026/10/5 3.2cm / 最小0.0cm",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "pbText": "18m自己ベストに 並びました 自己ベスト 54点（2026/10/2）・ 今回 54点",
+      "rendered": {
+        "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 6射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.3cm\nフォーム\n記録待ち",
+        "conclusion": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。",
+        "suggestions": [
+          "1\n左右のまとまりを確認\n\n最新記録は左右±0.0cmで、上下±0.0cmより広がっています。"
+        ],
+        "strips": [
+          "",
+          ""
+        ]
+      },
+      "historyText": "2026/10/5 ・ 18m ・ 40cm的\nセッティング未指定 ・ 所有架空fixture\n54\n合計 (6本)\n9.00\n平均/本\n0\n10点\n0\nX\n\n前回（2026/10/4）と同じ 54点\n\nこの日 54点 ・ 2026/10/4 54点\n\nRMSが 4.3 → 0.0cm に\n\n直近3回の平均と比較\n\n18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点\n\nエンド\t得点\t計\n1\t9・9・9・9・9・9\t54\n この回からのサイト調整提案\nサイトを右へ（中心は右に 3.2cm、補正 63%） — 目安 0.9mm\n判断: 保留 — まだ判断材料が少ないため、同じ狙いで1〜2エンド追加してから動かすのが安全です。\n 横長のグルーピングです（左右±0.0cm／上下±0.0cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。\n・この回の判断信頼度は低です。判断材料は良好。\n・個人モデル: 過去と一致（同条件3回 / 安定度100%）。\n・信頼度 32%（6本使用）。初回補正率は 63% です。\n個人モデル: 過去と一致 — 過去の同条件でも同じ方向へ寄る傾向があります。サイト調整の根拠が強くなります。\n過去の加重中心\n右に 1.2cm / 上に 0.7cm\n同条件データ\n3回 / 安定度 100%\n・次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。\n次のアクション\n1. サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。\n2. 調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。\n3. この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。\n4. 左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。\n詳しく（グルーピングの数値・信頼度・使用サイト）\n編集\n画像保存\n閉じる\n削除",
+      "stage": "webkit-375-dark-6",
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "errors": []
+    }
+  ]
+}

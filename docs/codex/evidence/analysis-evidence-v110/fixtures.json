@@ -1,0 +1,321 @@
+{
+  "old": [
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-prior-0",
+      "date": "2026-10-02",
+      "ends": [
+        [
+          {
+            "x": 4.5,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 2.2500000000000004,
+            "y": 3.8971143170299736,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -2.249999999999999,
+            "y": 3.897114317029974,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -4.5,
+            "y": 5.51091059616309e-16,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -2.2500000000000018,
+            "y": -3.8971143170299727,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 2.2500000000000004,
+            "y": -3.8971143170299736,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ]
+    },
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-prior-1",
+      "date": "2026-10-03",
+      "ends": [
+        [
+          {
+            "x": 4.5,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 2.2500000000000004,
+            "y": 3.8971143170299736,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -2.249999999999999,
+            "y": 3.897114317029974,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -4.5,
+            "y": 5.51091059616309e-16,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -2.2500000000000018,
+            "y": -3.8971143170299727,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 2.2500000000000004,
+            "y": -3.8971143170299736,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ]
+    },
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-prior-2",
+      "date": "2026-10-04",
+      "ends": [
+        [
+          {
+            "x": 4.5,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 2.2500000000000004,
+            "y": 3.8971143170299736,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -2.249999999999999,
+            "y": 3.897114317029974,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -4.5,
+            "y": 5.51091059616309e-16,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -2.2500000000000018,
+            "y": -3.8971143170299727,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 2.2500000000000004,
+            "y": -3.8971143170299736,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ]
+    }
+  ],
+  "cases": [
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-current-0",
+      "date": "2026-10-05",
+      "ends": [
+        []
+      ]
+    },
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-current-1",
+      "date": "2026-10-05",
+      "ends": [
+        [
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ]
+    },
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-current-2",
+      "date": "2026-10-05",
+      "ends": [
+        [
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ]
+    },
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-current-3",
+      "date": "2026-10-05",
+      "ends": [
+        [
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ]
+    },
+    {
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "setupId": null,
+      "shaft": 0.65,
+      "purpose": "practice",
+      "note": "所有架空fixture",
+      "id": "owned-analysis-current-6",
+      "date": "2026-10-05",
+      "ends": [
+        [
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ]
+    }
+  ]
+}

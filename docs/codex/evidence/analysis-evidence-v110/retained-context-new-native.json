@@ -1,0 +1,381 @@
+{
+  "version": 110,
+  "source": "f967d12e96bdb113c8e1747236dcd3394d53f42d",
+  "point": {
+    "x": 207.3177947998047,
+    "y": 453.15625,
+    "clear": true,
+    "rect": {
+      "x": 41.34375,
+      "y": 307,
+      "width": 292.3125,
+      "height": 292.3125,
+      "top": 307,
+      "right": 333.65625,
+      "bottom": 599.3125,
+      "left": 41.34375
+    }
+  },
+  "active": {
+    "id": "muuj825f70w73",
+    "date": "2026-10-05",
+    "setupId": null,
+    "dist": 18,
+    "faceD": 40,
+    "faceType": "single",
+    "perEnd": 6,
+    "shaft": 0.504,
+    "sightV": "",
+    "sightH": "",
+    "wx": "",
+    "note": "",
+    "windDir": "",
+    "windSpeed": "",
+    "round": "free",
+    "purpose": "practice",
+    "ends": [],
+    "cur": [
+      {
+        "x": 3.2,
+        "y": 0,
+        "s": 9,
+        "X": false
+      }
+    ]
+  },
+  "result": {
+    "version": 110,
+    "current": {
+      "id": "muuj825f70w73",
+      "date": "2026-10-05",
+      "n": 1,
+      "total": 9,
+      "avg": 9,
+      "stats": {
+        "n": 1,
+        "mx": 3.2,
+        "my": 0,
+        "rr": 0,
+        "sx": 0,
+        "sy": 0,
+        "cov": 0,
+        "corr": 0,
+        "major": 0,
+        "minor": 0,
+        "angleDeg": 0,
+        "effN": 1,
+        "used": [
+          {
+            "x": 3.2,
+            "y": 0
+          }
+        ],
+        "excluded": [],
+        "total": 1,
+        "method": "simple",
+        "confidence": 0.35
+      }
+    },
+    "qualification": {
+      "result": false,
+      "history": false
+    },
+    "pointScores": [
+      {
+        "saved": 9,
+        "X": false,
+        "calculated": {
+          "s": 9,
+          "X": false
+        }
+      }
+    ],
+    "dashboard": {
+      "lastPracticeDate": "2026-10-05",
+      "weekSessions": 1,
+      "weekArrows": 1,
+      "recentAverage": 9,
+      "scoreDelta": 0,
+      "groupingDelta": -4.203173404306163,
+      "formStability": null,
+      "confidence": {
+        "value": 0.5825,
+        "label": "中"
+      },
+      "groupingSamples": 4
+    },
+    "conclusion": {
+      "kind": "grouping-tight-offcenter",
+      "text": "グルーピング安定、左右のズレ（右寄り）だけ直しましょう。"
+    },
+    "suggestions": [
+      {
+        "id": "vertical-spread",
+        "title": "上下のまとまりを確認",
+        "reason": "最新記録は上下±0.0cmで、左右±0.0cmより広がっています。"
+      }
+    ],
+    "kpi": "平均点9.004回 19本 / 移動平均 → 横ばい 矢の集まり具合（グルーピング）0.0cm最新の半径(RMS) / 最小 0.0cm 最高合計542026/10/4 / 18m / 6本",
+    "period": [
+      {
+        "key": "2026-10",
+        "sessions": 4,
+        "arrows": 19,
+        "avg": 9,
+        "avgRms": 3.1523800532296224,
+        "best": {
+          "total": 54,
+          "date": "2026-10-02",
+          "arrows": 6
+        }
+      }
+    ],
+    "condition": {
+      "windy": {
+        "label": "風あり",
+        "sessions": 0,
+        "arrows": 0,
+        "avg": null,
+        "avgRms": null,
+        "biasX": null
+      },
+      "calm": {
+        "label": "風なし・弱風",
+        "sessions": 4,
+        "arrows": 19,
+        "avg": 9,
+        "avgRms": 3.1523800532296224,
+        "biasX": 1.925
+      }
+    },
+    "groupingSummary": "矢の集まり具合のまとめ（グルーピングサマリー） 対象3回 平均の集まり半径(RMS)4.2cm3セッションから集計 最小の集まり半径(RMS)4.2cm18m / 2026/10/4 最新の集まり半径(RMS)4.2cm18m / 2026/10/4 18m3回 / 最新 2026/10/4 4.2cm / 最小4.2cm",
+    "pb": {
+      "available": true,
+      "method": "avg-projected",
+      "bestTotal": 9,
+      "bestDate": "2026-10-02",
+      "todayTotal": 9,
+      "todayArrows": 1,
+      "remaining": 0,
+      "achieved": true,
+      "pace": "reached",
+      "paceRatio": 1,
+      "requiredAvg": 9,
+      "todayAvg": 9
+    },
+    "pbText": "18m自己ベストに 並びました 自己ベスト 9点（2026/10/2）・ 今回 9点",
+    "rendered": {
+      "dashboard": "練習ダッシュボード\nいまの状態\n信頼度 中\n最終練習\n2026/10/5\n今週\n1回 / 1射\n直近平均\n9.00\n前回から\n0.00点\nグルーピング\n改善 4.2cm\nフォーム\n記録待ち",
+      "conclusion": "",
+      "suggestions": [
+        ""
+      ],
+      "strips": [
+        "",
+        ""
+      ]
+    }
+  },
+  "summaryText": "おつかれさまでした！ 2026/10/5 ・ 18m\n9\n合計 (1本)\n9.00\n平均/本\n0\n10点\n0\nX\n\nグルーピングの比較は保留\n\n1本の座標 / 比較には3本以上必要です。\n\n18m自己ベストに 並びました\n\n自己ベスト 9点（2026/10/2）・ 今日 9点\n\nグルーピング中心\n右に 3.2cm / 下に 0.0cm\nグルーピング半径 (RMS)\n0.0 cm\nばらつき（±1σ）\n左右 0.0cm ・ 上下 0.0cm\nグルーピング楕円\n長軸 0.0cm ・ 短軸 0.0cm ・ 角度 0°\n演算信頼度\n35% / simple\n次のアクション\n1. 6本以上を記録して、中心とばらつきを出す。\n詳しい根拠を見る\n画像保存\n閉じる",
+  "completed": {
+    "sessions": [
+      {
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "round": "free",
+        "setupId": null,
+        "shaft": 0.65,
+        "purpose": "practice",
+        "note": "所有架空fixture",
+        "id": "owned-analysis-prior-0",
+        "date": "2026-10-02",
+        "ends": [
+          [
+            {
+              "x": 4.5,
+              "y": 0,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": 2.2500000000000004,
+              "y": 3.8971143170299736,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -2.249999999999999,
+              "y": 3.897114317029974,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -4.5,
+              "y": 5.51091059616309e-16,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -2.2500000000000018,
+              "y": -3.8971143170299727,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": 2.2500000000000004,
+              "y": -3.8971143170299736,
+              "s": 9,
+              "X": false
+            }
+          ]
+        ]
+      },
+      {
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "round": "free",
+        "setupId": null,
+        "shaft": 0.65,
+        "purpose": "practice",
+        "note": "所有架空fixture",
+        "id": "owned-analysis-prior-1",
+        "date": "2026-10-03",
+        "ends": [
+          [
+            {
+              "x": 4.5,
+              "y": 0,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": 2.2500000000000004,
+              "y": 3.8971143170299736,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -2.249999999999999,
+              "y": 3.897114317029974,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -4.5,
+              "y": 5.51091059616309e-16,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -2.2500000000000018,
+              "y": -3.8971143170299727,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": 2.2500000000000004,
+              "y": -3.8971143170299736,
+              "s": 9,
+              "X": false
+            }
+          ]
+        ]
+      },
+      {
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "round": "free",
+        "setupId": null,
+        "shaft": 0.65,
+        "purpose": "practice",
+        "note": "所有架空fixture",
+        "id": "owned-analysis-prior-2",
+        "date": "2026-10-04",
+        "ends": [
+          [
+            {
+              "x": 4.5,
+              "y": 0,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": 2.2500000000000004,
+              "y": 3.8971143170299736,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -2.249999999999999,
+              "y": 3.897114317029974,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -4.5,
+              "y": 5.51091059616309e-16,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": -2.2500000000000018,
+              "y": -3.8971143170299727,
+              "s": 9,
+              "X": false
+            },
+            {
+              "x": 2.2500000000000004,
+              "y": -3.8971143170299736,
+              "s": 9,
+              "X": false
+            }
+          ]
+        ]
+      },
+      {
+        "id": "muuj825f70w73",
+        "date": "2026-10-05",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [
+          [
+            {
+              "x": 3.2,
+              "y": 0,
+              "s": 9,
+              "X": false
+            }
+          ]
+        ]
+      }
+    ],
+    "active": null,
+    "setups": [],
+    "sightMarks": [],
+    "customRounds": []
+  },
+  "oldRecordsExact": true,
+  "reloadExact": true,
+  "errors": [],
+  "sameOriginalContext": true,
+  "newNativeRecordAfterInitializerDisposal": true,
+  "originalLostRecordNotRestored": true
+}

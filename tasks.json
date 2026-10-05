@@ -870,5 +870,17 @@
     ],
     "owner": "codex",
     "acceptance": "実旧109の選択解除hiddenをnative経路/pixel/rect/五点hitでredとして保持し、meta前の配置とselection-entryの最小scroll範囲でgreenにする。320/375明暗/通常抑制motion、40cm3本/122cm6本、通知表示/desktop、Chrome/WebKitで調整5ボタンと解除の寸法・文字overflow・5hitを確認。native選択/反復nudge→追加scrollなし解除→的→次矢/確定・旧記録/reload、meta入力中scroll維持を確認し375前後画像保存表示。採点/座標/数学/保存schema/handlers/依存/SWactivationを保ち、変更は同テンプレート順とrevealの範囲のみ。checkall/lint/format/生成全E2E/独立review、版markers110整合/CI/実Linux-public25assets/所有旧109profile更新bannerとoffline/newnative解除のgeometry-hit-pixelを証明し、既存72tasks/全acceptance保持、docs/progress/ledgerに出力と限界を保存する。"
+  },
+  {
+    "id": "AN-074",
+    "task": "少数座標と本数換算の分析表示を実110で監査する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-073"
+    ],
+    "owner": "codex",
+    "acceptance": "実Linux110/実public25byteとcurrentsourceを根拠に、Chrome/WebKit320/375明暗×0/1/2/3/6本40caseの実UI/計算を対照。既存scoreAt/lineCutRadius由来の架空矢でscore/X一致、RMS資格/result/historyとdashboard/KPI/結論/提案/period/condition/PBの値・文言・pixelを保存。PB換算below/tie/above・exactと座標不足/数値文字列を補助観測。旧3→native開始/1本記録/終了/結果→分析/保存reloadの同経路を確認、旧3/座標保持/errors0とrepresentative320375明暗画像原寸表示/copy一致。再現した不整合の範囲/根拠/次の最小修正と回帰を文書化し未実装fixを成功扱いしない。全app/scoring/math/UI/style/handlers/schema/deps/SWactivation/markers110・既存73task/全acceptance/sharedlock保持、formatcheck/独立readonly証拠review後にdocs/progress/ledger/task evidence更新。runtime不変なので新version/banner/releaseなし、physicalphone/fullmotion/INP/WKstrictOffline/oldclosedprofile回復を主張しない。"
   }
 ]

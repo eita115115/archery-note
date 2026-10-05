@@ -1,0 +1,99 @@
+{
+  "before": {
+    "rect": {
+      "x": 10,
+      "y": 286,
+      "width": 355,
+      "height": 109.34375,
+      "top": 286,
+      "right": 365,
+      "bottom": 395.34375,
+      "left": 10
+    },
+    "text": "平均点\n9.00\n4回 20本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+    "opacity": "1",
+    "visibility": "visible",
+    "ancestors": [
+      {
+        "tag": "DIV",
+        "class": "insightStrip",
+        "opacity": "1",
+        "transform": "none",
+        "display": "grid"
+      },
+      {
+        "tag": "MAIN",
+        "class": "viewEnter",
+        "opacity": "1",
+        "transform": "none",
+        "display": "block"
+      },
+      {
+        "tag": "BODY",
+        "class": "",
+        "opacity": "1",
+        "transform": "none",
+        "display": "block"
+      },
+      {
+        "tag": "HTML",
+        "class": "dark",
+        "opacity": "1",
+        "transform": "none",
+        "display": "block"
+      }
+    ],
+    "scroll": 577,
+    "animations": []
+  },
+  "after": {
+    "rect": {
+      "x": 10,
+      "y": 286,
+      "width": 355,
+      "height": 109.34375,
+      "top": 286,
+      "right": 365,
+      "bottom": 395.34375,
+      "left": 10
+    },
+    "text": "平均点\n9.00\n4回 20本 / 移動平均 → 横ばい\n矢の集まり具合（グルーピング）\n0.0cm\n最新の半径(RMS) / 最小 0.0cm\n最高合計\n54\n2026/10/4 / 18m / 6本",
+    "opacity": "1",
+    "visibility": "visible",
+    "ancestors": [
+      {
+        "tag": "DIV",
+        "class": "insightStrip",
+        "opacity": "1",
+        "transform": "none",
+        "display": "grid"
+      },
+      {
+        "tag": "MAIN",
+        "class": "viewEnter",
+        "opacity": "1",
+        "transform": "none",
+        "display": "block"
+      },
+      {
+        "tag": "BODY",
+        "class": "",
+        "opacity": "1",
+        "transform": "none",
+        "display": "block"
+      },
+      {
+        "tag": "HTML",
+        "class": "dark",
+        "opacity": "1",
+        "transform": "none",
+        "display": "block"
+      }
+    ],
+    "scroll": 577,
+    "animations": []
+  },
+  "errors": [],
+  "newOwnedDiagnosticContext": true,
+  "originalMatrixImagesRetained": true
+}
