@@ -25,3 +25,7 @@ PB換算達成の注記は次の別タスク。採点/数学、sessionMetrics/ca
 5. 公開確認後だけAN075pass＋非空evidence。旧74task/全acceptance/共有hiddenlock保持、docs/progress/historyに失敗/成功/限界/nextを記録する。
 
 大目標active。実iPhone/VoiceOver/統計的有意性/fullmotion/INP/GPU/実射/巨大履歴/WKstrictOffline/旧閉鎖profileの回復を今回のdesktop証拠から主張しない。失敗したownedprocess/contextは原因と元状態を保ち、観測timeoutだけでrestartしない。
+
+## Candidateで見つけた読みやすさ
+
+原寸の320明暗画像で長い保留説明の末尾がnavへ重なった。所有Chromeの同じ生成111を別readonly contextで対照: paragraph426〜502.5/nav488〜560、clearfalse。観測JSON/PNGを保存し正常に閉じた診断contextであり、元失敗の回復とはしない。copyを「グルーピングの比較は保留。座標を3本以上記録しましょう。」へ短縮、n1/2の320/375明暗E2Eへparagraph.bottom<=nav.top−4と横幅を追加する。計算/資格/layoutは同じ。長文時の全E2Eが動いている間はsandbox/distを上書きせず、終了後に最終copyを生成して必要チェックをやり直す。

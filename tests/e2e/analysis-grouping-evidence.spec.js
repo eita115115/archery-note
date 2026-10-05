@@ -108,6 +108,7 @@ for (const width of [320, 375])
           expect(observed.suggestions.some((s) => s.id === "collect-coordinates")).toBe(true);
           await expect(page.getByTestId("growth-dashboard")).toContainText("比較待ち");
           await expect(page.getByTestId("today-conclusion")).toContainText("比較は保留");
+          await settled(page);
           const bounds = await page
             .getByTestId("today-conclusion")
             .locator("p")
