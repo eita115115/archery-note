@@ -1,7 +1,13 @@
 "use strict";
 const { test, expect } = require("@playwright/test");
+const fs = require("node:fs");
 const fixtures = require("../../docs/codex/evidence/analysis-evidence-v110/fixtures.json");
 test.use({ hasTouch: true, isMobile: true });
+async function preserve(testInfo, name, value) {
+  const path = testInfo.outputPath(name + ".json");
+  fs.writeFileSync(path, JSON.stringify(value, null, 2));
+  await testInfo.attach(name, { path, contentType: "application/json" });
+}
 async function settled(page) {
   await page.evaluate(() => globalThis.document.fonts.ready);
   await expect
@@ -136,6 +142,12 @@ for (const width of [320, 375])
         } else if (count >= 3) await expect(tile.locator("b")).toHaveText("0.0cm");
         expect(await kpi.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
         await page.screenshot({ path: testInfo.outputPath("kpi.png") });
+        const rendered = {
+          dashboard: await page.getByTestId("growth-dashboard").innerText(),
+          conclusion: await page.getByTestId("today-conclusion").innerText(),
+          suggestions: await page.getByTestId("next-practice").innerText(),
+          kpi: await kpi.innerText(),
+        };
         await tap(page, '#tabs [data-v="history"]');
         await page.locator(`.historyRow[data-id="${current.id}"]`).click();
         await settled(page);
@@ -157,18 +169,16 @@ for (const width of [320, 375])
         await page.reload();
         expect((await stored(page)).sessions).toEqual(before.sessions);
         expect(errors).toEqual([]);
-        await testInfo.attach("observed", {
-          body: JSON.stringify({
-            width,
-            theme,
-            count,
-            observed,
-            history,
-            oldRecordsExact: true,
-            reloadExact: true,
-            errors,
-          }),
-          contentType: "application/json",
+        await preserve(testInfo, "observed", {
+          width,
+          theme,
+          count,
+          observed,
+          rendered,
+          history,
+          oldRecordsExact: true,
+          reloadExact: true,
+          errors,
         });
       });
     }
@@ -232,8 +242,5 @@ test("native one-arrow finish stays pending across analysis and history", async 
   await page.reload();
   expect((await stored(page)).sessions).toEqual(after.sessions);
   expect(errors).toEqual([]);
-  await testInfo.attach("native-saved", {
-    body: JSON.stringify({ point, active, after, history: text, errors }),
-    contentType: "application/json",
-  });
+  await preserve(testInfo, "native-saved", { point, active, after, history: text, errors });
 });
