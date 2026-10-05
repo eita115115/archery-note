@@ -108,6 +108,16 @@ for (const width of [320, 375])
           expect(observed.suggestions.some((s) => s.id === "collect-coordinates")).toBe(true);
           await expect(page.getByTestId("growth-dashboard")).toContainText("比較待ち");
           await expect(page.getByTestId("today-conclusion")).toContainText("比較は保留");
+          const bounds = await page
+            .getByTestId("today-conclusion")
+            .locator("p")
+            .evaluate((el) => ({
+              paragraph: el.getBoundingClientRect().toJSON(),
+              nav: globalThis.document.querySelector("#tabs").getBoundingClientRect().toJSON(),
+            }));
+          expect(bounds.paragraph.bottom).toBeLessThanOrEqual(bounds.nav.top - 4);
+          expect(bounds.paragraph.left).toBeGreaterThanOrEqual(0);
+          expect(bounds.paragraph.right).toBeLessThanOrEqual(width);
         }
         if (count >= 1)
           expect(observed.suggestions.some((s) => s.id.endsWith("spread"))).toBe(false);

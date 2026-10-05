@@ -439,7 +439,7 @@ function todayConclusion(rows) {
     return { kind: "trend-down", text: `平均点がやや下がり気味、本数を安定させましょう。` };
   }
   if (!analysisHasGroupingEvidence(latest.st)) {
-    return { kind: "grouping-pending", text: "グルーピングの比較は保留。座標を3本以上記録すると、まとまりを比較できます。" };
+    return { kind: "grouping-pending", text: "グルーピングの比較は保留。座標を3本以上記録しましょう。" };
   }
   if (groupingTight) {
     return { kind: "grouping-tight", text: "グルーピングは安定、この調子を保ちましょう。" };
