@@ -882,5 +882,17 @@
     ],
     "owner": "codex",
     "acceptance": "実Linux110/実public25byteとcurrentsourceを根拠に、Chrome/WebKit320/375明暗×0/1/2/3/6本40caseの実UI/計算を対照。既存scoreAt/lineCutRadius由来の架空矢でscore/X一致、RMS資格/result/historyとdashboard/KPI/結論/提案/period/condition/PBの値・文言・pixelを保存。PB換算below/tie/above・exactと座標不足/数値文字列を補助観測。旧3→native開始/1本記録/終了/結果→分析/保存reloadの同経路を確認、旧3/座標保持/errors0とrepresentative320375明暗画像原寸表示/copy一致。再現した不整合の範囲/根拠/次の最小修正と回帰を文書化し未実装fixを成功扱いしない。全app/scoring/math/UI/style/handlers/schema/deps/SWactivation/markers110・既存73task/全acceptance/sharedlock保持、formatcheck/独立readonly証拠review後にdocs/progress/ledger/task evidence更新。runtime不変なので新version/banner/releaseなし、physicalphone/fullmotion/INP/WKstrictOffline/oldclosedprofile回復を主張しない。"
+  },
+  {
+    "id": "AN-075",
+    "task": "分析と履歴助言のグルーピング資格を揃え少数本の誤解釈を防ぐ",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-074"
+    ],
+    "owner": "codex",
+    "acceptance": "実110監査をredとし、共通最低資格total/n>=3とfiniteRMS、表示精度に満たない方向差をconsumerで保留。dashboard最新前回/KPI/結論/提案/period/condition/履歴conditionInsights-shapeNote-result比較を揃え、score母集団/rawstats/座標/採点/数学/cache/schema/layout/handlers/依存/SWactivation/PB計算を保持。0/1/2/3/6本・3得点2座標・数値文字列・invalid・少数前回最新・score変化・valid3+・正方向/丸めゼロをredgreen回帰、Chrome/WK320375明暗40UIとnative保存reload旧3/score/coords/errors0、375前後代表画像原寸表示copy一致。checkall/lint/format/生成全E2E/独立review、現版読取後全markersbump/checkversion、承認済みCI/実Linux-public25byte/元所有110context更新banner-active保持-offlineと新native結果分析履歴を確認。旧74task/全acceptance/sharedhiddenlock保持、公開後pass非空evidence/docs-progress-ledgerを更新。PB換算注記は別タスク、physicalphone/fullmotion-INP-WKstrictOffline/oldclosedprofiles回復や大目標達成を主張しない。"
   }
 ]
