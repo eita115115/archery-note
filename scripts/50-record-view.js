@@ -1299,8 +1299,8 @@ function renderActive(m) {
         <button type="button" data-n="l" aria-label="選択中の矢を左に微調整">◀</button><button type="button" class="recordNudgeDelete" data-n="del" aria-label="選択中の矢を削除">${icon("trash")}</button><button type="button" data-n="r" aria-label="選択中の矢を右に微調整">▶</button>
         <span class="blank"></span><button type="button" data-n="d" aria-label="選択中の矢を下に微調整">▼</button><span class="blank"></span>
       </div>
-      <div class="shotMeta" id="shotMeta"></div>
       <button class="btn sm ghost" id="nudgeDone">選択解除</button>
+      <div class="shotMeta" id="shotMeta"></div>
     </div>
     ${activeGuideHtml()}
     <details class="adv activeStatsMore"><summary>この練習の詳細</summary>
@@ -1479,7 +1479,7 @@ function revealChipsAboveDock(chipsBox, behavior) {
   const overlap = chipsBottom - dockTop;
   if (overlap > 0) window.scrollBy({ top: overlap + 12, behavior });
 }
-/* 微調整を閉じた後とエンド確定後だけ、的を操作できる位置へ戻す。
+/* 微調整を閉じた後とエンド確定後だけ、的と残っている矢チップを操作できる位置へ戻す。
    通常の再描画・タグ入力・タブ復帰のスクロール位置には介入しない。 */
 function revealActiveTarget() {
   const target = $("#tgsvg"), dock = $("#activeActionDock");
@@ -1487,7 +1487,14 @@ function revealActiveTarget() {
   // Offscreen content-visibility placeholders must not shift after measuring.
   const card = target.closest(".card");
   if (card) card.style.contentVisibility = "visible";
-  const rect = target.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const chips = $("#curChips");
+  const chipsRect = chips && chips.childElementCount ? chips.getBoundingClientRect() : targetRect;
+  const rect = {
+    top: Math.min(targetRect.top, chipsRect.top),
+    bottom: Math.max(targetRect.bottom, chipsRect.bottom),
+  };
+  rect.height = rect.bottom - rect.top;
   const header = $("header.app");
   const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 8;
   const bottom = dock.getBoundingClientRect().top - 8;
@@ -1496,14 +1503,21 @@ function revealActiveTarget() {
   else if (rect.bottom > bottom) delta = rect.bottom - bottom;
   if (delta) window.scrollBy({ top: delta, behavior: "instant" });
 }
-/* 矢チップを選んだ時だけ、微調整パッドを操作列の上へ出す。
+/* 矢チップを選んだ時だけ、微調整パッドと選択解除を操作列の上へ出す。
    入場モーション中にも余白を残し、連続微調整やメタ入力の位置は変えない。 */
 function revealActiveCorrection() {
   const pad = $("#nudge .npad"), dock = $("#activeActionDock");
   if (!pad || !dock) return;
   const card = pad.closest(".card");
   if (card) card.style.contentVisibility = "visible";
-  const rect = pad.getBoundingClientRect();
+  const padRect = pad.getBoundingClientRect();
+  const done = $("#nudgeDone");
+  const doneRect = done ? done.getBoundingClientRect() : padRect;
+  const rect = {
+    top: Math.min(padRect.top, doneRect.top),
+    bottom: Math.max(padRect.bottom, doneRect.bottom),
+  };
+  rect.height = rect.bottom - rect.top;
   const header = $("header.app");
   const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 16;
   let bottom = dock.getBoundingClientRect().top - 16;

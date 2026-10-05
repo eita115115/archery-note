@@ -199,6 +199,31 @@ for (const config of [
           await expectTarget(page);
           expect((await state(page)).active.cur).toEqual(corrected);
           // A second arrow can enter correction too; confirm while correction is open.
+          fs.writeFileSync(
+            testInfo.outputPath("before-second-selection.json"),
+            JSON.stringify(
+              await page.evaluate(() => ({
+                scrollY: globalThis.scrollY,
+                elements: [
+                  "#tgsvg",
+                  "#curChips",
+                  '#curChips [data-i="1"]',
+                  "#activeActionDock",
+                  "#toast",
+                ].map((selector) => {
+                  const el = globalThis.document.querySelector(selector),
+                    r = el.getBoundingClientRect();
+                  const x = r.x + r.width / 2,
+                    y = r.y + r.height / 2;
+                  const hit = globalThis.document.elementFromPoint(x, y);
+                  return { selector, rect: r.toJSON(), hit: hit?.outerHTML.slice(0, 300) };
+                }),
+              })),
+              null,
+              2,
+            ),
+          );
+          await page.screenshot({ path: testInfo.outputPath("before-second-selection.png") });
           await tap(page, page.locator('#curChips [data-i="1"]'));
           await expectPad(page);
           await tap(page, page.getByTestId("active-end"));

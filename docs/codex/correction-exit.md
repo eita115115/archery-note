@@ -21,3 +21,25 @@ AN072は診断/回帰補強まで進捗。基点6954f2ad50780c0ecf2ee4f26758b654
 5. AN073だけpassと非empty evidenceを実公開後に記録。72oldtasks/acceptanceを保持しprogress/ledger更新、大目標active。
 
 設計self-review: 既存ID/label/handler/dataのみ、採点半径/数学変更なし、詳細入力のscroll保持を旧回帰で検証。所有sandbox/Node22.19以外のinstallなし。全承認に基づくUX小修正、再承認要求なし。実iPhone/VoiceOver/全motionframes/閉鎖oldIAB等の回復は主張しない。
+
+## 実装中に見つかった戻り経路
+
+旧109 sourceの生成25資産は実CI Linux109と全byte一致（`artifacts/correction-exit-v110/baseline-parity.json`）。新exit testは初期選択後19/19で解除五点hitfalseをredとして保存した。3回後の旧native解除hiddenはAN072の2ケース観測が別証拠であり、新19redが3回後まで進んだとは扱わない。
+
+最初の小修正ではexit19、WebKit19が通ったが、全体は`8 failed / 217 passed (2.8m)`。既存entry testの詳細入力→解除→別矢選択で320の8条件が失敗した。fresh診断JSONでは的y174〜378.46875、矢チップ388.46875〜428.46875、dock386〜480で、次矢chipの中心が取消buttonへhitした。元失敗browserは通常Playwright終了済み、このfresh診断を元context回復とはしない。
+
+解除を詳細より前に移したことで、詳細入力後に解除へ戻るときのscroll方向が変わった。既存`revealActiveTarget`の的だけの下端合わせではチップが隠れるため、**同じ呼出・同じ境界の測定範囲を的と残存チップのunionへ広げる**。本タスク内の戻り操作の退行修正で、handlerや通常renderへのscroll追加はない。これを計画2に追加し、既存entryの全assert（メタ入力位置/得点/保存/次矢/エンド）を残して再検証する。診断pixelとJSONもtestへ残した。
+
+最初のlintは所有一時WebKit configがrootの`*.js`へ入り4件no-undefで失敗した。所有configを`.cjs`へ移して、app/config変更なしでlint成功。元出力も保持する。
+
+## 更新リハーサルの保持と回復
+
+所有local109→110の更新・旧4件保持までは通ったが、追加した調整検証がdebounce前のlocalStorageを読んで座標assert失敗。元browser/contextを保持したまま、所有Node inspectorで読み取り確認するとmemoryと保存の両方がx0.6000000000000001、5ボタンと解除centerclear。初回resumeはmodule相対pathの誤りでUI操作前に失敗し、pathを修正して同じcontextへ再接続した。
+
+矢調整の再tap・データreset・新contextへの置換をせず、元contextでnative解除→native次矢2本→SW offline reload→終了5件/旧4件exact→少数本結果と履歴→reloadまで回復した。元commandはexit1のまま、回復は別`local-update/recovery-complete.json`/`local-recovery.txt`として記録する。公開用の所有harnessは保存されたxをpollしてから検証する。appのdebounce/schemaは変えない。
+
+## 画像
+
+375/320明暗の旧初期選択・新初期選択・新3回調整後を12枚、加工せずbyte一致で保存/原寸表示した（`docs/screenshots/correction-exit-v110/`、source/hashは`artifacts/correction-exit-v110/images.json`）。戻りボタンが調整の直下にあり、dock/通知の上で押せる配置を確認した。全motion frame・実iPhone/VoiceOverを視認した証拠ではない。
+
+公開/最終検証の結果は実行後に追記する。AN073はまだin-progress。

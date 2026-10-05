@@ -858,5 +858,17 @@
     ],
     "owner": "codex",
     "acceptance": "実Linux105/109の320/375明暗/通常抑制motion・18m40cm3本/70m122cm6本をChrome/WebKitの所有架空fixtureで対照。native選択→3回nudgeのscroll/ボタンrect・五点hit/得点と座標/入力trace/保存pixel、locator click対照とsampled motionを記録し、旧IAB閉鎖contextの回復や再現していないrootcauseを主張しない。旧case画像と代表375現在画像を保存表示する。現在の小caseが既に通るなら根拠ないapp変更を避け、既存回帰へ40cm条件と反復後pad/五点hit/記録保持を加え実行する。checkall/lint/format/生成全E2E/独立review/承認済みCIと実Linux-public25bytes、既存71task/全acceptance/全app・採点・schema・依存・SWactivation・version保持を確認し、docs/progress/ledgerへ出力/限界と次の実UX改善対象を残す。"
+  },
+  {
+    "id": "AN-073",
+    "task": "微調整の選択解除をパッド直下に出し追加スクロールをなくす",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-072"
+    ],
+    "owner": "codex",
+    "acceptance": "実旧109の選択解除hiddenをnative経路/pixel/rect/五点hitでredとして保持し、meta前の配置とselection-entryの最小scroll範囲でgreenにする。320/375明暗/通常抑制motion、40cm3本/122cm6本、通知表示/desktop、Chrome/WebKitで調整5ボタンと解除の寸法・文字overflow・5hitを確認。native選択/反復nudge→追加scrollなし解除→的→次矢/確定・旧記録/reload、meta入力中scroll維持を確認し375前後画像保存表示。採点/座標/数学/保存schema/handlers/依存/SWactivationを保ち、変更は同テンプレート順とrevealの範囲のみ。checkall/lint/format/生成全E2E/独立review、版markers110整合/CI/実Linux-public25assets/所有旧109profile更新bannerとoffline/newnative解除のgeometry-hit-pixelを証明し、既存72tasks/全acceptance保持、docs/progress/ledgerに出力と限界を保存する。"
   }
 ]
