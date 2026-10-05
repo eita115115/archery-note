@@ -42,4 +42,62 @@ AN072は診断/回帰補強まで進捗。基点6954f2ad50780c0ecf2ee4f26758b654
 
 375/320明暗の旧初期選択・新初期選択・新3回調整後を12枚、加工せずbyte一致で保存/原寸表示した（`docs/screenshots/correction-exit-v110/`、source/hashは`artifacts/correction-exit-v110/images.json`）。戻りボタンが調整の直下にあり、dock/通知の上で押せる配置を確認した。全motion frame・実iPhone/VoiceOverを視認した証拠ではない。
 
-公開/最終検証の結果は実行後に追記する。AN073はまだin-progress。
+## 最終候補の検証
+
+候補/sourceは`f967d12e96bdb113c8e1747236dcd3394d53f42d`。所有sandbox/Node22.19、生成dist、実DOM hitを使う。変更後の再検証出力:
+
+```text
+check:all (exit0)
+Archery Note checks OK (v110)
+check-globals OK (14 files, 1244 unresolved refs all accounted for)
+Analysis core characterization checks OK
+Robust median reuse checks OK
+Form core checks OK
+Form metric fixture checks OK
+Form diagnostic checks OK
+Gamification pure-function checks OK (streak / 12 badges / backfill / goals)
+Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)
+Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)
+Security regression: all 38 checks passed
+UI smoke checks OK (chrome.exe)
+PWA asset checks OK
+PWA update flow checks OK
+Storage contract checks OK
+Storage round-trip checks OK
+Save debounce checks OK
+Version alignment checks OK
+Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 197151→139638 bytes; cross-script fixtures
+lint (exit0, no findings)
+format:check (exit0)
+All matched files use Prettier code style!
+test:e2e:dist:225 passed (2.8m)
+focused correction-entry+exit:35 passed (2.4m)
+WebKit correction-entry+exit:35 passed (2.5m)
+PASS:72 prior tasks/all acceptance exact; dependencies/SWactivation/shared hiddenlock unchanged
+```
+
+最初の全体8失敗/217成功を消さず、戻り範囲の修正後に全225を再実行して成功した。採点/他矢/メタ入力scroll/次矢/確定/旧3件/reloadも両engineの35経路で確認。320詳細入力後の別矢chipはy338.46875〜378.46875（docktop386）、nativehitがchip本人へ戻った。before-second-selection pixel/JSONは旧entry testの各出力に保存。
+
+独立readonly reviewer`/root/review_correction_exit`は同じimmutableheadを確認しCritical/Importantなし、code ready。非blocking minorはtarget revealの`childElementCount`が空エンドhintも数えるため、start/確定後はそのhintも測定範囲へ入ること。変更せず通った候補を保持し、空欄hintを除外したという主張はしない。画面の利用可能高さより範囲が大きい場合は従来どおり上端合わせであり、全下端同時表示の保証ではない。
+
+12枚copy byte一致・原寸確認。新8枚は最終候補focused結果の原画像とも一致（`image-candidate-parity-corrected.json`）。最初の比較はWindows separatorの変換漏れで旧green画像同士を比べており、最終候補一致の証拠にせず、正しい`focused-final-results`へ解決して比較し直した。
+
+この候補段階では、sourceをmainへpush後もCIと公開検証が終わるまでAN073をin-progress/passfalseに保った。最終結果は以下の実公開受入へ記録する。
+
+## 実公開の受入（完了）
+
+- source/main `f967d12e96bdb113c8e1747236dcd3394d53f42d`、[CI37247118554](https://github.com/eita115115/archery-note/actions/runs/37247118554) validate/deploy success。Linux出力 `225 passed (5.3m)`、実artifact11319403251、26regularfiles/dirだけを所有root内へ安全抽出。
+- 実公開元109profile/旧3架空記録/native1/15旧HTTP bodiesを保持。normal max-age600、publication422058ms < 最短freshness597000ms、update完了checkpoint428751ms。練習中updatebar非表示、native終了後旧4exact/通知pixel、更新後APP/cache110/旧4exact。
+- 同じprofileで320新開始native1、3回右nudge/scroll0、全5padbuttonと解除の五点hit/rectclear。解除は78×48・y266.46875〜314.46875、docktop386。native解除→的をnative tapし次矢2（修正済み最初の矢exact）→保存checkpoint→SWoffline reload旧4+active2exact→native終了5件/旧4+両矢exact→少数本結果/history/reload、pageerrors0。成功browser/context閉鎖。local失敗profileの置換ではなく、別の実public検証として区別する。
+- 実Linux/public25assets byte-identical、保持profile更新firstdocument15body/canonical14scriptも実Linux一致。
+
+```text
+PASS:actual Linux26 regular files extracted within owned proof directory/no links
+225 passed (5.3m)
+PASS:all25 actual Linux/public110 assets byte-identical; all15 held-update first-document warm bodies match Linux
+PASS: same real public109→110 context, active update blocked/native finish/old4 retained, 320 newstart first native arrow/correction/native exit/next arrow, offline SWreload exact / two-arrow pending in summary+history / old4 and finish5 exact
+```
+
+public banner/correction-entry320/correction-exit320/offlineの4原画像を原寸表示して目視、docsへ加工なしでbyte一致copy。全16代表画像保存/表示と最終候補PNG一致、実publicDOM五点hitは別根拠。採点/座標/数学/schema/handlers/依存/SWactivation不変（版markers110とlockrootmetadata整合のみ）。旧72task objects/全acceptance/sharedhiddenlockのaudit後、AN073のみpassと非empty evidenceを同時記録。大目標はactive、次は少数本dashboardのRMS/PB解釈監査。
+
+実iPhone/VoiceOver/全motionframe/巨大履歴/旧閉鎖failure/WK厳密offlineは未確認。現サイズでのtarget/chip/解除表示は確認したが、物理的に表示範囲がviewportより大きい場合の全button同時表示を保証しない。原IABframe19の未再現重なりを今回の解除hidden fixで回復済みとはしない。

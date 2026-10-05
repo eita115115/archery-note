@@ -862,9 +862,9 @@
   {
     "id": "AN-073",
     "task": "微調整の選択解除をパッド直下に出し追加スクロールをなくす",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "source f967d12e96bdb113c8e1747236dcd3394d53f42d, v110; red19fail actualLinux109 baseline25byte; focused35passed2.4m/WK35passed2.5m; first full8fail217pass→final225passed2.8m; checkall/lint/format/review(no Critical/Important); CI37247118554 validate/deploy success 225 passed (5.3m), artifact11319403251/26safe; real held public109→110 publication422058ms<597000ms fresh, banner/activeblocked/nativefinish4/old4exact/320native3nudge→exit→nextcur2/offline→finish5exact/errors0; actualLinux/public25bytes/first15/canonical14exact; docs/codex/correction-exit.md; artifacts/correction-exit-v110; old72/allacceptance/sharedlock preserved; local debounce harness failure same-context no-retap recovered, original exit1 retained; physical iPhone/VoiceOver/fullmotion/oldclosedprofiles not verified",
     "dependencies": [
       "AN-072"
     ],
