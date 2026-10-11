@@ -41,7 +41,7 @@ for (const fixture of baseline.rows) {
       fixture.relation + ": projected comparison must say converted value",
     );
     assert(
-      html.includes("推定・1本換算"),
+      html.includes(`推定・${result.todayArrows}本換算`),
       fixture.relation + ": method/count note remains visible",
     );
     assert(!html.includes("<b>更新</b>"), "projection is not an actual total-record update");
@@ -55,6 +55,25 @@ for (const fixture of baseline.rows) {
   checks++;
 }
 const fixture = baseline.rows.find((r) => r.n === 1 && r.relation === "below");
+for (const source of baseline.rows.filter((r) => r.n === 1)) {
+  const current = {
+    ...source.current,
+    id: "owned-projected-two",
+    ends: [[...source.current.ends[0], ...source.current.ends[0]]],
+  };
+  const sessions = [...source.sessions.slice(0, 3), current];
+  const before = JSON.stringify(sessions);
+  const result = tr(sessions, current.id);
+  assert.equal(result.method, "avg-projected");
+  assert.equal(result.todayArrows, 2);
+  assert.equal(result.bestTotal, 18);
+  assert.equal(result.todayTotal, source.pb.todayTotal * 2);
+  const html = render(result, current, source.dayLabel);
+  assert(html.includes("推定・2本換算"));
+  assert(!html.includes("<b>更新</b>"));
+  assert.equal(JSON.stringify(sessions), before);
+  checks++;
+}
 const close = { ...fixture.pb, pace: "close" };
 assert(render(close, fixture.current, "今日").includes("ペースは近い"));
 assert(render(close, fixture.current, "今日").includes("推定・1本換算"));
