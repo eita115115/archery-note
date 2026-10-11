@@ -4,6 +4,8 @@
 
 ## 現在地
 
+- AN078進行中、codex/finish-metrics-sharing。前AN077は進捗、次の終了同期scope内のmetrics共有を実装・同条件再測定・公開検証する。設計/plan docs/codex/finish-metrics-sharing.md、基点82d4681e。UIや保存、既存DB_REV/署名を保ち、object identityの一時共有だけ。全承認継続・費用個人情報不使用。
+
 - AN077監査完了、branch codex/record-flow-audit、plan e9d33c9 / docs/codex/record-flow-performance-audit.md。実Linux112/public25一致、訂正38 native経路/418操作はgeometry-fivehit/scoreX/旧全件+新3本/reloadexact/errors0。Chrome375抑制motionの終了3件47.6ms→5000件227.0ms、CPU4では239.5→998.5ms、WebKit50.0→348.0ms（各2回、capture→第2rAF callback、実paint/fieldINPではない）。別8profileは当日結果/metrics/署名の反復参照を支持、保存/DOMの負担も残る。容量警告が320結果文へ重なる画像を保持、未修正。
 - 原38のsupplied rAF timestamp差は正値もelapsed解釈撤回、元raw保持＋callback内performance.nowの全38を別directoryで完走（timeout restartなし）。profile必須関数/実writeSafetySnapshot/idle完了/call≠書込を訂正、全browser閉鎖。代表14原寸PNG/copySHA一致、format/invariants/archive成功、旧76tasks/全acceptance/sharedlock保持。docs/codex/evidence/record-flow-v112にraw・profile・source・出力、ledger/tasks更新。公開112/source6dabcff不変、同sourceAN076全272/CI38158744620を明示して再利用。費用個人情報不使用・大目標active、今回はlocal監査notesのみ。
 

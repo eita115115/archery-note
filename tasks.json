@@ -845,8 +845,7 @@
     ],
     "owner": "codex",
     "acceptance": "実旧108の初期footer occlusionとscroll入力を対照・入力trace/rect/hit/保存pixelで診断し、元閉鎖profileを別freshの成功で回復扱いしない。320/375 light/dark通常/抑制motionとdesktopで回帰red→green、375前後画像を残す。代表比較行が初期操作列に覆われず4ボタン48px以上/文字overflowなし、長条件と通常6本もnative touch scrollで読み、close/削除cancel/edit entry/reloadの旧記録保持を確認。履歴CSSのrow方向だけに実装を限定し採点/統計/保存schema/handler/依存/SW activationを保つ。check:all/lint/format/生成dist全E2E/read-only reviewと公開版整合/CI/実Linux-public資産/所有旧profile更新offline/公開履歴hitとpixelを確認し、既存70task/全acceptance保持、docs/progress/ledgerに出力・限界を残す。"
-  }
-,
+  },
   {
     "id": "AN-072",
     "task": "微調整後の操作性を旧公開版と対照診断し回帰で守る",
@@ -906,18 +905,29 @@
     ],
     "owner": "codex",
     "acceptance": "PB avg-projectedの未達/並ぶ/超える全結果で推定と今回本数換算を明示し、換算超過を実PB更新と混同しない。exact-countのHTML/計算と全PB計算・score母集団・座標/採点/数学/cache/storage/schema/layout/handlers/依存/SWactivationを保持。旧111のfocused red→green、Chrome/WK320375明暗×method2×relation3の24条件各＋native320375、summary/history今日この日/値/座標/旧3保存reload/errors0/可読boundsと375前後代表原寸画像copyexact。checktodaysresult/checkall/lint/format/生成全E2E/独立immutable review、現版読取後一括markersbump/checkversion、承認済みCI実Linux/public25byte/元所有111context更新banner-active保留-offline/旧記録exact/新native換算達成注記。旧75task/allacceptance/sharedhiddenlock保持、公開後pass非空evidence/docsprogressledger更新。実phone/fullmotionINP/WKstrictOffline/旧閉鎖profile回復/大目標達成は未証明。"
+  },
+  {
+    "id": "AN-077",
+    "task": "記録フローの性能と操作性を架空履歴で測定する",
+    "status": "done",
+    "passes": true,
+    "evidence": "audit only/source6dabcff6ab73996e71693da348a271c9e1659cff/v112 unchanged;actualLinux112/public25byte exact;corrected Chrome-WebKit320375 normal-reduce x owned3/5000 x2 base32+CPU4x4+public2=38native/418actions geometry-fivehit/scoreX/observedcoords+nudge+x0.6/oldall+new3/reloadexact/errors0. Original38 retained but all supplied-rAF timestamp elapsed comparisons withdrawn after nonprimary CPU4 negative -8.8/-0.7ms; full corrected38 callback-performance-now exit0, not timeout restart.375reduce finish medians3-to5000 Chrome47.6-to227.0ms/CPU4 239.5-to998.5/WebKit50.0-to348.0,n2/lab capture excludes inputqueue/paint/fieldINP. Separate8profiles support historymetrics repeated15018calls/5001robustStats; wrapper times not matrix/speedup; actual writeSafetySnapshot required/idle observed/call not write.320 capacitytoast overlaps result text with synthetic5000, retained/unfixed. docs/codex/record-flow-performance-audit.md/evidence/record-flow-v112/14original-viewedPNG copySHAexact, raworiginal38+corrected38/profile8/source/fixtures/outputs. formatcheck/invariants/archive pass/old76tasks/allacceptance/sharedhiddenlock exact. Readonly harness review corrected Important nonexistent snapshot function/clockscope; same-sourceAN076272passed3.7m and CI38158744620/Linux272passed5.7m explicitly reused not rerun. No appfix/versionbump/release; next operation-local metrics sharing without globalcache/DB_REV/historycap changes; goalactive/money-private data unused/physicalphone-INP-WKstrictOffline-oldclosedprofiles unproven",
+    "dependencies": [
+      "AN-076"
+    ],
+    "owner": "codex",
+    "acceptance": "実Linux112/公開25byte一致と不変sourceを確認し、Chrome-WebKit320375通常抑制motion×所有架空3/5000履歴を各2回32native経路で対照。開始/矢/選択/3nudge/解除/次矢/エンド/終了の入力trace・二回目rAF/longtask対応有無/geometry-fivehit/score座標/旧全件/reloadexact/errorsと代表原寸画像を保存。追加Chrome375CPU4倍と公開320375probeは条件と限界を区別し、測定失敗は元出力/contextを保持、timeoutだけでrestartしない。再現範囲と最小次候補を示し未実装fix/物理phone/fieldINP改善を主張しない。アプリ全source/math/storage/schema/deps/SW/markers112・既存76taskobjects/全acceptance/sharedhiddenlockを保ち、formatcheck/invariantsと実測成功証拠後にdocsprogressledger/tasksを更新。同sourceAN076全272E2E/CIの再利用と今回新実行を区別し、新releaseはしない。"
+  },
+  {
+    "id": "AN-078",
+    "task": "終了時の当日結果と成長比較で統計情報を一時共有する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-077"
+    ],
+    "owner": "codex",
+    "acceptance": "終了の非編集・保存後同期scope内でsession object identityの一時metrics共有を行い、既存sessionMetrics初回呼出/DB_REV署名cache/49数学/保存schema/score/style/handlers/依存/SWactivationを保持。実112回帰red→green、通常同日/過去日未来除外/少数/座標なし/gamification/編集/同ID別object/次終了再計算のresult-growthBefore無共有比較、scope内同object実呼出一回を確認。Chrome-WK320375明暗focused/native/旧全件新矢score保存reload/errors0/375前後画像、checktodaysresult/checkall/lint/format/生成全E2E/独立immutable review。原Linux112対候補で375抑制motion3/5000x2×ChromeWKとChromeCPU4の11native経路を直列比較、callbackclock/対応API/fixture一致/保存正しさ/別profileの回数を区別しfieldINPや改善幅を未測定で断定しない。全markers一括bump/checkversion、承認済みCI実Linux-public25byte/元112contextのactive更新保留-banner-旧全件-新native-offlineを確認。旧77tasks/全acceptance/sharedhiddenlockを保持、公開証拠後だけpass非空evidence/docsprogressledger更新。容量警告位置/DOM最適化/物理phone-INP-WKstrictOffline旧閉鎖profile回復は別未完。"
   }
-,
-{
-  "id": "AN-077",
-  "task": "記録フローの性能と操作性を架空履歴で測定する",
-  "status": "done",
-  "passes": true,
-  "evidence": "audit only/source6dabcff6ab73996e71693da348a271c9e1659cff/v112 unchanged;actualLinux112/public25byte exact;corrected Chrome-WebKit320375 normal-reduce x owned3/5000 x2 base32+CPU4x4+public2=38native/418actions geometry-fivehit/scoreX/observedcoords+nudge+x0.6/oldall+new3/reloadexact/errors0. Original38 retained but all supplied-rAF timestamp elapsed comparisons withdrawn after nonprimary CPU4 negative -8.8/-0.7ms; full corrected38 callback-performance-now exit0, not timeout restart.375reduce finish medians3-to5000 Chrome47.6-to227.0ms/CPU4 239.5-to998.5/WebKit50.0-to348.0,n2/lab capture excludes inputqueue/paint/fieldINP. Separate8profiles support historymetrics repeated15018calls/5001robustStats; wrapper times not matrix/speedup; actual writeSafetySnapshot required/idle observed/call not write.320 capacitytoast overlaps result text with synthetic5000, retained/unfixed. docs/codex/record-flow-performance-audit.md/evidence/record-flow-v112/14original-viewedPNG copySHAexact, raworiginal38+corrected38/profile8/source/fixtures/outputs. formatcheck/invariants/archive pass/old76tasks/allacceptance/sharedhiddenlock exact. Readonly harness review corrected Important nonexistent snapshot function/clockscope; same-sourceAN076272passed3.7m and CI38158744620/Linux272passed5.7m explicitly reused not rerun. No appfix/versionbump/release; next operation-local metrics sharing without globalcache/DB_REV/historycap changes; goalactive/money-private data unused/physicalphone-INP-WKstrictOffline-oldclosedprofiles unproven",
-  "dependencies": [
-    "AN-076"
-  ],
-  "owner": "codex",
-  "acceptance": "実Linux112/公開25byte一致と不変sourceを確認し、Chrome-WebKit320375通常抑制motion×所有架空3/5000履歴を各2回32native経路で対照。開始/矢/選択/3nudge/解除/次矢/エンド/終了の入力trace・二回目rAF/longtask対応有無/geometry-fivehit/score座標/旧全件/reloadexact/errorsと代表原寸画像を保存。追加Chrome375CPU4倍と公開320375probeは条件と限界を区別し、測定失敗は元出力/contextを保持、timeoutだけでrestartしない。再現範囲と最小次候補を示し未実装fix/物理phone/fieldINP改善を主張しない。アプリ全source/math/storage/schema/deps/SW/markers112・既存76taskobjects/全acceptance/sharedhiddenlockを保ち、formatcheck/invariantsと実測成功証拠後にdocsprogressledger/tasksを更新。同sourceAN076全272E2E/CIの再利用と今回新実行を区別し、新releaseはしない。"
-}
 ]
