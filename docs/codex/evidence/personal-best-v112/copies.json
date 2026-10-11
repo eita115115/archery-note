@@ -1,0 +1,77 @@
+[
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-n-ecf4a-after-one-arrow-finish-375--webkit/native-summary.png",
+    "to": "docs/screenshots/personal-best-v112/after375-native-summary.png",
+    "sha256": "b52b21db51c7273644dfbcf7b6d83d8bfd828713272a6ed1c0c0dd6fca8f623d"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-n-ecf4a-after-one-arrow-finish-375--webkit/native-history.png",
+    "to": "docs/screenshots/personal-best-v112/after375-native-history.png",
+    "sha256": "616bd2044d5311eb2b592219903035fc6ef4a339636ee7209e59a2fa83d3883e"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-dark-1-tie--webkit/summary.png",
+    "to": "docs/screenshots/personal-best-v112/after320-dark-tie-summary.png",
+    "sha256": "9e60d262fd3fd8fd84a540a308e8f607d9aa2f2b5dc8a13e1f523797ec35904d"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-light-1-above--webkit/summary.png",
+    "to": "docs/screenshots/personal-best-v112/after320-light-above-summary.png",
+    "sha256": "9bd7870a505162dc362698338470eb115dd493d5cc11873e8acc650b1caf76e5"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-1-above--webkit/summary.png",
+    "to": "docs/screenshots/personal-best-v112/after375-dark-above-summary.png",
+    "sha256": "06884afa9c53c0f4a2ceb5739e878ded3c421a75c874c98b6f391df819731c95"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-1-above--webkit/history.png",
+    "to": "docs/screenshots/personal-best-v112/after375-dark-above-history.png",
+    "sha256": "0557e17e56752e7d618fd6a8a30aebc559c46a61190159cee581c55c7f7f89e8"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-1-tie--webkit/summary.png",
+    "to": "docs/screenshots/personal-best-v112/after375-light-tie-summary.png",
+    "sha256": "944fe97ca2121434c2bf32d7544b20cd5b49f173b3c654cf3b0e36825c69c310"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-1-tie--webkit/history.png",
+    "to": "docs/screenshots/personal-best-v112/after375-light-tie-history.png",
+    "sha256": "d01fb71bfbc90978376ddbcf8a0bd43b5e65d9da95634853401860fe02b951fd"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/red-ui-centered-results/personal-best-projection-PB-projection-375-light-1-tie--chromium/summary.png",
+    "to": "docs/screenshots/personal-best-v112/before375-light-tie-summary.png",
+    "sha256": "193643db17c4471693dff83e0c5a6aa0471a22353a20475732309b804f2bea26"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/red-ui-centered-results/personal-best-projection-PB-projection-375-dark-1-above--chromium/summary.png",
+    "to": "docs/screenshots/personal-best-v112/before375-dark-above-summary.png",
+    "sha256": "a432920f1d593d1a61ea61e97f53eabfc44ed05adb47a34a458fdddbdfc53e85"
+  },
+  {
+    "from": "artifacts/personal-best-v112/public-update/banner.png",
+    "to": "docs/screenshots/personal-best-v112/public-banner.png",
+    "sha256": "996eea5bcfa6c256a26df12026323306fd652db82df618b84027ff4e9ce44414"
+  },
+  {
+    "from": "artifacts/personal-best-v112/public-update/projected-summary.png",
+    "to": "docs/screenshots/personal-best-v112/public-projected-summary.png",
+    "sha256": "de1785b191512f17b6c4a089573181831fe3ba72121afa55ea99a84b5077a857"
+  },
+  {
+    "from": "artifacts/personal-best-v112/public-update/projected-history.png",
+    "to": "docs/screenshots/personal-best-v112/public-projected-history.png",
+    "sha256": "49ae3fc256d3eb238331b1b1bb8802a726fca64d1584d53bf8c6829fdd7c1cab"
+  },
+  {
+    "from": "artifacts/personal-best-v112/public-update/pending-analysis.png",
+    "to": "docs/screenshots/personal-best-v112/public-pending-analysis.png",
+    "sha256": "4b5fd718dc766f348c22f21adee307bd020833143cb7625788ef31f3ed36bbce"
+  },
+  {
+    "from": "artifacts/personal-best-v112/public-update/failure.png",
+    "to": "docs/screenshots/personal-best-v112/public-failure.png",
+    "sha256": "4b5fd718dc766f348c22f21adee307bd020833143cb7625788ef31f3ed36bbce"
+  }
+]

@@ -1,0 +1,1242 @@
+{
+  "metadata": {
+    "source": "6dabcff6ab73996e71693da348a271c9e1659cff",
+    "version": 112,
+    "public": false,
+    "note": "Owned final generated112, reduced-motion; actual Linux/public proof separate. Before images generated unchanged111 renderer, independently verified public111 parity."
+  },
+  "rows": [
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-n-a85cc-after-one-arrow-finish-320--chromium/native-complete.json",
+      "width": 320,
+      "active": {
+        "id": "mv42yqtr3rthm",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [],
+        "cur": [
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          }
+        ]
+      },
+      "saved": {
+        "schema": 5,
+        "setups": [],
+        "sightMarks": [],
+        "sessions": [
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-0",
+            "date": "2026-10-02",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-1",
+            "date": "2026-10-03",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-2",
+            "date": "2026-10-04",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "id": "mv42yqtr3rthm",
+            "date": "2026-10-12",
+            "setupId": null,
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "shaft": 0.504,
+            "sightV": "",
+            "sightH": "",
+            "wx": "",
+            "note": "",
+            "windDir": "",
+            "windSpeed": "",
+            "round": "free",
+            "purpose": "practice",
+            "ends": [
+              [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "s": 10,
+                  "X": true
+                }
+              ]
+            ]
+          }
+        ],
+        "trash": [],
+        "formAnalyses": [],
+        "customRounds": [],
+        "settings": {
+          "eyeSight": 850,
+          "theme": "light",
+          "fieldMode": false,
+          "lastBackupAt": null,
+          "activeGuideSeen": true,
+          "onboardingSeen": true,
+          "launchCount": 10,
+          "featureHints": {
+            "gearSetup": false,
+            "analysis": false,
+            "sightAdjust": false,
+            "formTracking": false,
+            "addToHome": false,
+            "practiceDays": false
+          },
+          "gamification": {
+            "enabled": false,
+            "practiceDays": null,
+            "goals": {
+              "dailyArrows": 36,
+              "weeklySessions": 3,
+              "monthlyArrows": 300
+            },
+            "backfilledAt": null
+          }
+        },
+        "gamification": {
+          "badges": []
+        },
+        "active": null,
+        "updatedAt": "2026-10-11T17:11:48.565Z"
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 280.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 280.859375,
+          "right": 304,
+          "bottom": 355.84375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 280.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 280.859375,
+          "right": 304,
+          "bottom": 355.84375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-n-ecf4a-after-one-arrow-finish-375--chromium/native-complete.json",
+      "width": 375,
+      "active": {
+        "id": "mv42yr7kf815n",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [],
+        "cur": [
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          }
+        ]
+      },
+      "saved": {
+        "schema": 5,
+        "setups": [],
+        "sightMarks": [],
+        "sessions": [
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-0",
+            "date": "2026-10-02",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-1",
+            "date": "2026-10-03",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-2",
+            "date": "2026-10-04",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "id": "mv42yr7kf815n",
+            "date": "2026-10-12",
+            "setupId": null,
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "shaft": 0.504,
+            "sightV": "",
+            "sightH": "",
+            "wx": "",
+            "note": "",
+            "windDir": "",
+            "windSpeed": "",
+            "round": "free",
+            "purpose": "practice",
+            "ends": [
+              [
+                {
+                  "x": 0,
+                  "y": 0,
+                  "s": 10,
+                  "X": true
+                }
+              ]
+            ]
+          }
+        ],
+        "trash": [],
+        "formAnalyses": [],
+        "customRounds": [],
+        "settings": {
+          "eyeSight": 850,
+          "theme": "light",
+          "fieldMode": false,
+          "lastBackupAt": null,
+          "activeGuideSeen": true,
+          "onboardingSeen": true,
+          "launchCount": 10,
+          "featureHints": {
+            "gearSetup": false,
+            "analysis": false,
+            "sightAdjust": false,
+            "formTracking": false,
+            "addToHome": false,
+            "practiceDays": false
+          },
+          "gamification": {
+            "enabled": false,
+            "practiceDays": null,
+            "goals": {
+              "dailyArrows": 36,
+              "weeklySessions": 3,
+              "monthlyArrows": 300
+            },
+            "backfilledAt": null
+          }
+        },
+        "gamification": {
+          "badges": []
+        },
+        "active": null,
+        "updatedAt": "2026-10-11T17:11:49.049Z"
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-n-a85cc-after-one-arrow-finish-320--webkit/native-complete.json",
+      "width": 320,
+      "active": {
+        "id": "mv42tvqdq1cxa",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [],
+        "cur": [
+          {
+            "x": 0,
+            "y": 0.05,
+            "s": 10,
+            "X": true
+          }
+        ]
+      },
+      "saved": {
+        "schema": 5,
+        "setups": [],
+        "sightMarks": [],
+        "sessions": [
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-0",
+            "date": "2026-10-02",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-1",
+            "date": "2026-10-03",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-2",
+            "date": "2026-10-04",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "id": "mv42tvqdq1cxa",
+            "date": "2026-10-12",
+            "setupId": null,
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "shaft": 0.504,
+            "sightV": "",
+            "sightH": "",
+            "wx": "",
+            "note": "",
+            "windDir": "",
+            "windSpeed": "",
+            "round": "free",
+            "purpose": "practice",
+            "ends": [
+              [
+                {
+                  "x": 0,
+                  "y": 0.05,
+                  "s": 10,
+                  "X": true
+                }
+              ]
+            ]
+          }
+        ],
+        "trash": [],
+        "formAnalyses": [],
+        "customRounds": [],
+        "settings": {
+          "eyeSight": 850,
+          "theme": "light",
+          "fieldMode": false,
+          "lastBackupAt": null,
+          "activeGuideSeen": true,
+          "onboardingSeen": true,
+          "launchCount": 10,
+          "featureHints": {
+            "gearSetup": false,
+            "analysis": false,
+            "sightAdjust": false,
+            "formTracking": false,
+            "addToHome": false,
+            "practiceDays": false
+          },
+          "gamification": {
+            "enabled": false,
+            "practiceDays": null,
+            "goals": {
+              "dailyArrows": 36,
+              "weeklySessions": 3,
+              "monthlyArrows": 300
+            },
+            "backfilledAt": null
+          }
+        },
+        "gamification": {
+          "badges": []
+        },
+        "active": null,
+        "updatedAt": "2026-10-11T17:08:01.779Z"
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 279.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 279.859375,
+          "right": 304,
+          "bottom": 354.84375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 279.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 279.859375,
+          "right": 304,
+          "bottom": 354.84375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-n-ecf4a-after-one-arrow-finish-375--webkit/native-complete.json",
+      "width": 375,
+      "active": {
+        "id": "mv42tvrflxrad",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 6,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [],
+        "cur": [
+          {
+            "x": -0.08,
+            "y": 0.03,
+            "s": 10,
+            "X": true
+          }
+        ]
+      },
+      "saved": {
+        "schema": 5,
+        "setups": [],
+        "sightMarks": [],
+        "sessions": [
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-0",
+            "date": "2026-10-02",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-1",
+            "date": "2026-10-03",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "round": "free",
+            "setupId": null,
+            "shaft": 0.65,
+            "purpose": "practice",
+            "note": "所有架空fixture",
+            "id": "owned-analysis-prior-2",
+            "date": "2026-10-04",
+            "ends": [
+              [
+                {
+                  "x": 4.5,
+                  "y": 0,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": 3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.249999999999999,
+                  "y": 3.897114317029974,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -4.5,
+                  "y": 5.51091059616309e-16,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": -2.2500000000000018,
+                  "y": -3.8971143170299727,
+                  "s": 9,
+                  "X": false
+                },
+                {
+                  "x": 2.2500000000000004,
+                  "y": -3.8971143170299736,
+                  "s": 9,
+                  "X": false
+                }
+              ]
+            ]
+          },
+          {
+            "id": "mv42tvrflxrad",
+            "date": "2026-10-12",
+            "setupId": null,
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 6,
+            "shaft": 0.504,
+            "sightV": "",
+            "sightH": "",
+            "wx": "",
+            "note": "",
+            "windDir": "",
+            "windSpeed": "",
+            "round": "free",
+            "purpose": "practice",
+            "ends": [
+              [
+                {
+                  "x": -0.08,
+                  "y": 0.03,
+                  "s": 10,
+                  "X": true
+                }
+              ]
+            ]
+          }
+        ],
+        "trash": [],
+        "formAnalyses": [],
+        "customRounds": [],
+        "settings": {
+          "eyeSight": 850,
+          "theme": "light",
+          "fieldMode": false,
+          "lastBackupAt": null,
+          "activeGuideSeen": true,
+          "onboardingSeen": true,
+          "launchCount": 10,
+          "featureHints": {
+            "gearSetup": false,
+            "analysis": false,
+            "sightAdjust": false,
+            "formTracking": false,
+            "addToHome": false,
+            "practiceDays": false
+          },
+          "gamification": {
+            "enabled": false,
+            "practiceDays": null,
+            "goals": {
+              "dailyArrows": 36,
+              "weeklySessions": 3,
+              "monthlyArrows": 300
+            },
+            "backfilledAt": null
+          }
+        },
+        "gamification": {
+          "badges": []
+        },
+        "active": null,
+        "updatedAt": "2026-10-11T17:08:01.787Z"
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "errors": []
+    }
+  ]
+}

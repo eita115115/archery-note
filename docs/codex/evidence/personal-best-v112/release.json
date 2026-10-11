@@ -1,0 +1,393 @@
+{
+  "source": "6dabcff6ab73996e71693da348a271c9e1659cff",
+  "version": 112,
+  "ciRun": 38158744620,
+  "ci": "https://github.com/eita115115/archery-note/actions/runs/38158744620",
+  "ciConclusion": "success",
+  "linuxE2E": "272 passed (5.7m)",
+  "artifactId": 11709683442,
+  "artifactDigest": "sha256:8d8d0ce75ef0644ed49fc934e2eb44a7c2dfd51b5a59792b15a68257233cbd3c",
+  "extractedRegularFiles": 26,
+  "public25ByteIdentical": true,
+  "heldFirstDocumentBodies": 15,
+  "canonicalScripts": 14,
+  "freshMs": 597000,
+  "publicationMs": 456098,
+  "updateCheckpointMs": 459063,
+  "old3To4To5Exact": true,
+  "offlineActive2Exact": true,
+  "errors": [],
+  "projectedSummary": {
+    "observed": {
+      "text": "18m自己ベストの換算値に 並びました\n\n推定・2本換算 20点（2026/10/12）・ 今日 20点",
+      "primary": "18m自己ベストの換算値に 並びました",
+      "detail": "推定・2本換算 20点（2026/10/12）・ 今日 20点",
+      "rect": {
+        "x": 16,
+        "y": 290.859375,
+        "width": 288,
+        "height": 54.6875,
+        "top": 290.859375,
+        "right": 304,
+        "bottom": 345.546875,
+        "left": 16
+      },
+      "scrollWidth": 288,
+      "clientWidth": 288
+    },
+    "result": {
+      "available": true,
+      "method": "avg-projected",
+      "bestTotal": 20,
+      "bestDate": "2026-10-12",
+      "todayTotal": 20,
+      "todayArrows": 2,
+      "remaining": 0,
+      "achieved": true,
+      "pace": "reached",
+      "paceRatio": 1,
+      "requiredAvg": 10,
+      "todayAvg": 10
+    }
+  },
+  "projectedHistory": {
+    "observed": {
+      "text": "18m自己ベストの換算値に 並びました\n\n推定・2本換算 20点（2026/10/12）・ この日 20点",
+      "primary": "18m自己ベストの換算値に 並びました",
+      "detail": "推定・2本換算 20点（2026/10/12）・ この日 20点",
+      "rect": {
+        "x": 16,
+        "y": 290.859375,
+        "width": 288,
+        "height": 54.6875,
+        "top": 290.859375,
+        "right": 304,
+        "bottom": 345.546875,
+        "left": 16
+      },
+      "scrollWidth": 288,
+      "clientWidth": 288
+    },
+    "result": {
+      "available": true,
+      "method": "avg-projected",
+      "bestTotal": 20,
+      "bestDate": "2026-10-12",
+      "todayTotal": 20,
+      "todayArrows": 2,
+      "remaining": 0,
+      "achieved": true,
+      "pace": "reached",
+      "paceRatio": 1,
+      "requiredAvg": 10,
+      "todayAvg": 10
+    }
+  },
+  "recovery": {
+    "sameOriginalContext": true,
+    "noReset": true,
+    "noRecordRetap": true,
+    "originalFailure": {
+      "stage": "few-arrow-result",
+      "message": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(analysis.kpi.includes('比較待ち'))\n\n    at C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\personal-best-v112\\held-public.cjs:79:272",
+      "before": {
+        "sessions": [
+          {
+            "id": "build-week-demo:1",
+            "date": "2026-09-22",
+            "setupId": null,
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 3,
+            "round": "free",
+            "purpose": "practice",
+            "note": "架空のデモデータ",
+            "ends": [
+              [
+                {
+                  "x": -1.8000000000000003,
+                  "y": 0,
+                  "s": 8
+                },
+                {
+                  "x": 4.6,
+                  "y": 0,
+                  "s": 7
+                },
+                {
+                  "x": 1.4,
+                  "y": -3.2,
+                  "s": 8
+                }
+              ],
+              [
+                {
+                  "x": 1.4,
+                  "y": 3.2,
+                  "s": 8
+                },
+                {
+                  "x": -0.8399999999999999,
+                  "y": 2.2399999999999998,
+                  "s": 7
+                },
+                {
+                  "x": 3.6399999999999997,
+                  "y": -2.2399999999999998,
+                  "s": 8
+                }
+              ]
+            ]
+          },
+          {
+            "id": "build-week-demo:2",
+            "date": "2026-10-04",
+            "setupId": null,
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 3,
+            "round": "free",
+            "purpose": "practice",
+            "note": "架空のデモデータ",
+            "ends": [
+              [
+                {
+                  "x": -1.5999999999999999,
+                  "y": 0,
+                  "s": 9
+                },
+                {
+                  "x": 3.2,
+                  "y": 0,
+                  "s": 8
+                },
+                {
+                  "x": 0.8,
+                  "y": -2.4,
+                  "s": 9
+                }
+              ],
+              [
+                {
+                  "x": 0.8,
+                  "y": 2.4,
+                  "s": 9
+                },
+                {
+                  "x": -0.8799999999999999,
+                  "y": 1.68,
+                  "s": 8
+                },
+                {
+                  "x": 2.48,
+                  "y": -1.68,
+                  "s": 9
+                }
+              ]
+            ]
+          },
+          {
+            "id": "build-week-demo:3",
+            "date": "2026-10-11",
+            "setupId": null,
+            "dist": 18,
+            "faceD": 40,
+            "faceType": "single",
+            "perEnd": 3,
+            "round": "free",
+            "purpose": "practice",
+            "note": "架空のデモデータ",
+            "ends": [
+              [
+                {
+                  "x": -1.4,
+                  "y": 0,
+                  "s": 9
+                },
+                {
+                  "x": 2,
+                  "y": 0,
+                  "s": 8
+                },
+                {
+                  "x": 0.3,
+                  "y": -1.7,
+                  "s": 9
+                }
+              ],
+              [
+                {
+                  "x": 0.3,
+                  "y": 1.7,
+                  "s": 9
+                },
+                {
+                  "x": -0.8899999999999999,
+                  "y": 1.19,
+                  "s": 8
+                },
+                {
+                  "x": 1.49,
+                  "y": -1.19,
+                  "s": 9
+                }
+              ]
+            ]
+          }
+        ],
+        "active": {
+          "id": "mv430cigxthsl",
+          "date": "2026-10-12",
+          "setupId": null,
+          "dist": 18,
+          "faceD": 40,
+          "faceType": "single",
+          "perEnd": 3,
+          "shaft": 0.504,
+          "sightV": "",
+          "sightH": "",
+          "wx": "",
+          "note": "",
+          "windDir": "",
+          "windSpeed": "",
+          "round": "free",
+          "purpose": "practice",
+          "ends": [],
+          "cur": [
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ]
+        },
+        "setups": [],
+        "sightMarks": [],
+        "customRounds": []
+      },
+      "warmedAt": 1791738783425,
+      "errors": [],
+      "loaded": [
+        {
+          "file": "style.min.css",
+          "sha256": "3086ca81230b54f6dba4b824372ee65053df3a32bb20a060d556589795c5caf6",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/style.min.css?v=112"
+        },
+        {
+          "file": "scripts/00-compat.js",
+          "sha256": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/00-compat.js?v=112"
+        },
+        {
+          "file": "scripts/90-init.js",
+          "sha256": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/90-init.js?v=112"
+        },
+        {
+          "file": "scripts/20-scoring.js",
+          "sha256": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/20-scoring.js?v=112"
+        },
+        {
+          "file": "scripts/10-storage-native.js",
+          "sha256": "2be0dfac9df0445251900f2f802f9da01ff9f40d3944d2db580ae543849f2c6d",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/10-storage-native.js?v=112"
+        },
+        {
+          "file": "scripts/48-gamification.js",
+          "sha256": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/48-gamification.js?v=112"
+        },
+        {
+          "file": "scripts/47-form-view.js",
+          "sha256": "77d70efa70a146065a669cb13683860239d58775e171d5fa90a58a8c645b52c2",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/47-form-view.js?v=112"
+        },
+        {
+          "file": "scripts/70-gear-settings.js",
+          "sha256": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/70-gear-settings.js?v=112"
+        },
+        {
+          "file": "scripts/49-todays-result.js",
+          "sha256": "49b6545fdac438f2b6050adc22913e9c7d5926b48414a0243fe43a9bde3d047c",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/49-todays-result.js?v=112"
+        },
+        {
+          "file": "scripts/45-analysis-core.js",
+          "sha256": "2466d97c44d656ea426b1b7fc898f16a5793ae841398bc58ff1b0d421dbf4312",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/45-analysis-core.js?v=112"
+        },
+        {
+          "file": "scripts/60-history-sight-view.js",
+          "sha256": "89778a3154d83669b9828df30a0fad36fbd96c59a231a959e624b8ec7d596c5b",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/60-history-sight-view.js?v=112"
+        },
+        {
+          "file": "scripts/50-record-view.js",
+          "sha256": "2e880d9898a19eb976bfccdd2fde663f1646ac3daa619ea04a1cd6eedd4cffbb",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/50-record-view.js?v=112"
+        },
+        {
+          "file": "scripts/40-analysis-physics.js",
+          "sha256": "60a02f18d3c3b55883335643e3add6a88abfbb7be9e65d978f28d0bb68bac34f",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/40-analysis-physics.js?v=112"
+        },
+        {
+          "file": "scripts/46-form-core.js",
+          "sha256": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/46-form-core.js?v=112"
+        },
+        {
+          "file": "scripts/30-target-svg.js",
+          "sha256": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e",
+          "status": 200,
+          "url": "https://eita115115.github.io/archery-note/scripts/30-target-svg.js?v=112"
+        }
+      ]
+    },
+    "observedAfter": "平均点\n8.57\n5回 21本 / 移動平均 ↑ +0.25\n矢の集まり具合（グルーピング）\n比較待ち\n最新は座標3本以上で比較 / 最小 0.4cm\n最高合計\n52\n2026/10/11 / 18m / 6本",
+    "completed": {
+      "sameOriginalContext": true,
+      "noReset": true,
+      "noRecordRetap": true,
+      "old4AndFinished2Exact": true,
+      "projectedHistory": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・2本換算 20点（2026/10/12）・ この日 20点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・2本換算 20点（2026/10/12）・ この日 20点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288
+      },
+      "errors": []
+    },
+    "rootCause": "unconfirmed; immediate DOM text assertion failed, same-context settled observation passed; no app change"
+  }
+}

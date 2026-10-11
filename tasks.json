@@ -898,9 +898,9 @@
   {
     "id": "AN-076",
     "task": "自己ベスト換算値の注記を到達後も表示する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "公開v112/source6dabcff6ab73996e71693da348a271c9e1659cff; PB renderer only換算値/推定・今回本数をbelow-tie-above保持、exactHTML/PB計算/全他scripts-math-score-cache-storage-schema-handlers-layout-deps-SWactivation保持。actual111unitred/訂正UI14failed12passed12.4s→Chrome26passed10.7s/WK26passed16.8s/final272passed3.7m/checkall-lint-format/18computedunitgreen、独立immutable4373653/6dabcff review blockingなし。48UIセル+4native旧3/score/座標/reloadexact/errors0。CI38158744620 validate-deploy success/Linux272passed5.7m/artifact11709683442/26safe、実Linux-public25bytes/元first15/canonical14一致。元public111context publication456098ms<fresh597000ms/activeupdateblock/nativefinish4/banner/cache112only/旧4exact、320native1→3nudge→解除→native次矢cur2/offlineSWreloadexact/finish5、summary/history推定2本換算/reload旧4+cur2exact/errors0。分析DOM比較待ち即時assertで元exit1/context保持、同context検査で比較待ち可読・recoveryhelper初strict2要素failureをfirstへ訂正後history/reload完了、reset/記録retapなし/rootcause未断定/元failure保持。docs/codex/personal-best-projection.md/evidence/personal-best-v112/代表15原寸PNGcopyexact。旧75tasks/allacceptance/sharedhiddenlock保持。費用個人情報不使用、大目標active;physicalphone/fullmotionINP/WKstrictOffline/旧閉鎖profile回復未証明。",
     "dependencies": [
       "AN-075"
     ],

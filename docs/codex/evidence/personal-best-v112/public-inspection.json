@@ -1,0 +1,272 @@
+{
+  "sameOriginalContext": true,
+  "stage": "few-arrow-result",
+  "errors": [],
+  "observed": {
+    "version": 112,
+    "text": "平均点\n8.57\n5回 21本 / 移動平均 ↑ +0.25\n矢の集まり具合（グルーピング）\n比較待ち\n最新は座標3本以上で比較 / 最小 0.4cm\n最高合計\n52\n2026/10/11 / 18m / 6本",
+    "content": "\n    平均点8.575回 21本 / 移動平均 ↑ +0.25\n    矢の集まり具合（グルーピング）比較待ち最新は座標3本以上で比較 / 最小 0.4cm\n    最高合計522026/10/11 / 18m / 6本\n  ",
+    "html": "<div class=\"insightStrip\">\n    <div class=\"insightTile\"><div class=\"k\">平均点</div><b>8.57</b><span>5回 21本 / 移動平均 ↑ +0.25</span></div>\n    <div class=\"insightTile\"><div class=\"k\">矢の集まり具合（グルーピング）</div><b>比較待ち</b><span>最新は座標3本以上で比較 / 最小 0.4cm</span></div>\n    <div class=\"insightTile\"><div class=\"k\">最高合計</div><b>52</b><span>2026/10/11 / 18m / 6本</span></div>\n  </div>",
+    "rect": {
+      "x": 8,
+      "y": 946,
+      "width": 304,
+      "height": 256.515625,
+      "top": 946,
+      "right": 312,
+      "bottom": 1202.515625,
+      "left": 8
+    },
+    "opacity": "1",
+    "animations": [],
+    "practice": {
+      "schema": 5,
+      "setups": [],
+      "sightMarks": [],
+      "sessions": [
+        {
+          "id": "build-week-demo:1",
+          "date": "2026-09-22",
+          "setupId": null,
+          "dist": 18,
+          "faceD": 40,
+          "faceType": "single",
+          "perEnd": 3,
+          "round": "free",
+          "purpose": "practice",
+          "note": "架空のデモデータ",
+          "ends": [
+            [
+              {
+                "x": -1.8000000000000003,
+                "y": 0,
+                "s": 8
+              },
+              {
+                "x": 4.6,
+                "y": 0,
+                "s": 7
+              },
+              {
+                "x": 1.4,
+                "y": -3.2,
+                "s": 8
+              }
+            ],
+            [
+              {
+                "x": 1.4,
+                "y": 3.2,
+                "s": 8
+              },
+              {
+                "x": -0.8399999999999999,
+                "y": 2.2399999999999998,
+                "s": 7
+              },
+              {
+                "x": 3.6399999999999997,
+                "y": -2.2399999999999998,
+                "s": 8
+              }
+            ]
+          ]
+        },
+        {
+          "id": "build-week-demo:2",
+          "date": "2026-10-04",
+          "setupId": null,
+          "dist": 18,
+          "faceD": 40,
+          "faceType": "single",
+          "perEnd": 3,
+          "round": "free",
+          "purpose": "practice",
+          "note": "架空のデモデータ",
+          "ends": [
+            [
+              {
+                "x": -1.5999999999999999,
+                "y": 0,
+                "s": 9
+              },
+              {
+                "x": 3.2,
+                "y": 0,
+                "s": 8
+              },
+              {
+                "x": 0.8,
+                "y": -2.4,
+                "s": 9
+              }
+            ],
+            [
+              {
+                "x": 0.8,
+                "y": 2.4,
+                "s": 9
+              },
+              {
+                "x": -0.8799999999999999,
+                "y": 1.68,
+                "s": 8
+              },
+              {
+                "x": 2.48,
+                "y": -1.68,
+                "s": 9
+              }
+            ]
+          ]
+        },
+        {
+          "id": "build-week-demo:3",
+          "date": "2026-10-11",
+          "setupId": null,
+          "dist": 18,
+          "faceD": 40,
+          "faceType": "single",
+          "perEnd": 3,
+          "round": "free",
+          "purpose": "practice",
+          "note": "架空のデモデータ",
+          "ends": [
+            [
+              {
+                "x": -1.4,
+                "y": 0,
+                "s": 9
+              },
+              {
+                "x": 2,
+                "y": 0,
+                "s": 8
+              },
+              {
+                "x": 0.3,
+                "y": -1.7,
+                "s": 9
+              }
+            ],
+            [
+              {
+                "x": 0.3,
+                "y": 1.7,
+                "s": 9
+              },
+              {
+                "x": -0.8899999999999999,
+                "y": 1.19,
+                "s": 8
+              },
+              {
+                "x": 1.49,
+                "y": -1.19,
+                "s": 9
+              }
+            ]
+          ]
+        },
+        {
+          "id": "mv430cigxthsl",
+          "date": "2026-10-12",
+          "setupId": null,
+          "dist": 18,
+          "faceD": 40,
+          "faceType": "single",
+          "perEnd": 3,
+          "shaft": 0.504,
+          "sightV": "",
+          "sightH": "",
+          "wx": "",
+          "note": "",
+          "windDir": "",
+          "windSpeed": "",
+          "round": "free",
+          "purpose": "practice",
+          "ends": [
+            [
+              {
+                "x": 0,
+                "y": 0,
+                "s": 10,
+                "X": true
+              }
+            ]
+          ]
+        },
+        {
+          "id": "mv43a7oiy7siw",
+          "date": "2026-10-12",
+          "setupId": null,
+          "dist": 18,
+          "faceD": 40,
+          "faceType": "single",
+          "perEnd": 3,
+          "shaft": 0.504,
+          "sightV": "",
+          "sightH": "",
+          "wx": "",
+          "note": "",
+          "windDir": "",
+          "windSpeed": "",
+          "round": "free",
+          "purpose": "practice",
+          "ends": [
+            [
+              {
+                "x": 0.6000000000000001,
+                "y": 0,
+                "s": 10,
+                "X": true
+              },
+              {
+                "x": 0,
+                "y": 0,
+                "s": 10,
+                "X": true
+              }
+            ]
+          ]
+        }
+      ],
+      "trash": [],
+      "formAnalyses": [],
+      "customRounds": [],
+      "settings": {
+        "eyeSight": 850,
+        "theme": "auto",
+        "fieldMode": false,
+        "lastBackupAt": null,
+        "activeGuideSeen": false,
+        "onboardingSeen": true,
+        "launchCount": 4,
+        "featureHints": {
+          "gearSetup": false,
+          "analysis": false,
+          "sightAdjust": false,
+          "formTracking": false,
+          "addToHome": false,
+          "practiceDays": false
+        },
+        "gamification": {
+          "enabled": false,
+          "practiceDays": null,
+          "goals": {
+            "dailyArrows": 36,
+            "weeklySessions": 3,
+            "monthlyArrows": 300
+          },
+          "backfilledAt": null
+        }
+      },
+      "gamification": {
+        "badges": []
+      },
+      "active": null,
+      "updatedAt": "2026-10-11T17:20:45.784Z"
+    },
+    "view": "analysis"
+  }
+}

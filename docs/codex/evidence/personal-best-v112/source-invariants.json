@@ -1,0 +1,12 @@
+{
+  "base": "49bb1d46d5c2f67b99ba613ebc9cc3b2c6c35f64",
+  "source": "6dabcff6ab73996e71693da348a271c9e1659cff",
+  "onlyRendererChanged": true,
+  "otherAllScriptsExact": true,
+  "mathPBCacheScoringCoordsStorageHandlersLayoutExact": true,
+  "versionOnlySW": true,
+  "old75TasksAllAcceptanceExact": true,
+  "dependenciesExact": true,
+  "lockOnlyVersion": true,
+  "sharedLock": "16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309"
+}

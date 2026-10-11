@@ -1,0 +1,132 @@
+{
+  "source": "6dabcff6ab73996e71693da348a271c9e1659cff",
+  "version": 112,
+  "loadedBodies": 15,
+  "rows": [
+    {
+      "path": "index.html",
+      "bytes": 6014,
+      "sha256": "62bed71867093b5d3381e2b4662397d473a0a7d1eb6de7ca8cd857b9a043ed78"
+    },
+    {
+      "path": "style.min.css",
+      "bytes": 66102,
+      "sha256": "3086ca81230b54f6dba4b824372ee65053df3a32bb20a060d556589795c5caf6"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 584,
+      "sha256": "15c82058a427d52cf51ab2b0ba55cb7dff45a2a0b9266dd5a5128e9da798c1e8"
+    },
+    {
+      "path": "sw.js",
+      "bytes": 4630,
+      "sha256": "093c819b78d37b7767abf0ba7f6bbe3b94c03c1212553f75a0718eead437c0f9"
+    },
+    {
+      "path": "icon.svg",
+      "bytes": 584,
+      "sha256": "3d8139a5fea8d992bbba05fc70ec40e3eecfaa7b4a4170c602dd0cdd19542ac7"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "bytes": 5001,
+      "sha256": "c46f061814e0afd68d86fd58a2cdd795768abc927c2de238e2853899573dc144"
+    },
+    {
+      "path": "version.json",
+      "bytes": 13,
+      "sha256": "fd4ad7c08fa9625afe4f9b691f4f4fd137932ce5e1a8672356b6d615b64e3ef1"
+    },
+    {
+      "path": "scripts/00-compat.js",
+      "bytes": 679,
+      "sha256": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f"
+    },
+    {
+      "path": "scripts/10-storage-native.js",
+      "bytes": 38970,
+      "sha256": "2be0dfac9df0445251900f2f802f9da01ff9f40d3944d2db580ae543849f2c6d"
+    },
+    {
+      "path": "scripts/20-scoring.js",
+      "bytes": 5906,
+      "sha256": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4"
+    },
+    {
+      "path": "scripts/30-target-svg.js",
+      "bytes": 4902,
+      "sha256": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e"
+    },
+    {
+      "path": "scripts/40-analysis-physics.js",
+      "bytes": 52807,
+      "sha256": "60a02f18d3c3b55883335643e3add6a88abfbb7be9e65d978f28d0bb68bac34f"
+    },
+    {
+      "path": "scripts/45-analysis-core.js",
+      "bytes": 11618,
+      "sha256": "2466d97c44d656ea426b1b7fc898f16a5793ae841398bc58ff1b0d421dbf4312"
+    },
+    {
+      "path": "scripts/46-form-core.js",
+      "bytes": 71651,
+      "sha256": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35"
+    },
+    {
+      "path": "scripts/47-form-view.js",
+      "bytes": 56077,
+      "sha256": "77d70efa70a146065a669cb13683860239d58775e171d5fa90a58a8c645b52c2"
+    },
+    {
+      "path": "scripts/48-gamification.js",
+      "bytes": 7051,
+      "sha256": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526"
+    },
+    {
+      "path": "scripts/49-todays-result.js",
+      "bytes": 8698,
+      "sha256": "49b6545fdac438f2b6050adc22913e9c7d5926b48414a0243fe43a9bde3d047c"
+    },
+    {
+      "path": "scripts/50-record-view.js",
+      "bytes": 93150,
+      "sha256": "2e880d9898a19eb976bfccdd2fde663f1646ac3daa619ea04a1cd6eedd4cffbb"
+    },
+    {
+      "path": "scripts/60-history-sight-view.js",
+      "bytes": 38037,
+      "sha256": "89778a3154d83669b9828df30a0fad36fbd96c59a231a959e624b8ec7d596c5b"
+    },
+    {
+      "path": "scripts/70-gear-settings.js",
+      "bytes": 68152,
+      "sha256": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a"
+    },
+    {
+      "path": "scripts/90-init.js",
+      "bytes": 2840,
+      "sha256": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26"
+    },
+    {
+      "path": "assets/pose/vision_bundle.mjs",
+      "bytes": 136870,
+      "sha256": "e77f281f9619150d937023c355bae170e9120e3b9e43f1e23a2a7bee07197669"
+    },
+    {
+      "path": "assets/pose/vision_wasm_internal.js",
+      "bytes": 209826,
+      "sha256": "9440cf0cc0cea21800e31581ec32aeedcc5fbf9df4509796bbc7d3f99e52ab9c"
+    },
+    {
+      "path": "assets/pose/vision_wasm_internal.wasm",
+      "bytes": 9423986,
+      "sha256": "f82a8e6c05e08a44cc9f9e7ec5f845935bcbb1b1500ebe8c2f4812fb4e2917dc"
+    },
+    {
+      "path": "assets/pose/pose_landmarker_lite.task",
+      "bytes": 5777746,
+      "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a"
+    }
+  ]
+}

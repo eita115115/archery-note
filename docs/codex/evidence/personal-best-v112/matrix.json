@@ -1,0 +1,5530 @@
+{
+  "metadata": {
+    "source": "6dabcff6ab73996e71693da348a271c9e1659cff",
+    "version": 112,
+    "public": false,
+    "note": "Owned final generated112, reduced-motion; actual Linux/public proof separate. Before images generated unchanged111 renderer, independently verified public111 parity."
+  },
+  "rows": [
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-dark-1-above--chromium/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 280.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 280.859375,
+          "right": 304,
+          "bottom": 355.84375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 280.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 280.859375,
+          "right": 304,
+          "bottom": 355.84375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-dark-1-below--chromium/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-dark-1-tie--chromium/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-dark-6-above--chromium/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-dark-6-below--chromium/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-dark-6-tie--chromium/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-light-1-above--chromium/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 280.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 280.859375,
+          "right": 304,
+          "bottom": 355.84375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 280.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 280.859375,
+          "right": 304,
+          "bottom": 355.84375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-light-1-below--chromium/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-light-1-tie--chromium/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 290.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.859375,
+          "right": 304,
+          "bottom": 345.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-light-6-above--chromium/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-light-6-below--chromium/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-320-light-6-tie--chromium/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 439,
+          "width": 320,
+          "height": 129,
+          "top": 439,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-dark-1-above--chromium/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-dark-1-below--chromium/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-dark-1-tie--chromium/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-dark-6-above--chromium/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-dark-6-below--chromium/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-dark-6-tie--chromium/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-light-1-above--chromium/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-light-1-below--chromium/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-light-1-tie--chromium/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-light-6-above--chromium/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-light-6-below--chromium/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "chrome",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/full-results/personal-best-projection-PB-projection-375-light-6-tie--chromium/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 683,
+          "width": 375,
+          "height": 129,
+          "top": 683,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-dark-1-above--webkit/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 279.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 279.859375,
+          "right": 304,
+          "bottom": 354.84375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 279.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 279.859375,
+          "right": 304,
+          "bottom": 354.84375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-dark-1-below--webkit/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-dark-1-tie--webkit/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-dark-6-above--webkit/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-dark-6-below--webkit/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-dark-6-tie--webkit/complete.json",
+      "width": 320,
+      "theme": "dark",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-light-1-above--webkit/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 279.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 279.859375,
+          "right": 304,
+          "bottom": 354.84375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 279.859375,
+          "width": 288,
+          "height": 74.984375,
+          "top": 279.859375,
+          "right": 304,
+          "bottom": 354.84375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-light-1-below--webkit/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-light-1-tie--webkit/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 289.859375,
+          "width": 288,
+          "height": 54.6875,
+          "top": 289.859375,
+          "right": 304,
+          "bottom": 344.546875,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-light-6-above--webkit/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-light-6-below--webkit/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-320-light-6-tie--webkit/complete.json",
+      "width": 320,
+      "theme": "light",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 290.546875,
+          "width": 288,
+          "height": 54.6875,
+          "top": 290.546875,
+          "right": 304,
+          "bottom": 345.234375,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 441,
+          "width": 320,
+          "height": 127,
+          "top": 441,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "scrollWidth": 288,
+        "clientWidth": 288,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-1-above--webkit/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-1-below--webkit/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-1-tie--webkit/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-6-above--webkit/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-6-below--webkit/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-dark-6-tie--webkit/complete.json",
+      "width": 375,
+      "theme": "dark",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-1-above--webkit/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 1,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 10,
+        "todayArrows": 1,
+        "remaining": -1,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 10点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値を 上回りました（+1点）\n\n推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "primary": "18m自己ベストの換算値を 上回りました（+1点）",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 10点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-1-below--webkit/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 1,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 7,
+        "todayArrows": 1,
+        "remaining": 2,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 7点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値まで あと2点\n\n推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "primary": "18m自己ベストの換算値まで あと2点",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 7点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-1-tie--webkit/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 1,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "avg-projected",
+        "bestTotal": 9,
+        "bestDate": "2026-10-02",
+        "todayTotal": 9,
+        "todayArrows": 1,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ 今日 9点",
+        "rect": {
+          "x": 16,
+          "y": 311.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 311.140625,
+          "right": 359,
+          "bottom": 365.828125,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストの換算値に 並びました\n\n推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "primary": "18m自己ベストの換算値に 並びました",
+        "detail": "推定・1本換算 9点（2026/10/2）・ この日 9点",
+        "rect": {
+          "x": 16,
+          "y": 336.140625,
+          "width": 343,
+          "height": 54.6875,
+          "top": 336.140625,
+          "right": 359,
+          "bottom": 390.828125,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-6-above--webkit/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 6,
+      "relation": "above",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 60,
+        "todayArrows": 6,
+        "remaining": -6,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1.1111111111111112,
+        "requiredAvg": 9,
+        "todayAvg": 10
+      },
+      "summary": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 60点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストを 更新（+6点）\n\n自己ベスト 54点（2026/10/2）・ この日 60点",
+        "primary": "18m自己ベストを 更新（+6点）",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 60点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        },
+        {
+          "saved": {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          "calculated": {
+            "s": 10,
+            "X": true
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-6-below--webkit/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 6,
+      "relation": "below",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 42,
+        "todayArrows": 6,
+        "remaining": 12,
+        "achieved": false,
+        "pace": "tracking",
+        "paceRatio": 0.7777777777777778,
+        "requiredAvg": 9,
+        "todayAvg": 7
+      },
+      "summary": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 42点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストまで あと12点\n\n自己ベスト 54点（2026/10/2）・ この日 42点",
+        "primary": "18m自己ベストまで あと12点",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 42点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 8,
+            "y": 0,
+            "s": 7,
+            "X": false
+          },
+          "calculated": {
+            "s": 7,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    },
+    {
+      "engine": "webkit",
+      "source": "artifacts/compact-js/sandbox/artifacts/personal-best-v112/webkit-results/personal-best-projection-PB-projection-375-light-6-tie--webkit/complete.json",
+      "width": 375,
+      "theme": "light",
+      "n": 6,
+      "relation": "tie",
+      "pb": {
+        "available": true,
+        "method": "exact-count",
+        "bestTotal": 54,
+        "bestDate": "2026-10-02",
+        "todayTotal": 54,
+        "todayArrows": 6,
+        "remaining": 0,
+        "achieved": true,
+        "pace": "reached",
+        "paceRatio": 1,
+        "requiredAvg": 9,
+        "todayAvg": 9
+      },
+      "summary": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ 今日 54点",
+        "rect": {
+          "x": 16,
+          "y": 365.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 365.828125,
+          "right": 359,
+          "bottom": 420.515625,
+          "left": 16
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "history": {
+        "text": "18m自己ベストに 並びました\n\n自己ベスト 54点（2026/10/2）・ この日 54点",
+        "primary": "18m自己ベストに 並びました",
+        "detail": "自己ベスト 54点（2026/10/2）・ この日 54点",
+        "rect": {
+          "x": 16,
+          "y": 390.828125,
+          "width": 343,
+          "height": 54.6875,
+          "top": 390.828125,
+          "right": 359,
+          "bottom": 445.515625,
+          "left": 16
+        },
+        "footer": {
+          "x": 0,
+          "y": 685,
+          "width": 375,
+          "height": 127,
+          "top": 685,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "scrollWidth": 343,
+        "clientWidth": 343,
+        "clear": true
+      },
+      "oldRecordsExact": true,
+      "reloadExact": true,
+      "scores": [
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        },
+        {
+          "saved": {
+            "x": 3.2,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          "calculated": {
+            "s": 9,
+            "X": false
+          }
+        }
+      ],
+      "errors": []
+    }
+  ]
+}
