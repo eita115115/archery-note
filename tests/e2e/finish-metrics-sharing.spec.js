@@ -16,7 +16,10 @@ function dataFor(kind, theme) {
     sessions.forEach((s, i) => {
       if (i % 3 < 2) s.ends = [s.ends[0].slice(0, (i % 3) + 1)];
     });
-  if (kind === "identity") sessions[1].id = sessions[0].id;
+  if (kind === "identity") {
+    sessions[1].id = sessions[0].id;
+    sessions[1].ends = [sessions[1].ends[0].slice(0, 3)];
+  }
   const n = kind === "sparse" ? 1 : 3;
   const cur = Array.from({ length: n }, (_, i) =>
     kind === "score-only" ? { s: 9, X: false } : { x: (i - 1) * 0.4, y: 0, s: 10, X: true },
@@ -223,7 +226,11 @@ test("same id distinct records retain distinct metrics", async ({ page }, info) 
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await setup(page, "identity", "light", 375);
-  await finish(page, info, "identity", "identity");
+  const observed = await finish(page, info, "identity", "identity");
+  const duplicates = observed.evidence.computations.filter((r) => r.id === "owned-metrics-0");
+  expect(duplicates).toHaveLength(2);
+  expect(duplicates.map((r) => r.calls)).toEqual([1, 1]);
+  expect(observed.data.sessions[0].ends).not.toEqual(observed.data.sessions[1].ends);
   expect(errors).toEqual([]);
 });
 test("next finish recomputes changed history after save", async ({ page }, info) => {
