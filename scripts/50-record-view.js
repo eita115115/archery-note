@@ -2028,10 +2028,17 @@ async function finishSession() {
   let growthBefore = null;
   if (!isEdit) {
     const trSessions = db.sessions.filter((x) => x && x.date && x.date <= s.date);
-    todaysResult = computeTodaysResult(trSessions, s.id, sessionMetrics, {
+    /* 同じ同期計算内の再参照だけを共有する。session/metricsはここでは変更せず、
+       既存のDB_REV署名cacheは初回に必ず通す。後のsave/summaryへ持ち越さない。 */
+    const resultMetrics = new WeakMap();
+    const metricsForResult = (session) => {
+      if (!resultMetrics.has(session)) resultMetrics.set(session, sessionMetrics(session));
+      return resultMetrics.get(session);
+    };
+    todaysResult = computeTodaysResult(trSessions, s.id, metricsForResult, {
       formAnalyses: db.formAnalyses,
     });
-    if (todaysResult.available) growthBefore = trGrowthBeforeFor(s, trSessions, sessionMetrics);
+    if (todaysResult.available) growthBefore = trGrowthBeforeFor(s, trSessions, metricsForResult);
   }
   const g = db.settings.gamification;
   if (g && g.enabled && !isEdit) {
