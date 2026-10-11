@@ -1,0 +1,10 @@
+{
+  "base": "4135db461f318bb56be7dcb2eca8f540868dbff5",
+  "releaseSource": "6dabcff6ab73996e71693da348a271c9e1659cff",
+  "allNonDocsTrackedGitCanonicalExact": true,
+  "noNewUntrackedRuntime": true,
+  "old76TasksExact": true,
+  "allAcceptanceExact": true,
+  "sharedLock": "16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309",
+  "version": 112
+}

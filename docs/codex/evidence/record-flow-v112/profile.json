@@ -1,0 +1,1570 @@
+[
+  {
+    "cpu": 1,
+    "count": 3,
+    "rep": 0,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 0.19999980926513672,
+        "selfMs": 0.19999980926513672,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 0.7999999523162842,
+        "selfMs": 0.5
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 0.7999999523162842,
+        "selfMs": 0
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0
+      },
+      "trAllArrows": {
+        "calls": 38,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "trSameCondition": {
+        "calls": 12,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 0.40000009536743164,
+        "selfMs": 0.2999999523162842
+      },
+      "sessionMetricSignature": {
+        "calls": 20,
+        "inclusiveMs": 1.1000001430511475,
+        "selfMs": 1.1000001430511475
+      },
+      "robustStats": {
+        "calls": 4,
+        "inclusiveMs": 1.0999996662139893,
+        "selfMs": 1.0999996662139893
+      },
+      "sessionMetrics": {
+        "calls": 20,
+        "inclusiveMs": 2.5,
+        "selfMs": 0.3000001907348633
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 13.099999904632568,
+        "selfMs": 11.200000047683716
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 0.40000009536743164,
+        "selfMs": 0.20000028610229492
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 0.7000000476837158,
+        "selfMs": 0.19999980926513672
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 14.299999952316284,
+        "selfMs": 0.09999990463256836
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 0.5999999046325684,
+        "selfMs": 0.19999980926513672
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 9,
+        "selfMs": 9
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 9.900000095367432,
+        "selfMs": 0.9000000953674316
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 0.5,
+        "selfMs": 0.5
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 10.599999904632568,
+        "selfMs": 0.19999980926513672
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.19999980926513672
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 19.59999990463257,
+        "selfMs": 19.59999990463257
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 0.7000000476837158,
+        "selfMs": 0.6000001430511475
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 33.30000019073486,
+        "selfMs": 1.8000001907348633
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 49.700000047683716,
+        "selfMs": 0.6000001430511475
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 1.1000001430511475,
+        "selfMs": 0.6000001430511475
+      }
+    }
+  },
+  {
+    "cpu": 1,
+    "count": 3,
+    "rep": 1,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 0.8999998569488525,
+        "selfMs": 0.39999985694885254
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 1,
+        "selfMs": 0.10000014305114746
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0
+      },
+      "trAllArrows": {
+        "calls": 38,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "trSameCondition": {
+        "calls": 12,
+        "inclusiveMs": 0.19999980926513672,
+        "selfMs": 0.19999980926513672
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.20000004768371582
+      },
+      "sessionMetricSignature": {
+        "calls": 20,
+        "inclusiveMs": 0.5999996662139893,
+        "selfMs": 0.5999996662139893
+      },
+      "robustStats": {
+        "calls": 4,
+        "inclusiveMs": 1.0999999046325684,
+        "selfMs": 1.0999999046325684
+      },
+      "sessionMetrics": {
+        "calls": 20,
+        "inclusiveMs": 2.499999761581421,
+        "selfMs": 0.8000001907348633
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 13.299999952316284,
+        "selfMs": 11.400000095367432
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 0.39999985694885254,
+        "selfMs": 0.20000004768371582
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 0.5,
+        "selfMs": 0.40000009536743164
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 14.599999904632568,
+        "selfMs": 0.20000004768371582
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 9.5,
+        "selfMs": 9.5
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 10.399999856948853,
+        "selfMs": 0.8999998569488525
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 0.5,
+        "selfMs": 0.5
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 11.299999952316284,
+        "selfMs": 0.10000014305114746
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.40000009536743164,
+        "selfMs": 0.3000001907348633
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 19.399999856948853,
+        "selfMs": 19.399999856948853
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 0.8000001907348633,
+        "selfMs": 0.7000000476837158
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 33.80000019073486,
+        "selfMs": 1.4000000953674316
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 50,
+        "selfMs": 0.39999985694885254
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 2,
+        "selfMs": 1.4000000953674316
+      }
+    }
+  },
+  {
+    "cpu": 1,
+    "count": 5000,
+    "rep": 0,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 19.100000143051147,
+        "selfMs": 19.100000143051147,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 0.5,
+        "selfMs": 0.5
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 37.59999990463257,
+        "selfMs": 26.799999713897705
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 37.59999990463257,
+        "selfMs": 0
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 0.3000001907348633,
+        "selfMs": 0.3000001907348633
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 0.3000001907348633,
+        "selfMs": 0
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 0.40000009536743164,
+        "selfMs": 0.09999990463256836
+      },
+      "trAllArrows": {
+        "calls": 55005,
+        "inclusiveMs": 32.79999852180481,
+        "selfMs": 32.79999852180481
+      },
+      "trSameCondition": {
+        "calls": 20000,
+        "inclusiveMs": 29.49999976158142,
+        "selfMs": 14.299999237060547
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 34.299999952316284,
+        "selfMs": 7.800000429153442
+      },
+      "sessionMetricSignature": {
+        "calls": 15018,
+        "inclusiveMs": 30.29999852180481,
+        "selfMs": 30.29999852180481
+      },
+      "robustStats": {
+        "calls": 5001,
+        "inclusiveMs": 62.799999475479126,
+        "selfMs": 62.799999475479126
+      },
+      "sessionMetrics": {
+        "calls": 15018,
+        "inclusiveMs": 113.70000052452087,
+        "selfMs": 20.60000252723694
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 116.20000004768372,
+        "selfMs": 24.80000066757202
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 17.799999952316284,
+        "selfMs": 8.700001955032349
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 49.59999990463257,
+        "selfMs": 15.899998664855957
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 194.70000004768372,
+        "selfMs": 0.8000001907348633
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 25.40000009536743,
+        "selfMs": 1.4000000953674316
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 5.599999904632568,
+        "selfMs": 5.599999904632568
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 6.400000095367432,
+        "selfMs": 0.8000001907348633
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 8.5,
+        "selfMs": 8.399999856948853
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 15.100000143051147,
+        "selfMs": 0.20000004768371582
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.19999980926513672
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 20.299999952316284,
+        "selfMs": 20.299999952316284
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 0.9000000953674316,
+        "selfMs": 0.9000000953674316
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 39.200000047683716,
+        "selfMs": 2.299999952316284
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 298.39999985694885,
+        "selfMs": 1.0999996662139893
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 9.900000095367432,
+        "selfMs": 9.900000095367432
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 35.19999980926514,
+        "selfMs": 16.399999856948853
+      }
+    }
+  },
+  {
+    "cpu": 1,
+    "count": 5000,
+    "rep": 1,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 19.200000047683716,
+        "selfMs": 19.200000047683716,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 0.3000001907348633,
+        "selfMs": 0.3000001907348633
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 35.200000047683716,
+        "selfMs": 25.199999809265137
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 35.200000047683716,
+        "selfMs": 0
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 0.19999980926513672,
+        "selfMs": 0.19999980926513672
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 0.19999980926513672,
+        "selfMs": 0
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 0.19999980926513672,
+        "selfMs": 0
+      },
+      "trAllArrows": {
+        "calls": 55005,
+        "inclusiveMs": 32.80000185966492,
+        "selfMs": 32.80000185966492
+      },
+      "trSameCondition": {
+        "calls": 20000,
+        "inclusiveMs": 32.59999966621399,
+        "selfMs": 16.69999885559082
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 34.5,
+        "selfMs": 6
+      },
+      "sessionMetricSignature": {
+        "calls": 15018,
+        "inclusiveMs": 29.09999942779541,
+        "selfMs": 29.09999942779541
+      },
+      "robustStats": {
+        "calls": 5001,
+        "inclusiveMs": 65.00000071525574,
+        "selfMs": 65.00000071525574
+      },
+      "sessionMetrics": {
+        "calls": 15018,
+        "inclusiveMs": 114.59999942779541,
+        "selfMs": 20.499999284744263
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 117.20000004768372,
+        "selfMs": 25.000000953674316
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 18,
+        "selfMs": 7.799998760223389
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 49.69999980926514,
+        "selfMs": 16.600000143051147
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 196.70000004768372,
+        "selfMs": 1
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 25.399999856948853,
+        "selfMs": 1.7000000476837158
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 5.599999904632568,
+        "selfMs": 5.599999904632568
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 6.6000001430511475,
+        "selfMs": 1.000000238418579
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 9,
+        "selfMs": 8.899999856948853
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 16.09999990463257,
+        "selfMs": 0.4999997615814209
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.39999985694885254,
+        "selfMs": 0.2999999523162842
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 19.600000143051147,
+        "selfMs": 19.600000143051147
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 0.7999999523162842,
+        "selfMs": 0.7999999523162842
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 39,
+        "selfMs": 1.8000001907348633
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 297.2999999523163,
+        "selfMs": 0.8000001907348633
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 9.400000095367432,
+        "selfMs": 9.400000095367432
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 36,
+        "selfMs": 17.09999990463257
+      }
+    }
+  },
+  {
+    "cpu": 4,
+    "count": 3,
+    "rep": 0,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 0.7000000476837158,
+        "selfMs": 0.7000000476837158,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 1.0999999046325684,
+        "selfMs": 1.0999999046325684
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 4.299999952316284,
+        "selfMs": 2.799999952316284
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 4.700000047683716,
+        "selfMs": 0.40000009536743164
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 0.40000009536743164,
+        "selfMs": 0.10000014305114746
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 0.40000009536743164,
+        "selfMs": 0
+      },
+      "trAllArrows": {
+        "calls": 38,
+        "inclusiveMs": 1.1000001430511475,
+        "selfMs": 1.1000001430511475
+      },
+      "trSameCondition": {
+        "calls": 12,
+        "inclusiveMs": 1.0999996662139893,
+        "selfMs": 0.8999998569488525
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 1.5,
+        "selfMs": 1.1000001430511475
+      },
+      "sessionMetricSignature": {
+        "calls": 20,
+        "inclusiveMs": 4.299999952316284,
+        "selfMs": 4.299999952316284
+      },
+      "robustStats": {
+        "calls": 4,
+        "inclusiveMs": 5.400000095367432,
+        "selfMs": 5.400000095367432
+      },
+      "sessionMetrics": {
+        "calls": 20,
+        "inclusiveMs": 12.100000143051147,
+        "selfMs": 2.4000000953674316
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 59.89999985694885,
+        "selfMs": 51.09999966621399
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 1.7000000476837158,
+        "selfMs": 0.6000001430511475
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 5.500000238418579,
+        "selfMs": 2.299999952316284
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 66,
+        "selfMs": 0.7999999523162842
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 3.5999999046325684,
+        "selfMs": 0.19999980926513672
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 34.90000009536743,
+        "selfMs": 34.90000009536743
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 40.09999990463257,
+        "selfMs": 5.199999809265137
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 4.5,
+        "selfMs": 4
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 45.5,
+        "selfMs": 0.9000000953674316
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.5999999046325684,
+        "selfMs": 0.5999999046325684
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 2.0999999046325684,
+        "selfMs": 1.5
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 2.200000047683716,
+        "selfMs": 2.200000047683716
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 92.5,
+        "selfMs": 92.5
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 4.400000095367432,
+        "selfMs": 4.300000190734863
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 159.09999990463257,
+        "selfMs": 11.999999761581421
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 236.20000004768372,
+        "selfMs": 2.4000000953674316
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 1.6999998092651367,
+        "selfMs": 1.6999998092651367
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.39999985694885254,
+        "selfMs": 0.39999985694885254
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 4.799999952316284,
+        "selfMs": 2.3000001907348633
+      }
+    }
+  },
+  {
+    "cpu": 4,
+    "count": 3,
+    "rep": 1,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 1.0999999046325684,
+        "selfMs": 1.0999999046325684,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 1,
+        "selfMs": 1
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 4.299999952316284,
+        "selfMs": 2.700000047683716
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 4.6000001430511475,
+        "selfMs": 0.3000001907348633
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 0.2999999523162842,
+        "selfMs": 0.2999999523162842
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 0.5,
+        "selfMs": 0.20000004768371582
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 0.5,
+        "selfMs": 0
+      },
+      "trAllArrows": {
+        "calls": 38,
+        "inclusiveMs": 0.6000001430511475,
+        "selfMs": 0.6000001430511475
+      },
+      "trSameCondition": {
+        "calls": 12,
+        "inclusiveMs": 0.8999998569488525,
+        "selfMs": 0.8999998569488525
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 1.3999998569488525,
+        "selfMs": 1
+      },
+      "sessionMetricSignature": {
+        "calls": 20,
+        "inclusiveMs": 4.499999523162842,
+        "selfMs": 4.499999523162842
+      },
+      "robustStats": {
+        "calls": 4,
+        "inclusiveMs": 7.400000333786011,
+        "selfMs": 7.400000333786011
+      },
+      "sessionMetrics": {
+        "calls": 20,
+        "inclusiveMs": 14.099999904632568,
+        "selfMs": 2.200000047683716
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 71.30000019073486,
+        "selfMs": 60.40000009536743
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 1.8999998569488525,
+        "selfMs": 1.1999998092651367
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 5.6000001430511475,
+        "selfMs": 2.9000003337860107
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 77.5,
+        "selfMs": 1
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 3.9000000953674316,
+        "selfMs": 0.20000004768371582
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 32.799999952316284,
+        "selfMs": 32.799999952316284
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 37.30000019073486,
+        "selfMs": 4.500000238418579
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 2.700000047683716,
+        "selfMs": 2.500000238418579
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 41.200000047683716,
+        "selfMs": 0.9999997615814209
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.6000001430511475,
+        "selfMs": 0.6000001430511475
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 3,
+        "selfMs": 2.3999998569488525
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.19999980926513672,
+        "selfMs": 0.19999980926513672
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 1.2000000476837158,
+        "selfMs": 1.2000000476837158
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 100.10000014305115,
+        "selfMs": 100.10000014305115
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 5,
+        "selfMs": 4.699999809265137
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 161.29999995231628,
+        "selfMs": 10.299999952316284
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 250.20000004768372,
+        "selfMs": 2.3999998569488525
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 1.3999998569488525,
+        "selfMs": 1.3999998569488525
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.39999985694885254,
+        "selfMs": 0.39999985694885254
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 4.400000095367432,
+        "selfMs": 1.700000286102295
+      }
+    }
+  },
+  {
+    "cpu": 4,
+    "count": 5000,
+    "rep": 0,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 67.40000009536743,
+        "selfMs": 67.40000009536743,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 1.7999999523162842,
+        "selfMs": 1.7999999523162842
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 149.29999995231628,
+        "selfMs": 113.59999990463257
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 149.29999995231628,
+        "selfMs": 0
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 1.1000001430511475,
+        "selfMs": 1.1000001430511475
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 1.2000000476837158,
+        "selfMs": 0.09999990463256836
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 1.4000000953674316,
+        "selfMs": 0.20000004768371582
+      },
+      "trAllArrows": {
+        "calls": 55005,
+        "inclusiveMs": 155.19999980926514,
+        "selfMs": 155.19999980926514
+      },
+      "trSameCondition": {
+        "calls": 20000,
+        "inclusiveMs": 132.4999988079071,
+        "selfMs": 73.60000014305115
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 141.29999995231628,
+        "selfMs": 26.300000429153442
+      },
+      "sessionMetricSignature": {
+        "calls": 15018,
+        "inclusiveMs": 131.59999918937683,
+        "selfMs": 131.59999918937683
+      },
+      "robustStats": {
+        "calls": 5001,
+        "inclusiveMs": 261.00000071525574,
+        "selfMs": 261.00000071525574
+      },
+      "sessionMetrics": {
+        "calls": 15018,
+        "inclusiveMs": 488.5999984741211,
+        "selfMs": 95.99999856948853
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 505.59999990463257,
+        "selfMs": 113.90000057220459
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 78.60000014305115,
+        "selfMs": 33.90000057220459
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 240.40000009536743,
+        "selfMs": 75.69999980926514
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 860.2000000476837,
+        "selfMs": 4.3999998569488525
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 115.60000014305115,
+        "selfMs": 5.300000190734863
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 24.799999952316284,
+        "selfMs": 24.799999952316284
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 29.700000047683716,
+        "selfMs": 4.900000095367432
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 41.10000014305115,
+        "selfMs": 40.700000524520874
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 72.79999995231628,
+        "selfMs": 1.999999761581421
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.6000001430511475,
+        "selfMs": 0.6000001430511475
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 2.200000047683716,
+        "selfMs": 1.5999999046325684
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.10000014305114746,
+        "selfMs": 0.10000014305114746
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.19999980926513672,
+        "selfMs": 0.19999980926513672
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 1,
+        "selfMs": 1
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 89.59999990463257,
+        "selfMs": 89.59999990463257
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 11.900000095367432,
+        "selfMs": 11.600000143051147
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 187.09999990463257,
+        "selfMs": 8.899999856948853
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 1318.7000000476837,
+        "selfMs": 5.099999904632568
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 26.700000047683716,
+        "selfMs": 26.700000047683716
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.5,
+        "selfMs": 0.5
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0.09999990463256836,
+        "selfMs": 0.09999990463256836
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.5999999046325684,
+        "selfMs": 0.5999999046325684
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 142.29999995231628,
+        "selfMs": 80.90000009536743
+      }
+    }
+  },
+  {
+    "cpu": 4,
+    "count": 5000,
+    "rep": 1,
+    "browser": "149.0.7827.55",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.7827.55 Safari/537.36",
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "errors": [],
+    "functions": {
+      "storageSetItem": {
+        "calls": 2,
+        "inclusiveMs": 69.5,
+        "selfMs": 69.5,
+        "keys": {
+          "archeryNote.v1": 1,
+          "archeryNote.snapshots.v1": 1
+        }
+      },
+      "scheduleSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 5.3999998569488525,
+        "selfMs": 5.3999998569488525
+      },
+      "writeDbNow": {
+        "calls": 1,
+        "inclusiveMs": 170.39999985694885,
+        "selfMs": 130.20000004768372
+      },
+      "save": {
+        "calls": 1,
+        "inclusiveMs": 170.39999985694885,
+        "selfMs": 0
+      },
+      "storageUsage": {
+        "calls": 1,
+        "inclusiveMs": 2.6000001430511475,
+        "selfMs": 2.6000001430511475
+      },
+      "storageUsageRatio": {
+        "calls": 1,
+        "inclusiveMs": 3.9000000953674316,
+        "selfMs": 1.2999999523162842
+      },
+      "maybeWarnStorageNearFull": {
+        "calls": 1,
+        "inclusiveMs": 4.5,
+        "selfMs": 0.5999999046325684
+      },
+      "trAllArrows": {
+        "calls": 55005,
+        "inclusiveMs": 138.6000006198883,
+        "selfMs": 138.6000006198883
+      },
+      "trSameCondition": {
+        "calls": 20000,
+        "inclusiveMs": 126.49999809265137,
+        "selfMs": 68.29999780654907
+      },
+      "computeWeeklyDiff": {
+        "calls": 1,
+        "inclusiveMs": 131.40000009536743,
+        "selfMs": 24.000001430511475
+      },
+      "sessionMetricSignature": {
+        "calls": 15018,
+        "inclusiveMs": 128.19999504089355,
+        "selfMs": 128.19999504089355
+      },
+      "robustStats": {
+        "calls": 5001,
+        "inclusiveMs": 265.8000011444092,
+        "selfMs": 265.8000011444092
+      },
+      "sessionMetrics": {
+        "calls": 15018,
+        "inclusiveMs": 484.7999951839447,
+        "selfMs": 90.79999899864197
+      },
+      "computeStabilityTrend": {
+        "calls": 1,
+        "inclusiveMs": 505.90000009536743,
+        "selfMs": 117.10000085830688
+      },
+      "computePersonalBestDistance": {
+        "calls": 1,
+        "inclusiveMs": 77.40000009536743,
+        "selfMs": 34.50000190734863
+      },
+      "computeGrowthStreaks": {
+        "calls": 2,
+        "inclusiveMs": 225.40000009536743,
+        "selfMs": 73.50000238418579
+      },
+      "computeTodaysResult": {
+        "calls": 1,
+        "inclusiveMs": 835.2999999523163,
+        "selfMs": 5.299999713897705
+      },
+      "trGrowthBeforeFor": {
+        "calls": 1,
+        "inclusiveMs": 115.70000004768372,
+        "selfMs": 5.299999952316284
+      },
+      "trajectoryModel": {
+        "calls": 1,
+        "inclusiveMs": 21.90000009536743,
+        "selfMs": 21.90000009536743
+      },
+      "adviceModel": {
+        "calls": 1,
+        "inclusiveMs": 25.899999856948853,
+        "selfMs": 3.999999761581421
+      },
+      "personalModel": {
+        "calls": 1,
+        "inclusiveMs": 36.90000009536743,
+        "selfMs": 36.50000023841858
+      },
+      "adviceFor": {
+        "calls": 1,
+        "inclusiveMs": 64.90000009536743,
+        "selfMs": 2.1000001430511475
+      },
+      "todaysResultPersonalBestRowHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.5,
+        "selfMs": 0.5
+      },
+      "todaysResultHtml": {
+        "calls": 1,
+        "inclusiveMs": 2,
+        "selfMs": 1.5
+      },
+      "trustHtml": {
+        "calls": 1,
+        "inclusiveMs": 0,
+        "selfMs": 0
+      },
+      "personalModelHtml": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "conditionHtml": {
+        "calls": 1,
+        "inclusiveMs": 1,
+        "selfMs": 1
+      },
+      "openModal": {
+        "calls": 1,
+        "inclusiveMs": 89,
+        "selfMs": 89
+      },
+      "plotSession": {
+        "calls": 1,
+        "inclusiveMs": 4,
+        "selfMs": 4
+      },
+      "openSummary": {
+        "calls": 1,
+        "inclusiveMs": 169.5,
+        "selfMs": 8.399999856948853
+      },
+      "finishSession": {
+        "calls": 1,
+        "inclusiveMs": 1305,
+        "selfMs": 9.600000143051147
+      },
+      "hashText": {
+        "calls": 1,
+        "inclusiveMs": 26.799999952316284,
+        "selfMs": 26.799999952316284
+      },
+      "readSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.5999999046325684,
+        "selfMs": 0.5999999046325684
+      },
+      "dataCounts": {
+        "calls": 1,
+        "inclusiveMs": 0.20000004768371582,
+        "selfMs": 0.20000004768371582
+      },
+      "thinSnapshots": {
+        "calls": 1,
+        "inclusiveMs": 0.9000000953674316,
+        "selfMs": 0.9000000953674316
+      },
+      "writeSafetySnapshot": {
+        "calls": 1,
+        "inclusiveMs": 142.29999995231628,
+        "selfMs": 79.09999990463257
+      }
+    }
+  }
+]

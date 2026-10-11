@@ -1,0 +1,27 @@
+{
+  "originalRunRetained": true,
+  "originalFrameClockComparisonWithdrawn": true,
+  "clockIssue": "Original toRaf2 used rAF supplied timestamp minus capture performance.now; CPU4-r1 non-primary click at arrow1=-8.8ms and arrow3=-0.7ms. Positive primary deltas also excluded from elapsed comparisons. Corrected full38 uses performance.now inside second callback, retaining raw frameClockDelta.",
+  "review": {
+    "reviewer": "review_record_flow_audit",
+    "first": "Critical none; Important profile skipped nonexistent pushSafetySnapshot; Minor capture scope and center coordinate claims.",
+    "second": "Supplemental12 supports only scoped diagnosis; full corrected38 selected to preserve all-condition acceptance.",
+    "third": "bundle2 Critical/Important none unresolved; Minor gate corrected completion and distinguish snapshot call from actual write.",
+    "fixesBeforeProfileExecution": "writeSafetySnapshot actual name; all functions required; snapshotPending/job completion and body calls>0; original+corrected38 gates; storageSetItem keys counted as calls, not successful snapshot writes. Coordinate claims limited to observed input persistence and nudge+x0.6."
+  },
+  "preparationFailures": [
+    {
+      "kind": "read-only peek inline Node eval",
+      "exit": 1,
+      "outputExcerpt": "Expected ';', '}' or <eof> / SyntaxError: Unexpected token ')' / Node.js v22.19.0",
+      "resolution": "Moved corrected peek expression into peek.cjs; main measurement unaffected."
+    },
+    {
+      "kind": "artifact invariant patch",
+      "outputExcerpt": "apply_patch verification failed: invalid patch: multiple operations target .../artifacts/record-flow-v112/invariants.cjs",
+      "resolution": "No partial patch; corrected Update File succeeded. Invariant not yet executed at this point. Binary assets prompted canonical git diff check instead of git-show binary maxBuffer."
+    }
+  ],
+  "appChanged": false,
+  "physicalPhoneFieldINPOrActualPaintClaim": false
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-320-no-preference-5000-r0-summary.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-320-no-preference-5000-r0-summary.png",
+    "sha256": "62e2f071e7493794e3b4ed5d3286a53a017ebf6682b29f8f83dacc127f3a98d1",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-320-no-preference-5000-r0-pb.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-320-no-preference-5000-r0-pb.png",
+    "sha256": "31a473ad97196c9551ed8be4ca762fdd2a0ba8a7c48965dfa1735574750d73aa",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-320-reduce-5000-r0-summary.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-320-reduce-5000-r0-summary.png",
+    "sha256": "55c322e4ab38a322949e03b7446c5a65f657a8e6f96d3481417e0c1946e2dd2c",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-320-reduce-5000-r0-pb.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-320-reduce-5000-r0-pb.png",
+    "sha256": "03a91732d743550e7523d98c79c2500accef1190a05c923657209379a09c3f88",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-375-no-preference-5000-r0-summary.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-375-no-preference-5000-r0-summary.png",
+    "sha256": "108a97ffb429377a149655e3a30d126c50b2f8414d084e635fc4bacaae2c9cd7",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-375-no-preference-5000-r0-pb.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-375-no-preference-5000-r0-pb.png",
+    "sha256": "108a97ffb429377a149655e3a30d126c50b2f8414d084e635fc4bacaae2c9cd7",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-375-reduce-5000-r0-summary.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-375-reduce-5000-r0-summary.png",
+    "sha256": "0324efaf6dca306fca41b10b2590571b1f855739a975f2b35f54cadaf6cfb16a",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/chromium-375-reduce-5000-r0-pb.png",
+    "to": "docs/screenshots/record-flow-v112/chromium-375-reduce-5000-r0-pb.png",
+    "sha256": "0324efaf6dca306fca41b10b2590571b1f855739a975f2b35f54cadaf6cfb16a",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/public-chromium-320-summary.png",
+    "to": "docs/screenshots/record-flow-v112/public-chromium-320-summary.png",
+    "sha256": "5f8a89b57ef83366866f6b98ea06ce45e10c930774984841a0ed95d62de03440",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/public-chromium-320-pb.png",
+    "to": "docs/screenshots/record-flow-v112/public-chromium-320-pb.png",
+    "sha256": "3d433373d66bddf7ab4104628b84be9a84dbce235b4ba47b33f478ae6256910b",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/public-chromium-375-summary.png",
+    "to": "docs/screenshots/record-flow-v112/public-chromium-375-summary.png",
+    "sha256": "cd41d32380540f99c34a49c72a52c9f43ef98e3fd51bd83981c911d4d9c07aec",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/corrected/public-chromium-375-pb.png",
+    "to": "docs/screenshots/record-flow-v112/public-chromium-375-pb.png",
+    "sha256": "cd41d32380540f99c34a49c72a52c9f43ef98e3fd51bd83981c911d4d9c07aec",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/chromium-320-no-preference-5000-r0-summary.png",
+    "to": "docs/screenshots/record-flow-v112/original-chromium-320-no-preference-5000-r0-summary.png",
+    "sha256": "62e2f071e7493794e3b4ed5d3286a53a017ebf6682b29f8f83dacc127f3a98d1",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/record-flow-v112/chromium-320-no-preference-5000-r0-pb.png",
+    "to": "docs/screenshots/record-flow-v112/original-chromium-320-no-preference-5000-r0-pb.png",
+    "sha256": "31a473ad97196c9551ed8be4ca762fdd2a0ba8a7c48965dfa1735574750d73aa",
+    "viewedOriginal": true
+  }
+]

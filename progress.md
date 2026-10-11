@@ -4,6 +4,9 @@
 
 ## 現在地
 
+- AN077監査完了、branch codex/record-flow-audit、plan e9d33c9 / docs/codex/record-flow-performance-audit.md。実Linux112/public25一致、訂正38 native経路/418操作はgeometry-fivehit/scoreX/旧全件+新3本/reloadexact/errors0。Chrome375抑制motionの終了3件47.6ms→5000件227.0ms、CPU4では239.5→998.5ms、WebKit50.0→348.0ms（各2回、capture→第2rAF callback、実paint/fieldINPではない）。別8profileは当日結果/metrics/署名の反復参照を支持、保存/DOMの負担も残る。容量警告が320結果文へ重なる画像を保持、未修正。
+- 原38のsupplied rAF timestamp差は正値もelapsed解釈撤回、元raw保持＋callback内performance.nowの全38を別directoryで完走（timeout restartなし）。profile必須関数/実writeSafetySnapshot/idle完了/call≠書込を訂正、全browser閉鎖。代表14原寸PNG/copySHA一致、format/invariants/archive成功、旧76tasks/全acceptance/sharedlock保持。docs/codex/evidence/record-flow-v112にraw・profile・source・出力、ledger/tasks更新。公開112/source6dabcff不変、同sourceAN076全272/CI38158744620を明示して再利用。費用個人情報不使用・大目標active、今回はlocal監査notesのみ。
+
 - AN076完了、公開v112/source/main `6dabcff6ab73996e71693da348a271c9e1659cff`。PB rendererだけで換算値の未達/並ぶ/超えると「推定・今回本数換算」を常に明示。同本数HTML/PB計算/採点/保存/全他機能保持、版112一括。18computedunit、Chrome26/WK26、最終272passed3.7m/checkall/lint/format/独立review成功。48セル＋4native、旧3/score/座標/reloadexact/errors0、代表15原寸PNG/copyexact。
 - CI38158744620 validate/deploy成功/Linux272passed5.7m、実artifact11709683442/26regularfiles、実Linux/public25byte・元first15/canonical14一致。元public111context publication456098ms<fresh597000ms、記録中update保留→finish4/banner/112cacheonly/旧4exact→320native1/3nudge/解除/次矢cur2/offlineSWreload/finish5。結果・履歴の推定2本換算と旧4＋cur2/reload/errors0確認。分析の即時DOM比較待ちassertで元exit1、保持元context検査で可読、helper strict2要素もfirstへ訂正しhistory/reloadまで回復。reset/記録retapなし、rootcause未断定、元failureを保存。
 - docs/codex/personal-best-projection.md/evidence/personal-best-v112、progress/tasks/ledger。旧75taskobjects/全acceptance/sharedhiddenlock保持、公開証拠後だけAN076pass/evidence。所有worktree/Node22/sandbox、branch codex/personal-best-projection。費用/個人情報不使用、大目標active。今回の公開CIはsource6dabcff、公開後notes commitはlocal保存のみ。
@@ -32,7 +35,7 @@
 
 ## 次と未解決
 
-- 次の一小タスク: 公開112の記録フローを性能・操作性の観点で測定する。320/375の開始→的入力→微調整→解除→エンド/終了、通常/抑制motionと所有の大きな架空履歴で入力遅延/long task/scroll/操作hitを対照し、次の最小改善を証拠から選ぶ。現時点で性能改善やINP達成を主張せず、既存実記録は使わない。新runで監査し、今回AN076へ実装を混ぜない。
+- 次の一小タスク候補: 終了時の同じ同期計算内に限り当日結果とgrowthBeforeのmetricsを共有し、5000件で15018回のsessionMetrics/署名参照の重複を減らす。global DB_REV/cacheや履歴件数を変更せず、同日/過去日/編集/成長/少数資格と保存・採点を対照する。実装と同条件再測定は新runへ分け、改善量はまだ主張しない。5001回の統計計算/保存/DOMは残り得る。320結果への容量警告重なりは別修正。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。
 - 元AN065fourabort/AN066fling/AN070閉鎖native-scroll/IABAN067閉鎖/公開98→99/99→100失敗profilesは別未回復。AN068元ReferenceError/debounceは同context/no-retap回復済み。

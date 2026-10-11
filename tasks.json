@@ -911,9 +911,9 @@
 {
   "id": "AN-077",
   "task": "記録フローの性能と操作性を架空履歴で測定する",
-  "status": "in-progress",
-  "passes": false,
-  "evidence": "",
+  "status": "done",
+  "passes": true,
+  "evidence": "audit only/source6dabcff6ab73996e71693da348a271c9e1659cff/v112 unchanged;actualLinux112/public25byte exact;corrected Chrome-WebKit320375 normal-reduce x owned3/5000 x2 base32+CPU4x4+public2=38native/418actions geometry-fivehit/scoreX/observedcoords+nudge+x0.6/oldall+new3/reloadexact/errors0. Original38 retained but all supplied-rAF timestamp elapsed comparisons withdrawn after nonprimary CPU4 negative -8.8/-0.7ms; full corrected38 callback-performance-now exit0, not timeout restart.375reduce finish medians3-to5000 Chrome47.6-to227.0ms/CPU4 239.5-to998.5/WebKit50.0-to348.0,n2/lab capture excludes inputqueue/paint/fieldINP. Separate8profiles support historymetrics repeated15018calls/5001robustStats; wrapper times not matrix/speedup; actual writeSafetySnapshot required/idle observed/call not write.320 capacitytoast overlaps result text with synthetic5000, retained/unfixed. docs/codex/record-flow-performance-audit.md/evidence/record-flow-v112/14original-viewedPNG copySHAexact, raworiginal38+corrected38/profile8/source/fixtures/outputs. formatcheck/invariants/archive pass/old76tasks/allacceptance/sharedhiddenlock exact. Readonly harness review corrected Important nonexistent snapshot function/clockscope; same-sourceAN076272passed3.7m and CI38158744620/Linux272passed5.7m explicitly reused not rerun. No appfix/versionbump/release; next operation-local metrics sharing without globalcache/DB_REV/historycap changes; goalactive/money-private data unused/physicalphone-INP-WKstrictOffline-oldclosedprofiles unproven",
   "dependencies": [
     "AN-076"
   ],

@@ -1,0 +1,18 @@
+[
+  {
+    "count": 3,
+    "arrows": 18,
+    "bytes": 3450,
+    "sha256": "04df3d8719829c8f6bc8158e0d3c6ec812ebd7eddc716b380945ce332fbe61f2",
+    "generator": "harness-source.json; audit.cjs fixture() uses source6dabcff20-scoring.js and fixed dates",
+    "scope": "owned synthetic, no user data"
+  },
+  {
+    "count": 5000,
+    "arrows": 30000,
+    "bytes": 5169538,
+    "sha256": "beb0d11f43b69445d810dcf3e055b0beac4573bacad85d4500d062286882db8f",
+    "generator": "harness-source.json; audit.cjs fixture() uses source6dabcff20-scoring.js and fixed dates",
+    "scope": "owned synthetic, no user data"
+  }
+]
