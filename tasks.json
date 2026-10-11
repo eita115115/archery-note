@@ -886,9 +886,9 @@
   {
     "id": "AN-075",
     "task": "分析と履歴助言のグルーピング資格を揃え少数本の誤解釈を防ぐ",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "公開v111/source97e89934953e4ed6224664c40d49eddaddd99645、CI37253017560 validate/deploy success/Linux246passed5.1m/artifact11321214071。immutable110回帰19fail/43→43green、checkall/lint/format/final246passed3.8m、testJSON保存後Chrome21passed24.4s/WK21passed29.2s/40セル＋2native保存reload旧3/score/座標exact/errors0。独立実装/fixture/短文bounds/JSON差分review blockingなし。実Linux/public25byte/元更新first15/canonical14一致、元public110context native1/activeupdateblock/finish4/banner/111cacheonly/320native1→nudge3→解除→次矢cur2/offlineSWreload/finish5旧4exact/結果履歴pending・分析KPI比較待ちscore上向き保持/reload/errors0、publication424772ms<fresh597000ms。docs/codex/analysis-grouping-evidence.mdとevidence/analysis-grouping-v111、代表14原寸画像copyexact。AST/math/cache/scoring/storage/schema/handlers/layout/deps/SWactivation/PB保持、旧74task/全acceptance/sharedhiddenlockexact、PB注記/実phone/fullmotionINP/WKstrictOffline/旧閉鎖profile回復は別未完、大目標active。",
     "dependencies": [
       "AN-074"
     ],

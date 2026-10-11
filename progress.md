@@ -4,9 +4,10 @@
 
 ## 現在地
 
-- AN075進行中、公開110保持。共通座標資格と表示精度を分析/履歴助言へ適用し、score/rawstats/math/cache/座標/保存/handlers/layout/依存/SWactivation保持をAST/sourceで確認。候補111（7884b34実装/5c20432版/3e859b5fixture/d00b3b1短文copy）、未公開/未pass。
-- immutable旧110の新回帰19fail/43→候補43green、既存characterization/todaysresultgreen。Chrome21passed24.6s、WK21passed1.1m、checkall/lint/format/local110→111更新・旧3→4→5/cur2/offline/errors0予行pass。初unit重複windText/setup wrappernpm path/誤selector9fail/12passと一時UIprofileEBUSYは保存、setup/対象を具体的に訂正し既存lock解除確認後に通過。独立3e859b5レビューblockingなし、minor6/12/18fixture契約を修正。
-- 原寸320で長文conclusionが426..502.5/nav488..560へ重なると別ownedreadonlyprobeで確認。短文へ変更、paragraph/navの初期可読boundsを回帰追加。長文時full246 E2Eの同live14810は終了までsandbox/dist保持、終了後短文版のChrome/WK40UI/全E2Eと最終チェック、実public110所有context更新/CI/Linux/publicbytes確認が残る。費用/個人情報不使用、大目標active。次候補PB換算注記は別タスク。
+- AN075完了、公開v111/source/main `97e89934953e4ed6224664c40d49eddaddd99645`。最低座標資格total/n>=3・finiteRMSと可読方向差を分析/履歴助言へ共通化。最新1/2本を過去の改善で代用せず比較待ち、period/conditionのRMS母集団だけ絞る。score/rawstats/math/cache/座標/保存/schema/handlers/layout/依存/SWactivation/PB計算はAST/source exact、版111だけ一括。
+- immutable旧110の最終回帰19fail/43→候補43green、checkall/lint/format成功、短文最終runtime全246passed3.8m。最後のJSON保存だけのtest差分後Chrome21passed24.4s/WK21passed29.2s、40セルDOM/数値と2native保存reload旧3/score/座標exact/errors0をdurable保存。320長文重なりは元426..502.5/nav488..560を保存、短文＋settled paragraph/nav boundsで解消。初unit重複windText/npm setup/selector9fail12pass/一時profileEBUSY/初JSON非durableは元出力保持、具体訂正後成功。独立immutable実装/fixture/短文/JSON差分review blockingなし。
+- CI37253017560 validate/deploy success/Linux246passed5.1m、実artifact11321214071/26regularfiles安全抽出。実Linux/public25byte/保持browser firstdocument15/canonical14一致。元public110 context旧3/native1/15warmnormal600、publication424772ms<fresh597000ms/記録中updateblocked/nativefinish4/banner/cache111only/旧4exact。320新開始native1→3nudge→解除→native次矢cur2/offlineSWreload旧4+cur2exact/nativefinish5/結果履歴pending・分析KPI比較待ち・score上向き保持/reload/errors0。reset/recreate/retrytapなし、成功browser閉鎖。
+- docs/codex/analysis-grouping-evidence.md/evidenceJSONと前後代表14画像原寸表示/copyexact、tasks/progress/ledger更新。旧74task/全acceptance/sharedhiddenlock保持、AN075公開後pass/evidence。費用/個人情報不使用、大目標active。所有worktree C:/Users/eita2/.codex/worktrees/app-quality/archery-note、branch codex/analysis-grouping-evidence、ownedsandbox/Node22.19、root/original junctionのinstall/ci/update禁止。共有hiddenlock16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309。
 
 ### 前回監査（AN074）
 
@@ -27,7 +28,7 @@
 
 ## 次と未解決
 
-- 次の一小タスクAN075: 分析のRMS/結論/方向提案/period/condition/KPIと履歴conditionInsightsの良好/方向助言の座標資格を結果/履歴の比較欄と揃える。score/allrows/rawstats/座標/数学/保存保持、少数最新を過去の改善で代用しない。独立reviewは履歴1/2本の比較保留と別助言「良好」の矛盾も確認。今回実110redから最小修正/回帰/UI/保存/レビュー/承認済み公開へ。PB換算の達成注記は次の別修正。参照docs/codex/analysis-evidence-audit.md。
+- 次の一小タスク: PB換算到達時の注記保持。AN074実110監査のpersonalBest avg-projectedでbelow時は換算注記、tie/aboveで注記が消える。PB計算/score母集団/保存は保ち、達成時も換算と実合計を読み違えない最小renderer修正へ。実監査red、focused回帰/320375UI/保存/review/承認済み公開を別runで進める。参照docs/codex/analysis-evidence-audit.md、今回AN075とは混ぜない。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。
 - 元AN065fourabort/AN066fling/AN070閉鎖native-scroll/IABAN067閉鎖/公開98→99/99→100失敗profilesは別未回復。AN068元ReferenceError/debounceは同context/no-retap回復済み。

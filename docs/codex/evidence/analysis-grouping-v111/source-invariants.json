@@ -1,0 +1,34 @@
+{
+  "base": "2aeda7c0bec1b4fa87d9c476c9cc2af351b3f440",
+  "source": "97e89934953e4ed6224664c40d49eddaddd99645",
+  "changedFunctions": {
+    "40-analysis-physics.js": [
+      "shapeNote",
+      "conditionInsights",
+      "analysisHasGroupingEvidence",
+      "analysisSpreadDirection"
+    ],
+    "45-analysis-core.js": [
+      "growthDashboard",
+      "nextPracticeSuggestions",
+      "aggregateByPeriod",
+      "conditionSplit",
+      "todayConclusion"
+    ],
+    "49-todays-result.js": [
+      "trHasGroupingEvidence"
+    ],
+    "50-record-view.js": [
+      "analysisKpiHtml",
+      "groupingSessionRow"
+    ]
+  },
+  "otherFunctionsStatementsExact": true,
+  "scoreSVGstyleLayoutExact": true,
+  "storageOnlyVersion": true,
+  "SWOnlyVersion": true,
+  "old74TasksAcceptanceExact": true,
+  "dependenciesExact": true,
+  "lockOnlyVersion": true,
+  "sharedLock": "16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309"
+}

@@ -1,0 +1,72 @@
+[
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-014fd-across-analysis-and-history-webkit/native-summary.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-one-native-summary.png",
+    "sha256": "590cbc5286f6df343336eaff2edb7dee23ce1c2614ef638fbff88daf8680782e"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-014fd-across-analysis-and-history-webkit/native-analysis.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-one-native-analysis.png",
+    "sha256": "2c882c69cd44c103514cea9ac7ac234146e770a93eadb941359d108222240c0b"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-186e6-uping-evidence-320-light-1--webkit/dashboard.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit320-light-1-dashboard.png",
+    "sha256": "f94352baa18010be341e856727535b1f793e6152d3ea45848f102a505c68d88d"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-734a0-ouping-evidence-320-dark-2--webkit/dashboard.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit320-dark-2-dashboard.png",
+    "sha256": "e08d3cb6327da6bbd9d6eed8c0f326852cd939a4fc0057c1c6d330de07c6ca86"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-99253-ouping-evidence-375-dark-2--webkit/dashboard.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-dark-2-dashboard.png",
+    "sha256": "a36dc511485ad2505eb34a4b58600bc5f212ca2dd92e7eb706267776a74c7968"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-99253-ouping-evidence-375-dark-2--webkit/kpi.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-dark-2-kpi.png",
+    "sha256": "5a4f7d9b3b0fe1af0562d5d60478bbdc4338af1511432728468f61909c6d9de0"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-99253-ouping-evidence-375-dark-2--webkit/history.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-dark-2-history.png",
+    "sha256": "c87e8dbde30669f2034db4d6fd8a7a6821252ac975661ee1a30e93cfd789bc31"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-c164a-uping-evidence-375-light-1--webkit/dashboard.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-light-1-dashboard.png",
+    "sha256": "2ced95be756a4b368a0f821529dd5fe9418509909d5bf2d47612103d057196e2"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-c164a-uping-evidence-375-light-1--webkit/kpi.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-light-1-kpi.png",
+    "sha256": "71facda1028a03a706f3c6be259179f0f7a056a8bc3c3d6009650197e5a7fefc"
+  },
+  {
+    "from": "artifacts/compact-js/sandbox/artifacts/analysis-grouping-v111/webkit-evidence-final-results/analysis-grouping-evidence-c164a-uping-evidence-375-light-1--webkit/history.png",
+    "to": "docs/screenshots/analysis-grouping-v111/webkit375-light-1-history.png",
+    "sha256": "2ce4aaa795ba1b595b3fc08de5804384cf5369322211168d6855e94825907f1b"
+  },
+  {
+    "from": "artifacts/analysis-grouping-v111/public-update/banner.png",
+    "to": "docs/screenshots/analysis-grouping-v111/public-banner.png",
+    "sha256": "996eea5bcfa6c256a26df12026323306fd652db82df618b84027ff4e9ce44414"
+  },
+  {
+    "from": "artifacts/analysis-grouping-v111/public-update/pending-analysis.png",
+    "to": "docs/screenshots/analysis-grouping-v111/public-pending-analysis.png",
+    "sha256": "89385e9da14b4b5c96bc8c6c3ccd18fe8e1da0bb8d09117b7f89c6c035172fab"
+  },
+  {
+    "from": "artifacts/analysis-grouping-v111/public-update/pending-summary.png",
+    "to": "docs/screenshots/analysis-grouping-v111/public-pending-summary.png",
+    "sha256": "9b306df9a9907da9220152d03aea71930abb546310c3fdd94e499fe9350661da"
+  },
+  {
+    "from": "artifacts/analysis-grouping-v111/public-update/pending-history.png",
+    "to": "docs/screenshots/analysis-grouping-v111/public-pending-history.png",
+    "sha256": "24d1243eeebcd1c62bae21783fb1cf817cc27335bacdace03a78375931c467a3"
+  }
+]

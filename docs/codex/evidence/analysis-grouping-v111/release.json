@@ -1,0 +1,50 @@
+{
+  "source": "97e89934953e4ed6224664c40d49eddaddd99645",
+  "version": 111,
+  "ciRun": 37253017560,
+  "ci": "https://github.com/eita115115/archery-note/actions/runs/37253017560",
+  "ciConclusion": "success",
+  "linuxE2E": "246 passed (5.1m)",
+  "artifactId": 11321214071,
+  "artifactDigest": "sha256:6b3fb250acb0273a4f322da3960b11c54eb15870a384c596b8dc49b2b271fc54",
+  "extractedRegularFiles": 26,
+  "public25ByteIdentical": true,
+  "heldFirstDocumentBodies": 15,
+  "canonicalScripts": 14,
+  "freshMs": 597000,
+  "publicationMs": 424772,
+  "updateCheckpointMs": 433942,
+  "activeUpdateBlocked": true,
+  "old3To4To5Exact": true,
+  "offlineActive2Exact": true,
+  "errors": [],
+  "analysis": {
+    "dashboard": {
+      "lastPracticeDate": "2026-10-05",
+      "weekSessions": 2,
+      "weekArrows": 3,
+      "recentAverage": 8.571428571428571,
+      "scoreDelta": 0,
+      "groupingDelta": null,
+      "formStability": null,
+      "confidence": {
+        "value": 0.7075,
+        "label": "中"
+      },
+      "groupingSamples": 3
+    },
+    "conclusion": {
+      "kind": "trend-up",
+      "text": "平均点が上向き、この調子を続けましょう。"
+    },
+    "suggestions": [
+      {
+        "id": "collect-coordinates",
+        "title": "座標を3本以上記録する",
+        "reason": "最新記録は2本の座標です。グルーピングの比較は3本以上から行います。"
+      }
+    ],
+    "kpi": "平均点\n8.57\n5回 21本 / 移動平均 ↑ +0.25\n矢の集まり具合（グルーピング）\n比較待ち\n最新は座標3本以上で比較 / 最小 0.4cm\n最高合計\n52\n2026/10/4 / 18m / 6本",
+    "text": "平均点が上向き、この調子を続けましょう。"
+  }
+}
