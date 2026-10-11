@@ -390,4 +390,6 @@ function sess(id, date, o) {
 }
 console.log("Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)");
 
+require("./check-personal-best-copy.js");
+
 console.log("Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)");

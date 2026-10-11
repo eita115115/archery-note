@@ -2170,20 +2170,22 @@ function todaysResultStabilityRowHtml(st) {
 /* 項目3: 自己ベストとの距離（§5 コピー対応表） */
 function todaysResultPersonalBestRowHtml(pb, sess, dayLabel) {
   const distLbl = distanceLabel(sess.dist);
+  const projected = pb.method === "avg-projected";
+  const bestLabel = projected ? "自己ベストの換算値" : "自己ベスト";
   let primary;
   if (pb.achieved) {
     primary =
       pb.remaining < 0
-        ? `${distLbl}自己ベストを <b>更新</b>（+${Math.abs(Math.round(pb.remaining))}点）`
-        : `${distLbl}自己ベストに <b>並びました</b>`;
+        ? `${distLbl}${bestLabel}を <b>${projected ? "上回りました" : "更新"}</b>（+${Math.abs(Math.round(pb.remaining))}点）`
+        : `${distLbl}${bestLabel}に <b>並びました</b>`;
   } else {
     const suffixParts = [];
     if (pb.pace === "close") suffixParts.push("ペースは近い");
-    if (pb.method === "avg-projected") suffixParts.push("推定・本数換算");
     const suffix = suffixParts.length ? `（${suffixParts.join("・")}）` : "";
-    primary = `${distLbl}自己ベストまで <b>あと${Math.round(pb.remaining)}点</b>${suffix}`;
+    primary = `${distLbl}${bestLabel}まで <b>あと${Math.round(pb.remaining)}点</b>${suffix}`;
   }
-  const detail = `自己ベスト ${pb.bestTotal}点（${fmtD(pb.bestDate)}）・ ${dayLabel} ${pb.todayTotal}点`;
+  const referenceLabel = projected ? `推定・${pb.todayArrows}本換算` : "自己ベスト";
+  const detail = `${referenceLabel} ${pb.bestTotal}点（${fmtD(pb.bestDate)}）・ ${dayLabel} ${pb.todayTotal}点`;
   return todaysResultRowHtml("personal-best", "target", primary, detail);
 }
 /* 項目4: 伸びの継続日数。score/stability それぞれ独立に0〜1行（§5 コピー対応表） */
