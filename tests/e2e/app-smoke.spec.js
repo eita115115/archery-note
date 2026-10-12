@@ -98,7 +98,10 @@ test("loads core tabs and seeded history without console errors", async ({ page 
 
   await mainTab(page, "履歴").click();
   await expect(page.locator("#main")).toContainText("練習履歴");
-  await expect(page.locator("#main")).toContainText("2026/6/27 ・ 70m");
+  await expect(page.locator(".historyDateHead")).toContainText("2026/6/27");
+  const record = page.getByTestId("history-row").first();
+  await expect(record).toHaveAccessibleName(/2026\/6\/27 ・ 70m/);
+  await expect(record).toContainText("70m");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
 
   await mainTab(page, "サイト調整").click();
