@@ -977,5 +977,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/history-refresh.mdの受入を満たす。320/375明暗/900 ChromeWKで日付・距離・的・本数・合計・平均・用具が読め、長文overflowなし。通常行は日付重複を除き読み上げ名に残す。複数日stageの日付と0本平均—を確認。既存filter/detail/round/paging/native記録/backup/旧全件reload/採点保持、前後375原寸、checkall/lint/format/全生成E2E/独立review、版117一括・承認済公開CI/公開資産/更新バナー確認。旧81tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
+  },
+  {
+    "id": "AN-083",
+    "task": "分析を比較条件・傾向・次回の練習・数値の順へ整える",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-082"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/analysis-refresh.mdの受入。比較条件と傾向が320/375で読め、期間groupと既存keyboard/focus/handlersを保持。表示0.0cmの方向は横ばい、null比較待ち、元delta/数学/保存/採点は保持。ChromeWK320375明暗900の前後/最終・空/該当なし・条件期間変更・旧全件reload/errors0・計算値一致・375原寸、checkall/lint/format/全生成E2E/独立review、markers118一括と承認済CI/実Linux-public25一致/元117context更新保留-banner-旧記録-新native-offlineを確認。旧82tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
   }
 ]
