@@ -1,0 +1,3498 @@
+[
+  {
+    "id": "chromium-320-light-15",
+    "version": 117,
+    "actions": [
+      {
+        "x": 12,
+        "y": 128.5,
+        "width": 214,
+        "height": 53.390625,
+        "top": 128.5,
+        "right": 226,
+        "bottom": 181.890625,
+        "left": 12,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 147.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 147.59375,
+        "right": 262.234375,
+        "bottom": 352.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 15,
+        "y": 362.0625,
+        "width": 40,
+        "height": 40,
+        "top": 362.0625,
+        "right": 55,
+        "bottom": 402.0625,
+        "left": 15,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 188.0625,
+        "width": 52,
+        "height": 46,
+        "top": 188.0625,
+        "right": 244,
+        "bottom": 234.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 188.0625,
+        "width": 52,
+        "height": 46,
+        "top": 188.0625,
+        "right": 244,
+        "bottom": 234.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 188.0625,
+        "width": 52,
+        "height": 46,
+        "top": 188.0625,
+        "right": 244,
+        "bottom": 234.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 120.609375,
+        "y": 292.0625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 292.0625,
+        "right": 199.390625,
+        "bottom": 340.0625,
+        "left": 120.609375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 7.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 7.59375,
+        "right": 262.234375,
+        "bottom": 212.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 96.9375,
+        "y": 421,
+        "width": 147.609375,
+        "height": 48,
+        "top": 421,
+        "right": 244.546875,
+        "bottom": 469,
+        "left": 96.9375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 7.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 7.59375,
+        "right": 262.234375,
+        "bottom": 212.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 21,
+        "y": 421,
+        "width": 69.9375,
+        "height": 48,
+        "top": 421,
+        "right": 90.9375,
+        "bottom": 469,
+        "left": 21,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 7.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 7.59375,
+        "right": 262.234375,
+        "bottom": 212.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 250.546875,
+        "y": 421,
+        "width": 48.453125,
+        "height": 48,
+        "top": 421,
+        "right": 299,
+        "bottom": 469,
+        "left": 250.546875,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 10,
+          "y": 410,
+          "width": 300,
+          "height": 70,
+          "top": 410,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 421,
+              "width": 69.9375,
+              "height": 48,
+              "top": 421,
+              "right": 90.9375,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30,
+                "y": 435,
+                "width": 51.9375,
+                "height": 20,
+                "top": 435,
+                "right": 81.9375,
+                "bottom": 455,
+                "left": 30
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 148,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 96.9375,
+              "y": 421,
+              "width": 147.609375,
+              "height": 48,
+              "top": 421,
+              "right": 244.546875,
+              "bottom": 469,
+              "left": 96.9375
+            },
+            "lines": [
+              {
+                "x": 138.234375,
+                "y": 435,
+                "width": 65,
+                "height": 20,
+                "top": 435,
+                "right": 203.234375,
+                "bottom": 455,
+                "left": 138.234375
+              }
+            ],
+            "scrollWidth": 146,
+            "clientWidth": 146,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 250.546875,
+              "y": 421,
+              "width": 48.453125,
+              "height": 48,
+              "top": 421,
+              "right": 299,
+              "bottom": 469,
+              "left": 250.546875
+            },
+            "lines": [
+              {
+                "x": 259.546875,
+                "y": 435,
+                "width": 30.453125,
+                "height": 20,
+                "top": 435,
+                "right": 290,
+                "bottom": 455,
+                "left": 259.546875
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 10,
+          "y": 410,
+          "width": 300,
+          "height": 70,
+          "top": 410,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 421,
+              "width": 69.9375,
+              "height": 48,
+              "top": 421,
+              "right": 90.9375,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30,
+                "y": 435,
+                "width": 51.9375,
+                "height": 20,
+                "top": 435,
+                "right": 81.9375,
+                "bottom": 455,
+                "left": 30
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": true,
+            "transform": "matrix(0.982, 0, 0, 0.982, 0, 1)",
+            "layoutWidth": 148,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 98.26598358154297,
+              "y": 422.4320068359375,
+              "width": 144.952392578125,
+              "height": 47.135986328125,
+              "top": 422.4320068359375,
+              "right": 243.21837615966797,
+              "bottom": 469.5679931640625,
+              "left": 98.26598358154297
+            },
+            "lines": [
+              {
+                "x": 138.81951904296875,
+                "y": 436.17999267578125,
+                "width": 63.829986572265625,
+                "height": 19.6400146484375,
+                "top": 436.17999267578125,
+                "right": 202.64950561523438,
+                "bottom": 455.82000732421875,
+                "left": 138.81951904296875
+              }
+            ],
+            "scrollWidth": 146,
+            "clientWidth": 146,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 250.546875,
+              "y": 421,
+              "width": 48.453125,
+              "height": 48,
+              "top": 421,
+              "right": 299,
+              "bottom": 469,
+              "left": 250.546875
+            },
+            "lines": [
+              {
+                "x": 259.546875,
+                "y": 435,
+                "width": 30.453125,
+                "height": 20,
+                "top": 435,
+                "right": 290,
+                "bottom": 455,
+                "left": 259.546875
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-dark-15",
+    "version": 117,
+    "actions": [
+      {
+        "x": 14,
+        "y": 132.5,
+        "width": 265,
+        "height": 53.390625,
+        "top": 132.5,
+        "right": 279,
+        "bottom": 185.890625,
+        "left": 14,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 300.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 300.59375,
+        "right": 333.65625,
+        "bottom": 592.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 17,
+        "y": 602.90625,
+        "width": 40,
+        "height": 40,
+        "top": 602.90625,
+        "right": 57,
+        "bottom": 642.90625,
+        "left": 17,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 219.5,
+        "y": 431.90625,
+        "width": 52,
+        "height": 46,
+        "top": 431.90625,
+        "right": 271.5,
+        "bottom": 477.90625,
+        "left": 219.5,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 219.5,
+        "y": 431.90625,
+        "width": 52,
+        "height": 46,
+        "top": 431.90625,
+        "right": 271.5,
+        "bottom": 477.90625,
+        "left": 219.5,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 219.5,
+        "y": 431.90625,
+        "width": 52,
+        "height": 46,
+        "top": 431.90625,
+        "right": 271.5,
+        "bottom": 477.90625,
+        "left": 219.5,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 148.109375,
+        "y": 535.90625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 535.90625,
+        "right": 226.890625,
+        "bottom": 583.90625,
+        "left": 148.109375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 7.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 7.59375,
+        "right": 333.65625,
+        "bottom": 299.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 96.9375,
+        "y": 665,
+        "width": 202.609375,
+        "height": 48,
+        "top": 665,
+        "right": 299.546875,
+        "bottom": 713,
+        "left": 96.9375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 7.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 7.59375,
+        "right": 333.65625,
+        "bottom": 299.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 21,
+        "y": 665,
+        "width": 69.9375,
+        "height": 48,
+        "top": 665,
+        "right": 90.9375,
+        "bottom": 713,
+        "left": 21,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 7.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 7.59375,
+        "right": 333.65625,
+        "bottom": 299.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 305.546875,
+        "y": 665,
+        "width": 48.453125,
+        "height": 48,
+        "top": 665,
+        "right": 354,
+        "bottom": 713,
+        "left": 305.546875,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 10,
+          "y": 654,
+          "width": 355,
+          "height": 70,
+          "top": 654,
+          "right": 365,
+          "bottom": 724,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 743,
+          "width": 375,
+          "height": 69,
+          "top": 743,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 665,
+              "width": 69.9375,
+              "height": 48,
+              "top": 665,
+              "right": 90.9375,
+              "bottom": 713,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30,
+                "y": 679,
+                "width": 51.9375,
+                "height": 20,
+                "top": 679,
+                "right": 81.9375,
+                "bottom": 699,
+                "left": 30
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 203,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 96.9375,
+              "y": 665,
+              "width": 202.609375,
+              "height": 48,
+              "top": 665,
+              "right": 299.546875,
+              "bottom": 713,
+              "left": 96.9375
+            },
+            "lines": [
+              {
+                "x": 165.734375,
+                "y": 679,
+                "width": 65,
+                "height": 20,
+                "top": 679,
+                "right": 230.734375,
+                "bottom": 699,
+                "left": 165.734375
+              }
+            ],
+            "scrollWidth": 201,
+            "clientWidth": 201,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 305.546875,
+              "y": 665,
+              "width": 48.453125,
+              "height": 48,
+              "top": 665,
+              "right": 354,
+              "bottom": 713,
+              "left": 305.546875
+            },
+            "lines": [
+              {
+                "x": 314.546875,
+                "y": 679,
+                "width": 30.453125,
+                "height": 20,
+                "top": 679,
+                "right": 345,
+                "bottom": 699,
+                "left": 314.546875
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 10,
+          "y": 654,
+          "width": 355,
+          "height": 70,
+          "top": 654,
+          "right": 365,
+          "bottom": 724,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 743,
+          "width": 375,
+          "height": 69,
+          "top": 743,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 665,
+              "width": 69.9375,
+              "height": 48,
+              "top": 665,
+              "right": 90.9375,
+              "bottom": 713,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30,
+                "y": 679,
+                "width": 51.9375,
+                "height": 20,
+                "top": 679,
+                "right": 81.9375,
+                "bottom": 699,
+                "left": 30
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": true,
+            "transform": "matrix(0.982, 0, 0, 0.982, 0, 1)",
+            "layoutWidth": 203,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 98.760986328125,
+              "y": 666.4320068359375,
+              "width": 198.96240234375,
+              "height": 47.135986328125,
+              "top": 666.4320068359375,
+              "right": 297.723388671875,
+              "bottom": 713.5679931640625,
+              "left": 98.760986328125
+            },
+            "lines": [
+              {
+                "x": 166.31951904296875,
+                "y": 680.1799926757812,
+                "width": 63.83000183105469,
+                "height": 19.6400146484375,
+                "top": 680.1799926757812,
+                "right": 230.14952087402344,
+                "bottom": 699.8200073242188,
+                "left": 166.31951904296875
+              }
+            ],
+            "scrollWidth": 201,
+            "clientWidth": 201,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 305.546875,
+              "y": 665,
+              "width": 48.453125,
+              "height": 48,
+              "top": 665,
+              "right": 354,
+              "bottom": 713,
+              "left": 305.546875
+            },
+            "lines": [
+              {
+                "x": 314.546875,
+                "y": 679,
+                "width": 30.453125,
+                "height": 20,
+                "top": 679,
+                "right": 345,
+                "bottom": 699,
+                "left": 314.546875
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-900-light-15",
+    "version": 117,
+    "actions": [
+      {
+        "x": 184,
+        "y": 142.390625,
+        "width": 450,
+        "height": 53.390625,
+        "top": 142.390625,
+        "right": 634,
+        "bottom": 195.78125,
+        "left": 184,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 266.59375,
+        "width": 324,
+        "height": 324,
+        "top": 266.59375,
+        "right": 612,
+        "bottom": 590.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 187,
+        "y": 600.59375,
+        "width": 40,
+        "height": 40,
+        "top": 600.59375,
+        "right": 227,
+        "bottom": 640.59375,
+        "left": 187,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 482,
+        "y": 519.59375,
+        "width": 52,
+        "height": 46,
+        "top": 519.59375,
+        "right": 534,
+        "bottom": 565.59375,
+        "left": 482,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 482,
+        "y": 519.59375,
+        "width": 52,
+        "height": 46,
+        "top": 519.59375,
+        "right": 534,
+        "bottom": 565.59375,
+        "left": 482,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 482,
+        "y": 519.59375,
+        "width": 52,
+        "height": 46,
+        "top": 519.59375,
+        "right": 534,
+        "bottom": 565.59375,
+        "left": 482,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 410.609375,
+        "y": 623.59375,
+        "width": 78.78125,
+        "height": 48,
+        "top": 623.59375,
+        "right": 489.390625,
+        "bottom": 671.59375,
+        "left": 410.609375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 51.59375,
+        "width": 324,
+        "height": 324,
+        "top": 51.59375,
+        "right": 612,
+        "bottom": 375.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 256.9375,
+        "y": 753,
+        "width": 407.609375,
+        "height": 48,
+        "top": 753,
+        "right": 664.546875,
+        "bottom": 801,
+        "left": 256.9375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 51.59375,
+        "width": 324,
+        "height": 324,
+        "top": 51.59375,
+        "right": 612,
+        "bottom": 375.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 181,
+        "y": 753,
+        "width": 69.9375,
+        "height": 48,
+        "top": 753,
+        "right": 250.9375,
+        "bottom": 801,
+        "left": 181,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 51.59375,
+        "width": 324,
+        "height": 324,
+        "top": 51.59375,
+        "right": 612,
+        "bottom": 375.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 670.546875,
+        "y": 753,
+        "width": 48.453125,
+        "height": 48,
+        "top": 753,
+        "right": 719,
+        "bottom": 801,
+        "left": 670.546875,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 170,
+          "y": 742,
+          "width": 560,
+          "height": 70,
+          "top": 742,
+          "right": 730,
+          "bottom": 812,
+          "left": 170
+        },
+        "nav": {
+          "x": 170,
+          "y": 831,
+          "width": 560,
+          "height": 69,
+          "top": 831,
+          "right": 730,
+          "bottom": 900,
+          "left": 170
+        },
+        "width": 900,
+        "scrollWidth": 900,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 181,
+              "y": 753,
+              "width": 69.9375,
+              "height": 48,
+              "top": 753,
+              "right": 250.9375,
+              "bottom": 801,
+              "left": 181
+            },
+            "lines": [
+              {
+                "x": 190,
+                "y": 767,
+                "width": 51.9375,
+                "height": 20,
+                "top": 767,
+                "right": 241.9375,
+                "bottom": 787,
+                "left": 190
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 408,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 256.9375,
+              "y": 753,
+              "width": 407.609375,
+              "height": 48,
+              "top": 753,
+              "right": 664.546875,
+              "bottom": 801,
+              "left": 256.9375
+            },
+            "lines": [
+              {
+                "x": 428.234375,
+                "y": 767,
+                "width": 65,
+                "height": 20,
+                "top": 767,
+                "right": 493.234375,
+                "bottom": 787,
+                "left": 428.234375
+              }
+            ],
+            "scrollWidth": 406,
+            "clientWidth": 406,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 670.546875,
+              "y": 753,
+              "width": 48.453125,
+              "height": 48,
+              "top": 753,
+              "right": 719,
+              "bottom": 801,
+              "left": 670.546875
+            },
+            "lines": [
+              {
+                "x": 679.546875,
+                "y": 767,
+                "width": 30.453125,
+                "height": 20,
+                "top": 767,
+                "right": 710,
+                "bottom": 787,
+                "left": 679.546875
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 170,
+          "y": 742,
+          "width": 560,
+          "height": 70,
+          "top": 742,
+          "right": 730,
+          "bottom": 812,
+          "left": 170
+        },
+        "nav": {
+          "x": 170,
+          "y": 831,
+          "width": 560,
+          "height": 69,
+          "top": 831,
+          "right": 730,
+          "bottom": 900,
+          "left": 170
+        },
+        "width": 900,
+        "scrollWidth": 900,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 181,
+              "y": 753,
+              "width": 69.9375,
+              "height": 48,
+              "top": 753,
+              "right": 250.9375,
+              "bottom": 801,
+              "left": 181
+            },
+            "lines": [
+              {
+                "x": 190,
+                "y": 767,
+                "width": 51.9375,
+                "height": 20,
+                "top": 767,
+                "right": 241.9375,
+                "bottom": 787,
+                "left": 190
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": true,
+            "transform": "matrix(0.982, 0, 0, 0.982, 0, 1)",
+            "layoutWidth": 408,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 260.6059875488281,
+              "y": 754.4320068359375,
+              "width": 400.2724304199219,
+              "height": 47.135986328125,
+              "top": 754.4320068359375,
+              "right": 660.87841796875,
+              "bottom": 801.5679931640625,
+              "left": 260.6059875488281
+            },
+            "lines": [
+              {
+                "x": 428.81951904296875,
+                "y": 768.1799926757812,
+                "width": 63.83001708984375,
+                "height": 19.6400146484375,
+                "top": 768.1799926757812,
+                "right": 492.6495361328125,
+                "bottom": 787.8200073242188,
+                "left": 428.81951904296875
+              }
+            ],
+            "scrollWidth": 406,
+            "clientWidth": 406,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 670.546875,
+              "y": 753,
+              "width": 48.453125,
+              "height": 48,
+              "top": 753,
+              "right": 719,
+              "bottom": 801,
+              "left": 670.546875
+            },
+            "lines": [
+              {
+                "x": 679.546875,
+                "y": 767,
+                "width": 30.453125,
+                "height": 20,
+                "top": 767,
+                "right": 710,
+                "bottom": 787,
+                "left": 679.546875
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-320-dark-20",
+    "version": 117,
+    "actions": [
+      {
+        "x": 12,
+        "y": 128.5,
+        "width": 214,
+        "height": 53.390625,
+        "top": 128.5,
+        "right": 226,
+        "bottom": 181.890625,
+        "left": 12,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 142.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 142.59375,
+        "right": 262.234375,
+        "bottom": 347.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 15,
+        "y": 357.0625,
+        "width": 40,
+        "height": 40,
+        "top": 357.0625,
+        "right": 55,
+        "bottom": 397.0625,
+        "left": 15,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 183.0625,
+        "width": 52,
+        "height": 46,
+        "top": 183.0625,
+        "right": 244,
+        "bottom": 229.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 183.0625,
+        "width": 52,
+        "height": 46,
+        "top": 183.0625,
+        "right": 244,
+        "bottom": 229.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 183.0625,
+        "width": 52,
+        "height": 46,
+        "top": 183.0625,
+        "right": 244,
+        "bottom": 229.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 120.609375,
+        "y": 287.0625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 287.0625,
+        "right": 199.390625,
+        "bottom": 335.0625,
+        "left": 120.609375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 7.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 7.59375,
+        "right": 262.234375,
+        "bottom": 212.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 114.25,
+        "y": 416,
+        "width": 120.140625,
+        "height": 53,
+        "top": 416,
+        "right": 234.390625,
+        "bottom": 469,
+        "left": 114.25,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 7.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 7.59375,
+        "right": 262.234375,
+        "bottom": 212.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 21,
+        "y": 416,
+        "width": 87.25,
+        "height": 53,
+        "top": 416,
+        "right": 108.25,
+        "bottom": 469,
+        "left": 21,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 7.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 7.59375,
+        "right": 262.234375,
+        "bottom": 212.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 240.390625,
+        "y": 416,
+        "width": 58.609375,
+        "height": 53,
+        "top": 416,
+        "right": 299,
+        "bottom": 469,
+        "left": 240.390625,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 10,
+          "y": 405,
+          "width": 300,
+          "height": 75,
+          "top": 405,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 87,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 21,
+              "y": 416,
+              "width": 87.25,
+              "height": 53,
+              "top": 416,
+              "right": 108.25,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30,
+                "y": 429,
+                "width": 69.25,
+                "height": 27,
+                "top": 429,
+                "right": 99.25,
+                "bottom": 456,
+                "left": 30
+              }
+            ],
+            "scrollWidth": 85,
+            "clientWidth": 85,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 120,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 114.25,
+              "y": 416,
+              "width": 120.140625,
+              "height": 53,
+              "top": 416,
+              "right": 234.390625,
+              "bottom": 469,
+              "left": 114.25
+            },
+            "lines": [
+              {
+                "x": 130.984375,
+                "y": 429,
+                "width": 86.65625,
+                "height": 27,
+                "top": 429,
+                "right": 217.640625,
+                "bottom": 456,
+                "left": 130.984375
+              }
+            ],
+            "scrollWidth": 118,
+            "clientWidth": 118,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 59,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 240.390625,
+              "y": 416,
+              "width": 58.609375,
+              "height": 53,
+              "top": 416,
+              "right": 299,
+              "bottom": 469,
+              "left": 240.390625
+            },
+            "lines": [
+              {
+                "x": 249.390625,
+                "y": 429,
+                "width": 40.609375,
+                "height": 27,
+                "top": 429,
+                "right": 290,
+                "bottom": 456,
+                "left": 249.390625
+              }
+            ],
+            "scrollWidth": 57,
+            "clientWidth": 57,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 10,
+          "y": 405,
+          "width": 300,
+          "height": 75,
+          "top": 405,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 87,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 21,
+              "y": 416,
+              "width": 87.25,
+              "height": 53,
+              "top": 416,
+              "right": 108.25,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30,
+                "y": 429,
+                "width": 69.25,
+                "height": 27,
+                "top": 429,
+                "right": 99.25,
+                "bottom": 456,
+                "left": 30
+              }
+            ],
+            "scrollWidth": 85,
+            "clientWidth": 85,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "20px",
+            "pressed": true,
+            "transform": "matrix(0.982, 0, 0, 0.982, 0, 1)",
+            "layoutWidth": 120,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 115.33126831054688,
+              "y": 417.47698974609375,
+              "width": 117.97808837890625,
+              "height": 52.0460205078125,
+              "top": 417.47698974609375,
+              "right": 233.30935668945312,
+              "bottom": 469.52301025390625,
+              "left": 115.33126831054688
+            },
+            "lines": [
+              {
+                "x": 131.76443481445312,
+                "y": 430.2430114746094,
+                "width": 85.096435546875,
+                "height": 26.51397705078125,
+                "top": 430.2430114746094,
+                "right": 216.86087036132812,
+                "bottom": 456.7569885253906,
+                "left": 131.76443481445312
+              }
+            ],
+            "scrollWidth": 118,
+            "clientWidth": 118,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 59,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 240.390625,
+              "y": 416,
+              "width": 58.609375,
+              "height": 53,
+              "top": 416,
+              "right": 299,
+              "bottom": 469,
+              "left": 240.390625
+            },
+            "lines": [
+              {
+                "x": 249.390625,
+                "y": 429,
+                "width": 40.609375,
+                "height": 27,
+                "top": 429,
+                "right": 290,
+                "bottom": 456,
+                "left": 249.390625
+              }
+            ],
+            "scrollWidth": 57,
+            "clientWidth": 57,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-320-light-15",
+    "version": 117,
+    "actions": [
+      {
+        "x": 12,
+        "y": 128.5,
+        "width": 214,
+        "height": 53.390625,
+        "top": 128.5,
+        "right": 226,
+        "bottom": 181.890625,
+        "left": 12,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 147.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 147.59375,
+        "right": 262.234375,
+        "bottom": 352.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 15,
+        "y": 362.0625,
+        "width": 40,
+        "height": 40,
+        "top": 362.0625,
+        "right": 55,
+        "bottom": 402.0625,
+        "left": 15,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 188.0625,
+        "width": 52,
+        "height": 46,
+        "top": 188.0625,
+        "right": 244,
+        "bottom": 234.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 188.0625,
+        "width": 52,
+        "height": 46,
+        "top": 188.0625,
+        "right": 244,
+        "bottom": 234.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 188.0625,
+        "width": 52,
+        "height": 46,
+        "top": 188.0625,
+        "right": 244,
+        "bottom": 234.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 120.609375,
+        "y": 292.0625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 292.0625,
+        "right": 199.390625,
+        "bottom": 340.0625,
+        "left": 120.609375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 8.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 8.59375,
+        "right": 262.234375,
+        "bottom": 213.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 96.9375,
+        "y": 421,
+        "width": 147.609375,
+        "height": 48,
+        "top": 421,
+        "right": 244.546875,
+        "bottom": 469,
+        "left": 96.9375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 8.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 8.59375,
+        "right": 262.234375,
+        "bottom": 213.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 21,
+        "y": 421,
+        "width": 69.9375,
+        "height": 48,
+        "top": 421,
+        "right": 90.9375,
+        "bottom": 469,
+        "left": 21,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 8.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 8.59375,
+        "right": 262.234375,
+        "bottom": 213.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 250.546875,
+        "y": 421,
+        "width": 48.453125,
+        "height": 48,
+        "top": 421,
+        "right": 299,
+        "bottom": 469,
+        "left": 250.546875,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 10,
+          "y": 410,
+          "width": 300,
+          "height": 70,
+          "top": 410,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 421,
+              "width": 69.9375,
+              "height": 48,
+              "top": 421,
+              "right": 90.9375,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30.001171112060547,
+                "y": 435,
+                "width": 51.93515396118164,
+                "height": 20,
+                "top": 435,
+                "right": 81.93632507324219,
+                "bottom": 455,
+                "left": 30.001171112060547
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 148,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 96.9375,
+              "y": 421,
+              "width": 147.609375,
+              "height": 48,
+              "top": 421,
+              "right": 244.546875,
+              "bottom": 469,
+              "left": 96.9375
+            },
+            "lines": [
+              {
+                "x": 138.241943359375,
+                "y": 435,
+                "width": 64.98486328125,
+                "height": 20,
+                "top": 435,
+                "right": 203.226806640625,
+                "bottom": 455,
+                "left": 138.241943359375
+              }
+            ],
+            "scrollWidth": 146,
+            "clientWidth": 146,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 250.546875,
+              "y": 421,
+              "width": 48.453125,
+              "height": 48,
+              "top": 421,
+              "right": 299,
+              "bottom": 469,
+              "left": 250.546875
+            },
+            "lines": [
+              {
+                "x": 259.5484313964844,
+                "y": 435,
+                "width": 30.45001220703125,
+                "height": 20,
+                "top": 435,
+                "right": 289.9984436035156,
+                "bottom": 455,
+                "left": 259.5484313964844
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 10,
+          "y": 410,
+          "width": 300,
+          "height": 70,
+          "top": 410,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 421,
+              "width": 69.9375,
+              "height": 48,
+              "top": 421,
+              "right": 90.9375,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30.001171112060547,
+                "y": 435,
+                "width": 51.93515396118164,
+                "height": 20,
+                "top": 435,
+                "right": 81.93632507324219,
+                "bottom": 455,
+                "left": 30.001171112060547
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 148,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 96.9375,
+              "y": 421,
+              "width": 147.609375,
+              "height": 48,
+              "top": 421,
+              "right": 244.546875,
+              "bottom": 469,
+              "left": 96.9375
+            },
+            "lines": [
+              {
+                "x": 138.241943359375,
+                "y": 435,
+                "width": 64.98486328125,
+                "height": 20,
+                "top": 435,
+                "right": 203.226806640625,
+                "bottom": 455,
+                "left": 138.241943359375
+              }
+            ],
+            "scrollWidth": 146,
+            "clientWidth": 146,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 250.546875,
+              "y": 421,
+              "width": 48.453125,
+              "height": 48,
+              "top": 421,
+              "right": 299,
+              "bottom": 469,
+              "left": 250.546875
+            },
+            "lines": [
+              {
+                "x": 259.5484313964844,
+                "y": 435,
+                "width": 30.45001220703125,
+                "height": 20,
+                "top": 435,
+                "right": 289.9984436035156,
+                "bottom": 455,
+                "left": 259.5484313964844
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-dark-15",
+    "version": 117,
+    "actions": [
+      {
+        "x": 14,
+        "y": 132.5,
+        "width": 265,
+        "height": 53.390625,
+        "top": 132.5,
+        "right": 279,
+        "bottom": 185.890625,
+        "left": 14,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 300.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 300.59375,
+        "right": 333.65625,
+        "bottom": 592.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 17,
+        "y": 602.90625,
+        "width": 40,
+        "height": 40,
+        "top": 602.90625,
+        "right": 57,
+        "bottom": 642.90625,
+        "left": 17,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 219.5,
+        "y": 432.90625,
+        "width": 52,
+        "height": 46,
+        "top": 432.90625,
+        "right": 271.5,
+        "bottom": 478.90625,
+        "left": 219.5,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 219.5,
+        "y": 432.90625,
+        "width": 52,
+        "height": 46,
+        "top": 432.90625,
+        "right": 271.5,
+        "bottom": 478.90625,
+        "left": 219.5,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 219.5,
+        "y": 432.90625,
+        "width": 52,
+        "height": 46,
+        "top": 432.90625,
+        "right": 271.5,
+        "bottom": 478.90625,
+        "left": 219.5,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 148.109375,
+        "y": 536.90625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 536.90625,
+        "right": 226.890625,
+        "bottom": 584.90625,
+        "left": 148.109375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 8.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 8.59375,
+        "right": 333.65625,
+        "bottom": 300.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 96.9375,
+        "y": 665,
+        "width": 202.609375,
+        "height": 48,
+        "top": 665,
+        "right": 299.546875,
+        "bottom": 713,
+        "left": 96.9375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 8.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 8.59375,
+        "right": 333.65625,
+        "bottom": 300.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 21,
+        "y": 665,
+        "width": 69.9375,
+        "height": 48,
+        "top": 665,
+        "right": 90.9375,
+        "bottom": 713,
+        "left": 21,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 41.34375,
+        "y": 8.59375,
+        "width": 292.3125,
+        "height": 292.3125,
+        "top": 8.59375,
+        "right": 333.65625,
+        "bottom": 300.90625,
+        "left": 41.34375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 305.546875,
+        "y": 665,
+        "width": 48.453125,
+        "height": 48,
+        "top": 665,
+        "right": 354,
+        "bottom": 713,
+        "left": 305.546875,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 10,
+          "y": 654,
+          "width": 355,
+          "height": 70,
+          "top": 654,
+          "right": 365,
+          "bottom": 724,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 743,
+          "width": 375,
+          "height": 69,
+          "top": 743,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 665,
+              "width": 69.9375,
+              "height": 48,
+              "top": 665,
+              "right": 90.9375,
+              "bottom": 713,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30.001171112060547,
+                "y": 679,
+                "width": 51.93515396118164,
+                "height": 20,
+                "top": 679,
+                "right": 81.93632507324219,
+                "bottom": 699,
+                "left": 30.001171112060547
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 203,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 96.9375,
+              "y": 665,
+              "width": 202.609375,
+              "height": 48,
+              "top": 665,
+              "right": 299.546875,
+              "bottom": 713,
+              "left": 96.9375
+            },
+            "lines": [
+              {
+                "x": 165.741943359375,
+                "y": 679,
+                "width": 64.98486328125,
+                "height": 20,
+                "top": 679,
+                "right": 230.726806640625,
+                "bottom": 699,
+                "left": 165.741943359375
+              }
+            ],
+            "scrollWidth": 201,
+            "clientWidth": 201,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 305.546875,
+              "y": 665,
+              "width": 48.453125,
+              "height": 48,
+              "top": 665,
+              "right": 354,
+              "bottom": 713,
+              "left": 305.546875
+            },
+            "lines": [
+              {
+                "x": 314.5484313964844,
+                "y": 679,
+                "width": 30.45001220703125,
+                "height": 20,
+                "top": 679,
+                "right": 344.9984436035156,
+                "bottom": 699,
+                "left": 314.5484313964844
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 10,
+          "y": 654,
+          "width": 355,
+          "height": 70,
+          "top": 654,
+          "right": 365,
+          "bottom": 724,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 743,
+          "width": 375,
+          "height": 69,
+          "top": 743,
+          "right": 375,
+          "bottom": 812,
+          "left": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 21,
+              "y": 665,
+              "width": 69.9375,
+              "height": 48,
+              "top": 665,
+              "right": 90.9375,
+              "bottom": 713,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30.001171112060547,
+                "y": 679,
+                "width": 51.93515396118164,
+                "height": 20,
+                "top": 679,
+                "right": 81.93632507324219,
+                "bottom": 699,
+                "left": 30.001171112060547
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 203,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 96.9375,
+              "y": 665,
+              "width": 202.609375,
+              "height": 48,
+              "top": 665,
+              "right": 299.546875,
+              "bottom": 713,
+              "left": 96.9375
+            },
+            "lines": [
+              {
+                "x": 165.741943359375,
+                "y": 679,
+                "width": 64.98486328125,
+                "height": 20,
+                "top": 679,
+                "right": 230.726806640625,
+                "bottom": 699,
+                "left": 165.741943359375
+              }
+            ],
+            "scrollWidth": 201,
+            "clientWidth": 201,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 305.546875,
+              "y": 665,
+              "width": 48.453125,
+              "height": 48,
+              "top": 665,
+              "right": 354,
+              "bottom": 713,
+              "left": 305.546875
+            },
+            "lines": [
+              {
+                "x": 314.5484313964844,
+                "y": 679,
+                "width": 30.45001220703125,
+                "height": 20,
+                "top": 679,
+                "right": 344.9984436035156,
+                "bottom": 699,
+                "left": 314.5484313964844
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-900-light-15",
+    "version": 117,
+    "actions": [
+      {
+        "x": 184,
+        "y": 142.390625,
+        "width": 450,
+        "height": 53.390625,
+        "top": 142.390625,
+        "right": 634,
+        "bottom": 195.78125,
+        "left": 184,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 266.59375,
+        "width": 324,
+        "height": 324,
+        "top": 266.59375,
+        "right": 612,
+        "bottom": 590.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 187,
+        "y": 600.59375,
+        "width": 40,
+        "height": 40,
+        "top": 600.59375,
+        "right": 227,
+        "bottom": 640.59375,
+        "left": 187,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 482,
+        "y": 520.59375,
+        "width": 52,
+        "height": 46,
+        "top": 520.59375,
+        "right": 534,
+        "bottom": 566.59375,
+        "left": 482,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 482,
+        "y": 520.59375,
+        "width": 52,
+        "height": 46,
+        "top": 520.59375,
+        "right": 534,
+        "bottom": 566.59375,
+        "left": 482,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 482,
+        "y": 520.59375,
+        "width": 52,
+        "height": 46,
+        "top": 520.59375,
+        "right": 534,
+        "bottom": 566.59375,
+        "left": 482,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 410.609375,
+        "y": 624.59375,
+        "width": 78.78125,
+        "height": 48,
+        "top": 624.59375,
+        "right": 489.390625,
+        "bottom": 672.59375,
+        "left": 410.609375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 52.59375,
+        "width": 324,
+        "height": 324,
+        "top": 52.59375,
+        "right": 612,
+        "bottom": 376.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 256.9375,
+        "y": 753,
+        "width": 407.609375,
+        "height": 48,
+        "top": 753,
+        "right": 664.546875,
+        "bottom": 801,
+        "left": 256.9375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 52.59375,
+        "width": 324,
+        "height": 324,
+        "top": 52.59375,
+        "right": 612,
+        "bottom": 376.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 181,
+        "y": 753,
+        "width": 69.9375,
+        "height": 48,
+        "top": 753,
+        "right": 250.9375,
+        "bottom": 801,
+        "left": 181,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 288,
+        "y": 52.59375,
+        "width": 324,
+        "height": 324,
+        "top": 52.59375,
+        "right": 612,
+        "bottom": 376.59375,
+        "left": 288,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 670.546875,
+        "y": 753,
+        "width": 48.453125,
+        "height": 48,
+        "top": 753,
+        "right": 719,
+        "bottom": 801,
+        "left": 670.546875,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 170,
+          "y": 742,
+          "width": 560,
+          "height": 70,
+          "top": 742,
+          "right": 730,
+          "bottom": 812,
+          "left": 170
+        },
+        "nav": {
+          "x": 170,
+          "y": 831,
+          "width": 560,
+          "height": 69,
+          "top": 831,
+          "right": 730,
+          "bottom": 900,
+          "left": 170
+        },
+        "width": 900,
+        "scrollWidth": 900,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 181,
+              "y": 753,
+              "width": 69.9375,
+              "height": 48,
+              "top": 753,
+              "right": 250.9375,
+              "bottom": 801,
+              "left": 181
+            },
+            "lines": [
+              {
+                "x": 190.0011749267578,
+                "y": 767,
+                "width": 51.935150146484375,
+                "height": 20,
+                "top": 767,
+                "right": 241.9363250732422,
+                "bottom": 787,
+                "left": 190.0011749267578
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 408,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 256.9375,
+              "y": 753,
+              "width": 407.609375,
+              "height": 48,
+              "top": 753,
+              "right": 664.546875,
+              "bottom": 801,
+              "left": 256.9375
+            },
+            "lines": [
+              {
+                "x": 428.241943359375,
+                "y": 767,
+                "width": 64.98486328125,
+                "height": 20,
+                "top": 767,
+                "right": 493.226806640625,
+                "bottom": 787,
+                "left": 428.241943359375
+              }
+            ],
+            "scrollWidth": 406,
+            "clientWidth": 406,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 670.546875,
+              "y": 753,
+              "width": 48.453125,
+              "height": 48,
+              "top": 753,
+              "right": 719,
+              "bottom": 801,
+              "left": 670.546875
+            },
+            "lines": [
+              {
+                "x": 679.5484619140625,
+                "y": 767,
+                "width": 30.449951171875,
+                "height": 20,
+                "top": 767,
+                "right": 709.9984130859375,
+                "bottom": 787,
+                "left": 679.5484619140625
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 170,
+          "y": 742,
+          "width": 560,
+          "height": 70,
+          "top": 742,
+          "right": 730,
+          "bottom": 812,
+          "left": 170
+        },
+        "nav": {
+          "x": 170,
+          "y": 831,
+          "width": 560,
+          "height": 69,
+          "top": 831,
+          "right": 730,
+          "bottom": 900,
+          "left": 170
+        },
+        "width": 900,
+        "scrollWidth": 900,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 70,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 181,
+              "y": 753,
+              "width": 69.9375,
+              "height": 48,
+              "top": 753,
+              "right": 250.9375,
+              "bottom": 801,
+              "left": 181
+            },
+            "lines": [
+              {
+                "x": 190.0011749267578,
+                "y": 767,
+                "width": 51.935150146484375,
+                "height": 20,
+                "top": 767,
+                "right": 241.9363250732422,
+                "bottom": 787,
+                "left": 190.0011749267578
+              }
+            ],
+            "scrollWidth": 68,
+            "clientWidth": 68,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 408,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 256.9375,
+              "y": 753,
+              "width": 407.609375,
+              "height": 48,
+              "top": 753,
+              "right": 664.546875,
+              "bottom": 801,
+              "left": 256.9375
+            },
+            "lines": [
+              {
+                "x": 428.241943359375,
+                "y": 767,
+                "width": 64.98486328125,
+                "height": 20,
+                "top": 767,
+                "right": 493.226806640625,
+                "bottom": 787,
+                "left": 428.241943359375
+              }
+            ],
+            "scrollWidth": 406,
+            "clientWidth": 406,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "15px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 48,
+            "layoutHeight": 48,
+            "rect": {
+              "x": 670.546875,
+              "y": 753,
+              "width": 48.453125,
+              "height": 48,
+              "top": 753,
+              "right": 719,
+              "bottom": 801,
+              "left": 670.546875
+            },
+            "lines": [
+              {
+                "x": 679.5484619140625,
+                "y": 767,
+                "width": 30.449951171875,
+                "height": 20,
+                "top": 767,
+                "right": 709.9984130859375,
+                "bottom": 787,
+                "left": 679.5484619140625
+              }
+            ],
+            "scrollWidth": 46,
+            "clientWidth": 46,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-320-dark-20",
+    "version": 117,
+    "actions": [
+      {
+        "x": 12,
+        "y": 128.5,
+        "width": 214,
+        "height": 53.390625,
+        "top": 128.5,
+        "right": 226,
+        "bottom": 181.890625,
+        "left": 12,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 142.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 142.59375,
+        "right": 262.234375,
+        "bottom": 347.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 15,
+        "y": 357.0625,
+        "width": 40,
+        "height": 40,
+        "top": 357.0625,
+        "right": 55,
+        "bottom": 397.0625,
+        "left": 15,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 183.0625,
+        "width": 52,
+        "height": 46,
+        "top": 183.0625,
+        "right": 244,
+        "bottom": 229.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 183.0625,
+        "width": 52,
+        "height": 46,
+        "top": 183.0625,
+        "right": 244,
+        "bottom": 229.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 192,
+        "y": 183.0625,
+        "width": 52,
+        "height": 46,
+        "top": 183.0625,
+        "right": 244,
+        "bottom": 229.0625,
+        "left": 192,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 120.609375,
+        "y": 287.0625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 287.0625,
+        "right": 199.390625,
+        "bottom": 335.0625,
+        "left": 120.609375,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 8.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 8.59375,
+        "right": 262.234375,
+        "bottom": 213.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 114.25,
+        "y": 416,
+        "width": 120.140625,
+        "height": 53,
+        "top": 416,
+        "right": 234.390625,
+        "bottom": 469,
+        "left": 114.25,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 8.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 8.59375,
+        "right": 262.234375,
+        "bottom": 213.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 21,
+        "y": 416,
+        "width": 87.25,
+        "height": 53,
+        "top": 416,
+        "right": 108.25,
+        "bottom": 469,
+        "left": 21,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 57.765625,
+        "y": 8.59375,
+        "width": 204.46875,
+        "height": 204.46875,
+        "top": 8.59375,
+        "right": 262.234375,
+        "bottom": 213.0625,
+        "left": 57.765625,
+        "hit": true,
+        "overflow": false
+      },
+      {
+        "x": 240.390625,
+        "y": 416,
+        "width": 58.609375,
+        "height": 53,
+        "top": 416,
+        "right": 299,
+        "bottom": 469,
+        "left": 240.390625,
+        "hit": true,
+        "overflow": false
+      }
+    ],
+    "geometries": [
+      {
+        "rect": {
+          "x": 10,
+          "y": 405,
+          "width": 300,
+          "height": 75,
+          "top": 405,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 87,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 21,
+              "y": 416,
+              "width": 87.25,
+              "height": 53,
+              "top": 416,
+              "right": 108.25,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30.001564025878906,
+                "y": 429,
+                "width": 69.24687194824219,
+                "height": 27,
+                "top": 429,
+                "right": 99.2484359741211,
+                "bottom": 456,
+                "left": 30.001564025878906
+              }
+            ],
+            "scrollWidth": 85,
+            "clientWidth": 85,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 120,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 114.25,
+              "y": 416,
+              "width": 120.140625,
+              "height": 53,
+              "top": 416,
+              "right": 234.390625,
+              "bottom": 469,
+              "left": 114.25
+            },
+            "lines": [
+              {
+                "x": 130.9892578125,
+                "y": 429,
+                "width": 86.646484375,
+                "height": 27,
+                "top": 429,
+                "right": 217.6357421875,
+                "bottom": 456,
+                "left": 130.9892578125
+              }
+            ],
+            "scrollWidth": 118,
+            "clientWidth": 118,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 59,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 240.390625,
+              "y": 416,
+              "width": 58.609375,
+              "height": 53,
+              "top": 416,
+              "right": 299,
+              "bottom": 469,
+              "left": 240.390625
+            },
+            "lines": [
+              {
+                "x": 249.3953094482422,
+                "y": 429,
+                "width": 40.59999084472656,
+                "height": 27,
+                "top": 429,
+                "right": 289.99530029296875,
+                "bottom": 456,
+                "left": 249.3953094482422
+              }
+            ],
+            "scrollWidth": 57,
+            "clientWidth": 57,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      },
+      {
+        "rect": {
+          "x": 10,
+          "y": 405,
+          "width": 300,
+          "height": 75,
+          "top": 405,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "nav": {
+          "x": 0,
+          "y": 499,
+          "width": 320,
+          "height": 69,
+          "top": 499,
+          "right": 320,
+          "bottom": 568,
+          "left": 0
+        },
+        "width": 320,
+        "scrollWidth": 320,
+        "buttons": [
+          {
+            "id": "bUndo",
+            "text": "1本取消",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 87,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 21,
+              "y": 416,
+              "width": 87.25,
+              "height": 53,
+              "top": 416,
+              "right": 108.25,
+              "bottom": 469,
+              "left": 21
+            },
+            "lines": [
+              {
+                "x": 30.001564025878906,
+                "y": 429,
+                "width": 69.24687194824219,
+                "height": 27,
+                "top": 429,
+                "right": 99.2484359741211,
+                "bottom": 456,
+                "left": 30.001564025878906
+              }
+            ],
+            "scrollWidth": 85,
+            "clientWidth": 85,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bEnd",
+            "text": "エンド確定",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 120,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 114.25,
+              "y": 416,
+              "width": 120.140625,
+              "height": 53,
+              "top": 416,
+              "right": 234.390625,
+              "bottom": 469,
+              "left": 114.25
+            },
+            "lines": [
+              {
+                "x": 130.9892578125,
+                "y": 429,
+                "width": 86.646484375,
+                "height": 27,
+                "top": 429,
+                "right": 217.6357421875,
+                "bottom": 456,
+                "left": 130.9892578125
+              }
+            ],
+            "scrollWidth": 118,
+            "clientWidth": 118,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          },
+          {
+            "id": "bFinish",
+            "text": "終了",
+            "font": "20px",
+            "pressed": false,
+            "transform": "none",
+            "layoutWidth": 59,
+            "layoutHeight": 53,
+            "rect": {
+              "x": 240.390625,
+              "y": 416,
+              "width": 58.609375,
+              "height": 53,
+              "top": 416,
+              "right": 299,
+              "bottom": 469,
+              "left": 240.390625
+            },
+            "lines": [
+              {
+                "x": 249.3953094482422,
+                "y": 429,
+                "width": 40.59999084472656,
+                "height": 27,
+                "top": 429,
+                "right": 289.99530029296875,
+                "bottom": 456,
+                "left": 249.3953094482422
+              }
+            ],
+            "scrollWidth": 57,
+            "clientWidth": 57,
+            "padLeft": 8,
+            "padRight": 8,
+            "clear": true
+          }
+        ]
+      }
+    ],
+    "oldAllExact": true,
+    "newArrowsExact": true,
+    "scoreAgreement": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]

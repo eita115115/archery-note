@@ -1,0 +1,1 @@
+Initial read used tests/history paths and Windows scripts globs; corrected to tests/e2e and rg scripts. One optional old error-context read guessed a nonexistent path; original failure output retained. A PowerShell parser rejected the attempted capture helper edit before any command ran; corrected using apply_patch. No app state changed by these helper errors.

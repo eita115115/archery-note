@@ -1,0 +1,435 @@
+{
+  "schema": 5,
+  "settings": {
+    "theme": "light",
+    "onboardingSeen": true,
+    "activeGuideSeen": true,
+    "launchCount": 10,
+    "featureHints": {
+      "gearSetup": true,
+      "analysis": true,
+      "sightAdjust": true,
+      "formTracking": true,
+      "addToHome": true,
+      "practiceDays": true
+    }
+  },
+  "sessions": [
+    {
+      "id": "owned-record-perf-0",
+      "date": "2026-10-12",
+      "dist": 70,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-bow",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "wx": "晴れ・弱い風"
+    },
+    {
+      "id": "owned-record-perf-1",
+      "date": "2026-10-12",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-bow",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3.5999999999999996,
+            "y": -1.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -2.4,
+            "y": 0.5,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": 2.5,
+            "s": 9,
+            "X": false
+          }
+        ],
+        [
+          {
+            "x": -1.7999999999999998,
+            "y": -1,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": 1,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.6,
+            "y": 3,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ],
+      "wx": ""
+    },
+    {
+      "id": "owned-record-perf-2",
+      "date": "2026-10-10",
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": null,
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3,
+            "y": 0,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 2,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          }
+        ],
+        [
+          {
+            "x": -1.2,
+            "y": 0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 2.5,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": 1.2,
+            "y": -2,
+            "s": 10,
+            "X": false
+          }
+        ]
+      ],
+      "wx": ""
+    },
+    {
+      "id": "owned-stage-0",
+      "date": "2026-09-28",
+      "dist": 90,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "wa1440_men",
+      "purpose": "practice",
+      "setupId": "owned-bow",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "wx": "晴れ・弱い風",
+      "roundGroup": {
+        "gid": "owned-round",
+        "roundId": "wa1440_men",
+        "stage": 0,
+        "stageCount": 4
+      }
+    },
+    {
+      "id": "owned-stage-1",
+      "date": "2026-09-28",
+      "dist": 70,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "wa1440_men",
+      "purpose": "practice",
+      "setupId": "owned-bow",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "wx": "晴れ・弱い風",
+      "roundGroup": {
+        "gid": "owned-round",
+        "roundId": "wa1440_men",
+        "stage": 1,
+        "stageCount": 4
+      }
+    },
+    {
+      "id": "owned-stage-2",
+      "date": "2026-09-28",
+      "dist": 50,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "wa1440_men",
+      "purpose": "practice",
+      "setupId": "owned-bow",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "wx": "晴れ・弱い風",
+      "roundGroup": {
+        "gid": "owned-round",
+        "roundId": "wa1440_men",
+        "stage": 2,
+        "stageCount": 4
+      }
+    },
+    {
+      "id": "owned-stage-3",
+      "date": "2026-09-28",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "wa1440_men",
+      "purpose": "practice",
+      "setupId": "owned-bow",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "wx": "晴れ・弱い風",
+      "roundGroup": {
+        "gid": "owned-round",
+        "roundId": "wa1440_men",
+        "stage": 3,
+        "stageCount": 4
+      }
+    }
+  ],
+  "active": null,
+  "setups": [
+    {
+      "id": "owned-bow",
+      "name": "屋外用リカーブ・練習セット"
+    }
+  ]
+}

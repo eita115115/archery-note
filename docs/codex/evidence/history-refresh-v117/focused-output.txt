@@ -1,0 +1,23 @@
+
+> archery-note@0.116.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/history-layout.spec.js tests/e2e/history-round-collapse.spec.js --workers=4
+
+Native web assets ready: dist\native (v116)
+[WebServer] (node:17480) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 7 tests using 2 workers
+
+(node:23176) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6788) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (light) (942ms)
+  ok 3 [chromium] › tests\e2e\history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (dark) (782ms)
+  ok 2 [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (light) (2.7s)
+  ok 4 [chromium] › tests\e2e\history-layout.spec.js:44:1 › history names each record with its date and shows an empty average without NaN (1.8s)
+  ok 5 [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (dark) (3.0s)
+  ok 6 [chromium] › tests\e2e\history-round-collapse.spec.js:111:1 › additional history keeps all stages together at a page boundary on a narrow phone (1.9s)
+  ok 7 [chromium] › tests\e2e\history-round-collapse.spec.js:133:1 › a filtered group labels its visible subtotal and excludes unmatched stages (2.3s)
+
+  7 passed (11.6s)

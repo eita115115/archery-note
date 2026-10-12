@@ -1,0 +1,519 @@
+
+> archery-note@0.117.0 test:e2e:dist
+> node tools/test-distribution.js --workers=4
+
+Native web assets ready: dist\native (v117)
+[WebServer] (node:32068) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 302 tests using 4 workers
+
+(node:16808) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:36848) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:32248) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:35776) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   1 [chromium] › tests\e2e\analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (320/light) (1.3s)
+  ok   2 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 0) (1.4s)
+  ok   5 [chromium] › tests\e2e\analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (320/light) (697ms)
+  ok   4 [chromium] › tests\e2e\build-week-growth.spec.js:9:1 › demo data opens an explainable growth dashboard and remains removable (2.1s)
+  ok   6 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 1) (1.1s)
+  ok   7 [chromium] › tests\e2e\analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (320/light) (823ms)
+  ok   8 [chromium] › tests\e2e\build-week-growth.spec.js:37:1 › growth dashboard works at narrow mobile width and in dark mode (927ms)
+  ok   9 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 2) (1.0s)
+  ok  10 [chromium] › tests\e2e\analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (375/dark) (958ms)
+  ok  13 [chromium] › tests\e2e\analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (375/dark) (696ms)
+  ok  12 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 3) (1.0s)
+  ok  14 [chromium] › tests\e2e\analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (375/dark) (777ms)
+  ok  15 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 6) (1.1s)
+  x    3 [chromium] › tests\e2e\app-smoke.spec.js:81:1 › loads core tabs and seeded history without console errors (5.9s)
+(node:34076) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  17 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 0) (999ms)
+  ok  19 [chromium] › tests\e2e\app-smoke.spec.js:117:1 › moves exactly one aria-current marker when switching tabs (523ms)
+  ok  18 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 1) (1.0s)
+  ok  21 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 2) (1.0s)
+  ok  20 [chromium] › tests\e2e\app-smoke.spec.js:140:1 › exposes distance chips as buttons with synced aria-pressed (1.3s)
+  ok  22 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 3) (995ms)
+  ok  23 [chromium] › tests\e2e\app-smoke.spec.js:169:1 › exposes history rows and sight distance chips as buttons (1.8s)
+  ok  16 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, light, reduce, 40, notice false) (5.3s)
+  ok  24 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 6) (993ms)
+  ok  25 [chromium] › tests\e2e\app-smoke.spec.js:208:1 › opens settings as a dialog, closes on Escape, and restores focus (504ms)
+  ok  27 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 0) (1.0s)
+  ok  29 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 1) (1.0s)
+  ok  28 [chromium] › tests\e2e\app-smoke.spec.js:235:1 › appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore (2.2s)
+  ok  30 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 2) (1.0s)
+  ok  11 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, no-preference, 18m/40cm/3) (11.6s)
+  ok  32 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 3) (1.0s)
+  ok  34 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 6) (1.0s)
+  ok  26 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, light, reduce, 122, notice false) (5.4s)
+  ok  35 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 0) (1.1s)
+  ok  37 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 1) (1.0s)
+  ok  31 [chromium] › tests\e2e\app-smoke.spec.js:281:1 › records a multi-distance round with stage advance and history badges (5.0s)
+  ok  38 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 2) (1.0s)
+  ok  39 [chromium] › tests\e2e\app-smoke.spec.js:337:1 › syncs aria-pressed on settings theme and form tracking chips (916ms)
+  ok  40 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 3) (1.0s)
+  ok  42 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 6) (954ms)
+  ok  41 [chromium] › tests\e2e\correction-names.spec.js:21:3 › named correction controls act on the selected arrow (320) (2.0s)
+  ok  33 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, reduce, 18m/40cm/3) (6.9s)
+  ok  43 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:186:1 › native one-arrow finish stays pending across analysis and history (2.1s)
+  ok  44 [chromium] › tests\e2e\correction-names.spec.js:21:3 › named correction controls act on the selected arrow (375) (2.0s)
+  ok  47 [chromium] › tests\e2e\distribution-assets.spec.js:8:1 › form assets are available unchanged without loading them at startup (1.2s)
+  ok  36 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 40, notice false) (8.4s)
+  ok  48 [chromium] › tests\e2e\double-tap-zoom.spec.js:53:1 › double-tapping the target records two arrows without triggering viewport zoom (805ms)
+  ok  50 [chromium] › tests\e2e\double-tap-zoom.spec.js:85:1 › double-tapping dock buttons does not trigger viewport zoom (1.1s)
+  ok  51 [chromium] › tests\e2e\end-dock-viewport.spec.js:2:1 › end action stays in viewport after tab animation and scoring (2.7s)
+  ok  52 [chromium] › tests\e2e\end-dock-viewport.spec.js:35:1 › page gestures retain scrolling without pinch zoom (247ms)
+  ok  45 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, no-preference, 18m/40cm/3) (10.6s)
+  ok  49 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 122, notice false) (9.2s)
+  ok  53 [chromium] › tests\e2e\end-sequence.spec.js:6:3 › two complete ends remain reachable (320x568) (6.8s)
+  ok  46 [chromium] › tests\e2e\correction-return.spec.js:94:5 › correction returns to target and next end (320, no-preference) (15.3s)
+  ok  55 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, dark, reduce, 40, notice false) (5.2s)
+  ok  54 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, reduce, 18m/40cm/3) (6.8s)
+  ok  56 [chromium] › tests\e2e\end-sequence.spec.js:6:3 › two complete ends remain reachable (375x812) (7.4s)
+  ok  60 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, daily) (612ms)
+  ok  58 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, dark, reduce, 122, notice false) (5.3s)
+  ok  61 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, backdated) (608ms)
+  ok  63 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, sparse) (545ms)
+  ok  64 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, score-only) (583ms)
+  ok  65 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, gamification) (565ms)
+  ok  66 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, edit) (569ms)
+  ok  67 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, daily) (577ms)
+  ok  68 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, backdated) (577ms)
+  ok  69 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, sparse) (565ms)
+  ok  57 [chromium] › tests\e2e\correction-return.spec.js:94:5 › correction returns to target and next end (320, reduce) (10.6s)
+  ok  70 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, score-only) (579ms)
+  ok  72 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, gamification) (598ms)
+  ok  59 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, no-preference, 18m/40cm/3) (11.3s)
+  ok  73 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, edit) (633ms)
+  ok  75 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, daily) (604ms)
+  ok  76 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, backdated) (586ms)
+  ok  77 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, sparse) (553ms)
+  ok  78 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, score-only) (587ms)
+  ok  62 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, dark, no-preference, 40, notice false) (8.9s)
+  ok  79 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, gamification) (621ms)
+  ok  81 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, edit) (563ms)
+  ok  82 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, daily) (595ms)
+  ok  83 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, backdated) (587ms)
+  ok  84 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, sparse) (596ms)
+  ok  85 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, score-only) (613ms)
+  ok  74 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, reduce, 18m/40cm/3) (6.8s)
+  ok  86 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, gamification) (631ms)
+  ok  88 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, edit) (570ms)
+  ok  89 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:225:1 › same id distinct records retain distinct metrics (594ms)
+  ok  90 [chromium] › tests\e2e\finish-metrics-sharing.spec.js:236:1 › next finish recomputes changed history after save (778ms)
+  ok  91 [chromium] › tests\e2e\form-diagnostics.spec.js:335:1 › selected deletion rolls back when the primary write fails (2.1s)
+  ok  80 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, dark, no-preference, 122, notice false) (9.1s)
+  ok  92 [chromium] › tests\e2e\form-diagnostics.spec.js:420:1 › zero-shot exact-debug live save freezes, rolls back, and retries once (1.3s)
+  ok  71 [chromium] › tests\e2e\correction-return.spec.js:94:5 › correction returns to target and next end (375, no-preference) (15.3s)
+  ok  94 [chromium] › tests\e2e\form-diagnostics.spec.js:471:1 › failed diagnostic discard cancel retains the candidate and confirm closes without saving (2.2s)
+  ok  96 [chromium] › tests\e2e\form-diagnostics.spec.js:501:1 › zero-shot exact-debug replay save retries without matrix advancement (1.4s)
+  ok  97 [chromium] › tests\e2e\form-diagnostics.spec.js:586:3 › absent formDebug keeps diagnostics hidden and disabled (1.2s)
+  ok  93 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, light, reduce, 40, notice false) (5.3s)
+  ok  87 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, no-preference, 18m/40cm/3) (10.7s)
+  ok  98 [chromium] › tests\e2e\form-diagnostics.spec.js:586:3 › false formDebug keeps diagnostics hidden and disabled (1.2s)
+  ok 101 [chromium] › tests\e2e\form-diagnostics.spec.js:586:3 › string "true" formDebug keeps diagnostics hidden and disabled (1.2s)
+  ok 102 [chromium] › tests\e2e\form-diagnostics.spec.js:598:1 › diagnostic controls follow exact formDebug without reopening settings (1.2s)
+  ok 103 [chromium] › tests\e2e\form-diagnostics.spec.js:612:1 › action-time exact gate rejects a value changed after render (1.2s)
+  ok  99 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, light, reduce, 122, notice false) (5.2s)
+  ok 104 [chromium] › tests\e2e\form-diagnostics.spec.js:624:1 › another workflow blocks both actions before confirmation (1.3s)
+  ok 100 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, reduce, 18m/40cm/3) (6.8s)
+  ok 106 [chromium] › tests\e2e\form-diagnostics.spec.js:639:1 › first start commits one fresh coordinator (1.2s)
+  ok  95 [chromium] › tests\e2e\correction-return.spec.js:94:5 › correction returns to target and next end (375, reduce) (10.8s)
+  ok 109 [chromium] › tests\e2e\form-secure-context.spec.js:71:1 › insecure HTTP blocks live capture before pose/media and offers saved-video replay (1.0s)
+  ok 110 [chromium] › tests\e2e\form-secure-context.spec.js:129:1 › trusted loopback HTTP remains eligible for live capture (529ms)
+  ok 108 [chromium] › tests\e2e\form-diagnostics.spec.js:660:1 › restart double click opens one confirmation; cancel preserves and confirm replaces (2.1s)
+  ok 111 [chromium] › tests\e2e\gamification.spec.js:109:1 › gamification.enabled:false hides the history streak hero and the analysis badge list (485ms)
+  ok 112 [chromium] › tests\e2e\form-diagnostics.spec.js:686:1 › restart post-confirm token change fails closed (1.6s)
+  ok 113 [chromium] › tests\e2e\gamification.spec.js:154:1 › enabling gamification from settings makes the history streak hero appear (1.3s)
+  ok 115 [chromium] › tests\e2e\gamification.spec.js:186:1 › unset practiceDays shows — with a CTA; tapping the hero CTA sets weekdays and switches to streak/goal rings (880ms)
+  ok 116 [chromium] › tests\e2e\gamification.spec.js:249:1 › finishing a session shows a before→after streak row in the summary sheet (505ms)
+  ok 117 [chromium] › tests\e2e\gamification.spec.js:300:1 › all 12 badges render in the analysis tab (locked by default); first_arrow unlocks via startup backfill (439ms)
+  ok 114 [chromium] › tests\e2e\form-diagnostics.spec.js:714:1 › allocation failure and save false both preserve prior coordinator and updatedAt (2.2s)
+  ok 118 [chromium] › tests\e2e\gamification.spec.js:355:1 › importing history with gamification enabled backfills quietly and does not re-fire an already-owned badge on the next session (regression: import badge misfire) (938ms)
+  ok 105 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 40, notice false) (8.9s)
+  ok 119 [chromium] › tests\e2e\form-diagnostics.spec.js:755:1 › side state uses fixed copy (1.2s)
+  ok 120 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 1) (831ms)
+  ok 123 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 2) (798ms)
+  ok 122 [chromium] › tests\e2e\form-diagnostics.spec.js:766:1 › complete state uses fixed copy (1.2s)
+  ok 124 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 3) (863ms)
+  ok 126 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 1) (805ms)
+  ok 127 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 2) (804ms)
+  ok 125 [chromium] › tests\e2e\form-diagnostics.spec.js:771:1 › export post-confirm exact-debug and workflow rechecks prevent transport (2.6s)
+  ok 107 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, no-preference, 70m/122cm/6) (11.9s)
+  ok 128 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 3) (913ms)
+  ok 131 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 1) (837ms)
+  ok 129 [chromium] › tests\e2e\form-diagnostics.spec.js:840:3 › incomplete refuses export without transport (1.6s)
+  ok 132 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 2) (854ms)
+  ok 133 [chromium] › tests\e2e\form-diagnostics.spec.js:840:3 › stale refuses export without transport (1.6s)
+  ok 134 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 3) (916ms)
+  ok 136 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 1) (843ms)
+  ok 121 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 122, notice false) (8.9s)
+  ok 135 [chromium] › tests\e2e\form-diagnostics.spec.js:840:3 › malformed refuses export without transport (1.6s)
+  ok 137 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 2) (885ms)
+  ok 140 [chromium] › tests\e2e\grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 3) (839ms)
+  ok 141 [chromium] › tests\e2e\grouping-evidence.spec.js:133:3 › first few-arrow result explains pending grouping (1) (359ms)
+  ok 139 [chromium] › tests\e2e\form-diagnostics.spec.js:840:3 › replay refuses export without transport (1.6s)
+  ok 142 [chromium] › tests\e2e\grouping-evidence.spec.js:133:3 › first few-arrow result explains pending grouping (2) (393ms)
+  ok 130 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, reduce, 70m/122cm/6) (6.9s)
+  ok 143 [chromium] › tests\e2e\form-diagnostics.spec.js:840:3 › duplicate selected ID refuses export without transport (1.6s)
+  ok 144 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (320, light, reduce, short) (1.7s)
+  ok 146 [chromium] › tests\e2e\form-diagnostics.spec.js:840:3 › overflow refuses export without transport (1.6s)
+  ok 138 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, dark, reduce, 40, notice false) (5.4s)
+  ok 148 [chromium] › tests\e2e\form-diagnostics.spec.js:857:1 › output-too-large uses the fixed repeat copy (1.7s)
+  ok 147 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (320, light, no-preference, short) (4.1s)
+  ok 150 [chromium] › tests\e2e\form-diagnostics.spec.js:873:1 › export double click opens one confirmation and cancel preserves all state (1.6s)
+  ok 151 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (320, dark, reduce, short) (1.7s)
+  ok 152 [chromium] › tests\e2e\form-diagnostics.spec.js:890:3 › web-success uses one File transport and preserves DB/backups (1.7s)
+  ok 149 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, dark, reduce, 122, notice false) (5.4s)
+  ok 154 [chromium] › tests\e2e\form-diagnostics.spec.js:890:3 › web-abort uses one File transport and preserves DB/backups (1.6s)
+  ok 156 [chromium] › tests\e2e\form-diagnostics.spec.js:890:3 › web-error uses one File transport and preserves DB/backups (1.6s)
+  ok 153 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (320, dark, no-preference, short) (4.1s)
+  ok 145 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, no-preference, 70m/122cm/6) (12.0s)
+  ok 157 [chromium] › tests\e2e\form-diagnostics.spec.js:912:1 › native final cleanup warning has no download fallback and preserves state (1.6s)
+  ok 158 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (375, light, reduce, short) (1.5s)
+  ok 160 [chromium] › tests\e2e\form-diagnostics.spec.js:933:1 › no-share environment downloads exact MIME/allowlist and revokes URL (1.9s)
+  ok 162 [chromium] › tests\e2e\form-diagnostics.spec.js:957:3 › diagnostic settings fit 360x780 (1.2s)
+  ok 161 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (375, light, no-preference, short) (3.9s)
+  ok 163 [chromium] › tests\e2e\form-diagnostics.spec.js:957:3 › diagnostic settings fit 390x844 (1.3s)
+  ok 155 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, dark, no-preference, 40, notice false) (8.7s)
+  ok 165 [chromium] › tests\e2e\form-diagnostics.spec.js:957:3 › diagnostic settings fit 1280x800 (1.3s)
+  ok 164 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (375, dark, reduce, short) (1.6s)
+  ok 159 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, reduce, 70m/122cm/6) (6.9s)
+  ok 167 [chromium] › tests\e2e\form-diagnostics.spec.js:1010:3 › form tracking missing is disabled everywhere (997ms)
+  ok 170 [chromium] › tests\e2e\form-diagnostics.spec.js:1010:3 › form tracking false is disabled everywhere (988ms)
+  ok 171 [chromium] › tests\e2e\form-diagnostics.spec.js:1010:3 › form tracking zero is disabled everywhere (949ms)
+  ok 172 [chromium] › tests\e2e\form-diagnostics.spec.js:1010:3 › form tracking one is disabled everywhere (963ms)
+  ok 168 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (375, dark, no-preference, short) (4.1s)
+  ok 173 [chromium] › tests\e2e\form-diagnostics.spec.js:1010:3 › form tracking string "true" is disabled everywhere (988ms)
+  ok 174 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (1024, light, reduce, short) (1.6s)
+  ok 175 [chromium] › tests\e2e\form-diagnostics.spec.js:1010:3 › form tracking string "false" is disabled everywhere (946ms)
+  ok 177 [chromium] › tests\e2e\form-diagnostics.spec.js:1010:3 › form tracking literal true is enabled everywhere (914ms)
+  ok 166 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, dark, no-preference, 122, notice false) (8.3s)
+  ok 178 [chromium] › tests\e2e\history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (light) (798ms)
+  ok 180 [chromium] › tests\e2e\history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (dark) (769ms)
+  ok 176 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (1024, light, no-preference, short) (4.0s)
+  ok 181 [chromium] › tests\e2e\history-layout.spec.js:44:1 › history names each record with its date and shows an empty average without NaN (2.3s)
+  ok 182 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (1024, dark, reduce, short) (1.5s)
+  ok 169 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, no-preference, 70m/122cm/6) (11.3s)
+  ok 184 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (1024, dark, no-preference, short) (3.9s)
+  ok 179 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 40, notice true) (8.3s)
+  x  183 [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (light) (6.6s)
+  ok 186 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (320, light, reduce, long) (2.7s)
+(node:24988) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 185 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, reduce, 70m/122cm/6) (6.8s)
+  ok 188 [chromium] › tests\e2e\history-actions.spec.js:120:3 › history actions preserve reading space (375, light, reduce, long) (2.7s)
+  ok 191 [chromium] › tests\e2e\modal-swipe-followup.spec.js:6:3 › a controlled sheet pull allows the first next touch to finish (320) (1.3s)
+  ok 192 [chromium] › tests\e2e\modal-swipe-followup.spec.js:6:3 › a controlled sheet pull allows the first next touch to finish (375) (1.3s)
+  ok 187 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 40, notice true) (8.1s)
+  ok 193 [chromium] › tests\e2e\modal-swipe.spec.js:12:1 › settings swipes close, short and sideways drags preserve the sheet (1.1s)
+  ok 195 [chromium] › tests\e2e\modal-swipe.spec.js:37:1 › swiping nested confirmation cancels and leaves underlying settings open (747ms)
+  x  189 [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (dark) (6.7s)
+(node:12140) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 196 [chromium] › tests\e2e\modal-swipe.spec.js:59:1 › touch pull closes settings; cancelled pull leaves it open (750ms)
+  ok 197 [chromium] › tests\e2e\onboarding.spec.js:96:1 › empty db (0 sessions / 0 setups / onboardingSeen:false) shows the welcome screen (317ms)
+  ok 199 [chromium] › tests\e2e\onboarding.spec.js:115:1 › skip goes straight to the normal record screen and saves onboardingSeen immediately (1.3s)
+  ok 198 [chromium] › tests\e2e\history-round-collapse.spec.js:113:1 › additional history keeps all stages together at a page boundary on a narrow phone (1.7s)
+  ok 200 [chromium] › tests\e2e\onboarding.spec.js:136:1 › 'はじめる' shows the quick-setup screen with 4 unselected distance chips (1.3s)
+  ok 194 [chromium] › tests\e2e\correction-exit.spec.js:99:3 › direct correction exit (1024, light, reduce, 122, notice false) (5.5s)
+  ok 201 [chromium] › tests\e2e\history-round-collapse.spec.js:135:1 › a filtered group labels its visible subtotal and excludes unmatched stages (1.9s)
+  ok 203 [chromium] › tests\e2e\outdoor-contrast.spec.js:94:1 › red-zone score chip (7-8 points) meets WCAG AA contrast against its text (517ms)
+  ok 205 [chromium] › tests\e2e\outdoor-contrast.spec.js:118:1 › blue-zone score chip (5-6 points) meets WCAG AA contrast against its text (510ms)
+  ok 190 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, no-preference, 70m/122cm/6) (11.4s)
+  ok 206 [chromium] › tests\e2e\outdoor-contrast.spec.js:142:1 › arrow marker keeps a thick white outline for outdoor glare readability (511ms)
+  ok 204 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, below) (1.1s)
+  ok 202 [chromium] › tests\e2e\onboarding.spec.js:171:3 › selecting 70m shows the auto-derived face/end hint and starts a matching db.active (2.3s)
+  ok 208 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, tie) (1.0s)
+  ok 209 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, above) (1.0s)
+  ok 211 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, below) (982ms)
+  ok 212 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, tie) (1.0s)
+  ok 210 [chromium] › tests\e2e\onboarding.spec.js:171:3 › selecting 50m shows the auto-derived face/end hint and starts a matching db.active (2.3s)
+  ok 213 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, above) (1.1s)
+  ok 214 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, below) (1.0s)
+  ok 217 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, above) (928ms)
+  ok 216 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, tie) (974ms)
+  ok 215 [chromium] › tests\e2e\onboarding.spec.js:171:3 › selecting 30m shows the auto-derived face/end hint and starts a matching db.active (2.2s)
+  ok 218 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, below) (1.0s)
+  ok 219 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, tie) (1.0s)
+  ok 222 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, below) (885ms)
+  ok 221 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, above) (999ms)
+  ok 207 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, reduce, 70m/122cm/6) (7.1s)
+  ok 223 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, tie) (929ms)
+  ok 224 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, above) (938ms)
+  ok 220 [chromium] › tests\e2e\onboarding.spec.js:171:3 › selecting 18m shows the auto-derived face/end hint and starts a matching db.active (2.3s)
+  ok 228 [chromium] › tests\e2e\onboarding.spec.js:224:3 › onboarding does not show for an existing user with an existing session (335ms)
+  ok 225 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, below) (1.0s)
+  ok 229 [chromium] › tests\e2e\onboarding.spec.js:224:3 › onboarding does not show for an existing user with an existing setup (no sessions yet) (313ms)
+  ok 226 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, tie) (1.1s)
+  ok 227 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, above) (1.0s)
+  ok 231 [chromium] › tests\e2e\onboarding.spec.js:224:3 › onboarding does not show for an existing user with onboardingSeen already true (349ms)
+  ok 234 [chromium] › tests\e2e\onboarding.spec.js:242:1 › clearing all data and reloading shows onboarding again (410ms)
+  ok 230 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, below) (1.0s)
+  ok 233 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, above) (979ms)
+  ok 232 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, tie) (1.0s)
+  ok 235 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, below) (1.1s)
+  ok 236 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, tie) (1.0s)
+  ok 237 [chromium] › tests\e2e\personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, above) (1.0s)
+  ok 241 [chromium] › tests\e2e\record-labels.spec.js:24:5 › named record controls 320 › starts with the visible named conditions and preserves records (779ms)
+  ok 238 [chromium] › tests\e2e\personal-best-projection.spec.js:186:3 › native PB projection after one-arrow finish (320) (2.0s)
+  ok 242 [chromium] › tests\e2e\record-labels.spec.js:24:5 › named record controls 375 › starts with the visible named conditions and preserves records (771ms)
+  ok 239 [chromium] › tests\e2e\personal-best-projection.spec.js:186:3 › native PB projection after one-arrow finish (375) (2.0s)
+  ok 240 [chromium] › tests\e2e\pwa-release.spec.js:3:1 › cached app starts a practice offline and retains it across reload (2.0s)
+  ok 245 [chromium] › tests\e2e\record-start.spec.js:4:5 › record start labels match the started conditions (light, repeat) (635ms)
+  ok 244 [chromium] › tests\e2e\record-labels.spec.js:24:5 › named record controls 900 › starts with the visible named conditions and preserves records (854ms)
+  ok 246 [chromium] › tests\e2e\pwa-release.spec.js:29:1 › newer version banner reload preserves demo records (988ms)
+  ok 247 [chromium] › tests\e2e\record-start.spec.js:4:5 › record start labels match the started conditions (light, current) (613ms)
+  ok 250 [chromium] › tests\e2e\record-start.spec.js:4:5 › record start labels match the started conditions (dark, repeat) (586ms)
+  ok 249 [chromium] › tests\e2e\summary-order.spec.js:86:5 › finished summary shows results first (320, light) (922ms)
+  ok 251 [chromium] › tests\e2e\record-start.spec.js:4:5 › record start labels match the started conditions (dark, current) (618ms)
+  ok 243 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, current) (3.2s)
+  ok 252 [chromium] › tests\e2e\summary-order.spec.js:86:5 › finished summary shows results first (320, dark) (910ms)
+  ok 255 [chromium] › tests\e2e\summary-order.spec.js:86:5 › finished summary shows results first (375, light) (898ms)
+  ok 256 [chromium] › tests\e2e\summary-order.spec.js:86:5 › finished summary shows results first (375, dark) (965ms)
+  ok 257 [chromium] › tests\e2e\summary-order.spec.js:130:3 › summary keeps its existing optional content (first) (738ms)
+  ok 254 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, repeat) (3.2s)
+  ok 258 [chromium] › tests\e2e\summary-order.spec.js:130:3 › summary keeps its existing optional content (gam-round) (767ms)
+  ok 260 [chromium] › tests\e2e\summary-order.spec.js:130:3 › summary keeps its existing optional content (edit) (748ms)
+  ok 261 [chromium] › tests\e2e\tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (reduce) (859ms)
+  ok 259 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, onboarding) (3.6s)
+  ok 262 [chromium] › tests\e2e\tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (no-preference) (1.8s)
+  ok 253 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings (7.6s)
+  ok 263 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, current) (1.6s)
+  ok 264 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (320, pointer) (2.7s)
+  ok 266 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, repeat) (1.6s)
+  ok 268 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, onboarding) (1.5s)
+  ok 248 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (no-preference) (14.9s)
+  ok 267 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (320, pointer) (3.5s)
+  ok 269 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, current) (3.2s)
+  ok 265 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings (7.6s)
+  ok 271 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (320, touch fallback) (2.7s)
+  ok 272 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, repeat) (3.7s)
+  ok 274 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (320, touch fallback) (3.5s)
+  ok 275 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, onboarding) (3.6s)
+  ok 276 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (375, pointer) (2.7s)
+  ok 273 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings (7.6s)
+  ok 270 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (reduce) (9.7s)
+  ok 279 [chromium] › tests\e2e\todays-result.spec.js:144:1 › first-ever session shows the baseline-established copy, with gamification off by default (416ms)
+  ok 281 [chromium] › tests\e2e\todays-result.spec.js:167:1 › second same-condition session shows the previous-comparison row in the summary (424ms)
+  ok 277 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, current) (1.7s)
+  ok 282 [chromium] › tests\e2e\todays-result.spec.js:192:1 › first session at a new condition says condition-first, not first-ever (strict-review major regression) (408ms)
+  ok 283 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, repeat) (1.6s)
+  ok 284 [chromium] › tests\e2e\todays-result.spec.js:213:1 › history detail sheet reconstructs the panel with この日 wording and no future leakage (1.7s)
+  ok 278 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (375, pointer) (3.5s)
+  ok 286 [chromium] › tests\e2e\touch-controls.spec.js:4:5 › secondary touch controls remain usable (360, light) (788ms)
+  ok 285 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, onboarding) (1.5s)
+  ok 289 [chromium] › tests\e2e\wake-lock.spec.js:105:1 › starting a record session acquires the screen wake lock exactly once (368ms)
+  ok 288 [chromium] › tests\e2e\touch-controls.spec.js:4:5 › secondary touch controls remain usable (360, dark) (787ms)
+  ok 290 [chromium] › tests\e2e\wake-lock.spec.js:122:1 › finishing a record session releases the screen wake lock (477ms)
+  ok 292 [chromium] › tests\e2e\wake-lock.spec.js:142:1 › wake lock is reacquired when the tab returns from background (357ms)
+  ok 291 [chromium] › tests\e2e\touch-controls.spec.js:4:5 › secondary touch controls remain usable (375, light) (872ms)
+  ok 293 [chromium] › tests\e2e\wake-lock.spec.js:177:1 › unsupported browsers skip wake lock silently and the session keeps working (391ms)
+  ok 287 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (375, touch fallback) (2.7s)
+  ok 295 [chromium] › tests\e2e\wake-lock.spec.js:195:1 › a rejected wake lock request warns via console but keeps the session usable (422ms)
+  ok 294 [chromium] › tests\e2e\touch-controls.spec.js:4:5 › secondary touch controls remain usable (375, dark) (888ms)
+  ok 298 [chromium] › tests\e2e\touch-controls.spec.js:38:3 › visible target above fixed actions accepts one arrow (360) (1.5s)
+  ok 299 [chromium] › tests\e2e\touch-controls.spec.js:38:3 › visible target above fixed actions accepts one arrow (375) (1.5s)
+  ok 296 [chromium] › tests\e2e\target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (375, touch fallback) (3.5s)
+  ok 297 [chromium] › tests\e2e\warm-cache-update.spec.js:7:1 › warm HTTP cache updates generated code and canonical offline cache together (3.6s)
+  ok 280 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (no-preference) (14.3s)
+  ok 300 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (reduce) (9.8s)
+  ok 301 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (no-preference) (14.2s)
+  ok 302 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (reduce) (9.8s)
+
+
+  1) [chromium] › tests\e2e\app-smoke.spec.js:81:1 › loads core tabs and seeded history without console errors 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#main')
+    Timeout: 5000ms
+    - Expected substring  -  1
+    + Received string     + 33
+
+    - 2026/6/27 ・ 70m
+    +
+    +       履歴
+    +       記録を数回続けると、今日の一言がここに出ます。
+    +       
+    +         練習1回6本を集計
+    +         平均9.171本あたり
+    +         最高合計552026/6/27 / 70m / 6本
+    +       
+    +       
+    +     
+    +   練習履歴 1/1回
+    +     
+    +     絞り込み すべて
+    +     
+    +       用具すべて未指定E2E recurve setup
+    +       距離すべて70m
+    +     
+    +     
+    +       ラウンドすべて自由練習
+    +       絞り込み解除
+    +     
+    +     
+    +     
+    +     2026年06月2026/6/27
+    +     
+    +       
+    +       70m 122cm的
+    +       6本
+    +       E2E recurve setup ・ 室内
+    +     
+    +     55点平均 9.17
+    +     ›
+    +   
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#main')
+        13 × locator resolved to <main id="main" class="viewEnter">…</main>
+           - unexpected value "
+          履歴
+          記録を数回続けると、今日の一言がここに出ます。
+          
+            練習1回6本を集計
+            平均9.171本あたり
+            最高合計552026/6/27 / 70m / 6本
+          
+          
+        
+      練習履歴 1/1回
+        
+        絞り込み すべて
+        
+          用具すべて未指定E2E recurve setup
+          距離すべて70m
+        
+        
+          ラウンドすべて自由練習
+          絞り込み解除
+        
+        
+        
+        2026年06月2026/6/27
+        
+          
+          70m 122cm的
+          6本
+          E2E recurve setup ・ 室内
+        
+        55点平均 9.17
+        ›
+      "
+
+
+       99 |   await mainTab(page, "履歴").click();
+      100 |   await expect(page.locator("#main")).toContainText("練習履歴");
+    > 101 |   await expect(page.locator("#main")).toContainText("2026/6/27 ・ 70m");
+          |                                       ^
+      102 |   await expect(page.locator("#main")).toContainText("E2E recurve setup");
+      103 |
+      104 |   await mainTab(page, "サイト調整").click();
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\app-smoke.spec.js:101:39
+
+    Error Context: test-results\app-smoke-loads-core-tabs--75717-tory-without-console-errors-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (light) 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('history-round').locator('[data-id="stage-0"]')
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 9
+
+    - 2026/09/28
+    +
+    +     
+    +       2026/9/28
+    +       90m 40cm的
+    +       1本
+    +       WA1440 男子 1/4
+    +     
+    +     10点平均 10.00
+    +     ›
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for getByTestId('history-round').locator('[data-id="stage-0"]')
+        14 × locator resolved to <button type="button" data-id="stage-0" data-testid="history-row" class="listItem historyRow" aria-label="2026/9/28 ・ 90m ・ 40cm的 ・ 1本 ・ 10点 ・ 平均 10.00 ・ WA1440 男子 1/4">…</button>
+           - unexpected value "
+        
+          2026/9/28
+          90m 40cm的
+          1本
+          WA1440 男子 1/4
+        
+        10点平均 10.00
+        ›"
+
+
+      84 |       await group.getByTestId("history-row").evaluateAll((els) => els.map((el) => el.dataset.id)),
+      85 |     ).toEqual(["stage-0", "stage-1", "stage-2", "stage-3"]);
+    > 86 |     await expect(group.locator('[data-id="stage-0"]')).toContainText("2026/09/28");
+         |                                                        ^
+      87 |     await expect(group.locator('[data-id="stage-3"]')).toContainText("2026/09/29");
+      88 |     await page.locator('#tabs [data-v="analysis"]').click();
+      89 |     await page.locator('#tabs [data-v="history"]').click();
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\history-round-collapse.spec.js:86:56
+
+    Error Context: test-results\history-round-collapse-a-r-4939e-out-changing-records-light--chromium\error-context.md
+
+  3) [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (dark) 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: getByTestId('history-round').locator('[data-id="stage-0"]')
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 9
+
+    - 2026/09/28
+    +
+    +     
+    +       2026/9/28
+    +       90m 40cm的
+    +       1本
+    +       WA1440 男子 1/4
+    +     
+    +     10点平均 10.00
+    +     ›
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for getByTestId('history-round').locator('[data-id="stage-0"]')
+        14 × locator resolved to <button type="button" data-id="stage-0" data-testid="history-row" class="listItem historyRow" aria-label="2026/9/28 ・ 90m ・ 40cm的 ・ 1本 ・ 10点 ・ 平均 10.00 ・ WA1440 男子 1/4">…</button>
+           - unexpected value "
+        
+          2026/9/28
+          90m 40cm的
+          1本
+          WA1440 男子 1/4
+        
+        10点平均 10.00
+        ›"
+
+
+      84 |       await group.getByTestId("history-row").evaluateAll((els) => els.map((el) => el.dataset.id)),
+      85 |     ).toEqual(["stage-0", "stage-1", "stage-2", "stage-3"]);
+    > 86 |     await expect(group.locator('[data-id="stage-0"]')).toContainText("2026/09/28");
+         |                                                        ^
+      87 |     await expect(group.locator('[data-id="stage-3"]')).toContainText("2026/09/29");
+      88 |     await page.locator('#tabs [data-v="analysis"]').click();
+      89 |     await page.locator('#tabs [data-v="history"]').click();
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\history-round-collapse.spec.js:86:56
+
+    Error Context: test-results\history-round-collapse-a-r-86e6f-hout-changing-records-dark--chromium\error-context.md
+
+  3 failed
+    [chromium] › tests\e2e\app-smoke.spec.js:81:1 › loads core tabs and seeded history without console errors 
+    [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (light) 
+    [chromium] › tests\e2e\history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (dark) 
+  299 passed (3.8m)

@@ -1,0 +1,8 @@
+{
+  "source": "3a1e6d0598c10dd022353ee15cf5f2b284cd51b7",
+  "critical": [],
+  "important": [],
+  "minor": [],
+  "staticMerge": true,
+  "verified": "test-only 6 insertions/3 deletions: fmtD zero padding and independent visible date/accessible name/distance checks; original full299pass3fail aligns with old expectations; final full pending at review"
+}

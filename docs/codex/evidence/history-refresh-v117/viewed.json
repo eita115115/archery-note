@@ -1,0 +1,42 @@
+[
+  {
+    "file": "before/chromium-375-light.png",
+    "sha256": "51dbd4ba68ef736df0dbf49af9f07227795d7372c87b3e59bba183e2c95c38b1"
+  },
+  {
+    "file": "after/chromium-375-light.png",
+    "sha256": "76507113fb1ffbb1f2cf1e684bf915cd40c91aea81d8f0b274a8a3dfc6151482"
+  },
+  {
+    "file": "after/webkit-320-light-expanded.png",
+    "sha256": "20d7632450c68e5a1f31876b8e8d0ea4eb6e10827ad9abae6727c1b5911aa735"
+  },
+  {
+    "file": "after/webkit-375-dark.png",
+    "sha256": "4bbd9cf946647a26234af2195d67611cc114ef7b70e325ef999ed38e76edf212"
+  },
+  {
+    "file": "after/chromium-900-light.png",
+    "sha256": "80d45cfe8d0d8615607024e127fb4daac3c32fcb34376e2388b39318b6bd8231"
+  },
+  {
+    "file": "release/chromium-375-light.png",
+    "sha256": "76507113fb1ffbb1f2cf1e684bf915cd40c91aea81d8f0b274a8a3dfc6151482"
+  },
+  {
+    "file": "long-text/chromium-320-light.png",
+    "sha256": "fe07a5f86f57a3d4bae58e3d60ecaf27fbeb5e352f31e133d5f9ffab1e1a60cf"
+  },
+  {
+    "file": "public-history/chromium-375-light.png",
+    "sha256": "56fd26c8dd59e4ad2ac6115057695e0b2320e18146939bc40733c22eb766cd1d"
+  },
+  {
+    "file": "public-update/banner.png",
+    "sha256": "8ff877cfc5d7fd0db5cbcaf453c288e3968977a06bb0e6e7cc200ba031de2bd6"
+  },
+  {
+    "file": "public-update/offline.png",
+    "sha256": "ffbd661857e9d43cddf44a865a72cb49358845b09f8aad6e0d7e7040052c1d74"
+  }
+]

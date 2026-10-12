@@ -1,0 +1,53 @@
+
+> archery-note@0.116.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/history-layout.spec.js --grep empty average --workers=1
+
+Native web assets ready: dist\native (v116)
+[WebServer] (node:21724) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:20732) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\history-layout.spec.js:44:1 › history names each record with its date and shows an empty average without NaN (6.6s)
+
+
+  1) [chromium] › tests\e2e\history-layout.spec.js:44:1 › history names each record with its date and shows an empty average without NaN 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('.historyRow[data-id="owned-empty-history"]')
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 4
+
+    - 平均 —
+    +
+    +     2026/10/12 ・ 18m
+    +     40cm的0本
+    +     0 / 平均NaN
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('.historyRow[data-id="owned-empty-history"]')
+        13 × locator resolved to <button type="button" data-testid="history-row" class="listItem historyRow" data-id="owned-empty-history">…</button>
+           - unexpected value "
+        2026/10/12 ・ 18m
+        40cm的0本
+        0 / 平均NaN"
+
+
+      61 |   await expect(row).toHaveAccessibleName(/2026\/10\/12/);
+      62 |   await expect(row).toContainText("0本");
+    > 63 |   await expect(row).toContainText("平均 —");
+         |                     ^
+      64 |   await expect(row).not.toContainText("NaN");
+      65 |   await row.click();
+      66 |   await expect(page.locator("#hClose")).toBeVisible();
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\history-layout.spec.js:63:21
+
+    Error Context: test-results\history-layout-history-nam-cde8f-n-empty-average-without-NaN-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\history-layout.spec.js:44:1 › history names each record with its date and shows an empty average without NaN 

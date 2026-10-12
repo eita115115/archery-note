@@ -1,0 +1,7 @@
+const fs=require('node:fs'),cp=require('node:child_process'),assert=require('node:assert/strict'),crypto=require('node:crypto');
+const base='86f3d937b17191d55dd7b2afedb12ca9337fe7e0',read=f=>fs.readFileSync(f,'utf8').replaceAll('\r\n','\n'),old=f=>cp.execFileSync('git',['show',base+':'+f],{encoding:'utf8',maxBuffer:10e6}).replaceAll('\r\n','\n');
+for(const f of cp.execFileSync('git',['ls-tree','-r','--name-only',base,'scripts'],{encoding:'utf8'}).trim().split('\n')){if(f==='scripts/60-history-sight-view.js')assert.equal(read(f).split('function historyListEntries')[1],old(f).split('function historyListEntries')[1]);else assert.equal(read(f).replace(/const APP_VER=117;/,'const APP_VER=116;'),old(f),f);}
+assert.equal(read('sw.js').replace('archery-note-v117','archery-note-v116'),old('sw.js'));
+const tasks=JSON.parse(read('tasks.json')),before=JSON.parse(fs.readFileSync('artifacts/history-refresh/old-tasks.json'));assert.equal(tasks.length,82);assert.deepEqual(tasks.slice(0,81),before);
+const lock='C:/Users/eita2/Projects/archery-note/node_modules/.package-lock.json',sha=crypto.createHash('sha256').update(fs.readFileSync(lock)).digest('hex').toUpperCase();assert.equal(sha,'16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309');
+console.log('PASS all other runtime exact except version; history grouping/filter/detail/paging tail exact; SW activation exact; old81 tasks/acceptance exact; original shared lock exact');

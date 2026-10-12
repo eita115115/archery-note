@@ -1,0 +1,137 @@
+{
+  "id": "webkit-320-dark-20",
+  "g": {
+    "rect": {
+      "x": 10,
+      "y": 405,
+      "width": 300,
+      "height": 75,
+      "top": 405,
+      "right": 310,
+      "bottom": 480,
+      "left": 10
+    },
+    "nav": {
+      "x": 0,
+      "y": 499,
+      "width": 320,
+      "height": 69,
+      "top": 499,
+      "right": 320,
+      "bottom": 568,
+      "left": 0
+    },
+    "width": 320,
+    "scrollWidth": 320,
+    "buttons": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "font": "20px",
+        "pressed": false,
+        "transform": "none",
+        "layoutWidth": 87,
+        "layoutHeight": 53,
+        "rect": {
+          "x": 21,
+          "y": 416,
+          "width": 87.25,
+          "height": 53,
+          "top": 416,
+          "right": 108.25,
+          "bottom": 469,
+          "left": 21
+        },
+        "lines": [
+          {
+            "x": 30.001564025878906,
+            "y": 429,
+            "width": 69.24687194824219,
+            "height": 27,
+            "top": 429,
+            "right": 99.2484359741211,
+            "bottom": 456,
+            "left": 30.001564025878906
+          }
+        ],
+        "scrollWidth": 85,
+        "clientWidth": 85,
+        "padLeft": 8,
+        "padRight": 8,
+        "clear": true
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "font": "20px",
+        "pressed": false,
+        "transform": "none",
+        "layoutWidth": 120,
+        "layoutHeight": 53,
+        "rect": {
+          "x": 114.25,
+          "y": 416,
+          "width": 120.140625,
+          "height": 53,
+          "top": 416,
+          "right": 234.390625,
+          "bottom": 469,
+          "left": 114.25
+        },
+        "lines": [
+          {
+            "x": 130.9892578125,
+            "y": 429,
+            "width": 86.646484375,
+            "height": 27,
+            "top": 429,
+            "right": 217.6357421875,
+            "bottom": 456,
+            "left": 130.9892578125
+          }
+        ],
+        "scrollWidth": 118,
+        "clientWidth": 118,
+        "padLeft": 8,
+        "padRight": 8,
+        "clear": true
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "font": "20px",
+        "pressed": false,
+        "transform": "none",
+        "layoutWidth": 59,
+        "layoutHeight": 53,
+        "rect": {
+          "x": 240.390625,
+          "y": 416,
+          "width": 58.609375,
+          "height": 53,
+          "top": 416,
+          "right": 299,
+          "bottom": 469,
+          "left": 240.390625
+        },
+        "lines": [
+          {
+            "x": 249.3953094482422,
+            "y": 429,
+            "width": 40.59999084472656,
+            "height": 27,
+            "top": 429,
+            "right": 289.99530029296875,
+            "bottom": 456,
+            "left": 249.3953094482422
+          }
+        ],
+        "scrollWidth": 57,
+        "clientWidth": 57,
+        "padLeft": 8,
+        "padRight": 8,
+        "clear": true
+      }
+    ]
+  }
+}

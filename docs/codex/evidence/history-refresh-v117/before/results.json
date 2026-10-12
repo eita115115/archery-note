@@ -1,0 +1,938 @@
+[
+  {
+    "id": "chromium-320-light",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 25,
+          "y": 372.6875,
+          "width": 270,
+          "height": 83,
+          "top": 372.6875,
+          "right": 295,
+          "bottom": 455.6875,
+          "left": 25
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 25,
+          "y": 455.6875,
+          "width": 270,
+          "height": 85,
+          "top": 455.6875,
+          "right": 295,
+          "bottom": 540.6875,
+          "left": 25
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 25,
+          "y": 565.6875,
+          "width": 270,
+          "height": 67,
+          "top": 565.6875,
+          "right": 295,
+          "bottom": 632.6875,
+          "left": 25
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 778.6875,
+          "width": 251,
+          "height": 121,
+          "top": 778.6875,
+          "right": 295,
+          "bottom": 899.6875,
+          "left": 44
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 899.6875,
+          "width": 251,
+          "height": 121,
+          "top": 899.6875,
+          "right": 295,
+          "bottom": 1020.6875,
+          "left": 44
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 1020.6875,
+          "width": 251,
+          "height": 121,
+          "top": 1020.6875,
+          "right": 295,
+          "bottom": 1141.6875,
+          "left": 44
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 1141.6875,
+          "width": 251,
+          "height": 120,
+          "top": 1141.6875,
+          "right": 295,
+          "bottom": 1261.6875,
+          "left": 44
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-light",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 376.6875,
+          "width": 321,
+          "height": 67,
+          "top": 376.6875,
+          "right": 348,
+          "bottom": 443.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 27,
+          "y": 443.6875,
+          "width": 321,
+          "height": 85,
+          "top": 443.6875,
+          "right": 348,
+          "bottom": 528.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 553.6875,
+          "width": 321,
+          "height": 67,
+          "top": 553.6875,
+          "right": 348,
+          "bottom": 620.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 766.6875,
+          "width": 302,
+          "height": 85,
+          "top": 766.6875,
+          "right": 348,
+          "bottom": 851.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 851.6875,
+          "width": 302,
+          "height": 85,
+          "top": 851.6875,
+          "right": 348,
+          "bottom": 936.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 936.6875,
+          "width": 302,
+          "height": 85,
+          "top": 936.6875,
+          "right": 348,
+          "bottom": 1021.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 1021.6875,
+          "width": 302,
+          "height": 84,
+          "top": 1021.6875,
+          "right": 348,
+          "bottom": 1105.6875,
+          "left": 46
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-dark",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 376.6875,
+          "width": 321,
+          "height": 67,
+          "top": 376.6875,
+          "right": 348,
+          "bottom": 443.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 27,
+          "y": 443.6875,
+          "width": 321,
+          "height": 85,
+          "top": 443.6875,
+          "right": 348,
+          "bottom": 528.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 553.6875,
+          "width": 321,
+          "height": 67,
+          "top": 553.6875,
+          "right": 348,
+          "bottom": 620.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 766.6875,
+          "width": 302,
+          "height": 85,
+          "top": 766.6875,
+          "right": 348,
+          "bottom": 851.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 851.6875,
+          "width": 302,
+          "height": 85,
+          "top": 851.6875,
+          "right": 348,
+          "bottom": 936.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 936.6875,
+          "width": 302,
+          "height": 85,
+          "top": 936.6875,
+          "right": 348,
+          "bottom": 1021.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 1021.6875,
+          "width": 302,
+          "height": 84,
+          "top": 1021.6875,
+          "right": 348,
+          "bottom": 1105.6875,
+          "left": 46
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-900-light",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 197,
+          "y": 361.84375,
+          "width": 506,
+          "height": 67,
+          "top": 361.84375,
+          "right": 703,
+          "bottom": 428.84375,
+          "left": 197
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 197,
+          "y": 428.84375,
+          "width": 506,
+          "height": 67,
+          "top": 428.84375,
+          "right": 703,
+          "bottom": 495.84375,
+          "left": 197
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 197,
+          "y": 520.84375,
+          "width": 506,
+          "height": 67,
+          "top": 520.84375,
+          "right": 703,
+          "bottom": 587.84375,
+          "left": 197
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 733.84375,
+          "width": 487,
+          "height": 67,
+          "top": 733.84375,
+          "right": 703,
+          "bottom": 800.84375,
+          "left": 216
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 800.84375,
+          "width": 487,
+          "height": 67,
+          "top": 800.84375,
+          "right": 703,
+          "bottom": 867.84375,
+          "left": 216
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 867.84375,
+          "width": 487,
+          "height": 67,
+          "top": 867.84375,
+          "right": 703,
+          "bottom": 934.84375,
+          "left": 216
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 934.84375,
+          "width": 487,
+          "height": 66,
+          "top": 934.84375,
+          "right": 703,
+          "bottom": 1000.84375,
+          "left": 216
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-320-light",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 25,
+          "y": 372.6875,
+          "width": 270,
+          "height": 83,
+          "top": 372.6875,
+          "right": 295,
+          "bottom": 455.6875,
+          "left": 25
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 25,
+          "y": 455.6875,
+          "width": 270,
+          "height": 85,
+          "top": 455.6875,
+          "right": 295,
+          "bottom": 540.6875,
+          "left": 25
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 25,
+          "y": 565.6875,
+          "width": 270,
+          "height": 67,
+          "top": 565.6875,
+          "right": 295,
+          "bottom": 632.6875,
+          "left": 25
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 778.6875,
+          "width": 251,
+          "height": 121,
+          "top": 778.6875,
+          "right": 295,
+          "bottom": 899.6875,
+          "left": 44
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 899.6875,
+          "width": 251,
+          "height": 121,
+          "top": 899.6875,
+          "right": 295,
+          "bottom": 1020.6875,
+          "left": 44
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 1020.6875,
+          "width": 251,
+          "height": 121,
+          "top": 1020.6875,
+          "right": 295,
+          "bottom": 1141.6875,
+          "left": 44
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 44,
+          "y": 1141.6875,
+          "width": 251,
+          "height": 120,
+          "top": 1141.6875,
+          "right": 295,
+          "bottom": 1261.6875,
+          "left": 44
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-light",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 376.6875,
+          "width": 321,
+          "height": 67,
+          "top": 376.6875,
+          "right": 348,
+          "bottom": 443.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 27,
+          "y": 443.6875,
+          "width": 321,
+          "height": 85,
+          "top": 443.6875,
+          "right": 348,
+          "bottom": 528.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 553.6875,
+          "width": 321,
+          "height": 67,
+          "top": 553.6875,
+          "right": 348,
+          "bottom": 620.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 766.6875,
+          "width": 302,
+          "height": 85,
+          "top": 766.6875,
+          "right": 348,
+          "bottom": 851.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 851.6875,
+          "width": 302,
+          "height": 85,
+          "top": 851.6875,
+          "right": 348,
+          "bottom": 936.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 936.6875,
+          "width": 302,
+          "height": 85,
+          "top": 936.6875,
+          "right": 348,
+          "bottom": 1021.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 1021.6875,
+          "width": 302,
+          "height": 84,
+          "top": 1021.6875,
+          "right": 348,
+          "bottom": 1105.6875,
+          "left": 46
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-dark",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 376.6875,
+          "width": 321,
+          "height": 67,
+          "top": 376.6875,
+          "right": 348,
+          "bottom": 443.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 27,
+          "y": 443.6875,
+          "width": 321,
+          "height": 85,
+          "top": 443.6875,
+          "right": 348,
+          "bottom": 528.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 27,
+          "y": 553.6875,
+          "width": 321,
+          "height": 67,
+          "top": 553.6875,
+          "right": 348,
+          "bottom": 620.6875,
+          "left": 27
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 766.6875,
+          "width": 302,
+          "height": 85,
+          "top": 766.6875,
+          "right": 348,
+          "bottom": 851.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 851.6875,
+          "width": 302,
+          "height": 85,
+          "top": 851.6875,
+          "right": 348,
+          "bottom": 936.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 936.6875,
+          "width": 302,
+          "height": 85,
+          "top": 936.6875,
+          "right": 348,
+          "bottom": 1021.6875,
+          "left": 46
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 46,
+          "y": 1021.6875,
+          "width": 302,
+          "height": 84,
+          "top": 1021.6875,
+          "right": 348,
+          "bottom": 1105.6875,
+          "left": 46
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-900-light",
+    "version": 116,
+    "geometry": [
+      {
+        "id": "owned-record-perf-1",
+        "text": "\n    2026/10/12 ・ 30m\n    40cm的屋外用リカーブ・練習セット6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 197,
+          "y": 361.84375,
+          "width": 506,
+          "height": 67,
+          "top": 361.84375,
+          "right": 703,
+          "bottom": 428.84375,
+          "left": 197
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-0",
+        "text": "\n    2026/10/12 ・ 70m\n    40cm的屋外用リカーブ・練習セット晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 197,
+          "y": 428.84375,
+          "width": 506,
+          "height": 67,
+          "top": 428.84375,
+          "right": 703,
+          "bottom": 495.84375,
+          "left": 197
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-record-perf-2",
+        "text": "\n    2026/10/10 ・ 18m\n    40cm的6本\n    57 / 平均9.50",
+        "rect": {
+          "x": 197,
+          "y": 520.84375,
+          "width": 506,
+          "height": 67,
+          "top": 520.84375,
+          "right": 703,
+          "bottom": 587.84375,
+          "left": 197
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-0",
+        "text": "\n    2026/9/28 ・ 90m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 1/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 733.84375,
+          "width": 487,
+          "height": 67,
+          "top": 733.84375,
+          "right": 703,
+          "bottom": 800.84375,
+          "left": 216
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-1",
+        "text": "\n    2026/9/28 ・ 70m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 2/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 800.84375,
+          "width": 487,
+          "height": 67,
+          "top": 800.84375,
+          "right": 703,
+          "bottom": 867.84375,
+          "left": 216
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-2",
+        "text": "\n    2026/9/28 ・ 50m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 3/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 867.84375,
+          "width": 487,
+          "height": 67,
+          "top": 867.84375,
+          "right": 703,
+          "bottom": 934.84375,
+          "left": 216
+        },
+        "overflow": false
+      },
+      {
+        "id": "owned-stage-3",
+        "text": "\n    2026/9/28 ・ 30m\n    40cm的屋外用リカーブ・練習セットWA1440 男子 4/4晴れ・弱い風6本\n    56 / 平均9.33",
+        "rect": {
+          "x": 216,
+          "y": 934.84375,
+          "width": 487,
+          "height": 66,
+          "top": 934.84375,
+          "right": 703,
+          "bottom": 1000.84375,
+          "left": 216
+        },
+        "overflow": false
+      }
+    ],
+    "oldAllExact": true,
+    "filter": true,
+    "round": true,
+    "detail": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]
