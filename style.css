@@ -1461,3 +1461,21 @@ html.field{--sub:#354e41;--accent:#07533d;--accent-strong:#07533d;}
 html.dark.field{--sub:#c1d4c8;--accent:#a2edc9;--accent-strong:#b8f2d4;}
 @media(prefers-color-scheme:dark){html.auto.field{--sub:#c1d4c8;--accent:#a2edc9;--accent-strong:#b8f2d4;}}
 @media(min-width:820px){.practiceHeading{margin-top:24px;}.practiceHeading h2{font-size:28px;}}
+/* Analysis: selected conditions, readable conclusion, next practice, then evidence. */
+.card.analysisFilterCard{padding:14px;}
+.card.analysisFilterCard h2{font-size:12px;margin:0;color:var(--sub);}
+.analysisFilterCard .row{flex-direction:row;gap:10px;}
+.analysisFilterCard .chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+.analysisFilterCard .chip{min-width:0;padding-inline:6px;white-space:nowrap;font-size:13px;}
+.card.todayConclusionCard{background:var(--soft);border:1px solid var(--line2);padding:18px;}
+.todayConclusionKicker{font-size:12px;font-weight:650;letter-spacing:.04em;}
+.todayConclusionText{font-size:20px;line-height:1.55;font-weight:750;letter-spacing:-.025em;overflow-wrap:anywhere;}
+.card.nextPractice > h2{font-size:18px;letter-spacing:-.025em;}
+.nextPracticeItem{grid-template-columns:24px minmax(0,1fr);gap:10px;}
+.nextPracticeItem b{font-size:16px;line-height:1.5;overflow-wrap:anywhere;}
+.nextPracticeItem p{font-size:13px;line-height:1.6;overflow-wrap:anywhere;}
+.nextPractice .btn{width:100%;margin-top:10px;}
+.growthHead h2{font-size:18px;letter-spacing:-.025em;}
+.growthMetrics > div{min-width:0;padding:12px 8px;}
+.growthMetrics span{font-size:12px;letter-spacing:0;}
+.growthMetrics b{font-size:17px;line-height:1.4;overflow-wrap:anywhere;}

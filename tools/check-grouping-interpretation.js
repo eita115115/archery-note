@@ -29,6 +29,40 @@ function check(label, fn) {
     failures.push(label + ": " + e.message);
   }
 }
+const dashboardView = view.slice(
+  view.indexOf("function growthDashboardHtml("),
+  view.indexOf("function nextPracticeCardHtml("),
+);
+const renderDashboard = new Function(
+  "growthDashboard",
+  "today",
+  "esc",
+  "fmtD",
+  `${dashboardView};return growthDashboardHtml([]);`,
+);
+for (const [groupingDelta, expected] of [
+  [null, "比較待ち"],
+  [-0.06, "改善 0.1cm"],
+  [0.06, "拡大 0.1cm"],
+  [-0.04, "横ばい 0.0cm"],
+  [-4e-16, "横ばい 0.0cm"],
+  [-0, "横ばい 0.0cm"],
+  [0, "横ばい 0.0cm"],
+  [0.04, "横ばい 0.0cm"],
+]) {
+  check(`dashboard visible grouping direction ${String(groupingDelta)}`, () => {
+    const data = { groupingDelta, scoreDelta: null, confidence: { label: "参考" } };
+    const before = JSON.stringify(data);
+    const html = renderDashboard(
+      () => data,
+      () => "2026-10-12",
+      String,
+      String,
+    );
+    assert(html.includes(`<b>${expected}</b>`));
+    assert.equal(JSON.stringify(data), before);
+  });
+}
 const base = { dist: 18, faceD: 40, faceType: "single", perEnd: 6, round: "free", shaft: 0.65 };
 const arrow = (x, y) => ({
   x,

@@ -53,10 +53,54 @@ async function expectWithinAppChrome(control) {
     .toBe(true);
 }
 
+test("empty analysis offers a direct route to the first practice without changing records", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.emulateMedia({ reducedMotion: "reduce", colorScheme: "light" });
+  await page.addInitScript(() => {
+    if (!localStorage.getItem("archeryNote.v1"))
+      localStorage.setItem(
+        "archeryNote.v1",
+        JSON.stringify({
+          schema: 5,
+          sessions: [],
+          setups: [],
+          active: null,
+          settings: { onboardingSeen: true, launchCount: 10 },
+        }),
+      );
+  });
+  await page.goto("/");
+  const before = await practiceData(page);
+  await page.locator('#tabs [data-v="analysis"]').click();
+  await expect(page.locator("#anSetup")).toHaveCount(0);
+  const start = page.getByRole("button", { name: "記録タブへ", exact: true });
+  await expect(start).toHaveCount(1);
+  await expectWithinAppChrome(start);
+  await start.click();
+  await expect(page.getByTestId("record-start")).toBeVisible();
+  expect(await practiceData(page)).toEqual(before);
+});
+
 for (const [width, height, colorScheme] of [
   [320, 568, "light"],
   [375, 812, "dark"],
 ]) {
+  test(`analysis opens with comparison conditions and its conclusion readable (${width}/${colorScheme})`, async ({
+    page,
+  }) => {
+    await seedAnalysis(page, width, height, colorScheme);
+    await expectWithinAppChrome(page.getByRole("combobox", { name: "用具", exact: true }));
+    await expectWithinAppChrome(page.getByRole("combobox", { name: "距離", exact: true }));
+    await expect(page.getByRole("group", { name: "期間", exact: true })).toHaveCount(1);
+    const bounds = await page.getByTestId("today-conclusion").evaluate((el) => ({
+      bottom: el.getBoundingClientRect().bottom,
+      nav: document.querySelector("#tabs").getBoundingClientRect().top,
+    }));
+    expect(bounds.bottom).toBeLessThanOrEqual(bounds.nav - 8);
+  });
+
   test(`changed analysis filters remain visible above fixed navigation (${width}/${colorScheme})`, async ({
     page,
   }) => {

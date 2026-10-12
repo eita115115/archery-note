@@ -20,3 +20,5 @@ Product gate: 得点/座標/用具/既存の次回提案を同じ順で結ぶ、
 4. 旧82taskobjects/全acceptance/sharedlock保持。成功証拠後だけAN083pass+evidence/progress/ledger。大目標active。物理iPhone/VoiceOver/fieldINP/WKstrictOfflineは未証明。
 
 自己レビュー: 今回は分析入口の情報階層。グラフ以下の全カードや分析ロジックの再設計は別タスク。既存承認があるため追加確認待ちは置かない。
+
+空画面の補足: 既存の記録CTAが詳細数値より後にあるため、同じid/handler/文言を「次回試すこと」直後へ移す。二重idを避けるため旧fallback内からは除く。記録ありの該当なしでは出さない。初helperの「既存CTAなし」は誤りで、実117では1個あり、訂正4contextに位置と往復を保存。初empty E2Eはdemo後にlocalStorageだけを書き換え、起動時pending saveで元の架空3件へ戻ったfixture不備。新規所有contextのguard付き初期化へ訂正後、CTAが画面下で見えないredを確認。保存やスナップショット機構の障害ではない。

@@ -883,24 +883,26 @@ function analysisFilterBarHtml(allRows, f) {
     ["90d", "90日"],
   ];
   return `<div class="card analysisFilterCard">
+    <h2>比較する条件</h2>
     <div class="row">
       <div><label class="f" for="anSetup">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
       <div><label class="f" for="anDist">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
     </div>
     <label class="f">期間</label>
-    <div class="chips" id="anPeriods">${periods.map(([id, lb]) => `<button type="button" class="chip ${f.period === id ? "on" : ""}" aria-pressed="${f.period === id}" data-period="${id}">${lb}</button>`).join("")}</div>
+    <div class="chips" id="anPeriods" role="group" aria-label="期間">${periods.map(([id, lb]) => `<button type="button" class="chip ${f.period === id ? "on" : ""}" aria-pressed="${f.period === id}" data-period="${id}">${lb}</button>`).join("")}</div>
   </div>`;
 }
 function growthDashboardHtml(rows) {
   const d = growthDashboard(rows, today());
   const delta = (v, suffix) =>
     v == null ? "比較待ち" : `${v > 0 ? "+" : ""}${v.toFixed(2)}${suffix}`;
+  const visibleGroupingDelta = d.groupingDelta == null ? null : Number(d.groupingDelta.toFixed(1));
   const group =
-    d.groupingDelta == null
+    visibleGroupingDelta == null
       ? "比較待ち"
-      : `${d.groupingDelta < 0 ? "改善 " : d.groupingDelta > 0 ? "拡大 " : "横ばい "}${Math.abs(d.groupingDelta).toFixed(1)}cm`;
+      : `${visibleGroupingDelta < 0 ? "改善 " : visibleGroupingDelta > 0 ? "拡大 " : "横ばい "}${Math.abs(visibleGroupingDelta).toFixed(1)}cm`;
   return `<section class="growthDashboard" data-testid="growth-dashboard" aria-labelledby="growth-title">
-    <div class="growthHead"><div><div class="kicker">練習ダッシュボード</div><h2 id="growth-title">いまの状態</h2></div><span class="growthConfidence">信頼度 ${esc(d.confidence.label)}</span></div>
+    <div class="growthHead"><div><div class="kicker">練習のまとめ</div><h2 id="growth-title">数値で振り返る</h2></div><span class="growthConfidence">信頼度 ${esc(d.confidence.label)}</span></div>
     <div class="growthMetrics">
       <div><span>最終練習</span><b>${d.lastPracticeDate ? esc(fmtD(d.lastPracticeDate)) : "—"}</b></div>
       <div><span>今週</span><b>${d.weekSessions}回 / ${d.weekArrows}射</b></div>
@@ -911,9 +913,9 @@ function growthDashboardHtml(rows) {
     </div>
   </section>`;
 }
-function nextPracticeCardHtml(rows) {
+function nextPracticeCardHtml(rows, showRecordCta = false) {
   const items = nextPracticeSuggestions(rows, today());
-  return `<section class="card nextPractice" data-testid="next-practice"><h2>次回試すこと</h2>${items.map((s, i) => `<div class="nextPracticeItem"><span aria-hidden="true">${i + 1}</span><div><b>${esc(s.title)}</b><p>${esc(s.reason)}</p></div></div>`).join("")}</section>`;
+  return `<section class="card nextPractice" data-testid="next-practice"><h2>次回試すこと</h2>${items.map((s, i) => `<div class="nextPracticeItem"><span aria-hidden="true">${i + 1}</span><div><b>${esc(s.title)}</b><p>${esc(s.reason)}</p></div></div>`).join("")}${showRecordCta ? `<button type="button" class="btn" id="anEmptyCta">記録タブへ</button>` : ""}</section>`;
 }
 function analysisKpiHtml(rows) {
   const scored = rows.filter((r) => r.n);
@@ -1043,7 +1045,7 @@ function todayConclusionCardHtml(rows) {
   const c = todayConclusion(rows);
   if (!c) return "";
   return `<div class="card todayConclusionCard" data-testid="today-conclusion">
-    <div class="todayConclusionKicker">今日の結論</div>
+    <div class="todayConclusionKicker">練習の傾向</div>
     <p class="todayConclusionText">${esc(c.text)}</p>
   </div>`;
 }
@@ -1154,11 +1156,11 @@ function renderAnalysis(m) {
   ]
     .filter(Boolean)
     .join("");
-  m.innerHTML = `${growthDashboardHtml(rows)}
+  m.innerHTML = `${allRows.length ? analysisFilterBarHtml(allRows, f) : ""}
   ${todayConclusionCardHtml(rows)}
-  ${nextPracticeCardHtml(rows)}
-  ${allRows.length ? analysisFilterBarHtml(allRows, f) : ""}
-  ${cards || `<div class="card"><h2>分析</h2><div class="empty">${allRows.length ? "この絞り込みに合う記録がありません。フィルタを広げてください。" : `<p>記録が増えると、矢の集まり具合や月間まとめがここに表示されます。</p><button type="button" class="btn" id="anEmptyCta">記録タブへ</button>`}</div></div>`}
+  ${nextPracticeCardHtml(rows, !allRows.length)}
+  ${growthDashboardHtml(rows)}
+  ${cards || `<div class="card"><h2>分析</h2><div class="empty">${allRows.length ? "この絞り込みに合う記録がありません。フィルタを広げてください。" : `<p>記録が増えると、矢の集まり具合や月間まとめがここに表示されます。</p>`}</div></div>`}
   ${gamificationBadgesCardHtml()}`;
   const anSetup = $("#anSetup");
   if (anSetup)
