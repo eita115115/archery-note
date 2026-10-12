@@ -1,9 +1,11 @@
+/* global analysisFormRecords, ui */
 const { test, expect } = require("@playwright/test");
 const { analysisFormDb } = require("./fixtures/analysis-form-db");
 test.use({ hasTouch: true });
-async function seed(page, onlyForm = false) {
+async function seed(page, onlyForm = false, onlyOld = false) {
   const d = analysisFormDb();
   if (onlyForm) d.sessions = [];
+  if (onlyOld) d.formAnalyses = [d.formAnalyses[8]];
   await page.addInitScript((d) => {
     if (!globalThis.localStorage.getItem("archeryNote.v1"))
       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(d));
@@ -41,7 +43,7 @@ test("form analysis follows capture period and linked equipment/distance", async
   expect(await ids(page)).toContain("form-9");
   await page.locator("#anSetup").selectOption("b");
   expect(await ids(page)).toEqual(["form-1", "form-10"]);
-  await expect(card.locator("svg")).toHaveCount(0);
+  await expect(card.locator('svg[role="img"]')).toHaveCount(0);
   await page.locator("#anSetup").selectOption("__none");
   expect(await ids(page)).toEqual(["form-14"]);
   await page.locator("#anSetup").selectOption("a");
@@ -76,6 +78,16 @@ test("form-only records still expose the shared period controls", async ({ page 
   await page.locator("#anSetup").selectOption("a");
   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-9", "form-12", "form-13"]);
 });
+test("form-only no-match keeps controls available to restore the list", async ({ page }) => {
+  await seed(page, true, true);
+  await page.locator('[data-period="7d"]').tap();
+  await expect(page.getByTestId("analysis-form-card")).toContainText(
+    "この条件に合う射形記録はありません",
+  );
+  await expect(page.locator("#anPeriods")).toBeVisible();
+  await page.locator('[data-period="all"]').tap();
+  await expect(page.locator('[data-form-id="form-8"]')).toHaveCount(1);
+});
 for (const width of [320, 375, 900]) {
   test(`form records expose readable values and safe detail actions (${width})`, async ({
     page,
@@ -106,8 +118,17 @@ for (const width of [320, 375, 900]) {
         ...el.querySelectorAll(".formRecordItem, .formRecordAngles, .formRecordComparison"),
       ].some((e) => e.scrollWidth > e.clientWidth),
       short: [...el.querySelectorAll("button")].some((e) => e.getBoundingClientRect().height < 44),
+      rowsOverlap: [...el.querySelectorAll(".formRecordItem")].some((item) => {
+        const lines = [...item.children].map((e) => e.getBoundingClientRect());
+        return lines.some((line, i) => i > 0 && line.top < lines[i - 1].bottom - 0.5);
+      }),
     }));
-    expect(layout).toEqual({ overflow: false, textOverflow: false, short: false });
+    expect(layout).toEqual({
+      overflow: false,
+      textOverflow: false,
+      short: false,
+      rowsOverlap: false,
+    });
     expect(await snapshot(page)).toEqual(before);
     await page.reload();
     expect(await snapshot(page)).toEqual(before);

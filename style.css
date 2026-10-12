@@ -643,6 +643,20 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .formAnalysisRow{display:flex; align-items:center; border-bottom:1px solid var(--line2);}
 .formAnalysisRow:last-child{border-bottom:none;}
 .formAnalysisRow button.listItem{flex:1; border-bottom:none; min-width:0;}
+.analysisFormCard .btnrow{margin-bottom:16px;}
+.analysisFormCard .formTrendLabel{display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px 12px; margin:16px 0 8px; font-size:13px;}
+.analysisFormCard .formTrendLabel span{color:var(--sub); font-variant-numeric:tabular-nums;}
+.analysisFormCard .formRecordList{margin-top:12px;}
+.analysisFormCard button.formRecordItem{display:flex; flex-direction:column; align-items:stretch; gap:6px; padding:16px 8px 16px 0; text-align:left;}
+.analysisFormCard .formRecordHead{display:flex; flex-wrap:wrap; gap:4px 10px; font-size:13px; font-weight:600;}
+.analysisFormCard .formRecordLink{color:var(--sub); font-size:11px; font-weight:400;}
+.analysisFormCard .formRecordAngles{display:flex; flex-wrap:wrap; gap:4px 16px; color:var(--sub); font-size:12px;}
+.analysisFormCard .formRecordAngles b{font-size:18px; color:var(--ink); font-variant-numeric:tabular-nums;}
+.analysisFormCard .formRecordComparison,.analysisFormCard .formRecordMeta{font-size:12px; color:var(--sub); line-height:1.5; overflow-wrap:anywhere;}
+.analysisFormCard .histDelBtn{flex-shrink:0; min-width:44px; min-height:44px;}
+.analysisFormCard .formComparisonHelp{margin-top:16px;}
+.analysisFormCard .formComparisonHelp>summary{min-height:44px; display:flex; align-items:center;}
+.analysisFormCard .formComparisonHelp p{margin:8px 0 0; color:var(--sub); font-size:13px; line-height:1.6;}
 .badge{display:inline-block; font-size:10.5px; background:var(--soft); color:var(--sub); border-radius:6px; padding:2px 6px; margin-right:4px;}
 .empty{color:var(--sub); font-size:13px; text-align:center; padding:18px 6px;}
 .empty p{margin:0 0 12px;}

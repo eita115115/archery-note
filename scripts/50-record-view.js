@@ -1129,6 +1129,7 @@ function renderAnalysis(m) {
     .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.id < a.id ? -1 : 1));
   const sessionRows = historySessionRows(ss);
   const sightMarks = analysisSightMarks(f);
+  const formRecords = analysisFormRecords(f);
   /* 全体構成（正本 5節）: 結論 → 得点の推移 → ばらつき(グルーピング) → サイト → 条件比較 → 月間 → その他。
      ロジックは変えず、既存カード関数の呼び出し順だけを並べ替える */
   const cards = [
@@ -1152,7 +1153,7 @@ function renderAnalysis(m) {
       scoreDistCard(ss),
     ]),
     // その他
-    formTrackingCard(),
+    formTrackingCard(formRecords),
     analysisDetailsGroupHtml("analysis-personal-details", "自己ベストと用具", "", [
       personalBestCard(rows),
       setupPerformanceCard(ss),
@@ -1161,7 +1162,7 @@ function renderAnalysis(m) {
   ]
     .filter(Boolean)
     .join("");
-  m.innerHTML = `${allRows.length ? analysisFilterBarHtml(allRows, f) : ""}
+  m.innerHTML = `${allRows.length || (formTrackingEnabled() && Array.isArray(db.formAnalyses) && db.formAnalyses.some(Boolean)) ? analysisFilterBarHtml(allRows, f) : ""}
   ${todayConclusionCardHtml(rows)}
   ${nextPracticeCardHtml(rows, !allRows.length)}
   ${growthDashboardHtml(rows)}
@@ -1204,6 +1205,24 @@ function renderAnalysis(m) {
   bindFormTrackingCard();
   const anCta = $("#anEmptyCta");
   if (anCta) anCta.onclick = () => showView("record");
+}
+/* 撮影日で期間を、紐付いた練習で用具/距離を揃える表示用adapter。
+   孤立した記録は保存用具だけ利用し、距離は推測しない。元recordを返し保存はしない。 */
+function analysisFormRecords(filter) {
+  const sessions = new Map((db.sessions || []).filter(Boolean).map((s) => [s.id, s]));
+  const rows = (Array.isArray(db.formAnalyses) ? db.formAnalyses : [])
+    .filter(Boolean)
+    .map((record) => {
+      const session = sessions.get(record.sessionId);
+      return {
+        record,
+        date: sightDateInfo(record).sort,
+        setupId: session ? session.setupId : record.setupId,
+        dist: session ? session.dist : null,
+        round: session ? session.round : "",
+      };
+    });
+  return filterAnalysisRows(rows, { ...filter, today: today() }).map((r) => r.record);
 }
 function analysisDetailsGroupHtml(id, title, meta, cards) {
   const body = cards.filter(Boolean).join("");

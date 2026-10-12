@@ -212,8 +212,8 @@ function formSelfBaselineLabel(value, key, priorRecords){
   return `${value.toFixed(0)}°（いつもより ${d>=0?"+":""}${d.toFixed(0)}°）`;
 }
 
-function formTrendMiniHtml(){
-  const series=formTrendSeries(db.formAnalyses||[]).filter(p=>Number.isFinite(p.bowArm));
+function formTrendMiniHtml(records=db.formAnalyses||[]){
+  const series=formTrendSeries(records).filter(p=>Number.isFinite(p.bowArm));
   if(series.length<3) return "";
   const W=300,H=54;
   const vals=series.map(p=>p.bowArm);
@@ -222,15 +222,15 @@ function formTrendMiniHtml(){
   const px=i=>(i/(series.length-1))*W;
   const py=v=>H-6-((v-min)/span)*(H-12);
   const path=series.map((p,i)=>`${i?"L":"M"}${px(i).toFixed(1)},${py(p.bowArm).toFixed(1)}`).join("");
-  return `<div class="note"><b>弓手肘の推移</b>（自分の記録の変化。基準値との比較ではありません）</div>
+  return `<div class="formTrendLabel"><b>弓手肘の推移</b><span>${series.length}回 · ${min.toFixed(0)}〜${max.toFixed(0)}°</span></div>
   <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H}px" role="img" aria-label="弓手肘角度の推移">
     <title>弓手肘角度の推移: ${series.length}回、${min.toFixed(0)}〜${max.toFixed(0)}°</title>
     <path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
     ${series.map((p,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(p.bowArm).toFixed(1)}" r="3" fill="var(--green)"/>`).join("")}
   </svg>`;
 }
-function formScoreLinkHtml(){
-  const link=formScoreLink(db.formAnalyses||[], db.sessions, sessionMetrics);
+function formScoreLinkHtml(records=db.formAnalyses||[]){
+  const link=formScoreLink(records, db.sessions, sessionMetrics);
   if(!link.split) return "";
   const s=link.split;
   const diff=s.stableAvg-s.driftAvg;
@@ -241,29 +241,33 @@ function formScoreLinkHtml(){
     ${Math.abs(diff)>=.1?`<div class="note">${diff>0?`リリースが安定していた日の方が平均 ${diff.toFixed(2)} 点/本 高い傾向です。`:`この期間はドリフトの有無と点数の差が出ていません（他要因が大きい可能性）。`}</div>`:""}
   </div>`;
 }
-function formTrackingCard(){
+function formTrackingCard(records=db.formAnalyses||[]){
   if(!formTrackingEnabled()) return "";
-  const allRecs=[...(db.formAnalyses||[])].sort((a,b)=>(b.ts||0)-(a.ts||0));
+  const allRecs=[...records].sort((a,b)=>(b.ts||0)-(a.ts||0));
   const recs=allRecs.slice(0,5);
   const rows=recs.map((r,i)=>{
     const s=formRecordSummary(r);
     const prior=allRecs.slice(i+1); // このカードより古い記録＝自分基準の母集団
+    const baseline=formSelfBaselineLabel(s.bowArm,"bowArm",prior);
+    const comparison=baseline.includes("（")?baseline.slice(baseline.indexOf("（")+1,-1):"";
+    const date=sightDateInfo(r).label;
     return `<div class="formAnalysisRow">
-      <button class="listItem recordReadOnlyItem" data-form-id="${esc(r.id)}" type="button">
-      <div><div class="t">${fmtD(r.date)} ・ ${s.shots}射${r.sessionId?" ・ 練習に紐付け":""}</div>
-      <div class="d">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} / アンカー ${esc(s.anchorLabel)} / タップで詳細</div></div>
-      <div class="big">${formSelfBaselineLabel(s.bowArm,"bowArm",prior)}<small> / 引き手${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</small></div>
+      <button class="listItem recordReadOnlyItem formRecordItem" data-form-id="${esc(r.id)}" type="button">
+      <span class="formRecordHead"><span>${esc(date)} · ${s.shots}射</span>${r.sessionId?`<span class="formRecordLink">練習に紐付け</span>`:""}</span>
+      <span class="formRecordAngles"><span>弓手肘 <b>${s.bowArm!=null?s.bowArm.toFixed(0)+"°":"—"}</b></span><span>引き手肘 <b>${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</b></span></span>
+      ${comparison?`<span class="formRecordComparison">${esc(comparison)}</span>`:""}
+      <span class="formRecordMeta">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} · アンカー ${esc(s.anchorLabel)}</span>
       </button>
-      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button">${icon("del")}</button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射形記録を削除">${icon("del")}</button>
     </div>`;
   }).join("");
-  return `<div class="card"><h2>射形トラッキング <span class="mini">ベータ / 端末内解析</span></h2>
+  return `<section class="card analysisFormCard" data-testid="analysis-form-card"><h2>射形トラッキング <span class="mini">${allRecs.length}件${allRecs.length>5?" · 最新5件":""}</span></h2>
     <div class="btnrow"><button class="btn" id="formStart">${icon("camera")} 射形を解析する</button><button class="btn sec sm" id="formReplay">保存済み動画を解析</button></div>
-    ${formTrendMiniHtml()}
-    ${rows||`<div class="empty">まだ射形記録がありません。カメラを横に置いて数射解析してみましょう。</div>`}
-    ${formScoreLinkHtml()}
-    <div class="hint">数値は弓手肘の中央値（直近の自分の記録と比較）。毎回同じ位置・角度で撮ると比較が正確になります。記録をタップすると、観測にもとづくコーチングコメントが見られます。</div>
-  </div>`;
+    ${formTrendMiniHtml(allRecs)}
+    <div class="formRecordList">${rows||`<div class="empty">${(db.formAnalyses||[]).length?"この条件に合う射形記録はありません。比較する条件を広げてください。":"まだ射形記録がありません。カメラを横に置いて数射解析してみましょう。"}</div>`}</div>
+    ${formScoreLinkHtml(records)}
+    <details class="adv formComparisonHelp"><summary>比較の見方</summary><p>期間は撮影日、用具・距離は紐付いた練習の条件です。紐付けがない記録は保存された用具だけで絞り込み、距離は推測しません。</p><p>弓手肘は中央値。自己比較と推移も、この条件の記録が対象です。同じ撮影位置・角度で比べてください。端末内解析・ベータ。</p></details>
+  </section>`;
 }
 
 function bindFormTrackingCard(){
