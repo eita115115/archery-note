@@ -929,5 +929,17 @@
     ],
     "owner": "codex",
     "acceptance": "終了の非編集・保存後同期scope内でsession object identityの一時metrics共有を行い、既存sessionMetrics初回呼出/DB_REV署名cache/49数学/保存schema/score/style/handlers/依存/SWactivationを保持。実112回帰red→green、通常同日/過去日未来除外/少数/座標なし/gamification/編集/同ID別object/次終了再計算のresult-growthBefore無共有比較、scope内同object実呼出一回を確認。Chrome-WK320375明暗focused/native/旧全件新矢score保存reload/errors0/375前後画像、checktodaysresult/checkall/lint/format/生成全E2E/独立immutable review。原Linux112対候補で375抑制motion3/5000x2×ChromeWKとChromeCPU4の11native経路を直列比較、callbackclock/対応API/fixture一致/保存正しさ/別profileの回数を区別しfieldINPや改善幅を未測定で断定しない。全markers一括bump/checkversion、承認済みCI実Linux-public25byte/元112contextのactive更新保留-banner-旧全件-新native-offlineを確認。旧77tasks/全acceptance/sharedhiddenlockを保持、公開証拠後だけpass非空evidence/docsprogressledger更新。容量警告位置/DOM最適化/物理phone-INP-WKstrictOffline旧閉鎖profile回復は別未完。"
+  },
+  {
+    "id": "AN-079",
+    "task": "共通の視覚基盤と記録画面を刷新する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-078"
+    ],
+    "owner": "codex",
+    "acceptance": "共通視覚基盤と記録画面を白/深緑のv3へ刷新し、dark/auto/fieldと設定/結果へ共通階層を適用。ユーザーのUI制約なし/全承認を継続。375前後代表原寸、320375desktop/明暗、ChromeWKの実native開始-矢-選択微調整-解除-次矢-エンド-取消終了、旧全件/score座標/reload/errors0、既存contrast/viewport/modal/backup回帰、checkall/lint/format/全生成E2E/独立reviewを確認。採点半径/数学/保存schema/handlers/依存/SWactivationを保持、全markers一括bump、承認済みCIと実Linux/public25byte、元113contextのactive更新保留-banner-旧記録保持-新native-offlineを確認。旧78taskobjects/全acceptance/sharedhiddenlock保持、公開証拠後だけpass/evidenceとdocsprogressledgerを更新。全画面の情報設計/物理phone-INP-WKstrictOffline/旧容量toast重なり解消は別未証明。"
   }
 ]

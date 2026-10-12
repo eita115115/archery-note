@@ -4,6 +4,8 @@
 
 ## 現在地
 
+- AN079進行中。ユーザーのUI一新/UI制約なしを承認として、共通視覚基盤と記録画面を白/深緑へ刷新する。plan docs/codex/ui-refresh.md、基点65a22c4c、公開113をbeforeに保存。費用個人情報不使用、採点/旧記録/主要操作を保つ。
+
 - AN078完了、公開v113/source3259d88cb78e2fe6756f21089b894b4b7bc6f0f8、branch codex/finish-metrics-sharing。非編集finishの同じ同期計算内だけmetricsをobject identityで共有し、5000件の参照15018→5017、統計5001回は保持。計測24/264・別8profile・Chrome26/WK26・local全298（identity test強化前）・finalLinux全298/checkall/lint/format/独立review成功。通常CPU5000はChrome230.4→224.3ms/WK346.5→338.5ms、CPU4は1032.3→1043.4ms/n2で速度改善は限定的・fieldINP未証明。CI38165314023 validate/deploy成功、artifact11712575196/26safe、実Linux/public25byte/frozen19byte+6LF・first15/canonical14一致。元112context publication436454ms/active更新保留/finish4/banner113/旧4exact→320native/nudge3/解除/次矢2/offlineSWreload/finish5/metrics各1回/少数pending-PB注記/analysis-history/reload/errors0。docs/codex/finish-metrics-sharing.md/evidence/finish-metrics-v113、代表15原寸PNGcopySHAexact、旧77tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。今回変更は50の同期block・回帰test・一括markers113、保存/数学/採点/全他runtime保持。公開後notesはlocal commitのみ。
 
 - AN077監査完了、branch codex/record-flow-audit、plan e9d33c9 / docs/codex/record-flow-performance-audit.md。実Linux112/public25一致、訂正38 native経路/418操作はgeometry-fivehit/scoreX/旧全件+新3本/reloadexact/errors0。Chrome375抑制motionの終了3件47.6ms→5000件227.0ms、CPU4では239.5→998.5ms、WebKit50.0→348.0ms（各2回、capture→第2rAF callback、実paint/fieldINPではない）。別8profileは当日結果/metrics/署名の反復参照を支持、保存/DOMの負担も残る。容量警告が320結果文へ重なる画像を保持、未修正。
