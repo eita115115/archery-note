@@ -941,5 +941,17 @@
     ],
     "owner": "codex",
     "acceptance": "共通視覚基盤と記録画面を白/深緑のv3へ刷新し、dark/auto/fieldと設定/結果へ共通階層を適用。ユーザーのUI制約なし/全承認を継続。375前後代表原寸、320375desktop/明暗、ChromeWKの実native開始-矢-選択微調整-解除-次矢-エンド-取消終了、旧全件/score座標/reload/errors0、既存contrast/viewport/modal/backup回帰、checkall/lint/format/全生成E2E/独立reviewを確認。採点半径/数学/保存schema/handlers/依存/SWactivationを保持、全markers一括bump、承認済みCIと実Linux/public25byte、元113contextのactive更新保留-banner-旧記録保持-新native-offlineを確認。旧78taskobjects/全acceptance/sharedhiddenlock保持、公開証拠後だけpass/evidenceとdocsprogressledgerを更新。全画面の情報設計/物理phone-INP-WKstrictOffline/旧容量toast重なり解消は別未証明。"
+  },
+  {
+    "id": "AN-080",
+    "task": "結果の容量警告を持続する案内とバックアップ設定への導線へ変える",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-079"
+    ],
+    "owner": "codex",
+    "acceptance": "結果の容量警告を通常flowの持続案内へ移し、閾値0.8/容量計測/保存schema/失敗警告/採点数学を保持。backup設定CTAは自動exportせず設定のbackup操作を表示し、閉じて結果へ戻る。320375desktop明暗、境界redgreen/実5000件native/旧全件+新座標得点/reload/非重複/前後原寸、checkall/lint/format/全E2E/独立review、版一括bump/承認済み公開CIと実公開更新確認。旧79tasks/全acceptance/sharedlock保持、成功証拠後だけpass/evidence、progress/ledger更新。実phone/VoiceOver/fieldINPは未証明。"
   }
 ]
