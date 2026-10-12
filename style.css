@@ -1383,7 +1383,7 @@ header.app .appLogo{border:0;border-radius:10px;background:transparent;}
 header.app .gear{border:0;border-radius:50%;background:var(--soft);}
 .card{background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:16px;box-shadow:none;}
 .card h2{font-size:14px;font-weight:650;letter-spacing:0;color:var(--ink);}
-.btn{border-radius:14px;font-weight:700;letter-spacing:.015em;}
+.btn{border-radius:12px;font-weight:700;letter-spacing:.015em;}
 .btn.sm{border-radius:10px;}
 .btn.sec{background:var(--soft);border:1px solid transparent;color:var(--ink);}
 .btn.ghost{background:var(--soft);border:1px solid transparent;}
@@ -1407,7 +1407,7 @@ header.app .gear{border:0;border-radius:50%;background:var(--soft);}
 .convergeLaunch .launchBody{padding:8px 16px 16px;}
 .quickDists .chip{border-radius:12px;min-height:46px;font-size:14px;}
 .sessionCardRule{margin:14px 0;background:var(--line2);}
-.startPrimary{border-radius:14px;font-size:16px;min-height:56px;}
+.startPrimary{border-radius:12px;font-size:16px;min-height:56px;}
 .sessionCondition .lensCard{border:0;border-radius:0;background:transparent;padding:8px 2px;}
 .sessionCondition .lensCard b{font-size:12px;}
 .recordDetails summary{color:var(--accent-strong);}
@@ -1427,7 +1427,7 @@ header.app .gear{border:0;border-radius:50%;background:var(--soft);}
 .activeActionDock .activeFinishBtn{background:transparent;border:1px solid var(--line);color:var(--sub);}
 nav.tabs{bottom:0;width:100%;border:0;border-top:1px solid var(--line2);border-radius:20px 20px 0 0;background:var(--card);box-shadow:0 -4px 24px rgba(24,39,34,.04);padding-bottom:max(6px,env(safe-area-inset-bottom));}
 nav.tabs::before{display:none;}
-nav.tabs button{border-radius:14px;font-weight:650;}
+nav.tabs button{border-radius:12px;font-weight:650;}
 nav.tabs button.on{color:var(--accent-strong);}
 nav.tabs button .ic{width:42px;border-radius:10px;}
 nav.tabs button.on .ic{background:var(--soft);color:var(--accent-strong);}
