@@ -1471,6 +1471,18 @@ html.dark.field{--sub:#c1d4c8;--accent:#a2edc9;--accent-strong:#b8f2d4;}
 .todayConclusionKicker{font-size:12px;font-weight:650;letter-spacing:.04em;}
 .todayConclusionText{font-size:20px;line-height:1.55;font-weight:750;letter-spacing:-.025em;overflow-wrap:anywhere;}
 .card.nextPractice > h2{font-size:18px;letter-spacing:-.025em;}
+
+/* 分析の詳細: 関連する比較を開いて読む。内側は平らな区切りにする。 */
+details.adv.analysisDetailsGroup{margin:0 0 12px;padding:0 16px;border:1px solid var(--line2);border-radius:20px;}
+details.adv.analysisDetailsGroup > summary{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;min-height:64px;padding:14px 0 14px 18px;color:var(--ink);font-size:15px;font-weight:650;}
+.analysisDetailsMeta{color:var(--sub);font-size:12px;font-weight:var(--fw-body);}
+.analysisDetailsBody > .card{padding:16px 0;margin:0;border:0;border-top:1px solid var(--line2);border-radius:0;background:transparent;}
+.analysisDetailsBody .histTrendRow{gap:12px;}
+.analysisDetailsBody .histTrendLabel{flex:0 0 44px;width:auto;}
+.analysisDetailsBody .histTrendChart{min-width:0;width:0;}
+.analysisDetailsBody .histTrendValue{flex:0 0 74px;width:auto;}
+.analysisDetailsBody .histTrendValue b{font-size:16px;font-weight:650;}
+.analysisDetailsBody .histTrendSub{display:block;white-space:nowrap;line-height:1.35;}
 .nextPracticeItem{grid-template-columns:24px minmax(0,1fr);gap:10px;}
 .nextPracticeItem b{font-size:16px;line-height:1.5;overflow-wrap:anywhere;}
 .nextPracticeItem p{font-size:13px;line-height:1.6;overflow-wrap:anywhere;}

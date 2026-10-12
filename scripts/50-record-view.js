@@ -1142,17 +1142,21 @@ function renderAnalysis(m) {
     // サイト
     sightHistoryCard(ss, sightMarks),
     sightSummaryHtml(sessionRows, f, sightMarks),
-    // 条件比較
-    conditionSplitCard(rows),
-    reasonBreakdownCard(rows),
-    // 月間
-    monthlyCard(ss),
-    distTrendCard(ss),
-    scoreDistCard(ss),
+    analysisDetailsGroupHtml("analysis-condition-details", "条件と理由", "風・理由タグ", [
+      conditionSplitCard(rows),
+      reasonBreakdownCard(rows),
+    ]),
+    analysisDetailsGroupHtml("analysis-breakdown-details", "練習の内訳", "月・距離・得点", [
+      monthlyCard(ss),
+      distTrendCard(ss),
+      scoreDistCard(ss),
+    ]),
     // その他
     formTrackingCard(),
-    personalBestCard(rows),
-    setupPerformanceCard(ss),
+    analysisDetailsGroupHtml("analysis-personal-details", "自己ベストと用具", "", [
+      personalBestCard(rows),
+      setupPerformanceCard(ss),
+    ]),
     distanceSummaryHtml(sessionRows),
   ]
     .filter(Boolean)
@@ -1200,6 +1204,14 @@ function renderAnalysis(m) {
   bindFormTrackingCard();
   const anCta = $("#anEmptyCta");
   if (anCta) anCta.onclick = () => showView("record");
+}
+function analysisDetailsGroupHtml(id, title, meta, cards) {
+  const body = cards.filter(Boolean).join("");
+  if (!body) return "";
+  return `<details class="adv analysisDetailsGroup" data-testid="${esc(id)}">
+    <summary><span>${esc(title)}</span>${meta ? `<span class="analysisDetailsMeta">${esc(meta)}</span>` : ""}</summary>
+    <div class="analysisDetailsBody">${body}</div>
+  </details>`;
 }
 /* HUD が使う3値（エンドn・合計・残り）と、折りたたみに回す詳細値をまとめて計算する。
    refreshActive() 側の状態モーション（数値ティック）も同じ計算を使う */

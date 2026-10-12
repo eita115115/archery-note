@@ -429,7 +429,7 @@ function monthlyCard(ss) {
   const keys = Object.keys(m).sort().reverse().slice(0, 6);
   if (!keys.length) return "";
   return (
-    `<div class="card"><h2>月ごとのまとめ</h2><table class="tbl"><tr><th>月</th><th class="right">練習</th><th class="right">本数</th><th class="right">平均/本</th></tr>` +
+    `<div class="card"><h2>月ごとのまとめ <span class="mini">点/本</span></h2><table class="tbl"><tr><th>月</th><th class="right">練習</th><th class="right">本数</th><th class="right">平均点</th></tr>` +
     keys
       .map(
         (k) =>
@@ -481,7 +481,7 @@ function distTrendCard(ss) {
       <div class="histTrendLabel">${esc(g.label)}</div>
       <svg width="100%" viewBox="0 0 ${W} ${H}" class="histTrendChart" style="max-height:${H}px" role="img" aria-label="${esc(g.label)}の平均点（点/本）推移"><title>${esc(g.label)}: ${pts.length}回、最新${pts[pts.length - 1].toFixed(2)}点/本</title><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
       ${pts.map((v, i) => `<circle cx="${(i / (pts.length - 1)) * W}" cy="${H - 4 - ((v - min) / span) * (H - 10)}" r="3" fill="var(--green)"/>`).join("")}</svg>
-      <div class="histTrendValue">${pts[pts.length - 1].toFixed(2)}点<br><span class="histTrendSub">最新平均/本</span></div>
+      <div class="histTrendValue"><b>${pts[pts.length - 1].toFixed(2)}</b><span class="histTrendSub">点/本 · 最新</span></div>
     </div>`;
       })
       .join("") +
