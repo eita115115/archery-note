@@ -1423,7 +1423,8 @@ header.app .gear{border:0;border-radius:0;background:radial-gradient(circle clos
 .targetTools .chip{border-radius:10px;}
 .nudge{border-radius:18px;background:var(--soft);}
 .npad button{border:0;border-radius:12px;background:var(--card);}
-.activeActionDock{border:1px solid var(--line2);border-radius:18px;background:var(--card);box-shadow:0 6px 24px rgba(24,39,34,.08);}
+.activeActionDock{grid-template-columns:max-content minmax(max-content,1fr) max-content;gap:6px;padding:10px;border:1px solid var(--line2);border-radius:18px;background:var(--card);box-shadow:0 6px 24px rgba(24,39,34,.08);}
+.activeActionDock .btn{min-width:48px;padding-inline:8px;white-space:nowrap;}
 .activeActionDock #bEnd{background:var(--invert-bg);color:var(--invert-fg);border-color:transparent;}
 .activeActionDock .activeFinishBtn{background:transparent;border:1px solid var(--line);color:var(--sub);}
 .summaryStorageNotice{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--soft);color:var(--ink);}
