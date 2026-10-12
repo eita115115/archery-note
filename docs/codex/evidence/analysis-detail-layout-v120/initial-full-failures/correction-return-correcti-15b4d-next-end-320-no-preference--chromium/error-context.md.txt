@@ -1,0 +1,248 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: correction-return.spec.js >> correction returns to target and next end (320, no-preference)
+- Location: tests\e2e\correction-return.spec.js:94:5
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: locator.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: '架空のデモデータで試す' })
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Archery Note" [level=1] [ref=e5]
+    - button "設定" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e10]
+  - navigation "主な画面" [ref=e11]:
+    - button "記録" [ref=e12] [cursor=pointer]:
+      - img [ref=e14]
+      - text: 記録
+    - button "履歴" [ref=e18] [cursor=pointer]:
+      - img [ref=e20]
+      - text: 履歴
+    - button "分析" [ref=e23] [cursor=pointer]:
+      - img [ref=e25]
+      - text: 分析
+    - button "サイト調整" [ref=e28] [cursor=pointer]:
+      - img [ref=e30]
+      - text: サイト調整
+    - button "用具" [ref=e33] [cursor=pointer]:
+      - img [ref=e35]
+      - text: 用具
+  - status
+```
+
+# Test source
+
+```ts
+  5   | async function settle(page) {
+  6   |   await page.evaluate(() =>
+  7   |     Promise.all(
+  8   |       globalThis.document
+  9   |         .getAnimations()
+  10  |         .filter((a) => Number.isFinite(a.effect.getTiming().iterations))
+  11  |         .map((a) => a.finished.catch(() => {})),
+  12  |     ),
+  13  |   );
+  14  | }
+  15  | 
+  16  | async function tap(page, locator) {
+  17  |   await settle(page);
+  18  |   const box = await locator.evaluate((el) => {
+  19  |     const r = el.getBoundingClientRect();
+  20  |     return {
+  21  |       x: r.x + r.width / 2,
+  22  |       y: r.y + r.height / 2,
+  23  |       uncovered:
+  24  |         globalThis.document
+  25  |           .elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+  26  |           ?.closest("button") === el,
+  27  |       nav: globalThis.document.querySelector("#tabs").getBoundingClientRect().top,
+  28  |     };
+  29  |   });
+  30  |   expect(box.uncovered).toBe(true);
+  31  |   expect(box.y).toBeGreaterThan(0);
+  32  |   expect(box.y).toBeLessThan(box.nav);
+  33  |   await page.touchscreen.tap(box.x, box.y);
+  34  | }
+  35  | 
+  36  | async function revealCorrection(page, locator) {
+  37  |   // Simulate the user's scroll to secondary controls; never recover the target.
+  38  |   const delta = await locator.evaluate((el) => {
+  39  |     const r = el.getBoundingClientRect();
+  40  |     const h = globalThis.document.querySelector("header.app").getBoundingClientRect();
+  41  |     const d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
+  42  |     return r.y + r.height / 2 - (Math.max(0, h.bottom) + 12 + d.top - 12) / 2;
+  43  |   });
+  44  |   await page.evaluate((d) => globalThis.scrollBy({ top: d, behavior: "instant" }), delta);
+  45  |   await settle(page);
+  46  | }
+  47  | 
+  48  | async function targetBounds(page) {
+  49  |   await settle(page);
+  50  |   return page.locator("#tgsvg").evaluate((el) => {
+  51  |     const r = el.getBoundingClientRect();
+  52  |     const h = globalThis.document.querySelector("header.app").getBoundingClientRect();
+  53  |     const d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
+  54  |     return {
+  55  |       x: r.x,
+  56  |       y: r.y,
+  57  |       width: r.width,
+  58  |       height: r.height,
+  59  |       top: Math.max(0, h.bottom),
+  60  |       bottom: d.top,
+  61  |     };
+  62  |   });
+  63  | }
+  64  | 
+  65  | async function recordArrow(page, index) {
+  66  |   const count = await page.evaluate(
+  67  |     () => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")).active.cur.length,
+  68  |   );
+  69  |   const r = await targetBounds(page);
+  70  |   const top = Math.max(r.y, r.top + 8),
+  71  |     bottom = Math.min(r.y + r.height, r.bottom - 8);
+  72  |   expect(bottom - top).toBeGreaterThan(32);
+  73  |   await page.touchscreen.tap(r.x + r.width / 2 + ((index % 3) - 1) * 14, (top + bottom) / 2);
+  74  |   await expect
+  75  |     .poll(() =>
+  76  |       page.evaluate(
+  77  |         () => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")).active.cur.length,
+  78  |       ),
+  79  |     )
+  80  |     .toBe(count + 1);
+  81  | }
+  82  | 
+  83  | async function expectTargetVisible(page) {
+  84  |   const r = await targetBounds(page);
+  85  |   expect(r.y).toBeGreaterThanOrEqual(r.top + 7);
+  86  |   expect(r.y + r.height).toBeLessThanOrEqual(r.bottom - 7);
+  87  | }
+  88  | 
+  89  | for (const size of [
+  90  |   { width: 320, height: 568 },
+  91  |   { width: 375, height: 812 },
+  92  | ]) {
+  93  |   for (const motion of ["no-preference", "reduce"]) {
+  94  |     test(`correction returns to target and next end (${size.width}, ${motion})`, async ({
+  95  |       page,
+  96  |     }, testInfo) => {
+  97  |       await page.setViewportSize(size);
+  98  |       await page.emulateMedia({
+  99  |         reducedMotion: motion,
+  100 |         colorScheme: size.width === 375 ? "dark" : "light",
+  101 |       });
+  102 |       const errors = [];
+  103 |       page.on("pageerror", (e) => errors.push(e.message));
+  104 |       await page.goto("/");
+> 105 |       await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+      |                                                               ^ Error: locator.click: Test timeout of 30000ms exceeded.
+  106 |       await page.locator('#tabs [data-v="record"]').click();
+  107 |       await page.getByRole("button", { name: "70m", exact: true }).click();
+  108 |       await page.locator("#fFace").selectOption("122");
+  109 |       await page.locator("#fArrows").selectOption("6");
+  110 |       const state = () => page.evaluate(() => JSON.parse(localStorage.getItem("archeryNote.v1")));
+  111 |       const before = (await state()).sessions;
+  112 |       await page.getByTestId("record-start").click();
+  113 |       for (let n = 0; n < 6; n++) {
+  114 |         await recordArrow(page, n);
+  115 |         await expect.poll(async () => (await state()).active.cur.length).toBe(n + 1);
+  116 |       }
+  117 |       await tap(page, page.locator('#curChips [data-i="0"]'));
+  118 |       const right = page.locator('#nudge [data-n="r"]');
+  119 |       await revealCorrection(page, right);
+  120 |       const original = (await state()).active.cur[0];
+  121 |       await tap(page, right);
+  122 |       await expect.poll(async () => (await state()).active.cur[0].x).toBeGreaterThan(original.x);
+  123 |       await revealCorrection(page, page.locator("#nudgeDone"));
+  124 |       const corrected = (await state()).active.cur;
+  125 |       await tap(page, page.locator("#nudgeDone"));
+  126 |       await page.screenshot({
+  127 |         path: testInfo.outputPath("correction-return.png"),
+  128 |         animations: "disabled",
+  129 |       });
+  130 |       await expectTargetVisible(page);
+  131 |       expect((await state()).active.cur).toEqual(corrected);
+  132 |       await tap(page, page.getByTestId("active-end"));
+  133 |       await expect.poll(async () => (await state()).active.ends.length).toBe(1);
+  134 |       expect((await state()).active.ends[0]).toEqual(corrected);
+  135 |       await expectTargetVisible(page);
+  136 |       await recordArrow(page, 0);
+  137 |       await expect.poll(async () => (await state()).active.cur.length).toBe(1);
+  138 |       // Ongoing correction and metadata updates must not jump back to the target.
+  139 |       const chip = page.locator('#curChips [data-i="0"]');
+  140 |       await tap(page, chip);
+  141 |       await revealCorrection(page, right);
+  142 |       let scroll = await page.evaluate(() => globalThis.scrollY);
+  143 |       await tap(page, right);
+  144 |       expect(
+  145 |         Math.abs((await page.evaluate(() => globalThis.scrollY)) - scroll),
+  146 |       ).toBeLessThanOrEqual(1);
+  147 |       const tag = page.locator("#shotReasonTags .reasonTag").first();
+  148 |       await revealCorrection(page, tag);
+  149 |       scroll = await page.evaluate(() => globalThis.scrollY);
+  150 |       await tap(page, tag);
+  151 |       expect(
+  152 |         Math.abs((await page.evaluate(() => globalThis.scrollY)) - scroll),
+  153 |       ).toBeLessThanOrEqual(1);
+  154 |       // User scrolls the chip near the top; toggle off without target recovery.
+  155 |       const move = await chip.evaluate((el) => el.getBoundingClientRect().top - 20);
+  156 |       await page.evaluate((d) => globalThis.scrollBy({ top: d, behavior: "instant" }), move);
+  157 |       await tap(page, chip);
+  158 |       await expect(page.locator("#nudge")).toBeHidden();
+  159 |       await expectTargetVisible(page);
+  160 |       // Delete also closes correction and returns to recording.
+  161 |       await tap(page, chip);
+  162 |       const remove = page.locator('#nudge [data-n="del"]');
+  163 |       await revealCorrection(page, remove);
+  164 |       await tap(page, remove);
+  165 |       await expect.poll(async () => (await state()).active.cur.length).toBe(0);
+  166 |       await expectTargetVisible(page);
+  167 |       // Confirm directly with correction open, without using deselect first.
+  168 |       await recordArrow(page, 0);
+  169 |       await tap(page, chip);
+  170 |       await revealCorrection(page, right);
+  171 |       const second = (await state()).active.cur;
+  172 |       await tap(page, page.getByTestId("active-end"));
+  173 |       await expect.poll(async () => (await state()).active.ends.length).toBe(2);
+  174 |       expect((await state()).active.ends[1]).toEqual(second);
+  175 |       await expectTargetVisible(page);
+  176 |       await recordArrow(page, 0);
+  177 |       await expect.poll(async () => (await state()).active.cur.length).toBe(1);
+  178 |       const active = (await state()).active;
+  179 |       expect((await state()).sessions).toEqual(before);
+  180 |       // Returning through a tab restores the reading position, not this helper's target position.
+  181 |       await page.evaluate(() => globalThis.scrollTo({ top: 120, behavior: "instant" }));
+  182 |       await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(120);
+  183 |       await page.locator('#tabs [data-v="history"]').click();
+  184 |       await page.locator('#tabs [data-v="record"]').click();
+  185 |       await settle(page);
+  186 |       await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(120);
+  187 |       expect((await state()).active).toEqual(active);
+  188 |       await page.reload();
+  189 |       expect((await state()).active).toEqual(active);
+  190 |       expect((await state()).sessions).toEqual(before);
+  191 |       expect(errors).toEqual([]);
+  192 |     });
+  193 |   }
+  194 | }
+  195 | 
+```

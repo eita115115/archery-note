@@ -1,0 +1,2 @@
+{"advisory_url":null,"dependency":{"ecosystem":"npm","name":"@capacitor/ios"},"manifest":"package-lock.json","number":37,"patched":{"identifier":"8.4.3"},"range":"\u003e= 8.3.5, \u003c 8.4.3","scope":"development","severity":"critical","state":"open"}
+{"advisory_url":null,"dependency":{"ecosystem":"npm","name":"@capacitor/android"},"manifest":"package-lock.json","number":36,"patched":{"identifier":"8.4.3"},"range":"\u003e= 8.3.5, \u003c 8.4.3","scope":"development","severity":"critical","state":"open"}

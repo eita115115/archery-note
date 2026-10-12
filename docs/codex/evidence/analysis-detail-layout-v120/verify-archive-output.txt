@@ -1,0 +1,1 @@
+PASS 115 archived originals/staged SHA/bytes exact; 16 viewed PNG; task85 done/evidence/old84raw prefix+objects/acceptance preserved

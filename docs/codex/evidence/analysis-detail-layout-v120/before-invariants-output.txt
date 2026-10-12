@@ -1,0 +1,11 @@
+page.evaluate: TypeError: Cannot read properties of undefined (reading 'date')
+    at http://127.0.0.1:65001/scripts/60-history-sight-view.js?v=119:1:16685
+    at Array.forEach (<anonymous>)
+    at monthlyCard (http://127.0.0.1:65001/scripts/60-history-sight-view.js?v=119:1:16662)
+    at eval (eval at evaluate (:303:30), <anonymous>:1:342)
+    at UtilityScript.evaluate (<anonymous>:305:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at observed (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-detail-layout\capture.cjs:9:37)
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-detail-layout\capture.cjs:10:1192 {
+  log: []
+}

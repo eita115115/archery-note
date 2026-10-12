@@ -1,0 +1,179 @@
+
+> archery-note@0.119.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-details.spec.js tests/e2e/analysis-filter-focus.spec.js tests/e2e/analysis-sight-filter.spec.js tests/e2e/tab-scroll.spec.js --workers=4
+
+Native web assets ready: dist\native (v119)
+[WebServer] (node:32616) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 23 tests using 4 workers
+
+(node:12920) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:33768) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:34644) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:30124) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  2 [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records (999ms)
+  ok  4 [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (320) (1.4s)
+tab-scroll positions (reduce): [
+  {
+    "stage": "before history",
+    "y": 0,
+    "height": 938,
+    "time": 156.29999995231628
+  },
+  {
+    "stage": "after history",
+    "y": 0,
+    "height": 5047,
+    "time": 271.89999985694885
+  },
+  {
+    "stage": "before analysis",
+    "y": 1400,
+    "height": 5047,
+    "time": 385.7000000476837
+  },
+  {
+    "stage": "after analysis",
+    "y": 0,
+    "height": 2535,
+    "time": 490.7000000476837
+  },
+  {
+    "stage": "before history",
+    "y": 600,
+    "height": 2535,
+    "time": 565
+  },
+  {
+    "stage": "after history",
+    "y": 1400,
+    "height": 5047,
+    "time": 624.8999998569489
+  },
+  {
+    "stage": "before record",
+    "y": 1400,
+    "height": 5047,
+    "time": 634.5999999046326
+  },
+  {
+    "stage": "after record",
+    "y": 0,
+    "height": 938,
+    "time": 689
+  },
+  {
+    "stage": "before analysis",
+    "y": 0,
+    "height": 938,
+    "time": 704.0999999046326
+  },
+  {
+    "stage": "after analysis",
+    "y": 600,
+    "height": 2535,
+    "time": 757.2000000476837
+  },
+  {
+    "stage": "final",
+    "y": 600,
+    "height": 2535,
+    "time": 805.5999999046326
+  }
+]
+  ok  3 [chromium] › tests\e2e\tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (reduce) (1.6s)
+  ok  5 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (320/light) (882ms)
+  ok  1 [chromium] › tests\e2e\analysis-details.spec.js:72:3 › analysis details keep comparisons available without a long default list (320) (1.9s)
+  ok  6 [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (375) (971ms)
+  ok  8 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (320/light) (1.2s)
+  ok  9 [chromium] › tests\e2e\analysis-details.spec.js:72:3 › analysis details keep comparisons available without a long default list (375) (1.5s)
+tab-scroll positions (no-preference): [
+  {
+    "stage": "before history",
+    "y": 0,
+    "height": 938,
+    "time": 145.60000014305115
+  },
+  {
+    "stage": "after history",
+    "y": 0,
+    "height": 5047,
+    "time": 275.90000009536743
+  },
+  {
+    "stage": "before analysis",
+    "y": 1400,
+    "height": 5047,
+    "time": 395.10000014305115
+  },
+  {
+    "stage": "after analysis",
+    "y": 0,
+    "height": 2535,
+    "time": 500.2000000476837
+  },
+  {
+    "stage": "before history",
+    "y": 600,
+    "height": 2535,
+    "time": 578.5
+  },
+  {
+    "stage": "after history",
+    "y": 1400,
+    "height": 5047,
+    "time": 662.9000000953674
+  },
+  {
+    "stage": "before record",
+    "y": 1400,
+    "height": 5047,
+    "time": 677
+  },
+  {
+    "stage": "after record",
+    "y": 0,
+    "height": 938,
+    "time": 759.4000000953674
+  },
+  {
+    "stage": "before analysis",
+    "y": 0,
+    "height": 938,
+    "time": 774
+  },
+  {
+    "stage": "after analysis",
+    "y": 600,
+    "height": 2535,
+    "time": 867.9000000953674
+  },
+  {
+    "stage": "final",
+    "y": 600,
+    "height": 2535,
+    "time": 914
+  }
+]
+  ok  7 [chromium] › tests\e2e\tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (no-preference) (1.8s)
+  ok 10 [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (7d) (1.3s)
+  ok 11 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (320/light) (786ms)
+  ok 14 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (320/light) (862ms)
+  ok 12 [chromium] › tests\e2e\analysis-details.spec.js:72:3 › analysis details keep comparisons available without a long default list (900) (1.4s)
+  ok 13 [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (30d) (1.3s)
+  ok 16 [chromium] › tests\e2e\analysis-details.spec.js:143:3 › analysis detail summaries retain native Enter and focus (600ms)
+  ok 15 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (375/dark) (740ms)
+  ok 18 [chromium] › tests\e2e\analysis-details.spec.js:143:3 › analysis detail summaries retain native Space and focus (601ms)
+  ok 17 [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (90d) (1.3s)
+  ok 20 [chromium] › tests\e2e\analysis-details.spec.js:159:1 › empty analysis does not offer empty detail groups (433ms)
+  ok 19 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (375/dark) (1.1s)
+  ok 21 [chromium] › tests\e2e\analysis-sight-filter.spec.js:155:1 › analysis sight selection preserves source marks and excludes unknown rounds (426ms)
+  ok 22 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (375/dark) (664ms)
+  ok 23 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (375/dark) (714ms)
+
+  23 passed (10.0s)

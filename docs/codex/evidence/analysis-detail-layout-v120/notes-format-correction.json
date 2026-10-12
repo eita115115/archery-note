@@ -1,0 +1,5 @@
+{
+  "note": "公開後notesの初formatは文書2件とraw error-context.md2件でfail。文書だけPrettier整形、raw2件は元bytesを変えず.md.txtへrenameしmanifestを更新。次formatはsyncが残した旧.mdコピー2件でfail、所有sandbox内/元bytes一致/正本不存在を確認してその2コピーだけ除去、最終format成功。原失敗出力も保持、runtime/public資産不変。",
+  "noRuntimeChanges": true,
+  "originalBytesPreserved": true
+}

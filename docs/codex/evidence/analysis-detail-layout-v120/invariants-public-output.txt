@@ -1,0 +1,1 @@
+PASS 99 other50 nodes exact; 60 only2 markup substitutions; all other runtime/math/scoring/storage/handlers/SWactivation/deps exact exceptversion; scopedCSS; before/after8x3 calculation+KPI+7card HTML/SVG exact except2 unit labels; old84tasks/acceptance/sharedlock exact

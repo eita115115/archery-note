@@ -1,0 +1,9 @@
+{
+  "initial": "315 passed (4.1m), 2 startup timeout",
+  "observed": "Both error contexts show loading fallback before record UI, no interaction reached",
+  "concurrent": "check:all/check:distribution regenerated the same served dist during the first full run",
+  "causality": "Consistent with race but no network trace; not definitive causal proof",
+  "correction": "Keep app and all test assertions unchanged; run full test alone after generation/checks completed",
+  "additionalProbeFailure": "First card invariant probe used r.session; source rows use r.s. Helper corrected, original failure retained, then before-invariants-corrected8 and after/final8 pass",
+  "clock": "Capture fixed synthetic date 2026-10-12 to retain same period boundaries after host midnight; no user clock/data touched"
+}

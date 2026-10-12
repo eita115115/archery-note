@@ -1005,9 +1005,9 @@
   {
     "id": "AN-085",
     "task": "分析の詳細を関連groupから開いて読める形へ整理する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "AN085完了、公開v120/sourceafe4f1b91d4bbc8a46bc3fdd475b25acfb493dda、branch codex/analysis-detail-layout。分析下部の既存7cardを「条件と理由」「練習の内訳」「自己ベストと用具」の3native detailsへ整理。初期閉/空group省略/64px以上summary/tap-Enter-Space-focusを保持し、内側をflatにした。月別は平均点+点/本、距離は最新値+点/本・最新を一行へ。比較条件/結論/次回/6数値/推移/サイト/射形の全件scopeは保持。50のwrapper+純表示helper、60の2markup、scopedCSSと一括markers120だけ。その他99nodes/全計算/採点半径/保存/handlers/依存/SWactivationはversion以外exact、ChromeWK8x3statesのrawdashboard/conclusion/next/KPI/7card HTML+SVGは2単位markup以外exact。所有12記録の全cardlayout高さ375で4768→3767px（実paint/fieldINPではない）。旧119red1→新6を含むfocused23passed10.0s、最終local317 passed (3.9m)、checkall/lint/format、final120native8/104旧3+新3/nudge0.6/undo/score/reloadexact/errors0。ChromeWK320375明暗900のbefore/after/final/public各8で旧sessions/setups/sightMarks/active/customRounds/formAnalyses/reloadexact/errors0。独立readonlyreview指摘なし（review時点serial全317/publicは未確認）。CI38318744208 validate/deploy成功/Linux317 passed (5.4m)、実Linux/public25byte・frozen19byte+6LF・first15/canonical14一致。CI E2E開始後にwarmした同じ元public119page/contextでpublication329376ms、active更新保留→finish4/banner120/旧全件exact→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/analysis-detail-layout-v120へ元失敗/訂正/最終raw・原寸PNGをSHA一致copy。追加ChromeWK明暗4contextの3groups Enter/Space/focus-visible/旧6/errors0も成功。旧84tasks/全acceptance/sharedlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/WKstrictOfflineは未証明。 初local全317は315passed4.1m/起動待ち2timeout、両snapshotは記録UI前のloadingfallback。同じ配信distをcheckall/checkdistributionが同時再生成していたため、元errorcontext/出力を保持し、生成終了後にapp/全assert不変で単独全再実行。network traceがなく同時生成との因果は断定しない。初card invariant helperはr.sessionを誤参照しdate undefined、正本r.sと同じsortへ訂正した別before-invariants-corrected8で成功。初captureのplaceholderずれも元/訂正PNG保持。capture比較用だけ日付2026-10-12固定、host日付変化後の期間境界を一定にしユーザー時計は変更なし。初review agentはusage limitで終了、費用不使用のままhost日付進行後同reviewerを再実行し成功。 公開後notesの初formatは文書2件とraw error-context.md2件でfail。文書だけPrettier整形、raw2件は元bytesを変えず.md.txtへrenameしmanifestを更新。次formatはsyncが残した旧.mdコピー2件でfail、所有sandbox内/元bytes一致/正本不存在を確認してその2コピーだけ除去、最終format成功。原失敗出力も保持、runtime/public資産不変。",
     "dependencies": [
       "AN-084"
     ],

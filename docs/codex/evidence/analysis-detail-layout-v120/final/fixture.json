@@ -1,0 +1,796 @@
+{
+  "schema": 5,
+  "settings": {
+    "theme": "light",
+    "onboardingSeen": true,
+    "activeGuideSeen": true,
+    "launchCount": 10,
+    "featureHints": {
+      "gearSetup": true,
+      "analysis": true,
+      "sightAdjust": true,
+      "formTracking": true,
+      "addToHome": true,
+      "practiceDays": true
+    }
+  },
+  "sessions": [
+    {
+      "id": "owned-detail-0",
+      "date": "2026-10-12",
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-b",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "sightV": "7.7",
+      "sightH": "0.7",
+      "windSpeed": "0",
+      "wx": "晴"
+    },
+    {
+      "id": "owned-detail-1",
+      "date": "2026-10-09",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3.5999999999999996,
+            "y": -1.5,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -2.4,
+            "y": 0.5,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": 2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.7999999999999998,
+            "y": -1,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": 1,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0.6,
+            "y": 3,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "3",
+      "wx": "風"
+    },
+    {
+      "id": "owned-detail-2",
+      "date": "2026-10-06",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3,
+            "y": 0,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 2,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": -2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.2,
+            "y": 0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 2.5,
+            "s": 10,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": 1.2,
+            "y": -2,
+            "s": 10,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "0",
+      "wx": "晴"
+    },
+    {
+      "id": "owned-detail-3",
+      "date": "2026-10-03",
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-b",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "sightV": "7.7",
+      "sightH": "0.7",
+      "windSpeed": "3",
+      "wx": "風"
+    },
+    {
+      "id": "owned-detail-4",
+      "date": "2026-09-30",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3.5999999999999996,
+            "y": -1.5,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -2.4,
+            "y": 0.5,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": 2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.7999999999999998,
+            "y": -1,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": 1,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0.6,
+            "y": 3,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "0",
+      "wx": "晴"
+    },
+    {
+      "id": "owned-detail-5",
+      "date": "2026-09-27",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3,
+            "y": 0,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 2,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": -2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.2,
+            "y": 0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 2.5,
+            "s": 10,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": 1.2,
+            "y": -2,
+            "s": 10,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "3",
+      "wx": "風"
+    },
+    {
+      "id": "owned-detail-6",
+      "date": "2026-09-24",
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-b",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "sightV": "7.7",
+      "sightH": "0.7",
+      "windSpeed": "0",
+      "wx": "晴"
+    },
+    {
+      "id": "owned-detail-7",
+      "date": "2026-09-21",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3.5999999999999996,
+            "y": -1.5,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -2.4,
+            "y": 0.5,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": 2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.7999999999999998,
+            "y": -1,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": 1,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0.6,
+            "y": 3,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "3",
+      "wx": "風"
+    },
+    {
+      "id": "owned-detail-8",
+      "date": "2026-09-18",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3,
+            "y": 0,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 2,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": -2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.2,
+            "y": 0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 2.5,
+            "s": 10,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": 1.2,
+            "y": -2,
+            "s": 10,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "0",
+      "wx": "晴"
+    },
+    {
+      "id": "owned-detail-9",
+      "date": "2026-09-15",
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-b",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -4.2,
+            "y": -3,
+            "s": 8,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -3,
+            "y": -1,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 1,
+            "s": 10,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -2.4,
+            "y": -2.5,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": -0.5,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0,
+            "y": 1.5,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ],
+      "sightV": "7.7",
+      "sightH": "0.7",
+      "windSpeed": "3",
+      "wx": "風"
+    },
+    {
+      "id": "owned-detail-10",
+      "date": "2026-09-12",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3.5999999999999996,
+            "y": -1.5,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -2.4,
+            "y": 0.5,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -1.2,
+            "y": 2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.7999999999999998,
+            "y": -1,
+            "s": 10,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": 1,
+            "s": 10,
+            "X": true,
+            "reason": "押し手"
+          },
+          {
+            "x": 0.6,
+            "y": 3,
+            "s": 9,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "0",
+      "wx": "晴"
+    },
+    {
+      "id": "owned-detail-11",
+      "date": "2026-09-09",
+      "dist": 30,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "round": "free",
+      "purpose": "practice",
+      "setupId": "owned-analysis-a",
+      "note": "架空の性能計測",
+      "ends": [
+        [
+          {
+            "x": -3,
+            "y": 0,
+            "s": 9,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": -1.7999999999999998,
+            "y": 2,
+            "s": 9,
+            "X": false
+          },
+          {
+            "x": -0.6,
+            "y": -2.5,
+            "s": 9,
+            "X": false,
+            "reason": "リリース"
+          }
+        ],
+        [
+          {
+            "x": -1.2,
+            "y": 0.5,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 2.5,
+            "s": 10,
+            "X": false,
+            "reason": "押し手"
+          },
+          {
+            "x": 1.2,
+            "y": -2,
+            "s": 10,
+            "X": false
+          }
+        ]
+      ],
+      "windSpeed": "3",
+      "wx": "風"
+    }
+  ],
+  "active": null,
+  "setups": [
+    {
+      "id": "owned-analysis-a",
+      "name": "屋外用リカーブ・練習セット"
+    },
+    {
+      "id": "owned-analysis-b",
+      "name": "室内用リカーブ"
+    }
+  ],
+  "sightMarks": [
+    {
+      "id": "match",
+      "setupId": "owned-analysis-a",
+      "dist": 30,
+      "date": "2026-10-12",
+      "v": "111.1",
+      "h": "1.1"
+    },
+    {
+      "id": "other-setup",
+      "setupId": "owned-analysis-b",
+      "dist": 18,
+      "date": "2026-10-12",
+      "v": "222.2",
+      "h": "2.2"
+    },
+    {
+      "id": "old",
+      "setupId": "owned-analysis-a",
+      "dist": 30,
+      "date": "2026-10-02",
+      "v": "333.3",
+      "h": "3.3"
+    },
+    {
+      "id": "none",
+      "setupId": null,
+      "dist": 30,
+      "date": "2026-10-12",
+      "v": "444.4",
+      "h": "4.4"
+    },
+    {
+      "id": "timestamp",
+      "setupId": "owned-analysis-a",
+      "dist": 30,
+      "ts": 1791601200000,
+      "v": "555.5",
+      "h": "5.5"
+    },
+    {
+      "id": "undated",
+      "setupId": "owned-analysis-a",
+      "dist": 30,
+      "ts": 0,
+      "v": "666.6",
+      "h": "6.6"
+    }
+  ]
+}

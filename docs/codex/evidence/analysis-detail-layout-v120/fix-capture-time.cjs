@@ -1,0 +1,1 @@
+const fs=require('fs');const p='artifacts/analysis-detail-layout/capture.cjs';let s=fs.readFileSync(p,'utf8').replace("await p.goto(process.env.PROOF_BASE", "await p.clock.setFixedTime(new Date('2026-10-12T12:00:00+09:00'));await p.goto(process.env.PROOF_BASE");fs.writeFileSync(p,s);

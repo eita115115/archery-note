@@ -1,0 +1,44 @@
+
+> archery-note@0.119.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-details.spec.js --grep 375 --workers=1
+
+Native web assets ready: dist\native (v119)
+[WebServer] (node:13068) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:27128) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\analysis-details.spec.js:72:3 › analysis details keep comparisons available without a long default list (375) (5.6s)
+
+
+  1) [chromium] › tests\e2e\analysis-details.spec.js:72:3 › analysis details keep comparisons available without a long default list (375) 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  getByTestId('analysis-condition-details')
+    Expected: 1
+    Received: 0
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for getByTestId('analysis-condition-details')
+        14 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      81 |     for (const id of groups) {
+      82 |       const group = page.getByTestId(id);
+    > 83 |       await expect(group).toHaveCount(1);
+         |                           ^
+      84 |       expect(await group.evaluate((el) => el.open)).toBe(false);
+      85 |       const summary = group.locator(":scope > summary");
+      86 |       expect(
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-details.spec.js:83:27
+
+    Error Context: test-results\analysis-details-analysis--d793b-ut-a-long-default-list-375--chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\analysis-details.spec.js:72:3 › analysis details keep comparisons available without a long default list (375) 

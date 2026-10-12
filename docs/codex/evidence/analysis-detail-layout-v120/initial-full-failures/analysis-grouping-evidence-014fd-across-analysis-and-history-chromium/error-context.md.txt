@@ -1,0 +1,205 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: analysis-grouping-evidence.spec.js >> native one-arrow finish stays pending across analysis and history
+- Location: tests\e2e\analysis-grouping-evidence.spec.js:186:1
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: locator.scrollIntoViewIfNeeded: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('#quickStart')
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Archery Note" [level=1] [ref=e5]
+    - button "設定" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - img [ref=e13]
+      - heading "読み込みに時間がかかっています" [level=2] [ref=e17]
+      - paragraph [ref=e18]: 通信が不安定な場合は再読み込みしてください。記録は端末内に保存されます。
+      - link "再読み込み" [ref=e19] [cursor=pointer]:
+        - /url: ./index.html
+  - navigation "主な画面" [ref=e20]:
+    - button "記録" [ref=e21] [cursor=pointer]:
+      - img [ref=e23]
+      - text: 記録
+    - button "履歴" [ref=e27] [cursor=pointer]:
+      - img [ref=e29]
+      - text: 履歴
+    - button "分析" [ref=e32] [cursor=pointer]:
+      - img [ref=e34]
+      - text: 分析
+    - button "サイト調整" [ref=e37] [cursor=pointer]:
+      - img [ref=e39]
+      - text: サイト調整
+    - button "用具" [ref=e42] [cursor=pointer]:
+      - img [ref=e44]
+      - text: 用具
+  - status
+```
+
+# Test source
+
+```ts
+  106 |         expect(observed.qualification).toBe(count >= 3);
+  107 |         expect(observed.dashboard.recentAverage).toBe(9);
+  108 |         expect(observed.period[0].arrows).toBe(18 + count);
+  109 |         expect(observed.condition.calm.arrows).toBe(18 + count);
+  110 |         if (count === 1 || count === 2) {
+  111 |           expect(observed.dashboard.groupingDelta).toBeNull();
+  112 |           expect(observed.dashboard.groupingSamples).toBe(3);
+  113 |           expect(observed.conclusion.kind).toBe("grouping-pending");
+  114 |           expect(observed.suggestions.some((s) => s.id === "collect-coordinates")).toBe(true);
+  115 |           await expect(page.getByTestId("growth-dashboard")).toContainText("比較待ち");
+  116 |           await expect(page.getByTestId("today-conclusion")).toContainText("比較は保留");
+  117 |           await settled(page);
+  118 |           const bounds = await page
+  119 |             .getByTestId("today-conclusion")
+  120 |             .locator("p")
+  121 |             .evaluate((el) => ({
+  122 |               paragraph: el.getBoundingClientRect().toJSON(),
+  123 |               nav: globalThis.document.querySelector("#tabs").getBoundingClientRect().toJSON(),
+  124 |             }));
+  125 |           expect(bounds.paragraph.bottom).toBeLessThanOrEqual(bounds.nav.top - 4);
+  126 |           expect(bounds.paragraph.left).toBeGreaterThanOrEqual(0);
+  127 |           expect(bounds.paragraph.right).toBeLessThanOrEqual(width);
+  128 |         }
+  129 |         if (count >= 1)
+  130 |           expect(observed.suggestions.some((s) => s.id.endsWith("spread"))).toBe(false);
+  131 |         await settled(page);
+  132 |         await page.screenshot({ path: testInfo.outputPath("dashboard.png") });
+  133 |         const kpi = page.locator(".insightStrip").first();
+  134 |         await kpi.scrollIntoViewIfNeeded();
+  135 |         await settled(page);
+  136 |         await expect(kpi).toBeVisible();
+  137 |         const tile = kpi.locator(".insightTile").nth(1);
+  138 |         if (count === 1 || count === 2) {
+  139 |           await expect(tile.locator("b")).toHaveText("比較待ち");
+  140 |           await expect(tile).toContainText("座標3本以上");
+  141 |           await expect(tile).not.toContainText("最小 0.0cm");
+  142 |         } else if (count >= 3) await expect(tile.locator("b")).toHaveText("0.0cm");
+  143 |         expect(await kpi.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+  144 |         await page.screenshot({ path: testInfo.outputPath("kpi.png") });
+  145 |         const rendered = {
+  146 |           dashboard: await page.getByTestId("growth-dashboard").innerText(),
+  147 |           conclusion: await page.getByTestId("today-conclusion").innerText(),
+  148 |           suggestions: await page.getByTestId("next-practice").innerText(),
+  149 |           kpi: await kpi.innerText(),
+  150 |         };
+  151 |         await tap(page, '#tabs [data-v="history"]');
+  152 |         await page.locator(`.historyRow[data-id="${current.id}"]`).click();
+  153 |         await settled(page);
+  154 |         const history = await page.locator(".ovl").last().innerText();
+  155 |         if (count === 1 || count === 2) {
+  156 |           expect(history).toContain("グルーピングの比較は保留");
+  157 |           expect(history).not.toContain("グルーピングは良好");
+  158 |         }
+  159 |         if (count >= 1) {
+  160 |           expect(history).not.toContain("左右の再現性");
+  161 |           expect(history).not.toContain("上下の再現性");
+  162 |           expect(history).not.toContain("横長のグルーピング");
+  163 |           expect(history).not.toContain("縦長のグルーピング");
+  164 |         }
+  165 |         await page.screenshot({ path: testInfo.outputPath("history.png") });
+  166 |         await tap(page, "#hClose");
+  167 |         const before = await stored(page);
+  168 |         expect(before.sessions).toEqual(data.sessions);
+  169 |         await page.reload();
+  170 |         expect((await stored(page)).sessions).toEqual(before.sessions);
+  171 |         expect(errors).toEqual([]);
+  172 |         await preserve(testInfo, "observed", {
+  173 |           width,
+  174 |           theme,
+  175 |           count,
+  176 |           observed,
+  177 |           rendered,
+  178 |           history,
+  179 |           oldRecordsExact: true,
+  180 |           reloadExact: true,
+  181 |           errors,
+  182 |         });
+  183 |       });
+  184 |     }
+  185 | 
+  186 | test("native one-arrow finish stays pending across analysis and history", async ({
+  187 |   page,
+  188 | }, testInfo) => {
+  189 |   const errors = [];
+  190 |   page.on("pageerror", (e) => errors.push(e.message));
+  191 |   await page.setViewportSize({ width: 375, height: 812 });
+  192 |   await page.emulateMedia({ reducedMotion: "reduce" });
+  193 |   await page.addInitScript((old) => {
+  194 |     if (!globalThis.localStorage.getItem("archeryNote.v1"))
+  195 |       globalThis.localStorage.setItem(
+  196 |         "archeryNote.v1",
+  197 |         JSON.stringify({
+  198 |           schema: 5,
+  199 |           settings: { onboardingSeen: true, activeGuideSeen: true, launchCount: 10 },
+  200 |           sessions: old,
+  201 |           active: null,
+  202 |         }),
+  203 |       );
+  204 |   }, fixtures.old);
+  205 |   await page.goto("/");
+> 206 |   await page.locator("#quickStart").scrollIntoViewIfNeeded();
+      |                                     ^ Error: locator.scrollIntoViewIfNeeded: Test timeout of 30000ms exceeded.
+  207 |   await tap(page, "#quickStart");
+  208 |   await settled(page);
+  209 |   const point = await page.locator("#tgsvg").evaluate((el) => {
+  210 |     const p = el.createSVGPoint();
+  211 |     p.x = 3.2;
+  212 |     p.y = 0;
+  213 |     const t = p.matrixTransform(el.getScreenCTM());
+  214 |     return { x: t.x, y: t.y, clear: el.contains(globalThis.document.elementFromPoint(t.x, t.y)) };
+  215 |   });
+  216 |   expect(point.clear).toBe(true);
+  217 |   await page.touchscreen.tap(point.x, point.y);
+  218 |   await expect.poll(async () => (await stored(page)).active.cur.length).toBe(1);
+  219 |   const active = (await stored(page)).active;
+  220 |   expect(active.cur[0].s).toBe(9);
+  221 |   await tap(page, "#bFinish");
+  222 |   await expect(page.getByTestId("todays-result-stability-pending")).toContainText("1本の座標");
+  223 |   await settled(page);
+  224 |   await page.screenshot({ path: testInfo.outputPath("native-summary.png") });
+  225 |   await page.locator("#sumClose").scrollIntoViewIfNeeded();
+  226 |   await tap(page, "#sumClose");
+  227 |   await tap(page, '#tabs [data-v="analysis"]');
+  228 |   await expect(page.getByTestId("growth-dashboard")).toContainText("比較待ち");
+  229 |   await expect(page.getByTestId("today-conclusion")).toContainText("比較は保留");
+  230 |   await settled(page);
+  231 |   await page.screenshot({ path: testInfo.outputPath("native-analysis.png") });
+  232 |   const after = await stored(page);
+  233 |   expect(after.sessions.slice(0, 3)).toEqual(fixtures.old);
+  234 |   const current = after.sessions.at(-1);
+  235 |   expect(current.ends).toEqual([active.cur]);
+  236 |   await tap(page, '#tabs [data-v="history"]');
+  237 |   await page.locator(`.historyRow[data-id="${current.id}"]`).click();
+  238 |   const text = await page.locator(".ovl").last().innerText();
+  239 |   expect(text).toContain("グルーピングの比較は保留");
+  240 |   expect(text).not.toContain("グルーピングは良好");
+  241 |   await tap(page, "#hClose");
+  242 |   await page.reload();
+  243 |   expect((await stored(page)).sessions).toEqual(after.sessions);
+  244 |   expect(errors).toEqual([]);
+  245 |   await preserve(testInfo, "native-saved", { point, active, after, history: text, errors });
+  246 | });
+  247 | 
+```

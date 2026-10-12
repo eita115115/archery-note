@@ -1,0 +1,1 @@
+const fs=require('fs'),p='artifacts/analysis-detail-layout/capture.cjs';let s=fs.readFileSync(p,'utf8').replace('return {filter:','const ss=rows.map(r=>r.s).sort((a,b)=>(b.date||\"\").localeCompare(a.date||\"\")||(b.id<a.id?-1:1));return {filter:').replaceAll('rows.map(r=>r.session)','ss');fs.writeFileSync(p,s);

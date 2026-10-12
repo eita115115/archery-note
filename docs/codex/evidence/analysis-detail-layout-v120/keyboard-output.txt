@@ -1,0 +1,4 @@
+PASS chromium/light 3groups Enter/Space/focus-visible/old6/errors0
+PASS chromium/dark 3groups Enter/Space/focus-visible/old6/errors0
+PASS webkit/light 3groups Enter/Space/focus-visible/old6/errors0
+PASS webkit/dark 3groups Enter/Space/focus-visible/old6/errors0

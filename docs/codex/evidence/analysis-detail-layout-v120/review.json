@@ -1,0 +1,22 @@
+{
+  "source": "afe4f1b91d4bbc8a46bc3fdd475b25acfb493dda",
+  "base": "1c8d06e98190e597365d4bf071593cc78189c65b",
+  "reviewer": "/root/review_finish_metrics",
+  "critical": [],
+  "important": [],
+  "minor": [],
+  "verdict": "Static merge ready; no concrete plan mismatch",
+  "evidenceInspected": [
+    "focused23passed",
+    "final120 analysis8",
+    "native8/104",
+    "375light/dark320PNG"
+  ],
+  "notVerified": [
+    "full317 serial success",
+    "CI",
+    "public update"
+  ],
+  "initialAttempt": "usage limit, no money used; retry after host date advance succeeded",
+  "causality": "Initial315pass2startup timeout retained; concurrent dist regeneration causality not independently proven"
+}

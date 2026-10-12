@@ -1,0 +1,1 @@
+PASS v120 archive/source/CI/full317/public25/native8/104/analysis4x8/raw+KPI+7cardSVG; original failures retained; viewed PNG copy SHA exact

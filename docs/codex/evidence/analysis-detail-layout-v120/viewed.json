@@ -1,0 +1,66 @@
+[
+  {
+    "file": "after/chromium-375-light-closed.png",
+    "sha256": "dd345afe83c3ce6b462ea1ad171a6d0bec7251249d114a927a12eba0cf43accf"
+  },
+  {
+    "file": "after/chromium-375-light.png",
+    "sha256": "68b22a272586d2756d02ea68b1e3f00362fa371db55c6f5b51ec8df984ab018d"
+  },
+  {
+    "file": "after/webkit-320-light.png",
+    "sha256": "b00d1402101700e6883909918c5a4d82a8e26a0e0967732a340024fcf535731b"
+  },
+  {
+    "file": "after/webkit-375-dark-closed.png",
+    "sha256": "5e2d11a31530eec8322382c2571e66ac3d0ee12a5a3edcacf2eb657ac1d2e115"
+  },
+  {
+    "file": "final/chromium-375-light.png",
+    "sha256": "68b22a272586d2756d02ea68b1e3f00362fa371db55c6f5b51ec8df984ab018d"
+  },
+  {
+    "file": "final/webkit-375-dark-closed.png",
+    "sha256": "5e2d11a31530eec8322382c2571e66ac3d0ee12a5a3edcacf2eb657ac1d2e115"
+  },
+  {
+    "file": "before-corrected/chromium-375-light.png",
+    "sha256": "f24909522df0e9139d3b5c200349cfdf5ca1d84cf24b8ad966144c96bb46feb7"
+  },
+  {
+    "file": "chromium-light-keyboard-focus.png",
+    "sha256": "cc2f3695325fd577469fb946cf39db7fe83903a9fd3e13b8d7a06fa739a9a410"
+  },
+  {
+    "file": "webkit-dark-keyboard-focus.png",
+    "sha256": "906da2219a227bd5e6bf5854c296aa5ec53b0fb1b46dddd52ae2e183a2ec2701"
+  },
+  {
+    "file": "public-final/banner.png",
+    "sha256": "d812517c22f59846940856ea521a4d677a7852d54970ecbe4b90ba4e2f14ff4a"
+  },
+  {
+    "file": "public-final/offline.png",
+    "sha256": "ffbd661857e9d43cddf44a865a72cb49358845b09f8aad6e0d7e7040052c1d74"
+  },
+  {
+    "file": "before/chromium-375-light.png",
+    "sha256": "b1490172f9757b852cc5fa76f9eb947b7f51bdcd3ef7623e59368c070c374f01"
+  },
+  {
+    "file": "public-analysis/chromium-375-light-closed.png",
+    "sha256": "dd345afe83c3ce6b462ea1ad171a6d0bec7251249d114a927a12eba0cf43accf"
+  },
+  {
+    "file": "public-analysis/chromium-375-light.png",
+    "sha256": "68b22a272586d2756d02ea68b1e3f00362fa371db55c6f5b51ec8df984ab018d"
+  },
+  {
+    "file": "public-analysis/webkit-375-dark-closed.png",
+    "sha256": "5e2d11a31530eec8322382c2571e66ac3d0ee12a5a3edcacf2eb657ac1d2e115"
+  },
+  {
+    "file": "public-analysis/webkit-320-light.png",
+    "sha256": "b00d1402101700e6883909918c5a4d82a8e26a0e0967732a340024fcf535731b"
+  }
+]
