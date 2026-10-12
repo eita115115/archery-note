@@ -25,3 +25,11 @@ Product gate: 得点/座標/用具/成長比較の既存情報を同じ視覚階
 旧容量警告のsummaryへの重なりは現行baselineを保持し、UIを変えたことで直ったと未検証で主張しない。必要な位置修正は別タスク。実iPhone/VoiceOver/fieldINP/GPU/WKstrictOffline/既存native依存critical2件/旧閉鎖profile回復は未証明。
 
 自己review: placeholderなし。静的な見た目と動的な採点styleを区別。ユーザーの制約なしはデータ削除/費用利用の許可ではない。広いUI一新の最初の視覚基盤を、残る各画面の情報設計完了へすり替えない。既存の全承認に基づき設計から実装まで続行する。
+
+## 初期実装の検証経過
+
+beforeは実Linux113/375明暗・320・desktopの4contextでnative3本→終了/旧3件+新1/reload/errors0、375開始/記録/結果/設定原寸を保存。初実装helperはstyleを書いた後、50のCRLFでheading置換assert失敗。Node24のerror formatterがacorn Unicode escape SyntaxErrorを出し元assertを隠したが、helper自体のnode --checkは成功、50がCRLF2789個・LF正規化後needle一致を確認。styleだけ適用された状態で、50 headingはapply_patchで追加。元helperを再実行してCSS重複を増やしていない。
+
+初afterはnative-web buildが既存style.min.cssをcopyするため旧CSSのまま。beforeの回復/新UI検証と呼ばない。rootで既存build:web-assetsを実行してからsandbox sync/build、別candidate1へ4contextを再実行し成功。候補375light idle/active/settings・dark active・320activeを原寸表示し、更新配色/部品/headingの実反映を確認。初after rawと出力は保存して区別する。
+
+focused生成E2Eはviewport/contrast/modalの18passed36.3s。追加native helper初回は3nudge後のlocalStorage値を2rAFだけで読み600ms debounce前の旧値をassertして失敗。元failure/outputを保存し元owned processを停止、timeout起因の再起動ではない。保存実装は不変、訂正版helperはhasPendingSaveがfalseになる実条件を待ち、Chrome/WebKit320375明暗8context/104native actions、nudge0.6cm/undo/score/旧3+新/reload/errors0でexit0。結果light/dark設定/desktop原寸も閲覧、darkのheroMetricが参照するglass tokenだけ新暗色へ整合した。

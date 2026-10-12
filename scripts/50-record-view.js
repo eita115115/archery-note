@@ -507,6 +507,7 @@ function renderRecord(m) {
   const defFace = suggestedFaceValue(defDist, last);
   const defPerEnd = last && last.perEnd ? last.perEnd : 6;
   m.innerHTML = `
+  <div class="practiceHeading"><h2>練習を記録</h2><span>${fmtD(today())}</span></div>
   ${featureHintHtml()}
   ${recordFastActionsHtml(last)}
   <section class="launchPanel convergeLaunch startFirst">

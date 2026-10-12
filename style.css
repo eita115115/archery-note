@@ -1,27 +1,27 @@
 :root{
-  /* Field Instrument v2 — light: 墨とインクの精密な計器。金は糸だけ */
-  --green:#3c7a5a; --green-l:#3c7a5a; --bg:#faf9f6; --card:#faf9f6;
-  --ink:#1b1b18; --sub:#5f6359; --line:#dcd7c8; --line2:#e8e4d8;
-  --soft:#ece8dc; --inpBg:#eeeade; --hdr:#1b1b18; --title:#1b1b18;
-  --advBg:#ece8dc; --advLine:#dcd7c8;
+  /* Practice Note v3 — light: 白い操作面と深いグリーン */
+  --green:#0b765d; --green-l:#0b765d; --bg:#f2f5f4; --card:#ffffff;
+  --ink:#182722; --sub:#5b7065; --line:#dce5e0; --line2:#e8eeea;
+  --soft:#edf3ef; --inpBg:#f3f6f4; --hdr:#182722; --title:#182722;
+  --advBg:#edf3ef; --advLine:#dce5e0;
   --gold:#fdd835; --red:#c62828; --blue:#1565c0;
-  /* 金は糸（線・ドット・ライブ数値の文字色）専用。面（背景）には使わない */
-  --accent:#b08a2e; --accent-strong:#8a6508;
-  /* 反転 CTA・選択状態: light = 墨面＋白文字 */
-  --invert-bg:#1b1b18; --invert-fg:#f2f0e8;
+  /* 主操作と選択状態は深いグリーン。的の色は独立したデータ色。 */
+  --accent:#0b765d; --accent-strong:#075b46;
+  /* 主 CTA・選択状態: light = グリーン面＋白文字 */
+  --invert-bg:#0b765d; --invert-fg:#ffffff;
   --danger:#c62828; --status-ok:#0f9d58; --status-warn:#c62828; --status-hold:#8a6d1d;
-  --paper:#faf9f6; --paper2:#ece8dc; --ink2:#1b1b18;
-  --teal:#0f766e; --amber:#b56b1f; --navy:#24537b; --mint:#ece8dc;
-  --shadow-raised:0 8px 24px rgba(27,27,24,.14);
+  --paper:#ffffff; --paper2:#edf3ef; --ink2:#182722;
+  --teal:#0f766e; --amber:#b56b1f; --navy:#24537b; --mint:#edf3ef;
+  --shadow-raised:0 8px 28px rgba(24,39,34,.08);
   --shadow-none:none;
   --shadow:var(--shadow-none); --glass:rgba(250,249,246,.9);
   --shadow-soft:var(--shadow-none);
   --press-shadow:var(--shadow-none);
-  --chrome-bg:rgba(250,249,246,.92); --chrome-border:rgba(27,27,24,.12);
-  --page-top:#faf9f6; --page-mid:#faf9f6;
-  --logo-surface-a:#faf9f6; --logo-surface-b:#faf9f6;
-  --target-surface-a:#eeeade; --target-surface-b:#e6e2d4;
-  --radius-card:8px; --radius-panel:8px; --radius-control:6px;
+  --chrome-bg:rgba(255,255,255,.97); --chrome-border:rgba(24,39,34,.10);
+  --page-top:#f2f5f4; --page-mid:#f2f5f4;
+  --logo-surface-a:#ffffff; --logo-surface-b:#ffffff;
+  --target-surface-a:#ffffff; --target-surface-b:#edf3ef;
+  --radius-card:20px; --radius-panel:20px; --radius-control:12px;
   --ease-app:cubic-bezier(.2,.8,.2,1);
   --ease-fluid:cubic-bezier(.22,1,.36,1);
   --motion-fast:.16s; --motion-med:.34s; --motion-fluid:.42s;
@@ -812,45 +812,87 @@ body:not(.modalOpen) main.hasActiveDock ~ .toast{bottom:var(--record-toast-botto
 .updbar:not([hidden]){display:block;}
 .updbar[hidden]{display:none!important;}
 html.dark{
-  /* Field Instrument v2 — dark: 純に近い墨。金は糸だけ */
-  --bg:#101110; --card:#101110; --ink:#e7eae5; --sub:#9aa396; --line:#33362f; --line2:#2a2d28;
-  --soft:#1e211c; --inpBg:#1e211c; --hdr:#e7eae5; --title:#e7eae5; --advBg:#1e211c; --advLine:#33362f;
-  --green:#63b088; --green-l:#63b088; --accent:#d9b25a; --accent-strong:#f0c04a; --danger:#ff8a80;
-  --status-ok:#4ade80; --status-warn:#ff8a80; --status-hold:#d9b25a;
-  /* 反転 CTA・選択状態: dark = 紙面＋墨文字 */
-  --invert-bg:#f2f0e8; --invert-fg:#1b1b18;
-  --paper:#101110; --paper2:#1e211c; --ink2:#e7eae5; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1e211c;
-  --shadow-raised:0 10px 28px rgba(0,0,0,.4);
-  --shadow-none:none;
-  --shadow:var(--shadow-none); --glass:rgba(16,17,16,.86);
-  --shadow-soft:var(--shadow-none);
-  --press-shadow:var(--shadow-none);
-  --chrome-bg:rgba(16,17,16,.92); --chrome-border:rgba(231,234,229,.10);
-  --page-top:#101110; --page-mid:#101110;
-  --logo-surface-a:#101110; --logo-surface-b:#101110;
-  --target-surface-a:#1e211c; --target-surface-b:#191b17;
-  --shadow-card:var(--shadow-none);
-  --shadow-floating:var(--shadow-raised);
+  --bg:#101a17;
+  --card:#17241f;
+  --ink:#edf5ef;
+  --sub:#a2b6aa;
+  --line:#344b3f;
+  --line2:#293e33;
+  --soft:#22342c;
+  --inpBg:#1e3028;
+  --hdr:#edf5ef;
+  --title:#edf5ef;
+  --advBg:#22342c;
+  --advLine:#344b3f;
+  --green:#94e3bf;
+  --green-l:#94e3bf;
+  --accent:#94e3bf;
+  --accent-strong:#b8f2d4;
+  --invert-bg:#94e3bf;
+  --invert-fg:#143326;
+  --paper:#17241f;
+  --paper2:#22342c;
+  --ink2:#edf5ef;
+  --teal:#64d3bf;
+  --amber:#f0b35a;
+  --navy:#78aee8;
+  --mint:#22342c;
+  --danger:#ff8a80;
+  --status-ok:#4ade80;
+  --status-warn:#ff8a80;
+  --status-hold:#e7c776;
+  --shadow-raised:0 10px 30px rgba(0,0,0,.24);
+  --glass:rgba(23,36,31,.97);
+  --chrome-bg:rgba(23,36,31,.97);
+  --chrome-border:rgba(237,245,239,.12);
+  --page-top:#101a17;
+  --page-mid:#101a17;
+  --logo-surface-a:#17241f;
+  --logo-surface-b:#17241f;
+  --target-surface-a:#17241f;
+  --target-surface-b:#22342c;
 }
 @media (prefers-color-scheme: dark){
   html.auto{
-    --bg:#101110; --card:#101110; --ink:#e7eae5; --sub:#9aa396; --line:#33362f; --line2:#2a2d28;
-    --soft:#1e211c; --inpBg:#1e211c; --hdr:#e7eae5; --title:#e7eae5; --advBg:#1e211c; --advLine:#33362f;
-    --green:#63b088; --green-l:#63b088; --accent:#d9b25a; --accent-strong:#f0c04a; --danger:#ff8a80;
-    --status-ok:#4ade80; --status-warn:#ff8a80; --status-hold:#d9b25a;
-    --invert-bg:#f2f0e8; --invert-fg:#1b1b18;
-    --paper:#101110; --paper2:#1e211c; --ink2:#e7eae5; --teal:#64d3bf; --amber:#f0b35a; --navy:#78aee8; --mint:#1e211c;
-    --shadow-raised:0 10px 28px rgba(0,0,0,.4);
-    --shadow-none:none;
-    --shadow:var(--shadow-none); --glass:rgba(16,17,16,.86);
-    --shadow-soft:var(--shadow-none);
-    --press-shadow:var(--shadow-none);
-    --chrome-bg:rgba(16,17,16,.92); --chrome-border:rgba(231,234,229,.10);
-    --page-top:#101110; --page-mid:#101110;
-    --logo-surface-a:#101110; --logo-surface-b:#101110;
-    --target-surface-a:#1e211c; --target-surface-b:#191b17;
-    --shadow-card:var(--shadow-none);
-    --shadow-floating:var(--shadow-raised);
+  --bg:#101a17;
+  --card:#17241f;
+  --ink:#edf5ef;
+  --sub:#a2b6aa;
+  --line:#344b3f;
+  --line2:#293e33;
+  --soft:#22342c;
+  --inpBg:#1e3028;
+  --hdr:#edf5ef;
+  --title:#edf5ef;
+  --advBg:#22342c;
+  --advLine:#344b3f;
+  --green:#94e3bf;
+  --green-l:#94e3bf;
+  --accent:#94e3bf;
+  --accent-strong:#b8f2d4;
+  --invert-bg:#94e3bf;
+  --invert-fg:#143326;
+  --paper:#17241f;
+  --paper2:#22342c;
+  --ink2:#edf5ef;
+  --teal:#64d3bf;
+  --amber:#f0b35a;
+  --navy:#78aee8;
+  --mint:#22342c;
+  --danger:#ff8a80;
+  --status-ok:#4ade80;
+  --status-warn:#ff8a80;
+  --status-hold:#e7c776;
+  --shadow-raised:0 10px 30px rgba(0,0,0,.24);
+  --glass:rgba(23,36,31,.97);
+  --chrome-bg:rgba(23,36,31,.97);
+  --chrome-border:rgba(237,245,239,.12);
+  --page-top:#101a17;
+  --page-mid:#101a17;
+  --logo-surface-a:#17241f;
+  --logo-surface-b:#17241f;
+  --target-surface-a:#17241f;
+  --target-surface-b:#22342c;
   }
 }
 /* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。
@@ -1330,3 +1372,76 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .modalSwipeHandle::before{content:"";width:32px;height:4px;border-radius:2px;background:currentColor;opacity:.5;}
 .modalSwipeHandle:active{cursor:grabbing;}
 .sheet.isDragging{animation:none;transition:none;user-select:none;}
+
+
+/* Practice Note v3 — approved UI refresh. Geometry and score-zone colors remain separate. */
+body{font-family:"Yu Gothic UI",-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans CJK JP",Meiryo,sans-serif;letter-spacing:.01em;}
+button,input,select,textarea{font-family:inherit;}
+header.app{background:var(--card);border-bottom:0;box-shadow:0 1px 0 var(--line2);}
+header.app h1{font-size:18px;font-weight:750;letter-spacing:-.045em;color:var(--ink);}
+header.app .appLogo{border:0;border-radius:10px;background:transparent;}
+header.app .gear{border:0;border-radius:50%;background:var(--soft);}
+.card{background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:16px;box-shadow:none;}
+.card h2{font-size:14px;font-weight:650;letter-spacing:0;color:var(--ink);}
+.btn{border-radius:14px;font-weight:700;letter-spacing:.015em;}
+.btn.sm{border-radius:10px;}
+.btn.sec{background:var(--soft);border:1px solid transparent;color:var(--ink);}
+.btn.ghost{background:var(--soft);border:1px solid transparent;}
+.btn.danger{background:transparent;border-color:var(--danger);color:var(--danger);}
+.inp,select.inp,textarea.inp{border-color:var(--line2);border-radius:12px;background-color:var(--inpBg);font-weight:500;}
+.inp:focus:not(:focus-visible){border-color:var(--accent);box-shadow:0 0 0 3px rgba(11,118,93,.12);}
+.chip{border-radius:12px;border-color:transparent;background:var(--soft);font-weight:600;}
+.chip.on{background:var(--invert-bg);color:var(--invert-fg);border-color:transparent;}
+.tinyAction{border-radius:10px;}
+.practiceHeading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:18px 6px 16px;}
+.practiceHeading h2{margin:0;font-size:25px;line-height:1.3;letter-spacing:-.045em;font-weight:750;}
+.practiceHeading>span{color:var(--sub);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+.recordRepeatBand{margin:0 4px 16px;gap:8px;}
+.repeatMain,.repeatHistory{border:0;border-radius:12px;background:var(--card);}
+.repeatMain{padding:10px 14px;}
+.repeatMain .repeatEyebrow{font-weight:650;}
+.repeatHistory{color:var(--accent-strong);}
+.launchPanel.convergeLaunch{border:1px solid var(--line2);border-radius:22px;background:var(--card);}
+.startFirst .launchHead{border-bottom:0;padding:16px 16px 4px;}
+.startFirst .launchHead h2{font-size:15px;font-weight:700;letter-spacing:0;color:var(--ink);}
+.convergeLaunch .launchBody{padding:8px 16px 16px;}
+.quickDists .chip{border-radius:12px;min-height:46px;font-size:14px;}
+.sessionCardRule{margin:14px 0;background:var(--line2);}
+.startPrimary{border-radius:14px;font-size:16px;min-height:56px;}
+.sessionCondition .lensCard{border:0;border-radius:0;background:transparent;padding:8px 2px;}
+.sessionCondition .lensCard b{font-size:12px;}
+.recordDetails summary{color:var(--accent-strong);}
+.compactHud{padding:8px 6px;}
+.liveContext{font-size:13px;font-weight:650;}
+.liveHudMore summary{border:0;border-radius:10px;background:var(--soft);color:var(--sub);}
+.liveGrid3 .liveCell b{font-size:26px;line-height:1.1;letter-spacing:-.03em;}
+.liveGrid3 .liveCell:nth-child(2) b{color:var(--accent-strong);}
+.targetFocusCard.targetFocusWide{padding:12px 6px;border:1px solid var(--line2);border-radius:20px;}
+.targetFocusCard h2{font-size:12px;font-weight:650;}
+.targetFocusCard .tgWrap svg.main{background:var(--card);border-radius:14px;}
+.targetTools .chip{border-radius:10px;}
+.nudge{border-radius:18px;background:var(--soft);}
+.npad button{border:0;border-radius:12px;background:var(--card);}
+.activeActionDock{border:1px solid var(--line2);border-radius:18px;background:var(--card);box-shadow:0 6px 24px rgba(24,39,34,.08);}
+.activeActionDock #bEnd{background:var(--invert-bg);color:var(--invert-fg);border-color:transparent;}
+.activeActionDock .activeFinishBtn{background:transparent;border:1px solid var(--line);color:var(--sub);}
+nav.tabs{bottom:0;width:100%;border:0;border-top:1px solid var(--line2);border-radius:20px 20px 0 0;background:var(--card);box-shadow:0 -4px 24px rgba(24,39,34,.04);padding-bottom:max(6px,env(safe-area-inset-bottom));}
+nav.tabs::before{display:none;}
+nav.tabs button{border-radius:14px;font-weight:650;}
+nav.tabs button.on{color:var(--accent-strong);}
+nav.tabs button .ic{width:42px;border-radius:10px;}
+nav.tabs button.on .ic{background:var(--soft);color:var(--accent-strong);}
+.sheet{border-radius:26px 26px 0 0;background:var(--card);}
+.sheet h3{font-size:18px;letter-spacing:-.025em;font-weight:750;}
+.confirmSheet{border-radius:20px;}
+.modalSwipeHandle::before{width:36px;background:var(--sub);opacity:.5;}
+.stat{background:var(--soft);border-radius:14px;padding:11px 4px;}
+.stat b{font-size:20px;letter-spacing:-.03em;}
+.decisionCard{border-radius:16px;border-color:var(--line2);}
+.settingsGroupTitle{font-size:12px;font-weight:650;letter-spacing:.03em;}
+details.adv{border-radius:14px;}
+.growthDashboard{background:var(--card);border:1px solid var(--line2);border-radius:20px;}
+html.field{--sub:#354e41;--accent:#07533d;--accent-strong:#07533d;}
+html.dark.field{--sub:#c1d4c8;--accent:#a2edc9;--accent-strong:#b8f2d4;}
+@media(prefers-color-scheme:dark){html.auto.field{--sub:#c1d4c8;--accent:#a2edc9;--accent-strong:#b8f2d4;}}
+@media(min-width:820px){.practiceHeading{margin-top:24px;}.practiceHeading h2{font-size:28px;}}
