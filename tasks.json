@@ -1001,5 +1001,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/analysis-sight-filter.mdの受入。実118red→green、用具/距離/未指定/期間7/30/90境界/ts日付/日付不明/該当なし/全解除を確認。旧sessions/setups/sightMarks/active/customRounds/reload/errors0、分析の他計算KPI/全条件解除全文/履歴default不変。ChromeWK320375明暗900前後/最終/公開/375原寸、native8/104、checkall/lint/format/全生成E2E/独立review、一括119・承認済CI/実Linux-public25一致/元118context記録中更新保留-banner-旧全件-新native-offline。旧83tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
+  },
+  {
+    "id": "AN-085",
+    "task": "分析の詳細を関連groupから開いて読める形へ整理する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-084"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/analysis-detail-layout.mdの受入。3native detailsに既存7cardをまとめ、初期閉/空groupなし/内容保持/Enter-Space-focus/tap開閉/期間-条件-該当なし-解除、月別・距離の点/本が読み取れ320/375/900で横overflowなし。計算/KPI/既存card本文/グラフSVG/採点/半径/保存/handlersは保持。旧sessions/setups/sightMarks/active/customRounds/formAnalyses/reload/errors0、ChromeWK8前後/最終/公開/375原寸、native8/104、checkall/lint/format/全生成E2E/独立review、一括120・承認済CI/実Linux-public25一致/元119page記録中更新保留-banner-旧全件-新native-offline。旧84tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
   }
 ]
