@@ -144,6 +144,13 @@ for (const size of [
         await expect(page.getByRole("status")).toHaveText("履歴の通知を確認");
         await readableToast(page, true);
         await page.setViewportSize({ width: size.width === 320 ? 375 : 320, height: 700 });
+        // The viewport protocol response can arrive before the browser dispatches resize.
+        await page.evaluate(
+          () =>
+            new Promise((resolve) =>
+              globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
+            ),
+        );
         await readableToast(page, true);
         await tap(page, page.getByTestId("active-finish"));
         await expect(page.locator("#sumClose")).toBeVisible();
