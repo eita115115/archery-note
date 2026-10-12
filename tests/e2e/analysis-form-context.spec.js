@@ -88,6 +88,35 @@ test("form-only no-match keeps controls available to restore the list", async ({
   await page.locator('[data-period="all"]').tap();
   await expect(page.locator('[data-form-id="form-8"]')).toHaveCount(1);
 });
+
+test("distance remains clearable after deleting its last linked practice", async ({ page }) => {
+  const d = analysisFormDb();
+  d.sessions = d.sessions.filter((s) => ["form-session-0", "form-session-1"].includes(s.id));
+  await page.addInitScript((d) => {
+    if (!globalThis.localStorage.getItem("archeryNote.v1"))
+      globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(d));
+  }, d);
+  await page.goto("/");
+  await page.locator('#tabs [data-v="analysis"]').tap();
+  await page.locator("#anDist").selectOption("30");
+  expect(await ids(page)).toEqual(["form-0"]);
+  await page.locator('#tabs [data-v="history"]').tap();
+  await page.locator('#histList [data-id="form-session-0"]').tap();
+  await page.locator("#hDel").tap();
+  await page.locator("#acOk").tap();
+  await expect(page.locator("#hDel")).toHaveCount(0);
+  await page.locator('#tabs [data-v="analysis"]').tap();
+  const afterDelete = await snapshot(page);
+  expect(afterDelete[0]).toEqual([d.sessions[1]]);
+  expect(afterDelete[5]).toEqual(d.formAnalyses);
+  await expect(page.locator("#anDist")).toHaveValue("30");
+  expect(await ids(page)).toEqual([]);
+  await page.locator("#anDist").selectOption("");
+  expect(await ids(page)).toHaveLength(15);
+  expect(await snapshot(page)).toEqual(afterDelete);
+  await page.reload();
+  expect(await snapshot(page)).toEqual(afterDelete);
+});
 for (const width of [320, 375, 900]) {
   test(`form records expose readable values and safe detail actions (${width})`, async ({
     page,

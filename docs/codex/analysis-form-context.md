@@ -21,3 +21,5 @@
 5. raw evidenceをbyte保持archiveし、受入後にのみAN087pass+evidence、progress/ledgerを更新。公開後notesはlocalcommit。物理phone/VoiceOver/fieldINP/実射は未証明として大目標activeを保つ。
 
 自己review: placeholderなし、公開範囲/日付/孤立記録の扱いを明記。保存や解析を変えず、分析内の射形の条件と可読性を一タスクとして扱う。
+
+独立reviewで、最後の対象距離の練習を履歴から削除するとselectが「すべて」を表示しながら旧距離で絞り込み続ける問題を発見。実履歴の削除確認→分析へ戻る回帰でredを確認し、選択中の正の有限距離を選択肢へ残して解除可能にする。保存/削除処理は変更しない。

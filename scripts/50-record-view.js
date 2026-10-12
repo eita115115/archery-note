@@ -875,7 +875,12 @@ function focusAnalysisFilterControl(control) {
   else if (rect.top < top) window.scrollBy({ top: rect.top - top, behavior: "instant" });
 }
 function analysisFilterBarHtml(allRows, f) {
-  const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))].sort((a, b) => b - a);
+  const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))];
+  const selectedDist = Number(f.dist);
+  // 最後の練習を削除した後も、選択中の条件を表示して解除できるようにする。
+  if (Number.isFinite(selectedDist) && selectedDist > 0 && !dists.some((d) => String(d) === String(f.dist)))
+    dists.push(selectedDist);
+  dists.sort((a, b) => b - a);
   const periods = [
     ["all", "全期間"],
     ["7d", "7日"],
