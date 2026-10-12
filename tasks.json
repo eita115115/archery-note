@@ -1025,5 +1025,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/native-proxy-patch.mdの受入。android/iosだけ8.4.0→8.4.3、package範囲~8.4.3、他locknodes/core/CLI/plugins/全app/CSS/採点半径/保存/SW/version120はexact。公式registry integrity/peer互換/全GHSA範囲非該当/実npmci独立非junction環境/公式nativeguard修正を確認。更新depsでcheckall/lint/format/全生成E2E317/25資産旧120byte一致、独立readonlyreview、承認済CI/checks/全E2E/実Linux-public25旧120byte一致、GitHub#36/#37自動fixed（手動dismissなし）。旧85tasks/acceptance/sharedhiddenlock保持、evidence後だけpass/progress/ledger。既存native配布バイナリの再build/再配布と実機remediationは未証明、taskはrepo依存更新の受入、PWAの版は120保持。費用/個人情報不使用。"
+  },
+  {
+    "id": "AN-087",
+    "task": "分析の射形を同じ比較条件で読める一覧へ整える",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-086"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/analysis-form-context.mdの受入。撮影日/ts/日付不明・7/30/90境界、紐付いた用具/距離/未指定/孤立記録、全解除、射形のみ/disabledを確認。一覧/推移/自己比較/scorelinkは同じ配列、全解除の数学不変。320375900可読/overflowなし/比較details開閉/詳細/削除cancel、ChromeWK前後8/原寸375、旧6fields/reload/errors0、他分析計算/採点半径/保存/依存/SWactivation保持。red→green/checkall/lint/format/checkform/golden/全生成E2E/独立review、一括versionbump/承認済CI/実Linux-public25/frozen19+6LF/同じ旧120pageの更新保留-banner-新記録-offline。旧86tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger、費用/個人情報不使用。物理phone/VoiceOver/fieldINP/実射未証明。"
   }
 ]

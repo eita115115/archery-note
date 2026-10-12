@@ -3386,3 +3386,7 @@ AN085完了、公開v120/sourceafe4f1b91d4bbc8a46bc3fdd475b25acfb493dda、branch
 AN086完了、sourcebc51abc8cac4975edeb6c42a4eb9ee4b4a27187d、branch codex/native-proxy-patch。@capacitor/android・iosだけ8.4.0→8.4.3、範囲~8.4.3。全270locknodes中対象2件+root2rangesだけ変更、core/CLI/plugins/全app/CSS/数学/採点半径/保存/SW/版120はexact。所有非junction新sandboxでnpm ci --ignore-scripts（268packages）、npm ls --all clean、公式registry integrity/peer ^8.4.0互換/10advisory範囲非該当、実配布native source5件のguardを静的確認。更新depsでcheckall/lint/format、local317 passed (3.8m)。独立readonlyreview指摘なし（review時点全317/CI/public/alerts/native実機は未確認）。CI38320896231 clean install/checks/lint/format/validate/deploy成功、Linux317 passed (5.6m)。実Linux/旧公開120Linux/現在public25資産byte一致、候補19byte+6allowlistedLFだけ。PWA画面/操作は変わらずversion bump不要、AN085の同一runtime記録/更新/offline証拠を今回の新実行と混同しない。GitHub#36/#37は自動fixed、dismissed_at null。docs/codex/evidence/native-proxy-patch-v120へraw出力/metadata/alert前後/source/hashをbyte保持archive。旧85tasks/acceptance/共有hiddenlock保持、費用/個人情報不使用、大目標active。native APK/IPA再build・sync・再配布・実機exploit/remediationは今回未実施/未証明。
 
 次: 射形トラッキングの期間/比較条件scopeと分析の長文を実画面で確認。公開後notesはlocalcommitのみ。
+
+## AN087開始 — 分析の射形を同じ条件で読む
+
+前goal turnはAN086依存更新/GitHub自動fixed/CI全317で進捗。基点0347bd10、所有branch codex/analysis-form-context。設計3案から共通filter+一覧可読性を選択、既存全承認/UI自由を継続。plan/task87 in-progress/passfalse/evidence空、旧86保持。
