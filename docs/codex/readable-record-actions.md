@@ -19,3 +19,9 @@ Product gate: 記録から成長比較への毎日の入力を保ち、結果の
 5. 旧80taskobjects/全acceptance/sharedhiddenlockを保持し、公開成功証拠後だけAN081pass/非空evidenceとprogress/ledger更新。公開後notesはlocalcommitのみ。
 
 自己review: 一タスクの範囲と受入は明確、placeholderなし。文字の切り捨てや縮小で達成したとしない。物理iPhone/VoiceOver/fieldINP/WKstrictOffline、全画面の情報設計は未証明のまま。大目標を今回だけでcompleteにしない。
+
+## 実装中の検証
+
+所有CSS overrideの8表示で通常15px/320の20pxとも一行。実装はv3のdock規則とbutton規則だけ。初nativeは最初のエンド確定後の寸法assertで停止、元page/processを保持して再計測した時点では48px。最初の矩形を保存できておらず、元failの原因を断定しない。訂正後の別caseでは既存pressed feedbackのscale(.982)でheight47.136/layout48/pressed trueを記録した。48pxは通常のborder-box/layout、押下feedback中は既存44px最低hitとfive-hitを確認する。文字containment/一行/旧記録/座標/採点のassertは保持した。
+
+元pageは既に最初の2本をエンド確定済みだった。初inspector回復ではactive.cur0だけから初期と誤認し、新しい次エンドの2本と最後1本を追加した後、既存確定エンドを期待配列へ含めずassert失敗（-0のJSON表現差も元出力に保持）。同じpageの保存状態を元failure.liveと照合し、旧3全件/元確定2本をそのまま保持、新追加3本/score/reloadexactを確認して所有browser/server閉鎖。reset/reseed/既存矢の変更なし、元fullerrorcollectorは取得不可、reloadErrors0だけを主張する。元exit1・初回回復失敗は保存し成功へすり替えない。別fixture訂正native8/104は全旧3+新3本/nudge0.6/undo/score/reloadexact/errors0、一行/15pxと20px/通常48px/押下44px/fivehit/非重複成功。functions orchestrationのquote構文失敗1回はtool実行前でfiles/browser変更なし。
