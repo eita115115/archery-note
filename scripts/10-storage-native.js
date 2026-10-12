@@ -154,7 +154,7 @@ async function prefetchStorageEstimate(){
   }catch(e){ /* 参考表示のみの機能。取得失敗は静かに無視する */ }
 }
 /* 設定＞データ管理の容量メーター本体。Field Instrument流儀: 金は細い線のみ、見出しは控えめ。
-   80%以上で警告色に切り替える（トースト警告 maybeWarnStorageNearFull と同じ閾値）。 */
+   80%以上で警告色に切り替える（結果の容量案内と同じ閾値）。 */
 function storageMeterHtml(){
   const u=storageUsageRatio();
   const warn=u.ratio>=STORAGE_WARN_RATIO;
@@ -166,10 +166,15 @@ function storageMeterHtml(){
     ${est}
   </div>`;
 }
-/* 練習終了時に一度だけ呼ぶ早期警告（現行の「保存容量が足りません」トーストは満杯後の事後警告のため、
-   その手前で気づけるようにする）。50-record-view.js の finishSession() から呼ばれる。 */
-function maybeWarnStorageNearFull(){
-  if(storageUsageRatio().ratio>=STORAGE_WARN_RATIO) toast("容量が残り少なくなっています。バックアップ保存をおすすめします",5000);
+/* 結果の通常flowへ容量案内を置く。比較文を覆わず、閉じるまで読み返せる。
+   満杯時の保存失敗toast・容量計測・閾値は変更しない。 */
+function summaryStorageNoticeHtml(){
+  if(storageUsageRatio().ratio<STORAGE_WARN_RATIO) return "";
+  return `<aside class="summaryStorageNotice" data-testid="summary-storage-notice" aria-label="保存容量のお知らせ">
+    <b>容量が残り少なくなっています</b>
+    <p>記録を守るため、バックアップ保存をおすすめします。</p>
+    <button type="button" class="btn sec" id="sumBackupSettings">バックアップ設定を開く</button>
+  </aside>`;
 }
 function load(){
   /* sessions キー欠落でも setups 等を持つ正当なデータは normalizeDb が補完して保持する */

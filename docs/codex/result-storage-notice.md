@@ -20,3 +20,9 @@ Product gate: 記録→成長の結果→backup保全を結ぶ、比較文を読
 ## 自己レビュー
 
 範囲/警告文/場所/閾値/CTA動作/検証が具体的、placeholderなし。警告の撤去や保存の変更ではなく、同じリスクを読める表示にする。save failure時の既存toastは撤去しない。実iPhone/VoiceOver/fieldINPは別未証明。ユーザーの継続承認内で実装する。
+
+## 実装中の検証記録
+
+初baselineの375画像はhelperがSVGのMIMEをapplication/octet-streamとして返しlogoが欠けた。アプリ障害ではなく、SVG/PNG MIMEを直した別before-correctedで同じ重なり/旧5000nativeを再確認、元画像/出力は保持。現行版redは3failed（案内が存在しない）。初green3failedはglobal .statbarが背面の記録画面を参照していたため、同じsheet内へscopeを限定。次green3failedは容量stubがratioだけを返し、設定meterのmb.toFixedで例外になる契約欠落。mb/capMb/percentを実APIと同じ形で返すよう訂正し、green3passed24.6s。幾何/0.8閾値/持続/保存/戻るの合格基準は弱めていない。
+
+apply_patchはstyleとformat済testの古いneedleで2回atomic検証失敗（source変更なし）。formatterの50への無関係な整形はpatchとして保持後、HEADへ同じ3箇所だけ適用し直してdiffを9行へ限定した。容量notice/helper・通常flow・CTA以外の数学/採点/保存実装は保持する。
