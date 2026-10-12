@@ -1,0 +1,10 @@
+{
+  "old78Exact": true,
+  "acceptanceExact": true,
+  "sharedLockExact": true,
+  "version": 114,
+  "allRuntimeExceptHeadingAndVersionExact": true,
+  "swActivationExact": true,
+  "dependenciesExact": true,
+  "indexManifestExact": true
+}

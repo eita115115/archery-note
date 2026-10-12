@@ -1,0 +1,2258 @@
+[
+  {
+    "theme": "light",
+    "system": "light",
+    "field": false,
+    "classes": "light",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 14.15732282143666
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(91, 112, 101)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 4.845755476321088
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(237, 243, 239)",
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(7, 91, 70)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 8.095893412080805
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(91, 112, 101)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 5.315897793619869
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "theme": "light",
+    "system": "light",
+    "field": true,
+    "classes": "light field",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 14.15732282143666
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(53, 78, 65)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 8.260214202038682
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(237, 243, 239)",
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(7, 83, 61)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 9.076288130658387
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(53, 78, 65)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 9.061632322558275
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "system": "dark",
+    "field": false,
+    "classes": "dark",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 15.994650120101817
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(162, 182, 170)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 8.296588793824979
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(34, 52, 44)",
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(184, 242, 212)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 12.75410601207628
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(162, 182, 170)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 7.495148741529107
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "theme": "dark",
+    "system": "dark",
+    "field": true,
+    "classes": "dark field",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 15.994650120101817
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(193, 212, 200)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 11.435751735828687
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(34, 52, 44)",
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(184, 242, 212)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 12.75410601207628
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(193, 212, 200)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 10.331072487891683
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "theme": "auto",
+    "system": "light",
+    "field": false,
+    "classes": "auto",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 14.15732282143666
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(91, 112, 101)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 4.845755476321088
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(237, 243, 239)",
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(7, 91, 70)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 8.095893412080805
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(91, 112, 101)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 5.315897793619869
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "theme": "auto",
+    "system": "light",
+    "field": true,
+    "classes": "auto field",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 14.15732282143666
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(53, 78, 65)",
+        "bg": "rgb(242, 245, 244)",
+        "ratio": 8.260214202038682
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(11, 118, 93)",
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(24, 39, 34)",
+        "bg": "rgb(237, 243, 239)",
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(7, 83, 61)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 9.076288130658387
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(53, 78, 65)",
+        "bg": "rgb(255, 255, 255)",
+        "ratio": 9.061632322558275
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "theme": "auto",
+    "system": "dark",
+    "field": false,
+    "classes": "auto",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 15.994650120101817
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(162, 182, 170)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 8.296588793824979
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(34, 52, 44)",
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(184, 242, 212)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 12.75410601207628
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(162, 182, 170)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 7.495148741529107
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "theme": "auto",
+    "system": "dark",
+    "field": true,
+    "classes": "auto field",
+    "colors": [
+      {
+        "selector": ".practiceHeading h2",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 15.994650120101817
+      },
+      {
+        "selector": ".practiceHeading>span",
+        "fg": "rgb(193, 212, 200)",
+        "bg": "rgb(16, 26, 23)",
+        "ratio": 11.435751735828687
+      },
+      {
+        "selector": "#fStart",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip.on",
+        "fg": "rgb(20, 51, 38)",
+        "bg": "rgb(148, 227, 191)",
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".quickDists .chip:not(.on)",
+        "fg": "rgb(237, 245, 239)",
+        "bg": "rgb(34, 52, 44)",
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": "nav.tabs button.on",
+        "fg": "rgb(184, 242, 212)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 12.75410601207628
+      },
+      {
+        "selector": "nav.tabs button:not(.on)",
+        "fg": "rgb(193, 212, 200)",
+        "bg": "rgb(23, 36, 31)",
+        "ratio": 10.331072487891683
+      }
+    ],
+    "nav": [
+      {
+        "v": "record",
+        "rect": {
+          "x": 4,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 77.390625,
+          "bottom": 806,
+          "left": 4
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 40.6953125,
+            "y": 778,
+            "hit": true,
+            "target": "path"
+          },
+          {
+            "x": 8,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 8,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 73.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "history",
+        "rect": {
+          "x": 77.390625,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 150.796875,
+          "bottom": 806,
+          "left": 77.390625
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 114.09375,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 81.390625,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 81.390625,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 146.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "analysis",
+        "rect": {
+          "x": 150.796875,
+          "y": 750,
+          "width": 73.390625,
+          "height": 56,
+          "top": 750,
+          "right": 224.1875,
+          "bottom": 806,
+          "left": 150.796875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 187.4921875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 154.796875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 154.796875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 220.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "sight",
+        "rect": {
+          "x": 224.1875,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 297.59375,
+          "bottom": 806,
+          "left": 224.1875
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 260.890625,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 228.1875,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 228.1875,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 293.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      },
+      {
+        "v": "gear",
+        "rect": {
+          "x": 297.59375,
+          "y": 750,
+          "width": 73.40625,
+          "height": 56,
+          "top": 750,
+          "right": 371,
+          "bottom": 806,
+          "left": 297.59375
+        },
+        "radius": "12px",
+        "hits": [
+          {
+            "x": 334.296875,
+            "y": 778,
+            "hit": true,
+            "target": "svg"
+          },
+          {
+            "x": 301.59375,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 754,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 301.59375,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          },
+          {
+            "x": 367,
+            "y": 802,
+            "hit": true,
+            "target": "BUTTON"
+          }
+        ]
+      }
+    ]
+  }
+]

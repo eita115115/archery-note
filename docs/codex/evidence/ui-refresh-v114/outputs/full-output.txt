@@ -1,0 +1,98 @@
+
+> archery-note@0.114.0 test:e2e:dist
+> node tools/test-distribution.js --workers=1 --output=../../ui-refresh/full-tests
+
+Native web assets ready: dist\native (v114)
+[WebServer] (node:25952) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 298 tests using 1 worker
+
+(node:20644) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok   1 [chromium] › tests\e2e\analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (320/light) (1.1s)
+  ok   2 [chromium] › tests\e2e\analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (320/light) (664ms)
+  ok   3 [chromium] › tests\e2e\analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (320/light) (723ms)
+  ok   4 [chromium] › tests\e2e\analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (375/dark) (934ms)
+  ok   5 [chromium] › tests\e2e\analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (375/dark) (715ms)
+  ok   6 [chromium] › tests\e2e\analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (375/dark) (735ms)
+  x    7 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 0) (379ms)
+(node:16864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    8 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 1) (463ms)
+(node:22448) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x    9 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 2) (517ms)
+(node:8540) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   10 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 3) (455ms)
+(node:30456) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   11 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 6) (438ms)
+(node:33780) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   12 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 0) (451ms)
+(node:30028) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   13 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 1) (437ms)
+(node:30728) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   14 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 2) (440ms)
+(node:26768) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   15 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 3) (433ms)
+(node:26304) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   16 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 6) (440ms)
+(node:23584) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   17 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 0) (430ms)
+(node:832) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   18 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 1) (439ms)
+(node:7752) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   19 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 2) (443ms)
+(node:27264) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   20 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 3) (459ms)
+(node:33292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   21 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 6) (426ms)
+(node:31576) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   22 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 0) (432ms)
+(node:28664) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   23 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 1) (433ms)
+(node:12552) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   24 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 2) (501ms)
+(node:2932) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   25 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 3) (443ms)
+(node:33384) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   26 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 6) (453ms)
+(node:30612) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x   27 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:186:1 › native one-arrow finish stays pending across analysis and history (1.6s)
+(node:35120) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  28 [chromium] › tests\e2e\app-smoke.spec.js:81:1 › loads core tabs and seeded history without console errors (760ms)
+  ok  29 [chromium] › tests\e2e\app-smoke.spec.js:117:1 › moves exactly one aria-current marker when switching tabs (422ms)
+  ok  30 [chromium] › tests\e2e\app-smoke.spec.js:140:1 › exposes distance chips as buttons with synced aria-pressed (1.2s)
+  ok  31 [chromium] › tests\e2e\app-smoke.spec.js:169:1 › exposes history rows and sight distance chips as buttons (1.8s)
+  ok  32 [chromium] › tests\e2e\app-smoke.spec.js:208:1 › opens settings as a dialog, closes on Escape, and restores focus (401ms)
+  ok  33 [chromium] › tests\e2e\app-smoke.spec.js:235:1 › appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore (2.1s)
+  ok  34 [chromium] › tests\e2e\app-smoke.spec.js:281:1 › records a multi-distance round with stage advance and history badges (4.8s)
+  ok  35 [chromium] › tests\e2e\app-smoke.spec.js:337:1 › syncs aria-pressed on settings theme and form tracking chips (863ms)
+  ok  36 [chromium] › tests\e2e\build-week-growth.spec.js:9:1 › demo data opens an explainable growth dashboard and remains removable (2.3s)
+  ok  37 [chromium] › tests\e2e\build-week-growth.spec.js:37:1 › growth dashboard works at narrow mobile width and in dark mode (1.3s)
+  ok  38 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, no-preference, 18m/40cm/3) (11.3s)
+  ok  39 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, reduce, 18m/40cm/3) (6.8s)
+  ok  40 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, no-preference, 18m/40cm/3) (11.2s)
+  ok  41 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, reduce, 18m/40cm/3) (6.8s)
+  ok  42 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, no-preference, 18m/40cm/3) (11.2s)
+  ok  43 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, reduce, 18m/40cm/3) (6.8s)
+  ok  44 [chromium] › tests\e2e\correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, no-preference, 18m/40cm/3) (11.3s)

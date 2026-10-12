@@ -1,0 +1,5 @@
+PASS candidate1/375-light screenshot/native3/old3+new/reload/errors0
+PASS candidate1/375-dark screenshot/native3/old3+new/reload/errors0
+PASS candidate1/320-light screenshot/native3/old3+new/reload/errors0
+PASS candidate1/1024-light screenshot/native3/old3+new/reload/errors0
+PASS candidate14 screens/native contexts closed

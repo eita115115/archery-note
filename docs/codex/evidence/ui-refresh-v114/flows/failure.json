@@ -1,0 +1,4 @@
+{
+  "message": "AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n\n  assert(Math.abs(corrected[0].x-first.x-0.6)<1e-7)\n\n    at C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\ui-refresh\\flows.cjs:7:1780",
+  "rows": []
+}

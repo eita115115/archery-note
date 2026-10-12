@@ -1,0 +1,1 @@
+PASS old78/acceptance/sharedlock; runtime exact except heading/version; SW activation/deps/index/manifest unchanged

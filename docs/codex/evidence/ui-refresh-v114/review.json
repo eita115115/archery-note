@@ -1,0 +1,34 @@
+{
+  "initial": {
+    "head": "9d7a11df4bc3c3d4c1be1c5be5a2c7e863e2e87a",
+    "critical": [],
+    "important": [
+      "14px button and nav radius excludes 4px inset corner hit points; reject merge until corrected"
+    ],
+    "minor": []
+  },
+  "followup": {
+    "head": "5017965cd6d183f1fe8523f4e156e07418dd0955",
+    "critical": [],
+    "important": [],
+    "minor": [],
+    "assessment": "Statically ready; final full298/check/lint/format pending at review time. Old104 native actions are before radius correction.",
+    "evidence": "12px .btn/startPrimary/nav; unchanged native hit tests; corrected8 contrast/nav contexts; readonly file and artifact review; no browser/build/test/network/edit"
+  },
+  "final": {
+    "head": "95b9bcc734b07c749523434986f05e0f318f9d13",
+    "critical": [],
+    "important": [],
+    "minor": [],
+    "assessment": "Static merge approved; identical previously reviewed working diff; public acceptance and retry CI pending at review time.",
+    "evidence": "Immutable 91ce18e..95b9bcc:2 files9 additions, production unchanged. Resize diagnostic immediate29fail/settled0/eventDelayed59 of60. Focused6passed1.2m; 15px assertions retained; readonly files only, no browser/build/test/network/edit."
+  },
+  "applicationFinal": {
+    "head": "91ce18e0f331f9dcf3a301c9eb0046938763750c",
+    "critical": [],
+    "important": [],
+    "minor": [],
+    "assessment": "Statically ready; full298/final-source screens/native/public acceptance pending at review time.",
+    "evidence": "Settings circular paint separated from 44x44 rectangular hit region; focus/label/handler/tests unchanged; generated edge tap6 passed7.9s; original294pass4fail preserved. Readonly files/artifacts; no browser/build/test/network/edit."
+  }
+}

@@ -1,0 +1,13 @@
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(Math.abs(corrected[0].x-first.x-0.6)<1e-7)
+
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\ui-refresh\flows.cjs:7:1780 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+Original owned context retained; no restart/reset on timeout

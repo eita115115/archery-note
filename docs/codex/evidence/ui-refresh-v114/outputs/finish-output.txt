@@ -1,0 +1,2 @@
+PASS old78/acceptance/sharedlock; runtime exact except heading/version; SW activation/deps/index/manifest unchanged
+PASS AN079 done with public evidence; progress/task/plan/ledger updated; old78/acceptance preserved

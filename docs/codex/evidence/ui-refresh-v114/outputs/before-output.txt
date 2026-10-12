@@ -1,0 +1,5 @@
+PASS before/375-light screenshot/native3/old3+new/reload/errors0
+PASS before/375-dark screenshot/native3/old3+new/reload/errors0
+PASS before/320-light screenshot/native3/old3+new/reload/errors0
+PASS before/1024-light screenshot/native3/old3+new/reload/errors0
+PASS before4 screens/native contexts closed

@@ -1,0 +1,8 @@
+PASS light/light/fieldfalse actual text contrasts >=4.5
+PASS light/light/fieldtrue actual text contrasts >=4.5
+PASS dark/dark/fieldfalse actual text contrasts >=4.5
+PASS dark/dark/fieldtrue actual text contrasts >=4.5
+PASS auto/light/fieldfalse actual text contrasts >=4.5
+PASS auto/light/fieldtrue actual text contrasts >=4.5
+PASS auto/dark/fieldfalse actual text contrasts >=4.5
+PASS auto/dark/fieldtrue actual text contrasts >=4.5

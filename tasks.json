@@ -933,9 +933,9 @@
   {
     "id": "AN-079",
     "task": "共通の視覚基盤と記録画面を刷新する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "AN079完了、共通視覚基盤と記録画面を白/深緑のv3へ刷新、公開v114/source95b9bcc734b07c749523434986f05e0f318f9d13（app実装91ce18eから不変、最終commitはtest待機修正）、branch codex/ui-refresh。light/dark/auto/field・共通header/nav/buttons/input/cards/sheets/HUDを整合、50は開始heading一行のみ。採点/半径/数学/保存schema/handlers/依存/SWactivation不変、markers一括114。初20nav角失敗で停止→12px、次全298は294pass4gear角fail8.1m→円の塗りと矩形hitを分離、3px/4pxのhit基準不変。初公開CI297pass1resize-racefail/deployskip、60resizeで即時29fail/2rAF後0failを診断しtest待機だけ修正、CI再実行。最終local全298passed3.8m/checkall/lint/format、設定edge6passed7.9s、ChromeWK8/104native・旧3+新/座標得点/nudge0.6/undo/reload/errors0、4実画面context/8contrast条件・独立review指摘なし。CI38198360485 validate/deploy success/Linux298passed5.2m、実artifact11724167833/26safe/実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。初113contextはCI失敗で600s timeout、同じpage/context/browser・旧3/active1確認後再warmして再開、元113context publication386131ms、記録中更新保留→finish4/banner114/旧4exact→320native/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/ui-refresh-v114/代表18原寸PNGcopySHAexact、旧78tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。全画面情報設計/物理phone/INP/WKstrictOffline/旧容量toast重なりの解消は未完。",
     "dependencies": [
       "AN-078"
     ],

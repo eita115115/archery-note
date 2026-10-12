@@ -4,7 +4,7 @@
 
 ## 現在地
 
-- AN079進行中。ユーザーのUI一新/UI制約なしを承認として、共通視覚基盤と記録画面を白/深緑へ刷新する。plan docs/codex/ui-refresh.md、基点65a22c4c、公開113をbeforeに保存。費用個人情報不使用、採点/旧記録/主要操作を保つ。
+- AN079完了、共通視覚基盤と記録画面を白/深緑のv3へ刷新、公開v114/source95b9bcc734b07c749523434986f05e0f318f9d13（app実装91ce18eから不変、最終commitはtest待機修正）、branch codex/ui-refresh。light/dark/auto/field・共通header/nav/buttons/input/cards/sheets/HUDを整合、50は開始heading一行のみ。採点/半径/数学/保存schema/handlers/依存/SWactivation不変、markers一括114。初20nav角失敗で停止→12px、次全298は294pass4gear角fail8.1m→円の塗りと矩形hitを分離、3px/4pxのhit基準不変。初公開CI297pass1resize-racefail/deployskip、60resizeで即時29fail/2rAF後0failを診断しtest待機だけ修正、CI再実行。最終local全298passed3.8m/checkall/lint/format、設定edge6passed7.9s、ChromeWK8/104native・旧3+新/座標得点/nudge0.6/undo/reload/errors0、4実画面context/8contrast条件・独立review指摘なし。CI38198360485 validate/deploy success/Linux298passed5.2m、実artifact11724167833/26safe/実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。初113contextはCI失敗で600s timeout、同じpage/context/browser・旧3/active1確認後再warmして再開、元113context publication386131ms、記録中更新保留→finish4/banner114/旧4exact→320native/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/ui-refresh-v114/代表18原寸PNGcopySHAexact、旧78tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。全画面情報設計/物理phone/INP/WKstrictOffline/旧容量toast重なりの解消は未完。
 
 - AN078完了、公開v113/source3259d88cb78e2fe6756f21089b894b4b7bc6f0f8、branch codex/finish-metrics-sharing。非編集finishの同じ同期計算内だけmetricsをobject identityで共有し、5000件の参照15018→5017、統計5001回は保持。計測24/264・別8profile・Chrome26/WK26・local全298（identity test強化前）・finalLinux全298/checkall/lint/format/独立review成功。通常CPU5000はChrome230.4→224.3ms/WK346.5→338.5ms、CPU4は1032.3→1043.4ms/n2で速度改善は限定的・fieldINP未証明。CI38165314023 validate/deploy成功、artifact11712575196/26safe、実Linux/public25byte/frozen19byte+6LF・first15/canonical14一致。元112context publication436454ms/active更新保留/finish4/banner113/旧4exact→320native/nudge3/解除/次矢2/offlineSWreload/finish5/metrics各1回/少数pending-PB注記/analysis-history/reload/errors0。docs/codex/finish-metrics-sharing.md/evidence/finish-metrics-v113、代表15原寸PNGcopySHAexact、旧77tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。今回変更は50の同期block・回帰test・一括markers113、保存/数学/採点/全他runtime保持。公開後notesはlocal commitのみ。
 
@@ -39,7 +39,7 @@
 
 ## 次と未解決
 
-- 次はユーザーの追加指示「UIダサすぎるから一新したって言い」を、UI一新の承認として優先する。まず現行の記録画面・結果・設定を比較し、frontend-design/brainstormingで具体的な刷新案とモバイルpreviewを作る。AN078は性能修正であり、UI刷新済みとは言わない。容量警告の重なりも刷新の課題へ含め、採点・旧練習データ・簡単な主要操作を保つ。費用・個人情報の利用は引き続き不可。
+- UI一新を継続する。次は小画面の記録ラベルと容量警告の重なりを別一タスクで整え、履歴/分析の情報設計へ進む。ユーザーのUI制約なし・全承認を継続、採点/旧練習データ/主要操作を保ち、費用・個人情報は使わない。
 - 統計5001回/保存/DOMの負担は残る。既存native依存@capacitor/android・iosのcritical2件（修正版8.4.3）はnative作業前の別確認が必要。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。

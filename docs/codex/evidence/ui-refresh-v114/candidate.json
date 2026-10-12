@@ -1,0 +1,31 @@
+{
+  "source": "91ce18e0f331f9dcf3a301c9eb0046938763750c",
+  "version": 114,
+  "hashes": {
+    "index.html": "c363eb77d83841e6b0f8de3727315f9b44fa9a757ece817bb7c66a33158ba03f",
+    "style.min.css": "794546cac6a0ca3535b989b33037ac00513f14be4c81ab363d7b3e64b5652af5",
+    "manifest.json": "66ede1526147344a640e4996d8ffe20876ad5af48c6ac639a78e6d9476554597",
+    "sw.js": "1098f633c3581e7af5ad72d81c24e9cf5a0a3bf687b00308da69366a1319d348",
+    "icon.svg": "2743dee3bca2cf2f1d3c8e0dc12ddacf4ef728e51a10954a4b0e3df0d3089ab4",
+    "apple-touch-icon.png": "c46f061814e0afd68d86fd58a2cdd795768abc927c2de238e2853899573dc144",
+    "version.json": "a777b787468a4af7bab3e5eaa501b40011435a0073bde243217dcf4f8698fa69",
+    "scripts/00-compat.js": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f",
+    "scripts/10-storage-native.js": "2b491eb04e863ea71cf402f4ef5c6a356068e3feb7fda25166c6b4509863aa25",
+    "scripts/20-scoring.js": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4",
+    "scripts/30-target-svg.js": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e",
+    "scripts/40-analysis-physics.js": "60a02f18d3c3b55883335643e3add6a88abfbb7be9e65d978f28d0bb68bac34f",
+    "scripts/45-analysis-core.js": "2466d97c44d656ea426b1b7fc898f16a5793ae841398bc58ff1b0d421dbf4312",
+    "scripts/46-form-core.js": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35",
+    "scripts/47-form-view.js": "77d70efa70a146065a669cb13683860239d58775e171d5fa90a58a8c645b52c2",
+    "scripts/48-gamification.js": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526",
+    "scripts/49-todays-result.js": "49b6545fdac438f2b6050adc22913e9c7d5926b48414a0243fe43a9bde3d047c",
+    "scripts/50-record-view.js": "b2bd929cefabbe5ee29cfa39f99768883b64b3b66428564fdf40068995a86d9c",
+    "scripts/60-history-sight-view.js": "89778a3154d83669b9828df30a0fad36fbd96c59a231a959e624b8ec7d596c5b",
+    "scripts/70-gear-settings.js": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a",
+    "scripts/90-init.js": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26",
+    "assets/pose/vision_bundle.mjs": "8ba4234736bd935a0154dd41bf8c772b4d95efdebd7ff5d7e3792de4088b6e8f",
+    "assets/pose/vision_wasm_internal.js": "80b646a9dadaa0e9fbab489b8a45eaf4d453580aaba321fda6912a7e533e0f4f",
+    "assets/pose/vision_wasm_internal.wasm": "f82a8e6c05e08a44cc9f9e7ec5f845935bcbb1b1500ebe8c2f4812fb4e2917dc",
+    "assets/pose/pose_landmarker_lite.task": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a"
+  }
+}

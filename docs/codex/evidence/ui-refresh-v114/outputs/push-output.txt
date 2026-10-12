@@ -1,0 +1,6 @@
+remote: 
+remote: GitHub found 2 vulnerabilities on eita115115/archery-note's default branch (2 critical). To find out more, visit:        
+remote:      https://github.com/eita115115/archery-note/security/dependabot        
+remote: 
+To https://github.com/eita115115/archery-note.git
+   3259d88c..91ce18e0  HEAD -> main

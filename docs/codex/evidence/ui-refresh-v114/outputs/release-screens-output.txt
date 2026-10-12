@@ -1,0 +1,5 @@
+PASS release/375-light screenshot/native3/old3+new/reload/errors0
+PASS release/375-dark screenshot/native3/old3+new/reload/errors0
+PASS release/320-light screenshot/native3/old3+new/reload/errors0
+PASS release/1024-light screenshot/native3/old3+new/reload/errors0
+PASS release4 screens/native contexts closed

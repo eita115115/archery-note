@@ -1,0 +1,20 @@
+
+> archery-note@0.114.0 test:e2e:dist
+> node tools/test-distribution.js record-toast.spec.js --workers=2 --output=../../ui-refresh/resize-focused-tests
+
+Native web assets ready: dist\native (v114)
+[WebServer] (node:8124) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:30908) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (no-preference) (13.5s)
+  ok 2 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (reduce) (9.8s)
+  ok 3 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (no-preference) (14.3s)
+  ok 4 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (reduce) (9.8s)
+  ok 5 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (no-preference) (13.8s)
+  ok 6 [chromium] › tests\e2e\record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (reduce) (9.8s)
+
+  6 passed (1.2m)

@@ -1,0 +1,277 @@
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push less than a minute ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  * Run all checks
+  * Lint
+  * Format check
+  * Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push less than a minute ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  * Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 1 minute ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 2 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 2 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 3 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 3 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 4 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 4 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 5 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 5 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  * E2E smoke test
+  * Configure Pages
+  * Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+Refreshing run status every 30 seconds. Press Ctrl+C to quit.
+
+* main CI · 38198360485
+Triggered via push about 6 minutes ago
+
+JOBS
+* validate (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  ✓ E2E smoke test
+  ✓ Configure Pages
+  ✓ Upload checked distribution
+  * Post Setup Node
+  * Post Checkout
+✓ main CI · 38198360485
+Triggered via push about 6 minutes ago
+
+JOBS
+✓ validate in 6m12s (ID 114645992815)
+  ✓ Set up job
+  ✓ Checkout
+  ✓ Setup Node
+  ✓ Install dependencies
+  ✓ Run all checks
+  ✓ Lint
+  ✓ Format check
+  ✓ Install Playwright browsers
+  ✓ E2E smoke test
+  ✓ Configure Pages
+  ✓ Upload checked distribution
+  ✓ Post Setup Node
+  ✓ Post Checkout
+  ✓ Complete job
+✓ deploy in 9s (ID 114647259016)
+  ✓ Set up job
+  ✓ Deploy checked distribution
+  ✓ Complete job
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/configure-pages@v5, actions/setup-node@v4, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+validate: .github#2
+
+- "The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+validate: .github#1
+
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/deploy-pages@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+deploy: .github#4
+
+- "The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+deploy: .github#1
+

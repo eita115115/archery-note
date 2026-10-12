@@ -1,0 +1,15 @@
+{
+  "id": 5,
+  "result": {
+    "result": {
+      "type": "object",
+      "value": {
+        "originalContextClosed": true,
+        "resumedContextClosed": true,
+        "samePage": true,
+        "originalErrors": [],
+        "resumedErrors": []
+      }
+    }
+  }
+}

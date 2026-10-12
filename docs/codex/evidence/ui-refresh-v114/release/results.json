@@ -1,0 +1,198 @@
+[
+  {
+    "width": 375,
+    "height": 812,
+    "theme": "light",
+    "version": 114,
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": [],
+    "saved": {
+      "id": "mv4nctudn4uwv",
+      "date": "2026-10-12",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.32,
+            "y": 0.32,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.65,
+            "y": 0.65,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "width": 375,
+    "height": 812,
+    "theme": "dark",
+    "version": 114,
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": [],
+    "saved": {
+      "id": "mv4ncupcdnjpt",
+      "date": "2026-10-12",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.32,
+            "y": 0.32,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.65,
+            "y": 0.65,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "width": 320,
+    "height": 568,
+    "theme": "light",
+    "version": 114,
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": [],
+    "saved": {
+      "id": "mv4ncvj665pno",
+      "date": "2026-10-12",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.46,
+            "y": 0.46,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.92,
+            "y": 0.92,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ]
+    }
+  },
+  {
+    "width": 1024,
+    "height": 900,
+    "theme": "light",
+    "version": 114,
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": [],
+    "saved": {
+      "id": "mv4ncw5agrjm2",
+      "date": "2026-10-12",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.29,
+            "y": 0.29,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.58,
+            "y": 0.58,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ]
+    }
+  }
+]

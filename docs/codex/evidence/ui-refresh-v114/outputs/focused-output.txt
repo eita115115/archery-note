@@ -1,0 +1,32 @@
+
+> archery-note@0.113.0 test:e2e:dist
+> node tools/test-distribution.js record-start-viewport.spec.js outdoor-contrast.spec.js modal-swipe.spec.js --workers=1 --output=../../ui-refresh/focused-tests
+
+Native web assets ready: dist\native (v113)
+[WebServer] (node:16548) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 18 tests using 1 worker
+
+(node:868) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\modal-swipe.spec.js:12:1 › settings swipes close, short and sideways drags preserve the sheet (1.2s)
+  ok  2 [chromium] › tests\e2e\modal-swipe.spec.js:37:1 › swiping nested confirmation cancels and leaves underlying settings open (794ms)
+  ok  3 [chromium] › tests\e2e\modal-swipe.spec.js:59:1 › touch pull closes settings; cancelled pull leaves it open (701ms)
+  ok  4 [chromium] › tests\e2e\outdoor-contrast.spec.js:94:1 › red-zone score chip (7-8 points) meets WCAG AA contrast against its text (447ms)
+  ok  5 [chromium] › tests\e2e\outdoor-contrast.spec.js:118:1 › blue-zone score chip (5-6 points) meets WCAG AA contrast against its text (437ms)
+  ok  6 [chromium] › tests\e2e\outdoor-contrast.spec.js:142:1 › arrow marker keeps a thick white outline for outdoor glare readability (417ms)
+  ok  7 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, current) (3.2s)
+  ok  8 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, repeat) (3.6s)
+  ok  9 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, onboarding) (3.8s)
+  ok 10 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, current) (1.6s)
+  ok 11 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, repeat) (1.6s)
+  ok 12 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, onboarding) (1.5s)
+  ok 13 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, current) (3.2s)
+  ok 14 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, repeat) (3.7s)
+  ok 15 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, onboarding) (3.7s)
+  ok 16 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, current) (1.6s)
+  ok 17 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, repeat) (1.6s)
+  ok 18 [chromium] › tests\e2e\record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, onboarding) (1.5s)
+
+  18 passed (36.3s)
