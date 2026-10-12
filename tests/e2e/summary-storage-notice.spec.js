@@ -34,11 +34,14 @@ for (const size of [
         }, ratio);
         await page.locator("#quickStart").click();
         await page.evaluate(
-          () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))),
+          () =>
+            new Promise((r) =>
+              globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(r)),
+            ),
         );
         const target = await page.locator("#tgsvg").boundingBox();
         await page.touchscreen.tap(target.x + target.width / 2, target.y + target.height / 2);
-        await page.waitForFunction(() => !hasPendingSave());
+        await page.waitForFunction(() => !globalThis.hasPendingSave());
         const arrows = (await state()).active.cur;
         expect(arrows).toHaveLength(1);
         await page.getByTestId("active-finish").click();
@@ -62,7 +65,7 @@ for (const size of [
               bottom: r.bottom,
               statBottom: stat.bottom,
               nextTop: next.top,
-              width: innerWidth,
+              width: globalThis.innerWidth,
             };
           });
           expect(geometry.left).toBeGreaterThanOrEqual(0);
