@@ -35,3 +35,5 @@ beforeは実Linux113/375明暗・320・desktopの4contextでnative3本→終了/
 focused生成E2Eはviewport/contrast/modalの18passed36.3s。追加native helper初回は3nudge後のlocalStorage値を2rAFだけで読み600ms debounce前の旧値をassertして失敗。元failure/outputを保存し元owned processを停止、timeout起因の再起動ではない。保存実装は不変、訂正版helperはhasPendingSaveがfalseになる実条件を待ち、Chrome/WebKit320375明暗8context/104native actions、nudge0.6cm/undo/score/旧3+新/reload/errors0でexit0。結果light/dark設定/desktop原寸も閲覧、darkのheroMetricが参照するglass tokenだけ新暗色へ整合した。
 
 immutable9d7a11のfull生成回帰は20件のanalysis nav four-corner判定に失敗し、44件までの元出力/error-contextを保存して原因確定後に停止した（全298完走/成功とは呼ばない、timeoutでの再起動ではない）。8theme/field contextの実computed contrastは全7対象4.5以上・field補助文字7以上、同時にnav右下4pxのhit falseを実測。14px角の中心(14,14)から(4,4)までsqrt200>14で外になることを独立reviewも確認し、同じbtn/開始/ナビの角を12pxへ揃えた。角の検査点やテストは弱めていない。元contrast.json/outputを保持し、訂正後は別出力へ再検査する。
+
+5017965の全298は294passed/4failed8.1m、4件は360/375明暗のtouch-controls最終設定tap(position3,3)でheader intercept。gearの新50%角丸が3px点を円の外へ切るためで、テストtimeoutだが単なるtimeout起因restartをせず原因修正へ。元full出力と4error-contextを保持。円形の塗りはradial-gradientへ移し、button自体はradius0の矩形44pxを保つ。handler/test/labelを変更せず、smallphone edge tapを守る。全チェックと全生成E2Eを別release出力へ再実行する。

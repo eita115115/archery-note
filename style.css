@@ -1380,7 +1380,8 @@ button,input,select,textarea{font-family:inherit;}
 header.app{background:var(--card);border-bottom:0;box-shadow:0 1px 0 var(--line2);}
 header.app h1{font-size:18px;font-weight:750;letter-spacing:-.045em;color:var(--ink);}
 header.app .appLogo{border:0;border-radius:10px;background:transparent;}
-header.app .gear{border:0;border-radius:50%;background:var(--soft);}
+/* 円形の塗りと矩形のタップ領域を分け、角付近でも設定を開ける。 */
+header.app .gear{border:0;border-radius:0;background:radial-gradient(circle closest-side,var(--soft) calc(100% - .5px),transparent 100%);}
 .card{background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:16px;box-shadow:none;}
 .card h2{font-size:14px;font-weight:650;letter-spacing:0;color:var(--ink);}
 .btn{border-radius:12px;font-weight:700;letter-spacing:.015em;}
