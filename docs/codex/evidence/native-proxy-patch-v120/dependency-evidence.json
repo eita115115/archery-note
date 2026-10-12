@@ -1,0 +1,88 @@
+{
+  "reports": [
+    {
+      "name": "@capacitor/android",
+      "old": "8.4.0",
+      "version": "8.4.3",
+      "integrity": "sha512-VICd1+E2u5uPvCb5hseoZr84u7/wi334BqayKyXvSLeqURn/iw7nCFEWK29RQNW2rxiW5l1vTVHQ2K6tAJkpTQ==",
+      "corePeer": "^8.4.0",
+      "cases": [
+        {
+          "range": ">= 6.0.0, < 6.2.2",
+          "affected": false
+        },
+        {
+          "range": ">= 7.0.0, < 7.6.9",
+          "affected": false
+        },
+        {
+          "range": ">= 8.5.0, < 8.5.1",
+          "affected": false
+        },
+        {
+          "range": ">= 8.3.5, < 8.4.3",
+          "affected": false
+        },
+        {
+          "range": ">= 8.0.0, <= 8.3.4",
+          "affected": false
+        }
+      ]
+    },
+    {
+      "name": "@capacitor/ios",
+      "old": "8.4.0",
+      "version": "8.4.3",
+      "integrity": "sha512-ziFt4WskFjUFgwCcudhxklcCFMCPNTUk1yVuwutw6xxCvUZzmiOJjVLjDrZ+3A1G02nV+oizUiGPff97htPRIg==",
+      "corePeer": "^8.4.0",
+      "cases": [
+        {
+          "range": ">= 6.0.0, < 6.2.2",
+          "affected": false
+        },
+        {
+          "range": ">= 7.0.0, < 7.6.9",
+          "affected": false
+        },
+        {
+          "range": ">= 8.5.0, < 8.5.1",
+          "affected": false
+        },
+        {
+          "range": ">= 8.3.5, < 8.4.3",
+          "affected": false
+        },
+        {
+          "range": ">= 8.0.0, <= 8.3.4",
+          "affected": false
+        }
+      ]
+    }
+  ],
+  "native": [
+    {
+      "file": "@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java",
+      "sha256": "862e5cca9f8fb6d4f5ffd534caaa3908876321c2dfc593fa0345b5fdbc4c4461"
+    },
+    {
+      "file": "@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java",
+      "sha256": "3b7fb9b16fd96dc0ef18050120c06b6bf0b72c4b6690a2967219a21b3e65c3ab"
+    },
+    {
+      "file": "@capacitor/ios/Capacitor/Capacitor/WebViewDelegationHandler.swift",
+      "sha256": "fd7eaef8a09b2156ca776fa562dd8c3c7da1c04ec91114696f22a4d30701e9d6"
+    },
+    {
+      "file": "@capacitor/ios/Capacitor/Capacitor/WebViewAssetHandler.swift",
+      "sha256": "5a7886af564e9891fb66aafbb890f8d2b6d6379d8b616aa34ad564c962813fc1"
+    },
+    {
+      "file": "@capacitor/ios/Capacitor/Capacitor/CapacitorBridge.swift",
+      "sha256": "3e7565c04eb282a1471f59b8df41046ce08229679a79c169f841ff869b84b767"
+    }
+  ],
+  "physicalOwnedModules": true,
+  "sharedHiddenLockExact": true,
+  "appAllExact": true,
+  "nativeRuntimeExploitTest": false
+}

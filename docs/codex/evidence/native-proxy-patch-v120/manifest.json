@@ -1,0 +1,374 @@
+{
+  "source": "bc51abc8cac4975edeb6c42a4eb9ee4b4a27187d",
+  "version": 120,
+  "ci": 38320896231,
+  "nativeBinaryRebuildOrRuntimeExploitVerified": false,
+  "files": [
+    {
+      "file": "alert-state.json",
+      "source": "artifacts/native-proxy-patch/alert-state.json",
+      "bytes": 230,
+      "sha256": "1c66e647d8d44e43b1928f7f567afb419bb2456b361503ea9efec841b69644e1"
+    },
+    {
+      "file": "alert36-after.json",
+      "source": "artifacts/native-proxy-patch/alert36-after.json",
+      "bytes": 11560,
+      "sha256": "de338bfe061b862c422cb5c42c8041e399a3dbbfce5d8cd4083084cde9a53471"
+    },
+    {
+      "file": "alert36-before.json",
+      "source": "artifacts/native-proxy-patch/alert36-before.json",
+      "bytes": 8653,
+      "sha256": "0984793bf0e798a5dfd91991769442172af19142fdf2d20abcd1a73b303bf5d2"
+    },
+    {
+      "file": "alert37-after.json",
+      "source": "artifacts/native-proxy-patch/alert37-after.json",
+      "bytes": 11552,
+      "sha256": "7c421d31846962a3b8f3ef0fea83e786a39f4f88da095f9d92639ca2fe22b47e"
+    },
+    {
+      "file": "alert37-before.json",
+      "source": "artifacts/native-proxy-patch/alert37-before.json",
+      "bytes": 8645,
+      "sha256": "289ebe175b41074e4b4a09bd12b6c7e7d23e1fee42f3b98293cde8ee8d70dd21"
+    },
+    {
+      "file": "alerts-output.txt",
+      "source": "artifacts/native-proxy-patch/alerts-output.txt",
+      "bytes": 54,
+      "sha256": "ee1a64d8d56db7c183b48fd1279067392d23e44b9265d7807bb2eda6583169f2"
+    },
+    {
+      "file": "android-8.4.0-metadata.json",
+      "source": "artifacts/native-proxy-patch/android-8.4.0-metadata.json",
+      "bytes": 3398,
+      "sha256": "48948bdb3854eddca2ae937f98880507aa88b388598342c703b342f315620287"
+    },
+    {
+      "file": "android-8.4.3-metadata.json",
+      "source": "artifacts/native-proxy-patch/android-8.4.3-metadata.json",
+      "bytes": 3600,
+      "sha256": "5a2571689a7bf88f56bfdb19190df73ab54f163142dfaace3eb228864e379517"
+    },
+    {
+      "file": "apply-lock-output.txt",
+      "source": "artifacts/native-proxy-patch/apply-lock-output.txt",
+      "bytes": 146,
+      "sha256": "e430fed008db48b0ae2f00ada839cf11d56a0eca8ab9380e954a8ebef0aef6a6"
+    },
+    {
+      "file": "apply-lock.cjs",
+      "source": "artifacts/native-proxy-patch/apply-lock.cjs",
+      "bytes": 1748,
+      "sha256": "1704430aeb81906bfed4cb4a6be92ec250be0115df75e28625d3ffefbfa758ad"
+    },
+    {
+      "file": "archive.cjs",
+      "source": "artifacts/native-proxy-patch/archive.cjs",
+      "bytes": 1946,
+      "sha256": "09505449b052595564080a4de1462e32d1acabb559dd14a419b94fa9a962f9a6"
+    },
+    {
+      "file": "base.json",
+      "source": "artifacts/native-proxy-patch/base.json",
+      "bytes": 139,
+      "sha256": "f761d5d038dec846692dd6ff84755769ee55b4f0a146aeadaee00fc4d53a3699"
+    },
+    {
+      "file": "before-package-lock.json",
+      "source": "artifacts/native-proxy-patch/before-package-lock.json",
+      "bytes": 122920,
+      "sha256": "fd5d395bbb58570936ba60e666ae0b556087ca810224bb41a56f77acb3a1a764"
+    },
+    {
+      "file": "before-package.json",
+      "source": "artifacts/native-proxy-patch/before-package.json",
+      "bytes": 3512,
+      "sha256": "f17b1fc7b986b77a0746eb4deb4cfa47656c21b5dc4290a85978a6948b8c382f"
+    },
+    {
+      "file": "before-tasks.json",
+      "source": "artifacts/native-proxy-patch/before-tasks.json",
+      "bytes": 121999,
+      "sha256": "09b896b9887ac5534fa906433187ccb5b952e605a60cdfc84feff8cd340a6117"
+    },
+    {
+      "file": "candidate.json",
+      "source": "artifacts/native-proxy-patch/candidate.json",
+      "bytes": 2564,
+      "sha256": "3e09819a8aa5e9bdf41a5a75768cd759ad5a4bf17c5a966ca79c471624ea6b4c"
+    },
+    {
+      "file": "checkall-output.txt",
+      "source": "artifacts/native-proxy-patch/checkall-output.txt",
+      "bytes": 4900,
+      "sha256": "60d588feac4e0e481e67853bc4131a672a851a8504ef753bacb363a91430c82f"
+    },
+    {
+      "file": "ci-artifacts.json",
+      "source": "artifacts/native-proxy-patch/ci-artifacts.json",
+      "bytes": 719,
+      "sha256": "5bab4aa8553161108117143495ae85c472eeadfc8f1bca5c9cdc586c09bf94f6"
+    },
+    {
+      "file": "ci-full-log.txt",
+      "source": "artifacts/native-proxy-patch/ci-full-log.txt",
+      "bytes": 150287,
+      "sha256": "53f420e8f2eb9398c17b0b7c9b2f187c40b61ea6cbc2f8869d1a048080a4ed68"
+    },
+    {
+      "file": "ci-install-output.txt",
+      "source": "artifacts/native-proxy-patch/ci-install-output.txt",
+      "bytes": 29,
+      "sha256": "dc348c5ca30a64cfde522e9b04a07c479c7941c5c879794d8a31d48f8cf0a2b1"
+    },
+    {
+      "file": "ci-selected.json",
+      "source": "artifacts/native-proxy-patch/ci-selected.json",
+      "bytes": 159,
+      "sha256": "4b2f3d1b48a3db93dbba0e710ee0dd67d096287276e5b1a2f79b2c488842c028"
+    },
+    {
+      "file": "ci.json",
+      "source": "artifacts/native-proxy-patch/ci.json",
+      "bytes": 5074,
+      "sha256": "af390e272dcb524d264a2341499e9180ea3084491a04d643fba30a276e83e5a2"
+    },
+    {
+      "file": "collect-ci.cjs",
+      "source": "artifacts/native-proxy-patch/collect-ci.cjs",
+      "bytes": 1006,
+      "sha256": "18ff492f9ef01b9d9252d4395b000c1e64aaebf6f6977cfd26091e6283c7bef3"
+    },
+    {
+      "file": "collect-output.txt",
+      "source": "artifacts/native-proxy-patch/collect-output.txt",
+      "bytes": 8828,
+      "sha256": "4897d0e9b65616d28201715b433a1a7cb992f945d6586b75683ee458e614e10d"
+    },
+    {
+      "file": "collect.cjs",
+      "source": "artifacts/native-proxy-patch/collect.cjs",
+      "bytes": 1105,
+      "sha256": "3b86b9ce9d73b44cbbc9ee1f2fb60c689b62d418b71c6819148052ac7de6d693"
+    },
+    {
+      "file": "dependency-evidence.json",
+      "source": "artifacts/native-proxy-patch/dependency-evidence.json",
+      "bytes": 2491,
+      "sha256": "58abc4cfc56c3aae180399ca555efbdf1d228cc7bb92633ae4dff76da8216c68"
+    },
+    {
+      "file": "extract.py",
+      "source": "artifacts/native-proxy-patch/extract.py",
+      "bytes": 611,
+      "sha256": "8d5def83c43616ee055fd690b02dbf4c86d1aa8f78688eb814f749005e38d2b0"
+    },
+    {
+      "file": "finish-notes-output.txt",
+      "source": "artifacts/native-proxy-patch/finish-notes-output.txt",
+      "bytes": 151,
+      "sha256": "20fbf45a7eaa300c42a6bffb0df60ba4339bc6c95536fd4719b85f883f00e56a"
+    },
+    {
+      "file": "finish-notes.cjs",
+      "source": "artifacts/native-proxy-patch/finish-notes.cjs",
+      "bytes": 4297,
+      "sha256": "73dc84a0d6ead4daf6d5fd5b250b19a0fdd38f1c47325b112a576eb833dac6b9"
+    },
+    {
+      "file": "format-notes-output.txt",
+      "source": "artifacts/native-proxy-patch/format-notes-output.txt",
+      "bytes": 401,
+      "sha256": "f729ff8a8895aab45c03f7e93aa85902cae3f6bc8a6a36f57297b4e123a71b22"
+    },
+    {
+      "file": "format-notes-write-output.txt",
+      "source": "artifacts/native-proxy-patch/format-notes-write-output.txt",
+      "bytes": 76,
+      "sha256": "d63b633b844659fd9c1c4ed14910958c0efb77e7075f6b4e6a17c5214efd1719"
+    },
+    {
+      "file": "format-output.txt",
+      "source": "artifacts/native-proxy-patch/format-output.txt",
+      "bytes": 401,
+      "sha256": "f729ff8a8895aab45c03f7e93aa85902cae3f6bc8a6a36f57297b4e123a71b22"
+    },
+    {
+      "file": "full-output.txt",
+      "source": "artifacts/native-proxy-patch/full-output.txt",
+      "bytes": 47713,
+      "sha256": "0ad71a9b5bd9736f7b62a8890a9d690f45abd8961cde7c3cfcda3c38e001e705"
+    },
+    {
+      "file": "ios-8.4.0-metadata.json",
+      "source": "artifacts/native-proxy-patch/ios-8.4.0-metadata.json",
+      "bytes": 3650,
+      "sha256": "169f9f8447be2686d9a04e249ccaf4766e0ca3cf8d1b4fb54f029dc6bd87ba10"
+    },
+    {
+      "file": "ios-8.4.3-metadata.json",
+      "source": "artifacts/native-proxy-patch/ios-8.4.3-metadata.json",
+      "bytes": 3850,
+      "sha256": "7a36387b6ad95b84ed1be007c1220b2998bc379d8df47e43bd8cbf387443aba5"
+    },
+    {
+      "file": "lint-output.txt",
+      "source": "artifacts/native-proxy-patch/lint-output.txt",
+      "bytes": 120,
+      "sha256": "8404f9eef5d37f0eb2b0483ab08a043efbb8baa0461d670197c54a25115c5bfd"
+    },
+    {
+      "file": "lock-output.txt",
+      "source": "artifacts/native-proxy-patch/lock-output.txt",
+      "bytes": 237,
+      "sha256": "c1fcc0f978725a9292c7e953d14224a6d72ec46116f71c95b004457194473a69"
+    },
+    {
+      "file": "npm-ls.json",
+      "source": "artifacts/native-proxy-patch/npm-ls.json",
+      "bytes": 75581,
+      "sha256": "a2dea45dc477b4c5ecc0962b4e8f2909a72aafd5888177fd32b9468675414694"
+    },
+    {
+      "file": "npm.cjs",
+      "source": "artifacts/native-proxy-patch/npm.cjs",
+      "bytes": 623,
+      "sha256": "62225b09e8df37d6a0b1c09cda1557ad4550287a6e327ad1866f80809fbc7986"
+    },
+    {
+      "file": "prepare-ci.cjs",
+      "source": "artifacts/native-proxy-patch/prepare-ci.cjs",
+      "bytes": 926,
+      "sha256": "491b61aa48fcc71819934d0d056c7732a1d2f9446930478845f05b0cf684bd5a"
+    },
+    {
+      "file": "prepare-output.txt",
+      "source": "artifacts/native-proxy-patch/prepare-output.txt",
+      "bytes": 395,
+      "sha256": "a02beea8b72c36b47d801a2127eae19d025742741650f8ded347e35de340b211"
+    },
+    {
+      "file": "prepare.cjs",
+      "source": "artifacts/native-proxy-patch/prepare.cjs",
+      "bytes": 1528,
+      "sha256": "d2c7519af892cb9a3b7f8333bae73a84ec33f97f82229c2141c61b37aa2e60ba"
+    },
+    {
+      "file": "public-output.txt",
+      "source": "artifacts/native-proxy-patch/public-output.txt",
+      "bytes": 106,
+      "sha256": "a1a155a8653f50018c4a9842b8d115cd284ba6587704b213e46254b550b88483"
+    },
+    {
+      "file": "public-parity.json",
+      "source": "artifacts/native-proxy-patch/public-parity.json",
+      "bytes": 4340,
+      "sha256": "a9773fa981f510833898b5964367da4d9b763c943daf9ab44cdbdc143e56936f"
+    },
+    {
+      "file": "review.json",
+      "source": "artifacts/native-proxy-patch/review.json",
+      "bytes": 663,
+      "sha256": "ea569424432e914d96172b576dc1cf5b14449bb378bff6410cb8fc5a1c2cdf53"
+    },
+    {
+      "file": "save-review.cjs",
+      "source": "artifacts/native-proxy-patch/save-review.cjs",
+      "bytes": 725,
+      "sha256": "55a97570d7950e755df415854a665fbe8a9865dcf7c7964e419f4ba25ea16d02"
+    },
+    {
+      "file": "sync.cjs",
+      "source": "artifacts/native-proxy-patch/sync.cjs",
+      "bytes": 730,
+      "sha256": "7ee63ab2cb764ea7db8e9b71b755bc063e930fe06727b04b118f5892d696ba0b"
+    },
+    {
+      "file": "verify-alerts.cjs",
+      "source": "artifacts/native-proxy-patch/verify-alerts.cjs",
+      "bytes": 884,
+      "sha256": "d231299caaf984d16e9b3f3828a9cc30108f18593d90294eebc2dce3d25951dc"
+    },
+    {
+      "file": "verify-archive.cjs",
+      "source": "artifacts/native-proxy-patch/verify-archive.cjs",
+      "bytes": 1186,
+      "sha256": "f6a03505b11379bc65f222ac32ac78aaa635534528cb98ff945ed7763bc7bb76"
+    },
+    {
+      "file": "verify-deps-output.txt",
+      "source": "artifacts/native-proxy-patch/verify-deps-output.txt",
+      "bytes": 208,
+      "sha256": "5fc6b725b16d2c93633f4d18c4894c8edb4a8919a0cc15257cae4086d08e35ff"
+    },
+    {
+      "file": "verify-deps.cjs",
+      "source": "artifacts/native-proxy-patch/verify-deps.cjs",
+      "bytes": 4926,
+      "sha256": "58770f6d4900bd03de4452920030b726462f9d3a4c9ac9377ae94c8b4dcff0f1"
+    },
+    {
+      "file": "verify-git.cjs",
+      "source": "artifacts/native-proxy-patch/verify-git.cjs",
+      "bytes": 1338,
+      "sha256": "2128ad074d907cda20cc28c42040821b658e2d4d8f0ad1271da207dd6094a0fb"
+    },
+    {
+      "file": "verify-public.cjs",
+      "source": "artifacts/native-proxy-patch/verify-public.cjs",
+      "bytes": 1803,
+      "sha256": "c4b22fcfc915193e25618f187afda71c75f596ee9132817857fa3b7bc82c11fa"
+    },
+    {
+      "file": "verify-web-output.txt",
+      "source": "artifacts/native-proxy-patch/verify-web-output.txt",
+      "bytes": 93,
+      "sha256": "0671494bb0b4b291451f645533c52138713df719fc52d62d8b74653c74f36636"
+    },
+    {
+      "file": "verify-web.cjs",
+      "source": "artifacts/native-proxy-patch/verify-web.cjs",
+      "bytes": 756,
+      "sha256": "11153fc055376f7a955a122d0dd1975865459f5b0ef65f546c186240c27c169b"
+    },
+    {
+      "file": "web-assets-unchanged.json",
+      "source": "artifacts/native-proxy-patch/web-assets-unchanged.json",
+      "bytes": 4083,
+      "sha256": "29d6a0fd2c67d29c251a054a80e03393454a800d3e92eca066739e39ccb5252a"
+    },
+    {
+      "file": "upstream-source/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java",
+      "source": "artifacts/native-proxy-patch/upstream-source/@capacitor/android/capacitor/src/main/java/com/getcapacitor/Bridge.java",
+      "bytes": 59779,
+      "sha256": "862e5cca9f8fb6d4f5ffd534caaa3908876321c2dfc593fa0345b5fdbc4c4461"
+    },
+    {
+      "file": "upstream-source/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java",
+      "source": "artifacts/native-proxy-patch/upstream-source/@capacitor/android/capacitor/src/main/java/com/getcapacitor/WebViewLocalServer.java",
+      "bytes": 31688,
+      "sha256": "3b7fb9b16fd96dc0ef18050120c06b6bf0b72c4b6690a2967219a21b3e65c3ab"
+    },
+    {
+      "file": "upstream-source/@capacitor/ios/Capacitor/Capacitor/CapacitorBridge.swift",
+      "source": "artifacts/native-proxy-patch/upstream-source/@capacitor/ios/Capacitor/Capacitor/CapacitorBridge.swift",
+      "bytes": 29046,
+      "sha256": "3e7565c04eb282a1471f59b8df41046ce08229679a79c169f841ff869b84b767"
+    },
+    {
+      "file": "upstream-source/@capacitor/ios/Capacitor/Capacitor/WebViewAssetHandler.swift",
+      "source": "artifacts/native-proxy-patch/upstream-source/@capacitor/ios/Capacitor/Capacitor/WebViewAssetHandler.swift",
+      "bytes": 22897,
+      "sha256": "5a7886af564e9891fb66aafbb890f8d2b6d6379d8b616aa34ad564c962813fc1"
+    },
+    {
+      "file": "upstream-source/@capacitor/ios/Capacitor/Capacitor/WebViewDelegationHandler.swift",
+      "source": "artifacts/native-proxy-patch/upstream-source/@capacitor/ios/Capacitor/Capacitor/WebViewDelegationHandler.swift",
+      "bytes": 15591,
+      "sha256": "fd7eaef8a09b2156ca776fa562dd8c3c7da1c04ec91114696f22a4d30701e9d6"
+    }
+  ]
+}

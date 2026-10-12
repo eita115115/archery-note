@@ -1,0 +1,137 @@
+{
+  "bugs": {
+    "url": "https://github.com/ionic-team/capacitor/issues"
+  },
+  "dist": {
+    "shasum": "c519f06fcb2957bf4ea928bd2948cc90ab54d619",
+    "tarball": "https://registry.npmjs.org/@capacitor/ios/-/ios-8.4.0.tgz",
+    "fileCount": 106,
+    "integrity": "sha512-tnwstEdbTJ2nHAfoAwnurXgYRscWeLY+IIGdz69o24gN2Crfj9Xc0TWo8L5uFLF1LmpbUywH1IT0U1oHV8c+CA==",
+    "signatures": [
+      {
+        "sig": "MEYCIQCbnel6N8I36CwZnaqNLtPpkYfIPoP/4H3P4+Xa/4Q7hgIhALrpwHvAH97J6hVnRQFkdsvJlnjhX12OUV0qG8/gmKVX",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/@capacitor%2fios@8.4.0",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "unpackedSize": 405163
+  },
+  "name": "@capacitor/ios",
+  "author": {
+    "url": "https://ionic.io",
+    "name": "Ionic Team",
+    "email": "hi@ionic.io"
+  },
+  "gitHead": "41fd9deb6df07ef83ae390d16824e8bcbefef517",
+  "license": "MIT",
+  "scripts": {
+    "verify": "npm run xc:build:Capacitor && npm run xc:build:CapacitorCordova",
+    "xc:build:Capacitor": "cd Capacitor && xcodebuild clean test -workspace Capacitor.xcworkspace -scheme Capacitor -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.0.1' && cd ..",
+    "xc:build:CapacitorCordova": "cd CapacitorCordova && xcodebuild && cd .."
+  },
+  "_npmUser": {
+    "name": "capacitor-plugin-bot",
+    "email": "ossplugins@outsystems.com"
+  },
+  "homepage": "https://capacitorjs.com",
+  "repository": {
+    "url": "git+https://github.com/ionic-team/capacitor.git",
+    "type": "git"
+  },
+  "_npmVersion": "10.9.8",
+  "description": "Capacitor: Cross-platform apps with JavaScript and the web",
+  "directories": {},
+  "maintainers": [
+    {
+      "name": "itschaced",
+      "email": "chace.daniels@outsystems.com"
+    },
+    {
+      "name": "ionicjs",
+      "email": "hi@ionic.io"
+    },
+    {
+      "name": "jcesarmobile",
+      "email": "jcesarmobile@gmail.com"
+    },
+    {
+      "name": "vmfo",
+      "email": "vitor.oliveira@outsystems.com"
+    },
+    {
+      "name": "jpender",
+      "email": "joey@ionic.io"
+    },
+    {
+      "name": "mark-ionic",
+      "email": "mark@ionic.io"
+    },
+    {
+      "name": "chuckytuh",
+      "email": "chuckynes@gmail.com"
+    },
+    {
+      "name": "alexgerardojacinto",
+      "email": "agerardojacinto@gmail.com"
+    },
+    {
+      "name": "os-pedrobilro",
+      "email": "pedro.gustavo.bilro@outsystems.com"
+    },
+    {
+      "name": "harvdoggy",
+      "email": "eric.harvey@outsystems.com"
+    },
+    {
+      "name": "jpender-os",
+      "email": "joey.pender@outsystems.com"
+    },
+    {
+      "name": "ndr",
+      "email": "andre.destro@outsystems.com"
+    },
+    {
+      "name": "kepatoto",
+      "email": "kepa.baum.totorica@outsystems.com"
+    },
+    {
+      "name": "rui.mendes",
+      "email": "rui.moreira.mendes@outsystems.com"
+    },
+    {
+      "name": "markemer",
+      "email": "emer@emer.net"
+    },
+    {
+      "name": "capacitor-plugin-bot",
+      "email": "ossplugins@outsystems.com"
+    },
+    {
+      "name": "eric-ionic",
+      "email": "horodyski@ionic.io"
+    },
+    {
+      "name": "os-ruialves",
+      "email": "rui.alves@outsystems.com"
+    }
+  ],
+  "_nodeVersion": "22.22.3",
+  "publishConfig": {
+    "access": "public"
+  },
+  "_hasShrinkwrap": false,
+  "peerDependencies": {
+    "@capacitor/core": "^8.4.0"
+  },
+  "_npmOperationalInternal": {
+    "tmp": "tmp/ios_8.4.0_1780415774590_0.4984143430221257",
+    "host": "s3://npm-registry-packages-npm-production"
+  },
+  "_id": "@capacitor/ios@8.4.0",
+  "version": "8.4.0"
+}

@@ -1,0 +1,1 @@
+PASS CI/317/public25/auto-fixed2 gates; AN086 done/pass+evidence together; old85raw prefix/objects/acceptance preserved; progress/ledger/plan updated

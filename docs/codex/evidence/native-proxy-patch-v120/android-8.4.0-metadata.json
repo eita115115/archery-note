@@ -1,0 +1,135 @@
+{
+  "bugs": {
+    "url": "https://github.com/ionic-team/capacitor/issues"
+  },
+  "dist": {
+    "shasum": "88ae78c9293ff1f9df39046d4661d73f162d4f33",
+    "tarball": "https://registry.npmjs.org/@capacitor/android/-/android-8.4.0.tgz",
+    "fileCount": 73,
+    "integrity": "sha512-K1ZPkQzvRzPEALz9nBdLx5p5nAPzp5fsTYWk7LRiKZeH/NXqjDvqfTv7lrLgrziQNoDeaL6ijg64oBREzXiV+g==",
+    "signatures": [
+      {
+        "sig": "MEQCIG7M83s2MSNhMi05TtMRO8lurBEgqS8OD8/HfWxg/gDdAiA/WHJTKxYMNiA3hdEFhQoxvDhnu+rMBBh9YkhWnnIDUA==",
+        "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+      }
+    ],
+    "attestations": {
+      "url": "https://registry.npmjs.org/-/npm/v1/attestations/@capacitor%2fandroid@8.4.0",
+      "provenance": {
+        "predicateType": "https://slsa.dev/provenance/v1"
+      }
+    },
+    "unpackedSize": 447642
+  },
+  "name": "@capacitor/android",
+  "author": {
+    "url": "https://ionic.io",
+    "name": "Ionic Team",
+    "email": "hi@ionic.io"
+  },
+  "gitHead": "41fd9deb6df07ef83ae390d16824e8bcbefef517",
+  "license": "MIT",
+  "scripts": {
+    "verify": "./gradlew clean lint build test -b capacitor/build.gradle"
+  },
+  "_npmUser": {
+    "name": "capacitor-plugin-bot",
+    "email": "ossplugins@outsystems.com"
+  },
+  "homepage": "https://capacitorjs.com",
+  "repository": {
+    "url": "git+https://github.com/ionic-team/capacitor.git",
+    "type": "git"
+  },
+  "_npmVersion": "10.9.8",
+  "description": "Capacitor: Cross-platform apps with JavaScript and the web",
+  "directories": {},
+  "maintainers": [
+    {
+      "name": "itschaced",
+      "email": "chace.daniels@outsystems.com"
+    },
+    {
+      "name": "ionicjs",
+      "email": "hi@ionic.io"
+    },
+    {
+      "name": "jcesarmobile",
+      "email": "jcesarmobile@gmail.com"
+    },
+    {
+      "name": "vmfo",
+      "email": "vitor.oliveira@outsystems.com"
+    },
+    {
+      "name": "jpender",
+      "email": "joey@ionic.io"
+    },
+    {
+      "name": "mark-ionic",
+      "email": "mark@ionic.io"
+    },
+    {
+      "name": "chuckytuh",
+      "email": "chuckynes@gmail.com"
+    },
+    {
+      "name": "alexgerardojacinto",
+      "email": "agerardojacinto@gmail.com"
+    },
+    {
+      "name": "os-pedrobilro",
+      "email": "pedro.gustavo.bilro@outsystems.com"
+    },
+    {
+      "name": "harvdoggy",
+      "email": "eric.harvey@outsystems.com"
+    },
+    {
+      "name": "jpender-os",
+      "email": "joey.pender@outsystems.com"
+    },
+    {
+      "name": "ndr",
+      "email": "andre.destro@outsystems.com"
+    },
+    {
+      "name": "kepatoto",
+      "email": "kepa.baum.totorica@outsystems.com"
+    },
+    {
+      "name": "rui.mendes",
+      "email": "rui.moreira.mendes@outsystems.com"
+    },
+    {
+      "name": "markemer",
+      "email": "emer@emer.net"
+    },
+    {
+      "name": "capacitor-plugin-bot",
+      "email": "ossplugins@outsystems.com"
+    },
+    {
+      "name": "eric-ionic",
+      "email": "horodyski@ionic.io"
+    },
+    {
+      "name": "os-ruialves",
+      "email": "rui.alves@outsystems.com"
+    }
+  ],
+  "_nodeVersion": "22.22.3",
+  "publishConfig": {
+    "access": "public"
+  },
+  "_hasShrinkwrap": false,
+  "peerDependencies": {
+    "@capacitor/core": "^8.4.0"
+  },
+  "_npmOperationalInternal": {
+    "tmp": "tmp/android_8.4.0_1780415770344_0.3534218286699966",
+    "host": "s3://npm-registry-packages-npm-production"
+  },
+  "_id": "@capacitor/android@8.4.0",
+  "version": "8.4.0"
+}

@@ -4,7 +4,9 @@
 
 ## 現在地
 
-- AN086進行中。既存native依存android/iosの警告#36/#37を公式修正8.4.3へ更新する。基点a6ff8b71acd405106c72f31371fc852e33abe221、plan docs/codex/native-proxy-patch.md、独立非junction installと生成PWA25byte不変を確認し、native配布済みbinaryの修正とは区別する。費用/個人情報不使用。
+- AN086完了、sourcebc51abc8cac4975edeb6c42a4eb9ee4b4a27187d、branch codex/native-proxy-patch。@capacitor/android・iosだけ8.4.0→8.4.3、範囲~8.4.3。全270locknodes中対象2件+root2rangesだけ変更、core/CLI/plugins/全app/CSS/数学/採点半径/保存/SW/版120はexact。所有非junction新sandboxでnpm ci --ignore-scripts（268packages）、npm ls --all clean、公式registry integrity/peer ^8.4.0互換/10advisory範囲非該当、実配布native source5件のguardを静的確認。更新depsでcheckall/lint/format、local317 passed (3.8m)。独立readonlyreview指摘なし（review時点全317/CI/public/alerts/native実機は未確認）。CI38320896231 clean install/checks/lint/format/validate/deploy成功、Linux317 passed (5.6m)。実Linux/旧公開120Linux/現在public25資産byte一致、候補19byte+6allowlistedLFだけ。PWA画面/操作は変わらずversion bump不要、AN085の同一runtime記録/更新/offline証拠を今回の新実行と混同しない。GitHub#36/#37は自動fixed、dismissed_at null。docs/codex/evidence/native-proxy-patch-v120へraw出力/metadata/alert前後/source/hashをbyte保持archive。旧85tasks/acceptance/共有hiddenlock保持、費用/個人情報不使用、大目標active。native APK/IPA再build・sync・再配布・実機exploit/remediationは今回未実施/未証明。
+
+- 次: 射形トラッキングの期間/比較条件scopeと分析の長文を実画面で確認し、一タスクずつUI改善する。変更: package.json/package-lock.jsonの依存2件、plan/tasks/progress/ledger/evidence。公開後notesはlocalcommitのみ。
 
 - AN085完了、公開v120/sourceafe4f1b91d4bbc8a46bc3fdd475b25acfb493dda、branch codex/analysis-detail-layout。分析下部の既存7cardを「条件と理由」「練習の内訳」「自己ベストと用具」の3native detailsへ整理。初期閉/空group省略/64px以上summary/tap-Enter-Space-focusを保持し、内側をflatにした。月別は平均点+点/本、距離は最新値+点/本・最新を一行へ。比較条件/結論/次回/6数値/推移/サイト/射形の全件scopeは保持。50のwrapper+純表示helper、60の2markup、scopedCSSと一括markers120だけ。その他99nodes/全計算/採点半径/保存/handlers/依存/SWactivationはversion以外exact、ChromeWK8x3statesのrawdashboard/conclusion/next/KPI/7card HTML+SVGは2単位markup以外exact。所有12記録の全cardlayout高さ375で4768→3767px（実paint/fieldINPではない）。旧119red1→新6を含むfocused23passed10.0s、最終local317 passed (3.9m)、checkall/lint/format、final120native8/104旧3+新3/nudge0.6/undo/score/reloadexact/errors0。ChromeWK320375明暗900のbefore/after/final/public各8で旧sessions/setups/sightMarks/active/customRounds/formAnalyses/reloadexact/errors0。独立readonlyreview指摘なし（review時点serial全317/publicは未確認）。CI38318744208 validate/deploy成功/Linux317 passed (5.4m)、実Linux/public25byte・frozen19byte+6LF・first15/canonical14一致。CI E2E開始後にwarmした同じ元public119page/contextでpublication329376ms、active更新保留→finish4/banner120/旧全件exact→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/analysis-detail-layout-v120へ元失敗/訂正/最終raw・原寸PNGをSHA一致copy。追加ChromeWK明暗4contextの3groups Enter/Space/focus-visible/旧6/errors0も成功。旧84tasks/全acceptance/sharedlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/WKstrictOfflineは未証明。
 
@@ -69,8 +71,8 @@
 
 ## 次と未解決
 
-- UI一新を継続する。次は分析画面で結論・比較条件・数値の階層を実画面から整える一タスク。履歴の情報階層はv117で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
-- 統計5001回/保存/DOMの負担は残る。既存native依存@capacitor/android・iosのcritical2件（修正版8.4.3）はnative作業前の別確認が必要。
+- UI一新を継続する。次は射形トラッキングの期間/比較条件scopeと分析の長文を実画面で確認する一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
+- 統計5001回/保存/DOMの負担は残る。native依存critical2件はAN086でrepo更新/GitHub自動fixed。配布済みnativebinaryがある場合の再build/再配布/実機remediationは未確認。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。
 - 元AN065fourabort/AN066fling/AN070閉鎖native-scroll/IABAN067閉鎖/公開98→99/99→100失敗profilesは別未回復。AN068元ReferenceError/debounceは同context/no-retap回復済み。

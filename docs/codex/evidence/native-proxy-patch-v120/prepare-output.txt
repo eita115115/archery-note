@@ -1,0 +1,5 @@
+PASS new owned sandbox/no node_modules/junction; package ranges2 only
+PASS official registry @capacitor/android@8.4.0 peer={"@capacitor/core":"^8.4.0"}
+PASS official registry @capacitor/android@8.4.3 peer={"@capacitor/core":"^8.4.0"}
+PASS official registry @capacitor/ios@8.4.0 peer={"@capacitor/core":"^8.4.0"}
+PASS official registry @capacitor/ios@8.4.3 peer={"@capacitor/core":"^8.4.0"}

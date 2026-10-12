@@ -1,0 +1,167 @@
+{
+  "conclusion": "success",
+  "databaseId": 38320896231,
+  "headSha": "bc51abc8cac4975edeb6c42a4eb9ee4b4a27187d",
+  "jobs": [
+    {
+      "completedAt": "2026-10-12T23:19:13Z",
+      "conclusion": "success",
+      "databaseId": 115048463375,
+      "name": "validate",
+      "startedAt": "2026-10-12T23:12:27Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-12T23:12:28Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-12T23:12:27Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:12:31Z",
+          "conclusion": "success",
+          "name": "Checkout",
+          "number": 2,
+          "startedAt": "2026-10-12T23:12:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:12:32Z",
+          "conclusion": "success",
+          "name": "Setup Node",
+          "number": 3,
+          "startedAt": "2026-10-12T23:12:31Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:12:37Z",
+          "conclusion": "success",
+          "name": "Install dependencies",
+          "number": 4,
+          "startedAt": "2026-10-12T23:12:32Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:12:59Z",
+          "conclusion": "success",
+          "name": "Run all checks",
+          "number": 5,
+          "startedAt": "2026-10-12T23:12:37Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:13:01Z",
+          "conclusion": "success",
+          "name": "Lint",
+          "number": 6,
+          "startedAt": "2026-10-12T23:12:59Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:13:05Z",
+          "conclusion": "success",
+          "name": "Format check",
+          "number": 7,
+          "startedAt": "2026-10-12T23:13:01Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:13:29Z",
+          "conclusion": "success",
+          "name": "Install Playwright browsers",
+          "number": 8,
+          "startedAt": "2026-10-12T23:13:05Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:09Z",
+          "conclusion": "success",
+          "name": "E2E smoke test",
+          "number": 9,
+          "startedAt": "2026-10-12T23:13:29Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:09Z",
+          "conclusion": "success",
+          "name": "Configure Pages",
+          "number": 10,
+          "startedAt": "2026-10-12T23:19:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:10Z",
+          "conclusion": "success",
+          "name": "Upload checked distribution",
+          "number": 11,
+          "startedAt": "2026-10-12T23:19:09Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:12Z",
+          "conclusion": "success",
+          "name": "Post Setup Node",
+          "number": 21,
+          "startedAt": "2026-10-12T23:19:10Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:12Z",
+          "conclusion": "success",
+          "name": "Post Checkout",
+          "number": 22,
+          "startedAt": "2026-10-12T23:19:12Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:12Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 23,
+          "startedAt": "2026-10-12T23:19:12Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/eita115115/archery-note/actions/runs/38320896231/job/115048463375"
+    },
+    {
+      "completedAt": "2026-10-12T23:19:27Z",
+      "conclusion": "success",
+      "databaseId": 115050410246,
+      "name": "deploy",
+      "startedAt": "2026-10-12T23:19:17Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-12T23:19:19Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-12T23:19:18Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:25Z",
+          "conclusion": "success",
+          "name": "Deploy checked distribution",
+          "number": 2,
+          "startedAt": "2026-10-12T23:19:19Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-12T23:19:25Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 3,
+          "startedAt": "2026-10-12T23:19:25Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/eita115115/archery-note/actions/runs/38320896231/job/115050410246"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/eita115115/archery-note/actions/runs/38320896231"
+}

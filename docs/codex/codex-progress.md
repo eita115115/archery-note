@@ -3380,3 +3380,9 @@ AN085完了、公開v120/sourceafe4f1b91d4bbc8a46bc3fdd475b25acfb493dda、branch
 ## AN086開始 — native proxy依存の修正
 
 前goal turnはAN085公開v120/317CIpassまでの進捗。基点a6ff8b71acd405106c72f31371fc852e33abe221、所有codex/native-proxy-patch。公式GHSA-rvm3-566m-v7fvと8.4.3releaseを確認、installedandroid/ios8.4.0は該当。repo依存2件更新、全PWA資産不変を受入、nativebinary再配布は未証明として分ける。plan native-proxy-patch.md/task86 in-progress/passfalse/evidence空、旧85保持。
+
+## AN086完了 — native proxy依存の修正
+
+AN086完了、sourcebc51abc8cac4975edeb6c42a4eb9ee4b4a27187d、branch codex/native-proxy-patch。@capacitor/android・iosだけ8.4.0→8.4.3、範囲~8.4.3。全270locknodes中対象2件+root2rangesだけ変更、core/CLI/plugins/全app/CSS/数学/採点半径/保存/SW/版120はexact。所有非junction新sandboxでnpm ci --ignore-scripts（268packages）、npm ls --all clean、公式registry integrity/peer ^8.4.0互換/10advisory範囲非該当、実配布native source5件のguardを静的確認。更新depsでcheckall/lint/format、local317 passed (3.8m)。独立readonlyreview指摘なし（review時点全317/CI/public/alerts/native実機は未確認）。CI38320896231 clean install/checks/lint/format/validate/deploy成功、Linux317 passed (5.6m)。実Linux/旧公開120Linux/現在public25資産byte一致、候補19byte+6allowlistedLFだけ。PWA画面/操作は変わらずversion bump不要、AN085の同一runtime記録/更新/offline証拠を今回の新実行と混同しない。GitHub#36/#37は自動fixed、dismissed_at null。docs/codex/evidence/native-proxy-patch-v120へraw出力/metadata/alert前後/source/hashをbyte保持archive。旧85tasks/acceptance/共有hiddenlock保持、費用/個人情報不使用、大目標active。native APK/IPA再build・sync・再配布・実機exploit/remediationは今回未実施/未証明。
+
+次: 射形トラッキングの期間/比較条件scopeと分析の長文を実画面で確認。公開後notesはlocalcommitのみ。

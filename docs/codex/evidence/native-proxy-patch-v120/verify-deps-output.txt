@@ -1,0 +1,1 @@
+PASS2 installed8.4.3/integrity/peer compatibility/10advisory ranges nonaffected; 5actual upstream source guards inspected; app+CSS+SW+version120/old85/sharedhiddenlock exact; native runtime exploit untested

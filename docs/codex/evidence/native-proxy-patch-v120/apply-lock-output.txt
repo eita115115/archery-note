@@ -1,0 +1,1 @@
+PASS 270locknodes/only2packages+root2ranges; official integrity/peerfields/othernodes exact; source package+lock applied; sharedhiddenlock exact

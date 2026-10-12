@@ -1,0 +1,1 @@
+PASS25 generated PWA assets byte-exact to v120 candidate; no app update/version bump needed
