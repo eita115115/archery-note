@@ -1128,6 +1128,7 @@ function renderAnalysis(m) {
     .map((r) => r.s)
     .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.id < a.id ? -1 : 1));
   const sessionRows = historySessionRows(ss);
+  const sightMarks = analysisSightMarks(f);
   /* 全体構成（正本 5節）: 結論 → 得点の推移 → ばらつき(グルーピング) → サイト → 条件比較 → 月間 → その他。
      ロジックは変えず、既存カード関数の呼び出し順だけを並べ替える */
   const cards = [
@@ -1139,8 +1140,8 @@ function renderAnalysis(m) {
     groupingTrendCard(ss),
     groupingSummaryHtml(sessionRows),
     // サイト
-    sightHistoryCard(ss),
-    sightSummaryHtml(sessionRows, { setupId: "", dist: "" }),
+    sightHistoryCard(ss, sightMarks),
+    sightSummaryHtml(sessionRows, f, sightMarks),
     // 条件比較
     conditionSplitCard(rows),
     reasonBreakdownCard(rows),
@@ -2513,8 +2514,20 @@ function setupPerformanceCard(ss) {
     .join("");
   return `<div class="card"><h2>用具ごとの成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
 }
-function sightHistoryCard(ss) {
-  const markRows = (Array.isArray(db.sightMarks) ? db.sightMarks : [])
+function analysisSightMarks(filter) {
+  const rows = (Array.isArray(db.sightMarks) ? db.sightMarks : [])
+    .filter(Boolean)
+    .map((mark) => ({
+      mark,
+      setupId: mark.setupId,
+      dist: mark.dist,
+      round: mark.round || "",
+      date: sightDateInfo(mark).sort,
+    }));
+  return filterAnalysisRows(rows, { ...filter, today: today() }).map((r) => r.mark);
+}
+function sightHistoryCard(ss, sightMarks = db.sightMarks) {
+  const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
     .filter((m) => hasSightInput(m && m.v) || hasSightInput(m && m.h))
     .map((m) => Object.assign({ source: "台帳" }, m));
   const sessionRows = (Array.isArray(ss) ? ss : [])
@@ -2647,11 +2660,11 @@ function setupNameFor(id) {
   const setup = (db.setups || []).find((s) => s.id === id);
   return setup && setup.name ? setup.name : "用具未指定";
 }
-function sightSummaryHtml(sessionRows, filter) {
+function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
   const hf = filter || ui.histFilter || { setupId: "", dist: "" };
   const setupOk = (id) => !hf.setupId || (hf.setupId === "__none" ? !id : hf.setupId === id);
   const distOk = (dist) => !hf.dist || String(dist) === String(hf.dist);
-  const markRows = (Array.isArray(db.sightMarks) ? db.sightMarks : [])
+  const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
     .filter((m) => setupOk(m && m.setupId) && distOk(m && m.dist))
     .map((m) => Object.assign({ source: "台帳" }, m));
   const sessionSightRows = (sessionRows || [])
