@@ -96,7 +96,7 @@ for (const [width, height, colorScheme] of [
     await expect(page.getByRole("group", { name: "期間", exact: true })).toHaveCount(1);
     const bounds = await page.getByTestId("today-conclusion").evaluate((el) => ({
       bottom: el.getBoundingClientRect().bottom,
-      nav: document.querySelector("#tabs").getBoundingClientRect().top,
+      nav: globalThis.document.querySelector("#tabs").getBoundingClientRect().top,
     }));
     expect(bounds.bottom).toBeLessThanOrEqual(bounds.nav - 8);
   });
