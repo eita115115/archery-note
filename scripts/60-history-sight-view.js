@@ -92,26 +92,27 @@ function openPracticeDaysSheet() {
   ovl.querySelector("#pdSkip").onclick = () => closeModal(ovl);
 }
 
-/* 履歴一覧の行: 「スコアカードの記録行」。合計点を主役数値（tabular-nums・大型）にし、
-   ラウンド/ステージ・天気は小さいバッジへ格下げする。ロジック（集計）は不変・表示のみ */
+/* 日付でまとまる記録行。複数日にまたがるラウンド内では個別日付も表示する。 */
 function historyRowHtml(s) {
   const all = s.ends.flat();
   const total = all.reduce((a, x) => a + x.s, 0);
   const setup = db.setups.find((x) => x.id === s.setupId);
-  const badges = [
-    `<span class="badge">${esc(faceLabel(s))}</span>`,
-    setup ? `<span class="badge">${esc(setup.name)}</span>` : "",
+  const average = all.length ? (total / all.length).toFixed(2) : "—";
+  const round =
     s.round && s.round !== "free"
-      ? `<span class="badge">${esc(roundLabel(s.round))}${s.roundGroup ? ` ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}` : ""}</span>`
-      : "",
-    s.wx ? `<span class="badge">${esc(s.wx)}</span>` : "",
-  ]
-    .filter(Boolean)
-    .join("");
-  return `<button type="button" class="listItem historyRow" data-id="${esc(s.id)}" data-testid="history-row">
-    <div class="historyRowMain"><div class="t">${fmtD(s.date)} ・ ${historyDistanceLabel(s.dist)}</div>
-    <div class="d">${badges}${all.length}本</div></div>
-    <div class="big historyRowTotal">${total}<small> / 平均${(total / all.length).toFixed(2)}</small></div></button>`;
+      ? `${roundLabel(s.round)}${s.roundGroup ? ` ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}` : ""}`
+      : "";
+  const context = [setup && setup.name, round, s.wx].filter(Boolean);
+  const name = [fmtD(s.date), historyDistanceLabel(s.dist), faceLabel(s), `${all.length}本`, `${total}点`, `平均 ${average}`, ...context].join(" ・ ");
+  return `<button type="button" class="listItem historyRow" data-id="${esc(s.id)}" data-testid="history-row" aria-label="${esc(name)}">
+    <span class="historyRowMain">
+      ${s.roundGroup ? `<span class="historyRowDate">${fmtD(s.date)}</span>` : ""}
+      <span class="historyRowTitle">${historyDistanceLabel(s.dist)} <span>${esc(faceLabel(s))}</span></span>
+      <span class="historyRowCount">${all.length}本</span>
+      ${context.length ? `<span class="historyRowContext">${context.map(esc).join(" ・ ")}</span>` : ""}
+    </span>
+    <span class="historyRowTotal"><b>${total}<small>点</small></b><span>平均 ${average}</span></span>
+    <span class="historyRowArrow" aria-hidden="true">›</span></button>`;
 }
 /* ページ分割前に同 gid の記録をまとめる。元配列・保存レコードは変更しない。 */
 function historyListEntries(ss) {

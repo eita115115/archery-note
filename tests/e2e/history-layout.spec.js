@@ -40,3 +40,35 @@ for (const theme of ["light", "dark"]) {
     await expect(page.locator("#hClose")).toBeVisible();
   });
 }
+
+test("history names each record with its date and shows an empty average without NaN", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto("/");
+  await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem("archeryNote.v1"));
+    data.sessions[0].id = "owned-empty-history";
+    data.sessions[0].date = "2026-10-12";
+    data.sessions[0].ends = [];
+    localStorage.setItem("archeryNote.v1", JSON.stringify(data));
+  });
+  await page.reload();
+  const before = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("archeryNote.v1")).sessions,
+  );
+  await page.locator('#tabs [data-v="history"]').click();
+  const row = page.locator('.historyRow[data-id="owned-empty-history"]');
+  await expect(row).toHaveAccessibleName(/2026\/10\/12/);
+  await expect(row).toContainText("0本");
+  await expect(row).toContainText("平均 —");
+  await expect(row).not.toContainText("NaN");
+  await row.click();
+  await expect(page.locator("#hClose")).toBeVisible();
+  await page.locator("#hClose").click();
+  await page.reload();
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem("archeryNote.v1")).sessions),
+  ).toEqual(before);
+});

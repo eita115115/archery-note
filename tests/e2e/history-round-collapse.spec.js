@@ -83,6 +83,8 @@ for (const theme of ["light", "dark"]) {
     expect(
       await group.getByTestId("history-row").evaluateAll((els) => els.map((el) => el.dataset.id)),
     ).toEqual(["stage-0", "stage-1", "stage-2", "stage-3"]);
+    await expect(group.locator('[data-id="stage-0"]')).toContainText("2026/09/28");
+    await expect(group.locator('[data-id="stage-3"]')).toContainText("2026/09/29");
     await page.locator('#tabs [data-v="analysis"]').click();
     await page.locator('#tabs [data-v="history"]').click();
     await expect(group).toHaveAttribute("open", "");

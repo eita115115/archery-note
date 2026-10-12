@@ -659,16 +659,26 @@ button.listItem{display:flex; width:100%; margin:0; border:none; border-bottom:1
 .subNoteSm{font-size:var(--font-size-xs); color:var(--sub);}
 /* history & sight view */
 .histFilterEnd{display:flex; align-items:flex-end;}
-/* 履歴一覧: 月ラベル・日付見出しは hairline のみで区切る（白カード段組は使わない） */
+/* 履歴一覧: 日付のまとまり、距離、得点の順に読み取る。 */
+.historyRecords > h2{font-size:18px; letter-spacing:-.025em;}
 .historyMonthLabel{
-  font-size:10.5px; letter-spacing:.08em; color:var(--sub); font-weight:var(--fw-label);
-  margin:14px 0 2px; padding-top:10px; border-top:1px solid var(--line);
+  font-size:15px; color:var(--ink); font-weight:var(--fw-emphasis);
+  margin:24px 0 12px; padding-top:20px; border-top:1px solid var(--line);
 }
 .historyMonthLabel:first-child{margin-top:0; padding-top:0; border-top:none;}
-.historyDateHead{font-size:11px; color:var(--sub); font-weight:var(--fw-label); margin:8px 0 2px;}
-.historyRow{align-items:flex-start;}
-.historyRowMain{min-width:0;}
-.historyRowTotal{font-size:24px;}
+.historyDateHead{font-size:12px; color:var(--sub); font-weight:var(--fw-label); margin:16px 0 0;}
+button.historyRow{display:grid; grid-template-columns:minmax(0,1fr) max-content 12px; gap:12px; align-items:start; padding:16px 0;}
+.historyRowMain{display:block; min-width:0; overflow-wrap:anywhere;}
+.historyRowTitle{display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 8px; font-size:20px; font-weight:var(--fw-emphasis); line-height:1.3; letter-spacing:-.025em;}
+.historyRowTitle > span{font-size:12px; color:var(--sub); font-weight:var(--fw-body); letter-spacing:0;}
+.historyRowCount,.historyRowDate,.historyRowContext{display:block; font-size:12px; color:var(--sub); line-height:1.6; margin-top:4px;}
+.historyRowDate{margin:0 0 6px;}
+.historyRowContext{margin-top:2px;}
+.historyRowTotal{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.historyRowTotal b{display:block; font-size:28px; font-weight:var(--fw-figure); line-height:1.15; color:var(--green); letter-spacing:-.035em;}
+.historyRowTotal b small{font-size:11px; color:var(--sub); font-weight:var(--fw-body); margin-left:3px; letter-spacing:0;}
+.historyRowTotal > span{display:block; font-size:12px; color:var(--sub); line-height:1.6; margin-top:5px;}
+.historyRowArrow{font-size:22px; color:var(--sub); line-height:28px;}
 .historyRound{border-bottom:1px solid var(--line2);}
 .historyRoundSummary{display:flex; align-items:flex-start; gap:var(--space-4); min-height:var(--tap-target-min); padding:var(--space-5) 0; cursor:pointer; list-style:none;}
 .historyRoundSummary::-webkit-details-marker{display:none;}
