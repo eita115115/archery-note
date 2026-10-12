@@ -1,0 +1,185 @@
+{
+  "stage": "waiting",
+  "message": "Error: Owned proof waiting paused to refresh old cache during delayed CI; no page reset\n    at o.context.request.get (<anonymous>:1:211)\n    at expect.poll.timeout (C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\analysis-sight-filter\\resume-public-rewarmed.cjs:96:60)\n    at C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\compact-js\\sandbox\\node_modules\\playwright\\lib\\matchers\\expect.js:12954:25\n    at async raceAgainstDeadline (C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\compact-js\\sandbox\\node_modules\\playwright-core\\lib\\coreBundle.js:4410:10)\n    at async pollAgainstDeadline (C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\compact-js\\sandbox\\node_modules\\playwright-core\\lib\\coreBundle.js:4431:22)\n    at async invokePollMatcher (C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\compact-js\\sandbox\\node_modules\\playwright\\lib\\matchers\\expect.js:12951:18)\n    at async C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\analysis-sight-filter\\resume-public-rewarmed.cjs:96:2",
+  "before": {
+    "sessions": [
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-22",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.8000000000000003,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 4.6,
+              "y": 0,
+              "s": 7
+            },
+            {
+              "x": 1.4,
+              "y": -3.2,
+              "s": 8
+            }
+          ],
+          [
+            {
+              "x": 1.4,
+              "y": 3.2,
+              "s": 8
+            },
+            {
+              "x": -0.8399999999999999,
+              "y": 2.2399999999999998,
+              "s": 7
+            },
+            {
+              "x": 3.6399999999999997,
+              "y": -2.2399999999999998,
+              "s": 8
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-04",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.5999999999999999,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 3.2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.8,
+              "y": -2.4,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.8,
+              "y": 2.4,
+              "s": 9
+            },
+            {
+              "x": -0.8799999999999999,
+              "y": 1.68,
+              "s": 8
+            },
+            {
+              "x": 2.48,
+              "y": -1.68,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-11",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.4,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.3,
+              "y": -1.7,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.3,
+              "y": 1.7,
+              "s": 9
+            },
+            {
+              "x": -0.8899999999999999,
+              "y": 1.19,
+              "s": 8
+            },
+            {
+              "x": 1.49,
+              "y": -1.19,
+              "s": 9
+            }
+          ]
+        ]
+      }
+    ],
+    "active": {
+      "id": "mv56ckd4xb9ib",
+      "date": "2026-10-12",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [],
+      "cur": [
+        {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        }
+      ]
+    },
+    "setups": [],
+    "sightMarks": [],
+    "customRounds": []
+  },
+  "warmedAt": 1791806293463,
+  "errors": [],
+  "loaded": []
+}

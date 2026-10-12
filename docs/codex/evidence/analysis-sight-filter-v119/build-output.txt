@@ -1,0 +1,1 @@
+Web assets ready: style.min.css (72392 bytes)

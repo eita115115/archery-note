@@ -1,0 +1,5 @@
+SUCCESS: The process with PID 13748 (child process of PID 19332) has been terminated.
+SUCCESS: The process with PID 28076 (child process of PID 19332) has been terminated.
+SUCCESS: The process with PID 19332 (child process of PID 34492) has been terminated.
+SUCCESS: The process with PID 34492 (child process of PID 27496) has been terminated.
+PASS completed owned profile only cleaned; original page closed/errors0/same page verified

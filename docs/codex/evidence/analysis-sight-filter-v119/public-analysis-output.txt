@@ -1,0 +1,9 @@
+AssertionError [ERR_ASSERTION]: held proof failure: preserve context
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\capture-after-update.cjs:2:96 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

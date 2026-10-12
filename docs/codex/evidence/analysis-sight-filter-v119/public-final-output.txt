@@ -1,0 +1,3 @@
+BASELINE_READY public118 / 15 warm old bodies / active1 and old3 / same context retained
+UPDATED public119 / finished1 and old3 exact / cache119 only
+PASS: same real public118→119 context, active update blocked/native finish/old4 retained, 320 newstart first native arrow/correction/native exit/next arrow, offline SWreload exact / two-arrow pending in summary+history / old4 and finish5 exact

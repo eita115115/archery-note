@@ -1,0 +1,13 @@
+const fs=require('node:fs'),root='artifacts/analysis-sight-filter';
+let s=fs.readFileSync(root+'/finish-notes.cjs','utf8');
+s=s.replace("const full=fs.readFileSync(root+'/ci-full-log.txt','utf8').match(/311 passed \\([^)]+\\)/);assert(full);", "const full=fs.readFileSync(root+'/ci-full-log.txt','utf8').match(/311 passed \\([^)]+\\)/);assert(full);const localFull=fs.readFileSync(root+'/full-monitored-output.txt','utf8').match(/311 passed \\([^)]+\\)/);assert(localFull);");
+s=s.replace('最終local全311passed3.9m/checkall/lint/format。','初local全311passed3.9m、最終診断追加後local${localFull[0]}、checkall/lint/format。');
+s=s.replace('独立readonlyreview指摘なし（review時点full完了/public/追加disclosure未確認）。','独立readonlyreview指摘なし（初appreview時点full完了/public/追加disclosure未確認、最終deltaはtest診断だけを静的review）。');
+s=s.replace('元public118context publication${proof.publicationMs}ms','初CI失敗後も保持した同じpublic118page/context/browserを再warm、publication${proof.publicationMs}ms');
+s=s.replace("const corrections='", "const corrections='初CI38243603273は310passed5.6m/既存tab-scroll reduce1fail（期待600/実244）、deployskip。元logを保持。通常20/CPU8倍20の診断は全てsaved/restored600、元assert保持の監視付き20passed20.4s、原因未確定。tests/e2e/tab-scroll.spec.jsへ操作前後の位置/高さの添付とlogだけを追加して再CI、runtimeと600/1400/0/保存一致assertは不変。追加evaluate/scrollHeightはタイミングへ影響し得るため、後続成功を初失敗の原因解消とはしない。元public helperは600s timeout、同一所有process内の元page/context/browser/旧3+active1/errors0を確認しseed/reset/矢retapなしで再warm再開、初失敗と新measurementを区別。 ");
+s=s.replace('tests/e2e/analysis-sight-filter.spec.js、一括markers119','tests/e2e/analysis-sight-filter.spec.js・tab-scroll診断、一括markers119');
+s=s.replace('新UI回帰6件、markers119','新UI回帰6件・既存scroll回帰の診断添付、markers119');
+fs.writeFileSync(root+'/finish-notes.cjs',s);
+let a=fs.readFileSync(root+'/archive.cjs','utf8');a=a.replace("['full-output.txt','ci-full-log.txt']","['full-output.txt','full-monitored-output.txt','ci-full-log.txt']");fs.writeFileSync(root+'/archive.cjs',a);
+const review=JSON.parse(fs.readFileSync(root+'/review.json'));review.implementationSource='1ce5e2aa7b2d83ef5c05056969bd2d0e57a189da';review.finalSource='cb09053b15c993162380c71b5e9dd80507ba61ca';review.diagnosticFollowup={source:review.finalSource,findings:[],staticMerge:true,scope:'Only tab-scroll diagnostic delta reviewed. All original position/data assertions retained. Added evaluate/scrollHeight may perturb timing; initial CI cause unconfirmed. New CI/public acceptance pending at review.'};fs.writeFileSync(root+'/review.json',JSON.stringify(review,null,2));
+console.log('PASS honest CI diagnosis/resumed measurement notes prepared; final pass gates retained');

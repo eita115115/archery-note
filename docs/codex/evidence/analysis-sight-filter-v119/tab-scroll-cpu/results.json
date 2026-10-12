@@ -1,0 +1,2562 @@
+[
+  {
+    "i": 0,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 816.0999999046326
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 955.2999999523163
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1281.2000000476837
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1372.8999998569489
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1495.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1503.2000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1680.7999999523163
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1893
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1984.5
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1995.5
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2156.5999999046326
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2193.5
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2199.399999856949
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2324.5
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2497.399999856949
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2508
+      }
+    ]
+  },
+  {
+    "i": 1,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 923.6000001430511
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1061.1000001430511
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1431.3000001907349
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1526
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1663
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1670.3000001907349
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1838.6000001430511
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2053.600000143051
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2163.300000190735
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2173.600000143051
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2314
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2351.9000000953674
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2363.800000190735
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2541.300000190735
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2739
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2750.9000000953674
+      }
+    ]
+  },
+  {
+    "i": 2,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 861.8999998569489
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 998.0999999046326
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1337.5
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1426.3999998569489
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1564.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1571.7999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1776.5
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1961.3999998569489
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2059.0999999046326
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2079.7000000476837
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2217.2999999523163
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2265.0999999046326
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2272
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2392.5999999046326
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2578.2000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2589.899999856949
+      }
+    ]
+  },
+  {
+    "i": 3,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 863.6999998092651
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1005
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1371.7999999523163
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1522.7999999523163
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1759.0999999046326
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1778.2999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2080.2999999523163
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2309
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2420.2999999523163
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2432.199999809265
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2551.5999999046326
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2625.7999999523163
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2633.399999856949
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2766.2999999523163
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2942.2999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2954.5999999046326
+      }
+    ]
+  },
+  {
+    "i": 4,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 861.7000000476837
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1065.2000000476837
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1454.5
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1550.5999999046326
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1708.2000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1718.2999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1911.7000000476837
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2113.2999999523163
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2208.9000000953674
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2220.7000000476837
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2369
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2404.7999999523163
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2410.4000000953674
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2523.7000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2721.2000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2731.4000000953674
+      }
+    ]
+  },
+  {
+    "i": 5,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 821.2999999523163
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 964.8999998569489
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1325.3999998569489
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1413.7000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1540.2000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1547.7999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1721.2000000476837
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1939.3999998569489
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2053.2000000476837
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2065.7000000476837
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2161.2000000476837
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2196
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2201.5
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2335.899999856949
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2511.7999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2523.7999999523163
+      }
+    ]
+  },
+  {
+    "i": 6,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 823.2999999523163
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 974.7999999523163
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1347.5999999046326
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1431.8999998569489
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1556.3999998569489
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1565.3999998569489
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1737.0999999046326
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1915.7999999523163
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2005.6999998092651
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2018
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2110.899999856949
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2152.5
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2159.0999999046326
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2298.5
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2474.699999809265
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2485.199999809265
+      }
+    ]
+  },
+  {
+    "i": 7,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 811.9000000953674
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 950.7999999523163
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1289.5
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1385.4000000953674
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1518.9000000953674
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1528.7999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1698.7999999523163
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1905.4000000953674
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1995.9000000953674
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2007.0999999046326
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2121.0999999046326
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2164.4000000953674
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2171.4000000953674
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2346.2000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2696.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2719.2999999523163
+      }
+    ]
+  },
+  {
+    "i": 8,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 846.5
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 978
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1340.0999999046326
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1434.2000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1563.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1570.0999999046326
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1765.5
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1936.2000000476837
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2029.2000000476837
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2048.7999999523163
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2176.0999999046326
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2219
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2225.2000000476837
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2333.0999999046326
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2516.5999999046326
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2525.7999999523163
+      }
+    ]
+  },
+  {
+    "i": 9,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 780.3999998569489
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 906.5999999046326
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1219.0999999046326
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1275.3999998569489
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1406.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1413.7999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1602.5
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1790.5999999046326
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1881.7000000476837
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1893.2999999523163
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1996.2999999523163
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2037.0999999046326
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2043.7999999523163
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2173.7000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2360.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2372.7000000476837
+      }
+    ]
+  },
+  {
+    "i": 10,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 807.0999999046326
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 934.0999999046326
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1253.6999998092651
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1340.6999998092651
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1464
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1473.3999998569489
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1664.0999999046326
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1843.5
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1932
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1943
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2037.6999998092651
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2073.0999999046326
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2078.2999999523163
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2227.2999999523163
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2415.899999856949
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2426.2999999523163
+      }
+    ]
+  },
+  {
+    "i": 11,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 873.5999999046326
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1017.8999998569489
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1368.5999999046326
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1464.0999999046326
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1620.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1629
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1809.7000000476837
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1996.5999999046326
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2115.899999856949
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2136.2000000476837
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2264.5999999046326
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2303
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2309.2999999523163
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2424.2999999523163
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2655.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2667.0999999046326
+      }
+    ]
+  },
+  {
+    "i": 12,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 739.2000000476837
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 917.5
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1431
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1571.4000000953674
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1790.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1799.5999999046326
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2069.7999999523163
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2382.7999999523163
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2635.7000000476837
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2661.4000000953674
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2833.9000000953674
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2913.5
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2930.5999999046326
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3133.9000000953674
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3496.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 3524.7000000476837
+      }
+    ]
+  },
+  {
+    "i": 13,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 1559.2000000476837
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1883.6000001430511
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2329.100000143051
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 2455.9000000953674
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2707.300000190735
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 2708.300000190735
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2860.4000000953674
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 3046.100000143051
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3154.800000190735
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 3169.9000000953674
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3285.5
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3326
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 3335.4000000953674
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3524
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3885
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 3904.9000000953674
+      }
+    ]
+  },
+  {
+    "i": 14,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 885
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1137.5
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1775.2999999523163
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1915.2999999523163
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2153.899999856949
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 2163.899999856949
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2444
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2686.399999856949
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2872.899999856949
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2896.5999999046326
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3051.399999856949
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3122.199999809265
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 3134.399999856949
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3328.0999999046326
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3671.0999999046326
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 3697.5999999046326
+      }
+    ]
+  },
+  {
+    "i": 15,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 1345.0999999046326
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1584
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2181.2000000476837
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 2326.0999999046326
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 2566.2000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 2577.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2879.4000000953674
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 3154.2999999523163
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3356
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 3365.2999999523163
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3478
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3558.7999999523163
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 3568.2999999523163
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 3773.9000000953674
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 4093.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 4112.599999904633
+      }
+    ]
+  },
+  {
+    "i": 16,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 810.7000000476837
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 1000.5
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1366.1000001430511
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1475.3000001907349
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1632.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1640.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1791.9000000953674
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1992.5
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2086.800000190735
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2098.5
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2187.5
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2223.600000143051
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2229.600000143051
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2370
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2553.9000000953674
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2564.5
+      }
+    ]
+  },
+  {
+    "i": 17,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 773.7999999523163
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 899.0999999046326
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1244
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1367.2000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1509.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1520.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1707
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1866.5999999046326
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1993.5999999046326
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2010.2999999523163
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2106.9000000953674
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2139.4000000953674
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2144.2000000476837
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2259.5999999046326
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2459.2999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2472.2000000476837
+      }
+    ]
+  },
+  {
+    "i": 18,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 826.6000001430511
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 967.7000000476837
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1280.7999999523163
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1384.2000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1527.1000001430511
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1534.2999999523163
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1702.9000000953674
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1889.1000001430511
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1977
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1986.1000001430511
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2080.7000000476837
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2113.2000000476837
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2118.4000000953674
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2230.2000000476837
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2442.7000000476837
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2454.4000000953674
+      }
+    ]
+  },
+  {
+    "i": 19,
+    "version": 119,
+    "scrollY": 600,
+    "stored": 600,
+    "trace": [
+      {
+        "stage": "before history",
+        "scrollY": 0,
+        "positions": {},
+        "time": 848
+      },
+      {
+        "stage": "after history",
+        "scrollY": 0,
+        "positions": {
+          "record": 0
+        },
+        "time": 975.5
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 1329.7000000476837
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0
+        },
+        "time": 1421.1000001430511
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1554.8000001907349
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 0,
+        "time": 1563.5
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 1727
+      },
+      {
+        "stage": "before history",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400
+        },
+        "time": 1907.4000000953674
+      },
+      {
+        "stage": "after history",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 1997.4000000953674
+      },
+      {
+        "stage": "scroll history",
+        "scrollY": 1400,
+        "time": 2008.2000000476837
+      },
+      {
+        "stage": "before record",
+        "scrollY": 1400,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2117.9000000953674
+      },
+      {
+        "stage": "after record",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2165.300000190735
+      },
+      {
+        "stage": "scroll record",
+        "scrollY": 0,
+        "time": 2171.5
+      },
+      {
+        "stage": "before analysis",
+        "scrollY": 0,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2304.9000000953674
+      },
+      {
+        "stage": "after analysis",
+        "scrollY": 600,
+        "positions": {
+          "record": 0,
+          "history": 1400,
+          "analysis": 600
+        },
+        "time": 2483.600000143051
+      },
+      {
+        "stage": "scroll analysis",
+        "scrollY": 600,
+        "time": 2494.7000000476837
+      }
+    ]
+  }
+]

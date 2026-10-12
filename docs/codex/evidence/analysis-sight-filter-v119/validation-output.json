@@ -1,0 +1,106 @@
+{
+  "source": "554892bccf962c30596d53b100940c069e69893f",
+  "version": 119,
+  "checkAll": "Version alignment checks OK",
+  "lint": "\r\n> archery-note@0.119.0 lint\r\n> eslint \"*.js\" \"scripts/**/*.js\" \"tools/**/*.js\" \"tests/**/*.js\" \"eslint.config.mjs\"\r\n\r\n",
+  "format": "All matched files use Prettier code style!",
+  "localFull": "311 passed (3.9m)",
+  "linuxFull": "311 passed (6.1m)",
+  "ci": 38247204147,
+  "CIConclusion": "success",
+  "focused36": "36 passed (24.0s)",
+  "settled20": "20 passed (22.6s)",
+  "native": "PASS 8 contexts / 104 native actions; closed",
+  "publicAssets": 25,
+  "heldProfile": {
+    "sameOriginalPage": true,
+    "publicationMs": 384325,
+    "blocked": true,
+    "offline": true,
+    "errors": []
+  },
+  "publicAnalysis": 8,
+  "originalImagesViewed": 14,
+  "scrollDiagnosis": {
+    "failedCI": [
+      "38243603273",
+      "38245615235"
+    ],
+    "secondCITrace": [
+      {
+        "stage": "before history",
+        "y": 0,
+        "height": 941,
+        "time": 72.60000000003492
+      },
+      {
+        "stage": "after history",
+        "y": 0,
+        "height": 812,
+        "time": 121.40000000002328
+      },
+      {
+        "stage": "before analysis",
+        "y": 1400,
+        "height": 5040,
+        "time": 146.30000000004657
+      },
+      {
+        "stage": "after analysis",
+        "y": 0,
+        "height": 4022,
+        "time": 187.70000000001164
+      },
+      {
+        "stage": "before history",
+        "y": 244,
+        "height": 3729,
+        "time": 213.60000000003492
+      },
+      {
+        "stage": "after history",
+        "y": 1400,
+        "height": 5040,
+        "time": 287.6000000000349
+      },
+      {
+        "stage": "before record",
+        "y": 1400,
+        "height": 5040,
+        "time": 289.70000000001164
+      },
+      {
+        "stage": "after record",
+        "y": 0,
+        "height": 812,
+        "time": 334
+      },
+      {
+        "stage": "before analysis",
+        "y": 0,
+        "height": 812,
+        "time": 336
+      },
+      {
+        "stage": "after analysis",
+        "y": 244,
+        "height": 3178,
+        "time": 375.1000000000349
+      },
+      {
+        "stage": "final",
+        "y": 244,
+        "height": 3178,
+        "time": 5248
+      }
+    ],
+    "observation": "Initial600 poll passes but actual position is244 before departure; restore244 agrees with departure. Controlled pre-frame scroll600 becomes209 after2rAF on Windows, then saves/restores209. Exact244 not reproduced locally.",
+    "testCorrection": "Set initial scroll to realize cards,2rAF,set desired reading position,2rAF; exact original restore1400/0/600 and practice assertions retained.",
+    "appChange": false,
+    "fastCases": 20,
+    "fastSettledCases": 20,
+    "focusedSettled": "20 passed (22.6s)",
+    "finalTestSource": "554892bccf962c30596d53b100940c069e69893f",
+    "productionScrollFixClaimed": false
+  }
+}

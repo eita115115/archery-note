@@ -1,0 +1,167 @@
+[
+  {
+    "id": "chromium-320-light",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録\n直近7件\n2026/10/12 ・ 30m\n屋外用リカーブ・練習セット / 台帳\n上下 111.1 / 左右1.1\n2026/10/12 ・ 30m\n屋外用リカーブ・練習セット / 練習\n上下 7.7 / 左右0.7\n2026/10/12 ・ 18m\n室内用リカーブ / 台帳\n上下 222.2 / 左右2.2\n2026/10/12 ・ 30m\nセットアップ未設定 / 台帳\n上下 444.4 / 左右4.4\n2026/10/10 ・ 30m\n屋外用リカーブ・練習セット / 台帳\n上下 555.5 / 左右5.5\n2026/10/2 ・ 30m\n屋外用リカーブ・練習セット / 台帳\n上下 333.3 / 左右3.3\n— ・ 30m\n屋外用リカーブ・練習セット / 台帳\n上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回\n30m\n用具未指定 / 最新 2026/10/12 / 台帳5・練習1\n444.4 / 左右4.4\n18m\n室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0\n222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力0回",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力0回",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 8,
+        "y": 258.5,
+        "width": 304,
+        "height": 217,
+        "top": 258.5,
+        "right": 312,
+        "bottom": 475.5,
+        "left": 8
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]

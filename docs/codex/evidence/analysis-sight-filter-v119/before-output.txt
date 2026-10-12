@@ -1,0 +1,47 @@
+PASS before chromium/320/light filters/all restore/old5fields/reload/errors0
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ ''
+- 'サイト値の記録\n' +
+-   '直近7件\n' +
+-   '2026/10/12 ・ 30m\n' +
+-   '屋外用リカーブ・練習セット / 台帳\n' +
+-   '上下 111.1 / 左右1.1\n' +
+-   '2026/10/12 ・ 30m\n' +
+-   '屋外用リカーブ・練習セット / 練習\n' +
+-   '上下 7.7 / 左右0.7\n' +
+-   '2026/10/12 ・ 18m\n' +
+-   '室内用リカーブ / 台帳\n' +
+-   '上下 222.2 / 左右2.2\n' +
+-   '2026/10/12 ・ 30m\n' +
+-   'セットアップ未設定 / 台帳\n' +
+-   '上下 444.4 / 左右4.4\n' +
+-   '2026/10/10 ・ 30m\n' +
+-   '屋外用リカーブ・練習セット / 台帳\n' +
+-   '上下 555.5 / 左右5.5\n' +
+-   '2026/10/2 ・ 30m\n' +
+-   '屋外用リカーブ・練習セット / 台帳\n' +
+-   '上下 333.3 / 左右3.3\n' +
+-   '— ・ 30m\n' +
+-   '屋外用リカーブ・練習セット / 台帳\n' +
+-   '上下 666.6 / 左右6.6'
+
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\probe.cjs:10:555 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '',
+  expected: 'サイト値の記録\n' +
+    '直近7件\n' +
+    '2026/10/12 ・ 30m\n' +
+    '屋外用リカーブ・練習セット / 台帳\n' +
+    '上下 111.1 / 左右1.1\n' +
+    '2026/10/12 ・ 30m\n' +
+    '屋外用リカーブ・練習セット / 練習\n' +
+    '上下 7.7 / 左右0.7\n' +
+    '2026/10/12 ・ 18m\n' +
+    '室内用リカーブ / 台帳\n' +
+    '...',
+  operator: 'strictEqual',
+  diff: 'simple'
+}

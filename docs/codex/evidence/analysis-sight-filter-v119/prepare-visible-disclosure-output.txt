@@ -1,0 +1,1 @@
+PASS separate visible-native proof: scroll+settle, actual hit geometry, native tap, open assert, click trace

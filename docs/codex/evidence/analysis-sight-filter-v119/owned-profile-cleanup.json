@@ -1,0 +1,11 @@
+{
+  "verified": {
+    "pid": 34492,
+    "cwd": "C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note",
+    "module": "C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\analysis-sight-filter\\public-update.cjs",
+    "pageClosed": true,
+    "errors": [],
+    "samePage": true
+  },
+  "action": "terminate completed owned launchServer process tree only"
+}

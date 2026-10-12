@@ -1,0 +1,20 @@
+{
+  "samePage": true,
+  "sameContext": true,
+  "sameBrowser": true,
+  "url": "https://eita115115.github.io/archery-note/",
+  "originalFailure": "public-update/failure.json",
+  "priorWaits": [
+    "public-resumed/failure.json",
+    "public-rewarmed/failure.json"
+  ],
+  "originalActiveID": "mv56ckd4xb9ib",
+  "originalSessionIDs": [
+    "build-week-demo:1",
+    "build-week-demo:2",
+    "build-week-demo:3"
+  ],
+  "newContextCreated": false,
+  "newSeed": false,
+  "newArrow": false
+}

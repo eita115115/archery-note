@@ -1,0 +1,17 @@
+C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\prepublish.cjs:3
+const rows=read('visible-disclosure/results.json');assert.equal(rows.length,8);assert(rows.every(r=>r.version===119&&r.tapGeometry.hit&&r.disclosureOpenMs>=0&&r.toggleTrace.some(e=>e.type==='click'&&e.target.includes('サイト値のまとめ'))&&r.oldAllExact&&r.reloadExact&&!r.errors.length));
+                                                                                                                                                                             ^
+
+TypeError: Cannot read properties of undefined (reading 'some')
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\prepublish.cjs:3:174
+    at Array.every (<anonymous>)
+    at Object.<anonymous> (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\prepublish.cjs:3:92)
+    at Module._compile (node:internal/modules/cjs/loader:1871:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:2002:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+
+Node.js v24.18.0

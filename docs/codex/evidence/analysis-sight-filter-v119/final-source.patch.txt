@@ -1,0 +1,445 @@
+diff --git a/docs/codex/analysis-sight-filter.md b/docs/codex/analysis-sight-filter.md
+new file mode 100644
+index 00000000..68d568cb
+--- /dev/null
++++ b/docs/codex/analysis-sight-filter.md
+@@ -0,0 +1,22 @@
++# 分析のサイト欄を比較条件に揃える — AN084
++
++基点541cf5e0、公開v118/sourcebcaf4932。前回AN083は公開まで進捗あり。全承認/UI制約なし/通常公開の承認を継続。所有worktree・Node22・sandboxだけを使い、共有依存のinstall/ci/update禁止、費用と個人情報を使わない。
++
++## 確認と設計
++
++実Linux118、Chrome/WebKit320/375明暗/900の8contextで、用具A/30m/7日にも他用具18m・10日前・日付なし・用具未指定の台帳が混ざることを再現。練習データのssは既にfilterAnalysisRowsを通るが、sightHistoryCardとsightSummaryHtmlはdb.sightMarksを全件読む。該当練習0件にも全台帳が表示される。
++
++採用: 分析の台帳もfilterAnalysisRowsで同じ用具・距離・期間・round条件へ絞り、既存2rendererへ渡す。日付は既存sightDateInfoの日付/tsフォールバックを使う。期間指定中の日付不明は除き、全期間では残す。roundを指定した場合はround不明の台帳を混ぜない。各markを包んだ表示用rowで絞り、保存したmark自体は変更しない。
++
++別案は全件台帳へ別見出しを付けることだが、先頭の比較条件と異なる母集団が同じ分析に並ぶ。全件台帳を削る案も既存の使い道を失うため採らない。履歴など他の呼び出しは従来の全件/default仕様を保つ。
++
++Product gate: 得点・用具・サイトの比較条件を結ぶ、成長の比較を同条件へ揃える、全local、毎回の振り返りで条件を信頼できる。採点/半径/数値計算/保存schema/依存/SWactivationは保持。射形トラッキングは独立収集の全記録表示で別途scopeを明示する必要があり、今回の変更には混ぜない。
++
++## 実装と受入
++
++1. 50に表示用analysisSightMarksを追加。renderAnalysisから絞ったmark配列をsightHistoryCard/sightSummaryHtmlへ渡し、両rendererは省略時の既存db.sightMarks仕様を保持。全条件解除時は表示全文が実118と一致。CSS/数学/保存/採点/他runtime/全handlersを保持。
++2. UI回帰で用具/距離/未指定、7/30/90日の下限内外、ts日付、日付不明、該当なし、全期間復帰、旧sessions/setups/sightMarks/active/customRoundsのreload一致/errors0を確認。実118red→green。ChromeWK320375明暗900の前後/最終/公開と375原寸、計算/KPI一致。native8/104、checkall/lint/format/全生成E2E/独立readonlyreview。
++3. markers119をversion:bumpで一括、承認済公開CIと実Linux/public25一致、元118context記録中更新保留→終了banner→旧記録保持→新native/offlineを確認。
++4. 旧83taskobjects/acceptance/sharedhiddenlockを保持し、証拠後だけAN084pass+evidence/progress/ledger。大目標active。物理iPhone/VoiceOver/fieldINP/WKstrictOffline未証明。
++
++初probeの訂正: chromium320の結果1件後、375の条件解除でrecord空を検出した。各select後のfocus scroll/animationを待つ前に次のtapを送るharnessの競合を疑い、settleを各操作の間へ追加し、disclosure開閉に依存しないtextContentへ訂正。元失敗出力/結果/画像を保持し、別before-corrected8contextで全条件復帰・旧5fields/reload/errors0を確認。元失敗の直接のhit先は未記録で、原因は断定しない。skillが参照する旧docs/ui-design-language.mdは不存在、rgで現在のdocs/design/ui-design-language.mdを発見しv3を確認。
+diff --git a/package-lock.json b/package-lock.json
+index 128de0ad..0c72228f 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "archery-note",
+-  "version": "0.118.0",
++  "version": "0.119.0",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "archery-note",
+-      "version": "0.118.0",
++      "version": "0.119.0",
+       "dependencies": {
+         "@capacitor/filesystem": "^8.1.2",
+         "@capacitor/haptics": "^8.0.2",
+diff --git a/package.json b/package.json
+index 6217929b..7c053a30 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "archery-note",
+-  "version": "0.118.0",
++  "version": "0.119.0",
+   "private": true,
+   "description": "Archery scoring, sight adjustment, and equipment notebook with a native-ready shell.",
+   "scripts": {
+diff --git a/scripts/10-storage-native.js b/scripts/10-storage-native.js
+index efff3ad4..94f8039c 100644
+--- a/scripts/10-storage-native.js
++++ b/scripts/10-storage-native.js
+@@ -4,7 +4,7 @@
+ const KEY="archeryNote.v1";
+ const SNAP_KEY="archeryNote.snapshots.v1";
+ const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
+-const APP_VER=118;
++const APP_VER=119;
+ const TRASH_LIMIT=50;
+ const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100};
+ const STORAGE_ADAPTER_VER="storage-adapter v32";
+diff --git a/scripts/50-record-view.js b/scripts/50-record-view.js
+index 98fe65b1..69dd286b 100644
+--- a/scripts/50-record-view.js
++++ b/scripts/50-record-view.js
+@@ -1128,6 +1128,7 @@ function renderAnalysis(m) {
+     .map((r) => r.s)
+     .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.id < a.id ? -1 : 1));
+   const sessionRows = historySessionRows(ss);
++  const sightMarks = analysisSightMarks(f);
+   /* 全体構成（正本 5節）: 結論 → 得点の推移 → ばらつき(グルーピング) → サイト → 条件比較 → 月間 → その他。
+      ロジックは変えず、既存カード関数の呼び出し順だけを並べ替える */
+   const cards = [
+@@ -1139,8 +1140,8 @@ function renderAnalysis(m) {
+     groupingTrendCard(ss),
+     groupingSummaryHtml(sessionRows),
+     // サイト
+-    sightHistoryCard(ss),
+-    sightSummaryHtml(sessionRows, { setupId: "", dist: "" }),
++    sightHistoryCard(ss, sightMarks),
++    sightSummaryHtml(sessionRows, f, sightMarks),
+     // 条件比較
+     conditionSplitCard(rows),
+     reasonBreakdownCard(rows),
+@@ -2513,8 +2514,20 @@ function setupPerformanceCard(ss) {
+     .join("");
+   return `<div class="card"><h2>用具ごとの成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
+ }
+-function sightHistoryCard(ss) {
+-  const markRows = (Array.isArray(db.sightMarks) ? db.sightMarks : [])
++function analysisSightMarks(filter) {
++  const rows = (Array.isArray(db.sightMarks) ? db.sightMarks : [])
++    .filter(Boolean)
++    .map((mark) => ({
++      mark,
++      setupId: mark.setupId,
++      dist: mark.dist,
++      round: mark.round || "",
++      date: sightDateInfo(mark).sort,
++    }));
++  return filterAnalysisRows(rows, { ...filter, today: today() }).map((r) => r.mark);
++}
++function sightHistoryCard(ss, sightMarks = db.sightMarks) {
++  const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
+     .filter((m) => hasSightInput(m && m.v) || hasSightInput(m && m.h))
+     .map((m) => Object.assign({ source: "台帳" }, m));
+   const sessionRows = (Array.isArray(ss) ? ss : [])
+@@ -2647,11 +2660,11 @@ function setupNameFor(id) {
+   const setup = (db.setups || []).find((s) => s.id === id);
+   return setup && setup.name ? setup.name : "用具未指定";
+ }
+-function sightSummaryHtml(sessionRows, filter) {
++function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
+   const hf = filter || ui.histFilter || { setupId: "", dist: "" };
+   const setupOk = (id) => !hf.setupId || (hf.setupId === "__none" ? !id : hf.setupId === id);
+   const distOk = (dist) => !hf.dist || String(dist) === String(hf.dist);
+-  const markRows = (Array.isArray(db.sightMarks) ? db.sightMarks : [])
++  const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
+     .filter((m) => setupOk(m && m.setupId) && distOk(m && m.dist))
+     .map((m) => Object.assign({ source: "台帳" }, m));
+   const sessionSightRows = (sessionRows || [])
+diff --git a/sw.js b/sw.js
+index 35631a0f..914552f6 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE = "archery-note-v118";
++const CACHE = "archery-note-v119";
+ const CACHE_PREFIX = "archery-note-v";
+ /* 射形トラッキングの pose 資産（assets/pose/ の wasm+モデル、約15MB・内容固定）専用キャッシュ。
+    名前を CACHE_PREFIX("archery-note-v") に前方一致させないことで、activate の
+diff --git a/tasks.json b/tasks.json
+index 6c649a10..75238a44 100644
+--- a/tasks.json
++++ b/tasks.json
+@@ -989,5 +989,17 @@
+     ],
+     "owner": "codex",
+     "acceptance": "docs/codex/analysis-refresh.mdの受入。比較条件と傾向が320/375で読め、期間groupと既存keyboard/focus/handlersを保持。表示0.0cmの方向は横ばい、null比較待ち、元delta/数学/保存/採点は保持。ChromeWK320375明暗900の前後/最終・空/該当なし・条件期間変更・旧全件reload/errors0・計算値一致・375原寸、checkall/lint/format/全生成E2E/独立review、markers118一括と承認済CI/実Linux-public25一致/元117context更新保留-banner-旧記録-新native-offlineを確認。旧82tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
++  },
++  {
++    "id": "AN-084",
++    "task": "分析のサイト欄を選択した用具・距離・期間に揃える",
++    "status": "in-progress",
++    "passes": false,
++    "evidence": "",
++    "dependencies": [
++      "AN-083"
++    ],
++    "owner": "codex",
++    "acceptance": "docs/codex/analysis-sight-filter.mdの受入。実118red→green、用具/距離/未指定/期間7/30/90境界/ts日付/日付不明/該当なし/全解除を確認。旧sessions/setups/sightMarks/active/customRounds/reload/errors0、分析の他計算KPI/全条件解除全文/履歴default不変。ChromeWK320375明暗900前後/最終/公開/375原寸、native8/104、checkall/lint/format/全生成E2E/独立review、一括119・承認済CI/実Linux-public25一致/元118context記録中更新保留-banner-旧全件-新native-offline。旧83tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
+   }
+ ]
+diff --git a/tests/e2e/analysis-sight-filter.spec.js b/tests/e2e/analysis-sight-filter.spec.js
+new file mode 100644
+index 00000000..15c3c3a2
+--- /dev/null
++++ b/tests/e2e/analysis-sight-filter.spec.js
+@@ -0,0 +1,170 @@
++const { test, expect } = require("@playwright/test");
++
++async function seed(page, boundaryDays = null) {
++  await page.addInitScript((days) => {
++    if (localStorage.getItem("archeryNote.v1")) return;
++    const date = (ago) => {
++      const d = new Date();
++      d.setDate(d.getDate() - ago);
++      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
++    };
++    const stamp = (ago) => new Date(`${date(ago)}T12:00:00`).getTime();
++    const mark = (id, v, ago, setupId = "sight-a", dist = 30) => ({
++      id,
++      v,
++      h: "1.2",
++      setupId,
++      dist,
++      date: ago == null ? "" : date(ago),
++    });
++    const marks =
++      days == null
++        ? [
++            mark("match", "111.1", 0),
++            mark("other", "222.2", 0, "sight-b", 18),
++            mark("old", "333.3", 10),
++            mark("none", "444.4", 0, null),
++            { ...mark("stamp", "555.5", null), ts: stamp(2) },
++            mark("undated", "666.6", null),
++          ]
++        : [
++            mark("inside", "777.7", days - 1),
++            mark("outside", "888.8", days),
++            { ...mark("stamp", "999.9", null), ts: stamp(days - 1) },
++            mark("undated", "666.6", null),
++          ];
++    localStorage.setItem(
++      "archeryNote.v1",
++      JSON.stringify({
++        schema: 5,
++        settings: { onboardingSeen: true, launchCount: 10 },
++        setups: [
++          { id: "sight-a", name: "用具A" },
++          { id: "sight-b", name: "用具B" },
++        ],
++        sessions: [
++          {
++            id: "owned-sight-session",
++            date: date(0),
++            setupId: "sight-a",
++            dist: 30,
++            faceD: 40,
++            faceType: "single",
++            round: "free",
++            perEnd: 3,
++            sightV: "7.7",
++            sightH: "0.7",
++            ends: [
++              [
++                { x: 0, y: 0, s: 10, X: true },
++                { x: 0.2, y: 0, s: 10, X: true },
++                { x: 0, y: 0.2, s: 10, X: true },
++              ],
++            ],
++          },
++        ],
++        sightMarks: marks,
++        active: null,
++        customRounds: [],
++      }),
++    );
++  }, boundaryDays);
++  await page.goto("/");
++  await page.locator('#tabs [data-v="analysis"]').click();
++}
++
++function records(page) {
++  return page
++    .locator(".card")
++    .filter({ has: page.getByRole("heading", { name: /^サイト値の記録/ }) });
++}
++function summary(page) {
++  return page
++    .locator("details")
++    .filter({ has: page.locator("summary").filter({ hasText: "サイト値のまとめ" }) });
++}
++async function practice(page) {
++  return page.evaluate(() => {
++    const d = JSON.parse(localStorage.getItem("archeryNote.v1"));
++    return {
++      sessions: d.sessions,
++      setups: d.setups,
++      sightMarks: d.sightMarks,
++      active: d.active,
++      customRounds: d.customRounds,
++    };
++  });
++}
++
++for (const [width, colorScheme] of [
++  [320, "light"],
++  [375, "dark"],
++]) {
++  test(`analysis sight records follow comparison conditions and restore without writes (${width})`, async ({
++    page,
++  }) => {
++    await page.setViewportSize({ width, height: width === 320 ? 568 : 812 });
++    await page.emulateMedia({ reducedMotion: "reduce", colorScheme });
++    const errors = [];
++    page.on("pageerror", (e) => errors.push(e.message));
++    await seed(page);
++    const before = await practice(page);
++    const all = await records(page).textContent();
++    await expect(records(page)).toContainText("666.6");
++    await page.locator("#anSetup").selectOption("sight-a");
++    await page.locator("#anDist").selectOption("30");
++    await page.locator('[data-period="7d"]').click();
++    for (const v of ["111.1", "555.5", "7.7"]) await expect(records(page)).toContainText(v);
++    for (const v of ["222.2", "333.3", "444.4", "666.6"])
++      await expect(records(page)).not.toContainText(v);
++    await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
++    await expect(summary(page)).toContainText("111.1");
++    await page.locator("#anSetup").selectOption("sight-b");
++    await expect(records(page)).toHaveCount(0);
++    await expect(summary(page)).toHaveCount(0);
++    await page.locator("#anSetup").selectOption("__none");
++    await page.locator('[data-period="all"]').click();
++    await expect(records(page)).toContainText("444.4");
++    await expect(records(page)).not.toContainText("111.1");
++    await page.locator("#anSetup").selectOption("");
++    await page.locator("#anDist").selectOption("");
++    await expect(records(page)).toHaveText(all);
++    expect(await practice(page)).toEqual(before);
++    await page.reload();
++    expect(await practice(page)).toEqual(before);
++    expect(errors).toEqual([]);
++  });
++}
++
++for (const days of [7, 30, 90]) {
++  test(`analysis sight period includes its first day and timestamp fallback (${days}d)`, async ({
++    page,
++  }) => {
++    await seed(page, days);
++    const before = await practice(page);
++    await page.locator(`[data-period="${days}d"]`).click();
++    for (const v of ["777.7", "999.9"]) await expect(records(page)).toContainText(v);
++    for (const v of ["888.8", "666.6"]) await expect(records(page)).not.toContainText(v);
++    await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
++    await page.locator('[data-period="all"]').click();
++    for (const v of ["888.8", "666.6"]) await expect(records(page)).toContainText(v);
++    expect(await practice(page)).toEqual(before);
++  });
++}
++
++test("analysis sight selection preserves source marks and excludes unknown rounds", async ({
++  page,
++}) => {
++  await seed(page);
++  const result = await page.evaluate(() => {
++    const marks = globalThis.eval("db.sightMarks");
++    const before = JSON.stringify(marks);
++    const all = globalThis.analysisSightMarks({ period: "all" });
++    return {
++      same: all.every((m, i) => m === marks[i]),
++      unchanged: before === JSON.stringify(marks),
++      round: globalThis.analysisSightMarks({ round: "free", period: "all" }).length,
++    };
++  });
++  expect(result).toEqual({ same: true, unchanged: true, round: 0 });
++});
+diff --git a/tests/e2e/tab-scroll.spec.js b/tests/e2e/tab-scroll.spec.js
+index 623b08f2..c1a7897f 100644
+--- a/tests/e2e/tab-scroll.spec.js
++++ b/tests/e2e/tab-scroll.spec.js
+@@ -2,7 +2,7 @@ const { test, expect } = require("@playwright/test");
+ for (const motion of ["reduce", "no-preference"]) {
+   test(`tabs retain their own reading position without changing practice data (${motion})`, async ({
+     page,
+-  }) => {
++  }, testInfo) => {
+     await page.setViewportSize({ width: 375, height: 812 });
+     await page.emulateMedia({ reducedMotion: motion });
+     await page.goto("/");
+@@ -19,27 +19,62 @@ for (const motion of ["reduce", "no-preference"]) {
+     const before = await page.evaluate(
+       () => JSON.parse(localStorage.getItem("archeryNote.v1")).sessions,
+     );
+-    const tab = (v) => page.locator(`#tabs [data-v="${v}"]`).click();
+-    await tab("history");
+-    await expect
+-      .poll(() =>
+-        page.locator(".historyRecords").evaluate((el) => el.getBoundingClientRect().height),
+-      )
+-      .toBeGreaterThan(2000);
+-    await page.evaluate(() => globalThis.scrollTo(0, 1400));
+-    await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(1400);
+-    await tab("analysis");
+-    await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(0);
+-    await page.evaluate(() => globalThis.scrollTo(0, 600));
+-    await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(600);
+-    await tab("history");
+-    await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(1400);
+-    await tab("record");
+-    await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(0);
+-    await tab("analysis");
+-    await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(600);
+-    expect(
+-      await page.evaluate(() => JSON.parse(localStorage.getItem("archeryNote.v1")).sessions),
+-    ).toEqual(before);
++    const positions = [];
++    const sample = async (stage) => {
++      positions.push({
++        stage,
++        ...(await page.evaluate(() => ({
++          y: globalThis.scrollY,
++          height: globalThis.document.documentElement.scrollHeight,
++          time: globalThis.performance.now(),
++        }))),
++      });
++    };
++    const tab = async (v) => {
++      await sample(`before ${v}`);
++      await page.locator(`#tabs [data-v="${v}"]`).click();
++      await sample(`after ${v}`);
++    };
++    const scrollToPosition = async (top) => {
++      await page.evaluate(async (position) => {
++        const frames = () =>
++          new Promise((resolve) =>
++            globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
++          );
++        // Enter the destination so content-visibility cards acquire their real heights.
++        // Set the reading position after that layout, before testing its restoration.
++        globalThis.scrollTo({ top: position, behavior: "instant" });
++        await frames();
++        globalThis.scrollTo({ top: position, behavior: "instant" });
++        await frames();
++      }, top);
++      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(top);
++    };
++    try {
++      await tab("history");
++      await expect
++        .poll(() =>
++          page.locator(".historyRecords").evaluate((el) => el.getBoundingClientRect().height),
++        )
++        .toBeGreaterThan(2000);
++      await scrollToPosition(1400);
++      await tab("analysis");
++      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(0);
++      await scrollToPosition(600);
++      await tab("history");
++      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(1400);
++      await tab("record");
++      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(0);
++      await tab("analysis");
++      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(600);
++      expect(
++        await page.evaluate(() => JSON.parse(localStorage.getItem("archeryNote.v1")).sessions),
++      ).toEqual(before);
++    } finally {
++      await sample("final");
++      const body = JSON.stringify(positions, null, 2);
++      await testInfo.attach("tab-scroll-positions", { body, contentType: "application/json" });
++      console.log(`tab-scroll positions (${motion}): ${body}`);
++    }
+   });
+ }
+diff --git a/version.json b/version.json
+index f245c95e..3fad133b 100644
+--- a/version.json
++++ b/version.json
+@@ -1 +1 @@
+-{ "v": 118 }
++{ "v": 119 }

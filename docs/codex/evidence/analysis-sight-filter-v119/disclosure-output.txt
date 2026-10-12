@@ -1,0 +1,27 @@
+PASS disclosure chromium/320/light filters/all restore/old5fields/reload/errors0
+PASS disclosure chromium/375/light filters/all restore/old5fields/reload/errors0
+PASS disclosure chromium/375/dark filters/all restore/old5fields/reload/errors0
+PASS disclosure chromium/900/light filters/all restore/old5fields/reload/errors0
+ExpectError: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+
+Call Log:
+- Timeout 3000ms exceeded while waiting on the predicate
+    at captureRawStack (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright-core\lib\coreBundle.js:3172:17)
+    at callMatcherAsStep (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12877:57)
+    at Object.toBe (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12867:23)
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\disclosure.cjs:9:1375 {
+  matcherResult: {
+    pass: false,
+    message: 'expect(received).toBe(expected) // Object.is equality\n' +
+      '\n' +
+      'Expected: true\n' +
+      'Received: false\n' +
+      '\n' +
+      'Call Log:\n' +
+      '- Timeout 3000ms exceeded while waiting on the predicate',
+    name: 'toBe'
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "appSource": "1ce5e2aa7b2d83ef5c05056969bd2d0e57a189da",
+  "source": "cb09053b15c993162380c71b5e9dd80507ba61ca",
+  "delta": "tests/e2e/tab-scroll.spec.js diagnostics only, all original 600/1400/0/data expectations retained",
+  "initialCI": "38243603273",
+  "initialFailure": "reduce expected600 received244, cause unconfirmed",
+  "localOriginal20": true,
+  "localCPU8x20": true,
+  "localMonitored20": "20 passed (20.4s)",
+  "full311Source": "1ce5e2aa7b2d83ef5c05056969bd2d0e57a189da",
+  "full311AppAssetsExact": true
+}

@@ -1,0 +1,21 @@
+{
+  "reviewer": "review_finish_metrics",
+  "source": "1ce5e2aa7b2d83ef5c05056969bd2d0e57a189da",
+  "findings": [],
+  "staticMerge": true,
+  "scope": "Immutable implementation/plan and saved focused36/native8/before-after8/raw-calculations-KPI/all-unfiltered-site text/images. At review full311 completion/public were pending. Additional disclosure failure/diagnosis and visible8 were checked by primary only; initial missing hit evidence remains unknown. Visible8 stores hit geometry/open elapsed; click trace was cleared by reload before JSON and is not claimed.",
+  "implementationSource": "1ce5e2aa7b2d83ef5c05056969bd2d0e57a189da",
+  "finalSource": "554892bccf962c30596d53b100940c069e69893f",
+  "diagnosticFollowup": {
+    "source": "cb09053b15c993162380c71b5e9dd80507ba61ca",
+    "findings": [],
+    "staticMerge": true,
+    "scope": "Only tab-scroll diagnostic delta reviewed. All original position/data assertions retained. Added evaluate/scrollHeight may perturb timing; initial CI cause unconfirmed. New CI/public acceptance pending at review."
+  },
+  "settledFollowup": {
+    "source": "554892bccf962c30596d53b100940c069e69893f",
+    "findings": [],
+    "staticMerge": true,
+    "scope": "Only test setup delta cb09053b..554892bc reviewed; original position/data expectations retained; second failed CI trace already244 before departure/restore244; controlled fast20 600→209→saved/restored209; focused20passed22.6s and fast-settled20 final600 checked. Production scroll fix not claimed. Linux full/public pending at review."
+  }
+}

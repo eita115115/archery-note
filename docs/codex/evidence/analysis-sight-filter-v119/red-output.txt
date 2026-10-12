@@ -1,0 +1,359 @@
+
+> archery-note@0.118.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-sight-filter.spec.js --workers=4
+
+Native web assets ready: dist\native (v118)
+[WebServer] (node:29292) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:15756) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (320) (5.7s)
+(node:29020) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (375) (5.6s)
+(node:32960) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (7d) (6.0s)
+(node:14916) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  4 [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (30d) (5.9s)
+(node:15668) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  5 [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (90d) (5.9s)
+(node:24764) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  6 [chromium] › tests\e2e\analysis-sight-filter.spec.js:155:1 › analysis sight selection preserves source marks and excludes unknown rounds (517ms)
+
+
+  1) [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (320) 
+
+    Error: expect(locator).not.toContainText(expected) failed
+
+    Locator: locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+    Expected substring: not "222.2"
+    Received string: "サイト値の記録 直近7件
+          2026/10/12 ・ 30m用具A / 台帳
+          上下 111.1 / 左右1.2
+        
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/10/12 ・ 18m用具B / 台帳
+          上下 222.2 / 左右1.2
+        
+          2026/10/12 ・ 30mセットアップ未設定 / 台帳
+          上下 444.4 / 左右1.2
+        
+          2026/10/10 ・ 30m用具A / 台帳
+          上下 555.5 / 左右1.2
+        
+          2026/10/2 ・ 30m用具A / 台帳
+          上下 333.3 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "not toContainText" with timeout 5000ms
+      - waiting for locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+        13 × locator resolved to <div class="card">…</div>
+           - unexpected value "サイト値の記録 直近7件
+          2026/10/12 ・ 30m用具A / 台帳
+          上下 111.1 / 左右1.2
+        
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/10/12 ・ 18m用具B / 台帳
+          上下 222.2 / 左右1.2
+        
+          2026/10/12 ・ 30mセットアップ未設定 / 台帳
+          上下 444.4 / 左右1.2
+        
+          2026/10/10 ・ 30m用具A / 台帳
+          上下 555.5 / 左右1.2
+        
+          2026/10/2 ・ 30m用具A / 台帳
+          上下 333.3 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+
+
+      117 |     for (const v of ["111.1", "555.5", "7.7"]) await expect(records(page)).toContainText(v);
+      118 |     for (const v of ["222.2", "333.3", "444.4", "666.6"])
+    > 119 |       await expect(records(page)).not.toContainText(v);
+          |                                       ^
+      120 |     await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
+      121 |     await expect(summary(page)).toContainText("111.1");
+      122 |     await page.locator("#anSetup").selectOption("sight-b");
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-sight-filter.spec.js:119:39
+
+    Error Context: test-results\analysis-sight-filter-anal-7a7b8-restore-without-writes-320--chromium\error-context.md
+
+  2) [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (375) 
+
+    Error: expect(locator).not.toContainText(expected) failed
+
+    Locator: locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+    Expected substring: not "222.2"
+    Received string: "サイト値の記録 直近7件
+          2026/10/12 ・ 30m用具A / 台帳
+          上下 111.1 / 左右1.2
+        
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/10/12 ・ 18m用具B / 台帳
+          上下 222.2 / 左右1.2
+        
+          2026/10/12 ・ 30mセットアップ未設定 / 台帳
+          上下 444.4 / 左右1.2
+        
+          2026/10/10 ・ 30m用具A / 台帳
+          上下 555.5 / 左右1.2
+        
+          2026/10/2 ・ 30m用具A / 台帳
+          上下 333.3 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "not toContainText" with timeout 5000ms
+      - waiting for locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+        13 × locator resolved to <div class="card">…</div>
+           - unexpected value "サイト値の記録 直近7件
+          2026/10/12 ・ 30m用具A / 台帳
+          上下 111.1 / 左右1.2
+        
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/10/12 ・ 18m用具B / 台帳
+          上下 222.2 / 左右1.2
+        
+          2026/10/12 ・ 30mセットアップ未設定 / 台帳
+          上下 444.4 / 左右1.2
+        
+          2026/10/10 ・ 30m用具A / 台帳
+          上下 555.5 / 左右1.2
+        
+          2026/10/2 ・ 30m用具A / 台帳
+          上下 333.3 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+
+
+      117 |     for (const v of ["111.1", "555.5", "7.7"]) await expect(records(page)).toContainText(v);
+      118 |     for (const v of ["222.2", "333.3", "444.4", "666.6"])
+    > 119 |       await expect(records(page)).not.toContainText(v);
+          |                                       ^
+      120 |     await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
+      121 |     await expect(summary(page)).toContainText("111.1");
+      122 |     await page.locator("#anSetup").selectOption("sight-b");
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-sight-filter.spec.js:119:39
+
+    Error Context: test-results\analysis-sight-filter-anal-1a2b9-restore-without-writes-375--chromium\error-context.md
+
+  3) [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (7d) 
+
+    Error: expect(locator).not.toContainText(expected) failed
+
+    Locator: locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+    Expected substring: not "888.8"
+    Received string: "サイト値の記録 直近5件
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/10/6 ・ 30m用具A / 台帳
+          上下 777.7 / 左右1.2
+        
+          2026/10/6 ・ 30m用具A / 台帳
+          上下 999.9 / 左右1.2
+        
+          2026/10/5 ・ 30m用具A / 台帳
+          上下 888.8 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "not toContainText" with timeout 5000ms
+      - waiting for locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+        13 × locator resolved to <div class="card">…</div>
+           - unexpected value "サイト値の記録 直近5件
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/10/6 ・ 30m用具A / 台帳
+          上下 777.7 / 左右1.2
+        
+          2026/10/6 ・ 30m用具A / 台帳
+          上下 999.9 / 左右1.2
+        
+          2026/10/5 ・ 30m用具A / 台帳
+          上下 888.8 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+
+
+      145 |     await page.locator(`[data-period="${days}d"]`).click();
+      146 |     for (const v of ["777.7", "999.9"]) await expect(records(page)).toContainText(v);
+    > 147 |     for (const v of ["888.8", "666.6"]) await expect(records(page)).not.toContainText(v);
+          |                                                                         ^
+      148 |     await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
+      149 |     await page.locator('[data-period="all"]').click();
+      150 |     for (const v of ["888.8", "666.6"]) await expect(records(page)).toContainText(v);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-sight-filter.spec.js:147:73
+
+    Error Context: test-results\analysis-sight-filter-anal-e6f06--and-timestamp-fallback-7d--chromium\error-context.md
+
+  4) [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (30d) 
+
+    Error: expect(locator).not.toContainText(expected) failed
+
+    Locator: locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+    Expected substring: not "888.8"
+    Received string: "サイト値の記録 直近5件
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/9/13 ・ 30m用具A / 台帳
+          上下 777.7 / 左右1.2
+        
+          2026/9/13 ・ 30m用具A / 台帳
+          上下 999.9 / 左右1.2
+        
+          2026/9/12 ・ 30m用具A / 台帳
+          上下 888.8 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "not toContainText" with timeout 5000ms
+      - waiting for locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+        13 × locator resolved to <div class="card">…</div>
+           - unexpected value "サイト値の記録 直近5件
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/9/13 ・ 30m用具A / 台帳
+          上下 777.7 / 左右1.2
+        
+          2026/9/13 ・ 30m用具A / 台帳
+          上下 999.9 / 左右1.2
+        
+          2026/9/12 ・ 30m用具A / 台帳
+          上下 888.8 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+
+
+      145 |     await page.locator(`[data-period="${days}d"]`).click();
+      146 |     for (const v of ["777.7", "999.9"]) await expect(records(page)).toContainText(v);
+    > 147 |     for (const v of ["888.8", "666.6"]) await expect(records(page)).not.toContainText(v);
+          |                                                                         ^
+      148 |     await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
+      149 |     await page.locator('[data-period="all"]').click();
+      150 |     for (const v of ["888.8", "666.6"]) await expect(records(page)).toContainText(v);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-sight-filter.spec.js:147:73
+
+    Error Context: test-results\analysis-sight-filter-anal-16eca-and-timestamp-fallback-30d--chromium\error-context.md
+
+  5) [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (90d) 
+
+    Error: expect(locator).not.toContainText(expected) failed
+
+    Locator: locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+    Expected substring: not "888.8"
+    Received string: "サイト値の記録 直近5件
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/7/15 ・ 30m用具A / 台帳
+          上下 777.7 / 左右1.2
+        
+          2026/7/15 ・ 30m用具A / 台帳
+          上下 999.9 / 左右1.2
+        
+          2026/7/14 ・ 30m用具A / 台帳
+          上下 888.8 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+    Timeout: 5000ms
+
+    Call log:
+      - Expect "not toContainText" with timeout 5000ms
+      - waiting for locator('.card').filter({ has: getByRole('heading', { name: /^サイト値の記録/ }) })
+        13 × locator resolved to <div class="card">…</div>
+           - unexpected value "サイト値の記録 直近5件
+          2026/10/12 ・ 30m用具A / 練習
+          上下 7.7 / 左右0.7
+        
+          2026/7/15 ・ 30m用具A / 台帳
+          上下 777.7 / 左右1.2
+        
+          2026/7/15 ・ 30m用具A / 台帳
+          上下 999.9 / 左右1.2
+        
+          2026/7/14 ・ 30m用具A / 台帳
+          上下 888.8 / 左右1.2
+        
+          — ・ 30m用具A / 台帳
+          上下 666.6 / 左右1.2
+        "
+
+
+      145 |     await page.locator(`[data-period="${days}d"]`).click();
+      146 |     for (const v of ["777.7", "999.9"]) await expect(records(page)).toContainText(v);
+    > 147 |     for (const v of ["888.8", "666.6"]) await expect(records(page)).not.toContainText(v);
+          |                                                                         ^
+      148 |     await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
+      149 |     await page.locator('[data-period="all"]').click();
+      150 |     for (const v of ["888.8", "666.6"]) await expect(records(page)).toContainText(v);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-sight-filter.spec.js:147:73
+
+    Error Context: test-results\analysis-sight-filter-anal-b7817-and-timestamp-fallback-90d--chromium\error-context.md
+
+  6) [chromium] › tests\e2e\analysis-sight-filter.spec.js:155:1 › analysis sight selection preserves source marks and excludes unknown rounds 
+
+    Error: page.evaluate: ReferenceError: analysisSightMarks is not defined
+        at eval (eval at evaluate (:303:30), <anonymous>:3:17)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:303:30), <anonymous>:3:17)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-sight-filter.spec.js:159:29
+
+    Error Context: test-results\analysis-sight-filter-anal-7a58d-and-excludes-unknown-rounds-chromium\error-context.md
+
+  6 failed
+    [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (320) 
+    [chromium] › tests\e2e\analysis-sight-filter.spec.js:103:3 › analysis sight records follow comparison conditions and restore without writes (375) 
+    [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (7d) 
+    [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (30d) 
+    [chromium] › tests\e2e\analysis-sight-filter.spec.js:140:3 › analysis sight period includes its first day and timestamp fallback (90d) 
+    [chromium] › tests\e2e\analysis-sight-filter.spec.js:155:1 › analysis sight selection preserves source marks and excludes unknown rounds 

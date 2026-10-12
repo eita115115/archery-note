@@ -1,0 +1,71 @@
+BASELINE_READY public118 / 15 warm old bodies / active1 and old3 / same context retained
+ExpectError: expect(received).toBe(expected) // Object.is equality
+
+Expected: 119
+Received: 118
+
+Call Log:
+- Timeout 600000ms exceeded while waiting on the predicate
+    at captureRawStack (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright-core\lib\coreBundle.js:3172:17)
+    at callMatcherAsStep (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12877:57)
+    at Object.toBe (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12867:23)
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\public-update.cjs:103:176 {
+  matcherResult: {
+    pass: false,
+    message: 'expect(received).toBe(expected) // Object.is equality\n' +
+      '\n' +
+      'Expected: 119\n' +
+      'Received: 118\n' +
+      '\n' +
+      'Call Log:\n' +
+      '- Timeout 600000ms exceeded while waiting on the predicate',
+    name: 'toBe'
+  }
+}
+Failure context retained for investigation; no reset or substitute context.
+Debugger listening on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging
+BASELINE_READY public118 / 15 warm old bodies / active1 and old3 / same context retained
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging
+Error: Owned proof waiting paused to refresh old cache during delayed CI; no page reset
+    at o.context.request.get (<anonymous>:1:211)
+    at expect.poll.timeout (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\resume-public.cjs:96:60)
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12954:25
+    at async raceAgainstDeadline (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright-core\lib\coreBundle.js:4410:10)
+    at async pollAgainstDeadline (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright-core\lib\coreBundle.js:4431:22)
+    at async invokePollMatcher (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12951:18)
+    at async C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\resume-public.cjs:96:2
+Failure context retained for investigation; no reset or substitute context.
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging
+BASELINE_READY public118 / 15 warm old bodies / active1 and old3 / same context retained
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging
+Error: Owned proof waiting paused to refresh old cache during delayed CI; no page reset
+    at o.context.request.get (<anonymous>:1:211)
+    at expect.poll.timeout (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\resume-public-rewarmed.cjs:96:60)
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12954:25
+    at async raceAgainstDeadline (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright-core\lib\coreBundle.js:4410:10)
+    at async pollAgainstDeadline (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright-core\lib\coreBundle.js:4431:22)
+    at async invokePollMatcher (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\node_modules\playwright\lib\matchers\expect.js:12951:18)
+    at async C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-sight-filter\resume-public-rewarmed.cjs:96:2
+Failure context retained for investigation; no reset or substitute context.
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging
+BASELINE_READY public118 / 15 warm old bodies / active1 and old3 / same context retained
+UPDATED public119 / finished1 and old3 exact / cache119 only
+PASS: same real public118→119 context, active update blocked/native finish/old4 retained, 320 newstart first native arrow/correction/native exit/next arrow, offline SWreload exact / two-arrow pending in summary+history / old4 and finish5 exact
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/b677167a-36eb-4c2f-af50-d24d398dd757
+For help, see: https://nodejs.org/learn/getting-started/debugging

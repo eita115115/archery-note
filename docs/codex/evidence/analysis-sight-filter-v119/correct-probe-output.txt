@@ -1,0 +1,1 @@
+PASS probe corrected: settle focus scroll/animations between each action; textContent independent of disclosure open state; separate before-corrected run

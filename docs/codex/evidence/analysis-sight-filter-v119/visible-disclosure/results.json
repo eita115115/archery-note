@@ -1,0 +1,1466 @@
+[
+  {
+    "id": "chromium-320-light",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 8,
+        "y": 258.5,
+        "width": 304,
+        "height": 136,
+        "top": 258.5,
+        "right": 312,
+        "bottom": 394.5,
+        "left": 8
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 26,
+    "tapGeometry": {
+      "rect": {
+        "x": 21,
+        "y": 261.5,
+        "width": 278,
+        "height": 44,
+        "top": 261.5,
+        "right": 299,
+        "bottom": 305.5,
+        "left": 21
+      },
+      "x": 160,
+      "y": 283.5,
+      "hit": true,
+      "above": -1417,
+      "below": 499
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-light",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 10,
+        "y": 381.328125,
+        "width": 355,
+        "height": 136,
+        "top": 381.328125,
+        "right": 365,
+        "bottom": 517.328125,
+        "left": 10
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 18,
+    "tapGeometry": {
+      "rect": {
+        "x": 23,
+        "y": 384.328125,
+        "width": 329,
+        "height": 44,
+        "top": 384.328125,
+        "right": 352,
+        "bottom": 428.328125,
+        "left": 23
+      },
+      "x": 187.5,
+      "y": 406.328125,
+      "hit": true,
+      "above": -1072,
+      "below": 743
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-dark",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 10,
+        "y": 381.328125,
+        "width": 355,
+        "height": 136,
+        "top": 381.328125,
+        "right": 365,
+        "bottom": 517.328125,
+        "left": 10
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 19,
+    "tapGeometry": {
+      "rect": {
+        "x": 23,
+        "y": 384.328125,
+        "width": 329,
+        "height": 44,
+        "top": 384.328125,
+        "right": 352,
+        "bottom": 428.328125,
+        "left": 23
+      },
+      "x": 187.5,
+      "y": 406.328125,
+      "hit": true,
+      "above": -1072,
+      "below": 743
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-900-light",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 180,
+        "y": 380.5625,
+        "width": 540,
+        "height": 120,
+        "top": 380.5625,
+        "right": 720,
+        "bottom": 500.5625,
+        "left": 180
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 18,
+    "tapGeometry": {
+      "rect": {
+        "x": 193,
+        "y": 383.5625,
+        "width": 514,
+        "height": 44,
+        "top": 383.5625,
+        "right": 707,
+        "bottom": 427.5625,
+        "left": 193
+      },
+      "x": 450,
+      "y": 405.5625,
+      "hit": true,
+      "above": -906,
+      "below": 743
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-320-light",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 8,
+        "y": 329.984375,
+        "width": 304,
+        "height": 136,
+        "top": 329.984375,
+        "right": 312,
+        "bottom": 465.984375,
+        "left": 8
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 24,
+    "tapGeometry": {
+      "rect": {
+        "x": 21,
+        "y": 332.984375,
+        "width": 278,
+        "height": 44,
+        "top": 332.984375,
+        "right": 299,
+        "bottom": 376.984375,
+        "left": 21
+      },
+      "x": 160,
+      "y": 354.984375,
+      "hit": true,
+      "above": -1488,
+      "below": 499
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-light",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 10,
+        "y": 232.984375,
+        "width": 355,
+        "height": 136,
+        "top": 232.984375,
+        "right": 365,
+        "bottom": 368.984375,
+        "left": 10
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 17,
+    "tapGeometry": {
+      "rect": {
+        "x": 23,
+        "y": 235.984375,
+        "width": 329,
+        "height": 44,
+        "top": 235.984375,
+        "right": 352,
+        "bottom": 279.984375,
+        "left": 23
+      },
+      "x": 187.5,
+      "y": 257.984375,
+      "hit": true,
+      "above": -1356,
+      "below": 743
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-dark",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 10,
+        "y": 232.984375,
+        "width": 355,
+        "height": 136,
+        "top": 232.984375,
+        "right": 365,
+        "bottom": 368.984375,
+        "left": 10
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 15,
+    "tapGeometry": {
+      "rect": {
+        "x": 23,
+        "y": 235.984375,
+        "width": 329,
+        "height": 44,
+        "top": 235.984375,
+        "right": 352,
+        "bottom": 279.984375,
+        "left": 23
+      },
+      "x": 187.5,
+      "y": 257.984375,
+      "hit": true,
+      "above": -1356,
+      "below": 743
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-900-light",
+    "version": 119,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近7件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/12 ・ 18m室内用リカーブ / 台帳 上下 222.2 / 左右2.2 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5 2026/10/2 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 333.3 / 左右3.3 — ・ 30m屋外用リカーブ・練習セット / 台帳 上下 666.6 / 左右6.6",
+      "summary": "サイト値のまとめ 台帳6件 / 練習入力1回 30m用具未指定 / 最新 2026/10/12 / 台帳5・練習1 444.4 / 左右4.4 18m室内用リカーブ / 最新 2026/10/12 / 台帳1・練習0 222.2 / 左右2.2",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  "
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "owned-analysis-a",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "サイト値の記録 直近3件 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 111.1 / 左右1.1 2026/10/12 ・ 30m屋外用リカーブ・練習セット / 練習 上下 7.7 / 左右0.7 2026/10/10 ・ 30m屋外用リカーブ・練習セット / 台帳 上下 555.5 / 左右5.5",
+      "summary": "サイト値のまとめ 台帳2件 / 練習入力1回 30m屋外用リカーブ・練習セット / 最新 2026/10/12 / 台帳2・練習1 111.1 / 左右1.1",
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  "
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "30",
+        "round": "",
+        "period": "7d"
+      },
+      "record": "",
+      "summary": "",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "unspecified": {
+      "filter": {
+        "setupId": "__none",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "record": "サイト値の記録 直近1件 2026/10/12 ・ 30mセットアップ未設定 / 台帳 上下 444.4 / 左右4.4",
+      "summary": "サイト値のまとめ 台帳1件 / 練習入力0回 30m用具未指定 / 最新 2026/10/12 / 台帳1・練習0 444.4 / 左右4.4",
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": ""
+    },
+    "geometry": {
+      "rect": {
+        "x": 180,
+        "y": 216.5625,
+        "width": 540,
+        "height": 120,
+        "top": 216.5625,
+        "right": 720,
+        "bottom": 336.5625,
+        "left": 180
+      },
+      "overflow": false,
+      "documentOverflow": false
+    },
+    "disclosureOpenMs": 16,
+    "tapGeometry": {
+      "rect": {
+        "x": 193,
+        "y": 219.5625,
+        "width": 514,
+        "height": 44,
+        "top": 219.5625,
+        "right": 707,
+        "bottom": 263.5625,
+        "left": 193
+      },
+      "x": 450,
+      "y": 241.5625,
+      "hit": true,
+      "above": -1070,
+      "below": 743
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]
