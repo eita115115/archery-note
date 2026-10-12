@@ -1,0 +1,2154 @@
+[
+  {
+    "id": "chromium-320-light",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n平均点\n9.44\n3回 18本 / 移動平均 ↓ -0.06\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.6cm\n最高合計\n57\n2026/10/5 / 18m / 6本\n得点の推移\n3回 / 線は直近5回の移動平均\n9.5点\n9.3点\n丸は各練習の平均点（1本あたり）、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。\n直近の得点\n直近3回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n2026/10/5\n18m / 6本\n9.50 / 合計57\n2026/9/20\n18m / 6本\n9.50 / 合計57\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n平均点\n9.33\n1回 6本 / 移動平均 —\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.7cm\n最高合計\n56\n2026/10/12 / 30m / 6本\n直近の得点\n直近1回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n月ごとのまとめ\n月\t練習\t本数\t平均/本\n2026/10\t1回\t6本\t9.33\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n分析\nこの絞り込みに合う記録がありません。フィルタを広げてください。"
+    },
+    "geometry": {
+      "width": 320,
+      "scrollWidth": 320,
+      "conclusion": {
+        "x": 8,
+        "y": 272,
+        "width": 304,
+        "height": 122,
+        "top": 272,
+        "right": 312,
+        "bottom": 394,
+        "left": 8
+      },
+      "filter": {
+        "x": 8,
+        "y": 62,
+        "width": 304,
+        "height": 198,
+        "top": 62,
+        "right": 312,
+        "bottom": 260,
+        "left": 8
+      },
+      "next": {
+        "x": 8,
+        "y": 406,
+        "width": 304,
+        "height": 162.59375,
+        "top": 406,
+        "right": 312,
+        "bottom": 568.59375,
+        "left": 8
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          11,
+          118,
+          93
+        ],
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 4.725463766476673
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 15.530887086192001
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-light",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n平均点\n9.44\n3回 18本 / 移動平均 ↓ -0.06\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.6cm\n最高合計\n57\n2026/10/5 / 18m / 6本\n得点の推移\n3回 / 線は直近5回の移動平均\n9.5点\n9.3点\n丸は各練習の平均点（1本あたり）、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。\n直近の得点\n直近3回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n2026/10/5\n18m / 6本\n9.50 / 合計57\n2026/9/20\n18m / 6本\n9.50 / 合計57\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n月ごとのまとめ\n月\t練習\t本数\t平均/本\n2026/10\t2回\t12本\t9.42\n2026/09\t1回\t6本\t9.50\n距離ごとの調子\n平均点(点/本)の推移\n18m\n9.50点\n最新平均/本\n得点の内訳\n全18本\nX\n4本 (22%)\n10\n5本 (28%)\n9\n8本 (44%)\n8\n1本 (6%)\n7\n0本 (0%)\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n平均点\n9.33\n1回 6本 / 移動平均 —\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.7cm\n最高合計\n56\n2026/10/12 / 30m / 6本\n直近の得点\n直近1回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n月ごとのまとめ\n月\t練習\t本数\t平均/本\n2026/10\t1回\t6本\t9.33\n自己ベスト\n距離×ラウンド別\n30m ・ 自由練習\n1回 / ベスト日 2026/10/12 / 6本\n56 / 平均ベスト9.33\n用具ごとの成績\n1件\n屋外用リカーブ・練習セット\n記録 1回 / 矢数 6 / 最新 2026/10/12\n9.33 / 最高56\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n分析\nこの絞り込みに合う記録がありません。フィルタを広げてください。"
+    },
+    "geometry": {
+      "width": 375,
+      "scrollWidth": 375,
+      "conclusion": {
+        "x": 10,
+        "y": 276,
+        "width": 355,
+        "height": 122,
+        "top": 276,
+        "right": 365,
+        "bottom": 398,
+        "left": 10
+      },
+      "filter": {
+        "x": 10,
+        "y": 66,
+        "width": 355,
+        "height": 198,
+        "top": 66,
+        "right": 365,
+        "bottom": 264,
+        "left": 10
+      },
+      "next": {
+        "x": 10,
+        "y": 410,
+        "width": 355,
+        "height": 162.59375,
+        "top": 410,
+        "right": 365,
+        "bottom": 572.59375,
+        "left": 10
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          11,
+          118,
+          93
+        ],
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 4.725463766476673
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 15.530887086192001
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-dark",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n平均点\n9.44\n3回 18本 / 移動平均 ↓ -0.06\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.6cm\n最高合計\n57\n2026/10/5 / 18m / 6本\n得点の推移\n3回 / 線は直近5回の移動平均\n9.5点\n9.3点\n丸は各練習の平均点（1本あたり）、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。\n直近の得点\n直近3回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n2026/10/5\n18m / 6本\n9.50 / 合計57\n2026/9/20\n18m / 6本\n9.50 / 合計57\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n月ごとのまとめ\n月\t練習\t本数\t平均/本\n2026/10\t2回\t12本\t9.42\n2026/09\t1回\t6本\t9.50\n距離ごとの調子\n平均点(点/本)の推移\n18m\n9.50点\n最新平均/本\n得点の内訳\n全18本\nX\n4本 (22%)\n10\n5本 (28%)\n9\n8本 (44%)\n8\n1本 (6%)\n7\n0本 (0%)\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n平均点\n9.33\n1回 6本 / 移動平均 —\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.7cm\n最高合計\n56\n2026/10/12 / 30m / 6本\n直近の得点\n直近1回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n月ごとのまとめ\n月\t練習\t本数\t平均/本\n2026/10\t1回\t6本\t9.33\n自己ベスト\n距離×ラウンド別\n30m ・ 自由練習\n1回 / ベスト日 2026/10/12 / 6本\n56 / 平均ベスト9.33\n用具ごとの成績\n1件\n屋外用リカーブ・練習セット\n記録 1回 / 矢数 6 / 最新 2026/10/12\n9.33 / 最高56\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n分析\nこの絞り込みに合う記録がありません。フィルタを広げてください。"
+    },
+    "geometry": {
+      "width": 375,
+      "scrollWidth": 375,
+      "conclusion": {
+        "x": 10,
+        "y": 276,
+        "width": 355,
+        "height": 122,
+        "top": 276,
+        "right": 365,
+        "bottom": 398,
+        "left": 10
+      },
+      "filter": {
+        "x": 10,
+        "y": 66,
+        "width": 355,
+        "height": 198,
+        "top": 66,
+        "right": 365,
+        "bottom": 264,
+        "left": 10
+      },
+      "next": {
+        "x": 10,
+        "y": 410,
+        "width": 355,
+        "height": 162.59375,
+        "top": 410,
+        "right": 365,
+        "bottom": 572.59375,
+        "left": 10
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(20, 51, 38)",
+        "background": [
+          148,
+          227,
+          191
+        ],
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 6.146915480653478
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 14.449587016787673
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-900-light",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": 0,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n平均点\n9.44\n3回 18本 / 移動平均 ↓ -0.06\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.6cm\n最高合計\n57\n2026/10/5 / 18m / 6本\n得点の推移\n3回 / 線は直近5回の移動平均\n9.5点\n9.3点\n丸は各練習の平均点（1本あたり）、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。\n直近の得点\n直近3回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n2026/10/5\n18m / 6本\n9.50 / 合計57\n2026/9/20\n18m / 6本\n9.50 / 合計57\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n月ごとのまとめ\n月\t練習\t本数\t平均/本\n2026/10\t2回\t12本\t9.42\n2026/09\t1回\t6本\t9.50\n距離ごとの調子\n平均点(点/本)の推移\n18m\n9.50点\n最新平均/本\n得点の内訳\n全18本\nX\n4本 (22%)\n10\n5本 (28%)\n9\n8本 (44%)\n8\n1本 (6%)\n7\n0本 (0%)\n自己ベスト\n距離×ラウンド別\n30m ・ 自由練習\n1回 / ベスト日 2026/10/12 / 6本\n56 / 平均ベスト9.33\n18m ・ 自由練習\n2回 / ベスト日 2026/10/5 / 6本\n57 / 平均ベスト9.50\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n平均点\n9.33\n1回 6本 / 移動平均 —\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.7cm\n最高合計\n56\n2026/10/12 / 30m / 6本\n直近の得点\n直近1回\n2026/10/12\n30m / 6本\n9.33 / 合計56\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n月ごとのまとめ\n月\t練習\t本数\t平均/本\n2026/10\t1回\t6本\t9.33\n自己ベスト\n距離×ラウンド別\n30m ・ 自由練習\n1回 / ベスト日 2026/10/12 / 6本\n56 / 平均ベスト9.33\n用具ごとの成績\n1件\n屋外用リカーブ・練習セット\n記録 1回 / 矢数 6 / 最新 2026/10/12\n9.33 / 最高56\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n分析\nこの絞り込みに合う記録がありません。フィルタを広げてください。"
+    },
+    "geometry": {
+      "width": 900,
+      "scrollWidth": 900,
+      "conclusion": {
+        "x": 180,
+        "y": 276,
+        "width": 540,
+        "height": 91,
+        "top": 276,
+        "right": 720,
+        "bottom": 367,
+        "left": 180
+      },
+      "filter": {
+        "x": 180,
+        "y": 66,
+        "width": 540,
+        "height": 198,
+        "top": 66,
+        "right": 720,
+        "bottom": 264,
+        "left": 180
+      },
+      "next": {
+        "x": 180,
+        "y": 379,
+        "width": 540,
+        "height": 141.796875,
+        "top": 379,
+        "right": 720,
+        "bottom": 520.796875,
+        "left": 180
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          11,
+          118,
+          93
+        ],
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 4.725463766476673
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 15.530887086192001
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-320-light",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち"
+    },
+    "geometry": {
+      "width": 320,
+      "scrollWidth": 320,
+      "conclusion": {
+        "x": 8,
+        "y": 272,
+        "width": 304,
+        "height": 122,
+        "top": 272,
+        "right": 312,
+        "bottom": 394,
+        "left": 8
+      },
+      "filter": {
+        "x": 8,
+        "y": 62,
+        "width": 304,
+        "height": 198,
+        "top": 62,
+        "right": 312,
+        "bottom": 260,
+        "left": 8
+      },
+      "next": {
+        "x": 8,
+        "y": 406,
+        "width": 304,
+        "height": 162.59375,
+        "top": 406,
+        "right": 312,
+        "bottom": 568.59375,
+        "left": 8
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          11,
+          118,
+          93
+        ],
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 4.725463766476673
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 15.530887086192001
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-light",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち"
+    },
+    "geometry": {
+      "width": 375,
+      "scrollWidth": 375,
+      "conclusion": {
+        "x": 10,
+        "y": 276,
+        "width": 355,
+        "height": 122,
+        "top": 276,
+        "right": 365,
+        "bottom": 398,
+        "left": 10
+      },
+      "filter": {
+        "x": 10,
+        "y": 66,
+        "width": 355,
+        "height": 198,
+        "top": 66,
+        "right": 365,
+        "bottom": 264,
+        "left": 10
+      },
+      "next": {
+        "x": 10,
+        "y": 410,
+        "width": 355,
+        "height": 162.59375,
+        "top": 410,
+        "right": 365,
+        "bottom": 572.59375,
+        "left": 10
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          11,
+          118,
+          93
+        ],
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 4.725463766476673
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 15.530887086192001
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-dark",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち"
+    },
+    "geometry": {
+      "width": 375,
+      "scrollWidth": 375,
+      "conclusion": {
+        "x": 10,
+        "y": 276,
+        "width": 355,
+        "height": 122,
+        "top": 276,
+        "right": 365,
+        "bottom": 398,
+        "left": 10
+      },
+      "filter": {
+        "x": 10,
+        "y": 66,
+        "width": 355,
+        "height": 198,
+        "top": 66,
+        "right": 365,
+        "bottom": 264,
+        "left": 10
+      },
+      "next": {
+        "x": 10,
+        "y": 410,
+        "width": 355,
+        "height": 162.59375,
+        "top": 410,
+        "right": 365,
+        "bottom": 572.59375,
+        "left": 10
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 7.495148741529107
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(20, 51, 38)",
+        "background": [
+          148,
+          227,
+          191
+        ],
+        "ratio": 9.1422112128462
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(162, 182, 170)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 6.146915480653478
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          34,
+          52,
+          44
+        ],
+        "ratio": 11.850383919722072
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(237, 245, 239)",
+        "background": [
+          23,
+          36,
+          31
+        ],
+        "ratio": 14.449587016787673
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-900-light",
+    "version": 118,
+    "all": {
+      "filter": {
+        "setupId": "",
+        "dist": "",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.444444444444445,
+        "scoreDelta": -0.16666666666666607,
+        "groupingDelta": -2.220446049250313e-16,
+        "formStability": null,
+        "confidence": {
+          "value": 0.465,
+          "label": "中"
+        },
+        "groupingSamples": 3
+      },
+      "conclusion": {
+        "kind": "trend-down",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.443回 18本 / 移動平均 ↓ -0.06\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.6cm\n    最高合計572026/10/5 / 18m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n平均点がやや下がり気味、本数を安定させましょう。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 中\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.44\n前回から\n-0.17点\nグルーピング\n横ばい 0.0cm\nフォーム\n記録待ち\n平均点\n9.44\n3回 18本 / 移動平均 ↓ -0.06\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.6cm\n最高合計\n57\n2026/10/5 / 18m / 6本\n矢の集まり具合のまとめ（グルーピングサマリー） 対象3回\n距離ごとのまとめ 2距離"
+    },
+    "filtered": {
+      "filter": {
+        "setupId": "",
+        "dist": "30",
+        "round": "",
+        "period": "all"
+      },
+      "dashboard": {
+        "lastPracticeDate": "2026-10-12",
+        "weekSessions": 1,
+        "weekArrows": 6,
+        "recentAverage": 9.333333333333334,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0.15500000000000003,
+          "label": "参考"
+        },
+        "groupingSamples": 1
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "vertical-spread",
+          "title": "上下のまとまりを確認",
+          "reason": "最新記録は上下±1.4cmで、左右±1.0cmより広がっています。"
+        }
+      ],
+      "kpi": "\n    平均点9.331回 6本 / 移動平均 —\n    矢の集まり具合（グルーピング）1.7cm最新の半径(RMS) / 最小 1.7cm\n    最高合計562026/10/12 / 30m / 6本\n  ",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\n上下のまとまりを確認\n\n最新記録は上下±1.4cmで、左右±1.0cmより広がっています。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n2026/10/12\n今週\n1回 / 6射\n直近平均\n9.33\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n平均点\n9.33\n1回 6本 / 移動平均 —\n矢の集まり具合（グルーピング）\n1.7cm\n最新の半径(RMS) / 最小 1.7cm\n最高合計\n56\n2026/10/12 / 30m / 6本\n矢の集まり具合のまとめ（グルーピングサマリー） 対象1回\n距離ごとのまとめ 1距離"
+    },
+    "noMatch": {
+      "filter": {
+        "setupId": "owned-analysis-b",
+        "dist": "",
+        "round": "",
+        "period": "7d"
+      },
+      "dashboard": {
+        "lastPracticeDate": null,
+        "weekSessions": 0,
+        "weekArrows": 0,
+        "recentAverage": null,
+        "scoreDelta": null,
+        "groupingDelta": null,
+        "formStability": null,
+        "confidence": {
+          "value": 0,
+          "label": "参考"
+        },
+        "groupingSamples": 0
+      },
+      "conclusion": {
+        "kind": "few",
+        "text": "記録を数回続けると、今日の一言がここに出ます。"
+      },
+      "next": [
+        {
+          "id": "collect-baseline",
+          "title": "まず1回記録する",
+          "reason": "比較できる練習記録がまだありません。"
+        }
+      ],
+      "kpi": "",
+      "visible": "比較する条件\n用具\nすべて\n未指定\n屋外用リカーブ・練習セット\n室内用リカーブ\n距離\nすべて\n30m\n18m\n期間\n全期間\n7日\n30日\n90日\n練習の傾向\n\n記録を数回続けると、今日の一言がここに出ます。\n\n次回試すこと\n1\nまず1回記録する\n\n比較できる練習記録がまだありません。\n\n練習のまとめ\n数値で振り返る\n信頼度 参考\n最終練習\n—\n今週\n0回 / 0射\n直近平均\n—\n前回から\n比較待ち\nグルーピング\n比較待ち\nフォーム\n記録待ち\n分析\nこの絞り込みに合う記録がありません。フィルタを広げてください。"
+    },
+    "geometry": {
+      "width": 900,
+      "scrollWidth": 900,
+      "conclusion": {
+        "x": 180,
+        "y": 276,
+        "width": 540,
+        "height": 91,
+        "top": 276,
+        "right": 720,
+        "bottom": 367,
+        "left": 180
+      },
+      "filter": {
+        "x": 180,
+        "y": 66,
+        "width": 540,
+        "height": 198,
+        "top": 66,
+        "right": 720,
+        "bottom": 264,
+        "left": 180
+      },
+      "next": {
+        "x": 180,
+        "y": 379,
+        "width": 540,
+        "height": 141.796875,
+        "top": 379,
+        "right": 720,
+        "bottom": 520.796875,
+        "left": 180
+      }
+    },
+    "contrast": [
+      {
+        "selector": ".analysisFilterCard h2",
+        "text": "比較する条件",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "用具",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "距離",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard label",
+        "text": "期間",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 5.315897793619867
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "全期間",
+        "color": "rgb(255, 255, 255)",
+        "background": [
+          11,
+          118,
+          93
+        ],
+        "ratio": 5.579666904934749
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "7日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "30日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".analysisFilterCard .chip",
+        "text": "90日",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".todayConclusionKicker",
+        "text": "練習の傾向",
+        "color": "rgb(91, 112, 101)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 4.725463766476673
+      },
+      {
+        "selector": ".todayConclusionText",
+        "text": "平均点がやや下がり気味、本数を安定させましょう。",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          237,
+          243,
+          239
+        ],
+        "ratio": 13.805879465012309
+      },
+      {
+        "selector": ".nextPractice h2",
+        "text": "次回試すこと",
+        "color": "rgb(24, 39, 34)",
+        "background": [
+          255,
+          255,
+          255
+        ],
+        "ratio": 15.530887086192001
+      }
+    ],
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]

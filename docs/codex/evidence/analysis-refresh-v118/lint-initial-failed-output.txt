@@ -1,0 +1,10 @@
+
+> archery-note@0.118.0 lint
+> eslint "*.js" "scripts/**/*.js" "tools/**/*.js" "tests/**/*.js" "eslint.config.mjs"
+
+
+C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-filter-focus.spec.js
+  99:12  error  'document' is not defined  no-undef
+
+✖ 1 problem (1 error, 0 warnings)
+

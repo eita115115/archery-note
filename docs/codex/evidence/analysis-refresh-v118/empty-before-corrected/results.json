@@ -1,0 +1,126 @@
+[
+  {
+    "id": "chromium-320-light",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 60,
+        "y": 746,
+        "width": 200,
+        "height": 48,
+        "top": 746,
+        "right": 260,
+        "bottom": 794,
+        "left": 60
+      },
+      "nav": {
+        "x": 0,
+        "y": 499,
+        "width": 320,
+        "height": 69,
+        "top": 499,
+        "right": 320,
+        "bottom": 568,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-dark",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 87.5,
+        "y": 750,
+        "width": 200,
+        "height": 48,
+        "top": 750,
+        "right": 287.5,
+        "bottom": 798,
+        "left": 87.5
+      },
+      "nav": {
+        "x": 0,
+        "y": 743,
+        "width": 375,
+        "height": 69,
+        "top": 743,
+        "right": 375,
+        "bottom": 812,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-320-light",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 60,
+        "y": 746,
+        "width": 200,
+        "height": 48,
+        "top": 746,
+        "right": 260,
+        "bottom": 794,
+        "left": 60
+      },
+      "nav": {
+        "x": 0,
+        "y": 499,
+        "width": 320,
+        "height": 69,
+        "top": 499,
+        "right": 320,
+        "bottom": 568,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-dark",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 87.5,
+        "y": 750,
+        "width": 200,
+        "height": 48,
+        "top": 750,
+        "right": 287.5,
+        "bottom": 798,
+        "left": 87.5
+      },
+      "nav": {
+        "x": 0,
+        "y": 743,
+        "width": 375,
+        "height": 69,
+        "top": 743,
+        "right": 375,
+        "bottom": 812,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]

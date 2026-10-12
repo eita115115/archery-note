@@ -1,0 +1,39 @@
+
+> archery-note@0.117.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-filter-focus.spec.js --grep empty analysis --workers=1
+
+Native web assets ready: dist\native (v117)
+[WebServer] (node:11128) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:2336) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records (4.5s)
+
+
+  1) [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+    Call Log:
+    - Timeout 5000ms exceeded while waiting on the predicate
+
+      51 |       }),
+      52 |     )
+    > 53 |     .toBe(true);
+         |      ^
+      54 | }
+      55 |
+      56 | test("empty analysis offers a direct route to the first practice without changing records", async ({ page }) => {
+        at expectWithinAppChrome (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-filter-focus.spec.js:53:6)
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-filter-focus.spec.js:68:3
+
+    Error Context: test-results\analysis-filter-focus-empt-24c09-ce-without-changing-records-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records 

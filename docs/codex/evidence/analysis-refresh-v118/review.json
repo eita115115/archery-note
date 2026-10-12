@@ -1,0 +1,8 @@
+{
+  "reviewer": "review_finish_metrics",
+  "runtimeSource": "5a4f25afedf52915e79fa9c3b9a1ce1bb5e9285a",
+  "finalSource": "bcaf493223c5545d93ed3f7878709bf5e4436af1",
+  "findings": [],
+  "staticMerge": true,
+  "scope": "Immutable app diff and saved before/after8 calculations+KPI/screenshots/focused32/grouping51. Full305/final118native/public were pending at initial review. Follow-up bcaf493 test-only globalThis.document qualifier reviewed; assertion/runtime unchanged; no new dynamic checks by reviewer."
+}

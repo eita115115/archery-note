@@ -1,0 +1,44 @@
+
+> archery-note@0.117.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-filter-focus.spec.js --grep empty analysis --workers=1
+
+Native web assets ready: dist\native (v117)
+[WebServer] (node:12944) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:17800) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records (5.8s)
+
+
+  1) [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('#anSetup')
+    Expected: 0
+    Received: 1
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for locator('#anSetup')
+        14 × locator resolved to 1 element
+           - unexpected value "1"
+
+
+      64 |   const before = await practiceData(page);
+      65 |   await page.locator('#tabs [data-v="analysis"]').click();
+    > 66 |   await expect(page.locator("#anSetup")).toHaveCount(0);
+         |                                          ^
+      67 |   const start = page.getByRole("button", { name: "記録タブへ", exact: true });
+      68 |   await expect(start).toHaveCount(1);
+      69 |   await expectWithinAppChrome(start);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\analysis-filter-focus.spec.js:66:42
+
+    Error Context: test-results\analysis-filter-focus-empt-24c09-ce-without-changing-records-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records 

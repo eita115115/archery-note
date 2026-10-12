@@ -1,0 +1,13 @@
+dashboard visible grouping direction -0.04: The expression evaluated to a falsy value:
+
+  assert(html.includes(`<b>${expected}</b>`))
+
+dashboard visible grouping direction -4e-16: The expression evaluated to a falsy value:
+
+  assert(html.includes(`<b>${expected}</b>`))
+
+dashboard visible grouping direction 0.04: The expression evaluated to a falsy value:
+
+  assert(html.includes(`<b>${expected}</b>`))
+
+3 failed / 51 grouping interpretation checks

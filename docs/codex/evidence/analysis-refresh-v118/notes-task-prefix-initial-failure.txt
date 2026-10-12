@@ -1,0 +1,5 @@
+Original terminal failure excerpt (not a rerun): inline node -e task-prefix preservation failed because PowerShell quoting truncated its regexp.
+Unterminated regexp literal
+SyntaxError: Invalid regular expression: missing /
+Node.js v24.18.0
+The same shell continued to commit the notes. No JSON values or app assets changed; old82 task objects/acceptance already matched. The local task JSON formatting was then restored from bcaf493 using preserve-task-text.cjs and the local notes commit amended. No deployment occurred for these notes.

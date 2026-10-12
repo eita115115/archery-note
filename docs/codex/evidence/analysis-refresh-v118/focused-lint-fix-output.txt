@@ -1,0 +1,23 @@
+
+> archery-note@0.118.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-filter-focus.spec.js --workers=4
+
+Native web assets ready: dist\native (v118)
+[WebServer] (node:9712) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 9 tests using 1 worker
+
+(node:17568) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records (562ms)
+  ok 2 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (320/light) (614ms)
+  ok 3 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (320/light) (873ms)
+  ok 4 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (320/light) (613ms)
+  ok 5 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (320/light) (672ms)
+  ok 6 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (375/dark) (589ms)
+  ok 7 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (375/dark) (881ms)
+  ok 8 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (375/dark) (631ms)
+  ok 9 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (375/dark) (696ms)
+
+  9 passed (8.0s)

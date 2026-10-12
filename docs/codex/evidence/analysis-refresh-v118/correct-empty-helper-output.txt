@@ -1,0 +1,1 @@
+PASS empty helper retains existing route and captures its position; original wrong CTA0 assertion retained

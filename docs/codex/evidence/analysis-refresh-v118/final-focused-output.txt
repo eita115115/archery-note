@@ -1,0 +1,50 @@
+
+> archery-note@0.117.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-filter-focus.spec.js tests/e2e/analysis-grouping-evidence.spec.js tests/e2e/build-week-growth.spec.js --workers=4
+
+Native web assets ready: dist\native (v117)
+[WebServer] (node:16100) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 32 tests using 3 workers
+
+(node:9200) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25476) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:29684) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  1 [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records (737ms)
+  ok  3 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 0) (1.3s)
+  ok  4 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (320/light) (708ms)
+  ok  2 [chromium] › tests\e2e\build-week-growth.spec.js:9:1 › demo data opens an explainable growth dashboard and remains removable (2.0s)
+  ok  5 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 1) (1.1s)
+  ok  6 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (320/light) (1.1s)
+  ok  9 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (320/light) (669ms)
+  ok  7 [chromium] › tests\e2e\build-week-growth.spec.js:37:1 › growth dashboard works at narrow mobile width and in dark mode (1.4s)
+  ok  8 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 2) (1.0s)
+  ok 10 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (320/light) (759ms)
+  ok 11 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 3) (1.0s)
+  ok 12 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (375/dark) (639ms)
+  ok 13 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 6) (1.0s)
+  ok 14 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (375/dark) (927ms)
+  ok 16 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (375/dark) (648ms)
+  ok 15 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 0) (959ms)
+  ok 17 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (375/dark) (720ms)
+  ok 18 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 1) (966ms)
+  ok 19 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 2) (975ms)
+  ok 20 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 3) (999ms)
+  ok 21 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 6) (959ms)
+  ok 22 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 0) (917ms)
+  ok 23 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 1) (1.0s)
+  ok 24 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 2) (988ms)
+  ok 25 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 3) (955ms)
+  ok 26 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 6) (942ms)
+  ok 27 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 0) (924ms)
+  ok 28 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 1) (988ms)
+  ok 29 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 2) (991ms)
+  ok 30 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 3) (972ms)
+  ok 31 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 6) (935ms)
+  ok 32 [chromium] › tests\e2e\analysis-grouping-evidence.spec.js:186:1 › native one-arrow finish stays pending across analysis and history (2.0s)
+
+  32 passed (23.8s)

@@ -1,0 +1,1 @@
+Grouping interpretation checks OK (51 checks; real scoring/statistics, score populations retained)

@@ -1,0 +1,1 @@
+PASS contrast probe prepared, rendered foreground over all ancestor backgrounds

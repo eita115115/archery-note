@@ -1,0 +1,126 @@
+[
+  {
+    "id": "chromium-320-light",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 25,
+        "y": 330.796875,
+        "width": 270,
+        "height": 48,
+        "top": 330.796875,
+        "right": 295,
+        "bottom": 378.796875,
+        "left": 25
+      },
+      "nav": {
+        "x": 0,
+        "y": 499,
+        "width": 320,
+        "height": 69,
+        "top": 499,
+        "right": 320,
+        "bottom": 568,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "chromium-375-dark",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 27,
+        "y": 334.796875,
+        "width": 321,
+        "height": 48,
+        "top": 334.796875,
+        "right": 348,
+        "bottom": 382.796875,
+        "left": 27
+      },
+      "nav": {
+        "x": 0,
+        "y": 743,
+        "width": 375,
+        "height": 69,
+        "top": 743,
+        "right": 375,
+        "bottom": 812,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-320-light",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 25,
+        "y": 330.796875,
+        "width": 270,
+        "height": 48,
+        "top": 330.796875,
+        "right": 295,
+        "bottom": 378.796875,
+        "left": 25
+      },
+      "nav": {
+        "x": 0,
+        "y": 499,
+        "width": 320,
+        "height": 69,
+        "top": 499,
+        "right": 320,
+        "bottom": 568,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "id": "webkit-375-dark",
+    "version": 117,
+    "count": 1,
+    "route": true,
+    "bounds": {
+      "rect": {
+        "x": 27,
+        "y": 334.796875,
+        "width": 321,
+        "height": 48,
+        "top": 334.796875,
+        "right": 348,
+        "bottom": 382.796875,
+        "left": 27
+      },
+      "nav": {
+        "x": 0,
+        "y": 743,
+        "width": 375,
+        "height": 69,
+        "top": 743,
+        "right": 375,
+        "bottom": 812,
+        "left": 0
+      }
+    },
+    "oldAllExact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]
