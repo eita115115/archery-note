@@ -1,0 +1,75 @@
+{
+  "id": 1,
+  "result": {
+    "result": {
+      "type": "object",
+      "value": {
+        "url": "http://127.0.0.1:64067/",
+        "animations": [],
+        "controls": [
+          {
+            "id": "bUndo",
+            "rect": {
+              "x": 21,
+              "y": 421,
+              "width": 69.9375,
+              "height": 48,
+              "top": 421,
+              "right": 90.9375,
+              "bottom": 469,
+              "left": 21
+            },
+            "font": "15px",
+            "minHeight": "48px",
+            "transform": "none"
+          },
+          {
+            "id": "bEnd",
+            "rect": {
+              "x": 96.9375,
+              "y": 421,
+              "width": 147.609375,
+              "height": 48,
+              "top": 421,
+              "right": 244.546875,
+              "bottom": 469,
+              "left": 96.9375
+            },
+            "font": "15px",
+            "minHeight": "48px",
+            "transform": "none"
+          },
+          {
+            "id": "bFinish",
+            "rect": {
+              "x": 250.546875,
+              "y": 421,
+              "width": 48.453125,
+              "height": 48,
+              "top": 421,
+              "right": 299,
+              "bottom": 469,
+              "left": 250.546875
+            },
+            "font": "15px",
+            "minHeight": "48px",
+            "transform": "none"
+          }
+        ],
+        "dock": {
+          "x": 10,
+          "y": 410,
+          "width": 300,
+          "height": 70,
+          "top": 410,
+          "right": 310,
+          "bottom": 480,
+          "left": 10
+        },
+        "sessions": 3,
+        "active": 0,
+        "pending": false
+      }
+    }
+  }
+}

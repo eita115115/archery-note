@@ -1,0 +1,12 @@
+{
+  "base": "704c1321",
+  "old80Exact": true,
+  "acceptanceExact": true,
+  "sharedLockExact": true,
+  "cssOnlyTwoDockRules": true,
+  "runtimeExceptVersionExact": true,
+  "scoringMathHandlersStorageSchemaExact": true,
+  "swActivationExact": true,
+  "dependenciesExact": true,
+  "indexManifestExact": true
+}

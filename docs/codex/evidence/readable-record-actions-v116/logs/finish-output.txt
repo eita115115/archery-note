@@ -1,0 +1,2 @@
+PASS old80/acceptance/sharedlock; CSS only two dock rules; runtime/scoring/math/handlers/storage/schema exact except version; SW activation/deps/index/manifest unchanged
+PASS AN081 done after actual final CI/public/native/full evidence; old80/acceptance preserved; progress/task/plan/ledger updated

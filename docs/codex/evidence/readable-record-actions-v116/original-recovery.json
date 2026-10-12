@@ -1,0 +1,71 @@
+{
+  "sameOriginalPage": true,
+  "noResetOrReseed": true,
+  "originalFailureAfterFirstEnd": true,
+  "originalCompletedEndExact": true,
+  "originalNativeNew2ThenRecoveryNew3": true,
+  "old3Exact": true,
+  "scoreAgreement": true,
+  "reloadExact": true,
+  "reloadErrors": [],
+  "originalErrorCollectorUnavailable": true,
+  "initialMeasurementUnavailable": true,
+  "initialTransientRootCauseUnproven": true,
+  "firstRecoveryAssertionFailedBecauseOriginalEndWasNotIncluded": true,
+  "finished": {
+    "id": "mv4pxbgs6ituz",
+    "date": "2026-10-12",
+    "setupId": null,
+    "dist": 18,
+    "faceD": 40,
+    "faceType": "single",
+    "perEnd": 3,
+    "shaft": 0.504,
+    "sightV": "",
+    "sightH": "",
+    "wx": "",
+    "note": "",
+    "windDir": "",
+    "windSpeed": "",
+    "round": "free",
+    "purpose": "practice",
+    "ends": [
+      [
+        {
+          "x": 0.6000000000000001,
+          "y": 0,
+          "s": 10,
+          "X": true
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        }
+      ],
+      [
+        {
+          "x": 0.6000000000000001,
+          "y": 0,
+          "s": 10,
+          "X": true
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        }
+      ],
+      [
+        {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        }
+      ]
+    ]
+  }
+}

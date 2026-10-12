@@ -4,7 +4,7 @@
 
 ## 現在地
 
-- AN081進行中。実Linux115/ChromeWK320で「1本取消」2行を再現。左右の補助操作を内容幅、中央確定を残り幅とし、文字サイズと文言を保って一行へ。plan docs/codex/readable-record-actions.md。費用個人情報不使用。
+- AN081完了、公開v116/source3688a3b3d4b8b4b64db5109a183645dc657f284e、branch codex/readable-record-actions。320で取消2行になる実115をChromeWKで再現、左右内容幅/中央残り幅とpadding/gapで全操作名を一行へ。文言/15px/順序を保ち、所有20px文字probeも320でcontainment。CSS2規則+生成CSSだけ、通常layout/非押下実寸48px、既存押下scale(.982)中も実44px以上/fivehit/非重複。全runtime/handlers/target/scoring/math/storage/schema/依存/SWactivationはversion以外exact。最終checkall/lint/format/全301passed3.7m、ChromeWK320375900+320文字20pxのfinal116 native8/104は旧3+新3本/nudge0.6/undo/score/reloadexact/errors0。初native後エンド寸法failの元page保持、初回回復は元確定エンドを期待へ含めずfail→同pageで旧3/元2本+新追加3本/score/reloadexact、元errorcollector不可/初fail矩形未保存を明記。別訂正8で押下47.136/layout48/pressedtrueを記録、元fail原因未断定。独立readonlyreview指摘なし（review時点full/final116/public未確認）。CI38202404737 validate/deploy success/Linux301passed5.9m、実artifact11725609858/26safe、実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。元public115context publication444724ms、記録中更新保留→finish4/banner116/旧4exact→320新dock一行/15px/48px/fivehit/containment→native1/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/readable-record-actions-v116/代表11原寸PNGcopySHAexact、旧80tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。全画面情報設計/物理phone/VoiceOver/fieldINP/WKstrictOfflineは未完。
 
 - AN080完了、公開v115/source20f19429609d1c6a0445ee5d6b63d2ec9a095e0c、branch codex/result-storage-notice。結果に重なる容量toastをstatbar直後の持続案内へ移し、「バックアップ設定を開く」で既存設定のbackup操作を表示、閉じて結果へ戻る。自動exportなし、閾値0.8/容量計測/保存失敗toast/保存schema/採点半径/数学/全他runtime/依存/SWactivation保持、CSS4rulesとmarkers一括115。境界3red→3green24.6s、最終local全301passed3.8m/checkall/lint/format成功、ChromeWK320375明暗×通常3/実高容量5000のnative8は旧全件+新矢座標得点/reloadexact/errors0/非重複/設定往復/no download。初WK5000は実ratio.784で案内なしが正しくharness誤判定、元pageを保持して旧5000+新1/reloadexact回復、元fullerrorcollectorは取得不可を明記。別synthetic padding fixtureの訂正8は実ratio>=.8をassert。独立readonlyreview指摘なし（review時点full/native/public未確認）。CI38200540609 validate/deploy success/Linux301passed5.9m、実artifact11726175058/26safe、実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。元public114context publication462061ms、記録中更新保留→finish4/banner115/旧4exact→320native1/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/result-storage-notice-v115/代表13原寸PNGcopySHAexact、旧79tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。小画面dockラベル/履歴分析の情報設計/物理phone/VoiceOver/fieldINP/WKstrictOfflineは未完。
 
@@ -43,7 +43,7 @@
 
 ## 次と未解決
 
-- UI一新を継続する。次は小画面の記録dockの操作ラベルを読みやすく整える一タスク。続いて履歴/分析の情報設計へ進む。ユーザーのUI制約なし・全承認を継続、採点/旧練習データ/主要操作を保ち、費用・個人情報は使わない。
+- UI一新を継続する。次は現行v116の履歴/分析で、過去の練習を見つける→成長の変化を読む流れを実画面で点検し、情報設計の刷新へ進む一タスク。ユーザーのUI制約なし・全承認を継続、採点/旧練習データ/主要操作を保ち、費用・個人情報は使わない。
 - 統計5001回/保存/DOMの負担は残る。既存native依存@capacitor/android・iosのcritical2件（修正版8.4.3）はnative作業前の別確認が必要。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。

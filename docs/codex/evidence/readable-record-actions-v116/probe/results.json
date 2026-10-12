@@ -1,0 +1,746 @@
+[
+  {
+    "browser": "chromium",
+    "width": 320,
+    "font": 15,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 21,
+          "y": 421,
+          "width": 69.9375,
+          "height": 48,
+          "top": 421,
+          "right": 90.9375,
+          "bottom": 469,
+          "left": 21
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 30,
+            "y": 435,
+            "width": 51.9375,
+            "height": 20,
+            "top": 435,
+            "right": 81.9375,
+            "bottom": 455,
+            "left": 30
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 96.9375,
+          "y": 421,
+          "width": 147.609375,
+          "height": 48,
+          "top": 421,
+          "right": 244.546875,
+          "bottom": 469,
+          "left": 96.9375
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 138.234375,
+            "y": 435,
+            "width": 65,
+            "height": 20,
+            "top": 435,
+            "right": 203.234375,
+            "bottom": 455,
+            "left": 138.234375
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 250.546875,
+          "y": 421,
+          "width": 48.453125,
+          "height": 48,
+          "top": 421,
+          "right": 299,
+          "bottom": 469,
+          "left": 250.546875
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 259.546875,
+            "y": 435,
+            "width": 30.453125,
+            "height": 20,
+            "top": 435,
+            "right": 290,
+            "bottom": 455,
+            "left": 259.546875
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 375,
+    "font": 15,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 21,
+          "y": 665,
+          "width": 69.9375,
+          "height": 48,
+          "top": 665,
+          "right": 90.9375,
+          "bottom": 713,
+          "left": 21
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 30,
+            "y": 679,
+            "width": 51.9375,
+            "height": 20,
+            "top": 679,
+            "right": 81.9375,
+            "bottom": 699,
+            "left": 30
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 96.9375,
+          "y": 665,
+          "width": 202.609375,
+          "height": 48,
+          "top": 665,
+          "right": 299.546875,
+          "bottom": 713,
+          "left": 96.9375
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 165.734375,
+            "y": 679,
+            "width": 65,
+            "height": 20,
+            "top": 679,
+            "right": 230.734375,
+            "bottom": 699,
+            "left": 165.734375
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 305.546875,
+          "y": 665,
+          "width": 48.453125,
+          "height": 48,
+          "top": 665,
+          "right": 354,
+          "bottom": 713,
+          "left": 305.546875
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 314.546875,
+            "y": 679,
+            "width": 30.453125,
+            "height": 20,
+            "top": 679,
+            "right": 345,
+            "bottom": 699,
+            "left": 314.546875
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 900,
+    "font": 15,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 181,
+          "y": 753,
+          "width": 69.9375,
+          "height": 48,
+          "top": 753,
+          "right": 250.9375,
+          "bottom": 801,
+          "left": 181
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 190,
+            "y": 767,
+            "width": 51.9375,
+            "height": 20,
+            "top": 767,
+            "right": 241.9375,
+            "bottom": 787,
+            "left": 190
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 256.9375,
+          "y": 753,
+          "width": 407.609375,
+          "height": 48,
+          "top": 753,
+          "right": 664.546875,
+          "bottom": 801,
+          "left": 256.9375
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 428.234375,
+            "y": 767,
+            "width": 65,
+            "height": 20,
+            "top": 767,
+            "right": 493.234375,
+            "bottom": 787,
+            "left": 428.234375
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 670.546875,
+          "y": 753,
+          "width": 48.453125,
+          "height": 48,
+          "top": 753,
+          "right": 719,
+          "bottom": 801,
+          "left": 670.546875
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 679.546875,
+            "y": 767,
+            "width": 30.453125,
+            "height": 20,
+            "top": 767,
+            "right": 710,
+            "bottom": 787,
+            "left": 679.546875
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "chromium",
+    "width": 320,
+    "font": 20,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 21,
+          "y": 416,
+          "width": 87.25,
+          "height": 53,
+          "top": 416,
+          "right": 108.25,
+          "bottom": 469,
+          "left": 21
+        },
+        "font": "20px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 30,
+            "y": 429,
+            "width": 69.25,
+            "height": 27,
+            "top": 429,
+            "right": 99.25,
+            "bottom": 456,
+            "left": 30
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 114.25,
+          "y": 416,
+          "width": 120.140625,
+          "height": 53,
+          "top": 416,
+          "right": 234.390625,
+          "bottom": 469,
+          "left": 114.25
+        },
+        "font": "20px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 130.984375,
+            "y": 429,
+            "width": 86.65625,
+            "height": 27,
+            "top": 429,
+            "right": 217.640625,
+            "bottom": 456,
+            "left": 130.984375
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 240.390625,
+          "y": 416,
+          "width": 58.609375,
+          "height": 53,
+          "top": 416,
+          "right": 299,
+          "bottom": 469,
+          "left": 240.390625
+        },
+        "font": "20px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 249.390625,
+            "y": 429,
+            "width": 40.609375,
+            "height": 27,
+            "top": 429,
+            "right": 290,
+            "bottom": 456,
+            "left": 249.390625
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 320,
+    "font": 15,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 21,
+          "y": 421,
+          "width": 69.9375,
+          "height": 48,
+          "top": 421,
+          "right": 90.9375,
+          "bottom": 469,
+          "left": 21
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 30.001171112060547,
+            "y": 435,
+            "width": 51.93515396118164,
+            "height": 20,
+            "top": 435,
+            "right": 81.93632507324219,
+            "bottom": 455,
+            "left": 30.001171112060547
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 96.9375,
+          "y": 421,
+          "width": 147.609375,
+          "height": 48,
+          "top": 421,
+          "right": 244.546875,
+          "bottom": 469,
+          "left": 96.9375
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 138.241943359375,
+            "y": 435,
+            "width": 64.98486328125,
+            "height": 20,
+            "top": 435,
+            "right": 203.226806640625,
+            "bottom": 455,
+            "left": 138.241943359375
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 250.546875,
+          "y": 421,
+          "width": 48.453125,
+          "height": 48,
+          "top": 421,
+          "right": 299,
+          "bottom": 469,
+          "left": 250.546875
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 259.5484313964844,
+            "y": 435,
+            "width": 30.45001220703125,
+            "height": 20,
+            "top": 435,
+            "right": 289.9984436035156,
+            "bottom": 455,
+            "left": 259.5484313964844
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 375,
+    "font": 15,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 21,
+          "y": 665,
+          "width": 69.9375,
+          "height": 48,
+          "top": 665,
+          "right": 90.9375,
+          "bottom": 713,
+          "left": 21
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 30.001171112060547,
+            "y": 679,
+            "width": 51.93515396118164,
+            "height": 20,
+            "top": 679,
+            "right": 81.93632507324219,
+            "bottom": 699,
+            "left": 30.001171112060547
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 96.9375,
+          "y": 665,
+          "width": 202.609375,
+          "height": 48,
+          "top": 665,
+          "right": 299.546875,
+          "bottom": 713,
+          "left": 96.9375
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 165.741943359375,
+            "y": 679,
+            "width": 64.98486328125,
+            "height": 20,
+            "top": 679,
+            "right": 230.726806640625,
+            "bottom": 699,
+            "left": 165.741943359375
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 305.546875,
+          "y": 665,
+          "width": 48.453125,
+          "height": 48,
+          "top": 665,
+          "right": 354,
+          "bottom": 713,
+          "left": 305.546875
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 314.5484313964844,
+            "y": 679,
+            "width": 30.45001220703125,
+            "height": 20,
+            "top": 679,
+            "right": 344.9984436035156,
+            "bottom": 699,
+            "left": 314.5484313964844
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 900,
+    "font": 15,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 181,
+          "y": 753,
+          "width": 69.9375,
+          "height": 48,
+          "top": 753,
+          "right": 250.9375,
+          "bottom": 801,
+          "left": 181
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 190.0011749267578,
+            "y": 767,
+            "width": 51.935150146484375,
+            "height": 20,
+            "top": 767,
+            "right": 241.9363250732422,
+            "bottom": 787,
+            "left": 190.0011749267578
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 256.9375,
+          "y": 753,
+          "width": 407.609375,
+          "height": 48,
+          "top": 753,
+          "right": 664.546875,
+          "bottom": 801,
+          "left": 256.9375
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 428.241943359375,
+            "y": 767,
+            "width": 64.98486328125,
+            "height": 20,
+            "top": 767,
+            "right": 493.226806640625,
+            "bottom": 787,
+            "left": 428.241943359375
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 670.546875,
+          "y": 753,
+          "width": 48.453125,
+          "height": 48,
+          "top": 753,
+          "right": 719,
+          "bottom": 801,
+          "left": 670.546875
+        },
+        "font": "15px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 679.5484619140625,
+            "y": 767,
+            "width": 30.449951171875,
+            "height": 20,
+            "top": 767,
+            "right": 709.9984130859375,
+            "bottom": 787,
+            "left": 679.5484619140625
+          }
+        ]
+      }
+    ],
+    "errors": []
+  },
+  {
+    "browser": "webkit",
+    "width": 320,
+    "font": 20,
+    "version": 115,
+    "controls": [
+      {
+        "id": "bUndo",
+        "text": "1本取消",
+        "rect": {
+          "x": 21,
+          "y": 416,
+          "width": 87.25,
+          "height": 53,
+          "top": 416,
+          "right": 108.25,
+          "bottom": 469,
+          "left": 21
+        },
+        "font": "20px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 30.001564025878906,
+            "y": 429,
+            "width": 69.24687194824219,
+            "height": 27,
+            "top": 429,
+            "right": 99.2484359741211,
+            "bottom": 456,
+            "left": 30.001564025878906
+          }
+        ]
+      },
+      {
+        "id": "bEnd",
+        "text": "エンド確定",
+        "rect": {
+          "x": 114.25,
+          "y": 416,
+          "width": 120.140625,
+          "height": 53,
+          "top": 416,
+          "right": 234.390625,
+          "bottom": 469,
+          "left": 114.25
+        },
+        "font": "20px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 130.9892578125,
+            "y": 429,
+            "width": 86.646484375,
+            "height": 27,
+            "top": 429,
+            "right": 217.6357421875,
+            "bottom": 456,
+            "left": 130.9892578125
+          }
+        ]
+      },
+      {
+        "id": "bFinish",
+        "text": "終了",
+        "rect": {
+          "x": 240.390625,
+          "y": 416,
+          "width": 58.609375,
+          "height": 53,
+          "top": 416,
+          "right": 299,
+          "bottom": 469,
+          "left": 240.390625
+        },
+        "font": "20px",
+        "padding": "12px 8px",
+        "lineRects": [
+          {
+            "x": 249.3953094482422,
+            "y": 429,
+            "width": 40.59999084472656,
+            "height": 27,
+            "top": 429,
+            "right": 289.99530029296875,
+            "bottom": 456,
+            "left": 249.3953094482422
+          }
+        ]
+      }
+    ],
+    "errors": []
+  }
+]

@@ -1,0 +1,1000 @@
+validate	UNKNOWN STEP	﻿2026-10-12T04:06:03.3333528Z Current runner version: '2.337.0'
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3368558Z ##[group]Runner Image Provisioner
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3369772Z Hosted Compute Agent
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3370827Z Version: 20261002.596
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3371928Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3373333Z Build Date: 2026-10-02T22:28:27Z
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3374474Z Worker ID: {e35ebc24-af7d-4da7-be01-8a22682d3bf0}
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3375996Z Region: eastus
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3376917Z Cloud: Azure
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3377832Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3380523Z ##[group]Operating System
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3381569Z Ubuntu
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3382505Z 24.04.5
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3383344Z LTS
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3384185Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3385203Z ##[group]Runner Image
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3386505Z Image: ubuntu-24.04
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3387473Z Version: 20261004.327.1
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3389621Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3392401Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3394056Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3396320Z ##[group]GITHUB_TOKEN Permissions
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3399256Z Contents: read
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3400336Z Metadata: read
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3401208Z Pages: read
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3402186Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3405050Z Secret source: Actions
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3406988Z Cache mode: write
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3408507Z Prepare workflow directory
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3877514Z Prepare all required actions
+validate	UNKNOWN STEP	2026-10-12T04:06:03.3947748Z Getting action download info
+validate	UNKNOWN STEP	2026-10-12T04:06:03.6238506Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+validate	UNKNOWN STEP	2026-10-12T04:06:03.7079116Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+validate	UNKNOWN STEP	2026-10-12T04:06:03.7902618Z Download action repository 'actions/configure-pages@v5' (SHA:983d7736d9b0ae728b81ab479565c72886d7745b)
+validate	UNKNOWN STEP	2026-10-12T04:06:03.9463106Z Download action repository 'actions/upload-pages-artifact@v4' (SHA:7b1f4a764d45c48632c6b24a0339c27f5614fb0b)
+validate	UNKNOWN STEP	2026-10-12T04:06:04.1480743Z Getting action download info
+validate	UNKNOWN STEP	2026-10-12T04:06:04.2442296Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+validate	UNKNOWN STEP	2026-10-12T04:06:04.3837469Z Complete job name: validate
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4686669Z ##[group]Run actions/checkout@v4
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4687682Z with:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4688250Z   repository: eita115115/archery-note
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4692680Z   token: ***
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4693156Z   ssh-strict: true
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4693626Z   ssh-user: git
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4694114Z   persist-credentials: true
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4694661Z   clean: true
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4695152Z   sparse-checkout-cone-mode: true
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4695909Z   fetch-depth: 1
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4696398Z   fetch-tags: false
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4696916Z   show-progress: true
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4697405Z   lfs: false
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4697861Z   submodules: false
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4698367Z   set-safe-directory: true
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4698918Z   allow-unsafe-pr-checkout: false
+validate	UNKNOWN STEP	2026-10-12T04:06:04.4699787Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5739557Z Syncing repository: eita115115/archery-note
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5742381Z ##[group]Getting Git version info
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5743991Z Working directory is '/home/runner/work/archery-note/archery-note'
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5746312Z [command]/usr/bin/git version
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5794747Z git version 2.55.0
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5819667Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5838062Z Temporarily overriding HOME='/home/runner/work/_temp/bb5ec552-74eb-4679-af2f-9a3c17881bee' before making global git config changes
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5841052Z Adding repository directory to the temporary git global config as a safe directory
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5844541Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/archery-note/archery-note
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5900836Z Deleting the contents of '/home/runner/work/archery-note/archery-note'
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5907208Z ##[group]Initializing the repository
+validate	UNKNOWN STEP	2026-10-12T04:06:04.5912169Z [command]/usr/bin/git init /home/runner/work/archery-note/archery-note
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6025770Z hint: Using 'master' as the name for the initial branch. This default branch name
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6027902Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6029769Z hint: to use in all of your new repositories, which will suppress this warning,
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6031342Z hint: call:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6131257Z hint:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6132576Z hint: 	git config --global init.defaultBranch <name>
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6133793Z hint:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6134996Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6137643Z hint: 'development'. The just-created branch can be renamed via this command:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6139215Z hint:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6140128Z hint: 	git branch -m <name>
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6141151Z hint:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6142428Z hint: Disable this message with "git config set advice.defaultBranchName false"
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6144563Z Initialized empty Git repository in /home/runner/work/archery-note/archery-note/.git/
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6148800Z [command]/usr/bin/git remote add origin https://github.com/eita115115/archery-note
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6152072Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6153272Z ##[group]Disabling automatic garbage collection
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6154064Z [command]/usr/bin/git config --local gc.auto 0
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6157473Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6158799Z ##[group]Setting up auth
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6161501Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6197188Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6585103Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6630657Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6856969Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+validate	UNKNOWN STEP	2026-10-12T04:06:04.6894785Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+validate	UNKNOWN STEP	2026-10-12T04:06:04.7119622Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+validate	UNKNOWN STEP	2026-10-12T04:06:04.7161903Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:04.7163350Z ##[group]Fetching the repository
+validate	UNKNOWN STEP	2026-10-12T04:06:04.7171866Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +3688a3b3d4b8b4b64db5109a183645dc657f284e:refs/remotes/origin/main
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2878662Z From https://github.com/eita115115/archery-note
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2879738Z  * [new ref]         3688a3b3d4b8b4b64db5109a183645dc657f284e -> origin/main
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2883986Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2884803Z ##[group]Determining the checkout info
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2886572Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2892276Z [command]/usr/bin/git sparse-checkout disable
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2947435Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2980735Z ##[group]Checking out the ref
+validate	UNKNOWN STEP	2026-10-12T04:06:06.2986646Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5191946Z Switched to a new branch 'main'
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5198667Z branch 'main' set up to track 'origin/main'.
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5214523Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5263180Z [command]/usr/bin/git log -1 --format=%H
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5290218Z 3688a3b3d4b8b4b64db5109a183645dc657f284e
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5568772Z ##[group]Run actions/setup-node@v4
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5569126Z with:
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5569332Z   node-version: 22
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5569557Z   cache: npm
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5569760Z   always-auth: false
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5569993Z   check-latest: false
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5572706Z   token: ***
+validate	UNKNOWN STEP	2026-10-12T04:06:06.5572923Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:06.6966156Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+validate	UNKNOWN STEP	2026-10-12T04:06:06.6971002Z (node:2313) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+validate	UNKNOWN STEP	2026-10-12T04:06:06.6972380Z (Use `node --trace-deprecation ...` to show where the warning was created)
+validate	UNKNOWN STEP	2026-10-12T04:06:06.6974681Z ##[group]Environment details
+validate	UNKNOWN STEP	2026-10-12T04:06:07.1299412Z node: v22.23.3
+validate	UNKNOWN STEP	2026-10-12T04:06:07.1300140Z npm: 10.9.9
+validate	UNKNOWN STEP	2026-10-12T04:06:07.1300770Z yarn: 1.22.22
+validate	UNKNOWN STEP	2026-10-12T04:06:07.1301737Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:07.1353939Z [command]/opt/hostedtoolcache/node/22.23.3/x64/bin/npm config get cache
+validate	UNKNOWN STEP	2026-10-12T04:06:07.2553754Z /home/runner/.npm
+validate	UNKNOWN STEP	2026-10-12T04:06:07.3227863Z npm cache is not found
+validate	UNKNOWN STEP	2026-10-12T04:06:07.3377336Z ##[group]Run npm ci
+validate	UNKNOWN STEP	2026-10-12T04:06:07.3377653Z ^[[36;1mnpm ci^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:06:07.3647765Z shell: /usr/bin/bash -e {0}
+validate	UNKNOWN STEP	2026-10-12T04:06:07.3648066Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1441430Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1448749Z added 268 packages, and audited 269 packages in 7s
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1449442Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1449995Z 43 packages are looking for funding
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1450653Z   run `npm fund` for details
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1756458Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1757280Z 2 critical severity vulnerabilities
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1757872Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1758356Z To address all issues, run:
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1759077Z   npm audit fix
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1759507Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.1760008Z Run `npm audit` for details.
+validate	UNKNOWN STEP	2026-10-12T04:06:14.2404794Z ##[group]Run npm run check:all
+validate	UNKNOWN STEP	2026-10-12T04:06:14.2405288Z ^[[36;1mnpm run check:all^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:06:14.2487272Z shell: /usr/bin/bash -e {0}
+validate	UNKNOWN STEP	2026-10-12T04:06:14.2487673Z env:
+validate	UNKNOWN STEP	2026-10-12T04:06:14.2488016Z   CHROME_PATH: /usr/bin/google-chrome
+validate	UNKNOWN STEP	2026-10-12T04:06:14.2488475Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:14.3502001Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.3502439Z > archery-note@0.116.0 check:all
+validate	UNKNOWN STEP	2026-10-12T04:06:14.3505025Z > npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version && npm run check:distribution
+validate	UNKNOWN STEP	2026-10-12T04:06:14.3507042Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.4531608Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.4532336Z > archery-note@0.116.0 check:app
+validate	UNKNOWN STEP	2026-10-12T04:06:14.4533381Z > node tools/check-app.js
+validate	UNKNOWN STEP	2026-10-12T04:06:14.4533937Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:14.6285120Z Score distribution: 36000 arrows, 72000 score reads
+validate	UNKNOWN STEP	2026-10-12T04:06:14.9407470Z Score trend: 1000 seeded histories and empty/sparse/coercion/overflow HTML unchanged; inputs immutable
+validate	UNKNOWN STEP	2026-10-12T04:06:14.9672972Z Score trend: 1000x36 fixture, 288 score reads, tail after eighth record untouched
+validate	UNKNOWN STEP	2026-10-12T04:06:14.9674055Z Archery Note checks OK (v116)
+validate	UNKNOWN STEP	2026-10-12T04:06:14.9674886Z Robust grouping: used=8, excluded=1, confidence=30%
+validate	UNKNOWN STEP	2026-10-12T04:06:14.9675940Z Physics: 209fps, rho=1.08, Cd=1.20
+validate	UNKNOWN STEP	2026-10-12T04:06:15.0758196Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:15.0759205Z > archery-note@0.116.0 check:globals
+validate	UNKNOWN STEP	2026-10-12T04:06:15.0760259Z > node tools/check-globals.js
+validate	UNKNOWN STEP	2026-10-12T04:06:15.0765180Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:15.5553568Z check-globals OK (14 files, 1240 unresolved refs all accounted for)
+validate	UNKNOWN STEP	2026-10-12T04:06:15.6635549Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:15.6636579Z > archery-note@0.116.0 check:analysis
+validate	UNKNOWN STEP	2026-10-12T04:06:15.6637576Z > node tools/check-analysis-core.js && node tools/check-grouping-interpretation.js
+validate	UNKNOWN STEP	2026-10-12T04:06:15.6638145Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:15.7259868Z Analysis core characterization checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:15.7273156Z Robust median reuse checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:15.7734801Z Grouping interpretation checks OK (43 checks; real scoring/statistics, score populations retained)
+validate	UNKNOWN STEP	2026-10-12T04:06:15.8721122Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:15.8721729Z > archery-note@0.116.0 check:form
+validate	UNKNOWN STEP	2026-10-12T04:06:15.8723048Z > node tools/check-form-core.js && node tools/golden-replay/test-form-metric-fixtures.js && node tools/check-form-diagnostics.js
+validate	UNKNOWN STEP	2026-10-12T04:06:15.8723751Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6579626Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6580698Z 矢プレゼンス検出: 合成フレーム分離性テーブル
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6586245Z label                                score
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6587513Z noisy bg + line                      1
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6588100Z noisy bg, no line                    0
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6593642Z textured bg + line                   1
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6594290Z textured bg, no line                 0
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6594992Z partially occluded line (rest area)  0.774
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6595867Z tilted 15deg + line                  0.839
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6604981Z tilted 15deg, no line                0
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6626252Z tilted -15deg + line                 0.871
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6626951Z tilted -15deg, no line               0
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6627596Z bright bg, dark line                 1
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6628264Z dark bg, bright line                 1
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6629115Z   min(あり)=0.774  max(なし)=0.000  分離しきい値候補=0.55
+validate	UNKNOWN STEP	2026-10-12T04:06:16.6629868Z Form core checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7006391Z ok - validates and freezes the exact bounded fixture schema
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7015321Z ok - rejects unknown keys, paths, URLs, and full landmark payloads
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7021829Z ok - rejects duplicate and unknown raw keys before JSON parsing
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7027789Z ok - rejects malformed or mismatched hashes and runtime profiles
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7032264Z ok - rejects nonfinite metrics, non-increasing time, and malformed null rows
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7066310Z ok - enforces bounded source bytes and frame count
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7097132Z ok - replay is deterministic, non-mutating, fresh, ordered, and cancels the latest fire
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7101628Z ok - browser and Node parity failures are replay errors
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7107950Z ok - runtime, parity, and configuration errors have distinct CLI classifications
+validate	UNKNOWN STEP	2026-10-12T04:06:16.7114919Z ok - review truth is matched by source SHA rather than fixture filename
+validate	UNKNOWN STEP	2026-10-12T04:06:16.8392054Z ok - both tracked public fixtures load and replay deterministically without mutation
+validate	UNKNOWN STEP	2026-10-12T04:06:16.8603862Z ok - reviewed oblique release is the only retained shot in its truth window
+validate	UNKNOWN STEP	2026-10-12T04:06:16.8827766Z ok - reviewed scene-cut retrieval retains no shot and emits no adaptive release
+validate	UNKNOWN STEP	2026-10-12T04:06:16.9500748Z ok - acceptance CLI maps synthetic truth and schema/config to exits 0 and 2
+validate	UNKNOWN STEP	2026-10-12T04:06:16.9502374Z ok - check:form includes fixture tests but excludes the standalone acceptance CLI
+validate	UNKNOWN STEP	2026-10-12T04:06:16.9503222Z Form metric fixture checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:16.9979811Z Form diagnostic checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:17.0993559Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:17.0994225Z > archery-note@0.116.0 check:gamification
+validate	UNKNOWN STEP	2026-10-12T04:06:17.0994884Z > node tools/check-gamification.js
+validate	UNKNOWN STEP	2026-10-12T04:06:17.0995129Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:17.1342005Z Gamification pure-function checks OK (streak / 12 badges / backfill / goals)
+validate	UNKNOWN STEP	2026-10-12T04:06:17.2375813Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:17.2376463Z > archery-note@0.116.0 check:todays-result
+validate	UNKNOWN STEP	2026-10-12T04:06:17.2376957Z > node tools/check-todays-result.js
+validate	UNKNOWN STEP	2026-10-12T04:06:17.2377193Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:17.2817859Z Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)
+validate	UNKNOWN STEP	2026-10-12T04:06:17.2875373Z Personal best copy checks OK (18 real computed cases; exact-count HTML/calculation preserved; projection and pace notes)
+validate	UNKNOWN STEP	2026-10-12T04:06:17.2877270Z Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)
+validate	UNKNOWN STEP	2026-10-12T04:06:17.3886845Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:17.3887763Z > archery-note@0.116.0 check:security
+validate	UNKNOWN STEP	2026-10-12T04:06:17.3888272Z > node tools/check-security.js
+validate	UNKNOWN STEP	2026-10-12T04:06:17.3888476Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:17.4183927Z Security regression: all 38 checks passed
+validate	UNKNOWN STEP	2026-10-12T04:06:17.5173628Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:17.5174169Z > archery-note@0.116.0 check:ui
+validate	UNKNOWN STEP	2026-10-12T04:06:17.5174976Z > node tools/check-ui.js
+validate	UNKNOWN STEP	2026-10-12T04:06:17.5175253Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:28.2994701Z UI smoke checks OK (google-chrome)
+validate	UNKNOWN STEP	2026-10-12T04:06:28.2995747Z artifacts/ui-smoke/iphone-390.png 390x844 20698 bytes
+validate	UNKNOWN STEP	2026-10-12T04:06:28.2997859Z artifacts/ui-smoke/small-360.png 360x780 22763 bytes
+validate	UNKNOWN STEP	2026-10-12T04:06:28.2998729Z artifacts/ui-smoke/desktop-1280.png 1280x800 27015 bytes
+validate	UNKNOWN STEP	2026-10-12T04:06:29.8402126Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:29.8402731Z > archery-note@0.116.0 check:pwa
+validate	UNKNOWN STEP	2026-10-12T04:06:29.8403323Z > node tools/check-pwa-assets.js && node tools/check-pwa-update-flow.js
+validate	UNKNOWN STEP	2026-10-12T04:06:29.8403689Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:29.8708756Z PWA asset checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:29.8977814Z PWA update flow checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:30.0007315Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:30.0007789Z > archery-note@0.116.0 check:storage
+validate	UNKNOWN STEP	2026-10-12T04:06:30.0008647Z > node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js && node tools/check-save-debounce.js
+validate	UNKNOWN STEP	2026-10-12T04:06:30.0009203Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:30.0388388Z Storage contract checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:30.0884781Z Storage round-trip checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:30.1217289Z Save debounce checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:30.2238831Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:30.2239663Z > archery-note@0.116.0 check:version
+validate	UNKNOWN STEP	2026-10-12T04:06:30.2240615Z > node tools/check-version-alignment.js
+validate	UNKNOWN STEP	2026-10-12T04:06:30.2241190Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:30.2521111Z Version alignment checks OK
+validate	UNKNOWN STEP	2026-10-12T04:06:30.3591439Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:30.3591983Z > archery-note@0.116.0 check:distribution
+validate	UNKNOWN STEP	2026-10-12T04:06:30.3592417Z > node tools/check-distribution.js
+validate	UNKNOWN STEP	2026-10-12T04:06:30.3592625Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:30.9322834Z Native web assets ready: dist/native (v116)
+validate	UNKNOWN STEP	2026-10-12T04:06:32.0614957Z Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 197185→140311 bytes; cross-script fixtures
+validate	UNKNOWN STEP	2026-10-12T04:06:32.0912643Z ##[group]Run npm run lint
+validate	UNKNOWN STEP	2026-10-12T04:06:32.0912952Z ^[[36;1mnpm run lint^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:06:32.0974863Z shell: /usr/bin/bash -e {0}
+validate	UNKNOWN STEP	2026-10-12T04:06:32.0975131Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:32.1991319Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:32.1991825Z > archery-note@0.116.0 lint
+validate	UNKNOWN STEP	2026-10-12T04:06:32.1992727Z > eslint "*.js" "scripts/**/*.js" "tools/**/*.js" "tests/**/*.js" "eslint.config.mjs"
+validate	UNKNOWN STEP	2026-10-12T04:06:32.1993285Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:34.5876249Z ##[group]Run npm run format:check
+validate	UNKNOWN STEP	2026-10-12T04:06:34.5876599Z ^[[36;1mnpm run format:check^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:06:34.5938272Z shell: /usr/bin/bash -e {0}
+validate	UNKNOWN STEP	2026-10-12T04:06:34.5938536Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:34.6935210Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:34.6935949Z > archery-note@0.116.0 format:check
+validate	UNKNOWN STEP	2026-10-12T04:06:34.6937776Z > prettier "package*.json" "README.md" "CHANGELOG.md" "CODE_OF_CONDUCT.md" "CONTRIBUTING.md" "SECURITY.md" "THIRD_PARTY.md" "docs/**/*.md" ".github/**/*.md" "eslint.config.mjs" "playwright.config.js" "tools/e2e-server.js" "tools/lighthouse-baseline.js" "tests/**/*.js" ".prettierrc" --check
+validate	UNKNOWN STEP	2026-10-12T04:06:34.6938948Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:34.7783698Z Checking formatting...
+validate	UNKNOWN STEP	2026-10-12T04:06:39.6271702Z All matched files use Prettier code style!
+validate	UNKNOWN STEP	2026-10-12T04:06:39.6623890Z ##[group]Run npx playwright install --with-deps chromium
+validate	UNKNOWN STEP	2026-10-12T04:06:39.6624343Z ^[[36;1mnpx playwright install --with-deps chromium^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:06:39.6686294Z shell: /usr/bin/bash -e {0}
+validate	UNKNOWN STEP	2026-10-12T04:06:39.6686618Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.4368333Z Installing dependencies...
+validate	UNKNOWN STEP	2026-10-12T04:06:40.4432327Z Switching to root user to install dependencies...
+validate	UNKNOWN STEP	2026-10-12T04:06:40.5447290Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.5617090Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6461085Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [492 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6491161Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6582449Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6602699Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6612222Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6643327Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [12.3 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6678470Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [548 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.6730826Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main all Packages [640 B]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.7641140Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1375 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.7737168Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [306 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.7764873Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1702 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.7869233Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [342 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.7880620Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1761 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.7974291Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [401 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.8012314Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [55.0 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.8027246Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.8663880Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1121 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.8726852Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [228 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.9169290Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1220 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.9235422Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [245 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.9258977Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1669 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.9343260Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [383 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.9373351Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [49.8 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:40.9388541Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [12.4 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:43.7251639Z Fetched 12.3 MB in 1s (9634 kB/s)
+validate	UNKNOWN STEP	2026-10-12T04:06:44.5710733Z Reading package lists...
+validate	UNKNOWN STEP	2026-10-12T04:06:44.5944550Z Reading package lists...
+validate	UNKNOWN STEP	2026-10-12T04:06:44.7643538Z Building dependency tree...
+validate	UNKNOWN STEP	2026-10-12T04:06:44.7650781Z Reading state information...
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9006923Z libasound2t64 is already the newest version (1.2.11-1ubuntu0.3).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9007907Z libasound2t64 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9008612Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9009283Z libatk-bridge2.0-0t64 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9010370Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9011198Z libatk1.0-0t64 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9011847Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9012443Z libatspi2.0-0t64 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9013010Z libcairo2 is already the newest version (1.18.0-3build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9013539Z libcairo2 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9014125Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.14).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9014781Z libcups2t64 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9015758Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9016578Z libdbus-1-3 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9017150Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.2).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9017639Z libdrm2 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9018100Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.4).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9018542Z libgbm1 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9019009Z libglib2.0-0t64 is already the newest version (2.80.0-6ubuntu3.9).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9019586Z libglib2.0-0t64 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9020060Z libnspr4 is already the newest version (2:4.35-1.1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9020503Z libnspr4 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9020944Z libnss3 is already the newest version (2:3.98-1ubuntu0.2).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9021377Z libnss3 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9021836Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9022302Z libpango-1.0-0 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9022815Z libx11-6 is already the newest version (2:1.8.7-1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9023231Z libx11-6 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9023746Z libxcb1 is already the newest version (1.15-1ubuntu2).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9024163Z libxcb1 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9024628Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9025100Z libxcomposite1 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9025698Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9026148Z libxdamage1 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9026581Z libxext6 is already the newest version (2:1.3.4-1build2).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9027089Z libxext6 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9027493Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9027888Z libxfixes3 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9028289Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9028691Z libxkbcommon0 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9029097Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9029487Z libxrandr2 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9029882Z xvfb is already the newest version (2:21.1.12-1ubuntu1.8).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9030419Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9030984Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9031401Z libfontconfig1 set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9031817Z fonts-liberation is already the newest version (1:2.1.5-3).
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9032222Z fonts-liberation set to manually installed.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9032621Z The following additional packages will be installed:
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9032975Z   xfonts-encodings xfonts-utils
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9033259Z Recommended packages:
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9033555Z   fonts-ipafont-mincho fonts-tlwg-loma
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9189495Z The following NEW packages will be installed:
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9190047Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9195001Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9195927Z   xfonts-utils
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9199317Z The following packages will be upgraded:
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9203571Z   libfreetype6
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9360003Z 1 upgraded, 9 newly installed, 0 to remove and 22 not upgraded.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9360788Z Need to get 21.5 MB of archives.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9361583Z After this operation, 79.5 MB of additional disk space will be used.
+validate	UNKNOWN STEP	2026-10-12T04:06:44.9362480Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+validate	UNKNOWN STEP	2026-10-12T04:06:45.0344736Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:45.2025868Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:45.3882177Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:45.4719809Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:45.6314850Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:45.9073973Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libfreetype6 amd64 2.13.2+dfsg-1ubuntu0.2 [403 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:45.9990035Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:46.0960708Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:46.1801835Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:46.2728387Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5222753Z Fetched 21.5 MB in 1s (15.9 MB/s)
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5442069Z Selecting previously unselected package fonts-ipafont-gothic.
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5732203Z (Reading database ... 
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5732707Z (Reading database ... 5%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5733154Z (Reading database ... 10%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5733577Z (Reading database ... 15%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5733867Z (Reading database ... 20%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5734228Z (Reading database ... 25%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5734551Z (Reading database ... 30%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5734824Z (Reading database ... 35%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5736079Z (Reading database ... 40%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5736499Z (Reading database ... 45%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5736791Z (Reading database ... 50%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.5782241Z (Reading database ... 55%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.6549121Z (Reading database ... 60%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.7192530Z (Reading database ... 65%
+validate	UNKNOWN STEP	2026-10-12T04:06:46.9101564Z (Reading database ... 70%
+validate	UNKNOWN STEP	2026-10-12T04:06:47.0940779Z (Reading database ... 75%
+validate	UNKNOWN STEP	2026-10-12T04:06:47.2515670Z (Reading database ... 80%
+validate	UNKNOWN STEP	2026-10-12T04:06:47.3981812Z (Reading database ... 85%
+validate	UNKNOWN STEP	2026-10-12T04:06:47.5986183Z (Reading database ... 90%
+validate	UNKNOWN STEP	2026-10-12T04:06:47.7406884Z (Reading database ... 95%
+validate	UNKNOWN STEP	2026-10-12T04:06:47.7407355Z (Reading database ... 100%
+validate	UNKNOWN STEP	2026-10-12T04:06:47.7407975Z (Reading database ... 203191 files and directories currently installed.)
+validate	UNKNOWN STEP	2026-10-12T04:06:47.7448099Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:47.7539671Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:47.9812195Z Selecting previously unselected package fonts-freefont-ttf.
+validate	UNKNOWN STEP	2026-10-12T04:06:47.9936013Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:47.9942605Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.0828894Z Selecting previously unselected package fonts-tlwg-loma-otf.
+validate	UNKNOWN STEP	2026-10-12T04:06:48.0950868Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.0958035Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.1151551Z Selecting previously unselected package fonts-unifont.
+validate	UNKNOWN STEP	2026-10-12T04:06:48.1271906Z Preparing to unpack .../3-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.1277968Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.2359585Z Selecting previously unselected package fonts-wqy-zenhei.
+validate	UNKNOWN STEP	2026-10-12T04:06:48.2482932Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.2582143Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.7446046Z Preparing to unpack .../5-libfreetype6_2.13.2+dfsg-1ubuntu0.2_amd64.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.7477968Z Unpacking libfreetype6:amd64 (2.13.2+dfsg-1ubuntu0.2) over (2.13.2+dfsg-1ubuntu0.1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.7726269Z Selecting previously unselected package xfonts-encodings.
+validate	UNKNOWN STEP	2026-10-12T04:06:48.7853158Z Preparing to unpack .../6-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.7859645Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.8143023Z Selecting previously unselected package xfonts-utils.
+validate	UNKNOWN STEP	2026-10-12T04:06:48.8274129Z Preparing to unpack .../7-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.8281004Z Unpacking xfonts-utils (1:7.7+6build3) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.8630232Z Selecting previously unselected package xfonts-cyrillic.
+validate	UNKNOWN STEP	2026-10-12T04:06:48.8752712Z Preparing to unpack .../8-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.8760175Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9094243Z Selecting previously unselected package xfonts-scalable.
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9218713Z Preparing to unpack .../9-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9227141Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9643465Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9766633Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9784752Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9803698Z Setting up libfreetype6:amd64 (2.13.2+dfsg-1ubuntu0.2) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9822346Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9840726Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9908312Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9923969Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9940745Z Setting up xfonts-utils (1:7.7+6build3) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:48.9978024Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:49.0253994Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:49.0520467Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:49.0854439Z Processing triggers for man-db (2.12.0-4build2) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:49.0875039Z Not building database; man-db/auto-update is not 'true'.
+validate	UNKNOWN STEP	2026-10-12T04:06:49.0888509Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+validate	UNKNOWN STEP	2026-10-12T04:06:49.7980568Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:49.7981247Z Running kernel seems to be up-to-date.
+validate	UNKNOWN STEP	2026-10-12T04:06:49.7981655Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:49.7981855Z Restarting services...
+validate	UNKNOWN STEP	2026-10-12T04:06:49.8054370Z  systemctl restart php8.3-fpm.service
+validate	UNKNOWN STEP	2026-10-12T04:06:49.9176235Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:49.9177531Z No containers need to be restarted.
+validate	UNKNOWN STEP	2026-10-12T04:06:49.9178159Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:49.9178739Z No user sessions are running outdated binaries.
+validate	UNKNOWN STEP	2026-10-12T04:06:49.9179493Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:49.9180438Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+validate	UNKNOWN STEP	2026-10-12T04:06:50.7459103Z Downloading Chrome for Testing 149.0.7827.55 (playwright chromium v1228) from https://cdn.playwright.dev/builds/cft/149.0.7827.55/linux64/chrome-linux64.zip
+validate	UNKNOWN STEP	2026-10-12T04:06:51.7519702Z |                                                                                |   0% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:51.9295065Z |■■■■■■■■                                                                        |  10% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.0260080Z |■■■■■■■■■■■■■■■■                                                                |  20% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.0924045Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.1601330Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.2279975Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.2908756Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.3485984Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.4083389Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.4686441Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:52.5268964Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 177 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:55.2179719Z Chrome for Testing 149.0.7827.55 (playwright chromium v1228) downloaded to /home/runner/.cache/ms-playwright/chromium-1228
+validate	UNKNOWN STEP	2026-10-12T04:06:55.2182584Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+validate	UNKNOWN STEP	2026-10-12T04:06:56.1925325Z |                                                                                |   0% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.1965768Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.1992992Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2013549Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2028253Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2049833Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2062069Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2076533Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2091972Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2103687Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2113609Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2715166Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+validate	UNKNOWN STEP	2026-10-12T04:06:56.2719046Z Downloading Chrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) from https://cdn.playwright.dev/builds/cft/149.0.7827.55/linux64/chrome-headless-shell-linux64.zip
+validate	UNKNOWN STEP	2026-10-12T04:06:57.2548327Z |                                                                                |   0% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.4216653Z |■■■■■■■■                                                                        |  10% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.5017956Z |■■■■■■■■■■■■■■■■                                                                |  20% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.5507403Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.5968929Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.6414828Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.6847515Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.7246014Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.7638999Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.8055386Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:57.8502830Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.2 MiB
+validate	UNKNOWN STEP	2026-10-12T04:06:59.7912813Z Chrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1228
+validate	UNKNOWN STEP	2026-10-12T04:06:59.8181224Z ##[group]Run npm run test:e2e:dist
+validate	UNKNOWN STEP	2026-10-12T04:06:59.8181833Z ^[[36;1mnpm run test:e2e:dist^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:06:59.8250910Z shell: /usr/bin/bash -e {0}
+validate	UNKNOWN STEP	2026-10-12T04:06:59.8251182Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:06:59.9271146Z 
+validate	UNKNOWN STEP	2026-10-12T04:06:59.9271743Z > archery-note@0.116.0 test:e2e:dist
+validate	UNKNOWN STEP	2026-10-12T04:06:59.9272258Z > node tools/test-distribution.js
+validate	UNKNOWN STEP	2026-10-12T04:06:59.9272482Z 
+validate	UNKNOWN STEP	2026-10-12T04:07:00.5197424Z Native web assets ready: dist/native (v116)
+validate	UNKNOWN STEP	2026-10-12T04:07:01.9311905Z 
+validate	UNKNOWN STEP	2026-10-12T04:07:01.9312810Z Running 301 tests using 2 workers
+validate	UNKNOWN STEP	2026-10-12T04:07:01.9328878Z 
+validate	UNKNOWN STEP	2026-10-12T04:07:03.8878223Z   ✓    2 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 0) (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:07:03.8887501Z   ✓    1 [chromium] › tests/e2e/analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (320/light) (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:07:04.5274498Z   ✓    4 [chromium] › tests/e2e/analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (320/light) (624ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:04.9853309Z   ✓    3 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 1) (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:07:05.2278237Z   ✓    5 [chromium] › tests/e2e/analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (320/light) (680ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:05.9909702Z   ✓    6 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 2) (987ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:06.0986008Z   ✓    7 [chromium] › tests/e2e/analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (375/dark) (840ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:06.7039215Z   ✓    9 [chromium] › tests/e2e/analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (375/dark) (594ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:07.0028026Z   ✓    8 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 3) (991ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:07.4219293Z   ✓   10 [chromium] › tests/e2e/analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (375/dark) (707ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:07.9998291Z   ✓   11 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 6) (981ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:08.0066095Z   ✓   12 [chromium] › tests/e2e/app-smoke.spec.js:81:1 › loads core tabs and seeded history without console errors (554ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:08.4857170Z   ✓   14 [chromium] › tests/e2e/app-smoke.spec.js:117:1 › moves exactly one aria-current marker when switching tabs (469ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:08.9922732Z   ✓   13 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 0) (975ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:09.7077826Z   ✓   15 [chromium] › tests/e2e/app-smoke.spec.js:140:1 › exposes distance chips as buttons with synced aria-pressed (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:07:09.8802800Z   ✓   16 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 1) (871ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:10.8393135Z   ✓   18 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 2) (946ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:11.4244468Z   ✓   17 [chromium] › tests/e2e/app-smoke.spec.js:169:1 › exposes history rows and sight distance chips as buttons (1.7s)
+validate	UNKNOWN STEP	2026-10-12T04:07:11.7840049Z   ✓   19 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 3) (930ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:11.8140457Z   ✓   20 [chromium] › tests/e2e/app-smoke.spec.js:208:1 › opens settings as a dialog, closes on Escape, and restores focus (370ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:12.7464613Z   ✓   21 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 6) (946ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:13.5615213Z   ✓   23 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 0) (801ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:13.8960309Z   ✓   22 [chromium] › tests/e2e/app-smoke.spec.js:235:1 › appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore (2.1s)
+validate	UNKNOWN STEP	2026-10-12T04:07:14.4418423Z   ✓   24 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 1) (867ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:15.3151385Z   ✓   26 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 2) (860ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:16.1850411Z   ✓   27 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 3) (854ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:17.0422721Z   ✓   28 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 6) (842ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:17.8817801Z   ✓   29 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 0) (825ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:18.3976935Z   ✓   25 [chromium] › tests/e2e/app-smoke.spec.js:281:1 › records a multi-distance round with stage advance and history badges (4.5s)
+validate	UNKNOWN STEP	2026-10-12T04:07:18.8474393Z   ✓   30 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 1) (952ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:19.2081948Z   ✓   31 [chromium] › tests/e2e/app-smoke.spec.js:337:1 › syncs aria-pressed on settings theme and form tracking chips (792ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:19.8026516Z   ✓   32 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 2) (942ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:20.6527930Z   ✓   34 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 3) (832ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:21.3253403Z   ✓   33 [chromium] › tests/e2e/build-week-growth.spec.js:9:1 › demo data opens an explainable growth dashboard and remains removable (2.1s)
+validate	UNKNOWN STEP	2026-10-12T04:07:21.6168223Z   ✓   35 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 6) (947ms)
+validate	UNKNOWN STEP	2026-10-12T04:07:22.5654407Z   ✓   36 [chromium] › tests/e2e/build-week-growth.spec.js:37:1 › growth dashboard works at narrow mobile width and in dark mode (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:07:23.7237268Z   ✓   37 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:186:1 › native one-arrow finish stays pending across analysis and history (2.1s)
+validate	UNKNOWN STEP	2026-10-12T04:07:28.6797470Z   ✓   39 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, reduce, 40, notice false) (4.9s)
+validate	UNKNOWN STEP	2026-10-12T04:07:33.1510531Z   ✓   38 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, no-preference, 18m/40cm/3) (10.6s)
+validate	UNKNOWN STEP	2026-10-12T04:07:33.3132761Z   ✓   40 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, reduce, 122, notice false) (4.6s)
+validate	UNKNOWN STEP	2026-10-12T04:07:39.6126303Z   ✓   41 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, reduce, 18m/40cm/3) (6.4s)
+validate	UNKNOWN STEP	2026-10-12T04:07:42.1706439Z   ✓   42 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 40, notice false) (8.8s)
+validate	UNKNOWN STEP	2026-10-12T04:07:49.3887569Z   ✓   44 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 122, notice false) (7.2s)
+validate	UNKNOWN STEP	2026-10-12T04:07:50.1377274Z   ✓   43 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, no-preference, 18m/40cm/3) (10.5s)
+validate	UNKNOWN STEP	2026-10-12T04:07:54.0524329Z   ✓   45 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, reduce, 40, notice false) (4.7s)
+validate	UNKNOWN STEP	2026-10-12T04:07:56.4157312Z   ✓   46 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, reduce, 18m/40cm/3) (6.3s)
+validate	UNKNOWN STEP	2026-10-12T04:07:58.7810469Z   ✓   47 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, reduce, 122, notice false) (4.7s)
+validate	UNKNOWN STEP	2026-10-12T04:08:06.4131673Z   ✓   48 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, no-preference, 18m/40cm/3) (10.0s)
+validate	UNKNOWN STEP	2026-10-12T04:08:07.5480742Z   ✓   49 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, no-preference, 40, notice false) (8.8s)
+validate	UNKNOWN STEP	2026-10-12T04:08:12.6757717Z   ✓   50 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, reduce, 18m/40cm/3) (6.2s)
+validate	UNKNOWN STEP	2026-10-12T04:08:16.3320796Z   ✓   51 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, no-preference, 122, notice false) (8.8s)
+validate	UNKNOWN STEP	2026-10-12T04:08:20.9630831Z   ✓   53 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, reduce, 40, notice false) (4.6s)
+validate	UNKNOWN STEP	2026-10-12T04:08:22.6949524Z   ✓   52 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, no-preference, 18m/40cm/3) (10.0s)
+validate	UNKNOWN STEP	2026-10-12T04:08:25.5527087Z   ✓   54 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, reduce, 122, notice false) (4.6s)
+validate	UNKNOWN STEP	2026-10-12T04:08:28.8671842Z   ✓   55 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, reduce, 18m/40cm/3) (6.2s)
+validate	UNKNOWN STEP	2026-10-12T04:08:33.6581524Z   ✓   56 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 40, notice false) (8.1s)
+validate	UNKNOWN STEP	2026-10-12T04:08:39.6528774Z   ✓   57 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, no-preference, 70m/122cm/6) (10.8s)
+validate	UNKNOWN STEP	2026-10-12T04:08:41.8595227Z   ✓   58 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 122, notice false) (8.2s)
+validate	UNKNOWN STEP	2026-10-12T04:08:45.9226819Z   ✓   59 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, reduce, 70m/122cm/6) (6.3s)
+validate	UNKNOWN STEP	2026-10-12T04:08:46.4379523Z   ✓   60 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, reduce, 40, notice false) (4.6s)
+validate	UNKNOWN STEP	2026-10-12T04:08:51.1659492Z   ✓   62 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, reduce, 122, notice false) (4.7s)
+validate	UNKNOWN STEP	2026-10-12T04:08:55.0343582Z   ✓   61 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, no-preference, 70m/122cm/6) (9.1s)
+validate	UNKNOWN STEP	2026-10-12T04:08:59.3447790Z   ✓   63 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, no-preference, 40, notice false) (8.2s)
+validate	UNKNOWN STEP	2026-10-12T04:09:01.2726642Z   ✓   64 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, reduce, 70m/122cm/6) (6.2s)
+validate	UNKNOWN STEP	2026-10-12T04:09:07.5224046Z   ✓   65 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, no-preference, 122, notice false) (8.2s)
+validate	UNKNOWN STEP	2026-10-12T04:09:11.6252458Z   ✓   66 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, no-preference, 70m/122cm/6) (10.3s)
+validate	UNKNOWN STEP	2026-10-12T04:09:15.7929111Z   ✓   67 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 40, notice true) (8.3s)
+validate	UNKNOWN STEP	2026-10-12T04:09:17.8918379Z   ✓   68 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, reduce, 70m/122cm/6) (6.3s)
+validate	UNKNOWN STEP	2026-10-12T04:09:23.6078042Z   ✓   69 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 40, notice true) (7.8s)
+validate	UNKNOWN STEP	2026-10-12T04:09:28.2448263Z   ✓   70 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, no-preference, 70m/122cm/6) (10.3s)
+validate	UNKNOWN STEP	2026-10-12T04:09:28.3367884Z   ✓   71 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (1024, light, reduce, 122, notice false) (4.7s)
+validate	UNKNOWN STEP	2026-10-12T04:09:30.0764161Z   ✓   73 [chromium] › tests/e2e/correction-names.spec.js:21:3 › named correction controls act on the selected arrow (320) (1.7s)
+validate	UNKNOWN STEP	2026-10-12T04:09:31.6271932Z   ✓   74 [chromium] › tests/e2e/correction-names.spec.js:21:3 › named correction controls act on the selected arrow (375) (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:09:34.6602220Z   ✓   72 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, reduce, 70m/122cm/6) (6.4s)
+validate	UNKNOWN STEP	2026-10-12T04:09:35.4257924Z   ✓   76 [chromium] › tests/e2e/distribution-assets.spec.js:8:1 › form assets are available unchanged without loading them at startup (741ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:36.1148743Z   ✓   77 [chromium] › tests/e2e/double-tap-zoom.spec.js:53:1 › double-tapping the target records two arrows without triggering viewport zoom (668ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:37.1156654Z   ✓   78 [chromium] › tests/e2e/double-tap-zoom.spec.js:85:1 › double-tapping dock buttons does not trigger viewport zoom (989ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:39.5726132Z   ✓   79 [chromium] › tests/e2e/end-dock-viewport.spec.js:2:1 › end action stays in viewport after tab animation and scoring (2.4s)
+validate	UNKNOWN STEP	2026-10-12T04:09:39.8233432Z   ✓   80 [chromium] › tests/e2e/end-dock-viewport.spec.js:35:1 › page gestures retain scrolling without pinch zoom (239ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:45.0503679Z   ✓   75 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (320, no-preference) (13.4s)
+validate	UNKNOWN STEP	2026-10-12T04:09:46.7235686Z   ✓   81 [chromium] › tests/e2e/end-sequence.spec.js:6:3 › two complete ends remain reachable (320x568) (6.9s)
+validate	UNKNOWN STEP	2026-10-12T04:09:53.5702676Z   ✓   83 [chromium] › tests/e2e/end-sequence.spec.js:6:3 › two complete ends remain reachable (375x812) (6.8s)
+validate	UNKNOWN STEP	2026-10-12T04:09:54.0656627Z   ✓   84 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, daily) (473ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:54.5354585Z   ✓   85 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, backdated) (447ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:54.8878316Z   ✓   82 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (320, reduce) (9.8s)
+validate	UNKNOWN STEP	2026-10-12T04:09:55.0960462Z   ✓   86 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, sparse) (549ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:55.5666748Z   ✓   88 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, score-only) (458ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:56.0425086Z   ✓   89 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, gamification) (463ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:56.6123365Z   ✓   90 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, edit) (556ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:57.0529664Z   ✓   91 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, daily) (430ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:57.5518936Z   ✓   92 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, backdated) (486ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:58.0315880Z   ✓   93 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, sparse) (465ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:58.5084348Z   ✓   94 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, score-only) (462ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:59.0050513Z   ✓   95 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, gamification) (484ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:59.4972848Z   ✓   96 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, edit) (478ms)
+validate	UNKNOWN STEP	2026-10-12T04:09:59.9821438Z   ✓   97 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, daily) (474ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:00.4712233Z   ✓   98 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, backdated) (471ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:00.9227103Z   ✓   99 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, sparse) (440ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:01.4148187Z   ✓  100 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, score-only) (468ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:01.8945916Z   ✓  101 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, gamification) (471ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:02.3874875Z   ✓  102 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, edit) (481ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:02.8733679Z   ✓  103 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, daily) (469ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:03.3958938Z   ✓  104 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, backdated) (511ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:03.8357811Z   ✓  105 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, sparse) (427ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:04.3039239Z   ✓  106 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, score-only) (454ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:04.7871939Z   ✓  107 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, gamification) (470ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:05.2523432Z   ✓  108 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, edit) (451ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:05.7393881Z   ✓  109 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:225:1 › same id distinct records retain distinct metrics (473ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:06.3669761Z   ✓  110 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:236:1 › next finish recomputes changed history after save (617ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:08.2611664Z   ✓  111 [chromium] › tests/e2e/form-diagnostics.spec.js:335:1 › selected deletion rolls back when the primary write fails (1.9s)
+validate	UNKNOWN STEP	2026-10-12T04:10:09.4137142Z   ✓  112 [chromium] › tests/e2e/form-diagnostics.spec.js:420:1 › zero-shot exact-debug live save freezes, rolls back, and retries once (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:10:09.5565818Z   ✓   87 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (375, no-preference) (14.7s)
+validate	UNKNOWN STEP	2026-10-12T04:10:11.4587163Z   ✓  113 [chromium] › tests/e2e/form-diagnostics.spec.js:471:1 › failed diagnostic discard cancel retains the candidate and confirm closes without saving (2.0s)
+validate	UNKNOWN STEP	2026-10-12T04:10:12.6260842Z   ✓  115 [chromium] › tests/e2e/form-diagnostics.spec.js:501:1 › zero-shot exact-debug replay save retries without matrix advancement (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:10:13.6717070Z   ✓  116 [chromium] › tests/e2e/form-diagnostics.spec.js:586:3 › absent formDebug keeps diagnostics hidden and disabled (1.0s)
+validate	UNKNOWN STEP	2026-10-12T04:10:14.6984057Z   ✓  117 [chromium] › tests/e2e/form-diagnostics.spec.js:586:3 › false formDebug keeps diagnostics hidden and disabled (1.0s)
+validate	UNKNOWN STEP	2026-10-12T04:10:15.7287655Z   ✓  118 [chromium] › tests/e2e/form-diagnostics.spec.js:586:3 › string "true" formDebug keeps diagnostics hidden and disabled (1.0s)
+validate	UNKNOWN STEP	2026-10-12T04:10:16.8259083Z   ✓  119 [chromium] › tests/e2e/form-diagnostics.spec.js:598:1 › diagnostic controls follow exact formDebug without reopening settings (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:10:17.8516316Z   ✓  120 [chromium] › tests/e2e/form-diagnostics.spec.js:612:1 › action-time exact gate rejects a value changed after render (1.0s)
+validate	UNKNOWN STEP	2026-10-12T04:10:18.9426256Z   ✓  121 [chromium] › tests/e2e/form-diagnostics.spec.js:624:1 › another workflow blocks both actions before confirmation (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:10:19.4903195Z   ✓  114 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (375, reduce) (9.9s)
+validate	UNKNOWN STEP	2026-10-12T04:10:19.9997138Z   ✓  122 [chromium] › tests/e2e/form-diagnostics.spec.js:639:1 › first start commits one fresh coordinator (1.0s)
+validate	UNKNOWN STEP	2026-10-12T04:10:20.3014421Z   ✓  123 [chromium] › tests/e2e/form-secure-context.spec.js:71:1 › insecure HTTP blocks live capture before pose/media and offers saved-video replay (794ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:20.6941736Z   ✓  125 [chromium] › tests/e2e/form-secure-context.spec.js:129:1 › trusted loopback HTTP remains eligible for live capture (379ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:21.0159039Z   ✓  126 [chromium] › tests/e2e/gamification.spec.js:109:1 › gamification.enabled:false hides the history streak hero and the analysis badge list (305ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:21.8937869Z   ✓  124 [chromium] › tests/e2e/form-diagnostics.spec.js:660:1 › restart double click opens one confirmation; cancel preserves and confirm replaces (1.9s)
+validate	UNKNOWN STEP	2026-10-12T04:10:22.2103741Z   ✓  127 [chromium] › tests/e2e/gamification.spec.js:154:1 › enabling gamification from settings makes the history streak hero appear (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:10:23.0162527Z   ✓  129 [chromium] › tests/e2e/gamification.spec.js:186:1 › unset practiceDays shows — with a CTA; tapping the hero CTA sets weekdays and switches to streak/goal rings (787ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:23.4023046Z   ✓  128 [chromium] › tests/e2e/form-diagnostics.spec.js:686:1 › restart post-confirm token change fails closed (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:23.4680132Z   ✓  130 [chromium] › tests/e2e/gamification.spec.js:249:1 › finishing a session shows a before→after streak row in the summary sheet (434ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:23.9530041Z   ✓  132 [chromium] › tests/e2e/gamification.spec.js:300:1 › all 12 badges render in the analysis tab (locked by default); first_arrow unlocks via startup backfill (469ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:24.6162090Z   ✓  133 [chromium] › tests/e2e/gamification.spec.js:355:1 › importing history with gamification enabled backfills quietly and does not re-fire an already-owned badge on the next session (regression: import badge misfire) (645ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:25.3430215Z   ✓  134 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 1) (700ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:25.5848395Z   ✓  131 [chromium] › tests/e2e/form-diagnostics.spec.js:714:1 › allocation failure and save false both preserve prior coordinator and updatedAt (2.2s)
+validate	UNKNOWN STEP	2026-10-12T04:10:26.0556925Z   ✓  135 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 2) (699ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:26.7041926Z   ✓  136 [chromium] › tests/e2e/form-diagnostics.spec.js:755:1 › side state uses fixed copy (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:10:26.7274784Z   ✓  137 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 3) (654ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:27.5246124Z   ✓  139 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 1) (784ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:27.9067348Z   ✓  138 [chromium] › tests/e2e/form-diagnostics.spec.js:766:1 › complete state uses fixed copy (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:10:28.2385817Z   ✓  140 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 2) (698ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:28.9396644Z   ✓  142 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 3) (688ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:29.6310467Z   ✓  143 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 1) (676ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:30.3481839Z   ✓  144 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 2) (704ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:30.4428542Z   ✓  141 [chromium] › tests/e2e/form-diagnostics.spec.js:771:1 › export post-confirm exact-debug and workflow rechecks prevent transport (2.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:31.1652716Z   ✓  145 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 3) (803ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:31.7774606Z   ✓  147 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 1) (599ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:32.0063844Z   ✓  146 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › incomplete refuses export without transport (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:32.5220267Z   ✓  148 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 2) (734ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:33.2341678Z   ✓  150 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 3) (700ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:33.5007606Z   ✓  149 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › stale refuses export without transport (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:33.5368111Z   ✓  151 [chromium] › tests/e2e/grouping-evidence.spec.js:133:3 › first few-arrow result explains pending grouping (1) (288ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:33.9679495Z   ✓  153 [chromium] › tests/e2e/grouping-evidence.spec.js:133:3 › first few-arrow result explains pending grouping (2) (417ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:35.1000889Z   ✓  152 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › malformed refuses export without transport (1.6s)
+validate	UNKNOWN STEP	2026-10-12T04:10:35.3777999Z   ✓  154 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, light, reduce, short) (1.4s)
+validate	UNKNOWN STEP	2026-10-12T04:10:36.6329376Z   ✓  155 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › replay refuses export without transport (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:38.1378207Z   ✓  157 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › duplicate selected ID refuses export without transport (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:38.9688740Z   ✓  156 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, light, no-preference, short) (3.6s)
+validate	UNKNOWN STEP	2026-10-12T04:10:39.5937720Z   ✓  158 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › overflow refuses export without transport (1.4s)
+validate	UNKNOWN STEP	2026-10-12T04:10:40.2530734Z   ✓  159 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, dark, reduce, short) (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:10:41.0573733Z   ✓  160 [chromium] › tests/e2e/form-diagnostics.spec.js:857:1 › output-too-large uses the fixed repeat copy (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:42.4918765Z   ✓  162 [chromium] › tests/e2e/form-diagnostics.spec.js:873:1 › export double click opens one confirmation and cancel preserves all state (1.4s)
+validate	UNKNOWN STEP	2026-10-12T04:10:43.7861685Z   ✓  161 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, dark, no-preference, short) (3.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:44.0642867Z   ✓  163 [chromium] › tests/e2e/form-diagnostics.spec.js:890:3 › web-success uses one File transport and preserves DB/backups (1.6s)
+validate	UNKNOWN STEP	2026-10-12T04:10:45.0859473Z   ✓  164 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, light, reduce, short) (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:10:45.7397672Z   ✓  165 [chromium] › tests/e2e/form-diagnostics.spec.js:890:3 › web-abort uses one File transport and preserves DB/backups (1.7s)
+validate	UNKNOWN STEP	2026-10-12T04:10:47.3047477Z   ✓  167 [chromium] › tests/e2e/form-diagnostics.spec.js:890:3 › web-error uses one File transport and preserves DB/backups (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:48.5542864Z   ✓  166 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, light, no-preference, short) (3.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:48.7736866Z   ✓  168 [chromium] › tests/e2e/form-diagnostics.spec.js:912:1 › native final cleanup warning has no download fallback and preserves state (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:49.8691011Z   ✓  169 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, dark, reduce, short) (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:10:50.3693342Z   ✓  170 [chromium] › tests/e2e/form-diagnostics.spec.js:933:1 › no-share environment downloads exact MIME/allowlist and revokes URL (1.6s)
+validate	UNKNOWN STEP	2026-10-12T04:10:51.4486541Z   ✓  172 [chromium] › tests/e2e/form-diagnostics.spec.js:957:3 › diagnostic settings fit 360x780 (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:10:52.5529255Z   ✓  173 [chromium] › tests/e2e/form-diagnostics.spec.js:957:3 › diagnostic settings fit 390x844 (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:10:53.3517934Z   ✓  171 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, dark, no-preference, short) (3.5s)
+validate	UNKNOWN STEP	2026-10-12T04:10:53.6735914Z   ✓  174 [chromium] › tests/e2e/form-diagnostics.spec.js:957:3 › diagnostic settings fit 1280x800 (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:10:54.5681143Z   ✓  176 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking missing is disabled everywhere (881ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:54.7844743Z   ✓  175 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, light, reduce, short) (1.4s)
+validate	UNKNOWN STEP	2026-10-12T04:10:55.5683940Z   ✓  177 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking false is disabled everywhere (986ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:56.3470183Z   ✓  179 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking zero is disabled everywhere (766ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:57.1569738Z   ✓  180 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking one is disabled everywhere (796ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:57.9130634Z   ✓  181 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking string "true" is disabled everywhere (740ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:58.4812786Z   ✓  178 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, light, no-preference, short) (3.7s)
+validate	UNKNOWN STEP	2026-10-12T04:10:58.7627993Z   ✓  182 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking string "false" is disabled everywhere (836ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:59.6244309Z   ✓  184 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking literal true is enabled everywhere (848ms)
+validate	UNKNOWN STEP	2026-10-12T04:10:59.9505307Z   ✓  183 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, dark, reduce, short) (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:11:00.3946953Z   ✓  185 [chromium] › tests/e2e/history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (light) (755ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:00.9468379Z   ✓  187 [chromium] › tests/e2e/history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (dark) (541ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:03.5211718Z   ✓  186 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, dark, no-preference, short) (3.6s)
+validate	UNKNOWN STEP	2026-10-12T04:11:03.6259943Z   ✓  188 [chromium] › tests/e2e/history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (light) (2.7s)
+validate	UNKNOWN STEP	2026-10-12T04:11:05.8628704Z   ✓  189 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, light, reduce, long) (2.3s)
+validate	UNKNOWN STEP	2026-10-12T04:11:05.8703559Z   ✓  190 [chromium] › tests/e2e/history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (dark) (2.2s)
+validate	UNKNOWN STEP	2026-10-12T04:11:07.6905965Z   ✓  192 [chromium] › tests/e2e/history-round-collapse.spec.js:111:1 › additional history keeps all stages together at a page boundary on a narrow phone (1.8s)
+validate	UNKNOWN STEP	2026-10-12T04:11:08.1122184Z   ✓  191 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, light, reduce, long) (2.2s)
+validate	UNKNOWN STEP	2026-10-12T04:11:09.2318269Z   ✓  194 [chromium] › tests/e2e/modal-swipe-followup.spec.js:6:3 › a controlled sheet pull allows the first next touch to finish (320) (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:09.8137539Z   ✓  193 [chromium] › tests/e2e/history-round-collapse.spec.js:133:1 › a filtered group labels its visible subtotal and excludes unmatched stages (2.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:10.2962511Z   ✓  195 [chromium] › tests/e2e/modal-swipe-followup.spec.js:6:3 › a controlled sheet pull allows the first next touch to finish (375) (1.0s)
+validate	UNKNOWN STEP	2026-10-12T04:11:10.4928035Z   ✓  197 [chromium] › tests/e2e/onboarding.spec.js:96:1 › empty db (0 sessions / 0 setups / onboardingSeen:false) shows the welcome screen (174ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:10.7394571Z   ✓  196 [chromium] › tests/e2e/modal-swipe.spec.js:12:1 › settings swipes close, short and sideways drags preserve the sheet (910ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:11.2908011Z   ✓  199 [chromium] › tests/e2e/modal-swipe.spec.js:37:1 › swiping nested confirmation cancels and leaves underlying settings open (538ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:11.6381794Z   ✓  198 [chromium] › tests/e2e/onboarding.spec.js:115:1 › skip goes straight to the normal record screen and saves onboardingSeen immediately (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:11.8604920Z   ✓  200 [chromium] › tests/e2e/modal-swipe.spec.js:59:1 › touch pull closes settings; cancelled pull leaves it open (554ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:12.2093027Z   ✓  202 [chromium] › tests/e2e/outdoor-contrast.spec.js:94:1 › red-zone score chip (7-8 points) meets WCAG AA contrast against its text (333ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:12.5230900Z   ✓  203 [chromium] › tests/e2e/outdoor-contrast.spec.js:118:1 › blue-zone score chip (5-6 points) meets WCAG AA contrast against its text (301ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:12.7637964Z   ✓  201 [chromium] › tests/e2e/onboarding.spec.js:136:1 › 'はじめる' shows the quick-setup screen with 4 unselected distance chips (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:12.9046358Z   ✓  204 [chromium] › tests/e2e/outdoor-contrast.spec.js:142:1 › arrow marker keeps a thick white outline for outdoor glare readability (366ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:13.6983890Z   ✓  206 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, below) (775ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:14.4235352Z   ✓  207 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, tie) (712ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:14.8984776Z   ✓  205 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 70m shows the auto-derived face/end hint and starts a matching db.active (2.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:15.1909371Z   ✓  208 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, above) (754ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:16.0311298Z   ✓  210 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, below) (826ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:16.8050978Z   ✓  211 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, tie) (761ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:17.0494170Z   ✓  209 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 50m shows the auto-derived face/end hint and starts a matching db.active (2.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:17.6558733Z   ✓  212 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, above) (840ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:18.3959261Z   ✓  214 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, below) (729ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:19.1261758Z   ✓  213 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 30m shows the auto-derived face/end hint and starts a matching db.active (2.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:19.2165278Z   ✓  215 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, tie) (788ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:20.0713193Z   ✓  217 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, above) (837ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:20.8403902Z   ✓  218 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, below) (756ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:21.3276066Z   ✓  216 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 18m shows the auto-derived face/end hint and starts a matching db.active (2.2s)
+validate	UNKNOWN STEP	2026-10-12T04:11:21.5689449Z   ✓  220 [chromium] › tests/e2e/onboarding.spec.js:224:3 › onboarding does not show for an existing user with an existing session (228ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:21.7004224Z   ✓  219 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, tie) (842ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:21.9444822Z   ✓  221 [chromium] › tests/e2e/onboarding.spec.js:224:3 › onboarding does not show for an existing user with an existing setup (no sessions yet) (359ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:22.2278265Z   ✓  223 [chromium] › tests/e2e/onboarding.spec.js:224:3 › onboarding does not show for an existing user with onboardingSeen already true (266ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:22.5519870Z   ✓  224 [chromium] › tests/e2e/onboarding.spec.js:242:1 › clearing all data and reloading shows onboarding again (313ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:22.7912780Z   ✓  222 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, above) (1.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:23.4517938Z   ✓  225 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, below) (884ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:23.6006330Z   ✓  226 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, tie) (797ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:24.3593781Z   ✓  227 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, above) (894ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:24.5408248Z   ✓  228 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, below) (919ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:25.3344445Z   ✓  229 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, tie) (961ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:25.4820070Z   ✓  230 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, above) (921ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:26.2098132Z   ✓  231 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, below) (860ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:26.4103085Z   ✓  232 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, tie) (914ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:27.1187675Z   ✓  233 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, above) (897ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:27.3097601Z   ✓  234 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, below) (880ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:28.0647142Z   ✓  235 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, tie) (927ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:28.1751283Z   ✓  236 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, above) (844ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:29.9708217Z   ✓  237 [chromium] › tests/e2e/personal-best-projection.spec.js:186:3 › native PB projection after one-arrow finish (320) (1.9s)
+validate	UNKNOWN STEP	2026-10-12T04:11:29.9883269Z   ✓  238 [chromium] › tests/e2e/personal-best-projection.spec.js:186:3 › native PB projection after one-arrow finish (375) (1.8s)
+validate	UNKNOWN STEP	2026-10-12T04:11:30.6105864Z   ✓  240 [chromium] › tests/e2e/record-labels.spec.js:24:5 › named record controls 320 › starts with the visible named conditions and preserves records (605ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:31.0958894Z   ✓  241 [chromium] › tests/e2e/record-labels.spec.js:24:5 › named record controls 375 › starts with the visible named conditions and preserves records (475ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:31.7137699Z   ✓  242 [chromium] › tests/e2e/record-labels.spec.js:24:5 › named record controls 900 › starts with the visible named conditions and preserves records (609ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:32.4553873Z   ✓  239 [chromium] › tests/e2e/pwa-release.spec.js:3:1 › cached app starts a practice offline and retains it across reload (2.5s)
+validate	UNKNOWN STEP	2026-10-12T04:11:33.7156416Z   ✓  244 [chromium] › tests/e2e/pwa-release.spec.js:29:1 › newer version banner reload preserves demo records (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:11:34.2194803Z   ✓  245 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (light, repeat) (489ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:34.6697054Z   ✓  246 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (light, current) (433ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:34.7340024Z   ✓  243 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, current) (3.0s)
+validate	UNKNOWN STEP	2026-10-12T04:11:35.2266786Z   ✓  247 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (dark, repeat) (541ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:35.6534865Z   ✓  249 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (dark, current) (416ms)
+validate	UNKNOWN STEP	2026-10-12T04:11:37.8063559Z   ✓  248 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, repeat) (3.1s)
+validate	UNKNOWN STEP	2026-10-12T04:11:41.2263583Z   ✓  251 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, onboarding) (3.4s)
+validate	UNKNOWN STEP	2026-10-12T04:11:42.5885131Z   ✓  252 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, current) (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:11:43.9538092Z   ✓  253 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, repeat) (1.4s)
+validate	UNKNOWN STEP	2026-10-12T04:11:45.2608129Z   ✓  254 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, onboarding) (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:11:48.2272976Z   ✓  255 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, current) (3.0s)
+validate	UNKNOWN STEP	2026-10-12T04:11:49.3871995Z   ✓  250 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (no-preference) (13.7s)
+validate	UNKNOWN STEP	2026-10-12T04:11:51.6243416Z   ✓  256 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, repeat) (3.4s)
+validate	UNKNOWN STEP	2026-10-12T04:11:55.0618616Z   ✓  258 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, onboarding) (3.4s)
+validate	UNKNOWN STEP	2026-10-12T04:11:56.4716224Z   ✓  259 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, current) (1.4s)
+validate	UNKNOWN STEP	2026-10-12T04:11:57.8981527Z   ✓  260 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, repeat) (1.4s)
+validate	UNKNOWN STEP	2026-10-12T04:11:58.5489300Z   ✓  257 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (reduce) (9.2s)
+validate	UNKNOWN STEP	2026-10-12T04:11:59.1823731Z   ✓  261 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, onboarding) (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:12:00.0041471Z   ✓  263 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (320, light) (805ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:00.8330390Z   ✓  264 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (320, dark) (815ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:01.5256806Z   ✓  265 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (375, light) (680ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:02.2202640Z   ✓  266 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (375, dark) (681ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:02.7715385Z   ✓  267 [chromium] › tests/e2e/summary-order.spec.js:130:3 › summary keeps its existing optional content (first) (537ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:03.3458994Z   ✓  268 [chromium] › tests/e2e/summary-order.spec.js:130:3 › summary keeps its existing optional content (gam-round) (559ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:03.9241766Z   ✓  269 [chromium] › tests/e2e/summary-order.spec.js:130:3 › summary keeps its existing optional content (edit) (566ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:11.1029015Z   ✓  270 [chromium] › tests/e2e/summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings (7.2s)
+validate	UNKNOWN STEP	2026-10-12T04:12:11.8449747Z   ✓  262 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (no-preference) (13.3s)
+validate	UNKNOWN STEP	2026-10-12T04:12:18.3079645Z   ✓  271 [chromium] › tests/e2e/summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings (7.2s)
+validate	UNKNOWN STEP	2026-10-12T04:12:20.8120498Z   ✓  272 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (reduce) (9.0s)
+validate	UNKNOWN STEP	2026-10-12T04:12:25.5710958Z   ✓  273 [chromium] › tests/e2e/summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings (7.3s)
+validate	UNKNOWN STEP	2026-10-12T04:12:26.2035034Z   ✓  275 [chromium] › tests/e2e/tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (reduce) (619ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:27.7439821Z   ✓  276 [chromium] › tests/e2e/tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (no-preference) (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:12:30.1727977Z   ✓  277 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (320, pointer) (2.4s)
+validate	UNKNOWN STEP	2026-10-12T04:12:33.4154738Z   ✓  278 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (320, pointer) (3.2s)
+validate	UNKNOWN STEP	2026-10-12T04:12:34.1169111Z   ✓  274 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (no-preference) (13.3s)
+validate	UNKNOWN STEP	2026-10-12T04:12:35.7627559Z   ✓  279 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (320, touch fallback) (2.3s)
+validate	UNKNOWN STEP	2026-10-12T04:12:38.9359852Z   ✓  281 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (320, touch fallback) (3.2s)
+validate	UNKNOWN STEP	2026-10-12T04:12:41.3510900Z   ✓  282 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (375, pointer) (2.4s)
+validate	UNKNOWN STEP	2026-10-12T04:12:43.1199522Z   ✓  280 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (reduce) (9.0s)
+validate	UNKNOWN STEP	2026-10-12T04:12:43.3793035Z   ✓  284 [chromium] › tests/e2e/todays-result.spec.js:144:1 › first-ever session shows the baseline-established copy, with gamification off by default (245ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:43.6811549Z   ✓  285 [chromium] › tests/e2e/todays-result.spec.js:167:1 › second same-condition session shows the previous-comparison row in the summary (287ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:43.9494766Z   ✓  286 [chromium] › tests/e2e/todays-result.spec.js:192:1 › first session at a new condition says condition-first, not first-ever (strict-review major regression) (257ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:44.5112962Z   ✓  283 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (375, pointer) (3.1s)
+validate	UNKNOWN STEP	2026-10-12T04:12:45.4792255Z   ✓  287 [chromium] › tests/e2e/todays-result.spec.js:213:1 › history detail sheet reconstructs the panel with この日 wording and no future leakage (1.5s)
+validate	UNKNOWN STEP	2026-10-12T04:12:46.0195854Z   ✓  289 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (360, light) (518ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:46.5595989Z   ✓  290 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (360, dark) (528ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:46.9956547Z   ✓  288 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (375, touch fallback) (2.5s)
+validate	UNKNOWN STEP	2026-10-12T04:12:47.2276220Z   ✓  291 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (375, light) (653ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:47.8746921Z   ✓  293 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (375, dark) (633ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:49.1321706Z   ✓  294 [chromium] › tests/e2e/touch-controls.spec.js:38:3 › visible target above fixed actions accepts one arrow (360) (1.2s)
+validate	UNKNOWN STEP	2026-10-12T04:12:50.2992691Z   ✓  292 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (375, touch fallback) (3.3s)
+validate	UNKNOWN STEP	2026-10-12T04:12:50.4475016Z   ✓  295 [chromium] › tests/e2e/touch-controls.spec.js:38:3 › visible target above fixed actions accepts one arrow (375) (1.3s)
+validate	UNKNOWN STEP	2026-10-12T04:12:50.5984582Z   ✓  296 [chromium] › tests/e2e/wake-lock.spec.js:105:1 › starting a record session acquires the screen wake lock exactly once (284ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:51.0207220Z   ✓  298 [chromium] › tests/e2e/wake-lock.spec.js:122:1 › finishing a record session releases the screen wake lock (407ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:51.2769123Z   ✓  299 [chromium] › tests/e2e/wake-lock.spec.js:142:1 › wake lock is reacquired when the tab returns from background (244ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:51.5552979Z   ✓  300 [chromium] › tests/e2e/wake-lock.spec.js:177:1 › unsupported browsers skip wake lock silently and the session keeps working (269ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:51.9895879Z   ✓  301 [chromium] › tests/e2e/wake-lock.spec.js:195:1 › a rejected wake lock request warns via console but keeps the session usable (420ms)
+validate	UNKNOWN STEP	2026-10-12T04:12:53.9405069Z   ✓  297 [chromium] › tests/e2e/warm-cache-update.spec.js:7:1 › warm HTTP cache updates generated code and canonical offline cache together (3.5s)
+validate	UNKNOWN STEP	2026-10-12T04:12:53.9986557Z 
+validate	UNKNOWN STEP	2026-10-12T04:12:53.9997335Z   301 passed (5.9m)
+validate	UNKNOWN STEP	2026-10-12T04:12:54.0312955Z ##[group]Run actions/configure-pages@v5
+validate	UNKNOWN STEP	2026-10-12T04:12:54.0313268Z with:
+validate	UNKNOWN STEP	2026-10-12T04:12:54.0316216Z   token: ***
+validate	UNKNOWN STEP	2026-10-12T04:12:54.0316445Z   enablement: false
+validate	UNKNOWN STEP	2026-10-12T04:12:54.0316668Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3068744Z ##[group]Run actions/upload-pages-artifact@v4
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3069088Z with:
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3069299Z   path: dist/native
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3069525Z   name: github-pages
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3069743Z   retention-days: 1
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3069944Z env:
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3070128Z   GITHUB_PAGES: true
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3070357Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3148082Z ##[start-action display=Archive artifact;id=__actions_upload-pages-artifact.__run]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3176268Z ##[group]Run echo ::group::Archive artifact
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3176618Z ^[[36;1mecho ::group::Archive artifact^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3176887Z ^[[36;1mtar \^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3177130Z ^[[36;1m  --dereference --hard-dereference \^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3177444Z ^[[36;1m  --directory "$INPUT_PATH" \^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3177745Z ^[[36;1m  -cvf "$RUNNER_TEMP/artifact.tar" \^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3178034Z ^[[36;1m  --exclude=.git \^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3178326Z ^[[36;1m  --exclude=.github \^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3178576Z ^[[36;1m  --exclude=".[^/]*" \^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3178813Z ^[[36;1m  .^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3179014Z ^[[36;1mecho ::endgroup::^[[0m
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3205205Z shell: /usr/bin/sh -e {0}
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3205598Z env:
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3205806Z   GITHUB_PAGES: true
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3206056Z   INPUT_PATH: dist/native
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3206289Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3251361Z ##[group]Archive artifact
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3266713Z ./
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3267182Z ./manifest.json
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3267735Z ./assets/
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3268105Z ./assets/pose/
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3268625Z ./assets/pose/vision_wasm_internal.wasm
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3341325Z ./assets/pose/pose_landmarker_lite.task
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3385973Z ./assets/pose/vision_bundle.mjs
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3387249Z ./assets/pose/vision_wasm_internal.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3398872Z ./index.html
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3399360Z ./version.json
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3399796Z ./scripts/
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3400285Z ./scripts/45-analysis-core.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3400833Z ./scripts/49-todays-result.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3401639Z ./scripts/48-gamification.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3404366Z ./scripts/00-compat.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3404820Z ./scripts/46-form-core.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3405211Z ./scripts/10-storage-native.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3406215Z ./scripts/20-scoring.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3406894Z ./scripts/40-analysis-physics.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3407457Z ./scripts/47-form-view.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3407966Z ./scripts/60-history-sight-view.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3408464Z ./scripts/50-record-view.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3408933Z ./scripts/70-gear-settings.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3409390Z ./scripts/30-target-svg.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3409817Z ./scripts/90-init.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3410223Z ./native-readiness.json
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3410602Z ./sw.js
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3410921Z ./icon.svg
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3411283Z ./apple-touch-icon.png
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3411617Z ./style.min.css
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3412082Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3423644Z ##[end-action id=__actions_upload-pages-artifact.__run;outcome=success;conclusion=success;duration_ms=27]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3427867Z ##[start-action display=Archive artifact;id=__actions_upload-pages-artifact.__run_2]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3433396Z ##[end-action id=__actions_upload-pages-artifact.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3436723Z ##[start-action display=Archive artifact;id=__actions_upload-pages-artifact.__run_3]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3440351Z ##[end-action id=__actions_upload-pages-artifact.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3442338Z ##[start-action display=Upload artifact;id=__actions_upload-pages-artifact.upload-artifact]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3496081Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3496479Z with:
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3496741Z   name: github-pages
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3497243Z   path: /home/runner/work/_temp/artifact.tar
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3497550Z   retention-days: 1
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3497771Z   if-no-files-found: error
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3498008Z   compression-level: 6
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3498229Z   overwrite: false
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3498441Z   include-hidden-files: false
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3498674Z env:
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3498864Z   GITHUB_PAGES: true
+validate	UNKNOWN STEP	2026-10-12T04:12:54.3499069Z ##[endgroup]
+validate	UNKNOWN STEP	2026-10-12T04:12:54.5229222Z (node:8337) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+validate	UNKNOWN STEP	2026-10-12T04:12:54.5230080Z (Use `node --trace-deprecation ...` to show where the warning was created)
+validate	UNKNOWN STEP	2026-10-12T04:12:54.5274660Z With the provided path, there will be 1 file uploaded
+validate	UNKNOWN STEP	2026-10-12T04:12:54.5281307Z Artifact name is valid!
+validate	UNKNOWN STEP	2026-10-12T04:12:54.5282145Z Root directory input is valid!
+validate	UNKNOWN STEP	2026-10-12T04:12:54.7320135Z Beginning upload of artifact content to blob storage
+validate	UNKNOWN STEP	2026-10-12T04:12:55.2248889Z (node:8337) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+validate	UNKNOWN STEP	2026-10-12T04:12:55.3727623Z Uploaded bytes 8105219
+validate	UNKNOWN STEP	2026-10-12T04:12:55.3884789Z Finished uploading artifact content to blob storage!
+validate	UNKNOWN STEP	2026-10-12T04:12:55.3886717Z SHA256 digest of uploaded artifact zip is 0a9f28fcd9199a09e852e228b88184f7648c7d5fda94a2a9ca1bd837963f649e
+validate	UNKNOWN STEP	2026-10-12T04:12:55.3888602Z Finalizing artifact upload
+validate	UNKNOWN STEP	2026-10-12T04:12:55.6074533Z Artifact github-pages.zip successfully finalized. Artifact ID 11725609858
+validate	UNKNOWN STEP	2026-10-12T04:12:55.6076405Z Artifact github-pages has been successfully uploaded! Final size is 8105219 bytes. Artifact ID is 11725609858
+validate	UNKNOWN STEP	2026-10-12T04:12:55.6082185Z Artifact download URL: https://github.com/eita115115/archery-note/actions/runs/38202404737/artifacts/11725609858
+validate	UNKNOWN STEP	2026-10-12T04:12:55.6210680Z ##[end-action id=__actions_upload-pages-artifact.upload-artifact;outcome=success;conclusion=success;duration_ms=1276]
+validate	UNKNOWN STEP	2026-10-12T04:12:55.6309965Z Post job cleanup.
+validate	UNKNOWN STEP	2026-10-12T04:12:55.7510465Z (node:8349) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+validate	UNKNOWN STEP	2026-10-12T04:12:55.7512008Z (Use `node --trace-deprecation ...` to show where the warning was created)
+validate	UNKNOWN STEP	2026-10-12T04:12:55.7734211Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/archery-note/archery-note --files-from manifest.txt --use-compress-program zstdmt
+validate	UNKNOWN STEP	2026-10-12T04:12:56.0119907Z (node:8349) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+validate	UNKNOWN STEP	2026-10-12T04:12:56.8825478Z Sent 41388291 of 41388291 (100.0%), 44.9 MBs/sec
+validate	UNKNOWN STEP	2026-10-12T04:12:56.9916083Z Cache saved with the key: node-cache-Linux-x64-npm-f91fcad1f580432eddb74e970e234e0a2c27a7614e3103ee40c9b90e682ab401
+validate	UNKNOWN STEP	2026-10-12T04:12:57.0084181Z Post job cleanup.
+validate	UNKNOWN STEP	2026-10-12T04:12:57.0954545Z [command]/usr/bin/git version
+validate	UNKNOWN STEP	2026-10-12T04:12:57.0998906Z git version 2.55.0
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1036960Z Temporarily overriding HOME='/home/runner/work/_temp/12bafbd0-8189-475a-a6b1-678eba1171c8' before making global git config changes
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1038599Z Adding repository directory to the temporary git global config as a safe directory
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1042352Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/archery-note/archery-note
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1079914Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1114832Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1374645Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1403267Z http.https://github.com/.extraheader
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1415015Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1452295Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1712540Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+validate	UNKNOWN STEP	2026-10-12T04:12:57.1752184Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+validate	UNKNOWN STEP	2026-10-12T04:12:57.2172250Z Cleaning up orphan processes
+validate	UNKNOWN STEP	2026-10-12T04:12:57.2509757Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/configure-pages@v5, actions/setup-node@v4, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+deploy	UNKNOWN STEP	﻿2026-10-12T04:13:02.8882105Z Current runner version: '2.337.0'
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8914043Z ##[group]Runner Image Provisioner
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8914985Z Hosted Compute Agent
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8915604Z Version: 20261002.596
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8916421Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8917218Z Build Date: 2026-10-02T22:28:27Z
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8917982Z Worker ID: {f555eae1-b966-4ace-8d0e-080739b167d4}
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8918735Z Region: northcentralus
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8919315Z Cloud: Azure
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8919937Z ##[endgroup]
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8921998Z ##[group]Operating System
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8922739Z Ubuntu
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8923404Z 24.04.5
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8924008Z LTS
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8924639Z ##[endgroup]
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8925243Z ##[group]Runner Image
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8925882Z Image: ubuntu-24.04
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8926504Z Version: 20261004.327.1
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8928243Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8929899Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8931486Z ##[endgroup]
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8932725Z ##[group]GITHUB_TOKEN Permissions
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8934974Z Contents: read
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8935656Z Metadata: read
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8936219Z Pages: write
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8936851Z ##[endgroup]
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8938899Z Secret source: Actions
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8940286Z Cache mode: write
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.8941431Z Prepare workflow directory
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.9297969Z Prepare all required actions
+deploy	UNKNOWN STEP	2026-10-12T04:13:02.9350324Z Getting action download info
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.1994917Z Download action repository 'actions/deploy-pages@v4' (SHA:d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e)
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.7567272Z Complete job name: deploy
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8345265Z ##[group]Run actions/deploy-pages@v4
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8346191Z with:
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8350364Z   token: ***
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8350845Z   timeout: 600000
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8351344Z   error_count: 10
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8351813Z   reporting_interval: 5000
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8352346Z   artifact_name: github-pages
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8352874Z   preview: false
+deploy	UNKNOWN STEP	2026-10-12T04:13:03.8353581Z ##[endgroup]
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.0320580Z (node:2304) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.0322934Z (Use `node --trace-deprecation ...` to show where the warning was created)
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.1531857Z Fetching artifact metadata for "github-pages" in this workflow run
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.2799186Z Found 1 artifact(s)
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.2813936Z Creating Pages deployment with payload:
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.2815077Z {
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.2815875Z 	"artifact_id": 11725609858,
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.2817277Z 	"pages_build_version": "3688a3b3d4b8b4b64db5109a183645dc657f284e",
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.2906408Z 	"oidc_token": "***"
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.2907365Z }
+deploy	UNKNOWN STEP	2026-10-12T04:13:04.7911940Z Created deployment for 3688a3b3d4b8b4b64db5109a183645dc657f284e, ID: 3688a3b3d4b8b4b64db5109a183645dc657f284e
+deploy	UNKNOWN STEP	2026-10-12T04:13:09.7913550Z Getting Pages deployment status...
+deploy	UNKNOWN STEP	2026-10-12T04:13:09.9494118Z Reported success!
+deploy	UNKNOWN STEP	2026-10-12T04:13:09.9789967Z Evaluate and set environment url
+deploy	UNKNOWN STEP	2026-10-12T04:13:09.9794210Z Evaluated environment url: https://eita115115.github.io/archery-note/
+deploy	UNKNOWN STEP	2026-10-12T04:13:09.9795247Z Cleaning up orphan processes
+deploy	UNKNOWN STEP	2026-10-12T04:13:10.0076289Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/deploy-pages@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

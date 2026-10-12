@@ -1,0 +1,89 @@
+{
+  "id": 1,
+  "result": {
+    "result": {
+      "type": "object",
+      "value": {
+        "generatedMessage": true,
+        "code": "ERR_ASSERTION",
+        "actual": [
+          [
+            {
+              "x": 0.6000000000000001,
+              "y": 0,
+              "s": 10,
+              "X": true
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ],
+          [
+            {
+              "x": 0.6000000000000001,
+              "y": 0,
+              "s": 10,
+              "X": true
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ],
+          [
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ]
+        ],
+        "expected": [
+          [
+            {
+              "x": 0.6000000000000001,
+              "y": 0,
+              "s": 10,
+              "X": true
+            },
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ],
+          [
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ]
+        ],
+        "operator": "deepStrictEqual",
+        "diff": "simple"
+      }
+    },
+    "exceptionDetails": {
+      "exceptionId": 1,
+      "text": "Uncaught (in promise) AssertionError: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  [\n    [\n      {\n        X: true,\n        s: 10,\n...\n        s: 10,\n+       x: 0,\n-       x: -0,\n        y: 0\n      }\n    ],\n    [\n      {\n        X: true,\n        s: 10,\n+       x: 0.6000000000000001,\n-       x: -0,\n        y: 0\n      },\n+     {\n+       X: true,\n+       s: 10,\n+       x: 0,\n+       y: 0\n+     }\n    ],\n+   [\n+     {\n+       X: true,\n+       s: 10,\n+       x: 0,\n+       y: 0\n+     }\n+   ]\n  ]\n",
+      "lineNumber": 0,
+      "columnNumber": 0,
+      "exception": {
+        "type": "object",
+        "subtype": "error",
+        "className": "AssertionError",
+        "description": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n... Skipped lines\n\n  [\n    [\n      {\n        X: true,\n        s: 10,\n...\n        s: 10,\n+       x: 0,\n-       x: -0,\n        y: 0\n      }\n    ],\n    [\n      {\n        X: true,\n        s: 10,\n+       x: 0.6000000000000001,\n-       x: -0,\n        y: 0\n      },\n+     {\n+       X: true,\n+       s: 10,\n+       x: 0,\n+       y: 0\n+     }\n    ],\n+   [\n+     {\n+       X: true,\n+       s: 10,\n+       x: 0,\n+       y: 0\n+     }\n+   ]\n  ]\n\n    at <anonymous>:1:2276",
+        "objectId": "-4071798398454387438.1.1"
+      }
+    }
+  }
+}

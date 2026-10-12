@@ -1,0 +1,30 @@
+[
+  {
+    "Case": "chromium-320-light-15",
+    "Button": "bEnd",
+    "Height": 47.135986328125,
+    "LayoutHeight": 48,
+    "Transform": "matrix(0.982, 0, 0, 0.982, 0, 1)"
+  },
+  {
+    "Case": "chromium-375-dark-15",
+    "Button": "bEnd",
+    "Height": 47.135986328125,
+    "LayoutHeight": 48,
+    "Transform": "matrix(0.982, 0, 0, 0.982, 0, 1)"
+  },
+  {
+    "Case": "chromium-900-light-15",
+    "Button": "bEnd",
+    "Height": 47.135986328125,
+    "LayoutHeight": 48,
+    "Transform": "matrix(0.982, 0, 0, 0.982, 0, 1)"
+  },
+  {
+    "Case": "chromium-320-dark-20",
+    "Button": "bEnd",
+    "Height": 52.0460205078125,
+    "LayoutHeight": 53,
+    "Transform": "matrix(0.982, 0, 0, 0.982, 0, 1)"
+  }
+]

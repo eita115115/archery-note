@@ -1,0 +1,24 @@
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(b.rect.width>=48&&b.rect.height>=48)
+
+    at controls (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\readable-record-actions\native.cjs:7:2773)
+    at async C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\readable-record-actions\native.cjs:7:3973 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+Original owned context retained; no restart/reset on timeout
+Debugger listening on ws://127.0.0.1:9229/d882d2be-767b-45d3-8c42-a8d3af171225
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/d882d2be-767b-45d3-8c42-a8d3af171225
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/d882d2be-767b-45d3-8c42-a8d3af171225
+For help, see: https://nodejs.org/en/docs/inspector
+Debugger attached.
+Waiting for the debugger to disconnect...

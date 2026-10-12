@@ -957,9 +957,9 @@
   {
     "id": "AN-081",
     "task": "記録中の操作ボタン名を小画面でも一行で読めるようにする",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "AN081完了、公開v116/source3688a3b3d4b8b4b64db5109a183645dc657f284e、branch codex/readable-record-actions。320で取消2行になる実115をChromeWKで再現、左右内容幅/中央残り幅とpadding/gapで全操作名を一行へ。文言/15px/順序を保ち、所有20px文字probeも320でcontainment。CSS2規則+生成CSSだけ、通常layout/非押下実寸48px、既存押下scale(.982)中も実44px以上/fivehit/非重複。全runtime/handlers/target/scoring/math/storage/schema/依存/SWactivationはversion以外exact。最終checkall/lint/format/全301passed3.7m、ChromeWK320375900+320文字20pxのfinal116 native8/104は旧3+新3本/nudge0.6/undo/score/reloadexact/errors0。初native後エンド寸法failの元page保持、初回回復は元確定エンドを期待へ含めずfail→同pageで旧3/元2本+新追加3本/score/reloadexact、元errorcollector不可/初fail矩形未保存を明記。別訂正8で押下47.136/layout48/pressedtrueを記録、元fail原因未断定。独立readonlyreview指摘なし（review時点full/final116/public未確認）。CI38202404737 validate/deploy success/Linux301passed5.9m、実artifact11725609858/26safe、実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。元public115context publication444724ms、記録中更新保留→finish4/banner116/旧4exact→320新dock一行/15px/48px/fivehit/containment→native1/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/readable-record-actions-v116/代表11原寸PNGcopySHAexact、旧80tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。全画面情報設計/物理phone/VoiceOver/fieldINP/WKstrictOfflineは未完。",
     "dependencies": [
       "AN-080"
     ],
