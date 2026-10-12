@@ -35,6 +35,21 @@ for (const motion of ["reduce", "no-preference"]) {
       await page.locator(`#tabs [data-v="${v}"]`).click();
       await sample(`after ${v}`);
     };
+    const scrollToPosition = async (top) => {
+      await page.evaluate(async (position) => {
+        const frames = () =>
+          new Promise((resolve) =>
+            globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
+          );
+        // Enter the destination so content-visibility cards acquire their real heights.
+        // Set the reading position after that layout, before testing its restoration.
+        globalThis.scrollTo({ top: position, behavior: "instant" });
+        await frames();
+        globalThis.scrollTo({ top: position, behavior: "instant" });
+        await frames();
+      }, top);
+      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(top);
+    };
     try {
       await tab("history");
       await expect
@@ -42,12 +57,10 @@ for (const motion of ["reduce", "no-preference"]) {
           page.locator(".historyRecords").evaluate((el) => el.getBoundingClientRect().height),
         )
         .toBeGreaterThan(2000);
-      await page.evaluate(() => globalThis.scrollTo(0, 1400));
-      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(1400);
+      await scrollToPosition(1400);
       await tab("analysis");
       await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(0);
-      await page.evaluate(() => globalThis.scrollTo(0, 600));
-      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(600);
+      await scrollToPosition(600);
       await tab("history");
       await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(1400);
       await tab("record");
