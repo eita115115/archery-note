@@ -3376,3 +3376,7 @@ AN085完了、公開v120/sourceafe4f1b91d4bbc8a46bc3fdd475b25acfb493dda、branch
 次: 既存native依存open critical #36/#37を別タスクで評価、射形トラッキングの比較scopeと分析の長文/説明。公開後notesはlocalcommitのみ。
 
 公開後notesの初formatは文書2件とraw error-context.md2件でfail。文書だけPrettier整形、raw2件は元bytesを変えず.md.txtへrenameしmanifestを更新。次formatはsyncが残した旧.mdコピー2件でfail、所有sandbox内/元bytes一致/正本不存在を確認してその2コピーだけ除去、最終format成功。原失敗出力も保持、runtime/public資産不変。
+
+## AN086開始 — native proxy依存の修正
+
+前goal turnはAN085公開v120/317CIpassまでの進捗。基点a6ff8b71acd405106c72f31371fc852e33abe221、所有codex/native-proxy-patch。公式GHSA-rvm3-566m-v7fvと8.4.3releaseを確認、installedandroid/ios8.4.0は該当。repo依存2件更新、全PWA資産不変を受入、nativebinary再配布は未証明として分ける。plan native-proxy-patch.md/task86 in-progress/passfalse/evidence空、旧85保持。

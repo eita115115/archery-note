@@ -1013,5 +1013,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/analysis-detail-layout.mdの受入。3native detailsに既存7cardをまとめ、初期閉/空groupなし/内容保持/Enter-Space-focus/tap開閉/期間-条件-該当なし-解除、月別・距離の点/本が読み取れ320/375/900で横overflowなし。計算/KPI/既存card本文/グラフSVG/採点/半径/保存/handlersは保持。旧sessions/setups/sightMarks/active/customRounds/formAnalyses/reload/errors0、ChromeWK8前後/最終/公開/375原寸、native8/104、checkall/lint/format/全生成E2E/独立review、一括120・承認済CI/実Linux-public25一致/元119page記録中更新保留-banner-旧全件-新native-offline。旧84tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
+  },
+  {
+    "id": "AN-086",
+    "task": "ネイティブ用Capacitor依存2件をproxy修正済み8.4.3へ更新する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-085"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/native-proxy-patch.mdの受入。android/iosだけ8.4.0→8.4.3、package範囲~8.4.3、他locknodes/core/CLI/plugins/全app/CSS/採点半径/保存/SW/version120はexact。公式registry integrity/peer互換/全GHSA範囲非該当/実npmci独立非junction環境/公式nativeguard修正を確認。更新depsでcheckall/lint/format/全生成E2E317/25資産旧120byte一致、独立readonlyreview、承認済CI/checks/全E2E/実Linux-public25旧120byte一致、GitHub#36/#37自動fixed（手動dismissなし）。旧85tasks/acceptance/sharedhiddenlock保持、evidence後だけpass/progress/ledger。既存native配布バイナリの再build/再配布と実機remediationは未証明、taskはrepo依存更新の受入、PWAの版は120保持。費用/個人情報不使用。"
   }
 ]
