@@ -989,5 +989,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/analysis-refresh.mdの受入。比較条件と傾向が320/375で読め、期間groupと既存keyboard/focus/handlersを保持。表示0.0cmの方向は横ばい、null比較待ち、元delta/数学/保存/採点は保持。ChromeWK320375明暗900の前後/最終・空/該当なし・条件期間変更・旧全件reload/errors0・計算値一致・375原寸、checkall/lint/format/全生成E2E/独立review、markers118一括と承認済CI/実Linux-public25一致/元117context更新保留-banner-旧記録-新native-offlineを確認。旧82tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
+  },
+  {
+    "id": "AN-084",
+    "task": "分析のサイト欄を選択した用具・距離・期間に揃える",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-083"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/analysis-sight-filter.mdの受入。実118red→green、用具/距離/未指定/期間7/30/90境界/ts日付/日付不明/該当なし/全解除を確認。旧sessions/setups/sightMarks/active/customRounds/reload/errors0、分析の他計算KPI/全条件解除全文/履歴default不変。ChromeWK320375明暗900前後/最終/公開/375原寸、native8/104、checkall/lint/format/全生成E2E/独立review、一括119・承認済CI/実Linux-public25一致/元118context記録中更新保留-banner-旧全件-新native-offline。旧83tasks/acceptance/sharedlock保持、証拠後pass+evidence/progressledger。物理phone/VoiceOver/fieldINP未証明。"
   }
 ]
