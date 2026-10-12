@@ -1,0 +1,50 @@
+[
+  {
+    "file": "index.html",
+    "linuxBytes": 6014,
+    "candidateBytes": 6076,
+    "linuxSHA": "8c72b19cfa9265a72f6c02793da06de81887ab22aad515b31be1dbb5b0a32c86",
+    "candidateSHA": "0f2b6db6594f86fa365576cbe7143b6e15ad93beddc98ee09b5db7a7655def90",
+    "lineEndingOnly": true
+  },
+  {
+    "file": "manifest.json",
+    "linuxBytes": 584,
+    "candidateBytes": 599,
+    "linuxSHA": "15c82058a427d52cf51ab2b0ba55cb7dff45a2a0b9266dd5a5128e9da798c1e8",
+    "candidateSHA": "66ede1526147344a640e4996d8ffe20876ad5af48c6ac639a78e6d9476554597",
+    "lineEndingOnly": true
+  },
+  {
+    "file": "sw.js",
+    "linuxBytes": 4630,
+    "candidateBytes": 4712,
+    "linuxSHA": "c6c5f9e306ac656d9aa4ccc80834548b07b2f1a140a278497a38b40a87e94fc9",
+    "candidateSHA": "68067328bec51ec70b1b9a8ddf56e28377aceeb54a09220da227fe5dc7c20218",
+    "lineEndingOnly": true
+  },
+  {
+    "file": "icon.svg",
+    "linuxBytes": 584,
+    "candidateBytes": 594,
+    "linuxSHA": "3d8139a5fea8d992bbba05fc70ec40e3eecfaa7b4a4170c602dd0cdd19542ac7",
+    "candidateSHA": "2743dee3bca2cf2f1d3c8e0dc12ddacf4ef728e51a10954a4b0e3df0d3089ab4",
+    "lineEndingOnly": true
+  },
+  {
+    "file": "assets/pose/vision_bundle.mjs",
+    "linuxBytes": 136870,
+    "candidateBytes": 136872,
+    "linuxSHA": "e77f281f9619150d937023c355bae170e9120e3b9e43f1e23a2a7bee07197669",
+    "candidateSHA": "8ba4234736bd935a0154dd41bf8c772b4d95efdebd7ff5d7e3792de4088b6e8f",
+    "lineEndingOnly": true
+  },
+  {
+    "file": "assets/pose/vision_wasm_internal.js",
+    "linuxBytes": 209826,
+    "candidateBytes": 209846,
+    "linuxSHA": "9440cf0cc0cea21800e31581ec32aeedcc5fbf9df4509796bbc7d3f99e52ab9c",
+    "candidateSHA": "80b646a9dadaa0e9fbab489b8a45eaf4d453580aaba321fda6912a7e533e0f4f",
+    "lineEndingOnly": true
+  }
+]

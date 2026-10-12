@@ -1,0 +1,661 @@
+node:assert:150
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Values have same structure but are not reference-equal:
+
+... Skipped lines
+'"use strict";\n' +
+  '/* Archery Note: record and active-session views */\n' +
+  '/* ============ views ============ */\n' +
+  'let view = "record";\n' +
+  'let ui = {\n' +
+  '  scrollByView: {},\n' +
+  '  selArrow: -1,\n' +
+  '  sightSel: { setupId: null, dist: 70 },\n' +
+  '  histOpen: null,\n' +
+  '  histFilter: { setupId: "", dist: "", round: "" },\n' +
+  '  analysisFilter: { setupId: "", dist: "", round: "", period: "all" },\n' +
+  '  zoom: 1,\n' +
+  '  recordMode: "practice",\n' +
+  '  freshArrow: -1,\n' +
+  '  freshTimer: 0,\n' +
+  '  onboardStep: 1,\n' +
+  '  onboardDist: null,\n' +
+  '};\n' +
+  'function showView(v) {\n' +
+  '  if (view === v) return;\n' +
+  '  const m = $("#main");\n' +
+  '  ui.scrollByView[view] = Math.max(0, window.scrollY);\n' +
+  '  view = v;\n' +
+  '  ui.selArrow = -1;\n' +
+  '  nativePulse("light");\n' +
+  '  render();\n' +
+  '  m.classList.remove("viewEnter");\n' +
+  '  void m.offsetWidth;\n' +
+  '  m.classList.add("viewEnter");\n' +
+  '  const top = ui.scrollByView[v] || 0;\n' +
+  '  // A restored view needs real card heights, not content-visibility placeholders.\n' +
+  '  // Keep these nodes laid out until the next render; no delayed scroll can fight input.\n' +
+  '  if (top > 0) Array.from(m.children).forEach((card) => { card.style.contentVisibility = "visible"; });\n' +
+  '  window.scrollTo({ top, left: 0, behavior: "instant" });\n' +
+  '}\n' +
+  'document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));\n' +
+  '\n' +
+  'function render() {\n' +
+  '  updateAppChrome();\n' +
+  '  if (typeof syncUpdateBarVisibility === "function") syncUpdateBarVisibility();\n' +
+  '  const tabs = Array.prototype.slice.call(document.querySelectorAll("#tabs button"));\n' +
+  '  const activeIndex = Math.max(\n' +
+  '    0,\n' +
+  '    tabs.findIndex((b) => b.dataset.v === view),\n' +
+  '  );\n' +
+  '  const tabBar = $("#tabs");\n' +
+  '  if (tabBar) {\n' +
+  '    tabBar.style.setProperty("--active-tab", activeIndex);\n' +
+  '    tabBar.style.setProperty("--tab-count", tabs.length || 1);\n' +
+  '  }\n' +
+...}
+
+    at Object.<anonymous> (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\result-storage-notice\invariants.cjs:14:286)
+    at Module._compile (node:internal/modules/cjs/loader:1706:14)
+    at Object..js (node:internal/modules/cjs/loader:1839:10)
+    at Module.load (node:internal/modules/cjs/loader:1441:32)
+    at Function._load (node:internal/modules/cjs/loader:1263:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:237:24)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:171:5)
+    at node:internal/main/run_main_module:36:49 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '"use strict";\n' +
+    '/* Archery Note: record and active-session views */\n' +
+    '/* ============ views ============ */\n' +
+    'let view = "record";\n' +
+    'let ui = {\n' +
+    '  scrollByView: {},\n' +
+    '  selArrow: -1,\n' +
+    '  sightSel: { setupId: null, dist: 70 },\n' +
+    '  histOpen: null,\n' +
+    '  histFilter: { setupId: "", dist: "", round: "" },\n' +
+    '  analysisFilter: { setupId: "", dist: "", round: "", period: "all" },\n' +
+    '  zoom: 1,\n' +
+    '  recordMode: "practice",\n' +
+    '  freshArrow: -1,\n' +
+    '  freshTimer: 0,\n' +
+    '  onboardStep: 1,\n' +
+    '  onboardDist: null,\n' +
+    '};\n' +
+    'function showView(v) {\n' +
+    '  if (view === v) return;\n' +
+    '  const m = $("#main");\n' +
+    '  ui.scrollByView[view] = Math.max(0, window.scrollY);\n' +
+    '  view = v;\n' +
+    '  ui.selArrow = -1;\n' +
+    '  nativePulse("light");\n' +
+    '  render();\n' +
+    '  m.classList.remove("viewEnter");\n' +
+    '  void m.offsetWidth;\n' +
+    '  m.classList.add("viewEnter");\n' +
+    '  const top = ui.scrollByView[v] || 0;\n' +
+    '  // A restored view needs real card heights, not content-visibility placeholders.\n' +
+    '  // Keep these nodes laid out until the next render; no delayed scroll can fight input.\n' +
+    '  if (top > 0) Array.from(m.children).forEach((card) => { card.style.contentVisibility = "visible"; });\n' +
+    '  window.scrollTo({ top, left: 0, behavior: "instant" });\n' +
+    '}\n' +
+    'document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));\n' +
+    '\n' +
+    'function render() {\n' +
+    '  updateAppChrome();\n' +
+    '  if (typeof syncUpdateBarVisibility === "function") syncUpdateBarVisibility();\n' +
+    '  const tabs = Array.prototype.slice.call(document.querySelectorAll("#tabs button"));\n' +
+    '  const activeIndex = Math.max(\n' +
+    '    0,\n' +
+    '    tabs.findIndex((b) => b.dataset.v === view),\n' +
+    '  );\n' +
+    '  const tabBar = $("#tabs");\n' +
+    '  if (tabBar) {\n' +
+    '    tabBar.style.setProperty("--active-tab", activeIndex);\n' +
+    '    tabBar.style.setProperty("--tab-count", tabs.length || 1);\n' +
+    '  }\n' +
+    '  tabs.forEach((b) => {\n' +
+    '    const on = b.dataset.v === view;\n' +
+    '    b.classList.toggle("on", on);\n' +
+    '    if (on) b.setAttribute("aria-current", "page");\n' +
+    '    else b.removeAttribute("aria-current");\n' +
+    '  });\n' +
+    '  const m = $("#main");\n' +
+    '  m.classList.remove("hasActiveDock");\n' +
+    '  if (view === "record") renderRecord(m);\n' +
+    '  else if (view === "history") renderHistory(m);\n' +
+    '  else if (view === "analysis") renderAnalysis(m);\n' +
+    '  else if (view === "sight") renderSight(m);\n' +
+    '  else renderGear(m);\n' +
+    '}\n' +
+    '\n' +
+    '/* ---------- 記録 ---------- */\n' +
+    'function setupOptions(sel) {\n' +
+    '  return (\n' +
+    '    `<option value="">（セッティング未指定）</option>` +\n' +
+    '    db.setups\n' +
+    '      .map(\n' +
+    '        (s) =>\n' +
+    '          `<option value="${esc(s.id)}" ${s.id === sel ? "selected" : ""}>${esc(s.name)}</option>`,\n' +
+    '      )\n' +
+    '      .join("")\n' +
+    '  );\n' +
+    '}\n' +
+    'const SHOT_REASON_TAGS = [\n' +
+    '  "良射",\n' +
+    '  "押し手",\n' +
+    '  "リリース",\n' +
+    '  "クリッカー",\n' +
+    '  "風",\n' +
+    '  "狙いミス",\n' +
+    '  "矢が怪しい",\n' +
+    '  "不明",\n' +
+    '];\n' +
+    'function setupSystemSummary(setupId) {\n' +
+    '  const setup = db.setups.find((s) => s.id === setupId);\n' +
+    '  if (!setup)\n' +
+    '    return {\n' +
+    '      score: 0,\n' +
+    '      level: "準備中",\n' +
+    '      profiles: {},\n' +
+    '      lines: ["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"],\n' +
+    '      next: "用具タブで初回セットアップ",\n' +
+    '    };\n' +
+    '  const gp = gearPrecisionProfile(setup),\n' +
+    '    mp = modelReadinessProfile(setupId),\n' +
+    '    pc = personalPhysicsCalibration(setupId),\n' +
+    '    cp = calibrationProfile(setupId);\n' +
+    '  const score = clamp(\n' +
+    '    gp.score * 0.25 + mp.score * 0.25 + (pc ? pc.score * 0.28 : 0) + (cp ? cp.score * 0.22 : 0),\n' +
+    '    0,\n' +
+    '    1,\n' +
+    '  );\n' +
+    '  const level = levelFromScore(score, LEVELS.system);\n' +
+    '  const next = [];\n' +
+    '  if (gp.score < 0.65) next.push((gp.missing || [])[0] || "用具入力");\n' +
+    '  if (mp.good < 5) next.push("6本以上の練習");\n' +
+    '  if (cp.dists < 3) next.push("複数距離のサイト値");\n' +
+    '  if (pc && pc.wind.sample < 2) next.push("横風メモつき練習");\n' +
+    '  return {\n' +
+    '    score,\n' +
+    '    level,\n' +
+    '    profiles: {\n' +
+    '      gear: gp,\n' +
+    '      model: mp,\n' +
+    '      physics: pc || { score: 0, level: "未校正" },\n' +
+    '      calibration: cp,\n' +
+    '    },\n' +
+    '    lines: [`用具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc ? pc.level : "未校正"}`],\n' +
+    '    next: next.slice(0, 2).join("・") || "同条件で記録を重ねる",\n' +
+    '  };\n' +
+    '}\n' +
+    'function recordSetupSnapshot(setupId, dist) {\n' +
+    '  const setup = db.setups.find((s) => s.id === setupId);\n' +
+    '  if (!setup)\n' +
+    '    return `<div class="setupLens" id="setupLens">\n' +
+    '    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b></div>\n' +
+    '    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b></div>\n' +
+    '  </div>`;\n' +
+    '  const mk = dist ? latestMark(setupId, dist) : null;\n' +
+    '  const markText = mk ? `上下 ${esc(mk.v || "—")} / 左右 ${esc(mk.h || "—")}` : "記録なし";\n' +
+    '  return `<div class="setupLens" id="setupLens">\n' +
+    '    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b></div>\n' +
+    '    <div class="lensCard"><div class="k">${dist ? dist + "m サイト" : "サイト台帳"}</div><b>${markText}</b></div>\n' +
+    '  </div>`;\n' +
+    '}\n' +
+    'function faceChoiceValue(sess) {\n' +
+    '  if (!sess) return "122";\n' +
+    '  if (sess.faceType === "triple") return "T40";\n' +
+    '  if (sess.faceType === "field") return `F${sess.faceD || 80}`;\n' +
+    '  return String(sess.faceD || 122);\n' +
+    '}\n' +
+    'function suggestedFaceValue(dist, last) {\n' +
+    '  if (last && last.faceD) return faceChoiceValue(last);\n' +
+    '  return String((dist || 70) >= 60 ? 122 : (dist || 70) <= 18 ? 40 : 80);\n' +
+    '}\n' +
+    'function actionFaceLabel(value) {\n' +
+    '  const f = parseFaceChoice(value);\n' +
+    '  if (f.faceType === "triple") return "40cm三つ目";\n' +
+    '  if (f.faceType === "field") return `${f.faceD}cmフィールド`;\n' +
+    '  return `${f.faceD}cm`;\n' +
+    '}\n' +
+    'function recordFastActionsHtml(last) {\n' +
+    '  /* 直前が多距離ラウンドのステージなら、押下時の挙動（ラウンドをステージ1から再開）に合わせたラベルにする */\n' +
+    '  const lastRound = last && last.roundGroup ? roundLabel(last.roundGroup.roundId) : null;\n' +
+    '  const lastTitle = lastRound ? `${lastRound}をもう一度` : "前回と同じ条件で開始";\n' +
+    '  const lastLabel = last\n' +
+    '    ? lastRound\n' +
+    '      ? "最初の距離から"\n' +
+    '      : `${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`\n' +
+    '    : "なし";\n' +
+    '  /* 前回条件は固定表示。フォームの編集中の条件は fStart のみが使う。\n' +
+    '     再開ショートカットは控えめにし、主操作はセッション票の「この条件で開始」にする。 */\n' +
+    '  if (!last) return "";\n' +
+    '  return `<section class="homeActions recordRepeatBand" aria-label="すぐ使う">\n' +
+    '    <button class="homeAction repeatMain" id="quickStart" type="button">\n' +
+    '      <span class="repeatEyebrow">${esc(lastTitle)}</span>\n' +
+    '      <b id="quickStartMeta">${esc(lastLabel)}</b>\n' +
+    '    </button>\n' +
+    '    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b></button>\n' +
+    '  </section>`;\n' +
+    '}\n' +
+    '/* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */\n' +
+    'function selectedMultiRound(roundId) {\n' +
+    '  if (!roundId || ROUND_TYPES.some((r) => r.id === roundId)) return null;\n' +
+    '  const def = findRoundDef(roundId);\n' +
+    '  return def && Array.isArray(def.stages) && def.stages.length ? def : null;\n' +
+    '}\n' +
+    '/* 多距離ラウンドのステージ一覧を「計器の行程表」風に表示（目盛り＋距離降順の目盛り線）。\n' +
+    '   当たり判定・記録ロジックには触れない、表示専用の集計 */\n' +
+    'function multiRoundStageGaugeHtml(def) {\n' +
+    '  const stages = def.stages;\n' +
+    '  const maxDist = Math.max(...stages.map((st) => st.dist));\n' +
+    '  const ticks = stages\n' +
+    '    .map(\n' +
+    '      (st, i) => `\n' +
+    '    <div class="stageGaugeTick">\n' +
+    '      <div class="stageGaugeMark" style="height:${8 + Math.round((st.dist / maxDist) * 18)}px"></div>\n' +
+    '      <b>${st.dist}m</b><span>${st.arrows}射</span>\n' +
+    '    </div>${i < stages.length - 1 ? `<div class="stageGaugeRail"></div>` : ""}`,\n' +
+    '    )\n' +
+    '    .join("");\n' +
+    '  return `<div class="stageGauge" aria-label="${esc(def.label)}のステージ行程">${ticks}</div>`;\n' +
+    '}\n' +
+    '/* ---------- オンボーディング（初回起動。onboarding-final-design.md） ----------\n' +
+    '   専用画面は2枚（ウェルカム／クイック設定）。3枚目は既存 activeGuideHtml() が\n' +
+    '   「文脈内ステップ3」を担うため追加実装しない。db.active の生成形は既存 fStart\n' +
+    '   ハンドラ（このファイル内の renderRecord）と完全同形にする。 */\n' +
+    'function shouldShowOnboarding() {\n' +
+    '  return (\n' +
+    '    !db.settings.onboardingSeen && !db.active && db.sessions.length === 0 && db.setups.length === 0\n' +
+    '  ); // 用具だけ登録済みの既存ユーザーには出さない\n' +
+    '}\n' +
+    '/* 距離から的サイズ・1エンド本数を自動決定（suggestedFaceValue と同ロジック。\n' +
+    '   18mのみ3本/エンド＝WAインドア標準。通常の記録フォームの既定6本は不変） */\n' +
+    'function onboardDerived(d) {\n' +
+    '  const faceD = d >= 60 ? 122 : d <= 18 ? 40 : 80;\n' +
+    '  const perEnd = d <= 18 ? 3 : 6;\n' +
+    '  return { faceD, perEnd };\n' +
+    '}\n' +
+    'function finishOnboarding() {\n' +
+    '  db.settings.onboardingSeen = true;\n' +
+    '  ui.onboardStep = 1;\n' +
+    '  ui.onboardDist = null;\n' +
+    '  nativePulse("light");\n' +
+    '  save({ reason: "onboarding-skip" }); // 即時 save: 直後にアプリを閉じられても失われない\n' +
+    '  render();\n' +
+    '}\n' +
+    'const DEMO_ID_PREFIX = "build-week-demo:";\n' +
+    'function demoSession(id, date, offset, spread, score) {\n' +
+    '  const pts = [\n' +
+    '    [-1, 0],\n' +
+    '    [1, 0],\n' +
+    '    [0, -1],\n' +
+    '    [0, 1],\n' +
+    '    [-0.7, 0.7],\n' +
+    '    [0.7, -0.7],\n' +
+    '  ];\n' +
+    '  return {\n' +
+    '    id: DEMO_ID_PREFIX + id,\n' +
+    '    date,\n' +
+    '    setupId: null,\n' +
+    '    dist: 18,\n' +
+    '    faceD: 40,\n' +
+    '    faceType: "single",\n' +
+    '    perEnd: 3,\n' +
+    '    round: "free",\n' +
+    '    purpose: "practice",\n' +
+    '    note: "架空のデモデータ",\n' +
+    '    ends: [\n' +
+    '      pts\n' +
+    '        .slice(0, 3)\n' +
+    '        .map((p, i) => ({\n' +
+    '          x: offset + p[0] * spread,\n' +
+    '          y: p[1] * spread,\n' +
+    '          s: score + (i === 1 ? -1 : 0),\n' +
+    '        })),\n' +
+    '      pts\n' +
+    '        .slice(3)\n' +
+    '        .map((p, i) => ({\n' +
+    '          x: offset + p[0] * spread,\n' +
+    '          y: p[1] * spread,\n' +
+    '          s: score + (i === 1 ? -1 : 0),\n' +
+    '        })),\n' +
+    '    ],\n' +
+    '  };\n' +
+    '}\n' +
+    'function installDemoData() {\n' +
+    '  const dates = [-20, -8, -1].map((n) => {\n' +
+    '    const d = new Date();\n' +
+    '    d.setDate(d.getDate() + n);\n' +
+    '    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;\n' +
+    '  });\n' +
+    '  db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));\n' +
+    '  db.sessions.push(\n' +
+    '    demoSession("1", dates[0], 1.4, 3.2, 8),\n' +
+    '    demoSession("2", dates[1], 0.8, 2.4, 9),\n' +
+    '    demoSession("3", dates[2], 0.3, 1.7, 9),\n' +
+    '  );\n' +
+    '  db.settings.onboardingSeen = true;\n' +
+    '  save({ reason: "demo-install", forceSnapshot: true });\n' +
+    '}\n' +
+    'function removeDemoData() {\n' +
+    '  const before = db.sessions.length;\n' +
+    '  db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));\n' +
+    '  if (db.sessions.length !== before) save({ reason: "demo-remove", forceSnapshot: true });\n' +
+    '  return before - db.sessions.length;\n' +
+    '}\n' +
+    'function onboardWelcomeHtml() {\n' +
+    '  return `<section class="onboard onboardWelcome" data-testid="onboard-welcome">\n' +
+    '    <div class="onboardLogo" aria-hidden="true">\n' +
+    '      <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke-linecap="butt">\n' +
+    '        <circle cx="32" cy="32" r="19" stroke="var(--ink)" stroke-width="1.5"/>\n' +
+    '        <path class="reticleAccent" d="M32 6v10M32 48v10M6 32h10M48 32h10" stroke-width="1.5"/>\n' +
+    '      </svg>\n' +
+    '    </div>\n' +
+    '    <h2>Archery Note</h2>\n' +
+    '    <p>的をタップするだけで得点を記録。サイト調整の提案まで、この一冊で。</p>\n' +
+    '    <div class="onboardPrivacy">\n' +
+    '      <svg viewBox="0 0 24 24" width="14" height="14" fi'... 102052 more characters,
+  expected: '"use strict";\n' +
+    '/* Archery Note: record and active-session views */\n' +
+    '/* ============ views ============ */\n' +
+    'let view = "record";\n' +
+    'let ui = {\n' +
+    '  scrollByView: {},\n' +
+    '  selArrow: -1,\n' +
+    '  sightSel: { setupId: null, dist: 70 },\n' +
+    '  histOpen: null,\n' +
+    '  histFilter: { setupId: "", dist: "", round: "" },\n' +
+    '  analysisFilter: { setupId: "", dist: "", round: "", period: "all" },\n' +
+    '  zoom: 1,\n' +
+    '  recordMode: "practice",\n' +
+    '  freshArrow: -1,\n' +
+    '  freshTimer: 0,\n' +
+    '  onboardStep: 1,\n' +
+    '  onboardDist: null,\n' +
+    '};\n' +
+    'function showView(v) {\n' +
+    '  if (view === v) return;\n' +
+    '  const m = $("#main");\n' +
+    '  ui.scrollByView[view] = Math.max(0, window.scrollY);\n' +
+    '  view = v;\n' +
+    '  ui.selArrow = -1;\n' +
+    '  nativePulse("light");\n' +
+    '  render();\n' +
+    '  m.classList.remove("viewEnter");\n' +
+    '  void m.offsetWidth;\n' +
+    '  m.classList.add("viewEnter");\n' +
+    '  const top = ui.scrollByView[v] || 0;\n' +
+    '  // A restored view needs real card heights, not content-visibility placeholders.\n' +
+    '  // Keep these nodes laid out until the next render; no delayed scroll can fight input.\n' +
+    '  if (top > 0) Array.from(m.children).forEach((card) => { card.style.contentVisibility = "visible"; });\n' +
+    '  window.scrollTo({ top, left: 0, behavior: "instant" });\n' +
+    '}\n' +
+    'document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));\n' +
+    '\n' +
+    'function render() {\n' +
+    '  updateAppChrome();\n' +
+    '  if (typeof syncUpdateBarVisibility === "function") syncUpdateBarVisibility();\n' +
+    '  const tabs = Array.prototype.slice.call(document.querySelectorAll("#tabs button"));\n' +
+    '  const activeIndex = Math.max(\n' +
+    '    0,\n' +
+    '    tabs.findIndex((b) => b.dataset.v === view),\n' +
+    '  );\n' +
+    '  const tabBar = $("#tabs");\n' +
+    '  if (tabBar) {\n' +
+    '    tabBar.style.setProperty("--active-tab", activeIndex);\n' +
+    '    tabBar.style.setProperty("--tab-count", tabs.length || 1);\n' +
+    '  }\n' +
+    '  tabs.forEach((b) => {\n' +
+    '    const on = b.dataset.v === view;\n' +
+    '    b.classList.toggle("on", on);\n' +
+    '    if (on) b.setAttribute("aria-current", "page");\n' +
+    '    else b.removeAttribute("aria-current");\n' +
+    '  });\n' +
+    '  const m = $("#main");\n' +
+    '  m.classList.remove("hasActiveDock");\n' +
+    '  if (view === "record") renderRecord(m);\n' +
+    '  else if (view === "history") renderHistory(m);\n' +
+    '  else if (view === "analysis") renderAnalysis(m);\n' +
+    '  else if (view === "sight") renderSight(m);\n' +
+    '  else renderGear(m);\n' +
+    '}\n' +
+    '\n' +
+    '/* ---------- 記録 ---------- */\n' +
+    'function setupOptions(sel) {\n' +
+    '  return (\n' +
+    '    `<option value="">（セッティング未指定）</option>` +\n' +
+    '    db.setups\n' +
+    '      .map(\n' +
+    '        (s) =>\n' +
+    '          `<option value="${esc(s.id)}" ${s.id === sel ? "selected" : ""}>${esc(s.name)}</option>`,\n' +
+    '      )\n' +
+    '      .join("")\n' +
+    '  );\n' +
+    '}\n' +
+    'const SHOT_REASON_TAGS = [\n' +
+    '  "良射",\n' +
+    '  "押し手",\n' +
+    '  "リリース",\n' +
+    '  "クリッカー",\n' +
+    '  "風",\n' +
+    '  "狙いミス",\n' +
+    '  "矢が怪しい",\n' +
+    '  "不明",\n' +
+    '];\n' +
+    'function setupSystemSummary(setupId) {\n' +
+    '  const setup = db.setups.find((s) => s.id === setupId);\n' +
+    '  if (!setup)\n' +
+    '    return {\n' +
+    '      score: 0,\n' +
+    '      level: "準備中",\n' +
+    '      profiles: {},\n' +
+    '      lines: ["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"],\n' +
+    '      next: "用具タブで初回セットアップ",\n' +
+    '    };\n' +
+    '  const gp = gearPrecisionProfile(setup),\n' +
+    '    mp = modelReadinessProfile(setupId),\n' +
+    '    pc = personalPhysicsCalibration(setupId),\n' +
+    '    cp = calibrationProfile(setupId);\n' +
+    '  const score = clamp(\n' +
+    '    gp.score * 0.25 + mp.score * 0.25 + (pc ? pc.score * 0.28 : 0) + (cp ? cp.score * 0.22 : 0),\n' +
+    '    0,\n' +
+    '    1,\n' +
+    '  );\n' +
+    '  const level = levelFromScore(score, LEVELS.system);\n' +
+    '  const next = [];\n' +
+    '  if (gp.score < 0.65) next.push((gp.missing || [])[0] || "用具入力");\n' +
+    '  if (mp.good < 5) next.push("6本以上の練習");\n' +
+    '  if (cp.dists < 3) next.push("複数距離のサイト値");\n' +
+    '  if (pc && pc.wind.sample < 2) next.push("横風メモつき練習");\n' +
+    '  return {\n' +
+    '    score,\n' +
+    '    level,\n' +
+    '    profiles: {\n' +
+    '      gear: gp,\n' +
+    '      model: mp,\n' +
+    '      physics: pc || { score: 0, level: "未校正" },\n' +
+    '      calibration: cp,\n' +
+    '    },\n' +
+    '    lines: [`用具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc ? pc.level : "未校正"}`],\n' +
+    '    next: next.slice(0, 2).join("・") || "同条件で記録を重ねる",\n' +
+    '  };\n' +
+    '}\n' +
+    'function recordSetupSnapshot(setupId, dist) {\n' +
+    '  const setup = db.setups.find((s) => s.id === setupId);\n' +
+    '  if (!setup)\n' +
+    '    return `<div class="setupLens" id="setupLens">\n' +
+    '    <div class="lensCard"><div class="k">セッティング</div><b>未指定</b></div>\n' +
+    '    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b></div>\n' +
+    '  </div>`;\n' +
+    '  const mk = dist ? latestMark(setupId, dist) : null;\n' +
+    '  const markText = mk ? `上下 ${esc(mk.v || "—")} / 左右 ${esc(mk.h || "—")}` : "記録なし";\n' +
+    '  return `<div class="setupLens" id="setupLens">\n' +
+    '    <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b></div>\n' +
+    '    <div class="lensCard"><div class="k">${dist ? dist + "m サイト" : "サイト台帳"}</div><b>${markText}</b></div>\n' +
+    '  </div>`;\n' +
+    '}\n' +
+    'function faceChoiceValue(sess) {\n' +
+    '  if (!sess) return "122";\n' +
+    '  if (sess.faceType === "triple") return "T40";\n' +
+    '  if (sess.faceType === "field") return `F${sess.faceD || 80}`;\n' +
+    '  return String(sess.faceD || 122);\n' +
+    '}\n' +
+    'function suggestedFaceValue(dist, last) {\n' +
+    '  if (last && last.faceD) return faceChoiceValue(last);\n' +
+    '  return String((dist || 70) >= 60 ? 122 : (dist || 70) <= 18 ? 40 : 80);\n' +
+    '}\n' +
+    'function actionFaceLabel(value) {\n' +
+    '  const f = parseFaceChoice(value);\n' +
+    '  if (f.faceType === "triple") return "40cm三つ目";\n' +
+    '  if (f.faceType === "field") return `${f.faceD}cmフィールド`;\n' +
+    '  return `${f.faceD}cm`;\n' +
+    '}\n' +
+    'function recordFastActionsHtml(last) {\n' +
+    '  /* 直前が多距離ラウンドのステージなら、押下時の挙動（ラウンドをステージ1から再開）に合わせたラベルにする */\n' +
+    '  const lastRound = last && last.roundGroup ? roundLabel(last.roundGroup.roundId) : null;\n' +
+    '  const lastTitle = lastRound ? `${lastRound}をもう一度` : "前回と同じ条件で開始";\n' +
+    '  const lastLabel = last\n' +
+    '    ? lastRound\n' +
+    '      ? "最初の距離から"\n' +
+    '      : `${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`\n' +
+    '    : "なし";\n' +
+    '  /* 前回条件は固定表示。フォームの編集中の条件は fStart のみが使う。\n' +
+    '     再開ショートカットは控えめにし、主操作はセッション票の「この条件で開始」にする。 */\n' +
+    '  if (!last) return "";\n' +
+    '  return `<section class="homeActions recordRepeatBand" aria-label="すぐ使う">\n' +
+    '    <button class="homeAction repeatMain" id="quickStart" type="button">\n' +
+    '      <span class="repeatEyebrow">${esc(lastTitle)}</span>\n' +
+    '      <b id="quickStartMeta">${esc(lastLabel)}</b>\n' +
+    '    </button>\n' +
+    '    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b></button>\n' +
+    '  </section>`;\n' +
+    '}\n' +
+    '/* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */\n' +
+    'function selectedMultiRound(roundId) {\n' +
+    '  if (!roundId || ROUND_TYPES.some((r) => r.id === roundId)) return null;\n' +
+    '  const def = findRoundDef(roundId);\n' +
+    '  return def && Array.isArray(def.stages) && def.stages.length ? def : null;\n' +
+    '}\n' +
+    '/* 多距離ラウンドのステージ一覧を「計器の行程表」風に表示（目盛り＋距離降順の目盛り線）。\n' +
+    '   当たり判定・記録ロジックには触れない、表示専用の集計 */\n' +
+    'function multiRoundStageGaugeHtml(def) {\n' +
+    '  const stages = def.stages;\n' +
+    '  const maxDist = Math.max(...stages.map((st) => st.dist));\n' +
+    '  const ticks = stages\n' +
+    '    .map(\n' +
+    '      (st, i) => `\n' +
+    '    <div class="stageGaugeTick">\n' +
+    '      <div class="stageGaugeMark" style="height:${8 + Math.round((st.dist / maxDist) * 18)}px"></div>\n' +
+    '      <b>${st.dist}m</b><span>${st.arrows}射</span>\n' +
+    '    </div>${i < stages.length - 1 ? `<div class="stageGaugeRail"></div>` : ""}`,\n' +
+    '    )\n' +
+    '    .join("");\n' +
+    '  return `<div class="stageGauge" aria-label="${esc(def.label)}のステージ行程">${ticks}</div>`;\n' +
+    '}\n' +
+    '/* ---------- オンボーディング（初回起動。onboarding-final-design.md） ----------\n' +
+    '   専用画面は2枚（ウェルカム／クイック設定）。3枚目は既存 activeGuideHtml() が\n' +
+    '   「文脈内ステップ3」を担うため追加実装しない。db.active の生成形は既存 fStart\n' +
+    '   ハンドラ（このファイル内の renderRecord）と完全同形にする。 */\n' +
+    'function shouldShowOnboarding() {\n' +
+    '  return (\n' +
+    '    !db.settings.onboardingSeen && !db.active && db.sessions.length === 0 && db.setups.length === 0\n' +
+    '  ); // 用具だけ登録済みの既存ユーザーには出さない\n' +
+    '}\n' +
+    '/* 距離から的サイズ・1エンド本数を自動決定（suggestedFaceValue と同ロジック。\n' +
+    '   18mのみ3本/エンド＝WAインドア標準。通常の記録フォームの既定6本は不変） */\n' +
+    'function onboardDerived(d) {\n' +
+    '  const faceD = d >= 60 ? 122 : d <= 18 ? 40 : 80;\n' +
+    '  const perEnd = d <= 18 ? 3 : 6;\n' +
+    '  return { faceD, perEnd };\n' +
+    '}\n' +
+    'function finishOnboarding() {\n' +
+    '  db.settings.onboardingSeen = true;\n' +
+    '  ui.onboardStep = 1;\n' +
+    '  ui.onboardDist = null;\n' +
+    '  nativePulse("light");\n' +
+    '  save({ reason: "onboarding-skip" }); // 即時 save: 直後にアプリを閉じられても失われない\n' +
+    '  render();\n' +
+    '}\n' +
+    'const DEMO_ID_PREFIX = "build-week-demo:";\n' +
+    'function demoSession(id, date, offset, spread, score) {\n' +
+    '  const pts = [\n' +
+    '    [-1, 0],\n' +
+    '    [1, 0],\n' +
+    '    [0, -1],\n' +
+    '    [0, 1],\n' +
+    '    [-0.7, 0.7],\n' +
+    '    [0.7, -0.7],\n' +
+    '  ];\n' +
+    '  return {\n' +
+    '    id: DEMO_ID_PREFIX + id,\n' +
+    '    date,\n' +
+    '    setupId: null,\n' +
+    '    dist: 18,\n' +
+    '    faceD: 40,\n' +
+    '    faceType: "single",\n' +
+    '    perEnd: 3,\n' +
+    '    round: "free",\n' +
+    '    purpose: "practice",\n' +
+    '    note: "架空のデモデータ",\n' +
+    '    ends: [\n' +
+    '      pts\n' +
+    '        .slice(0, 3)\n' +
+    '        .map((p, i) => ({\n' +
+    '          x: offset + p[0] * spread,\n' +
+    '          y: p[1] * spread,\n' +
+    '          s: score + (i === 1 ? -1 : 0),\n' +
+    '        })),\n' +
+    '      pts\n' +
+    '        .slice(3)\n' +
+    '        .map((p, i) => ({\n' +
+    '          x: offset + p[0] * spread,\n' +
+    '          y: p[1] * spread,\n' +
+    '          s: score + (i === 1 ? -1 : 0),\n' +
+    '        })),\n' +
+    '    ],\n' +
+    '  };\n' +
+    '}\n' +
+    'function installDemoData() {\n' +
+    '  const dates = [-20, -8, -1].map((n) => {\n' +
+    '    const d = new Date();\n' +
+    '    d.setDate(d.getDate() + n);\n' +
+    '    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;\n' +
+    '  });\n' +
+    '  db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));\n' +
+    '  db.sessions.push(\n' +
+    '    demoSession("1", dates[0], 1.4, 3.2, 8),\n' +
+    '    demoSession("2", dates[1], 0.8, 2.4, 9),\n' +
+    '    demoSession("3", dates[2], 0.3, 1.7, 9),\n' +
+    '  );\n' +
+    '  db.settings.onboardingSeen = true;\n' +
+    '  save({ reason: "demo-install", forceSnapshot: true });\n' +
+    '}\n' +
+    'function removeDemoData() {\n' +
+    '  const before = db.sessions.length;\n' +
+    '  db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));\n' +
+    '  if (db.sessions.length !== before) save({ reason: "demo-remove", forceSnapshot: true });\n' +
+    '  return before - db.sessions.length;\n' +
+    '}\n' +
+    'function onboardWelcomeHtml() {\n' +
+    '  return `<section class="onboard onboardWelcome" data-testid="onboard-welcome">\n' +
+    '    <div class="onboardLogo" aria-hidden="true">\n' +
+    '      <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke-linecap="butt">\n' +
+    '        <circle cx="32" cy="32" r="19" stroke="var(--ink)" stroke-width="1.5"/>\n' +
+    '        <path class="reticleAccent" d="M32 6v10M32 48v10M6 32h10M48 32h10" stroke-width="1.5"/>\n' +
+    '      </svg>\n' +
+    '    </div>\n' +
+    '    <h2>Archery Note</h2>\n' +
+    '    <p>的をタップするだけで得点を記録。サイト調整の提案まで、この一冊で。</p>\n' +
+    '    <div class="onboardPrivacy">\n' +
+    '      <svg viewBox="0 0 24 24" width="14" height="14" fi'... 102052 more characters,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v22.19.0

@@ -1,0 +1,1002 @@
+validate	Set up job	﻿2026-10-12T03:38:26.8117325Z Current runner version: '2.337.0'
+validate	Set up job	2026-10-12T03:38:26.8144252Z ##[group]Runner Image Provisioner
+validate	Set up job	2026-10-12T03:38:26.8145615Z Hosted Compute Agent
+validate	Set up job	2026-10-12T03:38:26.8146254Z Version: 20261002.596
+validate	Set up job	2026-10-12T03:38:26.8146914Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+validate	Set up job	2026-10-12T03:38:26.8147966Z Build Date: 2026-10-02T22:28:27Z
+validate	Set up job	2026-10-12T03:38:26.8148644Z Worker ID: {48f31f5b-4b92-4986-8fa6-6159dabc712e}
+validate	Set up job	2026-10-12T03:38:26.8149423Z Region: westus
+validate	Set up job	2026-10-12T03:38:26.8150018Z Cloud: Azure
+validate	Set up job	2026-10-12T03:38:26.8150546Z ##[endgroup]
+validate	Set up job	2026-10-12T03:38:26.8152324Z ##[group]Operating System
+validate	Set up job	2026-10-12T03:38:26.8152972Z Ubuntu
+validate	Set up job	2026-10-12T03:38:26.8153557Z 24.04.5
+validate	Set up job	2026-10-12T03:38:26.8154141Z LTS
+validate	Set up job	2026-10-12T03:38:26.8154636Z ##[endgroup]
+validate	Set up job	2026-10-12T03:38:26.8155252Z ##[group]Runner Image
+validate	Set up job	2026-10-12T03:38:26.8155838Z Image: ubuntu-24.04
+validate	Set up job	2026-10-12T03:38:26.8156428Z Version: 20261004.327.1
+validate	Set up job	2026-10-12T03:38:26.8157779Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+validate	Set up job	2026-10-12T03:38:26.8159654Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+validate	Set up job	2026-10-12T03:38:26.8160613Z ##[endgroup]
+validate	Set up job	2026-10-12T03:38:26.8161875Z ##[group]GITHUB_TOKEN Permissions
+validate	Set up job	2026-10-12T03:38:26.8164000Z Contents: read
+validate	Set up job	2026-10-12T03:38:26.8164682Z Metadata: read
+validate	Set up job	2026-10-12T03:38:26.8165292Z Pages: read
+validate	Set up job	2026-10-12T03:38:26.8165811Z ##[endgroup]
+validate	Set up job	2026-10-12T03:38:26.8168529Z Secret source: Actions
+validate	Set up job	2026-10-12T03:38:26.8169464Z Cache mode: write
+validate	Set up job	2026-10-12T03:38:26.8170534Z Prepare workflow directory
+validate	Set up job	2026-10-12T03:38:26.8520991Z Prepare all required actions
+validate	Set up job	2026-10-12T03:38:26.8573578Z Getting action download info
+validate	Set up job	2026-10-12T03:38:27.2102216Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+validate	Set up job	2026-10-12T03:38:27.3215932Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+validate	Set up job	2026-10-12T03:38:27.4112453Z Download action repository 'actions/configure-pages@v5' (SHA:983d7736d9b0ae728b81ab479565c72886d7745b)
+validate	Set up job	2026-10-12T03:38:27.7686903Z Download action repository 'actions/upload-pages-artifact@v4' (SHA:7b1f4a764d45c48632c6b24a0339c27f5614fb0b)
+validate	Set up job	2026-10-12T03:38:28.0639082Z Getting action download info
+validate	Set up job	2026-10-12T03:38:28.1927046Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+validate	Set up job	2026-10-12T03:38:28.3284058Z Complete job name: validate
+validate	Checkout	﻿2026-10-12T03:38:28.4181716Z ##[group]Run actions/checkout@v4
+validate	Checkout	2026-10-12T03:38:28.4182789Z with:
+validate	Checkout	2026-10-12T03:38:28.4183324Z   repository: eita115115/archery-note
+validate	Checkout	2026-10-12T03:38:28.4187905Z   token: ***
+validate	Checkout	2026-10-12T03:38:28.4188443Z   ssh-strict: true
+validate	Checkout	2026-10-12T03:38:28.4188930Z   ssh-user: git
+validate	Checkout	2026-10-12T03:38:28.4189414Z   persist-credentials: true
+validate	Checkout	2026-10-12T03:38:28.4189952Z   clean: true
+validate	Checkout	2026-10-12T03:38:28.4190430Z   sparse-checkout-cone-mode: true
+validate	Checkout	2026-10-12T03:38:28.4191015Z   fetch-depth: 1
+validate	Checkout	2026-10-12T03:38:28.4191498Z   fetch-tags: false
+validate	Checkout	2026-10-12T03:38:28.4192011Z   show-progress: true
+validate	Checkout	2026-10-12T03:38:28.4192505Z   lfs: false
+validate	Checkout	2026-10-12T03:38:28.4192978Z   submodules: false
+validate	Checkout	2026-10-12T03:38:28.4193515Z   set-safe-directory: true
+validate	Checkout	2026-10-12T03:38:28.4194072Z   allow-unsafe-pr-checkout: false
+validate	Checkout	2026-10-12T03:38:28.4194929Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:28.5268276Z Syncing repository: eita115115/archery-note
+validate	Checkout	2026-10-12T03:38:28.5272002Z ##[group]Getting Git version info
+validate	Checkout	2026-10-12T03:38:28.5274042Z Working directory is '/home/runner/work/archery-note/archery-note'
+validate	Checkout	2026-10-12T03:38:28.5276879Z [command]/usr/bin/git version
+validate	Checkout	2026-10-12T03:38:28.5353629Z git version 2.55.0
+validate	Checkout	2026-10-12T03:38:28.5376716Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:28.5393486Z Temporarily overriding HOME='/home/runner/work/_temp/07d72e40-a058-4237-9639-20427756bf9a' before making global git config changes
+validate	Checkout	2026-10-12T03:38:28.5396166Z Adding repository directory to the temporary git global config as a safe directory
+validate	Checkout	2026-10-12T03:38:28.5401874Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/archery-note/archery-note
+validate	Checkout	2026-10-12T03:38:28.5459425Z Deleting the contents of '/home/runner/work/archery-note/archery-note'
+validate	Checkout	2026-10-12T03:38:28.5562624Z ##[group]Initializing the repository
+validate	Checkout	2026-10-12T03:38:28.5564645Z [command]/usr/bin/git init /home/runner/work/archery-note/archery-note
+validate	Checkout	2026-10-12T03:38:28.5619538Z hint: Using 'master' as the name for the initial branch. This default branch name
+validate	Checkout	2026-10-12T03:38:28.5621407Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+validate	Checkout	2026-10-12T03:38:28.5623248Z hint: to use in all of your new repositories, which will suppress this warning,
+validate	Checkout	2026-10-12T03:38:28.5624582Z hint: call:
+validate	Checkout	2026-10-12T03:38:28.5625277Z hint:
+validate	Checkout	2026-10-12T03:38:28.5626159Z hint: 	git config --global init.defaultBranch <name>
+validate	Checkout	2026-10-12T03:38:28.5627330Z hint:
+validate	Checkout	2026-10-12T03:38:28.5628664Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+validate	Checkout	2026-10-12T03:38:28.5630364Z hint: 'development'. The just-created branch can be renamed via this command:
+validate	Checkout	2026-10-12T03:38:28.5631767Z hint:
+validate	Checkout	2026-10-12T03:38:28.5632584Z hint: 	git branch -m <name>
+validate	Checkout	2026-10-12T03:38:28.5633479Z hint:
+validate	Checkout	2026-10-12T03:38:28.5634621Z hint: Disable this message with "git config set advice.defaultBranchName false"
+validate	Checkout	2026-10-12T03:38:28.5642178Z Initialized empty Git repository in /home/runner/work/archery-note/archery-note/.git/
+validate	Checkout	2026-10-12T03:38:28.5653553Z [command]/usr/bin/git remote add origin https://github.com/eita115115/archery-note
+validate	Checkout	2026-10-12T03:38:28.5719756Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:28.5721536Z ##[group]Disabling automatic garbage collection
+validate	Checkout	2026-10-12T03:38:28.5723723Z [command]/usr/bin/git config --local gc.auto 0
+validate	Checkout	2026-10-12T03:38:28.5777524Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:28.5779327Z ##[group]Setting up auth
+validate	Checkout	2026-10-12T03:38:28.5785435Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+validate	Checkout	2026-10-12T03:38:28.5815390Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+validate	Checkout	2026-10-12T03:38:28.6250649Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+validate	Checkout	2026-10-12T03:38:28.6309907Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+validate	Checkout	2026-10-12T03:38:28.6554889Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+validate	Checkout	2026-10-12T03:38:28.6596477Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+validate	Checkout	2026-10-12T03:38:28.6835969Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+validate	Checkout	2026-10-12T03:38:28.6882872Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:28.6883992Z ##[group]Fetching the repository
+validate	Checkout	2026-10-12T03:38:28.6893927Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +20f19429609d1c6a0445ee5d6b63d2ec9a095e0c:refs/remotes/origin/main
+validate	Checkout	2026-10-12T03:38:30.6012016Z From https://github.com/eita115115/archery-note
+validate	Checkout	2026-10-12T03:38:30.6014980Z  * [new ref]         20f19429609d1c6a0445ee5d6b63d2ec9a095e0c -> origin/main
+validate	Checkout	2026-10-12T03:38:30.6019797Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:30.6020666Z ##[group]Determining the checkout info
+validate	Checkout	2026-10-12T03:38:30.6021419Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:30.6027205Z [command]/usr/bin/git sparse-checkout disable
+validate	Checkout	2026-10-12T03:38:30.6087895Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+validate	Checkout	2026-10-12T03:38:30.6129267Z ##[group]Checking out the ref
+validate	Checkout	2026-10-12T03:38:30.6133302Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+validate	Checkout	2026-10-12T03:38:30.8346362Z Switched to a new branch 'main'
+validate	Checkout	2026-10-12T03:38:30.8359030Z branch 'main' set up to track 'origin/main'.
+validate	Checkout	2026-10-12T03:38:30.8366800Z ##[endgroup]
+validate	Checkout	2026-10-12T03:38:30.8416795Z [command]/usr/bin/git log -1 --format=%H
+validate	Checkout	2026-10-12T03:38:30.8445077Z 20f19429609d1c6a0445ee5d6b63d2ec9a095e0c
+validate	Setup Node	﻿2026-10-12T03:38:30.8732811Z ##[group]Run actions/setup-node@v4
+validate	Setup Node	2026-10-12T03:38:30.8733234Z with:
+validate	Setup Node	2026-10-12T03:38:30.8733485Z   node-version: 22
+validate	Setup Node	2026-10-12T03:38:30.8733735Z   cache: npm
+validate	Setup Node	2026-10-12T03:38:30.8733982Z   always-auth: false
+validate	Setup Node	2026-10-12T03:38:30.8734253Z   check-latest: false
+validate	Setup Node	2026-10-12T03:38:30.8736849Z   token: ***
+validate	Setup Node	2026-10-12T03:38:30.8737098Z ##[endgroup]
+validate	Setup Node	2026-10-12T03:38:31.0241230Z (node:2313) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+validate	Setup Node	2026-10-12T03:38:31.0242507Z (Use `node --trace-deprecation ...` to show where the warning was created)
+validate	Setup Node	2026-10-12T03:38:31.0252079Z Found in cache @ /opt/hostedtoolcache/node/22.23.3/x64
+validate	Setup Node	2026-10-12T03:38:31.0279115Z ##[group]Environment details
+validate	Setup Node	2026-10-12T03:38:31.4992956Z node: v22.23.3
+validate	Setup Node	2026-10-12T03:38:31.4993792Z npm: 10.9.9
+validate	Setup Node	2026-10-12T03:38:31.4994225Z yarn: 1.22.22
+validate	Setup Node	2026-10-12T03:38:31.4995249Z ##[endgroup]
+validate	Setup Node	2026-10-12T03:38:31.5015022Z [command]/opt/hostedtoolcache/node/22.23.3/x64/bin/npm config get cache
+validate	Setup Node	2026-10-12T03:38:31.6213959Z /home/runner/.npm
+validate	Setup Node	2026-10-12T03:38:31.8835465Z npm cache is not found
+validate	Install dependencies	﻿2026-10-12T03:38:31.8971065Z ##[group]Run npm ci
+validate	Install dependencies	2026-10-12T03:38:31.8971410Z ^[[36;1mnpm ci^[[0m
+validate	Install dependencies	2026-10-12T03:38:31.9274684Z shell: /usr/bin/bash -e {0}
+validate	Install dependencies	2026-10-12T03:38:31.9275113Z ##[endgroup]
+validate	Install dependencies	2026-10-12T03:38:39.0008382Z 
+validate	Install dependencies	2026-10-12T03:38:39.0017905Z added 268 packages, and audited 269 packages in 7s
+validate	Install dependencies	2026-10-12T03:38:39.0018649Z 
+validate	Install dependencies	2026-10-12T03:38:39.0019220Z 43 packages are looking for funding
+validate	Install dependencies	2026-10-12T03:38:39.0019808Z   run `npm fund` for details
+validate	Install dependencies	2026-10-12T03:38:39.0256984Z 
+validate	Install dependencies	2026-10-12T03:38:39.0257872Z 2 critical severity vulnerabilities
+validate	Install dependencies	2026-10-12T03:38:39.0258147Z 
+validate	Install dependencies	2026-10-12T03:38:39.0258555Z To address all issues, run:
+validate	Install dependencies	2026-10-12T03:38:39.0259048Z   npm audit fix
+validate	Install dependencies	2026-10-12T03:38:39.0259281Z 
+validate	Install dependencies	2026-10-12T03:38:39.0259501Z Run `npm audit` for details.
+validate	Run all checks	﻿2026-10-12T03:38:39.0828612Z ##[group]Run npm run check:all
+validate	Run all checks	2026-10-12T03:38:39.0828973Z ^[[36;1mnpm run check:all^[[0m
+validate	Run all checks	2026-10-12T03:38:39.0895750Z shell: /usr/bin/bash -e {0}
+validate	Run all checks	2026-10-12T03:38:39.0896038Z env:
+validate	Run all checks	2026-10-12T03:38:39.0896323Z   CHROME_PATH: /usr/bin/google-chrome
+validate	Run all checks	2026-10-12T03:38:39.0896723Z ##[endgroup]
+validate	Run all checks	2026-10-12T03:38:39.1967309Z 
+validate	Run all checks	2026-10-12T03:38:39.1968069Z > archery-note@0.115.0 check:all
+validate	Run all checks	2026-10-12T03:38:39.1970786Z > npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version && npm run check:distribution
+validate	Run all checks	2026-10-12T03:38:39.1972677Z 
+validate	Run all checks	2026-10-12T03:38:39.3019483Z 
+validate	Run all checks	2026-10-12T03:38:39.3020457Z > archery-note@0.115.0 check:app
+validate	Run all checks	2026-10-12T03:38:39.3021514Z > node tools/check-app.js
+validate	Run all checks	2026-10-12T03:38:39.3021968Z 
+validate	Run all checks	2026-10-12T03:38:39.4665884Z Score distribution: 36000 arrows, 72000 score reads
+validate	Run all checks	2026-10-12T03:38:39.6603138Z Score trend: 1000 seeded histories and empty/sparse/coercion/overflow HTML unchanged; inputs immutable
+validate	Run all checks	2026-10-12T03:38:39.6752020Z Score trend: 1000x36 fixture, 288 score reads, tail after eighth record untouched
+validate	Run all checks	2026-10-12T03:38:39.6752999Z Archery Note checks OK (v115)
+validate	Run all checks	2026-10-12T03:38:39.6753741Z Robust grouping: used=8, excluded=1, confidence=30%
+validate	Run all checks	2026-10-12T03:38:39.6758883Z Physics: 209fps, rho=1.08, Cd=1.20
+validate	Run all checks	2026-10-12T03:38:39.7841500Z 
+validate	Run all checks	2026-10-12T03:38:39.7842211Z > archery-note@0.115.0 check:globals
+validate	Run all checks	2026-10-12T03:38:39.7842858Z > node tools/check-globals.js
+validate	Run all checks	2026-10-12T03:38:39.7843193Z 
+validate	Run all checks	2026-10-12T03:38:40.2628663Z check-globals OK (14 files, 1240 unresolved refs all accounted for)
+validate	Run all checks	2026-10-12T03:38:40.3733730Z 
+validate	Run all checks	2026-10-12T03:38:40.3734742Z > archery-note@0.115.0 check:analysis
+validate	Run all checks	2026-10-12T03:38:40.3735848Z > node tools/check-analysis-core.js && node tools/check-grouping-interpretation.js
+validate	Run all checks	2026-10-12T03:38:40.3736513Z 
+validate	Run all checks	2026-10-12T03:38:40.4376696Z Analysis core characterization checks OK
+validate	Run all checks	2026-10-12T03:38:40.4391127Z Robust median reuse checks OK
+validate	Run all checks	2026-10-12T03:38:40.4850349Z Grouping interpretation checks OK (43 checks; real scoring/statistics, score populations retained)
+validate	Run all checks	2026-10-12T03:38:40.5879835Z 
+validate	Run all checks	2026-10-12T03:38:40.5880632Z > archery-note@0.115.0 check:form
+validate	Run all checks	2026-10-12T03:38:40.5881969Z > node tools/check-form-core.js && node tools/golden-replay/test-form-metric-fixtures.js && node tools/check-form-diagnostics.js
+validate	Run all checks	2026-10-12T03:38:40.5882754Z 
+validate	Run all checks	2026-10-12T03:38:41.4246116Z 
+validate	Run all checks	2026-10-12T03:38:41.4247045Z 矢プレゼンス検出: 合成フレーム分離性テーブル
+validate	Run all checks	2026-10-12T03:38:41.4251943Z label                                score
+validate	Run all checks	2026-10-12T03:38:41.4274961Z noisy bg + line                      1
+validate	Run all checks	2026-10-12T03:38:41.4275833Z noisy bg, no line                    0
+validate	Run all checks	2026-10-12T03:38:41.4276541Z textured bg + line                   1
+validate	Run all checks	2026-10-12T03:38:41.4277235Z textured bg, no line                 0
+validate	Run all checks	2026-10-12T03:38:41.4278163Z partially occluded line (rest area)  0.774
+validate	Run all checks	2026-10-12T03:38:41.4278868Z tilted 15deg + line                  0.839
+validate	Run all checks	2026-10-12T03:38:41.4279651Z tilted 15deg, no line                0
+validate	Run all checks	2026-10-12T03:38:41.4280328Z tilted -15deg + line                 0.871
+validate	Run all checks	2026-10-12T03:38:41.4281040Z tilted -15deg, no line               0
+validate	Run all checks	2026-10-12T03:38:41.4281831Z bright bg, dark line                 1
+validate	Run all checks	2026-10-12T03:38:41.4282547Z dark bg, bright line                 1
+validate	Run all checks	2026-10-12T03:38:41.4283511Z   min(あり)=0.774  max(なし)=0.000  分離しきい値候補=0.55
+validate	Run all checks	2026-10-12T03:38:41.4284168Z Form core checks OK
+validate	Run all checks	2026-10-12T03:38:41.4651787Z ok - validates and freezes the exact bounded fixture schema
+validate	Run all checks	2026-10-12T03:38:41.4660552Z ok - rejects unknown keys, paths, URLs, and full landmark payloads
+validate	Run all checks	2026-10-12T03:38:41.4666606Z ok - rejects duplicate and unknown raw keys before JSON parsing
+validate	Run all checks	2026-10-12T03:38:41.4672639Z ok - rejects malformed or mismatched hashes and runtime profiles
+validate	Run all checks	2026-10-12T03:38:41.4676934Z ok - rejects nonfinite metrics, non-increasing time, and malformed null rows
+validate	Run all checks	2026-10-12T03:38:41.4708410Z ok - enforces bounded source bytes and frame count
+validate	Run all checks	2026-10-12T03:38:41.4742132Z ok - replay is deterministic, non-mutating, fresh, ordered, and cancels the latest fire
+validate	Run all checks	2026-10-12T03:38:41.4746925Z ok - browser and Node parity failures are replay errors
+validate	Run all checks	2026-10-12T03:38:41.4753306Z ok - runtime, parity, and configuration errors have distinct CLI classifications
+validate	Run all checks	2026-10-12T03:38:41.4761085Z ok - review truth is matched by source SHA rather than fixture filename
+validate	Run all checks	2026-10-12T03:38:41.6033707Z ok - both tracked public fixtures load and replay deterministically without mutation
+validate	Run all checks	2026-10-12T03:38:41.6165356Z ok - reviewed oblique release is the only retained shot in its truth window
+validate	Run all checks	2026-10-12T03:38:41.6427848Z ok - reviewed scene-cut retrieval retains no shot and emits no adaptive release
+validate	Run all checks	2026-10-12T03:38:41.7145423Z ok - acceptance CLI maps synthetic truth and schema/config to exits 0 and 2
+validate	Run all checks	2026-10-12T03:38:41.7147284Z ok - check:form includes fixture tests but excludes the standalone acceptance CLI
+validate	Run all checks	2026-10-12T03:38:41.7148489Z Form metric fixture checks OK
+validate	Run all checks	2026-10-12T03:38:41.7628732Z Form diagnostic checks OK
+validate	Run all checks	2026-10-12T03:38:41.8654731Z 
+validate	Run all checks	2026-10-12T03:38:41.8655499Z > archery-note@0.115.0 check:gamification
+validate	Run all checks	2026-10-12T03:38:41.8656080Z > node tools/check-gamification.js
+validate	Run all checks	2026-10-12T03:38:41.8656356Z 
+validate	Run all checks	2026-10-12T03:38:41.8991491Z Gamification pure-function checks OK (streak / 12 badges / backfill / goals)
+validate	Run all checks	2026-10-12T03:38:42.0003443Z 
+validate	Run all checks	2026-10-12T03:38:42.0004223Z > archery-note@0.115.0 check:todays-result
+validate	Run all checks	2026-10-12T03:38:42.0004806Z > node tools/check-todays-result.js
+validate	Run all checks	2026-10-12T03:38:42.0005093Z 
+validate	Run all checks	2026-10-12T03:38:42.0457014Z Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)
+validate	Run all checks	2026-10-12T03:38:42.0517655Z Personal best copy checks OK (18 real computed cases; exact-count HTML/calculation preserved; projection and pace notes)
+validate	Run all checks	2026-10-12T03:38:42.0519089Z Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)
+validate	Run all checks	2026-10-12T03:38:42.1579148Z 
+validate	Run all checks	2026-10-12T03:38:42.1580182Z > archery-note@0.115.0 check:security
+validate	Run all checks	2026-10-12T03:38:42.1580689Z > node tools/check-security.js
+validate	Run all checks	2026-10-12T03:38:42.1580927Z 
+validate	Run all checks	2026-10-12T03:38:42.1875230Z Security regression: all 38 checks passed
+validate	Run all checks	2026-10-12T03:38:42.2961890Z 
+validate	Run all checks	2026-10-12T03:38:42.2962594Z > archery-note@0.115.0 check:ui
+validate	Run all checks	2026-10-12T03:38:42.2963317Z > node tools/check-ui.js
+validate	Run all checks	2026-10-12T03:38:42.2963588Z 
+validate	Run all checks	2026-10-12T03:38:45.7493011Z UI smoke checks OK (google-chrome)
+validate	Run all checks	2026-10-12T03:38:45.7494097Z artifacts/ui-smoke/iphone-390.png 390x844 21127 bytes
+validate	Run all checks	2026-10-12T03:38:45.7494935Z artifacts/ui-smoke/small-360.png 360x780 23111 bytes
+validate	Run all checks	2026-10-12T03:38:45.7495817Z artifacts/ui-smoke/desktop-1280.png 1280x800 27487 bytes
+validate	Run all checks	2026-10-12T03:38:47.3009448Z 
+validate	Run all checks	2026-10-12T03:38:47.3010300Z > archery-note@0.115.0 check:pwa
+validate	Run all checks	2026-10-12T03:38:47.3011422Z > node tools/check-pwa-assets.js && node tools/check-pwa-update-flow.js
+validate	Run all checks	2026-10-12T03:38:47.3012137Z 
+validate	Run all checks	2026-10-12T03:38:47.3329155Z PWA asset checks OK
+validate	Run all checks	2026-10-12T03:38:47.3613495Z PWA update flow checks OK
+validate	Run all checks	2026-10-12T03:38:47.4668501Z 
+validate	Run all checks	2026-10-12T03:38:47.4670753Z > archery-note@0.115.0 check:storage
+validate	Run all checks	2026-10-12T03:38:47.4671994Z > node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js && node tools/check-save-debounce.js
+validate	Run all checks	2026-10-12T03:38:47.4672698Z 
+validate	Run all checks	2026-10-12T03:38:47.5064890Z Storage contract checks OK
+validate	Run all checks	2026-10-12T03:38:47.5602113Z Storage round-trip checks OK
+validate	Run all checks	2026-10-12T03:38:47.5948672Z Save debounce checks OK
+validate	Run all checks	2026-10-12T03:38:47.7025205Z 
+validate	Run all checks	2026-10-12T03:38:47.7025980Z > archery-note@0.115.0 check:version
+validate	Run all checks	2026-10-12T03:38:47.7026692Z > node tools/check-version-alignment.js
+validate	Run all checks	2026-10-12T03:38:47.7027003Z 
+validate	Run all checks	2026-10-12T03:38:47.7338593Z Version alignment checks OK
+validate	Run all checks	2026-10-12T03:38:47.8439536Z 
+validate	Run all checks	2026-10-12T03:38:47.8440333Z > archery-note@0.115.0 check:distribution
+validate	Run all checks	2026-10-12T03:38:47.8441120Z > node tools/check-distribution.js
+validate	Run all checks	2026-10-12T03:38:47.8441407Z 
+validate	Run all checks	2026-10-12T03:38:48.4905532Z Native web assets ready: dist/native (v115)
+validate	Run all checks	2026-10-12T03:38:49.6723627Z Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 197185→140310 bytes; cross-script fixtures
+validate	Lint	﻿2026-10-12T03:38:49.6994332Z ##[group]Run npm run lint
+validate	Lint	2026-10-12T03:38:49.6994657Z ^[[36;1mnpm run lint^[[0m
+validate	Lint	2026-10-12T03:38:49.7057890Z shell: /usr/bin/bash -e {0}
+validate	Lint	2026-10-12T03:38:49.7058220Z ##[endgroup]
+validate	Lint	2026-10-12T03:38:49.8107631Z 
+validate	Lint	2026-10-12T03:38:49.8108459Z > archery-note@0.115.0 lint
+validate	Lint	2026-10-12T03:38:49.8109521Z > eslint "*.js" "scripts/**/*.js" "tools/**/*.js" "tests/**/*.js" "eslint.config.mjs"
+validate	Lint	2026-10-12T03:38:49.8110287Z 
+validate	Format check	﻿2026-10-12T03:38:52.2499180Z ##[group]Run npm run format:check
+validate	Format check	2026-10-12T03:38:52.2499521Z ^[[36;1mnpm run format:check^[[0m
+validate	Format check	2026-10-12T03:38:52.2561997Z shell: /usr/bin/bash -e {0}
+validate	Format check	2026-10-12T03:38:52.2562270Z ##[endgroup]
+validate	Format check	2026-10-12T03:38:52.3558222Z 
+validate	Format check	2026-10-12T03:38:52.3558913Z > archery-note@0.115.0 format:check
+validate	Format check	2026-10-12T03:38:52.3561635Z > prettier "package*.json" "README.md" "CHANGELOG.md" "CODE_OF_CONDUCT.md" "CONTRIBUTING.md" "SECURITY.md" "THIRD_PARTY.md" "docs/**/*.md" ".github/**/*.md" "eslint.config.mjs" "playwright.config.js" "tools/e2e-server.js" "tools/lighthouse-baseline.js" "tests/**/*.js" ".prettierrc" --check
+validate	Format check	2026-10-12T03:38:52.3563543Z 
+validate	Format check	2026-10-12T03:38:52.4390304Z Checking formatting...
+validate	Format check	2026-10-12T03:38:57.4222418Z All matched files use Prettier code style!
+validate	Install Playwright browsers	﻿2026-10-12T03:38:57.4598271Z ##[group]Run npx playwright install --with-deps chromium
+validate	Install Playwright browsers	2026-10-12T03:38:57.4598770Z ^[[36;1mnpx playwright install --with-deps chromium^[[0m
+validate	Install Playwright browsers	2026-10-12T03:38:57.4663503Z shell: /usr/bin/bash -e {0}
+validate	Install Playwright browsers	2026-10-12T03:38:57.4663784Z ##[endgroup]
+validate	Install Playwright browsers	2026-10-12T03:38:58.2670274Z Installing dependencies...
+validate	Install Playwright browsers	2026-10-12T03:38:58.2741574Z Switching to root user to install dependencies...
+validate	Install Playwright browsers	2026-10-12T03:38:58.4159539Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+validate	Install Playwright browsers	2026-10-12T03:38:58.4299094Z Get:6 https://packages.microsoft.com/ubuntu/24.04/prod noble InRelease [3600 B]
+validate	Install Playwright browsers	2026-10-12T03:38:58.4519228Z Hit:2 http://azure.archive.ubuntu.com/ubuntu noble InRelease
+validate	Install Playwright browsers	2026-10-12T03:38:58.4532297Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.4608797Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.4649716Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.5956520Z Get:7 https://packages.microsoft.com/ubuntu/24.04/prod noble/main arm64 Packages [492 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.6122554Z Get:8 https://packages.microsoft.com/ubuntu/24.04/prod noble/main armhf Packages [12.3 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.6139076Z Get:9 https://packages.microsoft.com/ubuntu/24.04/prod noble/main amd64 Packages [548 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.6180196Z Get:10 https://packages.microsoft.com/ubuntu/24.04/prod noble/main all Packages [640 B]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7066026Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1375 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7133854Z Get:12 http://azure.archive.ubuntu.com/ubuntu noble-updates/main Translation-en [306 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7156435Z Get:13 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [1702 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7248544Z Get:14 http://azure.archive.ubuntu.com/ubuntu noble-updates/universe Translation-en [342 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7272443Z Get:15 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [1761 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7372540Z Get:16 http://azure.archive.ubuntu.com/ubuntu noble-updates/restricted Translation-en [401 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7398757Z Get:17 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [55.0 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.7408088Z Get:18 http://azure.archive.ubuntu.com/ubuntu noble-updates/multiverse Translation-en [14.3 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8211216Z Get:19 http://azure.archive.ubuntu.com/ubuntu noble-security/main amd64 Packages [1121 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8273308Z Get:20 http://azure.archive.ubuntu.com/ubuntu noble-security/main Translation-en [228 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8723299Z Get:21 http://azure.archive.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1220 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8785807Z Get:22 http://azure.archive.ubuntu.com/ubuntu noble-security/universe Translation-en [245 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8804825Z Get:23 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [1669 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8887338Z Get:24 http://azure.archive.ubuntu.com/ubuntu noble-security/restricted Translation-en [383 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8910475Z Get:25 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [49.8 kB]
+validate	Install Playwright browsers	2026-10-12T03:38:58.8919125Z Get:26 http://azure.archive.ubuntu.com/ubuntu noble-security/multiverse Translation-en [12.4 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:02.3103414Z Fetched 12.3 MB in 1s (9155 kB/s)
+validate	Install Playwright browsers	2026-10-12T03:39:03.2361215Z Reading package lists...
+validate	Install Playwright browsers	2026-10-12T03:39:03.2608955Z Reading package lists...
+validate	Install Playwright browsers	2026-10-12T03:39:03.4842086Z Building dependency tree...
+validate	Install Playwright browsers	2026-10-12T03:39:03.4850237Z Reading state information...
+validate	Install Playwright browsers	2026-10-12T03:39:03.7126469Z libasound2t64 is already the newest version (1.2.11-1ubuntu0.3).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7128129Z libasound2t64 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7129335Z libatk-bridge2.0-0t64 is already the newest version (2.52.0-1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7130446Z libatk-bridge2.0-0t64 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7131546Z libatk1.0-0t64 is already the newest version (2.52.0-1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7132976Z libatk1.0-0t64 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7133949Z libatspi2.0-0t64 is already the newest version (2.52.0-1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7134889Z libatspi2.0-0t64 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7136210Z libcairo2 is already the newest version (1.18.0-3build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7136665Z libcairo2 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7137107Z libcups2t64 is already the newest version (2.4.7-1.2ubuntu7.14).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7137830Z libcups2t64 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7138264Z libdbus-1-3 is already the newest version (1.14.10-4ubuntu4.1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7138919Z libdbus-1-3 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7139619Z libdrm2 is already the newest version (2.4.125-1ubuntu0.1~24.04.2).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7140050Z libdrm2 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7140447Z libgbm1 is already the newest version (25.2.8-0ubuntu0.24.04.4).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7140848Z libgbm1 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7141250Z libglib2.0-0t64 is already the newest version (2.80.0-6ubuntu3.9).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7141666Z libglib2.0-0t64 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7142081Z libnspr4 is already the newest version (2:4.35-1.1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7142471Z libnspr4 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7142854Z libnss3 is already the newest version (2:3.98-1ubuntu0.2).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7143293Z libnss3 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7143858Z libpango-1.0-0 is already the newest version (1.52.1+ds-1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7144277Z libpango-1.0-0 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7144679Z libx11-6 is already the newest version (2:1.8.7-1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7145040Z libx11-6 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7145392Z libxcb1 is already the newest version (1.15-1ubuntu2).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7145746Z libxcb1 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7146150Z libxcomposite1 is already the newest version (1:0.4.5-1build3).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7146553Z libxcomposite1 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7146957Z libxdamage1 is already the newest version (1:1.1.6-1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7147337Z libxdamage1 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7148040Z libxext6 is already the newest version (2:1.3.4-1build2).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7148419Z libxext6 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7148799Z libxfixes3 is already the newest version (1:6.0.0-2build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7149179Z libxfixes3 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7149567Z libxkbcommon0 is already the newest version (1.6.0-1build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7149953Z libxkbcommon0 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7150352Z libxrandr2 is already the newest version (2:1.5.2-2build1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7150723Z libxrandr2 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7151112Z xvfb is already the newest version (2:21.1.12-1ubuntu1.8).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7151652Z fonts-noto-color-emoji is already the newest version (2.047-0ubuntu0.24.04.1).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7152511Z libfontconfig1 is already the newest version (2.15.0-1.1ubuntu2).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7153259Z libfontconfig1 set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7154000Z fonts-liberation is already the newest version (1:2.1.5-3).
+validate	Install Playwright browsers	2026-10-12T03:39:03.7154706Z fonts-liberation set to manually installed.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7155387Z The following additional packages will be installed:
+validate	Install Playwright browsers	2026-10-12T03:39:03.7155987Z   xfonts-encodings xfonts-utils
+validate	Install Playwright browsers	2026-10-12T03:39:03.7156445Z Recommended packages:
+validate	Install Playwright browsers	2026-10-12T03:39:03.7156898Z   fonts-ipafont-mincho fonts-tlwg-loma
+validate	Install Playwright browsers	2026-10-12T03:39:03.7535791Z The following NEW packages will be installed:
+validate	Install Playwright browsers	2026-10-12T03:39:03.7537100Z   fonts-freefont-ttf fonts-ipafont-gothic fonts-tlwg-loma-otf fonts-unifont
+validate	Install Playwright browsers	2026-10-12T03:39:03.7549863Z   fonts-wqy-zenhei xfonts-cyrillic xfonts-encodings xfonts-scalable
+validate	Install Playwright browsers	2026-10-12T03:39:03.7550637Z   xfonts-utils
+validate	Install Playwright browsers	2026-10-12T03:39:03.7562194Z The following packages will be upgraded:
+validate	Install Playwright browsers	2026-10-12T03:39:03.7569879Z   libfreetype6
+validate	Install Playwright browsers	2026-10-12T03:39:03.7802667Z 1 upgraded, 9 newly installed, 0 to remove and 22 not upgraded.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7803784Z Need to get 21.5 MB of archives.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7804930Z After this operation, 79.5 MB of additional disk space will be used.
+validate	Install Playwright browsers	2026-10-12T03:39:03.7805984Z Get:1 file:/etc/apt/apt-mirrors.txt Mirrorlist [144 B]
+validate	Install Playwright browsers	2026-10-12T03:39:04.0772805Z Ign:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1
+validate	Install Playwright browsers	2026-10-12T03:39:04.2185413Z Get:3 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 fonts-freefont-ttf all 20211204+svn4273-2 [5641 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:04.6533042Z Get:4 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-tlwg-loma-otf all 1:0.7.3-1 [107 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:04.7926056Z Get:5 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-unifont all 1:15.1.01-1build1 [2993 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:04.9772012Z Get:6 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-wqy-zenhei all 0.9.45-8 [7472 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:05.4124582Z Get:7 http://azure.archive.ubuntu.com/ubuntu noble-updates/main amd64 libfreetype6 amd64 2.13.2+dfsg-1ubuntu0.2 [403 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:05.5566621Z Get:8 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-encodings all 1:1.0.5-0ubuntu2 [578 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:05.7032538Z Get:9 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-utils amd64 1:7.7+6build3 [94.4 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:05.8439270Z Get:10 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 xfonts-cyrillic all 1:1.0.5+nmu1 [384 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:05.9865870Z Get:11 http://azure.archive.ubuntu.com/ubuntu noble/main amd64 xfonts-scalable all 1:1.0.3-1.3 [304 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:06.1289694Z Get:2 http://azure.archive.ubuntu.com/ubuntu noble/universe amd64 fonts-ipafont-gothic all 00303-21ubuntu1 [3513 kB]
+validate	Install Playwright browsers	2026-10-12T03:39:06.5669552Z Fetched 21.5 MB in 3s (8580 kB/s)
+validate	Install Playwright browsers	2026-10-12T03:39:06.6201153Z Selecting previously unselected package fonts-ipafont-gothic.
+validate	Install Playwright browsers	2026-10-12T03:39:06.6621279Z (Reading database ... 
+validate	Install Playwright browsers	2026-10-12T03:39:06.6622055Z (Reading database ... 5%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6622693Z (Reading database ... 10%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6623194Z (Reading database ... 15%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6623566Z (Reading database ... 20%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6623920Z (Reading database ... 25%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6624274Z (Reading database ... 30%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6624624Z (Reading database ... 35%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6624976Z (Reading database ... 40%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6625319Z (Reading database ... 45%
+validate	Install Playwright browsers	2026-10-12T03:39:06.6625663Z (Reading database ... 50%
+validate	Install Playwright browsers	2026-10-12T03:39:06.7168233Z (Reading database ... 55%
+validate	Install Playwright browsers	2026-10-12T03:39:07.2425066Z (Reading database ... 60%
+validate	Install Playwright browsers	2026-10-12T03:39:07.6231413Z (Reading database ... 65%
+validate	Install Playwright browsers	2026-10-12T03:39:08.0312856Z (Reading database ... 70%
+validate	Install Playwright browsers	2026-10-12T03:39:08.5145460Z (Reading database ... 75%
+validate	Install Playwright browsers	2026-10-12T03:39:09.2000289Z (Reading database ... 80%
+validate	Install Playwright browsers	2026-10-12T03:39:10.4888885Z (Reading database ... 85%
+validate	Install Playwright browsers	2026-10-12T03:39:11.6209314Z (Reading database ... 90%
+validate	Install Playwright browsers	2026-10-12T03:39:12.8134810Z (Reading database ... 95%
+validate	Install Playwright browsers	2026-10-12T03:39:12.8135612Z (Reading database ... 100%
+validate	Install Playwright browsers	2026-10-12T03:39:12.8136719Z (Reading database ... 203191 files and directories currently installed.)
+validate	Install Playwright browsers	2026-10-12T03:39:12.8182634Z Preparing to unpack .../0-fonts-ipafont-gothic_00303-21ubuntu1_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:12.8286415Z Unpacking fonts-ipafont-gothic (00303-21ubuntu1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.0615523Z Selecting previously unselected package fonts-freefont-ttf.
+validate	Install Playwright browsers	2026-10-12T03:39:13.0752232Z Preparing to unpack .../1-fonts-freefont-ttf_20211204+svn4273-2_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.0759418Z Unpacking fonts-freefont-ttf (20211204+svn4273-2) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.1647875Z Selecting previously unselected package fonts-tlwg-loma-otf.
+validate	Install Playwright browsers	2026-10-12T03:39:13.1779568Z Preparing to unpack .../2-fonts-tlwg-loma-otf_1%3a0.7.3-1_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.1788361Z Unpacking fonts-tlwg-loma-otf (1:0.7.3-1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.2008848Z Selecting previously unselected package fonts-unifont.
+validate	Install Playwright browsers	2026-10-12T03:39:13.2138007Z Preparing to unpack .../3-fonts-unifont_1%3a15.1.01-1build1_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.2145553Z Unpacking fonts-unifont (1:15.1.01-1build1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.3242135Z Selecting previously unselected package fonts-wqy-zenhei.
+validate	Install Playwright browsers	2026-10-12T03:39:13.3401087Z Preparing to unpack .../4-fonts-wqy-zenhei_0.9.45-8_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.3513544Z Unpacking fonts-wqy-zenhei (0.9.45-8) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.8423865Z Preparing to unpack .../5-libfreetype6_2.13.2+dfsg-1ubuntu0.2_amd64.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.8455382Z Unpacking libfreetype6:amd64 (2.13.2+dfsg-1ubuntu0.2) over (2.13.2+dfsg-1ubuntu0.1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.8716104Z Selecting previously unselected package xfonts-encodings.
+validate	Install Playwright browsers	2026-10-12T03:39:13.8853157Z Preparing to unpack .../6-xfonts-encodings_1%3a1.0.5-0ubuntu2_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.8860460Z Unpacking xfonts-encodings (1:1.0.5-0ubuntu2) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.9175411Z Selecting previously unselected package xfonts-utils.
+validate	Install Playwright browsers	2026-10-12T03:39:13.9307305Z Preparing to unpack .../7-xfonts-utils_1%3a7.7+6build3_amd64.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.9314210Z Unpacking xfonts-utils (1:7.7+6build3) ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.9694755Z Selecting previously unselected package xfonts-cyrillic.
+validate	Install Playwright browsers	2026-10-12T03:39:13.9832504Z Preparing to unpack .../8-xfonts-cyrillic_1%3a1.0.5+nmu1_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:13.9840614Z Unpacking xfonts-cyrillic (1:1.0.5+nmu1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.0230813Z Selecting previously unselected package xfonts-scalable.
+validate	Install Playwright browsers	2026-10-12T03:39:14.0364532Z Preparing to unpack .../9-xfonts-scalable_1%3a1.0.3-1.3_all.deb ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.0372451Z Unpacking xfonts-scalable (1:1.0.3-1.3) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.0829159Z Setting up fonts-wqy-zenhei (0.9.45-8) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.0953609Z Setting up fonts-freefont-ttf (20211204+svn4273-2) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.0972711Z Setting up fonts-tlwg-loma-otf (1:0.7.3-1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.0993285Z Setting up libfreetype6:amd64 (2.13.2+dfsg-1ubuntu0.2) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.1014096Z Setting up xfonts-encodings (1:1.0.5-0ubuntu2) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.1032968Z Setting up fonts-ipafont-gothic (00303-21ubuntu1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.1102998Z update-alternatives: using /usr/share/fonts/opentype/ipafont-gothic/ipag.ttf to provide /usr/share/fonts/truetype/fonts-japanese-gothic.ttf (fonts-japanese-gothic.ttf) in auto mode
+validate	Install Playwright browsers	2026-10-12T03:39:14.1123243Z Setting up fonts-unifont (1:15.1.01-1build1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.1153065Z Setting up xfonts-utils (1:7.7+6build3) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.1206319Z Setting up xfonts-cyrillic (1:1.0.5+nmu1) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.1572185Z Setting up xfonts-scalable (1:1.0.3-1.3) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.1852696Z Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.2455060Z Processing triggers for man-db (2.12.0-4build2) ...
+validate	Install Playwright browsers	2026-10-12T03:39:14.2478142Z Not building database; man-db/auto-update is not 'true'.
+validate	Install Playwright browsers	2026-10-12T03:39:14.2492478Z Processing triggers for fontconfig (2.15.0-1.1ubuntu2) ...
+validate	Install Playwright browsers	2026-10-12T03:39:15.9136574Z 
+validate	Install Playwright browsers	2026-10-12T03:39:15.9137972Z Running kernel seems to be up-to-date.
+validate	Install Playwright browsers	2026-10-12T03:39:15.9138391Z 
+validate	Install Playwright browsers	2026-10-12T03:39:15.9138592Z Restarting services...
+validate	Install Playwright browsers	2026-10-12T03:39:15.9230507Z  systemctl restart php8.3-fpm.service
+validate	Install Playwright browsers	2026-10-12T03:39:16.0477281Z 
+validate	Install Playwright browsers	2026-10-12T03:39:16.0488697Z No containers need to be restarted.
+validate	Install Playwright browsers	2026-10-12T03:39:16.0489011Z 
+validate	Install Playwright browsers	2026-10-12T03:39:16.0489225Z No user sessions are running outdated binaries.
+validate	Install Playwright browsers	2026-10-12T03:39:16.0489473Z 
+validate	Install Playwright browsers	2026-10-12T03:39:16.0489795Z No VM guests are running outdated hypervisor (qemu) binaries on this host.
+validate	Install Playwright browsers	2026-10-12T03:39:17.3312670Z Downloading Chrome for Testing 149.0.7827.55 (playwright chromium v1228) from https://cdn.playwright.dev/builds/cft/149.0.7827.55/linux64/chrome-linux64.zip
+validate	Install Playwright browsers	2026-10-12T03:39:18.3765711Z |                                                                                |   0% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:18.5289344Z |■■■■■■■■                                                                        |  10% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:18.6339417Z |■■■■■■■■■■■■■■■■                                                                |  20% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:18.7414924Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:18.8512994Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:18.9888014Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:19.1163621Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:19.2279260Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:19.4192772Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:19.5403587Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:19.6387958Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 177 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:22.3584728Z Chrome for Testing 149.0.7827.55 (playwright chromium v1228) downloaded to /home/runner/.cache/ms-playwright/chromium-1228
+validate	Install Playwright browsers	2026-10-12T03:39:22.3588728Z Downloading FFmpeg (playwright ffmpeg v1011) from https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1011/ffmpeg-linux.zip
+validate	Install Playwright browsers	2026-10-12T03:39:23.3978507Z |                                                                                |   0% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.4375481Z |■■■■■■■■                                                                        |  10% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.4641466Z |■■■■■■■■■■■■■■■■                                                                |  20% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.4767078Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.4881955Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.5016201Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.5067542Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.5183692Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.5221980Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.5261674Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.5363451Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 2.3 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:23.5994409Z FFmpeg (playwright ffmpeg v1011) downloaded to /home/runner/.cache/ms-playwright/ffmpeg-1011
+validate	Install Playwright browsers	2026-10-12T03:39:23.5998370Z Downloading Chrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) from https://cdn.playwright.dev/builds/cft/149.0.7827.55/linux64/chrome-headless-shell-linux64.zip
+validate	Install Playwright browsers	2026-10-12T03:39:24.6302371Z |                                                                                |   0% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:24.7550476Z |■■■■■■■■                                                                        |  10% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:24.8246159Z |■■■■■■■■■■■■■■■■                                                                |  20% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:24.8876073Z |■■■■■■■■■■■■■■■■■■■■■■■■                                                        |  30% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:24.9655896Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                                |  40% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:25.0615701Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                        |  50% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:25.1610440Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                                |  60% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:25.2429526Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                        |  70% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:25.3087246Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■                |  80% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:25.3679249Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■        |  90% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:25.4627792Z |■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■| 100% of 114.2 MiB
+validate	Install Playwright browsers	2026-10-12T03:39:27.4299859Z Chrome Headless Shell 149.0.7827.55 (playwright chromium-headless-shell v1228) downloaded to /home/runner/.cache/ms-playwright/chromium_headless_shell-1228
+validate	E2E smoke test	﻿2026-10-12T03:39:27.4581731Z ##[group]Run npm run test:e2e:dist
+validate	E2E smoke test	2026-10-12T03:39:27.4582070Z ^[[36;1mnpm run test:e2e:dist^[[0m
+validate	E2E smoke test	2026-10-12T03:39:27.4645396Z shell: /usr/bin/bash -e {0}
+validate	E2E smoke test	2026-10-12T03:39:27.4645675Z ##[endgroup]
+validate	E2E smoke test	2026-10-12T03:39:27.5741240Z 
+validate	E2E smoke test	2026-10-12T03:39:27.5742108Z > archery-note@0.115.0 test:e2e:dist
+validate	E2E smoke test	2026-10-12T03:39:27.5742965Z > node tools/test-distribution.js
+validate	E2E smoke test	2026-10-12T03:39:27.5743359Z 
+validate	E2E smoke test	2026-10-12T03:39:28.2134543Z Native web assets ready: dist/native (v115)
+validate	E2E smoke test	2026-10-12T03:39:29.7785515Z 
+validate	E2E smoke test	2026-10-12T03:39:29.7786237Z Running 301 tests using 2 workers
+validate	E2E smoke test	2026-10-12T03:39:29.7803168Z 
+validate	E2E smoke test	2026-10-12T03:39:31.8206705Z   ✓    1 [chromium] › tests/e2e/analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (320/light) (1.3s)
+validate	E2E smoke test	2026-10-12T03:39:31.8695672Z   ✓    2 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 0) (1.3s)
+validate	E2E smoke test	2026-10-12T03:39:32.5353283Z   ✓    3 [chromium] › tests/e2e/analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (320/light) (695ms)
+validate	E2E smoke test	2026-10-12T03:39:32.9849953Z   ✓    4 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 1) (1.1s)
+validate	E2E smoke test	2026-10-12T03:39:33.2714839Z   ✓    5 [chromium] › tests/e2e/analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (320/light) (719ms)
+validate	E2E smoke test	2026-10-12T03:39:34.0206109Z   ✓    6 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 2) (1.0s)
+validate	E2E smoke test	2026-10-12T03:39:34.1165183Z   ✓    7 [chromium] › tests/e2e/analysis-filter-focus.spec.js:60:3 › changed analysis filters remain visible above fixed navigation (375/dark) (827ms)
+validate	E2E smoke test	2026-10-12T03:39:34.7806085Z   ✓    9 [chromium] › tests/e2e/analysis-filter-focus.spec.js:105:3 › analysis filters are reachable by their visible labels (375/dark) (642ms)
+validate	E2E smoke test	2026-10-12T03:39:35.0883105Z   ✓    8 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 3) (1.1s)
+validate	E2E smoke test	2026-10-12T03:39:35.5340600Z   ✓   10 [chromium] › tests/e2e/analysis-filter-focus.spec.js:126:3 › analysis selections keep keyboard position and period navigation (375/dark) (734ms)
+validate	E2E smoke test	2026-10-12T03:39:36.1302064Z   ✓   12 [chromium] › tests/e2e/app-smoke.spec.js:81:1 › loads core tabs and seeded history without console errors (570ms)
+validate	E2E smoke test	2026-10-12T03:39:36.1346674Z   ✓   11 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, light, 6) (1.0s)
+validate	E2E smoke test	2026-10-12T03:39:36.6077155Z   ✓   14 [chromium] › tests/e2e/app-smoke.spec.js:117:1 › moves exactly one aria-current marker when switching tabs (458ms)
+validate	E2E smoke test	2026-10-12T03:39:37.1964121Z   ✓   13 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 0) (1.1s)
+validate	E2E smoke test	2026-10-12T03:39:37.8241921Z   ✓   15 [chromium] › tests/e2e/app-smoke.spec.js:140:1 › exposes distance chips as buttons with synced aria-pressed (1.2s)
+validate	E2E smoke test	2026-10-12T03:39:38.1070842Z   ✓   16 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 1) (896ms)
+validate	E2E smoke test	2026-10-12T03:39:39.0493755Z   ✓   18 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 2) (925ms)
+validate	E2E smoke test	2026-10-12T03:39:39.5479912Z   ✓   17 [chromium] › tests/e2e/app-smoke.spec.js:169:1 › exposes history rows and sight distance chips as buttons (1.7s)
+validate	E2E smoke test	2026-10-12T03:39:39.8889885Z   ✓   20 [chromium] › tests/e2e/app-smoke.spec.js:208:1 › opens settings as a dialog, closes on Escape, and restores focus (323ms)
+validate	E2E smoke test	2026-10-12T03:39:40.0698500Z   ✓   19 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 3) (997ms)
+validate	E2E smoke test	2026-10-12T03:39:41.0008139Z   ✓   22 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (320, dark, 6) (918ms)
+validate	E2E smoke test	2026-10-12T03:39:41.8656901Z   ✓   23 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 0) (855ms)
+validate	E2E smoke test	2026-10-12T03:39:41.9874054Z   ✓   21 [chromium] › tests/e2e/app-smoke.spec.js:235:1 › appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes with focus restore (2.1s)
+validate	E2E smoke test	2026-10-12T03:39:42.8636245Z   ✓   24 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 1) (983ms)
+validate	E2E smoke test	2026-10-12T03:39:43.7368197Z   ✓   26 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 2) (861ms)
+validate	E2E smoke test	2026-10-12T03:39:44.6479505Z   ✓   27 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 3) (898ms)
+validate	E2E smoke test	2026-10-12T03:39:45.5370285Z   ✓   28 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, light, 6) (871ms)
+validate	E2E smoke test	2026-10-12T03:39:46.4321098Z   ✓   29 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 0) (882ms)
+validate	E2E smoke test	2026-10-12T03:39:46.6064364Z   ✓   25 [chromium] › tests/e2e/app-smoke.spec.js:281:1 › records a multi-distance round with stage advance and history badges (4.6s)
+validate	E2E smoke test	2026-10-12T03:39:47.4243142Z   ✓   30 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 1) (976ms)
+validate	E2E smoke test	2026-10-12T03:39:47.5007906Z   ✓   31 [chromium] › tests/e2e/app-smoke.spec.js:337:1 › syncs aria-pressed on settings theme and form tracking chips (875ms)
+validate	E2E smoke test	2026-10-12T03:39:48.4447994Z   ✓   32 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 2) (1.0s)
+validate	E2E smoke test	2026-10-12T03:39:49.2690426Z   ✓   34 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 3) (811ms)
+validate	E2E smoke test	2026-10-12T03:39:49.7278767Z   ✓   33 [chromium] › tests/e2e/build-week-growth.spec.js:9:1 › demo data opens an explainable growth dashboard and remains removable (2.2s)
+validate	E2E smoke test	2026-10-12T03:39:50.2158159Z   ✓   35 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:56:7 › analysis grouping evidence (375, dark, 6) (932ms)
+validate	E2E smoke test	2026-10-12T03:39:50.9656712Z   ✓   36 [chromium] › tests/e2e/build-week-growth.spec.js:37:1 › growth dashboard works at narrow mobile width and in dark mode (1.2s)
+validate	E2E smoke test	2026-10-12T03:39:52.1993258Z   ✓   37 [chromium] › tests/e2e/analysis-grouping-evidence.spec.js:186:1 › native one-arrow finish stays pending across analysis and history (2.0s)
+validate	E2E smoke test	2026-10-12T03:39:56.9747927Z   ✓   39 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, reduce, 40, notice false) (4.7s)
+validate	E2E smoke test	2026-10-12T03:40:01.7027131Z   ✓   38 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, no-preference, 18m/40cm/3) (10.7s)
+validate	E2E smoke test	2026-10-12T03:40:01.8670953Z   ✓   40 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, reduce, 122, notice false) (4.9s)
+validate	E2E smoke test	2026-10-12T03:40:08.2351111Z   ✓   41 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, reduce, 18m/40cm/3) (6.5s)
+validate	E2E smoke test	2026-10-12T03:40:10.7647332Z   ✓   42 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 40, notice false) (8.9s)
+validate	E2E smoke test	2026-10-12T03:40:18.7957051Z   ✓   43 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, no-preference, 18m/40cm/3) (10.5s)
+validate	E2E smoke test	2026-10-12T03:40:19.4614824Z   ✓   44 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 122, notice false) (8.7s)
+validate	E2E smoke test	2026-10-12T03:40:24.1958525Z   ✓   46 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, reduce, 40, notice false) (4.7s)
+validate	E2E smoke test	2026-10-12T03:40:25.2346319Z   ✓   45 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, reduce, 18m/40cm/3) (6.4s)
+validate	E2E smoke test	2026-10-12T03:40:28.9342411Z   ✓   47 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, reduce, 122, notice false) (4.7s)
+validate	E2E smoke test	2026-10-12T03:40:35.1904001Z   ✓   48 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, no-preference, 18m/40cm/3) (9.9s)
+validate	E2E smoke test	2026-10-12T03:40:37.7567216Z   ✓   49 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, no-preference, 40, notice false) (8.8s)
+validate	E2E smoke test	2026-10-12T03:40:41.4016485Z   ✓   50 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, reduce, 18m/40cm/3) (6.2s)
+validate	E2E smoke test	2026-10-12T03:40:46.4491552Z   ✓   51 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, dark, no-preference, 122, notice false) (8.7s)
+validate	E2E smoke test	2026-10-12T03:40:51.1060604Z   ✓   53 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, reduce, 40, notice false) (4.6s)
+validate	E2E smoke test	2026-10-12T03:40:51.7205794Z   ✓   52 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, no-preference, 18m/40cm/3) (10.3s)
+validate	E2E smoke test	2026-10-12T03:40:55.6839958Z   ✓   54 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, reduce, 122, notice false) (4.6s)
+validate	E2E smoke test	2026-10-12T03:40:57.9287607Z   ✓   55 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, reduce, 18m/40cm/3) (6.2s)
+validate	E2E smoke test	2026-10-12T03:41:03.8132345Z   ✓   56 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 40, notice false) (8.1s)
+validate	E2E smoke test	2026-10-12T03:41:08.9775947Z   ✓   57 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, no-preference, 70m/122cm/6) (11.0s)
+validate	E2E smoke test	2026-10-12T03:41:11.9878306Z   ✓   58 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 122, notice false) (8.2s)
+validate	E2E smoke test	2026-10-12T03:41:15.1566583Z   ✓   59 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, light, reduce, 70m/122cm/6) (6.2s)
+validate	E2E smoke test	2026-10-12T03:41:16.6952611Z   ✓   60 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, reduce, 40, notice false) (4.7s)
+validate	E2E smoke test	2026-10-12T03:41:21.3156907Z   ✓   62 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, reduce, 122, notice false) (4.6s)
+validate	E2E smoke test	2026-10-12T03:41:26.0111781Z   ✓   61 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, no-preference, 70m/122cm/6) (10.8s)
+validate	E2E smoke test	2026-10-12T03:41:29.6026727Z   ✓   63 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, no-preference, 40, notice false) (8.3s)
+validate	E2E smoke test	2026-10-12T03:41:32.3429791Z   ✓   64 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (320, dark, reduce, 70m/122cm/6) (6.3s)
+validate	E2E smoke test	2026-10-12T03:41:37.7170445Z   ✓   65 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, dark, no-preference, 122, notice false) (8.1s)
+validate	E2E smoke test	2026-10-12T03:41:42.3260395Z   ✓   66 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, no-preference, 70m/122cm/6) (10.0s)
+validate	E2E smoke test	2026-10-12T03:41:45.8953526Z   ✓   67 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (320, light, no-preference, 40, notice true) (8.2s)
+validate	E2E smoke test	2026-10-12T03:41:48.5468048Z   ✓   68 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, light, reduce, 70m/122cm/6) (6.2s)
+validate	E2E smoke test	2026-10-12T03:41:53.5309156Z   ✓   69 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (375, light, no-preference, 40, notice true) (7.6s)
+validate	E2E smoke test	2026-10-12T03:41:58.1776507Z   ✓   71 [chromium] › tests/e2e/correction-exit.spec.js:99:3 › direct correction exit (1024, light, reduce, 122, notice false) (4.6s)
+validate	E2E smoke test	2026-10-12T03:41:58.5726344Z   ✓   70 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, no-preference, 70m/122cm/6) (10.0s)
+validate	E2E smoke test	2026-10-12T03:41:59.8910055Z   ✓   72 [chromium] › tests/e2e/correction-names.spec.js:21:3 › named correction controls act on the selected arrow (320) (1.7s)
+validate	E2E smoke test	2026-10-12T03:42:01.4549556Z   ✓   74 [chromium] › tests/e2e/correction-names.spec.js:21:3 › named correction controls act on the selected arrow (375) (1.6s)
+validate	E2E smoke test	2026-10-12T03:42:04.8728720Z   ✓   73 [chromium] › tests/e2e/correction-entry.spec.js:123:9 › correction buttons need no extra scroll (375, dark, reduce, 70m/122cm/6) (6.3s)
+validate	E2E smoke test	2026-10-12T03:42:05.6355384Z   ✓   76 [chromium] › tests/e2e/distribution-assets.spec.js:8:1 › form assets are available unchanged without loading them at startup (742ms)
+validate	E2E smoke test	2026-10-12T03:42:06.3379147Z   ✓   77 [chromium] › tests/e2e/double-tap-zoom.spec.js:53:1 › double-tapping the target records two arrows without triggering viewport zoom (681ms)
+validate	E2E smoke test	2026-10-12T03:42:07.3403552Z   ✓   78 [chromium] › tests/e2e/double-tap-zoom.spec.js:85:1 › double-tapping dock buttons does not trigger viewport zoom (989ms)
+validate	E2E smoke test	2026-10-12T03:42:09.8207889Z   ✓   79 [chromium] › tests/e2e/end-dock-viewport.spec.js:2:1 › end action stays in viewport after tab animation and scoring (2.5s)
+validate	E2E smoke test	2026-10-12T03:42:10.0512442Z   ✓   80 [chromium] › tests/e2e/end-dock-viewport.spec.js:35:1 › page gestures retain scrolling without pinch zoom (216ms)
+validate	E2E smoke test	2026-10-12T03:42:16.2226555Z   ✓   75 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (320, no-preference) (14.8s)
+validate	E2E smoke test	2026-10-12T03:42:16.9398379Z   ✓   81 [chromium] › tests/e2e/end-sequence.spec.js:6:3 › two complete ends remain reachable (320x568) (6.9s)
+validate	E2E smoke test	2026-10-12T03:42:23.7671949Z   ✓   83 [chromium] › tests/e2e/end-sequence.spec.js:6:3 › two complete ends remain reachable (375x812) (6.8s)
+validate	E2E smoke test	2026-10-12T03:42:24.3026943Z   ✓   84 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, daily) (512ms)
+validate	E2E smoke test	2026-10-12T03:42:24.7577275Z   ✓   85 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, backdated) (437ms)
+validate	E2E smoke test	2026-10-12T03:42:25.2075307Z   ✓   86 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, sparse) (437ms)
+validate	E2E smoke test	2026-10-12T03:42:25.6192974Z   ✓   87 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, score-only) (401ms)
+validate	E2E smoke test	2026-10-12T03:42:26.1040961Z   ✓   88 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, gamification) (468ms)
+validate	E2E smoke test	2026-10-12T03:42:26.1117245Z   ✓   82 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (320, reduce) (9.9s)
+validate	E2E smoke test	2026-10-12T03:42:26.6753635Z   ✓   89 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, light, edit) (556ms)
+validate	E2E smoke test	2026-10-12T03:42:27.1392253Z   ✓   91 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, daily) (450ms)
+validate	E2E smoke test	2026-10-12T03:42:27.6584379Z   ✓   92 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, backdated) (508ms)
+validate	E2E smoke test	2026-10-12T03:42:28.1024320Z   ✓   93 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, sparse) (432ms)
+validate	E2E smoke test	2026-10-12T03:42:28.5812283Z   ✓   94 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, score-only) (464ms)
+validate	E2E smoke test	2026-10-12T03:42:29.1173039Z   ✓   95 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, gamification) (520ms)
+validate	E2E smoke test	2026-10-12T03:42:29.5395872Z   ✓   96 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (320, dark, edit) (410ms)
+validate	E2E smoke test	2026-10-12T03:42:30.0169600Z   ✓   97 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, daily) (467ms)
+validate	E2E smoke test	2026-10-12T03:42:30.4973818Z   ✓   98 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, backdated) (467ms)
+validate	E2E smoke test	2026-10-12T03:42:30.9497574Z   ✓   99 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, sparse) (439ms)
+validate	E2E smoke test	2026-10-12T03:42:31.4039494Z   ✓  100 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, score-only) (439ms)
+validate	E2E smoke test	2026-10-12T03:42:31.8719409Z   ✓  101 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, gamification) (457ms)
+validate	E2E smoke test	2026-10-12T03:42:32.3042913Z   ✓  102 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, light, edit) (420ms)
+validate	E2E smoke test	2026-10-12T03:42:32.7743827Z   ✓  103 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, daily) (459ms)
+validate	E2E smoke test	2026-10-12T03:42:33.2444866Z   ✓  104 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, backdated) (456ms)
+validate	E2E smoke test	2026-10-12T03:42:33.7142738Z   ✓  105 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, sparse) (458ms)
+validate	E2E smoke test	2026-10-12T03:42:34.1956077Z   ✓  106 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, score-only) (467ms)
+validate	E2E smoke test	2026-10-12T03:42:34.6868823Z   ✓  107 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, gamification) (478ms)
+validate	E2E smoke test	2026-10-12T03:42:35.1207016Z   ✓  108 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:218:7 › finish metrics (375, dark, edit) (422ms)
+validate	E2E smoke test	2026-10-12T03:42:35.5930816Z   ✓  109 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:225:1 › same id distinct records retain distinct metrics (461ms)
+validate	E2E smoke test	2026-10-12T03:42:36.2408914Z   ✓  110 [chromium] › tests/e2e/finish-metrics-sharing.spec.js:236:1 › next finish recomputes changed history after save (635ms)
+validate	E2E smoke test	2026-10-12T03:42:38.0880035Z   ✓  111 [chromium] › tests/e2e/form-diagnostics.spec.js:335:1 › selected deletion rolls back when the primary write fails (1.8s)
+validate	E2E smoke test	2026-10-12T03:42:39.2305635Z   ✓  112 [chromium] › tests/e2e/form-diagnostics.spec.js:420:1 › zero-shot exact-debug live save freezes, rolls back, and retries once (1.1s)
+validate	E2E smoke test	2026-10-12T03:42:40.7006794Z   ✓   90 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (375, no-preference) (14.6s)
+validate	E2E smoke test	2026-10-12T03:42:41.1966418Z   ✓  113 [chromium] › tests/e2e/form-diagnostics.spec.js:471:1 › failed diagnostic discard cancel retains the candidate and confirm closes without saving (2.0s)
+validate	E2E smoke test	2026-10-12T03:42:42.3487651Z   ✓  115 [chromium] › tests/e2e/form-diagnostics.spec.js:501:1 › zero-shot exact-debug replay save retries without matrix advancement (1.1s)
+validate	E2E smoke test	2026-10-12T03:42:43.3858240Z   ✓  116 [chromium] › tests/e2e/form-diagnostics.spec.js:586:3 › absent formDebug keeps diagnostics hidden and disabled (1.0s)
+validate	E2E smoke test	2026-10-12T03:42:44.4056426Z   ✓  117 [chromium] › tests/e2e/form-diagnostics.spec.js:586:3 › false formDebug keeps diagnostics hidden and disabled (1.0s)
+validate	E2E smoke test	2026-10-12T03:42:45.4185304Z   ✓  118 [chromium] › tests/e2e/form-diagnostics.spec.js:586:3 › string "true" formDebug keeps diagnostics hidden and disabled (1.0s)
+validate	E2E smoke test	2026-10-12T03:42:46.5387745Z   ✓  119 [chromium] › tests/e2e/form-diagnostics.spec.js:598:1 › diagnostic controls follow exact formDebug without reopening settings (1.1s)
+validate	E2E smoke test	2026-10-12T03:42:47.5949696Z   ✓  120 [chromium] › tests/e2e/form-diagnostics.spec.js:612:1 › action-time exact gate rejects a value changed after render (1.0s)
+validate	E2E smoke test	2026-10-12T03:42:48.7375145Z   ✓  121 [chromium] › tests/e2e/form-diagnostics.spec.js:624:1 › another workflow blocks both actions before confirmation (1.1s)
+validate	E2E smoke test	2026-10-12T03:42:49.7844102Z   ✓  122 [chromium] › tests/e2e/form-diagnostics.spec.js:639:1 › first start commits one fresh coordinator (1.0s)
+validate	E2E smoke test	2026-10-12T03:42:50.5980904Z   ✓  114 [chromium] › tests/e2e/correction-return.spec.js:94:5 › correction returns to target and next end (375, reduce) (9.9s)
+validate	E2E smoke test	2026-10-12T03:42:51.3856553Z   ✓  124 [chromium] › tests/e2e/form-secure-context.spec.js:71:1 › insecure HTTP blocks live capture before pose/media and offers saved-video replay (772ms)
+validate	E2E smoke test	2026-10-12T03:42:51.6351929Z   ✓  123 [chromium] › tests/e2e/form-diagnostics.spec.js:660:1 › restart double click opens one confirmation; cancel preserves and confirm replaces (1.8s)
+validate	E2E smoke test	2026-10-12T03:42:51.8592741Z   ✓  125 [chromium] › tests/e2e/form-secure-context.spec.js:129:1 › trusted loopback HTTP remains eligible for live capture (454ms)
+validate	E2E smoke test	2026-10-12T03:42:52.2885238Z   ✓  127 [chromium] › tests/e2e/gamification.spec.js:109:1 › gamification.enabled:false hides the history streak hero and the analysis badge list (406ms)
+validate	E2E smoke test	2026-10-12T03:42:53.2204344Z   ✓  126 [chromium] › tests/e2e/form-diagnostics.spec.js:686:1 › restart post-confirm token change fails closed (1.6s)
+validate	E2E smoke test	2026-10-12T03:42:53.4825244Z   ✓  128 [chromium] › tests/e2e/gamification.spec.js:154:1 › enabling gamification from settings makes the history streak hero appear (1.2s)
+validate	E2E smoke test	2026-10-12T03:42:54.2989041Z   ✓  130 [chromium] › tests/e2e/gamification.spec.js:186:1 › unset practiceDays shows — with a CTA; tapping the hero CTA sets weekdays and switches to streak/goal rings (799ms)
+validate	E2E smoke test	2026-10-12T03:42:54.7263151Z   ✓  131 [chromium] › tests/e2e/gamification.spec.js:249:1 › finishing a session shows a before→after streak row in the summary sheet (415ms)
+validate	E2E smoke test	2026-10-12T03:42:55.0520377Z   ✓  132 [chromium] › tests/e2e/gamification.spec.js:300:1 › all 12 badges render in the analysis tab (locked by default); first_arrow unlocks via startup backfill (312ms)
+validate	E2E smoke test	2026-10-12T03:42:55.3880474Z   ✓  129 [chromium] › tests/e2e/form-diagnostics.spec.js:714:1 › allocation failure and save false both preserve prior coordinator and updatedAt (2.1s)
+validate	E2E smoke test	2026-10-12T03:42:55.7851897Z   ✓  133 [chromium] › tests/e2e/gamification.spec.js:355:1 › importing history with gamification enabled backfills quietly and does not re-fire an already-owned badge on the next session (regression: import badge misfire) (718ms)
+validate	E2E smoke test	2026-10-12T03:42:56.4169777Z   ✓  135 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 1) (610ms)
+validate	E2E smoke test	2026-10-12T03:42:56.4953354Z   ✓  134 [chromium] › tests/e2e/form-diagnostics.spec.js:755:1 › side state uses fixed copy (1.1s)
+validate	E2E smoke test	2026-10-12T03:42:57.1542906Z   ✓  136 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 2) (725ms)
+validate	E2E smoke test	2026-10-12T03:42:57.6587067Z   ✓  137 [chromium] › tests/e2e/form-diagnostics.spec.js:766:1 › complete state uses fixed copy (1.1s)
+validate	E2E smoke test	2026-10-12T03:42:57.8458275Z   ✓  138 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, light, 3) (678ms)
+validate	E2E smoke test	2026-10-12T03:42:58.5319970Z   ✓  140 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 1) (670ms)
+validate	E2E smoke test	2026-10-12T03:42:59.1389395Z   ✓  141 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 2) (596ms)
+validate	E2E smoke test	2026-10-12T03:42:59.9028651Z   ✓  142 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (320, dark, 3) (750ms)
+validate	E2E smoke test	2026-10-12T03:43:00.2083304Z   ✓  139 [chromium] › tests/e2e/form-diagnostics.spec.js:771:1 › export post-confirm exact-debug and workflow rechecks prevent transport (2.5s)
+validate	E2E smoke test	2026-10-12T03:43:00.6629614Z   ✓  143 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 1) (745ms)
+validate	E2E smoke test	2026-10-12T03:43:01.3474797Z   ✓  145 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 2) (675ms)
+validate	E2E smoke test	2026-10-12T03:43:01.7419716Z   ✓  144 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › incomplete refuses export without transport (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:02.2018557Z   ✓  146 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, light, 3) (840ms)
+validate	E2E smoke test	2026-10-12T03:43:02.8953539Z   ✓  148 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 1) (680ms)
+validate	E2E smoke test	2026-10-12T03:43:03.2749734Z   ✓  147 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › stale refuses export without transport (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:03.6843084Z   ✓  149 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 2) (767ms)
+validate	E2E smoke test	2026-10-12T03:43:04.4264772Z   ✓  151 [chromium] › tests/e2e/grouping-evidence.spec.js:67:7 › grouping result requires three coordinates (375, dark, 3) (717ms)
+validate	E2E smoke test	2026-10-12T03:43:04.7045721Z   ✓  152 [chromium] › tests/e2e/grouping-evidence.spec.js:133:3 › first few-arrow result explains pending grouping (1) (266ms)
+validate	E2E smoke test	2026-10-12T03:43:04.8131143Z   ✓  150 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › malformed refuses export without transport (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:05.1117741Z   ✓  153 [chromium] › tests/e2e/grouping-evidence.spec.js:133:3 › first few-arrow result explains pending grouping (2) (393ms)
+validate	E2E smoke test	2026-10-12T03:43:06.3752158Z   ✓  154 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › replay refuses export without transport (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:06.5831694Z   ✓  155 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, light, reduce, short) (1.4s)
+validate	E2E smoke test	2026-10-12T03:43:07.9655852Z   ✓  156 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › duplicate selected ID refuses export without transport (1.6s)
+validate	E2E smoke test	2026-10-12T03:43:09.4199329Z   ✓  158 [chromium] › tests/e2e/form-diagnostics.spec.js:840:3 › overflow refuses export without transport (1.4s)
+validate	E2E smoke test	2026-10-12T03:43:10.6979634Z   ✓  157 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, light, no-preference, short) (4.1s)
+validate	E2E smoke test	2026-10-12T03:43:10.9055126Z   ✓  159 [chromium] › tests/e2e/form-diagnostics.spec.js:857:1 › output-too-large uses the fixed repeat copy (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:12.0282415Z   ✓  160 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, dark, reduce, short) (1.3s)
+validate	E2E smoke test	2026-10-12T03:43:12.3987269Z   ✓  161 [chromium] › tests/e2e/form-diagnostics.spec.js:873:1 › export double click opens one confirmation and cancel preserves all state (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:13.9651332Z   ✓  163 [chromium] › tests/e2e/form-diagnostics.spec.js:890:3 › web-success uses one File transport and preserves DB/backups (1.6s)
+validate	E2E smoke test	2026-10-12T03:43:15.5265616Z   ✓  164 [chromium] › tests/e2e/form-diagnostics.spec.js:890:3 › web-abort uses one File transport and preserves DB/backups (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:16.1046264Z   ✓  162 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, dark, no-preference, short) (4.1s)
+validate	E2E smoke test	2026-10-12T03:43:17.1228271Z   ✓  165 [chromium] › tests/e2e/form-diagnostics.spec.js:890:3 › web-error uses one File transport and preserves DB/backups (1.6s)
+validate	E2E smoke test	2026-10-12T03:43:17.3414843Z   ✓  166 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, light, reduce, short) (1.2s)
+validate	E2E smoke test	2026-10-12T03:43:18.6931685Z   ✓  167 [chromium] › tests/e2e/form-diagnostics.spec.js:912:1 › native final cleanup warning has no download fallback and preserves state (1.6s)
+validate	E2E smoke test	2026-10-12T03:43:20.1776688Z   ✓  169 [chromium] › tests/e2e/form-diagnostics.spec.js:933:1 › no-share environment downloads exact MIME/allowlist and revokes URL (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:20.8493691Z   ✓  168 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, light, no-preference, short) (3.5s)
+validate	E2E smoke test	2026-10-12T03:43:21.2753413Z   ✓  170 [chromium] › tests/e2e/form-diagnostics.spec.js:957:3 › diagnostic settings fit 360x780 (1.1s)
+validate	E2E smoke test	2026-10-12T03:43:22.0240730Z   ✓  171 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, dark, reduce, short) (1.2s)
+validate	E2E smoke test	2026-10-12T03:43:22.3393009Z   ✓  172 [chromium] › tests/e2e/form-diagnostics.spec.js:957:3 › diagnostic settings fit 390x844 (1.1s)
+validate	E2E smoke test	2026-10-12T03:43:23.4264834Z   ✓  174 [chromium] › tests/e2e/form-diagnostics.spec.js:957:3 › diagnostic settings fit 1280x800 (1.1s)
+validate	E2E smoke test	2026-10-12T03:43:24.2140627Z   ✓  175 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking missing is disabled everywhere (770ms)
+validate	E2E smoke test	2026-10-12T03:43:24.9913049Z   ✓  176 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking false is disabled everywhere (764ms)
+validate	E2E smoke test	2026-10-12T03:43:25.5070489Z   ✓  173 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, dark, no-preference, short) (3.5s)
+validate	E2E smoke test	2026-10-12T03:43:25.7971078Z   ✓  177 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking zero is disabled everywhere (789ms)
+validate	E2E smoke test	2026-10-12T03:43:26.7006455Z   ✓  179 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking one is disabled everywhere (886ms)
+validate	E2E smoke test	2026-10-12T03:43:26.9782439Z   ✓  178 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, light, reduce, short) (1.5s)
+validate	E2E smoke test	2026-10-12T03:43:27.6375526Z   ✓  180 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking string "true" is disabled everywhere (925ms)
+validate	E2E smoke test	2026-10-12T03:43:28.4194810Z   ✓  182 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking string "false" is disabled everywhere (765ms)
+validate	E2E smoke test	2026-10-12T03:43:29.2106122Z   ✓  183 [chromium] › tests/e2e/form-diagnostics.spec.js:1010:3 › form tracking literal true is enabled everywhere (780ms)
+validate	E2E smoke test	2026-10-12T03:43:29.7618282Z   ✓  184 [chromium] › tests/e2e/history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (light) (536ms)
+validate	E2E smoke test	2026-10-12T03:43:30.4489618Z   ✓  185 [chromium] › tests/e2e/history-layout.spec.js:3:3 › history prioritizes records and retains accessible filters (dark) (669ms)
+validate	E2E smoke test	2026-10-12T03:43:30.7319027Z   ✓  181 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, light, no-preference, short) (3.7s)
+validate	E2E smoke test	2026-10-12T03:43:32.0177018Z   ✓  187 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, dark, reduce, short) (1.3s)
+validate	E2E smoke test	2026-10-12T03:43:32.6465846Z   ✓  186 [chromium] › tests/e2e/history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (light) (2.2s)
+validate	E2E smoke test	2026-10-12T03:43:35.3512003Z   ✓  189 [chromium] › tests/e2e/history-round-collapse.spec.js:52:3 › a round opens in stage order, retains expansion and filters without changing records (dark) (2.7s)
+validate	E2E smoke test	2026-10-12T03:43:35.5734689Z   ✓  188 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (1024, dark, no-preference, short) (3.5s)
+validate	E2E smoke test	2026-10-12T03:43:36.6640404Z   ✓  190 [chromium] › tests/e2e/history-round-collapse.spec.js:111:1 › additional history keeps all stages together at a page boundary on a narrow phone (1.3s)
+validate	E2E smoke test	2026-10-12T03:43:37.8556578Z   ✓  191 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (320, light, reduce, long) (2.3s)
+validate	E2E smoke test	2026-10-12T03:43:38.7969000Z   ✓  192 [chromium] › tests/e2e/history-round-collapse.spec.js:133:1 › a filtered group labels its visible subtotal and excludes unmatched stages (2.1s)
+validate	E2E smoke test	2026-10-12T03:43:39.9756321Z   ✓  194 [chromium] › tests/e2e/modal-swipe-followup.spec.js:6:3 › a controlled sheet pull allows the first next touch to finish (320) (1.2s)
+validate	E2E smoke test	2026-10-12T03:43:40.0202659Z   ✓  193 [chromium] › tests/e2e/history-actions.spec.js:120:3 › history actions preserve reading space (375, light, reduce, long) (2.1s)
+validate	E2E smoke test	2026-10-12T03:43:41.0587067Z   ✓  196 [chromium] › tests/e2e/modal-swipe.spec.js:12:1 › settings swipes close, short and sideways drags preserve the sheet (1.0s)
+validate	E2E smoke test	2026-10-12T03:43:41.1702267Z   ✓  195 [chromium] › tests/e2e/modal-swipe-followup.spec.js:6:3 › a controlled sheet pull allows the first next touch to finish (375) (1.2s)
+validate	E2E smoke test	2026-10-12T03:43:41.4933272Z   ✓  198 [chromium] › tests/e2e/onboarding.spec.js:96:1 › empty db (0 sessions / 0 setups / onboardingSeen:false) shows the welcome screen (285ms)
+validate	E2E smoke test	2026-10-12T03:43:41.8472073Z   ✓  197 [chromium] › tests/e2e/modal-swipe.spec.js:37:1 › swiping nested confirmation cancels and leaves underlying settings open (775ms)
+validate	E2E smoke test	2026-10-12T03:43:42.3933435Z   ✓  200 [chromium] › tests/e2e/modal-swipe.spec.js:59:1 › touch pull closes settings; cancelled pull leaves it open (532ms)
+validate	E2E smoke test	2026-10-12T03:43:42.6830514Z   ✓  199 [chromium] › tests/e2e/onboarding.spec.js:115:1 › skip goes straight to the normal record screen and saves onboardingSeen immediately (1.2s)
+validate	E2E smoke test	2026-10-12T03:43:42.8020773Z   ✓  201 [chromium] › tests/e2e/outdoor-contrast.spec.js:94:1 › red-zone score chip (7-8 points) meets WCAG AA contrast against its text (389ms)
+validate	E2E smoke test	2026-10-12T03:43:43.2693478Z   ✓  203 [chromium] › tests/e2e/outdoor-contrast.spec.js:118:1 › blue-zone score chip (5-6 points) meets WCAG AA contrast against its text (448ms)
+validate	E2E smoke test	2026-10-12T03:43:43.5956517Z   ✓  204 [chromium] › tests/e2e/outdoor-contrast.spec.js:142:1 › arrow marker keeps a thick white outline for outdoor glare readability (308ms)
+validate	E2E smoke test	2026-10-12T03:43:43.8533815Z   ✓  202 [chromium] › tests/e2e/onboarding.spec.js:136:1 › 'はじめる' shows the quick-setup screen with 4 unselected distance chips (1.2s)
+validate	E2E smoke test	2026-10-12T03:43:44.4316832Z   ✓  205 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, below) (817ms)
+validate	E2E smoke test	2026-10-12T03:43:45.1786248Z   ✓  207 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, tie) (731ms)
+validate	E2E smoke test	2026-10-12T03:43:45.9419696Z   ✓  208 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 1, above) (747ms)
+validate	E2E smoke test	2026-10-12T03:43:45.9784800Z   ✓  206 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 70m shows the auto-derived face/end hint and starts a matching db.active (2.1s)
+validate	E2E smoke test	2026-10-12T03:43:46.8471523Z   ✓  209 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, below) (891ms)
+validate	E2E smoke test	2026-10-12T03:43:47.6249402Z   ✓  211 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, tie) (764ms)
+validate	E2E smoke test	2026-10-12T03:43:47.6726162Z   ✓  210 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 50m shows the auto-derived face/end hint and starts a matching db.active (1.7s)
+validate	E2E smoke test	2026-10-12T03:43:48.5255600Z   ✓  212 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, light, 6, above) (884ms)
+validate	E2E smoke test	2026-10-12T03:43:49.3040941Z   ✓  214 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, below) (765ms)
+validate	E2E smoke test	2026-10-12T03:43:49.8429965Z   ✓  213 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 30m shows the auto-derived face/end hint and starts a matching db.active (2.2s)
+validate	E2E smoke test	2026-10-12T03:43:50.1288763Z   ✓  215 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, tie) (810ms)
+validate	E2E smoke test	2026-10-12T03:43:50.8997264Z   ✓  217 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 1, above) (756ms)
+validate	E2E smoke test	2026-10-12T03:43:51.6783230Z   ✓  218 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, below) (767ms)
+validate	E2E smoke test	2026-10-12T03:43:51.9512117Z   ✓  216 [chromium] › tests/e2e/onboarding.spec.js:171:3 › selecting 18m shows the auto-derived face/end hint and starts a matching db.active (2.1s)
+validate	E2E smoke test	2026-10-12T03:43:52.2124004Z   ✓  220 [chromium] › tests/e2e/onboarding.spec.js:224:3 › onboarding does not show for an existing user with an existing session (245ms)
+validate	E2E smoke test	2026-10-12T03:43:52.4570742Z   ✓  221 [chromium] › tests/e2e/onboarding.spec.js:224:3 › onboarding does not show for an existing user with an existing setup (no sessions yet) (232ms)
+validate	E2E smoke test	2026-10-12T03:43:52.6631174Z   ✓  219 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, tie) (968ms)
+validate	E2E smoke test	2026-10-12T03:43:52.7748815Z   ✓  222 [chromium] › tests/e2e/onboarding.spec.js:224:3 › onboarding does not show for an existing user with onboardingSeen already true (301ms)
+validate	E2E smoke test	2026-10-12T03:43:53.1745416Z   ✓  224 [chromium] › tests/e2e/onboarding.spec.js:242:1 › clearing all data and reloading shows onboarding again (387ms)
+validate	E2E smoke test	2026-10-12T03:43:53.7027750Z   ✓  223 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (320, dark, 6, above) (1.0s)
+validate	E2E smoke test	2026-10-12T03:43:54.0569586Z   ✓  225 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, below) (863ms)
+validate	E2E smoke test	2026-10-12T03:43:54.5915852Z   ✓  226 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, tie) (874ms)
+validate	E2E smoke test	2026-10-12T03:43:54.9116641Z   ✓  227 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 1, above) (839ms)
+validate	E2E smoke test	2026-10-12T03:43:55.5265241Z   ✓  228 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, below) (918ms)
+validate	E2E smoke test	2026-10-12T03:43:55.8007747Z   ✓  229 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, tie) (872ms)
+validate	E2E smoke test	2026-10-12T03:43:56.4364141Z   ✓  230 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, light, 6, above) (898ms)
+validate	E2E smoke test	2026-10-12T03:43:56.6251534Z   ✓  231 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, below) (811ms)
+validate	E2E smoke test	2026-10-12T03:43:57.3258261Z   ✓  232 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, tie) (874ms)
+validate	E2E smoke test	2026-10-12T03:43:57.4843816Z   ✓  233 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 1, above) (843ms)
+validate	E2E smoke test	2026-10-12T03:43:58.2595671Z   ✓  234 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, below) (918ms)
+validate	E2E smoke test	2026-10-12T03:43:58.4751448Z   ✓  235 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, tie) (973ms)
+validate	E2E smoke test	2026-10-12T03:43:59.1442526Z   ✓  236 [chromium] › tests/e2e/personal-best-projection.spec.js:105:9 › PB projection (375, dark, 6, above) (873ms)
+validate	E2E smoke test	2026-10-12T03:44:00.2394273Z   ✓  237 [chromium] › tests/e2e/personal-best-projection.spec.js:186:3 › native PB projection after one-arrow finish (320) (1.8s)
+validate	E2E smoke test	2026-10-12T03:44:00.8616952Z   ✓  238 [chromium] › tests/e2e/personal-best-projection.spec.js:186:3 › native PB projection after one-arrow finish (375) (1.7s)
+validate	E2E smoke test	2026-10-12T03:44:01.3745097Z   ✓  240 [chromium] › tests/e2e/record-labels.spec.js:24:5 › named record controls 320 › starts with the visible named conditions and preserves records (495ms)
+validate	E2E smoke test	2026-10-12T03:44:01.9970306Z   ✓  241 [chromium] › tests/e2e/record-labels.spec.js:24:5 › named record controls 375 › starts with the visible named conditions and preserves records (613ms)
+validate	E2E smoke test	2026-10-12T03:44:02.5421323Z   ✓  242 [chromium] › tests/e2e/record-labels.spec.js:24:5 › named record controls 900 › starts with the visible named conditions and preserves records (535ms)
+validate	E2E smoke test	2026-10-12T03:44:02.7139663Z   ✓  239 [chromium] › tests/e2e/pwa-release.spec.js:3:1 › cached app starts a practice offline and retains it across reload (2.5s)
+validate	E2E smoke test	2026-10-12T03:44:04.0150470Z   ✓  244 [chromium] › tests/e2e/pwa-release.spec.js:29:1 › newer version banner reload preserves demo records (1.3s)
+validate	E2E smoke test	2026-10-12T03:44:04.4641740Z   ✓  245 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (light, repeat) (434ms)
+validate	E2E smoke test	2026-10-12T03:44:04.9178916Z   ✓  246 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (light, current) (439ms)
+validate	E2E smoke test	2026-10-12T03:44:05.3459930Z   ✓  247 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (dark, repeat) (416ms)
+validate	E2E smoke test	2026-10-12T03:44:05.6545500Z   ✓  243 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, current) (3.1s)
+validate	E2E smoke test	2026-10-12T03:44:05.8434955Z   ✓  248 [chromium] › tests/e2e/record-start.spec.js:4:5 › record start labels match the started conditions (dark, current) (486ms)
+validate	E2E smoke test	2026-10-12T03:44:08.6266358Z   ✓  249 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, repeat) (3.0s)
+validate	E2E smoke test	2026-10-12T03:44:12.0931531Z   ✓  251 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, no-preference, onboarding) (3.5s)
+validate	E2E smoke test	2026-10-12T03:44:13.4771913Z   ✓  252 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, current) (1.4s)
+validate	E2E smoke test	2026-10-12T03:44:14.8454427Z   ✓  253 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, repeat) (1.4s)
+validate	E2E smoke test	2026-10-12T03:44:16.1633734Z   ✓  254 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (320, reduce, onboarding) (1.3s)
+validate	E2E smoke test	2026-10-12T03:44:19.1282889Z   ✓  255 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, current) (3.0s)
+validate	E2E smoke test	2026-10-12T03:44:19.6729747Z   ✓  250 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (no-preference) (13.8s)
+validate	E2E smoke test	2026-10-12T03:44:22.0736498Z   ✓  256 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, repeat) (2.9s)
+validate	E2E smoke test	2026-10-12T03:44:25.5440030Z   ✓  258 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, no-preference, onboarding) (3.5s)
+validate	E2E smoke test	2026-10-12T03:44:26.9405973Z   ✓  259 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, current) (1.4s)
+validate	E2E smoke test	2026-10-12T03:44:28.2907846Z   ✓  260 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, repeat) (1.3s)
+validate	E2E smoke test	2026-10-12T03:44:28.7003933Z   ✓  257 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 320 › record feedback leaves actions readable (reduce) (9.0s)
+validate	E2E smoke test	2026-10-12T03:44:29.5674762Z   ✓  261 [chromium] › tests/e2e/record-start-viewport.spec.js:23:7 › first target is usable without recovery scroll (375, reduce, onboarding) (1.3s)
+validate	E2E smoke test	2026-10-12T03:44:30.3620412Z   ✓  263 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (320, light) (777ms)
+validate	E2E smoke test	2026-10-12T03:44:31.1607637Z   ✓  264 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (320, dark) (789ms)
+validate	E2E smoke test	2026-10-12T03:44:31.8125730Z   ✓  265 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (375, light) (641ms)
+validate	E2E smoke test	2026-10-12T03:44:32.4756692Z   ✓  266 [chromium] › tests/e2e/summary-order.spec.js:86:5 › finished summary shows results first (375, dark) (652ms)
+validate	E2E smoke test	2026-10-12T03:44:33.0082274Z   ✓  267 [chromium] › tests/e2e/summary-order.spec.js:130:3 › summary keeps its existing optional content (first) (518ms)
+validate	E2E smoke test	2026-10-12T03:44:33.5588305Z   ✓  268 [chromium] › tests/e2e/summary-order.spec.js:130:3 › summary keeps its existing optional content (gam-round) (540ms)
+validate	E2E smoke test	2026-10-12T03:44:34.1116448Z   ✓  269 [chromium] › tests/e2e/summary-order.spec.js:130:3 › summary keeps its existing optional content (edit) (541ms)
+validate	E2E smoke test	2026-10-12T03:44:41.2639462Z   ✓  270 [chromium] › tests/e2e/summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings (7.1s)
+validate	E2E smoke test	2026-10-12T03:44:41.9813404Z   ✓  262 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (no-preference) (13.3s)
+validate	E2E smoke test	2026-10-12T03:44:48.4454451Z   ✓  271 [chromium] › tests/e2e/summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings (7.2s)
+validate	E2E smoke test	2026-10-12T03:44:50.9563518Z   ✓  272 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 375 › record feedback leaves actions readable (reduce) (9.0s)
+validate	E2E smoke test	2026-10-12T03:44:55.6939949Z   ✓  273 [chromium] › tests/e2e/summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings (7.2s)
+validate	E2E smoke test	2026-10-12T03:44:56.4099486Z   ✓  275 [chromium] › tests/e2e/tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (reduce) (702ms)
+validate	E2E smoke test	2026-10-12T03:44:57.9669348Z   ✓  276 [chromium] › tests/e2e/tab-scroll.spec.js:3:3 › tabs retain their own reading position without changing practice data (no-preference) (1.5s)
+validate	E2E smoke test	2026-10-12T03:45:00.4126828Z   ✓  277 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (320, pointer) (2.4s)
+validate	E2E smoke test	2026-10-12T03:45:03.6977209Z   ✓  278 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (320, pointer) (3.3s)
+validate	E2E smoke test	2026-10-12T03:45:04.2689662Z   ✓  274 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (no-preference) (13.3s)
+validate	E2E smoke test	2026-10-12T03:45:06.1077675Z   ✓  279 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (320, touch fallback) (2.4s)
+validate	E2E smoke test	2026-10-12T03:45:09.2896687Z   ✓  281 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (320, touch fallback) (3.2s)
+validate	E2E smoke test	2026-10-12T03:45:11.6900697Z   ✓  282 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (375, pointer) (2.4s)
+validate	E2E smoke test	2026-10-12T03:45:13.3577990Z   ✓  280 [chromium] › tests/e2e/record-toast.spec.js:94:7 › notification clearance 900 › record feedback leaves actions readable (reduce) (9.1s)
+validate	E2E smoke test	2026-10-12T03:45:13.6522547Z   ✓  284 [chromium] › tests/e2e/todays-result.spec.js:144:1 › first-ever session shows the baseline-established copy, with gamification off by default (279ms)
+validate	E2E smoke test	2026-10-12T03:45:13.9495450Z   ✓  285 [chromium] › tests/e2e/todays-result.spec.js:167:1 › second same-condition session shows the previous-comparison row in the summary (281ms)
+validate	E2E smoke test	2026-10-12T03:45:14.2425930Z   ✓  286 [chromium] › tests/e2e/todays-result.spec.js:192:1 › first session at a new condition says condition-first, not first-ever (strict-review major regression) (278ms)
+validate	E2E smoke test	2026-10-12T03:45:14.9711789Z   ✓  283 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (375, pointer) (3.3s)
+validate	E2E smoke test	2026-10-12T03:45:15.7712084Z   ✓  287 [chromium] › tests/e2e/todays-result.spec.js:213:1 › history detail sheet reconstructs the panel with この日 wording and no future leakage (1.5s)
+validate	E2E smoke test	2026-10-12T03:45:16.2682483Z   ✓  289 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (360, light) (481ms)
+validate	E2E smoke test	2026-10-12T03:45:16.8156158Z   ✓  290 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (360, dark) (535ms)
+validate	E2E smoke test	2026-10-12T03:45:17.4126438Z   ✓  288 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels simultaneous fingers (375, touch fallback) (2.4s)
+validate	E2E smoke test	2026-10-12T03:45:17.4799644Z   ✓  291 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (375, light) (643ms)
+validate	E2E smoke test	2026-10-12T03:45:18.2988360Z   ✓  293 [chromium] › tests/e2e/touch-controls.spec.js:4:5 › secondary touch controls remain usable (375, dark) (805ms)
+validate	E2E smoke test	2026-10-12T03:45:19.5389974Z   ✓  294 [chromium] › tests/e2e/touch-controls.spec.js:38:3 › visible target above fixed actions accepts one arrow (360) (1.2s)
+validate	E2E smoke test	2026-10-12T03:45:20.8228377Z   ✓  292 [chromium] › tests/e2e/target-multitouch.spec.js:37:7 › target cancels added outside after fine fingers (375, touch fallback) (3.4s)
+validate	E2E smoke test	2026-10-12T03:45:20.8380325Z   ✓  295 [chromium] › tests/e2e/touch-controls.spec.js:38:3 › visible target above fixed actions accepts one arrow (375) (1.3s)
+validate	E2E smoke test	2026-10-12T03:45:21.2337346Z   ✓  296 [chromium] › tests/e2e/wake-lock.spec.js:105:1 › starting a record session acquires the screen wake lock exactly once (393ms)
+validate	E2E smoke test	2026-10-12T03:45:21.6219789Z   ✓  298 [chromium] › tests/e2e/wake-lock.spec.js:122:1 › finishing a record session releases the screen wake lock (371ms)
+validate	E2E smoke test	2026-10-12T03:45:22.0131537Z   ✓  299 [chromium] › tests/e2e/wake-lock.spec.js:142:1 › wake lock is reacquired when the tab returns from background (378ms)
+validate	E2E smoke test	2026-10-12T03:45:22.3329742Z   ✓  300 [chromium] › tests/e2e/wake-lock.spec.js:177:1 › unsupported browsers skip wake lock silently and the session keeps working (308ms)
+validate	E2E smoke test	2026-10-12T03:45:22.6301704Z   ✓  301 [chromium] › tests/e2e/wake-lock.spec.js:195:1 › a rejected wake lock request warns via console but keeps the session usable (286ms)
+validate	E2E smoke test	2026-10-12T03:45:23.8499595Z   ✓  297 [chromium] › tests/e2e/warm-cache-update.spec.js:7:1 › warm HTTP cache updates generated code and canonical offline cache together (3.0s)
+validate	E2E smoke test	2026-10-12T03:45:23.9081687Z 
+validate	E2E smoke test	2026-10-12T03:45:23.9090976Z   301 passed (5.9m)
+validate	Configure Pages	﻿2026-10-12T03:45:23.9415240Z ##[group]Run actions/configure-pages@v5
+validate	Configure Pages	2026-10-12T03:45:23.9415556Z with:
+validate	Configure Pages	2026-10-12T03:45:23.9418305Z   token: ***
+validate	Configure Pages	2026-10-12T03:45:23.9418517Z   enablement: false
+validate	Configure Pages	2026-10-12T03:45:23.9418737Z ##[endgroup]
+validate	Upload checked distribution	﻿2026-10-12T03:45:24.3056238Z ##[group]Run actions/upload-pages-artifact@v4
+validate	Upload checked distribution	2026-10-12T03:45:24.3056574Z with:
+validate	Upload checked distribution	2026-10-12T03:45:24.3056762Z   path: dist/native
+validate	Upload checked distribution	2026-10-12T03:45:24.3056969Z   name: github-pages
+validate	Upload checked distribution	2026-10-12T03:45:24.3057205Z   retention-days: 1
+validate	Upload checked distribution	2026-10-12T03:45:24.3057671Z env:
+validate	Upload checked distribution	2026-10-12T03:45:24.3057878Z   GITHUB_PAGES: true
+validate	Upload checked distribution	2026-10-12T03:45:24.3058086Z ##[endgroup]
+validate	Upload checked distribution	2026-10-12T03:45:24.3120909Z ##[start-action display=Archive artifact;id=__actions_upload-pages-artifact.__run]
+validate	Upload checked distribution	2026-10-12T03:45:24.3148679Z ##[group]Run echo ::group::Archive artifact
+validate	Upload checked distribution	2026-10-12T03:45:24.3149021Z ^[[36;1mecho ::group::Archive artifact^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3149285Z ^[[36;1mtar \^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3149517Z ^[[36;1m  --dereference --hard-dereference \^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3149824Z ^[[36;1m  --directory "$INPUT_PATH" \^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3150113Z ^[[36;1m  -cvf "$RUNNER_TEMP/artifact.tar" \^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3150396Z ^[[36;1m  --exclude=.git \^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3150632Z ^[[36;1m  --exclude=.github \^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3150919Z ^[[36;1m  --exclude=".[^/]*" \^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3151145Z ^[[36;1m  .^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3151341Z ^[[36;1mecho ::endgroup::^[[0m
+validate	Upload checked distribution	2026-10-12T03:45:24.3178216Z shell: /usr/bin/sh -e {0}
+validate	Upload checked distribution	2026-10-12T03:45:24.3178481Z env:
+validate	Upload checked distribution	2026-10-12T03:45:24.3178664Z   GITHUB_PAGES: true
+validate	Upload checked distribution	2026-10-12T03:45:24.3178879Z   INPUT_PATH: dist/native
+validate	Upload checked distribution	2026-10-12T03:45:24.3179095Z ##[endgroup]
+validate	Upload checked distribution	2026-10-12T03:45:24.3223492Z ##[group]Archive artifact
+validate	Upload checked distribution	2026-10-12T03:45:24.3238290Z ./
+validate	Upload checked distribution	2026-10-12T03:45:24.3238661Z ./manifest.json
+validate	Upload checked distribution	2026-10-12T03:45:24.3239042Z ./assets/
+validate	Upload checked distribution	2026-10-12T03:45:24.3239389Z ./assets/pose/
+validate	Upload checked distribution	2026-10-12T03:45:24.3239816Z ./assets/pose/vision_wasm_internal.wasm
+validate	Upload checked distribution	2026-10-12T03:45:24.3316240Z ./assets/pose/pose_landmarker_lite.task
+validate	Upload checked distribution	2026-10-12T03:45:24.3362387Z ./assets/pose/vision_bundle.mjs
+validate	Upload checked distribution	2026-10-12T03:45:24.3363384Z ./assets/pose/vision_wasm_internal.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3365839Z ./index.html
+validate	Upload checked distribution	2026-10-12T03:45:24.3366243Z ./version.json
+validate	Upload checked distribution	2026-10-12T03:45:24.3366633Z ./scripts/
+validate	Upload checked distribution	2026-10-12T03:45:24.3367080Z ./scripts/45-analysis-core.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3367852Z ./scripts/49-todays-result.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3368395Z ./scripts/48-gamification.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3368934Z ./scripts/00-compat.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3369427Z ./scripts/46-form-core.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3369974Z ./scripts/10-storage-native.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3370498Z ./scripts/20-scoring.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3371046Z ./scripts/40-analysis-physics.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3371587Z ./scripts/47-form-view.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3372159Z ./scripts/60-history-sight-view.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3372752Z ./scripts/50-record-view.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3373281Z ./scripts/70-gear-settings.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3373807Z ./scripts/30-target-svg.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3374238Z ./scripts/90-init.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3374631Z ./native-readiness.json
+validate	Upload checked distribution	2026-10-12T03:45:24.3374994Z ./sw.js
+validate	Upload checked distribution	2026-10-12T03:45:24.3375294Z ./icon.svg
+validate	Upload checked distribution	2026-10-12T03:45:24.3375610Z ./apple-touch-icon.png
+validate	Upload checked distribution	2026-10-12T03:45:24.3375851Z ./style.min.css
+validate	Upload checked distribution	2026-10-12T03:45:24.3379478Z ##[endgroup]
+validate	Upload checked distribution	2026-10-12T03:45:24.3393954Z ##[end-action id=__actions_upload-pages-artifact.__run;outcome=success;conclusion=success;duration_ms=27]
+validate	Upload checked distribution	2026-10-12T03:45:24.3398239Z ##[start-action display=Archive artifact;id=__actions_upload-pages-artifact.__run_2]
+validate	Upload checked distribution	2026-10-12T03:45:24.3403728Z ##[end-action id=__actions_upload-pages-artifact.__run_2;outcome=skipped;conclusion=skipped;duration_ms=0]
+validate	Upload checked distribution	2026-10-12T03:45:24.3406459Z ##[start-action display=Archive artifact;id=__actions_upload-pages-artifact.__run_3]
+validate	Upload checked distribution	2026-10-12T03:45:24.3410362Z ##[end-action id=__actions_upload-pages-artifact.__run_3;outcome=skipped;conclusion=skipped;duration_ms=0]
+validate	Upload checked distribution	2026-10-12T03:45:24.3412306Z ##[start-action display=Upload artifact;id=__actions_upload-pages-artifact.upload-artifact]
+validate	Upload checked distribution	2026-10-12T03:45:24.3470730Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+validate	Upload checked distribution	2026-10-12T03:45:24.3471130Z with:
+validate	Upload checked distribution	2026-10-12T03:45:24.3471317Z   name: github-pages
+validate	Upload checked distribution	2026-10-12T03:45:24.3471562Z   path: /home/runner/work/_temp/artifact.tar
+validate	Upload checked distribution	2026-10-12T03:45:24.3472064Z   retention-days: 1
+validate	Upload checked distribution	2026-10-12T03:45:24.3472278Z   if-no-files-found: error
+validate	Upload checked distribution	2026-10-12T03:45:24.3472518Z   compression-level: 6
+validate	Upload checked distribution	2026-10-12T03:45:24.3472736Z   overwrite: false
+validate	Upload checked distribution	2026-10-12T03:45:24.3472944Z   include-hidden-files: false
+validate	Upload checked distribution	2026-10-12T03:45:24.3473173Z env:
+validate	Upload checked distribution	2026-10-12T03:45:24.3473344Z   GITHUB_PAGES: true
+validate	Upload checked distribution	2026-10-12T03:45:24.3473541Z ##[endgroup]
+validate	Upload checked distribution	2026-10-12T03:45:24.5337836Z (node:8381) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+validate	Upload checked distribution	2026-10-12T03:45:24.5339172Z (Use `node --trace-deprecation ...` to show where the warning was created)
+validate	Upload checked distribution	2026-10-12T03:45:24.5418897Z With the provided path, there will be 1 file uploaded
+validate	Upload checked distribution	2026-10-12T03:45:24.5429608Z Artifact name is valid!
+validate	Upload checked distribution	2026-10-12T03:45:24.5439412Z Root directory input is valid!
+validate	Upload checked distribution	2026-10-12T03:45:24.9660809Z Beginning upload of artifact content to blob storage
+validate	Upload checked distribution	2026-10-12T03:45:25.4935148Z (node:8381) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+validate	Upload checked distribution	2026-10-12T03:45:26.4272062Z Uploaded bytes 8105250
+validate	Upload checked distribution	2026-10-12T03:45:26.5054067Z Finished uploading artifact content to blob storage!
+validate	Upload checked distribution	2026-10-12T03:45:26.5055323Z SHA256 digest of uploaded artifact zip is 43661269ccd2cb8634f2d1d8b990a21fc5bda9eb2026fb7ca5830cc207326251
+validate	Upload checked distribution	2026-10-12T03:45:26.5056647Z Finalizing artifact upload
+validate	Upload checked distribution	2026-10-12T03:45:26.7783743Z Artifact github-pages.zip successfully finalized. Artifact ID 11726175058
+validate	Upload checked distribution	2026-10-12T03:45:26.7785862Z Artifact github-pages has been successfully uploaded! Final size is 8105250 bytes. Artifact ID is 11726175058
+validate	Upload checked distribution	2026-10-12T03:45:26.7793488Z Artifact download URL: https://github.com/eita115115/archery-note/actions/runs/38200540609/artifacts/11726175058
+validate	Upload checked distribution	2026-10-12T03:45:26.7932541Z ##[end-action id=__actions_upload-pages-artifact.upload-artifact;outcome=success;conclusion=success;duration_ms=2451]
+validate	Post Setup Node	﻿2026-10-12T03:45:26.8039067Z Post job cleanup.
+validate	Post Setup Node	2026-10-12T03:45:26.9300601Z (node:8393) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+validate	Post Setup Node	2026-10-12T03:45:26.9301861Z (Use `node --trace-deprecation ...` to show where the warning was created)
+validate	Post Setup Node	2026-10-12T03:45:26.9562674Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/archery-note/archery-note --files-from manifest.txt --use-compress-program zstdmt
+validate	Post Setup Node	2026-10-12T03:45:27.3885948Z (node:8393) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+validate	Post Setup Node	2026-10-12T03:45:28.3795615Z Sent 23855104 of 41387417 (57.6%), 22.8 MBs/sec
+validate	Post Setup Node	2026-10-12T03:45:28.7532453Z Sent 41387417 of 41387417 (100.0%), 28.7 MBs/sec
+validate	Post Setup Node	2026-10-12T03:45:29.0509524Z Cache saved with the key: node-cache-Linux-x64-npm-5ef5ced04d10545e7913a6b54e14f048552e232476f9846448a34abbc0d7b163
+validate	Post Checkout	﻿2026-10-12T03:45:29.0703260Z Post job cleanup.
+validate	Post Checkout	2026-10-12T03:45:29.1567600Z [command]/usr/bin/git version
+validate	Post Checkout	2026-10-12T03:45:29.1611763Z git version 2.55.0
+validate	Post Checkout	2026-10-12T03:45:29.1653377Z Temporarily overriding HOME='/home/runner/work/_temp/b27c64f9-44a3-4337-aba5-2630802d0608' before making global git config changes
+validate	Post Checkout	2026-10-12T03:45:29.1654962Z Adding repository directory to the temporary git global config as a safe directory
+validate	Post Checkout	2026-10-12T03:45:29.1660073Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/archery-note/archery-note
+validate	Post Checkout	2026-10-12T03:45:29.1706918Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+validate	Post Checkout	2026-10-12T03:45:29.1746276Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+validate	Post Checkout	2026-10-12T03:45:29.1999433Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+validate	Post Checkout	2026-10-12T03:45:29.2029935Z http.https://github.com/.extraheader
+validate	Post Checkout	2026-10-12T03:45:29.2042848Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+validate	Post Checkout	2026-10-12T03:45:29.2096349Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+validate	Post Checkout	2026-10-12T03:45:29.2373538Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+validate	Post Checkout	2026-10-12T03:45:29.2422125Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+validate	Complete job	﻿2026-10-12T03:45:29.2857963Z Cleaning up orphan processes
+validate	Complete job	2026-10-12T03:45:29.3186753Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/configure-pages@v5, actions/setup-node@v4, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+deploy	Set up job	﻿2026-10-12T03:45:37.4212495Z Current runner version: '2.337.0'
+deploy	Set up job	2026-10-12T03:45:37.4236458Z ##[group]Runner Image Provisioner
+deploy	Set up job	2026-10-12T03:45:37.4237212Z Hosted Compute Agent
+deploy	Set up job	2026-10-12T03:45:37.4237681Z Version: 20261002.596
+deploy	Set up job	2026-10-12T03:45:37.4238272Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+deploy	Set up job	2026-10-12T03:45:37.4238930Z Build Date: 2026-10-02T22:28:27Z
+deploy	Set up job	2026-10-12T03:45:37.4239557Z Worker ID: {8b525812-c22a-4001-a270-1ad9d41c0f8d}
+deploy	Set up job	2026-10-12T03:45:37.4240135Z Region: westus
+deploy	Set up job	2026-10-12T03:45:37.4240571Z Cloud: Azure
+deploy	Set up job	2026-10-12T03:45:37.4241065Z ##[endgroup]
+deploy	Set up job	2026-10-12T03:45:37.4242264Z ##[group]Operating System
+deploy	Set up job	2026-10-12T03:45:37.4242824Z Ubuntu
+deploy	Set up job	2026-10-12T03:45:37.4243266Z 24.04.5
+deploy	Set up job	2026-10-12T03:45:37.4243686Z LTS
+deploy	Set up job	2026-10-12T03:45:37.4244154Z ##[endgroup]
+deploy	Set up job	2026-10-12T03:45:37.4244912Z ##[group]Runner Image
+deploy	Set up job	2026-10-12T03:45:37.4245486Z Image: ubuntu-24.04
+deploy	Set up job	2026-10-12T03:45:37.4245966Z Version: 20261004.327.1
+deploy	Set up job	2026-10-12T03:45:37.4246825Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+deploy	Set up job	2026-10-12T03:45:37.4248614Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+deploy	Set up job	2026-10-12T03:45:37.4249436Z ##[endgroup]
+deploy	Set up job	2026-10-12T03:45:37.4250442Z ##[group]GITHUB_TOKEN Permissions
+deploy	Set up job	2026-10-12T03:45:37.4252274Z Contents: read
+deploy	Set up job	2026-10-12T03:45:37.4252864Z Metadata: read
+deploy	Set up job	2026-10-12T03:45:37.4253329Z Pages: write
+deploy	Set up job	2026-10-12T03:45:37.4253821Z ##[endgroup]
+deploy	Set up job	2026-10-12T03:45:37.4255944Z Secret source: Actions
+deploy	Set up job	2026-10-12T03:45:37.4256840Z Cache mode: write
+deploy	Set up job	2026-10-12T03:45:37.4257623Z Prepare workflow directory
+deploy	Set up job	2026-10-12T03:45:37.4533108Z Prepare all required actions
+deploy	Set up job	2026-10-12T03:45:37.4574115Z Getting action download info
+deploy	Set up job	2026-10-12T03:45:37.7720129Z Download action repository 'actions/deploy-pages@v4' (SHA:d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e)
+deploy	Set up job	2026-10-12T03:45:38.6668885Z Complete job name: deploy
+deploy	Deploy checked distribution	﻿2026-10-12T03:45:38.7325065Z ##[group]Run actions/deploy-pages@v4
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7325875Z with:
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7329315Z   token: ***
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7329717Z   timeout: 600000
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7330101Z   error_count: 10
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7330495Z   reporting_interval: 5000
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7330927Z   artifact_name: github-pages
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7331363Z   preview: false
+deploy	Deploy checked distribution	2026-10-12T03:45:38.7331896Z ##[endgroup]
+deploy	Deploy checked distribution	2026-10-12T03:45:38.8847063Z (node:1958) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+deploy	Deploy checked distribution	2026-10-12T03:45:38.8848189Z (Use `node --trace-deprecation ...` to show where the warning was created)
+deploy	Deploy checked distribution	2026-10-12T03:45:39.1398580Z Fetching artifact metadata for "github-pages" in this workflow run
+deploy	Deploy checked distribution	2026-10-12T03:45:39.3856861Z Found 1 artifact(s)
+deploy	Deploy checked distribution	2026-10-12T03:45:39.3866703Z Creating Pages deployment with payload:
+deploy	Deploy checked distribution	2026-10-12T03:45:39.3867822Z {
+deploy	Deploy checked distribution	2026-10-12T03:45:39.3868675Z 	"artifact_id": 11726175058,
+deploy	Deploy checked distribution	2026-10-12T03:45:39.3869883Z 	"pages_build_version": "20f19429609d1c6a0445ee5d6b63d2ec9a095e0c",
+deploy	Deploy checked distribution	2026-10-12T03:45:39.3958486Z 	"oidc_token": "***"
+deploy	Deploy checked distribution	2026-10-12T03:45:39.3959364Z }
+deploy	Deploy checked distribution	2026-10-12T03:45:40.4410196Z Created deployment for 20f19429609d1c6a0445ee5d6b63d2ec9a095e0c, ID: 20f19429609d1c6a0445ee5d6b63d2ec9a095e0c
+deploy	Deploy checked distribution	2026-10-12T03:45:45.4436609Z Getting Pages deployment status...
+deploy	Deploy checked distribution	2026-10-12T03:45:45.6727416Z Reported success!
+deploy	Complete job	﻿2026-10-12T03:45:45.6991804Z Evaluate and set environment url
+deploy	Complete job	2026-10-12T03:45:45.6996663Z Evaluated environment url: https://eita115115.github.io/archery-note/
+deploy	Complete job	2026-10-12T03:45:45.6997535Z Cleaning up orphan processes
+deploy	Complete job	2026-10-12T03:45:45.7234291Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/deploy-pages@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

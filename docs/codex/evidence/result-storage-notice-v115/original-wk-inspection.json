@@ -1,0 +1,26 @@
+{
+  "id": 5,
+  "result": {
+    "result": {
+      "type": "object",
+      "value": {
+        "version": 115,
+        "usage": {
+          "mb": 3.92,
+          "capMb": 5,
+          "ratio": 0.784,
+          "percent": 78
+        },
+        "sessions": 5001,
+        "stored": 5001,
+        "toast": "X 点を記録",
+        "summary": true,
+        "active": null,
+        "snapshotBytes": 0,
+        "storageKeys": [
+          "archeryNote.v1"
+        ]
+      }
+    }
+  }
+}

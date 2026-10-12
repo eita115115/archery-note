@@ -4,7 +4,7 @@
 
 ## 現在地
 
-- AN080進行中。実Linux114/架空5000件で結果へ容量toastが重なることを再現。結果内の持続案内とbackup設定CTAへ変更する。plan docs/codex/result-storage-notice.md。閾値/計測/保存/採点保持、費用個人情報不使用。
+- AN080完了、公開v115/source20f19429609d1c6a0445ee5d6b63d2ec9a095e0c、branch codex/result-storage-notice。結果に重なる容量toastをstatbar直後の持続案内へ移し、「バックアップ設定を開く」で既存設定のbackup操作を表示、閉じて結果へ戻る。自動exportなし、閾値0.8/容量計測/保存失敗toast/保存schema/採点半径/数学/全他runtime/依存/SWactivation保持、CSS4rulesとmarkers一括115。境界3red→3green24.6s、最終local全301passed3.8m/checkall/lint/format成功、ChromeWK320375明暗×通常3/実高容量5000のnative8は旧全件+新矢座標得点/reloadexact/errors0/非重複/設定往復/no download。初WK5000は実ratio.784で案内なしが正しくharness誤判定、元pageを保持して旧5000+新1/reloadexact回復、元fullerrorcollectorは取得不可を明記。別synthetic padding fixtureの訂正8は実ratio>=.8をassert。独立readonlyreview指摘なし（review時点full/native/public未確認）。CI38200540609 validate/deploy success/Linux301passed5.9m、実artifact11726175058/26safe、実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。元public114context publication462061ms、記録中更新保留→finish4/banner115/旧4exact→320native1/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/result-storage-notice-v115/代表13原寸PNGcopySHAexact、旧79tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。小画面dockラベル/履歴分析の情報設計/物理phone/VoiceOver/fieldINP/WKstrictOfflineは未完。
 
 - AN079完了、共通視覚基盤と記録画面を白/深緑のv3へ刷新、公開v114/source95b9bcc734b07c749523434986f05e0f318f9d13（app実装91ce18eから不変、最終commitはtest待機修正）、branch codex/ui-refresh。light/dark/auto/field・共通header/nav/buttons/input/cards/sheets/HUDを整合、50は開始heading一行のみ。採点/半径/数学/保存schema/handlers/依存/SWactivation不変、markers一括114。初20nav角失敗で停止→12px、次全298は294pass4gear角fail8.1m→円の塗りと矩形hitを分離、3px/4pxのhit基準不変。初公開CI297pass1resize-racefail/deployskip、60resizeで即時29fail/2rAF後0failを診断しtest待機だけ修正、CI再実行。最終local全298passed3.8m/checkall/lint/format、設定edge6passed7.9s、ChromeWK8/104native・旧3+新/座標得点/nudge0.6/undo/reload/errors0、4実画面context/8contrast条件・独立review指摘なし。CI38198360485 validate/deploy success/Linux298passed5.2m、実artifact11724167833/26safe/実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。初113contextはCI失敗で600s timeout、同じpage/context/browser・旧3/active1確認後再warmして再開、元113context publication386131ms、記録中更新保留→finish4/banner114/旧4exact→320native/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/ui-refresh-v114/代表18原寸PNGcopySHAexact、旧78tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。全画面情報設計/物理phone/INP/WKstrictOffline/旧容量toast重なりの解消は未完。
 
@@ -41,7 +41,7 @@
 
 ## 次と未解決
 
-- UI一新を継続する。次は小画面の記録ラベルと容量警告の重なりを別一タスクで整え、履歴/分析の情報設計へ進む。ユーザーのUI制約なし・全承認を継続、採点/旧練習データ/主要操作を保ち、費用・個人情報は使わない。
+- UI一新を継続する。次は小画面の記録dockの操作ラベルを読みやすく整える一タスク。続いて履歴/分析の情報設計へ進む。ユーザーのUI制約なし・全承認を継続、採点/旧練習データ/主要操作を保ち、費用・個人情報は使わない。
 - 統計5001回/保存/DOMの負担は残る。既存native依存@capacitor/android・iosのcritical2件（修正版8.4.3）はnative作業前の別確認が必要。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。

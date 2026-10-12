@@ -1,0 +1,1 @@
+const fs=require('node:fs');const p='artifacts/result-storage-notice/baseline.cjs';let s=fs.readFileSync(p,'utf8');s=s.replace("'.json':'application/json'", "'.json':'application/json','.svg':'image/svg+xml','.png':'image/png'");fs.writeFileSync('artifacts/result-storage-notice/baseline-corrected.cjs',s);

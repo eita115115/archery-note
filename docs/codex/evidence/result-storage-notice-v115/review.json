@@ -1,0 +1,15 @@
+{
+  "reviewer": "review_finish_metrics",
+  "initialHead": "c3863ed720388d58e40dfafd2aa3fa2131f025d3",
+  "final": {
+    "head": "20f19429609d1c6a0445ee5d6b63d2ec9a095e0c",
+    "critical": [],
+    "important": [],
+    "minor": [],
+    "staticMerge": true,
+    "requirementMismatch": false
+  },
+  "confirmed": ["immutable diff and related existing code", "focused 3passed24.6s", "saved 320light and 375dark screenshots", "final commit changes only test globalThis qualifications and formatting; production and assertions unchanged"],
+  "pendingAtReview": ["full generated E2E301", "Chrome/WebKit native8 including5000 synthetic records", "public CI and update acceptance"],
+  "restatement": "No new browser, network, build, tests, or edits by reviewer during restatement"
+}

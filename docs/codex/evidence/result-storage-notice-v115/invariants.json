@@ -1,0 +1,12 @@
+{
+  "base": "3443bd9d",
+  "old79Exact": true,
+  "acceptanceExact": true,
+  "sharedLockExact": true,
+  "version": 115,
+  "allRuntimeExceptNoticeAndVersionExact": true,
+  "styleOnlyFourNoticeRules": true,
+  "swActivationExact": true,
+  "dependenciesExact": true,
+  "indexManifestExact": true
+}

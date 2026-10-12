@@ -1,0 +1,141 @@
+diff --git a/scripts/50-record-view.js b/scripts/50-record-view.js
+index 671a4fcf..b24f9b55 100644
+--- a/scripts/50-record-view.js
++++ b/scripts/50-record-view.js
+@@ -30,7 +30,10 @@ function showView(v) {
+   const top = ui.scrollByView[v] || 0;
+   // A restored view needs real card heights, not content-visibility placeholders.
+   // Keep these nodes laid out until the next render; no delayed scroll can fight input.
+-  if (top > 0) Array.from(m.children).forEach((card) => { card.style.contentVisibility = "visible"; });
++  if (top > 0)
++    Array.from(m.children).forEach((card) => {
++      card.style.contentVisibility = "visible";
++    });
+   window.scrollTo({ top, left: 0, behavior: "instant" });
+ }
+ document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));
+@@ -241,20 +244,16 @@ function demoSession(id, date, offset, spread, score) {
+     purpose: "practice",
+     note: "架空のデモデータ",
+     ends: [
+-      pts
+-        .slice(0, 3)
+-        .map((p, i) => ({
+-          x: offset + p[0] * spread,
+-          y: p[1] * spread,
+-          s: score + (i === 1 ? -1 : 0),
+-        })),
+-      pts
+-        .slice(3)
+-        .map((p, i) => ({
+-          x: offset + p[0] * spread,
+-          y: p[1] * spread,
+-          s: score + (i === 1 ? -1 : 0),
+-        })),
++      pts.slice(0, 3).map((p, i) => ({
++        x: offset + p[0] * spread,
++        y: p[1] * spread,
++        s: score + (i === 1 ? -1 : 0),
++      })),
++      pts.slice(3).map((p, i) => ({
++        x: offset + p[0] * spread,
++        y: p[1] * spread,
++        s: score + (i === 1 ? -1 : 0),
++      })),
+     ],
+   };
+ }
+@@ -1484,7 +1483,8 @@ function revealChipsAboveDock(chipsBox, behavior) {
+ /* 微調整を閉じた後とエンド確定後だけ、的と残っている矢チップを操作できる位置へ戻す。
+    通常の再描画・タグ入力・タブ復帰のスクロール位置には介入しない。 */
+ function revealActiveTarget() {
+-  const target = $("#tgsvg"), dock = $("#activeActionDock");
++  const target = $("#tgsvg"),
++    dock = $("#activeActionDock");
+   if (!target || !dock) return;
+   // Offscreen content-visibility placeholders must not shift after measuring.
+   const card = target.closest(".card");
+@@ -1508,7 +1508,8 @@ function revealActiveTarget() {
+ /* 矢チップを選んだ時だけ、微調整パッドと選択解除を操作列の上へ出す。
+    入場モーション中にも余白を残し、連続微調整やメタ入力の位置は変えない。 */
+ function revealActiveCorrection() {
+-  const pad = $("#nudge .npad"), dock = $("#activeActionDock");
++  const pad = $("#nudge .npad"),
++    dock = $("#activeActionDock");
+   if (!pad || !dock) return;
+   const card = pad.closest(".card");
+   if (card) card.style.contentVisibility = "visible";
+@@ -1526,7 +1527,8 @@ function revealActiveCorrection() {
+   const notice = $("#toast");
+   if (notice && notice.classList.contains("show")) {
+     // Fixed-layout position avoids measuring the notice's entrance transform.
+-    const noticeTop = window.innerHeight - parseFloat(getComputedStyle(notice).bottom) - notice.offsetHeight;
++    const noticeTop =
++      window.innerHeight - parseFloat(getComputedStyle(notice).bottom) - notice.offsetHeight;
+     if (Number.isFinite(noticeTop)) bottom = Math.min(bottom, noticeTop - 16);
+   }
+   let delta = 0;
+@@ -1793,7 +1795,10 @@ function attachTargetInput(s) {
+     const cp = clientPoint(e);
+     if (!cp) return;
+     const touching = e.pointerType === "touch" || !!e.touches;
+-    if (touchBlocked || (touching && (e.isPrimary === false || e.touches?.length > 1 || (drag && cp.id !== drag.id)))) {
++    if (
++      touchBlocked ||
++      (touching && (e.isPrimary === false || e.touches?.length > 1 || (drag && cp.id !== drag.id)))
++    ) {
+       e.preventDefault();
+       blockTouch();
+       return;
+@@ -2013,9 +2018,6 @@ async function finishSession() {
+   }
+   nativePulse("success");
+   save();
+-  /* S3（ストレージ守りタスク・OPFS移行裁定 §4）: 満杯後にしか出ない既存の「保存容量が足りません」
+-     トーストより手前で、練習終了のたびに一度だけ早期警告する。ratio<0.8 のときは何もしない */
+-  maybeWarnStorageNearFull();
+   /* ゲーミフィケーション: セッション終了の表出点（gamification-final-design.md §5）。
+      ストリーク・目標は導出値なので保存前後の2回 computeStreak を呼ぶだけで済む。
+      編集モード（isEdit）は対象外——過去記録の書き換えでストリークや実績を騒がせない */
+@@ -2243,12 +2245,14 @@ function todaysResultHtml(result, sess, opts) {
+   if (result.stabilityTrend && result.stabilityTrend.available)
+     rows.push(todaysResultStabilityRowHtml(result.stabilityTrend));
+   else if (result.stabilityTrend && result.stabilityTrend.reason === "insufficient-arrows")
+-    rows.push(todaysResultRowHtml(
+-      "stability-pending",
+-      "ruler",
+-      "グルーピングの比較は保留",
+-      `${result.stabilityTrend.coordinateCount}本の座標 / 比較には3本以上必要です。`,
+-    ));
++    rows.push(
++      todaysResultRowHtml(
++        "stability-pending",
++        "ruler",
++        "グルーピングの比較は保留",
++        `${result.stabilityTrend.coordinateCount}本の座標 / 比較には3本以上必要です。`,
++      ),
++    );
+   if (result.personalBestDistance && result.personalBestDistance.available)
+     rows.push(todaysResultPersonalBestRowHtml(result.personalBestDistance, sess, dayLabel));
+   rows.push(todaysResultGrowthRowsHtml(result.growthStreaks, opts.growthBefore));
+@@ -2351,6 +2355,7 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
+       <div class="stat"><b>${perfectScoreCount(all, sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
+       <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
+     </div>
++    ${summaryStorageNoticeHtml()}
+     ${isNew && todaysResult ? todaysResultHtml(todaysResult, sess, { growthBefore }) : ""}
+     ${isNew && gam ? summaryGamificationHtml(gam) : ""}
+     ${roundGroupSummaryHtml(sess)}
+@@ -2382,6 +2387,12 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
+     <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
+   </div>`;
+   openModal(ovl, { escapeTarget: "#sumClose" });
++  const backupSettings = ovl.querySelector("#sumBackupSettings");
++  if (backupSettings)
++    backupSettings.onclick = () => {
++      openSettings();
++      $("#dExp").scrollIntoView({ block: "center" });
++    };
+   plotSession(sess, ovl.querySelector("#sumPlot"));
+   const mk = ovl.querySelector("#sumMark");
+   if (mk)

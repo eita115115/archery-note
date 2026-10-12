@@ -1,0 +1,66 @@
+
+Running 3 tests using 1 worker
+
+  x  1 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings (2.2s)
+  x  2 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings (2.2s)
+  x  3 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings (2.3s)
+
+
+  1) [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 918.96875
+    Received:    310.171875
+
+      61 |           expect(geometry.left).toBeGreaterThanOrEqual(0);
+      62 |           expect(geometry.right).toBeLessThanOrEqual(geometry.width);
+    > 63 |           expect(geometry.top).toBeGreaterThanOrEqual(geometry.statBottom);
+         |                                ^
+      64 |           expect(geometry.bottom).toBeLessThanOrEqual(geometry.nextTop);
+      65 |           await page.screenshot({ path: info.outputPath("capacity-result.png") });
+      66 |           // The persistent message survives the old five-second toast lifetime.
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\summary-storage-notice.spec.js:63:32
+
+    Error Context: ..\..\result-storage-notice\green-tests\summary-storage-notice-res-795a1-t-and-opens-backup-settings-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 1068.03125
+    Received:    264.453125
+
+      61 |           expect(geometry.left).toBeGreaterThanOrEqual(0);
+      62 |           expect(geometry.right).toBeLessThanOrEqual(geometry.width);
+    > 63 |           expect(geometry.top).toBeGreaterThanOrEqual(geometry.statBottom);
+         |                                ^
+      64 |           expect(geometry.bottom).toBeLessThanOrEqual(geometry.nextTop);
+      65 |           await page.screenshot({ path: info.outputPath("capacity-result.png") });
+      66 |           // The persistent message survives the old five-second toast lifetime.
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\summary-storage-notice.spec.js:63:32
+
+    Error Context: ..\..\result-storage-notice\green-tests\summary-storage-notice-res-c6fd2-t-and-opens-backup-settings-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings 
+
+    Error: expect(received).toBeGreaterThanOrEqual(expected)
+
+    Expected: >= 1030.9375
+    Received:    275
+
+      61 |           expect(geometry.left).toBeGreaterThanOrEqual(0);
+      62 |           expect(geometry.right).toBeLessThanOrEqual(geometry.width);
+    > 63 |           expect(geometry.top).toBeGreaterThanOrEqual(geometry.statBottom);
+         |                                ^
+      64 |           expect(geometry.bottom).toBeLessThanOrEqual(geometry.nextTop);
+      65 |           await page.screenshot({ path: info.outputPath("capacity-result.png") });
+      66 |           // The persistent message survives the old five-second toast lifetime.
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\summary-storage-notice.spec.js:63:32
+
+    Error Context: ..\..\result-storage-notice\green-tests\summary-storage-notice-res-4488a-t-and-opens-backup-settings-chromium\error-context.md
+
+  3 failed
+    [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings 
+    [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings 
+    [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings 

@@ -1,0 +1,87 @@
+
+Running 3 tests using 1 worker
+
+  x  1 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings (7.3s)
+  x  2 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings (7.2s)
+  x  3 [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings (7.2s)
+
+
+  1) [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('summary-storage-notice')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByTestId('summary-storage-notice')
+
+
+      42 |         if (ratio < 0.8) await expect(notice).toHaveCount(0);
+      43 |         else {
+    > 44 |           await expect(notice).toBeVisible();
+         |                                ^
+      45 |           await expect(notice).toContainText("容量が残り少なくなっています");
+      46 |           await expect(page.locator("#toast")).not.toContainText("容量");
+      47 |           const geometry = await notice.evaluate((el) => {
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\summary-storage-notice.spec.js:44:32
+
+    Error Context: ..\..\result-storage-notice\red-tests\summary-storage-notice-res-795a1-t-and-opens-backup-settings-chromium\error-context.md
+
+  2) [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('summary-storage-notice')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByTestId('summary-storage-notice')
+
+
+      42 |         if (ratio < 0.8) await expect(notice).toHaveCount(0);
+      43 |         else {
+    > 44 |           await expect(notice).toBeVisible();
+         |                                ^
+      45 |           await expect(notice).toContainText("容量が残り少なくなっています");
+      46 |           await expect(page.locator("#toast")).not.toContainText("容量");
+      47 |           const geometry = await notice.evaluate((el) => {
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\summary-storage-notice.spec.js:44:32
+
+    Error Context: ..\..\result-storage-notice\red-tests\summary-storage-notice-res-c6fd2-t-and-opens-backup-settings-chromium\error-context.md
+
+  3) [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByTestId('summary-storage-notice')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for getByTestId('summary-storage-notice')
+
+
+      42 |         if (ratio < 0.8) await expect(notice).toHaveCount(0);
+      43 |         else {
+    > 44 |           await expect(notice).toBeVisible();
+         |                                ^
+      45 |           await expect(notice).toContainText("容量が残り少なくなっています");
+      46 |           await expect(page.locator("#toast")).not.toContainText("容量");
+      47 |           const geometry = await notice.evaluate((el) => {
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\summary-storage-notice.spec.js:44:32
+
+    Error Context: ..\..\result-storage-notice\red-tests\summary-storage-notice-res-4488a-t-and-opens-backup-settings-chromium\error-context.md
+
+  3 failed
+    [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 320 › keeps capacity guidance in the result and opens backup settings 
+    [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 375 › keeps capacity guidance in the result and opens backup settings 
+    [chromium] › tests\e2e\summary-storage-notice.spec.js:10:5 › result storage notice 900 › keeps capacity guidance in the result and opens backup settings 

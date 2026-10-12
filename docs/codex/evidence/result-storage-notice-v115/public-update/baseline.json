@@ -1,0 +1,627 @@
+{
+  "from": 114,
+  "to": 115,
+  "before": {
+    "sessions": [
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-22",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.8000000000000003,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 4.6,
+              "y": 0,
+              "s": 7
+            },
+            {
+              "x": 1.4,
+              "y": -3.2,
+              "s": 8
+            }
+          ],
+          [
+            {
+              "x": 1.4,
+              "y": 3.2,
+              "s": 8
+            },
+            {
+              "x": -0.8399999999999999,
+              "y": 2.2399999999999998,
+              "s": 7
+            },
+            {
+              "x": 3.6399999999999997,
+              "y": -2.2399999999999998,
+              "s": 8
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-04",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.5999999999999999,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 3.2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.8,
+              "y": -2.4,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.8,
+              "y": 2.4,
+              "s": 9
+            },
+            {
+              "x": -0.8799999999999999,
+              "y": 1.68,
+              "s": 8
+            },
+            {
+              "x": 2.48,
+              "y": -1.68,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-11",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.4,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.3,
+              "y": -1.7,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.3,
+              "y": 1.7,
+              "s": 9
+            },
+            {
+              "x": -0.8899999999999999,
+              "y": 1.19,
+              "s": 8
+            },
+            {
+              "x": 1.49,
+              "y": -1.19,
+              "s": 9
+            }
+          ]
+        ]
+      }
+    ],
+    "active": {
+      "id": "mv4pc5ebs3qke",
+      "date": "2026-10-12",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [],
+      "cur": [
+        {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        }
+      ]
+    },
+    "setups": [],
+    "sightMarks": [],
+    "customRounds": []
+  },
+  "warmedAt": 1791776285689,
+  "warm": [
+    {
+      "file": "style.min.css",
+      "hash": "794546cac6a0ca3535b989b33037ac00513f14be4c81ab363d7b3e64b5652af5",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "2",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "14902",
+        "content-type": "text/css; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-11090\"",
+        "expires": "Mon, 12 Oct 2026 03:47:59 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "12d533b589d5a2c30979374828df41e7178ce0ed",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "6EE0:3AE903:EE9D4F:F6D282:6ACC5617",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.677400,VS0,VE0"
+      }
+    },
+    {
+      "file": "scripts/00-compat.js",
+      "hash": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "2",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "377",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-2a7\"",
+        "expires": "Mon, 12 Oct 2026 03:47:59 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "9a123e16d010fb9e5dc7cf549826a3b4948fb64e",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "80BA:1B633D:EC5EDA:F4945D:6ACC5617",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.677275,VS0,VE0"
+      }
+    },
+    {
+      "file": "scripts/10-storage-native.js",
+      "hash": "2b491eb04e863ea71cf402f4ef5c6a356068e3feb7fda25166c6b4509863aa25",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "12099",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-983a\"",
+        "expires": "Mon, 12 Oct 2026 03:47:59 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "7417d20e9f69a3e46fe66528152c1cf303991b8b",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "D402:1AA201:EE6891:F69C1E:6ACC5617",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.677545,VS0,VE1"
+      }
+    },
+    {
+      "file": "scripts/20-scoring.js",
+      "hash": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "2059",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-1712\"",
+        "expires": "Mon, 12 Oct 2026 03:47:59 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "96699ccbda8358c2fac80539d5e4bea5c3c79668",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "9AF6:20E7CA:EFBBF1:F7F149:6ACC5617",
+        "x-origin-cache": "HIT",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.678430,VS0,VE0"
+      }
+    },
+    {
+      "file": "scripts/30-target-svg.js",
+      "hash": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "1584",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-1326\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "708c4f8b508495b040b05dda197fb2af4cd5f80b",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "E524:5D2E:ED7D59:F5B505:6ACC5617",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.678774,VS0,VE1"
+      }
+    },
+    {
+      "file": "scripts/40-analysis-physics.js",
+      "hash": "60a02f18d3c3b55883335643e3add6a88abfbb7be9e65d978f28d0bb68bac34f",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "18131",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-ce47\"",
+        "expires": "Mon, 12 Oct 2026 03:47:59 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "ceebf6ea9a62a0cf31819cc3ce1599d6cc7ea710",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "D678:B3323:ECF7AD:F52F01:6ACC5616",
+        "x-origin-cache": "HIT",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.678749,VS0,VE1"
+      }
+    },
+    {
+      "file": "scripts/45-analysis-core.js",
+      "hash": "2466d97c44d656ea426b1b7fc898f16a5793ae841398bc58ff1b0d421dbf4312",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "4202",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-2d62\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "fc063750156a7a718bc6e42b307699dfc1b1eaa3",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "3CC8:0A65:DB0192:E2C08B:6ACC5616",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.678738,VS0,VE1"
+      }
+    },
+    {
+      "file": "scripts/46-form-core.js",
+      "hash": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "17845",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-117e3\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "079146820d425f23716fb737fe58095dd9a552a7",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "5AA2:1CE0C7:ED8F59:F5C2B2:6ACC5617",
+        "x-origin-cache": "HIT",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.678599,VS0,VE0"
+      }
+    },
+    {
+      "file": "scripts/47-form-view.js",
+      "hash": "77d70efa70a146065a669cb13683860239d58775e171d5fa90a58a8c645b52c2",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "14696",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-db0d\"",
+        "expires": "Mon, 12 Oct 2026 03:47:59 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "67843977b384957d3cbf4a8ad339277ec9a8195d",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "EEA0:3AE903:EE9D4F:F6D284:6ACC5617",
+        "x-origin-cache": "HIT",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.678599,VS0,VE0"
+      }
+    },
+    {
+      "file": "scripts/48-gamification.js",
+      "hash": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "2760",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-1b8b\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "1f09bc83b973c004978132d7a2080368c608965d",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "C542:1CE0C7:ED8F59:F5C2B3:6ACC5617",
+        "x-origin-cache": "HIT",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.678573,VS0,VE1"
+      }
+    },
+    {
+      "file": "scripts/49-todays-result.js",
+      "hash": "49b6545fdac438f2b6050adc22913e9c7d5926b48414a0243fe43a9bde3d047c",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "2679",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-21fa\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "ac8a6ed7cf1de753143ba02fb41a6383968ac4e1",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "5A0A:0A67:268396:280374:6ACC5617",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.679819,VS0,VE1"
+      }
+    },
+    {
+      "file": "scripts/50-record-view.js",
+      "hash": "b2bd929cefabbe5ee29cfa39f99768883b64b3b66428564fdf40068995a86d9c",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "28548",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-16cf4\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "718cdf61c6ecf55477e3cc060dd479fc9fe077db",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "7018:29701B:EE0A2C:F6405B:6ACC5617",
+        "x-origin-cache": "HIT",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.679819,VS0,VE0"
+      }
+    },
+    {
+      "file": "scripts/60-history-sight-view.js",
+      "hash": "89778a3154d83669b9828df30a0fad36fbd96c59a231a959e624b8ec7d596c5b",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "12021",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-9495\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "e7de163b842fcf4962e17b0276c36f3a5c11460e",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "89A4:351FED:ED4927:F57EE2:6ACC5617",
+        "x-origin-cache": "HIT",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.679772,VS0,VE1"
+      }
+    },
+    {
+      "file": "scripts/70-gear-settings.js",
+      "hash": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "21142",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-10a38\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "1d8db0525079a685e157348100d2be7108434e3a",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "D218:D302C:EFDEB6:F80D9B:6ACC5617",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.680610,VS0,VE0"
+      }
+    },
+    {
+      "file": "scripts/90-init.js",
+      "hash": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26",
+      "headers": {
+        "accept-ranges": "bytes",
+        "access-control-allow-origin": "*",
+        "age": "3",
+        "cache-control": "max-age=600",
+        "content-encoding": "gzip",
+        "content-length": "1192",
+        "content-type": "application/javascript; charset=utf-8",
+        "date": "Mon, 12 Oct 2026 03:38:02 GMT",
+        "etag": "W/\"6acc4fe5-b18\"",
+        "expires": "Mon, 12 Oct 2026 03:48:00 GMT",
+        "last-modified": "Mon, 12 Oct 2026 03:11:33 GMT",
+        "server": "GitHub.com",
+        "strict-transport-security": "max-age=31556952",
+        "vary": "Accept-Encoding",
+        "via": "1.1 varnish",
+        "x-cache": "HIT",
+        "x-cache-hits": "2",
+        "x-fastly-request-id": "339914196875ab5d1ac6202ff2d339e53eb43453",
+        "x-github-edge-region": "japaneast",
+        "x-github-request-id": "288C:18C811:EF876E:F7BF5D:6ACC5617",
+        "x-proxy-cache": "MISS",
+        "x-served-by": "cache-nrt-rjtf7700065-NRT",
+        "x-timer": "S1791776283.680523,VS0,VE0"
+      }
+    }
+  ]
+}

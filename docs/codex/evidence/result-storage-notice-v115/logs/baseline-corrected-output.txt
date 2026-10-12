@@ -1,0 +1,1 @@
+[{"width":320,"version":114,"usage":100,"warning":true,"covered":["推定・1本換算 10点（2026/10/6）・ 今日 10点",""],"errors":[]},{"width":375,"version":114,"usage":100,"warning":true,"covered":[""],"errors":[]}]

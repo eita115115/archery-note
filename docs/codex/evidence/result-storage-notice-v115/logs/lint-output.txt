@@ -1,0 +1,13 @@
+
+> archery-note@0.115.0 lint
+> eslint "*.js" "scripts/**/*.js" "tools/**/*.js" "tests/**/*.js" "eslint.config.mjs"
+
+
+C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\compact-js\sandbox\tests\e2e\summary-storage-notice.spec.js
+  37:36  error  'requestAnimationFrame' is not defined  no-undef
+  37:64  error  'requestAnimationFrame' is not defined  no-undef
+  41:43  error  'hasPendingSave' is not defined         no-undef
+  65:22  error  'innerWidth' is not defined             no-undef
+
+✖ 4 problems (4 errors, 0 warnings)
+

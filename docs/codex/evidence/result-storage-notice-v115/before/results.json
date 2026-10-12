@@ -1,0 +1,93 @@
+[
+  {
+    "width": 320,
+    "version": 114,
+    "storage": {
+      "mb": 7.84,
+      "capMb": 5,
+      "ratio": 1.568,
+      "percent": 100
+    },
+    "toast": "容量が残り少なくなっています。バックアップ保存をおすすめします",
+    "shown": true,
+    "toastRect": {
+      "x": 80,
+      "y": 402,
+      "width": 160,
+      "height": 74,
+      "top": 402,
+      "right": 240,
+      "bottom": 476,
+      "left": 80
+    },
+    "covered": [
+      {
+        "text": "推定・1本換算 10点（2026/10/6）・ 今日 10点",
+        "rect": {
+          "x": 44,
+          "y": 393.15625,
+          "width": 260,
+          "height": 15.390625,
+          "top": 393.15625,
+          "right": 304,
+          "bottom": 408.546875,
+          "left": 44
+        }
+      },
+      {
+        "text": "",
+        "rect": {
+          "x": 16,
+          "y": 426.546875,
+          "width": 288,
+          "height": 288,
+          "top": 426.546875,
+          "right": 304,
+          "bottom": 714.546875,
+          "left": 16
+        }
+      }
+    ],
+    "sessions": 5001,
+    "errors": []
+  },
+  {
+    "width": 375,
+    "version": 114,
+    "storage": {
+      "mb": 7.84,
+      "capMb": 5,
+      "ratio": 1.568,
+      "percent": 100
+    },
+    "toast": "容量が残り少なくなっています。バックアップ保存をおすすめします",
+    "shown": true,
+    "toastRect": {
+      "x": 93.75,
+      "y": 646,
+      "width": 187.5,
+      "height": 74,
+      "top": 646,
+      "right": 281.25,
+      "bottom": 720,
+      "left": 93.75
+    },
+    "covered": [
+      {
+        "text": "",
+        "rect": {
+          "x": 16,
+          "y": 380.828125,
+          "width": 343,
+          "height": 343,
+          "top": 380.828125,
+          "right": 359,
+          "bottom": 723.828125,
+          "left": 16
+        }
+      }
+    ],
+    "sessions": 5001,
+    "errors": []
+  }
+]

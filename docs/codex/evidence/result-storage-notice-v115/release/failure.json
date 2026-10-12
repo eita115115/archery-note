@@ -1,0 +1,156 @@
+{
+  "error": "AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n\n0 !== 1\n\n    at C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\result-storage-notice\\native.cjs:5:1863",
+  "rows": [
+    {
+      "id": "chromium-320-3",
+      "version": 115,
+      "usage": {
+        "mb": 0.01,
+        "capMb": 5,
+        "ratio": 0.002,
+        "percent": 0
+      },
+      "geometry": null,
+      "oldAllExact": true,
+      "newArrowsExact": true,
+      "scoreAgreement": true,
+      "reloadExact": true,
+      "downloads": [],
+      "errors": []
+    },
+    {
+      "id": "chromium-320-5000",
+      "version": 115,
+      "usage": {
+        "mb": 7.84,
+        "capMb": 5,
+        "ratio": 1.568,
+        "percent": 100
+      },
+      "geometry": {
+        "notice": {
+          "x": 16,
+          "y": 310.171875,
+          "width": 288,
+          "height": 130.5,
+          "top": 310.171875,
+          "right": 304,
+          "bottom": 440.671875,
+          "left": 16
+        },
+        "stat": {
+          "x": 16,
+          "y": 154.171875,
+          "width": 288,
+          "height": 144,
+          "top": 154.171875,
+          "right": 304,
+          "bottom": 298.171875,
+          "left": 16
+        },
+        "result": {
+          "x": 16,
+          "y": 452.671875,
+          "width": 288,
+          "height": 108.375,
+          "top": 452.671875,
+          "right": 304,
+          "bottom": 561.046875,
+          "left": 16
+        },
+        "width": 320,
+        "scrollWidth": 320
+      },
+      "oldAllExact": true,
+      "newArrowsExact": true,
+      "scoreAgreement": true,
+      "reloadExact": true,
+      "downloads": [],
+      "errors": []
+    },
+    {
+      "id": "chromium-375-3",
+      "version": 115,
+      "usage": {
+        "mb": 0.01,
+        "capMb": 5,
+        "ratio": 0.002,
+        "percent": 0
+      },
+      "geometry": null,
+      "oldAllExact": true,
+      "newArrowsExact": true,
+      "scoreAgreement": true,
+      "reloadExact": true,
+      "downloads": [],
+      "errors": []
+    },
+    {
+      "id": "chromium-375-5000",
+      "version": 115,
+      "usage": {
+        "mb": 7.84,
+        "capMb": 5,
+        "ratio": 1.568,
+        "percent": 100
+      },
+      "geometry": {
+        "notice": {
+          "x": 16,
+          "y": 264.453125,
+          "width": 343,
+          "height": 130.5,
+          "top": 264.453125,
+          "right": 359,
+          "bottom": 394.953125,
+          "left": 16
+        },
+        "stat": {
+          "x": 16,
+          "y": 183.453125,
+          "width": 343,
+          "height": 69,
+          "top": 183.453125,
+          "right": 359,
+          "bottom": 252.453125,
+          "left": 16
+        },
+        "result": {
+          "x": 16,
+          "y": 406.953125,
+          "width": 343,
+          "height": 108.375,
+          "top": 406.953125,
+          "right": 359,
+          "bottom": 515.328125,
+          "left": 16
+        },
+        "width": 375,
+        "scrollWidth": 375
+      },
+      "oldAllExact": true,
+      "newArrowsExact": true,
+      "scoreAgreement": true,
+      "reloadExact": true,
+      "downloads": [],
+      "errors": []
+    },
+    {
+      "id": "webkit-320-3",
+      "version": 115,
+      "usage": {
+        "mb": 0.01,
+        "capMb": 5,
+        "ratio": 0.002,
+        "percent": 0
+      },
+      "geometry": null,
+      "oldAllExact": true,
+      "newArrowsExact": true,
+      "scoreAgreement": true,
+      "reloadExact": true,
+      "downloads": [],
+      "errors": []
+    }
+  ]
+}

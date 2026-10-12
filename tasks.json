@@ -945,9 +945,9 @@
   {
     "id": "AN-080",
     "task": "結果の容量警告を持続する案内とバックアップ設定への導線へ変える",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "AN080完了、公開v115/source20f19429609d1c6a0445ee5d6b63d2ec9a095e0c、branch codex/result-storage-notice。結果に重なる容量toastをstatbar直後の持続案内へ移し、「バックアップ設定を開く」で既存設定のbackup操作を表示、閉じて結果へ戻る。自動exportなし、閾値0.8/容量計測/保存失敗toast/保存schema/採点半径/数学/全他runtime/依存/SWactivation保持、CSS4rulesとmarkers一括115。境界3red→3green24.6s、最終local全301passed3.8m/checkall/lint/format成功、ChromeWK320375明暗×通常3/実高容量5000のnative8は旧全件+新矢座標得点/reloadexact/errors0/非重複/設定往復/no download。初WK5000は実ratio.784で案内なしが正しくharness誤判定、元pageを保持して旧5000+新1/reloadexact回復、元fullerrorcollectorは取得不可を明記。別synthetic padding fixtureの訂正8は実ratio>=.8をassert。独立readonlyreview指摘なし（review時点full/native/public未確認）。CI38200540609 validate/deploy success/Linux301passed5.9m、実artifact11726175058/26safe、実Linux-public25byte/frozen19byte+6LF/first15-canonical14一致。元public114context publication462061ms、記録中更新保留→finish4/banner115/旧4exact→320native1/nudge3/解除/次矢2/offlineSWreload/finish5/result-analysis-history/reload/errors0。docs/codex/evidence/result-storage-notice-v115/代表13原寸PNGcopySHAexact、旧79tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。小画面dockラベル/履歴分析の情報設計/物理phone/VoiceOver/fieldINP/WKstrictOfflineは未完。",
     "dependencies": [
       "AN-079"
     ],

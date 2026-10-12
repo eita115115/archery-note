@@ -1,0 +1,226 @@
+{
+  "entry": [
+    {
+      "id": "u",
+      "rect": {
+        "x": 134,
+        "y": 118.0625,
+        "width": 52,
+        "height": 46,
+        "top": 118.0625,
+        "right": 186,
+        "bottom": 164.0625,
+        "left": 134
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "l",
+      "rect": {
+        "x": 76,
+        "y": 170.0625,
+        "width": 52,
+        "height": 46,
+        "top": 170.0625,
+        "right": 128,
+        "bottom": 216.0625,
+        "left": 76
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "del",
+      "rect": {
+        "x": 134,
+        "y": 170.0625,
+        "width": 52,
+        "height": 46,
+        "top": 170.0625,
+        "right": 186,
+        "bottom": 216.0625,
+        "left": 134
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "r",
+      "rect": {
+        "x": 192,
+        "y": 170.0625,
+        "width": 52,
+        "height": 46,
+        "top": 170.0625,
+        "right": 244,
+        "bottom": 216.0625,
+        "left": 192
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "d",
+      "rect": {
+        "x": 134,
+        "y": 222.0625,
+        "width": 52,
+        "height": 46,
+        "top": 222.0625,
+        "right": 186,
+        "bottom": 268.0625,
+        "left": 134
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "nudgeDone",
+      "rect": {
+        "x": 120.609375,
+        "y": 274.0625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 274.0625,
+        "right": 199.390625,
+        "bottom": 322.0625,
+        "left": 120.609375
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    }
+  ],
+  "exitGeometry": [
+    {
+      "id": "u",
+      "rect": {
+        "x": 134,
+        "y": 118.0625,
+        "width": 52,
+        "height": 46,
+        "top": 118.0625,
+        "right": 186,
+        "bottom": 164.0625,
+        "left": 134
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "l",
+      "rect": {
+        "x": 76,
+        "y": 170.0625,
+        "width": 52,
+        "height": 46,
+        "top": 170.0625,
+        "right": 128,
+        "bottom": 216.0625,
+        "left": 76
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "del",
+      "rect": {
+        "x": 134,
+        "y": 170.0625,
+        "width": 52,
+        "height": 46,
+        "top": 170.0625,
+        "right": 186,
+        "bottom": 216.0625,
+        "left": 134
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "r",
+      "rect": {
+        "x": 192,
+        "y": 170.0625,
+        "width": 52,
+        "height": 46,
+        "top": 170.0625,
+        "right": 244,
+        "bottom": 216.0625,
+        "left": 192
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "d",
+      "rect": {
+        "x": 134,
+        "y": 222.0625,
+        "width": 52,
+        "height": 46,
+        "top": 222.0625,
+        "right": 186,
+        "bottom": 268.0625,
+        "left": 134
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    },
+    {
+      "id": "nudgeDone",
+      "rect": {
+        "x": 120.609375,
+        "y": 274.0625,
+        "width": 78.78125,
+        "height": 48,
+        "top": 274.0625,
+        "right": 199.390625,
+        "bottom": 322.0625,
+        "left": 120.609375
+      },
+      "clear": true,
+      "above": -421,
+      "below": 392,
+      "scrollY": 475
+    }
+  ],
+  "curBefore": [
+    {
+      "x": 0,
+      "y": 0,
+      "s": 10,
+      "X": true
+    }
+  ],
+  "corrected": [
+    {
+      "x": 0.6000000000000001,
+      "y": 0,
+      "s": 10,
+      "X": true
+    }
+  ]
+}

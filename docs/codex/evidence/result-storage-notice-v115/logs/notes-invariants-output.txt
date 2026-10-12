@@ -1,0 +1,1 @@
+PASS old79/acceptance/sharedlock; runtime exact except notice/version; CSS only four notice rules; scoring/math/storage/schema/SW activation/deps/index/manifest unchanged

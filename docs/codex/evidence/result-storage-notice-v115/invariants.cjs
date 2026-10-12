@@ -1,0 +1,22 @@
+const fs=require('node:fs'),cp=require('node:child_process'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+const root='artifacts/result-storage-notice',tasks=JSON.parse(fs.readFileSync('tasks.json')),old=JSON.parse(fs.readFileSync(root+'/old-tasks.json'));
+assert.equal(tasks.length,80);assert.deepEqual(tasks.slice(0,79),old);assert.equal(tasks[79].acceptance,JSON.parse(fs.readFileSync(root+'/acceptance.json')));
+const norm=s=>s.replaceAll('\r\n','\n'),base=p=>norm(cp.execFileSync('git',['show','3443bd9d:'+p],{encoding:'utf8'})),current=p=>norm(fs.readFileSync(p,'utf8'));
+let ten=current('scripts/10-storage-native.js').replace('APP_VER=115','APP_VER=114');
+ten=ten.replace('80%以上で警告色に切り替える（結果の容量案内と同じ閾値）。','80%以上で警告色に切り替える（トースト警告 maybeWarnStorageNearFull と同じ閾値）。');
+const oldBlock=base('scripts/10-storage-native.js').match(/\/\* 練習終了時に一度だけ呼ぶ早期警告[\s\S]*?\n}\nfunction load\(\)/)[0];
+assert(/\/\* 結果の通常flowへ容量案内を置く。[\s\S]*?\n}\nfunction load\(\)/.test(ten));
+ten=ten.replace(/\/\* 結果の通常flowへ容量案内を置く。[\s\S]*?\n}\nfunction load\(\)/,oldBlock);assert.equal(ten,base('scripts/10-storage-native.js'));
+let fifty=current('scripts/50-record-view.js');
+const removed=base('scripts/50-record-view.js').match(/  \/\* S3（ストレージ守りタスク・OPFS移行裁定 §4）:[\s\S]*?  maybeWarnStorageNearFull\(\);\n/)[0];
+const savePoint='  nativePulse("success");\n  save();\n  /* ゲーミフィケーション: セッション終了の表出点';assert(fifty.includes(savePoint));fifty=fifty.replace(savePoint,'  nativePulse("success");\n  save();\n'+removed+'  /* ゲーミフィケーション: セッション終了の表出点');
+fifty=fifty.replace('    ${summaryStorageNoticeHtml()}\n','');
+const added='  const backupSettings = ovl.querySelector("#sumBackupSettings");\n  if (backupSettings) backupSettings.onclick = () => {\n    openSettings();\n    $("#dExp").scrollIntoView({ block: "center" });\n  };\n';assert(fifty.includes(added));fifty=fifty.replace(added,'');assert.equal(fifty,base('scripts/50-record-view.js'));
+for(const p of cp.execFileSync('git',['ls-files','scripts'],{encoding:'utf8'}).trim().split('\n'))if(!['scripts/10-storage-native.js','scripts/50-record-view.js'].includes(p))assert.equal(current(p),base(p),p);
+for(const p of ['index.html','manifest.json'])assert.equal(current(p),base(p),p);
+assert.equal(current('sw.js').replace('archery-note-v115','archery-note-v114'),base('sw.js'));
+for(const p of ['package.json','package-lock.json']){const a=JSON.parse(current(p)),b=JSON.parse(base(p));a.version=b.version;if(a.packages)a.packages[''].version=b.packages[''].version;assert.deepEqual(a,b,p);}
+const style=current('style.css'),lines=style.split('\n').filter(l=>l.startsWith('.summaryStorageNotice'));assert.equal(lines.length,4);assert.equal(style.split('\n').filter(l=>!l.startsWith('.summaryStorageNotice')).join('\n'),base('style.css'));
+const lock=crypto.createHash('sha256').update(fs.readFileSync('C:/Users/eita2/Projects/archery-note/node_modules/.package-lock.json')).digest('hex').toUpperCase();assert.equal(lock,'16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309');
+fs.writeFileSync(root+'/invariants.json',JSON.stringify({base:'3443bd9d',old79Exact:true,acceptanceExact:true,sharedLockExact:true,version:115,allRuntimeExceptNoticeAndVersionExact:true,styleOnlyFourNoticeRules:true,swActivationExact:true,dependenciesExact:true,indexManifestExact:true},null,2));
+console.log('PASS old79/acceptance/sharedlock; runtime exact except notice/version; CSS only four notice rules; scoring/math/storage/schema/SW activation/deps/index/manifest unchanged');
