@@ -36,10 +36,10 @@
     "test:e2e:dist": "node tools/test-distribution.js"
   },
   "devDependencies": {
-    "@capacitor/android": "^8.4.0",
+    "@capacitor/android": "~8.4.3",
     "@capacitor/cli": "^8.4.0",
     "@capacitor/core": "^8.4.0",
-    "@capacitor/ios": "^8.4.0",
+    "@capacitor/ios": "~8.4.3",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.61.1",
     "clean-css": "5.3.3",
