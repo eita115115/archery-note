@@ -1,0 +1,3262 @@
+{
+  "flows": 24,
+  "actions": 264,
+  "clock": "trusted capture to performance.now in second rAF callback; input queue/paint/fieldINP excluded",
+  "scope": "375 light/reduce,2 repetitions per variant/engine/history/CPU; before-after order reversed at rep1; no broad device percentile claim",
+  "comparisons": [
+    {
+      "condition": "chromium/3/1/finish",
+      "before": {
+        "n": 2,
+        "min": 47,
+        "median": 47,
+        "max": 47
+      },
+      "after": {
+        "n": 2,
+        "min": 47.39999985694885,
+        "median": 47.449999928474426,
+        "max": 47.5
+      },
+      "medianDeltaMs": 0.44999992847442627,
+      "percentDelta": 0.9574466563285755
+    },
+    {
+      "condition": "chromium/3/4/finish",
+      "before": {
+        "n": 2,
+        "min": 230.39999985694885,
+        "median": 240.44999992847443,
+        "max": 250.5
+      },
+      "after": {
+        "n": 2,
+        "min": 205.69999980926514,
+        "median": 207.79999995231628,
+        "max": 209.90000009536743
+      },
+      "medianDeltaMs": -32.64999997615814,
+      "percentDelta": -13.57870658593071
+    },
+    {
+      "condition": "chromium/5000/1/finish",
+      "before": {
+        "n": 2,
+        "min": 229.39999985694885,
+        "median": 230.35000002384186,
+        "max": 231.30000019073486
+      },
+      "after": {
+        "n": 2,
+        "min": 222.80000019073486,
+        "median": 224.30000007152557,
+        "max": 225.79999995231628
+      },
+      "medianDeltaMs": -6.049999952316284,
+      "percentDelta": -2.626438008113785
+    },
+    {
+      "condition": "chromium/5000/4/finish",
+      "before": {
+        "n": 2,
+        "min": 1001.2000000476837,
+        "median": 1032.3000000715256,
+        "max": 1063.4000000953674
+      },
+      "after": {
+        "n": 2,
+        "min": 931.6000001430511,
+        "median": 1043.4000000953674,
+        "max": 1155.2000000476837
+      },
+      "medianDeltaMs": 11.100000023841858,
+      "percentDelta": 1.075268819439379
+    },
+    {
+      "condition": "webkit/3/1/finish",
+      "before": {
+        "n": 2,
+        "min": 47,
+        "median": 48,
+        "max": 49
+      },
+      "after": {
+        "n": 2,
+        "min": 49,
+        "median": 52,
+        "max": 55
+      },
+      "medianDeltaMs": 4,
+      "percentDelta": 8.333333333333325
+    },
+    {
+      "condition": "webkit/5000/1/finish",
+      "before": {
+        "n": 2,
+        "min": 333,
+        "median": 346.5,
+        "max": 360
+      },
+      "after": {
+        "n": 2,
+        "min": 338,
+        "median": 338.5,
+        "max": 339
+      },
+      "medianDeltaMs": -8,
+      "percentDelta": -2.3088023088023046
+    }
+  ],
+  "summary": [
+    {
+      "condition": "before/chromium/3/1/start",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 27.700000047683716,
+        "median": 27.800000071525574,
+        "max": 27.90000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000068,
+        "median": 16.800000000000068,
+        "max": 16.800000000000068
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        14.799999952316284,
+        14.099999904632568
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/arrow1",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 24.200000047683716,
+        "median": 25.799999952316284,
+        "max": 27.399999856948853
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999955,
+        "median": 16.800000000000068,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        3.4000000953674316,
+        3.700000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/select",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.700000047683716,
+        "median": 29.850000023841858,
+        "max": 30
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999727,
+        "median": 16.799999999999727,
+        "max": 16.799999999999727
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        8.5,
+        8.299999952316284
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/nudge1",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.40000009536743,
+        "median": 29.550000071525574,
+        "max": 29.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999727,
+        "median": 16.799999999999955,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.9000000953674316,
+        1.9000000953674316
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/nudge2",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.90000009536743,
+        "median": 31.300000071525574,
+        "max": 31.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.5999999046325684,
+        1.6000001430511475
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/nudge3",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.699999809265137,
+        "median": 29.949999928474426,
+        "max": 30.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.4000000953674316,
+        1.8999998569488525
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/deselect",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 31.09999990463257,
+        "median": 31.399999856948853,
+        "max": 31.699999809265137
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.5999999046325684,
+        1.7999999523162842
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/arrow2",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.799999952316284,
+        "median": 31.34999990463257,
+        "max": 31.899999856948853
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.3000001907348633,
+        2.299999952316284
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/end",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.199999809265137,
+        "median": 29.34999990463257,
+        "max": 29.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 16.80000000000109,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        5.799999952316284,
+        5.700000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/arrow3",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.700000047683716,
+        "median": 30.799999952316284,
+        "max": 30.899999856948853
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.800000000000182,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        3.5999999046325684,
+        2.700000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/3/1/finish",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu1-r0",
+        "before-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 47,
+        "median": 47,
+        "max": 47
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 25,
+        "max": 33.19999999999891
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        44.39999985694885,
+        44.40000009536743
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/start",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.200000047683716,
+        "median": 29.5,
+        "max": 29.799999952316284
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999955,
+        "median": 16.80000000000001,
+        "max": 16.800000000000068
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        14.299999952316284,
+        14.700000047683716
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/arrow1",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 27.90000009536743,
+        "median": 28.149999976158142,
+        "max": 28.399999856948853
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        3.700000047683716,
+        3.3000001907348633
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/select",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 28.799999952316284,
+        "median": 29.699999928474426,
+        "max": 30.59999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        8.299999952316284,
+        8.299999952316284
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/nudge1",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 28.699999809265137,
+        "median": 29.99999988079071,
+        "max": 31.299999952316284
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2,
+        1.7999999523162842
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/nudge2",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.90000009536743,
+        "median": 30,
+        "max": 30.09999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.699999999999818,
+        "median": 16.75,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.5,
+        1.6999998092651367
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/nudge3",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.100000143051147,
+        "median": 30.850000023841858,
+        "max": 31.59999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.700000000000728,
+        "median": 16.750000000000455,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.5,
+        1.5
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/deselect",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29,
+        "median": 29.799999952316284,
+        "max": 30.59999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.7999999523162842,
+        1.7999999523162842
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/arrow2",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.100000143051147,
+        "median": 30.75,
+        "max": 31.399999856948853
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.3999998569488525,
+        2.299999952316284
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/end",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.100000143051147,
+        "median": 29.15000009536743,
+        "max": 29.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 16.80000000000109,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        5,
+        5.400000095367432
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/arrow3",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.299999952316284,
+        "median": 30.5,
+        "max": 30.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 16.80000000000109,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.9000000953674316,
+        3.5
+      ]
+    },
+    {
+      "condition": "after/chromium/3/1/finish",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu1-r0",
+        "after-chromium-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 47.39999985694885,
+        "median": 47.449999928474426,
+        "max": 47.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.700000000000728,
+        "median": 25.050000000000182,
+        "max": 33.399999999999636
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        44.69999980926514,
+        44.69999980926514
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/start",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 93.40000009536743,
+        "median": 104.39999997615814,
+        "max": 115.39999985694885
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 83.30000000000001,
+        "median": 91.70000000000002,
+        "max": 100.10000000000002
+      },
+      "longTasks": [
+        103,
+        85
+      ],
+      "eventProcessingMs": [
+        91.79999995231628,
+        75.5
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/arrow1",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.5,
+        "median": 30.950000047683716,
+        "max": 31.40000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.299999999999955,
+        "median": 33.299999999999955,
+        "max": 33.299999999999955
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        19.600000143051147,
+        19
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/select",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 50.200000047683716,
+        "median": 51.15000009536743,
+        "max": 52.10000014305115
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.40000000000009,
+        "median": 33.40000000000009,
+        "max": 33.40000000000009
+      },
+      "longTasks": [
+        50
+      ],
+      "eventProcessingMs": [
+        42.59999990463257,
+        40.700000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/nudge1",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 20.399999856948853,
+        "median": 21.74999988079071,
+        "max": 23.09999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999727,
+        "median": 16.799999999999955,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        9.199999809265137,
+        9
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/nudge2",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 22.5,
+        "median": 23.350000023841858,
+        "max": 24.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        8.899999856948853,
+        9.5
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/nudge3",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23,
+        "median": 23.550000071525574,
+        "max": 24.100000143051147
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.700000000000728,
+        "median": 16.750000000000455,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        7.900000095367432,
+        8.299999952316284
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/deselect",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 20.899999856948853,
+        "median": 21.049999952316284,
+        "max": 21.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        9.900000095367432,
+        8.799999952316284
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/arrow2",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 25.09999990463257,
+        "median": 26.899999856948853,
+        "max": 28.699999809265137
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.700000000000728,
+        "median": 16.75000000000091,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        17,
+        10.599999904632568
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/end",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 38.09999990463257,
+        "median": 39.299999952316284,
+        "max": 40.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 25.100000000001273,
+        "max": 33.400000000001455
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        24.5,
+        24.59999990463257
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/arrow3",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23.09999990463257,
+        "median": 25.649999976158142,
+        "max": 28.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.799999999999272,
+        "max": 16.799999999999272
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        19.5,
+        14.200000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/3/4/finish",
+      "samples": [
+        "before-chromium-375-reduce-3-cpu4-r0",
+        "before-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 230.39999985694885,
+        "median": 240.44999992847443,
+        "max": 250.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 216.8000000000011,
+        "median": 225.05000000000018,
+        "max": 233.29999999999927
+      },
+      "longTasks": [
+        226,
+        248
+      ],
+      "eventProcessingMs": [
+        215.09999990463257,
+        234.79999995231628
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/start",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 87.59999990463257,
+        "median": 110.24999988079071,
+        "max": 132.89999985694885
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 83.29999999999995,
+        "median": 99.94999999999999,
+        "max": 116.60000000000002
+      },
+      "longTasks": [
+        116,
+        78
+      ],
+      "eventProcessingMs": [
+        105,
+        68.79999995231628
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/arrow1",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30,
+        "median": 30.300000071525574,
+        "max": 30.600000143051147
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.299999999999955,
+        "median": 33.30000000000007,
+        "max": 33.30000000000018
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        18.59999990463257,
+        19.40000009536743
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/select",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 48.10000014305115,
+        "median": 48.90000009536743,
+        "max": 49.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.20000000000027,
+        "median": 33.25,
+        "max": 33.29999999999973
+      },
+      "longTasks": [
+        50
+      ],
+      "eventProcessingMs": [
+        38.80000019073486,
+        40.59999990463257
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/nudge1",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23.199999809265137,
+        "median": 23.59999990463257,
+        "max": 24
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        9.200000047683716,
+        9.099999904632568
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/nudge2",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 22.300000190734863,
+        "median": 22.350000143051147,
+        "max": 22.40000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        7.799999952316284,
+        7.6000001430511475
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/nudge3",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 22.899999856948853,
+        "median": 23.949999928474426,
+        "max": 25
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        7.200000047683716,
+        7
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/deselect",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 22,
+        "median": 22.799999952316284,
+        "max": 23.59999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        9.800000190734863,
+        8.5
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/arrow2",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 20.299999952316284,
+        "median": 22.399999976158142,
+        "max": 24.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 16.80000000000109,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        11,
+        10.600000143051147
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/end",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 34,
+        "median": 34.800000071525574,
+        "max": 35.60000014305115
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.800000000000182,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        24,
+        24.399999856948853
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/arrow3",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 24.40000009536743,
+        "median": 24.75,
+        "max": 25.09999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.800000000000182,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        14.700000047683716,
+        15.200000047683716
+      ]
+    },
+    {
+      "condition": "after/chromium/3/4/finish",
+      "samples": [
+        "after-chromium-375-reduce-3-cpu4-r0",
+        "after-chromium-375-reduce-3-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 205.69999980926514,
+        "median": 207.79999995231628,
+        "max": 209.90000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 183.29999999999927,
+        "median": 191.64999999999964,
+        "max": 200
+      },
+      "longTasks": [
+        211,
+        205
+      ],
+      "eventProcessingMs": [
+        196.40000009536743,
+        193.19999980926514
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/start",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 48.30000019073486,
+        "median": 50.450000047683716,
+        "max": 52.59999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.29999999999973,
+        "median": 33.34999999999991,
+        "max": 33.40000000000009
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        42.700000047683716,
+        48.09999990463257
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/arrow1",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 28.600000143051147,
+        "median": 29.550000071525574,
+        "max": 30.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        3.9000000953674316,
+        3.6000001430511475
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/select",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30,
+        "median": 30.050000071525574,
+        "max": 30.100000143051147
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.700000000000728,
+        "median": 16.75,
+        "max": 16.799999999999272
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        8.600000143051147,
+        8.400000095367432
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/nudge1",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.699999809265137,
+        "median": 30.34999990463257,
+        "max": 31
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.800000000000182,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.0999999046325684,
+        2.1999998092651367
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/nudge2",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29,
+        "median": 29.5,
+        "max": 30
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 16.80000000000109,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.7000000476837158,
+        2
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/nudge3",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.5,
+        "median": 29.799999952316284,
+        "max": 30.09999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.800000000000182,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2,
+        2
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/deselect",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 28.40000009536743,
+        "median": 29.450000047683716,
+        "max": 30.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.800000000000182,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2,
+        1.7999999523162842
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/arrow2",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.40000009536743,
+        "median": 30.450000047683716,
+        "max": 31.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.700000000000728,
+        "median": 16.75000000000182,
+        "max": 16.80000000000291
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.4000000953674316,
+        2.8000001907348633
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/end",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 46.09999990463257,
+        "median": 46.449999928474426,
+        "max": 46.799999952316284
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.799999999999272,
+        "max": 16.799999999999272
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        24.799999952316284,
+        23.700000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/arrow3",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.200000047683716,
+        "median": 30.300000071525574,
+        "max": 31.40000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000291,
+        "median": 25.05000000000109,
+        "max": 33.29999999999927
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        3.200000047683716,
+        3.1000001430511475
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/1/finish",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu1-r0",
+        "before-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 229.39999985694885,
+        "median": 230.35000002384186,
+        "max": 231.30000019073486
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 200,
+        "median": 208.3000000000029,
+        "max": 216.60000000000582
+      },
+      "longTasks": [
+        227,
+        230
+      ],
+      "eventProcessingMs": [
+        226.29999995231628,
+        228.5
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/start",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 50.60000014305115,
+        "median": 51.15000009536743,
+        "max": 51.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.29999999999973,
+        "median": 33.34999999999991,
+        "max": 33.40000000000009
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        45.09999990463257,
+        46.90000009536743
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/arrow1",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 27.600000143051147,
+        "median": 29.15000009536743,
+        "max": 30.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.800000000000182,
+        "median": 16.800000000000182,
+        "max": 16.800000000000182
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        4.299999952316284,
+        4
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/select",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 28,
+        "median": 28.5,
+        "max": 29
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 16.80000000000109,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        8.5,
+        8.600000143051147
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/nudge1",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.300000190734863,
+        "median": 30.350000143051147,
+        "max": 30.40000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.799999999999272,
+        "max": 16.799999999999272
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.1000001430511475,
+        2.4000000953674316
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/nudge2",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 28.40000009536743,
+        "median": 29.550000071525574,
+        "max": 30.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.800000000000182,
+        "max": 16.80000000000109
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        1.9000000953674316,
+        1.8000001907348633
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/nudge3",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.09999990463257,
+        "median": 30.59999990463257,
+        "max": 31.09999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000109,
+        "median": 25.100000000000364,
+        "max": 33.399999999999636
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.299999952316284,
+        2
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/deselect",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.199999809265137,
+        "median": 29.99999988079071,
+        "max": 30.799999952316284
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.80000000000109,
+        "max": 16.80000000000291
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.5999999046325684,
+        2
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/arrow2",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29,
+        "median": 29.59999990463257,
+        "max": 30.199999809265137
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.799999999999272,
+        "max": 16.799999999999272
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        2.799999952316284,
+        2.6000001430511475
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/end",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.799999952316284,
+        "median": 39.35000002384186,
+        "max": 47.90000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.80000000000109,
+        "max": 16.80000000000291
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        28,
+        24.399999856948853
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/arrow3",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 29.40000009536743,
+        "median": 29.649999976158142,
+        "max": 29.899999856948853
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.80000000000291,
+        "median": 16.80000000000291,
+        "max": 16.80000000000291
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        3.4000000953674316,
+        3.1999998092651367
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/1/finish",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu1-r0",
+        "after-chromium-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 222.80000019073486,
+        "median": 224.30000007152557,
+        "max": 225.79999995231628
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 200,
+        "median": 200.0500000000029,
+        "max": 200.10000000000582
+      },
+      "longTasks": [
+        221,
+        224
+      ],
+      "eventProcessingMs": [
+        219.80000019073486,
+        222.70000004768372
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/start",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 210.5,
+        "median": 220.14999997615814,
+        "max": 229.79999995231628
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 200.10000000000036,
+        "median": 208.3499999999999,
+        "max": 216.59999999999945
+      },
+      "longTasks": [
+        196,
+        146,
+        221,
+        131
+      ],
+      "eventProcessingMs": [
+        192.59999990463257,
+        212
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/arrow1",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 31.59999990463257,
+        "median": 37.74999988079071,
+        "max": 43.89999985694885
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.60000000000036,
+        "median": 66.64999999999964,
+        "max": 66.69999999999891
+      },
+      "longTasks": [
+        69,
+        74
+      ],
+      "eventProcessingMs": [
+        18.5,
+        19.100000143051147
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/select",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 48.69999980926514,
+        "median": 51.84999990463257,
+        "max": 55
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.29999999999927,
+        "median": 33.29999999999927,
+        "max": 33.29999999999927
+      },
+      "longTasks": [
+        53
+      ],
+      "eventProcessingMs": [
+        39.299999952316284,
+        43.700000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/nudge1",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 19.799999952316284,
+        "median": 20.699999928474426,
+        "max": 21.59999990463257
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 49.900000000001455,
+        "median": 58.25000000000182,
+        "max": 66.60000000000218
+      },
+      "longTasks": [
+        69,
+        79
+      ],
+      "eventProcessingMs": [
+        11.5,
+        10.600000143051147
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/nudge2",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23.40000009536743,
+        "median": 24.100000023841858,
+        "max": 24.799999952316284
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.60000000000218,
+        "median": 66.65000000000146,
+        "max": 66.70000000000073
+      },
+      "longTasks": [
+        77,
+        78
+      ],
+      "eventProcessingMs": [
+        10.199999809265137,
+        8
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/nudge3",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23.799999952316284,
+        "median": 23.899999976158142,
+        "max": 24
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.60000000000218,
+        "median": 66.70000000000073,
+        "max": 66.79999999999927
+      },
+      "longTasks": [
+        71,
+        82
+      ],
+      "eventProcessingMs": [
+        9,
+        9.5
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/deselect",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 21.899999856948853,
+        "median": 22.049999952316284,
+        "max": 22.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.799999999999272,
+        "max": 16.799999999999272
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        9.700000047683716,
+        8.899999856948853
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/arrow2",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 20.09999990463257,
+        "median": 21.449999928474426,
+        "max": 22.799999952316284
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.69999999999709,
+        "median": 75.04999999999927,
+        "max": 83.40000000000146
+      },
+      "longTasks": [
+        76,
+        83
+      ],
+      "eventProcessingMs": [
+        11.299999952316284,
+        10.200000047683716
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/end",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 117,
+        "median": 117.05000007152557,
+        "max": 117.10000014305115
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 99.90000000000146,
+        "median": 99.95000000000073,
+        "max": 100
+      },
+      "longTasks": [
+        110,
+        117
+      ],
+      "eventProcessingMs": [
+        106.40000009536743,
+        108.60000014305115
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/arrow3",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.700000047683716,
+        "median": 30.950000047683716,
+        "max": 31.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.5,
+        "median": 66.60000000000218,
+        "max": 66.70000000000437
+      },
+      "longTasks": [
+        71,
+        94
+      ],
+      "eventProcessingMs": [
+        16.399999856948853,
+        16.90000009536743
+      ]
+    },
+    {
+      "condition": "before/chromium/5000/4/finish",
+      "samples": [
+        "before-chromium-375-reduce-5000-cpu4-r0",
+        "before-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 1001.2000000476837,
+        "median": 1032.3000000715256,
+        "max": 1063.4000000953674
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 983.2999999999956,
+        "median": 1016.5999999999949,
+        "max": 1049.8999999999942
+      },
+      "longTasks": [
+        991,
+        1054
+      ],
+      "eventProcessingMs": [
+        985.7000000476837,
+        1043
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/start",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 230.79999995231628,
+        "median": 240.70000004768372,
+        "max": 250.60000014305115
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 216.60000000000036,
+        "median": 225.00000000000045,
+        "max": 233.40000000000055
+      },
+      "longTasks": [
+        224,
+        131,
+        215,
+        135
+      ],
+      "eventProcessingMs": [
+        215.20000004768372,
+        211.29999995231628
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/arrow1",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 30.5,
+        "median": 30.75,
+        "max": 31
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.60000000000036,
+        "median": 74.94999999999982,
+        "max": 83.29999999999927
+      },
+      "longTasks": [
+        96,
+        77
+      ],
+      "eventProcessingMs": [
+        20.899999856948853,
+        18.800000190734863
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/select",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 48,
+        "median": 54.10000002384186,
+        "max": 60.200000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 33.29999999999927,
+        "median": 33.350000000000364,
+        "max": 33.400000000001455
+      },
+      "longTasks": [
+        54
+      ],
+      "eventProcessingMs": [
+        37.60000014305115,
+        45
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/nudge1",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 22.800000190734863,
+        "median": 23.75000011920929,
+        "max": 24.700000047683716
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.59999999999854,
+        "median": 66.59999999999854,
+        "max": 66.59999999999854
+      },
+      "longTasks": [
+        78,
+        78
+      ],
+      "eventProcessingMs": [
+        10.300000190734863,
+        10.100000143051147
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/nudge2",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23.299999952316284,
+        "median": 23.850000023841858,
+        "max": 24.40000009536743
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.59999999999854,
+        "median": 66.60000000000036,
+        "max": 66.60000000000218
+      },
+      "longTasks": [
+        79,
+        70
+      ],
+      "eventProcessingMs": [
+        8,
+        7.799999952316284
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/nudge3",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23.5,
+        "median": 23.5,
+        "max": 23.5
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 50,
+        "median": 66.70000000000073,
+        "max": 83.40000000000146
+      },
+      "longTasks": [
+        91,
+        66
+      ],
+      "eventProcessingMs": [
+        8.900000095367432,
+        9.200000047683716
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/deselect",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 20.700000047683716,
+        "median": 21.350000023841858,
+        "max": 22
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 16.799999999999272,
+        "median": 16.80000000000109,
+        "max": 16.80000000000291
+      },
+      "longTasks": [],
+      "eventProcessingMs": [
+        9.400000095367432,
+        9.099999904632568
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/arrow2",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 20.09999990463257,
+        "median": 28.24999988079071,
+        "max": 36.39999985694885
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 50.099999999998545,
+        "median": 58.39999999999782,
+        "max": 66.69999999999709
+      },
+      "longTasks": [
+        79,
+        67
+      ],
+      "eventProcessingMs": [
+        11.799999952316284,
+        27.5
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/end",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 120.20000004768372,
+        "median": 128.29999995231628,
+        "max": 136.39999985694885
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 99.90000000000146,
+        "median": 108.29999999999927,
+        "max": 116.69999999999709
+      },
+      "longTasks": [
+        133,
+        120
+      ],
+      "eventProcessingMs": [
+        119.89999985694885,
+        112.5
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/arrow3",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 31.5,
+        "median": 32.14999997615814,
+        "max": 32.799999952316284
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 66.59999999999854,
+        "median": 74.94999999999709,
+        "max": 83.29999999999563
+      },
+      "longTasks": [
+        84,
+        80
+      ],
+      "eventProcessingMs": [
+        20,
+        15.5
+      ]
+    },
+    {
+      "condition": "after/chromium/5000/4/finish",
+      "samples": [
+        "after-chromium-375-reduce-5000-cpu4-r0",
+        "after-chromium-375-reduce-5000-cpu4-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 931.6000001430511,
+        "median": 1043.4000000953674,
+        "max": 1155.2000000476837
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 916.5999999999985,
+        "median": 1025,
+        "max": 1133.4000000000015
+      },
+      "longTasks": [
+        927,
+        1146
+      ],
+      "eventProcessingMs": [
+        915.2000000476837,
+        1133.9000000953674
+      ]
+    },
+    {
+      "condition": "before/webkit/3/1/start",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23,
+        "median": 30,
+        "max": 37
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 27,
+        "median": 28,
+        "max": 29
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        15,
+        14
+      ]
+    },
+    {
+      "condition": "before/webkit/3/1/arrow1",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 14,
+        "median": 15.5,
+        "max": 17
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 27,
+        "median": 28,
+        "max": 29
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/select",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 26,
+        "median": 26,
+        "max": 26
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 28,
+        "median": 29,
+        "max": 30
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/nudge1",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 11,
+        "median": 13,
+        "max": 15
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 23,
+        "median": 27.5,
+        "max": 32
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/nudge2",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 12,
+        "median": 13.5,
+        "max": 15
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 22,
+        "median": 22,
+        "max": 22
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/nudge3",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 11,
+        "median": 13.5,
+        "max": 16
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 21,
+        "median": 23,
+        "max": 25
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/deselect",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 11,
+        "median": 13,
+        "max": 15
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 21,
+        "median": 22.5,
+        "max": 24
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/arrow2",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 13,
+        "median": 16.5,
+        "max": 20
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 20,
+        "median": 22,
+        "max": 24
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/end",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 15,
+        "median": 17.5,
+        "max": 20
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 19,
+        "median": 19.5,
+        "max": 20
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/arrow3",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 11,
+        "median": 12.5,
+        "max": 14
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 23,
+        "median": 25.5,
+        "max": 28
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/3/1/finish",
+      "samples": [
+        "before-webkit-375-reduce-3-cpu1-r0",
+        "before-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 47,
+        "median": 48,
+        "max": 49
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 38,
+        "median": 46,
+        "max": 54
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        27,
+        27
+      ]
+    },
+    {
+      "condition": "after/webkit/3/1/start",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 27,
+        "median": 32,
+        "max": 37
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 25,
+        "median": 27,
+        "max": 29
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        13,
+        13
+      ]
+    },
+    {
+      "condition": "after/webkit/3/1/arrow1",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 14,
+        "median": 16,
+        "max": 18
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 27,
+        "median": 29,
+        "max": 31
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/select",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 17,
+        "median": 17,
+        "max": 17
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 27,
+        "median": 29,
+        "max": 31
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/nudge1",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 15,
+        "median": 15.5,
+        "max": 16
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 22,
+        "median": 23,
+        "max": 24
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/nudge2",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 10,
+        "median": 15,
+        "max": 20
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 24,
+        "median": 26.5,
+        "max": 29
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/nudge3",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 12,
+        "median": 16,
+        "max": 20
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 18,
+        "median": 19,
+        "max": 20
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/deselect",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 9,
+        "median": 14.5,
+        "max": 20
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 21,
+        "median": 24.5,
+        "max": 28
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/arrow2",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 16,
+        "median": 17.5,
+        "max": 19
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 24,
+        "median": 24,
+        "max": 24
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/end",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 23,
+        "median": 23,
+        "max": 23
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 18,
+        "median": 23,
+        "max": 28
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/arrow3",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 12,
+        "median": 14,
+        "max": 16
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 21,
+        "median": 25.5,
+        "max": 30
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/3/1/finish",
+      "samples": [
+        "after-webkit-375-reduce-3-cpu1-r0",
+        "after-webkit-375-reduce-3-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 49,
+        "median": 52,
+        "max": 55
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 40,
+        "median": 40,
+        "max": 40
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        28,
+        27
+      ]
+    },
+    {
+      "condition": "before/webkit/5000/1/start",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 85,
+        "median": 90.5,
+        "max": 96
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 58,
+        "median": 63.5,
+        "max": 69
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        27,
+        26
+      ]
+    },
+    {
+      "condition": "before/webkit/5000/1/arrow1",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 14,
+        "median": 14,
+        "max": 14
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 38,
+        "median": 43.5,
+        "max": 49
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/select",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 15,
+        "median": 15,
+        "max": 15
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 18,
+        "median": 18,
+        "max": 18
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/nudge1",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 11,
+        "median": 15.5,
+        "max": 20
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 55,
+        "median": 61,
+        "max": 67
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/nudge2",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 11,
+        "median": 12.5,
+        "max": 14
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 52,
+        "median": 60.5,
+        "max": 69
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/nudge3",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 12,
+        "median": 14.5,
+        "max": 17
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 85,
+        "median": 94,
+        "max": 103
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/deselect",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 16,
+        "median": 17,
+        "max": 18
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 18,
+        "median": 19.5,
+        "max": 21
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/arrow2",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 11,
+        "median": 15.5,
+        "max": 20
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 104,
+        "median": 106.5,
+        "max": 109
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/end",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 75,
+        "median": 81,
+        "max": 87
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 55,
+        "median": 60,
+        "max": 65
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        20,
+        20
+      ]
+    },
+    {
+      "condition": "before/webkit/5000/1/arrow3",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 12,
+        "median": 12,
+        "max": 12
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 77,
+        "median": 85,
+        "max": 93
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "before/webkit/5000/1/finish",
+      "samples": [
+        "before-webkit-375-reduce-5000-cpu1-r0",
+        "before-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 333,
+        "median": 346.5,
+        "max": 360
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 313,
+        "median": 315.5,
+        "max": 318
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        291,
+        285
+      ]
+    },
+    {
+      "condition": "after/webkit/5000/1/start",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 87,
+        "median": 91,
+        "max": 95
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 58,
+        "median": 61.5,
+        "max": 65
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        30,
+        28
+      ]
+    },
+    {
+      "condition": "after/webkit/5000/1/arrow1",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 20,
+        "median": 20.5,
+        "max": 21
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 57,
+        "median": 61,
+        "max": 65
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/select",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 18,
+        "median": 21,
+        "max": 24
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 19,
+        "median": 22.5,
+        "max": 26
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/nudge1",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 14,
+        "median": 17.5,
+        "max": 21
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 54,
+        "median": 81,
+        "max": 108
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/nudge2",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 18,
+        "median": 18.5,
+        "max": 19
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 108,
+        "median": 109.5,
+        "max": 111
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/nudge3",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 10,
+        "median": 10.5,
+        "max": 11
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 103,
+        "median": 104.5,
+        "max": 106
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/deselect",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 9,
+        "median": 11,
+        "max": 13
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 19,
+        "median": 20,
+        "max": 21
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/arrow2",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 15,
+        "median": 15.5,
+        "max": 16
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 65,
+        "median": 85.5,
+        "max": 106
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/end",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 77,
+        "median": 78.5,
+        "max": 80
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 54,
+        "median": 57,
+        "max": 60
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        19,
+        23
+      ]
+    },
+    {
+      "condition": "after/webkit/5000/1/arrow3",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 14,
+        "median": 18,
+        "max": 22
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 65,
+        "median": 87,
+        "max": 109
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": []
+    },
+    {
+      "condition": "after/webkit/5000/1/finish",
+      "samples": [
+        "after-webkit-375-reduce-5000-cpu1-r0",
+        "after-webkit-375-reduce-5000-cpu1-r1"
+      ],
+      "twoRafMs": {
+        "n": 2,
+        "min": 338,
+        "median": 338.5,
+        "max": 339
+      },
+      "maxFrameGapMs": {
+        "n": 2,
+        "min": 299,
+        "median": 300,
+        "max": 301
+      },
+      "longTasks": "unsupported",
+      "eventProcessingMs": [
+        272,
+        271
+      ]
+    }
+  ]
+}

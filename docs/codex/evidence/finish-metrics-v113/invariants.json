@@ -1,0 +1,11 @@
+{
+  "base": "82d4681e5cbe394129abea69fa68d059871f2753",
+  "version": 113,
+  "onlyScopedFinishBlockChanged": true,
+  "allOtherRuntimeExactExceptVersion": true,
+  "globalMetricsSignatureAndDBREVExact": true,
+  "mathScoringStorageSchemaDependenciesSWActivationUnchanged": true,
+  "old77TaskObjectsExact": true,
+  "allAcceptanceExact": true,
+  "sharedLock": "16F9BA6219DA31278CED98C0C742013B4A5AAEA63059E4702E86756702A23309"
+}

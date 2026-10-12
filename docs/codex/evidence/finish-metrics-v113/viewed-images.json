@@ -1,0 +1,77 @@
+[
+  {
+    "from": "artifacts/finish-metrics-v113/red-tests/finish-metrics-sharing-finish-metrics-375-light-daily--chromium/finish.png",
+    "sha256": "6408ed95dda61f08c5d38384dd59011549824ab4027cc6a504469f3886220627",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/final-chromium/finish-metrics-sharing-finish-metrics-375-light-daily--chromium/finish.png",
+    "sha256": "6408ed95dda61f08c5d38384dd59011549824ab4027cc6a504469f3886220627",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/red-tests/finish-metrics-sharing-finish-metrics-375-dark-daily--chromium/finish.png",
+    "sha256": "f9f49dd9e6aab6f1b9109b3651c2934ee2970925f90bad179456448e25ae46de",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/final-chromium/finish-metrics-sharing-finish-metrics-375-dark-daily--chromium/finish.png",
+    "sha256": "f9f49dd9e6aab6f1b9109b3651c2934ee2970925f90bad179456448e25ae46de",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/final-chromium/finish-metrics-sharing-finish-metrics-375-light-sparse--chromium/finish.png",
+    "sha256": "5ebab8df70c8886bdb8dc530908412e7327df42b4e12f573f87370f541c06965",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/final-chromium/finish-metrics-sharing-fin-6e1a3-ics-375-light-gamification--chromium/finish.png",
+    "sha256": "300b37f4ebf3f147bcaa5538e2b9e8967c49df808dfc15770d5ba12f350c1092",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/bench/before-chromium-375-reduce-5000-cpu1-r0-summary.png",
+    "sha256": "0324efaf6dca306fca41b10b2590571b1f855739a975f2b35f54cadaf6cfb16a",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/bench/before-chromium-375-reduce-5000-cpu1-r0-pb.png",
+    "sha256": "0324efaf6dca306fca41b10b2590571b1f855739a975f2b35f54cadaf6cfb16a",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/bench/after-chromium-375-reduce-5000-cpu1-r0-summary.png",
+    "sha256": "0324efaf6dca306fca41b10b2590571b1f855739a975f2b35f54cadaf6cfb16a",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/bench/after-chromium-375-reduce-5000-cpu1-r0-pb.png",
+    "sha256": "0324efaf6dca306fca41b10b2590571b1f855739a975f2b35f54cadaf6cfb16a",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/public-update/first-target320.png",
+    "sha256": "88fa293225d3c0dd90cd377f92ef836aa1c547343f11b02a8f032fb8a45bae5e",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/public-update/correction-exit320.png",
+    "sha256": "a1a5061641ba04fd3263b4167ccf7d1a784dcfa7e630f2a87f52b1f1f66cc518",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/public-update/projected-summary.png",
+    "sha256": "de1785b191512f17b6c4a089573181831fe3ba72121afa55ea99a84b5077a857",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/public-update/pending-analysis.png",
+    "sha256": "4b5fd718dc766f348c22f21adee307bd020833143cb7625788ef31f3ed36bbce",
+    "viewedOriginal": true
+  },
+  {
+    "from": "artifacts/finish-metrics-v113/public-update/pending-history.png",
+    "sha256": "4fd1f734baadac1a64c9ac3460a7ca4a81faeb9078507deb51519c3b1d4b1dc1",
+    "viewedOriginal": true
+  }
+]

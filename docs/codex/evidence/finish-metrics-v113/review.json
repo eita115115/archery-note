@@ -1,0 +1,26 @@
+{
+  "reviewer": "review_finish_metrics",
+  "base": "82d4681e5cbe394129abea69fa68d059871f2753",
+  "initialHead": "edd82b8b83aa233bf42b71ee9c233f35a2c6e3a4",
+  "finalHead": "3259d88cb78e2fe6756f21089b894b4b7bc6f0f8",
+  "initialImportant": "Identity fixture had identical metrics, allowing ID-keyed incorrect sharing to escape. Require two computation entries, each once, and distinct metrics.",
+  "resolution": "Duplicate second record is3 arrows vs6; two same-ID entries each calls1 and different saved ends asserted. Test-only3259d88. Final readonly review no Critical/Important/Minor remaining, code ready to merge.",
+  "benchReview": "Sequential counterbalanced native24, byte-identical fixtures, callback-based clock, old/new persistence/reload/scoring and paired saved geometry; separate profile gated by benchmark completion with actual snapshot function and wrapper restoration. All25 frozen candidate hashes and runtime source parity inspected.",
+  "scope": "Static read-only. No tests/build/browser/network/mutations. Does not establish measured improvement or release completion.",
+  "followup": {
+    "initialImportant": "archive omitted profile comparison artifacts",
+    "minor": [
+      "unconditional viewed flag",
+      "no CI success/source gate"
+    ],
+    "resolution": "comparison JSON/source/output archived; 8 unique expected pairs plus metrics decrement; CI completed/success/source/alljobs; 15-path+SHA original-view manifest; candidate/Linux/public25 exact gate",
+    "final": "readonly no Critical/Important/Minor remaining; static only, no executions/public proof"
+  },
+  "publicParityFollowup": {
+    "originalFailure": "frozen candidate25 byte assert failed at index.html; first failure output retained",
+    "diagnosis": "19 byte-exact,6 text files differ only CRLF/LF;14 runtime scripts+CSS byte-exact; Windows core.autocrlf=true/build copy paths",
+    "resolution": "Actual Linux/public25 byte strict retained; candidate6 allowlist path set exact and LF equality;19 byte strict; both hashes/raw metadata archived",
+    "review": "No additional blocking issues; immutable source/test-only source/CI38165314023/artifact11712575196/Linux298 and public old5/errors0/loaded15-canonical14 aligned. Static read-only; reviewer did not certify image viewing/archive completion.",
+    "imagesArchive": "Parent separately viewed actual public5 originals, recorded15 path/SHA manifest and archive terminal0 before complete-task terminal0"
+  }
+}

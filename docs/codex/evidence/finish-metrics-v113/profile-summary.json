@@ -1,0 +1,189 @@
+{
+  "scope": "New after113 profiles vs reused AN077 before112 profiles; call counts only. Wrapper timing is not native benchmark speedup or same-run before-after timing.",
+  "pairs": [
+    {
+      "cpu": 1,
+      "count": 3,
+      "rep": 0,
+      "calls": {
+        "sessionMetrics": {
+          "before": 20,
+          "after": 13
+        },
+        "sessionMetricSignature": {
+          "before": 20,
+          "after": 13
+        },
+        "robustStats": {
+          "before": 4,
+          "after": 4
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    },
+    {
+      "cpu": 1,
+      "count": 3,
+      "rep": 1,
+      "calls": {
+        "sessionMetrics": {
+          "before": 20,
+          "after": 13
+        },
+        "sessionMetricSignature": {
+          "before": 20,
+          "after": 13
+        },
+        "robustStats": {
+          "before": 4,
+          "after": 4
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    },
+    {
+      "cpu": 1,
+      "count": 5000,
+      "rep": 0,
+      "calls": {
+        "sessionMetrics": {
+          "before": 15018,
+          "after": 5017
+        },
+        "sessionMetricSignature": {
+          "before": 15018,
+          "after": 5017
+        },
+        "robustStats": {
+          "before": 5001,
+          "after": 5001
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    },
+    {
+      "cpu": 1,
+      "count": 5000,
+      "rep": 1,
+      "calls": {
+        "sessionMetrics": {
+          "before": 15018,
+          "after": 5017
+        },
+        "sessionMetricSignature": {
+          "before": 15018,
+          "after": 5017
+        },
+        "robustStats": {
+          "before": 5001,
+          "after": 5001
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    },
+    {
+      "cpu": 4,
+      "count": 3,
+      "rep": 0,
+      "calls": {
+        "sessionMetrics": {
+          "before": 20,
+          "after": 13
+        },
+        "sessionMetricSignature": {
+          "before": 20,
+          "after": 13
+        },
+        "robustStats": {
+          "before": 4,
+          "after": 4
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    },
+    {
+      "cpu": 4,
+      "count": 3,
+      "rep": 1,
+      "calls": {
+        "sessionMetrics": {
+          "before": 20,
+          "after": 13
+        },
+        "sessionMetricSignature": {
+          "before": 20,
+          "after": 13
+        },
+        "robustStats": {
+          "before": 4,
+          "after": 4
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    },
+    {
+      "cpu": 4,
+      "count": 5000,
+      "rep": 0,
+      "calls": {
+        "sessionMetrics": {
+          "before": 15018,
+          "after": 5017
+        },
+        "sessionMetricSignature": {
+          "before": 15018,
+          "after": 5017
+        },
+        "robustStats": {
+          "before": 5001,
+          "after": 5001
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    },
+    {
+      "cpu": 4,
+      "count": 5000,
+      "rep": 1,
+      "calls": {
+        "sessionMetrics": {
+          "before": 15018,
+          "after": 5017
+        },
+        "sessionMetricSignature": {
+          "before": 15018,
+          "after": 5017
+        },
+        "robustStats": {
+          "before": 5001,
+          "after": 5001
+        },
+        "writeSafetySnapshot": {
+          "before": 1,
+          "after": 1
+        }
+      }
+    }
+  ]
+}

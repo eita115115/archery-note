@@ -1,0 +1,8 @@
+{
+  "source": "GitHub Dependabot API after authorized main push, public repository eita115115/archery-note",
+  "scope": "Existing native development dependencies; unchanged in AN078. Native shell unused; reachability and fixes not assessed here.",
+  "alerts": [
+    {"number":37,"package":"@capacitor/ios","scope":"development","severity":"critical","fixed":"8.4.3","summary":"Capacitor Android and iOS: remote content can be loaded at the app origin via the internal HTTP proxy path"},
+    {"number":36,"package":"@capacitor/android","scope":"development","severity":"critical","fixed":"8.4.3","summary":"Capacitor Android and iOS: remote content can be loaded at the app origin via the internal HTTP proxy path"}
+  ]
+}

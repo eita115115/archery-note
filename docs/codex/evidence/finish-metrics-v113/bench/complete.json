@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "before": {
+      "dist": "C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\personal-best-v112\\linux-dist",
+      "version": 112,
+      "source": "6dabcff6ab73996e71693da348a271c9e1659cff"
+    },
+    "after": {
+      "dist": "C:\\Users\\eita2\\.codex\\worktrees\\app-quality\\archery-note\\artifacts\\finish-metrics-v113\\candidate-dist",
+      "version": 113,
+      "source": "edd82b8b83aa233bf42b71ee9c233f35a2c6e3a4"
+    }
+  },
+  "cases": 24,
+  "actions": 264,
+  "scope": "375/light/reduce only; CPU4 lab; two repeats per variant/engine/history/cpu; counterbalanced before-after order; source112 Linux vs113 frozen Windows generated assets; not field INP or actual paint",
+  "errors": []
+}

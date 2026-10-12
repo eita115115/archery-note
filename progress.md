@@ -4,7 +4,7 @@
 
 ## 現在地
 
-- AN078進行中、codex/finish-metrics-sharing。前AN077は進捗、次の終了同期scope内のmetrics共有を実装・同条件再測定・公開検証する。設計/plan docs/codex/finish-metrics-sharing.md、基点82d4681e。UIや保存、既存DB_REV/署名を保ち、object identityの一時共有だけ。全承認継続・費用個人情報不使用。
+- AN078完了、公開v113/source3259d88cb78e2fe6756f21089b894b4b7bc6f0f8、branch codex/finish-metrics-sharing。非編集finishの同じ同期計算内だけmetricsをobject identityで共有し、5000件の参照15018→5017、統計5001回は保持。計測24/264・別8profile・Chrome26/WK26・local全298（identity test強化前）・finalLinux全298/checkall/lint/format/独立review成功。通常CPU5000はChrome230.4→224.3ms/WK346.5→338.5ms、CPU4は1032.3→1043.4ms/n2で速度改善は限定的・fieldINP未証明。CI38165314023 validate/deploy成功、artifact11712575196/26safe、実Linux/public25byte/frozen19byte+6LF・first15/canonical14一致。元112context publication436454ms/active更新保留/finish4/banner113/旧4exact→320native/nudge3/解除/次矢2/offlineSWreload/finish5/metrics各1回/少数pending-PB注記/analysis-history/reload/errors0。docs/codex/finish-metrics-sharing.md/evidence/finish-metrics-v113、代表15原寸PNGcopySHAexact、旧77tasks/全acceptance/sharedlock保持。費用個人情報不使用・大目標active。今回変更は50の同期block・回帰test・一括markers113、保存/数学/採点/全他runtime保持。公開後notesはlocal commitのみ。
 
 - AN077監査完了、branch codex/record-flow-audit、plan e9d33c9 / docs/codex/record-flow-performance-audit.md。実Linux112/public25一致、訂正38 native経路/418操作はgeometry-fivehit/scoreX/旧全件+新3本/reloadexact/errors0。Chrome375抑制motionの終了3件47.6ms→5000件227.0ms、CPU4では239.5→998.5ms、WebKit50.0→348.0ms（各2回、capture→第2rAF callback、実paint/fieldINPではない）。別8profileは当日結果/metrics/署名の反復参照を支持、保存/DOMの負担も残る。容量警告が320結果文へ重なる画像を保持、未修正。
 - 原38のsupplied rAF timestamp差は正値もelapsed解釈撤回、元raw保持＋callback内performance.nowの全38を別directoryで完走（timeout restartなし）。profile必須関数/実writeSafetySnapshot/idle完了/call≠書込を訂正、全browser閉鎖。代表14原寸PNG/copySHA一致、format/invariants/archive成功、旧76tasks/全acceptance/sharedlock保持。docs/codex/evidence/record-flow-v112にraw・profile・source・出力、ledger/tasks更新。公開112/source6dabcff不変、同sourceAN076全272/CI38158744620を明示して再利用。費用個人情報不使用・大目標active、今回はlocal監査notesのみ。
@@ -37,7 +37,8 @@
 
 ## 次と未解決
 
-- 次の一小タスク候補: 終了時の同じ同期計算内に限り当日結果とgrowthBeforeのmetricsを共有し、5000件で15018回のsessionMetrics/署名参照の重複を減らす。global DB_REV/cacheや履歴件数を変更せず、同日/過去日/編集/成長/少数資格と保存・採点を対照する。実装と同条件再測定は新runへ分け、改善量はまだ主張しない。5001回の統計計算/保存/DOMは残り得る。320結果への容量警告重なりは別修正。
+- 次はユーザーの追加指示「UIダサすぎるから一新したって言い」を、UI一新の承認として優先する。まず現行の記録画面・結果・設定を比較し、frontend-design/brainstormingで具体的な刷新案とモバイルpreviewを作る。AN078は性能修正であり、UI刷新済みとは言わない。容量警告の重なりも刷新の課題へ含め、採点・旧練習データ・簡単な主要操作を保つ。費用・個人情報の利用は引き続き不可。
+- 統計5001回/保存/DOMの負担は残る。既存native依存@capacitor/android・iosのcritical2件（修正版8.4.3）はnative作業前の別確認が必要。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。
 - 元AN065fourabort/AN066fling/AN070閉鎖native-scroll/IABAN067閉鎖/公開98→99/99→100失敗profilesは別未回復。AN068元ReferenceError/debounceは同context/no-retap回復済み。

@@ -921,9 +921,9 @@
   {
     "id": "AN-078",
     "task": "終了時の当日結果と成長比較で統計情報を一時共有する",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "公開v113/source3259d88cb78e2fe6756f21089b894b4b7bc6f0f8;非編集finish同期scopeのobject-identity WeakMap共有のみ/globalDB_REV署名cache/math/scoring/storage/schema/style/handlers/deps/SWactivation保持。actual112red22failed4passed→26green; finalChrome26passed18.3s/WK26passed19.3s/result-growth無共有比較/同ID別object/次finish再計算/320375明暗/旧全件新矢score-reload-errors0。localfull298passed3.1mはidentity強化前、finalLinuxCI38165314023全298成功/checkall-lint-format成功。24native/264操作同条件前後、5000CPU1 Chrome230.4→224.3ms/WK346.5→338.5ms、CPU4/5000は1032.3→1043.4msで一貫した高速化を主張しない/n2/callbackclock/fieldINP未証明。別8profiles/AN077before再利用はmetrics署名15018→5017、robustStats5001維持。CI validate/deploy success/artifact11712575196/26safe/実Linux-public25bytes/frozen19byte+6LF/first15-canonical14一致。元112context publication436454ms/記録中更新保留/nativefinish4/banner/cache113only/旧4exact、320native1→nudge3→解除→次矢cur2/offlineSWreloadexact/finish5/metrics各1回/少数pending-PB換算注記/analysis-history/reload/errors0。15原寸画像SHAexact/独立review最終blockingなし/旧77tasks-allacceptance-sharedlock保持。docs/codex/finish-metrics-sharing.md/evidence/finish-metrics-v113。費用個人情報不使用/goalactive;容量警告重なり・物理phone/WKstrictOffline等未解決、既存nativeCapacitor critical2件別確認。",
     "dependencies": [
       "AN-077"
     ],

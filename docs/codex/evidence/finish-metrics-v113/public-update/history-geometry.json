@@ -1,0 +1,23 @@
+{
+  "row": {
+    "x": 16,
+    "y": 323.171875,
+    "width": 288,
+    "height": 53.6875,
+    "top": 323.171875,
+    "right": 304,
+    "bottom": 376.859375,
+    "left": 16
+  },
+  "footer": {
+    "x": 0,
+    "y": 439,
+    "width": 320,
+    "height": 129,
+    "top": 439,
+    "right": 320,
+    "bottom": 568,
+    "left": 0
+  },
+  "clear": true
+}

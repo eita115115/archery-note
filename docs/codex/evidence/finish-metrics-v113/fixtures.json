@@ -1,0 +1,14 @@
+[
+  {
+    "count": 3,
+    "bytes": 3450,
+    "sha256": "04df3d8719829c8f6bc8158e0d3c6ec812ebd7eddc716b380945ce332fbe61f2",
+    "scope": "owned synthetic, byte-identical AN077 fixtures; generator in harness-source.json"
+  },
+  {
+    "count": 5000,
+    "bytes": 5169538,
+    "sha256": "beb0d11f43b69445d810dcf3e055b0beac4573bacad85d4500d062286882db8f",
+    "scope": "owned synthetic, byte-identical AN077 fixtures; generator in harness-source.json"
+  }
+]
