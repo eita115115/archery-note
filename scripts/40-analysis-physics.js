@@ -898,17 +898,18 @@ function regressionAdvice(setupId, dist){
 }
 /* セッティングの実測サイト値（上下）から距離→サイト値を直線近似 */
 function sightInterp(setupId){
-  const byDist={};
+  const byDist={}, sourceByDist=Object.create(null);
   [...db.sightMarks].filter(m=>m.setupId===setupId)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts||0)-(b.ts||0))
-    .forEach(m=>{ const v=parseFloat(m.v); if(isFinite(v)) byDist[m.dist]=v; });
-  const pts=Object.keys(byDist).map(d=>[+d, byDist[d]]).sort((a,b)=>a[0]-b[0]);
+    .forEach(m=>{ const v=parseFloat(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
+  const keys=Object.keys(byDist).sort((a,b)=>+a-+b);
+  const pts=keys.map(d=>[+d, byDist[d]]);
   if(pts.length<2) return null;
   const line=regress(pts);
   if(!line) return null;
   const curve=quadraticFit(pts);
   const model=(curve && curve.r2>line.r2+.04)?curve:line;
-  return {pts, have:pts.map(p=>p[0]), model:model.kind, r2:model.r2, est:model.est};
+  return {pts, have:pts.map(p=>p[0]), model:model.kind, r2:model.r2, est:model.est, sources:keys.map(d=>sourceByDist[d])};
 }
 function calibrationProfile(setupId){
   const setup=db.setups.find(x=>x.id===setupId)||{};

@@ -637,14 +637,62 @@ function openHistDetail(id) {
 }
 
 /* ---------- サイト ---------- */
+function sightRecordOrder(marks) {
+  if (marks.some((m) => typeof m.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(m.date)))
+    return { label: "順序未確定", note: "日付不明の記録を含みます。" };
+  const first = marks[0];
+  if (!first) return { label: "", note: "" };
+  const sameDay = marks.filter((m) => m.date === first.date);
+  if (sameDay.length > 1) {
+    if (sameDay.some((m) => !Number.isFinite(Number(m.ts)) || Number(m.ts) <= 0))
+      return { label: "同日・時刻不明", note: "同日の記録時刻が不足しています。" };
+    if (sameDay.filter((m) => Number(m.ts) === Number(first.ts)).length > 1)
+      return { label: "同日時の記録あり", note: "同じ日時の候補が複数あります。" };
+  }
+  return { label: "最新", note: "" };
+}
+function sightPredictionHtml(interp, marks) {
+  const groups = new Map();
+  marks.forEach((m) => {
+    const key = String(m.dist);
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(m);
+  });
+  const status = new Map();
+  groups.forEach((rows, key) => {
+    rows.sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.ts || 0) - (a.ts || 0));
+    status.set(key, { first: rows[0], order: sightRecordOrder(rows) });
+  });
+  const predictions = [18, 30, 50, 70].filter((d) => !interp.have.includes(d));
+  const sources = interp.pts.map((point, i) => {
+    const mark = interp.sources[i], info = status.get(String(mark.dist));
+    const notes = [];
+    if (info.order.note) notes.push(info.order.note);
+    if (info.first !== mark && !isFinite(parseFloat(info.first.v))) {
+      const dated = typeof mark.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(mark.date) && typeof info.first.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(info.first.date);
+      const newerDate = dated && info.first.date > mark.date;
+      const newerTime = dated && info.first.date === mark.date && Number.isFinite(Number(mark.ts)) && Number(mark.ts) > 0 && Number.isFinite(Number(info.first.ts)) && Number(info.first.ts) > Number(mark.ts);
+      notes.push(newerDate || newerTime ? "新しい記録に数値なし" : "数値のある記録から採用");
+    }
+    return `<li data-source-id="${esc(mark.id)}"><div><b>${esc(point[0])}m</b><div class="sightSourceDate">${esc(fmtD(mark.date) || "日付不明")}</div></div><strong>${esc(point[1])}</strong>${notes.length ? `<p class="sightSourceNote">${esc(notes.join(" "))}</p>` : ""}</li>`;
+  }).join("");
+  return `<section class="sightPrediction" data-testid="sight-prediction">
+    <h2><span class="h2Icon">${icon("ruler")} サイトマーク予測（上下）</span></h2>
+    <div class="sightPredictionMeta">${interp.model === "curve" ? "カーブ近似" : "直線近似"} ・ 一致度${pct(interp.r2 || 0)} ・ 上下の目盛り</div>
+    ${predictions.length ? `<dl class="sightPredictionRows">${predictions.map((d) => `<div data-predict-dist="${d}"><dt>${d}m <span>予測</span></dt><dd>${interp.est(d).toFixed(1)}<small>目盛り</small></dd></div>`).join("")}</dl>` : `<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
+    <details class="sightSources"><summary>採用した実測 ${interp.pts.length}距離</summary><ul class="sightSourceList">${sources}</ul></details>
+    <details class="sightPredictionHelp"><summary>予測の見方</summary><p>上下が数値で入力された記録から予測します。新しい記録の上下が未入力なら、以前の数値を使います。</p><p>2距離以上で直線近似、4距離以上では一致度が改善する場合にカーブ近似を使います。左右は予測しません。</p></details>
+  </section>`;
+}
 function sightLedgerHtml(marks) {
   const value = (v) => (v == null || v === "" ? "—" : String(v));
-  return `<ol class="sightLedgerList" data-testid="sight-ledger" aria-label="サイト記録">${marks
+  const order = sightRecordOrder(marks);
+  return `${order.note ? `<p class="sightLedgerOrderNote">${esc(order.note)}</p>` : ""}<ol class="sightLedgerList" data-testid="sight-ledger" aria-label="サイト記録">${marks
     .map((mk, i) => {
       const date = fmtD(mk.date) || "日付不明";
       return `<li class="sightLedgerRecord" data-sight-id="${esc(mk.id)}">
         <div class="sightMarkHead">
-          <div class="sightMarkDate">${esc(date)}${i === 0 ? `<span class="sightMarkLatest">最新</span>` : ""}</div>
+          <div class="sightMarkDate">${esc(date)}${i === 0 ? `<span class="sightMarkLatest${order.note ? " uncertain" : ""}">${esc(order.label)}</span>` : ""}</div>
           <button class="btn sm ghost histDelBtn" type="button" data-del="${esc(mk.id)}" aria-label="${esc(date)}のサイト値を削除">${icon("del")}</button>
         </div>
         <dl class="sightMarkValues"><div><dt>上下</dt><dd>${esc(value(mk.v))}</dd></div><div><dt>左右</dt><dd>${esc(value(mk.h))}</dd></div></dl>
@@ -674,16 +722,7 @@ function renderSight(m) {
   const reg = sid ? regressionAdvice(sid, dist) : {};
   const interp = sid ? sightInterp(sid) : null;
   const cal = sid ? calibrationProfile(sid) : null;
-  let interpHtml = "";
-  if (interp) {
-    const preds = [18, 30, 50, 70]
-      .filter((d) => !interp.have.includes(d))
-      .map((d) => `<div class="chip">${d}m → <b>${interp.est(d).toFixed(1)}</b></div>`);
-    interpHtml = `<h2 class="mt14"><span class="h2Icon">${icon("ruler")} サイトマーク予測（上下）</span></h2>
-      <div class="subNote">実測: ${interp.pts.map((p) => `${p[0]}m = ${p[1]}`).join(" ・ ")} / ${interp.model === "curve" ? "カーブ近似" : "直線近似"} / 一致度${pct(interp.r2 || 0)}</div>
-      ${preds.length ? `<div class="chips mt8">${preds.join("")}</div>` : `<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
-      <div class="hint">2距離以上の実測サイト値から予測します。4距離以上ある場合は、弾道に近いカーブ近似が有効なときだけ自動採用します。左右は距離の影響がほぼないため上下のみ予測します。</div>`;
-  }
+  const interpHtml = interp ? sightPredictionHtml(interp, db.sightMarks.filter((mk) => mk.setupId === sid)) : "";
   m.innerHTML = `${pageHeroHtml("sight", { setup, dist, marks, adv, lastSess })}
   <div class="card">
     <h2><span class="h2Icon">${icon("ledger")} サイト台帳</span></h2>

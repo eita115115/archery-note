@@ -640,6 +640,24 @@ table.tbl td,table.tbl th{font-variant-numeric:tabular-nums;}
 .sightMarkValues dd{margin:2px 0 0; font-size:20px; font-weight:700; color:var(--title); font-variant-numeric:tabular-nums; overflow-wrap:anywhere;}
 .sightMarkNote summary{box-sizing:border-box; min-height:44px; padding:10px 0; color:var(--accent); font-size:var(--font-size-sm); cursor:pointer;}
 .sightMarkNote p{margin:4px 0 0; font-size:var(--font-size-sm); color:var(--sub); line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere;}
+.sightMarkLatest.uncertain{color:var(--sub);}
+.sightLedgerOrderNote{margin:12px 0 0; color:var(--sub); font-size:var(--font-size-sm); line-height:1.5;}
+.sightPrediction{margin-top:16px;}
+.sightPrediction h2{margin:0 0 6px;}
+.sightPredictionMeta{font-size:var(--font-size-sm); color:var(--sub); line-height:1.5; overflow-wrap:anywhere;}
+.sightPredictionRows{margin:8px 0;}
+.sightPredictionRows>div{display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:64px; border-bottom:1px solid var(--line);}
+.sightPredictionRows dt{font-weight:600; color:var(--title);}
+.sightPredictionRows dt span{margin-left:6px; font-size:var(--font-size-xs); font-weight:400; color:var(--sub);}
+.sightPredictionRows dd{margin:0; font-size:24px; font-weight:700; color:var(--title); font-variant-numeric:tabular-nums; overflow-wrap:anywhere;}
+.sightPredictionRows dd small{margin-left:6px; font-size:var(--font-size-xs); font-weight:400; color:var(--sub);}
+.sightPrediction summary{box-sizing:border-box; min-height:44px; padding:12px 0; color:var(--accent); font-size:var(--font-size-sm); cursor:pointer;}
+.sightSourceList{list-style:none; margin:0; padding:0;}
+.sightSourceList li{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:4px 16px; padding:12px 0; border-bottom:1px solid var(--line); overflow-wrap:anywhere;}
+.sightSourceList strong{font-size:20px; font-variant-numeric:tabular-nums; color:var(--title);}
+.sightSourceDate{margin-top:3px; font-size:var(--font-size-sm); color:var(--sub);}
+.sightSourceNote{grid-column:1/-1; margin:2px 0 0; font-size:var(--font-size-sm); color:var(--sub); line-height:1.5;}
+.sightPredictionHelp p{margin:0 0 10px; font-size:var(--font-size-sm); color:var(--sub); line-height:1.6;}
 .ledgerDot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; box-shadow:0 0 0 3px rgba(176,138,46,.18); vertical-align:middle;}
 .right{text-align:right;} .center{text-align:center;}
 .listItem{
