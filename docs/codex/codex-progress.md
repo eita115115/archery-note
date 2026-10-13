@@ -3427,7 +3427,6 @@ AN090完了、公開v123/source4b07d14eaa9a48bc21546722561021904f5365ab、branch
 
 最初のlintはtest内sightSummaryHtml未修飾2件、globalThis修飾だけでassert/app不変、final全336成功。赤testには未到達のdata-days selector誤記があり、現在DOMのdata-period=7dへ訂正してgreen/全336。任意focused formatでscripts50とledgerがwarn、source50は基点もprettierfalseと確認し広範49/39行整形を適用せず診断原文を保存、docsのみ整形し公式format成功。after/greenはbump前122、final/native/publicは123。未知日時の混在群全体の絶対最新、同日時/欠落の先頭末尾問題、finite補間の測定点の由来、numeric0の校正/snapshot空欄は未変更の別課題。
 
-
 ## AN091開始 — サイト値0を保持
 
 前turnはAN090公開と全336/CI成功で進捗。基点b63bc68b6708badbf0ac82703fdbf463656ffbde、snapshot2式/校正prefill2式だけ、save/schema/math不変。task91in-progress/passfalse、旧90保持、全承認継続。

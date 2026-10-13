@@ -872,8 +872,8 @@ function openCalibrationWizard(setupId) {
       .map((d) => {
         const mk = latestMark(setupId, d) || {};
         return `<div class="row">
-        <div><label class="f">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v || "")}"></div>
-        <div><label class="f">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h || "")}"></div>
+        <div><label class="f">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v === 0 ? 0 : mk.v || "")}"></div>
+        <div><label class="f">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h === 0 ? 0 : mk.h || "")}"></div>
       </div>`;
       })
       .join("")}

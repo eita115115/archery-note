@@ -131,7 +131,7 @@ function recordSetupSnapshot(setupId, dist) {
     <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b></div>
   </div>`;
   const mk = dist ? latestMark(setupId, dist) : null;
-  const markText = mk ? `上下 ${esc(mk.v || "—")} / 左右 ${esc(mk.h || "—")}` : "記録なし";
+  const markText = mk ? `上下 ${esc(mk.v === 0 ? 0 : mk.v || "—")} / 左右 ${esc(mk.h === 0 ? 0 : mk.h || "—")}` : "記録なし";
   return `<div class="setupLens" id="setupLens">
     <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b></div>
     <div class="lensCard"><div class="k">${dist ? dist + "m サイト" : "サイト台帳"}</div><b>${markText}</b></div>
