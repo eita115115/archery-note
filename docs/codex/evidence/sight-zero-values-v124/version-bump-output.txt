@@ -1,0 +1,5 @@
+
+> archery-note@0.123.0 version:bump
+> node tools/bump-version.js
+
+Archery Note version set to 124

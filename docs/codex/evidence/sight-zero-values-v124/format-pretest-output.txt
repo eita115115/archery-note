@@ -1,0 +1,4 @@
+tests/e2e/sight-zero-values.spec.js 163ms
+tests/e2e/fixtures/sight-zero-db.js 9ms
+docs/codex/sight-zero-values.md 69ms (unchanged)
+docs/codex/codex-progress.md 870ms

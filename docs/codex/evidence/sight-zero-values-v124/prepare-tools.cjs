@@ -1,0 +1,1 @@
+const fs=require('fs');fs.writeFileSync('artifacts/sight-zero-values/prepare.cjs',fs.readFileSync('artifacts/sight-summary-recency/prepare.cjs','utf8').replaceAll('artifacts/sight-summary-recency','artifacts/sight-zero-values').replace("PORT:'8779'","PORT:'8780'"));

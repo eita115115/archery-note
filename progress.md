@@ -4,7 +4,11 @@
 
 ## 現在地
 
-- AN091進行中。数値0のサイト値を練習概要/校正prefillで保持する。plan docs/codex/sight-zero-values.md。旧90/費用個人情報保護、全承認継続。
+- AN091完了、公開v124/source17760d5370021124d4383941fd4033bc41ada5ed、branch codex/sight-zero-values。数値0のサイト値を練習開始snapshotと校正prefillで保持し、上下/左右とも—/空欄→0。50/60の4式だけnumeric0を明示し、文字0/null/empty/欠落/false/負数/文字/escapeは従来通り。校正保存は旧全marks prefix/他5fieldsを保持して新string0を追加、reload/練習snapshot0。practice start0→native1本finish→新session両軸string0/score/旧全件/reload保持。保存handler/schema/日時選択/補間は不変、全markers124一括。14scripts/全CSS・数学・採点半径・保存/handlers/依存/SWactivationは4式/版以外exact。ChromeWK320375明暗900のbefore/after/final/public各8で他record/sight/analysisHTML/latest/interp/regression/calibrationexact、snapshot/prefillの0だけ変化、旧6fields/reload/errors0/overflowなし/校正button44以上/実input可視を確認。corrected旧123red6→green6 passed (21.4s)、checkall/lint/公式format成功、local342 passed (3.9m)、CI38422877986 clean checks/validate/deploy/Linux342 passed (6.0m)。final124native8/104は旧3+新記録/nudge0.6/undo/score/reloadexact/errors0。独立readonlyreview Critical/Important0、各engine上下異なる型12組（±0/文字0/null/undefined/false/NaN/負数/text/HTML/Infinity/空白）で基点比較とcancel配列/保存不変。Minor文書方向表記は受入notesで訂正。実Linux/public25byte、frozen19byte+6allowlistedLF、held first15/canonical14一致。同じ元public123page/contextで記録中更新保留→finish4/banner124/旧全件→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/sight-zero-values-v124へ原helper/red失敗/訂正/最終raw/原寸PNG/source/hashをbyte保持archive。旧90tasks/acceptance/sharedhiddenlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/実射/WKstrictOfflineは未証明。
+
+- 初plan helperはMarkdown backtickをJS template内でescapeせずSyntaxError、後続gitaddはpath不存在/commitはnothing、app編集前に停止。元start-initial-output保持、文字引用を訂正して設計commit後に実装。初red6のmatrixはglobalThis.dbがglobal lexical let dbへ届かずTypeErrorでも失敗、原log/context/testを保持。dbを明示globalcommentで参照しcorrected red6が本来の0差で失敗、green6/全342成功。追加欠落caseでは実property削除も検証。after/greenはbump前123、final/native/publicは124。計画書0→空欄は方向逆というMinorを—/空欄→0へnotes訂正。日時曖昧な最新/finite補間の値の由来、他legacy数値の意味は未変更の別課題。
+
+- 次: サイト予測が採用した実測値の記録日/由来と、日時が曖昧な台帳の表示を一タスクで整理する。保存値や新旧の推測は変えない。変更: scripts/50-record-view.js・60-history-sight-view.js、新6回帰/fixture、版markers、plan/tasks/progress/ledger/evidence。公開後notesはlocalcommitのみ。
 
 - AN090完了、公開v123/source4b07d14eaa9a48bc21546722561021904f5365ab、branch codex/sight-summary-recency。分析のサイト最新値で、同日の明示date・両ts finite正数を持つ台帳同士なら時刻の新しい候補を選ぶ。逆配列/古い記録のnative削除復元後も台帳/prefill/補間90へ分析最新80→90を一致。date優先・同ts後勝ち・欠落/不正/ts-only fallback・台帳対練習・空上下/0/用具距離/periodは既存仕様を保持。50の表示選択17行と一括123のみ。14scripts/全CSS・数学・採点半径・保存/handlers/依存/SWactivationは版/選択block以外exact。ChromeWK320375明暗900x3条件のbefore/before-complete/after/final/public各24で他分析HTML/latest/interp/regression/calibration不変、明確tsの80→90のみ、旧6fields/reload/errors0/実hit/open待機/値可視を確認。新6旧122red→6passed16.7s、checkall/lint/公式format成功、local336 passed (3.9m)、CI38418711075 clean checks/validate/deploy/Linux336 passed (6.4m)。final123native8/104は旧3+新記録/nudge0.6/undo/score/reloadexact/errors0。独立readonlyreview Critical/Important/Minor0、各engineで確定日時4records全24並び順/fallback22/空0文字0null4/練習混在2/配列保存不変を独立確認。実Linux/public25byte、frozen19byte+6allowlistedLF、held first15/canonical14一致。同じ元public122page/contextで記録中更新保留→finish4/banner123/旧全件→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/sight-summary-recency-v123へ原red/lint/任意format失敗・最終raw/原寸PNG/source/hashをbyte保持archive。旧89tasks/acceptance/sharedhiddenlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/実射/WKstrictOfflineは未証明。
 
@@ -97,7 +101,7 @@
 
 ## 次と未解決
 
-- UI一新を継続する。AN087で射形の比較条件、AN088でサイト台帳を改善。AN089で日時の意味を監査し不整合を特定。AN090で日時が明確な分析最新値を修正。次はnumeric0の校正/snapshotを直す一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
+- UI一新を継続する。AN087で射形の比較条件、AN088でサイト台帳を改善。AN089で日時の意味を監査し不整合を特定。AN090で日時が明確な分析最新値を修正。AN091でnumeric0の校正/snapshotを修正。次はサイト予測の実測値の由来を表示する一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
 - 統計5001回/保存/DOMの負担は残る。native依存critical2件はAN086でrepo更新/GitHub自動fixed。配布済みnativebinaryがある場合の再build/再配布/実機remediationは未確認。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。

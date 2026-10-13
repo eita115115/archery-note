@@ -1,0 +1,29 @@
+{
+  "dashboard": {
+    "lastPracticeDate": "2026-10-14",
+    "weekSessions": 3,
+    "weekArrows": 9,
+    "recentAverage": 8.571428571428571,
+    "scoreDelta": 0,
+    "groupingDelta": null,
+    "formStability": null,
+    "confidence": {
+      "value": 0.7075,
+      "label": "中"
+    },
+    "groupingSamples": 3
+  },
+  "conclusion": {
+    "kind": "trend-up",
+    "text": "平均点が上向き、この調子を続けましょう。"
+  },
+  "suggestions": [
+    {
+      "id": "collect-coordinates",
+      "title": "座標を3本以上記録する",
+      "reason": "最新記録は2本の座標です。グルーピングの比較は3本以上から行います。"
+    }
+  ],
+  "kpi": "平均点\n8.57\n5回 21本 / 移動平均 ↑ +0.25\n矢の集まり具合（グルーピング）\n比較待ち\n最新は座標3本以上で比較 / 最小 0.4cm\n最高合計\n52\n2026/10/13 / 18m / 6本",
+  "text": "平均点が上向き、この調子を続けましょう。"
+}

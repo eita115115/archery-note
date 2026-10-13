@@ -1,0 +1,9 @@
+PASS after chromium-320-light snapshot/input/calibration/old6/reload/errors0
+PASS after chromium-375-light snapshot/input/calibration/old6/reload/errors0
+PASS after chromium-375-dark snapshot/input/calibration/old6/reload/errors0
+PASS after chromium-900-light snapshot/input/calibration/old6/reload/errors0
+PASS after webkit-320-light snapshot/input/calibration/old6/reload/errors0
+PASS after webkit-375-light snapshot/input/calibration/old6/reload/errors0
+PASS after webkit-375-dark snapshot/input/calibration/old6/reload/errors0
+PASS after webkit-900-light snapshot/input/calibration/old6/reload/errors0
+PASS after8 contexts / visible0 + raw unchanged evidence; closed

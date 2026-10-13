@@ -1,0 +1,20 @@
+
+> archery-note@0.123.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/sight-zero-values.spec.js --workers=4
+
+Native web assets ready: dist\native (v123)
+[WebServer] (node:10084) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:28468) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\sight-zero-values.spec.js:30:3 › numeric zero stays visible in practice and calibration (320) (2.5s)
+  ok 2 [chromium] › tests\e2e\sight-zero-values.spec.js:30:3 › numeric zero stays visible in practice and calibration (375) (3.4s)
+  ok 3 [chromium] › tests\e2e\sight-zero-values.spec.js:30:3 › numeric zero stays visible in practice and calibration (900) (2.9s)
+  ok 4 [chromium] › tests\e2e\sight-zero-values.spec.js:48:1 › zero display preserves missing, false, negatives, text and escaping (3.7s)
+  ok 5 [chromium] › tests\e2e\sight-zero-values.spec.js:86:1 › calibration save retains zero and all existing marks through reload (3.4s)
+  ok 6 [chromium] › tests\e2e\sight-zero-values.spec.js:108:1 › practice starts with zero sight values and saves a scored arrow (3.2s)
+
+  6 passed (20.9s)

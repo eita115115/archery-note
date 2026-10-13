@@ -1,0 +1,9 @@
+PASS public chromium-320-light snapshot/input/calibration/old6/reload/errors0
+PASS public chromium-375-light snapshot/input/calibration/old6/reload/errors0
+PASS public chromium-375-dark snapshot/input/calibration/old6/reload/errors0
+PASS public chromium-900-light snapshot/input/calibration/old6/reload/errors0
+PASS public webkit-320-light snapshot/input/calibration/old6/reload/errors0
+PASS public webkit-375-light snapshot/input/calibration/old6/reload/errors0
+PASS public webkit-375-dark snapshot/input/calibration/old6/reload/errors0
+PASS public webkit-900-light snapshot/input/calibration/old6/reload/errors0
+PASS public8 contexts / visible0 + raw unchanged evidence; closed

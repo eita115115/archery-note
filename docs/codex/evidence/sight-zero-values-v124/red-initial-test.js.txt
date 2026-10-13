@@ -1,0 +1,144 @@
+const { test, expect } = require("@playwright/test");
+const { sightZeroDb } = require("./fixtures/sight-zero-db");
+test.use({ hasTouch: true });
+async function seed(page) {
+  await page.addInitScript((data) => {
+    if (!globalThis.localStorage.getItem("archeryNote.v1"))
+      globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
+  }, sightZeroDb());
+  await page.goto("/");
+}
+async function state(page) {
+  return page.evaluate(() => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")));
+}
+function practice(d) {
+  return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
+}
+async function record(page) {
+  await page.locator('#tabs [data-v="record"]').tap();
+  await page.locator("details.recordDetails summary").tap();
+  await page.locator("#fSetup").selectOption("a");
+  await page.locator('#fDistChips [data-d="30"]').tap();
+}
+async function calibration(page) {
+  await page.locator('#tabs [data-v="sight"]').tap();
+  await page.locator('#sgDistChips [data-d="30"]').tap();
+  await page.locator("#sgCalMode").tap();
+}
+for (const width of [320, 375, 900]) {
+  test(`numeric zero stays visible in practice and calibration (${width})`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 812 });
+    await seed(page);
+    const before = practice(await state(page));
+    await record(page);
+    await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+    await expect(page.locator("#fSightV")).toHaveValue("0");
+    await expect(page.locator("#fSightH")).toHaveValue("0");
+    await calibration(page);
+    await expect(page.locator("#calV_30")).toHaveValue("0");
+    await expect(page.locator("#calH_30")).toHaveValue("0");
+    await page.locator("#calCancel").tap();
+    await expect(page.locator('[data-sight-id="newer"] dd')).toHaveText(["0", "0"]);
+    expect(practice(await state(page))).toEqual(before);
+    await page.reload();
+    expect(practice(await state(page))).toEqual(before);
+  });
+}
+test("zero display preserves missing, false, negatives, text and escaping", async ({ page }) => {
+  await seed(page);
+  const before = practice(await state(page));
+  const values = [0, "0", null, "", false, -1.5, "調整済", '<img src=x onerror="alert(1)">'];
+  for (const value of values) {
+    const expected = value === 0 ? "0" : value ? String(value) : "";
+    const snapshot = await page.evaluate((value) => {
+      const old = globalThis.db.sightMarks;
+      try {
+        globalThis.db.sightMarks = [{ ...old[0], v: value, h: value }];
+        return globalThis.recordSetupSnapshot("a", 30);
+      } finally {
+        globalThis.db.sightMarks = old;
+      }
+    }, value);
+    const text = await page.evaluate((html) => {
+      const holder = globalThis.document.createElement("div");
+      holder.innerHTML = html;
+      return { text: holder.textContent, images: holder.querySelectorAll("img").length };
+    }, snapshot);
+    expect(text.text).toContain(`上下 ${expected || "—"} / 左右 ${expected || "—"}`);
+    expect(text.images).toBe(0);
+    await page.evaluate((value) => {
+      const old = globalThis.db.sightMarks;
+      try {
+        globalThis.db.sightMarks = [{ ...old[0], v: value, h: value }];
+        globalThis.openCalibrationWizard("a");
+      } finally {
+        globalThis.db.sightMarks = old;
+      }
+    }, value);
+    await expect(page.locator("#calV_30")).toHaveValue(expected);
+    await expect(page.locator("#calH_30")).toHaveValue(expected);
+    await expect(page.locator(".ovl img")).toHaveCount(0);
+    await page.locator("#calCancel").tap();
+  }
+  expect(practice(await state(page))).toEqual(before);
+});
+test("calibration save retains zero and all existing marks through reload", async ({ page }) => {
+  await seed(page);
+  const before = await state(page);
+  await calibration(page);
+  await expect(page.locator("#calV_30")).toHaveValue("0");
+  await expect(page.locator("#calH_30")).toHaveValue("0");
+  await page.locator("#calSave").tap();
+  await expect
+    .poll(async () => (await state(page)).sightMarks.length)
+    .toBe(before.sightMarks.length + 2);
+  const saved = await state(page);
+  expect(saved.sightMarks.slice(0, before.sightMarks.length)).toEqual(before.sightMarks);
+  expect(saved.sightMarks.slice(before.sightMarks.length).find((m) => m.dist === 30)).toMatchObject(
+    { setupId: "a", v: "0", h: "0" },
+  );
+  for (const k of ["sessions", "setups", "active", "customRounds", "formAnalyses"])
+    expect(saved[k]).toEqual(before[k]);
+  await page.reload();
+  expect((await state(page)).sightMarks).toEqual(saved.sightMarks);
+  await record(page);
+  await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+});
+test("practice starts with zero sight values and saves a scored arrow", async ({ page }) => {
+  await seed(page);
+  const before = await state(page);
+  await record(page);
+  await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+  await page.locator("#fStart").tap();
+  await expect
+    .poll(async () => (await state(page)).active && (await state(page)).active.sightV)
+    .toBe("0");
+  expect((await state(page)).active.sightH).toBe("0");
+  await page.locator("#tgsvg").tap();
+  await expect.poll(async () => (await state(page)).active.cur.length).toBe(1);
+  await page.locator("#bFinish").tap();
+  await page.locator("#sumPlot").waitFor();
+  const saved = await state(page);
+  expect(saved.sessions.slice(0, before.sessions.length)).toEqual(before.sessions);
+  expect(saved.sessions.at(-1)).toMatchObject({ sightV: "0", sightH: "0" });
+  expect(saved.sessions.at(-1).ends.flat()).toHaveLength(1);
+  expect(
+    await page.evaluate(() => {
+      const s = globalThis.db.sessions.at(-1),
+        a = s.ends.flat()[0],
+        hit = globalThis.scoreAt(
+          a.x,
+          a.y,
+          s.faceD,
+          s.faceType,
+          globalThis.lineCutRadius(s.faceD, s.faceType),
+        );
+      return a.s === hit.s && !!a.X === hit.X;
+    }),
+  ).toBe(true);
+  for (const k of ["setups", "sightMarks", "customRounds", "formAnalyses"])
+    expect(saved[k]).toEqual(before[k]);
+  expect(saved.active).toBeNull();
+  await page.reload();
+  expect((await state(page)).sessions).toEqual(saved.sessions);
+});

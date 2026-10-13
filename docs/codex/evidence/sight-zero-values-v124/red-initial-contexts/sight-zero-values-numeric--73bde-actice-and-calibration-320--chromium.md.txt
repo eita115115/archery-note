@@ -1,0 +1,181 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: sight-zero-values.spec.js >> numeric zero stays visible in practice and calibration (320)
+- Location: tests\e2e\sight-zero-values.spec.js:29:3
+
+# Error details
+
+```
+Error: expect(locator).toContainText(expected) failed
+
+Locator: locator('#setupLens')
+Timeout: 5000ms
+- Expected substring  - 1
++ Received string     + 4
+
+- 上下 0 / 左右 0
++
++     セッティング合成の屋外用・通常練習セッティング
++     30m サイト上下 — / 左右 —
++   
+
+Call log:
+  - Expect "toContainText" with timeout 5000ms
+  - waiting for locator('#setupLens')
+    14 × locator resolved to <div id="setupLens" class="setupLens">…</div>
+       - unexpected value "
+    セッティング合成の屋外用・通常練習セッティング
+    30m サイト上下 — / 左右 —
+  "
+
+```
+
+```yaml
+- text: セッティング 合成の屋外用・通常練習セッティング 30m サイト 上下 — / 左右 —
+```
+
+# Test source
+
+```ts
+  1   | const { test, expect } = require("@playwright/test");
+  2   | const { sightZeroDb } = require("./fixtures/sight-zero-db");
+  3   | test.use({ hasTouch: true });
+  4   | async function seed(page) {
+  5   |   await page.addInitScript((data) => {
+  6   |     if (!globalThis.localStorage.getItem("archeryNote.v1"))
+  7   |       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
+  8   |   }, sightZeroDb());
+  9   |   await page.goto("/");
+  10  | }
+  11  | async function state(page) {
+  12  |   return page.evaluate(() => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")));
+  13  | }
+  14  | function practice(d) {
+  15  |   return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
+  16  | }
+  17  | async function record(page) {
+  18  |   await page.locator('#tabs [data-v="record"]').tap();
+  19  |   await page.locator("details.recordDetails summary").tap();
+  20  |   await page.locator("#fSetup").selectOption("a");
+  21  |   await page.locator('#fDistChips [data-d="30"]').tap();
+  22  | }
+  23  | async function calibration(page) {
+  24  |   await page.locator('#tabs [data-v="sight"]').tap();
+  25  |   await page.locator('#sgDistChips [data-d="30"]').tap();
+  26  |   await page.locator("#sgCalMode").tap();
+  27  | }
+  28  | for (const width of [320, 375, 900]) {
+  29  |   test(`numeric zero stays visible in practice and calibration (${width})`, async ({ page }) => {
+  30  |     await page.setViewportSize({ width, height: 812 });
+  31  |     await seed(page);
+  32  |     const before = practice(await state(page));
+  33  |     await record(page);
+> 34  |     await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+      |                                              ^ Error: expect(locator).toContainText(expected) failed
+  35  |     await expect(page.locator("#fSightV")).toHaveValue("0");
+  36  |     await expect(page.locator("#fSightH")).toHaveValue("0");
+  37  |     await calibration(page);
+  38  |     await expect(page.locator("#calV_30")).toHaveValue("0");
+  39  |     await expect(page.locator("#calH_30")).toHaveValue("0");
+  40  |     await page.locator("#calCancel").tap();
+  41  |     await expect(page.locator('[data-sight-id="newer"] dd')).toHaveText(["0", "0"]);
+  42  |     expect(practice(await state(page))).toEqual(before);
+  43  |     await page.reload();
+  44  |     expect(practice(await state(page))).toEqual(before);
+  45  |   });
+  46  | }
+  47  | test("zero display preserves missing, false, negatives, text and escaping", async ({ page }) => {
+  48  |   await seed(page);
+  49  |   const before = practice(await state(page));
+  50  |   const values = [0, "0", null, "", false, -1.5, "調整済", '<img src=x onerror="alert(1)">'];
+  51  |   for (const value of values) {
+  52  |     const expected = value === 0 ? "0" : value ? String(value) : "";
+  53  |     const snapshot = await page.evaluate((value) => {
+  54  |       const old = globalThis.db.sightMarks;
+  55  |       try {
+  56  |         globalThis.db.sightMarks = [{ ...old[0], v: value, h: value }];
+  57  |         return globalThis.recordSetupSnapshot("a", 30);
+  58  |       } finally {
+  59  |         globalThis.db.sightMarks = old;
+  60  |       }
+  61  |     }, value);
+  62  |     const text = await page.evaluate((html) => {
+  63  |       const holder = globalThis.document.createElement("div");
+  64  |       holder.innerHTML = html;
+  65  |       return { text: holder.textContent, images: holder.querySelectorAll("img").length };
+  66  |     }, snapshot);
+  67  |     expect(text.text).toContain(`上下 ${expected || "—"} / 左右 ${expected || "—"}`);
+  68  |     expect(text.images).toBe(0);
+  69  |     await page.evaluate((value) => {
+  70  |       const old = globalThis.db.sightMarks;
+  71  |       try {
+  72  |         globalThis.db.sightMarks = [{ ...old[0], v: value, h: value }];
+  73  |         globalThis.openCalibrationWizard("a");
+  74  |       } finally {
+  75  |         globalThis.db.sightMarks = old;
+  76  |       }
+  77  |     }, value);
+  78  |     await expect(page.locator("#calV_30")).toHaveValue(expected);
+  79  |     await expect(page.locator("#calH_30")).toHaveValue(expected);
+  80  |     await expect(page.locator(".ovl img")).toHaveCount(0);
+  81  |     await page.locator("#calCancel").tap();
+  82  |   }
+  83  |   expect(practice(await state(page))).toEqual(before);
+  84  | });
+  85  | test("calibration save retains zero and all existing marks through reload", async ({ page }) => {
+  86  |   await seed(page);
+  87  |   const before = await state(page);
+  88  |   await calibration(page);
+  89  |   await expect(page.locator("#calV_30")).toHaveValue("0");
+  90  |   await expect(page.locator("#calH_30")).toHaveValue("0");
+  91  |   await page.locator("#calSave").tap();
+  92  |   await expect
+  93  |     .poll(async () => (await state(page)).sightMarks.length)
+  94  |     .toBe(before.sightMarks.length + 2);
+  95  |   const saved = await state(page);
+  96  |   expect(saved.sightMarks.slice(0, before.sightMarks.length)).toEqual(before.sightMarks);
+  97  |   expect(saved.sightMarks.slice(before.sightMarks.length).find((m) => m.dist === 30)).toMatchObject(
+  98  |     { setupId: "a", v: "0", h: "0" },
+  99  |   );
+  100 |   for (const k of ["sessions", "setups", "active", "customRounds", "formAnalyses"])
+  101 |     expect(saved[k]).toEqual(before[k]);
+  102 |   await page.reload();
+  103 |   expect((await state(page)).sightMarks).toEqual(saved.sightMarks);
+  104 |   await record(page);
+  105 |   await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+  106 | });
+  107 | test("practice starts with zero sight values and saves a scored arrow", async ({ page }) => {
+  108 |   await seed(page);
+  109 |   const before = await state(page);
+  110 |   await record(page);
+  111 |   await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+  112 |   await page.locator("#fStart").tap();
+  113 |   await expect
+  114 |     .poll(async () => (await state(page)).active && (await state(page)).active.sightV)
+  115 |     .toBe("0");
+  116 |   expect((await state(page)).active.sightH).toBe("0");
+  117 |   await page.locator("#tgsvg").tap();
+  118 |   await expect.poll(async () => (await state(page)).active.cur.length).toBe(1);
+  119 |   await page.locator("#bFinish").tap();
+  120 |   await page.locator("#sumPlot").waitFor();
+  121 |   const saved = await state(page);
+  122 |   expect(saved.sessions.slice(0, before.sessions.length)).toEqual(before.sessions);
+  123 |   expect(saved.sessions.at(-1)).toMatchObject({ sightV: "0", sightH: "0" });
+  124 |   expect(saved.sessions.at(-1).ends.flat()).toHaveLength(1);
+  125 |   expect(
+  126 |     await page.evaluate(() => {
+  127 |       const s = globalThis.db.sessions.at(-1),
+  128 |         a = s.ends.flat()[0],
+  129 |         hit = globalThis.scoreAt(
+  130 |           a.x,
+  131 |           a.y,
+  132 |           s.faceD,
+  133 |           s.faceType,
+  134 |           globalThis.lineCutRadius(s.faceD, s.faceType),
+```

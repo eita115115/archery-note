@@ -1,0 +1,296 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: sight-zero-values.spec.js >> zero display preserves missing, false, negatives, text and escaping
+- Location: tests\e2e\sight-zero-values.spec.js:48:1
+
+# Error details
+
+```
+Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: "上下 0 / 左右 0"
+Received string:    "
+    セッティング合成の屋外用・通常練習セッティング
+    30m サイト上下 — / 左右 —
+  "
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Archery Note" [level=1] [ref=e5]
+    - button "設定" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - heading "練習を記録" [level=2] [ref=e12]
+      - generic [ref=e13]: 2026/10/14
+    - generic [ref=e14]:
+      - img [ref=e16]
+      - generic [ref=e19]:
+        - text: 3回分たまりました。
+        - strong [ref=e20]: 分析タブ
+        - text: で傾向が見えます
+      - button "見る" [ref=e21] [cursor=pointer]
+      - button "閉じる" [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+    - region "すぐ使う" [ref=e25]:
+      - button "前回と同じ条件で開始 18m / 40cm" [ref=e26] [cursor=pointer]:
+        - generic [ref=e27]: 前回と同じ条件で開始
+        - generic [ref=e28]: 18m / 40cm
+      - button "履歴" [ref=e29] [cursor=pointer]:
+        - generic [ref=e30]: 履歴
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - heading "条件を選ぶ" [level=2] [ref=e34]
+        - button "用具" [ref=e35] [cursor=pointer]
+      - generic [ref=e36]:
+        - generic [ref=e37]: 距離
+        - generic [ref=e38]:
+          - button "70m" [ref=e39] [cursor=pointer]
+          - button "50m" [ref=e40] [cursor=pointer]
+          - button "30m" [ref=e41] [cursor=pointer]
+          - button "18m" [pressed] [ref=e42] [cursor=pointer]
+          - button "カスタム" [ref=e43] [cursor=pointer]
+        - separator [ref=e44]
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]: 的
+            - combobox "的" [ref=e48]:
+              - option "122cm"
+              - option "80cm"
+              - option "60cm"
+              - option "40cm" [selected]
+              - option "40cm 三つ目（縦）"
+              - option "80cm フィールド"
+              - option "60cm フィールド"
+              - option "40cm フィールド"
+              - option "20cm フィールド"
+          - generic [ref=e49]:
+            - generic [ref=e50]: 1エンドの本数
+            - combobox "1エンドの本数" [ref=e51]:
+              - option "1本"
+              - option "2本"
+              - option "3本" [selected]
+              - option "4本"
+              - option "5本"
+              - option "6本"
+              - option "7本"
+              - option "8本"
+              - option "9本"
+              - option "10本"
+              - option "11本"
+              - option "12本"
+        - separator [ref=e52]
+        - button "この条件で開始" [ref=e54] [cursor=pointer]
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]: セッティング
+            - generic [ref=e59]: 未指定
+          - generic [ref=e60]:
+            - generic [ref=e61]: サイト台帳
+            - generic [ref=e62]: 未接続
+        - group [ref=e63]:
+          - generic "＋ 詳しく残す" [ref=e64] [cursor=pointer]
+          - option "（セッティング未指定）" [selected]
+          - option "合成の屋外用・通常練習セッティング"
+          - option "合成の室内用具"
+          - option "自由練習" [selected]
+          - option "70m 72射"
+          - option "50m 72射"
+          - option "30m 36射"
+          - option "18m 60射"
+          - option "フィールド 24標的/72射"
+          - option "WA1440 男子"
+          - option "WA1440 女子"
+          - option "—" [selected]
+          - option "晴れ"
+          - option "くもり"
+          - option "雨"
+          - option "風 弱"
+          - option "風 強"
+          - option "室内"
+          - option "—" [selected]
+          - option "向かい風"
+          - option "追い風"
+          - option "左から"
+          - option "右から"
+          - option "巻き風"
+  - navigation "主な画面" [ref=e65]:
+    - button "記録" [ref=e66] [cursor=pointer]:
+      - img [ref=e68]
+      - text: 記録
+    - button "履歴" [ref=e72] [cursor=pointer]:
+      - img [ref=e74]
+      - text: 履歴
+    - button "分析" [ref=e77] [cursor=pointer]:
+      - img [ref=e79]
+      - text: 分析
+    - button "サイト調整" [ref=e82] [cursor=pointer]:
+      - img [ref=e84]
+      - text: サイト調整
+    - button "用具" [ref=e87] [cursor=pointer]:
+      - img [ref=e89]
+      - text: 用具
+  - status
+```
+
+# Test source
+
+```ts
+  1   | /* global db */
+  2   | const { test, expect } = require("@playwright/test");
+  3   | const { sightZeroDb } = require("./fixtures/sight-zero-db");
+  4   | test.use({ hasTouch: true });
+  5   | async function seed(page) {
+  6   |   await page.addInitScript((data) => {
+  7   |     if (!globalThis.localStorage.getItem("archeryNote.v1"))
+  8   |       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
+  9   |   }, sightZeroDb());
+  10  |   await page.goto("/");
+  11  | }
+  12  | async function state(page) {
+  13  |   return page.evaluate(() => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")));
+  14  | }
+  15  | function practice(d) {
+  16  |   return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
+  17  | }
+  18  | async function record(page) {
+  19  |   await page.locator('#tabs [data-v="record"]').tap();
+  20  |   await page.locator("details.recordDetails summary").tap();
+  21  |   await page.locator("#fSetup").selectOption("a");
+  22  |   await page.locator('#fDistChips [data-d="30"]').tap();
+  23  | }
+  24  | async function calibration(page) {
+  25  |   await page.locator('#tabs [data-v="sight"]').tap();
+  26  |   await page.locator('#sgDistChips [data-d="30"]').tap();
+  27  |   await page.locator("#sgCalMode").tap();
+  28  | }
+  29  | for (const width of [320, 375, 900]) {
+  30  |   test(`numeric zero stays visible in practice and calibration (${width})`, async ({ page }) => {
+  31  |     await page.setViewportSize({ width, height: 812 });
+  32  |     await seed(page);
+  33  |     const before = practice(await state(page));
+  34  |     await record(page);
+  35  |     await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+  36  |     await expect(page.locator("#fSightV")).toHaveValue("0");
+  37  |     await expect(page.locator("#fSightH")).toHaveValue("0");
+  38  |     await calibration(page);
+  39  |     await expect(page.locator("#calV_30")).toHaveValue("0");
+  40  |     await expect(page.locator("#calH_30")).toHaveValue("0");
+  41  |     await page.locator("#calCancel").tap();
+  42  |     await expect(page.locator('[data-sight-id="newer"] dd')).toHaveText(["0", "0"]);
+  43  |     expect(practice(await state(page))).toEqual(before);
+  44  |     await page.reload();
+  45  |     expect(practice(await state(page))).toEqual(before);
+  46  |   });
+  47  | }
+  48  | test("zero display preserves missing, false, negatives, text and escaping", async ({ page }) => {
+  49  |   await seed(page);
+  50  |   const before = practice(await state(page));
+  51  |   const values = [0, "0", null, "", false, -1.5, "調整済", '<img src=x onerror="alert(1)">'];
+  52  |   for (const value of values) {
+  53  |     const expected = value === 0 ? "0" : value ? String(value) : "";
+  54  |     const snapshot = await page.evaluate((value) => {
+  55  |       const old = db.sightMarks;
+  56  |       try {
+  57  |         db.sightMarks = [{ ...old[0], v: value, h: value }];
+  58  |         return globalThis.recordSetupSnapshot("a", 30);
+  59  |       } finally {
+  60  |         db.sightMarks = old;
+  61  |       }
+  62  |     }, value);
+  63  |     const text = await page.evaluate((html) => {
+  64  |       const holder = globalThis.document.createElement("div");
+  65  |       holder.innerHTML = html;
+  66  |       return { text: holder.textContent, images: holder.querySelectorAll("img").length };
+  67  |     }, snapshot);
+> 68  |     expect(text.text).toContain(`上下 ${expected || "—"} / 左右 ${expected || "—"}`);
+      |                       ^ Error: expect(received).toContain(expected) // indexOf
+  69  |     expect(text.images).toBe(0);
+  70  |     await page.evaluate((value) => {
+  71  |       const old = db.sightMarks;
+  72  |       try {
+  73  |         db.sightMarks = [{ ...old[0], v: value, h: value }];
+  74  |         globalThis.openCalibrationWizard("a");
+  75  |       } finally {
+  76  |         db.sightMarks = old;
+  77  |       }
+  78  |     }, value);
+  79  |     await expect(page.locator("#calV_30")).toHaveValue(expected);
+  80  |     await expect(page.locator("#calH_30")).toHaveValue(expected);
+  81  |     await expect(page.locator(".ovl img")).toHaveCount(0);
+  82  |     await page.locator("#calCancel").tap();
+  83  |   }
+  84  |   expect(practice(await state(page))).toEqual(before);
+  85  | });
+  86  | test("calibration save retains zero and all existing marks through reload", async ({ page }) => {
+  87  |   await seed(page);
+  88  |   const before = await state(page);
+  89  |   await calibration(page);
+  90  |   await expect(page.locator("#calV_30")).toHaveValue("0");
+  91  |   await expect(page.locator("#calH_30")).toHaveValue("0");
+  92  |   await page.locator("#calSave").tap();
+  93  |   await expect
+  94  |     .poll(async () => (await state(page)).sightMarks.length)
+  95  |     .toBe(before.sightMarks.length + 2);
+  96  |   const saved = await state(page);
+  97  |   expect(saved.sightMarks.slice(0, before.sightMarks.length)).toEqual(before.sightMarks);
+  98  |   expect(saved.sightMarks.slice(before.sightMarks.length).find((m) => m.dist === 30)).toMatchObject(
+  99  |     { setupId: "a", v: "0", h: "0" },
+  100 |   );
+  101 |   for (const k of ["sessions", "setups", "active", "customRounds", "formAnalyses"])
+  102 |     expect(saved[k]).toEqual(before[k]);
+  103 |   await page.reload();
+  104 |   expect((await state(page)).sightMarks).toEqual(saved.sightMarks);
+  105 |   await record(page);
+  106 |   await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+  107 | });
+  108 | test("practice starts with zero sight values and saves a scored arrow", async ({ page }) => {
+  109 |   await seed(page);
+  110 |   const before = await state(page);
+  111 |   await record(page);
+  112 |   await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+  113 |   await page.locator("#fStart").tap();
+  114 |   await expect
+  115 |     .poll(async () => (await state(page)).active && (await state(page)).active.sightV)
+  116 |     .toBe("0");
+  117 |   expect((await state(page)).active.sightH).toBe("0");
+  118 |   await page.locator("#tgsvg").tap();
+  119 |   await expect.poll(async () => (await state(page)).active.cur.length).toBe(1);
+  120 |   await page.locator("#bFinish").tap();
+  121 |   await page.locator("#sumPlot").waitFor();
+  122 |   const saved = await state(page);
+  123 |   expect(saved.sessions.slice(0, before.sessions.length)).toEqual(before.sessions);
+  124 |   expect(saved.sessions.at(-1)).toMatchObject({ sightV: "0", sightH: "0" });
+  125 |   expect(saved.sessions.at(-1).ends.flat()).toHaveLength(1);
+  126 |   expect(
+  127 |     await page.evaluate(() => {
+  128 |       const s = db.sessions.at(-1),
+  129 |         a = s.ends.flat()[0],
+  130 |         hit = globalThis.scoreAt(
+  131 |           a.x,
+  132 |           a.y,
+  133 |           s.faceD,
+  134 |           s.faceType,
+  135 |           globalThis.lineCutRadius(s.faceD, s.faceType),
+  136 |         );
+  137 |       return a.s === hit.s && !!a.X === hit.X;
+  138 |     }),
+  139 |   ).toBe(true);
+  140 |   for (const k of ["setups", "sightMarks", "customRounds", "formAnalyses"])
+  141 |     expect(saved[k]).toEqual(before[k]);
+  142 |   expect(saved.active).toBeNull();
+  143 |   await page.reload();
+  144 |   expect((await state(page)).sessions).toEqual(saved.sessions);
+  145 | });
+  146 | 
+```

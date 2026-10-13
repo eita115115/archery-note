@@ -1,0 +1,1340 @@
+{
+  "source": "17760d5370021124d4383941fd4033bc41ada5ed",
+  "version": 124,
+  "ci": 38422877986,
+  "imagesViewed": 9,
+  "files": [
+    {
+      "file": "after/chromium-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/after/chromium-320-light-calibration.png",
+      "bytes": 32795,
+      "sha256": "affe8e06473af66c283f29099d26a3a15d0754469d361c1f058c253b777d7f73"
+    },
+    {
+      "file": "after/chromium-320-light-input.png",
+      "source": "artifacts/sight-zero-values/after/chromium-320-light-input.png",
+      "bytes": 39028,
+      "sha256": "fe6dddd4adcd76cd94dff60f9ebadfa86941382c9bec76c0169f0751c147a250"
+    },
+    {
+      "file": "after/chromium-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/chromium-320-light-snapshot.png",
+      "bytes": 37993,
+      "sha256": "af2916166e3c9f4df491450439a6cec8deb011d0eae9e0a4c033b4b68d003650"
+    },
+    {
+      "file": "after/chromium-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/after/chromium-375-dark-calibration.png",
+      "bytes": 46637,
+      "sha256": "3f4c1f9eee06c3fd86d3b254c60c5aa07cb392560ed726b9f80c9a5e77ed9814"
+    },
+    {
+      "file": "after/chromium-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/after/chromium-375-dark-input.png",
+      "bytes": 49225,
+      "sha256": "f996d47a3a25ef6b0f64aee50ee1fd1b349858f720b0c93977d3f1d6bc6694dd"
+    },
+    {
+      "file": "after/chromium-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/chromium-375-dark-snapshot.png",
+      "bytes": 40898,
+      "sha256": "7f9e6a5f0b35b526a251f13908aa04b10e3df6f32ee2c1140ed76e237d7024db"
+    },
+    {
+      "file": "after/chromium-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/after/chromium-375-light-calibration.png",
+      "bytes": 46185,
+      "sha256": "c93553b6e72bb69488ba876c21be412aa924d1db18e1ae80e0cdb8c52be75c73"
+    },
+    {
+      "file": "after/chromium-375-light-input.png",
+      "source": "artifacts/sight-zero-values/after/chromium-375-light-input.png",
+      "bytes": 48857,
+      "sha256": "b5ab7da609af8df399ff2a550143cd215ba2f0e23750fb112bb3745b1e021cf2"
+    },
+    {
+      "file": "after/chromium-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/chromium-375-light-snapshot.png",
+      "bytes": 39971,
+      "sha256": "3b592fd24f0ac8c0b8cddd8ed5245b16ca3352e81a64ea1dbc77ac068e317895"
+    },
+    {
+      "file": "after/chromium-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/after/chromium-900-light-calibration.png",
+      "bytes": 51577,
+      "sha256": "a9c462cbfcec1574f695277326a20b91cea0c772f26f14f6d040ca51a86430f5"
+    },
+    {
+      "file": "after/chromium-900-light-input.png",
+      "source": "artifacts/sight-zero-values/after/chromium-900-light-input.png",
+      "bytes": 52097,
+      "sha256": "6554bc25b26228aa6168143205a2a084e77710a5a6d2393a76814d9e5f95412f"
+    },
+    {
+      "file": "after/chromium-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/chromium-900-light-snapshot.png",
+      "bytes": 50469,
+      "sha256": "f6793ea3bd87e0457fdbffdc5df2d153a7dbedcf1b9ed2e26ca7e5226016caaa"
+    },
+    {
+      "file": "after/results.json",
+      "source": "artifacts/sight-zero-values/after/results.json",
+      "bytes": 339912,
+      "sha256": "bd8913632f8e83b2fb65df168ee06c60a4a8b9a48d1909c42f393f1fe848e0a0"
+    },
+    {
+      "file": "after/webkit-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/after/webkit-320-light-calibration.png",
+      "bytes": 26828,
+      "sha256": "3f7529c17dbc8bbc2d95d68e5830af010973262aa36e94d053ed3558cd907334"
+    },
+    {
+      "file": "after/webkit-320-light-input.png",
+      "source": "artifacts/sight-zero-values/after/webkit-320-light-input.png",
+      "bytes": 31572,
+      "sha256": "4fccc3577e48a3ab12fb32fcc7c03c8f63205bfa4de25116e4978b7dd9763fa3"
+    },
+    {
+      "file": "after/webkit-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/webkit-320-light-snapshot.png",
+      "bytes": 32704,
+      "sha256": "18fdf2b255763242d5d508c7b6e4aea4ae0c25aa094214d3d5d73070715b0d13"
+    },
+    {
+      "file": "after/webkit-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/after/webkit-375-dark-calibration.png",
+      "bytes": 36230,
+      "sha256": "4c9ce4a0bd61be4fa32a22bcd70ee685f8aa0d7e8d75504f5cf8dd6f565fc591"
+    },
+    {
+      "file": "after/webkit-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/after/webkit-375-dark-input.png",
+      "bytes": 38768,
+      "sha256": "bbc99f1e9fb3c0c1dcbeb05bca88c3582b5892929a63ffe04243e649419f2233"
+    },
+    {
+      "file": "after/webkit-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/webkit-375-dark-snapshot.png",
+      "bytes": 33922,
+      "sha256": "3b96d9b8798a7e14f6d85be98d51bea6d9376f23fdb7306decadf6f4549c0fdf"
+    },
+    {
+      "file": "after/webkit-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/after/webkit-375-light-calibration.png",
+      "bytes": 36475,
+      "sha256": "671d65d5ebe2e26b459ca4f59d224e5d593ef30e1ea91b012c2b296d9019eeaa"
+    },
+    {
+      "file": "after/webkit-375-light-input.png",
+      "source": "artifacts/sight-zero-values/after/webkit-375-light-input.png",
+      "bytes": 39192,
+      "sha256": "32bef6d415aa08605c313487b887bce71d71f264067f867095e618fd27dca1b9"
+    },
+    {
+      "file": "after/webkit-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/webkit-375-light-snapshot.png",
+      "bytes": 33949,
+      "sha256": "7b54e58f95012285a3d68b282b0375f1f1655ae490d1ab3d8f85128f7d845f6a"
+    },
+    {
+      "file": "after/webkit-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/after/webkit-900-light-calibration.png",
+      "bytes": 42555,
+      "sha256": "1bc0e0586781aa4f107e3afa071b33b1ec62112ac88615ee153f85945207ab45"
+    },
+    {
+      "file": "after/webkit-900-light-input.png",
+      "source": "artifacts/sight-zero-values/after/webkit-900-light-input.png",
+      "bytes": 42828,
+      "sha256": "f4306d5c2d99fd286902919a59fc14c7c91abbc22be292b90c3cc348e9a056d7"
+    },
+    {
+      "file": "after/webkit-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/after/webkit-900-light-snapshot.png",
+      "bytes": 43157,
+      "sha256": "27f8c9a7a3168d15b9eca83ac92b285077b279d54ad43694c735cc354d047366"
+    },
+    {
+      "file": "after-output.txt",
+      "source": "artifacts/sight-zero-values/after-output.txt",
+      "bytes": 680,
+      "sha256": "905f85064c76f8e6fbb1a6390c3584b52aefe19e75ccfef432be9e5fd109c062"
+    },
+    {
+      "file": "append-evidence.cjs",
+      "source": "artifacts/sight-zero-values/append-evidence.cjs",
+      "bytes": 826,
+      "sha256": "904cf9b366e9af3f0b7f5b0c4dc5b7c44e46c06e3d135f530d21aa46de55523c"
+    },
+    {
+      "file": "archive.cjs",
+      "source": "artifacts/sight-zero-values/archive.cjs",
+      "bytes": 2822,
+      "sha256": "ac2a2b6dfc19173ef8fe8369e6655020f61936a40bbb1c358055e58632450bb8"
+    },
+    {
+      "file": "base.json",
+      "source": "artifacts/sight-zero-values/base.json",
+      "bytes": 136,
+      "sha256": "1eaf765b3019bccd88f32c976250c8ce6a792ac9163d6c031d1ba076976a22e4"
+    },
+    {
+      "file": "before/chromium-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/before/chromium-320-light-calibration.png",
+      "bytes": 32298,
+      "sha256": "34d369bb5de16c26e6798d5e4cac4b9c1f5abb57ca7ccf43fc20f4ef80bd9dca"
+    },
+    {
+      "file": "before/chromium-320-light-input.png",
+      "source": "artifacts/sight-zero-values/before/chromium-320-light-input.png",
+      "bytes": 38739,
+      "sha256": "c441a6193ee5021e53a8499a15493c4ee8fad96b6e399a4dcb63e79c7afe4c59"
+    },
+    {
+      "file": "before/chromium-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/chromium-320-light-snapshot.png",
+      "bytes": 37709,
+      "sha256": "71db1890781e1b87d892fda3a2fc7e606b3f3fb440c05a5338727f8e9cdfd15a"
+    },
+    {
+      "file": "before/chromium-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/before/chromium-375-dark-calibration.png",
+      "bytes": 46047,
+      "sha256": "b7e63a4aec361d1d34eca3d2d22edc6cfd182eb2a783b7b01366d488affab595"
+    },
+    {
+      "file": "before/chromium-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/before/chromium-375-dark-input.png",
+      "bytes": 48942,
+      "sha256": "6ad82c57c0bc89562648cfd6b86b145cce27fafe0d0a833bc8166d7c6cd2c91f"
+    },
+    {
+      "file": "before/chromium-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/chromium-375-dark-snapshot.png",
+      "bytes": 40616,
+      "sha256": "e87e6b7deabfdec6f48668c905723a0b91ea0b1f24aa6cfd26188beb7bce3185"
+    },
+    {
+      "file": "before/chromium-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/before/chromium-375-light-calibration.png",
+      "bytes": 45620,
+      "sha256": "542c6110e905a05b856988d0bf18d9906e4af425d75fe135c3c849e1cf0022e5"
+    },
+    {
+      "file": "before/chromium-375-light-input.png",
+      "source": "artifacts/sight-zero-values/before/chromium-375-light-input.png",
+      "bytes": 48572,
+      "sha256": "47f636c384808c3aab213940c9f63fd49df2a72a37c240d0714ca23bc98ad9d2"
+    },
+    {
+      "file": "before/chromium-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/chromium-375-light-snapshot.png",
+      "bytes": 39684,
+      "sha256": "d2dd8d56b8d8bee6074491baccf410719943e0d6a27a0be3c1633395f98e46bf"
+    },
+    {
+      "file": "before/chromium-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/before/chromium-900-light-calibration.png",
+      "bytes": 51267,
+      "sha256": "f2052233c08d65ac20c9c0c8517b7b77a2099c72443575b867db2b44f9f9bacb"
+    },
+    {
+      "file": "before/chromium-900-light-input.png",
+      "source": "artifacts/sight-zero-values/before/chromium-900-light-input.png",
+      "bytes": 51826,
+      "sha256": "344f8d12938f13b368d0799a6431251f8d7605d87e5eac50c14696fbae13f015"
+    },
+    {
+      "file": "before/chromium-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/chromium-900-light-snapshot.png",
+      "bytes": 50190,
+      "sha256": "16727633e1c716e6ad6c89e8103807097049ff44503a84ec8a572859285c8ba4"
+    },
+    {
+      "file": "before/results.json",
+      "source": "artifacts/sight-zero-values/before/results.json",
+      "bytes": 339960,
+      "sha256": "4a60e7b60b425c93f03a9a1e674ccc1c9281ae5e80b60fecf2f6a849670e1d9c"
+    },
+    {
+      "file": "before/webkit-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/before/webkit-320-light-calibration.png",
+      "bytes": 26293,
+      "sha256": "25a73e42cc138f8bb4223ad19b604cfeeb1ed4b2516c46a40a5acee6a72f6a3b"
+    },
+    {
+      "file": "before/webkit-320-light-input.png",
+      "source": "artifacts/sight-zero-values/before/webkit-320-light-input.png",
+      "bytes": 31311,
+      "sha256": "8df8fff37c440ac841c450e0dc37896e7d51bcc9faf352589ad5ccb9ed9f01d1"
+    },
+    {
+      "file": "before/webkit-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/webkit-320-light-snapshot.png",
+      "bytes": 32427,
+      "sha256": "1357d20a20bfe37c8907e60a78f6d29c6b1801eb9ffe8dece88e124702ad67c9"
+    },
+    {
+      "file": "before/webkit-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/before/webkit-375-dark-calibration.png",
+      "bytes": 35763,
+      "sha256": "43c4cf3f44e5d1543883fba1af9a314cf1bf8e69014861531f8f2e522ca070ce"
+    },
+    {
+      "file": "before/webkit-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/before/webkit-375-dark-input.png",
+      "bytes": 38608,
+      "sha256": "82e28410a8eea0e36376a9af1046c7ee9de6e680c7d9b9d6e50c90554202ec10"
+    },
+    {
+      "file": "before/webkit-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/webkit-375-dark-snapshot.png",
+      "bytes": 33760,
+      "sha256": "b83983958e2b07ff388b7d31ab839dbdc59b911ea8e1c8aa78ac37bc126b82fe"
+    },
+    {
+      "file": "before/webkit-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/before/webkit-375-light-calibration.png",
+      "bytes": 36040,
+      "sha256": "c0994c7b6bc70e6113588deef55f5c5c3d209afe3985da448a86238ad39faaee"
+    },
+    {
+      "file": "before/webkit-375-light-input.png",
+      "source": "artifacts/sight-zero-values/before/webkit-375-light-input.png",
+      "bytes": 39030,
+      "sha256": "5c5a897e14c8cb9867319b00b031bd6d001ddd5c42bbaceacf513e8a7e7574bf"
+    },
+    {
+      "file": "before/webkit-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/webkit-375-light-snapshot.png",
+      "bytes": 33774,
+      "sha256": "930413c19ea35f44eb503be668911a78302f24d68a772f119cac525c628d5627"
+    },
+    {
+      "file": "before/webkit-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/before/webkit-900-light-calibration.png",
+      "bytes": 42252,
+      "sha256": "b4700def79fa9fcfbfc3881dcfeebde67566c4673d6dbb19f4d61976230a368c"
+    },
+    {
+      "file": "before/webkit-900-light-input.png",
+      "source": "artifacts/sight-zero-values/before/webkit-900-light-input.png",
+      "bytes": 42655,
+      "sha256": "669d950f1b14677517357b3db539ee9ac0656e4eedd6f27d6c36887b88e39fda"
+    },
+    {
+      "file": "before/webkit-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/before/webkit-900-light-snapshot.png",
+      "bytes": 42984,
+      "sha256": "b2bf88ec4f364ff0deca2d1ec3559c0e6fe2f6f43737a573634d0d441a05661f"
+    },
+    {
+      "file": "before-output.txt",
+      "source": "artifacts/sight-zero-values/before-output.txt",
+      "bytes": 689,
+      "sha256": "ac9c7190a83286217ef0d9e5525c58492c85e52c41efa2836fdd130ccb131399"
+    },
+    {
+      "file": "candidate-newline-diff.json",
+      "source": "artifacts/sight-zero-values/candidate-newline-diff.json",
+      "bytes": 1762,
+      "sha256": "b146e3db7c3e07f95575d25a05de130ed22b94dead04d73664bf260398a7b14f"
+    },
+    {
+      "file": "candidate.json",
+      "source": "artifacts/sight-zero-values/candidate.json",
+      "bytes": 2564,
+      "sha256": "0c66a74e8f4b481a3d1df97c70d1fc59cbf3eef57307ce54bb8f9f4603c04b35"
+    },
+    {
+      "file": "capture.cjs",
+      "source": "artifacts/sight-zero-values/capture.cjs",
+      "bytes": 4946,
+      "sha256": "5965c98f5ce51acdf03648c86251a35ffe99d41e57474247f221355d0afed30a"
+    },
+    {
+      "file": "checkall-output.txt",
+      "source": "artifacts/sight-zero-values/checkall-output.txt",
+      "bytes": 4900,
+      "sha256": "f5c0a88160bed801fdd7edb4ad3c77252ac6d2a813fafc404addc61ee4602073"
+    },
+    {
+      "file": "ci-artifacts.json",
+      "source": "artifacts/sight-zero-values/ci-artifacts.json",
+      "bytes": 719,
+      "sha256": "123b342dfdbb5cb99ce285b37ecf28be7f02c82584a14f9e16e570f9bc7eac48"
+    },
+    {
+      "file": "ci-final-warm-start.json",
+      "source": "artifacts/sight-zero-values/ci-final-warm-start.json",
+      "bytes": 3701,
+      "sha256": "f096e85620bc4ce634c68f6f851b8349d1c87c840623ba804d26cab5e333409c"
+    },
+    {
+      "file": "ci-full-log.txt",
+      "source": "artifacts/sight-zero-values/ci-full-log.txt",
+      "bytes": 155189,
+      "sha256": "7ad473e195c00163959e0e50c20c2e65faf2b256c8e008dda7da0af04bc1e21f"
+    },
+    {
+      "file": "ci-selected.json",
+      "source": "artifacts/sight-zero-values/ci-selected.json",
+      "bytes": 159,
+      "sha256": "195035531a70e57cf2e1f2e53a47d7f578df3c15fce3f527fb9b65a0a26b43b0"
+    },
+    {
+      "file": "ci.json",
+      "source": "artifacts/sight-zero-values/ci.json",
+      "bytes": 5074,
+      "sha256": "6251eb3b374122f60b82549aea9b9e907e8a64b1300c187988ab73d46f2de7fd"
+    },
+    {
+      "file": "collect-ci.cjs",
+      "source": "artifacts/sight-zero-values/collect-ci.cjs",
+      "bytes": 1005,
+      "sha256": "f532b0d34415f3cf5f336e25a05b20bd3160336fa89896e95eaeac9b00cb0fc1"
+    },
+    {
+      "file": "collect-output.txt",
+      "source": "artifacts/sight-zero-values/collect-output.txt",
+      "bytes": 7899,
+      "sha256": "a316986c5230e8149abe8968c0818fd0ad464bf8d87c50fcc0059dbdc359617b"
+    },
+    {
+      "file": "collect.cjs",
+      "source": "artifacts/sight-zero-values/collect.cjs",
+      "bytes": 1104,
+      "sha256": "d041e50b6ff2c563d15e4fc8971c019c3ce73aaee112bf606f262d8c16d2429c"
+    },
+    {
+      "file": "correct-test-db.cjs",
+      "source": "artifacts/sight-zero-values/correct-test-db.cjs",
+      "bytes": 725,
+      "sha256": "c965af1663ed7cc80ebc6e8f6b1cebea6d2558809f120b443b5c40bf7a4853da"
+    },
+    {
+      "file": "cover-missing.cjs",
+      "source": "artifacts/sight-zero-values/cover-missing.cjs",
+      "bytes": 422,
+      "sha256": "d0da0f810775b3469d3169beabe7e5125e9e6efe1695384b1db1a0e6258450af"
+    },
+    {
+      "file": "extract.py",
+      "source": "artifacts/sight-zero-values/extract.py",
+      "bytes": 610,
+      "sha256": "8691d9e0c73814e119667c2fbfcafbf360309fe188ddaf626b15440a6184a75b"
+    },
+    {
+      "file": "final/chromium-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/final/chromium-320-light-calibration.png",
+      "bytes": 32795,
+      "sha256": "affe8e06473af66c283f29099d26a3a15d0754469d361c1f058c253b777d7f73"
+    },
+    {
+      "file": "final/chromium-320-light-input.png",
+      "source": "artifacts/sight-zero-values/final/chromium-320-light-input.png",
+      "bytes": 39028,
+      "sha256": "fe6dddd4adcd76cd94dff60f9ebadfa86941382c9bec76c0169f0751c147a250"
+    },
+    {
+      "file": "final/chromium-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/chromium-320-light-snapshot.png",
+      "bytes": 37993,
+      "sha256": "af2916166e3c9f4df491450439a6cec8deb011d0eae9e0a4c033b4b68d003650"
+    },
+    {
+      "file": "final/chromium-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/final/chromium-375-dark-calibration.png",
+      "bytes": 46637,
+      "sha256": "3f4c1f9eee06c3fd86d3b254c60c5aa07cb392560ed726b9f80c9a5e77ed9814"
+    },
+    {
+      "file": "final/chromium-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/final/chromium-375-dark-input.png",
+      "bytes": 49225,
+      "sha256": "f996d47a3a25ef6b0f64aee50ee1fd1b349858f720b0c93977d3f1d6bc6694dd"
+    },
+    {
+      "file": "final/chromium-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/chromium-375-dark-snapshot.png",
+      "bytes": 40898,
+      "sha256": "7f9e6a5f0b35b526a251f13908aa04b10e3df6f32ee2c1140ed76e237d7024db"
+    },
+    {
+      "file": "final/chromium-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/final/chromium-375-light-calibration.png",
+      "bytes": 46185,
+      "sha256": "c93553b6e72bb69488ba876c21be412aa924d1db18e1ae80e0cdb8c52be75c73"
+    },
+    {
+      "file": "final/chromium-375-light-input.png",
+      "source": "artifacts/sight-zero-values/final/chromium-375-light-input.png",
+      "bytes": 48857,
+      "sha256": "b5ab7da609af8df399ff2a550143cd215ba2f0e23750fb112bb3745b1e021cf2"
+    },
+    {
+      "file": "final/chromium-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/chromium-375-light-snapshot.png",
+      "bytes": 39971,
+      "sha256": "3b592fd24f0ac8c0b8cddd8ed5245b16ca3352e81a64ea1dbc77ac068e317895"
+    },
+    {
+      "file": "final/chromium-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/final/chromium-900-light-calibration.png",
+      "bytes": 51577,
+      "sha256": "a9c462cbfcec1574f695277326a20b91cea0c772f26f14f6d040ca51a86430f5"
+    },
+    {
+      "file": "final/chromium-900-light-input.png",
+      "source": "artifacts/sight-zero-values/final/chromium-900-light-input.png",
+      "bytes": 52097,
+      "sha256": "6554bc25b26228aa6168143205a2a084e77710a5a6d2393a76814d9e5f95412f"
+    },
+    {
+      "file": "final/chromium-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/chromium-900-light-snapshot.png",
+      "bytes": 50469,
+      "sha256": "f6793ea3bd87e0457fdbffdc5df2d153a7dbedcf1b9ed2e26ca7e5226016caaa"
+    },
+    {
+      "file": "final/results.json",
+      "source": "artifacts/sight-zero-values/final/results.json",
+      "bytes": 339912,
+      "sha256": "656fd39ea4525b24e157d033535d6a712e5ec0fd9f95d9423dbebe9e37b4d4b5"
+    },
+    {
+      "file": "final/webkit-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/final/webkit-320-light-calibration.png",
+      "bytes": 26828,
+      "sha256": "3f7529c17dbc8bbc2d95d68e5830af010973262aa36e94d053ed3558cd907334"
+    },
+    {
+      "file": "final/webkit-320-light-input.png",
+      "source": "artifacts/sight-zero-values/final/webkit-320-light-input.png",
+      "bytes": 31572,
+      "sha256": "4fccc3577e48a3ab12fb32fcc7c03c8f63205bfa4de25116e4978b7dd9763fa3"
+    },
+    {
+      "file": "final/webkit-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/webkit-320-light-snapshot.png",
+      "bytes": 32704,
+      "sha256": "18fdf2b255763242d5d508c7b6e4aea4ae0c25aa094214d3d5d73070715b0d13"
+    },
+    {
+      "file": "final/webkit-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/final/webkit-375-dark-calibration.png",
+      "bytes": 36230,
+      "sha256": "4c9ce4a0bd61be4fa32a22bcd70ee685f8aa0d7e8d75504f5cf8dd6f565fc591"
+    },
+    {
+      "file": "final/webkit-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/final/webkit-375-dark-input.png",
+      "bytes": 38768,
+      "sha256": "bbc99f1e9fb3c0c1dcbeb05bca88c3582b5892929a63ffe04243e649419f2233"
+    },
+    {
+      "file": "final/webkit-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/webkit-375-dark-snapshot.png",
+      "bytes": 33922,
+      "sha256": "3b96d9b8798a7e14f6d85be98d51bea6d9376f23fdb7306decadf6f4549c0fdf"
+    },
+    {
+      "file": "final/webkit-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/final/webkit-375-light-calibration.png",
+      "bytes": 36475,
+      "sha256": "671d65d5ebe2e26b459ca4f59d224e5d593ef30e1ea91b012c2b296d9019eeaa"
+    },
+    {
+      "file": "final/webkit-375-light-input.png",
+      "source": "artifacts/sight-zero-values/final/webkit-375-light-input.png",
+      "bytes": 39192,
+      "sha256": "32bef6d415aa08605c313487b887bce71d71f264067f867095e618fd27dca1b9"
+    },
+    {
+      "file": "final/webkit-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/webkit-375-light-snapshot.png",
+      "bytes": 33949,
+      "sha256": "7b54e58f95012285a3d68b282b0375f1f1655ae490d1ab3d8f85128f7d845f6a"
+    },
+    {
+      "file": "final/webkit-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/final/webkit-900-light-calibration.png",
+      "bytes": 42555,
+      "sha256": "1bc0e0586781aa4f107e3afa071b33b1ec62112ac88615ee153f85945207ab45"
+    },
+    {
+      "file": "final/webkit-900-light-input.png",
+      "source": "artifacts/sight-zero-values/final/webkit-900-light-input.png",
+      "bytes": 42828,
+      "sha256": "f4306d5c2d99fd286902919a59fc14c7c91abbc22be292b90c3cc348e9a056d7"
+    },
+    {
+      "file": "final/webkit-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/final/webkit-900-light-snapshot.png",
+      "bytes": 43157,
+      "sha256": "27f8c9a7a3168d15b9eca83ac92b285077b279d54ad43694c735cc354d047366"
+    },
+    {
+      "file": "final-ui-output.txt",
+      "source": "artifacts/sight-zero-values/final-ui-output.txt",
+      "bytes": 680,
+      "sha256": "df7ea0e07d7bc124e377d6a2d3e14cb4760bc50f9fa7fc25a5fc00e34d682a6c"
+    },
+    {
+      "file": "finish.cjs",
+      "source": "artifacts/sight-zero-values/finish.cjs",
+      "bytes": 5569,
+      "sha256": "8a3a2f250fa4aaf7fffffbee5d3337a838fad9122ce97948301ee010031e7dad"
+    },
+    {
+      "file": "format-output.txt",
+      "source": "artifacts/sight-zero-values/format-output.txt",
+      "bytes": 401,
+      "sha256": "089a2e06488aceeda9588564ad4777a4edf6593bf2c303ad8e916fdc73e02948"
+    },
+    {
+      "file": "format-pretest-output.txt",
+      "source": "artifacts/sight-zero-values/format-pretest-output.txt",
+      "bytes": 170,
+      "sha256": "da86d2a63849063a40d78c9ae6ae043dcc061b93023d6bcc6ba7b52032dab268"
+    },
+    {
+      "file": "freeze-output.txt",
+      "source": "artifacts/sight-zero-values/freeze-output.txt",
+      "bytes": 52,
+      "sha256": "37f6ca16cf2ac6ad61d42e9896bc607136157edc20483bbc038287cfda3fabcd"
+    },
+    {
+      "file": "freeze.cjs",
+      "source": "artifacts/sight-zero-values/freeze.cjs",
+      "bytes": 878,
+      "sha256": "de0eac586e962b9f0172a50abac75fcf917e79f0414a519d108ddec3329e3321"
+    },
+    {
+      "file": "full-output.txt",
+      "source": "artifacts/sight-zero-values/full-output.txt",
+      "bytes": 51191,
+      "sha256": "aba51eb5a8d8dff57794b8da8fb9fcd577a190d5496be1ce8a03b8dc931bed40"
+    },
+    {
+      "file": "green-complete-output.txt",
+      "source": "artifacts/sight-zero-values/green-complete-output.txt",
+      "bytes": 1419,
+      "sha256": "7e0c964ce95c9567296d19437873c41921df394ae8b1a7185a787fcee87a04b8"
+    },
+    {
+      "file": "green-output.txt",
+      "source": "artifacts/sight-zero-values/green-output.txt",
+      "bytes": 1418,
+      "sha256": "dc0699632792a695dacf2b7d757befc673cca78f445e16348bd039ce9a78d966"
+    },
+    {
+      "file": "invariants-final-ui-output.txt",
+      "source": "artifacts/sight-zero-values/invariants-final-ui-output.txt",
+      "bytes": 286,
+      "sha256": "cdc065a923162f3281070df08685f00152305d71f50957bc2b2bacb2330b62ea"
+    },
+    {
+      "file": "invariants-output.txt",
+      "source": "artifacts/sight-zero-values/invariants-output.txt",
+      "bytes": 286,
+      "sha256": "cdc065a923162f3281070df08685f00152305d71f50957bc2b2bacb2330b62ea"
+    },
+    {
+      "file": "invariants-public-output.txt",
+      "source": "artifacts/sight-zero-values/invariants-public-output.txt",
+      "bytes": 286,
+      "sha256": "cdc065a923162f3281070df08685f00152305d71f50957bc2b2bacb2330b62ea"
+    },
+    {
+      "file": "invariants.cjs",
+      "source": "artifacts/sight-zero-values/invariants.cjs",
+      "bytes": 2846,
+      "sha256": "1d7427814f2cd6a8d98760e0fd3edaedfaf3a57bdec33abc9e198de071d1d03e"
+    },
+    {
+      "file": "lint-output.txt",
+      "source": "artifacts/sight-zero-values/lint-output.txt",
+      "bytes": 120,
+      "sha256": "4f4ff806c25c44159a55d2bf5f5d6c8fed90bd669ba79028701272b8e5318148"
+    },
+    {
+      "file": "missing-test-format-output.txt",
+      "source": "artifacts/sight-zero-values/missing-test-format-output.txt",
+      "bytes": 43,
+      "sha256": "f8f6b723295b9a649e1963b91f166c60027cc139a8214030ab043cfa6d0a6d60"
+    },
+    {
+      "file": "native/chromium-320-dark-20-active.png",
+      "source": "artifacts/sight-zero-values/native/chromium-320-dark-20-active.png",
+      "bytes": 46639,
+      "sha256": "b6ec74206f82d7c50d6c8a8817a45136dc5210e071d48a222f1186a1ea655b07"
+    },
+    {
+      "file": "native/chromium-320-light-15-active.png",
+      "source": "artifacts/sight-zero-values/native/chromium-320-light-15-active.png",
+      "bytes": 42530,
+      "sha256": "6f311ca86af841253de40c006c1bd890a8ba560c6ad3a9d6af86e412ec167705"
+    },
+    {
+      "file": "native/chromium-375-dark-15-active.png",
+      "source": "artifacts/sight-zero-values/native/chromium-375-dark-15-active.png",
+      "bytes": 63934,
+      "sha256": "5806d6970df9926a2dac9aae25f1759cf6c5371211ac26873a15aba83bcd9412"
+    },
+    {
+      "file": "native/chromium-375-dark-15-selected.png",
+      "source": "artifacts/sight-zero-values/native/chromium-375-dark-15-selected.png",
+      "bytes": 59266,
+      "sha256": "349c7ca0238814ae3c7f03d6fba98277ae3b5b864389a881b2e174badb819611"
+    },
+    {
+      "file": "native/chromium-900-light-15-active.png",
+      "source": "artifacts/sight-zero-values/native/chromium-900-light-15-active.png",
+      "bytes": 74913,
+      "sha256": "d8ec01f6789a35c51b4ef39bc698d857549e3b58c3e638946e9e4dac25cac746"
+    },
+    {
+      "file": "native/last-geometry.json",
+      "source": "artifacts/sight-zero-values/native/last-geometry.json",
+      "bytes": 3005,
+      "sha256": "400c0698b2b0c32241c1749f7879aaddea5ed03f8641557ec7b1516e838f3f09"
+    },
+    {
+      "file": "native/results.json",
+      "source": "artifacts/sight-zero-values/native/results.json",
+      "bytes": 84577,
+      "sha256": "a62b207dca8ce23708354736734d4199df2a4300dc8e3c459520839ff7052001"
+    },
+    {
+      "file": "native/webkit-320-dark-20-active.png",
+      "source": "artifacts/sight-zero-values/native/webkit-320-dark-20-active.png",
+      "bytes": 43931,
+      "sha256": "c7d931b8d7314bfb82bdb2758a859fc45c31b773c5ba12869a6a61c849df2a36"
+    },
+    {
+      "file": "native/webkit-320-light-15-active.png",
+      "source": "artifacts/sight-zero-values/native/webkit-320-light-15-active.png",
+      "bytes": 40836,
+      "sha256": "75a56353c3545317d796fbca7aaaab0156d0ba4080526f20eef35bd68049a9f7"
+    },
+    {
+      "file": "native/webkit-375-dark-15-active.png",
+      "source": "artifacts/sight-zero-values/native/webkit-375-dark-15-active.png",
+      "bytes": 60871,
+      "sha256": "6dd5283cc1288bf2fb1cbb21123216d6d24d3df4571024586ac22704136538d6"
+    },
+    {
+      "file": "native/webkit-375-dark-15-selected.png",
+      "source": "artifacts/sight-zero-values/native/webkit-375-dark-15-selected.png",
+      "bytes": 57560,
+      "sha256": "0c317a6667c7f205a6ddce0eb1fb7e0ccde28455961ab95961df08e2350e76a6"
+    },
+    {
+      "file": "native/webkit-900-light-15-active.png",
+      "source": "artifacts/sight-zero-values/native/webkit-900-light-15-active.png",
+      "bytes": 73772,
+      "sha256": "6773d9fb504226e6c93e0f49be9b98d84fe7bce4eef794539692bfc578b20876"
+    },
+    {
+      "file": "native-output.txt",
+      "source": "artifacts/sight-zero-values/native-output.txt",
+      "bytes": 682,
+      "sha256": "8a2d128fdf6d176053f174d93441bcb2e7a18ad87da0de49088dff45cdb641d4"
+    },
+    {
+      "file": "native.cjs",
+      "source": "artifacts/sight-zero-values/native.cjs",
+      "bytes": 7784,
+      "sha256": "85e765e41416d03839cb64af9985e8605611c1b72e6874dd192932d14e31df48"
+    },
+    {
+      "file": "npm.cjs",
+      "source": "artifacts/sight-zero-values/npm.cjs",
+      "bytes": 621,
+      "sha256": "a9cf67f42c87de76faf8fc327a521dc3adf13d922b013d41de96d32021a3f42b"
+    },
+    {
+      "file": "old-tasks.json",
+      "source": "artifacts/sight-zero-values/old-tasks.json",
+      "bytes": 139215,
+      "sha256": "f68d2a729cce72ab1932c6ce257d9fcfeaa5609387b9144d60d2e65649b33c87"
+    },
+    {
+      "file": "parity-output.txt",
+      "source": "artifacts/sight-zero-values/parity-output.txt",
+      "bytes": 211,
+      "sha256": "7f1d59461f20fa0bbe17539837df167e0ebc9b6a1fa94406af373c4b8be95dd7"
+    },
+    {
+      "file": "parity.cjs",
+      "source": "artifacts/sight-zero-values/parity.cjs",
+      "bytes": 2993,
+      "sha256": "cf81a3f7ae23d173c09fbd494e36d04d99eb437d871593720147af27cbf39f02"
+    },
+    {
+      "file": "parity.json",
+      "source": "artifacts/sight-zero-values/parity.json",
+      "bytes": 4362,
+      "sha256": "ddfc791bed9d03a2f9aa1f6d7e74376dbecabea6c8f940a96023fce56614ac04"
+    },
+    {
+      "file": "plan-commit-output.txt",
+      "source": "artifacts/sight-zero-values/plan-commit-output.txt",
+      "bytes": 161,
+      "sha256": "3397a09994612812551e70f69260a7c332352fe7415fcccef79e9cd74904f9e2"
+    },
+    {
+      "file": "prepare-notes.cjs",
+      "source": "artifacts/sight-zero-values/prepare-notes.cjs",
+      "bytes": 1115,
+      "sha256": "f3ca4299538cff92553149b25e097d740595a94850853e734ee3e7ccf4e52b31"
+    },
+    {
+      "file": "prepare-release.cjs",
+      "source": "artifacts/sight-zero-values/prepare-release.cjs",
+      "bytes": 981,
+      "sha256": "bda235753e93ba31a67959e858c62c7bd89756e8142504b3a1155fe5a468805c"
+    },
+    {
+      "file": "prepare-tools.cjs",
+      "source": "artifacts/sight-zero-values/prepare-tools.cjs",
+      "bytes": 268,
+      "sha256": "339c3b7890bab03dfbc452db7545f9873f06d0d6cbfc7e6ab846d526ffd4d457"
+    },
+    {
+      "file": "prepare.cjs",
+      "source": "artifacts/sight-zero-values/prepare.cjs",
+      "bytes": 1237,
+      "sha256": "f9510b061019eacd707a49531144e3e2d75f68fa7666ff3ef5aff18e82ed4682"
+    },
+    {
+      "file": "prepublish-output.txt",
+      "source": "artifacts/sight-zero-values/prepublish-output.txt",
+      "bytes": 113,
+      "sha256": "1b1abcde4007d869aa24ba0922d925dca06fcc6a67f8dd9101cf63eb59b95b3f"
+    },
+    {
+      "file": "prepublish.cjs",
+      "source": "artifacts/sight-zero-values/prepublish.cjs",
+      "bytes": 1606,
+      "sha256": "546ff1054b998d0712a265e4cfaea8e1e6dc62c157199305c776c6c5c7b8b4d0"
+    },
+    {
+      "file": "prepublish.json",
+      "source": "artifacts/sight-zero-values/prepublish.json",
+      "bytes": 307,
+      "sha256": "672df6b805230d74f23bcd929ee7cad708ff6f22c33b92fe38731c8907ae30d3"
+    },
+    {
+      "file": "public/chromium-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/public/chromium-320-light-calibration.png",
+      "bytes": 32795,
+      "sha256": "affe8e06473af66c283f29099d26a3a15d0754469d361c1f058c253b777d7f73"
+    },
+    {
+      "file": "public/chromium-320-light-input.png",
+      "source": "artifacts/sight-zero-values/public/chromium-320-light-input.png",
+      "bytes": 39028,
+      "sha256": "fe6dddd4adcd76cd94dff60f9ebadfa86941382c9bec76c0169f0751c147a250"
+    },
+    {
+      "file": "public/chromium-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/chromium-320-light-snapshot.png",
+      "bytes": 37993,
+      "sha256": "af2916166e3c9f4df491450439a6cec8deb011d0eae9e0a4c033b4b68d003650"
+    },
+    {
+      "file": "public/chromium-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/public/chromium-375-dark-calibration.png",
+      "bytes": 46637,
+      "sha256": "3f4c1f9eee06c3fd86d3b254c60c5aa07cb392560ed726b9f80c9a5e77ed9814"
+    },
+    {
+      "file": "public/chromium-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/public/chromium-375-dark-input.png",
+      "bytes": 49225,
+      "sha256": "f996d47a3a25ef6b0f64aee50ee1fd1b349858f720b0c93977d3f1d6bc6694dd"
+    },
+    {
+      "file": "public/chromium-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/chromium-375-dark-snapshot.png",
+      "bytes": 40898,
+      "sha256": "7f9e6a5f0b35b526a251f13908aa04b10e3df6f32ee2c1140ed76e237d7024db"
+    },
+    {
+      "file": "public/chromium-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/public/chromium-375-light-calibration.png",
+      "bytes": 46185,
+      "sha256": "c93553b6e72bb69488ba876c21be412aa924d1db18e1ae80e0cdb8c52be75c73"
+    },
+    {
+      "file": "public/chromium-375-light-input.png",
+      "source": "artifacts/sight-zero-values/public/chromium-375-light-input.png",
+      "bytes": 48857,
+      "sha256": "b5ab7da609af8df399ff2a550143cd215ba2f0e23750fb112bb3745b1e021cf2"
+    },
+    {
+      "file": "public/chromium-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/chromium-375-light-snapshot.png",
+      "bytes": 39971,
+      "sha256": "3b592fd24f0ac8c0b8cddd8ed5245b16ca3352e81a64ea1dbc77ac068e317895"
+    },
+    {
+      "file": "public/chromium-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/public/chromium-900-light-calibration.png",
+      "bytes": 51577,
+      "sha256": "a9c462cbfcec1574f695277326a20b91cea0c772f26f14f6d040ca51a86430f5"
+    },
+    {
+      "file": "public/chromium-900-light-input.png",
+      "source": "artifacts/sight-zero-values/public/chromium-900-light-input.png",
+      "bytes": 52097,
+      "sha256": "6554bc25b26228aa6168143205a2a084e77710a5a6d2393a76814d9e5f95412f"
+    },
+    {
+      "file": "public/chromium-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/chromium-900-light-snapshot.png",
+      "bytes": 50469,
+      "sha256": "f6793ea3bd87e0457fdbffdc5df2d153a7dbedcf1b9ed2e26ca7e5226016caaa"
+    },
+    {
+      "file": "public/results.json",
+      "source": "artifacts/sight-zero-values/public/results.json",
+      "bytes": 339912,
+      "sha256": "656fd39ea4525b24e157d033535d6a712e5ec0fd9f95d9423dbebe9e37b4d4b5"
+    },
+    {
+      "file": "public/webkit-320-light-calibration.png",
+      "source": "artifacts/sight-zero-values/public/webkit-320-light-calibration.png",
+      "bytes": 26828,
+      "sha256": "3f7529c17dbc8bbc2d95d68e5830af010973262aa36e94d053ed3558cd907334"
+    },
+    {
+      "file": "public/webkit-320-light-input.png",
+      "source": "artifacts/sight-zero-values/public/webkit-320-light-input.png",
+      "bytes": 31572,
+      "sha256": "4fccc3577e48a3ab12fb32fcc7c03c8f63205bfa4de25116e4978b7dd9763fa3"
+    },
+    {
+      "file": "public/webkit-320-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/webkit-320-light-snapshot.png",
+      "bytes": 32704,
+      "sha256": "18fdf2b255763242d5d508c7b6e4aea4ae0c25aa094214d3d5d73070715b0d13"
+    },
+    {
+      "file": "public/webkit-375-dark-calibration.png",
+      "source": "artifacts/sight-zero-values/public/webkit-375-dark-calibration.png",
+      "bytes": 36230,
+      "sha256": "4c9ce4a0bd61be4fa32a22bcd70ee685f8aa0d7e8d75504f5cf8dd6f565fc591"
+    },
+    {
+      "file": "public/webkit-375-dark-input.png",
+      "source": "artifacts/sight-zero-values/public/webkit-375-dark-input.png",
+      "bytes": 38768,
+      "sha256": "bbc99f1e9fb3c0c1dcbeb05bca88c3582b5892929a63ffe04243e649419f2233"
+    },
+    {
+      "file": "public/webkit-375-dark-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/webkit-375-dark-snapshot.png",
+      "bytes": 33922,
+      "sha256": "3b96d9b8798a7e14f6d85be98d51bea6d9376f23fdb7306decadf6f4549c0fdf"
+    },
+    {
+      "file": "public/webkit-375-light-calibration.png",
+      "source": "artifacts/sight-zero-values/public/webkit-375-light-calibration.png",
+      "bytes": 36475,
+      "sha256": "671d65d5ebe2e26b459ca4f59d224e5d593ef30e1ea91b012c2b296d9019eeaa"
+    },
+    {
+      "file": "public/webkit-375-light-input.png",
+      "source": "artifacts/sight-zero-values/public/webkit-375-light-input.png",
+      "bytes": 39192,
+      "sha256": "32bef6d415aa08605c313487b887bce71d71f264067f867095e618fd27dca1b9"
+    },
+    {
+      "file": "public/webkit-375-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/webkit-375-light-snapshot.png",
+      "bytes": 33949,
+      "sha256": "7b54e58f95012285a3d68b282b0375f1f1655ae490d1ab3d8f85128f7d845f6a"
+    },
+    {
+      "file": "public/webkit-900-light-calibration.png",
+      "source": "artifacts/sight-zero-values/public/webkit-900-light-calibration.png",
+      "bytes": 42555,
+      "sha256": "1bc0e0586781aa4f107e3afa071b33b1ec62112ac88615ee153f85945207ab45"
+    },
+    {
+      "file": "public/webkit-900-light-input.png",
+      "source": "artifacts/sight-zero-values/public/webkit-900-light-input.png",
+      "bytes": 42828,
+      "sha256": "f4306d5c2d99fd286902919a59fc14c7c91abbc22be292b90c3cc348e9a056d7"
+    },
+    {
+      "file": "public/webkit-900-light-snapshot.png",
+      "source": "artifacts/sight-zero-values/public/webkit-900-light-snapshot.png",
+      "bytes": 43157,
+      "sha256": "27f8c9a7a3168d15b9eca83ac92b285077b279d54ad43694c735cc354d047366"
+    },
+    {
+      "file": "public-final/after-update.json",
+      "source": "artifacts/sight-zero-values/public-final/after-update.json",
+      "bytes": 16371,
+      "sha256": "fd124368b5818e18e8e513393b1d6dc122a96ff1e2fde9fb9035986fb4aebadf"
+    },
+    {
+      "file": "public-final/analysis.json",
+      "source": "artifacts/sight-zero-values/public-final/analysis.json",
+      "bytes": 971,
+      "sha256": "33135fe053e0f61250499e7423532fd3fc66c53714da245556a6ae783b6e6783"
+    },
+    {
+      "file": "public-final/banner.png",
+      "source": "artifacts/sight-zero-values/public-final/banner.png",
+      "bytes": 46452,
+      "sha256": "69ce1cd3f941dfa729378282a4fb54e34112cbfa3bb92777414f4efc70387dcf"
+    },
+    {
+      "file": "public-final/baseline.json",
+      "source": "artifacts/sight-zero-values/public-final/baseline.json",
+      "bytes": 21382,
+      "sha256": "6493b5857d9e976a9979f4ce3cd658cab78079393208328fceb8a59cb88fdabb"
+    },
+    {
+      "file": "public-final/complete.json",
+      "source": "artifacts/sight-zero-values/public-final/complete.json",
+      "bytes": 26737,
+      "sha256": "7fb3cbd59bc27f0c0ccdcba232a42b966daf47aab2d33786fb03690d876e2291"
+    },
+    {
+      "file": "public-final/correction-entry320.png",
+      "source": "artifacts/sight-zero-values/public-final/correction-entry320.png",
+      "bytes": 29265,
+      "sha256": "e1e0b6788c833e352fb723af25d2c5f8ce50db6ee426850e9524246619e410a4"
+    },
+    {
+      "file": "public-final/correction-exit320.png",
+      "source": "artifacts/sight-zero-values/public-final/correction-exit320.png",
+      "bytes": 26742,
+      "sha256": "143c68b36612f8e30d7aa3371800f4476cbea6adcdaebeaa7a44ac4c85b63f65"
+    },
+    {
+      "file": "public-final/correction-geometry.json",
+      "source": "artifacts/sight-zero-values/public-final/correction-geometry.json",
+      "bytes": 4120,
+      "sha256": "123e6af4eb003beecc5e6a2996237147bb9a33d00b5787545e5723dda5b66d29"
+    },
+    {
+      "file": "public-final/dock-geometry.json",
+      "source": "artifacts/sight-zero-values/public-final/dock-geometry.json",
+      "bytes": 1628,
+      "sha256": "df76888e15984575beaaac7c2b3875493177444a9e217b3050e37695aecbe785"
+    },
+    {
+      "file": "public-final/first-target320.png",
+      "source": "artifacts/sight-zero-values/public-final/first-target320.png",
+      "bytes": 55816,
+      "sha256": "97a98cfdae0d42f1aed045bc1a491b72d071539c538ad6dcf7699cf5a14fb6c3"
+    },
+    {
+      "file": "public-final/history-geometry.json",
+      "source": "artifacts/sight-zero-values/public-final/history-geometry.json",
+      "bytes": 341,
+      "sha256": "d8c9c6cfb4e62004c846f42d8d062a8c982cb442952895d149286c9d9ddba015"
+    },
+    {
+      "file": "public-final/metrics-trace.json",
+      "source": "artifacts/sight-zero-values/public-final/metrics-trace.json",
+      "bytes": 10463,
+      "sha256": "8e371388858a3ff02e91bbfe8e2c26625fff375885bedeb466b7548aba1a383a"
+    },
+    {
+      "file": "public-final/offline.png",
+      "source": "artifacts/sight-zero-values/public-final/offline.png",
+      "bytes": 54398,
+      "sha256": "ffbd661857e9d43cddf44a865a72cb49358845b09f8aad6e0d7e7040052c1d74"
+    },
+    {
+      "file": "public-final/pending-analysis.png",
+      "source": "artifacts/sight-zero-values/public-final/pending-analysis.png",
+      "bytes": 33451,
+      "sha256": "c924df51666a005edc621becaba977d5cc450ee6d46847c3f65e82750d8c00ec"
+    },
+    {
+      "file": "public-final/pending-history.png",
+      "source": "artifacts/sight-zero-values/public-final/pending-history.png",
+      "bytes": 33169,
+      "sha256": "fab1afb52a13a5e97fa79f45317c9de461d5e95730f5cd312cfb61464075286f"
+    },
+    {
+      "file": "public-final/pending-summary.png",
+      "source": "artifacts/sight-zero-values/public-final/pending-summary.png",
+      "bytes": 47510,
+      "sha256": "29503e12a61ada0b5776c02c9b573c6ee9aebb31b6314f966f7061c2ab902c31"
+    },
+    {
+      "file": "public-final/progress.txt",
+      "source": "artifacts/sight-zero-values/public-final/progress.txt",
+      "bytes": 396,
+      "sha256": "8f5bd22773f1a9a9585af80dc52c28bec7cb89ed4b1aefee6dd4be770bed7d39"
+    },
+    {
+      "file": "public-final/projected-history.json",
+      "source": "artifacts/sight-zero-values/public-final/projected-history.json",
+      "bytes": 834,
+      "sha256": "ac945c942f45420b7d97bd238dc466af1d95c0a4032c69f2d75c5b0c16f21a31"
+    },
+    {
+      "file": "public-final/projected-history.png",
+      "source": "artifacts/sight-zero-values/public-final/projected-history.png",
+      "bytes": 33936,
+      "sha256": "ab081fc12b9ccca777b2007bd600b0156b028ad16e9380f36bf8798bdab1381f"
+    },
+    {
+      "file": "public-final/projected-summary.json",
+      "source": "artifacts/sight-zero-values/public-final/projected-summary.json",
+      "bytes": 828,
+      "sha256": "04f980b12d45ebd227fe15fcccbeb7ee7364eb130222e8270c8be78e33f61d32"
+    },
+    {
+      "file": "public-final/projected-summary.png",
+      "source": "artifacts/sight-zero-values/public-final/projected-summary.png",
+      "bytes": 47510,
+      "sha256": "29503e12a61ada0b5776c02c9b573c6ee9aebb31b6314f966f7061c2ab902c31"
+    },
+    {
+      "file": "public-ui-output.txt",
+      "source": "artifacts/sight-zero-values/public-ui-output.txt",
+      "bytes": 689,
+      "sha256": "39cb1da017f40c90b3922bc7861443368549f5329797390a5f8add18df09d7c4"
+    },
+    {
+      "file": "public-update.cjs",
+      "source": "artifacts/sight-zero-values/public-update.cjs",
+      "bytes": 20135,
+      "sha256": "3d54092f9a5183509d4e1104633bf7c6a8d13fe0d9b697e1062f9ff14d591ee8"
+    },
+    {
+      "file": "public-warm-output.txt",
+      "source": "artifacts/sight-zero-values/public-warm-output.txt",
+      "bytes": 517,
+      "sha256": "ab9e6aa4b43efde2f13daece73de240351eeebf4992b6dd345486dde6ad14c68"
+    },
+    {
+      "file": "push-output.txt",
+      "source": "artifacts/sight-zero-values/push-output.txt",
+      "bytes": 88,
+      "sha256": "6e76ee53d51c13d27a7fda620da3018fe0e64ace1839ab0be0d431f9b9fd2aab"
+    },
+    {
+      "file": "record-public-viewed.cjs",
+      "source": "artifacts/sight-zero-values/record-public-viewed.cjs",
+      "bytes": 526,
+      "sha256": "53aa456d13f77015d66d82e32d730b487391ecf9a3e89e9340d93d4d1a7d21d8"
+    },
+    {
+      "file": "red-contexts/sight-zero-values-calibrat-9ffcc-isting-marks-through-reload-chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-contexts/sight-zero-values-calibrat-9ffcc-isting-marks-through-reload-chromium.md.txt",
+      "bytes": 8343,
+      "sha256": "4ef29a57563f28d9784b9b738f413aa87d1b4733bd0b6abb09b8c87020a67d48"
+    },
+    {
+      "file": "red-contexts/sight-zero-values-numeric--32c7a-actice-and-calibration-375--chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-contexts/sight-zero-values-numeric--32c7a-actice-and-calibration-375--chromium.md.txt",
+      "bytes": 8308,
+      "sha256": "b2c6515953dd4467ea0936778e7ff88aa6671c9d09389278874659c655a158cb"
+    },
+    {
+      "file": "red-contexts/sight-zero-values-numeric--3d2e9-actice-and-calibration-900--chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-contexts/sight-zero-values-numeric--3d2e9-actice-and-calibration-900--chromium.md.txt",
+      "bytes": 8308,
+      "sha256": "149f7e2da1c736d18156dce9b7f535eba93670f69baacd257c7de83cc89c07cb"
+    },
+    {
+      "file": "red-contexts/sight-zero-values-numeric--73bde-actice-and-calibration-320--chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-contexts/sight-zero-values-numeric--73bde-actice-and-calibration-320--chromium.md.txt",
+      "bytes": 8308,
+      "sha256": "eb9fc8208d792b1049c899e854590432f9e398384ea3e8338d129fd3fce79e18"
+    },
+    {
+      "file": "red-contexts/sight-zero-values-practice-25660-es-and-saves-a-scored-arrow-chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-contexts/sight-zero-values-practice-25660-es-and-saves-a-scored-arrow-chromium.md.txt",
+      "bytes": 8221,
+      "sha256": "9a6798557b2ce79020ad696259bf73deb5991593ada6b59acecc8877198e6fcb"
+    },
+    {
+      "file": "red-contexts/sight-zero-values-zero-dis-5c396-negatives-text-and-escaping-chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-contexts/sight-zero-values-zero-dis-5c396-negatives-text-and-escaping-chromium.md.txt",
+      "bytes": 12639,
+      "sha256": "0ccd7a9ddc068dd47daa9c19876f1344338d208dcd4e3ac31ec8aa8e7dff97ec"
+    },
+    {
+      "file": "red-initial-contexts/sight-zero-values-calibrat-9ffcc-isting-marks-through-reload-chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-initial-contexts/sight-zero-values-calibrat-9ffcc-isting-marks-through-reload-chromium.md.txt",
+      "bytes": 8395,
+      "sha256": "a6298c5a1b0740980b4d5b5cd73bc6258c03cf044673ba163bc06debebaecc35"
+    },
+    {
+      "file": "red-initial-contexts/sight-zero-values-numeric--32c7a-actice-and-calibration-375--chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-initial-contexts/sight-zero-values-numeric--32c7a-actice-and-calibration-375--chromium.md.txt",
+      "bytes": 8360,
+      "sha256": "be8d6a5eec7d4ff0d67eb3900cbd74f3829c28aca9eba028d006d6b57d458b67"
+    },
+    {
+      "file": "red-initial-contexts/sight-zero-values-numeric--3d2e9-actice-and-calibration-900--chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-initial-contexts/sight-zero-values-numeric--3d2e9-actice-and-calibration-900--chromium.md.txt",
+      "bytes": 8360,
+      "sha256": "23225a761322b63ddef182919e03455cf90f606e3d2f23b2958eca02870574b4"
+    },
+    {
+      "file": "red-initial-contexts/sight-zero-values-numeric--73bde-actice-and-calibration-320--chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-initial-contexts/sight-zero-values-numeric--73bde-actice-and-calibration-320--chromium.md.txt",
+      "bytes": 8360,
+      "sha256": "a2d6f861342c331c98f045311c9783897d981eb0487d7124b0407c2ec931b480"
+    },
+    {
+      "file": "red-initial-contexts/sight-zero-values-practice-25660-es-and-saves-a-scored-arrow-chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-initial-contexts/sight-zero-values-practice-25660-es-and-saves-a-scored-arrow-chromium.md.txt",
+      "bytes": 8298,
+      "sha256": "ba7bd018cc7b85026a8fa6065fcf0fa043f8f3405c39771b6b27519346df4fa1"
+    },
+    {
+      "file": "red-initial-contexts/sight-zero-values-zero-dis-5c396-negatives-text-and-escaping-chromium.md.txt",
+      "source": "artifacts/sight-zero-values/red-initial-contexts/sight-zero-values-zero-dis-5c396-negatives-text-and-escaping-chromium.md.txt",
+      "bytes": 5058,
+      "sha256": "8fdf289225a81faf940926f190aea007644b54f1d92cc15c8bb01167a9ad2faa"
+    },
+    {
+      "file": "red-initial-output.txt",
+      "source": "artifacts/sight-zero-values/red-initial-output.txt",
+      "bytes": 11486,
+      "sha256": "a77dd513e9be1a498acb89de0a3178f8359a863af40c7be9e99bfdb850abe1ae"
+    },
+    {
+      "file": "red-initial-test.js.txt",
+      "source": "artifacts/sight-zero-values/red-initial-test.js.txt",
+      "bytes": 6374,
+      "sha256": "f6bfe3b5870854375f2b614e154d86d9dc004c6e1084a289a7556b3c48b3243e"
+    },
+    {
+      "file": "red-output.txt",
+      "source": "artifacts/sight-zero-values/red-output.txt",
+      "bytes": 11503,
+      "sha256": "3420819f9f3d3de8c83cd3ce2e27e524b367b5f827f2cba85c687f64875a038d"
+    },
+    {
+      "file": "red-test.js.txt",
+      "source": "artifacts/sight-zero-values/red-test.js.txt",
+      "bytes": 6314,
+      "sha256": "c1c676c210560f657fad66b41acf3675db8e966575cb05ef7304f32c7ed3aea5"
+    },
+    {
+      "file": "retain-red.cjs",
+      "source": "artifacts/sight-zero-values/retain-red.cjs",
+      "bytes": 417,
+      "sha256": "cee725b564fde11235a9f691937d9c0867d4bb83ada3c54823cb29a76f6ec00b"
+    },
+    {
+      "file": "review.json",
+      "source": "artifacts/sight-zero-values/review.json",
+      "bytes": 1076,
+      "sha256": "31715aaa9fc04f79eb48321745f3a472c652a20971e4e00f36ecc0e74313b3e1"
+    },
+    {
+      "file": "save-review.cjs",
+      "source": "artifacts/sight-zero-values/save-review.cjs",
+      "bytes": 1284,
+      "sha256": "cb3329e35e1ff27280685f3ab1d35cd58c539d1216947df5470547d35d4487e6"
+    },
+    {
+      "file": "source-commit-output.txt",
+      "source": "artifacts/sight-zero-values/source-commit-output.txt",
+      "bytes": 261,
+      "sha256": "6c327c66028a9fa7fdea6000040903ae214b10fe5fd516de22917df26dd9f149"
+    },
+    {
+      "file": "start-initial-output.txt",
+      "source": "artifacts/sight-zero-values/start-initial-output.txt",
+      "bytes": 6734,
+      "sha256": "31f232ee2f02c3ab57cdaf1e55998a6a2d14975f0063a4c044b3f44a85c76472"
+    },
+    {
+      "file": "start-output.txt",
+      "source": "artifacts/sight-zero-values/start-output.txt",
+      "bytes": 40,
+      "sha256": "78ddd3f6b8f850148d7c13ec29c7c182b1256bbc6a7fc3ab46ff7d4b7d60a0eb"
+    },
+    {
+      "file": "start.cjs",
+      "source": "artifacts/sight-zero-values/start.cjs",
+      "bytes": 5015,
+      "sha256": "d5f4a8c22743f7417f2773bf877daee96065ac95c4a0f8359cab5092023efec2"
+    },
+    {
+      "file": "test-db-format-output.txt",
+      "source": "artifacts/sight-zero-values/test-db-format-output.txt",
+      "bytes": 43,
+      "sha256": "1a00d74b02791d2c15c8c5adfa092d651810de03a302968ff383f7ea89635205"
+    },
+    {
+      "file": "verify-archive.cjs",
+      "source": "artifacts/sight-zero-values/verify-archive.cjs",
+      "bytes": 729,
+      "sha256": "50cb07efe9de140541188dbf2c3cd5068038028ba317ec0be374836e3ff48045"
+    },
+    {
+      "file": "version-bump-output.txt",
+      "source": "artifacts/sight-zero-values/version-bump-output.txt",
+      "bytes": 104,
+      "sha256": "e2d9adc199b9c9318edb0959f09bcca95e40d8a76f27b9250844eac4fcaf4390"
+    },
+    {
+      "file": "viewed.json",
+      "source": "artifacts/sight-zero-values/viewed.json",
+      "bytes": 1480,
+      "sha256": "487acdfa7ac249d0fa7ec4239d03887bd2b0ac11e535440823f6d1d56c8aa185"
+    },
+    {
+      "file": "warm-at-ci-e2e.cjs",
+      "source": "artifacts/sight-zero-values/warm-at-ci-e2e.cjs",
+      "bytes": 1607,
+      "sha256": "372bf47a0a46f183d721a117712db14c4e4ff0e479bd9c93755dcafe342c8b03"
+    },
+    {
+      "file": "completion.json",
+      "source": "artifacts/sight-zero-values/completion.json",
+      "bytes": 3059,
+      "sha256": "be8754e7f7ff0e299abb707c8140aa61d427dd56a676f6897c7b0e809fc2e4b6"
+    },
+    {
+      "file": "archive-output.txt",
+      "source": "artifacts/sight-zero-values/archive-output.txt",
+      "bytes": 113,
+      "sha256": "f38dea732c62b53fccc4dd042ee67879bfe9600d6c1faeb432463bb3f249a731"
+    },
+    {
+      "file": "finish-output.txt",
+      "source": "artifacts/sight-zero-values/finish-output.txt",
+      "bytes": 108,
+      "sha256": "8b655f367dcbe4ee53ca72c6588de781494e9919243b667af6e4a7efa8c51cfe"
+    },
+    {
+      "file": "notes-format-output.txt",
+      "source": "artifacts/sight-zero-values/notes-format-output.txt",
+      "bytes": 75,
+      "sha256": "cc5d080031dfc919909177821ca480a2056c6a8321648ba7f4f08dd4755f5ead"
+    },
+    {
+      "file": "notes-format-check-output.txt",
+      "source": "artifacts/sight-zero-values/notes-format-check-output.txt",
+      "bytes": 401,
+      "sha256": "089a2e06488aceeda9588564ad4777a4edf6593bf2c303ad8e916fdc73e02948"
+    },
+    {
+      "file": "notes-invariants-output.txt",
+      "source": "artifacts/sight-zero-values/notes-invariants-output.txt",
+      "bytes": 286,
+      "sha256": "cdc065a923162f3281070df08685f00152305d71f50957bc2b2bacb2330b62ea"
+    }
+  ]
+}

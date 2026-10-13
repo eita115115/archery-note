@@ -1,0 +1,4 @@
+[codex/sight-zero-values 17760d53] Preserve numeric zero in sight previews and calibration
+ 10 files changed, 176 insertions(+), 10 deletions(-)
+ create mode 100644 tests/e2e/fixtures/sight-zero-db.js
+ create mode 100644 tests/e2e/sight-zero-values.spec.js

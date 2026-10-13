@@ -1,0 +1,3 @@
+const fs=require('fs'),cp=require('child_process'),crypto=require('crypto'),assert=require('assert/strict'),root='docs/codex/evidence/sight-zero-values-v124',manifest=JSON.parse(fs.readFileSync(root+'/manifest.json'));
+for(const r of manifest.files){const b=fs.readFileSync(root+'/'+r.file);assert.equal(b.length,r.bytes);assert.equal(crypto.createHash('sha256').update(b).digest('hex'),r.sha256);assert.deepEqual(cp.execFileSync('git',['show','HEAD:'+root+'/'+r.file],{maxBuffer:30e6}),b);}
+assert.equal(cp.execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),'');console.log('PASS '+manifest.files.length+' archived original files byte/hash/Git object exact; clean worktree; source '+manifest.source+' v124');

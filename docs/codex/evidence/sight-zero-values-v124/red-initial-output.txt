@@ -1,0 +1,226 @@
+
+> archery-note@0.123.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/sight-zero-values.spec.js --workers=4
+
+Native web assets ready: dist\native (v123)
+[WebServer] (node:33932) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:32112) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (320) (6.0s)
+(node:24376) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  2 [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (375) (7.1s)
+(node:8136) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  3 [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (900) (6.0s)
+(node:33664) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  4 [chromium] › tests\e2e\sight-zero-values.spec.js:47:1 › zero display preserves missing, false, negatives, text and escaping (393ms)
+(node:15440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  5 [chromium] › tests\e2e\sight-zero-values.spec.js:85:1 › calibration save retains zero and all existing marks through reload (6.4s)
+(node:40804) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  6 [chromium] › tests\e2e\sight-zero-values.spec.js:107:1 › practice starts with zero sight values and saves a scored arrow (7.1s)
+
+
+  1) [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (320) 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#setupLens')
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 4
+
+    - 上下 0 / 左右 0
+    +
+    +     セッティング合成の屋外用・通常練習セッティング
+    +     30m サイト上下 — / 左右 —
+    +   
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#setupLens')
+        14 × locator resolved to <div id="setupLens" class="setupLens">…</div>
+           - unexpected value "
+        セッティング合成の屋外用・通常練習セッティング
+        30m サイト上下 — / 左右 —
+      "
+
+
+      32 |     const before = practice(await state(page));
+      33 |     await record(page);
+    > 34 |     await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+         |                                              ^
+      35 |     await expect(page.locator("#fSightV")).toHaveValue("0");
+      36 |     await expect(page.locator("#fSightH")).toHaveValue("0");
+      37 |     await calibration(page);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-zero-values\sandbox\tests\e2e\sight-zero-values.spec.js:34:46
+
+    Error Context: test-results\sight-zero-values-numeric--73bde-actice-and-calibration-320--chromium\error-context.md
+
+  2) [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (375) 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#setupLens')
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 4
+
+    - 上下 0 / 左右 0
+    +
+    +     セッティング合成の屋外用・通常練習セッティング
+    +     30m サイト上下 — / 左右 —
+    +   
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#setupLens')
+        13 × locator resolved to <div id="setupLens" class="setupLens">…</div>
+           - unexpected value "
+        セッティング合成の屋外用・通常練習セッティング
+        30m サイト上下 — / 左右 —
+      "
+
+
+      32 |     const before = practice(await state(page));
+      33 |     await record(page);
+    > 34 |     await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+         |                                              ^
+      35 |     await expect(page.locator("#fSightV")).toHaveValue("0");
+      36 |     await expect(page.locator("#fSightH")).toHaveValue("0");
+      37 |     await calibration(page);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-zero-values\sandbox\tests\e2e\sight-zero-values.spec.js:34:46
+
+    Error Context: test-results\sight-zero-values-numeric--32c7a-actice-and-calibration-375--chromium\error-context.md
+
+  3) [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (900) 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#setupLens')
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 4
+
+    - 上下 0 / 左右 0
+    +
+    +     セッティング合成の屋外用・通常練習セッティング
+    +     30m サイト上下 — / 左右 —
+    +   
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#setupLens')
+        14 × locator resolved to <div id="setupLens" class="setupLens">…</div>
+           - unexpected value "
+        セッティング合成の屋外用・通常練習セッティング
+        30m サイト上下 — / 左右 —
+      "
+
+
+      32 |     const before = practice(await state(page));
+      33 |     await record(page);
+    > 34 |     await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+         |                                              ^
+      35 |     await expect(page.locator("#fSightV")).toHaveValue("0");
+      36 |     await expect(page.locator("#fSightH")).toHaveValue("0");
+      37 |     await calibration(page);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-zero-values\sandbox\tests\e2e\sight-zero-values.spec.js:34:46
+
+    Error Context: test-results\sight-zero-values-numeric--3d2e9-actice-and-calibration-900--chromium\error-context.md
+
+  4) [chromium] › tests\e2e\sight-zero-values.spec.js:47:1 › zero display preserves missing, false, negatives, text and escaping 
+
+    Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'sightMarks')
+        at eval (eval at evaluate (:303:30), <anonymous>:2:33)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at eval (eval at evaluate (:303:30), <anonymous>:2:33)
+        at UtilityScript.evaluate (<anonymous>:305:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-zero-values\sandbox\tests\e2e\sight-zero-values.spec.js:53:33
+
+    Error Context: test-results\sight-zero-values-zero-dis-5c396-negatives-text-and-escaping-chromium\error-context.md
+
+  5) [chromium] › tests\e2e\sight-zero-values.spec.js:85:1 › calibration save retains zero and all existing marks through reload 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  locator('#calV_30')
+    Expected: "0"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" with timeout 5000ms
+      - waiting for locator('#calV_30')
+        14 × locator resolved to <input value="" class="inp" id="calV_30" inputmode="decimal"/>
+           - unexpected value ""
+
+
+      87 |   const before = await state(page);
+      88 |   await calibration(page);
+    > 89 |   await expect(page.locator("#calV_30")).toHaveValue("0");
+         |                                          ^
+      90 |   await expect(page.locator("#calH_30")).toHaveValue("0");
+      91 |   await page.locator("#calSave").tap();
+      92 |   await expect
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-zero-values\sandbox\tests\e2e\sight-zero-values.spec.js:89:42
+
+    Error Context: test-results\sight-zero-values-calibrat-9ffcc-isting-marks-through-reload-chromium\error-context.md
+
+  6) [chromium] › tests\e2e\sight-zero-values.spec.js:107:1 › practice starts with zero sight values and saves a scored arrow 
+
+    Error: expect(locator).toContainText(expected) failed
+
+    Locator: locator('#setupLens')
+    Timeout: 5000ms
+    - Expected substring  - 1
+    + Received string     + 4
+
+    - 上下 0 / 左右 0
+    +
+    +     セッティング合成の屋外用・通常練習セッティング
+    +     30m サイト上下 — / 左右 —
+    +   
+
+    Call log:
+      - Expect "toContainText" with timeout 5000ms
+      - waiting for locator('#setupLens')
+        14 × locator resolved to <div id="setupLens" class="setupLens">…</div>
+           - unexpected value "
+        セッティング合成の屋外用・通常練習セッティング
+        30m サイト上下 — / 左右 —
+      "
+
+
+      109 |   const before = await state(page);
+      110 |   await record(page);
+    > 111 |   await expect(page.locator("#setupLens")).toContainText("上下 0 / 左右 0");
+          |                                            ^
+      112 |   await page.locator("#fStart").tap();
+      113 |   await expect
+      114 |     .poll(async () => (await state(page)).active && (await state(page)).active.sightV)
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-zero-values\sandbox\tests\e2e\sight-zero-values.spec.js:111:44
+
+    Error Context: test-results\sight-zero-values-practice-25660-es-and-saves-a-scored-arrow-chromium\error-context.md
+
+  6 failed
+    [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (320) 
+    [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (375) 
+    [chromium] › tests\e2e\sight-zero-values.spec.js:29:3 › numeric zero stays visible in practice and calibration (900) 
+    [chromium] › tests\e2e\sight-zero-values.spec.js:47:1 › zero display preserves missing, false, negatives, text and escaping 
+    [chromium] › tests\e2e\sight-zero-values.spec.js:85:1 › calibration save retains zero and all existing marks through reload 
+    [chromium] › tests\e2e\sight-zero-values.spec.js:107:1 › practice starts with zero sight values and saves a scored arrow 
+npm notice
+npm notice New minor version of npm available! 11.16.0 -> 11.21.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.0
+npm notice To update run: npm install -g npm@11.21.0
+npm notice

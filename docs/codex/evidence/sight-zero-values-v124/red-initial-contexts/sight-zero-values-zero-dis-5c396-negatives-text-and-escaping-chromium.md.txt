@@ -1,0 +1,141 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: sight-zero-values.spec.js >> zero display preserves missing, false, negatives, text and escaping
+- Location: tests\e2e\sight-zero-values.spec.js:47:1
+
+# Error details
+
+```
+Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'sightMarks')
+    at eval (eval at evaluate (:303:30), <anonymous>:2:33)
+    at UtilityScript.evaluate (<anonymous>:305:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Archery Note" [level=1] [ref=e5]
+    - button "設定" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - heading "練習を記録" [level=2] [ref=e12]
+      - generic [ref=e13]: 2026/10/14
+    - generic [ref=e14]:
+      - img [ref=e16]
+      - generic [ref=e19]:
+        - text: 3回分たまりました。
+        - strong [ref=e20]: 分析タブ
+        - text: で傾向が見えます
+      - button "見る" [ref=e21] [cursor=pointer]
+      - button "閉じる" [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+    - region "すぐ使う" [ref=e25]:
+      - button "前回と同じ条件で開始 18m / 40cm" [ref=e26] [cursor=pointer]:
+        - generic [ref=e27]: 前回と同じ条件で開始
+        - generic [ref=e28]: 18m / 40cm
+      - button "履歴" [ref=e29] [cursor=pointer]:
+        - generic [ref=e30]: 履歴
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - heading "条件を選ぶ" [level=2] [ref=e34]
+        - button "用具" [ref=e35] [cursor=pointer]
+      - generic [ref=e36]:
+        - generic [ref=e37]: 距離
+        - generic [ref=e38]:
+          - button "70m" [ref=e39] [cursor=pointer]
+          - button "50m" [ref=e40] [cursor=pointer]
+          - button "30m" [ref=e41] [cursor=pointer]
+          - button "18m" [pressed] [ref=e42] [cursor=pointer]
+          - button "カスタム" [ref=e43] [cursor=pointer]
+        - separator [ref=e44]
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]: 的
+            - combobox "的" [ref=e48]:
+              - option "122cm"
+              - option "80cm"
+              - option "60cm"
+              - option "40cm" [selected]
+              - option "40cm 三つ目（縦）"
+              - option "80cm フィールド"
+              - option "60cm フィールド"
+              - option "40cm フィールド"
+              - option "20cm フィールド"
+          - generic [ref=e49]:
+            - generic [ref=e50]: 1エンドの本数
+            - combobox "1エンドの本数" [ref=e51]:
+              - option "1本"
+              - option "2本"
+              - option "3本" [selected]
+              - option "4本"
+              - option "5本"
+              - option "6本"
+              - option "7本"
+              - option "8本"
+              - option "9本"
+              - option "10本"
+              - option "11本"
+              - option "12本"
+        - separator [ref=e52]
+        - button "この条件で開始" [ref=e54] [cursor=pointer]
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]: セッティング
+            - generic [ref=e59]: 未指定
+          - generic [ref=e60]:
+            - generic [ref=e61]: サイト台帳
+            - generic [ref=e62]: 未接続
+        - group [ref=e63]:
+          - generic "＋ 詳しく残す" [ref=e64] [cursor=pointer]
+          - option "（セッティング未指定）" [selected]
+          - option "合成の屋外用・通常練習セッティング"
+          - option "合成の室内用具"
+          - option "自由練習" [selected]
+          - option "70m 72射"
+          - option "50m 72射"
+          - option "30m 36射"
+          - option "18m 60射"
+          - option "フィールド 24標的/72射"
+          - option "WA1440 男子"
+          - option "WA1440 女子"
+          - option "—" [selected]
+          - option "晴れ"
+          - option "くもり"
+          - option "雨"
+          - option "風 弱"
+          - option "風 強"
+          - option "室内"
+          - option "—" [selected]
+          - option "向かい風"
+          - option "追い風"
+          - option "左から"
+          - option "右から"
+          - option "巻き風"
+  - navigation "主な画面" [ref=e65]:
+    - button "記録" [ref=e66] [cursor=pointer]:
+      - img [ref=e68]
+      - text: 記録
+    - button "履歴" [ref=e72] [cursor=pointer]:
+      - img [ref=e74]
+      - text: 履歴
+    - button "分析" [ref=e77] [cursor=pointer]:
+      - img [ref=e79]
+      - text: 分析
+    - button "サイト調整" [ref=e82] [cursor=pointer]:
+      - img [ref=e84]
+      - text: サイト調整
+    - button "用具" [ref=e87] [cursor=pointer]:
+      - img [ref=e89]
+      - text: 用具
+  - status
+```

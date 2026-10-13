@@ -1,0 +1,47 @@
+[
+  {
+    "file": "before/chromium-375-light-snapshot.png",
+    "viewed": true,
+    "sha256": "d2dd8d56b8d8bee6074491baccf410719943e0d6a27a0be3c1633395f98e46bf"
+  },
+  {
+    "file": "before/chromium-375-light-calibration.png",
+    "viewed": true,
+    "sha256": "542c6110e905a05b856988d0bf18d9906e4af425d75fe135c3c849e1cf0022e5"
+  },
+  {
+    "file": "after/chromium-375-light-snapshot.png",
+    "viewed": true,
+    "sha256": "3b592fd24f0ac8c0b8cddd8ed5245b16ca3352e81a64ea1dbc77ac068e317895"
+  },
+  {
+    "file": "after/chromium-375-light-calibration.png",
+    "viewed": true,
+    "sha256": "c93553b6e72bb69488ba876c21be412aa924d1db18e1ae80e0cdb8c52be75c73"
+  },
+  {
+    "file": "final/webkit-375-dark-snapshot.png",
+    "viewed": true,
+    "sha256": "3b96d9b8798a7e14f6d85be98d51bea6d9376f23fdb7306decadf6f4549c0fdf"
+  },
+  {
+    "file": "final/webkit-375-dark-calibration.png",
+    "viewed": true,
+    "sha256": "4c9ce4a0bd61be4fa32a22bcd70ee685f8aa0d7e8d75504f5cf8dd6f565fc591"
+  },
+  {
+    "file": "public/chromium-375-light-snapshot.png",
+    "viewed": true,
+    "sha256": "3b592fd24f0ac8c0b8cddd8ed5245b16ca3352e81a64ea1dbc77ac068e317895"
+  },
+  {
+    "file": "public/chromium-375-light-calibration.png",
+    "viewed": true,
+    "sha256": "c93553b6e72bb69488ba876c21be412aa924d1db18e1ae80e0cdb8c52be75c73"
+  },
+  {
+    "file": "public/webkit-375-dark-calibration.png",
+    "viewed": true,
+    "sha256": "4c9ce4a0bd61be4fa32a22bcd70ee685f8aa0d7e8d75504f5cf8dd6f565fc591"
+  }
+]
