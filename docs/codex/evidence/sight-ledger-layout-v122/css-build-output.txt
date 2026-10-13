@@ -1,0 +1,5 @@
+
+> archery-note@0.121.0 build:web-assets
+> node tools/build-web-assets.js
+
+Web assets ready: style.min.css (75793 bytes)

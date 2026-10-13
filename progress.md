@@ -4,7 +4,11 @@
 
 ## 現在地
 
-- AN088進行中。サイト台帳を日付/上下左右/メモの縦一覧へ。plan docs/codex/sight-ledger-layout.md。前turnはAN087公開・全324・CI成功の進捗、旧87tasks保持、費用/個人情報不使用。
+- AN088完了、公開v122/source2ce72647d10f2b1088ab7ea957e190b7a0139871、branch codex/sight-ledger-layout。サイト台帳を日付/最新→上下・左右のラベル値→必要時に全文を開くnativeメモdetailsの縦一覧へ。0/空欄を区別、空メモ操作なし、escape/keyboard/focus/44pxを保持。実v121の長い通常メモはChrome320で一行615px、375で270px、final/publicの閉じた各行は220px未満。全体高さが全幅で減ったとの主張ではない。60の純表示helper+台帳markup、12scopedCSS/生成CSSと一括122のみ。他21nodes/全他scripts・数学・採点半径・保存/handlers/依存/SWactivationは版以外exact。ChromeWK8x5statesで用具/距離/該当なし/復帰と他HTML/advice/regression/interpolation/calibration/選択ID一致。旧121でlist回帰1failed→新6 passed (14.1s)、final checkall/lint/format成功、local330 passed (3.9m)、CI38326751775 clean checks/validate/deploy/Linux330 passed (6.3m)。final122 native8/104は旧3+新記録/nudge0.6/undo/score/reloadexact/errors0。ChromeWK320375明暗900のbefore/after/final/public各8、メモ全文/tap/Enter/Space/削除cancel/追加校正cancel/旧6fields/reload/errors0、削除confirm・ごみ箱復元は新回帰で保持。独立readonlyreview Critical/Important/Minor0。実Linux/public25byte、frozen19byte+6allowlistedLF、held first15/canonical14一致。同じ元public121page/contextで記録中更新保留→finish4/banner122/旧全件→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/sight-ledger-layout-v122へ原失敗/訂正/最終raw・原寸PNG・metadata/hashをbyte保持archive。旧87tasks/acceptance/sharedhiddenlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/実射/WKstrictOfflineは未証明。
+
+- 初start helperは旧全tasksのpassを誤要求し既存AN001実射openで停止、直前依存AN087だけへ訂正し旧87は変更なし。初capture helperは存在しないsimpleAdviceを呼びbefore失敗、正本adviceForへ訂正したbefore8で比較成功。初lintはtest内document/innerWidth未修飾3件、globalThis修飾のみでassert/app不変、final lint/全330成功。旧tableに新listのIDを要求したred1を保存、実UXのbeforeは615px行で別に示す。after/greenはbump前v121、final/native/publicは122として区別。whole-card画像の一部にfixed bottom navが途中へ写る撮影制約があるためviewport/幾何/native操作を併用。sortは既存date降順+ts降順を保持。日時とも同じ/欠落の旧記録tieと補間の後勝ちの意味は既存の別task候補、今回の計算変更なし。
+
+- 次: サイト記録の同日時/欠落日時の意味を監査し、一タスクずつUI改善を続ける。実スマートフォンで台帳/メモの読みやすさを継続評価。変更: scripts/60-history-sight-view.js、style.css/style.min.css、tests/e2e/sight-ledger-layout.spec.js・fixtures/sight-ledger-db.js、版markers、plan/tasks/progress/ledger/evidence。公開後notesはlocalcommitのみ。
 
 - AN087完了、公開v121/sourcee57893001888fa4ab5c4b97087c1084a34d4c034、branch codex/analysis-form-context。分析の射形一覧・推移・自己比較・得点関係を共通条件へ揃えた。期間は撮影date/ts fallback（日付不明は全期間）、用具/距離/roundはlinked練習、孤立記録は保存用具だけfallback、距離を推測しない。射形のみ/該当なしもfilterを保持。日付/射数→弓手/引き手→自己比較→保持/アンカーの縦階層、件数/最新5件、比較の見方details、44px削除actionで320/375/900を可読にした。独立reviewのImportant（最後の距離練習削除で条件が解除不能）は実履歴削除red→修正16passed12.1s、選択距離を候補へ残し再review指摘なし。50の表示adapter/filterbar/wrapperと47の3renderer/scopedCSS/一括121だけ。その他123nodes/全数学・採点半径・保存/handlers/依存/SWactivationは版以外exact、ChromeWK8x4statesの他分析raw/KPIと全解除の射形series/link/SVG保持。checkall/lint/format/checkform/golden成功、local324 passed (3.9m)、CI38324233767 clean checks/validate/deploy/Linux324 passed (5.5m)。final121 native8/104、旧3+新記録/nudge0.6/undo/score/reloadexact/errors0。ChromeWK320375明暗900のbefore/before-card/after/corrected/final/public各8で旧6fields/reload/errors0、final/publicの重なり/横overflow/44px操作を確認。実Linux/public25byte、frozen19byte+6allowlistedLF、held first15/canonical14一致。同じ旧public120page/contextで記録中更新保留→finish4/banner121/旧全件保持→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/analysis-form-context-v121へ原失敗/訂正/最終出力・PNG・metadata/hashをbyte保持archive。旧86tasks/acceptance/sharedhiddenlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/実射/WKstrictOfflineは未証明。
 
@@ -79,7 +83,7 @@
 
 ## 次と未解決
 
-- UI一新を継続する。次は射形トラッキングの期間/比較条件scopeと分析の長文を実画面で確認する一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
+- UI一新を継続する。AN087で射形の比較条件、AN088でサイト台帳を改善。次は同日時/欠落日時のサイト記録の意味を監査する一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
 - 統計5001回/保存/DOMの負担は残る。native依存critical2件はAN086でrepo更新/GitHub自動fixed。配布済みnativebinaryがある場合の再build/再配布/実機remediationは未確認。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。

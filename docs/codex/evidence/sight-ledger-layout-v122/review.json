@@ -1,0 +1,12 @@
+{
+  "source": "2ce72647d10f2b1088ab7ea957e190b7a0139871",
+  "base": "42e11058",
+  "reviewer": "/root/review_sight_ledger",
+  "critical": 0,
+  "important": 0,
+  "minor": 0,
+  "verdict": "コードレビュー上は次のリリース検証へ進める。",
+  "independentChecks": "実v122ソースでChromium/WebKit320px、悪意あるID/値/メモの無害化、負数/0/null、不明日付、keyboard開閉/focus表示、44x44以上、横overflowなし/pageerrorなし。tracked tree前後clean。保存/削除/復元/計算は変更なし。",
+  "latestOrdering": "renderSightはbaseから同じdate降順+ts降順、latestMarkと一致。通常入口はts保存。sightInterpは同じ日時順の後勝ち。heroはmarksではなくlastSess/advice。date/tsとも同じ又は欠ける旧記録tieの先頭/補間後勝ちの曖昧さは既存core別task候補、今回must-fixではない。",
+  "notVerifiedByReviewer": "全330、最終v122 native/UI、CI/public/update/offlineの完了、物理iPhone/VoiceOver。green6/after8はv121段階。checkall/lint/formatのv122成功は確認。"
+}

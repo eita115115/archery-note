@@ -1,0 +1,1 @@
+PASS 21 other60 nodes and all other scripts exact; only ledger markup/helper/scopedCSS/version; all math/scoring/storage/handlers/deps/SWactivation exact exceptversion;8x5 otherHTML/raw advice/regression/interpolation/calibration/selected ids exact; old87/acceptance/sharedlock exact

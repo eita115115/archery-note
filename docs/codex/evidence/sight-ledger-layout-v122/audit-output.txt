@@ -1,0 +1,8 @@
+{"id":"chromium-320-light","docWidth":320,"width":320,"tableWidth":270,"rowHeight":615,"errors":[]}
+{"id":"chromium-375-light","docWidth":375,"width":375,"tableWidth":321,"rowHeight":270,"errors":[]}
+{"id":"chromium-375-dark","docWidth":375,"width":375,"tableWidth":321,"rowHeight":270,"errors":[]}
+{"id":"chromium-900-light","docWidth":900,"width":900,"tableWidth":506,"rowHeight":105,"errors":[]}
+{"id":"webkit-320-light","docWidth":320,"width":320,"tableWidth":270,"rowHeight":585,"errors":[]}
+{"id":"webkit-375-light","docWidth":375,"width":375,"tableWidth":321,"rowHeight":270,"errors":[]}
+{"id":"webkit-375-dark","docWidth":375,"width":375,"tableWidth":321,"rowHeight":270,"errors":[]}
+{"id":"webkit-900-light","docWidth":900,"width":900,"tableWidth":506,"rowHeight":105,"errors":[]}

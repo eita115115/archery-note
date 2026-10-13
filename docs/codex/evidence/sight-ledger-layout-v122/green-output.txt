@@ -1,0 +1,20 @@
+
+> archery-note@0.121.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/sight-ledger-layout.spec.js --workers=4
+
+Native web assets ready: dist\native (v121)
+[WebServer] (node:15756) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 6 tests using 1 worker
+
+(node:5484) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 1 [chromium] › tests\e2e\sight-ledger-layout.spec.js:23:3 › sight values stay readable beside a long memo (320) (1.5s)
+  ok 2 [chromium] › tests\e2e\sight-ledger-layout.spec.js:23:3 › sight values stay readable beside a long memo (375) (1.3s)
+  ok 3 [chromium] › tests\e2e\sight-ledger-layout.spec.js:23:3 › sight values stay readable beside a long memo (900) (1.4s)
+  ok 4 [chromium] › tests\e2e\sight-ledger-layout.spec.js:61:1 › ledger filters and add/calibration entry keep their existing data (3.9s)
+  ok 5 [chromium] › tests\e2e\sight-ledger-layout.spec.js:79:1 › memo keyboard disclosure preserves escaped text and numeric zero (882ms)
+  ok 6 [chromium] › tests\e2e\sight-ledger-layout.spec.js:97:1 › sight deletion cancels safely and confirmed deletion can be restored (3.3s)
+
+  6 passed (14.1s)

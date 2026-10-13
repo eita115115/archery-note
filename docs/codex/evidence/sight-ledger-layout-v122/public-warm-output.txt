@@ -1,0 +1,5 @@
+CI_SELECTED 38326751775
+BASELINE_READY public121 / 15 warm old bodies / active1 and old3 / same context retained
+UPDATED public122 / finished1 and old3 exact / cache122 only
+PASS: same real public121→122 context, active update blocked/native finish/old4 retained, 320 newstart first native arrow/correction/native exit/next arrow, offline SWreload exact / two-arrow pending in summary+history / old4 and finish5 exact
+PASS original121 profile warmed after CI E2E started; same page update122/offline completed

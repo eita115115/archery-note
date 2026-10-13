@@ -1,0 +1,4 @@
+
+> archery-note@0.122.0 lint
+> eslint "*.js" "scripts/**/*.js" "tools/**/*.js" "tests/**/*.js" "eslint.config.mjs"
+

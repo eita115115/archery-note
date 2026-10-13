@@ -1,0 +1,1 @@
+PASS v122 archive/source/CI/full330/public25/native8/104/sight4x8; raw failures retained; raw+PNG byte/hash exact

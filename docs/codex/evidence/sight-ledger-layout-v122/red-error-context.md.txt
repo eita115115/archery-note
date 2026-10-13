@@ -1,0 +1,262 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: sight-ledger-layout.spec.js >> sight values stay readable beside a long memo (375)
+- Location: tests\e2e\sight-ledger-layout.spec.js:23:3
+
+# Error details
+
+```
+Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 5
++ Received  + 1
+
+- Array [
+-   "sight-new",
+-   "sight-old",
+-   "sight-empty",
+- ]
++ Array []
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Archery Note" [level=1] [ref=e5]
+    - button "設定" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e12]: サイト調整
+      - heading "いまの提案" [level=2] [ref=e13]
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - img [ref=e16]
+          - generic [ref=e18]: 右へ
+        - generic [ref=e19]: 0.4mm
+        - paragraph [ref=e20]: 信頼度 低。
+    - generic [ref=e21]:
+      - heading "サイト台帳" [level=2] [ref=e22]:
+        - generic [ref=e23]:
+          - img [ref=e24]
+          - text: サイト台帳
+      - generic [ref=e27]: セッティング
+      - combobox [ref=e28]:
+        - option "合成の屋外用・通常練習セッティング" [selected]
+        - option "合成の室内用具"
+      - generic [ref=e29]: 距離
+      - generic [ref=e30]:
+        - button "70m" [ref=e31] [cursor=pointer]
+        - button "50m" [ref=e32] [cursor=pointer]
+        - button "30m" [active] [pressed] [ref=e33] [cursor=pointer]
+        - button "18m" [ref=e34] [cursor=pointer]
+      - generic [ref=e35]:
+        - button "＋ このサイト値を台帳に記録" [ref=e36] [cursor=pointer]
+        - button "校正モード" [ref=e37] [cursor=pointer]
+      - table [ref=e38]:
+        - rowgroup [ref=e39]:
+          - row "日付 上下 左右 メモ" [ref=e40]:
+            - columnheader "日付" [ref=e41]
+            - columnheader "上下" [ref=e42]
+            - columnheader "左右" [ref=e43]
+            - columnheader "メモ" [ref=e44]
+            - columnheader [ref=e45]
+          - row "使用中 2026/10/13 86.25 0.4 風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。" [ref=e46]:
+            - cell "使用中 2026/10/13" [ref=e47]:
+              - generic "使用中" [ref=e48]
+              - text: 2026/10/13
+            - cell "86.25" [ref=e49]
+            - cell "0.4" [ref=e50]
+            - cell "風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。風が弱くなった後に確認。前回より上下を少し調整して中央へ戻った。" [ref=e51]
+            - cell [ref=e52]:
+              - button [ref=e53] [cursor=pointer]:
+                - img [ref=e54]
+          - row "2026/10/12 85.50 0 調整前の基準値" [ref=e56]:
+            - cell "2026/10/12" [ref=e57]
+            - cell "85.50" [ref=e58]
+            - cell "0" [ref=e59]
+            - cell "調整前の基準値" [ref=e60]
+            - cell [ref=e61]:
+              - button [ref=e62] [cursor=pointer]:
+                - img [ref=e63]
+          - row "2026/10/11 0 —" [ref=e65]:
+            - cell "2026/10/11" [ref=e66]
+            - cell "0" [ref=e67]
+            - cell "—" [ref=e68]
+            - cell [ref=e69]
+            - cell [ref=e70]:
+              - button [ref=e71] [cursor=pointer]:
+                - img [ref=e72]
+    - generic [ref=e74]:
+      - heading "詳しく 30m ・ 合成の屋外用・通常練習セッティング" [level=2] [ref=e75]:
+        - generic [ref=e76]:
+          - img [ref=e77]
+          - text: 詳しく
+        - generic [ref=e79]: 30m ・ 合成の屋外用・通常練習セッティング
+      - generic [ref=e80]: 最新の練習（2026/7/15・3本）の着弾傾向：
+      - group [ref=e81]:
+        - generic "調整アドバイスの全体像" [ref=e82] [cursor=pointer]
+      - group [ref=e83]:
+        - generic "判断の根拠" [ref=e84] [cursor=pointer]
+      - group [ref=e85]:
+        - generic "サイト値分析・予測" [ref=e86] [cursor=pointer]
+      - group [ref=e87]:
+        - generic "モデル診断・校正状況" [ref=e88] [cursor=pointer]
+      - group [ref=e89]:
+        - generic "クリック換算の設定（任意）" [ref=e90] [cursor=pointer]
+  - navigation "主な画面" [ref=e91]:
+    - button "記録" [ref=e92] [cursor=pointer]:
+      - img [ref=e94]
+      - text: 記録
+    - button "履歴" [ref=e98] [cursor=pointer]:
+      - img [ref=e100]
+      - text: 履歴
+    - button "分析" [ref=e103] [cursor=pointer]:
+      - img [ref=e105]
+      - text: 分析
+    - button "サイト調整" [ref=e108] [cursor=pointer]:
+      - img [ref=e110]
+      - text: サイト調整
+    - button "用具" [ref=e113] [cursor=pointer]:
+      - img [ref=e115]
+      - text: 用具
+  - status
+```
+
+# Test source
+
+```ts
+  1   | const { test, expect } = require("@playwright/test");
+  2   | const { sightLedgerDb } = require("./fixtures/sight-ledger-db");
+  3   | test.use({ hasTouch: true });
+  4   | async function seed(page, data = sightLedgerDb()) {
+  5   |   await page.addInitScript((data) => {
+  6   |     if (!globalThis.localStorage.getItem("archeryNote.v1"))
+  7   |       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
+  8   |   }, data);
+  9   |   await page.goto("/");
+  10  |   await page.locator('#tabs [data-v="sight"]').tap();
+  11  |   await page.locator('#sgDistChips [data-d="30"]').tap();
+  12  | }
+  13  | async function snapshot(page) {
+  14  |   return page.evaluate(() => {
+  15  |     const d = JSON.parse(globalThis.localStorage.getItem("archeryNote.v1"));
+  16  |     return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
+  17  |   });
+  18  | }
+  19  | async function ids(page) {
+  20  |   return page.locator("[data-sight-id]").evaluateAll((els) => els.map((e) => e.dataset.sightId));
+  21  | }
+  22  | for (const width of [320, 375, 900]) {
+  23  |   test(`sight values stay readable beside a long memo (${width})`, async ({ page }) => {
+  24  |     await page.setViewportSize({ width, height: 812 });
+  25  |     await seed(page);
+  26  |     const before = await snapshot(page);
+> 27  |     expect(await ids(page)).toEqual(["sight-new", "sight-old", "sight-empty"]);
+      |                             ^ Error: expect(received).toEqual(expected) // deep equality
+  28  |     const row = page.locator('[data-sight-id="sight-new"]');
+  29  |     await expect(row).toContainText("最新");
+  30  |     await expect(row.locator("dt")).toHaveText(["上下", "左右"]);
+  31  |     await expect(row.locator("dd")).toHaveText(["86.25", "0.4"]);
+  32  |     await expect(page.locator('[data-sight-id="sight-empty"] dd')).toHaveText(["0", "—"]);
+  33  |     await expect(page.locator('[data-sight-id="sight-empty"] details')).toHaveCount(0);
+  34  |     await expect(row.locator("details")).not.toHaveAttribute("open");
+  35  |     expect(await row.evaluate((el) => el.getBoundingClientRect().height)).toBeLessThan(220);
+  36  |     await row.locator("summary").tap();
+  37  |     await expect(row.locator("details p")).toHaveText(sightLedgerDb().sightMarks[0].note);
+  38  |     await expect(row.locator("details p")).toBeVisible();
+  39  |     const geometry = await row.evaluate((el) => {
+  40  |       const r = el.getBoundingClientRect(),
+  41  |         head = el.querySelector(".sightMarkHead").getBoundingClientRect(),
+  42  |         values = el.querySelector("dl").getBoundingClientRect(),
+  43  |         note = el.querySelector("details").getBoundingClientRect();
+  44  |       return {
+  45  |         overflow:
+  46  |           el.scrollWidth > el.clientWidth || document.documentElement.scrollWidth > innerWidth,
+  47  |         overlap: head.bottom > values.top || values.bottom > note.top,
+  48  |         outside: r.left < 0 || r.right > innerWidth,
+  49  |         short: [...el.querySelectorAll("button,summary")].some(
+  50  |           (e) => e.getBoundingClientRect().height < 44,
+  51  |         ),
+  52  |       };
+  53  |     });
+  54  |     expect(geometry).toEqual({ overflow: false, overlap: false, outside: false, short: false });
+  55  |     await row.locator("summary").tap();
+  56  |     expect(await snapshot(page)).toEqual(before);
+  57  |     await page.reload();
+  58  |     expect(await snapshot(page)).toEqual(before);
+  59  |   });
+  60  | }
+  61  | test("ledger filters and add/calibration entry keep their existing data", async ({ page }) => {
+  62  |   await seed(page);
+  63  |   const before = await snapshot(page);
+  64  |   await page.locator('#sgDistChips [data-d="18"]').tap();
+  65  |   expect(await ids(page)).toEqual(["other-distance"]);
+  66  |   await page.locator("#sgSetup").selectOption("b");
+  67  |   await page.locator('#sgDistChips [data-d="30"]').tap();
+  68  |   expect(await ids(page)).toEqual(["other-setup"]);
+  69  |   await page.locator('#sgDistChips [data-d="70"]').tap();
+  70  |   await expect(page.getByText("この距離の記録はまだありません", { exact: true })).toBeVisible();
+  71  |   await page.locator("#sgSetup").selectOption("a");
+  72  |   await page.locator('#sgDistChips [data-d="30"]').tap();
+  73  |   await page.locator("#sgAdd").tap();
+  74  |   await page.locator("#mkCancel").tap();
+  75  |   await page.locator("#sgCalMode").tap();
+  76  |   await page.locator("#calCancel").tap();
+  77  |   expect(await snapshot(page)).toEqual(before);
+  78  | });
+  79  | test("memo keyboard disclosure preserves escaped text and numeric zero", async ({ page }) => {
+  80  |   const data = sightLedgerDb();
+  81  |   data.sightMarks[1].note = '<img src=x onerror="alert(1)">\n' + "合成メモ".repeat(100);
+  82  |   data.sightMarks[2].v = 0;
+  83  |   data.sightMarks[2].h = 0;
+  84  |   await seed(page, data);
+  85  |   await expect(page.locator('[data-sight-id="sight-empty"] dd')).toHaveText(["0", "0"]);
+  86  |   const row = page.locator('[data-sight-id="sight-old"]'),
+  87  |     summary = row.locator("summary");
+  88  |   await summary.focus();
+  89  |   await page.keyboard.press("Enter");
+  90  |   await expect(row.locator("details")).toHaveAttribute("open", "");
+  91  |   await expect(row.locator("p")).toHaveText(data.sightMarks[1].note);
+  92  |   await expect(row.locator("img")).toHaveCount(0);
+  93  |   await page.keyboard.press("Space");
+  94  |   await expect(row.locator("details")).not.toHaveAttribute("open");
+  95  |   await expect(summary).toBeFocused();
+  96  | });
+  97  | test("sight deletion cancels safely and confirmed deletion can be restored", async ({ page }) => {
+  98  |   await seed(page);
+  99  |   const before = await snapshot(page);
+  100 |   const del = page.locator('[data-del="sight-new"]');
+  101 |   await expect(del).toHaveAccessibleName("2026/10/13のサイト値を削除");
+  102 |   await del.tap();
+  103 |   await page.locator("#acCancel").tap();
+  104 |   expect(await snapshot(page)).toEqual(before);
+  105 |   await del.tap();
+  106 |   await page.locator("#acOk").tap();
+  107 |   await expect(page.locator('[data-sight-id="sight-new"]')).toHaveCount(0);
+  108 |   const deleted = await snapshot(page);
+  109 |   expect(deleted[2]).toEqual(before[2].filter((r) => r.id !== "sight-new"));
+  110 |   for (const i of [0, 1, 3, 4, 5]) expect(deleted[i]).toEqual(before[i]);
+  111 |   await page.getByRole("button", { name: "設定", exact: true }).tap();
+  112 |   const restore = page.locator("[data-restore-trash]");
+  113 |   await restore.scrollIntoViewIfNeeded();
+  114 |   await restore.tap();
+  115 |   await page.locator("#setClose").tap();
+  116 |   const restored = await snapshot(page);
+  117 |   expect([...restored[2]].sort((a, b) => a.id.localeCompare(b.id))).toEqual(
+  118 |     [...before[2]].sort((a, b) => a.id.localeCompare(b.id)),
+  119 |   );
+  120 |   for (const i of [0, 1, 3, 4, 5]) expect(restored[i]).toEqual(before[i]);
+  121 |   await page.reload();
+  122 |   expect(await snapshot(page)).toEqual(restored);
+  123 | });
+  124 | 
+```

@@ -1,0 +1,8 @@
+page.evaluate: ReferenceError: simpleAdvice is not defined
+    at eval (eval at evaluate (:303:30), <anonymous>:1:369)
+    at UtilityScript.evaluate (<anonymous>:305:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+    at observe (C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-ledger-layout\capture.cjs:5:36)
+    at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-ledger-layout\capture.cjs:6:1170 {
+  log: []
+}

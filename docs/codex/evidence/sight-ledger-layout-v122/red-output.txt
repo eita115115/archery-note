@@ -1,0 +1,47 @@
+
+> archery-note@0.121.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/sight-ledger-layout.spec.js --grep readable.*375
+
+Native web assets ready: dist\native (v121)
+[WebServer] (node:30864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:21088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\sight-ledger-layout.spec.js:23:3 › sight values stay readable beside a long memo (375) (999ms)
+
+
+  1) [chromium] › tests\e2e\sight-ledger-layout.spec.js:23:3 › sight values stay readable beside a long memo (375) 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 5
+    + Received  + 1
+
+    - Array [
+    -   "sight-new",
+    -   "sight-old",
+    -   "sight-empty",
+    - ]
+    + Array []
+
+      25 |     await seed(page);
+      26 |     const before = await snapshot(page);
+    > 27 |     expect(await ids(page)).toEqual(["sight-new", "sight-old", "sight-empty"]);
+         |                             ^
+      28 |     const row = page.locator('[data-sight-id="sight-new"]');
+      29 |     await expect(row).toContainText("最新");
+      30 |     await expect(row.locator("dt")).toHaveText(["上下", "左右"]);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\sight-ledger-layout\sandbox\tests\e2e\sight-ledger-layout.spec.js:27:29
+
+    Error Context: test-results\sight-ledger-layout-sight--bd318-ble-beside-a-long-memo-375--chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\sight-ledger-layout.spec.js:23:3 › sight values stay readable beside a long memo (375) 
+npm notice
+npm notice New minor version of npm available! 11.16.0 -> 11.21.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.0
+npm notice To update run: npm install -g npm@11.21.0
+npm notice
