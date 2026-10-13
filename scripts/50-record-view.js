@@ -2731,10 +2731,26 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
     if (row.source === "台帳") current.markCount++;
     else current.sessionCount++;
     const candidate = { row, date, setupName: setupNameFor(row.setupId) };
+    const prior = current.latest && current.latest.row;
+    const stamp = Number(row.ts),
+      priorStamp = Number(prior && prior.ts);
+    const datedMarks =
+      prior &&
+      row.source === "台帳" &&
+      prior.source === "台帳" &&
+      date.sort &&
+      String(row.date || "").trim() === date.sort &&
+      String(prior.date || "").trim() === date.sort &&
+      Number.isFinite(stamp) &&
+      stamp > 0 &&
+      Number.isFinite(priorStamp) &&
+      priorStamp > 0;
     if (
       !current.latest ||
       date.sort > current.latest.date.sort ||
-      (date.sort === current.latest.date.sort && row.source === "台帳")
+      (date.sort === current.latest.date.sort &&
+        row.source === "台帳" &&
+        (!datedMarks || stamp >= priorStamp))
     ) {
       current.latest = candidate;
     }

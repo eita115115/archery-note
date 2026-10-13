@@ -3417,7 +3417,6 @@ AN089監査完了、branch codex/sight-order-audit、基点258fa0bf90d1d3b922bdf
 
 原renderedはChrome12+WK2成功後numeric-zero analysis visibility fail、元context閉鎖済/原因未断定、raw保持。別可視24は事前scroll/settle・実hit/open待ち・厳密80/90/0assertで成功、app変更なし。原matrixの同参照比較はin-place変化を見逃すと独立review指摘、原28を保持し別補強28は代入前JSON文字列/入力/一時db/元dbの不変を確認。prefill原viewportはfieldが下に隠れ、別2はscrollしinput0とsnapshot—を可視確認。source探索で存在しない旧physics/checkファイル名を一度参照したが現正本へ解決しapp変更なし。
 
-
 ## AN090開始 — 分析のサイト最新値
 
 前turnはAN089監査で進捗、基点661bee90ed6e824d27e8b846e7c2e25b869566e8。analysis summaryの明確な同日台帳tsだけを比較、曖昧日時/finite補間/numeric0校正は別範囲。task90 in-progress/passfalse、旧89保持、全承認継続。
