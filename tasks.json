@@ -1073,5 +1073,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/sight-summary-recency.mdの受入。同日で両方が明示date/finite正tsの台帳値なら新しいtsを選び、通常順/逆順/native削除復元で台帳/latestMark/記録prefillと分析が一致。日付優先・台帳対練習・同ts後勝ち・日時欠落/不正tsは既存fallback、空上下/文字値/0/用具距離/periodを保持。summary表示選択以外の全runtime/CSS/数学/採点半径/保存/handlers/deps/SWactivationは版以外exact、旧89tasks/全acceptance/sharedhiddenlock保持。red→green/ChromeWK320375明暗900の前後/最終/publicと375原寸、旧6fields/reload/errors0、native旧3+新記録/undo/nudge/score、checkall/lint/format/全生成E2E/独立review、一括123/承認済CI/実Linux-public25/frozen19+6LF/同じ旧122page記録中更新保留-banner-新記録-offline。証拠archive後pass+evidence/progressledger、費用個人情報不使用。曖昧日時の新旧やfinite補間、校正numeric0は未変更と明記。"
+  },
+  {
+    "id": "AN-091",
+    "task": "数値0のサイト値を練習概要と校正入力で保持する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-090"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/sight-zero-values.mdの受入。上下左右のnumeric0/文字0を台帳→練習開始snapshot/input→校正prefill/save/reloadで保持し0と空欄を区別。null/empty/欠落/false/負数/文字値/escapeと異用具距離の既存挙動を保持。新6red→green/ChromeWK320375明暗900の前後・最終・public8と375原寸、旧6fields/reload/errors0、校正保存のoldmarks prefix/他5fields/新string0、practice start0/1本finish保存/scoreを確認。50のsnapshot2式・60の校正prefill2式以外の全runtime/CSS/数学/採点半径/保存/handlers/deps/SWactivationは版以外exact、旧90tasks/acceptance/sharedlock保持。checkall/lint/format/全生成E2E/独立readonlyreview、一括124/承認済CI/実Linux-public25/frozen19+6LF/同じ旧123page更新保留-banner-新記録-offline、native8/104。証拠archive後pass+evidence/progressledger。費用/個人情報不使用。日時曖昧の仕様/補間/legacyデータの再保存は変更しない。"
   }
 ]
