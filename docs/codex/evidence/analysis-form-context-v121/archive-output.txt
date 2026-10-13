@@ -1,0 +1,1 @@
+PASS v121 archive/source/CI/full324/public25/native8/104/analysis6x8; original failures and staleCSS proof retained; all raw+PNG copy SHA exact

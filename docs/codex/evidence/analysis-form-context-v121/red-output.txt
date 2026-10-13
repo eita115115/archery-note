@@ -1,0 +1,51 @@
+
+> archery-note@0.120.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-form-context.spec.js --grep capture period --workers=1
+
+Native web assets ready: dist\native (v120)
+[WebServer] (node:28208) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:7052) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\analysis-form-context.spec.js:23:1 › form analysis follows capture period and linked equipment/distance (1.1s)
+
+
+  1) [chromium] › tests\e2e\analysis-form-context.spec.js:23:1 › form analysis follows capture period and linked equipment/distance 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 3
+    + Received  + 3
+
+      Array [
+        "form-0",
+    -   "form-12",
+    +   "form-1",
+        "form-13",
+    -   "form-2",
+    -   "form-3",
+    +   "form-14",
+    +   "form-9",
+      ]
+
+      34 |       .locator("[data-form-id]")
+      35 |       .evaluateAll((els) => els.map((e) => e.dataset.formId).sort()),
+    > 36 |   ).toEqual(["form-0", "form-12", "form-13", "form-2", "form-3"]);
+         |     ^
+      37 |   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-12", "form-13"]);
+      38 |   await expect(card.locator("svg title")).toContainText("5回");
+      39 |   await expect(card).toContainText("練習に紐付いた 5 記録");
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-form-context\sandbox\tests\e2e\analysis-form-context.spec.js:36:5
+
+    Error Context: test-results\analysis-form-context-form-b6b13-d-linked-equipment-distance-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\analysis-form-context.spec.js:23:1 › form analysis follows capture period and linked equipment/distance 
+npm notice
+npm notice New minor version of npm available! 11.16.0 -> 11.21.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.0
+npm notice To update run: npm install -g npm@11.21.0
+npm notice

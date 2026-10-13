@@ -1,0 +1,1 @@
+PASS old86 tasks original byte prefix and all87 acceptances unchanged; only AN087 completion fields changed

@@ -1,0 +1,112 @@
+
+> archery-note@0.120.0 check:all
+> npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version && npm run check:distribution
+
+
+> archery-note@0.120.0 check:app
+> node tools/check-app.js
+
+Score distribution: 36000 arrows, 72000 score reads
+Score trend: 1000 seeded histories and empty/sparse/coercion/overflow HTML unchanged; inputs immutable
+Score trend: 1000x36 fixture, 288 score reads, tail after eighth record untouched
+Archery Note checks OK (v120)
+Robust grouping: used=8, excluded=1, confidence=30%
+Physics: 209fps, rho=1.08, Cd=1.20
+
+> archery-note@0.120.0 check:globals
+> node tools/check-globals.js
+
+check-globals OK (14 files, 1250 unresolved refs all accounted for)
+
+> archery-note@0.120.0 check:analysis
+> node tools/check-analysis-core.js && node tools/check-grouping-interpretation.js
+
+Analysis core characterization checks OK
+Robust median reuse checks OK
+Grouping interpretation checks OK (51 checks; real scoring/statistics, score populations retained)
+
+> archery-note@0.120.0 check:form
+> node tools/check-form-core.js && node tools/golden-replay/test-form-metric-fixtures.js && node tools/check-form-diagnostics.js
+
+
+矢プレゼンス検出: 合成フレーム分離性テーブル
+label                                score
+noisy bg + line                      1
+noisy bg, no line                    0
+textured bg + line                   1
+textured bg, no line                 0
+partially occluded line (rest area)  0.774
+tilted 15deg + line                  0.839
+tilted 15deg, no line                0
+tilted -15deg + line                 0.871
+tilted -15deg, no line               0
+bright bg, dark line                 1
+dark bg, bright line                 1
+  min(あり)=0.774  max(なし)=0.000  分離しきい値候補=0.55
+Form core checks OK
+ok - validates and freezes the exact bounded fixture schema
+ok - rejects unknown keys, paths, URLs, and full landmark payloads
+ok - rejects duplicate and unknown raw keys before JSON parsing
+ok - rejects malformed or mismatched hashes and runtime profiles
+ok - rejects nonfinite metrics, non-increasing time, and malformed null rows
+ok - enforces bounded source bytes and frame count
+ok - replay is deterministic, non-mutating, fresh, ordered, and cancels the latest fire
+ok - browser and Node parity failures are replay errors
+ok - runtime, parity, and configuration errors have distinct CLI classifications
+ok - review truth is matched by source SHA rather than fixture filename
+ok - both tracked public fixtures load and replay deterministically without mutation
+ok - reviewed oblique release is the only retained shot in its truth window
+ok - reviewed scene-cut retrieval retains no shot and emits no adaptive release
+ok - acceptance CLI maps synthetic truth and schema/config to exits 0 and 2
+ok - check:form includes fixture tests but excludes the standalone acceptance CLI
+Form metric fixture checks OK
+Form diagnostic checks OK
+
+> archery-note@0.120.0 check:gamification
+> node tools/check-gamification.js
+
+Gamification pure-function checks OK (streak / 12 badges / backfill / goals)
+
+> archery-note@0.120.0 check:todays-result
+> node tools/check-todays-result.js
+
+Few-coordinate result evidence checks OK (0/1/2/3, baseline, daily streak, data preservation)
+Personal best copy checks OK (18 real computed cases; exact-count HTML/calculation preserved; projection and pace notes)
+Todays-result pure-function checks OK (weeklyDiff / stabilityTrend / personalBest / growthStreaks)
+
+> archery-note@0.120.0 check:security
+> node tools/check-security.js
+
+Security regression: all 38 checks passed
+
+> archery-note@0.120.0 check:ui
+> node tools/check-ui.js
+
+UI smoke checks OK (chrome.exe)
+artifacts\ui-smoke\iphone-390.png 390x844 41866 bytes
+artifacts\ui-smoke\small-360.png 360x780 41022 bytes
+artifacts\ui-smoke\desktop-1280.png 1280x800 46498 bytes
+
+> archery-note@0.120.0 check:pwa
+> node tools/check-pwa-assets.js && node tools/check-pwa-update-flow.js
+
+PWA asset checks OK
+PWA update flow checks OK
+
+> archery-note@0.120.0 check:storage
+> node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js && node tools/check-save-debounce.js
+
+Storage contract checks OK
+Storage round-trip checks OK
+Save debounce checks OK
+
+> archery-note@0.120.0 check:version
+> node tools/check-version-alignment.js
+
+Version alignment checks OK
+
+> archery-note@0.120.0 check:distribution
+> node tools/check-distribution.js
+
+Native web assets ready: dist\native (v120)
+Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS 198857→141264 bytes; cross-script fixtures

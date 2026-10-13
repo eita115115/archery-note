@@ -1,0 +1,143 @@
+{
+  "source": "e57893001888fa4ab5c4b97087c1084a34d4c034",
+  "version": 121,
+  "loadedBodies": 15,
+  "measuredCandidateEquivalent": true,
+  "candidateByteExact": 19,
+  "candidateLineEndingOnly": [
+    "index.html",
+    "manifest.json",
+    "sw.js",
+    "icon.svg",
+    "assets/pose/vision_bundle.mjs",
+    "assets/pose/vision_wasm_internal.js"
+  ],
+  "runtimeScriptsAndStyleExact": true,
+  "rows": [
+    {
+      "path": "index.html",
+      "bytes": 6014,
+      "sha256": "24f8f0054bae44a80ea94ced20cb979662dded4d6fa56a548700f188aa747e0a"
+    },
+    {
+      "path": "style.min.css",
+      "bytes": 74619,
+      "sha256": "e34318609449a2ef922bbb4be5ace239a8e530c0c50e3ec8f0125dfd67babad0"
+    },
+    {
+      "path": "manifest.json",
+      "bytes": 584,
+      "sha256": "15c82058a427d52cf51ab2b0ba55cb7dff45a2a0b9266dd5a5128e9da798c1e8"
+    },
+    {
+      "path": "sw.js",
+      "bytes": 4630,
+      "sha256": "866f16b44929ec2827ddbfca15ba790f09478ef2084e90da86466d854af3b850"
+    },
+    {
+      "path": "icon.svg",
+      "bytes": 584,
+      "sha256": "3d8139a5fea8d992bbba05fc70ec40e3eecfaa7b4a4170c602dd0cdd19542ac7"
+    },
+    {
+      "path": "apple-touch-icon.png",
+      "bytes": 5001,
+      "sha256": "c46f061814e0afd68d86fd58a2cdd795768abc927c2de238e2853899573dc144"
+    },
+    {
+      "path": "version.json",
+      "bytes": 13,
+      "sha256": "61b2e64db062fda1291b9350f16faa541ef715821c19888865711a66bc1fecd4"
+    },
+    {
+      "path": "scripts/00-compat.js",
+      "bytes": 679,
+      "sha256": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f"
+    },
+    {
+      "path": "scripts/10-storage-native.js",
+      "bytes": 39258,
+      "sha256": "90e02b57896ddc7d28e20b516b170108fd0d60222fcf2ad20a2eee1bc1c016ce"
+    },
+    {
+      "path": "scripts/20-scoring.js",
+      "bytes": 5906,
+      "sha256": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4"
+    },
+    {
+      "path": "scripts/30-target-svg.js",
+      "bytes": 4902,
+      "sha256": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e"
+    },
+    {
+      "path": "scripts/40-analysis-physics.js",
+      "bytes": 52807,
+      "sha256": "60a02f18d3c3b55883335643e3add6a88abfbb7be9e65d978f28d0bb68bac34f"
+    },
+    {
+      "path": "scripts/45-analysis-core.js",
+      "bytes": 11618,
+      "sha256": "2466d97c44d656ea426b1b7fc898f16a5793ae841398bc58ff1b0d421dbf4312"
+    },
+    {
+      "path": "scripts/46-form-core.js",
+      "bytes": 71651,
+      "sha256": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35"
+    },
+    {
+      "path": "scripts/47-form-view.js",
+      "bytes": 57015,
+      "sha256": "177b91c2e412be2f8832461ad6f76b435aa6f1946b4d5eb90c2edf3c79e2a1a5"
+    },
+    {
+      "path": "scripts/48-gamification.js",
+      "bytes": 7051,
+      "sha256": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526"
+    },
+    {
+      "path": "scripts/49-todays-result.js",
+      "bytes": 8698,
+      "sha256": "49b6545fdac438f2b6050adc22913e9c7d5926b48414a0243fe43a9bde3d047c"
+    },
+    {
+      "path": "scripts/50-record-view.js",
+      "bytes": 95637,
+      "sha256": "4ceeffba0378f941dae71bf3e7d7ef5b0dd8f14a889d47b0bce74d18bcce5cc3"
+    },
+    {
+      "path": "scripts/60-history-sight-view.js",
+      "bytes": 38448,
+      "sha256": "555e325211cd96a7c7efb1a6c614794be92b68215bc24ee163aa0842a149b2e6"
+    },
+    {
+      "path": "scripts/70-gear-settings.js",
+      "bytes": 68152,
+      "sha256": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a"
+    },
+    {
+      "path": "scripts/90-init.js",
+      "bytes": 2840,
+      "sha256": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26"
+    },
+    {
+      "path": "assets/pose/vision_bundle.mjs",
+      "bytes": 136870,
+      "sha256": "e77f281f9619150d937023c355bae170e9120e3b9e43f1e23a2a7bee07197669"
+    },
+    {
+      "path": "assets/pose/vision_wasm_internal.js",
+      "bytes": 209826,
+      "sha256": "9440cf0cc0cea21800e31581ec32aeedcc5fbf9df4509796bbc7d3f99e52ab9c"
+    },
+    {
+      "path": "assets/pose/vision_wasm_internal.wasm",
+      "bytes": 9423986,
+      "sha256": "f82a8e6c05e08a44cc9f9e7ec5f845935bcbb1b1500ebe8c2f4812fb4e2917dc"
+    },
+    {
+      "path": "assets/pose/pose_landmarker_lite.task",
+      "bytes": 5777746,
+      "sha256": "59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a"
+    }
+  ]
+}

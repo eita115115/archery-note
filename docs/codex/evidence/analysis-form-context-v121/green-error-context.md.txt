@@ -1,0 +1,298 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: analysis-form-context.spec.js >> form analysis follows capture period and linked equipment/distance
+- Location: tests\e2e\analysis-form-context.spec.js:23:1
+
+# Error details
+
+```
+Error: expect(locator).toHaveCount(expected) failed
+
+Locator:  locator('.card').filter({ has: getByRole('heading', { name: /射形トラッキング/ }) }).locator('svg')
+Expected: 0
+Received: 3
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveCount" with timeout 5000ms
+  - waiting for locator('.card').filter({ has: getByRole('heading', { name: /射形トラッキング/ }) }).locator('svg')
+    14 × locator resolved to 3 elements
+       - unexpected value "3"
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Archery Note" [level=1] [ref=e5]
+    - button "設定" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - heading "比較する条件" [level=2] [ref=e12]
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e15]: 用具
+          - combobox "用具" [ref=e16]:
+            - option "すべて"
+            - option "未指定"
+            - option "合成の屋外用具"
+            - option "合成の室内用具" [selected]
+        - generic [ref=e17]:
+          - generic [ref=e18]: 距離
+          - combobox "距離" [ref=e19]:
+            - option "すべて" [selected]
+            - option "30m"
+            - option "18m"
+      - generic [ref=e20]: 期間
+      - group "期間" [ref=e21]:
+        - button "全期間" [ref=e22] [cursor=pointer]
+        - button "7日" [pressed] [ref=e23] [cursor=pointer]
+        - button "30日" [ref=e24] [cursor=pointer]
+        - button "90日" [ref=e25] [cursor=pointer]
+    - generic [ref=e26]:
+      - generic [ref=e27]: 練習の傾向
+      - paragraph [ref=e28]: 記録を数回続けると、今日の一言がここに出ます。
+    - generic [ref=e29]:
+      - heading "次回試すこと" [level=2] [ref=e30]
+      - generic [ref=e31]:
+        - generic [ref=e32]: "1"
+        - generic [ref=e33]:
+          - text: 左右のまとまりを確認
+          - paragraph [ref=e34]: 最新記録は左右±0.8cmで、上下±0.0cmより広がっています。
+    - region "数値で振り返る" [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]:
+          - generic [ref=e38]: 練習のまとめ
+          - heading "数値で振り返る" [level=2] [ref=e39]
+        - generic [ref=e40]: 信頼度 参考
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e43]: 最終練習
+          - generic [ref=e44]: 2026/10/13
+        - generic [ref=e45]:
+          - generic [ref=e46]: 今週
+          - generic [ref=e47]: 1回 / 3射
+        - generic [ref=e48]:
+          - generic [ref=e49]: 直近平均
+          - generic [ref=e50]: "8.00"
+        - generic [ref=e51]:
+          - generic [ref=e52]: 前回から
+          - generic [ref=e53]: 比較待ち
+        - generic [ref=e54]:
+          - generic [ref=e55]: グルーピング
+          - generic [ref=e56]: 比較待ち
+        - generic [ref=e57]:
+          - generic [ref=e58]: フォーム
+          - generic [ref=e59]: 記録待ち
+    - generic [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e62]: 平均点
+        - generic [ref=e63]: "8.00"
+        - generic [ref=e64]: 1回 3本 / 移動平均 —
+      - generic [ref=e65]:
+        - generic [ref=e66]: 矢の集まり具合（グルーピング）
+        - generic [ref=e67]: 0.8cm
+        - generic [ref=e68]: 最新の半径(RMS) / 最小 0.8cm
+      - generic [ref=e69]:
+        - generic [ref=e70]: 最高合計
+        - generic [ref=e71]: "24"
+        - generic [ref=e72]: 2026/10/13 / 18m / 3本
+    - generic [ref=e73]:
+      - heading "直近の得点 直近1回" [level=2] [ref=e74]:
+        - text: 直近の得点
+        - generic [ref=e75]: 直近1回
+      - generic [ref=e76] [cursor=pointer]:
+        - generic [ref=e77]:
+          - generic [ref=e78]: 2026/10/13
+          - generic [ref=e79]: 18m / 3本
+        - generic [ref=e80]: 8.00 / 合計24
+    - group [ref=e81]:
+      - generic "矢の集まり具合のまとめ（グルーピングサマリー） 対象1回" [ref=e82] [cursor=pointer]
+    - group [ref=e83]:
+      - generic "練習の内訳 月・距離・得点" [ref=e84] [cursor=pointer]:
+        - generic [ref=e85]: 練習の内訳
+        - generic [ref=e86]: 月・距離・得点
+    - generic [ref=e87]:
+      - heading "射形トラッキング 2件" [level=2] [ref=e88]:
+        - text: 射形トラッキング
+        - generic [ref=e89]: 2件
+      - generic [ref=e90]:
+        - button "射形を解析する" [ref=e91] [cursor=pointer]:
+          - img [ref=e92]
+          - text: 射形を解析する
+        - button "保存済み動画を解析" [ref=e95] [cursor=pointer]
+      - generic [ref=e96]:
+        - generic [ref=e97]:
+          - button "2026/10/13 · 3射練習に紐付け 弓手肘 151°引き手肘 145° 保持 1.5秒 · アンカー 安定" [ref=e98] [cursor=pointer]:
+            - generic [ref=e99]: 2026/10/13 · 3射練習に紐付け
+            - generic [ref=e100]:
+              - generic [ref=e101]: 弓手肘 151°
+              - generic [ref=e102]: 引き手肘 145°
+            - generic [ref=e103]: 保持 1.5秒 · アンカー 安定
+          - button "2026/10/13の射形記録を削除" [ref=e104] [cursor=pointer]:
+            - img [ref=e105]
+        - generic [ref=e107]:
+          - button "2026/10/12 · 3射練習に紐付け 弓手肘 160°引き手肘 140° 保持 1.6秒 · アンカー 安定" [ref=e108] [cursor=pointer]:
+            - generic [ref=e109]: 2026/10/12 · 3射練習に紐付け
+            - generic [ref=e110]:
+              - generic [ref=e111]: 弓手肘 160°
+              - generic [ref=e112]: 引き手肘 140°
+            - generic [ref=e113]: 保持 1.6秒 · アンカー 安定
+          - button "2026/10/12の射形記録を削除" [ref=e114] [cursor=pointer]:
+            - img [ref=e115]
+      - group [ref=e117]:
+        - generic "比較の見方" [ref=e118] [cursor=pointer]
+    - group [ref=e119]:
+      - generic "自己ベストと用具" [ref=e120] [cursor=pointer]:
+        - generic [ref=e121]: 自己ベストと用具
+    - group [ref=e122]:
+      - generic "距離ごとのまとめ 1距離" [ref=e123] [cursor=pointer]
+  - navigation "主な画面" [ref=e124]:
+    - button "記録" [ref=e125] [cursor=pointer]:
+      - img [ref=e127]
+      - text: 記録
+    - button "履歴" [ref=e131] [cursor=pointer]:
+      - img [ref=e133]
+      - text: 履歴
+    - button "分析" [ref=e136] [cursor=pointer]:
+      - img [ref=e138]
+      - text: 分析
+    - button "サイト調整" [ref=e141] [cursor=pointer]:
+      - img [ref=e143]
+      - text: サイト調整
+    - button "用具" [ref=e146] [cursor=pointer]:
+      - img [ref=e148]
+      - text: 用具
+  - status
+```
+
+# Test source
+
+```ts
+  1   | const { test, expect } = require("@playwright/test");
+  2   | const { analysisFormDb } = require("./fixtures/analysis-form-db");
+  3   | test.use({ hasTouch: true });
+  4   | async function seed(page, onlyForm = false) {
+  5   |   const d = analysisFormDb();
+  6   |   if (onlyForm) d.sessions = [];
+  7   |   await page.addInitScript((d) => {
+  8   |     if (!globalThis.localStorage.getItem("archeryNote.v1"))
+  9   |       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(d));
+  10  |   }, d);
+  11  |   await page.goto("/");
+  12  |   await page.locator('#tabs [data-v="analysis"]').tap();
+  13  | }
+  14  | async function snapshot(page) {
+  15  |   return page.evaluate(() => {
+  16  |     const d = JSON.parse(globalThis.localStorage.getItem("archeryNote.v1"));
+  17  |     return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
+  18  |   });
+  19  | }
+  20  | async function ids(page) {
+  21  |   return page.evaluate(() => analysisFormRecords(ui.analysisFilter).map((r) => r.id));
+  22  | }
+  23  | test("form analysis follows capture period and linked equipment/distance", async ({ page }) => {
+  24  |   await seed(page);
+  25  |   const before = await snapshot(page);
+  26  |   await page.locator('[data-period="7d"]').tap();
+  27  |   await page.locator("#anSetup").selectOption("a");
+  28  |   await page.locator("#anDist").selectOption("30");
+  29  |   const card = page
+  30  |     .locator(".card")
+  31  |     .filter({ has: page.getByRole("heading", { name: /射形トラッキング/ }) });
+  32  |   expect(
+  33  |     await card
+  34  |       .locator("[data-form-id]")
+  35  |       .evaluateAll((els) => els.map((e) => e.dataset.formId).sort()),
+  36  |   ).toEqual(["form-0", "form-12", "form-13", "form-2", "form-3"]);
+  37  |   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-12", "form-13"]);
+  38  |   await expect(card.locator("svg title")).toContainText("5回");
+  39  |   await expect(card).toContainText("練習に紐付いた 5 記録");
+  40  |   await page.locator("#anDist").selectOption("");
+  41  |   expect(await ids(page)).toContain("form-9");
+  42  |   await page.locator("#anSetup").selectOption("b");
+  43  |   expect(await ids(page)).toEqual(["form-1", "form-10"]);
+> 44  |   await expect(card.locator("svg")).toHaveCount(0);
+      |                                     ^ Error: expect(locator).toHaveCount(expected) failed
+  45  |   await page.locator("#anSetup").selectOption("__none");
+  46  |   expect(await ids(page)).toEqual(["form-14"]);
+  47  |   await page.locator("#anSetup").selectOption("a");
+  48  |   await page.locator("#anDist").selectOption("18");
+  49  |   await expect(card).toContainText("この条件に合う射形記録はありません");
+  50  |   await expect(card.locator("[data-form-id]")).toHaveCount(0);
+  51  |   await page.locator("#anSetup").selectOption("");
+  52  |   await page.locator("#anDist").selectOption("");
+  53  |   for (const [period, included, excluded] of [
+  54  |     ["7d", "form-3", "form-4"],
+  55  |     ["30d", "form-5", "form-6"],
+  56  |     ["90d", "form-7", "form-8"],
+  57  |   ]) {
+  58  |     await page.locator(`[data-period="${period}"]`).tap();
+  59  |     const selected = await ids(page);
+  60  |     expect(selected).toContain(included);
+  61  |     expect(selected).not.toContain(excluded);
+  62  |     expect(selected).not.toContain("form-11");
+  63  |     expect(selected).toContain("form-12");
+  64  |   }
+  65  |   await page.locator('[data-period="all"]').tap();
+  66  |   expect(await ids(page)).toHaveLength(15);
+  67  |   expect(await snapshot(page)).toEqual(before);
+  68  |   await page.reload();
+  69  |   expect(await snapshot(page)).toEqual(before);
+  70  | });
+  71  | test("form-only records still expose the shared period controls", async ({ page }) => {
+  72  |   await seed(page, true);
+  73  |   await expect(page.locator("#anPeriods")).toBeVisible();
+  74  |   await page.locator('[data-period="7d"]').tap();
+  75  |   expect(await ids(page)).not.toContain("form-4");
+  76  |   await page.locator("#anSetup").selectOption("a");
+  77  |   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-9", "form-12", "form-13"]);
+  78  | });
+  79  | for (const width of [320, 375, 900]) {
+  80  |   test(`form records expose readable values and safe detail actions (${width})`, async ({
+  81  |     page,
+  82  |   }) => {
+  83  |     await page.setViewportSize({ width, height: 812 });
+  84  |     await page.emulateMedia({ reducedMotion: "reduce" });
+  85  |     await seed(page);
+  86  |     const before = await snapshot(page);
+  87  |     const card = page.getByTestId("analysis-form-card");
+  88  |     await card.scrollIntoViewIfNeeded();
+  89  |     await expect(card.locator("[data-form-id]")).toHaveCount(5);
+  90  |     const help = card.locator("details");
+  91  |     expect(await help.evaluate((e) => e.open)).toBe(false);
+  92  |     await help.locator("summary").tap();
+  93  |     await expect(help).toContainText("撮影日");
+  94  |     await help.locator("summary").tap();
+  95  |     const first = card.locator("[data-form-id]").first();
+  96  |     await expect(first).toContainText("弓手肘");
+  97  |     await expect(first).toContainText("引き手肘");
+  98  |     await first.tap();
+  99  |     await expect(page.locator("#fdClose")).toBeVisible();
+  100 |     await page.locator("#fdClose").tap();
+  101 |     await card.locator("[data-del-form]").first().tap();
+  102 |     await page.getByRole("button", { name: "キャンセル", exact: true }).tap();
+  103 |     const layout = await card.evaluate((el) => ({
+  104 |       overflow: el.scrollWidth > el.clientWidth,
+  105 |       textOverflow: [
+  106 |         ...el.querySelectorAll(".formRecordItem, .formRecordAngles, .formRecordComparison"),
+  107 |       ].some((e) => e.scrollWidth > e.clientWidth),
+  108 |       short: [...el.querySelectorAll("button")].some((e) => e.getBoundingClientRect().height < 44),
+  109 |     }));
+  110 |     expect(layout).toEqual({ overflow: false, textOverflow: false, short: false });
+  111 |     expect(await snapshot(page)).toEqual(before);
+  112 |     await page.reload();
+  113 |     expect(await snapshot(page)).toEqual(before);
+  114 |   });
+  115 | }
+  116 | 
+```

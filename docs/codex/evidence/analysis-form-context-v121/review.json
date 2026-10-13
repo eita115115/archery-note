@@ -1,0 +1,10 @@
+{
+  "source": "e57893001888fa4ab5c4b97087c1084a34d4c034",
+  "reviewer": "/root/review_form_context",
+  "initialSource": "fb388af7f27c6b7b1554d9861f368ca6b0c1e6b0",
+  "initialImportant": "選択中の最後の距離の練習を削除するとselectはすべて表示なのに内部条件が残り、解除できない",
+  "initialOtherChecks": "linked用具優先・孤立記録fallback・未指定・距離・round・7/30/90日境界・ts fallback・日付不明・非変更性PASS",
+  "finalVerdict": "Critical / Important / Minor: すべてなし。前回のImportantは解消済み。コードレビュー上はready。",
+  "independentVerification": "immutable e578930の実関数、Chromiumキーボード操作、練習0件・18mのみ・18/30mありの3状態で30m表示保持→すべて解除、内部条件解除、入力不変を確認。保存出力review-redの旧失敗とreview-greenの16 passed (12.1s)を確認。",
+  "notVerifiedByReviewer": "修正後全324 E2E、最終gate、CI・公開・最終v121 UI/native、実機・VoiceOver。リリース受入完了とは判定していない。"
+}

@@ -1,0 +1,487 @@
+{
+  "baseline": {
+    "old": [
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-23",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.8000000000000003,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 4.6,
+              "y": 0,
+              "s": 7
+            },
+            {
+              "x": 1.4,
+              "y": -3.2,
+              "s": 8
+            }
+          ],
+          [
+            {
+              "x": 1.4,
+              "y": 3.2,
+              "s": 8
+            },
+            {
+              "x": -0.8399999999999999,
+              "y": 2.2399999999999998,
+              "s": 7
+            },
+            {
+              "x": 3.6399999999999997,
+              "y": -2.2399999999999998,
+              "s": 8
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-05",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.5999999999999999,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 3.2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.8,
+              "y": -2.4,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.8,
+              "y": 2.4,
+              "s": 9
+            },
+            {
+              "x": -0.8799999999999999,
+              "y": 1.68,
+              "s": 8
+            },
+            {
+              "x": 2.48,
+              "y": -1.68,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.4,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.3,
+              "y": -1.7,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.3,
+              "y": 1.7,
+              "s": 9
+            },
+            {
+              "x": -0.8899999999999999,
+              "y": 1.19,
+              "s": 8
+            },
+            {
+              "x": 1.49,
+              "y": -1.19,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "mv5wp5qco2t9t",
+        "date": "2026-10-13",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [
+          [
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ]
+        ]
+      }
+    ],
+    "current": {
+      "id": "mv5ww9c7h5i7p",
+      "date": "2026-10-13",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.6000000000000001,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ]
+    },
+    "expected": {
+      "result": {
+        "available": true,
+        "todayStr": "2026-10-13",
+        "firstEver": false,
+        "weeklyDiff": {
+          "available": false,
+          "reason": "no-history",
+          "todayTotal": 20
+        },
+        "stabilityTrend": {
+          "available": false,
+          "reason": "insufficient-arrows",
+          "coordinateCount": 2
+        },
+        "personalBestDistance": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 20,
+          "bestDate": "2026-10-13",
+          "todayTotal": 20,
+          "todayArrows": 2,
+          "remaining": 0,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1,
+          "requiredAvg": 10,
+          "todayAvg": 10
+        },
+        "growthStreaks": {
+          "available": true,
+          "metrics": [
+            {
+              "key": "score",
+              "available": true,
+              "streakDays": 1
+            },
+            {
+              "key": "stability",
+              "available": false,
+              "streakDays": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "available": true,
+        "metrics": [
+          {
+            "key": "score",
+            "available": true,
+            "streakDays": 1
+          },
+          {
+            "key": "stability",
+            "available": false,
+            "streakDays": 0
+          }
+        ]
+      }
+    },
+    "edit": false
+  },
+  "trace": {
+    "expected": {
+      "result": {
+        "available": true,
+        "todayStr": "2026-10-13",
+        "firstEver": false,
+        "weeklyDiff": {
+          "available": false,
+          "reason": "no-history",
+          "todayTotal": 20
+        },
+        "stabilityTrend": {
+          "available": false,
+          "reason": "insufficient-arrows",
+          "coordinateCount": 2
+        },
+        "personalBestDistance": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 20,
+          "bestDate": "2026-10-13",
+          "todayTotal": 20,
+          "todayArrows": 2,
+          "remaining": 0,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1,
+          "requiredAvg": 10,
+          "todayAvg": 10
+        },
+        "growthStreaks": {
+          "available": true,
+          "metrics": [
+            {
+              "key": "score",
+              "available": true,
+              "streakDays": 1
+            },
+            {
+              "key": "stability",
+              "available": false,
+              "streakDays": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "available": true,
+        "metrics": [
+          {
+            "key": "score",
+            "available": true,
+            "streakDays": 1
+          },
+          {
+            "key": "stability",
+            "available": false,
+            "streakDays": 0
+          }
+        ]
+      }
+    },
+    "current": {
+      "id": "mv5ww9c7h5i7p",
+      "date": "2026-10-13",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [
+        [
+          {
+            "x": 0.6000000000000001,
+            "y": 0,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "s": 10,
+            "X": true
+          }
+        ]
+      ]
+    },
+    "edit": false,
+    "visits": [
+      {
+        "id": "mv5ww9c7h5i7p",
+        "date": "2026-10-13",
+        "phase": "result"
+      },
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-23",
+        "phase": "result"
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-05",
+        "phase": "result"
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-12",
+        "phase": "result"
+      },
+      {
+        "id": "mv5wp5qco2t9t",
+        "date": "2026-10-13",
+        "phase": "result"
+      }
+    ],
+    "actual": {
+      "result": {
+        "available": true,
+        "todayStr": "2026-10-13",
+        "firstEver": false,
+        "weeklyDiff": {
+          "available": false,
+          "reason": "no-history",
+          "todayTotal": 20
+        },
+        "stabilityTrend": {
+          "available": false,
+          "reason": "insufficient-arrows",
+          "coordinateCount": 2
+        },
+        "personalBestDistance": {
+          "available": true,
+          "method": "avg-projected",
+          "bestTotal": 20,
+          "bestDate": "2026-10-13",
+          "todayTotal": 20,
+          "todayArrows": 2,
+          "remaining": 0,
+          "achieved": true,
+          "pace": "reached",
+          "paceRatio": 1,
+          "requiredAvg": 10,
+          "todayAvg": 10
+        },
+        "growthStreaks": {
+          "available": true,
+          "metrics": [
+            {
+              "key": "score",
+              "available": true,
+              "streakDays": 1
+            },
+            {
+              "key": "stability",
+              "available": false,
+              "streakDays": 0
+            }
+          ]
+        }
+      },
+      "before": {
+        "available": true,
+        "metrics": [
+          {
+            "key": "score",
+            "available": true,
+            "streakDays": 1
+          },
+          {
+            "key": "stability",
+            "available": false,
+            "streakDays": 0
+          }
+        ]
+      }
+    },
+    "computations": [
+      {
+        "id": "mv5ww9c7h5i7p",
+        "date": "2026-10-13",
+        "calls": 1
+      },
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-23",
+        "calls": 1
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-05",
+        "calls": 1
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-12",
+        "calls": 1
+      },
+      {
+        "id": "mv5wp5qco2t9t",
+        "date": "2026-10-13",
+        "calls": 1
+      }
+    ]
+  }
+}

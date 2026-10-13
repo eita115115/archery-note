@@ -1,0 +1,8 @@
+PASS before-card chromium/320/light selected=15 old6/reload/errors0
+PASS before-card chromium/375/light selected=15 old6/reload/errors0
+PASS before-card chromium/375/dark selected=15 old6/reload/errors0
+PASS before-card chromium/900/light selected=15 old6/reload/errors0
+PASS before-card webkit/320/light selected=15 old6/reload/errors0
+PASS before-card webkit/375/light selected=15 old6/reload/errors0
+PASS before-card webkit/375/dark selected=15 old6/reload/errors0
+PASS before-card webkit/900/light selected=15 old6/reload/errors0

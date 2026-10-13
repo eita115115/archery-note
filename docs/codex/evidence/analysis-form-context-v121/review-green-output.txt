@@ -1,0 +1,32 @@
+
+> archery-note@0.121.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-form-context.spec.js tests/e2e/analysis-filter-focus.spec.js --workers=4
+
+Native web assets ready: dist\native (v121)
+[WebServer] (node:34508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 16 tests using 2 workers
+
+(node:37744) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:32864) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok  2 [chromium] › tests\e2e\analysis-filter-focus.spec.js:56:1 › empty analysis offers a direct route to the first practice without changing records (582ms)
+  ok  3 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (320/light) (627ms)
+  ok  4 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (320/light) (874ms)
+  ok  5 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (320/light) (616ms)
+  ok  1 [chromium] › tests\e2e\analysis-form-context.spec.js:25:1 › form analysis follows capture period and linked equipment/distance (3.2s)
+  ok  6 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (320/light) (719ms)
+  ok  7 [chromium] › tests\e2e\analysis-form-context.spec.js:73:1 › form-only records still expose the shared period controls (833ms)
+  ok  8 [chromium] › tests\e2e\analysis-filter-focus.spec.js:90:3 › analysis opens with comparison conditions and its conclusion readable (375/dark) (589ms)
+  ok 10 [chromium] › tests\e2e\analysis-filter-focus.spec.js:104:3 › changed analysis filters remain visible above fixed navigation (375/dark) (913ms)
+  ok  9 [chromium] › tests\e2e\analysis-form-context.spec.js:81:1 › form-only no-match keeps controls available to restore the list (1.2s)
+  ok 11 [chromium] › tests\e2e\analysis-filter-focus.spec.js:149:3 › analysis filters are reachable by their visible labels (375/dark) (627ms)
+  ok 13 [chromium] › tests\e2e\analysis-filter-focus.spec.js:170:3 › analysis selections keep keyboard position and period navigation (375/dark) (679ms)
+  ok 12 [chromium] › tests\e2e\analysis-form-context.spec.js:92:1 › distance remains clearable after deleting its last linked practice (2.0s)
+  ok 14 [chromium] › tests\e2e\analysis-form-context.spec.js:121:3 › form records expose readable values and safe detail actions (320) (979ms)
+  ok 15 [chromium] › tests\e2e\analysis-form-context.spec.js:121:3 › form records expose readable values and safe detail actions (375) (979ms)
+  ok 16 [chromium] › tests\e2e\analysis-form-context.spec.js:121:3 › form records expose readable values and safe detail actions (900) (954ms)
+
+  16 passed (12.1s)

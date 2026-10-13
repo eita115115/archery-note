@@ -1,0 +1,6 @@
+
+> archery-note@0.120.0 golden:form-fixtures
+> node tools/golden-replay/replay-form-fixtures.js
+
+oblique-single-release: retained=1 releases=[4457.414ms/close] finalPhase=DRAWING pendingAtEnd=false
+scene-cut-arrow-retrieval: retained=0 releases=[] finalPhase=DRAWING pendingAtEnd=false

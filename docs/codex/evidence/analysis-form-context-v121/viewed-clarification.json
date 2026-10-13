@@ -1,0 +1,5 @@
+{
+  "correctionTo": "viewed.json metadata note",
+  "file": "public-analysis/webkit-375-dark.png",
+  "clarification": "The generic filename predicate also labeled this public viewport as not exposing rows. In fact it visibly contains the last three form rows and score-link/help. Only before/webkit-375-dark.png and corrected/webkit-375-dark.png were the older viewport captures without form rows. All original screenshot bytes and hashes remain unchanged. Whole-card WebKit capture includes fixed navigation as separately noted."
+}

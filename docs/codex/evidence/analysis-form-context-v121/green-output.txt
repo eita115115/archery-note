@@ -1,0 +1,51 @@
+
+> archery-note@0.120.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-form-context.spec.js --workers=1
+
+Native web assets ready: dist\native (v120)
+[WebServer] (node:33088) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 5 tests using 1 worker
+
+(node:23584) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\analysis-form-context.spec.js:23:1 › form analysis follows capture period and linked equipment/distance (6.1s)
+(node:10352) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ok 2 [chromium] › tests\e2e\analysis-form-context.spec.js:71:1 › form-only records still expose the shared period controls (966ms)
+  ok 3 [chromium] › tests\e2e\analysis-form-context.spec.js:80:3 › form records expose readable values and safe detail actions (320) (1.0s)
+  ok 4 [chromium] › tests\e2e\analysis-form-context.spec.js:80:3 › form records expose readable values and safe detail actions (375) (973ms)
+  ok 5 [chromium] › tests\e2e\analysis-form-context.spec.js:80:3 › form records expose readable values and safe detail actions (900) (933ms)
+
+
+  1) [chromium] › tests\e2e\analysis-form-context.spec.js:23:1 › form analysis follows capture period and linked equipment/distance 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.card').filter({ has: getByRole('heading', { name: /射形トラッキング/ }) }).locator('svg')
+    Expected: 0
+    Received: 3
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for locator('.card').filter({ has: getByRole('heading', { name: /射形トラッキング/ }) }).locator('svg')
+        14 × locator resolved to 3 elements
+           - unexpected value "3"
+
+
+      42 |   await page.locator("#anSetup").selectOption("b");
+      43 |   expect(await ids(page)).toEqual(["form-1", "form-10"]);
+    > 44 |   await expect(card.locator("svg")).toHaveCount(0);
+         |                                     ^
+      45 |   await page.locator("#anSetup").selectOption("__none");
+      46 |   expect(await ids(page)).toEqual(["form-14"]);
+      47 |   await page.locator("#anSetup").selectOption("a");
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-form-context\sandbox\tests\e2e\analysis-form-context.spec.js:44:37
+
+    Error Context: test-results\analysis-form-context-form-b6b13-d-linked-equipment-distance-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\analysis-form-context.spec.js:23:1 › form analysis follows capture period and linked equipment/distance 
+  4 passed (12.6s)

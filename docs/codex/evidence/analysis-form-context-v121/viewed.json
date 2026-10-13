@@ -1,0 +1,80 @@
+[
+  {
+    "file": "before/chromium-375-light.png",
+    "sha256": "7919e891a67365ea757409c91e3151ecbae59a3681a6875c850cfb50fac4b011",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "after/chromium-375-light.png",
+    "sha256": "26fe090c01148dd16aacbff17f8168bdc5d985d8f3be3efffe5c0f4bf341a696",
+    "method": "view_image",
+    "note": "Initial stale style.min.css; not final visual proof"
+  },
+  {
+    "file": "corrected/chromium-375-light.png",
+    "sha256": "cc7d273a8c387986136cdcdad6faa5d208dd44aacc51423712a5cea918e05a1c",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "corrected/chromium-320-light.png",
+    "sha256": "a6bef17818221bf2c96b1e33e016652c52317063b8e00c1f3191dcd8165d8c36",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "corrected/webkit-375-dark.png",
+    "sha256": "df56eabecb1bd449a8196dd38a453b28c2074221920414324df2faf2ad2995bb",
+    "method": "view_image",
+    "note": "Viewport did not expose form rows; whole-card final separately inspected"
+  },
+  {
+    "file": "before/webkit-375-dark.png",
+    "sha256": "14fa612226830e62e228912f7488579295e55279050d7e263964f5631e65aa7c",
+    "method": "view_image",
+    "note": "Viewport did not expose form rows; whole-card final separately inspected"
+  },
+  {
+    "file": "before-card/chromium-375-light-card.png",
+    "sha256": "c7acb4f739b9ce81ab76509c8ad2f6a2d840ca4b8ee5cdd0e91784d53754d5e5",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "final/chromium-375-light-card.png",
+    "sha256": "82dc33c4f45a35e246611c7c5e36c900089c2ac974e27236d86a0c5a9736810c",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "final/chromium-320-light-card.png",
+    "sha256": "f1646d973a4bab5475a79a1758960be39a72cfe058290a103e991c25977b7130",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "final/webkit-375-dark-card.png",
+    "sha256": "5210cc0489970ece65705d16b8b79784ffcc5fdae048ee69d831074737592c9d",
+    "method": "view_image",
+    "note": "Whole-card screenshot includes fixed bottom navigation overlay; not viewport rendering evidence"
+  },
+  {
+    "file": "public-analysis/chromium-375-light-filtered.png",
+    "sha256": "67344e5d7cc3cfd18319dbc0a28b8ea240382bafef3dfccc7fd1a06c471f24e0",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "public-analysis/chromium-320-light-card.png",
+    "sha256": "f1646d973a4bab5475a79a1758960be39a72cfe058290a103e991c25977b7130",
+    "method": "view_image",
+    "note": ""
+  },
+  {
+    "file": "public-analysis/webkit-375-dark.png",
+    "sha256": "4d88a064a5d4addc535deccb7a2390f0092306cb030b5789f29bcfd5c3c85d02",
+    "method": "view_image",
+    "note": "Viewport did not expose form rows; whole-card final separately inspected"
+  }
+]

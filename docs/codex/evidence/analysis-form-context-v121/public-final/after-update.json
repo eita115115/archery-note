@@ -1,0 +1,653 @@
+{
+  "publicationMs": 324681,
+  "updateMs": 329840,
+  "before": {
+    "sessions": [
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-23",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.8000000000000003,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 4.6,
+              "y": 0,
+              "s": 7
+            },
+            {
+              "x": 1.4,
+              "y": -3.2,
+              "s": 8
+            }
+          ],
+          [
+            {
+              "x": 1.4,
+              "y": 3.2,
+              "s": 8
+            },
+            {
+              "x": -0.8399999999999999,
+              "y": 2.2399999999999998,
+              "s": 7
+            },
+            {
+              "x": 3.6399999999999997,
+              "y": -2.2399999999999998,
+              "s": 8
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-05",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.5999999999999999,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 3.2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.8,
+              "y": -2.4,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.8,
+              "y": 2.4,
+              "s": 9
+            },
+            {
+              "x": -0.8799999999999999,
+              "y": 1.68,
+              "s": 8
+            },
+            {
+              "x": 2.48,
+              "y": -1.68,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.4,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.3,
+              "y": -1.7,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.3,
+              "y": 1.7,
+              "s": 9
+            },
+            {
+              "x": -0.8899999999999999,
+              "y": 1.19,
+              "s": 8
+            },
+            {
+              "x": 1.49,
+              "y": -1.19,
+              "s": 9
+            }
+          ]
+        ]
+      }
+    ],
+    "active": {
+      "id": "mv5wp5qco2t9t",
+      "date": "2026-10-13",
+      "setupId": null,
+      "dist": 18,
+      "faceD": 40,
+      "faceType": "single",
+      "perEnd": 3,
+      "shaft": 0.504,
+      "sightV": "",
+      "sightH": "",
+      "wx": "",
+      "note": "",
+      "windDir": "",
+      "windSpeed": "",
+      "round": "free",
+      "purpose": "practice",
+      "ends": [],
+      "cur": [
+        {
+          "x": 0,
+          "y": 0,
+          "s": 10,
+          "X": true
+        }
+      ]
+    },
+    "setups": [],
+    "sightMarks": [],
+    "customRounds": [],
+    "formAnalyses": []
+  },
+  "beforeUpdate": {
+    "sessions": [
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-23",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.8000000000000003,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 4.6,
+              "y": 0,
+              "s": 7
+            },
+            {
+              "x": 1.4,
+              "y": -3.2,
+              "s": 8
+            }
+          ],
+          [
+            {
+              "x": 1.4,
+              "y": 3.2,
+              "s": 8
+            },
+            {
+              "x": -0.8399999999999999,
+              "y": 2.2399999999999998,
+              "s": 7
+            },
+            {
+              "x": 3.6399999999999997,
+              "y": -2.2399999999999998,
+              "s": 8
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-05",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.5999999999999999,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 3.2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.8,
+              "y": -2.4,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.8,
+              "y": 2.4,
+              "s": 9
+            },
+            {
+              "x": -0.8799999999999999,
+              "y": 1.68,
+              "s": 8
+            },
+            {
+              "x": 2.48,
+              "y": -1.68,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.4,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.3,
+              "y": -1.7,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.3,
+              "y": 1.7,
+              "s": 9
+            },
+            {
+              "x": -0.8899999999999999,
+              "y": 1.19,
+              "s": 8
+            },
+            {
+              "x": 1.49,
+              "y": -1.19,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "mv5wp5qco2t9t",
+        "date": "2026-10-13",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [
+          [
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ]
+        ]
+      }
+    ],
+    "active": null,
+    "setups": [],
+    "sightMarks": [],
+    "customRounds": [],
+    "formAnalyses": []
+  },
+  "after": {
+    "sessions": [
+      {
+        "id": "build-week-demo:1",
+        "date": "2026-09-23",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.8000000000000003,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 4.6,
+              "y": 0,
+              "s": 7
+            },
+            {
+              "x": 1.4,
+              "y": -3.2,
+              "s": 8
+            }
+          ],
+          [
+            {
+              "x": 1.4,
+              "y": 3.2,
+              "s": 8
+            },
+            {
+              "x": -0.8399999999999999,
+              "y": 2.2399999999999998,
+              "s": 7
+            },
+            {
+              "x": 3.6399999999999997,
+              "y": -2.2399999999999998,
+              "s": 8
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:2",
+        "date": "2026-10-05",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.5999999999999999,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 3.2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.8,
+              "y": -2.4,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.8,
+              "y": 2.4,
+              "s": 9
+            },
+            {
+              "x": -0.8799999999999999,
+              "y": 1.68,
+              "s": 8
+            },
+            {
+              "x": 2.48,
+              "y": -1.68,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "build-week-demo:3",
+        "date": "2026-10-12",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "round": "free",
+        "purpose": "practice",
+        "note": "架空のデモデータ",
+        "ends": [
+          [
+            {
+              "x": -1.4,
+              "y": 0,
+              "s": 9
+            },
+            {
+              "x": 2,
+              "y": 0,
+              "s": 8
+            },
+            {
+              "x": 0.3,
+              "y": -1.7,
+              "s": 9
+            }
+          ],
+          [
+            {
+              "x": 0.3,
+              "y": 1.7,
+              "s": 9
+            },
+            {
+              "x": -0.8899999999999999,
+              "y": 1.19,
+              "s": 8
+            },
+            {
+              "x": 1.49,
+              "y": -1.19,
+              "s": 9
+            }
+          ]
+        ]
+      },
+      {
+        "id": "mv5wp5qco2t9t",
+        "date": "2026-10-13",
+        "setupId": null,
+        "dist": 18,
+        "faceD": 40,
+        "faceType": "single",
+        "perEnd": 3,
+        "shaft": 0.504,
+        "sightV": "",
+        "sightH": "",
+        "wx": "",
+        "note": "",
+        "windDir": "",
+        "windSpeed": "",
+        "round": "free",
+        "purpose": "practice",
+        "ends": [
+          [
+            {
+              "x": 0,
+              "y": 0,
+              "s": 10,
+              "X": true
+            }
+          ]
+        ]
+      }
+    ],
+    "active": null,
+    "setups": [],
+    "sightMarks": [],
+    "customRounds": [],
+    "formAnalyses": []
+  },
+  "loaded": [
+    {
+      "file": "scripts/00-compat.js",
+      "sha256": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/00-compat.js?v=121"
+    },
+    {
+      "file": "scripts/20-scoring.js",
+      "sha256": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/20-scoring.js?v=121"
+    },
+    {
+      "file": "scripts/45-analysis-core.js",
+      "sha256": "2466d97c44d656ea426b1b7fc898f16a5793ae841398bc58ff1b0d421dbf4312",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/45-analysis-core.js?v=121"
+    },
+    {
+      "file": "scripts/30-target-svg.js",
+      "sha256": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/30-target-svg.js?v=121"
+    },
+    {
+      "file": "scripts/48-gamification.js",
+      "sha256": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/48-gamification.js?v=121"
+    },
+    {
+      "file": "scripts/50-record-view.js",
+      "sha256": "4ceeffba0378f941dae71bf3e7d7ef5b0dd8f14a889d47b0bce74d18bcce5cc3",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/50-record-view.js?v=121"
+    },
+    {
+      "file": "scripts/90-init.js",
+      "sha256": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/90-init.js?v=121"
+    },
+    {
+      "file": "style.min.css",
+      "sha256": "e34318609449a2ef922bbb4be5ace239a8e530c0c50e3ec8f0125dfd67babad0",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/style.min.css?v=121"
+    },
+    {
+      "file": "scripts/10-storage-native.js",
+      "sha256": "90e02b57896ddc7d28e20b516b170108fd0d60222fcf2ad20a2eee1bc1c016ce",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/10-storage-native.js?v=121"
+    },
+    {
+      "file": "scripts/47-form-view.js",
+      "sha256": "177b91c2e412be2f8832461ad6f76b435aa6f1946b4d5eb90c2edf3c79e2a1a5",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/47-form-view.js?v=121"
+    },
+    {
+      "file": "scripts/70-gear-settings.js",
+      "sha256": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/70-gear-settings.js?v=121"
+    },
+    {
+      "file": "scripts/46-form-core.js",
+      "sha256": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/46-form-core.js?v=121"
+    },
+    {
+      "file": "scripts/60-history-sight-view.js",
+      "sha256": "555e325211cd96a7c7efb1a6c614794be92b68215bc24ee163aa0842a149b2e6",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/60-history-sight-view.js?v=121"
+    },
+    {
+      "file": "scripts/49-todays-result.js",
+      "sha256": "49b6545fdac438f2b6050adc22913e9c7d5926b48414a0243fe43a9bde3d047c",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/49-todays-result.js?v=121"
+    },
+    {
+      "file": "scripts/40-analysis-physics.js",
+      "sha256": "60a02f18d3c3b55883335643e3add6a88abfbb7be9e65d978f28d0bb68bac34f",
+      "status": 200,
+      "url": "https://eita115115.github.io/archery-note/scripts/40-analysis-physics.js?v=121"
+    }
+  ],
+  "canonicalHashes": {
+    "scripts/00-compat.js": "7e7de7e66a7db589f994a8f59db432fc30779970c66b991804e780080deac35f",
+    "scripts/10-storage-native.js": "90e02b57896ddc7d28e20b516b170108fd0d60222fcf2ad20a2eee1bc1c016ce",
+    "scripts/20-scoring.js": "07b62a671fcf9b3b1f7886c60b578662ea607e40e2aa3b09faa51d9d48ff6cd4",
+    "scripts/30-target-svg.js": "5611e8b174d3ea2b947c3ebab1b00600536a9c51f107e263571e488fea6e2c0e",
+    "scripts/40-analysis-physics.js": "60a02f18d3c3b55883335643e3add6a88abfbb7be9e65d978f28d0bb68bac34f",
+    "scripts/45-analysis-core.js": "2466d97c44d656ea426b1b7fc898f16a5793ae841398bc58ff1b0d421dbf4312",
+    "scripts/46-form-core.js": "5bda9967cc551009a4727ae31f3dd655ee566b34cdc0886a8c1dcca4ea11cb35",
+    "scripts/47-form-view.js": "177b91c2e412be2f8832461ad6f76b435aa6f1946b4d5eb90c2edf3c79e2a1a5",
+    "scripts/48-gamification.js": "663a9f100a393e2ef115ff4dce35cfaa24c126527ce18ab1379d69efc1a3a526",
+    "scripts/49-todays-result.js": "49b6545fdac438f2b6050adc22913e9c7d5926b48414a0243fe43a9bde3d047c",
+    "scripts/50-record-view.js": "4ceeffba0378f941dae71bf3e7d7ef5b0dd8f14a889d47b0bce74d18bcce5cc3",
+    "scripts/60-history-sight-view.js": "555e325211cd96a7c7efb1a6c614794be92b68215bc24ee163aa0842a149b2e6",
+    "scripts/70-gear-settings.js": "8b42ba7a7f578431cb4cc561f9dd31bd84ce48fb3ffdb4fb93aaed07c3f0ed8a",
+    "scripts/90-init.js": "6d3665ef55d7ea9d02e12fc52d8e62482e37a6416e474f02b34a0ca3168e6b26"
+  }
+}

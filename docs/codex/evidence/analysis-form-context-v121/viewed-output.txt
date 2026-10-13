@@ -1,0 +1,1 @@
+PASS10 actually viewed originals hashed; stale and viewport limitations retained

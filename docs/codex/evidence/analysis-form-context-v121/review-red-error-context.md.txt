@@ -1,0 +1,196 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: analysis-form-context.spec.js >> distance remains clearable after deleting its last linked practice
+- Location: tests\e2e\analysis-form-context.spec.js:92:1
+
+# Error details
+
+```
+Error: expect(locator).toHaveValue(expected) failed
+
+Locator:  locator('#anDist')
+Expected: "30"
+Received: ""
+Timeout:  5000ms
+
+Call log:
+  - Expect "toHaveValue" with timeout 5000ms
+  - waiting for locator('#anDist')
+    14 × locator resolved to <select class="inp" id="anDist">…</select>
+       - unexpected value ""
+
+```
+
+```yaml
+- combobox "距離":
+  - option "すべて" [selected]
+  - option "18m"
+```
+
+# Test source
+
+```ts
+  12  |   }, d);
+  13  |   await page.goto("/");
+  14  |   await page.locator('#tabs [data-v="analysis"]').tap();
+  15  | }
+  16  | async function snapshot(page) {
+  17  |   return page.evaluate(() => {
+  18  |     const d = JSON.parse(globalThis.localStorage.getItem("archeryNote.v1"));
+  19  |     return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
+  20  |   });
+  21  | }
+  22  | async function ids(page) {
+  23  |   return page.evaluate(() => analysisFormRecords(ui.analysisFilter).map((r) => r.id));
+  24  | }
+  25  | test("form analysis follows capture period and linked equipment/distance", async ({ page }) => {
+  26  |   await seed(page);
+  27  |   const before = await snapshot(page);
+  28  |   await page.locator('[data-period="7d"]').tap();
+  29  |   await page.locator("#anSetup").selectOption("a");
+  30  |   await page.locator("#anDist").selectOption("30");
+  31  |   const card = page
+  32  |     .locator(".card")
+  33  |     .filter({ has: page.getByRole("heading", { name: /射形トラッキング/ }) });
+  34  |   expect(
+  35  |     await card
+  36  |       .locator("[data-form-id]")
+  37  |       .evaluateAll((els) => els.map((e) => e.dataset.formId).sort()),
+  38  |   ).toEqual(["form-0", "form-12", "form-13", "form-2", "form-3"]);
+  39  |   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-12", "form-13"]);
+  40  |   await expect(card.locator("svg title")).toContainText("5回");
+  41  |   await expect(card).toContainText("練習に紐付いた 5 記録");
+  42  |   await page.locator("#anDist").selectOption("");
+  43  |   expect(await ids(page)).toContain("form-9");
+  44  |   await page.locator("#anSetup").selectOption("b");
+  45  |   expect(await ids(page)).toEqual(["form-1", "form-10"]);
+  46  |   await expect(card.locator('svg[role="img"]')).toHaveCount(0);
+  47  |   await page.locator("#anSetup").selectOption("__none");
+  48  |   expect(await ids(page)).toEqual(["form-14"]);
+  49  |   await page.locator("#anSetup").selectOption("a");
+  50  |   await page.locator("#anDist").selectOption("18");
+  51  |   await expect(card).toContainText("この条件に合う射形記録はありません");
+  52  |   await expect(card.locator("[data-form-id]")).toHaveCount(0);
+  53  |   await page.locator("#anSetup").selectOption("");
+  54  |   await page.locator("#anDist").selectOption("");
+  55  |   for (const [period, included, excluded] of [
+  56  |     ["7d", "form-3", "form-4"],
+  57  |     ["30d", "form-5", "form-6"],
+  58  |     ["90d", "form-7", "form-8"],
+  59  |   ]) {
+  60  |     await page.locator(`[data-period="${period}"]`).tap();
+  61  |     const selected = await ids(page);
+  62  |     expect(selected).toContain(included);
+  63  |     expect(selected).not.toContain(excluded);
+  64  |     expect(selected).not.toContain("form-11");
+  65  |     expect(selected).toContain("form-12");
+  66  |   }
+  67  |   await page.locator('[data-period="all"]').tap();
+  68  |   expect(await ids(page)).toHaveLength(15);
+  69  |   expect(await snapshot(page)).toEqual(before);
+  70  |   await page.reload();
+  71  |   expect(await snapshot(page)).toEqual(before);
+  72  | });
+  73  | test("form-only records still expose the shared period controls", async ({ page }) => {
+  74  |   await seed(page, true);
+  75  |   await expect(page.locator("#anPeriods")).toBeVisible();
+  76  |   await page.locator('[data-period="7d"]').tap();
+  77  |   expect(await ids(page)).not.toContain("form-4");
+  78  |   await page.locator("#anSetup").selectOption("a");
+  79  |   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-9", "form-12", "form-13"]);
+  80  | });
+  81  | test("form-only no-match keeps controls available to restore the list", async ({ page }) => {
+  82  |   await seed(page, true, true);
+  83  |   await page.locator('[data-period="7d"]').tap();
+  84  |   await expect(page.getByTestId("analysis-form-card")).toContainText(
+  85  |     "この条件に合う射形記録はありません",
+  86  |   );
+  87  |   await expect(page.locator("#anPeriods")).toBeVisible();
+  88  |   await page.locator('[data-period="all"]').tap();
+  89  |   await expect(page.locator('[data-form-id="form-8"]')).toHaveCount(1);
+  90  | });
+  91  | 
+  92  | test("distance remains clearable after deleting its last linked practice", async ({ page }) => {
+  93  |   const d = analysisFormDb();
+  94  |   d.sessions = d.sessions.filter((s) => ["form-session-0", "form-session-1"].includes(s.id));
+  95  |   await page.addInitScript((d) => {
+  96  |     if (!globalThis.localStorage.getItem("archeryNote.v1"))
+  97  |       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(d));
+  98  |   }, d);
+  99  |   await page.goto("/");
+  100 |   await page.locator('#tabs [data-v="analysis"]').tap();
+  101 |   await page.locator("#anDist").selectOption("30");
+  102 |   expect(await ids(page)).toEqual(["form-0"]);
+  103 |   await page.locator('#tabs [data-v="history"]').tap();
+  104 |   await page.locator('#histList [data-id="form-session-0"]').tap();
+  105 |   await page.locator("#hDel").tap();
+  106 |   await page.locator("#acOk").tap();
+  107 |   await expect(page.locator("#hDel")).toHaveCount(0);
+  108 |   await page.locator('#tabs [data-v="analysis"]').tap();
+  109 |   const afterDelete = await snapshot(page);
+  110 |   expect(afterDelete[0]).toEqual([d.sessions[1]]);
+  111 |   expect(afterDelete[5]).toEqual(d.formAnalyses);
+> 112 |   await expect(page.locator("#anDist")).toHaveValue("30");
+      |                                         ^ Error: expect(locator).toHaveValue(expected) failed
+  113 |   expect(await ids(page)).toEqual([]);
+  114 |   await page.locator("#anDist").selectOption("");
+  115 |   expect(await ids(page)).toHaveLength(15);
+  116 |   expect(await snapshot(page)).toEqual(afterDelete);
+  117 |   await page.reload();
+  118 |   expect(await snapshot(page)).toEqual(afterDelete);
+  119 | });
+  120 | for (const width of [320, 375, 900]) {
+  121 |   test(`form records expose readable values and safe detail actions (${width})`, async ({
+  122 |     page,
+  123 |   }) => {
+  124 |     await page.setViewportSize({ width, height: 812 });
+  125 |     await page.emulateMedia({ reducedMotion: "reduce" });
+  126 |     await seed(page);
+  127 |     const before = await snapshot(page);
+  128 |     const card = page.getByTestId("analysis-form-card");
+  129 |     await card.scrollIntoViewIfNeeded();
+  130 |     await expect(card.locator("[data-form-id]")).toHaveCount(5);
+  131 |     const help = card.locator("details");
+  132 |     expect(await help.evaluate((e) => e.open)).toBe(false);
+  133 |     await help.locator("summary").tap();
+  134 |     await expect(help).toContainText("撮影日");
+  135 |     await help.locator("summary").tap();
+  136 |     const first = card.locator("[data-form-id]").first();
+  137 |     await expect(first).toContainText("弓手肘");
+  138 |     await expect(first).toContainText("引き手肘");
+  139 |     await first.tap();
+  140 |     await expect(page.locator("#fdClose")).toBeVisible();
+  141 |     await page.locator("#fdClose").tap();
+  142 |     await card.locator("[data-del-form]").first().tap();
+  143 |     await page.getByRole("button", { name: "キャンセル", exact: true }).tap();
+  144 |     const layout = await card.evaluate((el) => ({
+  145 |       overflow: el.scrollWidth > el.clientWidth,
+  146 |       textOverflow: [
+  147 |         ...el.querySelectorAll(".formRecordItem, .formRecordAngles, .formRecordComparison"),
+  148 |       ].some((e) => e.scrollWidth > e.clientWidth),
+  149 |       short: [...el.querySelectorAll("button")].some((e) => e.getBoundingClientRect().height < 44),
+  150 |       rowsOverlap: [...el.querySelectorAll(".formRecordItem")].some((item) => {
+  151 |         const lines = [...item.children].map((e) => e.getBoundingClientRect());
+  152 |         return lines.some((line, i) => i > 0 && line.top < lines[i - 1].bottom - 0.5);
+  153 |       }),
+  154 |     }));
+  155 |     expect(layout).toEqual({
+  156 |       overflow: false,
+  157 |       textOverflow: false,
+  158 |       short: false,
+  159 |       rowsOverlap: false,
+  160 |     });
+  161 |     expect(await snapshot(page)).toEqual(before);
+  162 |     await page.reload();
+  163 |     expect(await snapshot(page)).toEqual(before);
+  164 |   });
+  165 | }
+  166 | 
+  167 | 
+```

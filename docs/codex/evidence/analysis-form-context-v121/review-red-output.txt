@@ -1,0 +1,44 @@
+
+> archery-note@0.121.0 test:e2e:dist
+> node tools/test-distribution.js tests/e2e/analysis-form-context.spec.js --grep distance remains clearable
+
+Native web assets ready: dist\native (v121)
+[WebServer] (node:28244) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:34436) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 [chromium] › tests\e2e\analysis-form-context.spec.js:92:1 › distance remains clearable after deleting its last linked practice (7.0s)
+
+
+  1) [chromium] › tests\e2e\analysis-form-context.spec.js:92:1 › distance remains clearable after deleting its last linked practice 
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  locator('#anDist')
+    Expected: "30"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveValue" with timeout 5000ms
+      - waiting for locator('#anDist')
+        14 × locator resolved to <select class="inp" id="anDist">…</select>
+           - unexpected value ""
+
+
+      110 |   expect(afterDelete[0]).toEqual([d.sessions[1]]);
+      111 |   expect(afterDelete[5]).toEqual(d.formAnalyses);
+    > 112 |   await expect(page.locator("#anDist")).toHaveValue("30");
+          |                                         ^
+      113 |   expect(await ids(page)).toEqual([]);
+      114 |   await page.locator("#anDist").selectOption("");
+      115 |   expect(await ids(page)).toHaveLength(15);
+        at C:\Users\eita2\.codex\worktrees\app-quality\archery-note\artifacts\analysis-form-context\sandbox\tests\e2e\analysis-form-context.spec.js:112:41
+
+    Error Context: test-results\analysis-form-context-dist-f6321-ng-its-last-linked-practice-chromium\error-context.md
+
+  1 failed
+    [chromium] › tests\e2e\analysis-form-context.spec.js:92:1 › distance remains clearable after deleting its last linked practice 
