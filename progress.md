@@ -4,6 +4,12 @@
 
 ## 現在地
 
+- AN089監査完了、branch codex/sight-order-audit、基点258fa0bf90d1d3b922bdf1632279ace613f41c8d、公開v122/source2ce72647d10f2b1088ab7ea957e190b7a0139871不変。実Linux/public25byte再一致。台帳/latestMarkはdate↓ts↓先頭、補間はdate↑ts↑の最後のfinite上下、分析summaryは同日台帳の後勝ちでtsを無視。同日別tsの逆配列で台帳/prefill/補間90に対し分析最新80を実表示で再現。同日時/日時なしでは台帳80対補間90、native削除復元でmarks内容multisetを保持したまま配列順と選択が反転。numeric0は実input/台帳/補間0だが校正空・開始snapshot—、文字0は保持。上下空欄/非数値の最新rowと古いfinite測定点の違いは別仕様と区別。通常4書込入口はdate/ts保存、restoreは末尾push、normaladd95はlatest/補間一致・旧5fields+旧marks/reload保持。ChromeWK14cases各28matrix、UI48、別可視24、restore-add2、visiblezero2でerrors0。通常UI48/可視24は旧6/reloadexact、復元はmarks順exactとは称さずmultiset+他5exact。独立readonlyreview Critical/Important/Minor0、app/CSS/数学/採点半径/保存/schema/deps/SW/版122/testsは基点exact、旧88tasks/acceptance/sharedhiddenlock保持。formatcheck成功。同sourceAN088の全330/CI38326751775/更新offlineは明示再利用、今回新実行としない。docs/codex/evidence/sight-order-audit-v122へ原失敗/補強raw/原寸PNG/viewed8/source/hashをbyte保持archive。費用/個人情報不使用、大目標active、local監査notesのみ。物理phone/VoiceOver/fieldINP/実射は未証明、発見不具合は未修正。
+
+- 原renderedはChrome12+WK2成功後numeric-zero analysis visibility fail、元context閉鎖済/原因未断定、raw保持。別可視24は事前scroll/settle・実hit/open待ち・厳密80/90/0assertで成功、app変更なし。原matrixの同参照比較はin-place変化を見逃すと独立review指摘、原28を保持し別補強28は代入前JSON文字列/入力/一時db/元dbの不変を確認。prefill原viewportはfieldが下に隠れ、別2はscrollしinput0とsnapshot—を可視確認。source探索で存在しない旧physics/checkファイル名を一度参照したが現正本へ解決しapp変更なし。
+
+- 次: 明確なdate/tsを持つ同日台帳で分析の最新選択をlatestMarkへ一致させる一タスク。日時曖昧時の意味とfinite補間、numeric0の校正/snapshotは別判断。変更はplan/progress/tasks/ledger/evidenceのみ、公開122/source不変、localnotesのみ。
+
 - AN088完了、公開v122/source2ce72647d10f2b1088ab7ea957e190b7a0139871、branch codex/sight-ledger-layout。サイト台帳を日付/最新→上下・左右のラベル値→必要時に全文を開くnativeメモdetailsの縦一覧へ。0/空欄を区別、空メモ操作なし、escape/keyboard/focus/44pxを保持。実v121の長い通常メモはChrome320で一行615px、375で270px、final/publicの閉じた各行は220px未満。全体高さが全幅で減ったとの主張ではない。60の純表示helper+台帳markup、12scopedCSS/生成CSSと一括122のみ。他21nodes/全他scripts・数学・採点半径・保存/handlers/依存/SWactivationは版以外exact。ChromeWK8x5statesで用具/距離/該当なし/復帰と他HTML/advice/regression/interpolation/calibration/選択ID一致。旧121でlist回帰1failed→新6 passed (14.1s)、final checkall/lint/format成功、local330 passed (3.9m)、CI38326751775 clean checks/validate/deploy/Linux330 passed (6.3m)。final122 native8/104は旧3+新記録/nudge0.6/undo/score/reloadexact/errors0。ChromeWK320375明暗900のbefore/after/final/public各8、メモ全文/tap/Enter/Space/削除cancel/追加校正cancel/旧6fields/reload/errors0、削除confirm・ごみ箱復元は新回帰で保持。独立readonlyreview Critical/Important/Minor0。実Linux/public25byte、frozen19byte+6allowlistedLF、held first15/canonical14一致。同じ元public121page/contextで記録中更新保留→finish4/banner122/旧全件→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/sight-ledger-layout-v122へ原失敗/訂正/最終raw・原寸PNG・metadata/hashをbyte保持archive。旧87tasks/acceptance/sharedhiddenlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/実射/WKstrictOfflineは未証明。
 
 - 初start helperは旧全tasksのpassを誤要求し既存AN001実射openで停止、直前依存AN087だけへ訂正し旧87は変更なし。初capture helperは存在しないsimpleAdviceを呼びbefore失敗、正本adviceForへ訂正したbefore8で比較成功。初lintはtest内document/innerWidth未修飾3件、globalThis修飾のみでassert/app不変、final lint/全330成功。旧tableに新listのIDを要求したred1を保存、実UXのbeforeは615px行で別に示す。after/greenはbump前v121、final/native/publicは122として区別。whole-card画像の一部にfixed bottom navが途中へ写る撮影制約があるためviewport/幾何/native操作を併用。sortは既存date降順+ts降順を保持。日時とも同じ/欠落の旧記録tieと補間の後勝ちの意味は既存の別task候補、今回の計算変更なし。
@@ -83,7 +89,7 @@
 
 ## 次と未解決
 
-- UI一新を継続する。AN087で射形の比較条件、AN088でサイト台帳を改善。次は同日時/欠落日時のサイト記録の意味を監査する一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
+- UI一新を継続する。AN087で射形の比較条件、AN088でサイト台帳を改善。AN089で日時の意味を監査し不整合を特定。次は日時が明確な分析最新値を修正する一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
 - 統計5001回/保存/DOMの負担は残る。native依存critical2件はAN086でrepo更新/GitHub自動fixed。配布済みnativebinaryがある場合の再build/再配布/実機remediationは未確認。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。

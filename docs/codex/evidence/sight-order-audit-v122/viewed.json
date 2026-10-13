@@ -1,0 +1,42 @@
+[
+  {
+    "file": "ui/chromium-375-light-same-ts-ledger.png",
+    "viewed": true,
+    "sha256": "7f1fbb60d2b7b415d1bfcf7055ea20a9416b717c974a4d367c0703b5579d9de0"
+  },
+  {
+    "file": "ui/webkit-375-light-numeric-zero-calibration.png",
+    "viewed": true,
+    "sha256": "40902c5c969f4626fb65299a3bb69e9f76d1d837627d1e0eb0cf3c5bf6e5e29b"
+  },
+  {
+    "file": "ui/chromium-375-light-numeric-zero-prefill.png",
+    "viewed": true,
+    "sha256": "7705e87b365b95dea95b22bbbef7a559cdc3ce774fd67f619941d6818c1e7e7e"
+  },
+  {
+    "file": "ui/webkit-375-restore.png",
+    "viewed": true,
+    "sha256": "7250a5531a92ee04d8b3a84266451de02a016ea2848beb1520715f0436ed695e"
+  },
+  {
+    "file": "rendered-visible/chromium-375-light-same-ts-prediction.png",
+    "viewed": true,
+    "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+  },
+  {
+    "file": "rendered-visible/chromium-375-light-unique-ts-reverse-analysis.png",
+    "viewed": true,
+    "sha256": "85fc650a3f17e3407dc9b8520907a009d4072ccefa529aa19b020b549a93f328"
+  },
+  {
+    "file": "ui/chromium-375-numeric-zero-field-visible.png",
+    "viewed": true,
+    "sha256": "c06282bb38a161906b9642f38b52bf48d6f0a7aba9075d42b30e8188879bb6b6"
+  },
+  {
+    "file": "ui/webkit-375-numeric-zero-field-visible.png",
+    "viewed": true,
+    "sha256": "ae0737f8b6b60d9277d78caaa5374a19ad46f5335799f2382dc9f6b58c02d0eb"
+  }
+]

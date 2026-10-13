@@ -1,0 +1,2250 @@
+[
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "unique-ts",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "80 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "90",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "no-date-ts",
+    "version": 122,
+    "firstId": "A",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      "point": 90,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          90
+        ]
+      ],
+      "estimate50": 173.33333333333334,
+      "summary": "90 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "80",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "latest-blank",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 80,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          80
+        ]
+      ],
+      "estimate50": 146.66666666666669,
+      "summary": "— / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "firstId": "B",
+    "latestLabel": "最新",
+    "raw": {
+      "latest": {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      "point": 0,
+      "points": [
+        [
+          18,
+          40
+        ],
+        [
+          30,
+          0
+        ]
+      ],
+      "estimate50": -66.66666666666669,
+      "summary": "0 / 左右0.4",
+      "summaryHtml": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+      "unchanged": true
+    },
+    "calibration": {
+      "v": "",
+      "h": "0.4"
+    },
+    "prefill": {
+      "v": "0",
+      "h": "0.4"
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]

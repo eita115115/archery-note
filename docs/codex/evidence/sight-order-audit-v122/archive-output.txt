@@ -1,0 +1,1 @@
+PASS AN089 audit archive/public25/matrix-corrected28/UI48/rendered-visible24/restore-add2/zero2/viewed8; original failure+weak matrix kept; bytes/hash exact

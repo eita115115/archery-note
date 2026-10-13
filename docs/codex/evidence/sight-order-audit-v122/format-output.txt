@@ -1,0 +1,11 @@
+
+> archery-note@0.122.0 format:check
+> prettier "package*.json" "README.md" "CHANGELOG.md" "CODE_OF_CONDUCT.md" "CONTRIBUTING.md" "SECURITY.md" "THIRD_PARTY.md" "docs/**/*.md" ".github/**/*.md" "eslint.config.mjs" "playwright.config.js" "tools/e2e-server.js" "tools/lighthouse-baseline.js" "tests/**/*.js" ".prettierrc" --check
+
+Checking formatting...
+All matched files use Prettier code style!
+npm notice
+npm notice New minor version of npm available! 11.16.0 -> 11.21.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.21.0
+npm notice To update run: npm install -g npm@11.21.0
+npm notice

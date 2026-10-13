@@ -1,0 +1,3 @@
+PASS chromium 14 immutable-before-string matrix / visible input0 / snapshot— / storedmarks exact/errors0
+PASS webkit 14 immutable-before-string matrix / visible input0 / snapshot— / storedmarks exact/errors0
+PASS corrected28 independent snapshots +2 visible zero contexts; closed

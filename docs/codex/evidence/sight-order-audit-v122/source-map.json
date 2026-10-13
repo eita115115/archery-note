@@ -1,0 +1,88 @@
+{
+  "base": "258fa0bf90d1d3b922bdf1632279ace613f41c8d",
+  "source": "2ce72647d10f2b1088ab7ea957e190b7a0139871",
+  "files": [
+    {
+      "file": "scripts/10-storage-native.js",
+      "sha256": "787d9ca165f2871f801cdbfa6b49b4705aa4d388260d2864dcd36e54431b7123",
+      "matches": [
+        {
+          "line": 660,
+          "text": "}\nfunction restoreTrash(id){\n  const i=(db.trash||[]).findIndex(x=>x.id===id);\n  if(i<0) return false;\n  const item=db.trash[i], data=cloneData(item.data);\n  if(item.type===\"session\"){\n    if(!db.sessions.some(s=>s.id===data.id)) db.sessions.push(data);\n  }else if(item.type===\"sightMark\"){\n    if(!db.sightMarks.some(m=>m.id===data.id)) db.sightMarks.push(data);\n  }else if(item.type===\"setupBundle\"){\n    const setup=data.setup;\n    if(setup && !db.setups.some(s=>s.id===setup.id)) db.setups.push(setup);\n    (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });\n  }else if(item.type===\"formAnalysis\"){\n    if(!db.formAnalyses.some(f=>f.id===data.id)) db.formAnalyses.push(data);\n  }\n  db.trash.splice(i,1);\n  save({reason:\"restore-trash\",forceSnapshot:true});\n  return true;\n}\nfunction trashTypeLabel(t){ return t===\"session\"?\"練習\":t===\"sightMark\"?\"サイト値\":t===\"setupBundle\"?\"用具\":t===\"formAnalysis\"?\"射形記録\":\"削除データ\"; }\nfunction downloadText(filename,text,type){\n  const blob=new Blob([text],{type:type||\"text/plain\"});"
+        },
+        {
+          "line": 667,
+          "text": "  }else if(item.type===\"sightMark\"){\n    if(!db.sightMarks.some(m=>m.id===data.id)) db.sightMarks.push(data);\n  }else if(item.type===\"setupBundle\"){\n    const setup=data.setup;\n    if(setup && !db.setups.some(s=>s.id===setup.id)) db.setups.push(setup);\n    (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });\n  }else if(item.type===\"formAnalysis\"){\n    if(!db.formAnalyses.some(f=>f.id===data.id)) db.formAnalyses.push(data);\n  }\n  db.trash.splice(i,1);\n  save({reason:\"restore-trash\",forceSnapshot:true});\n  return true;\n}\nfunction trashTypeLabel(t){ return t===\"session\"?\"練習\":t===\"sightMark\"?\"サイト値\":t===\"setupBundle\"?\"用具\":t===\"formAnalysis\"?\"射形記録\":\"削除データ\"; }\nfunction downloadText(filename,text,type){\n  const blob=new Blob([text],{type:type||\"text/plain\"});\n  const a=document.createElement(\"a\"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);\n}\nasync function shareOrDownloadText(filename,text,type,title){\n  const mime=type||\"text/plain\";\n  try{\n    const file=new File([text],filename,{type:mime});\n    if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){"
+        },
+        {
+          "line": 671,
+          "text": "    if(setup && !db.setups.some(s=>s.id===setup.id)) db.setups.push(setup);\n    (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });\n  }else if(item.type===\"formAnalysis\"){\n    if(!db.formAnalyses.some(f=>f.id===data.id)) db.formAnalyses.push(data);\n  }\n  db.trash.splice(i,1);\n  save({reason:\"restore-trash\",forceSnapshot:true});\n  return true;\n}\nfunction trashTypeLabel(t){ return t===\"session\"?\"練習\":t===\"sightMark\"?\"サイト値\":t===\"setupBundle\"?\"用具\":t===\"formAnalysis\"?\"射形記録\":\"削除データ\"; }\nfunction downloadText(filename,text,type){\n  const blob=new Blob([text],{type:type||\"text/plain\"});\n  const a=document.createElement(\"a\"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);\n}\nasync function shareOrDownloadText(filename,text,type,title){\n  const mime=type||\"text/plain\";\n  try{\n    const file=new File([text],filename,{type:mime});\n    if(navigator.canShare && navigator.canShare({files:[file]}) && navigator.share){\n      await navigator.share({title:title||filename,files:[file]});\n      nativePulse(\"success\");\n      return true;\n    }"
+        }
+      ]
+    },
+    {
+      "file": "scripts/40-analysis-physics.js",
+      "sha256": "3e03228c753efd4208294d86f94e50e785d3c580d11b0f9256999f39d1186480",
+      "matches": [
+        {
+          "line": 900,
+          "text": "/* セッティングの実測サイト値（上下）から距離→サイト値を直線近似 */\nfunction sightInterp(setupId){\n  const byDist={};\n  [...db.sightMarks].filter(m=>m.setupId===setupId)\n    .sort((a,b)=>(a.date||\"\").localeCompare(b.date||\"\")||(a.ts||0)-(b.ts||0))\n    .forEach(m=>{ const v=parseFloat(m.v); if(isFinite(v)) byDist[m.dist]=v; });\n  const pts=Object.keys(byDist).map(d=>[+d, byDist[d]]).sort((a,b)=>a[0]-b[0]);\n  if(pts.length<2) return null;\n  const line=regress(pts);\n  if(!line) return null;\n  const curve=quadraticFit(pts);\n  const model=(curve && curve.r2>line.r2+.04)?curve:line;\n  return {pts, have:pts.map(p=>p[0]), model:model.kind, r2:model.r2, est:model.est};\n}\nfunction calibrationProfile(setupId){\n  const setup=db.setups.find(x=>x.id===setupId)||{};\n  const dists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist));\n  const sess=db.sessions.filter(s=>s.setupId===setupId);\n  const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;\n  const rich=gearPrecisionProfile(setup);\n  const score=clamp(dists.size*.12 + Math.min(withSight,10)*.035 + rich.score*.32 + (String(setup.arrowSpeed||\"\").trim()?0.14:0),0,1);\n  const level=levelFromScore(score, LEVELS.calibration);\n  const next=[];"
+        },
+        {
+          "line": 971,
+          "text": "}\nfunction latestMark(setupId, dist){\n  const ms=db.sightMarks.filter(m=>m.setupId===setupId && m.dist===dist).sort((a,b)=>(b.date||\"\").localeCompare(a.date||\"\")||(b.ts||0)-(a.ts||0));\n  return ms[0]||null;\n}\n"
+        }
+      ]
+    },
+    {
+      "file": "scripts/50-record-view.js",
+      "sha256": "d5eb88efa945049ece33c1fd8bdc7ec29e4dab6cd3420522d7b1acaa1ffd8d8d",
+      "matches": [
+        {
+          "line": 126,
+          "text": "}\nfunction recordSetupSnapshot(setupId, dist) {\n  const setup = db.setups.find((s) => s.id === setupId);\n  if (!setup)\n    return `<div class=\"setupLens\" id=\"setupLens\">\n    <div class=\"lensCard\"><div class=\"k\">セッティング</div><b>未指定</b></div>\n    <div class=\"lensCard\"><div class=\"k\">サイト台帳</div><b>未接続</b></div>\n  </div>`;\n  const mk = dist ? latestMark(setupId, dist) : null;\n  const markText = mk ? `上下 ${esc(mk.v || \"—\")} / 左右 ${esc(mk.h || \"—\")}` : \"記録なし\";\n  return `<div class=\"setupLens\" id=\"setupLens\">\n    <div class=\"lensCard\"><div class=\"k\">セッティング</div><b>${esc(setup.name)}</b></div>\n    <div class=\"lensCard\"><div class=\"k\">${dist ? dist + \"m サイト\" : \"サイト台帳\"}</div><b>${markText}</b></div>\n  </div>`;\n}\nfunction faceChoiceValue(sess) {\n  if (!sess) return \"122\";\n  if (sess.faceType === \"triple\") return \"T40\";\n  if (sess.faceType === \"field\") return `F${sess.faceD || 80}`;\n  return String(sess.faceD || 122);\n}\nfunction suggestedFaceValue(dist, last) {\n  if (last && last.faceD) return faceChoiceValue(last);"
+        },
+        {
+          "line": 2431,
+          "text": "    mk.onclick = () => {\n      db.sightMarks.push({\n        id: uid(),\n        setupId: sess.setupId,\n        dist: sess.dist,\n        v: sess.sightV,\n        h: sess.sightH,\n        date: sess.date,\n        ts: Date.now(),\n        note: `練習記録より（${all.length}本 / 平均${(total / all.length).toFixed(1)}）`,\n      });\n      save();\n      toast(\"サイト台帳に記録しました\");\n      mk.disabled = true;\n    };\n  ovl.querySelector(\"#sumCard\").onclick = () => exportScorecardImage(sess);\n  ovl.querySelector(\"#sumClose\").onclick = () => {\n    closeModal(ovl);\n    render();\n  };\n  const sumStreakSetup = ovl.querySelector(\"#sumStreakSetup\");\n  if (sumStreakSetup) sumStreakSetup.onclick = () => openPracticeDaysSheet();\n}"
+        },
+        {
+          "line": 2699,
+          "text": "}\nfunction sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {\n  const hf = filter || ui.histFilter || { setupId: \"\", dist: \"\" };\n  const setupOk = (id) => !hf.setupId || (hf.setupId === \"__none\" ? !id : hf.setupId === id);\n  const distOk = (dist) => !hf.dist || String(dist) === String(hf.dist);\n  const markRows = (Array.isArray(sightMarks) ? sightMarks : [])\n    .filter((m) => setupOk(m && m.setupId) && distOk(m && m.dist))\n    .map((m) => Object.assign({ source: \"台帳\" }, m));\n  const sessionSightRows = (sessionRows || [])\n    .map((r) => r.s)\n    .filter((s) => s && (hasSightInput(s.sightV) || hasSightInput(s.sightH)))\n    .map((s) => ({\n      source: \"練習\",\n      setupId: s.setupId,\n      dist: s.dist,\n      v: s.sightV,\n      h: s.sightH,\n      date: s.date,\n      ts: 0,\n    }));\n  const rows = [...markRows, ...sessionSightRows];\n  if (!rows.length) return \"\";\n  const byDist = new Map();"
+        }
+      ]
+    },
+    {
+      "file": "scripts/60-history-sight-view.js",
+      "sha256": "9c7bff8c47c8d8603c5be73d24d67008c961bc0917d39ea8685326ffc7b17777",
+      "matches": [
+        {
+          "line": 828,
+          "text": "}\nfunction openMarkForm(setupId, dist) {\n  const ovl = document.createElement(\"div\");\n  ovl.className = \"ovl\";\n  ovl.innerHTML = `<div class=\"sheet\"><h3>サイト値を記録（${dist}m）</h3>\n    <label class=\"f\">日付</label><input class=\"inp\" type=\"date\" id=\"mkDate\" value=\"${today()}\">\n    <div class=\"row\">\n      <div><label class=\"f\">上下</label><input class=\"inp\" id=\"mkV\" inputmode=\"decimal\"></div>\n      <div><label class=\"f\">左右</label><input class=\"inp\" id=\"mkH\" inputmode=\"decimal\"></div>\n    </div>\n    <label class=\"f\">メモ</label><input class=\"inp\" id=\"mkNote\" placeholder=\"例: 無風・ベスト調整\">\n    <div class=\"btnrow\"><button class=\"btn ghost\" id=\"mkCancel\">キャンセル</button><button class=\"btn\" id=\"mkSave\">保存</button></div>\n  </div>`;\n  openModal(ovl, { escapeTarget: \"#mkCancel\" });\n  ovl.querySelector(\"#mkCancel\").onclick = () => closeModal(ovl);\n  ovl.querySelector(\"#mkSave\").onclick = () => {\n    db.sightMarks.push({\n      id: uid(),\n      setupId,\n      dist,\n      v: ovl.querySelector(\"#mkV\").value.trim(),\n      h: ovl.querySelector(\"#mkH\").value.trim(),\n      date: ovl.querySelector(\"#mkDate\").value || today(),"
+        },
+        {
+          "line": 843,
+          "text": "  ovl.querySelector(\"#mkSave\").onclick = () => {\n    db.sightMarks.push({\n      id: uid(),\n      setupId,\n      dist,\n      v: ovl.querySelector(\"#mkV\").value.trim(),\n      h: ovl.querySelector(\"#mkH\").value.trim(),\n      date: ovl.querySelector(\"#mkDate\").value || today(),\n      ts: Date.now(),\n      note: ovl.querySelector(\"#mkNote\").value.trim(),\n    });\n    save();\n    closeModal(ovl);\n    render();\n    toast(\"台帳に記録しました\");\n  };\n}\nfunction openCalibrationWizard(setupId) {\n  const setup = db.setups.find((s) => s.id === setupId);\n  if (!setup) {\n    toast(\"セッティングを選んでください\");\n    return;\n  }"
+        },
+        {
+          "line": 859,
+          "text": "}\nfunction openCalibrationWizard(setupId) {\n  const setup = db.setups.find((s) => s.id === setupId);\n  if (!setup) {\n    toast(\"セッティングを選んでください\");\n    return;\n  }\n  const dists = [70, 50, 30, 18];\n  const ovl = document.createElement(\"div\");\n  ovl.className = \"ovl\";\n  ovl.innerHTML = `<div class=\"sheet\"><h3>校正モード — ${esc(setup.name)}</h3>\n    <div class=\"hint\">実測できている距離だけ入力してください。複数距離が揃うほど、距離別サイト予測と個人補正が強くなります。</div>\n    <label class=\"f\">日付</label><input class=\"inp\" type=\"date\" id=\"calDate\" value=\"${today()}\">\n    ${dists\n      .map((d) => {\n        const mk = latestMark(setupId, d) || {};\n        return `<div class=\"row\">\n        <div><label class=\"f\">${d}m 上下</label><input class=\"inp\" id=\"calV_${d}\" inputmode=\"decimal\" value=\"${esc(mk.v || \"\")}\"></div>\n        <div><label class=\"f\">${d}m 左右</label><input class=\"inp\" id=\"calH_${d}\" inputmode=\"decimal\" value=\"${esc(mk.h || \"\")}\"></div>\n      </div>`;\n      })\n      .join(\"\")}\n    <label class=\"f\">メモ</label><input class=\"inp\" id=\"calNote\" placeholder=\"例: 校正日 / 無風 / ベスト確認\">"
+        },
+        {
+          "line": 893,
+          "text": "      if (v || h) {\n        db.sightMarks.push({ id: uid(), setupId, dist: d, v, h, date, ts: Date.now(), note });\n        n++;\n      }\n    });\n    if (!n) {\n      toast(\"1つ以上入力してください\");\n      return;\n    }\n    save({ reason: \"calibration\", forceSnapshot: true });\n    closeModal(ovl);\n    render();\n    toast(`${n}距離の校正値を保存しました`);\n  };\n}\n\n/* ---------- 用具 ---------- */\n"
+        }
+      ]
+    },
+    {
+      "file": "scripts/70-gear-settings.js",
+      "sha256": "4855b3c1d077c54056a297b81d1a2b805bd2ba4bdd2126619b156ee96b40aaba",
+      "matches": [
+        {
+          "line": 1956,
+          "text": "      if (v || h)\n        db.sightMarks.push({\n          id: uid(),\n          setupId: n.id,\n          dist: d,\n          v,\n          h,\n          date: today(),\n          ts: Date.now(),\n          note: \"初回セットアップ\",\n        });\n    });\n    ui.sightSel.setupId = n.id;\n    save({ reason: \"setup-wizard\", forceSnapshot: true });\n    closeModal(ovl);\n    render();\n    toast(\"初回セットアップを保存しました\");\n  };\n}\nfunction openGearDetail(id) {\n  const s = db.setups.find((x) => x.id === id);\n  if (!s) return;\n  const ovl = document.createElement(\"div\");"
+        }
+      ]
+    }
+  ]
+}

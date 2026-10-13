@@ -1,0 +1,18 @@
+[
+  {
+    "engine": "chromium",
+    "fieldVisible": true,
+    "value": "0",
+    "snapshot": "\n    セッティング合成の屋外用・通常練習セッティング\n    30m サイト上下 — / 左右 0.4\n  ",
+    "storedMarksExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "fieldVisible": true,
+    "value": "0",
+    "snapshot": "\n    セッティング合成の屋外用・通常練習セッティング\n    30m サイト上下 — / 左右 0.4\n  ",
+    "storedMarksExact": true,
+    "errors": []
+  }
+]

@@ -1,0 +1,1 @@
+const fs=require('fs');for(const name of ['append-evidence.cjs','verify-archive.cjs'])fs.writeFileSync('artifacts/sight-order-audit/'+name,fs.readFileSync('artifacts/sight-ledger-layout/'+name,'utf8').replaceAll('sight-ledger-layout','sight-order-audit'));

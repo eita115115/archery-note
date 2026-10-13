@@ -1,0 +1,782 @@
+[
+  {
+    "engine": "chromium",
+    "id": "unique-ts",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "unique-ts-reverse",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "same-ts",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 100,
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "same-ts-reverse",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 100,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "date-only",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "no-date-ts",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "",
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "no-date-valid-ts",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "",
+      "ts": 200,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 1970/1/1 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "date-priority",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 100,
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "latest-blank",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "latest-invalid",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "調整済",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "numeric-zero",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": 0,
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        0
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "string-zero",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "0",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        0
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "latest-null",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": null,
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "chromium",
+    "id": "zero-ts-tie",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 0,
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "unique-ts",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "unique-ts-reverse",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "same-ts",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 100,
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "same-ts-reverse",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 100,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "date-only",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "no-date-ts",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "",
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 — / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "no-date-valid-ts",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "",
+      "ts": 200,
+      "v": "90",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 1970/1/1 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "date-priority",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 100,
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">80<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "latest-blank",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "latest-invalid",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "調整済",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "numeric-zero",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": 0,
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        0
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "string-zero",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": "0",
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        0
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">0<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "latest-null",
+    "latest": {
+      "id": "B",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 200,
+      "v": null,
+      "h": "0.4",
+      "note": "合成・日時整合監査 B"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        80
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">—<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  },
+  {
+    "engine": "webkit",
+    "id": "zero-ts-tie",
+    "latest": {
+      "id": "A",
+      "setupId": "a",
+      "dist": 30,
+      "date": "2026-10-13",
+      "ts": 0,
+      "v": "80",
+      "h": "0.4",
+      "note": "合成・日時整合監査 A"
+    },
+    "points": [
+      [
+        18,
+        40
+      ],
+      [
+        30,
+        90
+      ]
+    ],
+    "html": "<details class=\"adv historyAnalysisDetails\">\n    <summary>サイト値のまとめ <span class=\"mini\">台帳2件 / 練習入力0回</span></summary>\n    <div class=\"listItem recordReadOnlyItem\">\n        <div><div class=\"t\">30m</div><div class=\"d\">合成の屋外用・通常練習セッティング / 最新 2026/10/13 / 台帳2・練習0</div></div>\n        <div class=\"big\">90<small> / 左右0.4</small></div>\n      </div>\n  </details>",
+    "inputUnchanged": true,
+    "dbUnchanged": true,
+    "oldUnchanged": true
+  }
+]

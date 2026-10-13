@@ -1,0 +1,12 @@
+{
+  "source": "2ce72647d10f2b1088ab7ea957e190b7a0139871",
+  "base": "258fa0bf90d1d3b922bdf1632279ace613f41c8d",
+  "reviewer": "/root/review_sight_ledger",
+  "critical": 0,
+  "important": 0,
+  "minor": 0,
+  "conclusion": "監査結論採用可能。matrix同参照比較を補強28で解消。確定日時の分析不整合、同率/欠落の曖昧さ、数値0のsnapshot/校正空欄、全rowとfinite実測の区別を確認。runtime等100files不変を独立確認。",
+  "correction": "初renderedはChrome12+WK2成功後numeric-zero visibility失敗。元context閉鎖済、原原因不明。別可視24は成功。",
+  "next": "明確なdate/tsの分析latestをlatestMarkへ一致。tie/finite選択/保存は別判断。",
+  "limits": "docs formatと最終archiveは主担当が後続実施。全330/CI/更新offlineは同sourceAN088の再利用。"
+}

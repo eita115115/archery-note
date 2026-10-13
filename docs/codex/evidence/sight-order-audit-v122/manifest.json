@@ -1,0 +1,753 @@
+{
+  "source": "2ce72647d10f2b1088ab7ea957e190b7a0139871",
+  "base": "258fa0bf90d1d3b922bdf1632279ace613f41c8d",
+  "version": 122,
+  "scope": "AN089 audit only; no runtime changes or new deployment",
+  "imagesViewed": 8,
+  "files": [
+    {
+      "file": "append-evidence.cjs",
+      "source": "artifacts/sight-order-audit/append-evidence.cjs",
+      "bytes": 826,
+      "sha256": "21925f09c83fac54cec52bb9e45607f0055c347bc9d803757c0f1e69109af413"
+    },
+    {
+      "file": "archive.cjs",
+      "source": "artifacts/sight-order-audit/archive.cjs",
+      "bytes": 2135,
+      "sha256": "19684d267f14186db3b90c155a28b7991a008c8caa2890f60e2d1818879987bb"
+    },
+    {
+      "file": "audit-output.txt",
+      "source": "artifacts/sight-order-audit/audit-output.txt",
+      "bytes": 5240,
+      "sha256": "e963bb28a1d5f3e970e316bad38a0d236a4b434e882d2944e77acb4a942fd47d"
+    },
+    {
+      "file": "audit.cjs",
+      "source": "artifacts/sight-order-audit/audit.cjs",
+      "bytes": 6727,
+      "sha256": "eff5ccd3b7a92ef9448fde0355e983925595622d1c61b4963636361a361b6e53"
+    },
+    {
+      "file": "base.json",
+      "source": "artifacts/sight-order-audit/base.json",
+      "bytes": 136,
+      "sha256": "6d83060bc4dcb2098de689d6a82f7309df2a9e309421cc5d92768614e53371af"
+    },
+    {
+      "file": "cases-output.txt",
+      "source": "artifacts/sight-order-audit/cases-output.txt",
+      "bytes": 43,
+      "sha256": "916065575c3cab7008977c8f1d27b4295fbd926d05309f91e84965408b81cf28"
+    },
+    {
+      "file": "cases.cjs",
+      "source": "artifacts/sight-order-audit/cases.cjs",
+      "bytes": 1608,
+      "sha256": "a7d54d00aebf91e06f0a9a46e1475fe9dc17dbd715c0687851914ebbdefb2b6f"
+    },
+    {
+      "file": "cases.json",
+      "source": "artifacts/sight-order-audit/cases.json",
+      "bytes": 13779,
+      "sha256": "189228a090fe4e15a38246c21f1bf559540390b938c09b81cbef98630bd51b00"
+    },
+    {
+      "file": "correct-matrix-zero-output.txt",
+      "source": "artifacts/sight-order-audit/correct-matrix-zero-output.txt",
+      "bytes": 287,
+      "sha256": "7b26662ef5a132a239cba4cfd78f0fd000e07074b01175ba928ebebf7ce08b07"
+    },
+    {
+      "file": "correct-matrix-zero.cjs",
+      "source": "artifacts/sight-order-audit/correct-matrix-zero.cjs",
+      "bytes": 3570,
+      "sha256": "f979a4591a08fafb05a83774fd8525701ab91c48ae043a2b6be3767bf7217847"
+    },
+    {
+      "file": "correct-rendered.cjs",
+      "source": "artifacts/sight-order-audit/correct-rendered.cjs",
+      "bytes": 1636,
+      "sha256": "ba2609f3464a860061a57818548cfecf95d1009ecbb6be1da6bfe979788504df"
+    },
+    {
+      "file": "finish.cjs",
+      "source": "artifacts/sight-order-audit/finish.cjs",
+      "bytes": 4499,
+      "sha256": "6cca95c2f3c5f8df77e2590f26bf0ccd73cc7e41881d963db40b55eee7bfe6a7"
+    },
+    {
+      "file": "fixture.json",
+      "source": "artifacts/sight-order-audit/fixture.json",
+      "bytes": 23399,
+      "sha256": "1851997d9441a3b433a7a2f3dc61d6a608b4372c90dc39302e4728b5b55fa912"
+    },
+    {
+      "file": "format-output.txt",
+      "source": "artifacts/sight-order-audit/format-output.txt",
+      "bytes": 618,
+      "sha256": "fac10816f7df249d1524a00c8ae1f1200912a91ca51c1015c295436d4aca369e"
+    },
+    {
+      "file": "invariants-final-output.txt",
+      "source": "artifacts/sight-order-audit/invariants-final-output.txt",
+      "bytes": 534,
+      "sha256": "079bf0ebedaf69811d51861e74089e7478dc67ad7504366c8270371547b543d2"
+    },
+    {
+      "file": "invariants-output.txt",
+      "source": "artifacts/sight-order-audit/invariants-output.txt",
+      "bytes": 534,
+      "sha256": "079bf0ebedaf69811d51861e74089e7478dc67ad7504366c8270371547b543d2"
+    },
+    {
+      "file": "invariants.cjs",
+      "source": "artifacts/sight-order-audit/invariants.cjs",
+      "bytes": 2339,
+      "sha256": "cbc6a55b011e27db029c5f9e0ca270dca635ee6b403e160278bf1df690f00be9"
+    },
+    {
+      "file": "matrix-corrected.json",
+      "source": "artifacts/sight-order-audit/matrix-corrected.json",
+      "bytes": 25546,
+      "sha256": "8136122f023252df67d5dacbd0a3d78e226eec5371f6c63e3434d4f64e967567"
+    },
+    {
+      "file": "matrix.json",
+      "source": "artifacts/sight-order-audit/matrix.json",
+      "bytes": 24174,
+      "sha256": "2d637c31ab1469feeade3ab7bfb0b91a162d9b7639b143f921335276697712be"
+    },
+    {
+      "file": "metadata.cjs",
+      "source": "artifacts/sight-order-audit/metadata.cjs",
+      "bytes": 2337,
+      "sha256": "a83bce239c2362956b1ef635248675f52022668ae55cea736e99fe8bd1ca988c"
+    },
+    {
+      "file": "notes-format-output.txt",
+      "source": "artifacts/sight-order-audit/notes-format-output.txt",
+      "bytes": 75,
+      "sha256": "0666f0fbb53eec74f78cd10e23df9f7619e76ff93fc8594c0692bbcd97072ac9"
+    },
+    {
+      "file": "npm.cjs",
+      "source": "artifacts/sight-order-audit/npm.cjs",
+      "bytes": 621,
+      "sha256": "a8ea5aaa7aecde0db90c48942b8e43b1097df77d7fa483bd3d5c3c796640a62c"
+    },
+    {
+      "file": "old-tasks.json",
+      "source": "artifacts/sight-order-audit/old-tasks.json",
+      "bytes": 132048,
+      "sha256": "78e1648e05a5cff05c2db16357a486f35f7fa18ecddf91c996b3de0374a55b90"
+    },
+    {
+      "file": "prepare-final.cjs",
+      "source": "artifacts/sight-order-audit/prepare-final.cjs",
+      "bytes": 258,
+      "sha256": "50d570da2e20c803cd28d1d8773cd2a7cffb5f73c4a32094947d698ca10f8fa2"
+    },
+    {
+      "file": "prepare-tools.cjs",
+      "source": "artifacts/sight-order-audit/prepare-tools.cjs",
+      "bytes": 264,
+      "sha256": "21e7769f66f86c4d0cff93294d5d2aa165bd92fcc949138ee1091ebb33014a5b"
+    },
+    {
+      "file": "prepare.cjs",
+      "source": "artifacts/sight-order-audit/prepare.cjs",
+      "bytes": 1237,
+      "sha256": "a5bdc3ee3fd98ebf50c8c5ae30d365fc1e10d84d99549ce88a1009b83b7e4c11"
+    },
+    {
+      "file": "public-parity.json",
+      "source": "artifacts/sight-order-audit/public-parity.json",
+      "bytes": 4052,
+      "sha256": "59c76ade4321dcc12c3ad9c6b062c3f359ec839abe4f8fad2910a0b8144ee68b"
+    },
+    {
+      "file": "rendered/chromium-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-dark-numeric-zero-analysis.png",
+      "bytes": 66581,
+      "sha256": "7901dbd757a679d8a7f0f24f0aadc69b50eaac1e2c55bb1ba88a924f072cc086"
+    },
+    {
+      "file": "rendered/chromium-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-dark-numeric-zero-prediction.png",
+      "bytes": 57756,
+      "sha256": "8d7c909daaa8f00da6103488c4a8c7ad84caa237fdf57e5d6f632e7a733b93ba"
+    },
+    {
+      "file": "rendered/chromium-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-dark-same-ts-analysis.png",
+      "bytes": 67324,
+      "sha256": "1973563967517846360c7cf79ced2626afac56c3ed9ab8d7fcdc1bcaaf23952f"
+    },
+    {
+      "file": "rendered/chromium-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-dark-same-ts-prediction.png",
+      "bytes": 58269,
+      "sha256": "508a05296afe1347bd0b34b36e56387c8a92813cbd4a633fa9e7dddd343ab140"
+    },
+    {
+      "file": "rendered/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 67354,
+      "sha256": "afd5fcb28d09af64ac13e6e980f5daf913ab738590953f167734223bda5b9b1a"
+    },
+    {
+      "file": "rendered/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 58263,
+      "sha256": "68b5171375e9eed98ba7428b48efc80393866f307060ade18df30bb4f1af9073"
+    },
+    {
+      "file": "rendered/chromium-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-light-numeric-zero-analysis.png",
+      "bytes": 66257,
+      "sha256": "86cbca322034dee8ca7d0c96e7e13bfcaa05ecbfd4a521bac0908ef3068635ba"
+    },
+    {
+      "file": "rendered/chromium-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-light-numeric-zero-prediction.png",
+      "bytes": 57379,
+      "sha256": "15faf04eb634f66eb8a2b2e90a59b64a515b33bfad8af656199e4fbe535d352d"
+    },
+    {
+      "file": "rendered/chromium-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-light-same-ts-analysis.png",
+      "bytes": 66877,
+      "sha256": "c1e6930ed18c3ab1b13fe51cb33f730b238fa3a44e157f48d309d1554f4ecf7e"
+    },
+    {
+      "file": "rendered/chromium-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-light-same-ts-prediction.png",
+      "bytes": 57939,
+      "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+    },
+    {
+      "file": "rendered/chromium-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 66905,
+      "sha256": "85fc650a3f17e3407dc9b8520907a009d4072ccefa529aa19b020b549a93f328"
+    },
+    {
+      "file": "rendered/chromium-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered/chromium-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 57934,
+      "sha256": "f51baa86f2fce4b3aeb2a8be60a32f79ca22c07acc275e7b69d3b02e4c5487d4"
+    },
+    {
+      "file": "rendered/results.json",
+      "source": "artifacts/sight-order-audit/rendered/results.json",
+      "bytes": 4519,
+      "sha256": "774a2a1c14a1e59861165a9c0e621c1f9d320df05de319388a2ab0f3d4b34ee5"
+    },
+    {
+      "file": "rendered-output.txt",
+      "source": "artifacts/sight-order-audit/rendered-output.txt",
+      "bytes": 1946,
+      "sha256": "f91cb71226cca09196e41d9dd4efce9328df336cf94b0406da2154aa4411b2bb"
+    },
+    {
+      "file": "rendered-visible/chromium-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-dark-numeric-zero-analysis.png",
+      "bytes": 66581,
+      "sha256": "7901dbd757a679d8a7f0f24f0aadc69b50eaac1e2c55bb1ba88a924f072cc086"
+    },
+    {
+      "file": "rendered-visible/chromium-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-dark-numeric-zero-prediction.png",
+      "bytes": 57756,
+      "sha256": "8d7c909daaa8f00da6103488c4a8c7ad84caa237fdf57e5d6f632e7a733b93ba"
+    },
+    {
+      "file": "rendered-visible/chromium-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-dark-same-ts-analysis.png",
+      "bytes": 67324,
+      "sha256": "1973563967517846360c7cf79ced2626afac56c3ed9ab8d7fcdc1bcaaf23952f"
+    },
+    {
+      "file": "rendered-visible/chromium-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-dark-same-ts-prediction.png",
+      "bytes": 58269,
+      "sha256": "508a05296afe1347bd0b34b36e56387c8a92813cbd4a633fa9e7dddd343ab140"
+    },
+    {
+      "file": "rendered-visible/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 67354,
+      "sha256": "afd5fcb28d09af64ac13e6e980f5daf913ab738590953f167734223bda5b9b1a"
+    },
+    {
+      "file": "rendered-visible/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 58263,
+      "sha256": "68b5171375e9eed98ba7428b48efc80393866f307060ade18df30bb4f1af9073"
+    },
+    {
+      "file": "rendered-visible/chromium-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-light-numeric-zero-analysis.png",
+      "bytes": 66257,
+      "sha256": "86cbca322034dee8ca7d0c96e7e13bfcaa05ecbfd4a521bac0908ef3068635ba"
+    },
+    {
+      "file": "rendered-visible/chromium-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-light-numeric-zero-prediction.png",
+      "bytes": 57379,
+      "sha256": "15faf04eb634f66eb8a2b2e90a59b64a515b33bfad8af656199e4fbe535d352d"
+    },
+    {
+      "file": "rendered-visible/chromium-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-light-same-ts-analysis.png",
+      "bytes": 66877,
+      "sha256": "c1e6930ed18c3ab1b13fe51cb33f730b238fa3a44e157f48d309d1554f4ecf7e"
+    },
+    {
+      "file": "rendered-visible/chromium-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-light-same-ts-prediction.png",
+      "bytes": 57939,
+      "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+    },
+    {
+      "file": "rendered-visible/chromium-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 66905,
+      "sha256": "85fc650a3f17e3407dc9b8520907a009d4072ccefa529aa19b020b549a93f328"
+    },
+    {
+      "file": "rendered-visible/chromium-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/chromium-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 57934,
+      "sha256": "f51baa86f2fce4b3aeb2a8be60a32f79ca22c07acc275e7b69d3b02e4c5487d4"
+    },
+    {
+      "file": "rendered-visible/results.json",
+      "source": "artifacts/sight-order-audit/rendered-visible/results.json",
+      "bytes": 14042,
+      "sha256": "18d57f0e9d6d5b6eca721ba5d76ee6a3e9beb000c03d3e7d3348be6d3a647b30"
+    },
+    {
+      "file": "rendered-visible/webkit-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-dark-numeric-zero-analysis.png",
+      "bytes": 50936,
+      "sha256": "14fd1888cd80955809b1ba4ad86b946640469c5da904f06f5095f68c1f875462"
+    },
+    {
+      "file": "rendered-visible/webkit-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-dark-numeric-zero-prediction.png",
+      "bytes": 43944,
+      "sha256": "b1fe90f5ae01483a22a54efe61e5020c5f8f3c3fd8c3f2da088ddfbc6316f6ae"
+    },
+    {
+      "file": "rendered-visible/webkit-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-dark-same-ts-analysis.png",
+      "bytes": 51346,
+      "sha256": "cb213a54f03062e09ab2782add12bfa782b0d3ff26b243580dd1b2feea182244"
+    },
+    {
+      "file": "rendered-visible/webkit-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-dark-same-ts-prediction.png",
+      "bytes": 44279,
+      "sha256": "ffbcf8784be55d4f8a5726b6e4ff239312d294a303f025d036de450f7fba6c7b"
+    },
+    {
+      "file": "rendered-visible/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 51348,
+      "sha256": "b3f49a020cdef1de1c9f6c1f45c16f9c6ccd478b45fb0bca255b467b42ada39c"
+    },
+    {
+      "file": "rendered-visible/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 44285,
+      "sha256": "d2f2c56e69f671ebb910e42f0741fd6fedd74646942037309b57c81e1befe3c2"
+    },
+    {
+      "file": "rendered-visible/webkit-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-light-numeric-zero-analysis.png",
+      "bytes": 51447,
+      "sha256": "7fd1a6f598875ac22ef6e0d01ddb8be43328f5b68856d7e7c5073a46a4039a79"
+    },
+    {
+      "file": "rendered-visible/webkit-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-light-numeric-zero-prediction.png",
+      "bytes": 44268,
+      "sha256": "40c89a73b1fb4029b3cc1299ef319b0aebae67920d959ce378e8d09d177f4915"
+    },
+    {
+      "file": "rendered-visible/webkit-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-light-same-ts-analysis.png",
+      "bytes": 51922,
+      "sha256": "ecd61873bee3663a4659dbe9de3bebf84486baf3163be9006a1a6d94e1e22769"
+    },
+    {
+      "file": "rendered-visible/webkit-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-light-same-ts-prediction.png",
+      "bytes": 44552,
+      "sha256": "bc86ed565ca699482fdd72b69398d69b403046a9f15efe9fc1b747b7d205e106"
+    },
+    {
+      "file": "rendered-visible/webkit-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 51927,
+      "sha256": "8c8a1371bf5e09846393bc148e0d6d8c3f41db859938701b3c05db236ce3dca4"
+    },
+    {
+      "file": "rendered-visible/webkit-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-order-audit/rendered-visible/webkit-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 44561,
+      "sha256": "5f25f353339d118bc389fe59d01cf8bfe4a0d96e09f8f03084ce26e4cdb7b6cc"
+    },
+    {
+      "file": "rendered-visible-output.txt",
+      "source": "artifacts/sight-order-audit/rendered-visible-output.txt",
+      "bytes": 2744,
+      "sha256": "a9271c01f2f13bd4dae0e9962eaeddf8e9dbd083a0dca304758dd9fe9f659f76"
+    },
+    {
+      "file": "rendered-visible.cjs",
+      "source": "artifacts/sight-order-audit/rendered-visible.cjs",
+      "bytes": 4693,
+      "sha256": "6c62d614ba43138b491884be508772e23f556dbf4bc11a76612a38608d724be3"
+    },
+    {
+      "file": "rendered.cjs",
+      "source": "artifacts/sight-order-audit/rendered.cjs",
+      "bytes": 4244,
+      "sha256": "986292112b1161bb47b212f4e74d00ae8733f65bdfe7892458a84cca2a1377e6"
+    },
+    {
+      "file": "restore-add-output.txt",
+      "source": "artifacts/sight-order-audit/restore-add-output.txt",
+      "bytes": 288,
+      "sha256": "d96814c432b956927664da2b0ad1ea796bb1b86611fa31b52ec11391bd10e29f"
+    },
+    {
+      "file": "restore-add.cjs",
+      "source": "artifacts/sight-order-audit/restore-add.cjs",
+      "bytes": 4300,
+      "sha256": "aa8e4c589ed0c68f3a0dcfba54b0249d1d40e13d75510d87f948fb4383865761"
+    },
+    {
+      "file": "restore-add.json",
+      "source": "artifacts/sight-order-audit/restore-add.json",
+      "bytes": 310546,
+      "sha256": "6e11ca18cb1a5587719b0074da54a5dfb95d1620e8c3216d21c354e3f6e1231c"
+    },
+    {
+      "file": "reused-validation.json",
+      "source": "artifacts/sight-order-audit/reused-validation.json",
+      "bytes": 1200,
+      "sha256": "4c35332ebccf730b6f3180ee5361d64a493974340b7309f5d4661c3e463ef73d"
+    },
+    {
+      "file": "review.json",
+      "source": "artifacts/sight-order-audit/review.json",
+      "bytes": 860,
+      "sha256": "eed8440d46b8850941a8c054b8b4d334fd486b8ed9ce766e5861cc0fa3631aa4"
+    },
+    {
+      "file": "source-map.cjs",
+      "source": "artifacts/sight-order-audit/source-map.cjs",
+      "bytes": 1034,
+      "sha256": "d915fc595d878d44d43678e5c917703133fa3c7bea5503dee1964d176ec92e9d"
+    },
+    {
+      "file": "source-map.json",
+      "source": "artifacts/sight-order-audit/source-map.json",
+      "bytes": 14221,
+      "sha256": "349a69dc770501f0d9d2d057c60a6a7be4c618a827f30b8a9b21f848b93eafe2"
+    },
+    {
+      "file": "start-output.txt",
+      "source": "artifacts/sight-order-audit/start-output.txt",
+      "bytes": 55,
+      "sha256": "25f4f8f1e8abaaaa3a609288beffc6fd6e1af8f030eaa8fa5158d5f893f192be"
+    },
+    {
+      "file": "start.cjs",
+      "source": "artifacts/sight-order-audit/start.cjs",
+      "bytes": 5199,
+      "sha256": "5fa88c1485955f3ba71f5b4a4cfad1873568fd93c180c2c1f994d0cfb3001592"
+    },
+    {
+      "file": "ui/chromium-375-dark-latest-blank-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-latest-blank-ledger.png",
+      "bytes": 37019,
+      "sha256": "f712b6c0b7adacfe579a17beb74b511ed68b6d346ca589685380747bd934e3fc"
+    },
+    {
+      "file": "ui/chromium-375-dark-no-date-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-no-date-ts-ledger.png",
+      "bytes": 36993,
+      "sha256": "e451182c45a20f16aa7ccc48d8a8f65411f0e8c1398224e82e18991bd9ce6a9f"
+    },
+    {
+      "file": "ui/chromium-375-dark-numeric-zero-calibration.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-numeric-zero-calibration.png",
+      "bytes": 44657,
+      "sha256": "45455e7e39385a9331464e5f4ca80d1bde796ebb4fb64aa5927b7d12d9f0d8b4"
+    },
+    {
+      "file": "ui/chromium-375-dark-numeric-zero-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-numeric-zero-ledger.png",
+      "bytes": 37254,
+      "sha256": "91a4798617840e437dad966401909bad1482e1a6bc9853bbda755b9d8409b8fa"
+    },
+    {
+      "file": "ui/chromium-375-dark-numeric-zero-prefill.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-numeric-zero-prefill.png",
+      "bytes": 40889,
+      "sha256": "d402c4bf26fc83cc91d9077acc3d41ecde1df6075179c88bfe31743aca9fef8b"
+    },
+    {
+      "file": "ui/chromium-375-dark-same-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-same-ts-ledger.png",
+      "bytes": 37618,
+      "sha256": "e9457819eeeb96d49061d4c934d505213d0fe3e0196ecbf4fc912c78543355dc"
+    },
+    {
+      "file": "ui/chromium-375-dark-unique-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-unique-ts-ledger.png",
+      "bytes": 37619,
+      "sha256": "5f34c9e6eeea866dcfa44a61fe45b007bb93ec112566ec0ca1a7579ab8a06985"
+    },
+    {
+      "file": "ui/chromium-375-dark-unique-ts-reverse-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-dark-unique-ts-reverse-ledger.png",
+      "bytes": 37619,
+      "sha256": "5f34c9e6eeea866dcfa44a61fe45b007bb93ec112566ec0ca1a7579ab8a06985"
+    },
+    {
+      "file": "ui/chromium-375-light-latest-blank-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-latest-blank-ledger.png",
+      "bytes": 36688,
+      "sha256": "61d768eb9fe1a0579ab79ba0b6d1ddaa6de1fdc043cf427520d0f5b58cff4a27"
+    },
+    {
+      "file": "ui/chromium-375-light-no-date-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-no-date-ts-ledger.png",
+      "bytes": 36631,
+      "sha256": "35848ddfa59fc9cf8f1eb752f49b49024ea5ba89935d31ffb4be7d57adbc3348"
+    },
+    {
+      "file": "ui/chromium-375-light-numeric-zero-calibration.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-numeric-zero-calibration.png",
+      "bytes": 44037,
+      "sha256": "12e3098cd7f92ef5b2106ebec2741d6c55d1cccd10c5993f49212fad915c544d"
+    },
+    {
+      "file": "ui/chromium-375-light-numeric-zero-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-numeric-zero-ledger.png",
+      "bytes": 36939,
+      "sha256": "83e52f36cf0b66d0d43c44d42060f6965a943489ab0b847bb5a6cd5306c960cc"
+    },
+    {
+      "file": "ui/chromium-375-light-numeric-zero-prefill.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-numeric-zero-prefill.png",
+      "bytes": 39956,
+      "sha256": "7705e87b365b95dea95b22bbbef7a559cdc3ce774fd67f619941d6818c1e7e7e"
+    },
+    {
+      "file": "ui/chromium-375-light-same-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-same-ts-ledger.png",
+      "bytes": 37345,
+      "sha256": "7f1fbb60d2b7b415d1bfcf7055ea20a9416b717c974a4d367c0703b5579d9de0"
+    },
+    {
+      "file": "ui/chromium-375-light-unique-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-unique-ts-ledger.png",
+      "bytes": 37345,
+      "sha256": "239d20ae66f763977a95a5fb7cbc4319634b064c3e3f6b8a556c368dba86381d"
+    },
+    {
+      "file": "ui/chromium-375-light-unique-ts-reverse-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-light-unique-ts-reverse-ledger.png",
+      "bytes": 37345,
+      "sha256": "239d20ae66f763977a95a5fb7cbc4319634b064c3e3f6b8a556c368dba86381d"
+    },
+    {
+      "file": "ui/chromium-375-numeric-zero-field-visible.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-numeric-zero-field-visible.png",
+      "bytes": 49067,
+      "sha256": "c06282bb38a161906b9642f38b52bf48d6f0a7aba9075d42b30e8188879bb6b6"
+    },
+    {
+      "file": "ui/chromium-375-restore.png",
+      "source": "artifacts/sight-order-audit/ui/chromium-375-restore.png",
+      "bytes": 41784,
+      "sha256": "d479e8cfa8f64442aa970e5450390b9c3c1ac7831c4d3201b0b9cd0041ec9fed"
+    },
+    {
+      "file": "ui/results.json",
+      "source": "artifacts/sight-order-audit/ui/results.json",
+      "bytes": 62910,
+      "sha256": "1e3ba830caffd65fc5bf9dc36ce25a1bbdf0f566e3199bfa86c2f2074b0f6704"
+    },
+    {
+      "file": "ui/webkit-375-dark-latest-blank-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-latest-blank-ledger.png",
+      "bytes": 31325,
+      "sha256": "8a6447fc1c4e32965e886e7e2cb87bff11cbbc9409caff64644a9e24c0660c99"
+    },
+    {
+      "file": "ui/webkit-375-dark-no-date-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-no-date-ts-ledger.png",
+      "bytes": 31234,
+      "sha256": "ef43eef078425eb801ec91436c52c74480234575adabbd9b3cd2385b7041fc30"
+    },
+    {
+      "file": "ui/webkit-375-dark-numeric-zero-calibration.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-numeric-zero-calibration.png",
+      "bytes": 34402,
+      "sha256": "6e04e64e016006564723b0bd8e3727f3bfd3df7f368aba6c97711b1356fa7837"
+    },
+    {
+      "file": "ui/webkit-375-dark-numeric-zero-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-numeric-zero-ledger.png",
+      "bytes": 31504,
+      "sha256": "577786682a0ef7b99fa8e78bda8b75fa52d4bf9f1fd20fe9e95bcded66519586"
+    },
+    {
+      "file": "ui/webkit-375-dark-numeric-zero-prefill.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-numeric-zero-prefill.png",
+      "bytes": 33929,
+      "sha256": "40e23a0983e72fff5e127df2a3d0ab6ccffb75d44cf2a1357d9211063f1930d8"
+    },
+    {
+      "file": "ui/webkit-375-dark-same-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-same-ts-ledger.png",
+      "bytes": 31786,
+      "sha256": "890ec10fce2f178f352b3c9a801765248207bee8d6b1425e73c7403f1fe07496"
+    },
+    {
+      "file": "ui/webkit-375-dark-unique-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-unique-ts-ledger.png",
+      "bytes": 31764,
+      "sha256": "c2281086d8c3d7737e1dde7d48407d239f6a177ec152f9a9ebd7018de13848b0"
+    },
+    {
+      "file": "ui/webkit-375-dark-unique-ts-reverse-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-dark-unique-ts-reverse-ledger.png",
+      "bytes": 31764,
+      "sha256": "c2281086d8c3d7737e1dde7d48407d239f6a177ec152f9a9ebd7018de13848b0"
+    },
+    {
+      "file": "ui/webkit-375-light-latest-blank-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-latest-blank-ledger.png",
+      "bytes": 31129,
+      "sha256": "b6f583cf51f598ffcf11d342e0b33e1ce6d4c653d1cba79bd7bf3aa044ede60e"
+    },
+    {
+      "file": "ui/webkit-375-light-no-date-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-no-date-ts-ledger.png",
+      "bytes": 31043,
+      "sha256": "dcaf46e672e237acc2823b2ee94d319a3edbc8322f3f3357bb052a1b2751758e"
+    },
+    {
+      "file": "ui/webkit-375-light-numeric-zero-calibration.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-numeric-zero-calibration.png",
+      "bytes": 34682,
+      "sha256": "40902c5c969f4626fb65299a3bb69e9f76d1d837627d1e0eb0cf3c5bf6e5e29b"
+    },
+    {
+      "file": "ui/webkit-375-light-numeric-zero-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-numeric-zero-ledger.png",
+      "bytes": 31320,
+      "sha256": "bae3b1fbe9f88e3dc648a7c77b0240ac1f50c52cd5bb96d56d4b60144f11e6cc"
+    },
+    {
+      "file": "ui/webkit-375-light-numeric-zero-prefill.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-numeric-zero-prefill.png",
+      "bytes": 33941,
+      "sha256": "fb128372b402defd25e3eb0a8103206c5df35deb53bb6766a8528dba15d2e9e4"
+    },
+    {
+      "file": "ui/webkit-375-light-same-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-same-ts-ledger.png",
+      "bytes": 31534,
+      "sha256": "6e1f7bb0e98d82e37ae147ef257fef331f2d26749a6648358cd7b523a09f237e"
+    },
+    {
+      "file": "ui/webkit-375-light-unique-ts-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-unique-ts-ledger.png",
+      "bytes": 31581,
+      "sha256": "ac349ea3a4d191f0177853045e5bb6bcbb9071daa5e5f0e13ed39452e4c87b7a"
+    },
+    {
+      "file": "ui/webkit-375-light-unique-ts-reverse-ledger.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-light-unique-ts-reverse-ledger.png",
+      "bytes": 31581,
+      "sha256": "ac349ea3a4d191f0177853045e5bb6bcbb9071daa5e5f0e13ed39452e4c87b7a"
+    },
+    {
+      "file": "ui/webkit-375-numeric-zero-field-visible.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-numeric-zero-field-visible.png",
+      "bytes": 39307,
+      "sha256": "ae0737f8b6b60d9277d78caaa5374a19ad46f5335799f2382dc9f6b58c02d0eb"
+    },
+    {
+      "file": "ui/webkit-375-restore.png",
+      "source": "artifacts/sight-order-audit/ui/webkit-375-restore.png",
+      "bytes": 35517,
+      "sha256": "7250a5531a92ee04d8b3a84266451de02a016ea2848beb1520715f0436ed695e"
+    },
+    {
+      "file": "verify-archive.cjs",
+      "source": "artifacts/sight-order-audit/verify-archive.cjs",
+      "bytes": 729,
+      "sha256": "4be915dd4d0a2aaff8ac495bce355a3908035322c03233fa9fc262dc99cbbde6"
+    },
+    {
+      "file": "viewed.json",
+      "source": "artifacts/sight-order-audit/viewed.json",
+      "bytes": 1383,
+      "sha256": "efc24281c31b0ea97b2c0009b0990e531bc1957995b2248e992db2bb72cc98da"
+    },
+    {
+      "file": "zero-visible.json",
+      "source": "artifacts/sight-order-audit/zero-visible.json",
+      "bytes": 534,
+      "sha256": "be698150a6649f3e9430ebe16548786ad0ccbf85daee2891836f137e4b61d920"
+    },
+    {
+      "file": "completion.json",
+      "source": "artifacts/sight-order-audit/completion.json",
+      "bytes": 2395,
+      "sha256": "3e3cfe9a18194af3ed9d3e4f2d33810b1e39d1d40337e87254c78365ae47ec4b"
+    },
+    {
+      "file": "archive-output.txt",
+      "source": "artifacts/sight-order-audit/archive-output.txt",
+      "bytes": 158,
+      "sha256": "1e92eafe9fdbc25831caeca28580e52360efdf88fd7f17bcfc79ff2ea463b939"
+    },
+    {
+      "file": "finish-output.txt",
+      "source": "artifacts/sight-order-audit/finish-output.txt",
+      "bytes": 111,
+      "sha256": "c62e3dd0245f986dc48dcfd19c2f11da0a5c8966e0b08b7ad61af2a41bd2abde"
+    },
+    {
+      "file": "final-notes-format-output.txt",
+      "source": "artifacts/sight-order-audit/final-notes-format-output.txt",
+      "bytes": 75,
+      "sha256": "c5a2c0fc615f757149bf85d3ea5fc2cfe9406f47931808e0c820497b2fd91bba"
+    },
+    {
+      "file": "final-format-output.txt",
+      "source": "artifacts/sight-order-audit/final-format-output.txt",
+      "bytes": 401,
+      "sha256": "891064e82a4367f735876c0955500a544fedede81474734cb4511c647883a789"
+    },
+    {
+      "file": "notes-invariants-output.txt",
+      "source": "artifacts/sight-order-audit/notes-invariants-output.txt",
+      "bytes": 412,
+      "sha256": "e5b78103a4b3d7e2cf77ad0e2703fbae2a724b1c8897d79d243e8709be9c4a5d"
+    }
+  ]
+}

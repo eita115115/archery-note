@@ -1,0 +1,3 @@
+warning: in the working copy of 'progress.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'tasks.json', LF will be replaced by CRLF the next time Git touches it
+PASS immutable app/CSS/math/scoring/storage/schema/SW/version122/deps/tests; old88/acceptance/sharedlock exact; public25/matrix28/UI48/rendered24/restore-add2/zero2; same-source CI330 reused explicitly

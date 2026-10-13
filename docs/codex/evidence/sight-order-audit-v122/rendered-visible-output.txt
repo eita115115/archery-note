@@ -1,0 +1,25 @@
+PASS visible chromium-320-light-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible chromium-320-light-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible chromium-320-light-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS visible chromium-375-light-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible chromium-375-light-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible chromium-375-light-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS visible chromium-375-dark-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible chromium-375-dark-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible chromium-375-dark-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS visible chromium-900-light-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible chromium-900-light-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible chromium-900-light-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS visible webkit-320-light-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible webkit-320-light-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible webkit-320-light-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS visible webkit-375-light-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible webkit-375-light-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible webkit-375-light-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS visible webkit-375-dark-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible webkit-375-dark-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible webkit-375-dark-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS visible webkit-900-light-unique-ts-reverse latest=90 prediction=90 analysis=80 / 左右0.4 old6/reload/errors0
+PASS visible webkit-900-light-same-ts latest=80 prediction=90 analysis=90 / 左右0.4 old6/reload/errors0
+PASS visible webkit-900-light-numeric-zero latest=0 prediction=0 analysis=0 / 左右0.4 old6/reload/errors0
+PASS 24 native rendered prediction/analysis contexts; closed

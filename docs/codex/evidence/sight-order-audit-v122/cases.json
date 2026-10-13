@@ -1,0 +1,655 @@
+[
+  {
+    "id": "unique-ts",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 90
+  },
+  {
+    "id": "unique-ts-reverse",
+    "marks": [
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 90
+  },
+  {
+    "id": "same-ts",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "A",
+    "point": 90
+  },
+  {
+    "id": "same-ts-reverse",
+    "marks": [
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 80
+  },
+  {
+    "id": "date-only",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "A",
+    "point": 90
+  },
+  {
+    "id": "no-date-ts",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "A",
+    "point": 90
+  },
+  {
+    "id": "no-date-valid-ts",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "",
+        "ts": 200,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 90
+  },
+  {
+    "id": "date-priority",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-12",
+        "ts": 999,
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "A",
+    "point": 80
+  },
+  {
+    "id": "latest-blank",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-12",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 80
+  },
+  {
+    "id": "latest-invalid",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-12",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "調整済",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 80
+  },
+  {
+    "id": "numeric-zero",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-12",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": 0,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 0
+  },
+  {
+    "id": "string-zero",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-12",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": "0",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 0
+  },
+  {
+    "id": "latest-null",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-12",
+        "ts": 100,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 200,
+        "v": null,
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "B",
+    "point": 80
+  },
+  {
+    "id": "zero-ts-tie",
+    "marks": [
+      {
+        "id": "A",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 0,
+        "v": "80",
+        "h": "0.4",
+        "note": "合成・日時整合監査 A"
+      },
+      {
+        "id": "B",
+        "setupId": "a",
+        "dist": 30,
+        "date": "2026-10-13",
+        "v": "90",
+        "h": "0.4",
+        "note": "合成・日時整合監査 B"
+      },
+      {
+        "id": "other-dist",
+        "setupId": "a",
+        "dist": 18,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "40",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-dist"
+      },
+      {
+        "id": "other-setup",
+        "setupId": "b",
+        "dist": 30,
+        "date": "2026-10-13",
+        "ts": 300,
+        "v": "900",
+        "h": "0.4",
+        "note": "合成・日時整合監査 other-setup"
+      }
+    ],
+    "latest": "A",
+    "point": 90
+  }
+]

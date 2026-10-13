@@ -1,0 +1,30 @@
+{
+  "source": "2ce72647d10f2b1088ab7ea957e190b7a0139871",
+  "note": "AN088 same immutable runtime, not newly rerun in AN089",
+  "files": [
+    {
+      "file": "docs/codex/evidence/sight-ledger-layout-v122/ci.json",
+      "sha256": "31c0d220bba956f73af816ed50e52e90c2031706830837958036fba96f65b7e9"
+    },
+    {
+      "file": "docs/codex/evidence/sight-ledger-layout-v122/ci-full-log.txt",
+      "sha256": "669f333d2988f20055fe7f95df63b9731dd41e009c31f3d1790fe4cd5e6292c4"
+    },
+    {
+      "file": "docs/codex/evidence/sight-ledger-layout-v122/full-output.txt",
+      "sha256": "fb6e337a31cab8b24d17d34dded4101ab54422ad9fb3d55a5451c15e9ab372d6"
+    },
+    {
+      "file": "docs/codex/evidence/sight-ledger-layout-v122/public-final/complete.json",
+      "sha256": "0a6c852c363e00bf54c1a91f980fc56df4101a0ba800953476e4ecf1f245a825"
+    },
+    {
+      "file": "docs/codex/evidence/sight-ledger-layout-v122/checkall-output.txt",
+      "sha256": "b4be38b992cdd35a7c91c6aa4c0659800200883a69e044bc408ff5a8113cf1f0"
+    },
+    {
+      "file": "docs/codex/evidence/sight-ledger-layout-v122/lint-final-output.txt",
+      "sha256": "360aaa55f41bc7ab6edb330bdc3fb9d02ff7b7f8ec225c2d152fdeee5b8b1733"
+    }
+  ]
+}

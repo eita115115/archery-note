@@ -1,0 +1,198 @@
+[
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "same-ts",
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "numeric-zero",
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "same-ts",
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "numeric-zero",
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "unique-ts-reverse",
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "same-ts",
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "numeric-zero",
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "same-ts",
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "numeric-zero",
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "same-ts",
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]
