@@ -637,6 +637,22 @@ function openHistDetail(id) {
 }
 
 /* ---------- サイト ---------- */
+function sightLedgerHtml(marks) {
+  const value = (v) => (v == null || v === "" ? "—" : String(v));
+  return `<ol class="sightLedgerList" data-testid="sight-ledger" aria-label="サイト記録">${marks
+    .map((mk, i) => {
+      const date = fmtD(mk.date) || "日付不明";
+      return `<li class="sightLedgerRecord" data-sight-id="${esc(mk.id)}">
+        <div class="sightMarkHead">
+          <div class="sightMarkDate">${esc(date)}${i === 0 ? `<span class="sightMarkLatest">最新</span>` : ""}</div>
+          <button class="btn sm ghost histDelBtn" type="button" data-del="${esc(mk.id)}" aria-label="${esc(date)}のサイト値を削除">${icon("del")}</button>
+        </div>
+        <dl class="sightMarkValues"><div><dt>上下</dt><dd>${esc(value(mk.v))}</dd></div><div><dt>左右</dt><dd>${esc(value(mk.h))}</dd></div></dl>
+        ${mk.note ? `<details class="sightMarkNote"><summary>メモ</summary><p>${esc(mk.note)}</p></details>` : ""}
+      </li>`;
+    })
+    .join("")}</ol>`;
+}
 function renderSight(m) {
   if (!ui.sightSel.setupId && db.setups[0]) ui.sightSel.setupId = db.setups[0].id;
   const sid = ui.sightSel.setupId;
@@ -680,17 +696,7 @@ function renderSight(m) {
     <div class="btnrow"><button class="btn sec sm" id="sgAdd">＋ このサイト値を台帳に記録</button><button class="btn sec sm" id="sgCalMode">校正モード</button></div>
     ${
       marks.length
-        ? `<table class="tbl ledgerTbl mt10" data-testid="sight-ledger"><tr><th>日付</th><th>上下</th><th>左右</th><th>メモ</th><th></th></tr>
-      ${marks
-        .map(
-          (
-            mk,
-            i,
-          ) => `<tr class="${i === 0 ? "ledgerCurrent" : ""}"><td>${i === 0 ? `<span class="ledgerDot" title="使用中"></span>` : ""}${fmtD(mk.date)}</td><td><b>${esc(mk.v || "—")}</b></td><td><b>${esc(mk.h || "—")}</b></td>
-      <td class="subNoteSm">${esc(mk.note || "")}</td>
-      <td class="right"><button class="btn sm ghost histDelBtn" data-del="${esc(mk.id)}">${icon("del")}</button></td></tr>`,
-        )
-        .join("")}</table>`
+        ? sightLedgerHtml(marks)
         : `<div class="empty">この距離の記録はまだありません</div>`
     }
     `

@@ -628,6 +628,18 @@ table.tbl tr:last-child td{border-bottom:none;}
 table.tbl td,table.tbl th{font-variant-numeric:tabular-nums;}
 /* サイト台帳: 計器の目盛り台帳。使用中（先頭=最新）の行にだけ金ドットを置く */
 .ledgerCurrent td{color:var(--title);}
+.sightLedgerList{list-style:none; margin:16px 0 0; padding:0;}
+.sightLedgerRecord{min-width:0; padding:12px 0; border-top:1px solid var(--line);}
+.sightMarkHead{display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0;}
+.sightMarkDate{display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-width:0; overflow-wrap:anywhere; font-size:var(--font-size-sm); color:var(--title);}
+.sightMarkLatest{font-size:var(--font-size-xs); color:var(--accent);}
+.sightMarkHead .histDelBtn{flex:0 0 44px; width:44px; height:44px; min-height:44px; padding:10px;}
+.sightMarkValues{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin:4px 0 12px;}
+.sightMarkValues div{min-width:0;}
+.sightMarkValues dt{font-size:var(--font-size-xs); color:var(--sub);}
+.sightMarkValues dd{margin:2px 0 0; font-size:20px; font-weight:700; color:var(--title); font-variant-numeric:tabular-nums; overflow-wrap:anywhere;}
+.sightMarkNote summary{box-sizing:border-box; min-height:44px; padding:10px 0; color:var(--accent); font-size:var(--font-size-sm); cursor:pointer;}
+.sightMarkNote p{margin:4px 0 0; font-size:var(--font-size-sm); color:var(--sub); line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere;}
 .ledgerDot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; box-shadow:0 0 0 3px rgba(176,138,46,.18); vertical-align:middle;}
 .right{text-align:right;} .center{text-align:center;}
 .listItem{
