@@ -1,0 +1,92 @@
+[
+  {
+    "id": "bUndo",
+    "text": "1本取消",
+    "rect": {
+      "x": 21,
+      "y": 421,
+      "width": 69.9375,
+      "height": 48,
+      "top": 421,
+      "right": 90.9375,
+      "bottom": 469,
+      "left": 21
+    },
+    "lines": [
+      {
+        "x": 30,
+        "y": 435,
+        "width": 51.9375,
+        "height": 20,
+        "top": 435,
+        "right": 81.9375,
+        "bottom": 455,
+        "left": 30
+      }
+    ],
+    "font": "15px",
+    "paddingLeft": 8,
+    "paddingRight": 8,
+    "clear": true
+  },
+  {
+    "id": "bEnd",
+    "text": "エンド確定",
+    "rect": {
+      "x": 96.9375,
+      "y": 421,
+      "width": 147.609375,
+      "height": 48,
+      "top": 421,
+      "right": 244.546875,
+      "bottom": 469,
+      "left": 96.9375
+    },
+    "lines": [
+      {
+        "x": 138.234375,
+        "y": 435,
+        "width": 65,
+        "height": 20,
+        "top": 435,
+        "right": 203.234375,
+        "bottom": 455,
+        "left": 138.234375
+      }
+    ],
+    "font": "15px",
+    "paddingLeft": 8,
+    "paddingRight": 8,
+    "clear": true
+  },
+  {
+    "id": "bFinish",
+    "text": "終了",
+    "rect": {
+      "x": 250.546875,
+      "y": 421,
+      "width": 48.453125,
+      "height": 48,
+      "top": 421,
+      "right": 299,
+      "bottom": 469,
+      "left": 250.546875
+    },
+    "lines": [
+      {
+        "x": 259.546875,
+        "y": 435,
+        "width": 30.453125,
+        "height": 20,
+        "top": 435,
+        "right": 290,
+        "bottom": 455,
+        "left": 259.546875
+      }
+    ],
+    "font": "15px",
+    "paddingLeft": 8,
+    "paddingRight": 8,
+    "clear": true
+  }
+]

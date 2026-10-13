@@ -1,0 +1,698 @@
+[
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 21,
+        "y": 450.75,
+        "width": 278,
+        "height": 44,
+        "top": 450.75,
+        "right": 299,
+        "bottom": 494.75,
+        "left": 21
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 21,
+        "y": 450.75,
+        "width": 278,
+        "height": 44,
+        "top": 450.75,
+        "right": 299,
+        "bottom": 494.75,
+        "left": 21
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 320,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 21,
+        "y": 450.75,
+        "width": 278,
+        "height": 44,
+        "top": 450.75,
+        "right": 299,
+        "bottom": 494.75,
+        "left": 21
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 445.375,
+        "width": 329,
+        "height": 44,
+        "top": 445.375,
+        "right": 352,
+        "bottom": 489.375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 445.375,
+        "width": 329,
+        "height": 44,
+        "top": 445.375,
+        "right": 352,
+        "bottom": 489.375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 445.375,
+        "width": 329,
+        "height": 44,
+        "top": 445.375,
+        "right": 352,
+        "bottom": 489.375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 445.375,
+        "width": 329,
+        "height": 44,
+        "top": 445.375,
+        "right": 352,
+        "bottom": 489.375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 445.375,
+        "width": 329,
+        "height": 44,
+        "top": 445.375,
+        "right": 352,
+        "bottom": 489.375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 375,
+    "theme": "dark",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 445.375,
+        "width": 329,
+        "height": 44,
+        "top": 445.375,
+        "right": 352,
+        "bottom": 489.375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 193,
+        "y": 444.5625,
+        "width": 514,
+        "height": 44,
+        "top": 444.5625,
+        "right": 707,
+        "bottom": 488.5625,
+        "left": 193
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 193,
+        "y": 444.5625,
+        "width": 514,
+        "height": 44,
+        "top": 444.5625,
+        "right": 707,
+        "bottom": 488.5625,
+        "left": 193
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "chromium",
+    "width": 900,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 193,
+        "y": 444.5625,
+        "width": 514,
+        "height": 44,
+        "top": 444.5625,
+        "right": 707,
+        "bottom": 488.5625,
+        "left": 193
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 21,
+        "y": 564.984375,
+        "width": 278,
+        "height": 44,
+        "top": 564.984375,
+        "right": 299,
+        "bottom": 608.984375,
+        "left": 21
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 21,
+        "y": 564.984375,
+        "width": 278,
+        "height": 44,
+        "top": 564.984375,
+        "right": 299,
+        "bottom": 608.984375,
+        "left": 21
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 320,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 21,
+        "y": 564.984375,
+        "width": 278,
+        "height": 44,
+        "top": 564.984375,
+        "right": 299,
+        "bottom": 608.984375,
+        "left": 21
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 503.234375,
+        "width": 329,
+        "height": 44,
+        "top": 503.234375,
+        "right": 352,
+        "bottom": 547.234375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 503.234375,
+        "width": 329,
+        "height": 44,
+        "top": 503.234375,
+        "right": 352,
+        "bottom": 547.234375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 503.234375,
+        "width": 329,
+        "height": 44,
+        "top": 503.234375,
+        "right": 352,
+        "bottom": 547.234375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 503.234375,
+        "width": 329,
+        "height": 44,
+        "top": 503.234375,
+        "right": 352,
+        "bottom": 547.234375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 503.234375,
+        "width": 329,
+        "height": 44,
+        "top": 503.234375,
+        "right": 352,
+        "bottom": 547.234375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 375,
+    "theme": "dark",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 23,
+        "y": 503.234375,
+        "width": 329,
+        "height": 44,
+        "top": 503.234375,
+        "right": 352,
+        "bottom": 547.234375,
+        "left": 23
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "unique-ts-reverse",
+    "version": 122,
+    "latest": "90",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "80 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 193,
+        "y": 445.0625,
+        "width": 514,
+        "height": 44,
+        "top": 445.0625,
+        "right": 707,
+        "bottom": 489.0625,
+        "left": 193
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "same-ts",
+    "version": 122,
+    "latest": "80",
+    "predictionText": "実測: 18m = 40 ・ 30m = 90 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "90 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 193,
+        "y": 445.0625,
+        "width": 514,
+        "height": 44,
+        "top": 445.0625,
+        "right": 707,
+        "bottom": 489.0625,
+        "left": 193
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  },
+  {
+    "engine": "webkit",
+    "width": 900,
+    "theme": "light",
+    "id": "numeric-zero",
+    "version": 122,
+    "latest": "0",
+    "predictionText": "実測: 18m = 40 ・ 30m = 0 / 直線近似 / 一致度100%",
+    "analysisText": [
+      "0 / 左右0.4"
+    ],
+    "hit": {
+      "rect": {
+        "x": 193,
+        "y": 445.0625,
+        "width": 514,
+        "height": 44,
+        "top": 445.0625,
+        "right": 707,
+        "bottom": 489.0625,
+        "left": 193
+      },
+      "hit": true,
+      "open": false
+    },
+    "old6Exact": true,
+    "reloadExact": true,
+    "errors": []
+  }
+]

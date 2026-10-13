@@ -1,0 +1,4 @@
+Checking formatting...
+[warn] scripts/50-record-view.js
+[warn] docs/codex/codex-progress.md
+[warn] Code style issues found in 2 files. Run Prettier with --write to fix.

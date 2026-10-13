@@ -1,0 +1,3 @@
+tests/e2e/sight-summary-recency.spec.js 156ms
+docs/codex/sight-summary-recency.md 75ms (unchanged)
+docs/codex/codex-progress.md 858ms

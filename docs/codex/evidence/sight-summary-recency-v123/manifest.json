@@ -1,0 +1,1478 @@
+{
+  "source": "4b07d14eaa9a48bc21546722561021904f5365ab",
+  "version": 123,
+  "ci": 38418711075,
+  "imagesViewed": 6,
+  "files": [
+    {
+      "file": "after/chromium-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-dark-numeric-zero-analysis.png",
+      "bytes": 66581,
+      "sha256": "7901dbd757a679d8a7f0f24f0aadc69b50eaac1e2c55bb1ba88a924f072cc086"
+    },
+    {
+      "file": "after/chromium-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-dark-numeric-zero-prediction.png",
+      "bytes": 57756,
+      "sha256": "8d7c909daaa8f00da6103488c4a8c7ad84caa237fdf57e5d6f632e7a733b93ba"
+    },
+    {
+      "file": "after/chromium-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-dark-same-ts-analysis.png",
+      "bytes": 67324,
+      "sha256": "1973563967517846360c7cf79ced2626afac56c3ed9ab8d7fcdc1bcaaf23952f"
+    },
+    {
+      "file": "after/chromium-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-dark-same-ts-prediction.png",
+      "bytes": 58269,
+      "sha256": "508a05296afe1347bd0b34b36e56387c8a92813cbd4a633fa9e7dddd343ab140"
+    },
+    {
+      "file": "after/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 67324,
+      "sha256": "08eee8be1594b5ab6ec71a418f75a267acd287a5cb135764c20bca9575dc0072"
+    },
+    {
+      "file": "after/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 58263,
+      "sha256": "68b5171375e9eed98ba7428b48efc80393866f307060ade18df30bb4f1af9073"
+    },
+    {
+      "file": "after/chromium-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-light-numeric-zero-analysis.png",
+      "bytes": 66257,
+      "sha256": "86cbca322034dee8ca7d0c96e7e13bfcaa05ecbfd4a521bac0908ef3068635ba"
+    },
+    {
+      "file": "after/chromium-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-light-numeric-zero-prediction.png",
+      "bytes": 57379,
+      "sha256": "15faf04eb634f66eb8a2b2e90a59b64a515b33bfad8af656199e4fbe535d352d"
+    },
+    {
+      "file": "after/chromium-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-light-same-ts-analysis.png",
+      "bytes": 66877,
+      "sha256": "c1e6930ed18c3ab1b13fe51cb33f730b238fa3a44e157f48d309d1554f4ecf7e"
+    },
+    {
+      "file": "after/chromium-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-light-same-ts-prediction.png",
+      "bytes": 57939,
+      "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+    },
+    {
+      "file": "after/chromium-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 66877,
+      "sha256": "d686a55e4aa8974ef673c69b17c6fa0129525f9465573dddb26f3fce9d0a1907"
+    },
+    {
+      "file": "after/chromium-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/chromium-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 57934,
+      "sha256": "f51baa86f2fce4b3aeb2a8be60a32f79ca22c07acc275e7b69d3b02e4c5487d4"
+    },
+    {
+      "file": "after/results.json",
+      "source": "artifacts/sight-summary-recency/after/results.json",
+      "bytes": 429922,
+      "sha256": "7e2a7f514024d741b77a9364a3b490416a72ebd00765b808daece41654f0f421"
+    },
+    {
+      "file": "after/webkit-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-dark-numeric-zero-analysis.png",
+      "bytes": 50936,
+      "sha256": "14fd1888cd80955809b1ba4ad86b946640469c5da904f06f5095f68c1f875462"
+    },
+    {
+      "file": "after/webkit-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-dark-numeric-zero-prediction.png",
+      "bytes": 43944,
+      "sha256": "b1fe90f5ae01483a22a54efe61e5020c5f8f3c3fd8c3f2da088ddfbc6316f6ae"
+    },
+    {
+      "file": "after/webkit-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-dark-same-ts-analysis.png",
+      "bytes": 51346,
+      "sha256": "cb213a54f03062e09ab2782add12bfa782b0d3ff26b243580dd1b2feea182244"
+    },
+    {
+      "file": "after/webkit-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-dark-same-ts-prediction.png",
+      "bytes": 44279,
+      "sha256": "ffbcf8784be55d4f8a5726b6e4ff239312d294a303f025d036de450f7fba6c7b"
+    },
+    {
+      "file": "after/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 51344,
+      "sha256": "a9b3548324c905acb99e1c1529684526c7a9b1e04fbf6faed69341cd5b430cec"
+    },
+    {
+      "file": "after/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 44285,
+      "sha256": "d2f2c56e69f671ebb910e42f0741fd6fedd74646942037309b57c81e1befe3c2"
+    },
+    {
+      "file": "after/webkit-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-light-numeric-zero-analysis.png",
+      "bytes": 51447,
+      "sha256": "7fd1a6f598875ac22ef6e0d01ddb8be43328f5b68856d7e7c5073a46a4039a79"
+    },
+    {
+      "file": "after/webkit-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-light-numeric-zero-prediction.png",
+      "bytes": 44268,
+      "sha256": "40c89a73b1fb4029b3cc1299ef319b0aebae67920d959ce378e8d09d177f4915"
+    },
+    {
+      "file": "after/webkit-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-light-same-ts-analysis.png",
+      "bytes": 51922,
+      "sha256": "ecd61873bee3663a4659dbe9de3bebf84486baf3163be9006a1a6d94e1e22769"
+    },
+    {
+      "file": "after/webkit-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-light-same-ts-prediction.png",
+      "bytes": 44552,
+      "sha256": "bc86ed565ca699482fdd72b69398d69b403046a9f15efe9fc1b747b7d205e106"
+    },
+    {
+      "file": "after/webkit-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 51927,
+      "sha256": "0fcca67a309486c6836663af2a2e7991bd887f4107585305884e5b651c2b6d86"
+    },
+    {
+      "file": "after/webkit-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/after/webkit-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 44561,
+      "sha256": "5f25f353339d118bc389fe59d01cf8bfe4a0d96e09f8f03084ce26e4cdb7b6cc"
+    },
+    {
+      "file": "after-output.txt",
+      "source": "artifacts/sight-summary-recency/after-output.txt",
+      "bytes": 2744,
+      "sha256": "d30c665af6ac0e9d335ca582903b8048501e55d75697dddd2b7f74b531d39cdf"
+    },
+    {
+      "file": "append-evidence.cjs",
+      "source": "artifacts/sight-summary-recency/append-evidence.cjs",
+      "bytes": 834,
+      "sha256": "cd50ad85991197f5f23282429ac4677b4f5940fa3d458270f1cfa93787d2145a"
+    },
+    {
+      "file": "archive.cjs",
+      "source": "artifacts/sight-summary-recency/archive.cjs",
+      "bytes": 2771,
+      "sha256": "d1d1abe42c584c41ef38a57cf688e599ecefa58dda6af3a776c6287fa0a848f1"
+    },
+    {
+      "file": "base.json",
+      "source": "artifacts/sight-summary-recency/base.json",
+      "bytes": 136,
+      "sha256": "156efcdaa2a06d52a1c5b6652a07d2a56589aa944846440ffaaacfcd9727a91e"
+    },
+    {
+      "file": "before/chromium-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-dark-numeric-zero-analysis.png",
+      "bytes": 66581,
+      "sha256": "7901dbd757a679d8a7f0f24f0aadc69b50eaac1e2c55bb1ba88a924f072cc086"
+    },
+    {
+      "file": "before/chromium-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-dark-numeric-zero-prediction.png",
+      "bytes": 57756,
+      "sha256": "8d7c909daaa8f00da6103488c4a8c7ad84caa237fdf57e5d6f632e7a733b93ba"
+    },
+    {
+      "file": "before/chromium-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-dark-same-ts-analysis.png",
+      "bytes": 67324,
+      "sha256": "1973563967517846360c7cf79ced2626afac56c3ed9ab8d7fcdc1bcaaf23952f"
+    },
+    {
+      "file": "before/chromium-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-dark-same-ts-prediction.png",
+      "bytes": 58269,
+      "sha256": "508a05296afe1347bd0b34b36e56387c8a92813cbd4a633fa9e7dddd343ab140"
+    },
+    {
+      "file": "before/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 67354,
+      "sha256": "afd5fcb28d09af64ac13e6e980f5daf913ab738590953f167734223bda5b9b1a"
+    },
+    {
+      "file": "before/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 58263,
+      "sha256": "68b5171375e9eed98ba7428b48efc80393866f307060ade18df30bb4f1af9073"
+    },
+    {
+      "file": "before/chromium-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-light-numeric-zero-analysis.png",
+      "bytes": 66257,
+      "sha256": "86cbca322034dee8ca7d0c96e7e13bfcaa05ecbfd4a521bac0908ef3068635ba"
+    },
+    {
+      "file": "before/chromium-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-light-numeric-zero-prediction.png",
+      "bytes": 57379,
+      "sha256": "15faf04eb634f66eb8a2b2e90a59b64a515b33bfad8af656199e4fbe535d352d"
+    },
+    {
+      "file": "before/chromium-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-light-same-ts-analysis.png",
+      "bytes": 66877,
+      "sha256": "c1e6930ed18c3ab1b13fe51cb33f730b238fa3a44e157f48d309d1554f4ecf7e"
+    },
+    {
+      "file": "before/chromium-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-light-same-ts-prediction.png",
+      "bytes": 57939,
+      "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+    },
+    {
+      "file": "before/chromium-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 66905,
+      "sha256": "85fc650a3f17e3407dc9b8520907a009d4072ccefa529aa19b020b549a93f328"
+    },
+    {
+      "file": "before/chromium-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/chromium-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 57934,
+      "sha256": "f51baa86f2fce4b3aeb2a8be60a32f79ca22c07acc275e7b69d3b02e4c5487d4"
+    },
+    {
+      "file": "before/results.json",
+      "source": "artifacts/sight-summary-recency/before/results.json",
+      "bytes": 14522,
+      "sha256": "b351a744768f438bfd368c7f589a5dfd64f9bced2a5f1218bcd241998f9ff7c0"
+    },
+    {
+      "file": "before/webkit-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-dark-numeric-zero-analysis.png",
+      "bytes": 50936,
+      "sha256": "14fd1888cd80955809b1ba4ad86b946640469c5da904f06f5095f68c1f875462"
+    },
+    {
+      "file": "before/webkit-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-dark-numeric-zero-prediction.png",
+      "bytes": 43944,
+      "sha256": "b1fe90f5ae01483a22a54efe61e5020c5f8f3c3fd8c3f2da088ddfbc6316f6ae"
+    },
+    {
+      "file": "before/webkit-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-dark-same-ts-analysis.png",
+      "bytes": 51346,
+      "sha256": "cb213a54f03062e09ab2782add12bfa782b0d3ff26b243580dd1b2feea182244"
+    },
+    {
+      "file": "before/webkit-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-dark-same-ts-prediction.png",
+      "bytes": 44279,
+      "sha256": "ffbcf8784be55d4f8a5726b6e4ff239312d294a303f025d036de450f7fba6c7b"
+    },
+    {
+      "file": "before/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 51348,
+      "sha256": "b3f49a020cdef1de1c9f6c1f45c16f9c6ccd478b45fb0bca255b467b42ada39c"
+    },
+    {
+      "file": "before/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 44285,
+      "sha256": "d2f2c56e69f671ebb910e42f0741fd6fedd74646942037309b57c81e1befe3c2"
+    },
+    {
+      "file": "before/webkit-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-light-numeric-zero-analysis.png",
+      "bytes": 51447,
+      "sha256": "7fd1a6f598875ac22ef6e0d01ddb8be43328f5b68856d7e7c5073a46a4039a79"
+    },
+    {
+      "file": "before/webkit-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-light-numeric-zero-prediction.png",
+      "bytes": 44268,
+      "sha256": "40c89a73b1fb4029b3cc1299ef319b0aebae67920d959ce378e8d09d177f4915"
+    },
+    {
+      "file": "before/webkit-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-light-same-ts-analysis.png",
+      "bytes": 51922,
+      "sha256": "ecd61873bee3663a4659dbe9de3bebf84486baf3163be9006a1a6d94e1e22769"
+    },
+    {
+      "file": "before/webkit-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-light-same-ts-prediction.png",
+      "bytes": 44552,
+      "sha256": "bc86ed565ca699482fdd72b69398d69b403046a9f15efe9fc1b747b7d205e106"
+    },
+    {
+      "file": "before/webkit-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 51927,
+      "sha256": "8c8a1371bf5e09846393bc148e0d6d8c3f41db859938701b3c05db236ce3dca4"
+    },
+    {
+      "file": "before/webkit-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before/webkit-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 44561,
+      "sha256": "5f25f353339d118bc389fe59d01cf8bfe4a0d96e09f8f03084ce26e4cdb7b6cc"
+    },
+    {
+      "file": "before-complete/chromium-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-dark-numeric-zero-analysis.png",
+      "bytes": 66581,
+      "sha256": "7901dbd757a679d8a7f0f24f0aadc69b50eaac1e2c55bb1ba88a924f072cc086"
+    },
+    {
+      "file": "before-complete/chromium-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-dark-numeric-zero-prediction.png",
+      "bytes": 57756,
+      "sha256": "8d7c909daaa8f00da6103488c4a8c7ad84caa237fdf57e5d6f632e7a733b93ba"
+    },
+    {
+      "file": "before-complete/chromium-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-dark-same-ts-analysis.png",
+      "bytes": 67324,
+      "sha256": "1973563967517846360c7cf79ced2626afac56c3ed9ab8d7fcdc1bcaaf23952f"
+    },
+    {
+      "file": "before-complete/chromium-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-dark-same-ts-prediction.png",
+      "bytes": 58269,
+      "sha256": "508a05296afe1347bd0b34b36e56387c8a92813cbd4a633fa9e7dddd343ab140"
+    },
+    {
+      "file": "before-complete/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 67354,
+      "sha256": "afd5fcb28d09af64ac13e6e980f5daf913ab738590953f167734223bda5b9b1a"
+    },
+    {
+      "file": "before-complete/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 58263,
+      "sha256": "68b5171375e9eed98ba7428b48efc80393866f307060ade18df30bb4f1af9073"
+    },
+    {
+      "file": "before-complete/chromium-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-light-numeric-zero-analysis.png",
+      "bytes": 66257,
+      "sha256": "86cbca322034dee8ca7d0c96e7e13bfcaa05ecbfd4a521bac0908ef3068635ba"
+    },
+    {
+      "file": "before-complete/chromium-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-light-numeric-zero-prediction.png",
+      "bytes": 57379,
+      "sha256": "15faf04eb634f66eb8a2b2e90a59b64a515b33bfad8af656199e4fbe535d352d"
+    },
+    {
+      "file": "before-complete/chromium-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-light-same-ts-analysis.png",
+      "bytes": 66877,
+      "sha256": "c1e6930ed18c3ab1b13fe51cb33f730b238fa3a44e157f48d309d1554f4ecf7e"
+    },
+    {
+      "file": "before-complete/chromium-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-light-same-ts-prediction.png",
+      "bytes": 57939,
+      "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+    },
+    {
+      "file": "before-complete/chromium-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 66905,
+      "sha256": "85fc650a3f17e3407dc9b8520907a009d4072ccefa529aa19b020b549a93f328"
+    },
+    {
+      "file": "before-complete/chromium-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/chromium-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 57934,
+      "sha256": "f51baa86f2fce4b3aeb2a8be60a32f79ca22c07acc275e7b69d3b02e4c5487d4"
+    },
+    {
+      "file": "before-complete/results.json",
+      "source": "artifacts/sight-summary-recency/before-complete/results.json",
+      "bytes": 429922,
+      "sha256": "1252a4eaac44d3129fbeb229ac6809fc034ae46775dcfb9d63e1003738710fcc"
+    },
+    {
+      "file": "before-complete/webkit-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-dark-numeric-zero-analysis.png",
+      "bytes": 50936,
+      "sha256": "14fd1888cd80955809b1ba4ad86b946640469c5da904f06f5095f68c1f875462"
+    },
+    {
+      "file": "before-complete/webkit-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-dark-numeric-zero-prediction.png",
+      "bytes": 43944,
+      "sha256": "b1fe90f5ae01483a22a54efe61e5020c5f8f3c3fd8c3f2da088ddfbc6316f6ae"
+    },
+    {
+      "file": "before-complete/webkit-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-dark-same-ts-analysis.png",
+      "bytes": 51346,
+      "sha256": "cb213a54f03062e09ab2782add12bfa782b0d3ff26b243580dd1b2feea182244"
+    },
+    {
+      "file": "before-complete/webkit-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-dark-same-ts-prediction.png",
+      "bytes": 44279,
+      "sha256": "ffbcf8784be55d4f8a5726b6e4ff239312d294a303f025d036de450f7fba6c7b"
+    },
+    {
+      "file": "before-complete/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 51348,
+      "sha256": "b3f49a020cdef1de1c9f6c1f45c16f9c6ccd478b45fb0bca255b467b42ada39c"
+    },
+    {
+      "file": "before-complete/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 44285,
+      "sha256": "d2f2c56e69f671ebb910e42f0741fd6fedd74646942037309b57c81e1befe3c2"
+    },
+    {
+      "file": "before-complete/webkit-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-light-numeric-zero-analysis.png",
+      "bytes": 51447,
+      "sha256": "7fd1a6f598875ac22ef6e0d01ddb8be43328f5b68856d7e7c5073a46a4039a79"
+    },
+    {
+      "file": "before-complete/webkit-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-light-numeric-zero-prediction.png",
+      "bytes": 44268,
+      "sha256": "40c89a73b1fb4029b3cc1299ef319b0aebae67920d959ce378e8d09d177f4915"
+    },
+    {
+      "file": "before-complete/webkit-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-light-same-ts-analysis.png",
+      "bytes": 51922,
+      "sha256": "ecd61873bee3663a4659dbe9de3bebf84486baf3163be9006a1a6d94e1e22769"
+    },
+    {
+      "file": "before-complete/webkit-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-light-same-ts-prediction.png",
+      "bytes": 44552,
+      "sha256": "bc86ed565ca699482fdd72b69398d69b403046a9f15efe9fc1b747b7d205e106"
+    },
+    {
+      "file": "before-complete/webkit-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 51927,
+      "sha256": "8c8a1371bf5e09846393bc148e0d6d8c3f41db859938701b3c05db236ce3dca4"
+    },
+    {
+      "file": "before-complete/webkit-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/before-complete/webkit-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 44561,
+      "sha256": "5f25f353339d118bc389fe59d01cf8bfe4a0d96e09f8f03084ce26e4cdb7b6cc"
+    },
+    {
+      "file": "before-complete-output.txt",
+      "source": "artifacts/sight-summary-recency/before-complete-output.txt",
+      "bytes": 2744,
+      "sha256": "a9271c01f2f13bd4dae0e9962eaeddf8e9dbd083a0dca304758dd9fe9f659f76"
+    },
+    {
+      "file": "before-output.txt",
+      "source": "artifacts/sight-summary-recency/before-output.txt",
+      "bytes": 2744,
+      "sha256": "a9271c01f2f13bd4dae0e9962eaeddf8e9dbd083a0dca304758dd9fe9f659f76"
+    },
+    {
+      "file": "candidate-newline-diff.json",
+      "source": "artifacts/sight-summary-recency/candidate-newline-diff.json",
+      "bytes": 1762,
+      "sha256": "92c9c60d9719f707fe4eff5650065a4db57657388601211c8ab4c7355399e8d6"
+    },
+    {
+      "file": "candidate.json",
+      "source": "artifacts/sight-summary-recency/candidate.json",
+      "bytes": 2564,
+      "sha256": "37fc52cf21da398941a2fb8ba4f81bc39eccf0acd0d44c3df6f9e4494eb128c4"
+    },
+    {
+      "file": "capture.cjs",
+      "source": "artifacts/sight-summary-recency/capture.cjs",
+      "bytes": 5254,
+      "sha256": "f93a7689b89fb1e982901ddc5f5ecdfe5c03fce5e89207c0d148706b88d6486b"
+    },
+    {
+      "file": "cases.json",
+      "source": "artifacts/sight-summary-recency/cases.json",
+      "bytes": 13779,
+      "sha256": "189228a090fe4e15a38246c21f1bf559540390b938c09b81cbef98630bd51b00"
+    },
+    {
+      "file": "checkall-output.txt",
+      "source": "artifacts/sight-summary-recency/checkall-output.txt",
+      "bytes": 4900,
+      "sha256": "d18d1378fca07f1bdb2cfde3bcab75182ac088103cf08cadb8182908d26d3501"
+    },
+    {
+      "file": "checkall-prebump-output.txt",
+      "source": "artifacts/sight-summary-recency/checkall-prebump-output.txt",
+      "bytes": 4900,
+      "sha256": "21d71d12edc3e6339168bc2ae2d4c2ed729eeccce72960058c41b9467ba59231"
+    },
+    {
+      "file": "ci-artifacts.json",
+      "source": "artifacts/sight-summary-recency/ci-artifacts.json",
+      "bytes": 719,
+      "sha256": "331880f34e60436e0655f9246bf8e725b8dbb7ef812ae90c8e5f86bed2fe5a86"
+    },
+    {
+      "file": "ci-final-warm-start.json",
+      "source": "artifacts/sight-summary-recency/ci-final-warm-start.json",
+      "bytes": 3701,
+      "sha256": "e270329613b4edf652b0710f06ef8892b974a702f969c04c29539d95a8f1b2dc"
+    },
+    {
+      "file": "ci-full-log.txt",
+      "source": "artifacts/sight-summary-recency/ci-full-log.txt",
+      "bytes": 154956,
+      "sha256": "6100cf9e1b912be1d2f07b45c4ae511d2427b76b7316772fceee240f97364136"
+    },
+    {
+      "file": "ci-selected.json",
+      "source": "artifacts/sight-summary-recency/ci-selected.json",
+      "bytes": 159,
+      "sha256": "77a5fe98009fd354b15fe3188fd5aeb80a7c4dea992493695cb84615d828dbbe"
+    },
+    {
+      "file": "ci.json",
+      "source": "artifacts/sight-summary-recency/ci.json",
+      "bytes": 5074,
+      "sha256": "b6cdff3eb0da9ec92b303cb8ef9313e2ced16614af43af8b2fa558092fccc25b"
+    },
+    {
+      "file": "collect-ci.cjs",
+      "source": "artifacts/sight-summary-recency/collect-ci.cjs",
+      "bytes": 1009,
+      "sha256": "ea07883acc0e7919f552b2a33d6ef9645d7061095a695ce26fd1d3d794de26da"
+    },
+    {
+      "file": "collect-output.txt",
+      "source": "artifacts/sight-summary-recency/collect-output.txt",
+      "bytes": 9320,
+      "sha256": "e9bb034f477d0a6a696b608471899c9eee581dbde5ed223bdb97cb3e0b9e8d07"
+    },
+    {
+      "file": "collect.cjs",
+      "source": "artifacts/sight-summary-recency/collect.cjs",
+      "bytes": 1108,
+      "sha256": "cedc02adda16fa159477b954df40ac5ec8dc1ac3fe9ea72fc0cdebfc85956b70"
+    },
+    {
+      "file": "extend-capture.cjs",
+      "source": "artifacts/sight-summary-recency/extend-capture.cjs",
+      "bytes": 1051,
+      "sha256": "b5b80621eae45582d5908829dad14e48122719e4c4d8e06c7080df188fd44568"
+    },
+    {
+      "file": "extract.py",
+      "source": "artifacts/sight-summary-recency/extract.py",
+      "bytes": 614,
+      "sha256": "a0091611312d30e3bb0376d8fdfa430eba03d3c3af1c3e6151307a82cadca7b4"
+    },
+    {
+      "file": "final/chromium-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-dark-numeric-zero-analysis.png",
+      "bytes": 66581,
+      "sha256": "7901dbd757a679d8a7f0f24f0aadc69b50eaac1e2c55bb1ba88a924f072cc086"
+    },
+    {
+      "file": "final/chromium-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-dark-numeric-zero-prediction.png",
+      "bytes": 57756,
+      "sha256": "8d7c909daaa8f00da6103488c4a8c7ad84caa237fdf57e5d6f632e7a733b93ba"
+    },
+    {
+      "file": "final/chromium-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-dark-same-ts-analysis.png",
+      "bytes": 67324,
+      "sha256": "1973563967517846360c7cf79ced2626afac56c3ed9ab8d7fcdc1bcaaf23952f"
+    },
+    {
+      "file": "final/chromium-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-dark-same-ts-prediction.png",
+      "bytes": 58269,
+      "sha256": "508a05296afe1347bd0b34b36e56387c8a92813cbd4a633fa9e7dddd343ab140"
+    },
+    {
+      "file": "final/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 67324,
+      "sha256": "08eee8be1594b5ab6ec71a418f75a267acd287a5cb135764c20bca9575dc0072"
+    },
+    {
+      "file": "final/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 58263,
+      "sha256": "68b5171375e9eed98ba7428b48efc80393866f307060ade18df30bb4f1af9073"
+    },
+    {
+      "file": "final/chromium-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-light-numeric-zero-analysis.png",
+      "bytes": 66257,
+      "sha256": "86cbca322034dee8ca7d0c96e7e13bfcaa05ecbfd4a521bac0908ef3068635ba"
+    },
+    {
+      "file": "final/chromium-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-light-numeric-zero-prediction.png",
+      "bytes": 57379,
+      "sha256": "15faf04eb634f66eb8a2b2e90a59b64a515b33bfad8af656199e4fbe535d352d"
+    },
+    {
+      "file": "final/chromium-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-light-same-ts-analysis.png",
+      "bytes": 66877,
+      "sha256": "c1e6930ed18c3ab1b13fe51cb33f730b238fa3a44e157f48d309d1554f4ecf7e"
+    },
+    {
+      "file": "final/chromium-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-light-same-ts-prediction.png",
+      "bytes": 57939,
+      "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+    },
+    {
+      "file": "final/chromium-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 66877,
+      "sha256": "d686a55e4aa8974ef673c69b17c6fa0129525f9465573dddb26f3fce9d0a1907"
+    },
+    {
+      "file": "final/chromium-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/chromium-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 57934,
+      "sha256": "f51baa86f2fce4b3aeb2a8be60a32f79ca22c07acc275e7b69d3b02e4c5487d4"
+    },
+    {
+      "file": "final/results.json",
+      "source": "artifacts/sight-summary-recency/final/results.json",
+      "bytes": 429922,
+      "sha256": "c3145c511a74401fbdc68aa4c6ef9ad3308986e5a8acd20bea9195661f19744e"
+    },
+    {
+      "file": "final/webkit-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-dark-numeric-zero-analysis.png",
+      "bytes": 50936,
+      "sha256": "14fd1888cd80955809b1ba4ad86b946640469c5da904f06f5095f68c1f875462"
+    },
+    {
+      "file": "final/webkit-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-dark-numeric-zero-prediction.png",
+      "bytes": 43944,
+      "sha256": "b1fe90f5ae01483a22a54efe61e5020c5f8f3c3fd8c3f2da088ddfbc6316f6ae"
+    },
+    {
+      "file": "final/webkit-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-dark-same-ts-analysis.png",
+      "bytes": 51346,
+      "sha256": "cb213a54f03062e09ab2782add12bfa782b0d3ff26b243580dd1b2feea182244"
+    },
+    {
+      "file": "final/webkit-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-dark-same-ts-prediction.png",
+      "bytes": 44279,
+      "sha256": "ffbcf8784be55d4f8a5726b6e4ff239312d294a303f025d036de450f7fba6c7b"
+    },
+    {
+      "file": "final/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 51344,
+      "sha256": "a9b3548324c905acb99e1c1529684526c7a9b1e04fbf6faed69341cd5b430cec"
+    },
+    {
+      "file": "final/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 44285,
+      "sha256": "d2f2c56e69f671ebb910e42f0741fd6fedd74646942037309b57c81e1befe3c2"
+    },
+    {
+      "file": "final/webkit-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-light-numeric-zero-analysis.png",
+      "bytes": 51447,
+      "sha256": "7fd1a6f598875ac22ef6e0d01ddb8be43328f5b68856d7e7c5073a46a4039a79"
+    },
+    {
+      "file": "final/webkit-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-light-numeric-zero-prediction.png",
+      "bytes": 44268,
+      "sha256": "40c89a73b1fb4029b3cc1299ef319b0aebae67920d959ce378e8d09d177f4915"
+    },
+    {
+      "file": "final/webkit-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-light-same-ts-analysis.png",
+      "bytes": 51922,
+      "sha256": "ecd61873bee3663a4659dbe9de3bebf84486baf3163be9006a1a6d94e1e22769"
+    },
+    {
+      "file": "final/webkit-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-light-same-ts-prediction.png",
+      "bytes": 44552,
+      "sha256": "bc86ed565ca699482fdd72b69398d69b403046a9f15efe9fc1b747b7d205e106"
+    },
+    {
+      "file": "final/webkit-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 51927,
+      "sha256": "0fcca67a309486c6836663af2a2e7991bd887f4107585305884e5b651c2b6d86"
+    },
+    {
+      "file": "final/webkit-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/final/webkit-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 44561,
+      "sha256": "5f25f353339d118bc389fe59d01cf8bfe4a0d96e09f8f03084ce26e4cdb7b6cc"
+    },
+    {
+      "file": "final-ui-output.txt",
+      "source": "artifacts/sight-summary-recency/final-ui-output.txt",
+      "bytes": 2744,
+      "sha256": "d30c665af6ac0e9d335ca582903b8048501e55d75697dddd2b7f74b531d39cdf"
+    },
+    {
+      "file": "finish.cjs",
+      "source": "artifacts/sight-summary-recency/finish.cjs",
+      "bytes": 5050,
+      "sha256": "4d7e19acd4add7b00882a7771a2ece2ea1b48d3c938b286388b364588802c240"
+    },
+    {
+      "file": "fix-test-globals.cjs",
+      "source": "artifacts/sight-summary-recency/fix-test-globals.cjs",
+      "bytes": 971,
+      "sha256": "c862287b5ad7fed6e4b1e3931707444761be11b5891b644bef32577d7010347c"
+    },
+    {
+      "file": "fixture.json",
+      "source": "artifacts/sight-summary-recency/fixture.json",
+      "bytes": 23399,
+      "sha256": "1851997d9441a3b433a7a2f3dc61d6a608b4372c90dc39302e4728b5b55fa912"
+    },
+    {
+      "file": "focused-format-output.txt",
+      "source": "artifacts/sight-summary-recency/focused-format-output.txt",
+      "bytes": 173,
+      "sha256": "baa60c6c4af7038747b0132395b427988a568feb77b69c348d05d4c6f33bd663"
+    },
+    {
+      "file": "format-diagnosis-output.txt",
+      "source": "artifacts/sight-summary-recency/format-diagnosis-output.txt",
+      "bytes": 101,
+      "sha256": "b4f0547d8bde2b3223feeb7161cc5e58d31889942db22fecb5ea367e47ff524b"
+    },
+    {
+      "file": "format-fix-output.txt",
+      "source": "artifacts/sight-summary-recency/format-fix-output.txt",
+      "bytes": 137,
+      "sha256": "b1b2e942d49b3cdc83dd581dcaf1739b7a3649021444d7922e6931557dc0eec4"
+    },
+    {
+      "file": "format-output.txt",
+      "source": "artifacts/sight-summary-recency/format-output.txt",
+      "bytes": 401,
+      "sha256": "81dbd0db6ae73838544b9a35c4768e7e36e01e497ed2f2c84c3133ef02b2edaf"
+    },
+    {
+      "file": "freeze-output.txt",
+      "source": "artifacts/sight-summary-recency/freeze-output.txt",
+      "bytes": 52,
+      "sha256": "cac127f63be43135a4c9a40373c118d1bd17de536c5d3dd5a8bffbdf04a48dc4"
+    },
+    {
+      "file": "freeze.cjs",
+      "source": "artifacts/sight-summary-recency/freeze.cjs",
+      "bytes": 882,
+      "sha256": "c9b8c36781a7b5fbb1ce342ab21ab7f5bbd2b9c46876dfc2a4dd3ac10ba7bb94"
+    },
+    {
+      "file": "full-output.txt",
+      "source": "artifacts/sight-summary-recency/full-output.txt",
+      "bytes": 50360,
+      "sha256": "504b9a51020651e01790d23c35a527da22078858c3bd9c688431641693248723"
+    },
+    {
+      "file": "green-output.txt",
+      "source": "artifacts/sight-summary-recency/green-output.txt",
+      "bytes": 1393,
+      "sha256": "fc94b9f56346782885f3ccfa88d1270d8e20480b1ddd5f7ddc28a96c5832a922"
+    },
+    {
+      "file": "invariants-final-ui-output.txt",
+      "source": "artifacts/sight-summary-recency/invariants-final-ui-output.txt",
+      "bytes": 258,
+      "sha256": "ef86d0d45b8dc97eaf1c3268b29a8a6b895b2edd1a0194ec02330624aa9c01ec"
+    },
+    {
+      "file": "invariants-output.txt",
+      "source": "artifacts/sight-summary-recency/invariants-output.txt",
+      "bytes": 258,
+      "sha256": "ef86d0d45b8dc97eaf1c3268b29a8a6b895b2edd1a0194ec02330624aa9c01ec"
+    },
+    {
+      "file": "invariants-public-output.txt",
+      "source": "artifacts/sight-summary-recency/invariants-public-output.txt",
+      "bytes": 258,
+      "sha256": "ef86d0d45b8dc97eaf1c3268b29a8a6b895b2edd1a0194ec02330624aa9c01ec"
+    },
+    {
+      "file": "invariants.cjs",
+      "source": "artifacts/sight-summary-recency/invariants.cjs",
+      "bytes": 3120,
+      "sha256": "c0ddc28d999b714cfba36308e63f38f7f7b28ee3a80a851e0e408230f039831b"
+    },
+    {
+      "file": "lint-final-output.txt",
+      "source": "artifacts/sight-summary-recency/lint-final-output.txt",
+      "bytes": 120,
+      "sha256": "61ec196425af293068e6136b659c39788f52b473a0381f6bd9dbe250c8bce1d2"
+    },
+    {
+      "file": "lint-output.txt",
+      "source": "artifacts/sight-summary-recency/lint-output.txt",
+      "bytes": 425,
+      "sha256": "33a5a99979b996d35a96f862ffdb00331ca664d30e6514c091407b41ae928925"
+    },
+    {
+      "file": "native/chromium-320-dark-20-active.png",
+      "source": "artifacts/sight-summary-recency/native/chromium-320-dark-20-active.png",
+      "bytes": 46648,
+      "sha256": "2e64adabc881d700c344af1f08b5c1b1f7824ef4e70b91b713d56cd7c6ee1616"
+    },
+    {
+      "file": "native/chromium-320-light-15-active.png",
+      "source": "artifacts/sight-summary-recency/native/chromium-320-light-15-active.png",
+      "bytes": 42541,
+      "sha256": "fd9764f7348833bb9122506d0280abe4a384d2f2f5b709ccffc93af73e87e9de"
+    },
+    {
+      "file": "native/chromium-375-dark-15-active.png",
+      "source": "artifacts/sight-summary-recency/native/chromium-375-dark-15-active.png",
+      "bytes": 63943,
+      "sha256": "9ec3055eb5e10fc619f473994b370eba83fff83ea97e77a35ca1e55bbf4c0b1d"
+    },
+    {
+      "file": "native/chromium-375-dark-15-selected.png",
+      "source": "artifacts/sight-summary-recency/native/chromium-375-dark-15-selected.png",
+      "bytes": 59266,
+      "sha256": "349c7ca0238814ae3c7f03d6fba98277ae3b5b864389a881b2e174badb819611"
+    },
+    {
+      "file": "native/chromium-900-light-15-active.png",
+      "source": "artifacts/sight-summary-recency/native/chromium-900-light-15-active.png",
+      "bytes": 74922,
+      "sha256": "973095a4ecd13d7742aeee249bc7ba040f0ac5059cf4fd5ad72baf6c224bae09"
+    },
+    {
+      "file": "native/last-geometry.json",
+      "source": "artifacts/sight-summary-recency/native/last-geometry.json",
+      "bytes": 3005,
+      "sha256": "400c0698b2b0c32241c1749f7879aaddea5ed03f8641557ec7b1516e838f3f09"
+    },
+    {
+      "file": "native/results.json",
+      "source": "artifacts/sight-summary-recency/native/results.json",
+      "bytes": 84577,
+      "sha256": "bd8e0fa7e7eaae77b25ad0d2ff7796b41fc7f2dc1264945a57ce8089da1b511c"
+    },
+    {
+      "file": "native/webkit-320-dark-20-active.png",
+      "source": "artifacts/sight-summary-recency/native/webkit-320-dark-20-active.png",
+      "bytes": 43935,
+      "sha256": "ef7a08e2ab5dd8531d491b67ea0522c4a3489983ddffed8e8d8caae53bd69ca3"
+    },
+    {
+      "file": "native/webkit-320-light-15-active.png",
+      "source": "artifacts/sight-summary-recency/native/webkit-320-light-15-active.png",
+      "bytes": 40857,
+      "sha256": "39bf5d00e6d07acb5eb5180930a84f7fff52464363ba2f8289504e861eda9f18"
+    },
+    {
+      "file": "native/webkit-375-dark-15-active.png",
+      "source": "artifacts/sight-summary-recency/native/webkit-375-dark-15-active.png",
+      "bytes": 60882,
+      "sha256": "e759813399342c91dc7169fb39489a2845fb71b3ce247f2a2f15d7686ad2a016"
+    },
+    {
+      "file": "native/webkit-375-dark-15-selected.png",
+      "source": "artifacts/sight-summary-recency/native/webkit-375-dark-15-selected.png",
+      "bytes": 57560,
+      "sha256": "0c317a6667c7f205a6ddce0eb1fb7e0ccde28455961ab95961df08e2350e76a6"
+    },
+    {
+      "file": "native/webkit-900-light-15-active.png",
+      "source": "artifacts/sight-summary-recency/native/webkit-900-light-15-active.png",
+      "bytes": 73770,
+      "sha256": "3240d601c659a498a0ef65eae624ffe9f813a9c28f584b882d27d7e5711cda4d"
+    },
+    {
+      "file": "native-output.txt",
+      "source": "artifacts/sight-summary-recency/native-output.txt",
+      "bytes": 682,
+      "sha256": "8a2d128fdf6d176053f174d93441bcb2e7a18ad87da0de49088dff45cdb641d4"
+    },
+    {
+      "file": "native.cjs",
+      "source": "artifacts/sight-summary-recency/native.cjs",
+      "bytes": 7792,
+      "sha256": "1abed275067e42cd7043ee99eb2a22da6a490baf7b6f93a5be454d488ee5ef58"
+    },
+    {
+      "file": "npm.cjs",
+      "source": "artifacts/sight-summary-recency/npm.cjs",
+      "bytes": 629,
+      "sha256": "c0e38a3d6f737cc8b2262746be2fc2c82d1af68d873cd4028e2a94e647c63bbe"
+    },
+    {
+      "file": "old-tasks.json",
+      "source": "artifacts/sight-summary-recency/old-tasks.json",
+      "bytes": 135423,
+      "sha256": "fa4011c9a9dab1b35af02a2312e9d8d951198a5b313f30fd33b027d3309b2111"
+    },
+    {
+      "file": "parity-output.txt",
+      "source": "artifacts/sight-summary-recency/parity-output.txt",
+      "bytes": 211,
+      "sha256": "59fc8dd00fc63f22a9b67c64ccd9c3eabb1a68fbf1c691026525a5ac0e0b1291"
+    },
+    {
+      "file": "parity.cjs",
+      "source": "artifacts/sight-summary-recency/parity.cjs",
+      "bytes": 3021,
+      "sha256": "6a1a6ec8d68b754e8487dbaa28fdf1cea624857ae52deb45e8707d5496deba8a"
+    },
+    {
+      "file": "parity.json",
+      "source": "artifacts/sight-summary-recency/parity.json",
+      "bytes": 4362,
+      "sha256": "66aa3bac528b93d14f7a288a48c52f720de6226af16765e272df378808c01716"
+    },
+    {
+      "file": "plan-commit-output.txt",
+      "source": "artifacts/sight-summary-recency/plan-commit-output.txt",
+      "bytes": 172,
+      "sha256": "f284921d82d728e51e16bcf1fccc69a8e491d92750323abec3d98814da2ed469"
+    },
+    {
+      "file": "prepare-capture.cjs",
+      "source": "artifacts/sight-summary-recency/prepare-capture.cjs",
+      "bytes": 891,
+      "sha256": "fb021b0135ff133acc9ee63d9efa312e0aa43f016f800ccd8cb6b6edfe69e9e4"
+    },
+    {
+      "file": "prepare-notes.cjs",
+      "source": "artifacts/sight-summary-recency/prepare-notes.cjs",
+      "bytes": 706,
+      "sha256": "c504596b6775e8c8f64c07ca8c1e9e421cee3e4695c41ffb62ee15ddf46cd20b"
+    },
+    {
+      "file": "prepare-release.cjs",
+      "source": "artifacts/sight-summary-recency/prepare-release.cjs",
+      "bytes": 879,
+      "sha256": "111adcc97060078ff40700b4cf5c975a5d683029bb9da6f193d8780b9333011b"
+    },
+    {
+      "file": "prepare-tools.cjs",
+      "source": "artifacts/sight-summary-recency/prepare-tools.cjs",
+      "bytes": 272,
+      "sha256": "d4515fbc0074a5ba71c3444c3e8d49a3d3b220120cd8a3e86966949e9ff94830"
+    },
+    {
+      "file": "prepare.cjs",
+      "source": "artifacts/sight-summary-recency/prepare.cjs",
+      "bytes": 1241,
+      "sha256": "0b467a37cce51dc06fefdf808039f292dc8d9e2bd8b24aa92e9fcfaa94d6bc0f"
+    },
+    {
+      "file": "prepublish-output.txt",
+      "source": "artifacts/sight-summary-recency/prepublish-output.txt",
+      "bytes": 113,
+      "sha256": "6f293a6d12ed30326f6ab51f78b22545e5949926f31afacee931721edbe098b3"
+    },
+    {
+      "file": "prepublish.cjs",
+      "source": "artifacts/sight-summary-recency/prepublish.cjs",
+      "bytes": 1610,
+      "sha256": "d2c3cf1f84112e643a155047aa5d4c7b70890e5644ba8fd0d263bcab5e0f6409"
+    },
+    {
+      "file": "prepublish.json",
+      "source": "artifacts/sight-summary-recency/prepublish.json",
+      "bytes": 307,
+      "sha256": "5b0786717890d0dcca3f73cc21fe655e76fca2aaf42046d7e48a657c248b9502"
+    },
+    {
+      "file": "public/chromium-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-dark-numeric-zero-analysis.png",
+      "bytes": 66581,
+      "sha256": "7901dbd757a679d8a7f0f24f0aadc69b50eaac1e2c55bb1ba88a924f072cc086"
+    },
+    {
+      "file": "public/chromium-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-dark-numeric-zero-prediction.png",
+      "bytes": 57756,
+      "sha256": "8d7c909daaa8f00da6103488c4a8c7ad84caa237fdf57e5d6f632e7a733b93ba"
+    },
+    {
+      "file": "public/chromium-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-dark-same-ts-analysis.png",
+      "bytes": 67324,
+      "sha256": "1973563967517846360c7cf79ced2626afac56c3ed9ab8d7fcdc1bcaaf23952f"
+    },
+    {
+      "file": "public/chromium-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-dark-same-ts-prediction.png",
+      "bytes": 58269,
+      "sha256": "508a05296afe1347bd0b34b36e56387c8a92813cbd4a633fa9e7dddd343ab140"
+    },
+    {
+      "file": "public/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 67324,
+      "sha256": "08eee8be1594b5ab6ec71a418f75a267acd287a5cb135764c20bca9575dc0072"
+    },
+    {
+      "file": "public/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 58263,
+      "sha256": "68b5171375e9eed98ba7428b48efc80393866f307060ade18df30bb4f1af9073"
+    },
+    {
+      "file": "public/chromium-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-light-numeric-zero-analysis.png",
+      "bytes": 66257,
+      "sha256": "86cbca322034dee8ca7d0c96e7e13bfcaa05ecbfd4a521bac0908ef3068635ba"
+    },
+    {
+      "file": "public/chromium-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-light-numeric-zero-prediction.png",
+      "bytes": 57379,
+      "sha256": "15faf04eb634f66eb8a2b2e90a59b64a515b33bfad8af656199e4fbe535d352d"
+    },
+    {
+      "file": "public/chromium-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-light-same-ts-analysis.png",
+      "bytes": 66877,
+      "sha256": "c1e6930ed18c3ab1b13fe51cb33f730b238fa3a44e157f48d309d1554f4ecf7e"
+    },
+    {
+      "file": "public/chromium-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-light-same-ts-prediction.png",
+      "bytes": 57939,
+      "sha256": "7c2a618eb19b8747050552e4627f9e793cd600188cc040f47a3cea962a99c21b"
+    },
+    {
+      "file": "public/chromium-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 66877,
+      "sha256": "d686a55e4aa8974ef673c69b17c6fa0129525f9465573dddb26f3fce9d0a1907"
+    },
+    {
+      "file": "public/chromium-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/chromium-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 57934,
+      "sha256": "f51baa86f2fce4b3aeb2a8be60a32f79ca22c07acc275e7b69d3b02e4c5487d4"
+    },
+    {
+      "file": "public/results.json",
+      "source": "artifacts/sight-summary-recency/public/results.json",
+      "bytes": 429922,
+      "sha256": "c3145c511a74401fbdc68aa4c6ef9ad3308986e5a8acd20bea9195661f19744e"
+    },
+    {
+      "file": "public/webkit-375-dark-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-dark-numeric-zero-analysis.png",
+      "bytes": 50936,
+      "sha256": "14fd1888cd80955809b1ba4ad86b946640469c5da904f06f5095f68c1f875462"
+    },
+    {
+      "file": "public/webkit-375-dark-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-dark-numeric-zero-prediction.png",
+      "bytes": 43944,
+      "sha256": "b1fe90f5ae01483a22a54efe61e5020c5f8f3c3fd8c3f2da088ddfbc6316f6ae"
+    },
+    {
+      "file": "public/webkit-375-dark-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-dark-same-ts-analysis.png",
+      "bytes": 51346,
+      "sha256": "cb213a54f03062e09ab2782add12bfa782b0d3ff26b243580dd1b2feea182244"
+    },
+    {
+      "file": "public/webkit-375-dark-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-dark-same-ts-prediction.png",
+      "bytes": 44279,
+      "sha256": "ffbcf8784be55d4f8a5726b6e4ff239312d294a303f025d036de450f7fba6c7b"
+    },
+    {
+      "file": "public/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-dark-unique-ts-reverse-analysis.png",
+      "bytes": 51344,
+      "sha256": "a9b3548324c905acb99e1c1529684526c7a9b1e04fbf6faed69341cd5b430cec"
+    },
+    {
+      "file": "public/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-dark-unique-ts-reverse-prediction.png",
+      "bytes": 44285,
+      "sha256": "d2f2c56e69f671ebb910e42f0741fd6fedd74646942037309b57c81e1befe3c2"
+    },
+    {
+      "file": "public/webkit-375-light-numeric-zero-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-light-numeric-zero-analysis.png",
+      "bytes": 51447,
+      "sha256": "7fd1a6f598875ac22ef6e0d01ddb8be43328f5b68856d7e7c5073a46a4039a79"
+    },
+    {
+      "file": "public/webkit-375-light-numeric-zero-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-light-numeric-zero-prediction.png",
+      "bytes": 44268,
+      "sha256": "40c89a73b1fb4029b3cc1299ef319b0aebae67920d959ce378e8d09d177f4915"
+    },
+    {
+      "file": "public/webkit-375-light-same-ts-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-light-same-ts-analysis.png",
+      "bytes": 51922,
+      "sha256": "ecd61873bee3663a4659dbe9de3bebf84486baf3163be9006a1a6d94e1e22769"
+    },
+    {
+      "file": "public/webkit-375-light-same-ts-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-light-same-ts-prediction.png",
+      "bytes": 44552,
+      "sha256": "bc86ed565ca699482fdd72b69398d69b403046a9f15efe9fc1b747b7d205e106"
+    },
+    {
+      "file": "public/webkit-375-light-unique-ts-reverse-analysis.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-light-unique-ts-reverse-analysis.png",
+      "bytes": 51927,
+      "sha256": "0fcca67a309486c6836663af2a2e7991bd887f4107585305884e5b651c2b6d86"
+    },
+    {
+      "file": "public/webkit-375-light-unique-ts-reverse-prediction.png",
+      "source": "artifacts/sight-summary-recency/public/webkit-375-light-unique-ts-reverse-prediction.png",
+      "bytes": 44561,
+      "sha256": "5f25f353339d118bc389fe59d01cf8bfe4a0d96e09f8f03084ce26e4cdb7b6cc"
+    },
+    {
+      "file": "public-final/after-update.json",
+      "source": "artifacts/sight-summary-recency/public-final/after-update.json",
+      "bytes": 16371,
+      "sha256": "931cb0004ca7b4f5b58ab0bce0ac1bcc2f01289b6ffb3243cba70f7218d428cc"
+    },
+    {
+      "file": "public-final/analysis.json",
+      "source": "artifacts/sight-summary-recency/public-final/analysis.json",
+      "bytes": 971,
+      "sha256": "33135fe053e0f61250499e7423532fd3fc66c53714da245556a6ae783b6e6783"
+    },
+    {
+      "file": "public-final/banner.png",
+      "source": "artifacts/sight-summary-recency/public-final/banner.png",
+      "bytes": 46452,
+      "sha256": "69ce1cd3f941dfa729378282a4fb54e34112cbfa3bb92777414f4efc70387dcf"
+    },
+    {
+      "file": "public-final/baseline.json",
+      "source": "artifacts/sight-summary-recency/public-final/baseline.json",
+      "bytes": 21348,
+      "sha256": "1094ac90e99dcc49dd83865fbd970e6b759e272198d59a84043a6f0dad893c16"
+    },
+    {
+      "file": "public-final/complete.json",
+      "source": "artifacts/sight-summary-recency/public-final/complete.json",
+      "bytes": 26737,
+      "sha256": "156c6d3aeb7a914f182596c8286c8e90a1a9a0faefd193e6b6ad2e273ec78e87"
+    },
+    {
+      "file": "public-final/correction-entry320.png",
+      "source": "artifacts/sight-summary-recency/public-final/correction-entry320.png",
+      "bytes": 29265,
+      "sha256": "e1e0b6788c833e352fb723af25d2c5f8ce50db6ee426850e9524246619e410a4"
+    },
+    {
+      "file": "public-final/correction-exit320.png",
+      "source": "artifacts/sight-summary-recency/public-final/correction-exit320.png",
+      "bytes": 26742,
+      "sha256": "143c68b36612f8e30d7aa3371800f4476cbea6adcdaebeaa7a44ac4c85b63f65"
+    },
+    {
+      "file": "public-final/correction-geometry.json",
+      "source": "artifacts/sight-summary-recency/public-final/correction-geometry.json",
+      "bytes": 4120,
+      "sha256": "123e6af4eb003beecc5e6a2996237147bb9a33d00b5787545e5723dda5b66d29"
+    },
+    {
+      "file": "public-final/dock-geometry.json",
+      "source": "artifacts/sight-summary-recency/public-final/dock-geometry.json",
+      "bytes": 1628,
+      "sha256": "df76888e15984575beaaac7c2b3875493177444a9e217b3050e37695aecbe785"
+    },
+    {
+      "file": "public-final/first-target320.png",
+      "source": "artifacts/sight-summary-recency/public-final/first-target320.png",
+      "bytes": 55816,
+      "sha256": "97a98cfdae0d42f1aed045bc1a491b72d071539c538ad6dcf7699cf5a14fb6c3"
+    },
+    {
+      "file": "public-final/history-geometry.json",
+      "source": "artifacts/sight-summary-recency/public-final/history-geometry.json",
+      "bytes": 341,
+      "sha256": "d8c9c6cfb4e62004c846f42d8d062a8c982cb442952895d149286c9d9ddba015"
+    },
+    {
+      "file": "public-final/metrics-trace.json",
+      "source": "artifacts/sight-summary-recency/public-final/metrics-trace.json",
+      "bytes": 10463,
+      "sha256": "546a50d7a720a0f3bf1e915ecdb895e3cd56258f06840696651897d6ab7d02a2"
+    },
+    {
+      "file": "public-final/offline.png",
+      "source": "artifacts/sight-summary-recency/public-final/offline.png",
+      "bytes": 54398,
+      "sha256": "ffbd661857e9d43cddf44a865a72cb49358845b09f8aad6e0d7e7040052c1d74"
+    },
+    {
+      "file": "public-final/pending-analysis.png",
+      "source": "artifacts/sight-summary-recency/public-final/pending-analysis.png",
+      "bytes": 33451,
+      "sha256": "c924df51666a005edc621becaba977d5cc450ee6d46847c3f65e82750d8c00ec"
+    },
+    {
+      "file": "public-final/pending-history.png",
+      "source": "artifacts/sight-summary-recency/public-final/pending-history.png",
+      "bytes": 33169,
+      "sha256": "fab1afb52a13a5e97fa79f45317c9de461d5e95730f5cd312cfb61464075286f"
+    },
+    {
+      "file": "public-final/pending-summary.png",
+      "source": "artifacts/sight-summary-recency/public-final/pending-summary.png",
+      "bytes": 47510,
+      "sha256": "29503e12a61ada0b5776c02c9b573c6ee9aebb31b6314f966f7061c2ab902c31"
+    },
+    {
+      "file": "public-final/progress.txt",
+      "source": "artifacts/sight-summary-recency/public-final/progress.txt",
+      "bytes": 396,
+      "sha256": "24b0529224d7fae8ada75fbfc0d77b9df94e3d0a9bf195d67de769b3ce99a073"
+    },
+    {
+      "file": "public-final/projected-history.json",
+      "source": "artifacts/sight-summary-recency/public-final/projected-history.json",
+      "bytes": 834,
+      "sha256": "ac945c942f45420b7d97bd238dc466af1d95c0a4032c69f2d75c5b0c16f21a31"
+    },
+    {
+      "file": "public-final/projected-history.png",
+      "source": "artifacts/sight-summary-recency/public-final/projected-history.png",
+      "bytes": 33936,
+      "sha256": "ab081fc12b9ccca777b2007bd600b0156b028ad16e9380f36bf8798bdab1381f"
+    },
+    {
+      "file": "public-final/projected-summary.json",
+      "source": "artifacts/sight-summary-recency/public-final/projected-summary.json",
+      "bytes": 828,
+      "sha256": "04f980b12d45ebd227fe15fcccbeb7ee7364eb130222e8270c8be78e33f61d32"
+    },
+    {
+      "file": "public-final/projected-summary.png",
+      "source": "artifacts/sight-summary-recency/public-final/projected-summary.png",
+      "bytes": 47510,
+      "sha256": "29503e12a61ada0b5776c02c9b573c6ee9aebb31b6314f966f7061c2ab902c31"
+    },
+    {
+      "file": "public-ui-output.txt",
+      "source": "artifacts/sight-summary-recency/public-ui-output.txt",
+      "bytes": 2744,
+      "sha256": "d30c665af6ac0e9d335ca582903b8048501e55d75697dddd2b7f74b531d39cdf"
+    },
+    {
+      "file": "public-update.cjs",
+      "source": "artifacts/sight-summary-recency/public-update.cjs",
+      "bytes": 20145,
+      "sha256": "d918a607f0bc3618c017d5719d2e00f06c1e00322dfb9f5fe7e7cd6194daaf85"
+    },
+    {
+      "file": "public-warm-output.txt",
+      "source": "artifacts/sight-summary-recency/public-warm-output.txt",
+      "bytes": 517,
+      "sha256": "fc3d086d85d68c0f9fbf49608d8bdc8f8e55a4b255dcab10cefadb08f5688ed5"
+    },
+    {
+      "file": "push-output.txt",
+      "source": "artifacts/sight-summary-recency/push-output.txt",
+      "bytes": 88,
+      "sha256": "0e47ac6955806721c9506b651567dda50029c53ea8370fc7a217dcc571564cd7"
+    },
+    {
+      "file": "record-public-viewed.cjs",
+      "source": "artifacts/sight-summary-recency/record-public-viewed.cjs",
+      "bytes": 580,
+      "sha256": "a320923f09245682c2341968a9e4e8217b840de9e0e6b980dca0c05abd17f18e"
+    },
+    {
+      "file": "red-contexts/sight-summary-recency-rest-76e80--keeps-newer-analysis-value-chromium.md.txt",
+      "source": "artifacts/sight-summary-recency/red-contexts/sight-summary-recency-rest-76e80--keeps-newer-analysis-value-chromium.md.txt",
+      "bytes": 15668,
+      "sha256": "088bc022fff18d1f7af105a8dae991e3d4506d563011af1c01b33c9728307993"
+    },
+    {
+      "file": "red-contexts/sight-summary-recency-same-5183a-es-newer-recorded-time-900--chromium.md.txt",
+      "source": "artifacts/sight-summary-recency/red-contexts/sight-summary-recency-same-5183a-es-newer-recorded-time-900--chromium.md.txt",
+      "bytes": 17219,
+      "sha256": "cf19f05feb3b812060866b35be83cc52048cb7e4fac290feb77e92a105591051"
+    },
+    {
+      "file": "red-contexts/sight-summary-recency-same-b15bf-es-newer-recorded-time-375--chromium.md.txt",
+      "source": "artifacts/sight-summary-recency/red-contexts/sight-summary-recency-same-b15bf-es-newer-recorded-time-375--chromium.md.txt",
+      "bytes": 17219,
+      "sha256": "de695b9b47d16a8385dcf561a2c55ef8cf9d4bc264438b367b725c6ac34ae7c6"
+    },
+    {
+      "file": "red-contexts/sight-summary-recency-same-eb900-es-newer-recorded-time-320--chromium.md.txt",
+      "source": "artifacts/sight-summary-recency/red-contexts/sight-summary-recency-same-eb900-es-newer-recorded-time-320--chromium.md.txt",
+      "bytes": 17219,
+      "sha256": "4791b2a0c6be825bc51afd15d8a8bf3d6eae2cf27dd6d2dbb0d277c8311d93bd"
+    },
+    {
+      "file": "red-contexts/sight-summary-recency-summ-2de12-p-distance-and-period-scope-chromium.md.txt",
+      "source": "artifacts/sight-summary-recency/red-contexts/sight-summary-recency-summ-2de12-p-distance-and-period-scope-chromium.md.txt",
+      "bytes": 16896,
+      "sha256": "331d94ff4a13a03978ca71f5e631959bc22520ed70aa6b5124c28688098259fc"
+    },
+    {
+      "file": "red-contexts/sight-summary-recency-summ-d578a-ack-sessions-and-raw-values-chromium.md.txt",
+      "source": "artifacts/sight-summary-recency/red-contexts/sight-summary-recency-summ-d578a-ack-sessions-and-raw-values-chromium.md.txt",
+      "bytes": 12842,
+      "sha256": "55fbbb391d9cdc704a36501dce45e2af4115ececa3eb9da5ec44546a448fe26b"
+    },
+    {
+      "file": "red-output.txt",
+      "source": "artifacts/sight-summary-recency/red-output.txt",
+      "bytes": 11994,
+      "sha256": "044742c424d33888a9f4134aaebe76e887927bb4ce4eccb801050ee66ecd32d7"
+    },
+    {
+      "file": "red-test.js.txt",
+      "source": "artifacts/sight-summary-recency/red-test.js.txt",
+      "bytes": 6049,
+      "sha256": "8f4b1490e6acef56207bbb440a75754d3fb75a1ab0bd04a88119cec1be1ece58"
+    },
+    {
+      "file": "retain-red.cjs",
+      "source": "artifacts/sight-summary-recency/retain-red.cjs",
+      "bytes": 450,
+      "sha256": "8578c389d12e29e344baecceb782069dbc7c1a15e80c4248950a42a0dbf3e554"
+    },
+    {
+      "file": "review.json",
+      "source": "artifacts/sight-summary-recency/review.json",
+      "bytes": 914,
+      "sha256": "14b4975d424f1f74efede1ebbb7ddbd83da7d4e68611222de2d7fbc1239974aa"
+    },
+    {
+      "file": "save-review.cjs",
+      "source": "artifacts/sight-summary-recency/save-review.cjs",
+      "bytes": 1002,
+      "sha256": "3364ec1853d0c358e32c7b53df94e3a6f2f1c8695694df714373bb1813e2bb10"
+    },
+    {
+      "file": "source-commit-output.txt",
+      "source": "artifacts/sight-summary-recency/source-commit-output.txt",
+      "bytes": 266,
+      "sha256": "0afd3e384caaaa184fd13cb7e264b8c9ed2f1958e8fa5ff5a70c7e012b86d77c"
+    },
+    {
+      "file": "source-formatted.js.txt",
+      "source": "artifacts/sight-summary-recency/source-formatted.js.txt",
+      "bytes": 128990,
+      "sha256": "93580ddd98e511e5cc8a70a37fed6bd1bf4d57bd7bf5e284a96378d330469a6d"
+    },
+    {
+      "file": "start-output.txt",
+      "source": "artifacts/sight-summary-recency/start-output.txt",
+      "bytes": 40,
+      "sha256": "48478d078f5bc89e69effac5cdfae32fce49911dc227fd993dad350989c5f354"
+    },
+    {
+      "file": "start.cjs",
+      "source": "artifacts/sight-summary-recency/start.cjs",
+      "bytes": 5470,
+      "sha256": "940101c9de13263c5d17da103fc0add1ea9d99f4ba5d97ead90986039051fee2"
+    },
+    {
+      "file": "test-format-output.txt",
+      "source": "artifacts/sight-summary-recency/test-format-output.txt",
+      "bytes": 92,
+      "sha256": "117fa79f7309db13cd60e585615d927a0d6bd27a07ee498f8983399028b63e88"
+    },
+    {
+      "file": "verify-archive.cjs",
+      "source": "artifacts/sight-summary-recency/verify-archive.cjs",
+      "bytes": 733,
+      "sha256": "dd2ba563422633bc422d9dc0a0b4a630ee22201416af49b531285832f3777d62"
+    },
+    {
+      "file": "version-bump-output.txt",
+      "source": "artifacts/sight-summary-recency/version-bump-output.txt",
+      "bytes": 104,
+      "sha256": "c912223a536b1d7210ed6444fa1b43e74d2f94f1b38e098fb1fb830cf81e4711"
+    },
+    {
+      "file": "viewed.json",
+      "source": "artifacts/sight-summary-recency/viewed.json",
+      "bytes": 1097,
+      "sha256": "d91cb1997a99faec12fb3cd624eed1a5a30d5546d44dcb5d6cbf179b8acc2997"
+    },
+    {
+      "file": "warm-at-ci-e2e.cjs",
+      "source": "artifacts/sight-summary-recency/warm-at-ci-e2e.cjs",
+      "bytes": 1611,
+      "sha256": "b97a950d5fb2e134e913d09840797b872cea06cd9b4e70ffc17f976e0f45bf68"
+    },
+    {
+      "file": "completion.json",
+      "source": "artifacts/sight-summary-recency/completion.json",
+      "bytes": 2751,
+      "sha256": "f1944172f24cda3e7becee4f02cad4a0d756d405c44e7761ea4a9c5f4803f4e2"
+    },
+    {
+      "file": "archive-output.txt",
+      "source": "artifacts/sight-summary-recency/archive-output.txt",
+      "bytes": 114,
+      "sha256": "9c768185ad18a2e3ad3d86da9d78037cb811bdcf59eb506c58cbecf17366003e"
+    },
+    {
+      "file": "finish-output.txt",
+      "source": "artifacts/sight-summary-recency/finish-output.txt",
+      "bytes": 85,
+      "sha256": "d5fb9e910d0806f4dd68889427e9b17639f835d268a4bb5dcb69388f54a709d0"
+    },
+    {
+      "file": "notes-format-output.txt",
+      "source": "artifacts/sight-summary-recency/notes-format-output.txt",
+      "bytes": 79,
+      "sha256": "af3092991e172dfb426c0846e41915f7a45522a9c4156c8996507f1d9c2a8bb0"
+    },
+    {
+      "file": "notes-format-check-output.txt",
+      "source": "artifacts/sight-summary-recency/notes-format-check-output.txt",
+      "bytes": 401,
+      "sha256": "81dbd0db6ae73838544b9a35c4768e7e36e01e497ed2f2c84c3133ef02b2edaf"
+    },
+    {
+      "file": "notes-invariants-output.txt",
+      "source": "artifacts/sight-summary-recency/notes-invariants-output.txt",
+      "bytes": 258,
+      "sha256": "ef86d0d45b8dc97eaf1c3268b29a8a6b895b2edd1a0194ec02330624aa9c01ec"
+    }
+  ]
+}

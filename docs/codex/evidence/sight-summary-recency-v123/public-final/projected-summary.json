@@ -1,0 +1,33 @@
+{
+  "observed": {
+    "text": "18m自己ベストの換算値に 並びました\n\n推定・2本換算 20点（2026/10/14）・ 今日 20点",
+    "primary": "18m自己ベストの換算値に 並びました",
+    "detail": "推定・2本換算 20点（2026/10/14）・ 今日 20点",
+    "rect": {
+      "x": 16,
+      "y": 290.859375,
+      "width": 288,
+      "height": 54.6875,
+      "top": 290.859375,
+      "right": 304,
+      "bottom": 345.546875,
+      "left": 16
+    },
+    "scrollWidth": 288,
+    "clientWidth": 288
+  },
+  "result": {
+    "available": true,
+    "method": "avg-projected",
+    "bestTotal": 20,
+    "bestDate": "2026-10-14",
+    "todayTotal": 20,
+    "todayArrows": 2,
+    "remaining": 0,
+    "achieved": true,
+    "pace": "reached",
+    "paceRatio": 1,
+    "requiredAvg": 10,
+    "todayAvg": 10
+  }
+}

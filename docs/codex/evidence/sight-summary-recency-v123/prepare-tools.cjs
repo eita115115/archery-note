@@ -1,0 +1,1 @@
+const fs=require('fs');fs.writeFileSync('artifacts/sight-summary-recency/prepare.cjs',fs.readFileSync('artifacts/sight-ledger-layout/prepare.cjs','utf8').replaceAll('artifacts/sight-ledger-layout','artifacts/sight-summary-recency').replace("PORT:'8777'","PORT:'8779'"));

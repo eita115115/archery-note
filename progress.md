@@ -4,7 +4,11 @@
 
 ## 現在地
 
-- AN090進行中。日時が明確な同日台帳を分析最新へ反映する表示修正。plan docs/codex/sight-summary-recency.md。旧89/費用個人情報保護、全承認継続。
+- AN090完了、公開v123/source4b07d14eaa9a48bc21546722561021904f5365ab、branch codex/sight-summary-recency。分析のサイト最新値で、同日の明示date・両ts finite正数を持つ台帳同士なら時刻の新しい候補を選ぶ。逆配列/古い記録のnative削除復元後も台帳/prefill/補間90へ分析最新80→90を一致。date優先・同ts後勝ち・欠落/不正/ts-only fallback・台帳対練習・空上下/0/用具距離/periodは既存仕様を保持。50の表示選択17行と一括123のみ。14scripts/全CSS・数学・採点半径・保存/handlers/依存/SWactivationは版/選択block以外exact。ChromeWK320375明暗900x3条件のbefore/before-complete/after/final/public各24で他分析HTML/latest/interp/regression/calibration不変、明確tsの80→90のみ、旧6fields/reload/errors0/実hit/open待機/値可視を確認。新6旧122red→6passed16.7s、checkall/lint/公式format成功、local336 passed (3.9m)、CI38418711075 clean checks/validate/deploy/Linux336 passed (6.4m)。final123native8/104は旧3+新記録/nudge0.6/undo/score/reloadexact/errors0。独立readonlyreview Critical/Important/Minor0、各engineで確定日時4records全24並び順/fallback22/空0文字0null4/練習混在2/配列保存不変を独立確認。実Linux/public25byte、frozen19byte+6allowlistedLF、held first15/canonical14一致。同じ元public122page/contextで記録中更新保留→finish4/banner123/旧全件→320新native/nudge3/解除/次矢2/offlineSWreload/finish5/結果分析履歴/reload/errors0。docs/codex/evidence/sight-summary-recency-v123へ原red/lint/任意format失敗・最終raw/原寸PNG/source/hashをbyte保持archive。旧89tasks/acceptance/sharedhiddenlock保持、費用/個人情報不使用、大目標active。物理phone/VoiceOver/fieldINP/実射/WKstrictOfflineは未証明。
+
+- 最初のlintはtest内sightSummaryHtml未修飾2件、globalThis修飾だけでassert/app不変、final全336成功。赤testには未到達のdata-days selector誤記があり、現在DOMのdata-period=7dへ訂正してgreen/全336。任意focused formatでscripts50とledgerがwarn、source50は基点もprettierfalseと確認し広範49/39行整形を適用せず診断原文を保存、docsのみ整形し公式format成功。after/greenはbump前122、final/native/publicは123。未知日時の混在群全体の絶対最新、同日時/欠落の先頭末尾問題、finite補間の測定点の由来、numeric0の校正/snapshot空欄は未変更の別課題。
+
+- 次: numeric0が校正/開始snapshotで空欄になる表示を一タスクで修正。日時曖昧時の意味とfinite補間の由来は別判断として残す。変更: scripts/50-record-view.js、新6回帰/fixture、版markers、plan/tasks/progress/ledger/evidence。公開後notesはlocalcommitのみ。
 
 - AN089監査完了、branch codex/sight-order-audit、基点258fa0bf90d1d3b922bdf1632279ace613f41c8d、公開v122/source2ce72647d10f2b1088ab7ea957e190b7a0139871不変。実Linux/public25byte再一致。台帳/latestMarkはdate↓ts↓先頭、補間はdate↑ts↑の最後のfinite上下、分析summaryは同日台帳の後勝ちでtsを無視。同日別tsの逆配列で台帳/prefill/補間90に対し分析最新80を実表示で再現。同日時/日時なしでは台帳80対補間90、native削除復元でmarks内容multisetを保持したまま配列順と選択が反転。numeric0は実input/台帳/補間0だが校正空・開始snapshot—、文字0は保持。上下空欄/非数値の最新rowと古いfinite測定点の違いは別仕様と区別。通常4書込入口はdate/ts保存、restoreは末尾push、normaladd95はlatest/補間一致・旧5fields+旧marks/reload保持。ChromeWK14cases各28matrix、UI48、別可視24、restore-add2、visiblezero2でerrors0。通常UI48/可視24は旧6/reloadexact、復元はmarks順exactとは称さずmultiset+他5exact。独立readonlyreview Critical/Important/Minor0、app/CSS/数学/採点半径/保存/schema/deps/SW/版122/testsは基点exact、旧88tasks/acceptance/sharedhiddenlock保持。formatcheck成功。同sourceAN088の全330/CI38326751775/更新offlineは明示再利用、今回新実行としない。docs/codex/evidence/sight-order-audit-v122へ原失敗/補強raw/原寸PNG/viewed8/source/hashをbyte保持archive。費用/個人情報不使用、大目標active、local監査notesのみ。物理phone/VoiceOver/fieldINP/実射は未証明、発見不具合は未修正。
 
@@ -91,7 +95,7 @@
 
 ## 次と未解決
 
-- UI一新を継続する。AN087で射形の比較条件、AN088でサイト台帳を改善。AN089で日時の意味を監査し不整合を特定。次は日時が明確な分析最新値を修正する一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
+- UI一新を継続する。AN087で射形の比較条件、AN088でサイト台帳を改善。AN089で日時の意味を監査し不整合を特定。AN090で日時が明確な分析最新値を修正。次はnumeric0の校正/snapshotを直す一タスク。分析の情報階層はv118〜120で更新済み。ユーザーのUI制約なし・全承認を継続し、費用/個人情報/旧記録/採点を守る。
 - 統計5001回/保存/DOMの負担は残る。native依存critical2件はAN086でrepo更新/GitHub自動fixed。配布済みnativebinaryがある場合の再build/再配布/実機remediationは未確認。
 - AN072旧IAB105frame19の根本原因は再現未確定/元context閉鎖。今回の名前付き解除hidden修正を元frame19重なり回復とはしない。
 - 実iPhone/VoiceOver/Tab/fullmotionframes/INP/GPU/5000実保存/AN001実射、画像export、全エンド表底は未確認。

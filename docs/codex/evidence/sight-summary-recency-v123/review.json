@@ -1,0 +1,12 @@
+{
+  "source": "4b07d14eaa9a48bc21546722561021904f5365ab",
+  "base": "661bee90ed6e824d27e8b846e7c2e25b869566e8",
+  "reviewer": "/root/review_sight_ledger",
+  "critical": 0,
+  "important": 0,
+  "minor": 0,
+  "verdict": "コードレビュー上はリリース検証へ進める。",
+  "independentChecks": "Chromium/WebKitそれぞれ確定日時4recordsの全24並び順、fallback22条件の基点一致、空/数値0/文字0/null4条件、練習混在2条件、入力配列/保存不変。候補選択は同日・明示date・正finite tsの台帳対台帳だけ。全他計算/保存/画面を維持。",
+  "reviewedEvidence": "focused6/checkall/lint/公式format成功。review中にfinal123 UI24/native8/104完了。",
+  "notVerifiedByReviewer": "全336は進行中。CI/public25/held旧122更新offlineは未完了。未知日時が混ざる群全体の絶対最新、numeric0校正/snapshotは別課題。"
+}

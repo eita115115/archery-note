@@ -1,0 +1,4 @@
+[codex/sight-summary-recency 4b07d14] Choose newer dated sight records in analysis summary
+ 9 files changed, 182 insertions(+), 8 deletions(-)
+ create mode 100644 tests/e2e/fixtures/sight-recency-db.js
+ create mode 100644 tests/e2e/sight-summary-recency.spec.js

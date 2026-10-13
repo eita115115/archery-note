@@ -1,0 +1,2 @@
+docs/codex/sight-summary-recency.md 117ms
+docs/codex/codex-progress.md 850ms

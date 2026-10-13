@@ -1,0 +1,2 @@
+tests/e2e/sight-summary-recency.spec.js 161ms
+tests/e2e/fixtures/sight-recency-db.js 16ms

@@ -1,0 +1,315 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: sight-summary-recency.spec.js >> summary preserves date priority, ambiguous fallback, sessions and raw values
+- Location: tests\e2e\sight-summary-recency.spec.js:51:1
+
+# Error details
+
+```
+Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 4
++ Received  + 4
+
+@@ -2,11 +2,11 @@
+    Object {
+      "text": "90 / 左右0.4",
+      "unchanged": true,
+    },
+    Object {
+-     "text": "90 / 左右0.4",
++     "text": "80 / 左右0.4",
+      "unchanged": true,
+    },
+    Object {
+      "text": "80 / 左右0.4",
+      "unchanged": true,
+@@ -26,17 +26,17 @@
+    Object {
+      "text": "80 / 左右0.4",
+      "unchanged": true,
+    },
+    Object {
+-     "text": "— / 左右0.4",
++     "text": "80 / 左右0.4",
+      "unchanged": true,
+    },
+    Object {
+-     "text": "0 / 左右0.4",
++     "text": "80 / 左右0.4",
+      "unchanged": true,
+    },
+    Object {
+-     "text": "0 / 左右0.4",
++     "text": "80 / 左右0.4",
+      "unchanged": true,
+    },
+  ]
+```
+
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Archery Note" [level=1] [ref=e5]
+    - button "設定" [ref=e6] [cursor=pointer]:
+      - img [ref=e7]
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - heading "練習を記録" [level=2] [ref=e12]
+      - generic [ref=e13]: 2026/10/13
+    - generic [ref=e14]:
+      - img [ref=e16]
+      - generic [ref=e19]:
+        - text: 3回分たまりました。
+        - strong [ref=e20]: 分析タブ
+        - text: で傾向が見えます
+      - button "見る" [ref=e21] [cursor=pointer]
+      - button "閉じる" [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+    - region "すぐ使う" [ref=e25]:
+      - button "前回と同じ条件で開始 18m / 40cm" [ref=e26] [cursor=pointer]:
+        - generic [ref=e27]: 前回と同じ条件で開始
+        - generic [ref=e28]: 18m / 40cm
+      - button "履歴" [ref=e29] [cursor=pointer]:
+        - generic [ref=e30]: 履歴
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - heading "条件を選ぶ" [level=2] [ref=e34]
+        - button "用具" [ref=e35] [cursor=pointer]
+      - generic [ref=e36]:
+        - generic [ref=e37]: 距離
+        - generic [ref=e38]:
+          - button "70m" [ref=e39] [cursor=pointer]
+          - button "50m" [ref=e40] [cursor=pointer]
+          - button "30m" [ref=e41] [cursor=pointer]
+          - button "18m" [pressed] [ref=e42] [cursor=pointer]
+          - button "カスタム" [ref=e43] [cursor=pointer]
+        - separator [ref=e44]
+        - generic [ref=e45]:
+          - generic [ref=e46]:
+            - generic [ref=e47]: 的
+            - combobox "的" [ref=e48]:
+              - option "122cm"
+              - option "80cm"
+              - option "60cm"
+              - option "40cm" [selected]
+              - option "40cm 三つ目（縦）"
+              - option "80cm フィールド"
+              - option "60cm フィールド"
+              - option "40cm フィールド"
+              - option "20cm フィールド"
+          - generic [ref=e49]:
+            - generic [ref=e50]: 1エンドの本数
+            - combobox "1エンドの本数" [ref=e51]:
+              - option "1本"
+              - option "2本"
+              - option "3本" [selected]
+              - option "4本"
+              - option "5本"
+              - option "6本"
+              - option "7本"
+              - option "8本"
+              - option "9本"
+              - option "10本"
+              - option "11本"
+              - option "12本"
+        - separator [ref=e52]
+        - button "この条件で開始" [ref=e54] [cursor=pointer]
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58]: セッティング
+            - generic [ref=e59]: 未指定
+          - generic [ref=e60]:
+            - generic [ref=e61]: サイト台帳
+            - generic [ref=e62]: 未接続
+        - group [ref=e63]:
+          - generic "＋ 詳しく残す" [ref=e64] [cursor=pointer]
+          - option "（セッティング未指定）" [selected]
+          - option "合成の屋外用・通常練習セッティング"
+          - option "合成の室内用具"
+          - option "自由練習" [selected]
+          - option "70m 72射"
+          - option "50m 72射"
+          - option "30m 36射"
+          - option "18m 60射"
+          - option "フィールド 24標的/72射"
+          - option "WA1440 男子"
+          - option "WA1440 女子"
+          - option "—" [selected]
+          - option "晴れ"
+          - option "くもり"
+          - option "雨"
+          - option "風 弱"
+          - option "風 強"
+          - option "室内"
+          - option "—" [selected]
+          - option "向かい風"
+          - option "追い風"
+          - option "左から"
+          - option "右から"
+          - option "巻き風"
+  - navigation "主な画面" [ref=e65]:
+    - button "記録" [ref=e66] [cursor=pointer]:
+      - img [ref=e68]
+      - text: 記録
+    - button "履歴" [ref=e72] [cursor=pointer]:
+      - img [ref=e74]
+      - text: 履歴
+    - button "分析" [ref=e77] [cursor=pointer]:
+      - img [ref=e79]
+      - text: 分析
+    - button "サイト調整" [ref=e82] [cursor=pointer]:
+      - img [ref=e84]
+      - text: サイト調整
+    - button "用具" [ref=e87] [cursor=pointer]:
+      - img [ref=e89]
+      - text: 用具
+  - status
+```
+
+# Test source
+
+```ts
+  1   | const { test, expect } = require("@playwright/test");
+  2   | const { sightRecencyDb } = require("./fixtures/sight-recency-db");
+  3   | test.use({ hasTouch: true });
+  4   | async function seed(page, data = sightRecencyDb()) {
+  5   |   await page.clock.setFixedTime(new Date("2026-10-13T12:00:00+09:00"));
+  6   |   await page.addInitScript((data) => {
+  7   |     if (!globalThis.localStorage.getItem("archeryNote.v1"))
+  8   |       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
+  9   |   }, data);
+  10  |   await page.goto("/");
+  11  | }
+  12  | async function snapshot(page) {
+  13  |   return page.evaluate(() => {
+  14  |     const d = JSON.parse(globalThis.localStorage.getItem("archeryNote.v1"));
+  15  |     return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
+  16  |   });
+  17  | }
+  18  | async function summary(page, setup = "a", dist = "30") {
+  19  |   await page.locator('#tabs [data-v="analysis"]').tap();
+  20  |   await page.locator("#anSetup").selectOption(setup);
+  21  |   await page.locator("#anDist").selectOption(dist);
+  22  |   const control = page.locator("summary").filter({ hasText: "サイト値のまとめ" });
+  23  |   await control.scrollIntoViewIfNeeded();
+  24  |   await control.tap();
+  25  |   const details = control.locator("..");
+  26  |   await expect(details).toHaveAttribute("open", "");
+  27  |   await details.locator(".big").first().scrollIntoViewIfNeeded();
+  28  |   await expect(details.locator(".big").first()).toBeVisible();
+  29  |   return details.locator(".big");
+  30  | }
+  31  | for (const width of [320, 375, 900]) {
+  32  |   test(`same-day summary uses newer recorded time (${width})`, async ({ page }) => {
+  33  |     await page.setViewportSize({ width, height: 812 });
+  34  |     await seed(page);
+  35  |     const before = await snapshot(page);
+  36  |     await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
+  37  |     await page.locator('#tabs [data-v="sight"]').tap();
+  38  |     await page.locator('#sgDistChips [data-d="30"]').tap();
+  39  |     await expect(page.locator("[data-sight-id]").first()).toHaveAttribute("data-sight-id", "newer");
+  40  |     await expect(page.locator("[data-sight-id]").first().locator("dd")).toHaveText(["90", "0.4"]);
+  41  |     await page.locator('#tabs [data-v="record"]').tap();
+  42  |     await page.locator("details.recordDetails summary").tap();
+  43  |     await page.locator("#fSetup").selectOption("a");
+  44  |     await page.locator('#fDistChips [data-d="30"]').tap();
+  45  |     await expect(page.locator("#fSightV")).toHaveValue("90");
+  46  |     expect(await snapshot(page)).toEqual(before);
+  47  |     await page.reload();
+  48  |     expect(await snapshot(page)).toEqual(before);
+  49  |   });
+  50  | }
+  51  | test("summary preserves date priority, ambiguous fallback, sessions and raw values", async ({
+  52  |   page,
+  53  | }) => {
+  54  |   await seed(page);
+  55  |   const data = sightRecencyDb(),
+  56  |     newer = data.sightMarks[0],
+  57  |     older = data.sightMarks[1];
+  58  |   const cases = [
+  59  |     { rows: [older, newer], v: "90" },
+  60  |     { rows: [newer, older], v: "90" },
+  61  |     { rows: [{ ...newer, date: "2026-10-12" }, older], v: "80" },
+  62  |     { rows: [newer, { ...older, ts: newer.ts }], v: "80" },
+  63  |     { rows: [newer, { ...older, ts: null }], v: "80" },
+  64  |     { rows: [newer, { ...older, ts: "bad" }], v: "80" },
+  65  |     {
+  66  |       rows: [
+  67  |         { ...newer, date: "", ts: null },
+  68  |         { ...older, date: "", ts: null },
+  69  |       ],
+  70  |       v: "80",
+  71  |     },
+  72  |     { rows: [{ ...newer, v: "" }, older], v: "—" },
+  73  |     { rows: [{ ...newer, v: 0 }, older], v: "0" },
+  74  |     { rows: [{ ...newer, v: "0" }, older], v: "0" },
+  75  |   ];
+  76  |   const results = await page.evaluate(
+  77  |     (cases) =>
+  78  |       cases.map((c) => {
+  79  |         const original = JSON.stringify(c.rows),
+  80  |           holder = globalThis.document.createElement("div");
+  81  |         holder.innerHTML = sightSummaryHtml([], { setupId: "a", dist: "30" }, c.rows);
+  82  |         return {
+  83  |           text: holder.querySelector(".big").textContent,
+  84  |           unchanged: JSON.stringify(c.rows) === original,
+  85  |         };
+  86  |       }),
+  87  |     cases,
+  88  |   );
+> 89  |   expect(results).toEqual(cases.map((c) => ({ text: c.v + " / 左右0.4", unchanged: true })));
+      |                   ^ Error: expect(received).toEqual(expected) // deep equality
+  90  |   const mixed = await page.evaluate(
+  91  |     (rows) => {
+  92  |       const session = { date: rows[0].date, setupId: "a", dist: 30, sightV: "777", sightH: "8" };
+  93  |       const holder = globalThis.document.createElement("div");
+  94  |       holder.innerHTML = sightSummaryHtml([{ s: session }], { setupId: "a", dist: "30" }, rows);
+  95  |       return holder.querySelector(".big").textContent;
+  96  |     },
+  97  |     [newer, older],
+  98  |   );
+  99  |   expect(mixed).toBe("90 / 左右0.4");
+  100 | });
+  101 | test("summary keeps setup, distance and period scope", async ({ page }) => {
+  102 |   await seed(page);
+  103 |   const before = await snapshot(page);
+  104 |   await expect(await summary(page, "b", "30")).toHaveText(["900 / 左右0.4"]);
+  105 |   await expect(await summary(page, "a", "18")).toHaveText(["40 / 左右0.4"]);
+  106 |   await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
+  107 |   await page.locator('[data-days="7"]').tap();
+  108 |   const control = page.locator("summary").filter({ hasText: "サイト値のまとめ" });
+  109 |   await control.tap();
+  110 |   await expect(control.locator("..").locator(".big")).toHaveText(["90 / 左右0.4"]);
+  111 |   expect(await snapshot(page)).toEqual(before);
+  112 | });
+  113 | test("restoring an older same-day mark keeps newer analysis value", async ({ page }) => {
+  114 |   await seed(page);
+  115 |   const before = await snapshot(page);
+  116 |   await page.locator('#tabs [data-v="sight"]').tap();
+  117 |   await page.locator('#sgDistChips [data-d="30"]').tap();
+  118 |   await page.locator('[data-del="older"]').tap();
+  119 |   await page.locator("#acOk").tap();
+  120 |   await page.getByRole("button", { name: "設定", exact: true }).tap();
+  121 |   await page.locator("[data-restore-trash]").scrollIntoViewIfNeeded();
+  122 |   await page.locator("[data-restore-trash]").tap();
+  123 |   await page.locator("#setClose").tap();
+  124 |   const restored = await snapshot(page);
+  125 |   expect([...restored[2]].sort((a, b) => a.id.localeCompare(b.id))).toEqual(
+  126 |     [...before[2]].sort((a, b) => a.id.localeCompare(b.id)),
+  127 |   );
+  128 |   for (const i of [0, 1, 3, 4, 5]) expect(restored[i]).toEqual(before[i]);
+  129 |   await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
+  130 |   await page.reload();
+  131 |   expect(await snapshot(page)).toEqual(restored);
+  132 | });
+  133 | 
+```

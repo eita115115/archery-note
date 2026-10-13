@@ -1,0 +1,1 @@
+PASS v123 archive/source/CI/full336/public25/native8/104/UI5x24; raw failures retained; raw+PNG bytes/hash exact
