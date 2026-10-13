@@ -1085,5 +1085,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/sight-zero-values.mdの受入。上下左右のnumeric0/文字0を台帳→練習開始snapshot/input→校正prefill/save/reloadで保持し0と空欄を区別。null/empty/欠落/false/負数/文字値/escapeと異用具距離の既存挙動を保持。新6red→green/ChromeWK320375明暗900の前後・最終・public8と375原寸、旧6fields/reload/errors0、校正保存のoldmarks prefix/他5fields/新string0、practice start0/1本finish保存/scoreを確認。50のsnapshot2式・60の校正prefill2式以外の全runtime/CSS/数学/採点半径/保存/handlers/deps/SWactivationは版以外exact、旧90tasks/acceptance/sharedlock保持。checkall/lint/format/全生成E2E/独立readonlyreview、一括124/承認済CI/実Linux-public25/frozen19+6LF/同じ旧123page更新保留-banner-新記録-offline、native8/104。証拠archive後pass+evidence/progressledger。費用/個人情報不使用。日時曖昧の仕様/補間/legacyデータの再保存は変更しない。"
+  },
+  {
+    "id": "AN-092",
+    "task": "サイト予測の数値と採用した実測記録の由来を読みやすくする",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-091"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/sight-prediction-provenance.mdの受入。予測数値/目盛り/距離を縦行で表示、採用実測detailsに実際の数値/元markidentity/記録日、blank最新を飛ばした以前の数値/同日時・日時不明の根拠を示す。曖昧な台帳を最新と断定しない。0/parseFloat既存仕様/型違いdistance key/用具距離/2未満・全定番実測/keyboard/44px/escapeを確認。coreは元sourceへの参照metadataだけ追加しpts/have/model/r2/estと実測採用順を厳密維持、保存や記録の新旧を推測して変更しない。新6red→green/ChromeWK320375明暗900のbefore/after/final/public・375原寸/旧6fields/reload/errors0/他HTMLと全計算を比較、native8/104。全他source/CSS scoped以外/採点半径/保存/handlers/deps/SWactivationは版以外exact、旧91tasks/acceptance/sharedlock保持。checkall/lint/format/全生成E2E/独立readonlyreview、一括125/承認済CI/実Linux-public25/frozen19+6LF/同じ旧124page更新保留-banner-新記録-offline。証拠archive後pass+evidence/progressledger、費用/個人情報不使用。"
   }
 ]
