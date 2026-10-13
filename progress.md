@@ -4,6 +4,8 @@
 
 ## 現在地
 
+- AN090進行中。日時が明確な同日台帳を分析最新へ反映する表示修正。plan docs/codex/sight-summary-recency.md。旧89/費用個人情報保護、全承認継続。
+
 - AN089監査完了、branch codex/sight-order-audit、基点258fa0bf90d1d3b922bdf1632279ace613f41c8d、公開v122/source2ce72647d10f2b1088ab7ea957e190b7a0139871不変。実Linux/public25byte再一致。台帳/latestMarkはdate↓ts↓先頭、補間はdate↑ts↑の最後のfinite上下、分析summaryは同日台帳の後勝ちでtsを無視。同日別tsの逆配列で台帳/prefill/補間90に対し分析最新80を実表示で再現。同日時/日時なしでは台帳80対補間90、native削除復元でmarks内容multisetを保持したまま配列順と選択が反転。numeric0は実input/台帳/補間0だが校正空・開始snapshot—、文字0は保持。上下空欄/非数値の最新rowと古いfinite測定点の違いは別仕様と区別。通常4書込入口はdate/ts保存、restoreは末尾push、normaladd95はlatest/補間一致・旧5fields+旧marks/reload保持。ChromeWK14cases各28matrix、UI48、別可視24、restore-add2、visiblezero2でerrors0。通常UI48/可視24は旧6/reloadexact、復元はmarks順exactとは称さずmultiset+他5exact。独立readonlyreview Critical/Important/Minor0、app/CSS/数学/採点半径/保存/schema/deps/SW/版122/testsは基点exact、旧88tasks/acceptance/sharedhiddenlock保持。formatcheck成功。同sourceAN088の全330/CI38326751775/更新offlineは明示再利用、今回新実行としない。docs/codex/evidence/sight-order-audit-v122へ原失敗/補強raw/原寸PNG/viewed8/source/hashをbyte保持archive。費用/個人情報不使用、大目標active、local監査notesのみ。物理phone/VoiceOver/fieldINP/実射は未証明、発見不具合は未修正。
 
 - 原renderedはChrome12+WK2成功後numeric-zero analysis visibility fail、元context閉鎖済/原因未断定、raw保持。別可視24は事前scroll/settle・実hit/open待ち・厳密80/90/0assertで成功、app変更なし。原matrixの同参照比較はin-place変化を見逃すと独立review指摘、原28を保持し別補強28は代入前JSON文字列/入力/一時db/元dbの不変を確認。prefill原viewportはfieldが下に隠れ、別2はscrollしinput0とsnapshot—を可視確認。source探索で存在しない旧physics/checkファイル名を一度参照したが現正本へ解決しapp変更なし。

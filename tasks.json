@@ -1061,5 +1061,17 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/sight-order-audit.mdの受入。immutable公開122/source2ceの実Linux-public25一致を再確認。明確な日付/ts、同日時、欠落日時、逆配列、最新空欄/非数値/0、異なる用具距離を合成fixtureで照合。ChromeWK320375明暗900で台帳順序/最新ラベル/予測の実測点/練習開始・校正prefill/旧6fields/reload/errors0を保存。通常add/deletecancelと原寸375を確認。app/CSS/数学/採点半径/保存/schema/SW/version/deps/testsは全て基点exact、旧88tasks/全acceptance/sharedlock保持。結果と次の判断をdurable文書へ保存しformatcheck、既存同sourceCI330は再利用を明記。監査の受入後だけpass+evidence/progressledger。公開変更や修正済とは称さない。費用/個人情報不使用。"
+  },
+  {
+    "id": "AN-090",
+    "task": "日時が明確なサイト台帳の最新値を分析まとめへ反映する",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-089"
+    ],
+    "owner": "codex",
+    "acceptance": "docs/codex/sight-summary-recency.mdの受入。同日で両方が明示date/finite正tsの台帳値なら新しいtsを選び、通常順/逆順/native削除復元で台帳/latestMark/記録prefillと分析が一致。日付優先・台帳対練習・同ts後勝ち・日時欠落/不正tsは既存fallback、空上下/文字値/0/用具距離/periodを保持。summary表示選択以外の全runtime/CSS/数学/採点半径/保存/handlers/deps/SWactivationは版以外exact、旧89tasks/全acceptance/sharedhiddenlock保持。red→green/ChromeWK320375明暗900の前後/最終/publicと375原寸、旧6fields/reload/errors0、native旧3+新記録/undo/nudge/score、checkall/lint/format/全生成E2E/独立review、一括123/承認済CI/実Linux-public25/frozen19+6LF/同じ旧122page記録中更新保留-banner-新記録-offline。証拠archive後pass+evidence/progressledger、費用個人情報不使用。曖昧日時の新旧やfinite補間、校正numeric0は未変更と明記。"
   }
 ]
