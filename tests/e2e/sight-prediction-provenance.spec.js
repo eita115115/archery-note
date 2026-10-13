@@ -1,7 +1,7 @@
 /* global db */
 const { test, expect } = require("@playwright/test");
 const { sightProvenanceDb } = require("./fixtures/sight-provenance-db");
-test.use({ hasTouch: true });
+test.use({ hasTouch: true, reducedMotion: "reduce" });
 async function seed(page, data = sightProvenanceDb()) {
   await page.clock.setFixedTime(new Date("2026-10-14T12:00:00+09:00"));
   await page.addInitScript((data) => {
@@ -38,7 +38,14 @@ for (const width of [320, 375, 900]) {
     const details = panel.locator("details.sightSources"),
       summary = details.locator("summary");
     await expect(details).not.toHaveAttribute("open");
+    const arrow = () =>
+      summary.evaluate(
+        (el) =>
+          new globalThis.DOMMatrixReadOnly(globalThis.getComputedStyle(el, "::before").transform).b,
+      );
+    await expect.poll(arrow).toBeLessThan(0);
     await summary.tap();
+    await expect.poll(arrow).toBeGreaterThan(0);
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("2026/10/13");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("80");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText(
@@ -48,9 +55,23 @@ for (const width of [320, 375, 900]) {
     await summary.focus();
     await page.keyboard.press("Space");
     await expect(details).not.toHaveAttribute("open");
+    await expect.poll(arrow).toBeLessThan(0);
     await page.keyboard.press("Enter");
     await expect(details).toHaveAttribute("open");
+    await expect.poll(arrow).toBeGreaterThan(0);
     await expect(summary).toBeFocused();
+    const help = panel.locator("details.sightPredictionHelp"),
+      helpSummary = help.locator("summary"),
+      helpArrow = () =>
+        helpSummary.evaluate(
+          (el) =>
+            new globalThis.DOMMatrixReadOnly(globalThis.getComputedStyle(el, "::before").transform)
+              .b,
+        );
+    await expect.poll(helpArrow).toBeLessThan(0);
+    await helpSummary.tap();
+    await expect(help).toHaveAttribute("open");
+    await expect.poll(helpArrow).toBeGreaterThan(0);
     const geometry = await panel.evaluate((el) => ({
       overflow:
         el.scrollWidth > el.clientWidth ||
@@ -80,7 +101,10 @@ test("source metadata preserves point order, identity, zero and raw distance key
       const original = JSON.stringify(marks);
       db.sightMarks = marks;
       const p = globalThis.sightInterp("a");
+      const el = globalThis.document.createElement("div");
+      el.innerHTML = globalThis.sightPredictionHtml(p, marks);
       return {
+        countLabel: el.querySelector(".sightSources summary").textContent,
         pts: p.pts,
         ids: p.sources?.map((m) => m.id),
         identity: p.sources?.every((m) => marks.includes(m)),
@@ -91,6 +115,7 @@ test("source metadata preserves point order, identity, zero and raw distance key
     }
   });
   expect(result).toEqual({
+    countLabel: "採用した実測 3件",
     pts: [
       [18, 0],
       [30, 80],

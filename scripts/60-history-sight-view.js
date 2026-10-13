@@ -680,7 +680,7 @@ function sightPredictionHtml(interp, marks) {
     <h2><span class="h2Icon">${icon("ruler")} サイトマーク予測（上下）</span></h2>
     <div class="sightPredictionMeta">${interp.model === "curve" ? "カーブ近似" : "直線近似"} ・ 一致度${pct(interp.r2 || 0)} ・ 上下の目盛り</div>
     ${predictions.length ? `<dl class="sightPredictionRows">${predictions.map((d) => `<div data-predict-dist="${d}"><dt>${d}m <span>予測</span></dt><dd>${interp.est(d).toFixed(1)}<small>目盛り</small></dd></div>`).join("")}</dl>` : `<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
-    <details class="sightSources"><summary>採用した実測 ${interp.pts.length}距離</summary><ul class="sightSourceList">${sources}</ul></details>
+    <details class="sightSources"><summary>採用した実測 ${interp.pts.length}件</summary><ul class="sightSourceList">${sources}</ul></details>
     <details class="sightPredictionHelp"><summary>予測の見方</summary><p>上下が数値で入力された記録から予測します。新しい記録の上下が未入力なら、以前の数値を使います。</p><p>2距離以上で直線近似、4距離以上では一致度が改善する場合にカーブ近似を使います。左右は予測しません。</p></details>
   </section>`;
 }

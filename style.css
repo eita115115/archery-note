@@ -657,6 +657,8 @@ table.tbl td,table.tbl th{font-variant-numeric:tabular-nums;}
 .sightSourceList strong{font-size:20px; font-variant-numeric:tabular-nums; color:var(--title);}
 .sightSourceDate{margin-top:3px; font-size:var(--font-size-sm); color:var(--sub);}
 .sightSourceNote{grid-column:1/-1; margin:2px 0 0; font-size:var(--font-size-sm); color:var(--sub); line-height:1.5;}
+details.adv .sightPrediction details:not([open]) > summary::before{transform:translateY(-65%) rotate(-45deg);}
+details.adv .sightPrediction details[open] > summary::before{transform:translateY(-35%) rotate(45deg);}
 .sightPredictionHelp p{margin:0 0 10px; font-size:var(--font-size-sm); color:var(--sub); line-height:1.6;}
 .ledgerDot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-right:6px; box-shadow:0 0 0 3px rgba(176,138,46,.18); vertical-align:middle;}
 .right{text-align:right;} .center{text-align:center;}
