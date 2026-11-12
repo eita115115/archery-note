@@ -1179,6 +1179,11 @@ function openCustomRoundForm(id) {
 function applyTheme() {
   const t = db.settings.theme || "auto";
   document.documentElement.className = t;
+  /* ブラウザ上部（ステータスバー）の色もテーマに合わせる。自動のときは端末の設定に任せる */
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    const dark = t === "dark" || (t !== "light" && (m.getAttribute("media") || "").includes("dark"));
+    m.setAttribute("content", dark ? "#10141a" : "#f1f3f5");
+  });
 }
 /* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。
    applyTheme() は className を丸ごと置き換えるため独立関数として追加し（既存のテーマ切替ロジックは

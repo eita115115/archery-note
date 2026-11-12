@@ -280,10 +280,16 @@ function checkPartialLegacy(storageApi, fixtures) {
   // 欠落している settings キーは blankDb() の既定値で補完される。
   // 既定値が補完されないと、新機能が settings に追加した既定値が既存ユーザーに届かない
   // （旧 normalizeDb は Object.assign(base,src) で base.settings ごと置換されるバグがあった）。
+  // テーマ未保存の既存データは従来どおり端末に合わせる（新規インストールの既定ダークを既存ユーザーに押しつけない）
   assertEqual(
     db.settings.theme,
     "auto",
-    "[partial-legacy] missing setting theme is backfilled with default",
+    "[partial-legacy] missing setting theme keeps the legacy auto theme",
+  );
+  assertEqual(
+    storageApi.normalizeDb(null).settings.theme,
+    "dark",
+    "[new-install] fresh database defaults to the dark theme",
   );
   assertEqual(
     db.settings.lastBackupAt,
