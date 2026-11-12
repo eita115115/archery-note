@@ -84,7 +84,12 @@ assert(pkg.dependencies && pkg.dependencies["@capacitor/haptics"] && pkg.depende
 assert(cap.appId === "com.eita.archerynote" && cap.webDir === "dist/native", "Capacitor config mismatch");
 assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "features", "native-transition.md")), "Native transition files missing");
 assert(surface.includes("nativeReadinessHtml") && surface.includes("アプリ情報・保存状態") && surface.includes("RK4-3D JS core"), "Native readiness UI missing");
-assert(surface.includes("pageHeroHtml") && surface.includes("pageHeroLead") && surface.includes("history-hero-trend") && surface.includes("いまの提案") && surface.includes("いつものセッティングを残す"), "Reborn workspace UI missing");
+assert(surface.includes("pageHeroHtml") && surface.includes("pageHeroLead") && surface.includes("いまの提案") && surface.includes("いつものセッティングを残す"), "Reborn workspace UI missing");
+/* v5 段 6: ノート（履歴＋メモ）。冒頭の励ましの文・数値枠・目標のリングを置かず、メモだけのノートとゴミ箱の入口を持つ */
+assert(!surface.includes("history-hero") && !surface.includes("historyHero") && !surface.includes("gamificationHeroHtml") && !surface.includes("gamGoalRingHtml"), "Notes tab must not bring back the history hero or the goal rings");
+assert(surface.includes("function noteItems") && surface.includes("function openMemoDetail") && surface.includes("function openTrashSheet") && surface.includes("notes-goal-line") && surface.includes('data-testid="notes-trash"'), "Notes tab surfaces missing");
+assert(surface.includes('trashItem(\n          "note"') || /trashItem\(\s*"note"/.test(surface), "Deleting a memo note must go through the trash");
+assert(/else if\(item\.type==="note"\)/.test(surface), "restoreTrash must restore memo notes");
 assert(surface.includes("nativePulse") && surface.includes("shareOrDownloadText") && surface.includes("capPlugin") && surface.includes("updateAppChrome") && surface.includes("freshReload"), "Native interaction layer missing");
 assert(surface.includes("storageGetItem") && surface.includes("storageSetItem") && surface.includes("storageDriverProfile"), "Storage adapter missing");
 assert(surface.includes("scheduleSafetySnapshot") && surface.includes("flushSafetySnapshot") && surface.includes("requestIdleCallback"), "Deferred snapshot saving missing");

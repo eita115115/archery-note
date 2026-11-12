@@ -47,6 +47,13 @@ function sanitizeSessionArrows(sess){
 /* メモだけのノート（db.notes）とタグの非破壊サニタイズ。書いた本文は消さない:
    文字列だけの項目はノートに包み、id の無い項目には id を付け、本文・日付は文字列へ寄せる。
    オブジェクトでも文字列でもない項目（null・数値など。本文を持てない）だけを落とす */
+/* 文字列でない値を文字列へ寄せる。オブジェクトは JSON にする（String() は toString を持つデータで例外になる） */
+function textOrJson(v){
+  if(typeof v==="string") return v;
+  if(v==null) return "";
+  if(typeof v==="number"||typeof v==="boolean") return String(v);
+  try{ const j=JSON.stringify(v); return typeof j==="string"?j:""; }catch(_){ return ""; }
+}
 function sanitizeTagList(tags){
   if(typeof tags==="string") return tags.trim()?[tags.trim()]:[];
   if(!Array.isArray(tags)) return [];
@@ -61,8 +68,8 @@ function sanitizeNoteList(list){
     let n=src;
     if(typeof n==="string"){ if(!n.trim()) return; n={text:n}; }
     if(!n||typeof n!=="object"||Array.isArray(n)) return;
-    if(typeof n.text!=="string") n.text=n.text==null?"":String(n.text);
-    if(typeof n.date!=="string") n.date=n.date==null?"":String(n.date);
+    if(typeof n.text!=="string") n.text=textOrJson(n.text);
+    if(typeof n.date!=="string") n.date=textOrJson(n.date);
     if(typeof n.ts!=="number"||!Number.isFinite(n.ts)){ const t=typeof n.ts==="string"&&n.ts.trim()!==""?Number(n.ts):NaN; n.ts=Number.isFinite(t)?t:0; }
     if(Object.prototype.hasOwnProperty.call(n,"tags")) n.tags=sanitizeTagList(n.tags);
     let id=typeof n.id==="string"&&n.id?n.id:(typeof n.id==="number"&&Number.isFinite(n.id)?String(n.id):"");

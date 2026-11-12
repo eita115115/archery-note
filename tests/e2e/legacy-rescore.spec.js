@@ -59,7 +59,12 @@ test("legacy session shows the real-size rescore without changing stored scores"
   await expect(note).toContainText("矢径 5.0mm");
   await expect(note).toContainText("29点");
   await expect(note).toContainText("記録時 30点");
-  await expect(page.getByTestId("history-detail-stats")).toContainText("30");
+  // v5 段 6: 見出しの合計は保存された点数のまま。実寸判定の点数は「この記録の操作」の中に並べて示す
+  await expect(page.getByTestId("note-total")).toHaveText("30");
+  await expect(page.getByTestId("note-ops").getByTestId("history-rescore")).toHaveCount(1);
+  await expect(page.getByTestId("scorecard").locator('.scSub[data-sub="total"] .tot')).toHaveText(
+    "30",
+  );
   const stored = await page.evaluate(
     () =>
       JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")).sessions.find(
@@ -69,6 +74,6 @@ test("legacy session shows the real-size rescore without changing stored scores"
   expect(stored).toBe(10);
   await page.locator("#hClose").click();
   await page.locator('[data-id="owned-new-rule"]').first().click();
-  await expect(page.getByTestId("history-detail-stats")).toContainText("29");
+  await expect(page.getByTestId("note-total")).toHaveText("29");
   await expect(page.getByTestId("history-rescore")).toHaveCount(0);
 });

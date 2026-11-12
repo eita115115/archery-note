@@ -1578,7 +1578,7 @@ function openSettings() {
       ${storageMeterHtml()}
       ${backupReminderHtml()}
       ${webStorageRiskHtml()}
-      <div class="settingsActionHint">練習記録・セッティングをまとめて1つのJSONファイルに書き出します。</div>
+      <div class="settingsActionHint">練習記録・メモ・セッティングをまとめて1つのJSONファイルに書き出します。</div>
       <div class="btnrow">
         <button class="btn sec" id="dExp" data-testid="settings-export">${icon("down")} バックアップ保存</button>
         <button class="btn sec" id="dImp" data-testid="settings-import">${icon("up")} 読み込み</button>
@@ -1594,7 +1594,7 @@ function openSettings() {
         <button class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">今すぐバックアップ</button>
         <button class="btn ghost" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length ? "" : "disabled"}>選択したバックアップを復元</button>
       </div>
-      <div class="settingsActionHint">削除した用具・練習記録の一時保管です。ここから元に戻せます。</div>
+      <div class="settingsActionHint">ゴミ箱へ移した用具・練習記録・メモの一時保管です。ここから元に戻せます（ノートの一番下にも同じ入口があります）。</div>
       ${trashSettingsHtml()}
       <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
     </div>
@@ -1837,7 +1837,7 @@ function openSettings() {
         const warnText = vr.warnings.length ? `\n注意: ${vr.warnings.join("、")}` : "";
         if (
           await appConfirm(
-            `読み込むと現在のデータは置き換わります。\n（練習${(d.sessions || []).length}回 / セッティング${(d.setups || []).length}件）${warnText}よろしいですか？`,
+            `読み込むと現在のデータは置き換わります。\n（練習${(d.sessions || []).length}回 / セッティング${(d.setups || []).length}件 / メモ${Array.isArray(d.notes) ? d.notes.length : 0}件）${warnText}よろしいですか？`,
             { danger: true, okLabel: "読み込む" },
           )
         ) {

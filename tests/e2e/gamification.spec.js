@@ -7,7 +7,7 @@ const os = require("node:os");
 const path = require("node:path");
 
 /* ゲーミフィケーション（CHANGELOG v1.7.0 / scripts/48-gamification.js の純関数 +
-   scripts/60-history-sight-view.js の履歴Hero + scripts/50-record-view.js のバッジ一覧・
+   scripts/60-history-sight-view.js のノートの1行（v5 段 6 でリングと設定の入口を廃止）+ scripts/50-record-view.js のバッジ一覧・
    サマリー拡張 + scripts/70-gear-settings.js の設定トグル）の実挙動検証。
    すべて settings.gamification.enabled でゲートされ、無効時はUI・計算とも完全にスキップされる。 */
 
@@ -107,7 +107,7 @@ function mainTab(page, name) {
   return page.locator("#tabs").getByRole("button", { name });
 }
 
-test("gamification.enabled:false hides the history streak hero and the analysis badge list", async ({
+test("gamification.enabled:false hides the notes goal line and the analysis badge list", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -144,15 +144,16 @@ test("gamification.enabled:false hides the history streak hero and the analysis 
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await mainTab(page, "ノート").click();
-  await expect(page.locator("#main")).toContainText("練習履歴");
-  await expect(page.getByTestId("gamification-hero")).toHaveCount(0);
+  await expect(page.getByTestId("notes-list")).toBeVisible();
+  await expect(page.getByTestId("notes-goal-line")).toHaveCount(0);
+  await expect(page.locator(".goalRing, .streakHero")).toHaveCount(0);
 
   await mainTab(page, "分析").click();
   await expect(page.getByTestId("badge-section")).toHaveCount(0);
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("enabling gamification from settings makes the history streak hero appear", async ({
+test("enabling gamification from settings adds one plain goal line to the notes tab", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -173,18 +174,20 @@ test("enabling gamification from settings makes the history streak hero appear",
   await page.locator("#setClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
+  // v5 段 6: ノートには目標の事実を1行だけ。リング・炎のアイコン・設定の入口は置かない
   await mainTab(page, "ノート").click();
-  const hero = page.getByTestId("gamification-hero");
-  await expect(hero).toBeVisible();
-  await expect(page.getByTestId("streak-current")).toHaveText("—");
-  await expect(page.getByTestId("hero-streak-setup")).toBeVisible();
+  const line = page.getByTestId("notes-goal-line");
+  await expect(line).toHaveText("今週 0回 / 目標 3回・今月 0射 / 目標 300射");
+  await expect(page.getByTestId("streak-current")).toHaveCount(0);
+  await expect(page.locator(".goalRing, .streakHero, .streakFire")).toHaveCount(0);
+  await expect(page.getByTestId("hero-streak-setup")).toHaveCount(0);
 
   const db = await readDb(page);
   expect(db.settings.gamification.enabled).toBe(true);
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("unset practiceDays shows — with a CTA; tapping the hero CTA sets weekdays and switches to streak/goal rings", async ({
+test("unset practiceDays leaves the streak out of the notes line; choosing weekdays in settings adds it", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -219,28 +222,24 @@ test("unset practiceDays shows — with a CTA; tapping the hero CTA sets weekday
   await page.goto("/");
   await mainTab(page, "ノート").click();
 
-  const hero = page.getByTestId("gamification-hero");
-  await expect(hero).toBeVisible();
-  await expect(page.getByTestId("streak-current")).toHaveText("—");
-  await expect(page.getByTestId("hero-streak-setup")).toBeVisible();
-  // 目標リング（今日/今週/今月）は practiceDays 未設定でも常に表示される
-  await expect(page.locator(".streakGoals .goalRing")).toHaveCount(3);
+  const line = page.getByTestId("notes-goal-line");
+  await expect(line).toHaveText("今週 0回 / 目標 3回・今月 0射 / 目標 300射");
+  await expect(page.getByTestId("streak-current")).toHaveCount(0);
+  await expect(page.locator(".goalRing")).toHaveCount(0);
 
-  await page.getByTestId("hero-streak-setup").click();
-  const sheetChips = page.getByTestId("practice-days-sheet-chips");
-  await expect(sheetChips).toBeVisible();
-  // 日曜(0)を追加でタップして曜日設定できることを確認
-  await sheetChips.locator('.gamifyDayChip[data-d="0"]').click();
-  await expect(sheetChips.locator('.gamifyDayChip[data-d="0"]')).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await page.locator("#pdSave").click();
+  // 練習曜日は設定で選ぶ（ノートに設定の入口は置かない）
+  await mainTab(page, "記録").click();
+  await page.locator("#btnSettings").click();
+  const chips = page.getByTestId("gamify-day-chips");
+  for (const d of [0, 1, 3, 5, 6]) await chips.locator(`.gamifyDayChip[data-d="${d}"]`).click();
+  await expect(chips.locator('.gamifyDayChip[data-d="0"]')).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#setClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
+  await mainTab(page, "ノート").click();
+  await expect(line).toHaveText("今週 0回 / 目標 3回・今月 0射 / 目標 300射・連続 0日");
   await expect(page.getByTestId("streak-current")).toHaveText("0");
-  await expect(page.getByTestId("hero-streak-setup")).toHaveCount(0);
-  await expect(page.locator(".streakGoals .goalRing")).toHaveCount(3);
+  await expect(page.locator(".goalRing")).toHaveCount(0);
 
   const db = await readDb(page);
   expect(db.settings.gamification.practiceDays).toEqual([0, 1, 3, 5, 6]);

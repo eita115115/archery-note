@@ -317,7 +317,9 @@ function staticUiChecks() {
   assert(
     surface.includes("pageHero") &&
       surface.includes("pageHeroLead") &&
-      surface.includes("history-hero-trend") &&
+      !surface.includes("history-hero") &&
+      surface.includes("noteMonth") &&
+      surface.includes("openMemoDetail") &&
       surface.includes("いまの提案") &&
       surface.includes("いつものセッティングを残す") &&
       surface.includes("renderActive"),

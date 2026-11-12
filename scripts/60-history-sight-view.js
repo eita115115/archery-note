@@ -665,6 +665,11 @@ function legacyRescoreHtml(sess, setup, total) {
   const diff = r.total - total;
   return `<div class="hint histRescore" data-testid="history-rescore">実寸判定（${entered ? `矢径 ${dia}mm` : `矢径未入力のため ${dia}mm`}）では <b>${r.total}点</b>（記録時 ${total}点・差 ${diff > 0 ? "+" : ""}${diff}点・${r.changed}本）。保存された点数と着弾図の円は記録時の判定のままです。</div>`;
 }
+/* 詳細を閉じたあと一覧を描き直したとき、開いていた項目へフォーカスを戻す */
+function focusNoteEntry(id) {
+  const el = [...document.querySelectorAll("#histList .noteEntry")].find((x) => x.dataset.id === id);
+  if (el) el.focus({ preventScroll: true });
+}
 /* タグ（射型・風・サイト・弓具）の切り替え。練習は sess.tags、メモは note.tags に文字列の配列で持つ。
    データにある見本以外のタグも、外せるように並べる */
 function noteTagsHtml(tags) {
@@ -787,7 +792,7 @@ function openHistDetail(id) {
     <div id="hPlot" class="recordSummaryPlot${posCount ? " bleed" : ""}"></div>
     ${resultImpactFigsHtml(st)}
     ${noteConditionsHtml(sess, setup)}
-    <details class="adv summaryDetails histDetailNumbers" data-testid="history-detail-numbers">
+    <details class="adv summaryDetails histDetailNumbers" data-testid="note-sight-details">
       <summary>サイト調整の目安と詳しい根拠</summary>
       ${
         adv
@@ -801,7 +806,7 @@ function openHistDetail(id) {
       ${roundProgressHtml(sess)}
       ${conditionHtml(sess, st, setup)}
       ${hasImpact ? nextActionHtml(sess, adv, setup) : ""}
-      ${detailNumbersHtml}
+      <div data-testid="history-detail-numbers">${detailNumbersHtml}</div>
     </details>
     <section class="vsec histDetailActions" data-testid="note-ops">
       <div class="vsecH"><h2>この記録の操作</h2></div>
@@ -830,15 +835,20 @@ function openHistDetail(id) {
     syncNote();
     flushPendingSave();
   };
+  /* タグは押した時点で書き込む（本文と違い、続けて何度も変わる入力ではない） */
   bindNoteTags(ovl, sess, () => {
     edited = true;
     scheduleSave("note-tags");
+    flushPendingSave();
   });
   const close = () => {
     syncNote();
     flushPendingSave();
     closeModal(ovl);
-    if (edited) render();
+    if (edited) {
+      render();
+      focusNoteEntry(sess.id);
+    }
   };
   ovl.querySelectorAll("[data-stage-jump]").forEach(
     (b) =>
@@ -963,7 +973,10 @@ function openMemoDetail(id) {
     showDate();
     changed("memo-date");
   };
-  bindNoteTags(ovl, note, () => changed("memo-tags"));
+  bindNoteTags(ovl, note, () => {
+    changed("memo-tags");
+    flushPendingSave();
+  });
   const close = () => {
     syncText();
     if (isNew && stored && !String(note.text || "").trim()) {
@@ -974,7 +987,10 @@ function openMemoDetail(id) {
     }
     flushPendingSave();
     closeModal(ovl);
-    if (edited) render();
+    if (edited) {
+      render();
+      focusNoteEntry(note.id);
+    }
   };
   ovl.querySelector("#nClose").onclick = close;
   const del = ovl.querySelector("#nDel");

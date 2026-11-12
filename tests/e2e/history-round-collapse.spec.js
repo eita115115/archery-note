@@ -67,7 +67,7 @@ for (const theme of ["light", "dark"]) {
     const summary = group.locator("summary");
     await expect(summary).toContainText("34");
     await expect(summary).toContainText("4/4ステージ");
-    await expect(summary).toContainText("4本");
+    await expect(summary).toContainText("4射");
     await expect(group).not.toHaveAttribute("open", "");
     await expect(page.locator('[data-id="old-single"]')).toBeVisible();
     expect((await summary.boundingBox()).height).toBeGreaterThanOrEqual(44);
@@ -91,11 +91,11 @@ for (const theme of ["light", "dark"]) {
     await group.locator('[data-id="stage-1"]').click();
     await expect(page.getByTestId("history-stage-table")).toContainText("34");
     await page.keyboard.press("Escape");
-    await page.getByTestId("history-filter-toggle").click();
+    // v5 段 6: 距離は一覧の上の切り替えで選び、「すべて」で外す
     await page.locator("#histDist").selectOption("70");
     await expect(group).toHaveCount(0);
     await expect(page.getByTestId("history-row")).toHaveCount(2);
-    await page.locator("#histClear").click();
+    await page.locator('#noteSeg button[data-kind="all"]').click();
     await expect(group).toHaveAttribute("open", "");
     await summary.click();
     await expect(group).not.toHaveAttribute("open", "");
@@ -137,11 +137,10 @@ test("a filtered group labels its visible subtotal and excludes unmatched stages
 }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   const before = await seed(page, false, true);
-  await page.getByTestId("history-filter-toggle").click();
   await page.locator("#histDist").selectOption("70");
   const group = page.getByTestId("history-round");
   await expect(group.locator("summary")).toContainText("2/4ステージ");
-  await expect(group.locator(".historyRoundTotal")).toHaveText("17表示分合計");
+  await expect(group.locator(".historyRoundTotal")).toHaveText("17表示分の合計");
   await group.locator("summary").click();
   expect(
     await group.getByTestId("history-row").evaluateAll((els) => els.map((el) => el.dataset.id)),

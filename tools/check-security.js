@@ -155,6 +155,78 @@ const safeLabel = faceLabel({faceD: '<script>', faceType: "single"});
 assert(!safeLabel.includes("<script>"), "faceLabel must not pass through HTML");
 assert(safeLabel.includes("0cm"), "faceLabel must coerce non-numeric faceD to 0");
 
+/* ==== 10. normalizeDb keeps memo notes as text and forces their types ==== */
+const HOSTILE = '<img src=x onerror=alert(1)>"\'&';
+const notesDb = normalizeDb({
+  sessions: [{ id: "n-s1", date: "2026-11-10", ends: [], note: HOSTILE, tags: [HOSTILE, { evil: 1 }, 7] }],
+  setups: [],
+  notes: [
+    { id: HOSTILE, date: HOSTILE, ts: HOSTILE, text: HOSTILE, tags: [HOSTILE, { evil: 1 }] },
+    { id: { evil: 1 }, date: { evil: 1 }, text: { toString: 1 }, tags: { evil: 1 } },
+    HOSTILE,
+    null,
+  ],
+  trash: [{ id: "t-n", type: "note", data: { id: 5, text: 9, date: 3, tags: "x" } }],
+});
+assert(notesDb.notes.length === 3, "normalizeDb must keep note objects and bare text, and drop null");
+assert(notesDb.notes.every((n) => typeof n.id === "string" && n.id && typeof n.text === "string" && typeof n.date === "string" && Number.isFinite(n.ts)),
+  "normalizeDb must force note id/text/date to strings and ts to a number");
+assert(notesDb.notes[0].text === HOSTILE && notesDb.notes[2].text === HOSTILE, "normalizeDb must not rewrite note text");
+assert(notesDb.notes.every((n) => !("tags" in n) || (Array.isArray(n.tags) && n.tags.every((t) => typeof t === "string"))),
+  "normalizeDb must force note tags to a list of strings");
+assert(Array.isArray(notesDb.sessions[0].tags) && notesDb.sessions[0].tags.every((t) => typeof t === "string"),
+  "normalizeDb must force session tags to a list of strings");
+assert(typeof notesDb.trash[0].data.text === "string" && typeof notesDb.trash[0].data.id === "string" && Array.isArray(notesDb.trash[0].data.tags),
+  "normalizeDb must sanitize a trashed note");
+
+/* ==== 11. notes list / tag rows escape every user string ==== */
+const src50 = fs.readFileSync(path.join(root, "scripts/50-record-view.js"), "utf8");
+const src60 = fs.readFileSync(path.join(root, "scripts/60-history-sight-view.js"), "utf8");
+function topLevel(src, head) {
+  const a = src.indexOf(head);
+  if (a < 0) throw new Error(`check-security: ${head} not found`);
+  const b = src.indexOf("\n}\n", a);
+  return src.slice(a, b + 3);
+}
+function constLine(src, head) {
+  const a = src.indexOf(head);
+  if (a < 0) throw new Error(`check-security: ${head} not found`);
+  return src.slice(a, src.indexOf(";\n", a) + 2);
+}
+const noteApi = new Function(
+  "window", "document", "navigator", "localStorage", "hostileDb",
+  scripts +
+  constLine(src50, "const WEEKDAY_JA") + topLevel(src50, "function dateParts(") + topLevel(src50, "function sessionArrows(") +
+  constLine(src50, "const sumScores") +
+  constLine(src60, "const NOTE_TAGS") + topLevel(src60, "function noteDateOk(") + topLevel(src60, "function noteDayChanges(") +
+  topLevel(src60, "function noteDayCellHtml(") + topLevel(src60, "function noteChangesHtml(") + topLevel(src60, "function historyRowHtml(") +
+  topLevel(src60, "function memoRowHtml(") + topLevel(src60, "function historyDistanceLabel(") + topLevel(src60, "function noteTagsHtml(") +
+  "\ndb = hostileDb; return {historyRowHtml,memoRowHtml,noteTagsHtml,noteDayChanges,noteChangesHtml};"
+)(
+  {}, { querySelector() { return null; } }, {}, { getItem() { return null; }, setItem() {} },
+  normalizeDb({
+    sessions: [],
+    setups: [{ id: "hs", name: HOSTILE, history: [{ date: "2026-11-10", changes: [{ label: HOSTILE, from: HOSTILE, to: HOSTILE }] }] }],
+    sightMarks: [{ id: "hm", setupId: "hs", dist: 70, v: HOSTILE, h: HOSTILE, date: "2026-11-10" }],
+  }),
+);
+const dayChanges = noteApi.noteDayChanges().get("2026-11-10");
+assert(Array.isArray(dayChanges) && dayChanges.length === 2, "noteDayChanges must collect the gear change and the sight record of the day");
+const hostileHtml = [
+  noteApi.historyRowHtml(
+    { id: HOSTILE, date: "2026-11-10", dist: 70, faceD: 122, faceType: "single", setupId: "hs", wx: HOSTILE, note: HOSTILE, round: HOSTILE,
+      roundGroup: { gid: HOSTILE, stage: HOSTILE, stageCount: HOSTILE, roundId: HOSTILE }, ends: [[{ s: 9, src: "key" }]] },
+    dayChanges,
+  ),
+  noteApi.historyRowHtml({ id: "x", date: HOSTILE, dist: HOSTILE, faceD: 122, faceType: "single", ends: [] }, null),
+  noteApi.memoRowHtml({ id: HOSTILE, date: HOSTILE, text: HOSTILE, tags: [HOSTILE] }, dayChanges),
+  noteApi.noteTagsHtml([HOSTILE]),
+].join("\n");
+assert(!/<img/i.test(hostileHtml), "notes HTML must not let user text create an element");
+assert(!/onerror=alert\(1\)>"/.test(hostileHtml), "notes HTML must escape quotes in user text");
+assert(hostileHtml.includes("&lt;img src=x onerror=alert(1)&gt;"), "notes HTML must show user text as text");
+assert(!/NaN|undefined|\[object/.test(hostileHtml), "notes HTML must not print NaN / undefined / [object");
+
 /* ==== Summary ==== */
 if (fail > 0) {
   console.error(`\nSecurity regression: ${fail} FAILED, ${pass} passed`);

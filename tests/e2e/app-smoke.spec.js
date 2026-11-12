@@ -103,11 +103,12 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(page.locator('#tabs [data-v="sight"]')).toHaveCount(0);
 
   await mainTab(page, "ノート").click();
-  await expect(page.locator("#main")).toContainText("練習履歴");
-  await expect(page.locator(".historyDateHead")).toContainText("2026/6/27");
+  // v5 段 6: ノートは月の見出し（練習回数つき）と、練習1回＝1項目
+  await expect(page.getByTestId("notes-month")).toHaveText(/2026年6月\s*練習 1回/);
   const record = page.getByTestId("history-row").first();
-  await expect(record).toHaveAccessibleName(/2026\/6\/27 ・ 70m/);
+  await expect(record).toHaveAccessibleName(/2026\/6\/27.*27.*土曜.*70m/);
   await expect(record).toContainText("70m");
+  await expect(page.getByTestId("notes-new-memo")).toBeVisible();
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
   await expect(page.getByRole("heading", { level: 1, name: "ノート" })).toBeVisible();
   // 設定の入口は記録タブだけ。弓具の下線タブは弓具の画面でだけ出る
@@ -195,7 +196,7 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await mainTab(page, "ノート").click();
-  const row = page.locator("#histList .listItem").first();
+  const row = page.locator("#histList .historyRow").first();
   await expect(row).toBeVisible();
   await expect(row).toHaveJSProperty("tagName", "BUTTON");
   await row.click();
@@ -264,7 +265,7 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await mainTab(page, "ノート").click();
-  const row = page.locator("#histList .listItem").first();
+  const row = page.locator("#histList .historyRow").first();
   await row.click();
   const detailSheet = page.locator(".ovl .sheet");
   await expect(detailSheet).toBeVisible();
@@ -274,7 +275,7 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await delBtn.click();
   const confirmSheet = page.locator(".ovl .confirmSheet");
   await expect(confirmSheet).toBeVisible();
-  await expect(confirmSheet).toContainText("この練習記録を削除しますか？");
+  await expect(confirmSheet).toContainText("この練習の記録をゴミ箱へ移しますか？");
   await page.locator(".ovl .confirmSheet #acCancel").click();
   await expect(confirmSheet).toHaveCount(0);
   await expect(detailSheet).toBeVisible();
@@ -294,7 +295,9 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await expect(confirmSheet).toBeVisible();
   await page.locator(".ovl .confirmSheet #acOk").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
-  await expect(page.locator("#histList")).not.toContainText("2026/6/27 ・ 70m");
+  await expect(page.locator("#histList .historyRow")).toHaveCount(0);
+  // 消えずにゴミ箱へ入り、ノートの一番下から戻せる
+  await expect(page.getByTestId("notes-trash")).toContainText("ゴミ箱（1件）");
   await expect(unexpectedErrors).toEqual([]);
 });
 
@@ -347,7 +350,7 @@ test("records a multi-distance round with stage advance and history badges", asy
   await page.getByTestId("history-round").locator("summary").click();
   await expect(page.locator("#histList")).toContainText("WA1440 男子 1/4");
   await expect(page.locator("#histList")).toContainText("WA1440 男子 2/4");
-  await page.locator("#histList .listItem", { hasText: "90m" }).first().click();
+  await page.locator("#histList .historyRow", { hasText: "90m" }).first().click();
   const sheet = page.locator(".ovl .sheet");
   await expect(sheet).toContainText("ラウンド合計");
   await expect(sheet).toContainText("（表示中）");

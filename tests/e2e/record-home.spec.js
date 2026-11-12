@@ -104,13 +104,13 @@ test("home with history: band, previous practice figures, strip, trend and recen
   await rows.nth(2).click();
   const sheet = page.locator(".histDetailSheet");
   await expect(sheet).toBeVisible();
-  await expect(sheet.getByTestId("history-detail-stats")).toContainText(
-    String(totalOf(expectRows[2])),
-  );
+  await expect(sheet.getByTestId("note-total")).toHaveText(String(totalOf(expectRows[2])));
+  // 記録タブから開いたときの戻るボタンは「戻る」（ノートへは移らない）
+  await expect(sheet.locator("#hClose")).toHaveText("戻る");
   await expect(sheet.getByTestId("no-impact")).toContainText("着弾データなし");
   await sheet.locator("#hClose").click();
   await page.getByTestId("home-last-open").click();
-  await expect(sheet.getByTestId("history-detail-stats")).toContainText(String(totalOf(last)));
+  await expect(sheet.getByTestId("note-total")).toHaveText(String(totalOf(last)));
   await sheet.locator("#hClose").click();
   await page.locator("#homeNotes").click();
   await expect(page.locator("#viewTitle")).toHaveText("ノート");

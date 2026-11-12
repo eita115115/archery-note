@@ -670,16 +670,18 @@ test("a score-only session shows totals, and geometry says 着弾データなし
   await expectCleanText(page);
   // ノート（履歴）: 一覧は合計と平均、詳細は「着弾データなし」
   await page.locator('#tabs [data-v="history"]').click();
-  await expect(page.locator("#histList .listItem").first()).toContainText("97");
+  await expect(page.locator("#histList .historyRow").first()).toContainText("97");
   await expectCleanText(page);
-  await page.locator("#histList .listItem").first().click();
+  await page.locator("#histList .historyRow").first().click();
   const detail = page.locator(".histDetailSheet");
-  await expect(detail.getByTestId("history-detail-stats")).toContainText("97");
-  await expect(detail.getByTestId("history-detail-stats")).toContainText("合計 (12本)");
-  await expect(detail.getByTestId("history-detail-stats")).toContainText("8.08");
+  await expect(detail.getByTestId("note-total")).toHaveText("97");
+  await expect(detail.getByTestId("history-detail-stats")).toContainText("12射・1射平均 8.08");
   await expect(detail.getByTestId("no-impact")).toContainText("着弾データなし");
   await expect(detail.locator("svg.main")).toHaveCount(0);
-  await expect(detail.getByTestId("history-end-table")).toContainText("X・10・9・9・8・M");
+  // v5 段 6: エンドの表は記録中と同じスコア表（高い点から）
+  await expect(
+    detail.getByTestId("history-end-table").locator('.scRow[data-end="0"] .cell'),
+  ).toHaveText(["X", "10", "9", "9", "8", "M"]);
   await detail.locator("details.histDetailNumbers summary").click();
   await expect(detail.getByTestId("history-detail-numbers")).toContainText("着弾データなし");
   await expect(detail).not.toContainText("判断信頼度");
@@ -720,7 +722,7 @@ test("positioned sessions keep their analysis when score-only sessions are added
   const csvOf = () => page.evaluate(() => sessionsCsv());
   const before = await csvOf();
   await page.locator('#tabs [data-v="history"]').click();
-  await page.locator("#histList .listItem").first().click();
+  await page.locator("#histList .historyRow").first().click();
   const groupBefore = await page.getByTestId("history-detail-numbers").innerHTML();
   await expect(page.locator(".histDetailSheet svg.main")).toHaveCount(1);
   await expect(page.locator(".histDetailSheet").getByTestId("no-impact")).toHaveCount(0);
@@ -789,12 +791,12 @@ test("positioned sessions keep their analysis when score-only sessions are added
 
   // 位置のある記録の詳細は前と同じ数値
   await page.locator('#tabs [data-v="history"]').click();
-  await page.locator("#histList .listItem").nth(3).click();
+  await page.locator("#histList .historyRow").nth(3).click();
   await expect(page.locator(".histDetailSheet h3")).toContainText("2026/11/1");
   expect(await page.getByTestId("history-detail-numbers").innerHTML()).toBe(groupBefore);
   await page.locator(".histDetailSheet #hClose").click();
   // 混ざった記録の詳細: 的の図は位置のある矢だけで、その旨を書く
-  await page.locator("#histList .listItem").first().click();
+  await page.locator("#histList .historyRow").first().click();
   const detail = page.locator(".histDetailSheet");
   await expect(detail.getByTestId("plot-position-note")).toContainText("位置のある 12射を表示");
   await expect(detail.getByTestId("plot-position-note")).toContainText("位置なし 3射");
