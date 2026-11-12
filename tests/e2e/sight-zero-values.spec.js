@@ -132,6 +132,7 @@ test("practice starts with zero sight values and saves a scored arrow", async ({
   expect((await state(page)).active.sightH).toBe("0");
   await page.locator("#tgsvg").tap();
   await expect.poll(async () => (await state(page)).active.cur.length).toBe(1);
+  await page.locator("#bMenu").tap(); // v5: 終了はメニューの中
   await page.locator("#bFinish").tap();
   await page.locator("#sumPlot").waitFor();
   const saved = await state(page);

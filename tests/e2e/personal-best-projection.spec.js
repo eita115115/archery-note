@@ -121,6 +121,7 @@ for (const width of [320, 375])
           };
           await seed(page, theme, active);
           await page.goto("/");
+          await tap(page, "#bMenu"); // v5: 終了はメニューの中
           await tap(page, "#bFinish");
           const saved = await stored(page),
             current = saved.sessions.at(-1);
@@ -200,6 +201,7 @@ for (const width of [320, 375])
     await expect.poll(async () => (await stored(page)).active.cur.length).toBe(1);
     const active = (await stored(page)).active;
     expect(active.cur[0].s).toBe(10);
+    await tap(page, "#bMenu"); // v5: 終了はメニューの中
     await tap(page, "#bFinish");
     const summary = await readRow(page, info, "native-summary", width);
     assertCopy(summary, true, "above", 1, "今日", 10, 9);

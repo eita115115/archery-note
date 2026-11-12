@@ -190,7 +190,9 @@ for (const c of DIST_CASES) {
     // オンボーディング画面が消え、通常の記録中画面（active）に直接入る
     await expect(page.getByTestId("onboard-setup")).toHaveCount(0);
     await expect(page.getByTestId("active-target")).toBeVisible();
-    await expect(page.getByTestId("active-hud")).toContainText(`${c.dist}m`);
+    // v5: 条件は記録画面の上部（中断とメニューの間）
+    await expect(page.locator(".recTop .condT")).toContainText(`${c.dist}m`);
+    await expect(page.getByTestId("active-hud")).toContainText("第1エンド");
 
     const db = await readDb(page);
     expect(db.settings.onboardingSeen).toBe(true);

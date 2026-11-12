@@ -311,7 +311,8 @@ function staticUiChecks() {
     "lightweight record flow composition missing",
   );
   assert(
-    surface.includes("compactHud") &&
+    surface.includes("recScreen") &&
+      !appJs.includes("compactHud") &&
       !surface.includes("まず今日の記録を始める。詳しい材料") &&
       !surface.includes("距離・的サイズはこの画面で変更できます") &&
       !surface.includes("タップ＆ドラッグで確定"),
@@ -323,7 +324,7 @@ function staticUiChecks() {
       surface.includes("history-hero-trend") &&
       surface.includes("いまの提案") &&
       surface.includes("いつものセッティングを残す") &&
-      surface.includes("liveHud"),
+      surface.includes("renderActive"),
     "reborn workspace surfaces missing",
   );
   assert(

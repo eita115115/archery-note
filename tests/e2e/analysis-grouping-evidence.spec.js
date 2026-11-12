@@ -218,6 +218,7 @@ test("native one-arrow finish stays pending across analysis and history", async 
   await expect.poll(async () => (await stored(page)).active.cur.length).toBe(1);
   const active = (await stored(page)).active;
   expect(active.cur[0].s).toBe(9);
+  await tap(page, "#bMenu"); // v5: 終了はメニューの中
   await tap(page, "#bFinish");
   await expect(page.getByTestId("todays-result-stability-pending")).toContainText("1本の座標");
   await settled(page);

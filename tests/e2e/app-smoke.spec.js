@@ -1,6 +1,7 @@
 "use strict";
 
 const { expect, test } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 
 const sampleDate = "2026-06-27";
 const sampleDb = {
@@ -313,23 +314,27 @@ test("records a multi-distance round with stage advance and history badges", asy
   await page.getByTestId("record-start").click();
 
   // ステージ1: 90m から開始
-  const hud = page.getByTestId("active-hud");
+  // v5: 条件とステージは記録画面の上部（中断とメニューの間）に出る
+  const hud = page.locator(".recTop .condT");
   await expect(hud).toContainText("90m");
-  await expect(hud).toContainText("ステージ 1/4");
+  await expect(hud).toContainText("（1/4）");
+  await expect(page.getByTestId("active-hud")).toContainText("全36射");
   const target = page.getByTestId("active-target").locator("#tgsvg");
   for (let i = 0; i < 3; i++) await target.click();
   await page.getByTestId("active-end").click();
   // 36射未満の確定は appConfirm ダイアログ。確認ボタンをクリックして進める
-  await page.locator("#bNextStage").click();
+  // v5: 途中で次の距離へ進む操作はメニューの中
+  await page.getByTestId("active-menu").click();
+  await page.locator("#mNextStage").click();
   await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
   await page.locator(".ovl .confirmSheet #acOk").click();
   await expect(page.locator(".ovl .confirmSheet")).toHaveCount(0);
 
   // ステージ2: 70m へ遷移（2ステージで打ち切り）
   await expect(hud).toContainText("70m");
-  await expect(hud).toContainText("ステージ 2/4");
+  await expect(hud).toContainText("（2/4）");
   await target.click();
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
   // ラウンド途中終了も appConfirm ダイアログ経由
   await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
   await page.locator(".ovl .confirmSheet #acOk").click();

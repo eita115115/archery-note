@@ -5,6 +5,9 @@ let view = "record";
 let ui = {
   scrollByView: {},
   selArrow: -1,
+  editEnd: -1 /* 記録中: 開いて直している確定済みエンド（-1 = なし） */,
+  recPausedId: null /* 「中断」で離れた記録の id。再読み込みで消え、記録画面へ戻る */,
+  recMsg: "",
   sightSel: { setupId: null, dist: 70 },
   histOpen: null,
   histFilter: { setupId: "", dist: "", round: "" },
@@ -22,6 +25,7 @@ function showView(v) {
   ui.scrollByView[view] = Math.max(0, window.scrollY);
   view = v;
   ui.selArrow = -1;
+  ui.editEnd = -1;
   nativePulse("light");
   render();
   m.classList.remove("viewEnter");
@@ -64,7 +68,11 @@ function render() {
   if (typeof syncUpdateBarVisibility === "function") syncUpdateBarVisibility();
   syncViewChrome();
   const m = $("#main");
-  m.classList.remove("hasActiveDock");
+  /* 記録中は没入画面: 画面名の行とタブを隠す（style.css: html.recording） */
+  document.documentElement.classList.toggle(
+    "recording",
+    view === "record" && !!db.active && !recordPaused(),
+  );
   if (view === "record") renderRecord(m);
   else if (view === "history") renderHistory(m);
   else if (view === "analysis") renderAnalysis(m);
@@ -390,7 +398,6 @@ function renderOnboarding(m) {
     save({ reason: "onboarding-start" });
     m.classList.remove("viewEnter");
     render();
-    revealActiveTarget();
   };
   $("#obSkip2").onclick = finishOnboarding;
 }
@@ -503,7 +510,8 @@ function openAddToHomeSheet() {
 }
 function renderRecord(m) {
   if (db.active) {
-    renderActive(m);
+    if (recordPaused()) renderPausedRecord(m);
+    else renderActive(m);
     return;
   }
   if (shouldShowOnboarding()) {
@@ -744,7 +752,6 @@ function renderRecord(m) {
     save();
     m.classList.remove("viewEnter");
     render();
-    revealActiveTarget();
   };
 }
 
@@ -1254,57 +1261,218 @@ function analysisDetailsGroupHtml(id, title, meta, cards) {
     <div class="analysisDetailsBody">${body}</div>
   </details>`;
 }
-/* HUD が使う3値（エンドn・合計・残り）と、折りたたみに回す詳細値をまとめて計算する。
-   refreshActive() 側の状態モーション（数値ティック）も同じ計算を使う */
-function liveHudMetrics(s) {
-  const all = sessionArrows(s);
-  const total = all.reduce((a, x) => a + x.s, 0);
-  const avg = all.length ? (total / all.length).toFixed(2) : "—";
-  const remain = Math.max(0, (s.perEnd || 6) - (s.cur || []).length);
-  const r = ROUND_TYPES.find((x) => x.id === s.round);
-  /* 多距離ラウンド中は「残り」をステージ規定射数（arrows）基準にする */
-  const stageDef = sessionStageDef(s);
+/* ============ スコア表（確定済みエンドの表示） ============
+   並びは 回 | 矢 | 計 | 累計 | 10 | X（docs/design/v5/design.md 4.3）。保存された s / X をそのまま数える。
+   点数の計算し直しはしない。段 3 で点数入力と一緒に別ファイルへ分ける候補 */
+/* 表示用の並び: 高い点から（X → 10 → … → 1 → M）。保存は打った順のまま変えない */
+function scoreSortedArrows(end) {
+  return (end || [])
+    .map((a, i) => ({ a, i }))
+    .sort((p, q) => scoreRank(q.a) - scoreRank(p.a) || p.i - q.i)
+    .map((x) => x.a);
+}
+/* セルと枠の下線に使う的の色（文字色には使わない） */
+function scoreZoneClass(a, faceType) {
+  const s = +(a && a.s) || 0;
+  if (isFieldFace(faceType)) return s >= 5 ? "zg" : s >= 1 ? "zk" : "zm";
+  return s >= 9 ? "zg" : s >= 7 ? "zr" : s >= 5 ? "zb" : s >= 3 ? "zk" : s >= 1 ? "zw" : "zm";
+}
+/* インドアの短距離（40cm・60cm 的で 18m・25m）。スコア表の右2列を「10・9」にする */
+function isIndoorShortFace(sess) {
+  if (!sess || isFieldFace(sess.faceType)) return false;
+  const faceD = +sess.faceD,
+    dist = +sess.dist;
+  return (faceD === 40 || faceD === 60) && (dist === 18 || dist === 25);
+}
+/* 右端の2列（数える点）。アウトドアは 10（X を含む）と X、インドア短距離は 10 と 9、フィールドは 6 と 5 */
+function scorecardCountCols(sess) {
+  const eq = (v) => (arr) => arr.filter((a) => a.s === v).length;
+  if (isFieldFace(sess.faceType))
+    return [
+      { head: "6", name: "6点数", sub: "6点", count: eq(6) },
+      { head: "5", name: "5点数", sub: "5点", count: eq(5) },
+    ];
+  if (isIndoorShortFace(sess))
+    return [
+      { head: "10", name: "10点数（X含む）", sub: "10点", count: eq(10) },
+      { head: "9", name: "9点数", sub: "9点", count: eq(9) },
+    ];
+  return [
+    { head: "10", name: "10点数（X含む）", sub: "10+X", count: eq(10) },
+    { head: "X", name: "X数", sub: "X", count: (arr) => arr.filter((a) => a.X).length },
+  ];
+}
+/* ラウンドの計画: 規定射数（自由練習は null）、計画エンド数、小計を入れる区切り（エンド数）。
+   72射・60射のラウンドは半分（36射・30射）ごと。36射のラウンドは小計なしで合計だけ。
+   自由練習は 6射エンドなら 36射ごと、3射エンドなら 30射ごと（ほかの本数は 36射に近い区切り） */
+function scorecardPlan(sess) {
+  const per = Math.max(1, +(sess && sess.perEnd) || 6);
+  const stageDef = sessionStageDef(sess);
+  const r = ROUND_TYPES.find((x) => x.id === (sess && sess.round));
   const quota = stageDef && stageDef.arrows ? stageDef.arrows : r && r.arrows ? r.arrows : null;
-  const roundRemain = quota ? Math.max(0, quota - all.length) : null;
+  let blockArrows;
+  if (quota) blockArrows = quota >= 60 && (quota / 2) % per === 0 ? quota / 2 : null;
+  else blockArrows = per === 3 ? 30 : 36 % per === 0 ? 36 : per * 6;
   return {
-    total,
-    avg,
-    endNo: s.ends.length + 1,
-    remainText: roundRemain == null ? `${remain}` : String(roundRemain),
+    per,
+    quota,
+    planEnds: quota ? Math.ceil(quota / per) : null,
+    blockEnds: blockArrows ? blockArrows / per : null,
   };
 }
-function liveSessionHeroHtml(s, setup) {
-  const hm = liveHudMetrics(s);
-  const rg = s.roundGroup;
-  /* 射場モードの「いま必要な3つ」= エンドn・合計・残り。用具名・平均・ステージ詳細は details へ畳む */
-  return `<section class="liveHud compactHud" data-testid="active-hud" aria-label="記録中のスコア">
-    <div class="liveContext">
-      <span>${s._edit ? "過去記録の編集" : `${s.dist}m / ${esc(faceLabel(s))}`}</span>
-      <details class="liveHudMore"><summary>詳細</summary>
-        <div class="liveHudMoreBody">
-          <span>${setup ? esc(setup.name) : "用具未指定"}</span>
-          <span>平均 ${hm.avg}</span>
-          ${rg ? `<span>ステージ ${(+rg.stage || 0) + 1}/${rg.stageCount}・${s.dist}m</span>` : ""}
-        </div>
-      </details>
-    </div>
-    <div class="liveGrid liveGrid3" aria-live="polite" aria-atomic="true">
-      <div class="liveCell"><div class="k">エンド</div><b class="tnum" id="hudEndNo">${hm.endNo}</b></div>
-      <div class="liveCell"><div class="k">合計</div><b class="tnum" id="hudTotal">${hm.total}</b></div>
-      <div class="liveCell"><div class="k">残り</div><b class="tnum" id="hudRemain">${hm.remainText}<small>本</small></b></div>
-    </div>
-  </section>`;
+/* 矢の列の並べ方。6射は 3射ずつ隙間を空け、7射以上は2段に折り返す */
+function scoreGridLayout(cols) {
+  const wrap = cols > 6;
+  const line = wrap ? Math.ceil(cols / 2) : cols;
+  const cls = cols === 6 ? "p6" : cols === 3 ? "p3" : wrap ? "pn wrap2" : "pn";
+  return { cls, line, wrap, style: cols === 6 || cols === 3 ? "" : ` style="--sc-cols:${line}"` };
+}
+const sumScores = (arr) => arr.reduce((n, a) => n + (+a.s || 0), 0);
+/* opts.rowButtons: 行を「このエンドを直す」ボタンにする / opts.editEnd: 直している行 /
+   opts.skipIndex: 旧版の「開いて直す」で一時的に抜けているエンドの位置（番号だけ合わせる）/
+   opts.final: 規定射数に届いていなくても合計行を出す（結果の表示用） */
+function scorecardHtml(sess, opts) {
+  const o = opts || {};
+  const plan = scorecardPlan(sess);
+  const ends = (sess && sess.ends) || [];
+  const cols = Math.max(plan.per, ...ends.map((e) => e.length));
+  const lay = scoreGridLayout(cols);
+  const counts = scorecardCountCols(sess);
+  const skip = Number.isInteger(o.skipIndex) ? o.skipIndex : -1;
+  const withGap = (cells) => {
+    if (cols === 6) cells.splice(3, 0, '<div class="gapCol" role="presentation"></div>');
+    return cells.join("");
+  };
+  const subRow = (name, arr, cls) =>
+    `<div class="scSub${cls ? " " + cls : ""}" role="row" data-sub="${cls || "block"}"><span class="name" role="rowheader">${name}</span>` +
+    counts.map((c) => `<span role="cell">${c.sub}<b>${c.count(arr)}</b></span>`).join("") +
+    `<span class="tot" role="cell">${sumScores(arr)}</span></div>`;
+  let h =
+    `<div class="scard ${lay.cls}${o.rowButtons ? " is-edit" : ""}"${lay.style} role="table" aria-label="スコア表" data-testid="scorecard">` +
+    `<div class="scRow scHead" role="row"><div class="endNo" role="columnheader" aria-label="エンド">回</div>` +
+    withGap(
+      Array.from({ length: cols }, (_, i) => `<div role="columnheader">${i + 1}</div>`),
+    ) +
+    `<div class="endTot" role="columnheader" aria-label="エンドの計">計</div><div class="runTot" role="columnheader">累計</div>` +
+    counts
+      .map((c) => `<div class="cnt" role="columnheader" aria-label="${c.name}" title="${c.name}">${c.head}</div>`)
+      .join("") +
+    `</div>`;
+  let run = 0,
+    shot = 0;
+  ends.forEach((end, e) => {
+    const no = skip >= 0 && e >= skip ? e + 2 : e + 1;
+    const sorted = scoreSortedArrows(end);
+    const tot = sumScores(end);
+    run += tot;
+    const editing = o.editEnd === e;
+    const cells = Array.from({ length: cols }, (_, i) => {
+      const a = sorted[i];
+      return a
+        ? `<div class="cell ${scoreZoneClass(a, sess.faceType)}" role="cell">${esc(scoreLabel(a))}</div>`
+        : `<div class="cell" role="cell"></div>`;
+    });
+    const head = o.rowButtons
+      ? `<button type="button" class="scRowBtn" data-erow="${e}" aria-pressed="${editing}" aria-label="第${no}エンドを直す（計${tot}点）">${no}</button>`
+      : String(no);
+    h +=
+      `<div class="scRow${editing ? " is-edit" : ""}" role="row" data-end="${e}"><div class="endNo" role="rowheader">${head}</div>` +
+      withGap(cells) +
+      `<div class="endTot" role="cell">${tot}</div><div class="runTot" role="cell">${run}</div>` +
+      counts.map((c) => `<div class="cnt" role="cell">${c.count(end)}</div>`).join("") +
+      `</div>`;
+    shot += end.length;
+    if (skip < 0 && plan.blockEnds && (e + 1) % plan.blockEnds === 0) {
+      const b = (e + 1) / plan.blockEnds - 1;
+      const block = ends.slice(e + 1 - plan.blockEnds, e + 1).flat();
+      if (!plan.quota) h += subRow(`小計 ${shot - block.length + 1}〜${shot}射`, block, "");
+      else if (b < 2) h += subRow(`${b === 0 ? "前半" : "後半"} ${block.length}射`, block, "");
+    }
+  });
+  const complete = !!plan.planEnds && skip < 0 && ends.length >= plan.planEnds;
+  if (ends.length && (o.final || complete)) h += subRow(`合計 ${shot}射`, ends.flat(), "total");
+  return h + "</div>";
+}
+/* 入力中（または直しているエンド）の枠。打った順・番号つき。data-i は矢の位置（打った順） */
+function curRowHtml(arr, per, endNo, sel, o) {
+  const opt = o || {};
+  const cols = Math.max(per, arr.length);
+  const lay = scoreGridLayout(cols);
+  const cells = Array.from({ length: cols }, (_, i) => {
+    const a = arr[i];
+    if (!a)
+      return `<div class="slot${i === arr.length && !opt.locked ? " is-next" : ""}"><span class="ord" aria-hidden="true">${i + 1}</span></div>`;
+    const placed = Number.isFinite(a.x) && Number.isFinite(a.y);
+    return (
+      `<button type="button" class="slot ${scoreZoneClass(a, opt.faceType)}${sel === i ? " is-sel" : ""}" data-i="${i}" aria-pressed="${sel === i}" aria-label="${i + 1}射目 ${esc(scoreLabel(a))}">` +
+      `<span class="ord" aria-hidden="true">${i + 1}</span>${esc(scoreLabel(a))}` +
+      (a.no ? `<small class="arrowNo">#${esc(a.no)}</small>` : "") +
+      (placed ? "" : `<span class="nopos">位置なし</span>`) +
+      `</button>`
+    );
+  });
+  if (cols === 6) cells.splice(3, 0, '<div class="gapCol"></div>');
+  return (
+    `<div class="curRow ${lay.cls}"${lay.style}><div class="curNo" aria-label="第${endNo}エンド">${endNo}</div>${cells.join("")}` +
+    `<div class="sum" aria-label="このエンドの計">${arr.length ? sumScores(arr) : ""}</div></div>`
+  );
+}
+
+/* ============ 記録中（没入画面） ============ */
+/* 「中断」で記録画面を離れている間は、記録タブに再開の帯だけを出す。記録そのものは db.active に残る */
+function recordPaused() {
+  return !!(db.active && ui.recPausedId != null && ui.recPausedId === db.active.id);
+}
+function renderPausedRecord(m) {
+  const s = db.active;
+  const all = sessionArrows(s);
+  m.innerHTML = `<div class="band startBand" data-testid="record-paused">
+    <div class="l">${s._edit ? "編集中の記録" : "記録中の練習"}</div>
+    <div class="c">${s.dist}m・${esc(faceLabel(s))}</div>
+    <div class="m">${s.ends.length}エンド確定・${all.length}射・${sumScores(all)}点。1射ごとに保存しています。</div>
+    <div class="btnRow"><button type="button" class="btn" id="recResume" data-testid="record-resume">記録を再開する</button></div>
+  </div>`;
+  $("#recResume").onclick = () => {
+    ui.recPausedId = null;
+    render();
+  };
+}
+/* 直している矢の並び: 確定済みエンドを開いていればそのエンド、そうでなければ入力中のエンド */
+function activeEditEnd(s) {
+  return Number.isInteger(ui.editEnd) && ui.editEnd >= 0 && ui.editEnd < s.ends.length
+    ? ui.editEnd
+    : -1;
+}
+function activeEditArr(s) {
+  const e = activeEditEnd(s);
+  return e >= 0 ? s.ends[e] : s.cur;
+}
+/* 状態行・目盛り・操作列が使う値をまとめて計算する */
+function activeStatus(s) {
+  const plan = scorecardPlan(s);
+  /* 旧版の「エンドを開いて直す」の途中（エンドを s.cur に移してある）で再開した記録 */
+  const pulled = s.editIndex != null;
+  const doneArrows = s.ends.reduce((n, e) => n + e.length, 0);
+  const allDone = !!plan.quota && !pulled && !s.cur.length && doneArrows >= plan.quota;
+  return {
+    plan,
+    pulled,
+    doneArrows,
+    allDone,
+    endNo: pulled ? Math.min(s.editIndex, s.ends.length) + 1 : s.ends.length + 1,
+    total: sumScores(sessionArrows(s)),
+    full: s.cur.length >= plan.per,
+  };
 }
 function activeGuideHtml() {
-  if (db.settings.activeGuideSeen) return "";
-  return `<details class="adv activeGuide" open>
-    <summary>初回の操作ガイド</summary>
-    <div class="guideLine"><b>記録</b><span>的をタップして矢を記録します。位置を直すときは、的の下の得点を選びます。</span></div>
-    <div class="guideLine"><b>精密モード</b><span>的を0.4秒長押しすると精密モードになります。指の移動量の1/4で矢が動き、ルーペで確認できます。</span></div>
-    <div class="guideLine"><b>微調整</b><span>選んだ矢を下の矢印で動かします。「選択解除」で的に戻り、次の矢を記録できます。</span></div>
-    <div class="guideLine"><b>進行</b><span>${db.active && db.active.perEnd ? db.active.perEnd : 6}本入れたら「エンド確定」。途中の本数でも確定できます。練習の最後は「終了」で結果を見ます。</span></div>
-    <button class="btn sm ghost activeGuideDone" id="activeGuideDone">次から表示しない</button>
-  </details>`;
+  if (db.settings.activeGuideSeen)
+    return `<div class="miniEmpty">的をタップするとその位置を1射として記録します。長く押すと拡大鏡が出て、指を離した位置で記録します。</div>`;
+  return `<div class="miniEmpty activeGuide" data-testid="active-guide">
+    <b>初回の操作ガイド</b>
+    <span>的をタップするとその位置を1射として記録します。長く押すと拡大鏡が出て、指を離した位置で記録します（0.4秒で微調整）。的の外で指を離すと取消です。</span>
+    <span>下の枠をタップすると、その矢を置き直し・1mm ずつ移動・削除できます。確定したエンドは行をタップして直します。</span>
+    <button type="button" class="txtBtn activeGuideDone" id="activeGuideDone">次から表示しない</button>
+  </div>`;
 }
 /* 多距離ラウンドの次ステージ定義。最終ステージ・編集モード・単一距離では null */
 function nextStageDef(s) {
@@ -1315,135 +1483,252 @@ function nextStageDef(s) {
   const def = findRoundDef(rg.roundId);
   return def && Array.isArray(def.stages) ? def.stages[stage + 1] || null : null;
 }
+const REC_CHEVRON =
+  '<svg viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 1 2 8l6 7"/></svg>';
+/* 的の表示範囲。三つ目的は縦長のまま。それ以外は的がほぼ幅いっぱい、「中心を拡大」で 6点帯の内側まで寄る */
+function activeViewHalf(s) {
+  return (s.faceD / 2) * ((ui.zoom || 1) > 1 ? 0.47 : 1.035);
+}
+function applyActiveZoom(s) {
+  const tg = $("#tgsvg");
+  if (!tg || s.faceType === "triple") return;
+  const M = activeViewHalf(s);
+  tg.setAttribute("viewBox", `${-M} ${-M} ${2 * M} ${2 * M}`);
+  const b = $("#bZoom");
+  if (b) {
+    const on = (ui.zoom || 1) > 1;
+    b.textContent = on ? "全体に戻す" : "中心を拡大";
+    b.setAttribute("aria-pressed", String(on));
+  }
+}
 function renderActive(m) {
   const s = db.active;
-  const setup = db.setups.find((x) => x.id === s.setupId);
-  const nextStage = nextStageDef(s);
-  m.classList.add(
-    "hasActiveDock",
-  ); /* 固定操作列の高さ分、下部に呼吸を確保する（style.css: main.hasActiveDock） */
+  const rg = s.roundGroup;
+  const per = Math.max(1, +s.perEnd || 6);
+  const cond = s._edit
+    ? `過去記録の編集・${s.dist}m`
+    : `${s.dist}m・${esc(faceLabel(s))}${rg ? `（${(+rg.stage || 0) + 1}/${rg.stageCount}）` : ""}`;
+  const step = [
+    ["l", "←", "左"],
+    ["u", "↑", "上"],
+    ["d", "↓", "下"],
+    ["r", "→", "右"],
+  ];
+  /* 的の大きさは「画面の高さ − 固定の帯」。7射以上のエンドは入力中の枠が2段になるぶんを引く */
   m.innerHTML = `
-  ${liveSessionHeroHtml(s, setup)}
-  <div class="card targetFocusCard targetFocusWide">
-    <div class="targetTools">
-      <h2>記録中${s._edit ? "（過去記録の編集）" : ""} <span class="mini">${fmtD(s.date)} ・ ${s.dist}m ・ ${esc(faceLabel(s))} ・ ${setup ? esc(setup.name) : "セッティング未指定"}</span></h2>
-      ${
-        s.faceType === "triple"
-          ? ""
-          : `<div class="chips" id="zoomChips">
-        ${[
-          [1, "全体"],
-          [2, "×2"],
-          [3, "×3"],
-        ]
-          .map(
-            ([z, lb]) =>
-              `<button type="button" class="chip ${(ui.zoom || 1) === z ? "on" : ""}" aria-pressed="${(ui.zoom || 1) === z}" data-z="${z}">${lb}</button>`,
-          )
-          .join("")}
-      </div>`
-      }
-    </div>
-    <div class="tgWrap tgWrapWide" id="tgWrap" data-testid="active-target">
+  <div class="recScreen${s.faceType === "triple" ? " is-triple" : ""}" id="recScreen"${per > 6 ? ' style="--rec-fixed:372px"' : ""}>
+    <header class="recTop">
+      <button type="button" class="txtBtn" id="bPause" data-testid="active-pause" aria-label="記録を中断して戻る">${REC_CHEVRON}中断</button>
+      <div class="condT">${cond}</div>
+      <button type="button" class="txtBtn" id="bMenu" data-testid="active-menu" aria-haspopup="dialog">メニュー</button>
+    </header>
+    <section class="recStat" data-testid="active-hud" aria-label="記録中のスコア">
+      <div class="recStatMain"><div class="endN" id="recEndN"></div><div class="msg" id="recMsg" aria-live="polite" aria-atomic="true"></div></div>
+      <div class="tot"><span>合計</span><b class="tnum" id="hudTotal"></b></div>
+    </section>
+    <div class="ruler" id="recRuler" aria-hidden="true"></div>
+    <div class="recTarget" id="tgWrap" data-testid="active-target">
       ${targetMarkup(s.faceD, "tg", s.faceType)}
+      ${s.faceType === "triple" ? "" : `<button type="button" class="zoomBtn" id="bZoom" data-testid="active-zoom" aria-pressed="false">中心を拡大</button>`}
       <div class="lens" id="lens"><svg id="lensSvg" width="122" height="122"><use href="#tgmain"/><g id="lensCross"></g></svg></div>
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
-    <div class="scoreChips" id="curChips" data-testid="active-arrow-chips"></div>
+    <div class="miniCard" id="recCard" data-testid="active-scorecard"></div>
     <div class="srOnly" id="arrowAnnounce" aria-live="polite" aria-atomic="true" data-testid="active-announce"></div>
-    <div class="nudge" id="nudge">
-      <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD / 200).toFixed(1)}cm）</div>
-      <div class="npad" role="group" aria-label="選択中の矢の微調整">
-        <span class="blank"></span><button type="button" data-n="u" aria-label="選択中の矢を上に微調整">▲</button><span class="blank"></span>
-        <button type="button" data-n="l" aria-label="選択中の矢を左に微調整">◀</button><button type="button" class="recordNudgeDelete" data-n="del" aria-label="選択中の矢を削除">${icon("trash")}</button><button type="button" data-n="r" aria-label="選択中の矢を右に微調整">▶</button>
-        <span class="blank"></span><button type="button" data-n="d" aria-label="選択中の矢を下に微調整">▼</button><span class="blank"></span>
-      </div>
-      <button class="btn sm ghost" id="nudgeDone">選択解除</button>
-      <div class="shotMeta" id="shotMeta"></div>
+    <div class="curEnd">
+      <div class="curCap" id="curCap" hidden></div>
+      <div id="curChips" data-testid="active-arrow-chips" role="group" aria-label="入力中のエンド（打った順）"></div>
     </div>
-    ${activeGuideHtml()}
-    <details class="adv activeStatsMore"><summary>この練習の詳細</summary>
-      <div class="statbar" id="statbar"></div>
-    </details>
-    ${nextStage ? `<div class="btnrow activeNextStageRow"><button class="btn sec" id="bNextStage">次の距離へ（${nextStage.dist}m）</button></div>` : ""}
-  </div>
-  <div class="card"><h2>エンド一覧</h2><div id="endsTbl"></div></div>
-  <div class="activeActionDock" id="activeActionDock" data-testid="active-action-dock">
-    <button class="btn ghost" id="bUndo" data-testid="active-undo">1本取消</button>
-    <button class="btn sec" id="bEnd" data-testid="active-end">エンド確定</button>
-    <button class="btn activeFinishBtn" id="bFinish" data-testid="active-finish">終了</button>
+    <div class="editBar" id="nudge">
+      <div class="ttl"><span id="nudgeTitle"></span><button type="button" class="txtBtn" id="shotMetaOpen">理由・矢番号</button></div>
+      <div class="desc" id="nudgeDesc"></div>
+      <!-- 段 3: 「点数だけ直す」（手動の点数上書き）はこの行に足す。いまは位置の修正だけ -->
+      <div class="nudgeRow">
+        <div class="nudgeKeys" role="group" aria-label="選択中の矢の微調整">
+          ${step.map(([k, g, name]) => `<button type="button" class="btn ghost" data-n="${k}" aria-label="選択中の矢を${name}に微調整">${g}</button>`).join("")}
+          <button type="button" class="btn danger" data-n="del" aria-label="選択中の矢を削除">削除</button>
+        </div>
+        <button type="button" class="btn" id="nudgeDone">完了</button>
+      </div>
+    </div>
+    <div class="dockRow t2" id="activeActionDock" data-testid="active-action-dock"></div>
   </div>`;
-  const liveToast = $("#toast");
-  if (liveToast && liveToast.classList.contains("show")) positionToast(liveToast);
   attachTargetInput(s);
-  function applyZoom() {
-    if (s.faceType === "triple") return;
-    const M = ((s.faceD / 2) * 1.18) / (ui.zoom || 1);
-    $("#tgsvg").setAttribute("viewBox", `${-M} ${-M} ${2 * M} ${2 * M}`);
-  }
-  document.querySelectorAll("#zoomChips .chip").forEach(
-    (c) =>
-      (c.onclick = () => {
-        ui.zoom = +c.dataset.z;
-        document.querySelectorAll("#zoomChips .chip").forEach((x) => {
-          const on = x === c;
-          x.classList.toggle("on", on);
-          x.setAttribute("aria-pressed", String(on));
-        });
-        applyZoom();
-        /* 拡大率が変わると画面上の倍率も変わるので、矢番号の吹き出しを描き直す */
-        refreshActive();
-      }),
-  );
-  applyZoom();
-  $("#bUndo").onclick = () => {
-    if (s.cur.length) {
-      s.cur.pop();
-      ui.selArrow = -1;
-      nativePulse("light");
-      save();
+  applyActiveZoom(s);
+  const zoomBtn = $("#bZoom");
+  if (zoomBtn)
+    zoomBtn.onclick = () => {
+      ui.zoom = (ui.zoom || 1) > 1 ? 1 : 2;
+      applyActiveZoom(s);
+      /* 拡大すると画面上の倍率が変わるので、矢番号の吹き出しを描き直す */
       refreshActive();
-    } else toast("このエンドに矢がありません");
-  };
-  $("#bEnd").onclick = () => {
-    if (!s.cur.length) {
-      toast("矢を記録してください");
-      return;
-    }
-    if (s.editIndex != null) {
-      const at = Math.min(s.editIndex, s.ends.length);
-      s.ends.splice(at, 0, s.cur);
-      toast(`エンド${at + 1}を更新しました`);
-      s.editIndex = null;
-    } else {
-      s.ends.push(s.cur);
-      toast(`エンド${s.ends.length} 確定`);
-    }
-    s.cur = [];
-    ui.selArrow = -1;
-    nativePulse("success");
-    save();
-    refreshActive();
-    revealActiveTarget();
-  };
-  $("#bFinish").onclick = () => finishSession();
-  const bNext = $("#bNextStage");
-  if (bNext) bNext.onclick = () => advanceRoundStage();
-  const guideDone = $("#activeGuideDone");
-  if (guideDone)
-    guideDone.onclick = () => {
-      db.settings.activeGuideSeen = true;
-      save("active-guide");
-      render();
     };
+  $("#bPause").onclick = () => {
+    flushPendingSave();
+    ui.recPausedId = s.id;
+    ui.selArrow = -1;
+    ui.editEnd = -1;
+    render();
+  };
+  $("#bMenu").onclick = () => openActiveMenu();
+  $("#shotMetaOpen").onclick = () => openShotMetaSheet();
   document
-    .querySelectorAll("#nudge .npad button")
+    .querySelectorAll("#nudge [data-n]")
     .forEach((b) => (b.onclick = () => nudgeArrow(b.dataset.n)));
   $("#nudgeDone").onclick = () => {
     ui.selArrow = -1;
     refreshActive();
   };
   refreshActive();
+}
+/* エンド確定。旧版の「開いて直す」途中（editIndex）の記録は元の位置へ戻す */
+function confirmActiveEnd() {
+  const s = db.active;
+  if (!s || !s.cur.length) return;
+  if (s.editIndex != null) {
+    s.ends.splice(Math.min(s.editIndex, s.ends.length), 0, s.cur);
+    s.editIndex = null;
+  } else s.ends.push(s.cur);
+  s.cur = [];
+  ui.selArrow = -1;
+  nativePulse("success");
+  save();
+  refreshActive();
+}
+function undoActiveArrow() {
+  const s = db.active;
+  if (!s || !s.cur.length) return;
+  s.cur.pop();
+  ui.selArrow = -1;
+  nativePulse("light");
+  save();
+  refreshActive();
+}
+/* 下端の操作列。入力中は 取消 / エンド確定。規定の射数を終えたら主ボタンが「終了」（多距離の途中は「次の距離へ」）。
+   確定済みエンドを開いているあいだは「修正を終える」だけにする */
+function renderActiveDock(s, st) {
+  const dock = $("#activeActionDock");
+  const next = nextStageDef(s);
+  const left = Math.max(0, st.plan.per - s.cur.length);
+  let html;
+  if (activeEditEnd(s) >= 0) {
+    dock.className = "dockRow t1";
+    html = `<button type="button" class="btn" id="bEditDone" data-testid="active-edit-done">修正を終える</button>`;
+  } else if (st.allDone) {
+    dock.className = "dockRow t2";
+    html =
+      `<button type="button" class="btn ghost" id="bUndo" data-testid="active-undo" disabled>取消</button>` +
+      (next
+        ? `<button type="button" class="btn" id="bNextStage">次の距離へ（${next.dist}m）</button>`
+        : `<button type="button" class="btn" id="bFinishMain" data-testid="active-finish-primary">${s._edit ? "編集を保存して結果を見る" : "記録を終了して結果を見る"}</button>`);
+  } else {
+    dock.className = "dockRow t2";
+    html =
+      `<button type="button" class="btn ghost" id="bUndo" data-testid="active-undo"${s.cur.length ? "" : " disabled"}>取消</button>` +
+      `<button type="button" class="btn col${st.full ? "" : " ghost"}" id="bEnd" data-testid="active-end"${s.cur.length ? "" : " disabled"}>エンド確定${st.full ? "" : `<small>あと${left}射</small>`}</button>`;
+  }
+  dock.innerHTML = html;
+  const on = (id, fn) => {
+    const b = $("#" + id);
+    if (b) b.onclick = fn;
+  };
+  on("bUndo", undoActiveArrow);
+  on("bEnd", confirmActiveEnd);
+  on("bFinishMain", () => finishSession());
+  on("bNextStage", () => advanceRoundStage());
+  on("bEditDone", () => {
+    ui.editEnd = -1;
+    ui.selArrow = -1;
+    refreshActive();
+  });
+}
+/* ---------- 記録のメニュー ---------- */
+function openActiveMenu() {
+  const s = db.active;
+  if (!s) return;
+  const setup = db.setups.find((x) => x.id === s.setupId);
+  const all = sessionArrows(s);
+  const total = sumScores(all);
+  const next = nextStageDef(s);
+  const counts = scorecardCountCols(s);
+  const go =
+    '<svg class="go chev" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 1l6 7-6 7"/></svg>';
+  const item = (id, title, sub, attr) =>
+    `<button type="button" class="lrow link" id="${id}"${attr || ""}><span class="lmain"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</span>${go}</button>`;
+  const meta = [s.wx, s.windDir, s.windSpeed ? `${s.windSpeed}m/s` : "", s.note]
+    .filter(Boolean)
+    .map(esc)
+    .join("・");
+  const ovl = document.createElement("div");
+  ovl.className = "ovl";
+  ovl.innerHTML = `<div class="sheet recMenu" data-testid="active-menu-sheet">
+    <h3>記録のメニュー</h3>
+    <p class="basis">${fmtD(s.date)}・${s.dist}m・${esc(faceLabel(s))}・${setup ? esc(setup.name) : "セッティング未指定"}</p>
+    <div class="figs recMenuFigs">
+      <div class="fig"><div class="l">合計（${all.length}射）</div><div class="n">${total}</div></div>
+      <div class="fig"><div class="l">平均/射</div><div class="n">${all.length ? (total / all.length).toFixed(2) : "—"}</div></div>
+      <div class="fig"><div class="l">${counts.map((c) => c.sub).join(" / ")}</div><div class="n">${counts.map((c) => c.count(all)).join("<small>/</small>")}</div></div>
+    </div>
+    ${item("mMeta", "天気・風・メモを書く", meta || "必要なときだけ入力します")}
+    ${next ? item("mNextStage", `次の距離へ（${next.dist}m）`, "このステージを確定して次へ進みます") : ""}
+    ${item("mSettings", "設定", "表示・拡大鏡の位置など")}
+    ${item(
+      "bFinish",
+      s._edit ? "編集を終了して保存する" : "ここで記録を終了する",
+      all.length ? `${all.length}射まで保存して結果を表示します` : "矢がまだありません。記録を破棄できます",
+      ' data-testid="active-finish"',
+    )}
+    <div class="btnRow"><button type="button" class="btn ghost" id="mClose">閉じる</button></div>
+  </div>`;
+  /* 段 3: 入力方法（的面 / 点数だけ）の切り替えをここに足す */
+  openModal(ovl, { escapeTarget: "#mClose" });
+  const pick = (sel, fn) => {
+    const b = ovl.querySelector(sel);
+    if (b)
+      b.onclick = () => {
+        closeModal(ovl);
+        fn();
+      };
+  };
+  ovl.querySelector("#mClose").onclick = () => closeModal(ovl);
+  pick("#mMeta", openSessionMetaSheet);
+  pick("#mNextStage", () => advanceRoundStage());
+  pick("#mSettings", openSettings);
+  pick("#bFinish", () => finishSession());
+}
+/* 天気・風・メモ（記録開始時の「詳しく残す」と同じ項目を、記録の途中で書き足す） */
+function openSessionMetaSheet() {
+  const s = db.active;
+  if (!s) return;
+  const opts = (list, cur) =>
+    [""]
+      .concat(list, cur && !list.includes(cur) ? [cur] : [])
+      .map((v) => `<option value="${esc(v)}"${v === (cur || "") ? " selected" : ""}>${v ? esc(v) : "—"}</option>`)
+      .join("");
+  const ovl = document.createElement("div");
+  ovl.className = "ovl";
+  ovl.innerHTML = `<div class="sheet" data-testid="active-meta-sheet">
+    <h3>天気・風・メモ</h3>
+    <label class="f" for="amWx">天候・コンディション</label>
+    <select class="inp" id="amWx">${opts(["晴れ", "くもり", "雨", "風 弱", "風 強", "室内"], s.wx)}</select>
+    <div class="row">
+      <div><label class="f" for="amWindDir">風向</label><select class="inp" id="amWindDir">${opts(["向かい風", "追い風", "左から", "右から", "巻き風"], s.windDir)}</select></div>
+      <div><label class="f" for="amWindSpeed">風速 (m/s)</label><input class="inp" id="amWindSpeed" inputmode="decimal" placeholder="例: 2.5" value="${esc(s.windSpeed || "")}"></div>
+    </div>
+    <label class="f" for="amNote">メモ</label>
+    <textarea class="noteBox" id="amNote" rows="3" placeholder="メモ（任意）">${esc(s.note || "")}</textarea>
+    <div class="btnRow"><button type="button" class="btn ghost" id="amCancel">やめる</button><button type="button" class="btn" id="amSave">保存</button></div>
+  </div>`;
+  openModal(ovl, { escapeTarget: "#amCancel" });
+  ovl.querySelector("#amCancel").onclick = () => closeModal(ovl);
+  ovl.querySelector("#amSave").onclick = () => {
+    s.wx = ovl.querySelector("#amWx").value;
+    s.windDir = ovl.querySelector("#amWindDir").value;
+    s.windSpeed = ovl.querySelector("#amWindSpeed").value.trim();
+    s.note = ovl.querySelector("#amNote").value.trim();
+    save();
+    closeModal(ovl);
+  };
 }
 function shotMetaHtml(a, index) {
   const tags = SHOT_REASON_TAGS.map(
@@ -1461,141 +1746,57 @@ function shotMetaHtml(a, index) {
     </div>
   </div>`;
 }
-function bindShotMeta() {
+/* 選択中の矢の理由タグと矢番号（任意の記録）。修正バーの「理由・矢番号」から開く */
+function openShotMetaSheet() {
   const s = db.active,
-    a = s && s.cur && s.cur[ui.selArrow];
+    a = s && activeEditArr(s)[ui.selArrow];
   if (!a) return;
-  const no = $("#shotArrowNo");
-  if (no)
+  const ovl = document.createElement("div");
+  ovl.className = "ovl";
+  ovl.innerHTML = `<div class="sheet" data-testid="shot-meta-sheet">
+    <h3>${ui.selArrow + 1}射目の理由・矢番号</h3>
+    <div class="shotMeta" id="shotMeta">${shotMetaHtml(a, ui.selArrow)}</div>
+    <div class="btnRow"><button type="button" class="btn" id="shotMetaClose">閉じる</button></div>
+  </div>`;
+  openModal(ovl, { escapeTarget: "#shotMetaClose" });
+  ovl.querySelector("#shotMetaClose").onclick = () => closeModal(ovl);
+  bindShotMeta(ovl, a);
+}
+function bindShotMeta(root, a) {
+  const no = root.querySelector("#shotArrowNo");
+  if (no) {
     no.oninput = (e) => {
       a.no = e.target.value.trim();
-      scheduleSave(
-        "shot-meta",
-      ); /* キーストロークごとの全量書き込みを避ける（flush は pagehide 等で保証） */
+      /* キーストロークごとの全量書き込みを避ける（flush は pagehide 等で保証） */
+      scheduleSave("shot-meta");
     };
-  if (no) no.onchange = () => refreshActive();
-  document.querySelectorAll("#shotReasonTags .reasonTag").forEach(
+    no.onchange = () => refreshActive();
+  }
+  root.querySelectorAll("#shotReasonTags .reasonTag").forEach(
     (btn) =>
       (btn.onclick = () => {
         const reason = btn.dataset.reason;
-        /* refreshActive() が #shotMeta を innerHTML で作り直すため、フォーカス中のタグを data-reason で復元する */
-        const hadFocus = !!(
-          document.activeElement &&
-          document.activeElement.closest &&
-          document.activeElement.closest("#shotReasonTags")
-        );
         a.reason = a.reason === reason ? "" : reason;
+        root.querySelectorAll("#shotReasonTags .reasonTag").forEach((x) => {
+          const on = x.dataset.reason === a.reason;
+          x.classList.toggle("on", on);
+          x.setAttribute("aria-pressed", String(on));
+        });
         nativePulse("light");
         scheduleSave("shot-meta");
-        refreshActive();
-        if (hadFocus) {
-          const back = document.querySelector(
-            `#shotReasonTags .reasonTag[data-reason="${reason}"]`,
-          );
-          if (back) back.focus({ preventScroll: true });
-        }
       }),
   );
 }
-/* motion:因果 — 矢の着弾座標（SVG座標系、yは上向き正）から4象限のどこから来たかを判定するだけの表示用ヘルパー。
-   attachTargetInput の座標計算・当たり判定には一切関与しない */
-function impactQuadrantClass(a) {
-  const x = (a && a.x) || 0,
-    y = (a && a.y) || 0;
-  return `impactFrom-${y >= 0 ? "n" : "s"}${x >= 0 ? "e" : "w"}`;
-}
-/* motion:状態 — HUD の3値（エンド・合計・残り）が前回描画時と変わっていたら短いティッククラスを付ける。
-   render() を跨いだ状態は #main の dataset に載せて持ち回す（DOM 再構築に強い） */
-function updateHudMetrics(s) {
-  const hud = $('[data-testid="active-hud"]');
-  if (!hud) return;
-  const hm = liveHudMetrics(s);
-  const fields = [
-    ["hudEndNo", String(hm.endNo)],
-    ["hudTotal", String(hm.total)],
-    ["hudRemain", hm.remainText],
-  ];
-  fields.forEach(([id, val]) => {
-    const el = $("#" + id);
-    if (!el) return;
-    const prev = el.dataset.v;
-    const textNode = el.firstChild;
-    if (textNode && textNode.nodeType === 3) textNode.textContent = val;
-    else el.textContent = val;
-    if (prev != null && prev !== val) {
-      el.classList.remove("tick");
-      void el.offsetWidth;
-      el.classList.add("tick");
-    }
-    el.dataset.v = val;
-  });
-}
-/* 矢チップ列が固定操作列（activeActionDock）の裏に隠れていたら見える位置まで押し上げる。
-   ドックは position:fixed のため通常の scrollIntoView はドックの高さを考慮しないので手計算する */
-function revealChipsAboveDock(chipsBox, behavior) {
-  const dock = $("#activeActionDock");
-  if (!dock || !chipsBox) return;
-  const dockTop = dock.getBoundingClientRect().top;
-  const chipsBottom = chipsBox.getBoundingClientRect().bottom;
-  const overlap = chipsBottom - dockTop;
-  if (overlap > 0) window.scrollBy({ top: overlap + 12, behavior });
-}
-/* 微調整を閉じた後とエンド確定後だけ、的と残っている矢チップを操作できる位置へ戻す。
-   通常の再描画・タグ入力・タブ復帰のスクロール位置には介入しない。 */
-function revealActiveTarget() {
-  const target = $("#tgsvg"), dock = $("#activeActionDock");
-  if (!target || !dock) return;
-  // Offscreen content-visibility placeholders must not shift after measuring.
-  const card = target.closest(".card");
-  if (card) card.style.contentVisibility = "visible";
-  const targetRect = target.getBoundingClientRect();
-  const chips = $("#curChips");
-  const chipsRect = chips && chips.childElementCount ? chips.getBoundingClientRect() : targetRect;
-  const rect = {
-    top: Math.min(targetRect.top, chipsRect.top),
-    bottom: Math.max(targetRect.bottom, chipsRect.bottom),
-  };
-  rect.height = rect.bottom - rect.top;
-  const top = 8; // 上に固定の帯は無い（v5）
-  const bottom = dock.getBoundingClientRect().top - 8;
-  let delta = 0;
-  if (rect.top < top || rect.height > bottom - top) delta = rect.top - top;
-  else if (rect.bottom > bottom) delta = rect.bottom - bottom;
-  if (delta) window.scrollBy({ top: delta, behavior: "instant" });
-}
-/* 矢チップを選んだ時だけ、微調整パッドと選択解除を操作列の上へ出す。
-   入場モーション中にも余白を残し、連続微調整やメタ入力の位置は変えない。 */
-function revealActiveCorrection() {
-  const pad = $("#nudge .npad"), dock = $("#activeActionDock");
-  if (!pad || !dock) return;
-  const card = pad.closest(".card");
-  if (card) card.style.contentVisibility = "visible";
-  const padRect = pad.getBoundingClientRect();
-  const done = $("#nudgeDone");
-  const doneRect = done ? done.getBoundingClientRect() : padRect;
-  const rect = {
-    top: Math.min(padRect.top, doneRect.top),
-    bottom: Math.max(padRect.bottom, doneRect.bottom),
-  };
-  rect.height = rect.bottom - rect.top;
-  const top = 16; // 上に固定の帯は無い（v5）
-  let bottom = dock.getBoundingClientRect().top - 16;
-  const notice = $("#toast");
-  if (notice && notice.classList.contains("show")) {
-    // Fixed-layout position avoids measuring the notice's entrance transform.
-    const noticeTop = window.innerHeight - parseFloat(getComputedStyle(notice).bottom) - notice.offsetHeight;
-    if (Number.isFinite(noticeTop)) bottom = Math.min(bottom, noticeTop - 16);
-  }
-  let delta = 0;
-  if (rect.top < top || rect.height > bottom - top) delta = rect.top - top;
-  else if (rect.bottom > bottom) delta = rect.bottom - bottom;
-  if (delta) window.scrollBy({ top: delta, behavior: "instant" });
-}
-/* 矢を記録したことは画面ではチップの出現で示し、トーストは出さない（入力の邪魔をしない）。
+/* 矢を記録したことは画面では枠の出現で示し、トーストは出さない（入力の邪魔をしない）。
    画面読み上げには「3射目 9点」を知らせる */
 function announceArrow(n, a) {
   const el = $("#arrowAnnounce");
   if (el) el.textContent = `${n}射目 ${a.s === 0 ? "ミス" : `${scoreLabel(a)}点`}`;
+}
+/* 状態行の一時的な案内（6射を入力済み、など）。次の操作で消える */
+function activeNotice(msg) {
+  ui.recMsg = msg;
+  refreshActive();
 }
 /* 記録中セッションの判定用半径(cm)。記録開始時の arrowR。旧判定で始まった記録・旧記録の編集は旧半径のまま
    （20-scoring.js sessionScoringRadius）。保存された点数と矢円と新しい矢の判定をセッション内で揃える */
@@ -1603,36 +1804,39 @@ function activeArrowR(s) {
   return sessionScoringRadius(s, s && db.setups.find((x) => x.id === s.setupId));
 }
 /* 記録中の的の印（矢円と矢番号の吹き出し）を描く。吹き出しの大きさは画面上の倍率で決まるため、
-   画面の幅が変わったときもこれだけを描き直す */
+   画面の幅が変わったときもこれだけを描き直す。
+   番号を付けるのは入力中のエンド（確定済みエンドを開いているときはそのエンド）。ほかのエンドは薄く、番号なし */
 function drawActiveMarks(s) {
   if (!s || !$("#tgmarks")) return;
   let html = "";
   const placed = (a) => a && Number.isFinite(a.x) && Number.isFinite(a.y);
   const gp = (a) => (s.faceType === "triple" ? { x: a.x, y: a.y + SPOT_Y[a.spot || 0] } : a);
   const arrowR = activeArrowR(s);
-  /* 確定済みエンドは番号なし・低彩度。座標のない矢（座標なしの M など）は描かない */
-  s.ends.forEach((end, ei) =>
+  const focus = activeEditArr(s);
+  /* 座標のない矢（座標なしの M など）は描かない */
+  [...s.ends, s.cur].forEach((end) => {
+    if (end === focus) return;
     end.forEach((a) => {
       if (placed(a)) html += markCircle(gp(a), s.faceD, "rgba(60,60,60,.45)", "", "", arrowR);
-    }),
-  );
-  s.cur.forEach((a, i) => {
+    });
+  });
+  focus.forEach((a, i) => {
     if (!placed(a)) return;
     html += markCircle(
       gp(a),
       s.faceD,
       i === ui.selArrow ? "#111" : "var(--green-l)",
       "",
-      i === ui.freshArrow ? "shotNew" : "",
+      focus === s.cur && i === ui.freshArrow ? "shotNew" : "",
       arrowR,
     );
   });
-  /* 現在エンドの矢番号（射った順）を画面上で読める大きさの吹き出しにし、重なりを避けて引き出し線で結ぶ */
+  /* 矢番号（射った順）を画面上で読める大きさの吹き出しにし、重なりを避けて引き出し線で結ぶ */
   const tg = $("#tgsvg");
   const vb = tg && tg.viewBox && tg.viewBox.baseVal;
   const pxPerCm = tg && vb && vb.width > 0 ? tg.getBoundingClientRect().width / vb.width : 0;
   if (pxPerCm > 0) {
-    const pts = s.cur.map((a) => (placed(a) ? gp(a) : null));
+    const pts = focus.map((a) => (placed(a) ? gp(a) : null));
     const lay = layoutArrowLabels(pts, pxPerCm, vb);
     pts.forEach((p, i) => {
       html += arrowLabelSvg(p, lay.labels[i], lay.r, lay.font, String(i + 1), i === ui.selArrow);
@@ -1642,122 +1846,182 @@ function drawActiveMarks(s) {
 }
 function refreshActive() {
   const s = db.active;
-  if (!s) return;
-  const leavingCorrection = $("#nudge").classList.contains("on") && ui.selArrow < 0;
-  drawActiveMarks(s);
-  // chips（innerHTML 全置換でフォーカス中のチップが消えるため、置換前に data-i を控えて復元する）
   const chipsBox = $("#curChips");
+  if (!s || !chipsBox) return;
+  ui.editEnd = activeEditEnd(s);
+  const arr = activeEditArr(s);
+  if (!(ui.selArrow >= 0 && arr[ui.selArrow])) ui.selArrow = -1;
+  const st = activeStatus(s);
+  const per = st.plan.per;
+  const editing = ui.editEnd >= 0;
+  const sel = ui.selArrow;
+  drawActiveMarks(s);
+  /* 状態行: 第Nエンド・何射目・合計 */
+  $("#recEndN").textContent = st.allDone
+    ? "全エンド確定"
+    : st.pulled
+      ? `第${st.endNo}エンドを修正中`
+      : `第${st.endNo}エンド`;
+  const first = st.doneArrows + 1;
+  const range = per > 1 ? `${first}〜${first + per - 1}射目` : `${first}射目`;
+  const notice = ui.recMsg || "";
+  ui.recMsg = "";
+  const msg = $("#recMsg");
+  msg.textContent =
+    notice ||
+    (st.allDone
+      ? `${st.doneArrows}射を記録しました`
+      : st.pulled
+        ? "確定で元の位置に戻ります"
+        : `${range}・${st.plan.quota ? `全${st.plan.quota}射` : "自由練習"}`);
+  msg.classList.toggle("is-warn", !!notice);
+  $("#hudTotal").textContent = String(st.total);
+  /* エンドの目盛り。規定のあるラウンドは計画エンド数、自由練習は小計の区切りごとに延ばす */
+  const block = st.plan.blockEnds || 6;
+  const shown = s.ends.length + (st.pulled ? 1 : 0);
+  const segs = Math.max(
+    st.plan.planEnds || Math.ceil((shown + 1) / block) * block,
+    shown + (st.allDone ? 0 : 1),
+  );
+  $("#recRuler").innerHTML = Array.from(
+    { length: segs },
+    (_, i) =>
+      `<i class="${i < shown && !(st.pulled && i === st.endNo - 1) ? "is-done" : i === st.endNo - 1 && !st.allDone ? "is-cur" : ""}"></i>`,
+  ).join("");
+  /* 確定済みエンドのスコア表（高い点から表示）。行をタップするとそのエンドを下の枠に開く */
+  const card = $("#recCard");
   const focused = document.activeElement;
+  const rowFocus =
+    focused && focused.dataset && focused.dataset.erow != null && card.contains(focused)
+      ? focused.dataset.erow
+      : null;
+  card.innerHTML = s.ends.length
+    ? scorecardHtml(s, {
+        rowButtons: !st.pulled,
+        editEnd: editing ? ui.editEnd : -1,
+        skipIndex: st.pulled ? Math.min(s.editIndex, s.ends.length) : null,
+      })
+    : activeGuideHtml();
+  card.querySelectorAll("[data-erow]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        const e = +b.dataset.erow;
+        ui.editEnd = ui.editEnd === e ? -1 : e;
+        ui.selArrow = -1;
+        nativePulse("light");
+        refreshActive();
+      }),
+  );
+  const guideDone = $("#activeGuideDone");
+  if (guideDone)
+    guideDone.onclick = () => {
+      db.settings.activeGuideSeen = true;
+      save("active-guide");
+      refreshActive();
+    };
+  if (rowFocus != null) {
+    const back = card.querySelector(`[data-erow="${rowFocus}"]`);
+    if (back) back.focus({ preventScroll: true });
+  }
+  /* 入力中（または直している）エンドの枠。innerHTML の置き換えでフォーカスが消えるので data-i で戻す */
   const focusI =
-    focused && focused.classList && focused.classList.contains("sc") && chipsBox.contains(focused)
+    focused && focused.dataset && focused.dataset.i != null && chipsBox.contains(focused)
       ? focused.dataset.i
       : null;
-  chipsBox.innerHTML =
-    s.cur
-      .map((a, i) => {
-        const z = zoneStyle(a.s, a.X, s.faceType);
-        /* motion:因果 — 的タップの着弾象限から得点チップが現れる方向を決める（表示のみ。当たり判定・座標計算は不変） */
-        const fromCls = i === ui.freshArrow ? `fresh ${impactQuadrantClass(a)}` : "";
-        return `<button type="button" class="sc ${i === ui.selArrow ? "sel" : ""} ${fromCls}" aria-pressed="${i === ui.selArrow}" aria-label="${i + 1}射目 ${esc(scoreLabel(a))}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><i class="scOrder" aria-hidden="true">${i + 1}</i><span>${esc(scoreLabel(a))}</span>${a.no ? `<small>#${esc(a.no)}</small>` : ""}</button>`;
-      })
-      .join("") ||
-    `<span class="recordCurEmpty">エンド${s.ends.length + 1}：的をタップして記録</span>`;
+  const cap = $("#curCap");
+  /* 見出しは矢を選ぶ前だけ（選んだあとは修正バーの見出しがエンド名を兼ねる。短い画面で高さを空ける） */
+  cap.hidden = !editing || sel >= 0;
+  cap.innerHTML = editing
+    ? `<b>第${ui.editEnd + 1}エンドを修正中</b><span>${arr.length < per ? "矢を選ぶか、的をタップで追加" : "直す矢を選んでください"}</span>`
+    : "";
+  const rowNo = editing ? ui.editEnd + 1 : st.allDone ? Math.min(st.endNo, st.plan.planEnds) : st.endNo;
+  chipsBox.innerHTML = curRowHtml(st.allDone && !editing ? [] : arr, per, rowNo, sel, {
+    faceType: s.faceType,
+    locked: st.allDone && !editing,
+  });
+  chipsBox.querySelectorAll(".slot[data-i]").forEach(
+    (c) =>
+      (c.onclick = () => {
+        ui.selArrow = ui.selArrow === +c.dataset.i ? -1 : +c.dataset.i;
+        nativePulse("light");
+        refreshActive();
+      }),
+  );
   if (focusI != null) {
-    const back = chipsBox.querySelector(`.sc[data-i="${focusI}"]`);
+    const back = chipsBox.querySelector(`.slot[data-i="${focusI}"]`);
     if (back) back.focus({ preventScroll: true });
   }
   if (ui.freshArrow >= 0) {
     clearTimeout(ui.freshTimer);
     ui.freshTimer = setTimeout(() => {
       ui.freshArrow = -1;
-      document
-        .querySelectorAll(".shotNew,.sc.fresh")
-        .forEach((el) => el.classList.remove("shotNew", "fresh"));
+      document.querySelectorAll(".shotNew").forEach((el) => el.classList.remove("shotNew"));
     }, 640);
-    revealChipsAboveDock(chipsBox, "instant");
-  } else {
-    /* 初期表示（再描画・タブ復帰含む）でもチップ行がドックの裏に隠れていたら、無演出で即座に押し上げる */
-    revealChipsAboveDock(chipsBox, "instant");
   }
-  document.querySelectorAll("#curChips .sc").forEach(
-    (c) =>
-      (c.onclick = () => {
-        ui.selArrow = ui.selArrow === +c.dataset.i ? -1 : +c.dataset.i;
-        nativePulse("light");
-        refreshActive();
-        if (ui.selArrow >= 0) revealActiveCorrection();
-      }),
-  );
-  $("#nudge").classList.toggle("on", ui.selArrow >= 0);
-  const meta = $("#shotMeta");
-  if (meta) {
-    const a = s.cur[ui.selArrow];
-    meta.innerHTML = a ? shotMetaHtml(a, ui.selArrow) : "";
-    if (a) bindShotMeta();
+  /* 矢を選ぶと、操作列の代わりに修正バー（置き直し・1mm 移動・削除）を出す */
+  const bar = $("#nudge");
+  bar.classList.toggle("on", sel >= 0);
+  if (sel >= 0) {
+    const a = arr[sel];
+    const placed = Number.isFinite(a.x) && Number.isFinite(a.y);
+    $("#nudgeTitle").textContent =
+      `${editing ? `第${ui.editEnd + 1}エンド ` : ""}${sel + 1}射目を修正（${scoreLabel(a)}${a.s === 0 || a.X ? "" : "点"}）`;
+    $("#nudgeDesc").textContent = placed
+      ? "的をタップで置き直し・矢印は1mmずつ"
+      : "位置のない矢です。的をタップで位置を付けられます";
+    bar.querySelectorAll("[data-n]").forEach((b) => {
+      if (b.dataset.n !== "del") b.disabled = !placed;
+    });
   }
-  // stats
-  const all = [...s.ends.flat(), ...s.cur];
-  const total = all.reduce((a, x) => a + x.s, 0);
-  $("#statbar").innerHTML = `
-    <div class="stat"><b>${total}</b><span>合計</span></div>
-    <div class="stat"><b>${all.length ? (total / all.length).toFixed(2) : "-"}</b><span>平均/本</span></div>
-    <div class="stat"><b>${perfectScoreCount(all, s)}</b><span>${perfectScoreLabel(s)}</span></div>
-    <div class="stat"><b>${secondaryScoreCount(all, s)}</b><span>${secondaryScoreLabel(s)}</span></div>`;
-  /* motion:状態 — HUD の合計・残りが変わった時だけ短いティックを掛ける（値が同じなら再アニメしない） */
-  updateHudMetrics(s);
-  // ends table
-  $("#endsTbl").innerHTML = s.ends.length
-    ? `<table class="tbl"><tr><th>#</th><th>得点</th><th class="right">計</th><th></th></tr>` +
-      s.ends
-        .map((end, i) => {
-          const sorted = [...end].sort((a, b) => b.s - a.s || (b.X ? 1 : 0) - (a.X ? 1 : 0));
-          return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i % ENDCOLORS.length]}"></span>${i + 1}</td>
-        <td>${sorted.map(scoreLabel).join("・")}</td>
-        <td class="right"><b>${end.reduce((a, x) => a + x.s, 0)}</b></td>
-        <td class="right"><button class="btn sm ghost recordEndEditBtn" data-open="${i}">${icon("pencil")}</button></td></tr>`;
-        })
-        .join("") +
-      `</table>`
-    : `<div class="empty">確定したエンドはまだありません</div>`;
-  document.querySelectorAll("#endsTbl [data-open]").forEach(
-    (b) =>
-      (b.onclick = () => {
-        if (s.cur.length) {
-          toast("先に現在のエンドを確定（または取消）してください");
-          return;
-        }
-        s.editIndex = +b.dataset.open;
-        s.cur = s.ends.splice(s.editIndex, 1)[0];
-        ui.selArrow = -1;
-        save();
-        refreshActive();
-        toast(`エンド${s.editIndex + 1}を編集中（確定で戻ります）`);
-      }),
-  );
-  if (leavingCorrection) revealActiveTarget();
+  /* 操作列は状態に合わせて作り直す。キーボード操作のフォーカスは同じ id のボタンへ戻す */
+  const dock = $("#activeActionDock");
+  const dockFocus = focused && dock.contains(focused) ? focused.id : "";
+  dock.hidden = sel >= 0;
+  renderActiveDock(s, st);
+  const dockBack = dockFocus ? document.getElementById(dockFocus) : null;
+  if (dockBack && !dockBack.disabled) dockBack.focus({ preventScroll: true });
+  /* 新しいエンドが見える位置へ。開いているエンドがあればその行を見える範囲に入れる */
+  const row = editing ? card.querySelector(`.scRow[data-end="${ui.editEnd}"]`) : null;
+  if (row) {
+    const top = row.offsetTop - card.offsetTop,
+      bottom = top + row.offsetHeight;
+    if (top < card.scrollTop) card.scrollTop = top;
+    else if (bottom > card.scrollTop + card.clientHeight) card.scrollTop = bottom - card.clientHeight;
+  } else card.scrollTop = card.scrollHeight;
+  const t = $("#toast");
+  if (t && t.classList.contains("show")) positionToast(t);
 }
+/* 選択中の矢を 1mm 動かす（または削除する）。動かしたあとは、描かれる矢円と同じ半径で採点し直す */
+const NUDGE_STEP_CM = 0.1;
 function nudgeArrow(dirKey) {
   const s = db.active;
-  if (!s || ui.selArrow < 0 || !s.cur[ui.selArrow]) return;
+  if (!s) return;
+  const arr = activeEditArr(s);
+  if (ui.selArrow < 0 || !arr[ui.selArrow]) return;
   if (dirKey === "del") {
-    s.cur.splice(ui.selArrow, 1);
+    arr.splice(ui.selArrow, 1);
+    /* 確定済みエンドの矢がすべて無くなったら、そのエンド自体を外す */
+    if (arr !== s.cur && !arr.length) {
+      s.ends.splice(ui.editEnd, 1);
+      ui.editEnd = -1;
+    }
     ui.selArrow = -1;
     nativePulse("heavy");
     save();
     refreshActive();
     return;
   }
-  const a = s.cur[ui.selArrow],
-    step = s.faceD / 200;
+  const a = arr[ui.selArrow],
+    step = NUDGE_STEP_CM;
   if (!Number.isFinite(a.x) || !Number.isFinite(a.y)) {
-    toast("座標のない矢は位置を動かせません。削除して記録し直してください");
+    activeNotice("位置のない矢は動かせません");
     return;
   }
   /* 配置と同じく 0.01cm に丸めた座標を保存して採点する */
-  if (dirKey === "u") a.y = +(a.y + step).toFixed(2);
-  if (dirKey === "d") a.y = +(a.y - step).toFixed(2);
-  if (dirKey === "l") a.x = +(a.x - step).toFixed(2);
-  if (dirKey === "r") a.x = +(a.x + step).toFixed(2);
+  if (dirKey === "u") a.y = +(a.y + step).toFixed(2) || 0;
+  if (dirKey === "d") a.y = +(a.y - step).toFixed(2) || 0;
+  if (dirKey === "l") a.x = +(a.x - step).toFixed(2) || 0;
+  if (dirKey === "r") a.x = +(a.x + step).toFixed(2) || 0;
   Object.assign(a, scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s)));
   nativePulse("light");
   scheduleSave("nudge");
@@ -1825,6 +2089,11 @@ function attachTargetInput(s) {
     const p = pt.matrixTransform(inv);
     return { x: p.x, y: -p.y };
   }
+  /* 指が的の枠の外に出ているか（外で離すと取消） */
+  function outsideTarget(cp) {
+    const r = svg.getBoundingClientRect();
+    return cp.x < r.left || cp.x > r.right || cp.y < r.top || cp.y > r.bottom;
+  }
   function drawCursor(p) {
     const w = ringW(s.faceD, s.faceType);
     const fine = !!(drag && drag.fine);
@@ -1839,7 +2108,11 @@ function attachTargetInput(s) {
     lensTag.classList.toggle("miss", fine && !cutting);
     /* ルーペの下に、離したときの得点（大きく）と線かみの状態を出す */
     const hit = hitFromGlobal(+p.x.toFixed(2), +p.y.toFixed(2), s.faceD, s.faceType, arrowR);
-    lensTag.innerHTML = `<b>${esc(scoreLabel(hit))}</b><span>${fine ? (cutting ? "線かみ" : "線なし") : "点"}</span>`;
+    const out = !!(drag && drag.out);
+    lensTag.classList.toggle("is-cancel", out);
+    lensTag.innerHTML = out
+      ? `<b>取消</b><span>離すと記録しません</span>`
+      : `<b>${esc(scoreLabel(hit))}</b><span>${fine ? (cutting ? "線かみ" : "線なし") : "点"}</span>`;
     cur.innerHTML = `<g>
       <line x1="${p.x - w}" y1="${-p.y}" x2="${p.x + w}" y2="${-p.y}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
       <line x1="${p.x}" y1="${-p.y - w}" x2="${p.x}" y2="${-p.y + w}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
@@ -1889,7 +2162,7 @@ function attachTargetInput(s) {
     cur.innerHTML = "";
     lens.style.display = "none";
     lens.classList.remove("fine", "cut", "miss");
-    lensTag.classList.remove("fine", "cut", "miss");
+    lensTag.classList.remove("fine", "cut", "miss", "is-cancel");
     lensTag.style.display = "none";
     if (!touchBlocked) stopTouchGuard();
   }
@@ -1933,9 +2206,24 @@ function attachTargetInput(s) {
       blockTouch();
       return;
     }
-    if (s.cur.length >= s.perEnd) {
-      toast(`1エンド${s.perEnd}本です。「エンド確定」を押してください`);
-      return;
+    /* 矢を選んでいるときのタップは置き直し。選んでいないときは、枠が埋まっていれば受け付けず状態行で知らせる */
+    if (ui.selArrow < 0) {
+      const st = activeStatus(s);
+      const blocked =
+        activeEditEnd(s) >= 0
+          ? activeEditArr(s).length >= st.plan.per
+            ? "直す矢を選んでください"
+            : ""
+          : st.allDone
+            ? "全エンドを記録済みです"
+            : st.full
+              ? "エンドを確定してください"
+              : "";
+      if (blocked) {
+        e.preventDefault();
+        activeNotice(blocked);
+        return;
+      }
     }
     e.preventDefault();
     resetDrag();
@@ -1950,6 +2238,7 @@ function attachTargetInput(s) {
       p,
       raw: { x: cp.x, y: cp.y },
       start: { x: cp.x, y: cp.y },
+      out: false,
       moved: 0,
       fine: false,
       shown: false,
@@ -1978,6 +2267,7 @@ function attachTargetInput(s) {
     drag.p = { x: drag.p.x + (a.x - b.x) * k, y: drag.p.y + (a.y - b.y) * k };
     drag.raw = { x: cp.x, y: cp.y };
     drag.moved = Math.max(drag.moved, Math.hypot(cp.x - drag.start.x, cp.y - drag.start.y));
+    drag.out = outsideTarget(cp);
     if (!drag.shown && drag.moved >= LENS_SHOW_MOVE_PX) showLens();
     if (drag.shown) scheduleCursor(drag.p);
   }
@@ -1987,6 +2277,11 @@ function attachTargetInput(s) {
     e.preventDefault();
     clearTimeout(drag.tm);
     clearTimeout(drag.showTm);
+    /* 指を的の外へ出して離したら記録しない */
+    if (drag.out || outsideTarget(cp)) {
+      resetDrag();
+      return;
+    }
     let MX = (s.faceD / 2) * 1.18,
       MY = MX;
     if (s.faceType === "triple") {
@@ -2001,15 +2296,28 @@ function attachTargetInput(s) {
     const arrowR = activeArrowR(s);
     const hit = hitFromGlobal(p.x, p.y, s.faceD, s.faceType, arrowR);
     /* 保存する丸め後の座標で採点する（表示される矢円の位置と点数を一致させる） */
-    const rec = { x: +hit.x.toFixed(2), y: +hit.y.toFixed(2) };
+    /* -0 は保存（JSON）で 0 になるので、ここで 0 に揃える */
+    const rec = { x: +hit.x.toFixed(2) || 0, y: +hit.y.toFixed(2) || 0 };
     Object.assign(rec, scoreAt(rec.x, rec.y, s.faceD, s.faceType, arrowR));
     if (hit.spot != null) rec.spot = hit.spot;
-    s.cur.push(rec);
-    ui.freshArrow = s.cur.length - 1;
+    const arr = activeEditArr(s);
+    const target = ui.selArrow >= 0 ? arr[ui.selArrow] : null;
     nativePulse(isLineCutting(rec.x, rec.y, s.faceD, s.faceType, arrowR) ? "success" : "light");
+    if (target) {
+      /* 置き直し: 位置と点数だけ入れ替える（矢番号・理由はそのまま）。選択は保ち、続けて 1mm 動かせる */
+      Object.assign(target, { x: rec.x, y: rec.y, s: rec.s, X: rec.X });
+      if (rec.spot != null) target.spot = rec.spot;
+      else delete target.spot;
+      scheduleSave("arrow-move");
+      refreshActive();
+      announceArrow(ui.selArrow + 1, target);
+      return;
+    }
+    arr.push(rec);
+    if (arr === s.cur) ui.freshArrow = arr.length - 1;
     scheduleSave("arrow-add");
     refreshActive();
-    announceArrow(s.cur.length, rec);
+    announceArrow(arr.length, rec);
   }
   function cancel(e) {
     const cp = clientPoint(e);

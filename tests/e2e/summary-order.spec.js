@@ -1,5 +1,6 @@
 /* global db, render, save, scoreAt, lineCutRadius */
 const { test, expect } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 
 test.use({ hasTouch: true, isMobile: true });
 
@@ -92,7 +93,7 @@ for (const width of [320, 375]) {
       await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
       const before = await prepare(page, "compare");
       const expected = before.active.ends.flat().reduce((n, a) => n + a.s, 0);
-      await page.getByTestId("active-finish").click();
+      await finishFromMenu(page);
       await settle(page);
       await page.screenshot({
         path: testInfo.outputPath(`summary-order-${width}-${theme}.png`),
@@ -131,7 +132,7 @@ for (const mode of ["first", "gam-round", "edit"]) {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     const before = await prepare(page, mode);
-    await page.getByTestId("active-finish").click();
+    await finishFromMenu(page);
     await settle(page);
     const p = await positions(page);
     expect(p.stats).toBeLessThan(p.decision);

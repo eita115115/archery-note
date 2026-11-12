@@ -51,7 +51,7 @@ for (const width of [320, 375]) {
     await page.touchscreen.tap(chip.x + chip.width / 2, chip.y + chip.height / 2);
     await settle(page);
     await testInfo.attach("correction-accessibility", {
-      body: await page.locator("#nudge .npad").ariaSnapshot(),
+      body: await page.locator("#nudge .nudgeKeys").ariaSnapshot(),
       contentType: "text/plain",
     });
     await page.screenshot({
@@ -63,7 +63,7 @@ for (const width of [320, 375]) {
     await expect(pad.getByRole("button")).toHaveCount(5);
     const before = await page.evaluate(() => db.active.cur);
     const scroll = await page.evaluate(() => globalThis.scrollY);
-    const step = 122 / 200;
+    const step = 0.1; // v5: 1mm ずつ
     let x = before[0].x,
       y = before[0].y;
     for (const [direction, dx, dy, key] of [

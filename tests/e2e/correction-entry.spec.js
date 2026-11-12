@@ -50,13 +50,11 @@ async function record(page) {
 }
 
 async function pad(page) {
-  return page.locator("#nudge .npad button").evaluateAll((buttons) => {
+  return page.locator("#nudge [data-n]").evaluateAll((buttons) => {
     const header = { bottom: 0 }; // v5: 上に固定の帯は無い（画面の上端が基準）
-    const dock = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
-    const notice = globalThis.document.querySelector("#toast");
-    const noticeTop = notice.classList.contains("show")
-      ? notice.getBoundingClientRect().top
-      : dock.top;
+    // v5: 修正バーは操作列の代わりに画面の下端へ出る。下の基準は画面の下端
+    const dock = { top: globalThis.innerHeight };
+    const noticeTop = dock.top;
     return buttons.map((el) => {
       const r = el.getBoundingClientRect();
       const points = [
@@ -89,17 +87,13 @@ async function expectPad(page) {
     expect(b.bottom, b.direction).toBeLessThanOrEqual(b.below - 7);
     expect(b.hit, b.direction).toBe(true);
   }
-}
-
-async function revealSecondary(page, locator) {
-  const delta = await locator.evaluate((el) => {
-    const r = el.getBoundingClientRect(),
-      h = { bottom: 0 },
-      d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
-    return r.top + r.height / 2 - (Math.max(0, h.bottom) + d.top) / 2;
-  });
-  await page.evaluate((top) => globalThis.scrollBy({ top, behavior: "instant" }), delta);
-  await settle(page);
+  // 修正バーが出ても画面は縦に流れない（没入画面は1画面に収まる）
+  expect(await page.evaluate(() => globalThis.scrollY)).toBe(0);
+  expect(
+    await page.evaluate(
+      () => globalThis.document.documentElement.scrollHeight <= globalThis.innerHeight,
+    ),
+  ).toBe(true);
 }
 
 async function expectTarget(page) {
@@ -168,7 +162,7 @@ for (const config of [
           await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(top);
           await expect
             .poll(async () => (await state(page)).active.cur[0].x)
-            .toBeCloseTo(before.x + (3 * config.faceD) / 200);
+            .toBeCloseTo(before.x + 0.3); // v5: 矢印は的の大きさによらず 1mm ずつ
           const agreement = await page.evaluate(() => {
             const s = db.active,
               a = s.cur[0];
@@ -179,26 +173,27 @@ for (const config of [
           });
           expect(agreement.arrow.s).toBe(agreement.hit.s);
           expect(agreement.arrow.X).toBe(agreement.hit.X);
+          // v5: 外れ理由と矢番号は修正バーの「理由・矢番号」から開くシートに置く
+          await tap(page, page.getByRole("button", { name: "理由・矢番号", exact: true }));
           const reason = page.getByRole("button", { name: "風", exact: true });
-          await revealSecondary(page, reason);
-          const reasonTop = await page.evaluate(() => globalThis.scrollY);
           await tap(page, reason);
+          await expect(reason).toHaveAttribute("aria-pressed", "true");
           await expect.poll(async () => (await state(page)).active.cur[0].reason).toBe("風");
-          expect(await page.evaluate(() => globalThis.scrollY)).toBe(reasonTop);
           const number = page.getByRole("textbox", { name: "矢番号", exact: true });
-          await revealSecondary(page, number);
-          const numberTop = await page.evaluate(() => globalThis.scrollY);
           await number.fill("7");
           await number.press("Tab");
           await expect.poll(async () => (await state(page)).active.cur[0].no).toBe("7");
-          expect(await page.evaluate(() => globalThis.scrollY)).toBe(numberTop);
-          await revealSecondary(page, page.locator("#nudgeDone"));
+          await tap(page, page.locator("#shotMetaClose"));
+          await expect(page.getByTestId("shot-meta-sheet")).toHaveCount(0);
+          await expect(page.locator('#curChips [data-i="0"]')).toContainText("#7");
+          await expect(page.locator("#nudge")).toHaveClass(/\bon\b/);
+          expect(await page.evaluate(() => globalThis.scrollY)).toBe(0);
           const corrected = (await state(page)).active.cur;
           await tap(page, page.locator("#nudgeDone"));
           await settle(page);
           await expectTarget(page);
           expect((await state(page)).active.cur).toEqual(corrected);
-          // A second arrow can enter correction too; confirm while correction is open.
+          // A second arrow can enter correction too. v5: 修正バーを「完了」で閉じてからエンドを確定する
           fs.writeFileSync(
             testInfo.outputPath("before-second-selection.json"),
             JSON.stringify(
@@ -226,6 +221,8 @@ for (const config of [
           await page.screenshot({ path: testInfo.outputPath("before-second-selection.png") });
           await tap(page, page.locator('#curChips [data-i="1"]'));
           await expectPad(page);
+          await expect(page.getByTestId("active-action-dock")).toBeHidden();
+          await tap(page, page.locator("#nudgeDone"));
           await tap(page, page.getByTestId("active-end"));
           await expect.poll(async () => (await state(page)).active.ends.length).toBe(1);
           expect((await state(page)).active.ends[0]).toEqual(corrected);

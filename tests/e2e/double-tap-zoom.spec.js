@@ -78,7 +78,7 @@ test("double-tapping the target records two arrows without triggering viewport z
 
   expect(await readViewportScale(page)).toBe(1);
 
-  const chipCount = await page.locator('[data-testid="active-arrow-chips"] .sc').count();
+  const chipCount = await page.locator('[data-testid="active-arrow-chips"] .slot[data-i]').count();
   expect(chipCount).toBe(2);
 });
 

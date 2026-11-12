@@ -895,7 +895,7 @@ html.dark .ovl,html.auto .ovl{background:rgba(0,0,0,.58);}
 html.dark .shotNew circle,html.auto .shotNew circle{animation-name:impactFlashDark;}
 .toast.show{opacity:.98; transform:translateX(-50%) translateY(0) scale(1);}
 /* 記録中だけ実寸の操作列から16px空ける。シート内の通知は通常位置を保つ。 */
-body:not(.modalOpen) main.hasActiveDock ~ .toast{bottom:var(--record-toast-bottom,calc(92px + env(safe-area-inset-bottom)));}
+html.recording body:not(.modalOpen) .toast{bottom:var(--record-toast-bottom,calc(92px + env(safe-area-inset-bottom)));}
 .histChip{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:baseline;}
 .tgWrap svg.main.triple{width:58%; margin:0 auto;}
 .updbar{
@@ -1832,7 +1832,7 @@ p.basis{margin:0; font-size:14px; line-height:1.65; color:var(--sub); padding:4p
   background-position:calc(100% - 9px) 55%,calc(100% - 4px) 55%; background-size:5px 5px; background-repeat:no-repeat;
 }
 .pick option{background:var(--surface); color:var(--ink);}
-.startBand{padding:14px 0 16px; margin-top:4px;}
+.startBand{padding:14px var(--gut) 16px; margin-top:4px;}
 .startBand .l{font-size:14px; color:var(--sub); line-height:1.3;}
 .startBand .c{font-size:22px; font-weight:700; line-height:1.35; margin-top:2px;}
 .startBand .m{font-size:14px; color:var(--sub); line-height:1.45; margin-bottom:12px;}
@@ -1938,8 +1938,10 @@ button.scRow{font-size:inherit; font-weight:inherit; cursor:pointer;}
 .editBar{flex:none; background:var(--surface); border-top:1px solid var(--rule); padding:8px var(--gut) calc(8px + var(--safe-b));}
 .editBar .ttl{font-size:15px; font-weight:600; line-height:1.4;}
 .editBar .desc{font-size:14px; color:var(--sub); line-height:1.4; margin-bottom:8px;}
-.nudgeRow{display:grid; grid-template-columns:repeat(4,48px) 1fr 1fr; gap:6px;}
-.nudgeRow .btn{padding:0; min-height:48px; font-size:15px;}
+.nudgeRow{display:flex; gap:6px;}
+.nudgeKeys{display:grid; grid-template-columns:repeat(4,48px) minmax(0,1fr); gap:6px; flex:1 1 auto; min-width:0;}
+.nudgeRow > .btn{flex:0 0 calc((100% - 222px) / 2);}
+.nudgeRow .btn{padding:0; min-width:0; min-height:48px; font-size:15px;}
 .editKeys{display:grid; grid-template-columns:repeat(6,1fr); gap:5px; margin-top:8px;}
 .editKeys .key{height:52px; font-size:20px;}
 /* ノート */
@@ -1987,7 +1989,89 @@ button.scRow{font-size:inherit; font-weight:inherit; cursor:pointer;}
   .key{height:52px;}
   .keys{gap:5px;}
   .dockRow.t3{grid-template-columns:66px 84px 1fr;}
-  .nudgeRow{grid-template-columns:repeat(4,44px) 1fr 1fr; gap:5px;}
+  .nudgeRow{gap:5px;}
+  .nudgeKeys{grid-template-columns:repeat(4,44px) minmax(0,1fr); gap:5px;}
+  .nudgeRow > .btn{flex-basis:calc((100% - 201px) / 2);}
+  .scard.pn .scRow{grid-template-columns:24px repeat(var(--sc-cols,6),minmax(0,1fr)) 34px 44px 21px 21px;}
+  .curRow.pn{grid-template-columns:28px repeat(var(--sc-cols,6),minmax(0,1fr)) 50px;}
+  .curRow.wrap2{grid-auto-rows:50px;}
   .bigNum{font-size:40px;}
   .fig .n{font-size:26px;}
 }
+
+/* ===================================================================================
+   段 2: 記録中の没入画面（docs/design/v5/design.md 4.2・4.3）。
+   記録中は html.recording が付き、画面名の行とタブを隠して画面の高さいっぱいに並べる:
+   上部 → 状態行 → 目盛り → 的 → 確定済みのスコア表 → 入力中エンド → 操作列（または修正バー）
+   =================================================================================== */
+html.recording body{padding-bottom:0; overflow:hidden;}
+html.recording #viewTop,html.recording #tabs,html.recording #gearSubTabs{display:none;}
+html.recording main{max-width:480px; padding:0;}
+.recScreen{--vh:100vh; height:var(--vh); padding-top:var(--safe-t); background:var(--bg);}
+@supports (height:100dvh){.recScreen{--vh:100dvh;}}
+/* 的は正方形。幅いっぱいを基本に、短い画面では固定の帯（--rec-fixed）を引いた高さに合わせて縮める */
+.recScreen{--tg:max(160px,min(100vw,480px,calc(var(--vh) - var(--rec-fixed,318px) - var(--safe-t) - var(--safe-b))));}
+.recTop .condT{overflow:hidden; text-overflow:ellipsis;}
+.recTop .txtBtn{flex:none;}
+.recStat .recStatMain{flex:1 1 auto; min-width:0;}
+.recStat .msg{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.recStat .tot{flex:none; white-space:nowrap;}
+.recTarget{
+  flex:none; position:relative; display:flex; justify-content:center; background:var(--mat);
+  border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); touch-action:none;
+}
+.recTarget svg.main{display:block; width:var(--tg); height:var(--tg); background:var(--mat); touch-action:none;}
+.recScreen.is-triple .recTarget svg.main{width:calc(var(--tg) * .4);}
+.zoomBtn{margin:0; cursor:pointer; touch-action:manipulation;}
+/* 拡大鏡の中では矢番号の吹き出しを消す（拡大されて矢の位置を隠すため）。<use> の複製は変数を継承する */
+.arrowLabel{opacity:var(--arrow-label-opacity,1);}
+#lensSvg{--arrow-label-opacity:0;}
+.lensTag.is-cancel,.lensTag.fine.is-cancel{background:var(--ink); color:var(--bg);}
+/* スコア表: 行ごとに「このエンドを直す」ボタンを1つ置き、行全体をその当たり判定にする */
+.scard .scRow{position:relative;}
+.scard.is-edit .scRow > .endNo{position:static;}
+.scRow.scHead > *{font-size:13px; font-weight:400; color:var(--sub);}
+/* 記録中の表は見出しを上に貼り付け、スクロールしても列の意味が分かるようにする */
+.miniCard .scHead{position:sticky; top:0; z-index:3;}
+.scRowBtn{
+  width:100%; height:100%; margin:0; padding:0; border:0; background:none;
+  font:inherit; color:inherit; cursor:pointer; touch-action:manipulation;
+}
+.scRowBtn::after{content:""; position:absolute; inset:0; z-index:1;}
+.scRowBtn:focus-visible{outline:none;}
+.scRowBtn:focus-visible::after{outline:2px solid var(--accent); outline-offset:-2px;}
+/* 3射・6射以外のエンド: 列数を変数で渡す。7射以上は2段に折り返し、回・計・累計・数える列は2段ぶんの高さ */
+.scard.pn .scRow{grid-template-columns:30px repeat(var(--sc-cols,6),minmax(0,1fr)) 40px 52px 26px 26px;}
+.scard.wrap2 .scRow > .endNo{grid-column:1; grid-row:1 / span 2;}
+.scard.wrap2 .scRow > .endTot{grid-column:-5; grid-row:1 / span 2;}
+.scard.wrap2 .scRow > .runTot{grid-column:-4; grid-row:1 / span 2;}
+.scard.wrap2 .scRow > .cnt{grid-column:-3; grid-row:1 / span 2;}
+.scard.wrap2 .scRow > .cnt:last-child{grid-column:-2;}
+.scard.wrap2 .scRow > .cell{min-height:36px;}
+.curRow.pn{grid-template-columns:34px repeat(var(--sc-cols,6),minmax(0,1fr)) 58px;}
+.curRow.wrap2{height:auto; grid-auto-rows:54px;}
+.curRow.wrap2 > .curNo{grid-column:1; grid-row:1 / span 2;}
+.curRow.wrap2 > .sum{grid-column:-2; grid-row:1 / span 2;}
+.curCap[hidden]{display:none;}
+.curEnd #curChips{row-gap:0; padding:0; min-height:0;}
+button.slot{font-family:inherit; cursor:pointer; touch-action:manipulation;}
+.slot .arrowNo{position:absolute; top:2px; right:4px; font-size:13px; font-weight:600; color:var(--sub); line-height:1.1;}
+.miniEmpty.activeGuide{display:flex; flex-direction:column; align-items:flex-start; gap:4px; margin:0;}
+.miniEmpty.activeGuide b{font-size:15px; color:var(--ink);}
+.miniEmpty .activeGuideDone{margin:0;}
+/* 操作列と修正バー（矢を選ぶと操作列の代わりに出る） */
+.dockRow{touch-action:manipulation;}
+.dockRow[hidden]{display:none;}
+.dockRow.t1{grid-template-columns:1fr;}
+.dockRow .btn{width:auto; min-width:0;}
+.editBar{display:none; touch-action:manipulation;}
+.editBar.on{display:block;}
+.editBar .ttl{display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:44px;}
+.editBar .desc{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.editBar .ttl > span{min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.editBar .ttl .txtBtn{flex:none;}
+/* 記録のメニュー */
+.recMenu .basis{padding:0 0 8px;}
+.recMenuFigs{border-top:1px solid var(--rule);}
+.recMenuFigs .fig .n{font-size:24px;}
+.recMenu .lrow{cursor:pointer;}

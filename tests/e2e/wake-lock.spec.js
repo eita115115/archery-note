@@ -1,6 +1,7 @@
 "use strict";
 
 const { expect, test } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 
 /* Screen Wake Lock（scripts/10-storage-native.js の wakeLock IIFE）の実挙動検証。
    記録セッション中に画面が自動消灯しないよう navigator.wakeLock.request("screen") を握り、
@@ -130,9 +131,9 @@ test("finishing a record session releases the screen wake lock", async ({ page }
 
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await target.click(); // 中央タップ=X。1本記録すれば単一距離の終了は確認ダイアログを挟まない
-  await expect(page.locator('[data-testid="active-arrow-chips"] .sc')).toHaveCount(1);
+  await expect(page.locator('[data-testid="active-arrow-chips"] .slot[data-i]')).toHaveCount(1);
 
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
   await expect(page.locator(".ovl .sheet")).toBeVisible(); // 終了サマリシート
 
   await expect.poll(() => page.evaluate(() => globalThis.__wakeLockReleaseCalls)).toBe(1);
@@ -188,7 +189,7 @@ test("unsupported browsers skip wake lock silently and the session keeps working
   await page.getByTestId("record-start").click();
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await target.click();
-  await expect(page.locator('[data-testid="active-arrow-chips"] .sc')).toHaveCount(1);
+  await expect(page.locator('[data-testid="active-arrow-chips"] .slot[data-i]')).toHaveCount(1);
   expect(unexpectedErrors).toEqual([]);
 });
 
@@ -209,7 +210,7 @@ test("a rejected wake lock request warns via console but keeps the session usabl
 
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await target.click();
-  await expect(page.locator('[data-testid="active-arrow-chips"] .sc')).toHaveCount(1);
+  await expect(page.locator('[data-testid="active-arrow-chips"] .slot[data-i]')).toHaveCount(1);
   // console.warn は collectUnexpectedErrors の対象外（type()==="error" のみ拾う）なので、
   // ここで unexpectedErrors が空であること自体が「UIエラーなし」の直接的な検証になる
   expect(unexpectedErrors).toEqual([]);

@@ -1,6 +1,7 @@
 "use strict";
 
 const { expect, test } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
@@ -285,7 +286,7 @@ test("finishing a session shows a before→after streak row in the summary sheet
 
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await target.click(); // 中央タップ=X。単一距離1本の終了は確認ダイアログを挟まない
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
 
   const summaryGam = page.getByTestId("summary-gamification");
   await expect(summaryGam).toBeVisible();
@@ -450,7 +451,7 @@ test("importing history with gamification enabled backfills quietly and does not
     await page.getByTestId("record-start").click();
     const target = page.getByTestId("active-target").locator("#tgsvg");
     await target.click();
-    await page.getByTestId("active-finish").click();
+    await finishFromMenu(page);
 
     await expect(page.locator(".ovl .sheet")).toBeVisible();
     await expect(page.locator('[data-testid="summary-badges"]')).toHaveCount(0);

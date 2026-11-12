@@ -69,8 +69,15 @@ for (const width of [320, 375]) {
     expect(right.x + right.width).toBeGreaterThan(width - 20);
     expect(right.y).toBeGreaterThanOrEqual(0);
     await expect(page.locator("header.app")).toHaveCount(0);
+    // v5: 的は幅いっぱい。拡大鏡は的の枠の右上の角に少し掛かることがあるが、的面（円）には重ならない
     const svg = await page.locator("#tgsvg").boundingBox();
-    expect(right.y + right.height).toBeLessThanOrEqual(svg.y + 1);
+    const faceR = svg.width / 2 / 1.035;
+    const corner = Math.hypot(
+      right.x - (svg.x + svg.width / 2),
+      right.y + right.height - (svg.y + svg.height / 2),
+    );
+    expect(corner).toBeGreaterThan(faceR);
+    expect(right.y + right.height).toBeLessThanOrEqual(svg.y + 24);
   });
 }
 

@@ -496,7 +496,9 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 /* 記録中は通知を固定操作列の上へ。位置だけを測り、点数・保存・通知の寿命には触れない。 */
 function positionToast(t){
-  const dock=$("#activeActionDock");
+  /* 矢の修正中は操作列の代わりに修正バー（#nudge）が出ている */
+  const bar=$("#nudge.on");
+  const dock=bar||$("#activeActionDock");
   if(dock){
     const rect=dock.getBoundingClientRect();
     t.style.setProperty("--record-toast-bottom",`${window.innerHeight-rect.top+16}px`);

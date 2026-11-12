@@ -44,11 +44,20 @@ for (const width of [320, 375]) {
       render();
     });
     const before = await page.evaluate(() => ({ sessions: db.sessions, active: db.active }));
-    await page.locator("#btnSettings").click();
+    // v5: 記録中は画面名の行が無い。設定はメニューから開く
+    await page.getByTestId("active-menu").click();
+    await page.locator("#mSettings").click();
+    await expect(page.locator("#setClose")).toBeVisible();
     await expect(page.locator(".ovl")).toHaveCount(1);
     await pullSheetHandle(page, context);
     await expect(page.locator(".ovl")).toHaveCount(0);
-    // Exactly one touchscreen tap. No keyboard, mouse click, or retry follows the pull.
+    // Exactly one touchscreen tap per control. No keyboard, mouse click, or retry follows the pull.
+    // v5: 終了はメニューの中なので、引き下げ直後の1タップでメニューが開き、次の1タップで終了する
+    const menu = page.getByTestId("active-menu"),
+      menuBox = await menu.boundingBox();
+    expect(menuBox).not.toBeNull();
+    await page.touchscreen.tap(menuBox.x + menuBox.width / 2, menuBox.y + menuBox.height / 2);
+    await expect(page.getByTestId("active-menu-sheet")).toBeVisible();
     const button = page.getByTestId("active-finish"),
       box = await button.boundingBox();
     expect(box).not.toBeNull();

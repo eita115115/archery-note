@@ -79,6 +79,7 @@ for (const width of [320, 375]) {
         await page.goto("/");
         await expect(page.locator("#bootFallback")).toBeHidden();
         const before = await stored(page);
+        await nativeTap(page, "#bMenu"); // v5: 終了はメニューの中
         await nativeTap(page, "#bFinish");
         await expect(page.locator("#sumPlot")).toBeAttached();
         await settle(page);
@@ -138,6 +139,7 @@ for (const count of [1, 2]) {
       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(database));
     }, data);
     await page.goto("/");
+    await nativeTap(page, "#bMenu"); // v5: 終了はメニューの中
     await nativeTap(page, "#bFinish");
     await expect(page.getByTestId("todays-result-stability-pending")).toContainText(
       `${count}本の座標`,

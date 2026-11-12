@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { pauseRecording, resumeRecording } = require("./record-helpers");
 
 async function settled(page) {
   await expect
@@ -120,30 +121,56 @@ for (const size of [
         for (let n = 1; n < 6; n++) await arrow(page, n);
         await expect(announce).toHaveText(/^6射目 /);
         const six = (await state(page)).active.cur;
-        // A seventh tap emits the genuine multi-line end-capacity instruction.
+        // v5: 7本目のタップは記録せず、状態行（aria-live）で知らせる。トーストは出さない
         const target = await page.getByTestId("active-target").boundingBox();
         await page.touchscreen.tap(target.x + target.width / 2, target.y + target.height / 2);
-        await expect(page.getByRole("status")).toContainText("エンド確定");
-        await readableToast(page, true);
+        const notice = page.locator("#recMsg");
+        await expect(notice).toHaveText("エンドを確定してください");
+        await expect(notice).toHaveAttribute("aria-live", "polite");
+        await expect(notice).toHaveClass(/is-warn/);
+        await expect(page.getByRole("status")).not.toHaveClass(/show/);
+        const noticeBox = await notice.evaluate((e) => {
+          const r = e.getBoundingClientRect(),
+            cs = globalThis.getComputedStyle(e);
+          return {
+            left: r.left,
+            right: r.right,
+            width: globalThis.innerWidth,
+            fits: e.scrollWidth <= e.clientWidth + 1,
+            size: parseFloat(cs.fontSize),
+          };
+        });
+        expect(noticeBox.left).toBeGreaterThanOrEqual(0);
+        expect(noticeBox.right).toBeLessThanOrEqual(noticeBox.width);
+        expect(noticeBox.fits).toBe(true);
+        expect(noticeBox.size).toBeGreaterThanOrEqual(13);
         await page.screenshot({ path: testInfo.outputPath("record-toast-capacity.png") });
         expect((await state(page)).active.cur).toEqual(six);
+        // エンド確定もトーストなし。スコア表の行と状態行で分かる
         await tap(page, page.getByTestId("active-end"));
-        await expect(page.getByRole("status")).toHaveText("エンド1 確定");
-        await readableToast(page, true);
+        await expect.poll(async () => (await state(page)).active.ends.length).toBe(1);
+        await expect(page.getByRole("status")).not.toHaveClass(/show/);
+        await expect(page.getByTestId("active-hud")).toContainText("第2エンド");
+        await expect(page.locator('[data-testid="scorecard"] .scRow[data-end="0"]')).toBeVisible();
         expect((await state(page)).active.ends[0]).toEqual(six);
         await arrow(page, 0);
         await tap(page, page.getByTestId("active-undo"));
         await expect.poll(async () => (await state(page)).active.cur.length).toBe(0);
 
-        await page.locator("#btnSettings").click();
+        // v5: 記録中の設定はメニューから。ほかの通知（設定・履歴など）は従来どおり読める位置に出る
+        await page.getByTestId("active-menu").click();
+        await page.locator("#mSettings").click();
+        await expect(page.locator("#setClose")).toBeVisible();
         await page.evaluate(() => globalThis.toast("設定の通知を確認", 10000));
         await readableToast(page, false);
         await page.getByRole("button", { name: "閉じる（下にスワイプ）", exact: true }).click();
         await readableToast(page, true);
+        await pauseRecording(page);
         await page.locator('#tabs [data-v="history"]').click();
         await page.evaluate(() => globalThis.toast("履歴の通知を確認", 10000));
         await readableToast(page, false);
         await page.locator('#tabs [data-v="record"]').click();
+        await resumeRecording(page);
         await expect(page.getByRole("status")).toHaveText("履歴の通知を確認");
         await readableToast(page, true);
         await page.setViewportSize({ width: size.width === 320 ? 375 : 320, height: 700 });
@@ -155,6 +182,7 @@ for (const size of [
             ),
         );
         await readableToast(page, true);
+        await tap(page, page.getByTestId("active-menu"));
         await tap(page, page.getByTestId("active-finish"));
         await expect(page.locator("#sumClose")).toBeVisible();
         await page.evaluate(() => globalThis.toast("結果の通知を確認", 10000));

@@ -133,6 +133,9 @@ async function arm(page) {
 async function finish(page, info, label, kind, reload = true) {
   const baseline = await arm(page);
   await settled(page);
+  // v5: 終了はメニューの中（testid active-finish / #bFinish はメニューの項目）
+  await page.getByTestId("active-menu").click();
+  await settled(page);
   const p = await page.locator("#bFinish").evaluate((el) => {
     const r = el.getBoundingClientRect(),
       x = r.x + r.width / 2,

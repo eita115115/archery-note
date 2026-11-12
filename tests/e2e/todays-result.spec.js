@@ -1,6 +1,7 @@
 "use strict";
 
 const { expect, test } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 
 /* 「今日の結果」統合パネル（scripts/49-todays-result.js の純関数 +
    scripts/50-record-view.js の openSummary 統合 + scripts/60-history-sight-view.js の
@@ -155,7 +156,7 @@ test("first-ever session shows the baseline-established copy, with gamification 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
   const empty = page.getByTestId("todays-result-empty");
   await expect(empty).toBeVisible();
   await expect(empty).toHaveText("初回記録: 基準ができました。次回から比較が始まります。");
@@ -178,7 +179,7 @@ test("second same-condition session shows the previous-comparison row in the sum
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
   const panel = page.getByTestId("todays-result");
   await expect(panel).toBeVisible();
   const weeklyRow = page.getByTestId("todays-result-weekly");
@@ -203,7 +204,7 @@ test("first session at a new condition says condition-first, not first-ever (str
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
   const empty = page.getByTestId("todays-result-empty");
   await expect(empty).toBeVisible();
   await expect(empty).toHaveText("この条件では初記録。次回から比較が始まります。");

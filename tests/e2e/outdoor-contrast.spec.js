@@ -81,7 +81,7 @@ function contrastRatio(colorA, colorB) {
 async function tapAtRingOffset(target, ringMultiple) {
   const box = await target.boundingBox();
   const faceD = 122;
-  const M = (faceD / 2) * 1.18; // 30-target-svg.js targetMarkup() の M と同一式
+  const M = (faceD / 2) * 1.035; // v5: 記録中の的の表示範囲（50-record-view.js activeViewHalf）
   const w = faceD / 20; // ringW(122,"single")
   const touchCm = faceD / 85 + faceD / 1200; // arrowMarkRadius(122) + targetLineHalfWidth(122,"single")
   const offsetCm = w * ringMultiple + touchCm;
@@ -103,15 +103,26 @@ test("red-zone score chip (7-8 points) meets WCAG AA contrast against its text",
 
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await tapAtRingOffset(target, 2.5); // (2w,3w] の中央 -> 8点（zoneStyle: s>=7 は var(--red)）
-  const chip = page.locator('[data-testid="active-arrow-chips"] .sc');
+  // v5: 入力中エンドの枠は罫線の面（帯の色）に文字色。的の色は枠の下線だけに使い、文字には使わない
+  const chip = page.locator('[data-testid="active-arrow-chips"] .slot[data-i]');
   await expect(chip).toHaveCount(1);
-  await expect(chip.locator("span").first()).toHaveText("8");
+  await expect(chip).toHaveAttribute("aria-label", "1射目 8");
+  await expect(chip).toHaveClass(/\bzr\b/);
 
   const colors = await chip.evaluate((el) => {
     const cs = globalThis.getComputedStyle(el);
-    return { bg: cs.backgroundColor, fg: cs.color };
+    return {
+      bg: globalThis.getComputedStyle(el.closest(".curEnd")).backgroundColor,
+      own: cs.backgroundColor,
+      fg: cs.color,
+      line: globalThis.getComputedStyle(el, "::after").backgroundColor,
+      size: parseFloat(cs.fontSize),
+    };
   });
+  expect(colors.own).toBe("rgba(0, 0, 0, 0)");
   expect(contrastRatio(colors.bg, colors.fg)).toBeGreaterThanOrEqual(4.5);
+  expect(colors.size).toBeGreaterThanOrEqual(24);
+  expect(colors.line).toBe("rgb(242, 59, 59)");
   expect(unexpectedErrors).toEqual([]);
 });
 
@@ -127,15 +138,26 @@ test("blue-zone score chip (5-6 points) meets WCAG AA contrast against its text"
 
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await tapAtRingOffset(target, 4.5); // (4w,5w] の中央 -> 6点（zoneStyle: s>=5 は var(--blue)）
-  const chip = page.locator('[data-testid="active-arrow-chips"] .sc');
+  // v5: 入力中エンドの枠は罫線の面（帯の色）に文字色。的の色は枠の下線だけに使い、文字には使わない
+  const chip = page.locator('[data-testid="active-arrow-chips"] .slot[data-i]');
   await expect(chip).toHaveCount(1);
-  await expect(chip.locator("span").first()).toHaveText("6");
+  await expect(chip).toHaveAttribute("aria-label", "1射目 6");
+  await expect(chip).toHaveClass(/\bzb\b/);
 
   const colors = await chip.evaluate((el) => {
     const cs = globalThis.getComputedStyle(el);
-    return { bg: cs.backgroundColor, fg: cs.color };
+    return {
+      bg: globalThis.getComputedStyle(el.closest(".curEnd")).backgroundColor,
+      own: cs.backgroundColor,
+      fg: cs.color,
+      line: globalThis.getComputedStyle(el, "::after").backgroundColor,
+      size: parseFloat(cs.fontSize),
+    };
   });
+  expect(colors.own).toBe("rgba(0, 0, 0, 0)");
   expect(contrastRatio(colors.bg, colors.fg)).toBeGreaterThanOrEqual(4.5);
+  expect(colors.size).toBeGreaterThanOrEqual(24);
+  expect(colors.line).toBe("rgb(55, 166, 224)");
   expect(unexpectedErrors).toEqual([]);
 });
 

@@ -637,7 +637,7 @@ function openHistDetail(id) {
     save();
     closeModal(ovl);
     showView("record");
-    toast("過去の記録を編集中。「セッション終了」で上書き保存されます");
+    toast("過去の記録を編集中。メニューの「編集を終了して保存する」で上書きします");
   };
   ovl.querySelector("#hCard").onclick = () => exportScorecardImage(sess);
   ovl.querySelector("#hDel").onclick = async () => {
