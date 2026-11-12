@@ -21,6 +21,7 @@ const fixtureFiles = {
   formDiagnosticsMalformedCoordinator:
     "archery-note-v1-form-diagnostics-malformed-coordinator.json",
   customRounds: "archery-note-v1-custom-rounds.json",
+  notes: "archery-note-v1-notes.json",
 };
 
 function assert(ok, message) {
@@ -113,6 +114,7 @@ function checkBaseShape(name, db) {
   assertArray(db.sightMarks, `[${name}] sightMarks`);
   assertArray(db.sessions, `[${name}] sessions`);
   assertArray(db.trash, `[${name}] trash`);
+  assertArray(db.notes, `[${name}] notes`);
   assertObject(db.settings, `[${name}] settings`);
 }
 
@@ -939,6 +941,123 @@ function checkGamificationEnabledDefault(storageApi) {
   );
 }
 
+/* v5 段 6: メモだけのノート（db.notes）と練習のタグ（sess.tags）。追加のみで、書いた本文は消さない */
+function checkNotesCompatibility(storageApi, fixtures) {
+  const source = fixtures.notes;
+  const db = storageApi.normalizeDb(clone(source));
+  checkBaseShape("notes", db);
+  assertStrict.deepStrictEqual(db.notes, source.notes, "[notes] notes survive normalizeDb unchanged");
+  assertStrict.deepStrictEqual(
+    db.sessions[0].tags,
+    source.sessions[0].tags,
+    "[notes] session tags survive normalizeDb unchanged",
+  );
+  assertEqual(db.sessions[0].note, source.sessions[0].note, "[notes] session memo text");
+  assertStrict.deepStrictEqual(db.trash[0].data, source.trash[0].data, "[notes] trashed note data");
+
+  // notes を持たない既存データ・壊れた値は空配列に補完される（migration なし）
+  for (const legacy of [fixtures.representative, { notes: null }, { notes: "x" }, { notes: {} }]) {
+    const out = storageApi.normalizeDb(clone(legacy));
+    assertArray(out.notes, "[notes] legacy db notes");
+    assertEqual(out.notes.length, 0, "[notes] legacy db notes count");
+  }
+  assertStrict.deepStrictEqual(storageApi.blankDb().notes, [], "[notes] blankDb has notes");
+  // tags を持たない練習に、空の tags を勝手に足さない
+  const plain = storageApi.normalizeDb(clone(fixtures.representative));
+  assert(
+    plain.sessions.every((s) => !Object.hasOwn(s, "tags")),
+    "[notes] sessions without tags must not gain a tags key",
+  );
+
+  // 壊れた項目: 本文のあるものは残す（文字列は包む・id を補う・型を寄せる）。本文を持てないものだけ落とす
+  const messy = storageApi.normalizeDb({
+    sessions: [{ id: "s-tags", ends: [], tags: "風" }, { id: "s-tags2", ends: [], tags: [1, "", "風", "風", null] }],
+    notes: [
+      "文字列だけのメモ",
+      null,
+      42,
+      [],
+      "   ",
+      { text: "id のないメモ", date: 20261108 },
+      { id: "dup", text: "同じ id の1つ目", ts: "1794100000000", tags: "射型" },
+      { id: "dup", text: "同じ id の2つ目", ts: "abc", tags: [null, "風", 3] },
+      { id: "no-text", date: "2026-11-08" },
+      { id: "num-text", text: 12345, date: null },
+    ],
+  });
+  assertStrict.deepStrictEqual(
+    messy.notes.map((n) => n.text),
+    ["文字列だけのメモ", "id のないメモ", "同じ id の1つ目", "同じ id の2つ目", "", "12345"],
+    "[notes] every entry that carries text is kept, in order",
+  );
+  assertEqual(new Set(messy.notes.map((n) => n.id)).size, messy.notes.length, "[notes] ids are unique");
+  assert(
+    messy.notes.every(
+      (n) =>
+        typeof n.id === "string" &&
+        n.id &&
+        typeof n.text === "string" &&
+        typeof n.date === "string" &&
+        Number.isFinite(n.ts),
+    ),
+    "[notes] id / text / date are strings and ts is a number",
+  );
+  assertEqual(messy.notes[1].date, "20261108", "[notes] non-string date becomes a string");
+  assertEqual(messy.notes[2].id, "dup", "[notes] first duplicate keeps its id");
+  assertEqual(messy.notes[2].ts, 1794100000000, "[notes] numeric string ts becomes a number");
+  assertStrict.deepStrictEqual(messy.notes[2].tags, ["射型"], "[notes] string tags become a list");
+  assertEqual(messy.notes[3].ts, 0, "[notes] unreadable ts becomes 0");
+  assertStrict.deepStrictEqual(messy.notes[3].tags, ["風", "3"], "[notes] tags keep strings only");
+  assertStrict.deepStrictEqual(messy.sessions[0].tags, ["風"], "[notes] session string tags");
+  assertStrict.deepStrictEqual(messy.sessions[1].tags, ["1", "風"], "[notes] session tag list");
+  assertStrict.deepStrictEqual(
+    storageApi.normalizeDb(clone(messy)).notes,
+    messy.notes,
+    "[notes] sanitizing is idempotent",
+  );
+}
+
+function checkNoteTrashRestore(storageApi, fixtures) {
+  const db = storageApi.normalizeDb(clone(fixtures.notes));
+  const before = clone(db.notes);
+  let saves = 0;
+  const trashApi = loadTrashApi(db, () => {
+    saves++;
+  });
+  // ゴミ箱にあったメモを戻す
+  assert(trashApi.restoreTrash("trash-memo"), "[notes trash] fixture note should restore");
+  assertStrict.deepStrictEqual(
+    db.notes.find((n) => n.id === "memo-0"),
+    fixtures.notes.trash[0].data,
+    "[notes trash] restored note keeps text, date, ts and tags",
+  );
+  // メモをゴミ箱へ移して戻す。本文は1文字も変わらない
+  const target = db.notes.find((n) => n.id === "memo-1");
+  const item = trashApi.trashItem("note", "メモ", target);
+  db.notes = db.notes.filter((n) => n.id !== "memo-1");
+  assertEqual(item.type, "note", "[notes trash] trash entry type");
+  assert(!db.notes.some((n) => n.id === "memo-1"), "[notes trash] note leaves the list");
+  assert(trashApi.restoreTrash(item.id), "[notes trash] restore should succeed");
+  assertStrict.deepStrictEqual(
+    db.notes.find((n) => n.id === "memo-1"),
+    before.find((n) => n.id === "memo-1"),
+    "[notes trash] note returns unchanged",
+  );
+  assert(!trashApi.restoreTrash(item.id), "[notes trash] second restore of same id should fail");
+  assertEqual(saves, 2, "[notes trash] each restore saves once");
+  // 練習（メモとタグつき）も同じ
+  const sess = db.sessions[0];
+  const sessItem = trashApi.trashItem("session", "練習", sess);
+  db.sessions = [];
+  assert(trashApi.restoreTrash(sessItem.id), "[notes trash] session restore should succeed");
+  assertStrict.deepStrictEqual(db.sessions[0], sess, "[notes trash] session memo and tags return");
+  // notes が無い古い db でも戻せる
+  const legacy = { trash: [clone(fixtures.notes.trash[0])], sessions: [], sightMarks: [], setups: [], formAnalyses: [] };
+  const legacyApi = loadTrashApi(legacy, () => {});
+  assert(legacyApi.restoreTrash("trash-memo"), "[notes trash] restore into a db without notes");
+  assertEqual(legacy.notes.length, 1, "[notes trash] notes array is created");
+}
+
 function checkDbRevContract() {
   assert(
     /^let DB_REV\s*=\s*0/m.test(storageScript),
@@ -975,6 +1094,8 @@ function main() {
   checkFormDiagnosticsCompatibility(storageApi, fixtures);
   checkCustomRoundsCompatibility(storageApi, fixtures);
   checkMultiRoundDefs(fixtures);
+  checkNotesCompatibility(storageApi, fixtures);
+  checkNoteTrashRestore(storageApi, fixtures);
 
   console.log("Storage contract checks OK");
 }

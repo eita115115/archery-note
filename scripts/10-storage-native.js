@@ -6,12 +6,12 @@ const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
 const APP_VER=126;
 const TRASH_LIMIT=50;
-const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100};
+const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100,notes:10000};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"dark",fieldMode:false,lensSide:"right",lastInputMode:"target",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],notes:[],settings:{eyeSight:850,theme:"dark",fieldMode:false,lensSide:"right",lastInputMode:"target",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -44,6 +44,34 @@ function sanitizeSessionArrows(sess){
   if(!sess || typeof sess!=="object" || !Array.isArray(sess.ends)) return;
   sess.ends.forEach(sanitizeArrowList);
 }
+/* メモだけのノート（db.notes）とタグの非破壊サニタイズ。書いた本文は消さない:
+   文字列だけの項目はノートに包み、id の無い項目には id を付け、本文・日付は文字列へ寄せる。
+   オブジェクトでも文字列でもない項目（null・数値など。本文を持てない）だけを落とす */
+function sanitizeTagList(tags){
+  if(typeof tags==="string") return tags.trim()?[tags.trim()]:[];
+  if(!Array.isArray(tags)) return [];
+  const out=[];
+  tags.forEach(t=>{ if(typeof t!=="string"&&typeof t!=="number") return; const v=String(t).trim(); if(v&&!out.includes(v)) out.push(v); });
+  return out;
+}
+function sanitizeNoteList(list){
+  if(!Array.isArray(list)) return [];
+  const seen=new Set(), out=[];
+  list.forEach((src,i)=>{
+    let n=src;
+    if(typeof n==="string"){ if(!n.trim()) return; n={text:n}; }
+    if(!n||typeof n!=="object"||Array.isArray(n)) return;
+    if(typeof n.text!=="string") n.text=n.text==null?"":String(n.text);
+    if(typeof n.date!=="string") n.date=n.date==null?"":String(n.date);
+    if(typeof n.ts!=="number"||!Number.isFinite(n.ts)){ const t=typeof n.ts==="string"&&n.ts.trim()!==""?Number(n.ts):NaN; n.ts=Number.isFinite(t)?t:0; }
+    if(Object.prototype.hasOwnProperty.call(n,"tags")) n.tags=sanitizeTagList(n.tags);
+    let id=typeof n.id==="string"&&n.id?n.id:(typeof n.id==="number"&&Number.isFinite(n.id)?String(n.id):"");
+    if(!id||seen.has(id)){ let k=0; do{ id="note-"+i+(k?"-"+k:""); k++; }while(seen.has(id)); }
+    n.id=id; seen.add(id);
+    out.push(n);
+  });
+  return out.slice(0,IMPORT_LIMITS.notes);
+}
 function normalizeDb(d){
   const base=blankDb(), src=(d&&typeof d==="object")?d:{};
   const out=Object.assign(base,src);
@@ -51,6 +79,8 @@ function normalizeDb(d){
   /* 新規インストールの既定はダーク。テーマを保存していない既存データは従来どおり端末の設定に合わせる */
   if(src.settings&&typeof src.settings==="object"&&!Object.prototype.hasOwnProperty.call(src.settings,"theme")) out.settings.theme="auto";
   ["setups","sightMarks","sessions","trash","formAnalyses","customRounds"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  /* メモだけのノート（v5 段 6 で追加。SCHEMA_VER は据え置き: 配列の補完だけで migration は不要） */
+  out.notes=sanitizeNoteList(out.notes);
   out.sessions=out.sessions.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sessions);
   out.setups=out.setups.filter(x=>x&&typeof x==="object"&&x.id&&x.name).slice(0,IMPORT_LIMITS.setups);
   out.sightMarks=out.sightMarks.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sightMarks);
@@ -118,9 +148,15 @@ function normalizeDb(d){
     if(typeof s.faceD!=="number"||!Number.isFinite(s.faceD)) s.faceD=122;
     if(!VALID_FACE_TYPES.includes(s.faceType)) s.faceType="single";
     if(s.dist!=null&&(typeof s.dist!=="number"||!Number.isFinite(s.dist))) s.dist=18;
+    /* 練習のメモに付けるタグ（v5 段 6 で追加）。キーのある記録だけ文字列の配列へ寄せる */
+    if(Object.prototype.hasOwnProperty.call(s,"tags")) s.tags=sanitizeTagList(s.tags);
     sanitizeSessionArrows(s);
   });
-  out.trash.forEach(t=>{ if(t.type==="session") sanitizeSessionArrows(t.data); });
+  out.trash.forEach(t=>{
+    if(t.type==="session") sanitizeSessionArrows(t.data);
+    /* ゴミ箱のメモも、戻したときに一覧で扱える形（本文・日付が文字列）にしておく */
+    if(t.type==="note"&&t.data&&typeof t.data==="object"){ const fixed=sanitizeNoteList([t.data])[0]; if(fixed) t.data=fixed; }
+  });
   if(out.active && typeof out.active==="object"){
     sanitizeSessionArrows(out.active);
     sanitizeArrowList(out.active.cur);
@@ -194,7 +230,7 @@ function load(){
   return blankDb();
 }
 function dataCounts(d=db){
-  return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length};
+  return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length,notes:(d.notes||[]).length};
 }
 function storageBridge(){
   const w=typeof window!=="undefined"?window:{};
@@ -685,12 +721,15 @@ function restoreTrash(id){
     (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });
   }else if(item.type==="formAnalysis"){
     if(!db.formAnalyses.some(f=>f.id===data.id)) db.formAnalyses.push(data);
+  }else if(item.type==="note"){
+    if(!Array.isArray(db.notes)) db.notes=[];
+    if(!db.notes.some(n=>n.id===data.id)) db.notes.push(data);
   }
   db.trash.splice(i,1);
   save({reason:"restore-trash",forceSnapshot:true});
   return true;
 }
-function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":t==="formAnalysis"?"射形記録":"削除データ"; }
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":t==="formAnalysis"?"射形記録":t==="note"?"メモ":"削除データ"; }
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);
