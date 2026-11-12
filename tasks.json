@@ -1097,5 +1097,15 @@
     ],
     "owner": "codex",
     "acceptance": "docs/codex/sight-prediction-provenance.mdの受入。予測数値/目盛り/距離を縦行で表示、採用実測detailsに実際の数値/元markidentity/記録日、blank最新を飛ばした以前の数値/同日時・日時不明の根拠を示す。曖昧な台帳を最新と断定しない。0/parseFloat既存仕様/型違いdistance key/用具距離/2未満・全定番実測/keyboard/44px/escapeを確認。coreは元sourceへの参照metadataだけ追加しpts/have/model/r2/estと実測採用順を厳密維持、保存や記録の新旧を推測して変更しない。新6red→green/ChromeWK320375明暗900のbefore/after/final/public・375原寸/旧6fields/reload/errors0/他HTMLと全計算を比較、native8/104。全他source/CSS scoped以外/採点半径/保存/handlers/deps/SWactivationは版以外exact、旧91tasks/acceptance/sharedlock保持。checkall/lint/format/全生成E2E/独立readonlyreview、一括125/承認済CI/実Linux-public25/frozen19+6LF/同じ旧124page更新保留-banner-新記録-offline。証拠archive後pass+evidence/progressledger、費用/個人情報不使用。"
+  },
+  {
+    "id": "AN-093",
+    "task": "計算の中核（採点・グルーピング統計・サイト判定・弾道・サイト予測）を正しい数式で作り直す",
+    "status": "done",
+    "passes": true,
+    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii commits f1c82e6 ad542fd 4740bc5 6ef884a 8274b09（未push・版125据え置き）。npm run check:all 全OK（check:app/analysis/globals/ui/storage/pwa/version/distribution 等）、npm run lint 成功、npm run format:check 成功、Playwright 349 passed (7.1m)（この環境ではプロジェクトの@playwright/testとブラウザ版が合わないため、/opt/pw-browsers/chromium を指定する一時設定で実行）。矢円=判定半径はcheck-appとe2e outdoor-contrast（外縁0.285cm）・legacy-rescoreで確認、375px撮影で線かみ10/9を目視確認。独立レビュー2回（採点120万点総当たり不一致0、誤警報5.0〜5.6%、誤除外0.9〜1.1%、95%区間被覆94.7〜95.1%）、指摘は修正済み、フィールド的の寸法のみ未確認。",
+    "dependencies": [],
+    "owner": "claude",
+    "acceptance": "evals/acceptance.md の採点・物理（check:app・check:analysis、表示される矢円と採点結果の一致）と広い変更（check:all・test:e2e）。画面構成と保存形式は維持し、既存の練習データと保存点数を変更しない。数式と根拠を docs/design/math-core-rebuild.md に記録する。"
   }
 ]
