@@ -1248,6 +1248,7 @@ const ANALYSIS_CHART_MAX = 12; /* 推移の図に出す回数（直近） */
 const ANALYSIS_PICK_MAX = 200; /* 記録を選ぶ欄に並べる件数（新しい順） */
 const ANALYSIS_PERIODS = [
   ["all", "全期間"],
+  ["7d", "直近7日"],
   ["30d", "直近30日"],
   ["90d", "直近90日"],
 ];
@@ -1733,7 +1734,7 @@ function analysisImpactHtml() {
       sess,
       html: `${head}${plot}
       <div class="noImpact" data-testid="analysis-impact-pending"><b>グループRMSは計算していません</b><span>対象: ${dateText}・${esc(distanceLabel(sess.dist))}・${esc(faceLabel(sess))}、${posText}。位置のある矢が3射以上あるときに計算します。</span></div>
-      ${footprint}${sightLink}`,
+      ${footprint}${analysisGroupingTrendHtml(sess, sessions)}${sightLink}`,
     };
   const endRms = analysisEndRms(sess);
   const per = scorecardPlan(sess).per;
@@ -1742,7 +1743,7 @@ function analysisImpactHtml() {
     html: `${head}${plot}
     <section class="vsec anFirst" data-testid="analysis-impact">
       <div class="figs two">
-        <div class="fig" data-fig="rms"><div class="l">グループRMS（全射）</div><div class="n">${im.rms.toFixed(1)}<small>cm</small></div><div class="d">${im.ci ? `95%区間 ${im.ci.lo.toFixed(1)}〜${im.ci.hi.toFixed(1)}cm` : `95%区間は ${MCD_MIN_N}射以上で計算`}</div></div>
+        <div class="fig" data-fig="rms"><div class="l">グループRMS（全射）</div><div class="n">${im.rms.toFixed(1)}<small>cm</small></div><div class="d">${im.ci ? `95%区間 ${im.ci.lo.toFixed(1)}〜${im.ci.hi.toFixed(1)}cm` : im.st.n >= MCD_MIN_N ? "95%区間は計算できない値" : `95%区間は ${MCD_MIN_N}射以上で計算`}</div></div>
         <div class="fig" data-fig="offset"><div class="l">着弾中心のずれ</div><div class="n">${im.offset.toFixed(1)}<small>cm</small></div><div class="d">${anOffsetDirText(im.mx, im.my)}</div></div>
       </div>
       <div class="figs two">
@@ -4109,3 +4110,4 @@ function groupingSessionRow(row) {
     n: st.n,
   };
 }
+/* end: grouping rows（tools/check-analysis-core.js・check-coordless.js がここまでを切り出す） */

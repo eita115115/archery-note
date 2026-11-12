@@ -6,11 +6,21 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test("demo data opens an explainable growth dashboard and remains removable", async ({ page }) => {
+/* v5 段 7: 「練習のまとめ」（信頼度つきの枠）と「次回試すこと」は廃止。デモデータは 分析 > スコア を開く */
+test("demo data opens the score analysis with its target stated and remains removable", async ({
+  page,
+}) => {
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
-  await expect(page.getByTestId("growth-dashboard")).toBeVisible();
-  await expect(page.getByTestId("next-practice")).toContainText("次回試すこと");
-  await expect(page.locator("[data-period='7d']")).toBeVisible();
+  await expect(page.locator("#analysisSubTabs [data-an='score']")).toHaveAttribute(
+    "aria-current",
+    "page",
+  );
+  await expect(page.getByTestId("analysis-score")).toBeVisible();
+  await expect(page.getByTestId("analysis-target")).toContainText("対象: ");
+  await expect(page.getByTestId("growth-dashboard")).toHaveCount(0);
+  await expect(page.getByTestId("next-practice")).toHaveCount(0);
+  await expect(page.locator("#main")).not.toContainText("次回試すこと");
+  await expect(page.locator("#anPeriod option[value='7d']")).toHaveCount(1);
   const demoCount = await page.evaluate(
     () =>
       JSON.parse(localStorage.getItem("archeryNote.v1")).sessions.filter((s) =>
@@ -36,10 +46,15 @@ test("demo data opens an explainable growth dashboard and remains removable", as
     .toBe(0);
 });
 
-test("growth dashboard works at narrow mobile width and in dark mode", async ({ page }) => {
+test("demo analysis works at narrow mobile width and in dark mode", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 780 });
   await page.emulateMedia({ colorScheme: "dark" });
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
-  await expect(page.getByTestId("growth-dashboard")).toBeVisible();
+  await expect(page.getByTestId("analysis-score")).toBeVisible();
   await expect(page.locator("body")).not.toHaveCSS("overflow-x", "scroll");
+  expect(
+    await page.evaluate(
+      () => globalThis.document.documentElement.scrollWidth <= globalThis.innerWidth,
+    ),
+  ).toBe(true);
 });

@@ -5,10 +5,12 @@ const assert = require("node:assert/strict");
 const root = path.resolve(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, "scripts", file), "utf8");
 const view = read("50-record-view.js");
+/* 分析 > 着弾 の数値（v5 段 7。旧 KPI の枠と「練習のまとめ」は廃止）。全射の値は 3射以上でだけ出す */
 const kpi = view.slice(
-  view.indexOf("function analysisKpiHtml("),
-  view.indexOf("function analysisTrendChartHtml("),
+  view.indexOf("function analysisImpactModel("),
+  view.indexOf("/* エンドごとの RMS（全射と同じ定義）"),
 );
+assert(kpi.includes("function analysisImpactModel("), "analysisImpactModel source missing");
 const api = new Function(`let DB_REV=0;
 const db={settings:{eyeSight:850}};
 const esc=String, icon=()=>"", fmtD=String;
@@ -18,7 +20,7 @@ ${read("45-analysis-core.js")}
 ${read("49-todays-result.js")}
 ${kpi}
 return {scoreAt,lineCutRadius,sessionMetrics,buildAnalysisRows,growthDashboard,nextPracticeSuggestions,
-aggregateByPeriod,conditionSplit,todayConclusion,analysisKpiHtml,conditionInsights,shapeNote,trHasGroupingEvidence};`)();
+aggregateByPeriod,conditionSplit,todayConclusion,analysisImpactModel,conditionInsights,shapeNote,trHasGroupingEvidence};`)();
 const failures = [];
 let checks = 0;
 function check(label, fn) {
@@ -28,40 +30,6 @@ function check(label, fn) {
   } catch (e) {
     failures.push(label + ": " + e.message);
   }
-}
-const dashboardView = view.slice(
-  view.indexOf("function growthDashboardHtml("),
-  view.indexOf("function nextPracticeCardHtml("),
-);
-const renderDashboard = new Function(
-  "growthDashboard",
-  "today",
-  "esc",
-  "fmtD",
-  `${dashboardView};return growthDashboardHtml([]);`,
-);
-for (const [groupingDelta, expected] of [
-  [null, "比較待ち"],
-  [-0.06, "改善 0.1cm"],
-  [0.06, "拡大 0.1cm"],
-  [-0.04, "横ばい 0.0cm"],
-  [-4e-16, "横ばい 0.0cm"],
-  [-0, "横ばい 0.0cm"],
-  [0, "横ばい 0.0cm"],
-  [0.04, "横ばい 0.0cm"],
-]) {
-  check(`dashboard visible grouping direction ${String(groupingDelta)}`, () => {
-    const data = { groupingDelta, scoreDelta: null, confidence: { label: "参考" } };
-    const before = JSON.stringify(data);
-    const html = renderDashboard(
-      () => data,
-      () => "2026-10-12",
-      String,
-      String,
-    );
-    assert(html.includes(`<b>${expected}</b>`));
-    assert.equal(JSON.stringify(data), before);
-  });
 }
 const base = { dist: 18, faceD: 40, faceType: "single", perEnd: 6, round: "free", shaft: 0.65 };
 const arrow = (x, y) => ({
@@ -120,11 +88,13 @@ for (const n of [0, 1, 2, 3, 6]) {
   });
   if (n === 1 || n === 2) {
     check(`pending current dashboard n${n}`, () => assert.equal(dash.groupingDelta, null));
-    check(`pending current KPI n${n}`, () => {
-      const html = api.analysisKpiHtml(rows);
-      assert.match(html, /比較待ち/);
-      assert.doesNotMatch(html, /<b>0\.0cm<\/b>/);
-      assert.match(html, /最小 4\.4cm/); // 半径4cmの円周上の6本: 不偏RMS = 4·√(6/5) ≈ 4.38cm
+    check(`pending current impact figures n${n}`, () => {
+      const im = api.analysisImpactModel(current);
+      assert.equal(im.ok, false);
+      assert.equal(im.positioned, n);
+      assert.equal(im.rms, undefined);
+      // 半径4cmの円周上の6本: 不偏RMS = 4·√(6/5) ≈ 4.38cm
+      assert.equal(api.analysisImpactModel(old[0]).rms.toFixed(1), "4.4");
     });
     check(`pending conclusion n${n}`, () =>
       assert.equal(api.todayConclusion(rows).kind, "grouping-pending"),

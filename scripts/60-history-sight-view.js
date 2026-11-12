@@ -963,10 +963,13 @@ function sightLedgerHtml(marks) {
     .join("")}</ol>`;
 }
 /* v5 段 7 で分析タブから移した「サイト値の記録」「サイト値のまとめ」。中身は従来のまま（作り直しは段 8）。
-   分析の絞り込みは持たず、すべての弓具・距離・期間を対象にする */
-function sightRecordsOverviewHtml() {
-  const ss = sessionsByDateDesc().filter((s) => Array.isArray(s.ends));
-  const body = `${sightHistoryCard(ss)}${sightSummaryHtml(historySessionRows(ss), { setupId: "", dist: "" })}`;
+   分析の絞り込みの代わりに、この画面で選んでいる弓具の記録（すべての距離・期間）を対象にする。
+   弓具が1つも無いときは、すべての記録が対象 */
+function sightRecordsOverviewHtml(setupId) {
+  const own = (x) => !setupId || (x && x.setupId === setupId);
+  const ss = sessionsByDateDesc().filter((s) => Array.isArray(s.ends) && own(s));
+  const marks = (Array.isArray(db.sightMarks) ? db.sightMarks : []).filter(own);
+  const body = `${sightHistoryCard(ss, marks)}${sightSummaryHtml(historySessionRows(ss), { setupId: "", dist: "" }, marks)}`;
   return body ? `<div class="sightRecordsOverview" data-testid="sight-records-overview">${body}</div>` : "";
 }
 function renderSight(m) {
@@ -1080,7 +1083,7 @@ function renderSight(m) {
     </details>
   </div>`
       : ""
-  }${sightRecordsOverviewHtml()}`;
+  }${sightRecordsOverviewHtml(sid)}`;
   const sgSetup = $("#sgSetup");
   if (sgSetup)
     sgSetup.onchange = (e) => {

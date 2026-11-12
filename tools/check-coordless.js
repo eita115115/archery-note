@@ -47,7 +47,7 @@ ${section(view, "function sessionArrows(", "function heroMetricHtml(")}
 ${section(view, "function scoreSortedArrows(", "/* ============ 記録中（没入画面）")}
 ${section(view, "function distanceLabel(", "function historyAnalysisDetailsHtml(")}
 ${section(view, "function sightValueText(", "function sightSummaryHtml(")}
-${section(view, "function groupingMetricNumber(", "function groupingSummaryHtml(")}
+${section(view, "function groupingMetricNumber(", "/* end: grouping rows")}
 ${section(hist, "function sessionGroupPoint(", "function historyDistanceLabel(")}
 ${section(hist, "function legacyRescoreHtml(", "function openHistDetail(")}
 db = normalizeDb(fixtureDb);

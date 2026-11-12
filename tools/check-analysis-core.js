@@ -416,7 +416,7 @@ function sampleSession() {
     "distanceBucketInfo",
     "sightDateInfo",
     `${analysisScript.slice(0, analysisScript.indexOf("/* ============ sight advice"))}
-${section(recordScript, "function groupingMetricNumber", "function groupingSummaryHtml")}
+${section(recordScript, "function groupingMetricNumber", "/* end: grouping rows")}
 return {groupingSessionRow};`,
   )(
     analysis.sessionMetrics,

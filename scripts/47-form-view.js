@@ -262,7 +262,7 @@ function formTrackingCard(records=db.formAnalyses||[]){
     </div>`;
   }).join("");
   return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="vsecH"><h2>射型の記録</h2><span class="aside">${allRecs.length}件${allRecs.length>5?"・新しい5件を表示":""}</span></div>
-    <div class="btnRow"><button class="btn" id="formStart">${icon("camera")} 撮影して解析</button><button class="btn sec" id="formReplay">動画から解析</button></div>
+    <div class="btnRow"><button class="btn" id="formStart">${icon("camera")} 撮影して解析</button><button class="btn sec" id="formReplay">保存済み動画を解析</button></div>
     ${formTrendMiniHtml(allRecs)}
     <div class="formRecordList">${rows||`<div class="empty">${(db.formAnalyses||[]).length?"この条件に合う射型の記録は 0件です。弓具・距離・期間の選択を広げると表示されます。":"射型の記録はまだありません。カメラを横に置いて数射を撮ると、ここに並びます。"}</div>`}</div>
     ${formScoreLinkHtml(records)}

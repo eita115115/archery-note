@@ -112,42 +112,51 @@ for (const width of [320, 375])
           expect(observed.dashboard.groupingSamples).toBe(3);
           expect(observed.conclusion.kind).toBe("grouping-pending");
           expect(observed.suggestions.some((s) => s.id === "collect-coordinates")).toBe(true);
-          await expect(page.getByTestId("growth-dashboard")).toContainText("比較待ち");
-          await expect(page.getByTestId("today-conclusion")).toContainText("比較は保留");
-          await settled(page);
-          const bounds = await page
-            .getByTestId("today-conclusion")
-            .locator("p")
-            .evaluate((el) => ({
-              paragraph: el.getBoundingClientRect().toJSON(),
-              nav: globalThis.document.querySelector("#tabs").getBoundingClientRect().toJSON(),
-            }));
-          expect(bounds.paragraph.bottom).toBeLessThanOrEqual(bounds.nav.top - 4);
-          expect(bounds.paragraph.left).toBeGreaterThanOrEqual(0);
-          expect(bounds.paragraph.right).toBeLessThanOrEqual(width);
         }
         if (count >= 1)
           expect(observed.suggestions.some((s) => s.id.endsWith("spread"))).toBe(false);
+        /* v5 段 7: 分析 > 着弾。位置のある矢が 3射未満の記録は図だけ出し、グループRMS は出さない */
         await settled(page);
-        await page.screenshot({ path: testInfo.outputPath("dashboard.png") });
-        const kpi = page.locator(".insightStrip").first();
-        await kpi.scrollIntoViewIfNeeded();
-        await settled(page);
-        await expect(kpi).toBeVisible();
-        const tile = kpi.locator(".insightTile").nth(1);
+        await page.screenshot({ path: testInfo.outputPath("score.png") });
+        await tap(page, '#analysisSubTabs [data-an="impact"]');
+        const view = page.getByTestId("analysis-view");
+        await expect(view).toHaveAttribute("data-tab", "impact");
+        if (count >= 1) {
+          await page.locator("#anImpact").selectOption(current.id);
+          await expect(page.getByTestId("analysis-plot").locator("circle.arrowFoot")).toHaveCount(
+            count,
+          );
+        } else await expect(page.locator(`#anImpact option[value="${current.id}"]`)).toHaveCount(0);
+        const rms = page.locator('[data-testid="analysis-impact"] [data-fig="rms"] .n');
         if (count === 1 || count === 2) {
-          await expect(tile.locator("b")).toHaveText("比較待ち");
-          await expect(tile).toContainText("座標3本以上");
-          await expect(tile).not.toContainText("最小 0.0cm");
-        } else if (count >= 3) await expect(tile.locator("b")).toHaveText("0.0cm");
-        expect(await kpi.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
-        await page.screenshot({ path: testInfo.outputPath("kpi.png") });
-        const rendered = {
-          dashboard: await page.getByTestId("growth-dashboard").innerText(),
-          conclusion: await page.getByTestId("today-conclusion").innerText(),
-          suggestions: await page.getByTestId("next-practice").innerText(),
-          kpi: await kpi.innerText(),
-        };
+          const pending = page.getByTestId("analysis-impact-pending");
+          await expect(pending).toContainText("グループRMSは計算していません");
+          await expect(pending).toContainText(`位置のある ${count}射`);
+          await expect(pending).toContainText("3射以上あるときに計算します");
+          await expect(rms).toHaveCount(0);
+          await expect(view).not.toContainText("0.0cm");
+        } else if (count >= 3) {
+          await expect(rms).toHaveText("0.0cm");
+          await expect(
+            page.locator('[data-testid="analysis-impact"] [data-fig="offset"] .n'),
+          ).toHaveText("3.2cm");
+          await expect(
+            page.locator('[data-testid="analysis-impact"] [data-fig="offset"] .d'),
+          ).toHaveText("右 3.2cm");
+        }
+        /* 推移の表に入るのは、位置のある矢が 3射以上ある回だけ */
+        await expect(
+          page.locator('[data-testid="analysis-grouping-trend"] .cmpRow:not(.is-head)'),
+        ).toHaveCount(3 + (count >= 3 ? 1 : 0));
+        expect(
+          await page.evaluate(
+            () => globalThis.document.documentElement.scrollWidth <= globalThis.innerWidth,
+          ),
+        ).toBe(true);
+        await settled(page);
+        await page.screenshot({ path: testInfo.outputPath("impact.png") });
+        const rendered = { impact: await view.innerText() };
+        expect(rendered.impact).not.toMatch(/NaN|undefined|比較待ち|信頼度/);
         await tap(page, '#tabs [data-v="history"]');
         await page.locator(`.historyRow[data-id="${current.id}"]`).click();
         await settled(page);
@@ -228,13 +237,15 @@ test("native one-arrow finish stays pending across analysis and history", async 
   await page.locator("#sumClose").scrollIntoViewIfNeeded();
   await tap(page, "#sumClose");
   await tap(page, '#tabs [data-v="analysis"]');
-  await expect(page.getByTestId("growth-dashboard")).toContainText("比較待ち");
-  await expect(page.getByTestId("today-conclusion")).toContainText("比較は保留");
-  await settled(page);
-  await page.screenshot({ path: testInfo.outputPath("native-analysis.png") });
   const after = await stored(page);
   expect(after.sessions.slice(0, 3)).toEqual(fixtures.old);
   const current = after.sessions.at(-1);
+  await tap(page, '#analysisSubTabs [data-an="impact"]');
+  await page.locator("#anImpact").selectOption(current.id);
+  await expect(page.getByTestId("analysis-impact-pending")).toContainText("位置のある 1射");
+  await expect(page.getByTestId("analysis-impact")).toHaveCount(0);
+  await settled(page);
+  await page.screenshot({ path: testInfo.outputPath("native-analysis.png") });
   expect(current.ends).toEqual([active.cur]);
   await tap(page, '#tabs [data-v="history"]');
   await page.locator(`.historyRow[data-id="${current.id}"]`).click();

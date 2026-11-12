@@ -622,7 +622,7 @@ assert(gearApi.gearPrecisionHtml({poundage:"38", drawLength:"28.5", arrowLength:
 
 const historyApi = new Function(
   "db","robustStats","sessionMetrics","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc","zoneStyle","sightStats",
-  section("function sessionGroupPoint", "function monthlyCard") + "\nreturn {groupingTrendCard,scoreDistCard};"
+  section("function sessionGroupPoint", "function monthlyCard") + "\nreturn {sessionGroupPoint,scoreDistCard};"
 )(
   {setups:[{id:"main",name:"Main setup"}]},
   statsApi.robustStats,
@@ -640,8 +640,10 @@ const sampleSessions = [
   {id:"b",date:"2026-02-01",setupId:"main",dist:70,faceD:122,faceType:"single",ends:[[{x:2,y:1,s:9},{x:3,y:2,s:9},{x:1,y:1,s:10},{x:2,y:0,s:10},{x:3,y:1,s:9},{x:2,y:2,s:9}]]},
   {id:"a",date:"2026-01-01",setupId:"main",dist:70,faceD:122,faceType:"single",ends:[[{x:-1,y:0,s:10},{x:0,y:1,s:10},{x:-2,y:0,s:9},{x:-1,y:-1,s:10},{x:0,y:0,s:10},{x:-1,y:1,s:10}]]}
 ];
-const trendHtml = historyApi.groupingTrendCard(sampleSessions);
-assert(trendHtml.includes("矢の集まり具合の推移") && trendHtml.includes("Main setup"), "Grouping trend card failed");
+/* 「矢の集まり具合の推移」のカードは v5 段 7 で 分析 > 着弾 の「グループRMSの推移」（全射の値の表）に置き換えた。
+   回ごとの中心と半径を出す sessionGroupPoint は残してあるので、ここではその値だけを確かめる */
+const trendPoint = historyApi.sessionGroupPoint(sampleSessions[0]);
+assert(trendPoint && trendPoint.setupName === "Main setup" && trendPoint.n === 6 && Number.isFinite(trendPoint.rr), "Session group point failed");
 const fieldDistHtml = historyApi.scoreDistCard([{id:"field",date:"2026-03-01",dist:30,faceD:40,faceType:"field",ends:[[
   {s:6},{s:5},{s:4},{s:3},{s:2},{s:1},{s:6},{s:5},{s:4},{s:3},{s:2},{s:0}
 ]]}]);
@@ -654,13 +656,12 @@ const distributionSessions = Array.from({length:1000}, () => ({
   ends:[Array.from({length:36}, () => ({get s(){ distributionScoreReads++; return 9; }, X:false}))]
 }));
 const largeDistributionHtml = historyApi.scoreDistCard(distributionSessions);
-assert(largeDistributionHtml.includes("全36000本") && largeDistributionHtml.includes("36000本 (100%)"), "Large score distribution totals changed");
+assert(largeDistributionHtml.includes("全36000射") && largeDistributionHtml.includes("36000射 (100%)"), "Large score distribution totals changed");
 assert(distributionScoreReads <= 36000 * 2 + 128, `Score distribution repeatedly scans arrows: ${distributionScoreReads} reads`);
 const fieldWithEmptySingle = historyApi.scoreDistCard([{faceType:"single",ends:[]}, {faceType:"field",ends:[Array.from({length:12},()=>({s:6}))]}]);
 assert(fieldWithEmptySingle.includes(">6</div>") && !fieldWithEmptySingle.includes(">X</div>"), "Empty sessions changed field-only score buckets");
 console.log(`Score distribution: 36000 arrows, ${distributionScoreReads} score reads`);
 
-require("./check-score-trend.js");
 console.log(`Archery Note checks OK (v${version})`);
 console.log(`Robust grouping: used=${st.n}, excluded=${st.excluded.length}, confidence=${Math.round(st.confidence*100)}%`);
 console.log(`Physics: ${phys.speedFps.toFixed(0)}fps, rho=${phys.rho.toFixed(2)}, Cd=${phys.cd.toFixed(2)}`);
