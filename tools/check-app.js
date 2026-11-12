@@ -249,13 +249,14 @@ const targetApi = new Function(
 const fieldSvg = targetApi.targetMarkup(80, "tf", "field");
 assert(fieldSvg.includes('class="main field"') && fieldSvg.includes("#ffe14d") && fieldSvg.includes("#1c1e1c"), "Field target SVG failed");
 
-const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats,centerOffsetTest,axisCorrection,probWithin,fmtChance,tCrit975};")();
+const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats,centerOffsetTest,axisCorrection,probWithin,fmtChance,tCrit975,sightStats};")();
 const arrows = [
   {x:1,y:1},{x:2,y:1.5},{x:0,y:.5},{x:1.2,y:1.7},{x:.8,y:.9},{x:1.5,y:1.1},
   {x:2.1,y:2.0},{x:1.7,y:1.6},{x:28,y:-20}
 ];
 const st = statsApi.robustStats(arrows);
-assert(st && st.excluded.length === 1 && st.excluded[0].x === 28 && st.method === "mean+outlier", "Robust grouping failed");
+/* grouping-v3: 最上位は全射（A）。外れ値候補は excluded、サイト判断用の統計は excl（B）、ロバスト推定は robust（C） */
+assert(st && st.excluded.length === 1 && st.excluded[0].x === 28 && st.n === arrows.length && st.excl.n === arrows.length - 1 && st.robust && st.version === "grouping-v3", "Robust grouping failed");
 /* 新しい統計: 残りの矢の標本平均・不偏標準偏差・中心の標準誤差と95%区間（t分布） */
 {
   const pts = [{x:-1,y:0},{x:1,y:0},{x:0,y:-1},{x:0,y:1},{x:0,y:0}];
@@ -275,7 +276,7 @@ assert(wr && wr.kind === "weighted-robust" && wr.zero > 6.8 && wr.zero < 7.5 && 
 
 const analysisDb = {sessions:[]};
 const analysisApi = new Function(
-  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance","tCrit975",
+  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance","tCrit975","sightStats",
   section("function windText", "function roundProgressHtml") + "\nreturn {sessionQuality,personalModel,judgementFor,nextActionPlan};"
 )(
   analysisDb,
@@ -290,7 +291,8 @@ const analysisApi = new Function(
   statsApi.groupStats,
   statsApi.probWithin,
   statsApi.fmtChance,
-  statsApi.tCrit975
+  statsApi.tCrit975,
+  statsApi.sightStats
 );
 const sessAt = (id,cx,cy) => ({id,date:`2026-06-${id}`,setupId:"main",dist:70,faceD:122,faceType:"single",wx:"晴れ",ends:[[
   {x:cx-0.5,y:cy,s:9},{x:cx+0.3,y:cy+0.2,s:9},{x:cx,y:cy-0.4,s:10},
@@ -499,7 +501,7 @@ assert(sp && sp.ready && sp.candidates.includes(660) && ["概ね候補域","候�
 assert(gearApi.gearPrecisionHtml({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"}).includes("スパイン初期候補"), "Spine guidance UI missing");
 
 const historyApi = new Function(
-  "db","robustStats","sessionMetrics","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc","zoneStyle",
+  "db","robustStats","sessionMetrics","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc","zoneStyle","sightStats",
   section("function sessionGroupPoint", "function monthlyCard") + "\nreturn {groupingTrendCard,scoreDistCard};"
 )(
   {setups:[{id:"main",name:"Main setup"}]},
@@ -511,7 +513,8 @@ const historyApi = new Function(
   iso=>iso,
   (v,axis)=>`${axis}:${v.toFixed(1)}`,
   s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
-  scoreApi.zoneStyle
+  scoreApi.zoneStyle,
+  statsApi.sightStats
 );
 const sampleSessions = [
   {id:"b",date:"2026-02-01",setupId:"main",dist:70,faceD:122,faceType:"single",ends:[[{x:2,y:1,s:9},{x:3,y:2,s:9},{x:1,y:1,s:10},{x:2,y:0,s:10},{x:3,y:1,s:9},{x:2,y:2,s:9}]]},

@@ -70,6 +70,8 @@ const BROWSER_GLOBALS = new Set([
   "Intl",
   "ArrayBuffer",
   "Uint8Array",
+  "Int32Array",
+  "Float64Array",
   // ブラウザ / DOM
   "window",
   "document",

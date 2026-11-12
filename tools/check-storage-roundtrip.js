@@ -50,6 +50,25 @@ const expectedCsvHeader = [
   "sight_h",
   "condition",
   "note",
+  // grouping-v3 の研究用の比較列（既存の列の後ろに追加）
+  "group_n",
+  "rms_ci95_lo_cm",
+  "rms_ci95_hi_cm",
+  "rms_df_eff",
+  "excl_n_flagged",
+  "excl_x_cm",
+  "excl_y_cm",
+  "excl_rms_cm",
+  "robust_x_cm",
+  "robust_y_cm",
+  "robust_rms_cm",
+  "robust_n_weighted",
+  "legacy_x_cm",
+  "legacy_y_cm",
+  "legacy_rms_cm",
+  "legacy_excluded",
+  "legacy_method",
+  "stats_version",
 ];
 
 function assert(ok, message) {

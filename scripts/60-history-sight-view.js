@@ -267,6 +267,8 @@ function sessionGroupPoint(s) {
   if (m.all.length < 3) return null;
   const st = m.st;
   if (!st || st.n < 3) return null;
+  /* サイト中心の履歴は外れ値候補を除いた中心（B）、半径・ばらつきは全射（A） */
+  const sc = sightStats(st);
   const setup = db.setups.find((x) => x.id === s.setupId);
   return {
     id: s.id,
@@ -276,8 +278,8 @@ function sessionGroupPoint(s) {
     dist: s.dist,
     faceD: s.faceD,
     faceType: s.faceType || "single",
-    mx: st.mx,
-    my: st.my,
+    mx: sc.mx,
+    my: sc.my,
     rr: st.rr,
     sx: st.sx,
     sy: st.sy,
@@ -763,7 +765,7 @@ function renderSight(m) {
     <h2><span class="h2Icon">${icon("tool")} 詳しく</span> <span class="mini">${dist}m ・ ${esc(setup.name)}</span></h2>
     ${
       adv
-        ? `<div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length ? `、外れ値${adv.st.excluded.length}本除外` : ""}）の着弾傾向：</div>`
+        ? `<div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length ? `、外れ値候補${adv.st.excluded.length}本はサイト判断から除く` : ""}）の着弾傾向：</div>`
         : `<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`
     }
     <details class="adv" ${adv ? "" : "open"}>
