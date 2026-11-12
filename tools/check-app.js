@@ -169,7 +169,9 @@ assert(scoreApi.scoreAt(fw*6.05,0,fieldD,"field",0).s === 0, "Field miss score f
 assert(scoreApi.scoreAt(fw+fieldTouch*.8,0,fieldD,"field",fieldTouch).s === 6, "Field line-cutter inner score failed");
 assert(scoreApi.scoreAt(fw+fieldTouch*1.2,0,fieldD,"field",fieldTouch).s === 5, "Field line-cutter outer score failed");
 assert(scoreApi.hitFromGlobal(fw*2.4,0,fieldD,"field",fieldTouch).s === 4, "Field global hit score failed");
-assert(scoreApi.zoneStyle(5,false,"field").bg === "var(--gold)" && scoreApi.zoneStyle(4,false,"field").bg === "#222", "Field score chip colors failed");
+/* 得点チップは帯色の変数（style.css の --z-*）。フィールド的は 6・5 が金、4〜1 が黒 */
+assert(scoreApi.zoneStyle(5,false,"field").bg === "var(--z-gold)" && scoreApi.zoneStyle(4,false,"field").bg === "var(--z-black)" && scoreApi.zoneStyle(4,false,"field").fg === "var(--z-black-fg)", "Field score chip colors failed");
+assert(scoreApi.zoneStyle(8,false,"single").bg === "var(--z-red)" && scoreApi.zoneStyle(0,false,"single").bg === "var(--z-miss)", "Target score chip colors failed");
 
 /* Triple (vertical 3-spot) regression. Expected values derived from ring geometry, not from the implementation. */
 const tripleD = 40; // 標準的な40cm三つ目的

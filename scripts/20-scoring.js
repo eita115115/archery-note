@@ -109,18 +109,20 @@ function sessionRescore(sess, arrowR){
   }));
   return out;
 }
+/* 得点チップ・キーの色。的面の色とは別に、文字との比を優先した帯色の変数（style.css の --z-*）を使う */
 function zoneStyle(s,X,faceType){
+  const z=k=>({bg:`var(--z-${k})`,fg:`var(--z-${k}-fg)`});
   if(isFieldFace(faceType)){
-    if(s>=5) return {bg:"var(--gold)",fg:"#1c1e1c"};
-    if(s>=1) return {bg:"#222",fg:"#fff"};
-    return {bg:"#888b85",fg:"#fff"};
+    if(s>=5) return z("gold");
+    if(s>=1) return z("black");
+    return z("miss");
   }
-  if(s>=9) return {bg:"var(--gold)",fg:"#1c1e1c"};
-  if(s>=7) return {bg:"var(--red)",fg:"#fff"};
-  if(s>=5) return {bg:"var(--blue)",fg:"#fff"};
-  if(s>=3) return {bg:"#222",fg:"#fff"};
-  if(s>=1) return {bg:"#fff",fg:"#1c1e1c"};
-  return {bg:"#888b85",fg:"#fff"};
+  if(s>=9) return z("gold");
+  if(s>=7) return z("red");
+  if(s>=5) return z("blue");
+  if(s>=3) return z("black");
+  if(s>=1) return z("white");
+  return z("miss");
 }
 function scoreLabel(a){ return a.s===0?"M":(a.X?"X":String(a.s)); }
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }

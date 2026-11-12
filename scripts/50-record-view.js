@@ -1727,12 +1727,32 @@ function nudgeArrow(dirKey) {
 }
 
 /* target pointer input with long-press fine mode + lens */
+/* ルーペ（拡大鏡）は的の外、ヘッダー直下の右（設定で左）に画面固定し、入力中は動かさない（中身だけ指に追従）。
+   的のカードの中に置くと親要素の影響で固定できないため、ページ直下の固定レイヤーへ移す。
+   <use href="#tgmain"> で的を参照するので場所を移しても描画できる。再描画のたびに古いレイヤーは捨てる */
+function mountLensLayer() {
+  document.querySelectorAll("body > .lensLayer").forEach((n) => n.remove());
+  const lens = $("#lens"),
+    lensTag = $("#lensTag");
+  if (!lens || !lensTag) return;
+  const layer = document.createElement("div");
+  layer.className = "lensLayer";
+  layer.append(lens, lensTag);
+  document.body.append(layer);
+}
 function attachTargetInput(s) {
+  mountLensLayer();
   const svg = $("#tgsvg"),
     lens = $("#lens"),
     lensSvg = $("#lensSvg"),
     lensTag = $("#lensTag"),
     cur = $("#tgcur");
+  /* ルーペを出す条件: 150ms 以上押し続けるか、6px 以上動かしたとき。短いタップでは出さない。
+     400ms 押し続けて動きが 10px 未満なら精密モード（移動量 1/4） */
+  const LENS_SHOW_MS = 150,
+    LENS_SHOW_MOVE_PX = 6,
+    FINE_MS = 400,
+    FINE_MAX_MOVE_PX = 10;
   let drag = null,
     cursorFrame = 0,
     cursorPoint = null,
@@ -1779,7 +1799,9 @@ function attachTargetInput(s) {
     lens.classList.toggle("miss", fine && !cutting);
     lensTag.classList.toggle("cut", cutting);
     lensTag.classList.toggle("miss", fine && !cutting);
-    if (fine) lensTag.textContent = cutting ? "線かみ" : "線なし";
+    /* ルーペの下に、離したときの得点（大きく）と線かみの状態を出す */
+    const hit = hitFromGlobal(+p.x.toFixed(2), +p.y.toFixed(2), s.faceD, s.faceType, arrowR);
+    lensTag.innerHTML = `<b>${esc(scoreLabel(hit))}</b><span>${fine ? (cutting ? "線かみ" : "線なし") : "点"}</span>`;
     cur.innerHTML = `<g>
       <line x1="${p.x - w}" y1="${-p.y}" x2="${p.x + w}" y2="${-p.y}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
       <line x1="${p.x}" y1="${-p.y - w}" x2="${p.x}" y2="${-p.y + w}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
@@ -1788,12 +1810,28 @@ function attachTargetInput(s) {
     /* 微調整モードでは実寸の矢円が見える倍率まで寄せる（線かみの目視確認用） */
     const z = fine ? clamp(arrowR * 12, w * 0.6, w * 2.2) : w * 2.2;
     lensSvg.setAttribute("viewBox", `${p.x - z} ${-p.y - z} ${2 * z} ${2 * z}`);
-    // lens位置: 指と重ならない側へ
-    const half = p.x < 0;
-    lens.style.left = half ? "auto" : "8px";
-    lens.style.right = half ? "8px" : "auto";
-    lensTag.style.left = half ? "auto" : "12px";
-    lensTag.style.right = half ? "12px" : "auto";
+  }
+  /* ルーペの固定位置（画面座標）。表示するときに1回だけ決め、入力中は動かさない */
+  function placeLens() {
+    const hdr = $("header.app");
+    const top = Math.round((hdr ? hdr.getBoundingClientRect().bottom : 0) + 8);
+    const left = db.settings.lensSide === "left";
+    for (const el of [lens, lensTag]) {
+      el.style.left = left ? "12px" : "auto";
+      el.style.right = left ? "auto" : "12px";
+    }
+    lens.style.top = `${top}px`;
+    lensTag.style.top = `${top + lens.offsetHeight + 6}px`;
+  }
+  function showLens() {
+    if (!drag || drag.shown) return;
+    drag.shown = true;
+    lens.style.display = "block";
+    lens.classList.remove("cut", "miss");
+    lensTag.classList.remove("fine", "cut", "miss");
+    lensTag.style.display = "flex";
+    placeLens();
+    drawCursor(drag.p);
   }
   function scheduleCursor(p) {
     cursorPoint = p;
@@ -1805,6 +1843,7 @@ function attachTargetInput(s) {
   }
   function resetDrag() {
     if (drag && drag.tm) clearTimeout(drag.tm);
+    if (drag && drag.showTm) clearTimeout(drag.showTm);
     if (cursorFrame) {
       caf(cursorFrame);
       cursorFrame = 0;
@@ -1874,24 +1913,24 @@ function attachTargetInput(s) {
     drag = {
       p,
       raw: { x: cp.x, y: cp.y },
+      start: { x: cp.x, y: cp.y },
+      moved: 0,
       fine: false,
+      shown: false,
       id: cp.id,
+      showTm: setTimeout(showLens, LENS_SHOW_MS),
       tm: setTimeout(() => {
-        if (drag) {
+        if (drag && drag.moved < FINE_MAX_MOVE_PX) {
+          showLens();
           drag.fine = true;
           lens.classList.add("fine");
           lensTag.classList.add("fine");
-          lensTag.style.display = "block";
+          /* 精密モードに入ったことを触覚（ネイティブ版・対応端末）と枠の太さで知らせる */
+          nativePulse("medium");
           scheduleCursor(drag.p);
         }
-      }, 400),
+      }, FINE_MS),
     };
-    lens.style.display = "block";
-    lens.classList.remove("cut", "miss");
-    lensTag.classList.remove("fine", "cut", "miss");
-    lensTag.textContent = "位置調整中…";
-    lensTag.style.display = "block";
-    drawCursor(p);
   }
   function move(e) {
     const cp = clientPoint(e);
@@ -1902,13 +1941,16 @@ function attachTargetInput(s) {
     const k = drag.fine ? 0.25 : 1;
     drag.p = { x: drag.p.x + (a.x - b.x) * k, y: drag.p.y + (a.y - b.y) * k };
     drag.raw = { x: cp.x, y: cp.y };
-    scheduleCursor(drag.p);
+    drag.moved = Math.max(drag.moved, Math.hypot(cp.x - drag.start.x, cp.y - drag.start.y));
+    if (!drag.shown && drag.moved >= LENS_SHOW_MOVE_PX) showLens();
+    if (drag.shown) scheduleCursor(drag.p);
   }
   function up(e) {
     const cp = clientPoint(e);
     if (!drag || !cp || cp.id !== drag.id) return;
     e.preventDefault();
     clearTimeout(drag.tm);
+    clearTimeout(drag.showTm);
     let MX = (s.faceD / 2) * 1.18,
       MY = MX;
     if (s.faceType === "triple") {

@@ -1532,6 +1532,19 @@ function openSettings() {
         <button type="button" class="chip ${db.settings.fieldMode ? "on" : ""}" aria-pressed="${!!db.settings.fieldMode}" data-fm="1">ON</button>
       </div>
       <div class="hint">直射日光下での記録用に、文字と数値のコントラストを高めます。</div>
+      <label class="f">ルーペの位置</label>
+      <div class="chips" id="lsChips" data-testid="settings-lens-side-chips">
+        ${[
+          ["right", "右上"],
+          ["left", "左上"],
+        ]
+          .map(
+            ([v, lb]) =>
+              `<button type="button" class="chip ${(db.settings.lensSide || "right") === v ? "on" : ""}" aria-pressed="${(db.settings.lensSide || "right") === v}" data-ls="${v}">${lb}</button>`,
+          )
+          .join("")}
+      </div>
+      <div class="hint">的を長押ししたときに出る拡大表示の位置です。入力中は動きません。</div>
       <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
       <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight || 850}">
       <label class="f">射形トラッキング（ベータ）</label>
@@ -1600,6 +1613,18 @@ function openSettings() {
         applyTheme();
         applyFieldMode();
         ovl.querySelectorAll("#thChips .chip").forEach((x) => {
+          const on = x === c;
+          x.classList.toggle("on", on);
+          x.setAttribute("aria-pressed", String(on));
+        });
+      }),
+  );
+  ovl.querySelectorAll("#lsChips .chip").forEach(
+    (c) =>
+      (c.onclick = () => {
+        db.settings.lensSide = c.dataset.ls === "left" ? "left" : "right";
+        save();
+        ovl.querySelectorAll("#lsChips .chip").forEach((x) => {
           const on = x === c;
           x.classList.toggle("on", on);
           x.setAttribute("aria-pressed", String(on));
