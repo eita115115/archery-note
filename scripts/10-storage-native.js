@@ -553,7 +553,7 @@ function openModal(ovl,opts){
   const o=opts||{};
   const sheet=ovl.querySelector(".sheet")||ovl;
   const dismiss=()=>{ const btn=o.escapeTarget?ovl.querySelector(o.escapeTarget):null; if(btn) btn.click(); else closeModal(ovl); };
-  addModalSwipeHandle(ovl,sheet,dismiss);
+  if(o.swipe!==false) addModalSwipeHandle(ovl,sheet,dismiss); /* 全画面の結果は下スワイプで閉じない */
   ovl.setAttribute("role","dialog");
   ovl.setAttribute("aria-modal","true");
   const h3=sheet.querySelector("h3");

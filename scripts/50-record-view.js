@@ -3111,261 +3111,217 @@ function trGrowthBeforeFor(sess, allSessions, metricsFn) {
   return computeGrowthStreaks(priorSessions, priorLastDate, metricsFn);
 }
 
-/* 1行の骨格（既存 .summaryStreak パターンを一般化。§4） */
-function todaysResultRowHtml(kind, iconName, primaryHtml, detailText, sparkHtml) {
+/* 1行の骨格: 事実（.fact）→ 対象と条件（.basis）。励まし・評価語・感嘆符は書かない（ui-redesign-plan.md 5章） */
+function todaysResultRowHtml(kind, factHtml, basisText) {
   return `<div class="todaysResultRow" data-testid="todays-result-${kind}">
-    <span class="todaysResultIcon" aria-hidden="true">${icon(iconName)}</span>
-    <div class="todaysResultBody">
-      <p class="todaysResultPrimary">${primaryHtml}</p>
-      ${detailText ? `<p class="todaysResultDetail">${detailText}</p>` : ""}
-    </div>
-    ${sparkHtml || ""}
+    <p class="fact">${factHtml}</p>
+    ${basisText ? `<p class="basis">${basisText}</p>` : ""}
   </div>`;
 }
-/* 安定性行の任意スパークライン（hairline SVGのみ。§4。direction="tight" のときだけ末尾にアクセントドット） */
-function todaysResultSparkHtml(sparkline, direction) {
-  if (!Array.isArray(sparkline) || sparkline.length < 2) return "";
-  const w = 60,
-    h = 20,
-    pad = 2;
-  const min = Math.min(...sparkline),
-    max = Math.max(...sparkline);
-  const range = max - min || 1;
-  const stepX = (w - pad * 2) / (sparkline.length - 1);
-  const pts = sparkline.map((v, i) => [
-    pad + i * stepX,
-    pad + (1 - (v - min) / range) * (h - pad * 2),
-  ]);
-  const d = pts
-    .map((p, i) => `${i === 0 ? "M" : "L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`)
-    .join(" ");
-  const last = pts[pts.length - 1];
-  const dot =
-    direction === "tight"
-      ? `<circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="2" fill="var(--accent)"/>`
-      : "";
-  return `<svg class="todaysResultSpark" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="var(--line)" stroke-width="1"/>${dot}</svg>`;
+/* 差の表記: +5.7 / −5.7 / ±0 */
+function signedText(v, dec) {
+  const r = +(+v).toFixed(dec || 0);
+  if (r === 0) return "±0";
+  return (r > 0 ? "+" : "−") + Math.abs(r).toFixed(dec || 0);
 }
-/* 項目1: 前回差（§5 コピー対応表）。「先週◯曜平均より」の分岐は削除済み——
-   computeWeeklyDiff のフォールバックが集合論的に到達不能なため（weekPeers ⊆ peers、
-   strict-review 2026-07-12 minor③）。kind は常に "previous" */
-function todaysResultWeeklyRowHtml(wd, dayLabel) {
-  const roundedToday = Math.round(wd.todayTotal);
-  const deltaSign = wd.deltaPoints > 0 ? "+" : wd.deltaPoints < 0 ? "-" : "";
-  const iconName = wd.deltaPoints > 0 ? "up" : wd.deltaPoints < 0 ? "down" : "updown";
-  const label = `前回（${fmtD(wd.compareDate)}）`;
-  const primary =
-    wd.deltaPoints === 0
-      ? `${label}と同じ ${roundedToday}点`
-      : `${label}より <b>${deltaSign}${Math.abs(Math.round(wd.deltaPoints))}点</b>`;
-  const detail = `${dayLabel} ${roundedToday}点 ・ ${fmtD(wd.compareDate)} ${Math.round(wd.compareValue)}点`;
-  return todaysResultRowHtml("weekly", iconName, primary, detail);
+/* 文中の日付。記録と同じ年なら月日だけ */
+function refDateText(iso, sess) {
+  const a = dateParts(iso),
+    b = dateParts(sess && sess.date);
+  return a && b && a.y === b.y ? fmtMD(iso) : fmtD(iso);
 }
-/* 項目2: 安定性の変化（§5 コピー対応表） */
-function todaysResultStabilityRowHtml(st) {
-  const primary =
-    st.direction === "flat"
-      ? `RMSは横ばい（${st.latestValue.toFixed(1)}cm前後）`
-      : `RMSが ${st.baselineValue.toFixed(1)} → <b>${st.latestValue.toFixed(1)}cm</b> に`;
-  /* baseline は movingAverage(history, 5) の末尾値 = 直近 min(5, N) 件の単純平均。
-     文言を実際の比較基準に一致させる（strict-review minor④: sampleCount は履歴長で最大10のため、
-     「直近10回の移動平均」と書くと事実と異なる） */
-  const detail = `直近${Math.min(5, st.sampleCount)}回の平均と比較`;
+function sessionConditionText(sess) {
+  return `${sess.dist}m・${faceLabel(sess)}・${((sess && sess.ends) || []).flat().length}射`;
+}
+/* 同じ条件（距離・的・射数）の過去の平均との差。3回未満・途中終了は、比べていないことと理由を書く */
+function todaysResultComparisonRowHtml(cmp, sess, word) {
+  if (!cmp) return "";
+  if (cmp.available)
+    return todaysResultRowHtml(
+      "comparison",
+      `同じ条件の過去${cmp.sampleCount}回の平均 ${cmp.mean.toFixed(1)} 点との差は <b>${signedText(cmp.diff, 1)} 点</b>です。`,
+      `対象: ${fmtDateRange(cmp.firstDate, cmp.lastDate)}、${esc(sessionConditionText(sess))}。過去の回ごとの標準偏差は ${cmp.sd.toFixed(1)} 点で、${word}の差は${cmp.withinSd ? "その範囲内" : "それより大きい値"}です。`,
+    );
+  if (cmp.reason === "partial")
+    return todaysResultRowHtml(
+      "comparison",
+      `${cmp.todayArrows}射で終了した記録です。射数が違うため、過去の ${cmp.quota}射の合計とは比べていません。`,
+      "",
+    );
+  if (cmp.reason === "insufficient-history")
+    return todaysResultRowHtml(
+      "comparison",
+      cmp.sampleCount
+        ? `同じ条件の過去の記録が${cmp.sampleCount}回のため、平均との比較は表示していません。`
+        : `同じ条件の過去の記録がないため、平均との比較は表示していません。`,
+      `条件: ${esc(sessionConditionText(sess))}。${cmp.minSessions}回以上あるときに、平均と回ごとの標準偏差を表示します。`,
+    );
+  return "";
+}
+/* 前回（同じ条件の直近1回）との差 */
+function todaysResultWeeklyRowHtml(wd, sess, word) {
   return todaysResultRowHtml(
-    "stability",
-    "ruler",
-    primary,
-    detail,
-    todaysResultSparkHtml(st.sparkline, st.direction),
+    "weekly",
+    `同じ条件の前回（${refDateText(wd.compareDate, sess)}）は ${Math.round(wd.compareValue)} 点で、${word}との差は <b>${signedText(wd.deltaPoints, 0)} 点</b>です。`,
+    "",
   );
 }
-/* 項目3: 自己ベストとの距離（§5 コピー対応表） */
-function todaysResultPersonalBestRowHtml(pb, sess, dayLabel) {
-  const distLbl = distanceLabel(sess.dist);
-  const projected = pb.method === "avg-projected";
-  const bestLabel = projected ? "自己ベストの換算値" : "自己ベスト";
-  let primary;
-  if (pb.achieved) {
-    primary =
+/* グループ RMS と、同じ距離・的の直近の平均 */
+function todaysResultStabilityRowHtml(st, word) {
+  const n = Math.min(5, st.sampleCount);
+  return todaysResultRowHtml(
+    "stability",
+    `${word}のグループ RMS は ${st.latestValue.toFixed(1)}cm です。同じ距離・的の直近${n}回の平均は ${st.baselineValue.toFixed(1)}cm で、差は ${signedText(st.latestValue - st.baselineValue, 1)}cm です。`,
+    "位置のある矢だけで計算しています。値が小さいほど矢が集まっています。",
+  );
+}
+/* これまでの最高との関係。同じ射数の記録があればその合計、無ければ1射平均の最も高い回を今回の射数に換算する */
+function todaysResultPersonalBestRowHtml(pb, sess, word) {
+  const bestDate = refDateText(pb.bestDate, sess);
+  const best = `${pb.bestTotal} 点、${bestDate}`;
+  if (pb.method === "avg-projected") {
+    const rel =
       pb.remaining < 0
-        ? `${distLbl}${bestLabel}を <b>${projected ? "上回りました" : "更新"}</b>（+${Math.abs(Math.round(pb.remaining))}点）`
-        : `${distLbl}${bestLabel}に <b>並びました</b>`;
-  } else {
-    const suffixParts = [];
-    if (pb.pace === "close") suffixParts.push("ペースは近い");
-    const suffix = suffixParts.length ? `（${suffixParts.join("・")}）` : "";
-    primary = `${distLbl}${bestLabel}まで <b>あと${Math.round(pb.remaining)}点</b>${suffix}`;
+        ? `${word}はそれより ${Math.abs(Math.round(pb.remaining))} 点高い値です`
+        : pb.remaining === 0
+          ? `${word}と同じです`
+          : `${word}との差は −${Math.round(pb.remaining)} 点です`;
+    return todaysResultRowHtml(
+      "personal-best",
+      `この距離・的で1射平均が最も高い回（${bestDate}）を ${pb.todayArrows}射に換算すると ${pb.bestTotal} 点で、${rel}。`,
+      `同じ射数の記録がないため、1射平均からの換算値（推定）で比べています。実際の合計の最高ではありません。`,
+    );
   }
-  const referenceLabel = projected ? `推定・${pb.todayArrows}本換算` : "自己ベスト";
-  const detail = `${referenceLabel} ${pb.bestTotal}点（${fmtD(pb.bestDate)}）・ ${dayLabel} ${pb.todayTotal}点`;
-  return todaysResultRowHtml("personal-best", "target", primary, detail);
+  const fact =
+    pb.remaining < 0
+      ? `この距離・的・射数で<b>最高です</b>（これまで ${best}）。`
+      : pb.remaining === 0
+        ? `この距離・的・射数のこれまでの最高（${best}）と同じです。`
+        : `この距離・的・射数の最高は ${best} で、${word}との差は −${Math.round(pb.remaining)} 点です。`;
+  return todaysResultRowHtml(
+    "personal-best",
+    fact,
+    `対象: ${esc(sessionConditionText(sess))}の、この日までの記録。`,
+  );
 }
-/* 項目4: 伸びの継続日数。score/stability それぞれ独立に0〜1行（§5 コピー対応表） */
-const TODAYS_RESULT_METRIC_LABEL = { score: "得点", stability: "安定性" };
-function todaysResultGrowthRowsHtml(gs, growthBefore) {
-  if (!gs || !gs.available || !Array.isArray(gs.metrics)) return "";
-  return gs.metrics
-    .map((m) => {
-      if (!m.available) return "";
-      const label = TODAYS_RESULT_METRIC_LABEL[m.key] || m.key;
-      const beforeMetric =
-        growthBefore && growthBefore.available && Array.isArray(growthBefore.metrics)
-          ? growthBefore.metrics.find((x) => x.key === m.key)
-          : null;
-      const broke =
-        beforeMetric && beforeMetric.available && beforeMetric.streakDays > 0 && m.streakDays === 0;
-      if (broke) {
-        return todaysResultRowHtml(
-          `streak-${m.key}`,
-          "updown",
-          `${label}の伸びが途切れました（<b>${beforeMetric.streakDays}日→0日</b>）`,
-          "",
-        );
-      }
-      if (m.streakDays >= 2) {
-        return todaysResultRowHtml(
-          `streak-${m.key}`,
-          "updown",
-          `${label}の伸びが <b>${m.streakDays}日</b> 続いている`,
-          "",
-        );
-      }
-      return "";
-    })
-    .join("");
-}
-/* オーケストレータ: computeTodaysResult() の結果を0〜4行の可変長パネルへ描く。0行なら
-   todaysResultEmpty の1行に縮退する（§2・§4）。dayLabel は openSummary からの呼び出しでは既定の
-   「今日」、履歴詳細シート（60-history-sight-view.js）からの再構成では opts.dayLabel="この日" を渡す */
+/* computeTodaysResult() と computeConditionComparison() の結果を、事実と根拠の行にする。
+   opts.comparison: 同じ条件の平均との比較 / opts.dayLabel: 「今日」（結果の画面）か「この日」（ノートの詳細）。
+   伸びの継続日数（growthStreaks）は表示しない: しきい値が暫定で、根拠を1行で示せないため（v5 段 5） */
 function todaysResultHtml(result, sess, opts) {
   opts = opts || {};
   if (!result || !result.available) return "";
-  const dayLabel = opts.dayLabel || "今日";
+  const retro = !!opts.dayLabel && opts.dayLabel !== "今日";
+  const word = retro ? "この回" : "今回";
+  const cmp = opts.comparison || null;
   const rows = [];
   if (result.weeklyDiff && result.weeklyDiff.available)
-    rows.push(todaysResultWeeklyRowHtml(result.weeklyDiff, dayLabel));
-  if (result.stabilityTrend && result.stabilityTrend.available)
-    rows.push(todaysResultStabilityRowHtml(result.stabilityTrend));
-  else if (result.stabilityTrend && result.stabilityTrend.reason === "insufficient-arrows")
-    rows.push(todaysResultRowHtml(
-      "stability-pending",
-      "ruler",
-      "グルーピングの比較は保留",
-      `${result.stabilityTrend.coordinateCount}本の座標 / 比較には3本以上必要です。`,
-    ));
+    rows.push(todaysResultWeeklyRowHtml(result.weeklyDiff, sess, word));
   if (result.personalBestDistance && result.personalBestDistance.available)
-    rows.push(todaysResultPersonalBestRowHtml(result.personalBestDistance, sess, dayLabel));
-  rows.push(todaysResultGrowthRowsHtml(result.growthStreaks, opts.growthBefore));
-  const html = rows.join("");
-  if (!html) {
-    /* 空欄縮退コピーは「真の初回」と「条件初回」を区別する（strict-review major①）:
-       4サブ結果の不成立は初めての距離・的サイズを試した日にも起こるため、「初回記録」と
-       書くと記録歴のあるユーザーに事実誤認の文言を出してしまう。firstEver（母集団に当該
-       セッション以外の有効セッションが無い）のときだけ「初回記録」、それ以外は条件初回。
-       履歴詳細シート（dayLabel="この日"）では回顧時制に切り替える（「次回」は既に過去） */
-    const retro = dayLabel !== "今日";
+    rows.push(todaysResultPersonalBestRowHtml(result.personalBestDistance, sess, word));
+  if (result.stabilityTrend && result.stabilityTrend.available)
+    rows.push(todaysResultStabilityRowHtml(result.stabilityTrend, word));
+  else if (result.stabilityTrend && result.stabilityTrend.reason === "insufficient-arrows")
+    rows.push(
+      todaysResultRowHtml(
+        "stability-pending",
+        `位置のある矢が${result.stabilityTrend.coordinateCount}射のため、グループ RMS は比べていません。`,
+        "3射以上の位置があるときに計算します。",
+      ),
+    );
+  if (!rows.length && (!cmp || (cmp.reason === "insufficient-history" && !cmp.sampleCount))) {
+    /* 比べる過去の記録が1つも無い: 最初の記録か、この条件で最初の記録か */
     const msg = result.firstEver
-      ? retro
-        ? "初回記録: この日が基準になりました。"
-        : "初回記録: 基準ができました。次回から比較が始まります。"
-      : retro
-        ? "この条件では、この日が初記録でした。"
-        : "この条件では初記録。次回から比較が始まります。";
-    return `<div class="summaryTodaysResult todaysResultEmpty" data-testid="todays-result-empty">${msg}</div>`;
+      ? "最初の記録です。比べる過去の記録はありません。"
+      : `この条件（${esc(sessionConditionText(sess))}）では最初の記録です。同じ条件の記録が3回以上になると、平均との比較を表示します。`;
+    return `<div class="summaryTodaysResult todaysResultEmpty" data-testid="todays-result-empty"><p class="fact">${msg}</p></div>`;
   }
-  return `<div class="summaryTodaysResult" data-testid="todays-result">${html}</div>`;
+  return `<div class="summaryTodaysResult" data-testid="todays-result">${todaysResultComparisonRowHtml(cmp, sess, word)}${rows.join("")}</div>`;
 }
 
-/* セッション終了サマリー拡張: openSummary の第3引数（省略可）で受けた {streakBefore, streakAfter,
-   newBadges} を .statbar 直後にインラインで描く。gamification-final-design.md 観点4(d) 確定仕様:
-   別画面(openFeedback)・バッジ逐次モーダルは却下済みのため、ここでの一本化のみが正。
-   isNew && gam が真のときだけ呼ばれる（finishSession 側で isEdit を既に弾いている） */
+/* 練習の目標と連続記録（設定で入にしたときだけ）。結果の画面には事実を1〜2行だけ出す */
 function summaryGamificationHtml(gam) {
   const streakBefore = gam.streakBefore,
     streakAfter = gam.streakAfter,
     newBadges = gam.newBadges || [];
   let streakPart;
   if (streakAfter.configured) {
-    const grew = streakAfter.current > streakBefore.current;
-    /* 前回練習日より後に消費されたフリーズだけを今回分として表示する（strict-review major②）。
-       同日2回の computeStreak（before/after は「今回のセッションの有無」だけが違う）を単純に
-       差集合すると、過去の欠席日はどちらの走査にも同一に現れるため常に空になり通知が出ない */
+    /* 前回練習日より後に消費されたフリーズだけを今回分として表示する */
     const freezeUsed = streakAfter.freezeUsedDates.filter(
       (d) => streakBefore.lastPracticeDate && d > streakBefore.lastPracticeDate,
     );
-    const msg = grew
-      ? "連続記録が伸びました"
-      : streakAfter.current > 0
-        ? "今日も練習できました"
-        : "今日から始めましょう";
-    streakPart = `<div class="summaryStreak">
-      <span class="summaryStreakIcon" aria-hidden="true">${icon("fire")}</span>
-      <div class="summaryStreakBody">
-        <div class="summaryStreakRow">
-          ${grew ? `<span class="summaryStreakBefore">${streakBefore.current}</span><span class="summaryStreakArrow" aria-hidden="true">→</span>` : ""}
-          <span class="summaryStreakNum${grew ? " landed" : ""}" data-testid="summary-streak-num">${streakAfter.current}</span><span class="streakUnit">日連続</span>
-        </div>
-        <p class="summaryStreakMsg">${msg}</p>
-        ${freezeUsed.length ? `<p class="summaryStreakMsg">フリーズを${freezeUsed.length}個使用</p>` : ""}
-      </div>
-    </div>`;
+    streakPart = `<p class="fact">連続記録は <b data-testid="summary-streak-num">${streakAfter.current}</b> 日です（この記録の前は ${streakBefore.current} 日）。${freezeUsed.length ? `フリーズを${freezeUsed.length}個使いました。` : ""}</p>`;
   } else {
-    streakPart = `<div class="summaryStreak summaryStreakUnset">
-      <span class="summaryStreakIcon" aria-hidden="true">${icon("fire")}</span>
-      <div class="summaryStreakBody">
-        <p class="summaryStreakMsg">練習曜日を設定するとストリークが始まります</p>
-        <button type="button" class="btn sm sec" id="sumStreakSetup" data-testid="summary-streak-setup">練習曜日を設定</button>
-      </div>
-    </div>`;
+    streakPart = `<p class="fact">練習曜日が未設定のため、連続記録は数えていません。</p>
+      <button type="button" class="btn sm sec" id="sumStreakSetup" data-testid="summary-streak-setup">練習曜日を設定</button>`;
   }
   let badgesPart = "";
   if (newBadges.length) {
-    const shown = newBadges.slice(0, 3);
-    const restCount = newBadges.length - shown.length;
-    badgesPart = `<div class="summaryBadges" data-testid="summary-badges">
-      <div class="summaryBadgesKicker">新しく解除</div>
-      ${shown
-        .map((nb, i) => {
-          const def = BADGE_DEFS.find((b) => b.id === nb.id);
-          return `<div class="summaryBadgeRow" style="animation-delay:${(i * 0.14).toFixed(2)}s">
-        <span class="summaryBadgeIcon" aria-hidden="true">${BADGE_ICONS[nb.id] || ""}</span>
-        <div class="summaryBadgeText"><b>${esc(def ? def.name : "")}</b><span>${esc(def ? def.reason : "")}</span></div>
-      </div>`;
-        })
-        .join("")}
-      ${restCount > 0 ? `<div class="summaryBadgeMore">ほか${restCount}件</div>` : ""}
-    </div>`;
+    const names = newBadges.map((nb) => {
+      const def = BADGE_DEFS.find((b) => b.id === nb.id);
+      return def ? `「${esc(def.name)}」（${esc(def.reason)}）` : "";
+    });
+    badgesPart = `<p class="basis" data-testid="summary-badges">この記録で条件を満たしたバッジ: ${names.filter(Boolean).join("、")}</p>`;
   }
   return `<div class="summaryGamification" data-testid="summary-gamification">${streakPart}${badgesPart}</div>`;
 }
+/* 着弾の数値（グループ RMS と着弾中心のずれ）。位置のある矢の統計が無ければ空 */
+function resultImpactFigsHtml(st) {
+  if (!st) return "";
+  const ci = st.rrCi ? `95%区間 ${st.rrCi.lo.toFixed(1)}〜${st.rrCi.hi.toFixed(1)}` : `${st.n}射`;
+  return `<div class="figs two resultImpactFigs" data-testid="result-impact-figs">
+    <div class="fig"><div class="l">グループRMS（全射）</div><div class="n">${st.rr.toFixed(1)}<small>cm</small></div><div class="d">${ci}</div></div>
+    <div class="fig"><div class="l">着弾中心のずれ</div><div class="n offs">${cmOffsetText(st.mx, "x")}<br>${cmOffsetText(st.my, "y")}</div></div>
+  </div>`;
+}
+/* ---------- 今日の結果（全画面。docs/design/v5/design.md 4.4・試作 #result） ----------
+   記録を終了した直後に出す。合計 → 前後半・数える点 → 同じ条件との比較（根拠つき）→ スコア表 →
+   着弾 → サイト調整の目安と根拠（既存の内容。作り直しは段 8）→ メモ → 分析で見る / 保存して閉じる */
 function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
+  void growthBefore; /* 伸びの継続日数は表示しない（todaysResultHtml の説明を参照） */
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const m = sessionMetrics(sess);
   const all = m.all,
     total = m.total,
     st = m.st;
   const adv = adviceFor(sess, setup);
+  const posCount = all.filter(arrowHasPos).length;
+  const comparison =
+    isNew && todaysResult
+      ? computeConditionComparison(
+          db.sessions.filter((x) => x && x.date && x.date <= sess.date),
+          sess.id,
+          scorecardPlan(sess).quota,
+        )
+      : null;
+  const title = isNew && sess.date === today() ? "今日の結果" : "記録の結果";
   const ovl = document.createElement("div");
-  ovl.className = "ovl";
-  ovl.innerHTML = `<div class="sheet">
-    <h3>${isNew ? "おつかれさまでした！" : ""} ${fmtD(sess.date)} ・ ${sess.dist}m</h3>
-    <div class="statbar">
-      <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
-      <div class="stat"><b>${(total / all.length).toFixed(2)}</b><span>平均/本</span></div>
-      <div class="stat"><b>${perfectScoreCount(all, sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
-      <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
-    </div>
+  ovl.className = "ovl resultOvl";
+  ovl.innerHTML = `<div class="sheet resultScreen" data-testid="result-screen">
+    <header class="subHead">
+      <div class="viewDate" data-testid="result-condition">${fmtMDW(sess.date)}・${esc(sess.dist)}m・${esc(faceLabel(sess))}${setup ? "・" + esc(setup.name) : ""}</div>
+      <h3>${title}</h3>
+    </header>
+    <section class="vsec resultTotalSec" data-testid="result-total">
+      <div class="vsecH"><h2>合計</h2><span class="aside">${all.length}射・1射平均 ${(total / all.length).toFixed(2)}</span></div>
+      <div class="bigRow">${sessionBigTotalHtml(sess, "resultTotal")}</div>
+      ${sessionFigsHtml(sess, "ends")}
+    </section>
     ${summaryStorageNoticeHtml()}
-    ${isNew && todaysResult ? todaysResultHtml(todaysResult, sess, { growthBefore }) : ""}
+    ${isNew && todaysResult ? todaysResultHtml(todaysResult, sess, { comparison }) : ""}
     ${isNew && gam ? summaryGamificationHtml(gam) : ""}
     ${roundGroupSummaryHtml(sess)}
-    ${summaryDecisionHtml(adv, sess)}
-    <div id="sumPlot" class="recordSummaryPlot"></div>
-    ${groupSummaryHtml(st)}
-    ${summarySightDialHtml(sess, adv)}
-    ${st ? nextActionHtml(sess, adv, setup) : ""}
+    <section class="vsec"><div class="vsecH"><h2>スコア表</h2><span class="aside">高い点から表示</span></div></section>
+    <div class="bleed">${scorecardHtml(sess, { final: true })}</div>
+    ${all.some(arrowIsManual) ? `<p class="basis">* は手で直した点数です（位置からの採点とは違う点を選んだ矢）。</p>` : ""}
+    <section class="vsec"><div class="vsecH"><h2>着弾</h2><span class="aside">${posCount ? `${posCount}射の位置` : "位置の記録なし"}</span></div></section>
+    <div id="sumPlot" class="recordSummaryPlot${posCount ? " bleed" : ""}"></div>
+    ${resultImpactFigsHtml(st)}
     <details class="adv summaryDetails">
-      <summary>詳しい根拠を見る</summary>
+      <summary>サイト調整の目安と詳しい根拠</summary>
+      ${summaryDecisionHtml(adv, sess)}
+      ${groupSummaryHtml(st)}
+      ${summarySightDialHtml(sess, adv)}
+      ${st ? nextActionHtml(sess, adv, setup) : ""}
       ${st ? confidenceNoteHtml("calc") : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
       ${st ? trustHtml(sess, setup, st) : ""}
       ${roundProgressHtml(sess)}
@@ -3384,9 +3340,17 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
       ${conditionHtml(sess, st, setup)}
     </details>
     ${sess.setupId && (sess.sightV || sess.sightH) ? `<div class="btnrow"><button class="btn sec" id="sumMark">${icon("ledger")} このサイト値を台帳に記録</button></div>` : ""}
-    <div class="btnrow"><button class="btn sec" id="sumCard">画像保存</button><button class="btn ghost" id="sumClose">閉じる</button></div>
+    <section class="vsec">
+      <div class="vsecH"><h2><label for="sumNote">${title === "今日の結果" ? "今日のメモ" : "この記録のメモ"}</label></h2><span class="aside">ノートに残ります</span></div>
+      <textarea class="noteBox" id="sumNote" data-testid="result-note" placeholder="感覚、気づいたこと、次に確かめること">${esc(sess.note || "")}</textarea>
+    </section>
+    <div class="btnrow"><button class="btn sec" id="sumCard">スコア表を画像で保存</button></div>
+    <div class="actbar two">
+      <button type="button" class="btn sec" id="sumAnalysis" data-testid="result-analysis">分析で見る</button>
+      <button type="button" class="btn pri" id="sumClose">保存して閉じる</button>
+    </div>
   </div>`;
-  openModal(ovl, { escapeTarget: "#sumClose" });
+  openModal(ovl, { escapeTarget: "#sumClose", swipe: false });
   const backupSettings = ovl.querySelector("#sumBackupSettings");
   if (backupSettings) backupSettings.onclick = () => {
     openSettings();
@@ -3410,10 +3374,28 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
       toast("サイト台帳に記録しました");
       mk.disabled = true;
     };
+  /* メモはこの記録の note に書く（記録の条件・記録中のメニューと同じ項目）。入力のたびに保存を予約する */
+  const note = ovl.querySelector("#sumNote");
+  const noteChanged = () => (sess.note || "") !== note.value.trim();
+  note.oninput = () => {
+    if (!noteChanged()) return;
+    sess.note = note.value.trim();
+    scheduleSave("result-note");
+  };
   ovl.querySelector("#sumCard").onclick = () => exportScorecardImage(sess);
-  ovl.querySelector("#sumClose").onclick = () => {
+  const close = () => {
+    if (noteChanged()) sess.note = note.value.trim();
+    if (hasPendingSave()) save({ reason: "result-note" });
     closeModal(ovl);
+  };
+  ovl.querySelector("#sumClose").onclick = () => {
+    close();
     render();
+  };
+  ovl.querySelector("#sumAnalysis").onclick = () => {
+    close();
+    if (view === "analysis") render();
+    else showView("analysis");
   };
   const sumStreakSetup = ovl.querySelector("#sumStreakSetup");
   if (sumStreakSetup) sumStreakSetup.onclick = () => openPracticeDaysSheet();

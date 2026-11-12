@@ -2119,3 +2119,39 @@ details.adv.recordDetails{margin-top:22px; border-top:2px solid var(--ink)!impor
   .recordDetails summary .sumNote{display:none;}
 }
 .homeGoalLine span{white-space:nowrap;}
+
+/* ===================================================================================
+   段 5: 今日の結果（全画面。docs/design/v5/design.md 4.4）。openModal の中身を画面いっぱいに広げる。
+   =================================================================================== */
+.ovl.resultOvl{align-items:stretch; background:var(--bg); animation:none;}
+.sheet.resultScreen{
+  width:100%; max-width:480px; height:100%; max-height:none; margin:0 auto; overflow-y:auto;
+  background:var(--bg); border-top:0; animation:none;
+  padding:var(--safe-t) var(--gut) calc(96px + var(--safe-b));
+}
+.resultScreen .subHead h3{margin:0; font-size:24px; font-weight:700; line-height:1.25; letter-spacing:.01em; color:var(--ink);}
+.resultScreen .vsec{margin-top:18px;}
+.resultScreen .resultTotalSec{margin-top:4px;}
+.resultScreen .vsecH h2 label{font:inherit; color:inherit;}
+.bigNum.resultTotal{font-size:56px;}
+.resultScreen .bleed{margin:0 calc(-1 * var(--gut));}
+.resultScreen .bleed .tgWrap{background:var(--mat);}
+.resultScreen .recordSummaryPlot{margin-top:0;}
+.resultImpactFigs .n.offs{font-size:17px; line-height:1.5; padding-top:4px;}
+/* 事実と根拠の行（今日の結果・ノートの詳細）。旧い行の作り（アイコン＋本文の横並び）を置き換える */
+.summaryTodaysResult{margin-top:0; display:block;}
+.summaryTodaysResult.todaysResultEmpty{font-size:15px; color:var(--ink); padding:0; text-align:left;}
+.todaysResultRow{display:block; padding:0 0 8px;}
+.todaysResultRow + .todaysResultRow{border-top:1px solid var(--rule);}
+.todaysResultRow .fact b{font-weight:700;}
+.summaryGamification{margin-top:0; display:block; border-top:1px solid var(--rule); padding-bottom:8px;}
+.summaryGamification .btn.sm{margin-top:8px; min-height:44px;}
+.resultScreen .summaryStorageNotice{border-radius:6px; border:1px solid var(--rule-strong); background:var(--surface);}
+.resultScreen .summaryStorageNotice b{font-size:15px;}
+.resultScreen .summaryStorageNotice p{font-size:14px;}
+.resultScreen .summaryStorageNotice .btn{font-size:15px;}
+.resultScreen .summaryDetails{margin-top:14px;}
+.resultScreen .noteBox{margin-top:6px;}
+@media (max-width:340px){
+  .bigNum.resultTotal{font-size:52px;}
+}

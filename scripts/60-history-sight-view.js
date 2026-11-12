@@ -558,7 +558,7 @@ function openHistDetail(id) {
   const histTodaysResult = computeTodaysResult(histSessions, sess.id, sessionMetrics, {
     formAnalyses: db.formAnalyses,
   });
-  const histGrowthBefore = histTodaysResult.available ? trGrowthBeforeFor(sess, histSessions, sessionMetrics) : null;
+  const histComparison = computeConditionComparison(histSessions, sess.id, scorecardPlan(sess).quota);
   /* 構成（正本 B節）: 主役数値 → 着弾図 → エンド表 → 分析カード群 → 操作。
      ロジック（集計・adviceFor 等）は不変・呼び出し順と見た目だけを並べ替える */
   const endTableHtml = `<table class="tbl mt8 histEndTable" data-testid="history-end-table"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
@@ -602,7 +602,7 @@ function openHistDetail(id) {
       <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
     ${legacyRescoreHtml(sess, setup, total)}
-    ${todaysResultHtml(histTodaysResult, sess, { dayLabel: "この日", growthBefore: histGrowthBefore })}
+    ${todaysResultHtml(histTodaysResult, sess, { dayLabel: "この日", comparison: histComparison })}
     <div id="hPlot" class="mt10"></div>
     ${endTableHtml}
     ${analysisCardsHtml}
