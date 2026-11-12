@@ -75,7 +75,7 @@ const old = [0, 1, 2].map((i) => ({
   date: "2026-10-0" + (i + 1),
   ends: [
     Array.from({ length: 6 }, (_, j) =>
-      arrow(Math.cos((j / 6) * Math.PI * 2) * 4.5, Math.sin((j / 6) * Math.PI * 2) * 4.5),
+      arrow(Math.cos((j / 6) * Math.PI * 2) * 4, Math.sin((j / 6) * Math.PI * 2) * 4),
     ),
   ],
 }));
@@ -124,7 +124,7 @@ for (const n of [0, 1, 2, 3, 6]) {
       const html = api.analysisKpiHtml(rows);
       assert.match(html, /比較待ち/);
       assert.doesNotMatch(html, /<b>0\.0cm<\/b>/);
-      assert.match(html, /最小 4\.2cm/);
+      assert.match(html, /最小 3\.7cm/);
     });
     check(`pending conclusion n${n}`, () =>
       assert.equal(api.todayConclusion(rows).kind, "grouping-pending"),

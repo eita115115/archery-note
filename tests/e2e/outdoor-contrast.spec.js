@@ -149,8 +149,11 @@ test("arrow marker keeps a thick white outline for outdoor glare readability", a
 
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await target.click(); // 中央タップで矢マークを1つ生成
-  const mark = page.locator("#tgmarks circle").first();
-  await expect(mark).toBeVisible();
+  // 実寸の矢円（判定と同じ半径）と、位置を探すための目印（判定には使わない）の2つを描く
+  const mark = page.locator("#tgmarks circle.arrowFoot").first();
+  await expect(mark).toHaveCount(1);
+  const locator = page.locator("#tgmarks circle.arrowLocator").first();
+  await expect(locator).toBeVisible();
 
   const attrs = await mark.evaluate((el) => ({
     stroke: el.getAttribute("stroke"),
@@ -158,7 +161,15 @@ test("arrow marker keeps a thick white outline for outdoor glare readability", a
     r: parseFloat(el.getAttribute("r")),
   }));
   expect(attrs.stroke).toBe("#fff");
-  // markCircle() は stroke-width を r/3 で描画（白縁を太くする現行仕様）
+  // markCircle() は実寸の矢円の stroke-width を r/3 で描画（白縁を太くする現行仕様）
   expect(attrs.strokeWidth / attrs.r).toBeCloseTo(1 / 3, 5);
+  // 表示される矢円の半径 = 線かみ判定の半径（既定矢径 5.7mm → 0.285cm）。的の大きさに依存しない
+  expect(attrs.r).toBeCloseTo(0.285, 6);
+  const loc = await locator.evaluate((el) => ({
+    stroke: el.getAttribute("stroke"),
+    dash: el.getAttribute("stroke-dasharray"),
+  }));
+  expect(loc.stroke).toBe("#fff");
+  expect(loc.dash).toBeTruthy();
   expect(unexpectedErrors).toEqual([]);
 });
