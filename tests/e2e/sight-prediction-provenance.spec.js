@@ -31,9 +31,11 @@ for (const width of [320, 375, 900]) {
     await seed(page);
     const before = await snapshot(page),
       panel = await prediction(page);
+    // 18m:40・30m:80 の2点を弾道モデル（照準角 tan(α) への線形回帰）で外挿した値。
+    // 旧版の直線近似（146.7/213.3）より、空気抵抗で遠距離ほど目盛りの伸びが大きくなる
     await expect(panel.locator("[data-predict-dist] dd")).toHaveText([
-      "146.7目盛り",
-      "213.3目盛り",
+      "155.9目盛り",
+      "239.2目盛り",
     ]);
     const details = panel.locator("details.sightSources"),
       summary = details.locator("summary");
@@ -219,7 +221,9 @@ test("prediction keeps setup scope, disappears below two distances and handles a
   });
   const panel = await prediction(page);
   await expect(panel.locator("[data-predict-dist]")).toHaveCount(0);
-  await expect(panel).toContainText("カーブ近似");
+  await expect(panel).toContainText("弾道モデル");
+  // 0/0/0/100 のような矛盾した台帳では初速の当てはめが探索範囲の端に張り付くので採らず、用具からの推定を使う
+  await expect(panel).toContainText("用具から推定");
   await expect(panel).toContainText("定番距離");
   await panel.locator("details.sightSources summary").tap();
   await expect(panel.locator("[data-source-id]")).toHaveCount(4);

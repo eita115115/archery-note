@@ -665,7 +665,7 @@ const GEAR_PLACEHOLDERS = {
   drawLength: "例: 28.5",
   arrowSpeed: "例: 205fps / 62.5m/s",
   arrowCd: "未入力なら矢径とベインから推定",
-  bowEfficiency: "未入力なら72〜78%で推定",
+  bowEfficiency: "未入力なら矢の重さから推定",
   stabilizer: "例: SHIBUYA Vanquish PRO",
   tab: "例: SHIBUYA APEX",
   shaftSetWeightSpread: "同一セットの最大差。例: 3",

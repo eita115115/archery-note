@@ -338,7 +338,24 @@ const phys = physicsApi.physicsProfile({
 });
 assert(phys.speedFps > 150 && phys.speedFps < 260, "Physics speed out of range");
 assert(phys.rho > .9 && phys.rho < 1.25, "Air density out of range");
-assert(phys.cd > 1.1 && phys.cd < 1.3, "Arrow Cd out of range");
+/* 前面積基準の Cd: φ5.6mm・29inch で 2.6（Park 2011 の乱流・ポイント付き実測）を基準に 長さ/直径 に比例。
+   5.5mm・29inch・Spin Wing(×1.05)・ベイン高2.0(×1.006) → 2.6×(5.6/5.5)×1.05×1.006 ≈ 2.80 */
+assert(Math.abs(phys.cd - 2.6 * (5.6 / 5.5) * 1.05 * 1.006) < 1e-9, "Arrow Cd out of range");
+{
+  /* 細い矢ほど前面積基準の Cd は大きい（表面摩擦が支配的）。旧版は逆向きだった */
+  const thin = physicsApi.physicsProfile({arrowDia:"4.6", arrowLength:"29"});
+  const fat = physicsApi.physicsProfile({arrowDia:"9.3", arrowLength:"29"});
+  assert(thin.cd > fat.cd, "Thin arrows must have the larger frontal-area Cd");
+  /* 初速: パワーストローク（引き尺−1.75−ブレースハイト）と仮想質量。40lb/28in/BH8.75/320gr → 約198fps */
+  const v40 = physicsApi.physicsProfile({poundage:"40", drawLength:"28", brace:"8.75 inch", arrowWeight:"320"});
+  assert(v40.speedFps > 190 && v40.speedFps < 206 && Math.abs(v40.braceIn - 8.75) < 1e-12, "Power-stroke speed estimate failed");
+  const heavy = physicsApi.physicsProfile({poundage:"40", drawLength:"28", arrowWeight:"420"});
+  const kinetic = (pp) => 0.5 * pp.massKg * pp.speedMps * pp.speedMps;
+  assert(heavy.speedFps < v40.speedFps && kinetic(heavy) > kinetic(v40), "Heavier arrows must be slower but take more energy");
+  const longBrace = physicsApi.physicsProfile({poundage:"40", drawLength:"28", brace:"9.5", arrowWeight:"320"});
+  assert(longBrace.speedFps < v40.speedFps, "A higher brace height shortens the power stroke");
+  assert(Math.abs(physicsApi.physicsProfile({brace:"22.2"}).braceIn - 22.2 / 2.54) < 1e-12, "Brace height in cm must be converted");
+}
 assert(phys.variation.confidenceFactor < 1, "Gear variation did not apply");
 const calmTraj = physicsApi.trajectoryModel({dist:70}, {
   poundage:"38", drawLength:"28.5", shaftGpi:"6.8", arrowLength:"29", pointWeight:"110", arrowDia:"5.5",
@@ -351,12 +368,36 @@ const windTraj = physicsApi.trajectoryModel({dist:70, windDir:"左から", windS
 assert(calmTraj.engine === "RK4-3D" && calmTraj.tof > .6 && calmTraj.tof < 1.5, "RK4 trajectory failed");
 assert(windTraj.wind.side > 0 && windTraj.windDriftCm > 0 && windTraj.windUncertaintyCm > 0, "Wind drift model failed");
 assert(physicsApi.ArcheryPhysicsCore && physicsApi.ArcheryPhysicsCore.trajectory({dist:70}, {poundage:"38"}, 850).engine === "RK4-3D", "Physics core facade failed");
+/* 距離別サイト値の予測: 弾道から計算した照準角 tan(α) にサイト値を線形回帰する。
+   前提と異なる「真の値」（目と矢の高低差12cm・的との高低差25cm・Cd2.0・初速58m/s）から作った台帳でも、
+   実測範囲の外（18m・70m・90m）を1mm前後で当てる。旧版の一次/二次近似は 2〜9mm ずれていた */
+{
+  const sightDb = {settings:{eyeSight:850}, setups:[{id:"s", poundage:"40", drawLength:"28", arrowWeight:"320", arrowDia:"5.5"}], sightMarks:[], sessions:[]};
+  const sightApi = new Function("normGearText","db", section("function clamp", "function calibrationProfile") + "\nreturn {physicsProfile,solveZeroAngle,sightInterp,sightAngleFeature};")(normGearText, sightDb);
+  const truth = Object.assign({}, sightApi.physicsProfile(sightDb.setups[0]), {speedMps:58, cd:2.0});
+  const mark = (D) => { const th = sightApi.solveZeroAngle(D, truth, null, -0.12, -0.25); return 100 - 850 * Math.tan(th - Math.atan2(-0.25, D)); };
+  sightDb.sightMarks = [30, 50].map((d, i) => ({id:"m" + i, setupId:"s", dist:d, v:mark(d).toFixed(2), date:"2026-01-0" + (i + 1)}));
+  const it = sightApi.sightInterp("s");
+  assert(it && it.model === "physics" && it.speedSource === "estimated", "Physics sight model missing");
+  for (const d of [18, 70, 90]) assert(Math.abs(it.est(d) - mark(d)) < (d === 90 ? 1.5 : 0.8), `Sight prediction at ${d}m off by ${Math.abs(it.est(d) - mark(d))}`);
+  assert(Math.abs(it.est(30) - mark(30)) < 0.01 && Math.abs(it.est(50) - mark(50)) < 0.01, "Two-mark fit must pass through the marks");
+  /* 近距離ほど 1/距離 の項（目と矢の高低差）が効き、照準角は距離に対して直線にならない */
+  const ph = sightApi.physicsProfile(sightDb.setups[0]);
+  const f = [18, 30, 50, 70].map((d) => sightApi.sightAngleFeature(d, ph));
+  assert(f[0] < f[1] && f[1] < f[2] && f[2] < f[3], "Sight angle must grow with distance");
+  assert((f[1] - f[0]) / 12 < (f[3] - f[2]) / 20, "Sight angle curvature (drag) missing");
+  sightDb.sightMarks = [18, 30, 50, 70].map((d, i) => ({id:"m" + i, setupId:"s", dist:d, v:mark(d).toFixed(2), date:"2026-01-0" + (i + 1)}));
+  const it4 = sightApi.sightInterp("s");
+  assert(it4.speedSource === "fitted" && it4.r2 > 0.9999 && Math.abs(it4.est(90) - mark(90)) < 1.5, "Four-mark speed fit failed");
+}
 const calibDb = {
   setups:[{id:"main",poundage:"38",drawLength:"28.5",shaftGpi:"6.8",arrowLength:"29",pointWeight:"110",arrowDia:"5.5",arrowWeight:"334",vane:"Spin Wing",temperature:"30",altitude:"500",humidity:"70"}],
   sessions:[],
   sightMarks:[{setupId:"main",dist:30,v:"4.2"},{setupId:"main",dist:50,v:"5.6"},{setupId:"main",dist:70,v:"6.8"}],
   settings:{eyeSight:850}
 };
+const windDrift70 = physicsApi.trajectoryModel({dist:70, windDir:"左から", windSpeed:"4"}, calibDb.setups[0], 850).windDriftCm;
+assert(windDrift70 > 24 && windDrift70 < 40, `70m crosswind drift out of the published range: ${windDrift70}`);
 const calibSess = (id, sightV, cx, cy, windDir="", windSpeed="") => ({
   id, date:`2026-05-${id}`, setupId:"main", dist:70, faceD:122, faceType:"single", sightV:String(sightV), windDir, windSpeed,
   ends:[[0,1,2,3,4,5].map(i=>({x:cx+(i%3-1)*.2,y:cy+(Math.floor(i/3)-.5)*.2,s:9}))]
@@ -365,8 +406,9 @@ calibDb.sessions.push(
   calibSess("01",5,0,2),
   calibSess("02",6,0,0),
   calibSess("03",7,0,-2),
-  calibSess("04",6,11,0,"左から","4"),
-  calibSess("05",6,10.5,0,"左から","4")
+  /* 風の回の左右ズレはモデルの横流れの95%/90%（70m・横風4m/sで約29cm。WAの研究では3m/sでリング4本超） */
+  calibSess("04",6,windDrift70*.95,0,"左から","4"),
+  calibSess("05",6,windDrift70*.9,0,"左から","4")
 );
 const calibApi = new Function(
   "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc",

@@ -67,19 +67,22 @@ function airDensity(setup){
   const dry=pressure-vapor;
   return clamp(dry/(287.05*tK)+vapor/(461.495*tK),.82,1.32);
 }
+/* 矢の抗力係数（前面積基準）。矢の抗力はシャフト表面の摩擦が支配的で（Park 2011）、前面積基準の Cd は
+   長さ/直径に比例して大きくなる。基準値は φ5.6mm・29inch の矢で Cd≈2.6（乱流境界層・ポイント付きの実測、
+   層流なら約1.5）。旧版は 1.0〜1.3 で、細い矢ほど小さくしていた（物理的に逆向き）ため抗力を過小評価していた */
+const ARROW_CD_REF=2.6, ARROW_CD_REF_DIA_MM=5.6, ARROW_CD_REF_LEN_IN=29;
 function estimateArrowCd(setup, diaMm){
   const explicit=num(setup&&setup.arrowCd);
-  if(explicit!=null) return clamp(explicit,.55,1.9);
-  let cd=diaMm<=4.2?1.03:diaMm<=5.5?1.12:diaMm<=7?1.22:1.34;
+  if(explicit!=null) return clamp(explicit,.8,4.5);
+  const len=clamp(num(setup&&setup.arrowLength)||ARROW_CD_REF_LEN_IN,20,34);
+  let cd=ARROW_CD_REF*(ARROW_CD_REF_DIA_MM/clamp(diaMm,3,10))*(len/ARROW_CD_REF_LEN_IN);
   const vane=normGearText(setup&&setup.vane);
-  if(/FEATHER|羽根|ナチュラル/.test(vane)) cd+=.14;
-  else if(/SPIN|WING|XS|GAS PRO|KURLY|ELIVANES/.test(vane)) cd+=.07;
-  else if(/LOW|TINY|1\.5|1 5/.test(vane)) cd-=.03;
+  if(/FEATHER|羽根|ナチュラル/.test(vane)) cd*=1.10;
+  else if(/SPIN|WING|XS|GAS PRO|KURLY|ELIVANES/.test(vane)) cd*=1.05;
+  else if(/LOW|TINY|1\.5|1 5/.test(vane)) cd*=.98;
   const vh=num(setup&&setup.vaneHeight);
-  if(vh!=null) cd+=clamp((vh-1.8)*.045,-.05,.12);
-  const foc=num(setup&&setup.foc);
-  if(foc!=null && foc>16) cd+=.015;
-  return clamp(cd,.75,1.75);
+  if(vh!=null) cd*=1+clamp((vh-1.8)*.03,-.04,.08);
+  return clamp(cd,.8,4.5);
 }
 function gearVariation(setup){
   const spread=num(setup&&setup.shaftSetWeightSpread);
@@ -103,6 +106,19 @@ function gearVariation(setup){
   if(/きつ|TIGHT/.test(nock)){ penalty+=.02; notes.push("ノックフィットがきつめです。リリース時の離れに影響することがあります。"); }
   return {penalty:clamp(penalty,0,.28), confidenceFactor:clamp(1-penalty,.72,1), notes};
 }
+/* ブレースハイト(inch)。"8.75 inch" のような文字列も読む。15〜30 は cm 入力とみなして換算 */
+function braceInches(setup){
+  const b=num(setup&&setup.brace);
+  if(b==null) return 8.75;
+  if(b>=15&&b<=30) return b/2.54;
+  return clamp(b,6,11);
+}
+/* 初速の推定（実測がないとき）:
+   蓄積エネルギー E = q × 最大引き重量 × パワーストローク（引き尺 − 1.75inch − ブレースハイト）、
+   初速 v = √(2E / (m_矢 + m_仮想))（Hickman の仮想質量モデル。重い矢ほど効率が上がる）。
+   q=0.6・仮想質量 5.2g はリカーブで 40lb/28inch/320gr → 約200fps になる値。旧版は引き尺全体を
+   パワーストロークとして使い（ブレースハイトを無視）、効率を固定していた。弓効率(%)の入力があればそれを使う */
+const POWER_STROKE_Q=0.6, BOW_VIRTUAL_MASS_KG=0.0052;
 function physicsProfile(setup){
   const p=num(setup&&setup.poundage);
   const drawIn=num(setup&&setup.drawLength)||28;
@@ -111,23 +127,25 @@ function physicsProfile(setup){
   const speedRaw=num(setup&&setup.arrowSpeed);
   const measuredSpeed=speedRaw!=null;
   const massKg=massGr*0.00006479891;
+  const braceIn=braceInches(setup);
   let speedMps;
   if(measuredSpeed){
     speedMps=speedRaw>100 ? speedRaw*0.3048 : speedRaw;
   }else{
     const drawN=(p||36)*4.44822;
-    const drawM=drawIn*0.0254;
-    const stored=0.5*drawN*drawM;
+    const strokeM=Math.max(.2,(drawIn-1.75-braceIn)*0.0254);
+    const stored=POWER_STROKE_Q*drawN*strokeM;
     const explicitEff=num(setup&&setup.bowEfficiency);
-    const eff=explicitEff!=null?clamp(explicitEff/100,.55,.88):(p&&p>=45?.78:.72);
-    speedMps=Math.sqrt(Math.max(1,2*stored*eff/massKg));
+    speedMps=explicitEff!=null
+      ? Math.sqrt(2*stored*clamp(explicitEff/100,.55,.92)/massKg)
+      : Math.sqrt(2*stored/(massKg+BOW_VIRTUAL_MASS_KG));
   }
   speedMps=clamp(speedMps,35,95);
   const cd=estimateArrowCd(setup||{}, diaMm);
   const area=Math.PI*(diaMm/1000/2)**2;
   const rho=airDensity(setup||{});
   const variation=gearVariation(setup||{});
-  return {pound:p||null, drawIn, massGr, diaMm, speedMps, speedFps:speedMps/0.3048, measuredSpeed, cd, area, massKg, rho, variation};
+  return {pound:p||null, drawIn, braceIn, massGr, diaMm, speedMps, speedFps:speedMps/0.3048, measuredSpeed, cd, area, massKg, rho, variation};
 }
 function sessionWindSpeed(sess){
   const v=num(sess&&sess.windSpeed);
@@ -154,10 +172,14 @@ function windDriftText(cm){
   const a=Math.abs(cm).toFixed(1);
   return cm>0?`右へ${a}cm`:cm<0?`左へ${a}cm`:`0.0cm`;
 }
-function simulateArrow(distM, angle, phys, wind){
+/* 照準の幾何（既定値）: アンカー時に目は矢より約10cm上、目の高さ(約1.6m)は的中心(1.3m)より約30cm上。
+   近距離のサイト値はこの高低差の影響が大きい（距離に反比例する項）。 */
+const EYE_ABOVE_ARROW_M=0.10, EYE_ABOVE_TARGET_M=0.30;
+/* 点質量 + 相対風に対する2次抗力の3次元弾道を RK4 で積分。y0 は発射点の高さ(m) */
+function simulateArrow(distM, angle, phys, wind, y0){
   wind=wind||{down:0,side:0};
   const k=0.5*phys.rho*phys.cd*phys.area/phys.massKg, dt=0.006, g=9.80665;
-  let s={x:0,y:0,z:0,t:0,vx:phys.speedMps*Math.cos(angle),vy:phys.speedMps*Math.sin(angle),vz:0};
+  let s={x:0,y:y0||0,z:0,t:0,vx:phys.speedMps*Math.cos(angle),vy:phys.speedMps*Math.sin(angle),vz:0};
   const deriv=a=>{
     const rx=a.vx-(wind.down||0), ry=a.vy, rz=a.vz-(wind.side||0);
     const rv=Math.hypot(rx,ry,rz);
@@ -182,29 +204,39 @@ function simulateArrow(distM, angle, phys, wind){
   }
   return {y:s.y,z:s.z,t:s.t,speed:Math.hypot(s.vx,s.vy,s.vz),state:s};
 }
-function solveZeroAngle(distM, phys, wind){
+/* 距離 distM で高さ yT に当たる発射角（y0 から発射）。二分法、括れない場合は真空近似 */
+function solveZeroAngle(distM, phys, wind, y0, yT){
+  y0=y0||0; yT=yT||0;
   let lo=-0.05, hi=0.42;
-  let yl=simulateArrow(distM,lo,phys,wind).y, yh=simulateArrow(distM,hi,phys,wind).y;
+  let yl=simulateArrow(distM,lo,phys,wind,y0).y-yT, yh=simulateArrow(distM,hi,phys,wind,y0).y-yT;
   if(!(yl<=0 && yh>=0)){
     const v=phys.speedMps, g=9.80665;
-    const s=clamp(g*distM/(v*v),-.95,.95);
-    return 0.5*Math.asin(s);
+    const sn=clamp(g*distM/(v*v),-.95,.95);
+    return 0.5*Math.asin(sn)+Math.atan2(yT-y0,distM);
   }
   for(let i=0;i<32;i++){
-    const mid=(lo+hi)/2, ym=simulateArrow(distM,mid,phys,wind).y;
+    const mid=(lo+hi)/2, ym=simulateArrow(distM,mid,phys,wind,y0).y-yT;
     if(ym>=0) hi=mid; else lo=mid;
   }
   return (lo+hi)/2;
+}
+/* サイトピンの位置を決める角度: 矢の発射方向と照準線（目→的中心）の角度差 α の tan。
+   ピンの目盛りは s = a + b·tan(α) と線形に対応する（a,b は目盛りの原点と単位・向き。アイ〜サイト距離は b に吸収） */
+function sightAngleFeature(distM, phys){
+  const y0=-EYE_ABOVE_ARROW_M, yT=-EYE_ABOVE_TARGET_M;
+  const th=solveZeroAngle(distM, phys, null, y0, yT);
+  return Math.tan(th-Math.atan2(yT,distM));
 }
 function trajectoryModel(sess, setup, eyeMm){
   const distM=Math.max(5, sess.dist||70);
   const phys=physicsProfile(setup||{});
   const wind=windModel(sess||{});
-  const angle=solveZeroAngle(distM, phys, wind);
-  const base=simulateArrow(distM, angle, phys, wind);
+  const y0=-EYE_ABOVE_ARROW_M, yT=-EYE_ABOVE_TARGET_M;
+  const angle=solveZeroAngle(distM, phys, wind, y0, yT);
+  const base=simulateArrow(distM, angle, phys, wind, y0);
   const dth=0.0015;
-  const up=simulateArrow(distM, angle+dth, phys, wind);
-  const dn=simulateArrow(distM, angle-dth, phys, wind);
+  const up=simulateArrow(distM, angle+dth, phys, wind, y0);
+  const dn=simulateArrow(distM, angle-dth, phys, wind, y0);
   const sens=Math.max(distM*.55, (up.y-dn.y)/(2*dth));
   const mmPerCmV=(0.01/sens)*eyeMm;
   const mmPerCmH=(0.01/distM)*eyeMm;
@@ -280,7 +312,8 @@ function computePersonalPhysicsCalibration(setupId){
     const wm=windModel(it.s);
     if(!wm.speed || !wm.side) return;
     const traj=trajectoryModel(it.s,setup,eye);
-    if(Math.abs(traj.windDriftCm)<.6 || Math.abs(it.st.mx)>ringW(it.s.faceD,it.s.faceType)*4) return;
+    /* 70mでは横風3m/sでも横流れがリング4本分を超えるため、リング幅ではなく観測/予測の比で外れを除く */
+    if(Math.abs(traj.windDriftCm)<.6) return;
     const ratio=it.st.mx/traj.windDriftCm;
     if(ratio>0 && ratio<2.6) windRatios.push({v:ratio,w:it.w});
     else if(Math.abs(it.st.mx)>ringW(it.s.faceD,it.s.faceType)*.35) windConflicts.push(it);
@@ -891,7 +924,20 @@ function regressionAdvice(setupId, dist){
   });
   return res;
 }
-/* セッティングの実測サイト値（上下）から距離→サイト値を直線近似 */
+/* 距離→サイト値（上下）の予測。旧版は距離の一次式/二次式で近似しており、近距離の照準幾何（1/距離の項）や
+   空気抵抗による曲がりを表せなかった。ここでは弾道から計算した照準角の特徴量 f(距離)=tan(α) に
+   サイト値を線形回帰する（s = a + b·f）。4距離以上の実測があれば、残差が最小になる初速も当てはめる。 */
+const SIGHT_INTERP_CACHE=new Map();
+function sightFitAtSpeed(pts, phys, speedMps){
+  const ph=Object.assign({}, phys, {speedMps});
+  const fs=pts.map(p=>sightAngleFeature(p[0], ph));
+  const n=pts.length, fb=fs.reduce((a,f)=>a+f,0)/n, yb=pts.reduce((a,p)=>a+p[1],0)/n;
+  let sff=0,sfy=0; fs.forEach((f,i)=>{ sff+=(f-fb)**2; sfy+=(f-fb)*(pts[i][1]-yb); });
+  if(sff<1e-14) return null;
+  const b=sfy/sff, a=yb-b*fb;
+  let sse=0,sst=0; fs.forEach((f,i)=>{ sse+=(pts[i][1]-(a+b*f))**2; sst+=(pts[i][1]-yb)**2; });
+  return {a,b,sse,r2:sst>1e-12?clamp(1-sse/sst,0,1):0,ph};
+}
 function sightInterp(setupId){
   const byDist={}, sourceByDist=Object.create(null);
   [...db.sightMarks].filter(m=>m.setupId===setupId)
@@ -900,11 +946,43 @@ function sightInterp(setupId){
   const keys=Object.keys(byDist).sort((a,b)=>+a-+b);
   const pts=keys.map(d=>[+d, byDist[d]]);
   if(pts.length<2) return null;
-  const line=regress(pts);
-  if(!line) return null;
-  const curve=quadraticFit(pts);
-  const model=(curve && curve.r2>line.r2+.04)?curve:line;
-  return {pts, have:pts.map(p=>p[0]), model:model.kind, r2:model.r2, est:model.est, sources:keys.map(d=>sourceByDist[d])};
+  const setup=db.setups.find(x=>x.id===setupId)||{};
+  const phys=physicsProfile(setup);
+  const cacheKey=JSON.stringify([pts,phys.speedMps,phys.cd,phys.rho,phys.massKg,phys.area]);
+  let fit=SIGHT_INTERP_CACHE.get(cacheKey);
+  if(!fit){
+    fit=sightFitAtSpeed(pts, phys, phys.speedMps);
+    let fitted=false;
+    if(fit && pts.length>=4){
+      /* 初速の当てはめ（黄金分割探索、35〜95 m/s）。実測初速の入力があっても台帳の方を優先しない（実測のまま） */
+      if(!phys.measuredSpeed){
+        let lo=35, hi=95;
+        const gr=(Math.sqrt(5)-1)/2;
+        const sse=v=>{ const f=sightFitAtSpeed(pts, phys, v); return f?f.sse:Infinity; };
+        let c=hi-gr*(hi-lo), d=lo+gr*(hi-lo), fc=sse(c), fd=sse(d);
+        for(let i=0;i<28;i++){
+          if(fc<fd){ hi=d; d=c; fd=fc; c=hi-gr*(hi-lo); fc=sse(c); }
+          else{ lo=c; c=d; fc=fd; d=lo+gr*(hi-lo); fd=sse(d); }
+        }
+        /* 探索範囲の端に張り付いた当てはめは台帳の矛盾（記録違い・別の用具）を示すので採らない */
+        const vBest=(lo+hi)/2;
+        const best=vBest>35.5&&vBest<94.5?sightFitAtSpeed(pts, phys, vBest):null;
+        if(best && best.sse<=fit.sse){ fit=best; fitted=true; }
+      }
+    }
+    if(fit) fit.fitted=fitted;
+    SIGHT_INTERP_CACHE.set(cacheKey, fit||false);
+    if(SIGHT_INTERP_CACHE.size>16) SIGHT_INTERP_CACHE.delete(SIGHT_INTERP_CACHE.keys().next().value);
+  }
+  const sources=keys.map(d=>sourceByDist[d]);
+  if(!fit){
+    const line=regress(pts);
+    if(!line) return null;
+    return {pts, have:pts.map(p=>p[0]), model:"linear", r2:line.r2, est:line.est, sources};
+  }
+  const f=fit;
+  return {pts, have:pts.map(p=>p[0]), model:"physics", r2:f.r2, est:d=>f.a+f.b*sightAngleFeature(d, f.ph), sources,
+    speedFps:f.ph.speedMps/0.3048, speedSource:phys.measuredSpeed?"measured":f.fitted?"fitted":"estimated"};
 }
 function calibrationProfile(setupId){
   const setup=db.setups.find(x=>x.id===setupId)||{};
