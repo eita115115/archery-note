@@ -1111,9 +1111,9 @@
   {
     "id": "AN-094",
     "task": "グルーピング統計を grouping-v3（A 全射RMSを正式指標、B MCD外れ値候補除外、C 再重み付けMCDロバストRMS、旧方式は比較用に保持）へ作り直す",
-    "status": "in-progress",
-    "passes": false,
-    "evidence": "",
+    "status": "done",
+    "passes": true,
+    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii（PR #136）。仕様 docs/design/grouping-stats-v3.md（Fable設計・Fable検証済み）。npm run check:all 全OK、lint・format:check 成功、Playwright 349 passed (7.1m)。tools/check-grouping-stats.js: A偏り0.992〜1.003、C偏り0.990〜1.005、B偏り≥0.989、全射RMS区間被覆94.6〜97.5%、誤除外0.7〜1.7%、8σ外れ矢1本の検出 n=12 91%/n=24 100%、3本まとまり n=12 72%/n=24 100%、巻き添え≤1.75%、崩壊点8/36で全除外100%、並べ替え不一致0、サイト判定の誤った動かす4.0〜4.9%、速度 n=72 0.23ms/n=144 0.51ms/36本×3000回 288ms。小標本係数は72本まで1本刻みで生成（20万/10万回）。",
     "dependencies": [
       "AN-093"
     ],
