@@ -1,5 +1,14 @@
-Archery Note includes third-party software and assets.
+Archery Note
+Required Notice: Copyright 2026 eita115115 (https://github.com/eita115115/archery-note)
 
-See THIRD_PARTY.md for names, sources, licenses, and attribution details.
+Archery Note is licensed under the PolyForm Noncommercial License 1.0.0
+(https://polyformproject.org/licenses/noncommercial/1.0.0). See LICENSE.
+Commercial use is not permitted.
 
-Additional notices required by upstream licenses will be listed here.
+Versions published up to and including app v126 (commit 66391ff, 2026-11-12)
+were released under the Apache License 2.0. Copies of those versions obtained
+under that license remain usable under its terms.
+
+Archery Note includes third-party software and assets that keep their own
+licenses. See THIRD_PARTY.md for names, sources, licenses, and attribution
+details. Additional notices required by upstream licenses will be listed here.

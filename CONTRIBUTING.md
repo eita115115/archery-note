@@ -30,3 +30,7 @@ Archery Noteは端末内保存を重視しています。storage schemaを変更
 ## Accessibility
 
 モバイル利用、キーボード操作、ブラウザズームを妨げない設計を優先してください。スコア入力の主導線は、屋外で片手でも扱いやすい簡潔さを保ってください。
+
+## License
+
+Archery Noteは PolyForm Noncommercial License 1.0.0（[LICENSE](LICENSE)）で公開しています。個人の非商用利用・研究・学習は自由ですが、商用利用はできません。PRで送られた変更は、同じライセンスで提供されたものとして扱います。第三者の素材を含める場合は、[THIRD_PARTY.md](THIRD_PARTY.md) の手順に従ってください。
