@@ -523,6 +523,19 @@ function histRoundGroupHtml(sess) {
     </table>
   </div>`;
 }
+/* 旧判定（矢円=的の直径÷85）で記録した回は、保存された点数を変えずに実寸判定の点数を並べて示す。
+   新しい判定で記録した回（arrowR を保存済み）は記録時の点数がそのまま実寸判定なので何も出さない */
+function legacyRescoreHtml(sess, setup, total) {
+  if (!sess || validArrowR(sess.arrowR)) return "";
+  const arrowR = sessionArrowR(sess, setup);
+  const r = sessionRescore(sess, arrowR);
+  if (!r.scored || r.total === total) return "";
+  const enteredDia = parseFloat(setup && setup.arrowDia);
+  const entered = Number.isFinite(enteredDia) && enteredDia >= ARROW_DIA_MM_MIN && enteredDia <= ARROW_DIA_MM_MAX;
+  const dia = (arrowR * 20).toFixed(1);
+  const diff = r.total - total;
+  return `<div class="hint histRescore" data-testid="history-rescore">実寸判定（${entered ? `矢径 ${dia}mm` : `矢径未入力のため ${dia}mm`}）では <b>${r.total}点</b>（記録時 ${total}点・差 ${diff > 0 ? "+" : ""}${diff}点・${r.changed}本）。保存された点数は変えていません。</div>`;
+}
 function openHistDetail(id) {
   const sess = db.sessions.find((s) => s.id === id);
   if (!sess) return;
@@ -584,6 +597,7 @@ function openHistDetail(id) {
       <div class="stat"><b>${perfectScoreCount(all, sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
       <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
     </div>
+    ${legacyRescoreHtml(sess, setup, total)}
     ${todaysResultHtml(histTodaysResult, sess, { dayLabel: "この日", growthBefore: histGrowthBefore })}
     <div id="hPlot" class="mt10"></div>
     ${endTableHtml}

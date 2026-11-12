@@ -361,7 +361,7 @@ function renderOnboarding(m) {
       faceD,
       faceType: "single",
       perEnd,
-      shaft: +lineCutRadius(faceD, "single").toFixed(3),
+      arrowR: +sessionArrowR(null, null).toFixed(4),
       sightV: "",
       sightH: "",
       wx: "",
@@ -716,7 +716,7 @@ function renderRecord(m) {
       faceD: face.faceD,
       faceType: face.faceType,
       perEnd: st0 ? st0.perEnd || 6 : +$("#fArrows").value,
-      shaft: +lineCutRadius(face.faceD, face.faceType).toFixed(3),
+      arrowR: +sessionArrowR(null, db.setups.find((x) => x.id === $("#fSetup").value)).toFixed(4),
       sightV: $("#fSightV").value.trim(),
       sightH: $("#fSightH").value.trim(),
       wx: $("#fWx").value,
@@ -1573,6 +1573,10 @@ function revealActiveCorrection() {
   else if (rect.bottom > bottom) delta = rect.bottom - bottom;
   if (delta) window.scrollBy({ top: delta, behavior: "instant" });
 }
+/* 記録中セッションの判定用矢半径(cm)。記録開始時の arrowR → 用具の矢径 → 既定値（20-scoring.js sessionArrowR） */
+function activeArrowR(s) {
+  return sessionArrowR(s, s && db.setups.find((x) => x.id === s.setupId));
+}
 function refreshActive() {
   const s = db.active;
   if (!s) return;
@@ -1580,9 +1584,10 @@ function refreshActive() {
   // markers
   let html = "";
   const gp = (a) => (s.faceType === "triple" ? { x: a.x, y: a.y + SPOT_Y[a.spot || 0] } : a);
+  const arrowR = activeArrowR(s);
   s.ends.forEach((end, ei) =>
     end.forEach((a) => {
-      html += markCircle(gp(a), s.faceD, "rgba(60,60,60,.45)");
+      html += markCircle(gp(a), s.faceD, "rgba(60,60,60,.45)", "", "", arrowR);
     }),
   );
   s.cur.forEach((a, i) => {
@@ -1592,6 +1597,7 @@ function refreshActive() {
       i === ui.selArrow ? "#111" : "var(--green-l)",
       scoreLabel(a),
       i === ui.freshArrow ? "shotNew" : "",
+      arrowR,
     );
   });
   $("#tgmarks").innerHTML = html;
@@ -1703,7 +1709,7 @@ function nudgeArrow(dirKey) {
   if (dirKey === "d") a.y -= step;
   if (dirKey === "l") a.x -= step;
   if (dirKey === "r") a.x += step;
-  Object.assign(a, scoreAt(a.x, a.y, s.faceD, s.faceType, lineCutRadius(s.faceD, s.faceType)));
+  Object.assign(a, scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s)));
   nativePulse("light");
   scheduleSave("nudge");
   refreshActive();
@@ -1753,7 +1759,8 @@ function attachTargetInput(s) {
   function drawCursor(p) {
     const w = ringW(s.faceD, s.faceType);
     const fine = !!(drag && drag.fine);
-    const cutting = fine && isLineCuttingFromGlobal(p.x, p.y, s.faceD, s.faceType);
+    const arrowR = activeArrowR(s);
+    const cutting = fine && isLineCuttingFromGlobal(p.x, p.y, s.faceD, s.faceType, arrowR);
     const c = fine ? (cutting ? "var(--status-ok)" : "var(--status-warn)") : "#111";
     lens.classList.toggle("cut", cutting);
     lens.classList.toggle("miss", fine && !cutting);
@@ -1763,9 +1770,10 @@ function attachTargetInput(s) {
     cur.innerHTML = `<g>
       <line x1="${p.x - w}" y1="${-p.y}" x2="${p.x + w}" y2="${-p.y}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
       <line x1="${p.x}" y1="${-p.y - w}" x2="${p.x}" y2="${-p.y + w}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
-      <circle cx="${p.x}" cy="${-p.y}" r="${arrowMarkRadius(s.faceD)}" fill="none" stroke="${c}" stroke-width="${s.faceD / 400}"/>
+      <circle cx="${p.x}" cy="${-p.y}" r="${arrowMarkRadius(s.faceD, arrowR)}" fill="none" stroke="${c}" stroke-width="${Math.min(s.faceD / 400, arrowR / 2.5)}"/>
     </g>`;
-    const z = ringW(s.faceD, s.faceType) * 2.2;
+    /* 微調整モードでは実寸の矢円が見える倍率まで寄せる（線かみの目視確認用） */
+    const z = fine ? clamp(arrowR * 12, w * 0.6, w * 2.2) : w * 2.2;
     lensSvg.setAttribute("viewBox", `${p.x - z} ${-p.y - z} ${2 * z} ${2 * z}`);
     // lens位置: 指と重ならない側へ
     const half = p.x < 0;
@@ -1899,15 +1907,18 @@ function attachTargetInput(s) {
       y: Math.max(-MY, Math.min(MY, drag.p.y)),
     };
     resetDrag();
-    const hit = hitFromGlobal(p.x, p.y, s.faceD, s.faceType, lineCutRadius(s.faceD, s.faceType));
-    const rec = { x: +hit.x.toFixed(2), y: +hit.y.toFixed(2), s: hit.s, X: hit.X };
+    const arrowR = activeArrowR(s);
+    const hit = hitFromGlobal(p.x, p.y, s.faceD, s.faceType, arrowR);
+    /* 保存する丸め後の座標で採点する（表示される矢円の位置と点数を一致させる） */
+    const rec = { x: +hit.x.toFixed(2), y: +hit.y.toFixed(2) };
+    Object.assign(rec, scoreAt(rec.x, rec.y, s.faceD, s.faceType, arrowR));
     if (hit.spot != null) rec.spot = hit.spot;
     s.cur.push(rec);
     ui.freshArrow = s.cur.length - 1;
-    nativePulse(isLineCuttingFromGlobal(p.x, p.y, s.faceD, s.faceType) ? "success" : "light");
+    nativePulse(isLineCutting(rec.x, rec.y, s.faceD, s.faceType, arrowR) ? "success" : "light");
     scheduleSave("arrow-add");
     refreshActive();
-    toast(`${scoreLabel(hit)} 点を記録`);
+    toast(`${scoreLabel(rec)} 点を記録`);
   }
   function cancel(e) {
     const cp = clientPoint(e);
@@ -1974,7 +1985,7 @@ async function advanceRoundStage() {
     faceD: next.faceD,
     faceType: nextFaceType,
     perEnd: next.perEnd || 6,
-    shaft: +lineCutRadius(next.faceD, nextFaceType).toFixed(3),
+    arrowR: +activeArrowR(s).toFixed(4),
     sightV: mk && mk.v != null ? String(mk.v).trim() : "",
     sightH: mk && mk.h != null ? String(mk.h).trim() : "",
     wx: s.wx,

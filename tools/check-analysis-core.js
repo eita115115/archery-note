@@ -56,14 +56,9 @@ return {sessionWindSpeed, windModel, sessionMetricSignature, sessionMetrics, reg
 
 /* ---------- scoreAt / 線かみ ---------- */
 
-// 122cm単的: リング幅 6.1cm、矢円半径 122/85、的線半幅 122/1200
+// 122cm単的: リング幅 6.1cm。線かみ半径は矢の実寸（既定矢径 5.7mm → 0.285cm）で、的の大きさに依存しない
 assertClose(scoring.ringW(122, "single"), 6.1, 1e-9, "ringW 122 single");
-assertClose(
-  scoring.lineCutRadius(122, "single"),
-  122 / 85 + 122 / 1200,
-  1e-9,
-  "lineCutRadius 122 single",
-);
+assertClose(scoring.lineCutRadius(122, "single"), 0.285, 1e-9, "lineCutRadius 122 single");
 
 // 中心は X
 {
@@ -78,10 +73,12 @@ assertEqual(scoring.scoreAt(3.05, 0, 122, "single", 0).X, true, "X boundary incl
   assertEqual(hit.s, 10, "just outside X keeps 10");
   assertEqual(hit.X, false, "just outside X is not X");
 }
-// 線かみ: 10リング(6.1cm)の外 7.6cm でも矢円+線幅ぶんで 10 になる
-assertEqual(scoring.scoreAt(7.6, 0, 122, "single").s, 10, "line cutter promotes to 10");
-assertEqual(scoring.scoreAt(7.6, 0, 122, "single", 0).s, 9, "same point without touch is 9");
-assertEqual(scoring.isLineCutting(7.6, 0, 122, "single"), true, "isLineCutting at 7.6cm");
+// 線かみ: 10リング(6.1cm)外縁から矢の半径(0.285cm)以内なら 10。1.5cm 外（7.6cm）は 9 のまま
+assertEqual(scoring.scoreAt(6.3, 0, 122, "single").s, 10, "line cutter promotes to 10");
+assertEqual(scoring.scoreAt(6.3, 0, 122, "single", 0).s, 9, "same point without touch is 9");
+assertEqual(scoring.isLineCutting(6.3, 0, 122, "single"), true, "isLineCutting at 6.3cm");
+assertEqual(scoring.scoreAt(7.6, 0, 122, "single").s, 9, "7.6cm is not a line cutter with a real arrow");
+assertEqual(scoring.isLineCutting(7.6, 0, 122, "single"), false, "no line cutting at 7.6cm");
 assertEqual(scoring.isLineCutting(9, 0, 122, "single"), false, "no line cutting mid-ring");
 
 // 三つ目的: 6点未満は 0 に切り捨て

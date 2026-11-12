@@ -156,7 +156,7 @@ const fieldHits = [{s:6},{s:5},{s:4},{s:6}];
 assert(faceApi.perfectScoreLabel(f40) === "6点" && faceApi.perfectScoreCount(fieldHits,f40) === 2, "Field perfect score helpers failed");
 assert(faceApi.secondaryScoreLabel(f40) === "5点以上" && faceApi.secondaryScoreCount(fieldHits,f40) === 3, "Field secondary score helpers failed");
 
-const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,isLineCuttingFromGlobal,hitFromGlobal,zoneStyle,SPOT_Y};")();
+const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,arrowLocatorRadius,arrowRadiusFromDiaMm,sessionArrowR,sessionRescore,DEFAULT_ARROW_R,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,isLineCuttingFromGlobal,hitFromGlobal,zoneStyle,SPOT_Y};")();
 const fieldD = 80;
 const fw = scoreApi.ringW(fieldD, "field");
 const fieldTouch = scoreApi.lineCutRadius(fieldD, "field");
@@ -174,9 +174,9 @@ assert(scoreApi.zoneStyle(5,false,"field").bg === "var(--gold)" && scoreApi.zone
 /* Triple (vertical 3-spot) regression. Expected values derived from ring geometry, not from the implementation. */
 const tripleD = 40; // 標準的な40cm三つ目的
 const tw = scoreApi.ringW(tripleD, "triple"); // ringW = faceD/20 = 40/20 = 2cm
-const tripleTouch = scoreApi.lineCutRadius(tripleD, "triple"); // arrowMarkRadius(40/85≈0.4706cm) + targetLineHalfWidth(triple: 40/640=0.0625cm) ≈ 0.5331cm
+const tripleTouch = scoreApi.lineCutRadius(tripleD, "triple"); // 矢の実寸の半径（既定矢径5.7mm → 0.285cm）。境界線は高得点側なので線幅は足さない
 assert(tw === tripleD / 20, "Triple ring width failed");
-assert(Math.abs(tripleTouch - (tripleD / 85 + tripleD / 640)) < 1e-12, "Triple line-cut radius failed");
+assert(Math.abs(tripleTouch - 0.285) < 1e-12, "Triple line-cut radius failed");
 /* 通常採点（touch=0 の純幾何）: Xリングは r<=w/2=1cm、n点リング境界は r=(11-n)*2cm */
 const tripleCenter = scoreApi.scoreAt(0,0,tripleD,"triple",0); // r=0 <= 1cm → X(10)
 assert(tripleCenter.s === 10 && tripleCenter.X === true, "Triple center X failed");
@@ -191,16 +191,16 @@ assert(scoreApi.scoreAt(tw*5,0,tripleD,"triple",0).s === 6, "Triple 6-ring edge 
 assert(scoreApi.scoreAt(tw*5.05,0,tripleD,"triple",0).s === 0, "Triple just-outside-6 must be M"); // r=10.1cm → s=5 → M
 assert(scoreApi.scoreAt(tw*5.5,0,tripleD,"single",0).s === 5, "Single 5-ring sanity failed"); // r=11cm は single だと5点
 assert(scoreApi.scoreAt(tw*5.5,0,tripleD,"triple",0).s === 0, "Triple 5-ring position must be M"); // 同じ r=11cm が triple では M
-/* ラインカッター境界: 矢円(半径0.4706cm)が6リング線(半幅0.0625cm)に触れる条件は 中心距離 <= 10cm + tripleTouch */
+/* ラインカッター境界: 実寸の矢(半径0.285cm)が6リング外縁に触れる条件は 中心距離 <= 10cm + tripleTouch */
 assert(scoreApi.scoreAt(tw*5+tripleTouch*.8,0,tripleD,"triple",tripleTouch).s === 6, "Triple line-cutter inner score failed"); // 10+0.8*touch: 円が6リングに接触 → 6
 assert(scoreApi.scoreAt(tw*5+tripleTouch*1.2,0,tripleD,"triple",tripleTouch).s === 0, "Triple line-cutter outer must be M"); // 10+1.2*touch: 届かない → M
 /* hitFromGlobal のスポット割当: SPOT_Y=[22,0,-22]（上・中・下, cm, y上向き）。局所座標 = (gx, gy-SPOT_Y[spot]) */
 assert(scoreApi.SPOT_Y.join(",") === "22,0,-22", "Triple spot geometry changed unexpectedly");
 const topHit = scoreApi.hitFromGlobal(0,22,tripleD,"triple",tripleTouch); // gy=22 は上スポット中心 → spot=0, 局所(0,0) → X
 assert(topHit.spot === 0 && topHit.x === 0 && topHit.y === 0 && topHit.s === 10 && topHit.X === true, "Triple top spot assignment failed");
-const bottomHit = scoreApi.hitFromGlobal(3,-21,tripleD,"triple",tripleTouch); // 下スポット(-22)まで√(9+1)≈3.16cm、中(0)まで21.2cm → spot=2, 局所(3,1), r=3.1623-0.5331=2.629cm → 9
+const bottomHit = scoreApi.hitFromGlobal(3,-21,tripleD,"triple",tripleTouch); // 下スポット(-22)まで√(9+1)≈3.16cm、中(0)まで21.2cm → spot=2, 局所(3,1), r=3.1623-0.285=2.877cm → 9
 assert(bottomHit.spot === 2 && bottomHit.x === 3 && bottomHit.y === 1 && bottomHit.s === 9, "Triple bottom spot local coords failed");
-const upperHit = scoreApi.hitFromGlobal(0,13,tripleD,"triple",tripleTouch); // 上(22)まで9cm < 中(0)まで13cm → spot=0, 局所y=-9, r=9-0.5331=8.467cm → 6
+const upperHit = scoreApi.hitFromGlobal(0,13,tripleD,"triple",tripleTouch); // 上(22)まで9cm < 中(0)まで13cm → spot=0, 局所y=-9, r=9-0.285=8.715cm → 6
 assert(upperHit.spot === 0 && upperHit.y === -9 && upperHit.s === 6, "Triple upper-half spot assignment failed");
 const midHit = scoreApi.hitFromGlobal(0,11,tripleD,"triple",tripleTouch); // gy=11 は上下等距離(11cm)。現実装は先着(小さい index=上)を採用 → spot=0, 局所y=-11 → M
 // タイブレークの固定は WA 規則由来ではなく、保存データ(spot/局所座標)の無断変化を検知するための回帰固定。意図的に仕様を変える場合はこのテストを更新すること。
@@ -210,6 +210,26 @@ assert(nearMidHit.spot === 1 && nearMidHit.y === 10.9 && nearMidHit.s === 0, "Tr
 /* isLineCuttingFromGlobal: ドラッグ中のカッター表示が使う経路。スポット選択+局所化の後に isLineCutting と同じ判定になること */
 assert(scoreApi.isLineCuttingFromGlobal(0, 22 + tw*5 + tripleTouch*.8, tripleD, "triple") === true, "Triple global line-cutter true case failed"); // 上スポット局所r=10+0.8*touch: 素の採点はM、カッター込みで6 → true
 assert(scoreApi.isLineCuttingFromGlobal(0, 33, tripleD, "triple") === false, "Triple global line-cutter false case failed"); // 上スポット局所r=11cm: カッター込みでも r-touch>10 で M のまま → false
+/* 実寸判定（WA: 矢のシャフトが線に触れれば高得点。矢の太さは的の大きさと無関係）
+   旧実装は矢円半径を faceD/85 としていたため 122cm 的では 1.44cm の太さで線かみを判定していた */
+assert(scoreApi.lineCutRadius(122, "single") === scoreApi.lineCutRadius(40, "single"), "Arrow radius must not scale with face size");
+assert(Math.abs(scoreApi.arrowRadiusFromDiaMm(5.7) - 0.285) < 1e-12 && Math.abs(scoreApi.arrowRadiusFromDiaMm("9.3") - 0.465) < 1e-12, "Arrow diameter mm→radius cm failed");
+assert(scoreApi.arrowRadiusFromDiaMm("") === scoreApi.DEFAULT_ARROW_R && scoreApi.arrowRadiusFromDiaMm(55) === scoreApi.DEFAULT_ARROW_R, "Invalid arrow diameter must fall back to default");
+assert(scoreApi.sessionArrowR({arrowR:0.4},{arrowDia:"5"}) === 0.4, "Stored session arrow radius must win");
+assert(Math.abs(scoreApi.sessionArrowR({},{arrowDia:"5.0"}) - 0.25) < 1e-12, "Setup arrow diameter must be used for legacy sessions");
+assert(scoreApi.scoreAt(6.1+0.28,0,122,"single").s === 10 && scoreApi.scoreAt(6.1+0.29,0,122,"single").s === 9, "122cm 10-ring line-cut boundary must use the real arrow radius");
+assert(scoreApi.scoreAt(7.6,0,122,"single").s === 9, "Arrow 1.5cm outside the 10 ring must not be promoted");
+assert(scoreApi.scoreAt(2+0.465,0,40,"single",0.465).s === 10 && scoreApi.scoreAt(2+0.47,0,40,"single",0.465).s === 9, "Fat indoor arrow (9.3mm) line-cut boundary failed");
+assert(scoreApi.scoreAt(18.3,0,122,"single",0).s === 8, "Exact ring boundary must stay in the higher zone despite float error");
+assert(scoreApi.arrowMarkRadius(122) === scoreApi.lineCutRadius(122,"single"), "Displayed arrow circle must equal the scoring radius");
+assert(scoreApi.arrowLocatorRadius(122) > scoreApi.arrowMarkRadius(122), "Locator halo is larger than the real arrow on big faces");
+{
+  const legacy = {faceD:122, faceType:"single", ends:[[{x:7.6,y:0,s:10,X:false},{x:0,y:0,s:10,X:true},{s:7}]]};
+  const before = JSON.stringify(legacy);
+  const r = scoreApi.sessionRescore(legacy, 0.285);
+  assert(r.stored === 27 && r.total === 26 && r.changed === 1 && r.skipped === 1 && r.scored === 2, "Legacy rescore totals failed");
+  assert(JSON.stringify(legacy) === before, "Legacy rescore must not mutate stored scores");
+}
 
 const targetApi = new Function(
   "ringW","isFieldFace","targetLineHalfWidth","SPOT_Y",

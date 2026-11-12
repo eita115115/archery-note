@@ -3,12 +3,15 @@
 /* ============ target SVG ============ */
 function targetMarkup(faceD, idPrefix, faceType){
   const w=ringW(faceD,faceType);
+  /* 境界線は高得点側ゾーンに属する（WA規則）。線の外縁が公称半径に来るよう半径を線幅の半分だけ内側へ寄せる */
+  const inset=(r,sw)=>Math.max(0,r-sw/2);
   const spotG=(cx,cy)=>{
     let h="";
+    const sw=w/16;
     [[6,"#37a6e0"],[7,"#f23b3b"],[8,"#f23b3b"],[9,"#ffe14d"],[10,"#ffe14d"]].forEach(([sc,fill])=>{
-      h+=`<circle cx="${cx}" cy="${cy}" r="${(11-sc)*w}" fill="${fill}" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
+      h+=`<circle cx="${cx}" cy="${cy}" r="${inset((11-sc)*w,sw)}" fill="${fill}" stroke="#1c1e1c" stroke-width="${sw}"/>`;
     });
-    h+=`<circle cx="${cx}" cy="${cy}" r="${w/2}" fill="none" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
+    h+=`<circle cx="${cx}" cy="${cy}" r="${inset(w/2,sw)}" fill="none" stroke="#1c1e1c" stroke-width="${sw}"/>`;
     h+=`<line x1="${cx-w/6}" y1="${cy}" x2="${cx+w/6}" y2="${cy}" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
     h+=`<line x1="${cx}" y1="${cy-w/6}" x2="${cx}" y2="${cy+w/6}" stroke="#1c1e1c" stroke-width="${w/16}"/>`;
     return h;
@@ -35,7 +38,7 @@ function targetMarkup(faceD, idPrefix, faceType){
     ];
     let g="";
     zones.forEach(([k,fill])=>{
-      g+=`<circle cx="0" cy="0" r="${k*w}" fill="${fill}" stroke="${fill==="#1c1e1c"?"#f0f1ec":"#1c1e1c"}" stroke-width="${line}"/>`;
+      g+=`<circle cx="0" cy="0" r="${inset(k*w,line)}" fill="${fill}" stroke="${fill==="#1c1e1c"?"#f0f1ec":"#1c1e1c"}" stroke-width="${line}"/>`;
     });
     g+=`<line x1="${-w/6}" y1="0" x2="${w/6}" y2="0" stroke="#1c1e1c" stroke-width="${line}"/>`;
     g+=`<line x1="0" y1="${-w/6}" x2="0" y2="${w/6}" stroke="#1c1e1c" stroke-width="${line}"/>`;
@@ -46,19 +49,25 @@ function targetMarkup(faceD, idPrefix, faceType){
   const R=faceD/2, M=R*1.18;
   const zones=[ [10,"#fff"],[9,"#fff"],[8,"#1c1e1c"],[7,"#1c1e1c"],[6,"#37a6e0"],[5,"#37a6e0"],[4,"#f23b3b"],[3,"#f23b3b"],[2,"#ffe14d"],[1,"#ffe14d"] ];
   let g="";
-  zones.forEach(([k,fill])=>{ g+=`<circle cx="0" cy="0" r="${k*w}" fill="${fill}" stroke="${fill==="#1c1e1c"?"#e9ebe6":"#1c1e1c"}" stroke-width="${R/300}"/>`; });
-  g+=`<circle cx="0" cy="0" r="${w/2}" fill="none" stroke="#1c1e1c" stroke-width="${R/300}"/>`;
+  zones.forEach(([k,fill])=>{ g+=`<circle cx="0" cy="0" r="${inset(k*w,R/300)}" fill="${fill}" stroke="${fill==="#1c1e1c"?"#e9ebe6":"#1c1e1c"}" stroke-width="${R/300}"/>`; });
+  g+=`<circle cx="0" cy="0" r="${inset(w/2,R/300)}" fill="none" stroke="#1c1e1c" stroke-width="${R/300}"/>`;
   g+=`<line x1="${-w/6}" y1="0" x2="${w/6}" y2="0" stroke="#1c1e1c" stroke-width="${R/300}"/>`;
   g+=`<line x1="0" y1="${-w/6}" x2="0" y2="${w/6}" stroke="#1c1e1c" stroke-width="${R/300}"/>`;
   return `<svg class="main" id="${idPrefix}svg" viewBox="${-M} ${-M} ${2*M} ${2*M}" xmlns="http://www.w3.org/2000/svg">
     <g id="${idPrefix}main"><g>${g}</g><g id="${idPrefix}marks"></g><g id="${idPrefix}cur"></g></g>
   </svg>`;
 }
-function markCircle(a, faceD, color, label, cls){
-  const r=arrowMarkRadius(faceD);
+/* 矢の印: 実寸の矢円（判定と同じ半径・白い実線の縁）＋ 位置を探すための半透明の目印（白い破線の縁・判定には使わない）。
+   arrowR は矢の半径(cm)。目印は fill-opacity で薄くし、着弾アニメの opacity とは掛け合わせで効く */
+function markCircle(a, faceD, color, label, cls, arrowR){
+  const r=arrowMarkRadius(faceD, arrowR);
+  const loc=Math.max(arrowLocatorRadius(faceD), r);
   const klass=cls?` class="${cls}"`:"";
-  return `<g${klass}><circle cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/3}" opacity="1"/>`+
-    (label?`<text x="${a.x}" y="${-a.y}" font-size="${r*1.2}" fill="#fff" text-anchor="middle" dominant-baseline="central" font-weight="bold">${esc(label)}</text>`:"")+`</g>`;
+  return `<g${klass}>`+
+    (loc>r*1.05?`<circle class="arrowLocator" cx="${a.x}" cy="${-a.y}" r="${loc}" fill="${color}" fill-opacity=".42" stroke="#fff" stroke-width="${loc/6}" stroke-dasharray="${loc*.45} ${loc*.3}"/>`:"")+
+    `<circle class="arrowFoot" cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/3}"/>`+
+    /* 番号は実寸の矢円に重ならないよう目印の上寄りに置く（目印が実寸と同じ大きさなら中央） */
+    (label?`<text x="${a.x}" y="${-a.y-(loc>r*1.05?loc*.4:0)}" font-size="${loc*(loc>r*1.05?1:1.2)}" fill="#fff" stroke="rgba(0,0,0,.55)" stroke-width="${loc*.12}" paint-order="stroke" text-anchor="middle" dominant-baseline="central" font-weight="bold">${esc(label)}</text>`:"")+`</g>`;
 }
 /* static plot for history/summary */
 function plotSession(sess, container){
@@ -68,7 +77,8 @@ function plotSession(sess, container){
     (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"");
   const marks=$("#plmarks");
   let html="";
-  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length]); }); });
+  const arrowR=sessionArrowR(sess, db.setups.find(x=>x.id===sess.setupId));
+  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
   const st=sessionMetrics(sess).st;
   if(st){
     const w=ringW(faceD,ft);

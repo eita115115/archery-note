@@ -51,6 +51,10 @@ add one row here.
   `markCircle`.
 - Re-score paths for drag, nudge, and initial placement must use the same radius
   source as the displayed arrow circle.
+- The arrow circle is the real arrow footprint (setup `arrowDia`, default 5.7mm;
+  stored per session as `arrowR` in cm). The dashed translucent locator drawn
+  around it is only a visual aid and is never used for scoring. Formulas and
+  their sources: `docs/design/math-core-rebuild.md`.
 
 ## Commands
 
