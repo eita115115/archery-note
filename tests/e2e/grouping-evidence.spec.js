@@ -85,17 +85,19 @@ for (const width of [320, 375]) {
         await settle(page);
         await page.screenshot({ path: testInfo.outputPath("summary.png") });
         const stability = page.getByTestId("todays-result-stability");
-        await expect(page.locator(".ovl .statbar")).toContainText(`合計 (${count}本)`);
+        await expect(page.getByTestId("result-total").locator(".vsecH .aside")).toContainText(
+          `${count}射`,
+        );
         if (count < 3) {
           await expect(stability).toHaveCount(0);
           const pending = page.getByTestId("todays-result-stability-pending");
-          await expect(pending).toContainText("グルーピングの比較は保留");
-          await expect(pending).toContainText(`${count}本の座標`);
-          await expect(pending.locator("svg.todaysResultSpark")).toHaveCount(0);
+          await expect(pending).toContainText("グループ RMS は比べていません");
+          await expect(pending).toContainText(`位置のある矢が${count}射`);
+          await expect(pending).toContainText("3射以上の位置があるときに計算します");
           await expect(page.getByTestId("todays-result-streak-stability")).toHaveCount(0);
         } else {
-          await expect(stability).toContainText("RMSが");
-          await expect(stability.locator(".todaysResultSpark")).toHaveCount(1);
+          await expect(stability).toContainText("グループ RMS は");
+          await expect(stability).toContainText("同じ距離・的の直近");
           await expect(page.getByTestId("todays-result-stability-pending")).toHaveCount(0);
         }
         const comparison =
@@ -111,7 +113,10 @@ for (const width of [320, 375]) {
         await nativeTap(page, "#sumClose");
         await page.locator('#tabs [data-v="history"]').click();
         await page.locator(`.historyRow[data-id="${data.active.id}"]`).click();
-        await expect(comparison).toHaveText(summaryText);
+        // ノートの詳細では同じ事実を「この回」で書く
+        expect((await comparison.innerText()).trim()).toBe(
+          summaryText.trim().replaceAll("今回", "この回"),
+        );
         await settle(page);
         await page.screenshot({ path: testInfo.outputPath("history.png") });
         expect(
@@ -142,7 +147,7 @@ for (const count of [1, 2]) {
     await nativeTap(page, "#bMenu"); // v5: 終了はメニューの中
     await nativeTap(page, "#bFinish");
     await expect(page.getByTestId("todays-result-stability-pending")).toContainText(
-      `${count}本の座標`,
+      `位置のある矢が${count}射`,
     );
     await expect(page.getByTestId("todays-result-stability")).toHaveCount(0);
     await expect(page.getByTestId("todays-result-streak-stability")).toHaveCount(0);

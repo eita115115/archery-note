@@ -68,7 +68,17 @@ function homeResultDb(opts) {
     "2026-11-04",
     "2026-11-10",
   ].map((d, i) =>
-    session("p" + i, d, 70, 122, sigmas[i], 12, 6, 100 + i, i === 6 ? { note: "架空のメモ。3エンド目で引き手の肘が下がりました。" } : {}),
+    session(
+      "p" + i,
+      d,
+      70,
+      122,
+      sigmas[i],
+      12,
+      6,
+      100 + i,
+      i === 6 ? { note: "架空のメモ。3エンド目で引き手の肘が下がりました。" } : {},
+    ),
   );
   const p5 = sessions[5];
   p5.inputMode = "score";
@@ -76,7 +86,9 @@ function homeResultDb(opts) {
   p5.note = "雨のため点数だけ記録。";
   p5.ends = p5.ends.map((e) => e.map((a) => ({ s: a.s, X: a.X, src: "key" })));
   sessions.push(session("i0", "2026-11-01", 18, 40, 1.9, 20, 3, 900, { wx: "室内" }));
-  sessions.push(session("i1", "2026-11-07", 18, 40, 1.8, 20, 3, 901, { wx: "室内", setupId: "s2" }));
+  sessions.push(
+    session("i1", "2026-11-07", 18, 40, 1.8, 20, 3, 901, { wx: "室内", setupId: "s2" }),
+  );
   /* 保存の並びは日付順にしない（待機画面は日付で並べ直す） */
   const db = {
     schema: 5,

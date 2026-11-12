@@ -159,7 +159,7 @@ test("first-ever session shows the baseline-established copy, with gamification 
   await finishFromMenu(page);
   const empty = page.getByTestId("todays-result-empty");
   await expect(empty).toBeVisible();
-  await expect(empty).toHaveText("初回記録: 基準ができました。次回から比較が始まります。");
+  await expect(empty).toHaveText("最初の記録です。比べる過去の記録はありません。");
   // gamification.enabled=false（既定）でも本パネルは出る。逆に summaryGamification は出ない
   await expect(page.locator('[data-testid="summary-gamification"]')).toHaveCount(0);
   expect(unexpectedErrors).toEqual([]);
@@ -183,8 +183,23 @@ test("second same-condition session shows the previous-comparison row in the sum
   const panel = page.getByTestId("todays-result");
   await expect(panel).toBeVisible();
   const weeklyRow = page.getByTestId("todays-result-weekly");
-  await expect(weeklyRow).toContainText("前回（2026/6/1）より +6点");
-  await expect(weeklyRow).toContainText("今日 54点 ・ 2026/6/1 48点");
+  // 文中の日付は、記録と同じ年なら月日だけ
+  const june1 = new Date().getFullYear() === 2026 ? "6/1" : "2026/6/1";
+  await expect(weeklyRow.locator(".fact")).toHaveText(
+    `同じ条件の前回（${june1}）は 48 点で、今回との差は +6 点です。`,
+  );
+  // 過去が 1 回なので、平均との比較は出さず、その理由を書く
+  const cmp = page.getByTestId("todays-result-comparison");
+  await expect(cmp.locator(".fact")).toHaveText(
+    "同じ条件の過去の記録が1回のため、平均との比較は表示していません。",
+  );
+  await expect(cmp.locator(".basis")).toHaveText(
+    "条件: 70m・122cm的・6射。3回以上あるときに、平均と回ごとの標準偏差を表示します。",
+  );
+  await expect(page.getByTestId("todays-result-personal-best").locator(".fact")).toHaveText(
+    `この距離・的・射数で最高です（これまで 48 点、${june1}）。`,
+  );
+  await expect(panel.locator('[data-testid^="todays-result-streak"]')).toHaveCount(0);
   // 初回縮退コピーは出ない
   await expect(page.getByTestId("todays-result-empty")).toHaveCount(0);
   expect(unexpectedErrors).toEqual([]);
@@ -207,7 +222,9 @@ test("first session at a new condition says condition-first, not first-ever (str
   await finishFromMenu(page);
   const empty = page.getByTestId("todays-result-empty");
   await expect(empty).toBeVisible();
-  await expect(empty).toHaveText("この条件では初記録。次回から比較が始まります。");
+  await expect(empty).toHaveText(
+    "この条件（70m・122cm的・6射）では最初の記録です。同じ条件の記録が3回以上になると、平均との比較を表示します。",
+  );
   expect(unexpectedErrors).toEqual([]);
 });
 
@@ -236,10 +253,13 @@ test("history detail sheet reconstructs the panel with この日 wording and no 
   const panel = page.getByTestId("todays-result");
   await expect(panel).toBeVisible();
   const weeklyRow = page.getByTestId("todays-result-weekly");
-  await expect(weeklyRow).toContainText("前回（2026/6/1）より +6点");
-  await expect(weeklyRow).toContainText("この日 54点 ・ 2026/6/1 48点");
+  await expect(weeklyRow.locator(".fact")).toHaveText(
+    "同じ条件の前回（6/1）は 48 点で、この回との差は +6 点です。",
+  );
   await expect(panel).not.toContainText("今日");
-  await expect(panel).not.toContainText("2026/6/5");
+  await expect(panel).not.toContainText("今回");
+  await expect(panel).not.toContainText("6/5");
+  await expect(panel).not.toContainText("60 点");
   await page.locator("#hClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
@@ -247,7 +267,7 @@ test("history detail sheet reconstructs the panel with この日 wording and no 
   await page.locator('.historyRow[data-id="h-old"]').click();
   const empty = page.getByTestId("todays-result-empty");
   await expect(empty).toBeVisible();
-  await expect(empty).toHaveText("初回記録: この日が基準になりました。");
+  await expect(empty).toHaveText("最初の記録です。この日より前の記録はありません。");
   await page.locator("#hClose").click();
   expect(unexpectedErrors).toEqual([]);
 });

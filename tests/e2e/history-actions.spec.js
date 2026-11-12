@@ -139,6 +139,8 @@ for (const c of cases) {
     const row = c.long
       ? '[data-testid="todays-result-stability"]'
       : '[data-testid="todays-result-stability-pending"]';
+    // v5 段 5: 比較の行が増えたので、読む行を画面へ送ってから、操作の帯に隠れないことを確かめる
+    if (!c.long) await page.locator(row).scrollIntoViewIfNeeded();
     const initial = await hit(page, row);
     const action = await page.locator(".histDetailActions").boundingBox();
     fs.writeFileSync(
@@ -165,6 +167,9 @@ for (const c of cases) {
     await expect
       .poll(() => page.locator(".histDetailSheet").evaluate((el) => el.scrollTop))
       .toBeGreaterThan(0);
+    // v5 段 5: 比較の行が増えて RMS の行が下がった。1回のスクロールで届かないときは、その行まで送る
+    if (c.long && !(await hit(page, row)).clear)
+      await page.locator(row).evaluate((el) => el.scrollIntoView({ block: "center" }));
     await expect.poll(async () => (await hit(page, row)).clear).toBe(true);
     fs.writeFileSync(
       testInfo.outputPath("reading-geometry.json"),

@@ -247,7 +247,7 @@ test("unset practiceDays shows — with a CTA; tapping the hero CTA sets weekday
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("finishing a session shows a before→after streak row in the summary sheet", async ({
+test("finishing a session states the streak before and after as a plain fact in the result", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -291,10 +291,21 @@ test("finishing a session shows a before→after streak row in the summary sheet
   const summaryGam = page.getByTestId("summary-gamification");
   await expect(summaryGam).toBeVisible();
   await expect(page.getByTestId("summary-streak-num")).toHaveText("1");
-  await expect(summaryGam.locator(".summaryStreakBefore")).toHaveText("0");
-  await expect(summaryGam.locator(".summaryStreakMsg").first()).toHaveText("連続記録が伸びました");
-  // 初回セッションなので「初矢」バッジも同時に解除される
-  await expect(page.getByTestId("summary-badges")).toContainText("初矢");
+  // v5 段 5: 事実だけを1行で（アイコン・励ましの文・演出なし）
+  await expect(summaryGam.locator(".fact")).toHaveText(
+    "連続記録は 1 日です（この記録の前は 0 日）。",
+  );
+  await expect(summaryGam.locator("svg")).toHaveCount(0);
+  await expect(summaryGam).not.toContainText(/伸びました|練習できました|始めましょう|！/);
+  // 初回セッションなので「初矢」バッジの条件も同時に満たす（名前と理由を文で示す）
+  await expect(page.getByTestId("summary-badges")).toContainText(
+    "この記録で条件を満たしたバッジ: 「初矢」",
+  );
+  // 記録タブには、目標と連続記録を1行だけ出す
+  await page.locator("#sumClose").click();
+  await expect(page.getByTestId("home-goal-line")).toHaveText(
+    "今週 1回 / 目標 3回・今月 1射 / 目標 300射・連続 1日",
+  );
   expect(unexpectedErrors).toEqual([]);
 });
 

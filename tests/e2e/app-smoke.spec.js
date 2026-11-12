@@ -166,22 +166,21 @@ test("exposes distance chips as buttons with synced aria-pressed", async ({ page
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  const chips = page.locator("#fDistChips .chip");
+  // v5: 距離の選択は 記録タブ →「条件を変える」→ 記録の条件
+  await page.getByTestId("record-conditions").click();
+  const chips = page.locator("#fDistChips [data-d]");
   await expect(chips.first()).toBeVisible();
   const chipCount = await chips.count();
   for (let i = 0; i < chipCount; i++) {
     await expect(chips.nth(i)).toHaveJSProperty("tagName", "BUTTON");
   }
 
-  const pressed = page.locator('#fDistChips .chip[aria-pressed="true"]');
+  const pressed = page.locator('#fDistChips [data-d][aria-pressed="true"]');
   await expect(pressed).toHaveCount(1);
   await expect(pressed).toHaveAttribute("data-d", "70");
 
-  await page.locator('#fDistChips .chip[data-d="30"]').click();
-  await expect(page.locator('#fDistChips .chip[data-d="30"]')).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await page.locator('#fDistChips [data-d="30"]').click();
+  await expect(page.locator('#fDistChips [data-d="30"]')).toHaveAttribute("aria-pressed", "true");
   await expect(pressed).toHaveCount(1);
   await expect(unexpectedErrors).toEqual([]);
 });
@@ -308,7 +307,7 @@ test("records a multi-distance round with stage advance and history badges", asy
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await page.locator(".recordDetails summary").click();
+  await page.getByTestId("record-conditions").click();
   await page.locator("#fRound").selectOption("wa1440_men");
   await expect(page.locator("#fRoundStages")).toContainText("WA1440 男子");
   await page.getByTestId("record-start").click();

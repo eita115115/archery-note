@@ -40,6 +40,7 @@ for (const width of [320, 375, 900]) {
     await expect(page.locator("[data-sight-id]").first()).toHaveAttribute("data-sight-id", "newer");
     await expect(page.locator("[data-sight-id]").first().locator("dd")).toHaveText(["90", "0.4"]);
     await page.locator('#tabs [data-v="record"]').tap();
+    await page.getByTestId("record-conditions").tap();
     await page.locator("details.recordDetails summary").tap();
     await page.locator("#fSetup").selectOption("a");
     await page.locator('#fDistChips [data-d="30"]').tap();

@@ -115,10 +115,10 @@ test("recording hides the tabs; pause leaves the session resumable from the reco
   await expect(page.locator("#tabs")).toBeVisible();
   await expect(page.locator("#viewTitle")).toHaveText("記録");
   const band = page.getByTestId("record-paused");
-  await expect(band).toContainText("記録中の練習");
+  await expect(band).toContainText("記録の途中です");
   await expect(band).toContainText("70m・122cm的");
   await expect(band).toContainText("1エンド確定・7射・63点");
-  // 記録中の練習があるあいだは、新しい記録を始める入口を出さない（上書きで消さない）
+  // 記録の途中のあいだは、新しい記録を始める入口を出さない（上書きで消さない）
   await expect(page.getByTestId("record-start")).toHaveCount(0);
   await expect(page.locator("#quickStart")).toHaveCount(0);
   expect(await stored(page)).toEqual(before);

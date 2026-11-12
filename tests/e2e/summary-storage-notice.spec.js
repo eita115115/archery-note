@@ -55,7 +55,9 @@ for (const size of [
           await expect(page.locator("#toast")).not.toContainText("容量");
           const geometry = await notice.evaluate((el) => {
             const r = el.getBoundingClientRect(),
-              stat = el.parentElement.querySelector(".statbar").getBoundingClientRect();
+              stat = el.parentElement
+                .querySelector('[data-testid="result-total"]')
+                .getBoundingClientRect();
             const next = el.parentElement
               .querySelector(".summaryTodaysResult")
               .getBoundingClientRect();

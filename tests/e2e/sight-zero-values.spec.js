@@ -17,11 +17,15 @@ function practice(d) {
 }
 async function record(page) {
   await page.locator('#tabs [data-v="record"]').tap();
+  await page.getByTestId("record-conditions").tap();
   await page.locator("details.recordDetails summary").tap();
   await page.locator("#fSetup").selectOption("a");
   await page.locator('#fDistChips [data-d="30"]').tap();
 }
 async function calibration(page) {
+  // v5: 記録の条件は全画面（タブなし）。開いていれば戻ってからタブを使う
+  const back = page.getByTestId("conditions-back");
+  if (await back.count()) await back.tap();
   await page.locator('#tabs [data-v="gear"]').tap();
   await page.getByTestId("gear-subtab-sight").tap();
   await page.locator('#sgDistChips [data-d="30"]').tap();

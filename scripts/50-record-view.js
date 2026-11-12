@@ -3230,9 +3230,14 @@ function todaysResultHtml(result, sess, opts) {
     );
   if (!rows.length && (!cmp || (cmp.reason === "insufficient-history" && !cmp.sampleCount))) {
     /* 比べる過去の記録が1つも無い: 最初の記録か、この条件で最初の記録か */
+    const condFirst = `この条件（${esc(sessionConditionText(sess))}）では最初の記録です。`;
     const msg = result.firstEver
-      ? "最初の記録です。比べる過去の記録はありません。"
-      : `この条件（${esc(sessionConditionText(sess))}）では最初の記録です。同じ条件の記録が3回以上になると、平均との比較を表示します。`;
+      ? retro
+        ? "最初の記録です。この日より前の記録はありません。"
+        : "最初の記録です。比べる過去の記録はありません。"
+      : retro
+        ? condFirst
+        : `${condFirst}同じ条件の記録が3回以上になると、平均との比較を表示します。`;
     return `<div class="summaryTodaysResult todaysResultEmpty" data-testid="todays-result-empty"><p class="fact">${msg}</p></div>`;
   }
   return `<div class="summaryTodaysResult" data-testid="todays-result">${todaysResultComparisonRowHtml(cmp, sess, word)}${rows.join("")}</div>`;

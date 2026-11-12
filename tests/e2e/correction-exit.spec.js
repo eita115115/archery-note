@@ -110,6 +110,7 @@ for (const c of cases) {
     await page.goto("/");
     await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
     await page.locator('#tabs [data-v="record"]').click();
+    await page.getByTestId("record-conditions").click();
     await page.getByRole("button", { name: c.faceD === 40 ? "18m" : "70m", exact: true }).click();
     await page.getByRole("combobox", { name: "的", exact: true }).selectOption(String(c.faceD));
     await page

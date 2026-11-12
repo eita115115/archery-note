@@ -34,6 +34,7 @@ for (const sample of [
       await page.goto("/");
       await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
       await page.locator('#tabs [data-v="record"]').click();
+      await page.getByTestId("record-conditions").click();
       await page.getByRole("button", { name: "70m", exact: true }).click();
       await settle(page);
       await page.screenshot({ path: testInfo.outputPath(`record-labels-${sample.width}.png`) });
@@ -67,14 +68,16 @@ for (const sample of [
       expect(chosenFace).toContain(String(sample.faceD));
       expect(chosenArrows).toBe(`${sample.perEnd}本`);
       await arrows.focus();
-      // 本数 → 入力方法（的面に打つ / 点数だけ）→ 開始
+      // 本数 → 入力方法（的面に打つ / 点数だけ）→ 弓具とサイト。開始は下端に固定のボタン
       await page.keyboard.press("Tab");
       await expect(page.getByTestId("start-input-target")).toBeFocused();
       await expect(page.getByTestId("start-input-target")).toHaveAttribute("aria-pressed", "true");
       await page.keyboard.press("Tab");
       await expect(page.getByTestId("start-input-score")).toBeFocused();
       await page.keyboard.press("Tab");
-      await expect(page.getByTestId("record-start")).toBeFocused();
+      await expect(page.locator("#jumpGear")).toBeFocused();
+      await expect(page.getByTestId("record-start")).toHaveAccessibleName("この条件で記録を始める");
+      await page.getByTestId("record-start").focus();
       await page.keyboard.press("Enter");
       await expect(page.getByTestId("active-target")).toBeVisible();
       const state = () =>

@@ -30,17 +30,16 @@ for (const size of [
         await page.goto("/");
         if (entry === "onboarding") {
           await page.locator("#obStart").click();
-          await page.locator('#obDistChips [data-d="18"]').click();
+          await page.locator('#fDistChips [data-d="18"]').click();
         } else {
           await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
           await page.locator('#tabs [data-v="record"]').click();
+          if (entry === "current") await page.getByTestId("record-conditions").click();
         }
         const state = () =>
           page.evaluate(() => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")));
         const before = (await state())?.sessions || [];
-        const start = page.locator(
-          entry === "onboarding" ? "#obGo" : entry === "repeat" ? "#quickStart" : "#fStart",
-        );
+        const start = page.locator(entry === "repeat" ? "#quickStart" : "#fStart");
         // Only reveal the pre-start button. Do not scroll the resulting target into view.
         await start.scrollIntoViewIfNeeded();
         await settle(page);
@@ -50,8 +49,7 @@ for (const size of [
             globalThis.document.addEventListener(
               "click",
               (e) => {
-                if (!["fStart", "quickStart", "obGo"].includes(e.target.closest("button")?.id))
-                  return;
+                if (!["fStart", "quickStart"].includes(e.target.closest("button")?.id)) return;
                 const r = globalThis.document.querySelector("#tgsvg")?.getBoundingClientRect();
                 globalThis.__startTrace.push({
                   capture,

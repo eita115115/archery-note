@@ -109,6 +109,7 @@ for (const size of [
       await page.goto("/");
       await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
       await page.locator('#tabs [data-v="record"]').click();
+      await page.getByTestId("record-conditions").click();
       await page.getByRole("button", { name: "70m", exact: true }).click();
       await page.locator("#fFace").selectOption("122");
       await page.locator("#fArrows").selectOption("6");

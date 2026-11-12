@@ -35,7 +35,11 @@ const stored = (page) =>
 async function finishCopyOf(page, session, patch) {
   await page.evaluate(
     ([s, p]) => {
-      db.active = Object.assign(JSON.parse(JSON.stringify(s)), { id: "live", date: "2026-11-12", cur: [] }, p || {});
+      db.active = Object.assign(
+        JSON.parse(JSON.stringify(s)),
+        { id: "live", date: "2026-11-12", cur: [] },
+        p || {},
+      );
       save();
       render();
     },
@@ -57,14 +61,20 @@ test("result screen: total, halves, counts, comparison with n / period / SD, bes
     total = totalOf(src);
 
   await expect(screen.locator("h3")).toHaveText("今日の結果");
-  await expect(page.getByTestId("result-condition")).toHaveText("11/12（木）・70m・122cm的・架空のリカーブ");
+  await expect(page.getByTestId("result-condition")).toHaveText(
+    "11/12（木）・70m・122cm的・架空のリカーブ",
+  );
   const head = page.getByTestId("result-total");
-  await expect(head.locator(".vsecH .aside")).toHaveText(`72射・1射平均 ${(total / 72).toFixed(2)}`);
+  await expect(head.locator(".vsecH .aside")).toHaveText(
+    `72射・1射平均 ${(total / 72).toFixed(2)}`,
+  );
   await expect(head.getByTestId("session-total")).toHaveText(`${total}/ 720`);
   await expect(head.locator('[data-fig="halves"] .n')).toHaveText(
     `${sum(src.ends.slice(0, 6).flat())}/ ${sum(src.ends.slice(6).flat())}`,
   );
-  await expect(head.locator('[data-fig="count0"]')).toHaveText(`10+X${all.filter((a) => a.s === 10).length}`);
+  await expect(head.locator('[data-fig="count0"]')).toHaveText(
+    `10+X${all.filter((a) => a.s === 10).length}`,
+  );
   await expect(head.locator('[data-fig="count1"]')).toHaveText(`X${all.filter((a) => a.X).length}`);
 
   // 同じ条件（70m・122cm的・72射）の過去 7 回との比較。n・期間・標準偏差を文に書く
@@ -101,7 +111,7 @@ test("result screen: total, halves, counts, comparison with n / period / SD, bes
 
   // スコア表: 記録中と同じ部品。読むだけ（行のボタンは無い）。合計行は保存値の合計
   const card = screen.getByTestId("scorecard");
-  await expect(card.locator('.scRow[data-end]')).toHaveCount(12);
+  await expect(card.locator(".scRow[data-end]")).toHaveCount(12);
   await expect(card.locator(".scRowBtn")).toHaveCount(0);
   await expect(card.locator('[data-sub="total"] .tot')).toHaveText(String(total));
   await expect(card.locator('[data-sub="block"]')).toHaveCount(2);
@@ -124,8 +134,12 @@ test("result screen: total, halves, counts, comparison with n / period / SD, bes
   expect(saved.note).toBe("架空のメモ: 後半は風が弱まりました。");
   expect(saved.ends).toEqual(src.ends);
   // 閉じると記録タブ。前回の練習がこの記録になる
-  await expect(page.getByTestId("home-last").locator(".vsecH .aside")).toHaveText("11/12（木）・70m・72射");
-  await expect(page.getByTestId("home-last").getByTestId("session-total")).toHaveText(`${total}/ 720`);
+  await expect(page.getByTestId("home-last").locator(".vsecH .aside")).toHaveText(
+    "11/12（木）・70m・72射",
+  );
+  await expect(page.getByTestId("home-last").getByTestId("session-total")).toHaveText(
+    `${total}/ 720`,
+  );
   await expect(page.getByTestId("home-recent-row").first().locator(".txt")).toHaveText(
     "架空のメモ: 後半は風が弱まりました。",
   );
@@ -134,7 +148,9 @@ test("result screen: total, halves, counts, comparison with n / period / SD, bes
   expect(errors).toEqual([]);
 });
 
-test("a new best is stated as a plain fact with the previous best and its date", async ({ page }) => {
+test("a new best is stated as a plain fact with the previous best and its date", async ({
+  page,
+}) => {
   const data = homeResultDb();
   const errors = await open(page, data);
   const peers = data.sessions.filter((s) => s.dist === 70);
@@ -154,7 +170,9 @@ test("a new best is stated as a plain fact with the previous best and its date",
   await expect(page.getByTestId("todays-result-comparison").locator(".basis")).toContainText(
     "今回の差はそれより大きい値です。",
   );
-  await expect(page.getByTestId("result-total").getByTestId("session-total")).toHaveText("720/ 720");
+  await expect(page.getByTestId("result-total").getByTestId("session-total")).toHaveText(
+    "720/ 720",
+  );
   await page.getByTestId("result-analysis").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
   await expect(page.locator("#viewTitle")).toHaveText("分析");
@@ -162,19 +180,25 @@ test("a new best is stated as a plain fact with the previous best and its date",
   expect(errors).toEqual([]);
 });
 
-test("score-only session: 着弾データなし, no impact figures, no broken values", async ({ page }) => {
+test("score-only session: 着弾データなし, no impact figures, no broken values", async ({
+  page,
+}) => {
   const data = homeResultDb();
   const errors = await open(page, data);
   const src = data.sessions.find((s) => s.id === "p5");
   await finishCopyOf(page, src);
   const screen = page.getByTestId("result-screen");
   await expect(screen.getByTestId("session-total")).toHaveText(`${totalOf(src)}/ 720`);
-  await expect(screen.locator(".vsecH", { hasText: "着弾" }).locator(".aside")).toHaveText("位置の記録なし");
+  await expect(screen.locator(".vsecH", { hasText: "着弾" }).locator(".aside")).toHaveText(
+    "位置の記録なし",
+  );
   await expect(screen.getByTestId("no-impact")).toContainText("着弾データなし");
   await expect(screen.locator("#sumPlot svg")).toHaveCount(0);
   await expect(screen.getByTestId("result-impact-figs")).toHaveCount(0);
   await expect(screen.getByTestId("todays-result-stability")).toHaveCount(0);
-  await expect(screen.getByTestId("todays-result-comparison")).toContainText("同じ条件の過去7回の平均");
+  await expect(screen.getByTestId("todays-result-comparison")).toContainText(
+    "同じ条件の過去7回の平均",
+  );
   await expect(screen.getByTestId("scorecard").locator('[data-sub="total"] .tot')).toHaveText(
     String(totalOf(src)),
   );
@@ -213,7 +237,9 @@ test("no comparison is shown, with the reason, for fewer than 3 past sessions an
   const head = page.getByTestId("result-total");
   await expect(head.locator('[data-fig="halves"]')).toHaveCount(0);
   await expect(head.locator('[data-fig="ends"]')).toHaveText("エンド6");
-  await expect(head.getByTestId("session-total")).toHaveText(`${sum(src.ends.slice(0, 6).flat())}/ 720`);
+  await expect(head.getByTestId("session-total")).toHaveText(
+    `${sum(src.ends.slice(0, 6).flat())}/ 720`,
+  );
   expect(await page.getByTestId("result-screen").innerText()).not.toMatch(/NaN|undefined|null/);
   expect(errors).toEqual([]);
 });
@@ -229,9 +255,15 @@ test("indoor 18m / 40cm counts 10 and 9, consistent with the scorecard", async (
   await expect(head.locator('[data-fig="halves"] .n')).toHaveText(
     `${sum(src.ends.slice(0, 10).flat())}/ ${sum(src.ends.slice(10).flat())}`,
   );
-  await expect(head.locator('[data-fig="count0"]')).toHaveText(`10点${all.filter((a) => a.s === 10).length}`);
-  await expect(head.locator('[data-fig="count1"]')).toHaveText(`9点${all.filter((a) => a.s === 9).length}`);
-  const totalRow = page.getByTestId("result-screen").locator('[data-testid="scorecard"] [data-sub="total"]');
+  await expect(head.locator('[data-fig="count0"]')).toHaveText(
+    `10点${all.filter((a) => a.s === 10).length}`,
+  );
+  await expect(head.locator('[data-fig="count1"]')).toHaveText(
+    `9点${all.filter((a) => a.s === 9).length}`,
+  );
+  const totalRow = page
+    .getByTestId("result-screen")
+    .locator('[data-testid="scorecard"] [data-sub="total"]');
   await expect(totalRow).toContainText(`10点${all.filter((a) => a.s === 10).length}`);
   await expect(totalRow).toContainText(`9点${all.filter((a) => a.s === 9).length}`);
   // 同じ条件は 2 回（i0・i1）なので比較は出ない
@@ -245,7 +277,9 @@ test("streak line appears only when practice goals are on, as a plain fact", asy
   const src = data.sessions.find((s) => s.id === "p3");
   await finishCopyOf(page, src);
   const gam = page.getByTestId("summary-gamification");
-  await expect(gam.locator(".fact")).toHaveText(/^連続記録は \d+ 日です（この記録の前は \d+ 日）。/);
+  await expect(gam.locator(".fact")).toHaveText(
+    /^連続記録は \d+ 日です（この記録の前は \d+ 日）。/,
+  );
   await expect(gam.locator(".summaryStreakIcon, .summaryBadgeIcon, svg")).toHaveCount(0);
   await page.locator("#sumClose").click();
   await page.evaluate(() => {
@@ -262,7 +296,10 @@ for (const theme of ["light", "dark"]) {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
     const data = homeResultDb({ theme });
     const errors = await open(page, data, { width: 320, height: 640 });
-    await finishCopyOf(page, data.sessions.find((s) => s.id === "p3"));
+    await finishCopyOf(
+      page,
+      data.sessions.find((s) => s.id === "p3"),
+    );
     const screen = page.getByTestId("result-screen");
     // 全画面: 画面名の行とタブは結果の下に隠れる
     const box = await screen.boundingBox();
@@ -272,7 +309,8 @@ for (const theme of ["light", "dark"]) {
     await expect(screen.getByTestId("session-total")).toBeInViewport({ ratio: 1 });
     await screen.locator(".summaryDetails summary").click();
     const audit = await screen.evaluate((root) => {
-      const visible = (e) => e.getClientRects().length && getComputedStyle(e).visibility !== "hidden";
+      const visible = (e) =>
+        e.getClientRects().length && globalThis.getComputedStyle(e).visibility !== "hidden";
       const small = [...root.querySelectorAll("*")]
         .filter(
           (e) =>
@@ -280,14 +318,19 @@ for (const theme of ["light", "dark"]) {
             !e.closest("svg") &&
             !e.closest(".summaryDetails") &&
             [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) &&
-            parseFloat(getComputedStyle(e).fontSize) < 13,
+            parseFloat(globalThis.getComputedStyle(e).fontSize) < 13,
         )
         .map((e) => e.className + ":" + e.textContent.trim().slice(0, 10));
       const shortTargets = [...root.querySelectorAll("button, textarea, summary")]
         .filter((e) => visible(e) && e.getBoundingClientRect().height < 44)
         .map((e) => (e.id || e.className) + ":" + Math.round(e.getBoundingClientRect().height));
       const wide = [...root.querySelectorAll("*")]
-        .filter((e) => visible(e) && !e.closest("svg") && e.getBoundingClientRect().right > globalThis.innerWidth + 0.5)
+        .filter(
+          (e) =>
+            visible(e) &&
+            !e.closest("svg") &&
+            e.getBoundingClientRect().right > globalThis.innerWidth + 0.5,
+        )
         .map((e) => e.className || e.tagName);
       return { small, shortTargets, wide, hscroll: root.scrollWidth > root.clientWidth };
     });

@@ -7,13 +7,28 @@ for (const width of [360, 375])
       await page.goto("/");
       await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
       await page.locator('#tabs [data-v="record"]').click();
-      for (const selector of ["#btnSettings", "#jumpGear", ".recordDetails summary"]) {
-        const rect = await page.locator(selector).boundingBox();
-        expect(rect.width).toBeGreaterThanOrEqual(44);
-        expect(rect.height).toBeGreaterThanOrEqual(44);
-      }
+      const tappable = async (selectors) => {
+        for (const selector of selectors) {
+          const rect = await page.locator(selector).boundingBox();
+          expect(rect.width, selector).toBeGreaterThanOrEqual(44);
+          expect(rect.height, selector).toBeGreaterThanOrEqual(44);
+        }
+      };
+      // v5: 待機画面の操作 → 記録の条件の操作（弓具を開く・日付などの折りたたみ・戻る）
+      await tappable([
+        "#btnSettings",
+        "#recConditions",
+        "#quickStart",
+        '[data-testid="start-input-target"]',
+        '[data-testid="start-input-score"]',
+        "#homeLastOpen",
+        "#homeNotes",
+      ]);
+      await page.locator("#recConditions").click();
+      await tappable(["#condBack", "#jumpGear", ".recordDetails summary", "#fStart"]);
       await page.locator(".recordDetails summary").click({ position: { x: 3, y: 3 } });
       await expect(page.locator(".recordDetails")).toHaveAttribute("open", "");
+      await page.locator("#condBack").click({ position: { x: 3, y: 3 } });
       await page.locator("#quickStart").click();
       // v5: 記録中の副操作は 中断・メニュー・中心を拡大。どれも 44px 以上で、端をタップしても反応する
       for (const selector of ["#bPause", "#bMenu", "#bZoom"]) {

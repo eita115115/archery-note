@@ -216,9 +216,9 @@ test("a 72-arrow round is entered with the keypad only", async ({ page }) => {
   // 終了: 合計は点数から。的の図は出さず「着弾データなし」
   await page.getByTestId("active-finish-primary").click();
   const sheet = page.locator(".ovl .sheet");
-  await expect(sheet.locator(".statbar")).toContainText("587");
-  await expect(sheet.locator(".statbar")).toContainText("合計 (72本)");
-  await expect(sheet.locator(".statbar")).toContainText("8.15");
+  const head = sheet.getByTestId("result-total");
+  await expect(head.getByTestId("session-total")).toHaveText("587/ 720");
+  await expect(head.locator(".vsecH .aside")).toHaveText("72射・1射平均 8.15");
   await expect(sheet.getByTestId("no-impact")).toContainText("着弾データなし");
   await expect(sheet.locator("svg.main")).toHaveCount(0);
   await expectCleanText(page);

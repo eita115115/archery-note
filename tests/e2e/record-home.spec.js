@@ -104,7 +104,9 @@ test("home with history: band, previous practice figures, strip, trend and recen
   await rows.nth(2).click();
   const sheet = page.locator(".histDetailSheet");
   await expect(sheet).toBeVisible();
-  await expect(sheet.getByTestId("history-detail-stats")).toContainText(String(totalOf(expectRows[2])));
+  await expect(sheet.getByTestId("history-detail-stats")).toContainText(
+    String(totalOf(expectRows[2])),
+  );
   await expect(sheet.getByTestId("no-impact")).toContainText("着弾データなし");
   await sheet.locator("#hClose").click();
   await page.getByTestId("home-last-open").click();
@@ -205,7 +207,13 @@ test("a paused recording replaces the start band; nothing on the tab can start a
   await expect(page.getByTestId("home-last")).toBeVisible();
   // 開始の関数を直接呼んでも、記録の途中は上書きしない
   await page.evaluate(() =>
-    globalThis.beginRecording({ dist: 18, faceD: 40, faceType: "single", perEnd: 3, round: "free" }),
+    globalThis.beginRecording({
+      dist: 18,
+      faceD: 40,
+      faceType: "single",
+      perEnd: 3,
+      round: "free",
+    }),
   );
   expect((await stored(page)).active).toEqual(active);
   // ほかのタブへ行って戻っても帯は同じ
@@ -320,7 +328,9 @@ test("goal line appears only when the practice goals setting is on, as one plain
     .filter((s) => s.date.startsWith("2026-11"))
     .reduce((n, s) => n + s.ends.flat().length, 0);
   const line = page.getByTestId("home-goal-line");
-  await expect(line).toHaveText(new RegExp(`^今週 1回 / 目標 3回・今月 ${month}射 / 目標 300射・連続 \\d+日$`));
+  await expect(line).toHaveText(
+    new RegExp(`^今週 1回 / 目標 3回・今月 ${month}射 / 目標 300射・連続 \\d+日$`),
+  );
   await expect(page.locator("#main .streakHero, #main .badgeCard, #main .goalRing")).toHaveCount(0);
   await page.evaluate(() => {
     db.settings.gamification.enabled = false;
@@ -336,24 +346,31 @@ for (const theme of ["light", "dark"]) {
     const errors = await open(page, homeResultDb({ theme }), { width: 320, height: 640 });
     const audit = () =>
       page.evaluate(() => {
-        const visible = (e) => e.getClientRects().length && getComputedStyle(e).visibility !== "hidden";
+        const visible = (e) =>
+          e.getClientRects().length && globalThis.getComputedStyle(e).visibility !== "hidden";
         const small = [...globalThis.document.querySelectorAll("#main *, #viewTop *")]
           .filter(
             (e) =>
               visible(e) &&
               !e.closest("svg") &&
               [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) &&
-              parseFloat(getComputedStyle(e).fontSize) < 13,
+              parseFloat(globalThis.getComputedStyle(e).fontSize) < 13,
           )
           .map((e) => e.className + ":" + e.textContent.trim().slice(0, 10));
-        const svgSmall = [...globalThis.document.querySelectorAll("#main svg.lineChart text")].filter(
-          (t) => t.getBoundingClientRect().height < 13,
-        ).length;
-        const shortTargets = [...globalThis.document.querySelectorAll("#main button, #main select, #main input, #main summary, #viewTop button")]
+        const svgSmall = [
+          ...globalThis.document.querySelectorAll("#main svg.lineChart text"),
+        ].filter((t) => t.getBoundingClientRect().height < 13).length;
+        const shortTargets = [
+          ...globalThis.document.querySelectorAll(
+            "#main button, #main select, #main input, #main summary, #viewTop button",
+          ),
+        ]
           .filter((e) => visible(e) && e.getBoundingClientRect().height < 44)
           .map((e) => (e.id || e.className) + ":" + Math.round(e.getBoundingClientRect().height));
         const wide = [...globalThis.document.querySelectorAll("#main *")]
-          .filter((e) => visible(e) && e.getBoundingClientRect().right > globalThis.innerWidth + 0.5)
+          .filter(
+            (e) => visible(e) && e.getBoundingClientRect().right > globalThis.innerWidth + 0.5,
+          )
           .map((e) => e.className || e.tagName);
         return {
           small,
@@ -365,11 +382,23 @@ for (const theme of ["light", "dark"]) {
       });
     await expect(page.getByTestId("record-start")).toBeInViewport({ ratio: 1 });
     await expect(page.getByTestId("record-conditions")).toBeInViewport({ ratio: 1 });
-    expect(await audit()).toEqual({ small: [], svgSmall: 0, shortTargets: [], wide: [], hscroll: false });
+    expect(await audit()).toEqual({
+      small: [],
+      svgSmall: 0,
+      shortTargets: [],
+      wide: [],
+      hscroll: false,
+    });
     await page.screenshot({ path: info.outputPath(`home-320-${theme}.png`) });
     await page.getByTestId("record-conditions").click();
     await page.locator(".recordDetails summary").click();
-    expect(await audit()).toEqual({ small: [], svgSmall: 0, shortTargets: [], wide: [], hscroll: false });
+    expect(await audit()).toEqual({
+      small: [],
+      svgSmall: 0,
+      shortTargets: [],
+      wide: [],
+      hscroll: false,
+    });
     // 開始ボタンは下端に固定され、最後の入力欄を隠さない
     const start = page.getByTestId("record-start");
     await expect(start).toBeInViewport({ ratio: 1 });
