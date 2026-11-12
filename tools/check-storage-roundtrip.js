@@ -69,6 +69,11 @@ const expectedCsvHeader = [
   "legacy_excluded",
   "legacy_method",
   "stats_version",
+  "group_cov_cm2",
+  "excl_sigma_x_cm",
+  "excl_sigma_y_cm",
+  "robust_sigma_x_cm",
+  "robust_sigma_y_cm",
 ];
 
 function assert(ok, message) {

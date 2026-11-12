@@ -531,7 +531,8 @@ assert(
 
 const coreScript = fs.readFileSync(path.join(root, "scripts", "45-analysis-core.js"), "utf8");
 const core = new Function(
-  `${analysisScript.slice(0, analysisScript.indexOf("/* ============ sight advice"))}
+  `${scoringScript}
+${analysisScript.slice(0, analysisScript.indexOf("/* ============ sight advice"))}
 ${coreScript}
 return {buildAnalysisRows, filterAnalysisRows, isoWeekKey, aggregateByPeriod, movingAverage, personalBests, conditionSplit, reasonBreakdown, aggregateRoundGroups, roundGroupBests, todayConclusion, growthDashboard, nextPracticeSuggestions};`,
 )();

@@ -1107,5 +1107,17 @@
     "dependencies": [],
     "owner": "claude",
     "acceptance": "evals/acceptance.md の採点・物理（check:app・check:analysis、表示される矢円と採点結果の一致）と広い変更（check:all・test:e2e）。画面構成と保存形式は維持し、既存の練習データと保存点数を変更しない。数式と根拠を docs/design/math-core-rebuild.md に記録する。"
+  },
+  {
+    "id": "AN-094",
+    "task": "グルーピング統計を grouping-v3（A 全射RMSを正式指標、B MCD外れ値候補除外、C 再重み付けMCDロバストRMS、旧方式は比較用に保持）へ作り直す",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-093"
+    ],
+    "owner": "claude",
+    "acceptance": "docs/design/grouping-stats-v3.md §8 の検証基準（tools/check-grouping-stats.js）、npm run check:all・lint・format:check・Playwright e2e がすべて成功。保存形式と保存点数を変えない。表示の正式な値は全射、サイト判断は外れ値候補を除いた統計。"
   }
 ]

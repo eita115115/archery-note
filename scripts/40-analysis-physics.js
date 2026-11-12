@@ -4,8 +4,10 @@
 function analysisHasGroupingEvidence(st){
   return !!st && st.total>=3 && st.n>=3 && Number.isFinite(st.rr);
 }
-/* A direction must remain distinguishable at the displayed 0.1cm precision. */
+/* A direction must remain distinguishable at the displayed 0.1cm precision.
+   散り方の診断は外れ値候補を除いた統計（B）で行う（外れ矢1本で「縦長」などの助言にしない） */
 function analysisSpreadDirection(st,ratio,strict){
+  st=sightStats(st);
   if(!analysisHasGroupingEvidence(st) || !Number.isFinite(st.sx) || !Number.isFinite(st.sy) || st.sx<0 || st.sy<0) return null;
   const x=Number(st.sx.toFixed(1)), y=Number(st.sy.toFixed(1));
   if(y>x && (strict ? st.sy>st.sx*ratio : st.sy>=st.sx*ratio)) return "vertical";
@@ -14,12 +16,15 @@ function analysisSpreadDirection(st,ratio,strict){
 }
 /* ============ sight advice ============ */
 function shapeNote(st){
+  const flagged=((st&&st.excluded)||[]).length;
+  st=sightStats(st); /* 散り方の形は外れ値候補を除いた統計（B）で診断する */
   if(!analysisHasGroupingEvidence(st) || st.n<6) return "";
+  const basis=flagged?`、外れ値候補${flagged}本を除く`:"";
   const tilt=Math.abs(st.angleDeg||0);
   const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&Number(st.major.toFixed(1))>Number(st.minor.toFixed(1))&&tilt>15&&tilt<75;
-  if(tilted) return `<div class="note">${icon("ruler")} <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
-  if(analysisSpreadDirection(st,1.3,true)==="vertical") return `<div class="note">${icon("ruler")} <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
-  if(analysisSpreadDirection(st,1.3,true)==="horizontal") return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
+  if(tilted) return `<div class="note">${icon("ruler")} <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°${basis}）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
+  if(analysisSpreadDirection(st,1.3,true)==="vertical") return `<div class="note">${icon("ruler")} <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm${basis}）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
+  if(analysisSpreadDirection(st,1.3,true)==="horizontal") return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm${basis}）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
   return "";
 }
 /* 信頼度の算出根拠1行注記。v2の説明文禁止に抵触しないよう「詳しく」details 内でのみ表示する */
@@ -49,7 +54,8 @@ function groupSummaryHtml(st, opts){
     <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / 全射</span></div>
     ${opts&&opts.withConfidenceNote?confidenceNoteHtml("calc"):""}
     ${refRows}
-    ${nFlag?`<div class="kv"><span>外れ値候補</span><span>${nFlag}本（図の×印。全射RMSには含み、サイト判断でのみ除外）</span></div>`:""}`;
+    ${nFlag?`<div class="kv"><span>外れ値候補</span><span>${nFlag}本（図の×印。全射RMSには含み、サイト判断でのみ除外）</span></div>
+    <div class="kv"><span>サイト判断の中心（外れ値候補を除く）</span><span>${cmOffsetText(ex.mx,"x")} / ${cmOffsetText(ex.my,"y")}</span></div>`:""}`;
 }
 function cmOffsetText(v, axis){
   const a=Math.abs(v).toFixed(1);
@@ -780,7 +786,8 @@ function roundProgressHtml(sess){
 function sessionsCsv(){
   /* 既存の列の位置は変えない。group_* と sigma_* は全射（A）、excluded は外れ値候補の本数。研究用の比較列は末尾に追加 */
   const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note",
-    "group_n","rms_ci95_lo_cm","rms_ci95_hi_cm","rms_df_eff","excl_n_flagged","excl_x_cm","excl_y_cm","excl_rms_cm","robust_x_cm","robust_y_cm","robust_rms_cm","robust_n_weighted","legacy_x_cm","legacy_y_cm","legacy_rms_cm","legacy_excluded","legacy_method","stats_version"];
+    "group_n","rms_ci95_lo_cm","rms_ci95_hi_cm","rms_df_eff","excl_n_flagged","excl_x_cm","excl_y_cm","excl_rms_cm","robust_x_cm","robust_y_cm","robust_rms_cm","robust_n_weighted","legacy_x_cm","legacy_y_cm","legacy_rms_cm","legacy_excluded","legacy_method","stats_version",
+    "group_cov_cm2","excl_sigma_x_cm","excl_sigma_y_cm","robust_sigma_x_cm","robust_sigma_y_cm"];
   const f2=v=>Number.isFinite(v)?v.toFixed(2):"";
   const rows=[head];
   db.sessions.forEach(s=>{
@@ -797,12 +804,13 @@ function sessionsCsv(){
 }
 /* 研究用の比較列（全射RMSの区間・外れ値候補を除いた統計・ロバスト統計・旧方式）。旧方式は CSV だけで計算する */
 function csvGroupingResearchColumns(pts, st, f2){
-  if(!st) return Array(18).fill("");
+  if(!st) return Array(23).fill("");
   const ex=st.excl, rob=st.robust, ci=st.rrCi;
   const legacy=pts&&pts.length?legacyRobustStats(pts):null;
   return [st.n, ci?f2(ci.lo):"", ci?f2(ci.hi):"", ci?f2(ci.df):"", (st.excluded||[]).length,
     ex?f2(ex.mx):"", ex?f2(ex.my):"", ex?f2(ex.rr):"", rob?f2(rob.mx):"", rob?f2(rob.my):"", rob?f2(rob.rr):"", rob?rob.nw:"",
-    legacy?f2(legacy.mx):"", legacy?f2(legacy.my):"", legacy?f2(legacy.rr):"", legacy?legacy.excluded.length:"", legacy?legacy.method:"", st.version||""];
+    legacy?f2(legacy.mx):"", legacy?f2(legacy.my):"", legacy?f2(legacy.rr):"", legacy?legacy.excluded.length:"", legacy?legacy.method:"", st.version||"",
+    f2(st.cov), ex?f2(ex.sx):"", ex?f2(ex.sy):"", rob?f2(rob.sx):"", rob?f2(rob.sy):""];
 }
 function exportSessionsCsv(){
   beginActiveWorkflow();

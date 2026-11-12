@@ -908,7 +908,7 @@ function setupComparisonHtml(setupId) {
     ${
       a.st && b.st
         ? `<div class="kv"><span>グルーピング半径</span><span>${a.st.rr.toFixed(1)}cm → ${b.st.rr.toFixed(1)}cm（${delta(b.st.rr - a.st.rr, "cm", true)}）</span></div>
-    <div class="kv"><span>中心の移動</span><span>${driftText(b.st.mx - a.st.mx, b.st.my - a.st.my)}</span></div>`
+    <div class="kv"><span>中心の移動</span><span>${driftText(sightStats(b.st).mx - sightStats(a.st).mx, sightStats(b.st).my - sightStats(a.st).my)}</span></div>`
         : ""
     }
     <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
