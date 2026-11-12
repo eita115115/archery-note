@@ -4,6 +4,10 @@
 
 ## 現在地
 
+- AN096 段0・段1 完了（UI v5、branch claude/sharp-faraday-bu8pii、版126据え置き・未push・未公開）。オーナーが v5 試作を承認（確認事項5件は提案どおり）。段0: style.css のトークンを v5 の値へ入れ替え（旧トークン名は :root で対応づけて残す）、末尾の「UI v5 foundation」層で既存部品を罫線の見出し・6px の操作部品・影なしへ寄せ、段2以降で使う部品を衝突しない名前で追加（.scard・.scRow・.key・.curRow・.slot・.recStat・.ruler・.entry・.cmpRow・.figs・.lrow・.vsec・.seg・.utabs など）。段1: header.app を廃止し画面名の行（#viewTop、#viewTitle）へ、#btnSettings は記録タブの見出し行だけに表示、下端に付く平らな4タブ（記録/ノート/分析/弓具、data-v は record/history/analysis/gear）、サイトは弓具の中の下線タブ（#gearSubTabs、showView("sight") は従来どおり動く）。拡大鏡・スクロール補正・通知の位置からヘッダーの高さを外した。変更: index.html、style.css、style.min.css、scripts/50-record-view.js・60-history-sight-view.js・70-gear-settings.js、tools/check-ui.js・check-app.js、tests/e2e（21本）、docs/design/v5/design.md。検証: check:all 全OK、lint・format:check 成功、Playwright 352 passed、375/320px のライト/ダークで画面確認。
+
+- 次: 段2（記録中の没入画面）。未解決: 設定の入口が記録タブだけになったため、分析・弓具・サイトの画面からゴミ箱の復元やデモデータの削除へ行くには記録タブを経由する（段6・8 でノートとデータの入口を足す設計）。sw.js のキャッシュ名と版は未変更で、公開時に version:bump が要る。記録タブの待機画面・記録中・履歴・分析・弓具の中身は旧構成のまま（文言「用具」「サイト調整」「練習履歴」も残る）。
+
 - AN096進行中（UI v5、生まれ変わり）。オーナー評価「前の UI を引きずりすぎ。生まれ変わらせてほしかった」を受け、第1段階（AN095、PR #139）の色と文字の差し替えではなく、骨格から作り直した試作を Fable が作成: docs/design/v5/prototype.html（単一ファイル、外部依存なし、ハッシュで各画面）、design.md（デザイン言語・実測コントラスト・全機能の行き先・画面仕様・規則の出典・移植の段0〜9・リスク）、shots/（75枚、128色に減色）。要点: ヘッダー帯・浮いたタブ・カードを廃止し罫線の帳票の作り、平らな4タブ（記録/ノート/分析/弓具、サイトは弓具内）、記録中はタブなしの没入画面（状態行→的→確定済みスコア表→入力中エンド→操作）、点数キー 4×3、スコア表は 回｜3射｜3射｜計｜累計｜10（X含む）｜X と36射小計・合計、確定済みは高い点から表示・保存は打った順、修正は行タップ→大きな枠→キー（320px でセルが約29pxのため）、M 位置なし、履歴とメモをノートに統合、分析は スコア/着弾/比較/射型。オーナー承認済み（2026-11-12）: トースト廃止、既定ダーク、4タブ、触覚はネイティブのみ、スコア表は公認大会の採点用紙を参考（JAF 2024〜2025年版 第208条・第111条・第206条、WA Book 3 2026-01-27 12.1.3/12.2.8/12.4/12.5.1。同点順は両者で逆のため順位は判定しない）。規則書の取得のため個人用環境「archery-note」（www.archery.or.jp・extranet.worldarchery.sport・eita115115.github.io を許可）を作成。
 
 - 次: オーナーが v5 試作を確認（design.md 6章の確認事項）。承認後に段0（新しい CSS 層）から本体へ移す。段1（index.html の骨格）は Service Worker のキャッシュ名更新を伴うため事前に確認する。
