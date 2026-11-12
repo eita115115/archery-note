@@ -776,7 +776,7 @@ function renderSight(m) {
       ${judgementHtml(adv, lastSess)}
       ${shapeNote(adv.st)}
       ${adv.notes.map((n) => `<div class="note">・${n}</div>`).join("")}
-      <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。グルーピング中心 ${cmOffsetText(adv.st.mx, "x")} / ${cmOffsetText(adv.st.my, "y")}（半径 ${adv.st.rr.toFixed(1)}cm）</div></div>`
+      <div class="note">原則：<b>矢の集まった方向へサイトを動かす</b>。サイト判断の中心 ${cmOffsetText(sightStats(adv.st).mx, "x")} / ${cmOffsetText(sightStats(adv.st).my, "y")}${adv.st.excluded.length ? `（外れ値候補${adv.st.excluded.length}本を除く）` : ""}・全射の半径 ${adv.st.rr.toFixed(1)}cm</div></div>`
           : ""
       }
     </details>

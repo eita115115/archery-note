@@ -370,8 +370,9 @@ function conditionSplit(rows, isWindyFn) {
       g.rrSum += r.st.rr;
       g.rrCount++;
     }
-    if (analysisHasGroupingEvidence(r.st) && Number.isFinite(r.st.mx)) {
-      g.mxSum += r.st.mx;
+    /* 中心の偏りは外れ値候補を除いた中心（B）、半径は全射（A） */
+    if (analysisHasGroupingEvidence(r.st) && Number.isFinite(sightStats(r.st).mx)) {
+      g.mxSum += sightStats(r.st).mx;
       g.mxCount++;
     }
   });
@@ -411,8 +412,10 @@ function todayConclusion(rows) {
   const groupingTight = latestRr != null && avgRr != null && avgRr - latestRr >= RR_TIGHT_DELTA;
   // しきい値3: 中心オフセットが 1.0cm 以上ズレていれば「まだ中心が寄っている」扱い
   const OFFSET_THRESHOLD = 1.0;
-  const mx = latest.st && Number.isFinite(latest.st.mx) ? latest.st.mx : 0;
-  const my = latest.st && Number.isFinite(latest.st.my) ? latest.st.my : 0;
+  /* 「ズレだけ直す」の判断は外れ値候補を除いた中心（B）。外れ矢1本で中心がずれたと言わない */
+  const center = latest.st ? sightStats(latest.st) : null;
+  const mx = center && Number.isFinite(center.mx) ? center.mx : 0;
+  const my = center && Number.isFinite(center.my) ? center.my : 0;
   const offCenter = Math.max(Math.abs(mx), Math.abs(my)) >= OFFSET_THRESHOLD;
   if (groupingTight && offCenter) {
     const dir = Math.abs(my) >= Math.abs(mx) ? (my > 0 ? "上" : "下") : mx > 0 ? "右" : "左";

@@ -72,7 +72,8 @@ const pct = (v) => `${(v * 100).toFixed(2)}%`;
 /* ---------- A・B・C の偏り、区間の被覆、誤除外率 ---------- */
 const onGrid = new Set(api.MCD_TABLE_N);
 for (const shape of SHAPES) {
-  for (const n of [6, 12, 36, 72, 33, 100]) {
+  /* 33 は本数を4で割った余りが1（係数ののこぎりの谷）、77 と 100 は表にない本数（1/n で補間） */
+  for (const n of [6, 12, 36, 72, 33, 77, 100]) {
     const trials = n <= 36 ? 20000 : 6000;
     const gauss = rngNormal(1000 * n + shape.s1 * 7 + shape.deg);
     let sumA = 0;

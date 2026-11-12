@@ -216,6 +216,17 @@ for (const [scale, visible] of [
     else assert.equal(note, "");
   });
 }
+check("one flyer does not turn a round group into a vertical-spread diagnosis", () => {
+  const round = Array.from({ length: 12 }, (_, i) =>
+    arrow(Math.cos((i / 12) * Math.PI * 2) * 1.5, Math.sin((i / 12) * Math.PI * 2) * 1.5),
+  );
+  const s = { ...base, id: "owned-flyer", date: "2026-10-05", ends: [[...round, arrow(0.2, 15)]] };
+  const st = api.sessionMetrics(s).st;
+  assert.equal(st.excluded.length, 1);
+  assert(st.sy > st.sx * 1.3, "the all-arrow spread really is vertical");
+  assert.equal(api.shapeNote(st), "");
+  assert(!api.conditionInsights(s, st, null).some((x) => /上下の再現性/.test(x)));
+});
 check("existing strict and inclusive ratio boundaries", () => {
   const st = { total: 6, n: 6, rr: 2, sx: 1, sy: 1.3, angleDeg: 0 };
   assert.equal(api.shapeNote(st), "");
