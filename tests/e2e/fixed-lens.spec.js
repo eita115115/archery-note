@@ -1,3 +1,4 @@
+/* global db */
 "use strict";
 
 const { test, expect } = require("@playwright/test");

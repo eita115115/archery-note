@@ -108,14 +108,16 @@ for (const size of [
         const before = (await state(page)).sessions;
         await page.getByTestId("record-start").click();
         await arrow(page, 0);
-        await expect(page.getByRole("status")).toContainText("点を記録");
-        // Hold the real feedback through the slower screenshot/overlay checks.
-        const message = await page.getByRole("status").textContent();
-        await page.evaluate((text) => globalThis.toast(text, 10000), message);
+        // 矢の記録ではトーストを出さない（チップの出現で示す）。読み上げにだけ「1射目 X点」を伝える
+        const announce = page.getByTestId("active-announce");
+        await expect(announce).toHaveText(/^1射目 ((X|\d+)点|ミス)$/);
+        await expect(announce).toHaveAttribute("aria-live", "polite");
+        await expect(announce).toHaveAttribute("aria-atomic", "true");
+        await expect(page.getByRole("status")).not.toContainText("点を記録");
         await settled(page);
-        await page.screenshot({ path: testInfo.outputPath("record-toast.png") });
-        await readableToast(page, true);
+        await page.screenshot({ path: testInfo.outputPath("record-arrow.png") });
         for (let n = 1; n < 6; n++) await arrow(page, n);
+        await expect(announce).toHaveText(/^6射目 /);
         const six = (await state(page)).active.cur;
         // A seventh tap emits the genuine multi-line end-capacity instruction.
         const target = await page.getByTestId("active-target").boundingBox();

@@ -251,6 +251,29 @@ const targetApi = new Function(
 const fieldSvg = targetApi.targetMarkup(80, "tf", "field");
 assert(fieldSvg.includes('class="main field"') && fieldSvg.includes("#ffe14d") && fieldSvg.includes("#1c1e1c"), "Field target SVG failed");
 
+/* 矢番号の吹き出し: 画面上 13px の文字・直径 22px を保ち、重なった矢でも互いに離れ、表示範囲に収まる */
+const labelApi = new Function(section("function layoutArrowLabels", "function arrowLabelSvg") + "\nreturn {layoutArrowLabels};")();
+{
+  const pxPerCm = 3; // 122cm 的を 375px 幅で全体表示したときの目安
+  const box = { x: -72, y: -72, width: 144, height: 144 };
+  const same = Array.from({ length: 6 }, () => ({ x: 0.2, y: -0.1 }));
+  const lay = labelApi.layoutArrowLabels([...same, null], pxPerCm, box);
+  assert(Math.abs(lay.r * pxPerCm - 11) < 1e-9 && Math.abs(lay.font * pxPerCm - 13) < 1e-9, "Arrow label must stay 22px / 13px on screen");
+  assert(lay.labels[6] === null, "Arrow label skips arrows without coordinates");
+  for (let i = 0; i < 6; i++) for (let j = i + 1; j < 6; j++) {
+    const d = Math.hypot(lay.labels[i].x - lay.labels[j].x, lay.labels[i].y - lay.labels[j].y);
+    assert(d >= 2 * lay.r * 0.99, `Arrow labels ${i + 1} and ${j + 1} overlap (${(d * pxPerCm).toFixed(1)}px)`);
+  }
+  for (let i = 0; i < 6; i++) {
+    const d = Math.hypot(lay.labels[i].x - same[0].x, lay.labels[i].y - same[0].y);
+    assert(d >= lay.r * 1.2, `Arrow label ${i + 1} covers an arrow (${(d * pxPerCm).toFixed(1)}px)`);
+  }
+  const edge = labelApi.layoutArrowLabels([{ x: 71, y: 71 }], pxPerCm, box).labels[0];
+  assert(edge.x <= box.x + box.width - lay.r + 1e-9 && -edge.y >= box.y + lay.r - 1e-9, "Arrow label must stay inside the target view");
+  const again = labelApi.layoutArrowLabels([...same], pxPerCm, box);
+  assert(JSON.stringify(again.labels) === JSON.stringify(lay.labels.slice(0, 6)), "Arrow label layout must be deterministic");
+}
+
 const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats,centerOffsetTest,axisCorrection,probWithin,fmtChance,tCrit975,sightStats};")();
 const arrows = [
   {x:1,y:1},{x:2,y:1.5},{x:0,y:.5},{x:1.2,y:1.7},{x:.8,y:.9},{x:1.5,y:1.1},

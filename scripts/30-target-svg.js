@@ -70,6 +70,58 @@ function markCircle(a, faceD, color, label, cls, arrowR){
     /* 番号は実寸の矢円に重ならないよう目印の上寄りに置く（目印が実寸と同じ大きさなら中央） */
     (label?`<text x="${a.x}" y="${-a.y-(loc>r*1.05?loc*.4:0)}" font-size="${loc*(loc>r*1.05?1:1.2)}" fill="#fff" stroke="rgba(0,0,0,.55)" stroke-width="${loc*.12}" paint-order="stroke" text-anchor="middle" dominant-baseline="central" font-weight="bold">${esc(label)}</text>`:"")+`</g>`;
 }
+/* 記録中のエンドの矢番号（射った順）を、画面上の実寸で読める吹き出しにする。
+   吹き出しは矢から北東へずらし、重なるときは互いに押し出して引き出し線で結ぶ（決定的な反復）。
+   pxPerCm は的の SVG の画面上の倍率。吹き出しは直径 22px・文字 13px 相当で、実寸の矢円（arrowFoot）には触れない */
+function layoutArrowLabels(points, pxPerCm, box){
+  const r=11/pxPerCm, minD=2*r*1.08, off=r*1.75;
+  /* box は SVG の viewBox（x, y, width, height）。吹き出しは的の表示範囲からはみ出さない */
+  const clamp=(l)=>{
+    if(!box) return l;
+    const x=Math.min(Math.max(l.x, box.x+r), box.x+box.width-r);
+    const sy=Math.min(Math.max(-l.y, box.y+r), box.y+box.height-r);
+    return {x, y:-sy};
+  };
+  const L=points.map(p=>p?clamp({x:p.x+off*Math.SQRT1_2,y:p.y+off*Math.SQRT1_2}):null);
+  for(let it=0;it<80;it++){
+    let moved=false;
+    for(let i=0;i<L.length;i++){
+      if(!L[i]) continue;
+      for(let j=i+1;j<L.length;j++){
+        if(!L[j]) continue;
+        const d=Math.hypot(L[j].x-L[i].x, L[j].y-L[i].y);
+        if(d>=minD) continue;
+        /* 完全に重なったときは番号ごとに決まった向き（黄金角）へ離す */
+        const ang=(j*2.399963)%(2*Math.PI);
+        const ux=d>1e-9?(L[j].x-L[i].x)/d:Math.cos(ang), uy=d>1e-9?(L[j].y-L[i].y)/d:Math.sin(ang);
+        const push=(minD-d)/2;
+        L[i]=clamp({x:L[i].x-ux*push,y:L[i].y-uy*push});
+        L[j]=clamp({x:L[j].x+ux*push,y:L[j].y+uy*push});
+        moved=true;
+      }
+      /* 吹き出しが矢そのもの（自分以外の矢も含む）を隠さないよう、矢の位置からも離す */
+      for(let k=0;k<points.length;k++){
+        const p=points[k];
+        if(!p) continue;
+        const d=Math.hypot(L[i].x-p.x, L[i].y-p.y), minA=r*1.3;
+        if(d>=minA) continue;
+        const ang=((i+1)*2.399963)%(2*Math.PI);
+        const ux=d>1e-9?(L[i].x-p.x)/d:Math.cos(ang), uy=d>1e-9?(L[i].y-p.y)/d:Math.sin(ang);
+        L[i]=clamp({x:L[i].x+ux*(minA-d),y:L[i].y+uy*(minA-d)});
+        moved=true;
+      }
+    }
+    if(!moved) break;
+  }
+  return {labels:L, r, font:13/pxPerCm};
+}
+function arrowLabelSvg(p, l, r, font, label, selected){
+  if(!p||!l) return "";
+  const fill=selected?"var(--ink)":"var(--invert-bg)", fg=selected?"var(--bg)":"var(--invert-fg)";
+  return `<g class="arrowLabel"><line x1="${p.x}" y1="${-p.y}" x2="${l.x}" y2="${-l.y}" stroke="${fill}" stroke-width="${r/7}"/>`+
+    `<circle cx="${l.x}" cy="${-l.y}" r="${r}" fill="${fill}" stroke="#fff" stroke-width="${r/9}"/>`+
+    `<text x="${l.x}" y="${-l.y}" font-size="${font}" fill="${fg}" text-anchor="middle" dominant-baseline="central" font-weight="700">${esc(label)}</text></g>`;
+}
 /* static plot for history/summary */
 function plotSession(sess, container){
   const faceD=sess.faceD;
@@ -80,7 +132,8 @@ function plotSession(sess, container){
   let html="";
   /* 記録時の判定の半径で描く（旧判定の記録は旧半径。保存された点数と矢円を一致させる） */
   const arrowR=sessionScoringRadius(sess, db.setups.find(x=>x.id===sess.setupId));
-  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
+  /* 座標のない矢（点数だけの記録・座標なしの M）は描かない */
+  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ if(Number.isFinite(a.x)&&Number.isFinite(a.y)) html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
   const st=sessionMetrics(sess).st;
   if(st){
     const w=ringW(faceD,ft);

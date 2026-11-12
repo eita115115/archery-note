@@ -1342,6 +1342,7 @@ function renderActive(m) {
       <div class="lensTag" id="lensTag">微調整モード</div>
     </div>
     <div class="scoreChips" id="curChips" data-testid="active-arrow-chips"></div>
+    <div class="srOnly" id="arrowAnnounce" aria-live="polite" aria-atomic="true" data-testid="active-announce"></div>
     <div class="nudge" id="nudge">
       <div class="recordNudgeHint">選択中の矢を微調整（1目盛 = ${(s.faceD / 200).toFixed(1)}cm）</div>
       <div class="npad" role="group" aria-label="選択中の矢の微調整">
@@ -1382,6 +1383,8 @@ function renderActive(m) {
           x.setAttribute("aria-pressed", String(on));
         });
         applyZoom();
+        /* 拡大率が変わると画面上の倍率も変わるので、矢番号の吹き出しを描き直す */
+        refreshActive();
       }),
   );
   applyZoom();
@@ -1582,35 +1585,60 @@ function revealActiveCorrection() {
   else if (rect.bottom > bottom) delta = rect.bottom - bottom;
   if (delta) window.scrollBy({ top: delta, behavior: "instant" });
 }
+/* 矢を記録したことは画面ではチップの出現で示し、トーストは出さない（入力の邪魔をしない）。
+   画面読み上げには「3射目 9点」を知らせる */
+function announceArrow(n, a) {
+  const el = $("#arrowAnnounce");
+  if (el) el.textContent = `${n}射目 ${a.s === 0 ? "ミス" : `${scoreLabel(a)}点`}`;
+}
 /* 記録中セッションの判定用半径(cm)。記録開始時の arrowR。旧判定で始まった記録・旧記録の編集は旧半径のまま
    （20-scoring.js sessionScoringRadius）。保存された点数と矢円と新しい矢の判定をセッション内で揃える */
 function activeArrowR(s) {
   return sessionScoringRadius(s, s && db.setups.find((x) => x.id === s.setupId));
 }
-function refreshActive() {
-  const s = db.active;
-  if (!s) return;
-  const leavingCorrection = $("#nudge").classList.contains("on") && ui.selArrow < 0;
-  // markers
+/* 記録中の的の印（矢円と矢番号の吹き出し）を描く。吹き出しの大きさは画面上の倍率で決まるため、
+   画面の幅が変わったときもこれだけを描き直す */
+function drawActiveMarks(s) {
+  if (!s || !$("#tgmarks")) return;
   let html = "";
+  const placed = (a) => a && Number.isFinite(a.x) && Number.isFinite(a.y);
   const gp = (a) => (s.faceType === "triple" ? { x: a.x, y: a.y + SPOT_Y[a.spot || 0] } : a);
   const arrowR = activeArrowR(s);
+  /* 確定済みエンドは番号なし・低彩度。座標のない矢（座標なしの M など）は描かない */
   s.ends.forEach((end, ei) =>
     end.forEach((a) => {
-      html += markCircle(gp(a), s.faceD, "rgba(60,60,60,.45)", "", "", arrowR);
+      if (placed(a)) html += markCircle(gp(a), s.faceD, "rgba(60,60,60,.45)", "", "", arrowR);
     }),
   );
   s.cur.forEach((a, i) => {
+    if (!placed(a)) return;
     html += markCircle(
       gp(a),
       s.faceD,
       i === ui.selArrow ? "#111" : "var(--green-l)",
-      scoreLabel(a),
+      "",
       i === ui.freshArrow ? "shotNew" : "",
       arrowR,
     );
   });
+  /* 現在エンドの矢番号（射った順）を画面上で読める大きさの吹き出しにし、重なりを避けて引き出し線で結ぶ */
+  const tg = $("#tgsvg");
+  const vb = tg && tg.viewBox && tg.viewBox.baseVal;
+  const pxPerCm = tg && vb && vb.width > 0 ? tg.getBoundingClientRect().width / vb.width : 0;
+  if (pxPerCm > 0) {
+    const pts = s.cur.map((a) => (placed(a) ? gp(a) : null));
+    const lay = layoutArrowLabels(pts, pxPerCm, vb);
+    pts.forEach((p, i) => {
+      html += arrowLabelSvg(p, lay.labels[i], lay.r, lay.font, String(i + 1), i === ui.selArrow);
+    });
+  }
   $("#tgmarks").innerHTML = html;
+}
+function refreshActive() {
+  const s = db.active;
+  if (!s) return;
+  const leavingCorrection = $("#nudge").classList.contains("on") && ui.selArrow < 0;
+  drawActiveMarks(s);
   // chips（innerHTML 全置換でフォーカス中のチップが消えるため、置換前に data-i を控えて復元する）
   const chipsBox = $("#curChips");
   const focused = document.activeElement;
@@ -1624,7 +1652,7 @@ function refreshActive() {
         const z = zoneStyle(a.s, a.X, s.faceType);
         /* motion:因果 — 的タップの着弾象限から得点チップが現れる方向を決める（表示のみ。当たり判定・座標計算は不変） */
         const fromCls = i === ui.freshArrow ? `fresh ${impactQuadrantClass(a)}` : "";
-        return `<button type="button" class="sc ${i === ui.selArrow ? "sel" : ""} ${fromCls}" aria-pressed="${i === ui.selArrow}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><span>${esc(scoreLabel(a))}</span>${a.no ? `<small>#${esc(a.no)}</small>` : ""}</button>`;
+        return `<button type="button" class="sc ${i === ui.selArrow ? "sel" : ""} ${fromCls}" aria-pressed="${i === ui.selArrow}" aria-label="${i + 1}射目 ${esc(scoreLabel(a))}" data-i="${i}" style="background:${z.bg};color:${z.fg}"><i class="scOrder" aria-hidden="true">${i + 1}</i><span>${esc(scoreLabel(a))}</span>${a.no ? `<small>#${esc(a.no)}</small>` : ""}</button>`;
       })
       .join("") ||
     `<span class="recordCurEmpty">エンド${s.ends.length + 1}：的をタップして記録</span>`;
@@ -1715,6 +1743,10 @@ function nudgeArrow(dirKey) {
   }
   const a = s.cur[ui.selArrow],
     step = s.faceD / 200;
+  if (!Number.isFinite(a.x) || !Number.isFinite(a.y)) {
+    toast("座標のない矢は位置を動かせません。削除して記録し直してください");
+    return;
+  }
   /* 配置と同じく 0.01cm に丸めた座標を保存して採点する */
   if (dirKey === "u") a.y = +(a.y + step).toFixed(2);
   if (dirKey === "d") a.y = +(a.y - step).toFixed(2);
@@ -1973,7 +2005,7 @@ function attachTargetInput(s) {
     nativePulse(isLineCutting(rec.x, rec.y, s.faceD, s.faceType, arrowR) ? "success" : "light");
     scheduleSave("arrow-add");
     refreshActive();
-    toast(`${scoreLabel(rec)} 点を記録`);
+    announceArrow(s.cur.length, rec);
   }
   function cancel(e) {
     const cp = clientPoint(e);

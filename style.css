@@ -51,7 +51,9 @@
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0; overflow-x:hidden; touch-action:pan-x pan-y;}
-html{background:var(--bg);}
+html{background:var(--bg);
+  /* 画面下の固定タブ（高さ約71px＋下余白8px）の裏へ、スクロールやキーボード操作のフォーカス移動で要素を隠さない */
+  scroll-padding-bottom:calc(84px + env(safe-area-inset-bottom));}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Meiryo,sans-serif;
   min-height:100dvh;
@@ -560,8 +562,17 @@ nav.tabs button.on{color:var(--title);}
 .lensTag.fine.cut{background:var(--green); color:var(--invert-fg);}
 .lensTag.fine.miss{background:var(--red); color:#fff;}
 .hint{font-size:13px; color:var(--sub); margin-top:8px; line-height:1.5;}
+/* 画面には出さず読み上げにだけ伝える */
+.srOnly{position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); clip-path:inset(50%); white-space:nowrap; border:0;}
+/* 矢番号の吹き出しはタップを邪魔しない（的の入力は SVG 全体で受ける） */
+.arrowLabel{pointer-events:none;}
 /* score chips */
 .scoreChips{display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; min-height:36px;}
+/* 記録中のエンドは矢番号（射った順）をチップの上に出す。的の吹き出しの番号と対応させる */
+/* 1本目でチップ行の高さが変わると画面がずれるので、番号＋チップ分（18+40px）を最初から確保する */
+#curChips{row-gap:22px; padding-top:18px; min-height:58px; align-items:flex-start;}
+.scOrder{position:absolute; left:0; right:0; top:-19px; font-style:normal; font-size:13px; line-height:16px; font-weight:var(--fw-label); color:var(--sub); text-align:center; pointer-events:none;}
+.sc.sel .scOrder{color:var(--ink);}
 .sc{
   position:relative; width:40px; height:40px; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center;
   font-weight:var(--fw-figure); font-size:15px; border:2px solid transparent; cursor:pointer;
