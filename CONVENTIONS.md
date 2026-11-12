@@ -89,6 +89,7 @@ The `db` structure (from `blankDb()`):
   trash: [],         // soft-deleted items
   formAnalyses: [],  // form (shooting form) analysis records
   customRounds: [],  // user-defined multi-distance rounds
+  notes: [],         // memo-only notes {id, date, ts, text, tags?} (shown in the ノート tab)
   settings: {
     eyeSight: 850,
     theme: "auto",
