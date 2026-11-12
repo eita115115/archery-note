@@ -271,8 +271,9 @@ test("the menu holds finish, settings and the weather / note sheet", async ({ pa
   await expect(menu).toContainText("9.00");
   await expect(menu.getByTestId("active-finish")).toContainText("ここで記録を終了する");
   await expect(menu.getByTestId("active-finish")).toContainText("2射まで保存して結果を表示します");
-  // 入力方法の切り替えは段 3。見せかけの項目は置かない
-  await expect(menu).not.toContainText("入力");
+  // 入力方法の切り替え（段 3）。いまの方法が選ばれている
+  await expect(menu.getByTestId("input-mode-target")).toHaveAttribute("aria-pressed", "true");
+  await expect(menu.getByTestId("input-mode-score")).toHaveAttribute("aria-pressed", "false");
   for (const row of await menu.locator(".lrow").all())
     expect((await row.boundingBox()).height).toBeGreaterThanOrEqual(44);
 

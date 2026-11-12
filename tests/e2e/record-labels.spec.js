@@ -67,6 +67,12 @@ for (const sample of [
       expect(chosenFace).toContain(String(sample.faceD));
       expect(chosenArrows).toBe(`${sample.perEnd}本`);
       await arrows.focus();
+      // 本数 → 入力方法（的面に打つ / 点数だけ）→ 開始
+      await page.keyboard.press("Tab");
+      await expect(page.getByTestId("start-input-target")).toBeFocused();
+      await expect(page.getByTestId("start-input-target")).toHaveAttribute("aria-pressed", "true");
+      await page.keyboard.press("Tab");
+      await expect(page.getByTestId("start-input-score")).toBeFocused();
       await page.keyboard.press("Tab");
       await expect(page.getByTestId("record-start")).toBeFocused();
       await page.keyboard.press("Enter");
