@@ -689,16 +689,30 @@ test("a score-only session shows totals, and geometry says 着弾データなし
   await expectCleanText(page);
   await detail.locator("#hClose").click();
 
-  // 分析: 得点は集計し、集まり具合は「着弾データなし」
+  // 分析 > スコア: 得点は集計する（点数だけの記録であることを対象の行に書く）
   await page.locator('#tabs [data-v="analysis"]').click();
-  const noImpact = page.getByTestId("analysis-no-impact");
-  await expect(noImpact).toContainText("着弾データなし");
-  await expect(noImpact).toContainText("対象の2回・24射のうち、位置のある矢は0射です");
+  await expect(page.getByTestId("analysis-target")).toContainText("2回・24射");
+  await expect(page.getByTestId("analysis-target")).toContainText("うち2回は点数だけの記録です");
   await expect(page.locator("main")).toContainText("8.08");
-  for (const d of await page.locator("main details").all())
-    await d.evaluate((el) => (el.open = true));
   await expectCleanText(page);
   expect(await page.locator("main").innerHTML()).not.toMatch(/NaN|undefined/);
+  // 分析 > 着弾・比較: 「着弾データなし」。的の図と統計は作らない
+  await page.locator('#analysisSubTabs [data-an="impact"]').click();
+  const noImpact = page.getByTestId("analysis-no-impact");
+  await expect(noImpact).toContainText("着弾データなし");
+  await expect(noImpact).toContainText("12射のうち、位置のある矢は 0射");
+  await expect(page.locator("main svg.main")).toHaveCount(0);
+  await expect(page.getByTestId("analysis-grouping-trend")).toHaveCount(0);
+  await expectCleanText(page);
+  expect(await page.locator("main").innerHTML()).not.toMatch(/NaN|undefined/);
+  await page.locator('#analysisSubTabs [data-an="compare"]').click();
+  await expect(page.getByTestId("compare-plot-a")).toHaveText("着弾データなし");
+  await expect(page.getByTestId("compare-plot-b")).toHaveText("着弾データなし");
+  await expect(page.locator('[data-row="rms"] [data-col="diff"]')).toHaveText("—");
+  await expect(page.locator("main svg.main")).toHaveCount(0);
+  await expectCleanText(page);
+  expect(await page.locator("main").innerHTML()).not.toMatch(/NaN|undefined/);
+  await page.locator('#analysisSubTabs [data-an="score"]').click();
 
   // 弓具 → サイト: 着弾傾向は出さない
   await page.locator('#tabs [data-v="gear"]').click();
@@ -805,7 +819,10 @@ test("positioned sessions keep their analysis when score-only sessions are added
   await detail.locator("#hClose").click();
   // 分析: 位置のある回があるので「着弾データなし」は出さない
   await page.locator('#tabs [data-v="analysis"]').click();
+  await expectCleanText(page);
+  await page.locator('#analysisSubTabs [data-an="impact"]').click();
   await expect(page.getByTestId("analysis-no-impact")).toHaveCount(0);
+  await expect(page.getByTestId("analysis-plot").locator("svg.main")).toHaveCount(1);
   for (const d of await page.locator("main details").all())
     await d.evaluate((el) => (el.open = true));
   await expectCleanText(page);

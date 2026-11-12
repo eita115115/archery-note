@@ -358,6 +358,7 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
   await seedDiagnosticDb(page, database);
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射形の記録は 分析 > 射型
   await page.waitForTimeout(750);
   await installPrimaryWriteGate(page);
   const rollbackBaseline = await page.evaluate(() => {
@@ -435,6 +436,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await seedDiagnosticDb(page, database);
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射形の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
@@ -474,6 +476,7 @@ test("failed diagnostic discard cancel retains the candidate and confirm closes 
   await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射形の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
@@ -516,6 +519,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   );
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射形の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.evaluate(() => {
@@ -1017,8 +1021,9 @@ for (const [label, value, enabled] of [
     await seedDiagnosticDb(page, database);
     await page.goto("/");
     await page.locator('#tabs [data-v="analysis"]').click();
+    await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射形の記録は 分析 > 射型
 
-    const card = page.locator(".card").filter({ hasText: "射形トラッキング" });
+    const card = page.getByTestId("analysis-form-card");
     if (enabled) await expect(card).toHaveCount(1);
     else await expect(card).toHaveCount(0);
 

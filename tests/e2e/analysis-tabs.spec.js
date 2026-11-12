@@ -99,7 +99,9 @@ test("the form tab lists form records, opens one, and counts the reason marks wi
   await expect(reasons).toContainText("印の数は原因を示すものではありません");
   /* 距離で絞ると、対象の回数と印の数も変わる */
   await page.locator("#anDist").selectOption("18");
-  await expect(page.getByTestId("analysis-reasons")).toContainText("対象: 2回・120射のうち、理由の印がある 0射。");
+  await expect(page.getByTestId("analysis-reasons")).toContainText(
+    "対象: 2回・120射のうち、理由の印がある 0射。",
+  );
   await expect(page.getByTestId("analysis-reason-row")).toHaveCount(0);
   expect(errors).toEqual([]);
 });
@@ -112,7 +114,9 @@ test("the form tab explains the switch when form tracking is off and still count
   await openAnalysis(page, data);
   await gotoSubTab(page, "form");
   await expect(page.getByTestId("analysis-form-card")).toHaveCount(0);
-  await expect(page.getByTestId("analysis-form-off")).toContainText("設定の「射形トラッキング」を入にすると使えます");
+  await expect(page.getByTestId("analysis-form-off")).toContainText(
+    "設定の「射形トラッキング」を入にすると使えます",
+  );
   await expect(page.getByTestId("analysis-reason-row")).toHaveCount(3);
 });
 
@@ -182,7 +186,9 @@ for (const theme of ["light", "dark"]) {
           wide = [];
         const visible = (el) => {
           const r = el.getBoundingClientRect();
-          return r.width > 0 && r.height > 0 && globalThis.getComputedStyle(el).visibility !== "hidden";
+          return (
+            r.width > 0 && r.height > 0 && globalThis.getComputedStyle(el).visibility !== "hidden"
+          );
         };
         root.querySelectorAll("*").forEach((el) => {
           if (!visible(el) || el.closest("svg.main") || el.tagName === "OPTION") return;
@@ -192,16 +198,23 @@ for (const theme of ["light", "dark"]) {
             const svg = el.closest("svg");
             if (svg && svg.viewBox && svg.viewBox.baseVal && svg.viewBox.baseVal.width)
               size *= svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
-            if (size < 12.99) small.push(`${el.tagName}.${el.className && el.className.baseVal !== undefined ? el.className.baseVal : el.className}:${size.toFixed(1)}:${el.textContent.trim().slice(0, 12)}`);
+            if (size < 12.99)
+              small.push(
+                `${el.tagName}.${el.className && el.className.baseVal !== undefined ? el.className.baseVal : el.className}:${size.toFixed(1)}:${el.textContent.trim().slice(0, 12)}`,
+              );
           }
           const r = el.getBoundingClientRect();
           if (r.right > globalThis.innerWidth + 0.5 || r.left < -0.5)
             wide.push(`${el.tagName}.${el.className}`);
         });
-        [...root.querySelectorAll("button, select, summary, a[href]"), ...doc.querySelectorAll("#analysisSubTabs button")].forEach((el) => {
+        [
+          ...root.querySelectorAll("button, select, summary, a[href]"),
+          ...doc.querySelectorAll("#analysisSubTabs button"),
+        ].forEach((el) => {
           if (!visible(el)) return;
           const r = el.getBoundingClientRect();
-          if (r.height < 43.5) short.push(`${el.tagName}#${el.id}.${el.className}:${r.height.toFixed(1)}`);
+          if (r.height < 43.5)
+            short.push(`${el.tagName}#${el.id}.${el.className}:${r.height.toFixed(1)}`);
         });
         return {
           small,

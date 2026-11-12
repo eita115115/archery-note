@@ -1661,7 +1661,7 @@ function analysisScoreHtml(allRows, f) {
 /* ---------- 着弾 ---------- */
 function analysisRefMetricsHtml(im) {
   const body = im.refReady
-    ? `<div class="lrow" data-ref="b"><span class="lk">外れ値候補を除いたRMS</span><span class="lv">${im.rmsB != null ? `${im.rmsB.toFixed(1)} cm` : "—"}<small>${im.st.total}射のうち ${im.flagged}射を除く</small></span></div>
+    ? `<div class="lrow" data-ref="b"><span class="lk">外れ値候補を除いたRMS</span><span class="lv">${im.rmsB != null ? `${im.rmsB.toFixed(1)} cm` : "—"}<small>${im.st.total}射中 ${im.flagged}射を除く</small></span></div>
       <div class="lrow" data-ref="c"><span class="lk">ロバストRMS</span><span class="lv">${im.rmsC != null ? `${im.rmsC.toFixed(1)} cm` : "—"}<small>再重み付け MCD</small></span></div>
       <div class="lrow" data-ref="flagged"><span class="lk">外れ値候補</span><span class="lv">${im.flagged}射</span></div>`
     : `<p class="basis">位置のある矢が ${MCD_MIN_N}射以上あるときに計算します（いまは ${im.positioned}射）。</p>`;
@@ -1982,7 +1982,7 @@ function renderAnalysis(m) {
   const f = ui.analysisFilter;
   if (!ANALYSIS_PERIODS.some((p) => p[0] === f.period)) f.period = "all";
   const allRows = buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
-  let html = "",
+  let html,
     after = null;
   if (tab === "score") html = analysisScoreHtml(allRows, f);
   else if (tab === "impact") {

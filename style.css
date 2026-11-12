@@ -2248,3 +2248,7 @@ table.anMonthTbl th:last-child,table.anMonthTbl td:last-child{padding-right:0;}
 .anView .analysisFormCard .btnRow .btn{min-height:48px;}
 .sightRecordsOverview{margin-top:22px;}
 .settingsGroup .badgeSection{margin-top:16px;}
+.anView .analysisFormCard svg{overflow:visible;}
+@media (max-width:340px){
+  .anView .analysisFormCard .btnRow{flex-direction:column;}
+}

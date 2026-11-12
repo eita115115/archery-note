@@ -185,7 +185,10 @@ let ui = {
   sightSel: { setupId: null, dist: 70 },
   histOpen: null,          // currently open history detail
   histFilter: { setupId: "", dist: "", round: "" },
-  analysisFilter: { setupId: "", dist: "", round: "", period: "all" },
+  analysisFilter: { setupId: "", dist: "", round: "", period: "all", cond: "" }, // cond: score-tab condition key "dist|faceD|faceType|arrows"
+  analysisTab: "score",   // analysis sub-tab: "score" | "impact" | "compare" | "form" (#analysisSubTabs)
+  analysisImpactId: null,  // session shown on the impact tab (null = latest session with positions)
+  analysisCmp: { a: null, b: null }, // the two sessions on the compare tab
   zoom: 1,                // target zoom: 1 = whole face, 2 = centre (single "中心を拡大" button)
   editEnd: -1,            // confirmed end opened for correction (-1 = none)
   recPausedId: null,      // id of the active session the user paused (left the recording screen)

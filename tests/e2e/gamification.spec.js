@@ -107,7 +107,7 @@ function mainTab(page, name) {
   return page.locator("#tabs").getByRole("button", { name });
 }
 
-test("gamification.enabled:false hides the notes goal line and the analysis badge list", async ({
+test("gamification.enabled:false hides the notes goal line and the badge list", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -149,6 +149,11 @@ test("gamification.enabled:false hides the notes goal line and the analysis badg
   await expect(page.locator(".goalRing, .streakHero")).toHaveCount(0);
 
   await mainTab(page, "分析").click();
+  await expect(page.getByTestId("badge-section")).toHaveCount(0);
+  /* 設定でも、切のときはバッジの一覧を出さない */
+  await mainTab(page, "記録").click();
+  await page.locator("#btnSettings").click();
+  await expect(page.getByTestId("settings-group-gamification")).toBeVisible();
   await expect(page.getByTestId("badge-section")).toHaveCount(0);
   expect(unexpectedErrors).toEqual([]);
 });
@@ -308,7 +313,7 @@ test("finishing a session states the streak before and after as a plain fact in 
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("all 12 badges render in the analysis tab (locked by default); first_arrow unlocks via startup backfill", async ({
+test("all 12 badges render in settings (locked by default); first_arrow unlocks via startup backfill", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -344,8 +349,13 @@ test("all 12 badges render in the analysis tab (locked by default); first_arrow 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
+  /* v5 段 7: バッジの一覧は分析タブの末尾から、設定の「ゲーミフィケーション」の中へ移した */
   await mainTab(page, "分析").click();
-  const section = page.getByTestId("badge-section");
+  await expect(page.getByTestId("badge-section")).toHaveCount(0);
+  await mainTab(page, "記録").click();
+  await page.locator("#btnSettings").click();
+  const section = page.getByTestId("settings-group-gamification").getByTestId("badge-section");
+  await section.scrollIntoViewIfNeeded();
   await expect(section).toBeVisible();
   await expect(section).toContainText("1/12");
   await expect(page.getByTestId("badge-card")).toHaveCount(12);
@@ -450,10 +460,12 @@ test("importing history with gamification enabled backfills quietly and does not
     // インポート直後: サマリーや新規解除の演出は一切出ない（インポートは openSummary を呼ばない経路）
     await expect(page.locator('[data-testid="summary-gamification"]')).toHaveCount(0);
 
-    // 分析タブ: インポート時の同期バックフィルで「初矢」が静かに解除済みになっている
-    await mainTab(page, "分析").click();
+    // 設定のバッジ一覧: インポート時の同期バックフィルで「初矢」が静かに解除済みになっている
+    await page.locator("#btnSettings").click();
     const firstArrow = page.locator('[data-testid="badge-card"][data-badge="first_arrow"]');
     await expect(firstArrow).not.toHaveClass(/locked/);
+    await page.locator("#setClose").click();
+    await expect(page.locator(".ovl")).toHaveCount(0);
 
     // 続けて新しいセッションを1本だけ記録して終了 -- 8e22fedd 回帰確認:
     // 既に持っている「初矢」バッジがここで再度「新しく解除」として誤発火しないこと

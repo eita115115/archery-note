@@ -28,7 +28,9 @@ async function summary(page, setup = "a", dist = "30") {
   await control.tap();
   const details = control.locator("..");
   await expect(details).toHaveAttribute("open", "");
-  const row = details.locator(".listItem").filter({ has: page.getByText(`${dist}m`, { exact: true }) });
+  const row = details
+    .locator(".listItem")
+    .filter({ has: page.getByText(`${dist}m`, { exact: true }) });
   await row.locator(".big").scrollIntoViewIfNeeded();
   await expect(row.locator(".big")).toBeVisible();
   return row.locator(".big");
@@ -115,7 +117,9 @@ test("summary keeps the selected setup and lists each distance", async ({ page }
   await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
   /* 分析タブには、サイトの記録への入口だけを置く */
   await page.locator('#tabs [data-v="analysis"]').tap();
-  await expect(page.locator("#main summary").filter({ hasText: "サイト値のまとめ" })).toHaveCount(0);
+  await expect(page.locator("#main summary").filter({ hasText: "サイト値のまとめ" })).toHaveCount(
+    0,
+  );
   expect(await snapshot(page)).toEqual(before);
 });
 test("restoring an older same-day mark keeps newer analysis value", async ({ page }) => {

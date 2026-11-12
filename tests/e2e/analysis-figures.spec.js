@@ -66,7 +66,9 @@ test("score: mean, latest and best match the stored totals and the target line s
   await expect(fig(score, "latest").locator(".n")).toHaveText(String(totals[6]));
   await expect(fig(score, "latest").locator(".d")).toHaveText("11/10");
   await expect(fig(score, "best").locator(".n")).toHaveText(String(best));
-  await expect(fig(score, "best").locator(".d")).toHaveText(md(list[totals.lastIndexOf(best)].date));
+  await expect(fig(score, "best").locator(".d")).toHaveText(
+    md(list[totals.lastIndexOf(best)].date),
+  );
   await expect(page.getByTestId("analysis-target")).toHaveText(
     "対象: 70m・122cm的・72射、7回・504射、10/3〜11/10。うち1回は点数だけの記録です。",
   );
@@ -78,7 +80,9 @@ test("score: mean, latest and best match the stored totals and the target line s
     .locator("text")
     .evaluateAll((els) => els.map((el) => parseFloat(globalThis.getComputedStyle(el).fontSize)));
   expect(Math.min(...sizes)).toBeGreaterThanOrEqual(13);
-  expect(await chart.evaluate((el) => el.getBoundingClientRect().width / el.viewBox.baseVal.width)).toBeCloseTo(1, 2);
+  expect(
+    await chart.evaluate((el) => el.getBoundingClientRect().width / el.viewBox.baseVal.width),
+  ).toBeCloseTo(1, 2);
   await expect(page.getByTestId("analysis-sd")).toHaveText(
     `回ごとの標準偏差は ${sd(totals).toFixed(1)} 点です。`,
   );
@@ -99,7 +103,9 @@ test("score: mean, latest and best match the stored totals and the target line s
   const endAvg = Array.from({ length: 12 }, (_, i) => mean(list.map((s) => sum(s.ends[i]))));
   const cells = page.getByTestId("analysis-end-strip").locator("[data-end] b");
   await expect(cells).toHaveText(endAvg.map((v) => v.toFixed(1)));
-  await expect(page.getByTestId("analysis-end-avg")).toContainText("各エンドの合計を 7回で平均した値です");
+  await expect(page.getByTestId("analysis-end-avg")).toContainText(
+    "各エンドの合計を 7回で平均した値です",
+  );
   /* 得点の内訳 */
   const all = list.flatMap((s) => s.ends.flat());
   const dist = page.getByTestId("analysis-score-dist");
@@ -233,10 +239,13 @@ test("impact: RMS with its 95% interval, centre offset and spreads match the all
   /* 図: 72射すべて。矢の円は判定と同じ半径（外径 5.7mm → 白い縁の外側が 0.285cm）。十字と半径 RMS の円 */
   const plot = page.getByTestId("analysis-plot");
   await expect(plot.locator("circle.arrowFoot")).toHaveCount(72);
-  const foot = await plot.locator("circle.arrowFoot").first().evaluate((el) => ({
-    r: +el.getAttribute("r"),
-    sw: +el.getAttribute("stroke-width"),
-  }));
+  const foot = await plot
+    .locator("circle.arrowFoot")
+    .first()
+    .evaluate((el) => ({
+      r: +el.getAttribute("r"),
+      sw: +el.getAttribute("stroke-width"),
+    }));
   expect(foot.r + foot.sw / 2).toBeCloseTo(0.285, 6);
   const ring = plot.locator("#anmarks circle[stroke-dasharray]:not(.arrowLocator)");
   await expect(ring).toHaveCount(1);
@@ -275,7 +284,7 @@ test("impact: the reference metrics B and C appear only inside the collapsed det
   );
   await ref.locator("summary").click();
   await expect(ref.locator('[data-ref="b"] .lv')).toContainText(`${st.b.toFixed(1)} cm`);
-  await expect(ref.locator('[data-ref="b"] .lv')).toContainText(`72射のうち ${st.flagged}射を除く`);
+  await expect(ref.locator('[data-ref="b"] .lv')).toContainText(`72射中 ${st.flagged}射を除く`);
   await expect(ref.locator('[data-ref="c"] .lv')).toContainText(`${st.c.toFixed(1)} cm`);
   await expect(ref.locator('[data-ref="flagged"] .lv')).toHaveText(`${st.flagged}射`);
   await expect(ref).toContainText("正式な値は上の全射の RMS です");
@@ -347,9 +356,9 @@ test("impact: the default is the latest record with positions, and mixed records
   const st = await statsOf(page, "i1");
   expect(st.n).toBe(57);
   /* 位置のある矢が 2射未満のエンドは「—」 */
-  await expect(
-    page.getByTestId("analysis-end-rms-strip").locator('[data-end="0"] b'),
-  ).toHaveText("—");
+  await expect(page.getByTestId("analysis-end-rms-strip").locator('[data-end="0"] b')).toHaveText(
+    "—",
+  );
   /* 外径 9.3mm の弓具は、その半径で描く */
   const foot = await page
     .getByTestId("analysis-plot")
@@ -413,7 +422,11 @@ test("compare: the default pair has the same conditions and the table shows the 
     signed(half(b, 1) - half(a, 1)),
   ]);
   await expect(row("count0").locator("div").first()).toHaveText("10+X");
-  await expect(cols("count0")).toHaveText([String(tens(a)), String(tens(b)), signed(tens(b) - tens(a))]);
+  await expect(cols("count0")).toHaveText([
+    String(tens(a)),
+    String(tens(b)),
+    signed(tens(b) - tens(a)),
+  ]);
   await expect(row("count1").locator("div").first()).toHaveText("X");
   await expect(cols("count1")).toHaveText([String(xs(a)), String(xs(b)), signed(xs(b) - xs(a))]);
   const sa = await statsOf(page, "p4"),
@@ -431,14 +444,15 @@ test("compare: the default pair has the same conditions and the table shows the 
   /* 差の文は数値と、回ごとの標準偏差との大小だけ。原因は書かない */
   const totals = data.sessions.filter((s) => s.dist === 70).map(totalOf);
   const d = totalOf(b) - totalOf(a);
-  const s7 =
-    Math.sqrt(
-      totals.reduce((t, v) => t + (v - totals.reduce((x, y) => x + y, 0) / 7) ** 2, 0) / 6,
-    );
+  const s7 = Math.sqrt(
+    totals.reduce((t, v) => t + (v - totals.reduce((x, y) => x + y, 0) / 7) ** 2, 0) / 6,
+  );
   await expect(page.getByTestId("compare-total-diff")).toHaveText(
     `合計の差（B − A）は ${signed(d)} 点です。同じ距離・的・射数の 7回の、回ごとの標準偏差は ${s7.toFixed(1)} 点で、差は${Math.abs(d) <= s7 ? "その範囲内" : "それより大きい値"}です。`,
   );
-  await expect(page.getByTestId("compare-caution")).toContainText("差は原因を示すものではありません");
+  await expect(page.getByTestId("compare-caution")).toContainText(
+    "差は原因を示すものではありません",
+  );
   await expect(page.getByTestId("compare-caution")).toContainText("原因とは断定できません");
   /* 的の図は2枚。それぞれ 72射 */
   await expect(page.getByTestId("compare-plot-a").locator("circle.arrowFoot")).toHaveCount(72);
@@ -448,8 +462,12 @@ test("compare: the default pair has the same conditions and the table shows the 
   await expect(changes).toContainText("10/28〜11/10");
   await expect(changes).toContainText("弓具の変更: 架空のリカーブ（プランジャー 中 → やや硬め）");
   await expect(changes).toContainText("サイトの記録: 70m 上下 5.20・左右 0");
-  await expect(page.getByTestId("compare-memo-a")).toContainText("架空のメモ。後半に押し手が流れました。");
-  await expect(page.getByTestId("compare-memo-b")).toContainText("3エンド目で引き手の肘が下がりました。");
+  await expect(page.getByTestId("compare-memo-a")).toContainText(
+    "架空のメモ。後半に押し手が流れました。",
+  );
+  await expect(page.getByTestId("compare-memo-b")).toContainText(
+    "3エンド目で引き手の肘が下がりました。",
+  );
   expect((await stored(page)).sessions).toEqual(data.sessions);
   expect(errors).toEqual([]);
 });
