@@ -172,6 +172,9 @@ When `db.active` is non-null, `renderRecord()` calls `renderActive()` instead of
 - Corrections go through `activeEditArr(s)`: the confirmed end opened with `ui.editEnd`, otherwise `s.cur`. `ui.selArrow` indexes that array.
 - "中断" only sets `ui.recPausedId`; the session stays in `db.active` and the record tab shows a resume band (`renderPausedRecord`).
 - No toast for recording feedback: use the status row (`activeNotice(msg)`) and `#arrowAnnounce`.
+- Input method: `sessionInputMode(s)` (`"score"` only when `s.inputMode === "score"`). Score mode renders the keypad (`scoreKeyDefs(faceType)`, `pressScoreKey`) instead of the target; switching keeps every arrow.
+- Arrows without a position (keypad input, "M 位置なし") have no `x` / `y` keys. Test with `arrowHasPos(a)` (20-scoring.js), never with `Number(a.x)` (`Number(null)` is 0). They count in totals, arrow counts and 10/X counts; they are skipped by every plot, grouping statistic, sight calculation and re-score. `tools/check-coordless.js` guards this.
+- A manual score (`applyScoreKey` on a positioned arrow) sets `manual: true` and keeps the automatic score in `auto`; moving the arrow calls `clearManualScore` and re-scores from the position.
 
 ### 3.5 Transient UI State: The `ui` Object
 
