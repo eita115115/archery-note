@@ -156,7 +156,7 @@ const fieldHits = [{s:6},{s:5},{s:4},{s:6}];
 assert(faceApi.perfectScoreLabel(f40) === "6点" && faceApi.perfectScoreCount(fieldHits,f40) === 2, "Field perfect score helpers failed");
 assert(faceApi.secondaryScoreLabel(f40) === "5点以上" && faceApi.secondaryScoreCount(fieldHits,f40) === 3, "Field secondary score helpers failed");
 
-const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,arrowLocatorRadius,arrowRadiusFromDiaMm,sessionArrowR,sessionRescore,DEFAULT_ARROW_R,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,isLineCuttingFromGlobal,hitFromGlobal,zoneStyle,SPOT_Y};")();
+const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,arrowLocatorRadius,arrowRadiusFromDiaMm,sessionArrowR,sessionScoringRadius,sessionRescore,DEFAULT_ARROW_R,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,isLineCuttingFromGlobal,hitFromGlobal,zoneStyle,SPOT_Y};")();
 const fieldD = 80;
 const fw = scoreApi.ringW(fieldD, "field");
 const fieldTouch = scoreApi.lineCutRadius(fieldD, "field");
@@ -216,6 +216,11 @@ assert(scoreApi.lineCutRadius(122, "single") === scoreApi.lineCutRadius(40, "sin
 assert(Math.abs(scoreApi.arrowRadiusFromDiaMm(5.7) - 0.285) < 1e-12 && Math.abs(scoreApi.arrowRadiusFromDiaMm("9.3") - 0.465) < 1e-12, "Arrow diameter mm→radius cm failed");
 assert(scoreApi.arrowRadiusFromDiaMm("") === scoreApi.DEFAULT_ARROW_R && scoreApi.arrowRadiusFromDiaMm(55) === scoreApi.DEFAULT_ARROW_R, "Invalid arrow diameter must fall back to default");
 assert(scoreApi.sessionArrowR({arrowR:0.4},{arrowDia:"5"}) === 0.4, "Stored session arrow radius must win");
+/* 旧判定の記録は、記録・編集・着弾図とも旧半径のまま（保存された点数と矢円を一致させる） */
+assert(scoreApi.sessionScoringRadius({ends:[], arrowR:0.3}, null) === 0.3, "New sessions score with the stored real radius");
+assert(scoreApi.sessionScoringRadius({ends:[], faceD:122, shaft:1.537}, {arrowDia:"5"}) === 1.537, "Legacy sessions keep their stored radius");
+assert(Math.abs(scoreApi.sessionScoringRadius({ends:[], faceD:122, faceType:"single"}, null) - (122/85 + 122/1200)) < 1e-12, "Legacy sessions without shaft use the old formula");
+assert(scoreApi.arrowMarkRadius(122, 1.537) === 1.537, "Legacy circles are drawn at the legacy radius");
 assert(Math.abs(scoreApi.sessionArrowR({},{arrowDia:"5.0"}) - 0.25) < 1e-12, "Setup arrow diameter must be used for legacy sessions");
 assert(scoreApi.scoreAt(6.1+0.28,0,122,"single").s === 10 && scoreApi.scoreAt(6.1+0.29,0,122,"single").s === 9, "122cm 10-ring line-cut boundary must use the real arrow radius");
 assert(scoreApi.scoreAt(7.6,0,122,"single").s === 9, "Arrow 1.5cm outside the 10 ring must not be promoted");
@@ -269,7 +274,7 @@ assert(wr && wr.kind === "weighted-robust" && wr.zero > 6.8 && wr.zero < 7.5 && 
 
 const analysisDb = {sessions:[]};
 const analysisApi = new Function(
-  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance",
+  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance","tCrit975",
   section("function windText", "function roundProgressHtml") + "\nreturn {sessionQuality,personalModel,judgementFor,nextActionPlan};"
 )(
   analysisDb,
@@ -283,7 +288,8 @@ const analysisApi = new Function(
   s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
   statsApi.groupStats,
   statsApi.probWithin,
-  statsApi.fmtChance
+  statsApi.fmtChance,
+  statsApi.tCrit975
 );
 const sessAt = (id,cx,cy) => ({id,date:`2026-06-${id}`,setupId:"main",dist:70,faceD:122,faceType:"single",wx:"晴れ",ends:[[
   {x:cx-0.5,y:cy,s:9},{x:cx+0.3,y:cy+0.2,s:9},{x:cx,y:cy-0.4,s:10},
@@ -296,6 +302,9 @@ analysisDb.sessions.push(sessAt("01",2,1), sessAt("02",2.4,1.2));
 const current = sessAt("03",2.8,1.3);
 const curSt = statsApi.robustStats(current.ends.flat());
 const q = analysisApi.sessionQuality(current,{id:"main"});
+/* 2本では標準誤差そのものが不確かなので判断信頼度は「高」にならない */
+const q2 = analysisApi.sessionQuality({...current, id:"two", ends:[[{x:1,y:1,s:10},{x:1.1,y:1,s:10}]]},{id:"main"});
+assert(q2.label !== "高", `Two arrows must not give high decision quality (${q2.score})`);
 const pm = analysisApi.personalModel(current,{id:"main"},curSt);
 assert(q.score > .45 && ["中","高"].includes(q.label), "Session quality failed");
 assert(pm && pm.sample === 2 && pm.state === "過去と一致", "Personal model failed");
@@ -303,11 +312,13 @@ const judgement = analysisApi.judgementFor({st:curSt,confidence:.7,lines:[{axis:
 assert(judgement && judgement.label === "動かす", "Personal judgement failed");
 assert(analysisApi.nextActionPlan(current,{st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},{id:"main"}).length > 0, "Next action plan failed");
 
+/* 矢径の妥当範囲（20-scoring.js の定数）。物理の矢径チェックが採点と同じ範囲を使うため、物理を切り出す枠に足す */
+const arrowDiaConsts = section("const DEFAULT_ARROW_DIA_MM", "const SCORE_EPS");
 const normGearText = s => String(s || "").normalize("NFKC").toUpperCase().replace(/[・_/]+/g, " ").replace(/\s+/g, " ").trim();
 
 /* サイト調整の判定（統計）: 中心のズレを Hotelling T² で検定し、量は縮小推定 m·(1−SE²/m²) */
 {
-  const decisionApi = new Function("normGearText","ringW", section("function clamp", "function adviceModel") + "\nreturn {sightDecision,robustStats};")(normGearText, scoreApi.ringW);
+  const decisionApi = new Function("normGearText","ringW", arrowDiaConsts + section("function clamp", "function adviceModel") + "\nreturn {sightDecision,robustStats};")(normGearText, scoreApi.ringW);
   const grid = (cx, cy) => [-1, 0, 1].flatMap(i => [-1, 0, 1].map(j => ({x:cx + i*2, y:cy + j*2})));
   const sess = {faceD:122, faceType:"single"};
   let d = decisionApi.sightDecision(sess, decisionApi.robustStats(grid(0.3, -0.2)), null, null);
@@ -315,9 +326,20 @@ const normGearText = s => String(s || "").normalize("NFKC").toUpperCase().replac
   d = decisionApi.sightDecision(sess, decisionApi.robustStats(grid(4, 0)), null, null);
   // 9本・σ=√3: SE=√(3/9)=0.577、縮小率 1−(1/3)/16=0.979 → 補正 3.92cm
   assert(d.significant && d.h.move && !d.v.move && Math.abs(d.h.adj - 4 * (1 - (1/3)/16)) < 1e-9, "Offset group must move horizontally with shrinkage");
+  /* 横風: 風上へのねらい修正の有無が分からないので、推定横流れは差し引かずに左右の誤差として扱う */
   const windTraj = {wind:{speed:4, known:true, side:4, label:"左から"}, windDriftCm:4, windUncertaintyCm:0.5};
   d = decisionApi.sightDecision(Object.assign({windSpeed:"4"}, sess), decisionApi.robustStats(grid(4, 0)), windTraj, null);
-  assert(d.windCorrected && !d.h.move, "Known crosswind drift must be removed before moving the sight");
+  assert(d.windAccounted && !d.h.move, "Crosswind drift must count as left/right uncertainty");
+  const bigWind = {wind:{speed:3, known:true, side:3, label:"左から"}, windDriftCm:24.6, windUncertaintyCm:4.8};
+  d = decisionApi.sightDecision(Object.assign({windSpeed:"3"}, sess), decisionApi.robustStats(grid(0, 0)), bigWind, null);
+  assert(!d.h.move && !d.v.move, "An archer who aimed off into the wind must not be told to move the sight upwind");
+  /* 判定中の回を含む風係数は使わない（自分自身で校正すると左右の提案が消える） */
+  const selfCal = {wind:{factor:0.2, sample:1, items:[{v:0.2, w:1, id:"cur", date:"2026-11-01"}]}};
+  d = decisionApi.sightDecision(Object.assign({id:"cur", date:"2026-11-01", windSpeed:"3"}, sess), decisionApi.robustStats(grid(0, 0)), bigWind, selfCal);
+  assert(d.windFactor === 1, "Wind factor must exclude the session being judged");
+  /* 閉検定: 横だけずれた群れで、合っている上下は動かさない */
+  d = decisionApi.sightDecision(sess, decisionApi.robustStats([...grid(6, 0.3), ...grid(6, -0.3)]), null, null);
+  assert(d.h.move && !d.v.move, "Closed testing must keep a centred axis still");
   /* 中心が合っている6本の群れで「動かせ」と出る割合（旧版は約9割） */
   let seed = 4242;
   const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
@@ -330,7 +352,7 @@ const normGearText = s => String(s || "").normalize("NFKC").toUpperCase().replac
   }
   assert(moved / 2000 < 0.08, `False sight-move rate too high: ${moved / 2000}`);
 }
-const physicsApi = new Function("normGearText", section("function clamp", "function adviceModel") + "\nreturn {physicsProfile,trajectoryModel,windModel,ArcheryPhysicsCore};")(normGearText);
+const physicsApi = new Function("normGearText", arrowDiaConsts + section("function clamp", "function adviceModel") + "\nreturn {physicsProfile,trajectoryModel,windModel,ArcheryPhysicsCore};")(normGearText);
 const phys = physicsApi.physicsProfile({
   poundage:"38", drawLength:"28.5", shaftGpi:"6.8", arrowLength:"29", pointWeight:"110", arrowDia:"5.5",
   vane:"Spin Wing", vaneHeight:"2.0", temperature:"30", altitude:"500", humidity:"70",
@@ -343,6 +365,7 @@ assert(phys.rho > .9 && phys.rho < 1.25, "Air density out of range");
 assert(Math.abs(phys.cd - 2.6 * (5.6 / 5.5) * 1.05 * 1.006) < 1e-9, "Arrow Cd out of range");
 {
   /* 細い矢ほど前面積基準の Cd は大きい（表面摩擦が支配的）。旧版は逆向きだった */
+  assert(physicsApi.physicsProfile({arrowDia:"23"}).diaMm === 5.7 && physicsApi.physicsProfile({arrowDia:"0.2"}).diaMm === 5.7, "Physics must apply the same arrow-diameter range as scoring");
   const thin = physicsApi.physicsProfile({arrowDia:"4.6", arrowLength:"29"});
   const fat = physicsApi.physicsProfile({arrowDia:"9.3", arrowLength:"29"});
   assert(thin.cd > fat.cd, "Thin arrows must have the larger frontal-area Cd");
@@ -373,7 +396,7 @@ assert(physicsApi.ArcheryPhysicsCore && physicsApi.ArcheryPhysicsCore.trajectory
    実測範囲の外（18m・70m・90m）を1mm前後で当てる。旧版の一次/二次近似は 2〜9mm ずれていた */
 {
   const sightDb = {settings:{eyeSight:850}, setups:[{id:"s", poundage:"40", drawLength:"28", arrowWeight:"320", arrowDia:"5.5"}], sightMarks:[], sessions:[]};
-  const sightApi = new Function("normGearText","db", section("function clamp", "function calibrationProfile") + "\nreturn {physicsProfile,solveZeroAngle,sightInterp,sightAngleFeature};")(normGearText, sightDb);
+  const sightApi = new Function("normGearText","db", arrowDiaConsts + section("function clamp", "function calibrationProfile") + "\nreturn {physicsProfile,solveZeroAngle,sightInterp,sightAngleFeature};")(normGearText, sightDb);
   const truth = Object.assign({}, sightApi.physicsProfile(sightDb.setups[0]), {speedMps:58, cd:2.0});
   const mark = (D) => { const th = sightApi.solveZeroAngle(D, truth, null, -0.12, -0.25); return 100 - 850 * Math.tan(th - Math.atan2(-0.25, D)); };
   sightDb.sightMarks = [30, 50].map((d, i) => ({id:"m" + i, setupId:"s", dist:d, v:mark(d).toFixed(2), date:"2026-01-0" + (i + 1)}));
@@ -386,9 +409,14 @@ assert(physicsApi.ArcheryPhysicsCore && physicsApi.ArcheryPhysicsCore.trajectory
   const f = [18, 30, 50, 70].map((d) => sightApi.sightAngleFeature(d, ph));
   assert(f[0] < f[1] && f[1] < f[2] && f[2] < f[3], "Sight angle must grow with distance");
   assert((f[1] - f[0]) / 12 < (f[3] - f[2]) / 20, "Sight angle curvature (drag) missing");
+  /* 4距離では自由度1で初速の当てはめが不安定なので当てはめない（用具からの推定のまま） */
   sightDb.sightMarks = [18, 30, 50, 70].map((d, i) => ({id:"m" + i, setupId:"s", dist:d, v:mark(d).toFixed(2), date:"2026-01-0" + (i + 1)}));
   const it4 = sightApi.sightInterp("s");
-  assert(it4.speedSource === "fitted" && it4.r2 > 0.9999 && Math.abs(it4.est(90) - mark(90)) < 1.5, "Four-mark speed fit failed");
+  assert(it4.speedSource === "estimated" && Math.abs(it4.est(90) - mark(90)) < 1.5, "Four marks must not fit the launch speed");
+  const it5marks = [18, 30, 40, 50, 60, 70];
+  sightDb.sightMarks = it5marks.map((d, i) => ({id:"m" + i, setupId:"s", dist:d, v:mark(d).toFixed(2), date:"2026-01-0" + (i + 1)}));
+  const it6 = sightApi.sightInterp("s");
+  assert(it6.r2 > 0.9999 && Math.abs(it6.est(90) - mark(90)) < 1.5, `Six-mark prediction failed (${it6.speedSource})`);
 }
 const calibDb = {
   setups:[{id:"main",poundage:"38",drawLength:"28.5",shaftGpi:"6.8",arrowLength:"29",pointWeight:"110",arrowDia:"5.5",arrowWeight:"334",vane:"Spin Wing",temperature:"30",altitude:"500",humidity:"70"}],
@@ -412,7 +440,7 @@ calibDb.sessions.push(
 );
 const calibApi = new Function(
   "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc",
-  section("function clamp", "function adviceModel") + section("function regress", "function calibrationProfile") + "\nreturn {personalPhysicsCalibration,physicsCalibrationHtml};"
+  arrowDiaConsts + section("function clamp", "function adviceModel") + section("function regress", "function calibrationProfile") + "\nreturn {personalPhysicsCalibration,physicsCalibrationHtml};"
 )(
   calibDb,
   normGearText,

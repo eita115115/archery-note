@@ -161,10 +161,11 @@ test("arrow marker keeps a thick white outline for outdoor glare readability", a
     r: parseFloat(el.getAttribute("r")),
   }));
   expect(attrs.stroke).toBe("#fff");
-  // markCircle() は実寸の矢円の stroke-width を r/3 で描画（白縁を太くする現行仕様）
-  expect(attrs.strokeWidth / attrs.r).toBeCloseTo(1 / 3, 5);
-  // 表示される矢円の半径 = 線かみ判定の半径（既定矢径 5.7mm → 0.285cm）。的の大きさに依存しない
-  expect(attrs.r).toBeCloseTo(0.285, 6);
+  // 白縁の外縁が矢円の半径: 円は 5r/6 に描き、縁の太さは r/3（白縁を太くする現行仕様）
+  const outer = attrs.r + attrs.strokeWidth / 2;
+  expect(attrs.strokeWidth / outer).toBeCloseTo(1 / 3, 5);
+  // 表示される矢円の外縁 = 線かみ判定の半径（既定矢径 5.7mm → 0.285cm）。的の大きさに依存しない
+  expect(outer).toBeCloseTo(0.285, 6);
   const loc = await locator.evaluate((el) => ({
     stroke: el.getAttribute("stroke"),
     dash: el.getAttribute("stroke-dasharray"),

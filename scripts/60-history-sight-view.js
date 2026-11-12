@@ -534,7 +534,7 @@ function legacyRescoreHtml(sess, setup, total) {
   const entered = Number.isFinite(enteredDia) && enteredDia >= ARROW_DIA_MM_MIN && enteredDia <= ARROW_DIA_MM_MAX;
   const dia = (arrowR * 20).toFixed(1);
   const diff = r.total - total;
-  return `<div class="hint histRescore" data-testid="history-rescore">実寸判定（${entered ? `矢径 ${dia}mm` : `矢径未入力のため ${dia}mm`}）では <b>${r.total}点</b>（記録時 ${total}点・差 ${diff > 0 ? "+" : ""}${diff}点・${r.changed}本）。保存された点数は変えていません。</div>`;
+  return `<div class="hint histRescore" data-testid="history-rescore">実寸判定（${entered ? `矢径 ${dia}mm` : `矢径未入力のため ${dia}mm`}）では <b>${r.total}点</b>（記録時 ${total}点・差 ${diff > 0 ? "+" : ""}${diff}点・${r.changed}本）。保存された点数と着弾図の円は記録時の判定のままです。</div>`;
 }
 function openHistDetail(id) {
   const sess = db.sessions.find((s) => s.id === id);
@@ -695,7 +695,7 @@ function sightPredictionHtml(interp, marks) {
     <div class="sightPredictionMeta">${interp.model === "physics" ? `弾道モデル（初速 ${Math.round(interp.speedFps)}fps・${interp.speedSource === "measured" ? "実測" : interp.speedSource === "fitted" ? "台帳から当てはめ" : "用具から推定"}）` : "直線近似"} ・ 一致度${pct(interp.r2 || 0)} ・ 上下の目盛り</div>
     ${predictions.length ? `<dl class="sightPredictionRows">${predictions.map((d) => `<div data-predict-dist="${d}"><dt>${d}m <span>予測</span></dt><dd>${interp.est(d).toFixed(1)}<small>目盛り</small></dd></div>`).join("")}</dl>` : `<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
     <details class="sightSources"><summary>採用した実測 ${interp.pts.length}件</summary><ul class="sightSourceList">${sources}</ul></details>
-    <details class="sightPredictionHelp"><summary>予測の見方</summary><p>上下が数値で入力された記録から予測します。新しい記録の上下が未入力なら、以前の数値を使います。</p><p>2距離以上で、矢の弾道（重力・空気抵抗・目と矢と的の高低差）から計算した照準角にサイト値を当てはめます。4距離以上では初速も台帳から当てはめます。左右は予測しません。</p></details>
+    <details class="sightPredictionHelp"><summary>予測の見方</summary><p>上下が数値で入力された記録から予測します。新しい記録の上下が未入力なら、以前の数値を使います。</p><p>2距離以上で、矢の弾道（重力・空気抵抗・目と矢と的の高低差）から計算した照準角にサイト値を当てはめます。5距離以上で台帳の当てはまりが大きく良くなる場合は、初速も台帳から当てはめます。左右は予測しません。</p></details>
   </section>`;
 }
 function sightLedgerHtml(marks) {
