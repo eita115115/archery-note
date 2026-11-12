@@ -24,8 +24,21 @@ function sessionArrowR(sess, setup){
   if(sess&&validArrowR(sess.arrowR)) return sess.arrowR;
   return arrowRadiusFromDiaMm(setup&&setup.arrowDia);
 }
-/* 画面上の矢円 = 判定に使う矢の実寸の円（不変条件: 表示される矢円と線かみ判定が一致する） */
-function arrowMarkRadius(faceD, arrowR){ return validArrowR(arrowR)?arrowR:DEFAULT_ARROW_R; }
+/* 記録の判定に使う半径(cm)。新しい記録は保存済みの arrowR（矢の実寸）。arrowR を持たない旧判定の記録
+   （記録途中・編集中を含む）は、保存された点数と矢円が食い違わないよう、そのセッション内では旧半径を保つ:
+   保存された shaft、無ければ旧式（的の直径/85 + 線の半幅）。実寸での比較は sessionRescore で別に出す */
+function sessionScoringRadius(sess, setup){
+  if(sess&&validArrowR(sess.arrowR)) return sess.arrowR;
+  if(sess&&typeof sess==="object"&&Array.isArray(sess.ends)){
+    const shaft=Number(sess.shaft);
+    if(Number.isFinite(shaft)&&shaft>0&&shaft<5) return shaft;
+    const faceD=Number(sess.faceD);
+    if(Number.isFinite(faceD)&&faceD>0) return faceD/85+targetLineHalfWidth(faceD,sess.faceType);
+  }
+  return arrowRadiusFromDiaMm(setup&&setup.arrowDia);
+}
+/* 画面上の矢円 = 判定に使う半径の円（不変条件: 表示される矢円と線かみ判定が一致する） */
+function arrowMarkRadius(faceD, arrowR){ return Number.isFinite(arrowR)&&arrowR>0&&arrowR<5?arrowR:DEFAULT_ARROW_R; }
 /* 実寸の矢は122cm的では画面上1px前後しかないため、位置を探すための半透明の目印を別に描く。
    目印は判定に一切使わない（線に触れていても点数は上がらない）。 */
 function arrowLocatorRadius(faceD){ return faceD/85; }
@@ -215,7 +228,7 @@ function erfApprox(x){
   const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
   return sg*y;
 }
-/* 真の値が推定値の ±tol 以内にある確率（正規近似）。se=∞ は 0、se=0 は 1 */
+/* 真の値が推定値の ±tol 以内にある確率（正規近似。標本の少なさは呼び出し側で se を t/1.96 倍して補う）。se=∞ は 0、se=0 は 1 */
 function probWithin(tol, se){
   if(!(se>=0)) return 0;
   if(se===0) return 1;

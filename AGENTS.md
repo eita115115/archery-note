@@ -53,7 +53,9 @@ add one row here.
   source as the displayed arrow circle.
 - The arrow circle is the real arrow footprint (setup `arrowDia`, default 5.7mm;
   stored per session as `arrowR` in cm). The dashed translucent locator drawn
-  around it is only a visual aid and is never used for scoring. Formulas and
+  around it is only a visual aid and is never used for scoring. Legacy sessions
+  without `arrowR` keep their recorded radius (`sessionScoringRadius`) so stored
+  scores and drawn circles still agree; never rewrite their stored scores. Formulas and
   their sources: `docs/design/math-core-rebuild.md`.
 
 ## Commands

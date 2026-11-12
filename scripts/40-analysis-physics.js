@@ -123,7 +123,8 @@ function physicsProfile(setup){
   const p=num(setup&&setup.poundage);
   const drawIn=num(setup&&setup.drawLength)||28;
   const massGr=estimatedTotalArrowWeight(setup) || (p?clamp(p*8.4,260,520):330);
-  const diaMm=num(setup&&setup.arrowDia)||5.7;
+  const diaIn=num(setup&&setup.arrowDia);
+  const diaMm=diaIn!=null&&diaIn>=ARROW_DIA_MM_MIN&&diaIn<=ARROW_DIA_MM_MAX?diaIn:DEFAULT_ARROW_DIA_MM;
   const speedRaw=num(setup&&setup.arrowSpeed);
   const measuredSpeed=speedRaw!=null;
   const massKg=massGr*0.00006479891;
@@ -207,7 +208,7 @@ function simulateArrow(distM, angle, phys, wind, y0){
 /* 距離 distM で高さ yT に当たる発射角（y0 から発射）。二分法、括れない場合は真空近似 */
 function solveZeroAngle(distM, phys, wind, y0, yT){
   y0=y0||0; yT=yT||0;
-  let lo=-0.05, hi=0.42;
+  let lo=-0.05, hi=0.7;
   let yl=simulateArrow(distM,lo,phys,wind,y0).y-yT, yh=simulateArrow(distM,hi,phys,wind,y0).y-yT;
   if(!(yl<=0 && yh>=0)){
     const v=phys.speedMps, g=9.80665;
@@ -308,14 +309,17 @@ function computePersonalPhysicsCalibration(setupId){
     return {s,st,q,w:clamp(q.score*recency,.05,1)};
   }).filter(Boolean);
   const windRatios=[], windConflicts=[];
+  const trajMemo=new Map(); /* 同じ距離・風の記録は弾道を1回だけ計算する */
   usable.forEach(it=>{
     const wm=windModel(it.s);
     if(!wm.speed || !wm.side) return;
-    const traj=trajectoryModel(it.s,setup,eye);
+    const tk=[it.s.dist,it.s.windSpeed,it.s.windDir,it.s.wx].join("|");
+    if(!trajMemo.has(tk)) trajMemo.set(tk, trajectoryModel(it.s,setup,eye));
+    const traj=trajMemo.get(tk);
     /* 70mでは横風3m/sでも横流れがリング4本分を超えるため、リング幅ではなく観測/予測の比で外れを除く */
     if(Math.abs(traj.windDriftCm)<.6) return;
     const ratio=it.st.mx/traj.windDriftCm;
-    if(ratio>0 && ratio<2.6) windRatios.push({v:ratio,w:it.w});
+    if(ratio>0 && ratio<2.6) windRatios.push({v:ratio,w:it.w,id:it.s.id,date:it.s.date});
     else if(Math.abs(it.st.mx)>ringW(it.s.faceD,it.s.faceType)*.35) windConflicts.push(it);
   });
   const clickV=[], clickH=[];
@@ -345,7 +349,7 @@ function computePersonalPhysicsCalibration(setupId){
   if(v70!=null||h70!=null) notes.push(`目盛り効き ${v70!=null?`上下${v70.toFixed(1)}cm@70m`:""}${v70!=null&&h70!=null?" / ":""}${h70!=null?`左右${h70.toFixed(1)}cm@70m`:""}`);
   if(sightFit) notes.push(`距離別サイト値 ${markPts.length}点 / 一致度${pct(sightFit.r2||0)}`);
   if(!notes.length) notes.push("サイト値つき練習・横風メモ・複数距離の台帳が増えるほど校正されます。");
-  return {score,level,usable:usable.length,wind:{factor:windFactor,sample:windRatios.length,conflicts:windConflicts.length},click:{v70,h70,vSample:clickV.length,hSample:clickH.length},sight:{n:markPts.length,r2:sightFit?sightFit.r2:0},notes};
+  return {score,level,usable:usable.length,wind:{factor:windFactor,sample:windRatios.length,conflicts:windConflicts.length,items:windRatios},click:{v70,h70,vSample:clickV.length,hSample:clickH.length},sight:{n:markPts.length,r2:sightFit?sightFit.r2:0},notes};
 }
 function physicsCalibrationHtml(setupId){
   const c=personalPhysicsCalibration(setupId);
@@ -359,30 +363,33 @@ function physicsCalibrationHtml(setupId){
 }
 /* サイト調整の判定（統計）。旧版の「しきい値=リング幅/8 と RMS の10%」は本数を無視しており、
    中心が合っていても6本で約9割「動かせ」と出ていた。ここでは:
-   1) 中心のズレを Hotelling T² で検定（偶然でこれだけずれる確率 p < 5% のときだけ動かす）
+   1) 中心のズレを Hotelling T² で同時検定し（偶然でこれだけずれる確率 p < 5%）、さらに軸ごとに
+      95%区間がゼロを含まない軸だけを動かす（閉検定。合っている軸を巻き添えで動かさない）
    2) 動かす量は軸ごとの縮小推定 adj = m·(1 − SE²/m²)（誤差の大きいズレほど控えめ）
    3) リング幅の1/10未満の補正は実用上動かさない
-   4) 横風は風向と風速が分かるときだけ推定横流れを差し引き、その不確かさを誤差に加える */
+   4) 横風（風向と風速が分かるとき）は、風上へねらいを修正したかが記録から分からないため推定横流れを
+      差し引かず、横流れの大きさ全体を左右の誤差として加える（風の日は左右を動かしにくくする）。
+      個人の風係数は、判定中の回と同じ日を除いた3回以上の横風の記録があるときだけ使う */
 function sightDecision(sess, st, traj, pcal){
   const w=ringW(sess.faceD,sess.faceType);
   const th=w/10;
-  let offX=st.mx, windCm=0, windUnc=0, windCorrected=false;
+  let windCm=0, windUnc=0, windAccounted=false, windFactor=1;
   const wind=traj&&traj.wind;
   if(wind && wind.speed && wind.known && wind.side){
-    const factor=pcal&&pcal.wind&&pcal.wind.sample?pcal.wind.factor:1;
-    windCm=traj.windDriftCm*factor;
-    windUnc=traj.windUncertaintyCm+(num(sess.windSpeed)==null?Math.abs(windCm)*.5:0);
-    offX=st.mx-windCm;
-    windCorrected=true;
+    const others=((pcal&&pcal.wind&&pcal.wind.items)||[]).filter(r=>r.id!==sess.id && r.date!==sess.date);
+    windFactor=others.length>=3?weightedMedian(others,1):1;
+    windCm=traj.windDriftCm*windFactor;
+    windUnc=Math.hypot(windCm, traj.windUncertaintyCm);
+    windAccounted=true;
   }
-  const test=centerOffsetTest(st, offX, st.my, windUnc*windUnc);
+  const test=centerOffsetTest(st, st.mx, st.my, windUnc*windUnc);
   const seX=Math.sqrt(st.seX*st.seX+windUnc*windUnc);
-  const h=axisCorrection(offX, seX, st.df), v=axisCorrection(st.my, st.seY, st.df);
+  const h=axisCorrection(st.mx, seX, st.df), v=axisCorrection(st.my, st.seY, st.df);
   const significant=!!(test.testable && test.p<.05);
-  h.move=significant && Math.abs(h.adj)>=th;
-  v.move=significant && Math.abs(v.adj)>=th;
+  h.move=significant && Math.abs(h.m)>h.ci && Math.abs(h.adj)>=th;
+  v.move=significant && Math.abs(v.m)>v.ci && Math.abs(v.adj)>=th;
   const precise=Number.isFinite(h.ci)&&Number.isFinite(v.ci)&&h.ci<=w/2&&v.ci<=w/2;
-  return {h, v, test, significant, precise, th, w, windCm, windUnc, windCorrected,
+  return {h, v, test, significant, precise, th, w, windCm, windUnc, windAccounted, windFactor,
     windUnknown:!!(wind && wind.speed && !wind.known)};
 }
 function adviceModel(sess, setup, st){
@@ -393,8 +400,8 @@ function adviceModel(sess, setup, st){
   const gear=gearVariation(setup||{});
   const notes=[];
   notes.push(`中心は${cmOffsetText(st.mx,"x")}（±${decision.h.ci.toFixed(1)}cm）・${cmOffsetText(st.my,"y")}（±${decision.v.ci.toFixed(1)}cm）、95%区間。${st.n}本使用${st.excluded.length?` / 外れ値${st.excluded.length}本除外`:""}。偶然でこれだけずれる確率は ${fmtChance(decision.test.p)}。`);
-  if(decision.windCorrected) notes.push(`風: ${traj.wind.label} ${traj.wind.speed.toFixed(1)}m/s。横流れ推定 ${windDriftText(decision.windCm)}（不確かさ±${decision.windUnc.toFixed(1)}cm）を差し引いて左右を判定しています。`);
-  else if(decision.windUnknown) notes.push("風向が分からないため、風の横流れは差し引いていません。左右の判断は風待ちで再確認すると確実です。");
+  if(decision.windAccounted) notes.push(`風: ${traj.wind.label} ${traj.wind.speed.toFixed(1)}m/sで横流れ推定 ${windDriftText(decision.windCm)}${decision.windFactor!==1?`（個人係数${decision.windFactor.toFixed(2)}倍）`:""}。風上へのねらい修正の有無が分からないため、この大きさを左右の誤差として扱っています。`);
+  else if(decision.windUnknown) notes.push("風向が分からないため、風の横流れは見込んでいません。左右の判断は風待ちで再確認すると確実です。");
   notes.push(`物理エンジン: ${traj.engine}（3D空気抵抗/RK4）。初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、矢重量 ${traj.phys.massGr.toFixed(0)}gr、Cd ${traj.phys.cd.toFixed(2)}、空気密度 ${traj.phys.rho.toFixed(2)}kg/m³、飛翔 ${traj.tof.toFixed(2)}秒。mm換算はアイ〜サイト ${eye}mm と弾道の感度から計算。`);
   if(pcal && pcal.score>.2) notes.push(`個人校正: ${pcal.level}（${pct(pcal.score)}）。${pcal.notes.slice(0,2).join(" / ")}`);
   if(setup&&setup.id){
@@ -434,7 +441,7 @@ function adviceFor(sess, setup){
     const mm=adj*(axis==="v"?model.traj.mmPerCmV:model.traj.mmPerCmH);
     const dir=axis==="v"?(a.m>0?"上":"下"):(a.m>0?"右":"左");
     const off=axis==="v"?cmOffsetText(a.m,"y"):cmOffsetText(a.m,"x");
-    const subject=axis==="h"&&d.windCorrected?"風の横流れを除いた中心は":"中心は";
+    const subject="中心は";
     let l=`サイトを<b>${dir}</b>へ（${subject}${off} ±${a.ci.toFixed(1)}cm${a.shrink<.95?`、誤差を見込みズレの${pct(a.shrink)}で計算`:""}） — 目安 ${mm.toFixed(1)}mm`;
     const ck=sightClickText(adj, dist, setup, model.pcal, axis);
     if(ck) l+=` ≒ ${ck.clicks.toFixed(1)}${ck.label}`;
@@ -446,7 +453,7 @@ function adviceFor(sess, setup){
   if(d.h.move) out.lines.push(axisLine("h"));
   if(!out.lines.length){
     out.lines.push({axis:"-", html:d.precise
-      ? "グルーピング中心は誤差の範囲内でセンターです。<b>サイト調整は不要</b>です。"
+      ? (d.significant?"中心のズレは小さく（リング幅の1/10未満）、<b>サイト調整は不要</b>です。":"グルーピング中心は誤差の範囲内でセンターです。<b>サイト調整は不要</b>です。")
       : `ズレはまだ誤差の範囲です（95%区間 左右±${d.h.ci.toFixed(1)}cm・上下±${d.v.ci.toFixed(1)}cm）。<b>サイトは触らず</b>本数を重ねて確認します。`});
   }
   return out;
@@ -458,6 +465,8 @@ function primarySightSuggestion(sess, setup, adv){
   const d=adv.decision;
   const moves=adv.lines.filter(l=>l.axis!=="-").map(l=>l.axis);
   if(!moves.length || !d) return {axis:"-", none:true, reason:d&&!d.precise?"uncertain":"centered"};
+  const j=judgementFor(adv, sess);
+  if(j && (j.label==="保留" || j.label==="風を考慮")) return {axis:"-", none:true, reason:"uncertain"};
   const axis=moves.length>1?(Math.abs(d.v.adj)>=Math.abs(d.h.adj)?"v":"h"):moves[0];
   const a=d[axis], adj=Math.abs(a.adj);
   const mm=adj*(axis==="v"?adv.traj.mmPerCmV:adv.traj.mmPerCmH);
@@ -510,12 +519,13 @@ function judgementFor(adv,sess){
   const moves=adv.lines.filter(l=>l.axis!=="-");
   const ciText=d?`95%区間 左右±${d.h.ci.toFixed(1)}cm・上下±${d.v.ci.toFixed(1)}cm`:"";
   if(!moves.length){
-    if(!d || d.precise) return {label:"維持",tone:"ok",text:`中心のズレは誤差の範囲内です${ciText?`（${ciText}）`:""}。サイトは触らず、この基準で本数を重ねられます。`};
+    if(d && d.windAccounted && !d.precise && Math.abs(d.windCm)>w*.25) return {label:"風を考慮",tone:"hold",text:`横風で約${Math.abs(d.windCm).toFixed(0)}cm流れる条件です。風上へのねらい修正の有無が記録から分からないため、左右のサイトは動かさず、風待ちか無風の日に確認します。`};
+    if(!d || d.precise) return {label:"維持",tone:"ok",text:d&&d.significant?`中心のズレは小さく（リング幅の1/10未満、${ciText}）、サイトは触らずに本数を重ねられます。`:`中心のズレは誤差の範囲内です${ciText?`（${ciText}）`:""}。サイトは触らず、この基準で本数を重ねられます。`};
     return {label:"保留",tone:"hold",text:`中心をまだ絞り込めていません（${ciText}）。同じ狙いで1〜2エンド追加してから判断します。`};
   }
   if(adv.personal && adv.personal.state==="今回だけの可能性" && (adv.personal.stability||0)>.45) return {label:"保留",tone:"hold",text:"同じサイト設定の過去の傾向と今回の中心が逆方向です。まず追加エンドで再現性を確認します。"};
   if(st.rr>w*2.8) return {label:"射形優先",tone:"warn",text:"中心のズレは読めますが散りが大きめです。サイトは提案量だけにとどめ、リリース・押し手・照準の再現性を先に見ます。"};
-  if(isWindy(sess) && d && !d.windCorrected && moves.some(l=>l.axis==="h") && !moves.some(l=>l.axis==="v")) return {label:"風を考慮",tone:"hold",text:"左右のズレに風の影響が混ざっている可能性があります。風向・風速を記録するか、無風・風待ちで再確認すると精度が上がります。"};
+  if(isWindy(sess) && d && !d.windAccounted && moves.some(l=>l.axis==="h") && !moves.some(l=>l.axis==="v")) return {label:"風を考慮",tone:"hold",text:"左右のズレに風の影響が混ざっている可能性があります。風向・風速を記録するか、無風・風待ちで再確認すると精度が上がります。"};
   if(adv.personal && adv.personal.state==="過去と一致") return {label:"動かす",tone:"ok",text:"今回の中心と、同じサイト設定の過去の傾向が一致しています。提案量を目安に動かす根拠があります。"};
   const shrinks=d?moves.map(l=>d[l.axis].shrink):[1];
   if(Math.min(...shrinks)>=.85) return {label:"動かす",tone:"ok",text:`中心のズレが誤差を超えています（偶然でこれだけずれる確率 ${fmtChance(d?d.test.p:NaN)}）。提案量を目安に動かせます。`};
@@ -604,7 +614,7 @@ function sessionMetrics(sess){
   SESSION_METRIC_CACHE.set(sess,{signature:sig,metrics});
   return metrics;
 }
-/* 判断信頼度: グルーピング中心の推定値が真の中心からリング幅の半分以内にある確率（左右×上下、正規近似）。
+/* 判断信頼度: グルーピング中心の推定値が真の中心からリング幅の半分以内にある確率（左右×上下）。
    旧版は信頼度・本数・広さの重み付き和に経験的な掛け目を重ねたもので、統計的な意味がなかった。
    理由（風・外れ値・広さ・本数）は説明として並べるだけで、数値に掛け目はかけない */
 function sessionQuality(sess, setup, st){
@@ -613,7 +623,10 @@ function sessionQuality(sess, setup, st){
   if(!st || !(st.n>=2)) return {score:.05,label:"低",tone:"warn",reasons:["矢数が不足"],metrics:m};
   const w=ringW(sess.faceD,sess.faceType);
   const tol=w/2;
-  const score=clamp(probWithin(tol, st.seX)*probWithin(tol, st.seY),0,1);
+  /* 標本が少ないと標準誤差そのものが不確かなので t/1.96 倍で補い、全矢同一点などで広がりが0にならないよう
+     ばらつきの下限をリング幅の1/10とする（2本で100%「高」などを防ぐ） */
+  const k=tCrit975(st.df)/1.96, floorSe=(w/10)/Math.sqrt(st.n);
+  const score=clamp(probWithin(tol, Math.max(st.seX,floorSe)*k)*probWithin(tol, Math.max(st.seY,floorSe)*k),0,1);
   const outRate=st.total?st.excluded.length/st.total:0;
   const reasons=[];
   if(st.n<6) reasons.push("本数少なめ");
@@ -630,9 +643,22 @@ function dirAlign(ax,ay,bx,by){
   if(am<.01||bm<.01) return 0;
   return clamp((ax*bx+ay*by)/(am*bm),-1,1);
 }
+/* 回ごとの中心を、回の中の誤差（標準誤差）と日ごとのばらつき τ² の両方で重み付けして平均する
+   （DerSimonian–Laird のランダム効果モデル）。回の中の誤差だけで重み付けすると、日ごとに中心が揺れる
+   アーチャーで過去の傾向を「有意」と誤判定する */
+function pooledRandomEffects(vals, ses){
+  const w=ses.map(s=>1/Math.max(1e-4,s*s));
+  const sw=w.reduce((a,b)=>a+b,0);
+  const fixed=vals.reduce((a,v,i)=>a+v*w[i],0)/sw;
+  const q=vals.reduce((a,v,i)=>a+w[i]*(v-fixed)**2,0);
+  const c=sw-w.reduce((a,b)=>a+b*b,0)/sw;
+  const tau2=c>0?Math.max(0,(q-(vals.length-1))/c):0;
+  const ws=ses.map(s=>1/(Math.max(1e-4,s*s)+tau2));
+  const sws=ws.reduce((a,b)=>a+b,0);
+  return {mean:vals.reduce((a,v,i)=>a+v*ws[i],0)/sws, se:Math.sqrt(1/sws), tau2};
+}
 /* 同じサイト設定どうしの比較。サイトを動かした前後の着弾中心は比べられないため、
-   上下・左右のサイト値の記録が今回と同じ（どちらも未記録を含む）過去の同条件セッションだけを使う。
-   過去の中心は各回の標準誤差で重み付け（逆分散加重）して平均する */
+   上下・左右のサイト値の記録が今回と同じ（どちらも未記録を含む）過去の同条件セッションだけを使う */
 function sightKey(v){ return String(v==null?"":v).normalize("NFKC").replace(/\s+/g,"").trim(); }
 function personalModel(sess,setup,currentSt){
   if(!sess || !currentSt) return null;
@@ -646,15 +672,11 @@ function personalModel(sess,setup,currentSt){
   }).filter(Boolean);
   const sightNote=sv||sh?"同じサイト値":"サイト値未記録どうし";
   if(items.length<2) return {sample:items.length,state:"データ蓄積中",text:`${sightNote}の同条件データがまだ少ないため、今回の記録を個人モデルの材料として蓄積します。`};
-  const floor=.05;
-  let wx=0,wy=0,mx=0,my=0,rr=0,avg=0,sw=0;
-  items.forEach(it=>{
-    const ix=1/Math.max(floor,it.st.seX*it.st.seX), iy=1/Math.max(floor,it.st.seY*it.st.seY);
-    wx+=ix; wy+=iy; mx+=it.st.mx*ix; my+=it.st.my*iy;
-    sw+=1; rr+=it.st.rr; avg+=sessionMetrics(it.sess).avg;
-  });
-  mx/=wx; my/=wy; rr/=sw; avg/=sw;
-  const seMx=Math.sqrt(1/wx), seMy=Math.sqrt(1/wy);
+  const px=pooledRandomEffects(items.map(it=>it.st.mx), items.map(it=>it.st.seX));
+  const py=pooledRandomEffects(items.map(it=>it.st.my), items.map(it=>it.st.seY));
+  const mx=px.mean, my=py.mean, seMx=px.se, seMy=py.se;
+  const rr=items.reduce((a,it)=>a+it.st.rr,0)/items.length;
+  const avg=items.reduce((a,it)=>a+sessionMetrics(it.sess).avg,0)/items.length;
   const centers=items.map(it=>({x:it.st.mx,y:it.st.my}));
   const spread=groupStats(centers);
   const ring=ringW(sess.faceD,sess.faceType);
@@ -953,8 +975,9 @@ function sightInterp(setupId){
   if(!fit){
     fit=sightFitAtSpeed(pts, phys, phys.speedMps);
     let fitted=false;
-    if(fit && pts.length>=4){
-      /* 初速の当てはめ（黄金分割探索、35〜95 m/s）。実測初速の入力があっても台帳の方を優先しない（実測のまま） */
+    if(fit && pts.length>=5){
+      /* 初速の当てはめ（黄金分割探索、35〜95 m/s）。4点では自由度1で不安定なので5距離以上に限り、
+         残差が半分以下になるときだけ採る。実測初速の入力があれば当てはめない（実測のまま） */
       if(!phys.measuredSpeed){
         let lo=35, hi=95;
         const gr=(Math.sqrt(5)-1)/2;
@@ -967,7 +990,7 @@ function sightInterp(setupId){
         /* 探索範囲の端に張り付いた当てはめは台帳の矛盾（記録違い・別の用具）を示すので採らない */
         const vBest=(lo+hi)/2;
         const best=vBest>35.5&&vBest<94.5?sightFitAtSpeed(pts, phys, vBest):null;
-        if(best && best.sse<=fit.sse){ fit=best; fitted=true; }
+        if(best && best.sse<=fit.sse*.5){ fit=best; fitted=true; }
       }
     }
     if(fit) fit.fitted=fitted;

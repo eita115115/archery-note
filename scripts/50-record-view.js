@@ -1575,9 +1575,10 @@ function revealActiveCorrection() {
   else if (rect.bottom > bottom) delta = rect.bottom - bottom;
   if (delta) window.scrollBy({ top: delta, behavior: "instant" });
 }
-/* 記録中セッションの判定用矢半径(cm)。記録開始時の arrowR → 用具の矢径 → 既定値（20-scoring.js sessionArrowR） */
+/* 記録中セッションの判定用半径(cm)。記録開始時の arrowR。旧判定で始まった記録・旧記録の編集は旧半径のまま
+   （20-scoring.js sessionScoringRadius）。保存された点数と矢円と新しい矢の判定をセッション内で揃える */
 function activeArrowR(s) {
-  return sessionArrowR(s, s && db.setups.find((x) => x.id === s.setupId));
+  return sessionScoringRadius(s, s && db.setups.find((x) => x.id === s.setupId));
 }
 function refreshActive() {
   const s = db.active;
@@ -1707,10 +1708,11 @@ function nudgeArrow(dirKey) {
   }
   const a = s.cur[ui.selArrow],
     step = s.faceD / 200;
-  if (dirKey === "u") a.y += step;
-  if (dirKey === "d") a.y -= step;
-  if (dirKey === "l") a.x -= step;
-  if (dirKey === "r") a.x += step;
+  /* 配置と同じく 0.01cm に丸めた座標を保存して採点する */
+  if (dirKey === "u") a.y = +(a.y + step).toFixed(2);
+  if (dirKey === "d") a.y = +(a.y - step).toFixed(2);
+  if (dirKey === "l") a.x = +(a.x - step).toFixed(2);
+  if (dirKey === "r") a.x = +(a.x + step).toFixed(2);
   Object.assign(a, scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s)));
   nativePulse("light");
   scheduleSave("nudge");
@@ -1762,7 +1764,9 @@ function attachTargetInput(s) {
     const w = ringW(s.faceD, s.faceType);
     const fine = !!(drag && drag.fine);
     const arrowR = activeArrowR(s);
-    const cutting = fine && isLineCuttingFromGlobal(p.x, p.y, s.faceD, s.faceType, arrowR);
+    /* 確定時と同じく 0.01cm に丸めた位置で線かみを判定する */
+    const cutting = fine && isLineCuttingFromGlobal(+p.x.toFixed(2), +p.y.toFixed(2), s.faceD, s.faceType, arrowR);
+    const cursorStroke = Math.min(s.faceD / 400, arrowR / 2.5);
     const c = fine ? (cutting ? "var(--status-ok)" : "var(--status-warn)") : "#111";
     lens.classList.toggle("cut", cutting);
     lens.classList.toggle("miss", fine && !cutting);
@@ -1772,7 +1776,7 @@ function attachTargetInput(s) {
     cur.innerHTML = `<g>
       <line x1="${p.x - w}" y1="${-p.y}" x2="${p.x + w}" y2="${-p.y}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
       <line x1="${p.x}" y1="${-p.y - w}" x2="${p.x}" y2="${-p.y + w}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
-      <circle cx="${p.x}" cy="${-p.y}" r="${arrowMarkRadius(s.faceD, arrowR)}" fill="none" stroke="${c}" stroke-width="${Math.min(s.faceD / 400, arrowR / 2.5)}"/>
+      <circle cx="${p.x}" cy="${-p.y}" r="${arrowMarkRadius(s.faceD, arrowR) - cursorStroke / 2}" fill="none" stroke="${c}" stroke-width="${cursorStroke}"/>
     </g>`;
     /* 微調整モードでは実寸の矢円が見える倍率まで寄せる（線かみの目視確認用） */
     const z = fine ? clamp(arrowR * 12, w * 0.6, w * 2.2) : w * 2.2;
@@ -1987,7 +1991,8 @@ async function advanceRoundStage() {
     faceD: next.faceD,
     faceType: nextFaceType,
     perEnd: next.perEnd || 6,
-    arrowR: +activeArrowR(s).toFixed(4),
+    /* 次のステージは新しい記録なので、矢の実寸で判定する */
+    arrowR: +sessionArrowR(null, db.setups.find((x) => x.id === s.setupId)).toFixed(4),
     sightV: mk && mk.v != null ? String(mk.v).trim() : "",
     sightH: mk && mk.h != null ? String(mk.h).trim() : "",
     wx: s.wx,

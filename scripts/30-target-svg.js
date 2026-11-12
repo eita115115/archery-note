@@ -65,7 +65,8 @@ function markCircle(a, faceD, color, label, cls, arrowR){
   const klass=cls?` class="${cls}"`:"";
   return `<g${klass}>`+
     (loc>r*1.05?`<circle class="arrowLocator" cx="${a.x}" cy="${-a.y}" r="${loc}" fill="${color}" fill-opacity=".42" stroke="#fff" stroke-width="${loc/6}" stroke-dasharray="${loc*.45} ${loc*.3}"/>`:"")+
-    `<circle class="arrowFoot" cx="${a.x}" cy="${-a.y}" r="${r}" fill="${color}" stroke="#fff" stroke-width="${r/3}"/>`+
+    /* 白縁(太さ r/3)の外縁がちょうど判定半径 r になるよう、円は内側 5r/6 に描く */
+    `<circle class="arrowFoot" cx="${a.x}" cy="${-a.y}" r="${r*5/6}" fill="${color}" stroke="#fff" stroke-width="${r/3}"/>`+
     /* 番号は実寸の矢円に重ならないよう目印の上寄りに置く（目印が実寸と同じ大きさなら中央） */
     (label?`<text x="${a.x}" y="${-a.y-(loc>r*1.05?loc*.4:0)}" font-size="${loc*(loc>r*1.05?1:1.2)}" fill="#fff" stroke="rgba(0,0,0,.55)" stroke-width="${loc*.12}" paint-order="stroke" text-anchor="middle" dominant-baseline="central" font-weight="bold">${esc(label)}</text>`:"")+`</g>`;
 }
@@ -77,7 +78,8 @@ function plotSession(sess, container){
     (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"");
   const marks=$("#plmarks");
   let html="";
-  const arrowR=sessionArrowR(sess, db.setups.find(x=>x.id===sess.setupId));
+  /* 記録時の判定の半径で描く（旧判定の記録は旧半径。保存された点数と矢円を一致させる） */
+  const arrowR=sessionScoringRadius(sess, db.setups.find(x=>x.id===sess.setupId));
   sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
   const st=sessionMetrics(sess).st;
   if(st){
