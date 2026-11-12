@@ -14,7 +14,7 @@ for (const theme of ["light", "dark"]) {
       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
     });
     await page.reload();
-    await page.locator("#tabs").getByRole("button", { name: "履歴", exact: true }).click();
+    await page.locator("#tabs").getByRole("button", { name: "ノート", exact: true }).click();
     const filters = page.getByTestId("history-filters");
     await expect(filters).not.toHaveAttribute("open", "");
     await expect(page.locator("#histList .listItem")).toHaveCount(3);

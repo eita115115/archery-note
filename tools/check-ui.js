@@ -112,9 +112,10 @@ function staticUiChecks() {
   );
   assert(
     appScripts.every((file) =>
-      new RegExp(`<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`).test(html),
-    ) &&
-      !/<script>([\s\S]*?)<\/script>/.test(html),
+      new RegExp(
+        `<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`,
+      ).test(html),
+    ) && !/<script>([\s\S]*?)<\/script>/.test(html),
     "External app scripts missing",
   );
   assert(
@@ -129,17 +130,44 @@ function staticUiChecks() {
   const tabMatches = [...html.matchAll(/<button data-v="([^"]+)"[^>]*>[\s\S]*?<\/button>/g)].map(
     (m) => m[1],
   );
+  // v5: 下端に付く平らな4タブ（記録 / ノート / 分析 / 弓具）。サイトは弓具の中の下線タブ
   assert(
-    tabMatches.join(",") === "record,history,analysis,sight,gear",
+    tabMatches.join(",") === "record,history,analysis,gear",
     `Unexpected tabs: ${tabMatches.join(",")}`,
   );
+  const tabLabels = [
+    ...html.matchAll(
+      /<button data-v="[^"]+" aria-label="([^"]+)"[^>]*>[\s\S]*?<\/span>([^<]+)<\/button>/g,
+    ),
+  ].map((m) => `${m[1]}=${m[2]}`);
   assert(
-    surface.includes("記録") &&
-      surface.includes("履歴") &&
-      surface.includes("分析") &&
-      surface.includes("サイト調整") &&
-      surface.includes("用具"),
-    "Tab labels missing",
+    tabLabels.join(",") === "記録=記録,ノート=ノート,分析=分析,弓具=弓具",
+    `Unexpected tab labels: ${tabLabels.join(",")}`,
+  );
+  assert(
+    !/<header\b/.test(html) && !html.includes("appIdentity") && !html.includes("appLogo"),
+    "v5 has no app-name header band",
+  );
+  assert(
+    /<div class="viewTop" id="viewTop">[\s\S]*<h1 id="viewTitle">[\s\S]*id="btnSettings"[\s\S]*<\/div>\s*<!--[\s\S]*?-->\s*<nav class="utabs" id="gearSubTabs"/.test(
+      html,
+    ),
+    "screen title row (title + settings entry) must sit above the gear sub-tabs",
+  );
+  const subTabs = [
+    ...html.matchAll(
+      /<button type="button" data-sub="([^"]+)" data-testid="([^"]+)">([^<]+)<\/button>/g,
+    ),
+  ].map((m) => `${m[1]}:${m[2]}:${m[3]}`);
+  assert(
+    subTabs.join(",") === "gear:gear-subtab-setup:セッティング,sight:gear-subtab-sight:サイト",
+    `Sight must be an underline sub-tab inside 弓具: ${subTabs.join(",")}`,
+  );
+  assert(
+    appJs.includes('sight: "弓具"') &&
+      appJs.includes('view === "sight" ? "gear" : view') &&
+      appJs.includes('settings.hidden = view !== "record"'),
+    "sight view must stay reachable under the 弓具 tab and settings only on the record tab",
   );
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
@@ -193,7 +221,7 @@ function staticUiChecks() {
       surface.includes("prefers-reduced-motion") &&
       surface.includes("ic-record") &&
       surface.includes("ic-analysis") &&
-      surface.includes("ic-sight"),
+      html.includes("ic-gear"),
     "minimal recording feedback, tab icons, and reduced-motion guard missing",
   );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
@@ -209,11 +237,18 @@ function staticUiChecks() {
       !/class="icoInline"[^>]*stroke-linecap="round"/.test(appJs),
     "icon() set must use the 24px grid with butt caps",
   );
+  // v5: 選択中のタブは上辺の線で示す（動く下線・浮いた角丸ピル・ガラスは使わない）
+  const v5Css = css.slice(css.indexOf("UI v5 foundation"));
   assert(
-    surface.includes("--active-tab") &&
-      surface.includes("nav.tabs::before") &&
-      surface.includes('setProperty("--active-tab"'),
-    "smooth state-following tab motion missing",
+    css.includes("UI v5 foundation") &&
+      /nav\.tabs\{[^}]*bottom:0;[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\);[^}]*border-radius:0;[^}]*backdrop-filter:none;/.test(
+        v5Css,
+      ) &&
+      /nav\.tabs button\.on,nav\.tabs button\[aria-current=page\]\{[^}]*border-top-color:var\(--accent\);/.test(
+        v5Css,
+      ) &&
+      !appJs.includes('setProperty("--active-tab"'),
+    "flat bottom-edge tab bar (selected = top rule) missing",
   );
   assert(
     !surface.includes("targetImpact") &&
@@ -328,7 +363,9 @@ function staticUiChecks() {
   );
   assert(
     surface.includes("演算信頼度は 1−1/√(使用本数)") &&
-      surface.includes("判断信頼度は、グルーピング中心が真の中心からリング幅の半分以内に入っている確率"),
+      surface.includes(
+        "判断信頼度は、グルーピング中心が真の中心からリング幅の半分以内に入っている確率",
+      ),
     "confidence derivation notes missing",
   );
   assert(
@@ -474,7 +511,10 @@ function staticUiChecks() {
     "export acquires workflow lock before awaiting confirmation",
   );
   for (const source of [startHandler, exportHandler]) {
-    assert(source.includes("db.settings.formDebug!==true"), "post-confirm exact debug recheck exists");
+    assert(
+      source.includes("db.settings.formDebug!==true"),
+      "post-confirm exact debug recheck exists",
+    );
     assert(
       source.includes("activeWorkflowCount!==1") && source.includes("db.active"),
       "post-confirm workflow ownership recheck exists",
@@ -755,6 +795,10 @@ async function screenshot(browser, view) {
           overflow,
           gear: gear && { left: gear.left, right: gear.right, width: gear.width },
           tabs: tabs.map(t => ({ left: t.left, right: t.right, width: t.width })),
+          navBottom: document.querySelector("nav.tabs").getBoundingClientRect().bottom,
+          vh: window.innerHeight,
+          header: document.querySelectorAll("header.app").length,
+          title: document.querySelector("#viewTitle")?.textContent,
         };
       })()`,
       returnByValue: true,
@@ -762,13 +806,24 @@ async function screenshot(browser, view) {
     const value = metrics.result.value;
     assert(value.overflow <= 1, `${view.name} has horizontal overflow: ${JSON.stringify(value)}`);
     assert(
-      value.gear && value.gear.left >= 0 && value.gear.right <= value.vw + 1,
+      value.gear &&
+        value.gear.width >= 44 &&
+        value.gear.left >= 0 &&
+        value.gear.right <= value.vw + 1,
       `${view.name} settings button is clipped: ${JSON.stringify(value.gear)}`,
     );
     assert(
-      value.tabs.length === 5 &&
+      value.tabs.length === 4 &&
         value.tabs.every((t) => t.left >= -1 && t.right <= value.vw + 1 && t.width > 44),
       `${view.name} tab bar is clipped: ${JSON.stringify(value.tabs)}`,
+    );
+    assert(
+      Math.abs(value.navBottom - value.vh) <= 1,
+      `${view.name} tab bar must sit on the bottom edge: ${value.navBottom} / ${value.vh}`,
+    );
+    assert(
+      value.header === 0 && value.title === "記録",
+      `${view.name} must show the screen title row without a header band: ${JSON.stringify(value)}`,
     );
     const capture = await client.send("Page.captureScreenshot", {
       format: "png",

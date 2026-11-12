@@ -45,7 +45,7 @@ async function expectWithinAppChrome(control) {
     .poll(() =>
       control.evaluate((element) => {
         const rect = element.getBoundingClientRect();
-        const header = globalThis.document.querySelector("header.app").getBoundingClientRect();
+        const header = { bottom: 0 }; // v5: 上に固定の帯は無い（画面の上端が基準）
         const tabs = globalThis.document.querySelector("#tabs").getBoundingClientRect();
         return rect.top >= Math.max(0, header.bottom) + 4 && rect.bottom <= tabs.top - 4;
       }),
@@ -201,13 +201,15 @@ for (const [width, height, colorScheme] of [
     await expect(sevenDays).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator(".insightStrip .insightTile").first()).toContainText("1回 6本");
     // Changing a filter externally should not pull focus from another live control.
-    await page.locator("#btnSettings").focus();
+    // v5: 設定の入口は記録タブだけなので、分析の画面で常に出ている下部タブを「別の操作部品」として使う
+    const otherControl = page.locator('#tabs [data-v="analysis"]');
+    await otherControl.focus();
     await page.evaluate(() => {
       const select = globalThis.document.querySelector("#anDist");
       select.value = "70";
       select.dispatchEvent(new Event("change", { bubbles: true }));
     });
-    await expect(page.locator("#btnSettings")).toBeFocused();
+    await expect(otherControl).toBeFocused();
     expect(await practiceData(page)).toEqual(before);
     expect(
       await page.evaluate(

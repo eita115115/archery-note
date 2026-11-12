@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; media-src 'self' blob:; worker-src 'self' blob:">
 <meta name="description" content="Archery Noteは、アーチェリーの得点・着弾・用具をまとめて残し、練習後にサイトを動かすか・保留するかの判断材料を見られる練習ノートです。">
-<meta name="theme-color" content="#f1f3f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#10141a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f4f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e1217" media="(prefers-color-scheme: dark)">
 <meta property="og:title" content="Archery Note — 得点記録 &amp; サイト調整">
 <meta property="og:description" content="アーチェリーの得点・着弾・用具をまとめて残し、練習後にサイトを動かすか・保留するかの判断材料を見られる練習ノートです。">
 <meta property="og:type" content="website">
@@ -19,11 +19,16 @@
 <link rel="stylesheet" href="style.min.css">
 </head>
 <body>
-<header class="app">
-  <div class="appLogo" aria-hidden="true"><img src="icon.svg" alt=""></div>
-  <div class="appIdentity"><h1>Archery Note</h1></div>
-  <button class="gear" id="btnSettings" aria-label="設定"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.7v2.6M12 18.7v2.6M21.3 12h-2.6M5.3 12H2.7M17.7 6.3l-1.85 1.85M8.15 15.85 6.3 17.7M17.7 17.7l-1.85-1.85M8.15 8.15 6.3 6.3"/></svg></button>
-</header>
+<!-- 画面名の行（v5: ヘッダー帯は廃止）。画面名・日付・設定の表示は render() が切り替える。設定は記録タブだけに出す -->
+<div class="viewTop" id="viewTop">
+  <div><div class="viewDate" id="viewDate"></div><h1 id="viewTitle">記録</h1></div>
+  <button type="button" class="txtBtn" id="btnSettings">設定</button>
+</div>
+<!-- 弓具タブの中の切り替え（セッティング / サイト）。弓具とサイトの画面でだけ出す -->
+<nav class="utabs" id="gearSubTabs" aria-label="弓具の切り替え" hidden>
+  <button type="button" data-sub="gear" data-testid="gear-subtab-setup">セッティング</button>
+  <button type="button" data-sub="sight" data-testid="gear-subtab-sight">サイト</button>
+</nav>
 <main id="main">
   <section class="bootFallback" id="bootFallback" aria-live="polite">
     <div class="bootIcon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="butt"><circle cx="12" cy="12" r="7.25"/><path d="M12 2.4v3.1M12 18.5v3.1M2.4 12h3.1M18.5 12h3.1"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></div>
@@ -34,12 +39,12 @@
 </main>
 <nav class="tabs" id="tabs" aria-label="主な画面">
   <!-- aria-current="page" は初期ビュー=record と同期。既定ビューを変えるときは render() 側と合わせること -->
-  <!-- タブアイコン: 24pxグリッド・stroke1.5・butt cap（デザイン言語v2 5節「計器の刻印」） -->
+  <!-- v5: 下端に付く平らな4タブ（記録 / ノート / 分析 / 弓具）。サイトは弓具の中の下線タブ（#gearSubTabs）。
+       data-v は既存の値を保つ（history＝ノート）。アイコンは 24px グリッド・stroke1.5・butt cap -->
   <button data-v="record" aria-label="記録" aria-current="page"><span class="ic ic-record" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><circle cx="12" cy="12" r="7.25"/><path d="M12 2.4v3.1M12 18.5v3.1M2.4 12h3.1M18.5 12h3.1"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></span>記録</button>
-  <button data-v="history" aria-label="履歴"><span class="ic ic-history" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M3 6h1.6M3 12h1.6M3 18h1.6"/><path d="M8 6h13M8 12h13M8 18h9"/></svg></span>履歴</button>
+  <button data-v="history" aria-label="ノート"><span class="ic ic-history" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M3 6h1.6M3 12h1.6M3 18h1.6"/><path d="M8 6h13M8 12h13M8 18h9"/></svg></span>ノート</button>
   <button data-v="analysis" aria-label="分析"><span class="ic ic-analysis" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter"><path d="M3 16.5 9 10l4.5 4L21 6"/><circle cx="21" cy="6" r="1.4" fill="currentColor" stroke="none"/></svg></span>分析</button>
-  <button data-v="sight" aria-label="サイト調整"><span class="ic ic-sight" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M8 2.5v19M8 5.5h5.5M8 12h5.5M8 18.5h5.5"/><path d="M15.2 12 19 8.2 22.8 12 19 15.8z" fill="currentColor" stroke="none"/></svg></span>サイト調整</button>
-  <button data-v="gear" aria-label="用具"><span class="ic ic-gear" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M7 4C18.5 5.2 18.5 18.8 7 20"/><path d="M7 4v16"/></svg></span>用具</button>
+  <button data-v="gear" aria-label="弓具"><span class="ic ic-gear" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M7 4C18.5 5.2 18.5 18.8 7 20"/><path d="M7 4v16"/></svg></span>弓具</button>
 </nav>
 <button type="button" class="updbar" id="updBar" hidden aria-live="polite">新しい版があります。タップで更新</button>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>

@@ -142,7 +142,7 @@ test("gamification.enabled:false hides the history streak hero and the analysis 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   await expect(page.locator("#main")).toContainText("練習履歴");
   await expect(page.getByTestId("gamification-hero")).toHaveCount(0);
 
@@ -172,7 +172,7 @@ test("enabling gamification from settings makes the history streak hero appear",
   await page.locator("#setClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   const hero = page.getByTestId("gamification-hero");
   await expect(hero).toBeVisible();
   await expect(page.getByTestId("streak-current")).toHaveText("—");
@@ -216,7 +216,7 @@ test("unset practiceDays shows — with a CTA; tapping the hero CTA sets weekday
   );
 
   await page.goto("/");
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
 
   const hero = page.getByTestId("gamification-hero");
   await expect(hero).toBeVisible();

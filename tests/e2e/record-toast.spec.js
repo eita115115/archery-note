@@ -80,7 +80,8 @@ async function readableToast(page, active) {
   expect(box.right).toBeLessThanOrEqual(box.width);
   expect(box.top).toBeGreaterThanOrEqual(0);
   if (active) expect(box.bottom).toBeLessThanOrEqual(box.dockTop - 15);
-  else expect(box.bottomInset).toBeCloseTo(92, 0);
+  // v5: 下端に付くタブ（62px＋上罫線1px）の 12px 上
+  else expect(box.bottomInset).toBeCloseTo(75, 0);
 }
 
 for (const size of [

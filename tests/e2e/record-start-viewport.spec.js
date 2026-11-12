@@ -71,7 +71,7 @@ for (const size of [
         await settle(page);
         const geometry = await page.locator("#tgsvg").evaluate((el) => {
           const r = el.getBoundingClientRect();
-          const header = globalThis.document.querySelector("header.app").getBoundingClientRect();
+          const header = { bottom: 0 }; // v5: 上に固定の帯は無い（画面の上端が基準）
           const dock = globalThis.document
             .querySelector("#activeActionDock")
             .getBoundingClientRect();

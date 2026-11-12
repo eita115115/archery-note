@@ -38,7 +38,7 @@ async function record(page) {
   const count = (await state(page)).active.cur.length;
   const point = await page.locator("#tgsvg").evaluate((el) => {
     const r = el.getBoundingClientRect();
-    const header = globalThis.document.querySelector("header.app").getBoundingClientRect();
+    const header = { bottom: 0 }; // v5: 上に固定の帯は無い（画面の上端が基準）
     const dock = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     return {
       x: r.x + r.width / 2,
@@ -51,7 +51,7 @@ async function record(page) {
 
 async function pad(page) {
   return page.locator("#nudge .npad button").evaluateAll((buttons) => {
-    const header = globalThis.document.querySelector("header.app").getBoundingClientRect();
+    const header = { bottom: 0 }; // v5: 上に固定の帯は無い（画面の上端が基準）
     const dock = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     const notice = globalThis.document.querySelector("#toast");
     const noticeTop = notice.classList.contains("show")
@@ -94,7 +94,7 @@ async function expectPad(page) {
 async function revealSecondary(page, locator) {
   const delta = await locator.evaluate((el) => {
     const r = el.getBoundingClientRect(),
-      h = globalThis.document.querySelector("header.app").getBoundingClientRect(),
+      h = { bottom: 0 },
       d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     return r.top + r.height / 2 - (Math.max(0, h.bottom) + d.top) / 2;
   });
@@ -105,7 +105,7 @@ async function revealSecondary(page, locator) {
 async function expectTarget(page) {
   const r = await page.locator("#tgsvg").evaluate((el) => {
     const r = el.getBoundingClientRect(),
-      h = globalThis.document.querySelector("header.app").getBoundingClientRect(),
+      h = { bottom: 0 },
       d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     return { top: r.top, bottom: r.bottom, above: Math.max(0, h.bottom), below: d.top };
   });

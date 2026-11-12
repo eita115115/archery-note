@@ -967,7 +967,7 @@ function renderGear(m) {
     </div>`
     }</div>
     ${db.setups.length ? `<div class="btnrow"><button class="btn" id="gAdd" data-testid="gear-add">＋ 新しいセッティング</button></div>` : ""}
-    <div class="hint">バックアップ・テーマなどは右上の <b>設定</b> から。</div>
+    <div class="hint">バックアップ・テーマなどは記録タブの <b>設定</b> から。</div>
   </div>`;
   /* 初回セットアップ導線は空状態専用（登録済みなら金面CTAは「＋新しいセッティング」1つ） */
   const wiz = $("#gWizardEmpty");
@@ -1182,7 +1182,7 @@ function applyTheme() {
   /* ブラウザ上部（ステータスバー）の色もテーマに合わせる。自動のときは端末の設定に任せる */
   document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
     const dark = t === "dark" || (t !== "light" && (m.getAttribute("media") || "").includes("dark"));
-    m.setAttribute("content", dark ? "#10141a" : "#f1f3f5");
+    m.setAttribute("content", dark ? "#0e1217" : "#f3f4f1");
   });
 }
 /* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。

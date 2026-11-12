@@ -14,10 +14,7 @@ async function count(page) {
 async function points(page) {
   const r = await page.locator("#tgsvg").evaluate((svg) => {
     const r = svg.getBoundingClientRect();
-    const top = Math.max(
-      r.top,
-      document.querySelector("header.app").getBoundingClientRect().bottom + 8,
-    );
+    const top = Math.max(r.top, 8); // v5: 上に固定の帯は無い
     const bottom = Math.min(
       r.bottom,
       document.querySelector("#activeActionDock").getBoundingClientRect().top - 8,

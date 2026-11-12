@@ -23,7 +23,7 @@ async function settle(page) {
 async function geometry(page, selector) {
   return page.locator(selector).evaluate((el) => {
     const r = el.getBoundingClientRect(),
-      h = globalThis.document.querySelector("header.app").getBoundingClientRect(),
+      h = { bottom: 0 },
       d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect(),
       notice = globalThis.document.querySelector("#toast");
     const points = [
@@ -56,7 +56,7 @@ async function record(page) {
   const n = (await state(page)).active.cur.length;
   const p = await page.locator("#tgsvg").evaluate((el) => {
     const r = el.getBoundingClientRect(),
-      h = globalThis.document.querySelector("header.app").getBoundingClientRect(),
+      h = { bottom: 0 },
       d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     return {
       x: r.x + r.width / 2,

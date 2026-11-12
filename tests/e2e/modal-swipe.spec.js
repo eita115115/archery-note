@@ -14,6 +14,8 @@ test("settings swipes close, short and sideways drags preserve the sheet", async
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+  // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
+  await page.locator('#tabs [data-v="record"]').click();
   await page.locator("#btnSettings").focus();
   await page.keyboard.press("Enter");
   const handle = page.locator(".modalSwipeHandle");
@@ -40,6 +42,8 @@ test("swiping nested confirmation cancels and leaves underlying settings open", 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+  // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
+  await page.locator('#tabs [data-v="record"]').click();
   await page.locator("#btnSettings").click();
   await page.evaluate(() => {
     globalThis.swipeResult = "pending";
@@ -65,6 +69,8 @@ test("touch pull closes settings; cancelled pull leaves it open", async ({
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+  // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
+  await page.locator('#tabs [data-v="record"]').click();
   await page.locator("#btnSettings").click();
   const handle = page.locator(".modalSwipeHandle");
   await handle.scrollIntoViewIfNeeded();

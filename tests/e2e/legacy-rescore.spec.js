@@ -52,7 +52,7 @@ test("legacy session shows the real-size rescore without changing stored scores"
   }, database);
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
-  await page.locator("#tabs").getByRole("button", { name: "履歴" }).click();
+  await page.locator("#tabs").getByRole("button", { name: "ノート" }).click();
   await page.locator('[data-id="owned-legacy-rescore"]').first().click();
   const note = page.getByTestId("history-rescore");
   await expect(note).toBeVisible();

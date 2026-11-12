@@ -34,7 +34,8 @@ for (const width of [320, 375, 900]) {
     await seed(page);
     const before = await snapshot(page);
     await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
-    await page.locator('#tabs [data-v="sight"]').tap();
+    await page.locator('#tabs [data-v="gear"]').tap();
+    await page.getByTestId("gear-subtab-sight").tap();
     await page.locator('#sgDistChips [data-d="30"]').tap();
     await expect(page.locator("[data-sight-id]").first()).toHaveAttribute("data-sight-id", "newer");
     await expect(page.locator("[data-sight-id]").first().locator("dd")).toHaveText(["90", "0.4"]);
@@ -117,10 +118,13 @@ test("summary keeps setup, distance and period scope", async ({ page }) => {
 test("restoring an older same-day mark keeps newer analysis value", async ({ page }) => {
   await seed(page);
   const before = await snapshot(page);
-  await page.locator('#tabs [data-v="sight"]').tap();
+  await page.locator('#tabs [data-v="gear"]').tap();
+  await page.getByTestId("gear-subtab-sight").tap();
   await page.locator('#sgDistChips [data-d="30"]').tap();
   await page.locator('[data-del="older"]').tap();
   await page.locator("#acOk").tap();
+  // v5: 設定（ゴミ箱からの復元）の入口は記録タブの見出し行だけにある
+  await page.locator('#tabs [data-v="record"]').tap();
   await page.getByRole("button", { name: "設定", exact: true }).tap();
   await page.locator("[data-restore-trash]").scrollIntoViewIfNeeded();
   await page.locator("[data-restore-trash]").tap();

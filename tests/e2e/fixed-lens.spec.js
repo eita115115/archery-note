@@ -65,10 +65,10 @@ for (const width of [320, 375]) {
     await expect.poll(() => page.evaluate(() => db.active.cur.length)).toBe(3);
     await expect(page.locator("#lens")).toBeHidden();
 
-    // 既定は右上。ヘッダーの下にあり、的とは重ならない
+    // 既定は右上。v5 でヘッダー帯が無くなったので画面の上端に収まり、的とは重ならない
     expect(right.x + right.width).toBeGreaterThan(width - 20);
-    const header = await page.locator("header.app").boundingBox();
-    expect(right.y).toBeGreaterThanOrEqual(header.y + header.height);
+    expect(right.y).toBeGreaterThanOrEqual(0);
+    await expect(page.locator("header.app")).toHaveCount(0);
     const svg = await page.locator("#tgsvg").boundingBox();
     expect(right.y + right.height).toBeLessThanOrEqual(svg.y + 1);
   });

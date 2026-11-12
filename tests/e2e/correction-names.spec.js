@@ -37,7 +37,7 @@ for (const width of [320, 375]) {
       await settle(page);
       const p = await page.locator("#tgsvg").evaluate((e) => {
         const r = e.getBoundingClientRect(),
-          h = globalThis.document.querySelector("header.app").getBoundingClientRect(),
+          h = { bottom: 0 },
           d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
         return {
           x: r.x + r.width / 2,

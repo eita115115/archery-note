@@ -37,7 +37,7 @@ async function revealCorrection(page, locator) {
   // Simulate the user's scroll to secondary controls; never recover the target.
   const delta = await locator.evaluate((el) => {
     const r = el.getBoundingClientRect();
-    const h = globalThis.document.querySelector("header.app").getBoundingClientRect();
+    const h = { bottom: 0 };
     const d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     return r.y + r.height / 2 - (Math.max(0, h.bottom) + 12 + d.top - 12) / 2;
   });
@@ -49,7 +49,7 @@ async function targetBounds(page) {
   await settle(page);
   return page.locator("#tgsvg").evaluate((el) => {
     const r = el.getBoundingClientRect();
-    const h = globalThis.document.querySelector("header.app").getBoundingClientRect();
+    const h = { bottom: 0 };
     const d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     return {
       x: r.x,

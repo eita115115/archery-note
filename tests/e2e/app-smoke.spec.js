@@ -87,28 +87,44 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await page.goto("/");
 
   await expect(page).toHaveTitle(/Archery Note/);
-  await expect(page.getByRole("heading", { name: "Archery Note" })).toBeVisible();
+  // v5: アプリ名のヘッダー帯は無く、画面名が見出しになる。設定の入口は記録タブの見出し行にある
+  await expect(page.locator("header.app")).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1, name: "記録" })).toBeVisible();
+  await expect(page.locator("#btnSettings")).toBeVisible();
   await expect(page.locator("#bootFallback")).toBeHidden();
   await expect(page.getByTestId("record-start")).toBeVisible();
 
   await expect(mainTab(page, "記録")).toBeVisible();
-  await expect(mainTab(page, "履歴")).toBeVisible();
-  await expect(mainTab(page, "サイト調整")).toBeVisible();
-  await expect(mainTab(page, "用具")).toBeVisible();
+  await expect(mainTab(page, "ノート")).toBeVisible();
+  await expect(mainTab(page, "分析")).toBeVisible();
+  await expect(mainTab(page, "弓具")).toBeVisible();
+  await expect(page.locator("#tabs button")).toHaveCount(4);
+  await expect(page.locator('#tabs [data-v="sight"]')).toHaveCount(0);
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   await expect(page.locator("#main")).toContainText("練習履歴");
   await expect(page.locator(".historyDateHead")).toContainText("2026/6/27");
   const record = page.getByTestId("history-row").first();
   await expect(record).toHaveAccessibleName(/2026\/6\/27 ・ 70m/);
   await expect(record).toContainText("70m");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
+  await expect(page.getByRole("heading", { level: 1, name: "ノート" })).toBeVisible();
+  // 設定の入口は記録タブだけ。弓具の下線タブは弓具の画面でだけ出る
+  await expect(page.locator("#btnSettings")).toBeHidden();
+  await expect(page.locator("#gearSubTabs")).toBeHidden();
 
-  await mainTab(page, "サイト調整").click();
+  // サイトは弓具タブの中の下線タブ（セッティング / サイト）
+  await mainTab(page, "弓具").click();
+  await expect(page.getByRole("heading", { level: 1, name: "弓具" })).toBeVisible();
+  await expect(page.locator("#main")).toContainText("機材台帳");
+  await expect(page.getByTestId("gear-subtab-setup")).toHaveAttribute("aria-current", "page");
+  await page.getByTestId("gear-subtab-sight").click();
   await expect(page.locator("#main")).toContainText("サイト台帳");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
+  await expect(page.getByTestId("gear-subtab-sight")).toHaveAttribute("aria-current", "page");
+  await expect(mainTab(page, "弓具")).toHaveAttribute("aria-current", "page");
 
-  await mainTab(page, "用具").click();
+  await page.getByTestId("gear-subtab-setup").click();
   await expect(page.locator("#main")).toContainText("機材台帳");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
 
@@ -130,7 +146,7 @@ test("moves exactly one aria-current marker when switching tabs", async ({ page 
   await expect(currentTab).toHaveCount(1);
   await expect(currentTab).toHaveAttribute("data-v", "record");
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   await expect(currentTab).toHaveCount(1);
   await expect(currentTab).toHaveAttribute("data-v", "history");
 
@@ -178,7 +194,7 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   const row = page.locator("#histList .listItem").first();
   await expect(row).toBeVisible();
   await expect(row).toHaveJSProperty("tagName", "BUTTON");
@@ -187,7 +203,8 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await page.locator("#hClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
-  await mainTab(page, "サイト調整").click();
+  await mainTab(page, "弓具").click();
+  await page.getByTestId("gear-subtab-sight").click();
   const chips = page.locator("#sgDistChips .chip");
   await expect(chips.first()).toBeVisible();
   const chipCount = await chips.count();
@@ -246,7 +263,7 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   const row = page.locator("#histList .listItem").first();
   await row.click();
   const detailSheet = page.locator(".ovl .sheet");
@@ -321,7 +338,7 @@ test("records a multi-distance round with stage advance and history badges", asy
   await page.locator("#sumClose").click();
 
   // 履歴: 途中ラウンドを展開し、各ステージの詳細から別ステージへ移動
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   await expect(page.getByTestId("history-round").locator("summary")).toContainText("2/4ステージ");
   await page.getByTestId("history-round").locator("summary").click();
   await expect(page.locator("#histList")).toContainText("WA1440 男子 1/4");

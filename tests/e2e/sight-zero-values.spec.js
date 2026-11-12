@@ -22,7 +22,8 @@ async function record(page) {
   await page.locator('#fDistChips [data-d="30"]').tap();
 }
 async function calibration(page) {
-  await page.locator('#tabs [data-v="sight"]').tap();
+  await page.locator('#tabs [data-v="gear"]').tap();
+  await page.getByTestId("gear-subtab-sight").tap();
   await page.locator('#sgDistChips [data-d="30"]').tap();
   await page.locator("#sgCalMode").tap();
 }

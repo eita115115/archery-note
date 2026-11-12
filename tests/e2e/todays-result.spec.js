@@ -227,7 +227,7 @@ test("history detail sheet reconstructs the panel with この日 wording and no 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   await expect(page.locator("#main")).toContainText("練習履歴");
 
   // 中間セッション（6/3）: 「この日」で再構成され、前回=6/1（未来の 6/5 は混入しない）

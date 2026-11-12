@@ -1022,6 +1022,8 @@ for (const [label, value, enabled] of [
     if (enabled) await expect(card).toHaveCount(1);
     else await expect(card).toHaveCount(0);
 
+    // v5: 設定の入口は記録タブの見出し行だけにある
+    await page.locator('#tabs [data-v="record"]').click();
     await page.locator("#btnSettings").click();
     const pressed = page.locator('#ftChips .chip[aria-pressed="true"]');
     await expect(pressed).toHaveCount(1);

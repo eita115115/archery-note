@@ -34,26 +34,35 @@ function showView(v) {
   window.scrollTo({ top, left: 0, behavior: "instant" });
 }
 document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));
+document.querySelectorAll("#gearSubTabs button").forEach((b) => (b.onclick = () => showView(b.dataset.sub)));
+/* 画面名。サイトは弓具タブの中の画面（下線タブで切り替える）なので、タブも画面名も「弓具」になる */
+const VIEW_TITLES = { record: "記録", history: "ノート", analysis: "分析", gear: "弓具", sight: "弓具" };
+function markCurrent(b, on) {
+  b.classList.toggle("on", on);
+  if (on) b.setAttribute("aria-current", "page");
+  else b.removeAttribute("aria-current");
+}
+/* 画面名の行・下部タブ・弓具内の下線タブを現在の画面に合わせる。設定の入口は記録タブだけに出す */
+function syncViewChrome() {
+  const tabView = view === "sight" ? "gear" : view;
+  document.querySelectorAll("#tabs button").forEach((b) => markCurrent(b, b.dataset.v === tabView));
+  const title = $("#viewTitle");
+  if (title) title.textContent = VIEW_TITLES[view] || "";
+  const date = $("#viewDate");
+  if (date) date.textContent = view === "record" ? fmtD(today()) : "";
+  const settings = $("#btnSettings");
+  if (settings) settings.hidden = view !== "record";
+  const sub = $("#gearSubTabs");
+  if (sub) {
+    sub.hidden = tabView !== "gear";
+    sub.querySelectorAll("button").forEach((b) => markCurrent(b, b.dataset.sub === view));
+  }
+}
 
 function render() {
   updateAppChrome();
   if (typeof syncUpdateBarVisibility === "function") syncUpdateBarVisibility();
-  const tabs = Array.prototype.slice.call(document.querySelectorAll("#tabs button"));
-  const activeIndex = Math.max(
-    0,
-    tabs.findIndex((b) => b.dataset.v === view),
-  );
-  const tabBar = $("#tabs");
-  if (tabBar) {
-    tabBar.style.setProperty("--active-tab", activeIndex);
-    tabBar.style.setProperty("--tab-count", tabs.length || 1);
-  }
-  tabs.forEach((b) => {
-    const on = b.dataset.v === view;
-    b.classList.toggle("on", on);
-    if (on) b.setAttribute("aria-current", "page");
-    else b.removeAttribute("aria-current");
-  });
+  syncViewChrome();
   const m = $("#main");
   m.classList.remove("hasActiveDock");
   if (view === "record") renderRecord(m);
@@ -93,7 +102,7 @@ function setupSystemSummary(setupId) {
       level: "準備中",
       profiles: {},
       lines: ["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"],
-      next: "用具タブで初回セットアップ",
+      next: "弓具タブで初回セットアップ",
     };
   const gp = gearPrecisionProfile(setup),
     mp = modelReadinessProfile(setupId),
@@ -508,7 +517,6 @@ function renderRecord(m) {
   const defFace = suggestedFaceValue(defDist, last);
   const defPerEnd = last && last.perEnd ? last.perEnd : 6;
   m.innerHTML = `
-  <div class="practiceHeading"><h2>練習を記録</h2><span>${fmtD(today())}</span></div>
   ${featureHintHtml()}
   ${recordFastActionsHtml(last)}
   <section class="launchPanel convergeLaunch startFirst">
@@ -876,9 +884,9 @@ function focusAnalysisFilterControl(control) {
   }
   control.focus({ preventScroll: true });
   const rect = control.getBoundingClientRect();
-  const header = $("header.app");
   const tabs = $("#tabs");
-  const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 12;
+  // 上には固定の帯が無い（v5）。画面の上端から 12px を空ける。
+  const top = 12;
   const bottom = (tabs ? tabs.getBoundingClientRect().top : window.innerHeight) - 12;
   if (rect.bottom > bottom) window.scrollBy({ top: rect.bottom - bottom, behavior: "instant" });
   else if (rect.top < top) window.scrollBy({ top: rect.top - top, behavior: "instant" });
@@ -1548,8 +1556,7 @@ function revealActiveTarget() {
     bottom: Math.max(targetRect.bottom, chipsRect.bottom),
   };
   rect.height = rect.bottom - rect.top;
-  const header = $("header.app");
-  const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 8;
+  const top = 8; // 上に固定の帯は無い（v5）
   const bottom = dock.getBoundingClientRect().top - 8;
   let delta = 0;
   if (rect.top < top || rect.height > bottom - top) delta = rect.top - top;
@@ -1571,8 +1578,7 @@ function revealActiveCorrection() {
     bottom: Math.max(padRect.bottom, doneRect.bottom),
   };
   rect.height = rect.bottom - rect.top;
-  const header = $("header.app");
-  const top = Math.max(0, header ? header.getBoundingClientRect().bottom : 0) + 16;
+  const top = 16; // 上に固定の帯は無い（v5）
   let bottom = dock.getBoundingClientRect().top - 16;
   const notice = $("#toast");
   if (notice && notice.classList.contains("show")) {
@@ -1845,15 +1851,13 @@ function attachTargetInput(s) {
   }
   /* ルーペの固定位置（画面座標）。表示するときに1回だけ決め、入力中は動かさない */
   function placeLens() {
-    const hdr = $("header.app");
-    const top = Math.round((hdr ? hdr.getBoundingClientRect().bottom : 0) + 8);
     const left = db.settings.lensSide === "left";
     for (const el of [lens, lensTag]) {
       el.style.left = left ? "12px" : "auto";
       el.style.right = left ? "auto" : "12px";
     }
-    lens.style.top = `${top}px`;
-    lensTag.style.top = `${top + lens.offsetHeight + 6}px`;
+    /* 上端は CSS（.lens の top＝安全域＋8px）が決める。ヘッダー帯は無い（v5）。ラベルはその直下 */
+    lensTag.style.top = `${Math.round(lens.getBoundingClientRect().bottom + 6)}px`;
   }
   function showLens() {
     if (!drag || drag.shown) return;

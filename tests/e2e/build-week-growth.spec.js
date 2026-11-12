@@ -19,7 +19,9 @@ test("demo data opens an explainable growth dashboard and remains removable", as
   );
   expect(demoCount).toBe(3);
 
-  await page.getByRole("button", { name: "設定" }).click();
+  // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
+  await page.locator('#tabs [data-v="record"]').click();
+  await page.getByRole("button", { name: "設定", exact: true }).click();
   await page.getByTestId("settings-demo-remove").click();
   await page.getByRole("button", { name: "削除する" }).click();
   await expect

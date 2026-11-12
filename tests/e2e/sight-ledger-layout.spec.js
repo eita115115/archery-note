@@ -7,7 +7,8 @@ async function seed(page, data = sightLedgerDb()) {
       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
   }, data);
   await page.goto("/");
-  await page.locator('#tabs [data-v="sight"]').tap();
+  await page.locator('#tabs [data-v="gear"]').tap();
+  await page.getByTestId("gear-subtab-sight").tap();
   await page.locator('#sgDistChips [data-d="30"]').tap();
 }
 async function snapshot(page) {
@@ -109,6 +110,8 @@ test("sight deletion cancels safely and confirmed deletion can be restored", asy
   const deleted = await snapshot(page);
   expect(deleted[2]).toEqual(before[2].filter((r) => r.id !== "sight-new"));
   for (const i of [0, 1, 3, 4, 5]) expect(deleted[i]).toEqual(before[i]);
+  // v5: 設定（ゴミ箱からの復元）の入口は記録タブの見出し行だけにある
+  await page.locator('#tabs [data-v="record"]').tap();
   await page.getByRole("button", { name: "設定", exact: true }).tap();
   const restore = page.locator("[data-restore-trash]");
   await restore.scrollIntoViewIfNeeded();
