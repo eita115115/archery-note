@@ -1220,6 +1220,7 @@ function gamifySettingsHtml() {
         <div class="gamifyGoalRow"><span>月の本数</span><input class="inp" id="gamGoalMonthly" inputmode="numeric" data-testid="gamify-goal-monthly" value="${goals.monthlyArrows}"></div>
       </div>
       <div class="gamifyInfo">練習した日は曜日を問わず+1。練習曜日に記録がない日だけフリーズを消費（またはリセット、当日はまだ判定しません）。ストリークが7増えるごとにフリーズ+1（最大3）。</div>
+      ${gamificationBadgesCardHtml()}
       `
           : ""
       }
@@ -1666,7 +1667,7 @@ function openSettings() {
         });
         toast(
           db.settings.formTrackingEnabled===true
-            ? "射形トラッキングを有効にしました（分析タブ）"
+            ? "射形トラッキングを有効にしました（分析 > 射型）"
             : "射形トラッキングを無効にしました",
         );
       }),

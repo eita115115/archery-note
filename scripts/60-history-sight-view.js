@@ -433,78 +433,6 @@ function driftText(dx, dy) {
     parts.push(dy > 0 ? `上${Math.abs(dy).toFixed(1)}cm` : `下${Math.abs(dy).toFixed(1)}cm`);
   return parts.length ? parts.join(" / ") : "ほぼ変化なし";
 }
-function groupingTrendCard(ss) {
-  const by = {};
-  const recent = ss.slice(0, 120);
-  [...recent].reverse().forEach((s) => {
-    const p = sessionGroupPoint(s);
-    if (!p) return;
-    const key = [p.setupId, p.dist, p.faceD, p.faceType].join("|");
-    (by[key] = by[key] || []).push(p);
-  });
-  const groups = Object.values(by)
-    .filter((g) => g.length >= 2)
-    .sort((a, b) => (b[b.length - 1].date || "").localeCompare(a[a.length - 1].date || ""))
-    .slice(0, 4);
-  if (!groups.length) return "";
-  return (
-    `<div class="card"><h2>矢の集まり具合の推移 <span class="mini">過去の中心の分布と偏移</span></h2>` +
-    groups.map((g) => groupingTrendItem(g)).join("") +
-    `<div class="hint">丸は各練習のグルーピング（矢の集まり）中心、線は時系列、緑の楕円は過去中心の分布です。的の中心からどちらへ偏り続けているか、直近でどちらへ流れているかを見るための俯瞰です。</div></div>`
-  );
-}
-function groupingTrendItem(g) {
-  const latest = g[g.length - 1],
-    first = g[0],
-    prev = g[g.length - 2];
-  const centers = g.map((p) => ({ x: p.mx, y: p.my }));
-  const cst = groupStats(centers);
-  const w = ringW(latest.faceD, latest.faceType);
-  const maxAbs = Math.max(
-    w * 2.6,
-    ...g.map((p) => Math.max(Math.abs(p.mx) + p.rr * 0.25, Math.abs(p.my) + p.rr * 0.25)),
-    Math.abs(cst.mx) + (cst.major || 0) * 1.6,
-    Math.abs(cst.my) + (cst.major || 0) * 1.6,
-    4,
-  );
-  const M = Math.min((latest.faceD / 2) * 0.9, maxAbs * 1.25);
-  const path = g.map((p, i) => `${i ? "L" : "M"}${p.mx},${-p.my}`).join("");
-  const avgRr = g.reduce((a, p) => a + p.rr, 0) / g.length;
-  const recentDx = latest.mx - prev.mx,
-    recentDy = latest.my - prev.my;
-  const allDx = latest.mx - first.mx,
-    allDy = latest.my - first.my;
-  const bias = Math.hypot(latest.mx, latest.my);
-  const biasState = bias <= w * 0.25 ? "センター付近" : bias <= w * 0.75 ? "軽い偏り" : "偏り強め";
-  const setup = esc(latest.setupName);
-  return `<div class="histRecentBlock">
-    <div class="histRecentHead">
-      <svg viewBox="${-M} ${-M} ${2 * M} ${2 * M}" class="histRecentTarget">
-        <circle cx="0" cy="0" r="${w / 2}" fill="none" stroke="var(--sub)" stroke-width="${M / 140}"/>
-        <circle cx="0" cy="0" r="${w}" fill="none" stroke="var(--line)" stroke-width="${M / 160}"/>
-        <line x1="${-M}" y1="0" x2="${M}" y2="0" stroke="var(--line)" stroke-width="${M / 150}"/>
-        <line x1="0" y1="${-M}" x2="0" y2="${M}" stroke="var(--line)" stroke-width="${M / 150}"/>
-        ${cst && cst.major != null ? `<ellipse cx="${cst.mx}" cy="${-cst.my}" rx="${Math.max(cst.major, 0.18)}" ry="${Math.max(cst.minor, 0.18)}" transform="rotate(${-cst.angleDeg} ${cst.mx} ${-cst.my})" fill="var(--status-ok)" fill-opacity="0.10" stroke="var(--status-ok)" stroke-width="${M / 95}"/>` : ""}
-        <path d="${path}" fill="none" stroke="var(--blue)" stroke-width="${M / 75}" stroke-linecap="round" stroke-linejoin="round"/>
-        ${g
-          .map((p, i) => {
-            const r = i === g.length - 1 ? M / 18 : M / 25;
-            const fill = i === g.length - 1 ? "var(--status-ok)" : "var(--blue)";
-            return `<circle cx="${p.mx}" cy="${-p.my}" r="${r}" fill="${fill}" opacity="${0.35 + (i / g.length) * 0.55}" stroke="#fff" stroke-width="${M / 120}"/>`;
-          })
-          .join("")}
-      </svg>
-      <div class="histRecentBody">
-        <div class="t histRecentTitle">${setup} ・ ${historyDistanceLabel(latest.dist)} ・ ${esc(faceLabel(latest))}</div>
-        <div class="d">${g.length}回 / ${fmtD(first.date)}〜${fmtD(latest.date)} / 平均の集まり半径(RMS) ${avgRr.toFixed(1)}cm</div>
-        <div class="kv"><span>最新の中心</span><span>${cmOffsetText(latest.mx, "x")} / ${cmOffsetText(latest.my, "y")}（${biasState}）</span></div>
-        <div class="kv"><span>前回から</span><span>${driftText(recentDx, recentDy)}</span></div>
-        <div class="kv"><span>初回から</span><span>${driftText(allDx, allDy)}</span></div>
-        <div class="kv"><span>過去中心の広がり</span><span>${cst.rr.toFixed(1)}cm${cst.major != null ? ` / 長軸${cst.major.toFixed(1)}cm` : ""}</span></div>
-      </div>
-    </div>
-  </div>`;
-}
 function scoreDistCard(ss) {
   /* 各得点の件数と最初の的種を一度で集計。空の得点行の色探しで全矢を再走査しない。 */
   const cnt = Object.create(null), firstFace = Object.create(null);
@@ -525,7 +453,7 @@ function scoreDistCard(ss) {
     : ["X", "10", "9", "8", "7", "6", "5", "4", "3", "2", "1", "M"];
   const max = Math.max(...keys.map((k) => cnt[k] || 0)) || 1;
   return (
-    `<div class="card"><h2>得点の内訳 <span class="mini">全${count}本</span></h2>` +
+    `<section class="vsec" data-testid="analysis-score-dist"><div class="vsecH"><h2>得点の内訳</h2><span class="aside">全${count}射</span></div>` +
     keys
       .filter((k) => cnt[k] > 0 || (!fieldOnly && ["X", "10", "9", "8", "7"].includes(k)))
       .map((k) => {
@@ -535,11 +463,11 @@ function scoreDistCard(ss) {
         return `<div class="histScoreRow">
         <div class="histScoreLabel" style="background:${z.bg};color:${z.fg}">${k}</div>
         <div class="histScoreTrack"><div class="histScoreFill" style="width:${((n / max) * 100).toFixed(1)}%"></div></div>
-        <div class="histScoreCount">${n}本 (${((n / count) * 100).toFixed(0)}%)</div>
+        <div class="histScoreCount">${n}射 (${((n / count) * 100).toFixed(0)}%)</div>
       </div>`;
       })
       .join("") +
-    `</div>`
+    `<p class="basis">上の対象の全${count}射を、保存された点数で数えています。</p></section>`
   );
 }
 function monthlyCard(ss) {
@@ -558,63 +486,14 @@ function monthlyCard(ss) {
   const keys = Object.keys(m).sort().reverse().slice(0, 6);
   if (!keys.length) return "";
   return (
-    `<div class="card"><h2>月ごとのまとめ <span class="mini">点/本</span></h2><table class="tbl"><tr><th>月</th><th class="right">練習</th><th class="right">本数</th><th class="right">平均点</th></tr>` +
+    `<section class="vsec" data-testid="analysis-monthly"><div class="vsecH"><h2>月ごとのまとめ</h2><span class="aside">${keys.length}か月</span></div><table class="tbl anMonthTbl"><tr><th>月</th><th class="right">練習</th><th class="right">射数</th><th class="right">1射平均</th></tr>` +
     keys
       .map(
         (k) =>
-          `<tr><td>${k.replace("-", "/")}</td><td class="right">${m[k].c}回</td><td class="right">${m[k].n}本</td><td class="right"><b>${m[k].n ? (m[k].sum / m[k].n).toFixed(2) : "-"}</b></td></tr>`,
+          `<tr><td>${k.replace("-", "/")}</td><td class="right">${m[k].c}回</td><td class="right">${m[k].n}射</td><td class="right"><b>${m[k].n ? (m[k].sum / m[k].n).toFixed(2) : "—"}</b></td></tr>`,
       )
       .join("") +
-    `</table></div>`
-  );
-}
-function distTrendCard(ss) {
-  // 距離別 平均点推移（簡易スパークライン）
-  const byDist = {};
-  [...ss].reverse().forEach((s) => {
-    const all = s.ends.flat();
-    if (!all.length) return;
-    const info = {
-      key: `dist:${historyDistanceLabel(s.dist)}`,
-      label: historyDistanceLabel(s.dist),
-      sort: Number(s.dist) || -1,
-    };
-    const g = (byDist[info.key] = byDist[info.key] || {
-      label: info.label,
-      sort: info.sort,
-      pts: [],
-    });
-    g.pts.push(all.reduce((a, x) => a + x.s, 0) / all.length);
-  });
-  const groups = Object.values(byDist)
-    .filter((g) => g.pts.length >= 2)
-    .sort((a, b) => b.sort - a.sort || a.label.localeCompare(b.label));
-  if (!groups.length) return "";
-  return (
-    `<div class="card"><h2>距離ごとの調子 <span class="mini">平均点(点/本)の推移</span></h2>` +
-    groups
-      .map((g) => {
-        const pts = g.pts;
-        const W = 300,
-          H = 46;
-        const min = Math.min(...pts),
-          max = Math.max(...pts),
-          span = max - min || 1;
-        const path = pts
-          .map(
-            (v, i) =>
-              `${i ? "L" : "M"}${(i / (pts.length - 1)) * W},${H - 4 - ((v - min) / span) * (H - 10)}`,
-          )
-          .join("");
-        return `<div class="histTrendRow">
-      <div class="histTrendLabel">${esc(g.label)}</div>
-      <svg width="100%" viewBox="0 0 ${W} ${H}" class="histTrendChart" style="max-height:${H}px" role="img" aria-label="${esc(g.label)}の平均点（点/本）推移"><title>${esc(g.label)}: ${pts.length}回、最新${pts[pts.length - 1].toFixed(2)}点/本</title><path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
-      ${pts.map((v, i) => `<circle cx="${(i / (pts.length - 1)) * W}" cy="${H - 4 - ((v - min) / span) * (H - 10)}" r="3" fill="var(--green)"/>`).join("")}</svg>
-      <div class="histTrendValue"><b>${pts[pts.length - 1].toFixed(2)}</b><span class="histTrendSub">点/本 · 最新</span></div>
-    </div>`;
-      })
-      .join("") +
-    `</div>`
+    `</table><p class="basis">弓具と期間の選択に合う、すべての条件の記録です（新しい月から6か月まで）。</p></section>`
   );
 }
 /* 多距離ラウンド（IMP-09）: 履歴詳細に同 gid の他ステージ一覧とラウンド合計を出す。
@@ -877,8 +756,7 @@ function openHistDetail(id) {
   ovl.querySelector("#hCard").onclick = () => exportScorecardImage(sess);
   ovl.querySelector("#hAnalysis").onclick = () => {
     close();
-    if (view === "analysis") render();
-    else showView("analysis");
+    openAnalysisFor(sess);
   };
   ovl.querySelector("#hDel").onclick = async () => {
     if (
@@ -1084,6 +962,13 @@ function sightLedgerHtml(marks) {
     })
     .join("")}</ol>`;
 }
+/* v5 段 7 で分析タブから移した「サイト値の記録」「サイト値のまとめ」。中身は従来のまま（作り直しは段 8）。
+   分析の絞り込みは持たず、すべての弓具・距離・期間を対象にする */
+function sightRecordsOverviewHtml() {
+  const ss = sessionsByDateDesc().filter((s) => Array.isArray(s.ends));
+  const body = `${sightHistoryCard(ss)}${sightSummaryHtml(historySessionRows(ss), { setupId: "", dist: "" })}`;
+  return body ? `<div class="sightRecordsOverview" data-testid="sight-records-overview">${body}</div>` : "";
+}
 function renderSight(m) {
   if (!ui.sightSel.setupId && db.setups[0]) ui.sightSel.setupId = db.setups[0].id;
   const sid = ui.sightSel.setupId;
@@ -1195,7 +1080,7 @@ function renderSight(m) {
     </details>
   </div>`
       : ""
-  }`;
+  }${sightRecordsOverviewHtml()}`;
   const sgSetup = $("#sgSetup");
   if (sgSetup)
     sgSetup.onchange = (e) => {

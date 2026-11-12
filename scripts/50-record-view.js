@@ -11,7 +11,11 @@ let ui = {
   sightSel: { setupId: null, dist: 70 },
   histOpen: null,
   histFilter: { setupId: "", dist: "", round: "", kind: "all" } /* kind: "all" | "rec" | "memo" */,
-  analysisFilter: { setupId: "", dist: "", round: "", period: "all" },
+  /* cond は スコア の条件（距離|的径|的種|射数）。dist は 射型 の距離の選択 */
+  analysisFilter: { setupId: "", dist: "", round: "", period: "all", cond: "" },
+  analysisTab: "score" /* 分析の下線タブ: "score" | "impact" | "compare" | "form"。使っている間だけ覚える */,
+  analysisImpactId: null /* 着弾 で選んでいる記録の id（null は位置のある最新の記録） */,
+  analysisCmp: { a: null, b: null } /* 比較 で選んでいる2回の id */,
   zoom: 1,
   recordMode: "practice",
   freshArrow: -1,
@@ -40,6 +44,7 @@ function showView(v) {
 }
 document.querySelectorAll("#tabs button").forEach((b) => (b.onclick = () => showView(b.dataset.v)));
 document.querySelectorAll("#gearSubTabs button").forEach((b) => (b.onclick = () => showView(b.dataset.sub)));
+document.querySelectorAll("#analysisSubTabs button").forEach((b) => (b.onclick = () => showAnalysisTab(b.dataset.an)));
 /* 画面名。サイトは弓具タブの中の画面（下線タブで切り替える）なので、タブも画面名も「弓具」になる */
 const VIEW_TITLES = { record: "記録", history: "ノート", analysis: "分析", gear: "弓具", sight: "弓具" };
 function markCurrent(b, on) {
@@ -64,6 +69,11 @@ function syncViewChrome() {
   if (sub) {
     sub.hidden = tabView !== "gear";
     sub.querySelectorAll("button").forEach((b) => markCurrent(b, b.dataset.sub === view));
+  }
+  const an = $("#analysisSubTabs");
+  if (an) {
+    an.hidden = view !== "analysis";
+    an.querySelectorAll("button").forEach((b) => markCurrent(b, b.dataset.an === ui.analysisTab));
   }
 }
 
@@ -1158,206 +1168,7 @@ function pageHeroHtml(type, ctx) {
   }
   return "";
 }
-function focusAnalysisFilterControl(control) {
-  if (!control) return;
-  const card = control.closest(".analysisFilterCard");
-  // Replacement cards lose their measured content-visibility heights. Lay out
-  // the cards above this control before restoring focus or measuring its position.
-  for (const child of Array.from($("#main").children)) {
-    child.style.contentVisibility = "visible";
-    if (child === card) break;
-  }
-  control.focus({ preventScroll: true });
-  const rect = control.getBoundingClientRect();
-  const tabs = $("#tabs");
-  // 上には固定の帯が無い（v5）。画面の上端から 12px を空ける。
-  const top = 12;
-  const bottom = (tabs ? tabs.getBoundingClientRect().top : window.innerHeight) - 12;
-  if (rect.bottom > bottom) window.scrollBy({ top: rect.bottom - bottom, behavior: "instant" });
-  else if (rect.top < top) window.scrollBy({ top: rect.top - top, behavior: "instant" });
-}
-function analysisFilterBarHtml(allRows, f) {
-  const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))];
-  const selectedDist = Number(f.dist);
-  // 最後の練習を削除した後も、選択中の条件を表示して解除できるようにする。
-  if (Number.isFinite(selectedDist) && selectedDist > 0 && !dists.some((d) => String(d) === String(f.dist)))
-    dists.push(selectedDist);
-  dists.sort((a, b) => b - a);
-  const periods = [
-    ["all", "全期間"],
-    ["7d", "7日"],
-    ["30d", "30日"],
-    ["90d", "90日"],
-  ];
-  return `<div class="card analysisFilterCard">
-    <h2>比較する条件</h2>
-    <div class="row">
-      <div><label class="f" for="anSetup">用具</label><select class="inp" id="anSetup"><option value="">すべて</option><option value="__none" ${f.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${f.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
-      <div><label class="f" for="anDist">距離</label><select class="inp" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(f.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
-    </div>
-    <label class="f">期間</label>
-    <div class="chips" id="anPeriods" role="group" aria-label="期間">${periods.map(([id, lb]) => `<button type="button" class="chip ${f.period === id ? "on" : ""}" aria-pressed="${f.period === id}" data-period="${id}">${lb}</button>`).join("")}</div>
-  </div>`;
-}
-function growthDashboardHtml(rows) {
-  const d = growthDashboard(rows, today());
-  const delta = (v, suffix) =>
-    v == null ? "比較待ち" : `${v > 0 ? "+" : ""}${v.toFixed(2)}${suffix}`;
-  const visibleGroupingDelta = d.groupingDelta == null ? null : Number(d.groupingDelta.toFixed(1));
-  const group =
-    visibleGroupingDelta == null
-      ? "比較待ち"
-      : `${visibleGroupingDelta < 0 ? "改善 " : visibleGroupingDelta > 0 ? "拡大 " : "横ばい "}${Math.abs(visibleGroupingDelta).toFixed(1)}cm`;
-  return `<section class="growthDashboard" data-testid="growth-dashboard" aria-labelledby="growth-title">
-    <div class="growthHead"><div><div class="kicker">練習のまとめ</div><h2 id="growth-title">数値で振り返る</h2></div><span class="growthConfidence">信頼度 ${esc(d.confidence.label)}</span></div>
-    <div class="growthMetrics">
-      <div><span>最終練習</span><b>${d.lastPracticeDate ? esc(fmtD(d.lastPracticeDate)) : "—"}</b></div>
-      <div><span>今週</span><b>${d.weekSessions}回 / ${d.weekArrows}射</b></div>
-      <div><span>直近平均</span><b>${d.recentAverage == null ? "—" : d.recentAverage.toFixed(2)}</b></div>
-      <div><span>前回から</span><b>${delta(d.scoreDelta, "点")}</b></div>
-      <div><span>グルーピング</span><b>${group}</b></div>
-      <div><span>フォーム</span><b>${d.formStability == null ? "記録待ち" : `${Math.round(d.formStability)}%`}</b></div>
-    </div>
-  </section>`;
-}
-function nextPracticeCardHtml(rows, showRecordCta = false) {
-  const items = nextPracticeSuggestions(rows, today());
-  return `<section class="card nextPractice" data-testid="next-practice"><h2>次回試すこと</h2>${items.map((s, i) => `<div class="nextPracticeItem"><span aria-hidden="true">${i + 1}</span><div><b>${esc(s.title)}</b><p>${esc(s.reason)}</p></div></div>`).join("")}${showRecordCta ? `<button type="button" class="btn" id="anEmptyCta">記録タブへ</button>` : ""}</section>`;
-}
-function analysisKpiHtml(rows) {
-  const scored = rows.filter((r) => r.n);
-  if (!scored.length) return "";
-  const sorted = [...scored].sort(
-    (a, b) => (a.date || "").localeCompare(b.date || "") || (a.id > b.id ? 1 : -1),
-  );
-  const arrows = scored.reduce((a, r) => a + r.n, 0);
-  const avg = arrows ? scored.reduce((a, r) => a + r.total, 0) / arrows : 0;
-  const ma = movingAverage(
-    sorted.map((r) => r.avg),
-    5,
-  );
-  const latestMa = ma.length ? ma[ma.length - 1] : null;
-  const prevMa = ma.length > 1 ? ma[ma.length - 2] : null;
-  const delta = latestMa != null && prevMa != null ? latestMa - prevMa : null;
-  const trend =
-    delta == null
-      ? "—"
-      : delta > 0.02
-        ? `↑ +${delta.toFixed(2)}`
-        : delta < -0.02
-          ? `↓ ${delta.toFixed(2)}`
-          : "→ 横ばい";
-  const rrRows = sorted.filter((r) => analysisHasGroupingEvidence(r.st));
-  const latestStats = sorted[sorted.length - 1].st;
-  const latestRr = analysisHasGroupingEvidence(latestStats) ? latestStats.rr : null;
-  const bestRr = rrRows.length ? Math.min(...rrRows.map((r) => r.st.rr)) : null;
-  const best = [...scored].sort(
-    (a, b) => b.total - a.total || (b.date || "").localeCompare(a.date || ""),
-  )[0];
-  return `<div class="insightStrip">
-    <div class="insightTile"><div class="k">平均点</div><b>${avg.toFixed(2)}</b><span>${scored.length}回 ${arrows}本 / 移動平均 ${trend}</span></div>
-    <div class="insightTile"><div class="k">矢の集まり具合（グルーピング）</div><b>${latestRr != null ? latestRr.toFixed(1) + "cm" : "比較待ち"}</b><span>${latestRr != null ? "最新の半径(RMS)" : "最新は座標3本以上で比較"} / 最小 ${bestRr != null ? bestRr.toFixed(1) + "cm" : "—"}</span></div>
-    <div class="insightTile"><div class="k">最高合計</div><b>${best ? best.total : "—"}</b><span>${best ? [fmtD(best.date), best.dist ? `${best.dist}m` : "", `${best.n}本`].filter(Boolean).join(" / ") : "記録待ち"}</span></div>
-  </div>`;
-}
-function analysisTrendChartHtml(rows) {
-  const sorted = rows
-    .filter((r) => r.n)
-    .sort((a, b) => (a.date || "").localeCompare(b.date || "") || (a.id > b.id ? 1 : -1));
-  if (sorted.length < 3) return "";
-  const avgs = sorted.map((r) => r.avg);
-  const ma = movingAverage(avgs, 5).map((v, i) => (v == null ? avgs[i] : v));
-  const W = 320,
-    H = 96;
-  const min = Math.min(...avgs, ...ma),
-    max = Math.max(...avgs, ...ma),
-    span = max - min || 1;
-  const px = (i) => (i / (sorted.length - 1)) * W;
-  const py = (v) => H - 10 - ((v - min) / span) * (H - 22);
-  const maPath = ma
-    .map((v, i) => `${i ? "L" : "M"}${px(i).toFixed(1)},${py(v).toFixed(1)}`)
-    .join("");
-  return `<div class="card"><h2>得点の推移 <span class="mini">${sorted.length}回 / 線は直近5回の移動平均</span></h2>
-    <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H + 20}px" role="img" aria-label="平均点（点/本）の推移">
-      <title>得点推移チャート: ${sorted.length}回の練習、${min.toFixed(1)}〜${max.toFixed(1)}点/本</title>
-      <text x="2" y="10" font-size="9" fill="var(--sub)">${max.toFixed(1)}点</text>
-      <text x="2" y="${H - 2}" font-size="9" fill="var(--sub)">${min.toFixed(1)}点</text>
-      ${sorted.map((r, i) => `<circle cx="${px(i).toFixed(1)}" cy="${py(r.avg).toFixed(1)}" r="3" fill="var(--green)" opacity=".5"/>`).join("")}
-      <path d="${maPath}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
-    </svg>
-    <div class="hint">丸は各練習の平均点（1本あたり）、線は移動平均です。用具・距離・期間で絞ると同条件の推移として読めます。</div>
-  </div>`;
-}
-/* 多距離ラウンドの「ラウンド合計ベスト」行（IMP-09）: complete なグループのみ対象。
-   roundGroup 付きの行が無ければ空文字（従来の自己ベスト表示は不変） */
-function roundGroupBestRowsHtml(rows) {
-  const bests = roundGroupBests(aggregateRoundGroups(rows));
-  if (!bests.length) return "";
-  return bests
-    .sort((a, b) => b.total - a.total)
-    .map(
-      (b) => `<div class="listItem recordReadOnlyItem">
-    <div><div class="t">${esc(roundLabel(b.roundId))} 合計</div><div class="d">完了ラウンドのベスト / ${fmtD(b.date)}</div></div>
-    <div class="big">${b.total}<small> / ${b.arrows}射</small></div>
-  </div>`,
-    )
-    .join("");
-}
-function personalBestCard(rows) {
-  const pbs = personalBests(rows).slice(0, 6);
-  const groupRows = roundGroupBestRowsHtml(rows);
-  if (!pbs.length && !groupRows) return "";
-  const body = pbs
-    .map((g) => {
-      const lb = [
-        g.dist ? `${g.dist}m` : "距離未設定",
-        g.round !== "free" ? esc(roundLabel(g.round)) : "自由練習",
-      ].join(" ・ ");
-      return `<div class="listItem recordReadOnlyItem">
-      <div><div class="t">${esc(lb)}</div><div class="d">${g.sessions}回 / ベスト日 ${g.bestTotal ? fmtD(g.bestTotal.date) : "—"}${g.bestTotal ? ` / ${g.bestTotal.arrows}本` : ""}</div></div>
-      <div class="big">${g.bestTotal ? g.bestTotal.total : "—"}<small> / 平均ベスト${g.bestAvg ? g.bestAvg.avg.toFixed(2) : "—"}</small></div>
-    </div>`;
-    })
-    .join("");
-  return `<div class="card"><h2>自己ベスト <span class="mini">距離×ラウンド別</span></h2>${body}${groupRows}</div>`;
-}
-function conditionSplitCard(rows) {
-  const cs = conditionSplit(rows, isWindy);
-  if (cs.windy.sessions < 2 || cs.calm.sessions < 2) return "";
-  const line = (g) => `<div class="listItem recordReadOnlyItem">
-    <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本${g.biasX != null && Math.abs(g.biasX) >= 0.3 ? ` / 平均中心 ${cmOffsetText(g.biasX, "x")}` : ""}</div></div>
-    <div class="big">${g.avg != null ? g.avg.toFixed(2) : "—"}<small> / 矢の集まり半径(RMS) ${g.avgRms != null ? g.avgRms.toFixed(1) + "cm" : "—"}</small></div>
-  </div>`;
-  return `<div class="card"><h2>風の有無で比べる <span class="mini">風あり vs 風なし</span></h2>${line(cs.calm)}${line(cs.windy)}
-    <div class="hint">風の有無で平均点と矢の集まり方がどれだけ変わるかの俯瞰です。風ありの平均中心が横へ流れていれば、風待ちやエイムオフの効果を検討できます。</div></div>`;
-}
-function reasonBreakdownCard(rows) {
-  const rb = reasonBreakdown(rows);
-  if (rb.tagged < 5) return "";
-  const body = rb.items
-    .slice(0, 6)
-    .map(
-      (g) => `<div class="listItem recordReadOnlyItem">
-    <div><div class="t">${esc(g.reason)}</div><div class="d">${g.count}本${Math.abs(g.mx || 0) >= 0.3 || Math.abs(g.my || 0) >= 0.3 ? ` / 平均ズレ ${driftText(g.mx || 0, g.my || 0)}` : ""}</div></div>
-    <div class="big">${g.avg != null ? g.avg.toFixed(2) : "—"}<small> / 平均点</small></div>
-  </div>`,
-    )
-    .join("");
-  return `<div class="card"><h2>外れた理由の傾向 <span class="mini">${rb.tagged}本にタグ</span></h2>${body}
-  <div class="hint">記録中に付けた理由タグ別の平均点と平均ズレ方向です。特定のタグが同じ方向へ寄っていれば、次の練習の重点候補になります。</div></div>`;
-}
-/* 「今日の結論」カード: 初心者文法の入口。既存の todayConclusion() の言い換え文をそのまま大きく出す。
-   新しい統計計算はしない — 表示だけの薄いラッパー */
-function todayConclusionCardHtml(rows) {
-  const c = todayConclusion(rows);
-  if (!c) return "";
-  return `<div class="card todayConclusionCard" data-testid="today-conclusion">
-    <div class="todayConclusionKicker">練習の傾向</div>
-    <p class="todayConclusionText">${esc(c.text)}</p>
-  </div>`;
-}
-
-/* ============ gamification: バッジ12種の線画SVG + 分析タブ末尾のバッジ一覧 ============
+/* ============ gamification: バッジ12種の線画SVG + 設定のバッジ一覧 ============
    ICONS規約準拠（10-storage-native.js ICONS 同様: 24pxグリッド・currentColor・視覚的に3要素以内）。
    絵文字は使わない（gamification-final-design.md 観点5 確定）。48-gamification.js の
    BADGE_DEFS と id を1対1対応させる。ここは表示専用データなので純関数ファイルには置かない。 */
@@ -1387,7 +1198,7 @@ const BADGE_ICONS = {
   all_weather:
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><path d="M7.5 17.5a4 4 0 0 1 .3-8 5 5 0 0 1 9.6 1.4A3.3 3.3 0 0 1 17 17.5z"/><path d="M9 8.2A4.4 4.4 0 0 1 12.6 3"/></svg>',
 };
-/* 分析タブ末尾のバッジ一覧（実績グリッド）。enabled=false では何も描画しない。
+/* バッジ一覧（実績グリッド）。v5 段 7 で分析タブの末尾から設定の「ゲーミフィケーション」へ移した。enabled=false では何も描画しない。
    解除済み=accent 1px枠+アイコンaccent色、未解除=line2枠+opacity.45（絵文字前提のgrayscaleフィルタは使わない） */
 function gamificationBadgesCardHtml() {
   const g = db.settings.gamification;
@@ -1421,95 +1232,807 @@ function gamificationBadgesCardHtml() {
     </div>
   </section>`;
 }
-function renderAnalysis(m) {
-  const f = ui.analysisFilter;
-  const allRows = buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
+/* ============ 分析（v5 段 7）: スコア / 着弾 / 比較 / 射型 ============
+   文の規則（docs/design/ui-redesign-plan.md 5節、docs/design/v5/design.md 4.5）:
+   - 対象（距離・的・射数、回数と射数、期間）を必ず文に書く
+   - 傾向の文は同じ条件の記録が ANALYSIS_TREND_MIN 回以上あるときだけ。数値と差だけを書く
+   - 原因は書かない。助言・励ましの文は置かない
+   - グループRMS（まとまり）と着弾中心のずれ（偏り）は別の枠に出す
+   - 位置のない矢から着弾は作らない（「着弾データなし」）
+   統計の定義は変えない: 正式な値は全射（A）。外れ値候補を除いた値（B）とロバスト推定（C）は
+   「比較用の指標」を開いたときだけ出す（docs/design/grouping-stats-v3.md） */
+const ANALYSIS_TABS = ["score", "impact", "compare", "form"];
+const ANALYSIS_TREND_MIN = 5; /* 傾向の文を出す最少回数（同じ条件） */
+const ANALYSIS_TREND_RECENT = 3; /* 「直近」として平均する回数 */
+const ANALYSIS_CHART_MAX = 12; /* 推移の図に出す回数（直近） */
+const ANALYSIS_PICK_MAX = 200; /* 記録を選ぶ欄に並べる件数（新しい順） */
+const ANALYSIS_PERIODS = [
+  ["all", "全期間"],
+  ["30d", "直近30日"],
+  ["90d", "直近90日"],
+];
+function showAnalysisTab(tab) {
+  if (!ANALYSIS_TABS.includes(tab)) return;
+  const changed = ui.analysisTab !== tab;
+  ui.analysisTab = tab;
+  if (view !== "analysis") {
+    showView("analysis");
+    return;
+  }
+  render();
+  if (changed) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+}
+/* 記録の結果・ノートの詳細の「分析で見る」。位置のある記録は 着弾、点数だけの記録は スコア を、その記録の条件で開く */
+function openAnalysisFor(sess) {
+  if (sess && sess.id) {
+    ui.analysisTab = sessionHasPos(sess) ? "impact" : "score";
+    ui.analysisImpactId = sess.id;
+    if (anArrows(sess).length) ui.analysisFilter.cond = anCondKey(sess);
+    ui.scrollByView.analysis = 0;
+  }
+  if (view === "analysis") {
+    render();
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  } else showView("analysis");
+}
+function anArrows(sess) {
+  return (Array.isArray(sess && sess.ends) ? sess.ends : []).flatMap((e) =>
+    Array.isArray(e) ? e.filter((a) => a && typeof a === "object") : [],
+  );
+}
+function anTotal(sess) {
+  return sumScores(anArrows(sess));
+}
+/* 分析の対象にする記録（矢が1本以上ある記録）。日付の新しい順 */
+function analysisSessionList() {
+  return sessionsByDateDesc().filter((s) => Array.isArray(s.ends) && anArrows(s).length > 0);
+}
+/* スコアの条件: 距離・的・射数が同じ記録（今日の結果・待機画面の「同じ条件」と同じ区切り） */
+function anCondKey(sess) {
+  return [
+    String(sess.dist),
+    Number(sess.faceD) || 0,
+    sess.faceType || "single",
+    anArrows(sess).length,
+  ].join("|");
+}
+function anCondLabel(sess) {
+  return `${distanceLabel(sess.dist)}・${faceLabel(sess)}・${anArrows(sess).length}射`;
+}
+/* 比較で合計を並べてよい組: 距離・的・射数・ラウンドが同じ */
+function anComparable(a, b) {
+  return (
+    !!a &&
+    !!b &&
+    trSameCondition(a, b, { matchArrows: true }) &&
+    (a.round || "free") === (b.round || "free")
+  );
+}
+function anDateLabel(iso) {
+  const p = dateParts(iso);
+  if (!p) return "日付なし";
+  const now = dateParts(today());
+  return now && p.y === now.y ? fmtMDW(iso) : `${p.y}/${p.mo}/${p.d}`;
+}
+function anShortDate(iso) {
+  const p = dateParts(iso);
+  if (!p) return "日付なし";
+  const now = dateParts(today());
+  return now && p.y === now.y ? fmtMD(iso) : fmtD(iso);
+}
+function anSessLabel(sess) {
+  return `${anDateLabel(sess.date)} ${distanceLabel(sess.dist)} ${anArrows(sess).length}射 ${anTotal(sess)}点${sessionHasPos(sess) ? "" : "・点数だけ"}`;
+}
+function anSessOptionsHtml(list, selId) {
+  return list
+    .map(
+      (s) =>
+        `<option value="${esc(s.id)}"${s.id === selId ? " selected" : ""}>${esc(anSessLabel(s))}</option>`,
+    )
+    .join("");
+}
+/* 小数1桁で並べた2つの値の差。表示した数どうしの引き算と一致させる（622.1 と 620.0 なら +2.1） */
+function anDiff1(b, a) {
+  return +(+b.toFixed(1) - +a.toFixed(1)).toFixed(1);
+}
+function anMean(vals) {
+  return vals.length ? vals.reduce((t, v) => t + v, 0) / vals.length : null;
+}
+/* 着弾中心のずれの向き。0.05cm 未満の軸は書かない */
+function anOffsetDirText(mx, my) {
+  const parts = [];
+  if (Math.abs(mx) >= 0.05) parts.push(`${mx > 0 ? "右" : "左"} ${Math.abs(mx).toFixed(1)}cm`);
+  if (Math.abs(my) >= 0.05) parts.push(`${my > 0 ? "上" : "下"} ${Math.abs(my).toFixed(1)}cm`);
+  return parts.length ? parts.join("・") : "的の中心と同じ位置";
+}
+/* 着弾の数値（全射＝A）。位置のある矢が3射以上あるときだけ値を持つ */
+function analysisImpactModel(sess) {
+  const m = sessionMetrics(sess);
+  const st = m.st;
+  const base = { arrows: m.all.length, positioned: m.pts.length, st, ok: false };
+  if (!analysisHasGroupingEvidence(st)) return base;
+  const flagged = (st.excluded || []).length;
+  return Object.assign(base, {
+    ok: true,
+    rms: st.rr,
+    ci: st.rrCi || null,
+    mx: st.mx,
+    my: st.my,
+    offset: Math.hypot(st.mx, st.my),
+    sx: st.sx,
+    sy: st.sy,
+    ciX: Number.isFinite(st.ciX) ? st.ciX : null,
+    ciY: Number.isFinite(st.ciY) ? st.ciY : null,
+    refReady: st.n >= MCD_MIN_N,
+    rmsB: st.excl && Number.isFinite(st.excl.rr) ? st.excl.rr : null,
+    rmsC: st.robust && Number.isFinite(st.robust.rr) ? st.robust.rr : null,
+    flagged,
+  });
+}
+/* エンドごとの RMS（全射と同じ定義）。位置のある矢が2射未満のエンドは null */
+function analysisEndRms(sess) {
+  return (Array.isArray(sess && sess.ends) ? sess.ends : []).map((end) => {
+    const pts = (Array.isArray(end) ? end : [])
+      .filter(arrowHasPos)
+      .map((a) => ({ x: Number(a.x), y: Number(a.y) }));
+    if (pts.length < 2) return null;
+    const st = sampleStats(pts);
+    return st && Number.isFinite(st.rr) ? st.rr : null;
+  });
+}
+/* スコアの集計。list は同じ条件の記録（日付の古い順）。合計は保存された点数の和で、計算し直さない */
+function analysisScoreModel(list) {
+  const n = list.length;
+  if (!n) return null;
+  const totals = list.map(anTotal);
+  const mean = anMean(totals);
+  const latest = list[n - 1];
+  let bestIdx = 0;
+  totals.forEach((v, i) => {
+    if (v >= totals[bestIdx]) bestIdx = i;
+  });
+  const model = {
+    n,
+    totals,
+    mean,
+    sd: n >= 2 ? sampleSd(totals) : null,
+    arrows: list.reduce((t, s) => t + anArrows(s).length, 0),
+    firstDate: list[0].date,
+    lastDate: latest.date,
+    latest: { total: totals[n - 1], date: latest.date },
+    best: { total: totals[bestIdx], date: list[bestIdx].date },
+    scoreOnly: list.filter((s) => !sessionHasPos(s)).length,
+    trend: null,
+    halves: null,
+    ends: null,
+  };
+  if (n >= ANALYSIS_TREND_MIN) {
+    const recent = totals.slice(-ANALYSIS_TREND_RECENT),
+      earlier = totals.slice(0, -ANALYSIS_TREND_RECENT);
+    const rm = anMean(recent),
+      em = anMean(earlier);
+    model.trend = {
+      recentN: recent.length,
+      recentMean: rm,
+      earlierN: earlier.length,
+      earlierMean: em,
+      diff: anDiff1(rm, em),
+    };
+  }
+  const halves = list.map(sessionHalves).filter(Boolean);
+  if (halves.length) {
+    const first = anMean(halves.map((h) => h[0])),
+      second = anMean(halves.map((h) => h[1]));
+    const diffs = halves.map((h) => h[1] - h[0]);
+    model.halves = {
+      n: halves.length,
+      first,
+      second,
+      diff: anDiff1(second, first),
+      diffSd: halves.length >= 2 ? sampleSd(diffs) : null,
+      blockArrows: scorecardPlan(latest).blockEnds * scorecardPlan(latest).per,
+    };
+  }
+  /* エンド別の平均は、エンドの分け方（各エンドの射数の並び）が最新の記録と同じ回だけで出す */
+  const shape = (s) => s.ends.map((e) => (Array.isArray(e) ? e.length : 0)).join(",");
+  const ref = shape(latest);
+  const same = list.filter((s) => shape(s) === ref);
+  const endCount = latest.ends.length;
+  if (endCount >= 2)
+    model.ends = {
+      n: same.length,
+      per: Math.max(...latest.ends.map((e) => (Array.isArray(e) ? e.length : 0))),
+      avg: Array.from({ length: endCount }, (_, i) => anMean(same.map((s) => sumScores(s.ends[i])))),
+    };
+  return model;
+}
+/* 数値の棒の列（エンド別の平均・エンドごとの RMS）。1段 6 つまで。null は「—」 */
+function valueStripHtml(vals, o) {
+  const opt = o || {};
+  const fin = vals.filter((v) => Number.isFinite(v));
+  if (!fin.length) return "";
+  const lo = Math.min(...fin),
+    hi = Math.max(...fin);
+  const per = vals.length <= 6 ? vals.length : 6;
+  const dec = opt.dec == null ? 1 : opt.dec;
+  const cell = (v, i) =>
+    Number.isFinite(v)
+      ? `<div${opt.markHigh && v === hi ? ' class="hi"' : ""} data-end="${i}"><b>${v.toFixed(dec)}</b><i style="height:${Math.round(8 + ((v - lo) / (hi - lo || 1)) * 30)}px"></i><span>${i + 1}</span></div>`
+      : `<div data-end="${i}"><b>—</b><i style="height:2px"></i><span>${i + 1}</span></div>`;
+  let h = "";
+  for (let r = 0; r * per < vals.length; r++) {
+    const row = vals.slice(r * per, (r + 1) * per).map((v, i) => cell(v, r * per + i));
+    while (row.length < per) row.push("<div></div>");
+    h += `<div class="strip" style="grid-template-columns:repeat(${per},1fr)">${row.join("")}</div>`;
+  }
+  return `<div data-testid="${esc(opt.testid || "value-strip")}" role="group" aria-label="${esc(opt.label || "")}">${h}</div>`;
+}
+function analysisTabHeadingHtml(tab) {
+  const name = { score: "スコア", impact: "着弾", compare: "比較", form: "射型" }[tab];
+  return `<h2 class="srOnly">分析: ${name}</h2>`;
+}
+function analysisEmptyHtml(msg) {
+  return `<div class="empty" data-testid="analysis-empty"><b>記録がまだありません</b>${msg}<p class="anEmptyAct"><button type="button" class="btn" id="anEmptyCta">記録タブへ</button></p></div>`;
+}
+function anSetupOptionsHtml(f) {
+  return `<option value="">すべて</option><option value="__none"${f.setupId === "__none" ? " selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}"${f.setupId === s.id ? " selected" : ""}>${esc(s.name)}</option>`).join("")}`;
+}
+function anPeriodOptionsHtml(f) {
+  return ANALYSIS_PERIODS.map(
+    ([id, lb]) => `<option value="${id}"${f.period === id ? " selected" : ""}>${lb}</option>`,
+  ).join("");
+}
+function anSetupFilterText(f) {
+  if (!f.setupId) return "";
+  if (f.setupId === "__none") return "、弓具は未指定の記録";
+  const s = db.setups.find((x) => x.id === f.setupId);
+  return s ? `、弓具は ${esc(s.name)}` : "";
+}
+function anPeriodText(f) {
+  const p = ANALYSIS_PERIODS.find((x) => x[0] === f.period);
+  return p && f.period !== "all" ? `、期間は${p[1]}` : "";
+}
+/* ---------- スコア ---------- */
+function analysisConditionRowsHtml(rows, selKey) {
+  const by = new Map();
+  rows.forEach((r) => {
+    if (!r.n) return;
+    const key = anCondKey(r.s);
+    const g = by.get(key) || { key, ref: r.s, list: [] };
+    g.list.push(r.s);
+    by.set(key, g);
+  });
+  const groups = [...by.values()]
+    .map((g) => {
+      const list = g.list.sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")));
+      const totals = list.map(anTotal);
+      let bi = 0;
+      totals.forEach((v, i) => {
+        if (v >= totals[bi]) bi = i;
+      });
+      return {
+        key: g.key,
+        label: anCondLabel(g.ref),
+        n: list.length,
+        first: list[0].date,
+        last: list[list.length - 1].date,
+        mean: anMean(totals),
+        best: totals[bi],
+        bestDate: list[bi].date,
+      };
+    })
+    .sort((a, b) => String(b.last || "").localeCompare(String(a.last || "")) || b.n - a.n);
+  if (!groups.length) return "";
+  return groups
+    .map(
+      (g) => `<button type="button" class="lrow anCondRow" data-cond="${esc(g.key)}" data-testid="analysis-cond-row"${g.key === selKey ? ' aria-current="true"' : ""}>
+      <span class="lmain"><b>${esc(g.label)}</b><span>${g.n}回・${fmtDateRange(g.first, g.last) || "日付なし"}${g.key === selKey ? "・表示中" : ""}</span></span>
+      <span class="lv">平均 ${g.mean.toFixed(1)}<small>最高 ${g.best}（${esc(anShortDate(g.bestDate))}）</small></span>
+    </button>`,
+    )
+    .join("");
+}
+/* 多距離ラウンドの合計の最高（最後まで打ち終えたラウンドだけ） */
+function roundGroupBestRowsHtml(rows) {
+  const bests = roundGroupBests(aggregateRoundGroups(rows));
+  if (!bests.length) return "";
+  return bests
+    .sort((a, b) => b.total - a.total)
+    .map(
+      (b) => `<div class="lrow" data-testid="analysis-round-best">
+      <span class="lmain"><b>${esc(roundLabel(b.roundId))} 合計</b><span>打ち終えたラウンドの最高・${b.arrows}射</span></span>
+      <span class="lv">${b.total}<small>${esc(anShortDate(b.date))}</small></span>
+    </div>`,
+    )
+    .join("");
+}
+function analysisWindSplitHtml(condRows, count) {
+  const cs = conditionSplit(condRows, isWindy);
+  if (cs.windy.sessions < 2 || cs.calm.sessions < 2) return "";
+  const meanTotal = (g) => g.avg * (g.arrows / g.sessions);
+  const calm = meanTotal(cs.calm),
+    windy = meanTotal(cs.windy);
+  const line = (key, g, v) => `<div class="lrow" data-wind="${key}">
+      <span class="lk">${esc(g.label)}</span>
+      <span class="lv">平均 ${v.toFixed(1)} 点<small>${g.sessions}回・${g.arrows}射</small></span>
+    </div>`;
+  return `<section class="vsec" data-testid="analysis-wind-split">
+    <div class="vsecH"><h2>風の強い日と弱い日</h2><span class="aside">${count}回</span></div>
+    ${line("calm", cs.calm, calm)}${line("windy", cs.windy, windy)}
+    <div class="lrow" data-wind="diff"><span class="lk">差（風あり − 風なし・弱風）</span><span class="lv">${signedText(anDiff1(windy, calm), 1)} 点</span></div>
+    <p class="basis">対象は上と同じ ${count}回です。「風あり」は、天気が「風 強」か、風速が 3.5m/s 以上の記録です。ほかの条件はそろえていないので、差が風によるものとは限りません。</p>
+  </section>`;
+}
+function analysisScoreHtml(allRows, f) {
+  const sessions = analysisSessionList();
+  if (!sessions.length)
+    return analysisEmptyHtml("練習を記録すると、合計点の推移や前半と後半の差をここに表示します。");
+  /* 条件の選択肢は全記録から作る（期間や弓具を変えても、選んだ条件が欄から消えない） */
+  const conds = new Map();
+  sessions.forEach((s) => {
+    const k = anCondKey(s);
+    if (!conds.has(k)) conds.set(k, anCondLabel(s));
+  });
+  if (!f.cond || !conds.has(f.cond)) f.cond = anCondKey(sessions[0]);
+  const rows = filterAnalysisRows(allRows, { setupId: f.setupId, period: f.period, today: today() });
+  const condRows = rows
+    .filter((r) => r.n && anCondKey(r.s) === f.cond)
+    .sort(
+      (a, b) => String(a.date || "").localeCompare(String(b.date || "")) || (a.id > b.id ? 1 : -1),
+    );
+  const list = condRows.map((r) => r.s);
+  const condLabel = conds.get(f.cond);
+  const head = `<div class="cond one"><label><span>条件</span><select class="pick" id="anCond">${[...conds].map(([k, v]) => `<option value="${esc(k)}"${k === f.cond ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></label></div>
+  <div class="cond"><label><span>弓具</span><select class="pick" id="anSetup">${anSetupOptionsHtml(f)}</select></label><label><span>期間</span><select class="pick" id="anPeriod">${anPeriodOptionsHtml(f)}</select></label></div>`;
+  const filterText = `${anSetupFilterText(f)}${anPeriodText(f)}`;
+  const m = analysisScoreModel(list);
+  const overviewRows = `${analysisConditionRowsHtml(rows, f.cond)}${roundGroupBestRowsHtml(rows)}`;
+  const overview = overviewRows
+    ? `<section class="vsec" data-testid="analysis-conditions">
+      <div class="vsecH"><h2>条件ごとの記録</h2><span class="aside">${rows.filter((r) => r.n).length}回</span></div>
+      ${overviewRows}
+      <p class="basis">距離・的・射数が同じ記録ごとの、合計点の平均と最高です${filterText ? `（${filterText.slice(1)}）` : ""}。行を押すと、その条件を上に表示します。</p>
+    </section>`
+    : "";
+  const monthly = monthlyCard(rows.filter((r) => r.n).map((r) => r.s));
+  if (!m)
+    return `${head}
+    <div class="empty" data-testid="analysis-score-none"><b>この条件の記録はありません</b>${esc(condLabel)}${filterText} に合う記録が 0回です。期間か弓具の選択を広げると表示されます。</div>
+    ${overview}${monthly}`;
+  const ref = list[list.length - 1];
+  const perfect = anArrows(ref).length * perfectScoreValue(ref);
+  const shown = list.slice(-ANALYSIS_CHART_MAX);
+  const shownTotals = shown.map(anTotal);
+  const meanInRange = m.mean >= Math.min(...shownTotals) - 5 && m.mean <= Math.max(...shownTotals) + 2;
+  const chart =
+    m.n >= 2
+      ? totalsLineChartHtml(shownTotals, shown.map((s) => anShortDate(s.date)), meanInRange ? m.mean : NaN)
+      : "";
+  const trend = m.trend
+    ? `<p class="fact" data-testid="analysis-trend">直近${m.trend.recentN}回の平均は ${m.trend.recentMean.toFixed(1)} 点、それより前の${m.trend.earlierN}回の平均は ${m.trend.earlierMean.toFixed(1)} 点で、差は <b>${signedText(m.trend.diff, 1)} 点</b>です。</p>`
+    : `<p class="basis" data-testid="analysis-trend-pending">同じ条件の記録が ${ANALYSIS_TREND_MIN}回以上あるときに、直近${ANALYSIS_TREND_RECENT}回とそれより前の平均の差を表示します（いまは ${m.n}回）。</p>`;
+  const sdLine =
+    m.sd != null
+      ? `<p class="fact" data-testid="analysis-sd">回ごとの標準偏差は ${m.sd.toFixed(1)} 点です。</p>`
+      : "";
+  const chartNote =
+    m.n >= 2
+      ? `<p class="basis">${m.n > shown.length ? `図は直近${shown.length}回（全${m.n}回のうち）です。` : ""}${meanInRange ? "破線は対象の平均です。" : ""}</p>`
+      : `<p class="basis">記録が2回になると、推移の図を表示します。</p>`;
+  const halves = m.halves
+    ? `<section class="vsec" data-testid="analysis-halves">
+      <div class="vsecH"><h2>前半と後半</h2><span class="aside">${m.halves.blockArrows}射ずつ</span></div>
+      <div class="figs">
+        <div class="fig" data-fig="first"><div class="l">前半の平均</div><div class="n">${m.halves.first.toFixed(1)}</div></div>
+        <div class="fig" data-fig="second"><div class="l">後半の平均</div><div class="n">${m.halves.second.toFixed(1)}</div></div>
+        <div class="fig" data-fig="diff"><div class="l">後半 − 前半</div><div class="n">${signedText(m.halves.diff, 1)}</div></div>
+      </div>
+      <p class="basis">${m.halves.n}回の平均です${m.halves.n < m.n ? `（前半と後半を打ち終えた記録だけ。対象 ${m.n}回のうち）` : ""}。${m.halves.diffSd != null ? `差の回ごとの標準偏差は ${m.halves.diffSd.toFixed(1)} 点です。` : ""}</p>
+    </section>`
+    : "";
+  const ends = m.ends
+    ? `<section class="vsec" data-testid="analysis-end-avg">
+      <div class="vsecH"><h2>エンド別の平均</h2><span class="aside">${m.ends.per}射・${m.ends.per * perfectScoreValue(ref)}点満点</span></div>
+      ${valueStripHtml(m.ends.avg, { dec: 1, markHigh: true, testid: "analysis-end-strip", label: "エンド別の平均" })}
+      <p class="basis">各エンドの合計を ${m.ends.n}回で平均した値です${m.ends.n < m.n ? `（エンドの分け方が最新の記録と同じ回だけ。対象 ${m.n}回のうち）` : ""}。最も高いエンドに色を付けています。${m.ends.avg.length > 6 ? "1段に 6エンドずつ並べています。" : ""}</p>
+    </section>`
+    : "";
+  return `${head}
+  <section class="vsec anFirst" data-testid="analysis-score">
+    <div class="figs">
+      <div class="fig" data-fig="mean"><div class="l">平均</div><div class="n">${m.mean.toFixed(1)}</div><div class="d">${m.n}回</div></div>
+      <div class="fig" data-fig="latest"><div class="l">直近</div><div class="n">${m.latest.total}</div><div class="d">${esc(anShortDate(m.latest.date))}</div></div>
+      <div class="fig" data-fig="best"><div class="l">最高</div><div class="n">${m.best.total}</div><div class="d">${esc(anShortDate(m.best.date))}</div></div>
+    </div>
+    <p class="basis" data-testid="analysis-target">対象: ${esc(condLabel)}、${m.n}回・${m.arrows}射、${fmtDateRange(m.firstDate, m.lastDate) || "日付なし"}${filterText}。${m.scoreOnly ? `うち${m.scoreOnly}回は点数だけの記録です。` : ""}</p>
+  </section>
+  <section class="vsec" data-testid="analysis-trend-section">
+    <div class="vsecH"><h2>合計点の推移</h2><span class="aside">${perfect}点満点</span></div>
+    ${chart}
+    ${sdLine}${trend}${chartNote}
+  </section>
+  ${halves}${ends}
+  ${scoreDistCard(list)}
+  ${analysisWindSplitHtml(condRows, m.n)}
+  ${overview}${monthly}
+  <p class="foot">数値はこの端末に保存された記録の点数から計算しています。</p>`;
+}
+/* ---------- 着弾 ---------- */
+function analysisRefMetricsHtml(im) {
+  const body = im.refReady
+    ? `<div class="lrow" data-ref="b"><span class="lk">外れ値候補を除いたRMS</span><span class="lv">${im.rmsB != null ? `${im.rmsB.toFixed(1)} cm` : "—"}<small>${im.st.total}射のうち ${im.flagged}射を除く</small></span></div>
+      <div class="lrow" data-ref="c"><span class="lk">ロバストRMS</span><span class="lv">${im.rmsC != null ? `${im.rmsC.toFixed(1)} cm` : "—"}<small>再重み付け MCD</small></span></div>
+      <div class="lrow" data-ref="flagged"><span class="lk">外れ値候補</span><span class="lv">${im.flagged}射</span></div>`
+    : `<p class="basis">位置のある矢が ${MCD_MIN_N}射以上あるときに計算します（いまは ${im.positioned}射）。</p>`;
+  return `<details class="anRef" data-testid="analysis-ref-metrics">
+    <summary><span class="anRefT"><b>比較用の指標</b><small>外れ値候補を除いた値・ロバスト推定</small></span></summary>
+    <div class="anRefBody">
+      <p class="basis">正式な値は上の全射の RMS です。下の2つは、大きく外れた矢の影響を比べるための参考の値です。外れた矢を除くと小さく出るため、正式な値には使いません。</p>
+      ${body}
+    </div>
+  </details>`;
+}
+function analysisGroupingTrendHtml(sess, sessions) {
+  const rows = sessions
+    .filter((s) => trSameCondition(s, sess))
+    .map((s) => ({ s, im: analysisImpactModel(s) }))
+    .filter((r) => r.im.ok)
+    .reverse();
+  if (!rows.length) return "";
+  const shown = rows.slice(-8);
+  return `<section class="vsec" data-testid="analysis-grouping-trend">
+    <div class="vsecH"><h2>グループRMSの推移</h2><span class="aside">${rows.length}回</span></div>
+    <div class="cmp anTrendTbl">
+      <div class="cmpRow is-head"><div>日付</div><div>射数</div><div>RMS cm</div><div>ずれ cm</div></div>
+      ${shown
+        .map(
+          (r) =>
+            `<div class="cmpRow${r.s.id === sess.id ? " is-cur" : ""}" data-id="${esc(r.s.id)}"><div>${esc(anShortDate(r.s.date))}${r.s.id === sess.id ? "<small>表示中</small>" : ""}</div><div>${r.im.st.n}</div><div>${r.im.rms.toFixed(1)}</div><div>${r.im.offset.toFixed(1)}</div></div>`,
+        )
+        .join("")}
+    </div>
+    <p class="basis">対象: ${esc(distanceLabel(sess.dist))}・${esc(faceLabel(sess))} の記録のうち、位置のある矢が3射以上ある ${rows.length}回${rows.length > shown.length ? `（直近${shown.length}回を表示）` : ""}。RMS は全射の値、ずれは的の中心から着弾中心までの距離、射数は位置のある矢の数です。</p>
+  </section>`;
+}
+function analysisImpactHtml() {
+  const sessions = analysisSessionList();
+  if (!sessions.length)
+    return {
+      html: analysisEmptyHtml("的面で記録すると、着弾の図とグループRMSをここに表示します。"),
+      sess: null,
+    };
+  const pick = sessions.slice(0, ANALYSIS_PICK_MAX);
+  let sess = pick.find((s) => s.id === ui.analysisImpactId);
+  if (!sess) {
+    sess = pick.find(sessionHasPos) || pick[0];
+    ui.analysisImpactId = sess.id;
+  }
+  const setup = db.setups.find((x) => x.id === sess.setupId);
+  const im = analysisImpactModel(sess);
+  const dateText = esc(anDateLabel(sess.date));
+  const head = `<div class="cond one"><label><span>練習</span><select class="pick" id="anImpact">${anSessOptionsHtml(pick, sess.id)}</select></label></div>`;
+  const sightLink = `<section class="vsec"><button type="button" class="lrow link" id="anToSight" data-testid="analysis-to-sight"><span class="lmain"><b>サイトの記録と調整の目安</b><span>弓具 &gt; サイト</span></span><span class="go" aria-hidden="true">›</span></button></section>`;
+  if (!im.positioned) {
+    const cols = scorecardCountCols(sess);
+    const all = anArrows(sess);
+    return {
+      sess: null,
+      html: `${head}
+      <div class="noImpact" data-testid="analysis-no-impact"><b>着弾データなし</b><span>${dateText} は点数だけの記録です（${im.arrows}射のうち、位置のある矢は 0射）。点数から着弾の位置を作ることはしません。</span></div>
+      <div class="lrow"><span class="lk">合計</span><span class="lv">${anTotal(sess)} 点<small>${im.arrows}射</small></span></div>
+      <div class="lrow"><span class="lk">${cols[0].sub} / ${cols[1].sub}</span><span class="lv">${cols[0].count(all)} / ${cols[1].count(all)}</span></div>
+      ${analysisGroupingTrendHtml(sess, sessions)}${sightLink}`,
+    };
+  }
+  const missing = im.arrows - im.positioned;
+  const posText = `位置のある ${im.positioned}射${missing ? `（位置なし ${missing}射は図と数値に入れていません）` : ""}`;
+  const plot = `<div class="anBleed" id="anPlot" data-testid="analysis-plot"></div>`;
+  const footprint = `<p class="basis">矢の円は判定と同じ大きさ（外径 ${(sessionScoringRadius(sess, setup) * 20).toFixed(1)}mm）です。周りの薄い輪は位置を探すための目印で、判定には使いません。</p>`;
+  if (!im.ok)
+    return {
+      sess,
+      html: `${head}${plot}
+      <div class="noImpact" data-testid="analysis-impact-pending"><b>グループRMSは計算していません</b><span>対象: ${dateText}・${esc(distanceLabel(sess.dist))}・${esc(faceLabel(sess))}、${posText}。位置のある矢が3射以上あるときに計算します。</span></div>
+      ${footprint}${sightLink}`,
+    };
+  const endRms = analysisEndRms(sess);
+  const per = scorecardPlan(sess).per;
+  return {
+    sess,
+    html: `${head}${plot}
+    <section class="vsec anFirst" data-testid="analysis-impact">
+      <div class="figs two">
+        <div class="fig" data-fig="rms"><div class="l">グループRMS（全射）</div><div class="n">${im.rms.toFixed(1)}<small>cm</small></div><div class="d">${im.ci ? `95%区間 ${im.ci.lo.toFixed(1)}〜${im.ci.hi.toFixed(1)}cm` : `95%区間は ${MCD_MIN_N}射以上で計算`}</div></div>
+        <div class="fig" data-fig="offset"><div class="l">着弾中心のずれ</div><div class="n">${im.offset.toFixed(1)}<small>cm</small></div><div class="d">${anOffsetDirText(im.mx, im.my)}</div></div>
+      </div>
+      <div class="figs two">
+        <div class="fig" data-fig="sx"><div class="l">左右のばらつき</div><div class="n">${im.sx.toFixed(1)}<small>cm</small></div></div>
+        <div class="fig" data-fig="sy"><div class="l">上下のばらつき</div><div class="n">${im.sy.toFixed(1)}<small>cm</small></div></div>
+      </div>
+      <p class="fact">グループRMSは矢のまとまりの大きさ、着弾中心のずれは的の中心からの偏りです。別のものなので、分けて表示しています。</p>
+      <p class="basis" data-testid="analysis-impact-target">対象: ${dateText}・${esc(distanceLabel(sess.dist))}・${esc(faceLabel(sess))}、${posText}。十字が着弾中心、破線の円は着弾中心から半径 RMS の範囲です。${im.ciX != null && im.ciY != null ? `着弾中心の位置の誤差（95%区間）は、左右 ±${im.ciX.toFixed(1)}cm・上下 ±${im.ciY.toFixed(1)}cm です。` : ""}</p>
+      ${footprint}
+    </section>
+    <section class="vsec" data-testid="analysis-end-rms">
+      <div class="vsecH"><h2>エンドごとのRMS</h2><span class="aside">cm・${per}射ずつ</span></div>
+      ${valueStripHtml(endRms, { dec: 1, testid: "analysis-end-rms-strip", label: "エンドごとのRMS" })}
+      <p class="basis">${per}射だけの値は誤差が大きく、エンドの間の差は目安です。${endRms.some((v) => v == null) ? "位置のある矢が2射未満のエンドは「—」です。" : ""}${endRms.length > 6 ? "1段に 6エンドずつ並べています。" : ""}</p>
+    </section>
+    <section class="vsec">${analysisRefMetricsHtml(im)}</section>
+    ${analysisGroupingTrendHtml(sess, sessions)}${sightLink}`,
+  };
+}
+/* ---------- 比較 ---------- */
+function analysisCompareDefaults(sessions) {
+  const c = ui.analysisCmp;
+  let b = sessions.find((s) => s.id === c.b),
+    a = sessions.find((s) => s.id === c.a);
+  if (!b) b = sessions[0];
+  /* A の既定: B と条件が同じ直前の記録。B に位置があれば、位置のある記録を先に探す */
+  if (!a) {
+    const others = sessions.filter((s) => s.id !== b.id);
+    const same = others.filter((s) => anComparable(s, b));
+    a = (sessionHasPos(b) && same.find(sessionHasPos)) || same[0] || others[0];
+  }
+  c.a = a.id;
+  c.b = b.id;
+  return { a, b };
+}
+function anCondFullLabel(sess) {
+  if ((sess.round || "free") === "free") return `${anCondLabel(sess)}、自由練習`;
+  const round = roundLabel(sess.round);
+  /* ラウンド名が「70m 72射」のように条件と同じ内容なら繰り返さない */
+  const same = round.replace(/\s+/g, "") === `${distanceLabel(sess.dist)}${anArrows(sess).length}射`;
+  return same ? `${anCondLabel(sess)}（ラウンド）` : `${anCondLabel(sess)}、${round}`;
+}
+function anSightText(sess) {
+  const v = sightValueText(sess.sightV),
+    h = sightValueText(sess.sightH);
+  return v === "—" && h === "—" ? "記録なし" : `上下 ${v}・左右 ${h}`;
+}
+function analysisCompareSideHtml(key, sess) {
+  const im = analysisImpactModel(sess);
+  const cols = scorecardCountCols(sess);
+  const all = anArrows(sess);
+  const halves = sessionHalves(sess);
+  return `<section class="vsec" data-testid="compare-side-${key}">
+    <div class="vsecH"><h2>${key.toUpperCase()} ${esc(anDateLabel(sess.date))}</h2><span class="aside">${esc(anCondLabel(sess))}</span></div>
+    <div class="lrow"><span class="lk">合計</span><span class="lv">${anTotal(sess)} 点<small>${all.length}射</small></span></div>
+    ${halves ? `<div class="lrow"><span class="lk">前半 / 後半</span><span class="lv">${halves[0]} / ${halves[1]}</span></div>` : ""}
+    <div class="lrow"><span class="lk">${cols[0].sub} / ${cols[1].sub}</span><span class="lv">${cols[0].count(all)} / ${cols[1].count(all)}</span></div>
+    <div class="lrow"><span class="lk">グループRMS</span><span class="lv">${im.ok ? `${im.rms.toFixed(1)} cm` : "着弾データなし"}<small>位置のある ${im.positioned}射</small></span></div>
+    <div class="lrow"><span class="lk">着弾中心のずれ</span><span class="lv">${im.ok ? `${im.offset.toFixed(1)} cm<small>${anOffsetDirText(im.mx, im.my)}</small>` : "着弾データなし"}</span></div>
+  </section>`;
+}
+function analysisCompareNotesHtml(a, b) {
+  const da = String(a.date || ""),
+    dbb = String(b.date || "");
+  const lo = da < dbb ? da : dbb,
+    hi = da < dbb ? dbb : da;
+  const changes = [];
+  if (dateParts(lo) && dateParts(hi))
+    [...noteDayChanges()]
+      .filter(([d]) => d >= lo && d <= hi)
+      .sort((x, y) => x[0].localeCompare(y[0]))
+      .forEach(([d, list]) => list.forEach((t) => changes.push({ d, t })));
+  const nameOf = (s) => (s.setupId ? setupNameFor(s.setupId) : "未指定");
+  const side = (k, s) => `<div class="anMemo" data-testid="compare-memo-${k}">
+      <div class="anMemoH">${k.toUpperCase()} ${esc(anDateLabel(s.date))}</div>
+      <div class="anMemoMeta">弓具: ${esc(nameOf(s))}・サイト: ${esc(anSightText(s))}${windText(s) ? `・${esc(windText(s))}` : ""}</div>
+      <div class="anMemoTxt${s.note ? "" : " none"}">${s.note ? esc(s.note) : "メモなし"}</div>
+    </div>`;
+  return `<section class="vsec" data-testid="compare-changes">
+    <div class="vsecH"><h2>この間の変更とメモ</h2><span class="aside">${fmtDateRange(lo, hi) || ""}</span></div>
+    ${
+      changes.length
+        ? changes
+            .map(
+              (c) =>
+                `<div class="lrow anChange"><span class="lk">${esc(anShortDate(c.d))}</span><span class="lv">${esc(c.t)}</span></div>`,
+            )
+            .join("")
+        : `<p class="basis" data-testid="compare-no-changes">この期間に、弓具の変更とサイトの記録はありません。</p>`
+    }
+    ${side("a", a)}${side("b", b)}
+  </section>`;
+}
+function analysisCompareHtml() {
+  const sessions = analysisSessionList();
+  if (!sessions.length)
+    return { html: analysisEmptyHtml("記録が2回になると、2回を並べて比べられます。"), plots: [] };
+  if (sessions.length < 2)
+    return {
+      html: `<div class="empty" data-testid="compare-need-two"><b>比べるには記録が2回必要です</b>いまの記録は 1回です。</div>`,
+      plots: [],
+    };
+  const pick = sessions.slice(0, ANALYSIS_PICK_MAX);
+  const { a, b } = analysisCompareDefaults(pick);
+  const head = `<div class="cond one"><label><span>A</span><select class="pick" id="cmpA">${anSessOptionsHtml(pick, a.id)}</select></label></div>
+  <div class="cond one"><label><span>B</span><select class="pick" id="cmpB">${anSessOptionsHtml(pick, b.id)}</select></label></div>`;
+  if (a.id === b.id)
+    return {
+      html: `${head}<div class="noImpact" data-testid="compare-same"><b>A と B が同じ記録です</b><span>別の記録を選ぶと、2回を並べて表示します。</span></div>`,
+      plots: [],
+    };
+  if (!anComparable(a, b))
+    return {
+      plots: [],
+      html: `${head}
+      <div class="noImpact" data-testid="compare-notice"><b>条件が違うため、合計と差は並べていません</b><span>A: ${esc(anCondFullLabel(a))}<br>B: ${esc(anCondFullLabel(b))}<br>距離・的・射数・ラウンドが同じ記録を選ぶと、差の表を表示します。下は、それぞれの記録の数値です。</span></div>
+      ${analysisCompareSideHtml("a", a)}${analysisCompareSideHtml("b", b)}
+      ${analysisCompareNotesHtml(a, b)}`,
+    };
+  const ia = analysisImpactModel(a),
+    ib = analysisImpactModel(b);
+  const cols = scorecardCountCols(b);
+  const aa = anArrows(a),
+    ab = anArrows(b);
+  const ha = sessionHalves(a),
+    hb = sessionHalves(b);
+  const row = (key, name, va, vb, dec) => {
+    const ok = va != null && vb != null;
+    const t = (v) => (v == null ? "—" : dec ? v.toFixed(dec) : String(v));
+    return `<div class="cmpRow" data-row="${key}"><div>${name}</div><div data-col="a">${t(va)}</div><div data-col="b">${t(vb)}</div><div class="df" data-col="diff">${ok ? signedText(dec ? anDiff1(vb, va) : vb - va, dec) : "—"}</div></div>`;
+  };
+  const ta = anTotal(a),
+    tb = anTotal(b);
+  const peers = sessions.filter((s) => trSameCondition(s, b, { matchArrows: true }));
+  const sd = peers.length >= 3 ? sampleSd(peers.map(anTotal)) : null;
+  const diff = tb - ta;
+  const mini = (k, s) =>
+    `<div><div id="cmpPlot${k.toUpperCase()}" data-testid="compare-plot-${k}"></div><span>${k.toUpperCase()} ${esc(anShortDate(s.date))}</span></div>`;
+  const setupLine =
+    a.setupId === b.setupId
+      ? `弓具は同じ（${esc(a.setupId ? setupNameFor(a.setupId) : "未指定")}）`
+      : `弓具は A が ${esc(a.setupId ? setupNameFor(a.setupId) : "未指定")}、B が ${esc(b.setupId ? setupNameFor(b.setupId) : "未指定")}`;
+  return {
+    plots: [
+      ["a", a],
+      ["b", b],
+    ],
+    html: `${head}
+    <section class="vsec anFirst" data-testid="compare-table-section">
+      <p class="basis" data-testid="compare-target">対象: ${esc(anCondFullLabel(b))} の2回。${setupLine}。</p>
+      <div class="cmp" data-testid="compare-table">
+        <div class="cmpRow is-head"><div></div><div>A ${esc(anShortDate(a.date))}</div><div>B ${esc(anShortDate(b.date))}</div><div>B − A</div></div>
+        ${row("total", "合計", ta, tb)}
+        ${ha && hb ? row("first", "前半", ha[0], hb[0]) + row("second", "後半", ha[1], hb[1]) : ""}
+        ${row("count0", cols[0].sub, cols[0].count(aa), cols[0].count(ab))}
+        ${row("count1", cols[1].sub, cols[1].count(aa), cols[1].count(ab))}
+        ${row("rms", "グループRMS cm", ia.ok ? ia.rms : null, ib.ok ? ib.rms : null, 1)}
+        ${row("offset", "中心のずれ cm", ia.ok ? ia.offset : null, ib.ok ? ib.offset : null, 1)}
+      </div>
+    </section>
+    <div class="pair anBleed" data-testid="compare-plots">${mini("a", a)}${mini("b", b)}</div>
+    <section class="vsec anFirst">
+      <p class="fact" data-testid="compare-total-diff">合計の差（B − A）は <b>${signedText(diff)} 点</b>です。${sd != null ? `同じ距離・的・射数の ${peers.length}回の、回ごとの標準偏差は ${sd.toFixed(1)} 点で、差は${Math.abs(diff) <= sd ? "その範囲内" : "それより大きい値"}です。` : ""}</p>
+      ${ia.ok && ib.ok ? `<p class="fact" data-testid="compare-centers">着弾中心は A が ${anOffsetDirText(ia.mx, ia.my)}、B が ${anOffsetDirText(ib.mx, ib.my)} です。</p>` : ""}
+      <p class="basis" data-testid="compare-caution">1回ずつの比較です。差は原因を示すものではありません。下の変更が差の原因とは断定できません。${ia.ok && ib.ok ? "" : "グループRMSと中心のずれは、位置のある矢が3射以上ある記録だけで表示します。"}</p>
+    </section>
+    ${analysisCompareNotesHtml(a, b)}`,
+  };
+}
+/* ---------- 射型 ---------- */
+function analysisReasonHtml(rows) {
+  const rb = reasonBreakdown(rows);
+  const sessions = rows.filter((r) => r.n);
+  const arrows = sessions.reduce((t, r) => t + r.n, 0);
+  const target = `対象: ${sessions.length}回・${arrows}射のうち、理由の印がある ${rb.tagged}射。記録中に自分で付けた印を数えています。`;
+  if (!rb.tagged)
+    return `<section class="vsec" data-testid="analysis-reasons">
+      <div class="vsecH"><h2>外れた理由の印</h2><span class="aside">0射</span></div>
+      <p class="basis">${target}印は、記録中に矢を選んで付けます。</p>
+    </section>`;
+  return `<section class="vsec" data-testid="analysis-reasons">
+    <div class="vsecH"><h2>外れた理由の印</h2><span class="aside">${rb.tagged}射</span></div>
+    ${rb.items
+      .slice(0, 8)
+      .map(
+        (g) => `<div class="lrow" data-testid="analysis-reason-row">
+        <span class="lmain"><b>${esc(g.reason)}</b><span>平均 ${g.avg != null ? g.avg.toFixed(2) : "—"} 点${g.mx != null && g.my != null ? `・位置の平均 ${anOffsetDirText(g.mx, g.my)}` : ""}</span></span>
+        <span class="lv">${g.count}射</span>
+      </div>`,
+      )
+      .join("")}
+    <p class="basis">${target}位置の平均は、位置のある矢だけで出しています。印の数は原因を示すものではありません。</p>
+  </section>`;
+}
+function analysisFormHtml(allRows, f) {
+  const hasForm = Array.isArray(db.formAnalyses) && db.formAnalyses.some(Boolean);
+  if (!allRows.length && !hasForm && !formTrackingEnabled())
+    return analysisEmptyHtml("射型の記録と、記録中に付けた「外れた理由」の印の集計をここに表示します。");
+  const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))];
+  const selectedDist = Number(f.dist);
+  /* 最後の練習を消した後も、選んでいる距離を欄に残して外せるようにする */
+  if (Number.isFinite(selectedDist) && selectedDist > 0 && !dists.some((d) => String(d) === String(f.dist)))
+    dists.push(selectedDist);
+  dists.sort((a, b) => b - a);
+  const head = `<div class="cond one"><label><span>弓具</span><select class="pick" id="anSetup">${anSetupOptionsHtml(f)}</select></label></div>
+  <div class="cond"><label><span>距離</span><select class="pick" id="anDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}"${String(f.dist) === String(d) ? " selected" : ""}>${d}m</option>`).join("")}</select></label><label><span>期間</span><select class="pick" id="anPeriod">${anPeriodOptionsHtml(f)}</select></label></div>`;
   const rows = filterAnalysisRows(allRows, {
     setupId: f.setupId,
     dist: f.dist,
-    round: f.round,
     period: f.period,
     today: today(),
   });
-  const ss = rows
-    .map((r) => r.s)
-    .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.id < a.id ? -1 : 1));
-  const sessionRows = historySessionRows(ss);
-  const sightMarks = analysisSightMarks(f);
-  const formRecords = analysisFormRecords(f);
-  /* 全体構成（正本 5節）: 結論 → 得点の推移 → ばらつき(グルーピング) → サイト → 条件比較 → 月間 → その他。
-     ロジックは変えず、既存カード関数の呼び出し順だけを並べ替える */
-  const cards = [
-    // 得点の推移
-    analysisKpiHtml(rows),
-    analysisTrendChartHtml(rows),
-    scoreTrendCard(ss),
-    // 矢の集まり具合（グルーピング＝ばらつき）
-    groupingTrendCard(ss),
-    groupingSummaryHtml(sessionRows),
-    // サイト
-    sightHistoryCard(ss, sightMarks),
-    sightSummaryHtml(sessionRows, f, sightMarks),
-    analysisDetailsGroupHtml("analysis-condition-details", "条件と理由", "風・理由タグ", [
-      conditionSplitCard(rows),
-      reasonBreakdownCard(rows),
-    ]),
-    analysisDetailsGroupHtml("analysis-breakdown-details", "練習の内訳", "月・距離・得点", [
-      monthlyCard(ss),
-      distTrendCard(ss),
-      scoreDistCard(ss),
-    ]),
-    // その他
-    formTrackingCard(formRecords),
-    analysisDetailsGroupHtml("analysis-personal-details", "自己ベストと用具", "", [
-      personalBestCard(rows),
-      setupPerformanceCard(ss),
-    ]),
-    distanceSummaryHtml(sessionRows),
-  ]
-    .filter(Boolean)
-    .join("");
-  m.innerHTML = `${allRows.length || (formTrackingEnabled() && Array.isArray(db.formAnalyses) && db.formAnalyses.some(Boolean)) ? analysisFilterBarHtml(allRows, f) : ""}
-  ${todayConclusionCardHtml(rows)}
-  ${nextPracticeCardHtml(rows, !allRows.length)}
-  ${growthDashboardHtml(rows)}
-  ${cards || `<div class="card"><h2>分析</h2><div class="empty">${allRows.length ? "この絞り込みに合う記録がありません。フィルタを広げてください。" : `<p>記録が増えると、矢の集まり具合や月間まとめがここに表示されます。</p>`}</div></div>`}
-  ${gamificationBadgesCardHtml()}`;
-  const anSetup = $("#anSetup");
-  if (anSetup)
-    anSetup.onchange = (e) => {
-      const hadFocus = document.activeElement === e.target;
-      f.setupId = e.target.value;
-      render();
-      const next = $("#anSetup");
-      if (hadFocus) focusAnalysisFilterControl(next);
+  const form = formTrackingEnabled()
+    ? formTrackingCard(analysisFormRecords(f))
+    : `<section class="vsec" data-testid="analysis-form-off">
+      <div class="vsecH"><h2>射型の記録</h2><span class="aside">切</span></div>
+      <p class="basis">カメラで射型を記録する機能は、設定の「射形トラッキング」を入にすると使えます。動画と写真はこの端末の中だけで扱います。</p>
+    </section>`;
+  return `${head}${form}${analysisReasonHtml(rows)}`;
+}
+/* 選択を変えて描き直した後、同じ欄へフォーカスを戻す。下の固定タブに隠れないよう位置も合わせる */
+function focusAnalysisControl(id) {
+  const control = document.getElementById(id);
+  if (!control) return;
+  control.focus({ preventScroll: true });
+  const rect = control.getBoundingClientRect();
+  const tabs = $("#tabs");
+  const top = 12;
+  const bottom = (tabs ? tabs.getBoundingClientRect().top : window.innerHeight) - 12;
+  if (rect.bottom > bottom) window.scrollBy({ top: rect.bottom - bottom, behavior: "instant" });
+  else if (rect.top < top) window.scrollBy({ top: rect.top - top, behavior: "instant" });
+}
+function renderAnalysis(m) {
+  if (!ANALYSIS_TABS.includes(ui.analysisTab)) ui.analysisTab = "score";
+  const tab = ui.analysisTab;
+  const f = ui.analysisFilter;
+  if (!ANALYSIS_PERIODS.some((p) => p[0] === f.period)) f.period = "all";
+  const allRows = buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
+  let html = "",
+    after = null;
+  if (tab === "score") html = analysisScoreHtml(allRows, f);
+  else if (tab === "impact") {
+    const r = analysisImpactHtml();
+    html = r.html;
+    after = () => {
+      const el = $("#anPlot");
+      if (el && r.sess) plotSession(r.sess, el, { idPrefix: "an", plain: true });
     };
-  const anDist = $("#anDist");
-  if (anDist)
-    anDist.onchange = (e) => {
+  } else if (tab === "compare") {
+    const r = analysisCompareHtml();
+    html = r.html;
+    after = () =>
+      r.plots.forEach(([k, s]) => {
+        const el = $("#cmpPlot" + k.toUpperCase());
+        if (!el) return;
+        if (sessionHasPos(s)) plotSession(s, el, { idPrefix: "cmp" + k, plain: true });
+        else el.innerHTML = `<div class="pairNone" data-testid="compare-no-impact">着弾データなし</div>`;
+      });
+  } else html = analysisFormHtml(allRows, f);
+  m.innerHTML = `<div class="anView" data-testid="analysis-view" data-tab="${tab}">${analysisTabHeadingHtml(tab)}${html}</div>`;
+  if (after) after();
+  const bindSelect = (id, apply) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.onchange = (e) => {
       const hadFocus = document.activeElement === e.target;
-      f.dist = e.target.value;
+      apply(e.target.value);
       render();
-      const next = $("#anDist");
-      if (hadFocus) focusAnalysisFilterControl(next);
+      if (hadFocus) focusAnalysisControl(id);
     };
-  document.querySelectorAll("#anPeriods .chip[data-period]").forEach(
-    (c) =>
-      (c.onclick = () => {
-        const hadFocus = !!(
-          document.activeElement &&
-          document.activeElement.closest &&
-          document.activeElement.closest("#anPeriods")
-        );
-        f.period = c.dataset.period;
+  };
+  bindSelect("anCond", (v) => (f.cond = v));
+  bindSelect("anSetup", (v) => (f.setupId = v));
+  bindSelect("anDist", (v) => (f.dist = v));
+  bindSelect("anPeriod", (v) => (f.period = v));
+  bindSelect("anImpact", (v) => (ui.analysisImpactId = v));
+  bindSelect("cmpA", (v) => (ui.analysisCmp.a = v));
+  bindSelect("cmpB", (v) => (ui.analysisCmp.b = v));
+  m.querySelectorAll("[data-cond]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        f.cond = b.dataset.cond;
         render();
-        if (hadFocus) {
-          const chip = document.querySelector(`#anPeriods [data-period="${c.dataset.period}"]`);
-          focusAnalysisFilterControl(chip);
-        }
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        focusAnalysisControl("anCond");
       }),
   );
-  bindFormTrackingCard();
+  const toSight = $("#anToSight");
+  if (toSight) toSight.onclick = () => showView("sight");
+  if (tab === "form") bindFormTrackingCard();
   const anCta = $("#anEmptyCta");
   if (anCta) anCta.onclick = () => showView("record");
 }
@@ -1530,14 +2053,6 @@ function analysisFormRecords(filter) {
       };
     });
   return filterAnalysisRows(rows, { ...filter, today: today() }).map((r) => r.record);
-}
-function analysisDetailsGroupHtml(id, title, meta, cards) {
-  const body = cards.filter(Boolean).join("");
-  if (!body) return "";
-  return `<details class="adv analysisDetailsGroup" data-testid="${esc(id)}">
-    <summary><span>${esc(title)}</span>${meta ? `<span class="analysisDetailsMeta">${esc(meta)}</span>` : ""}</summary>
-    <div class="analysisDetailsBody">${body}</div>
-  </details>`;
 }
 /* ============ スコア表（確定済みエンドの表示） ============
    並びは 回 | 矢 | 計 | 累計 | 10 | X（docs/design/v5/design.md 4.3）。保存された s / X をそのまま数える。
@@ -3366,8 +3881,7 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
   };
   ovl.querySelector("#sumAnalysis").onclick = () => {
     close();
-    if (view === "analysis") render();
-    else showView("analysis");
+    openAnalysisFor(sess);
   };
   const sumStreakSetup = ovl.querySelector("#sumStreakSetup");
   if (sumStreakSetup) sumStreakSetup.onclick = () => openPracticeDaysSheet();
@@ -3388,101 +3902,11 @@ function historySessionRows(src) {
     return { s, arrows, total };
   });
 }
-function historySummaryDetailsHtml(sessionRows, filter) {
-  return `${distanceSummaryHtml(sessionRows)}${sightSummaryHtml(sessionRows, filter)}${groupingSummaryHtml(sessionRows)}`;
-}
-function scoreTrendCard(ss) {
-  const rows = [];
-  for (const session of Array.isArray(ss) ? ss : []) {
-    const row = historySessionRows([session])[0];
-    if (row.arrows.length) rows.push(row);
-    if (rows.length === 8) break;
-  }
-  if (!rows.length) return "";
-  const body = rows
-    .map((r) => {
-      const avg = r.arrows.length ? r.total / r.arrows.length : null;
-      const avgText = Number.isFinite(avg) ? avg.toFixed(2) : "—";
-      const totalText = Number.isFinite(r.total) ? String(r.total) : "—";
-      const date = r.s && r.s.date ? fmtD(r.s.date) : "日付未設定";
-      const dist = distanceLabel(r.s && r.s.dist);
-      return `<div class="listItem recordReadOnlyItem">
-      <div><div class="t">${esc(date)}</div><div class="d">${esc(dist)} / ${r.arrows.length}本</div></div>
-      <div class="big">${avgText}<small> / 合計${totalText}</small></div>
-    </div>`;
-    })
-    .join("");
-  return `<div class="card"><h2>直近の得点 <span class="mini">直近${rows.length}回</span></h2>${body}</div>`;
-}
 function setupPerformanceLabel(setupId) {
   if (!setupId) return { key: "setup:none", label: "セットアップ未設定" };
   const setup = (db.setups || []).find((s) => s.id === setupId);
   if (setup) return { key: `setup:${setup.id}`, label: setup.name || "名称未設定" };
   return { key: "setup:deleted", label: "削除済みセットアップ" };
-}
-function setupPerformanceCard(ss) {
-  const rows = historySessionRows(ss);
-  const groups = new Map();
-  rows.forEach((r) => {
-    const info = setupPerformanceLabel(r.s && r.s.setupId);
-    const g = groups.get(info.key) || {
-      label: info.label,
-      sessions: 0,
-      arrows: 0,
-      total: 0,
-      best: null,
-      latestDate: "",
-    };
-    g.sessions++;
-    g.arrows += r.arrows.length;
-    g.total += r.total;
-    const date = (r.s && r.s.date) || "";
-    if (date > g.latestDate) g.latestDate = date;
-    if (
-      r.arrows.length &&
-      (!g.best ||
-        r.total > g.best.total ||
-        (r.total === g.best.total && date > (g.best.date || "")))
-    ) {
-      g.best = { total: r.total, date, arrows: r.arrows.length };
-    }
-    groups.set(info.key, g);
-  });
-  const list = [...groups.values()]
-    .filter((g) => g.sessions)
-    .sort(
-      (a, b) =>
-        b.sessions - a.sessions ||
-        (b.latestDate || "").localeCompare(a.latestDate || "") ||
-        (b.arrows ? b.total / b.arrows : -1) - (a.arrows ? a.total / a.arrows : -1) ||
-        a.label.localeCompare(b.label),
-    );
-  if (!list.length) return "";
-  const body = list
-    .map((g) => {
-      const avg = g.arrows ? g.total / g.arrows : null;
-      const avgText = Number.isFinite(avg) ? avg.toFixed(2) : "—";
-      const bestText = g.best && Number.isFinite(g.best.total) ? String(g.best.total) : "—";
-      const latest = g.latestDate ? fmtD(g.latestDate) : "—";
-      return `<div class="listItem recordReadOnlyItem">
-      <div><div class="t">${esc(g.label)}</div><div class="d">記録 ${g.sessions}回 / 矢数 ${g.arrows} / 最新 ${esc(latest)}</div></div>
-      <div class="big">${avgText}<small> / 最高${bestText}</small></div>
-    </div>`;
-    })
-    .join("");
-  return `<div class="card"><h2>用具ごとの成績 <span class="mini">${list.length}件</span></h2>${body}</div>`;
-}
-function analysisSightMarks(filter) {
-  const rows = (Array.isArray(db.sightMarks) ? db.sightMarks : [])
-    .filter(Boolean)
-    .map((mark) => ({
-      mark,
-      setupId: mark.setupId,
-      dist: mark.dist,
-      round: mark.round || "",
-      date: sightDateInfo(mark).sort,
-    }));
-  return filterAnalysisRows(rows, { ...filter, today: today() }).map((r) => r.mark);
 }
 function sightHistoryCard(ss, sightMarks = db.sightMarks) {
   const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
@@ -3545,49 +3969,6 @@ function historyAnalysisDetailsHtml(title, meta, bodyHtml) {
     <summary>${esc(title)} <span class="mini">${esc(meta || "")}</span></summary>
     ${bodyHtml}
   </details>`;
-}
-function distanceSummaryHtml(sessionRows) {
-  const byDist = new Map();
-  sessionRows.forEach((r) => {
-    const info = distanceBucketInfo(r.s && r.s.dist);
-    const g = byDist.get(info.key) || {
-      label: info.label,
-      sort: info.sort,
-      sessions: 0,
-      arrows: 0,
-      total: 0,
-      best: null,
-      latestDate: "",
-    };
-    g.sessions++;
-    g.arrows += r.arrows.length;
-    g.total += r.total;
-    if (((r.s && r.s.date) || "") > g.latestDate) g.latestDate = r.s.date || "";
-    if (
-      r.arrows.length &&
-      (!g.best ||
-        r.total > g.best.total ||
-        (r.total === g.best.total && ((r.s && r.s.date) || "") > (g.best.date || "")))
-    ) {
-      g.best = { total: r.total, date: (r.s && r.s.date) || "", arrows: r.arrows.length };
-    }
-    byDist.set(info.key, g);
-  });
-  const rows = [...byDist.values()].sort(
-    (a, b) => b.sort - a.sort || b.sessions - a.sessions || a.label.localeCompare(b.label),
-  );
-  if (!rows.length) return "";
-  const body = rows
-    .map((g) => {
-      const avg = g.arrows ? (g.total / g.arrows).toFixed(2) : "—";
-      const latest = g.latestDate ? fmtD(g.latestDate) : "—";
-      return `<div class="listItem recordReadOnlyItem">
-        <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / ${g.arrows}本 / 最新 ${esc(latest)}</div></div>
-        <div class="big">${avg}<small> / 最高${g.best ? g.best.total : "—"}</small></div>
-      </div>`;
-    })
-    .join("");
-  return historyAnalysisDetailsHtml("距離ごとのまとめ", `${rows.length}距離`, body);
 }
 function sightValueText(v) {
   const raw = String(v == null ? "" : v).trim();
@@ -3727,71 +4108,4 @@ function groupingSessionRow(row) {
     sy: groupingMetricNumber(st.sy),
     n: st.n,
   };
-}
-/* 対象の記録に、位置のある矢が3本以上ある回がないとき（点数だけの記録を選んだとき）に出す。
-   位置のある矢だけで記録してきた従来のデータでは出ない */
-function impactNoDataHtml(sessionRows) {
-  const list = (sessionRows || []).filter((r) => r && r.s);
-  let arrows = 0,
-    positioned = 0;
-  list.forEach((r) => {
-    const m = sessionMetrics(r.s);
-    arrows += m.all.length;
-    positioned += m.pts.length;
-  });
-  if (!list.length || positioned >= arrows) return "";
-  return `<div class="card noImpactCard" data-testid="analysis-no-impact"><h2>矢の集まり具合 <span class="mini">対象${list.length}回</span></h2>
-    <div class="noImpact"><b>着弾データなし</b><span>対象の${list.length}回・${arrows}射のうち、位置のある矢は${positioned}射です。集まり具合（グルーピング）は、位置のある矢が3本以上ある回から計算します。得点の集計は点数だけの記録も含みます。</span></div></div>`;
-}
-function groupingSummaryHtml(sessionRows) {
-  const rows = (sessionRows || []).map(groupingSessionRow).filter(Boolean);
-  if (!rows.length) return impactNoDataHtml(sessionRows);
-  const avg = rows.reduce((a, r) => a + r.rr, 0) / rows.length;
-  const best = [...rows].sort(
-    (a, b) => a.rr - b.rr || (b.date.sort || "").localeCompare(a.date.sort || ""),
-  )[0];
-  const latest = [...rows].sort(
-    (a, b) => (b.date.sort || "").localeCompare(a.date.sort || "") || b.rr - a.rr,
-  )[0];
-  const byDist = new Map();
-  rows.forEach((r) => {
-    const g = byDist.get(r.distInfo.key) || {
-      label: r.distInfo.label,
-      sort: r.distInfo.sort,
-      sessions: 0,
-      total: 0,
-      best: null,
-      latest: null,
-    };
-    g.sessions++;
-    g.total += r.rr;
-    if (!g.best || r.rr < g.best.rr) g.best = r;
-    if (!g.latest || (r.date.sort || "") > (g.latest.date.sort || "")) g.latest = r;
-    byDist.set(r.distInfo.key, g);
-  });
-  const groups = [...byDist.values()].sort(
-    (a, b) => b.sort - a.sort || b.sessions - a.sessions || a.label.localeCompare(b.label),
-  );
-  const meta = (r) =>
-    [r.distInfo.label, r.date.label].filter((x) => x && x !== "—").join(" / ") || "—";
-  const body = `<div class="insightStrip">
-      <div class="insightTile"><div class="k">平均の集まり半径(RMS)</div><b>${groupingMetricText(avg)}</b><span>${rows.length}セッションから集計</span></div>
-      <div class="insightTile"><div class="k">最小の集まり半径(RMS)</div><b>${groupingMetricText(best && best.rr)}</b><span>${esc(best ? meta(best) : "—")}</span></div>
-      <div class="insightTile"><div class="k">最新の集まり半径(RMS)</div><b>${groupingMetricText(latest && latest.rr)}</b><span>${esc(latest ? meta(latest) : "—")}</span></div>
-    </div>
-    ${groups
-      .map((g) => {
-        const distAvg = g.sessions ? g.total / g.sessions : null;
-        const latest = g.latest && g.latest.date.label ? g.latest.date.label : "—";
-        return `<div class="listItem recordReadOnlyItem">
-        <div><div class="t">${esc(g.label)}</div><div class="d">${g.sessions}回 / 最新 ${esc(latest)}</div></div>
-        <div class="big">${groupingMetricText(distAvg)}<small> / 最小${groupingMetricText(g.best && g.best.rr)}</small></div>
-      </div>`;
-      })
-      .join("")}`;
-  return historyAnalysisDetailsHtml(
-    "矢の集まり具合のまとめ（グルーピングサマリー）",
-    `対象${rows.length}回`,
-    body,
-  );
 }

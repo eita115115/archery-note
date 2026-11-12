@@ -128,16 +128,20 @@ function noImpactHtml(sess){
   const n=((sess&&sess.ends)||[]).flat().length;
   return `<div class="noImpact" data-testid="no-impact"><b>着弾データなし</b><span>${n}射すべて位置のない記録です（点数だけの入力）。合計・平均・10/X の数は点数から数えています。的の図・集まり具合・サイトの目安は、位置のある矢がある記録だけで作ります。</span></div>`;
 }
-function plotSession(sess, container){
+/* opts.idPrefix: 同じ画面に図を複数置くときの id の接頭辞（既定 "pl"）。
+   opts.plain: 分析の図。矢・着弾中心の十字・半径 RMS の破線の円だけを描く（外れ値候補の×印と楕円は描かない） */
+function plotSession(sess, container, opts){
+  const o=opts||{};
+  const pfx=o.idPrefix||"pl";
   const faceD=sess.faceD;
   const allArrows=((sess&&sess.ends)||[]).flat();
   const posCount=allArrows.filter(arrowHasPos).length;
   if(!posCount){ container.innerHTML=noImpactHtml(sess); return; }
   const ft=sess.faceType==="triple"?"spot":sess.faceType;
-  container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,"pl",ft)}</div>`+
+  container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,pfx,ft)}</div>`+
     (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"")+
     (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射を表示しています（位置なし ${allArrows.length-posCount}射は、図と着弾の統計に入れていません）。</div>`:"");
-  const marks=$("#plmarks");
+  const marks=container.querySelector("#"+pfx+"marks");
   let html="";
   /* 記録時の判定の半径で描く（旧判定の記録は旧半径。保存された点数と矢円を一致させる） */
   const arrowR=sessionScoringRadius(sess, db.setups.find(x=>x.id===sess.setupId));
@@ -146,7 +150,7 @@ function plotSession(sess, container){
   const st=sessionMetrics(sess).st;
   if(st){
     const w=ringW(faceD,ft);
-    st.excluded.forEach(a=>{
+    if(!o.plain) st.excluded.forEach(a=>{
       const r=faceD/70;
       html+=`<g><line x1="${a.x-r}" y1="${-a.y-r}" x2="${a.x+r}" y2="${-a.y+r}" stroke="#000" stroke-width="${faceD/300}"/>`+
         `<line x1="${a.x-r}" y1="${-a.y+r}" x2="${a.x+r}" y2="${-a.y-r}" stroke="#000" stroke-width="${faceD/300}"/></g>`;
@@ -154,7 +158,7 @@ function plotSession(sess, container){
     html+=`<g><line x1="${st.mx-w*0.8}" y1="${-st.my}" x2="${st.mx+w*0.8}" y2="${-st.my}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<line x1="${st.mx}" y1="${-st.my-w*0.8}" x2="${st.mx}" y2="${-st.my+w*0.8}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<circle cx="${st.mx}" cy="${-st.my}" r="${st.rr}" fill="none" stroke="#000" stroke-dasharray="${faceD/60} ${faceD/120}" stroke-width="${faceD/400}"/></g>`;
-    if(st.major!=null && st.minor!=null){
+    if(!o.plain && st.major!=null && st.minor!=null){
       html+=`<ellipse cx="${st.mx}" cy="${-st.my}" rx="${st.major}" ry="${st.minor}" transform="rotate(${-st.angleDeg} ${st.mx} ${-st.my})" fill="none" stroke="var(--status-ok)" stroke-dasharray="${faceD/90} ${faceD/160}" stroke-width="${faceD/380}"/>`;
     }
   }

@@ -238,7 +238,7 @@ function formScoreLinkHtml(records=db.formAnalyses||[]){
     <div class="note"><b>射形と得点の関係</b>（練習に紐付いた ${link.n} 記録）</div>
     <div class="kv"><span>リリース安定の日</span><span>平均 <b>${s.stableAvg.toFixed(2)}</b>（${s.stableN}回）</span></div>
     <div class="kv"><span>ドリフト多めの日</span><span>平均 <b>${s.driftAvg.toFixed(2)}</b>（${s.driftN}回）</span></div>
-    ${Math.abs(diff)>=.1?`<div class="note">${diff>0?`リリースが安定していた日の方が平均 ${diff.toFixed(2)} 点/本 高い傾向です。`:`この期間はドリフトの有無と点数の差が出ていません（他要因が大きい可能性）。`}</div>`:""}
+    <div class="note">差（リリース安定の日 − ドリフト多めの日）は ${diff>0?"+":diff<0?"−":"±"}${Math.abs(diff).toFixed(2)} 点/射です。回数が少なく、ほかの条件はそろえていないので、射型が原因とは限りません。</div>
   </div>`;
 }
 function formTrackingCard(records=db.formAnalyses||[]){
@@ -261,12 +261,12 @@ function formTrackingCard(records=db.formAnalyses||[]){
       <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射形記録を削除">${icon("del")}</button>
     </div>`;
   }).join("");
-  return `<section class="card analysisFormCard" data-testid="analysis-form-card"><h2>射形トラッキング <span class="mini">${allRecs.length}件${allRecs.length>5?" · 最新5件":""}</span></h2>
-    <div class="btnrow"><button class="btn" id="formStart">${icon("camera")} 射形を解析する</button><button class="btn sec sm" id="formReplay">保存済み動画を解析</button></div>
+  return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="vsecH"><h2>射型の記録</h2><span class="aside">${allRecs.length}件${allRecs.length>5?"・新しい5件を表示":""}</span></div>
+    <div class="btnRow"><button class="btn" id="formStart">${icon("camera")} 撮影して解析</button><button class="btn sec" id="formReplay">動画から解析</button></div>
     ${formTrendMiniHtml(allRecs)}
-    <div class="formRecordList">${rows||`<div class="empty">${(db.formAnalyses||[]).length?"この条件に合う射形記録はありません。比較する条件を広げてください。":"まだ射形記録がありません。カメラを横に置いて数射解析してみましょう。"}</div>`}</div>
+    <div class="formRecordList">${rows||`<div class="empty">${(db.formAnalyses||[]).length?"この条件に合う射型の記録は 0件です。弓具・距離・期間の選択を広げると表示されます。":"射型の記録はまだありません。カメラを横に置いて数射を撮ると、ここに並びます。"}</div>`}</div>
     ${formScoreLinkHtml(records)}
-    <details class="adv formComparisonHelp"><summary>比較の見方</summary><p>期間は撮影日、用具・距離は紐付いた練習の条件です。紐付けがない記録は保存された用具だけで絞り込み、距離は推測しません。</p><p>弓手肘は中央値。自己比較と推移も、この条件の記録が対象です。同じ撮影位置・角度で比べてください。端末内解析・ベータ。</p></details>
+    <p class="basis">対象: 期間は撮影日、弓具・距離は紐付いた練習の条件で選んでいます。紐付けのない記録は保存された弓具だけで選び、距離は推測しません。弓手肘は中央値です。撮影の位置と角度が違う記録の差は、射型の差とは限りません。動画はこの端末の中だけで解析します（ベータ）。</p>
   </section>`;
 }
 

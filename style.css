@@ -2191,3 +2191,60 @@ button.ntag[aria-pressed="true"]{background:var(--accent-soft); color:var(--ink)
 .noteScreen .stageTable{margin-bottom:4px;}
 .trashSheet .trashRow .lmain b{overflow-wrap:anywhere;}
 .trashSheet .trashRow .txtBtn{flex:none; padding:0 6px;}
+
+/* ---- 分析（v5 段 7）: スコア / 着弾 / 比較 / 射型 ---- */
+.anView{padding-bottom:8px;}
+.cond.one{grid-template-columns:1fr;}
+.cond .pick{text-overflow:ellipsis; cursor:pointer;}
+.cond .pick:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+.vsec.anFirst{margin-top:0;}
+.anBleed{margin-left:calc(-1 * var(--gut)); margin-right:calc(-1 * var(--gut));}
+.anBleed .hint{padding:6px var(--gut) 0; margin:0;}
+.pair.anBleed{margin-top:16px;}
+.pair .tgWrap,.pair .tgWrap svg.main{background:transparent;}
+.pair .tgWrap svg.main.triple{width:58%;}
+.pair .hint{display:none;}
+.pairNone{display:flex; align-items:center; justify-content:center; aspect-ratio:1; padding:0 10px; font-size:14px; color:var(--sub);}
+.anView .noImpact{margin-top:0;}
+.anRef summary{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:56px; padding:8px 0;
+  border-top:2px solid var(--ink); border-bottom:1px solid var(--rule); font-size:17px; font-weight:700; cursor:pointer; list-style:none;
+}
+.anRef summary::-webkit-details-marker{display:none;}
+.anRefT{flex:1; min-width:0;}
+.anRefT b{display:block; font-size:17px; font-weight:700; line-height:1.35;}
+.anRefT small{display:block; font-size:14px; font-weight:400; color:var(--sub); line-height:1.45;}
+.anRef summary::after{content:"＋"; flex:none; font-size:17px; font-weight:400; color:var(--sub);}
+.anRef[open] summary::after{content:"−";}
+.anRef summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.anRefBody{padding-top:4px;}
+.cmpRow small{display:block; font-size:13px; font-weight:400; color:var(--sub); line-height:1.2;}
+.cmpRow.is-cur > *:first-child{color:var(--ink); font-weight:700;}
+.anTrendTbl .cmpRow{grid-template-columns:1.3fr .8fr 1fr 1fr;}
+button.lrow.anCondRow{cursor:pointer; min-height:56px;}
+.anCondRow[aria-current=true] .lmain b{box-shadow:inset 0 -3px 0 var(--accent);}
+.anCondRow .lmain b{display:inline-block;}
+.anCondRow .lv{flex:none; white-space:nowrap;}
+.anCondRow:focus-visible,.lrow.link:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+button.lrow.link{cursor:pointer;}
+.anMemo{padding:10px 0 12px; border-bottom:1px solid var(--rule);}
+.anMemoH{font-size:15px; font-weight:700; line-height:1.5;}
+.anMemoMeta{font-size:14px; color:var(--sub); line-height:1.5; overflow-wrap:anywhere;}
+.anMemoTxt{font-size:15px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; padding-top:2px;}
+.anMemoTxt.none{color:var(--sub);}
+.lrow.anChange{align-items:flex-start;}
+.lrow.anChange .lv{flex:1; font-size:15px; font-weight:400; text-align:left; line-height:1.6; overflow-wrap:anywhere;}
+.lrow .lmain{overflow-wrap:anywhere;}
+.anEmptyAct{margin:16px 0 0;}
+table.anMonthTbl{font-size:15px;}
+table.anMonthTbl th,table.anMonthTbl td{padding:9px 6px;}
+table.anMonthTbl th:first-child,table.anMonthTbl td:first-child{padding-left:0;}
+table.anMonthTbl th:last-child,table.anMonthTbl td:last-child{padding-right:0;}
+.anView .histScoreRow{gap:10px; padding:4px 0;}
+.anView .histScoreLabel{width:32px; font-size:14px; border-radius:0; padding:3px 0;}
+.anView .histScoreCount{width:92px; font-size:13px; white-space:nowrap;}
+.anView .analysisFormCard{padding:0; border:0; background:none;}
+.anView .analysisFormCard .btnRow{padding-top:12px;}
+.anView .analysisFormCard .btnRow .btn{min-height:48px;}
+.sightRecordsOverview{margin-top:22px;}
+.settingsGroup .badgeSection{margin-top:16px;}

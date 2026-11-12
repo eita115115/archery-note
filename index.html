@@ -30,6 +30,13 @@
   <button type="button" data-sub="gear" data-testid="gear-subtab-setup">セッティング</button>
   <button type="button" data-sub="sight" data-testid="gear-subtab-sight">サイト</button>
 </nav>
+<!-- 分析タブの中の切り替え（スコア / 着弾 / 比較 / 射型）。分析の画面でだけ出す -->
+<nav class="utabs" id="analysisSubTabs" aria-label="分析の切り替え" hidden>
+  <button type="button" data-an="score" data-testid="analysis-tab-score">スコア</button>
+  <button type="button" data-an="impact" data-testid="analysis-tab-impact">着弾</button>
+  <button type="button" data-an="compare" data-testid="analysis-tab-compare">比較</button>
+  <button type="button" data-an="form" data-testid="analysis-tab-form">射型</button>
+</nav>
 <main id="main">
   <section class="bootFallback" id="bootFallback" aria-live="polite">
     <div class="bootIcon" aria-hidden="true"><svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="butt"><circle cx="12" cy="12" r="7.25"/><path d="M12 2.4v3.1M12 18.5v3.1M2.4 12h3.1M18.5 12h3.1"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></div>
