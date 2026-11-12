@@ -1,59 +1,8 @@
 "use strict";
 /* Archery Note: history and sight-adjustment views */
 
-/* ============ gamification: 履歴タブ pageHero 内のストリーク+目標リング ============
-   最終設計書 gamification-final-design.md §5 画面別配置 / ui-specs-fable-adjudication.md
-   「3. 2a 履歴タブ ストリークヒーロー」準拠。enabled=false では何も描画しない。
-   ストリーク・目標は永続値ではなく毎回 sessions から導出する（db.gamification.streak は存在しない）。
-   practiceDays 未設定時は数字の代わりに設定CTAを出す（既定曜日の押し付け禁止） */
-function gamGoalRingHtml(cls, current, target, caption, rest) {
-  const r = 20, c = 2 * Math.PI * r;
-  const off = goalRingOffset(current, target, c);
-  return `<div class="goalRing ${rest ? "rest" : ""}">
-    <svg viewBox="0 0 48 48" aria-hidden="true">
-      <circle class="goalRingBg" cx="24" cy="24" r="${r}"/>
-      <circle class="goalRingFill ${cls}" cx="24" cy="24" r="${r}" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" transform="rotate(-90 24 24)"/>
-      <text class="goalRingLabel" x="24" y="24">${current}</text>
-    </svg>
-    <span class="goalRingCaption">${caption}</span>
-  </div>`;
-}
-function gamificationHeroHtml() {
-  const g = db.settings.gamification;
-  if (!g || !g.enabled) return "";
-  const streak = computeStreak(db.sessions, g.practiceDays, today());
-  const goals = calcGoalProgress(db.sessions, g.goals, today());
-  const restDay = streak.configured && !g.practiceDays.includes(new Date().getDay());
-  const mainHtml = streak.configured
-    ? `<div class="streakRow">
-        <span class="streakFire" aria-hidden="true">${icon("fire")}</span>
-        <span class="streakNum" data-testid="streak-current">${streak.current}</span><span class="streakUnit">日連続</span>
-      </div>
-      <div class="streakBest">ベスト <b>${streak.best}</b>日</div>
-      <div class="freezeDots" aria-hidden="true" data-testid="freeze-dots">
-        ${[0, 1, 2].map((i) => `<span class="freezeDot ${i < streak.freezeTokens ? "full" : ""}"></span>`).join("")}
-      </div>`
-    : `<div class="streakRow streakRowUnset">
-        <span class="streakFire" aria-hidden="true">${icon("fire")}</span>
-        <span class="streakNum" data-testid="streak-current">—</span><span class="streakUnit">日連続</span>
-      </div>
-      <p>練習曜日を設定するとストリークが始まります</p>
-      <button type="button" class="btn sm sec" id="heroStreakSetup" data-testid="hero-streak-setup">練習曜日を設定</button>`;
-  return `<div class="streakHero" data-testid="gamification-hero">
-    <div class="streakMain">
-      <div class="kicker">継続</div>
-      ${mainHtml}
-    </div>
-    <div class="streakDivider" aria-hidden="true"></div>
-    <div class="streakGoals">
-      ${gamGoalRingHtml("daily", goals.daily.current, goals.daily.target, "今日", restDay)}
-      ${gamGoalRingHtml("weekly", goals.weekly.current, goals.weekly.target, "今週")}
-      ${gamGoalRingHtml("monthly", goals.monthly.current, goals.monthly.target, "今月")}
-    </div>
-  </div>`;
-}
 /* 練習曜日のクイック設定シート。record タブの feature hint（practiceDays）と
-   履歴Heroの設定CTAの両方から呼ばれる。月水金土をプリセレクトするが、あくまで
+   結果の画面の「練習曜日を設定」から呼ばれる（ノートの上部にあったリングと設定の入口は v5 段 6 で廃止）。月水金土をプリセレクトするが、あくまで
    タップで開いた時だけの提案であり自動ポップアップはしない（既定曜日の押し付け禁止）。
    スキップも設定も同じ重みのボタンとして扱う */
 function openPracticeDaysSheet() {
@@ -92,175 +41,353 @@ function openPracticeDaysSheet() {
   ovl.querySelector("#pdSkip").onclick = () => closeModal(ovl);
 }
 
-/* 日付でまとまる記録行。複数日にまたがるラウンド内では個別日付も表示する。 */
-function historyRowHtml(s) {
-  const all = s.ends.flat();
-  const total = all.reduce((a, x) => a + x.s, 0);
-  const setup = db.setups.find((x) => x.id === s.setupId);
-  const average = all.length ? (total / all.length).toFixed(2) : "—";
-  const round =
-    s.round && s.round !== "free"
-      ? `${roundLabel(s.round)}${s.roundGroup ? ` ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}` : ""}`
-      : "";
-  const context = [setup && setup.name, round, s.wx].filter(Boolean);
-  const name = [fmtD(s.date), historyDistanceLabel(s.dist), faceLabel(s), `${all.length}本`, `${total}点`, `平均 ${average}`, ...context].join(" ・ ");
-  return `<button type="button" class="listItem historyRow" data-id="${esc(s.id)}" data-testid="history-row" aria-label="${esc(name)}">
-    <span class="historyRowMain">
-      ${s.roundGroup ? `<span class="historyRowDate">${fmtD(s.date)}</span>` : ""}
-      <span class="historyRowTitle">${historyDistanceLabel(s.dist)} <span>${esc(faceLabel(s))}</span></span>
-      <span class="historyRowCount">${all.length}本</span>
-      ${context.length ? `<span class="historyRowContext">${context.map(esc).join(" ・ ")}</span>` : ""}
-    </span>
-    <span class="historyRowTotal"><b>${total}<small>点</small></b><span>平均 ${average}</span></span>
-    <span class="historyRowArrow" aria-hidden="true">›</span></button>`;
+/* ============ ノート（履歴＋メモ。docs/design/v5/design.md 4.6・試作 #notes） ============
+   練習1回＝1項目、メモだけの日（db.notes）も同じ並びに入る。日付の新しい順、同じ日は書いた時刻の新しい順。
+   冒頭の励ましの文・数値枠・目標のリングは置かない（設定で入のときだけ、目標と連続記録を1行）。 */
+const NOTE_TAGS = ["射型", "風", "サイト", "弓具"];
+const NOTE_GO =
+  '<svg class="go chev" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 1l6 7-6 7"/></svg>';
+function noteDateOk(iso) {
+  return typeof iso === "string" && /^\d{4}-\d{2}-\d{2}$/.test(iso);
 }
-/* ページ分割前に同 gid の記録をまとめる。元配列・保存レコードは変更しない。 */
-function historyListEntries(ss) {
+/* 並べ替え用の時刻。メモは ts。練習は ts を持たないので、uid()（先頭が開始時刻の36進数）の id から読む。
+   読めないとき（取り込んだデータなど）は 0 で、保存の並びの新しい順になる */
+function noteSortTs(x) {
+  const t = Number(x && x.ts);
+  if (Number.isFinite(t) && t > 0) return t;
+  const id = x && typeof x.id === "string" ? x.id : "";
+  if (/^[0-9a-z]{13}$/.test(id)) {
+    const v = parseInt(id.slice(0, 8), 36);
+    if (v > 1.4e12 && v < Date.now() + 864e5) return v;
+  }
+  return 0;
+}
+/* ノートの項目（練習とメモ）を新しい順に並べる。保存の並び・保存レコードは変えない */
+function noteItems() {
+  const items = [];
+  (db.sessions || []).forEach((s, i) => {
+    if (s && typeof s === "object") items.push({ kind: "session", s, date: String(s.date || ""), ts: noteSortTs(s), i });
+  });
+  (db.notes || []).forEach((n, i) => {
+    if (n && typeof n === "object") items.push({ kind: "memo", n, date: String(n.date || ""), ts: noteSortTs(n), i });
+  });
+  return items.sort(
+    (a, b) =>
+      b.date.localeCompare(a.date) ||
+      b.ts - a.ts ||
+      (a.kind === b.kind ? b.i - a.i : a.kind === "session" ? -1 : 1),
+  );
+}
+function noteItemHasMemo(it) {
+  return it.kind === "memo" ? true : !!(it.s.note && String(it.s.note).trim());
+}
+/* その日の弓具の変更（セッティングの変更履歴）とサイトの記録（サイト台帳）。日付 → 文の配列 */
+function noteDayChanges() {
+  const by = new Map();
+  const add = (date, text) => {
+    if (!noteDateOk(date)) return;
+    if (!by.has(date)) by.set(date, []);
+    by.get(date).push(text);
+  };
+  (db.setups || []).forEach((setup) => {
+    (Array.isArray(setup.history) ? setup.history : []).forEach((h) => {
+      const changes = h && Array.isArray(h.changes) ? h.changes : [];
+      if (!changes.length) return;
+      add(
+        h.date,
+        `弓具の変更: ${setup.name}（${changes.map((c) => `${c.label} ${c.from || "未設定"} → ${c.to || "削除"}`).join("、")}）`,
+      );
+    });
+  });
+  (db.sightMarks || []).forEach((mk) => {
+    if (!mk || typeof mk !== "object") return;
+    const has = (v) => v != null && v !== "";
+    if (!has(mk.v) && !has(mk.h)) return;
+    add(
+      mk.date,
+      `サイトの記録: ${historyDistanceLabel(mk.dist)} 上下 ${has(mk.v) ? mk.v : "—"}・左右 ${has(mk.h) ? mk.h : "—"}`,
+    );
+  });
+  return by;
+}
+function noteDayCellHtml(iso) {
+  const p = dateParts(iso);
+  return p
+    ? `<span class="day"><span class="srOnly">${fmtD(iso)} </span>${p.d}<small>${p.w}曜</small></span>`
+    : `<span class="day nodate">—<small>日付なし</small></span>`;
+}
+function noteChangesHtml(changes) {
+  return (changes || []).map((c) => `<span class="chg">${esc(c)}</span>`).join("");
+}
+/* 練習の項目。日・曜日 / 距離・射数と合計 / 的・弓具・天気・「点数だけ」 / メモ2行 / その日の弓具変更 */
+function historyRowHtml(s, changes) {
+  const all = sessionArrows(s);
+  const total = sumScores(all);
+  const setup = db.setups.find((x) => x.id === s.setupId);
+  /* ラウンド名は、見出し（距離・射数）と同じ内容（「70m 72射」など）なら繰り返さない */
+  const roundName = s.round && s.round !== "free" ? roundLabel(s.round) : "";
+  const round = s.roundGroup
+    ? `${roundName} ${(Number(s.roundGroup.stage) || 0) + 1}/${s.roundGroup.stageCount}`
+    : roundName.replace(/\s+/g, "") === `${historyDistanceLabel(s.dist)}${all.length}射`
+      ? ""
+      : roundName;
+  const meta = [faceLabel(s), setup && setup.name, round, s.wx];
+  if (all.length && !sessionHasPos(s)) meta.push("点数だけ");
+  const note = s.note ? String(s.note).trim() : "";
+  return `<button type="button" class="entry noteEntry historyRow" data-kind="session" data-id="${esc(s.id)}" data-testid="history-row">
+    ${noteDayCellHtml(s.date)}
+    <span class="entryBody">
+      <span class="hd"><b>${historyDistanceLabel(s.dist)}・${all.length}射</b><span class="sc1">${total}<small>点</small></span></span>
+      <span class="meta">${esc(meta.filter(Boolean).join("・"))}</span>
+      ${note ? `<span class="txt">${esc(note)}</span>` : ""}
+      ${noteChangesHtml(changes)}
+    </span>
+  </button>`;
+}
+/* メモだけの項目 */
+function memoRowHtml(n, changes) {
+  const tags = Array.isArray(n.tags) ? n.tags : [];
+  const text = String(n.text || "").trim();
+  return `<button type="button" class="entry noteEntry memoRow" data-kind="memo" data-id="${esc(n.id)}" data-testid="notes-memo-row">
+    ${noteDayCellHtml(n.date)}
+    <span class="entryBody">
+      <span class="hd"><b>メモ</b></span>
+      ${tags.length ? `<span class="meta">${esc(tags.join("・"))}</span>` : ""}
+      <span class="txt${text ? "" : " none"}">${text ? esc(text) : "本文はありません"}</span>
+      ${noteChangesHtml(changes)}
+    </span>
+  </button>`;
+}
+/* ページ分割前に同 gid の記録（多距離ラウンドのステージ）をまとめる。元配列・保存レコードは変更しない。 */
+function historyListEntries(items) {
   const groups = new Map();
   const entries = [];
-  ss.forEach((s) => {
-    const gid = s.roundGroup && s.roundGroup.gid;
+  items.forEach((it) => {
+    const s = it.kind === "session" ? it.s : null;
+    const gid = s && s.roundGroup && s.roundGroup.gid;
     if (typeof gid !== "string" || !gid) {
-      entries.push({ sessions: [s], gid: "" });
+      entries.push({ items: [it], gid: "", date: it.date });
       return;
     }
     let entry = groups.get(gid);
     if (!entry) {
-      entry = { sessions: [], gid };
+      entry = { items: [], gid, date: it.date };
       groups.set(gid, entry);
       entries.push(entry);
     }
-    entry.sessions.push(s);
+    entry.items.push(it);
   });
   return entries;
 }
-function historyRoundHtml(entry, filtered) {
-  const stages = [...entry.sessions].sort(
-    (a, b) => (Number(a.roundGroup.stage) || 0) - (Number(b.roundGroup.stage) || 0),
-  );
+function historyRoundHtml(entry, filtered, changesFor) {
+  const stages = entry.items
+    .map((it) => it.s)
+    .sort((a, b) => (Number(a.roundGroup.stage) || 0) - (Number(b.roundGroup.stage) || 0));
   let total = 0, arrows = 0;
-  stages.forEach((s) => s.ends.forEach((end) => end.forEach((a) => { total += a.s; arrows++; })));
+  stages.forEach((s) => { const all = sessionArrows(s); total += sumScores(all); arrows += all.length; });
   const rg = stages[0].roundGroup;
   const count = Number(rg.stageCount);
   const stageLabel = Number.isInteger(count) && count > 0 ? `${stages.length}/${count}ステージ` : `${stages.length}ステージ`;
-  const distances = stages.map((s) => historyDistanceLabel(s.dist)).join(" ・ ");
+  const distances = stages.map((s) => historyDistanceLabel(s.dist)).join("・");
   return `<details class="historyRound" data-testid="history-round" data-gid="${esc(entry.gid)}" ${ui.histRoundOpen && ui.histRoundOpen.has(entry.gid) ? "open" : ""}>
     <summary class="historyRoundSummary">
       <span class="historyRoundMain"><span class="historyRoundTitle">${esc(roundLabel(rg.roundId))}</span>
-      <span class="historyRoundMeta">${stageLabel} ・ ${arrows}本</span><span class="historyRoundMeta">${distances}</span></span>
-      <span class="historyRoundTotal">${total}<small>${filtered ? "表示分合計" : "合計"}</small></span>
+      <span class="historyRoundMeta">${stageLabel}・${arrows}射</span><span class="historyRoundMeta">${distances}</span></span>
+      <span class="historyRoundTotal">${total}<small>${filtered ? "表示分の合計" : "合計"}</small></span>
     </summary>
-    <div class="historyRoundStages">${stages.map(historyRowHtml).join("")}</div>
+    <div class="historyRoundStages">${stages.map((s) => historyRowHtml(s, changesFor(s.date))).join("")}</div>
   </details>`;
 }
-/* 同日複数記録を hairline 見出しでまとめ、月替わりに月ラベルを出す。 */
-function historyGroupedListHtml(entries, filtered) {
-  let prevMonth = "",
-    prevDate = "";
+/* 月の見出し（その月の練習回数つき）→ 項目。monthCounts は絞り込み後の全項目から数える（ページ分割に左右されない） */
+function noteListHtml(entries, monthCounts, filtered) {
+  const dayChanges = noteDayChanges();
+  const used = new Set();
+  /* その日の変更は、その日の最初の項目にだけ付ける */
+  const changesFor = (date) => {
+    if (!dayChanges.has(date) || used.has(date)) return null;
+    used.add(date);
+    return dayChanges.get(date);
+  };
+  let prevMonth = null;
   const parts = [];
   entries.forEach((entry) => {
-    const s = entry.sessions[0];
-    const iso = s.date || "";
-    const month = iso.slice(0, 7);
-    if (month && month !== prevMonth) {
-      parts.push(`<div class="historyMonthLabel">${month.replace("-", "年")}月</div>`);
+    const month = noteDateOk(entry.date) ? entry.date.slice(0, 7) : "";
+    if (month !== prevMonth) {
       prevMonth = month;
-      prevDate = "";
+      const label = month ? `${+month.slice(0, 4)}年${+month.slice(5, 7)}月` : "日付なし";
+      parts.push(
+        `<h2 class="noteMonth" data-testid="notes-month" data-month="${month}"><span>${label}</span><span class="cnt">練習 ${monthCounts.get(month) || 0}回</span></h2>`,
+      );
     }
-    if (iso && iso !== prevDate) {
-      parts.push(`<div class="historyDateHead">${fmtD(iso)}</div>`);
-      prevDate = iso;
+    if (entry.gid && entry.items.length > 1) parts.push(historyRoundHtml(entry, filtered, changesFor));
+    else {
+      const it = entry.items[0];
+      parts.push(
+        it.kind === "session" ? historyRowHtml(it.s, changesFor(it.date)) : memoRowHtml(it.n, changesFor(it.date)),
+      );
     }
-    parts.push(entry.sessions.length > 1 ? historyRoundHtml(entry, filtered) : historyRowHtml(s));
   });
   return parts.join("");
 }
+/* 練習の目標と連続記録（設定で入のときだけ）。ノートには事実を1行だけ。バッジは設定・分析の側 */
+function notesGoalLineHtml() {
+  const g = db.settings.gamification;
+  if (!g || !g.enabled) return "";
+  const goals = calcGoalProgress(db.sessions, g.goals, today());
+  const streak = computeStreak(db.sessions, g.practiceDays, today());
+  const parts = [
+    `今週 ${goals.weekly.current}回 / 目標 ${goals.weekly.target}回`,
+    `今月 ${goals.monthly.current}射 / 目標 ${goals.monthly.target}射`,
+  ];
+  if (streak.configured) parts.push(`連続 <b data-testid="streak-current">${streak.current}</b>日`);
+  return `<p class="basis homeGoalLine notesGoalLine" data-testid="notes-goal-line">${parts.map((t) => `<span>${t}</span>`).join("・")}</p>`;
+}
 function renderHistory(m) {
-  const allSs = [...db.sessions].sort(
-    (a, b) => (b.date || "").localeCompare(a.date || "") || (b.id < a.id ? -1 : 1),
-  );
-  const hf = ui.histFilter || { setupId: "", dist: "", round: "" };
-  const dists = [...new Set(allSs.map((s) => s.dist).filter(Boolean))].sort((a, b) => b - a);
-  const rounds = [...new Set(allSs.map((s) => s.round || "free"))];
-  const ss = allSs.filter(
-    (s) =>
-      (!hf.setupId || (hf.setupId === "__none" ? !s.setupId : s.setupId === hf.setupId)) &&
-      (!hf.dist || String(s.dist) === String(hf.dist)) &&
-      (!hf.round || (s.round || "free") === hf.round),
-  );
-  const _heroRows = buildAnalysisRows(ss, db.setups, sessionMetrics);
-  const filterCount = [hf.setupId, hf.dist, hf.round].filter(Boolean).length;
-  const entries = historyListEntries(ss);
+  const all = noteItems();
+  if (!ui.histFilter) ui.histFilter = { setupId: "", dist: "", round: "", kind: "all" };
+  const hf = ui.histFilter;
+  if (hf.kind !== "rec" && hf.kind !== "memo") hf.kind = "all";
+  const sessions = all.filter((it) => it.kind === "session").map((it) => it.s);
+  const dists = [...new Set(sessions.map((s) => s.dist).filter(Boolean))].sort((a, b) => b - a);
+  const rounds = [...new Set(sessions.map((s) => s.round || "free"))];
+  /* 距離・用具・ラウンドは練習だけが持つ条件。どれかを選ぶと、メモだけの項目は外れる */
+  const sessionOnly = !!(hf.setupId || hf.dist || hf.round);
+  const sessionOk = (s) =>
+    (!hf.setupId || (hf.setupId === "__none" ? !s.setupId : s.setupId === hf.setupId)) &&
+    (!hf.dist || String(s.dist) === String(hf.dist)) &&
+    (!hf.round || (s.round || "free") === hf.round);
+  const items = all.filter((it) => {
+    if (it.kind === "memo") return !sessionOnly && hf.kind !== "rec";
+    if (hf.kind === "memo" && !noteItemHasMemo(it)) return false;
+    return sessionOk(it.s);
+  });
+  const detailCount = [hf.setupId, hf.round].filter(Boolean).length;
+  const filtered = sessionOnly || hf.kind !== "all";
+  const monthCounts = new Map();
+  items.forEach((it) => {
+    if (it.kind !== "session") return;
+    const month = noteDateOk(it.date) ? it.date.slice(0, 7) : "";
+    monthCounts.set(month, (monthCounts.get(month) || 0) + 1);
+  });
+  const entries = historyListEntries(items);
   const limit = ui._histLimit || 50;
-  m.innerHTML = `${pageHeroHtml("history", { ss, rows: _heroRows })}
-  <div class="card historyRecords"><h2>練習履歴 <span class="mini">${ss.length}/${allSs.length}回</span></h2>
-    <details class="historyFilters" data-testid="history-filters" ${filterCount ? "open" : ""}>
-    <summary data-testid="history-filter-toggle">絞り込み <span>${filterCount ? `${filterCount}条件` : "すべて"}</span></summary>
-    <div class="row">
-      <div><label class="f" for="histSetup">用具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
-      <div><label class="f" for="histDist">距離</label><select class="inp" id="histDist"><option value="">すべて</option>${dists.map((d) => `<option value="${d}" ${String(hf.dist) === String(d) ? "selected" : ""}>${d}m</option>`).join("")}</select></div>
+  const seg = (kind, label) =>
+    `<button type="button" data-kind="${kind}" aria-pressed="${!hf.dist && hf.kind === kind}">${label}</button>`;
+  const trashCount = (db.trash || []).length;
+  m.innerHTML = `${notesGoalLineHtml()}
+  <div class="historyRecords" data-testid="notes-list">
+    <div class="seg noteSeg" id="noteSeg" role="group" aria-label="表示する項目" data-testid="notes-filter">
+      ${seg("all", "すべて")}${seg("rec", "練習")}${seg("memo", "メモあり")}
+      <span class="segPick${hf.dist ? " on" : ""}"><select id="histDist" aria-label="距離" data-testid="notes-filter-dist"${dists.length ? "" : " disabled"}><option value="">距離</option>${dists.map((d) => `<option value="${esc(d)}" ${String(hf.dist) === String(d) ? "selected" : ""}>${historyDistanceLabel(d)}</option>`).join("")}</select></span>
     </div>
+    <details class="historyFilters" data-testid="history-filters" ${detailCount ? "open" : ""}>
+    <summary data-testid="history-filter-toggle">弓具・ラウンドで絞り込む <span>${detailCount ? `${detailCount}条件` : "すべて"}</span></summary>
     <div class="row">
+      <div><label class="f" for="histSetup">弓具</label><select class="inp" id="histSetup"><option value="">すべて</option><option value="__none" ${hf.setupId === "__none" ? "selected" : ""}>未指定</option>${db.setups.map((s) => `<option value="${esc(s.id)}" ${hf.setupId === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
       <div><label class="f" for="histRound">ラウンド</label><select class="inp" id="histRound"><option value="">すべて</option>${rounds.map((r) => `<option value="${esc(r)}" ${hf.round === r ? "selected" : ""}>${esc(roundLabel(r))}</option>`).join("")}</select></div>
-      <div class="histFilterEnd"><button class="btn ghost" id="histClear">絞り込み解除</button></div>
     </div>
+    <div class="btnrow"><button type="button" class="btn ghost" id="histClear">絞り込みを解除</button></div>
     </details>
     <div id="histList">
     ${
-      ss.length
-        ? historyGroupedListHtml(entries.slice(0, limit), filterCount > 0) + (entries.length > limit ? `<div class="btnrow"><button class="btn ghost" id="histMore">さらに表示（残り${entries.length - limit}件）</button></div>` : "")
-        : allSs.length
-          ? `<div class="empty">この絞り込みに合う記録がありません。フィルタを広げてください。</div>`
+      items.length
+        ? noteListHtml(entries.slice(0, limit), monthCounts, filtered) +
+          (entries.length > limit ? `<div class="btnrow"><button type="button" class="btn ghost" id="histMore">さらに表示（残り${entries.length - limit}件）</button></div>` : "")
+        : all.length
+          ? `<div class="empty" data-testid="notes-no-match"><b>該当する記録はありません</b>絞り込みの条件を変えると表示されます。</div>`
           : `<div class="empty historyEmpty" data-testid="history-empty">
-        <p>まだ記録がありません。最初の1回を記録すると、ここに合計点とグルーピングの推移が並びます。</p>
+        <b>ノートはまだ空です</b>
+        <p>練習を記録して終了すると、日付の順にここへ並びます。練習のない日は「メモを書く」で書き残せます。</p>
         <button type="button" class="btn" id="histEmptyCta">記録タブへ</button>
       </div>`
     }
-  </div></div>`;
-  $("#histSetup").onchange = (e) => {
-    ui.histFilter.setupId = e.target.value;
+    </div>
+    <button type="button" class="lrow link noteTrashLink" id="notesTrash" data-testid="notes-trash"><span class="lmain"><b>ゴミ箱（${trashCount}件）</b><span>${trashCount ? "ここから元に戻せます" : "ゴミ箱へ移した記録とメモが、ここに入ります"}</span></span>${NOTE_GO}</button>
+  </div>`;
+  const rerender = (focusSel) => {
     ui._histLimit = 0;
     render();
-    if (e.target.value) $("#histSetup").focus({ preventScroll: true });
-    else $(".historyFilters summary").focus({ preventScroll: true });
+    const el = focusSel && $(focusSel);
+    if (el) el.focus({ preventScroll: true });
   };
+  m.querySelectorAll("#noteSeg button").forEach(
+    (b) =>
+      (b.onclick = () => {
+        hf.kind = b.dataset.kind;
+        hf.dist = "";
+        rerender(`#noteSeg button[data-kind="${b.dataset.kind}"]`);
+      }),
+  );
   $("#histDist").onchange = (e) => {
-    ui.histFilter.dist = e.target.value;
-    ui._histLimit = 0;
-    render();
-    if (e.target.value) $("#histDist").focus({ preventScroll: true });
-    else $(".historyFilters summary").focus({ preventScroll: true });
+    hf.dist = e.target.value;
+    hf.kind = "all";
+    rerender("#histDist");
+  };
+  $("#histSetup").onchange = (e) => {
+    hf.setupId = e.target.value;
+    rerender(e.target.value ? "#histSetup" : ".historyFilters summary");
   };
   $("#histRound").onchange = (e) => {
-    ui.histFilter.round = e.target.value;
-    ui._histLimit = 0;
-    render();
-    if (e.target.value) $("#histRound").focus({ preventScroll: true });
-    else $(".historyFilters summary").focus({ preventScroll: true });
+    hf.round = e.target.value;
+    rerender(e.target.value ? "#histRound" : ".historyFilters summary");
   };
   $("#histClear").onclick = () => {
-    ui.histFilter = { setupId: "", dist: "", round: "" };
-    ui._histLimit = 0;
-    render();
-    $(".historyFilters summary").focus({ preventScroll: true });
+    ui.histFilter = { setupId: "", dist: "", round: "", kind: "all" };
+    rerender(".historyFilters summary");
   };
   const more = $("#histMore");
   if (more) more.onclick = () => { ui._histLimit = (ui._histLimit || 50) + 50; render(); };
   if (!ui.histRoundOpen) ui.histRoundOpen = new Set();
-  document.querySelectorAll("#histList .historyRound").forEach((group) => {
+  m.querySelectorAll("#histList .historyRound").forEach((group) => {
     group.ontoggle = () => {
       if (!group.isConnected) return;
       if (group.open) ui.histRoundOpen.add(group.dataset.gid);
       else ui.histRoundOpen.delete(group.dataset.gid);
     };
   });
-  document
-    .querySelectorAll("#histList .listItem")
-    .forEach((li) => (li.onclick = () => openHistDetail(li.dataset.id)));
+  m.querySelectorAll("#histList .noteEntry").forEach(
+    (li) =>
+      (li.onclick = () =>
+        li.dataset.kind === "memo" ? openMemoDetail(li.dataset.id) : openHistDetail(li.dataset.id)),
+  );
   const cta = $("#histEmptyCta");
   if (cta) cta.onclick = () => showView("record");
-  const heroStreakSetup = $("#heroStreakSetup");
-  if (heroStreakSetup) heroStreakSetup.onclick = () => openPracticeDaysSheet();
+  $("#notesTrash").onclick = () => openTrashSheet();
+}
+/* ゴミ箱（ノートの一番下から開く。設定 > データにも同じ中身がある）。練習・メモ・弓具・サイト値を元に戻せる */
+function openTrashSheet() {
+  const items = db.trash || [];
+  const ovl = document.createElement("div");
+  ovl.className = "ovl";
+  ovl.innerHTML = `<div class="sheet trashSheet" data-testid="trash-sheet">
+    <h3>ゴミ箱（${items.length}件）</h3>
+    <p class="basis">ゴミ箱へ移した順に、新しい${TRASH_LIMIT}件までを残しています。「元に戻す」で、元の場所へ戻ります。</p>
+    ${
+      items.length
+        ? items
+            .map(
+              (it) => `<div class="lrow trashRow" data-testid="trash-row" data-type="${esc(it.type)}">
+        <span class="lmain"><b>${esc(it.label)}</b><span>${esc(trashTypeLabel(it.type))}${fmtD(it.date) ? `・${fmtD(it.date)} にゴミ箱へ` : ""}</span></span>
+        <button type="button" class="txtBtn" data-restore-trash="${esc(it.id)}" aria-label="${esc(it.label)} を元に戻す">元に戻す</button>
+      </div>`,
+            )
+            .join("")
+        : `<div class="empty"><b>ゴミ箱は空です</b>ゴミ箱へ移した記録とメモが、ここに入ります。</div>`
+    }
+    <div class="btnrow"><button type="button" class="btn ghost" id="trashClose">閉じる</button></div>
+  </div>`;
+  openModal(ovl, { escapeTarget: "#trashClose" });
+  ovl.querySelector("#trashClose").onclick = () => closeModal(ovl);
+  ovl.querySelectorAll("[data-restore-trash]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        if (!restoreTrash(b.dataset.restoreTrash)) return;
+        closeModal(ovl);
+        render();
+        if ((db.trash || []).length) openTrashSheet();
+        toast("元に戻しました");
+      }),
+  );
 }
 function sessionGroupPoint(s) {
   const m = sessionMetrics(s);
@@ -538,120 +665,342 @@ function legacyRescoreHtml(sess, setup, total) {
   const diff = r.total - total;
   return `<div class="hint histRescore" data-testid="history-rescore">実寸判定（${entered ? `矢径 ${dia}mm` : `矢径未入力のため ${dia}mm`}）では <b>${r.total}点</b>（記録時 ${total}点・差 ${diff > 0 ? "+" : ""}${diff}点・${r.changed}本）。保存された点数と着弾図の円は記録時の判定のままです。</div>`;
 }
+/* タグ（射型・風・サイト・弓具）の切り替え。練習は sess.tags、メモは note.tags に文字列の配列で持つ。
+   データにある見本以外のタグも、外せるように並べる */
+function noteTagsHtml(tags) {
+  const cur = Array.isArray(tags) ? tags : [];
+  const list = [...NOTE_TAGS, ...cur.filter((t) => !NOTE_TAGS.includes(t))];
+  return `<div class="ntags noteTagRow" role="group" aria-label="タグ" data-testid="note-tags">${list
+    .map(
+      (t) =>
+        `<button type="button" class="ntag" data-tag="${esc(t)}" aria-pressed="${cur.includes(t)}">${esc(t)}</button>`,
+    )
+    .join("")}</div>`;
+}
+function bindNoteTags(root, target, onChange) {
+  root.querySelectorAll(".noteTagRow .ntag").forEach(
+    (b) =>
+      (b.onclick = () => {
+        const cur = Array.isArray(target.tags) ? target.tags : [];
+        const tag = b.dataset.tag;
+        const next = cur.includes(tag) ? cur.filter((t) => t !== tag) : [...cur, tag];
+        if (next.length) target.tags = next;
+        else delete target.tags;
+        b.setAttribute("aria-pressed", String(next.includes(tag)));
+        onChange();
+      }),
+  );
+}
+function noteCondRowHtml(k, v, sub) {
+  return `<div class="lrow"><span class="lk">${k}</span><span class="lv">${v}${sub ? `<small>${sub}</small>` : ""}</span></div>`;
+}
+/* 条件（ラウンド・弓具・サイト・天気と風・入力）。記録に残っている値だけを書く */
+function noteConditionsHtml(sess, setup) {
+  const all = sessionArrows(sess);
+  const plan = scorecardPlan(sess);
+  const pos = all.filter(arrowHasPos).length;
+  const stored = validArrowR(sess.arrowR);
+  const dia = (sessionScoringRadius(sess, setup) * 20).toFixed(1);
+  const round = sess.round && sess.round !== "free" ? roundLabel(sess.round) : "";
+  const sight =
+    sess.sightV || sess.sightH
+      ? `上下 ${esc(sess.sightV || "—")}・左右 ${esc(sess.sightH || "—")}`
+      : "記録なし";
+  const input = !all.length
+    ? "記録なし"
+    : !pos
+      ? "点数だけ"
+      : pos < all.length
+        ? "的面に打つ"
+        : sessionInputMode(sess) === "score"
+          ? "点数だけ"
+          : "的面に打つ";
+  return `<section class="vsec" data-testid="note-conditions">
+    <div class="vsecH"><h2>条件</h2></div>
+    ${noteCondRowHtml("ラウンド", `${historyDistanceLabel(sess.dist)}・${esc(faceLabel(sess))}`, `${round ? esc(round) + "・" : ""}${plan.per}射 × ${sess.ends.length}エンド`)}
+    ${noteCondRowHtml("弓具", setup ? esc(setup.name) : "未指定", stored ? `矢の外径 ${dia}mm で判定` : `記録時の判定の円（直径 ${dia}mm）で採点`)}
+    ${noteCondRowHtml("サイト", sight)}
+    ${noteCondRowHtml("天気・風", windText(sess) ? esc(windText(sess)) : "記録なし")}
+    ${noteCondRowHtml("入力", input, pos && pos < all.length ? `位置なし ${all.length - pos}射` : "")}
+  </section>`;
+}
+/* ---------- ノートの詳細（全画面。試作 #note/<id>）----------
+   上から: 日付・距離と合計 → メモとタグ → 数値 → 同じ条件との比較（「この回」）→ スコア表 → 着弾 → 条件 →
+   サイト調整の目安と詳しい根拠 → この記録の操作（直す・画像で保存・分析で見る・ゴミ箱へ移す）。
+   保存された点数はここで書き換えない。メモとタグだけが、この画面からその記録に書き込まれる */
 function openHistDetail(id) {
   const sess = db.sessions.find((s) => s.id === id);
   if (!sess) return;
   const ovl = document.createElement("div");
-  ovl.className = "ovl";
+  ovl.className = "ovl resultOvl noteOvl";
   const all = sess.ends.flat();
   const total = all.reduce((a, x) => a + x.s, 0);
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const st = sessionMetrics(sess).st;
   /* 位置のある矢が1本もない記録（点数だけの入力）: 着弾の数値・信頼度・次のアクションは出さない */
   const hasImpact = !!st;
+  const posCount = all.filter(arrowHasPos).length;
   const adv = adviceFor(sess, setup);
-  /* 「今日の結果」統合パネルの再構成（todays-result-integration-design.md §12 T6）:
-     この日の時点までのデータだけで computeTodaysResult を再現する（未来のセッションを
-     「前回」等に混入させないよう、当日以前に絞った母集団を渡す）。文言は「今日」→「この日」に切替 */
+  /* この日の時点までのデータだけで computeTodaysResult を再現する（未来のセッションを
+     「前回」等に混入させないよう、当日以前に絞った母集団を渡す）。文言は「今回」→「この回」に切替 */
   const histAsOfDate = sess.date || today();
   const histSessions = db.sessions.filter((x) => x && x.date && x.date <= histAsOfDate);
   const histTodaysResult = computeTodaysResult(histSessions, sess.id, sessionMetrics, {
     formAnalyses: db.formAnalyses,
   });
   const histComparison = computeConditionComparison(histSessions, sess.id, scorecardPlan(sess).quota);
-  /* 構成（正本 B節）: 主役数値 → 着弾図 → エンド表 → 分析カード群 → 操作。
-     ロジック（集計・adviceFor 等）は不変・呼び出し順と見た目だけを並べ替える */
-  const endTableHtml = `<table class="tbl mt8 histEndTable" data-testid="history-end-table"><tr><th>エンド</th><th>得点</th><th class="right">計</th></tr>
-    ${sess.ends
-      .map((end, i) => {
-        const sorted = [...end].sort((a, b) => b.s - a.s);
-        return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i % ENDCOLORS.length]}"></span>${i + 1}</td><td>${sorted.map((a) => scoreLabel(a) + (a.manual === true ? "*" : "")).join("・")}</td><td class="right"><b>${end.reduce((a, x) => a + x.s, 0)}</b></td></tr>`;
-      })
-      .join("")}</table>${all.some((a) => a.manual === true) ? `<div class="hint" data-testid="history-manual-note">* は手で直した点数です（位置からの採点とは違う点を、記録中に選んでいます）。</div>` : ""}`;
-  /* 初心者文法（正本 机上モード 5節）: 一言解釈を持つカード（サイト提案・個人モデル・次のアクション）は
-     そのまま表示。数値の羅列だけの groupSummaryHtml/使用サイト/矢番号メモは「詳しく」に畳む */
+  const p = dateParts(sess.date);
+  const counts = scorecardCountCols(sess);
+  const quota = scorecardPlan(sess).quota;
+  const rescore = legacyRescoreHtml(sess, setup, total);
+  const op = (opId, title, sub) =>
+    `<button type="button" class="lrow link" id="${opId}"><span class="lmain"><b>${title}</b><span>${sub}</span></span>${NOTE_GO}</button>`;
   const detailNumbersHtml = `${hasImpact ? groupSummaryHtml(st, { withConfidenceNote: true }) : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
     ${sess.sightV || sess.sightH ? `<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV || "—")} / 左右 ${esc(sess.sightH || "—")}</span></div>` : ""}
     ${hasImpact ? trustHtml(sess, setup, st) : ""}
     ${arrowMetaSummaryHtml(sess)}`;
-  const analysisCardsHtml = `
-    ${
-      adv
-        ? `<div class="advice"><div class="subNote">${icon("tool")} この回からのサイト調整提案</div>${adv.lines.map((l) => `<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv, sess)}${shapeNote(adv.st)}${adv.notes
-            .slice(0, 3)
-            .map((n) => `<div class="note">・${n}</div>`)
-            .join("")}</div>`
-        : ""
-    }
-    ${personalModelHtml(adv, sess, setup)}
-    ${roundProgressHtml(sess)}
-    ${histRoundGroupHtml(sess)}
-    ${conditionHtml(sess, st, setup)}
-    ${hasImpact ? nextActionHtml(sess, adv, setup) : ""}
-    <details class="adv histDetailNumbers" data-testid="history-detail-numbers">
-      <summary>詳しく（グルーピングの数値・信頼度・使用サイト）</summary>
-      ${detailNumbersHtml}
-    </details>`;
-  ovl.innerHTML = `<div class="sheet histDetailSheet">
-    <h3>${fmtD(sess.date)} ・ ${historyDistanceLabel(sess.dist)} ・ ${esc(faceLabel(sess))}</h3>
-    <div class="subNote">${setup ? esc(setup.name) : "セッティング未指定"}${sess.round && sess.round !== "free" ? " ・ " + esc(roundLabel(sess.round)) : ""}${windText(sess) ? " ・ " + esc(windText(sess)) : ""}${sess.note ? " ・ " + esc(sess.note) : ""}</div>
-    <div class="statbar" data-testid="history-detail-stats">
-      <div class="stat"><b>${total}</b><span>合計 (${all.length}本)</span></div>
-      <div class="stat"><b>${(total / all.length).toFixed(2)}</b><span>平均/本</span></div>
-      <div class="stat"><b>${perfectScoreCount(all, sess)}</b><span>${perfectScoreLabel(sess)}</span></div>
-      <div class="stat"><b>${secondaryScoreCount(all, sess)}</b><span>${secondaryScoreLabel(sess)}</span></div>
-    </div>
-    ${legacyRescoreHtml(sess, setup, total)}
+  ovl.innerHTML = `<div class="sheet resultScreen noteScreen histDetailSheet" data-testid="note-detail" data-id="${esc(sess.id)}">
+    <div class="subTop"><button type="button" class="backBtn" id="hClose" data-testid="note-back">${REC_CHEVRON}${view === "history" ? "ノート" : "戻る"}</button></div>
+    <header class="subHead noteHead">
+      <div>
+        <div class="viewDate">${p ? `${p.y}年` : "日付なし"}</div>
+        <h3>${p ? `${fmtMDW(sess.date)}&emsp;` : ""}${historyDistanceLabel(sess.dist)}<span class="srOnly">（${fmtD(sess.date)}・${esc(faceLabel(sess))}）</span></h3>
+      </div>
+      <div class="bigNum noteTotal" data-testid="note-total" aria-label="合計 ${total}点">${total}</div>
+    </header>
+    <p class="basis noteCond" data-testid="note-condition">${esc([faceLabel(sess), setup ? setup.name : "弓具未指定", sess.round && sess.round !== "free" ? roundLabel(sess.round) : "", windText(sess)].filter(Boolean).join("・"))}</p>
+    <section class="vsec">
+      <div class="vsecH"><h2><label for="hNote">メモ</label></h2><span class="aside">書くと保存されます</span></div>
+      <textarea class="noteBox" id="hNote" data-testid="note-memo" placeholder="感覚、気づいたこと、次に確かめること">${esc(sess.note || "")}</textarea>
+      ${noteTagsHtml(sess.tags)}
+    </section>
+    <section class="vsec" data-testid="history-detail-stats">
+      <div class="vsecH"><h2>合計の内訳</h2><span class="aside">${all.length}射・1射平均 ${all.length ? (total / all.length).toFixed(2) : "—"}${quota ? `・満点 ${quota * perfectScoreValue(sess)}` : ""}</span></div>
+      ${sessionFigsHtml(sess, "ends")}
+    </section>
     ${todaysResultHtml(histTodaysResult, sess, { dayLabel: "この日", comparison: histComparison })}
-    <div id="hPlot" class="mt10"></div>
-    ${endTableHtml}
-    ${analysisCardsHtml}
-    <div class="histDetailActions">
-      <div class="btnrow">
-        <button class="btn sec" id="hEdit">${icon("pencil")} 編集</button>
-        <button class="btn sec" id="hCard">画像保存</button>
-      </div>
-      <div class="btnrow">
-        <button class="btn ghost" id="hClose">閉じる</button>
-        <button class="btn danger" id="hDel">削除</button>
-      </div>
-    </div>
+    ${histRoundGroupHtml(sess)}
+    <section class="vsec"><div class="vsecH"><h2>スコア表</h2><span class="aside">${counts.map((c) => `${c.sub} ${c.count(all)}`).join("・")}</span></div></section>
+    <div class="bleed" data-testid="history-end-table">${scorecardHtml(sess, { final: true })}</div>
+    ${all.some((a) => a.manual === true) ? `<p class="basis" data-testid="history-manual-note">* は手で直した点数です（位置からの採点とは違う点を、記録中に選んでいます）。</p>` : ""}
+    <section class="vsec"><div class="vsecH"><h2>着弾</h2><span class="aside">${posCount ? `${posCount}射の位置` : "位置の記録なし"}</span></div></section>
+    <div id="hPlot" class="recordSummaryPlot${posCount ? " bleed" : ""}"></div>
+    ${resultImpactFigsHtml(st)}
+    ${noteConditionsHtml(sess, setup)}
+    <details class="adv summaryDetails histDetailNumbers" data-testid="history-detail-numbers">
+      <summary>サイト調整の目安と詳しい根拠</summary>
+      ${
+        adv
+          ? `<div class="advice"><div class="subNote">${icon("tool")} この回からのサイト調整提案</div>${adv.lines.map((l) => `<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv, sess)}${shapeNote(adv.st)}${adv.notes
+              .slice(0, 3)
+              .map((n) => `<div class="note">・${n}</div>`)
+              .join("")}</div>`
+          : ""
+      }
+      ${personalModelHtml(adv, sess, setup)}
+      ${roundProgressHtml(sess)}
+      ${conditionHtml(sess, st, setup)}
+      ${hasImpact ? nextActionHtml(sess, adv, setup) : ""}
+      ${detailNumbersHtml}
+    </details>
+    <section class="vsec histDetailActions" data-testid="note-ops">
+      <div class="vsecH"><h2>この記録の操作</h2></div>
+      ${op("hEdit", "点数や位置を直す", "記録中と同じ画面で直します。直した矢には印が付きます")}
+      ${op("hCard", "スコア表を画像で保存", "共有の画面が出る端末では、そこから送れます")}
+      ${op("hAnalysis", "分析で見る", "分析タブへ移ります")}
+      ${rescore}
+      <div class="btnRow"><button type="button" class="btn danger" id="hDel">ゴミ箱へ移す</button></div>
+      <p class="basis">ゴミ箱に移した記録は、ノートの一番下から元に戻せます。</p>
+    </section>
   </div>`;
-  openModal(ovl, { escapeTarget: "#hClose" });
+  openModal(ovl, { escapeTarget: "#hClose", swipe: false });
   plotSession(sess, ovl.querySelector("#hPlot"));
+  /* メモとタグはこの記録に書く。入力のたびに保存を予約し、欄を離れるとき・閉じるときに書き込む */
+  const note = ovl.querySelector("#hNote");
+  let edited = false;
+  const syncNote = () => {
+    const v = note.value.trim();
+    if ((sess.note || "") === v) return;
+    sess.note = v;
+    edited = true;
+    scheduleSave("note-memo");
+  };
+  note.oninput = syncNote;
+  note.onblur = () => {
+    syncNote();
+    flushPendingSave();
+  };
+  bindNoteTags(ovl, sess, () => {
+    edited = true;
+    scheduleSave("note-tags");
+  });
+  const close = () => {
+    syncNote();
+    flushPendingSave();
+    closeModal(ovl);
+    if (edited) render();
+  };
   ovl.querySelectorAll("[data-stage-jump]").forEach(
     (b) =>
       (b.onclick = () => {
-        closeModal(ovl);
+        close();
         openHistDetail(b.dataset.stageJump);
       }),
   );
-  ovl.querySelector("#hClose").onclick = () => closeModal(ovl);
+  ovl.querySelector("#hClose").onclick = close;
   ovl.querySelector("#hEdit").onclick = () => {
     if (db.active) {
-      toast("記録中のセッションがあります。先に終了してください");
+      toast("記録の途中のものがあります。先に終了してください");
       return;
     }
+    syncNote();
     const cp = JSON.parse(JSON.stringify(sess));
     cp.cur = [];
     cp._edit = true;
     db.active = cp;
     save();
     closeModal(ovl);
-    showView("record");
+    if (view === "record") render();
+    else showView("record");
     toast("過去の記録を編集中。メニューの「編集を終了して保存する」で上書きします");
   };
   ovl.querySelector("#hCard").onclick = () => exportScorecardImage(sess);
+  ovl.querySelector("#hAnalysis").onclick = () => {
+    close();
+    if (view === "analysis") render();
+    else showView("analysis");
+  };
   ovl.querySelector("#hDel").onclick = async () => {
-    if (await appConfirm("この練習記録を削除しますか？", { danger: true, okLabel: "削除" })) {
+    if (
+      await appConfirm("この練習の記録をゴミ箱へ移しますか？ ノートの一番下のゴミ箱から元に戻せます。", {
+        danger: true,
+        okLabel: "ゴミ箱へ移す",
+      })
+    ) {
+      syncNote();
       trashItem("session", `${fmtD(sess.date)} ${historyDistanceLabel(sess.dist)}`, sess);
       db.sessions = db.sessions.filter((s) => s.id !== id);
       save({ reason: "delete-session", forceSnapshot: true });
       closeModal(ovl);
       render();
-      toast("削除しました。設定から復元できます");
+      toast("ゴミ箱へ移しました。ノートの一番下から元に戻せます");
     }
   };
+}
+/* ---------- メモだけのノート（db.notes）: 書く・読む・直す・ゴミ箱へ移す ----------
+   id が無ければ今日の日付で新しく書く。新しいメモは本文を書いた時点でノートに入り、入力のたびに保存を予約する。
+   欄を離れるとき・閉じるとき（戻る・Esc）に書き込む。本文が空のままの新しいメモは残さない */
+function openMemoDetail(id) {
+  if (!Array.isArray(db.notes)) db.notes = [];
+  const existing = id ? db.notes.find((n) => n.id === id) : null;
+  if (id && !existing) return;
+  const isNew = !existing;
+  const note = existing || { id: uid(), date: today(), ts: Date.now(), text: "" };
+  let stored = !isNew,
+    edited = false;
+  const ovl = document.createElement("div");
+  ovl.className = "ovl resultOvl noteOvl";
+  ovl.innerHTML = `<div class="sheet resultScreen noteScreen memoScreen" data-testid="memo-detail" data-id="${esc(note.id)}">
+    <div class="subTop"><button type="button" class="backBtn" id="nClose" data-testid="memo-back">${REC_CHEVRON}${view === "history" ? "ノート" : "戻る"}</button></div>
+    <header class="subHead">
+      <div class="viewDate" id="nDateLabel"></div>
+      <h3>${isNew ? "メモを書く" : "メモ"}</h3>
+    </header>
+    <section class="vsec">
+      <div class="vsecH"><h2><label for="nDate">日付</label></h2><span class="aside">ノートに並ぶ日</span></div>
+      <input type="date" class="inp" id="nDate" data-testid="memo-date" value="${noteDateOk(note.date) ? note.date : ""}">
+    </section>
+    <section class="vsec">
+      <div class="vsecH"><h2><label for="nText">本文</label></h2><span class="aside">書くと保存されます</span></div>
+      <textarea class="noteBox memoBox" id="nText" data-testid="memo-text" placeholder="練習のない日の気づき、素引きや筋トレの内容、次に確かめること">${esc(note.text || "")}</textarea>
+      ${noteTagsHtml(note.tags)}
+    </section>
+    ${
+      isNew
+        ? `<p class="basis">本文を書くと、ノートに1項目として入ります。本文が空のまま戻ると、何も残りません。</p>`
+        : `<section class="vsec histDetailActions" data-testid="memo-ops">
+      <div class="vsecH"><h2>このメモの操作</h2></div>
+      <div class="btnRow"><button type="button" class="btn danger" id="nDel">ゴミ箱へ移す</button></div>
+      <p class="basis">ゴミ箱に移したメモは、ノートの一番下から元に戻せます。</p>
+    </section>`
+    }
+  </div>`;
+  openModal(ovl, { escapeTarget: "#nClose", swipe: false });
+  const text = ovl.querySelector("#nText"),
+    date = ovl.querySelector("#nDate"),
+    label = ovl.querySelector("#nDateLabel");
+  const showDate = () => {
+    const p = dateParts(note.date);
+    label.textContent = p ? `${p.y}年 ${fmtMDW(note.date)}` : "日付なし";
+  };
+  showDate();
+  const changed = (reason) => {
+    edited = true;
+    if (!stored && String(note.text || "").trim()) {
+      db.notes.push(note);
+      stored = true;
+    }
+    if (stored) scheduleSave(reason);
+  };
+  const syncText = () => {
+    if ((note.text || "") === text.value) return;
+    note.text = text.value;
+    changed("memo-text");
+  };
+  text.oninput = syncText;
+  text.onblur = () => {
+    syncText();
+    flushPendingSave();
+  };
+  date.onchange = () => {
+    /* 空・読めない日付は受け取らず、元の日付のままにする */
+    if (!noteDateOk(date.value)) {
+      date.value = noteDateOk(note.date) ? note.date : "";
+      return;
+    }
+    if (note.date === date.value) return;
+    note.date = date.value;
+    showDate();
+    changed("memo-date");
+  };
+  bindNoteTags(ovl, note, () => changed("memo-tags"));
+  const close = () => {
+    syncText();
+    if (isNew && stored && !String(note.text || "").trim()) {
+      /* 書いてから全部消した新しいメモは、項目ごと取り下げる（本文は空なので失うものは無い） */
+      db.notes = db.notes.filter((n) => n !== note);
+      stored = false;
+      scheduleSave("memo-empty");
+    }
+    flushPendingSave();
+    closeModal(ovl);
+    if (edited) render();
+  };
+  ovl.querySelector("#nClose").onclick = close;
+  const del = ovl.querySelector("#nDel");
+  if (del)
+    del.onclick = async () => {
+      if (
+        await appConfirm("このメモをゴミ箱へ移しますか？ ノートの一番下のゴミ箱から元に戻せます。", {
+          danger: true,
+          okLabel: "ゴミ箱へ移す",
+        })
+      ) {
+        syncText();
+        const head = String(note.text || "").trim().replace(/\s+/g, " ");
+        trashItem(
+          "note",
+          `メモ ${fmtD(note.date) || "日付なし"}${head ? ` ${head.slice(0, 24)}${head.length > 24 ? "…" : ""}` : ""}`,
+          note,
+        );
+        db.notes = db.notes.filter((n) => n.id !== note.id);
+        save({ reason: "delete-note", forceSnapshot: true });
+        closeModal(ovl);
+        render();
+        toast("ゴミ箱へ移しました。ノートの一番下から元に戻せます");
+      }
+    };
+  if (isNew) text.focus({ preventScroll: true });
 }
 
 /* ---------- サイト ---------- */

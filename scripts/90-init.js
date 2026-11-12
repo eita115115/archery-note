@@ -7,6 +7,7 @@ if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostn
 applyTheme();
 applyFieldMode();
 $("#btnSettings").onclick=openSettings;
+$("#btnNewMemo").onclick=()=>openMemoDetail(null);
 /* 表示中の通知だけ、画面幅変更後の操作列の実寸に追従する。 */
 window.addEventListener("resize",()=>{
   const t=$("#toast");

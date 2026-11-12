@@ -801,16 +801,6 @@ button.historyRow{display:grid; grid-template-columns:minmax(0,1fr) max-content 
 .stageTotalRow td{border-top:1px solid var(--line); padding-top:9px;}
 .histDelBtn{padding:4px var(--space-3); min-width:var(--tap-target-min);}
 .histEndTable td,.histEndTable th{font-variant-numeric:tabular-nums;}
-/* 履歴詳細の操作列: 下部に固定（sticky）。編集=通常、画像保存=sec、削除=danger で右端へ隔離 */
-.histDetailActions{
-  position:sticky; bottom:calc(-1 * (16px + env(safe-area-inset-bottom))); left:0; right:0;
-  margin:14px -16px calc(-16px - env(safe-area-inset-bottom)); padding:10px 16px calc(10px + env(safe-area-inset-bottom));
-  background:var(--card); border-top:1px solid var(--line);
-}
-.histDetailActions .btnrow:first-child{margin-top:0;}
-.histDetailActions .btnrow:last-child{justify-content:space-between;}
-.histDetailActions .btnrow:last-child #hClose{flex:1;}
-.histDetailActions #hDel{flex:0 0 auto; width:auto; padding-left:18px; padding-right:18px;}
 /* gear & settings view */
 .gearAdviceCard{background:var(--card); border-color:var(--line);}
 .gearChevron{font-size:18px; color:var(--sub);}
@@ -990,7 +980,6 @@ header.app .gear{
   main{padding:8px;}
   .row{flex-direction:column;}
   .btnrow{flex-direction:column;}
-  .histDetailActions .btnrow{flex-direction:row;}
   .statbar{flex-wrap:wrap;}
   .stat{min-width:46%;}
   .setupLens,.insightStrip,.nativeStack,.heroMetrics,.liveGrid{grid-template-columns:1fr;}
@@ -2156,3 +2145,56 @@ details.adv.recordDetails{margin-top:22px; border-top:2px solid var(--ink)!impor
 @media (max-width:340px){
   .bigNum.resultTotal{font-size:52px;}
 }
+
+/* ===================================================================================
+   段 6: ノート（履歴＋メモ。docs/design/v5/design.md 4.6）。一覧は月の見出し＋1項目1行組、
+   詳細とメモは今日の結果と同じ全画面（.resultOvl / .resultScreen）を使う。
+   =================================================================================== */
+.notesGoalLine{padding:0 0 10px;}
+.seg .segPick{position:relative; display:flex; min-width:0; border-left:1px solid var(--rule-strong);}
+.seg .segPick select{
+  appearance:none; -webkit-appearance:none; width:100%; min-height:44px; margin:0; padding:0 18px 0 6px;
+  border:0; border-radius:0; background-color:transparent; color:var(--sub); font:inherit; font-size:15px; font-weight:600;
+  text-align:center; text-align-last:center; cursor:pointer;
+  background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);
+  background-position:calc(100% - 11px) 52%,calc(100% - 6px) 52%; background-size:5px 5px; background-repeat:no-repeat;
+}
+.seg .segPick select:disabled{opacity:.55; cursor:default;}
+.seg .segPick select option{background:var(--surface); color:var(--ink);}
+.seg .segPick.on{background:var(--accent-soft); box-shadow:inset 0 -3px 0 var(--accent);}
+.seg .segPick.on select{color:var(--ink);}
+.historyRecords .historyFilters{margin-bottom:0;}
+.historyRecords .historyFilters summary{font-size:15px;}
+.noteMonth{
+  display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+  margin:0; padding:18px 0 7px; border-bottom:2px solid var(--ink); font-size:17px; font-weight:700; line-height:1.35;
+}
+.noteMonth .cnt{font-size:14px; font-weight:500; color:var(--sub);}
+.entry.noteEntry{grid-template-columns:54px minmax(0,1fr); min-height:56px; white-space:normal; cursor:pointer;}
+.entry.noteEntry .hd b{overflow-wrap:anywhere;}
+.entry .txt{overflow-wrap:anywhere;}
+.entry .txt.none{color:var(--sub);}
+.entry .chg{display:block; overflow-wrap:anywhere;}
+.entry .day.nodate{font-size:20px; line-height:1.3;}
+.historyRecords .historyRound{border-bottom:1px solid var(--rule);}
+.historyRecords .historyRoundStages .entry:last-child{border-bottom:0;}
+.noteTrashLink{margin-top:22px; border-top:1px solid var(--rule); cursor:pointer;}
+.historyEmpty b{margin-bottom:6px;}
+/* ノートの詳細・メモ（全画面。下端に固定の操作は置かない） */
+.sheet.resultScreen.noteScreen{padding-top:0; padding-bottom:calc(40px + var(--safe-b));}
+.noteHead{display:flex; align-items:flex-end; justify-content:space-between; gap:12px;}
+.noteHead > div:first-child{min-width:0;}
+.bigNum.noteTotal{font-size:36px; flex:none;}
+.noteCond{padding:2px 0 0; overflow-wrap:anywhere;}
+.noteScreen .noteBox{display:block;}
+.noteBox.memoBox{min-height:220px;}
+.noteScreen input[type="date"].inp{margin-top:6px; min-height:48px; width:100%;}
+.noteTagRow{gap:8px; padding-top:10px;}
+button.ntag{min-height:44px; min-width:56px; margin:0; padding:0 14px; justify-content:center; background:none; font-size:15px; cursor:pointer; touch-action:manipulation;}
+button.ntag[aria-pressed="true"]{background:var(--accent-soft); color:var(--ink); box-shadow:inset 0 -3px 0 var(--accent); font-weight:700;}
+.noteScreen .lrow.link{cursor:pointer;}
+.noteScreen .histDetailActions .btnRow .btn{min-height:52px;}
+.noteScreen .histRescore{margin:10px 0 0;}
+.noteScreen .stageTable{margin-bottom:4px;}
+.trashSheet .trashRow .lmain b{overflow-wrap:anywhere;}
+.trashSheet .trashRow .txtBtn{flex:none; padding:0 6px;}

@@ -10,7 +10,7 @@ let ui = {
   recMsg: "",
   sightSel: { setupId: null, dist: 70 },
   histOpen: null,
-  histFilter: { setupId: "", dist: "", round: "" },
+  histFilter: { setupId: "", dist: "", round: "", kind: "all" } /* kind: "all" | "rec" | "memo" */,
   analysisFilter: { setupId: "", dist: "", round: "", period: "all" },
   zoom: 1,
   recordMode: "practice",
@@ -58,6 +58,8 @@ function syncViewChrome() {
   if (date) date.textContent = dp ? `${dp.mo}月${dp.d}日（${dp.w}）` : "";
   const settings = $("#btnSettings");
   if (settings) settings.hidden = view !== "record";
+  const memo = $("#btnNewMemo");
+  if (memo) memo.hidden = view !== "history";
   const sub = $("#gearSubTabs");
   if (sub) {
     sub.hidden = tabView !== "gear";
@@ -1114,42 +1116,7 @@ function heroMetricHtml(k, b, span) {
 }
 function pageHeroHtml(type, ctx) {
   ctx = ctx || {};
-  /* 分析タブにヒーローは置かない（結論→根拠→詳細の原則: 一等地は「今日の結論」カードが使う） */
-  if (type === "history") {
-    const src = ctx.ss || db.sessions || [];
-    const sessionRows = historySessionRows(src);
-    const arrows = sessionRows.flatMap((r) => r.arrows);
-    const total = sessionRows.reduce((a, r) => a + r.total, 0);
-    /* 結論→根拠: 説明文ではなく既存の todayConclusion() 計算をそのまま言い換えた1行だけを置く。
-       新しい統計は作らない — 分析タブの「今日の結論」と同じ入力（buildAnalysisRows）を使う。
-       数値枠は 練習・平均・最高合計 の3つに一本化（旧「記録サマリー」カードはここへ統合。
-       「直近」はリスト先頭行が直近そのものなので数値枠には置かない） */
-    const rows = ctx.rows || buildAnalysisRows(src, db.setups, sessionMetrics);
-    const conclusion = todayConclusion(rows);
-    const best = sessionRows
-      .filter((r) => r.arrows.length)
-      .sort(
-        (a, b) =>
-          b.total - a.total ||
-          b.arrows.length - a.arrows.length ||
-          (b.s.date || "").localeCompare(a.s.date || ""),
-      )[0];
-    const bestMeta = best
-      ? [fmtD(best.s.date), distanceLabel(best.s.dist), `${best.arrows.length}本`]
-          .filter(Boolean)
-          .join(" / ")
-      : "記録待ち";
-    return `<section class="pageHero historyHero" data-testid="history-hero">
-      <div class="kicker">履歴</div>
-      <h2 class="pageHeroLead" data-testid="history-hero-trend">${esc(conclusion ? conclusion.text : "")}</h2>
-      <div class="heroMetrics">
-        ${heroMetricHtml("練習", `${src.length}回`, `${arrows.length}本を集計`)}
-        ${heroMetricHtml("平均", arrows.length ? (total / arrows.length).toFixed(2) : "—", "1本あたり")}
-        ${heroMetricHtml("最高合計", best ? `${best.total}` : "—", bestMeta)}
-      </div>
-      ${gamificationHeroHtml()}
-    </section>`;
-  }
+  /* 分析タブにヒーローは置かない。ノート（旧・履歴）の冒頭にあった励ましの文と数値枠は v5 段 6 で廃止 */
   if (type === "sight") {
     const setup = ctx.setup,
       dist = ctx.dist,
