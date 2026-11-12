@@ -1131,5 +1131,17 @@
     ],
     "owner": "claude",
     "acceptance": "evals/acceptance.md の UI 行（npm run check:ui・lint、375px の変更前後スクリーンショット）に加え、check:all・format:check・Playwright e2e が成功。実寸の矢円と線かみ判定、保存形式と保存点数は不変。テーマ未保存の既存データは自動テーマのまま。オーナーが見た目を確認する。"
+  },
+  {
+    "id": "AN-096",
+    "task": "UI v5（生まれ変わり）: 骨格から作り直した試作 docs/design/v5/ をオーナーが確認し、承認後に段0〜9（design.md 5章）で本体へ移す",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "",
+    "dependencies": [
+      "AN-095"
+    ],
+    "owner": "claude",
+    "acceptance": "各段で evals/acceptance.md の UI 行（check:ui・lint、375px の変更前後スクリーンショット）に加え check:all・format:check・該当 e2e が成功。実寸の矢円と線かみ判定、保存形式と保存点数は不変。座標のない矢を図・統計・サイト計算の全経路で除外。スコア表は公認大会の採点用紙の並び（JAF 第208条・WA Book 3 12.1.3/12.4）で、画面で公式・公認を名乗らない。公開は段ごとにオーナーの承認を得る。"
   }
 ]
