@@ -3462,3 +3462,11 @@ AN091完了、公開v124/source17760d5370021124d4383941fd4033bc41ada5ed、branch
 位置のある矢の結果が変わらないことの確認: tools/check-coordless.js を、コードを変える前（commit 8de7271）に実行して、見本データ（70m 9回・18m 2回・50m 1回・フィールド 1回、旧判定の2回を含む）の sessionMetrics・sessionQuality・adviceFor・personalModel・sessionRescore・sessionsCsv・growthDashboard・personalBests・todayConclusion・conditionSplit・reasonBreakdown・computeTodaysResult・regressionAdvice・computePersonalPhysicsCalibration・sightInterp の出力を SHA-256（e62c17de…22c0）にした。変更後も同じ値。変更前のコードでは同じ検査の 22 項目が失敗（null 座標が的の中心として統計と再採点に入る、理由別のずれが位置のない矢で薄まる、など）し、変更後は 84 項目すべて成功。
 
 検証: npm run check:all 全OK、lint・format:check 成功、Playwright 384 passed (6.6m)。既存 spec の変更は2本（record-labels: 本数 → 入力方法 → 開始 の Tab 順、record-immersive: メニューに入力方法がある）。画面写真は scratchpad/v5-stage3/ に 56枚。リスク: 実機未確認。y だけ null の壊れた旧データは位置なしとして統計から外れる（これまでは 0）。次は段4。
+
+## AN096 段4・段5 — 記録タブの待機画面、記録の条件、今日の結果
+
+2026-11-12、段4・段5 を実装（branch claude/sharp-faraday-bu8pii、版126据え置き・未push）。変更: scripts/50-record-view.js（renderRecord を 待機画面 renderRecordHome / 記録の条件 renderRecordConditions / 記録中 に分け、開始の出口を beginRecording に一本化。recordFastActionsHtml・renderPausedRecord・renderOnboarding・onboardWelcomeHtml・onboardSetupHtml・finishOnboarding を削除。todaysResultHtml と各行、summaryGamificationHtml、openSummary を作り直し）、scripts/49-todays-result.js（computeConditionComparison を追加。既存の関数は不変）、scripts/60-history-sight-view.js（詳細の比較の行へ comparison を渡す）、scripts/10-storage-native.js（openModal の swipe:false）、style.css（段4・段5 の層を末尾に追加、旧 .onboard* を削除）と style.min.css、tools/check-app.js・check-ui.js（旧い画面の文字列の検査を新しい画面へ）、tools/check-personal-best-copy.js（文言の検査へ作り直し）、tests/e2e。
+
+挙動の変更（オーナー確認用）: 「前回」は日付の最も新しい記録（従来は保存順の最後）。距離の決まったラウンド（70m 72射 など）を選ぶと距離・的・1エンドの本数をそのラウンドに合わせる。記録の条件の初期値は前回のラウンドを含む（従来はラウンドだけ常に自由練習）。初回の専用2画面と「スキップ」を廃止し、帯の「条件を選ぶ」→ 記録の条件 に一本化（初回だけ 18m は 3射エンド）。結果の画面から 伸びの継続日数・「おつかれさまでした！」・連続記録の演出 を削除。
+
+検証: npm run check:all 全OK、lint・format:check 成功、Playwright 401 passed (6.5m)。途中の全実行は 76 failed（結果の markup と文言・記録の条件への移動による既存 spec の不一致）で、27 本を新しい経路へ移した。app 側の修正が要った失敗は1件（記録の条件の「弓具を開く」が高さ 32px だった → 44px）。画面写真は scratchpad/v5-stage45/ に 64枚（375×812・320×640、ライト/ダーク: 待機画面 上/中/下・目標の行・初回・記録なし・記録の途中、記録の条件 上/下、結果 上/中/下、点数だけの結果）。
