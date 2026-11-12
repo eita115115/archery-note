@@ -11,7 +11,7 @@ const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
 const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"dark",fieldMode:false,lensSide:"right",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"dark",fieldMode:false,lensSide:"right",lastInputMode:"target",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -32,6 +32,12 @@ function sanitizeArrowList(arrows){
     if(a.s!=null && typeof a.s!=="number") a.s=0;
     if(a.x!=null && typeof a.x!=="number") a.x=0;
     if(a.y!=null && typeof a.y!=="number") a.y=0;
+    /* 手で直す前の自動採点（auto）も点数と同じ規則で数値にそろえる。x/y の無い矢（点数だけの入力・
+       「M 位置なし」）と null の座標はそのまま残す（座標を作らない） */
+    if(a.auto && typeof a.auto==="object"){
+      const as=arrowNumberOrKeep(a.auto.s); if(as!==a.auto.s) a.auto.s=as;
+      if(a.auto.s!=null && typeof a.auto.s!=="number") a.auto.s=0;
+    }
   });
 }
 function sanitizeSessionArrows(sess){
@@ -62,6 +68,8 @@ function normalizeDb(d){
   if(typeof out.settings.fieldMode!=="boolean") out.settings.fieldMode=false;
   /* ルーペの固定位置（右/左）。既存データ・破損インポートでも "right" に補完 */
   if(out.settings.lensSide!=="left"&&out.settings.lensSide!=="right") out.settings.lensSide="right";
+  /* 入力方法（的面に打つ / 点数だけ）の前回値。既存データ・破損インポートでは "target" に補完 */
+  if(out.settings.lastInputMode!=="score"&&out.settings.lastInputMode!=="target") out.settings.lastInputMode="target";
   if(typeof out.settings.launchCount!=="number"||!Number.isFinite(out.settings.launchCount)) out.settings.launchCount=0;
   const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false};
   if(!out.settings.featureHints||typeof out.settings.featureHints!=="object"||Array.isArray(out.settings.featureHints)){

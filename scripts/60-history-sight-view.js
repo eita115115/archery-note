@@ -547,6 +547,8 @@ function openHistDetail(id) {
   const total = all.reduce((a, x) => a + x.s, 0);
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const st = sessionMetrics(sess).st;
+  /* 位置のある矢が1本もない記録（点数だけの入力）: 着弾の数値・信頼度・次のアクションは出さない */
+  const hasImpact = !!st;
   const adv = adviceFor(sess, setup);
   /* 「今日の結果」統合パネルの再構成（todays-result-integration-design.md §12 T6）:
      この日の時点までのデータだけで computeTodaysResult を再現する（未来のセッションを
@@ -563,14 +565,14 @@ function openHistDetail(id) {
     ${sess.ends
       .map((end, i) => {
         const sorted = [...end].sort((a, b) => b.s - a.s);
-        return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i % ENDCOLORS.length]}"></span>${i + 1}</td><td>${sorted.map(scoreLabel).join("・")}</td><td class="right"><b>${end.reduce((a, x) => a + x.s, 0)}</b></td></tr>`;
+        return `<tr><td><span class="histChip" style="background:${ENDCOLORS[i % ENDCOLORS.length]}"></span>${i + 1}</td><td>${sorted.map((a) => scoreLabel(a) + (a.manual === true ? "*" : "")).join("・")}</td><td class="right"><b>${end.reduce((a, x) => a + x.s, 0)}</b></td></tr>`;
       })
-      .join("")}</table>`;
+      .join("")}</table>${all.some((a) => a.manual === true) ? `<div class="hint" data-testid="history-manual-note">* は手で直した点数です（位置からの採点とは違う点を、記録中に選んでいます）。</div>` : ""}`;
   /* 初心者文法（正本 机上モード 5節）: 一言解釈を持つカード（サイト提案・個人モデル・次のアクション）は
      そのまま表示。数値の羅列だけの groupSummaryHtml/使用サイト/矢番号メモは「詳しく」に畳む */
-  const detailNumbersHtml = `${groupSummaryHtml(st, { withConfidenceNote: true })}
+  const detailNumbersHtml = `${hasImpact ? groupSummaryHtml(st, { withConfidenceNote: true }) : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
     ${sess.sightV || sess.sightH ? `<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV || "—")} / 左右 ${esc(sess.sightH || "—")}</span></div>` : ""}
-    ${trustHtml(sess, setup, st)}
+    ${hasImpact ? trustHtml(sess, setup, st) : ""}
     ${arrowMetaSummaryHtml(sess)}`;
   const analysisCardsHtml = `
     ${
@@ -585,7 +587,7 @@ function openHistDetail(id) {
     ${roundProgressHtml(sess)}
     ${histRoundGroupHtml(sess)}
     ${conditionHtml(sess, st, setup)}
-    ${nextActionHtml(sess, adv, setup)}
+    ${hasImpact ? nextActionHtml(sess, adv, setup) : ""}
     <details class="adv histDetailNumbers" data-testid="history-detail-numbers">
       <summary>詳しく（グルーピングの数値・信頼度・使用サイト）</summary>
       ${detailNumbersHtml}
@@ -733,7 +735,10 @@ function renderSight(m) {
     .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.ts || 0) - (a.ts || 0));
   const cur = marks[0];
   // 最新セッション（同setup×距離）
-  const lastSess = [...db.sessions].reverse().find((s) => s.setupId === sid && s.dist === dist);
+  /* 位置のある矢が1本もない記録（点数だけの入力）は着弾傾向を出せないので、その前の記録を使う */
+  const lastSess = [...db.sessions]
+    .reverse()
+    .find((s) => s.setupId === sid && s.dist === dist && sessionHasPos(s));
   const adv = lastSess ? adviceFor(lastSess, setup) : null;
   const reg = sid ? regressionAdvice(sid, dist) : {};
   const interp = sid ? sightInterp(sid) : null;
@@ -766,7 +771,7 @@ function renderSight(m) {
     ${
       adv
         ? `<div class="subNote">最新の練習（${fmtD(lastSess.date)}・${adv.st.n}本${adv.st.excluded.length ? `、外れ値候補${adv.st.excluded.length}本はサイト判断から除く` : ""}）の着弾傾向：</div>`
-        : `<div class="empty">この距離の練習記録がまだないため、着弾傾向からの提案はできません。</div>`
+        : `<div class="empty">${!lastSess && db.sessions.some((s) => s.setupId === sid && s.dist === dist) ? "着弾データなし。この距離の練習は点数だけの記録のため、着弾傾向からの提案はできません。" : "この距離の練習記録がまだないため、着弾傾向からの提案はできません。"}</div>`
     }
     <details class="adv" ${adv ? "" : "open"}>
       <summary>調整アドバイスの全体像</summary>

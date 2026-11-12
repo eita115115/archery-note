@@ -2075,3 +2075,47 @@ button.slot{font-family:inherit; cursor:pointer; touch-action:manipulation;}
 .recMenuFigs{border-top:1px solid var(--rule);}
 .recMenuFigs .fig .n{font-size:24px;}
 .recMenu .lrow{cursor:pointer;}
+
+/* ===================================================================================
+   段 3: 点数だけの入力・「M 位置なし」・「点数だけ直す」（docs/design/v5/design.md 4.3）。
+   点数だけの記録は的を出さず、スコア表 → 入力中エンド → 得点キー → 操作列 と並べる
+   =================================================================================== */
+/* 得点キー。4列で、ミス（M）はいつも右端に置く（フィールド的・三つ目的はキーが少ない） */
+.keys{touch-action:manipulation;}
+.keys .key.is-miss{grid-column:4;}
+.key{font-family:inherit; display:flex; align-items:center; justify-content:center; padding-top:6px;}
+.key:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+.keys.is-replace{border-top-color:var(--accent);}
+.recScreen.is-score .curEnd{border-top-width:1px; border-top-color:var(--rule-strong);}
+/* 手で直した点数の印。スコア表のセルは右上、枠は点数の右肩 */
+.slot .man{position:absolute; top:14px; right:5px; font-size:15px; font-weight:700; color:var(--warn); line-height:1;}
+.slot .nopos{top:2px; right:4px; bottom:auto; line-height:1.1;}
+.curCap.has-act{align-items:center; padding-top:0; padding-bottom:0; min-height:44px;}
+.curCap .capMain{min-width:0; flex:1 1 auto; display:flex; flex-direction:column; line-height:1.3;}
+.curCap .capMain > *{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.curCap .txtBtn{flex:none; min-height:44px; margin:0; padding:0 0 0 8px;}
+/* 修正バー: 見出しと短い説明を1行に、その下に「点数だけ直す」「理由・矢番号」、矢印と削除 */
+.editBar .ttl{min-height:26px; justify-content:flex-start; gap:10px;}
+.editBar .ttl > #nudgeTitle{flex:none; max-width:100%;}
+.editBar .ttl .desc{flex:1 1 0; min-width:0; margin:0; font-size:13px; font-weight:400; text-align:right;}
+.editLinks{display:flex; justify-content:space-between; gap:8px;}
+.editLinks .txtBtn{min-height:44px; margin:0; padding:0;}
+/* 操作列: 取消 / M 位置なし / エンド確定 */
+.dockRow.t3 .btn{font-size:15px;}
+.dockRow.t2 #bMiss{font-size:15px;}
+/* 「点数だけ直す」のキー（下からのシート） */
+.sheetKeys{padding:8px 0 0; border-top:1px solid var(--rule); background:none;}
+.scoreOverride .basis{padding:0 0 10px;}
+/* 記録のメニュー: 入力方法 */
+.recMenuMode{display:block; cursor:default;}
+.recMenuMode .seg{margin-top:8px;}
+.recMenuMode .seg button{min-height:44px;}
+/* 記録開始: 入力方法（待機画面の作り込みは段 4） */
+.startInput{margin:0 0 12px;}
+.startInput label.f{margin:0 0 6px;}
+.startInput .seg button{min-height:44px;}
+/* 位置のある矢がない記録 */
+.noImpact{display:flex; flex-direction:column; gap:4px; padding:14px 0; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+.noImpact b{font-size:17px; font-weight:700; color:var(--ink);}
+.noImpact span{font-size:14px; color:var(--sub); line-height:1.6;}
+.noImpactCard .noImpact{border-bottom:0; padding-bottom:4px;}

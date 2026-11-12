@@ -316,7 +316,8 @@ function computePersonalPhysicsCalibration(setupId){
   const setup=db.setups.find(s=>s.id===setupId);
   if(!setup) return null;
   const eye=db.settings.eyeSight||850;
-  const sessions=db.sessions.filter(s=>s.setupId===setupId)
+  /* 位置のある矢が1本もない記録（点数だけの入力）は、校正の対象にも新しさの順位にも入れない */
+  const sessions=db.sessions.filter(s=>s.setupId===setupId && sessionHasPos(s))
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
   const usable=sessions.map((s,i)=>{
     const q=sessionQuality(s,setup);
@@ -637,7 +638,8 @@ function sessionMetrics(sess){
   const all=(sess.ends||[]).flat();
   const total=all.reduce((a,x)=>a+x.s,0);
   /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
-  const pts=all.map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
+  /* 座標のない矢（点数だけの入力・「M 位置なし」。x/y が無いか null）は統計に入れない。null を 0 と読まない */
+  const pts=all.filter(arrowHasPos).map(a=>({x:Number(a.x),y:Number(a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
   const st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st,pts};
   SESSION_METRIC_CACHE.set(sess,{signature:sig,metrics});
@@ -820,7 +822,7 @@ function exportSessionsCsv(){
 }
 function scorecardSvg(sess){
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);
-  const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(scoreLabel).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
+  const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(a=>scoreLabel(a)+(a.manual===true?"*":"")).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
   const h=210+rows.length*34;
   const title=`${fmtD(sess.date)} ${sess.dist}m ${esc(roundLabel(sess.round))}`;
   const bg="#f7f8f4", ink="#1c1e1c", green="#1a5c3a";

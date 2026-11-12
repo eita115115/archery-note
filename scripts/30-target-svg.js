@@ -123,17 +123,26 @@ function arrowLabelSvg(p, l, r, font, label, selected){
     `<text x="${l.x}" y="${-l.y}" font-size="${font}" fill="${fg}" text-anchor="middle" dominant-baseline="central" font-weight="700">${esc(label)}</text></g>`;
 }
 /* static plot for history/summary */
+/* 位置のある矢が1本もない記録（点数だけの入力）に出す表示。的の図・統計・サイトの目安は作らない */
+function noImpactHtml(sess){
+  const n=((sess&&sess.ends)||[]).flat().length;
+  return `<div class="noImpact" data-testid="no-impact"><b>着弾データなし</b><span>${n}射すべて位置のない記録です（点数だけの入力）。合計・平均・10/X の数は点数から数えています。的の図・集まり具合・サイトの目安は、位置のある矢がある記録だけで作ります。</span></div>`;
+}
 function plotSession(sess, container){
   const faceD=sess.faceD;
+  const allArrows=((sess&&sess.ends)||[]).flat();
+  const posCount=allArrows.filter(arrowHasPos).length;
+  if(!posCount){ container.innerHTML=noImpactHtml(sess); return; }
   const ft=sess.faceType==="triple"?"spot":sess.faceType;
   container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,"pl",ft)}</div>`+
-    (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"");
+    (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"")+
+    (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射を表示しています（位置なし ${allArrows.length-posCount}射は、図と着弾の統計に入れていません）。</div>`:"");
   const marks=$("#plmarks");
   let html="";
   /* 記録時の判定の半径で描く（旧判定の記録は旧半径。保存された点数と矢円を一致させる） */
   const arrowR=sessionScoringRadius(sess, db.setups.find(x=>x.id===sess.setupId));
   /* 座標のない矢（点数だけの記録・座標なしの M）は描かない */
-  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ if(Number.isFinite(a.x)&&Number.isFinite(a.y)) html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
+  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ if(arrowHasPos(a)) html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
   const st=sessionMetrics(sess).st;
   if(st){
     const w=ringW(faceD,ft);

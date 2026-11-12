@@ -158,7 +158,7 @@ const fieldHits = [{s:6},{s:5},{s:4},{s:6}];
 assert(faceApi.perfectScoreLabel(f40) === "6点" && faceApi.perfectScoreCount(fieldHits,f40) === 2, "Field perfect score helpers failed");
 assert(faceApi.secondaryScoreLabel(f40) === "5点以上" && faceApi.secondaryScoreCount(fieldHits,f40) === 3, "Field secondary score helpers failed");
 
-const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,arrowLocatorRadius,arrowRadiusFromDiaMm,sessionArrowR,sessionScoringRadius,sessionRescore,DEFAULT_ARROW_R,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,isLineCuttingFromGlobal,hitFromGlobal,zoneStyle,SPOT_Y};")();
+const scoreApi = new Function(section("function isFieldFace", "function momentStats") + "\nreturn {isFieldFace,ringW,arrowMarkRadius,arrowLocatorRadius,arrowRadiusFromDiaMm,sessionArrowR,sessionScoringRadius,sessionRescore,arrowHasPos,sessionHasPos,DEFAULT_ARROW_R,targetLineHalfWidth,lineCutRadius,scoreAt,isLineCutting,isLineCuttingFromGlobal,hitFromGlobal,zoneStyle,SPOT_Y};")();
 const fieldD = 80;
 const fw = scoreApi.ringW(fieldD, "field");
 const fieldTouch = scoreApi.lineCutRadius(fieldD, "field");
@@ -265,16 +265,17 @@ assert(scripts.includes("scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s))
 /* スコア表: 表示は高い点から（X → 10 → … → M）、保存は打った順のまま。計・累計・数える列・小計は保存された点数から数える */
 {
   const cardApi = new Function(
-    "scoreRank","isFieldFace","sessionStageDef","ROUND_TYPES","esc","scoreLabel",
+    "scoreRank","isFieldFace","sessionStageDef","ROUND_TYPES","esc","scoreLabel","arrowHasPos",
     section("/* ============ スコア表", "/* ============ 記録中（没入画面）") +
-      "\nreturn {scoreSortedArrows,scoreZoneClass,isIndoorShortFace,scorecardCountCols,scorecardPlan,scorecardHtml,curRowHtml};"
+      "\nreturn {scoreSortedArrows,scoreZoneClass,isIndoorShortFace,scorecardCountCols,scorecardPlan,scorecardHtml,curRowHtml,sessionInputMode,scoreKeyDefs,applyScoreKey,clearManualScore};"
   )(
     (hit) => hit.s * 2 + (hit.X ? 1 : 0),
     scoreApi.isFieldFace,
     roundApi.sessionStageDef,
     roundApi.ROUND_TYPES,
     (v) => String(v == null ? "" : v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]),
-    (a) => (a.s === 0 ? "M" : a.X ? "X" : String(a.s))
+    (a) => (a.s === 0 ? "M" : a.X ? "X" : String(a.s)),
+    scoreApi.arrowHasPos
   );
   const A = (s, X) => ({ x: 0, y: 0, s, X: !!X });
   const shot = [A(0), A(10), A(7), A(10, true), A(9), A(10)];
@@ -312,6 +313,29 @@ assert(scripts.includes("scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s))
   const row = cardApi.curRowHtml(shot.slice(0, 4), 6, 3, 1, { faceType: "single" });
   assert((row.match(/data-i="/g) || []).length === 4 && /data-i="0"[^>]*aria-label="1射目 M"/.test(row) && /data-i="1" aria-pressed="true"/.test(row) && row.includes("is-next") && />27<\/div><\/div>$/.test(row), "Current-end slot row (shot order) failed");
   assert(!/公式|公認/.test(card + fullCard + indoor + free), "Scorecard must not call itself official");
+  /* 段 3: 得点キーはその的で付く点だけ。点数だけ直すと manual / auto が付き、自動採点と同じ点を選ぶか動かすと外れる */
+  const ids = (ft) => cardApi.scoreKeyDefs(ft).map((k) => k.id).join(" ");
+  assert(ids("single") === "X 10 9 8 7 6 5 4 3 2 1 M" && ids("triple") === "X 10 9 8 7 6 M" && ids("field") === "6 5 4 3 2 1 M", "Score keys must match the face's score set");
+  for (const ft of ["single", "triple", "field"]) {
+    const reachable = new Set();
+    for (let r = 0; r <= 70; r += 0.05) { const h = scoreApi.scoreAt(r, 0, ft === "single" ? 122 : ft === "triple" ? 40 : 80, ft, 0); reachable.add(h.s === 0 ? "M" : h.X ? "X" : String(h.s)); }
+    assert([...reachable].sort().join(" ") === cardApi.scoreKeyDefs(ft).map((k) => k.id).sort().join(" "), `Score keys for ${ft} must equal the values scoreAt can return`);
+  }
+  assert(cardApi.sessionInputMode({ inputMode: "score" }) === "score" && cardApi.sessionInputMode({}) === "target" && cardApi.sessionInputMode({ inputMode: "x" }) === "target", "Input mode must default to target");
+  const keyOf = (id) => cardApi.scoreKeyDefs("single").find((k) => k.id === id);
+  const placed = { x: 3, y: 4, s: 9, X: false };
+  cardApi.applyScoreKey(placed, keyOf("10"));
+  assert(placed.s === 10 && placed.manual === true && placed.auto.s === 9 && placed.x === 3 && placed.y === 4, "Score override must keep the position and the automatic score");
+  cardApi.applyScoreKey(placed, keyOf("X"));
+  assert(placed.s === 10 && placed.X === true && placed.auto.s === 9 && placed.auto.X === false, "A second override must keep the first automatic score");
+  assert(/class="man" role="img" aria-label="手で修正"/.test(cardApi.scorecardHtml({ dist: 70, faceD: 122, faceType: "single", round: "free", perEnd: 6, ends: [[placed]] })) && /aria-label="1射目 X 手で修正"/.test(cardApi.curRowHtml([placed], 6, 1, -1, { faceType: "single" })), "Manual override must be marked in the scorecard and the slot");
+  cardApi.applyScoreKey(placed, keyOf("9"));
+  assert(placed.s === 9 && !("manual" in placed) && !("auto" in placed), "Choosing the automatic score must clear the override");
+  const keyArrow = { s: 0, X: false, src: "key" };
+  cardApi.applyScoreKey(keyArrow, keyOf("X"));
+  assert(keyArrow.s === 10 && keyArrow.X === true && !("x" in keyArrow) && !("manual" in keyArrow), "Key arrows are replaced without coordinates or a manual flag");
+  const noposRow = cardApi.curRowHtml([{ s: 0, X: false, src: "key" }], 6, 1, -1, { faceType: "single" });
+  assert(/aria-label="1射目 M 位置なし"/.test(noposRow) && noposRow.includes('class="nopos"') && !cardApi.curRowHtml([{ s: 0, X: false, src: "key" }], 6, 1, -1, { faceType: "single", scoreMode: true }).includes("nopos"), "Coordinate-less arrow slot label failed");
 }
 
 /* 矢番号の吹き出し: 画面上 13px の文字・直径 22px を保ち、重なった矢でも互いに離れ、表示範囲に収まる */
@@ -364,7 +388,7 @@ assert(wr && wr.kind === "weighted-robust" && wr.zero > 6.8 && wr.zero < 7.5 && 
 
 const analysisDb = {sessions:[]};
 const analysisApi = new Function(
-  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance","tCrit975","sightStats",
+  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance","tCrit975","sightStats","arrowHasPos",
   section("function windText", "function roundProgressHtml") + "\nreturn {sessionQuality,personalModel,judgementFor,nextActionPlan};"
 )(
   analysisDb,
@@ -380,7 +404,8 @@ const analysisApi = new Function(
   statsApi.probWithin,
   statsApi.fmtChance,
   statsApi.tCrit975,
-  statsApi.sightStats
+  statsApi.sightStats,
+  scoreApi.arrowHasPos
 );
 const sessAt = (id,cx,cy) => ({id,date:`2026-06-${id}`,setupId:"main",dist:70,faceD:122,faceType:"single",wx:"晴れ",ends:[[
   {x:cx-0.5,y:cy,s:9},{x:cx+0.3,y:cy+0.2,s:9},{x:cx,y:cy-0.4,s:10},
@@ -533,7 +558,7 @@ calibDb.sessions.push(
   calibSess("05",6,windDrift70*.9,0,"左から","4")
 );
 const calibApi = new Function(
-  "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc",
+  "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc","sessionHasPos",
   arrowDiaConsts + section("function clamp", "function adviceModel") + section("function regress", "function calibrationProfile") + "\nreturn {personalPhysicsCalibration,physicsCalibrationHtml};"
 )(
   calibDb,
@@ -543,7 +568,8 @@ const calibApi = new Function(
   f=>f/20,
   s=>!!(s.windSpeed && +s.windSpeed>=3.5),
   v=>`${Math.round(v*100)}%`,
-  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))
+  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
+  scoreApi.sessionHasPos
 );
 const pcal = calibApi.personalPhysicsCalibration("main");
 assert(pcal && pcal.click.v70 > 1.5 && pcal.click.v70 < 2.5 && pcal.wind.sample >= 2 && pcal.wind.factor > .7 && pcal.score > .25, "Personal physics calibration failed");

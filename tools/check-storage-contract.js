@@ -715,6 +715,75 @@ function checkArrowCoordinateSanitize(storageApi) {
     "[arrow-sanitize] non-session trash entries pass through untouched",
   );
 
+  // 座標のない矢（点数だけの入力・「M 位置なし」）と、手で直した点数（段 3 の追加項目）。
+  // 矢を消さない・座標を作らない・追加項目を落とさない。旧データ（項目なし）はそのまま。
+  const keyDb = storageApi.normalizeDb({
+    sessions: [
+      {
+        id: "key-session",
+        inputMode: "score",
+        ends: [
+          [
+            { s: 10, X: true, src: "key" },
+            { s: "0", X: false, src: "key" },
+            { x: null, y: null, s: 9, src: "key" },
+            { x: 1.5, y: -2, s: 10, X: false, src: "pos", manual: true, auto: { s: "9", X: false } },
+            { x: 0.4, y: 0.2, s: 10, X: true },
+          ],
+        ],
+      },
+      { id: "legacy-session", ends: [[{ x: 0.4, y: 0.2, s: 10, X: true }]] },
+    ],
+    active: { inputMode: "score", ends: [], cur: [{ s: 7, X: false, src: "key" }] },
+    trash: [{ id: "t-key", type: "session", data: { id: "s-key", ends: [[{ s: 8, src: "key" }]] } }],
+  });
+  const keyEnd = keyDb.sessions[0].ends[0];
+  assertEqual(keyEnd.length, 5, "[coordless] no arrow is dropped");
+  assert(
+    !Object.hasOwn(keyEnd[0], "x") && !Object.hasOwn(keyEnd[0], "y"),
+    "[coordless] a key arrow must not get x / y properties",
+  );
+  assertEqual(keyEnd[0].src, "key", "[coordless] src survives");
+  assertEqual(keyEnd[1].s, 0, "[coordless] string score of a key arrow becomes a number");
+  assert(!Object.hasOwn(keyEnd[1], "x"), "[coordless] coordinate-less M must not get coordinates");
+  assertEqual(keyEnd[2].x, null, "[coordless] null x is kept as-is (never repaired to 0)");
+  assertEqual(keyEnd[2].y, null, "[coordless] null y is kept as-is (never repaired to 0)");
+  assertEqual(keyEnd[3].manual, true, "[coordless] manual flag survives");
+  assertEqual(keyEnd[3].auto.s, 9, "[coordless] automatic score before the override becomes a number");
+  assertEqual(keyEnd[3].x, 1.5, "[coordless] overridden arrow keeps its position");
+  assertEqual(keyDb.sessions[0].inputMode, "score", "[coordless] session inputMode survives");
+  assertEqual(
+    JSON.stringify(keyDb.sessions[1]),
+    JSON.stringify({ id: "legacy-session", ends: [[{ x: 0.4, y: 0.2, s: 10, X: true }]], date: "", faceD: 122, faceType: "single" }),
+    "[coordless] legacy session gains no stage-3 fields",
+  );
+  assert(
+    !Object.hasOwn(keyDb.active.cur[0], "x") && keyDb.active.inputMode === "score",
+    "[coordless] active score-mode session survives",
+  );
+  assert(
+    !Object.hasOwn(keyDb.trash[0].data.ends[0][0], "x"),
+    "[coordless] trashed key arrow must not get coordinates",
+  );
+  assertEqual(keyDb.settings.lastInputMode, "target", "[coordless] lastInputMode defaults to target");
+  assertEqual(
+    storageApi.normalizeDb({ settings: { lastInputMode: "score" } }).settings.lastInputMode,
+    "score",
+    "[coordless] lastInputMode score survives",
+  );
+  assertEqual(
+    storageApi.normalizeDb({ settings: { lastInputMode: 3 } }).settings.lastInputMode,
+    "target",
+    "[coordless] invalid lastInputMode falls back to target",
+  );
+  // JSON の往復（バックアップの書き出しと読み込み）でも同じ形のまま。
+  const again = storageApi.normalizeDb(JSON.parse(JSON.stringify(keyDb)));
+  assertEqual(
+    JSON.stringify(again.sessions),
+    JSON.stringify(keyDb.sessions),
+    "[coordless] sessions are unchanged by a JSON round-trip",
+  );
+
   // キーを持たない矢に own property を生やさないこと（変化時のみ代入）。
   const bare = storageApi.normalizeDb({ sessions: [{ id: "b", ends: [[{ x: 1, y: 2 }]] }] });
   assert(

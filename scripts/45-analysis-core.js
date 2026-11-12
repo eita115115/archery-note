@@ -460,11 +460,15 @@ function reasonBreakdown(rows) {
       (Array.isArray(end) ? end : []).forEach((a) => {
         if (!a || !a.reason) return;
         tagged++;
-        const g = by.get(a.reason) || { reason: a.reason, count: 0, total: 0, xSum: 0, ySum: 0 };
+        const g = by.get(a.reason) || { reason: a.reason, count: 0, total: 0, xSum: 0, ySum: 0, pos: 0 };
         g.count++;
         g.total += Number.isFinite(Number(a.s)) ? Number(a.s) : 0;
-        if (Number.isFinite(a.x)) g.xSum += a.x;
-        if (Number.isFinite(a.y)) g.ySum += a.y;
+        /* ずれの平均は位置のある矢だけで出す（点数だけの入力・「M 位置なし」は本数と平均点にだけ入る） */
+        if (Number.isFinite(a.x) && Number.isFinite(a.y)) {
+          g.xSum += a.x;
+          g.ySum += a.y;
+          g.pos++;
+        }
         by.set(a.reason, g);
       }),
     );
@@ -477,8 +481,8 @@ function reasonBreakdown(rows) {
         reason: g.reason,
         count: g.count,
         avg: g.count ? g.total / g.count : null,
-        mx: g.count ? g.xSum / g.count : null,
-        my: g.count ? g.ySum / g.count : null,
+        mx: g.pos ? g.xSum / g.pos : null,
+        my: g.pos ? g.ySum / g.pos : null,
       })),
   };
 }

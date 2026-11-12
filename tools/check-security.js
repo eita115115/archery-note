@@ -108,6 +108,31 @@ assert(typeof cleanedArrow.x === "number" && cleanedArrow.x === 0,
 assert(typeof cleanedArrow.y === "number" && cleanedArrow.y === 0,
   "normalizeDb must sanitize malicious arrow y to 0");
 
+/* ==== 7b. coordinate-less arrows and manual overrides (stage 3) ==== */
+const keyDb = normalizeDb({
+  sessions: [{
+    id: "k1", date: "2026-01-01", dist: 70, faceD: 122, faceType: "single", round: "free",
+    inputMode: "<img src=x onerror=alert(1)>",
+    ends: [[
+      {s: 9, src: "key"},
+      {x: null, y: null, s: "<b>7</b>", src: "<script>"},
+      {x: 1, y: 2, s: 10, manual: true, auto: {s: "<svg onload=alert(1)>", X: "<i>"}},
+    ]],
+  }],
+  setups: [{id: "s1", name: "test"}],
+  settings: {lastInputMode: "<script>alert(1)</script>"},
+});
+const keyEnd = keyDb.sessions[0].ends[0];
+assert(keyEnd.length === 3, "normalizeDb must keep coordinate-less arrows");
+assert(!("x" in keyEnd[0]) && !("y" in keyEnd[0]) && keyEnd[0].s === 9,
+  "normalizeDb must not invent coordinates for a key arrow");
+assert(keyEnd[1].x === null && keyEnd[1].y === null && keyEnd[1].s === 0,
+  "normalizeDb must keep null coordinates and force a malicious score to 0");
+assert(typeof keyEnd[2].auto.s === "number" && keyEnd[2].auto.s === 0,
+  "normalizeDb must sanitize a malicious automatic score to 0");
+assert(keyDb.settings.lastInputMode === "target",
+  "normalizeDb must force lastInputMode to a known value");
+
 /* ==== 8. normalizeDb validates session metadata ==== */
 const metaDb = {
   sessions: [{
