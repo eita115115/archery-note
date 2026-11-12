@@ -47,7 +47,7 @@ They execute in numbered order and share one global scope:
 
 ### DOM IDs
 
-- Short, camelCase or flat-lowercase. Examples: `#main`, `#tabs`, `#toast`, `#tgsvg`, `#tgmarks`, `#tgcur`, `#nudge`, `#curChips`, `#endsTbl`, `#statbar`.
+- Short, camelCase or flat-lowercase. Examples: `#main`, `#tabs`, `#toast`, `#tgsvg`, `#tgmarks`, `#tgcur`, `#nudge`, `#curChips`, `#recCard`, `#activeActionDock`.
 - Settings/form fields use prefixes: `fDist`, `fFace`, `fSetup`, `fStart` (record form), `gf_bow`, `gf_limbs` (gear form), `wName`, `wBow` (wizard), `cr*` (custom round).
 
 ### data-testid Attributes
@@ -165,9 +165,13 @@ function showView(v) {
 
 When `db.active` is non-null, `renderRecord()` calls `renderActive()` instead of showing the launch form.
 
-- `renderActive(m)` rebuilds the full recording UI.
-- `refreshActive()` is a lightweight update that only redraws the target markers, score chips, stats, end table, and HUD -- without rebuilding the whole DOM.
+- `renderActive(m)` rebuilds the full recording UI: the immersive screen (`.recScreen`: top bar, status row, end ruler, target, confirmed-ends scorecard, current-end slots, dock / edit bar). `render()` sets `html.recording` while it is shown, which hides the title row and the tab bar.
+- `refreshActive()` is a lightweight update that only redraws the target markers, status row, ruler, scorecard (`scorecardHtml`), current-end slots (`curRowHtml`), and dock -- without rebuilding the whole DOM.
 - Always call `refreshActive()` after modifying `db.active.cur` (current end arrows) or `db.active.ends`.
+- Scorecard rows are display-only and sorted high to low (`scoreSortedArrows`); `db.active.ends` always stays in shot order. Counts and totals read the stored `s` / `X`.
+- Corrections go through `activeEditArr(s)`: the confirmed end opened with `ui.editEnd`, otherwise `s.cur`. `ui.selArrow` indexes that array.
+- "中断" only sets `ui.recPausedId`; the session stays in `db.active` and the record tab shows a resume band (`renderPausedRecord`).
+- No toast for recording feedback: use the status row (`activeNotice(msg)`) and `#arrowAnnounce`.
 
 ### 3.5 Transient UI State: The `ui` Object
 
@@ -178,7 +182,10 @@ let ui = {
   histOpen: null,          // currently open history detail
   histFilter: { setupId: "", dist: "", round: "" },
   analysisFilter: { setupId: "", dist: "", round: "", period: "all" },
-  zoom: 1,                // target zoom level
+  zoom: 1,                // target zoom: 1 = whole face, 2 = centre (single "中心を拡大" button)
+  editEnd: -1,            // confirmed end opened for correction (-1 = none)
+  recPausedId: null,      // id of the active session the user paused (left the recording screen)
+  recMsg: "",             // one-shot notice for the recording status row
   recordMode: "practice",  // "practice" | "calibration"
   freshArrow: -1,          // index of just-placed arrow (for animation)
   freshTimer: 0,           // timeout handle for fresh arrow animation

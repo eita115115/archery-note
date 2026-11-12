@@ -3450,3 +3450,7 @@ AN091完了、公開v124/source17760d5370021124d4383941fd4033bc41ada5ed、branch
 ## AN096開始 — UI v5（骨格から作り直す試作）
 
 2026-11-12、オーナーが第1段階（PR #139）を「前の UI を引きずりすぎ」と評価。メモ末尾の「既存に合う最小限の改善から」に寄せすぎていたため、Fable に骨格から作り直す試作を依頼し、docs/design/v5/（prototype.html・design.md・shots・shoot.js）を作成。本番コード（scripts/・style・index.html・sw.js・tests/）は変更なし。途中でオーナーが5項目を承認し、スコア表は公認大会の採点用紙を参考にと指示。規則書（JAF 2024〜2025年版、WA Book 3 2026-01-27）を取得して該当条文を design.md 4.3 と ui-redesign-plan.md 8章に記載。撮影時の自動検査（横はみ出し・13px 未満・44px 未満）は最終 0 件、コントラストはダーク 7.04〜16.58・ライト 5.06〜17.19（Fable の報告）。主要10枚を目視確認しオーナーへ送付。
+
+## AN096 段2 — 記録中の没入画面とスコア表
+
+2026-11-12、段2 を実装（commit e2edd4d、branch claude/sharp-faraday-bu8pii、版126据え置き・未push）。変更: scripts/50-record-view.js（renderActive〜nudgeArrow を作り直し。scorecardHtml・curRowHtml・scorecardPlan・activeEditArr・openActiveMenu・openSessionMetaSheet・openShotMetaSheet・renderPausedRecord を追加、的の入力に「選択中は置き直し」「的の外で離すと取消」を追加）、10-storage-native.js（通知の位置を修正バーにも合わせる）、60-history-sight-view.js（編集開始の文言）、style.css・style.min.css（html.recording と段2の部品）、tools/check-app.js・check-ui.js、tests/e2e（25本を更新、3ファイル追加）、docs/design/v5/design.md、CONVENTIONS.md。検証: check:all 全OK、lint・format:check 成功、Playwright 372 passed (6.4m)。リスク: 記録中の画面は1画面に収める固定レイアウトで、端末の文字拡大や極端に低い画面（高さ 480px 未満）ではスコア表の領域が無くなる。矢印の移動量を 1mm に変えたので、旧来の「1目盛 = 的の直径/200」に慣れた利用者には小さく感じる可能性がある（大きな移動は的のタップで置き直す）。拡大鏡の大きさは段1のまま。次: 段3（点数入力・M 位置なし・点数だけ直す・座標のない矢の除外）。
