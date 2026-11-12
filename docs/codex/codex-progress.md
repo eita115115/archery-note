@@ -3440,3 +3440,9 @@ AN091完了、公開v124/source17760d5370021124d4383941fd4033bc41ada5ed、branch
 ## AN092開始 — 予測の採用実測と記録日
 
 前turnはAN091公開/全342/CI成功で進捗、基点8ab3de6375bb1d33c6a6fa159b2a186317274f25。縦予測+source details/日時曖昧badge、core metadataだけ追加してmath/store保持。task92in-progress/passfalse、旧91保持、全承認継続。
+
+## AN095開始 — UI v4 第1段階（見た目と記録画面）
+
+2026-11-12、Claude（branch claude/sharp-faraday-bu8pii、版126据え置き）。オーナーの UI/UX 検討メモを参考資料として受け取り、設計 docs/design/ui-redesign-plan.md を作成。第1段階で変えたもの: style.css の色トークン（グラファイト＋セージ、ライト/ダーク/射場モードを1か所に統合）と文字の最小13px、scripts/20-scoring.js の zoneStyle を `--z-*` 変数へ、scripts/50-record-view.js のルーペ固定（body 直下の .lensLayer、150ms/6px 表示・400ms 精密）と矢番号の吹き出し・チップ番号・読み上げ（#arrowAnnounce）、scripts/30-target-svg.js の layoutArrowLabels/arrowLabelSvg と座標なしの矢を描かないガード、scripts/10-storage-native.js の lensSide と新規インストールの既定テーマ dark（テーマ未保存の既存データは auto）、scripts/70-gear-settings.js のルーペ位置設定と theme-color 同期。tests: fixed-lens.spec.js 新規、record-toast.spec.js をトースト廃止に合わせて意図的に変更、check-app に吹き出し配置の回帰、check-storage-contract に既定テーマの回帰。座標なしの M は分析経路の対応が要るため第2段階へ。1本目の記録でチップ行が伸びて画面が20pxずれたため、行の高さを最初から確保して解消。吹き出しの乱択検査（6000配置）で吹き出し同士の重なり0、矢の上に乗るのは矢の間隔が吹き出しと同程度（約24px）の11件（0.18%）。
+
+全e2e（1回目）は 345 passed / 7 failed。fixed-lens 2件はテストが `globalThis.db` を参照していた誤り（db はグローバルの let で window のプロパティではない）で、既存テストと同じ `/* global db */` 指定へ訂正。history-actions（320px）5件は第1段階の文字拡大で履歴の行が画面下の固定タブの裏に入り、scrollIntoViewIfNeeded が「見えている」と判断してスクロールしなかったもの（db80f28 では5件成功、8ebaba8 で再現）。html に scroll-padding-bottom（固定タブ分）を加え、スクロールとキーボードのフォーカス移動でタブの裏に隠れないようにして解消。

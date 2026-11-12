@@ -1119,5 +1119,17 @@
     ],
     "owner": "claude",
     "acceptance": "docs/design/grouping-stats-v3.md §8 の検証基準（tools/check-grouping-stats.js）、npm run check:all・lint・format:check・Playwright e2e がすべて成功。保存形式と保存点数を変えない。表示の正式な値は全射、サイト判断は外れ値候補を除いた統計。"
+  },
+  {
+    "id": "AN-095",
+    "task": "UI v4 第1段階: グラファイト＋セージの色トークン、文字の最小13px、ルーペの画面固定、記録中エンドの矢番号の吹き出し（重なり回避）、記録トーストを読み上げへ置き換え、新規インストールの既定テーマをダーク",
+    "status": "in-progress",
+    "passes": false,
+    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii（版126据え置き・未公開）。npm run check:all 全OK、lint・format:check 成功、check:globals・check:security 成功、Playwright 352 passed (7.3m)。check-app に矢番号の吹き出し配置の回帰（画面上22px/13px、6本同位置でも重ならない、矢の上に乗らない、表示範囲内、決定的）、check-storage-contract に既定テーマの回帰（新規 dark、テーマ未保存の既存データ auto）。吹き出しの乱択検査6000配置で吹き出し同士の重なり0、矢の上に乗るのは矢の間隔が約24pxの11件（0.18%）。375px・320px のライト/ダークで変更前後のスクリーンショットを撮影。オーナーの見た目確認は未了のため passes は false のまま。",
+    "dependencies": [
+      "AN-094"
+    ],
+    "owner": "claude",
+    "acceptance": "evals/acceptance.md の UI 行（npm run check:ui・lint、375px の変更前後スクリーンショット）に加え、check:all・format:check・Playwright e2e が成功。実寸の矢円と線かみ判定、保存形式と保存点数は不変。テーマ未保存の既存データは自動テーマのまま。オーナーが見た目を確認する。"
   }
 ]
