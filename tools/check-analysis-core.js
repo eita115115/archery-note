@@ -99,23 +99,28 @@ assertEqual(scoring.scoreAt(0, 0, 40, "field", 0).X, false, "field has no X");
 
 /* ---------- robustStats ---------- */
 
-// 5本未満は simple 法 + 低信頼度
+// 6本未満は外れ値検定をせず標本平均。演算信頼度 = 1 − 1/√n
 {
   const st = scoring.robustStats([
     { x: 0, y: 0 },
     { x: 1, y: 0 },
     { x: 0, y: 1 },
   ]);
-  assertEqual(st.method, "simple", "small sample uses simple method");
-  assertClose(st.confidence, 0.55, 1e-9, "3-arrow confidence");
+  assertEqual(st.method, "mean", "small sample uses the plain mean");
+  assertClose(st.confidence, 1 - 1 / Math.sqrt(3), 1e-12, "3-arrow confidence");
   assertEqual(st.total, 3, "small sample total");
+  assertClose(st.mx, 1 / 3, 1e-12, "3-arrow mean x");
+  // 不偏分散（n−1）: x = 0,1,0 → 分散 1/3
+  assertClose(st.sx, Math.sqrt(1 / 3), 1e-12, "3-arrow sample SD");
+  assertClose(st.seX, Math.sqrt(1 / 3) / Math.sqrt(3), 1e-12, "3-arrow standard error");
+  assertClose(st.ciX, 4.303 * st.seX, 1e-12, "3-arrow 95% interval uses t(2)");
 }
 {
   const st = scoring.robustStats([
     { x: 0, y: 0 },
     { x: 1, y: 1 },
   ]);
-  assertClose(st.confidence, 0.35, 1e-9, "2-arrow confidence");
+  assertClose(st.confidence, 1 - 1 / Math.sqrt(2), 1e-12, "2-arrow confidence");
 }
 
 // 明白な外れ値 1 本はクラスタ中心を保ったまま除外される
@@ -132,14 +137,40 @@ assertEqual(scoring.scoreAt(0, 0, 40, "field", 0).X, false, "field has no X");
     { x: -1, y: 1 },
   ];
   const st = scoring.robustStats([...cluster, { x: 40, y: 40 }]);
-  assertEqual(st.method, "ellipse-biweight", "large sample uses ellipse-biweight");
+  assertEqual(st.method, "mean+outlier", "outlier exclusion is reported");
   assertEqual(st.excluded.length, 1, "one outlier excluded");
   assertEqual(st.excluded[0].x, 40, "the excluded arrow is the outlier");
-  assert(
-    Math.abs(st.mx) < 0.5 && Math.abs(st.my) < 0.5,
-    `center stays near origin, got (${st.mx}, ${st.my})`,
-  );
+  assertClose(st.mx, 0, 1e-12, "center is the mean of the remaining arrows (x)");
+  assertClose(st.my, 0, 1e-12, "center is the mean of the remaining arrows (y)");
   assert(st.confidence > 0.3 && st.confidence <= 1, `confidence in range, got ${st.confidence}`);
+}
+
+// 正規分布の群れで、正常な矢を外れ値として除外する割合が設計値（1%）程度に収まる
+{
+  let seed = 20261112;
+  const rand = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return seed / 2147483648;
+  };
+  const gauss = () => {
+    let u = 0;
+    while (!u) u = rand();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+  };
+  let anyExcluded = 0;
+  let covered = 0;
+  const trials = 1500;
+  for (let t = 0; t < trials; t++) {
+    const pts = Array.from({ length: 12 }, () => ({ x: gauss() * 4, y: gauss() * 2 }));
+    const st = scoring.robustStats(pts);
+    if (st.excluded.length) anyExcluded++;
+    if (Math.abs(st.mx) <= st.ciX) covered++;
+  }
+  assert(anyExcluded / trials < 0.03, `false exclusion rate ${anyExcluded / trials}`);
+  assert(
+    Math.abs(covered / trials - 0.95) < 0.025,
+    `95% interval coverage ${covered / trials}`,
+  );
 }
 
 /* ---------- 回帰 ---------- */

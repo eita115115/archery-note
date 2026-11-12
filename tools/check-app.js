@@ -243,20 +243,33 @@ const targetApi = new Function(
 const fieldSvg = targetApi.targetMarkup(80, "tf", "field");
 assert(fieldSvg.includes('class="main field"') && fieldSvg.includes("#ffe14d") && fieldSvg.includes("#1c1e1c"), "Field target SVG failed");
 
-const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats};")();
+const statsApi = new Function(section("function clamp", "/* ============ target SVG") + "\nreturn {robustStats,groupStats,centerOffsetTest,axisCorrection,probWithin,fmtChance,tCrit975};")();
 const arrows = [
   {x:1,y:1},{x:2,y:1.5},{x:0,y:.5},{x:1.2,y:1.7},{x:.8,y:.9},{x:1.5,y:1.1},
   {x:2.1,y:2.0},{x:1.7,y:1.6},{x:28,y:-20}
 ];
 const st = statsApi.robustStats(arrows);
-assert(st && st.excluded.length === 1 && st.method === "ellipse-biweight", "Robust grouping failed");
+assert(st && st.excluded.length === 1 && st.excluded[0].x === 28 && st.method === "mean+outlier", "Robust grouping failed");
+/* 新しい統計: 残りの矢の標本平均・不偏標準偏差・中心の標準誤差と95%区間（t分布） */
+{
+  const pts = [{x:-1,y:0},{x:1,y:0},{x:0,y:-1},{x:0,y:1},{x:0,y:0}];
+  const s5 = statsApi.robustStats(pts);
+  assert(s5.method === "mean" && s5.mx === 0 && s5.my === 0, "Plain mean failed");
+  assert(Math.abs(s5.sx - Math.sqrt(0.5)) < 1e-12 && Math.abs(s5.seX - Math.sqrt(0.5 / 5)) < 1e-12, "Sample SD / SE failed");
+  assert(Math.abs(s5.ciX - 2.776 * s5.seX) < 1e-12, "95% t interval failed");
+  const one = statsApi.robustStats([{x:2,y:3}]);
+  assert(one.n === 1 && one.mx === 2 && one.seX === Infinity && one.rr === 0, "Single arrow stats failed");
+  /* 旧版は円周上に並ぶ6本で RMS 0.0cm を返す不具合があった */
+  const ring = Array.from({length:6}, (_, j) => ({x:Math.cos(j/6*Math.PI*2)*3.9, y:Math.sin(j/6*Math.PI*2)*3.9}));
+  assert(Math.abs(statsApi.robustStats(ring).rr - 3.9 * Math.sqrt(6/5)) < 1e-9, "Ring RMS must not collapse");
+}
 const lineApi = new Function(section("function clamp", "function solve3") + "\nreturn {robustWeightedLine};")();
 const wr = lineApi.robustWeightedLine([[5,3,1],[6,1.5,1],[7,0.2,1],[8,-1.1,1],[9,-2.6,1],[12,20,0.05]]);
 assert(wr && wr.kind === "weighted-robust" && wr.zero > 6.8 && wr.zero < 7.5 && wr.quality > .4, "Weighted robust sight regression failed");
 
 const analysisDb = {sessions:[]};
 const analysisApi = new Function(
-  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats",
+  "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance",
   section("function windText", "function roundProgressHtml") + "\nreturn {sessionQuality,personalModel,judgementFor,nextActionPlan};"
 )(
   analysisDb,
@@ -268,7 +281,9 @@ const analysisApi = new Function(
   v=>`${Math.round(v*100)}%`,
   (v,axis)=>`${axis}:${v.toFixed(1)}`,
   s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
-  statsApi.groupStats
+  statsApi.groupStats,
+  statsApi.probWithin,
+  statsApi.fmtChance
 );
 const sessAt = (id,cx,cy) => ({id,date:`2026-06-${id}`,setupId:"main",dist:70,faceD:122,faceType:"single",wx:"晴れ",ends:[[
   {x:cx-0.5,y:cy,s:9},{x:cx+0.3,y:cy+0.2,s:9},{x:cx,y:cy-0.4,s:10},
@@ -289,6 +304,32 @@ assert(judgement && judgement.label === "動かす", "Personal judgement failed"
 assert(analysisApi.nextActionPlan(current,{st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},{id:"main"}).length > 0, "Next action plan failed");
 
 const normGearText = s => String(s || "").normalize("NFKC").toUpperCase().replace(/[・_/]+/g, " ").replace(/\s+/g, " ").trim();
+
+/* サイト調整の判定（統計）: 中心のズレを Hotelling T² で検定し、量は縮小推定 m·(1−SE²/m²) */
+{
+  const decisionApi = new Function("normGearText","ringW", section("function clamp", "function adviceModel") + "\nreturn {sightDecision,robustStats};")(normGearText, scoreApi.ringW);
+  const grid = (cx, cy) => [-1, 0, 1].flatMap(i => [-1, 0, 1].map(j => ({x:cx + i*2, y:cy + j*2})));
+  const sess = {faceD:122, faceType:"single"};
+  let d = decisionApi.sightDecision(sess, decisionApi.robustStats(grid(0.3, -0.2)), null, null);
+  assert(!d.significant && !d.h.move && !d.v.move, "Centered group must not move the sight");
+  d = decisionApi.sightDecision(sess, decisionApi.robustStats(grid(4, 0)), null, null);
+  // 9本・σ=√3: SE=√(3/9)=0.577、縮小率 1−(1/3)/16=0.979 → 補正 3.92cm
+  assert(d.significant && d.h.move && !d.v.move && Math.abs(d.h.adj - 4 * (1 - (1/3)/16)) < 1e-9, "Offset group must move horizontally with shrinkage");
+  const windTraj = {wind:{speed:4, known:true, side:4, label:"左から"}, windDriftCm:4, windUncertaintyCm:0.5};
+  d = decisionApi.sightDecision(Object.assign({windSpeed:"4"}, sess), decisionApi.robustStats(grid(4, 0)), windTraj, null);
+  assert(d.windCorrected && !d.h.move, "Known crosswind drift must be removed before moving the sight");
+  /* 中心が合っている6本の群れで「動かせ」と出る割合（旧版は約9割） */
+  let seed = 4242;
+  const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+  const gauss = () => { let u = 0; while (!u) u = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand()); };
+  let moved = 0;
+  for (let t = 0; t < 2000; t++) {
+    const st = decisionApi.robustStats(Array.from({length:6}, () => ({x:gauss()*4, y:gauss()*4})));
+    const dd = decisionApi.sightDecision(sess, st, null, null);
+    if (dd.h.move || dd.v.move) moved++;
+  }
+  assert(moved / 2000 < 0.08, `False sight-move rate too high: ${moved / 2000}`);
+}
 const physicsApi = new Function("normGearText", section("function clamp", "function adviceModel") + "\nreturn {physicsProfile,trajectoryModel,windModel,ArcheryPhysicsCore};")(normGearText);
 const phys = physicsApi.physicsProfile({
   poundage:"38", drawLength:"28.5", shaftGpi:"6.8", arrowLength:"29", pointWeight:"110", arrowDia:"5.5",

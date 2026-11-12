@@ -124,7 +124,7 @@ for (const n of [0, 1, 2, 3, 6]) {
       const html = api.analysisKpiHtml(rows);
       assert.match(html, /比較待ち/);
       assert.doesNotMatch(html, /<b>0\.0cm<\/b>/);
-      assert.match(html, /最小 3\.7cm/);
+      assert.match(html, /最小 4\.4cm/); // 半径4cmの円周上の6本: 不偏RMS = 4·√(6/5) ≈ 4.38cm
     });
     check(`pending conclusion n${n}`, () =>
       assert.equal(api.todayConclusion(rows).kind, "grouping-pending"),

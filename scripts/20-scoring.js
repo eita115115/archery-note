@@ -132,59 +132,120 @@ function momentStats(arrows, weights){
   return {n,mx,my,rr,sx,sy,cov,corr,major,minor,angleDeg,effN};
 }
 function groupStats(arrows){ return momentStats(arrows); }
-function weightedStats(arrows, weights){ return momentStats(arrows, weights); }
-function robustScale(vals, center, fallback){
-  const dev=vals.map(v=>Math.abs(v-center));
-  return Math.max(1.4826*median(dev), fallback||0, 0.01);
+/* 両側95%の t 分布臨界値（自由度1〜30は表、31以上は 1.96+2.4/df で誤差0.003以内） */
+const T975 = [NaN, 12.706, 4.303, 3.182, 2.776, 2.571, 2.447, 2.365, 2.306, 2.262, 2.228, 2.201, 2.179, 2.160, 2.145, 2.131, 2.120, 2.110, 2.101, 2.093, 2.086, 2.080, 2.074, 2.069, 2.064, 2.060, 2.056, 2.052, 2.048, 2.045, 2.042];
+function tCrit975(df) {
+  if (!(df >= 1)) return Infinity;
+  return df <= 30 ? T975[Math.floor(df)] : 1.96 + 2.4 / df;
 }
-/* 中央値/MAD・楕円距離・重み付き中心で、明らかな外れ値を除いたグルーピング統計 */
-function robustStats(arrows){
-  const total=arrows.length;
-  if(!total) return null;
-  if(total<5){
-    const st=groupStats(arrows);
-    return Object.assign(st,{used:arrows.slice(),excluded:[],total,method:"simple",confidence:total>=3?.55:.35});
+/* 標本平均・不偏共分散（n−1）と楕円。n=1 は広がり0・標準誤差∞ */
+function sampleStats(arrows) {
+  const n = arrows.length;
+  if (!n) return null;
+  const mx = arrows.reduce((a, p) => a + p.x, 0) / n;
+  const my = arrows.reduce((a, p) => a + p.y, 0) / n;
+  let vx = 0, vy = 0, cov = 0;
+  arrows.forEach((p) => { const dx = p.x - mx, dy = p.y - my; vx += dx * dx; vy += dy * dy; cov += dx * dy; });
+  const df = n - 1;
+  if (df > 0) { vx /= df; vy /= df; cov /= df; } else { vx = vy = cov = 0; }
+  const sx = Math.sqrt(Math.max(0, vx)), sy = Math.sqrt(Math.max(0, vy));
+  const disc = Math.sqrt(Math.max(0, (vx - vy) ** 2 + 4 * cov * cov));
+  const l1 = Math.max(0, (vx + vy + disc) / 2), l2 = Math.max(0, (vx + vy - disc) / 2);
+  const se = (s) => (df > 0 ? s / Math.sqrt(n) : Infinity);
+  const t = tCrit975(df);
+  return {
+    n, mx, my, sx, sy, cov,
+    rr: Math.sqrt(Math.max(0, vx + vy)),
+    corr: sx > 0 && sy > 0 ? clamp(cov / (sx * sy), -1, 1) : 0,
+    major: Math.sqrt(l1), minor: Math.sqrt(l2),
+    angleDeg: (0.5 * Math.atan2(2 * cov, vx - vy)) * 180 / Math.PI,
+    effN: n, df, seX: se(sx), seY: se(sy), tcrit: t, ciX: t * se(sx), ciY: t * se(sy),
+  };
+}
+/* 1本を除いた残り m 本の平均・不偏共分散から見た、その矢のマハラノビス距離による外れ値の p 値。
+   新しい観測の T² = m/(m+1)·d² は (2(m−1)/(m−2))·F(2, m−2) に従い、2次元では F の上側確率が
+   (1 + 2F/k)^(−k/2)（k=m−2）と閉じた式になる。縮退（全矢同一点・一直線）は共分散に微小な下駄を足す */
+function leaveOneOutPValue(arrows, i, sums) {
+  const p = arrows[i], m = sums.n - 1;
+  if (m < 4) return 1;
+  const sx = sums.x - p.x, sy = sums.y - p.y;
+  const mx = sx / m, my = sy / m;
+  const vx = (sums.xx - p.x * p.x - m * mx * mx) / (m - 1);
+  const vy = (sums.yy - p.y * p.y - m * my * my) / (m - 1);
+  const cv = (sums.xy - p.x * p.y - m * mx * my) / (m - 1);
+  const eps = Math.max(1e-6, (Math.max(0, vx) + Math.max(0, vy)) * 1e-6);
+  const a = Math.max(0, vx) + eps, d = Math.max(0, vy) + eps;
+  const det = a * d - cv * cv;
+  if (!(det > 0)) return 1;
+  const dx = p.x - mx, dy = p.y - my;
+  const d2 = (d * dx * dx - 2 * cv * dx * dy + a * dy * dy) / det;
+  const k = m - 2, F = ((m / (m + 1)) * d2 * k) / (2 * (m - 1));
+  return Math.pow(1 + (2 * F) / k, -k / 2);
+}
+const OUTLIER_ALPHA = 0.01; /* 1セッション全体で正常な矢を誤って除外する確率の上限（ボンフェローニ補正） */
+/* 外れ値を除いたグルーピング統計:
+   1) 6本以上のとき、各矢を「残りの矢から見て統計的にあり得ないか」で検定（上の p 値 < α/n）。
+      最も極端な1本ずつ除き、最大で全体の20%まで繰り返す
+   2) 残りの矢の標本平均・不偏共分散から中心・ばらつき・中心の標準誤差・95%区間を出す */
+function robustStats(arrows) {
+  const total = arrows.length;
+  if (!total) return null;
+  let used = arrows.slice();
+  const excluded = [];
+  const limit = total >= 6 ? Math.floor(total * 0.2) : 0;
+  while (excluded.length < limit) {
+    const sums = used.reduce((s, a) => ({ n: s.n + 1, x: s.x + a.x, y: s.y + a.y, xx: s.xx + a.x * a.x, yy: s.yy + a.y * a.y, xy: s.xy + a.x * a.y }), { n: 0, x: 0, y: 0, xx: 0, yy: 0, xy: 0 });
+    let worst = -1, worstP = 1;
+    for (let i = 0; i < used.length; i++) {
+      const pv = leaveOneOutPValue(used, i, sums);
+      if (pv < worstP) { worstP = pv; worst = i; }
+    }
+    if (worst < 0 || worstP >= OUTLIER_ALPHA / used.length) break;
+    excluded.push(used[worst]);
+    used = used.filter((_, i) => i !== worst);
   }
-  const cx=median(arrows.map(a=>a.x)), cy=median(arrows.map(a=>a.y));
-  const ds=arrows.map(a=>Math.hypot(a.x-cx,a.y-cy));
-  const md=median(ds);
-  const mad=median(ds.map(d=>Math.abs(d-md)));
-  const base=groupStats(arrows);
-  const sigma=Math.max(1.4826*mad, base.rr*.35, 0.01);
-  const sx0=robustScale(arrows.map(a=>a.x), cx, base.sx*.45);
-  const sy0=robustScale(arrows.map(a=>a.y), cy, base.sy*.45);
-  const eds=arrows.map(a=>Math.hypot((a.x-cx)/sx0,(a.y-cy)/sy0));
-  const em=median(eds), emad=median(eds.map(d=>Math.abs(d-em)));
-  const limit=Math.max(md+3*sigma, md*2.2, base.rr*1.65);
-  const eLimit=Math.max(3.15, em+3*Math.max(1.4826*emad,.35));
-  let used=[], excluded=[];
-  const maxExcluded=Math.floor(total*.25);
-  arrows.forEach((a,i)=>{
-    const radial=ds[i]>limit && ds[i]>md+2.4*sigma;
-    const elliptical=eds[i]>eLimit && eds[i]>3.15;
-    const obvious=(radial||elliptical) && excluded.length<maxExcluded;
-    (obvious?excluded:used).push(a);
-  });
-  if(used.length<Math.max(3,total-excluded.length)){
-    used=arrows.slice(); excluded=[];
-  }
-  const unchanged=excluded.length===0;
-  const ux=unchanged?cx:median(used.map(a=>a.x)), uy=unchanged?cy:median(used.map(a=>a.y));
-  const uds=unchanged?ds:used.map(a=>Math.hypot(a.x-ux,a.y-uy));
-  const udm=unchanged?md:median(uds);
-  const xScale=robustScale(used.map(a=>a.x), ux, base.sx*.55);
-  const yScale=robustScale(used.map(a=>a.y), uy, base.sy*.55);
-  const scale=Math.max(udm+3*(unchanged?mad:median(uds.map(d=>Math.abs(d-udm)))), base.rr, 0.01);
-  const weights=used.map(a=>{
-    const radialU=Math.hypot(a.x-ux,a.y-uy)/scale;
-    const ellU=Math.hypot((a.x-ux)/xScale,(a.y-uy)/yScale)/3;
-    const u=Math.max(radialU,ellU);
-    return u>=1?0.05:(1-u*u)**2;
-  });
-  const st=weightedStats(used, weights);
-  const outRate=excluded.length/total;
-  const sample=clamp((st.effN-2)/10,.35,1);
-  const outPenalty=clamp(1-outRate*1.6,.55,1);
-  const skewPenalty=st.minor>0?clamp(st.minor/st.major+.35,.55,1):.7;
-  return Object.assign(st,{used,excluded,total,method:"ellipse-biweight",confidence:sample*outPenalty*skewPenalty});
+  const st = sampleStats(used);
+  /* 演算信頼度 = 1 − 1/√n: 中心の推定誤差（標準誤差）がグルーピングの広がりの何割か、の補数 */
+  const confidence = clamp(1 - 1 / Math.sqrt(st.n), 0, 1);
+  return Object.assign(st, { used, excluded, total, method: excluded.length ? "mean+outlier" : "mean", confidence });
+}
+/* 誤差関数（Abramowitz–Stegun 7.1.26、絶対誤差 1.5e-7 以下） */
+function erfApprox(x){
+  const sg=x<0?-1:1, t=1/(1+0.3275911*Math.abs(x));
+  const y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);
+  return sg*y;
+}
+/* 真の値が推定値の ±tol 以内にある確率（正規近似）。se=∞ は 0、se=0 は 1 */
+function probWithin(tol, se){
+  if(!(se>=0)) return 0;
+  if(se===0) return 1;
+  if(!Number.isFinite(se)) return 0;
+  return erfApprox(tol/(Math.SQRT2*se));
+}
+/* グルーピング中心が的中心(0,0)からずれているかの同時検定（Hotelling T²）。
+   2次元では F(2,n−2) の上側確率が (1+2F/k)^(−k/2) と閉じた式になる。
+   offX/offY は検定するズレ（風補正後など）、extraVarX は中心の左右に足す分散（風の不確かさ²） */
+function centerOffsetTest(st, offX, offY, extraVarX){
+  const n=st&&st.n;
+  if(!(n>=3)) return {p:1,testable:false};
+  const vx=st.sx*st.sx+n*(extraVarX||0), vy=st.sy*st.sy, cv=st.cov||0;
+  const eps=Math.max(1e-6,(vx+vy)*1e-6);
+  const a=vx+eps, d=vy+eps, det=a*d-cv*cv;
+  if(!(det>0)) return {p:1,testable:false};
+  const d2=(d*offX*offX-2*cv*offX*offY+a*offY*offY)/det;
+  const k=n-2, F=(n*d2*k)/(2*(n-1));
+  return {p:Math.pow(1+2*F/k,-k/2),testable:true,T2:n*d2};
+}
+/* 確率の表示（0.1%未満は丸める） */
+function fmtChance(p){
+  if(!(p>=0)) return "—";
+  if(p<.001) return "0.1%未満";
+  return `${(p*100).toFixed(p<.1?1:0)}%`;
+}
+/* 1軸の補正量。経験ベイズの縮小推定 adj = m·max(0, 1 − SE²/m²)：
+   ズレの推定誤差が大きいほど控えめに動かす（偶然のズレを追いかけない）。ci は95%区間の半幅 */
+function axisCorrection(m, se, df){
+  const t=tCrit975(df);
+  const shrink=Number.isFinite(se)&&Math.abs(m)>0?Math.max(0,1-(se*se)/(m*m)):0;
+  return {m, se, ci:t*se, shrink, adj:m*shrink};
 }
