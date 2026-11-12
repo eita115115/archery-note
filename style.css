@@ -1068,52 +1068,6 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .formBar{display:flex;gap:8px;padding:8px 12px;flex:0 0 auto;align-items:center;justify-content:center}
 .formFootnote{flex:0 0 auto;padding:2px 12px 4px;font-size:13px;color:#888;line-height:1.4;text-align:center}
 
-/* onboard — 初回ユーザー向けオンボーディング（ウェルカム＋クイック設定の2画面。onboarding-final-design.md） */
-.onboard{
-  display:flex; flex-direction:column; align-items:center;
-  min-height:72vh; min-height:72dvh; padding:0 16px; text-align:center;
-  animation:appRise .42s var(--ease-app) both;
-}
-.onboard.onboardWelcome{justify-content:center; gap:10px;}
-.onboard.onboardSetup{
-  justify-content:flex-start; padding-top:32px; gap:12px;
-  text-align:left; align-items:stretch;
-}
-.onboardLogo{width:64px; height:64px; display:flex; align-items:center; justify-content:center; margin:0 auto;}
-.onboardLogo svg{width:64px; height:64px; display:block;}
-.onboardLogo .reticleAccent{stroke:var(--accent);}
-.onboard h2{font-size:22px; font-weight:var(--fw-figure); color:var(--title); margin:0; line-height:var(--line-height-tight);}
-.onboardSetup h2{font-size:18px;}
-.onboard p{font-size:14px; color:var(--sub); margin:0; line-height:var(--line-height-relaxed); max-width:320px;}
-.onboardSetup p{max-width:none;}
-.onboardPrivacy{
-  display:flex; align-items:center; justify-content:center; gap:6px;
-  font-size:13px; color:var(--sub); margin-top:4px;
-}
-.onboardPrivacy svg{width:14px; height:14px; flex:0 0 auto; color:var(--sub);}
-/* タップターゲット規約（--tap-target-min:44px）準拠。ドラフトの36pxから是正（ui-specs-fable-adjudication.md #1） */
-.onboardSkip{
-  background:none; border:none; color:var(--sub); font-size:14px; cursor:pointer;
-  padding:8px 12px; min-height:var(--tap-target-min); font-family:inherit;
-  transition:color var(--motion-fast);
-}
-.onboardSkip:active{color:var(--ink);}
-.onboardAutoHint{font-size:13px; color:var(--sub); margin-top:2px; line-height:var(--line-height-normal);}
-.onboardChips{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:100%;}
-.onboardChip{
-  min-height:var(--tap-target-min); padding:9px 4px; border-radius:var(--radius-control); border:1px solid var(--line);
-  background:var(--soft); color:var(--ink); font-size:14px; cursor:pointer; user-select:none;
-  display:flex; align-items:center; justify-content:center;
-  font-family:inherit; font-weight:inherit; -webkit-appearance:none; appearance:none;
-  transition:transform var(--motion-fast), background var(--motion-fast), border-color var(--motion-fast);
-}
-.onboardChip:active{transform:scale(.975);}
-.onboardChip.on{
-  background:var(--invert-bg); border-color:var(--invert-bg); color:var(--invert-fg);
-  font-weight:var(--fw-emphasis); animation:chipPop .2s var(--ease-app);
-}
-.onboard .btn{width:100%; max-width:320px; min-height:var(--tap-target-comfortable); font-size:16px;}
-.onboard .btn[disabled]{opacity:.4;}
 
 /* hintBanner — 段階的機能発見ヒント（記録タブ上部のみ・常に最大1枚。onboarding-final-design.md 観点4） */
 .hintBanner{
@@ -1144,9 +1098,6 @@ nav.tabs button.on .ic{animation:tabPop .26s var(--ease-app);}
 .hintBannerClose:active{color:var(--ink);}
 @supports (content-visibility:auto){
   main > .hintBanner{content-visibility:auto; contain-intrinsic-size:auto 120px;}
-}
-@media (max-width:520px){
-  .onboardChips{grid-template-columns:repeat(2,1fr);}
 }
 @media (max-width:420px){
   .hintBanner{flex-wrap:wrap;}
@@ -2119,3 +2070,52 @@ button.slot{font-family:inherit; cursor:pointer; touch-action:manipulation;}
 .noImpact b{font-size:17px; font-weight:700; color:var(--ink);}
 .noImpact span{font-size:14px; color:var(--sub); line-height:1.6;}
 .noImpactCard .noImpact{border-bottom:0; padding-bottom:4px;}
+
+/* ===================================================================================
+   段 4: 記録タブの待機画面（ホームを兼ねる）と記録の条件（docs/design/v5/design.md 4.1）。
+   =================================================================================== */
+.startBand .btnRow .btn{white-space:nowrap;}
+.startBand .btnRow .btn.sec{flex:1; padding-left:8px; padding-right:8px;}
+.startBand .basis{padding-top:10px;}
+.startBand .seg button,.condSec .seg button{min-height:44px;}
+.homeGoalLine{padding:10px 0 0;}
+main > .hintBanner{margin-top:12px;}
+.bigRow{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding:6px 0 12px; border-bottom:1px solid var(--rule);}
+.fig .n.halves{font-size:24px; line-height:1.4; white-space:nowrap;}
+.fig .n.halves small{margin:0 2px 0 3px;}
+.lineChart{display:block; max-width:100%; margin-top:6px;}
+.entry.homeEntry{grid-template-columns:62px 1fr; cursor:pointer; min-height:56px;}
+.entry.homeEntry .day{font-size:20px; line-height:1.3;}
+.entry .entryBody{display:block; min-width:0;}
+.entry .entryBody .meta{display:block;}
+.entry:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+/* 記録の条件・今日の結果: 画面名の行とタブを隠す全画面 */
+html.subscreen #viewTop,html.subscreen #tabs,html.subscreen #gearSubTabs{display:none;}
+html.subscreen body{padding-bottom:calc(92px + var(--safe-b));}
+.subTop{margin:0 calc(-1 * var(--gut)); padding-top:var(--safe-t); border-bottom:1px solid var(--rule);}
+.subHead{padding:16px 0 4px;}
+.subHead h1{margin:0; font-size:24px; font-weight:700; line-height:1.25; letter-spacing:.01em; color:var(--ink);}
+.subHead .viewDate{font-size:14px; color:var(--sub); line-height:1.3;}
+.actbar{
+  position:fixed; left:50%; transform:translateX(-50%); bottom:0; z-index:20;
+  width:min(100%,480px); background:var(--surface); border-top:1px solid var(--rule-strong);
+  padding:10px var(--gut) calc(10px + var(--safe-b));
+}
+.actbar .btn{width:100%; min-height:56px; font-size:17px;}
+.actbar.two{display:grid; grid-template-columns:1fr 1.6fr; gap:10px;}
+.actbar.two .btn{min-height:52px; font-size:16px; padding-left:8px; padding-right:8px; white-space:nowrap;}
+.condSec .vsecH .txtBtn{min-height:32px;}
+.condSec .seg{margin-top:4px;}
+.condSec .row{gap:12px;}
+.condSec .stageGaugeWrap{border:0; border-radius:0; background:none; padding:10px 0 0;}
+.condSec .sessionCondition{margin-top:8px;}
+.distSeg .distOpt{padding-left:2px; padding-right:2px;}
+details.adv.recordDetails{margin-top:22px; border-top:2px solid var(--ink)!important; border-radius:0;}
+.recordDetails summary{width:100%; margin-left:0; min-height:52px; font-size:17px; font-weight:700; color:var(--ink); justify-content:flex-start; gap:6px;}
+.recordDetails summary .sumNote{margin-left:auto; font-size:14px; font-weight:400; color:var(--sub);}
+@media (max-width:340px){
+  .distSeg .distOpt{font-size:14px;}
+  .startBand .btnRow .btn.pri{flex:1.4;}
+  .recordDetails summary .sumNote{display:none;}
+}
+.homeGoalLine span{white-space:nowrap;}

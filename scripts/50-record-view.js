@@ -16,8 +16,8 @@ let ui = {
   recordMode: "practice",
   freshArrow: -1,
   freshTimer: 0,
-  onboardStep: 1,
-  onboardDist: null,
+  recScreen: "home" /* 記録タブ（記録していないとき）: "home" 待機画面 / "conditions" 記録の条件 */,
+  startMode: null /* 待機画面と記録の条件で選んでいる入力方法。null は settings.lastInputMode */,
 };
 function showView(v) {
   if (view === v) return;
@@ -26,6 +26,7 @@ function showView(v) {
   view = v;
   ui.selArrow = -1;
   ui.editEnd = -1;
+  ui.recScreen = "home";
   nativePulse("light");
   render();
   m.classList.remove("viewEnter");
@@ -53,7 +54,8 @@ function syncViewChrome() {
   const title = $("#viewTitle");
   if (title) title.textContent = VIEW_TITLES[view] || "";
   const date = $("#viewDate");
-  if (date) date.textContent = view === "record" ? fmtD(today()) : "";
+  const dp = view === "record" ? dateParts(today()) : null;
+  if (date) date.textContent = dp ? `${dp.mo}月${dp.d}日（${dp.w}）` : "";
   const settings = $("#btnSettings");
   if (settings) settings.hidden = view !== "record";
   const sub = $("#gearSubTabs");
@@ -72,6 +74,11 @@ function render() {
   document.documentElement.classList.toggle(
     "recording",
     view === "record" && !!db.active && !recordPaused(),
+  );
+  /* 記録の条件は全画面: 画面名の行とタブを隠す（style.css: html.subscreen） */
+  document.documentElement.classList.toggle(
+    "subscreen",
+    view === "record" && !db.active && ui.recScreen === "conditions",
   );
   if (view === "record") renderRecord(m);
   else if (view === "history") renderHistory(m);
@@ -170,26 +177,6 @@ function actionFaceLabel(value) {
   if (f.faceType === "field") return `${f.faceD}cmフィールド`;
   return `${f.faceD}cm`;
 }
-function recordFastActionsHtml(last) {
-  /* 直前が多距離ラウンドのステージなら、押下時の挙動（ラウンドをステージ1から再開）に合わせたラベルにする */
-  const lastRound = last && last.roundGroup ? roundLabel(last.roundGroup.roundId) : null;
-  const lastTitle = lastRound ? `${lastRound}をもう一度` : "前回と同じ条件で開始";
-  const lastLabel = last
-    ? lastRound
-      ? "最初の距離から"
-      : `${last.dist}m / ${actionFaceLabel(faceChoiceValue(last))}`
-    : "なし";
-  /* 前回条件は固定表示。フォームの編集中の条件は fStart のみが使う。
-     再開ショートカットは控えめにし、主操作はセッション票の「この条件で開始」にする。 */
-  if (!last) return "";
-  return `<section class="homeActions recordRepeatBand" aria-label="すぐ使う">
-    <button class="homeAction repeatMain" id="quickStart" type="button">
-      <span class="repeatEyebrow">${esc(lastTitle)}</span>
-      <b id="quickStartMeta">${esc(lastLabel)}</b>
-    </button>
-    <button class="homeAction repeatHistory" id="quickHistory" type="button"><b>履歴</b></button>
-  </section>`;
-}
 /* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
 function selectedMultiRound(roundId) {
   if (!roundId || ROUND_TYPES.some((r) => r.id === roundId)) return null;
@@ -212,29 +199,20 @@ function multiRoundStageGaugeHtml(def) {
     .join("");
   return `<div class="stageGauge" aria-label="${esc(def.label)}のステージ行程">${ticks}</div>`;
 }
-/* ---------- オンボーディング（初回起動。onboarding-final-design.md） ----------
-   専用画面は2枚（ウェルカム／クイック設定）。3枚目は既存 activeGuideHtml() が
-   「文脈内ステップ3」を担うため追加実装しない。db.active の生成形は既存 fStart
-   ハンドラ（このファイル内の renderRecord）と完全同形にする。 */
+/* ---------- 初回（記録も弓具も無い） ----------
+   v5: 専用の画面は持たない。記録タブの帯が「最初の条件を選ぶ」になり、記録の条件へ進む
+   （homeFirstRunBandHtml）。記録を始めるかデモデータを入れると onboardingSeen を立てる。 */
 function shouldShowOnboarding() {
   return (
     !db.settings.onboardingSeen && !db.active && db.sessions.length === 0 && db.setups.length === 0
   ); // 用具だけ登録済みの既存ユーザーには出さない
 }
-/* 距離から的サイズ・1エンド本数を自動決定（suggestedFaceValue と同ロジック。
-   18mのみ3本/エンド＝WAインドア標準。通常の記録フォームの既定6本は不変） */
+/* 距離から的サイズ・1エンド本数を決める（suggestedFaceValue と同じ規則。18m だけ 3射エンド）。
+   記録の条件で、初回に距離を選んだときと、距離の決まったラウンドを選んだときに使う */
 function onboardDerived(d) {
   const faceD = d >= 60 ? 122 : d <= 18 ? 40 : 80;
   const perEnd = d <= 18 ? 3 : 6;
   return { faceD, perEnd };
-}
-function finishOnboarding() {
-  db.settings.onboardingSeen = true;
-  ui.onboardStep = 1;
-  ui.onboardDist = null;
-  nativePulse("light");
-  save({ reason: "onboarding-skip" }); // 即時 save: 直後にアプリを閉じられても失われない
-  render();
 }
 const DEMO_ID_PREFIX = "build-week-demo:";
 function demoSession(id, date, offset, spread, score) {
@@ -296,110 +274,6 @@ function removeDemoData() {
   db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));
   if (db.sessions.length !== before) save({ reason: "demo-remove", forceSnapshot: true });
   return before - db.sessions.length;
-}
-function onboardWelcomeHtml() {
-  return `<section class="onboard onboardWelcome" data-testid="onboard-welcome">
-    <div class="onboardLogo" aria-hidden="true">
-      <svg viewBox="0 0 64 64" width="64" height="64" fill="none" stroke-linecap="butt">
-        <circle cx="32" cy="32" r="19" stroke="var(--ink)" stroke-width="1.5"/>
-        <path class="reticleAccent" d="M32 6v10M32 48v10M6 32h10M48 32h10" stroke-width="1.5"/>
-      </svg>
-    </div>
-    <h2>Archery Note</h2>
-    <p>的をタップするだけで得点を記録。サイト調整の提案まで、この一冊で。</p>
-    <div class="onboardPrivacy">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt"><rect x="5" y="10.5" width="14" height="9.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>
-      <span>データはこの端末の中だけに保存されます</span>
-    </div>
-    <button type="button" class="btn" id="obStart">はじめる</button>
-    <button type="button" class="btn sec" id="obDemo">架空のデモデータで試す</button>
-    <button type="button" class="onboardSkip" id="obSkip">スキップして記録へ →</button>
-  </section>`;
-}
-function onboardSetupHtml() {
-  return `<section class="onboard onboardSetup" data-testid="onboard-setup">
-    <h2>いつも練習する距離は？</h2>
-    <p>的のサイズと1エンドの本数は距離から自動で決まります。</p>
-    <div class="onboardChips" id="obDistChips">
-      ${[70, 50, 30, 18]
-        .map(
-          (d) =>
-            `<button type="button" class="onboardChip" data-d="${d}" aria-pressed="false">${d}m</button>`,
-        )
-        .join("")}
-    </div>
-    <div class="onboardAutoHint" id="obAutoHint" aria-live="polite">距離を選んでください</div>
-    <button type="button" class="btn" id="obGo" disabled>この条件で1本目を記録する</button>
-    <button type="button" class="onboardSkip" id="obSkip2">あとで設定する</button>
-  </section>`;
-}
-function renderOnboarding(m) {
-  const step = ui.onboardStep || 1;
-  if (step === 1) {
-    m.innerHTML = onboardWelcomeHtml();
-    $("#obStart").onclick = () => {
-      ui.onboardStep = 2;
-      nativePulse("light");
-      render();
-    };
-    $("#obSkip").onclick = finishOnboarding;
-    $("#obDemo").onclick = () => {
-      installDemoData();
-      showView("analysis");
-    };
-    return;
-  }
-  m.innerHTML = onboardSetupHtml();
-  document.querySelectorAll("#obDistChips .onboardChip").forEach(
-    (c) =>
-      (c.onclick = () => {
-        ui.onboardDist = +c.dataset.d;
-        document.querySelectorAll("#obDistChips .onboardChip").forEach((x) => {
-          const on = x === c;
-          x.classList.toggle("on", on);
-          x.setAttribute("aria-pressed", String(on));
-        });
-        const { faceD, perEnd } = onboardDerived(ui.onboardDist);
-        $("#obAutoHint").textContent =
-          `${ui.onboardDist}m → ${faceD}cm的・${perEnd}本/エンド（あとで変更できます）`;
-        $("#obGo").disabled = false;
-        nativePulse("light");
-      }),
-  );
-  $("#obGo").onclick = () => {
-    const d = ui.onboardDist;
-    if (!d) return;
-    const { faceD, perEnd } = onboardDerived(d);
-    db.settings.onboardingSeen = true;
-    db.active = {
-      id: uid(),
-      date: today(),
-      setupId: null,
-      dist: d,
-      faceD,
-      faceType: "single",
-      perEnd,
-      arrowR: +sessionArrowR(null, null).toFixed(4),
-      sightV: "",
-      sightH: "",
-      wx: "",
-      note: "",
-      windDir: "",
-      windSpeed: "",
-      round: "free",
-      purpose: "practice",
-      ends: [],
-      cur: [],
-    };
-    nativePulse("success");
-    wakeLock.acquire(); // 通常の fStart 開始と同じく記録中の画面消灯を防ぐ
-    ui.onboardStep = 1;
-    ui.onboardDist = null;
-    save({ reason: "onboarding-start" });
-    m.classList.remove("viewEnter");
-    render();
-  };
-  $("#obSkip2").onclick = finishOnboarding;
 }
 
 /* ---------- 段階的機能発見ヒント（記録タブ上部のみ・常に最大1枚。onboarding-final-design.md 観点4） ----------
@@ -508,41 +382,469 @@ function openAddToHomeSheet() {
   openModal(ovl, { escapeTarget: "#a2hClose" });
   ovl.querySelector("#a2hClose").onclick = () => closeModal(ovl);
 }
-function renderRecord(m) {
-  if (db.active) {
-    if (recordPaused()) renderPausedRecord(m);
-    else renderActive(m);
-    return;
+/* ---------- 記録タブの待機画面（ホームを兼ねる。docs/design/v5/design.md 4.1） ----------
+   上から: 開始の帯（前回と同じ条件・入力方法・条件を変える・記録を始める）→ 前回の練習 →
+   同じ条件の推移 → 最近の練習。記録の途中なら帯は「記録の途中です」だけになり、
+   新しい記録を始める入口は出さない（上書きで消さないため）。 */
+const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"];
+function dateParts(iso) {
+  if (!iso || typeof iso !== "string" || !/^\d{4}-\d{2}-\d{2}/.test(iso)) return null;
+  const [y, mo, d] = iso.split("-").map((v) => parseInt(v, 10));
+  return { y, mo, d, w: WEEKDAY_JA[new Date(y, mo - 1, d).getDay()] };
+}
+function fmtMD(iso) {
+  const p = dateParts(iso);
+  return p ? `${p.mo}/${p.d}` : "";
+}
+function fmtMDW(iso) {
+  const p = dateParts(iso);
+  return p ? `${p.mo}/${p.d}（${p.w}）` : "";
+}
+/* 期間の表記。年をまたぐときだけ年を付ける */
+function fmtDateRange(a, b) {
+  const pa = dateParts(a),
+    pb = dateParts(b);
+  if (!pa || !pb) return "";
+  if (a === b) return fmtMD(a);
+  return pa.y === pb.y ? `${fmtMD(a)}〜${fmtMD(b)}` : `${fmtD(a)}〜${fmtD(b)}`;
+}
+function sampleSd(vals) {
+  if (!Array.isArray(vals) || vals.length < 2) return 0;
+  const m = vals.reduce((t, v) => t + v, 0) / vals.length;
+  return Math.sqrt(vals.reduce((t, v) => t + (v - m) ** 2, 0) / (vals.length - 1));
+}
+/* 日付の新しい順（同じ日は後から保存したものが先）。保存の並びは変えない */
+function sessionsByDateDesc() {
+  return db.sessions
+    .map((s, i) => ({ s, i }))
+    .filter((x) => x.s && typeof x.s === "object")
+    .sort((a, b) => String(b.s.date || "").localeCompare(String(a.s.date || "")) || b.i - a.i)
+    .map((x) => x.s);
+}
+function roundQuota(roundId) {
+  const r = ROUND_TYPES.find((x) => x.id === roundId);
+  return r && r.arrows ? r.arrows : null;
+}
+/* 「前回と同じ条件」で始めるときの条件。多距離ラウンドは最初の距離から始める。
+   記録が無いときは 70m・122cm的・6射の自由練習 */
+function startConditionFrom(last) {
+  if (!last)
+    return {
+      dist: 70,
+      faceD: 122,
+      faceType: "single",
+      perEnd: 6,
+      setupId: db.setups[0] ? db.setups[0].id : null,
+      round: "free",
+      mdef: null,
+    };
+  const known = ROUND_TYPES.some((r) => r.id === last.round) || !!findRoundDef(last.round);
+  const round = known ? last.round : "free";
+  const mdef = selectedMultiRound(round);
+  const st0 = mdef ? mdef.stages[0] : null;
+  const setupId = db.setups.some((x) => x.id === last.setupId) ? last.setupId : null;
+  if (st0)
+    return {
+      dist: st0.dist,
+      faceD: st0.faceD,
+      faceType: st0.faceType || "single",
+      perEnd: st0.perEnd || 6,
+      setupId,
+      round,
+      mdef,
+    };
+  const face = parseFaceChoice(faceChoiceValue(last));
+  return {
+    dist: last.dist,
+    faceD: face.faceD,
+    faceType: face.faceType,
+    perEnd: last.perEnd || 6,
+    setupId,
+    round,
+    mdef: null,
+  };
+}
+/* 記録を始める（待機画面の「記録を始める」と、記録の条件の「この条件で記録を始める」の共通の出口） */
+function beginRecording(c) {
+  if (db.active) return; /* 記録の途中に別の記録で上書きしない */
+  const firstRun = shouldShowOnboarding();
+  const setup = db.setups.find((x) => x.id === c.setupId);
+  const inputMode = c.inputMode === "score" ? "score" : "target";
+  db.active = {
+    id: uid(),
+    date: c.date || today(),
+    setupId: c.setupId || null,
+    dist: c.dist,
+    faceD: c.faceD,
+    faceType: c.faceType || "single",
+    perEnd: c.perEnd,
+    arrowR: +sessionArrowR(null, setup).toFixed(4),
+    sightV: c.sightV || "",
+    sightH: c.sightH || "",
+    wx: c.wx || "",
+    note: c.note || "",
+    windDir: c.windDir || "",
+    windSpeed: c.windSpeed || "",
+    round: c.round || "free",
+    purpose: ui.recordMode || "practice",
+    inputMode,
+    ends: [],
+    cur: [],
+  };
+  db.settings.lastInputMode = inputMode;
+  if (firstRun) db.settings.onboardingSeen = true;
+  if (c.mdef)
+    db.active.roundGroup = {
+      gid: uid(),
+      roundId: c.round,
+      stage: 0,
+      stageCount: c.mdef.stages.length,
+    };
+  ui.recScreen = "home";
+  ui.startMode = null;
+  nativePulse("success");
+  wakeLock.acquire();
+  save();
+  $("#main").classList.remove("viewEnter");
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  render();
+}
+function currentStartMode() {
+  if (ui.startMode !== "score" && ui.startMode !== "target")
+    ui.startMode = db.settings.lastInputMode === "score" ? "score" : "target";
+  return ui.startMode;
+}
+function inputModeSegHtml(id, mode) {
+  return `<div class="seg" id="${id}" role="group" aria-label="入力方法" data-testid="start-input-mode">
+    <button type="button" data-mode="target" data-testid="start-input-target" aria-pressed="${mode === "target"}">的面に打つ</button>
+    <button type="button" data-mode="score" data-testid="start-input-score" aria-pressed="${mode === "score"}">点数だけ</button>
+  </div>`;
+}
+function bindInputModeSeg(id, onChange) {
+  document.querySelectorAll(`#${id} [data-mode]`).forEach(
+    (b) =>
+      (b.onclick = () => {
+        ui.startMode = b.dataset.mode === "score" ? "score" : "target";
+        document
+          .querySelectorAll(`#${id} [data-mode]`)
+          .forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.mode === ui.startMode)));
+        if (onChange) onChange(ui.startMode);
+      }),
+  );
+}
+/* 開始の帯。last が無ければ既定の条件を出す */
+function homeStartBandHtml(last) {
+  const c = startConditionFrom(last);
+  const setup = db.setups.find((x) => x.id === c.setupId);
+  const quota = c.mdef ? null : roundQuota(c.round);
+  const mk = setup ? latestMark(setup.id, c.dist) : null;
+  const label = !last ? "記録の条件" : c.mdef ? "前回と同じラウンド" : "前回と同じ条件";
+  const cond = c.mdef
+    ? esc(c.mdef.label)
+    : `${esc(c.dist)}m・${esc(faceLabel(c))}${quota ? `・${quota}射` : ""}`;
+  const parts = [];
+  if (c.mdef) parts.push(`最初の距離 ${esc(c.dist)}m・${esc(faceLabel(c))}から`);
+  else if (quota) parts.push(`${c.perEnd}射×${Math.ceil(quota / c.perEnd)}エンド`);
+  else parts.push(`自由練習・1エンド ${c.perEnd}射`);
+  parts.push(setup ? esc(setup.name) : "弓具 未指定");
+  if (setup) parts.push(mk && hasSightInput(mk.v) ? `サイト ${esc(sightValueText(mk.v))}` : "サイト 記録なし");
+  return `<section class="band startBand" data-testid="home-start-band" aria-label="記録を始める">
+    <div class="l">${label}</div>
+    <div class="c" id="quickStartMeta">${cond}</div>
+    <div class="m">${parts.join("・")}</div>
+    ${inputModeSegHtml("homeInputMode", currentStartMode())}
+    <div class="btnRow">
+      <button type="button" class="btn sec" id="recConditions" data-testid="record-conditions">条件を変える</button>
+      <button type="button" class="btn pri" id="quickStart" data-testid="record-start">記録を始める</button>
+    </div>
+  </section>`;
+}
+/* 記録の途中（「中断」で離れた記録、または編集の途中）。再開だけを出す */
+function homePausedBandHtml(s) {
+  const all = sessionArrows(s);
+  const quota = scorecardPlan(s).quota;
+  return `<section class="band startBand" data-testid="record-paused" aria-label="記録の途中">
+    <div class="l">${s._edit ? "編集の途中です" : "記録の途中です"}</div>
+    <div class="c">${esc(s.dist)}m・${esc(faceLabel(s))}${quota ? `・${quota}射` : ""}</div>
+    <div class="m">${fmtMDW(s.date)}・${s.ends.length}エンド確定・${all.length}射・${sumScores(all)}点。1射ごとに保存しています。</div>
+    <div class="btnRow"><button type="button" class="btn pri" id="recResume" data-testid="record-resume">記録を再開する</button></div>
+    <p class="basis">記録の途中は、新しい記録を始められません。再開して終了すると、次の記録を始められます。</p>
+  </section>`;
+}
+/* 初回（記録も弓具も無く、まだ条件を選んでいない）。帯が「最初の条件を選ぶ」になる */
+function homeFirstRunBandHtml() {
+  return `<section class="band startBand onboard" data-testid="onboard-welcome" aria-label="最初の条件を選ぶ">
+    <div class="l">最初の条件を選ぶ</div>
+    <div class="c">距離と的を選んで記録を始めます</div>
+    <div class="m">的をタップした位置、または点数だけで記録できます。記録はこの端末の中だけに保存されます。</div>
+    <div class="btnRow">
+      <button type="button" class="btn sec" id="obDemo">架空のデモデータで試す</button>
+      <button type="button" class="btn pri" id="obStart" data-testid="record-conditions">条件を選ぶ</button>
+    </div>
+    <p class="basis">デモデータは架空の練習3回ぶんです。設定の「データ」から消せます。</p>
+  </section>`;
+}
+/* 前半 / 後半の合計。規定射数が 60 以上で、両方の半分を打ち終えた記録だけ（スコア表の小計と同じ区切り） */
+function sessionHalves(sess) {
+  const plan = scorecardPlan(sess);
+  const ends = (sess && sess.ends) || [];
+  if (!plan.quota || !plan.blockEnds || ends.length < plan.blockEnds * 2) return null;
+  return [
+    sumScores(ends.slice(0, plan.blockEnds).flat()),
+    sumScores(ends.slice(plan.blockEnds, plan.blockEnds * 2).flat()),
+  ];
+}
+/* 数値の組: 前半 / 後半（無ければ fallback）と、スコア表の右端2列と同じ数える点 */
+function sessionFigsHtml(sess, fallback) {
+  const ends = (sess && sess.ends) || [];
+  const all = ends.flat();
+  const halves = sessionHalves(sess);
+  const first = halves
+    ? `<div class="fig" data-fig="halves"><div class="l">前半 / 後半</div><div class="n halves">${halves[0]}<small>/</small> ${halves[1]}</div></div>`
+    : fallback === "ends"
+      ? `<div class="fig" data-fig="ends"><div class="l">エンド</div><div class="n">${ends.length}</div></div>`
+      : `<div class="fig" data-fig="avg"><div class="l">1射平均</div><div class="n">${all.length ? (sumScores(all) / all.length).toFixed(2) : "—"}</div></div>`;
+  return `<div class="figs">${first}${scorecardCountCols(sess)
+    .map(
+      (c, i) =>
+        `<div class="fig" data-fig="count${i}"><div class="l">${c.sub}</div><div class="n">${c.count(all)}</div></div>`,
+    )
+    .join("")}</div>`;
+}
+/* 合計の大きな数字。規定射数のあるラウンドだけ満点を添える */
+function sessionBigTotalHtml(sess, cls) {
+  const quota = scorecardPlan(sess).quota;
+  const total = sumScores(((sess && sess.ends) || []).flat());
+  return `<div class="bigNum${cls ? " " + cls : ""}" data-testid="session-total">${total}${quota ? `<small>/ ${quota * perfectScoreValue(sess)}</small>` : ""}</div>`;
+}
+/* エンドごとの合計の棒。最も高いエンドに色を付ける。13エンド以上は2段以上に分ける */
+function endStripHtml(sess) {
+  const tots = ((sess && sess.ends) || []).map(sumScores);
+  if (!tots.length) return "";
+  const lo = Math.min(...tots),
+    hi = Math.max(...tots);
+  const rows = Math.ceil(tots.length / 12);
+  const per = Math.ceil(tots.length / rows);
+  const cell = (v, i) =>
+    `<div${v === hi ? ' class="hi"' : ""} data-end="${i}"><b>${v}</b><i style="height:${Math.round(8 + ((v - lo) / (hi - lo || 1)) * 30)}px"></i><span>${i + 1}</span></div>`;
+  let h = "";
+  for (let r = 0; r * per < tots.length; r++)
+    h += `<div class="strip" style="grid-template-columns:repeat(${per},1fr)">${tots
+      .slice(r * per, (r + 1) * per)
+      .map((v, i) => cell(v, r * per + i))
+      .join("")}</div>`;
+  return `<div data-testid="end-strip" role="group" aria-label="エンドごとの合計">${h}</div>`;
+}
+/* 合計点の推移（折れ線）。破線は平均。幅は画面に合わせて決め、文字は 13px のまま縮めない */
+function totalsLineChartHtml(vals, labels, meanVal) {
+  const gut = window.innerWidth <= 340 ? 12 : 16;
+  const W = Math.max(240, Math.min(window.innerWidth, 480) - gut * 2),
+    H = 176,
+    L = 42,
+    R = 24,
+    T = 26,
+    B = 28;
+  const step = 10;
+  let lo = Math.floor((Math.min(...vals) - 5) / step) * step,
+    hi = Math.ceil((Math.max(...vals) + 2) / step) * step;
+  if (hi === lo) hi += step;
+  const n = vals.length;
+  const gap = n === 1 ? 0 : (W - L - R - 14) / (n - 1);
+  const X = (i) => L + 14 + (n === 1 ? (W - L - R - 14) / 2 : i * gap);
+  const Y = (v) => T + ((hi - v) / (hi - lo)) * (H - T - B);
+  const lines = Math.min(4, (hi - lo) / step);
+  let h = `<svg class="lineChart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="合計点の推移: ${vals.map((v, i) => `${labels[i]} ${v}点`).join("、")}">`;
+  for (let k = 0; k <= lines; k++) {
+    const v = lo + ((hi - lo) / lines) * k;
+    h += `<path d="M${L} ${Y(v).toFixed(1)}H${W - R + 10}" stroke="var(--rule)"/><text class="ax" x="${L - 8}" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end">${Math.round(v)}</text>`;
   }
-  if (shouldShowOnboarding()) {
-    renderOnboarding(m);
-    return;
-  }
-  const last = db.sessions[db.sessions.length - 1];
-  const defSetup = last ? last.setupId : db.setups[0] ? db.setups[0].id : "";
-  const defDist = last ? last.dist : 70;
-  const mode = ui.recordMode || "practice";
-  const defFace = suggestedFaceValue(defDist, last);
-  const defPerEnd = last && last.perEnd ? last.perEnd : 6;
-  /* 入力方法は前回選んだもの（settings.lastInputMode）を初期値にする */
-  let startMode = db.settings.lastInputMode === "score" ? "score" : "target";
+  if (Number.isFinite(meanVal))
+    h += `<path d="M${L} ${Y(meanVal).toFixed(1)}H${W - R + 10}" stroke="var(--sub)" stroke-dasharray="5 4"/>`;
+  h += `<path d="${vals.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join("")}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  /* 日付のラベルは 40px より詰まるときは1つおき（最後の回は必ず出す） */
+  const everyOther = n > 1 && gap < 40;
+  vals.forEach((v, i) => {
+    const last = i === n - 1;
+    const nb = [vals[i - 1], vals[i + 1]].filter((x) => x != null);
+    const below = nb.length && v < nb.reduce((t, x) => t + x, 0) / nb.length;
+    h += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${last ? 5 : 4}" fill="${last ? "var(--accent)" : "var(--bg)"}" stroke="${last ? "var(--accent)" : "var(--ink)"}" stroke-width="2"/>`;
+    h += `<text x="${X(i).toFixed(1)}" y="${(below ? Y(v) + 20 : Y(v) - 10).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${last ? 700 : 500}" fill="var(--ink)" stroke="var(--bg)" stroke-width="4" paint-order="stroke">${v}</text>`;
+    if (!everyOther || (n - 1 - i) % 2 === 0)
+      h += `<text class="ax" x="${X(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${labels[i]}</text>`;
+  });
+  return h + "</svg>";
+}
+const HOME_TREND_MAX = 7;
+/* 同じ条件（距離・的・射数）の合計点の推移。ref を含む。直近 HOME_TREND_MAX 回まで */
+function homeTrendHtml(ref) {
+  const n = ((ref && ref.ends) || []).flat().length;
+  if (!n) return "";
+  const cond = `${esc(ref.dist)}m・${esc(faceLabel(ref))}・${n}射`;
+  const same = sessionsByDateDesc()
+    .filter((s) => trSameCondition(s, ref, { matchArrows: true }))
+    .reverse();
+  const shown = same.slice(-HOME_TREND_MAX);
+  const head = `<div class="vsecH"><h2>${esc(ref.dist)}m・${n}射の推移</h2><span class="aside">${same.length}回</span></div>`;
+  if (shown.length < 2)
+    return `<section class="vsec" data-testid="home-trend">${head}
+      <p class="fact">同じ条件（${cond}）の記録は1回です。2回目から推移を表示します。</p></section>`;
+  const tv = shown.map((s) => sumScores(s.ends.flat()));
+  const m = tv.reduce((t, v) => t + v, 0) / tv.length;
+  const sd = sampleSd(tv);
+  const scope =
+    same.length > shown.length ? `直近${shown.length}回（全${same.length}回のうち）` : `${shown.length}回`;
+  return `<section class="vsec" data-testid="home-trend">${head}
+    ${totalsLineChartHtml(tv, shown.map((s) => fmtMD(s.date)), m)}
+    <p class="fact">${scope}の平均は ${m.toFixed(1)} 点、回ごとの標準偏差は ${sd.toFixed(1)} 点です。</p>
+    <p class="basis">対象: ${fmtDateRange(shown[0].date, shown[shown.length - 1].date)}、${cond}。破線は平均です。${shown.length < 8 ? "回数が少ないため、上向き・下向きの判定はしていません。" : ""}</p>
+  </section>`;
+}
+function homeLastPracticeHtml(ref) {
+  const all = ref.ends.flat();
+  const per = scorecardPlan(ref).per;
+  return `<section class="vsec" data-testid="home-last">
+    <div class="vsecH"><h2>前回の練習</h2><span class="aside">${fmtMDW(ref.date)}・${esc(ref.dist)}m・${all.length}射</span></div>
+    <div class="bigRow">${sessionBigTotalHtml(ref)}<button type="button" class="txtBtn" id="homeLastOpen" data-testid="home-last-open">スコア表を見る</button></div>
+    ${sessionFigsHtml(ref, "avg")}
+    ${endStripHtml(ref)}
+    <p class="basis">エンドごとの合計（${per}射、${per * perfectScoreValue(ref)}点満点）。最も高いエンドに色を付けています。${sessionHasPos(ref) ? "" : "点数だけの記録です。"}</p>
+  </section>`;
+}
+function homeRecentRowHtml(s) {
+  const p = dateParts(s.date);
+  const all = (s.ends || []).flat();
+  const setup = db.setups.find((x) => x.id === s.setupId);
+  const meta = [faceLabel(s)];
+  if (setup) meta.push(setup.name);
+  if (s.wx) meta.push(s.wx);
+  if (!sessionHasPos(s)) meta.push("点数だけ");
+  return `<button type="button" class="entry homeEntry" data-testid="home-recent-row" data-id="${esc(s.id)}" aria-label="${p ? `${p.mo}月${p.d}日` : ""} ${esc(s.dist)}m ${all.length}射 ${sumScores(all)}点の記録を開く">
+    <span class="day">${p ? `${p.mo}/${p.d}` : "—"}<small>${p ? p.w + "曜" : ""}</small></span>
+    <span class="entryBody">
+      <span class="hd"><b>${esc(s.dist)}m・${all.length}射</b><span class="sc1">${sumScores(all)}<small>点</small></span></span>
+      <span class="meta">${esc(meta.join("・"))}</span>
+      ${s.note ? `<span class="txt">${esc(s.note)}</span>` : ""}
+    </span>
+  </button>`;
+}
+/* 練習の目標と連続記録（設定で入にしたときだけ）。1行の事実だけを出す。バッジは設定・分析の側 */
+function homeGoalLineHtml() {
+  const g = db.settings.gamification;
+  if (!g || !g.enabled) return "";
+  const goals = calcGoalProgress(db.sessions, g.goals, today());
+  const streak = computeStreak(db.sessions, g.practiceDays, today());
+  const parts = [
+    `今週 ${goals.weekly.current}回 / 目標 ${goals.weekly.target}回`,
+    `今月 ${goals.monthly.current}射 / 目標 ${goals.monthly.target}射`,
+  ];
+  if (streak.configured) parts.push(`連続 ${streak.current}日`);
+  return `<p class="basis homeGoalLine" data-testid="home-goal-line">${parts.map((t) => `<span>${t}</span>`).join("・")}</p>`;
+}
+function renderRecordHome(m) {
+  const paused = !!db.active;
+  const firstRun = !paused && shouldShowOnboarding();
+  const recent = sessionsByDateDesc();
+  const ref = recent.find((s) => (s.ends || []).flat().length > 0) || null;
+  const band = paused
+    ? homePausedBandHtml(db.active)
+    : firstRun
+      ? homeFirstRunBandHtml()
+      : homeStartBandHtml(recent[0] || null);
+  const history = ref
+    ? `${homeLastPracticeHtml(ref)}
+      ${homeTrendHtml(ref)}
+      <section class="vsec" data-testid="home-recent">
+        <div class="vsecH"><h2>最近の練習</h2><button type="button" class="txtBtn" id="homeNotes">ノートで見る</button></div>
+        ${recent.slice(0, 3).map(homeRecentRowHtml).join("")}
+      </section>`
+    : `<section class="vsec" data-testid="home-empty">
+        <div class="vsecH"><h2>前回の練習</h2><span class="aside">0回</span></div>
+        <div class="empty"><b>練習の記録はまだありません</b>1回記録して終了すると、ここに合計・エンドごとの点数・同じ条件の推移が出ます。</div>
+      </section>`;
+  m.innerHTML = `${band}${homeGoalLineHtml()}${paused || firstRun ? "" : featureHintHtml()}${history}`;
+  if (!paused && !firstRun) bindFeatureHint();
+  const on = (id, fn) => {
+    const el = $(id);
+    if (el) el.onclick = fn;
+  };
+  on("#recResume", () => {
+    ui.recPausedId = null;
+    render();
+  });
+  const openConditions = () => {
+    ui.recScreen = "conditions";
+    nativePulse("light");
+    render();
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  };
+  on("#recConditions", openConditions);
+  on("#obStart", openConditions);
+  on("#obDemo", () => {
+    installDemoData();
+    showView("analysis");
+  });
+  bindInputModeSeg("homeInputMode");
+  on("#quickStart", () => {
+    const c = startConditionFrom(recent[0] || null);
+    const mk = c.setupId ? latestMark(c.setupId, c.dist) : null;
+    beginRecording(
+      Object.assign(c, {
+        inputMode: currentStartMode(),
+        sightV: mk ? String(mk.v ?? "").trim() : "",
+        sightH: mk ? String(mk.h ?? "").trim() : "",
+      }),
+    );
+  });
+  on("#homeLastOpen", () => ref && openHistDetail(ref.id));
+  on("#homeNotes", () => showView("history"));
+  document
+    .querySelectorAll('[data-testid="home-recent-row"]')
+    .forEach((b) => (b.onclick = () => openHistDetail(b.dataset.id)));
+}
+/* ---------- 記録の条件（全画面。docs/design/v5/design.md 4.1・試作 #start） ----------
+   記録タブの「条件を変える」から開く。タブと画面名の行は隠す（style.css: html.subscreen）。
+   ラウンド → 距離と的 → 入力の方法 → 弓具とサイト → 日付・天気・風・メモ → 下端に「この条件で記録を始める」 */
+const INPUT_MODE_NOTE = {
+  target: "的をタップした位置を記録します。着弾の分布とサイト調整の目安に使えます。",
+  score: "点数キーで記録します。着弾位置は残らないため、着弾の分析には使えません。",
+};
+function renderRecordConditions(m) {
+  const firstRun = shouldShowOnboarding();
+  const last = sessionsByDateDesc()[0] || null;
+  const def = startConditionFrom(last);
+  const defSetup = def.setupId || "";
+  const defDist = def.dist;
+  const defFace = faceChoiceValue(def);
+  const defRound = def.round || "free";
+  const knownDist = [70, 50, 30, 18].includes(+defDist);
   m.innerHTML = `
-  ${featureHintHtml()}
-  ${recordFastActionsHtml(last)}
-  <section class="launchPanel convergeLaunch startFirst">
-    <div class="launchHead">
-      <div class="launchTitle"><h2>${mode === "calibration" ? "サイト値を残す練習" : "条件を選ぶ"}</h2></div>
-      <button class="tinyAction" id="jumpGear">用具</button>
+  <div class="subTop"><button type="button" class="backBtn" id="condBack" data-testid="conditions-back">${REC_CHEVRON}記録</button></div>
+  <header class="subHead"><h1 id="condTitle">記録の条件</h1></header>
+  <section class="vsec condSec" aria-labelledby="condRoundH">
+    <div class="vsecH"><h2 id="condRoundH">ラウンド</h2><span class="aside" id="fRoundInfo"></span></div>
+    <label class="f" for="fRound">ラウンド</label>
+    <select class="inp" id="fRound">
+      ${ROUND_TYPES.map((r) => `<option value="${r.id}" ${r.id === defRound ? "selected" : ""}>${r.label}</option>`).join("")}
+      <optgroup label="多距離ラウンド">
+        ${multiRoundDefs()
+          .map(
+            (r) =>
+              `<option value="${esc(r.id)}" ${r.id === defRound ? "selected" : ""}>${esc(r.label)}</option>`,
+          )
+          .join("")}
+      </optgroup>
+    </select>
+    <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
+    <p class="basis">規定の射数の途中でも終了できます。自作のラウンドは、設定の「カスタムラウンド」で登録します。</p>
+  </section>
+  <section class="vsec condSec" aria-labelledby="condDistH">
+    <div class="vsecH"><h2 id="condDistH">距離と的</h2></div>
+    <div class="seg distSeg" id="fDistChips" role="group" aria-label="距離">
+      ${[70, 50, 30, 18].map((d) => `<button type="button" class="distOpt" aria-pressed="${knownDist && d === +defDist}" data-d="${d}">${d}m</button>`).join("")}
+      <button type="button" class="distOpt" aria-pressed="${!knownDist}" data-d="custom">カスタム</button>
     </div>
-    <div class="launchBody">
-    <label class="f">距離</label>
-    <div class="chips quickDists" id="fDistChips">
-      ${[70, 50, 30, 18].map((d) => `<button type="button" class="chip ${d === defDist ? "on" : ""}" aria-pressed="${d === defDist}" data-d="${d}">${d}m</button>`).join("")}
-      <button type="button" class="chip" aria-pressed="false" data-d="custom">カスタム</button>
-    </div>
-    <div id="fDistCustomWrap" class="recordDistCustomWrap"><label class="f">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60"></div>
-    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
-    <div class="quickSelects">
+    <div id="fDistCustomWrap" class="recordDistCustomWrap" style="display:${knownDist ? "none" : "block"}"><label class="f" for="fDistCustom">距離 (m)</label><input class="inp" type="number" id="fDistCustom" min="5" max="90" step="1" placeholder="例: 60" value="${knownDist ? "" : esc(defDist)}"></div>
+    <div class="row">
       <div><label class="f" for="fFace">的</label><select class="inp" id="fFace">
         <optgroup label="ターゲット">
           ${[122, 80, 60, 40].map((f) => `<option value="${f}" ${String(defFace) === String(f) ? "selected" : ""}>${f}cm</option>`).join("")}
@@ -552,63 +854,45 @@ function renderRecord(m) {
           ${FIELD_FACE_SIZES.map((f) => `<option value="F${f}" ${defFace === `F${f}` ? "selected" : ""}>${f}cm フィールド</option>`).join("")}
         </optgroup>
       </select></div>
-      <div><label class="f" for="fArrows">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === defPerEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+      <div><label class="f" for="fArrows">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === def.perEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
     </div>
-    <div class="sessionCardRule" role="separator" aria-hidden="true"></div>
-    <div class="startInput">
-      <label class="f" id="fInputModeLabel">入力方法</label>
-      <div class="seg" id="fInputMode" role="group" aria-labelledby="fInputModeLabel" data-testid="start-input-mode">
-        <button type="button" data-mode="target" data-testid="start-input-target" aria-pressed="${startMode === "target"}">的面に打つ</button>
-        <button type="button" data-mode="score" data-testid="start-input-score" aria-pressed="${startMode === "score"}">点数だけ</button>
-      </div>
-    </div>
-    <div class="btnrow"><button class="btn startPrimary" id="fStart" data-testid="record-start">${mode === "calibration" ? "サイト値つきで開始" : "この条件で開始"}</button></div>
+  </section>
+  <section class="vsec condSec" aria-labelledby="fInputModeLabel">
+    <div class="vsecH"><h2 id="fInputModeLabel">入力の方法</h2></div>
+    ${inputModeSegHtml("fInputMode", currentStartMode())}
+    <p class="basis"><span id="fInputModeNote">${INPUT_MODE_NOTE[currentStartMode()]}</span>記録の途中でも切り替えられます。</p>
+  </section>
+  <section class="vsec condSec" aria-labelledby="condGearH">
+    <div class="vsecH"><h2 id="condGearH">弓具とサイト</h2><button type="button" class="txtBtn" id="jumpGear">弓具を開く</button></div>
+    <label class="f" for="fSetup">弓具（セッティング）</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select>
     <div class="sessionCondition">${recordSetupSnapshot(defSetup, defDist)}</div>
-    <details class="adv recordDetails" ${mode === "calibration" ? "open" : ""}>
-      <summary>詳しく残す</summary>
-      <div class="fieldBand">
-        <div><label class="f">用具セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select></div>
-      </div>
-      <label class="f">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
-      <label class="f">ラウンド</label><select class="inp" id="fRound">
-        ${ROUND_TYPES.map((r) => `<option value="${r.id}">${r.label}</option>`).join("")}
-        <optgroup label="多距離ラウンド">
-          ${multiRoundDefs()
-            .map((r) => `<option value="${esc(r.id)}">${esc(r.label)}</option>`)
-            .join("")}
-        </optgroup>
-      </select>
-      <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
-      <div class="row">
-        <div><label class="f">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
-        <div><label class="f">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
-      </div>
-      <div class="hint">サイトの目盛りをそのまま記入（左右は<b>右なら 2、左なら -2</b>）。台帳に記録があれば自動入力されます。</div>
-      <label class="f">天候・コンディション</label>
-      <div class="row">
-        <select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select>
-        <input class="inp" id="fNote" placeholder="${mode === "calibration" ? "例: サイト1目盛り確認" : "メモ（任意）"}" value="${mode === "calibration" ? "サイト値確認" : ""}">
-      </div>
-      <div class="row">
-        <div><label class="f">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
-        <div><label class="f">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5"></div>
-      </div>
-    </details>
-    ${mode === "calibration" ? `<div class="advice recordNeutralAdvice"><div class="note"><b>サイト値を残すコツ</b> — サイト値を必ず入力し、風があれば風向/風速も残します。同じ距離で2回以上残ると履歴推定が強くなります。</div></div>` : ""}
+    <div class="row">
+      <div><label class="f" for="fSightV">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
+      <div><label class="f" for="fSightH">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
     </div>
-  </section>`;
-  bindFeatureHint();
-  document.querySelectorAll("#fInputMode [data-mode]").forEach(
-    (b) =>
-      (b.onclick = () => {
-        startMode = b.dataset.mode === "score" ? "score" : "target";
-        document
-          .querySelectorAll("#fInputMode [data-mode]")
-          .forEach((x) => x.setAttribute("aria-pressed", String(x.dataset.mode === startMode)));
-      }),
-  );
+    <p class="basis">サイトの目盛りをそのまま書きます（左右は右なら 2、左なら -2）。弓具と距離が同じ記録が台帳にあれば、その値が入ります。</p>
+  </section>
+  <details class="adv recordDetails">
+    <summary>日付・天気・風・メモ<span class="sumNote">必要なときだけ入力します</span></summary>
+    <label class="f" for="fDate">日付</label><input class="inp" type="date" id="fDate" value="${today()}">
+    <div class="row">
+      <div><label class="f" for="fWx">天候</label><select class="inp" id="fWx"><option value="">—</option><option>晴れ</option><option>くもり</option><option>雨</option><option>風 弱</option><option>風 強</option><option>室内</option></select></div>
+      <div><label class="f" for="fWindDir">風向</label><select class="inp" id="fWindDir"><option value="">—</option><option>向かい風</option><option>追い風</option><option>左から</option><option>右から</option><option>巻き風</option></select></div>
+    </div>
+    <label class="f" for="fWindSpeed">風速 (m/s)</label><input class="inp" id="fWindSpeed" inputmode="decimal" placeholder="例: 2.5">
+    <label class="f" for="fNote">メモ</label><input class="inp" id="fNote" placeholder="メモ（任意）">
+  </details>
+  <div class="actbar"><button type="button" class="btn pri startPrimary" id="fStart" data-testid="record-start">この条件で記録を始める</button></div>`;
   const distState = { d: defDist };
   const faceSel = $("#fFace");
+  bindInputModeSeg("fInputMode", (mode) => {
+    $("#fInputModeNote").textContent = INPUT_MODE_NOTE[mode];
+  });
+  $("#condBack").onclick = () => {
+    ui.recScreen = "home";
+    render();
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  };
   const suggestFace = (d) => {
     if (String(faceSel.value).startsWith("F")) return;
     faceSel.value = d >= 60 ? 122 : d <= 18 ? 40 : 80;
@@ -616,20 +900,35 @@ function renderRecord(m) {
   faceSel.onchange = () => {
     if (String(faceSel.value).startsWith("F") && $("#fArrows").value === "6")
       $("#fArrows").value = "3";
+    refreshRoundInfo();
   };
-  /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
-  function applyMultiRoundStage0(def) {
-    const st0 = def.stages[0];
-    distState.d = st0.dist;
-    const known = [70, 50, 30, 18].includes(+st0.dist);
-    const key = known ? String(st0.dist) : "custom";
-    document.querySelectorAll("#fDistChips .chip").forEach((x) => {
-      const on = String(x.dataset.d) === key;
-      x.classList.toggle("on", on);
-      x.setAttribute("aria-pressed", String(on));
-    });
+  $("#fArrows").onchange = () => refreshRoundInfo();
+  function setDistChip(d) {
+    distState.d = d;
+    const known = [70, 50, 30, 18].includes(+d);
+    const key = known ? String(d) : "custom";
+    document
+      .querySelectorAll("#fDistChips [data-d]")
+      .forEach((x) => x.setAttribute("aria-pressed", String(String(x.dataset.d) === key)));
     $("#fDistCustomWrap").style.display = known ? "none" : "block";
-    if (!known) $("#fDistCustom").value = st0.dist;
+    if (!known) $("#fDistCustom").value = d || "";
+  }
+  /* 見出しの右に、いま選んでいる条件を1行で出す（規定射数とエンド数） */
+  function refreshRoundInfo() {
+    const roundId = $("#fRound").value || "free";
+    const mdef = selectedMultiRound(roundId);
+    const quota = roundQuota(roundId);
+    const per = +$("#fArrows").value || 6;
+    $("#fRoundInfo").textContent = mdef
+      ? `${mdef.stages.length}距離・合計 ${mdef.stages.reduce((t, st) => t + (st.arrows || 0), 0)}射`
+      : quota
+        ? `${quota}射（${per}射×${Math.ceil(quota / per)}エンド）`
+        : "射数は決めません";
+  }
+  /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
+  function applyMultiRoundStage0(mdef) {
+    const st0 = mdef.stages[0];
+    setDistChip(st0.dist);
     faceSel.value =
       st0.faceType === "triple"
         ? "T40"
@@ -640,70 +939,57 @@ function renderRecord(m) {
     fillSight();
     refreshLens();
   }
-  $("#fRound").onchange = (e) => {
-    const def = selectedMultiRound(e.target.value);
+  function showRoundStages(mdef) {
     const stagesEl = $("#fRoundStages");
-    if (def) {
-      applyMultiRoundStage0(def);
+    if (mdef) {
       stagesEl.style.display = "block";
-      stagesEl.innerHTML = `<div class="stageGaugeLabel">${esc(def.label)}</div>${multiRoundStageGaugeHtml(def)}`;
+      stagesEl.innerHTML = `<div class="stageGaugeLabel">${esc(mdef.label)}</div>${multiRoundStageGaugeHtml(mdef)}`;
     } else {
       stagesEl.style.display = "none";
       stagesEl.textContent = "";
-      if (e.target.value === "field72") {
-        if (!String(faceSel.value).startsWith("F")) faceSel.value = "F80";
-        $("#fArrows").value = "3";
+    }
+  }
+  $("#fRound").onchange = (e) => {
+    const mdef = selectedMultiRound(e.target.value);
+    showRoundStages(mdef);
+    if (mdef) applyMultiRoundStage0(mdef);
+    else if (e.target.value === "field72") {
+      if (!String(faceSel.value).startsWith("F")) faceSel.value = "F80";
+      $("#fArrows").value = "3";
+    } else {
+      /* 距離の決まったラウンド（70m 72射 など）は、距離・的・1エンドの本数をそのラウンドに合わせる */
+      const r = ROUND_TYPES.find((x) => x.id === e.target.value);
+      if (r && r.dist) {
+        setDistChip(r.dist);
+        const dv = onboardDerived(r.dist);
+        faceSel.value = String(dv.faceD);
+        $("#fArrows").value = String(dv.perEnd);
+        fillSight();
+        refreshLens();
       }
     }
+    refreshRoundInfo();
   };
   $("#jumpGear").onclick = () => showView("gear");
-  const quickHistory = $("#quickHistory");
-  if (quickHistory) quickHistory.onclick = () => showView("history");
-  if (last) {
-    /* 「前回と同じ」: 表示している前回条件をフォームへ復元してから即開始する。 */
-    $("#quickStart").onclick = () => {
-      distState.d = last.dist || defDist;
-      const known = [70, 50, 30, 18].includes(+distState.d);
-      const key = known ? String(distState.d) : "custom";
-      document.querySelectorAll("#fDistChips .chip").forEach((x) => {
-        const on = String(x.dataset.d) === key;
-        x.classList.toggle("on", on);
-        x.setAttribute("aria-pressed", String(on));
-      });
-      $("#fDistCustomWrap").style.display = known ? "none" : "block";
-      if (!known) $("#fDistCustom").value = distState.d || "";
-      faceSel.value = faceChoiceValue(last);
-      $("#fArrows").value = last.perEnd || 6;
-      $("#fSetup").value = last.setupId || "";
-      $("#fRound").value = last.round || "free";
-      fillSight();
-      refreshLens();
-      $("#fStart").click();
-    };
-  }
   function refreshLens() {
     const old = $("#setupLens");
     if (old) old.outerHTML = recordSetupSnapshot($("#fSetup").value, distState.d);
   }
-  document.querySelectorAll("#fDistChips .chip").forEach(
+  document.querySelectorAll("#fDistChips [data-d]").forEach(
     (c) =>
       (c.onclick = () => {
-        document.querySelectorAll("#fDistChips .chip").forEach((x) => {
-          x.classList.remove("on");
-          x.setAttribute("aria-pressed", "false");
-        });
-        c.classList.add("on");
-        c.setAttribute("aria-pressed", "true");
         if (c.dataset.d === "custom") {
-          $("#fDistCustomWrap").style.display = "block";
-          distState.d = null;
+          setDistChip(null);
+          $("#fDistCustom").value = "";
         } else {
-          $("#fDistCustomWrap").style.display = "none";
-          distState.d = +c.dataset.d;
+          setDistChip(+c.dataset.d);
           suggestFace(distState.d);
+          /* 初回だけ、18m は 3射エンドを初期値にする（2回目からは前回の本数を保つ） */
+          if (firstRun) $("#fArrows").value = String(onboardDerived(distState.d).perEnd);
           fillSight();
         }
         refreshLens();
+        refreshRoundInfo();
       }),
   );
   $("#fDistCustom").oninput = (e) => {
@@ -729,6 +1015,8 @@ function renderRecord(m) {
     refreshLens();
   };
   fillSight();
+  showRoundStages(selectedMultiRound(defRound));
+  refreshRoundInfo();
   $("#fStart").onclick = () => {
     const roundId = $("#fRound").value || "free";
     const mdef = selectedMultiRound(roundId);
@@ -738,20 +1026,17 @@ function renderRecord(m) {
       toast("距離を入力してください");
       return;
     }
-    const fv = faceSel.value;
     /* 多距離ラウンドは dist/faceD/faceType/perEnd を stage[0] から採る */
     const face = st0
       ? { faceD: st0.faceD, faceType: st0.faceType || "single" }
-      : parseFaceChoice(fv);
-    db.active = {
-      id: uid(),
+      : parseFaceChoice(faceSel.value);
+    beginRecording({
       date: $("#fDate").value || today(),
       setupId: $("#fSetup").value || null,
       dist: d,
       faceD: face.faceD,
       faceType: face.faceType,
       perEnd: st0 ? st0.perEnd || 6 : +$("#fArrows").value,
-      arrowR: +sessionArrowR(null, db.setups.find((x) => x.id === $("#fSetup").value)).toFixed(4),
       sightV: $("#fSightV").value.trim(),
       sightH: $("#fSightH").value.trim(),
       wx: $("#fWx").value,
@@ -759,20 +1044,21 @@ function renderRecord(m) {
       windDir: $("#fWindDir").value,
       windSpeed: $("#fWindSpeed").value.trim(),
       round: roundId,
-      purpose: ui.recordMode || "practice",
-      inputMode: startMode,
-      ends: [],
-      cur: [],
-    };
-    db.settings.lastInputMode = startMode;
-    if (st0)
-      db.active.roundGroup = { gid: uid(), roundId, stage: 0, stageCount: mdef.stages.length };
-    nativePulse("success");
-    wakeLock.acquire();
-    save();
-    m.classList.remove("viewEnter");
-    render();
+      inputMode: currentStartMode(),
+      mdef: st0 ? mdef : null,
+    });
   };
+}
+function renderRecord(m) {
+  if (db.active && !recordPaused()) {
+    renderActive(m);
+    return;
+  }
+  if (!db.active && ui.recScreen === "conditions") {
+    renderRecordConditions(m);
+    return;
+  }
+  renderRecordHome(m);
 }
 
 function sessionArrows(sess) {
@@ -1505,20 +1791,6 @@ function curRowHtml(arr, per, endNo, sel, o) {
 /* 「中断」で記録画面を離れている間は、記録タブに再開の帯だけを出す。記録そのものは db.active に残る */
 function recordPaused() {
   return !!(db.active && ui.recPausedId != null && ui.recPausedId === db.active.id);
-}
-function renderPausedRecord(m) {
-  const s = db.active;
-  const all = sessionArrows(s);
-  m.innerHTML = `<div class="band startBand" data-testid="record-paused">
-    <div class="l">${s._edit ? "編集中の記録" : "記録中の練習"}</div>
-    <div class="c">${s.dist}m・${esc(faceLabel(s))}</div>
-    <div class="m">${s.ends.length}エンド確定・${all.length}射・${sumScores(all)}点。1射ごとに保存しています。</div>
-    <div class="btnRow"><button type="button" class="btn" id="recResume" data-testid="record-resume">記録を再開する</button></div>
-  </div>`;
-  $("#recResume").onclick = () => {
-    ui.recPausedId = null;
-    render();
-  };
 }
 /* 直している矢の並び: 確定済みエンドを開いていればそのエンド、そうでなければ入力中のエンド */
 function activeEditEnd(s) {
