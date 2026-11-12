@@ -203,31 +203,306 @@ function leaveOneOutPValue(arrows, i, sums) {
   return Math.pow(1 + (2 * F) / k, -k / 2);
 }
 const OUTLIER_ALPHA = 0.01; /* 1セッション全体で正常な矢を誤って除外する確率の上限（ボンフェローニ補正） */
-/* 外れ値を除いたグルーピング統計:
-   1) 6本以上のとき、各矢を「残りの矢から見て統計的にあり得ないか」で検定（上の p 値 < α/n）。
-      最も極端な1本ずつ除き、最大で全体の20%まで繰り返す
-   2) 残りの矢の標本平均・不偏共分散から中心・ばらつき・中心の標準誤差・95%区間を出す */
-function robustStats(arrows) {
-  const total = arrows.length;
-  if (!total) return null;
-  let used = arrows.slice();
-  const excluded = [];
-  const limit = total >= 6 ? Math.floor(total * 0.2) : 0;
-  while (excluded.length < limit) {
-    const sums = used.reduce((s, a) => ({ n: s.n + 1, x: s.x + a.x, y: s.y + a.y, xx: s.xx + a.x * a.x, yy: s.yy + a.y * a.y, xy: s.xy + a.x * a.y }), { n: 0, x: 0, y: 0, xx: 0, yy: 0, xy: 0 });
-    let worst = -1, worstP = 1;
-    for (let i = 0; i < used.length; i++) {
-      const pv = leaveOneOutPValue(used, i, sums);
-      if (pv < worstP) { worstP = pv; worst = i; }
+/* ============ グルーピング統計 grouping-v3（docs/design/grouping-stats-v3.md） ============
+   A（正式）: 全射の標本統計。B（参考・サイト判断用）: MCD の順位と厳密 F 検定で外れ値候補を除いた標本統計。
+   C（参考）: 再重み付け MCD による「まとまっている矢のばらつき」の推定。旧方式は legacyRobustStats に保持 */
+/* 決定的な擬似乱数（MCD の開始点用。呼び出しごとに同じシードで初期化する） */
+function splitmix32(seed){
+  let s=seed>>>0;
+  return function(){
+    s=(s+0x9E3779B9)>>>0;
+    let z=s;
+    z=Math.imul(z^(z>>>16),0x85EBCA6B)>>>0;
+    z=Math.imul(z^(z>>>13),0xC2B2AE35)>>>0;
+    return (z^(z>>>16))>>>0;
+  };
+}
+function xoshiro128ss(seed){
+  const sm=splitmix32(seed);
+  let a=sm(), b=sm(), c=sm(), d=sm();
+  if(!(a|b|c|d)) a=1;
+  const rotl=(x,k)=>(x<<k)|(x>>>(32-k));
+  return function(){
+    const r=Math.imul(rotl(Math.imul(b,5),7),9)>>>0;
+    const t=b<<9;
+    c^=a; d^=b; b^=c; a^=d; c^=t; d=rotl(d,11);
+    return r/4294967296;
+  };
+}
+/* χ² 分位点の Wilson–Hilferty 近似（z は標準正規の分位点） */
+function chi2QuantileWH(nu, z){
+  const k=2/(9*nu);
+  return nu*Math.pow(1-k+z*Math.sqrt(k),3);
+}
+/* 全射 RMS の 95% 区間（2 変量正規。trace(S) を Satterthwaite の自由度 nu の尺度付き χ² で近似）。6 本以上 */
+function rmsCi(st){
+  if(!st || !(st.n>=6)) return null;
+  const a=st.sx*st.sx, d=st.sy*st.sy, b=st.cov||0, tr=a+d, den=a*a+d*d+2*b*b;
+  if(!(tr>0) || !(den>0) || !Number.isFinite(tr) || !Number.isFinite(den)) return null;
+  const nu=(st.n-1)*tr*tr/den;
+  const lo=st.rr*Math.sqrt(nu/chi2QuantileWH(nu,1.959964)), hi=st.rr*Math.sqrt(nu/chi2QuantileWH(nu,-1.959964));
+  return Number.isFinite(lo)&&Number.isFinite(hi)?{lo,hi,df:nu}:null;
+}
+/* 2×2 共分散 (a,b;b,d) の楕円（1σ）と角度 */
+function ellipseOfCov(a, b, d){
+  const disc=Math.sqrt(Math.max(0,(a-d)**2+4*b*b));
+  const l1=Math.max(0,(a+d+disc)/2), l2=Math.max(0,(a+d-disc)/2);
+  return {major:Math.sqrt(l1), minor:Math.sqrt(l2), angleDeg:(0.5*Math.atan2(2*b,a-d))*180/Math.PI};
+}
+const MCD_MIN_N=6;
+const MCD_ALPHA=0.75; /* h = ceil(0.75n)。効率と崩壊点の折り合い（Rousseeuw & Van Driessen 1999） */
+const MCD_C75=0.75/(1-0.25*(1+Math.log(4))); /* 一貫性係数 c = a / F_χ²(4)(χ²(2) の a 分位点)（Croux & Haesbroeck 1999） */
+const RMCD_Q=-2*Math.log(0.025); /* χ²(2) の 97.5% 点 */
+const RMCD_C=0.975/(1-0.025*(1-Math.log(0.025)));
+const MCD_SEED=0x4D434431;
+const MCD_STARTS=24;
+/* 小標本補正係数（tools/gen-mcd-tables.js で生成: n≤30 は20万回・それ以上は10万回、シード 20261112+n / +1000+n。表にない n は 1/n で線形補間、150 本超は (1/150, 値) と (0, 1) の間） */
+const MCD_TABLE_N=[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,32,36,40,48,54,60,72,84,96,108,120,144,150];
+const MCD_MRAW=[0.8858,0.8382,0.9788,0.935,0.899,0.8694,0.9654,0.9367,0.9113,0.887,0.9635,0.9409,0.9197,0.9004,0.9637,0.9453,0.9277,0.9115,0.9643,0.9489,0.9342,0.9183,0.9656,0.9526,0.9389,0.9673,0.9681,0.9697,0.973,0.9581,0.9752,0.9782,0.9817,0.9825,0.9835,0.9857,0.9877,0.9819];
+const MCD_MRW=[1.158,1.1296,1.2818,1.2358,1.201,1.172,1.2523,1.2178,1.1897,1.1665,1.2139,1.1895,1.1706,1.1534,1.1827,1.166,1.151,1.1385,1.1598,1.148,1.1347,1.1251,1.1417,1.1306,1.1209,1.1256,1.1129,1.1045,1.0874,1.075,1.0729,1.0601,1.0521,1.0461,1.0415,1.0368,1.0311,1.0298];
+function mcdTableFactor(table, n){
+  const N=MCD_TABLE_N, last=N.length-1;
+  if(n<=N[0]) return table[0];
+  if(n>N[last]) return 1+(table[last]-1)*(N[last]/n);
+  for(let i=1;i<=last;i++){
+    if(n<=N[i]){
+      const x=1/n, x0=1/N[i-1], x1=1/N[i];
+      return table[i-1]+(table[i]-table[i-1])*(x-x0)/(x1-x0);
     }
-    if (worst < 0 || worstP >= OUTLIER_ALPHA / used.length) break;
-    excluded.push(used[worst]);
-    used = used.filter((_, i) => i !== worst);
   }
-  const st = sampleStats(used);
+  return 1;
+}
+/* 部分集合（mask）の平均と ML 共分散（座標は全体平均で中心化済みなので、1 回の走査の和から求めても桁落ちしない） */
+function mcdSubsetFit(X, Y, mask){
+  let c=0, sx=0, sy=0, sxx=0, syy=0, sxy=0;
+  for(let i=0;i<X.length;i++){
+    if(!mask[i]) continue;
+    const x=X[i], y=Y[i];
+    c++; sx+=x; sy+=y; sxx+=x*x; syy+=y*y; sxy+=x*y;
+  }
+  const mx=sx/c, my=sy/c;
+  const a=Math.max(0,sxx/c-mx*mx), d=Math.max(0,syy/c-my*my), b=sxy/c-mx*my;
+  return {mx, my, a, b, d, det:a*d-b*b};
+}
+/* (mx,my,a,b,d) に対するマハラノビス距離²（eps は逆行列のための対角の下駄） */
+function mcdDistances(X, Y, f, eps, out){
+  const a=f.a+eps, d=f.d+eps, b=f.b, det=a*d-b*b;
+  for(let i=0;i<X.length;i++){
+    const dx=X[i]-f.mx, dy=Y[i]-f.my;
+    out[i]=det>0?(d*dx*dx-2*b*dx*dy+a*dy*dy)/det:Infinity;
+  }
+  return out;
+}
+/* C ステップ: 距離²の小さい h 点を選び直して当てはめる。h 番目の値をしきい値に、それ未満は全部、
+   しきい値と同じ値は正準順の早い方から選ぶ（安定な並べ替えで先頭 h 点を取るのと同じ結果） */
+function mcdCStep(X, Y, f, h, eps, d2, tmp){
+  mcdDistances(X, Y, f, eps, d2);
+  tmp.set(d2);
+  tmp.sort();
+  const t=tmp[h-1], n=X.length;
+  const mask=new Uint8Array(n);
+  let c=0;
+  for(let i=0;i<n;i++) if(d2[i]<t){ mask[i]=1; c++; }
+  for(let i=0;i<n && c<h;i++) if(d2[i]===t){ mask[i]=1; c++; }
+  const g=mcdSubsetFit(X, Y, mask);
+  g.mask=mask;
+  return g;
+}
+/* 決定的で入力順に不変な MCD。n ≤ 16 は全組み合わせを列挙、それより多いと正準順の先頭 h 点と
+   固定シードの 3 点の開始点から C ステップ。縮退（同一点・一直線）は null */
+function mcdFit(points){
+  const n=points.length;
+  if(n<MCD_MIN_N) return null;
+  let cx=0, cy=0;
+  for(const p of points){ cx+=p.x; cy+=p.y; }
+  cx/=n; cy/=n;
+  let a0=0, b0=0, d0=0;
+  for(const p of points){ const dx=p.x-cx, dy=p.y-cy; a0+=dx*dx; b0+=dx*dy; d0+=dy*dy; }
+  a0/=n; b0/=n; d0/=n;
+  const tr=a0+d0, detFloor=1e-12*(tr/2)*(tr/2);
+  if(!(tr>0) || !(a0*d0-b0*b0>detFloor)) return null;
+  /* 正準順: 古典的マハラノビス距離²の昇順、同値は x、y（アフィン変換と入力順に不変） */
+  const cd2=points.map(p=>{ const dx=p.x-cx, dy=p.y-cy; return (d0*dx*dx-2*b0*dx*dy+a0*dy*dy)/(a0*d0-b0*b0); });
+  const orig=Array.from({length:n},(_,i)=>i).sort((i,j)=>cd2[i]-cd2[j]||points[i].x-points[j].x||points[i].y-points[j].y);
+  const X=new Float64Array(n), Y=new Float64Array(n);
+  orig.forEach((o,i)=>{ X[i]=points[o].x-cx; Y[i]=points[o].y-cy; });
+  const h=Math.ceil(MCD_ALPHA*n), k=n-h;
+  let best=null;
+  if(n<=16){
+    let Sx=0, Sy=0, Sxx=0, Syy=0, Sxy=0;
+    for(let i=0;i<n;i++){ Sx+=X[i]; Sy+=Y[i]; Sxx+=X[i]*X[i]; Syy+=Y[i]*Y[i]; Sxy+=X[i]*Y[i]; }
+    const removed=new Int32Array(k);
+    let bestDet=Infinity, bestRemoved=null;
+    const rec=(start, depth, rx, ry, rxx, ryy, rxy)=>{
+      if(depth===k){
+        const mx=(Sx-rx)/h, my=(Sy-ry)/h;
+        const a=(Sxx-rxx)/h-mx*mx, d=(Syy-ryy)/h-my*my, b=(Sxy-rxy)/h-mx*my;
+        const det=a*d-b*b;
+        if(det<bestDet){ bestDet=det; bestRemoved=Array.from(removed); }
+        return;
+      }
+      for(let i=start;i<=n-(k-depth);i++){
+        removed[depth]=i;
+        rec(i+1, depth+1, rx+X[i], ry+Y[i], rxx+X[i]*X[i], ryy+Y[i]*Y[i], rxy+X[i]*Y[i]);
+      }
+    };
+    rec(0, 0, 0, 0, 0, 0, 0);
+    const mask=new Uint8Array(n).fill(1);
+    bestRemoved.forEach(i=>{ mask[i]=0; });
+    best=mcdSubsetFit(X, Y, mask);
+    best.mask=mask;
+  }else{
+    const eps=1e-9*tr, d2=new Float64Array(n), tmp=new Float64Array(n);
+    const rng=xoshiro128ss(MCD_SEED);
+    const starts=[];
+    const first=new Uint8Array(n);
+    for(let i=0;i<h;i++) first[i]=1;
+    starts.push(first);
+    for(let s=0;s<MCD_STARTS;s++){
+      const m=new Uint8Array(n);
+      let c=0;
+      while(c<3){ const i=Math.floor(rng()*n); if(!m[i]){ m[i]=1; c++; } }
+      starts.push(m);
+    }
+    const cands=starts.map(m=>{
+      let f=mcdSubsetFit(X, Y, m);
+      for(let s=0;s<2;s++) f=mcdCStep(X, Y, f, h, eps, d2, tmp);
+      return f;
+    });
+    const top=cands.map((f,i)=>[f.det,i]).sort((p,q)=>p[0]-q[0]||p[1]-q[1]).slice(0,3).map(p=>cands[p[1]]);
+    top.forEach(f0=>{
+      let f=f0;
+      for(let it=0;it<50;it++){
+        const g=mcdCStep(X, Y, f, h, eps, d2, tmp);
+        if(!(g.det<f.det*(1-1e-12))) break;
+        f=g;
+      }
+      if(!best || f.det<best.det) best=f;
+    });
+  }
+  if(!best || !(best.det>detFloor)) return null;
+  return {n, h, k, cx, cy, X, Y, orig, T0:{x:best.mx, y:best.my}, S0:{a:best.a, b:best.b, d:best.d}, mask:best.mask};
+}
+/* C: 再重み付け MCD。mraw/mrw は小標本補正（省略時は表） */
+function rmcdFromFit(fit, mraw, mrw){
+  const n=fit.n;
+  const f=MCD_C75*(mraw==null?mcdTableFactor(MCD_MRAW,n):mraw);
+  const raw={mx:fit.T0.x, my:fit.T0.y, a:fit.S0.a*f, b:fit.S0.b*f, d:fit.S0.d*f};
+  if(!(raw.a*raw.d-raw.b*raw.b>0)) return null;
+  const d2=mcdDistances(fit.X, fit.Y, raw, 0, new Float64Array(n));
+  const w=new Uint8Array(n);
+  let m=0;
+  for(let i=0;i<n;i++) if(d2[i]<=RMCD_Q){ w[i]=1; m++; }
+  if(m<3) return null;
+  const g=mcdSubsetFit(fit.X, fit.Y, w);
+  const s=RMCD_C*(mrw==null?mcdTableFactor(MCD_MRW,n):mrw)*m/(m-1); /* ML → 不偏（m−1）→ 補正 */
+  const S={a:g.a*s, b:g.b*s, d:g.d*s};
+  if(!(S.a*S.d-S.b*S.b>0)) return null;
+  return {T:{x:g.mx, y:g.my}, S, w, m};
+}
+/* B: MCD の順位（C からの距離²の大きい順、同値は正準順）で最大 k 本を順に除きながら、各段で 1 本除外の厳密 F 検定。
+   最後に有意だった段までを外れ値候補とする（Caroni & Prescott 1992 の逐次手順。まとまった外れ矢に隠されない） */
+function mcdOutlierIndices(fit, rob){
+  const n=fit.n;
+  const d2=mcdDistances(fit.X, fit.Y, {mx:rob.T.x, my:rob.T.y, a:rob.S.a, b:rob.S.b, d:rob.S.d}, 0, new Float64Array(n));
+  const order=Array.from({length:n},(_,i)=>i).sort((i,j)=>d2[j]-d2[i]||i-j);
+  const sums={n:0, x:0, y:0, xx:0, yy:0, xy:0};
+  for(let i=0;i<n;i++){ const x=fit.X[i], y=fit.Y[i]; sums.n++; sums.x+=x; sums.y+=y; sums.xx+=x*x; sums.yy+=y*y; sums.xy+=x*y; }
+  let flaggedCount=0;
+  for(let j=0;j<fit.k && sums.n>=6;j++){
+    const i=order[j], pt={x:fit.X[i], y:fit.Y[i]};
+    const pv=leaveOneOutPValue([pt], 0, sums);
+    if(pv<OUTLIER_ALPHA/sums.n) flaggedCount=j+1;
+    sums.n--; sums.x-=pt.x; sums.y-=pt.y; sums.xx-=pt.x*pt.x; sums.yy-=pt.y*pt.y; sums.xy-=pt.x*pt.y;
+  }
+  return order.slice(0, flaggedCount).map(i=>fit.orig[i]);
+}
+/* グルーピング統計。最上位は A（全射）。excl は B（サイト判断用、外れ値候補がなければ A と同じ値）、robust は C */
+function robustStats(arrows){
+  const total=arrows.length;
+  if(!total) return null;
+  const A=sampleStats(arrows);
+  let robust=null, flaggedIdx=[];
+  const fit=total>=MCD_MIN_N?mcdFit(arrows):null;
+  if(fit){
+    const r=rmcdFromFit(fit);
+    if(r){
+      const e=ellipseOfCov(r.S.a, r.S.b, r.S.d);
+      robust={mx:r.T.x+fit.cx, my:r.T.y+fit.cy, sx:Math.sqrt(r.S.a), sy:Math.sqrt(r.S.d), cov:r.S.b,
+        rr:Math.sqrt(r.S.a+r.S.d), major:e.major, minor:e.minor, angleDeg:e.angleDeg, nw:r.m, h:fit.h, method:"rmcd"};
+      flaggedIdx=mcdOutlierIndices(fit, r).sort((p,q)=>p-q);
+    }
+  }
+  const flagged=new Set(flaggedIdx);
+  const excluded=flaggedIdx.map(i=>arrows[i]);
+  const unflagged=flagged.size?arrows.filter((_,i)=>!flagged.has(i)):arrows.slice();
+  const excl=Object.assign(flagged.size?sampleStats(unflagged):Object.assign({},A), {used:unflagged, excluded, total, method:"mcd-exclude"});
+  excl.confidence=clamp(1-1/Math.sqrt(excl.n),0,1);
   /* 演算信頼度 = 1 − 1/√n: 中心の推定誤差（標準誤差）がグルーピングの広がりの何割か、の補数 */
-  const confidence = clamp(1 - 1 / Math.sqrt(st.n), 0, 1);
-  return Object.assign(st, { used, excluded, total, method: excluded.length ? "mean+outlier" : "mean", confidence });
+  return Object.assign(A, {total, used:arrows.slice(), excluded, flagged:excluded, method:"mean",
+    confidence:clamp(1-1/Math.sqrt(A.n),0,1), rrCi:rmsCi(A), version:"grouping-v3", excl, robust});
+}
+/* サイト判断に使う統計（外れ値候補を除いた B）。B を渡しても B を返す */
+function sightStats(st){ return st&&st.excl?st.excl:st; }
+/* ---- 旧方式（997db97 の robustStats をそのまま保持。既知の欠陥: 記録順依存・重みの不連続・
+   RMS の過小評価・円周上6本で RMS 0。修正しないこと。研究用の比較として CSV 出力からだけ呼ぶ） ---- */
+function legacyRobustStats(arrows){
+  function legacyRobustScale(vals, center, fallback){
+    const dev=vals.map(v=>Math.abs(v-center));
+    return Math.max(1.4826*median(dev), fallback||0, 0.01);
+  }
+  function legacyWeightedStats(pts, weights){ return momentStats(pts, weights); }
+  function original(arrows){
+    const total=arrows.length;
+    if(!total) return null;
+    if(total<5){
+      const st=groupStats(arrows);
+      return Object.assign(st,{used:arrows.slice(),excluded:[],total,method:"simple",confidence:total>=3?.55:.35});
+    }
+    const cx=median(arrows.map(a=>a.x)), cy=median(arrows.map(a=>a.y));
+    const ds=arrows.map(a=>Math.hypot(a.x-cx,a.y-cy));
+    const md=median(ds);
+    const mad=median(ds.map(d=>Math.abs(d-md)));
+    const base=groupStats(arrows);
+    const sigma=Math.max(1.4826*mad, base.rr*.35, 0.01);
+    const sx0=legacyRobustScale(arrows.map(a=>a.x), cx, base.sx*.45);
+    const sy0=legacyRobustScale(arrows.map(a=>a.y), cy, base.sy*.45);
+    const eds=arrows.map(a=>Math.hypot((a.x-cx)/sx0,(a.y-cy)/sy0));
+    const em=median(eds), emad=median(eds.map(d=>Math.abs(d-em)));
+    const limit=Math.max(md+3*sigma, md*2.2, base.rr*1.65);
+    const eLimit=Math.max(3.15, em+3*Math.max(1.4826*emad,.35));
+    let used=[], excluded=[];
+    const maxExcluded=Math.floor(total*.25);
+    arrows.forEach((a,i)=>{
+      const radial=ds[i]>limit && ds[i]>md+2.4*sigma;
+      const elliptical=eds[i]>eLimit && eds[i]>3.15;
+      const obvious=(radial||elliptical) && excluded.length<maxExcluded;
+      (obvious?excluded:used).push(a);
+    });
+    if(used.length<Math.max(3,total-excluded.length)){
+      used=arrows.slice(); excluded=[];
+    }
+    const unchanged=excluded.length===0;
+    const ux=unchanged?cx:median(used.map(a=>a.x)), uy=unchanged?cy:median(used.map(a=>a.y));
+    const uds=unchanged?ds:used.map(a=>Math.hypot(a.x-ux,a.y-uy));
+    const udm=unchanged?md:median(uds);
+    const xScale=legacyRobustScale(used.map(a=>a.x), ux, base.sx*.55);
+    const yScale=legacyRobustScale(used.map(a=>a.y), uy, base.sy*.55);
+    const scale=Math.max(udm+3*(unchanged?mad:median(uds.map(d=>Math.abs(d-udm)))), base.rr, 0.01);
+    const weights=used.map(a=>{
+      const radialU=Math.hypot(a.x-ux,a.y-uy)/scale;
+      const ellU=Math.hypot((a.x-ux)/xScale,(a.y-uy)/yScale)/3;
+      const u=Math.max(radialU,ellU);
+      return u>=1?0.05:(1-u*u)**2;
+    });
+    const st=legacyWeightedStats(used, weights);
+    const outRate=excluded.length/total;
+    const sample=clamp((st.effN-2)/10,.35,1);
+    const outPenalty=clamp(1-outRate*1.6,.55,1);
+    const skewPenalty=st.minor>0?clamp(st.minor/st.major+.35,.55,1):.7;
+    return Object.assign(st,{used,excluded,total,method:"ellipse-biweight",confidence:sample*outPenalty*skewPenalty});
+  }
+  return original(arrows);
 }
 /* 誤差関数（Abramowitz–Stegun 7.1.26、絶対誤差 1.5e-7 以下） */
 function erfApprox(x){

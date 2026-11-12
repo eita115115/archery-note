@@ -41,7 +41,7 @@ function section(source, start, end) {
 
 const scoring = new Function(
   `${scoringScript}
-return {ringW, arrowMarkRadius, lineCutRadius, scoreAt, isLineCutting, hitFromGlobal, robustStats, groupStats, median, clamp};`,
+return {ringW, arrowMarkRadius, lineCutRadius, scoreAt, isLineCutting, hitFromGlobal, robustStats, groupStats, median, clamp, xoshiro128ss};`,
 )();
 
 const analysis = new Function(
@@ -137,38 +137,51 @@ assertEqual(scoring.scoreAt(0, 0, 40, "field", 0).X, false, "field has no X");
     { x: -1, y: 1 },
   ];
   const st = scoring.robustStats([...cluster, { x: 40, y: 40 }]);
-  assertEqual(st.method, "mean+outlier", "outlier exclusion is reported");
-  assertEqual(st.excluded.length, 1, "one outlier excluded");
-  assertEqual(st.excluded[0].x, 40, "the excluded arrow is the outlier");
-  assertClose(st.mx, 0, 1e-12, "center is the mean of the remaining arrows (x)");
-  assertClose(st.my, 0, 1e-12, "center is the mean of the remaining arrows (y)");
+  // 全射（A）が正式な値。外れ値候補は excluded に印を付け、サイト判断用の B（excl）からだけ除く
+  assertEqual(st.method, "mean", "official statistics use every arrow");
+  assertClose(st.mx, 4, 1e-12, "official center includes the flyer (x)");
+  assertEqual(st.excluded.length, 1, "one outlier candidate flagged");
+  assertEqual(st.excluded[0].x, 40, "the flagged arrow is the outlier");
+  assertEqual(st.excl.method, "mcd-exclude", "B is the MCD exclusion statistic");
+  assertClose(st.excl.mx, 0, 1e-12, "B center is the mean of the remaining arrows (x)");
+  assertClose(st.excl.my, 0, 1e-12, "B center is the mean of the remaining arrows (y)");
   assert(st.confidence > 0.3 && st.confidence <= 1, `confidence in range, got ${st.confidence}`);
 }
 
-// 正規分布の群れで、正常な矢を外れ値として除外する割合が設計値（1%）程度に収まる
+// 正規分布の群れで、正常な矢を外れ値候補にする割合が設計値（2%以下）に収まり、中心の95%区間が真の中心を含む
+// 乱数は xoshiro128**（線形合同法は偏りがあるため使わない）と Marsaglia の極座標法
 {
-  let seed = 20261112;
-  const rand = () => {
-    seed = (seed * 1103515245 + 12345) % 2147483648;
-    return seed / 2147483648;
-  };
+  const rand = scoring.xoshiro128ss(20261112);
+  let spare = null;
   const gauss = () => {
-    let u = 0;
-    while (!u) u = rand();
-    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rand());
+    if (spare != null) {
+      const v = spare;
+      spare = null;
+      return v;
+    }
+    for (;;) {
+      const u = 2 * rand() - 1;
+      const v = 2 * rand() - 1;
+      const q = u * u + v * v;
+      if (q > 0 && q < 1) {
+        const f = Math.sqrt((-2 * Math.log(q)) / q);
+        spare = v * f;
+        return u * f;
+      }
+    }
   };
   let anyExcluded = 0;
   let covered = 0;
-  const trials = 1500;
+  const trials = 3000;
   for (let t = 0; t < trials; t++) {
     const pts = Array.from({ length: 12 }, () => ({ x: gauss() * 4, y: gauss() * 2 }));
     const st = scoring.robustStats(pts);
     if (st.excluded.length) anyExcluded++;
     if (Math.abs(st.mx) <= st.ciX) covered++;
   }
-  assert(anyExcluded / trials < 0.03, `false exclusion rate ${anyExcluded / trials}`);
+  assert(anyExcluded / trials <= 0.02, `false exclusion rate ${anyExcluded / trials}`);
   assert(
-    Math.abs(covered / trials - 0.95) < 0.025,
+    Math.abs(covered / trials - 0.95) < 0.015,
     `95% interval coverage ${covered / trials}`,
   );
 }

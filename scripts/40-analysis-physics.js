@@ -28,17 +28,28 @@ function confidenceNoteHtml(kind){
     ? `<div class="subNoteSm">演算信頼度は 1−1/√(使用本数)。中心の推定誤差がグルーピングの広がりに比べてどれだけ小さいかを表します。</div>`
     : `<div class="subNoteSm">判断信頼度は、グルーピング中心が真の中心からリング幅の半分以内に入っている確率（左右×上下）です。</div>`;
 }
+/* グルーピングの数値。正式な値は全射（A）。外れ値候補を除いた RMS（B）とロバスト RMS（C）は参考として並べる
+   （docs/design/grouping-stats-v3.md）。B は除いた分だけ小さく出るので正式な値には使わない */
 function groupSummaryHtml(st, opts){
   if(!st) return "";
   const ci=st.n>=2&&Number.isFinite(st.ciX)?`<div class="kv"><span>中心の誤差（95%区間）</span><span>左右 ±${st.ciX.toFixed(1)}cm ・ 上下 ±${st.ciY.toFixed(1)}cm</span></div>`:"";
+  const ex=st.excl, rob=st.robust, nFlag=(st.excluded||[]).length;
+  const refRows=st.n>=MCD_MIN_N
+    ? `<div class="kv"><span>全射RMSの95%区間</span><span>${st.rrCi?`${st.rrCi.lo.toFixed(1)}–${st.rrCi.hi.toFixed(1)} cm（正規分布を仮定）`:"—"}</span></div>
+    <div class="kv"><span>外れ値候補を除いたRMS（参考）</span><span>${ex?`${ex.rr.toFixed(1)} cm（${st.total}本中${nFlag}本を除く）`:"—"}</span></div>
+    <div class="subNoteSm">外れ値候補はMCD法の順位と検定で判定。除くと実力より小さく出るため、公式の値には使いません。</div>
+    <div class="kv"><span>ロバストRMS（参考）</span><span>${rob?`${rob.rr.toFixed(1)} cm`:"—"}</span></div>
+    <div class="subNoteSm">極端な着弾の影響を抑えた、まとまっている矢のばらつきの推定（再重み付けMCD）。</div>`
+    : `<div class="kv"><span>外れ値候補を除いたRMS・ロバストRMS（参考）</span><span>6本以上で計算します</span></div>`;
   return `<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
     ${ci}
-    <div class="kv"><span>グルーピング半径 (RMS)</span><span>${st.rr.toFixed(1)} cm</span></div>
+    <div class="kv"><span>グルーピング半径 (RMS・全射)</span><span>${st.rr.toFixed(1)} cm</span></div>
     <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
     ${st.major!=null?`<div class="kv"><span>グルーピング楕円</span><span>長軸 ${st.major.toFixed(1)}cm ・ 短軸 ${st.minor.toFixed(1)}cm ・ 角度 ${st.angleDeg.toFixed(0)}°</span></div>`:""}
-    <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / ${st.method}</span></div>
+    <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / 全射</span></div>
     ${opts&&opts.withConfidenceNote?confidenceNoteHtml("calc"):""}
-    ${st.excluded.length?`<div class="kv"><span>外れ値の除外</span><span>${st.excluded.length}本を分析から除外（図の×印）</span></div>`:""}`;
+    ${refRows}
+    ${nFlag?`<div class="kv"><span>外れ値候補</span><span>${nFlag}本（図の×印。全射RMSには含み、サイト判断でのみ除外）</span></div>`:""}`;
 }
 function cmOffsetText(v, axis){
   const a=Math.abs(v).toFixed(1);
@@ -303,7 +314,7 @@ function computePersonalPhysicsCalibration(setupId){
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
   const usable=sessions.map((s,i)=>{
     const q=sessionQuality(s,setup);
-    const st=q&&q.metrics?q.metrics.st:null;
+    const st=q&&q.metrics?sightStats(q.metrics.st):null;
     if(!st || st.n<6) return null;
     const recency=.72+(i+1)/Math.max(1,sessions.length)*.28;
     return {s,st,q,w:clamp(q.score*recency,.05,1)};
@@ -377,6 +388,7 @@ function personalWindFactor(sess, pcal){
   return others.length>=3?weightedMedian(others,1):1;
 }
 function sightDecision(sess, st, traj, pcal){
+  st=sightStats(st); /* 外れ値候補を除いた統計（B）。外れ矢でサイトを動かさない */
   const w=ringW(sess.faceD,sess.faceType);
   const th=w/10;
   let windCm=0, windUnc=0, windAccounted=false, windFactor=1;
@@ -404,7 +416,8 @@ function adviceModel(sess, setup, st){
   const decision=sightDecision(sess, st, traj, pcal);
   const gear=gearVariation(setup||{});
   const notes=[];
-  notes.push(`中心は${cmOffsetText(st.mx,"x")}（±${decision.h.ci.toFixed(1)}cm）・${cmOffsetText(st.my,"y")}（±${decision.v.ci.toFixed(1)}cm）、95%区間。${st.n}本使用${st.excluded.length?` / 外れ値${st.excluded.length}本除外`:""}。偶然でこれだけずれる確率は ${fmtChance(decision.test.p)}。`);
+  const ss=sightStats(st);
+  notes.push(`サイト判断の中心は${cmOffsetText(ss.mx,"x")}（±${decision.h.ci.toFixed(1)}cm）・${cmOffsetText(ss.my,"y")}（±${decision.v.ci.toFixed(1)}cm）、95%区間。${ss.n}本使用${st.excluded.length?` / 外れ値候補${st.excluded.length}本を除く`:""}。偶然でこれだけずれる確率は ${fmtChance(decision.test.p)}。`);
   if(decision.windAccounted) notes.push(`風: ${traj.wind.label} ${traj.wind.speed.toFixed(1)}m/sで横流れ推定 ${windDriftText(decision.windCm)}${decision.windFactor!==1?`（個人係数${decision.windFactor.toFixed(2)}倍）`:""}。風上へのねらい修正の有無が分からないため、この大きさを左右の誤差として扱っています。`);
   else if(decision.windUnknown) notes.push("風向が分からないため、風の横流れは見込んでいません。左右の判断は風待ちで再確認すると確実です。");
   notes.push(`物理エンジン: ${traj.engine}（3D空気抵抗/RK4）。初速 ${traj.phys.speedFps.toFixed(0)}fps${traj.phys.measuredSpeed?"（実測）":"（推定）"}、矢重量 ${traj.phys.massGr.toFixed(0)}gr、Cd ${traj.phys.cd.toFixed(2)}、空気密度 ${traj.phys.rho.toFixed(2)}kg/m³、飛翔 ${traj.tof.toFixed(2)}秒。mm換算はアイ〜サイト ${eye}mm と弾道の感度から計算。`);
@@ -487,7 +500,7 @@ function primarySightSuggestion(sess, setup, adv){
 }
 function summarySightDialHtml(sess, adv){
   if(!adv || !adv.st) return "";
-  const st=adv.st;
+  const st=sightStats(adv.st);
   const span=Math.max(ringW(sess.faceD,sess.faceType)*2.4, st.rr*1.4, 6);
   const dx=clamp(st.mx/span,-1,1)*36;
   const dy=clamp(-st.my/span,-1,1)*36;
@@ -506,7 +519,7 @@ function summarySightDialHtml(sess, adv){
       </svg>
       <div>
         <b>${move?"中心ズレからサイト方向を読む":"中心はほぼ合っています"}</b>
-        <span>緑の点が今回のグルーピング中心です。${label}。判断信頼度は ${pct(adv.confidence||0)}、外れ値を除いた中心を使っています。</span>
+        <span>緑の点が今回のグルーピング中心です。${label}。判断信頼度は ${pct(adv.confidence||0)}、外れ値候補を除いた中心を使っています。</span>
       </div>
     </div>
   </div>`;
@@ -620,7 +633,7 @@ function sessionMetrics(sess){
   /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
   const pts=all.map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
   const st=robustStats(pts);
-  const metrics={all,total,avg:all.length?total/all.length:0,st};
+  const metrics={all,total,avg:all.length?total/all.length:0,st,pts};
   SESSION_METRIC_CACHE.set(sess,{signature:sig,metrics});
   return metrics;
 }
@@ -631,16 +644,18 @@ function sessionQuality(sess, setup, st){
   const m=sessionMetrics(sess);
   st=st||m.st;
   if(!st || !(st.n>=2)) return {score:.05,label:"低",tone:"warn",reasons:["矢数が不足"],metrics:m};
+  const all=st;
+  st=sightStats(st); /* 中心の精度は外れ値候補を除いた統計（B）、「広め」の理由は全射（A） */
   const w=ringW(sess.faceD,sess.faceType);
   const tol=w/2;
   /* 標本が少ないと標準誤差そのものが不確かなので t/1.96 倍で補い、全矢同一点などで広がりが0にならないよう
      ばらつきの下限をリング幅の1/4（上級者でも±1σがリング半分程度）とする（少数のまとまった矢で100%「高」などを防ぐ） */
   const k=tCrit975(st.df)/1.96, floorSe=(w/4)/Math.sqrt(st.n);
   const score=clamp(probWithin(tol, Math.max(st.seX,floorSe)*k)*probWithin(tol, Math.max(st.seY,floorSe)*k),0,1);
-  const outRate=st.total?st.excluded.length/st.total:0;
+  const outRate=all.total?(all.excluded||[]).length/all.total:0;
   const reasons=[];
   if(st.n<6) reasons.push("本数少なめ");
-  if(st.rr>w*2.6) reasons.push("グルーピング広め");
+  if(all.rr>w*2.6) reasons.push("グルーピング広め");
   if(outRate>.18) reasons.push("外れ値が多め");
   if(isWindy(sess)) reasons.push("風の影響あり");
   const label=score>=.72?"高":score>=.48?"中":"低";
@@ -672,20 +687,21 @@ function pooledRandomEffects(vals, ses){
 function sightKey(v){ return String(v==null?"":v).normalize("NFKC").replace(/\s+/g,"").trim(); }
 function personalModel(sess,setup,currentSt){
   if(!sess || !currentSt) return null;
+  currentSt=sightStats(currentSt);
   const sv=sightKey(sess.sightV), sh=sightKey(sess.sightH);
   const same=db.sessions.filter(s=>s.id!==sess.id && (s.setupId||"")==(sess.setupId||"") && s.dist===sess.dist && s.faceD===sess.faceD && (s.faceType||"single")===(sess.faceType||"single") && sightKey(s.sightV)===sv && sightKey(s.sightH)===sh)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1))
     .slice(-10);
   const items=same.map(s=>{
-    const st=sessionMetrics(s).st;
-    return st && st.n>=3 && Number.isFinite(st.seX) && Number.isFinite(st.seY) ? {sess:s,st} : null;
+    const all=sessionMetrics(s).st, st=sightStats(all);
+    return st && st.n>=3 && Number.isFinite(st.seX) && Number.isFinite(st.seY) ? {sess:s,st,all} : null;
   }).filter(Boolean);
   const sightNote=sv||sh?"同じサイト値":"サイト値未記録どうし";
   if(items.length<2) return {sample:items.length,state:"データ蓄積中",text:`${sightNote}の同条件データがまだ少ないため、今回の記録を個人モデルの材料として蓄積します。`};
   const px=pooledRandomEffects(items.map(it=>it.st.mx), items.map(it=>it.st.seX));
   const py=pooledRandomEffects(items.map(it=>it.st.my), items.map(it=>it.st.seY));
   const mx=px.mean, my=py.mean, seMx=px.se, seMy=py.se;
-  const rr=items.reduce((a,it)=>a+it.st.rr,0)/items.length;
+  const rr=items.reduce((a,it)=>a+it.all.rr,0)/items.length;
   const avg=items.reduce((a,it)=>a+sessionMetrics(it.sess).avg,0)/items.length;
   const centers=items.map(it=>({x:it.st.mx,y:it.st.my}));
   const spread=groupStats(centers);
@@ -762,7 +778,10 @@ function roundProgressHtml(sess){
   return `<div class="kv"><span>ラウンド進捗</span><span>${esc(roundLabel(sess.round))}${stageInfo} / ${shot}/${arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
 }
 function sessionsCsv(){
-  const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note"];
+  /* 既存の列の位置は変えない。group_* と sigma_* は全射（A）、excluded は外れ値候補の本数。研究用の比較列は末尾に追加 */
+  const head=["date","setup","distance_m","round","face","arrows","total","avg","x_or_5plus","ten_or_6","group_x_cm","group_y_cm","group_rms_cm","sigma_x_cm","sigma_y_cm","confidence","decision_quality","personal_model","excluded","sight_v","sight_h","condition","note",
+    "group_n","rms_ci95_lo_cm","rms_ci95_hi_cm","rms_df_eff","excl_n_flagged","excl_x_cm","excl_y_cm","excl_rms_cm","robust_x_cm","robust_y_cm","robust_rms_cm","robust_n_weighted","legacy_x_cm","legacy_y_cm","legacy_rms_cm","legacy_excluded","legacy_method","stats_version"];
+  const f2=v=>Number.isFinite(v)?v.toFixed(2):"";
   const rows=[head];
   db.sessions.forEach(s=>{
     const m=sessionMetrics(s), all=m.all, st=m.st, total=m.total, setup=db.setups.find(x=>x.id===s.setupId);
@@ -771,9 +790,19 @@ function sessionsCsv(){
     rows.push([s.date,setup?setup.name:"",s.dist,roundLabel(s.round),faceLabel(s),all.length,total,all.length?(total/all.length).toFixed(3):"",
       secondaryScoreCount(all,s),perfectScoreCount(all,s),st?st.mx.toFixed(2):"",st?st.my.toFixed(2):"",st?st.rr.toFixed(2):"",
       st?st.sx.toFixed(2):"",st?st.sy.toFixed(2):"",st?pct(st.confidence||0):"",q.label,p?p.state:"",st?st.excluded.length:"",
-      s.sightV||"",s.sightH||"",windText(s),s.note||""]);
+      s.sightV||"",s.sightH||"",windText(s),s.note||"",
+      ...csvGroupingResearchColumns(m.pts, st, f2)]);
   });
   return "\ufeff"+rows.map(r=>r.map(csvCell).join(",")).join("\n");
+}
+/* 研究用の比較列（全射RMSの区間・外れ値候補を除いた統計・ロバスト統計・旧方式）。旧方式は CSV だけで計算する */
+function csvGroupingResearchColumns(pts, st, f2){
+  if(!st) return Array(18).fill("");
+  const ex=st.excl, rob=st.robust, ci=st.rrCi;
+  const legacy=pts&&pts.length?legacyRobustStats(pts):null;
+  return [st.n, ci?f2(ci.lo):"", ci?f2(ci.hi):"", ci?f2(ci.df):"", (st.excluded||[]).length,
+    ex?f2(ex.mx):"", ex?f2(ex.my):"", ex?f2(ex.rr):"", rob?f2(rob.mx):"", rob?f2(rob.my):"", rob?f2(rob.rr):"", rob?rob.nw:"",
+    legacy?f2(legacy.mx):"", legacy?f2(legacy.my):"", legacy?f2(legacy.rr):"", legacy?legacy.excluded.length:"", legacy?legacy.method:"", st.version||""];
 }
 function exportSessionsCsv(){
   beginActiveWorkflow();
@@ -937,7 +966,7 @@ function regressionAdvice(setupId, dist){
     ss.forEach(s=>{
       const v=parseFloat(s[key]);
       const q=sessionQuality(s,setup);
-      const st=q&&q.metrics?q.metrics.st:null;
+      const st=q&&q.metrics?sightStats(q.metrics.st):null;
       const se=st?(axis==="my"?st.seY:st.seX):NaN;
       if(isFinite(v) && st && st.n>=6 && Number.isFinite(se)){
         const windFactor=axis==="mx"&&isWindy(s)?.5:1;
