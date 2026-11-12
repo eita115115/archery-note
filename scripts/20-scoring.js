@@ -18,17 +18,24 @@ function arrowRadiusFromDiaMm(diaMm){
   return mm/20; /* 直径mm → 半径cm */
 }
 const DEFAULT_ARROW_R=arrowRadiusFromDiaMm(DEFAULT_ARROW_DIA_MM);
-function validArrowR(r){ return typeof r==="number"&&Number.isFinite(r)&&r>=ARROW_DIA_MM_MIN/20&&r<=ARROW_DIA_MM_MAX/20; }
+/* 保存された矢半径(cm)を数値として読む（インポートで文字列になった値も受け付ける）。範囲外・不正は null */
+function storedArrowR(r){
+  const n=typeof r==="number"?r:typeof r==="string"&&r.trim()!==""?Number(r):NaN;
+  return Number.isFinite(n)&&n>=ARROW_DIA_MM_MIN/20&&n<=ARROW_DIA_MM_MAX/20?n:null;
+}
+function validArrowR(r){ return storedArrowR(r)!=null; }
 /* セッションの判定用矢半径(cm): 記録開始時に保存した arrowR → 用具の矢径 → 既定値 */
 function sessionArrowR(sess, setup){
-  if(sess&&validArrowR(sess.arrowR)) return sess.arrowR;
+  const stored=sess?storedArrowR(sess.arrowR):null;
+  if(stored!=null) return stored;
   return arrowRadiusFromDiaMm(setup&&setup.arrowDia);
 }
 /* 記録の判定に使う半径(cm)。新しい記録は保存済みの arrowR（矢の実寸）。arrowR を持たない旧判定の記録
    （記録途中・編集中を含む）は、保存された点数と矢円が食い違わないよう、そのセッション内では旧半径を保つ:
    保存された shaft、無ければ旧式（的の直径/85 + 線の半幅）。実寸での比較は sessionRescore で別に出す */
 function sessionScoringRadius(sess, setup){
-  if(sess&&validArrowR(sess.arrowR)) return sess.arrowR;
+  const stored=sess?storedArrowR(sess.arrowR):null;
+  if(stored!=null) return stored;
   if(sess&&typeof sess==="object"&&Array.isArray(sess.ends)){
     const shaft=Number(sess.shaft);
     if(Number.isFinite(shaft)&&shaft>0&&shaft<5) return shaft;

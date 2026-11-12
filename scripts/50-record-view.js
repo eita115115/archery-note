@@ -240,6 +240,7 @@ function demoSession(id, date, offset, spread, score) {
     round: "free",
     purpose: "practice",
     note: "架空のデモデータ",
+    arrowR: DEFAULT_ARROW_R,
     ends: [
       pts
         .slice(0, 3)
@@ -836,10 +837,16 @@ function pageHeroHtml(type, ctx) {
       body = `<p class="pageHeroLead sightNowNote">この距離・用具の練習記録なし</p>`;
     } else if (!sug || sug.none) {
       /* 「中心が合っている」と「まだ判定できない」を区別する（統計的に誤差の範囲内でも、区間が広ければ保留） */
-      const uncertain = !!(sug && sug.reason === "uncertain");
+      const reason = (sug && sug.reason) || "centered";
+      const heroNote = {
+        centered: "グルーピング中心は誤差の範囲内でセンターです。今の設定のまま本数を重ねられます。",
+        uncertain: "ズレは誤差の範囲ですが、まだ中心を絞り込めていません。同じ狙いで本数を重ねてから判断します。",
+        wind: "左右のズレに横風の影響が混ざっています。風上へのねらい修正の有無が分からないため、左右は風待ちで確認します。",
+        history: "同じサイト設定の過去の傾向と今回の中心が逆方向です。追加エンドで再現するか確認してから動かします。",
+      }[reason];
       body = `<div class="sightNow sightNowNeutral" data-testid="sight-now-suggestion">
-        <div class="sightNowDir">${icon("target")}<span>${uncertain ? "判断保留" : "調整不要"}</span></div>
-        <p class="sightNowNote">${uncertain ? "ズレは誤差の範囲ですが、まだ中心を絞り込めていません。同じ狙いで本数を重ねてから判断します。" : "グルーピング中心は誤差の範囲内でセンターです。今の設定のまま本数を重ねられます。"}</p>
+        <div class="sightNowDir">${icon("target")}<span>${reason === "centered" ? "調整不要" : "判断保留"}</span></div>
+        <p class="sightNowNote">${heroNote}</p>
       </div>`;
     } else {
       const arrowIcon = icon(sug.dir);

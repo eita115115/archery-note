@@ -370,14 +370,19 @@ function physicsCalibrationHtml(setupId){
    4) 横風（風向と風速が分かるとき）は、風上へねらいを修正したかが記録から分からないため推定横流れを
       差し引かず、横流れの大きさ全体を左右の誤差として加える（風の日は左右を動かしにくくする）。
       個人の風係数は、判定中の回と同じ日を除いた3回以上の横風の記録があるときだけ使う */
+/* 個人の風係数（観測横ズレ/予測横流れの加重中央値）。判定・表示している回と同じ日の記録は除き、
+   残りが3回以上あるときだけ使う（自分自身で校正しない） */
+function personalWindFactor(sess, pcal){
+  const others=((pcal&&pcal.wind&&pcal.wind.items)||[]).filter(r=>r.id!==(sess&&sess.id) && r.date!==(sess&&sess.date));
+  return others.length>=3?weightedMedian(others,1):1;
+}
 function sightDecision(sess, st, traj, pcal){
   const w=ringW(sess.faceD,sess.faceType);
   const th=w/10;
   let windCm=0, windUnc=0, windAccounted=false, windFactor=1;
   const wind=traj&&traj.wind;
   if(wind && wind.speed && wind.known && wind.side){
-    const others=((pcal&&pcal.wind&&pcal.wind.items)||[]).filter(r=>r.id!==sess.id && r.date!==sess.date);
-    windFactor=others.length>=3?weightedMedian(others,1):1;
+    windFactor=personalWindFactor(sess, pcal);
     windCm=traj.windDriftCm*windFactor;
     windUnc=Math.hypot(windCm, traj.windUncertaintyCm);
     windAccounted=true;
@@ -464,9 +469,14 @@ function primarySightSuggestion(sess, setup, adv){
   if(!adv) return null;
   const d=adv.decision;
   const moves=adv.lines.filter(l=>l.axis!=="-").map(l=>l.axis);
-  if(!moves.length || !d) return {axis:"-", none:true, reason:d&&!d.precise?"uncertain":"centered"};
+  if(!moves.length || !d){
+    const j0=d?judgementFor(adv, sess):null;
+    if(j0 && j0.label==="風を考慮") return {axis:"-", none:true, reason:"wind"};
+    return {axis:"-", none:true, reason:d&&!d.precise?"uncertain":"centered"};
+  }
   const j=judgementFor(adv, sess);
-  if(j && (j.label==="保留" || j.label==="風を考慮")) return {axis:"-", none:true, reason:"uncertain"};
+  if(j && j.label==="風を考慮") return {axis:"-", none:true, reason:"wind"};
+  if(j && j.label==="保留") return {axis:"-", none:true, reason:adv.personal&&adv.personal.state==="今回だけの可能性"?"history":"uncertain"};
   const axis=moves.length>1?(Math.abs(d.v.adj)>=Math.abs(d.h.adj)?"v":"h"):moves[0];
   const a=d[axis], adj=Math.abs(a.adj);
   const mm=adj*(axis==="v"?adv.traj.mmPerCmV:adv.traj.mmPerCmH);
@@ -565,7 +575,7 @@ function conditionInsights(sess,st,setup){
     if(wm.speed){
       const traj=trajectoryModel(sess,setup||{},db.settings.eyeSight||850);
       const pc=personalPhysicsCalibration(setup&&setup.id);
-      const wf=pc&&pc.wind.sample?pc.wind.factor:1;
+      const wf=personalWindFactor(sess, pc);
       out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm*wf)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm${wf!==1?` / 個人係数${wf.toFixed(2)}倍`:""}）として扱います。`);
     }
     if(analysisHasGroupingEvidence(st)){
@@ -624,8 +634,8 @@ function sessionQuality(sess, setup, st){
   const w=ringW(sess.faceD,sess.faceType);
   const tol=w/2;
   /* 標本が少ないと標準誤差そのものが不確かなので t/1.96 倍で補い、全矢同一点などで広がりが0にならないよう
-     ばらつきの下限をリング幅の1/10とする（2本で100%「高」などを防ぐ） */
-  const k=tCrit975(st.df)/1.96, floorSe=(w/10)/Math.sqrt(st.n);
+     ばらつきの下限をリング幅の1/4（上級者でも±1σがリング半分程度）とする（少数のまとまった矢で100%「高」などを防ぐ） */
+  const k=tCrit975(st.df)/1.96, floorSe=(w/4)/Math.sqrt(st.n);
   const score=clamp(probWithin(tol, Math.max(st.seX,floorSe)*k)*probWithin(tol, Math.max(st.seY,floorSe)*k),0,1);
   const outRate=st.total?st.excluded.length/st.total:0;
   const reasons=[];
@@ -976,8 +986,8 @@ function sightInterp(setupId){
     fit=sightFitAtSpeed(pts, phys, phys.speedMps);
     let fitted=false;
     if(fit && pts.length>=5){
-      /* 初速の当てはめ（黄金分割探索、35〜95 m/s）。4点では自由度1で不安定なので5距離以上に限り、
-         残差が半分以下になるときだけ採る。実測初速の入力があれば当てはめない（実測のまま） */
+      /* 初速の当てはめ（黄金分割探索、35〜95 m/s）。4点では自由度1で不安定なので5距離以上に限る。
+         実測初速の入力があれば当てはめない（実測のまま） */
       if(!phys.measuredSpeed){
         let lo=35, hi=95;
         const gr=(Math.sqrt(5)-1)/2;
@@ -990,7 +1000,10 @@ function sightInterp(setupId){
         /* 探索範囲の端に張り付いた当てはめは台帳の矛盾（記録違い・別の用具）を示すので採らない */
         const vBest=(lo+hi)/2;
         const best=vBest>35.5&&vBest<94.5?sightFitAtSpeed(pts, phys, vBest):null;
-        if(best && best.sse<=fit.sse*.5){ fit=best; fitted=true; }
+        /* 入れ子モデルの F 検定（自由度 1, n−3、5%）で、初速を加えた改善が偶然を超えるときだけ採る */
+        const df2=pts.length-3, F95=[NaN,161.4,18.51,10.13,7.71,6.61,5.99,5.59,5.32,5.12,4.96];
+        const fcrit=df2<=10?F95[df2]:3.84+8/df2;
+        if(best && best.sse<fit.sse && (fit.sse-best.sse)/Math.max(best.sse/df2,1e-12)>fcrit){ fit=best; fitted=true; }
       }
     }
     if(fit) fit.fitted=fitted;
