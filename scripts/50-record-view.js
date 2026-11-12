@@ -835,9 +835,11 @@ function pageHeroHtml(type, ctx) {
     } else if (!adv) {
       body = `<p class="pageHeroLead sightNowNote">この距離・用具の練習記録なし</p>`;
     } else if (!sug || sug.none) {
+      /* 「中心が合っている」と「まだ判定できない」を区別する（統計的に誤差の範囲内でも、区間が広ければ保留） */
+      const uncertain = !!(sug && sug.reason === "uncertain");
       body = `<div class="sightNow sightNowNeutral" data-testid="sight-now-suggestion">
-        <div class="sightNowDir">${icon("target")}<span>調整不要</span></div>
-        <p class="sightNowNote">グルーピング中心はほぼセンターです。今の設定のまま本数を重ねられます。</p>
+        <div class="sightNowDir">${icon("target")}<span>${uncertain ? "判断保留" : "調整不要"}</span></div>
+        <p class="sightNowNote">${uncertain ? "ズレは誤差の範囲ですが、まだ中心を絞り込めていません。同じ狙いで本数を重ねてから判断します。" : "グルーピング中心は誤差の範囲内でセンターです。今の設定のまま本数を重ねられます。"}</p>
       </div>`;
     } else {
       const arrowIcon = icon(sug.dir);

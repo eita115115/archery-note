@@ -327,8 +327,8 @@ function staticUiChecks() {
     "form-tracking measurement-error and camera-position hints missing",
   );
   assert(
-    surface.includes("演算信頼度は有効本数・外れ値率・グルーピングの偏りから算出") &&
-      surface.includes("判断信頼度は演算信頼度・本数・グルーピングの広さ・風・用具入力から算出"),
+    surface.includes("演算信頼度は 1−1/√(使用本数)") &&
+      surface.includes("判断信頼度は、グルーピング中心が真の中心からリング幅の半分以内に入っている確率"),
     "confidence derivation notes missing",
   );
   assert(
