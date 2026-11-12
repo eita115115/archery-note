@@ -221,6 +221,7 @@ assert(scoreApi.sessionScoringRadius({ends:[], arrowR:0.3}, null) === 0.3, "New 
 assert(scoreApi.sessionScoringRadius({ends:[], faceD:122, shaft:1.537}, {arrowDia:"5"}) === 1.537, "Legacy sessions keep their stored radius");
 assert(Math.abs(scoreApi.sessionScoringRadius({ends:[], faceD:122, faceType:"single"}, null) - (122/85 + 122/1200)) < 1e-12, "Legacy sessions without shaft use the old formula");
 assert(scoreApi.arrowMarkRadius(122, 1.537) === 1.537, "Legacy circles are drawn at the legacy radius");
+assert(scoreApi.sessionScoringRadius({ends:[], faceD:122, shaft:1.537, arrowR:"0.285"}, null) === 0.285, "A numeric-string arrowR (import) is a stored real radius, not legacy");
 assert(Math.abs(scoreApi.sessionArrowR({},{arrowDia:"5.0"}) - 0.25) < 1e-12, "Setup arrow diameter must be used for legacy sessions");
 assert(scoreApi.scoreAt(6.1+0.28,0,122,"single").s === 10 && scoreApi.scoreAt(6.1+0.29,0,122,"single").s === 9, "122cm 10-ring line-cut boundary must use the real arrow radius");
 assert(scoreApi.scoreAt(7.6,0,122,"single").s === 9, "Arrow 1.5cm outside the 10 ring must not be promoted");
@@ -305,6 +306,9 @@ const q = analysisApi.sessionQuality(current,{id:"main"});
 /* 2本では標準誤差そのものが不確かなので判断信頼度は「高」にならない */
 const q2 = analysisApi.sessionQuality({...current, id:"two", ends:[[{x:1,y:1,s:10},{x:1.1,y:1,s:10}]]},{id:"main"});
 assert(q2.label !== "高", `Two arrows must not give high decision quality (${q2.score})`);
+const q3 = analysisApi.sessionQuality({...current, id:"three", faceD:40, ends:[[{x:0.1,y:0,s:10},{x:0,y:0.1,s:10},{x:-0.1,y:0,s:10}]]},{id:"main"});
+// ばらつきの下限（リング幅の1/4）と t 補正で、3本のまとまりを「ほぼ確実」とはしない（旧下限 w/10 では 0.998）
+assert(q3.score < 0.85, `Three tight arrows must not look near-certain (${q3.score})`);
 const pm = analysisApi.personalModel(current,{id:"main"},curSt);
 assert(q.score > .45 && ["中","高"].includes(q.label), "Session quality failed");
 assert(pm && pm.sample === 2 && pm.state === "過去と一致", "Personal model failed");
