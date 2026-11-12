@@ -2104,7 +2104,8 @@ html.subscreen body{padding-bottom:calc(92px + var(--safe-b));}
 .actbar .btn{width:100%; min-height:56px; font-size:17px;}
 .actbar.two{display:grid; grid-template-columns:1fr 1.6fr; gap:10px;}
 .actbar.two .btn{min-height:52px; font-size:16px; padding-left:8px; padding-right:8px; white-space:nowrap;}
-.condSec .vsecH .txtBtn{min-height:32px;}
+.condSec .vsecH{align-items:center; padding:2px 0 1px;}
+.condSec .vsecH h2{padding:7px 0;}
 .condSec .seg{margin-top:4px;}
 .condSec .row{gap:12px;}
 .condSec .stageGaugeWrap{border:0; border-radius:0; background:none; padding:10px 0 0;}

@@ -107,7 +107,7 @@ function staticUiChecks() {
     "Toast status live region missing",
   );
   assert(
-    html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".launchPanel"),
+    html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".startBand"),
     "Minified production stylesheet link missing",
   );
   assert(
@@ -271,9 +271,7 @@ function staticUiChecks() {
     "startup/update fallback should be calm and initially hidden",
   );
   assert(
-    recordSurface.includes("サイト値を残す") &&
-      recordSurface.includes("サイト値つきで開始") &&
-      !recordSurface.includes("校正用") &&
+    !recordSurface.includes("校正用") &&
       !recordSurface.includes("状態確認"),
     "record mode labels should stay user-facing",
   );
@@ -296,15 +294,13 @@ function staticUiChecks() {
     "first-run active guide missing",
   );
   assert(
-    surface.includes("この条件で開始") &&
-      surface.includes("前回と同じ") &&
-      surface.includes("recordRepeatBand") &&
-      surface.includes("homeActions") &&
+    surface.includes("この条件で記録を始める") &&
+      surface.includes("前回と同じ条件") &&
+      surface.includes("homeStartBandHtml") &&
+      surface.includes("renderRecordConditions") &&
       surface.includes("quickStart") &&
       surface.includes("quickStartMeta") &&
-      surface.includes("actionFaceLabel") &&
       !surface.includes("今の条件で開始") &&
-      surface.includes("quickSelects") &&
       surface.includes("summaryDecisionHtml") &&
       surface.includes("setupLens") &&
       surface.includes("insightStrip"),

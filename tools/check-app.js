@@ -43,7 +43,7 @@ const appVer = /const APP_VER=(\d+)/.exec(scripts)?.[1];
 const version = JSON.parse(fs.readFileSync(path.join(root, "version.json"), "utf8")).v;
 const swVer = /archery-note-v(\d+)/.exec(fs.readFileSync(path.join(root, "sw.js"), "utf8"))?.[1];
 assert(+appVer === version && +swVer === version, `Version mismatch app=${appVer} json=${version} sw=${swVer}`);
-assert(html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".launchPanel"), "Minified production stylesheet missing");
+assert(html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".startBand"), "Minified production stylesheet missing");
 assert(html.includes('name="description"') && html.includes('property="og:description"'), "Share/SEO metadata missing");
 assert(!/user-scalable\s*=\s*no/i.test(html), "Viewport must not disable user scaling");
 assert(!/maximum-scale\s*=\s*1/i.test(html), "Viewport must not lock maximum scale to 1");
@@ -58,9 +58,10 @@ assert(scripts.includes('class="icoInline" viewBox="0 0 24 24"') && !/class="ico
 assert(/nav\.tabs button\.on,nav\.tabs button\[aria-current=page\]\{[^}]*border-top-color:var\(--accent\)/.test(css), "Flat tab bar selected state (top rule) missing");
 assert(!scripts.includes('setProperty("--active-tab"') && !/<button data-v="sight"/.test(html) && html.includes('data-testid="gear-subtab-sight"') && !/<header\b/.test(html), "v5 skeleton (4 tabs, sight under gear, no header band) missing");
 assert(!surface.includes("targetImpact") && !surface.includes("screenIn") && !surface.includes("triggerReleaseMotion") && !surface.includes("arrowFlight"), "Overdone transition/target animation should not return");
-assert(surface.includes("この条件で開始") && surface.includes("条件を選ぶ") && surface.includes("詳しく残す"), "record launch UI missing");
+// v5 段 4: 記録タブの待機画面（帯）と記録の条件（全画面）
+assert(surface.includes("この条件で記録を始める") && surface.includes("条件を変える") && surface.includes("記録の条件") && surface.includes("renderRecordConditions") && surface.includes("html.subscreen"), "record conditions screen missing");
 assert(surface.includes("読み込みに時間がかかっています") && surface.includes("bootFallback") && surface.includes("bootFallbackDelay") && html.includes('id="updBar" hidden'), "startup/update fallback should be calm and initially hidden");
-assert(surface.includes("この条件で開始") && surface.includes("前回と同じ") && surface.includes("recordRepeatBand") && surface.includes("homeActions") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("actionFaceLabel") && !surface.includes("今の条件で開始") && surface.includes("quickSelects") && surface.includes("recordSetupSnapshot") && surface.includes("gearHeroHtml"), "lightweight record launch UI missing");
+assert(surface.includes("前回と同じ条件") && surface.includes("記録の途中です") && surface.includes("最初の条件を選ぶ") && surface.includes("homeStartBandHtml") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("beginRecording") && !surface.includes("今の条件で開始") && surface.includes("recordSetupSnapshot") && surface.includes("gearHeroHtml"), "record tab home (start band) missing");
 assert(scripts.includes('class="recScreen') && !scripts.includes("compactHud") && !surface.includes("まず今日の記録を始める。詳しい材料") && !surface.includes("距離・的サイズはこの画面で変更できます") && !surface.includes("タップ＆ドラッグで確定"), "Record screen should stay compact and low-noise");
 assert(surface.includes("levelFromScore") && surface.includes("summarySightDialHtml") && surface.includes("summaryDecisionHtml"), "record UI helpers missing");
 assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
@@ -104,7 +105,7 @@ assert(surface.includes("judgementFor") && surface.includes("conditionInsights")
 assert(surface.includes("histFilter") && surface.includes("histSetup"), "History filters missing");
 assert(surface.includes("ROUND_TYPES") && surface.includes("roundProgressHtml"), "Round scoring support missing");
 assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "Field target setup UI missing");
-assert(surface.includes("サイト値を残す") && surface.includes("サイト値つきで開始") && !surface.includes("校正用") && !surface.includes("状態確認"), "Record mode labels should be user-facing");
+assert(!surface.includes("校正用") && !surface.includes("状態確認"), "Record mode labels should be user-facing");
 assert(surface.includes("personalModel") && surface.includes("sessionQuality") && surface.includes("nextActionPlan"), "Personal decision model missing");
 assert(surface.includes("SESSION_METRIC_CACHE") && surface.includes("sessionMetricSignature"), "Session metric cache missing");
 assert(surface.includes("decision_quality") && surface.includes("personal_model"), "CSV decision columns missing");
