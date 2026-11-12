@@ -4,6 +4,10 @@
 
 ## 現在地
 
+- 公開 v126 完了（AN093 計算の中核の作り直し＋AN094 grouping-v3）。2026-11-12 公開 v126: PR #136 を main へ rebase マージ（main fe25f2f）。CI run 43167230638 の validate（check:all・lint・format・配信版e2e）と deploy が成功、06:27:21Z に公開 version.json=126 を確認（環境の許可ホストに eita115115.github.io を追加）。公開サイトの実ブラウザ確認: APP_VER 126、122cm的で7.6cmの矢=9点、線かみ半径0.285cm、円周6本のRMS 4.272cm、grouping-v3・外れ値候補1本、初速推定198fps、ページエラー0。
+
+- 次: 実際の練習記録で外れ値候補（B）とロバストRMS（C）の挙動を確認し、必要なら判定の調整を検討。フィールド的の寸法をWAの図面で確認。旧版CSVとは group_* の意味が違うため、研究データは stats_version=grouping-v3 の行だけを比較する。
+
 - AN094完了（grouping-v3、PR #136 にpush済み・未マージ・版125据え置き）。ユーザー提案（A全射RMSを正式、B MCD外れ値除外RMS、C ロバストRMS、旧方式保持）を、Fableの設計で確定し実装、Fableが独立検証。A=全射の標本統計＋RMSの95%区間（Satterthwaite・Wilson–Hilferty）、B=決定的・入力順不変のMCD（16本以下全列挙、超は固定シードCステップ）の順位で1本除外F検定をRosner型に全段実行（Caroni & Prescott 1992、まとまった外れ矢に隠されない）、C=再重み付けMCD＋一貫性係数＋小標本係数表（72本まで1本刻み）。表示・推移・CSVのgroup_*はA、サイト判断・散り方の診断・ズレの助言・用具比較の中心はB。旧方式は legacyRobustStats でCSV末尾の比較列のみ。検証: 2026-11-12 branch claude/sharp-faraday-bu8pii（PR #136）。仕様 docs/design/grouping-stats-v3.md（Fable設計・Fable検証済み）。npm run check:all 全OK、lint・format:check 成功、Playwright 349 passed (7.1m)。tools/check-grouping-stats.js: A偏り0.992〜1.003、C偏り0.990〜1.005、B偏り≥0.989、全射RMS区間被覆94.6〜97.5%、誤除外0.7〜1.7%、8σ外れ矢1本の検出 n=12 91%/n=24 100%、3本まとまり n=12 72%/n=24 100%、巻き添え≤1.75%、崩壊点8/36で全除外100%、並べ替え不一致0、サイト判定の誤った動かす4.0〜4.9%、速度 n=72 0.23ms/n=144 0.51ms/36本×3000回 288ms。小標本係数は72本まで1本刻みで生成（20万/10万回）。
 
 - 未解決: 実際の練習記録でのB・Cの挙動確認（MCDが常に正しいとは限らない）。旧版CSVとは group_* の意味が違う（stats_version で区別）。正規性の仮定はRMS区間のみ。公開には版上げ（npm run version:bump）とmainへのマージが必要。

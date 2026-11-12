@@ -1103,7 +1103,7 @@
     "task": "計算の中核（採点・グルーピング統計・サイト判定・弾道・サイト予測）を正しい数式で作り直す",
     "status": "done",
     "passes": true,
-    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii commits f1c82e6 ad542fd 4740bc5 6ef884a 8274b09（未push・版125据え置き）。npm run check:all 全OK（check:app/analysis/globals/ui/storage/pwa/version/distribution 等）、npm run lint 成功、npm run format:check 成功、Playwright 349 passed (7.1m)（この環境ではプロジェクトの@playwright/testとブラウザ版が合わないため、/opt/pw-browsers/chromium を指定する一時設定で実行）。矢円=判定半径はcheck-appとe2e outdoor-contrast（外縁0.285cm）・legacy-rescoreで確認、375px撮影で線かみ10/9を目視確認。独立レビュー2回（採点120万点総当たり不一致0、誤警報5.0〜5.6%、誤除外0.9〜1.1%、95%区間被覆94.7〜95.1%）、指摘は修正済み、フィールド的の寸法のみ未確認。",
+    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii commits f1c82e6 ad542fd 4740bc5 6ef884a 8274b09（未push・版125据え置き）。npm run check:all 全OK（check:app/analysis/globals/ui/storage/pwa/version/distribution 等）、npm run lint 成功、npm run format:check 成功、Playwright 349 passed (7.1m)（この環境ではプロジェクトの@playwright/testとブラウザ版が合わないため、/opt/pw-browsers/chromium を指定する一時設定で実行）。矢円=判定半径はcheck-appとe2e outdoor-contrast（外縁0.285cm）・legacy-rescoreで確認、375px撮影で線かみ10/9を目視確認。独立レビュー2回（採点120万点総当たり不一致0、誤警報5.0〜5.6%、誤除外0.9〜1.1%、95%区間被覆94.7〜95.1%）、指摘は修正済み、フィールド的の寸法のみ未確認。 / 2026-11-12 公開 v126: PR #136 を main へ rebase マージ（main fe25f2f）。CI run 43167230638 の validate（check:all・lint・format・配信版e2e）と deploy が成功、06:27:21Z に公開 version.json=126 を確認（環境の許可ホストに eita115115.github.io を追加）。公開サイトの実ブラウザ確認: APP_VER 126、122cm的で7.6cmの矢=9点、線かみ半径0.285cm、円周6本のRMS 4.272cm、grouping-v3・外れ値候補1本、初速推定198fps、ページエラー0。",
     "dependencies": [],
     "owner": "claude",
     "acceptance": "evals/acceptance.md の採点・物理（check:app・check:analysis、表示される矢円と採点結果の一致）と広い変更（check:all・test:e2e）。画面構成と保存形式は維持し、既存の練習データと保存点数を変更しない。数式と根拠を docs/design/math-core-rebuild.md に記録する。"
@@ -1113,7 +1113,7 @@
     "task": "グルーピング統計を grouping-v3（A 全射RMSを正式指標、B MCD外れ値候補除外、C 再重み付けMCDロバストRMS、旧方式は比較用に保持）へ作り直す",
     "status": "done",
     "passes": true,
-    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii（PR #136）。仕様 docs/design/grouping-stats-v3.md（Fable設計・Fable検証済み）。npm run check:all 全OK、lint・format:check 成功、Playwright 349 passed (7.1m)。tools/check-grouping-stats.js: A偏り0.992〜1.003、C偏り0.990〜1.005、B偏り≥0.989、全射RMS区間被覆94.6〜97.5%、誤除外0.7〜1.7%、8σ外れ矢1本の検出 n=12 91%/n=24 100%、3本まとまり n=12 72%/n=24 100%、巻き添え≤1.75%、崩壊点8/36で全除外100%、並べ替え不一致0、サイト判定の誤った動かす4.0〜4.9%、速度 n=72 0.23ms/n=144 0.51ms/36本×3000回 288ms。小標本係数は72本まで1本刻みで生成（20万/10万回）。",
+    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii（PR #136）。仕様 docs/design/grouping-stats-v3.md（Fable設計・Fable検証済み）。npm run check:all 全OK、lint・format:check 成功、Playwright 349 passed (7.1m)。tools/check-grouping-stats.js: A偏り0.992〜1.003、C偏り0.990〜1.005、B偏り≥0.989、全射RMS区間被覆94.6〜97.5%、誤除外0.7〜1.7%、8σ外れ矢1本の検出 n=12 91%/n=24 100%、3本まとまり n=12 72%/n=24 100%、巻き添え≤1.75%、崩壊点8/36で全除外100%、並べ替え不一致0、サイト判定の誤った動かす4.0〜4.9%、速度 n=72 0.23ms/n=144 0.51ms/36本×3000回 288ms。小標本係数は72本まで1本刻みで生成（20万/10万回）。 / 2026-11-12 公開 v126: PR #136 を main へ rebase マージ（main fe25f2f）。CI run 43167230638 の validate（check:all・lint・format・配信版e2e）と deploy が成功、06:27:21Z に公開 version.json=126 を確認（環境の許可ホストに eita115115.github.io を追加）。公開サイトの実ブラウザ確認: APP_VER 126、122cm的で7.6cmの矢=9点、線かみ半径0.285cm、円周6本のRMS 4.272cm、grouping-v3・外れ値候補1本、初速推定198fps、ページエラー0。",
     "dependencies": [
       "AN-093"
     ],
