@@ -1123,9 +1123,9 @@
   {
     "id": "AN-095",
     "task": "UI v4 第1段階: グラファイト＋セージの色トークン、文字の最小13px、ルーペの画面固定、記録中エンドの矢番号の吹き出し（重なり回避）、記録トーストを読み上げへ置き換え、新規インストールの既定テーマをダーク",
-    "status": "in-progress",
+    "status": "done",
     "passes": false,
-    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii（版126据え置き・未公開）。npm run check:all 全OK、lint・format:check 成功、check:globals・check:security 成功、Playwright 352 passed (7.3m)。check-app に矢番号の吹き出し配置の回帰（画面上22px/13px、6本同位置でも重ならない、矢の上に乗らない、表示範囲内、決定的）、check-storage-contract に既定テーマの回帰（新規 dark、テーマ未保存の既存データ auto）。吹き出しの乱択検査6000配置で吹き出し同士の重なり0、矢の上に乗るのは矢の間隔が約24pxの11件（0.18%）。375px・320px のライト/ダークで変更前後のスクリーンショットを撮影。オーナーの見た目確認は未了のため passes は false のまま。",
+    "evidence": "2026-11-12 branch claude/sharp-faraday-bu8pii（版126据え置き・未公開）。npm run check:all 全OK、lint・format:check 成功、check:globals・check:security 成功、Playwright 352 passed (7.3m)。check-app に矢番号の吹き出し配置の回帰（画面上22px/13px、6本同位置でも重ならない、矢の上に乗らない、表示範囲内、決定的）、check-storage-contract に既定テーマの回帰（新規 dark、テーマ未保存の既存データ auto）。吹き出しの乱択検査6000配置で吹き出し同士の重なり0、矢の上に乗るのは矢の間隔が約24pxの11件（0.18%）。375px・320px のライト/ダークで変更前後のスクリーンショットを撮影。オーナーの見た目確認は未了のため passes は false のまま。 / 2026-11-13 オーナー判断で閉じる（「閉じていいよ」）。v4 の見た目はオーナー評価「前の UI を引きずりすぎ」により AN-096（UI v5）へ置き換え、v127 で公開済み。第1段階の中身（文字の最小13px・拡大鏡の画面固定・矢番号の吹き出し・記録トーストの読み上げへの置き換え・新規の既定テーマをダーク）は v5 に引き継いで公開。v4 の色トークン（グラファイト＋セージ）は v5 のトークンに置き換わったため、受入条件の「オーナーが見た目を確認する」は v4 としては満たしていない。そのため passes は false のまま閉じる。",
     "dependencies": [
       "AN-094"
     ],
