@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const net = require("net");
+const zlib = require("zlib");
 
 const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
@@ -74,6 +75,65 @@ function pngSize(file) {
   const b = fs.readFileSync(file);
   assert(b.length > 24 && b.toString("ascii", 1, 4) === "PNG", `Not a PNG: ${file}`);
   return { width: b.readUInt32BE(16), height: b.readUInt32BE(20), bytes: b.length };
+}
+
+/* Chrome が書き出す PNG（8bit・RGB または RGBA・インターレースなし）を画素に戻す。
+   白紙の検出で、背景だけの画像と画素ごとに比べるために使う（依存を増やさない） */
+function decodePng(buf) {
+  assert(buf.toString("ascii", 1, 4) === "PNG", "Not a PNG buffer");
+  let off = 8;
+  let width = 0, height = 0, depth = 0, colorType = 0, interlace = 0;
+  const idat = [];
+  while (off < buf.length) {
+    const len = buf.readUInt32BE(off);
+    const type = buf.toString("ascii", off + 4, off + 8);
+    const data = buf.subarray(off + 8, off + 8 + len);
+    if (type === "IHDR") {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      depth = data[8];
+      colorType = data[9];
+      interlace = data[12];
+    } else if (type === "IDAT") idat.push(data);
+    else if (type === "IEND") break;
+    off += 12 + len;
+  }
+  const ch = colorType === 6 ? 4 : colorType === 2 ? 3 : 0;
+  assert(depth === 8 && ch && !interlace, `Unsupported PNG (depth ${depth}, color ${colorType}, interlace ${interlace})`);
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const stride = width * ch;
+  const out = Buffer.alloc(stride * height);
+  for (let y = 0; y < height; y++) {
+    const f = raw[y * (stride + 1)];
+    const src = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    for (let x = 0; x < stride; x++) {
+      const a = x >= ch ? out[y * stride + x - ch] : 0;
+      const b = y ? out[(y - 1) * stride + x] : 0;
+      const c = x >= ch && y ? out[(y - 1) * stride + x - ch] : 0;
+      let v = src[x];
+      if (f === 1) v += a;
+      else if (f === 2) v += b;
+      else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4) {
+        const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+        v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+      }
+      out[y * stride + x] = v & 255;
+    }
+  }
+  return { width, height, ch, data: out };
+}
+/* 2枚の同じ大きさの画像で、色が目に見えて違う画素の割合 */
+function differingPixelRatio(a, b) {
+  assert(a.width === b.width && a.height === b.height, "image sizes differ");
+  let diff = 0;
+  const n = a.width * a.height;
+  for (let i = 0; i < n; i++) {
+    let d = 0;
+    for (let k = 0; k < 3; k++) d = Math.max(d, Math.abs(a.data[i * a.ch + k] - b.data[i * b.ch + k]));
+    if (d > 24) diff++;
+  }
+  return diff / n;
 }
 
 function staticUiChecks() {
@@ -841,8 +901,33 @@ async function screenshot(browser, view) {
       size.width === view.width && size.height === view.height,
       `Unexpected screenshot size for ${view.name}: ${size.width}x${size.height}`,
     );
-    assert(size.bytes > 12000, `Screenshot too small for ${view.name}: ${size.bytes} bytes`);
-    return { file: shot, ...size };
+    /* 白紙（何も描けていない）検出。以前は 12000 bytes の固定値だったが、PNG の大きさは
+       描かれる文字のフォントに左右される（CI の ubuntu には日本語フォントが無く、文字が豆腐になる。
+       v5 の暗く平らな記録タブは、それで 1万 bytes を切る）。同じ画面の中身を隠して撮った
+       「背景だけ」の画像と画素ごとに比べ、色の違う画素が 1% を超えることを確かめる（白紙なら 0%。広い画面では中身が中央の列だけなので約3%）（大きさの比はフォントで変わるので使わない） */
+    await client.send("Runtime.evaluate", {
+      expression: `(() => {
+        const s = document.createElement("style");
+        s.textContent = "html *{visibility:hidden!important}";
+        document.head.appendChild(s);
+        return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      })()`,
+      awaitPromise: true,
+    });
+    const blankCapture = await client.send("Page.captureScreenshot", {
+      format: "png",
+      fromSurface: true,
+      captureBeyondViewport: false,
+    });
+    const drawn = differingPixelRatio(
+      decodePng(fs.readFileSync(shot)),
+      decodePng(Buffer.from(blankCapture.data, "base64")),
+    );
+    assert(
+      drawn > 0.01,
+      `Screenshot looks blank for ${view.name}: only ${(drawn * 100).toFixed(1)}% of pixels differ from the background`,
+    );
+    return { file: shot, ...size, drawn };
   } finally {
     if (client) client.close();
     await stopProcess(proc);
@@ -866,7 +951,9 @@ async function main() {
   }
   console.log(`UI smoke checks OK (${path.basename(browser)})`);
   shots.forEach((s) =>
-    console.log(`${path.relative(root, s.file)} ${s.width}x${s.height} ${s.bytes} bytes`),
+    console.log(
+      `${path.relative(root, s.file)} ${s.width}x${s.height} ${s.bytes} bytes (${(s.drawn * 100).toFixed(1)}% of pixels differ from the background)`,
+    ),
   );
 }
 
