@@ -751,6 +751,49 @@ test("a distance in an imported recording or past-session edit is shown as text,
   expect(errors).toEqual([]);
 });
 
+test("a later practice on the same day is not treated as earlier in the note detail of the first one", async ({
+  page,
+}) => {
+  // 同じ日に2回練習したとき、1回目のノートの「中心の移り変わり」に2回目を入れない（塗った点はこの記録）
+  const database = notesDb();
+  const p6 = database.sessions.find((s) => s.id === "p6");
+  database.sessions.push({
+    ...JSON.parse(JSON.stringify(p6)),
+    id: "p6b",
+    ends: p6.ends.map((e) => e.map((a) => ({ ...a, x: a.x + 6, y: a.y - 6 }))),
+  });
+  const errors = await open(page, database);
+  await page.evaluate(() => globalThis.openHistDetail("p6"));
+  const fold = page.getByTestId("note-sight-details");
+  await fold.locator("summary").click();
+  const rows = fold.locator(".sightDriftTbl tr");
+  // 見出し + 位置のある6回（10/3〜11/10。11/4 は点数だけの記録）。後に保存した同じ日の p6b は入らない
+  await expect(rows).toHaveCount(7);
+  await expect(rows.nth(1).locator("td").first()).toHaveText("1・10/3");
+  await expect(rows.nth(6).locator("td").first()).toHaveText("6・11/10");
+  // 2回目のノートでは、1回目も前の回として並ぶ
+  await page.locator("#hClose").click();
+  await page.evaluate(() => globalThis.openHistDetail("p6b"));
+  const fold2 = page.getByTestId("note-sight-details");
+  await fold2.locator("summary").click();
+  const rows2 = fold2.locator(".sightDriftTbl tr");
+  await expect(rows2).toHaveCount(8);
+  await expect(rows2.nth(6).locator("td").first()).toHaveText("6・11/10");
+  await expect(rows2.nth(7).locator("td").first()).toHaveText("7・11/10");
+  expect(errors).toEqual([]);
+});
+
+test("a broken entry in a setup's change history does not hide the notes", async ({ page }) => {
+  const database = notesDb();
+  database.setups[0].history = [
+    { date: "2026-11-10", changes: [null, "x", { from: "a", to: "b" }] },
+  ];
+  const errors = await open(page, database);
+  await expect(page.locator("#histList .historyRow")).toHaveCount(database.sessions.length);
+  await expect(page.locator("#histList .memoRow")).toHaveCount(database.notes.length);
+  expect(errors).toEqual([]);
+});
+
 test("notes with broken dates and an empty practice show no NaN and keep the stored data", async ({
   page,
 }) => {

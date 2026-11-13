@@ -91,11 +91,11 @@ function noteDayChanges() {
   };
   (db.setups || []).forEach((setup) => {
     (Array.isArray(setup.history) ? setup.history : []).forEach((h) => {
-      const changes = h && Array.isArray(h.changes) ? h.changes : [];
+      const changes = h && Array.isArray(h.changes) ? h.changes.filter((c) => c && typeof c === "object") : [];
       if (!changes.length) return;
       add(
         h.date,
-        `弓具の変更: ${setup.name}（${changes.map((c) => `${c.label} ${c.from || "未設定"} → ${c.to || "削除"}`).join("、")}）`,
+        `弓具の変更: ${setup.name}（${changes.map((c) => `${String(c.label || "項目")} ${c.from || "未設定"} → ${c.to || "削除"}`).join("、")}）`,
       );
     });
   });
@@ -622,8 +622,7 @@ function openHistDetail(id) {
   const posCount = all.filter(arrowHasPos).length;
   /* この日の時点までのデータだけで computeTodaysResult を再現する（未来のセッションを
      「前回」等に混入させないよう、当日以前に絞った母集団を渡す）。文言は「今回」→「この回」に切替 */
-  const histAsOfDate = sess.date || today();
-  const histSessions = db.sessions.filter((x) => x && x.date && x.date <= histAsOfDate);
+  const histSessions = sessionsAsOf(sess);
   const histTodaysResult = computeTodaysResult(histSessions, sess.id, sessionMetrics, {
     formAnalyses: db.formAnalyses,
   });
@@ -1104,8 +1103,10 @@ function sightOffsetWord(v, k) {
    サイトの判断は B の中心で行うので、ここ（判断の根拠）にだけ出す。正式な値（全射の A）は 分析 > 着弾 にある */
 const SIGHT_DRIFT_MAX = 8;
 function sightCentreRows(sess) {
+  /* この記録の時点まで（同じ日の後の回は入れない）。日付の無い記録は従来どおり日付の比較で選ぶ */
+  const asOf = sess.date ? new Set(sessionsAsOf(sess)) : null;
   return sessionsByDateDesc()
-    .filter((s) => (s.setupId || "") === (sess.setupId || "") && s.dist === sess.dist && s.faceD === sess.faceD && (s.faceType || "single") === (sess.faceType || "single") && (s.date || "") <= (sess.date || "") && sessionHasPos(s))
+    .filter((s) => (s.setupId || "") === (sess.setupId || "") && s.dist === sess.dist && s.faceD === sess.faceD && (s.faceType || "single") === (sess.faceType || "single") && (asOf ? asOf.has(s) : (s.date || "") <= (sess.date || "")) && sessionHasPos(s))
     .slice(0, SIGHT_DRIFT_MAX)
     .map((s) => {
       const st = sightStats(sessionMetrics(s).st);

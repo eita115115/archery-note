@@ -390,6 +390,16 @@ function sessionsByDateDesc() {
     .sort((a, b) => String(b.s.date || "").localeCompare(String(a.s.date || "")) || b.i - a.i)
     .map((x) => x.s);
 }
+/* sess の時点までの記録（保存順）: 日付が前の記録と、同じ日付なら sess より先に保存した記録と sess 自身。
+   同じ日の後の回を、前の回のノートで「前回」・比較・中心の移り変わりに入れないため。
+   sess に日付が無いときは asOfDate（既定は今日）以前の日付つきの記録 */
+function sessionsAsOf(sess, asOfDate) {
+  const d = (sess && sess.date) || asOfDate || today();
+  const idx = sess && sess.date === d ? db.sessions.indexOf(sess) : -1;
+  return db.sessions.filter(
+    (x, i) => x && typeof x === "object" && x.date && (x.date < d || (x.date === d && (idx < 0 || i <= idx))),
+  );
+}
 function roundQuota(roundId) {
   const r = ROUND_TYPES.find((x) => x.id === roundId);
   return r && r.arrows ? r.arrows : null;

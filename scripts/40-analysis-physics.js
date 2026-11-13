@@ -626,9 +626,8 @@ function csvGroupingResearchColumns(pts, st, f2){
 }
 function exportSessionsCsv(){
   beginActiveWorkflow();
+  /* CSV からは元に戻せないので、バックアップの「最後の書き出し」には数えない */
   shareOrDownloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8","Archery Note CSV").finally(endActiveWorkflow);
-  db.settings.lastBackupAt=new Date().toISOString();
-  save("csv-export");
 }
 function scorecardSvg(sess){
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);

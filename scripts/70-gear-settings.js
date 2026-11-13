@@ -1648,6 +1648,16 @@ function settingsRowHtml(title, sub, ctl, cls) {
 function settingsLinkHtml(id, testid, title, sub, value, cls) {
   return `<button type="button" class="lrow link setLink${cls ? " " + cls : ""}" id="${id}" data-testid="${testid}"><span class="lmain"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</span><span class="lv">${value ? `<span>${value}</span>` : ""}${NOTE_GO}</span></button>`;
 }
+/* 控えの選択肢は位置ではなく作った時刻で指す。書き出しで新しい控えが先頭に入っても、選んだ控えを戻す */
+function snapshotKey(snap, i) {
+  return snap && snap.ts != null ? `ts:${snap.ts}` : `i:${i}`;
+}
+function snapshotByKey(key) {
+  const snaps = readSnapshots();
+  const k = String(key || "");
+  if (k.startsWith("i:")) return snaps[+k.slice(2)];
+  return snaps.find((x, i) => snapshotKey(x, i) === k);
+}
 function lastBackupText() {
   const t = db.settings.lastBackupAt ? new Date(db.settings.lastBackupAt) : null;
   if (!t || !Number.isFinite(t.getTime())) return "まだ書き出していません";
@@ -1752,7 +1762,7 @@ function openSettings() {
       <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
       <div class="setBlock" data-testid="settings-snapshots">
         <div class="lmain"><b>自動バックアップ</b><span>書き出す・読み込む・控えに戻す操作のたびに、この端末の中に控えを残します（${snaps.length}件）。ブラウザのデータを消すと、控えも一緒に消えます</span></div>
-        ${snaps.length ? `<label class="f" for="dSnapSel">戻す控え</label><select class="inp" id="dSnapSel">${snaps.map((s, i) => `<option value="${i}">${esc(snapshotWhenText(s))}</option>`).join("")}</select><p class="basis" id="dSnapInfo" data-testid="settings-snapshot-info">この控えの中身: ${esc(snapshotCountsText(snaps[0]))}</p>` : ""}
+        ${snaps.length ? `<label class="f" for="dSnapSel">戻す控え</label><select class="inp" id="dSnapSel">${snaps.map((s, i) => `<option value="${esc(snapshotKey(s, i))}">${esc(snapshotWhenText(s))}</option>`).join("")}</select><p class="basis" id="dSnapInfo" data-testid="settings-snapshot-info">この控えの中身: ${esc(snapshotCountsText(snaps[0]))}</p>` : ""}
         <div class="btnRow">
           <button type="button" class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">いま控えを残す</button>
           <button type="button" class="btn sec" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length ? "" : "disabled"}>選んだ控えに戻す</button>
@@ -1958,13 +1968,13 @@ function openSettings() {
   const snapSel = ovl.querySelector("#dSnapSel");
   if (snapSel)
     snapSel.onchange = () => {
-      const snap = readSnapshots()[+snapSel.value];
+      const snap = snapshotByKey(snapSel.value);
       const info = ovl.querySelector("#dSnapInfo");
       if (snap && info) info.textContent = `この控えの中身: ${snapshotCountsText(snap)}`;
     };
   ovl.querySelector("#dSnapRestore").onclick = async () => {
     const sel = ovl.querySelector("#dSnapSel");
-    const snap = readSnapshots()[sel ? +sel.value : 0];
+    const snap = sel ? snapshotByKey(sel.value) : readSnapshots()[0];
     if (!snap || !snap.data) {
       toast("戻せる控えがありません");
       return;

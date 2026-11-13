@@ -789,3 +789,48 @@ for (const colorScheme of ["light", "dark"]) {
     expect(errors).toEqual([]);
   });
 }
+
+test("after writing a backup, restoring the selected snapshot restores that one, and CSV does not count as a backup", async ({
+  page,
+}) => {
+  const data = gearDb();
+  data.settings.lastBackupAt = null;
+  await page.addInitScript((d) => {
+    if (globalThis.sessionStorage.getItem("__snapSeeded")) return;
+    globalThis.sessionStorage.setItem("__snapSeeded", "1");
+    const mk = (date, n) => ({
+      ts: date.getTime(),
+      reason: "test",
+      hash: `h${n}`,
+      counts: { sessions: n, setups: 1, marks: 0 },
+      data: { ...d, sessions: d.sessions.slice(0, n) },
+    });
+    globalThis.localStorage.setItem(
+      "archeryNote.snapshots.v1",
+      JSON.stringify([mk(new Date(2026, 10, 11, 10, 0), 2), mk(new Date(2026, 10, 10, 9, 0), 1)]),
+    );
+  }, data);
+  const errors = await open(page, data);
+  await page.locator("#btnSettings").click();
+  const sel = page.locator("#dSnapSel");
+  await sel.selectOption({ label: "2026/11/11 10:00" });
+  await expect(page.getByTestId("settings-snapshot-info")).toHaveText(
+    "この控えの中身: 練習2・セッティング1・サイト0",
+  );
+  /* CSV は元に戻せないので「最後の書き出し」は変わらない */
+  const csv = page.waitForEvent("download");
+  await page.getByTestId("settings-csv").click();
+  await csv;
+  expect((await stored(page)).settings.lastBackupAt).toBeNull();
+  /* 書き出すと新しい控えが先頭に入る。選んでいた控えはそのまま */
+  const json = page.waitForEvent("download");
+  await page.getByTestId("settings-export").click();
+  await json;
+  expect((await stored(page)).settings.lastBackupAt).not.toBeNull();
+  await page.getByTestId("settings-snapshot-restore").click();
+  await expect(page.locator(".confirmSheet")).toContainText(
+    "2026/11/11 10:00（練習2・セッティング1・サイト0） の控えに戻します",
+  );
+  await page.locator("#acCancel").click();
+  expect(errors).toEqual([]);
+});
