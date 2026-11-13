@@ -70,6 +70,14 @@ function markCircle(a, faceD, color, label, cls, arrowR){
     /* 番号は実寸の矢円に重ならないよう目印の上寄りに置く（目印が実寸と同じ大きさなら中央） */
     (label?`<text x="${a.x}" y="${-a.y-(loc>r*1.05?loc*.4:0)}" font-size="${loc*(loc>r*1.05?1:1.2)}" fill="#fff" stroke="rgba(0,0,0,.55)" stroke-width="${loc*.12}" paint-order="stroke" text-anchor="middle" dominant-baseline="central" font-weight="bold">${esc(label)}</text>`:"")+`</g>`;
 }
+/* 「点数だけ直す」で、位置から決まる点と違う点にした矢（manual:true）の印。スコア表の * と同じ記号を
+   矢円の右上に置く。矢円の大きさと位置は変えない（採点の円はそのまま）。fontCm は文字の大きさ（cm）、
+   省略時は的の直径から決める */
+function manualMarkSvg(a, faceD, arrowR, fontCm){
+  const r=arrowMarkRadius(faceD, arrowR), loc=Math.max(arrowLocatorRadius(faceD), r);
+  const f=fontCm||faceD/22;
+  return `<text class="manualMark" x="${a.x+loc*.8+f*.3}" y="${-a.y-loc*.8-f*.15}" font-size="${f}" fill="#fff" stroke="#000" stroke-width="${f*.16}" paint-order="stroke" text-anchor="middle" dominant-baseline="central" font-weight="bold" aria-hidden="true">*</text>`;
+}
 /* 記録中のエンドの矢番号（射った順）を、画面上の実寸で読める吹き出しにする。
    吹き出しは矢から北東へずらし、重なるときは互いに押し出して引き出し線で結ぶ（決定的な反復）。
    pxPerCm は的の SVG の画面上の倍率。吹き出しは直径 22px・文字 13px 相当で、実寸の矢円（arrowFoot）には触れない */
@@ -137,16 +145,20 @@ function plotSession(sess, container, opts){
   const allArrows=((sess&&sess.ends)||[]).flat();
   const posCount=allArrows.filter(arrowHasPos).length;
   if(!posCount){ container.innerHTML=noImpactHtml(sess); return; }
+  const manualCount=allArrows.filter(a=>arrowHasPos(a)&&a.manual===true).length;
   const ft=sess.faceType==="triple"?"spot":sess.faceType;
   container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,pfx,ft)}</div>`+
     (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"")+
-    (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射を表示しています（位置なし ${allArrows.length-posCount}射は、図と着弾の統計に入れていません）。</div>`:"");
+    (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射を表示しています（位置なし ${allArrows.length-posCount}射は、図と着弾の統計に入れていません）。</div>`:"")+
+    (manualCount?`<div class="hint plotManualNote" data-testid="plot-manual-note">* の付いた矢（${manualCount}射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録しています。</div>`:"");
   const marks=container.querySelector("#"+pfx+"marks");
   let html="";
   /* 記録時の判定の半径で描く（旧判定の記録は旧半径。保存された点数と矢円を一致させる） */
   const arrowR=sessionScoringRadius(sess, db.setups.find(x=>x.id===sess.setupId));
   /* 座標のない矢（点数だけの記録・座標なしの M）は描かない */
   sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ if(arrowHasPos(a)) html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
+  /* 手で直した矢の * は、ほかの矢円に隠れないよう最後に描く */
+  sess.ends.forEach(end=>{ end.forEach(a=>{ if(arrowHasPos(a)&&a.manual===true) html+=manualMarkSvg(a,faceD,arrowR); }); });
   const st=sessionMetrics(sess).st;
   if(st){
     const w=ringW(faceD,ft);

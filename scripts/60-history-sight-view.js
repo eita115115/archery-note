@@ -915,7 +915,7 @@ function sightPredictionHtml(interp, marks) {
     const mark = interp.sources[i], info = status.get(String(mark.dist));
     const notes = [];
     if (info.order.note) notes.push(info.order.note);
-    if (info.first !== mark && !isFinite(parseFloat(info.first.v))) {
+    if (info.first !== mark && !isFinite(parseSightNumber(info.first.v))) {
       const dated = typeof mark.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(mark.date) && typeof info.first.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(info.first.date);
       const newerDate = dated && info.first.date > mark.date;
       const newerTime = dated && info.first.date === mark.date && Number.isFinite(Number(mark.ts)) && Number(mark.ts) > 0 && Number.isFinite(Number(info.first.ts)) && Number(info.first.ts) > Number(mark.ts);
@@ -976,8 +976,8 @@ function sightDistRows(sid, dists, interp) {
     const all = db.sightMarks
       .filter((x) => x.setupId === sid && x.dist === d)
       .sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.ts || 0) - (a.ts || 0));
-    const numeric = all.find((x) => hasSightInput(x.v) && Number.isFinite(Number(String(x.v).trim())));
-    if (numeric) return { dist: d, kind: "rec", v: Number(String(numeric.v).trim()), text: sightValueText(numeric.v), h: numeric.h, mark: numeric, count: all.length };
+    const numeric = all.find((x) => hasSightInput(x.v) && Number.isFinite(parseSightNumber(x.v)));
+    if (numeric) return { dist: d, kind: "rec", v: parseSightNumber(numeric.v), text: sightValueText(numeric.v), h: numeric.h, mark: numeric, count: all.length };
     if (interp && !interp.have.includes(d)) {
       const est = interp.est(d);
       if (Number.isFinite(est)) return { dist: d, kind: "pred", v: est, text: est.toFixed(1), count: all.length, n: interp.pts.length };

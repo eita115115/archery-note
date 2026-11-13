@@ -3530,3 +3530,11 @@ CSS: scripts と index.html のどこにも出てこないクラス（176 個）
 版上げ: `npm run version:bump` で 127（APP_VER・version.json・sw.js `archery-note-v127`・package.json / package-lock.json）、check:version 成功。CHANGELOG に v127。検証: build:web-assets・check:all（exit 0）・lint・format:check 成功、Playwright 454 passed (6.7m)。
 
 次: オーナーの承認後に PR #139 をマージし、Pages の version.json が 127 になることを確かめる。リスク: 画面の全面的な作り直しで、実物の iPhone（Safari）での確認は未実施（Playwright の Chromium・モバイル寸法のみ）。
+
+## AN096 公開前の追加（オーナー判断）と CI の修正
+
+2026-11-13、オーナー判断で3点を追加。(1) 手で直した点数（manual:true）の矢に的の図で * を付ける（`manualMarkSvg`、記録中・結果・ノート・分析）。(2) 見本データの点数を位置から `scoreAt` で決める（入れ済みの見本は書き換えない）。(3) サイト値を `parseSightNumber`（NFKC・小数のカンマ・先頭の数）で読む読み方に統一（台帳・目盛り・予測・調整の目安・校正・表示）。
+
+CI: PR #139 の validate は段4・5の push から失敗していた（check:ui「Screenshot too small for iphone-390: 9865 bytes」）。親が各段で PR の CI を確認していなかった。原因は CI に日本語フォントが無く、v5 の暗く平らな記録タブの PNG が 12000 bytes を切ること（日本語フォントを外した fontconfig で再現: 7088 bytes）。判定を「中身を隠した背景だけの画像と比べ、色の違う画素が 1% を超える」に変更（node:zlib で PNG を読む。依存なし）。白紙で 0.0% と失敗することを確認。
+
+検証: check:all（exit 0）・lint・format:check 成功、Playwright 456 passed (6.9m)、配布版 e2e 454 passed（追加前）。

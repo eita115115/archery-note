@@ -352,6 +352,45 @@ test("the sight scale figure and the distance rows show the ledger values", asyn
   expect(errors).toEqual([]);
 });
 
+test("a sight value written with a comma or full-width digits is read the same in the ledger and the prediction", async ({
+  page,
+}) => {
+  // 「5,2」「４．５」も、台帳・目盛りの図・予測で同じ数として読む（以前は台帳では数値なし、予測では 5）
+  const data = gearDb();
+  const m70 = data.sightMarks.find((m) => m.setupId === "s1" && m.dist === 70 && m.id === "m1");
+  m70.v = "5,2";
+  data.sightMarks.push({
+    id: "mfw",
+    setupId: "s1",
+    dist: 18,
+    v: "１．９",
+    h: "0",
+    date: "2026-11-11",
+    ts: 1794200000000,
+  });
+  const errors = await open(page, data);
+  await gotoSight(page);
+  const scale = page.getByTestId("sight-scale");
+  const marks = await scale
+    .locator("[data-scale-dist]")
+    .evaluateAll((els) =>
+      els.map((e) => [e.dataset.scaleDist, e.dataset.scaleKind, e.dataset.scaleV].join(":")).sort(),
+    );
+  expect(marks).toContain("70:rec:5.2");
+  expect(marks).toContain("18:rec:1.9");
+  const used = await page.evaluate(() => {
+    const it = globalThis.sightInterp("s1");
+    return it.pts.map((p) => p.join(":")).sort();
+  });
+  expect(used).toContain("70:5.2");
+  expect(used).toContain("18:1.9");
+  // 保存された文字はそのまま
+  const after = await stored(page);
+  expect(after.sightMarks.find((m) => m.id === "m1").v).toBe("5,2");
+  expect(after.sightMarks.find((m) => m.id === "mfw").v).toBe("１．９");
+  expect(errors).toEqual([]);
+});
+
 test("the adjustment guide states the decision, the numbers, n and its basis in plain copy", async ({
   page,
 }) => {

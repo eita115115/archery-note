@@ -527,6 +527,8 @@ test("moving or re-placing a manually overridden arrow re-scores it from the pos
   expect(s.cur[1]).toEqual(manual(-7.8, 0));
   await expect(page.locator('#curChips [data-i="0"] .man')).toHaveCount(0);
   await expect(page.locator('#curChips [data-i="1"] .man')).toHaveCount(1);
+  // 的の図でも、手で直した矢だけに * の印（矢円の大きさと位置は変えない）
+  await expect(page.locator("#tgmarks .manualMark")).toHaveCount(1);
 
   // 的をタップで置き直す: 同じく手修正を外す
   await page.locator('#curChips [data-i="1"]').click();
@@ -539,6 +541,32 @@ test("moving or re-placing a manually overridden arrow re-scores it from the pos
   expect(s.cur[1].auto).toBeUndefined();
   expect(Math.hypot(s.cur[1].x, s.cur[1].y)).toBeLessThan(1);
   await expect(page.locator("#curChips .man")).toHaveCount(0);
+  await expect(page.locator("#tgmarks .manualMark")).toHaveCount(0);
+  expect(errors).toEqual([]);
+});
+
+test("manually corrected arrows carry a * on the result, note and analysis targets", async ({
+  page,
+}) => {
+  const manual = (x, y) => ({ x, y, s: 10, X: false, manual: true, auto: { s: 9, X: false } });
+  const { errors } = await open(page, { cur: [manual(7.8, 0), P(1, 1, 10, true), P(-2, 0, 10)] });
+  await expect(page.locator("#tgmarks .manualMark")).toHaveCount(1);
+  // 確定して終了 → 結果の図
+  await page.getByTestId("active-end").click();
+  await page.getByTestId("active-menu").click();
+  await page.getByTestId("active-finish").click();
+  await expect(page.locator("#sumPlot .manualMark")).toHaveCount(1);
+  await expect(page.locator("#sumPlot").getByTestId("plot-manual-note")).toHaveText(
+    "* の付いた矢（1射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録しています。",
+  );
+  // 印は矢円の右上で、矢円（判定の円）の数と位置は変わらない
+  const foot = await page.locator("#sumPlot .arrowFoot").count();
+  expect(foot).toBe(3);
+  await page.locator("#sumClose").click();
+  const id = (await storedDb(page)).sessions.at(-1).id;
+  await page.evaluate((i) => globalThis.openHistDetail(i), id);
+  await expect(page.locator("#hPlot .manualMark")).toHaveCount(1);
+  await expect(page.locator("#hPlot").getByTestId("plot-manual-note")).toBeVisible();
   expect(errors).toEqual([]);
 });
 

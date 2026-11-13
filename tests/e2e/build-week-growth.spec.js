@@ -28,6 +28,19 @@ test("demo data opens the score analysis with its target stated and remains remo
       ).length,
   );
   expect(demoCount).toBe(3);
+  // 見本の点数は、図の円（位置と矢の太さ）から決まる点と同じ（矢円と採点の一致）
+  const mismatches = await page.evaluate(() => {
+    const out = [];
+    for (const s of JSON.parse(localStorage.getItem("archeryNote.v1")).sessions) {
+      if (!s.id.startsWith("build-week-demo:")) continue;
+      for (const a of s.ends.flat()) {
+        const g = globalThis.scoreAt(a.x, a.y, s.faceD, s.faceType, s.arrowR);
+        if (g.s !== a.s || !!g.X !== !!a.X) out.push({ id: s.id, a, g });
+      }
+    }
+    return out;
+  });
+  expect(mismatches).toEqual([]);
 
   // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
   await page.locator('#tabs [data-v="record"]').click();

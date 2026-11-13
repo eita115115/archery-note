@@ -184,7 +184,9 @@ function onboardDerived(d) {
   return { faceD, perEnd };
 }
 const DEMO_ID_PREFIX = "build-week-demo:";
-function demoSession(id, date, offset, spread, score) {
+/* 見本の練習（架空）。点数は矢の位置から、記録と同じ判定（scoreAt・矢の太さ DEFAULT_ARROW_R）で決める。
+   以前は点数を固定値で入れていたため、図の円と点数が合わない矢があった */
+function demoSession(id, date, offset, spread) {
   const pts = [
     [-1, 0],
     [1, 0],
@@ -193,6 +195,11 @@ function demoSession(id, date, offset, spread, score) {
     [-0.7, 0.7],
     [0.7, -0.7],
   ];
+  const arrow = (p) => {
+    const x = offset + p[0] * spread,
+      y = p[1] * spread;
+    return { x, y, ...scoreAt(x, y, 40, "single", DEFAULT_ARROW_R) };
+  };
   return {
     id: DEMO_ID_PREFIX + id,
     date,
@@ -205,22 +212,7 @@ function demoSession(id, date, offset, spread, score) {
     purpose: "practice",
     note: "架空のデモデータ",
     arrowR: DEFAULT_ARROW_R,
-    ends: [
-      pts
-        .slice(0, 3)
-        .map((p, i) => ({
-          x: offset + p[0] * spread,
-          y: p[1] * spread,
-          s: score + (i === 1 ? -1 : 0),
-        })),
-      pts
-        .slice(3)
-        .map((p, i) => ({
-          x: offset + p[0] * spread,
-          y: p[1] * spread,
-          s: score + (i === 1 ? -1 : 0),
-        })),
-    ],
+    ends: [pts.slice(0, 3).map(arrow), pts.slice(3).map(arrow)],
   };
 }
 function installDemoData() {
@@ -231,9 +223,9 @@ function installDemoData() {
   });
   db.sessions = db.sessions.filter((s) => !String(s.id || "").startsWith(DEMO_ID_PREFIX));
   db.sessions.push(
-    demoSession("1", dates[0], 1.4, 3.2, 8),
-    demoSession("2", dates[1], 0.8, 2.4, 9),
-    demoSession("3", dates[2], 0.3, 1.7, 9),
+    demoSession("1", dates[0], 1.4, 3.2),
+    demoSession("2", dates[1], 0.8, 2.4),
+    demoSession("3", dates[2], 0.3, 1.7),
   );
   db.settings.onboardingSeen = true;
   save({ reason: "demo-install", forceSnapshot: true });
@@ -2769,10 +2761,17 @@ function drawActiveMarks(s) {
       arrowR,
     );
   });
-  /* 矢番号（射った順）を画面上で読める大きさの吹き出しにし、重なりを避けて引き出し線で結ぶ */
   const tg = $("#tgsvg");
   const vb = tg && tg.viewBox && tg.viewBox.baseVal;
   const pxPerCm = tg && vb && vb.width > 0 ? tg.getBoundingClientRect().width / vb.width : 0;
+  /* 「点数だけ直す」で手で直した矢は、スコア表と同じ * を矢円の右上に（画面上で 15px 相当） */
+  [...s.ends, s.cur].forEach((end) =>
+    end.forEach((a) => {
+      if (placed(a) && arrowIsManual(a))
+        html += manualMarkSvg(gp(a), s.faceD, arrowR, pxPerCm > 0 ? 15 / pxPerCm : undefined);
+    }),
+  );
+  /* 矢番号（射った順）を画面上で読める大きさの吹き出しにし、重なりを避けて引き出し線で結ぶ */
   if (pxPerCm > 0) {
     const pts = focus.map((a) => (placed(a) ? gp(a) : null));
     const lay = layoutArrowLabels(pts, pxPerCm, vb);
@@ -3849,11 +3848,14 @@ function historyAnalysisDetailsHtml(title, meta, bodyHtml) {
     ${bodyHtml}
   </details>`;
 }
+/* サイト値の表示。数だけの値は書いたとおり（「5.20」）。カンマ小数・全角・後ろに文字がある値は、
+   計算と同じ読み方（parseSightNumber）の数で示す（「5,2」は 5.2）。数で始まらない値は「—」 */
 function sightValueText(v) {
   const raw = String(v == null ? "" : v).trim();
   if (!raw) return "—";
-  const n = Number(raw);
-  return Number.isFinite(n) ? raw : "—";
+  if (Number.isFinite(Number(raw))) return raw;
+  const n = parseSightNumber(raw);
+  return Number.isFinite(n) ? String(n) : "—";
 }
 function hasSightInput(v) {
   return v != null && String(v).trim() !== "";

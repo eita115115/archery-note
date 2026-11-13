@@ -313,8 +313,8 @@ function computePersonalPhysicsCalibration(setupId){
     if(r.v && isFinite(r.v.slope) && Math.abs(r.v.slope)>.05) clickV.push({v:Math.abs(r.v.slope)*70/d,w:clamp(r.v.quality||r.v.r2||.2,.05,1)});
     if(r.h && isFinite(r.h.slope) && Math.abs(r.h.slope)>.05) clickH.push({v:Math.abs(r.h.slope)*70/d,w:clamp(r.h.quality||r.h.r2||.2,.05,1)});
   });
-  const sightMarks=db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v)));
-  const markPts=sightMarks.map(m=>[m.dist, parseFloat(m.v)]).filter(p=>isFinite(p[0])&&isFinite(p[1]));
+  const sightMarks=db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseSightNumber(m.v)));
+  const markPts=sightMarks.map(m=>[m.dist, parseSightNumber(m.v)]).filter(p=>isFinite(p[0])&&isFinite(p[1]));
   const sightFit=markPts.length>=2 ? robustLine(markPts) : null;
   const windFactor=weightedMedian(windRatios,1);
   const v70=weightedMedian(clickV,null), h70=weightedMedian(clickH,null);
@@ -668,6 +668,16 @@ function regress(pts){
   let ss=0,se=0; pts.forEach(p=>{ ss+=(p[1]-yb)**2; se+=(p[1]-(a+b*p[0]))**2; });
   return {a,b,zero: Math.abs(b)>1e-9? -a/b : null,r2:ss>1e-9?clamp(1-se/ss,0,1):0,kind:"linear",est:d=>a+b*d};
 }
+/* サイト値の文字列を数に読む。台帳・目盛りの図・予測・調整の目安・校正で同じ読み方にする。
+   全角は半角に、小数のカンマは点に（「5,2」は 5.2）。先頭の数だけを読む（「5.2 無風」は 5.2）。
+   数で始まらない値は NaN（台帳では「上下の数値なし」、計算には使わない） */
+function parseSightNumber(v){
+  if(typeof v==="number") return Number.isFinite(v)?v:NaN;
+  if(v==null) return NaN;
+  const t=String(v).normalize("NFKC").trim().replace(/^\u2212/,"-");
+  const m=t.match(/^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)/);
+  return m?Number(m[0].replace(",",".")):NaN;
+}
 function robustLine(pts){
   if(pts.length<2) return null;
   const slopes=[];
@@ -729,7 +739,7 @@ function regressionAdvice(setupId, dist){
     /* 重み = 各回の中心の逆分散（1/SE²）を最大1に正規化。風の回は左右の誤差が読めないので左右の重みを半分にする */
     const raw=[];
     ss.forEach(s=>{
-      const v=parseFloat(s[key]);
+      const v=parseSightNumber(s[key]);
       const q=sessionQuality(s,setup);
       const st=q&&q.metrics?sightStats(q.metrics.st):null;
       const se=st?(axis==="my"?st.seY:st.seX):NaN;
@@ -768,7 +778,7 @@ function sightInterp(setupId){
   const byDist={}, sourceByDist=Object.create(null);
   [...db.sightMarks].filter(m=>m.setupId===setupId)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts||0)-(b.ts||0))
-    .forEach(m=>{ const v=parseFloat(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
+    .forEach(m=>{ const v=parseSightNumber(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
   const keys=Object.keys(byDist).sort((a,b)=>+a-+b);
   const pts=keys.map(d=>[+d, byDist[d]]);
   if(pts.length<2) return null;
