@@ -3548,3 +3548,9 @@ CI: PR #139 の validate は段4・5の push から失敗していた（check:ui
 ## v127 のオーナー確認
 
 2026-11-13、オーナーが公開版 v127 を確認（「確認しました。いい感じです」）。UI v5（AN-096）の作業はここで区切り。低い優先度の残りは progress.md に記録。
+
+## AN-097 v127 後の小さな後片付け（版128）
+
+2026-11-13、独立レビューで残した低い指摘を片付けた。記録画面を出していないときに拡大鏡の固定レイヤーと（PointerEvent の無いブラウザの）window のマウスの受け口を外す `teardownTargetInput`、描き直しで受け口を付け替える `detachTargetWindowMouse`、中心の拡大を記録ごとにする `ui.zoomFor`、@container の無いブラウザで高さを測って欠けたスコア表を隠す `watchCrampedScorecard`。tools/diagnostics/verify-v96-worker-update.cjs の `scoreTrendCard` は、固定した過去のコミットを配って動かす履歴の検査なので変えていない。tools/check-app.js の静的検査は `classList.toggle` の書き方の変更に合わせた。
+
+検証: check:all（exit 0）・lint・format:check 成功、Playwright 460 passed (6.9m)。tests/e2e/record-teardown.spec.js の4本は、修正を外すと4本とも失敗することを確認。版128（npm run version:bump、check:version 成功）。

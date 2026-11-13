@@ -18,6 +18,7 @@ let ui = {
   analysisImpactId: null /* 着弾 で選んでいる記録の id（null は位置のある最新の記録） */,
   analysisCmp: { a: null, b: null } /* 比較 で選んでいる2回の id */,
   zoom: 1,
+  zoomFor: null /* ui.zoom を使っている記録の id。別の記録に入ると拡大を戻す */,
   recordMode: "practice",
   freshArrow: -1,
   freshTimer: 0,
@@ -84,10 +85,10 @@ function render() {
   syncViewChrome();
   const m = $("#main");
   /* 記録中は没入画面: 画面名の行とタブを隠す（style.css: html.recording） */
-  document.documentElement.classList.toggle(
-    "recording",
-    view === "record" && !!db.active && !recordPaused(),
-  );
+  const recordingShown = view === "record" && !!db.active && !recordPaused();
+  document.documentElement.classList.toggle("recording", recordingShown);
+  /* 記録画面を出していないときは、的の入力のために body と window に付けたものを外す */
+  if (!recordingShown) teardownTargetInput();
   /* 記録の条件は全画面: 画面名の行とタブを隠す（style.css: html.subscreen） */
   document.documentElement.classList.toggle(
     "subscreen",
@@ -2249,6 +2250,18 @@ const REC_CHEVRON =
 function activeViewHalf(s) {
   return (s.faceD / 2) * ((ui.zoom || 1) > 1 ? 0.47 : 1.035);
 }
+/* 短い画面で修正バーを開くと、スコア表の高さが見出しの行（28px）に足りなくなる。style.css の @container で隠すが、
+   @container の無いブラウザ（Safari 15 以前）では同じ判定を高さの実測で行い、.is-cramped を付けて隠す */
+function watchCrampedScorecard() {
+  const card = $("#recCard");
+  if (!card) return;
+  const css = window.CSS;
+  if (css && typeof css.supports === "function" && css.supports("container-type: size")) return;
+  const check = () => card.classList.toggle("is-cramped", card.clientHeight > 0 && card.clientHeight <= 27);
+  check();
+  if (typeof window.ResizeObserver === "function") new window.ResizeObserver(check).observe(card);
+  else window.requestAnimationFrame(check);
+}
 function applyActiveZoom(s) {
   const tg = $("#tgsvg");
   if (!tg || s.faceType === "triple") return;
@@ -2263,6 +2276,11 @@ function applyActiveZoom(s) {
 }
 function renderActive(m) {
   const s = db.active;
+  /* 中心の拡大は記録ごと。別の記録（新しい記録・過去記録の編集）に入ったら拡大していない状態から */
+  if (ui.zoomFor !== s.id) {
+    ui.zoom = 1;
+    ui.zoomFor = s.id;
+  }
   const rg = s.roundGroup;
   const per = Math.max(1, +s.perEnd || 6);
   const scoreMode = sessionInputMode(s) === "score";
@@ -2338,6 +2356,7 @@ function renderActive(m) {
       .querySelectorAll("#scoreKeys [data-key]")
       .forEach((b) => (b.onclick = () => pressScoreKey(b.dataset.key)));
   } else attachTargetInput(s);
+  watchCrampedScorecard();
   applyActiveZoom(s);
   const zoomBtn = $("#bZoom");
   if (zoomBtn)
@@ -2991,6 +3010,19 @@ function nudgeArrow(dirKey) {
 /* ルーペ（拡大鏡）は的の外、ヘッダー直下の右（設定で左）に画面固定し、入力中は動かさない（中身だけ指に追従）。
    的のカードの中に置くと親要素の影響で固定できないため、ページ直下の固定レイヤーへ移す。
    <use href="#tgmain"> で的を参照するので場所を移しても描画できる。再描画のたびに古いレイヤーは捨てる */
+/* PointerEvent の無いブラウザで window に付けるマウスの受け口。描き直しのたびに付け替え、記録画面を離れたら外す */
+let targetWindowMouse = null;
+function detachTargetWindowMouse() {
+  if (!targetWindowMouse) return;
+  window.removeEventListener("mousemove", targetWindowMouse.move);
+  window.removeEventListener("mouseup", targetWindowMouse.up);
+  targetWindowMouse = null;
+}
+/* 記録画面を離れたとき: 拡大鏡の固定レイヤー（body 直下）と window の受け口を外す */
+function teardownTargetInput() {
+  document.querySelectorAll("body > .lensLayer").forEach((n) => n.remove());
+  detachTargetWindowMouse();
+}
 function mountLensLayer() {
   document.querySelectorAll("body > .lensLayer").forEach((n) => n.remove());
   const lens = $("#lens"),
@@ -3295,6 +3327,8 @@ function attachTargetInput(s) {
     svg.addEventListener("touchend", up, { passive: false });
     svg.addEventListener("touchcancel", cancel, { passive: false });
     svg.addEventListener("mousedown", down);
+    detachTargetWindowMouse();
+    targetWindowMouse = { move, up };
     window.addEventListener("mousemove", move);
     window.addEventListener("mouseup", up);
   }

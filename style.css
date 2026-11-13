@@ -1747,8 +1747,10 @@ button.lrow.setLink{cursor:pointer; min-height:60px;}
   .dockRow #bFinishMain,.dockRow #bNextStage{font-size:15px; padding:0 4px; white-space:nowrap;}
 }
 /* 短い画面で修正バーを開くと、的とバーのあいだに残るスコア表は見出しの行（28px）にも足りない高さになる。
-   欠けた行を見せず、その高さのあいだは表を隠す（表の高さが戻れば出る。@container の無いブラウザでは従来どおり） */
+   欠けた行を見せず、その高さのあいだは表を隠す（表の高さが戻れば出る。@container の無いブラウザは .is-cramped で同じ扱い） */
 .miniCard{container-type:size;}
 @container (max-height:27px){
   .miniCard .scard{visibility:hidden;}
 }
+/* @container の無いブラウザでは、50-record-view.js の watchCrampedScorecard が高さを測って付ける */
+.miniCard.is-cramped .scard{visibility:hidden;}

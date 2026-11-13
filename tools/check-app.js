@@ -261,7 +261,7 @@ const fieldSvg = targetApi.targetMarkup(80, "tf", "field");
 assert(fieldSvg.includes('class="main field"') && fieldSvg.includes("#ffe14d") && fieldSvg.includes("#1c1e1c"), "Field target SVG failed");
 
 /* v5 段 2: 記録中は没入画面（タブと画面名の行を隠す）。ズームは1ボタン、終了はメニュー、記録のトーストなし */
-assert(css.includes("html.recording #viewTop") && scripts.includes('classList.toggle(\n    "recording"') && scripts.includes("recordPaused()") && scripts.includes('data-testid="record-resume"'), "Immersive recording screen (html.recording / pause and resume) missing");
+assert(css.includes("html.recording #viewTop") && scripts.includes('classList.toggle("recording", recordingShown)') && scripts.includes("if (!recordingShown) teardownTargetInput();") && scripts.includes("recordPaused()") && scripts.includes('data-testid="record-resume"'), "Immersive recording screen (html.recording / pause and resume) missing");
 assert(scripts.includes('data-testid="active-menu"') && scripts.includes('data-testid="active-finish"') && scripts.includes("pick(\"#mSettings\", openSettings)") && scripts.includes("openSessionMetaSheet"), "Recording menu (finish / settings / weather and note) missing");
 assert(scripts.includes("中心を拡大") && scripts.includes("全体に戻す") && !scripts.includes("zoomChips") && !scripts.includes('data-z="'), "Target zoom must be the single centre-zoom button");
 assert(!/toast\(`エンド\$\{[^`]*確定/.test(scripts) && scripts.includes('id="arrowAnnounce" aria-live="polite"') && scripts.includes('id="recMsg" aria-live="polite"'), "Recording feedback must use the status row and aria-live, not toasts");
