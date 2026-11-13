@@ -1146,6 +1146,7 @@ button.scRow{font-size:inherit; font-weight:inherit; cursor:pointer;}
 .miniCard .scard{border-top:0;}
 .miniEmpty{padding:14px var(--gut); font-size:14px; color:var(--sub); line-height:1.6;}
 .curEnd{flex:none; border-top:2px solid var(--ink); background:var(--surface);}
+.curEnd[hidden]{display:none;}
 .curRow{display:grid; height:54px;}
 .curRow.p6{grid-template-columns:34px repeat(3,minmax(0,1fr)) 6px repeat(3,minmax(0,1fr)) 58px;}
 .curRow.p3{grid-template-columns:34px repeat(3,minmax(0,1fr)) 58px;}

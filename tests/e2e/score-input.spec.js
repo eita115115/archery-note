@@ -205,6 +205,7 @@ test("a 72-arrow round is entered with the keypad only", async ({ page }) => {
   await expect(card.locator(".scSub.total")).toHaveText(/合計 72射\s*10\+X\s*25\s*X\s*6\s*587/);
   await expect(page.getByTestId("active-hud")).toContainText("全エンド確定");
   await expect(page.locator("#hudTotal")).toHaveText("587");
+  await expect(page.getByTestId("active-arrow-chips")).toBeHidden();
   for (const k of await page.getByTestId("score-keys").locator(".key").all())
     await expect(k).toBeDisabled();
   s = await stored(page);

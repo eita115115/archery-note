@@ -189,6 +189,8 @@ test("a 72-arrow round gets a subtotal after 36 arrows and a total when complete
   await expect(card.locator(".scSub.total")).toHaveText(/合計 72射\s*10\+X\s*24\s*X\s*12\s*627/);
   await expect(page.getByTestId("active-hud")).toContainText("全エンド確定");
   await expect(page.getByTestId("active-end")).toHaveCount(0);
+  // 入力するエンドが無いので、空の枠の行は出さない
+  await expect(page.getByTestId("active-arrow-chips")).toBeHidden();
   // 規定の射数を終えたあとは的のタップを受け付けず、状態行で知らせる
   const box = await page.locator("#tgsvg").boundingBox();
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);

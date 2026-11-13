@@ -2876,6 +2876,9 @@ function refreshActive() {
     locked: st.allDone && !editing,
     scoreMode,
   });
+  /* 全エンドを確定したあとは入力するエンドが無いので、空の枠の行は出さない（スコア表と合計で足りる） */
+  const curEnd = chipsBox.closest(".curEnd");
+  if (curEnd) curEnd.hidden = st.allDone && !editing;
   chipsBox.querySelectorAll(".slot[data-i]").forEach(
     (c) =>
       (c.onclick = () => {
