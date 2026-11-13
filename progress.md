@@ -4,6 +4,8 @@
 
 ## 現在地
 
+- v127 をオーナーが確認（2026-11-13「確認しました。いい感じです」）。UI v5 の作業はこれで区切り。残り（低い優先度）: 拡大鏡の層が記録の終了後も DOM に残る、PointerEvent の無いブラウザでの重複リスナー、ui.zoom の持ち越し、tools/diagnostics/verify-v96-worker-update.cjs が削除済みの scoreTrendCard を呼ぶ、修正中にスコア表を隠す処理は `@container`（Safari 16 以降）。
+
 - 公開 v127 完了（AN-096 UI v5）。2026-11-13 オーナー承認後、PR #139 の CI validate 成功（7dac094）を確かめて main へマージ（fea13c8）。Pages の version.json が 127、sw.js が archery-note-v127、公開ページを Chromium で開いて APP_VER 127・タブ4つ・コンソールのエラー 0 件を確認。AN-096 を passes:true（tasks.json に証拠）。
 
 - 次: 実物の iPhone（Safari）で記録 → 結果 → ノート → 分析 → 弓具 → 設定 を一巡し、更新の帯から v127 へ上がること、旧データ（v126 以前の記録・サイト台帳・テーマ）がそのまま読めることを確かめる。AN-095（v4 第1段階）はオーナー判断で閉じた（status done・passes false。v5 に置き換え）。未解決: (2) レビューで残した低い指摘（拡大鏡の層が記録の終了後も DOM に残る、PointerEvent の無いブラウザでの重複リスナー、ui.zoom の持ち越し、tools/diagnostics/verify-v96-worker-update.cjs が削除済みの scoreTrendCard を呼ぶ）、(3) 修正中にスコア表を隠す処理は `@container`（Safari 16 以降）。
