@@ -402,9 +402,17 @@ function hashText(s){
 function readSnapshots(){
   try{ const a=JSON.parse(storageGetItem(SNAP_KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; }
 }
-function snapshotLabel(s){
+/* 控えの日時。端末の言語設定に左右されない書き方にする（例: 2026/11/12 9:00） */
+function snapshotWhenText(s){
+  const d=new Date(s.ts||Date.now());
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function snapshotCountsText(s){
   const c=s.counts||dataCounts(s.data||{});
-  return `${new Date(s.ts||Date.now()).toLocaleString()}（練習${c.sessions||0} / 弓具${c.setups||0} / サイト${c.marks||0}）`;
+  return `練習${c.sessions||0}・セッティング${c.setups||0}・サイト${c.marks||0}`;
+}
+function snapshotLabel(s){
+  return `${snapshotWhenText(s)}（${snapshotCountsText(s)}）`;
 }
 let snapshotJob=null, snapshotPending=null;
 function runIdleTask(fn, timeout){

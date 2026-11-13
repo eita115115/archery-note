@@ -201,17 +201,16 @@ function staticUiChecks() {
     /\.histScoreCount\{[^}]*font-size:var\(--font-size-xs\);/.test(css),
     ".histScoreCount must preserve 11px text size",
   );
-  assert(
-    /\.histTrendRow\{[^}]*gap:var\(--space-4\);/.test(css),
-    ".histTrendRow must preserve 10px gap",
-  );
-  assert(
-    /\.histTrendValue\{[^}]*font-size:var\(--font-size-sm\);/.test(css),
-    ".histTrendValue must preserve 12px text size",
-  );
+  /* v5 段 9: どの画面も使わなくなった旧クラスの規則は style.css から消した */
+  const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const old of [".histTrendRow", ".launchPanel", ".homeActions", ".streakHero", ".goalRing", ".pageHero", ".nativeStack", ".settingsGroup", ".statbar", "header.app", ".decisionCard", ".sightMiniDial"])
+    assert(
+      !cssRules.includes(old + "{") && !cssRules.includes(old + " ") && !cssRules.includes(old + ","),
+      `retired class ${old} is still in style.css`,
+    );
   /* .histSightVal was removed during v2 design-language migration; check retired */
   assert(
-    surface.includes("@keyframes appRise") &&
+    !surface.includes("@keyframes appRise") &&
       !surface.includes("primaryPulse") &&
       surface.includes("scorePop") &&
       surface.includes("markPop") &&
@@ -258,9 +257,9 @@ function staticUiChecks() {
     "overdone transition/target animation should not return",
   );
   assert(
-    surface.includes("この条件で開始") &&
-      surface.includes("条件を選ぶ") &&
-      surface.includes("詳しく残す"),
+    appJs.includes("この条件で記録を始める") &&
+      appJs.includes("条件を選ぶ") &&
+      appJs.includes("日付・天気・風・メモ"),
     "record launch UI missing",
   );
   assert(

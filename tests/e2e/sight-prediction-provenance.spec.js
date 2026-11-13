@@ -41,14 +41,12 @@ for (const width of [320, 375, 900]) {
     const details = panel.locator("details.sightSources"),
       summary = details.locator("summary");
     await expect(details).not.toHaveAttribute("open");
-    const arrow = () =>
-      summary.evaluate(
-        (el) =>
-          new globalThis.DOMMatrixReadOnly(globalThis.getComputedStyle(el, "::before").transform).b,
-      );
-    await expect.poll(arrow).toBeLessThan(0);
+    // 折りたたみの印は右端の ＋ / −（v5 段 9 で全画面をそろえた。旧: 左の山形）
+    const marker = () =>
+      summary.evaluate((el) => globalThis.getComputedStyle(el, "::after").content);
+    await expect.poll(marker).toBe('"＋"');
     await summary.tap();
-    await expect.poll(arrow).toBeGreaterThan(0);
+    await expect.poll(marker).toBe('"−"');
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("2026/10/13");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("80");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText(
@@ -58,23 +56,19 @@ for (const width of [320, 375, 900]) {
     await summary.focus();
     await page.keyboard.press("Space");
     await expect(details).not.toHaveAttribute("open");
-    await expect.poll(arrow).toBeLessThan(0);
+    await expect.poll(marker).toBe('"＋"');
     await page.keyboard.press("Enter");
     await expect(details).toHaveAttribute("open");
-    await expect.poll(arrow).toBeGreaterThan(0);
+    await expect.poll(marker).toBe('"−"');
     await expect(summary).toBeFocused();
     const help = panel.locator("details.sightPredictionHelp"),
       helpSummary = help.locator("summary"),
-      helpArrow = () =>
-        helpSummary.evaluate(
-          (el) =>
-            new globalThis.DOMMatrixReadOnly(globalThis.getComputedStyle(el, "::before").transform)
-              .b,
-        );
-    await expect.poll(helpArrow).toBeLessThan(0);
+      helpMarker = () =>
+        helpSummary.evaluate((el) => globalThis.getComputedStyle(el, "::after").content);
+    await expect.poll(helpMarker).toBe('"＋"');
     await helpSummary.tap();
     await expect(help).toHaveAttribute("open");
-    await expect.poll(helpArrow).toBeGreaterThan(0);
+    await expect.poll(helpMarker).toBe('"−"');
     const geometry = await panel.evaluate((el) => ({
       overflow:
         el.scrollWidth > el.clientWidth ||

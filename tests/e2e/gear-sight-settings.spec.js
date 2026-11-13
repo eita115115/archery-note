@@ -432,6 +432,94 @@ test("the adjustment guide states the decision, the numbers, n and its basis in 
   expect(errors).toEqual([]);
 });
 
+/* v5 段 9: 今日の結果とノートの詳細の折りたたみも、サイトの画面と同じ調整の目安を出す */
+const OLD_ADVICE_LABELS = [
+  "判断信頼度",
+  "演算信頼度",
+  "次のアクション",
+  "個人モデル",
+  "動かすべきか",
+  "サイト調整の提案",
+  "次の重点",
+  "精度向上",
+  "公式",
+];
+for (const size of [
+  { width: 375, height: 812 },
+  { width: 320, height: 640 },
+])
+  test(`result and note detail use the sight screen's adjustment guide (${size.width})`, async ({
+    page,
+  }) => {
+    const data = gearDb();
+    const errors = await open(page, data, size);
+    await gotoSight(page);
+    const sightFact = await page.getByTestId("sight-advice-fact").textContent();
+    for (const [surface, testid, show] of [
+      [
+        "note detail",
+        "note-sight-details",
+        (id) => page.evaluate((i) => globalThis.openHistDetail(i), id),
+      ],
+      [
+        "result",
+        "result-sight-details",
+        (id) =>
+          page.evaluate(
+            (i) =>
+              globalThis.openSummary(
+                db.sessions.find((s) => s.id === i),
+                false,
+              ),
+            id,
+          ),
+      ],
+    ]) {
+      /* 位置のある記録: 同じ文（着弾中心・射数・95%区間・確率） */
+      await show("p6");
+      const fold = page.getByTestId(testid);
+      await fold.locator("summary").click();
+      await expect(fold.getByTestId("sight-advice-fact")).toHaveText(sightFact);
+      await expect(fold.locator(".sightAdvice .fig .n")).toHaveText(["動かさない", "動かさない"]);
+      await expect(fold.locator(".foldH")).toHaveText("着弾の数値");
+      let text = await expectCleanCopy(fold, surface);
+      for (const w of OLD_ADVICE_LABELS) expect(text, `${surface}: "${w}"`).not.toContain(w);
+      const fit = await fold.evaluate((el) => ({
+        over: el.scrollWidth > el.clientWidth + 1,
+        small: [...el.querySelectorAll("*")].filter(
+          (e) =>
+            e.getClientRects().length &&
+            !e.closest("svg") &&
+            [...e.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim()) &&
+            parseFloat(globalThis.getComputedStyle(e).fontSize) < 13,
+        ).length,
+        summaryH: el.querySelector("summary").getBoundingClientRect().height,
+      }));
+      expect(fit.over, `${surface}: no horizontal overflow`).toBe(false);
+      expect(fit.small, `${surface}: no text under 13px`).toBe(0);
+      expect(fit.summaryH).toBeGreaterThanOrEqual(44);
+      await page.evaluate(() =>
+        globalThis.document.querySelectorAll(".ovl").forEach((o) => globalThis.closeModal(o)),
+      );
+      await expect(page.locator(".ovl")).toHaveCount(0);
+      /* 点数だけの記録: 目安も着弾の数値も出さない */
+      await show("p5");
+      await fold.locator("summary").click();
+      await expect(fold.getByTestId("sight-advice")).toHaveCount(0);
+      await expect(fold.getByTestId("session-sight-empty")).toHaveText(
+        "着弾データなし。位置のある矢がない記録のため、着弾中心からの目安は出せません。",
+      );
+      text = await expectCleanCopy(fold, `${surface} (score only)`);
+      for (const w of OLD_ADVICE_LABELS) expect(text, `${surface}: "${w}"`).not.toContain(w);
+      expect(text).not.toMatch(/\d(\.\d+)?\s?(cm|mm|クリック|目盛り)/);
+      await page.evaluate(() =>
+        globalThis.document.querySelectorAll(".ovl").forEach((o) => globalThis.closeModal(o)),
+      );
+      await expect(page.locator(".ovl")).toHaveCount(0);
+    }
+    expect(errors).toEqual([]);
+  });
+
 test("settings opens full-screen from the record title row and from the recording menu", async ({
   page,
 }) => {

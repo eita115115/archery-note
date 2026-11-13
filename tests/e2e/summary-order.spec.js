@@ -115,7 +115,10 @@ for (const width of [320, 375]) {
       expect(p.card).toBeLessThan(p.decision);
       expect(p.statsTop).toBeGreaterThanOrEqual(p.sheetTop);
       expect(p.statsBottom).toBeLessThanOrEqual(p.viewport - 8);
-      await expect(page.locator(".ovl .decisionCard")).toHaveCount(1);
+      // サイトの判断は、弓具 > サイト と同じ調整の目安（折りたたみの中に1つ）
+      await expect(
+        page.getByTestId("result-sight-details").getByTestId("sight-advice"),
+      ).toHaveCount(1);
       await expect(page.locator("#sumPlot svg")).toHaveCount(1);
       await page.locator("#sumClose").click();
       await expect(page.locator(".ovl")).toHaveCount(0);
@@ -143,7 +146,9 @@ for (const mode of ["first", "gam-round", "edit"]) {
     await settle(page);
     const p = await positions(page);
     expect(p.stats).toBeLessThan(p.decision);
-    await expect(page.locator(".ovl .decisionCard")).toHaveCount(1);
+    await expect(page.getByTestId("result-sight-details").getByTestId("sight-advice")).toHaveCount(
+      1,
+    );
     if (mode === "first")
       await expect(page.getByTestId("todays-result-empty")).toContainText("最初の記録です");
     if (mode === "gam-round") {

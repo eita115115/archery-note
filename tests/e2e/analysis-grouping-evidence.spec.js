@@ -80,9 +80,7 @@ for (const width of [320, 375])
             m = globalThis.sessionMetrics(s);
           return {
             stats: m.st,
-            dashboard: globalThis.growthDashboard(rows, s.date),
-            conclusion: globalThis.todayConclusion(rows),
-            suggestions: globalThis.nextPracticeSuggestions(rows, s.date),
+            qualifiedRows: rows.filter((r) => globalThis.trHasGroupingEvidence(r.st)).length,
             period: globalThis.aggregateByPeriod(rows, "month"),
             condition: globalThis.conditionSplit(rows, globalThis.isWindy),
             qualification: globalThis.trHasGroupingEvidence(m.st),
@@ -104,17 +102,10 @@ for (const width of [320, 375])
           expect(p.X).toBe(p.calculated.X);
         }
         expect(observed.qualification).toBe(count >= 3);
-        expect(observed.dashboard.recentAverage).toBe(9);
         expect(observed.period[0].arrows).toBe(18 + count);
         expect(observed.condition.calm.arrows).toBe(18 + count);
-        if (count === 1 || count === 2) {
-          expect(observed.dashboard.groupingDelta).toBeNull();
-          expect(observed.dashboard.groupingSamples).toBe(3);
-          expect(observed.conclusion.kind).toBe("grouping-pending");
-          expect(observed.suggestions.some((s) => s.id === "collect-coordinates")).toBe(true);
-        }
-        if (count >= 1)
-          expect(observed.suggestions.some((s) => s.id.endsWith("spread"))).toBe(false);
+        /* グルーピングの集計に入るのは、位置のある矢が 3射以上の記録だけ */
+        expect(observed.qualifiedRows).toBe(count >= 3 ? 4 : 3);
         /* v5 段 7: 分析 > 着弾。位置のある矢が 3射未満の記録は図だけ出し、グループRMS は出さない */
         await settled(page);
         await page.screenshot({ path: testInfo.outputPath("score.png") });

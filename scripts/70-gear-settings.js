@@ -978,13 +978,17 @@ function gearHistoryEntries(s) {
   (Array.isArray(s.history) ? s.history : []).forEach((h) => {
     const changes = (h && Array.isArray(h.changes) ? h.changes : []).filter(Boolean);
     if (!changes.length) return;
+    /* parts: 項目名と変化を分けて持つ（行の中で 項目名 / 変化 の2段に組む）。text は parts をつないだ1文 */
+    const parts = changes.map((c) => ({
+      label: gearLabelUnit("", String(c.label || "項目")).label,
+      change: `${c.from || "未入力"} → ${c.to || "未入力"}`,
+    }));
     out.push({
       date: (h && h.date) || "",
       ord: ord++,
       kind: "gear",
-      text: changes
-        .map((c) => `${gearLabelUnit("", String(c.label || "項目")).label} ${c.from || "未入力"} → ${c.to || "未入力"}`)
-        .join("、"),
+      parts,
+      text: parts.map((x) => `${x.label} ${x.change}`).join("、"),
     });
   });
   const marks = (db.sightMarks || [])
@@ -997,23 +1001,24 @@ function gearHistoryEntries(s) {
       h = sightValueText(mk.h);
     const p = prev.get(key);
     const dist = distanceLabel(mk.dist);
-    let text;
-    if (!p) text = `サイト ${dist} 上下 ${v}・左右 ${h} を記録`;
+    let change;
+    if (!p) change = `上下 ${v}・左右 ${h} を記録`;
     else {
       const parts = [];
       if (p.v !== v) parts.push(`上下 ${p.v} → ${v}`);
       if (p.h !== h) parts.push(`左右 ${p.h} → ${h}`);
-      text = parts.length ? `サイト ${dist} ${parts.join("・")}` : `サイト ${dist} 上下 ${v}・左右 ${h}（前回と同じ値）`;
+      change = parts.length ? parts.join("・") : `上下 ${v}・左右 ${h}（前回と同じ値）`;
     }
+    const label = `サイト ${dist}`;
     prev.set(key, { v, h });
-    out.push({ date: mk.date || "", ord: ord++, kind: "sight", text });
+    out.push({ date: mk.date || "", ord: ord++, kind: "sight", parts: [{ label, change }], text: `${label} ${change}` });
   });
   return out.sort((a, b) => (b.date || "").localeCompare(a.date || "") || b.ord - a.ord);
 }
 const GEAR_HISTORY_SHOWN = 8;
 function gearHistoryRowHtml(e) {
   const iso = /^\d{4}-\d{2}-\d{2}$/.test(e.date) ? e.date : "";
-  return `<div class="lrow gearHistRow" data-testid="gear-history-row" data-kind="${e.kind}"><span class="lk">${iso ? fmtMDW(iso) : "日付なし"}</span><span class="lv">${esc(e.text)}</span></div>`;
+  return `<div class="lrow gearHistRow" data-testid="gear-history-row" data-kind="${e.kind}"><span class="lk">${iso ? fmtMDW(iso) : "日付なし"}</span><span class="lv">${(e.parts || [{ label: e.text, change: "" }]).map((x) => `<span class="ghItem"><span class="ghK">${esc(x.label)}</span> <span class="ghV">${esc(x.change)}</span></span>`).join(`<span class="ghSep">、</span>`)}</span></div>`;
 }
 function gearHistoryHtml(s) {
   const list = gearHistoryEntries(s);
@@ -1747,7 +1752,7 @@ function openSettings() {
       <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
       <div class="setBlock" data-testid="settings-snapshots">
         <div class="lmain"><b>自動バックアップ</b><span>書き出す・読み込む・控えに戻す操作のたびに、この端末の中に控えを残します（${snaps.length}件）。ブラウザのデータを消すと、控えも一緒に消えます</span></div>
-        ${snaps.length ? `<label class="f" for="dSnapSel">戻す控え</label><select class="inp" id="dSnapSel">${snaps.map((s, i) => `<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>` : ""}
+        ${snaps.length ? `<label class="f" for="dSnapSel">戻す控え</label><select class="inp" id="dSnapSel">${snaps.map((s, i) => `<option value="${i}">${esc(snapshotWhenText(s))}</option>`).join("")}</select><p class="basis" id="dSnapInfo" data-testid="settings-snapshot-info">この控えの中身: ${esc(snapshotCountsText(snaps[0]))}</p>` : ""}
         <div class="btnRow">
           <button type="button" class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">いま控えを残す</button>
           <button type="button" class="btn sec" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length ? "" : "disabled"}>選んだ控えに戻す</button>
@@ -1949,6 +1954,14 @@ function openSettings() {
   ovl.querySelector("#setAddHome").onclick = () => openAddToHomeSheet();
   const upd = ovl.querySelector("#setUpdate");
   if (upd) upd.onclick = () => freshReload();
+  /* 選択肢は日時だけにして（狭い画面で切れない）、中身の件数は下の行に書く */
+  const snapSel = ovl.querySelector("#dSnapSel");
+  if (snapSel)
+    snapSel.onchange = () => {
+      const snap = readSnapshots()[+snapSel.value];
+      const info = ovl.querySelector("#dSnapInfo");
+      if (snap && info) info.textContent = `この控えの中身: ${snapshotCountsText(snap)}`;
+    };
   ovl.querySelector("#dSnapRestore").onclick = async () => {
     const sel = ovl.querySelector("#dSnapSel");
     const snap = readSnapshots()[sel ? +sel.value : 0];

@@ -1178,7 +1178,7 @@ function sessionSightFoldHtml(sess, setup, opts) {
       ${adv ? sightAdviceHtml(sess, setup, adv) : `<p class="basis" data-testid="session-sight-empty">${empty}</p>`}
       ${adv ? `<p class="basis">クリック換算の設定と計算の内訳は 弓具 &gt; サイト にあります。</p>` : ""}
       <div data-testid="history-detail-numbers">
-        ${st ? groupSummaryHtml(st) : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
+        ${st ? `<h4 class="foldH">着弾の数値</h4>${groupSummaryHtml(st)}` : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
         ${sightKv}
         ${arrowMetaSummaryHtml(sess)}
         ${roundProgressHtml(sess)}
