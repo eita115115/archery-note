@@ -3518,3 +3518,15 @@ CSS: scripts と index.html のどこにも出てこないクラス（176 個）
 検査: tools/check-gear-sight-view.js に、今日の結果とノートの詳細の折りたたみの検査を追加（位置あり / 点数だけ / 位置 2射 / セッティングなし。使わない語 26 と旧い枠の語 14、目安の HTML が サイトの画面と同じであること、点数だけの記録に数値が出ないこと。160 → 293 checks）。消した関数の検査を tools/check-analysis-core.js・check-grouping-interpretation.js・check-coordless.js・check-gamification.js・check-app.js・check-ui.js から外し、残した関数（aggregateByPeriod・conditionSplit・analysisImpactModel・trHasGroupingEvidence など）の検査は残した。e2e: finish-metrics-sharing（growthBefore の受け渡しを外した）、analysis-grouping-evidence（消した3関数の呼び出しを、グルーピングに入る記録の数の確認に替えた）、summary-order（`.decisionCard` の確認を、折りたたみの中の調整の目安 1つ に替えた）、sight-prediction-provenance（折りたたみの印を 山形の回転 から ＋ / − の確認に替えた）、gear-sight-settings（結果とノートの詳細の折りたたみが サイトの画面と同じ文になること・旧い語が無いこと・点数だけの記録に数値が出ないことを 375 と 320 で確認する2本を追加）。
 
 検証: build:web-assets（style.min.css 86.8KB）・check:all（exit 0）・lint・format:check 成功、Playwright 449 passed (6.7m)。途中の全実行は 10 failed（上の summary-order 7・sight-prediction-provenance 3）と、修正バーを短い画面で詰めた案での 17 failed（correction-entry・correction-exit の「下端から 7px」「完了は 48px」の決まりに触れた。詰めるのをやめ、矢印と完了の大きさ・下端の余白は元のままにした）。画面写真は scratchpad/v5-stage9/（before 240枚・after・CSS を消す前後の mid / mid2 各 266枚）。
+
+## AN096 段9の検証・独立レビュー・版上げ準備
+
+2026-11-13、親（Claude）が段9を検証（check:all・lint・format:check 成功、Playwright 449 passed）し push。全エンド確定後に空の「入力中のエンド」行が残る問題を直した（10e7b5f、scorecard・score-input の e2e に確認を追加）。
+
+独立レビュー2件（結論を渡さず差分だけを渡した）。記録・採点・保存の範囲: 矢円と採点の半径は初回の配置・置き直し・1mm 移動・拡大鏡・描画で同じ（`activeArrowR` → `sessionScoringRadius`）、旧データの編集でも arrowR を書き足さず点数を書き換えない、座標のない矢は図・統計・再採点から外れている、を確認。指摘: (1) 過去記録の編集を中断している間にノートの詳細からメモ・タグを書く、またはゴミ箱へ移すと、編集を終えたときに写しで置き換わり消える・戻る（高）、(2) 記録画面の距離と自作ラウンドの値が esc されていない（低。CSP でスクリプトは止まる）、(3) 「点数だけ直す」の矢は的の図に印が無い（文書化された例外。オーナー判断）、(4) 拡大鏡の層が終了後も DOM に残る・PointerEvent の無いブラウザでの重複リスナー・ui.zoom の持ち越し（低。未修正）、(5) 見本データの保存点数が座標と合わない（main から既存）。ノート・サイト・弓具・設定の範囲: 削除した関数の呼び出し残りなし（tools/diagnostics/verify-v96-worker-update.cjs だけ。npm から呼ばれない）、利用者の文字の esc は確認した全画面で問題なし、`sightAdviceModel` は `adviceFor`・`sightDecision`・`judgementFor` を読むだけ。指摘: (6) 同じ日の後の回がノートの詳細で前の回として中心の移り変わり・比較に入る（中）、(7) 弓具の変更履歴の壊れた1件でノート一覧が空になる、(8) サイト値のカンマ小数を台帳と予測で別々に読む（予測側は main から既存。未修正）、(9) CSV 書き出しがバックアップの「最後の書き出し」を更新する、(10) 書き出し後に「選んだ控えに戻す」が別の控えを戻す（main から既存）。
+
+修正: (1) 編集の途中はノートの詳細のメモ・タグを読み取りだけにし、直す・ゴミ箱へ移すを出さない（aa538c9）。(2) esc（aa538c9）。(6) `sessionsAsOf`（日付が前、または同じ日付で先に保存した記録）を 50- に置き、ノートの詳細の母集団と `sightCentreRows` で使う。(7) 変更の配列からオブジェクト以外を除く。(9) CSV は `lastBackupAt` を書かない。(10) 控えの選択肢を作った時刻で指す（571e22b）。各修正に e2e を追加（notes.spec.js 4本・gear-sight-settings.spec.js 1本）、修正を外すと失敗することを確認。
+
+版上げ: `npm run version:bump` で 127（APP_VER・version.json・sw.js `archery-note-v127`・package.json / package-lock.json）、check:version 成功。CHANGELOG に v127。検証: build:web-assets・check:all（exit 0）・lint・format:check 成功、Playwright 454 passed (6.7m)。
+
+次: オーナーの承認後に PR #139 をマージし、Pages の version.json が 127 になることを確かめる。リスク: 画面の全面的な作り直しで、実物の iPhone（Safari）での確認は未実施（Playwright の Chromium・モバイル寸法のみ）。
