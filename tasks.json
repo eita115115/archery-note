@@ -1147,13 +1147,13 @@
   {
     "id": "AN-097",
     "task": "v127 後の小さな後片付け: 記録画面を離れたら拡大鏡の固定レイヤーと window のマウスの受け口を外す、中心の拡大を記録ごとにする、@container の無いブラウザで欠けたスコア表を隠す",
-    "status": "in-progress",
-    "passes": false,
+    "status": "done",
+    "passes": true,
     "dependencies": [
       "AN-096"
     ],
     "owner": "claude",
     "acceptance": "evals/acceptance.md の UI 行（check:ui・lint）と リリース行（check:version）に加え check:all・format:check・Playwright e2e が成功。各修正に e2e があり、修正を外すと失敗する。矢円と採点、保存形式は不変。公開はオーナーの承認後。",
-    "evidence": "2026-11-13 実装: scripts/50-record-view.js（teardownTargetInput・detachTargetWindowMouse・ui.zoomFor・watchCrampedScorecard）、style.css（.miniCard.is-cramped）、tools/check-app.js（静的検査を新しい書き方に合わせた）、tests/e2e/record-teardown.spec.js（4本。修正を外すと4本とも失敗）。check:all exit 0・lint・format:check 成功、Playwright 460 passed (6.9m)。版128（npm run version:bump、check:version 成功）。tools/diagnostics/verify-v96-worker-update.cjs の scoreTrendCard は、固定した過去のコミットに対して動く履歴の検査なので変えない。"
+    "evidence": "2026-11-13 実装: scripts/50-record-view.js（teardownTargetInput・detachTargetWindowMouse・ui.zoomFor・watchCrampedScorecard）、style.css（.miniCard.is-cramped）、tools/check-app.js（静的検査を新しい書き方に合わせた）、tests/e2e/record-teardown.spec.js（4本。修正を外すと4本とも失敗）。check:all exit 0・lint・format:check 成功、Playwright 460 passed (6.9m)。版128（npm run version:bump、check:version 成功）。tools/diagnostics/verify-v96-worker-update.cjs の scoreTrendCard は、固定した過去のコミットに対して動く履歴の検査なので変えない。 / 2026-11-13 公開: オーナー承認（「mainに入れて構いません」）後、PR #141 の CI validate 成功（19ded1a）を確かめて main へマージ（57728a4）。Pages の version.json が { \"v\": 128 }、sw.js が archery-note-v128、公開ページを Chromium（390×844）で開いて APP_VER 128・見出し「記録」・タブ4つ・コンソールのエラー 0 件。"
   }
 ]

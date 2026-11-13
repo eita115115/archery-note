@@ -3554,3 +3554,7 @@ CI: PR #139 の validate は段4・5の push から失敗していた（check:ui
 2026-11-13、独立レビューで残した低い指摘を片付けた。記録画面を出していないときに拡大鏡の固定レイヤーと（PointerEvent の無いブラウザの）window のマウスの受け口を外す `teardownTargetInput`、描き直しで受け口を付け替える `detachTargetWindowMouse`、中心の拡大を記録ごとにする `ui.zoomFor`、@container の無いブラウザで高さを測って欠けたスコア表を隠す `watchCrampedScorecard`。tools/diagnostics/verify-v96-worker-update.cjs の `scoreTrendCard` は、固定した過去のコミットを配って動かす履歴の検査なので変えていない。tools/check-app.js の静的検査は `classList.toggle` の書き方の変更に合わせた。
 
 検証: check:all（exit 0）・lint・format:check 成功、Playwright 460 passed (6.9m)。tests/e2e/record-teardown.spec.js の4本は、修正を外すと4本とも失敗することを確認。版128（npm run version:bump、check:version 成功）。
+
+## 公開 v128（AN-097）
+
+2026-11-13、オーナー承認後、PR #141 の CI 成功（19ded1a）を確かめて main へマージ（57728a4）。Pages の `version.json` が `{ "v": 128 }`、`sw.js` が `archery-note-v128`、公開ページを Chromium で開いて APP_VER 128・タブ4つ・コンソールのエラー 0 件。AN-097 を passes:true にした。
