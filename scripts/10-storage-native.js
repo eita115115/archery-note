@@ -4,14 +4,13 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
-const APP_VER=126;
+const APP_VER=127;
 const TRASH_LIMIT=50;
-const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100};
+const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100,notes:10000};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
 const ENGINE_VER="RK4-3D JS core v32";
-const NATIVE_CHANNEL="PWA + Capacitor-ready";
 let db = load();
-function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],settings:{eyeSight:850,theme:"auto",fieldMode:false,lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
+function blankDb(){ return {schema:SCHEMA_VER,setups:[],sightMarks:[],sessions:[],trash:[],formAnalyses:[],customRounds:[],notes:[],settings:{eyeSight:850,theme:"dark",fieldMode:false,lensSide:"right",lastInputMode:"target",lastBackupAt:null,activeGuideSeen:false,onboardingSeen:false,launchCount:0,featureHints:{gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false},gamification:{enabled:false,practiceDays:null,goals:{dailyArrows:36,weeklySessions:3,monthlyArrows:300},backfilledAt:null}},gamification:{badges:[]},active:null}; }
 /* 矢データの非破壊サニタイズ: 数値文字列 "1.2" は数値へ置換、変換できない値は矢を消さずそのまま残す（既存データ保全） */
 function arrowNumberOrKeep(v){
   if(typeof v==="number") return v;
@@ -32,17 +31,62 @@ function sanitizeArrowList(arrows){
     if(a.s!=null && typeof a.s!=="number") a.s=0;
     if(a.x!=null && typeof a.x!=="number") a.x=0;
     if(a.y!=null && typeof a.y!=="number") a.y=0;
+    /* 手で直す前の自動採点（auto）も点数と同じ規則で数値にそろえる。x/y の無い矢（点数だけの入力・
+       「M 位置なし」）と null の座標はそのまま残す（座標を作らない） */
+    if(a.auto && typeof a.auto==="object"){
+      const as=arrowNumberOrKeep(a.auto.s); if(as!==a.auto.s) a.auto.s=as;
+      if(a.auto.s!=null && typeof a.auto.s!=="number") a.auto.s=0;
+    }
   });
 }
 function sanitizeSessionArrows(sess){
   if(!sess || typeof sess!=="object" || !Array.isArray(sess.ends)) return;
   sess.ends.forEach(sanitizeArrowList);
 }
+/* メモだけのノート（db.notes）とタグの非破壊サニタイズ。書いた本文は消さない:
+   文字列だけの項目はノートに包み、id の無い項目には id を付け、本文・日付は文字列へ寄せる。
+   オブジェクトでも文字列でもない項目（null・数値など。本文を持てない）だけを落とす */
+/* 文字列でない値を文字列へ寄せる。オブジェクトは JSON にする（String() は toString を持つデータで例外になる） */
+function textOrJson(v){
+  if(typeof v==="string") return v;
+  if(v==null) return "";
+  if(typeof v==="number"||typeof v==="boolean") return String(v);
+  try{ const j=JSON.stringify(v); return typeof j==="string"?j:""; }catch(_){ return ""; }
+}
+function sanitizeTagList(tags){
+  if(typeof tags==="string") return tags.trim()?[tags.trim()]:[];
+  if(!Array.isArray(tags)) return [];
+  const out=[];
+  tags.forEach(t=>{ if(typeof t!=="string"&&typeof t!=="number") return; const v=String(t).trim(); if(v&&!out.includes(v)) out.push(v); });
+  return out;
+}
+function sanitizeNoteList(list){
+  if(!Array.isArray(list)) return [];
+  const seen=new Set(), out=[];
+  list.forEach((src,i)=>{
+    let n=src;
+    if(typeof n==="string"){ if(!n.trim()) return; n={text:n}; }
+    if(!n||typeof n!=="object"||Array.isArray(n)) return;
+    if(typeof n.text!=="string") n.text=textOrJson(n.text);
+    if(typeof n.date!=="string") n.date=textOrJson(n.date);
+    if(typeof n.ts!=="number"||!Number.isFinite(n.ts)){ const t=typeof n.ts==="string"&&n.ts.trim()!==""?Number(n.ts):NaN; n.ts=Number.isFinite(t)?t:0; }
+    if(Object.prototype.hasOwnProperty.call(n,"tags")) n.tags=sanitizeTagList(n.tags);
+    let id=typeof n.id==="string"&&n.id?n.id:(typeof n.id==="number"&&Number.isFinite(n.id)?String(n.id):"");
+    if(!id||seen.has(id)){ let k=0; do{ id="note-"+i+(k?"-"+k:""); k++; }while(seen.has(id)); }
+    n.id=id; seen.add(id);
+    out.push(n);
+  });
+  return out.slice(0,IMPORT_LIMITS.notes);
+}
 function normalizeDb(d){
   const base=blankDb(), src=(d&&typeof d==="object")?d:{};
   const out=Object.assign(base,src);
   out.settings=Object.assign({},blankDb().settings,src.settings||{});
+  /* 新規インストールの既定はダーク。テーマを保存していない既存データは従来どおり端末の設定に合わせる */
+  if(src.settings&&typeof src.settings==="object"&&!Object.prototype.hasOwnProperty.call(src.settings,"theme")) out.settings.theme="auto";
   ["setups","sightMarks","sessions","trash","formAnalyses","customRounds"].forEach(k=>{ if(!Array.isArray(out[k])) out[k]=[]; });
+  /* メモだけのノート（v5 段 6 で追加。SCHEMA_VER は据え置き: 配列の補完だけで migration は不要） */
+  out.notes=sanitizeNoteList(out.notes);
   out.sessions=out.sessions.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sessions);
   out.setups=out.setups.filter(x=>x&&typeof x==="object"&&x.id&&x.name).slice(0,IMPORT_LIMITS.setups);
   out.sightMarks=out.sightMarks.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sightMarks);
@@ -58,6 +102,10 @@ function normalizeDb(d){
   /* 射場モード（3.3 AAAトグル）: 既存データ・破損インポートでも型を boolean に強制する。
      SCHEMA_VER は据え置き（他の featureHints/onboardingSeen 等と同じキー単位補完） */
   if(typeof out.settings.fieldMode!=="boolean") out.settings.fieldMode=false;
+  /* ルーペの固定位置（右/左）。既存データ・破損インポートでも "right" に補完 */
+  if(out.settings.lensSide!=="left"&&out.settings.lensSide!=="right") out.settings.lensSide="right";
+  /* 入力方法（的面に打つ / 点数だけ）の前回値。既存データ・破損インポートでは "target" に補完 */
+  if(out.settings.lastInputMode!=="score"&&out.settings.lastInputMode!=="target") out.settings.lastInputMode="target";
   if(typeof out.settings.launchCount!=="number"||!Number.isFinite(out.settings.launchCount)) out.settings.launchCount=0;
   const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false};
   if(!out.settings.featureHints||typeof out.settings.featureHints!=="object"||Array.isArray(out.settings.featureHints)){
@@ -106,9 +154,15 @@ function normalizeDb(d){
     if(typeof s.faceD!=="number"||!Number.isFinite(s.faceD)) s.faceD=122;
     if(!VALID_FACE_TYPES.includes(s.faceType)) s.faceType="single";
     if(s.dist!=null&&(typeof s.dist!=="number"||!Number.isFinite(s.dist))) s.dist=18;
+    /* 練習のメモに付けるタグ（v5 段 6 で追加）。キーのある記録だけ文字列の配列へ寄せる */
+    if(Object.prototype.hasOwnProperty.call(s,"tags")) s.tags=sanitizeTagList(s.tags);
     sanitizeSessionArrows(s);
   });
-  out.trash.forEach(t=>{ if(t.type==="session") sanitizeSessionArrows(t.data); });
+  out.trash.forEach(t=>{
+    if(t.type==="session") sanitizeSessionArrows(t.data);
+    /* ゴミ箱のメモも、戻したときに一覧で扱える形（本文・日付が文字列）にしておく */
+    if(t.type==="note"&&t.data&&typeof t.data==="object"){ const fixed=sanitizeNoteList([t.data])[0]; if(fixed) t.data=fixed; }
+  });
   if(out.active && typeof out.active==="object"){
     sanitizeSessionArrows(out.active);
     sanitizeArrowList(out.active.cur);
@@ -162,7 +216,7 @@ function storageMeterHtml(){
   return `<div class="storageMeterBlock" data-testid="settings-storage-meter">
     <div class="storageMeterHead"><span>使用容量</span><span>${u.mb.toFixed(2)} / 約${u.capMb}MB（${u.percent}%）</span></div>
     <div class="storageMeter" role="img" aria-label="保存容量使用率 約${u.percent}%"><div class="storageMeterFill${warn?" warn":""}" style="width:${Math.min(u.percent,100)}%"></div></div>
-    ${warn?`<div class="note">容量が残り少なくなっています。バックアップ保存をおすすめします。</div>`:""}
+    ${warn?`<div class="note">使用量が目安の 80% を超えています。この目安を超えると保存に失敗することがあります。バックアップを書き出してから、不要な記録をゴミ箱へ移すと空きが増えます。</div>`:""}
     ${est}
   </div>`;
 }
@@ -172,7 +226,7 @@ function summaryStorageNoticeHtml(){
   if(storageUsageRatio().ratio<STORAGE_WARN_RATIO) return "";
   return `<aside class="summaryStorageNotice" data-testid="summary-storage-notice" aria-label="保存容量のお知らせ">
     <b>容量が残り少なくなっています</b>
-    <p>記録を守るため、バックアップ保存をおすすめします。</p>
+    <p>使用量が保存できる量の目安の 80% を超えています。設定の「バックアップを書き出す」で、控えのファイルを作れます。</p>
     <button type="button" class="btn sec" id="sumBackupSettings">バックアップ設定を開く</button>
   </aside>`;
 }
@@ -182,7 +236,7 @@ function load(){
   return blankDb();
 }
 function dataCounts(d=db){
-  return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length};
+  return {sessions:(d.sessions||[]).length,setups:(d.setups||[]).length,marks:(d.sightMarks||[]).length,notes:(d.notes||[]).length};
 }
 function storageBridge(){
   const w=typeof window!=="undefined"?window:{};
@@ -318,27 +372,26 @@ function nativeReadinessProfile(){
   const shellScore=clamp(.54 + nativeScore*.36,0,1);
   const next=[];
   if(!db.settings.lastBackupAt) next.push("バックアップ保存");
-  if(!counts.setups) next.push("用具登録");
+  if(!counts.setups) next.push("弓具登録");
   if(counts.sessions<3) next.push("練習記録");
   if(!next.length) next.push("同条件の記録を増やす");
   return {runtime,storage,native,nativeScore,storageScore,engineScore,shellScore,next,counts};
 }
+/* 設定 > アプリ の「アプリ情報・保存状態」。動作環境・保存先・計算の版を、そのまま並べる（点数や割合にはしない） */
 function nativeReadinessHtml(){
   const p=nativeReadinessProfile();
   const nf=p.native;
-  return `<details class="adv appInfoDetails">
+  const feats=[nf.haptics?"触感":"",nf.share?"共有":"",nf.filesystem?"ファイル保存":""].filter(Boolean).join("・");
+  const persist=!_storagePersist.supported?"":(!_storagePersist.checked?"確認中":(_storagePersist.persisted?"有効":"未確定"));
+  const row=(k,v)=>`<div class="lrow"><span class="lk">${k}</span><span class="lv">${esc(v)}</span></div>`;
+  return `<details class="gearMore appInfoDetails" data-testid="settings-app-info">
     <summary>アプリ情報・保存状態</summary>
-    <div class="advice" style="background:var(--card);border-color:var(--line)">
-    <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER} / ${esc(p.storage.label)}</div>
-    ${storagePersistNoteHtml()}
-    <div class="nativeStack">
-      <div class="nativePill"><div class="k">保存</div><b>${pct(p.storageScore)}</b><span>バックアップと復元を維持</span></div>
-      <div class="nativePill"><div class="k">演算</div><b>${pct(p.engineScore)}</b><span>物理コア分離へ移行中</span></div>
-      <div class="nativePill"><div class="k">触感/共有</div><b>${pct(p.nativeScore)}</b><span>${nf.haptics?"触感 ":""}${nf.share?"共有 ":""}${nf.filesystem?"ファイル ":""}${nf.statusBar?"表示 ":""}</span></div>
-      <div class="nativePill"><div class="k">配布</div><b>${pct(p.shellScore)}</b><span>${NATIVE_CHANNEL}</span></div>
-    </div>
-    <div class="note">次に整える材料: ${p.next.map(esc).join("・")}</div>
-    </div>
+    ${row("開き方",p.runtime.label)}
+    ${row("保存先",p.storage.label)}
+    ${persist?row("保護された保存",persist):""}
+    ${row("弾道の計算",ENGINE_VER)}
+    ${row("端末の機能",feats||"なし")}
+    ${row("保存している件数",`練習 ${p.counts.sessions}回・セッティング ${p.counts.setups}件・サイト値 ${p.counts.marks}件・メモ ${p.counts.notes}件`)}
   </details>`;
 }
 function hashText(s){
@@ -349,9 +402,17 @@ function hashText(s){
 function readSnapshots(){
   try{ const a=JSON.parse(storageGetItem(SNAP_KEY)); return Array.isArray(a)?a:[]; }catch(e){ return []; }
 }
-function snapshotLabel(s){
+/* 控えの日時。端末の言語設定に左右されない書き方にする（例: 2026/11/12 9:00） */
+function snapshotWhenText(s){
+  const d=new Date(s.ts||Date.now());
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`;
+}
+function snapshotCountsText(s){
   const c=s.counts||dataCounts(s.data||{});
-  return `${new Date(s.ts||Date.now()).toLocaleString()}（練習${c.sessions||0} / 用具${c.setups||0} / サイト${c.marks||0}）`;
+  return `練習${c.sessions||0}・セッティング${c.setups||0}・サイト${c.marks||0}`;
+}
+function snapshotLabel(s){
+  return `${snapshotWhenText(s)}（${snapshotCountsText(s)}）`;
 }
 let snapshotJob=null, snapshotPending=null;
 function runIdleTask(fn, timeout){
@@ -449,7 +510,7 @@ function writeDbNow(o){
     return true;
   }catch(e){
     console.error(e);
-    try{ toast("保存容量が足りません。設定からバックアップ保存してください",6000); }catch(_){}
+    try{ toast("保存できませんでした（容量が足りません）。設定 > データ でバックアップを書き出してください",6000); }catch(_){}
     return false;
   }
 }
@@ -492,7 +553,9 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 /* 記録中は通知を固定操作列の上へ。位置だけを測り、点数・保存・通知の寿命には触れない。 */
 function positionToast(t){
-  const dock=$("#activeActionDock");
+  /* 矢の修正中は操作列の代わりに修正バー（#nudge）が出ている */
+  const bar=$("#nudge.on");
+  const dock=bar||$("#activeActionDock");
   if(dock){
     const rect=dock.getBoundingClientRect();
     t.style.setProperty("--record-toast-bottom",`${window.innerHeight-rect.top+16}px`);
@@ -539,7 +602,7 @@ function openModal(ovl,opts){
   const o=opts||{};
   const sheet=ovl.querySelector(".sheet")||ovl;
   const dismiss=()=>{ const btn=o.escapeTarget?ovl.querySelector(o.escapeTarget):null; if(btn) btn.click(); else closeModal(ovl); };
-  addModalSwipeHandle(ovl,sheet,dismiss);
+  if(o.swipe!==false) addModalSwipeHandle(ovl,sheet,dismiss); /* 全画面の結果は下スワイプで閉じない */
   ovl.setAttribute("role","dialog");
   ovl.setAttribute("aria-modal","true");
   const h3=sheet.querySelector("h3");
@@ -671,12 +734,15 @@ function restoreTrash(id){
     (data.sightMarks||[]).forEach(m=>{ if(!db.sightMarks.some(x=>x.id===m.id)) db.sightMarks.push(m); });
   }else if(item.type==="formAnalysis"){
     if(!db.formAnalyses.some(f=>f.id===data.id)) db.formAnalyses.push(data);
+  }else if(item.type==="note"){
+    if(!Array.isArray(db.notes)) db.notes=[];
+    if(!db.notes.some(n=>n.id===data.id)) db.notes.push(data);
   }
   db.trash.splice(i,1);
   save({reason:"restore-trash",forceSnapshot:true});
   return true;
 }
-function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":t==="formAnalysis"?"射形記録":"削除データ"; }
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型記録":t==="note"?"メモ":"削除データ"; }
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);

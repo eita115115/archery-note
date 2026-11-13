@@ -81,12 +81,17 @@ async function tap(page, selector) {
   expect(p.clear, selector).toBe(true);
   await page.touchscreen.tap(p.rect.x + p.rect.width / 2, p.rect.y + p.rect.height / 2);
 }
-async function touchScroll(page, context, distance, startSelector = ".histDetailSheet .statbar") {
+async function touchScroll(
+  page,
+  context,
+  distance,
+  startSelector = '.histDetailSheet [data-testid="history-detail-stats"]',
+) {
   const stats = await page.locator(startSelector).boundingBox(),
-    handle = await page.locator(".modalSwipeHandle").boundingBox();
+    top = await page.locator(".histDetailSheet .subTop").boundingBox();
   const x = stats.x + stats.width / 2,
     start = stats.y + stats.height / 2,
-    end = Math.max(handle.y + handle.height + 16, start - distance);
+    end = Math.max(top.y + top.height + 16, start - distance);
   const cdp = await context.newCDPSession(page);
   try {
     await cdp.send("Input.dispatchTouchEvent", {
@@ -116,15 +121,18 @@ for (const width of [320, 375, 1024])
       cases.push({ width, theme, motion, long: false });
 for (const width of [320, 375]) cases.push({ width, theme: "light", motion: "reduce", long: true });
 
+/* v5 段 6: ノートの詳細は全画面。操作は一番下の「この記録の操作」にまとめ、下端に固定の帯は置かない。
+   「戻る」だけを上端に留める。読む行は帯に隠れず、操作は 48px 以上で、読むだけでは何も書き換わらない。 */
 for (const c of cases) {
-  test(`history actions preserve reading space (${c.width}, ${c.theme}, ${c.motion}, ${c.long ? "long" : "short"})`, async ({
+  test(`note detail keeps reading space and reachable actions (${c.width}, ${c.theme}, ${c.motion}, ${c.long ? "long" : "short"})`, async ({
     page,
     context,
   }, testInfo) => {
     const data = fixture(c.theme, c.long),
       errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.setViewportSize({ width: c.width, height: c.width === 320 ? 568 : 812 });
+    const height = c.width === 320 ? 568 : 812;
+    await page.setViewportSize({ width: c.width, height });
     await page.emulateMedia({ colorScheme: c.theme, reducedMotion: c.motion });
     await page.addInitScript((database) => {
       if (!globalThis.localStorage.getItem("archeryNote.v1"))
@@ -136,36 +144,38 @@ for (const c of cases) {
     await page.locator(record).scrollIntoViewIfNeeded();
     await tap(page, record);
     await settle(page);
+    const old = await stored(page);
+    // 全画面: 画面の高さいっぱいで、下に引いて閉じる取っ手は無い
+    const sheet = await page.locator(".histDetailSheet").boundingBox();
+    expect(sheet.y).toBe(0);
+    expect(sheet.height).toBe(height);
+    await expect(page.locator(".histDetailSheet .modalSwipeHandle")).toHaveCount(0);
+    // 下端に固定の操作の帯は無い（操作は流れの最後）
+    expect(
+      await page
+        .locator(".histDetailActions")
+        .evaluate((el) => globalThis.getComputedStyle(el).position),
+    ).toBe("static");
+    const back = await hit(page, "#hClose");
+    expect(back.rect.height).toBeGreaterThanOrEqual(48);
+    expect(back.rect.width).toBeGreaterThanOrEqual(48);
+    expect(back.clear).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath("initial.png") });
+
+    // 指で送る。読む行は「戻る」の帯に隠れない
     const row = c.long
       ? '[data-testid="todays-result-stability"]'
       : '[data-testid="todays-result-stability-pending"]';
-    const initial = await hit(page, row);
-    const action = await page.locator(".histDetailActions").boundingBox();
-    fs.writeFileSync(
-      testInfo.outputPath("initial-geometry.json"),
-      JSON.stringify({ initial, action }, null, 2),
-    );
-    await page.screenshot({ path: testInfo.outputPath("initial.png") });
-    expect(action.height).toBeLessThan(160);
-    if (!c.long) {
-      expect(initial.rect.bottom).toBeLessThanOrEqual(action.y);
-      expect(initial.clear).toBe(true);
-    }
-    for (const selector of ["#hEdit", "#hCard", "#hClose", "#hDel"]) {
-      const b = await hit(page, selector);
-      expect(b.rect.height).toBeGreaterThanOrEqual(48);
-      expect(b.rect.width).toBeGreaterThanOrEqual(48);
-      expect(b.clear).toBe(true);
-      expect(
-        await page.locator(selector).evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
-      ).toBe(true);
-    }
-    const old = await stored(page);
     await touchScroll(page, context, c.long ? 210 : 110);
     await expect
       .poll(() => page.locator(".histDetailSheet").evaluate((el) => el.scrollTop))
       .toBeGreaterThan(0);
+    await page.locator(row).evaluate((el) => el.scrollIntoView({ block: "center" }));
     await expect.poll(async () => (await hit(page, row)).clear).toBe(true);
+    const bar = await page.locator(".histDetailSheet .subTop").boundingBox();
+    expect(Math.round(bar.y)).toBe(0);
+    expect((await hit(page, row)).rect.top).toBeGreaterThanOrEqual(bar.y + bar.height);
+    expect((await hit(page, "#hClose")).clear).toBe(true);
     fs.writeFileSync(
       testInfo.outputPath("reading-geometry.json"),
       JSON.stringify(
@@ -179,11 +189,27 @@ for (const c of cases) {
     );
     await page.screenshot({ path: testInfo.outputPath("reading.png") });
     if (c.long) {
-      await touchScroll(page, context, 130, row);
       const lastResult = ".histDetailSheet .summaryTodaysResult .todaysResultRow:last-child";
+      await page.locator(lastResult).evaluate((el) => el.scrollIntoView({ block: "center" }));
       await expect.poll(async () => (await hit(page, lastResult)).clear).toBe(true);
       await page.screenshot({ path: testInfo.outputPath("last-result.png") });
     }
+    // この記録の操作: 一番下まで送ると、どれも 48px 以上で、ほかの部品に隠れない
+    await page
+      .locator(".histDetailSheet")
+      .evaluate((el) => el.scrollTo({ top: el.scrollHeight, behavior: "instant" }));
+    await settle(page);
+    for (const selector of ["#hEdit", "#hCard", "#hAnalysis", "#hDel"]) {
+      const b = await hit(page, selector);
+      expect(b.rect.height, selector).toBeGreaterThanOrEqual(48);
+      expect(b.rect.width, selector).toBeGreaterThanOrEqual(48);
+      expect(b.clear, selector).toBe(true);
+      expect(b.rect.bottom, selector).toBeLessThanOrEqual(height);
+      expect(
+        await page.locator(selector).evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+      ).toBe(true);
+    }
+    await page.screenshot({ path: testInfo.outputPath("actions.png") });
     expect((await stored(page)).sessions).toEqual(old.sessions);
     await tap(page, "#hDel");
     await expect(page.locator(".ovl")).toHaveCount(2);
@@ -192,7 +218,11 @@ for (const c of cases) {
     expect((await stored(page)).sessions).toEqual(old.sessions);
     await tap(page, "#hClose");
     await expect(page.locator(".ovl")).toHaveCount(0);
+    expect((await stored(page)).sessions).toEqual(old.sessions);
     await tap(page, record);
+    await page
+      .locator(".histDetailSheet")
+      .evaluate((el) => el.scrollTo({ top: el.scrollHeight, behavior: "instant" }));
     await tap(page, "#hEdit");
     await expect(page.locator("#tgsvg")).toBeAttached();
     const editing = await stored(page);

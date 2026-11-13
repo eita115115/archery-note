@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Archery Note v5 試作</title>
+<style>
+/* ===== トークン ===== */
+:root{
+  color-scheme:dark;
+  --bg:#0e1217; --surface:#151a21; --raised:#1e252e; --mat:#090c10;
+  --rule:#2a323d; --rule-strong:#66727f;
+  --ink:#eef1f4; --sub:#a9b3bf;
+  --accent:#a8c7ac; --on-accent:#0f1a13; --accent-soft:#1c2a22;
+  --warn:#e6c46a; --danger:#ff9288; --info:#8fb8ea;
+  --zg:#ffe14d; --zr:#f23b3b; --zb:#37a6e0; --zk:#1c1e1c; --zw:#ffffff; --zm:#7b8591;
+  --font:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
+  --gut:16px; --safe-b:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme=light]{
+  color-scheme:light;
+  --bg:#f3f4f1; --surface:#ffffff; --raised:#e7eae6; --mat:#dfe3de;
+  --rule:#d3d8d3; --rule-strong:#717d87;
+  --ink:#141c24; --sub:#4d5964;
+  --accent:#2c6649; --on-accent:#ffffff; --accent-soft:#dfeae3;
+  --warn:#7a5c10; --danger:#b3261e; --info:#1f5f9e;
+  --zm:#5d6672;
+}
+:root[data-field="1"]{--bg:#000000; --surface:#0a0c10; --raised:#161b22; --ink:#ffffff; --sub:#d0d7df; --rule:#4a5563; --rule-strong:#8a96a6; --accent:#c2e3c6;}
+:root[data-theme=light][data-field="1"]{--bg:#ffffff; --surface:#ffffff; --raised:#e9ecea; --ink:#0a0f14; --sub:#36414c; --rule:#9aa5ae; --rule-strong:#4d5964; --accent:#1c4a35;}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums;font-feature-settings:"palt" 0}
+button,select,textarea,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ===== 画面の骨格（タブ画面） ===== */
+.scr{padding-bottom:calc(84px + var(--safe-b))}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:18px var(--gut) 10px}
+.top h1{font-size:24px;font-weight:700;line-height:1.25;letter-spacing:.01em}
+.top .date{font-size:14px;color:var(--sub);line-height:1.3}
+.txtBtn{white-space:nowrap;min-height:44px;min-width:44px;padding:0 4px;font-size:15px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:4px}
+.backBtn{min-height:48px;padding:0 12px 0 var(--gut);font-size:16px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.backBtn svg,.txtBtn svg,.chev{width:10px;height:16px;flex:none}
+
+/* 区切り: カードではなく、太い罫線つきの見出しと細い罫線の行 */
+.sec{padding:0 var(--gut);margin-top:22px}
+.secH{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-top:2px solid var(--ink);padding:9px 0 8px}
+.secH h2{font-size:17px;font-weight:700;line-height:1.35}
+.secH .aside{font-size:14px;color:var(--sub);text-align:right}
+.band{background:var(--surface);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+p.fact{font-size:15px;line-height:1.7;color:var(--ink);padding:10px 0 2px}
+p.fact + p.fact{padding-top:4px}
+p.basis{font-size:14px;line-height:1.65;color:var(--sub);padding:4px 0 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;padding:8px 0;border-bottom:1px solid var(--rule);width:100%;text-align:left}
+.row .k{font-size:15px;color:var(--sub);flex:none}
+.row .v{font-size:16px;font-weight:600;text-align:right;min-width:0}
+.row .v small{display:block;font-size:13px;font-weight:400;color:var(--sub);line-height:1.4}
+.row.link .v{display:flex;align-items:center;gap:10px}
+.row .main{min-width:0;flex:1}
+.row .main b{display:block;font-size:16px;font-weight:600;line-height:1.4}
+.row .main span{display:block;font-size:14px;color:var(--sub);line-height:1.45}
+.go{color:var(--sub);flex:none}
+
+/* 数値 */
+.big{font-size:44px;font-weight:700;line-height:1;letter-spacing:-.01em}
+.big small{font-size:17px;font-weight:500;color:var(--sub);margin-left:4px;letter-spacing:0}
+.figs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--rule)}
+.figs.two{grid-template-columns:repeat(2,1fr)}
+.fig{padding:10px 0 10px 12px;border-left:1px solid var(--rule)}
+.fig:first-child{padding-left:0;border-left:0}
+.fig .l{font-size:13px;color:var(--sub);line-height:1.3}
+.fig .n{font-size:28px;font-weight:700;line-height:1.2}
+.fig .n small{font-size:14px;font-weight:500;color:var(--sub);margin-left:2px}
+.fig .d{font-size:13px;color:var(--sub);line-height:1.3}
+
+/* ボタン */
+.btn{min-height:48px;padding:0 18px;border-radius:6px;font-size:16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--rule-strong);background:transparent;color:var(--ink)}
+.btn.pri{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.block{display:flex;width:100%}
+.btn.danger{color:var(--danger)}
+.btnRow{display:flex;gap:10px;padding-top:14px}
+.btnRow .btn{flex:1}
+
+/* セグメント: 角の小さい連結ボタン */
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--rule-strong);border-radius:6px;overflow:hidden}
+.seg button{min-height:44px;font-size:15px;font-weight:600;color:var(--sub);border-left:1px solid var(--rule-strong);padding:0 4px}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--ink);box-shadow:inset 0 -3px 0 var(--accent)}
+/* 画面内の切り替え: 下線タブ */
+.utabs{display:flex;gap:0;padding:0 var(--gut);border-bottom:1px solid var(--rule)}
+.utabs button{flex:1;min-height:48px;font-size:16px;font-weight:600;color:var(--sub);border-bottom:3px solid transparent;margin-bottom:-1px}
+.utabs button[aria-current=page]{color:var(--ink);border-bottom-color:var(--accent)}
+/* 条件の選択 */
+.cond{display:grid;grid-template-columns:1.5fr 1fr;gap:0;margin:0 var(--gut);border-bottom:1px solid var(--rule)}
+.cond label{display:block;padding:8px 0 0;position:relative}
+.cond label + label{border-left:1px solid var(--rule);padding-left:12px}
+.cond span{display:block;font-size:13px;color:var(--sub);line-height:1.3}
+.pick{appearance:none;-webkit-appearance:none;background:transparent;border:0;width:100%;min-height:44px;font-size:16px;font-weight:600;padding-right:18px;background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);background-position:calc(100% - 9px) 55%,calc(100% - 4px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+.pick option{background:var(--surface);color:var(--ink)}
+
+/* ===== 下部ナビ: 端まで届く平らなバー＋中央の記録キー ===== */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,480px);display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--rule-strong);padding-bottom:var(--safe-b);z-index:20}
+.actbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,480px);background:var(--surface);border-top:1px solid var(--rule-strong);z-index:20;padding:10px var(--gut) calc(10px + var(--safe-b))}
+.tabbar button{height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:600;color:var(--sub);border-top:3px solid transparent}
+.tabbar button svg{width:22px;height:22px}
+.tabbar button[aria-current=page]{color:var(--ink);border-top-color:var(--accent)}
+.startBand{padding:14px var(--gut) 16px;margin-top:4px}
+.startBand .l{font-size:14px;color:var(--sub);line-height:1.3}
+.startBand .c{font-size:22px;font-weight:700;line-height:1.35;margin-top:2px}
+.startBand .m{font-size:14px;color:var(--sub);line-height:1.45;margin-bottom:12px}
+.startBand .btnRow{padding-top:10px}
+.startBand .btnRow .btn.pri{flex:1.7;min-height:56px;font-size:17px}
+.startBand .btnRow .btn{min-height:56px}
+
+/* ===== グラフ ===== */
+svg text{font-family:var(--font);font-variant-numeric:tabular-nums}
+.ax{fill:var(--sub);font-size:13px}
+.strip{display:grid;gap:2px;align-items:end;padding:10px 0 6px;border-bottom:1px solid var(--rule)}
+.strip > div{min-width:0}
+.strip div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:74px}
+.strip i{display:block;width:100%;background:var(--rule-strong);min-height:2px}
+.strip div.hi i{background:var(--accent)}
+.strip b{font-size:13px;font-weight:600;line-height:1}
+.strip span{font-size:13px;color:var(--sub);line-height:1}
+
+/* ===== スコア表 ===== */
+.sc{font-size:17px;border-top:1px solid var(--rule-strong);border-bottom:1px solid var(--rule-strong);background:var(--surface)}
+.scRow{display:grid;border-bottom:1px solid var(--rule);min-height:38px;align-items:stretch;width:100%;color:inherit}
+.sc.p6 .scRow{grid-template-columns:30px repeat(3,minmax(0,1fr)) 6px repeat(3,minmax(0,1fr)) 40px 52px 26px 26px}
+.sc.p3 .scRow{grid-template-columns:34px repeat(3,minmax(0,1fr)) 48px 60px 34px 34px}
+.sc.edit .scRow{min-height:44px}
+.sc.edit .scHead{min-height:28px}
+button.scRow{font-size:inherit;font-weight:inherit}
+.scRow.ed{box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
+.scRow .gp{background:var(--bg)}
+.scRow .cn{font-size:15px;font-weight:600}
+.scRow.scHead .r{justify-content:flex-end;padding-right:6px}
+.scRow:last-child{border-bottom:0}
+.scRow > *{display:flex;align-items:center;justify-content:center;border-left:1px solid var(--rule);position:relative;min-width:0}
+.scRow > *:first-child{border-left:0}
+.scHead{min-height:28px;font-size:13px;color:var(--sub);background:var(--bg)}
+.scRow .en{font-size:14px;color:var(--sub);font-weight:600}
+.scRow .c{font-weight:600}
+.scRow .c::after{content:"";position:absolute;left:22%;right:22%;bottom:4px;height:3px;border-radius:1px}
+.c.zg::after{background:var(--zg)} .c.zr::after{background:var(--zr)} .c.zb::after{background:var(--zb)}
+.c.zk::after{background:var(--zk);outline:1px solid var(--rule-strong)} .c.zw::after{background:var(--zw);outline:1px solid var(--rule-strong)} .c.zm::after{background:var(--zm)}
+.scRow .et{font-weight:700}
+.scRow .rt{font-weight:700;justify-content:flex-end;padding-right:6px}
+.scRow.cur{background:var(--accent-soft)}
+.scRow.cur .en{color:var(--ink)}
+.scRow.cur .en::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent)}
+.scRow .prov{color:var(--sub);font-weight:600}
+.c.sel{box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
+.c.next{box-shadow:inset 0 0 0 1px var(--rule-strong)}
+.c .man{position:absolute;top:1px;right:3px;font-size:13px;color:var(--warn);font-weight:700;line-height:1}
+button.c{font-size:inherit}
+.scSub{display:flex;align-items:center;gap:14px;min-height:38px;padding:0 8px 0 10px;border-bottom:1px solid var(--rule-strong);border-top:1px solid var(--rule-strong);margin-top:-1px;background:var(--bg);font-size:14px;color:var(--sub)}
+.scSub b{color:var(--ink);font-size:15px;font-weight:700;margin-left:3px}
+.scSub .t{margin-left:auto;font-size:18px;font-weight:700;color:var(--ink)}
+.scSub .nm{color:var(--ink);font-weight:700;font-size:14px;min-width:74px}
+.scSub.total{background:var(--surface)}
+.scSub.total .t{font-size:22px}
+
+/* ===== 記録画面（没入・タブなし） ===== */
+.rec{height:100dvh;display:flex;flex-direction:column;overflow:hidden;user-select:none;-webkit-user-select:none}
+.recTop{flex:none;display:flex;align-items:center;justify-content:space-between;height:48px;border-bottom:1px solid var(--rule)}
+.recTop .condT{font-size:15px;font-weight:600;text-align:center;line-height:1.25;min-width:0;white-space:nowrap}
+.recTop .txtBtn{padding:0 var(--gut);color:var(--ink);min-height:48px}
+.recStat{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:6px var(--gut) 4px}
+.recStat .endN{font-size:20px;font-weight:700;line-height:1.25}
+.recStat .msg{font-size:14px;color:var(--sub);line-height:1.3;min-height:18px}
+.recStat .msg.warn{color:var(--warn)}
+.recStat .tot{text-align:right;line-height:1}
+.recStat .tot span{font-size:13px;color:var(--sub);margin-right:6px}
+.recStat .tot b{font-size:36px;font-weight:700}
+.ruler{flex:none;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;padding:0 var(--gut) 6px}
+.ruler i{height:5px;background:var(--rule)}
+.ruler i.d{background:var(--sub)}
+.ruler i.c{background:var(--accent)}
+.tgWrap{flex:none;background:var(--mat);position:relative;display:flex;justify-content:center;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.tgWrap svg{display:block;width:min(100vw,480px,calc(100dvh - 318px));height:auto;aspect-ratio:1;touch-action:none}
+.zoomBtn{position:absolute;left:6px;bottom:6px;min-width:64px;height:44px;padding:0 10px;border-radius:6px;background:var(--surface);border:1px solid var(--rule-strong);font-size:14px;font-weight:700;color:var(--ink)}
+.lens{position:fixed;top:6px;z-index:40;width:132px;display:none;flex-direction:column;align-items:center;gap:0;pointer-events:none}
+.lens.on{display:flex}
+.lens.right{right:max(6px,calc(50vw - 234px))}
+.lens.left{left:max(6px,calc(50vw - 234px))}
+.lens svg{width:132px;height:132px;border-radius:50%;border:2px solid var(--ink);background:#888;display:block}
+.lens .read{margin-top:-14px;min-width:92px;padding:3px 10px 4px;border-radius:6px;background:var(--ink);color:var(--bg);text-align:center;font-size:24px;font-weight:700;line-height:1.15}
+.lens .read small{display:block;font-size:13px;font-weight:600;line-height:1.2}
+.miniCard{flex:1 1 0;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.miniCard .sc{border-top:0}
+.miniEmpty{padding:14px var(--gut);font-size:14px;color:var(--sub);line-height:1.6}
+.curEnd{flex:none;border-top:2px solid var(--ink);background:var(--surface)}
+.curRow{display:grid;height:54px}
+.curRow.p6{grid-template-columns:34px repeat(3,minmax(0,1fr)) 6px repeat(3,minmax(0,1fr)) 58px}
+.curRow.p3{grid-template-columns:34px repeat(3,minmax(0,1fr)) 58px}
+.curRow .gp{background:var(--bg)}
+.curCap{display:flex;justify-content:space-between;gap:8px;padding:5px var(--gut) 4px;font-size:14px;color:var(--sub);border-bottom:1px solid var(--rule);line-height:1.3}
+.curCap b{color:var(--ink);font-weight:700}
+.curRow > *{display:flex;align-items:center;justify-content:center;border-left:1px solid var(--rule);position:relative;font-size:24px;font-weight:700}
+.curRow > *:first-child{border-left:0;font-size:15px;color:var(--sub)}
+.curRow .slot .ord{position:absolute;top:2px;left:5px;font-size:13px;font-weight:600;color:var(--sub);line-height:1.1}
+.curRow .slot::after{content:"";position:absolute;left:18%;right:18%;bottom:5px;height:4px;border-radius:1px}
+.slot.zg::after{background:var(--zg)} .slot.zr::after{background:var(--zr)} .slot.zb::after{background:var(--zb)}
+.slot.zk::after{background:var(--zk);outline:1px solid var(--rule-strong)} .slot.zw::after{background:var(--zw);outline:1px solid var(--rule-strong)} .slot.zm::after{background:var(--zm)}
+.slot.sel{box-shadow:inset 0 0 0 2px var(--accent);background:var(--accent-soft)}
+.slot.next{box-shadow:inset 0 0 0 1px var(--rule-strong)}
+.slot .nopos{position:absolute;bottom:11px;right:4px;font-size:13px;color:var(--sub);font-weight:600;line-height:1}
+.curRow .sum{flex-direction:column;gap:0;font-size:24px}
+.dock{flex:none;display:grid;gap:8px;padding:8px var(--gut) calc(8px + var(--safe-b));border-top:1px solid var(--rule);background:var(--surface)}
+.dock.t3{grid-template-columns:76px 92px 1fr}
+.dock.t2{grid-template-columns:96px 1fr}
+.dock .btn{min-height:52px;padding:0 8px}
+.dock .btn small{font-size:13px;font-weight:600;display:block;line-height:1.1}
+.dock .btn.col{flex-direction:column;gap:1px;line-height:1.15}
+.btn[disabled]{opacity:.42}
+.keys{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px var(--gut) 0;background:var(--surface);border-top:2px solid var(--ink)}
+.key{height:54px;border-radius:6px;background:var(--raised);border:1px solid var(--rule-strong);font-size:24px;font-weight:700;position:relative;overflow:hidden}
+.key::before{content:"";position:absolute;left:0;right:0;top:0;height:6px}
+.key.zg::before{background:var(--zg)} .key.zr::before{background:var(--zr)} .key.zb::before{background:var(--zb)}
+.key.zk::before{background:var(--zk);border-bottom:1px solid var(--rule-strong)} .key.zw::before{background:var(--zw);border-bottom:1px solid var(--rule-strong)} .key.zm::before{background:var(--zm)}
+.key[disabled]{opacity:.38}
+.key:active{background:var(--accent-soft)}
+.scScroll{flex:1 1 0;min-height:0;overflow-y:auto}
+.editBar{flex:none;background:var(--surface);border-top:1px solid var(--rule);padding:8px var(--gut) calc(8px + var(--safe-b))}
+.editBar .t{font-size:15px;font-weight:600;line-height:1.4}
+.editBar .s{font-size:14px;color:var(--sub);line-height:1.4;margin-bottom:8px}
+.nudge{display:grid;grid-template-columns:repeat(4,48px) 1fr 1fr;gap:6px}
+.nudge .btn{padding:0;min-height:48px;font-size:15px}
+.editKeys{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:8px}
+.editKeys .key{height:52px;font-size:20px}
+
+/* シート */
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:min(100%,480px);background:var(--surface);border-top:2px solid var(--ink);padding:6px var(--gut) calc(14px + var(--safe-b))}
+.sheet h2{font-size:17px;font-weight:700;padding:10px 0 4px}
+
+/* ノート */
+.month{font-size:15px;font-weight:700;padding:16px var(--gut) 6px;border-bottom:2px solid var(--ink);margin:0}
+.entry{display:grid;grid-template-columns:54px 1fr;gap:0 10px;padding:12px var(--gut);border-bottom:1px solid var(--rule);width:100%;text-align:left}
+.entry .day{font-size:26px;font-weight:700;line-height:1.05}
+.entry .day small{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-top:3px}
+.entry .hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.entry .hd b{font-size:16px;font-weight:600}
+.entry .hd .sc1{font-size:24px;font-weight:700;line-height:1.1}
+.entry .hd .sc1 small{font-size:13px;font-weight:500;color:var(--sub);margin-left:2px}
+.entry .meta{font-size:14px;color:var(--sub);line-height:1.45}
+.entry .txt{font-size:15px;line-height:1.6;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.entry .chg{font-size:14px;color:var(--info);line-height:1.45;margin-top:3px}
+.noteBox{width:100%;min-height:96px;background:var(--surface);border:1px solid var(--rule-strong);border-radius:6px;padding:10px 12px;font-size:16px;line-height:1.6;resize:vertical}
+.tags{display:flex;flex-wrap:wrap;gap:6px;padding-top:8px}
+.tag{font-size:14px;color:var(--sub);border:1px solid var(--rule-strong);border-radius:4px;padding:2px 8px;min-height:28px;display:inline-flex;align-items:center}
+
+/* 比較 */
+.cmp{border-top:1px solid var(--rule-strong)}
+.cmpRow{display:grid;grid-template-columns:1.25fr 1fr 1fr .9fr;border-bottom:1px solid var(--rule);min-height:42px;align-items:center}
+.cmpRow > *{padding:4px 8px 4px 0;font-size:17px;font-weight:700;text-align:right}
+.cmpRow > *:first-child{text-align:left;font-size:15px;font-weight:500;color:var(--sub)}
+.cmpRow.h > *{font-size:13px;font-weight:600;color:var(--sub)}
+.cmpRow .df{font-weight:600;font-size:16px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.pair > div{background:var(--mat);padding:6px 0 4px;text-align:center}
+.pair svg{display:block;width:100%;height:auto}
+.pair span{font-size:14px;font-weight:600}
+.empty{padding:28px 12px;text-align:center;font-size:15px;color:var(--sub);line-height:1.7;border-bottom:1px solid var(--rule)}
+.empty b{display:block;font-size:17px;color:var(--ink);margin-bottom:4px}
+.swatch{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:6px}
+
+/* サイト */
+.sightGrid{display:grid;grid-template-columns:112px 1fr;gap:0 14px;align-items:start}
+.sightGrid svg{display:block;width:112px}
+.pill{font-size:13px;font-weight:600;border:1px solid var(--rule-strong);border-radius:4px;padding:1px 6px;color:var(--sub);margin-left:6px;white-space:nowrap}
+.pill.on{color:var(--accent);border-color:var(--accent)}
+.foot{padding:22px var(--gut) 8px;font-size:13px;color:var(--sub);line-height:1.6}
+@media (max-width:340px){
+  :root{--gut:12px}
+  .sc{font-size:16px}
+  .sc.p6 .scRow{grid-template-columns:24px repeat(3,minmax(0,1fr)) 5px repeat(3,minmax(0,1fr)) 34px 44px 21px 21px}
+  .sc.p3 .scRow{grid-template-columns:28px repeat(3,minmax(0,1fr)) 42px 52px 28px 28px}
+  .curRow{height:50px}
+  .curRow.p6{grid-template-columns:28px repeat(3,minmax(0,1fr)) 5px repeat(3,minmax(0,1fr)) 50px}
+  .scRow .cn{font-size:14px}
+  .scSub{gap:10px}
+  .recStat .tot b{font-size:32px}
+  .key{height:52px}
+  .keys{gap:5px}
+  .dock.t3{grid-template-columns:66px 84px 1fr}
+  .nudge{grid-template-columns:repeat(4,44px) 1fr 1fr;gap:5px}
+  .big{font-size:40px}
+  .fig .n{font-size:26px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ============================================================
+   Archery Note v5 試作。本番コードとは独立。データは決定的な乱数で作った見本。
+   座標は的の中心からの cm（x 右が正、y 上が正）。矢の半径は実寸 2.85mm。
+   ============================================================ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const qs=new URLSearchParams(location.search);
+const settings={theme:qs.get("theme")||"dark",field:qs.get("field")==="1",lens:qs.get("lens")||"right",gamify:false};
+function applyTheme(){const r=document.documentElement;r.dataset.theme=settings.theme;if(settings.field)r.dataset.field="1";else delete r.dataset.field}
+applyTheme();
+
+/* ---------- 採点（本番 scoreAt と同じ規則: 矢円が線に触れたら高い方） ---------- */
+const ARROW_R=0.285, EPS=1e-9;
+function scoreAt(x,y,faceD,r=ARROW_R){
+  const w=faceD/20, d=Math.max(0,Math.hypot(x,y)-r);
+  if(d<=w/2*(1+EPS)) return {s:10,X:true};
+  const s=11-Math.ceil(d/w-EPS);
+  return {s:s<1?0:Math.min(10,s),X:false};
+}
+const lab=a=>a.X?"X":a.s===0?"M":String(a.s);
+const rank=a=>a.X?11:a.s;
+const zone=a=>a.X||a.s>=9?"zg":a.s>=7?"zr":a.s>=5?"zb":a.s>=3?"zk":a.s>=1?"zw":"zm";
+const KEYS=[["X",10,1],["10",10],["9",9],["8",8],["7",7],["6",6],["5",5],["4",4],["3",3],["2",2],["1",1],["M",0]];
+
+/* ---------- 見本データ ---------- */
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(!u)u=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*r())}
+const r2=v=>Math.round(v*100)/100;
+function mkSess(o){
+  const r=rng(o.seed), ends=[];
+  for(let e=0;e<o.endsPlan;e++){const a=[];for(let i=0;i<o.per;i++){
+    const x=o.bx+gauss(r)*o.sg, y=o.by+gauss(r)*o.sg*1.12, sc=scoreAt(x,y,o.faceD);
+    a.push(o.inputMode==="key"?{x:null,y:null,s:sc.s,X:sc.X,src:"key"}:{x:r2(x),y:r2(y),s:sc.s,X:sc.X,src:"pos"});
+  }ends.push(a)}
+  return Object.assign({faceType:"full",arrowR:ARROW_R,setupId:"s1",inputMode:"pos",tags:[],note:""},o,{ends});
+}
+const DB={
+  setups:[{id:"s1",name:"メインリカーブ",active:true,spec:[["ハンドル","25インチ"],["リム","68インチ・38ポンド（実測 36.5）"],["矢","カーボン 620番・28.5インチ"],["矢の外径","5.7mm（線の判定に使います）"],["ポイント","100グレイン"],["ブレースハイト","22.3cm"],["ティラー差","上 +3mm"],["ノッキングポイント","+4mm"],["プランジャー","中間・ばね 中"]]},
+          {id:"s2",name:"インドア用",active:false,spec:[["リム","68インチ・36ポンド"],["矢","アルミ 2312"],["矢の外径","9.1mm（線の判定に使います）"]]}],
+  gearLog:[{date:"2026-10-28",text:"サイト 70m 5.00 → 5.20"},{date:"2026-10-14",text:"プランジャー ばね 弱 → 中"},{date:"2026-10-03",text:"ノッキングポイント +3mm → +4mm"}],
+  marks:[{dist:18,v:1.85,date:"2026-11-01",kind:"実測"},{dist:30,v:2.60,date:"2026-09-20",kind:"実測"},{dist:50,v:3.84,date:null,kind:"予測"},{dist:70,v:5.20,date:"2026-10-28",kind:"実測"}],
+  notes:[{id:"n1",date:"2026-11-08",text:"素引き30回。引き手の肘が下がる感覚があったので、鏡で肩の高さを確認しました。",tags:["射型"]}],
+  trash:2,
+  sessions:[
+    mkSess({id:"a1",seed:11,date:"2026-10-03",dist:70,faceD:122,per:6,endsPlan:12,sg:8.6,bx:-2.6,by:-2.0,weather:"晴れ",wind:"弱い",note:"ノッキングポイントを1mm上げた初日。上下のばらつきを見るために72射。"}),
+    mkSess({id:"a2",seed:23,date:"2026-10-10",dist:70,faceD:122,per:6,endsPlan:12,sg:8.2,bx:-2.2,by:-1.4,weather:"くもり",wind:"なし",note:""}),
+    mkSess({id:"a3",seed:37,date:"2026-10-14",dist:70,faceD:122,per:6,endsPlan:12,sg:8.9,bx:-2.9,by:-0.8,weather:"晴れ",wind:"左から中",note:"左からの風。後半は風上をねらいました。プランジャーのばねを中に変更。",tags:["風"]}),
+    mkSess({id:"a4",seed:41,date:"2026-10-21",dist:70,faceD:122,per:6,endsPlan:12,sg:8.0,bx:-2.4,by:-1.2,weather:"晴れ",wind:"なし",note:"リリースで引き手が外に逃げる回が数回。"}),
+    mkSess({id:"a5",seed:53,date:"2026-10-28",dist:70,faceD:122,per:6,endsPlan:12,sg:8.3,bx:-2.8,by:-1.0,weather:"晴れ",wind:"弱い",note:"着弾が左に寄っていたため、終了後にサイトを 5.00 から 5.20 に変更。",tags:["サイト"]}),
+    mkSess({id:"a6",seed:67,date:"2026-11-04",dist:70,faceD:122,per:6,endsPlan:12,sg:8.1,bx:-0.6,by:-0.9,weather:"雨",wind:"なし",inputMode:"key",note:"雨のため点数だけ記録。"}),
+    mkSess({id:"b1",seed:71,date:"2026-11-01",dist:18,faceD:40,per:3,endsPlan:20,sg:1.75,bx:0.2,by:-0.3,weather:"屋内",wind:"なし",setupId:"s2",note:"インドア用の矢で初回。18m のサイト値を記録。",tags:["サイト"]}),
+    mkSess({id:"a7",seed:89,date:"2026-11-10",dist:70,faceD:122,per:6,endsPlan:12,sg:7.9,bx:-0.5,by:-0.8,weather:"晴れ",wind:"弱い",note:"サイト変更後の2回目。3エンド目と9エンド目で引き手の肘が下がりました。",tags:["射型"]}),
+    mkSess({id:"b2",seed:97,date:"2026-11-07",dist:18,faceD:40,per:3,endsPlan:20,sg:1.65,bx:0.1,by:-0.2,weather:"屋内",wind:"なし",setupId:"s2",note:""})
+  ]
+};
+const TODAY="2026-11-12";
+/* ---------- 集計 ---------- */
+const flat=s=>s.ends.flat();
+const sum=a=>a.reduce((t,x)=>t+x.s,0);
+const total=s=>sum(flat(s));
+const tens=a=>a.filter(x=>x.s===10).length, xs=a=>a.filter(x=>x.X).length;
+const shots=s=>flat(s).length;
+const planned=s=>s.per*s.endsPlan;
+const halfTot=(s,h)=>{const n=s.endsPlan/2;return sum(s.ends.slice(h*n,(h+1)*n).flat())};
+const mean=a=>a.reduce((t,v)=>t+v,0)/a.length;
+const sd=a=>{if(a.length<2)return 0;const m=mean(a);return Math.sqrt(a.reduce((t,v)=>t+(v-m)**2,0)/(a.length-1))};
+const pos=s=>flat(s).filter(a=>a.x!=null);
+function group(arr){ /* 指標A: 全射。rr = sqrt(sxx+syy)（n-1 で割る）。95%区間は Satterthwaite と Wilson–Hilferty */
+  const n=arr.length; if(n<3) return null;
+  const cx=mean(arr.map(a=>a.x)), cy=mean(arr.map(a=>a.y));
+  let sxx=0,syy=0,sxy=0; arr.forEach(a=>{sxx+=(a.x-cx)**2;syy+=(a.y-cy)**2;sxy+=(a.x-cx)*(a.y-cy)});
+  sxx/=n-1;syy/=n-1;sxy/=n-1;
+  const rr=Math.sqrt(sxx+syy), nu=(n-1)*(sxx+syy)**2/(sxx*sxx+syy*syy+2*sxy*sxy);
+  const chi=(p)=>{const z=p===0.975?1.959964:-1.959964;return nu*Math.pow(1-2/(9*nu)+z*Math.sqrt(2/(9*nu)),3)};
+  return {n,cx,cy,sx:Math.sqrt(sxx),sy:Math.sqrt(syy),rr,lo:rr*Math.sqrt(nu/chi(0.975)),hi:rr*Math.sqrt(nu/chi(0.025))};
+}
+const f1=v=>v.toFixed(1), f2=v=>v.toFixed(2);
+const sgn=(v,d=0)=>(v>0?"+":v<0?"−":"±")+Math.abs(v).toFixed(d);
+const WD=["日","月","火","水","木","金","土"];
+const dOf=s=>new Date(s+"T00:00:00");
+const md=s=>{const d=dOf(s);return (d.getMonth()+1)+"/"+d.getDate()};
+const mdw=s=>md(s)+"（"+WD[dOf(s).getDay()]+"）";
+const condKey=s=>s.dist+"|"+s.faceD+"|"+planned(s);
+const condLabel=s=>`${s.dist}m・${s.faceD}cm的・${planned(s)}射`;
+const setupName=id=>(DB.setups.find(s=>s.id===id)||{}).name||"";
+const offTxt=g=>{const h=Math.abs(g.cx)<0.05?"左右 0.0":(g.cx<0?"左 ":"右 ")+f1(Math.abs(g.cx)),v=Math.abs(g.cy)<0.05?"上下 0.0":(g.cy<0?"下 ":"上 ")+f1(Math.abs(g.cy));return h+"cm・"+v+"cm"};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const byDateDesc=(a,b)=>a.date<b.date?1:-1;
+const done=()=>DB.sessions.filter(s=>s.ends.length===s.endsPlan);
+
+/* ---------- 的の描画 ---------- */
+const ZFILL=["","#ffffff","#ffffff","#1c1e1c","#1c1e1c","#37a6e0","#37a6e0","#f23b3b","#f23b3b","#ffe14d","#ffe14d"];
+function faceMarkup(faceD){
+  const w=faceD/20; let h="";
+  for(let s=1;s<=10;s++){const r=w*(11-s);const line=(s===3)?"#1c1e1c":(s===4)?"#ffffff":"#1c1e1c";
+    h+=`<circle r="${r}" fill="${ZFILL[s]}" stroke="${s===1?"#717d87":line}" stroke-width="${s===1?1:0.7}" vector-effect="non-scaling-stroke"/>`}
+  h+=`<circle r="${w/2}" fill="none" stroke="#1c1e1c" stroke-width="0.7" vector-effect="non-scaling-stroke"/>`;
+  h+=`<path d="M${-w*0.16} 0H${w*0.16}M0 ${-w*0.16}V${w*0.16}" stroke="#1c1e1c" stroke-width="0.7" vector-effect="non-scaling-stroke"/>`;
+  return h;
+}
+const dotFill=(a,faceD)=>{const z=scoreAt(a.x,a.y,faceD,0).s;return (z===3||z===4)?"#ffffff":"#10151b"};
+/* 実寸の矢円（判定と同じ半径）＋位置の目印（破線、判定に使わない） */
+function arrowDot(a,faceD,k,o={}){
+  const loc=Math.max(faceD/85,4.2*k), f=dotFill(a,faceD);
+  return `<g opacity="${o.dim?0.5:1}"><circle cx="${a.x}" cy="${-a.y}" r="${loc}" fill="${f==="#ffffff"?"rgba(255,255,255,.16)":"rgba(16,21,27,.16)"}" stroke="${f}" stroke-width="${o.sel?2:1}" ${o.plain?"":'stroke-dasharray="2 2"'} vector-effect="non-scaling-stroke"/><circle cx="${a.x}" cy="${-a.y}" r="${o.r||ARROW_R}" fill="${f}"/></g>`;
+}
+/* 番号ラベルの重なり回避: 群の重心から外へ出し、ラベル同士と矢の位置から押し離す */
+function layoutLabels(pts,k,vb){
+  const R=11*k,n=pts.length; if(!n) return [];
+  const cx=mean(pts.map(p=>p.x)), cy=mean(pts.map(p=>p.y));
+  const L=pts.map((p,i)=>{let dx=p.x-cx,dy=p.y-cy,d=Math.hypot(dx,dy);if(d<0.2*k){const a=-Math.PI/3+i*2.1;dx=Math.cos(a);dy=Math.sin(a);d=1}return{x:p.x+dx/d*24*k,y:p.y+dy/d*24*k}});
+  for(let it=0;it<80;it++){
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){let dx=L[j].x-L[i].x,dy=L[j].y-L[i].y,d=Math.hypot(dx,dy),m=2*R+4*k;if(d<m){if(d<1e-6){dx=1;dy=0;d=1}const p=(m-d)/2;L[i].x-=dx/d*p;L[i].y-=dy/d*p;L[j].x+=dx/d*p;L[j].y+=dy/d*p}}
+    for(let i=0;i<n;i++)for(let j=0;j<n;j++){let dx=L[i].x-pts[j].x,dy=L[i].y-pts[j].y,d=Math.hypot(dx,dy),m=R+7*k;if(d<m){if(d<1e-6){dx=0;dy=1;d=1}L[i].x+=dx/d*(m-d);L[i].y+=dy/d*(m-d)}}
+    for(const l of L){l.x=Math.min(vb.x+vb.w-R-k,Math.max(vb.x+R+k,l.x));l.y=Math.min(-vb.y-R-k,Math.max(-vb.y-vb.h+R+k,l.y))}
+  }
+  return L;
+}
+function labelsMarkup(arrs,k,vb,sel){
+  const idx=arrs.map((a,i)=>({a,i})).filter(o=>o.a.x!=null), L=layoutLabels(idx.map(o=>o.a),k,vb);
+  let lines="",badges="";
+  idx.forEach((o,j)=>{const l=L[j],on=sel===o.i;
+    lines+=`<path d="M${o.a.x} ${-o.a.y}L${l.x} ${-l.y}" stroke="#ffffff" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M${o.a.x} ${-o.a.y}L${l.x} ${-l.y}" stroke="#10151b" stroke-width="1.25" vector-effect="non-scaling-stroke"/>`;
+    badges+=`<g><circle cx="${l.x}" cy="${-l.y}" r="${11*k}" fill="${on?"#a8c7ac":"#10151b"}" stroke="#ffffff" stroke-width="1.5" vector-effect="non-scaling-stroke"/><text x="${l.x}" y="${-l.y}" font-size="${13*k}" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="${on?"#0f1a13":"#ffffff"}">${o.i+1}</text></g>`});
+  return lines+badges;
+}
+function viewBoxFor(faceD,zoom){const R=faceD/2*(zoom?0.47:1.035);return {x:-R,y:-R,w:2*R,h:2*R}}
+/* 集計用の的図: 全矢、着弾中心、RMS の円 */
+function plotSvg(sess,px,o={}){
+  const vb=viewBoxFor(sess.faceD,false),k=vb.w/px,arr=pos(sess),g=group(arr);
+  let h=`<svg viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" width="${px}" height="${px}" role="img" aria-label="着弾位置の図">${faceMarkup(sess.faceD)}`;
+  arr.forEach(a=>h+=arrowDot(a,sess.faceD,k,{plain:true}));
+  if(g){const c=9*k;
+    h+=`<circle cx="${g.cx}" cy="${-g.cy}" r="${g.rr}" fill="none" stroke="#ffffff" stroke-width="3.5" vector-effect="non-scaling-stroke"/><circle cx="${g.cx}" cy="${-g.cy}" r="${g.rr}" fill="none" stroke="#10151b" stroke-width="1.5" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    h+=`<path d="M${g.cx-c} ${-g.cy}H${g.cx+c}M${g.cx} ${-g.cy-c}V${-g.cy+c}" stroke="#ffffff" stroke-width="5" vector-effect="non-scaling-stroke"/><path d="M${g.cx-c} ${-g.cy}H${g.cx+c}M${g.cx} ${-g.cy-c}V${-g.cy+c}" stroke="#10151b" stroke-width="2" vector-effect="non-scaling-stroke"/>`}
+  return h+"</svg>";
+}
+
+/* ---------- スコア表 ---------- */
+function scorecard(sess,o={}){
+  /* 並びは公認大会で使われる採点用紙を参考: 回 | 3射 | 3射 | 計 | 累計 | 10数(X含む) | X数、36射ごとの小計、総合計 */
+  const per=sess.per,N=sess.endsPlan,half=N/2,cur=o.cur,split=per===6;
+  const gap=a=>{if(split)a.splice(3,0,'<div class="gp"></div>');return a.join("")};
+  let run=0,h=`<div class="sc p${per}${o.edit?" edit":""}" role="table" aria-label="スコア表"><div class="scRow scHead" role="row"><div>回</div>${gap(Array.from({length:per},(_,i)=>`<div>${i+1}</div>`))}<div>計</div><div class="r">累計</div><div title="10点の数（Xを含む）">10</div><div>X</div></div>`;
+  const sub=(name,a0,full,cls="")=>`<div class="scSub ${cls}" role="row"><span class="nm">${name}</span><span>10+X<b>${full?tens(a0):"—"}</b></span><span>X<b>${full?xs(a0):"—"}</b></span><span class="t">${full?sum(a0):"—"}</span></div>`;
+  for(let e=0;e<N;e++){
+    const isDone=e<sess.ends.length,isCur=!isDone&&cur&&e===sess.ends.length;
+    if(o.onlyDone&&!isDone) break;
+    let arr=(isDone?sess.ends[e]:isCur?cur:[]).slice();
+    if(isDone&&o.ed!==e) arr.sort((p,q)=>rank(q)-rank(p)); /* 表示だけ高い点から。保存は打った順 */
+    const et=sum(arr); if(isDone) run+=et;
+    const tag=o.edit&&isDone?"button":"div";
+    const cells=Array.from({length:per},(_,i)=>{const a=arr[i];return a?`<div class="c ${zone(a)}">${lab(a)}${a.manual?'<span class="man" title="手動で修正">*</span>':""}</div>`:`<div class="c${isCur&&i===arr.length?" next":""}"></div>`});
+    h+=`<${tag} class="scRow${isCur?" cur":""}${o.ed===e?" ed":""}" role="row" ${isCur?'id="curRowEl"':""} ${tag==="button"?`data-erow="${e}" aria-label="${e+1}エンド 計${et}点。タップで修正"`:""}><div class="en">${e+1}</div>${gap(cells)}`;
+    h+=`<div class="et${isCur?" prov":""}">${isDone||(isCur&&arr.length)?et:""}</div><div class="rt${isCur?" prov":""}">${isDone?run:isCur&&arr.length?run+et:""}</div><div class="cn">${isDone?tens(arr):""}</div><div class="cn">${isDone?xs(arr):""}</div></${tag}>`;
+    if(!o.onlyDone||isDone){
+      if(e===half-1) h+=sub(`前半 ${half*per}射`,sess.ends.slice(0,half).flat(),sess.ends.length>=half);
+      if(e===N-1){h+=sub(`後半 ${half*per}射`,sess.ends.slice(half).flat(),sess.ends.length>=N);h+=sub(`合計 ${N*per}射`,flat(sess),sess.ends.length>=N,"total")}
+    }
+  }
+  return h+"</div>";
+}
+/* 入力中（または修正中）のエンド: 打った順の大きな枠 */
+function curRowHtml(arr,per,endNo,sel,o={}){
+  const cells=Array.from({length:per},(_,i)=>{const a=arr[i];return a?`<button class="slot ${zone(a)}${sel===i?" sel":""}" data-slot="${i}" aria-label="${i+1}射目 ${lab(a)}。タップで修正"><span class="ord">${i+1}</span>${lab(a)}${a.manual?'<span class="man" style="position:absolute;top:2px;right:4px;font-size:13px;color:var(--warn)">*</span>':""}${o.showNoPos&&a.x==null?'<span class="nopos">位置なし</span>':""}</button>`:`<div class="slot${i===arr.length&&!o.locked?" next":""}"><span class="ord">${i+1}</span></div>`});
+  if(per===6) cells.splice(3,0,'<div class="gp"></div>');
+  return `<div class="curRow p${per}"><div>${endNo}</div>${cells.join("")}<div class="sum">${arr.length?sum(arr):""}</div></div>`;
+}
+
+/* ---------- グラフ ---------- */
+function chartW(){return Math.min(innerWidth,480)-(innerWidth<=340?24:32)}
+function lineChart(vals,labels,o={}){
+  const W=chartW(),H=o.h||176,L=42,R=24,T=26,B=28;
+  let lo=Math.min(...vals),hi=Math.max(...vals);const step=o.step||10;lo=Math.floor((lo-5)/step)*step;hi=Math.ceil((hi+2)/step)*step;if(hi===lo)hi+=step;
+  const X=i=>L+14+(vals.length===1?(W-L-R-14)/2:i*(W-L-R-14)/(vals.length-1)),Y=v=>T+(hi-v)/(hi-lo)*(H-T-B);
+  let h=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${o.label||"推移"}">`;
+  const ticks=[];for(let v=lo;v<=hi+1e-9;v+=(hi-lo)/((hi-lo)/step>4?2:(hi-lo)/step))ticks.push(v);
+  ticks.forEach(v=>{h+=`<path d="M${L} ${Y(v)}H${W-R+10}" stroke="var(--rule)"/><text class="ax" x="${L-8}" y="${Y(v)+4.5}" text-anchor="end">${Math.round(v)}</text>`});
+  if(o.mean!=null) h+=`<path d="M${L} ${Y(o.mean)}H${W-R+10}" stroke="var(--sub)" stroke-dasharray="5 4"/>`;
+  h+=`<path d="${vals.map((v,i)=>(i?"L":"M")+X(i)+" "+Y(v)).join("")}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  vals.forEach((v,i)=>{const last=i===vals.length-1;h+=`<circle cx="${X(i)}" cy="${Y(v)}" r="${last?5:4}" fill="${last?"var(--accent)":"var(--bg)"}" stroke="${last?"var(--accent)":"var(--ink)"}" stroke-width="2"/>`;
+    const nb=[vals[i-1],vals[i+1]].filter(x=>x!=null),below=nb.length&&v<mean(nb);
+    h+=`<text x="${X(i)}" y="${below?Y(v)+20:Y(v)-10}" text-anchor="middle" font-size="13" font-weight="${last?700:500}" fill="var(--ink)">${v}</text>`;
+    h+=`<text class="ax" x="${X(i)}" y="${H-6}" text-anchor="middle">${labels[i]}</text>`});
+  return h+"</svg>";
+}
+function endStrip(vals,o={}){
+  const lo=Math.min(...vals),hi=Math.max(...vals),best=hi,per=o.rows===2?Math.ceil(vals.length/2):vals.length;
+  const cell=(v,i)=>`<div class="${v===best&&o.mark?"hi":""}"><b>${o.fmt?o.fmt(v):v}</b><i style="height:${Math.round(8+(v-lo)/((hi-lo)||1)*30)}px"></i><span>${i+1}</span></div>`;
+  let h="";for(let r=0;r*per<vals.length;r++)h+=`<div class="strip" style="grid-template-columns:repeat(${per},1fr)">${vals.slice(r*per,(r+1)*per).map((v,i)=>cell(v,r*per+i)).join("")}</div>`;
+  return h;
+}
+
+/* ============================================================ 画面 ============================================================ */
+const ICON={
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11 12 4l8 7v9H4z"/><path d="M10 20v-6h4v6"/></svg>',
+  notes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h12v18H6z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4v16h16"/><path d="M7 15l4-5 3 3 5-7"/></svg>',
+  bow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 3c11 2 11 16 0 18"/><path d="M7 3v18M3 12h17M17 9l3 3-3 3"/></svg>',
+  tgt:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>',
+  back:'<svg viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 1 2 8l6 7"/></svg>',
+  go:'<svg class="go chev" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 1l6 7-6 7"/></svg>'
+};
+let active=null; /* 記録中のセッション {sess,cur,sel,zoom,msg} */
+function tabbar(cur){
+  const t=(id,hash,name,ic)=>`<button data-go="${hash}" ${cur===id?'aria-current="page"':""}>${ICON[ic]}${name}</button>`;
+  return `<nav class="tabbar" aria-label="主な画面">${t("record","#home","記録","tgt")}${t("notes","#notes","ノート","notes")}${t("analysis","#analysis-score","分析","chart")}${t("gear","#gear","弓具","bow")}</nav>`;
+}
+const row=(k,v,sub)=>`<div class="row"><span class="k">${k}</span><span class="v">${v}${sub?`<small>${sub}</small>`:""}</span></div>`;
+const linkRow=(hash,b,s,right="")=>`<button class="row link" data-go="${hash}"><span class="main"><b>${b}</b>${s?`<span>${s}</span>`:""}</span><span class="v">${right}${ICON.go}</span></button>`;
+
+/* ---------- 記録タブの待機画面（ホームの役割） ---------- */
+function scrHome(){
+  const all=done().sort(byDateDesc), ref=all[0], same=all.filter(s=>condKey(s)===condKey(ref)).reverse();
+  const tv=same.map(total), m=mean(tv), d=sd(tv), a=flat(ref), mark=DB.marks.find(x=>x.dist===ref.dist);
+  const band=active?`<div class="band startBand"><div class="l">記録中の練習</div><div class="c">${condLabel(active.sess)}</div><div class="m">${active.sess.ends.length}エンド確定・${shots(active.sess)+active.cur.length}射・${total(active.sess)+sum(active.cur)}点。1射ごとに保存しています。</div>
+      <div class="btnRow" style="padding-top:0"><button class="btn pri" data-go="#record-${active.sess.inputMode==="key"?"score":"target"}">記録を再開する</button></div></div>`:
+    `<div class="band startBand"><div class="l">前回と同じ条件</div><div class="c">${condLabel(ref)}</div><div class="m">${ref.per}射×${ref.endsPlan}エンド・${setupName(ref.setupId)}・サイト ${mark?f2(mark.v):"記録なし"}</div>
+      <div class="seg"><button aria-pressed="${startSel.mode==="pos"}" data-mode="pos">的面に打つ</button><button aria-pressed="${startSel.mode==="key"}" data-mode="key">点数だけ</button></div>
+      <div class="btnRow"><button class="btn" data-go="#start">条件を変える</button><button class="btn pri" id="btnQuick">記録を始める</button></div></div>`;
+  return `<main class="scr">
+  <header class="top"><div><div class="date">${mdw(TODAY).replace("/","月").replace("（","日（")}</div><h1>記録</h1></div><button class="txtBtn" data-go="#settings">設定</button></header>
+  ${band}
+  <section class="sec"><div class="secH"><h2>前回の練習</h2><span class="aside">${mdw(ref.date)}・${ref.dist}m・${planned(ref)}射</span></div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;padding:6px 0 12px;border-bottom:1px solid var(--rule)"><div class="big">${total(ref)}<small>/ ${planned(ref)*10}</small></div><button class="txtBtn" data-go="#note/${ref.id}">スコア表を見る</button></div>
+    <div class="figs"><div class="fig"><div class="l">前半 / 後半</div><div class="n" style="font-size:24px">${halfTot(ref,0)}<small>/</small> ${halfTot(ref,1)}</div></div><div class="fig"><div class="l">10+X</div><div class="n">${tens(a)}</div></div><div class="fig"><div class="l">X</div><div class="n">${xs(a)}</div></div></div>
+    ${endStrip(ref.ends.map(sum),{mark:true})}
+    <p class="basis">エンドごとの合計（${ref.per}射、${ref.per*10}点満点）。最も高いエンドに色を付けています。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>${ref.dist}m・${planned(ref)}射の推移</h2><span class="aside">${same.length}回</span></div>
+    ${lineChart(tv,same.map(s=>md(s.date)),{mean:m,label:"合計点の推移"})}
+    <p class="fact">${same.length}回の平均は ${f1(m)} 点、回ごとの標準偏差は ${f1(d)} 点です。</p>
+    <p class="basis">対象: ${md(same[0].date)}〜${md(same[same.length-1].date)}、${condLabel(ref)}。破線は平均です。${same.length<8?"回数が少ないため、上向き・下向きの判定はしていません。":""}</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>最近の練習</h2><button class="txtBtn" data-go="#notes" style="min-height:32px">ノートで見る</button></div></section>
+  ${noteEntries(all.slice(0,3))}
+  </main>${tabbar("record")}`;
+}
+
+/* ---------- 記録の条件 ---------- */
+const startSel={round:"70m",mode:"pos"};
+const ROUNDS={"70m":{n:"70m 72射",dist:70,faceD:122,per:6,endsPlan:12},"50m":{n:"50m 72射",dist:50,faceD:122,per:6,endsPlan:12},"30m":{n:"30m 36射",dist:30,faceD:80,per:6,endsPlan:6},"18m":{n:"18m 60射",dist:18,faceD:40,per:3,endsPlan:20},"free":{n:"自由練習",dist:70,faceD:122,per:6,endsPlan:12},"custom":{n:"自作ラウンド",dist:70,faceD:122,per:6,endsPlan:12}};
+function scrStart(){
+  const r=ROUNDS[startSel.round],mk=DB.marks.find(m=>m.dist===r.dist);
+  const rb=k=>`<button aria-pressed="${startSel.round===k}" data-round="${k}">${ROUNDS[k].n.split(" ")[0]}</button>`;
+  return `<main class="scr" style="padding-bottom:calc(92px + var(--safe-b))">
+  <div style="border-bottom:1px solid var(--rule)"><button class="backBtn" data-go="#home">${ICON.back}記録</button></div>
+  <header class="top"><h1>記録の条件</h1></header>
+  <section class="sec" style="margin-top:6px"><div class="secH"><h2>ラウンド</h2><span class="aside">${r.n}</span></div>
+    <div class="seg" style="margin-top:4px">${rb("70m")}${rb("50m")}${rb("30m")}${rb("18m")}</div>
+    <div class="seg" style="margin-top:8px">${rb("free")}${rb("custom")}</div>
+    <div style="margin-top:8px">${row("距離",r.dist+"m")}${row("的",r.faceD+"cm・10点帯まで")}${row("1エンド",r.per+"射 × "+r.endsPlan+"エンド",`合計 ${r.per*r.endsPlan}射。途中で終了できます`)}</div>
+  </section>
+  <section class="sec"><div class="secH"><h2>入力の方法</h2></div>
+    <div class="seg" style="margin-top:4px"><button aria-pressed="${startSel.mode==="pos"}" data-mode="pos">的面に打つ</button><button aria-pressed="${startSel.mode==="key"}" data-mode="key">点数だけ</button></div>
+    <p class="basis">${startSel.mode==="pos"?"的をタップした位置を記録します。着弾の分布とサイト調整の目安に使えます。":"点数キーで記録します。着弾位置は残らないため、着弾の分析には使えません。"}記録の途中でも切り替えられます。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>弓具とサイト</h2></div>
+    ${linkRow("#gear","弓具",setupName("s1")+"・矢の外径 5.7mm")}
+    ${linkRow("#sight",r.dist+"m のサイト",mk?(mk.kind==="予測"?"実測の記録はありません。台帳からの予測値":md(mk.date)+" に記録"):"記録なし",mk?`<span style="font-size:20px;font-weight:700">${f2(mk.v)}</span>`:"")}
+    <button class="row link" data-noop><span class="main"><b>天気・風・メモ</b><span>必要なときだけ入力します</span></span><span class="v">${ICON.go}</span></button>
+  </section>
+  </main>
+  <div class="actbar"><button class="btn pri block" id="btnStart" style="min-height:56px;font-size:17px">この条件で記録を始める</button></div>`;
+}
+
+/* ---------- 記録（共通） ---------- */
+function demoActive(mode){
+  const base=DB.sessions.find(s=>s.id==="a7"), n=mode==="key"?7:3;
+  const sess=Object.assign({},base,{id:"live",date:TODAY,inputMode:mode,note:"",ends:base.ends.slice(0,n).map(e=>e.map(a=>mode==="key"?{x:null,y:null,s:a.s,X:a.X,src:"key"}:Object.assign({},a)))});
+  const cur=mode==="key"?[[9],[10,1],[8],[9]].map(([s,X])=>({x:null,y:null,s,X:!!X,src:"key"})):[[1.6,2.1],[-0.9,0.6],[2.8,-1.9]].map(([x,y])=>Object.assign({x,y,src:"pos"},scoreAt(x,y,122)));
+  return {sess,cur,sel:null,zoom:false,msg:"",scoreEdit:false};
+}
+function newActive(){const r=ROUNDS[startSel.round];return {sess:{id:"live",date:TODAY,dist:r.dist,faceD:r.faceD,faceType:"full",per:r.per,endsPlan:r.endsPlan,arrowR:ARROW_R,setupId:"s1",inputMode:startSel.mode,note:"",tags:[],weather:"",wind:"",ends:[]},cur:[],sel:null,zoom:false,msg:"",scoreEdit:false}}
+function recHeader(A){
+  const s=A.sess,e=s.ends.length,allDone=e>=s.endsPlan,first=e*s.per+1,tot=total(s)+sum(A.cur);
+  const def=allDone?`${planned(s)}射を記録しました`:`${first}〜${first+s.per-1}射目・全${planned(s)}射`;
+  return `<header class="recTop"><button class="txtBtn" data-go="#home" aria-label="記録を中断して戻る">${ICON.back}中断</button><div class="condT">${s.dist}m・${s.faceD}cm的</div><button class="txtBtn" id="btnMenu">メニュー</button></header>
+  <div class="recStat"><div><div class="endN">${allDone?"全エンド確定":`第${e+1}エンド`}</div><div class="msg${A.msg?" warn":""}" id="recMsg" role="status" aria-live="polite">${A.msg||def}</div></div><div class="tot"><span>合計</span><b>${tot}</b></div></div>
+  <div class="ruler" aria-hidden="true">${Array.from({length:s.endsPlan},(_,i)=>`<i class="${i<e?"d":i===e?"c":""}"></i>`).join("")}</div>`;
+}
+function menuSheet(A){
+  const other=A.sess.inputMode==="key"?"的面に打つ入力に切り替える":"点数だけの入力に切り替える";
+  return `<div class="ovl" id="ovl"><div class="sheet" role="dialog" aria-label="記録のメニュー"><h2>記録のメニュー</h2>
+  <button class="row link" id="mSwitch"><span class="main"><b>${other}</b><span>ここまでの記録はそのまま残ります</span></span><span class="v">${ICON.go}</span></button>
+  <button class="row link" data-noop><span class="main"><b>天気・風・メモを書く</b></span><span class="v">${ICON.go}</span></button>
+  <button class="row link" id="mFinish"><span class="main"><b>ここで記録を終了する</b><span>${shots(A.sess)+A.cur.length}射まで保存して結果を表示します</span></span><span class="v">${ICON.go}</span></button>
+  <div class="btnRow"><button class="btn" id="mClose">閉じる</button></div></div></div>`;
+}
+
+/* ---------- 記録: 的面 ---------- */
+function targetSvg(A,px){
+  const s=A.sess,vb=viewBoxFor(s.faceD,A.zoom),k=vb.w/px;
+  let h=`<svg id="tg" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" role="application" aria-label="的面。タップで着弾位置を記録、長押しで拡大して調整">${faceMarkup(s.faceD)}`;
+  s.ends.flat().filter(a=>a.x!=null).forEach(a=>h+=arrowDot(a,s.faceD,k,{dim:true,plain:true}));
+  A.cur.forEach((a,i)=>{if(a.x!=null)h+=arrowDot(a,s.faceD,k,{sel:A.sel===i})});
+  h+=labelsMarkup(A.cur,k,vb,A.sel)+`<g id="ghost"></g></svg>`;
+  return h;
+}
+function scrRecTarget(){
+  const A=active,s=A.sess,per=s.per,allDone=s.ends.length>=s.endsPlan,full=A.cur.length>=per,sel=A.sel!=null?A.cur[A.sel]:null;
+  let bottom;
+  if(sel){
+    bottom=`<div class="editBar"><div class="t" style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px"><span>${A.sel+1}射目を修正（${lab(sel)}${sel.s?"点":""}${sel.manual?"・手動":""}）</span>${A.scoreEdit?"":`<button class="txtBtn" id="eScore">点数だけ直す</button>`}</div>
+    <div class="s">${A.scoreEdit?"位置はそのままで、点数だけを置き換えます。":sel.x!=null?"的をタップで置き直し・矢印は1mmずつ":"位置のない矢です。的をタップで位置を付けられます"}</div>
+    ${A.scoreEdit?`<div class="editKeys" style="margin-top:0">${KEYS.map((k,i)=>`<button class="key ${zone({s:k[1],X:!!k[2]})}" data-ek="${i}">${k[0]}</button>`).join("")}</div>`:
+    `<div class="nudge">${[["←",-1,0,"左へ1mm"],["↑",0,1,"上へ1mm"],["↓",0,-1,"下へ1mm"],["→",1,0,"右へ1mm"]].map(n=>`<button class="btn" data-nx="${n[1]}" data-ny="${n[2]}" aria-label="${n[3]}" ${sel.x==null?"disabled":""}>${n[0]}</button>`).join("")}<button class="btn danger" id="eDel">削除</button><button class="btn pri" id="eDone">完了</button></div>`}</div>`;
+  }else if(allDone){
+    bottom=`<div class="dock t2"><button class="btn" id="bUndo" disabled>取消</button><button class="btn pri" id="bFinish">記録を終了して結果を見る</button></div>`;
+  }else{
+    bottom=`<div class="dock t3"><button class="btn" id="bUndo" ${A.cur.length?"":"disabled"}>取消</button><button class="btn col" id="bMiss" ${full?"disabled":""}>M<small>位置なし</small></button>${endBtn(full,per-A.cur.length)}</div>`;
+  }
+  const px=Math.min(innerWidth,480,innerHeight-318);
+  return `<div class="rec">${recHeader(A)}
+  <div class="tgWrap">${targetSvg(A,px)}<button class="zoomBtn" id="bZoom" aria-pressed="${A.zoom}">${A.zoom?"全体に戻す":"中心を拡大"}</button></div>
+  <div class="miniCard" id="mini">${s.ends.length?scorecard(s,{onlyDone:true}):`<div class="miniEmpty">的をタップするとその位置を1射として記録します。長く押すと拡大鏡が出て、指を離した位置で記録します。</div>`}</div>
+  <div class="curEnd">${curRowHtml(A.cur,per,Math.min(s.ends.length+1,s.endsPlan),A.sel,{showNoPos:true,locked:allDone})}</div>
+  ${bottom}
+  <div class="lens ${settings.lens}" id="lens" aria-hidden="true"><svg id="lensSvg" viewBox="0 0 1 1"></svg><div class="read" id="lensRead"></div></div>
+  </div>`;
+}
+function bindRecTarget(){
+  const A=active,s=A.sess,svg=$("#tg"),lens=$("#lens"),lensSvg=$("#lensSvg"),read=$("#lensRead"),ghost=$("#ghost");
+  const mini=$("#mini"); if(mini) mini.scrollTop=mini.scrollHeight;
+  const vb=viewBoxFor(s.faceD,A.zoom), face=faceMarkup(s.faceD), span=s.faceD/20*2.2;
+  let g=null; /* 進行中の操作 */
+  const toData=ev=>{const r=svg.getBoundingClientRect();return {x:vb.x+(ev.clientX-r.left)/r.width*vb.w,y:-(vb.y+(ev.clientY-r.top)/r.height*vb.h),k:vb.w/r.width,inside:ev.clientX>=r.left&&ev.clientX<=r.right&&ev.clientY>=r.top&&ev.clientY<=r.bottom}};
+  const showLens=()=>{if(!g||g.lens)return;g.lens=true;lens.classList.add("on");draw()};
+  function draw(){
+    if(!g) return; const p=g.p, sc=scoreAt(p.x,p.y,s.faceD), c0=scoreAt(p.x,p.y,s.faceD,0), cut=rank(sc)!==rank(c0);
+    const k=g.k, f=dotFill(p,s.faceD);
+    ghost.innerHTML=`<circle cx="${p.x}" cy="${-p.y}" r="${9*k}" fill="none" stroke="#ffffff" stroke-width="3" vector-effect="non-scaling-stroke"/><circle cx="${p.x}" cy="${-p.y}" r="${9*k}" fill="none" stroke="#10151b" stroke-width="1.25" vector-effect="non-scaling-stroke"/><circle cx="${p.x}" cy="${-p.y}" r="${ARROW_R}" fill="${f}"/>`;
+    if(!g.lens) return;
+    const lk=span/132, others=[...s.ends.flat(),...A.cur.filter((a,i)=>i!==A.sel)].filter(a=>a.x!=null&&Math.hypot(a.x-p.x,a.y-p.y)<span).map(a=>`<circle cx="${a.x}" cy="${-a.y}" r="${ARROW_R}" fill="${dotFill(a,s.faceD)}" opacity=".45"/>`).join("");
+    const gp=ARROW_R+3*lk, ln=span*0.2;
+    lensSvg.setAttribute("viewBox",`${p.x-span/2} ${-p.y-span/2} ${span} ${span}`);
+    lensSvg.innerHTML=`<rect x="${p.x-span}" y="${-p.y-span}" width="${span*2}" height="${span*2}" fill="#8b949e"/>${face}${others}<circle cx="${p.x}" cy="${-p.y}" r="${ARROW_R}" fill="${f}"/>`+
+      [[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>`<path d="M${p.x+dx*gp} ${-p.y+dy*gp}L${p.x+dx*(gp+ln)} ${-p.y+dy*(gp+ln)}" stroke="#ffffff" stroke-width="3.5" vector-effect="non-scaling-stroke"/><path d="M${p.x+dx*gp} ${-p.y+dy*gp}L${p.x+dx*(gp+ln)} ${-p.y+dy*(gp+ln)}" stroke="#10151b" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`).join("");
+    read.innerHTML=g.out?`取消<small>指を離すと記録しません</small>`:`${lab(sc)}${sc.s?"点":""}<small>${cut?"線に接触・高い方":g.fine?"微調整中":"離すと記録"}</small>`;
+  }
+  svg.addEventListener("pointerdown",ev=>{
+    if(g) return; ev.preventDefault();
+    const full=A.cur.length>=s.per, allDone=s.ends.length>=s.endsPlan;
+    if(A.sel==null&&(full||allDone)){A.msg=allDone?"全エンドを記録済みです。":`${s.per}射を入力済みです。エンドを確定してください。`;render();return}
+    try{svg.setPointerCapture(ev.pointerId)}catch(_){}
+    const d=toData(ev);
+    g={id:ev.pointerId,t:performance.now(),cx:ev.clientX,cy:ev.clientY,p:{x:d.x,y:d.y},k:d.k,lens:false,fine:false,out:false};
+    g.t1=setTimeout(showLens,150);
+    g.t2=setTimeout(()=>{if(!g)return;g.fine=true;g.ax=g.p.x;g.ay=g.p.y;g.fx=g.lx||g.cx;g.fy=g.ly||g.cy;showLens();draw()},400);
+    draw();
+  });
+  svg.addEventListener("pointermove",ev=>{
+    if(!g||ev.pointerId!==g.id) return; const d=toData(ev); g.lx=ev.clientX; g.ly=ev.clientY; g.out=!d.inside;
+    if(g.fine){g.p={x:g.ax+(ev.clientX-g.fx)*g.k/4,y:g.ay-(ev.clientY-g.fy)*g.k/4}}
+    else{g.p={x:d.x,y:d.y}; if(Math.hypot(ev.clientX-g.cx,ev.clientY-g.cy)>6) showLens()}
+    draw();
+  });
+  const end=(ev,cancel)=>{
+    if(!g||ev.pointerId!==g.id) return; clearTimeout(g.t1);clearTimeout(g.t2);
+    const p=g.p,out=g.out; g=null; lens.classList.remove("on"); ghost.innerHTML="";
+    if(cancel||out){render();return}
+    const a=Object.assign({x:r2(p.x),y:r2(p.y),src:"pos"},scoreAt(r2(p.x),r2(p.y),s.faceD));
+    if(A.sel!=null){A.cur[A.sel]=a}else{A.cur.push(a)}
+    A.msg=""; render();
+  };
+  svg.addEventListener("pointerup",ev=>end(ev,false));
+  svg.addEventListener("pointercancel",ev=>end(ev,true));
+  svg.addEventListener("contextmenu",ev=>ev.preventDefault());
+  on("#bZoom",()=>{A.zoom=!A.zoom;render()});
+  $$("[data-slot]").forEach(b=>b.onclick=()=>{A.sel=+b.dataset.slot;A.scoreEdit=false;A.msg="";render()});
+  on("#bUndo",()=>{A.cur.pop();A.msg="";render()});
+  on("#bMiss",()=>{A.cur.push({x:null,y:null,s:0,X:false,src:"key"});render()});
+  on("#bEnd",confirmEnd); on("#bFinish",finish);
+  $$("[data-nx]").forEach(b=>b.onclick=()=>{const a=A.cur[A.sel];const x=r2(a.x+b.dataset.nx*0.1),y=r2(a.y+b.dataset.ny*0.1);A.cur[A.sel]=Object.assign({x,y,src:"pos"},scoreAt(x,y,s.faceD));render()});
+  on("#eDel",()=>{A.cur.splice(A.sel,1);A.sel=null;render()});
+  on("#eDone",()=>{A.sel=null;A.scoreEdit=false;render()});
+  on("#eScore",()=>{A.scoreEdit=true;render()});
+  $$("[data-ek]").forEach(b=>b.onclick=()=>{const k=KEYS[+b.dataset.ek],a=A.cur[A.sel],auto=a.x!=null?scoreAt(a.x,a.y,s.faceD):null;
+    A.cur[A.sel]=Object.assign({},a,{s:k[1],X:!!k[2],manual:!!auto&&(auto.s!==k[1]||auto.X!==!!k[2]),auto:auto?auto.s:undefined});A.scoreEdit=false;A.sel=null;render()});
+}
+const endBtn=(full,left)=>`<button class="btn col ${full?"pri":""}" id="bEnd" ${full?"":"disabled"}>エンド確定${full?"":`<small>あと${left}射</small>`}</button>`;
+function confirmEnd(){const A=active;if(A.cur.length<A.sess.per)return;A.sess.ends.push(A.cur);A.cur=[];A.sel=null;A.msg="";render()}
+function finish(){
+  const A=active;if(!A)return;const s=A.sess;if(A.cur.length){s.ends.push(A.cur)}
+  s.id="live"+Date.now();s.partial=s.ends.length<s.endsPlan;DB.sessions=DB.sessions.filter(x=>!x.live);s.live=true;DB.sessions.push(s);active=null;lastResult=s.id;location.hash="#result";
+}
+
+/* ---------- 記録: 点数だけ ---------- */
+function scrRecScore(){
+  const A=active,s=A.sess,per=s.per,allDone=s.ends.length>=s.endsPlan,ed=A.edEnd,editing=ed!=null;
+  const arr=editing?s.ends[ed]:A.cur,full=A.cur.length>=per,sel=A.sel;
+  const keysOff=sel==null&&(editing||full||allDone);
+  const cap=editing?`<b>${ed+1}エンドを修正中</b><span>${sel!=null?"キーを押すと置き換わります":"直す矢を選んでください（打った順）"}</span>`:sel!=null?`<b>${sel+1}射目を選択中</b><span>キーを押すと置き換わります</span>`:`<b>${allDone?"全エンド確定":`${s.ends.length+1}エンドを入力中`}</b><span>打った順に表示</span>`;
+  let dock;
+  if(editing) dock=`<button class="btn" id="bUndo" ${sel!=null?"":"disabled"}>選択解除</button><button class="btn pri" id="bEdDone">修正を終える</button>`;
+  else if(allDone) dock=`<button class="btn" id="bUndo" disabled>取消</button><button class="btn pri" id="bFinish">記録を終了して結果を見る</button>`;
+  else dock=`<button class="btn" id="bUndo" ${sel!=null||A.cur.length?"":"disabled"}>${sel!=null?"選択解除":"取消"}</button>${endBtn(full&&sel==null,per-A.cur.length)}`;
+  return `<div class="rec">${recHeader(A)}
+  <div class="scScroll" id="scScroll">${scorecard(s,{cur:allDone?null:A.cur,edit:true,ed:ed})}
+    <p class="basis" style="padding:10px var(--gut) 14px">確定したエンドは高い点から並べて表示します。保存は打った順のままです。10 の列は X を含む数です。行をタップすると、そのエンドを直せます。</p></div>
+  <div class="curEnd"><div class="curCap">${cap}</div>${curRowHtml(allDone&&!editing?[]:arr,per,editing?ed+1:Math.min(s.ends.length+1,s.endsPlan),sel,{locked:allDone||editing})}</div>
+  <div class="keys" style="border-top:1px solid var(--rule)">${KEYS.map((k,i)=>`<button class="key ${zone({s:k[1],X:!!k[2]})}" data-key="${i}" ${keysOff?"disabled":""}>${k[0]}</button>`).join("")}</div>
+  <div class="dock t2" style="border-top:0">${dock}</div>
+  </div>`;
+}
+function bindRecScore(){
+  const A=active,s=A.sess,sc=$("#scScroll"),cr=$("#curRowEl");
+  if(A.scTop!=null) sc.scrollTop=A.scTop; else if(cr) sc.scrollTop=Math.max(0,cr.offsetTop-sc.offsetTop-sc.clientHeight+cr.offsetHeight+44); else sc.scrollTop=sc.scrollHeight;
+  const keep=()=>{A.scTop=sc.scrollTop};
+  $$("[data-erow]").forEach(b=>b.onclick=()=>{keep();const e=+b.dataset.erow;A.edEnd=A.edEnd===e?null:e;A.sel=null;render()});
+  $$("[data-slot]").forEach(b=>b.onclick=()=>{keep();const i=+b.dataset.slot;A.sel=A.sel===i?null:i;render()});
+  $$("[data-key]").forEach(b=>b.onclick=()=>{const k=KEYS[+b.dataset.key],a={x:null,y:null,s:k[1],X:!!k[2],src:"key"};
+    if(A.sel!=null){keep();const arr=A.edEnd!=null?s.ends[A.edEnd]:A.cur,old=arr[A.sel];arr[A.sel]=old.x!=null?Object.assign({},old,{s:a.s,X:a.X,manual:true}):a;A.sel=null}
+    else if(A.cur.length<s.per){A.scTop=null;A.cur.push(a)}
+    render()});
+  on("#bUndo",()=>{keep();if(A.sel!=null)A.sel=null;else A.cur.pop();render()});
+  on("#bEdDone",()=>{A.edEnd=null;A.sel=null;A.scTop=null;render()});
+  on("#bEnd",()=>{A.scTop=null;confirmEnd()}); on("#bFinish",finish);
+}
+
+/* ---------- 今日の結果 ---------- */
+let lastResult=null;
+function scrResult(){
+  const s=DB.sessions.find(x=>x.id===lastResult)||DB.sessions.find(x=>x.id==="a7"), a=flat(s), g=group(pos(s));
+  const same=done().filter(x=>x.id!==s.id&&condKey(x)===condKey(s)&&x.date<=s.date), tv=same.map(total), full=!s.partial&&s.ends.length===s.endsPlan;
+  const m=tv.length?mean(tv):null, d=sd(tv), diff=m!=null?total(s)-m:null, px=Math.min(innerWidth,480);
+  let cmp="";
+  if(!full) cmp=`<p class="fact">${shots(s)}射で終了した記録です。射数が違うため、過去の ${planned(s)}射の合計とは比べていません。</p>`;
+  else if(tv.length>=3) cmp=`<p class="fact">同じ条件の過去${tv.length}回の平均 ${f1(m)} 点との差は ${sgn(diff,1)} 点です。</p><p class="basis">対象: ${md(same[0].date)}〜${md(same[same.length-1].date)}、${condLabel(s)}。過去の回ごとの標準偏差は ${f1(d)} 点で、今回の差は${Math.abs(diff)<=d?"その範囲内":"それより大きい値"}です。</p>`;
+  else cmp=`<p class="fact">同じ条件の記録が${tv.length}回のため、過去との比較は表示していません。</p>`;
+  return `<main class="scr" style="padding-bottom:calc(96px + var(--safe-b))">
+  <header class="top"><div><div class="date">${mdw(s.date)}・${s.dist}m・${s.faceD}cm的</div><h1>今日の結果</h1></div></header>
+  <section class="sec" style="margin-top:4px"><div class="secH"><h2>合計</h2><span class="aside">${shots(s)}射・1射平均 ${f2(total(s)/shots(s))}</span></div>
+    <div class="big" style="font-size:56px;padding:4px 0 12px;border-bottom:1px solid var(--rule)">${total(s)}<small>/ ${shots(s)*10}</small></div>
+    <div class="figs">${full?`<div class="fig"><div class="l">前半 / 後半</div><div class="n" style="font-size:24px">${halfTot(s,0)}<small>/</small> ${halfTot(s,1)}</div></div>`:`<div class="fig"><div class="l">エンド</div><div class="n">${s.ends.length}</div></div>`}<div class="fig"><div class="l">10+X</div><div class="n">${tens(a)}</div></div><div class="fig"><div class="l">X</div><div class="n">${xs(a)}</div></div></div>
+    ${cmp}
+  </section>
+  <section class="sec"><div class="secH"><h2>スコア表</h2><span class="aside">高い点から表示</span></div></section>
+  ${scorecard(s,{onlyDone:!full})}
+  <section class="sec"><div class="secH"><h2>着弾</h2><span class="aside">${g?g.n+"射の位置":"位置の記録なし"}</span></div></section>
+  ${g?`<div class="tgWrap">${plotSvg(s,px)}</div>
+  <section class="sec" style="margin-top:0"><div class="figs two"><div class="fig"><div class="l">グループRMS（全射）</div><div class="n">${f1(g.rr)}<small>cm</small></div><div class="d">95%区間 ${f1(g.lo)}〜${f1(g.hi)}</div></div><div class="fig"><div class="l">着弾中心のずれ</div><div class="n" style="font-size:17px;line-height:2">${offTxt(g)}</div></div></div>
+    ${linkRow("#sight","サイト調整の目安を見る","着弾中心と台帳の値から計算します")}</section>`:
+  `<div style="padding:0 var(--gut)"><div class="empty"><b>着弾データなし</b>点数だけで記録したため、位置は残っていません。点数から位置を推定することはしません。</div></div>`}
+  <section class="sec"><div class="secH"><h2>今日のメモ</h2><span class="aside">ノートに残ります</span></div>
+    <textarea class="noteBox" style="margin-top:6px" placeholder="感覚、気づいたこと、次に確かめること" aria-label="今日のメモ">${esc(s.note||"")}</textarea>
+    <div class="tags"><span class="tag">射型</span><span class="tag">風</span><span class="tag">サイト</span><span class="tag">弓具</span></div>
+  </section>
+  </main>
+  <div class="actbar" style="display:grid;grid-template-columns:1fr 1.6fr;gap:10px"><button class="btn" data-go="#analysis-impact">分析で見る</button><button class="btn pri" data-go="#notes">保存して閉じる</button></div>`;
+}
+
+/* ---------- 分析 ---------- */
+const an={cond:"70|122|72",period:"all",impact:"a7",cA:"a5",cB:"a7"};
+function anHead(cur){
+  const t=(id,n)=>`<button data-go="#analysis-${id}" ${cur===id?'aria-current="page"':""}>${n}</button>`;
+  return `<header class="top"><h1>分析</h1></header><div class="utabs" role="tablist">${t("score","スコア")}${t("impact","着弾")}${t("compare","比較")}${t("form","射型")}</div>`;
+}
+const condOpts=()=>{const m=new Map();done().forEach(s=>m.set(condKey(s),condLabel(s)));return [...m].map(([k,v])=>`<option value="${k}" ${an.cond===k?"selected":""}>${v}</option>`).join("")};
+const sessOpt=(s,cur)=>`<option value="${s.id}" ${cur===s.id?"selected":""}>${mdw(s.date)} ${s.dist}m ${shots(s)}射 ${total(s)}点</option>`;
+function inPeriod(s){if(an.period==="all")return true;return (dOf(TODAY)-dOf(s.date))/864e5<=+an.period}
+function scrAnScore(){
+  const list=done().filter(s=>condKey(s)===an.cond&&inPeriod(s)).sort(byDateDesc).reverse();
+  const head=`${anHead("score")}<div class="cond"><label><span>条件</span><select class="pick" id="anCond">${condOpts()}</select></label><label><span>期間</span><select class="pick" id="anPeriod">${[["30","直近30日"],["90","直近90日"],["all","全期間"]].map(o=>`<option value="${o[0]}" ${an.period===o[0]?"selected":""}>${o[1]}</option>`).join("")}</select></label></div>`;
+  if(!list.length) return `<main class="scr">${head}<div style="padding:0 var(--gut)"><div class="empty"><b>この条件の記録はありません</b>期間か条件を変えてください。</div></div></main>${tabbar("analysis")}`;
+  const tv=list.map(total),m=mean(tv),d=sd(tv),s0=list[0],N=s0.endsPlan,last=list[list.length-1];
+  const h1=list.map(s=>halfTot(s,0)),h2=list.map(s=>halfTot(s,1)),dh=mean(h2)-mean(h1),dsd=sd(list.map((s,i)=>h2[i]-h1[i]));
+  const endAvg=Array.from({length:N},(_,e)=>mean(list.map(s=>sum(s.ends[e]))));
+  const keyOnly=list.filter(s=>s.inputMode==="key").length;
+  return `<main class="scr">${head}
+  <section class="sec" style="margin-top:0"><div class="figs" style="border-top:0"><div class="fig"><div class="l">平均</div><div class="n">${f1(m)}</div><div class="d">${list.length}回</div></div><div class="fig"><div class="l">直近</div><div class="n">${tv[tv.length-1]}</div><div class="d">${md(last.date)}</div></div><div class="fig"><div class="l">最高</div><div class="n">${Math.max(...tv)}</div><div class="d">${md(list[tv.indexOf(Math.max(...tv))].date)}</div></div></div></section>
+  <section class="sec"><div class="secH"><h2>合計点の推移</h2><span class="aside">${planned(s0)*10}点満点</span></div>
+    ${lineChart(tv,list.map(s=>md(s.date)),{mean:m,h:190,label:"合計点の推移"})}
+    <p class="fact">回ごとの標準偏差は ${f1(d)} 点です。${list.length>=2?`直近と初回の差は ${sgn(tv[tv.length-1]-tv[0])} 点です。`:""}</p>
+    <p class="basis">対象: ${list.length}回（${md(list[0].date)}〜${md(last.date)}）、${condLabel(s0)}${keyOnly?`。うち${keyOnly}回は点数だけの記録`:""}。${list.length<8?"8回未満のため、傾向の判定は表示していません。":""}</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>前半と後半</h2><span class="aside">${N/2*s0.per}射ずつ</span></div>
+    <div class="figs"><div class="fig"><div class="l">前半の平均</div><div class="n">${f1(mean(h1))}</div></div><div class="fig"><div class="l">後半の平均</div><div class="n">${f1(mean(h2))}</div></div><div class="fig"><div class="l">後半 − 前半</div><div class="n">${sgn(dh,1)}</div></div></div>
+    <p class="basis">${list.length}回の平均です。差の回ごとの標準偏差は ${f1(dsd)} 点で、${Math.abs(dh)<dsd?"差はその範囲内です。":"差はそれより大きい値です。"}</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>エンド別の平均</h2><span class="aside">${s0.per}射・${s0.per*10}点満点</span></div>
+    ${N<=12?endStrip(endAvg,{fmt:v=>v.toFixed(1),rows:2}):endStrip(endAvg.filter((_,i)=>i%2===0).map((v,i)=>v+endAvg[i*2+1]),{fmt:v=>v.toFixed(1),rows:2})}
+    <p class="basis">${N<=12?`各エンドの合計を ${list.length}回で平均した値です。上段が前半、下段が後半です。`:`表示幅のため2エンドずつ（${s0.per*2}射、${s0.per*20}点満点）にまとめています。`}</p>
+  </section>
+  <div class="foot">数値はこの端末に保存された記録から計算しています。</div>
+  </main>${tabbar("analysis")}`;
+}
+function scrAnImpact(){
+  const list=done().sort(byDateDesc), s=list.find(x=>x.id===an.impact)||list[0], arr=pos(s), g=group(arr), px=Math.min(innerWidth,480);
+  const head=`${anHead("impact")}<div class="cond" style="grid-template-columns:1fr"><label><span>練習</span><select class="pick" id="anImpact">${list.map(x=>sessOpt(x,s.id)).join("")}</select></label></div>`;
+  if(!g) return `<main class="scr">${head}<div style="padding:0 var(--gut)"><div class="empty" style="padding:56px 12px"><b>着弾データなし</b>${mdw(s.date)} は点数だけで記録した練習です。<br>点数から着弾位置を推定することはしません。</div>${row("合計",total(s)+" 点",shots(s)+"射")}${row("10+X / X",tens(flat(s))+" / "+xs(flat(s)))}</div></main>${tabbar("analysis")}`;
+  const se=Math.hypot(g.sx,g.sy)/Math.sqrt(g.n), off=Math.hypot(g.cx,g.cy);
+  const perEnd=s.ends.map(e=>{const p=e.filter(a=>a.x!=null);const q=group(p);return q?q.rr:0});
+  return `<main class="scr">${head}
+  <div class="tgWrap" style="border-top:0">${plotSvg(s,px)}</div>
+  <section class="sec" style="margin-top:0">
+    <div class="figs two"><div class="fig"><div class="l">グループRMS（全射）</div><div class="n">${f1(g.rr)}<small>cm</small></div><div class="d">95%区間 ${f1(g.lo)}〜${f1(g.hi)}cm</div></div><div class="fig"><div class="l">着弾中心のずれ</div><div class="n">${f1(off)}<small>cm</small></div><div class="d">${offTxt(g)}</div></div></div>
+    <div class="figs two"><div class="fig"><div class="l">左右のばらつき</div><div class="n">${f1(g.sx)}<small>cm</small></div></div><div class="fig"><div class="l">上下のばらつき</div><div class="n">${f1(g.sy)}<small>cm</small></div></div></div>
+    <p class="fact">グループRMSは矢のまとまり、着弾中心のずれはねらいの偏りを表します。別の問題として見てください。</p>
+    <p class="basis">対象: ${mdw(s.date)}、位置のある ${g.n}射${shots(s)-g.n?`（位置なし ${shots(s)-g.n}射を除く）`:""}。破線の円は着弾中心から半径 RMS、十字が着弾中心です。中心のずれ ${f1(off)}cm に対し、平均位置の標準誤差は約 ${f1(se)}cm です。</p>
+    <p class="basis">点は矢の実寸（外径 5.7mm）、周りの輪は位置を示す目印で、判定には使いません。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>エンドごとのRMS</h2><span class="aside">cm・${s.per}射ずつ</span></div>
+    ${perEnd.length<=12?endStrip(perEnd,{fmt:v=>v.toFixed(1),rows:2}):endStrip(perEnd.filter((_,i)=>i%2===0),{fmt:v=>v.toFixed(1),rows:2})}
+    <p class="basis">${s.per}射だけの値は誤差が大きく、エンド間の差は目安です。${perEnd.length>12?"表示幅のため奇数エンドだけを表示しています。":""}</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>比較用の指標</h2></div>
+    ${linkRow("#analysis-impact","外れ値候補を除いた値（B）・ロバスト推定（C）","正式な値は全射（A）です。B と C は参考として別に表示します")}
+  </section>
+  </main>${tabbar("analysis")}`;
+}
+function scrAnCompare(){
+  const list=done().sort(byDateDesc), A=list.find(s=>s.id===an.cA), B=list.find(s=>s.id===an.cB), sameCond=condKey(A)===condKey(B);
+  const gA=group(pos(A)), gB=group(pos(B)), px=Math.floor((Math.min(innerWidth,480)-1)/2);
+  const r=(name,a,b,dec=0,lowerBetter=false)=>{const ok=a!=null&&b!=null;return `<div class="cmpRow"><div>${name}</div><div>${a!=null?(dec?a.toFixed(dec):a):"—"}</div><div>${b!=null?(dec?b.toFixed(dec):b):"—"}</div><div class="df">${ok?sgn(b-a,dec):"—"}</div></div>`};
+  const tvAll=done().filter(s=>condKey(s)===condKey(A)).map(total), d=sd(tvAll), diff=total(B)-total(A);
+  const lo=A.date<B.date?A.date:B.date, hi=A.date<B.date?B.date:A.date, chg=DB.gearLog.filter(g=>g.date>=lo&&g.date<=hi);
+  const mini=(s,g,l)=>`<div>${g?plotSvg(s,px):`<div style="height:${px}px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--sub);padding:0 10px">着弾データなし</div>`}<span>${l} ${md(s.date)}</span></div>`;
+  return `<main class="scr">${anHead("compare")}
+  <div class="cond" style="grid-template-columns:1fr"><label><span>A（前）</span><select class="pick" id="cmpA">${list.map(x=>sessOpt(x,A.id)).join("")}</select></label></div>
+  <div class="cond" style="grid-template-columns:1fr"><label><span>B（後）</span><select class="pick" id="cmpB">${list.map(x=>sessOpt(x,B.id)).join("")}</select></label></div>
+  <section class="sec" style="margin-top:12px">
+    ${sameCond?`<p class="basis" style="padding:0 0 8px">条件は同じです（${condLabel(A)}、${setupName(A.setupId)}）。</p>
+    <div class="cmp"><div class="cmpRow h"><div></div><div>A ${md(A.date)}</div><div>B ${md(B.date)}</div><div>B − A</div></div>
+      ${r("合計",total(A),total(B))}${r("前半",halfTot(A,0),halfTot(B,0))}${r("後半",halfTot(A,1),halfTot(B,1))}${r("10+X",tens(flat(A)),tens(flat(B)))}${r("X",xs(flat(A)),xs(flat(B)))}
+      ${r("グループRMS cm",gA?gA.rr:null,gB?gB.rr:null,1)}${r("中心のずれ cm",gA?Math.hypot(gA.cx,gA.cy):null,gB?Math.hypot(gB.cx,gB.cy):null,1)}</div>`:
+    `<div class="empty" style="border-top:1px solid var(--rule)"><b>条件が違うため、合計は並べていません</b>A: ${condLabel(A)}<br>B: ${condLabel(B)}<br>距離・的・射数が同じ練習を選ぶと比較表を表示します。</div>`}
+  </section>
+  ${sameCond?`<div class="pair" style="margin-top:14px">${mini(A,gA,"A")}${mini(B,gB,"B")}</div>
+  <section class="sec" style="margin-top:0">
+    <p class="fact">合計の差は ${sgn(diff)} 点です。同じ条件 ${tvAll.length}回の回ごとの標準偏差は ${f1(d)} 点で、差は${Math.abs(diff)<=d?"その範囲内":Math.abs(diff)<=2*d?"その1〜2倍":"その2倍を超える値"}です。</p>
+    ${gA&&gB?`<p class="fact">着弾中心は A が ${offTxt(gA)}、B が ${offTxt(gB)} です。</p>`:""}
+    <p class="basis">1回ずつの比較です。下の変更が原因とは断定できません。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>この間の変更とメモ</h2><span class="aside">${md(lo)}〜${md(hi)}</span></div>
+    ${chg.length?chg.map(c=>row(md(c.date),c.text)).join(""):`<p class="basis">弓具の変更記録はありません。</p>`}
+    ${[A,B].filter(s=>s.note).map(s=>`<div class="row" style="align-items:flex-start"><span class="k">${md(s.date)}</span><span class="v" style="font-weight:400;font-size:15px;text-align:left;flex:1;line-height:1.6">${esc(s.note)}</span></div>`).join("")}
+  </section>`:""}
+  </main>${tabbar("analysis")}`;
+}
+function scrAnForm(){
+  const recs=[["2026-11-10","引き手の肘の高さ","動画 2本・70m の記録に添付"],["2026-10-21","リリース後の引き手の動き","動画 1本"],["2026-10-03","押し手の肩","写真 3枚"]];
+  return `<main class="scr">${anHead("form")}
+  <section class="sec" style="margin-top:16px"><div class="secH"><h2>射型の記録</h2><span class="aside">${recs.length}件</span></div>
+    ${recs.map(r=>linkRow("#analysis-form",r[1],mdw(r[0])+"・"+r[2])).join("")}
+    <div class="btnRow"><button class="btn">撮影して記録する</button><button class="btn">並べて見る</button></div>
+    <p class="basis" style="padding-top:12px">動画と写真はこの端末の中だけに保存します。姿勢の自動判定は補助の目安で、点数との関係は断定しません。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>外れた理由のメモ</h2><span class="aside">直近90日・自分で付けた印</span></div>
+    ${row("リリース","7回")}${row("押し手","4回")}${row("風","3回")}
+    <p class="basis">記録中に矢を選んで付けた印の集計です。印を付けた矢だけが対象です。</p>
+  </section></main>${tabbar("analysis")}`;
+}
+
+/* ---------- ノート ---------- */
+const nt={filter:"all"};
+function noteEntries(list){
+  return list.map(x=>{
+    const d=dOf(x.date), isS=!!x.ends, chg=DB.gearLog.filter(g=>g.date===x.date);
+    return `<button class="entry" data-go="${isS?"#note/"+x.id:"#notes"}"><div class="day">${d.getDate()}<small>${WD[d.getDay()]}曜</small></div><div>
+      ${isS?`<div class="hd"><b>${x.dist}m・${shots(x)}射</b><span class="sc1">${total(x)}<small>点</small></span></div><div class="meta">${x.faceD}cm的・${setupName(x.setupId)}・${x.weather}${x.inputMode==="key"?"・点数だけ":""}</div>`:`<div class="hd"><b>メモ</b></div>`}
+      ${x.note||x.text?`<div class="txt">${esc(x.note||x.text)}</div>`:""}
+      ${chg.map(c=>`<div class="chg">弓具の変更: ${esc(c.text)}</div>`).join("")}</div></button>`}).join("");
+}
+function scrNotes(){
+  let items=[...done(),...DB.notes].sort(byDateDesc);
+  if(nt.filter==="rec") items=items.filter(x=>x.ends); if(nt.filter==="memo") items=items.filter(x=>x.note||x.text); if(nt.filter==="70") items=items.filter(x=>x.dist===70);
+  const fb=(k,n)=>`<button aria-pressed="${nt.filter===k}" data-nf="${k}">${n}</button>`;
+  let h="",cm="";
+  items.forEach(x=>{const d=dOf(x.date),m=d.getFullYear()+"年"+(d.getMonth()+1)+"月";if(m!==cm){cm=m;const n=items.filter(y=>y.date.slice(0,7)===x.date.slice(0,7)&&y.ends).length;h+=`<h2 class="month" style="display:flex;justify-content:space-between;align-items:baseline"><span>${m}</span><span style="font-size:14px;font-weight:500;color:var(--sub)">練習 ${n}回</span></h2>`}h+=noteEntries([x])});
+  return `<main class="scr"><header class="top"><h1>ノート</h1><button class="txtBtn">メモを書く</button></header>
+  <div style="padding:0 var(--gut)"><div class="seg">${fb("all","すべて")}${fb("rec","練習")}${fb("memo","メモあり")}${fb("70","70m")}</div></div>
+  ${h||`<div style="padding:0 var(--gut)"><div class="empty"><b>該当する記録はありません</b></div></div>`}
+  <div style="padding:0 var(--gut);margin-top:18px"><button class="row link" data-noop style="border-top:1px solid var(--rule)"><span class="main"><b>ゴミ箱</b><span>${DB.trash}件。ここから元に戻せます</span></span><span class="v">${ICON.go}</span></button></div>
+  </main>${tabbar("notes")}`;
+}
+function scrNote(id){
+  const s=DB.sessions.find(x=>x.id===id)||DB.sessions.find(x=>x.id==="a7"), a=flat(s), g=group(pos(s)), px=Math.min(innerWidth,480), mk=DB.marks.find(m=>m.dist===s.dist);
+  return `<main class="scr" style="padding-bottom:40px"><div style="border-bottom:1px solid var(--rule)"><button class="backBtn" data-go="#notes">${ICON.back}ノート</button></div>
+  <header class="top"><div><div class="date">${dOf(s.date).getFullYear()}年</div><h1>${mdw(s.date)}　${s.dist}m</h1></div><div class="big" style="font-size:36px">${total(s)}</div></header>
+  <section class="sec" style="margin-top:6px"><div class="secH"><h2>メモ</h2><button class="txtBtn" style="min-height:32px">書き直す</button></div>
+    <p class="fact" style="padding-top:4px">${s.note?esc(s.note):'<span style="color:var(--sub)">メモはありません。</span>'}</p>
+    ${s.tags&&s.tags.length?`<div class="tags">${s.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>`:""}
+  </section>
+  <section class="sec"><div class="secH"><h2>スコア表</h2><span class="aside">10+X ${tens(a)}・X ${xs(a)}</span></div></section>
+  ${scorecard(s)}
+  <section class="sec"><div class="secH"><h2>着弾</h2><span class="aside">${g?`RMS ${f1(g.rr)}cm・中心 ${offTxt(g)}`:"位置の記録なし"}</span></div></section>
+  ${g?`<div class="tgWrap">${plotSvg(s,px)}</div>`:`<div style="padding:0 var(--gut)"><div class="empty"><b>着弾データなし</b>点数だけで記録した練習です。</div></div>`}
+  <section class="sec"><div class="secH"><h2>条件</h2></div>
+    ${row("ラウンド",`${s.dist}m・${s.faceD}cm的`,`${s.per}射 × ${s.endsPlan}エンド`)}${row("弓具",setupName(s.setupId),"矢の外径 5.7mm で判定")}${row("サイト",mk?f2(mk.v):"記録なし")}${row("天気・風",`${s.weather}・風 ${s.wind}`)}${row("入力",s.inputMode==="key"?"点数だけ":"的面に打つ")}
+  </section>
+  <section class="sec"><div class="secH"><h2>この記録の操作</h2></div>
+    ${linkRow("#analysis-compare","ほかの練習と比べる","")}<button class="row link" data-noop><span class="main"><b>点数や位置を直す</b><span>記録中と同じ画面で直します。直した矢には印が付きます</span></span><span class="v">${ICON.go}</span></button>
+    <div class="btnRow"><button class="btn danger">ゴミ箱へ移す</button></div><p class="basis" style="padding-top:8px">ゴミ箱に移した記録は、ノートの一番下から元に戻せます。</p>
+  </section></main>`;
+}
+
+/* ---------- 弓具・サイト ---------- */
+function gearHead(cur){return `<header class="top"><h1>弓具</h1></header><div class="utabs"><button data-go="#gear" ${cur==="gear"?'aria-current="page"':""}>セッティング</button><button data-go="#sight" ${cur==="sight"?'aria-current="page"':""}>サイト</button></div>`}
+function scrGear(){
+  const s=DB.setups[0];
+  return `<main class="scr">${gearHead("gear")}
+  <section class="sec" style="margin-top:16px"><div class="secH"><h2>${s.name}<span class="pill on">記録に使用中</span></h2><button class="txtBtn" style="min-height:32px">編集</button></div>
+    ${s.spec.map(p=>row(p[0],p[1])).join("")}
+  </section>
+  <section class="sec"><div class="secH"><h2>変更の履歴</h2><span class="aside">${DB.gearLog.length}件</span></div>
+    ${DB.gearLog.map(g=>row(mdw(g.date),g.text)).join("")}
+    <p class="basis">変更した日は、ノートと比較の画面にも表示します。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>ほかのセッティング</h2></div>
+    ${DB.setups.slice(1).map(x=>linkRow("#gear",x.name,x.spec.map(p=>p[1].split("（")[0]).slice(0,2).join("・"))).join("")}
+    <div class="btnRow"><button class="btn">セッティングを追加</button></div>
+  </section></main>${tabbar("gear")}`;
+}
+function sightScale(){
+  const W=112,H=330,T=16,B=16,lo=0,hi=7,Y=v=>T+(v-lo)/(hi-lo)*(H-T-B);
+  let h=`<svg viewBox="0 0 ${W} ${H}" height="${H}" role="img" aria-label="サイトの目盛りと各距離の位置"><path d="M34 ${T}V${H-B}" stroke="var(--ink)" stroke-width="2"/>`;
+  for(let v=lo;v<=hi+1e-9;v+=0.2){const major=Math.abs(v-Math.round(v))<1e-6,half=Math.abs(v*2-Math.round(v*2))<1e-6;h+=`<path d="M34 ${Y(v)}h${major?-14:half?-9:-5}" stroke="var(${major?"--ink":"--rule-strong"})" stroke-width="${major?1.5:1}"/>`;if(major)h+=`<text class="ax" x="14" y="${Y(v)+4.5}" text-anchor="end">${Math.round(v)}</text>`}
+  DB.marks.forEach(m=>{const p=m.kind==="予測";h+=`<path d="M34 ${Y(m.v)}H58" stroke="var(${p?"--sub":"--accent"})" stroke-width="2" ${p?'stroke-dasharray="4 3"':""}/><path d="M36 ${Y(m.v)}l8 -5v10z" fill="var(${p?"--sub":"--accent"})"/><text x="62" y="${Y(m.v)+5}" font-size="14" font-weight="700" fill="var(--ink)">${m.dist}m</text>`});
+  return h+"</svg>";
+}
+function scrSight(){
+  const s=done().filter(x=>x.dist===70&&pos(x).length).sort(byDateDesc)[0], g=group(pos(s)), se=Math.hypot(g.sx,g.sy)/Math.sqrt(2*g.n)*1, sex=g.sx/Math.sqrt(g.n), sey=g.sy/Math.sqrt(g.n);
+  const sigX=Math.abs(g.cx)>2*sex, sigY=Math.abs(g.cy)>2*sey, cmPer=6.4;
+  return `<main class="scr">${gearHead("sight")}
+  <div class="cond" style="margin-top:0"><label><span>セッティング</span><select class="pick">${DB.setups.map(x=>`<option>${x.name}</option>`).join("")}</select></label><label><span>目盛りの向き</span><select class="pick"><option>大きいほど下</option></select></label></div>
+  <section class="sec" style="margin-top:14px"><div class="secH"><h2>サイト台帳</h2><span class="aside">上下の値</span></div>
+    <div class="sightGrid"><div style="padding-top:6px">${sightScale()}</div><div>
+      ${DB.marks.slice().reverse().map(m=>`<div class="row" style="min-height:64px"><span class="k" style="color:var(--ink);font-weight:700;font-size:17px">${m.dist}m</span><span class="v" style="font-size:24px;font-weight:700;line-height:1.2">${f2(m.v)}<small>${m.kind==="予測"?"予測（実測2点から）":md(m.date)+" 実測"}</small></span></div>`).join("")}
+      <p class="basis">左右は全距離 0.0 です。</p>
+    </div></div>
+    <div class="btnRow"><button class="btn pri">サイト値を記録</button><button class="btn">校正する</button></div>
+  </section>
+  <section class="sec"><div class="secH"><h2>調整の目安</h2><span class="aside">70m・${mdw(s.date)}</span></div>
+    <div class="figs two"><div class="fig"><div class="l">左右</div><div class="n" style="font-size:24px">${sigX?(g.cx<0?"右へ ":"左へ ")+f1(Math.abs(g.cx)/cmPer)+"目盛":"動かさない"}</div><div class="d">着弾中心 ${g.cx<0?"左":"右"} ${f1(Math.abs(g.cx))}cm</div></div><div class="fig"><div class="l">上下</div><div class="n" style="font-size:24px">${sigY?(g.cy<0?"下げる ":"上げる ")+f1(Math.abs(g.cy)/cmPer)+"目盛":"動かさない"}</div><div class="d">着弾中心 ${g.cy<0?"下":"上"} ${f1(Math.abs(g.cy))}cm</div></div></div>
+    <p class="fact">着弾中心は ${offTxt(g)} です（位置のある ${g.n}射）。平均位置の標準誤差は左右 ${f1(sex)}cm・上下 ${f1(sey)}cm です。</p>
+    <p class="basis">ずれが標準誤差の2倍を超える方向だけ、目盛りに換算しています。換算は校正値（70m で 1目盛 = 約 ${cmPer}cm、10/3 に校正）によります。風のあった日の左右は、風の影響を含みます。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>記録していない距離の予測</h2></div>
+    ${row("50m","3.84","30m 2.60 と 70m 5.20 の実測から")}${row("60m","4.51","同上")}
+    <p class="basis">実測が2点のため、矢速の仮定に左右されます。初回は必ず実射で確かめてください。</p>
+  </section></main>${tabbar("gear")}`;
+}
+
+/* ---------- 設定 ---------- */
+function scrSettings(){
+  const seg=(key,opts)=>`<div class="seg" style="min-width:164px">${opts.map(o=>`<button aria-pressed="${String(settings[key])===String(o[0])}" data-set="${key}" data-val="${o[0]}">${o[1]}</button>`).join("")}</div>`;
+  const sr=(k,ctl,sub)=>`<div class="row" style="flex-wrap:wrap"><span class="main"><b>${k}</b>${sub?`<span>${sub}</span>`:""}</span>${ctl}</div>`;
+  return `<main class="scr" style="padding-bottom:40px"><div style="border-bottom:1px solid var(--rule)"><button class="backBtn" data-go="#home">${ICON.back}記録</button></div>
+  <header class="top"><h1>設定</h1></header>
+  <section class="sec" style="margin-top:6px"><div class="secH"><h2>表示</h2></div>
+    ${sr("テーマ",seg("theme",[["dark","ダーク"],["light","ライト"]]),"端末の設定に合わせることもできます")}
+    ${sr("射場モード",seg("field",[["false","切"],["true","入"]]),"日光の下で読めるよう、濃淡の差を大きくします")}
+    ${sr("拡大鏡の位置",seg("lens",[["left","左上"],["right","右上"]]),"記録中は動きません。持ち手の反対側が見やすい位置です")}
+  </section>
+  <section class="sec"><div class="secH"><h2>記録</h2></div>
+    ${linkRow("#settings","自作ラウンド","距離・的・射数の組み合わせを登録します","2件")}
+    ${linkRow("#settings","スコア表の並び","確定したエンドを高い点から表示","入")}
+    ${sr("練習の目標と連続記録",seg("gamify",[["false","切"],["true","入"]]),"入れると、週の目標と練習日数を記録タブに1行で表示します")}
+  </section>
+  <section class="sec"><div class="secH"><h2>データ</h2><span class="aside">この端末に保存・9回分</span></div>
+    ${linkRow("#settings","バックアップを書き出す","最後の書き出し: 11/10")}${linkRow("#settings","バックアップから読み込む","今の記録に追加します。上書きはしません")}${linkRow("#settings","表計算用に書き出す（CSV）","")}${linkRow("#settings","自動バックアップ","端末内に3世代を保持","入")}${linkRow("#settings","ゴミ箱",DB.trash+"件","")}
+    <p class="basis">ブラウザのデータを消去すると記録も消えます。機種変更の前に書き出してください。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>アプリ</h2></div>
+    ${linkRow("#settings","ホーム画面に追加","")}${row("版","試作 v5")}
+  </section></main>`;
+}
+
+/* ============================================================ 経路 ============================================================ */
+function on(sel,fn){const e=$(sel);if(e)e.onclick=fn}
+function render(){
+  const app=$("#app"), h=(location.hash||"#home").slice(1), [name,arg]=h.split("/");
+  let html,bind=null;
+  if(name==="record-target"||name==="record-score"){
+    const mode=name==="record-score"?"key":"pos";
+    if(!active) active=demoActive(mode);
+    active.sess.inputMode=mode;
+    if(render.last!==name){active.sel=null;active.edEnd=null;active.scTop=null}
+    if(mode==="pos"){html=scrRecTarget();bind=bindRecTarget}
+    else{html=scrRecScore();bind=bindRecScore}
+  }else{
+    html=({home:scrHome,start:scrStart,result:scrResult,"analysis-score":scrAnScore,"analysis-impact":scrAnImpact,"analysis-compare":scrAnCompare,"analysis-form":scrAnForm,notes:scrNotes,note:()=>scrNote(arg),gear:scrGear,sight:scrSight,settings:scrSettings}[name]||scrHome)();
+  }
+  const keepY=render.last===name?scrollY:0; render.last=name;
+  app.innerHTML=html; scrollTo(0,keepY);
+  $$("[data-go]").forEach(b=>b.addEventListener("click",()=>{location.hash=b.dataset.go}));
+  if(bind) bind();
+  on("#btnMenu",()=>{app.insertAdjacentHTML("beforeend",menuSheet(active));on("#mClose",()=>$("#ovl").remove());$("#ovl").onclick=e=>{if(e.target.id==="ovl")$("#ovl").remove()};
+    on("#mSwitch",()=>{const to=active.sess.inputMode==="key"?"target":"score";active.sel=null;location.hash="#record-"+to});on("#mFinish",finish)});
+  $$("[data-round]").forEach(b=>b.onclick=()=>{startSel.round=b.dataset.round;render()});
+  $$("[data-mode]").forEach(b=>b.onclick=()=>{startSel.mode=b.dataset.mode;render()});
+  on("#btnQuick",()=>{const ref=done().sort(byDateDesc)[0];startSel.round=ref.dist===18?"18m":ref.dist+"m";active=newActive();location.hash="#record-"+(startSel.mode==="key"?"score":"target")});
+  on("#btnStart",()=>{active=newActive();location.hash="#record-"+(startSel.mode==="key"?"score":"target")});
+  $$("[data-nf]").forEach(b=>b.onclick=()=>{nt.filter=b.dataset.nf;render()});
+  $$("[data-set]").forEach(b=>b.onclick=()=>{const k=b.dataset.set,v=b.dataset.val;settings[k]=v==="true"?true:v==="false"?false:v;applyTheme();render()});
+  const bindSel=(id,fn)=>{const e=$(id);if(e)e.onchange=()=>{fn(e.value);render()}};
+  bindSel("#anCond",v=>an.cond=v);bindSel("#anPeriod",v=>an.period=v);bindSel("#anImpact",v=>an.impact=v);bindSel("#cmpA",v=>an.cA=v);bindSel("#cmpB",v=>an.cB=v);
+}
+addEventListener("hashchange",render);
+addEventListener("resize",()=>{clearTimeout(render.rt);render.rt=setTimeout(render,120)});
+render();
+</script>
+</body>
+</html>

@@ -70,13 +70,13 @@ async function seed(page, boundaryDays = null) {
     );
   }, boundaryDays);
   await page.goto("/");
-  await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#tabs [data-v="gear"]').click();
+  await page.getByTestId("gear-subtab-sight").click();
 }
 
 function records(page) {
-  return page
-    .locator(".card")
-    .filter({ has: page.getByRole("heading", { name: /^サイト値の記録/ }) });
+  // v5 段 8: 「サイト値の記録」は枠ではなく、罫線の見出しの下の行
+  return page.getByTestId("sight-records-list");
 }
 function summary(page) {
   return page
@@ -96,11 +96,13 @@ async function practice(page) {
   });
 }
 
+/* v5 段 7: 「サイト値の記録」「サイト値のまとめ」は 分析 から 弓具 > サイト へ移した（中身は従来のまま）。
+   分析の絞り込み（弓具・距離・期間）の代わりに、サイトの画面で選んでいる弓具の全距離・全期間を対象にする。 */
 for (const [width, colorScheme] of [
   [320, "light"],
   [375, "dark"],
 ]) {
-  test(`analysis sight records follow comparison conditions and restore without writes (${width})`, async ({
+  test(`sight records overview follows the selected setup without writes (${width})`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: width === 320 ? 568 : 812 });
@@ -109,62 +111,36 @@ for (const [width, colorScheme] of [
     page.on("pageerror", (e) => errors.push(e.message));
     await seed(page);
     const before = await practice(page);
+    await expect(page.locator("#sgSetup")).toHaveValue("sight-a");
+    const overview = page.getByTestId("sight-records-overview");
+    await expect(overview).toHaveCount(1);
     const all = await records(page).textContent();
-    await expect(records(page)).toContainText("666.6");
-    await page.locator("#anSetup").selectOption("sight-a");
-    await page.locator("#anDist").selectOption("30");
-    await page.locator('[data-period="7d"]').click();
-    for (const v of ["111.1", "555.5", "7.7"]) await expect(records(page)).toContainText(v);
-    for (const v of ["222.2", "333.3", "444.4", "666.6"])
-      await expect(records(page)).not.toContainText(v);
-    await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
-    await expect(summary(page)).toContainText("111.1");
-    await page.locator("#anSetup").selectOption("sight-b");
-    await expect(records(page)).toHaveCount(0);
-    await expect(summary(page)).toHaveCount(0);
-    await page.locator("#anSetup").selectOption("__none");
-    await page.locator('[data-period="all"]').click();
-    await expect(records(page)).toContainText("444.4");
-    await expect(records(page)).not.toContainText("111.1");
-    await page.locator("#anSetup").selectOption("");
-    await page.locator("#anDist").selectOption("");
+    /* 選んでいる弓具の台帳（日付なし・時刻だけの記録を含む）と、練習に入れたサイト値 */
+    for (const v of ["111.1", "333.3", "555.5", "666.6", "7.7"])
+      await expect(records(page)).toContainText(v);
+    for (const v of ["222.2", "444.4"]) await expect(records(page)).not.toContainText(v);
+    await expect(summary(page)).toContainText("台帳4件 / 練習入力1回");
+    await page.locator("#sgSetup").selectOption("sight-b");
+    await expect(records(page)).toContainText("222.2");
+    for (const v of ["111.1", "444.4", "7.7"]) await expect(records(page)).not.toContainText(v);
+    await expect(summary(page)).toContainText("台帳1件 / 練習入力0回");
+    await page.locator("#sgSetup").selectOption("sight-a");
     await expect(records(page)).toHaveText(all);
+    expect(
+      await page.evaluate(
+        () => globalThis.document.documentElement.scrollWidth <= globalThis.innerWidth,
+      ),
+    ).toBe(true);
+    /* 分析タブにはカードを置かず、着弾 の下に入口の行だけを置く */
+    await page.locator('#tabs [data-v="analysis"]').click();
+    await expect(page.locator("#main")).not.toContainText("サイト値の記録");
+    await page.locator('#analysisSubTabs [data-an="impact"]').click();
+    await page.getByTestId("analysis-to-sight").click();
+    await expect(page.getByTestId("gear-subtab-sight")).toHaveAttribute("aria-current", "page");
+    await expect(page.getByTestId("sight-records-overview")).toHaveCount(1);
     expect(await practice(page)).toEqual(before);
     await page.reload();
     expect(await practice(page)).toEqual(before);
     expect(errors).toEqual([]);
   });
 }
-
-for (const days of [7, 30, 90]) {
-  test(`analysis sight period includes its first day and timestamp fallback (${days}d)`, async ({
-    page,
-  }) => {
-    await seed(page, days);
-    const before = await practice(page);
-    await page.locator(`[data-period="${days}d"]`).click();
-    for (const v of ["777.7", "999.9"]) await expect(records(page)).toContainText(v);
-    for (const v of ["888.8", "666.6"]) await expect(records(page)).not.toContainText(v);
-    await expect(summary(page)).toContainText("台帳2件 / 練習入力1回");
-    await page.locator('[data-period="all"]').click();
-    for (const v of ["888.8", "666.6"]) await expect(records(page)).toContainText(v);
-    expect(await practice(page)).toEqual(before);
-  });
-}
-
-test("analysis sight selection preserves source marks and excludes unknown rounds", async ({
-  page,
-}) => {
-  await seed(page);
-  const result = await page.evaluate(() => {
-    const marks = globalThis.eval("db.sightMarks");
-    const before = JSON.stringify(marks);
-    const all = globalThis.analysisSightMarks({ period: "all" });
-    return {
-      same: all.every((m, i) => m === marks[i]),
-      unchanged: before === JSON.stringify(marks),
-      round: globalThis.analysisSightMarks({ round: "free", period: "all" }).length,
-    };
-  });
-  expect(result).toEqual({ same: true, unchanged: true, round: 0 });
-});

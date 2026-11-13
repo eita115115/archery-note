@@ -1,5 +1,5 @@
 "use strict";
-/* 射形コア (scripts/46-form-core.js) の単体テスト。
+/* 射型コア (scripts/46-form-core.js) の単体テスト。
    合成ランドマーク・合成時系列のみで検証する（カメラ・MediaPipe 不要）。
    フェーズ検出のケース（低速リリース検出 / レットダウン非誤検出 / 連続2射）は
    F1 実射検証で確定した仕様なので、しきい値変更時も必ず維持すること。 */
@@ -2509,7 +2509,7 @@ function releaseFrames(totalMs, dt, fromAnchor) {
 }
 {
   /* 瞬間速度が固定 legacy 閾値に届かなくても、校正速度を超えながら連続して
-     アンカーから離れる実射形の系列は検出する。drawArm<125 で adaptive evidence を
+     アンカーから離れる実射型の系列は検出する。drawArm<125 で adaptive evidence を
      意図的に作らず、legacy continuity 経路だけを検証する。 */
   const sustainedRelease = [];
   for (let i = 0; i < 60; i++) sustainedRelease.push([mkRaw(0.22, 10), 0.02, 20]);
@@ -4150,7 +4150,7 @@ function resolveReceiptFrameForTest(tracker, hadPendingRelease, pendingAfterStep
   const replay = boundedSourceSection(
     viewScript,
     "function startFormReplay(videoUrl){",
-    '    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);',
+    '    hud.textContent="射型解析を開始できませんでした: "+(e&&e.message||e);',
     "startFormReplay section",
   );
   const liveRemove = boundedSourceSection(

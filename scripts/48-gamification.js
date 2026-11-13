@@ -236,8 +236,3 @@ function calcGoalProgress(sessions, goals, todayStr){
   };
 }
 
-/* SVGリングの stroke-dashoffset 値。target<=0 は空リング（=circumference） */
-function goalRingOffset(current, target, circumference){
-  if(!target||target<=0) return circumference;
-  return circumference*(1-Math.min(current/target,1));
-}

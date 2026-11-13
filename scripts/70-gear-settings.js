@@ -571,7 +571,7 @@ const GEAR_FIELDS = [
   ["shaftSpine", "シャフト番手/スパイン"],
   ["arrowLength", "矢尺/シャフト長 (inch)"],
   ["pointWeight", "ポイント重量 (gr)"],
-  ["arrowDia", "矢の直径 (mm)"],
+  ["arrowDia", "矢の外径 (mm)"],
   ["shaftGpi", "シャフト重量 (gr/in)"],
   ["arrowWeight", "矢重量 合計 (gr)"],
   ["shaftSetWeightSpread", "矢セット重量差 (gr)"],
@@ -597,14 +597,14 @@ const GEAR_FIELDS = [
   ["notes", "その他メモ"],
 ];
 const GEAR_SECTIONS = [
-  { title: "基本", keys: ["bow", "limbs", "poundage", "drawLength", "arrow"], open: true },
+  {
+    title: "基本",
+    keys: ["bow", "limbs", "poundage", "drawLength", "arrow", "shaftSpine", "arrowLength", "arrowDia", "pointWeight"],
+    open: true,
+  },
   {
     title: "矢の実測・精密データ",
     keys: [
-      "shaftSpine",
-      "arrowLength",
-      "pointWeight",
-      "arrowDia",
       "shaftGpi",
       "arrowWeight",
       "shaftSetWeightSpread",
@@ -776,7 +776,11 @@ function gearFieldHtml(k, lb, s) {
   const body = unit
     ? `<div class="fieldUnit">${input}<span class="fieldUnitLabel">${esc(unit)}</span></div>`
     : input;
-  return `<label class="f" for="gf_${k}">${esc(label)}</label>${body}${opts.length ? `<datalist id="${listId}">${opts.map((v) => `<option value="${esc(v)}"></option>`).join("")}</datalist>` : ""}`;
+  const note =
+    k === "arrowDia"
+      ? `<div class="hint" data-testid="gear-form-dia-note">的の線の判定に使います（未入力は ${DEFAULT_ARROW_DIA_MM}mm）。変更は、これから始める記録に使います。保存済みの記録の点数と円は変わりません。</div>`
+      : "";
+  return `<label class="f" for="gf_${k}">${esc(label)}</label>${body}${note}${opts.length ? `<datalist id="${listId}">${opts.map((v) => `<option value="${esc(v)}"></option>`).join("")}</datalist>` : ""}`;
 }
 function gearSectionHtml(sec, s) {
   const body = sec.keys
@@ -862,121 +866,248 @@ function spineGuidance(s) {
 function spineGuidanceHtml(s) {
   const g = spineGuidance(s);
   if (!g.ready)
-    return `<div class="note">スパイン初期候補: ${esc(g.missing.join("・"))}未入力</div>`;
-  const color =
-    g.tone === "ok"
-      ? "var(--status-ok)"
-      : g.tone === "warn"
-        ? "var(--status-warn)"
-        : "var(--status-hold)";
-  return `<div class="note"><b>スパイン初期候補</b>: ${g.candidates.join(" / ")}（動的負荷 ${g.eff.toFixed(1)}lbs相当、矢尺${g.len.toFixed(1)}in、ポイント${g.point}gr）</div>
-    <div class="note"><b style="color:${color}">${g.state}</b> — ${esc(g.text)}</div>`;
+    return `<p class="basis" data-testid="gear-spine">スパインの初期候補: ${esc(g.missing.join("・"))}が未入力のため計算していません。</p>`;
+  const cur =
+    g.actual == null
+      ? ""
+      : g.state === "アルミ番手"
+        ? `いまの番手 ${g.actual} はアルミの番手で、カーボンのスパインとは数え方が違うため比べていません。`
+        : g.state === "概ね候補域"
+          ? `いまの番手 ${g.actual} は目安 ${Math.round(g.ideal)} との差が 90 以内です。`
+          : `いまの番手 ${g.actual} は目安 ${Math.round(g.ideal)} より${g.state === "柔らかめ寄り" ? "柔らかい側" : "硬い側"}です（差 ${Math.abs(Math.round(g.actual - g.ideal))}）。`;
+  return `<p class="basis" data-testid="gear-spine">スパインの初期候補（カーボン）: ${g.candidates.join(" / ")}。実測ポンド・引き尺・矢尺 ${g.len.toFixed(1)}インチ・ポイント ${g.point}グレインからの概算（${g.eff.toFixed(1)}ポンド相当）です。${cur}メーカーの番手表でも確かめてください。</p>`;
 }
+/* 軌道の計算に使う項目の入力状況（事実だけ。評価の語は付けない） */
 function gearPrecisionHtml(s) {
   const p = gearPrecisionProfile(s);
-  const next = p.missing.slice(0, 3).join("・");
-  return `<div class="advice gearAdviceCard">
-    <div class="note"><b>演算入力の充実度: ${p.level}</b>（${Math.round(p.score * 100)}%）</div>
-    ${next ? `<div class="note">次に測ると効く項目: ${esc(next)}</div>` : `<div class="note">主要な物理モデル項目はかなり埋まっています。</div>`}
-    ${spineGuidanceHtml(s)}
-  </div>`;
+  const total = p.filled.length + p.missing.length;
+  return `<p class="fact" data-testid="gear-inputs">サイトの予測と換算に使う ${total}項目のうち、${p.filled.length}項目が入力済みです。</p>
+    ${p.missing.length ? `<p class="basis">未入力: ${esc(p.missing.join("・"))}。未入力の項目は、一般的な値で代用して計算します。</p>` : ""}
+    ${spineGuidanceHtml(s)}`;
 }
-function setupComparisonHtml(setupId) {
-  const ss = db.sessions
-    .filter((s) => s.setupId === setupId)
-    .sort((a, b) => (a.date || "").localeCompare(b.date || "") || (a.id > b.id ? 1 : -1));
-  if (ss.length < 2) return "";
-  const last = ss[ss.length - 1];
-  const prev =
-    [...ss.slice(0, -1)].reverse().find((s) => s.dist === last.dist) || ss[ss.length - 2];
-  const metric = (s) => {
-    const m = sessionMetrics(s);
-    return { all: m.all, st: m.st, total: m.total, avg: m.avg };
+/* ---------- 弓具 > セッティング（v5 段 8。docs/design/v5/design.md 4.7） ----------
+   選んでいるセッティングの仕様表 → 変更の履歴 → ほかのセッティング → 追加。
+   「記録に使用中」は、記録中ならその記録の、無ければ「前回と同じ条件」で始まるときのセッティング。 */
+function recordingSetupId() {
+  if (db.active && db.setups.some((x) => x.id === db.active.setupId)) return db.active.setupId;
+  const c = startConditionFrom(sessionsByDateDesc()[0]);
+  return c.setupId || "";
+}
+function gearViewSetup() {
+  if (!db.setups.length) return null;
+  let s = db.setups.find((x) => x.id === ui.gearSel);
+  if (!s) s = db.setups.find((x) => x.id === recordingSetupId()) || db.setups[0];
+  ui.gearSel = s.id;
+  return s;
+}
+const GEAR_JA_UNITS = { lbs: "ポンド", inch: "インチ", gr: "グレイン" };
+/* 入力は自由記述。数だけが入っているときに限り単位を付ける（「38lbs」のような入力は、そのまま出す） */
+function gearValueText(s, k) {
+  const raw = String(s[k] == null ? "" : s[k]).trim();
+  if (!raw) return "";
+  const unit = GEAR_UNIT_LABELS[k];
+  if (!unit || !/^[+-]?\d+(\.\d+)?$/.test(raw)) return raw;
+  return raw + (GEAR_JA_UNITS[unit] || unit);
+}
+/* 仕様表の行。データにある項目だけを出す（矢の外径だけは、未入力でも線の判定に使う値を出す） */
+const GEAR_SPEC_MAIN_KEYS = [
+  "bow",
+  "limbs",
+  "poundage",
+  "drawLength",
+  "arrow",
+  "shaftSpine",
+  "arrowLength",
+  "arrowDia",
+  "pointWeight",
+  "brace",
+  "tiller",
+  "nock",
+  "plunger",
+  "plungerTension",
+  "sight",
+  "notes",
+];
+function gearSpecRows(s) {
+  const t = (k) => gearValueText(s, k);
+  const join = (parts) => parts.filter(Boolean).join("・");
+  const rows = [];
+  const add = (key, label, value, note) => {
+    if (value) rows.push({ key, label, value, note: note || "" });
   };
-  const a = metric(prev),
-    b = metric(last);
-  const delta = (x, unit = "", goodLow = false) => {
-    const sign = x > 0 ? "+" : "";
-    const good = goodLow ? x < 0 : x > 0;
-    const color =
-      Math.abs(x) < 0.01 ? "var(--sub)" : good ? "var(--status-ok)" : "var(--status-warn)";
-    return `<b style="color:${color}">${sign}${x.toFixed(2)}${unit}</b>`;
-  };
-  return `<div class="advice gearAdviceCard">
-    <div class="note"><b>用具比較</b> — ${fmtD(prev.date)} → ${fmtD(last.date)}${prev.dist === last.dist ? ` / ${last.dist}m` : ` / ${prev.dist}m→${last.dist}m`}</div>
-    <div class="kv"><span>平均点</span><span>${a.avg.toFixed(2)} → ${b.avg.toFixed(2)}（${delta(b.avg - a.avg)}）</span></div>
-    ${
-      a.st && b.st
-        ? `<div class="kv"><span>グルーピング半径</span><span>${a.st.rr.toFixed(1)}cm → ${b.st.rr.toFixed(1)}cm（${delta(b.st.rr - a.st.rr, "cm", true)}）</span></div>
-    <div class="kv"><span>中心の移動</span><span>${driftText(sightStats(b.st).mx - sightStats(a.st).mx, sightStats(b.st).my - sightStats(a.st).my)}</span></div>`
-        : ""
+  add("bow", "ハンドル", t("bow"));
+  add("limbs", "リム", join([t("limbs"), t("poundage") ? `実測 ${t("poundage")}` : ""]));
+  add("drawLength", "引き尺", t("drawLength"));
+  const spine = String(s.shaftSpine == null ? "" : s.shaftSpine).trim();
+  add("arrow", "矢", join([t("arrow"), spine ? (/^\d+$/.test(spine) ? `${spine}番` : spine) : "", t("arrowLength")]));
+  const diaRaw = String(s.arrowDia == null ? "" : s.arrowDia).trim();
+  const diaMm = arrowRadiusFromDiaMm(s.arrowDia) * 20;
+  const diaUsed = `${+diaMm.toFixed(2)}mm`;
+  const diaEntered = diaRaw && Math.abs(parseFloat(diaRaw) - diaMm) < 1e-9;
+  rows.push({
+    key: "arrowDia",
+    label: "矢の外径",
+    value: diaUsed,
+    note: diaEntered
+      ? "線の判定に使います"
+      : diaRaw
+        ? `入力「${diaRaw}」は 3〜10mm の外のため、標準の値を線の判定に使います`
+        : "未入力のため標準の値。線の判定に使います",
+  });
+  add("pointWeight", "ポイント", t("pointWeight"));
+  add("brace", "ブレースハイト", t("brace"));
+  add("tiller", "ティラー差", t("tiller"));
+  add("nock", "ノッキングポイント", t("nock"));
+  add("plunger", "プランジャー", join([t("plunger"), t("plungerTension")]));
+  add("sight", "サイト", t("sight"));
+  return rows;
+}
+function gearSpecOtherRows(s) {
+  return GEAR_FIELDS.filter(([k]) => !GEAR_SPEC_MAIN_KEYS.includes(k) && gearValueText(s, k)).map(
+    ([k, lb]) => ({ key: k, label: gearLabelUnit(k, lb).label, value: gearValueText(s, k) }),
+  );
+}
+function gearSpecRowHtml(r) {
+  return `<div class="lrow specRow" data-spec="${esc(r.key)}"><span class="lk">${esc(r.label)}</span><span class="lv">${esc(r.value)}${r.note ? `<small>${esc(r.note)}</small>` : ""}</span></div>`;
+}
+/* 変更の履歴: セッティングの編集（setup.history）と、そのセッティングのサイト台帳（db.sightMarks）を日付順に並べる。
+   サイトは同じ距離の1つ前の記録との差で書く。保存してあるデータは書き換えない */
+function gearHistoryEntries(s) {
+  const out = [];
+  let ord = 0;
+  (Array.isArray(s.history) ? s.history : []).forEach((h) => {
+    const changes = (h && Array.isArray(h.changes) ? h.changes : []).filter(Boolean);
+    if (!changes.length) return;
+    /* parts: 項目名と変化を分けて持つ（行の中で 項目名 / 変化 の2段に組む）。text は parts をつないだ1文 */
+    const parts = changes.map((c) => ({
+      label: gearLabelUnit("", String(c.label || "項目")).label,
+      change: `${c.from || "未入力"} → ${c.to || "未入力"}`,
+    }));
+    out.push({
+      date: (h && h.date) || "",
+      ord: ord++,
+      kind: "gear",
+      parts,
+      text: parts.map((x) => `${x.label} ${x.change}`).join("、"),
+    });
+  });
+  const marks = (db.sightMarks || [])
+    .filter((mk) => mk && mk.setupId === s.id)
+    .sort((a, b) => (a.date || "").localeCompare(b.date || "") || (a.ts || 0) - (b.ts || 0));
+  const prev = new Map();
+  marks.forEach((mk) => {
+    const key = String(mk.dist);
+    const v = sightValueText(mk.v),
+      h = sightValueText(mk.h);
+    const p = prev.get(key);
+    const dist = distanceLabel(mk.dist);
+    let change;
+    if (!p) change = `上下 ${v}・左右 ${h} を記録`;
+    else {
+      const parts = [];
+      if (p.v !== v) parts.push(`上下 ${p.v} → ${v}`);
+      if (p.h !== h) parts.push(`左右 ${p.h} → ${h}`);
+      change = parts.length ? parts.join("・") : `上下 ${v}・左右 ${h}（前回と同じ値）`;
     }
-    <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
-  </div>`;
+    const label = `サイト ${dist}`;
+    prev.set(key, { v, h });
+    out.push({ date: mk.date || "", ord: ord++, kind: "sight", parts: [{ label, change }], text: `${label} ${change}` });
+  });
+  return out.sort((a, b) => (b.date || "").localeCompare(a.date || "") || b.ord - a.ord);
 }
-/* pageHeroHtml("gear") の縮小版。旧指標行（用具ライブラリ/入力材料/よく使う用具）はここへ統合し、
-   上部の数値枠は 登録件数・入力材料%・直近使用 の1ブロック3値まで。「よく使う用具」は台帳の金ドットが担う。
-   50-record-view.js の pageHeroHtml 本体は並行改修中のため触らず、ここで独立に描画する */
-function gearHeroHtml() {
-  const setups = db.setups || [];
-  const gp = setups.map((s) => gearPrecisionProfile(s));
-  const avg = gp.length ? gp.reduce((a, p) => a + p.score, 0) / gp.length : 0;
-  const lastSess = [...db.sessions].sort(
-    (a, b) => (b.date || "").localeCompare(a.date || "") || (b.id > a.id ? 1 : -1),
-  )[0];
-  const lastSetup = lastSess && setups.find((s) => s.id === lastSess.setupId);
-  return `<section class="pageHero">
-    <div class="kicker">用具</div>
-    <h2>いつものセッティングを残す</h2>
-    <div class="heroMetrics">
-      ${heroMetricHtml("登録", `${setups.length}件`, `${db.sessions.filter((s) => s.setupId).length}回の練習に接続`)}
-      ${heroMetricHtml("入力材料", setups.length ? pct(avg) : "—", "用具データの平均充実度")}
-      ${heroMetricHtml("直近使用", lastSetup ? lastSetup.name : "—", lastSess ? fmtD(lastSess.date) : "記録待ち")}
-    </div>
+const GEAR_HISTORY_SHOWN = 8;
+function gearHistoryRowHtml(e) {
+  const iso = /^\d{4}-\d{2}-\d{2}$/.test(e.date) ? e.date : "";
+  return `<div class="lrow gearHistRow" data-testid="gear-history-row" data-kind="${e.kind}"><span class="lk">${iso ? fmtMDW(iso) : "日付なし"}</span><span class="lv">${(e.parts || [{ label: e.text, change: "" }]).map((x) => `<span class="ghItem"><span class="ghK">${esc(x.label)}</span> <span class="ghV">${esc(x.change)}</span></span>`).join(`<span class="ghSep">、</span>`)}</span></div>`;
+}
+function gearHistoryHtml(s) {
+  const list = gearHistoryEntries(s);
+  const head = `<div class="vsecH"><h2>変更の履歴</h2><span class="aside">${list.length}件</span></div>`;
+  if (!list.length)
+    return `<section class="vsec" data-testid="gear-history">${head}<p class="basis">まだありません。セッティングを編集するか、サイト値を記録すると、日付と一緒にここへ残ります。</p></section>`;
+  const first = list.slice(0, GEAR_HISTORY_SHOWN),
+    rest = list.slice(GEAR_HISTORY_SHOWN);
+  return `<section class="vsec" data-testid="gear-history">${head}
+    ${first.map(gearHistoryRowHtml).join("")}
+    ${rest.length ? `<details class="gearMore"><summary>以前の変更（${rest.length}件）</summary>${rest.map(gearHistoryRowHtml).join("")}</details>` : ""}
+    <p class="basis">変更した日は、ノートと分析の比較にも表示します。</p>
   </section>`;
 }
+function gearSetupSubText(x) {
+  const cnt = db.sessions.filter((r) => r.setupId === x.id).length;
+  return [gearValueText(x, "bow"), gearValueText(x, "limbs"), `練習${cnt}回`].filter(Boolean).join("・");
+}
 function renderGear(m) {
-  const lastSess = [...db.sessions].sort(
-    (a, b) => (b.date || "").localeCompare(a.date || "") || (b.id > a.id ? 1 : -1),
-  )[0];
-  const activeId = lastSess ? lastSess.setupId : "";
-  m.innerHTML = `${gearHeroHtml()}
-  <div class="card"><h2>機材台帳 <span class="mini">${db.setups.length}件</span></h2>
-    <div id="gearList">${
-      db.setups.length
-        ? db.setups
-            .map((s) => {
-              const cnt = db.sessions.filter((x) => x.setupId === s.id).length;
-              const gp = gearPrecisionProfile(s);
-              const mp = modelReadinessProfile(s.id);
-              const active = activeId === s.id;
-              return `<button type="button" class="listItem gearLedgerItem" data-id="${esc(s.id)}" data-testid="gear-ledger-item"><div>
-        <div class="t">${active ? `<span class="gearActiveDot" title="使用中" aria-hidden="true"></span>` : ""}${esc(s.name)}</div>
-        <div class="gearLedgerSpecs">
-          <span class="gearSpecCell">弓<b>${s.bow ? esc(s.bow) : "—"}</b></span>
-          <span class="gearSpecCell">リム<b>${s.limbs ? esc(s.limbs) : "—"}</b></span>
-          <span class="gearSpecCell">ポンド<b>${s.poundage ? esc(s.poundage) + "lbs" : "—"}</b></span>
-        </div>
-        <div class="d">練習${cnt}回 ・ 入力材料 ${gp.level} ・ 履歴 ${mp.level}</div>
-      </div><div class="gearChevron">${icon("chevron")}</div></button>`;
-            })
-            .join("")
-        : `<div class="empty">
-      <p>セッティングを登録すると、サイト台帳・調整提案・成績がセッティングごとに紐付きます。</p>
-      <button class="btn" id="gWizardEmpty" data-testid="gear-wizard-start">初回セットアップを始める</button>
-    </div>`
-    }</div>
-    ${db.setups.length ? `<div class="btnrow"><button class="btn" id="gAdd" data-testid="gear-add">＋ 新しいセッティング</button></div>` : ""}
-    <div class="hint">バックアップ・テーマなどは右上の <b>設定</b> から。</div>
+  const s = gearViewSetup();
+  if (!s) {
+    m.innerHTML = `<div class="gearView" id="gearList"><div class="empty" data-testid="gear-empty">
+      <b>セッティングはまだありません</b>
+      <p>登録すると、サイト台帳と記録がセッティングごとに分かれます。矢の外径は、的の線の判定に使います。</p>
+      <button type="button" class="btn pri" id="gWizardEmpty" data-testid="gear-wizard-start">最初のセッティングを登録</button>
+    </div></div>`;
+    $("#gWizardEmpty").onclick = () => openSetupWizard();
+    return;
+  }
+  const recId = recordingSetupId();
+  const pill = `<span class="pill is-on" data-testid="gear-recording-pill">記録に使用中</span>`;
+  const rows = gearSpecRows(s),
+    others = gearSpecOtherRows(s);
+  const memo = String(s.notes == null ? "" : s.notes).trim();
+  const rest = db.setups.filter((x) => x.id !== s.id);
+  m.innerHTML = `<div class="gearView">
+  <section class="vsec anFirst" data-testid="gear-active" data-id="${esc(s.id)}">
+    <div class="vsecH gearHead"><h2><span data-testid="gear-active-name">${esc(s.name)}</span>${s.id === recId ? pill : ""}</h2><button type="button" class="txtBtn" id="gEdit" data-testid="gear-edit">編集</button></div>
+    <div class="specSheet" data-testid="gear-spec-sheet">${rows.map(gearSpecRowHtml).join("")}</div>
+    ${others.length ? `<details class="gearMore" data-testid="gear-spec-more"><summary>ほかの項目（${others.length}件）</summary>${others.map(gearSpecRowHtml).join("")}</details>` : ""}
+    ${memo ? `<div class="gearMemo" data-testid="gear-spec-notes"><span class="lk">メモ</span><p>${esc(memo)}</p></div>` : ""}
+    <details class="gearMore" data-testid="gear-inputs-fold"><summary>計算に使う項目の入力状況</summary>${gearPrecisionHtml(s)}</details>
+  </section>
+  ${gearHistoryHtml(s)}
+  <section class="vsec" data-testid="gear-others">
+    <div class="vsecH"><h2>${rest.length ? "ほかのセッティング" : "セッティングの追加"}</h2><span class="aside">登録 ${db.setups.length}件</span></div>
+    <div id="gearList">${rest
+      .map(
+        (x) =>
+          `<button type="button" class="lrow link gearLedgerItem" data-id="${esc(x.id)}" data-testid="gear-ledger-item"><span class="lmain"><b>${esc(x.name)}${x.id === recId ? pill : ""}</b><span>${esc(gearSetupSubText(x))}</span></span>${NOTE_GO}</button>`,
+      )
+      .join("")}</div>
+    <div class="btnRow"><button type="button" class="btn sec" id="gAdd" data-testid="gear-add">セッティングを追加</button></div>
+    <p class="basis">記録に使うセッティングは、記録の条件で選びます。</p>
+  </section>
+  <section class="vsec gearDangerSec">
+    <button type="button" class="lrow link gearDelRow" id="gDel" data-testid="gear-delete"><span class="lmain"><b>「${esc(s.name)}」をゴミ箱へ移す</b><span>このセッティングのサイト台帳も一緒に移します。練習の記録は残ります。設定 &gt; データ のゴミ箱から元に戻せます。</span></span>${NOTE_GO}</button>
+  </section>
   </div>`;
-  /* 初回セットアップ導線は空状態専用（登録済みなら金面CTAは「＋新しいセッティング」1つ） */
-  const wiz = $("#gWizardEmpty");
-  if (wiz) wiz.onclick = () => openSetupWizard();
-  const add = $("#gAdd");
-  if (add) add.onclick = () => openGearForm(null);
-  document
-    .querySelectorAll("#gearList .listItem")
-    .forEach((li) => (li.onclick = () => openGearDetail(li.dataset.id)));
+  $("#gAdd").onclick = () => openGearForm(null);
+  $("#gEdit").onclick = () => openGearForm(s.id);
+  document.querySelectorAll("#gearList [data-id]").forEach(
+    (li) =>
+      (li.onclick = () => {
+        ui.gearSel = li.dataset.id;
+        render();
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        /* 押した行は描き直しで無くなるので、キーボードの位置を仕様表の「編集」へ移す */
+        const edit = $("#gEdit");
+        if (edit) edit.focus({ preventScroll: true });
+      }),
+  );
+  $("#gDel").onclick = async () => {
+    if (
+      await appConfirm(
+        `「${s.name}」をゴミ箱へ移しますか？\nこのセッティングのサイト台帳も一緒に移します。練習の記録は消えませんが、セッティングとのつながりは外れます。`,
+        { danger: true, okLabel: "ゴミ箱へ移す" },
+      )
+    ) {
+      const marks = db.sightMarks.filter((x) => x.setupId === s.id);
+      trashItem("setupBundle", s.name, { setup: s, sightMarks: marks });
+      db.setups = db.setups.filter((x) => x.id !== s.id);
+      db.sightMarks = db.sightMarks.filter((x) => x.setupId !== s.id);
+      ui.gearSel = null;
+      save({ reason: "delete-setup", forceSnapshot: true });
+      render();
+      toast("ゴミ箱へ移しました。設定 > データ のゴミ箱から元に戻せます", 4000);
+    }
+  };
 }
 
 /* ---------- カスタムラウンド（IMP-09 多距離ラウンド定義） ---------- */
@@ -997,22 +1128,16 @@ function customRoundStagesText(def) {
 }
 function customRoundsSettingsHtml() {
   const list = db.customRounds || [];
-  return `<details class="adv" data-testid="settings-custom-rounds"><summary>多距離ラウンドの定義を管理</summary>
-    <div class="hint">保存すると記録タブのラウンド選択（多距離ラウンド）に表示されます。</div>
-    ${
-      list.length
-        ? list
-            .map(
-              (r) => `<button type="button" class="listItem" data-cr="${esc(r.id)}"><div>
-      <div class="t">${esc(r.label)}</div>
-      <div class="d">${esc(customRoundStagesText(r))}</div>
-    </div><div class="gearChevron">${icon("chevron")}</div></button>`,
-            )
-            .join("")
-        : `<div class="empty">カスタムラウンドはまだありません。</div>`
-    }
-    <div class="btnrow"><button class="btn sec" id="crAdd" data-testid="settings-custom-round-add">＋ カスタムラウンドを追加</button></div>
-  </details>`;
+  return `<div class="setBlock" data-testid="settings-custom-rounds">
+    <div class="lrow setHeadRow"><span class="lmain"><b>自作ラウンド</b><span>距離・的・射数の組み合わせを登録します。登録すると、記録の条件のラウンドに並びます</span></span><span class="lv">${list.length}件</span></div>
+    ${list
+      .map(
+        (r) =>
+          `<button type="button" class="lrow link setSubRow" data-cr="${esc(r.id)}"><span class="lmain"><b>${esc(r.label)}</b><span>${esc(customRoundStagesText(r))}</span></span>${NOTE_GO}</button>`,
+      )
+      .join("")}
+    <div class="btnRow"><button type="button" class="btn sec" id="crAdd" data-testid="settings-custom-round-add">自作ラウンドを追加</button></div>
+  </div>`;
 }
 function openCustomRoundForm(id) {
   const src = id ? (db.customRounds || []).find((r) => r.id === id) : null;
@@ -1031,7 +1156,7 @@ function openCustomRoundForm(id) {
   }));
   const ovl = document.createElement("div");
   ovl.className = "ovl";
-  ovl.innerHTML = `<div class="sheet"><h3>${src ? "カスタムラウンド編集" : "新しいカスタムラウンド"}</h3>
+  ovl.innerHTML = `<div class="sheet"><h3>${src ? "自作ラウンドの編集" : "自作ラウンドの追加"}</h3>
     <label class="f">名前 *</label><input class="inp" id="crName" value="${esc(src ? src.label : "")}" placeholder="例: 60m/30m 各36射">
     <div id="crStages"></div>
     <div class="btnrow"><button class="btn sec" id="crAddStage">＋ ステージを追加</button></div>
@@ -1151,7 +1276,7 @@ function openCustomRoundForm(id) {
     save({ reason: "custom-round", forceSnapshot: true });
     closeModal(ovl);
     openSettings();
-    toast("カスタムラウンドを保存しました");
+    toast("自作ラウンドを保存しました");
   };
   const del = ovl.querySelector("#crDel");
   if (del)
@@ -1179,6 +1304,11 @@ function openCustomRoundForm(id) {
 function applyTheme() {
   const t = db.settings.theme || "auto";
   document.documentElement.className = t;
+  /* ブラウザ上部（ステータスバー）の色もテーマに合わせる。自動のときは端末の設定に任せる */
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    const dark = t === "dark" || (t !== "light" && (m.getAttribute("media") || "").includes("dark"));
+    m.setAttribute("content", dark ? "#0e1217" : "#f3f4f1");
+  });
 }
 /* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。
    applyTheme() は className を丸ごと置き換えるため独立関数として追加し（既存のテーマ切替ロジックは
@@ -1195,26 +1325,31 @@ function gamifySettingsHtml() {
   const pd = Array.isArray(g.practiceDays) ? g.practiceDays : [];
   const goals = g.goals || { dailyArrows: 36, weeklySessions: 3, monthlyArrows: 300 };
   const DOW = ["日", "月", "火", "水", "木", "金", "土"];
-  return `<div class="settingsGroup gamifySettings" data-testid="settings-group-gamification">
-      <div class="settingsGroupTitle">ゲーミフィケーション</div>
-      <div class="gamifyToggleRow">
-        <span>ストリーク・バッジ・目標を表示</span>
-        <input type="checkbox" class="gamifyToggle" id="gamEnabled" data-testid="gamify-toggle" ${g.enabled ? "checked" : ""}>
-      </div>
+  const goalRow = (id, testid, label, unit, val) =>
+    `<div class="lrow setRow gamifyGoalRow"><span class="lmain"><b><label for="${id}">${label}</label></b></span><span class="fieldUnit setNum"><input class="inp" id="${id}" inputmode="numeric" data-testid="${testid}" value="${esc(val)}"><span class="fieldUnitLabel">${unit}</span></span></div>`;
+  return `<div class="gamifySettings" data-testid="settings-group-gamification">
+      ${settingsRowHtml(
+        "練習の目標と連続記録",
+        "入にすると、週と月の目標・練習した日数を、記録タブとノートに 1行で表示します",
+        settingsSegHtml("gamEnabled", "gamify-toggle", "gm", g.enabled ? 1 : 0, [
+          ["0", "切"],
+          ["1", "入"],
+        ]),
+      )}
       ${
         g.enabled
           ? `
-      <label class="f gamifyDayLabel">練習曜日 — 未選択のままならストリーク判定は停止します</label>
-      <div class="gamifyDayChips" id="gamDayChips" data-testid="gamify-day-chips">
-        ${DOW.map((lb, i) => `<button type="button" class="gamifyDayChip ${pd.includes(i) ? "on" : ""}" aria-pressed="${pd.includes(i)}" data-d="${i}">${lb}</button>`).join("")}
+      <div class="setBlock">
+        <div class="lmain"><b id="gamDayLabel">練習曜日</b><span>選んだ曜日に記録が無い日があると、連続記録が止まります。選ばないあいだは、連続記録を数えません</span></div>
+        <div class="gamifyDayChips" id="gamDayChips" data-testid="gamify-day-chips" role="group" aria-labelledby="gamDayLabel">
+          ${DOW.map((lb, i) => `<button type="button" class="gamifyDayChip ${pd.includes(i) ? "on" : ""}" aria-pressed="${pd.includes(i)}" data-d="${i}">${lb}</button>`).join("")}
+        </div>
       </div>
-      <label class="f gamifyGoalLabel">練習目標</label>
-      <div class="gamifyGoalRows">
-        <div class="gamifyGoalRow"><span>1日の本数</span><input class="inp" id="gamGoalDaily" inputmode="numeric" data-testid="gamify-goal-daily" value="${goals.dailyArrows}"></div>
-        <div class="gamifyGoalRow"><span>週のセッション数</span><input class="inp" id="gamGoalWeekly" inputmode="numeric" data-testid="gamify-goal-weekly" value="${goals.weeklySessions}"></div>
-        <div class="gamifyGoalRow"><span>月の本数</span><input class="inp" id="gamGoalMonthly" inputmode="numeric" data-testid="gamify-goal-monthly" value="${goals.monthlyArrows}"></div>
-      </div>
-      <div class="gamifyInfo">練習した日は曜日を問わず+1。練習曜日に記録がない日だけフリーズを消費（またはリセット、当日はまだ判定しません）。ストリークが7増えるごとにフリーズ+1（最大3）。</div>
+      ${goalRow("gamGoalDaily", "gamify-goal-daily", "1日の目標", "射", goals.dailyArrows)}
+      ${goalRow("gamGoalWeekly", "gamify-goal-weekly", "週の目標", "回", goals.weeklySessions)}
+      ${goalRow("gamGoalMonthly", "gamify-goal-monthly", "月の目標", "射", goals.monthlyArrows)}
+      <p class="basis gamifyInfo">練習した日は、曜日に関係なく 1日と数えます。練習曜日に記録が無い日は、持っている「休み」を 1つ使い、無ければ連続記録が 0 に戻ります（当日はまだ判定しません）。「休み」は連続 7日ごとに 1つ増え、3つまで持てます。</p>
+      ${gamificationBadgesCardHtml()}
       `
           : ""
       }
@@ -1225,7 +1360,7 @@ function gamifySettingsHtml() {
 const FORM_DIAGNOSTIC_PRIVACY_CONFIRM =
   "現在の18射診断バッチの診断値だけを書き出します。練習記録、日付、メモ、端末内ID、映像、画像、ランドマークは含みません。診断値の共有先は自分で確認してください。";
 const FORM_DIAGNOSTIC_RESTART_CONFIRM =
-  "現在の未完了の診断バッチを新しく開始し直しますか？保存済みの射形記録は削除されません。";
+  "現在の未完了の診断バッチを新しく開始し直しますか？保存済みの射型記録は削除されません。";
 const FORM_DIAGNOSTIC_RESULT_COPY = Object.freeze({
   "invalid-app-version": "restart-required",
   "invalid-batch-id": "allocation-failed",
@@ -1363,8 +1498,8 @@ function formDiagnosticSettingsStatusResult() {
 function formDiagnosticSettingsHtml() {
   const enabled = db.settings.formDebug===true;
   const status = formDiagnosticUiCopy(formDiagnosticSettingsStatusResult());
-  return `<section class="settingsGroup" data-form-diagnostic-section data-testid="form-diagnostic-section" aria-hidden="${enabled ? "false" : "true"}" ${enabled ? "" : "hidden"}>
-      <div class="settingsGroupTitle">18射の診断JSON</div>
+  return `<section class="setBlock formDiagBlock" data-form-diagnostic-section data-testid="form-diagnostic-section" aria-hidden="${enabled ? "false" : "true"}" ${enabled ? "" : "hidden"}>
+      <div class="lmain"><b>18射の診断JSON</b></div>
       <div class="hint">開始後、真横→やや斜め→通常設置の順に各6射を記録します。条件を満たさない記録は診断バッチに追加されません。</div>
       <div class="settingsActionHint" data-form-diagnostic-status data-testid="form-diagnostic-status" role="status" aria-live="polite">${esc(status)}</div>
       <div class="btnrow">
@@ -1498,175 +1633,245 @@ function bindFormDiagnosticSettingsActions(settingsOverlay) {
   if (exportButton) exportButton.onclick = () => exportFormDiagnosticMatrixFromSettings(settingsOverlay);
 }
 /* FORM_DIAGNOSTIC_SETTINGS_END */
+/* ---------- 設定（v5 段 8。docs/design/v5/design.md 4.7） ----------
+   全画面（今日の結果・ノートの詳細と同じ作り）。表示 / 記録 / データ / アプリ の罫線の行。
+   記録タブの見出し行の「設定」と、記録中のメニューから開く。
+   データを消す・置き換える操作の注意書きは、その操作の行に書く（AGENTS.md）。 */
+function settingsSegHtml(id, testid, attr, cur, opts) {
+  return `<div class="seg" id="${id}"${testid ? ` data-testid="${testid}"` : ""}>${opts
+    .map(([v, lb]) => `<button type="button" aria-pressed="${String(cur) === String(v)}" data-${attr}="${v}">${lb}</button>`)
+    .join("")}</div>`;
+}
+function settingsRowHtml(title, sub, ctl, cls) {
+  return `<div class="lrow setRow${cls ? " " + cls : ""}"><span class="lmain"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</span>${ctl}</div>`;
+}
+function settingsLinkHtml(id, testid, title, sub, value, cls) {
+  return `<button type="button" class="lrow link setLink${cls ? " " + cls : ""}" id="${id}" data-testid="${testid}"><span class="lmain"><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</span><span class="lv">${value ? `<span>${value}</span>` : ""}${NOTE_GO}</span></button>`;
+}
+/* 控えの選択肢は位置ではなく作った時刻で指す。書き出しで新しい控えが先頭に入っても、選んだ控えを戻す */
+function snapshotKey(snap, i) {
+  return snap && snap.ts != null ? `ts:${snap.ts}` : `i:${i}`;
+}
+function snapshotByKey(key) {
+  const snaps = readSnapshots();
+  const k = String(key || "");
+  if (k.startsWith("i:")) return snaps[+k.slice(2)];
+  return snaps.find((x, i) => snapshotKey(x, i) === k);
+}
+function lastBackupText() {
+  const t = db.settings.lastBackupAt ? new Date(db.settings.lastBackupAt) : null;
+  if (!t || !Number.isFinite(t.getTime())) return "まだ書き出していません";
+  return `最後の書き出し: ${t.getFullYear()}/${t.getMonth() + 1}/${t.getDate()}`;
+}
+/* 設定を描き直すときに、読んでいた位置を保つ（全画面なので、閉じて開くと先頭へ戻ってしまう） */
+function reopenSettings(ovl) {
+  const sheet = ovl.querySelector(".sheet");
+  const top = sheet ? sheet.scrollTop : 0;
+  const prev = ovl._modalPrevFocus;
+  closeModal(ovl);
+  const next = openSettings();
+  if (next) {
+    next._modalPrevFocus = prev;
+    const s2 = next.querySelector(".sheet");
+    if (s2) s2.scrollTop = top;
+  }
+  return next;
+}
 function openSettings() {
   const ovl = document.createElement("div");
-  ovl.className = "ovl";
+  ovl.className = "ovl resultOvl settingsOvl";
   const th = db.settings.theme || "auto";
   const formTrackingOn = db.settings.formTrackingEnabled===true;
   const snaps = readSnapshots();
-  ovl.innerHTML = `<div class="sheet"><h3>${icon("gear")} 設定</h3>
-    <div class="settingsGroup" data-testid="settings-group-app">
-      <div class="settingsGroupTitle">アプリ情報</div>
-      ${nativeReadinessHtml()}
-      <div class="hint settingsVersionFooter">Archery Note v${APP_VER}</div>
-    </div>
+  const counts = dataCounts();
+  const trashCount = (db.trash || []).length;
+  const hasDemo = db.sessions.some((s) => String(s.id || "").startsWith(DEMO_ID_PREFIX));
+  const web = runtimeKind().kind === "Web";
+  const canUpdate = typeof updateAvailable !== "undefined" && !!updateAvailable;
+  ovl.innerHTML = `<div class="sheet resultScreen noteScreen settingsScreen" data-testid="settings-screen">
+    <div class="subTop"><button type="button" class="backBtn" id="setClose" data-testid="settings-back">${REC_CHEVRON}${view === "record" && !document.querySelector("body > .ovl") && !(db.active && !recordPaused()) ? "記録" : "戻る"}</button></div>
+    <header class="subHead"><h3>設定</h3></header>
 
-    <div class="settingsGroup" data-testid="settings-group-display">
-      <div class="settingsGroupTitle">表示</div>
-      <label class="f">テーマ</label>
-      <div class="chips" id="thChips" data-testid="settings-theme-chips">
-        ${[
-          ["auto", "自動（端末に合わせる）"],
+    <section class="vsec setFirst" data-testid="settings-group-display">
+      <div class="vsecH"><h2>表示</h2></div>
+      ${settingsRowHtml(
+        "テーマ",
+        "自動は、端末の設定に合わせます",
+        settingsSegHtml("thChips", "settings-theme-chips", "th", th, [
+          ["auto", "自動"],
           ["light", "ライト"],
           ["dark", "ダーク"],
-        ]
-          .map(
-            ([v, lb]) =>
-              `<button type="button" class="chip ${th === v ? "on" : ""}" aria-pressed="${th === v}" data-th="${v}">${lb}</button>`,
-          )
-          .join("")}
-      </div>
-      <label class="f">射場モード</label>
-      <div class="chips" id="fmChips" data-testid="settings-field-mode-chips">
-        <button type="button" class="chip ${db.settings.fieldMode ? "" : "on"}" aria-pressed="${!db.settings.fieldMode}" data-fm="0">OFF</button>
-        <button type="button" class="chip ${db.settings.fieldMode ? "on" : ""}" aria-pressed="${!!db.settings.fieldMode}" data-fm="1">ON</button>
-      </div>
-      <div class="hint">直射日光下での記録用に、文字と数値のコントラストを高めます。</div>
-      <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
-      <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight || 850}">
-      <label class="f">射形トラッキング（ベータ）</label>
-      <div class="chips" id="ftChips">
-        <button type="button" class="chip ${formTrackingOn ? "" : "on"}" aria-pressed="${!formTrackingOn}" data-ft="0">OFF</button>
-        <button type="button" class="chip ${formTrackingOn ? "on" : ""}" aria-pressed="${formTrackingOn}" data-ft="1">ON</button>
-      </div>
-      <div class="hint">解析はすべて端末内で行い、映像は保存・送信しません。初回のみ解析モデル（約15MB）を読み込みます。</div>
-      <label class="f">検証用の診断データ保存</label>
-      <div class="chips" id="fdChips">
-        <button type="button" class="chip ${db.settings.formDebug===true?"":"on"}" aria-pressed="${db.settings.formDebug!==true}" data-fd="0">OFF</button>
-        <button type="button" class="chip ${db.settings.formDebug===true?"on":""}" aria-pressed="${db.settings.formDebug===true}" data-fd="1">ON</button>
-      </div>
-      <div class="hint">実射検証用に、各射の内部診断値（速度・確度など）も記録へあわせて保存します。通常はOFFのままで構いません。</div>
-      <h3 class="settingsH3">カスタムラウンド</h3>
-      <div class="settingsActionHint">距離ごとのステージを持つ自分用ラウンドを増減・編集します。</div>
+        ]),
+        "wide",
+      )}
+      ${settingsRowHtml(
+        "射場モード",
+        "日光の下で読めるよう、濃淡の差を大きくします",
+        settingsSegHtml("fmChips", "settings-field-mode-chips", "fm", db.settings.fieldMode ? 1 : 0, [
+          ["0", "切"],
+          ["1", "入"],
+        ]),
+      )}
+      ${settingsRowHtml(
+        "拡大鏡の位置",
+        "的を押さえている間に出る拡大表示の位置です。記録中は動きません",
+        settingsSegHtml("lsChips", "settings-lens-side-chips", "ls", db.settings.lensSide === "left" ? "left" : "right", [
+          ["left", "左上"],
+          ["right", "右上"],
+        ]),
+      )}
+    </section>
+
+    <section class="vsec" data-testid="settings-group-record">
+      <div class="vsecH"><h2>記録</h2></div>
       ${customRoundsSettingsHtml()}
-    </div>
+      ${settingsRowHtml(
+        `<label for="setEye">アイ〜サイト距離</label>`,
+        "サイト調整の目安を mm に換算するときに使います",
+        `<span class="fieldUnit setNum"><input class="inp" id="setEye" data-testid="settings-eye-sight" inputmode="numeric" value="${esc(db.settings.eyeSight || 850)}"><span class="fieldUnitLabel">mm</span></span>`,
+      )}
+      ${settingsRowHtml(
+        "射型の記録（試験中）",
+        "カメラで射型を記録する機能を 分析 &gt; 射型 に出します。解析は端末の中で行い、映像は保存も送信もしません。初回だけ解析用のデータ（約15MB）を読み込みます",
+        settingsSegHtml("ftChips", "settings-form-tracking-chips", "ft", formTrackingOn ? 1 : 0, [
+          ["0", "切"],
+          ["1", "入"],
+        ]),
+        "wide",
+      )}
+      ${settingsRowHtml(
+        "検証用の診断データ",
+        "射型の記録に、各射の内部の診断値（速度・確度など）も保存します。ふだんは切のままで使えます",
+        settingsSegHtml("fdChips", "settings-form-debug-chips", "fd", db.settings.formDebug === true ? 1 : 0, [
+          ["0", "切"],
+          ["1", "入"],
+        ]),
+        "wide",
+      )}
+      ${formDiagnosticSettingsHtml()}
+      ${gamifySettingsHtml()}
+    </section>
 
-    ${formDiagnosticSettingsHtml()}
-
-    ${gamifySettingsHtml()}
-
-    <div class="settingsGroup" data-testid="settings-group-data">
-      <div class="settingsGroupTitle">データ</div>
+    <section class="vsec" data-testid="settings-group-data">
+      <div class="vsecH"><h2>データ</h2><span class="aside">この端末に保存・練習 ${counts.sessions}回</span></div>
+      <p class="basis setWarn" data-testid="settings-data-warning"><b>記録は、この端末のブラウザの中だけにあります。</b>iPhone の「設定 → Safari → 履歴とWebサイトデータを消去」や、ブラウザの「サイトデータを削除」を行うと、このアプリの記録もすべて消えます。その操作の前と機種変更の前に、バックアップを書き出してください。${web ? "ブラウザで開いたまま 7日間使わないと、記録が消える場合があります。ホーム画面に追加すると、この制限を受けにくくなります。" : ""}</p>
       ${storageMeterHtml()}
-      ${backupReminderHtml()}
-      ${webStorageRiskHtml()}
-      <div class="settingsActionHint">練習記録・セッティングをまとめて1つのJSONファイルに書き出します。</div>
-      <div class="btnrow">
-        <button class="btn sec" id="dExp" data-testid="settings-export">${icon("down")} バックアップ保存</button>
-        <button class="btn sec" id="dImp" data-testid="settings-import">${icon("up")} 読み込み</button>
-      </div>
-      <div class="settingsActionHint">練習記録だけを表計算ソフトで開けるCSV形式で書き出します。</div>
-      <div class="btnrow"><button class="btn sec" id="dCsv" data-testid="settings-csv">CSV出力</button></div>
-      ${db.sessions.some((s) => String(s.id || "").startsWith(DEMO_ID_PREFIX)) ? `<div class="settingsActionHint">架空のデモ記録だけを削除します。自分の記録には触れません。</div><div class="btnrow"><button class="btn ghost" id="dDemoRemove" data-testid="settings-demo-remove">デモデータを完全に削除</button></div>` : ""}
+      ${settingsLinkHtml("dExp", "settings-export", "バックアップを書き出す", `練習の記録・メモ・セッティング・サイト台帳を 1つのファイル（JSON）にします。${esc(lastBackupText())}`, "")}
+      ${settingsLinkHtml("dImp", "settings-import", "バックアップから読み込む", "<b>いまのデータは、読み込んだ内容にすべて置き換わります。</b>置き換える前の状態は、下の自動バックアップに残します", "")}
+      ${settingsLinkHtml("dCsv", "settings-csv", "表計算用に書き出す（CSV）", "練習の記録だけを書き出します。このファイルから元に戻すことはできません", "")}
       <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
-      <h3 class="settingsH3">自動バックアップ</h3>
-      <div class="settingsActionHint">バックアップ・読み込み操作のたびに、端末内へ復元用の控えを自動で残します。</div>
-      ${snaps.length ? `<label class="f">復元候補</label><select class="inp" id="dSnapSel">${snaps.map((s, i) => `<option value="${i}">${esc(snapshotLabel(s))}</option>`).join("")}</select>` : `<div class="empty">自動バックアップはまだありません。保存操作を行うと端末内に復元用バックアップが残ります。</div>`}
-      <div class="btnrow">
-        <button class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">今すぐバックアップ</button>
-        <button class="btn ghost" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length ? "" : "disabled"}>選択したバックアップを復元</button>
+      <div class="setBlock" data-testid="settings-snapshots">
+        <div class="lmain"><b>自動バックアップ</b><span>書き出す・読み込む・控えに戻す操作のたびに、この端末の中に控えを残します（${snaps.length}件）。ブラウザのデータを消すと、控えも一緒に消えます</span></div>
+        ${snaps.length ? `<label class="f" for="dSnapSel">戻す控え</label><select class="inp" id="dSnapSel">${snaps.map((s, i) => `<option value="${esc(snapshotKey(s, i))}">${esc(snapshotWhenText(s))}</option>`).join("")}</select><p class="basis" id="dSnapInfo" data-testid="settings-snapshot-info">この控えの中身: ${esc(snapshotCountsText(snaps[0]))}</p>` : ""}
+        <div class="btnRow">
+          <button type="button" class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">いま控えを残す</button>
+          <button type="button" class="btn sec" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length ? "" : "disabled"}>選んだ控えに戻す</button>
+        </div>
+        <p class="basis">控えに戻すと、<b>いまのデータは控えの内容に置き換わります。</b>置き換える前の状態も控えに残します。</p>
       </div>
-      <div class="settingsActionHint">削除した用具・練習記録の一時保管です。ここから元に戻せます。</div>
-      ${trashSettingsHtml()}
-      <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
-    </div>
+      ${settingsLinkHtml("setTrash", "settings-trash", "ゴミ箱", "ゴミ箱へ移した練習・メモ・セッティング・サイト値を、元に戻せます", `${trashCount}件`)}
+      ${trashCount ? settingsLinkHtml("trashClear", "settings-trash-clear", "ゴミ箱を空にする", "<b>ゴミ箱の中身を完全に消します。元に戻せません</b>", "", "setDanger") : ""}
+      ${hasDemo ? settingsLinkHtml("dDemoRemove", "settings-demo-remove", "デモデータを消す", "架空のデモの記録だけを完全に消します。自分の記録は変わりません", "", "setDanger") : ""}
+    </section>
 
-    <div class="settingsGroup settingsDangerZone" data-testid="settings-group-danger">
-      <div class="settingsGroupTitle">危険域</div>
-      ${trashClearButtonHtml()}
-      <div class="hint settingsDangerHint">${icon("warn")} iPhoneの「設定 → Safari → 履歴とWebサイトデータを消去」や、Safariの「Webサイトデータを削除」を行うと、<b>このアプリの記録もすべて消えます。</b>その操作をする前と、機種変更の前には必ず「バックアップ保存」をしてください。月1回のバックアップ習慣がおすすめです。</div>
-    </div>
-
-    <div class="btnrow"><button class="btn ghost" id="setClose">閉じる</button></div>
+    <section class="vsec" data-testid="settings-group-app">
+      <div class="vsecH"><h2>アプリ</h2></div>
+      ${settingsLinkHtml("setAddHome", "settings-add-home", "ホーム画面に追加", web ? "いまはブラウザで開いています。追加の手順を表示します" : "ホーム画面から開いています", "")}
+      <div class="lrow" data-testid="settings-version"><span class="lk">版</span><span class="lv settingsVersionFooter">Archery Note v${APP_VER}<small>${canUpdate ? "新しい版があります" : "新しい版は、起動したときと画面に戻ったときに確かめます"}</small></span></div>
+      ${canUpdate ? `<div class="btnRow"><button type="button" class="btn sec" id="setUpdate" data-testid="settings-update">新しい版に更新する</button></div>` : ""}
+      <div class="lrow" data-testid="settings-license"><span class="lk">ライセンス</span><span class="lv">PolyForm Noncommercial 1.0.0<small>非営利の利用に限ります</small></span></div>
+      ${nativeReadinessHtml()}
+    </section>
   </div>`;
-  openModal(ovl, { escapeTarget: "#setClose" });
+  openModal(ovl, { escapeTarget: "#setClose", swipe: false });
   syncFormDiagnosticSettingsUi(ovl);
   bindFormDiagnosticSettingsActions(ovl);
-  ovl.querySelectorAll("#thChips .chip").forEach(
+  ovl.querySelectorAll("#thChips button").forEach(
     (c) =>
       (c.onclick = () => {
         db.settings.theme = c.dataset.th;
         save();
         applyTheme();
         applyFieldMode();
-        ovl.querySelectorAll("#thChips .chip").forEach((x) => {
+        ovl.querySelectorAll("#thChips button").forEach((x) => {
           const on = x === c;
-          x.classList.toggle("on", on);
           x.setAttribute("aria-pressed", String(on));
         });
       }),
   );
-  ovl.querySelectorAll("#fmChips .chip").forEach(
+  ovl.querySelectorAll("#lsChips button").forEach(
+    (c) =>
+      (c.onclick = () => {
+        db.settings.lensSide = c.dataset.ls === "left" ? "left" : "right";
+        save();
+        ovl.querySelectorAll("#lsChips button").forEach((x) => {
+          const on = x === c;
+          x.setAttribute("aria-pressed", String(on));
+        });
+      }),
+  );
+  ovl.querySelectorAll("#fmChips button").forEach(
     (c) =>
       (c.onclick = () => {
         db.settings.fieldMode = c.dataset.fm === "1";
         save();
         applyFieldMode();
-        ovl.querySelectorAll("#fmChips .chip").forEach((x) => {
+        ovl.querySelectorAll("#fmChips button").forEach((x) => {
           const on = x === c;
-          x.classList.toggle("on", on);
           x.setAttribute("aria-pressed", String(on));
         });
-        toast(db.settings.fieldMode ? "射場モードを有効にしました" : "射場モードを無効にしました");
+        toast(db.settings.fieldMode ? "射場モードを入にしました" : "射場モードを切にしました");
       }),
   );
   ovl.querySelector("#setEye").onchange = (e) => {
     db.settings.eyeSight = +e.target.value || 850;
     save();
   };
-  ovl.querySelectorAll("#ftChips .chip").forEach(
+  ovl.querySelectorAll("#ftChips button").forEach(
     (c) =>
       (c.onclick = () => {
         db.settings.formTrackingEnabled = c.dataset.ft === "1";
         save();
-        ovl.querySelectorAll("#ftChips .chip").forEach((x) => {
+        ovl.querySelectorAll("#ftChips button").forEach((x) => {
           const on = x === c;
-          x.classList.toggle("on", on);
           x.setAttribute("aria-pressed", String(on));
         });
         toast(
           db.settings.formTrackingEnabled===true
-            ? "射形トラッキングを有効にしました（分析タブ）"
-            : "射形トラッキングを無効にしました",
+            ? "射型の記録を入にしました（分析 > 射型）"
+            : "射型の記録を切にしました",
         );
       }),
   );
-  ovl.querySelectorAll("#fdChips .chip").forEach(
+  ovl.querySelectorAll("#fdChips button").forEach(
     (c) =>
       (c.onclick = () => {
         db.settings.formDebug = c.dataset.fd === "1";
         save();
-        ovl.querySelectorAll("#fdChips .chip").forEach((x) => {
+        ovl.querySelectorAll("#fdChips button").forEach((x) => {
           const on = x === c;
-          x.classList.toggle("on", on);
           x.setAttribute("aria-pressed", String(on));
         });
         toast(
           db.settings.formDebug === true
-            ? "検証用の診断データ保存を有効にしました"
-            : "検証用の診断データ保存を無効にしました",
+            ? "検証用の診断データを入にしました"
+            : "検証用の診断データを切にしました",
         );
         syncFormDiagnosticSettingsUi(ovl);
       }),
   );
-  const gamEnabled = ovl.querySelector("#gamEnabled");
-  if (gamEnabled)
-    gamEnabled.onchange = (e) => {
-      db.settings.gamification.enabled = e.target.checked;
-      save({ reason: "gamification-toggle" });
-      closeModal(ovl);
-      openSettings();
-    };
+  ovl.querySelectorAll("#gamEnabled button").forEach(
+    (c) =>
+      (c.onclick = () => {
+        const on = c.dataset.gm === "1";
+        if (db.settings.gamification.enabled === on) return;
+        db.settings.gamification.enabled = on;
+        save({ reason: "gamification-toggle" });
+        const next = reopenSettings(ovl);
+        const btn = next && next.querySelector(`#gamEnabled [data-gm="${on ? 1 : 0}"]`);
+        if (btn) btn.focus({ preventScroll: true });
+      }),
+  );
   ovl.querySelectorAll("#gamDayChips .gamifyDayChip").forEach(
     (c) =>
       (c.onclick = () => {
@@ -1739,34 +1944,45 @@ function openSettings() {
   if (demoRemove)
     demoRemove.onclick = async () => {
       if (
-        await appConfirm("架空のデモデータだけを完全に削除しますか？", {
+        await appConfirm("架空のデモデータだけを完全に消しますか？\n自分の記録は変わりません。", {
           danger: true,
-          okLabel: "削除する",
+          okLabel: "消す",
         })
       ) {
         const count = removeDemoData();
         closeModal(ovl);
         render();
-        toast(`デモデータを${count}件削除しました`);
+        toast(`デモデータを${count}件消しました`);
       }
     };
   ovl.querySelector("#dSnapNow").onclick = () => {
     writeSafetySnapshot("manual", true);
-    toast("現在のデータをバックアップしました");
-    closeModal(ovl);
-    openSettings();
+    toast("いまのデータの控えを残しました");
+    reopenSettings(ovl);
   };
+  ovl.querySelector("#setTrash").onclick = () => openSettingsTrash(ovl);
+  ovl.querySelector("#setAddHome").onclick = () => openAddToHomeSheet();
+  const upd = ovl.querySelector("#setUpdate");
+  if (upd) upd.onclick = () => freshReload();
+  /* 選択肢は日時だけにして（狭い画面で切れない）、中身の件数は下の行に書く */
+  const snapSel = ovl.querySelector("#dSnapSel");
+  if (snapSel)
+    snapSel.onchange = () => {
+      const snap = snapshotByKey(snapSel.value);
+      const info = ovl.querySelector("#dSnapInfo");
+      if (snap && info) info.textContent = `この控えの中身: ${snapshotCountsText(snap)}`;
+    };
   ovl.querySelector("#dSnapRestore").onclick = async () => {
     const sel = ovl.querySelector("#dSnapSel");
-    const snap = readSnapshots()[sel ? +sel.value : 0];
+    const snap = sel ? snapshotByKey(sel.value) : readSnapshots()[0];
     if (!snap || !snap.data) {
-      toast("復元できるバックアップデータがありません");
+      toast("戻せる控えがありません");
       return;
     }
     if (
       await appConfirm(
-        `${snapshotLabel(snap)} を復元します。\n現在のデータも先にバックアップしてから置き換えます。よろしいですか？`,
-        { danger: true, okLabel: "復元する" },
+        `${snapshotLabel(snap)} の控えに戻します。\nいまのデータは控えの内容に置き換わります（置き換える前の状態も控えに残します）。`,
+        { danger: true, okLabel: "控えに戻す" },
       )
     ) {
       beginActiveWorkflow();
@@ -1784,7 +2000,7 @@ function openSettings() {
         applyFieldMode();
         closeModal(ovl);
         render();
-        toast("バックアップデータを復元しました");
+        toast("控えの内容に戻しました");
       } finally {
         endActiveWorkflow();
       }
@@ -1807,7 +2023,7 @@ function openSettings() {
         const warnText = vr.warnings.length ? `\n注意: ${vr.warnings.join("、")}` : "";
         if (
           await appConfirm(
-            `読み込むと現在のデータは置き換わります。\n（練習${(d.sessions || []).length}回 / セッティング${(d.setups || []).length}件）${warnText}よろしいですか？`,
+            `読み込むと、いまのデータは読み込んだ内容にすべて置き換わります。\n（練習${(d.sessions || []).length}回 / セッティング${(d.setups || []).length}件 / メモ${Array.isArray(d.notes) ? d.notes.length : 0}件）${warnText}\n置き換える前の状態は、自動バックアップに残します。`,
             { danger: true, okLabel: "読み込む" },
           )
         ) {
@@ -1851,38 +2067,33 @@ function openSettings() {
     };
     r.readAsText(f);
   };
-  ovl.querySelectorAll("[data-restore-trash]").forEach(
-    (b) =>
-      (b.onclick = () => {
-        beginActiveWorkflow();
-        try {
-          if (restoreTrash(b.dataset.restoreTrash)) {
-            closeModal(ovl);
-            render();
-            openSettings();
-            toast("復元しました");
-          }
-        } finally {
-          endActiveWorkflow();
-        }
-      }),
-  );
   const tc = ovl.querySelector("#trashClear");
   if (tc)
     tc.onclick = async () => {
       if (
-        await appConfirm("ゴミ箱の中身を完全に削除しますか？", {
+        await appConfirm("ゴミ箱の中身を完全に消しますか？\n元に戻せません。", {
           danger: true,
           okLabel: "空にする",
         })
       ) {
         db.trash = [];
         save({ reason: "clear-trash", forceSnapshot: true });
-        closeModal(ovl);
-        openSettings();
+        reopenSettings(ovl);
         toast("ゴミ箱を空にしました");
       }
     };
+  return ovl;
+}
+/* 設定 > データ のゴミ箱。ノートの一番下と同じ一覧（openTrashSheet）を開き、閉じたら件数を描き直す */
+function openSettingsTrash(settingsOvl) {
+  const before = (db.trash || []).length;
+  openTrashSheet();
+  const watch = new MutationObserver(() => {
+    if (document.querySelector("body > .ovl .trashSheet")) return;
+    watch.disconnect();
+    if (document.body.contains(settingsOvl) && (db.trash || []).length !== before) reopenSettings(settingsOvl);
+  });
+  watch.observe(document.body, { childList: true });
 }
 function openSetupWizard() {
   const choiceOpts = (k) => gearOptions(k).slice(0, 80);
@@ -1891,10 +2102,12 @@ function openSetupWizard() {
       .map((v) => `<option value="${esc(v)}"></option>`)
       .join("");
   const ovl = document.createElement("div");
-  ovl.className = "ovl";
-  ovl.innerHTML = `<div class="sheet"><h3>初回セットアップ</h3>
-    <div class="hint">最初は分かる範囲だけで大丈夫です。矢とサイト値が入るほど、調整提案の精度が上がります。</div>
-    <label class="f">名前 *</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
+  ovl.className = "ovl resultOvl";
+  ovl.innerHTML = `<div class="sheet resultScreen noteScreen formScreen" data-testid="gear-wizard">
+    <div class="subTop"><button type="button" class="backBtn" id="wCancel" data-testid="gear-wizard-back">${REC_CHEVRON}弓具</button></div>
+    <header class="subHead"><h3>最初のセッティング</h3></header>
+    <p class="basis">名前だけで登録できます。ほかの項目は、分かるものだけ入れてください。あとから編集できます。</p>
+    <label class="f" for="wName">名前（必須）</label><input class="inp" id="wName" placeholder="例: メイン70m仕様">
     ${choiceFieldHtml("wBow", "ハンドル/弓本体", choiceOpts("bow"), "", "", "")}
     ${choiceFieldHtml("wLimbs", "リム", choiceOpts("limbs"), "", "", "")}
     <div class="row">
@@ -1906,10 +2119,14 @@ function openSetupWizard() {
       <div><label class="f">番手/スパイン</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
       <div><label class="f">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
     </div>
-    <label class="f">ポイント重量 (gr)</label><input class="inp" id="wPoint" inputmode="decimal" list="wPointList" placeholder="例: 110"><datalist id="wPointList">${opts("pointWeight")}</datalist>
+    <div class="row">
+      <div><label class="f" for="wDia">矢の外径 (mm)</label><input class="inp" id="wDia" inputmode="decimal" placeholder="例: 5.7"></div>
+      <div><label class="f" for="wPoint">ポイント重量 (gr)</label><input class="inp" id="wPoint" inputmode="decimal" list="wPointList" placeholder="例: 110"><datalist id="wPointList">${opts("pointWeight")}</datalist></div>
+    </div>
+    <div class="hint">矢の外径は、的の線の判定に使います。未入力のときは、カタログにある矢はカタログの値、それ以外は ${DEFAULT_ARROW_DIA_MM}mm を使います。</div>
     ${choiceFieldHtml("wSight", "サイト", choiceOpts("sight"), "", "", "")}
     <details class="adv" open>
-      <summary>実測サイト値（分かる距離だけ）</summary>
+      <summary>サイト値（分かる距離だけ）</summary>
       ${[70, 50, 30, 18]
         .map(
           (d) => `<div class="row">
@@ -1919,9 +2136,9 @@ function openSetupWizard() {
         )
         .join("")}
     </details>
-    <div class="btnrow"><button class="btn ghost" id="wCancel">キャンセル</button><button class="btn" id="wSave">保存して開始</button></div>
+    <div class="actbar"><button type="button" class="btn pri" id="wSave" data-testid="gear-wizard-save">登録する</button></div>
   </div>`;
-  openModal(ovl, { escapeTarget: "#wCancel" });
+  openModal(ovl, { escapeTarget: "#wCancel", swipe: false });
   bindChoiceFields(ovl);
   ovl.querySelector("#wCancel").onclick = () => closeModal(ovl);
   ovl.querySelector("#wSave").onclick = () => {
@@ -1948,6 +2165,8 @@ function openSetupWizard() {
       if (inf.total) n.arrowWeight = inf.total.toFixed(0);
       n.notes = `カタログ推定: ${inf.notes.join(" / ")}`;
     }
+    const dia = ovl.querySelector("#wDia").value.trim();
+    if (dia) n.arrowDia = dia;
     db.setups.push(n);
     [70, 50, 30, 18].forEach((d) => {
       const v = ovl.querySelector(`#wV_${d}`).value.trim(),
@@ -1961,85 +2180,31 @@ function openSetupWizard() {
           h,
           date: today(),
           ts: Date.now(),
-          note: "初回セットアップ",
+          note: "最初の登録",
         });
     });
     ui.sightSel.setupId = n.id;
+    ui.gearSel = n.id;
     save({ reason: "setup-wizard", forceSnapshot: true });
     closeModal(ovl);
     render();
-    toast("初回セットアップを保存しました");
-  };
-}
-function openGearDetail(id) {
-  const s = db.setups.find((x) => x.id === id);
-  if (!s) return;
-  const ovl = document.createElement("div");
-  ovl.className = "ovl";
-  ovl.innerHTML = `<div class="sheet"><h3>${esc(s.name)}</h3>
-    ${gearPrecisionHtml(s)}
-    ${modelReadinessHtml(id)}
-    ${physicsCalibrationHtml(id)}
-    ${setupComparisonHtml(id)}
-    <div class="specSheet" data-testid="gear-spec-sheet">${GEAR_FIELDS.map(([k, lb]) => {
-      if (!s[k]) return "";
-      const { label, unit } = gearLabelUnit(k, lb);
-      return `<div class="specRow"><span>${esc(label)}</span><b>${esc(s[k])}${unit ? esc(unit) : ""}</b></div>`;
-    }).join("")}</div>
-    ${
-      s.history && s.history.length
-        ? `<h3 class="gearHistoryH3">変更履歴</h3>
-      ${[...s.history]
-        .reverse()
-        .map(
-          (h) => `<div class="gearHistoryRow">
-        <b>${fmtD(h.date)}</b> — ${h.changes.map((c) => `${esc(c.label)}: ${esc(c.from || "（未設定）")} → <b>${esc(c.to || "（削除）")}</b>`).join(" / ")}</div>`,
-        )
-        .join("")}`
-        : ""
-    }
-    <div class="btnrow">
-      <button class="btn danger" id="gDel" data-testid="gear-delete">削除</button>
-      <button class="btn sec" id="gEdit" data-testid="gear-edit">編集</button>
-      <button class="btn ghost" id="gClose">閉じる</button>
-    </div>
-  </div>`;
-  openModal(ovl, { escapeTarget: "#gClose" });
-  ovl.querySelector("#gClose").onclick = () => closeModal(ovl);
-  ovl.querySelector("#gEdit").onclick = () => {
-    closeModal(ovl);
-    openGearForm(id);
-  };
-  ovl.querySelector("#gDel").onclick = async () => {
-    if (
-      await appConfirm(
-        `「${s.name}」を削除しますか？\n（練習記録・サイト台帳との紐付けが外れます）`,
-        { danger: true, okLabel: "削除" },
-      )
-    ) {
-      const marks = db.sightMarks.filter((x) => x.setupId === id);
-      trashItem("setupBundle", s.name, { setup: s, sightMarks: marks });
-      db.setups = db.setups.filter((x) => x.id !== id);
-      db.sightMarks = db.sightMarks.filter((x) => x.setupId !== id);
-      save({ reason: "delete-setup", forceSnapshot: true });
-      closeModal(ovl);
-      render();
-      toast("削除しました。設定から復元できます");
-    }
+    toast("セッティングを登録しました");
   };
 }
 function openGearForm(id) {
   const s = id ? db.setups.find((x) => x.id === id) : null;
   const ovl = document.createElement("div");
-  ovl.className = "ovl";
-  ovl.innerHTML = `<div class="sheet"><h3>${s ? "セッティング編集" : "新しいセッティング"}</h3>
-    <label class="f">名前 *</label><input class="inp" id="gfName" value="${esc(s ? s.name : "")}" placeholder="例: メイン70m仕様">
+  ovl.className = "ovl resultOvl";
+  ovl.innerHTML = `<div class="sheet resultScreen noteScreen formScreen" data-testid="gear-form">
+    <div class="subTop"><button type="button" class="backBtn" id="gfCancel" data-testid="gear-form-back">${REC_CHEVRON}弓具</button></div>
+    <header class="subHead"><h3>${s ? "セッティングの編集" : "セッティングの追加"}</h3></header>
+    <label class="f" for="gfName">名前（必須）</label><input class="inp" id="gfName" value="${esc(s ? s.name : "")}" placeholder="例: メイン70m仕様">
     ${GEAR_SECTIONS.map((sec) => gearSectionHtml(sec, s)).join("")}
-    <div class="btnrow"><button class="btn sec" id="gfInfer">${icon("book")} カタログから推定</button></div>
-    <div class="hint" id="gfInferHint">シャフト銘柄と番手を別々に入れると、掲載モデル・直径・GPI・総矢重量を推定します。矢尺とポイント重量は専用欄に入れてください。</div>
-    <div class="btnrow"><button class="btn ghost" id="gfCancel">キャンセル</button><button class="btn" id="gfSave">保存</button></div>
+    <div class="btnRow"><button type="button" class="btn sec" id="gfInfer">カタログの値を入れる</button></div>
+    <div class="hint" id="gfInferHint">シャフト銘柄と番手から、カタログにある外径・1インチあたりの重さ・矢の重さを入れます。入れた値は保存の前に直せます。</div>
+    <div class="actbar"><button type="button" class="btn pri" id="gfSave" data-testid="gear-form-save">保存</button></div>
   </div>`;
-  openModal(ovl, { escapeTarget: "#gfCancel" });
+  openModal(ovl, { escapeTarget: "#gfCancel", swipe: false });
   bindChoiceFields(ovl);
   ovl.querySelector("#gfCancel").onclick = () => closeModal(ovl);
   ovl.querySelector("#gfInfer").onclick = () => {
@@ -2086,12 +2251,13 @@ function openGearForm(id) {
       s.name = name;
       if (changes.length) {
         (s.history = s.history || []).push({ date: today(), changes });
-        toast("変更を履歴に記録しました");
+        toast("変更を履歴に残しました");
       }
     } else {
       const n = { id: uid(), name, history: [], createdAt: today() };
       GEAR_FIELDS.forEach(([k]) => (n[k] = ovl.querySelector("#gf_" + k).value.trim()));
       db.setups.push(n);
+      ui.gearSel = n.id;
       if (!ui.sightSel.setupId) ui.sightSel.setupId = n.id;
     }
     save();

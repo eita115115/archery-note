@@ -1,5 +1,6 @@
 /* global db, render, save, scoreAt, lineCutRadius */
 const { test, expect } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 
 test.use({ hasTouch: true, isMobile: true });
 
@@ -21,6 +22,7 @@ async function prepare(page, mode) {
   await page.goto("/");
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
   await page.locator('#tabs [data-v="record"]').click();
+  await page.getByTestId("record-conditions").click();
   await page.getByRole("button", { name: "18m", exact: true }).click();
   await page.getByRole("combobox", { name: "的", exact: true }).selectOption("40");
   await page.getByRole("combobox", { name: "1エンドの本数", exact: true }).selectOption("6");
@@ -65,11 +67,14 @@ async function prepare(page, mode) {
 async function positions(page) {
   return page.locator(".ovl .sheet").evaluate((sheet) => {
     const nodes = Array.from(sheet.children),
-      stats = sheet.querySelector(".statbar"),
-      decision = sheet.querySelector(".decisionCard"),
-      comparison = sheet.querySelector(".summaryTodaysResult");
-    const r = stats.getBoundingClientRect();
+      stats = sheet.querySelector('[data-testid="result-total"]'),
+      decision = sheet.querySelector(".summaryDetails"), // サイトを動かすかの判断はこの中
+      comparison = sheet.querySelector(".summaryTodaysResult"),
+      card = sheet.querySelector(".bleed"),
+      total = sheet.querySelector('[data-testid="session-total"]');
+    const r = total.getBoundingClientRect();
     return {
+      card: nodes.indexOf(card),
       stats: nodes.indexOf(stats),
       decision: nodes.indexOf(decision),
       comparison: nodes.indexOf(comparison),
@@ -92,22 +97,28 @@ for (const width of [320, 375]) {
       await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
       const before = await prepare(page, "compare");
       const expected = before.active.ends.flat().reduce((n, a) => n + a.s, 0);
-      await page.getByTestId("active-finish").click();
+      await finishFromMenu(page);
       await settle(page);
       await page.screenshot({
         path: testInfo.outputPath(`summary-order-${width}-${theme}.png`),
         animations: "disabled",
       });
-      const stats = page.locator(".ovl .statbar");
-      await expect(stats).toContainText(`合計 (6本)`);
-      await expect(stats.locator(".stat b").first()).toHaveText(String(expected));
+      const stats = page.getByTestId("result-total");
+      await expect(stats.locator(".vsecH .aside")).toContainText("6射・1射平均");
+      await expect(stats.getByTestId("session-total")).toHaveText(String(expected));
       await expect(page.getByTestId("todays-result-weekly")).toBeVisible();
       const p = await positions(page);
       expect(p.stats).toBeLessThan(p.decision);
       expect(p.comparison).toBeLessThan(p.decision);
+      // 合計 → 比較 → スコア表 → 着弾・サイトの判断 の順
+      expect(p.comparison).toBeLessThan(p.card);
+      expect(p.card).toBeLessThan(p.decision);
       expect(p.statsTop).toBeGreaterThanOrEqual(p.sheetTop);
       expect(p.statsBottom).toBeLessThanOrEqual(p.viewport - 8);
-      await expect(page.locator(".ovl .decisionCard")).toHaveCount(1);
+      // サイトの判断は、弓具 > サイト と同じ調整の目安（折りたたみの中に1つ）
+      await expect(
+        page.getByTestId("result-sight-details").getByTestId("sight-advice"),
+      ).toHaveCount(1);
       await expect(page.locator("#sumPlot svg")).toHaveCount(1);
       await page.locator("#sumClose").click();
       await expect(page.locator(".ovl")).toHaveCount(0);
@@ -131,13 +142,15 @@ for (const mode of ["first", "gam-round", "edit"]) {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.emulateMedia({ reducedMotion: "reduce" });
     const before = await prepare(page, mode);
-    await page.getByTestId("active-finish").click();
+    await finishFromMenu(page);
     await settle(page);
     const p = await positions(page);
     expect(p.stats).toBeLessThan(p.decision);
-    await expect(page.locator(".ovl .decisionCard")).toHaveCount(1);
+    await expect(page.getByTestId("result-sight-details").getByTestId("sight-advice")).toHaveCount(
+      1,
+    );
     if (mode === "first")
-      await expect(page.getByTestId("todays-result-empty")).toContainText("初回記録");
+      await expect(page.getByTestId("todays-result-empty")).toContainText("最初の記録です");
     if (mode === "gam-round") {
       await expect(page.getByTestId("summary-gamification")).toHaveCount(1);
       await expect(page.locator(".ovl .recordNeutralAdvice")).toContainText("1/4ステージ");

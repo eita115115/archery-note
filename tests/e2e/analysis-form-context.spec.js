@@ -12,7 +12,9 @@ async function seed(page, onlyForm = false, onlyOld = false) {
   }, d);
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').tap();
+  await page.locator('#analysisSubTabs [data-an="form"]').tap(); // v5 段 7: 射型の記録は 分析 > 射型
 }
+const period = (page, id) => page.locator("#anPeriod").selectOption(id);
 async function snapshot(page) {
   return page.evaluate(() => {
     const d = JSON.parse(globalThis.localStorage.getItem("archeryNote.v1"));
@@ -25,12 +27,11 @@ async function ids(page) {
 test("form analysis follows capture period and linked equipment/distance", async ({ page }) => {
   await seed(page);
   const before = await snapshot(page);
-  await page.locator('[data-period="7d"]').tap();
+  await period(page, "7d");
   await page.locator("#anSetup").selectOption("a");
   await page.locator("#anDist").selectOption("30");
-  const card = page
-    .locator(".card")
-    .filter({ has: page.getByRole("heading", { name: /射形トラッキング/ }) });
+  const card = page.getByTestId("analysis-form-card");
+  await expect(card.getByRole("heading", { name: "射型の記録" })).toBeVisible();
   expect(
     await card
       .locator("[data-form-id]")
@@ -48,23 +49,23 @@ test("form analysis follows capture period and linked equipment/distance", async
   expect(await ids(page)).toEqual(["form-14"]);
   await page.locator("#anSetup").selectOption("a");
   await page.locator("#anDist").selectOption("18");
-  await expect(card).toContainText("この条件に合う射形記録はありません");
+  await expect(card).toContainText("この条件に合う射型の記録は 0件です");
   await expect(card.locator("[data-form-id]")).toHaveCount(0);
   await page.locator("#anSetup").selectOption("");
   await page.locator("#anDist").selectOption("");
-  for (const [period, included, excluded] of [
+  for (const [id, included, excluded] of [
     ["7d", "form-3", "form-4"],
     ["30d", "form-5", "form-6"],
     ["90d", "form-7", "form-8"],
   ]) {
-    await page.locator(`[data-period="${period}"]`).tap();
+    await page.locator("#anPeriod").selectOption(id);
     const selected = await ids(page);
     expect(selected).toContain(included);
     expect(selected).not.toContain(excluded);
     expect(selected).not.toContain("form-11");
     expect(selected).toContain("form-12");
   }
-  await page.locator('[data-period="all"]').tap();
+  await period(page, "all");
   expect(await ids(page)).toHaveLength(15);
   expect(await snapshot(page)).toEqual(before);
   await page.reload();
@@ -72,20 +73,20 @@ test("form analysis follows capture period and linked equipment/distance", async
 });
 test("form-only records still expose the shared period controls", async ({ page }) => {
   await seed(page, true);
-  await expect(page.locator("#anPeriods")).toBeVisible();
-  await page.locator('[data-period="7d"]').tap();
+  await expect(page.locator("#anPeriod")).toBeVisible();
+  await period(page, "7d");
   expect(await ids(page)).not.toContain("form-4");
   await page.locator("#anSetup").selectOption("a");
   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-9", "form-12", "form-13"]);
 });
 test("form-only no-match keeps controls available to restore the list", async ({ page }) => {
   await seed(page, true, true);
-  await page.locator('[data-period="7d"]').tap();
+  await period(page, "7d");
   await expect(page.getByTestId("analysis-form-card")).toContainText(
-    "この条件に合う射形記録はありません",
+    "この条件に合う射型の記録は 0件です",
   );
-  await expect(page.locator("#anPeriods")).toBeVisible();
-  await page.locator('[data-period="all"]').tap();
+  await expect(page.locator("#anPeriod")).toBeVisible();
+  await period(page, "all");
   await expect(page.locator('[data-form-id="form-8"]')).toHaveCount(1);
 });
 
@@ -98,6 +99,7 @@ test("distance remains clearable after deleting its last linked practice", async
   }, d);
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').tap();
+  await page.locator('#analysisSubTabs [data-an="form"]').tap();
   await page.locator("#anDist").selectOption("30");
   expect(await ids(page)).toEqual(["form-0"]);
   await page.locator('#tabs [data-v="history"]').tap();
@@ -128,11 +130,9 @@ for (const width of [320, 375, 900]) {
     const card = page.getByTestId("analysis-form-card");
     await card.scrollIntoViewIfNeeded();
     await expect(card.locator("[data-form-id]")).toHaveCount(5);
-    const help = card.locator("details");
-    expect(await help.evaluate((e) => e.open)).toBe(false);
-    await help.locator("summary").tap();
-    await expect(help).toContainText("撮影日");
-    await help.locator("summary").tap();
+    /* 対象の説明は、開かなくても読める1段落 */
+    await expect(card.locator("details")).toHaveCount(0);
+    await expect(card.locator("p.basis")).toContainText("期間は撮影日");
     const first = card.locator("[data-form-id]").first();
     await expect(first).toContainText("弓手肘");
     await expect(first).toContainText("引き手肘");

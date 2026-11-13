@@ -12,7 +12,9 @@ test("end action stays in viewport after tab animation and scoring", async ({ pa
   const end = page.getByTestId("active-end");
   const box = await end.boundingBox();
   expect(box.y).toBeGreaterThan(0);
-  expect(box.y + box.height).toBeLessThan(640 - 64);
+  // v5: 記録中はタブが無く、操作列が画面の下端に付く
+  expect(box.y + box.height).toBeLessThanOrEqual(640);
+  await expect(page.locator("#tabs")).toBeHidden();
   const target = await page.locator("#tgWrap").boundingBox();
   await page.mouse.click(
     target.x + target.width / 2,
@@ -22,7 +24,7 @@ test("end action stays in viewport after tab animation and scoring", async ({ pa
     page.evaluate(() => JSON.parse(localStorage.getItem("archeryNote.v1")).active);
   await expect.poll(async () => (await current()).cur.length).toBe(1);
   const afterArrow = await end.boundingBox();
-  expect(afterArrow.y + afterArrow.height).toBeLessThan(576);
+  expect(afterArrow.y + afterArrow.height).toBeLessThanOrEqual(640);
   // Use screen coordinates: locator.click could conceal the regression by auto-scrolling.
   await page.mouse.click(afterArrow.x + afterArrow.width / 2, afterArrow.y + afterArrow.height / 2);
   await expect.poll(async () => (await current()).ends.length).toBe(1);

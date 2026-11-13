@@ -25,6 +25,7 @@ const fixtureFiles = {
   formDiagnostics: "archery-note-v1-form-diagnostics.json",
   formDiagnosticsMalformedCoordinator:
     "archery-note-v1-form-diagnostics-malformed-coordinator.json",
+  notes: "archery-note-v1-notes.json",
 };
 const expectedCsvHeader = [
   "date",
@@ -165,7 +166,7 @@ const num = value => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 const gearPrecisionProfile = () => ({score: 1, missing: [], level: "fixture"});
-${section(analysisScript, "function windText", "function personalModelHtml")}
+${section(analysisScript, "function windText", "function roundProgressHtml")}
 ${section(analysisScript, "function sessionsCsv", "function exportSessionsCsv")}
 return sessionsCsv();`,
   )(clone(db), makeLocalStorageShim());
@@ -235,6 +236,7 @@ function checkBaseShape(name, db) {
   assertArray(db.sightMarks, `[${name}] sightMarks`);
   assertArray(db.sessions, `[${name}] sessions`);
   assertArray(db.trash, `[${name}] trash`);
+  assertArray(db.notes, `[${name}] notes`);
   assertObject(db.settings, `[${name}] settings`);
   assertHasOwn(db, "active", `[${name}] database`);
 }
@@ -435,6 +437,29 @@ function checkSnapshot(storageApi, representative) {
   assert(latest.hash, "[snapshot] hash should be recorded");
 }
 
+/* v5 段 6: メモだけのノートと練習のタグが、バックアップ JSON・保存と再読み込み・自動バックアップを通っても変わらない */
+function checkNotesRoundTrip(storageApi, fixtures, normalized) {
+  const source = fixtures.notes;
+  const same = (db, label) => {
+    assertStrict.deepStrictEqual(db.notes, source.notes, `[notes] ${label}: notes`);
+    assertStrict.deepStrictEqual(db.sessions[0].tags, source.sessions[0].tags, `[notes] ${label}: tags`);
+    assertEqual(db.sessions[0].note, source.sessions[0].note, `[notes] ${label}: session memo`);
+    assertStrict.deepStrictEqual(db.trash[0], source.trash[0], `[notes] ${label}: trashed note`);
+  };
+  same(normalized.notes, "backup JSON import");
+  // 設定の「バックアップ保存」と同じ書き出し（JSON.stringify(db, null, 1)）→ 読み込み（normalizeDb）
+  const exported = JSON.stringify(normalized.notes, null, 1);
+  same(storageApi.normalizeDb(JSON.parse(exported)), "export then import");
+  same(saveAndReloadFixture(source), "save then reload");
+  const snap = createImportSnapshot(normalized.notes);
+  same(storageApi.normalizeDb(clone(snap.snapshots[0].data)), "safety snapshot restore");
+  assertEqual(snap.snapshots[0].counts.notes, 2, "[notes] snapshot counts notes");
+  // CSV は練習だけ（メモだけのノートは行にならない）。練習のメモは note 列に出る
+  const rows = parseCsv(createSessionsCsv(normalized.notes));
+  assertEqual(rows.length, 2, "[notes] CSV has the header and one session row");
+  assertEqual(rows[1][22], source.sessions[0].note, "[notes] CSV note column keeps the memo text");
+}
+
 function saveAndReloadFixture(fixture) {
   const shim = makeLocalStorageShim();
   const raw = new Function(
@@ -576,6 +601,7 @@ function main() {
   checkMissingSessionsLoad(fixtures.missingSessions);
   checkSnapshot(storageApi, fixtures.representative);
   checkFormDiagnosticsRoundTrip(storageApi, fixtures, normalized);
+  checkNotesRoundTrip(storageApi, fixtures, normalized);
   checkCsvForAllFixtures(normalized);
   checkCsvRows("missing-sessions", normalized.missingSessions, 1);
 

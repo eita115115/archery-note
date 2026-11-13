@@ -9,7 +9,8 @@ async function seed(page, data = sightProvenanceDb()) {
       globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(data));
   }, data);
   await page.goto("/");
-  await page.locator('#tabs [data-v="sight"]').tap();
+  await page.locator('#tabs [data-v="gear"]').tap();
+  await page.getByTestId("gear-subtab-sight").tap();
   await page.locator('#sgDistChips [data-d="30"]').tap();
 }
 async function snapshot(page) {
@@ -19,11 +20,11 @@ async function snapshot(page) {
   });
 }
 async function prediction(page) {
-  const control = page.locator("summary").filter({ hasText: "サイト値分析・予測" });
-  await control.scrollIntoViewIfNeeded();
-  await control.tap();
-  await expect(control.locator("..")).toHaveAttribute("open", "");
-  return page.locator('[data-testid="sight-prediction"]');
+  // v5 段 8: 予測は折りたたみの中ではなく、「記録していない距離の予測」の見出しで常に出ている
+  const panel = page.locator('[data-testid="sight-prediction"]');
+  await panel.scrollIntoViewIfNeeded();
+  await expect(panel.getByRole("heading", { name: "記録していない距離の予測" })).toBeVisible();
+  return panel;
 }
 for (const width of [320, 375, 900]) {
   test(`prediction shows values and adopted record dates (${width})`, async ({ page }) => {
@@ -40,14 +41,12 @@ for (const width of [320, 375, 900]) {
     const details = panel.locator("details.sightSources"),
       summary = details.locator("summary");
     await expect(details).not.toHaveAttribute("open");
-    const arrow = () =>
-      summary.evaluate(
-        (el) =>
-          new globalThis.DOMMatrixReadOnly(globalThis.getComputedStyle(el, "::before").transform).b,
-      );
-    await expect.poll(arrow).toBeLessThan(0);
+    // 折りたたみの印は右端の ＋ / −（v5 段 9 で全画面をそろえた。旧: 左の山形）
+    const marker = () =>
+      summary.evaluate((el) => globalThis.getComputedStyle(el, "::after").content);
+    await expect.poll(marker).toBe('"＋"');
     await summary.tap();
-    await expect.poll(arrow).toBeGreaterThan(0);
+    await expect.poll(marker).toBe('"−"');
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("2026/10/13");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("80");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText(
@@ -57,23 +56,19 @@ for (const width of [320, 375, 900]) {
     await summary.focus();
     await page.keyboard.press("Space");
     await expect(details).not.toHaveAttribute("open");
-    await expect.poll(arrow).toBeLessThan(0);
+    await expect.poll(marker).toBe('"＋"');
     await page.keyboard.press("Enter");
     await expect(details).toHaveAttribute("open");
-    await expect.poll(arrow).toBeGreaterThan(0);
+    await expect.poll(marker).toBe('"−"');
     await expect(summary).toBeFocused();
     const help = panel.locator("details.sightPredictionHelp"),
       helpSummary = help.locator("summary"),
-      helpArrow = () =>
-        helpSummary.evaluate(
-          (el) =>
-            new globalThis.DOMMatrixReadOnly(globalThis.getComputedStyle(el, "::before").transform)
-              .b,
-        );
-    await expect.poll(helpArrow).toBeLessThan(0);
+      helpMarker = () =>
+        helpSummary.evaluate((el) => globalThis.getComputedStyle(el, "::after").content);
+    await expect.poll(helpMarker).toBe('"＋"');
     await helpSummary.tap();
     await expect(help).toHaveAttribute("open");
-    await expect.poll(helpArrow).toBeGreaterThan(0);
+    await expect.poll(helpMarker).toBe('"−"');
     const geometry = await panel.evaluate((el) => ({
       overflow:
         el.scrollWidth > el.clientWidth ||
@@ -117,7 +112,7 @@ test("source metadata preserves point order, identity, zero and raw distance key
     }
   });
   expect(result).toEqual({
-    countLabel: "採用した実測 3件",
+    countLabel: "計算に使った実測 3件",
     pts: [
       [18, 0],
       [30, 80],
@@ -221,10 +216,10 @@ test("prediction keeps setup scope, disappears below two distances and handles a
   });
   const panel = await prediction(page);
   await expect(panel.locator("[data-predict-dist]")).toHaveCount(0);
-  await expect(panel).toContainText("弾道モデル");
+  await expect(panel).toContainText("弾道の計算");
   // 0/0/0/100 のような矛盾した台帳では初速の当てはめが探索範囲の端に張り付くので採らず、用具からの推定を使う
-  await expect(panel).toContainText("用具から推定");
-  await expect(panel).toContainText("定番距離");
+  await expect(panel).toContainText("弓具から推定");
+  await expect(panel).toContainText("定番の距離");
   await panel.locator("details.sightSources summary").tap();
   await expect(panel.locator("[data-source-id]")).toHaveCount(4);
 });

@@ -73,7 +73,7 @@ async function arm(page) {
     const population = d.sessions.filter((s) => s && s.date && s.date <= current.date);
     population.push(current);
     const expected = edit
-      ? { result: null, before: null }
+      ? { result: null }
       : {
           result: globalThis.computeTodaysResult(
             population,
@@ -83,12 +83,10 @@ async function arm(page) {
               formAnalyses: d.formAnalyses,
             },
           ),
-          before: globalThis.trGrowthBeforeFor(current, population, globalThis.sessionMetrics),
         };
     const original = {
       metrics: globalThis.sessionMetrics,
       result: globalThis.computeTodaysResult,
-      before: globalThis.trGrowthBeforeFor,
       summary: globalThis.openSummary,
     };
     let phase = null;
@@ -101,30 +99,25 @@ async function arm(page) {
       }
       return original.metrics(s);
     };
-    for (const [key, name] of [
-      ["result", "computeTodaysResult"],
-      ["before", "trGrowthBeforeFor"],
-    ])
-      globalThis[name] = function (...args) {
-        phase = key;
-        try {
-          return original[key](...args);
-        } finally {
-          phase = null;
-        }
-      };
+    globalThis.computeTodaysResult = function (...args) {
+      phase = "result";
+      try {
+        return original.result(...args);
+      } finally {
+        phase = null;
+      }
+    };
     globalThis.__finishMetricsEvidence = { expected, current, edit, visits };
-    globalThis.openSummary = function (s, isNew, gam, result, before) {
+    globalThis.openSummary = function (s, isNew, gam, result) {
       Object.assign(globalThis.__finishMetricsEvidence, {
-        actual: { result, before },
+        actual: { result },
         computations: [...counts].map(([s, calls]) => ({ id: s.id, date: s.date, calls })),
       });
-      return original.summary(s, isNew, gam, result, before);
+      return original.summary(s, isNew, gam, result);
     };
     globalThis.__restoreFinishMetrics = () => {
       globalThis.sessionMetrics = original.metrics;
       globalThis.computeTodaysResult = original.result;
-      globalThis.trGrowthBeforeFor = original.before;
       globalThis.openSummary = original.summary;
     };
     return { old: d.sessions, current, expected, edit };
@@ -132,6 +125,9 @@ async function arm(page) {
 }
 async function finish(page, info, label, kind, reload = true) {
   const baseline = await arm(page);
+  await settled(page);
+  // v5: 終了はメニューの中（testid active-finish / #bFinish はメニューの項目）
+  await page.getByTestId("active-menu").click();
   await settled(page);
   const p = await page.locator("#bFinish").evaluate((el) => {
     const r = el.getBoundingClientRect(),

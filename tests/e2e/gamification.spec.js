@@ -1,12 +1,13 @@
 "use strict";
 
 const { expect, test } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
 /* ゲーミフィケーション（CHANGELOG v1.7.0 / scripts/48-gamification.js の純関数 +
-   scripts/60-history-sight-view.js の履歴Hero + scripts/50-record-view.js のバッジ一覧・
+   scripts/60-history-sight-view.js のノートの1行（v5 段 6 でリングと設定の入口を廃止）+ scripts/50-record-view.js のバッジ一覧・
    サマリー拡張 + scripts/70-gear-settings.js の設定トグル）の実挙動検証。
    すべて settings.gamification.enabled でゲートされ、無効時はUI・計算とも完全にスキップされる。 */
 
@@ -106,7 +107,7 @@ function mainTab(page, name) {
   return page.locator("#tabs").getByRole("button", { name });
 }
 
-test("gamification.enabled:false hides the history streak hero and the analysis badge list", async ({
+test("gamification.enabled:false hides the notes goal line and the badge list", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -142,16 +143,22 @@ test("gamification.enabled:false hides the history streak hero and the analysis 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await mainTab(page, "履歴").click();
-  await expect(page.locator("#main")).toContainText("練習履歴");
-  await expect(page.getByTestId("gamification-hero")).toHaveCount(0);
+  await mainTab(page, "ノート").click();
+  await expect(page.getByTestId("notes-list")).toBeVisible();
+  await expect(page.getByTestId("notes-goal-line")).toHaveCount(0);
+  await expect(page.locator(".goalRing, .streakHero")).toHaveCount(0);
 
   await mainTab(page, "分析").click();
+  await expect(page.getByTestId("badge-section")).toHaveCount(0);
+  /* 設定でも、切のときはバッジの一覧を出さない */
+  await mainTab(page, "記録").click();
+  await page.locator("#btnSettings").click();
+  await expect(page.getByTestId("settings-group-gamification")).toBeVisible();
   await expect(page.getByTestId("badge-section")).toHaveCount(0);
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("enabling gamification from settings makes the history streak hero appear", async ({
+test("enabling gamification from settings adds one plain goal line to the notes tab", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -161,29 +168,33 @@ test("enabling gamification from settings makes the history streak hero appear",
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await page.locator("#btnSettings").click();
+  // v5 段 8: 「練習の目標と連続記録」は 切 / 入 の2択（設定 > 記録）
   const gamToggle = page.getByTestId("gamify-toggle");
-  await expect(gamToggle).not.toBeChecked();
+  const gamPressed = gamToggle.locator('[aria-pressed="true"]');
+  await expect(gamPressed).toHaveAttribute("data-gm", "0");
   await expect(page.getByTestId("gamify-day-chips")).toHaveCount(0);
 
-  await gamToggle.click();
-  await expect(gamToggle).toBeChecked();
+  await gamToggle.locator('[data-gm="1"]').click();
+  await expect(gamPressed).toHaveAttribute("data-gm", "1");
   await expect(page.getByTestId("gamify-day-chips")).toBeVisible();
 
   await page.locator("#setClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
-  await mainTab(page, "履歴").click();
-  const hero = page.getByTestId("gamification-hero");
-  await expect(hero).toBeVisible();
-  await expect(page.getByTestId("streak-current")).toHaveText("—");
-  await expect(page.getByTestId("hero-streak-setup")).toBeVisible();
+  // v5 段 6: ノートには目標の事実を1行だけ。リング・炎のアイコン・設定の入口は置かない
+  await mainTab(page, "ノート").click();
+  const line = page.getByTestId("notes-goal-line");
+  await expect(line).toHaveText("今週 0回 / 目標 3回・今月 0射 / 目標 300射");
+  await expect(page.getByTestId("streak-current")).toHaveCount(0);
+  await expect(page.locator(".goalRing, .streakHero, .streakFire")).toHaveCount(0);
+  await expect(page.getByTestId("hero-streak-setup")).toHaveCount(0);
 
   const db = await readDb(page);
   expect(db.settings.gamification.enabled).toBe(true);
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("unset practiceDays shows — with a CTA; tapping the hero CTA sets weekdays and switches to streak/goal rings", async ({
+test("unset practiceDays leaves the streak out of the notes line; choosing weekdays in settings adds it", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -216,37 +227,33 @@ test("unset practiceDays shows — with a CTA; tapping the hero CTA sets weekday
   );
 
   await page.goto("/");
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
 
-  const hero = page.getByTestId("gamification-hero");
-  await expect(hero).toBeVisible();
-  await expect(page.getByTestId("streak-current")).toHaveText("—");
-  await expect(page.getByTestId("hero-streak-setup")).toBeVisible();
-  // 目標リング（今日/今週/今月）は practiceDays 未設定でも常に表示される
-  await expect(page.locator(".streakGoals .goalRing")).toHaveCount(3);
+  const line = page.getByTestId("notes-goal-line");
+  await expect(line).toHaveText("今週 0回 / 目標 3回・今月 0射 / 目標 300射");
+  await expect(page.getByTestId("streak-current")).toHaveCount(0);
+  await expect(page.locator(".goalRing")).toHaveCount(0);
 
-  await page.getByTestId("hero-streak-setup").click();
-  const sheetChips = page.getByTestId("practice-days-sheet-chips");
-  await expect(sheetChips).toBeVisible();
-  // 日曜(0)を追加でタップして曜日設定できることを確認
-  await sheetChips.locator('.gamifyDayChip[data-d="0"]').click();
-  await expect(sheetChips.locator('.gamifyDayChip[data-d="0"]')).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
-  await page.locator("#pdSave").click();
+  // 練習曜日は設定で選ぶ（ノートに設定の入口は置かない）
+  await mainTab(page, "記録").click();
+  await page.locator("#btnSettings").click();
+  const chips = page.getByTestId("gamify-day-chips");
+  for (const d of [0, 1, 3, 5, 6]) await chips.locator(`.gamifyDayChip[data-d="${d}"]`).click();
+  await expect(chips.locator('.gamifyDayChip[data-d="0"]')).toHaveAttribute("aria-pressed", "true");
+  await page.locator("#setClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
+  await mainTab(page, "ノート").click();
+  await expect(line).toHaveText("今週 0回 / 目標 3回・今月 0射 / 目標 300射・連続 0日");
   await expect(page.getByTestId("streak-current")).toHaveText("0");
-  await expect(page.getByTestId("hero-streak-setup")).toHaveCount(0);
-  await expect(page.locator(".streakGoals .goalRing")).toHaveCount(3);
+  await expect(page.locator(".goalRing")).toHaveCount(0);
 
   const db = await readDb(page);
   expect(db.settings.gamification.practiceDays).toEqual([0, 1, 3, 5, 6]);
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("finishing a session shows a before→after streak row in the summary sheet", async ({
+test("finishing a session states the streak before and after as a plain fact in the result", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -285,19 +292,30 @@ test("finishing a session shows a before→after streak row in the summary sheet
 
   const target = page.getByTestId("active-target").locator("#tgsvg");
   await target.click(); // 中央タップ=X。単一距離1本の終了は確認ダイアログを挟まない
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
 
   const summaryGam = page.getByTestId("summary-gamification");
   await expect(summaryGam).toBeVisible();
   await expect(page.getByTestId("summary-streak-num")).toHaveText("1");
-  await expect(summaryGam.locator(".summaryStreakBefore")).toHaveText("0");
-  await expect(summaryGam.locator(".summaryStreakMsg").first()).toHaveText("連続記録が伸びました");
-  // 初回セッションなので「初矢」バッジも同時に解除される
-  await expect(page.getByTestId("summary-badges")).toContainText("初矢");
+  // v5 段 5: 事実だけを1行で（アイコン・励ましの文・演出なし）
+  await expect(summaryGam.locator(".fact")).toHaveText(
+    "連続記録は 1 日です（この記録の前は 0 日）。",
+  );
+  await expect(summaryGam.locator("svg")).toHaveCount(0);
+  await expect(summaryGam).not.toContainText(/伸びました|練習できました|始めましょう|！/);
+  // 初回セッションなので「初矢」バッジの条件も同時に満たす（名前と理由を文で示す）
+  await expect(page.getByTestId("summary-badges")).toContainText(
+    "この記録で条件を満たしたバッジ: 「初矢」",
+  );
+  // 記録タブには、目標と連続記録を1行だけ出す
+  await page.locator("#sumClose").click();
+  await expect(page.getByTestId("home-goal-line")).toHaveText(
+    "今週 1回 / 目標 3回・今月 1射 / 目標 300射・連続 1日",
+  );
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("all 12 badges render in the analysis tab (locked by default); first_arrow unlocks via startup backfill", async ({
+test("all 12 badges render in settings (locked by default); first_arrow unlocks via startup backfill", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -333,8 +351,13 @@ test("all 12 badges render in the analysis tab (locked by default); first_arrow 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
+  /* v5 段 7: バッジの一覧は分析タブの末尾から、設定の「ゲーミフィケーション」の中へ移した */
   await mainTab(page, "分析").click();
-  const section = page.getByTestId("badge-section");
+  await expect(page.getByTestId("badge-section")).toHaveCount(0);
+  await mainTab(page, "記録").click();
+  await page.locator("#btnSettings").click();
+  const section = page.getByTestId("settings-group-gamification").getByTestId("badge-section");
+  await section.scrollIntoViewIfNeeded();
   await expect(section).toBeVisible();
   await expect(section).toContainText("1/12");
   await expect(page.getByTestId("badge-card")).toHaveCount(12);
@@ -439,10 +462,12 @@ test("importing history with gamification enabled backfills quietly and does not
     // インポート直後: サマリーや新規解除の演出は一切出ない（インポートは openSummary を呼ばない経路）
     await expect(page.locator('[data-testid="summary-gamification"]')).toHaveCount(0);
 
-    // 分析タブ: インポート時の同期バックフィルで「初矢」が静かに解除済みになっている
-    await mainTab(page, "分析").click();
+    // 設定のバッジ一覧: インポート時の同期バックフィルで「初矢」が静かに解除済みになっている
+    await page.locator("#btnSettings").click();
     const firstArrow = page.locator('[data-testid="badge-card"][data-badge="first_arrow"]');
     await expect(firstArrow).not.toHaveClass(/locked/);
+    await page.locator("#setClose").click();
+    await expect(page.locator(".ovl")).toHaveCount(0);
 
     // 続けて新しいセッションを1本だけ記録して終了 -- 8e22fedd 回帰確認:
     // 既に持っている「初矢」バッジがここで再度「新しく解除」として誤発火しないこと
@@ -450,7 +475,7 @@ test("importing history with gamification enabled backfills quietly and does not
     await page.getByTestId("record-start").click();
     const target = page.getByTestId("active-target").locator("#tgsvg");
     await target.click();
-    await page.getByTestId("active-finish").click();
+    await finishFromMenu(page);
 
     await expect(page.locator(".ovl .sheet")).toBeVisible();
     await expect(page.locator('[data-testid="summary-badges"]')).toHaveCount(0);

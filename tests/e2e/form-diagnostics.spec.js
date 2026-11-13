@@ -275,6 +275,12 @@ async function seedTask9Page(page, database, mode = "web-success") {
   await page.goto("/");
   await page.locator("#btnSettings").click();
   await page.waitForTimeout(750);
+  // 起動直後の保存（launch-count）の控えは、ブラウザの手が空いたとき（最長 1.8 秒後）に書かれる。
+  // 全画面の設定では描画が止まっていて手空きの通知が遅れることがあるので、ここで書き切ってから「前」の状態を取る
+  await page.evaluate(() => {
+    globalThis.flushPendingSave();
+    globalThis.flushSafetySnapshot();
+  });
 }
 
 async function task9PersistenceSnapshot(page) {
@@ -358,6 +364,7 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
   await seedDiagnosticDb(page, database);
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await page.waitForTimeout(750);
   await installPrimaryWriteGate(page);
   const rollbackBaseline = await page.evaluate(() => {
@@ -371,7 +378,7 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
 
   await expect(page.locator('[data-form-id="selected-record"]')).toHaveCount(1);
   await expect(page.locator("#toast")).toContainText(
-    "射形記録を保存できなかったため、削除していません",
+    "射型記録を保存できなかったため、削除していません",
   );
   expect(
     await page.evaluate(() => ({
@@ -435,6 +442,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await seedDiagnosticDb(page, database);
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
@@ -474,6 +482,7 @@ test("failed diagnostic discard cancel retains the candidate and confirm closes 
   await seedDiagnosticDb(page, makeSyntheticDiagnosticDb({ settings: { formDebug: true } }));
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.locator("#formStart").click();
@@ -516,6 +525,7 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   );
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
   await page.evaluate(() => {
@@ -1017,20 +1027,23 @@ for (const [label, value, enabled] of [
     await seedDiagnosticDb(page, database);
     await page.goto("/");
     await page.locator('#tabs [data-v="analysis"]').click();
+    await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
 
-    const card = page.locator(".card").filter({ hasText: "射形トラッキング" });
+    const card = page.getByTestId("analysis-form-card");
     if (enabled) await expect(card).toHaveCount(1);
     else await expect(card).toHaveCount(0);
 
+    // v5: 設定の入口は記録タブの見出し行だけにある
+    await page.locator('#tabs [data-v="record"]').click();
     await page.locator("#btnSettings").click();
-    const pressed = page.locator('#ftChips .chip[aria-pressed="true"]');
+    const pressed = page.locator('#ftChips button[aria-pressed="true"]');
     await expect(pressed).toHaveCount(1);
     await expect(pressed).toHaveAttribute("data-ft", enabled ? "1" : "0");
 
-    await page.locator('#ftChips .chip[data-ft="1"]').click();
+    await page.locator('#ftChips button[data-ft="1"]').click();
     await expect(pressed).toHaveAttribute("data-ft", "1");
     expect(await page.evaluate(() => db.settings.formTrackingEnabled)).toBe(true);
-    await page.locator('#ftChips .chip[data-ft="0"]').click();
+    await page.locator('#ftChips button[data-ft="0"]').click();
     await expect(pressed).toHaveAttribute("data-ft", "0");
     expect(await page.evaluate(() => db.settings.formTrackingEnabled)).toBe(false);
   });

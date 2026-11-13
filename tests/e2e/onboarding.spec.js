@@ -2,11 +2,10 @@
 
 const { expect, test } = require("@playwright/test");
 
-/* 初回起動オンボーディング（CHANGELOG v1.7.0 / scripts/50-record-view.js の
-   shouldShowOnboarding・renderOnboarding・onboardDerived）の実挙動検証。
-   専用画面は2枚（ウェルカム／クイック設定）。距離選択で的サイズ・1エンド本数を自動決定し、
-   db.active を通常の fStart 開始と同形で生成する。既存ユーザー（記録 or セッティングが
-   1件でもある / onboardingSeen 済み）には出さない。 */
+/* 初回（scripts/50-record-view.js の shouldShowOnboarding・homeFirstRunBandHtml・onboardDerived）。
+   v5: 専用の画面は無く、記録タブの帯が「最初の条件を選ぶ」になって記録の条件へ進む。
+   初回は距離を選ぶと的サイズ・1エンドの本数が決まり（18m は 3射）、db.active は通常の開始と
+   同じ形で作る。既存ユーザー（記録 or セッティングが1件でもある / onboardingSeen 済み）には出さない。 */
 
 function blankDb(overrides) {
   return Object.assign(
@@ -93,7 +92,7 @@ async function readDb(page) {
   return JSON.parse(raw);
 }
 
-test("empty db (0 sessions / 0 setups / onboardingSeen:false) shows the welcome screen", async ({
+test("empty db (0 sessions / 0 setups / onboardingSeen:false) shows the first-run band", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -104,36 +103,25 @@ test("empty db (0 sessions / 0 setups / onboardingSeen:false) shows the welcome 
 
   const welcome = page.getByTestId("onboard-welcome");
   await expect(welcome).toBeVisible();
-  await expect(welcome.locator("h2")).toHaveText("Archery Note");
-  await expect(welcome.locator("#obStart")).toHaveText("はじめる");
-  await expect(welcome.locator("#obSkip")).toBeVisible();
-  // オンボーディング表示中は通常の記録フォームが出ない
+  await expect(welcome.locator(".l")).toHaveText("最初の条件を選ぶ");
+  await expect(welcome.locator("#obStart")).toHaveText("条件を選ぶ");
+  await expect(welcome.locator("#obDemo")).toHaveText("架空のデモデータで試す");
+  await expect(welcome).toContainText("この端末の中だけに保存されます");
+  // 初回は「前回と同じ条件」の開始ボタンを出さない（条件を選んでから始める）
   await expect(page.getByTestId("record-start")).toHaveCount(0);
+  await expect(page.locator("#quickStart")).toHaveCount(0);
+  // 記録が無いので、前回の練習は空の状態を言葉で示す（見本の数値は出さない）
+  await expect(page.getByTestId("home-empty")).toContainText("練習の記録はまだありません");
+  await expect(page.getByTestId("home-last")).toHaveCount(0);
+  await expect(page.getByTestId("home-trend")).toHaveCount(0);
+  // 画面名の行とタブは出たまま（v5: 専用のオンボーディング画面は無い）
+  await expect(page.locator("#viewTitle")).toHaveText("記録");
+  await expect(page.locator("#tabs")).toBeVisible();
+  expect(await page.locator("#main").innerText()).not.toMatch(/NaN|undefined|null/);
   expect(unexpectedErrors).toEqual([]);
 });
 
-test("skip goes straight to the normal record screen and saves onboardingSeen immediately", async ({
-  page,
-}) => {
-  const unexpectedErrors = collectUnexpectedErrors(page);
-  await seedDb(page, blankDb());
-
-  await page.goto("/");
-  await expect(page.getByTestId("onboard-welcome")).toBeVisible();
-
-  await page.locator("#obSkip").click();
-
-  await expect(page.getByTestId("onboard-welcome")).toHaveCount(0);
-  await expect(page.getByTestId("record-start")).toBeVisible();
-
-  // finishOnboarding() は save() で即時同期書き込みするため、リロードなしで localStorage に反映される
-  const db = await readDb(page);
-  expect(db.settings.onboardingSeen).toBe(true);
-  expect(db.active).toBeNull();
-  expect(unexpectedErrors).toEqual([]);
-});
-
-test("'はじめる' shows the quick-setup screen with 4 unselected distance chips", async ({
+test("the first-run band stays until a record is started; back returns to it unchanged", async ({
   page,
 }) => {
   const unexpectedErrors = collectUnexpectedErrors(page);
@@ -141,22 +129,39 @@ test("'はじめる' shows the quick-setup screen with 4 unselected distance chi
 
   await page.goto("/");
   await page.locator("#obStart").click();
+  await expect(page.locator("#condTitle")).toHaveText("記録の条件");
+  await expect(page.locator("#tabs")).toBeHidden();
+  await page.getByTestId("conditions-back").click();
 
-  const setup = page.getByTestId("onboard-setup");
-  await expect(setup).toBeVisible();
-  const chips = setup.locator("#obDistChips .onboardChip");
-  await expect(chips).toHaveCount(4);
+  await expect(page.getByTestId("onboard-welcome")).toBeVisible();
+  await expect(page.locator("#tabs")).toBeVisible();
+  const db = await readDb(page);
+  expect(db.settings.onboardingSeen).toBe(false);
+  expect(db.active).toBeNull();
+  expect(db.sessions).toEqual([]);
+  expect(unexpectedErrors).toEqual([]);
+});
+
+test("'条件を選ぶ' opens the conditions screen with the 4 standard distances", async ({ page }) => {
+  const unexpectedErrors = collectUnexpectedErrors(page);
+  await seedDb(page, blankDb());
+
+  await page.goto("/");
+  await page.locator("#obStart").click();
+
+  const chips = page.locator("#fDistChips [data-d]");
+  await expect(chips).toHaveCount(5);
   await expect(chips.nth(0)).toHaveAttribute("data-d", "70");
   await expect(chips.nth(1)).toHaveAttribute("data-d", "50");
   await expect(chips.nth(2)).toHaveAttribute("data-d", "30");
   await expect(chips.nth(3)).toHaveAttribute("data-d", "18");
-  // 事前選択なし
-  await expect(setup.locator(".onboardChip.on")).toHaveCount(0);
-  for (let i = 0; i < 4; i++) {
-    await expect(chips.nth(i)).toHaveAttribute("aria-pressed", "false");
-  }
-  await expect(setup.locator("#obAutoHint")).toHaveText("距離を選んでください");
-  await expect(setup.locator("#obGo")).toBeDisabled();
+  await expect(chips.nth(4)).toHaveAttribute("data-d", "custom");
+  // 既定は 70m・122cm・6射の自由練習
+  await expect(chips.nth(0)).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#fFace")).toHaveValue("122");
+  await expect(page.locator("#fArrows")).toHaveValue("6");
+  await expect(page.locator("#fRound")).toHaveValue("free");
+  await expect(page.getByTestId("record-start")).toHaveText("この条件で記録を始める");
   expect(unexpectedErrors).toEqual([]);
 });
 
@@ -168,7 +173,7 @@ const DIST_CASES = [
 ];
 
 for (const c of DIST_CASES) {
-  test(`selecting ${c.dist}m shows the auto-derived face/end hint and starts a matching db.active`, async ({
+  test(`first run: selecting ${c.dist}m sets the face and arrows per end and starts a matching db.active`, async ({
     page,
   }) => {
     const unexpectedErrors = collectUnexpectedErrors(page);
@@ -177,20 +182,19 @@ for (const c of DIST_CASES) {
     await page.goto("/");
     await page.locator("#obStart").click();
 
-    const chip = page.locator(`#obDistChips .onboardChip[data-d="${c.dist}"]`);
+    const chip = page.locator(`#fDistChips [data-d="${c.dist}"]`);
     await chip.click();
     await expect(chip).toHaveAttribute("aria-pressed", "true");
-    await expect(page.locator("#obAutoHint")).toHaveText(
-      `${c.dist}m → ${c.faceD}cm的・${c.perEnd}本/エンド（あとで変更できます）`,
-    );
-    const go = page.locator("#obGo");
-    await expect(go).toBeEnabled();
-    await go.click();
+    await expect(page.locator("#fFace")).toHaveValue(String(c.faceD));
+    await expect(page.locator("#fArrows")).toHaveValue(String(c.perEnd));
+    await page.getByTestId("record-start").click();
 
-    // オンボーディング画面が消え、通常の記録中画面（active）に直接入る
-    await expect(page.getByTestId("onboard-setup")).toHaveCount(0);
+    // 記録の条件が消え、記録中の画面（active）に直接入る
+    await expect(page.locator("#condTitle")).toHaveCount(0);
     await expect(page.getByTestId("active-target")).toBeVisible();
-    await expect(page.getByTestId("active-hud")).toContainText(`${c.dist}m`);
+    // v5: 条件は記録画面の上部（中断とメニューの間）
+    await expect(page.locator(".recTop .condT")).toContainText(`${c.dist}m`);
+    await expect(page.getByTestId("active-hud")).toContainText("第1エンド");
 
     const db = await readDb(page);
     expect(db.settings.onboardingSeen).toBe(true);
@@ -199,6 +203,8 @@ for (const c of DIST_CASES) {
     expect(db.active.faceD).toBe(c.faceD);
     expect(db.active.perEnd).toBe(c.perEnd);
     expect(db.active.faceType).toBe("single");
+    expect(db.active.round).toBe("free");
+    expect(db.active.inputMode).toBe("target");
     expect(db.active.ends).toEqual([]);
     expect(db.active.cur).toEqual([]);
     expect(unexpectedErrors).toEqual([]);
@@ -233,8 +239,8 @@ for (const c of EXISTING_USER_CASES) {
     await expect(page.locator("#bootFallback")).toBeHidden();
 
     await expect(page.getByTestId("onboard-welcome")).toHaveCount(0);
-    await expect(page.getByTestId("onboard-setup")).toHaveCount(0);
     await expect(page.getByTestId("record-start")).toBeVisible();
+    await expect(page.locator("#quickStart")).toHaveText("記録を始める");
     expect(unexpectedErrors).toEqual([]);
   });
 }

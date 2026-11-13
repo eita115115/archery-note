@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { pauseRecording, resumeRecording } = require("./record-helpers");
 
 test.use({ hasTouch: true, isMobile: true, serviceWorkers: "block" });
 
@@ -24,7 +25,7 @@ async function tap(page, locator) {
         globalThis.document
           .elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
           ?.closest("button") === el,
-      nav: globalThis.document.querySelector("#tabs").getBoundingClientRect().top,
+      nav: globalThis.innerHeight, // v5: 記録中はタブが無い。画面の下端が基準
     };
   });
   expect(box.uncovered).toBe(true);
@@ -34,23 +35,27 @@ async function tap(page, locator) {
 }
 
 async function revealCorrection(page, locator) {
-  // Simulate the user's scroll to secondary controls; never recover the target.
-  const delta = await locator.evaluate((el) => {
-    const r = el.getBoundingClientRect();
-    const h = globalThis.document.querySelector("header.app").getBoundingClientRect();
-    const d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
-    return r.y + r.height / 2 - (Math.max(0, h.bottom) + 12 + d.top - 12) / 2;
-  });
-  await page.evaluate((d) => globalThis.scrollBy({ top: d, behavior: "instant" }), delta);
+  // v5: 修正の操作は画面の下端に出るので、探すためのスクロールは要らない。画面内にあることだけ確かめる
   await settle(page);
+  const r = await locator.evaluate((el) => {
+    const b = el.getBoundingClientRect();
+    return { top: b.top, bottom: b.bottom, height: globalThis.innerHeight, y: globalThis.scrollY };
+  });
+  expect(r.top).toBeGreaterThanOrEqual(0);
+  expect(r.bottom).toBeLessThanOrEqual(r.height);
+  expect(r.y).toBe(0);
 }
 
 async function targetBounds(page) {
   await settle(page);
   return page.locator("#tgsvg").evaluate((el) => {
     const r = el.getBoundingClientRect();
-    const h = globalThis.document.querySelector("header.app").getBoundingClientRect();
-    const d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
+    const h = { bottom: 0 };
+    // 下の基準は見えている方（操作列、または矢を選んだときの修正バー）
+    const d = (
+      globalThis.document.querySelector("#nudge.on") ||
+      globalThis.document.querySelector("#activeActionDock")
+    ).getBoundingClientRect();
     return {
       x: r.x,
       y: r.y,
@@ -104,6 +109,7 @@ for (const size of [
       await page.goto("/");
       await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
       await page.locator('#tabs [data-v="record"]').click();
+      await page.getByTestId("record-conditions").click();
       await page.getByRole("button", { name: "70m", exact: true }).click();
       await page.locator("#fFace").selectOption("122");
       await page.locator("#fArrows").selectOption("6");
@@ -144,16 +150,18 @@ for (const size of [
       expect(
         Math.abs((await page.evaluate(() => globalThis.scrollY)) - scroll),
       ).toBeLessThanOrEqual(1);
+      // v5: 理由タグは「理由・矢番号」のシートの中。閉じても修正バーは開いたまま
+      await tap(page, page.locator("#shotMetaOpen"));
       const tag = page.locator("#shotReasonTags .reasonTag").first();
-      await revealCorrection(page, tag);
       scroll = await page.evaluate(() => globalThis.scrollY);
       await tap(page, tag);
+      await expect.poll(async () => (await state()).active.cur[0].reason).toBeTruthy();
+      await tap(page, page.locator("#shotMetaClose"));
+      await expect(page.locator("#nudge")).toBeVisible();
       expect(
         Math.abs((await page.evaluate(() => globalThis.scrollY)) - scroll),
       ).toBeLessThanOrEqual(1);
-      // User scrolls the chip near the top; toggle off without target recovery.
-      const move = await chip.evaluate((el) => el.getBoundingClientRect().top - 20);
-      await page.evaluate((d) => globalThis.scrollBy({ top: d, behavior: "instant" }), move);
+      // 同じ枠をもう一度タップすると選択が外れ、操作列に戻る
       await tap(page, chip);
       await expect(page.locator("#nudge")).toBeHidden();
       await expectTargetVisible(page);
@@ -164,11 +172,13 @@ for (const size of [
       await tap(page, remove);
       await expect.poll(async () => (await state()).active.cur.length).toBe(0);
       await expectTargetVisible(page);
-      // Confirm directly with correction open, without using deselect first.
+      // v5: 修正バーが出ている間は操作列が隠れる。「完了」で閉じてからエンドを確定する
       await recordArrow(page, 0);
       await tap(page, chip);
       await revealCorrection(page, right);
       const second = (await state()).active.cur;
+      await expect(page.getByTestId("active-end")).toBeHidden();
+      await tap(page, page.locator("#nudgeDone"));
       await tap(page, page.getByTestId("active-end"));
       await expect.poll(async () => (await state()).active.ends.length).toBe(2);
       expect((await state()).active.ends[1]).toEqual(second);
@@ -177,13 +187,18 @@ for (const size of [
       await expect.poll(async () => (await state()).active.cur.length).toBe(1);
       const active = (await state()).active;
       expect((await state()).sessions).toEqual(before);
-      // Returning through a tab restores the reading position, not this helper's target position.
-      await page.evaluate(() => globalThis.scrollTo({ top: 120, behavior: "instant" }));
-      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(120);
+      // v5: 記録中はタブが無い。「中断」で離れて別のタブを見ても、記録タブの「記録を再開する」で同じ状態に戻る
+      await expect(page.locator("#tabs")).toBeHidden();
+      await pauseRecording(page);
+      await expect(page.locator("#tabs")).toBeVisible();
       await page.locator('#tabs [data-v="history"]').click();
       await page.locator('#tabs [data-v="record"]').click();
+      await expect(page.getByTestId("record-paused")).toContainText("2エンド確定");
+      await expect(page.getByTestId("record-start")).toHaveCount(0);
+      await resumeRecording(page);
       await settle(page);
-      await expect.poll(() => page.evaluate(() => globalThis.scrollY)).toBe(120);
+      await expectTargetVisible(page);
+      await expect(page.locator("#curChips [data-i]")).toHaveCount(1);
       expect((await state()).active).toEqual(active);
       await page.reload();
       expect((await state()).active).toEqual(active);

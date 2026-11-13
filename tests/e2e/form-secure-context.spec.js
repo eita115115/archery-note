@@ -81,6 +81,7 @@ test("insecure HTTP blocks live capture before pose/media and offers saved-video
 
   await page.goto("http://archery-note.test/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await installCaptureProbe(page);
 
   expect(await page.evaluate(() => globalThis.isSecureContext)).toBe(false);
@@ -131,6 +132,7 @@ test("trusted loopback HTTP remains eligible for live capture", async ({ page })
 
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').click();
+  await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await installCaptureProbe(page);
 
   expect(await page.evaluate(() => globalThis.isSecureContext)).toBe(true);

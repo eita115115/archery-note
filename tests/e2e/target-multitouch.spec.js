@@ -14,10 +14,7 @@ async function count(page) {
 async function points(page) {
   const r = await page.locator("#tgsvg").evaluate((svg) => {
     const r = svg.getBoundingClientRect();
-    const top = Math.max(
-      r.top,
-      document.querySelector("header.app").getBoundingClientRect().bottom + 8,
-    );
+    const top = Math.max(r.top, 8); // v5: 上に固定の帯は無い
     const bottom = Math.min(
       r.bottom,
       document.querySelector("#activeActionDock").getBoundingClientRect().top - 8,
@@ -57,6 +54,7 @@ for (const width of [320, 375]) {
         await page.goto("/");
         await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
         await page.locator('#tabs [data-v="record"]').click();
+        await page.getByTestId("record-conditions").click();
         await page.getByRole("combobox", { name: "1エンドの本数", exact: true }).selectOption("6");
         await page.getByTestId("record-start").click();
         const sessions = await page.evaluate(() => JSON.parse(JSON.stringify(db.sessions)));

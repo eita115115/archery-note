@@ -22,10 +22,13 @@ async function settle(page) {
 }
 async function geometry(page, selector) {
   return page.locator(selector).evaluate((el) => {
+    // v5: 矢を選ぶと操作列の代わりに修正バーが画面の下端へ出る。操作列が隠れている間の下の基準は画面の下端
+    const dockEl = globalThis.document.querySelector("#activeActionDock");
     const r = el.getBoundingClientRect(),
-      h = globalThis.document.querySelector("header.app").getBoundingClientRect(),
-      d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect(),
-      notice = globalThis.document.querySelector("#toast");
+      h = { bottom: 0 },
+      d = dockEl.hidden ? { top: globalThis.innerHeight } : dockEl.getBoundingClientRect(),
+      notice = globalThis.document.querySelector("#toast"),
+      n = notice.getBoundingClientRect();
     const points = [
       [r.x + r.width / 2, r.y + r.height / 2],
       [r.left + 8, r.top + 8],
@@ -37,10 +40,9 @@ async function geometry(page, selector) {
       rect: r.toJSON(),
       clear: points.every(([x, y]) => el.contains(globalThis.document.elementFromPoint(x, y))),
       above: Math.max(0, h.bottom),
-      below: Math.min(
-        d.top,
-        notice.classList.contains("show") ? notice.getBoundingClientRect().top : d.top,
-      ),
+      below: d.top,
+      // 通知が出ていても、この要素に重ならない
+      noticeOverlap: notice.classList.contains("show") && !(n.bottom <= r.top || n.top >= r.bottom),
       scrollY: globalThis.scrollY,
     };
   });
@@ -56,7 +58,7 @@ async function record(page) {
   const n = (await state(page)).active.cur.length;
   const p = await page.locator("#tgsvg").evaluate((el) => {
     const r = el.getBoundingClientRect(),
-      h = globalThis.document.querySelector("header.app").getBoundingClientRect(),
+      h = { bottom: 0 },
       d = globalThis.document.querySelector("#activeActionDock").getBoundingClientRect();
     return {
       x: r.x + r.width / 2,
@@ -78,6 +80,8 @@ async function expectControls(page) {
   ]) {
     const p = await geometry(page, selector);
     expect(p.clear, selector).toBe(true);
+    expect(p.noticeOverlap, selector).toBe(false);
+    expect(p.scrollY).toBe(0);
     expect(p.rect.top, selector).toBeGreaterThanOrEqual(p.above + 7);
     expect(p.rect.bottom, selector).toBeLessThanOrEqual(p.below - 7);
     expect(p.rect.width).toBeGreaterThanOrEqual(44);
@@ -106,6 +110,7 @@ for (const c of cases) {
     await page.goto("/");
     await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
     await page.locator('#tabs [data-v="record"]').click();
+    await page.getByTestId("record-conditions").click();
     await page.getByRole("button", { name: c.faceD === 40 ? "18m" : "70m", exact: true }).click();
     await page.getByRole("combobox", { name: "的", exact: true }).selectOption(String(c.faceD));
     await page
@@ -131,7 +136,7 @@ for (const c of cases) {
     }
     await expect
       .poll(async () => (await state(page)).active.cur[0].x)
-      .toBeCloseTo(before[0].x + (3 * c.faceD) / 200);
+      .toBeCloseTo(before[0].x + 0.3); // v5: 矢印は的の大きさによらず 1mm ずつ
     const corrected = (await state(page)).active.cur;
     expect(corrected[1]).toEqual(before[1]);
     const agreement = await page.evaluate(() => {
@@ -148,6 +153,8 @@ for (const c of cases) {
     await tap(page, "#nudgeDone");
     await settle(page);
     await expect(page.locator("#nudge")).not.toHaveClass(/on/);
+    await expect(page.locator("#nudge")).toBeHidden();
+    await expect(page.getByTestId("active-action-dock")).toBeVisible();
     expect((await state(page)).active.cur).toEqual(corrected);
     const target = await geometry(page, "#tgsvg");
     expect(target.rect.top).toBeGreaterThanOrEqual(target.above + 7);

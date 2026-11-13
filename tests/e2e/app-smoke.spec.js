@@ -1,6 +1,7 @@
 "use strict";
 
 const { expect, test } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 
 const sampleDate = "2026-06-27";
 const sampleDb = {
@@ -87,29 +88,49 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await page.goto("/");
 
   await expect(page).toHaveTitle(/Archery Note/);
-  await expect(page.getByRole("heading", { name: "Archery Note" })).toBeVisible();
+  // v5: アプリ名のヘッダー帯は無く、画面名が見出しになる。設定の入口は記録タブの見出し行にある
+  await expect(page.locator("header.app")).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 1, name: "記録" })).toBeVisible();
+  await expect(page.locator("#btnSettings")).toBeVisible();
   await expect(page.locator("#bootFallback")).toBeHidden();
   await expect(page.getByTestId("record-start")).toBeVisible();
 
   await expect(mainTab(page, "記録")).toBeVisible();
-  await expect(mainTab(page, "履歴")).toBeVisible();
-  await expect(mainTab(page, "サイト調整")).toBeVisible();
-  await expect(mainTab(page, "用具")).toBeVisible();
+  await expect(mainTab(page, "ノート")).toBeVisible();
+  await expect(mainTab(page, "分析")).toBeVisible();
+  await expect(mainTab(page, "弓具")).toBeVisible();
+  await expect(page.locator("#tabs button")).toHaveCount(4);
+  await expect(page.locator('#tabs [data-v="sight"]')).toHaveCount(0);
 
-  await mainTab(page, "履歴").click();
-  await expect(page.locator("#main")).toContainText("練習履歴");
-  await expect(page.locator(".historyDateHead")).toContainText("2026/6/27");
+  await mainTab(page, "ノート").click();
+  // v5 段 6: ノートは月の見出し（練習回数つき）と、練習1回＝1項目
+  await expect(page.getByTestId("notes-month")).toHaveText(/2026年6月\s*練習 1回/);
   const record = page.getByTestId("history-row").first();
-  await expect(record).toHaveAccessibleName(/2026\/6\/27 ・ 70m/);
+  await expect(record).toHaveAccessibleName(/2026\/6\/27.*27.*土曜.*70m/);
   await expect(record).toContainText("70m");
+  await expect(page.getByTestId("notes-new-memo")).toBeVisible();
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
+  await expect(page.getByRole("heading", { level: 1, name: "ノート" })).toBeVisible();
+  // 設定の入口は記録タブだけ。弓具の下線タブは弓具の画面でだけ出る
+  await expect(page.locator("#btnSettings")).toBeHidden();
+  await expect(page.locator("#gearSubTabs")).toBeHidden();
 
-  await mainTab(page, "サイト調整").click();
+  // サイトは弓具タブの中の下線タブ（セッティング / サイト）
+  await mainTab(page, "弓具").click();
+  await expect(page.getByRole("heading", { level: 1, name: "弓具" })).toBeVisible();
+  // v5 段 8: セッティングは仕様表（記録に使っているものに「記録に使用中」）
+  await expect(page.getByTestId("gear-spec-sheet")).toBeVisible();
+  await expect(page.getByTestId("gear-active-name")).toHaveText("E2E recurve setup");
+  await expect(page.getByTestId("gear-recording-pill")).toHaveText("記録に使用中");
+  await expect(page.getByTestId("gear-subtab-setup")).toHaveAttribute("aria-current", "page");
+  await page.getByTestId("gear-subtab-sight").click();
   await expect(page.locator("#main")).toContainText("サイト台帳");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
+  await expect(page.getByTestId("gear-subtab-sight")).toHaveAttribute("aria-current", "page");
+  await expect(mainTab(page, "弓具")).toHaveAttribute("aria-current", "page");
 
-  await mainTab(page, "用具").click();
-  await expect(page.locator("#main")).toContainText("機材台帳");
+  await page.getByTestId("gear-subtab-setup").click();
+  await expect(page.getByTestId("gear-spec-sheet")).toBeVisible();
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
 
   await mainTab(page, "記録").click();
@@ -130,7 +151,7 @@ test("moves exactly one aria-current marker when switching tabs", async ({ page 
   await expect(currentTab).toHaveCount(1);
   await expect(currentTab).toHaveAttribute("data-v", "record");
 
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   await expect(currentTab).toHaveCount(1);
   await expect(currentTab).toHaveAttribute("data-v", "history");
 
@@ -149,22 +170,21 @@ test("exposes distance chips as buttons with synced aria-pressed", async ({ page
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  const chips = page.locator("#fDistChips .chip");
+  // v5: 距離の選択は 記録タブ →「条件を変える」→ 記録の条件
+  await page.getByTestId("record-conditions").click();
+  const chips = page.locator("#fDistChips [data-d]");
   await expect(chips.first()).toBeVisible();
   const chipCount = await chips.count();
   for (let i = 0; i < chipCount; i++) {
     await expect(chips.nth(i)).toHaveJSProperty("tagName", "BUTTON");
   }
 
-  const pressed = page.locator('#fDistChips .chip[aria-pressed="true"]');
+  const pressed = page.locator('#fDistChips [data-d][aria-pressed="true"]');
   await expect(pressed).toHaveCount(1);
   await expect(pressed).toHaveAttribute("data-d", "70");
 
-  await page.locator('#fDistChips .chip[data-d="30"]').click();
-  await expect(page.locator('#fDistChips .chip[data-d="30"]')).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  );
+  await page.locator('#fDistChips [data-d="30"]').click();
+  await expect(page.locator('#fDistChips [data-d="30"]')).toHaveAttribute("aria-pressed", "true");
   await expect(pressed).toHaveCount(1);
   await expect(unexpectedErrors).toEqual([]);
 });
@@ -178,8 +198,8 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await mainTab(page, "履歴").click();
-  const row = page.locator("#histList .listItem").first();
+  await mainTab(page, "ノート").click();
+  const row = page.locator("#histList .historyRow").first();
   await expect(row).toBeVisible();
   await expect(row).toHaveJSProperty("tagName", "BUTTON");
   await row.click();
@@ -187,20 +207,21 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
   await page.locator("#hClose").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 
-  await mainTab(page, "サイト調整").click();
-  const chips = page.locator("#sgDistChips .chip");
+  await mainTab(page, "弓具").click();
+  await page.getByTestId("gear-subtab-sight").click();
+  const chips = page.locator("#sgDistChips button");
   await expect(chips.first()).toBeVisible();
   const chipCount = await chips.count();
   for (let i = 0; i < chipCount; i++) {
     await expect(chips.nth(i)).toHaveJSProperty("tagName", "BUTTON");
   }
 
-  const pressed = page.locator('#sgDistChips .chip[aria-pressed="true"]');
+  const pressed = page.locator('#sgDistChips button[aria-pressed="true"]');
   await expect(pressed).toHaveCount(1);
   await expect(pressed).toHaveAttribute("data-d", "70");
 
-  await page.locator('#sgDistChips .chip[data-d="30"]').click();
-  await expect(page.locator('#sgDistChips .chip[data-d="30"]')).toHaveAttribute(
+  await page.locator('#sgDistChips button[data-d="30"]').click();
+  await expect(page.locator('#sgDistChips button[data-d="30"]')).toHaveAttribute(
     "aria-pressed",
     "true",
   );
@@ -246,8 +267,8 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await mainTab(page, "履歴").click();
-  const row = page.locator("#histList .listItem").first();
+  await mainTab(page, "ノート").click();
+  const row = page.locator("#histList .historyRow").first();
   await row.click();
   const detailSheet = page.locator(".ovl .sheet");
   await expect(detailSheet).toBeVisible();
@@ -257,7 +278,7 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await delBtn.click();
   const confirmSheet = page.locator(".ovl .confirmSheet");
   await expect(confirmSheet).toBeVisible();
-  await expect(confirmSheet).toContainText("この練習記録を削除しますか？");
+  await expect(confirmSheet).toContainText("この練習の記録をゴミ箱へ移しますか？");
   await page.locator(".ovl .confirmSheet #acCancel").click();
   await expect(confirmSheet).toHaveCount(0);
   await expect(detailSheet).toBeVisible();
@@ -277,7 +298,9 @@ test("appConfirm dialog: cancel keeps data, Escape cancels, and confirm deletes 
   await expect(confirmSheet).toBeVisible();
   await page.locator(".ovl .confirmSheet #acOk").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
-  await expect(page.locator("#histList")).not.toContainText("2026/6/27 ・ 70m");
+  await expect(page.locator("#histList .historyRow")).toHaveCount(0);
+  // 消えずにゴミ箱へ入り、ノートの一番下から戻せる
+  await expect(page.getByTestId("notes-trash")).toContainText("ゴミ箱（1件）");
   await expect(unexpectedErrors).toEqual([]);
 });
 
@@ -290,29 +313,33 @@ test("records a multi-distance round with stage advance and history badges", asy
   await page.goto("/");
   await expect(page.locator("#bootFallback")).toBeHidden();
 
-  await page.locator(".recordDetails summary").click();
+  await page.getByTestId("record-conditions").click();
   await page.locator("#fRound").selectOption("wa1440_men");
   await expect(page.locator("#fRoundStages")).toContainText("WA1440 男子");
   await page.getByTestId("record-start").click();
 
   // ステージ1: 90m から開始
-  const hud = page.getByTestId("active-hud");
+  // v5: 条件とステージは記録画面の上部（中断とメニューの間）に出る
+  const hud = page.locator(".recTop .condT");
   await expect(hud).toContainText("90m");
-  await expect(hud).toContainText("ステージ 1/4");
+  await expect(hud).toContainText("（1/4）");
+  await expect(page.getByTestId("active-hud")).toContainText("全36射");
   const target = page.getByTestId("active-target").locator("#tgsvg");
   for (let i = 0; i < 3; i++) await target.click();
   await page.getByTestId("active-end").click();
   // 36射未満の確定は appConfirm ダイアログ。確認ボタンをクリックして進める
-  await page.locator("#bNextStage").click();
+  // v5: 途中で次の距離へ進む操作はメニューの中
+  await page.getByTestId("active-menu").click();
+  await page.locator("#mNextStage").click();
   await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
   await page.locator(".ovl .confirmSheet #acOk").click();
   await expect(page.locator(".ovl .confirmSheet")).toHaveCount(0);
 
   // ステージ2: 70m へ遷移（2ステージで打ち切り）
   await expect(hud).toContainText("70m");
-  await expect(hud).toContainText("ステージ 2/4");
+  await expect(hud).toContainText("（2/4）");
   await target.click();
-  await page.getByTestId("active-finish").click();
+  await finishFromMenu(page);
   // ラウンド途中終了も appConfirm ダイアログ経由
   await expect(page.locator(".ovl .confirmSheet")).toBeVisible();
   await page.locator(".ovl .confirmSheet #acOk").click();
@@ -321,12 +348,12 @@ test("records a multi-distance round with stage advance and history badges", asy
   await page.locator("#sumClose").click();
 
   // 履歴: 途中ラウンドを展開し、各ステージの詳細から別ステージへ移動
-  await mainTab(page, "履歴").click();
+  await mainTab(page, "ノート").click();
   await expect(page.getByTestId("history-round").locator("summary")).toContainText("2/4ステージ");
   await page.getByTestId("history-round").locator("summary").click();
   await expect(page.locator("#histList")).toContainText("WA1440 男子 1/4");
   await expect(page.locator("#histList")).toContainText("WA1440 男子 2/4");
-  await page.locator("#histList .listItem", { hasText: "90m" }).first().click();
+  await page.locator("#histList .historyRow", { hasText: "90m" }).first().click();
   const sheet = page.locator(".ovl .sheet");
   await expect(sheet).toContainText("ラウンド合計");
   await expect(sheet).toContainText("（表示中）");
@@ -347,19 +374,19 @@ test("syncs aria-pressed on settings theme and form tracking chips", async ({ pa
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await page.locator("#btnSettings").click();
-  await expect(page.locator("#thChips .chip").first()).toBeVisible();
+  await expect(page.locator("#thChips button").first()).toBeVisible();
 
-  const pressedTheme = page.locator('#thChips .chip[aria-pressed="true"]');
+  const pressedTheme = page.locator('#thChips button[aria-pressed="true"]');
   await expect(pressedTheme).toHaveCount(1);
   await expect(pressedTheme).toHaveAttribute("data-th", "auto");
-  await page.locator('#thChips .chip[data-th="dark"]').click();
+  await page.locator('#thChips button[data-th="dark"]').click();
   await expect(pressedTheme).toHaveCount(1);
   await expect(pressedTheme).toHaveAttribute("data-th", "dark");
 
-  const pressedFt = page.locator('#ftChips .chip[aria-pressed="true"]');
+  const pressedFt = page.locator('#ftChips button[aria-pressed="true"]');
   await expect(pressedFt).toHaveCount(1);
   await expect(pressedFt).toHaveAttribute("data-ft", "0");
-  await page.locator('#ftChips .chip[data-ft="1"]').click();
+  await page.locator('#ftChips button[data-ft="1"]').click();
   await expect(pressedFt).toHaveCount(1);
   await expect(pressedFt).toHaveAttribute("data-ft", "1");
   await expect(unexpectedErrors).toEqual([]);

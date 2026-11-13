@@ -83,10 +83,10 @@ function computeWeeklyDiff(sessions, currentSessionId, todayStr){
    主軸: グルーピング半径RMS（metricsFn(s).st.rr）。表示値（groupSummaryHtml 等）との一致を
    構造的に保証するため sessionMetrics/robustStats を関数注入で使う（buildAnalysisRows と同じ契約）。
    副軸（任意）: opts.formAnalyses が渡され、紐付けレコードがあるときだけ anchorNorm 連携を追加する
-   （射形トラッキングは既定OFFのベータ機能で母集団が薄いため v1 は省略可。Fable裁定 §11-4） */
+   （射型トラッキングは既定OFFのベータ機能で母集団が薄いため v1 は省略可。Fable裁定 §11-4） */
 function computeStabilityTrend(sessions, currentSessionId, metricsFn, opts){
   opts=opts||{};
-  const STABILITY_TIGHT_DELTA=0.3; /* 45-analysis-core.js todayConclusion() の RR_TIGHT_DELTA と同一値 */
+  const STABILITY_TIGHT_DELTA=0.3; /* 半径（RMS）と過去の平均との差がこの値(cm)以上のときだけ、小さい・大きいと書く */
   const MIN_HISTORY=3;
   const all=(sessions||[]).filter(s=>s&&typeof s==="object");
   const cur=all.find(s=>s.id===currentSessionId);
@@ -113,7 +113,7 @@ function computeStabilityTrend(sessions, currentSessionId, metricsFn, opts){
     latestValue:latest, baselineValue:baseline, sampleCount:history.length,
     sparkline:history.map(p=>+p.m.st.rr.toFixed(2)).concat([+latest.toFixed(2)])};
 
-  /* secondary（任意・射形トラッキング連携。formAnalyses が渡され紐付けレコードがあるときだけ算出） */
+  /* secondary（任意・射型トラッキング連携。formAnalyses が渡され紐付けレコードがあるときだけ算出） */
   if(opts.formAnalyses && opts.formAnalyses.length){
     result.secondary = trAnchorSecondary(cur, opts.formAnalyses);
   }
@@ -188,6 +188,34 @@ function computePersonalBestDistance(sessions, currentSessionId){
 
   return {available:true, method, bestTotal, bestDate, todayTotal:curTotal, todayArrows:curN,
     remaining, achieved:remaining<=0, pace, paceRatio, requiredAvg, todayAvg};
+}
+
+/* ============ 3.3b 同じ条件の過去の平均との比較（UI v5 今日の結果。design.md 4.4） ============ */
+/* computeConditionComparison(sessions, currentSessionId, quota)
+   同じ条件 = 距離+的サイズ+的種別+射数（trSameCondition の matchArrows:true。computeWeeklyDiff と同じ）。
+   過去の回が MIN_SESSIONS 回以上あるときだけ、合計点の平均・回ごとの標準偏差（不偏、n-1）・今回との差を返す。
+   quota（規定射数）に届かずに終了した記録は、射数が違うので比べない（reason:"partial"）。
+   母集団は呼び出し側が「当日以前」に絞って渡す（computeTodaysResult と同じ契約）。 */
+function computeConditionComparison(sessions, currentSessionId, quota){
+  const MIN_SESSIONS=3;
+  const all=(sessions||[]).filter(s=>s&&typeof s==="object");
+  const cur=all.find(s=>s.id===currentSessionId);
+  if(!cur) return {available:false, reason:"no-current-session"};
+  const curArrows=trAllArrows(cur);
+  if(!curArrows.length) return {available:false, reason:"empty-session"};
+  const tot=s=>trAllArrows(s).reduce((a,x)=>a+(x.s||0),0);
+  const curTotal=tot(cur), curN=curArrows.length;
+  if(quota && curN<quota) return {available:false, reason:"partial", todayTotal:curTotal, todayArrows:curN, quota};
+  const peers=all.filter(s=>s.id!==cur.id && trSameCondition(s,cur,{matchArrows:true}) && trAllArrows(s).length>0)
+    .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
+  if(peers.length<MIN_SESSIONS)
+    return {available:false, reason:"insufficient-history", sampleCount:peers.length, minSessions:MIN_SESSIONS, todayTotal:curTotal, todayArrows:curN};
+  const totals=peers.map(tot);
+  const mean=totals.reduce((a,x)=>a+x,0)/totals.length;
+  const sd=Math.sqrt(totals.reduce((a,x)=>a+(x-mean)**2,0)/(totals.length-1));
+  const diff=curTotal-mean;
+  return {available:true, sampleCount:peers.length, mean, sd, diff, withinSd:Math.abs(diff)<=sd,
+    firstDate:peers[0].date, lastDate:peers[peers.length-1].date, todayTotal:curTotal, todayArrows:curN};
 }
 
 /* ============ 3.4 伸びの継続日数 ============ */

@@ -16,13 +16,13 @@ They execute in numbered order and share one global scope:
 | 10 | `10-storage-native.js` | Data layer, persistence, modals, utilities | `db`, `KEY`, `SCHEMA_VER`, `APP_VER`, `$`, `esc`, `toast`, `uid`, `save`, `scheduleSave`, `openModal`, `closeModal`, `appConfirm`, `icon`, `clamp`, `ROUND_TYPES`, `MULTI_ROUND_PRESETS`, `ICONS`, `ENDCOLORS` |
 | 20 | `20-scoring.js` | Scoring math (pure functions) | `scoreAt`, `hitFromGlobal`, `zoneStyle`, `scoreLabel`, `clamp`, `median`, `momentStats`, `ringW`, `lineCutRadius`, `isLineCutting` |
 | 30 | `30-target-svg.js` | Target SVG drawing | `targetMarkup`, `markCircle` |
-| 40 | `40-analysis-physics.js` | Physics engine, calibration, analysis helpers | `num`, `pct`, `levelFromScore`, `LEVELS`, `sessionMetrics`, `latestMark`, `personalPhysicsCalibration`, `calibrationProfile`, `modelReadinessProfile`, `exportSessionsCsv`, `backupReminderHtml`, `trashSettingsHtml` |
+| 40 | `40-analysis-physics.js` | Physics engine, calibration, analysis helpers | `num`, `pct`, `levelFromScore`, `LEVELS`, `sessionMetrics`, `latestMark`, `personalPhysicsCalibration`, `adviceFor`, `judgementFor`, `groupSummaryHtml`, `exportSessionsCsv` |
 | 45 | `45-analysis-core.js` | Analysis pure functions (no DOM/db access) | `buildAnalysisRows`, `filterAnalysisRows`, `isoWeekKey`, `aggregateByPeriod` |
 | 46 | `46-form-core.js` | Form analysis core (pose detection) | form analysis functions |
 | 47 | `47-form-view.js` | Form analysis view | form view rendering |
 | 50 | `50-record-view.js` | Record view, active session, history, analysis, sight views | `view`, `ui`, `render`, `showView`, `renderRecord`, `renderActive`, `refreshActive`, `renderHistory`, `renderAnalysis`, `renderSight`, `renderGear` is in 70 |
-| 60 | `60-history-sight-view.js` | History detail sheets, sight table | `driftText`, sight/history rendering helpers |
-| 70 | `70-gear-settings.js` | Gear management, settings panel | `renderGear`, `openSettings`, `applyTheme`, `GEAR_FIELDS`, `GEAR_SECTIONS`, `CATALOG_SHAFTS`, `openGearForm`, `openGearDetail`, `openSetupWizard` |
+| 60 | `60-history-sight-view.js` | History detail sheets, sight table | `sightAdviceModel`, `sightAdviceHtml`, `sessionSightFoldHtml`, sight/history rendering helpers |
+| 70 | `70-gear-settings.js` | Gear management, settings panel | `renderGear`, `openSettings`, `applyTheme`, `GEAR_FIELDS`, `GEAR_SECTIONS`, `CATALOG_SHAFTS`, `openGearForm`, `openSetupWizard`, `recordingSetupId`, `gearSpecRows`, `gearHistoryEntries` |
 | 90 | `90-init.js` | Startup: SW registration, event wiring, first `render()` | `updateAvailable`, `freshReload`, `beginActiveWorkflow`, `endActiveWorkflow` |
 
 ### Dependency Rules
@@ -39,7 +39,7 @@ They execute in numbered order and share one global scope:
 
 ### JavaScript
 
-- **Functions**: `camelCase`. Examples: `renderRecord`, `openModal`, `sessionMetrics`, `heroMetricHtml`.
+- **Functions**: `camelCase`. Examples: `renderRecord`, `openModal`, `sessionMetrics`, `sessionFigsHtml`.
 - **Constants**: `UPPER_SNAKE_CASE`. Examples: `SCHEMA_VER`, `APP_VER`, `TRASH_LIMIT`, `ROUND_TYPES`, `GEAR_FIELDS`, `ENDCOLORS`, `SAVE_DEBOUNCE_MS`.
 - **Local variables**: `camelCase`. Single-letter allowed in tight scopes (`s` for session, `a` for arrow, `m` for main element, `r` for row, `d` for data, `f` for filter).
 - **Private/internal**: prefix with `_` for file-internal state. Example: `_lastSnapTs`.
@@ -47,7 +47,7 @@ They execute in numbered order and share one global scope:
 
 ### DOM IDs
 
-- Short, camelCase or flat-lowercase. Examples: `#main`, `#tabs`, `#toast`, `#tgsvg`, `#tgmarks`, `#tgcur`, `#nudge`, `#curChips`, `#endsTbl`, `#statbar`.
+- Short, camelCase or flat-lowercase. Examples: `#main`, `#tabs`, `#toast`, `#tgsvg`, `#tgmarks`, `#tgcur`, `#nudge`, `#curChips`, `#recCard`, `#activeActionDock`.
 - Settings/form fields use prefixes: `fDist`, `fFace`, `fSetup`, `fStart` (record form), `gf_bow`, `gf_limbs` (gear form), `wName`, `wBow` (wizard), `cr*` (custom round).
 
 ### data-testid Attributes
@@ -58,7 +58,7 @@ They execute in numbered order and share one global scope:
 ### CSS Classes
 
 - Flat `camelCase` or `lowerCamelCase`. No BEM methodology.
-- Component-scoped by name prefix. Examples: `recordNudgeHint`, `recordDistCustomWrap`, `activeActionDock`, `gearLedgerItem`, `gearActiveDot`, `settingsGroup`, `confirmSheet`, `heroMetric`, `setupLens`, `lensCard`.
+- Component-scoped by name prefix. Examples: `recScreen`, `recStat`, `dockRow`, `scard`, `scRow`, `curRow`, `vsec`, `vsecH`, `lrow`, `figs`, `gearLedgerItem`, `gearHistRow`, `sightAdvice`, `settingsScreen`, `confirmSheet`, `setupLens`, `lensCard`.
 - State classes: `on`, `sel`, `show`, `fine`, `cut`, `miss`, `fresh`, `is-hidden`.
 - Utility: `tnum` (tabular-nums), `right`, `empty`, `adv` (advanced/details).
 
@@ -89,6 +89,7 @@ The `db` structure (from `blankDb()`):
   trash: [],         // soft-deleted items
   formAnalyses: [],  // form (shooting form) analysis records
   customRounds: [],  // user-defined multi-distance rounds
+  notes: [],         // memo-only notes {id, date, ts, text, tags?} (shown in the ノート tab)
   settings: {
     eyeSight: 850,
     theme: "auto",
@@ -165,9 +166,16 @@ function showView(v) {
 
 When `db.active` is non-null, `renderRecord()` calls `renderActive()` instead of showing the launch form.
 
-- `renderActive(m)` rebuilds the full recording UI.
-- `refreshActive()` is a lightweight update that only redraws the target markers, score chips, stats, end table, and HUD -- without rebuilding the whole DOM.
+- `renderActive(m)` rebuilds the full recording UI: the immersive screen (`.recScreen`: top bar, status row, end ruler, target, confirmed-ends scorecard, current-end slots, dock / edit bar). `render()` sets `html.recording` while it is shown, which hides the title row and the tab bar.
+- `refreshActive()` is a lightweight update that only redraws the target markers, status row, ruler, scorecard (`scorecardHtml`), current-end slots (`curRowHtml`), and dock -- without rebuilding the whole DOM.
 - Always call `refreshActive()` after modifying `db.active.cur` (current end arrows) or `db.active.ends`.
+- Scorecard rows are display-only and sorted high to low (`scoreSortedArrows`); `db.active.ends` always stays in shot order. Counts and totals read the stored `s` / `X`.
+- Corrections go through `activeEditArr(s)`: the confirmed end opened with `ui.editEnd`, otherwise `s.cur`. `ui.selArrow` indexes that array.
+- "中断" only sets `ui.recPausedId`; the session stays in `db.active` and the record tab shows a resume band (`renderPausedRecord`).
+- No toast for recording feedback: use the status row (`activeNotice(msg)`) and `#arrowAnnounce`.
+- Input method: `sessionInputMode(s)` (`"score"` only when `s.inputMode === "score"`). Score mode renders the keypad (`scoreKeyDefs(faceType)`, `pressScoreKey`) instead of the target; switching keeps every arrow.
+- Arrows without a position (keypad input, "M 位置なし") have no `x` / `y` keys. Test with `arrowHasPos(a)` (20-scoring.js), never with `Number(a.x)` (`Number(null)` is 0). They count in totals, arrow counts and 10/X counts; they are skipped by every plot, grouping statistic, sight calculation and re-score. `tools/check-coordless.js` guards this.
+- A manual score (`applyScoreKey` on a positioned arrow) sets `manual: true` and keeps the automatic score in `auto`; moving the arrow calls `clearManualScore` and re-scores from the position.
 
 ### 3.5 Transient UI State: The `ui` Object
 
@@ -177,8 +185,14 @@ let ui = {
   sightSel: { setupId: null, dist: 70 },
   histOpen: null,          // currently open history detail
   histFilter: { setupId: "", dist: "", round: "" },
-  analysisFilter: { setupId: "", dist: "", round: "", period: "all" },
-  zoom: 1,                // target zoom level
+  analysisFilter: { setupId: "", dist: "", round: "", period: "all", cond: "" }, // cond: score-tab condition key "dist|faceD|faceType|arrows"
+  analysisTab: "score",   // analysis sub-tab: "score" | "impact" | "compare" | "form" (#analysisSubTabs)
+  analysisImpactId: null,  // session shown on the impact tab (null = latest session with positions)
+  analysisCmp: { a: null, b: null }, // the two sessions on the compare tab
+  zoom: 1,                // target zoom: 1 = whole face, 2 = centre (single "中心を拡大" button)
+  editEnd: -1,            // confirmed end opened for correction (-1 = none)
+  recPausedId: null,      // id of the active session the user paused (left the recording screen)
+  recMsg: "",             // one-shot notice for the recording status row
   recordMode: "practice",  // "practice" | "calibration"
   freshArrow: -1,          // index of just-placed arrow (for animation)
   freshTimer: 0,           // timeout handle for fresh arrow animation
@@ -333,13 +347,12 @@ items.length ? items.map(...).join("") : `<div class="empty">No items yet.</div>
 Many views define `xxxHtml()` functions that return HTML strings:
 
 ```js
-function heroMetricHtml(k, b, span) {
-  return `<div class="heroMetric"><div class="k">${esc(k)}</div><b>${esc(b)}</b><span>${esc(span || "")}</span></div>`;
+function gearSpecRowHtml(r) {
+  return `<div class="lrow specRow" data-spec="${esc(r.key)}"><span class="lk">${esc(r.label)}</span><span class="lv">${esc(r.value)}</span></div>`;
 }
 
-function gearPrecisionHtml(s) {
-  const p = gearPrecisionProfile(s);
-  return `<div class="advice gearAdviceCard">...</div>`;
+function todaysResultRowHtml(kind, factHtml, basisText) {
+  return `<div class="todaysResultRow" data-testid="todays-result-${kind}"><p class="fact">${factHtml}</p>${basisText ? `<p class="basis">${basisText}</p>` : ""}</div>`;
 }
 ```
 
@@ -613,7 +626,7 @@ el.classList.add("tick");
 6. **Always use `nativePulse("light"|"heavy"|"success")` on significant user interactions** (tab switch, arrow placement, delete).
 7. **Name new files with the `NN-description.js` convention** where NN indicates load order position.
 8. **Wrap destructive actions in `appConfirm()`** with `danger: true`.
-9. **When adding a new view section, use the `heroMetricHtml()` pattern** for KPI displays.
+9. **When adding a new view section, use a ruled section (`.vsec` + `.vsecH`) with `.figs` / `.lrow` rows**; write copy as fact (`.fact`) then basis (`.basis`).
 10. **When adding new icons, add to the `ICONS` object** in `10-storage-native.js` following the 24px/stroke-1.5/butt-cap convention.
 
 ---

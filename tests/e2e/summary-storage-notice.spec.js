@@ -1,4 +1,5 @@
 const { test, expect } = require("@playwright/test");
+const { finishFromMenu } = require("./record-helpers");
 
 for (const size of [
   { width: 320, height: 568, theme: "light" },
@@ -44,7 +45,7 @@ for (const size of [
         await page.waitForFunction(() => !globalThis.hasPendingSave());
         const arrows = (await state()).active.cur;
         expect(arrows).toHaveLength(1);
-        await page.getByTestId("active-finish").click();
+        await finishFromMenu(page);
         await page.locator("#sumClose").waitFor();
         const notice = page.getByTestId("summary-storage-notice");
         if (ratio < 0.8) await expect(notice).toHaveCount(0);
@@ -54,7 +55,9 @@ for (const size of [
           await expect(page.locator("#toast")).not.toContainText("容量");
           const geometry = await notice.evaluate((el) => {
             const r = el.getBoundingClientRect(),
-              stat = el.parentElement.querySelector(".statbar").getBoundingClientRect();
+              stat = el.parentElement
+                .querySelector('[data-testid="result-total"]')
+                .getBoundingClientRect();
             const next = el.parentElement
               .querySelector(".summaryTodaysResult")
               .getBoundingClientRect();

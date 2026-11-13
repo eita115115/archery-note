@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 const net = require("net");
+const zlib = require("zlib");
 
 const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
@@ -76,6 +77,65 @@ function pngSize(file) {
   return { width: b.readUInt32BE(16), height: b.readUInt32BE(20), bytes: b.length };
 }
 
+/* Chrome が書き出す PNG（8bit・RGB または RGBA・インターレースなし）を画素に戻す。
+   白紙の検出で、背景だけの画像と画素ごとに比べるために使う（依存を増やさない） */
+function decodePng(buf) {
+  assert(buf.toString("ascii", 1, 4) === "PNG", "Not a PNG buffer");
+  let off = 8;
+  let width = 0, height = 0, depth = 0, colorType = 0, interlace = 0;
+  const idat = [];
+  while (off < buf.length) {
+    const len = buf.readUInt32BE(off);
+    const type = buf.toString("ascii", off + 4, off + 8);
+    const data = buf.subarray(off + 8, off + 8 + len);
+    if (type === "IHDR") {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      depth = data[8];
+      colorType = data[9];
+      interlace = data[12];
+    } else if (type === "IDAT") idat.push(data);
+    else if (type === "IEND") break;
+    off += 12 + len;
+  }
+  const ch = colorType === 6 ? 4 : colorType === 2 ? 3 : 0;
+  assert(depth === 8 && ch && !interlace, `Unsupported PNG (depth ${depth}, color ${colorType}, interlace ${interlace})`);
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const stride = width * ch;
+  const out = Buffer.alloc(stride * height);
+  for (let y = 0; y < height; y++) {
+    const f = raw[y * (stride + 1)];
+    const src = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    for (let x = 0; x < stride; x++) {
+      const a = x >= ch ? out[y * stride + x - ch] : 0;
+      const b = y ? out[(y - 1) * stride + x] : 0;
+      const c = x >= ch && y ? out[(y - 1) * stride + x - ch] : 0;
+      let v = src[x];
+      if (f === 1) v += a;
+      else if (f === 2) v += b;
+      else if (f === 3) v += (a + b) >> 1;
+      else if (f === 4) {
+        const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+        v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
+      }
+      out[y * stride + x] = v & 255;
+    }
+  }
+  return { width, height, ch, data: out };
+}
+/* 2枚の同じ大きさの画像で、色が目に見えて違う画素の割合 */
+function differingPixelRatio(a, b) {
+  assert(a.width === b.width && a.height === b.height, "image sizes differ");
+  let diff = 0;
+  const n = a.width * a.height;
+  for (let i = 0; i < n; i++) {
+    let d = 0;
+    for (let k = 0; k < 3; k++) d = Math.max(d, Math.abs(a.data[i * a.ch + k] - b.data[i * b.ch + k]));
+    if (d > 24) diff++;
+  }
+  return diff / n;
+}
+
 function staticUiChecks() {
   const appScriptTags = [
     ...html.matchAll(/<script\b([^>]*)\bsrc="scripts\/[^"]+"([^>]*)><\/script>/g),
@@ -107,14 +167,15 @@ function staticUiChecks() {
     "Toast status live region missing",
   );
   assert(
-    html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".launchPanel"),
+    html.includes('<link rel="stylesheet" href="style.min.css">') && css.includes(".startBand"),
     "Minified production stylesheet link missing",
   );
   assert(
     appScripts.every((file) =>
-      new RegExp(`<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`).test(html),
-    ) &&
-      !/<script>([\s\S]*?)<\/script>/.test(html),
+      new RegExp(
+        `<script\\b[^>]*\\bdefer\\b[^>]*\\bsrc=["']${file.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["'][^>]*><\\/script>`,
+      ).test(html),
+    ) && !/<script>([\s\S]*?)<\/script>/.test(html),
     "External app scripts missing",
   );
   assert(
@@ -129,17 +190,44 @@ function staticUiChecks() {
   const tabMatches = [...html.matchAll(/<button data-v="([^"]+)"[^>]*>[\s\S]*?<\/button>/g)].map(
     (m) => m[1],
   );
+  // v5: 下端に付く平らな4タブ（記録 / ノート / 分析 / 弓具）。サイトは弓具の中の下線タブ
   assert(
-    tabMatches.join(",") === "record,history,analysis,sight,gear",
+    tabMatches.join(",") === "record,history,analysis,gear",
     `Unexpected tabs: ${tabMatches.join(",")}`,
   );
+  const tabLabels = [
+    ...html.matchAll(
+      /<button data-v="[^"]+" aria-label="([^"]+)"[^>]*>[\s\S]*?<\/span>([^<]+)<\/button>/g,
+    ),
+  ].map((m) => `${m[1]}=${m[2]}`);
   assert(
-    surface.includes("記録") &&
-      surface.includes("履歴") &&
-      surface.includes("分析") &&
-      surface.includes("サイト調整") &&
-      surface.includes("用具"),
-    "Tab labels missing",
+    tabLabels.join(",") === "記録=記録,ノート=ノート,分析=分析,弓具=弓具",
+    `Unexpected tab labels: ${tabLabels.join(",")}`,
+  );
+  assert(
+    !/<header\b/.test(html) && !html.includes("appIdentity") && !html.includes("appLogo"),
+    "v5 has no app-name header band",
+  );
+  assert(
+    /<div class="viewTop" id="viewTop">[\s\S]*<h1 id="viewTitle">[\s\S]*id="btnSettings"[\s\S]*<\/div>\s*<!--[\s\S]*?-->\s*<nav class="utabs" id="gearSubTabs"/.test(
+      html,
+    ),
+    "screen title row (title + settings entry) must sit above the gear sub-tabs",
+  );
+  const subTabs = [
+    ...html.matchAll(
+      /<button type="button" data-sub="([^"]+)" data-testid="([^"]+)">([^<]+)<\/button>/g,
+    ),
+  ].map((m) => `${m[1]}:${m[2]}:${m[3]}`);
+  assert(
+    subTabs.join(",") === "gear:gear-subtab-setup:セッティング,sight:gear-subtab-sight:サイト",
+    `Sight must be an underline sub-tab inside 弓具: ${subTabs.join(",")}`,
+  );
+  assert(
+    appJs.includes('sight: "弓具"') &&
+      appJs.includes('view === "sight" ? "gear" : view') &&
+      appJs.includes('settings.hidden = view !== "record"'),
+    "sight view must stay reachable under the 弓具 tab and settings only on the record tab",
   );
   assert(/@media \(max-width:360px\)/.test(surface), "Small-screen media query missing");
   assert(/\.row\{flex-direction:column;\}/.test(surface), "Small-screen row stacking missing");
@@ -173,17 +261,16 @@ function staticUiChecks() {
     /\.histScoreCount\{[^}]*font-size:var\(--font-size-xs\);/.test(css),
     ".histScoreCount must preserve 11px text size",
   );
-  assert(
-    /\.histTrendRow\{[^}]*gap:var\(--space-4\);/.test(css),
-    ".histTrendRow must preserve 10px gap",
-  );
-  assert(
-    /\.histTrendValue\{[^}]*font-size:var\(--font-size-sm\);/.test(css),
-    ".histTrendValue must preserve 12px text size",
-  );
+  /* v5 段 9: どの画面も使わなくなった旧クラスの規則は style.css から消した */
+  const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  for (const old of [".histTrendRow", ".launchPanel", ".homeActions", ".streakHero", ".goalRing", ".pageHero", ".nativeStack", ".settingsGroup", ".statbar", "header.app", ".decisionCard", ".sightMiniDial"])
+    assert(
+      !cssRules.includes(old + "{") && !cssRules.includes(old + " ") && !cssRules.includes(old + ","),
+      `retired class ${old} is still in style.css`,
+    );
   /* .histSightVal was removed during v2 design-language migration; check retired */
   assert(
-    surface.includes("@keyframes appRise") &&
+    !surface.includes("@keyframes appRise") &&
       !surface.includes("primaryPulse") &&
       surface.includes("scorePop") &&
       surface.includes("markPop") &&
@@ -193,7 +280,7 @@ function staticUiChecks() {
       surface.includes("prefers-reduced-motion") &&
       surface.includes("ic-record") &&
       surface.includes("ic-analysis") &&
-      surface.includes("ic-sight"),
+      html.includes("ic-gear"),
     "minimal recording feedback, tab icons, and reduced-motion guard missing",
   );
   // アイコンの刻印規律（v2 5節）: タブは 24px グリッドのインライン SVG＋butt cap、icon() セットも 24 グリッドで round cap 禁止
@@ -209,11 +296,18 @@ function staticUiChecks() {
       !/class="icoInline"[^>]*stroke-linecap="round"/.test(appJs),
     "icon() set must use the 24px grid with butt caps",
   );
+  // v5: 選択中のタブは上辺の線で示す（動く下線・浮いた角丸ピル・ガラスは使わない）
+  const v5Css = css.slice(css.indexOf("UI v5 foundation"));
   assert(
-    surface.includes("--active-tab") &&
-      surface.includes("nav.tabs::before") &&
-      surface.includes('setProperty("--active-tab"'),
-    "smooth state-following tab motion missing",
+    css.includes("UI v5 foundation") &&
+      /nav\.tabs\{[^}]*bottom:0;[^}]*grid-template-columns:repeat\(4,minmax\(0,1fr\)\);[^}]*border-radius:0;[^}]*backdrop-filter:none;/.test(
+        v5Css,
+      ) &&
+      /nav\.tabs button\.on,nav\.tabs button\[aria-current=page\]\{[^}]*border-top-color:var\(--accent\);/.test(
+        v5Css,
+      ) &&
+      !appJs.includes('setProperty("--active-tab"'),
+    "flat bottom-edge tab bar (selected = top rule) missing",
   );
   assert(
     !surface.includes("targetImpact") &&
@@ -223,9 +317,9 @@ function staticUiChecks() {
     "overdone transition/target animation should not return",
   );
   assert(
-    surface.includes("この条件で開始") &&
-      surface.includes("条件を選ぶ") &&
-      surface.includes("詳しく残す"),
+    appJs.includes("この条件で記録を始める") &&
+      appJs.includes("条件を選ぶ") &&
+      appJs.includes("日付・天気・風・メモ"),
     "record launch UI missing",
   );
   assert(
@@ -236,9 +330,7 @@ function staticUiChecks() {
     "startup/update fallback should be calm and initially hidden",
   );
   assert(
-    recordSurface.includes("サイト値を残す") &&
-      recordSurface.includes("サイト値つきで開始") &&
-      !recordSurface.includes("校正用") &&
+    !recordSurface.includes("校正用") &&
       !recordSurface.includes("状態確認"),
     "record mode labels should stay user-facing",
   );
@@ -261,38 +353,43 @@ function staticUiChecks() {
     "first-run active guide missing",
   );
   assert(
-    surface.includes("この条件で開始") &&
-      surface.includes("前回と同じ") &&
-      surface.includes("recordRepeatBand") &&
-      surface.includes("homeActions") &&
+    surface.includes("この条件で記録を始める") &&
+      surface.includes("前回と同じ条件") &&
+      surface.includes("homeStartBandHtml") &&
+      surface.includes("renderRecordConditions") &&
       surface.includes("quickStart") &&
       surface.includes("quickStartMeta") &&
-      surface.includes("actionFaceLabel") &&
       !surface.includes("今の条件で開始") &&
-      surface.includes("quickSelects") &&
-      surface.includes("summaryDecisionHtml") &&
+      surface.includes("function sessionSightFoldHtml") &&
+      !surface.includes("summaryDecisionHtml") &&
       surface.includes("setupLens") &&
       surface.includes("insightStrip"),
     "lightweight record flow composition missing",
   );
   assert(
-    surface.includes("compactHud") &&
+    surface.includes("recScreen") &&
+      !appJs.includes("compactHud") &&
       !surface.includes("まず今日の記録を始める。詳しい材料") &&
       !surface.includes("距離・的サイズはこの画面で変更できます") &&
       !surface.includes("タップ＆ドラッグで確定"),
     "record screen should stay compact and low-noise",
   );
   assert(
-    surface.includes("pageHero") &&
-      surface.includes("pageHeroLead") &&
-      surface.includes("history-hero-trend") &&
-      surface.includes("いまの提案") &&
-      surface.includes("いつものセッティングを残す") &&
-      surface.includes("liveHud"),
+    /* v5 段 8: 弓具とサイトの冒頭の枠（pageHero）は廃止。仕様表・目盛りの図・調整の目安が入口になる */
+    !surface.includes("pageHeroHtml") &&
+      !surface.includes("history-hero") &&
+      surface.includes("noteMonth") &&
+      surface.includes("openMemoDetail") &&
+      !surface.includes("いつものセッティングを残す") &&
+      surface.includes('data-testid="gear-spec-sheet"') &&
+      surface.includes("線の判定に使います") &&
+      surface.includes("function sightScaleSvg") &&
+      surface.includes("function sightAdviceHtml") &&
+      surface.includes("renderActive"),
     "reborn workspace surfaces missing",
   );
   assert(
-    surface.includes("nativePill") &&
+    surface.includes('data-testid="settings-app-info"') &&
       surface.includes("触感") &&
       surface.includes("共有") &&
       surface.includes("freshReload") &&
@@ -307,16 +404,15 @@ function staticUiChecks() {
     "shot reason and arrow-number note UI missing",
   );
   assert(
-    surface.includes("判断信頼度") &&
-      surface.includes("個人モデル") &&
-      surface.includes("次のアクション") &&
-      surface.includes("個人データ準備度") &&
-      surface.includes("スパイン初期候補") &&
-      surface.includes("RK4-3D") &&
-      surface.includes("物理校正"),
-    "analysis cards missing",
+    /* v5 段 9: 「次のアクション」「個人データ準備度」「物理校正」の枠は全画面から外した */
+    !surface.includes("次のアクション") &&
+      !surface.includes("個人データ準備度") &&
+      !surface.includes("物理校正:") &&
+      surface.includes("スパインの初期候補") &&
+      surface.includes("RK4-3D"),
+    "old analysis cards left, or spine / trajectory labels missing",
   );
-  // 「信頼度」の語の分離（監査 High/Medium 対応）: 射形側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
+  // 「信頼度」の語の分離（監査 High/Medium 対応）: 射型側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
   assert(
     surface.includes("検出の鮮明さ") && !appJs.includes("・ 信頼度"),
     "form-tracking must say 検出の鮮明さ, not bare 信頼度, in the capture HUD",
@@ -327,21 +423,26 @@ function staticUiChecks() {
     "form-tracking measurement-error and camera-position hints missing",
   );
   assert(
-    surface.includes("演算信頼度は 1−1/√(使用本数)") &&
-      surface.includes("判断信頼度は、グルーピング中心が真の中心からリング幅の半分以内に入っている確率"),
-    "confidence derivation notes missing",
+    /* v5 段 9: 「演算信頼度」「判断信頼度」の行と注記は画面から外した（値は CSV の confidence 列に残る） */
+    !surface.includes("<span>演算信頼度</span>") &&
+      !surface.includes("<span>判断信頼度</span>") &&
+      !surface.includes("演算信頼度は 1−1/√(使用本数)"),
+    "confidence label rows should be gone from every screen",
   );
   assert(
     surface.includes("アプリ情報・保存状態") &&
-      surface.includes("nativeStack") &&
-      surface.includes("PWA + Capacitor-ready") &&
       surface.includes("ブラウザ保存"),
     "native readiness UI missing",
   );
   assert(
     surface.includes("自動バックアップ") &&
-      surface.includes("今すぐバックアップ") &&
-      surface.includes("バックアップデータを復元しました") &&
+      surface.includes("いま控えを残す") &&
+      surface.includes("控えの内容に戻しました") &&
+      /* データを置き換える操作の注意書きは、その操作の行にある（AGENTS.md） */
+      surface.includes('data-testid="settings-data-warning"') &&
+      surface.includes("いまのデータは、読み込んだ内容にすべて置き換わります") &&
+      surface.includes("いまのデータは控えの内容に置き換わります") &&
+      surface.includes("元に戻せません") &&
       !surface.includes("\u81ea\u52d5\u9000\u907f") &&
       !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"),
     "backup settings copy should be user-facing",
@@ -474,7 +575,10 @@ function staticUiChecks() {
     "export acquires workflow lock before awaiting confirmation",
   );
   for (const source of [startHandler, exportHandler]) {
-    assert(source.includes("db.settings.formDebug!==true"), "post-confirm exact debug recheck exists");
+    assert(
+      source.includes("db.settings.formDebug!==true"),
+      "post-confirm exact debug recheck exists",
+    );
     assert(
       source.includes("activeWorkflowCount!==1") && source.includes("db.active"),
       "post-confirm workflow ownership recheck exists",
@@ -755,6 +859,10 @@ async function screenshot(browser, view) {
           overflow,
           gear: gear && { left: gear.left, right: gear.right, width: gear.width },
           tabs: tabs.map(t => ({ left: t.left, right: t.right, width: t.width })),
+          navBottom: document.querySelector("nav.tabs").getBoundingClientRect().bottom,
+          vh: window.innerHeight,
+          header: document.querySelectorAll("header.app").length,
+          title: document.querySelector("#viewTitle")?.textContent,
         };
       })()`,
       returnByValue: true,
@@ -762,13 +870,24 @@ async function screenshot(browser, view) {
     const value = metrics.result.value;
     assert(value.overflow <= 1, `${view.name} has horizontal overflow: ${JSON.stringify(value)}`);
     assert(
-      value.gear && value.gear.left >= 0 && value.gear.right <= value.vw + 1,
+      value.gear &&
+        value.gear.width >= 44 &&
+        value.gear.left >= 0 &&
+        value.gear.right <= value.vw + 1,
       `${view.name} settings button is clipped: ${JSON.stringify(value.gear)}`,
     );
     assert(
-      value.tabs.length === 5 &&
+      value.tabs.length === 4 &&
         value.tabs.every((t) => t.left >= -1 && t.right <= value.vw + 1 && t.width > 44),
       `${view.name} tab bar is clipped: ${JSON.stringify(value.tabs)}`,
+    );
+    assert(
+      Math.abs(value.navBottom - value.vh) <= 1,
+      `${view.name} tab bar must sit on the bottom edge: ${value.navBottom} / ${value.vh}`,
+    );
+    assert(
+      value.header === 0 && value.title === "記録",
+      `${view.name} must show the screen title row without a header band: ${JSON.stringify(value)}`,
     );
     const capture = await client.send("Page.captureScreenshot", {
       format: "png",
@@ -782,8 +901,33 @@ async function screenshot(browser, view) {
       size.width === view.width && size.height === view.height,
       `Unexpected screenshot size for ${view.name}: ${size.width}x${size.height}`,
     );
-    assert(size.bytes > 12000, `Screenshot too small for ${view.name}: ${size.bytes} bytes`);
-    return { file: shot, ...size };
+    /* 白紙（何も描けていない）検出。以前は 12000 bytes の固定値だったが、PNG の大きさは
+       描かれる文字のフォントに左右される（CI の ubuntu には日本語フォントが無く、文字が豆腐になる。
+       v5 の暗く平らな記録タブは、それで 1万 bytes を切る）。同じ画面の中身を隠して撮った
+       「背景だけ」の画像と画素ごとに比べ、色の違う画素が 1% を超えることを確かめる（白紙なら 0%。広い画面では中身が中央の列だけなので約3%）（大きさの比はフォントで変わるので使わない） */
+    await client.send("Runtime.evaluate", {
+      expression: `(() => {
+        const s = document.createElement("style");
+        s.textContent = "html *{visibility:hidden!important}";
+        document.head.appendChild(s);
+        return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      })()`,
+      awaitPromise: true,
+    });
+    const blankCapture = await client.send("Page.captureScreenshot", {
+      format: "png",
+      fromSurface: true,
+      captureBeyondViewport: false,
+    });
+    const drawn = differingPixelRatio(
+      decodePng(fs.readFileSync(shot)),
+      decodePng(Buffer.from(blankCapture.data, "base64")),
+    );
+    assert(
+      drawn > 0.01,
+      `Screenshot looks blank for ${view.name}: only ${(drawn * 100).toFixed(1)}% of pixels differ from the background`,
+    );
+    return { file: shot, ...size, drawn };
   } finally {
     if (client) client.close();
     await stopProcess(proc);
@@ -807,7 +951,9 @@ async function main() {
   }
   console.log(`UI smoke checks OK (${path.basename(browser)})`);
   shots.forEach((s) =>
-    console.log(`${path.relative(root, s.file)} ${s.width}x${s.height} ${s.bytes} bytes`),
+    console.log(
+      `${path.relative(root, s.file)} ${s.width}x${s.height} ${s.bytes} bytes (${(s.drawn * 100).toFixed(1)}% of pixels differ from the background)`,
+    ),
   );
 }
 

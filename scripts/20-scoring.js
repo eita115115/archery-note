@@ -94,33 +94,46 @@ function hitFromGlobal(gx,gy,faceD,faceType,arrowR){
   const rx=gx, ry=gy-SPOT_Y[spot];
   return Object.assign({x:rx,y:ry,spot}, scoreAt(rx,ry,faceD,"triple",arrowR));
 }
+/* 矢に位置（座標）があるか。点数だけの入力と「M 位置なし」は x/y を持たない（null のこともある）。
+   位置のない矢は合計・本数・平均・10/X の数には入れ、的の図・統計・着弾中心・サイト判断・再採点には入れない。
+   Number(null) は 0 になるので、Number 化より先にここで除く（座標を作らない）。数値の文字列は従来どおり位置として読む */
+function coordIsNumber(v){
+  if(typeof v==="number") return Number.isFinite(v);
+  return typeof v==="string"&&v.trim()!==""&&Number.isFinite(Number(v));
+}
+function arrowHasPos(a){ return !!a&&typeof a==="object"&&coordIsNumber(a.x)&&coordIsNumber(a.y); }
+/* 位置のある矢が1本でもある記録か（点数だけの記録は false） */
+function sessionHasPos(sess){ return ((sess&&sess.ends)||[]).some(end=>Array.isArray(end)&&end.some(arrowHasPos)); }
 /* 記録済みの座標を実寸判定で採点し直す（表示専用。保存された点数は書き換えない）。
-   三つ目的の矢座標はスポット中心基準で保存されているのでそのまま使える。座標のない矢は記録時の点数を使う。 */
+   三つ目的の矢座標はスポット中心基準で保存されているのでそのまま使える。座標のない矢は記録時の点数を使う。
+   手で直した点数（manual）は利用者が決めた点なので、位置から採点し直さず保存された点数を使う。 */
 function sessionRescore(sess, arrowR){
   const out={total:0,stored:0,changed:0,scored:0,skipped:0,arrowR};
   ((sess&&sess.ends)||[]).forEach(end=>(end||[]).forEach(a=>{
     const stored=Number(a&&a.s)||0;
     out.stored+=stored;
-    const x=Number(a&&a.x), y=Number(a&&a.y);
-    if(!Number.isFinite(x)||!Number.isFinite(y)){ out.total+=stored; out.skipped++; return; }
+    if(!arrowHasPos(a)||a.manual===true){ out.total+=stored; out.skipped++; return; }
+    const x=Number(a.x), y=Number(a.y);
     const h=scoreAt(x,y,sess.faceD,sess.faceType,arrowR);
     out.total+=h.s; out.scored++;
     if(h.s!==stored||!!h.X!==!!(a&&a.X)) out.changed++;
   }));
   return out;
 }
+/* 得点チップ・キーの色。的面の色とは別に、文字との比を優先した帯色の変数（style.css の --z-*）を使う */
 function zoneStyle(s,X,faceType){
+  const z=k=>({bg:`var(--z-${k})`,fg:`var(--z-${k}-fg)`});
   if(isFieldFace(faceType)){
-    if(s>=5) return {bg:"var(--gold)",fg:"#1c1e1c"};
-    if(s>=1) return {bg:"#222",fg:"#fff"};
-    return {bg:"#888b85",fg:"#fff"};
+    if(s>=5) return z("gold");
+    if(s>=1) return z("black");
+    return z("miss");
   }
-  if(s>=9) return {bg:"var(--gold)",fg:"#1c1e1c"};
-  if(s>=7) return {bg:"var(--red)",fg:"#fff"};
-  if(s>=5) return {bg:"var(--blue)",fg:"#fff"};
-  if(s>=3) return {bg:"#222",fg:"#fff"};
-  if(s>=1) return {bg:"#fff",fg:"#1c1e1c"};
-  return {bg:"#888b85",fg:"#fff"};
+  if(s>=9) return z("gold");
+  if(s>=7) return z("red");
+  if(s>=5) return z("blue");
+  if(s>=3) return z("black");
+  if(s>=1) return z("white");
+  return z("miss");
 }
 function scoreLabel(a){ return a.s===0?"M":(a.X?"X":String(a.s)); }
 function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }

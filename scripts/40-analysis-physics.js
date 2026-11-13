@@ -4,45 +4,17 @@
 function analysisHasGroupingEvidence(st){
   return !!st && st.total>=3 && st.n>=3 && Number.isFinite(st.rr);
 }
-/* A direction must remain distinguishable at the displayed 0.1cm precision.
-   散り方の診断は外れ値候補を除いた統計（B）で行う（外れ矢1本で「縦長」などの助言にしない） */
-function analysisSpreadDirection(st,ratio,strict){
-  st=sightStats(st);
-  if(!analysisHasGroupingEvidence(st) || !Number.isFinite(st.sx) || !Number.isFinite(st.sy) || st.sx<0 || st.sy<0) return null;
-  const x=Number(st.sx.toFixed(1)), y=Number(st.sy.toFixed(1));
-  if(y>x && (strict ? st.sy>st.sx*ratio : st.sy>=st.sx*ratio)) return "vertical";
-  if(x>y && (strict ? st.sx>st.sy*ratio : st.sx>=st.sy*ratio)) return "horizontal";
-  return null;
-}
 /* ============ sight advice ============ */
-function shapeNote(st){
-  const flagged=((st&&st.excluded)||[]).length;
-  st=sightStats(st); /* 散り方の形は外れ値候補を除いた統計（B）で診断する */
-  if(!analysisHasGroupingEvidence(st) || st.n<6) return "";
-  const basis=flagged?`、外れ値候補${flagged}本を除く`:"";
-  const tilt=Math.abs(st.angleDeg||0);
-  const tilted=st.major&&st.minor&&st.major>st.minor*1.45&&Number(st.major.toFixed(1))>Number(st.minor.toFixed(1))&&tilt>15&&tilt<75;
-  if(tilted) return `<div class="note">${icon("ruler")} <b>斜め方向に伸びたグルーピング</b>です（長軸${st.major.toFixed(1)}cm／短軸${st.minor.toFixed(1)}cm、角度${st.angleDeg.toFixed(0)}°${basis}）。照準の流れ、リリース方向、押し手の入り方を同じリズムで確認すると原因を絞りやすいです。</div>`;
-  if(analysisSpreadDirection(st,1.3,true)==="vertical") return `<div class="note">${icon("ruler")} <b>縦長のグルーピング</b>です（上下±${st.sy.toFixed(1)}cm／左右±${st.sx.toFixed(1)}cm${basis}）。上下ブレはリリースの強弱・引き尺・プレッシャーポイントの上下、または矢の重量差が原因になりやすいです。</div>`;
-  if(analysisSpreadDirection(st,1.3,true)==="horizontal") return `<div class="note">${icon("ruler")} <b>横長のグルーピング</b>です（左右±${st.sx.toFixed(1)}cm／上下±${st.sy.toFixed(1)}cm${basis}）。左右ブレは風・エイミング・ボウハンド、センターショットやプランジャー由来が多いです。</div>`;
-  return "";
-}
-/* 信頼度の算出根拠1行注記。v2の説明文禁止に抵触しないよう「詳しく」details 内でのみ表示する */
-function confidenceNoteHtml(kind){
-  return kind==="calc"
-    ? `<div class="subNoteSm">演算信頼度は 1−1/√(使用本数)。中心の推定誤差がグルーピングの広がりに比べてどれだけ小さいかを表します。</div>`
-    : `<div class="subNoteSm">判断信頼度は、グルーピング中心が真の中心からリング幅の半分以内に入っている確率（左右×上下）です。</div>`;
-}
 /* グルーピングの数値。正式な値は全射（A）。外れ値候補を除いた RMS（B）とロバスト RMS（C）は参考として並べる
    （docs/design/grouping-stats-v3.md）。B は除いた分だけ小さく出るので正式な値には使わない */
-function groupSummaryHtml(st, opts){
+function groupSummaryHtml(st){
   if(!st) return "";
   const ci=st.n>=2&&Number.isFinite(st.ciX)?`<div class="kv"><span>中心の誤差（95%区間）</span><span>左右 ±${st.ciX.toFixed(1)}cm ・ 上下 ±${st.ciY.toFixed(1)}cm</span></div>`:"";
   const ex=st.excl, rob=st.robust, nFlag=(st.excluded||[]).length;
   const refRows=st.n>=MCD_MIN_N
     ? `<div class="kv"><span>全射RMSの95%区間</span><span>${st.rrCi?`${st.rrCi.lo.toFixed(1)}–${st.rrCi.hi.toFixed(1)} cm（正規分布を仮定）`:"—"}</span></div>
     <div class="kv"><span>外れ値候補を除いたRMS（参考）</span><span>${ex?`${ex.rr.toFixed(1)} cm（${st.total}本中${nFlag}本を除く）`:"—"}</span></div>
-    <div class="subNoteSm">外れ値候補はMCD法の順位と検定で判定。除くと実力より小さく出るため、公式の値には使いません。</div>
+    <div class="subNoteSm">外れ値候補はMCD法の順位と検定で判定。除くと実力より小さく出るため、正式な値には使いません。</div>
     <div class="kv"><span>ロバストRMS（参考）</span><span>${rob?`${rob.rr.toFixed(1)} cm`:"—"}</span></div>
     <div class="subNoteSm">極端な着弾の影響を抑えた、まとまっている矢のばらつきの推定（再重み付けMCD）。</div>`
     : `<div class="kv"><span>外れ値候補を除いたRMS・ロバストRMS（参考）</span><span>6本以上で計算します</span></div>`;
@@ -51,8 +23,6 @@ function groupSummaryHtml(st, opts){
     <div class="kv"><span>グルーピング半径 (RMS・全射)</span><span>${st.rr.toFixed(1)} cm</span></div>
     <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
     ${st.major!=null?`<div class="kv"><span>グルーピング楕円</span><span>長軸 ${st.major.toFixed(1)}cm ・ 短軸 ${st.minor.toFixed(1)}cm ・ 角度 ${st.angleDeg.toFixed(0)}°</span></div>`:""}
-    <div class="kv"><span>演算信頼度</span><span>${pct(st.confidence||0)} / 全射</span></div>
-    ${opts&&opts.withConfidenceNote?confidenceNoteHtml("calc"):""}
     ${refRows}
     ${nFlag?`<div class="kv"><span>外れ値候補</span><span>${nFlag}本（図の×印。全射RMSには含み、サイト判断でのみ除外）</span></div>
     <div class="kv"><span>サイト判断の中心（外れ値候補を除く）</span><span>${cmOffsetText(ex.mx,"x")} / ${cmOffsetText(ex.my,"y")}</span></div>`:""}`;
@@ -296,10 +266,7 @@ function levelFromScore(score, tiers){
   return tiers.find(t=>s>=t.min).label;
 }
 const LEVELS={
-  physics:[{min:.72,label:"校正安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"未校正"}],
-  data:[{min:.72,label:"高"},{min:.45,label:"中"},{min:0,label:"データ蓄積中"}],
-  calibration:[{min:.72,label:"高"},{min:.42,label:"中"},{min:0,label:"データ蓄積中"}],
-  system:[{min:.72,label:"提案安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"準備中"}]
+  physics:[{min:.72,label:"校正安定"},{min:.45,label:"データ充実"},{min:.22,label:"データ蓄積中"},{min:0,label:"未校正"}]
 };
 const PCAL_CACHE=new Map();
 /* 校正はセッション横断のRK4連鎖を含み重いので、db更新時刻をキーにメモ化する */
@@ -316,7 +283,8 @@ function computePersonalPhysicsCalibration(setupId){
   const setup=db.setups.find(s=>s.id===setupId);
   if(!setup) return null;
   const eye=db.settings.eyeSight||850;
-  const sessions=db.sessions.filter(s=>s.setupId===setupId)
+  /* 位置のある矢が1本もない記録（点数だけの入力）は、校正の対象にも新しさの順位にも入れない */
+  const sessions=db.sessions.filter(s=>s.setupId===setupId && sessionHasPos(s))
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1));
   const usable=sessions.map((s,i)=>{
     const q=sessionQuality(s,setup);
@@ -345,8 +313,8 @@ function computePersonalPhysicsCalibration(setupId){
     if(r.v && isFinite(r.v.slope) && Math.abs(r.v.slope)>.05) clickV.push({v:Math.abs(r.v.slope)*70/d,w:clamp(r.v.quality||r.v.r2||.2,.05,1)});
     if(r.h && isFinite(r.h.slope) && Math.abs(r.h.slope)>.05) clickH.push({v:Math.abs(r.h.slope)*70/d,w:clamp(r.h.quality||r.h.r2||.2,.05,1)});
   });
-  const sightMarks=db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v)));
-  const markPts=sightMarks.map(m=>[m.dist, parseFloat(m.v)]).filter(p=>isFinite(p[0])&&isFinite(p[1]));
+  const sightMarks=db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseSightNumber(m.v)));
+  const markPts=sightMarks.map(m=>[m.dist, parseSightNumber(m.v)]).filter(p=>isFinite(p[0])&&isFinite(p[1]));
   const sightFit=markPts.length>=2 ? robustLine(markPts) : null;
   const windFactor=weightedMedian(windRatios,1);
   const v70=weightedMedian(clickV,null), h70=weightedMedian(clickH,null);
@@ -367,16 +335,6 @@ function computePersonalPhysicsCalibration(setupId){
   if(sightFit) notes.push(`距離別サイト値 ${markPts.length}点 / 一致度${pct(sightFit.r2||0)}`);
   if(!notes.length) notes.push("サイト値つき練習・横風メモ・複数距離の台帳が増えるほど校正されます。");
   return {score,level,usable:usable.length,wind:{factor:windFactor,sample:windRatios.length,conflicts:windConflicts.length,items:windRatios},click:{v70,h70,vSample:clickV.length,hSample:clickH.length},sight:{n:markPts.length,r2:sightFit?sightFit.r2:0},notes};
-}
-function physicsCalibrationHtml(setupId){
-  const c=personalPhysicsCalibration(setupId);
-  if(!c) return "";
-  const color=c.level==="校正安定"?"var(--status-ok)":c.level==="未校正"?"var(--status-hold)":"var(--blue)";
-  return `<div class="advice analysisAdviceCard">
-    <div class="note"><b style="color:${color}">物理校正: ${c.level}</b>（${pct(c.score)}）</div>
-    <div class="kv"><span>校正材料</span><span>有効練習 ${c.usable}回 / 風 ${c.wind.sample}回 / サイト値 ${c.sight.n}点</span></div>
-    ${c.notes.map(n=>`<div class="note">・${esc(n)}</div>`).join("")}
-  </div>`;
 }
 /* サイト調整の判定（統計）。旧版の「しきい値=リング幅/8 と RMS の10%」は本数を無視しており、
    中心が合っていても6本で約9割「動かせ」と出ていた。ここでは:
@@ -482,54 +440,6 @@ function adviceFor(sess, setup){
   }
   return out;
 }
-/* サイトタブの「いまの提案」表示専用の整形（adviceFor の判定結果を読むだけ。量・方向は再計算しない）。
-   上下と左右の両方に動きがある場合は補正量の大きい軸を主提案に選ぶ */
-function primarySightSuggestion(sess, setup, adv){
-  if(!adv) return null;
-  const d=adv.decision;
-  const moves=adv.lines.filter(l=>l.axis!=="-").map(l=>l.axis);
-  if(!moves.length || !d){
-    const j0=d?judgementFor(adv, sess):null;
-    if(j0 && j0.label==="風を考慮") return {axis:"-", none:true, reason:"wind"};
-    return {axis:"-", none:true, reason:d&&!d.precise?"uncertain":"centered"};
-  }
-  const j=judgementFor(adv, sess);
-  if(j && j.label==="風を考慮") return {axis:"-", none:true, reason:"wind"};
-  if(j && j.label==="保留") return {axis:"-", none:true, reason:adv.personal&&adv.personal.state==="今回だけの可能性"?"history":"uncertain"};
-  const axis=moves.length>1?(Math.abs(d.v.adj)>=Math.abs(d.h.adj)?"v":"h"):moves[0];
-  const a=d[axis], adj=Math.abs(a.adj);
-  const mm=adj*(axis==="v"?adv.traj.mmPerCmV:adv.traj.mmPerCmH);
-  const ck=sightClickText(adj, sess.dist, setup, adv.pcal, axis);
-  const clickLabel=ck?(ck.label==="クリック"?"クリック":"目盛り（推定）"):null;
-  if(axis==="v") return {axis, dir:a.m>0?"up":"down", dirLabel:a.m>0?"上":"下", mm, clicks:ck?ck.clicks:null, clickLabel, other:moves.length>1};
-  return {axis, dir:a.m>0?"right":"left", dirLabel:a.m>0?"右":"左", mm, clicks:ck?ck.clicks:null, clickLabel, other:moves.length>1};
-}
-function summarySightDialHtml(sess, adv){
-  if(!adv || !adv.st) return "";
-  const st=sightStats(adv.st);
-  const span=Math.max(ringW(sess.faceD,sess.faceType)*2.4, st.rr*1.4, 6);
-  const dx=clamp(st.mx/span,-1,1)*36;
-  const dy=clamp(-st.my/span,-1,1)*36;
-  const move=adv.lines.some(l=>l.axis!=="-");
-  const label=`${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}`;
-  return `<div class="sightMiniDial">
-    <div class="dialGrid">
-      <svg viewBox="0 0 110 110" aria-hidden="true">
-        <circle class="ring" cx="55" cy="55" r="48"/>
-        <circle class="ring dialRingInner" cx="55" cy="55" r="30"/>
-        <line class="axis" x1="10" y1="55" x2="100" y2="55"/>
-        <line class="axis" x1="55" y1="10" x2="55" y2="100"/>
-        <line class="vector" x1="55" y1="55" x2="${(55+dx).toFixed(1)}" y2="${(55+dy).toFixed(1)}"/>
-        <circle class="originDot" cx="55" cy="55" r="3.5"/>
-        <circle class="groupDot" cx="${(55+dx).toFixed(1)}" cy="${(55+dy).toFixed(1)}" r="7"/>
-      </svg>
-      <div>
-        <b>${move?"中心ズレからサイト方向を読む":"中心はほぼ合っています"}</b>
-        <span>緑の点が今回のグルーピング中心です。${label}。判断信頼度は ${pct(adv.confidence||0)}、外れ値候補を除いた中心を使っています。</span>
-      </div>
-    </div>
-  </div>`;
-}
 function windText(sess){
   const parts=[];
   if(sess.wx) parts.push(sess.wx);
@@ -553,68 +463,12 @@ function judgementFor(adv,sess){
     return {label:"保留",tone:"hold",text:`中心をまだ絞り込めていません（${ciText}）。同じ狙いで1〜2エンド追加してから判断します。`};
   }
   if(adv.personal && adv.personal.state==="今回だけの可能性" && (adv.personal.stability||0)>.45) return {label:"保留",tone:"hold",text:"同じサイト設定の過去の傾向と今回の中心が逆方向です。まず追加エンドで再現性を確認します。"};
-  if(st.rr>w*2.8) return {label:"射形優先",tone:"warn",text:"中心のズレは読めますが散りが大きめです。サイトは提案量だけにとどめ、リリース・押し手・照準の再現性を先に見ます。"};
+  if(st.rr>w*2.8) return {label:"射型優先",tone:"warn",text:"中心のズレは読めますが散りが大きめです。サイトは提案量だけにとどめ、リリース・押し手・照準の再現性を先に見ます。"};
   if(isWindy(sess) && d && !d.windAccounted && moves.some(l=>l.axis==="h") && !moves.some(l=>l.axis==="v")) return {label:"風を考慮",tone:"hold",text:"左右のズレに風の影響が混ざっている可能性があります。風向・風速を記録するか、無風・風待ちで再確認すると精度が上がります。"};
   if(adv.personal && adv.personal.state==="過去と一致") return {label:"動かす",tone:"ok",text:"今回の中心と、同じサイト設定の過去の傾向が一致しています。提案量を目安に動かす根拠があります。"};
   const shrinks=d?moves.map(l=>d[l.axis].shrink):[1];
   if(Math.min(...shrinks)>=.85) return {label:"動かす",tone:"ok",text:`中心のズレが誤差を超えています（偶然でこれだけずれる確率 ${fmtChance(d?d.test.p:NaN)}）。提案量を目安に動かせます。`};
   return {label:"少量調整",tone:"mid",text:"ズレは誤差を超えていますが、推定にまだ幅があります。提案量は誤差を見込んで控えめに計算済みなので、その量で動かして次のエンドで確認します。"};
-}
-function judgementHtml(adv,sess){
-  const j=judgementFor(adv,sess);
-  if(!j) return "";
-  const color=j.tone==="ok"?"var(--status-ok)":j.tone==="warn"?"var(--status-warn)":"var(--status-hold)";
-  return `<div class="note analysisMt6"><b style="color:${color}">判断: ${j.label}</b> — ${esc(j.text)}</div>`;
-}
-function summaryDecisionHtml(adv,sess){
-  const j=judgementFor(adv,sess);
-  if(!j) return "";
-  const tone=j.tone==="ok"?"ok":j.tone==="warn"?"warn":"hold";
-  const move=adv && adv.lines ? adv.lines.filter(l=>l.axis!=="-").length : 0;
-  const reason=move
-    ? "方向と量は下に出ます。先に、動かす根拠が十分かを確認します。"
-    : "動かさない理由を先に見て、同じ条件で本数を重ねます。";
-  return `<div class="decisionCard ${tone}">
-    <div class="k">動かすべきか</div>
-    <span class="decisionQuestion">サイトを触る前の判断</span>
-    <b>${esc(j.label)}</b>
-    <p>${esc(j.text)}</p>
-    <span>${reason}</span>
-  </div>`;
-}
-function conditionInsights(sess,st,setup){
-  const out=[];
-  const wind=windText(sess);
-  if(wind) out.push(`条件メモ: ${esc(wind)}${sess.note?` / ${esc(sess.note)}`:""}`);
-  if(setup && (setup.tuningMethod||setup.tuningResult)){
-    out.push(`チューニング記録: ${esc([setup.tuningMethod,setup.tuningResult].filter(Boolean).join(" / "))}`);
-  }
-  if(st){
-    const wm=windModel(sess||{});
-    if(wm.speed){
-      const traj=trajectoryModel(sess,setup||{},db.settings.eyeSight||850);
-      const pc=personalPhysicsCalibration(setup&&setup.id);
-      const wf=personalWindFactor(sess, pc);
-      out.push(`風の物理推定: ${wm.label} ${wm.speed.toFixed(1)}m/sで、横流れは${windDriftText(traj.windDriftCm*wf)}前後（±${traj.windUncertaintyCm.toFixed(1)}cm${wf!==1?` / 個人係数${wf.toFixed(2)}倍`:""}）として扱います。`);
-    }
-    if(analysisHasGroupingEvidence(st)){
-      if(isWindy(sess) && Math.abs(st.mx)>ringW(sess.faceD,sess.faceType)*.35) out.push("風のある回なので、左右ズレはサイトだけでなく風待ち・エイミング時間も一緒に記録してください。");
-      const direction=analysisSpreadDirection(st,1.35,true);
-      if(direction==="vertical") out.push("次の重点: 上下の再現性。引き尺、アンカーの高さ、リリース圧の変化を1項目ずつ確認。");
-      else if(direction==="horizontal") out.push("次の重点: 左右の再現性。風、ボウハンド、プランジャー、センターショットの順に切り分け。");
-      else if(st.rr<ringW(sess.faceD,sess.faceType)*1.2) out.push("次の重点: グルーピングは良好。中心ズレだけを小さく補正し、同じ条件で再確認。");
-    }
-    if(setup && !setup.arrowSpeed) out.push("精度向上: 実測初速を入れると、上下サイトのmm換算と距離別予測が安定します。");
-    if(setup && !setup.shaftSetWeightSpread) out.push("精度向上: 矢セット重量差を入れると、上下散りの信頼度判定が強くなります。");
-    const sp=setup?spineGuidance(setup):null;
-    if(sp && sp.ready && (sp.state==="柔らかめ寄り" || sp.state==="硬め寄り")) out.push(`用具確認: スパインが${sp.state}です。候補 ${sp.candidates.slice(0,3).join(" / ")} と矢飛びを比較してください。`);
-  }
-  if(sess.round && sess.round!=="free") out.push(`ラウンド: ${esc(roundLabel(sess.round))} の途中/結果として扱っています。`);
-  return out;
-}
-function conditionHtml(sess,st,setup){
-  const notes=conditionInsights(sess,st,setup).slice(0,4);
-  return notes.length?`<div class="advice analysisAdviceCard">${notes.map(n=>`<div class="note">・${n}</div>`).join("")}</div>`:"";
 }
 /* 記録ごとに最新結果だけを保持。長い履歴の巡回で固定件数キャッシュが全件ミスに
    なるのを防ぎ、削除・置換された記録は WeakMap により回収可能にする。 */
@@ -637,7 +491,8 @@ function sessionMetrics(sess){
   const all=(sess.ends||[]).flat();
   const total=all.reduce((a,x)=>a+x.s,0);
   /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
-  const pts=all.map(a=>({x:Number(a&&a.x),y:Number(a&&a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
+  /* 座標のない矢（点数だけの入力・「M 位置なし」。x/y が無いか null）は統計に入れない。null を 0 と読まない */
+  const pts=all.filter(arrowHasPos).map(a=>({x:Number(a.x),y:Number(a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
   const st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st,pts};
   SESSION_METRIC_CACHE.set(sess,{signature:sig,metrics});
@@ -723,52 +578,9 @@ function personalModel(sess,setup,currentSt){
   const state=support?"過去と一致":conflict?"今回だけの可能性":"観察継続";
   let text;
   if(support) text=`${sightNote}の過去の同条件でも同じ方向へ寄っています。サイト調整の根拠が強くなります。`;
-  else if(conflict) text=`${sightNote}の過去の偏りと今回の中心が逆方向です。風や射形の一時要因を疑い、追加エンドで確認する価値があります。`;
+  else if(conflict) text=`${sightNote}の過去の偏りと今回の中心が逆方向です。風や射型の一時要因を疑い、追加エンドで確認する価値があります。`;
   else text="過去傾向はまだ決定的ではありません。今回の中心とグルーピング形状を主材料にします。";
   return {sample:items.length,state,text,mx,my,seMx,seMy,rr,avg,align,stability,spread,histMag,curMag};
-}
-function personalModelHtml(adv,sess,setup){
-  if(!adv || !adv.personal) return "";
-  const p=adv.personal;
-  const tone=p.state==="過去と一致"?"var(--status-ok)":p.state==="今回だけの可能性"?"var(--status-warn)":"var(--status-hold)";
-  if(p.sample<2) return `<div class="advice analysisAdviceCard"><div class="note"><b>個人モデル: データ蓄積中</b> — ${esc(p.text)}</div></div>`;
-  return `<div class="advice analysisAdviceCard">
-    <div class="note"><b style="color:${tone}">個人モデル: ${p.state}</b> — ${esc(p.text)}</div>
-    <div class="kv"><span>過去の加重中心</span><span>${cmOffsetText(p.mx,"x")} / ${cmOffsetText(p.my,"y")}</span></div>
-    <div class="kv"><span>同条件データ</span><span>${p.sample}回 / 安定度 ${pct(p.stability)}</span></div>
-  </div>`;
-}
-function trustHtml(sess,setup,st){
-  const q=sessionQuality(sess,setup,st);
-  const color=q.tone==="ok"?"var(--status-ok)":q.tone==="warn"?"var(--status-warn)":"var(--status-hold)";
-  /* trustHtml は全呼び出し箇所が details（詳しく/詳しい根拠/判断の根拠）内のため、注記を常設できる */
-  return `<div class="kv"><span>判断信頼度</span><span><b style="color:${color}">${q.label}</b>（${pct(q.score)} / ${q.reasons.map(esc).join("・")}）</span></div>
-    ${confidenceNoteHtml("judge")}`;
-}
-function nextActionPlan(sess,adv,setup){
-  const plan=[];
-  const q=sessionQuality(sess,setup,adv&&adv.st);
-  const j=judgementFor(adv,sess);
-  if(!adv){ return ["6本以上を記録して、中心とばらつきを出す。"]; }
-  if(j && j.label==="動かす") plan.push("提案方向へサイトを動かし、次の1エンドは同じ狙い方で確認する。");
-  else if(j && j.label==="少量調整") plan.push("提案量（誤差を見込んで控えめに計算済み）だけ動かし、中心が戻るか確認する。");
-  else if(j && (j.label==="保留" || j.label==="風を考慮")) plan.push("サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。");
-  else if(j && j.label==="射形優先") plan.push("サイト調整は控えめにして、リリース・押し手・照準時間の再現性を先に整える。");
-  if(adv.personal && adv.personal.state==="今回だけの可能性") plan.push("過去傾向と逆なので、風向/射形メモを残して次回の同距離データと比較する。");
-  if(adv.personal && adv.personal.state==="過去と一致") plan.push("調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。");
-  if(q.score<.48) plan.push("この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。");
-  const st=adv.st;
-  if(st.sy>st.sx*1.35) plan.push("上下散りが強いので、アンカー高・引き尺・リリース圧を1項目ずつ固定して確認する。");
-  else if(st.sx>st.sy*1.35) plan.push("左右散りが強いので、風待ち・ボウハンド・プランジャーの順で切り分ける。");
-  if(setup){
-    const gp=gearPrecisionProfile(setup);
-    if(gp.missing.length) plan.push(`精度を上げる追加データ: ${esc(gp.missing.slice(0,2).join("・"))}`);
-  }
-  return plan.slice(0,4);
-}
-function nextActionHtml(sess,adv,setup){
-  const plan=nextActionPlan(sess,adv,setup);
-  return plan.length?`<div class="advice analysisAdviceCard"><div class="note"><b>次のアクション</b></div>${plan.map((p,i)=>`<div class="note">${i+1}. ${p}</div>`).join("")}</div>`:"";
 }
 function roundProgressHtml(sess){
   const r=ROUND_TYPES.find(x=>x.id===sess.round);
@@ -814,13 +626,12 @@ function csvGroupingResearchColumns(pts, st, f2){
 }
 function exportSessionsCsv(){
   beginActiveWorkflow();
+  /* CSV からは元に戻せないので、バックアップの「最後の書き出し」には数えない */
   shareOrDownloadText(`archery-note-sessions-${today()}.csv`,sessionsCsv(),"text/csv;charset=utf-8","Archery Note CSV").finally(endActiveWorkflow);
-  db.settings.lastBackupAt=new Date().toISOString();
-  save("csv-export");
 }
 function scorecardSvg(sess){
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);
-  const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(scoreLabel).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
+  const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(a=>scoreLabel(a)+(a.manual===true?"*":"")).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
   const h=210+rows.length*34;
   const title=`${fmtD(sess.date)} ${sess.dist}m ${esc(roundLabel(sess.round))}`;
   const bg="#f7f8f4", ink="#1c1e1c", green="#1a5c3a";
@@ -848,39 +659,6 @@ function scorecardSvg(sess){
 function exportScorecardImage(sess){
   shareOrDownloadText(`archery-scorecard-${sess.date||today()}-${sess.dist}m.svg`,scorecardSvg(sess),"image/svg+xml;charset=utf-8","Archery Note Scorecard");
 }
-function backupReminderHtml(){
-  if(db.sessions.length<3) return "";
-  const t=db.settings.lastBackupAt?Date.parse(db.settings.lastBackupAt):0;
-  const days=t?Math.floor((Date.now()-t)/(24*60*60*1000)):999;
-  if(days<30) return `<div class="hint">最終バックアップ/CSV出力: ${new Date(t).toLocaleDateString()}。月1回の保存ペースは良好です。</div>`;
-  return `<div class="advice analysisAdviceCard"><div class="note"><b>バックアップ推奨</b> — 練習記録が${db.sessions.length}回あります。端末トラブルに備えて、JSONバックアップを保存しておくと安心です。</div></div>`;
-}
-/* S4（ストレージ守りタスク・OPFS移行裁定 §4／§5-観点5）: 7日ITP対策の案内。
-   ブラウザのタブ・ブックマークのまま使い続ける（ホーム画面未追加の）利用者は、Safari の ITP により
-   7日間サイトを開かないと localStorage ごと消去される場合がある。これは OPFS へ移行しても解決しない
-   （裁定書§5参照）ため、バックアップ節で運用対策として案内する。runtimeKind() が "Web"（ネイティブ
-   でもホーム画面PWAでもない）のときだけ表示する。記録タブの featureHints.addToHome（一度見たら
-   消える発見ヒント）とは独立: こちらは「今も非standalone実行中」というライブ状態が理由なので、
-   既読フラグで恒久的に消してはいけない（ホーム画面に追加すれば runtimeKind() 自体が変わり自然に消える） */
-function webStorageRiskHtml(){
-  if(runtimeKind().kind!=="Web") return "";
-  return `<div class="hint">ブラウザで開いたままだと、7日間操作がないとデータが失われる場合があります。<b>ホーム画面に追加</b>すると安全性が上がります。</div>`;
-}
-/* ゴミ箱の一覧+復元は「データ」節、全消去ボタンは危険域へ分離して表示する（表示のみの分割。
-   #trashClear の挙動・確認ダイアログの有無は変えない） */
-function trashSettingsHtml(){
-  const items=(db.trash||[]).slice(0,8);
-  if(!items.length) return `<h3 class="trashH3">ゴミ箱</h3><div class="empty">削除したデータはありません。</div>`;
-  return `<h3 class="trashH3">ゴミ箱 <span class="subNoteSm">最新${items.length}/${(db.trash||[]).length}件</span></h3>
-    <table class="tbl"><tr><th>種類</th><th>内容</th><th>削除日</th><th></th></tr>
-    ${items.map(it=>`<tr><td>${trashTypeLabel(it.type)}</td><td>${esc(it.label)}</td><td>${fmtD(it.date)}</td><td class="right"><button class="btn sm ghost trashRestoreBtn" data-restore-trash="${esc(it.id)}">復元</button></td></tr>`).join("")}</table>`;
-}
-function trashClearButtonHtml(){
-  const items=(db.trash||[]).slice(0,8);
-  if(!items.length) return "";
-  return `<div class="settingsActionHint">ゴミ箱の中身を完全に削除します。元に戻せません。</div>
-    <div class="btnrow"><button class="btn danger" id="trashClear" data-testid="settings-trash-clear">ゴミ箱を空にする</button></div>`;
-}
 function regress(pts){
   const n=pts.length; if(n<2) return null;
   const xb=pts.reduce((a,p)=>a+p[0],0)/n, yb=pts.reduce((a,p)=>a+p[1],0)/n;
@@ -889,6 +667,16 @@ function regress(pts){
   const b=cv/vx, a=yb-b*xb;
   let ss=0,se=0; pts.forEach(p=>{ ss+=(p[1]-yb)**2; se+=(p[1]-(a+b*p[0]))**2; });
   return {a,b,zero: Math.abs(b)>1e-9? -a/b : null,r2:ss>1e-9?clamp(1-se/ss,0,1):0,kind:"linear",est:d=>a+b*d};
+}
+/* サイト値の文字列を数に読む。台帳・目盛りの図・予測・調整の目安・校正で同じ読み方にする。
+   全角は半角に、小数のカンマは点に（「5,2」は 5.2）。先頭の数だけを読む（「5.2 無風」は 5.2）。
+   数で始まらない値は NaN（台帳では「上下の数値なし」、計算には使わない） */
+function parseSightNumber(v){
+  if(typeof v==="number") return Number.isFinite(v)?v:NaN;
+  if(v==null) return NaN;
+  const t=String(v).normalize("NFKC").trim().replace(/^\u2212/,"-");
+  const m=t.match(/^[+-]?(?:\d+(?:[.,]\d+)?|[.,]\d+)/);
+  return m?Number(m[0].replace(",",".")):NaN;
 }
 function robustLine(pts){
   if(pts.length<2) return null;
@@ -940,27 +728,6 @@ function robustWeightedLine(pts){
   fit.base=base;
   return fit;
 }
-function solve3(A,b){
-  const m=A.map((r,i)=>[...r,b[i]]);
-  for(let c=0;c<3;c++){
-    let piv=c; for(let r=c+1;r<3;r++) if(Math.abs(m[r][c])>Math.abs(m[piv][c])) piv=r;
-    if(Math.abs(m[piv][c])<1e-9) return null;
-    [m[c],m[piv]]=[m[piv],m[c]];
-    const div=m[c][c]; for(let k=c;k<4;k++) m[c][k]/=div;
-    for(let r=0;r<3;r++) if(r!==c){ const f=m[r][c]; for(let k=c;k<4;k++) m[r][k]-=f*m[c][k]; }
-  }
-  return [m[0][3],m[1][3],m[2][3]];
-}
-function quadraticFit(pts){
-  if(pts.length<4) return null;
-  const sx=[0,0,0,0,0], sy=[0,0,0];
-  pts.forEach(([x,y])=>{ let p=1; for(let i=0;i<5;i++){ sx[i]+=p; p*=x; } sy[0]+=y; sy[1]+=x*y; sy[2]+=x*x*y; });
-  const coef=solve3([[sx[0],sx[1],sx[2]],[sx[1],sx[2],sx[3]],[sx[2],sx[3],sx[4]]],sy);
-  if(!coef) return null;
-  const [a,b,c]=coef, yb=pts.reduce((s,p)=>s+p[1],0)/pts.length;
-  let ss=0,se=0; pts.forEach(([x,y])=>{ const e=a+b*x+c*x*x; ss+=(y-yb)**2; se+=(y-e)**2; });
-  return {a,b,c,kind:"curve",r2:ss>1e-9?clamp(1-se/ss,0,1):0,est:d=>a+b*d+c*d*d};
-}
 /* setup+distance のセッション群から「ズレ0になるサイト値」を回帰推定 */
 function regressionAdvice(setupId, dist){
   const setup=db.setups.find(s=>s.id===setupId);
@@ -972,7 +739,7 @@ function regressionAdvice(setupId, dist){
     /* 重み = 各回の中心の逆分散（1/SE²）を最大1に正規化。風の回は左右の誤差が読めないので左右の重みを半分にする */
     const raw=[];
     ss.forEach(s=>{
-      const v=parseFloat(s[key]);
+      const v=parseSightNumber(s[key]);
       const q=sessionQuality(s,setup);
       const st=q&&q.metrics?sightStats(q.metrics.st):null;
       const se=st?(axis==="my"?st.seY:st.seX):NaN;
@@ -1011,7 +778,7 @@ function sightInterp(setupId){
   const byDist={}, sourceByDist=Object.create(null);
   [...db.sightMarks].filter(m=>m.setupId===setupId)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts||0)-(b.ts||0))
-    .forEach(m=>{ const v=parseFloat(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
+    .forEach(m=>{ const v=parseSightNumber(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
   const keys=Object.keys(byDist).sort((a,b)=>+a-+b);
   const pts=keys.map(d=>[+d, byDist[d]]);
   if(pts.length<2) return null;
@@ -1034,7 +801,7 @@ function sightInterp(setupId){
           if(fc<fd){ hi=d; d=c; fd=fc; c=hi-gr*(hi-lo); fc=sse(c); }
           else{ lo=c; c=d; fc=fd; d=lo+gr*(hi-lo); fd=sse(d); }
         }
-        /* 探索範囲の端に張り付いた当てはめは台帳の矛盾（記録違い・別の用具）を示すので採らない */
+        /* 探索範囲の端に張り付いた当てはめは台帳の矛盾（記録違い・別の弓具）を示すので採らない */
         const vBest=(lo+hi)/2;
         const best=vBest>35.5&&vBest<94.5?sightFitAtSpeed(pts, phys, vBest):null;
         /* 入れ子モデルの F 検定（自由度 1, n−3、5%）で、初速を加えた改善が偶然を超えるときだけ採る */
@@ -1056,64 +823,6 @@ function sightInterp(setupId){
   const f=fit;
   return {pts, have:pts.map(p=>p[0]), model:"physics", r2:f.r2, est:d=>f.a+f.b*sightAngleFeature(d, f.ph), sources,
     speedFps:f.ph.speedMps/0.3048, speedSource:phys.measuredSpeed?"measured":f.fitted?"fitted":"estimated"};
-}
-function calibrationProfile(setupId){
-  const setup=db.setups.find(x=>x.id===setupId)||{};
-  const dists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist));
-  const sess=db.sessions.filter(s=>s.setupId===setupId);
-  const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;
-  const rich=gearPrecisionProfile(setup);
-  const score=clamp(dists.size*.12 + Math.min(withSight,10)*.035 + rich.score*.32 + (String(setup.arrowSpeed||"").trim()?0.14:0),0,1);
-  const level=levelFromScore(score, LEVELS.calibration);
-  const next=[];
-  if(dists.size<3) next.push("異なる距離のサイト値");
-  if(withSight<5) next.push("練習開始時のサイト値");
-  if(!setup.arrowSpeed) next.push("実測初速");
-  if(rich.score<.65) next.push("矢重量/FOC/ベイン");
-  return {score,level,dists:dists.size,withSight,gearLevel:rich.level,next};
-}
-const _MODEL_READINESS_CACHE=new Map();
-function modelReadinessProfile(setupId){
-  const cacheKey=setupId+"|"+DB_REV;
-  const hit=_MODEL_READINESS_CACHE.get(cacheKey);
-  if(hit) return hit;
-  const setup=db.setups.find(x=>x.id===setupId)||{};
-  const sess=db.sessions.filter(s=>s.setupId===setupId);
-  const usable=sess.map(s=>({s,q:sessionQuality(s,setup)}))
-    .filter(x=>x.q.metrics.st && x.q.metrics.st.n>=6);
-  const good=usable.filter(x=>x.q.score>=.48);
-  const byKey={};
-  good.forEach(x=>{
-    const s=x.s;
-    const k=[s.dist,s.faceD,s.faceType||"single"].join("|");
-    (byKey[k]=byKey[k]||[]).push(x);
-  });
-  const repeatGroups=Object.values(byKey).filter(g=>g.length>=2).length;
-  const withSight=sess.filter(s=>isFinite(parseFloat(s.sightV))||isFinite(parseFloat(s.sightH))).length;
-  const sightDists=new Set(db.sightMarks.filter(m=>m.setupId===setupId && isFinite(parseFloat(m.v))).map(m=>m.dist)).size;
-  const gp=gearPrecisionProfile(setup);
-  const score=clamp(good.length*.035 + repeatGroups*.13 + Math.min(withSight,10)*.035 + sightDists*.06 + gp.score*.24,0,1);
-  const level=levelFromScore(score, LEVELS.data);
-  const next=[];
-  if(good.length<5) next.push("6本以上の練習記録");
-  if(repeatGroups<2) next.push("同じ距離/的での反復");
-  if(withSight<4) next.push("練習開始時のサイト値");
-  if(sightDists<3) next.push("複数距離のサイト台帳");
-  if(gp.score<.65) next.push("矢重量・矢径・実測初速");
-  const result={score,level,total:sess.length,usable:usable.length,good:good.length,repeatGroups,withSight,sightDists,gearLevel:gp.level,next};
-  _MODEL_READINESS_CACHE.set(cacheKey,result);
-  if(_MODEL_READINESS_CACHE.size>20) _MODEL_READINESS_CACHE.delete(_MODEL_READINESS_CACHE.keys().next().value);
-  return result;
-}
-function modelReadinessHtml(setupId){
-  if(!setupId) return "";
-  const p=modelReadinessProfile(setupId);
-  return `<div class="advice analysisAdviceCard">
-    <div class="note"><b>個人データ準備度: ${p.level}</b>（${pct(p.score)}）</div>
-    <div class="kv"><span>使える練習</span><span>${p.good}回 / 同条件反復 ${p.repeatGroups}組</span></div>
-    <div class="kv"><span>サイト校正材料</span><span>サイト値つき練習 ${p.withSight}回 / 台帳 ${p.sightDists}距離</span></div>
-    ${p.next.length?`<div class="note">次に効くデータ: ${esc(p.next.slice(0,3).join("・"))}</div>`:`<div class="note">履歴・サイト値・用具入力の土台がかなり揃っています。</div>`}
-  </div>`;
 }
 function latestMark(setupId, dist){
   const ms=db.sightMarks.filter(m=>m.setupId===setupId && m.dist===dist).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.ts||0)-(a.ts||0));

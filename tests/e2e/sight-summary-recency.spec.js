@@ -15,18 +15,25 @@ async function snapshot(page) {
     return [d.sessions, d.setups, d.sightMarks, d.active, d.customRounds, d.formAnalyses];
   });
 }
+/* v5 段 7: 「サイト値のまとめ」は 分析 から 弓具 > サイト へ移した。対象は、その画面で選んでいる弓具の全距離 */
 async function summary(page, setup = "a", dist = "30") {
-  await page.locator('#tabs [data-v="analysis"]').tap();
-  await page.locator("#anSetup").selectOption(setup);
-  await page.locator("#anDist").selectOption(dist);
-  const control = page.locator("summary").filter({ hasText: "サイト値のまとめ" });
+  await page.locator('#tabs [data-v="gear"]').tap();
+  await page.getByTestId("gear-subtab-sight").tap();
+  await page.locator("#sgSetup").selectOption(setup);
+  const control = page
+    .getByTestId("sight-records-overview")
+    .locator("summary")
+    .filter({ hasText: "サイト値のまとめ" });
   await control.scrollIntoViewIfNeeded();
   await control.tap();
   const details = control.locator("..");
   await expect(details).toHaveAttribute("open", "");
-  await details.locator(".big").first().scrollIntoViewIfNeeded();
-  await expect(details.locator(".big").first()).toBeVisible();
-  return details.locator(".big");
+  const row = details
+    .locator(".listItem")
+    .filter({ has: page.getByText(`${dist}m`, { exact: true }) });
+  await row.locator(".big").scrollIntoViewIfNeeded();
+  await expect(row.locator(".big")).toBeVisible();
+  return row.locator(".big");
 }
 for (const width of [320, 375, 900]) {
   test(`same-day summary uses newer recorded time (${width})`, async ({ page }) => {
@@ -34,11 +41,11 @@ for (const width of [320, 375, 900]) {
     await seed(page);
     const before = await snapshot(page);
     await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
-    await page.locator('#tabs [data-v="sight"]').tap();
     await page.locator('#sgDistChips [data-d="30"]').tap();
     await expect(page.locator("[data-sight-id]").first()).toHaveAttribute("data-sight-id", "newer");
     await expect(page.locator("[data-sight-id]").first().locator("dd")).toHaveText(["90", "0.4"]);
     await page.locator('#tabs [data-v="record"]').tap();
+    await page.getByTestId("record-conditions").tap();
     await page.locator("details.recordDetails summary").tap();
     await page.locator("#fSetup").selectOption("a");
     await page.locator('#fDistChips [data-d="30"]').tap();
@@ -102,28 +109,36 @@ test("summary preserves date priority, ambiguous fallback, sessions and raw valu
   );
   expect(mixed).toBe("90 / 左右0.4");
 });
-test("summary keeps setup, distance and period scope", async ({ page }) => {
+test("summary keeps the selected setup and lists each distance", async ({ page }) => {
   await seed(page);
   const before = await snapshot(page);
   await expect(await summary(page, "b", "30")).toHaveText(["900 / 左右0.4"]);
   await expect(await summary(page, "a", "18")).toHaveText(["40 / 左右0.4"]);
   await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
-  await page.locator('[data-period="7d"]').tap();
-  const control = page.locator("summary").filter({ hasText: "サイト値のまとめ" });
-  await control.tap();
-  await expect(control.locator("..").locator(".big")).toHaveText(["90 / 左右0.4"]);
+  /* 分析タブには、サイトの記録への入口だけを置く */
+  await page.locator('#tabs [data-v="analysis"]').tap();
+  await expect(page.locator("#main summary").filter({ hasText: "サイト値のまとめ" })).toHaveCount(
+    0,
+  );
   expect(await snapshot(page)).toEqual(before);
 });
 test("restoring an older same-day mark keeps newer analysis value", async ({ page }) => {
   await seed(page);
   const before = await snapshot(page);
-  await page.locator('#tabs [data-v="sight"]').tap();
+  await page.locator('#tabs [data-v="gear"]').tap();
+  await page.getByTestId("gear-subtab-sight").tap();
   await page.locator('#sgDistChips [data-d="30"]').tap();
   await page.locator('[data-del="older"]').tap();
   await page.locator("#acOk").tap();
+  // v5: 設定（ゴミ箱からの復元）の入口は記録タブの見出し行だけにある
+  await page.locator('#tabs [data-v="record"]').tap();
   await page.getByRole("button", { name: "設定", exact: true }).tap();
+  // v5 段 8: 設定 > データ の「ゴミ箱」から一覧を開いて元に戻す
+  await page.getByTestId("settings-trash").scrollIntoViewIfNeeded();
+  await page.getByTestId("settings-trash").tap();
   await page.locator("[data-restore-trash]").scrollIntoViewIfNeeded();
   await page.locator("[data-restore-trash]").tap();
+  await expect(page.getByTestId("trash-sheet")).toHaveCount(0);
   await page.locator("#setClose").tap();
   const restored = await snapshot(page);
   expect([...restored[2]].sort((a, b) => a.id.localeCompare(b.id))).toEqual(

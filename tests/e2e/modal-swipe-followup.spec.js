@@ -16,6 +16,7 @@ for (const width of [320, 375]) {
     await page.goto("/");
     await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
     await page.locator('#tabs [data-v="record"]').click();
+    await page.getByTestId("record-conditions").click();
     await page.getByRole("button", { name: "18m", exact: true }).click();
     await page.getByRole("combobox", { name: "的", exact: true }).selectOption("40");
     await page.getByRole("combobox", { name: "1エンドの本数", exact: true }).selectOption("6");
@@ -44,11 +45,20 @@ for (const width of [320, 375]) {
       render();
     });
     const before = await page.evaluate(() => ({ sessions: db.sessions, active: db.active }));
-    await page.locator("#btnSettings").click();
+    // v5 段 8: 設定は全画面になり、下へ引く取っ手が無い。メニューの「天気・風・メモ」のシートで確かめる
+    await page.getByTestId("active-menu").click();
+    await page.locator("#mMeta").click();
+    await expect(page.locator(".modalSwipeHandle")).toBeVisible();
     await expect(page.locator(".ovl")).toHaveCount(1);
     await pullSheetHandle(page, context);
     await expect(page.locator(".ovl")).toHaveCount(0);
-    // Exactly one touchscreen tap. No keyboard, mouse click, or retry follows the pull.
+    // Exactly one touchscreen tap per control. No keyboard, mouse click, or retry follows the pull.
+    // v5: 終了はメニューの中なので、引き下げ直後の1タップでメニューが開き、次の1タップで終了する
+    const menu = page.getByTestId("active-menu"),
+      menuBox = await menu.boundingBox();
+    expect(menuBox).not.toBeNull();
+    await page.touchscreen.tap(menuBox.x + menuBox.width / 2, menuBox.y + menuBox.height / 2);
+    await expect(page.getByTestId("active-menu-sheet")).toBeVisible();
     const button = page.getByTestId("active-finish"),
       box = await button.boundingBox();
     expect(box).not.toBeNull();
@@ -57,7 +67,7 @@ for (const width of [320, 375]) {
       path: testInfo.outputPath(`swipe-followup-${width}.png`),
       animations: "disabled",
     });
-    await expect(page.locator(".ovl .statbar")).toContainText("合計 (7本)");
+    await expect(page.getByTestId("result-total").locator(".vsecH .aside")).toContainText("7射");
     await expect
       .poll(() =>
         page.evaluate(() => JSON.parse(globalThis.localStorage.getItem("archeryNote.v1")).active),
@@ -71,7 +81,9 @@ for (const width of [320, 375]) {
       ...before.active.ends.flat(),
       ...before.active.cur,
     ]);
-    const handleBox = await page.locator(".modalSwipeHandle").boundingBox();
+    // v5: 結果は全画面で、下へ引いて閉じる取っ手は無い。「保存して閉じる」の1タップで閉じる
+    await expect(page.getByTestId("result-screen").locator(".modalSwipeHandle")).toHaveCount(0);
+    const handleBox = await page.locator("#sumClose").boundingBox();
     await page.touchscreen.tap(
       handleBox.x + handleBox.width / 2,
       handleBox.y + handleBox.height / 2,

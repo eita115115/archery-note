@@ -1,0 +1,41 @@
+{
+  "schema": 5,
+  "setups": [],
+  "sightMarks": [],
+  "sessions": [
+    {
+      "id": "notes-session-1",
+      "date": "2026-11-10",
+      "dist": 70,
+      "faceD": 122,
+      "faceType": "single",
+      "perEnd": 6,
+      "round": "free",
+      "note": "3エンド目で引き手の肘が下がりました。<b>太字</b> & \"引用\"",
+      "tags": ["射型", "風"],
+      "ends": [[{ "x": 0, "y": 0, "s": 10, "X": true }, { "s": 9, "src": "key" }]]
+    }
+  ],
+  "notes": [
+    {
+      "id": "memo-1",
+      "date": "2026-11-08",
+      "ts": 1794100000000,
+      "text": "素引き30回。<script>alert(1)</script> 鏡で肩の高さを確認しました。",
+      "tags": ["射型"]
+    },
+    { "id": "memo-2", "date": "2026-11-09", "ts": 1794200000000, "text": "タグのないメモ\n2行目" }
+  ],
+  "trash": [
+    {
+      "id": "trash-memo",
+      "type": "note",
+      "label": "メモ 2026/11/1",
+      "date": "2026-11-02",
+      "ts": 1793600000000,
+      "data": { "id": "memo-0", "date": "2026-11-01", "ts": 1793500000000, "text": "ゴミ箱のメモ", "tags": ["弓具"] }
+    }
+  ],
+  "settings": { "eyeSight": 850, "theme": "auto", "lastBackupAt": null, "activeGuideSeen": true },
+  "active": null
+}

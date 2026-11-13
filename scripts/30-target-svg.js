@@ -70,21 +70,99 @@ function markCircle(a, faceD, color, label, cls, arrowR){
     /* 番号は実寸の矢円に重ならないよう目印の上寄りに置く（目印が実寸と同じ大きさなら中央） */
     (label?`<text x="${a.x}" y="${-a.y-(loc>r*1.05?loc*.4:0)}" font-size="${loc*(loc>r*1.05?1:1.2)}" fill="#fff" stroke="rgba(0,0,0,.55)" stroke-width="${loc*.12}" paint-order="stroke" text-anchor="middle" dominant-baseline="central" font-weight="bold">${esc(label)}</text>`:"")+`</g>`;
 }
+/* 「点数だけ直す」で、位置から決まる点と違う点にした矢（manual:true）の印。スコア表の * と同じ記号を
+   矢円の右上に置く。矢円の大きさと位置は変えない（採点の円はそのまま）。fontCm は文字の大きさ（cm）、
+   省略時は的の直径から決める */
+function manualMarkSvg(a, faceD, arrowR, fontCm){
+  const r=arrowMarkRadius(faceD, arrowR), loc=Math.max(arrowLocatorRadius(faceD), r);
+  const f=fontCm||faceD/22;
+  return `<text class="manualMark" x="${a.x+loc*.8+f*.3}" y="${-a.y-loc*.8-f*.15}" font-size="${f}" fill="#fff" stroke="#000" stroke-width="${f*.16}" paint-order="stroke" text-anchor="middle" dominant-baseline="central" font-weight="bold" aria-hidden="true">*</text>`;
+}
+/* 記録中のエンドの矢番号（射った順）を、画面上の実寸で読める吹き出しにする。
+   吹き出しは矢から北東へずらし、重なるときは互いに押し出して引き出し線で結ぶ（決定的な反復）。
+   pxPerCm は的の SVG の画面上の倍率。吹き出しは直径 22px・文字 13px 相当で、実寸の矢円（arrowFoot）には触れない */
+function layoutArrowLabels(points, pxPerCm, box){
+  const r=11/pxPerCm, minD=2*r*1.08, off=r*1.75;
+  /* box は SVG の viewBox（x, y, width, height）。吹き出しは的の表示範囲からはみ出さない */
+  const clamp=(l)=>{
+    if(!box) return l;
+    const x=Math.min(Math.max(l.x, box.x+r), box.x+box.width-r);
+    const sy=Math.min(Math.max(-l.y, box.y+r), box.y+box.height-r);
+    return {x, y:-sy};
+  };
+  const L=points.map(p=>p?clamp({x:p.x+off*Math.SQRT1_2,y:p.y+off*Math.SQRT1_2}):null);
+  for(let it=0;it<80;it++){
+    let moved=false;
+    for(let i=0;i<L.length;i++){
+      if(!L[i]) continue;
+      for(let j=i+1;j<L.length;j++){
+        if(!L[j]) continue;
+        const d=Math.hypot(L[j].x-L[i].x, L[j].y-L[i].y);
+        if(d>=minD) continue;
+        /* 完全に重なったときは番号ごとに決まった向き（黄金角）へ離す */
+        const ang=(j*2.399963)%(2*Math.PI);
+        const ux=d>1e-9?(L[j].x-L[i].x)/d:Math.cos(ang), uy=d>1e-9?(L[j].y-L[i].y)/d:Math.sin(ang);
+        const push=(minD-d)/2;
+        L[i]=clamp({x:L[i].x-ux*push,y:L[i].y-uy*push});
+        L[j]=clamp({x:L[j].x+ux*push,y:L[j].y+uy*push});
+        moved=true;
+      }
+      /* 吹き出しが矢そのもの（自分以外の矢も含む）を隠さないよう、矢の位置からも離す */
+      for(let k=0;k<points.length;k++){
+        const p=points[k];
+        if(!p) continue;
+        const d=Math.hypot(L[i].x-p.x, L[i].y-p.y), minA=r*1.3;
+        if(d>=minA) continue;
+        const ang=((i+1)*2.399963)%(2*Math.PI);
+        const ux=d>1e-9?(L[i].x-p.x)/d:Math.cos(ang), uy=d>1e-9?(L[i].y-p.y)/d:Math.sin(ang);
+        L[i]=clamp({x:L[i].x+ux*(minA-d),y:L[i].y+uy*(minA-d)});
+        moved=true;
+      }
+    }
+    if(!moved) break;
+  }
+  return {labels:L, r, font:13/pxPerCm};
+}
+function arrowLabelSvg(p, l, r, font, label, selected){
+  if(!p||!l) return "";
+  const fill=selected?"var(--ink)":"var(--invert-bg)", fg=selected?"var(--bg)":"var(--invert-fg)";
+  return `<g class="arrowLabel"><line x1="${p.x}" y1="${-p.y}" x2="${l.x}" y2="${-l.y}" stroke="${fill}" stroke-width="${r/7}"/>`+
+    `<circle cx="${l.x}" cy="${-l.y}" r="${r}" fill="${fill}" stroke="#fff" stroke-width="${r/9}"/>`+
+    `<text x="${l.x}" y="${-l.y}" font-size="${font}" fill="${fg}" text-anchor="middle" dominant-baseline="central" font-weight="700">${esc(label)}</text></g>`;
+}
 /* static plot for history/summary */
-function plotSession(sess, container){
+/* 位置のある矢が1本もない記録（点数だけの入力）に出す表示。的の図・統計・サイトの目安は作らない */
+function noImpactHtml(sess){
+  const n=((sess&&sess.ends)||[]).flat().length;
+  return `<div class="noImpact" data-testid="no-impact"><b>着弾データなし</b><span>${n}射すべて位置のない記録です（点数だけの入力）。合計・平均・10/X の数は点数から数えています。的の図・集まり具合・サイトの目安は、位置のある矢がある記録だけで作ります。</span></div>`;
+}
+/* opts.idPrefix: 同じ画面に図を複数置くときの id の接頭辞（既定 "pl"）。
+   opts.plain: 分析の図。矢・着弾中心の十字・半径 RMS の破線の円だけを描く（外れ値候補の×印と楕円は描かない） */
+function plotSession(sess, container, opts){
+  const o=opts||{};
+  const pfx=o.idPrefix||"pl";
   const faceD=sess.faceD;
+  const allArrows=((sess&&sess.ends)||[]).flat();
+  const posCount=allArrows.filter(arrowHasPos).length;
+  if(!posCount){ container.innerHTML=noImpactHtml(sess); return; }
+  const manualCount=allArrows.filter(a=>arrowHasPos(a)&&a.manual===true).length;
   const ft=sess.faceType==="triple"?"spot":sess.faceType;
-  container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,"pl",ft)}</div>`+
-    (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"");
-  const marks=$("#plmarks");
+  container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,pfx,ft)}</div>`+
+    (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"")+
+    (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射を表示しています（位置なし ${allArrows.length-posCount}射は、図と着弾の統計に入れていません）。</div>`:"")+
+    (manualCount?`<div class="hint plotManualNote" data-testid="plot-manual-note">* の付いた矢（${manualCount}射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録しています。</div>`:"");
+  const marks=container.querySelector("#"+pfx+"marks");
   let html="";
   /* 記録時の判定の半径で描く（旧判定の記録は旧半径。保存された点数と矢円を一致させる） */
   const arrowR=sessionScoringRadius(sess, db.setups.find(x=>x.id===sess.setupId));
-  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
+  /* 座標のない矢（点数だけの記録・座標なしの M）は描かない */
+  sess.ends.forEach((end,ei)=>{ end.forEach(a=>{ if(arrowHasPos(a)) html+=markCircle(a,faceD,ENDCOLORS[ei%ENDCOLORS.length],"","",arrowR); }); });
+  /* 手で直した矢の * は、ほかの矢円に隠れないよう最後に描く */
+  sess.ends.forEach(end=>{ end.forEach(a=>{ if(arrowHasPos(a)&&a.manual===true) html+=manualMarkSvg(a,faceD,arrowR); }); });
   const st=sessionMetrics(sess).st;
   if(st){
     const w=ringW(faceD,ft);
-    st.excluded.forEach(a=>{
+    if(!o.plain) st.excluded.forEach(a=>{
       const r=faceD/70;
       html+=`<g><line x1="${a.x-r}" y1="${-a.y-r}" x2="${a.x+r}" y2="${-a.y+r}" stroke="#000" stroke-width="${faceD/300}"/>`+
         `<line x1="${a.x-r}" y1="${-a.y+r}" x2="${a.x+r}" y2="${-a.y-r}" stroke="#000" stroke-width="${faceD/300}"/></g>`;
@@ -92,7 +170,7 @@ function plotSession(sess, container){
     html+=`<g><line x1="${st.mx-w*0.8}" y1="${-st.my}" x2="${st.mx+w*0.8}" y2="${-st.my}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<line x1="${st.mx}" y1="${-st.my-w*0.8}" x2="${st.mx}" y2="${-st.my+w*0.8}" stroke="#000" stroke-width="${faceD/400}"/>`+
       `<circle cx="${st.mx}" cy="${-st.my}" r="${st.rr}" fill="none" stroke="#000" stroke-dasharray="${faceD/60} ${faceD/120}" stroke-width="${faceD/400}"/></g>`;
-    if(st.major!=null && st.minor!=null){
+    if(!o.plain && st.major!=null && st.minor!=null){
       html+=`<ellipse cx="${st.mx}" cy="${-st.my}" rx="${st.major}" ry="${st.minor}" transform="rotate(${-st.angleDeg} ${st.mx} ${-st.my})" fill="none" stroke="var(--status-ok)" stroke-dasharray="${faceD/90} ${faceD/160}" stroke-width="${faceD/380}"/>`;
     }
   }

@@ -27,7 +27,8 @@ for (const size of [
       }
       const action = await page.getByTestId("active-end").boundingBox();
       expect(action.y).toBeGreaterThan(0);
-      expect(action.y + action.height).toBeLessThan(size.height - 64);
+      // v5: 記録中はタブが無く、操作列が画面の下端に付く
+      expect(action.y + action.height).toBeLessThanOrEqual(size.height);
       await page.mouse.click(action.x + action.width / 2, action.y + action.height / 2);
       await expect.poll(async () => (await state()).ends.length).toBe(end + 1);
       expect((await state()).ends[end]).toHaveLength(3);
