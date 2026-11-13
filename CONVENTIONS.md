@@ -22,7 +22,7 @@ They execute in numbered order and share one global scope:
 | 47 | `47-form-view.js` | Form analysis view | form view rendering |
 | 50 | `50-record-view.js` | Record view, active session, history, analysis, sight views | `view`, `ui`, `render`, `showView`, `renderRecord`, `renderActive`, `refreshActive`, `renderHistory`, `renderAnalysis`, `renderSight`, `renderGear` is in 70 |
 | 60 | `60-history-sight-view.js` | History detail sheets, sight table | `driftText`, sight/history rendering helpers |
-| 70 | `70-gear-settings.js` | Gear management, settings panel | `renderGear`, `openSettings`, `applyTheme`, `GEAR_FIELDS`, `GEAR_SECTIONS`, `CATALOG_SHAFTS`, `openGearForm`, `openGearDetail`, `openSetupWizard` |
+| 70 | `70-gear-settings.js` | Gear management, settings panel | `renderGear`, `openSettings`, `applyTheme`, `GEAR_FIELDS`, `GEAR_SECTIONS`, `CATALOG_SHAFTS`, `openGearForm`, `openSetupWizard`, `recordingSetupId`, `gearSpecRows`, `gearHistoryEntries` |
 | 90 | `90-init.js` | Startup: SW registration, event wiring, first `render()` | `updateAvailable`, `freshReload`, `beginActiveWorkflow`, `endActiveWorkflow` |
 
 ### Dependency Rules

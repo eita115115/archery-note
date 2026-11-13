@@ -1081,6 +1081,9 @@ function renderGear(m) {
         ui.gearSel = li.dataset.id;
         render();
         window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        /* 押した行は描き直しで無くなるので、キーボードの位置を仕様表の「編集」へ移す */
+        const edit = $("#gEdit");
+        if (edit) edit.focus({ preventScroll: true });
       }),
   );
   $("#gDel").onclick = async () => {
