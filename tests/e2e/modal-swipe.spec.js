@@ -9,14 +9,14 @@ async function drag(page, handle, dy, dx = 0) {
   await page.mouse.move(x + dx, y + dy, { steps: 8 });
   await page.mouse.up();
 }
-test("settings swipes close, short and sideways drags preserve the sheet", async ({ page }) => {
+test("a sheet swipes closed, short and sideways drags preserve it", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
-  // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
-  await page.locator('#tabs [data-v="record"]').click();
-  await page.locator("#btnSettings").focus();
+  // v5 段 8: 設定は全画面になり、下へ引く取っ手が無い。ノートの一番下の「ゴミ箱」のシートで確かめる
+  await page.locator('#tabs [data-v="history"]').click();
+  await page.locator("#notesTrash").focus();
   await page.keyboard.press("Enter");
   const handle = page.locator(".modalSwipeHandle");
   await expect(handle).toBeVisible();
@@ -34,17 +34,17 @@ test("settings swipes close, short and sideways drags preserve the sheet", async
   await drag(page, handle, 110);
   await expect(page.locator(".ovl")).toHaveCount(0);
   await expect(page.locator("body")).not.toHaveClass(/modalOpen/);
-  await expect(page.locator("#btnSettings")).toBeFocused();
+  await expect(page.locator("#notesTrash")).toBeFocused();
 });
-test("swiping nested confirmation cancels and leaves underlying settings open", async ({
+test("swiping nested confirmation cancels and leaves the underlying sheet open", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
-  // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
-  await page.locator('#tabs [data-v="record"]').click();
-  await page.locator("#btnSettings").click();
+  // v5 段 8: 設定は全画面になり、下へ引く取っ手が無い。ノートの一番下の「ゴミ箱」のシートで確かめる
+  await page.locator('#tabs [data-v="history"]').click();
+  await page.locator("#notesTrash").click();
   await page.evaluate(() => {
     globalThis.swipeResult = "pending";
     globalThis.eval('appConfirm("架空データの確認")').then((result) => {
@@ -60,7 +60,7 @@ test("swiping nested confirmation cancels and leaves underlying settings open", 
   await page.keyboard.press("Enter");
   await expect(page.locator(".ovl")).toHaveCount(0);
 });
-test("touch pull closes settings; cancelled pull leaves it open", async ({
+test("touch pull closes a sheet; cancelled pull leaves it open", async ({
   page,
   context,
   browserName,
@@ -69,9 +69,9 @@ test("touch pull closes settings; cancelled pull leaves it open", async ({
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
-  // v5: デモデータは分析の画面で開く。設定の入口は記録タブの見出し行だけにある
-  await page.locator('#tabs [data-v="record"]').click();
-  await page.locator("#btnSettings").click();
+  // v5 段 8: 設定は全画面になり、下へ引く取っ手が無い。ノートの一番下の「ゴミ箱」のシートで確かめる
+  await page.locator('#tabs [data-v="history"]').click();
+  await page.locator("#notesTrash").click();
   const handle = page.locator(".modalSwipeHandle");
   await handle.scrollIntoViewIfNeeded();
   const b = await handle.boundingBox();
@@ -92,5 +92,18 @@ test("touch pull closes settings; cancelled pull leaves it open", async ({
       touchPoints: [{ x, y: y + dy }],
     });
   await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await expect(page.locator(".ovl")).toHaveCount(0);
+});
+test("full-screen settings has no swipe handle and closes with the back button", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
+  await page.locator('#tabs [data-v="record"]').click();
+  await page.locator("#btnSettings").click();
+  await expect(page.getByTestId("settings-screen")).toBeVisible();
+  await expect(page.locator(".modalSwipeHandle")).toHaveCount(0);
+  await page.getByTestId("settings-back").click();
   await expect(page.locator(".ovl")).toHaveCount(0);
 });

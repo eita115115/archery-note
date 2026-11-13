@@ -45,10 +45,10 @@ for (const width of [320, 375]) {
       render();
     });
     const before = await page.evaluate(() => ({ sessions: db.sessions, active: db.active }));
-    // v5: 記録中は画面名の行が無い。設定はメニューから開く
+    // v5 段 8: 設定は全画面になり、下へ引く取っ手が無い。メニューの「天気・風・メモ」のシートで確かめる
     await page.getByTestId("active-menu").click();
-    await page.locator("#mSettings").click();
-    await expect(page.locator("#setClose")).toBeVisible();
+    await page.locator("#mMeta").click();
+    await expect(page.locator(".modalSwipeHandle")).toBeVisible();
     await expect(page.locator(".ovl")).toHaveCount(1);
     await pullSheetHandle(page, context);
     await expect(page.locator(".ovl")).toHaveCount(0);

@@ -991,11 +991,6 @@ function sightRecordsOverviewHtml(setupId) {
    セッティングの選択 → サイト台帳（目盛りの図と距離ごとの最新値。行を押すと距離を選ぶ）→ 選んだ距離の記録 →
    調整の目安 → 記録していない距離の予測 → サイト値の記録（全距離）。
    計算（sightDecision・sightInterp ほか 20-・40-）は変えず、結果の出し方だけを作り直している。 */
-function sightNumText(v) {
-  const n = Number(v);
-  if (!Number.isFinite(n)) return "—";
-  return String(+n.toFixed(2));
-}
 /* 距離ごとの最新の記録。図と値に使うのは、上下が数値で入っている最も新しい記録（sightInterp と同じ採り方） */
 function sightDistRows(sid, dists, interp) {
   return dists.map((d) => {

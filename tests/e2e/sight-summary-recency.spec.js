@@ -133,8 +133,12 @@ test("restoring an older same-day mark keeps newer analysis value", async ({ pag
   // v5: 設定（ゴミ箱からの復元）の入口は記録タブの見出し行だけにある
   await page.locator('#tabs [data-v="record"]').tap();
   await page.getByRole("button", { name: "設定", exact: true }).tap();
+  // v5 段 8: 設定 > データ の「ゴミ箱」から一覧を開いて元に戻す
+  await page.getByTestId("settings-trash").scrollIntoViewIfNeeded();
+  await page.getByTestId("settings-trash").tap();
   await page.locator("[data-restore-trash]").scrollIntoViewIfNeeded();
   await page.locator("[data-restore-trash]").tap();
+  await expect(page.getByTestId("trash-sheet")).toHaveCount(0);
   await page.locator("#setClose").tap();
   const restored = await snapshot(page);
   expect([...restored[2]].sort((a, b) => a.id.localeCompare(b.id))).toEqual(

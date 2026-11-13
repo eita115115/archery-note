@@ -20,11 +20,11 @@ async function snapshot(page) {
   });
 }
 async function prediction(page) {
-  const control = page.locator("summary").filter({ hasText: "サイト値分析・予測" });
-  await control.scrollIntoViewIfNeeded();
-  await control.tap();
-  await expect(control.locator("..")).toHaveAttribute("open", "");
-  return page.locator('[data-testid="sight-prediction"]');
+  // v5 段 8: 予測は折りたたみの中ではなく、「記録していない距離の予測」の見出しで常に出ている
+  const panel = page.locator('[data-testid="sight-prediction"]');
+  await panel.scrollIntoViewIfNeeded();
+  await expect(panel.getByRole("heading", { name: "記録していない距離の予測" })).toBeVisible();
+  return panel;
 }
 for (const width of [320, 375, 900]) {
   test(`prediction shows values and adopted record dates (${width})`, async ({ page }) => {
@@ -118,7 +118,7 @@ test("source metadata preserves point order, identity, zero and raw distance key
     }
   });
   expect(result).toEqual({
-    countLabel: "採用した実測 3件",
+    countLabel: "計算に使った実測 3件",
     pts: [
       [18, 0],
       [30, 80],
@@ -222,10 +222,10 @@ test("prediction keeps setup scope, disappears below two distances and handles a
   });
   const panel = await prediction(page);
   await expect(panel.locator("[data-predict-dist]")).toHaveCount(0);
-  await expect(panel).toContainText("弾道モデル");
+  await expect(panel).toContainText("弾道の計算");
   // 0/0/0/100 のような矛盾した台帳では初速の当てはめが探索範囲の端に張り付くので採らず、用具からの推定を使う
   await expect(panel).toContainText("弓具から推定");
-  await expect(panel).toContainText("定番距離");
+  await expect(panel).toContainText("定番の距離");
   await panel.locator("details.sightSources summary").tap();
   await expect(panel.locator("[data-source-id]")).toHaveCount(4);
 });

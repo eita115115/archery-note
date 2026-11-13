@@ -75,9 +75,8 @@ async function seed(page, boundaryDays = null) {
 }
 
 function records(page) {
-  return page
-    .locator(".card")
-    .filter({ has: page.getByRole("heading", { name: /^サイト値の記録/ }) });
+  // v5 段 8: 「サイト値の記録」は枠ではなく、罫線の見出しの下の行
+  return page.getByTestId("sight-records-list");
 }
 function summary(page) {
   return page

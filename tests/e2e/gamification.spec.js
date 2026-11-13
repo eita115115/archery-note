@@ -168,12 +168,14 @@ test("enabling gamification from settings adds one plain goal line to the notes 
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await page.locator("#btnSettings").click();
+  // v5 段 8: 「練習の目標と連続記録」は 切 / 入 の2択（設定 > 記録）
   const gamToggle = page.getByTestId("gamify-toggle");
-  await expect(gamToggle).not.toBeChecked();
+  const gamPressed = gamToggle.locator('[aria-pressed="true"]');
+  await expect(gamPressed).toHaveAttribute("data-gm", "0");
   await expect(page.getByTestId("gamify-day-chips")).toHaveCount(0);
 
-  await gamToggle.click();
-  await expect(gamToggle).toBeChecked();
+  await gamToggle.locator('[data-gm="1"]').click();
+  await expect(gamPressed).toHaveAttribute("data-gm", "1");
   await expect(page.getByTestId("gamify-day-chips")).toBeVisible();
 
   await page.locator("#setClose").click();

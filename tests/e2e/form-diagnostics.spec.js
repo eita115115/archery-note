@@ -275,6 +275,12 @@ async function seedTask9Page(page, database, mode = "web-success") {
   await page.goto("/");
   await page.locator("#btnSettings").click();
   await page.waitForTimeout(750);
+  // 起動直後の保存（launch-count）の控えは、ブラウザの手が空いたとき（最長 1.8 秒後）に書かれる。
+  // 全画面の設定では描画が止まっていて手空きの通知が遅れることがあるので、ここで書き切ってから「前」の状態を取る
+  await page.evaluate(() => {
+    globalThis.flushPendingSave();
+    globalThis.flushSafetySnapshot();
+  });
 }
 
 async function task9PersistenceSnapshot(page) {
@@ -1030,14 +1036,14 @@ for (const [label, value, enabled] of [
     // v5: 設定の入口は記録タブの見出し行だけにある
     await page.locator('#tabs [data-v="record"]').click();
     await page.locator("#btnSettings").click();
-    const pressed = page.locator('#ftChips .chip[aria-pressed="true"]');
+    const pressed = page.locator('#ftChips button[aria-pressed="true"]');
     await expect(pressed).toHaveCount(1);
     await expect(pressed).toHaveAttribute("data-ft", enabled ? "1" : "0");
 
-    await page.locator('#ftChips .chip[data-ft="1"]').click();
+    await page.locator('#ftChips button[data-ft="1"]').click();
     await expect(pressed).toHaveAttribute("data-ft", "1");
     expect(await page.evaluate(() => db.settings.formTrackingEnabled)).toBe(true);
-    await page.locator('#ftChips .chip[data-ft="0"]').click();
+    await page.locator('#ftChips button[data-ft="0"]').click();
     await expect(pressed).toHaveAttribute("data-ft", "0");
     expect(await page.evaluate(() => db.settings.formTrackingEnabled)).toBe(false);
   });

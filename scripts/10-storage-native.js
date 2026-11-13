@@ -227,7 +227,7 @@ function summaryStorageNoticeHtml(){
   if(storageUsageRatio().ratio<STORAGE_WARN_RATIO) return "";
   return `<aside class="summaryStorageNotice" data-testid="summary-storage-notice" aria-label="保存容量のお知らせ">
     <b>容量が残り少なくなっています</b>
-    <p>記録を守るため、バックアップ保存をおすすめします。</p>
+    <p>使用量が保存できる量の目安の 80% を超えています。設定の「バックアップを書き出す」で、控えのファイルを作れます。</p>
     <button type="button" class="btn sec" id="sumBackupSettings">バックアップ設定を開く</button>
   </aside>`;
 }
@@ -503,7 +503,7 @@ function writeDbNow(o){
     return true;
   }catch(e){
     console.error(e);
-    try{ toast("保存容量が足りません。設定からバックアップ保存してください",6000); }catch(_){}
+    try{ toast("保存できませんでした（容量が足りません）。設定 > データ でバックアップを書き出してください",6000); }catch(_){}
     return false;
   }
 }

@@ -33,7 +33,7 @@ test("demo data opens the score analysis with its target stated and remains remo
   await page.locator('#tabs [data-v="record"]').click();
   await page.getByRole("button", { name: "設定", exact: true }).click();
   await page.getByTestId("settings-demo-remove").click();
-  await page.getByRole("button", { name: "削除する" }).click();
+  await page.getByRole("button", { name: "消す", exact: true }).click();
   await expect
     .poll(() =>
       page.evaluate(

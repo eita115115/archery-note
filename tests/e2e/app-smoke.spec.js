@@ -118,7 +118,10 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   // サイトは弓具タブの中の下線タブ（セッティング / サイト）
   await mainTab(page, "弓具").click();
   await expect(page.getByRole("heading", { level: 1, name: "弓具" })).toBeVisible();
-  await expect(page.locator("#main")).toContainText("機材台帳");
+  // v5 段 8: セッティングは仕様表（記録に使っているものに「記録に使用中」）
+  await expect(page.getByTestId("gear-spec-sheet")).toBeVisible();
+  await expect(page.getByTestId("gear-active-name")).toHaveText("E2E recurve setup");
+  await expect(page.getByTestId("gear-recording-pill")).toHaveText("記録に使用中");
   await expect(page.getByTestId("gear-subtab-setup")).toHaveAttribute("aria-current", "page");
   await page.getByTestId("gear-subtab-sight").click();
   await expect(page.locator("#main")).toContainText("サイト台帳");
@@ -127,7 +130,7 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(mainTab(page, "弓具")).toHaveAttribute("aria-current", "page");
 
   await page.getByTestId("gear-subtab-setup").click();
-  await expect(page.locator("#main")).toContainText("機材台帳");
+  await expect(page.getByTestId("gear-spec-sheet")).toBeVisible();
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
 
   await mainTab(page, "記録").click();
@@ -206,19 +209,19 @@ test("exposes history rows and sight distance chips as buttons", async ({ page }
 
   await mainTab(page, "弓具").click();
   await page.getByTestId("gear-subtab-sight").click();
-  const chips = page.locator("#sgDistChips .chip");
+  const chips = page.locator("#sgDistChips button");
   await expect(chips.first()).toBeVisible();
   const chipCount = await chips.count();
   for (let i = 0; i < chipCount; i++) {
     await expect(chips.nth(i)).toHaveJSProperty("tagName", "BUTTON");
   }
 
-  const pressed = page.locator('#sgDistChips .chip[aria-pressed="true"]');
+  const pressed = page.locator('#sgDistChips button[aria-pressed="true"]');
   await expect(pressed).toHaveCount(1);
   await expect(pressed).toHaveAttribute("data-d", "70");
 
-  await page.locator('#sgDistChips .chip[data-d="30"]').click();
-  await expect(page.locator('#sgDistChips .chip[data-d="30"]')).toHaveAttribute(
+  await page.locator('#sgDistChips button[data-d="30"]').click();
+  await expect(page.locator('#sgDistChips button[data-d="30"]')).toHaveAttribute(
     "aria-pressed",
     "true",
   );
@@ -371,19 +374,19 @@ test("syncs aria-pressed on settings theme and form tracking chips", async ({ pa
   await expect(page.locator("#bootFallback")).toBeHidden();
 
   await page.locator("#btnSettings").click();
-  await expect(page.locator("#thChips .chip").first()).toBeVisible();
+  await expect(page.locator("#thChips button").first()).toBeVisible();
 
-  const pressedTheme = page.locator('#thChips .chip[aria-pressed="true"]');
+  const pressedTheme = page.locator('#thChips button[aria-pressed="true"]');
   await expect(pressedTheme).toHaveCount(1);
   await expect(pressedTheme).toHaveAttribute("data-th", "auto");
-  await page.locator('#thChips .chip[data-th="dark"]').click();
+  await page.locator('#thChips button[data-th="dark"]').click();
   await expect(pressedTheme).toHaveCount(1);
   await expect(pressedTheme).toHaveAttribute("data-th", "dark");
 
-  const pressedFt = page.locator('#ftChips .chip[aria-pressed="true"]');
+  const pressedFt = page.locator('#ftChips button[aria-pressed="true"]');
   await expect(pressedFt).toHaveCount(1);
   await expect(pressedFt).toHaveAttribute("data-ft", "0");
-  await page.locator('#ftChips .chip[data-ft="1"]').click();
+  await page.locator('#ftChips button[data-ft="1"]').click();
   await expect(pressedFt).toHaveCount(1);
   await expect(pressedFt).toHaveAttribute("data-ft", "1");
   await expect(unexpectedErrors).toEqual([]);

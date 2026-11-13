@@ -164,7 +164,8 @@ for (const size of [
         await expect(page.locator("#setClose")).toBeVisible();
         await page.evaluate(() => globalThis.toast("設定の通知を確認", 10000));
         await readableToast(page, false);
-        await page.getByRole("button", { name: "閉じる（下にスワイプ）", exact: true }).click();
+        // v5 段 8: 設定は全画面。左上の「戻る」で閉じる（下へ引く取っ手は無い）
+        await page.locator("#setClose").click();
         await readableToast(page, true);
         await pauseRecording(page);
         await page.locator('#tabs [data-v="history"]').click();
