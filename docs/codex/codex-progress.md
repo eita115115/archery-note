@@ -3538,3 +3538,9 @@ CSS: scripts と index.html のどこにも出てこないクラス（176 個）
 CI: PR #139 の validate は段4・5の push から失敗していた（check:ui「Screenshot too small for iphone-390: 9865 bytes」）。親が各段で PR の CI を確認していなかった。原因は CI に日本語フォントが無く、v5 の暗く平らな記録タブの PNG が 12000 bytes を切ること（日本語フォントを外した fontconfig で再現: 7088 bytes）。判定を「中身を隠した背景だけの画像と比べ、色の違う画素が 1% を超える」に変更（node:zlib で PNG を読む。依存なし）。白紙で 0.0% と失敗することを確認。
 
 検証: check:all（exit 0）・lint・format:check 成功、Playwright 456 passed (6.9m)、配布版 e2e 454 passed（追加前）。
+
+## 公開 v127（AN-096 UI v5）
+
+2026-11-13、オーナー承認（「いいよ」）後、PR #139 の CI validate 成功（7dac094）を確かめて main へマージ（fea13c8）。main の CI と Pages の配信のあと、`version.json` が `{ "v": 127 }`、`sw.js` が `archery-note-v127`、公開ページを Chromium（390×844・モバイル）で開いて APP_VER 127・見出し「記録」・タブ 記録/ノート/分析/弓具・コンソールのエラー 0 件を確認。AN-096 を passes:true にした。
+
+次: 実物の iPhone（Safari）での一巡と、v126 からの更新で旧データがそのまま読めることの確認。
