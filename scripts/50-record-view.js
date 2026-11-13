@@ -162,7 +162,7 @@ function multiRoundStageGaugeHtml(def) {
       (st, i) => `
     <div class="stageGaugeTick">
       <div class="stageGaugeMark" style="height:${8 + Math.round((st.dist / maxDist) * 18)}px"></div>
-      <b>${st.dist}m</b><span>${st.arrows}射</span>
+      <b>${esc(st.dist)}m</b><span>${esc(st.arrows)}射</span>
     </div>${i < stages.length - 1 ? `<div class="stageGaugeRail"></div>` : ""}`,
     )
     .join("");
@@ -2265,8 +2265,8 @@ function renderActive(m) {
   const per = Math.max(1, +s.perEnd || 6);
   const scoreMode = sessionInputMode(s) === "score";
   const cond = s._edit
-    ? `過去記録の編集・${s.dist}m`
-    : `${s.dist}m・${esc(faceLabel(s))}${rg ? `（${(+rg.stage || 0) + 1}/${rg.stageCount}）` : ""}`;
+    ? `過去記録の編集・${esc(s.dist)}m`
+    : `${esc(s.dist)}m・${esc(faceLabel(s))}${rg ? `（${(+rg.stage || 0) + 1}/${esc(rg.stageCount)}）` : ""}`;
   const step = [
     ["l", "←", "左"],
     ["u", "↑", "上"],
@@ -2451,7 +2451,7 @@ function renderActiveDock(s, st) {
   const endBtn = `<button type="button" class="btn col${st.full ? "" : " ghost"}" id="bEnd" data-testid="active-end"${s.cur.length ? "" : " disabled"}>エンド確定${st.full ? "" : `<small>あと${left}射</small>`}</button>`;
   const editDoneBtn = `<button type="button" class="btn" id="bEditDone" data-testid="active-edit-done">修正を終える</button>`;
   const finishBtn = next
-    ? `<button type="button" class="btn" id="bNextStage">次の距離へ（${next.dist}m）</button>`
+    ? `<button type="button" class="btn" id="bNextStage">次の距離へ（${esc(next.dist)}m）</button>`
     : `<button type="button" class="btn" id="bFinishMain" data-testid="active-finish-primary">${s._edit ? "編集を保存して結果を見る" : "記録を終了して結果を見る"}</button>`;
   let html, cls;
   if (scoreMode && ui.selArrow >= 0) {
@@ -2518,7 +2518,7 @@ function openActiveMenu() {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet recMenu" data-testid="active-menu-sheet">
     <h3>記録のメニュー</h3>
-    <p class="basis">${fmtD(s.date)}・${s.dist}m・${esc(faceLabel(s))}・${setup ? esc(setup.name) : "セッティング未指定"}</p>
+    <p class="basis">${fmtD(s.date)}・${esc(s.dist)}m・${esc(faceLabel(s))}・${setup ? esc(setup.name) : "セッティング未指定"}</p>
     <div class="figs recMenuFigs">
       <div class="fig"><div class="l">合計（${all.length}射）</div><div class="n">${total}</div></div>
       <div class="fig"><div class="l">平均/射</div><div class="n">${all.length ? (total / all.length).toFixed(2) : "—"}</div></div>
@@ -2532,7 +2532,7 @@ function openActiveMenu() {
       </div>
     </div>
     ${item("mMeta", "天気・風・メモを書く", meta || "必要なときだけ入力します")}
-    ${next ? item("mNextStage", `次の距離へ（${next.dist}m）`, "このステージを確定して次へ進みます") : ""}
+    ${next ? item("mNextStage", `次の距離へ（${esc(next.dist)}m）`, "このステージを確定して次へ進みます") : ""}
     ${item("mSettings", "設定", "表示・拡大鏡の位置など")}
     ${item(
       "bFinish",

@@ -406,6 +406,53 @@ test("editing a practice memo and tags in the detail is saved to that session an
   expect(errors).toEqual([]);
 });
 
+test("while a practice is being edited in the record tab, its note detail cannot change the memo, tags or trash it", async ({
+  page,
+}) => {
+  // 編集を終えると記録タブの写しで置き換わるため、途中でノートから書いたメモ・タグやゴミ箱への移動は消える。
+  // 編集の途中はノートの詳細から書き換えられないようにする
+  const database = notesDb();
+  database.sessions.find((s) => s.id === "p4").note = "架空のメモ。編集前のメモ。";
+  const errors = await open(page, database);
+  await page.locator('.historyRow[data-id="p4"]').click();
+  await page.locator("#hEdit").click();
+  await expect(page.getByTestId("active-pause")).toBeVisible();
+  await page.getByTestId("active-pause").click();
+  await page.locator('#tabs [data-v="history"]').click();
+  await page.locator('.historyRow[data-id="p4"]').click();
+
+  await expect(page.getByTestId("note-editing-lock")).toBeVisible();
+  await expect(page.getByTestId("note-memo")).toHaveAttribute("readonly", "");
+  for (const b of await page.locator(".noteTagRow .ntag").all()) await expect(b).toBeDisabled();
+  await expect(page.locator("#hEdit")).toHaveCount(0);
+  await expect(page.locator("#hDel")).toHaveCount(0);
+  await expect(page.locator("#hCard")).toBeVisible();
+  await page.getByTestId("note-memo").press("End");
+  await page.keyboard.type("書き足し");
+  await page.locator("#hClose").click();
+  let saved = (await stored(page)).sessions.find((s) => s.id === "p4");
+  expect(saved.note).toBe("架空のメモ。編集前のメモ。");
+
+  // 記録タブで再開して編集を終えると、ノートの詳細はまた書き換えられる
+  await page.locator('#tabs [data-v="record"]').click();
+  await page.getByTestId("record-resume").click();
+  await page.getByTestId("active-menu").click();
+  await page.getByTestId("active-finish").click();
+  await expect(page.locator("#sumClose")).toBeVisible();
+  await page.locator("#sumClose").click();
+  await expect(page.locator(".ovl")).toHaveCount(0);
+  saved = (await stored(page)).sessions.find((s) => s.id === "p4");
+  expect(saved.note).toBe("架空のメモ。編集前のメモ。");
+  expect((await stored(page)).trash || []).toEqual([]);
+  await page.locator('#tabs [data-v="history"]').click();
+  await page.locator('.historyRow[data-id="p4"]').click();
+  await expect(page.getByTestId("note-editing-lock")).toHaveCount(0);
+  await expect(page.getByTestId("note-memo")).not.toHaveAttribute("readonly", "");
+  await expect(page.locator("#hEdit")).toBeVisible();
+  await expect(page.locator("#hDel")).toHaveCount(1);
+  expect(errors).toEqual([]);
+});
+
 test("memo notes: write for today, change the date, edit, move to the trash and restore", async ({
   page,
 }) => {
@@ -673,6 +720,34 @@ test("user text in memos, tags, session notes and the trash is shown as text, ne
   await page.getByTestId("notes-trash").click();
   await expect(page.getByTestId("trash-row").locator("b")).toHaveText(HOSTILE);
   await noMarkup();
+  expect(errors).toEqual([]);
+});
+
+test("a distance in an imported recording or past-session edit is shown as text, never as markup", async ({
+  page,
+}) => {
+  const database = notesDb();
+  const p4 = database.sessions.find((s) => s.id === "p4");
+  database.active = { ...JSON.parse(JSON.stringify(p4)), dist: HOSTILE, cur: [], _edit: true };
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.clock.setFixedTime(new Date("2026-11-12T10:00:00"));
+  await page.addInitScript((d) => {
+    if (globalThis.sessionStorage.getItem("__seeded")) return;
+    globalThis.sessionStorage.setItem("__seeded", "1");
+    globalThis.localStorage.setItem("archeryNote.v1", JSON.stringify(d));
+  }, database);
+  await page.goto("/");
+  // 記録の途中があると記録画面から始まる
+  await expect(page.locator(".condT")).toContainText(HOSTILE);
+  await expect(page.locator(".condT img")).toHaveCount(0);
+  await page.getByTestId("active-menu").click();
+  await expect(page.locator(".ovl img")).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await page.getByTestId("active-pause").click();
+  await expect(page.getByTestId("record-paused")).toContainText(HOSTILE);
+  await expect(page.locator('[data-testid="record-paused"] img')).toHaveCount(0);
+  expect(await page.evaluate(() => globalThis.__xss)).toBeUndefined();
   expect(errors).toEqual([]);
 });
 

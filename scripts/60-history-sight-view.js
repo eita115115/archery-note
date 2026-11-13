@@ -632,6 +632,9 @@ function openHistDetail(id) {
   const counts = scorecardCountCols(sess);
   const quota = scorecardPlan(sess).quota;
   const rescore = legacyRescoreHtml(sess, setup, total);
+  /* 記録タブでこの記録を直している途中（中断中を含む）は、ここからは書き換えない。
+     編集を終えると記録タブの写しで置き換わるので、ここで書いたメモ・タグやゴミ箱への移動が消えたり戻ったりする */
+  const editingThis = !!(db.active && db.active._edit && db.active.id === sess.id);
   const op = (opId, title, sub) =>
     `<button type="button" class="lrow link" id="${opId}"><span class="lmain"><b>${title}</b><span>${sub}</span></span>${NOTE_GO}</button>`;
   ovl.innerHTML = `<div class="sheet resultScreen noteScreen histDetailSheet" data-testid="note-detail" data-id="${esc(sess.id)}">
@@ -645,8 +648,9 @@ function openHistDetail(id) {
     </header>
     <p class="basis noteCond" data-testid="note-condition">${esc([faceLabel(sess), setup ? setup.name : "弓具未指定", sess.round && sess.round !== "free" ? roundLabel(sess.round) : "", windText(sess)].filter(Boolean).join("・"))}</p>
     <section class="vsec">
-      <div class="vsecH"><h2><label for="hNote">メモ</label></h2><span class="aside">書くと保存されます</span></div>
-      <textarea class="noteBox" id="hNote" data-testid="note-memo" placeholder="感覚、気づいたこと、次に確かめること">${esc(sess.note || "")}</textarea>
+      <div class="vsecH"><h2><label for="hNote">メモ</label></h2><span class="aside">${editingThis ? "編集の途中です" : "書くと保存されます"}</span></div>
+      ${editingThis ? `<p class="basis" data-testid="note-editing-lock">この記録は記録タブで直している途中です。メモ・タグの変更とゴミ箱へ移す操作は、記録タブで編集を終えるか取り消してからできます。</p>` : ""}
+      <textarea class="noteBox" id="hNote" data-testid="note-memo" placeholder="感覚、気づいたこと、次に確かめること"${editingThis ? " readonly" : ""}>${esc(sess.note || "")}</textarea>
       ${noteTagsHtml(sess.tags)}
     </section>
     <section class="vsec" data-testid="history-detail-stats">
@@ -665,12 +669,12 @@ function openHistDetail(id) {
     ${sessionSightFoldHtml(sess, setup, { testid: "note-sight-details", cls: "histDetailNumbers" })}
     <section class="vsec histDetailActions" data-testid="note-ops">
       <div class="vsecH"><h2>この記録の操作</h2></div>
-      ${op("hEdit", "点数や位置を直す", "記録中と同じ画面で直します。直した矢には印が付きます")}
+      ${editingThis ? "" : op("hEdit", "点数や位置を直す", "記録中と同じ画面で直します。直した矢には印が付きます")}
       ${op("hCard", "スコア表を画像で保存", "共有の画面が出る端末では、そこから送れます")}
       ${op("hAnalysis", "分析で見る", "分析タブへ移ります")}
       ${rescore}
-      <div class="btnRow"><button type="button" class="btn danger" id="hDel">ゴミ箱へ移す</button></div>
-      <p class="basis">ゴミ箱に移した記録は、ノートの一番下から元に戻せます。</p>
+      ${editingThis ? "" : `<div class="btnRow"><button type="button" class="btn danger" id="hDel">ゴミ箱へ移す</button></div>
+      <p class="basis">ゴミ箱に移した記録は、ノートの一番下から元に戻せます。</p>`}
     </section>
   </div>`;
   openModal(ovl, { escapeTarget: "#hClose", swipe: false });
@@ -691,11 +695,13 @@ function openHistDetail(id) {
     flushPendingSave();
   };
   /* タグは押した時点で書き込む（本文と違い、続けて何度も変わる入力ではない） */
-  bindNoteTags(ovl, sess, () => {
-    edited = true;
-    scheduleSave("note-tags");
-    flushPendingSave();
-  });
+  if (editingThis) ovl.querySelectorAll(".noteTagRow .ntag").forEach((b) => (b.disabled = true));
+  else
+    bindNoteTags(ovl, sess, () => {
+      edited = true;
+      scheduleSave("note-tags");
+      flushPendingSave();
+    });
   const close = () => {
     syncNote();
     flushPendingSave();
@@ -713,43 +719,47 @@ function openHistDetail(id) {
       }),
   );
   ovl.querySelector("#hClose").onclick = close;
-  ovl.querySelector("#hEdit").onclick = () => {
-    if (db.active) {
-      toast("記録の途中のものがあります。先に終了してください");
-      return;
-    }
-    syncNote();
-    const cp = JSON.parse(JSON.stringify(sess));
-    cp.cur = [];
-    cp._edit = true;
-    db.active = cp;
-    save();
-    closeModal(ovl);
-    if (view === "record") render();
-    else showView("record");
-    toast("過去の記録を編集中。メニューの「編集を終了して保存する」で上書きします");
-  };
+  const hEdit = ovl.querySelector("#hEdit");
+  if (hEdit)
+    hEdit.onclick = () => {
+      if (db.active) {
+        toast("記録の途中のものがあります。先に終了してください");
+        return;
+      }
+      syncNote();
+      const cp = JSON.parse(JSON.stringify(sess));
+      cp.cur = [];
+      cp._edit = true;
+      db.active = cp;
+      save();
+      closeModal(ovl);
+      if (view === "record") render();
+      else showView("record");
+      toast("過去の記録を編集中。メニューの「編集を終了して保存する」で上書きします");
+    };
   ovl.querySelector("#hCard").onclick = () => exportScorecardImage(sess);
   ovl.querySelector("#hAnalysis").onclick = () => {
     close();
     openAnalysisFor(sess);
   };
-  ovl.querySelector("#hDel").onclick = async () => {
-    if (
-      await appConfirm("この練習の記録をゴミ箱へ移しますか？ ノートの一番下のゴミ箱から元に戻せます。", {
-        danger: true,
-        okLabel: "ゴミ箱へ移す",
-      })
-    ) {
-      syncNote();
-      trashItem("session", `${fmtD(sess.date)} ${historyDistanceLabel(sess.dist)}`, sess);
-      db.sessions = db.sessions.filter((s) => s.id !== id);
-      save({ reason: "delete-session", forceSnapshot: true });
-      closeModal(ovl);
-      render();
-      toast("ゴミ箱へ移しました。ノートの一番下から元に戻せます");
-    }
-  };
+  const hDel = ovl.querySelector("#hDel");
+  if (hDel)
+    hDel.onclick = async () => {
+      if (
+        await appConfirm("この練習の記録をゴミ箱へ移しますか？ ノートの一番下のゴミ箱から元に戻せます。", {
+          danger: true,
+          okLabel: "ゴミ箱へ移す",
+        })
+      ) {
+        syncNote();
+        trashItem("session", `${fmtD(sess.date)} ${historyDistanceLabel(sess.dist)}`, sess);
+        db.sessions = db.sessions.filter((s) => s.id !== id);
+        save({ reason: "delete-session", forceSnapshot: true });
+        closeModal(ovl);
+        render();
+        toast("ゴミ箱へ移しました。ノートの一番下から元に戻せます");
+      }
+    };
 }
 /* ---------- メモだけのノート（db.notes）: 書く・読む・直す・ゴミ箱へ移す ----------
    id が無ければ今日の日付で新しく書く。新しいメモは本文を書いた時点でノートに入り、入力のたびに保存を予約する。
