@@ -488,7 +488,7 @@ function checkFormAnalysisTrashRestore(storageApi, fixtures) {
   const db = storageApi.normalizeDb(clone(fixtures.formAnalyses));
   const rec = db.formAnalyses[0];
   const trashApi = loadTrashApi(db, () => {});
-  const item = trashApi.trashItem("formAnalysis", "射形記録", rec);
+  const item = trashApi.trashItem("formAnalysis", "射型記録", rec);
   db.formAnalyses = db.formAnalyses.filter((f) => f.id !== rec.id);
   assert(trashApi.restoreTrash(item.id), "[form-analyses trash] restore should succeed");
   assert(

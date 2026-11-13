@@ -115,7 +115,7 @@ test("the form tab explains the switch when form tracking is off and still count
   await gotoSubTab(page, "form");
   await expect(page.getByTestId("analysis-form-card")).toHaveCount(0);
   await expect(page.getByTestId("analysis-form-off")).toContainText(
-    "設定の「射形トラッキング」を入にすると使えます",
+    "設定の「射型トラッキング」を入にすると使えます",
   );
   await expect(page.getByTestId("analysis-reason-row")).toHaveCount(3);
 });

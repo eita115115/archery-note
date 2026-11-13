@@ -554,7 +554,7 @@ function judgementFor(adv,sess){
     return {label:"保留",tone:"hold",text:`中心をまだ絞り込めていません（${ciText}）。同じ狙いで1〜2エンド追加してから判断します。`};
   }
   if(adv.personal && adv.personal.state==="今回だけの可能性" && (adv.personal.stability||0)>.45) return {label:"保留",tone:"hold",text:"同じサイト設定の過去の傾向と今回の中心が逆方向です。まず追加エンドで再現性を確認します。"};
-  if(st.rr>w*2.8) return {label:"射形優先",tone:"warn",text:"中心のズレは読めますが散りが大きめです。サイトは提案量だけにとどめ、リリース・押し手・照準の再現性を先に見ます。"};
+  if(st.rr>w*2.8) return {label:"射型優先",tone:"warn",text:"中心のズレは読めますが散りが大きめです。サイトは提案量だけにとどめ、リリース・押し手・照準の再現性を先に見ます。"};
   if(isWindy(sess) && d && !d.windAccounted && moves.some(l=>l.axis==="h") && !moves.some(l=>l.axis==="v")) return {label:"風を考慮",tone:"hold",text:"左右のズレに風の影響が混ざっている可能性があります。風向・風速を記録するか、無風・風待ちで再確認すると精度が上がります。"};
   if(adv.personal && adv.personal.state==="過去と一致") return {label:"動かす",tone:"ok",text:"今回の中心と、同じサイト設定の過去の傾向が一致しています。提案量を目安に動かす根拠があります。"};
   const shrinks=d?moves.map(l=>d[l.axis].shrink):[1];
@@ -608,7 +608,7 @@ function conditionInsights(sess,st,setup){
     if(setup && !setup.arrowSpeed) out.push("精度向上: 実測初速を入れると、上下サイトのmm換算と距離別予測が安定します。");
     if(setup && !setup.shaftSetWeightSpread) out.push("精度向上: 矢セット重量差を入れると、上下散りの信頼度判定が強くなります。");
     const sp=setup?spineGuidance(setup):null;
-    if(sp && sp.ready && (sp.state==="柔らかめ寄り" || sp.state==="硬め寄り")) out.push(`用具確認: スパインが${sp.state}です。候補 ${sp.candidates.slice(0,3).join(" / ")} と矢飛びを比較してください。`);
+    if(sp && sp.ready && (sp.state==="柔らかめ寄り" || sp.state==="硬め寄り")) out.push(`弓具確認: スパインが${sp.state}です。候補 ${sp.candidates.slice(0,3).join(" / ")} と矢飛びを比較してください。`);
   }
   if(sess.round && sess.round!=="free") out.push(`ラウンド: ${esc(roundLabel(sess.round))} の途中/結果として扱っています。`);
   return out;
@@ -725,7 +725,7 @@ function personalModel(sess,setup,currentSt){
   const state=support?"過去と一致":conflict?"今回だけの可能性":"観察継続";
   let text;
   if(support) text=`${sightNote}の過去の同条件でも同じ方向へ寄っています。サイト調整の根拠が強くなります。`;
-  else if(conflict) text=`${sightNote}の過去の偏りと今回の中心が逆方向です。風や射形の一時要因を疑い、追加エンドで確認する価値があります。`;
+  else if(conflict) text=`${sightNote}の過去の偏りと今回の中心が逆方向です。風や射型の一時要因を疑い、追加エンドで確認する価値があります。`;
   else text="過去傾向はまだ決定的ではありません。今回の中心とグルーピング形状を主材料にします。";
   return {sample:items.length,state,text,mx,my,seMx,seMy,rr,avg,align,stability,spread,histMag,curMag};
 }
@@ -755,8 +755,8 @@ function nextActionPlan(sess,adv,setup){
   if(j && j.label==="動かす") plan.push("提案方向へサイトを動かし、次の1エンドは同じ狙い方で確認する。");
   else if(j && j.label==="少量調整") plan.push("提案量（誤差を見込んで控えめに計算済み）だけ動かし、中心が戻るか確認する。");
   else if(j && (j.label==="保留" || j.label==="風を考慮")) plan.push("サイトは触らず、同条件で1〜2エンド追加して中心が再現するか見る。");
-  else if(j && j.label==="射形優先") plan.push("サイト調整は控えめにして、リリース・押し手・照準時間の再現性を先に整える。");
-  if(adv.personal && adv.personal.state==="今回だけの可能性") plan.push("過去傾向と逆なので、風向/射形メモを残して次回の同距離データと比較する。");
+  else if(j && j.label==="射型優先") plan.push("サイト調整は控えめにして、リリース・押し手・照準時間の再現性を先に整える。");
+  if(adv.personal && adv.personal.state==="今回だけの可能性") plan.push("過去傾向と逆なので、風向/射型メモを残して次回の同距離データと比較する。");
   if(adv.personal && adv.personal.state==="過去と一致") plan.push("調整後の中心が過去平均との差から縮むかを、履歴フィルタで同条件比較する。");
   if(q.score<.48) plan.push("この回は信頼度が低め。判断材料として残しつつ、強い結論は次回へ送る。");
   const st=adv.st;
@@ -1036,7 +1036,7 @@ function sightInterp(setupId){
           if(fc<fd){ hi=d; d=c; fd=fc; c=hi-gr*(hi-lo); fc=sse(c); }
           else{ lo=c; c=d; fc=fd; d=lo+gr*(hi-lo); fd=sse(d); }
         }
-        /* 探索範囲の端に張り付いた当てはめは台帳の矛盾（記録違い・別の用具）を示すので採らない */
+        /* 探索範囲の端に張り付いた当てはめは台帳の矛盾（記録違い・別の弓具）を示すので採らない */
         const vBest=(lo+hi)/2;
         const best=vBest>35.5&&vBest<94.5?sightFitAtSpeed(pts, phys, vBest):null;
         /* 入れ子モデルの F 検定（自由度 1, n−3、5%）で、初速を加えた改善が偶然を超えるときだけ採る */
@@ -1114,7 +1114,7 @@ function modelReadinessHtml(setupId){
     <div class="note"><b>個人データ準備度: ${p.level}</b>（${pct(p.score)}）</div>
     <div class="kv"><span>使える練習</span><span>${p.good}回 / 同条件反復 ${p.repeatGroups}組</span></div>
     <div class="kv"><span>サイト校正材料</span><span>サイト値つき練習 ${p.withSight}回 / 台帳 ${p.sightDists}距離</span></div>
-    ${p.next.length?`<div class="note">次に効くデータ: ${esc(p.next.slice(0,3).join("・"))}</div>`:`<div class="note">履歴・サイト値・用具入力の土台がかなり揃っています。</div>`}
+    ${p.next.length?`<div class="note">次に効くデータ: ${esc(p.next.slice(0,3).join("・"))}</div>`:`<div class="note">履歴・サイト値・弓具入力の土台がかなり揃っています。</div>`}
   </div>`;
 }
 function latestMark(setupId, dist){

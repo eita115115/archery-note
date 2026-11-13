@@ -250,7 +250,7 @@ function renderHistory(m) {
   const sessions = all.filter((it) => it.kind === "session").map((it) => it.s);
   const dists = [...new Set(sessions.map((s) => s.dist).filter(Boolean))].sort((a, b) => b - a);
   const rounds = [...new Set(sessions.map((s) => s.round || "free"))];
-  /* 距離・用具・ラウンドは練習だけが持つ条件。どれかを選ぶと、メモだけの項目は外れる */
+  /* 距離・弓具・ラウンドは練習だけが持つ条件。どれかを選ぶと、メモだけの項目は外れる */
   const sessionOnly = !!(hf.setupId || hf.dist || hf.round);
   const sessionOk = (s) =>
     (!hf.setupId || (hf.setupId === "__none" ? !s.setupId : s.setupId === hf.setupId)) &&
@@ -939,7 +939,7 @@ function sightPredictionHtml(interp, marks) {
   }).join("");
   return `<section class="sightPrediction" data-testid="sight-prediction">
     <h2><span class="h2Icon">${icon("ruler")} サイトマーク予測（上下）</span></h2>
-    <div class="sightPredictionMeta">${interp.model === "physics" ? `弾道モデル（初速 ${Math.round(interp.speedFps)}fps・${interp.speedSource === "measured" ? "実測" : interp.speedSource === "fitted" ? "台帳から推定" : "用具から推定"}）` : "直線近似"} ・ 一致度${pct(interp.r2 || 0)} ・ 上下の目盛り</div>
+    <div class="sightPredictionMeta">${interp.model === "physics" ? `弾道モデル（初速 ${Math.round(interp.speedFps)}fps・${interp.speedSource === "measured" ? "実測" : interp.speedSource === "fitted" ? "台帳から推定" : "弓具から推定"}）` : "直線近似"} ・ 一致度${pct(interp.r2 || 0)} ・ 上下の目盛り</div>
     ${predictions.length ? `<dl class="sightPredictionRows">${predictions.map((d) => `<div data-predict-dist="${d}"><dt>${d}m <span>予測</span></dt><dd>${interp.est(d).toFixed(1)}<small>目盛り</small></dd></div>`).join("")}</dl>` : `<div class="hint">定番距離（18/30/50/70m）はすべて実測済みです</div>`}
     <details class="sightSources"><summary>採用した実測 ${interp.pts.length}件</summary><ul class="sightSourceList">${sources}</ul></details>
     <details class="sightPredictionHelp"><summary>予測の見方</summary><p>上下が数値で入力された記録から予測します。新しい記録の上下が未入力なら、以前の数値を使います。</p><p>2距離以上で、矢の弾道（重力・空気抵抗・目と矢と的の高低差）から計算した照準角にサイト値を当てはめます。5距離以上で、初速を変えた方が統計的に有意に当てはまる場合は、初速も台帳から推定します。左右は予測しません。</p></details>
@@ -1065,7 +1065,7 @@ function renderSight(m) {
         cal
           ? `<div class="advice histAdviceCard mt10">
         <div class="kv"><span>個人補正データ</span><span><b>${cal.level}</b>（${Math.round(cal.score * 100)}%）</span></div>
-        <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 用具入力 ${cal.gearLevel}</div>
+        <div class="note">実測サイト距離 ${cal.dists}距離 / サイト値つき練習 ${cal.withSight}回 / 弓具入力 ${cal.gearLevel}</div>
         ${cal.next.length ? `<div class="note">次に精度へ効く項目: ${esc(cal.next.slice(0, 3).join("・"))}</div>` : `<div class="note">個人補正に必要な主要データはかなり揃っています。</div>`}
       </div>`
           : ""
@@ -1218,4 +1218,4 @@ function openCalibrationWizard(setupId) {
   };
 }
 
-/* ---------- 用具 ---------- */
+/* ---------- 弓具 ---------- */

@@ -12,7 +12,7 @@ async function seed(page, onlyForm = false, onlyOld = false) {
   }, d);
   await page.goto("/");
   await page.locator('#tabs [data-v="analysis"]').tap();
-  await page.locator('#analysisSubTabs [data-an="form"]').tap(); // v5 段 7: 射形の記録は 分析 > 射型
+  await page.locator('#analysisSubTabs [data-an="form"]').tap(); // v5 段 7: 射型の記録は 分析 > 射型
 }
 const period = (page, id) => page.locator("#anPeriod").selectOption(id);
 async function snapshot(page) {

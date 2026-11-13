@@ -350,7 +350,7 @@ function staticUiChecks() {
       surface.includes("物理校正"),
     "analysis cards missing",
   );
-  // 「信頼度」の語の分離（監査 High/Medium 対応）: 射形側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
+  // 「信頼度」の語の分離（監査 High/Medium 対応）: 射型側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
   assert(
     surface.includes("検出の鮮明さ") && !appJs.includes("・ 信頼度"),
     "form-tracking must say 検出の鮮明さ, not bare 信頼度, in the capture HUD",

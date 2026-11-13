@@ -83,7 +83,7 @@ function computeWeeklyDiff(sessions, currentSessionId, todayStr){
    主軸: グルーピング半径RMS（metricsFn(s).st.rr）。表示値（groupSummaryHtml 等）との一致を
    構造的に保証するため sessionMetrics/robustStats を関数注入で使う（buildAnalysisRows と同じ契約）。
    副軸（任意）: opts.formAnalyses が渡され、紐付けレコードがあるときだけ anchorNorm 連携を追加する
-   （射形トラッキングは既定OFFのベータ機能で母集団が薄いため v1 は省略可。Fable裁定 §11-4） */
+   （射型トラッキングは既定OFFのベータ機能で母集団が薄いため v1 は省略可。Fable裁定 §11-4） */
 function computeStabilityTrend(sessions, currentSessionId, metricsFn, opts){
   opts=opts||{};
   const STABILITY_TIGHT_DELTA=0.3; /* 45-analysis-core.js todayConclusion() の RR_TIGHT_DELTA と同一値 */
@@ -113,7 +113,7 @@ function computeStabilityTrend(sessions, currentSessionId, metricsFn, opts){
     latestValue:latest, baselineValue:baseline, sampleCount:history.length,
     sparkline:history.map(p=>+p.m.st.rr.toFixed(2)).concat([+latest.toFixed(2)])};
 
-  /* secondary（任意・射形トラッキング連携。formAnalyses が渡され紐付けレコードがあるときだけ算出） */
+  /* secondary（任意・射型トラッキング連携。formAnalyses が渡され紐付けレコードがあるときだけ算出） */
   if(opts.formAnalyses && opts.formAnalyses.length){
     result.secondary = trAnchorSecondary(cur, opts.formAnalyses);
   }

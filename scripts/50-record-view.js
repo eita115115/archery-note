@@ -128,7 +128,7 @@ function setupSystemSummary(setupId) {
       score: 0,
       level: "準備中",
       profiles: {},
-      lines: ["用具セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"],
+      lines: ["セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"],
       next: "弓具タブで初回セットアップ",
     };
   const gp = gearPrecisionProfile(setup),
@@ -142,7 +142,7 @@ function setupSystemSummary(setupId) {
   );
   const level = levelFromScore(score, LEVELS.system);
   const next = [];
-  if (gp.score < 0.65) next.push((gp.missing || [])[0] || "用具入力");
+  if (gp.score < 0.65) next.push((gp.missing || [])[0] || "弓具入力");
   if (mp.good < 5) next.push("6本以上の練習");
   if (cp.dists < 3) next.push("複数距離のサイト値");
   if (pc && pc.wind.sample < 2) next.push("横風メモつき練習");
@@ -155,7 +155,7 @@ function setupSystemSummary(setupId) {
       physics: pc || { score: 0, level: "未校正" },
       calibration: cp,
     },
-    lines: [`用具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc ? pc.level : "未校正"}`],
+    lines: [`弓具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc ? pc.level : "未校正"}`],
     next: next.slice(0, 2).join("・") || "同条件で記録を重ねる",
   };
 }
@@ -217,7 +217,7 @@ function multiRoundStageGaugeHtml(def) {
 function shouldShowOnboarding() {
   return (
     !db.settings.onboardingSeen && !db.active && db.sessions.length === 0 && db.setups.length === 0
-  ); // 用具だけ登録済みの既存ユーザーには出さない
+  ); // 弓具だけ登録済みの既存ユーザーには出さない
 }
 /* 距離から的サイズ・1エンド本数を決める（suggestedFaceValue と同じ規則。18m だけ 3射エンド）。
    記録の条件で、初回に距離を選んだときと、距離の決まったラウンドを選んだときに使う */
@@ -295,7 +295,7 @@ const FEATURE_HINTS = [
   {
     key: "gearSetup",
     ico: "tool",
-    html: "<strong>用具を登録</strong>するとサイト台帳と自動でつながります",
+    html: "<strong>弓具を登録</strong>するとサイト台帳と自動でつながります",
     act: "設定する",
     when: () => db.sessions.length >= 1 && db.setups.length === 0,
     go: () => showView("gear"),
@@ -330,7 +330,7 @@ const FEATURE_HINTS = [
   {
     key: "formTracking",
     ico: "camera",
-    html: "カメラで<strong>射形トラッキング</strong>も記録できます",
+    html: "カメラで<strong>射型トラッキング</strong>も記録できます",
     act: "試す",
     when: () => db.sessions.length >= 5,
     go: () => showView("analysis"),
@@ -1135,9 +1135,9 @@ function pageHeroHtml(type, ctx) {
     const sug = lastSess ? primarySightSuggestion(lastSess, setup, adv) : null;
     let body;
     if (!setup) {
-      body = `<p class="pageHeroLead sightNowNote">用具セッティング未登録</p>`;
+      body = `<p class="pageHeroLead sightNowNote">セッティング未登録</p>`;
     } else if (!adv) {
-      body = `<p class="pageHeroLead sightNowNote">この距離・用具の練習記録なし</p>`;
+      body = `<p class="pageHeroLead sightNowNote">この距離・弓具の練習記録なし</p>`;
     } else if (!sug || sug.none) {
       /* 「中心が合っている」と「まだ判定できない」を区別する（統計的に誤差の範囲内でも、区間が広ければ保留） */
       const reason = (sug && sug.reason) || "centered";
@@ -1960,7 +1960,7 @@ function analysisFormHtml(allRows, f) {
     ? formTrackingCard(analysisFormRecords(f))
     : `<section class="vsec" data-testid="analysis-form-off">
       <div class="vsecH"><h2>射型の記録</h2><span class="aside">切</span></div>
-      <p class="basis">カメラで射型を記録する機能は、設定の「射形トラッキング」を入にすると使えます。動画と写真はこの端末の中だけで扱います。</p>
+      <p class="basis">カメラで射型を記録する機能は、設定の「射型トラッキング」を入にすると使えます。動画と写真はこの端末の中だけで扱います。</p>
     </section>`;
   return `${head}${form}${analysisReasonHtml(rows)}`;
 }
@@ -2037,8 +2037,8 @@ function renderAnalysis(m) {
   const anCta = $("#anEmptyCta");
   if (anCta) anCta.onclick = () => showView("record");
 }
-/* 撮影日で期間を、紐付いた練習で用具/距離を揃える表示用adapter。
-   孤立した記録は保存用具だけ利用し、距離は推測しない。元recordを返し保存はしない。 */
+/* 撮影日で期間を、紐付いた練習で弓具/距離を揃える表示用adapter。
+   孤立した記録は保存弓具だけ利用し、距離は推測しない。元recordを返し保存はしない。 */
 function analysisFormRecords(filter) {
   const sessions = new Map((db.sessions || []).filter(Boolean).map((s) => [s.id, s]));
   const rows = (Array.isArray(db.formAnalyses) ? db.formAnalyses : [])
@@ -3998,7 +3998,7 @@ function sightDateInfo(item) {
 }
 function setupNameFor(id) {
   const setup = (db.setups || []).find((s) => s.id === id);
-  return setup && setup.name ? setup.name : "用具未指定";
+  return setup && setup.name ? setup.name : "弓具未指定";
 }
 function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
   const hf = filter || ui.histFilter || { setupId: "", dist: "" };
@@ -4075,7 +4075,7 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
       const latest = g.latest || {};
       const row = latest.row || {};
       return `<div class="listItem recordReadOnlyItem">
-        <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName || "用具未指定")} / 最新 ${esc(latest.date ? latest.date.label : "—")} / 台帳${g.markCount}・練習${g.sessionCount}</div></div>
+        <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName || "弓具未指定")} / 最新 ${esc(latest.date ? latest.date.label : "—")} / 台帳${g.markCount}・練習${g.sessionCount}</div></div>
         <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
       </div>`;
     })

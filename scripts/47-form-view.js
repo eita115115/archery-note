@@ -1,5 +1,5 @@
 "use strict";
-/* Archery Note: 射形トラッキング ビュー（ベータ）
+/* Archery Note: 射型トラッキング ビュー（ベータ）
    カメラ + オンデバイス姿勢推定。計算は 46-form-core.js の純関数、
    資産は assets/pose/（自己ホスト・機能有効時のみ遅延ロード）。
    映像・生ランドマークは保存しない。保存は formAnalyses の派生特徴量のみ。 */
@@ -235,7 +235,7 @@ function formScoreLinkHtml(records=db.formAnalyses||[]){
   const s=link.split;
   const diff=s.stableAvg-s.driftAvg;
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
-    <div class="note"><b>射形と得点の関係</b>（練習に紐付いた ${link.n} 記録）</div>
+    <div class="note"><b>射型と得点の関係</b>（練習に紐付いた ${link.n} 記録）</div>
     <div class="kv"><span>リリース安定の日</span><span>平均 <b>${s.stableAvg.toFixed(2)}</b>（${s.stableN}回）</span></div>
     <div class="kv"><span>ドリフト多めの日</span><span>平均 <b>${s.driftAvg.toFixed(2)}</b>（${s.driftN}回）</span></div>
     <div class="note">差（リリース安定の日 − ドリフト多めの日）は ${diff>0?"+":diff<0?"−":"±"}${Math.abs(diff).toFixed(2)} 点/射です。回数が少なく、ほかの条件はそろえていないので、射型が原因とは限りません。</div>
@@ -258,7 +258,7 @@ function formTrackingCard(records=db.formAnalyses||[]){
       ${comparison?`<span class="formRecordComparison">${esc(comparison)}</span>`:""}
       <span class="formRecordMeta">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} · アンカー ${esc(s.anchorLabel)}</span>
       </button>
-      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射形記録を削除">${icon("del")}</button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射型記録を削除">${icon("del")}</button>
     </div>`;
   }).join("");
   return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="vsecH"><h2>射型の記録</h2><span class="aside">${allRecs.length}件${allRecs.length>5?"・新しい5件を表示":""}</span></div>
@@ -287,7 +287,7 @@ function bindFormTrackingCard(){
       toast("削除対象を一意に特定できないため、削除していません",6000);
       return;
     }
-    if(!(await appConfirm("この射形記録を削除しますか？",{danger:true,okLabel:"削除"}))) return;
+    if(!(await appConfirm("この射型記録を削除しますか？",{danger:true,okLabel:"削除"}))) return;
 
     matches=(db.formAnalyses||[]).filter(record=>record&&record.id===recordId);
     if(matches.length!==1){
@@ -298,7 +298,7 @@ function bindFormTrackingCard(){
     const trashEntry={
       id:uid(),
       type:"formAnalysis",
-      label:`${fmtD(record.date)} 射形${record.shots||0}射`,
+      label:`${fmtD(record.date)} 射型${record.shots||0}射`,
       data:cloneData(record),
       date:today(),
       ts:Date.now()
@@ -314,7 +314,7 @@ function bindFormTrackingCard(){
       db,planned.candidate,{reason:"delete-form-analysis",forceSnapshot:true},save
     );
     if(!committed.ok){
-      toast("射形記録を保存できなかったため、削除していません",6000);
+      toast("射型記録を保存できなかったため、削除していません",6000);
       return;
     }
     render();
@@ -338,7 +338,7 @@ function openFormDetail(rec){
   const lm=linked?sessionMetrics(linked):null;
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet">
-    <h3>射形記録 ${fmtD(rec.date)} <span class="mini">${rec.shots||0}射 / ${esc(rec.modelVer||"")}</span></h3>
+    <h3>射型記録 ${fmtD(rec.date)} <span class="mini">${rec.shots||0}射 / ${esc(rec.modelVer||"")}</span></h3>
     ${linked?`<div class="kv"><span>紐付いた練習</span><span>${fmtD(linked.date)} ${linked.dist?linked.dist+"m":""} ・ 平均 ${lm&&lm.all.length?lm.avg.toFixed(2):"—"} 点/本</span></div>`:`<div class="subNote">練習セッションには紐付いていません（撮影日に練習記録があると自動で紐付きます）。</div>`}
     ${ins?`<div class="kv"><span>要約</span><span>弓手肘 ${ins.stats.bowArm!=null?ins.stats.bowArm.toFixed(0)+"°":"—"} / 引き手肘 ${ins.stats.drawArm!=null?ins.stats.drawArm.toFixed(0)+"°":"—"} / 保持 ${ins.stats.holdMs!=null?(ins.stats.holdMs/1000).toFixed(1)+"秒":"—"}</span></div>`:""}
     ${ins?formInsightBlockHtml("観測",ins.facts):""}
@@ -796,11 +796,11 @@ function openFormCapture(){
     const {result,linked}=attemptLiveDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#fcSave");
     if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
     const matrixNotice=!zeroShot&&frozenDiagnosticSave.record.captureMode==="live"?(frozenDiagnosticSave.matrixAdvanced?"診断バッチに追加しました":["coordinator-missing","coordinator-invalid","coordinator-stale","coordinator-complete"].includes(frozenDiagnosticSave.matrixCode)?"18射の診断を開始し直してください":"診断条件を満たさなかったため、同じ条件をもう一度記録してください"):null;
-    toast(matrixNotice||(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`));
+    toast(matrixNotice||(zeroShot?"診断用に0射で保存しました":linked?`射型記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射型記録を保存しました（${shots.length}射）`));
     nativePulse("success"); finishCapture(); render(); await offerRecordedVideoAfterSave(); return true;
   }
   ovl.querySelector("#fcClose").onclick=async()=>{
-    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishCapture(); return; }
+    if(receiptFailure){ if(await appConfirm("射型解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishCapture(); return; }
     if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; finishCapture(); return; }
     if(!shots.length&&db.settings.formDebug===true){ await finishLiveDiagnosticAttempt(true); return; }
     if(!shots.length){ abandonActiveReceipt("workflow-close"); finishCapture(); return; }
@@ -817,7 +817,7 @@ function openFormCapture(){
        中央値/最大値をレコードへ添える（既定OFF、ストレージ肥大防止）。前方互換の追加フィールド */
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
-    toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
+    toast(linked?`射型記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射型記録を保存しました（${shots.length}射）`);
     nativePulse("success");
     finishCapture(); render(); await offerRecordedVideoAfterSave();
   };
@@ -869,7 +869,7 @@ function openFormCapture(){
     hud.textContent="準備完了。横向き全身が写る位置で数射どうぞ。";
     loop();
   }).catch(e=>{
-    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e)+"（カメラ許可と、iOS 16.4以降/最新ブラウザをご確認ください）";
+    hud.textContent="射型解析を開始できませんでした: "+(e&&e.message||e)+"（カメラ許可と、iOS 16.4以降/最新ブラウザをご確認ください）";
   });
 }
 
@@ -892,7 +892,7 @@ function startFormReplay(videoUrl){
       <button class="btn sec sm" id="frHand">利き手: ${db.settings.formHandedness==="left"?"左":"右"}</button>
       <button class="btn" id="frSave" disabled>保存して終了</button>
     </div>
-    <div class="formFootnote">保存済み動画からの射形解析。検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。</div>
+    <div class="formFootnote">保存済み動画からの射型解析。検出の鮮明さは骨格検出の確からしさで、カメラの角度による測定誤差は反映されません。毎回同じ位置・角度で撮ると比較の精度が上がります。</div>
   </div>`;
   openModal(ovl,{escapeTarget:"#frClose"});
   beginActiveWorkflow();
@@ -1119,11 +1119,11 @@ function startFormReplay(videoUrl){
   function finishReplayDiagnosticAttempt(zeroShot){
     const {result,linked}=attemptReplayDiagnosticSave(zeroShot),saveButton=ovl.querySelector("#frSave");
     if(!result.ok){ hud.textContent=result.code==="diagnostics-disabled"||result.code==="coordinator-changed"?"診断設定または18射バッチが変わったため、保存を再試行できません。":"診断を保存できませんでした。保存を再試行するか、閉じて破棄してください。"; saveButton.disabled=false; saveButton.textContent="保存を再試行"; return false; }
-    toast(zeroShot?"診断用に0射で保存しました":linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
+    toast(zeroShot?"診断用に0射で保存しました":linked?`射型記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射型記録を保存しました（${shots.length}射）`);
     nativePulse("success"); finishReplay(); render(); return true;
   }
   ovl.querySelector("#frClose").onclick=async()=>{
-    if(receiptFailure){ if(await appConfirm("射形解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishReplay(); return; }
+    if(receiptFailure){ if(await appConfirm("射型解析を再開するには、この画面を閉じてやり直してください。保存していない結果を破棄して閉じますか？",{danger:true,okLabel:"閉じる"})) finishReplay(); return; }
     if(frozenDiagnosticSave&&!frozenDiagnosticSave.committed){ const discard=await appConfirm("保存できていない診断を破棄して閉じますか？",{danger:true,okLabel:"破棄して閉じる"}); if(!discard) return; frozenDiagnosticSave=null; finishReplay(); return; }
     if(!shots.length&&db.settings.formDebug===true){ finishReplayDiagnosticAttempt(true); return; }
     if(!shots.length){ abandonActiveReceipt("workflow-close"); finishReplay(); return; }
@@ -1148,7 +1148,7 @@ function startFormReplay(videoUrl){
        formDebug フラグでのみ保存（OFF時は既存と同一サイズ）。前方互換の追加フィールド */
     db.formAnalyses.push(rec);
     save({reason:"form-analysis"});
-    toast(linked?`射形記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射形記録を保存しました（${shots.length}射）`);
+    toast(linked?`射型記録を保存し、今日の練習に紐付けました（${shots.length}射）`:`射型記録を保存しました（${shots.length}射）`);
     nativePulse("success"); finishReplay(); render();
   };
   ovl.querySelector("#frHand").onclick=e=>{
@@ -1172,6 +1172,6 @@ function startFormReplay(videoUrl){
     video.src=videoUrl;
     video.load();
   }).catch(e=>{
-    hud.textContent="射形解析を開始できませんでした: "+(e&&e.message||e);
+    hud.textContent="射型解析を開始できませんでした: "+(e&&e.message||e);
   });
 }

@@ -224,7 +224,7 @@ test("prediction keeps setup scope, disappears below two distances and handles a
   await expect(panel.locator("[data-predict-dist]")).toHaveCount(0);
   await expect(panel).toContainText("弾道モデル");
   // 0/0/0/100 のような矛盾した台帳では初速の当てはめが探索範囲の端に張り付くので採らず、用具からの推定を使う
-  await expect(panel).toContainText("用具から推定");
+  await expect(panel).toContainText("弓具から推定");
   await expect(panel).toContainText("定番距離");
   await panel.locator("details.sightSources summary").tap();
   await expect(panel.locator("[data-source-id]")).toHaveCount(4);

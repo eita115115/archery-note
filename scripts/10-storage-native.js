@@ -373,7 +373,7 @@ function nativeReadinessProfile(){
   const shellScore=clamp(.54 + nativeScore*.36,0,1);
   const next=[];
   if(!db.settings.lastBackupAt) next.push("バックアップ保存");
-  if(!counts.setups) next.push("用具登録");
+  if(!counts.setups) next.push("弓具登録");
   if(counts.sessions<3) next.push("練習記録");
   if(!next.length) next.push("同条件の記録を増やす");
   return {runtime,storage,native,nativeScore,storageScore,engineScore,shellScore,next,counts};
@@ -406,7 +406,7 @@ function readSnapshots(){
 }
 function snapshotLabel(s){
   const c=s.counts||dataCounts(s.data||{});
-  return `${new Date(s.ts||Date.now()).toLocaleString()}（練習${c.sessions||0} / 用具${c.setups||0} / サイト${c.marks||0}）`;
+  return `${new Date(s.ts||Date.now()).toLocaleString()}（練習${c.sessions||0} / 弓具${c.setups||0} / サイト${c.marks||0}）`;
 }
 let snapshotJob=null, snapshotPending=null;
 function runIdleTask(fn, timeout){
@@ -736,7 +736,7 @@ function restoreTrash(id){
   save({reason:"restore-trash",forceSnapshot:true});
   return true;
 }
-function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"用具":t==="formAnalysis"?"射形記録":t==="note"?"メモ":"削除データ"; }
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型記録":t==="note"?"メモ":"削除データ"; }
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);

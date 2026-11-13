@@ -903,7 +903,7 @@ function setupComparisonHtml(setupId) {
     return `<b style="color:${color}">${sign}${x.toFixed(2)}${unit}</b>`;
   };
   return `<div class="advice gearAdviceCard">
-    <div class="note"><b>用具比較</b> — ${fmtD(prev.date)} → ${fmtD(last.date)}${prev.dist === last.dist ? ` / ${last.dist}m` : ` / ${prev.dist}m→${last.dist}m`}</div>
+    <div class="note"><b>弓具比較</b> — ${fmtD(prev.date)} → ${fmtD(last.date)}${prev.dist === last.dist ? ` / ${last.dist}m` : ` / ${prev.dist}m→${last.dist}m`}</div>
     <div class="kv"><span>平均点</span><span>${a.avg.toFixed(2)} → ${b.avg.toFixed(2)}（${delta(b.avg - a.avg)}）</span></div>
     ${
       a.st && b.st
@@ -914,8 +914,8 @@ function setupComparisonHtml(setupId) {
     <div class="note">セッティング変更の直後は、同距離・似た風条件で2回以上見ると判断が安定します。</div>
   </div>`;
 }
-/* pageHeroHtml("gear") の縮小版。旧指標行（用具ライブラリ/入力材料/よく使う用具）はここへ統合し、
-   上部の数値枠は 登録件数・入力材料%・直近使用 の1ブロック3値まで。「よく使う用具」は台帳の金ドットが担う。
+/* pageHeroHtml("gear") の縮小版。旧指標行（弓具ライブラリ/入力材料/よく使う弓具）はここへ統合し、
+   上部の数値枠は 登録件数・入力材料%・直近使用 の1ブロック3値まで。「よく使う弓具」は台帳の金ドットが担う。
    50-record-view.js の pageHeroHtml 本体は並行改修中のため触らず、ここで独立に描画する */
 function gearHeroHtml() {
   const setups = db.setups || [];
@@ -926,11 +926,11 @@ function gearHeroHtml() {
   )[0];
   const lastSetup = lastSess && setups.find((s) => s.id === lastSess.setupId);
   return `<section class="pageHero">
-    <div class="kicker">用具</div>
+    <div class="kicker">弓具</div>
     <h2>いつものセッティングを残す</h2>
     <div class="heroMetrics">
       ${heroMetricHtml("登録", `${setups.length}件`, `${db.sessions.filter((s) => s.setupId).length}回の練習に接続`)}
-      ${heroMetricHtml("入力材料", setups.length ? pct(avg) : "—", "用具データの平均充実度")}
+      ${heroMetricHtml("入力材料", setups.length ? pct(avg) : "—", "弓具データの平均充実度")}
       ${heroMetricHtml("直近使用", lastSetup ? lastSetup.name : "—", lastSess ? fmtD(lastSess.date) : "記録待ち")}
     </div>
   </section>`;
@@ -1231,7 +1231,7 @@ function gamifySettingsHtml() {
 const FORM_DIAGNOSTIC_PRIVACY_CONFIRM =
   "現在の18射診断バッチの診断値だけを書き出します。練習記録、日付、メモ、端末内ID、映像、画像、ランドマークは含みません。診断値の共有先は自分で確認してください。";
 const FORM_DIAGNOSTIC_RESTART_CONFIRM =
-  "現在の未完了の診断バッチを新しく開始し直しますか？保存済みの射形記録は削除されません。";
+  "現在の未完了の診断バッチを新しく開始し直しますか？保存済みの射型記録は削除されません。";
 const FORM_DIAGNOSTIC_RESULT_COPY = Object.freeze({
   "invalid-app-version": "restart-required",
   "invalid-batch-id": "allocation-failed",
@@ -1553,7 +1553,7 @@ function openSettings() {
       <div class="hint">的を長押ししたときに出る拡大表示の位置です。入力中は動きません。</div>
       <label class="f">アイ〜サイト距離 (mm) — 調整提案のmm目安の計算に使用</label>
       <input class="inp" id="setEye" inputmode="numeric" value="${db.settings.eyeSight || 850}">
-      <label class="f">射形トラッキング（ベータ）</label>
+      <label class="f">射型トラッキング（ベータ）</label>
       <div class="chips" id="ftChips">
         <button type="button" class="chip ${formTrackingOn ? "" : "on"}" aria-pressed="${!formTrackingOn}" data-ft="0">OFF</button>
         <button type="button" class="chip ${formTrackingOn ? "on" : ""}" aria-pressed="${formTrackingOn}" data-ft="1">ON</button>
@@ -1595,7 +1595,7 @@ function openSettings() {
         <button class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">今すぐバックアップ</button>
         <button class="btn ghost" id="dSnapRestore" data-testid="settings-snapshot-restore" ${snaps.length ? "" : "disabled"}>選択したバックアップを復元</button>
       </div>
-      <div class="settingsActionHint">ゴミ箱へ移した用具・練習記録・メモの一時保管です。ここから元に戻せます（ノートの一番下にも同じ入口があります）。</div>
+      <div class="settingsActionHint">ゴミ箱へ移した弓具・練習記録・メモの一時保管です。ここから元に戻せます（ノートの一番下にも同じ入口があります）。</div>
       ${trashSettingsHtml()}
       <div class="hint">記録データはこの端末のブラウザ内にだけ保存されます（サーバーには送信されません）。</div>
     </div>
@@ -1667,8 +1667,8 @@ function openSettings() {
         });
         toast(
           db.settings.formTrackingEnabled===true
-            ? "射形トラッキングを有効にしました（分析 > 射型）"
-            : "射形トラッキングを無効にしました",
+            ? "射型トラッキングを有効にしました（分析 > 射型）"
+            : "射型トラッキングを無効にしました",
         );
       }),
   );
