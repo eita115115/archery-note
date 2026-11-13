@@ -122,44 +122,6 @@ const SHOT_REASON_TAGS = [
   "矢が怪しい",
   "不明",
 ];
-function setupSystemSummary(setupId) {
-  const setup = db.setups.find((s) => s.id === setupId);
-  if (!setup)
-    return {
-      score: 0,
-      level: "準備中",
-      profiles: {},
-      lines: ["セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"],
-      next: "弓具タブでセッティングを登録",
-    };
-  const gp = gearPrecisionProfile(setup),
-    mp = modelReadinessProfile(setupId),
-    pc = personalPhysicsCalibration(setupId),
-    cp = calibrationProfile(setupId);
-  const score = clamp(
-    gp.score * 0.25 + mp.score * 0.25 + (pc ? pc.score * 0.28 : 0) + (cp ? cp.score * 0.22 : 0),
-    0,
-    1,
-  );
-  const level = levelFromScore(score, LEVELS.system);
-  const next = [];
-  if (gp.score < 0.65) next.push((gp.missing || [])[0] || "弓具入力");
-  if (mp.good < 5) next.push("6本以上の練習");
-  if (cp.dists < 3) next.push("複数距離のサイト値");
-  if (pc && pc.wind.sample < 2) next.push("横風メモつき練習");
-  return {
-    score,
-    level,
-    profiles: {
-      gear: gp,
-      model: mp,
-      physics: pc || { score: 0, level: "未校正" },
-      calibration: cp,
-    },
-    lines: [`弓具 ${gp.level} / 履歴 ${mp.level} / 物理校正 ${pc ? pc.level : "未校正"}`],
-    next: next.slice(0, 2).join("・") || "同条件で記録を重ねる",
-  };
-}
 function recordSetupSnapshot(setupId, dist) {
   const setup = db.setups.find((s) => s.id === setupId);
   if (!setup)
@@ -183,12 +145,6 @@ function faceChoiceValue(sess) {
 function suggestedFaceValue(dist, last) {
   if (last && last.faceD) return faceChoiceValue(last);
   return String((dist || 70) >= 60 ? 122 : (dist || 70) <= 18 ? 40 : 80);
-}
-function actionFaceLabel(value) {
-  const f = parseFaceChoice(value);
-  if (f.faceType === "triple") return "40cm三つ目";
-  if (f.faceType === "field") return `${f.faceD}cmフィールド`;
-  return `${f.faceD}cm`;
 }
 /* 多距離ラウンド（IMP-09）: ラウンドIDが ROUND_TYPES に無く stages を持つ定義なら返す。それ以外は null */
 function selectedMultiRound(roundId) {
@@ -3464,10 +3420,8 @@ async function finishSession() {
      gamification.enabled の値に一切依存せず常に計算する。編集モード（isEdit）は対象外
      （過去記録の書き換えで「今日の結果」を騒がせない。既存 .summaryGamification と同じ扱い）。
      母集団は履歴詳細シート（T6）と同じ「当日以前」フィルタで揃える（strict-review minor②）:
-     fDate バックデート記録時に未来のセッションが「前回」「自己ベスト」や growthBefore の
-     基準日へ混入するのを防ぎ、後日同じセッションを履歴から開いたときの再構成と一致させる */
+     fDate バックデート記録時に未来のセッションが「前回」「自己ベスト」へ混入するのを防ぎ、後日同じセッションを履歴から開いたときの再構成と一致させる */
   let todaysResult = null;
-  let growthBefore = null;
   if (!isEdit) {
     const trSessions = db.sessions.filter((x) => x && x.date && x.date <= s.date);
     /* 同じ同期計算内の再参照だけを共有する。session/metricsはここでは変更せず、
@@ -3480,7 +3434,6 @@ async function finishSession() {
     todaysResult = computeTodaysResult(trSessions, s.id, metricsForResult, {
       formAnalyses: db.formAnalyses,
     });
-    if (todaysResult.available) growthBefore = trGrowthBeforeFor(s, trSessions, metricsForResult);
   }
   const g = db.settings.gamification;
   if (g && g.enabled && !isEdit) {
@@ -3504,9 +3457,9 @@ async function finishSession() {
       db.gamification.badges.push(...newBadges);
       save({ reason: "gamification-badges" });
     }
-    openSummary(s, !isEdit, { streakBefore, streakAfter, newBadges }, todaysResult, growthBefore);
+    openSummary(s, !isEdit, { streakBefore, streakAfter, newBadges }, todaysResult);
   } else {
-    openSummary(s, !isEdit, null, todaysResult, growthBefore);
+    openSummary(s, !isEdit, null, todaysResult);
   }
 }
 
@@ -3530,24 +3483,6 @@ function roundGroupSummaryHtml(sess) {
   </div>`;
 }
 /* ---------- 「今日の結果」統合パネル ---------- */
-/* todays-result-integration-design.md §3.4 の「途切れました」検出に使う before/after パターン。
-   今回のセッションを除いた直前の練習日を基準にした computeGrowthStreaks を計算する。
-   finishSession・履歴詳細シート（60-history-sight-view.js）の両方とも「当日以前」に絞った
-   同一定義の母集団を渡す（strict-review minor②: 経路間の非対称を禁止。バックデート記録でも
-   before/after が同じ as-of 母集団で比較され、偽の「途切れました」が出ない） */
-function trGrowthBeforeFor(sess, allSessions, metricsFn) {
-  const priorSessions = (allSessions || []).filter((x) => x && x.id !== sess.id);
-  const priorLastDate = priorSessions.length
-    ? priorSessions
-        .map((x) => x.date)
-        .filter(Boolean)
-        .sort()
-        .slice(-1)[0]
-    : null;
-  if (!priorLastDate) return null;
-  return computeGrowthStreaks(priorSessions, priorLastDate, metricsFn);
-}
-
 /* 1行の骨格: 事実（.fact）→ 対象と条件（.basis）。励まし・評価語・感嘆符は書かない（ui-redesign-plan.md 5章） */
 function todaysResultRowHtml(kind, factHtml, basisText) {
   return `<div class="todaysResultRow" data-testid="todays-result-${kind}">
@@ -3717,15 +3652,13 @@ function resultImpactFigsHtml(st) {
 }
 /* ---------- 今日の結果（全画面。docs/design/v5/design.md 4.4・試作 #result） ----------
    記録を終了した直後に出す。合計 → 前後半・数える点 → 同じ条件との比較（根拠つき）→ スコア表 →
-   着弾 → サイト調整の目安と根拠（既存の内容。作り直しは段 8）→ メモ → 分析で見る / 保存して閉じる */
-function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
-  void growthBefore; /* 伸びの継続日数は表示しない（todaysResultHtml の説明を参照） */
+   着弾 → サイト調整の目安と根拠（弓具 > サイト と同じ sightAdviceHtml。sessionSightFoldHtml）→ メモ → 分析で見る / 保存して閉じる */
+function openSummary(sess, isNew, gam, todaysResult) {
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const m = sessionMetrics(sess);
   const all = m.all,
     total = m.total,
     st = m.st;
-  const adv = adviceFor(sess, setup);
   const posCount = all.filter(arrowHasPos).length;
   const comparison =
     isNew && todaysResult
@@ -3758,29 +3691,7 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
     <section class="vsec"><div class="vsecH"><h2>着弾</h2><span class="aside">${posCount ? `${posCount}射の位置` : "位置の記録なし"}</span></div></section>
     <div id="sumPlot" class="recordSummaryPlot${posCount ? " bleed" : ""}"></div>
     ${resultImpactFigsHtml(st)}
-    <details class="adv summaryDetails">
-      <summary>サイト調整の目安と詳しい根拠</summary>
-      ${summaryDecisionHtml(adv, sess)}
-      ${groupSummaryHtml(st)}
-      ${summarySightDialHtml(sess, adv)}
-      ${st ? nextActionHtml(sess, adv, setup) : ""}
-      ${st ? confidenceNoteHtml("calc") : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
-      ${st ? trustHtml(sess, setup, st) : ""}
-      ${roundProgressHtml(sess)}
-      ${sess.sightV || sess.sightH ? `<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV || "—")} / 左右 ${esc(sess.sightH || "—")}</span></div>` : ""}
-      ${arrowMetaSummaryHtml(sess)}
-      ${
-        adv
-          ? `<div class="advice"><div class="recordAdviceLabel">サイト調整の提案</div>${adv.lines.map((l) => `<div class="dir">${l.html}</div>`).join("")}
-        ${judgementHtml(adv, sess)}
-        ${shapeNote(adv.st)}
-        ${adv.notes.map((n) => `<div class="note">・${n}</div>`).join("")}
-        <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight || 850}mm と弾道モデルから計算した参考値です（設定 > 記録 で変更できます）。</div></div>`
-          : ""
-      }
-      ${personalModelHtml(adv, sess, setup)}
-      ${conditionHtml(sess, st, setup)}
-    </details>
+    ${sessionSightFoldHtml(sess, setup, { testid: "result-sight-details" })}
     ${sess.setupId && (sess.sightV || sess.sightH) ? `<div class="btnrow"><button class="btn sec" id="sumMark">${icon("ledger")} このサイト値を台帳に記録</button></div>` : ""}
     <section class="vsec">
       <div class="vsecH"><h2><label for="sumNote">${title === "今日の結果" ? "今日のメモ" : "この記録のメモ"}</label></h2><span class="aside">ノートに残ります</span></div>
@@ -4043,10 +3954,6 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
 function groupingMetricNumber(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
-}
-function groupingMetricText(v) {
-  const n = groupingMetricNumber(v);
-  return n == null ? "—" : `${n.toFixed(1)}cm`;
 }
 function groupingSessionRow(row) {
   /* robustStats 直呼びはやめ、同じ Number 化＋有限フィルタ済みの sessionMetrics キャッシュを経由する */

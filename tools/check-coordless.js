@@ -29,8 +29,11 @@ function makeLocalStorageShim() {
   };
 }
 
-/* 段 3 の変更前（commit 8de7271）のコードで、下の見本データから作った値 */
-const GOLDEN_SHA256 = "e62c17de074e134c582e9070e3a7557e6916e5c3eaf09b5461d08b60c88722c0";
+/* 段 3 の変更前（commit 8de7271）のコードで、下の見本データから作った値。
+   段 9 で、消した関数の出力（次の一手・散り方の文・成長の要約・今日の結論）を見本の値から外し、
+   着弾の数値の表から「演算信頼度」の行を外した。段 8 の終わり（commit 0ff6629）のコードで同じ項目を集め、
+   表の同じ行を取り除いた値が、いまの値と一致することを確かめてから置き換えた（残した値は変わっていない） */
+const GOLDEN_SHA256 = "ffb9c6d7df00eeae9c541e0d06439151cbe97d32299635334e91821bf332df1a";
 
 function loadApp(fixtureDb) {
   return new Function(
@@ -52,8 +55,8 @@ ${section(hist, "function sessionGroupPoint(", "function historyDistanceLabel(")
 ${section(hist, "function legacyRescoreHtml(", "function openHistDetail(")}
 db = normalizeDb(fixtureDb);
 return {db, normalizeDb, scoreAt, sessionMetrics, sessionQuality, adviceFor, personalModel, sessionRescore,
-  sessionGroupPoint, groupSummaryHtml, shapeNote, conditionInsights, judgementFor, nextActionPlan, sessionsCsv,
-  buildAnalysisRows, growthDashboard, personalBests, todayConclusion, conditionSplit, reasonBreakdown,
+  sessionGroupPoint, groupSummaryHtml, judgementFor, sessionsCsv,
+  buildAnalysisRows, personalBests, conditionSplit, reasonBreakdown,
   aggregateByPeriod, isWindy, computeTodaysResult, regressionAdvice, computePersonalPhysicsCalibration,
   sightInterp, gamGroupRms, gamAllArrows, arrowMetaSummaryHtml, scorecardHtml, curRowHtml, groupingSessionRow,
   legacyRescoreHtml, trashItem, sessionScoringRadius,
@@ -195,10 +198,7 @@ function geometryView(app, s) {
     },
     personal: app.personalModel(s, setup, m.st),
     judgement: app.judgementFor(adv, s),
-    plan: app.nextActionPlan(s, adv, setup),
-    groupHtml: app.groupSummaryHtml(m.st, { withConfidenceNote: true }),
-    shape: app.shapeNote(m.st),
-    conditions: app.conditionInsights(s, m.st, setup),
+    groupHtml: app.groupSummaryHtml(m.st),
     gamRms: app.gamGroupRms(app.gamAllArrows(s)),
   };
 }
@@ -223,9 +223,7 @@ function fullView(app) {
         row: app.groupingSessionRow({ s }) && { ...app.groupingSessionRow({ s }), session: undefined },
       };
     }),
-    growth: strip(app.growthDashboard(rows, "2026-11-12")),
     bests: strip(app.personalBests(rows)),
-    conclusion: strip(app.todayConclusion(rows)),
     split: strip(app.conditionSplit(rows, app.isWindy)),
     reasons: app.reasonBreakdown(rows),
     weekly: strip(app.aggregateByPeriod(rows, "week")),
@@ -307,7 +305,7 @@ const geometryCells = (line) => {
   check(k.total === 92 && k.arrows === 12 && Math.abs(k.avg - 92 / 12) < 1e-12, "score-only session counts total, arrows and average", JSON.stringify([k.total, k.arrows, k.avg]));
   check(k.geometry.st === null && k.geometry.pts.length === 0, "score-only session has no grouping statistics");
   check(k.geometry.advice === null && k.geometry.judgement === null, "score-only session gives no sight advice");
-  check(k.geometry.groupHtml === "" && k.geometry.shape === "", "score-only session renders no grouping numbers");
+  check(k.geometry.groupHtml === "", "score-only session renders no grouping numbers");
   check(k.point === null && k.row === null && k.geometry.gamRms === null, "score-only session has no grouping point / row / RMS");
   check(k.rescore.scored === 0 && k.rescore.skipped === 12 && k.rescore.total === 92 && k.rescore.changed === 0, "rescore keeps stored scores of a score-only session", JSON.stringify(k.rescore));
   check(k.geometry.quality.label === "低" && noBadText(JSON.stringify(k.geometry.quality)), "score-only session quality is the low/no-data value without NaN");
@@ -340,7 +338,7 @@ const geometryCells = (line) => {
   check(same(mixed.geometry.pts, base.geometry.pts), "mixed session uses only positioned points");
   check(same(mixed.geometry.advice, base.geometry.advice), "mixed session sight advice equals the positioned-only advice");
   check(same(mixed.geometry.quality, base.geometry.quality), "mixed session decision quality equals the positioned-only value");
-  check(same(mixed.geometry.groupHtml, base.geometry.groupHtml) && same(mixed.geometry.shape, base.geometry.shape), "mixed session grouping text equals the positioned-only text");
+  check(same(mixed.geometry.groupHtml, base.geometry.groupHtml), "mixed session grouping text equals the positioned-only text");
   check(mixed.geometry.gamRms === base.geometry.gamRms, "mixed session gamification RMS equals the positioned-only value");
   check(mixed.point && same({ ...mixed.point, total: 0, avg: 0 }, { ...base.point, total: 0, avg: 0 }), "mixed session grouping point equals the positioned-only point");
   check(mixed.rescore.scored === base.rescore.scored && mixed.rescore.skipped === 6 && mixed.rescore.total === base.rescore.total + added && mixed.rescore.changed === base.rescore.changed, "rescore of a mixed session keeps stored scores of coordinate-less arrows", JSON.stringify(mixed.rescore));

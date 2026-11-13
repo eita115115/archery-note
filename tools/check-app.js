@@ -63,7 +63,7 @@ assert(surface.includes("この条件で記録を始める") && surface.includes
 assert(surface.includes("読み込みに時間がかかっています") && surface.includes("bootFallback") && surface.includes("bootFallbackDelay") && html.includes('id="updBar" hidden'), "startup/update fallback should be calm and initially hidden");
 assert(surface.includes("前回と同じ条件") && surface.includes("記録の途中です") && surface.includes("最初の条件を選ぶ") && surface.includes("homeStartBandHtml") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("beginRecording") && !surface.includes("今の条件で開始") && surface.includes("recordSetupSnapshot") && !surface.includes("gearHeroHtml"), "record tab home (start band) missing");
 assert(scripts.includes('class="recScreen') && !scripts.includes("compactHud") && !surface.includes("まず今日の記録を始める。詳しい材料") && !surface.includes("距離・的サイズはこの画面で変更できます") && !surface.includes("タップ＆ドラッグで確定"), "Record screen should stay compact and low-noise");
-assert(surface.includes("levelFromScore") && surface.includes("summarySightDialHtml") && surface.includes("summaryDecisionHtml"), "record UI helpers missing");
+assert(surface.includes("levelFromScore") && surface.includes("function sessionSightFoldHtml") && !surface.includes("summarySightDialHtml") && !surface.includes("summaryDecisionHtml"), "record UI helpers missing");
 assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
 assert(surface.includes("SHOT_REASON_TAGS") && surface.includes("外れ理由") && surface.includes("矢番号") && surface.includes("arrowMetaSummaryHtml"), "Shot reason and arrow-number note UI missing");
 assert(surface.includes("window.PointerEvent") && surface.includes("touchstart") && surface.includes("mousedown"), "Input fallback handlers missing");
@@ -104,21 +104,21 @@ assert(storageApi.dataCounts({sessions:[1,2],setups:[1],sightMarks:[1,2,3]}).mar
 assert(storageApi.hashText("abc") === storageApi.hashText("abc"), "Hash stability failed");
 assert(storageApi.snapshotLabel({ts:Date.now(),counts:{sessions:2,setups:1,marks:3}}).includes("練習2"), "Snapshot label failed");
 assert(storageApi.storageGetItem("__missing__") == null && storageApi.storageSetItem("__test__", "1") === false && storageApi.storageDriverProfile().id === "localStorage", "Storage adapter fallback failed");
-assert(surface.includes("TRASH_LIMIT") && surface.includes("restoreTrash") && surface.includes("trashSettingsHtml"), "Trash/restore support missing");
+assert(surface.includes("TRASH_LIMIT") && surface.includes("restoreTrash") && surface.includes("function openTrashSheet") && !surface.includes("trashSettingsHtml"), "Trash/restore support missing");
 assert(surface.includes("openSetupWizard") && surface.includes("openCalibrationWizard"), "Wizard/calibration flows missing");
 assert(surface.includes("sessionsCsv") && surface.includes("scorecardSvg"), "Export flows missing");
-assert(surface.includes("judgementFor") && surface.includes("conditionInsights"), "Analysis judgement flows missing");
+assert(surface.includes("judgementFor") && !surface.includes("conditionInsights"), "Analysis judgement flows missing");
 assert(surface.includes("histFilter") && surface.includes("histSetup"), "History filters missing");
 assert(surface.includes("ROUND_TYPES") && surface.includes("roundProgressHtml"), "Round scoring support missing");
 assert(surface.includes("FIELD_FACE_SIZES") && surface.includes("cm フィールド") && surface.includes("フィールド 24標的/72射"), "Field target setup UI missing");
 assert(!surface.includes("校正用") && !surface.includes("状態確認"), "Record mode labels should be user-facing");
-assert(surface.includes("personalModel") && surface.includes("sessionQuality") && surface.includes("nextActionPlan"), "Personal decision model missing");
+assert(surface.includes("personalModel") && surface.includes("sessionQuality") && !surface.includes("nextActionPlan") && !surface.includes("次のアクション"), "Personal decision model missing");
 assert(surface.includes("SESSION_METRIC_CACHE") && surface.includes("sessionMetricSignature"), "Session metric cache missing");
 assert(surface.includes("decision_quality") && surface.includes("personal_model"), "CSV decision columns missing");
-assert(surface.includes("robustWeightedLine") && surface.includes("modelReadinessProfile") && surface.includes("個人データ準備度"), "v19 weighted model readiness missing");
+assert(surface.includes("robustWeightedLine") && !surface.includes("modelReadinessProfile") && !surface.includes("個人データ準備度"), "v19 weighted regression missing or old readiness panel left");
 assert(surface.includes("spineGuidance") && surface.includes("スパインの初期候補") && surface.includes("stabilizer"), "v20 gear guidance missing");
 assert(surface.includes("RK4-3D") && surface.includes("windModel") && surface.includes("横流れ推定"), "v21 physics engine missing");
-assert(surface.includes("personalPhysicsCalibration") && surface.includes("物理校正") && surface.includes("履歴推定"), "v22 personal physics calibration missing");
+assert(surface.includes("personalPhysicsCalibration") && !surface.includes("物理校正:") && surface.includes("履歴推定"), "v22 personal physics calibration missing");
 assert(fs.existsSync(path.join(root, "tools", "extract-catalog.py")), "Catalog extraction tool missing");
 const trashDb = {sessions:[],setups:[],sightMarks:[],trash:[]};
 let trashSaved = 0;
@@ -389,14 +389,14 @@ assert(st && st.excluded.length === 1 && st.excluded[0].x === 28 && st.n === arr
   const ring = Array.from({length:6}, (_, j) => ({x:Math.cos(j/6*Math.PI*2)*3.9, y:Math.sin(j/6*Math.PI*2)*3.9}));
   assert(Math.abs(statsApi.robustStats(ring).rr - 3.9 * Math.sqrt(6/5)) < 1e-9, "Ring RMS must not collapse");
 }
-const lineApi = new Function(section("function clamp", "function solve3") + "\nreturn {robustWeightedLine};")();
+const lineApi = new Function(section("function clamp", "function regressionAdvice") + "\nreturn {robustWeightedLine};")();
 const wr = lineApi.robustWeightedLine([[5,3,1],[6,1.5,1],[7,0.2,1],[8,-1.1,1],[9,-2.6,1],[12,20,0.05]]);
 assert(wr && wr.kind === "weighted-robust" && wr.zero > 6.8 && wr.zero < 7.5 && wr.quality > .4, "Weighted robust sight regression failed");
 
 const analysisDb = {sessions:[]};
 const analysisApi = new Function(
   "db","robustStats","ringW","clamp","num","gearPrecisionProfile","pct","cmOffsetText","esc","groupStats","probWithin","fmtChance","tCrit975","sightStats","arrowHasPos",
-  section("function windText", "function roundProgressHtml") + "\nreturn {sessionQuality,personalModel,judgementFor,nextActionPlan};"
+  section("function windText", "function roundProgressHtml") + "\nreturn {sessionQuality,personalModel,judgementFor};"
 )(
   analysisDb,
   statsApi.robustStats,
@@ -436,7 +436,6 @@ assert(q.score > .45 && ["中","高"].includes(q.label), "Session quality failed
 assert(pm && pm.sample === 2 && pm.state === "過去と一致", "Personal model failed");
 const judgement = analysisApi.judgementFor({st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},current);
 assert(judgement && judgement.label === "動かす", "Personal judgement failed");
-assert(analysisApi.nextActionPlan(current,{st:curSt,confidence:.7,lines:[{axis:"h"}],personal:pm},{id:"main"}).length > 0, "Next action plan failed");
 
 /* 矢径の妥当範囲（20-scoring.js の定数）。物理の矢径チェックが採点と同じ範囲を使うため、物理を切り出す枠に足す */
 const arrowDiaConsts = section("const DEFAULT_ARROW_DIA_MM", "const SCORE_EPS");
@@ -522,7 +521,7 @@ assert(physicsApi.ArcheryPhysicsCore && physicsApi.ArcheryPhysicsCore.trajectory
    実測範囲の外（18m・70m・90m）を1mm前後で当てる。旧版の一次/二次近似は 2〜9mm ずれていた */
 {
   const sightDb = {settings:{eyeSight:850}, setups:[{id:"s", poundage:"40", drawLength:"28", arrowWeight:"320", arrowDia:"5.5"}], sightMarks:[], sessions:[]};
-  const sightApi = new Function("normGearText","db", arrowDiaConsts + section("function clamp", "function calibrationProfile") + "\nreturn {physicsProfile,solveZeroAngle,sightInterp,sightAngleFeature};")(normGearText, sightDb);
+  const sightApi = new Function("normGearText","db", arrowDiaConsts + section("function clamp", "function latestMark") + "\nreturn {physicsProfile,solveZeroAngle,sightInterp,sightAngleFeature};")(normGearText, sightDb);
   const truth = Object.assign({}, sightApi.physicsProfile(sightDb.setups[0]), {speedMps:58, cd:2.0});
   const mark = (D) => { const th = sightApi.solveZeroAngle(D, truth, null, -0.12, -0.25); return 100 - 850 * Math.tan(th - Math.atan2(-0.25, D)); };
   sightDb.sightMarks = [30, 50].map((d, i) => ({id:"m" + i, setupId:"s", dist:d, v:mark(d).toFixed(2), date:"2026-01-0" + (i + 1)}));
@@ -566,7 +565,7 @@ calibDb.sessions.push(
 );
 const calibApi = new Function(
   "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc","sessionHasPos",
-  arrowDiaConsts + section("function clamp", "function adviceModel") + section("function regress", "function calibrationProfile") + "\nreturn {personalPhysicsCalibration,physicsCalibrationHtml};"
+  arrowDiaConsts + section("function clamp", "function adviceModel") + section("function regress", "function latestMark") + "\nreturn {personalPhysicsCalibration};"
 )(
   calibDb,
   normGearText,
@@ -580,7 +579,6 @@ const calibApi = new Function(
 );
 const pcal = calibApi.personalPhysicsCalibration("main");
 assert(pcal && pcal.click.v70 > 1.5 && pcal.click.v70 < 2.5 && pcal.wind.sample >= 2 && pcal.wind.factor > .7 && pcal.score > .25, "Personal physics calibration failed");
-assert(calibApi.physicsCalibrationHtml("main").includes("物理校正"), "Physics calibration UI failed");
 
 const gearApi = new Function(
   "clamp","num","esc","DEFAULT_ARROW_DIA_MM",

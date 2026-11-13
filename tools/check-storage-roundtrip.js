@@ -166,7 +166,7 @@ const num = value => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 const gearPrecisionProfile = () => ({score: 1, missing: [], level: "fixture"});
-${section(analysisScript, "function windText", "function personalModelHtml")}
+${section(analysisScript, "function windText", "function roundProgressHtml")}
 ${section(analysisScript, "function sessionsCsv", "function exportSessionsCsv")}
 return sessionsCsv();`,
   )(clone(db), makeLocalStorageShim());

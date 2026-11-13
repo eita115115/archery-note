@@ -53,7 +53,7 @@ ${cut("function distanceLabel(", "function historyAnalysisDetailsHtml(")}
 ${cut("function sightValueText(", "function sightSummaryHtml(")}
 ${cutFrom(hist, "function noteDateOk(", "function noteSortTs(")}
 ${cutFrom(hist, "function noteDayChanges(", "function noteDayCellHtml(")}
-${cutFrom(hist, "function historyDistanceLabel(", "function driftText(")}
+${cutFrom(hist, "function historyDistanceLabel(", "function scoreDistCard(")}
 ${cutFrom(hist, "function scoreDistCard(", "/* 多距離ラウンド（IMP-09）")}
 return {
   setDb: (d) => { db = d; DB_REV++; },

@@ -33,7 +33,7 @@ function assertDeepEqual(actual, expected, label) {
 
 const gam = new Function(
   `${script}
-return {computeStreak, checkBadges, backfillBadges, calcGoalProgress, goalRingOffset,
+return {computeStreak, checkBadges, backfillBadges, calcGoalProgress,
         BADGE_DEFS, gamFmtDate, gamAllArrows, gamTotalShots, gamPerfect, gamRingW, gamGroupRms, gamIsoWeek};`,
 )();
 
@@ -431,16 +431,6 @@ function fired(ss, cur, id, ctx) {
     weekly: { current: 0, target: 3 },
     monthly: { current: 0, target: 300 },
   }, "defaults apply when goals are empty");
-}
-
-/* ---------- goalRingOffset ---------- */
-
-{
-  assertEqual(gam.goalRingOffset(0, 36, 100), 100, "ring empty at 0 progress");
-  assertEqual(gam.goalRingOffset(18, 36, 100), 50, "ring half at 50% progress");
-  assertEqual(gam.goalRingOffset(36, 36, 100), 0, "ring full at target");
-  assertEqual(gam.goalRingOffset(72, 36, 100), 0, "overachievement clamps to full");
-  assertEqual(gam.goalRingOffset(10, 0, 100), 100, "target 0 shows empty ring");
 }
 
 console.log("Gamification pure-function checks OK (streak / 12 badges / backfill / goals)");

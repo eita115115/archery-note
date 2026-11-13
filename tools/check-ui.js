@@ -301,7 +301,8 @@ function staticUiChecks() {
       surface.includes("quickStart") &&
       surface.includes("quickStartMeta") &&
       !surface.includes("今の条件で開始") &&
-      surface.includes("summaryDecisionHtml") &&
+      surface.includes("function sessionSightFoldHtml") &&
+      !surface.includes("summaryDecisionHtml") &&
       surface.includes("setupLens") &&
       surface.includes("insightStrip"),
     "lightweight record flow composition missing",
@@ -344,14 +345,13 @@ function staticUiChecks() {
     "shot reason and arrow-number note UI missing",
   );
   assert(
-    surface.includes("判断信頼度") &&
-      surface.includes("個人モデル") &&
-      surface.includes("次のアクション") &&
-      surface.includes("個人データ準備度") &&
+    /* v5 段 9: 「次のアクション」「個人データ準備度」「物理校正」の枠は全画面から外した */
+    !surface.includes("次のアクション") &&
+      !surface.includes("個人データ準備度") &&
+      !surface.includes("物理校正:") &&
       surface.includes("スパインの初期候補") &&
-      surface.includes("RK4-3D") &&
-      surface.includes("物理校正"),
-    "analysis cards missing",
+      surface.includes("RK4-3D"),
+    "old analysis cards left, or spine / trajectory labels missing",
   );
   // 「信頼度」の語の分離（監査 High/Medium 対応）: 射型側は「検出の鮮明さ」、グルーピング側は算出根拠の注記を持つ
   assert(
@@ -364,15 +364,14 @@ function staticUiChecks() {
     "form-tracking measurement-error and camera-position hints missing",
   );
   assert(
-    surface.includes("演算信頼度は 1−1/√(使用本数)") &&
-      surface.includes(
-        "判断信頼度は、グルーピング中心が真の中心からリング幅の半分以内に入っている確率",
-      ),
-    "confidence derivation notes missing",
+    /* v5 段 9: 「演算信頼度」「判断信頼度」の行と注記は画面から外した（値は CSV の confidence 列に残る） */
+    !surface.includes("<span>演算信頼度</span>") &&
+      !surface.includes("<span>判断信頼度</span>") &&
+      !surface.includes("演算信頼度は 1−1/√(使用本数)"),
+    "confidence label rows should be gone from every screen",
   );
   assert(
     surface.includes("アプリ情報・保存状態") &&
-      surface.includes("PWA + Capacitor-ready") &&
       surface.includes("ブラウザ保存"),
     "native readiness UI missing",
   );

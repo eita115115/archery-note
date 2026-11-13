@@ -86,7 +86,7 @@ function computeWeeklyDiff(sessions, currentSessionId, todayStr){
    （射型トラッキングは既定OFFのベータ機能で母集団が薄いため v1 は省略可。Fable裁定 §11-4） */
 function computeStabilityTrend(sessions, currentSessionId, metricsFn, opts){
   opts=opts||{};
-  const STABILITY_TIGHT_DELTA=0.3; /* 45-analysis-core.js todayConclusion() の RR_TIGHT_DELTA と同一値 */
+  const STABILITY_TIGHT_DELTA=0.3; /* 半径（RMS）と過去の平均との差がこの値(cm)以上のときだけ、小さい・大きいと書く */
   const MIN_HISTORY=3;
   const all=(sessions||[]).filter(s=>s&&typeof s==="object");
   const cur=all.find(s=>s.id===currentSessionId);

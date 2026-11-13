@@ -34,6 +34,7 @@ const faceLabel = (s) => (s.faceType === "triple" ? "40cm三つ目" : s.faceType
 const perfectScoreValue = (s) => (s && s.faceType === "field" ? 6 : 10);
 const ROUND_TYPES = [{ id: "free", label: "自由練習" }, { id: "70m72", label: "70m 72射", arrows: 72 }, { id: "18m60", label: "18m 60射", arrows: 60 }];
 const findRoundDef = () => null;
+const MULTI_ROUND_PRESETS = [];
 const selectedMultiRound = () => null;
 const parseFaceChoice = (v) => ({ faceD: +v || 122, faceType: "single" });
 const faceChoiceValue = (s) => String(s.faceD || 122);
@@ -41,7 +42,9 @@ const NOTE_GO = "";
 ${read("scripts/20-scoring.js")}
 ${read("scripts/40-analysis-physics.js")}
 ${cutFrom(view, "const WEEKDAY_JA", "function roundQuota(")}
+${cutFrom(store, "function roundLabel(", "/* 記録セッション中の画面消灯")}
 ${cutFrom(view, "function startConditionFrom(", "/* 記録を始める（待機画面の")}
+${cutFrom(view, "function arrowMetaSummaryHtml(", "/* ============ gamification: バッジ12種")}
 ${cutFrom(view, "function distanceLabel(", "function historyAnalysisDetailsHtml(")}
 ${cutFrom(view, "function sightValueText(", "function sightSummaryHtml(")}
 ${cutFrom(gear, "const CATALOG_SHAFTS", "function renderGear(")}
@@ -55,6 +58,7 @@ return {
   recordingSetupId, gearViewSetup, GEAR_FIELDS,
   sightDistRows, sightScaleTicks, sightScaleSvg, sightDistRowHtml, sightHorizontalNoteHtml,
   sightAdviceModel, sightAdviceHtml, sightCentreRows, sightCentreDriftHtml, sightBasisRowsHtml,
+  sessionSightFoldHtml,
   sightPredictionHtml, sightLedgerHtml,
 };`;
 const app = new Function("db", "ui", source)(null, {
@@ -590,5 +594,101 @@ const adviceCase = (label, mutate) => {
     "snapshot restore carries the replace warning",
   );
 }
+
+/* ---------- 今日の結果・ノートの詳細: 折りたたみ「サイト調整の目安と詳しい根拠」（v5 段 9） ----------
+   弓具 > サイト と同じ sightAdviceHtml を使う。旧い枠の語（判断信頼度・次のアクション など）は、どの記録でも出ない */
+{
+  const OLD_LABELS = [
+    "判断信頼度",
+    "演算信頼度",
+    "次のアクション",
+    "個人モデル",
+    "個人補正",
+    "準備度",
+    "物理校正",
+    "動かすべきか",
+    "サイト調整の提案",
+    "次の重点",
+    "精度向上",
+    "判断:",
+    "公式",
+    "公認",
+  ];
+  const foldCase = (label, sess, setup, testid) => {
+    const html = app.sessionSightFoldHtml(sess, setup, { testid });
+    const text = clean(html, label);
+    for (const w of OLD_LABELS) ok(!text.includes(w), `${label}: old label "${w}" is gone`);
+    ok(html.includes(`data-testid="${testid}"`), `${label}: test id`);
+    ok(text.includes("サイト調整の目安と詳しい根拠"), `${label}: fold title`);
+    return { html, text };
+  };
+  const d = load((x) => {
+    /* 矢番号と外れ理由のある記録でも、同じ語の決まりを満たす */
+    const a = x.sessions.find((s) => s.id === "p6").ends[0];
+    a[0].no = "3";
+    a[0].reason = "リリース";
+    a[1].no = "3";
+  });
+  const setup = d.setups[0];
+  const pos = d.sessions.find((s) => s.id === "p6");
+  for (const testid of ["result-sight-details", "note-sight-details"]) {
+    const r = foldCase(`fold ${testid} (positions)`, pos, setup, testid);
+    const adv = app.adviceFor(pos, setup);
+    ok(
+      r.html.includes(app.sightAdviceHtml(pos, setup, adv)),
+      `${testid}: the advice block is the one the sight screen renders`,
+    );
+    ok(/着弾中心は .*（位置のある \d+射/.test(r.text), `${testid}: centre and n are stated`);
+    ok(r.text.includes("グルーピング半径 (RMS・全射)"), `${testid}: all-arrow figures stay`);
+    ok(r.text.includes("矢番号・外れ理由メモ"), `${testid}: arrow notes stay`);
+    ok(r.text.includes("ラウンド進捗"), `${testid}: round progress stays`);
+  }
+  /* 位置のある矢が1本もない記録（点数だけ）: 着弾の数値を出さない */
+  const keyOnly = d.sessions.find((s) => s.id === "p5");
+  for (const testid of ["result-sight-details", "note-sight-details"]) {
+    const r = foldCase(`fold ${testid} (score only)`, keyOnly, setup, testid);
+    ok(!r.html.includes('data-testid="sight-advice"'), `${testid}: no advice without positions`);
+    ok(r.text.includes("着弾データなし"), `${testid}: says there is no impact data`);
+    ok(
+      !/\d(\.\d+)?\s?(cm|mm|クリック|目盛り)/.test(r.text.replace(/122cm的/g, "")),
+      `${testid}: no impact or sight numbers without positions: ${r.text}`,
+    );
+  }
+  /* 位置のある矢が 2射だけ: 目安は出さず、理由を書く */
+  const two = JSON.parse(JSON.stringify(pos));
+  two.id = "two";
+  two.ends = [[pos.ends[0][0], pos.ends[0][1], { s: 9, X: false, src: "key" }]];
+  if (process.argv.includes("--print-fold")) console.log(textOf(app.sessionSightFoldHtml(pos, setup, {})).replace(/\s+/g, " "));
+  const r2 = foldCase("fold (2 positions)", two, setup, "note-sight-details");
+  ok(!r2.html.includes('data-testid="sight-advice"'), "two positions: no advice");
+  ok(r2.text.includes("位置のある矢が 3射に満たないため"), "two positions: the reason is stated");
+  /* セッティングの無い記録でも落ちない */
+  foldCase("fold (no setup)", { ...pos, setupId: "" }, undefined, "note-sight-details");
+  /* 2つの画面とも、この関数だけを使う（旧い部品の名前がソースに残っていない） */
+  const all = view + hist + read("scripts/40-analysis-physics.js");
+  ok(
+    cutFrom(view, "function openSummary(", "openModal(ovl").includes("sessionSightFoldHtml(sess, setup"),
+    "result screen uses sessionSightFoldHtml",
+  );
+  ok(
+    cutFrom(hist, "function openHistDetail(", "openModal(ovl").includes("sessionSightFoldHtml(sess, setup"),
+    "note detail uses sessionSightFoldHtml",
+  );
+  for (const w of [
+    "nextActionHtml",
+    "trustHtml",
+    "personalModelHtml",
+    "summaryDecisionHtml",
+    "summarySightDialHtml",
+    "judgementHtml",
+    "confidenceNoteHtml",
+    "conditionHtml(",
+    "modelReadinessHtml",
+    "physicsCalibrationHtml",
+    "primarySightSuggestion",
+  ])
+    ok(!all.includes(w), `removed part "${w}" is still in the sources`);
+}
+
 
 console.log(`Gear / sight / settings copy and view-model checks OK (${checks} checks)`);

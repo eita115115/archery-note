@@ -431,14 +431,6 @@ function historyDistanceLabel(dist) {
   }
   return "距離未設定";
 }
-function driftText(dx, dy) {
-  const parts = [];
-  if (Math.abs(dx) >= 0.2)
-    parts.push(dx > 0 ? `右${Math.abs(dx).toFixed(1)}cm` : `左${Math.abs(dx).toFixed(1)}cm`);
-  if (Math.abs(dy) >= 0.2)
-    parts.push(dy > 0 ? `上${Math.abs(dy).toFixed(1)}cm` : `下${Math.abs(dy).toFixed(1)}cm`);
-  return parts.length ? parts.join(" / ") : "ほぼ変化なし";
-}
 function scoreDistCard(ss) {
   /* 各得点の件数と最初の的種を一度で集計。空の得点行の色探しで全矢を再走査しない。 */
   const cnt = Object.create(null), firstFace = Object.create(null);
@@ -627,10 +619,7 @@ function openHistDetail(id) {
   const total = all.reduce((a, x) => a + x.s, 0);
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const st = sessionMetrics(sess).st;
-  /* 位置のある矢が1本もない記録（点数だけの入力）: 着弾の数値・信頼度・次のアクションは出さない */
-  const hasImpact = !!st;
   const posCount = all.filter(arrowHasPos).length;
-  const adv = adviceFor(sess, setup);
   /* この日の時点までのデータだけで computeTodaysResult を再現する（未来のセッションを
      「前回」等に混入させないよう、当日以前に絞った母集団を渡す）。文言は「今回」→「この回」に切替 */
   const histAsOfDate = sess.date || today();
@@ -645,10 +634,6 @@ function openHistDetail(id) {
   const rescore = legacyRescoreHtml(sess, setup, total);
   const op = (opId, title, sub) =>
     `<button type="button" class="lrow link" id="${opId}"><span class="lmain"><b>${title}</b><span>${sub}</span></span>${NOTE_GO}</button>`;
-  const detailNumbersHtml = `${hasImpact ? groupSummaryHtml(st, { withConfidenceNote: true }) : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
-    ${sess.sightV || sess.sightH ? `<div class="kv"><span>使用サイト</span><span>上下 ${esc(sess.sightV || "—")} / 左右 ${esc(sess.sightH || "—")}</span></div>` : ""}
-    ${hasImpact ? trustHtml(sess, setup, st) : ""}
-    ${arrowMetaSummaryHtml(sess)}`;
   ovl.innerHTML = `<div class="sheet resultScreen noteScreen histDetailSheet" data-testid="note-detail" data-id="${esc(sess.id)}">
     <div class="subTop"><button type="button" class="backBtn" id="hClose" data-testid="note-back">${REC_CHEVRON}${view === "history" ? "ノート" : "戻る"}</button></div>
     <header class="subHead noteHead">
@@ -677,22 +662,7 @@ function openHistDetail(id) {
     <div id="hPlot" class="recordSummaryPlot${posCount ? " bleed" : ""}"></div>
     ${resultImpactFigsHtml(st)}
     ${noteConditionsHtml(sess, setup)}
-    <details class="adv summaryDetails histDetailNumbers" data-testid="note-sight-details">
-      <summary>サイト調整の目安と詳しい根拠</summary>
-      ${
-        adv
-          ? `<div class="advice"><div class="subNote">${icon("tool")} この回からのサイト調整提案</div>${adv.lines.map((l) => `<div class="dir">${l.html}</div>`).join("")}${judgementHtml(adv, sess)}${shapeNote(adv.st)}${adv.notes
-              .slice(0, 3)
-              .map((n) => `<div class="note">・${n}</div>`)
-              .join("")}</div>`
-          : ""
-      }
-      ${personalModelHtml(adv, sess, setup)}
-      ${roundProgressHtml(sess)}
-      ${conditionHtml(sess, st, setup)}
-      ${hasImpact ? nextActionHtml(sess, adv, setup) : ""}
-      <div data-testid="history-detail-numbers">${detailNumbersHtml}</div>
-    </details>
+    ${sessionSightFoldHtml(sess, setup, { testid: "note-sight-details", cls: "histDetailNumbers" })}
     <section class="vsec histDetailActions" data-testid="note-ops">
       <div class="vsecH"><h2>この記録の操作</h2></div>
       ${op("hEdit", "点数や位置を直す", "記録中と同じ画面で直します。直した矢には印が付きます")}
@@ -1187,6 +1157,33 @@ function sightAdviceHtml(sess, setup, adv, opts) {
     <p class="basis" data-testid="sight-advice-basis">${basis.join("")}</p>
     ${o.drift === false ? "" : sightCentreDriftHtml(sess)}
   </div>`;
+}
+/* 今日の結果とノートの詳細の折りたたみ「サイト調整の目安と詳しい根拠」。
+   目安は 弓具 > サイト と同じ sightAdviceModel / sightAdviceHtml（量と方向は adviceFor の結果を読むだけ）。
+   その下に着弾の数値（全射）と、矢ごとの記録・ラウンドの進み。
+   位置のある矢が1本もない記録（点数だけの入力）は、着弾の数値と目安を出さない */
+function sessionSightFoldHtml(sess, setup, opts) {
+  const o = opts || {};
+  const st = sessionMetrics(sess).st;
+  const adv = adviceFor(sess, setup);
+  const empty = st
+    ? "位置のある矢が 3射に満たないため、目安は出していません。"
+    : "着弾データなし。位置のある矢がない記録のため、着弾中心からの目安は出せません。";
+  const sightKv =
+    !adv && (sess.sightV || sess.sightH)
+      ? `<div class="kv"><span>この記録のサイト値</span><span>上下 ${esc(sightValueText(sess.sightV))}・左右 ${esc(sightValueText(sess.sightH))}</span></div>`
+      : "";
+  return `<details class="adv summaryDetails${o.cls ? " " + o.cls : ""}" data-testid="${o.testid || "session-sight-details"}">
+      <summary>サイト調整の目安と詳しい根拠</summary>
+      ${adv ? sightAdviceHtml(sess, setup, adv) : `<p class="basis" data-testid="session-sight-empty">${empty}</p>`}
+      ${adv ? `<p class="basis">クリック換算の設定と計算の内訳は 弓具 &gt; サイト にあります。</p>` : ""}
+      <div data-testid="history-detail-numbers">
+        ${st ? groupSummaryHtml(st) : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
+        ${sightKv}
+        ${arrowMetaSummaryHtml(sess)}
+        ${roundProgressHtml(sess)}
+      </div>
+    </details>`;
 }
 /* 計算の内訳（折りたたみ）: 弾道の前提、同じサイト値の過去の記録、サイト値とずれの回帰、履歴からの換算。数値と件数だけを書く */
 function sightBasisRowsHtml(sess, setup, adv, sid, dist) {
