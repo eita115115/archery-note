@@ -4,6 +4,10 @@
 
 ## 現在地
 
+- AN-097 実装（v127 後の小さな後片付け。branch claude/sharp-faraday-bu8pii、版128、未公開）。記録画面を出していないときは拡大鏡の固定レイヤー（body 直下の .lensLayer）と PointerEvent の無い経路の window の mousemove/mouseup を外す（`teardownTargetInput`。描き直しでは付け替えて1組だけ）、中心の拡大は記録ごと（`ui.zoomFor`。同じ記録の中断・再開では保つ）、@container の無いブラウザは高さを測って `.is-cramped` で欠けたスコア表を隠す（`watchCrampedScorecard`）。tools/diagnostics/verify-v96-worker-update.cjs の scoreTrendCard は固定した過去のコミットに対する検査なので変えない。検証: check:all exit 0・lint・format:check、Playwright 460 passed、新しい e2e 4本は修正を外すと失敗。次: オーナーの承認後に公開（PR を main へ、Pages の version.json が 128）。
+
+- v127 をオーナーが確認（2026-11-13「確認しました。いい感じです」）。UI v5 の作業はこれで区切り。残り（低い優先度）: 拡大鏡の層が記録の終了後も DOM に残る、PointerEvent の無いブラウザでの重複リスナー、ui.zoom の持ち越し、tools/diagnostics/verify-v96-worker-update.cjs が削除済みの scoreTrendCard を呼ぶ、修正中にスコア表を隠す処理は `@container`（Safari 16 以降）。
+
 - 公開 v127 完了（AN-096 UI v5）。2026-11-13 オーナー承認後、PR #139 の CI validate 成功（7dac094）を確かめて main へマージ（fea13c8）。Pages の version.json が 127、sw.js が archery-note-v127、公開ページを Chromium で開いて APP_VER 127・タブ4つ・コンソールのエラー 0 件を確認。AN-096 を passes:true（tasks.json に証拠）。
 
 - 次: 実物の iPhone（Safari）で記録 → 結果 → ノート → 分析 → 弓具 → 設定 を一巡し、更新の帯から v127 へ上がること、旧データ（v126 以前の記録・サイト台帳・テーマ）がそのまま読めることを確かめる。AN-095（v4 第1段階）はオーナー判断で閉じた（status done・passes false。v5 に置き換え）。未解決: (2) レビューで残した低い指摘（拡大鏡の層が記録の終了後も DOM に残る、PointerEvent の無いブラウザでの重複リスナー、ui.zoom の持ち越し、tools/diagnostics/verify-v96-worker-update.cjs が削除済みの scoreTrendCard を呼ぶ）、(3) 修正中にスコア表を隠す処理は `@container`（Safari 16 以降）。
