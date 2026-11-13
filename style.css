@@ -2252,3 +2252,174 @@ table.anMonthTbl th:last-child,table.anMonthTbl td:last-child{padding-right:0;}
 @media (max-width:340px){
   .anView .analysisFormCard .btnRow{flex-direction:column;}
 }
+
+/* ===================================================================================
+   段 8: 弓具（セッティング / サイト）と設定（docs/design/v5/design.md 4.7）。
+   仕様表・台帳・設定は罫線の行（.lrow）。枠で囲まない。全画面は今日の結果と同じ .resultOvl / .resultScreen。
+   =================================================================================== */
+.gearView,.sightView{padding-bottom:8px;}
+.gearView > .vsec.anFirst{margin-top:16px;}
+.sightPredictionRows dt.lk{color:var(--ink); flex:1; min-width:0;}
+.gearHead{align-items:center; padding:4px 0 3px;}
+.gearHead h2{display:flex; align-items:center; flex-wrap:wrap; gap:4px 0; min-width:0; overflow-wrap:anywhere;}
+.gearHead .txtBtn{flex:none;}
+.lrow.specRow,.lrow.gearHistRow,.lrow.sightBasisRow{align-items:baseline; font-size:15px; padding:11px 0;}
+.lrow.specRow .lv,.lrow.gearHistRow .lv,.lrow.sightBasisRow .lv{overflow-wrap:anywhere;}
+.lrow.specRow:last-child{border-bottom:1px solid var(--rule);}
+.lrow.specRow span:first-child{color:var(--sub);}
+.lrow.gearHistRow .lk{min-width:76px;}
+.lrow.gearHistRow .lv{flex:1; font-size:15px; font-weight:600; line-height:1.55;}
+.lrow.gearHistRow[data-kind="sight"] .lv{color:var(--info);}
+.specSheet{margin-top:0;}
+.gearMemo{padding:10px 0 12px; border-bottom:1px solid var(--rule);}
+.gearMemo .lk{font-size:15px; color:var(--sub);}
+.gearMemo p{margin:4px 0 0; font-size:15px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere;}
+details.gearMore{border-bottom:1px solid var(--rule);}
+details.gearMore > summary{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:52px; padding:8px 0;
+  font-size:15px; font-weight:600; color:var(--ink); cursor:pointer; list-style:none;
+}
+details.gearMore > summary::-webkit-details-marker{display:none;}
+details.gearMore > summary::after{content:"＋"; flex:none; font-size:17px; font-weight:400; color:var(--sub);}
+details.gearMore[open] > summary::after{content:"−";}
+details.gearMore > summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+details.gearMore[open]{padding-bottom:12px;}
+details.gearMore > .lrow:last-of-type{border-bottom:0;}
+details.gearMore .row{gap:12px;}
+button.lrow.gearLedgerItem{cursor:pointer; min-height:60px; padding-left:0;}
+.gearLedgerItem .lmain b .pill{margin-left:8px; vertical-align:1px;}
+.gearDangerSec{margin-top:28px;}
+button.lrow.gearDelRow{cursor:pointer; border-top:1px solid var(--rule);}
+.gearDelRow .lmain b{color:var(--danger); overflow-wrap:anywhere;}
+.gearView .empty .btn,.sightView .empty .btn{margin-top:14px;}
+.gearView .empty p{margin:0;}
+
+/* 全画面の入力（セッティングの編集・最初のセッティング）: 下端に保存を固定 */
+.sheet.resultScreen.formScreen{padding-bottom:calc(104px + var(--safe-b));}
+.formScreen .subHead{padding-bottom:8px;}
+.formScreen details.adv{margin-top:16px;}
+.formScreen .hint{margin-top:6px;}
+
+/* サイト */
+.sightGrid{display:grid; grid-template-columns:112px minmax(0,1fr); gap:0 14px; align-items:start;}
+.sightGrid.noScale{grid-template-columns:minmax(0,1fr);}
+.sightScaleCol{padding-top:6px;}
+svg.sightScale{display:block; width:112px; height:auto; overflow:visible;}
+button.lrow.sightDistRow{min-height:64px; cursor:pointer; padding:6px 8px 6px 0; align-items:center;}
+.sightDistRow .lk{font-size:17px; font-weight:700; color:var(--ink);}
+.sightDistRow .lv{font-size:24px; font-weight:700; line-height:1.2; overflow-wrap:anywhere;}
+.sightDistRow .lv.est{color:var(--sub);}
+.sightDistRow.is-cur{box-shadow:inset -3px 0 0 var(--accent); background:var(--accent-soft);}
+.sightDistRow.is-cur .lk{padding-left:8px;}
+.sightDistRow:focus-visible{outline:2px solid var(--accent); outline-offset:-2px;}
+.sightView .btnRow .btn{min-height:52px; padding-left:8px; padding-right:8px;}
+.sightLedgerList{margin:0;}
+.sightLedgerRecord{padding:8px 0 10px; border-top:0; border-bottom:1px solid var(--rule);}
+.sightMarkDate{font-size:15px; color:var(--ink);}
+.sightMarkLatest{font-size:13px; font-weight:600; color:var(--accent); border:1px solid var(--accent); border-radius:4px; padding:1px 6px;}
+.sightMarkLatest.uncertain{color:var(--sub); border-color:var(--rule-strong);}
+.sightMarkValues{margin:0 0 4px;}
+.sightMarkValues dt{font-size:13px;}
+.sightMarkValues dd{font-size:24px; color:var(--ink);}
+.sightMarkNote summary{font-size:15px; font-weight:600;}
+.sightMarkNote p{font-size:15px; color:var(--ink); line-height:1.7;}
+.sightLedgerOrderNote{margin:8px 0 0; font-size:14px;}
+.sightAdvN{font-size:24px; line-height:1.35; overflow-wrap:anywhere;}
+.sightAdvice .fig[data-state="none"] .sightAdvN,.sightAdvice .fig[data-state="open"] .sightAdvN,.sightAdvice .fig[data-state="hold"] .sightAdvN{color:var(--ink);}
+.sightAdvice .fig[data-state="move"] .sightAdvN{box-shadow:inset 0 -3px 0 var(--accent); display:inline-block;}
+.sightDrift{margin-top:14px; padding-top:4px; border-top:1px solid var(--rule);}
+.sightDrift svg{display:block; margin:10px auto 0; max-width:100%; height:auto;}
+table.sightDriftTbl{margin-top:10px; font-size:14px;}
+table.sightDriftTbl th,table.sightDriftTbl td{padding:8px 4px; white-space:nowrap;}
+table.sightDriftTbl th:first-child,table.sightDriftTbl td:first-child{padding-left:0;}
+.sightPrediction{margin-top:22px;}
+.sightPredictionRows{margin:0;}
+.sightPredictionRows > div.lrow{min-height:60px; border-bottom:1px solid var(--rule);}
+.sightPredictionRows dt{font-size:17px; font-weight:700; color:var(--ink);}
+.sightPredictionRows dt span{display:block; margin:0; font-size:13px; font-weight:400; color:var(--sub); line-height:1.4;}
+.sightPredictionRows dd{font-size:24px; color:var(--ink); white-space:nowrap;}
+.sightPredictionRows dd small{display:inline; margin-left:4px; font-size:13px;}
+.sightPrediction .sightPredictionMeta{font-size:14px; padding-top:8px;}
+.sightPrediction summary{
+  position:relative; display:flex; align-items:center; min-height:48px; padding:8px 0 8px 22px;
+  font-size:15px; font-weight:600; color:var(--ink); list-style:none; border-bottom:1px solid var(--rule);
+}
+.sightPrediction summary::-webkit-details-marker{display:none;}
+.sightPrediction summary::before{
+  content:""; position:absolute; left:3px; top:50%; width:7px; height:7px;
+  border-right:1.5px solid var(--sub); border-bottom:1.5px solid var(--sub);
+}
+.sightPrediction details:not([open]) > summary::before{transform:translateY(-65%) rotate(-45deg);}
+.sightPrediction details[open] > summary::before{transform:translateY(-35%) rotate(45deg);}
+.sightSourceList li{border-bottom:1px solid var(--rule);}
+.sightSourceList strong{color:var(--ink);}
+.sightSourceDate,.sightSourceNote,.sightPredictionHelp p{font-size:14px;}
+.sightPredictionHelp p{margin:8px 0 0; line-height:1.65;}
+/* サイト値の記録・まとめ（全距離）。旧いカードと一覧の作りを罫線の行にする */
+.sightRecordsOverview{margin-top:0;}
+.sightRecordsOverview .listItem{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:56px; padding:8px 0;
+  border:0; border-bottom:1px solid var(--rule); border-radius:0; background:none; box-shadow:none; margin:0;
+}
+.sightRecordsOverview .listItem .t{font-size:15px; font-weight:600; color:var(--ink);}
+.sightRecordsOverview .listItem .d{font-size:13px; color:var(--sub); overflow-wrap:anywhere;}
+.sightRecordsOverview .listItem .big{font-size:17px; font-weight:700; text-align:right; color:var(--ink); flex:none; max-width:55%; overflow-wrap:anywhere;}
+.sightRecordsOverview .listItem .big small{font-size:13px; font-weight:400; color:var(--sub);}
+.sightRecordsOverview details.adv.historyAnalysisDetails{margin:0; padding:0; border:0!important; border-bottom:1px solid var(--rule)!important; border-radius:0; background:none;}
+.sightRecordsOverview details.adv.historyAnalysisDetails > summary{min-height:52px; font-size:15px; font-weight:600; color:var(--ink);}
+.sightRecordsOverview details.adv.historyAnalysisDetails .listItem:last-child{border-bottom:0;}
+
+/* 設定（全画面） */
+.settingsScreen .vsec{margin-top:26px;}
+.settingsScreen .vsec.setFirst{margin-top:6px;}
+.lrow.setRow{flex-wrap:wrap; align-items:center; padding:10px 0;}
+.lrow.setRow .lmain{flex:1 1 150px;}
+.lrow.setRow .seg{flex:0 0 auto; min-width:164px;}
+.lrow.setRow .seg button{padding:0 10px;}
+.lrow.setRow.wide .lmain{flex:1 1 100%;}
+.lrow.setRow.wide .seg{flex:1 1 100%;}
+.lrow.setRow label{font:inherit; color:inherit; margin:0;}
+.setNum{flex:0 0 132px; width:132px;}
+.setNum .inp,.settingsScreen .gamifyGoalRow .setNum .inp{margin:0; min-height:44px; padding:8px 44px 8px 10px; font-size:16px; text-align:right;}
+button.lrow.setLink{cursor:pointer; min-height:60px;}
+.setLink .lmain b,.setRow .lmain b,.setBlock .lmain b{overflow-wrap:anywhere;}
+.setLink .lmain span b,.setBlock .basis b,.setWarn b{display:inline; font-size:inherit; font-weight:700; color:var(--ink);}
+.setLink .lv{flex:none; font-size:15px; color:var(--sub); font-weight:600;}
+.setLink.setDanger .lmain > b{color:var(--danger);}
+.setLink:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.setBlock{padding:10px 0 14px; border-bottom:1px solid var(--rule);}
+.setBlock .lmain b{display:block; font-size:16px; font-weight:600; line-height:1.4;}
+.setBlock .lmain span{display:block; font-size:14px; color:var(--sub); line-height:1.45;}
+.setBlock > .lrow.setHeadRow{border-bottom:0; padding-top:0; min-height:0;}
+.setBlock .lrow.setSubRow{border-bottom:0; border-top:1px solid var(--rule); cursor:pointer; min-height:56px;}
+.setBlock .btnRow{padding-top:10px;}
+.setBlock .btnRow .btn{min-height:48px; padding-left:8px; padding-right:8px;}
+.setBlock label.f{margin-top:10px;}
+.setBlock[hidden]{display:none;}
+.setWarn{padding:10px 0 12px; border-bottom:1px solid var(--rule); color:var(--ink);}
+.settingsScreen .storageMeterBlock{margin:0; padding:12px 0; border-bottom:1px solid var(--rule);}
+.settingsScreen .storageMeterHead{font-size:14px; margin-bottom:6px;}
+.settingsScreen .storageMeter{height:4px;}
+.settingsScreen .storageMeterBlock .note,.settingsScreen .storageMeterBlock .hint{font-size:14px; line-height:1.6; margin-top:8px; color:var(--sub);}
+.settingsScreen .settingsVersionFooter{text-align:right; margin-top:0;}
+.settingsScreen .gamifySettings{margin-top:0;}
+.settingsScreen .gamifyDayChips{margin-top:10px; gap:4px;}
+.settingsScreen .gamifyDayChip{min-height:44px; width:auto; height:auto; font-size:15px;}
+.settingsScreen .gamifyGoalRow{display:flex; grid-template-columns:none;}
+.settingsScreen .gamifyGoalRow .inp{width:100%;}
+.settingsScreen .gamifyInfo{border:0; background:none; padding:10px 0 0; margin:0; font-size:14px; border-radius:0;}
+.settingsScreen .badgeSection{margin-top:18px; margin-bottom:0;}
+.settingsScreen .badgeSection h2{font-size:17px;}
+.settingsScreen .formDiagBlock .hint{font-size:14px;}
+.settingsScreen .formDiagBlock .settingsActionHint{color:var(--ink);}
+.settingsScreen .appInfoDetails .lrow{font-size:15px;}
+.settingsScreen .appInfoDetails .lv{font-size:15px; overflow-wrap:anywhere;}
+@media (max-width:340px){
+  .lrow.setRow .seg{flex:1 1 100%;}
+  .settingsScreen .gamifyDayChips{grid-template-columns:repeat(4,1fr);}
+  .sightGrid{grid-template-columns:96px minmax(0,1fr); gap:0 8px;}
+  svg.sightScale{width:96px;}
+  .sightDistRow .lv{font-size:22px;}
+  .sightAdvN{font-size:21px;}
+  .lrow.gearHistRow .lk{min-width:68px;}
+}

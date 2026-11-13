@@ -43,7 +43,7 @@ ${read("45-analysis-core.js")}
 ${read("48-gamification.js")}
 ${read("49-todays-result.js")}
 ${read("70-gear-settings.js")}
-${section(view, "function sessionArrows(", "function heroMetricHtml(")}
+${section(view, "function sessionArrows(", "const BADGE_ICONS")}
 ${section(view, "function scoreSortedArrows(", "/* ============ 記録中（没入画面）")}
 ${section(view, "function distanceLabel(", "function historyAnalysisDetailsHtml(")}
 ${section(view, "function sightValueText(", "function sightSummaryHtml(")}

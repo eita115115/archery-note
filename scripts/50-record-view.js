@@ -9,6 +9,7 @@ let ui = {
   recPausedId: null /* 「中断」で離れた記録の id。再読み込みで消え、記録画面へ戻る */,
   recMsg: "",
   sightSel: { setupId: null, dist: 70 },
+  gearSel: null /* 弓具 > セッティング で表示しているセッティングの id（null は記録に使っているもの） */,
   histOpen: null,
   histFilter: { setupId: "", dist: "", round: "", kind: "all" } /* kind: "all" | "rec" | "memo" */,
   /* cond は スコア の条件（距離|的径|的種|射数）。dist は 射型 の距離の選択 */
@@ -129,7 +130,7 @@ function setupSystemSummary(setupId) {
       level: "準備中",
       profiles: {},
       lines: ["セッティングを登録すると、サイト台帳・物理校正・個人モデルの材料が整います。"],
-      next: "弓具タブで初回セットアップ",
+      next: "弓具タブでセッティングを登録",
     };
   const gp = gearPrecisionProfile(setup),
     mp = modelReadinessProfile(setupId),
@@ -295,7 +296,7 @@ const FEATURE_HINTS = [
   {
     key: "gearSetup",
     ico: "tool",
-    html: "<strong>弓具を登録</strong>するとサイト台帳と自動でつながります",
+    html: "<strong>弓具のセッティング</strong>を登録すると、サイト台帳をセッティングごとに分けられます",
     act: "設定する",
     when: () => db.sessions.length >= 1 && db.setups.length === 0,
     go: () => showView("gear"),
@@ -322,7 +323,7 @@ const FEATURE_HINTS = [
   {
     key: "sightAdjust",
     ico: "target",
-    html: "2距離のサイト値が揃いました。<strong>サイト調整</strong>が使えます",
+    html: "2距離のサイト値があります。<strong>弓具 &gt; サイト</strong>で、ほかの距離の予測を見られます",
     act: "開く",
     when: () => new Set(db.sightMarks.map((x) => x.dist)).size >= 2,
     go: () => showView("sight"),
@@ -330,7 +331,7 @@ const FEATURE_HINTS = [
   {
     key: "formTracking",
     ico: "camera",
-    html: "カメラで<strong>射型トラッキング</strong>も記録できます",
+    html: "カメラで<strong>射型</strong>を記録できます（分析 &gt; 射型）",
     act: "試す",
     when: () => db.sessions.length >= 5,
     go: () => showView("analysis"),
@@ -847,7 +848,7 @@ function renderRecordConditions(m) {
       </optgroup>
     </select>
     <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
-    <p class="basis">規定の射数の途中でも終了できます。自作のラウンドは、設定の「カスタムラウンド」で登録します。</p>
+    <p class="basis">規定の射数の途中でも終了できます。自作のラウンドは、設定の「自作ラウンド」で登録します。</p>
   </section>
   <section class="vsec condSec" aria-labelledby="condDistH">
     <div class="vsecH"><h2 id="condDistH">距離と的</h2></div>
@@ -1120,53 +1121,6 @@ function arrowMetaSummaryHtml(sess) {
     <div class="note"><b>矢番号・外れ理由メモ</b>${reasonLine ? ` — ${reasonLine}` : ""}</div>
     ${rows}
   </div>`;
-}
-function heroMetricHtml(k, b, span) {
-  return `<div class="heroMetric"><div class="k">${esc(k)}</div><b>${esc(b)}</b><span>${esc(span || "")}</span></div>`;
-}
-function pageHeroHtml(type, ctx) {
-  ctx = ctx || {};
-  /* 分析タブにヒーローは置かない。ノート（旧・履歴）の冒頭にあった励ましの文と数値枠は v5 段 6 で廃止 */
-  if (type === "sight") {
-    const setup = ctx.setup,
-      dist = ctx.dist,
-      adv = ctx.adv,
-      lastSess = ctx.lastSess;
-    const sug = lastSess ? primarySightSuggestion(lastSess, setup, adv) : null;
-    let body;
-    if (!setup) {
-      body = `<p class="pageHeroLead sightNowNote">セッティング未登録</p>`;
-    } else if (!adv) {
-      body = `<p class="pageHeroLead sightNowNote">この距離・弓具の練習記録なし</p>`;
-    } else if (!sug || sug.none) {
-      /* 「中心が合っている」と「まだ判定できない」を区別する（統計的に誤差の範囲内でも、区間が広ければ保留） */
-      const reason = (sug && sug.reason) || "centered";
-      const heroNote = {
-        centered: "グルーピング中心は誤差の範囲内でセンターです。今の設定のまま本数を重ねられます。",
-        uncertain: "ズレは誤差の範囲ですが、まだ中心を絞り込めていません。同じ狙いで本数を重ねてから判断します。",
-        wind: "左右のズレに横風の影響が混ざっています。風上へのねらい修正の有無が分からないため、左右は風待ちで確認します。",
-        history: "同じサイト設定の過去の傾向と今回の中心が逆方向です。追加エンドで再現するか確認してから動かします。",
-      }[reason];
-      body = `<div class="sightNow sightNowNeutral" data-testid="sight-now-suggestion">
-        <div class="sightNowDir">${icon("target")}<span>${reason === "centered" ? "調整不要" : "判断保留"}</span></div>
-        <p class="sightNowNote">${heroNote}</p>
-      </div>`;
-    } else {
-      const arrowIcon = icon(sug.dir);
-      const q = sessionQuality(lastSess, setup);
-      body = `<div class="sightNow" data-testid="sight-now-suggestion">
-        <div class="sightNowDir">${arrowIcon}<span>${sug.dirLabel}へ</span></div>
-        <div class="sightNowAmount">${sug.clicks != null ? `${Math.abs(sug.clicks).toFixed(1)}<small>${esc(sug.clickLabel)}</small>` : `${sug.mm.toFixed(1)}<small>mm</small>`}</div>
-        <p class="sightNowNote">${sug.clicks != null ? `目安 ${sug.mm.toFixed(1)}mm相当。` : ""}${sug.other ? " 上下・左右の両方に動きがあります（詳細は下）。" : ""} 信頼度 ${q.label}。</p>
-      </div>`;
-    }
-    return `<section class="pageHero" data-testid="sight-hero">
-      <div class="kicker">サイト調整</div>
-      <h2 class="pageHeroLead">いまの提案</h2>
-      ${body}
-    </section>`;
-  }
-  return "";
 }
 /* ============ gamification: バッジ12種の線画SVG + 設定のバッジ一覧 ============
    ICONS規約準拠（10-storage-native.js ICONS 同様: 24pxグリッド・currentColor・視覚的に3要素以内）。
@@ -3821,7 +3775,7 @@ function openSummary(sess, isNew, gam, todaysResult, growthBefore) {
         ${judgementHtml(adv, sess)}
         ${shapeNote(adv.st)}
         ${adv.notes.map((n) => `<div class="note">・${n}</div>`).join("")}
-        <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight || 850}mm と弾道モデルから計算した参考値です（サイトタブで変更可）。</div></div>`
+        <div class="note">※「矢の集まった方向へサイトを動かす」が原則。mm目安はアイ〜サイト距離 ${db.settings.eyeSight || 850}mm と弾道モデルから計算した参考値です（設定 > 記録 で変更できます）。</div></div>`
           : ""
       }
       ${personalModelHtml(adv, sess, setup)}
@@ -3904,10 +3858,10 @@ function historySessionRows(src) {
   });
 }
 function setupPerformanceLabel(setupId) {
-  if (!setupId) return { key: "setup:none", label: "セットアップ未設定" };
+  if (!setupId) return { key: "setup:none", label: "セッティング未指定" };
   const setup = (db.setups || []).find((s) => s.id === setupId);
   if (setup) return { key: `setup:${setup.id}`, label: setup.name || "名称未設定" };
-  return { key: "setup:deleted", label: "削除済みセットアップ" };
+  return { key: "setup:deleted", label: "ゴミ箱へ移したセッティング" };
 }
 function sightHistoryCard(ss, sightMarks = db.sightMarks) {
   const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
@@ -3943,12 +3897,12 @@ function sightHistoryCard(ss, sightMarks = db.sightMarks) {
   const body = rows
     .map(({ row, date, setup, distInfo }) => {
       return `<div class="listItem recordReadOnlyItem">
-      <div><div class="t">${esc(date.label)} ・ ${esc(distInfo.label)}</div><div class="d">${esc(setup.label)} / ${esc(row.source || "履歴")}</div></div>
+      <div><div class="t">${esc(date.label)}・${esc(distInfo.label)}</div><div class="d">${esc(setup.label)}・${esc(row.source || "履歴")}</div></div>
       <div class="big">上下 ${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
     </div>`;
     })
     .join("");
-  return `<div class="card"><h2>サイト値の記録 <span class="mini">直近${rows.length}件</span></h2>${body}</div>`;
+  return `<section class="vsec sightRecCard" data-testid="sight-records-list"><div class="vsecH"><h2>サイト値の記録</h2><span class="aside">全距離・直近${rows.length}件</span></div>${body}<p class="basis">台帳の記録と、練習を始めるときに入れたサイト値を、新しい順に並べています。</p></section>`;
 }
 /* 旧 historyOverviewHtml（記録サマリー insightStrip）は履歴ヒーローへ統合済み（UI-P3 差し戻し対応）。
    同種数値の二重掲示（練習回数・平均点の重複）を避けるため、履歴一覧の集計数値はヒーロー1箇所のみ */

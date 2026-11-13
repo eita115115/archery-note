@@ -61,7 +61,7 @@ assert(!surface.includes("targetImpact") && !surface.includes("screenIn") && !su
 // v5 段 4: 記録タブの待機画面（帯）と記録の条件（全画面）
 assert(surface.includes("この条件で記録を始める") && surface.includes("条件を変える") && surface.includes("記録の条件") && surface.includes("renderRecordConditions") && surface.includes("html.subscreen"), "record conditions screen missing");
 assert(surface.includes("読み込みに時間がかかっています") && surface.includes("bootFallback") && surface.includes("bootFallbackDelay") && html.includes('id="updBar" hidden'), "startup/update fallback should be calm and initially hidden");
-assert(surface.includes("前回と同じ条件") && surface.includes("記録の途中です") && surface.includes("最初の条件を選ぶ") && surface.includes("homeStartBandHtml") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("beginRecording") && !surface.includes("今の条件で開始") && surface.includes("recordSetupSnapshot") && surface.includes("gearHeroHtml"), "record tab home (start band) missing");
+assert(surface.includes("前回と同じ条件") && surface.includes("記録の途中です") && surface.includes("最初の条件を選ぶ") && surface.includes("homeStartBandHtml") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("beginRecording") && !surface.includes("今の条件で開始") && surface.includes("recordSetupSnapshot") && !surface.includes("gearHeroHtml"), "record tab home (start band) missing");
 assert(scripts.includes('class="recScreen') && !scripts.includes("compactHud") && !surface.includes("まず今日の記録を始める。詳しい材料") && !surface.includes("距離・的サイズはこの画面で変更できます") && !surface.includes("タップ＆ドラッグで確定"), "Record screen should stay compact and low-noise");
 assert(surface.includes("levelFromScore") && surface.includes("summarySightDialHtml") && surface.includes("summaryDecisionHtml"), "record UI helpers missing");
 assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
@@ -84,7 +84,8 @@ assert(pkg.dependencies && pkg.dependencies["@capacitor/haptics"] && pkg.depende
 assert(cap.appId === "com.eita.archerynote" && cap.webDir === "dist/native", "Capacitor config mismatch");
 assert(fs.existsSync(path.join(root, "tools", "build-native-web.js")) && fs.existsSync(path.join(root, "docs", "features", "native-transition.md")), "Native transition files missing");
 assert(surface.includes("nativeReadinessHtml") && surface.includes("アプリ情報・保存状態") && surface.includes("RK4-3D JS core"), "Native readiness UI missing");
-assert(surface.includes("pageHeroHtml") && surface.includes("pageHeroLead") && surface.includes("いまの提案") && surface.includes("いつものセッティングを残す"), "Reborn workspace UI missing");
+/* v5 段 8: 弓具（仕様表・変更の履歴）、サイト（目盛りの図・調整の目安）、設定（全画面・4つの組） */
+assert(!surface.includes("pageHeroHtml") && !surface.includes("いつものセッティングを残す") && surface.includes("function gearSpecRows") && surface.includes("function gearHistoryEntries") && surface.includes("function recordingSetupId") && surface.includes("function sightScaleSvg") && surface.includes("function sightAdviceModel") && surface.includes('data-testid="settings-screen"') && ["display","record","data","app"].every(g => surface.includes(`data-testid="settings-group-${g}"`)), "v5 gear / sight / settings surfaces missing");
 /* v5 段 6: ノート（履歴＋メモ）。冒頭の励ましの文・数値枠・目標のリングを置かず、メモだけのノートとゴミ箱の入口を持つ */
 assert(!surface.includes("history-hero") && !surface.includes("historyHero") && !surface.includes("gamificationHeroHtml") && !surface.includes("gamGoalRingHtml"), "Notes tab must not bring back the history hero or the goal rings");
 assert(surface.includes("function noteItems") && surface.includes("function openMemoDetail") && surface.includes("function openTrashSheet") && surface.includes("notes-goal-line") && surface.includes('data-testid="notes-trash"'), "Notes tab surfaces missing");
@@ -93,7 +94,7 @@ assert(/else if\(item\.type==="note"\)/.test(surface), "restoreTrash must restor
 assert(surface.includes("nativePulse") && surface.includes("shareOrDownloadText") && surface.includes("capPlugin") && surface.includes("updateAppChrome") && surface.includes("freshReload"), "Native interaction layer missing");
 assert(surface.includes("storageGetItem") && surface.includes("storageSetItem") && surface.includes("storageDriverProfile"), "Storage adapter missing");
 assert(surface.includes("scheduleSafetySnapshot") && surface.includes("flushSafetySnapshot") && surface.includes("requestIdleCallback"), "Deferred snapshot saving missing");
-assert(surface.includes("自動バックアップ") && surface.includes("今すぐバックアップ") && surface.includes("バックアップデータを復元しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "Backup settings copy should be user-facing");
+assert(surface.includes("自動バックアップ") && surface.includes("いま控えを残す") && surface.includes("控えの内容に戻しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "Backup settings copy should be user-facing");
 assert(surface.includes("ArcheryPhysicsCore") && surface.includes("window.ArcheryPhysicsCore"), "Physics core interface missing");
 
 const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel,storageGetItem,storageSetItem,storageDriverProfile};")();
@@ -115,7 +116,7 @@ assert(surface.includes("personalModel") && surface.includes("sessionQuality") &
 assert(surface.includes("SESSION_METRIC_CACHE") && surface.includes("sessionMetricSignature"), "Session metric cache missing");
 assert(surface.includes("decision_quality") && surface.includes("personal_model"), "CSV decision columns missing");
 assert(surface.includes("robustWeightedLine") && surface.includes("modelReadinessProfile") && surface.includes("個人データ準備度"), "v19 weighted model readiness missing");
-assert(surface.includes("spineGuidance") && surface.includes("スパイン初期候補") && surface.includes("stabilizer"), "v20 gear guidance missing");
+assert(surface.includes("spineGuidance") && surface.includes("スパインの初期候補") && surface.includes("stabilizer"), "v20 gear guidance missing");
 assert(surface.includes("RK4-3D") && surface.includes("windModel") && surface.includes("横流れ推定"), "v21 physics engine missing");
 assert(surface.includes("personalPhysicsCalibration") && surface.includes("物理校正") && surface.includes("履歴推定"), "v22 personal physics calibration missing");
 assert(fs.existsSync(path.join(root, "tools", "extract-catalog.py")), "Catalog extraction tool missing");
@@ -582,12 +583,13 @@ assert(pcal && pcal.click.v70 > 1.5 && pcal.click.v70 < 2.5 && pcal.wind.sample 
 assert(calibApi.physicsCalibrationHtml("main").includes("物理校正"), "Physics calibration UI failed");
 
 const gearApi = new Function(
-  "clamp","num","esc",
+  "clamp","num","esc","DEFAULT_ARROW_DIA_MM",
   section("const CATALOG_SHAFTS", "function renderGear") + "\nreturn {inferCatalogGear,gearSectionHtml,gearPrecisionProfile,gearPrecisionHtml,spineGuidance,GEAR_SECTIONS,GEAR_FIELDS,GEAR_SUGGESTIONS};"
 )(
   (v,a,b)=>Math.max(a,Math.min(b,v)),
   v=>{ const n=parseFloat(v); return Number.isFinite(n)?n:null; },
-  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))
+  s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
+  5.7
 );
 const inf = gearApi.inferCatalogGear({arrow:"EASTON X10", notes:"", shaftSpine:"650", arrowLength:"29", pointWeight:"110"});
 assert(inf && inf.spine === 650 && Math.round(inf.total) === 334, "Catalog inference failed");
@@ -618,7 +620,7 @@ assert(gearApi.GEAR_FIELDS.some(([k]) => k === "stabilizer") && gearApi.GEAR_FIE
 assert(gearApi.GEAR_FIELDS.some(([k]) => k === "tuningMethod") && gearApi.GEAR_FIELDS.some(([k]) => k === "tuningResult"), "Tuning practice fields missing");
 const sp = gearApi.spineGuidance({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"});
 assert(sp && sp.ready && sp.candidates.includes(660) && ["概ね候補域","候補を表示"].includes(sp.state), "Spine guidance failed");
-assert(gearApi.gearPrecisionHtml({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"}).includes("スパイン初期候補"), "Spine guidance UI missing");
+assert(gearApi.gearPrecisionHtml({poundage:"38", drawLength:"28.5", arrowLength:"29", pointWeight:"110", shaftSpine:"660"}).includes("スパインの初期候補"), "Spine guidance UI missing");
 
 const historyApi = new Function(
   "db","robustStats","sessionMetrics","ringW","groupStats","faceLabel","fmtD","cmOffsetText","esc","zoneStyle","sightStats",

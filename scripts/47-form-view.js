@@ -318,7 +318,7 @@ function bindFormTrackingCard(){
       return;
     }
     render();
-    toast("削除しました。設定から復元できます");
+    toast("ゴミ箱へ移しました。設定 > データ のゴミ箱から元に戻せます",4000);
   });
 }
 

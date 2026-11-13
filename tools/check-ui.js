@@ -315,18 +315,21 @@ function staticUiChecks() {
     "record screen should stay compact and low-noise",
   );
   assert(
-    surface.includes("pageHero") &&
-      surface.includes("pageHeroLead") &&
+    /* v5 段 8: 弓具とサイトの冒頭の枠（pageHero）は廃止。仕様表・目盛りの図・調整の目安が入口になる */
+    !surface.includes("pageHeroHtml") &&
       !surface.includes("history-hero") &&
       surface.includes("noteMonth") &&
       surface.includes("openMemoDetail") &&
-      surface.includes("いまの提案") &&
-      surface.includes("いつものセッティングを残す") &&
+      !surface.includes("いつものセッティングを残す") &&
+      surface.includes('data-testid="gear-spec-sheet"') &&
+      surface.includes("線の判定に使います") &&
+      surface.includes("function sightScaleSvg") &&
+      surface.includes("function sightAdviceHtml") &&
       surface.includes("renderActive"),
     "reborn workspace surfaces missing",
   );
   assert(
-    surface.includes("nativePill") &&
+    surface.includes('data-testid="settings-app-info"') &&
       surface.includes("触感") &&
       surface.includes("共有") &&
       surface.includes("freshReload") &&
@@ -345,7 +348,7 @@ function staticUiChecks() {
       surface.includes("個人モデル") &&
       surface.includes("次のアクション") &&
       surface.includes("個人データ準備度") &&
-      surface.includes("スパイン初期候補") &&
+      surface.includes("スパインの初期候補") &&
       surface.includes("RK4-3D") &&
       surface.includes("物理校正"),
     "analysis cards missing",
@@ -369,15 +372,19 @@ function staticUiChecks() {
   );
   assert(
     surface.includes("アプリ情報・保存状態") &&
-      surface.includes("nativeStack") &&
       surface.includes("PWA + Capacitor-ready") &&
       surface.includes("ブラウザ保存"),
     "native readiness UI missing",
   );
   assert(
     surface.includes("自動バックアップ") &&
-      surface.includes("今すぐバックアップ") &&
-      surface.includes("バックアップデータを復元しました") &&
+      surface.includes("いま控えを残す") &&
+      surface.includes("控えの内容に戻しました") &&
+      /* データを置き換える操作の注意書きは、その操作の行にある（AGENTS.md） */
+      surface.includes('data-testid="settings-data-warning"') &&
+      surface.includes("いまのデータは、読み込んだ内容にすべて置き換わります") &&
+      surface.includes("いまのデータは控えの内容に置き換わります") &&
+      surface.includes("元に戻せません") &&
       !surface.includes("\u81ea\u52d5\u9000\u907f") &&
       !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"),
     "backup settings copy should be user-facing",

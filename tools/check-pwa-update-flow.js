@@ -246,7 +246,8 @@ assertMatch(
 
 assertMatch(
   /ovl\.querySelectorAll\(\s*["']\[data-restore-trash\]["']\s*\)\.forEach\([\s\S]*?onclick\s*=[\s\S]*?beginActiveWorkflow\(\);[\s\S]*?finally\s*\{\s*endActiveWorkflow\(\);\s*\}/,
-  gearText,
+  /* v5 段 8: 設定のゴミ箱は、ノートと同じ一覧（openTrashSheet）を開く */
+  readText("scripts/60-history-sight-view.js"),
   "trash restore must be guarded by beginActiveWorkflow/endActiveWorkflow",
 );
 

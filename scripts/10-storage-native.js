@@ -217,7 +217,7 @@ function storageMeterHtml(){
   return `<div class="storageMeterBlock" data-testid="settings-storage-meter">
     <div class="storageMeterHead"><span>使用容量</span><span>${u.mb.toFixed(2)} / 約${u.capMb}MB（${u.percent}%）</span></div>
     <div class="storageMeter" role="img" aria-label="保存容量使用率 約${u.percent}%"><div class="storageMeterFill${warn?" warn":""}" style="width:${Math.min(u.percent,100)}%"></div></div>
-    ${warn?`<div class="note">容量が残り少なくなっています。バックアップ保存をおすすめします。</div>`:""}
+    ${warn?`<div class="note">使用量が目安の 80% を超えています。この目安を超えると保存に失敗することがあります。バックアップを書き出してから、不要な記録をゴミ箱へ移すと空きが増えます。</div>`:""}
     ${est}
   </div>`;
 }
@@ -378,22 +378,21 @@ function nativeReadinessProfile(){
   if(!next.length) next.push("同条件の記録を増やす");
   return {runtime,storage,native,nativeScore,storageScore,engineScore,shellScore,next,counts};
 }
+/* 設定 > アプリ の「アプリ情報・保存状態」。動作環境・保存先・計算の版を、そのまま並べる（点数や割合にはしない） */
 function nativeReadinessHtml(){
   const p=nativeReadinessProfile();
   const nf=p.native;
-  return `<details class="adv appInfoDetails">
+  const feats=[nf.haptics?"触感":"",nf.share?"共有":"",nf.filesystem?"ファイル保存":""].filter(Boolean).join("・");
+  const persist=!_storagePersist.supported?"":(!_storagePersist.checked?"確認中":(_storagePersist.persisted?"有効":"未確定"));
+  const row=(k,v)=>`<div class="lrow"><span class="lk">${k}</span><span class="lv">${esc(v)}</span></div>`;
+  return `<details class="gearMore appInfoDetails" data-testid="settings-app-info">
     <summary>アプリ情報・保存状態</summary>
-    <div class="advice" style="background:var(--card);border-color:var(--line)">
-    <div class="note"><b>アプリ基盤: ${p.runtime.label}</b> / ${ENGINE_VER} / ${esc(p.storage.label)}</div>
-    ${storagePersistNoteHtml()}
-    <div class="nativeStack">
-      <div class="nativePill"><div class="k">保存</div><b>${pct(p.storageScore)}</b><span>バックアップと復元を維持</span></div>
-      <div class="nativePill"><div class="k">演算</div><b>${pct(p.engineScore)}</b><span>物理コア分離へ移行中</span></div>
-      <div class="nativePill"><div class="k">触感/共有</div><b>${pct(p.nativeScore)}</b><span>${nf.haptics?"触感 ":""}${nf.share?"共有 ":""}${nf.filesystem?"ファイル ":""}${nf.statusBar?"表示 ":""}</span></div>
-      <div class="nativePill"><div class="k">配布</div><b>${pct(p.shellScore)}</b><span>${NATIVE_CHANNEL}</span></div>
-    </div>
-    <div class="note">次に整える材料: ${p.next.map(esc).join("・")}</div>
-    </div>
+    ${row("開き方",p.runtime.label)}
+    ${row("保存先",p.storage.label)}
+    ${persist?row("保護された保存",persist):""}
+    ${row("弾道の計算",ENGINE_VER)}
+    ${row("端末の機能",feats||"なし")}
+    ${row("保存している件数",`練習 ${p.counts.sessions}回・セッティング ${p.counts.setups}件・サイト値 ${p.counts.marks}件・メモ ${p.counts.notes}件`)}
   </details>`;
 }
 function hashText(s){
