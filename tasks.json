@@ -1165,5 +1165,17 @@
     "owner": "claude",
     "acceptance": "npm run check:form・check:all・lint・format:check・golden:form-fixtures と Playwright e2e 全件が成功。tools/check-form-core.js の合成時系列で、横長1280×720・縦長720×1280・中央固定の3通りの射数・リリース時刻・射ごとの値が修正後に一致し、修正前は縦長が一致しないことを示す。既存の check-form の検査・境界の掃引・golden の metric fixture は変えずに通る（矢の判定の1件だけは直す対象の動作だったので期待値を替えた）。SCHEMA_VER・保存キーは不変で、旧記録は読み込みで変わらない。映像・画素・ランドマークは保存しない。実射での確認（AN-001）は未了のまま。公開・版上げはオーナーの承認後。",
     "evidence": "2026-11-14 実装（branch claude/sharp-faraday-bu8pii、版128据え置き・未push・未公開）: scripts/46-form-core.js（formRefScaleX・computeFormMetrics の frame 引数・formShotArmAngle・formPreReleaseWindow の端点・judgeArrowCheck・formCaptureConditions・formMergeCaptureConditions・formRecordGeometry・formComparableRecords）、scripts/47-form-view.js、scripts/49-todays-result.js、tools/check-form-core.js、tools/check-storage-contract.js、tests/e2e/form-geometry.spec.js、docs/design/form-tracking-accuracy.md。合成3射: 縦長 720×1280 は修正前 0射（アンカー最小 0.433）→ 修正後 3射、リリース 3333/8033/12733ms で横長・中央固定と一致。同じ画素の姿勢の anchorNorm は縦長 0.524 → 0.176（横長 0.176 のまま）。check:all exit 0・lint・format:check 成功、golden:form-fixtures は oblique-single-release retained=1（4457.414ms/close）・scene-cut-arrow-retrieval retained=0 で変化なし、Playwright 462 passed (6.2m)（460 + 新しい2本）。実射での確認は AN-001 に残る。"
+  },
+  {
+    "id": "AN-099",
+    "task": "射型の記録 v2 段1〜2（解析器）: 撮影のあとに 1 回ぶんのランドマークの列をまとめて解析する純関数 scripts/44-form-analyze.js（FormAnalyze）。離れの位置がはっきり決まった射だけを数え、決まらなかったものは candidates で返す。射ごとの値・測定のゆれ・回の中の比較・置き方の印・重ね図用の姿（保持と離れのあと、9 点 × 2）。まだ撮影の画面からは呼ばない（いまの 46/47 はそのまま）",
+    "status": "in-progress",
+    "passes": false,
+    "dependencies": [
+      "AN-098"
+    ],
+    "owner": "claude",
+    "acceptance": "docs/design/form-v2/algorithm.md 7.4 の基準を、独立したベンチマーク（tools/form-bench、全部の群・全部の種）と検査（npm run check:form-analyze）で確かめ、届いたもの・届いていないものを 7.5 に数値で書く。check:all・lint・format:check が成功。解析器は DOM・db・時計・乱数を使わず、入力を書き換えず、同じ入力に同じ出力。新しい依存・モデル・保存形式の変更なし。SCHEMA_VER・保存キーは不変。版上げ・push・公開はオーナーの承認後。届いていない基準の扱い（algorithm.md 9.1）はオーナーが決める。実射での確認（design.md 6.3）は未了のまま。",
+    "evidence": "2026-11-14 実装（branch claude/sharp-faraday-bu8pii、版128据え置き・未push・未公開。commit 33aad01・99d53a1 ほか）: scripts/44-form-analyze.js（index.html・sw.js・check-app・check-ui・build-native-web・check-distribution に登録、アプリのスクリプトは 15 本）、tools/form-analyze-loader.js、tools/form-analyze-fixture.js、tools/check-form-analyze.js（14 件、約 5 秒、check:all に追加）、tools/form-bench/adapters/v2-analyzer.js、docs/design/form-v2/algorithm.md・design.md。独立したベンチマーク（種 1〜5、ベンチマークは commit 1bf83bd）: core 390 射のうち 382 射を数えて当たり 381・外れ 1・候補 8（いまの仕組みは 29 射と数えて当たり 1）、引き戻し 66 回を射に数えたもの 0、射のない場面 25 回とも 0 射、全部の群 1,170 射のうち 1,115 射を数えて当たり 1,113・外れ 2・候補 55。届いていない基準: 名目のゆれで射数がぴったりの回 89%（基準 97%）、離れの 95% が 79ms、保持の長さの 95% が 0.47 秒（基準 0.22 秒）、難しい場面の再現率（weak-release 0.33・rapid-fire 0.40・drop-arm 0.87・occluded-draw-hand 0.87。数えない決定による）。素材映像 3 本: 2 本は期待どおり 0 射、1 本（斜め後ろの高い位置）は 1 射を数えられず。検査用の合成（ゆれ 胴の 1.2%）では基本の基準をすべて満たす（再現率・適合率 1.00、離れの 95% 15〜23ms、保持の 95% 35〜57ms、不変性 1e-6、10.4 分・30fps を 0.27 秒）。passes は false のまま: 届いていない基準の扱いと実地の確認が残る。"
   }
 ]

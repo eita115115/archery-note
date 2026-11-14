@@ -115,6 +115,7 @@ const FormAnalyze = (() => {
     TPL_COVER: 0.5, // 型の長さのうち、見えていなければならない割合
     POSE_REL_FROM_MS: 150, // 離れのあとの姿を取る窓
     POSE_REL_TO_MS: 350,
+    STEEP_DEG: 25, // 弓手の腕の仰角（射の中央値）がこれ以上なら warnings に "steep"（G1 の上限に近い）
     RHO_REF: 1.15, // 真横での「弓手の腕 / 胴」の目安（体節比。6 章）
   });
 
@@ -1090,7 +1091,9 @@ const FormAnalyze = (() => {
       side: (o.handedness === "left" ? -1 : 1) * sig.dir > 0 ? "c" : "b",
       cls: !fin(ratio) ? null : ratio >= 0.94 ? "s" : ratio >= 0.77 ? "o" : "x",
     };
+    const elev = median(real.map(x => x.features.bowElev));
     if (!dr.runs.length) quality.warnings.push("noFullDraw");
+    if (fin(elev) && elev >= P.STEEP_DEG) quality.warnings.push("steep");
     if (sig.T0 < 100) quality.warnings.push("small");
     if (1000 / dt < 15) quality.warnings.push("lowFps");
     if (pk.coverage < 0.8) quality.warnings.push("gappy");

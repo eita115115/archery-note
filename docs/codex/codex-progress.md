@@ -3568,3 +3568,19 @@ CI: PR #139 の validate は段4・5の push から失敗していた（check:ui
 検証: check:all（exit 0）・lint・format:check 成功、golden:form-fixtures は oblique-single-release retained=1（4457.414ms/close）・scene-cut-arrow-retrieval retained=0 で変化なし、Playwright 462 passed (6.2m)（460 + 新しい2本）。fixture の `coreSha256` は取得時点の core の控えで、現在の core とは照合していない（README のとおり）ので更新していない。
 
 リスク: 実射では未確認（AN-001）。新しい記録の肘の角度は旧記録と測り方が違う（版で分けて比べない）。既存の検査1件（発射前のサンプルなしで「発射と一致」）の期待値を替えた。次: 親の検証、公開はオーナーの承認後。段B（結果の読みやすさ）。
+
+## AN-099 射型の記録 v2 段1〜2（解析器。版128据え置き・未公開）
+
+2026-11-14、v2 の設計（docs/design/form-v2/design.md）の段 1〜2 を実装した。オーナーの決定: v2 の設計で進める、離れがはっきりしない射は数えず候補で返す、保持の姿を保存する、cm は任意の身長で画面が直す、合図の音は既定で切、旧記録は別の一覧、既定の 6 項目は設計どおり。
+
+変更: `scripts/44-form-analyze.js`（新規。グローバルは `FormAnalyze` だけ。DOM・db・時計・乱数を使わない純関数。撮影の画面からはまだ呼ばない）、`tools/form-analyze-loader.js`（Node から読む入口）、`tools/form-analyze-fixture.js`・`tools/check-form-analyze.js`（検査 14 件、約 5 秒）、`tools/form-bench/adapters/v2-analyzer.js`（独立したベンチマークへの橋渡し。このフォルダで触ったのはこの 1 本だけ）、`index.html`・`sw.js`・`tools/check-app.js`・`tools/check-ui.js`・`tools/build-native-web.js`・`tools/check-distribution.js`・`CONVENTIONS.md`（スクリプトの登録。15 本）、`package.json`（`check:form-analyze` を足し、check:all に入れた）、`docs/design/form-v2/algorithm.md`・`design.md`、`tasks.json`、`progress.md`。`scripts/46-form-core.js`・`47-form-view.js`・保存形式・版・sw.js のキャッシュ名は変えていない。
+
+下書き（sketch/analyze-sketch.js）との違い: 離れの位置を「いちばん大きく動いた瞬間」ではなく、保持の位置から動いたまま戻らない「変わり目」（引き手の手首と肘の累積和）で決める。弓手の下がりを手首と肘で見る（しきい値 0.15 → 0.45 胴）。手首の隠れを `visibility` の落ち込みで外し、肘から補完する。左右の入れ替わりを戻す。人の入れ替わりで区間を切る。構えの門に「引き手が顔の所にある」（G3）を足す。弓を下ろしながらの引き戻しを見分ける。アンカーは引きの形（最小躍度）の当てはめで決める。離れの動き始めは「力がかかって動き出す」形の当てはめ。その回の型と比べて候補に `likely` を付ける（数には入れない）。頭や胴が同時に動いたら離れにしない。重ね図用の姿を返す。`weak: true`（数には入れるが時刻は粗い射）は無くした。
+
+数値（独立したベンチマーク、種 1〜5、ベンチマークは commit 1bf83bd。実射なし）: core 390 射 → 下書き 当たり 253（適合率 0.68・再現率 0.65）、v2 382 射と数えて当たり 381・外れ 1・候補 8（適合率 1.00・再現率 0.98）、いまの仕組み 29 射と数えて当たり 1。引き戻し 66 回を射に数えたもの 0。射のない場面 25 回とも 0 射。全部の群 1,170 射 → 1,115 射と数えて当たり 1,113・外れ 2・候補 55。離れの時刻（core）偏り +28ms・95% で 79ms。保持の長さ（core、「手が止まった」の正解と比べる）中央値 0.11 秒・95% で 0.47 秒。素材映像 3 本（Pixabay）: 2 本は 0 射で期待どおり、1 本（斜め後ろの高い位置）は 1 射を数えられず。
+
+届いていない基準（algorithm.md 7.5。基準は変えていない）: 名目のゆれで射数がぴったりの回 89%（97%）、離れの 95% 79ms（40ms）、アンカー・保持の 95% 0.45・0.47 秒（0.20・0.22 秒）、難しい場面の再現率（weak-release 0.33・rapid-fire 0.40・drop-arm 0.87・occluded-draw-hand 0.87）、数えた射の外れ 2 件。検査用の合成（ゆれ 胴の 1.2%）では、再現率・適合率 1.00、離れの 95% 15〜23ms、保持の 95% 35〜57ms、不変性（縦横・左右・時刻・大きさ）1e-6、10.4 分・30fps を 0.27 秒。
+
+検証: check:all（exit 0）・lint・format:check 成功、`npm run check:form-analyze` 14 件成功、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real` と `--adapter current --with-real`（どちらも種 1〜5、全部の群）。Playwright e2e は回していない（画面とアプリの動きを変えていない。足したスクリプトはグローバルを 1 つ定義するだけ）。
+
+リスク: 実射では未確認。合成のゆれが現実より大きいか小さいかで、未達の重さが変わる。離れの動きの形と、肘が離れで大きく動くことは仮定。`"bodyMoved"` の決まりは素材映像 1 本を見て入れた。速射（保持 0.4 秒未満）はほとんど候補になる。index.html に 1 本足したので、次の公開は版上げと一緒に。次: 親の検証、オーナーに algorithm.md 9.1 の 4 点を決めてもらう、段 3（記録 v2）。
