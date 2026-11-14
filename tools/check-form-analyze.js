@@ -277,6 +277,109 @@ test("identity jump: a hold interrupted by another body is cut, not counted", ()
   assert.equal(match(cap.truth.filter((x) => x !== t), shotsOf(res), 150).length, 5);
 });
 
+/* ---- 6b. 壊れかけた入力でも落ちない（保持の窓が欠けた射、時刻の飛び、想定していない形） ---- */
+test("template: a shot whose hold window is hidden keeps the other shots' typicality aligned and does not throw", () => {
+  const ev = [];
+  for (let i = 0; i < 6; i++) ev.push({ kind: "shot", holdMs: 2400 + 300 * i, drawMs: 1250 });
+  const cap = FX.makeCapture({ seed: 5, events: ev }),
+    frames = FX.toFrames(cap.poses);
+  const base = shotsOf(FA.analyze(frames, OPT));
+  assert.equal(base.length, 6);
+  for (const which of [0, 2, 5]) {
+    for (const vis of [0, 0.2]) {
+      /* その射の離れの前 650 ms のあいだ、弓手の肘と手首（13・15）が見えない */
+      const rel = cap.truth[which].releaseMs;
+      const hidden = frames.map((f) =>
+        f.tMs >= rel - 650 && f.tMs <= rel && f.landmarks
+          ? {
+              tMs: f.tMs,
+              landmarks: f.landmarks.map((p, i) =>
+                i === 13 || i === 15 ? { ...p, visibility: vis } : p,
+              ),
+            }
+          : f,
+      );
+      let res;
+      assert.doesNotThrow(
+        () => {
+          res = FA.analyze(hidden, OPT);
+        },
+        `shot ${which + 1}, visibility ${vis}`,
+      );
+      const det = shotsOf(res);
+      assert.equal(det.length, 6);
+      assert.ok(!res.quality.warnings.includes("internalError"));
+      assert.equal(res.quality.template.shots, 5, "the hidden shot is left out of the template");
+      det.forEach((d, i) => {
+        if (i === which)
+          assert.equal(d.typicality, null, "no typicality for the shot that could not be compared");
+        else
+          assert.ok(
+            Number.isFinite(d.typicality) && d.typicality < 1,
+            `shot ${i + 1} keeps its own typicality (${d.typicality})`,
+          );
+      });
+    }
+  }
+});
+
+test("contract: an unexpected internal error gives an empty result with a warning, not an exception", () => {
+  /* 点の列が欠けた（役割が無い）入力。packFrames からは来ない形 */
+  const pk = {
+    n: 20,
+    t: Float64Array.from({ length: 20 }, (_, i) => i * 33),
+    pose: new Uint8Array(20),
+    pts: {},
+    coverage: 1,
+  };
+  let res;
+  assert.doesNotThrow(() => {
+    res = FA.analyzePacked(pk, OPT);
+  });
+  assert.deepEqual(res.shots, []);
+  assert.deepEqual(res.candidates, []);
+  assert.deepEqual(res.quality.warnings, ["internalError"]);
+  assert.equal(res.quality.frames, 20);
+});
+
+test("timestamp jump: the series is cut at the gap, not stretched across it; times are reported on the original clock", () => {
+  const cap = FX.makeCapture({ seed: 2, events: sixShots() }),
+    frames = FX.toFrames(cap.poses);
+  const at = cap.truth[2].releaseMs + 3000,
+    GAP = 3600000; // 3 射目のあとで、時刻が 1 時間飛ぶ
+  const jumped = frames.map((f) =>
+    f.tMs >= at ? { tMs: f.tMs + GAP, landmarks: f.landmarks } : f,
+  );
+  const sig = FA.prepare(FA.packFrames(jumped, OPT), OPT);
+  assert.ok(
+    sig.n <= frames.length + FA.P.GAP_CUT_MS / sig.dt + 2,
+    `resampled length follows the frame count (${sig.n} samples for ${frames.length} frames)`,
+  );
+  const res = FA.analyze(jumped, OPT),
+    det = shotsOf(res);
+  assert.ok(res.quality.warnings.includes("timeGap"));
+  assert.equal(det.length, 6);
+  const truth = cap.truth.map((t) => ({
+    releaseMs: t.releaseMs >= at ? t.releaseMs + GAP : t.releaseMs,
+  }));
+  assert.equal(
+    match(truth, det, 80).length,
+    6,
+    "releases after the jump are reported at their original times",
+  );
+  assert.ok(
+    Math.abs(res.quality.durationMs - (jumped[jumped.length - 1].tMs - jumped[0].tMs)) < 200,
+  );
+  /* 壊れた時刻（約 116 日ぶんの飛び）でも、大きな配列を作らずに終わる */
+  const broken = frames.map((f) =>
+    f.tMs >= at ? { tMs: f.tMs + 1e10, landmarks: f.landmarks } : f,
+  );
+  assert.equal(shotsOf(FA.analyze(broken, OPT)).length, 6);
+  /* 飛びが無ければ何も変わらない */
+  assert.ok(!FA.analyze(frames, OPT).quality.warnings.includes("timeGap"));
+  assert.ok(FA.P.MAX_SAMPLES >= 30 * 60 * 60, "a 30-minute capture at 60 fps is never truncated");
+});
+
 /* ---- 7. 測定のゆれと比較（5.3・5.4） ---- */
 test("comparison: a real difference is flagged, noise alone is not", () => {
   let flaggedTrue = 0, flaggedNoise = 0;

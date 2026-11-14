@@ -16,6 +16,8 @@ const FormAnalyze = (() => {
   const P = Object.freeze({
     V_MIN: 0.3, // 点を使う visibility の下限
     GAP_FILL_MS: 200, // これ以下の欠測は線形補間する
+    GAP_CUT_MS: 5000, // コマの時刻がこれより大きく飛んだ所は、この長さの欠測として扱う（壊れた時刻で系列が巨大にならないように）
+    MAX_SAMPLES: 216000, // 等間隔にした系列の上限（60fps で 60 分ぶん）。超えたぶんは読まない
     SCALE_WIN_MS: 2000, // 胴の長さの移動中央値の幅
     HAMPEL_HALF: 2, // 外れ点除去の半幅（標本）
     HAMPEL_K: 3, // 中央値から MAD の何倍離れたら外れ点か
@@ -288,6 +290,28 @@ const FormAnalyze = (() => {
     return { pk: out, swapped };
   }
 
+  /* 時刻の飛び（GAP_CUT_MS より長いコマ間隔）を GAP_CUT_MS に詰める。系列の長さは「飛んだ時間 / dt」ではなく、コマ数に見合う長さになる。
+     gaps = [{ at: 詰めたあとの時刻（飛びの終わり）, add: そこまでに詰めた合計 }]。restore(gaps, t) が、詰めた時刻をもとの時刻へ戻す。入力は書き換えない */
+  function closeGaps(pk) {
+    const t = pk.t, n = t.length, gaps = [];
+    let cut = 0, out = null;
+    for (let i = 1; i < n; i++) {
+      const d = t[i] - t[i - 1];
+      if (d > P.GAP_CUT_MS) {
+        if (!out) out = Float64Array.from(t);
+        cut += d - P.GAP_CUT_MS;
+        gaps.push({ at: t[i] - cut, add: cut });
+      }
+      if (out) out[i] = t[i] - cut;
+    }
+    return out ? { pk: Object.assign({}, pk, { t: out }), gaps } : { pk, gaps };
+  }
+  function restore(gaps, tMs) {
+    let add = 0;
+    for (const g of gaps) { if (tMs >= g.at) add = g.add; else break; }
+    return tMs + add;
+  }
+
   /* ---- 3.2 等間隔にする ---- */
   function resample(pk, fpsHint) {
     const { t } = pk, m = t.length, dts = [];
@@ -295,8 +319,8 @@ const FormAnalyze = (() => {
     let dt = median(dts);
     if (!fin(dt)) dt = 1000 / (fpsHint > 0 ? fpsHint : 30);
     dt = Math.min(100, Math.max(1000 / 60, dt));
-    const t0 = m ? t[0] : 0, n = m ? Math.floor((t[m - 1] - t0) / dt + 1e-9) + 1 : 0;
-    const out = { dt, t0, n, pts: {}, span: {} };
+    const t0 = m ? t[0] : 0, full = m ? Math.floor((t[m - 1] - t0) / dt + 1e-9) + 1 : 0, n = Math.min(full, P.MAX_SAMPLES);
+    const out = { dt, t0, n, pts: {}, span: {}, truncated: full > n };
     const maxGap = Math.max(P.GAP_FILL_MS, dt * 1.5);
     for (const r of ROLES) {
       const s = pk.pts[r], X = nanArray(n), Y = nanArray(n), V = nanArray(n), span = new Float64Array(n);
@@ -910,13 +934,14 @@ const FormAnalyze = (() => {
         return v;
       });
     };
-    const snips = real.map(s => snippet(s._i)).filter(Boolean);
-    if (snips.length < P.TPL_MIN_SHOTS) return null;
+    /* snips[k] は real[k] の射（番号をそろえておく）。保持の窓が欠けた射は null で、型にも距離にも入れない */
+    const snips = real.map(s => snippet(s._i)), used = snips.filter(Boolean).length;
+    if (used < P.TPL_MIN_SHOTS) return null;
     const build = skip => comps.map((_, c) => {
       const t = nanArray(L), col = [];
       for (let j = 0; j < L; j++) {
         col.length = 0;
-        for (let k = 0; k < snips.length; k++) if (k !== skip && fin(snips[k][c][j])) col.push(snips[k][c][j]);
+        for (let k = 0; k < snips.length; k++) if (k !== skip && snips[k] && fin(snips[k][c][j])) col.push(snips[k][c][j]);
         t[j] = col.length ? median(col) : NaN;
       }
       return t;
@@ -926,17 +951,17 @@ const FormAnalyze = (() => {
       for (let j = 0; j < L; j++) if (fin(snip[c][j]) && fin(tpl[c][j])) { sum += Math.abs(snip[c][j] - tpl[c][j]); cnt++; }
       return { d: cnt ? sum / cnt : NaN, cover: cnt / L };
     });
-    const loo = snips.map((sn, k) => raw(sn, build(k)));
-    const scale = comps.map((_, c) => Math.max(1e-3, median(loo.map(r => r[c].d))));
+    const loo = snips.map((sn, k) => (sn ? raw(sn, build(k)) : null)), looOk = loo.filter(Boolean);
+    const scale = comps.map((_, c) => Math.max(1e-3, median(looOk.map(r => r[c].d))));
     const total = r => {
       let sum = 0, cnt = 0, cover = 1;
       r.forEach((x, c) => { if (fin(x.d)) { sum += x.d / scale[c]; cnt++; cover = Math.min(cover, x.cover); } });
       return { d: cnt === comps.length ? sum / cnt : NaN, cover: cnt === comps.length ? cover : 0 };
     };
-    const looD = loo.map(total).map(x => x.d).filter(fin);
+    const looD = looOk.map(total).map(x => x.d).filter(fin);
     if (looD.length < P.TPL_MIN_SHOTS) return null;
     const bound = P.TPL_BOUND * Math.max(...looD), full = build(-1);
-    real.forEach((s, k) => { const d = total(loo[k]).d; s.typicality = fin(d) ? d / bound : null; });
+    real.forEach((s, k) => { const d = loo[k] ? total(loo[k]).d : NaN; s.typicality = fin(d) ? d / bound : null; });
     for (const cnd of candidates) {
       if (cnd._to === undefined) continue;
       let best = Infinity, bi = -1;
@@ -954,7 +979,7 @@ const FormAnalyze = (() => {
         }
       }
     }
-    return { bound, shots: snips.length };
+    return { bound, shots: used };
   }
 
   /* ---- 5.3 測定のゆれ ---- */
@@ -1027,17 +1052,32 @@ const FormAnalyze = (() => {
 
   /* ---- 全体 ---- */
   function prepare(pk, opts) {
-    const fixed = repairSwaps(pk), rs = resample(fixed.pk, opts.fps), sig = buildSignals(rs);
+    const closed = closeGaps(pk), fixed = repairSwaps(closed.pk), rs = resample(fixed.pk, opts.fps), sig = buildSignals(rs);
     sig.stats.swapped = fixed.swapped;
+    sig.gaps = closed.gaps;
+    sig.truncated = rs.truncated;
     return sig;
   }
+  /* 契約: 例外を投げない。中で想定していない例外が起きたら、射を 1 つも返さず、warnings に "internalError" を入れて返す
+     （呼ぶ側は、数えられなかった回として扱える。画面は「解析できませんでした」と出し、点の列を残してやり直せる） */
   function analyzePacked(pk, opts) {
+    try {
+      return analyzeCore(pk, opts);
+    } catch (e) {
+      const n = pk && fin(pk.n) ? pk.n : 0, c = pk && fin(pk.coverage) ? pk.coverage : 0;
+      return { shots: [], candidates: [], quality: { version: VERSION, frames: n, coverage: c, warnings: ["internalError"] } };
+    }
+  }
+  function analyzeCore(pk, opts) {
     const o = Object.assign({ handedness: "right", fps: 30 }, opts || {});
     const quality = { version: VERSION, frames: pk ? pk.n : 0, coverage: pk ? pk.coverage : 0, warnings: [] };
     const empty = w => { quality.warnings.push(w); return { shots: [], candidates: [], quality }; };
     if (!pk || !(pk.n >= 10)) return empty("tooShort");
     const sig = prepare(pk, o), { dt, n } = sig;
-    Object.assign(quality, { fps: 1000 / dt, durationMs: n * dt, scalePx: sig.T0, dir: sig.dir, repaired: sig.stats });
+    const lost = sig.gaps.length ? sig.gaps[sig.gaps.length - 1].add : 0; // 詰めた時間の合計。時刻はあとで、もとの時刻へ戻す
+    Object.assign(quality, { fps: 1000 / dt, durationMs: n * dt + lost, scalePx: sig.T0, dir: sig.dir, repaired: sig.stats });
+    if (lost > 0) quality.warnings.push("timeGap");
+    if (sig.truncated) quality.warnings.push("truncated");
     if (!fin(sig.T0) || !(sig.T0 > 0)) return empty("noBody");
     const calm = [];
     for (let i = 0; i < n; i++) if (fin(sig.vs[i])) calm.push(sig.vs[i]);
@@ -1088,6 +1128,13 @@ const FormAnalyze = (() => {
     quality.template = tpl ? { shots: tpl.shots } : null;
     for (const x of shots) delete x._i;
     for (const x of candidates) { delete x._from; delete x._to; }
+    if (lost > 0) {
+      /* 時刻の飛びを詰めて解析したので、返す時刻をもとの時刻へ戻す（長さは変えない。飛びをまたぐ保持は無い） */
+      const back = (obj, keys) => { for (const k of keys) if (fin(obj[k])) obj[k] = restore(sig.gaps, obj[k]); };
+      for (const x of shots) back(x, ["releaseMs", "anchorStartMs", "drawStartMs", "drawEndMs"]);
+      for (const x of candidates) back(x, ["tMs", "fromMs", "toMs"]);
+      for (const x of quality.debug || []) back(x, ["s", "e", "is", "tc", "to", "t", "c"]);
+    }
     quality.noise = ns.noise;
     quality.noiseDf = ns.df;
     quality.letdowns = shots.length - real.length;
@@ -1113,7 +1160,7 @@ const FormAnalyze = (() => {
 
   return {
     VERSION, P, ROLES, FEATURE_KEYS, DEFAULT_KEYS, FLOORS, COMPARE_KEYS,
-    packFrames, repairSwaps, resample, buildSignals, prepare, holdLevel, drawnRuns, changePoint, jumpAt, onsetFit, runEvent,
+    packFrames, repairSwaps, closeGaps, resample, buildSignals, prepare, holdLevel, drawnRuns, changePoint, jumpAt, onsetFit, runEvent,
     anchorStart, drawStart, shotFeatures, featureWindow, poseAt, poseWindow, fitDraw, templateMatch, captureNoise, compareShots, analyzePacked, analyze,
   };
 })();
