@@ -1663,6 +1663,8 @@ function openSettings() {
     (c) =>
       (c.onclick = () => {
         db.settings.formDebug = c.dataset.fd === "1";
+        /* 切にしたら「体の点の列も含める」も切に戻す（次に入にしたとき、知らないうちに体の点の列が入らないように） */
+        if (db.settings.formDebug !== true) db.settings.formDebugLandmarks = false;
         save();
         ovl.querySelectorAll("#fdChips button").forEach((x) => {
           const on = x === c;

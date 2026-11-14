@@ -90,7 +90,9 @@ function normalizeDb(d){
   out.sessions=out.sessions.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sessions);
   out.setups=out.setups.filter(x=>x&&typeof x==="object"&&x.id&&x.name).slice(0,IMPORT_LIMITS.setups);
   out.sightMarks=out.sightMarks.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sightMarks);
-  out.formAnalyses=out.formAnalyses.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.formAnalyses);
+  /* 射型の記録は、読み込みのときに件数で切り捨てない（保存は末尾に足すので、先頭から 1000 件に切ると、いちばん新しい記録が再読み込みで消える）。
+     件数の目安（IMPORT_LIMITS.formAnalyses）は、保存するときに知らせるだけ（47-form-v2-view.js）。自動では消さない */
+  out.formAnalyses=out.formAnalyses.filter(x=>x&&typeof x==="object"&&x.id);
   out.customRounds=out.customRounds.filter(x=>x&&typeof x==="object"&&x.id&&x.label&&Array.isArray(x.stages)).slice(0,IMPORT_LIMITS.customRounds);
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
@@ -180,6 +182,7 @@ function validateImportData(d){
   if(!Array.isArray(d.setups)) return {ok:false,reason:"setups 配列が見つかりません"};
   const warnings=[];
   for(const [k,limit] of Object.entries(IMPORT_LIMITS)){
+    if(k==="formAnalyses") continue; // 件数で切り捨てない（normalizeDb を参照）ので、注意も出さない
     if(Array.isArray(d[k])&&d[k].length>limit) warnings.push(`${k} が ${d[k].length} 件（上限 ${limit}）`);
   }
   return {ok:true,warnings};

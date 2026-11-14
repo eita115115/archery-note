@@ -58,7 +58,7 @@ function loadFixtures() {
 
 function loadStorageApi() {
   return new Function(
-    `${section("const KEY=", "function uid")}\nreturn {normalizeDb, blankDb, dataCounts};`,
+    `${section("const KEY=", "function uid")}\nreturn {normalizeDb, blankDb, dataCounts, validateImportData, IMPORT_LIMITS};`,
   )();
 }
 
@@ -639,6 +639,56 @@ function checkFormAnalysesV2(storageApi, fixtures) {
     JSON.stringify(db.formAnalyses.find((f) => f.id === v2.id)),
     JSON.stringify(v2),
     "[form-analyses-v2 trash] restored record is unchanged",
+  );
+}
+
+/* 射型の記録は、読み込みで件数を理由に捨てない。保存は末尾に足すので、先頭から 1000 件に切ると、いちばん新しい記録が
+   再読み込みのたびに消えていた。件数の目安（IMPORT_LIMITS.formAnalyses）は、保存するときに知らせるだけで、自動では消さない */
+function checkFormAnalysesNeverDroppedOnLoad(storageApi, fixtures) {
+  const limit = storageApi.IMPORT_LIMITS.formAnalyses;
+  assert(
+    Number.isSafeInteger(limit) && limit > 0,
+    "[form-analyses count] the save-time guide number exists",
+  );
+  const base = clone(fixtures.formAnalysesV2);
+  const template = base.formAnalyses[2];
+  const many = [];
+  for (let i = 0; i < limit + 7; i++)
+    many.push({ ...clone(template), id: `fa-${i}`, ts: template.ts + i });
+  base.formAnalyses = many;
+  const once = storageApi.normalizeDb(clone(base));
+  const twice = storageApi.normalizeDb(JSON.parse(JSON.stringify(once)));
+  [once, twice].forEach((loaded, k) => {
+    assertEqual(
+      loaded.formAnalyses.length,
+      limit + 7,
+      `[form-analyses count] every record survives load ${k + 1}`,
+    );
+    assertEqual(
+      loaded.formAnalyses[limit + 6].id,
+      `fa-${limit + 6}`,
+      `[form-analyses count] the newest record survives load ${k + 1}`,
+    );
+    assertEqual(
+      JSON.stringify(loaded.formAnalyses.map((r) => r.id)),
+      JSON.stringify(many.map((r) => r.id)),
+      `[form-analyses count] order is unchanged by load ${k + 1}`,
+    );
+  });
+  /* 読み込むバックアップについても、件数で切らないので「上限」の注意は出さない（ほかの種類はこれまでどおり） */
+  const report = storageApi.validateImportData(clone(base));
+  assert(report.ok, "[form-analyses count] a backup with many form records is accepted");
+  assert(
+    !report.warnings.some((w) => w.includes("formAnalyses")),
+    "[form-analyses count] no truncation warning for form records",
+  );
+  /* 壊れた要素（null・id なし）だけは、これまでどおり落とす */
+  const dirty = clone(fixtures.formAnalysesV2);
+  dirty.formAnalyses = [null, { date: "2026-01-01" }, ...dirty.formAnalyses];
+  assertEqual(
+    storageApi.normalizeDb(dirty).formAnalyses.length,
+    3,
+    "[form-analyses count] broken entries are still filtered",
   );
 }
 
@@ -1250,6 +1300,7 @@ function main() {
   checkFormAnalysesCompatibility(storageApi, fixtures);
   checkFormAnalysisTrashRestore(storageApi, fixtures);
   checkFormAnalysesV2(storageApi, fixtures);
+  checkFormAnalysesNeverDroppedOnLoad(storageApi, fixtures);
   checkFormDiagnosticsCompatibility(storageApi, fixtures);
   checkCustomRoundsCompatibility(storageApi, fixtures);
   checkMultiRoundDefs(fixtures);

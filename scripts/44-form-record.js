@@ -28,9 +28,13 @@ const FormV2 = (() => {
     MAX_SHOTS: 36, // 1 記録の射の上限（約 9KB）
     VIDEO_MS: 10 * 60 * 1000, // 動画を残す上限
     LIVE_WINDOW_MS: 20000, // 撮影中の射数の目安: 直近のこの長さを
-    LIVE_EVERY_MS: 2000, // この間隔で解析する
-    LIVE_SETTLE_MS: 600, // 離れからこの時間たってから数える
+    LIVE_EVERY_MS: 1000, // この間隔で解析する
+    LIVE_SETTLE_MS: 600, // 離れからこの時間たってから見る
     LIVE_SAME_MS: 1200, // これ以内の離れは同じ射とみなす
+    LIVE_CONFIRM_RUNS: 4, // 続けてこの回数（= 3 秒のあいだ）、同じ時刻に同じ種類で見つかったら数える
+    LIVE_STABLE_MS: 150, // 「同じ時刻」の幅
+    LIVE_MIN_HOLD_MS: 600, // 保持がこれより短い射は、撮影中は数えない（全体の解析では数えられないことが多い）
+    LIVE_MAX_AGE_MS: 8000, // 離れからこれより遅れて初めて確かめられたものは数えない（窓の端で形が変わった見え方のことが多い）
   });
   const COLS = Object.freeze(["holdMs", "drawMs", "followMs", "bowDy", "relBack", "ancY", "ext", "elbAng", "shTilt", "headX", "headY", "lean", "creep"]);
   /* kind: t = 時間、h = 高さ、p = 面内。unit: s = 秒（保存は 0.01 秒）、b = 胴（0.001）、d = 度（0.1）。
@@ -158,28 +162,44 @@ const FormV2 = (() => {
     };
   }
 
-  /* 撮影中の射数の目安（design.md 2.4）。同じ解析器を直近 LIVE_WINDOW_MS にかけ、まだ数えていない離れを足す。
-     2 つめの状態機械は持たない。数は目安で、終わってから全体を解析した数が記録になる */
+  /* 撮影中の射数の目安（design.md 2.4）。同じ解析器を直近 LIVE_WINDOW_MS にかける。2 つめの状態機械は持たない。
+     数は目安で、終わってから全体を解析した数が記録になる。全体の解析より多く数えない側へ寄せてある（少なく出ることはある）:
+     - 直近の窓だけを見た解析は、引いている途中や窓の端で、全体の解析には無い射を一時的に出す。そこで、続けて LIVE_CONFIRM_RUNS 回、
+       同じ時刻（±LIVE_STABLE_MS）に同じ種類で見つかったものだけを数える。1 回だけ現れて消えるものは数えない（音も鳴らない）。
+     - 保持が LIVE_MIN_HOLD_MS より短い射と、離れから LIVE_MAX_AGE_MS より遅れて初めて確かめられたものは数えない。
+     - いちど数えたものは減らさない。引き戻しとして数えたものが、あとで射として確かめられたら、射に替える。
+     ベンチマークの全部の場面 × 種 1〜3 で、撮影中の数が全体の解析の数を超えないことを検査している（tools/check-form-record.js） */
   function makeLiveCounter(analyzer) {
-    const seen = [];
+    const seen = [], recent = []; // seen = 数えたもの、recent = 直前の LIVE_CONFIRM_RUNS − 1 回の解析で見つかったもの
     let lastRun = -Infinity;
+    const count = (kind) => seen.filter((e) => e.kind === kind).length;
     return {
       due: (nowMs) => nowMs - lastRun >= LIMITS.LIVE_EVERY_MS,
       update(buffer, handedness, fps) {
         const now = buffer.lastMs;
         lastRun = now;
         const r = analyzer.analyzePacked(buffer.pack(handedness, now - LIMITS.LIVE_WINDOW_MS), { handedness, fps });
+        const cur = (r.shots || []).filter((s) => fin(s.releaseMs) && now - s.releaseMs >= LIMITS.LIVE_SETTLE_MS).map((s) => ({ t: s.releaseMs, kind: s.kind === "shot" ? "shot" : "letdown", hold: s.holdMs }));
         let added = 0;
-        for (const s of r.shots) {
-          if (now - s.releaseMs < LIMITS.LIVE_SETTLE_MS) continue;
-          if (seen.some((e) => Math.abs(e.t - s.releaseMs) < LIMITS.LIVE_SAME_MS)) continue;
-          seen.push({ t: s.releaseMs, kind: s.kind });
-          if (s.kind === "shot") added++;
+        for (const s of cur) {
+          let stable = recent.length >= LIMITS.LIVE_CONFIRM_RUNS - 1;
+          for (let j = 0; j < recent.length && stable; j++) stable = recent[j].some((q) => q.kind === s.kind && Math.abs(q.t - s.t) <= LIMITS.LIVE_STABLE_MS);
+          const shot = s.kind === "shot" && s.hold >= LIMITS.LIVE_MIN_HOLD_MS;
+          const known = seen.find((e) => Math.abs(e.t - s.t) < LIMITS.LIVE_SAME_MS);
+          if (known) {
+            if (stable && shot && known.kind === "letdown") { known.kind = "shot"; known.t = s.t; added++; } // 引き戻しと見えたものが、射だった
+            continue;
+          }
+          if (!stable || now - s.t > LIMITS.LIVE_MAX_AGE_MS || (s.kind === "shot" && !shot)) continue;
+          seen.push({ t: s.t, kind: s.kind });
+          if (shot) added++;
         }
-        return { shots: seen.filter((e) => e.kind === "shot").length, letdowns: seen.filter((e) => e.kind === "letdown").length, added };
+        recent.push(cur);
+        if (recent.length > LIMITS.LIVE_CONFIRM_RUNS - 1) recent.shift();
+        return { shots: count("shot"), letdowns: count("letdown"), added };
       },
-      get shots() { return seen.filter((e) => e.kind === "shot").length; },
-      get letdowns() { return seen.filter((e) => e.kind === "letdown").length; },
+      get shots() { return count("shot"); },
+      get letdowns() { return count("letdown"); },
     };
   }
 
@@ -402,10 +422,32 @@ const FormV2 = (() => {
     v.ed = [added, removed];
     return out;
   }
+  /* 分けた記録（同じ撮影の全部。part[0] の順）の通し番号を合わせ直す。射数を直すと、その記録の射数が変わるので、
+     うしろの記録の「それより前の射数」（part[2]）を、前の記録の射数（shots）の合計に置き直す。番号が重ならない。
+     もとの記録は書き換えず、写しを返す。分けていない記録（part が無い）はそのまま返す。
+     1 件に入る「値を測れた射」は 36 までのまま（分け直さない）。候補や引き戻しを射に数えると、その記録の射数は 36 を超えることがある
+     （足した射は値を持たないので、記録の大きさはほとんど変わらない）。うしろの記録の番号は、その数から続く */
+  function renumber(records) {
+    const list = Array.isArray(records) ? records : [];
+    let off = 0;
+    return list.map((r) => {
+      if (!r || !r.v2 || !Array.isArray(r.v2.part)) return r;
+      const out = JSON.parse(JSON.stringify(r));
+      out.v2.part[2] = off;
+      off += fin(out.shots) && out.shots > 0 ? Math.round(out.shots) : 0;
+      return out;
+    });
+  }
 
   /* ---------- 記録の読み分け（design.md 5.2） ---------- */
   const isV2 = (r) => !!(r && r.v2 && typeof r.v2 === "object" && Array.isArray(r.v2.ev) && r.cap && r.cap.g === GEOM);
   const natural = (int, k) => (fin(int) ? int / SCALE[META[k].unit] : null);
+  /* 読み込んだバックアップの値は信用しない: 画面に出す数は、有限の整数でなければ null にする（文字列などをそのまま HTML に入れない） */
+  const safeInt = (x) => (typeof x === "number" && fin(x) ? Math.round(x) + 0 : null);
+  const partOf = (v) => {
+    const p = v && Array.isArray(v.part) ? v.part.slice(0, 3).map(safeInt) : null;
+    return p && p.length === 3 && p[0] >= 1 && p[1] >= p[0] && p[2] >= 0 ? p : null;
+  };
 
   /* 保存した記録 → 画面用の形。画面はこれだけから描く（保存の前後で表示が変わらない）。
      events = 時刻順の全部の区間。n = 射の番号（数えているものだけ）。vals = 解析器の単位（ms・胴・度）の値 */
@@ -431,7 +473,7 @@ const FormV2 = (() => {
     });
     events.sort((a, b) => a.tS - b.tS);
     /* 射の番号は、その撮影の通し番号（分けた記録では、前の記録の射数から続ける）。count はこの記録の中の数 */
-    const off = Array.isArray(v.part) && v.part[2] > 0 ? v.part[2] : 0;
+    const pt = partOf(v), off = pt ? pt[2] : 0;
     let n = 0;
     for (const e of events) e.n = e.counted ? off + ++n : null;
     const noise = {}, df = {};
@@ -439,9 +481,10 @@ const FormV2 = (() => {
     const compared = events.filter((e) => e.kind === "shot" && e.counted);
     return {
       rec, v, events, count: n, offset: off, compared, noise, df,
-      part: Array.isArray(v.part) ? { k: v.part[0], of: v.part[1] } : null,
-      fromS: Array.isArray(v.span) ? v.span[0] / 100 : 0,
-      toS: Array.isArray(v.span) ? v.span[1] / 100 : null,
+      part: pt ? { k: pt[0], of: pt[1] } : null,
+      tpx: safeInt(v.tpx), cov: safeInt(v.cov), dur: safeInt(v.dur) || 0,
+      fromS: Array.isArray(v.span) && fin(v.span[0]) ? v.span[0] / 100 : 0,
+      toS: Array.isArray(v.span) && fin(v.span[1]) ? v.span[1] / 100 : null,
       letdowns: events.filter((e) => e.kind === "letdown" && !e.counted).length,
       openCands: events.filter((e) => e.kind === "cand" && !e.counted).length,
       added: events.filter((e) => e.counted && e.kind !== "shot").length,
@@ -676,7 +719,7 @@ const FormV2 = (() => {
 
   return {
     FV, GEOM, TORSO_PER_HEIGHT, LIMITS, COLS, META, REASONS,
-    makeBuffer, makeLiveCounter, placement, captureState, captureNoise, buildRecord, buildRecords, diagBlock, RUN_COLS, DIAG_KIND, diagnostics, landmarkDump, setCounted, isV2, read, keysFor, compare, exceedsF95, sdInterval,
+    makeBuffer, makeLiveCounter, placement, captureState, captureNoise, buildRecord, buildRecords, renumber, diagBlock, RUN_COLS, DIAG_KIND, diagnostics, landmarkDump, setCounted, isV2, read, keysFor, compare, exceedsF95, sdInterval,
     shown, shownSize, unitText, fmt, cmText, flagSentence, summary, comparable, trend, median, quantile, sd,
   };
 })();
