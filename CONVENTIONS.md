@@ -17,10 +17,12 @@ They execute in numbered order and share one global scope:
 | 20 | `20-scoring.js` | Scoring math (pure functions) | `scoreAt`, `hitFromGlobal`, `zoneStyle`, `scoreLabel`, `clamp`, `median`, `momentStats`, `ringW`, `lineCutRadius`, `isLineCutting` |
 | 30 | `30-target-svg.js` | Target SVG drawing | `targetMarkup`, `markCircle` |
 | 40 | `40-analysis-physics.js` | Physics engine, calibration, analysis helpers | `num`, `pct`, `levelFromScore`, `LEVELS`, `sessionMetrics`, `latestMark`, `personalPhysicsCalibration`, `adviceFor`, `judgementFor`, `groupSummaryHtml`, `exportSessionsCsv` |
-| 44 | `44-form-analyze.js` | Form tracking v2 analyser: pure whole-capture analysis (no DOM/db access; not called by the UI yet) | `FormAnalyze` |
+| 44 | `44-form-analyze.js` | Form tracking v2 analyser: pure whole-capture analysis (no DOM/db access) | `FormAnalyze` |
+| 44 | `44-form-record.js` | Form tracking v2 record format, capture buffer, placement check, within-capture comparison (pure, no DOM/db access) | `FormV2` |
 | 45 | `45-analysis-core.js` | Analysis pure functions (no DOM/db access) | `buildAnalysisRows`, `filterAnalysisRows`, `isoWeekKey`, `aggregateByPeriod` |
 | 46 | `46-form-core.js` | Form analysis core (pose detection) | form analysis functions |
-| 47 | `47-form-view.js` | Form analysis view | form view rendering |
+| 47 | `47-form-v2-view.js` | Form tracking v2 screens: enable, placement, capture, analysing, result, fix the count, shot detail, save | `formV2*` functions, `loadFormPose` stays in 47-form-view |
+| 47 | `47-form-view.js` | Form analysis card, older-record list/detail, legacy diagnostic capture (verification setting only) | form view rendering |
 | 50 | `50-record-view.js` | Record view, active session, history, analysis, sight views | `view`, `ui`, `render`, `showView`, `renderRecord`, `renderActive`, `refreshActive`, `renderHistory`, `renderAnalysis`, `renderSight`, `renderGear` is in 70 |
 | 60 | `60-history-sight-view.js` | History detail sheets, sight table | `sightAdviceModel`, `sightAdviceHtml`, `sessionSightFoldHtml`, sight/history rendering helpers |
 | 70 | `70-gear-settings.js` | Gear management, settings panel | `renderGear`, `openSettings`, `applyTheme`, `GEAR_FIELDS`, `GEAR_SECTIONS`, `CATALOG_SHAFTS`, `openGearForm`, `openSetupWizard`, `recordingSetupId`, `gearSpecRows`, `gearHistoryEntries` |

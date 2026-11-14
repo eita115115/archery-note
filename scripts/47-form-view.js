@@ -1,5 +1,7 @@
 "use strict";
 /* Archery Note: 射型トラッキング ビュー（ベータ）
+   新しい記録の画面（撮影・解析・結果）は 47-form-v2-view.js。このファイルに残っているのは、姿勢推定の読み込み（loadFormPose）、
+   以前の記録の一覧と詳細、削除、そして「検証用の診断データ」が入のときだけ開く以前の撮影画面（openFormCapture・startFormReplay）。
    カメラ + オンデバイス姿勢推定。計算は 46-form-core.js の純関数、
    資産は assets/pose/（自己ホスト・機能有効時のみ遅延ロード）。
    映像・生ランドマークは保存しない。保存は formAnalyses の派生特徴量のみ。 */
@@ -270,8 +272,10 @@ function formScoreLinkHtml(records=db.formAnalyses||[]){
     <div class="note">差（リリース安定の日 − ドリフト多めの日）は ${diff>0?"+":diff<0?"−":"±"}${Math.abs(diff).toFixed(2)} 点/射です。回数が少なく、ほかの条件はそろえていないので、射型が原因とは限りません。</div>
   </div>`;
 }
-function formTrackingCard(records=db.formAnalyses||[]){
-  if(!formTrackingEnabled()) return "";
+/* 以前の記録（撮りながら数える方式で保存した記録。cap が無いか、cap.g が 2 以下）。
+   新しい記録（v2。47-form-v2-view.js の formTrackingCard）の下に分けて並べる。値は保存されたまま読むだけで、書き換えない。
+   測り方が違うので、新しい記録とは比べない（docs/design/form-v2/design.md 5.2・5.3） */
+function formLegacyRecordsHtml(records){
   const allRecs=[...records].sort((a,b)=>(b.ts||0)-(a.ts||0));
   const recs=allRecs.slice(0,5);
   const rows=recs.map((r,i)=>{
@@ -290,20 +294,24 @@ function formTrackingCard(records=db.formAnalyses||[]){
       <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射型記録を削除">${icon("del")}</button>
     </div>`;
   }).join("");
-  return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="vsecH"><h2>射型の記録</h2><span class="aside">${allRecs.length}件${allRecs.length>5?"・新しい5件を表示":""}</span></div>
-    <div class="btnRow"><button class="btn" id="formStart">${icon("camera")} 撮影して解析</button><button class="btn sec" id="formReplay">保存済み動画を解析</button></div>
+  return `<div class="formLegacy" data-testid="analysis-form-legacy"><div class="vsecH"><h2>以前の記録</h2><span class="aside">${allRecs.length}件${allRecs.length>5?"・新しい5件を表示":""}</span></div>
+    <p class="basis" data-testid="analysis-form-legacy-note">撮りながら数える以前の方式で保存した記録です。測り方が違うので、新しい記録とは比べていません。記録はそのまま残してあり、開くと射ごとの値を見られます。</p>
     ${formTrendMiniHtml(allRecs)}
-    <div class="formRecordList">${rows||`<div class="empty">${(db.formAnalyses||[]).length?"この条件に合う射型の記録は 0件です。弓具・距離・期間の選択を広げると表示されます。":"射型の記録はまだありません。カメラを横に置いて数射を撮ると、ここに並びます。"}</div>`}</div>
+    <div class="formRecordList">${rows}</div>
     ${formScoreLinkHtml(records)}
-    <p class="basis">対象: 期間は撮影日、弓具・距離は紐付いた練習の条件で選んでいます。紐付けのない記録は保存された弓具だけで選び、距離は推測しません。弓手肘は中央値です。撮影の位置と角度が違う記録の差は、射型の差とは限りません。${allRecs.some(r=>formRecordGeometry(r)!==formRecordGeometry(allRecs[0]))?"画面の向きによる差を補正する前の記録と後の記録は測り方が違うため、互いに比べていません。":""}動画はこの端末の中だけで解析します（ベータ）。</p>
-  </section>`;
+    <p class="basis" data-testid="analysis-form-legacy-basis">対象: 期間は撮影日、弓具・距離は紐付いた練習の条件で選んでいます。紐付けのない記録は保存された弓具だけで選び、距離は推測しません。弓手肘は中央値です。撮影の位置と角度が違う記録の差は、射型の差とは限りません。${allRecs.some(r=>formRecordGeometry(r)!==formRecordGeometry(allRecs[0]))?"画面の向きによる差を補正する前の記録と後の記録は測り方が違うため、互いに比べていません。":""}</p>
+  </div>`;
 }
 
 function bindFormTrackingCard(){
+  /* 撮影と保存した動画の解析は v2 の画面（47-form-v2-view.js）で開く。実時間の検出器（46-form-core.js）は使わない。
+     「検証用の診断データ」が入のあいだだけ、診断（18 射の診断 JSON）を取るために以前の撮影画面を残してある（実地の確認のあとで消す） */
+  const legacyDiagnostics=db.settings.formDebug===true;
   const start=$("#formStart");
-  if(start) start.onclick=openFormCapture;
+  if(start) start.onclick=legacyDiagnostics?openFormCapture:formV2StartLive;
   const replay=$("#formReplay");
-  if(replay) replay.onclick=openFormReplay;
+  if(replay) replay.onclick=legacyDiagnostics?openFormReplay:formV2PickReplay;
+  bindFormV2Card();
   document.querySelectorAll("[data-form-id]").forEach(li=>li.onclick=()=>{
     const rec=(db.formAnalyses||[]).find(r=>r.id===li.dataset.formId);
     if(rec) openFormDetail(rec);

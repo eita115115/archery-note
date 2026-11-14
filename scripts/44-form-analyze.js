@@ -8,7 +8,7 @@
    - shots には、離れの位置がはっきり決まった射（kind "shot"）と引き戻し（kind "letdown"）だけが入る。
    - 引いて保持したが、離れがはっきり写らなかったものは candidates に分けて返す（射数には入れない）。
    - DOM・db・時計・乱数を使わない。入力を書き換えない。同じ入力には同じ出力。例外を投げない。
-   - まだ撮影の画面からは呼ばれない（段 1〜2）。いまの検出器は 46-form-core.js のまま。
+   - 撮影の画面（47-form-v2-view.js）が、ためたランドマークの列を analyzePacked に渡す。記録の形は 44-form-record.js。
    グローバルは FormAnalyze の 1 つだけ。Node からは tools/form-analyze-loader.js で読む。 */
 const FormAnalyze = (() => {
   const VERSION = 1; // 数え方や定義を変えたら上げる（記録の v2.av）
@@ -999,9 +999,16 @@ const FormAnalyze = (() => {
     const z = zq(1 - p / 2), g1 = (z ** 3 + z) / 4, g2 = (5 * z ** 5 + 16 * z ** 3 + 3 * z) / 96, g3 = (3 * z ** 7 + 19 * z ** 5 + 17 * z ** 3 - 15 * z) / 384;
     return z + g1 / nu + g2 / nu ** 2 + g3 / nu ** 3;
   }
-  const FLOORS = Object.freeze({ ext: 0.03, ancY: 0.03, ancX: 0.03, bowElev: 2, shTilt: 2, elbAng: 4, headX: 0.03, headY: 0.03, lean: 1.5 });
+  /* 床（これより小さい違いは出さない。5.4）。時間は ms、位置は胴、角度は °。
+     COMPARE_KEYS = keys を渡さないときに比べる項目（ゆれを解析器が見積もる 9 項目。段 2 から変えていない）。
+     時間と離れのあとの項目は、ゆれを呼ぶ側（記録を組み立てる 44-form-record.js）が quality.noise に入れて keys で指定する。 */
+  const FLOORS = Object.freeze({
+    ext: 0.03, ancY: 0.03, ancX: 0.03, bowElev: 2, shTilt: 2, elbAng: 4, headX: 0.03, headY: 0.03, lean: 1.5,
+    holdMs: 300, drawMs: 300, followMs: 300, relBack: 0.03, relDy: 0.03, bowDy: 0.03, creep: 0.03,
+  });
+  const COMPARE_KEYS = Object.freeze(["ext", "ancY", "ancX", "bowElev", "shTilt", "elbAng", "headX", "headY", "lean"]);
   function compareShots(result, opts) {
-    const keys = (opts && opts.keys) || Object.keys(FLOORS), alpha = (opts && opts.alpha) || 0.05;
+    const keys = (opts && opts.keys) || COMPARE_KEYS, alpha = (opts && opts.alpha) || 0.05;
     const real = result.shots.filter(s => s.kind === "shot"), n = real.length, out = { n, features: {}, flags: [] };
     if (n < 4) return out;
     const pEach = 1 - Math.pow(1 - alpha, 1 / (n * keys.length));
@@ -1105,7 +1112,7 @@ const FormAnalyze = (() => {
   }
 
   return {
-    VERSION, P, ROLES, FEATURE_KEYS, DEFAULT_KEYS, FLOORS,
+    VERSION, P, ROLES, FEATURE_KEYS, DEFAULT_KEYS, FLOORS, COMPARE_KEYS,
     packFrames, repairSwaps, resample, buildSignals, prepare, holdLevel, drawnRuns, changePoint, jumpAt, onsetFit, runEvent,
     anchorStart, drawStart, shotFeatures, featureWindow, poseAt, poseWindow, fitDraw, templateMatch, captureNoise, compareShots, analyzePacked, analyze,
   };

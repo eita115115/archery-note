@@ -1,0 +1,412 @@
+"use strict";
+/* 射型の記録 v2 の記録の形・バッファ・置き方の確認・比較（scripts/44-form-record.js）の検査。
+   npm run check:form-analyze の後半（check:all に入っている）。設計: docs/design/form-v2/design.md 5 章・10 章。
+   合成の射手は tools/form-analyze-fixture.js。実射の映像は使わない。 */
+const assert = require("node:assert/strict");
+const FA = require("./form-analyze-loader.js");
+const FV = require("./form-record-loader.js");
+const FX = require("./form-analyze-fixture.js");
+
+const results = [];
+function test(name, fn) {
+  fn();
+  results.push(name);
+}
+const CTX = {
+  id: "mabc1234xyz",
+  date: "2026-11-14",
+  ts: 1794614400000,
+  sessionId: "mabc1234xyz",
+  setupId: "mabc1234xyz",
+  appVer: 128,
+  modelVer: "pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+  facing: "environment",
+  hand: "right",
+  src: "live",
+};
+/* 6 射 + 引き戻し 1 回 + 離れがはっきりしない保持 1 回。4 射目は保持が長く、アンカーが低い */
+const EVENTS = [
+  { kind: "shot", holdMs: 3400 },
+  { kind: "shot", holdMs: 3100 },
+  { kind: "shot", holdMs: 3600 },
+  { kind: "letdown", holdMs: 4800 },
+  { kind: "shot", holdMs: 5400, anchorDy: -0.09 },
+  { kind: "shot", holdMs: 3200 },
+  { kind: "shot", holdMs: 3000, back: 0.03 },
+  { kind: "shot", holdMs: 3300 },
+];
+function capture(w, h, events, seed) {
+  const cap = FX.makeCapture({ seed: seed || 7, events: events || EVENTS, fps: 30, torsoPx: 200, cx: 300, cy: 420 });
+  const frames = FX.toFrames(cap.poses, { w, h });
+  const buf = FV.makeBuffer();
+  for (const f of frames) buf.push(f.tMs, f.landmarks, w, h);
+  return { cap, frames, buf };
+}
+const analyse = (buf) => FA.analyzePacked(buf.pack("right"), { handedness: "right", fps: 30 });
+const allInts = (v) =>
+  Array.isArray(v) ? v.every(allInts) : v === null || Number.isInteger(v) || typeof v === "string";
+
+test("buffer: packed stream gives the same analysis as packFrames, in portrait and landscape", () => {
+  for (const [w, h] of [
+    [720, 1280],
+    [1280, 720],
+  ]) {
+    const { frames, buf } = capture(w, h);
+    const direct = FA.analyze(frames, { frame: { w, h }, handedness: "right", fps: 30 });
+    const viaBuf = analyse(buf);
+    assert.equal(buf.n, frames.length);
+    assert.equal(viaBuf.shots.length, direct.shots.length);
+    assert.equal(viaBuf.candidates.length, direct.candidates.length);
+    viaBuf.shots.forEach((s, i) => {
+      assert.equal(s.kind, direct.shots[i].kind);
+      assert.ok(Math.abs(s.releaseMs - direct.shots[i].releaseMs) < 1, "release within 1 ms");
+      assert.ok(Math.abs(s.holdMs - direct.shots[i].holdMs) < 1, "hold within 1 ms");
+    });
+    assert.deepEqual(buf.frame, { w, h, mixed: false });
+    assert.equal(buf.coverage, 1);
+  }
+});
+
+test("buffer: rejects non-increasing times, stops at the frame limit, and windows by time", () => {
+  const buf = FV.makeBuffer({ maxFrames: 5 });
+  assert.equal(buf.push(10, null, 0, 0), true);
+  assert.equal(buf.push(10, null, 0, 0), false);
+  assert.equal(buf.push(NaN, null, 0, 0), false);
+  for (let i = 1; i <= 4; i++) assert.equal(buf.push(10 + i * 33, null, 720, 1280), true);
+  assert.equal(buf.full, true);
+  assert.equal(buf.push(999, null, 720, 1280), false);
+  assert.equal(buf.n, 5);
+  assert.equal(buf.pack("right", 76).n, 3);
+  assert.equal(buf.pack("right").n, 5);
+  assert.equal(buf.pack("right").coverage, 0);
+  /* 30 分・60fps の上限でも 13MB 未満（algorithm.md 10.1） */
+  const perFrame = FV.makeBuffer().bytes() || 8 + 27 * 4 + 1;
+  assert.ok((FV.LIMITS.MAX_FRAMES * (8 + 27 * 4 + 1)) / 1e6 < 13, `limit stays under 13 MB (${perFrame})`);
+  /* 左利きは役割を入れ替えて渡す */
+  const { frames } = capture(720, 1280);
+  const b2 = FV.makeBuffer();
+  b2.push(0, frames[0].landmarks, 720, 1280);
+  const r = b2.pack("right"),
+    l = b2.pack("left");
+  assert.equal(r.pts.bWr.x[0], l.pts.dWr.x[0]);
+  assert.equal(r.pts.dSh.y[0], l.pts.bSh.y[0]);
+});
+
+test("record: shape, integers only, size budget, JSON round trip", () => {
+  for (const [w, h] of [
+    [720, 1280],
+    [1280, 720],
+  ]) {
+    const { buf } = capture(w, h);
+    const res = analyse(buf);
+    assert.equal(res.shots.filter((s) => s.kind === "shot").length, 6);
+    assert.equal(res.candidates.length, 1);
+    const rec = FV.buildRecord(res, { ...CTX, frame: { w, h } });
+    assert.equal(rec.shots, 6);
+    assert.deepEqual(rec.features, []);
+    assert.deepEqual(rec.cap, {
+      g: 3,
+      fw: w,
+      fh: h,
+      mw: w,
+      mh: h,
+      o: w < h ? "p" : "l",
+      crop: 0,
+      facing: "environment",
+      hand: "right",
+      src: "live",
+    });
+    const v = rec.v2;
+    assert.deepEqual(Object.keys(v), [
+      "av",
+      "fv",
+      "dur",
+      "cov",
+      "tpx",
+      "view",
+      "ld",
+      "ev",
+      "cd",
+      "f",
+      "nz",
+      "nd",
+      "ps",
+      "pr",
+      "ed",
+      "w",
+    ]);
+    assert.equal(v.av, FA.VERSION);
+    assert.equal(v.fv, FV.FV);
+    assert.equal(v.ld, 1);
+    assert.equal(v.ev.length, 7);
+    assert.equal(v.cd.length, 1);
+    assert.equal(v.f.length, 6);
+    assert.equal(v.ps.length, 6);
+    assert.equal(v.pr.length, 6);
+    assert.deepEqual(v.ed, [0, 0]);
+    for (const row of v.f) assert.equal(row.length, FV.COLS.length);
+    for (const row of v.ps.concat(v.pr)) assert.equal(row.length, 18);
+    assert.equal(v.nz.length, FV.COLS.length);
+    for (const k of ["ev", "cd", "f", "nz", "nd", "ps", "pr"]) assert.ok(allInts(v[k]), `${k} holds integers`);
+    const json = JSON.stringify(rec);
+    assert.ok(json.length <= 2000, `six shots, a let-down and a candidate fit in 2 KB, got ${json.length}`);
+    assert.deepEqual(JSON.parse(json), rec);
+    assert.ok(!/landmarks|visibility|"t":\[/.test(json), "no landmark stream is stored");
+    assert.ok(FV.isV2(rec));
+    /* 画面の値は保存した形だけから作る: 保存の前後で同じ */
+    const a = FV.read(rec),
+      b = FV.read(JSON.parse(json));
+    assert.equal(a.count, 6);
+    assert.equal(a.letdowns, 1);
+    assert.equal(a.openCands, 1);
+    assert.deepEqual(
+      a.events.map((e) => [e.kind, e.n, e.tS]),
+      b.events.map((e) => [e.kind, e.n, e.tS]),
+    );
+    assert.deepEqual(FV.compare(a, FA).flags, FV.compare(b, FA).flags);
+  }
+  /* 12 射で約 3.2KB、上限の 36 射で 9KB ほど */
+  const twelve = [];
+  for (let i = 0; i < 12; i++) twelve.push({ kind: "shot", holdMs: 2600 + 150 * (i % 5) });
+  const big = capture(720, 1280, twelve, 3);
+  const rec12 = FV.buildRecord(analyse(big.buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  assert.equal(rec12.shots, 12);
+  assert.ok(JSON.stringify(rec12).length <= 3400, `twelve shots fit in 3.4 KB, got ${JSON.stringify(rec12).length}`);
+});
+
+test("record: portrait and landscape of the same pixels store the same values", () => {
+  const p = FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  const l = FV.buildRecord(analyse(capture(1280, 720).buf), { ...CTX, frame: { w: 1280, h: 720 } });
+  assert.deepEqual(p.v2.f, l.v2.f);
+  assert.deepEqual(p.v2.ev, l.v2.ev);
+  assert.deepEqual(p.v2.nz, l.v2.nz);
+  assert.deepEqual(p.v2.ps, l.v2.ps);
+});
+
+test("fix the count: removing a shot, adding a candidate and counting a let-down", () => {
+  const base = FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  const frozen = JSON.stringify(base);
+  const removedRec = FV.setCounted(base, "ev", 1, false);
+  assert.equal(JSON.stringify(base), frozen, "the edit returns a copy");
+  const removed = FV.read(removedRec);
+  assert.equal(removed.count, 5);
+  assert.equal(removed.compared.length, 5);
+  assert.equal(removedRec.shots, 5);
+  assert.deepEqual(removedRec.v2.ed, [0, 1]);
+  assert.equal(removedRec.v2.f.length, 6, "the removed shot keeps its values so the edit can be undone");
+  assert.deepEqual(
+    removed.events.filter((e) => e.counted).map((e) => e.n),
+    [1, 2, 3, 4, 5],
+  );
+  assert.deepEqual(FV.setCounted(removedRec, "ev", 1, true), base, "undoing the edit restores the record");
+  const addedRec = FV.setCounted(base, "cd", 0, true);
+  const added = FV.read(addedRec);
+  assert.equal(added.count, 7);
+  assert.equal(addedRec.shots, 7);
+  assert.equal(added.compared.length, 6, "an added candidate has no values and is not compared");
+  assert.equal(added.openCands, 0);
+  assert.deepEqual(addedRec.v2.ed, [1, 0]);
+  assert.equal(addedRec.v2.cd[0][6], 1);
+  const cand = added.events.find((e) => e.kind === "cand");
+  assert.equal(cand.n, 6, "the candidate takes its place in time order");
+  assert.equal(cand.reason, "noRelease");
+  const ldRec = FV.setCounted(base, "ev", 3, true);
+  const ld = FV.read(ldRec);
+  assert.equal(ldRec.v2.ev[3][0], 1, "row 3 is the let-down");
+  assert.equal(ld.count, 7);
+  assert.equal(ld.letdowns, 0);
+  assert.equal(ldRec.v2.ld, 0);
+  assert.deepEqual(ldRec.v2.ed, [1, 0]);
+});
+
+test("compare: the shot that differed is named with numbers; noise alone marks nothing", () => {
+  const m = FV.read(FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } }));
+  const cmp = FV.compare(m, FA);
+  assert.equal(cmp.n, 6);
+  assert.ok(cmp.flags.some((f) => f.n === 4 && f.key === "holdMs"));
+  assert.ok(cmp.flags.some((f) => f.n === 4 && f.key === "ancY"));
+  assert.ok(cmp.flags.every((f) => f.n === 4), "only the fourth shot is marked");
+  const s = FV.summary(m, cmp, null);
+  assert.equal(s.n, 4);
+  assert.match(s.text, /^4 射目は、保持が 5\.\d 秒でした。ほかの 5 射は 3\.\d〜3\.\d 秒です。$/);
+  assert.ok(cmp.feat.holdMs.limit >= 300, "the time floor is 0.3 s");
+  assert.equal(cmp.feat.holdMs.indistinct, false);
+  assert.equal(cmp.feat.headY.indistinct, true);
+  /* 同じ射だけの回 */
+  const same = [];
+  for (let i = 0; i < 6; i++) same.push({ kind: "shot", holdMs: 3000 });
+  let flagged = 0;
+  for (let seed = 1; seed <= 20; seed++) {
+    const mm = FV.read(FV.buildRecord(analyse(capture(720, 1280, same, seed).buf), { ...CTX, frame: { w: 720, h: 1280 } }));
+    const c = FV.compare(mm, FA);
+    if (c.flags.length) flagged++;
+    else assert.equal(FV.summary(mm, c, null).text, "6 射のあいだに、測定のゆれより大きい違いは見つかりませんでした。");
+  }
+  assert.ok(flagged <= 2, `noise-only captures are rarely marked (${flagged}/20)`);
+  /* 4 射に満たない回は比べない */
+  const three = FV.read(FV.buildRecord(analyse(capture(720, 1280, same.slice(0, 3), 2).buf), { ...CTX, frame: { w: 720, h: 1280 } }));
+  const c3 = FV.compare(three, FA);
+  assert.deepEqual(c3.flags, []);
+  assert.match(FV.summary(three, c3, null).text, /4 射以上要ります。この回は 3 射でした。/);
+});
+
+test("height: cm appears only with the setting, torso percent always", () => {
+  assert.equal(FV.cmText("ancY", 3, null), "");
+  assert.equal(FV.cmText("ancY", 3, undefined), "");
+  assert.equal(FV.cmText("ancY", 3, 90), "", "an implausible height is ignored");
+  assert.equal(FV.cmText("ancY", 3, 170), "約 1.5cm");
+  assert.equal(FV.cmText("bowDy", 30, 170), "約 15cm");
+  assert.equal(FV.cmText("holdMs", 3, 170), "", "times have no cm");
+  assert.equal(FV.cmText("ext", 3, 170), "", "the draw-length guide is relative to the capture median");
+  assert.equal(FV.TORSO_PER_HEIGHT, 0.288);
+  const m = FV.read(FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } }));
+  const cmp = FV.compare(m, FA);
+  const anc = cmp.flags.find((f) => f.key === "ancY");
+  assert.ok(!/cm/.test(FV.flagSentence(anc, cmp, null)));
+  assert.match(FV.flagSentence(anc, cmp, 170), /胴の \d+\.\d%（約 \d+cm）/);
+});
+
+test("views: oblique and back-side captures hide what one camera cannot measure", () => {
+  const rec = FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  const steep = JSON.parse(JSON.stringify(rec));
+  steep.v2.view.cls = "x";
+  assert.deepEqual(FV.keysFor(steep), ["holdMs", "drawMs", "followMs", "bowDy", "ancY", "headY"]);
+  const back = JSON.parse(JSON.stringify(rec));
+  back.v2.view.side = "b";
+  assert.ok(!FV.keysFor(back).includes("ancY"));
+  assert.ok(FV.keysFor(back).includes("holdMs"));
+});
+
+test("comparable: like with like only; old records are never compared", () => {
+  const a = FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  a.v2.view.cls = "s";
+  const b = JSON.parse(JSON.stringify(a));
+  const legacy = { id: "old", features: [{ angles: { bowArm: 170 } }], shots: 1 };
+  const stageA = { ...legacy, cap: { g: 2, fw: 720, fh: 1280 } };
+  assert.equal(FV.isV2(legacy), false);
+  assert.equal(FV.isV2(stageA), false);
+  assert.equal(FV.comparable(a, legacy, "holdMs").ok, false);
+  assert.equal(FV.comparable(a, stageA, "holdMs").ok, false);
+  for (const k of ["holdMs", "ancY", "ext"]) assert.equal(FV.comparable(a, b, k).ok, true, k);
+  b.cap.fw = 1280; // 縦向きと横向きは分けない
+  b.cap.fh = 720;
+  assert.equal(FV.comparable(a, b, "ext").ok, true);
+  b.v2.view.cls = "o";
+  assert.equal(FV.comparable(a, b, "holdMs").ok, true);
+  assert.equal(FV.comparable(a, b, "ancY").ok, true);
+  assert.equal(FV.comparable(a, b, "ext").ok, false);
+  b.v2.view.cls = "s";
+  b.v2.view.rho = Math.round(a.v2.view.rho * 1.08);
+  assert.equal(FV.comparable(a, b, "ext").ok, false);
+  b.v2.view.rho = a.v2.view.rho;
+  b.v2.view.side = "b";
+  assert.equal(FV.comparable(a, b, "holdMs").ok, true);
+  assert.equal(FV.comparable(a, b, "ancY").ok, false);
+  b.v2.view.side = "c";
+  b.cap.hand = "left";
+  assert.equal(FV.comparable(a, b, "holdMs").ok, false);
+  b.cap.hand = "right";
+  b.v2.av = 2;
+  assert.equal(FV.comparable(a, b, "holdMs").ok, false);
+  b.v2.av = a.v2.av;
+  b.v2.tpx = 90;
+  assert.equal(FV.comparable(a, b, "holdMs").ok, false);
+  /* 推移は v2 の記録だけ */
+  const t = FV.trend([legacy, stageA, a, { ...JSON.parse(JSON.stringify(a)), id: "x2", ts: a.ts + 1 }], "holdMs");
+  assert.equal(t.points.length, 2);
+  assert.equal(t.excluded, 0);
+});
+
+test("live count: the recent-window analysis reaches the full count and never passes it", () => {
+  const { frames, buf: full } = capture(720, 1280);
+  const truth = analyse(full).shots.filter((s) => s.kind === "shot").length;
+  const buf = FV.makeBuffer(),
+    live = FV.makeLiveCounter(FA);
+  let last = 0,
+    runs = 0;
+  for (const f of frames) {
+    buf.push(f.tMs, f.landmarks, 720, 1280);
+    if (!live.due(f.tMs)) continue;
+    const r = live.update(buf, "right", 30);
+    runs++;
+    assert.ok(r.shots >= last, "the count never goes down");
+    assert.ok(r.shots <= truth, "the count never passes the final count");
+    last = r.shots;
+  }
+  assert.equal(last, truth);
+  assert.equal(live.letdowns, 1);
+  assert.ok(runs >= 40 && runs <= 60, `one run every 2 s (${runs})`);
+});
+
+test("placement: the five rows are measured from the current landmarks", () => {
+  const { cap } = capture(720, 1280);
+  const frames = FX.toFrames(cap.poses, { w: 720, h: 1280 });
+  const rest = frames[5].landmarks;
+  const mem = {};
+  const a = FV.placement(rest, { w: 720, h: 1280 }, "right", 28, mem);
+  assert.deepEqual(
+    a.rows.map((r) => r.k),
+    ["写り", "大きさ", "余白", "向き", "速さ"],
+  );
+  assert.equal(a.rows[0].state, "ok");
+  assert.equal(a.rows[1].text, "胴の長さ 200px");
+  assert.equal(a.rows[2].state, "warn", "at rest the reach is predicted: 300 px − 1.6 torso leaves the frame");
+  assert.equal(a.rows[3].state, "wait");
+  assert.equal(a.rows[4].text, "毎秒 28 コマ");
+  assert.equal(a.raised, false);
+  /* 弓を上げた形（保持）で確かめる */
+  const res = analyse(capture(720, 1280).buf);
+  const holdT = res.shots[0].releaseMs - 500;
+  const held = frames.find((f) => f.tMs >= holdT).landmarks;
+  const b = FV.placement(held, { w: 720, h: 1280 }, "right", 28, mem);
+  assert.equal(b.raised, true);
+  assert.match(b.rows[2].text, /弓を上げた形で確かめました/);
+  assert.equal(b.rows[2].state, "ok");
+  assert.match(b.rows[3].text, /胸側/);
+  assert.equal(b.rows[3].state, "info");
+  /* 覚えは、腕を下ろしたあとも残る */
+  const c = FV.placement(rest, { w: 720, h: 1280 }, "right", 28, mem);
+  assert.match(c.rows[2].text, /弓を上げた形で確かめました/);
+  /* 左右を反転した映像（右利きで弓が画面の左）は背中側 */
+  const mirrored = FX.toFrames(cap.poses, { w: 720, h: 1280, mirror: true, canvasW: 600 });
+  const d = FV.placement(mirrored.find((f) => f.tMs >= holdT).landmarks, { w: 720, h: 1280 }, "right", 28, {});
+  assert.match(d.rows[3].text, /背中側/);
+  /* 小さい・遅い・写っていない */
+  const far = FX.toFrames(FX.makeCapture({ seed: 2, events: [], torsoPx: 96, cx: 300, cy: 420 }).poses, { w: 720, h: 1280 })[3].landmarks;
+  const e = FV.placement(far, { w: 720, h: 1280 }, "right", 12, {});
+  assert.equal(e.rows[1].state, "warn");
+  assert.match(e.rows[1].text, /小さく写っています（胴 9\dpx）/);
+  assert.match(e.rows[4].text, /解析が遅れています（毎秒 12 コマ）/);
+  const none = FV.placement(null, { w: 720, h: 1280 }, "right", 0, {});
+  assert.equal(none.rows[0].state, "warn");
+  assert.match(none.rows[0].text, /体が写っていません/);
+  assert.equal(none.rows[4].state, "wait");
+  for (const r of a.rows.concat(b.rows, e.rows, none.rows)) assert.ok(!/NaN|undefined|null/.test(r.text), r.text);
+});
+
+test("capture state: a warning only when something needs doing", () => {
+  const { cap } = capture(720, 1280);
+  const lms = FX.toFrames(cap.poses, { w: 720, h: 1280 })[5].landmarks;
+  assert.deepEqual(FV.captureState(lms, 28, 0), { warn: false, text: "体は枠の中です。毎秒 28 コマ。" });
+  assert.equal(FV.captureState(lms, 12, 0).warn, true);
+  assert.equal(FV.captureState(null, 28, 500).warn, false);
+  assert.equal(FV.captureState(null, 28, 2500).warn, true);
+  const cut = lms.map((p) => ({ ...p }));
+  cut[14].x = 1.02;
+  assert.match(FV.captureState(cut, 28, 0).text, /腕が枠の端にかかっています/);
+});
+
+test("statistics helpers", () => {
+  /* 6 射・ν = 30 なら spread < 1.59·noise は区別できない（algorithm.md 5.4） */
+  assert.equal(FV.exceedsF95(1.55 * 1.55, 5, 30), false);
+  assert.equal(FV.exceedsF95(1.63 * 1.63, 5, 30), true);
+  const iv = FV.sdInterval(6);
+  assert.ok(Math.abs(iv.lo - 0.62) < 0.01 && Math.abs(iv.hi - 2.45) < 0.08, `${iv.lo} ${iv.hi}`);
+  assert.equal(FV.fmt("holdMs", 3.44), "3.4 秒");
+  assert.equal(FV.fmt("bowDy", -0.2), "0%");
+  assert.equal(FV.fmt("ancY", -1.26, { sign: true }), "−1.3%");
+  assert.equal(FV.fmt("ancY", 1.26, { sign: true }), "+1.3%");
+  assert.equal(FV.fmt("lean", null), "—");
+});
+
+console.log(`Form record v2 checks OK (${results.length} tests)`);

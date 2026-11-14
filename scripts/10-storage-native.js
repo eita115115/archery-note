@@ -107,6 +107,11 @@ function normalizeDb(d){
   /* 入力方法（的面に打つ / 点数だけ）の前回値。既存データ・破損インポートでは "target" に補完 */
   if(out.settings.lastInputMode!=="score"&&out.settings.lastInputMode!=="target") out.settings.lastInputMode="target";
   if(typeof out.settings.launchCount!=="number"||!Number.isFinite(out.settings.launchCount)) out.settings.launchCount=0;
+  /* 射型の記録 v2（AN-100）: 身長（任意。胴の長さの割合のとなりに cm の目安を出すときだけ使う。100〜230cm の整数、無ければ null）と、
+     数えた合図の音（既定は切）。SCHEMA_VER は据え置き（キー単位の補完だけ） */
+  const formHeight=out.settings.formHeightCm;
+  out.settings.formHeightCm=(typeof formHeight==="number"&&Number.isFinite(formHeight)&&formHeight>=100&&formHeight<=230)?Math.round(formHeight):null;
+  if(typeof out.settings.formCountSound!=="boolean") out.settings.formCountSound=false;
   const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false};
   if(!out.settings.featureHints||typeof out.settings.featureHints!=="object"||Array.isArray(out.settings.featureHints)){
     out.settings.featureHints={...FH_DEFS};

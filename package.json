@@ -10,7 +10,7 @@
     "check:analysis": "node tools/check-analysis-core.js && node tools/check-grouping-interpretation.js && node tools/check-grouping-stats.js && node tools/check-coordless.js && node tools/check-analysis-view.js && node tools/check-gear-sight-view.js",
     "check:coordless": "node tools/check-coordless.js",
     "check:form": "node tools/check-form-core.js && node tools/golden-replay/test-form-metric-fixtures.js && node tools/check-form-diagnostics.js",
-    "check:form-analyze": "node tools/check-form-analyze.js",
+    "check:form-analyze": "node tools/check-form-analyze.js && node tools/check-form-record.js",
     "check:gamification": "node tools/check-gamification.js",
     "check:todays-result": "node tools/check-todays-result.js",
     "check:globals": "node tools/check-globals.js",

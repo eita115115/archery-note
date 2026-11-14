@@ -1740,8 +1740,13 @@ function openSettings() {
         "wide",
       )}
       ${settingsRowHtml(
+        `<label for="setFormHeight">身長（任意）</label>`,
+        "射型の記録で、胴の長さに対する割合のとなりに cm の目安を出すときだけ使います。空のままなら cm は出しません。体格の比からの換算なので、±5% ほどの幅があります",
+        `<span class="fieldUnit setNum"><input class="inp" id="setFormHeight" data-testid="settings-form-height" inputmode="numeric" placeholder="未設定" value="${esc(db.settings.formHeightCm || "")}"><span class="fieldUnitLabel">cm</span></span>`,
+      )}
+      ${settingsRowHtml(
         "検証用の診断データ",
-        "射型の記録に、各射の内部の診断値（速度・確度など）も保存します。ふだんは切のままで使えます",
+        "入のあいだは、診断を取るために以前の撮影画面（撮りながら数える方式）で開き、各射の内部の診断値（速度・確度など）も保存します。ふだんは切のままで使えます",
         settingsSegHtml("fdChips", "settings-form-debug-chips", "fd", db.settings.formDebug === true ? 1 : 0, [
           ["0", "切"],
           ["1", "入"],
@@ -1826,6 +1831,15 @@ function openSettings() {
   ovl.querySelector("#setEye").onchange = (e) => {
     db.settings.eyeSight = +e.target.value || 850;
     save();
+  };
+  /* 身長（任意）: 100〜230cm の整数だけ受け取る。空や範囲の外は「未設定」に戻す（射型の記録の cm の目安だけに使う） */
+  ovl.querySelector("#setFormHeight").onchange = (e) => {
+    const v = Math.round(+e.target.value);
+    const ok = e.target.value.trim() !== "" && Number.isFinite(v) && v >= 100 && v <= 230;
+    db.settings.formHeightCm = ok ? v : null;
+    e.target.value = ok ? String(v) : "";
+    save();
+    if (!ok && e.target.value !== "") toast("身長は 100〜230cm で入れてください", 3000);
   };
   ovl.querySelectorAll("#ftChips button").forEach(
     (c) =>
