@@ -6,7 +6,11 @@
    - projections match the pinhole math and MediaPipe normalization
    - ground-truth events and features line up with the generated motion
    - a perfect session is scored perfectly by the truth oracle, and the scorer's matching rules hold
-   - the current-pipeline adapter reproduces the app loop on the check suite's synthetic shots */
+   - the current-pipeline adapter reproduces the app loop on the check suite's synthetic shots
+   - scenarios added later leave the earlier scenarios' frames and truth unchanged
+   - the added scenes (no-shot scripts, re-anchoring, let-down while lowering, camera shake,
+     bow-wrist drop-outs) and the second anchor definition behave as documented
+   - the real landmark clips load, carry provenance, and are scored as documented */
 
 const crypto = require("crypto");
 const { V, angle2d, median } = require("./lib");
@@ -15,6 +19,7 @@ const { makeCamera, projectPose } = require("./camera");
 const { renderSession } = require("./noise");
 const { computeTruth } = require("./truth");
 const { matchReleases, scoreSession, aggregate } = require("./metrics");
+const { loadRealClips, scoreRealClip } = require("./real/clips");
 const { resolveScenario, SCENARIOS } = require("./scenarios");
 const { runSession } = require("./run-bench");
 const oracle = require("./adapters/truth-oracle");
@@ -387,6 +392,226 @@ const scenario = (id) => resolveScenario(SCENARIOS.find((s) => s.id === id));
     probe.length === 1 && Number.isFinite(probe[0].features.anchorDist),
     "measurement probe returns features",
   );
+}
+
+/* ---------- earlier scenarios are unchanged by later additions ---------- */
+{
+  /* sha256 (first 16 hex) of frames + per-cycle truth, recorded before the v2-review scenarios
+     were added (commit 3cf713f). A change here means earlier published numbers moved. */
+  const expected = {
+    "side-landscape/1": "d944c5e117c6bf9a",
+    "letdowns/4": "84ff1a70edea5e2d",
+    "walk-off/1": "9eeb082a2e9ac782",
+    "mixed-session/4": "08b0ce822f52372a",
+    "oblique-40/4": "3c3394932945898b",
+    "ideal-side/1": "34ff6aea656f661d",
+  };
+  for (const [key, hash] of Object.entries(expected)) {
+    const [id, seed] = key.split("/");
+    const cfg = scenario(id);
+    const sess = simulateSession(cfg.sim, Number(seed));
+    const r = renderSession(sess, cfg.camera, cfg.noise, cfg.timing, Number(seed));
+    const t = computeTruth(sess, r.camera);
+    const h = crypto
+      .createHash("sha256")
+      .update(
+        JSON.stringify(r.frames) +
+          JSON.stringify(t.cycles.map((c) => [c.releaseMs, c.anchorMs, c.t2, c.t3])),
+      )
+      .digest("hex")
+      .slice(0, 16);
+    check(h === hash, `${key} unchanged (${h})`);
+  }
+}
+
+/* ---------- added scenes ---------- */
+{
+  for (const id of [
+    "noshot-walking",
+    "noshot-retrieval",
+    "noshot-raise-one-hand",
+    "noshot-stretch",
+    "noshot-blank-letdown",
+  ]) {
+    const cfg = scenario(id);
+    for (const seed of [1, 2]) {
+      const sess = simulateSession(cfg.sim, seed);
+      const t = computeTruth(sess, makeCamera(cfg.camera, sess.body, sess.handedness));
+      check(t.shots.length === 0, `${id} seed ${seed}: no true shots`);
+      if (id === "noshot-blank-letdown") check(t.letdowns.length === 5, `${id}: five let-downs`);
+      if (id === "noshot-walking") {
+        const r = renderSession(sess, cfg.camera, cfg.noise, cfg.timing, seed);
+        check(r.stats.outOfFrame < r.frames.length * 0.25, `${id}: archer mostly in frame`);
+      }
+    }
+  }
+  // re-anchoring: the hand leaves the anchor by >= 1 cm and comes back
+  {
+    const cfg = scenario("re-anchor");
+    const sess = simulateSession(cfg.sim, 1);
+    const s = sideIndices(sess.handedness);
+    const re = sess.cycles.filter((c) => c.reanchor);
+    check(re.length >= 2, `re-anchor: shots with re-anchoring (${re.length})`);
+    for (const c of re) {
+      const w = (t) => sess.poseAt(t).pts[s.draw.wrist];
+      const a = w(c.reanchor.startMs);
+      let far = 0;
+      for (let t = c.reanchor.startMs; t <= c.reanchor.endMs; t += 20)
+        far = Math.max(far, V.dist(w(t), a));
+      check(
+        far > 0.01,
+        `re-anchor ${c.index}: hand leaves the anchor (${(far * 100).toFixed(1)} cm)`,
+      );
+      check(
+        V.dist(w(c.reanchor.endMs), a) < Math.min(0.015, far / 2),
+        `re-anchor ${c.index}: hand returns (expansion and head drift continue meanwhile)`,
+      );
+      check(c.reanchor.endMs < c.releaseMs - 200, `re-anchor ${c.index}: ends before the release`);
+    }
+  }
+  // let-down while lowering the bow: the bow hand drops during the let-down
+  {
+    const cfg = scenario("letdown-lowering");
+    const sess = simulateSession(cfg.sim, 2);
+    const s = sideIndices(sess.handedness);
+    const lds = sess.cycles.filter((c) => c.kind === "letdown");
+    check(lds.length > 0, "letdown-lowering: has let-downs");
+    for (const c of lds) {
+      const z0 = sess.poseAt(c.letdownStartMs).pts[s.bow.wrist][2];
+      const z1 = sess.poseAt(c.letdownEndMs).pts[s.bow.wrist][2];
+      check(
+        z0 - z1 > 0.05,
+        `letdown-lowering ${c.index}: bow hand lowered ${((z0 - z1) * 100).toFixed(0)} cm`,
+      );
+    }
+  }
+  // camera shake moves the image but not the truth; bow-wrist drop-outs happen
+  {
+    const base = scenario("side-landscape"),
+      shake = scenario("camera-shake");
+    const sess = simulateSession(base.sim, 3);
+    const a = renderSession(sess, base.camera, base.noise, base.timing, 3);
+    const b = renderSession(sess, shake.camera, shake.noise, shake.timing, 3);
+    check(sha(a.frames) !== sha(b.frames), "camera shake changes the frames");
+    check(
+      sha(computeTruth(sess, a.camera).shots) === sha(computeTruth(sess, b.camera).shots),
+      "camera shake leaves the truth unchanged",
+    );
+    const occ = scenario("bow-wrist-occluded");
+    const r = renderSession(sess, occ.camera, occ.noise, occ.timing, 3);
+    check(r.stats.bowDropFrames > 0, `bow-wrist drop-out frames (${r.stats.bowDropFrames})`);
+  }
+  // second anchor definition: hand below 0.2 torso/s, 50-700 ms before the end of the draw
+  {
+    const sess = simulateSession({ arrowsPerEnd: 6 }, 4);
+    const t = computeTruth(sess, makeCamera({}, sess.body, "right"));
+    const s = sideIndices(sess.handedness);
+    for (const shot of t.shots) {
+      const lead = shot.anchorMs - shot.anchorStillMs;
+      check(
+        lead >= 50 && lead <= 700,
+        `shot ${shot.index}: still anchor ${lead.toFixed(0)} ms before the draw end`,
+      );
+      close(
+        shot.holdStillMs,
+        shot.releaseMs - shot.anchorStillMs,
+        1e-9,
+        `shot ${shot.index}: hold (still)`,
+      );
+      const P = (tm) => sess.poseAt(tm).pts;
+      const torso = (p) => V.dist(V.lerp(p[11], p[12], 0.5), V.lerp(p[23], p[24], 0.5));
+      const sp = (tm) =>
+        V.dist(P(tm)[s.draw.wrist], P(tm - 5)[s.draw.wrist]) / 0.005 / torso(P(tm));
+      check(
+        sp(shot.anchorStillMs - 5) >= 0.2 && sp(shot.anchorStillMs + 5) < 0.2,
+        `shot ${shot.index}: crossing at the still anchor`,
+      );
+    }
+  }
+  // count metrics and both hold definitions
+  {
+    const truth = {
+      shots: [
+        {
+          releaseMs: 5000,
+          anchorMs: 3000,
+          anchorStillMs: 2700,
+          holdMs: 2000,
+          holdStillMs: 2300,
+          t2: {},
+          t3: {},
+        },
+      ],
+      letdowns: [],
+    };
+    const sc = scoreSession(
+      truth,
+      { shots: [{ releaseMs: 5020, holdMs: 2200, kind: "shot" }] },
+      [],
+      null,
+    );
+    const none = scoreSession({ shots: [], letdowns: [] }, { shots: [] }, [], null);
+    const ag = aggregate([sc, none], []);
+    close(ag.holdErrMs.medAbs, 200, 1e-9, "hold error vs end of draw");
+    close(ag.holdErrStillMs.medAbs, 100, 1e-9, "hold error vs still anchor");
+    check(
+      ag.exactCountRate === 1 && ag.zeroShotCorrectRate === 1,
+      "exact count and zero-shot rates",
+    );
+  }
+}
+
+/* ---------- real landmark clips ---------- */
+{
+  const clips = loadRealClips();
+  check(clips.length >= 2, `real clips present (${clips.length})`);
+  for (const c of clips) {
+    const fx = c.fixture;
+    check(
+      /^[0-9a-f]{64}$/.test(fx.videoSha256) && /^[0-9a-f]{64}$/.test(fx.runtime.poseModelSha256),
+      `${c.id}: provenance hashes`,
+    );
+    check(fx.source.url.startsWith("https://cdn.pixabay.com/"), `${c.id}: Pixabay source only`);
+    check(
+      fx.extraction.framesAnalyzed === fx.video.decodedFrames && fx.extraction.framesSkipped === 0,
+      `${c.id}: every decoded frame analysed`,
+    );
+    const posed = c.frames.find((f) => f.landmarks);
+    if (posed) {
+      check(posed.landmarks.length === 33, `${c.id}: 33 landmark slots`);
+      check(
+        posed.landmarks.filter(Boolean).length === fx.points.length,
+        `${c.id}: only stored points are filled`,
+      );
+    }
+    const res = current.analyze(c.frames, c.meta);
+    check(Array.isArray(res.shots), `${c.id}: current pipeline runs on the clip`);
+  }
+  const fx = {
+    truth: {
+      visualShots: 1,
+      reviewedExpectation: { expectedDetectedShots: 1, acceptedReleaseWindowsMs: [[4300, 4600]] },
+    },
+  };
+  const ok = scoreRealClip(fx, {
+    shots: [
+      { releaseMs: 4500, kind: "shot" },
+      { releaseMs: 6000, kind: "letdown" },
+    ],
+  });
+  check(
+    ok.passReviewed && ok.inWindow[0] && ok.countMatchesVisual,
+    "real scorer: release in window passes",
+  );
+  const bad = scoreRealClip(fx, { shots: [{ releaseMs: 4200, kind: "shot" }] });
+  check(!bad.passReviewed && !bad.inWindow[0], "real scorer: release outside the window fails");
+  const extra = scoreRealClip(fx, {
+    shots: [
+      { releaseMs: 4400, kind: "shot" },
+      { releaseMs: 4450, kind: "shot" },
+    ],
+  });
+  check(!extra.passReviewed, "real scorer: one release per window");
 }
 
 console.log(`form-bench sanity: ${passed} passed, ${failures.length} failed`);

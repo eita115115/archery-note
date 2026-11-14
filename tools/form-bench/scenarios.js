@@ -7,9 +7,11 @@
      camera  placement and frame (camera.js): width, height, torsoFrac, yawDeg, pitchDeg, rollDeg
      noise   detector-noise model (noise.js): preset "nominal" | "none" plus overrides
      timing  frame clock (noise.js frameTimes): fps, jitterMs, dropProb, stallPerMin
-   group: "reference" (noise-free floor), "core" (the matrix the overall numbers pool), or
+   group: "reference" (noise-free floor), "core" (the matrix the overall numbers pool),
    "sensitivity" (deliberately outside the assumed ranges, to show how much a result depends on an
-   assumption). */
+   assumption), and the groups added for the v2 analyser review: "drift" (slow landmark drift),
+   "capture" (release drop-outs, bow-wrist occlusion, camera shake), "behaviour" (archer habits),
+   "long" (12-36 shots per capture) and "no-shot" (scenes where the right answer is zero shots). */
 
 const BASE = Object.freeze({
   sim: {
@@ -136,7 +138,130 @@ const SCENARIOS = [
     desc: "Follow-through 2.5x longer and ~4x faster than assumed (peak ~20 torso/s), like the check suite's 2D synthetic shot",
     sim: { releaseScale: 2.5, releaseTauS: 0.02 },
   },
+
+  /* ---- added for the v2 analyser review (algorithm.md 7.4). Existing entries above are kept
+     unchanged so earlier numbers stay comparable. ---- */
+  {
+    id: "drift-0.3s",
+    group: "drift",
+    desc: "Slow landmark drift with a 0.3 s correlation length (same amplitude as nominal)",
+    noise: { slowTauMs: 300 },
+  },
+  {
+    id: "drift-1s",
+    group: "drift",
+    desc: "Slow landmark drift with a 1 s correlation length",
+    noise: { slowTauMs: 1000 },
+  },
+  {
+    id: "drift-3s",
+    group: "drift",
+    desc: "Slow landmark drift with a 3 s correlation length (as long as a hold)",
+    noise: { slowTauMs: 3000 },
+  },
+  {
+    id: "release-dropout",
+    group: "capture",
+    desc: "Release blur: 70% of shots lose the pose for 80-350 ms at the release, 70% stick-and-snap",
+    noise: { noPose: { releaseProb: 0.7, releaseMs: [80, 350] }, releaseBlur: { prob: 0.7 } },
+  },
+  {
+    id: "bow-wrist-occluded",
+    group: "capture",
+    desc: "Bow-side wrist hidden by the riser: -0.4 visibility, jitter x3, 0.6 drop-outs/s while raised",
+    noise: { bowHand: { visDrop: 0.4, jitterMul: 3, dropRate: 0.6, dropMs: [150, 600] } },
+  },
+  {
+    id: "camera-shake",
+    group: "capture",
+    desc: "Small camera shake: 0.25 deg pointing jitter (tau 300 ms) and 0.15 deg roll",
+    camera: { shake: { deg: 0.25, tauMs: 300, rollDeg: 0.15 } },
+  },
+  {
+    id: "drop-arm",
+    group: "behaviour",
+    desc: "Archer drops the arms right after the shot: lowering starts when the 300 ms release motion ends, lowered in 0.5-0.9 s",
+    sim: { followMs: [300, 350], lowerMs: [500, 900] },
+  },
+  {
+    id: "letdown-lowering",
+    group: "behaviour",
+    desc: "Let-downs (50% before each shot) that lower the bow while the hand returns",
+    sim: { letdownProb: 0.5, letdownStyle: "lower" },
+  },
+  {
+    id: "re-anchor",
+    group: "behaviour",
+    desc: "70% of shots re-anchor during the hold: hand creeps 1.5-4 cm off the anchor and back",
+    sim: { reanchorProb: 0.7 },
+  },
+  {
+    id: "rapid-fire",
+    group: "behaviour",
+    desc: "Rapid shooting: draw 0.7-1.3 s, hold 80-400 ms, 0.3-1 s between shots",
+    sim: { drawMs: [700, 1300], holdMs: [80, 400], idleMs: [300, 1000] },
+  },
+  {
+    id: "capture-12",
+    group: "long",
+    desc: "12 shots in one capture (2 ends of 6, arrow retrieval between ends)",
+    sim: { ends: 2, arrowsPerEnd: 6, walkOff: true },
+  },
+  {
+    id: "capture-24",
+    group: "long",
+    desc: "24 shots in one capture (4 ends of 6, arrow retrieval between ends)",
+    sim: { ends: 4, arrowsPerEnd: 6, walkOff: true },
+  },
+  {
+    id: "capture-36",
+    group: "long",
+    desc: "36 shots in one capture (6 ends of 6, arrow retrieval between ends)",
+    sim: { ends: 6, arrowsPerEnd: 6, walkOff: true },
+  },
+  {
+    id: "noshot-walking",
+    group: "no-shot",
+    desc: "No shots: walking back and forth across the frame with the bow in hand",
+    sim: { script: "walking" },
+  },
+  {
+    id: "noshot-retrieval",
+    group: "no-shot",
+    desc: "No shots: two arrow retrievals (walk out of frame and back), ghost poses while away",
+    sim: { script: "retrieval" },
+    noise: { ghost: { rate: 0.05 } },
+  },
+  {
+    id: "noshot-raise-one-hand",
+    group: "no-shot",
+    desc: "No shots: raising the bow with the bow arm only, holding 1-4 s, lowering (x5)",
+    sim: { script: "raise-one-hand" },
+  },
+  {
+    id: "noshot-stretch",
+    group: "no-shot",
+    desc: "No shots: stretches (arms spread, draw arm overhead, draw hand across to the bow shoulder)",
+    sim: { script: "stretch" },
+  },
+  {
+    id: "noshot-blank-letdown",
+    group: "no-shot",
+    desc: "No shots: five full draws that are all let down",
+    sim: { script: "blank-letdown" },
+  },
 ];
+
+const GROUPS = Object.freeze([
+  "reference",
+  "core",
+  "sensitivity",
+  "drift",
+  "capture",
+  "behaviour",
+  "long",
+  "no-shot",
+]);
 
 function merge(base, over) {
   if (over == null) return base;
@@ -161,4 +286,4 @@ function resolveScenario(s) {
 
 const DEFAULT_SEEDS = [1, 2, 3, 4, 5];
 
-module.exports = { BASE, SCENARIOS, resolveScenario, DEFAULT_SEEDS };
+module.exports = { BASE, SCENARIOS, GROUPS, resolveScenario, DEFAULT_SEEDS };

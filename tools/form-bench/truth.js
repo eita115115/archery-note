@@ -1,8 +1,13 @@
 "use strict";
 /* Ground truth for a simulated session seen through a given camera.
 
-   Event times come from the motion script itself (simulator.js): anchorMs = end of the draw,
-   releaseMs = the instant the string hand starts its release motion, holdMs = releaseMs - anchorMs.
+   Event times come from the motion script itself (simulator.js): anchorMs = end of the draw
+   motion, releaseMs = the instant the string hand starts its release motion,
+   holdMs = releaseMs - anchorMs. A second, kinematic anchor definition is also given:
+   anchorStillMs = the time at the end of the draw from which the true draw-wrist speed stays below
+   STILL_TORSO_PER_S (0.2 torso lengths/s, 3D speed / 3D torso) until anchorMs, and
+   holdStillMs = releaseMs - anchorStillMs (150-450 ms longer). It matches the "hand stopped"
+   definition used by the v2 analyser design; both are reported so hold errors are comparable.
    Per-shot features are measured on the noise-free motion, sampled every 10 ms (independent of the
    camera frame rate):
    - "3D": true joint positions, torso = |mid-shoulder - mid-hip| in metres;
@@ -22,6 +27,8 @@ const { sideIndices } = require("./simulator");
 const { projectPose } = require("./camera");
 
 const STEP_MS = 10;
+const STILL_TORSO_PER_S = 0.2;
+const STILL_STEP_MS = 5;
 const FOLLOW_MS = 300;
 const DRIFT_MS = 500;
 
@@ -100,6 +107,20 @@ function dir3(d, back) {
   return (Math.atan2(V.dot(d, perp), V.dot(d, back)) * 180) / Math.PI;
 }
 
+/* last time before the end of the draw where the draw wrist still moved at >= 0.2 torso/s (3D) */
+function stillAnchor(sess, c) {
+  const d = sideIndices(sess.handedness).draw.wrist;
+  const speed = (t) => {
+    const a = sess.poseAt(t).pts,
+      b = sess.poseAt(t - STILL_STEP_MS).pts;
+    const torso = V.dist(V.lerp(a[11], a[12], 0.5), V.lerp(a[23], a[24], 0.5));
+    return V.dist(a[d], b[d]) / (STILL_STEP_MS / 1000) / torso;
+  };
+  let t = c.anchorMs;
+  while (t > c.drawStartMs && speed(t) < STILL_TORSO_PER_S) t -= STILL_STEP_MS;
+  return Math.min(c.anchorMs, t + STILL_STEP_MS);
+}
+
 function computeTruth(sess, cam) {
   const sample = sampler(sess, cam);
   const cycles = sess.cycles.map((c) => {
@@ -137,14 +158,18 @@ function computeTruth(sess, cam) {
       setupMs: c.setupMs,
       drawStartMs: c.drawStartMs,
       anchorMs: c.anchorMs,
+      anchorStillMs: stillAnchor(sess, c),
       drawMs: c.drawMs,
       holdMs: c.holdMs,
+      holdStillMs: null,
+      reanchor: c.reanchor || null,
       releaseMs: c.kind === "shot" ? c.releaseMs : null,
       letdownStartMs: c.letdownStartMs == null ? null : c.letdownStartMs,
       letdownEndMs: c.letdownEndMs == null ? null : c.letdownEndMs,
       t3,
       t2,
     };
+    out.holdStillMs = (c.kind === "shot" ? c.releaseMs : c.letdownStartMs) - out.anchorStillMs;
     if (c.kind === "shot") {
       const sF = sample(c.releaseMs + FOLLOW_MS);
       const d3 = V.sub(sF.P[dIdx], sE.P[dIdx]);
@@ -192,6 +217,7 @@ function computeTruth(sess, cam) {
 }
 
 module.exports = {
+  STILL_TORSO_PER_S,
   computeTruth,
   FEATURE_KEYS: [
     "anchorDist",

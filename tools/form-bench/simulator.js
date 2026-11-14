@@ -292,8 +292,8 @@ function sampleShot(rng, archer, H, cfg) {
     settleMs: rng.uniform(200, 700),
     drawMs: rng.uniform(d0, d1),
     holdMs: rng.uniform(h0, h1),
-    followMs: rng.uniform(700, 1500),
-    lowerMs: rng.uniform(1000, 1800),
+    followMs: rng.uniform(...(cfg.followMs || [700, 1500])),
+    lowerMs: rng.uniform(...(cfg.lowerMs || [1000, 1800])),
     releaseTau: Math.max(0.012, archer.tauMean + rng.normal(0, 0.004)), // s
     reactTau: rng.uniform(0.06, 0.12), // s
     ch: {
@@ -325,6 +325,8 @@ function buildTimeline(cfg, seed) {
   const archer = sampleArcher(rng.fork("archer"), H, cfg);
   const shotRng = rng.fork("shots");
   const evRng = rng.fork("events");
+  const reRng = cfg.reanchorProb > 0 ? rng.fork("reanchor") : null;
+  const scriptRng = rng.fork("script");
   const first = sampleShot(shotRng, archer, H, cfg);
   const init = {
     rootX: 0,
@@ -342,6 +344,9 @@ function buildTimeline(cfg, seed) {
     drawRetract: 0,
     expand: 0,
     headDrift: 0,
+    reanchor: 0, // 0..1 blend toward a re-anchoring offset during the hold
+    reFwd: 0,
+    reDown: 0,
     ...first.ch,
   };
   const ch = {};
@@ -411,6 +416,27 @@ function buildTimeline(cfg, seed) {
     move(holdS, { expand: 1 }, null, { ease: { type: "linear" } });
     ch.headDrift.to(tAnchor, tAnchor + holdS, 1, { type: "smooth" });
     mark("hold", tAnchor, T);
+    /* re-anchoring: the hand creeps off the anchor (forward/down) and is pulled back, then the
+       hold continues. Separate random stream, used only when enabled. */
+    if (reRng && kind === "shot" && holdS > 1.4 && reRng.chance(cfg.reanchorProb)) {
+      const out = reRng.uniform(0.2, 0.35),
+        stay = reRng.uniform(0.15, 0.4),
+        back = reRng.uniform(0.3, 0.5);
+      const t0 = tAnchor + reRng.uniform(0.3, holdS - (out + stay + back) - 0.3);
+      const fwd = reRng.uniform(0.015, 0.04),
+        down = reRng.uniform(-0.01, 0.025);
+      ch.reFwd.to(t0 - 0.01, t0, fwd, { type: "linear" });
+      ch.reDown.to(t0 - 0.01, t0, down, { type: "linear" });
+      ch.reanchor.to(t0, t0 + out, 1);
+      ch.reanchor.to(t0 + out + stay, t0 + out + stay + back, 0);
+      mark("reanchor", t0, t0 + out + stay + back);
+      cyc.reanchor = {
+        startMs: t0 * 1000,
+        endMs: (t0 + out + stay + back) * 1000,
+        fwdM: fwd,
+        downM: down,
+      };
+    }
     const tEnd = T;
     Object.assign(cyc, {
       setupMs: tSet * 1000,
@@ -430,7 +456,9 @@ function buildTimeline(cfg, seed) {
         peakSpeedMs: null, // filled in by the truth module from the motion itself
       };
       hand.to(T, T + relDur, "FOLLOW", { type: "damped", k: relDur / shot.releaseTau });
-      ch.bowReact.to(T, T + 0.5, 1, { type: "damped", k: 0.5 / shot.reactTau });
+      // bow reaction lasts 0.5 s, or less when the archer lowers the arms right away
+      const reactDur = Math.min(0.5, Math.max(relDur, shot.followMs / 1000));
+      ch.bowReact.to(T, T + reactDur, 1, { type: "damped", k: reactDur / shot.reactTau });
       T += Math.max(relDur, shot.followMs / 1000);
       mark("follow", tEnd, T);
       const tLow = T;
@@ -452,7 +480,12 @@ function buildTimeline(cfg, seed) {
     } else {
       const ldS = evRng.uniform(800, 2500) / 1000;
       cyc.letdownStartMs = tEnd * 1000;
-      move(ldS, { shoulderUp: 0.3, drawRetract: 0, expand: 0, headDrift: 0 }, "STRING");
+      const lowering = cfg.letdownStyle === "lower" ? { raise: 0.45, headTurn: 0.85 } : {};
+      move(
+        ldS,
+        { shoulderUp: 0.3, drawRetract: 0, expand: 0, headDrift: 0, ...lowering },
+        "STRING",
+      );
       cyc.letdownEndMs = T * 1000;
       mark("letdown", tEnd, T);
       wait(evRng.uniform(0.3, 1.0), "letdown-rest");
@@ -489,7 +522,93 @@ function buildTimeline(cfg, seed) {
     mark("walk", t0, T, { end: endIndex });
   };
 
+  /* ---- scenes without shots (the right answer is zero shots) ---- */
+  const walkTo = (x) => {
+    const cur = ch.rootX.last().v;
+    const dist = Math.abs(x - cur);
+    if (dist < 1e-6) return;
+    const t0 = T;
+    move(0.8, { yaw: x > cur ? Math.PI / 2 : -Math.PI / 2, open: 0, headTurn: 0, headDown: 0.1 });
+    const tw = T,
+      dur = dist / WALK_SPEED;
+    ch.gait.to(tw, tw + 0.5, 1, { type: "smooth" });
+    ch.rootX.to(tw, tw + dur, x, { type: "linear" });
+    ch.walkDist.to(tw, tw + dur, ch.walkDist.last().v + dist, { type: "linear" });
+    T = tw + dur;
+    ch.gait.to(T, T + 0.5, 0, { type: "smooth" });
+    T += 0.5;
+    mark("walk", t0, T);
+  };
+  const faceStance = () =>
+    move(1.0, { yaw: 0, open: archer.open, headTurn: 0.75, headDown: 0.18, lean: archer.lean });
+  const scripts = {
+    /* walking back and forth across the frame with the bow in hand */
+    walking() {
+      for (let k = 0; k < 3; k++) {
+        idle(1500, 4000);
+        walkTo(scriptRng.uniform(1.0, 1.6));
+        idle(1000, 3000);
+        walkTo(-scriptRng.uniform(1.0, 1.6));
+      }
+      walkTo(0);
+      faceStance();
+    },
+    /* arrow retrieval twice: walk out of frame and back */
+    retrieval() {
+      for (let k = 0; k < 2; k++) {
+        idle(2000, 5000);
+        walkOff(k);
+      }
+    },
+    /* raising the bow with the bow arm only; the draw hand stays down */
+    "raise-one-hand"() {
+      for (let k = 0; k < 5; k++) {
+        idle(1500, 4000);
+        const t0 = T;
+        move(scriptRng.uniform(0.8, 1.4), {
+          raise: 1,
+          headTurn: archer.headTurnMax,
+          headDown: 0.08,
+        });
+        wait(scriptRng.uniform(1.0, 4.0));
+        move(scriptRng.uniform(0.8, 1.3), { raise: 0, headTurn: 0.75, headDown: 0.18 });
+        mark("raise-one-hand", t0, T);
+      }
+    },
+    /* warm-up stretches: arms spread, draw arm overhead, draw hand across to the bow shoulder */
+    stretch() {
+      const kinds = ["SPREAD", "OVERHEAD", "ACROSS", "SPREAD", "ACROSS", "OVERHEAD"];
+      for (const target of kinds) {
+        idle(1500, 3500);
+        const t0 = T;
+        const arms = target === "SPREAD" ? { raise: 1, headTurn: 0.5 } : { raise: 0 };
+        move(scriptRng.uniform(0.7, 1.2), arms, target);
+        wait(scriptRng.uniform(1.5, 3.5));
+        move(scriptRng.uniform(0.7, 1.2), { raise: 0, headTurn: 0.75 }, "REST");
+        mark("stretch", t0, T);
+      }
+    },
+    /* blank draws that are all let down (no release) */
+    "blank-letdown"() {
+      let s = first;
+      reload(s);
+      for (let k = 0; k < 5; k++) {
+        drawCycle("letdown", s, { end: 0, arrow: 0 });
+        idle(2000, 5000);
+        s = sampleShot(shotRng, archer, H, cfg);
+        setShotChannels(s);
+        wait(0.6);
+      }
+    },
+  };
+
   wait(evRng.uniform(1.5, 3.0), "idle");
+  if (cfg.script && cfg.script !== "practice") {
+    if (!scripts[cfg.script]) throw new Error(`unknown script ${cfg.script}`);
+    scripts[cfg.script]();
+    idle(2000, 3500);
+    return { body, archer, ch, hand, cycles, intervals, durationMs: T * 1000 };
+  }
   const ends = cfg.ends || 1;
   const perEnd = cfg.arrowsPerEnd || 6;
   let arrow = 0;
@@ -562,7 +681,9 @@ function handTarget(name, x) {
       return { W: finger(S, x.arrowDir), hdir: x.arrowDir };
     }
     case "ANCHOR": {
-      const S = V.addm(x.A, x.arrowDir, -c.expand * c.expansionM);
+      let S = V.addm(x.A, x.arrowDir, -c.expand * c.expansionM);
+      if (c.reanchor)
+        S = V.comb([S, 1], [x.arrowDir, c.reanchor * c.reFwd], [x.up, -c.reanchor * c.reDown]);
       return { W: finger(S, x.arrowDir), hdir: x.arrowDir };
     }
     case "FOLLOW": {
@@ -578,6 +699,20 @@ function handTarget(name, x) {
     case "FACE": {
       const W = V.comb([x.nose, 1], [x.rH, 0.05 * H], [x.uH, -0.05 * H], [x.f, -0.04 * H]);
       return { W, hdir: V.norm(V.sub(x.nose, W)) };
+    }
+    case "SPREAD": {
+      // draw arm stretched straight back, away from the target
+      const dir = V.mul(x.aimH, -1);
+      return { W: V.addm(x.sD, dir, (b.upperArm + b.forearm) * 0.97), hdir: dir };
+    }
+    case "OVERHEAD": {
+      const W = V.comb([x.sD, 1], [x.up, (b.upperArm + b.forearm) * 0.95], [x.n, -0.02 * H]);
+      return { W, hdir: [0, 0, 1] };
+    }
+    case "ACROSS": {
+      // draw hand on the bow-side shoulder, forearm across the chest (cross-body stretch)
+      const W = V.comb([x.sB, 1], [x.n, 0.08 * H], [x.up, 0.03 * H]);
+      return { W, hdir: V.norm(V.sub(x.sB, x.sD)) };
     }
     default: {
       // REST: hanging at the side
@@ -681,7 +816,7 @@ function poseRight(sess, t) {
     [f, c.anchorDf],
   );
   const arrowDir = V.norm(V.sub(grip, A));
-  const ctx = { b, c, H, P, M, n, l, nS, lS, up, f, uH, rH, nose, A, grip, arrowDir, sD };
+  const ctx = { b, c, H, P, M, n, l, nS, lS, up, f, uH, rH, nose, A, grip, arrowDir, sD, sB, aimH };
   const hk = sess.hand.at(t);
   const T0 = handTarget(hk.from, ctx);
   const T1 = hk.to === hk.from ? T0 : handTarget(hk.to, ctx);
@@ -767,7 +902,9 @@ function poseRight(sess, t) {
 const mirrorPoint = (p) => [-p[0], p[1], p[2]];
 
 /* Build a session. cfg: see scenarios.js (handedness, ends, arrowsPerEnd, letdownProb, walkOff,
-   fidgetProb, drawMs, holdMs, idleMs, outOfFrameMs, anchorSdM, heightM). */
+   fidgetProb, drawMs, holdMs, idleMs, followMs, lowerMs, outOfFrameMs, anchorSdM, heightM,
+   releaseTauS, releaseScale, reanchorProb, letdownStyle "lower", script "practice" | "walking" |
+   "retrieval" | "raise-one-hand" | "stretch" | "blank-letdown"). */
 function simulateSession(cfg, seed) {
   const c = cfg || {};
   const tl = buildTimeline(c, seed);

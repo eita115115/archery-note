@@ -42,6 +42,17 @@ function matchReleases(trueTimes, detTimes, tolMs) {
 const fin = (v) => typeof v === "number" && Number.isFinite(v);
 
 /* Score one session. activityAt(tMs) labels the archer's activity (from the simulator). */
+/* true let-downs for which the detector returned a kind "letdown" entry (its releaseMs, i.e. the
+   time it puts on the event, inside anchor - 300 ms .. let-down end + 1 s) */
+function countReportedLetdowns(truth, result) {
+  const ld = (result && result.shots ? result.shots : []).filter(
+    (s) => s && s.kind === "letdown" && fin(s.releaseMs),
+  );
+  return truth.letdowns.filter((c) =>
+    ld.some((s) => s.releaseMs >= c.anchorMs - 300 && s.releaseMs <= c.letdownEndMs + 1000),
+  ).length;
+}
+
 function scoreSession(truth, result, provides, activityAt) {
   const shots = (result && result.shots ? result.shots : [])
     .filter((s) => s && fin(s.releaseMs) && s.kind !== "letdown")
@@ -69,6 +80,8 @@ function scoreSession(truth, result, provides, activityAt) {
       detReleaseMs: d.releaseMs,
       dtMs: m.dt,
       trueHoldMs: t.holdMs,
+      trueHoldStillMs: fin(t.holdStillMs) ? t.holdStillMs : null,
+      trueAnchorStillMs: fin(t.anchorStillMs) ? t.anchorStillMs : null,
       detHoldMs: fin(d.holdMs) ? d.holdMs : null,
       trueAnchorMs: t.anchorMs,
       detAnchorMs: fin(d.anchorStartMs) ? d.anchorStartMs : null,
@@ -115,6 +128,7 @@ function scoreSession(truth, result, provides, activityAt) {
     nTrue: trueShots.length,
     nLetdowns: letdowns.length,
     nDet: shots.length,
+    letdownsReported: countReportedLetdowns(truth, result),
     tp,
     fp,
     missed,
@@ -191,6 +205,9 @@ function aggregate(scored, provides) {
   for (const f of fp) fpBy[f.cls] = (fpBy[f.cls] || 0) + 1;
   const ldCounted = scored.reduce((s, x) => s + x.letdownsCounted, 0);
   const holdPairs = tp.filter((p) => p.detHoldMs != null);
+  const holdStillPairs = holdPairs.filter((p) => p.trueHoldStillMs != null);
+  const withTrue = scored.filter((x) => x.nTrue > 0);
+  const noShot = scored.filter((x) => x.nTrue === 0);
   const anchorPairs = tp.filter((p) => p.detAnchorMs != null);
   const features = featureSummary(
     tp.map((p) => p.feats),
@@ -219,9 +236,31 @@ function aggregate(scored, provides) {
     fpByClass: fpBy,
     releaseErrMs: errStats(dt),
     releaseErrHistogram10ms: hist,
+    /* hold error against both anchor definitions: end of the draw motion (holdErrMs) and the
+       draw wrist falling below 0.2 torso/s (holdErrStillMs, truth.js) */
     holdErrMs: errStats(holdPairs.map((p) => p.detHoldMs - p.trueHoldMs)),
+    holdErrStillMs: errStats(holdStillPairs.map((p) => p.detHoldMs - p.trueHoldStillMs)),
     holdUnavailable: tp.length ? +((tp.length - holdPairs.length) / tp.length).toFixed(3) : null,
     anchorStartErrMs: errStats(anchorPairs.map((p) => p.detAnchorMs - p.trueAnchorMs)),
+    anchorStartErrStillMs: errStats(
+      anchorPairs
+        .filter((p) => p.trueAnchorStillMs != null)
+        .map((p) => p.detAnchorMs - p.trueAnchorStillMs),
+    ),
+    /* shot count per session (detected vs true), independent of timing */
+    exactCountRate: scored.length
+      ? +(scored.filter((x) => x.nDet === x.nTrue).length / scored.length).toFixed(3)
+      : null,
+    withinOneRate: scored.length
+      ? +(scored.filter((x) => Math.abs(x.nDet - x.nTrue) <= 1).length / scored.length).toFixed(3)
+      : null,
+    sessionsWithShots: withTrue.length,
+    /* scenes without true shots: fraction of sessions where the detector reported none */
+    zeroShotSessions: noShot.length,
+    zeroShotCorrectRate: noShot.length
+      ? +(noShot.filter((x) => x.nDet === 0).length / noShot.length).toFixed(3)
+      : null,
+    letdownsReported: scored.reduce((sum, x) => sum + (x.letdownsReported || 0), 0),
     features,
   };
 }

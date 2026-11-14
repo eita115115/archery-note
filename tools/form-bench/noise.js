@@ -19,7 +19,7 @@
      optional ghost poses while nobody is in frame;
    - frame timing: nominal fps with jitter, dropped frames and occasional stalls. */
 
-const { makeRng, clamp01 } = require("./lib");
+const { makeRng, clamp01, DEG } = require("./lib");
 const { LM_COUNT, SWAP_INDEX, sideIndices } = require("./simulator");
 const { makeCamera, projectPose } = require("./camera");
 
@@ -92,7 +92,15 @@ const NOISE_PRESETS = Object.freeze({
     events: true,
     selfOcclusion: { visDrop: 0.35, jitterMul: 1.8 },
     offscreen: { vis: [0.03, 0.25], jitterMul: 2.5 },
-    bowHand: { visDrop: 0.18, jitterMul: 1.6 }, // when the bow is raised (riser, limbs, sling)
+    /* when the bow is raised (riser, limbs, sling); dropRate > 0 adds bow-hand drop-outs
+       (frozen, slid toward the bow elbow, or slid down along the riser) */
+    bowHand: {
+      visDrop: 0.18,
+      jitterMul: 1.6,
+      dropRate: 0,
+      dropMs: [100, 500],
+      dropVis: [0.05, 0.35],
+    },
     drawHand: {
       nearFace: 0.75, // wrist-nose distance (torso) below which the hand counts as at the face
       visDrop: 0.1,
@@ -269,6 +277,13 @@ function renderSession(sess, cameraCfg, noiseCfg, timingCfg, seed) {
   const flipLeft = { bow: 0, draw: 0 };
   let drop = null; // active draw-hand drop-out
   let stick = null; // release blur: position the wrist sticks at
+  /* optional extras, each on its own random stream so the nominal model is unchanged */
+  const bowRng = ev && nz.bowHand.dropRate > 0 ? makeRng(seed, "noise-bow") : null;
+  let bowDrop = null;
+  /* small camera shake: AR(1) pointing jitter (deg, tauMs) + roll, applied to the image */
+  const shake = cameraCfg && cameraCfg.shake ? cameraCfg.shake : null;
+  const shRng = shake ? makeRng(seed, "shake") : null;
+  const shState = [0, 0, 0];
   const stats = {
     frames: times.length,
     noPose: 0,
@@ -278,6 +293,7 @@ function renderSession(sess, cameraCfg, noiseCfg, timingCfg, seed) {
     armSwapFrames: 0,
     elbowFlipFrames: 0,
     drawDropFrames: 0,
+    bowDropFrames: 0,
     releaseStickFrames: 0,
   };
   const frames = [];
@@ -287,6 +303,22 @@ function renderSession(sess, cameraCfg, noiseCfg, timingCfg, seed) {
     lastT = t;
     const pose = sess.poseAt(t);
     const { proj, hipDepth } = projectPose(cam, pose.pts);
+    if (shRng) {
+      const a = Math.exp(-(dtS * 1000) / (shake.tauMs || 300));
+      for (let k = 0; k < 3; k++)
+        shState[k] = a * shState[k] + Math.sqrt(1 - a * a) * shRng.normal();
+      const du = cam.f * Math.tan((shake.deg || 0) * DEG * shState[0]);
+      const dv = cam.f * Math.tan((shake.deg || 0) * DEG * shState[1]);
+      const rr = (shake.rollDeg || 0) * DEG * shState[2];
+      const c0 = Math.cos(rr),
+        s0 = Math.sin(rr);
+      for (const p of proj) {
+        const x = p.u - W / 2,
+          y = p.v - Hp / 2;
+        p.u = W / 2 + x * c0 - y * s0 + du;
+        p.v = Hp / 2 + x * s0 + y * c0 + dv;
+      }
+    }
     const mid = (a, b) => ({
       u: (proj[a].u + proj[b].u) / 2,
       v: (proj[a].v + proj[b].v) / 2,
@@ -334,6 +366,7 @@ function renderSession(sess, cameraCfg, noiseCfg, timingCfg, seed) {
       stats.noPose++;
       euro = null; // MediaPipe restarts tracking: the landmark filter resets
       drop = null;
+      bowDrop = null;
       continue;
     }
 
@@ -397,6 +430,19 @@ function renderSession(sess, cameraCfg, noiseCfg, timingCfg, seed) {
       }
     }
     if (drop && t >= drop.end) drop = null;
+    const bowHandIdx = [side.bow.wrist, side.bow.index, side.bow.pinky, side.bow.thumb];
+    if (bowRng) {
+      if (bowDrop && t >= bowDrop.end) bowDrop = null;
+      if (!bowDrop && pose.aux.raise > 0.5 && bowRng.chance(nz.bowHand.dropRate * dtS)) {
+        bowDrop = {
+          end: t + bowRng.uniform(nz.bowHand.dropMs[0], nz.bowHand.dropMs[1]),
+          mode: bowRng.pick(["freeze", "elbow", "riser"]),
+          k: bowRng.uniform(0.3, 0.6),
+          vis: bowRng.uniform(nz.bowHand.dropVis[0], nz.bowHand.dropVis[1]),
+          freeze: {},
+        };
+      }
+    }
 
     // noisy image positions (square pixels)
     const out = new Array(LM_COUNT);
@@ -435,6 +481,23 @@ function renderSession(sess, cameraCfg, noiseCfg, timingCfg, seed) {
           const tgt = drop.mode === "face" ? out[0] : elbow;
           p.u += (tgt.u - p.u) * drop.k;
           p.v += (tgt.v - p.v) * drop.k;
+        }
+      }
+    }
+    if (bowDrop) {
+      stats.bowDropFrames++;
+      const elbow = out[side.bow.elbow];
+      for (const i of bowHandIdx) {
+        const p = out[i];
+        if (bowDrop.mode === "freeze") {
+          if (!bowDrop.freeze[i]) bowDrop.freeze[i] = { u: p.u, v: p.v };
+          p.u = bowDrop.freeze[i].u;
+          p.v = bowDrop.freeze[i].v;
+        } else if (bowDrop.mode === "elbow") {
+          p.u += (elbow.u - p.u) * bowDrop.k;
+          p.v += (elbow.v - p.v) * bowDrop.k;
+        } else {
+          p.v += bowDrop.k * 0.35 * torsoPx; // slid down along the riser
         }
       }
     }
@@ -533,6 +596,7 @@ function renderSession(sess, cameraCfg, noiseCfg, timingCfg, seed) {
         if (vDrop[i] >= 1) target = rng.uniform(nz.offscreen.vis[0], nz.offscreen.vis[1]);
         else target -= vDrop[i];
         if (drop && drawHandIdx.includes(i)) target = drop.vis;
+        if (bowDrop && bowHandIdx.includes(i)) target = bowDrop.vis;
         target = clamp01(target + rng.normal(0, visCfg.sd));
         const a = 1 - Math.exp(-(dtS * 1000) / (visCfg.tauMs || 90));
         vis = visState[i] == null ? target : visState[i] + a * (target - visState[i]);
