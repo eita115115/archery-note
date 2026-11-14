@@ -1,7 +1,10 @@
 "use strict";
 /* Archery Note: 射型トラッキング ビュー（ベータ）
    新しい記録の画面（撮影・解析・結果）は 47-form-v2-view.js。このファイルに残っているのは、姿勢推定の読み込み（loadFormPose）、
-   以前の記録の一覧と詳細、削除、そして「検証用の診断データ」が入のときだけ開く以前の撮影画面（openFormCapture・startFormReplay）。
+   以前の記録の一覧と詳細、削除、そして以前の撮影画面（openFormCapture・startFormReplay）。以前の撮影画面は、どの画面からも開けない
+   （実地の確認が終わるまで、比べるための基準としてコードと検査だけを残してある。検証用の診断は v2 の記録から書き出す）。
+   以前の記録の一覧と詳細には、評価の語（安定・ばらつき大・いつも通り）と助言（原因候補・次の練習）を出さない。しきい値に根拠が無いため
+   （docs/design/form-v2/design.md 5.3）。保存された値と、その元（何件・何射）だけを出す。
    カメラ + オンデバイス姿勢推定。計算は 46-form-core.js の純関数、
    資産は assets/pose/（自己ホスト・機能有効時のみ遅延ロード）。
    映像・生ランドマークは保存しない。保存は formAnalyses の派生特徴量のみ。 */
@@ -221,22 +224,21 @@ function formRecordSummary(r){
   return {
     bowArm:med("bowArm"), drawArm:med("drawArm"),
     holdS:holds.length?formMedian(holds)/1000:null,
-    anchorLabel:av.label, shots:feats.length
+    anchorStd:av.std, anchorN:av.n, shots:feats.length
   };
 }
 
-/* 自分基準の表示ラベルを作る。2026-07-05: エリート基準（172°等）との比較は
-   撮影角度に飲まれるため停止し、直近の自分の記録との差で表す。
-   直近3件未満（中央値の元になる記録がまだ少ない）場合は生値のみ返す。 */
+/* 以前の同じ測り方の記録との差を、数と元（何件の中央値か）で書く。評価の語（いつも通り など）は付けない。
+   2026-07-05: エリート基準（172°等）との比較は撮影角度に飲まれるため停止し、自分の以前の記録との差で表す。
+   以前の記録が 3件に満たないときは、値だけを返す。 */
 function formSelfBaselineLabel(value, key, priorRecords){
   if(!Number.isFinite(value)) return "—";
   const priorVals=(priorRecords||[]).map(r=>formRecordStats(r)).filter(Boolean)
     .map(st=>st[key]).filter(Number.isFinite);
   if(priorVals.length<3) return `${value.toFixed(0)}°`;
   const base=formMedian(priorVals);
-  const d=value-base;
-  if(Math.abs(d)<1) return `${value.toFixed(0)}°（いつも通り）`;
-  return `${value.toFixed(0)}°（いつもより ${d>=0?"+":""}${d.toFixed(0)}°）`;
+  const d=Math.round(value)-Math.round(base);
+  return `${value.toFixed(0)}°（以前の ${priorVals.length}件の中央値 ${base.toFixed(0)}° との差 ${d>0?"+":d<0?"−":""}${Math.abs(d)}°）`;
 }
 
 function formTrendMiniHtml(records=db.formAnalyses||[]){
@@ -265,11 +267,11 @@ function formScoreLinkHtml(records=db.formAnalyses||[]){
   const s=link.split;
   const diff=s.stableAvg-s.driftAvg;
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
-    <div class="note"><b>射型と得点の関係</b>（練習に紐付いた ${link.n} 記録）</div>
-    <div class="kv"><span>リリース安定の日</span><span>平均 <b>${s.stableAvg.toFixed(2)}</b>（${s.stableN}回）</span></div>
-    <div class="kv"><span>ドリフト多めの日</span><span>平均 <b>${s.driftAvg.toFixed(2)}</b>（${s.driftN}回）</span></div>
+    <div class="note"><b>ドリフトを観測した射の割合と得点</b>（練習に紐付いた ${link.n} 記録）</div>
+    <div class="kv"><span>ドリフトの射が半分未満の回</span><span>平均 <b>${s.stableAvg.toFixed(2)}</b>（${s.stableN}回）</span></div>
+    <div class="kv"><span>ドリフトの射が半分以上の回</span><span>平均 <b>${s.driftAvg.toFixed(2)}</b>（${s.driftN}回）</span></div>
     ${link.excluded?`<div class="note">測り方の違う記録 ${link.excluded}件は、この比較に入れていません。</div>`:""}
-    <div class="note">差（リリース安定の日 − ドリフト多めの日）は ${diff>0?"+":diff<0?"−":"±"}${Math.abs(diff).toFixed(2)} 点/射です。回数が少なく、ほかの条件はそろえていないので、射型が原因とは限りません。</div>
+    <div class="note">差（半分未満の回 − 半分以上の回）は ${diff>0?"+":diff<0?"−":"±"}${Math.abs(diff).toFixed(2)} 点/射です。ドリフト = リリース前 0.5 秒に、弓手か引き手が以前の方式の決めた幅より大きく動いたこと。その幅と「半分」という境目は確かめていない値で、回数も少なく、ほかの条件もそろえていません。射型が原因とは言えません。</div>
   </div>`;
 }
 /* 以前の記録（撮りながら数える方式で保存した記録。cap が無いか、cap.g が 2 以下）。
@@ -289,28 +291,28 @@ function formLegacyRecordsHtml(records){
       <span class="formRecordHead"><span>${esc(date)} · ${s.shots}射</span>${r.sessionId?`<span class="formRecordLink">練習に紐付け</span>`:""}</span>
       <span class="formRecordAngles"><span>弓手肘 <b>${s.bowArm!=null?s.bowArm.toFixed(0)+"°":"—"}</b></span><span>引き手肘 <b>${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</b></span></span>
       ${comparison?`<span class="formRecordComparison">${esc(comparison)}</span>`:""}
-      <span class="formRecordMeta">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} · アンカー ${esc(s.anchorLabel)}</span>
+      <span class="formRecordMeta">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} · アンカーのばらつき ${s.anchorStd!=null?`σ ${s.anchorStd.toFixed(3)}（${s.anchorN}射）`:"—"}</span>
       </button>
       <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射型記録を削除">${icon("del")}</button>
     </div>`;
   }).join("");
   return `<div class="formLegacy" data-testid="analysis-form-legacy"><div class="vsecH"><h2>以前の記録</h2><span class="aside">${allRecs.length}件${allRecs.length>5?"・新しい5件を表示":""}</span></div>
-    <p class="basis" data-testid="analysis-form-legacy-note">撮りながら数える以前の方式で保存した記録です。測り方が違うので、新しい記録とは比べていません。記録はそのまま残してあり、開くと射ごとの値を見られます。</p>
+    <p class="basis" data-testid="analysis-form-legacy-note">撮りながら数える以前の方式で保存した記録です。測り方が違うので、新しい記録とは比べず、推移にも入れていません。記録はそのまま残してあり、開くと射ごとの値を見られます。以前の画面にあった評価の語と助言は、決めた幅に根拠が無いので出していません。</p>
     ${formTrendMiniHtml(allRecs)}
     <div class="formRecordList">${rows}</div>
     ${formScoreLinkHtml(records)}
-    <p class="basis" data-testid="analysis-form-legacy-basis">対象: 期間は撮影日、弓具・距離は紐付いた練習の条件で選んでいます。紐付けのない記録は保存された弓具だけで選び、距離は推測しません。弓手肘は中央値です。撮影の位置と角度が違う記録の差は、射型の差とは限りません。${allRecs.some(r=>formRecordGeometry(r)!==formRecordGeometry(allRecs[0]))?"画面の向きによる差を補正する前の記録と後の記録は測り方が違うため、互いに比べていません。":""}</p>
+    <p class="basis" data-testid="analysis-form-legacy-basis">対象: 期間は撮影日、弓具・距離は紐付いた練習の条件で選んでいます。紐付けのない記録は保存された弓具だけで選び、距離は推測しません。弓手肘は中央値です。アンカーのばらつきは、射ごとのアンカー位置（胴の長さに対する比）の標準偏差で、2射以上の記録に出します。撮影の位置と角度が違う記録の差は、射型の差とは限りません。${allRecs.some(r=>formRecordGeometry(r)!==formRecordGeometry(allRecs[0]))?"画面の向きによる差を補正する前の記録と後の記録は測り方が違うため、互いに比べていません。":""}</p>
   </div>`;
 }
 
 function bindFormTrackingCard(){
-  /* 撮影と保存した動画の解析は v2 の画面（47-form-v2-view.js）で開く。実時間の検出器（46-form-core.js）は使わない。
-     「検証用の診断データ」が入のあいだだけ、診断（18 射の診断 JSON）を取るために以前の撮影画面を残してある（実地の確認のあとで消す） */
-  const legacyDiagnostics=db.settings.formDebug===true;
+  /* 撮影と保存した動画の解析は、いつも v2 の画面（47-form-v2-view.js）で開く。検証用の診断も v2 の記録から書き出す。
+     以前の撮影画面（下の openFormCapture・openFormReplay・startFormReplay。実時間の検出器 46-form-core.js を使う）へは、
+     どの画面からも行けない。比べるための基準として、実地の確認が終わるまでコードと検査だけを残してある */
   const start=$("#formStart");
-  if(start) start.onclick=legacyDiagnostics?openFormCapture:formV2StartLive;
+  if(start) start.onclick=formV2StartLive;
   const replay=$("#formReplay");
-  if(replay) replay.onclick=legacyDiagnostics?openFormReplay:formV2PickReplay;
+  if(replay) replay.onclick=formV2PickReplay;
   bindFormV2Card();
   document.querySelectorAll("[data-form-id]").forEach(li=>li.onclick=()=>{
     const rec=(db.formAnalyses||[]).find(r=>r.id===li.dataset.formId);
@@ -366,27 +368,39 @@ function formInsightBlockHtml(title, items){
     ${items.map(t=>`<div class="note">・${esc(t)}</div>`).join("")}
   </div>`;
 }
+/* 以前の記録の詳細に出す事実（値と、その元）。46-form-core.js の formRecordInsights は評価の語・助言・鮮明さの % を含むので、
+   画面では使わない（関数と検査は、以前の検出器と一緒に残してある） */
+function formLegacyFacts(rec, prev){
+  const st=formRecordStats(rec);
+  if(!st) return [];
+  const pv=prev?formRecordStats(prev):null, facts=[];
+  const diff=(a,b)=>`（前回比 ${a-b>=0?"+":""}${(a-b).toFixed(0)}°）`;
+  if(st.holdMs!=null) facts.push(`フルドロー保持は中央値 ${(st.holdMs/1000).toFixed(1)} 秒でした（${st.shots}射）。`);
+  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°${pv&&pv.bowArm!=null?diff(st.bowArm,pv.bowArm):""}です。`);
+  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°${pv&&pv.drawArm!=null?diff(st.drawArm,pv.drawArm):""}です。`);
+  if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカー位置のばらつきは σ=${st.anchorStd.toFixed(3)} です（胴の長さに対する比の標準偏差）。`);
+  const withRelease=(rec.features||[]).filter(f=>f&&f.release), drifted=withRelease.filter(f=>f.release.stable===false).length;
+  if(withRelease.length) facts.push(`${withRelease.length}射中 ${drifted}射で、リリース前 0.5 秒に弓手か引き手の動き（ドリフト）を観測しました。`);
+  return facts;
+}
 function openFormDetail(rec){
   const sorted=[...(db.formAnalyses||[])].sort((a,b)=>(a.ts||0)-(b.ts||0));
   const idx=sorted.findIndex(r=>r.id===rec.id);
   /* 前回比は同じ測り方の記録とだけ出す（AN-098） */
   const earlier=formComparableRecords(sorted.slice(0,Math.max(0,idx)),rec);
   const prev=earlier.length?earlier[earlier.length-1]:null;
-  const ins=formRecordInsights(rec, prev);
+  const st=formRecordStats(rec);
   const linked=rec.sessionId?db.sessions.find(s=>s.id===rec.sessionId):null;
   const lm=linked?sessionMetrics(linked):null;
   const ovl=document.createElement("div"); ovl.className="ovl";
-  ovl.innerHTML=`<div class="sheet">
+  ovl.innerHTML=`<div class="sheet" data-testid="form-legacy-detail">
     <h3>射型記録 ${fmtD(rec.date)} <span class="mini">${rec.shots||0}射 / ${esc(rec.modelVer||"")}</span></h3>
     ${linked?`<div class="kv"><span>紐付いた練習</span><span>${fmtD(linked.date)} ${linked.dist?linked.dist+"m":""} ・ 平均 ${lm&&lm.all.length?lm.avg.toFixed(2):"—"} 点/本</span></div>`:`<div class="subNote">練習セッションには紐付いていません（撮影日に練習記録があると自動で紐付きます）。</div>`}
-    ${ins?`<div class="kv"><span>要約</span><span>弓手肘 ${ins.stats.bowArm!=null?ins.stats.bowArm.toFixed(0)+"°":"—"} / 引き手肘 ${ins.stats.drawArm!=null?ins.stats.drawArm.toFixed(0)+"°":"—"} / 保持 ${ins.stats.holdMs!=null?(ins.stats.holdMs/1000).toFixed(1)+"秒":"—"}</span></div>`:""}
-    ${ins?formInsightBlockHtml("観測",ins.facts):""}
-    ${ins?formInsightBlockHtml("原因候補",ins.causes):""}
-    ${ins?formInsightBlockHtml("確認点",ins.checks):""}
-    ${ins?formInsightBlockHtml("次の練習",ins.next):""}
+    ${st?`<div class="kv"><span>要約</span><span>弓手肘 ${st.bowArm!=null?st.bowArm.toFixed(0)+"°":"—"} / 引き手肘 ${st.drawArm!=null?st.drawArm.toFixed(0)+"°":"—"} / 保持 ${st.holdMs!=null?(st.holdMs/1000).toFixed(1)+"秒":"—"}</span></div>`:""}
+    ${formInsightBlockHtml("この記録の値",formLegacyFacts(rec,prev))}
     <table class="tbl mt8"><tr><th>射</th><th>弓手肘</th><th>引き手肘</th><th class="right">保持</th></tr>
     ${(rec.features||[]).map((f,i)=>`<tr><td>${i+1}</td><td>${f.angles&&Number.isFinite(f.angles.bowArm)?f.angles.bowArm.toFixed(0)+"°":"—"}${f.release&&f.release.stable===false?` ${icon("warn")}`:""}</td><td>${f.angles&&Number.isFinite(f.angles.drawArm)?f.angles.drawArm.toFixed(0)+"°":"—"}</td><td class="right">${f.phase&&Number.isFinite(f.phase.anchorMs)?(f.phase.anchorMs/1000).toFixed(1)+"s":"—"}</td></tr>`).join("")}</table>
-    <div class="hint">${icon("warn")} = リリース前0.5秒にドリフトを観測した射。「—」は、腕が短く写った・値がそろわなかったなどで角度を出せなかった射です。コメントは観測にもとづく候補で、断定ではありません。</div>
+    <div class="hint">${icon("warn")} = リリース前0.5秒にドリフトを観測した射。「—」は、腕が短く写った・値がそろわなかったなどで角度を出せなかった射です。以前の方式の記録なので、評価や助言は出していません（決めた幅に根拠が無いため）。値は保存されたままです。</div>
     ${formCaptureNoteHtml(rec)}
     <div class="btnrow"><button class="btn ghost" id="fdClose">閉じる</button></div>
   </div>`;

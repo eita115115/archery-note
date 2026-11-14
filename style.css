@@ -1856,6 +1856,23 @@ details.fv2More ul{margin:0; padding:0 0 12px 18px; font-size:14px; line-height:
 .fv2Tr.h > *{font-size:13px; font-weight:600; color:var(--sub);}
 .fv2Tr.dif{background:var(--accent-soft); box-shadow:inset 3px 0 0 var(--info);}
 .fv2Tr.dif > *:first-child{color:var(--ink); padding-left:8px;}
+/* 段 7・8: 値を途中で折り返さない、推移の凡例、動画で確かめる画面 */
+.fv2Nw{white-space:nowrap;}
+.fv2Legend .k7{width:10px; height:10px; border-radius:50%; background:var(--ink);}
+.fv2Legend .k8{width:5px; height:12px; background:var(--rule-strong);}
+.fv2Legend .k9{width:0; height:12px; border-left:1.5px dashed var(--info);}
+.fv2Rev .fv2Video{max-height:46dvh;}
+.fv2Chips{display:flex; flex-wrap:wrap; gap:6px; padding:10px 0 0;}
+.fv2Chip{min-width:44px; height:44px; padding:0 8px; border:1px solid var(--rule-strong); border-radius:6px; background:none; font-size:16px; font-weight:700; color:var(--ink); cursor:pointer;}
+.fv2Chip[aria-pressed=true]{background:var(--accent-soft); box-shadow:inset 0 -3px 0 var(--accent);}
+.fv2Chip:disabled{color:var(--sub); border-style:dashed; cursor:default;}
+.fv2Scrub{padding:6px 0 0;}
+.fv2Scrub input{display:block; width:100%; height:44px; margin:0; accent-color:var(--accent);}
+.fv2Scrub .t{display:flex; justify-content:space-between; font-size:13px; color:var(--sub);}
+.fv2RevCtl{margin-top:8px;}
+.formDiagBlock .formDiagLm{margin-top:14px;}
+.formDiagBlock #fdLmChips{margin-top:8px;}
+.sheet.resultScreen.fv2Screen[data-stage="review"]{padding-bottom:calc(28px + var(--safe-b));}
 @media (max-width:340px){
   .fv2Count .num{font-size:132px;}
   .fv2Count{min-height:190px;}

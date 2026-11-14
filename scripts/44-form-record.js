@@ -13,7 +13,10 @@
      cd = [[時刻, 始め, 終わり, 幅, 理由, 射らしい, 足した], …]   離れがはっきり写らなかった候補。足した = 1 なら射に数える
      f  = [[13 個の整数], …]   ev の kind 0 の行と同じ順。列は COLS。時間 0.01 秒、位置 0.001 胴、角度 0.1°。欠けは null
      nz・nd = 列ごとの測定のゆれ（f と同じ単位）と自由度。ps・pr = 射ごとの姿（9 点 × 2、0.01 胴）
-     ed = [足した数, 外した数]。w = 解析器の warnings */
+     ed = [足した数, 外した数]。w = 解析器の warnings
+     36 射を超えた撮影は、36 射以下の記録に等分する（どの射も捨てない）。分けた記録だけが持つもの:
+       cid = その撮影の id（最初の記録の id）、part = [何番目, 全部でいくつ, それより前の記録の射数]、span = [始め, 終わり]（0.01 秒）
+     dg = 検証用の診断（設定「検証用の診断データ」が入のときだけ付ける。解析器の中の値。diagBlock を参照） */
 const FormV2 = (() => {
   const FV = 1; // 項目の列の版（COLS を変えたら上げる）
   const GEOM = 3; // 測り方の版（正方形の画素・体の単位）。1 = 補正なし、2 = 段 A
@@ -127,8 +130,23 @@ const FormV2 = (() => {
       }
       return { n: m, t, pose, pts, coverage: m ? cnt / m : 0 };
     }
+    /* i 番めのコマ。pts = 9 点 × [x, y, visibility]（正方形の画素。使えない点の x, y は NaN） */
+    function frameAt(i) {
+      if (!(i >= 0 && i < n)) return null;
+      const c = i >> 12, k = i & 4095, d = ds[c], o = k * PER, pts = [];
+      for (let s = 0; s < 9; s++) pts.push([d[o + s * 3], d[o + s * 3 + 1], d[o + s * 3 + 2]]);
+      return { i, t: ts[c][k], pose: ps[c][k] === 1, pts };
+    }
+    /* tMs にいちばん近いコマ（動画で確かめる画面が、骨格を描くのに使う） */
+    function at(tMs) {
+      if (!n || !fin(tMs)) return null;
+      let lo = 0, hi = n - 1;
+      while (lo < hi) { const m = (lo + hi) >> 1; if (timeAt(m) < tMs) lo = m + 1; else hi = m; }
+      if (lo > 0 && tMs - timeAt(lo - 1) <= timeAt(lo) - tMs) lo--;
+      return frameAt(lo);
+    }
     return {
-      push, pack,
+      push, pack, frameAt, at,
       get n() { return n; },
       get full() { return n >= maxFrames; },
       get firstMs() { return first; },
@@ -262,13 +280,42 @@ const FormV2 = (() => {
     if (fin(nz.bowElev) && fin(rho)) { noise.bowDy = Math.SQRT2 * ((nz.bowElev * Math.PI) / 180) * rho; nd.bowDy = df.bowElev || 0; }
     return { noise, nd };
   }
-  function buildRecord(result, ctx) {
+  /* 検証用の診断（design.md 6.3・8 章）。解析器の中の値を、整数に丸めて持つ。映像・画素・点の列は入れない。
+     s = 射ごと（ev と同じ順）: [離れの時刻の不確かさ, 射か引き戻しかの点, 離れを決めた線（0 = 引き尺、1 = 肘）, 引きを当てはめられたか, 型からの遠さ, 引き始め, アンカー, 引き終わり]
+     r = 引いていた区間ごと（解析器の debug）: RUN_COLS の順。q = 回ごと。pl = 置き方の確認（始めたときの 5 行）
+     時刻は 0.01 秒、点と z は 0.01、型からの遠さは 0.01 */
+  const RUN_COLS = Object.freeze(["s", "e", "is", "kind", "type", "tc", "to", "t", "unc", "c", "zL", "zJ", "zLW", "zLE", "zJW", "zJE", "stepW", "stepE", "reason"]);
+  const RUN_TIME = { s: 1, e: 1, is: 1, tc: 1, to: 1, t: 1, unc: 1, c: 1 };
+  function diagBlock(result, placement) {
+    const q = result.quality || {};
+    const row = (x) => [toInt(x.releaseUncMs, 0.1), toInt(x.kindScore, 100), x.source === "elbow" ? 1 : 0, x.anchorFit ? 1 : 0, toInt(x.typicality, 100), toInt(x.drawStartMs, 0.1), toInt(x.anchorStartMs, 0.1), toInt(x.drawEndMs, 0.1)];
+    const run = (d) => RUN_COLS.map((k) => {
+      const v = d[k];
+      if (k === "kind") return v === "shot" ? 0 : v === "letdown" ? 1 : 2;
+      if (k === "type" || k === "reason") return typeof v === "string" ? v : null;
+      return toInt(v, RUN_TIME[k] ? 0.1 : 100);
+    });
+    const rp = {};
+    for (const k of Object.keys(q.repaired || {})) if (fin(q.repaired[k])) rp[k] = Math.round(q.repaired[k]);
+    const out = {
+      v: 1,
+      q: { fr: fin(q.frames) ? q.frames : 0, st: toInt(q.still, 1000), dl: toInt(q.drawLevel, 1000), tp: q.template ? q.template.shots : null, dir: q.dir === -1 ? -1 : 1, rp },
+      s: result.shots.map(row),
+      r: (q.debug || []).map(run),
+    };
+    if (placement && Array.isArray(placement.rows)) {
+      out.pl = { st: placement.rows.map((r) => r.state), tpx: fin(placement.tpx) ? placement.tpx : null, l: toInt(placement.left, 1), r: toInt(placement.right, 1), rho: toInt(placement.rho, 1000) };
+    }
+    return out;
+  }
+  /* 1 件の記録を組み立てる。sel = この記録に入れる射・引き戻し（result.shots の番号）と候補（result.candidates の番号）。省けば全部 */
+  function assemble(result, ctx, sel) {
     const q = result.quality || {}, c = ctx || {};
-    const ev = [], f = [], ps = [], pr = [];
-    let ld = 0, dropped = 0;
-    for (const s of result.shots) {
+    const ev = [], f = [], ps = [], pr = [], pick = sel ? new Set(sel.shots) : null, pickC = sel ? new Set(sel.cands) : null;
+    let ld = 0;
+    result.shots.forEach((s, si) => {
+      if (pick && !pick.has(si)) return;
       const shot = s.kind === "shot";
-      if (shot && f.length >= LIMITS.MAX_SHOTS) { dropped++; continue; }
       if (!shot) ld++;
       ev.push([shot ? 0 : 1, toInt(s.releaseMs, 0.1), toInt(s.holdMs, 0.1), toInt(s.drawMs, 0.1), shot ? Math.round((fin(s.confidence) ? s.confidence : 0.5) * 10) : 8, shot && s.typicality >= 1 ? 8 : 0]);
       if (shot) {
@@ -276,13 +323,13 @@ const FormV2 = (() => {
         ps.push(Array.isArray(s.poseHold) ? s.poseHold.slice() : null);
         pr.push(Array.isArray(s.poseRel) ? s.poseRel.slice() : null);
       }
-    }
-    const cd = (result.candidates || []).map((x) => [toInt(x.tMs, 0.1), toInt(x.fromMs, 0.1), toInt(x.toMs, 0.1), toInt(x.uncMs, 0.1), Math.max(0, REASONS.indexOf(x.reason)), x.likely ? 1 : 0, 0]);
+    });
+    const cd = (result.candidates || []).filter((_, i) => !pickC || pickC.has(i)).map((x) => [toInt(x.tMs, 0.1), toInt(x.fromMs, 0.1), toInt(x.toMs, 0.1), toInt(x.uncMs, 0.1), Math.max(0, REASONS.indexOf(x.reason)), x.likely ? 1 : 0, 0]);
     const { noise, nd } = captureNoise(result);
     const fw = c.frame && c.frame.w > 0 ? Math.round(c.frame.w) : null, fh = c.frame && c.frame.h > 0 ? Math.round(c.frame.h) : null;
     const view = q.view || {};
     const rec = {
-      id: c.id, date: c.date, ts: c.ts, sessionId: c.sessionId || null, setupId: c.setupId || null,
+      id: sel ? sel.id : c.id, date: c.date, ts: sel ? sel.ts : c.ts, sessionId: c.sessionId || null, setupId: c.setupId || null,
       shots: f.length,
       modelVer: c.modelVer || "", appVer: c.appVer, fps: fin(q.fps) ? +q.fps.toFixed(1) : null,
       features: [], // v2 を知らない版のアプリが読んでも落ちないように置く（0 射の記録として一覧に出る）
@@ -302,8 +349,39 @@ const FormV2 = (() => {
       },
     };
     if (c.note) rec.note = c.note;
-    if (dropped) rec.v2.over = dropped; // 上限を超えて入れなかった射の数
+    if (sel) { rec.v2.cid = c.id; rec.v2.part = [sel.k + 1, sel.parts, sel.offset]; rec.v2.span = [toInt(sel.fromMs, 0.1), toInt(sel.toMs, 0.1)]; }
+    if (c.diag) {
+      const dg = diagBlock(result, c.placement);
+      if (sel) { dg.s = dg.s.filter((_, i) => pick.has(i)); if (sel.k) { dg.r = []; delete dg.pl; } }
+      rec.v2.dg = dg;
+    }
     return rec;
+  }
+  /* 撮影 1 回 → 記録の配列（design.md 5.1）。36 射以下なら 1 件。超えたら、36 射以下になるいちばん少ない数に等分する。
+     どの射も捨てない。引き戻しと候補は、時刻で、その時刻までの射が入る記録へ入れる。
+     分けた記録は cid（最初の記録の id）と part で互いにつながる。ctx.ids = 2 件め以降の id（無ければ id から作る） */
+  function buildRecords(result, ctx) {
+    const c = ctx || {}, idx = [];
+    result.shots.forEach((s, i) => { if (s.kind === "shot") idx.push(i); });
+    const parts = Math.max(1, Math.ceil(idx.length / LIMITS.MAX_SHOTS));
+    if (parts === 1) return [assemble(result, c, null)];
+    const per = Math.ceil(idx.length / parts), q = result.quality || {}, end = fin(q.durationMs) ? q.durationMs : 0;
+    const cut = []; // cut[k] = k 番めの記録の最後の射の離れ（次の記録との境）
+    for (let k = 1; k < parts; k++) cut.push(result.shots[idx[k * per - 1]].releaseMs);
+    const partOf = (t) => { let k = 0; while (k < cut.length && t > cut[k]) k++; return k; };
+    const out = [];
+    for (let k = 0; k < parts; k++) {
+      const shots = [], cands = [];
+      result.shots.forEach((s, i) => { if (partOf(s.releaseMs) === k) shots.push(i); });
+      (result.candidates || []).forEach((x, i) => { if (partOf(x.tMs) === k) cands.push(i); });
+      const fromMs = k ? cut[k - 1] : 0, toMs = k < cut.length ? cut[k] : Math.max(end, fromMs);
+      out.push(assemble(result, c, { k, parts, offset: k * per, shots, cands, fromMs, toMs, id: k ? (c.ids && c.ids[k - 1]) || `${c.id}-${k + 1}` : c.id, ts: (c.ts || 0) + (k ? Math.max(k, Math.round(fromMs)) : 0) }));
+    }
+    return out;
+  }
+  /* 1 件だけを返す入口（36 射以下の撮影）。36 射を超える撮影は buildRecords を使う */
+  function buildRecord(result, ctx) {
+    return buildRecords(result, ctx)[0];
   }
   /* 射数を直す（design.md 2.8）。src = "ev" | "cd"、i = その配列の中の番号、on = 射に数えるかどうか。
      もとの記録は書き換えず、直した写しを返す。数（shots・ld）と、足した・外した数（ed）も合わせ直す。
@@ -352,13 +430,18 @@ const FormV2 = (() => {
       events.push({ src: "cd", i, kind: "cand", tS: r[0] / 100, fromS: fin(r[1]) ? r[1] / 100 : null, toS: fin(r[2]) ? r[2] / 100 : null, uncS: fin(r[3]) ? r[3] / 100 : null, reason: REASONS[r[4]] || "", likely: !!r[5], counted: !!r[6], flags: 0, fi: -1 });
     });
     events.sort((a, b) => a.tS - b.tS);
+    /* 射の番号は、その撮影の通し番号（分けた記録では、前の記録の射数から続ける）。count はこの記録の中の数 */
+    const off = Array.isArray(v.part) && v.part[2] > 0 ? v.part[2] : 0;
     let n = 0;
-    for (const e of events) e.n = e.counted ? ++n : null;
+    for (const e of events) e.n = e.counted ? off + ++n : null;
     const noise = {}, df = {};
     COLS.forEach((k, c) => { noise[k] = natural((v.nz || [])[c], k); df[k] = (v.nd || [])[c] || 0; });
     const compared = events.filter((e) => e.kind === "shot" && e.counted);
     return {
-      rec, v, events, count: n, compared, noise, df,
+      rec, v, events, count: n, offset: off, compared, noise, df,
+      part: Array.isArray(v.part) ? { k: v.part[0], of: v.part[1] } : null,
+      fromS: Array.isArray(v.span) ? v.span[0] / 100 : 0,
+      toS: Array.isArray(v.span) ? v.span[1] / 100 : null,
       letdowns: events.filter((e) => e.kind === "letdown" && !e.counted).length,
       openCands: events.filter((e) => e.kind === "cand" && !e.counted).length,
       added: events.filter((e) => e.counted && e.kind !== "shot").length,
@@ -485,28 +568,114 @@ const FormV2 = (() => {
     if (va.av !== vb.av || a.cap.hand !== b.cap.hand) return { ok: false, why: va.av !== vb.av ? "解析の版が違う" : "利き手が違う" };
     for (const v of [va, vb]) if (!(v.tpx >= 100) || !(v.cov >= 80)) return { ok: false, why: "写りが足りない" };
     if (m.kind === "t") return { ok: true, why: "" };
-    if (!va.view || !vb.view || va.view.side !== vb.view.side) return { ok: false, why: "胸側と背中側" };
+    if (!va.view || !vb.view || va.view.side !== vb.view.side) return { ok: false, why: "胸側と背中側の違い" };
     if (m.kind === "h") return va.view.cls && vb.view.cls && va.view.cls !== "x" && vb.view.cls !== "x" ? { ok: true, why: "" } : { ok: false, why: "斜めすぎ" };
     if (va.view.cls !== "s" || vb.view.cls !== "s") return { ok: false, why: "真横でない" };
-    return va.view.rho > 0 && Math.abs(vb.view.rho / va.view.rho - 1) <= 0.06 ? { ok: true, why: "" } : { ok: false, why: "置き方が違う" };
+    return va.view.rho > 0 && Math.abs(vb.view.rho / va.view.rho - 1) <= 0.06 ? { ok: true, why: "" } : { ok: false, why: "腕の写る長さが 6% より違う" };
   }
-  /* 推移: いちばん新しい記録と比べてよい回だけ。1 回 = 中央値と四分位 */
+  /* 推移（design.md 2.9・5.4）。いちばん新しい記録と比べてよい回だけを並べる。1 回 = 1 回の撮影（分けた記録は 1 つにまとめる）。
+     points[] = { id, ids, date, ts, n, med, q1, q3, unc, gear }。値は解析器の単位。「—」（測れなかった値）は数えない。
+       unc = その回の中央値の 95% の不確かさ（1.96 × 1.2533 × 射どうしの標準偏差 / √n。2 射に満たなければ null）
+       gear = 前の点と、紐づけた弓具が違う
+     excluded = 入れなかった回の数、why = その理由ごとの数、skipped = 入れなかった記録の id、
+     ref = 比べる相手（いちばん新しい記録）、refUnmeasured = その記録の置き方ではこの項目を測れない、
+     unc = 点の unc の中央値、range = 中央値のいちばん大きい回と小さい回の差 */
   function trend(records, key) {
+    const out = { key, points: [], excluded: 0, why: {}, skipped: [], ref: null, refUnmeasured: false, unc: null, range: null };
     const v2 = records.filter(isV2).sort((a, b) => (a.ts || 0) - (b.ts || 0));
-    if (!v2.length) return { points: [], excluded: 0 };
-    const ref = v2[v2.length - 1], points = [];
-    let excluded = 0;
-    for (const r of v2) {
-      const vals = read(r).compared.map((e) => e.vals[key]).filter(fin);
-      if (!comparable(ref, r, key).ok || !keysFor(r, [key]).length || !vals.length) { excluded++; continue; }
-      points.push({ id: r.id, date: r.date, ts: r.ts, n: vals.length, med: median(vals), q1: quantile(vals, 0.25), q3: quantile(vals, 0.75) });
+    if (!v2.length || !META[key]) return out;
+    const ref = (out.ref = v2[v2.length - 1]);
+    if (!keysFor(ref, [key]).length) { out.refUnmeasured = true; return out; }
+    const groups = new Map();
+    for (const r of v2) { const g = r.v2.cid || r.id; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(r); }
+    const drop = (g, why) => { out.excluded++; out.why[why] = (out.why[why] || 0) + 1; for (const r of g) out.skipped.push(r.id); };
+    let prevSetup = null;
+    for (const g of groups.values()) {
+      const head = g[0], c = comparable(ref, head, key);
+      if (!c.ok) { drop(g, c.why); continue; }
+      if (!keysFor(head, [key]).length) { drop(g, "この置き方では測れない"); continue; }
+      const vals = [];
+      for (const r of g) for (const e of read(r).compared) if (fin(e.vals[key])) vals.push(e.vals[key]);
+      if (!vals.length) { drop(g, "値を測れた射が無い"); continue; }
+      const s = sd(vals), setup = head.setupId || null;
+      out.points.push({
+        id: head.id, ids: g.map((r) => r.id), date: head.date, ts: head.ts, n: vals.length,
+        med: median(vals), q1: quantile(vals, 0.25), q3: quantile(vals, 0.75),
+        unc: fin(s) ? (1.96 * 1.2533 * s) / Math.sqrt(vals.length) : null,
+        gear: !!(setup && prevSetup && setup !== prevSetup),
+      });
+      if (setup) prevSetup = setup;
     }
-    return { points, excluded };
+    const uncs = out.points.map((p) => p.unc).filter(fin), meds = out.points.map((p) => p.med);
+    if (uncs.length) out.unc = median(uncs);
+    if (meds.length) out.range = Math.max(...meds) - Math.min(...meds);
+    return out;
+  }
+
+  /* ---------- 検証用の書き出し（design.md 6.3） ----------
+     実地の確認で解析器を見直すための JSON。数値だけ。入れないもの: 映像、画素、記録の id、日付と時刻、メモ、練習や弓具との紐づけ、
+     身長、保存した姿（ps・pr）。体の点の列（landmarks）は、利用者が 2 つめの設定を入にして、撮った直後の画面から書き出すときだけ入る。
+     records = v2 の記録（古い順に並べ直す）。opts = { appVer, landmarks: { id: 記録の id → makeBuffer の中身を書き出したもの } } */
+  const DIAG_KIND = "archery-note-form-v2-diagnostics";
+  function diagnostics(records, opts) {
+    const o = opts || {}, list = (records || []).filter(isV2).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    const order = new Map();
+    const captures = list.map((r) => {
+      const v = r.v2, m = read(r), g = v.cid || r.id;
+      if (!order.has(g)) order.set(g, order.size + 1);
+      const c = {
+        capture: order.get(g), part: Array.isArray(v.part) ? v.part.slice(0, 3) : [1, 1, 0],
+        src: r.cap.src, hand: r.cap.hand, facing: r.cap.facing || null,
+        frame: { w: r.cap.fw, h: r.cap.fh, o: r.cap.o }, fps: fin(r.fps) ? r.fps : null,
+        model: r.modelVer || "", appVer: fin(r.appVer) ? r.appVer : null, analyzer: v.av, featureVersion: v.fv,
+        durS: v.dur, spanS: Array.isArray(v.span) ? v.span.map((x) => x / 100) : null, coveragePct: v.cov, torsoPx: v.tpx,
+        view: { side: v.view.side, cls: v.view.cls, rho: v.view.rho, om: v.view.om },
+        warnings: (v.w || []).slice(),
+        counts: { shots: m.count, letdowns: m.letdowns, candidates: (v.cd || []).length, added: m.added, removed: m.removed },
+        events: (v.ev || []).map((x) => x.slice()),
+        candidates: (v.cd || []).map((x) => { const y = x.slice(); y[4] = REASONS[x[4]] || ""; return y; }),
+        features: (v.f || []).map((x) => x.slice()),
+        noise: (v.nz || []).slice(), noiseDf: (v.nd || []).slice(),
+        analyzerDetail: v.dg ? JSON.parse(JSON.stringify(v.dg)) : null,
+      };
+      if (o.landmarks && o.landmarks[r.id]) c.landmarks = o.landmarks[r.id];
+      return c;
+    });
+    return {
+      kind: DIAG_KIND, version: 1,
+      app: { appVer: fin(o.appVer) ? o.appVer : null, geometry: GEOM, featureVersion: FV },
+      units: {
+        events: "[kind 0=射 1=引き戻し, 離れ 0.01s, 保持 0.01s, 引き 0.01s, 確かさ 0-10, 印 2=引き戻しを射に 4=射から外した 8=型から遠い]",
+        candidates: "[時刻 0.01s, 始め, 終わり, 幅, 理由, 射らしい 0/1, 足した 0/1]",
+        features: COLS.join(",") + "（時間 0.01s・位置 0.001 胴・角度 0.1°）",
+        noise: "features と同じ列・同じ単位",
+        "analyzerDetail.s": "[離れの不確かさ 0.01s, 射か引き戻しかの点 0.01, 離れの線 0=引き尺 1=肘, 引きの当てはめ 0/1, 型からの遠さ 0.01, 引き始め 0.01s, アンカー 0.01s, 引き終わり 0.01s]（events と同じ順）",
+        "analyzerDetail.r": RUN_COLS.join(",") + "（時刻 0.01s・ほかは 0.01）",
+        "analyzerDetail.pl": "置き方の確認（写り・大きさ・余白・向き・速さ の状態、胴 px、左右の余白 %、腕の長さ 0.001 胴）",
+        landmarks: "t = 時刻 ms、p = 1 コマ 27 個（9 点 ×（x 0.1px, y 0.1px, visibility 0.01））。点の順: 鼻・左肩・右肩・左肘・右肘・左手首・右手首・左腰・右腰。姿勢が取れなかったコマは null",
+      },
+      captures,
+    };
+  }
+  /* バッファを、書き出せる形にする（体の点の列。2 つめの設定が入のときだけ使う）。fromMs〜toMs だけを切り出せる */
+  function landmarkDump(buffer, fromMs, toMs) {
+    const t = [], p = [], fr = buffer.frame;
+    for (let i = 0; i < buffer.n; i++) {
+      const f = buffer.frameAt(i);
+      if (fin(fromMs) && f.t < fromMs) continue;
+      if (fin(toMs) && f.t > toMs) break;
+      t.push(Math.round(f.t));
+      if (!f.pose) { p.push(null); continue; }
+      const row = [];
+      for (const q of f.pts) row.push(toInt(q[0], 10), toInt(q[1], 10), toInt(q[2], 100));
+      p.push(row);
+    }
+    return { w: fr.w, h: fr.h, n: t.length, t, p };
   }
 
   return {
     FV, GEOM, TORSO_PER_HEIGHT, LIMITS, COLS, META, REASONS,
-    makeBuffer, makeLiveCounter, placement, captureState, captureNoise, buildRecord, setCounted, isV2, read, keysFor, compare, exceedsF95, sdInterval,
+    makeBuffer, makeLiveCounter, placement, captureState, captureNoise, buildRecord, buildRecords, diagBlock, RUN_COLS, DIAG_KIND, diagnostics, landmarkDump, setCounted, isV2, read, keysFor, compare, exceedsF95, sdInterval,
     shown, shownSize, unitText, fmt, cmText, flagSentence, summary, comparable, trend, median, quantile, sd,
   };
 })();

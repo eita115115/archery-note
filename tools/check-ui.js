@@ -85,7 +85,11 @@ function pngSize(file) {
 function decodePng(buf) {
   assert(buf.toString("ascii", 1, 4) === "PNG", "Not a PNG buffer");
   let off = 8;
-  let width = 0, height = 0, depth = 0, colorType = 0, interlace = 0;
+  let width = 0,
+    height = 0,
+    depth = 0,
+    colorType = 0,
+    interlace = 0;
   const idat = [];
   while (off < buf.length) {
     const len = buf.readUInt32BE(off);
@@ -102,7 +106,10 @@ function decodePng(buf) {
     off += 12 + len;
   }
   const ch = colorType === 6 ? 4 : colorType === 2 ? 3 : 0;
-  assert(depth === 8 && ch && !interlace, `Unsupported PNG (depth ${depth}, color ${colorType}, interlace ${interlace})`);
+  assert(
+    depth === 8 && ch && !interlace,
+    `Unsupported PNG (depth ${depth}, color ${colorType}, interlace ${interlace})`,
+  );
   const raw = zlib.inflateSync(Buffer.concat(idat));
   const stride = width * ch;
   const out = Buffer.alloc(stride * height);
@@ -118,7 +125,10 @@ function decodePng(buf) {
       else if (f === 2) v += b;
       else if (f === 3) v += (a + b) >> 1;
       else if (f === 4) {
-        const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+        const p = a + b - c,
+          pa = Math.abs(p - a),
+          pb = Math.abs(p - b),
+          pc = Math.abs(p - c);
         v += pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
       }
       out[y * stride + x] = v & 255;
@@ -133,7 +143,8 @@ function differingPixelRatio(a, b) {
   const n = a.width * a.height;
   for (let i = 0; i < n; i++) {
     let d = 0;
-    for (let k = 0; k < 3; k++) d = Math.max(d, Math.abs(a.data[i * a.ch + k] - b.data[i * b.ch + k]));
+    for (let k = 0; k < 3; k++)
+      d = Math.max(d, Math.abs(a.data[i * a.ch + k] - b.data[i * b.ch + k]));
     if (d > 24) diff++;
   }
   return diff / n;
@@ -266,9 +277,24 @@ function staticUiChecks() {
   );
   /* v5 段 9: どの画面も使わなくなった旧クラスの規則は style.css から消した */
   const cssRules = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  for (const old of [".histTrendRow", ".launchPanel", ".homeActions", ".streakHero", ".goalRing", ".pageHero", ".nativeStack", ".settingsGroup", ".statbar", "header.app", ".decisionCard", ".sightMiniDial"])
+  for (const old of [
+    ".histTrendRow",
+    ".launchPanel",
+    ".homeActions",
+    ".streakHero",
+    ".goalRing",
+    ".pageHero",
+    ".nativeStack",
+    ".settingsGroup",
+    ".statbar",
+    "header.app",
+    ".decisionCard",
+    ".sightMiniDial",
+  ])
     assert(
-      !cssRules.includes(old + "{") && !cssRules.includes(old + " ") && !cssRules.includes(old + ","),
+      !cssRules.includes(old + "{") &&
+        !cssRules.includes(old + " ") &&
+        !cssRules.includes(old + ","),
       `retired class ${old} is still in style.css`,
     );
   /* .histSightVal was removed during v2 design-language migration; check retired */
@@ -333,8 +359,7 @@ function staticUiChecks() {
     "startup/update fallback should be calm and initially hidden",
   );
   assert(
-    !recordSurface.includes("校正用") &&
-      !recordSurface.includes("状態確認"),
+    !recordSurface.includes("校正用") && !recordSurface.includes("状態確認"),
     "record mode labels should stay user-facing",
   );
   assert(
@@ -433,8 +458,7 @@ function staticUiChecks() {
     "confidence label rows should be gone from every screen",
   );
   assert(
-    surface.includes("アプリ情報・保存状態") &&
-      surface.includes("ブラウザ保存"),
+    surface.includes("アプリ情報・保存状態") && surface.includes("ブラウザ保存"),
     "native readiness UI missing",
   );
   assert(
@@ -500,38 +524,27 @@ function staticUiChecks() {
     return source.slice(start, end);
   }
 
-  const requiredFormDiagnosticCopy = [
-    "18射の診断JSON",
-    "18射の診断を開始",
-    "開始後、真横→やや斜め→通常設置の順に各6射を記録します。条件を満たさない記録は診断バッチに追加されません。",
-    "次は「真横」を6射記録してください。",
-    "次は「やや斜め」を6射記録してください。",
-    "次は「通常設置」を6射記録してください。",
-    "18射の診断がそろいました。",
-    "診断JSONを書き出す",
-    "現在の18射診断バッチの診断値だけを書き出します。練習記録、日付、メモ、端末内ID、映像、画像、ランドマークは含みません。診断値の共有先は自分で確認してください。",
-    "18射の診断が完了していません。開始後、表示された条件を各6射ずつ記録してください。",
-  ];
-  for (const copy of requiredFormDiagnosticCopy) {
-    assert(gearSettingsSource.includes(copy), `form diagnostic copy missing: ${copy}`);
-  }
-
+  /* 検証用の診断は v2 の記録から書き出す（AN-101）。以前の「18射の診断」の画面は無い */
+  const formV2ViewSource = fs.readFileSync(
+    path.join(root, "scripts", "47-form-v2-view.js"),
+    "utf8",
+  );
   const settingsHelpers = sourceBetween(
     gearSettingsSource,
     "/* FORM_DIAGNOSTIC_SETTINGS_START */",
     "/* FORM_DIAGNOSTIC_SETTINGS_END */",
   );
-  const startHandler = sourceBetween(
-    settingsHelpers,
-    "async function startFormDiagnosticMatrixFromSettings",
-    "async function exportFormDiagnosticMatrixFromSettings",
-  );
-  const exportHandler = sourceBetween(
-    settingsHelpers,
-    "async function exportFormDiagnosticMatrixFromSettings",
-    "function bindFormDiagnosticSettingsActions",
-  );
-
+  for (const copy of ["検証用の書き出し", "診断を書き出す", "体の点の列も含める"]) {
+    assert(settingsHelpers.includes(copy), `form diagnostic copy missing: ${copy}`);
+  }
+  for (const gone of [
+    "18射の診断",
+    "startFormDiagnosticMatrixFromSettings",
+    "fdMatrixStart",
+    "以前の撮影画面",
+  ]) {
+    assert(!gearSettingsSource.includes(gone), `retired diagnostic matrix UI remains: ${gone}`);
+  }
   assert(
     settingsHelpers.includes('data-testid="form-diagnostic-section"') &&
       settingsHelpers.includes("data-form-diagnostic-section") &&
@@ -541,7 +554,8 @@ function staticUiChecks() {
   );
   assert(
     settingsHelpers.includes("db.settings.formDebug===true") &&
-      settingsHelpers.includes("db.settings.formDebug!==true"),
+      settingsHelpers.includes("db.settings.formDebug!==true") &&
+      settingsHelpers.includes("db.settings.formDebugLandmarks===true"),
     "diagnostic settings use exact boolean gates",
   );
   assert(
@@ -550,47 +564,24 @@ function staticUiChecks() {
       !/!!\s*db\.settings\.formTrackingEnabled/.test(gearSettingsSource),
     "form tracking chips use exact boolean gates",
   );
-  assert(
-    settingsHelpers.includes("FORM_DIAGNOSTIC_SLOTS[") &&
-      !/const\s+FORM_DIAGNOSTIC_SLOTS\b/.test(gearSettingsSource),
-    "settings consume the Task-4 global slot list without redeclaration",
-  );
-  for (const code of [
-    "coordinator-missing",
-    "coordinator-incomplete",
-    "coordinator-invalid",
-    "coordinator-stale",
-    "source-missing",
-    "source-ambiguous",
-    "source-invalid",
-    "output-too-large",
-    "encoding-unavailable",
-  ]) {
-    assert(settingsHelpers.includes(`"${code}"`), `result map missing ${code}`);
-  }
-
-  assert(
-    startHandler.indexOf("beginActiveWorkflow()") < startHandler.indexOf("await appConfirm"),
-    "restart acquires workflow lock before awaiting confirmation",
+  const exportHandler = sourceBetween(
+    formV2ViewSource,
+    "async function formV2ExportDiagnostics",
+    "\n}\n",
   );
   assert(
-    exportHandler.indexOf("beginActiveWorkflow()") < exportHandler.indexOf("await appConfirm"),
-    "export acquires workflow lock before awaiting confirmation",
+    exportHandler.indexOf("db.settings.formDebug !== true") <
+      exportHandler.indexOf("await appConfirm") &&
+      exportHandler.lastIndexOf("db.settings.formDebug !== true") >
+        exportHandler.indexOf("await appConfirm"),
+    "diagnostic export checks the exact setting before and after the confirmation",
   );
-  for (const source of [startHandler, exportHandler]) {
-    assert(
-      source.includes("db.settings.formDebug!==true"),
-      "post-confirm exact debug recheck exists",
-    );
-    assert(
-      source.includes("activeWorkflowCount!==1") && source.includes("db.active"),
-      "post-confirm workflow ownership recheck exists",
-    );
-    assert(
-      source.includes("formDiagnosticCoordinatorTokenMatches(token)"),
-      "post-confirm coordinator token recheck exists",
-    );
-  }
+  assert(
+    exportHandler.includes("db.settings.formDebugLandmarks === true") &&
+      exportHandler.includes("FormV2.diagnostics(") &&
+      exportHandler.includes("shareFormDiagnosticsJson(json)"),
+    "diagnostic export builds from FormV2.diagnostics and uses the shared transport",
+  );
   for (const forbidden of [
     "shareOrDownloadText",
     "lastBackupAt",
@@ -598,13 +589,31 @@ function staticUiChecks() {
     "scheduleSafetySnapshot",
     "JSON.stringify(db",
     "save(",
+    "fetch(",
   ]) {
     assert(!exportHandler.includes(forbidden), `diagnostic export excludes ${forbidden}`);
+  }
+  /* 以前の撮影画面へは、どの画面からも行けない（関数の定義と、その中の呼び出しだけが残る） */
+  const appSources = fs
+    .readdirSync(path.join(root, "scripts"))
+    .filter((f) => f.endsWith(".js"))
+    .map((f) => [f, fs.readFileSync(path.join(root, "scripts", f), "utf8")]);
+  for (const [file, source] of appSources) {
+    const body =
+      file === "47-form-view.js"
+        ? source.slice(0, source.indexOf("function openFormCapture(){"))
+        : source;
+    assert(
+      !/openFormCapture|openFormReplay|startFormReplay\(/.test(
+        body.replace(/\/\*[\s\S]*?\*\//g, ""),
+      ),
+      `${file} must not reach the earlier capture screen`,
+    );
   }
   assert(
     !formViewSource.includes("form-diagnostic-section") &&
       !html.includes("form-diagnostic-section"),
-    "diagnostic matrix controls stay out of the primary capture surface",
+    "diagnostic controls stay out of the primary capture surface",
   );
 }
 

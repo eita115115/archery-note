@@ -4,6 +4,8 @@
    撮影中はランドマークをメモリのバッファ（FormV2.makeBuffer）にためるだけで、終わってから FormAnalyze.analyzePacked に渡す。
    実時間の状態機械（46-form-core.js の stepFormPhase など）は使わない。保存するのは FormV2.buildRecord の数値だけ。
    映像・画素・ランドマークの列は保存も送信もしない。動画は、利用者が「端末に保存」を押したときだけ端末へ書き出す。
+   推移（項目を選ぶ）と一覧は 分析 > 射型 のカード、動画で確かめる画面は結果から開く（段 7・8）。
+   検証用の診断（設定「検証用の診断データ」）も、この画面の記録から書き出す。以前の撮影画面（47-form-view.js の openFormCapture）は開かない。
    検査から差し替えられる入口: loadFormPose（47-form-view.js）、formV2FrameSource、formV2Unsupported。 */
 
 const FORM_V2_MODEL = "pose_landmarker_lite v1 (tasks-vision 0.10.14)";
@@ -107,7 +109,8 @@ function formV2Beep() {
 /* ---------- 図 ---------- */
 /* 時間の帯: 引き → 保持 → 離れ を 1 射ずつ。引き戻しは白抜き、数えていない候補は破線 */
 function formV2TimelineSvg(model) {
-  const w = formV2W(), h = 74, dur = Math.max(1, model.v.dur || 0, ...model.events.map((e) => e.tS + 1)), x = (t) => 4 + ((w - 8) * Math.max(0, t)) / dur;
+  const w = formV2W(), h = 74, from = model.fromS || 0;
+  const dur = model.toS == null ? Math.max(1, model.v.dur || 0, ...model.events.map((e) => e.tS + 1)) : Math.max(1, model.toS - from), x = (t) => 4 + ((w - 8) * Math.min(dur, Math.max(0, t - from))) / dur;
   let g = `<path d="M0 46H${w}" stroke="var(--rule-strong)" stroke-width="1"/>`, lastLabel = -99;
   const label = (cx, text, cls) => {
     if (cx - lastLabel < 14) return "";
@@ -131,7 +134,7 @@ function formV2TimelineSvg(model) {
       g += label((x1 + x2) / 2, e.kind === "letdown" ? "戻" : "外", "ax");
     }
   }
-  g += `<text x="0" y="66" class="ax">0:00</text><text x="${w}" y="66" text-anchor="end" class="ax">${formV2Mmss(dur)}</text><text x="${w / 2}" y="66" text-anchor="middle" class="ax">時間</text>`;
+  g += `<text x="0" y="66" class="ax">${formV2Mmss(from)}</text><text x="${w}" y="66" text-anchor="end" class="ax">${formV2Mmss(from + dur)}</text><text x="${w / 2}" y="66" text-anchor="middle" class="ax">時間</text>`;
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="時間の帯。${model.count} 射、引き戻し ${model.letdowns} 回">${g}</svg>`;
 }
 /* 射の順の図: 帯 = 測定のゆれから出せる下限、破線 = 中央値、塗りつぶし = 違った射 */
@@ -161,7 +164,7 @@ function formV2RunChartHtml(model, cmp, key) {
   else if (ft.indistinct) note = `ばらつきは測定のゆれ（±${u(nz)}）と区別できません。`;
   else note = `ばらつき ±${u(spread)}（${ok.length} 射。射数が少ないので ${iv.lo.toFixed(1)}〜${iv.hi.toFixed(1)} 倍の幅で不確かです）。測定のゆれは ±${u(nz)}。`;
   const cm = FormV2.cmText(key, m, formV2Height());
-  const head = meta.rel ? "この回の中央値を 100%" : `中央値 ${meta.unit === "b" ? "胴の " : ""}${FormV2.fmt(key, m)}${cm ? `（${cm}）` : ""}`;
+  const head = meta.rel ? "この回の中央値を 100%" : `中央値 ${formV2ValHtml(key, m, cm)}`;
   return `<div class="fv2Chart" data-key="${key}"><div class="fv2ChartH"><b>${esc(meta.name)}</b><span>${head}</span></div><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(meta.name)}。射の順">${g}</svg><p class="basis">${note}</p></div>`;
 }
 /* 姿の図。pose = 18 個の整数（9 点 × (x, y)、0.01 胴、原点 = 両肩の中点、弓の向きが x 正、上が y 正）。見えない点は null */
@@ -196,6 +199,11 @@ function formV2OverlayHtml(model, phase, hi, only) {
   if (hi != null && hi >= 0) g += formV2PosePath(poses[hi], m, { c: "var(--info)", w: 3 });
   return `<div class="fv2Ov"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="骨格の重ね図（${phase === "rel" ? "離れのあと" : "保持"}）">${g}</svg></div>`;
 }
+/* 「胴の 33.2%（約 16cm）」を、かっこの途中で折り返さない形にする（値と cm の目安を、それぞれひとかたまりにする） */
+function formV2ValHtml(key, x, cm) {
+  const m = FormV2.META[key], b = m.unit === "b" && !m.rel ? "胴の " : "";
+  return `<span class="fv2Nw">${b}${FormV2.fmt(key, x)}</span>${cm ? `<span class="fv2Nw">（${cm}）</span>` : ""}`;
+}
 function formV2SegHtml(name, cur, opts) {
   return `<div class="seg" role="group" data-seg="${name}">${opts.map(([v, l]) => `<button type="button" data-val="${v}" aria-pressed="${cur === v}">${l}</button>`).join("")}</div>`;
 }
@@ -203,25 +211,70 @@ function formV2SegHtml(name, cur, opts) {
 /* ---------- 分析 > 射型 のカード ---------- */
 function formV2RecordLine(rec) {
   const m = FormV2.read(rec), hold = FormV2.median(m.compared.map((e) => e.vals.holdMs));
-  return { m, title: `${fmtMDW(rec.date)}\u3000${m.count} 射${Number.isFinite(hold) ? `\u3000保持 ${(hold / 1000).toFixed(1)} 秒` : ""}`, sub: `${formV2ViewText(rec.v2.view)}${m.letdowns ? `。引き戻し ${m.letdowns} 回` : ""}${rec.cap.src === "replay" ? "。保存した動画" : ""}` };
+  const part = m.part ? `。${m.part.of} つに分けた記録の ${m.part.k} つめ（${m.offset + 1} 射目から）` : "";
+  return { m, title: `${fmtMDW(rec.date)}\u3000${m.count} 射${Number.isFinite(hold) ? `\u3000保持 ${(hold / 1000).toFixed(1)} 秒` : ""}`, sub: `${formV2ViewText(rec.v2.view)}${m.letdowns ? `。引き戻し ${m.letdowns} 回` : ""}${rec.cap.src === "replay" ? "。保存した動画" : ""}${part}` };
 }
-/* 保持の時間の推移（比べてよい回が 3 回以上あるときだけ） */
+/* ---------- 推移（design.md 2.9・5.4）: 項目を選ぶ。比べてよい回だけを描く ---------- */
+let formV2TrendKey = "holdMs"; // 選んでいる項目（画面の状態。保存しない）
+let formV2ListAll = false; // 記録の一覧を全部出すか
+function formV2TrendKeys() {
+  return FormAnalyze.DEFAULT_KEYS.filter((k) => FormV2.META[k]);
+}
+/* 軸の目盛り（3〜4 本）。lo〜hi を切りのよい間隔で割る */
+function formV2Ticks(lo, hi) {
+  const raw = (hi - lo) / 3 || 1, p = Math.pow(10, Math.floor(Math.log10(raw))), step = [1, 2, 5, 10].map((m) => m * p).find((v) => v >= raw) || raw;
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
+  return { out, dp: Math.max(0, -Math.floor(Math.log10(step) + 1e-9)) };
+}
+function formV2TrendCond(t, key) {
+  const ref = t.ref, kind = FormV2.META[key].kind, view = (ref && ref.v2.view) || {}, side = view.side === "b" ? "背中側" : "胸側";
+  const hand = ref && ref.cap.hand === "left" ? "左利き" : "右利き";
+  if (kind === "t") return `${hand}の記録（時間の項目は、置き方が違っても比べます）`;
+  if (kind === "h") return `${hand}・${side}で、真横かやや斜めの記録（高さの項目）`;
+  return `${hand}・${side}で真横、腕の写る長さの差が 6% 以内の記録（面内の項目）`;
+}
+function formV2TrendWhy(t) {
+  const list = Object.keys(t.why).map((k) => `${k}（${t.why[k]} 回）`);
+  return list.length ? `入れていない回: ${list.join("、")}。` : "";
+}
 function formV2TrendHtml(records) {
-  const t = FormV2.trend(records, "holdMs"), pts = t.points;
-  if (pts.length < 3) return pts.length ? `<p class="basis">保持の時間の推移は、比べてよい記録が 3 回になると出ます（いま ${pts.length} 回）。</p>` : "";
-  const w = formV2W(), h = 118, pt = 12, pb = 26, s = (v) => v / 1000;
-  const lo = Math.min(...pts.map((p) => s(p.q1))), hi = Math.max(...pts.map((p) => s(p.q3))), pad = Math.max(0.3, (hi - lo) * 0.2);
-  const y = (v) => pt + (h - pt - pb) * (1 - (v - (lo - pad)) / (hi + pad - (lo - pad))), x = (i) => 56 + ((w - 76) * i) / (pts.length - 1);
+  const keys = formV2TrendKeys(), key = keys.includes(formV2TrendKey) ? formV2TrendKey : keys[0];
+  const t = FormV2.trend(records, key), pts = t.points, meta = FormV2.META[key], body = meta.unit === "b" && !meta.rel ? "胴の " : "";
+  if (!t.ref) return "";
+  const picker = `<label class="lrow fv2Pick"><span class="lk">項目</span><select class="pick" id="fv2TrendKey" data-testid="form-v2-trend-key" aria-label="推移の項目">${keys.map((k) => `<option value="${k}"${k === key ? " selected" : ""}>${esc(FormV2.META[k].name)}</option>`).join("")}</select></label>`;
+  const wrap = (inner) => `<div class="fv2Sub" data-testid="form-v2-trend" data-key="${key}" data-points="${pts.length}" data-excluded="${t.excluded}"><div class="fv2ChartH"><b>推移</b><span>${pts.length >= 3 ? `${pts.length} 回` : "比べてよい回だけ"}</span></div>${picker}${inner}</div>`;
+  if (t.refUnmeasured) return wrap(`<p class="basis" data-testid="form-v2-trend-note">いちばん新しい記録の置き方（${esc(formV2ViewText(t.ref.v2.view))}）では「${esc(meta.name)}」を測れないので、この項目の推移は出していません。</p>`);
+  if (pts.length < 3) return wrap(`<p class="basis" data-testid="form-v2-trend-note">「${esc(meta.name)}」を比べてよい記録は、まだ ${pts.length} 回です。3 回になると推移を出します。対象は、いちばん新しい記録と同じ条件: ${esc(formV2TrendCond(t, key))}。${esc(formV2TrendWhy(t))}</p>`);
+  const ref = meta.rel ? pts[0].med : NaN, sh = (v) => FormV2.shown(key, v, ref);
+  const rows = pts.map((p) => { const a = sh(p.q1), b = sh(p.q3); return { p, med: sh(p.med), lo: Math.min(a, b), hi: Math.max(a, b) }; });
+  const w = formV2W(), h = 150, pt = 12, pb = 26, left = 58;
+  const lo0 = Math.min(...rows.map((r) => r.lo)), hi0 = Math.max(...rows.map((r) => r.hi)), pad = Math.max((hi0 - lo0) * 0.2, meta.unit === "s" ? 0.3 : 1);
+  const lo = lo0 - pad, hi = hi0 + pad, y = (v) => pt + (h - pt - pb) * (1 - (v - lo) / (hi - lo)), x = (i) => left + ((w - left - 20) * i) / (rows.length - 1);
+  const ticks = formV2Ticks(lo0 - pad * 0.5, hi0 + pad * 0.5);
   let g = "";
-  for (let v = Math.ceil(lo - pad); v <= hi + pad; v++) g += `<path d="M0 ${y(v).toFixed(1)}H${w}" stroke="var(--rule)" stroke-width="1"/><text x="0" y="${(y(v) - 4).toFixed(1)}" class="ax">${v} 秒</text>`;
-  pts.forEach((p, i) => {
-    g += `<path d="M${x(i).toFixed(1)} ${y(s(p.q1)).toFixed(1)}V${y(s(p.q3)).toFixed(1)}" stroke="var(--rule-strong)" stroke-width="5"/><circle cx="${x(i).toFixed(1)}" cy="${y(s(p.med)).toFixed(1)}" r="5" fill="${i === pts.length - 1 ? "var(--accent)" : "var(--ink)"}"/>`;
-    if (i === 0 || i === pts.length - 1) g += `<text x="${x(i).toFixed(1)}" y="${h - 6}" text-anchor="${i ? "end" : "start"}" class="ax">${fmtMD(p.date)}</text>`;
+  for (const v of ticks.out) g += `<path d="M0 ${y(v).toFixed(1)}H${w}" stroke="var(--rule)" stroke-width="1"/><text x="0" y="${(y(v) - 4).toFixed(1)}" class="ax">${FormV2.fmt(key, v, { dp: ticks.dp })}</text>`;
+  rows.forEach((r, i) => {
+    if (r.p.gear) g += `<path d="M${x(i).toFixed(1)} ${pt}V${h - pb}" stroke="var(--info)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    g += `<path d="M${x(i).toFixed(1)} ${y(r.lo).toFixed(1)}V${y(r.hi).toFixed(1)}" stroke="var(--rule-strong)" stroke-width="5"/><circle cx="${x(i).toFixed(1)}" cy="${y(r.med).toFixed(1)}" r="5" fill="${i === rows.length - 1 ? "var(--accent)" : "var(--ink)"}"/>`;
+    if (i === 0 || i === rows.length - 1) g += `<text x="${x(i).toFixed(1)}" y="${h - 6}" text-anchor="${i ? "end" : "start"}" class="ax">${fmtMD(r.p.date)}</text>`;
   });
-  const meds = pts.slice(-5).map((p) => s(p.med)), shots = pts.reduce((n, p) => n + p.n, 0);
-  return `<div class="fv2Sub" data-testid="form-v2-trend"><div class="fv2ChartH"><b>保持の時間の推移</b><span>${pts.length} 回</span></div>
-    <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="保持の時間の推移。${pts.length} 回">${g}</svg>
-    <p class="basis">直近 ${meds.length} 回の中央値は ${Math.min(...meds).toFixed(1)}〜${Math.max(...meds).toFixed(1)} 秒でした。点は各回の中央値、縦の線は射どうしの幅（四分位）。${pts.length} 回・計 ${shots} 射。保持の時間は置き方が違っても比べられます。${t.excluded ? `利き手や解析の版、写りが違う ${t.excluded} 回は入れていません。` : ""}</p></div>`;
+  const dp = Math.max(1, meta.dp), f = (v, o) => FormV2.fmt(key, v, Object.assign({ dp }, o || {}));
+  const last = rows.slice(-5).map((r) => r.med), ns = pts.map((p) => p.n), shots = ns.reduce((n, v) => n + v, 0);
+  const unc = t.unc == null ? null : FormV2.shownSize(key, t.unc, ref), range = FormV2.shownSize(key, t.range, ref);
+  const cmA = FormV2.cmText(key, Math.min(...last), formV2Height()), cmB = FormV2.cmText(key, Math.max(...last), formV2Height());
+  const cm = cmA && cmB ? `${cmA.replace("cm", "")}〜${cmB.replace("約 ", "")}` : "";
+  let doubt = "各回の射が少ないので、中央値の不確かさは見積もれていません。";
+  if (unc != null) {
+    doubt = `各回の中央値には、射どうしのばらつきから見て ±${f(unc)} ほどの不確かさがあります（95% の目安）。`
+      + (range <= 2 * unc ? `回どうしの中央値の差（いちばん離れた 2 回で ${f(range)}）は、この不確かさと区別できません。` : `中央値がいちばん離れた 2 回の差は ${f(range)} で、この不確かさより大きい違いです。`);
+  }
+  if (meta.kind !== "t") doubt += "台の位置や向きが変わると、回ごとに一定のずれが乗ります。その大きさは見積もれていません。";
+  return wrap(`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(meta.name)}の推移。${pts.length} 回">${g}</svg>
+    <div class="fv2Legend"><span><i class="k7"></i>各回の中央値</span><span><i class="k8"></i>射どうしの幅（四分位）</span>${rows.some((r) => r.p.gear) ? `<span><i class="k9"></i>弓具が前の回と違う</span>` : ""}</div>
+    <p class="fact" data-testid="form-v2-trend-fact">直近 ${last.length} 回の中央値は ${body}${f(Math.min(...last), { bare: true })}〜${f(Math.max(...last))}${/[%°]$/.test(f(1)) ? " " : ""}でした${cm ? `（${cm}）` : ""}。</p>
+    <p class="basis" data-testid="form-v2-trend-basis">対象: ${esc(formV2TrendCond(t, key))}。${pts.length} 回（${fmtMD(pts[0].date)}〜${fmtMD(pts[pts.length - 1].date)}）、計 ${shots} 射、各 ${Math.min(...ns)}${Math.min(...ns) === Math.max(...ns) ? "" : `〜${Math.max(...ns)}`} 射。測れなかった値（—）は数えていません。${meta.rel ? "最初の回の中央値を 100% としています。" : ""}${esc(formV2TrendWhy(t))}</p>
+    <p class="basis" data-testid="form-v2-trend-doubt">${doubt}</p>`);
 }
 /* 切のとき: その場で入にできる（design.md 2.1） */
 function formTrackingOffCard() {
@@ -245,14 +298,16 @@ function formTrackingCard(records = db.formAnalyses || []) {
   let latest = "";
   if (v2.length) {
     const rec = v2[0], line = formV2RecordLine(rec), cmp = FormV2.compare(line.m, FormAnalyze);
-    latest = `<div class="fv2Sub" data-testid="form-v2-latest"><div class="fv2ChartH"><b>直近の記録</b><span>${fmtMDW(rec.date)}</span></div>
+    latest = `<div class="fv2Sub" data-testid="form-v2-latest"><div class="fv2ChartH"><b>直近の記録</b><span>${fmtMDW(rec.date)}${line.m.part ? `・${line.m.part.of} つに分けた ${line.m.part.k} つめ` : ""}</span></div>
       <p class="fact">${esc(FormV2.summary(line.m, cmp, formV2Height()).text)}</p>
       <p class="basis">${line.m.count} 射${line.m.letdowns ? `、引き戻し ${line.m.letdowns} 回` : ""}。${esc(formV2ViewText(rec.v2.view))}、${rec.cap.o === "l" ? "横向き" : rec.cap.o === "p" ? "縦向き" : "正方形"}。</p></div>`;
   }
-  const rows = v2.slice(0, 8).map((rec) => {
+  const skipped = new Set(FormV2.trend(v2, formV2TrendKeys().includes(formV2TrendKey) ? formV2TrendKey : "holdMs").skipped);
+  const shownRows = formV2ListAll ? v2 : v2.slice(0, 8);
+  const rows = shownRows.map((rec) => {
     const line = formV2RecordLine(rec);
     return `<div class="formAnalysisRow">
-      <button class="lrow link fv2Item" data-form-v2-id="${esc(rec.id)}" type="button"><span class="lmain"><b>${esc(line.title)}</b><span>${esc(line.sub)}</span></span>${FORM_V2_GO}</button>
+      <button class="lrow link fv2Item" data-form-v2-id="${esc(rec.id)}" type="button"><span class="lmain"><b>${esc(line.title)}</b><span>${esc(line.sub)}${skipped.has(rec.id) ? "。選んだ項目の推移には入れていません" : ""}</span></span>${FORM_V2_GO}</button>
       <button class="btn sm ghost histDelBtn" data-del-form="${esc(rec.id)}" type="button" aria-label="${esc(fmtMDW(rec.date))}の射型記録を削除">${icon("del")}</button>
     </div>`;
   }).join("");
@@ -262,9 +317,10 @@ function formTrackingCard(records = db.formAnalyses || []) {
   return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="vsecH"><h2>射型の記録</h2><span class="aside">試験中${v2.length ? `・${v2.length}件` : ""}</span></div>
     <div class="btnRow"><button type="button" class="btn fv2Tall" id="formStart" data-testid="form-v2-start">${icon("camera")} 撮影して記録する</button></div>
     <div class="btnRow fv2Tight"><button type="button" class="btn sec" id="formReplay" data-testid="form-v2-replay">保存した動画を解析する</button></div>
-    ${debug ? `<p class="basis" data-testid="form-v2-debug-note">「検証用の診断データ」が入のあいだは、診断を取るために以前の撮影画面（撮りながら数える方式）で開きます。設定 &gt; 記録 で切にすると、新しい記録の画面になります。</p>` : ""}
+    ${debug ? `<p class="basis" data-testid="form-v2-debug-note">「検証用の診断データ」が入です。撮影の画面と数え方はふだんと同じで、保存する記録に解析器の中の値（数値だけ）を付けます。書き出しは、結果の画面か 設定 &gt; 記録 から行います。</p>` : ""}
     ${latest}${formV2TrendHtml(v2)}
-    ${rows ? `<div class="fv2Sub"><div class="fv2ChartH"><b>記録</b><span>${v2.length}件${v2.length > 8 ? "・新しい8件を表示" : ""}</span></div><div class="formRecordList" data-testid="form-v2-list">${rows}</div>
+    ${rows ? `<div class="fv2Sub"><div class="fv2ChartH"><b>記録</b><span>${v2.length}件${v2.length > 8 && !formV2ListAll ? "・新しい8件を表示" : ""}</span></div><div class="formRecordList" data-testid="form-v2-list">${rows}</div>
+      ${v2.length > 8 ? `<div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2ListAll" data-testid="form-v2-list-all">${formV2ListAll ? "新しい 8 件だけにする" : `${v2.length} 件すべてを表示`}</button></div>` : ""}
       <p class="basis">映像は残していません。数値だけを、この端末の中に保存しています。期間は撮影日、弓具・距離は紐づけた練習の条件で選んでいます。</p></div>` : ""}
     ${empty}
     ${legacy.length ? formLegacyRecordsHtml(legacy) : ""}
@@ -280,6 +336,15 @@ function bindFormV2Card() {
     const start = $("#formStart");
     if (start) start.focus({ preventScroll: true });
   };
+  const key = $("#fv2TrendKey");
+  if (key) key.onchange = () => {
+    formV2TrendKey = key.value;
+    render();
+    const again = $("#fv2TrendKey");
+    if (again) again.focus({ preventScroll: true });
+  };
+  const all = $("#fv2ListAll");
+  if (all) all.onclick = () => { formV2ListAll = !formV2ListAll; render(); };
   document.querySelectorAll("[data-form-v2-id]").forEach((b) => (b.onclick = () => {
     const rec = (db.formAnalyses || []).find((r) => r && r.id === b.dataset.formV2Id);
     if (rec) formV2OpenRecord(rec);
@@ -300,8 +365,11 @@ function formV2NewState(src) {
     video: document.createElement("video"), stream: null, landmarker: null, source: null, running: false,
     buffer: null, live: null, times: [], fps: 0, mem: {}, t0: NaN, lastT: -Infinity, lastUi: -Infinity, noPoseSince: NaN, lastLms: null,
     recorder: null, recChunks: [], recBlob: null, recStart: NaN, recMime: "",
-    result: null, record: null, saved: false, savedBytes: 0, overlay: "hold", shot: null, closed: false, startedAt: 0, fileName: "", notice: "",
+    recEnd: NaN, review: null, urls: [], place: null,
+    result: null, records: [], pi: 0, saved: false, savedBytes: 0, overlay: "hold", shot: null, closed: false, startedAt: 0, fileName: "", notice: "",
   };
+  /* 36 射を超えた撮影は、いくつかの記録に分かれる（FormV2.buildRecords）。S.record = いま見ている 1 件 */
+  Object.defineProperty(S, "record", { get: () => S.records[S.pi] || null, set: (v) => { if (v) S.records[S.pi] = v; else { S.records = []; S.pi = 0; } } });
   S.root = S.ovl.querySelector(".sheet");
   S.video.playsInline = true;
   S.video.muted = true;
@@ -314,7 +382,12 @@ function formV2Close(S) {
   if (S.closed) return;
   S.closed = true;
   formV2StopCapture(S);
+  formV2EndReview(S);
+  /* 映像の URL とメモリの中の動画・点の列を手放す（アプリの中には何も残さない） */
+  for (const u of S.urls.splice(0)) URL.revokeObjectURL(u);
   if (S.fileUrl) { URL.revokeObjectURL(S.fileUrl); S.fileUrl = null; }
+  try { S.video.removeAttribute("src"); S.video.load(); } catch (e) {}
+  S.recChunks = [];
   if (S.onResize) window.removeEventListener("resize", S.onResize);
   if (S.onHide) document.removeEventListener("visibilitychange", S.onHide);
   S.buffer = null;
@@ -534,6 +607,7 @@ function formV2PlaceFrame(S, lms, vw, vh, tMs) {
   if (tMs - S.lastUi < 250) return;
   S.lastUi = tMs;
   const p = FormV2.placement(lms, { w: vw, h: vh }, S.hand, S.fps, S.mem), box = S.root.querySelector("#fv2Rows"), tag = S.root.querySelector("#fv2Tag");
+  S.place = { rows: p.rows, tpx: p.tpx, left: S.mem.left, right: S.mem.right, rho: S.mem.rho }; // 始めたときの確認の結果（検証用の診断に入れる）
   if (box) box.innerHTML = p.rows.map(S.rowHtml).join("");
   if (tag) tag.textContent = `${vw < vh ? "縦向き" : vw > vh ? "横向き" : "正方形"} ${vw}×${vh}`;
 }
@@ -609,6 +683,7 @@ function formV2StartRec(S) {
 }
 function formV2StopRec(S) {
   const r = S.recorder;
+  if (r) S.recEnd = Number.isFinite(S.t0) ? S.lastT - S.t0 : 0;
   S.recorder = null;
   try { if (r && r.state !== "inactive") r.stop(); } catch (e) {}
 }
@@ -626,7 +701,13 @@ async function formV2ShareVideo(S) {
   const ext = blob.type.includes("mp4") ? "mp4" : "webm", file = new File([blob], `archery-form-${S.record ? S.record.date : today()}.${ext}`, { type: blob.type });
   try {
     if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file] });
-    else { const u = URL.createObjectURL(blob), a = document.createElement("a"); a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 1000); toast("動画を書き出しました"); }
+    else {
+      const u = URL.createObjectURL(blob), a = document.createElement("a");
+      S.urls.push(u);
+      a.href = u; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => { const i = S.urls.indexOf(u); if (i >= 0) { S.urls.splice(i, 1); URL.revokeObjectURL(u); } }, 1000);
+      toast("動画を書き出しました");
+    }
   } catch (e) { if (!e || e.name !== "AbortError") toast("動画を書き出せませんでした", 4000); }
 }
 
@@ -711,21 +792,24 @@ function formV2Analyze(S) {
   });
   setTimeout(() => {
     if (S.closed) return;
-    const result = FormAnalyze.analyzePacked(S.buffer.pack(S.hand), { handedness: S.hand, fps: fpsSeen || 30, rhoRef: formV2RhoRef(S.hand) });
+    const diag = db.settings.formDebug === true; // 検証用: 解析器の中の値も受け取る（数え方は変わらない）
+    const result = FormAnalyze.analyzePacked(S.buffer.pack(S.hand), { handedness: S.hand, fps: fpsSeen || 30, rhoRef: formV2RhoRef(S.hand), debug: diag });
     S.result = result;
     const replay = S.src === "replay";
     const date = replay ? S.fileDate : today();
     const linked = replay ? null : db.sessions.filter((s) => s && s.date === date).slice(-1)[0] || null;
-    S.record = FormV2.buildRecord(result, {
-      id: uid(), date, ts: S.startedAt || Date.now(), sessionId: linked ? linked.id : null, setupId: linked ? linked.setupId || null : null,
+    const nShots = result.shots.filter((x) => x.kind === "shot").length, nParts = Math.max(1, Math.ceil(nShots / FormV2.LIMITS.MAX_SHOTS));
+    S.pi = 0;
+    S.records = FormV2.buildRecords(result, {
+      id: uid(), ids: Array.from({ length: nParts - 1 }, () => uid()), date, ts: S.startedAt || Date.now(), sessionId: linked ? linked.id : null, setupId: linked ? linked.setupId || null : null,
       appVer: APP_VER, modelVer: FORM_V2_MODEL, frame, facing: replay ? null : S.facing, hand: S.hand, src: S.src,
-      note: replay ? "(保存済み動画から解析)" : "",
+      note: replay ? "(保存済み動画から解析)" : "", diag, placement: replay ? null : S.place,
     });
-    const m = FormV2.read(S.record), q = result.quality, shots = m.count, df = Math.max(0, ...FormV2.COLS.map((k) => (FormV2.META[k].unit === "s" ? 0 : m.df[k] || 0)));
-    const found = `${shots} 射、引き戻し ${m.letdowns} 回。${m.openCands ? `離れがはっきり写らなかった保持 ${m.openCands} 回` : "離れがはっきり写らなかった保持 なし"}`;
+    const tot = formV2Totals(S), m = FormV2.read(S.record), q = result.quality, shots = tot.shots, df = Math.max(0, ...FormV2.COLS.map((k) => (FormV2.META[k].unit === "s" ? 0 : m.df[k] || 0)));
+    const found = `${shots} 射、引き戻し ${tot.letdowns} 回。${tot.openCands ? `離れがはっきり写らなかった保持 ${tot.openCands} 回` : "離れがはっきり写らなかった保持 なし"}${S.records.length > 1 ? `。1 つの記録は ${FormV2.LIMITS.MAX_SHOTS} 射までなので、${S.records.length} つの記録に分けます` : ""}`;
     const vals = shots ? `${shots} 射 × ${FormV2.keysFor(S.record).length} 項目。${formV2ViewText(S.record.v2.view)}` : "射が無いので測っていません";
     const noise = df ? `保持の中の区間どうしの差 ${df} 個から` : "見積もれる保持がありませんでした";
-    const any = m.events.length > 0;
+    const any = tot.events > 0;
     const warns = q.warnings || [];
     const why = warns.includes("tooShort") ? "記録が短すぎました（10 コマ未満）。"
       : warns.includes("noBody") ? "体の点が取れませんでした。上半身と両腕が入る向きに置いてください。"
@@ -745,15 +829,25 @@ function formV2Analyze(S) {
       on("fv2Back", () => formV2Close(S));
       on("fv2ZeroClose", () => formV2Close(S));
       on("fv2Show", () => formV2PaintResult(S));
-      on("fv2Again", () => { S.buffer = null; S.result = null; S.record = null; formV2BeginLive(S); });
+      on("fv2Again", () => { S.buffer = null; S.result = null; S.record = null; S.recBlob = null; formV2BeginLive(S); });
     });
   }, 30);
+}
+
+/* この撮影の全部の記録を合わせた数 */
+function formV2Totals(S) {
+  const t = { shots: 0, letdowns: 0, openCands: 0, events: 0 };
+  for (const r of S.records) { const m = FormV2.read(r); t.shots += m.count; t.letdowns += m.letdowns; t.openCands += m.openCands; t.events += m.events.length; }
+  return t;
 }
 
 /* ---- 結果（design.md 2.6） ---- */
 function formV2OpenRecord(rec) {
   const S = formV2NewState(rec.cap && rec.cap.src === "replay" ? "replay" : "live");
-  S.record = cloneData(rec);
+  /* 36 射を超えて分けた記録は、同じ撮影のほかの記録も読み、行き来できるようにする */
+  const cid = rec.v2 && rec.v2.cid, sibs = cid ? (db.formAnalyses || []).filter((r) => FormV2.isV2(r) && r.v2.cid === cid).sort((a, b) => (a.v2.part ? a.v2.part[0] : 0) - (b.v2.part ? b.v2.part[0] : 0)) : [rec];
+  S.records = cloneData(sibs.length ? sibs : [rec]);
+  S.pi = Math.max(0, S.records.findIndex((r) => r.id === rec.id));
   S.saved = true;
   S.stored = true; // 一覧から開いた保存済みの記録
   openModal(S.ovl, { escapeTarget: "#fv2Back", swipe: false });
@@ -763,6 +857,7 @@ function formV2OpenRecord(rec) {
   return S;
 }
 function formV2Rerender(S) {
+  if (S.stage === "review") return;
   const top = S.root.scrollTop;
   if (S.stage === "shot") formV2PaintShot(S, S.shot); else formV2PaintResult(S);
   S.root.scrollTop = top;
@@ -779,7 +874,7 @@ function formV2PaintResult(S) {
   const time = new Date(rec.ts || Date.now()), hhmm = `${time.getHours()}:${String(time.getMinutes()).padStart(2, "0")}`;
   const valText = (f) => {
     const ref = cmp.feat[f.key].median, x = FormV2.shown(f.key, f.value, ref), o = f.others.map((t) => FormV2.shown(f.key, t, ref)).filter(Number.isFinite), cm = FormV2.cmText(f.key, x, height), b = FormV2.META[f.key].unit === "b" && !FormV2.META[f.key].rel ? "胴の " : "";
-    return `<div class="lrow"><span class="lk">${esc(FormV2.META[f.key].name)}</span><span class="lv">${b}${FormV2.fmt(f.key, x)}${cm ? `（${cm}）` : ""}<small>ほかの ${o.length} 射 ${b}${FormV2.fmt(f.key, Math.min(...o), { bare: true })}〜${FormV2.fmt(f.key, Math.max(...o))}</small></span></div>`;
+    return `<div class="lrow"><span class="lk">${esc(FormV2.META[f.key].name)}</span><span class="lv">${formV2ValHtml(f.key, x, cm)}<small>ほかの ${o.length} 射 ${b}${FormV2.fmt(f.key, Math.min(...o), { bare: true })}〜${FormV2.fmt(f.key, Math.max(...o))}</small></span></div>`;
   };
   let basis = "";
   if (first) {
@@ -794,10 +889,15 @@ function formV2PaintResult(S) {
   const linkOpts = `<option value="">紐づけない</option>${sessions.map((s) => `<option value="${esc(s.id)}"${s.id === rec.sessionId ? " selected" : ""}>${esc(formV2SessionLabel(s))}</option>`).join("")}`;
   const warnText = { small: "体が小さく写っていました（胴の長さ 100px 未満）。位置の項目は粗くなります。", lowFps: "毎秒 15 コマ未満でした。離れの時刻は粗くなります。", gappy: "姿勢が取れなかったコマが 2 割を超えました。値が欠けた射があります。", steep: "弓手の腕がかなり上を向いていました（長い距離）。検出の境目に近い置き方です。" };
   const warns = (v.w || []).filter((w) => warnText[w]).map((w) => `<p class="basis">${warnText[w]}</p>`).join("");
-  const bytes = JSON.stringify(rec).length;
+  const bytes = S.records.reduce((n, r) => n + JSON.stringify(r).length, 0);
   const mb = S.recBlob ? Math.max(0.1, S.recBlob.size / 1e6) : 0;
+  const many = S.records.length > 1, tot = formV2Totals(S), review = formV2CanReview(S), diag = db.settings.formDebug === true;
+  const partsHtml = many ? `<section class="vsec" data-testid="form-v2-parts"><div class="vsecH"><h2>分けた記録</h2><span class="aside">${S.pi + 1} / ${S.records.length}</span></div>
+      <p class="basis">この撮影は ${tot.shots} 射でした。1 つの記録に入るのは ${FormV2.LIMITS.MAX_SHOTS} 射までなので、${S.records.length} つの記録に分けてあります。どの射も入っています。射の番号は撮影の通し番号で、射どうしを比べるのは、それぞれの記録の中です。</p>
+      <div class="fv2SegRow">${formV2SegHtml("part", String(S.pi), S.records.map((r, i) => { const pm = FormV2.read(r); return [String(i), pm.count ? `${pm.offset + 1}〜${pm.offset + pm.count}` : `${i + 1} つめ`]; }))}</div></section>` : "";
   formV2Paint(S, "result", `${formV2TopHtml("射型", "")}
     <header class="subHead fv2Head"><h3>${fmtMDW(rec.date)}の記録</h3><span class="viewDate">${hhmm}〜<br>${formV2Dur(v.dur)}</span></header>
+    ${partsHtml}
     <section class="vsec" data-testid="form-v2-summary"><div class="vsecH"><h2>この回</h2>${S.stored ? `<span class="aside">${rec.cap.src === "replay" ? "保存した動画" : "撮影"}</span>` : `<button type="button" class="txtBtn fv2FixBtn" id="fv2Fix" data-testid="form-v2-fix-open">射数を直す</button>`}</div>
       <div class="figs two"><div class="fig"><div class="l">射</div><div class="n" data-testid="form-v2-shots">${model.count}<small>射</small></div><div class="d">${model.added || model.removed ? `直した数: 足した ${model.added}・外した ${model.removed}` : `離れがはっきり写った射 ${model.count}`}</div></div>
         <div class="fig"><div class="l">引き戻し</div><div class="n" data-testid="form-v2-letdowns">${model.letdowns}<small>回</small></div><div class="d">射に数えていません</div></div></div>
@@ -805,7 +905,6 @@ function formV2PaintResult(S) {
       <div class="fv2Legend"><span><i class="k1"></i>保持</span><span><i class="k2"></i>離れ</span><span><i class="k3"></i>戻 = 引き戻し</span>${model.openCands ? `<span><i class="k4"></i>？ = 数えていない保持</span>` : ""}${model.removed ? `<span><i class="k3"></i>外 = 外した射</span>` : ""}</div>
       ${model.openCands ? `<p class="basis" data-testid="form-v2-cand-note">離れがはっきり写らなかった保持が ${model.openCands} 回あります。射かもしれませんが、数には入れていません。${S.stored ? "" : "「射数を直す」で足せます。"}</p>` : ""}
       ${lowConf.length ? `<p class="basis">${lowConf.join("・")} 射目は、離れの位置の決め手が弱めでした。数には入れています。動画があれば確かめてください。</p>` : ""}
-      ${v.over ? `<p class="basis">1 つの記録に入るのは ${FormV2.LIMITS.MAX_SHOTS} 射までです。それより後ろの ${v.over} 射は、この記録に入っていません。</p>` : ""}
     </section>
     <section class="vsec" data-testid="form-v2-diff"><div class="vsecH"><h2>ほかと違った射</h2><span class="aside">${first ? `${first.n} 射目` : "なし"}</span></div>
       <p class="fact" data-testid="form-v2-sentence">${esc(sum.text)}</p>
@@ -831,24 +930,31 @@ function formV2PaintResult(S) {
       <label class="lrow fv2Pick"><span class="lk">練習</span><select class="pick" id="fv2Link" data-testid="form-v2-link" aria-label="紐づける練習">${linkOpts}</select></label>
       ${warns}
       <details class="fv2More"><summary>一台のカメラでは見えないもの</summary><ul>${FORM_V2_UNSEEN.map((t) => `<li>${t}</li>`).join("")}</ul></details>
-      ${S.recBlob ? `<div class="btnRow"><button type="button" class="btn sec" id="fv2Video" data-testid="form-v2-video-save">動画を端末に保存（${mb.toFixed(mb < 10 ? 1 : 0)}MB）</button></div>
-        <p class="basis">この動画はアプリの中には保存されません。この画面を閉じると消えます。残すときは「端末に保存」で写真かファイルへ書き出してください。</p>` : ""}
+      ${review ? `<div class="btnRow"><button type="button" class="btn sec" id="fv2Review" data-testid="form-v2-review">動画で確かめる</button></div>` : ""}
+      ${S.recBlob ? `<div class="btnRow${review ? " fv2Tight" : ""}"><button type="button" class="btn sec" id="fv2Video" data-testid="form-v2-video-save">動画を端末に保存（${mb.toFixed(mb < 10 ? 1 : 0)}MB）</button></div>
+        <p class="basis">この動画はアプリの中には保存されません。この画面を閉じると消えます。残すときは「端末に保存」で写真かファイルへ書き出してください。</p>` : review ? `<p class="basis">選んだ動画に、読み取った点を重ねて見られます。動画はアプリの中には保存されません。</p>` : ""}
+      ${diag ? `<div class="btnRow"><button type="button" class="btn sec" id="fv2Diag" data-testid="form-v2-diag-export">検証用の診断を書き出す</button></div>
+        <p class="basis" data-testid="form-v2-diag-note">「検証用の診断データ」が入です。${rec.v2.dg ? "この記録には、解析器の中の値（数値だけ）が付いています。" : "この記録は設定が切のあいだに保存したので、解析器の中の値は付いていません。記録の数値だけを書き出します。"}映像・画像・日付・メモは入りません。${S.buffer && db.settings.formDebugLandmarks === true ? "「体の点の列も含める」が入なので、体の 9 点の位置の列も入ります。" : ""}</p>` : ""}
       ${S.saved ? "" : `<div class="btnRow"><button type="button" class="btn sec" id="fv2Discard" data-testid="form-v2-discard">保存せずに閉じる</button></div>`}
     </section>
-    <div class="actbar" data-testid="form-v2-actbar">${S.saveError ? `<div class="fv2Saved err" role="alert">記録を保存できませんでした。端末の保存領域が足りません。結果はこの画面に残っています。設定 &gt; データ でバックアップを書き出してから、もう一度試してください。</div>` : ""}${S.saved && !S.stored ? `<div class="fv2Saved" data-testid="form-v2-saved" role="status">保存しました。数値だけを残しました（${(S.savedBytes / 1000).toFixed(1)}KB）。</div>` : ""}
+    <div class="actbar" data-testid="form-v2-actbar">${S.saveError ? `<div class="fv2Saved err" role="alert">記録を保存できませんでした。端末の保存領域が足りません。結果はこの画面に残っています。設定 &gt; データ でバックアップを書き出してから、もう一度試してください。</div>` : ""}${S.saved && !S.stored ? `<div class="fv2Saved" data-testid="form-v2-saved" role="status">保存しました。数値だけを残しました（${many ? `${S.records.length} つの記録、` : ""}${(S.savedBytes / 1000).toFixed(1)}KB）。</div>` : ""}
       <button type="button" class="btn pri" id="fv2Save" data-testid="form-v2-save">${S.saved ? "射型へ戻る" : S.saveError ? "もう一度試す" : "記録を保存する"}</button></div>`, () => {
     const on = (id, fn) => { const b = S.root.querySelector("#" + id); if (b) b.onclick = fn; };
     const leave = async () => {
-      if (S.saved || (await appConfirm(`${model.count} 射の結果を保存せずに閉じますか？`, { danger: true, okLabel: "閉じる" }))) formV2Close(S);
+      if (S.saved || (await appConfirm(`${tot.shots} 射の結果を保存せずに閉じますか？`, { danger: true, okLabel: "閉じる" }))) formV2Close(S);
     };
     on("fv2Back", leave);
     on("fv2Discard", leave);
     on("fv2Fix", () => formV2OpenFix(S));
     on("fv2ToShot", () => formV2PaintShot(S, first ? first.row : 0));
     on("fv2Video", () => formV2ShareVideo(S));
+    on("fv2Review", () => formV2PaintReview(S));
+    on("fv2Diag", () => formV2ExportDiagnostics(S.records, S.stored ? null : S.buffer));
+    S.root.querySelectorAll('[data-seg="part"] button').forEach((b) => (b.onclick = () => { S.pi = +b.dataset.val; S.shot = null; formV2PaintResult(S); }));
     on("fv2Save", () => {
       if (S.saved) { formV2Close(S); return; }
-      const out = cloneData(S.record), done = commitFormDiagnosticDbCandidate(db, { formAnalyses: (db.formAnalyses || []).concat(out) }, { reason: "form-analysis" }, save);
+      /* 分けた記録は、全部を 1 回で保存する（途中までだけ残ることがない） */
+      const out = cloneData(S.records), done = commitFormDiagnosticDbCandidate(db, { formAnalyses: (db.formAnalyses || []).concat(out) }, { reason: "form-analysis" }, save);
       S.saveError = !done.ok;
       if (done.ok) { S.saved = true; S.savedBytes = bytes; nativePulse("success"); }
       formV2PaintResult(S);
@@ -857,20 +963,21 @@ function formV2PaintResult(S) {
     const link = S.root.querySelector("#fv2Link");
     if (link) link.onchange = () => {
       const s = sessions.find((x) => x.id === link.value) || null;
-      S.record.sessionId = s ? s.id : null;
-      S.record.setupId = s ? s.setupId || null : null;
+      for (const r of S.records) { r.sessionId = s ? s.id : null; r.setupId = s ? s.setupId || null : null; }
       if (S.saved) {
-        /* 保存済みの記録は、紐づけだけを書き換える */
-        const cur = (db.formAnalyses || []).find((r) => r && r.id === S.record.id);
-        if (cur) { cur.sessionId = S.record.sessionId; cur.setupId = S.record.setupId; save({ reason: "form-analysis-link" }); }
+        /* 保存済みの記録は、紐づけだけを書き換える（分けた記録は全部） */
+        let touched = false;
+        for (const r of S.records) {
+          const cur = (db.formAnalyses || []).find((x) => x && x.id === r.id);
+          if (cur) { cur.sessionId = r.sessionId; cur.setupId = r.setupId; touched = true; }
+        }
+        if (touched) save({ reason: "form-analysis-link" });
       }
     };
     const date = S.root.querySelector("#fv2Date");
     if (date) date.onchange = () => {
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date.value) || date.value > today()) { date.value = S.record.date; return; }
-      S.record.date = date.value;
-      S.record.sessionId = null;
-      S.record.setupId = null;
+      for (const r of S.records) { r.date = date.value; r.sessionId = null; r.setupId = null; }
       formV2Rerender(S);
     };
   });
@@ -929,7 +1036,7 @@ function formV2PaintShot(S, row) {
   };
   const pct = height ? `（身長 ${height}cm なら 1% は約 ${((FormV2.TORSO_PER_HEIGHT * height) / 100).toFixed(1)}cm。目安です）` : "";
   formV2Paint(S, "shot", `${formV2TopHtml("結果", "")}
-    <header class="subHead fv2Head"><h3>${e.n} 射目</h3><span class="viewDate">${formV2Mmss(e.tS)}<br>${model.count} 射中</span></header>
+    <header class="subHead fv2Head"><h3>${e.n} 射目</h3><span class="viewDate">${formV2Mmss(e.tS)}<br>${model.count === n ? `${n} 射中` : `値を測れた ${n} 射中`}</span></header>
     <section class="vsec" data-testid="form-v2-shot-time"><div class="vsecH"><h2>時間</h2><span class="aside">縦線 = ほかの ${n - 1} 射の中央値</span></div>
       <div class="fv2Bars">${[["drawMs", "引き"], ["holdMs", "保持"], ["followMs", "弓手を上げていた"]].map(([k, l]) => bar(k, l)).join("")}</div></section>
     <section class="vsec" data-testid="form-v2-shot-overlay"><div class="vsecH"><h2>重ね図</h2><span class="aside">青 = この射、灰 = ほかの中央</span></div>
@@ -937,6 +1044,7 @@ function formV2PaintShot(S, row) {
       <p class="basis">灰色は、ほかの ${n - 1} 射の点ごとの中央値です。保存した姿（9 点）から描いています。</p></section>
     <section class="vsec" data-testid="form-v2-shot-table"><div class="vsecH"><h2>射ごとの値</h2><span class="aside">${flagged.size ? `${flagged.size} 項目で違い` : "違いなし"}</span></div>
       <div class="fv2Tbl"><div class="fv2Tr h"><span>項目</span><span>この射</span><span>ほか ${n - 1} 射</span><span>差</span></div>${keys.map(tr).join("")}</div>
+      ${model.count === n ? "" : `<p class="basis" data-testid="form-v2-shot-count-note">この記録の射数は ${model.count} 射です。足した ${model.added} 射は値を測れていないので、ここで比べているのは ${n} 射です。</p>`}
       <p class="basis">色の付いた行は、差が測定のゆれから出せる下限を超えています。% は胴の長さに対する割合です${pct}。引き尺の目安は、この回の中央値を 100% としています。「—」は測れなかった値です。</p>
       <div class="btnRow"><button type="button" class="btn sec" id="fv2Prev" data-testid="form-v2-prev">前の射</button><button type="button" class="btn sec" id="fv2Next" data-testid="form-v2-next">次の射</button></div>
     </section>`, () => {
@@ -945,4 +1053,224 @@ function formV2PaintShot(S, row) {
     S.root.querySelector("#fv2Next").onclick = () => formV2PaintShot(S, (i + 1) % n);
     S.root.querySelectorAll('[data-seg="overlay"] button').forEach((b) => (b.onclick = () => { S.overlay = b.dataset.val; formV2Rerender(S); }));
   });
+}
+
+/* ---- 動画で確かめる（design.md 2.10）----
+   撮りながら残した動画（S.recBlob）か、選んだ動画（S.fileUrl）を再生し、メモリにある点の列（S.buffer）から骨格を重ねる。再推論はしない。
+   射の区間では、ほかの射の中央の姿（保存する 9 点 = ps・pr）を白い線で重ねる。動画も点の列も、アプリの中には保存しない。
+   上限: 撮りながら残す動画は 10 分・約 1.5Mbps（約 110MB）。点の列は 30 分で約 6〜13MB。画面を閉じると、どちらも手放す */
+function formV2CanReview(S) {
+  return !!(S.buffer && S.buffer.n > 1 && !S.stored && (S.recBlob || (S.src === "replay" && S.fileUrl)));
+}
+function formV2EndReview(S) {
+  const R = S.review;
+  if (!R) return;
+  S.review = null;
+  R.on = false;
+  try { R.video.pause(); } catch (e) {}
+  try { if (R.vfc && typeof R.video.cancelVideoFrameCallback === "function") R.video.cancelVideoFrameCallback(R.vfc); } catch (e) {}
+  try { R.video.removeAttribute("src"); R.video.load(); } catch (e) {}
+  if (R.ownUrl) {
+    const i = S.urls.indexOf(R.url);
+    if (i >= 0) S.urls.splice(i, 1);
+    URL.revokeObjectURL(R.url);
+  }
+}
+/* 射の区間（引き始め〜離れの 0.8 秒あと）と、そこに重ねる「ほかの射の中央の姿」 */
+function formV2ReviewShots(S) {
+  const out = [];
+  for (const rec of S.records) {
+    const m = FormV2.read(rec), view = rec.v2.view || {};
+    const dir = (view.side === "b" ? -1 : 1) * (rec.cap.hand === "left" ? -1 : 1);
+    m.events.forEach((e) => {
+      if (e.kind === "cand") { out.push({ kind: "cand", n: e.n, tMs: e.tS * 1000, fromMs: e.tS * 1000 - 3000, toMs: e.tS * 1000 + 800, label: e.counted ? String(e.n) : "？", dir }); return; }
+      const others = m.compared.filter((x) => x !== e);
+      out.push({
+        kind: e.kind, n: e.n, tMs: e.tS * 1000, fromMs: (e.tS - (e.holdS || 0) - (e.drawS || 0)) * 1000, toMs: e.tS * 1000 + 800, dir, tpx: rec.v2.tpx,
+        label: e.counted ? String(e.n) : e.kind === "letdown" ? "戻" : "外",
+        hold: e.kind === "shot" && others.length ? formV2MedianPose(others.map((x) => x.ps)) : null,
+        rel: e.kind === "shot" && others.length ? formV2MedianPose(others.map((x) => x.pr)) : null,
+        others: others.length,
+      });
+    });
+  }
+  return out.sort((a, b) => a.tMs - b.tMs);
+}
+function formV2PaintReview(S) {
+  if (!formV2CanReview(S)) return;
+  formV2EndReview(S);
+  const live = S.src !== "replay", fr = S.buffer.frame;
+  const R = (S.review = {
+    on: true, video: document.createElement("video"), url: "", ownUrl: false, vfc: 0,
+    /* 動画の 0 秒が、撮影の何 ms にあたるか。撮りながら残した動画は、録画を始めた時刻から */
+    from: live ? (Number.isFinite(S.recStart) ? S.recStart : 0) : 0,
+    dur: 0, pos: 0, rate: 1, skel: true, ghost: true, playing: false, shots: formV2ReviewShots(S),
+  });
+  R.dur = Math.max(0, (live ? (Number.isFinite(S.recEnd) ? S.recEnd : S.buffer.lastMs) : S.buffer.lastMs) - R.from);
+  R.pos = R.from;
+  if (live) { R.url = URL.createObjectURL(S.recBlob); R.ownUrl = true; S.urls.push(R.url); } else R.url = S.fileUrl;
+  const v = R.video;
+  v.playsInline = true;
+  v.muted = true;
+  v.preload = "auto";
+  v.setAttribute("playsinline", "");
+  v.className = "fv2Video";
+  v.dataset.testid = "form-v2-review-video";
+  const inRange = (t) => t >= R.from - 1 && t <= R.from + R.dur + 1;
+  const chips = R.shots.map((e, i) => `<button type="button" class="fv2Chip" data-shot="${i}" aria-pressed="false" ${inRange(e.tMs) ? "" : "disabled"} aria-label="${e.kind === "shot" && e.n ? `${e.n} 射目へ` : e.kind === "letdown" ? "引き戻しへ" : e.kind === "cand" ? "数えていない保持へ" : "外した射へ"}">${e.label}</button>`).join("");
+  const mb = S.recBlob ? Math.max(0.1, S.recBlob.size / 1e6) : 0;
+  const cut = live && R.shots.some((e) => !inRange(e.tMs));
+  formV2Paint(S, "review", `${formV2TopHtml("結果", "動画で確かめる")}
+    <div class="fv2Cam bleed fv2Rev" id="fv2RevCam" data-testid="form-v2-review-cam"><canvas id="fv2RevCanvas" data-testid="form-v2-review-canvas" aria-hidden="true"></canvas><span class="fv2Tag" id="fv2RevTag" data-testid="form-v2-review-tag"></span></div>
+    <div class="fv2Chips" data-testid="form-v2-review-shots" role="group" aria-label="射の頭出し">${chips || `<span class="basis">見つけた射はありません。</span>`}</div>
+    <div class="fv2Scrub"><input type="range" id="fv2RevPos" data-testid="form-v2-review-pos" min="0" max="${Math.max(1, Math.round(R.dur))}" step="10" value="0" aria-label="再生位置"><div class="t"><span id="fv2RevNow">${formV2Mmss(R.from / 1000)}</span><span>${formV2Mmss((R.from + R.dur) / 1000)}</span></div></div>
+    <section class="vsec fv2RevCtl">
+      <div class="btnRow"><button type="button" class="btn sec" id="fv2RevBack1" data-testid="form-v2-review-prev">1 コマ戻る</button><button type="button" class="btn" id="fv2RevPlay" data-testid="form-v2-review-play">再生</button><button type="button" class="btn sec" id="fv2RevFwd1" data-testid="form-v2-review-next">1 コマ進む</button></div>
+      <div class="fv2Opt"><div><b>速さ</b><span>再生の倍率</span></div>${formV2SegHtml("rate", "1", [["0.25", "0.25"], ["0.5", "0.5"], ["1", "1"]])}</div>
+      <div class="fv2Opt"><div><b>骨格</b><span>読み取った点と線</span></div>${formV2SegHtml("skel", "on", [["on", "入"], ["off", "切"]])}</div>
+      <div class="fv2Opt"><div><b>ほかの射を重ねる</b><span>白 = ほかの射の中央の姿</span></div>${formV2SegHtml("ghost", "on", [["on", "入"], ["off", "切"]])}</div>
+      ${S.recBlob ? `<div class="btnRow"><button type="button" class="btn sec" id="fv2RevSave" data-testid="form-v2-review-save">動画を端末に保存（${mb.toFixed(mb < 10 ? 1 : 0)}MB）</button></div>` : ""}
+      <p class="basis">骨格は、${live ? "撮影のときに" : "解析のときに"}読み取った点を、動画の時刻に合わせて描いています（もう一度読み取ってはいません。1 コマほどずれることがあります）。白い線は、その射を除いた射の、点ごとの中央の姿です。保持のあいだは保持の姿、離れのあとは離れの 0.25 秒あとの姿を重ねます。</p>
+      ${cut ? `<p class="basis" data-testid="form-v2-review-cut">動画に入っていない時刻の射は、番号を押せません（動画を残したのは ${formV2Mmss(R.from / 1000)}〜${formV2Mmss((R.from + R.dur) / 1000)}）。</p>` : ""}
+      <p class="basis" data-testid="form-v2-review-limits">${live ? "撮りながら残す動画は、最長 10 分・約 1.5Mbps（約 110MB まで）です。" : "選んだ動画は、もとのファイルをそのまま再生しています。"}動画も点の列も、アプリの中には保存されません。この画面と結果の画面を閉じると消えます。${live ? "残すときは「端末に保存」で写真かファイルへ書き出してください。" : ""}</p>
+    </section>`, () => {
+    const root = S.root, cam = root.querySelector("#fv2RevCam"), cv = root.querySelector("#fv2RevCanvas"), tag = root.querySelector("#fv2RevTag");
+    const pos = root.querySelector("#fv2RevPos"), now = root.querySelector("#fv2RevNow"), play = root.querySelector("#fv2RevPlay");
+    cam.prepend(v);
+    const mapGhost = (pose, f, e) => {
+      /* 保存した姿（両肩の中点が原点、弓の向きが x 正、上が y 正、0.01 胴）を、いまのコマの肩の位置と胴の長さで画面へ戻す */
+      const a = f.pts[1], b = f.pts[2], ha = f.pts[7], hb = f.pts[8];
+      if (!Array.isArray(pose) || !Number.isFinite(a[0]) || !Number.isFinite(b[0])) return null;
+      const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+      const T = Number.isFinite(ha[0]) && Number.isFinite(hb[0]) ? Math.hypot(mx - (ha[0] + hb[0]) / 2, my - (ha[1] + hb[1]) / 2) : e.tpx;
+      if (!(T > 0)) return null;
+      return (i) => (Number.isFinite(pose[i * 2]) && Number.isFinite(pose[i * 2 + 1]) ? [mx + (e.dir * pose[i * 2] * T) / 100, my - (pose[i * 2 + 1] * T) / 100] : null);
+    };
+    const draw = () => {
+      if (!R.on) return;
+      const w = fr.w || v.videoWidth || 720, h = fr.h || v.videoHeight || 1280;
+      if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+      const ctx = cv.getContext("2d"), f = S.buffer.at(R.pos), lw = Math.max(3, w / 180);
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      const near = f && Math.abs(f.t - R.pos) <= 250 && f.pose;
+      const e = R.shots.find((x) => R.pos >= x.fromMs && R.pos <= x.toMs) || null;
+      let ghost = false, skel = false;
+      if (R.ghost && near && e && e.kind === "shot") {
+        const P = mapGhost(R.pos <= e.tMs ? e.hold : e.rel, f, e);
+        if (P) {
+          ctx.strokeStyle = "rgba(255,255,255,.9)";
+          ctx.lineWidth = lw * 0.75;
+          ctx.beginPath();
+          for (const [a, b] of [[2, 1], [1, 3], [3, 5], [2, 4], [4, 6], [1, 7], [2, 8], [8, 7]]) { const p = P(a), q = P(b); if (p && q) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ghost = true; } }
+          ctx.stroke();
+        }
+      }
+      if (R.skel && near) {
+        ctx.strokeStyle = "#a8c7ac";
+        ctx.fillStyle = "#a8c7ac";
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        for (const [a, b] of [[1, 2], [1, 3], [3, 5], [2, 4], [4, 6], [1, 7], [2, 8], [7, 8]]) {
+          const p = f.pts[a], q = f.pts[b];
+          if (Number.isFinite(p[0]) && Number.isFinite(q[0])) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); skel = true; }
+        }
+        ctx.stroke();
+        for (const p of f.pts) if (Number.isFinite(p[0])) { ctx.beginPath(); ctx.arc(p[0], p[1], lw * 1.3, 0, Math.PI * 2); ctx.fill(); }
+      }
+      const what = !e ? "" : e.kind === "shot" && e.n ? `${e.n} 射目` : e.kind === "letdown" ? "引き戻し" : e.kind === "cand" ? "数えていない保持" : "外した射";
+      tag.textContent = `${formV2Mmss(R.pos / 1000)}${what ? `\u3000${what}\u3000${R.pos <= e.tMs ? "離れの前" : "離れのあと"}` : ""}`;
+      now.textContent = formV2Mmss(R.pos / 1000);
+      if (root.ownerDocument.activeElement !== pos) pos.value = String(Math.round(R.pos - R.from));
+      const cur = e ? R.shots.indexOf(e) : -1;
+      root.querySelectorAll(".fv2Chip").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.shot === cur)));
+      /* 検査から見える印: いまの位置（撮影の ms）、骨格と白い線を描いたか */
+      cam.dataset.pos = String(Math.round(R.pos));
+      cam.dataset.skel = skel ? "1" : "0";
+      cam.dataset.ghost = ghost ? "1" : "0";
+    };
+    const seek = (ms) => {
+      R.pos = Math.min(R.from + R.dur, Math.max(R.from, ms));
+      try { v.currentTime = (R.pos - R.from) / 1000; } catch (e) {}
+      draw();
+    };
+    const setPlaying = (on) => { R.playing = on; play.textContent = on ? "止める" : "再生"; play.setAttribute("aria-pressed", String(on)); };
+    const tick = (nowMs, meta) => {
+      if (!R.on) return;
+      if (R.playing) { R.pos = Math.min(R.from + R.dur, R.from + (meta && Number.isFinite(meta.mediaTime) ? meta.mediaTime : v.currentTime) * 1000); draw(); }
+      if (typeof v.requestVideoFrameCallback === "function") R.vfc = v.requestVideoFrameCallback(tick);
+    };
+    if (typeof v.requestVideoFrameCallback === "function") R.vfc = v.requestVideoFrameCallback(tick);
+    else v.ontimeupdate = () => tick(0, null);
+    v.onseeked = () => draw();
+    v.onloadeddata = () => draw();
+    v.onended = () => setPlaying(false);
+    v.onpause = () => setPlaying(false);
+    v.onerror = () => { tag.textContent = "この動画は、この端末では再生できません。骨格だけを表示します。"; };
+    v.src = R.url;
+    v.load();
+    root.querySelector("#fv2Back").onclick = () => { formV2EndReview(S); formV2PaintResult(S); };
+    play.onclick = () => {
+      if (R.playing) { v.pause(); return; }
+      if (R.pos >= R.from + R.dur - 50) seek(R.from);
+      v.playbackRate = R.rate;
+      setPlaying(true);
+      const p = v.play();
+      if (p && typeof p.catch === "function") p.catch(() => setPlaying(false));
+    };
+    const stepBy = (d) => {
+      v.pause();
+      const f = S.buffer.at(R.pos), g = f ? S.buffer.frameAt(f.i + d) : null;
+      if (g) seek(g.t);
+    };
+    root.querySelector("#fv2RevBack1").onclick = () => stepBy(-1);
+    root.querySelector("#fv2RevFwd1").onclick = () => stepBy(1);
+    pos.oninput = () => { v.pause(); seek(R.from + +pos.value); };
+    root.querySelectorAll(".fv2Chip").forEach((b) => (b.onclick = () => {
+      /* 頭出し: 離れの 0.5 秒前（保持の終わり）。そこから再生すると離れが見える */
+      const e = R.shots[+b.dataset.shot];
+      v.pause();
+      seek(e.tMs - 500);
+    }));
+    root.querySelectorAll("[data-seg] button").forEach((b) => (b.onclick = () => {
+      const name = b.parentElement.dataset.seg, val = b.dataset.val;
+      b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      if (name === "rate") { R.rate = +val; v.playbackRate = R.rate; }
+      if (name === "skel") R.skel = val === "on";
+      if (name === "ghost") R.ghost = val === "on";
+      draw();
+    }));
+    const saveBtn = root.querySelector("#fv2RevSave");
+    if (saveBtn) saveBtn.onclick = () => formV2ShareVideo(S);
+    draw();
+  });
+}
+
+/* ---- 検証用の診断の書き出し（design.md 6.3）----
+   設定「検証用の診断データ」が入のときだけ。数値だけを JSON にして、共有シートかダウンロードへ渡す（アプリからどこかへ送ることはしない）。
+   buffer = 撮った直後のメモリの中の点の列。2 つめの設定「体の点の列も含める」が入のときだけ、書き出しに入れる */
+const FORM_V2_DIAG_CONFIRM = "検証用の診断を書き出します。入るのは数値だけです: 射と引き戻しの時刻と確かさ、数えなかった保持とその理由、射ごとの値、測定のゆれ、置き方の判定、毎秒コマ数と画面の大きさ、アプリと解析器の版。映像、画像、日付、メモ、練習や弓具との紐づけ、端末の中の ID は入りません。共有先は自分で確かめてください。";
+function formV2DiagRecords() {
+  return (db.formAnalyses || []).filter((r) => FormV2.isV2(r) && r.v2.dg).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 12);
+}
+async function formV2ExportDiagnostics(records, buffer) {
+  if (db.settings.formDebug !== true) { toast("「検証用の診断データ」を入にしてください"); return "debug-disabled"; }
+  const list = (records || []).filter(FormV2.isV2);
+  if (!list.length) { toast("書き出せる記録がありません"); return "empty"; }
+  const withLm = !!(buffer && buffer.n && db.settings.formDebugLandmarks === true);
+  const extra = withLm ? `\n\n「体の点の列も含める」が入なので、この撮影の体の 9 点（鼻・肩・肘・手首・腰）の位置の列も入ります（${buffer.n.toLocaleString("ja-JP")} コマ、約 ${Math.max(0.1, (buffer.n * 170) / 1e6).toFixed(1)}MB）。映像や画像ではありませんが、体の動きそのものの記録です。` : "";
+  if (!(await appConfirm(FORM_V2_DIAG_CONFIRM + extra, { okLabel: "書き出す" }))) return "canceled";
+  if (db.settings.formDebug !== true) { toast("「検証用の診断データ」を入にしてください"); return "debug-disabled"; }
+  let json;
+  try {
+    const first = list.slice().sort((a, b) => (a.ts || 0) - (b.ts || 0))[0];
+    json = JSON.stringify(FormV2.diagnostics(list, { appVer: APP_VER, landmarks: withLm ? { [first.id]: FormV2.landmarkDump(buffer) } : null }));
+  } catch (e) { toast("診断を書き出せませんでした。もう一度お試しください。", 4000); return "failed"; }
+  const res = await shareFormDiagnosticsJson(json);
+  if (res.cleanupFailed) toast("診断の一時ファイルを削除できませんでした。端末のキャッシュに診断の数値が残っている可能性があります。", 6000);
+  else if (res.status === "shared") toast("診断を共有しました");
+  else if (res.status === "downloaded") toast("診断を書き出しました");
+  else if (res.status !== "canceled") toast("診断を書き出せませんでした。もう一度お試しください。", 4000);
+  return res.status;
 }
