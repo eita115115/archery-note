@@ -1,6 +1,6 @@
 "use strict";
 /* 射型の記録 v2 — 記録の形、撮影中のバッファ、置き方の確認、射どうしの比較（どれも純関数）。
-   設計: docs/design/form-v2/design.md（5 章 = 記録、2.3 = 置き方、4 章 = 構成、10 章 = 実装の覚え書き）。
+   設計: docs/design/form-v2/design.md（5 章 = 記録、2.3 = 置き方、4 章 = 構成、11 章 = 実装の覚え書き）。
    解析そのものは 44-form-analyze.js（FormAnalyze）。ここは、その結果を保存する形にし、保存した形から画面の値を作る。
    DOM・db・時計・乱数を使わない。グローバルは FormV2 の 1 つだけ。Node からは tools/form-record-loader.js で読む。
 
@@ -256,7 +256,7 @@ const FormV2 = (() => {
       noise.drawMs = Math.hypot(100, 100); nd.drawMs = 60;
       noise.followMs = Math.hypot(50, u); nd.followMs = 60;
     }
-    /* 離れのあとの項目は「離れのあとの窓 − 保持の窓」の差なので、保持の窓のゆれの √2 倍と置く（仮の見積もり。design.md 10 章）:
+    /* 離れのあとの項目は「離れのあとの窓 − 保持の窓」の差なので、保持の窓のゆれの √2 倍と置く（仮の見積もり。design.md 11 章）:
        引き手は引き尺のゆれ、弓手の手首の高さは 弓手の腕の仰角のゆれ × 腕の長さ */
     if (fin(nz.ext)) { noise.relBack = Math.SQRT2 * nz.ext; nd.relBack = df.ext || 0; noise.creep = Math.SQRT2 * nz.ext; nd.creep = df.ext || 0; }
     if (fin(nz.bowElev) && fin(rho)) { noise.bowDy = Math.SQRT2 * ((nz.bowElev * Math.PI) / 180) * rho; nd.bowDy = df.bowElev || 0; }

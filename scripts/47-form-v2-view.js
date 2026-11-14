@@ -203,7 +203,7 @@ function formV2SegHtml(name, cur, opts) {
 /* ---------- 分析 > 射型 のカード ---------- */
 function formV2RecordLine(rec) {
   const m = FormV2.read(rec), hold = FormV2.median(m.compared.map((e) => e.vals.holdMs));
-  return { m, title: `${fmtMDW(rec.date)}　${m.count} 射${Number.isFinite(hold) ? `　保持 ${(hold / 1000).toFixed(1)} 秒` : ""}`, sub: `${formV2ViewText(rec.v2.view)}${m.letdowns ? `。引き戻し ${m.letdowns} 回` : ""}${rec.cap.src === "replay" ? "。保存した動画" : ""}` };
+  return { m, title: `${fmtMDW(rec.date)}\u3000${m.count} 射${Number.isFinite(hold) ? `\u3000保持 ${(hold / 1000).toFixed(1)} 秒` : ""}`, sub: `${formV2ViewText(rec.v2.view)}${m.letdowns ? `。引き戻し ${m.letdowns} 回` : ""}${rec.cap.src === "replay" ? "。保存した動画" : ""}` };
 }
 /* 保持の時間の推移（比べてよい回が 3 回以上あるときだけ） */
 function formV2TrendHtml(records) {
@@ -735,7 +735,7 @@ function formV2Analyze(S) {
     formV2Paint(S, "analyzing", `${head.replace("解析しています", zero ? "射が見つかりませんでした" : "解析が終わりました")}
       ${S.limitHit ? `<p class="fact" data-testid="form-v2-limit">30 分（またはコマ数の上限）になったので、撮影を止めました。</p>` : ""}
       <div class="fv2Steps" data-testid="form-v2-steps">${step("記録を読み込む", read, true)}${step("射を探す", found, true)}${step("射ごとの値を測る", vals, true)}${step("測定のゆれを見積もる", noise, true)}</div>
-      ${zero ? `<section class="vsec" data-testid="form-v2-zero"><div class="vsecH"><h2>射が見つかりませんでした</h2></div><p class="fact">射として数えた区間は 0 回でした。</p><p class="basis">${why}</p>
+      ${zero ? `<section class="vsec" data-testid="form-v2-zero"><div class="vsecH"><h2>考えられる理由</h2></div><p class="fact">射として数えた区間は 0 回でした。</p><p class="basis">${why}</p>
         ${S.src === "live" ? `<div class="btnRow"><button type="button" class="btn" id="fv2Again">置き方を確かめる</button></div>` : ""}
         ${any ? `<div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2Show">見つけた区間を見る</button></div>` : ""}
         <div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2ZeroClose">閉じる</button></div></section>` : ""}

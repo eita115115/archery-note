@@ -1,0 +1,648 @@
+{
+  "schema": 3,
+  "setups": [
+    {
+      "id": "fixture-form-setup",
+      "name": "Form tracking setup",
+      "poundage": "38"
+    }
+  ],
+  "sightMarks": [],
+  "sessions": [
+    {
+      "id": "fixture-form-session",
+      "date": "2026-07-01",
+      "setupId": "fixture-form-setup",
+      "dist": 70,
+      "faceD": 122,
+      "faceType": "single",
+      "round": "free",
+      "ends": [
+        [
+          {
+            "x": 1.2,
+            "y": 0.4,
+            "s": 9
+          },
+          {
+            "x": -0.6,
+            "y": 1.1,
+            "s": 10,
+            "X": true
+          },
+          {
+            "x": 0.3,
+            "y": -0.8,
+            "s": 10
+          }
+        ]
+      ]
+    }
+  ],
+  "trash": [],
+  "settings": {
+    "eyeSight": 850
+  },
+  "active": null,
+  "formAnalyses": [
+    {
+      "id": "fixture-form-analysis-1",
+      "date": "2026-07-01",
+      "ts": 1782800000000,
+      "sessionId": "fixture-form-session",
+      "setupId": "fixture-form-setup",
+      "shots": 2,
+      "modelVer": "pose_landmarker_lite v1",
+      "appVer": 65,
+      "fps": 18.5,
+      "features": [
+        {
+          "phase": {
+            "drawMs": 2100,
+            "anchorMs": 1800,
+            "releaseToFollowMs": 400
+          },
+          "angles": {
+            "bowShoulder": 96,
+            "bowElbow": 171,
+            "drawElbow": 151,
+            "drawShoulder": 84,
+            "torsoLean": 3,
+            "headTilt": 2
+          },
+          "release": {
+            "drawHandSpeed": 1.8,
+            "elbowLineDeg": 4
+          },
+          "confidence": 0.91
+        },
+        {
+          "phase": {
+            "drawMs": 2300,
+            "anchorMs": 1650,
+            "releaseToFollowMs": 380
+          },
+          "angles": {
+            "bowShoulder": 94,
+            "bowElbow": 169,
+            "drawElbow": 149,
+            "drawShoulder": 86,
+            "torsoLean": 4,
+            "headTilt": 3
+          },
+          "release": {
+            "drawHandSpeed": 2.1,
+            "elbowLineDeg": 6
+          },
+          "confidence": 0.88
+        }
+      ],
+      "note": "schema 3 実装にとっては未知フィールド。破棄されないことを固定する"
+    },
+    {
+      "id": "fixture-form-analysis-cap",
+      "date": "2026-07-01",
+      "ts": 1782800000000,
+      "sessionId": "fixture-form-session",
+      "setupId": "fixture-form-setup",
+      "shots": 2,
+      "modelVer": "pose_landmarker_lite v1",
+      "appVer": 65,
+      "fps": 18.5,
+      "features": [
+        {
+          "phase": {
+            "drawMs": 2100,
+            "anchorMs": 1800,
+            "releaseToFollowMs": 400
+          },
+          "angles": {
+            "bowShoulder": 96,
+            "bowElbow": 171,
+            "drawElbow": 151,
+            "drawShoulder": 84,
+            "torsoLean": 3,
+            "headTilt": 2
+          },
+          "release": {
+            "drawHandSpeed": 1.8,
+            "elbowLineDeg": 4
+          },
+          "confidence": 0.91
+        },
+        {
+          "phase": {
+            "drawMs": 2300,
+            "anchorMs": 1650,
+            "releaseToFollowMs": 380
+          },
+          "angles": {
+            "bowShoulder": 94,
+            "bowElbow": 169,
+            "drawElbow": 149,
+            "drawShoulder": 86,
+            "torsoLean": 4,
+            "headTilt": 3
+          },
+          "release": {
+            "drawHandSpeed": 2.1,
+            "elbowLineDeg": 6
+          },
+          "confidence": 0.88
+        }
+      ],
+      "note": "schema 3 実装にとっては未知フィールド。破棄されないことを固定する",
+      "cap": {
+        "g": 2,
+        "fw": 720,
+        "fh": 1280,
+        "mw": 504,
+        "mh": 1280,
+        "o": "p",
+        "crop": 1,
+        "facing": "environment",
+        "hand": "right",
+        "src": "live"
+      }
+    },
+    {
+      "id": "fixture-form-analysis-v2",
+      "date": "2026-11-14",
+      "ts": 1794614400000,
+      "sessionId": "fixture-form-session",
+      "setupId": null,
+      "shots": 7,
+      "modelVer": "pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+      "appVer": 128,
+      "fps": 30,
+      "features": [],
+      "cap": {
+        "g": 3,
+        "fw": 720,
+        "fh": 1280,
+        "mw": 720,
+        "mh": 1280,
+        "o": "p",
+        "crop": 0,
+        "facing": "environment",
+        "hand": "right",
+        "src": "live"
+      },
+      "v2": {
+        "av": 1,
+        "fv": 1,
+        "dur": 100,
+        "cov": 100,
+        "tpx": 200,
+        "view": {
+          "side": "c",
+          "cls": "o",
+          "rho": 1049,
+          "om": 704
+        },
+        "ld": 1,
+        "ev": [
+          [
+            0,
+            769,
+            357,
+            132,
+            10,
+            0
+          ],
+          [
+            0,
+            1891,
+            326,
+            133,
+            10,
+            0
+          ],
+          [
+            0,
+            3140,
+            377,
+            132,
+            10,
+            0
+          ],
+          [
+            1,
+            4462,
+            527,
+            136,
+            8,
+            0
+          ],
+          [
+            0,
+            5811,
+            557,
+            132,
+            10,
+            0
+          ],
+          [
+            0,
+            7029,
+            336,
+            136,
+            10,
+            0
+          ],
+          [
+            0,
+            9303,
+            347,
+            136,
+            10,
+            0
+          ]
+        ],
+        "cd": [
+          [
+            8218,
+            7731,
+            8231,
+            50,
+            2,
+            0,
+            1
+          ]
+        ],
+        "f": [
+          [
+            357,
+            132,
+            127,
+            -64,
+            286,
+            -241,
+            1511,
+            972,
+            0,
+            239,
+            295,
+            0,
+            21
+          ],
+          [
+            326,
+            133,
+            131,
+            -58,
+            306,
+            -241,
+            1497,
+            945,
+            -10,
+            248,
+            307,
+            -1,
+            -33
+          ],
+          [
+            377,
+            132,
+            132,
+            -46,
+            300,
+            -231,
+            1488,
+            925,
+            7,
+            261,
+            294,
+            -4,
+            -14
+          ],
+          [
+            557,
+            132,
+            134,
+            -54,
+            277,
+            -333,
+            1507,
+            1196,
+            3,
+            253,
+            291,
+            -3,
+            4
+          ],
+          [
+            336,
+            136,
+            129,
+            -46,
+            265,
+            -251,
+            1515,
+            947,
+            -8,
+            247,
+            290,
+            2,
+            -9
+          ],
+          [
+            347,
+            136,
+            128,
+            -69,
+            288,
+            -261,
+            1510,
+            981,
+            -10,
+            255,
+            303,
+            -1,
+            -21
+          ]
+        ],
+        "nz": [
+          10,
+          14,
+          5,
+          17,
+          21,
+          10,
+          15,
+          16,
+          8,
+          8,
+          12,
+          5,
+          21
+        ],
+        "nd": [
+          60,
+          60,
+          60,
+          15,
+          15,
+          15,
+          15,
+          15,
+          27,
+          21,
+          15,
+          15,
+          15
+        ],
+        "ps": [
+          [
+            24,
+            30,
+            36,
+            0,
+            -36,
+            0,
+            86,
+            -2,
+            -6,
+            54,
+            138,
+            4,
+            -12,
+            5,
+            24,
+            -100,
+            -24,
+            -100
+          ],
+          [
+            25,
+            31,
+            35,
+            -1,
+            -35,
+            1,
+            88,
+            -3,
+            -6,
+            55,
+            140,
+            5,
+            -10,
+            6,
+            25,
+            -100,
+            -25,
+            -102
+          ],
+          [
+            26,
+            29,
+            34,
+            0,
+            -34,
+            0,
+            90,
+            -2,
+            -6,
+            54,
+            139,
+            2,
+            -10,
+            6,
+            25,
+            -101,
+            -23,
+            -101
+          ],
+          [
+            25,
+            29,
+            36,
+            0,
+            -36,
+            0,
+            88,
+            -3,
+            10,
+            40,
+            140,
+            4,
+            -11,
+            -4,
+            25,
+            -101,
+            -24,
+            -99
+          ],
+          [
+            25,
+            29,
+            35,
+            0,
+            -35,
+            0,
+            87,
+            -2,
+            -7,
+            54,
+            140,
+            2,
+            -11,
+            4,
+            24,
+            -99,
+            -25,
+            -101
+          ],
+          [
+            26,
+            30,
+            35,
+            -1,
+            -35,
+            1,
+            89,
+            -1,
+            -3,
+            56,
+            140,
+            4,
+            -11,
+            4,
+            25,
+            -100,
+            -25,
+            -100
+          ]
+        ],
+        "pr": [
+          [
+            26,
+            31,
+            36,
+            0,
+            -36,
+            0,
+            89,
+            -5,
+            -92,
+            23,
+            144,
+            -2,
+            -40,
+            7,
+            25,
+            -100,
+            -22,
+            -100
+          ],
+          [
+            24,
+            31,
+            34,
+            0,
+            -34,
+            0,
+            88,
+            -4,
+            -95,
+            24,
+            142,
+            0,
+            -41,
+            7,
+            23,
+            -99,
+            -27,
+            -100
+          ],
+          [
+            24,
+            29,
+            34,
+            1,
+            -34,
+            -1,
+            90,
+            -5,
+            -94,
+            21,
+            142,
+            -2,
+            -40,
+            7,
+            25,
+            -101,
+            -26,
+            -101
+          ],
+          [
+            25,
+            30,
+            35,
+            1,
+            -35,
+            -1,
+            88,
+            -6,
+            -70,
+            -50,
+            142,
+            -2,
+            -39,
+            -1,
+            26,
+            -100,
+            -23,
+            -99
+          ],
+          [
+            24,
+            28,
+            34,
+            0,
+            -34,
+            0,
+            90,
+            -8,
+            -92,
+            23,
+            144,
+            -3,
+            -37,
+            6,
+            24,
+            -100,
+            -25,
+            -100
+          ],
+          [
+            25,
+            29,
+            35,
+            1,
+            -35,
+            -1,
+            85,
+            -7,
+            -92,
+            21,
+            141,
+            -4,
+            -40,
+            5,
+            25,
+            -102,
+            -24,
+            -100
+          ]
+        ],
+        "ed": [
+          1,
+          0
+        ],
+        "w": []
+      }
+    }
+  ],
+  "fixtureNotice": "synthetic-only-no-real-user-or-device-data"
+}

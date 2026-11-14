@@ -17,6 +17,7 @@ const fixtureFiles = {
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
   missingSessions: "archery-note-v1-missing-sessions.json",
   formAnalyses: "archery-note-v1-form-analyses.json",
+  formAnalysesV2: "archery-note-v1-form-analyses-v2.json",
   formDiagnostics: "archery-note-v1-form-diagnostics.json",
   formDiagnosticsMalformedCoordinator:
     "archery-note-v1-form-diagnostics-malformed-coordinator.json",
@@ -538,6 +539,107 @@ function checkFormAnalysesCompatibility(storageApi, fixtures) {
   });
   assertEqual(once.schema, storageApi.normalizeDb(clone(fixtures.formAnalyses)).schema, "[form-analyses cap] schema unchanged");
   assert(schemaBefore != null, "[form-analyses cap] fixture declares a schema");
+}
+
+/* AN-100: 射型の記録 v2（cap.g = 3 と v2 の数値）。追加のフィールドだけで、SCHEMA_VER とキーは変えない。
+   fixture は合成の射手から作った本物の形の 1 件（6 射 + 引き戻し 1 回 + 足した候補 1 回）と、以前の記録 2 件 */
+function checkFormAnalysesV2(storageApi, fixtures) {
+  const FormV2 = require("./form-record-loader.js");
+  const FormAnalyze = require("./form-analyze-loader.js");
+  const source = fixtures.formAnalysesV2;
+  const [legacy, stageA, v2] = source.formAnalyses;
+  const once = storageApi.normalizeDb(clone(source));
+  const twice = storageApi.normalizeDb(JSON.parse(JSON.stringify(once)));
+  checkBaseShape("form-analyses-v2", once);
+  [once, twice].forEach((loaded, i) => {
+    assertEqual(loaded.formAnalyses.length, 3, `[form-analyses-v2] record count after load ${i + 1}`);
+    loaded.formAnalyses.forEach((rec, k) => {
+      assertEqual(
+        JSON.stringify(rec),
+        JSON.stringify(source.formAnalyses[k]),
+        `[form-analyses-v2] record ${k} is unchanged by load ${i + 1}`,
+      );
+    });
+  });
+  assertEqual(
+    once.schema,
+    storageApi.normalizeDb(clone(fixtures.formAnalyses)).schema,
+    "[form-analyses-v2] schema unchanged",
+  );
+  // 読み分け: v2 は cap.g = 3 と v2.ev を持つ記録だけ。以前の記録（cap なし・cap.g = 2）は v2 ではない
+  assert(!FormV2.isV2(legacy), "[form-analyses-v2] a record without cap is not v2");
+  assert(!FormV2.isV2(stageA), "[form-analyses-v2] a stage-A record (cap.g 2) is not v2");
+  assert(FormV2.isV2(v2), "[form-analyses-v2] the v2 record is recognised");
+  assertEqual(v2.cap.g, 3, "[form-analyses-v2] geometry version");
+  assertArray(v2.features, "[form-analyses-v2] features placeholder for older app versions");
+  assertEqual(v2.features.length, 0, "[form-analyses-v2] features placeholder is empty");
+  for (const key of ["av", "fv", "dur", "cov", "tpx", "view", "ld", "ev", "cd", "f", "nz", "nd", "ps", "pr", "ed", "w"]) {
+    assert(Object.hasOwn(v2.v2, key), `[form-analyses-v2] v2.${key} exists`);
+  }
+  assertEqual(v2.v2.f.length, 6, "[form-analyses-v2] one value row per analysed shot");
+  assertEqual(v2.v2.ps[0].length, 18, "[form-analyses-v2] hold pose has 9 points");
+  assertEqual(v2.v2.pr[0].length, 18, "[form-analyses-v2] release pose has 9 points");
+  assertEqual(v2.shots, 7, "[form-analyses-v2] count includes the candidate the archer added");
+  assertEqual(JSON.stringify(v2.v2.ed), "[1,0]", "[form-analyses-v2] edits are recorded");
+  const bytes = JSON.stringify(v2).length;
+  assert(bytes <= 2000, `[form-analyses-v2] six shots stay within 2 KB, got ${bytes}`);
+  assert(
+    !/landmarks|visibility/.test(JSON.stringify(v2)),
+    "[form-analyses-v2] no landmark stream is stored",
+  );
+  // 画面は保存した形だけから描く: 読み込みの前後で同じ数と同じ文になる
+  const before = FormV2.read(v2);
+  const after = FormV2.read(twice.formAnalyses[2]);
+  assertEqual(after.count, 7, "[form-analyses-v2] count read back");
+  assertEqual(after.letdowns, 1, "[form-analyses-v2] let-downs read back");
+  assertEqual(
+    FormV2.summary(after, FormV2.compare(after, FormAnalyze), null).text,
+    FormV2.summary(before, FormV2.compare(before, FormAnalyze), null).text,
+    "[form-analyses-v2] summary sentence is the same after a reload",
+  );
+  // 以前の記録とは比べない
+  assert(!FormV2.comparable(v2, legacy, "holdMs").ok, "[form-analyses-v2] never compared with a legacy record");
+  assert(!FormV2.comparable(v2, stageA, "holdMs").ok, "[form-analyses-v2] never compared with a stage-A record");
+  assertEqual(FormV2.trend(once.formAnalyses, "holdMs").points.length, 1, "[form-analyses-v2] trend holds v2 records only");
+  // 設定の既定: 身長は未設定（null）、数えた合図の音は切。SCHEMA_VER は変えずにキー単位で補う
+  assertEqual(once.settings.formHeightCm, null, "[form-analyses-v2] height defaults to unset");
+  assertEqual(once.settings.formCountSound, false, "[form-analyses-v2] count sound defaults to off");
+  const blank = storageApi.normalizeDb(clone(fixtures.blank));
+  assertEqual(blank.settings.formHeightCm, null, "[form-analyses-v2] blank db height is unset");
+  assertEqual(blank.settings.formCountSound, false, "[form-analyses-v2] blank db count sound is off");
+  for (const [given, expected] of [
+    [172, 172],
+    [172.4, 172],
+    ["172", null],
+    [30, null],
+    [400, null],
+    [NaN, null],
+    [undefined, null],
+  ]) {
+    const withHeight = clone(source);
+    withHeight.settings.formHeightCm = given;
+    withHeight.settings.formCountSound = given === 172 ? true : "yes";
+    const loaded = storageApi.normalizeDb(withHeight);
+    assertEqual(loaded.settings.formHeightCm, expected, `[form-analyses-v2] height ${String(given)}`);
+    assertEqual(loaded.settings.formCountSound, given === 172, `[form-analyses-v2] count sound for ${String(given)}`);
+    assertEqual(
+      JSON.stringify(loaded.formAnalyses),
+      JSON.stringify(source.formAnalyses),
+      `[form-analyses-v2] records untouched when height is ${String(given)}`,
+    );
+  }
+  // ゴミ箱から戻しても同じ形
+  const db = storageApi.normalizeDb(clone(source));
+  const trashApi = loadTrashApi(db, () => {});
+  const item = { id: "trash-form-v2", type: "formAnalysis", data: clone(v2), date: "2026-11-14", ts: 1 };
+  db.trash.unshift(item);
+  db.formAnalyses = db.formAnalyses.filter((f) => f.id !== v2.id);
+  assert(trashApi.restoreTrash(item.id), "[form-analyses-v2 trash] restore should succeed");
+  assertEqual(
+    JSON.stringify(db.formAnalyses.find((f) => f.id === v2.id)),
+    JSON.stringify(v2),
+    "[form-analyses-v2 trash] restored record is unchanged",
+  );
 }
 
 function checkFormAnalysisTrashRestore(storageApi, fixtures) {
@@ -1147,6 +1249,7 @@ function main() {
   checkSightMarksCompatibility(storageApi, fixtures);
   checkFormAnalysesCompatibility(storageApi, fixtures);
   checkFormAnalysisTrashRestore(storageApi, fixtures);
+  checkFormAnalysesV2(storageApi, fixtures);
   checkFormDiagnosticsCompatibility(storageApi, fixtures);
   checkCustomRoundsCompatibility(storageApi, fixtures);
   checkMultiRoundDefs(fixtures);

@@ -87,7 +87,7 @@ async function installFormV2Stub(page, stream, opts = {}) {
           },
         });
       };
-      const cv = document.createElement("canvas");
+      const cv = globalThis.document.createElement("canvas");
       cv.width = stream.w;
       cv.height = stream.h;
       const cx = cv.getContext("2d");
@@ -119,7 +119,7 @@ async function installFormV2Stub(page, stream, opts = {}) {
           start(onFrame, onEnd) {
             on = true;
             const stage = () => {
-              const el = document.querySelector('[data-testid="form-v2-screen"]');
+              const el = globalThis.document.querySelector('[data-testid="form-v2-screen"]');
               return el ? el.dataset.stage : "";
             };
             let base = NaN;
@@ -155,8 +155,65 @@ async function installFormV2Stub(page, stream, opts = {}) {
         };
       };
     },
-    { stream: { w: stream.w, h: stream.h, frames: stream.frames, restIndex: stream.restIndex }, opts },
+    {
+      stream: { w: stream.w, h: stream.h, frames: stream.frames, restIndex: stream.restIndex },
+      opts,
+    },
   );
 }
 
 module.exports = { formV2Stream, installFormV2Stub, SIX_SHOTS };
+
+/* 画面の検査（試作の shoot.js と同じ項目）: 13px 未満の文字、44px 未満の押せる部品、横あふれ、NaN・undefined。
+   いちばん手前の全画面（.ovl）か、無ければ #main を見る。問題の一覧を返す（無ければ空） */
+async function auditFormV2Screen(page) {
+  return page.evaluate(() => {
+    const doc = globalThis.document;
+    const overlays = [...doc.querySelectorAll("body > .ovl")];
+    const root = overlays.length ? overlays[overlays.length - 1] : doc.querySelector("#main");
+    const out = [],
+      W = doc.documentElement.clientWidth;
+    if (doc.documentElement.scrollWidth > W)
+      out.push("page-x-scroll " + doc.documentElement.scrollWidth);
+    const visible = (e) => {
+      const r = e.getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && globalThis.getComputedStyle(e).visibility !== "hidden";
+    };
+    root.querySelectorAll("*").forEach((e) => {
+      if (e.closest("svg") || e.closest(".srOnly") || !visible(e)) return;
+      const cs = globalThis.getComputedStyle(e),
+        size = parseFloat(cs.fontSize),
+        r = e.getBoundingClientRect();
+      const hasText = [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
+      const label = `${e.tagName}.${e.className} "${e.textContent.trim().slice(0, 14)}"`;
+      if (hasText && size < 13) out.push(`font<13 ${label} ${size}`);
+      if (r.right > W + 0.5 || r.left < -0.5)
+        out.push(`x-overflow ${label} ${Math.round(r.left)}-${Math.round(r.right)}`);
+      const tap = ["BUTTON", "SELECT", "INPUT", "SUMMARY"].includes(e.tagName);
+      if (tap && (r.height < 43.5 || r.width < 43.5))
+        out.push(`tap<44 ${label} ${Math.round(r.width)}x${Math.round(r.height)}`);
+      if (
+        e.scrollWidth > e.clientWidth + 1 &&
+        cs.overflowX !== "visible" &&
+        !["SELECT", "INPUT", "VIDEO"].includes(e.tagName)
+      )
+        out.push(`clipped ${label}`);
+    });
+    root.querySelectorAll("svg text").forEach((t) => {
+      const svg = t.ownerSVGElement,
+        box = svg.getBoundingClientRect();
+      if (!box.width) return;
+      const scale = box.width / (svg.viewBox.baseVal.width || box.width),
+        size = parseFloat(globalThis.getComputedStyle(t).fontSize) * scale,
+        r = t.getBoundingClientRect();
+      if (size < 12.95) out.push(`svgtext<13 ${size.toFixed(1)} ${t.textContent}`);
+      if (r.right > W + 0.5 || r.left < -0.5) out.push(`svgtext-overflow ${t.textContent}`);
+    });
+    const text = root.innerText;
+    for (const bad of ["NaN", "undefined", "null", "Infinity"])
+      if (text.includes(bad)) out.push(`text contains ${bad}`);
+    return [...new Set(out)];
+  });
+}
+
+module.exports.auditFormV2Screen = auditFormV2Screen;

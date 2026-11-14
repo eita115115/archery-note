@@ -3584,3 +3584,15 @@ CI: PR #139 の validate は段4・5の push から失敗していた（check:ui
 検証: check:all（exit 0）・lint・format:check 成功、`npm run check:form-analyze` 14 件成功、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real` と `--adapter current --with-real`（どちらも種 1〜5、全部の群）。Playwright e2e は回していない（画面とアプリの動きを変えていない。足したスクリプトはグローバルを 1 つ定義するだけ）。
 
 リスク: 実射では未確認。合成のゆれが現実より大きいか小さいかで、未達の重さが変わる。離れの動きの形と、肘が離れで大きく動くことは仮定。`"bodyMoved"` の決まりは素材映像 1 本を見て入れた。速射（保持 0.4 秒未満）はほとんど候補になる。index.html に 1 本足したので、次の公開は版上げと一緒に。次: 親の検証、オーナーに algorithm.md 9.1 の 4 点を決めてもらう、段 3（記録 v2）。
+
+## AN-100 射型の記録 v2 段3〜6（アプリへの組み込み。版128据え置き・未公開）
+
+2026-11-14、v2 の設計（docs/design/form-v2/design.md）の段 3〜6 を実装した。撮影はランドマークをメモリのバッファにためるだけになり、終わってから `FormAnalyze.analyzePacked` にまとめて渡す。実時間の検出器（`stepFormPhase` など）は、利用者の撮影では使わない（コードと検査は残した）。
+
+変更: `scripts/44-form-record.js`（新規。`FormV2`: バッファ、射数の目安、置き方の確認、記録 v2 の組み立て・読み分け・射数の直し、比較、比べてよい回、文字）、`scripts/47-form-v2-view.js`（新規。画面）、`scripts/47-form-view.js`（カードを v2 へ。以前の記録は `formLegacyRecordsHtml` として別の区切りに。入口は `formDebug` が入のときだけ以前の撮影画面）、`scripts/44-form-analyze.js`（`FLOORS` に時間と離れのあとの床を足し、既定の項目を `COMPARE_KEYS` に分けた。これまでの結果は不変）、`scripts/10-storage-native.js`（`formHeightCm`・`formCountSound` をキー単位で補う）、`scripts/50-record-view.js`（切の案内、ヒントから射型のタブを直接開く）、`scripts/70-gear-settings.js`（身長の欄、検証用の設定の説明）、`style.css`・`style.min.css`、`index.html`・`sw.js`（`APP_SCRIPTS` に 2 行。キャッシュ名と版は変えていない）、`tools/check-app.js`・`check-ui.js`・`build-native-web.js`・`check-distribution.js`（17 本）、`tools/check-globals.js`（`Float32Array`・`WebAssembly`）、`tools/check-analysis-view.js`、`tools/check-form-record.js`・`tools/form-record-loader.js`（新規）、`tools/check-storage-contract.js`・`check-storage-roundtrip.js`、`tests/fixtures/storage/archery-note-v1-form-analyses-v2.json`（新規）、`tests/e2e/form-v2.spec.js`・`tests/e2e/fixtures/form-v2-stream.js`（新規）、`package.json`（`check:form-analyze` に記録の検査を足した。依存は変えていない）、`CONVENTIONS.md`、`docs/design/form-v2/design.md`（11 章）、`tasks.json`、`progress.md`。
+
+書き換えた e2e: `tests/e2e/form-secure-context.spec.js` の 2 本（https でない開き方は、確認ダイアログと以前の撮影画面ではなく v2 の「困ったとき」になった。姿勢推定もカメラも呼ばないこと、保存した動画へ進めること、ループバックでは置き方の画面まで進むことは同じように確かめる）、`tests/e2e/analysis-tabs.spec.js` の 1 本（切のときの文が「設定で入にする」から、その場の「入にする」に変わった）、`tests/e2e/analysis-form-context.spec.js` の 1 か所（説明の段落を、以前の記録の区切りの中で探す）。`form-diagnostics.spec.js`・`form-geometry.spec.js` は変えていない。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（14 件 + 13 件）、Playwright 481 passed。画面の写真 124 枚と検査 0 件。
+
+リスク: 実射・実機では未確認。合成の射手は腕の形が単純で、置き方の印（`rho`）は「やや斜め」と出る。時間と離れのあとの項目のゆれは仮の値。検証用の設定が入のあいだは以前の撮影画面が開く。次: 親の検証、オーナーの確認（progress.md の「決めてほしいこと」）、実地の確認（design.md 6.3）、段 7〜8 の残り。

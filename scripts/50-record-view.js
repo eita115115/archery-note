@@ -1857,7 +1857,8 @@ function analysisReasonHtml(rows) {
 function analysisFormHtml(allRows, f) {
   const hasForm = Array.isArray(db.formAnalyses) && db.formAnalyses.some(Boolean);
   /* 記録が 1 つも無く、射型の記録が切のとき: その場で入にできる案内だけを出す（docs/design/form-v2/design.md 2.1） */
-  if (!allRows.length && !hasForm && !formTrackingEnabled()) return formTrackingOffCard();
+  if (!allRows.length && !hasForm && !formTrackingEnabled())
+    return analysisEmptyHtml("射型の記録と、記録中に付けた「外れた理由」の印の集計をここに表示します。") + formTrackingOffCard();
   const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))];
   const selectedDist = Number(f.dist);
   /* 最後の練習を消した後も、選んでいる距離を欄に残して外せるようにする */

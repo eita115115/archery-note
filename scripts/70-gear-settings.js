@@ -1834,12 +1834,12 @@ function openSettings() {
   };
   /* 身長（任意）: 100〜230cm の整数だけ受け取る。空や範囲の外は「未設定」に戻す（射型の記録の cm の目安だけに使う） */
   ovl.querySelector("#setFormHeight").onchange = (e) => {
-    const v = Math.round(+e.target.value);
-    const ok = e.target.value.trim() !== "" && Number.isFinite(v) && v >= 100 && v <= 230;
+    const raw = e.target.value.trim(), v = Math.round(+raw);
+    const ok = raw !== "" && Number.isFinite(v) && v >= 100 && v <= 230;
     db.settings.formHeightCm = ok ? v : null;
     e.target.value = ok ? String(v) : "";
     save();
-    if (!ok && e.target.value !== "") toast("身長は 100〜230cm で入れてください", 3000);
+    if (!ok && raw !== "") toast("身長は 100〜230cm で入れてください", 3000);
   };
   ovl.querySelectorAll("#ftChips button").forEach(
     (c) =>

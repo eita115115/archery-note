@@ -1177,5 +1177,17 @@
     "owner": "claude",
     "acceptance": "docs/design/form-v2/algorithm.md 7.4 の基準を、独立したベンチマーク（tools/form-bench、全部の群・全部の種）と検査（npm run check:form-analyze）で確かめ、届いたもの・届いていないものを 7.5 に数値で書く。check:all・lint・format:check が成功。解析器は DOM・db・時計・乱数を使わず、入力を書き換えず、同じ入力に同じ出力。新しい依存・モデル・保存形式の変更なし。SCHEMA_VER・保存キーは不変。版上げ・push・公開はオーナーの承認後。届いていない基準の扱い（algorithm.md 9.1）はオーナーが決める。実射での確認（design.md 6.3）は未了のまま。",
     "evidence": "2026-11-14 実装（branch claude/sharp-faraday-bu8pii、版128据え置き・未push・未公開。commit 33aad01・99d53a1 ほか）: scripts/44-form-analyze.js（index.html・sw.js・check-app・check-ui・build-native-web・check-distribution に登録、アプリのスクリプトは 15 本）、tools/form-analyze-loader.js、tools/form-analyze-fixture.js、tools/check-form-analyze.js（14 件、約 5 秒、check:all に追加）、tools/form-bench/adapters/v2-analyzer.js、docs/design/form-v2/algorithm.md・design.md。独立したベンチマーク（種 1〜5、ベンチマークは commit 1bf83bd）: core 390 射のうち 382 射を数えて当たり 381・外れ 1・候補 8（いまの仕組みは 29 射と数えて当たり 1）、引き戻し 66 回を射に数えたもの 0、射のない場面 25 回とも 0 射、全部の群 1,170 射のうち 1,115 射を数えて当たり 1,113・外れ 2・候補 55。届いていない基準: 名目のゆれで射数がぴったりの回 89%（基準 97%）、離れの 95% が 79ms、保持の長さの 95% が 0.47 秒（基準 0.22 秒）、難しい場面の再現率（weak-release 0.33・rapid-fire 0.40・drop-arm 0.87・occluded-draw-hand 0.87。数えない決定による）。素材映像 3 本: 2 本は期待どおり 0 射、1 本（斜め後ろの高い位置）は 1 射を数えられず。検査用の合成（ゆれ 胴の 1.2%）では基本の基準をすべて満たす（再現率・適合率 1.00、離れの 95% 15〜23ms、保持の 95% 35〜57ms、不変性 1e-6、10.4 分・30fps を 0.27 秒）。passes は false のまま: 届いていない基準の扱いと実地の確認が残る。"
+  },
+  {
+    "id": "AN-100",
+    "task": "射型の記録 v2 段3〜6（アプリへの組み込み）: 記録の形 v2（cap.g = 3 と v2 の数値。追加のフィールドだけ）、撮影の土台（ランドマークのバッファ・上限・直近の窓での射数の目安・置き方の確認）、画面（切の案内とその場の入・置き方・撮る・解析中・結果・射数を直す・射の詳細・保存・困ったとき）、保存した動画を同じ解析器へ、以前の記録は別の区切りに、任意の身長で cm の目安",
+    "status": "in-progress",
+    "passes": false,
+    "dependencies": [
+      "AN-099"
+    ],
+    "owner": "claude",
+    "acceptance": "npm run build:web-assets・check:all・lint・format:check・check:form-analyze と Playwright e2e 全件が成功。e2e は合成の列でカメラと姿勢推定を代え、縦向きと横向きで 入にする → 置き方 → 6 射と引き戻し → 結果の数と 1 文 → 候補を足す → 保存 → v2 の形で保存 → 一覧、困ったとき、動画のボタン（44px 以上）、以前の記録が別の区切りで不変、320×640 を確かめる。SCHEMA_VER・保存キーは不変で、以前の記録は読み込みで変わらず、v2 の記録と比べない。映像・画素・ランドマークの列は保存しない。実時間の検出器（46-form-core.js）は、利用者の撮影には使わない（コードと検査は残す）。新しい依存・モデル・資産・Service Worker の決まりの変更なし。版上げ・push・公開はオーナーの承認後。実射での確認（design.md 6.3）は未了のまま。",
+    "evidence": "2026-11-14 実装（branch claude/sharp-faraday-bu8pii、版128据え置き・未push・未公開。commit dc92ade ほか）: scripts/44-form-record.js（FormV2）、scripts/47-form-v2-view.js、scripts/47-form-view.js（以前の記録の区切り・入口の切り替え）、scripts/44-form-analyze.js（FLOORS に時間と離れのあとの床、COMPARE_KEYS。既定の結果は不変）、scripts/10-storage-native.js（formHeightCm・formCountSound の補完）、scripts/50-record-view.js、scripts/70-gear-settings.js（身長の欄）、style.css、tools/check-form-record.js（13 件）、tools/check-storage-contract.js・check-storage-roundtrip.js（v2 の fixture）、tests/e2e/form-v2.spec.js（19 本）ほか。アプリのスクリプトは 17 本。記録の大きさ: 6 射 + 引き戻し 1 回 + 候補 1 回で 1,814〜1,827 バイト。検証の結果と、設計との違いは docs/design/form-v2/design.md 11 章と progress.md。passes は false のまま: 実射での確認と、オーナーに決めてほしいこと（検証用の設定のあいだ以前の撮影画面を残すこと、仮に置いた測定のゆれ、10fps への間引きを入れていないこと）が残る。"
   }
 ]

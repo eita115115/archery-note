@@ -114,9 +114,16 @@ test("the form tab explains the switch when form tracking is off and still count
   await openAnalysis(page, data);
   await gotoSubTab(page, "form");
   await expect(page.getByTestId("analysis-form-card")).toHaveCount(0);
-  await expect(page.getByTestId("analysis-form-off")).toContainText(
-    "設定の「射型トラッキング」を入にすると使えます",
-  );
+  /* 切のときは、その場で入にできる（AN-100。設定へ行く道が無かった） */
+  const off = page.getByTestId("analysis-form-off");
+  await expect(off).toContainText("映像");
+  await expect(off).toContainText("保存しません");
+  await expect(off).toContainText("設定 > 記録 の「射型の記録（試験中）」と同じ切り替えです");
+  await expect(page.getByTestId("analysis-reason-row")).toHaveCount(3);
+  await page.getByTestId("form-v2-enable").click();
+  await expect(page.getByTestId("analysis-form-off")).toHaveCount(0);
+  await expect(page.getByTestId("analysis-form-card").locator("#formStart")).toBeVisible();
+  expect((await stored(page)).settings.formTrackingEnabled).toBe(true);
   await expect(page.getByTestId("analysis-reason-row")).toHaveCount(3);
 });
 
