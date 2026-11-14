@@ -26,9 +26,9 @@ function loadFormPose(){
 
 function formFeatureFromShot(shot,includeDiagnostics){
   const f={
-    phase:{anchorMs:shot.holdMs},
-    angles:shot.angles,
-    anchorNorm:shot.anchorNorm,
+    phase:{anchorMs:formRoundStored(shot.holdMs,0)},
+    angles:formStoredAngles(shot.angles),
+    anchorNorm:formRoundStored(shot.anchorNorm,4),
     release:shot.pre?{bowMove:+shot.pre.bowMove.toFixed(3),drawMove:+shot.pre.drawMove.toFixed(3),stable:!shot.pre.bowDrift&&!shot.pre.drawDrift,...(Number.isFinite(shot.pre.noise)?{noise:+shot.pre.noise.toFixed(3)}:{})}:null,
     confidence:shot.confidence==null?null:+shot.confidence.toFixed(2),
     score:shot.score==null?null:Math.round(shot.score),
@@ -45,6 +45,18 @@ function formFeatureFromShot(shot,includeDiagnostics){
     f.receiptId=shot.id;
   }
   return f;
+}
+
+/* 保存する値の桁（AN-098。1記録を約2KBに収めるため）: 角度は 0.1°、胴体長比は 0.001（アンカーは 0.0001）、保持は 1ms。
+   null（測れなかった）はそのまま残す */
+function formRoundStored(value,digits){
+  return Number.isFinite(value)?+value.toFixed(digits):value;
+}
+function formStoredAngles(angles){
+  if(!angles||typeof angles!=="object") return angles;
+  const out={};
+  Object.keys(angles).forEach(key=>{ out[key]=formRoundStored(angles[key],key==="bowArm"||key==="drawArm"?1:3); });
+  return out;
 }
 
 /* 検証計装（H-2, release-detection-triage-2026-07-13 Plan-0）: canceled/近接rejectedフレームの

@@ -196,6 +196,85 @@ const featureShot = {
   assert(!Object.hasOwn(feature, "diag"), `diagnostics ${String(setting)} excludes existing diag`);
   assert(!Object.hasOwn(feature, "receiptId"), `diagnostics ${String(setting)} excludes receiptId`);
 });
+{
+  // AN-098: 保存する値は丸める（角度 0.1°・比 0.001・アンカー 0.0001・保持 1ms）。null は null のまま
+  const stored = featureApi.formFeatureFromShot(
+    {
+      holdMs: 1666.6666666666715,
+      angles: {
+        bowArm: 179.04515874612764,
+        drawArm: null,
+        shoulderDrop: 0.008333333333333415,
+        headOffset: 0.2541666666666667,
+        forceLine: 0.1234567,
+      },
+      anchorNorm: 0.176063987514342,
+      pre: {
+        bowMove: 0.01234,
+        drawMove: 0.00234,
+        noise: 0.00412,
+        bowDrift: false,
+        drawDrift: false,
+      },
+      confidence: 0.951,
+      score: 54.4,
+      arrowCheck: null,
+    },
+    false,
+  );
+  assertJsonEqual(
+    stored,
+    {
+      phase: { anchorMs: 1667 },
+      angles: {
+        bowArm: 179,
+        drawArm: null,
+        shoulderDrop: 0.008,
+        headOffset: 0.254,
+        forceLine: 0.123,
+      },
+      anchorNorm: 0.1761,
+      release: { bowMove: 0.012, drawMove: 0.002, stable: true, noise: 0.004 },
+      confidence: 0.95,
+      score: 54,
+      arrowCheck: null,
+    },
+    "stored feature is rounded and keeps an unavailable angle as null",
+  );
+  const sixShots = JSON.stringify({
+    id: "mabc1234xyz",
+    date: "2026-11-14",
+    ts: 1794614400000,
+    sessionId: "mabc1234xyz",
+    setupId: "mabc1234xyz",
+    shots: 6,
+    modelVer: "pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+    appVer: 128,
+    fps: 29.8,
+    features: Array(6).fill({
+      ...stored,
+      arrowCheck: { judgment: "letdown-mismatch", preScore: 0.91, confirmScore: 0.88 },
+    }),
+    note: "",
+    cap: {
+      g: 2,
+      fw: 720,
+      fh: 1280,
+      mw: 504,
+      mh: 1280,
+      o: "p",
+      crop: 1,
+      facing: "environment",
+      hand: "right",
+      src: "live",
+    },
+  }).length;
+  // 目安は1記録 約2KB（docs/infra/storage-schema4-design.md）。丸める前の6射の記録は約2.6KBだった
+  assert(
+    sixShots < 2400,
+    `a six-shot record with capture conditions stays near 2 KB, got ${sixShots}`,
+  );
+}
 const enabledFeature = featureApi.formFeatureFromShot(featureShot, true);
 assert(Object.hasOwn(enabledFeature, "diag"), "exact true retains existing diag");
 assertEqual(enabledFeature.receiptId, featureShot.id, "exact true retains receipt ID");
