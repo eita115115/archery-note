@@ -1813,7 +1813,7 @@ button.lrow.fv2Item{cursor:pointer;}
 .fv2Timeline{padding-top:8px;}
 .fv2ChartH{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:12px 0 2px;}
 .fv2ChartH b{font-size:15px; font-weight:600;}
-.fv2ChartH span{font-size:14px; color:var(--sub); text-align:right;}
+.fv2ChartH span{font-size:14px; color:var(--sub); text-align:right; min-width:0;}
 .fv2Legend{display:flex; flex-wrap:wrap; gap:4px 14px; padding:8px 0 0; font-size:13px; color:var(--sub); line-height:1.5;}
 .fv2Legend i{display:inline-block; vertical-align:middle; margin-right:5px;}
 .fv2Legend .k1{width:14px; height:6px; background:var(--ink);}
@@ -1857,7 +1857,8 @@ details.fv2More ul{margin:0; padding:0 0 12px 18px; font-size:14px; line-height:
 .fv2Tr.dif{background:var(--accent-soft); box-shadow:inset 3px 0 0 var(--info);}
 .fv2Tr.dif > *:first-child{color:var(--ink); padding-left:8px;}
 /* 段 7・8: 値を途中で折り返さない、推移の凡例、動画で確かめる画面 */
-.fv2Nw{white-space:nowrap;}
+/* 値と（約 cm）をひとかたまりで次の行へ送る。1行に収まらない長さのときだけ中で折り返す（はみ出さない。字の幅は端末のフォントで変わる） */
+.fv2Nw{display:inline-block; max-width:100%;}
 .fv2Legend .k7{width:10px; height:10px; border-radius:50%; background:var(--ink);}
 .fv2Legend .k8{width:5px; height:12px; background:var(--rule-strong);}
 .fv2Legend .k9{width:0; height:12px; border-left:1.5px dashed var(--info);}

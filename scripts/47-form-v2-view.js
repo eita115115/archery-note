@@ -204,7 +204,7 @@ function formV2OverlayHtml(model, phase, hi, only) {
 /* 「胴の 33.2%（約 16cm）」を、かっこの途中で折り返さない形にする（値と cm の目安を、それぞれひとかたまりにする） */
 function formV2ValHtml(key, x, cm) {
   const m = FormV2.META[key], b = m.unit === "b" && !m.rel ? "胴の " : "";
-  return `<span class="fv2Nw">${b}${FormV2.fmt(key, x)}</span>${cm ? `<span class="fv2Nw">（${cm}）</span>` : ""}`;
+  return `<span class="fv2Nw">${b}${FormV2.fmt(key, x)}</span>${cm ? `<wbr><span class="fv2Nw">（${cm}）</span>` : ""}`;
 }
 function formV2SegHtml(name, cur, opts) {
   return `<div class="seg" role="group" data-seg="${name}">${opts.map(([v, l]) => `<button type="button" data-val="${v}" aria-pressed="${cur === v}">${l}</button>`).join("")}</div>`;
