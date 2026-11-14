@@ -409,4 +409,153 @@ test("statistics helpers", () => {
   assert.equal(FV.fmt("lean", null), "—");
 });
 
+/* ---------- AN-101: 36 射を超えた撮影、推移、検証用の書き出し、コマの取り出し ---------- */
+const MANY = Array.from({ length: 40 }, (_, i) =>
+  i === 20 ? { kind: "letdown", holdMs: 2500 } : { kind: "shot", holdMs: 1600 + (i % 5) * 150 },
+);
+test("split: a capture over 36 shots becomes linked records of at most 36, keeping every shot", () => {
+  const { buf } = capture(720, 1280, MANY, 11);
+  const result = analyse(buf);
+  const real = result.shots.filter((s) => s.kind === "shot").length;
+  assert.ok(real > 36, `needs more than 36 shots, got ${real}`);
+  const recs = FV.buildRecords(result, { ...CTX, ids: ["second"], frame: { w: 720, h: 1280 } });
+  assert.equal(recs.length, Math.ceil(real / 36));
+  assert.equal(recs.reduce((n, r) => n + r.shots, 0), real, "no shot is dropped");
+  assert.equal(recs.reduce((n, r) => n + r.v2.ev.length, 0), result.shots.length);
+  assert.equal(recs.reduce((n, r) => n + r.v2.cd.length, 0), result.candidates.length);
+  assert.equal(recs.reduce((n, r) => n + r.v2.ld, 0), result.shots.length - real);
+  let offset = 0;
+  recs.forEach((r, k) => {
+    assert.ok(r.shots <= 36 && r.shots > 0);
+    assert.ok(FV.isV2(r));
+    assert.equal(r.v2.cid, CTX.id);
+    assert.deepEqual(r.v2.part, [k + 1, recs.length, offset]);
+    assert.equal(r.v2.f.length, r.shots);
+    assert.equal(r.v2.over, undefined);
+    assert.ok(allInts(r.v2.span) && r.v2.span[1] > r.v2.span[0]);
+    for (const e of r.v2.ev) assert.ok(e[1] > r.v2.span[0] - 1 && e[1] <= r.v2.span[1] + 1, "events fall in the span");
+    const m = FV.read(r);
+    assert.equal(m.count, r.shots);
+    assert.equal(m.compared[0].n, offset + 1, "numbering continues across the parts");
+    offset += r.shots;
+  });
+  assert.equal(recs[0].id, CTX.id);
+  assert.equal(recs[1].id, "second");
+  assert.ok(recs[1].ts > recs[0].ts);
+  assert.ok(Math.abs(recs[0].shots - recs[1].shots) <= 1, "split evenly");
+  /* 36 射以下は 1 件で、分けた印を持たない（これまでの形のまま） */
+  const one = FV.buildRecords(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  assert.equal(one.length, 1);
+  assert.equal(one[0].v2.cid, undefined);
+  assert.equal(one[0].v2.part, undefined);
+  assert.equal(one[0].v2.dg, undefined);
+  /* 推移では、分けた記録は 1 回 */
+  const t = FV.trend(recs, "holdMs");
+  assert.equal(t.points.length, 1);
+  assert.equal(t.points[0].n, real);
+});
+
+test("trend: comparable captures only, reasons counted, missing values skipped", () => {
+  const base = FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  base.v2.view.cls = "s";
+  const mk = (i, f) => {
+    const r = JSON.parse(JSON.stringify(base));
+    r.id = `r${i}`;
+    r.ts = base.ts + i * 86400000;
+    if (f) f(r);
+    return r;
+  };
+  const recs = [
+    mk(0),
+    mk(1, (r) => { r.v2.view.cls = "o"; }),
+    mk(2, (r) => { r.v2.view.side = "b"; }),
+    mk(3, (r) => { r.cap.hand = "left"; }),
+    mk(4, (r) => { r.setupId = "other-setup"; }),
+    mk(5),
+  ];
+  const hold = FV.trend(recs, "holdMs");
+  assert.equal(hold.points.length, 5);
+  assert.equal(hold.excluded, 1);
+  assert.deepEqual(hold.why, { "利き手が違う": 1 });
+  assert.deepEqual(hold.skipped, ["r3"]);
+  assert.equal(hold.points[3].gear, true, "a different setup is marked");
+  assert.ok(hold.unc > 0 && hold.range === 0);
+  const anc = FV.trend(recs, "ancY");
+  assert.equal(anc.points.length, 4);
+  assert.deepEqual(anc.why, { "胸側と背中側の違い": 1, "利き手が違う": 1 });
+  const ext = FV.trend(recs, "ext");
+  assert.equal(ext.points.length, 3);
+  assert.deepEqual(ext.why, { "真横でない": 1, "胸側と背中側の違い": 1, "利き手が違う": 1 });
+  /* 測れなかった値（null）は数えない。全部が欠けた回は入れない */
+  const gap = mk(6, (r) => { r.v2.f[0][0] = null; });
+  const none = mk(7, (r) => { for (const row of r.v2.f) row[0] = null; });
+  const t = FV.trend([mk(0), gap, none, mk(8)], "holdMs");
+  assert.equal(t.points.length, 3);
+  assert.equal(t.points[1].n, t.points[0].n - 1);
+  assert.deepEqual(t.why, { "値を測れた射が無い": 1 });
+  /* いちばん新しい記録の置き方で測れない項目は、推移を出さない */
+  const back = FV.trend([mk(0), mk(9, (r) => { r.v2.view.side = "b"; })], "ancY");
+  assert.equal(back.refUnmeasured, true);
+  assert.equal(back.points.length, 0);
+});
+
+test("diagnostics: numbers only, no identifiers, analyser detail and landmarks only when asked", () => {
+  const { buf } = capture(720, 1280);
+  const result = FA.analyzePacked(buf.pack("right"), { handedness: "right", fps: 30, debug: true });
+  const plain = analyse(buf);
+  assert.deepEqual(result.shots.map((s) => s.releaseMs), plain.shots.map((s) => s.releaseMs), "debug does not change the count");
+  const place = { rows: [{ state: "ok" }, { state: "ok" }, { state: "ok" }, { state: "info" }, { state: "ok" }], tpx: 200, left: 12.4, right: 30.2, rho: 1.18 };
+  const rec = FV.buildRecord(result, { ...CTX, note: "private note", frame: { w: 720, h: 1280 }, diag: true, placement: place });
+  const dg = rec.v2.dg;
+  assert.equal(dg.v, 1);
+  assert.equal(dg.s.length, rec.v2.ev.length);
+  assert.ok(dg.r.length >= rec.v2.ev.length, "one row per drawn run");
+  assert.equal(dg.r[0].length, FV.RUN_COLS.length);
+  assert.deepEqual(dg.pl, { st: ["ok", "ok", "ok", "info", "ok"], tpx: 200, l: 12, r: 30, rho: 1180 });
+  assert.ok(JSON.stringify(rec).length < 6000, `record with diagnostics ${JSON.stringify(rec).length} bytes`);
+  const out = FV.diagnostics([rec], { appVer: 128 });
+  assert.equal(out.kind, "archery-note-form-v2-diagnostics");
+  assert.equal(out.version, 1);
+  assert.deepEqual(out.app, { appVer: 128, geometry: 3, featureVersion: 1 });
+  const c = out.captures[0];
+  assert.equal(c.capture, 1);
+  assert.deepEqual(c.part, [1, 1, 0]);
+  assert.deepEqual(c.frame, { w: 720, h: 1280, o: "p" });
+  assert.deepEqual(c.counts, { shots: 6, letdowns: 1, candidates: 1, added: 0, removed: 0 });
+  assert.equal(c.events.length, 7);
+  assert.equal(typeof c.candidates[0][4], "string");
+  assert.equal(c.features.length, 6);
+  assert.equal(c.noise.length, 13);
+  assert.ok(c.view.cls && c.view.side && c.fps > 0 && c.analyzer === FA.VERSION);
+  assert.deepEqual(c.analyzerDetail, dg);
+  assert.equal(c.landmarks, undefined);
+  const text = JSON.stringify(out);
+  for (const bad of [CTX.id, CTX.date, String(CTX.ts), "private note", '"id"', '"date"', '"ts"', '"sessionId"', '"setupId"', '"note"', '"ps"', '"pr"', "blob:"])
+    assert.ok(!text.includes(bad), `diagnostics must not contain ${bad}`);
+  /* 記録に付いていなければ、解析器の中の値は null */
+  const bare = FV.buildRecord(plain, { ...CTX, frame: { w: 720, h: 1280 } });
+  assert.equal(FV.diagnostics([bare], { appVer: 128 }).captures[0].analyzerDetail, null);
+  /* 体の点の列は、渡したときだけ */
+  const dump = FV.landmarkDump(buf);
+  assert.equal(dump.n, buf.n);
+  assert.equal(dump.p[0].length, 27);
+  assert.ok(allInts(dump.p) && allInts(dump.t));
+  const withLm = FV.diagnostics([rec], { appVer: 128, landmarks: { [rec.id]: dump } });
+  assert.equal(withLm.captures[0].landmarks.n, buf.n);
+  assert.ok(!JSON.stringify(withLm).includes(`"${CTX.id}"`));
+});
+
+test("buffer: the frame nearest a time, for drawing the skeleton over the video", () => {
+  const { buf, frames } = capture(720, 1280);
+  const f = buf.at(frames[100].tMs + 3);
+  assert.equal(f.i, 100);
+  assert.equal(f.pose, true);
+  assert.equal(f.pts.length, 9);
+  assert.ok(Math.abs(f.pts[1][0] - frames[100].landmarks[11].x * 720) < 0.01);
+  assert.equal(buf.at(-1e9).i, 0);
+  assert.equal(buf.at(1e12).i, buf.n - 1);
+  assert.equal(buf.frameAt(buf.n), null);
+  assert.equal(FV.makeBuffer().at(0), null);
+});
+
 console.log(`Form record v2 checks OK (${results.length} tests)`);

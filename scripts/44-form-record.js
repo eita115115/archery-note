@@ -575,7 +575,8 @@ const FormV2 = (() => {
   }
   /* 推移（design.md 2.9・5.4）。いちばん新しい記録と比べてよい回だけを並べる。1 回 = 1 回の撮影（分けた記録は 1 つにまとめる）。
      points[] = { id, ids, date, ts, n, med, q1, q3, unc, gear }。値は解析器の単位。「—」（測れなかった値）は数えない。
-       unc = その回の中央値の 95% の不確かさ（1.96 × 1.2533 × 射どうしの標準偏差 / √n。2 射に満たなければ null）
+       unc = その回の中央値の 95% の不確かさ（1.96 × 1.2533 × σ / √n。σ は 4 射以上なら 四分位の幅 / 1.349（1 射だけ離れた値に
+             引っぱられないように）、2〜3 射なら標準偏差。2 射に満たなければ null）
        gear = 前の点と、紐づけた弓具が違う
      excluded = 入れなかった回の数、why = その理由ごとの数、skipped = 入れなかった記録の id、
      ref = 比べる相手（いちばん新しい記録）、refUnmeasured = その記録の置き方ではこの項目を測れない、
@@ -597,10 +598,10 @@ const FormV2 = (() => {
       const vals = [];
       for (const r of g) for (const e of read(r).compared) if (fin(e.vals[key])) vals.push(e.vals[key]);
       if (!vals.length) { drop(g, "値を測れた射が無い"); continue; }
-      const s = sd(vals), setup = head.setupId || null;
+      const q1 = quantile(vals, 0.25), q3 = quantile(vals, 0.75), s = vals.length >= 4 ? (q3 - q1) / 1.349 : sd(vals), setup = head.setupId || null;
       out.points.push({
         id: head.id, ids: g.map((r) => r.id), date: head.date, ts: head.ts, n: vals.length,
-        med: median(vals), q1: quantile(vals, 0.25), q3: quantile(vals, 0.75),
+        med: median(vals), q1, q3,
         unc: fin(s) ? (1.96 * 1.2533 * s) / Math.sqrt(vals.length) : null,
         gear: !!(setup && prevSetup && setup !== prevSetup),
       });

@@ -162,7 +162,71 @@ async function installFormV2Stub(page, stream, opts = {}) {
   );
 }
 
-module.exports = { formV2Stream, installFormV2Stub, SIX_SHOTS };
+/* 保存済みの v2 の記録を、アプリと同じ解析器・同じ組み立てで作る（推移・検証用の書き出しの検査用。合成の射手）。
+   opts: { id, date, ts, seed, events, diag（解析器の中の値を付ける）, edit（記録を直す関数）, sessionId, setupId }。→ 記録の配列（36 射を超えると複数） */
+const FA = require("../../../tools/form-analyze-loader.js");
+const FV = require("../../../tools/form-record-loader.js");
+function formV2Records(opts = {}) {
+  const w = opts.w || 720,
+    h = opts.h || 1280;
+  const cap = FX.makeCapture({
+    seed: opts.seed || 7,
+    events: opts.events || SIX_SHOTS,
+    fps: 30,
+    torsoPx: 200,
+    cx: 300,
+    cy: 420,
+  });
+  const buf = FV.makeBuffer();
+  for (const f of FX.toFrames(cap.poses, { w, h })) buf.push(f.tMs, f.landmarks, w, h);
+  const result = FA.analyzePacked(buf.pack("right"), {
+    handedness: "right",
+    fps: 30,
+    debug: !!opts.diag,
+  });
+  const id = opts.id || "v2-rec";
+  const recs = FV.buildRecords(result, {
+    id,
+    ids: ["b", "c", "d", "e", "f"].map((x) => `${id}-${x}`),
+    date: opts.date || "2026-11-01",
+    ts: opts.ts || 1793491200000,
+    sessionId: opts.sessionId || null,
+    setupId: opts.setupId || null,
+    appVer: 128,
+    modelVer: "pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+    frame: { w, h },
+    facing: "environment",
+    hand: "right",
+    src: "live",
+    diag: !!opts.diag,
+  });
+  for (const r of recs) {
+    r.v2.view.cls = "s"; // 合成の射手は真横。腕の長さの基準が実物と違うので、検査では真横と決めておく
+    if (opts.edit) opts.edit(r);
+  }
+  return recs;
+}
+
+/* 検証用の書き出し（FormV2.diagnostics）に入っていてはいけないものが無いことを確かめるための一覧 */
+const DIAG_FORBIDDEN_KEYS = ["id", "date", "ts", "sessionId", "setupId", "note", "ps", "pr"];
+function diagnosticKeyPaths(value, path = "", out = []) {
+  if (Array.isArray(value)) value.forEach((v, i) => diagnosticKeyPaths(v, `${path}[${i}]`, out));
+  else if (value && typeof value === "object")
+    for (const k of Object.keys(value)) {
+      out.push(`${path}.${k}`);
+      diagnosticKeyPaths(value[k], `${path}.${k}`, out);
+    }
+  return out;
+}
+
+module.exports = {
+  formV2Stream,
+  installFormV2Stub,
+  SIX_SHOTS,
+  formV2Records,
+  DIAG_FORBIDDEN_KEYS,
+  diagnosticKeyPaths,
+};
 
 /* 画面の検査（試作の shoot.js と同じ項目）: 13px 未満の文字、44px 未満の押せる部品、横あふれ、NaN・undefined。
    いちばん手前の全画面（.ovl）か、無ければ #main を見る。問題の一覧を返す（無ければ空） */

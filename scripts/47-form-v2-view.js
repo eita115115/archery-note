@@ -112,9 +112,11 @@ function formV2TimelineSvg(model) {
   const w = formV2W(), h = 74, from = model.fromS || 0;
   const dur = model.toS == null ? Math.max(1, model.v.dur || 0, ...model.events.map((e) => e.tS + 1)) : Math.max(1, model.toS - from), x = (t) => 4 + ((w - 8) * Math.min(dur, Math.max(0, t - from))) / dur;
   let g = `<path d="M0 46H${w}" stroke="var(--rule-strong)" stroke-width="1"/>`, lastLabel = -99;
+  /* 番号は、前の番号に重なるときは省く（射の多い記録では、とびとびに出る） */
   const label = (cx, text, cls) => {
-    if (cx - lastLabel < 14) return "";
-    lastLabel = cx;
+    const half = String(text).length * 4.6 + 2;
+    if (cx - half < lastLabel + 3) return "";
+    lastLabel = cx + half;
     return `<text x="${Math.min(w - 6, Math.max(6, cx)).toFixed(1)}" y="14" text-anchor="middle" class="${cls}">${text}</text>`;
   };
   for (const e of model.events) {
@@ -266,7 +268,7 @@ function formV2TrendHtml(records) {
   const cm = cmA && cmB ? `${cmA.replace("cm", "")}〜${cmB.replace("約 ", "")}` : "";
   let doubt = "各回の射が少ないので、中央値の不確かさは見積もれていません。";
   if (unc != null) {
-    doubt = `各回の中央値には、射どうしのばらつきから見て ±${f(unc)} ほどの不確かさがあります（95% の目安）。`
+    doubt = `各回の中央値には、射どうしの幅（四分位）から見て ±${f(unc)} ほどの不確かさがあります（95% の目安）。`
       + (range <= 2 * unc ? `回どうしの中央値の差（いちばん離れた 2 回で ${f(range)}）は、この不確かさと区別できません。` : `中央値がいちばん離れた 2 回の差は ${f(range)} で、この不確かさより大きい違いです。`);
   }
   if (meta.kind !== "t") doubt += "台の位置や向きが変わると、回ごとに一定のずれが乗ります。その大きさは見積もれていません。";
@@ -1125,8 +1127,8 @@ function formV2PaintReview(S) {
     <div class="fv2Chips" data-testid="form-v2-review-shots" role="group" aria-label="射の頭出し">${chips || `<span class="basis">見つけた射はありません。</span>`}</div>
     <div class="fv2Scrub"><input type="range" id="fv2RevPos" data-testid="form-v2-review-pos" min="0" max="${Math.max(1, Math.round(R.dur))}" step="10" value="0" aria-label="再生位置"><div class="t"><span id="fv2RevNow">${formV2Mmss(R.from / 1000)}</span><span>${formV2Mmss((R.from + R.dur) / 1000)}</span></div></div>
     <section class="vsec fv2RevCtl">
-      <div class="btnRow"><button type="button" class="btn sec" id="fv2RevBack1" data-testid="form-v2-review-prev">1 コマ戻る</button><button type="button" class="btn" id="fv2RevPlay" data-testid="form-v2-review-play">再生</button><button type="button" class="btn sec" id="fv2RevFwd1" data-testid="form-v2-review-next">1 コマ進む</button></div>
-      <div class="fv2Opt"><div><b>速さ</b><span>再生の倍率</span></div>${formV2SegHtml("rate", "1", [["0.25", "0.25"], ["0.5", "0.5"], ["1", "1"]])}</div>
+      <div class="btnRow"><button type="button" class="btn sec" id="fv2RevBack1" data-testid="form-v2-review-prev">前のコマ</button><button type="button" class="btn" id="fv2RevPlay" data-testid="form-v2-review-play">再生</button><button type="button" class="btn sec" id="fv2RevFwd1" data-testid="form-v2-review-next">次のコマ</button></div>
+      <div class="fv2Opt w3"><div><b>速さ</b><span>再生の倍率</span></div>${formV2SegHtml("rate", "1", [["0.25", "0.25"], ["0.5", "0.5"], ["1", "1"]])}</div>
       <div class="fv2Opt"><div><b>骨格</b><span>読み取った点と線</span></div>${formV2SegHtml("skel", "on", [["on", "入"], ["off", "切"]])}</div>
       <div class="fv2Opt"><div><b>ほかの射を重ねる</b><span>白 = ほかの射の中央の姿</span></div>${formV2SegHtml("ghost", "on", [["on", "入"], ["off", "切"]])}</div>
       ${S.recBlob ? `<div class="btnRow"><button type="button" class="btn sec" id="fv2RevSave" data-testid="form-v2-review-save">動画を端末に保存（${mb.toFixed(mb < 10 ? 1 : 0)}MB）</button></div>` : ""}
