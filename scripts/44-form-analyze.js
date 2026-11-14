@@ -18,7 +18,7 @@ const FormAnalyze = (() => {
     GAP_FILL_MS: 200, // これ以下の欠測は線形補間する
     SCALE_WIN_MS: 2000, // 胴の長さの移動中央値の幅
     HAMPEL_HALF: 2, // 外れ点除去の半幅（標本）
-    HAMPEL_K: 3,
+    HAMPEL_K: 3, // 中央値から MAD の何倍離れたら外れ点か
     SMOOTH_MED_MS: 100, // 特徴用の平滑（中央値 → 平均）
     SMOOTH_AVG_MS: 160,
     VIS_BLOCK_MS: 1000, // visibility の基準を取る区切り
@@ -26,7 +26,7 @@ const FormAnalyze = (() => {
     VIS_DIP_K: 3, // …または ふだんのゆれ × VIS_DIP_K
     SWAP_JUMP: 0.5, // 手首が 1 コマでこれ以上（胴比）跳んだら、左右の入れ替わりを疑う
     SWAP_REF_MS: 700, // 入れ替わりの判定に使う前後の時間
-    SWAP_MAX_FRAMES: 8,
+    SWAP_MAX_FRAMES: 8, // 入れ替わりが続くとみなす最長のコマ数
     IDENTITY_JUMP: 1.0, // 腰の中点が IDENTITY_MS 以内にこれ以上（胴比）動いたら、別人・切り替わり
     IDENTITY_MS: 200,
     G1_LO: -0.45, // 弓手の手首の高さ − 弓手の肩の高さ（胴比、上が正）
@@ -37,32 +37,27 @@ const FormAnalyze = (() => {
     G3_HI: 0.25, // 同じ量の上限。顔まで引いてきたか
     D_MIN: 0.55, // 引き尺（手首間の距離）の絶対下限（胴比）
     D_FRAC: 0.8, // 引いている区間のしきい値 = D_FRAC × 保持の水準
-    LEVEL_BIN: 0.05,
-    LEVEL_MASS: 0.25,
-    LEVEL_REL: 0.55,
+    LEVEL_BIN: 0.05, // 保持の水準を探すヒストグラムの幅（胴比）
+    LEVEL_MASS: 0.25, // いちばん大きいかたまりの何割あれば「十分な時間」とするか
+    LEVEL_REL: 0.55, // いちばん高いかたまりの何倍以上を保持の候補とするか
     RUN_BRIDGE_MS: 700, // 引いている区間・終わり方の判定で、これ以下の途切れ（欠測、ゆれ）はつなぐ
-    RUN_MIN_MS: 300,
+    RUN_MIN_MS: 300, // これより短い区間は捨てる
     RUN_JOIN_MS: 1500, // 弓手を上げたまま、これ以下の間をおいて続く区間はつなぐ
     STILL_MIN: 0.2, // 静止とみなす速さの下限と上限（胴/秒）
     STILL_MAX: 0.8,
-    STILL_K: 3,
-    SETTLE_MS: 150,
+    STILL_K: 3, // 静止の速さ = STILL_K × 速さの 20% 点
+    SETTLE_MS: 150, // この時間、静止が続いたら「手が止まった」
     SETTLE_FRAC: 0.93, // 「手が止まった」とみなすのは、引き尺が保持の水準のこの割合に届いてから
-    PRE_FROM_MS: 600, // 離れの前の基準 = 直前 [PRE_FROM, PRE_TO] の中央値
-    PRE_TO_MS: 60,
-    PRE_MIN_MS: 150, // 基準の窓の最短
-    POST_FROM_MS: 80, // 離れのあとの窓 = [POST_FROM, POST_TO]
-    POST_TO_MS: 380,
-    PERSIST_FROM_MS: 400, // 動いたままかどうかを見る窓
-    PERSIST_TO_MS: 2000,
-    PERSIST_FRAC: 0.5,
+    PRE_TO_MS: 60, // 離れ・変わり目の直前のこの時間は、保持の値に入れない（動き始めを混ぜない）
+    PRE_MIN_MS: 150, // 手が止まってから、離れを探し始めるまでの最短
+    POST_FROM_MS: 80, // 変わり目の直後のこの時間は、離れたあとの値に入れない
     EXIT_MIN: 0.05, // 離れとみなす段差の下限（胴比。胴 50cm なら 2.5cm）
     EXIT_K: 6, // 離れの段差が、その保持のゆれの幅の何倍あれば「はっきりした離れ」か
     SHORTH_FRAC: 0.35, // ゆれのかたまりを取り出す区間の割合
     STEP_NOISE_MIN: 0.004, // 段差のゆれの幅の下限（胴比）
-    LOCATE_K: 3, // 腕を下ろして終わった保持（射の証拠がある）で、離れの段差として採る下限
+    LOCATE_K: 5, // 腕を下ろして終わった保持（射の証拠がある）で、離れの段差として採る下限（ゆれの幅の倍数）
     EXIT_J: 4, // 変わり目での急な動きの下限（ゆれの幅の倍数）
-    LOCATE_J: 2.5,
+    LOCATE_J: 2.5, // 同じく、腕を下ろして終わった保持での下限
     CP_HEAD_FRAC: 0.4, // 変化点の最初の見積もりで、保持の位置を取る範囲（始めからこの割合）
     CP_TAIL_MS: 400, // 同じく、終わりぎわの位置を取る長さ
     CP_SEG_MS: 1500, // 2 回目以降、変わり目の前後で位置を取る長さ
@@ -71,27 +66,30 @@ const FormAnalyze = (() => {
     JUMP_LAG_MS: 60, // 動き始めから、急な動きの中ほどまで
     ELBOW_DROP: 0.25, // 弓手の肘がこれだけ下がれば「下ろし始めた」（手首の ARM_DROP に当たる量）
     ARM_ONSET: 0.27, // 腕を下ろし始めた所 = 直前の高さから、「下ろした」とみなす量のこの割合だけ下がった所
+    BODY_JUMP: 0.2, // 変わり目の前後で、鼻・腰がこれ以上（胴比）動いていたら、離れではない
+    BODY_PRE_MS: 400, // その前後の窓の長さ
+    SCALE_JUMP: 0.15, // 同じく、体の大きさ（胴の長さ）の変化の割合
     LOWER_GUARD_MS: 150, // 変わり目が、腕を下ろし始めた所のこれより手前に無ければ、離れとは認めない
     LOWER_TAIL_MS: 200, // 離れを探す範囲を、腕を下ろし始めた所からこれだけ先まで延ばす
     LETDOWN_FWD: 0.25, // 腕を下ろした時点で、引き手が保持位置よりこれだけ前にあれば引き戻し
     ONSET_BACK_MS: 1200, // 終わり方の時刻から、下ろし始めをさかのぼって探す最長の時間
     LOOK_MS: 2500, // 区間の終わりのあと、終わり方を見る最長の時間
     HOLD0_MS: 1000, // 保持の始めの水準とゆれを取る長さ
-    MACRO_K: 5,
-    SUSTAIN_MS: 300,
-    CLOSE_GUARD_MS: 150,
+    MACRO_K: 5, // 終わり方のしきい値 = max(固定の下限, 保持の始めのゆれ × MACRO_K)
+    SUSTAIN_MS: 300, // 終わり方の条件が続くべき時間
+    CLOSE_GUARD_MS: 150, // 近づき始める直前のこの時間は、離れを探さない
     CLOSE_FRAC: 0.3, // 手首間の距離がこの割合だけ縮めば「近づいた」
     ARM_DROP: 0.45, // 弓手の手首がこれだけ下がれば「下ろし始めた」（胴比）
-    FLAT_FRAC: 0.35, // 離れの前の基準の窓の中で、段差のこの割合を超えて動いていたら、まだ引いている途中
-    WEAK_UNC_MS: 150,
-    LATE_UNC_MS: 500,
-    FOLLOW_DEFAULT_MS: 800,
+    WEAK_UNC_MS: 150, // 離れがはっきりしない候補・引き戻しの時刻の不確かさ
+    LATE_UNC_MS: 500, // 離れの見当が付かない候補の時刻の不確かさ
     FIT_BEFORE_MS: 350, // 動き始めの当てはめに使う範囲（変わり目の前後）
     FIT_AFTER_MS: 300,
-    FIT_EARLY_MS: 80, // 動き始めを探す範囲 = [変わり目の 1 コマ前 − FIT_EARLY, 変わり目 + FIT_LATE]
-    FIT_LATE_MS: -10,
     FIT_DEFAULT_MS: 50, // 当てはめられないときの、変わり目から動き始めまでの見込み
-    FIT_TAUS: [35, 70, 105, 140],
+    FIT_EARLY_MS: 100, // 動き始めを探す範囲 = [変わり目の 1 コマ前 − FIT_EARLY, 変わり目]
+    FIT_TAUS: Object.freeze([15, 25, 35, 50, 70]), // 離れの動きの時定数の候補（ms）
+    FIT_TAU_TYP: 30, // ふつうの値（決め手が無いときに寄せる先）
+    FIT_TAU_FLAT: 1, // 残差が最小の (1 + FIT_TAU_FLAT) 倍までの長さは、決め手が無いとみなす
+    FIT_FLAT: 0.05, // 動きの中ほどは、残差が最小の (1 + FIT_FLAT) 倍までを同じ良さとみなし、その幅の中ほどを取る
     ELBOW_UNC_MS: 40, // 肘で決めた離れの時刻の不確かさの下限
     GAP_MIN_MS: 100, // これより短い欠測は、動き始めの時刻に影響させない
     GAP_ONSET_MS: 40, // 動き始めが欠測の中にあるとき、欠測の始まりからこれだけあとを時刻にする（欠測の半分まで）
@@ -104,12 +102,17 @@ const FormAnalyze = (() => {
     DRAW_BASE_MS: 400, // 引く前の水準を取る長さ
     DRAW_FIT_RMS: 0.12, // 当てはめの残差（引きの振れ幅に対する比）がこれを超えたら使わない
     SETTLE_WAIT_MS: 400, // 境目のあと、手が止まるのを待つ最長の時間
-    REFRACTORY_MS: 1500,
+    REFRACTORY_MS: 1500, // 事象どうしの最短の間隔
     FEAT_FROM_MS: 600, // 特徴の窓 = 離れの [FEAT_FROM, FEAT_TO] 前
     FEAT_TO_MS: 60,
-    FEAT_SETTLE_MS: 200,
-    FEAT_WINS_MAX: 8,
-    NOISE_LAGS: 3,
+    FEAT_SETTLE_MS: 200, // アンカーに入ってからこの時間は、ゆれの見積もりに使わない
+    FEAT_WINS_MAX: 8, // 1 射で使う窓の数の上限
+    NOISE_LAGS: 3, // 窓どうしの差を取る間隔の上限
+    TPL_BEFORE_MS: 2000, // 型の範囲 = 離れの [−TPL_BEFORE, +TPL_AFTER]
+    TPL_AFTER_MS: 600,
+    TPL_MIN_SHOTS: 3, // 型を作るのに要る、はっきりした射の数
+    TPL_BOUND: 1.5, // 「射らしい」とみなす距離 = はっきりした射の距離の最大 × TPL_BOUND
+    TPL_COVER: 0.5, // 型の長さのうち、見えていなければならない割合
     POSE_REL_FROM_MS: 150, // 離れのあとの姿を取る窓
     POSE_REL_TO_MS: 350,
     RHO_REF: 1.15, // 真横での「弓手の腕 / 胴」の目安（体節比。6 章）
@@ -166,6 +169,10 @@ const FormAnalyze = (() => {
     return Math.sqrt(v.reduce((s, x) => s + (x - m) * (x - m), 0) / (v.length - 1));
   }
   const nanArray = n => new Float64Array(n).fill(NaN);
+  /* 離れの動きの形: 止まっていた手に、時刻 0 から力がかかる（臨界減衰の 2 次の応答）。0 → 1。s = 経過時間 / 時定数 */
+  const releaseShape = s => (s <= 0 ? 0 : 1 - (1 + s) * Math.exp(-s));
+  /* 止まった所から止まった所へのなめらかな動き（最小躍度。Flash & Hogan 1985）: 0 → 1 */
+  const minJerk = u => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * u * (10 - 15 * u + 6 * u * u));
   /* 値のかたまりの中心と幅: 全体の SHORTH_FRAC を含むいちばん短い区間（shorth）。
      離れの段差のように片側へ大きく外れた値が半分近く混じっても、保持のゆれのかたまりを取り出せる。
      幅は、正規分布なら標準偏差になるように直す。 */
@@ -552,8 +559,7 @@ const FormAnalyze = (() => {
   }
 
   /* 動き始めを 1 コマより細かく（4.6）: 点 ch の、保持の位置 A から終わりぎわの位置 B へ向かう変位に
-     「0 → 直線で増える → 1」を当てはめる。動き始め tr（変わり目 c の [FIT_EARLY, FIT_LATE] の範囲）と立ち上がりの長さ tau を、
-     残差の二乗和が最小になるように選ぶ。c は「A と B の中ほどを越えた所」なので、動き始めはその少し前にある。 */
+     「0 → 力がかかって動き出す（releaseShape）→ 1」を当てはめる。動き始め tr と時定数 tau を、残差の二乗和が最小になるように選ぶ。 */
   function onsetFit(sig, ch, span, lv, c) {
     const { dt, n } = sig, ux = lv.B.x - lv.A.x, uy = lv.B.y - lv.A.y, L2 = ux * ux + uy * uy;
     const fail = { t: c - P.FIT_DEFAULT_MS / dt, unc: Math.max(dt, P.WEAK_UNC_MS / 2), ok: false };
@@ -566,18 +572,29 @@ const FormAnalyze = (() => {
       us.push(((ch.x[j] - lv.A.x) * ux + (ch.y[j] - lv.A.y) * uy) / L2);
     }
     if (us.length < 5) return fail;
-    const step = dt / 8, lo = (c - 1) * dt - P.FIT_EARLY_MS, hi = c * dt + P.FIT_LATE_MS;
-    let best = { sse: Infinity, tr: c * dt };
-    for (const tau of P.FIT_TAUS) {
-      for (let tr = lo; tr <= hi; tr += step) {
-        let sse = 0;
-        for (let k = 0; k < ts.length; k++) {
-          const u = (ts[k] - tr) / tau, mdl = u <= 0 ? 0 : u >= 1 ? 1 : u;
-          sse += (us[k] - mdl) * (us[k] - mdl);
-        }
-        if (sse < best.sse) best = { sse, tr, tau };
+    /* 動き始め tr は、変わり目 c（A と B の中ほどを越えたあとの最初のコマ）の少し前にある。[c の 1 コマ前 − FIT_EARLY, c] を細かく探す。
+       時定数 tau はコマの間隔が粗いと決まらないので、残差がほとんど同じ候補の中では、ふつうの値 FIT_TAU_TYP に近いものを取る */
+    const step = dt / 8, lo = (c - 1) * dt - P.FIT_EARLY_MS, hi = c * dt;
+    const sseOf = (tr, tau) => {
+      let sse = 0;
+      for (let k = 0; k < ts.length; k++) {
+        const mdl = releaseShape((ts[k] - tr) / tau);
+        sse += (us[k] - mdl) * (us[k] - mdl);
       }
-    }
+      return sse;
+    };
+    const perTau = P.FIT_TAUS.map(tau => {
+      let bs = Infinity, bt = c * dt;
+      for (let tr = lo; tr <= hi; tr += step) { const e = sseOf(tr, tau); if (e < bs) { bs = e; bt = tr; } }
+      /* 残差がほとんど同じになる tr が幅を持つときは、その中ほど（端へ寄せない） */
+      let t0 = bt, t1 = bt;
+      for (let tr = lo; tr <= hi; tr += step) if (sseOf(tr, tau) <= bs * (1 + P.FIT_FLAT) + 1e-12) { if (tr < t0) t0 = tr; if (tr > t1) t1 = tr; }
+      return { tau, sse: bs, tr: (t0 + t1) / 2 };
+    });
+    const minSse = Math.min(...perTau.map(x => x.sse));
+    let pick = null;
+    for (const x of perTau) if (x.sse <= minSse * (1 + P.FIT_TAU_FLAT) + 1e-12 && (!pick || Math.abs(x.tau - P.FIT_TAU_TYP) < Math.abs(pick.tau - P.FIT_TAU_TYP))) pick = x;
+    const best = { tr: pick.tr, tau: pick.tau };
     /* 動き始めの近くで、この点が写っていない（補間した、または欠測のまま）区間 */
     const g = Math.min(n - 1, Math.max(0, Math.round(best.tr / dt))), holeAt = j => j >= 0 && j < n && (!fin(ch.x[j]) || span[j] > 1.5 * dt);
     let h = -1;
@@ -681,12 +698,23 @@ const FormAnalyze = (() => {
       const pos = v => (fin(v) && v > 0 ? v : 0);
       ev.zL = Math.hypot(pos(ev.zLW), pos(ev.zLE));
       ev.zJ = Math.hypot(pos(ev.zJW), pos(ev.zJE));
-      /* 引き手の手首が見えているなら、後ろへ動いていること（前へ戻る動き = 引き戻し は離れにしない） */
-      ev.back = fin(stepW) ? stepW >= P.EXIT_MIN : stepE >= P.EXIT_MIN;
+      /* 引き手の手首が見えているなら、後ろへ動いていること（前へ戻る動き = 引き戻し は離れにしない）。
+         段差が残っているか、変わり目で後ろへ急に動いたか（そのあとゆれで戻って見えることがある）のどちらか */
+      ev.back = fin(stepW) ? stepW >= P.EXIT_MIN || (jW >= P.EXIT_MIN && ev.zJW >= P.LOCATE_J && stepW > -P.EXIT_MIN) : stepE >= P.EXIT_MIN;
       /* 変わり目が、腕を下ろし始めた所と重なる: 下ろす動きそのものを拾った。離れの位置は分からない */
       if (type === "lower" && cp.c > to - Math.round(P.LOWER_GUARD_MS / dt)) ev.back = false;
+      /* 離れでは頭と胴は動かない。同じ時刻に鼻・腰（両肩の中点から見た位置）や体の大きさが大きく変わったなら、
+         人の入れ替わり・場面の切り替わり・姿勢推定の取り違えであって、離れではない */
+      const pa = Math.max(is, cp.c - Math.round(P.BODY_PRE_MS / dt)), pb = cp.c - Math.round(P.PRE_TO_MS / dt), qa = cp.c + Math.round(P.POST_FROM_MS / dt), qb = Math.min(n - 1, cp.c + Math.round(P.BODY_PRE_MS / dt));
+      for (const ch of [C.nose, C.hipMid]) {
+        const p0 = medPt(ch, pa, pb), p1 = medPt(ch, qa, qb);
+        if (p0 && p1 && Math.hypot(p1.x - p0.x, p1.y - p0.y) >= P.BODY_JUMP) ev.bodyMoved = true;
+      }
+      const T0 = medRange(sig.T, pa, pb), T1 = medRange(sig.T, qa, qb);
+      if (fin(T0) && fin(T1) && Math.abs(T1 / T0 - 1) >= P.SCALE_JUMP) ev.bodyMoved = true;
     }
     Object.assign(base, ev || {});
+    if (ev && ev.bodyMoved) return Object.assign(base, { kind: null, reason: "bodyMoved" });
     const clear = ev && ev.back && (type === "lower" ? ev.zL >= P.LOCATE_K && (ev.zJ >= P.LOCATE_J || ev.zL >= P.EXIT_K) : ev.zL >= P.EXIT_K && ev.zJ >= P.EXIT_J);
     if (clear) return Object.assign(base, { kind: "shot", score: ev.zL });
     if (type === "close") {
@@ -740,7 +768,6 @@ const FormAnalyze = (() => {
   /* 引きの軌道に滑らかな形を当てはめる（4.8）: 引き尺 ds が「引く前の水準 → 最小躍度の立ち上がり → 保持の水準」をたどるとして、
      引き始め t0 と引き終わり t1 を、残差の二乗和が最小になるように選ぶ。速さを差分で測るより、ランドマークのゆれに強い。
      当てはまりが悪い（残差が大きい）ときは null を返し、呼び出し側は境目と速さで決めた時刻を使う。 */
-  const minJerk = u => (u <= 0 ? 0 : u >= 1 ? 1 : u * u * u * (10 - 15 * u + 6 * u * u));
   function fitDraw(sig, w, aI, relI, dHold) {
     const { dt } = sig;
     const i0 = Math.max(0, Math.round(aI - (P.DRAW_FIT_BACK_MS + P.DRAW_BASE_MS) / dt)), i1 = Math.min(Math.round(relI - P.PRE_TO_MS / dt), Math.round(aI + P.DRAW_FIT_FWD_MS / dt));
@@ -855,12 +882,79 @@ const FormAnalyze = (() => {
     const out = [];
     for (const r of ROLES) {
       const p = medPt(sig.C[r], a, b);
-      out.push(p ? Math.round(p.x * 100) : null, p ? Math.round(p.y * 100) : null);
+      out.push(p ? Math.round(p.x * 100) + 0 : null, p ? Math.round(p.y * 100) + 0 : null); // + 0: −0 を 0 にする
     }
     return out;
   }
 
   const poseWindow = (sig, relI) => winIdx(relI, P.POSE_REL_FROM_MS, P.POSE_REL_TO_MS, sig.dt, sig.n);
+
+  /* ---- 4.9 自己相似: その回の「型」と比べる ---- */
+  /* 型 = はっきりした射の、離れの [−TPL_BEFORE, +TPL_AFTER] の 引き尺 / 保持の引き尺・弓手の高さ・引き手の高さ（保持からの差）の、
+     時刻ごとの中央値。射から型までの距離は、項目ごとに「ほかの射で作った型からの距離」の中央値で割って平均する。
+     候補（離れがはっきりしなかった保持）は、型をずらしながら当て、いちばん近い位置での距離が
+     「はっきりした射の距離の最大 × TPL_BOUND」以下なら likely（射らしい）の印を付ける。離れの見当が無い候補は、時刻を型の位置にする。
+     射数には入れない（離れがはっきり写っていないことは変わらない）。逆に、型から遠い射には atypical の印だけを付ける。 */
+  function templateMatch(sig, real, candidates) {
+    const { dt, n } = sig, K = Math.round(P.TPL_BEFORE_MS / dt), M = Math.round(P.TPL_AFTER_MS / dt), L = K + M + 1;
+    if (real.length < P.TPL_MIN_SHOTS) return null;
+    const comps = [sig.ds, sig.es, sig.ays];
+    const snippet = relI => {
+      const i = Math.round(relI), [w0, w1] = winIdx(i, -P.FEAT_FROM_MS, -P.FEAT_TO_MS, dt, n);
+      const ref = comps.map(a => medRange(a, w0, w1));
+      if (!fin(ref[0]) || !(ref[0] > 0)) return null;
+      return comps.map((a, c) => {
+        const v = nanArray(L);
+        for (let j = 0; j < L; j++) { const x = a[i - K + j]; if (fin(x)) v[j] = c === 0 ? x / ref[0] : x - ref[c]; }
+        return v;
+      });
+    };
+    const snips = real.map(s => snippet(s._i)).filter(Boolean);
+    if (snips.length < P.TPL_MIN_SHOTS) return null;
+    const build = skip => comps.map((_, c) => {
+      const t = nanArray(L), col = [];
+      for (let j = 0; j < L; j++) {
+        col.length = 0;
+        for (let k = 0; k < snips.length; k++) if (k !== skip && fin(snips[k][c][j])) col.push(snips[k][c][j]);
+        t[j] = col.length ? median(col) : NaN;
+      }
+      return t;
+    });
+    const raw = (snip, tpl) => comps.map((_, c) => {
+      let sum = 0, cnt = 0;
+      for (let j = 0; j < L; j++) if (fin(snip[c][j]) && fin(tpl[c][j])) { sum += Math.abs(snip[c][j] - tpl[c][j]); cnt++; }
+      return { d: cnt ? sum / cnt : NaN, cover: cnt / L };
+    });
+    const loo = snips.map((sn, k) => raw(sn, build(k)));
+    const scale = comps.map((_, c) => Math.max(1e-3, median(loo.map(r => r[c].d))));
+    const total = r => {
+      let sum = 0, cnt = 0, cover = 1;
+      r.forEach((x, c) => { if (fin(x.d)) { sum += x.d / scale[c]; cnt++; cover = Math.min(cover, x.cover); } });
+      return { d: cnt === comps.length ? sum / cnt : NaN, cover: cnt === comps.length ? cover : 0 };
+    };
+    const looD = loo.map(total).map(x => x.d).filter(fin);
+    if (looD.length < P.TPL_MIN_SHOTS) return null;
+    const bound = P.TPL_BOUND * Math.max(...looD), full = build(-1);
+    real.forEach((s, k) => { const d = total(loo[k]).d; s.typicality = fin(d) ? d / bound : null; });
+    for (const cnd of candidates) {
+      if (cnd._to === undefined) continue;
+      let best = Infinity, bi = -1;
+      for (let i = cnd._from; i <= cnd._to; i++) {
+        const sn = snippet(i);
+        if (!sn) continue;
+        const r = total(raw(sn, full));
+        if (r.cover >= P.TPL_COVER && r.d < best) { best = r.d; bi = i; }
+      }
+      if (bi >= 0) {
+        cnd.templateDist = best / bound;
+        if (best <= bound) {
+          cnd.likely = true;
+          if (cnd.reason !== "weakRelease") { cnd.tMs = sig.t0 + bi * dt; cnd.uncMs = P.LATE_UNC_MS; }
+        }
+      }
+    }
+    return { bound, shots: snips.length };
+  }
 
   /* ---- 5.3 測定のゆれ ---- */
   function captureNoise(real) {
@@ -956,14 +1050,16 @@ const FormAnalyze = (() => {
       const nextStart = ri + 1 < dr.runs.length ? dr.runs[ri + 1][0] : n;
       const ev = runEvent(sig, is, e, nextStart);
       if (o.debug) (quality.debug = quality.debug || []).push(ev ? { s: tOf(s), e: tOf(e), is: tOf(is), kind: ev.kind, type: ev.type, tc: tOf(ev.tc), to: tOf(ev.to), t: tOf(ev.t), unc: ev.unc, c: tOf(ev.c), zL: ev.zL, zJ: ev.zJ, zLW: ev.zLW, zLE: ev.zLE, zJW: ev.zJW, zJE: ev.zJE, stepW: ev.stepW, stepE: ev.stepE, reason: ev.reason } : { s: tOf(s), e: tOf(e), is: tOf(is), ev: null });
-      const cand = (i, reason, unc) => candidates.push({ tMs: tOf(i), uncMs: unc, reason, fromMs: tOf(s), toMs: tOf(e) });
+      const cand = (i, reason, unc) => candidates.push({ tMs: tOf(i), uncMs: unc, reason, likely: false, fromMs: tOf(s), toMs: tOf(e), _from: is, _to: ev && ev.type === "lower" ? Math.min(n - 1, ev.tc) : undefined });
       if (!ev) return cand(e, "short", P.LATE_UNC_MS);
-      if (!ev.kind) return cand(ev.t, ev.reason, ev.reason === "weakRelease" ? P.WEAK_UNC_MS : P.LATE_UNC_MS);
+      if (!ev.kind) return cand(fin(ev.t) ? ev.t : ev.tc, ev.reason, ev.reason === "weakRelease" ? P.WEAK_UNC_MS : P.LATE_UNC_MS);
       const relT = tOf(ev.t);
       if (relT - lastEvt < P.REFRACTORY_MS) return cand(ev.t, "tooSoon", P.WEAK_UNC_MS);
       lastEvt = relT;
       /* 引きの進み具合: 引き手の手首（平滑）の、引きの軸に沿った位置（後ろが正） */
-      const w = nanArray(n), wLo = Math.max(0, is - Math.round((P.ANCHOR_BACK_MS + 5000) / dt));
+      const w = nanArray(n);
+      let wLo = Math.max(0, is - Math.round((P.ANCHOR_BACK_MS + 5000) / dt));
+      for (let i = is; i >= wLo; i--) if (sig.cut[i]) { wLo = i + 1; break; } // 人が入れ替わった所より前は見ない
       for (let i = wLo; i <= Math.min(n - 1, Math.ceil(ev.t)); i++) w[i] = sig.ps.x[i] * ev.axis.x + sig.ps.y[i] * ev.axis.y;
       const an = anchorStart(sig, w, ev.t, is, still), fd = fitDraw(sig, w, an.a, ev.t, an.dHold);
       const aI = fd ? Math.min(fd.stillI, ev.t - 1) : an.a, dI = fd ? fd.startI : drawStart(sig, aI, ev.D0), endI = fd ? Math.min(fd.endI, ev.t) : aI;
@@ -973,13 +1069,17 @@ const FormAnalyze = (() => {
       shots.push({
         releaseMs: relT, anchorStartMs: tOf(aI), holdMs: relT - tOf(aI), kind: ev.kind,
         drawStartMs: tOf(dI), drawMs: tOf(aI) - tOf(dI), drawEndMs: tOf(endI), anchorFit: !!fd, releaseUncMs: ev.unc,
-        confidence: isShot ? Math.min(1, 0.7 + 0.03 * (ev.score - P.EXIT_K)) : 0.8,
+        confidence: isShot ? Math.max(0.5, Math.min(1, 0.5 + 0.05 * (ev.score - P.LOCATE_K))) : 0.8, _i: ev.t,
         source: isShot ? (ev.stepW >= P.EXIT_MIN ? "draw" : "elbow") : "draw", kindScore: ev.score,
         features: Object.assign({ holdMs: relT - tOf(aI), drawMs: tOf(aI) - tOf(dI) }, ft.f), wins: ft.wins,
         poseHold: poseAt(sig, ft.w0, ft.w1), poseRel: isShot ? poseAt(sig, p0, p1) : null,
       });
     });
     const real = shots.filter(x => x.kind === "shot"), ns = captureNoise(real);
+    const tpl = templateMatch(sig, real, candidates);
+    quality.template = tpl ? { shots: tpl.shots } : null;
+    for (const x of shots) delete x._i;
+    for (const x of candidates) { delete x._from; delete x._to; }
     quality.noise = ns.noise;
     quality.noiseDf = ns.df;
     quality.letdowns = shots.length - real.length;
@@ -1004,6 +1104,6 @@ const FormAnalyze = (() => {
   return {
     VERSION, P, ROLES, FEATURE_KEYS, DEFAULT_KEYS, FLOORS,
     packFrames, repairSwaps, resample, buildSignals, prepare, holdLevel, drawnRuns, changePoint, jumpAt, onsetFit, runEvent,
-    anchorStart, drawStart, shotFeatures, featureWindow, poseAt, poseWindow, fitDraw, captureNoise, compareShots, analyzePacked, analyze,
+    anchorStart, drawStart, shotFeatures, featureWindow, poseAt, poseWindow, fitDraw, templateMatch, captureNoise, compareShots, analyzePacked, analyze,
   };
 })();
