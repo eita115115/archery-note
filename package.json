@@ -34,6 +34,7 @@
     "golden:replay": "python tools/golden-replay/run-golden-replay.py",
     "test:form-fixtures": "node tools/golden-replay/test-form-metric-fixtures.js",
     "golden:form-fixtures": "node tools/golden-replay/replay-form-fixtures.js",
+    "bench:form": "node tools/form-bench/run-bench.js",
     "check:distribution": "node tools/check-distribution.js",
     "test:e2e:dist": "node tools/test-distribution.js"
   },
