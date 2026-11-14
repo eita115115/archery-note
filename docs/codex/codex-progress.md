@@ -3620,3 +3620,7 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 検証: `npm run build:web-assets`、`npm run check:all`（exit 0、3 分 37 秒）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（17 件 + 21 件）、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real`（直す前の出力と 1 文字も変わらない）、Playwright 489 passed。新しい検査を、直す前のスクリプト（de5bda6 の作業ツリー）で流し、Node の 8 件と e2e の 15 本が落ちることを確かめた。
 
 リスク: 撮影中の数え方は合成の場面で決めた値で、実射で超えないとは言えない。数が増えるのが離れの 4〜5 秒あとになった。撮影中の計算は 2 倍。`check:all` は約 2 分長い。射型の記録の 1,000 件は目安（超えても保存できる）。実射・実機では未確認のまま。次: 親の検証、オーナーの確認、実地の確認（design.md 6.3）。
+
+## 公開 v129（射型の記録 v2、AN-098〜AN-101）
+
+2026-11-14、オーナー承認後に PR #143 を main へマージ（c43353e）。マージ前の CI は 320×640 の監査で「（約 16cm）」が幅 320 を越えて失敗した（ランナーのフォントで折り返し位置が変わり、white-space:nowrap の塊が押し出された）。値と cm の塊を max-width 100% の inline-block にし、間に折り返しの機会を入れて直した（251fafe。値を 3 倍に広げても画面内に収まることを確認）。Pages の version.json が 129、sw.js が archery-note-v129、公開ページで APP_VER 129・エラー 0 件。AN-098〜AN-101 を passes:true にした。次は実射での確認（AN-001）。
