@@ -135,7 +135,9 @@ function trAnchorSecondary(cur, formAnalyses){
   if(!linked) return null;
   const latest=trAnchorStd(linked);
   if(latest==null) return null;
-  const priorStds=formAnalyses.filter(f=>f&&f.sessionId && f.sessionId!==cur.id && f.date && f.date<=cur.date)
+  /* 測り方の版（cap.g。無い記録は 1）が同じ記録とだけ比べる（AN-098。46-form-core.js formRecordGeometry と同じ規則のローカル複製） */
+  const geomOf=f=>(f&&f.cap&&Number.isSafeInteger(f.cap.g)&&f.cap.g>=2)?f.cap.g:1;
+  const priorStds=formAnalyses.filter(f=>f&&f.sessionId && f.sessionId!==cur.id && f.date && f.date<=cur.date && geomOf(f)===geomOf(linked))
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")).slice(-10)
     .map(trAnchorStd).filter(Number.isFinite);
   if(priorStds.length<3) return null;

@@ -49,7 +49,7 @@ async function main() {
   const scripts = [...html.matchAll(/<script\b[^>]*src="(scripts\/[^"]+\.js)"[^>]*>/g)].map(
     (match) => match[1],
   );
-  assert.equal(scripts.length, 14);
+  assert.equal(scripts.length, 17);
   const sources = scripts.map((file) => fs.readFileSync(path.join(root, file), "utf8"));
   cp.execFileSync(process.execPath, [path.join(__dirname, "build-native-web.js")], {
     stdio: "inherit",
@@ -121,7 +121,7 @@ async function main() {
   const compact = await Promise.all(fixtures.map(compactScript));
   assert.equal(run(compact), run(fixtures), "cross-script globals/ASI/regex/template runtime");
   console.log(
-    `Distribution checks passed:14 structures/names/order/source/regeneration; gzip JS ${originalBytes}→${deliveredBytes} bytes; cross-script fixtures`,
+    `Distribution checks passed:17 structures/names/order/source/regeneration; gzip JS ${originalBytes}→${deliveredBytes} bytes; cross-script fixtures`,
   );
 }
 

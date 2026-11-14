@@ -132,7 +132,9 @@ for (const width of [320, 375, 900]) {
     await expect(card.locator("[data-form-id]")).toHaveCount(5);
     /* 対象の説明は、開かなくても読める1段落 */
     await expect(card.locator("details")).toHaveCount(0);
-    await expect(card.locator("p.basis")).toContainText("期間は撮影日");
+    /* 以前の記録は、新しい記録（v2）の下の別の区切りに並ぶ（AN-100）。説明の段落もその中にある */
+    await expect(card.getByTestId("analysis-form-legacy")).toContainText("以前の記録");
+    await expect(card.getByTestId("analysis-form-legacy-basis")).toContainText("期間は撮影日");
     const first = card.locator("[data-form-id]").first();
     await expect(first).toContainText("弓手肘");
     await expect(first).toContainText("引き手肘");

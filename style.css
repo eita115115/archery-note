@@ -1754,3 +1754,133 @@ button.lrow.setLink{cursor:pointer; min-height:60px;}
 }
 /* @container の無いブラウザでは、50-record-view.js の watchCrampedScorecard が高さを測って付ける */
 .miniCard.is-cramped .scard{visibility:hidden;}
+
+/* ===================================================================================
+   射型の記録 v2（docs/design/form-v2/design.md 2 章、試作 prototype.html）。
+   全画面は今日の結果と同じ .resultOvl / .resultScreen。カードなし・罫線の見出し・13px 以上・押せる部品 44px 以上。
+   =================================================================================== */
+.axi{fill:var(--ink); font-size:13px; font-weight:700;}
+.sheet.resultScreen.fv2Screen{position:relative; padding-bottom:calc(150px + var(--safe-b));}
+.fv2Top{display:grid; grid-template-columns:1fr auto 1fr; align-items:center; min-height:48px;}
+.fv2Top .backBtn{justify-self:start;}
+.fv2Ttl{font-size:15px; font-weight:600; text-align:center; white-space:nowrap;}
+.fv2Head{display:flex; align-items:flex-end; justify-content:space-between; gap:12px;}
+.fv2Head .viewDate{text-align:right; flex:none;}
+.btn.fv2Tall{min-height:56px; font-size:17px;}
+.btnRow.fv2Tight{padding-top:10px;}
+.fv2Sub{margin-top:14px;}
+.fv2Gap{padding-top:10px;}
+.formLegacy{margin-top:22px;}
+button.lrow.fv2Item{cursor:pointer;}
+.formAnalysisRow .fv2Item{flex:1; min-width:0; border-bottom:0;}
+/* 置き方・動画の読み込み: 映像と確認の行 */
+.fv2Cam{position:relative; background:#1a2027; border-bottom:1px solid var(--rule); min-height:150px; line-height:0;}
+.fv2Video{display:block; width:100%;}
+.fv2Cam .fv2Video{max-height:40dvh; object-fit:contain;}
+.fv2Cam canvas{position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none;}
+.fv2Tag{position:absolute; top:8px; left:8px; font-size:13px; font-weight:600; line-height:1.5; color:#dfe5ea; background:rgba(0,0,0,.55); border-radius:4px; padding:2px 7px;}
+.fv2Tag:empty{display:none;}
+.fv2Note{min-height:0;}
+.fv2Note:empty{display:none;}
+.lrow.fv2Chk{min-height:46px; padding:6px 0;}
+.lrow.fv2Chk .lk{width:56px; color:var(--ink); font-weight:600;}
+.lrow.fv2Chk .lv{flex:1; text-align:left; font-size:14px; font-weight:400; color:var(--sub); line-height:1.45; overflow-wrap:anywhere;}
+.lrow.fv2Chk.bad .lv{color:var(--ink);}
+.pill.fv2Pill{flex:none; margin-left:0; line-height:1.5;}
+.pill.fv2Pill.ok{color:var(--accent); border-color:var(--accent);}
+.pill.fv2Pill.warn{color:var(--warn); border-color:var(--warn);}
+.fv2Opt{display:grid; grid-template-columns:1fr 132px; align-items:center; gap:10px; min-height:56px; padding:4px 0; border-bottom:1px solid var(--rule);}
+.fv2Opt b{display:block; font-size:15px; font-weight:600; line-height:1.4;}
+.fv2Opt span{display:block; font-size:13px; color:var(--sub); line-height:1.4;}
+/* 撮影: 大きな射数だけ */
+.sheet.fv2Screen[data-stage="capture"]{display:flex; flex-direction:column;}
+.fv2Count{flex:1 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:230px; padding:8px 0; text-align:center;}
+.fv2Count .lab{font-size:15px; color:var(--sub);}
+.fv2Count .num{font-size:160px; font-weight:700; line-height:1; letter-spacing:-.02em;}
+.fv2Count .sub{font-size:17px; font-weight:600; min-height:26px; margin-top:2px;}
+.fv2Thumb{position:absolute; top:calc(var(--safe-t) + 60px); right:var(--gut); width:64px; background:#1a2027; border:1px solid var(--rule); line-height:0;}
+.fv2Thumb .fv2Video{max-height:96px; object-fit:cover;}
+.fv2RecBtn{justify-self:end; display:inline-flex; align-items:center; gap:6px; min-height:48px; padding:0 var(--gut) 0 8px; border:0; background:none; font-size:14px; font-weight:600; color:var(--ink); white-space:nowrap; cursor:pointer;}
+.fv2RecBtn i{display:block; width:14px; height:14px; border-radius:50%; border:2px solid var(--danger);}
+.fv2RecBtn.on i{background:var(--danger);}
+.fv2State{padding:10px 12px; border:1px solid var(--rule-strong); border-radius:6px; font-size:15px; line-height:1.55;}
+.fv2State.warn{border-color:var(--warn); color:var(--warn); font-weight:600;}
+.fv2Steps .lrow .lmain b{font-size:15px;}
+/* 結果: 図 */
+.vsecH .txtBtn.fv2FixBtn{margin:-12px 0;}
+.fv2Chart{border-bottom:1px solid var(--rule); padding-bottom:10px;}
+.fv2Chart svg,.fv2Sub svg,.fv2Ov svg{display:block; max-width:100%; height:auto;}
+.fv2Timeline{padding-top:8px;}
+.fv2ChartH{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:12px 0 2px;}
+.fv2ChartH b{font-size:15px; font-weight:600;}
+.fv2ChartH span{font-size:14px; color:var(--sub); text-align:right; min-width:0;}
+.fv2Legend{display:flex; flex-wrap:wrap; gap:4px 14px; padding:8px 0 0; font-size:13px; color:var(--sub); line-height:1.5;}
+.fv2Legend i{display:inline-block; vertical-align:middle; margin-right:5px;}
+.fv2Legend .k1{width:14px; height:6px; background:var(--ink);}
+.fv2Legend .k2{width:2px; height:12px; background:var(--ink);}
+.fv2Legend .k3{width:13px; height:6px; border:1.5px solid var(--sub);}
+.fv2Legend .k4{width:13px; height:6px; border:1.5px dashed var(--ink);}
+.fv2Legend .k5{width:14px; height:10px; background:var(--raised); border:1px solid var(--rule);}
+.fv2Legend .k6{width:12px; height:12px; border-radius:50%; background:var(--info);}
+.fv2Ov{background:var(--surface); border:1px solid var(--rule); margin-top:10px;}
+.fv2SegRow{padding-top:10px;}
+.lrow.fv2Pick{cursor:pointer;}
+.lrow.fv2Pick .pick{width:62%; text-align:right; text-overflow:ellipsis;}
+.noteScreen .lrow.fv2Pick input[type="date"].inp{width:62%; min-height:44px; margin:0;}
+details.fv2More{border-bottom:1px solid var(--rule);}
+details.fv2More > summary{display:flex; align-items:center; justify-content:space-between; min-height:48px; font-size:15px; font-weight:600; cursor:pointer; list-style:none;}
+details.fv2More > summary::-webkit-details-marker{display:none;}
+details.fv2More > summary::after{content:"＋"; flex:none; font-size:17px; font-weight:400; color:var(--sub);}
+details.fv2More[open] > summary::after{content:"−";}
+details.fv2More > summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+details.fv2More ul{margin:0; padding:0 0 12px 18px; font-size:14px; line-height:1.75; color:var(--sub);}
+.fv2Saved{padding:0 0 8px; font-size:15px; font-weight:600; line-height:1.5; color:var(--accent);}
+.fv2Saved.err{color:var(--danger);}
+/* 射数を直す */
+.fv2FixRow{display:grid; grid-template-columns:1fr 112px; gap:10px; align-items:center; min-height:56px; padding:4px 0; border-bottom:1px solid var(--rule);}
+.fv2FixRow b{display:block; font-size:15px; font-weight:600; line-height:1.4;}
+.fv2FixRow span{display:block; font-size:13px; color:var(--sub); line-height:1.4;}
+.fv2Tog{min-height:44px; padding:0 6px; border:1px solid var(--rule-strong); border-radius:6px; background:none; font-size:14px; font-weight:700; color:var(--ink); cursor:pointer;}
+.fv2Tog[aria-pressed=true]{background:var(--accent-soft); box-shadow:inset 0 -3px 0 var(--accent);}
+/* 射の詳細 */
+.fv2Bars{padding-top:6px;}
+.fv2Bar{display:grid; grid-template-columns:92px 1fr 104px; align-items:center; gap:8px; min-height:44px; border-bottom:1px solid var(--rule);}
+.fv2Bar .k{font-size:14px; color:var(--sub); line-height:1.3;}
+.fv2Bar .v{font-size:15px; font-weight:600; text-align:right; line-height:1.25;}
+.fv2Bar .v small{display:block; font-size:13px; font-weight:400; color:var(--sub);}
+.fv2Bar svg{display:block; width:100%; height:22px;}
+.fv2Tbl{border-top:1px solid var(--rule-strong); margin-top:10px;}
+.fv2Tr{display:grid; grid-template-columns:1.45fr .9fr .9fr .9fr; align-items:center; min-height:44px; border-bottom:1px solid var(--rule);}
+.fv2Tr > *{padding:4px 6px 4px 0; font-size:15px; font-weight:600; text-align:right; line-height:1.3; min-width:0; overflow-wrap:anywhere;}
+.fv2Tr > *:first-child{text-align:left; font-size:14px; font-weight:500; color:var(--sub);}
+.fv2Tr.h > *{font-size:13px; font-weight:600; color:var(--sub);}
+.fv2Tr.dif{background:var(--accent-soft); box-shadow:inset 3px 0 0 var(--info);}
+.fv2Tr.dif > *:first-child{color:var(--ink); padding-left:8px;}
+/* 段 7・8: 値を途中で折り返さない、推移の凡例、動画で確かめる画面 */
+/* 値と（約 cm）をひとかたまりで次の行へ送る。1行に収まらない長さのときだけ中で折り返す（はみ出さない。字の幅は端末のフォントで変わる） */
+.fv2Nw{display:inline-block; max-width:100%;}
+.fv2Legend .k7{width:10px; height:10px; border-radius:50%; background:var(--ink);}
+.fv2Legend .k8{width:5px; height:12px; background:var(--rule-strong);}
+.fv2Legend .k9{width:0; height:12px; border-left:1.5px dashed var(--info);}
+.fv2Rev .fv2Video{max-height:46dvh;}
+.fv2Chips{display:flex; flex-wrap:wrap; gap:6px; padding:10px 0 0;}
+.fv2Chip{min-width:44px; height:44px; padding:0 8px; border:1px solid var(--rule-strong); border-radius:6px; background:none; font-size:16px; font-weight:700; color:var(--ink); cursor:pointer;}
+.fv2Chip[aria-pressed=true]{background:var(--accent-soft); box-shadow:inset 0 -3px 0 var(--accent);}
+.fv2Chip:disabled{color:var(--sub); border-style:dashed; cursor:default;}
+.fv2Scrub{padding:6px 0 0;}
+.fv2Scrub input{display:block; width:100%; height:44px; margin:0; accent-color:var(--accent);}
+.fv2Scrub .t{display:flex; justify-content:space-between; font-size:13px; color:var(--sub);}
+.fv2RevCtl{margin-top:8px;}
+.fv2Opt.w3{grid-template-columns:1fr 156px;}
+.formDiagBlock .formDiagLm{margin-top:14px;}
+.formDiagBlock #fdLmChips{margin-top:8px;}
+.sheet.resultScreen.fv2Screen[data-stage="review"]{padding-bottom:calc(28px + var(--safe-b));}
+@media (max-width:340px){
+  .fv2Count .num{font-size:132px;}
+  .fv2Count{min-height:190px;}
+  .fv2Bar{grid-template-columns:80px 1fr 96px;}
+  .fv2Opt{grid-template-columns:1fr 116px;}
+  .fv2Tr > *{font-size:14px;}
+  .fv2Tr > *:first-child{font-size:13px;}
+  .fv2FixRow{grid-template-columns:1fr 104px;}
+}

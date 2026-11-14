@@ -38,6 +38,7 @@ const sessionStageDef = () => null;
 const sumScores = (arr) => arr.reduce((n, a) => n + (+a.s || 0), 0);
 const formTrackingEnabled = () => false;
 const formTrackingCard = () => "";
+const formTrackingOffCard = () => "";
 ${read("scripts/20-scoring.js")}
 ${read("scripts/40-analysis-physics.js")}
 ${read("scripts/45-analysis-core.js")}

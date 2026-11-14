@@ -1,4 +1,4 @@
-const CACHE = "archery-note-v128";
+const CACHE = "archery-note-v129";
 const CACHE_PREFIX = "archery-note-v";
 /* 射形トラッキングの pose 資産（assets/pose/ の wasm+モデル、約15MB・内容固定）専用キャッシュ。
    名前を CACHE_PREFIX("archery-note-v") に前方一致させないことで、activate の
@@ -11,8 +11,11 @@ const APP_SCRIPTS = [
   "./scripts/20-scoring.js",
   "./scripts/30-target-svg.js",
   "./scripts/40-analysis-physics.js",
+  "./scripts/44-form-analyze.js",
+  "./scripts/44-form-record.js",
   "./scripts/45-analysis-core.js",
   "./scripts/46-form-core.js",
+  "./scripts/47-form-v2-view.js",
   "./scripts/47-form-view.js",
   "./scripts/48-gamification.js",
   "./scripts/49-todays-result.js",

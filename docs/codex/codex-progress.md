@@ -3558,3 +3558,65 @@ CI: PR #139 の validate は段4・5の push から失敗していた（check:ui
 ## 公開 v128（AN-097）
 
 2026-11-13、オーナー承認後、PR #141 の CI 成功（19ded1a）を確かめて main へマージ（57728a4）。Pages の `version.json` が `{ "v": 128 }`、`sw.js` が `archery-note-v128`、公開ページを Chromium で開いて APP_VER 128・タブ4つ・コンソールのエラー 0 件。AN-097 を passes:true にした。
+
+## AN-098 射型の記録 段A（正確さ。版128据え置き・未公開）
+
+2026-11-14、射型の記録の測定を、画面の形（縦長・横長・中央固定）によらないものにした。変更: scripts/46-form-core.js（`formRefScaleX`、`computeFormMetrics` の frame 引数と正方形の画素の角度、`formShotArmAngle`、`formPreReleaseWindow` の端点、`judgeArrowCheck` の発射前の証拠、`formCaptureConditions`・`formMergeCaptureConditions`・`formRecordGeometry`・`formComparableRecords`、`formScoreLink`・`formRecordInsights`・`formTrendSeries` の版）、scripts/47-form-view.js（画面の大きさを core へ渡す、撮影条件を記録に添える、保存する値の丸め、同じ版だけの比較、撮影条件の行）、scripts/49-todays-result.js（アンカーの副軸を同じ版だけで）、tools/check-form-core.js（合成の画素座標の時系列ほか）、tools/check-storage-contract.js、tests/e2e/form-geometry.spec.js、docs/design/form-tracking-accuracy.md、AGENTS.md（正本の表に1行）。
+
+修正前後の数値（合成、実射なし）: 同じ画素の姿勢の anchorNorm は 横長 0.176 → 0.176、縦長 0.524 → 0.176。3射の時系列は 横長 3射 → 3射（リリース 3333/8033/12733ms で同じ）、縦長 0射 → 3射（同じ時刻）。中央固定は切り出しの座標を画面全体へ戻しているので修正前から横長と同じ。
+
+検証: check:all（exit 0）・lint・format:check 成功、golden:form-fixtures は oblique-single-release retained=1（4457.414ms/close）・scene-cut-arrow-retrieval retained=0 で変化なし、Playwright 462 passed (6.2m)（460 + 新しい2本）。fixture の `coreSha256` は取得時点の core の控えで、現在の core とは照合していない（README のとおり）ので更新していない。
+
+リスク: 実射では未確認（AN-001）。新しい記録の肘の角度は旧記録と測り方が違う（版で分けて比べない）。既存の検査1件（発射前のサンプルなしで「発射と一致」）の期待値を替えた。次: 親の検証、公開はオーナーの承認後。段B（結果の読みやすさ）。
+
+## AN-099 射型の記録 v2 段1〜2（解析器。版128据え置き・未公開）
+
+2026-11-14、v2 の設計（docs/design/form-v2/design.md）の段 1〜2 を実装した。オーナーの決定: v2 の設計で進める、離れがはっきりしない射は数えず候補で返す、保持の姿を保存する、cm は任意の身長で画面が直す、合図の音は既定で切、旧記録は別の一覧、既定の 6 項目は設計どおり。
+
+変更: `scripts/44-form-analyze.js`（新規。グローバルは `FormAnalyze` だけ。DOM・db・時計・乱数を使わない純関数。撮影の画面からはまだ呼ばない）、`tools/form-analyze-loader.js`（Node から読む入口）、`tools/form-analyze-fixture.js`・`tools/check-form-analyze.js`（検査 14 件、約 5 秒）、`tools/form-bench/adapters/v2-analyzer.js`（独立したベンチマークへの橋渡し。このフォルダで触ったのはこの 1 本だけ）、`index.html`・`sw.js`・`tools/check-app.js`・`tools/check-ui.js`・`tools/build-native-web.js`・`tools/check-distribution.js`・`CONVENTIONS.md`（スクリプトの登録。15 本）、`package.json`（`check:form-analyze` を足し、check:all に入れた）、`docs/design/form-v2/algorithm.md`・`design.md`、`tasks.json`、`progress.md`。`scripts/46-form-core.js`・`47-form-view.js`・保存形式・版・sw.js のキャッシュ名は変えていない。
+
+下書き（sketch/analyze-sketch.js）との違い: 離れの位置を「いちばん大きく動いた瞬間」ではなく、保持の位置から動いたまま戻らない「変わり目」（引き手の手首と肘の累積和）で決める。弓手の下がりを手首と肘で見る（しきい値 0.15 → 0.45 胴）。手首の隠れを `visibility` の落ち込みで外し、肘から補完する。左右の入れ替わりを戻す。人の入れ替わりで区間を切る。構えの門に「引き手が顔の所にある」（G3）を足す。弓を下ろしながらの引き戻しを見分ける。アンカーは引きの形（最小躍度）の当てはめで決める。離れの動き始めは「力がかかって動き出す」形の当てはめ。その回の型と比べて候補に `likely` を付ける（数には入れない）。頭や胴が同時に動いたら離れにしない。重ね図用の姿を返す。`weak: true`（数には入れるが時刻は粗い射）は無くした。
+
+数値（独立したベンチマーク、種 1〜5、ベンチマークは commit 1bf83bd。実射なし）: core 390 射 → 下書き 当たり 253（適合率 0.68・再現率 0.65）、v2 382 射と数えて当たり 381・外れ 1・候補 8（適合率 1.00・再現率 0.98）、いまの仕組み 29 射と数えて当たり 1。引き戻し 66 回を射に数えたもの 0。射のない場面 25 回とも 0 射。全部の群 1,170 射 → 1,115 射と数えて当たり 1,113・外れ 2・候補 55。離れの時刻（core）偏り +28ms・95% で 79ms。保持の長さ（core、「手が止まった」の正解と比べる）中央値 0.11 秒・95% で 0.47 秒。素材映像 3 本（Pixabay）: 2 本は 0 射で期待どおり、1 本（斜め後ろの高い位置）は 1 射を数えられず。
+
+届いていない基準（algorithm.md 7.5。基準は変えていない）: 名目のゆれで射数がぴったりの回 89%（97%）、離れの 95% 79ms（40ms）、アンカー・保持の 95% 0.45・0.47 秒（0.20・0.22 秒）、難しい場面の再現率（weak-release 0.33・rapid-fire 0.40・drop-arm 0.87・occluded-draw-hand 0.87）、数えた射の外れ 2 件。検査用の合成（ゆれ 胴の 1.2%）では、再現率・適合率 1.00、離れの 95% 15〜23ms、保持の 95% 35〜57ms、不変性（縦横・左右・時刻・大きさ）1e-6、10.4 分・30fps を 0.27 秒。
+
+検証: check:all（exit 0）・lint・format:check 成功、`npm run check:form-analyze` 14 件成功、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real` と `--adapter current --with-real`（どちらも種 1〜5、全部の群）。Playwright e2e は回していない（画面とアプリの動きを変えていない。足したスクリプトはグローバルを 1 つ定義するだけ）。
+
+リスク: 実射では未確認。合成のゆれが現実より大きいか小さいかで、未達の重さが変わる。離れの動きの形と、肘が離れで大きく動くことは仮定。`"bodyMoved"` の決まりは素材映像 1 本を見て入れた。速射（保持 0.4 秒未満）はほとんど候補になる。index.html に 1 本足したので、次の公開は版上げと一緒に。次: 親の検証、オーナーに algorithm.md 9.1 の 4 点を決めてもらう、段 3（記録 v2）。
+
+## AN-100 射型の記録 v2 段3〜6（アプリへの組み込み。版128据え置き・未公開）
+
+2026-11-14、v2 の設計（docs/design/form-v2/design.md）の段 3〜6 を実装した。撮影はランドマークをメモリのバッファにためるだけになり、終わってから `FormAnalyze.analyzePacked` にまとめて渡す。実時間の検出器（`stepFormPhase` など）は、利用者の撮影では使わない（コードと検査は残した）。
+
+変更: `scripts/44-form-record.js`（新規。`FormV2`: バッファ、射数の目安、置き方の確認、記録 v2 の組み立て・読み分け・射数の直し、比較、比べてよい回、文字）、`scripts/47-form-v2-view.js`（新規。画面）、`scripts/47-form-view.js`（カードを v2 へ。以前の記録は `formLegacyRecordsHtml` として別の区切りに。入口は `formDebug` が入のときだけ以前の撮影画面）、`scripts/44-form-analyze.js`（`FLOORS` に時間と離れのあとの床を足し、既定の項目を `COMPARE_KEYS` に分けた。これまでの結果は不変）、`scripts/10-storage-native.js`（`formHeightCm`・`formCountSound` をキー単位で補う）、`scripts/50-record-view.js`（切の案内、ヒントから射型のタブを直接開く）、`scripts/70-gear-settings.js`（身長の欄、検証用の設定の説明）、`style.css`・`style.min.css`、`index.html`・`sw.js`（`APP_SCRIPTS` に 2 行。キャッシュ名と版は変えていない）、`tools/check-app.js`・`check-ui.js`・`build-native-web.js`・`check-distribution.js`（17 本）、`tools/check-globals.js`（`Float32Array`・`WebAssembly`）、`tools/check-analysis-view.js`、`tools/check-form-record.js`・`tools/form-record-loader.js`（新規）、`tools/check-storage-contract.js`・`check-storage-roundtrip.js`、`tests/fixtures/storage/archery-note-v1-form-analyses-v2.json`（新規）、`tests/e2e/form-v2.spec.js`・`tests/e2e/fixtures/form-v2-stream.js`（新規）、`package.json`（`check:form-analyze` に記録の検査を足した。依存は変えていない）、`CONVENTIONS.md`、`docs/design/form-v2/design.md`（11 章）、`tasks.json`、`progress.md`。
+
+書き換えた e2e: `tests/e2e/form-secure-context.spec.js` の 2 本（https でない開き方は、確認ダイアログと以前の撮影画面ではなく v2 の「困ったとき」になった。姿勢推定もカメラも呼ばないこと、保存した動画へ進めること、ループバックでは置き方の画面まで進むことは同じように確かめる）、`tests/e2e/analysis-tabs.spec.js` の 1 本（切のときの文が「設定で入にする」から、その場の「入にする」に変わった）、`tests/e2e/analysis-form-context.spec.js` の 1 か所（説明の段落を、以前の記録の区切りの中で探す）。`form-diagnostics.spec.js`・`form-geometry.spec.js` は変えていない。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（14 件 + 13 件）、Playwright 481 passed。画面の写真 124 枚と検査 0 件。
+
+リスク: 実射・実機では未確認。合成の射手は腕の形が単純で、置き方の印（`rho`）は「やや斜め」と出る。時間と離れのあとの項目のゆれは仮の値。検証用の設定が入のあいだは以前の撮影画面が開く。次: 親の検証、オーナーの確認（progress.md の「決めてほしいこと」）、実地の確認（design.md 6.3）、段 7〜8 の残り。
+
+## AN-101 射型の記録 v2 段7〜8 と 2 つの決定（版128据え置き・未公開）
+
+2026-11-14、オーナーの決定（検証用の診断を v2 の上に作り直す／36 射を超えた撮影は分ける）と、v2 の設計の段 7（推移と一覧、以前の記録の見せ方）・段 8（動画で確かめる）を実装した。解析器（`scripts/44-form-analyze.js`）は変えていない。
+
+変更: `scripts/44-form-record.js`（`buildRecords` = 36 射以下に等分・`cid`/`part`/`span`、`diagBlock`・`diagnostics`・`landmarkDump` = 検証用の書き出し、`trend` の作り直し = 理由ごとの数・分けた記録をまとめる・弓具の印・中央値の不確かさ、バッファの `at`・`frameAt`、`read` の通し番号）、`scripts/47-form-v2-view.js`（推移の項目選び、記録を全部表示、分けた記録の行き来と一括保存、動画で確かめる画面、診断の書き出し、射の詳細の見出し、値を途中で折り返さない、時間の帯の番号の間引き）、`scripts/47-form-view.js`（撮影の入口はいつも v2、以前の記録の一覧・詳細・得点との関係から評価の語と助言を外す）、`scripts/70-gear-settings.js`（検証用の書き出しと「体の点の列も含める」。18 射の診断の設定画面と関数を削除）、`style.css`・`style.min.css`、`tools/check-form-record.js`（17 件）、`tools/check-ui.js`（診断の静的検査を v2 へ。以前の撮影画面を呼ぶスクリプトが無いこと）、`tests/e2e/form-v2.spec.js`、`tests/e2e/form-diagnostics.spec.js`、`tests/e2e/fixtures/form-v2-stream.js`、`CONVENTIONS.md`、`docs/design/form-v2/design.md`（6.3 の手順、11.7）、`tasks.json`、`progress.md`。
+
+e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道が無い ×2、結果からの診断の書き出し、設定が切なら書き出しも `dg` も無い、36 射を超えた撮影、推移 ×2、以前の記録、射の詳細の見出しと折り返し、動画で確かめる、推移・分けた記録・以前の記録・設定の 320×640 ×2。form-diagnostics.spec.js 3 本 = 設定からの書き出しの共有・取り消しとダウンロード・設定が変わったら止める）。書き換えた 15 本（以前の撮影画面の保存の失敗とやり直しの 3 本は `openFormCapture`・`startFormReplay` を直接呼ぶ。設定の入・切で欄が隠れる・現れる 4 本と、欄が収まる 3 本（360 幅を 320 幅に替えた）は新しい欄へ。保存した動画の 1 本に確かめる画面を足し、これまでの 320×640 の 2 本に確かめる画面を足した。主な流れの 2 本は以前の記録の文を直した）。外した 22 本（18 射の診断の設定画面: 開始・やり直し・状態の文・書き出しの確認と転送。画面ごと無くしたため。純関数の検査 `tools/check-form-diagnostics.js` は残る）と、form-v2.spec.js の「検証用の設定が入のあいだは以前の撮影画面」の 1 本。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（14 件 + 17 件）、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real`（AN-099 の結果と同一）、Playwright 473 passed。画面の写真 132 枚と検査 0 件。
+
+リスク: 実射・実機では未確認。動画の時刻（MediaRecorder）とコマの時刻は別の時計で、骨格が 1 コマほどずれることがある。iPhone の mp4 の頭出しは見ていない。推移の「区別できません」の境は仮の値。体の点の列の書き出しは、既定で切の 2 つめの設定のときだけ。次: 親の検証、オーナーの確認、実地の確認（design.md 6.3）。
+
+## AN-101 見直しの直し（15 点。版128据え置き・未公開）
+
+2026-11-14、AN-101 の実装（HEAD de5bda6）に対する 2 つの独立した見直し（解析と保存／画面・カメラ・動画）の 15 点を直した。版・依存・モデル・資産・Service Worker の決まりは変えていない。保存は追加だけ（`SCHEMA_VER`・保存キーは不変。射型の記録の件数の扱いは、消さない側へ変えた）。
+
+変更: `scripts/44-form-analyze.js`（`templateMatch` の番号ずれ、`analyzePacked` を `analyzeCore` で包んで `internalError`、`closeGaps`・`restore`・`MAX_SAMPLES` = 時刻の飛び）、`scripts/44-form-record.js`（`makeLiveCounter` の数え方と `LIMITS.LIVE_*`、`renumber`、`read` の `part`・`tpx`・`cov`・`dur`）、`scripts/10-storage-native.js`（`normalizeDb` が `formAnalyses` を件数で切らない、読み込みの注意から外す）、`scripts/70-gear-settings.js`（診断を切にしたら体の点の列も切）、`scripts/47-form-v2-view.js`（コマの時刻の覚えを捨てる、解析の失敗の画面、保存後は射数と撮影日を出さない、`formV2BeginReplay`・`formV2ReadStopped`、`formV2ConfirmLeave`、撮影日で `ts` を移す、録画のかたまり、1,000 件の確認、値の `esc`）、`scripts/47-form-view.js`（以前の記録の詳細の見出しと「秒」）、`tools/check-form-analyze.js`（+3）、`tools/check-form-record.js`（+4、撮影中の数え方をベンチマークの全部の場面 × 種 1〜3 で流す）、`tools/check-storage-contract.js`（+1）、`tests/e2e/form-v2-review-fixes.spec.js`（16 本）、`tests/e2e/fixtures/form-v2-stream.js`（映像の始め直しで時刻が戻る代役、姿勢推定の回数、部品の読み込みの失敗を途中で直せる）、`docs/design/form-v2/design.md`（11.8 と、2.4・4 章・11.4 の「2 秒おき」）、`docs/design/form-v2/algorithm.md`（2 か所）。
+
+撮影中の射数: 直す前は 105 回（全部の場面 × 種 1〜3）のうち 17 回で、全体の解析より多かった（撮影中 694 射・全体 674 射）。いまは 105 回で 0（同じ 89・少ない 16、650 射・674 射）、種 1〜5 の 175 回で 0（同じ 155・少ない 20、1,084 射・1,115 射）。数え方の 4 つの数（続けて 4 回・±0.15 秒・保持 0.6 秒以上・離れから 8 秒以内）は、2 秒おきと 1 秒おきの解析の結果を書き出して選んだ（1 秒おき・4 回で、多い回 0 のまま遅れの中央値 4.3 秒。2 秒おき・3 回では 5.4 秒）。8 秒を 7〜9 秒、0.6 秒を 0.5〜0.8 秒、0.15 秒を 0.1〜0.25 秒に変えても 0 のまま、10 秒にすると 1 回超える。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0、3 分 37 秒）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（17 件 + 21 件）、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real`（直す前の出力と 1 文字も変わらない）、Playwright 489 passed。新しい検査を、直す前のスクリプト（de5bda6 の作業ツリー）で流し、Node の 8 件と e2e の 15 本が落ちることを確かめた。
+
+リスク: 撮影中の数え方は合成の場面で決めた値で、実射で超えないとは言えない。数が増えるのが離れの 4〜5 秒あとになった。撮影中の計算は 2 倍。`check:all` は約 2 分長い。射型の記録の 1,000 件は目安（超えても保存できる）。実射・実機では未確認のまま。次: 親の検証、オーナーの確認、実地の確認（design.md 6.3）。

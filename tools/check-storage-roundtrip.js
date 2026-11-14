@@ -22,6 +22,7 @@ const fixtureFiles = {
   sightMarksCompatibility: "archery-note-v1-sight-marks-compatibility.json",
   missingSessions: "archery-note-v1-missing-sessions.json",
   formAnalyses: "archery-note-v1-form-analyses.json",
+  formAnalysesV2: "archery-note-v1-form-analyses-v2.json",
   formDiagnostics: "archery-note-v1-form-diagnostics.json",
   formDiagnosticsMalformedCoordinator:
     "archery-note-v1-form-diagnostics-malformed-coordinator.json",
@@ -474,6 +475,27 @@ function saveAndReloadFixture(fixture) {
 }
 
 function checkFormDiagnosticsRoundTrip(storageApi, fixtures, normalized) {
+  /* AN-100: v2 の記録（cap.g = 3 と v2 の数値）と以前の記録が、取り込み・保存と再読み込み・控えからの復元で 1 文字も変わらない */
+  {
+    const source = fixtures.formAnalysesV2;
+    assertStrict.deepStrictEqual(
+      normalized.formAnalysesV2.formAnalyses,
+      source.formAnalyses,
+      "[formAnalysesV2] JSON import preserves v2 and older records",
+    );
+    assertStrict.deepStrictEqual(
+      saveAndReloadFixture(source).formAnalyses,
+      source.formAnalyses,
+      "[formAnalysesV2] save/load preserves v2 and older records",
+    );
+    const snapshot = createImportSnapshot(storageApi.normalizeDb(clone(source)));
+    assertStrict.deepStrictEqual(
+      storageApi.normalizeDb(clone(snapshot.snapshots[0].data)).formAnalyses,
+      source.formAnalyses,
+      "[formAnalysesV2] safety restore preserves v2 and older records",
+    );
+    assertStrict.equal(saveAndReloadFixture(source).settings.formHeightCm, null);
+  }
   ["formDiagnostics", "formDiagnosticsMalformedCoordinator"].forEach((name) => {
     const source = fixtures[name];
     assertStrict.deepStrictEqual(

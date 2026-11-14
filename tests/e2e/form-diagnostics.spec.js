@@ -4,6 +4,11 @@
 const fs = require("fs");
 const path = require("path");
 const { expect, test } = require("@playwright/test");
+const {
+  formV2Records,
+  DIAG_FORBIDDEN_KEYS,
+  diagnosticKeyPaths,
+} = require("./fixtures/form-v2-stream.js");
 
 function makeSyntheticDiagnosticDb(overrides = {}) {
   const { settings: settingsOverrides = {}, ...databaseOverrides } = overrides;
@@ -283,6 +288,12 @@ async function seedTask9Page(page, database, mode = "web-success") {
   });
 }
 
+/* 以前の撮影画面（実時間の検出器）は、どの画面からも開けない（AN-101）。比べるための基準としてコードと検査だけを残してあるので、
+   関数を直接呼んで、保存の失敗とやり直しの決まりを確かめ続ける */
+async function openEarlierCapture(page) {
+  await page.evaluate(() => globalThis.openFormCapture());
+}
+
 async function task9PersistenceSnapshot(page) {
   return page.evaluate(
     ({ key, snapshotKey }) => ({
@@ -304,38 +315,86 @@ async function task9Confirm(page, label) {
     .click();
 }
 
-function assertTask9Artifact(payload) {
-  expect(Object.keys(payload)).toEqual(["format", "schemaVersion", "appVersion", "matrix", "runs"]);
-  expect(payload.format).toBe("archery-note-form-diagnostics");
-  expect(payload.schemaVersion).toBe(1);
-  expect(payload.appVersion).toBe(TASK9_APP_VER);
-  expect(payload.matrix).toBe("field-3x6");
-  expect(payload.runs).toHaveLength(3);
-  payload.runs.forEach((run, index) => {
-    expect(Object.keys(run)).toEqual(["runOrdinal", "condition", "retainedShotCount", "receipts"]);
-    expect(run.runOrdinal).toBe(index + 1);
-    expect(run.condition).toBe(TASK9_SLOTS[index]);
-    expect(run.retainedShotCount).toBe(6);
-    expect(run.receipts).toHaveLength(6);
+/* v2 の検証用の書き出しの形（FormV2.diagnostics）。数値だけで、記録の id・日付・メモ・紐づけ・保存した姿が入っていないこと */
+function assertV2Diagnostics(payload, captures) {
+  expect(Object.keys(payload)).toEqual(["kind", "version", "app", "units", "captures"]);
+  expect(payload.kind).toBe("archery-note-form-v2-diagnostics");
+  expect(payload.version).toBe(1);
+  expect(payload.app).toEqual({ appVer: TASK9_APP_VER, geometry: 3, featureVersion: 1 });
+  expect(payload.captures).toHaveLength(captures);
+  payload.captures.forEach((c, index) => {
+    expect(Object.keys(c)).toEqual([
+      "capture",
+      "part",
+      "src",
+      "hand",
+      "facing",
+      "frame",
+      "fps",
+      "model",
+      "appVer",
+      "analyzer",
+      "featureVersion",
+      "durS",
+      "spanS",
+      "coveragePct",
+      "torsoPx",
+      "view",
+      "warnings",
+      "counts",
+      "events",
+      "candidates",
+      "features",
+      "noise",
+      "noiseDf",
+      "analyzerDetail",
+    ]);
+    expect(c.capture).toBe(index + 1);
+    expect(c.counts).toEqual({ shots: 6, letdowns: 1, candidates: 1, added: 0, removed: 0 });
+    expect(c.events).toHaveLength(7);
+    expect(c.frame).toEqual({ w: 720, h: 1280, o: "p" });
+    expect(c.fps).toBeGreaterThan(20);
+    expect(c.view.cls).toBe("s");
+    expect(c.analyzerDetail.s).toHaveLength(7);
+    expect(c.analyzerDetail.r.length).toBeGreaterThanOrEqual(7);
   });
+  const keys = diagnosticKeyPaths(payload).map((k) => k.split(".").pop());
+  for (const forbidden of DIAG_FORBIDDEN_KEYS) expect(keys).not.toContain(forbidden);
   const serialized = JSON.stringify(payload);
   for (const forbidden of [
     TASK9_SENTINEL,
-    "synthetic-task9-record-",
-    "form-receipt-",
+    "v2-diag-",
     "synthetic-private-session",
     "synthetic-private-setup",
     "2099-01-01",
-    "framesBefore",
-    "rejectedFramesNear",
+    "2026-11-",
+    'landmarks":{',
+    "blob:",
     "settings",
     "trash",
-    "path",
-    "url",
-    "unknownFutureKey",
   ]) {
     expect(serialized).not.toContain(forbidden);
   }
+}
+/* 診断の付いた v2 の記録 3 件（実地の確認の 3 回ぶん）を、以前の方式の記録に足した db */
+function makeV2DiagnosticDb() {
+  const database = makeTask9DiagnosticDb(true);
+  const v2 = [0, 1, 2].flatMap((i) =>
+    formV2Records({
+      id: `v2-diag-${i}`,
+      date: `2026-11-0${i + 1}`,
+      ts: 1793491200000 + i * 86400000,
+      seed: 7,
+      diag: true,
+      sessionId: "synthetic-private-session",
+      setupId: "synthetic-private-setup",
+      edit: (r) => {
+        r.note = TASK9_SENTINEL;
+      },
+    }),
+  );
+  database.formAnalyses = database.formAnalyses.concat(v2);
+  return database;
 }
 
 test("selected deletion rolls back when the primary write fails", async ({ page }) => {
@@ -445,7 +504,7 @@ test("zero-shot exact-debug live save freezes, rolls back, and retries once", as
   await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
-  await page.locator("#formStart").click();
+  await openEarlierCapture(page);
   const liveBaseline = await resetWriteProbeAfterStartup(page);
   await page.locator("#fcClose").click();
   await expect(page.locator(".formCapture")).toBeVisible();
@@ -485,7 +544,7 @@ test("failed diagnostic discard cancel retains the candidate and confirm closes 
   await page.locator('#analysisSubTabs [data-an="form"]').click(); // v5 段 7: 射型の記録は 分析 > 射型
   await stallFormPose(page);
   await installPrimaryWriteGate(page);
-  await page.locator("#formStart").click();
+  await openEarlierCapture(page);
   await resetWriteProbeAfterStartup(page);
   await page.locator("#fcClose").click();
   await page.locator("#fcClose").click();
@@ -531,13 +590,12 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   await page.evaluate(() => {
     globalThis.__replayCoordinatorReference = db.settings.formDiagnosticMatrixBatch;
   });
-  const chooserPromise = page.waitForEvent("filechooser");
-  await page.locator("#formReplay").click();
-  const chooser = await chooserPromise;
-  await chooser.setFiles({
-    name: "synthetic-form-replay.mp4",
-    mimeType: "video/mp4",
-    buffer: Buffer.from("synthetic replay fixture"),
+  /* 以前の動画解析の画面も、画面からは開けない。関数を直接呼ぶ（中身は再生できない合成のファイル） */
+  await page.evaluate(() => {
+    const file = new globalThis.File(["synthetic replay fixture"], "synthetic-form-replay.mp4", {
+      type: "video/mp4",
+    });
+    globalThis.startFormReplay(URL.createObjectURL(file));
   });
   await expect(page.locator("#frVideo")).toBeVisible();
   const replayBaseline = await resetWriteProbeAfterStartup(page);
@@ -588,6 +646,9 @@ test("zero-shot exact-debug replay save retries without matrix advancement", asy
   });
 });
 
+/* ---- 設定の検証用の書き出し（v2 の記録から。AN-101） ----
+   以前の「18射の診断」（開始・やり直し・3 条件 × 6 射の書き出し）の画面の検査 22 本は、画面ごと無くしたので外した。
+   その純関数の検査は tools/check-form-diagnostics.js に残っている。 */
 for (const [label, value, own] of [
   ["absent", undefined, false],
   ["false", false, true],
@@ -600,8 +661,9 @@ for (const [label, value, own] of [
     await seedTask9Page(page, database);
     const section = page.getByTestId("form-diagnostic-section");
     await expect(section).toBeHidden();
-    await expect(section.locator("#fdMatrixStart")).toBeDisabled();
-    await expect(section.locator("#fdMatrixExport")).toBeDisabled();
+    await expect(section.locator("#fdV2Export")).toBeDisabled();
+    await expect(section.locator("#fdLmChips button").first()).toBeDisabled();
+    await expect(page.locator("#fdMatrixStart, #fdMatrixExport")).toHaveCount(0);
   });
 }
 
@@ -611,347 +673,51 @@ test("diagnostic controls follow exact formDebug without reopening settings", as
   await expect(section).toBeHidden();
   await page.locator('#fdChips [data-fd="1"]').click();
   await expect(section).toBeVisible();
-  await expect(section.getByRole("button", { name: "18射の診断を開始" })).toBeEnabled();
+  await expect(section.locator("#fdV2Export")).toBeEnabled();
+  await expect(section).not.toContainText("18射");
+  await expect(page.getByTestId("settings-group-record")).not.toContainText("以前の撮影画面");
+  await expect(section.locator('#fdLmChips [data-fl="0"]')).toHaveAttribute("aria-pressed", "true");
   await page.locator('#fdChips [data-fd="0"]').click();
   await expect(section).toBeHidden();
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
-    TASK9_BATCH_ID,
-  );
 });
 
-test("action-time exact gate rejects a value changed after render", async ({ page }) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true));
-  await page.evaluate(() => {
-    db.settings.formDebug = "true";
-    globalThis.document.querySelector("#fdMatrixStart").click();
-  });
-  await expect(page.getByTestId("form-diagnostic-section")).toBeHidden();
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
-    TASK9_BATCH_ID,
-  );
-});
-
-test("another workflow blocks both actions before confirmation", async ({ page }) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true));
-  await page.evaluate(() => globalThis.beginActiveWorkflow());
-  try {
-    await page.locator("#fdMatrixStart").click();
-    await page.locator("#fdMatrixExport").click();
-    await expect(page.locator(".confirmSheet")).toHaveCount(0);
-    await expect(page.locator("#toast")).toContainText(
-      "ほかの操作中は18射の診断を開始・書き出しできません。",
-    );
-  } finally {
-    await page.evaluate(() => globalThis.endActiveWorkflow());
-  }
-});
-
-test("first start commits one fresh coordinator", async ({ page }) => {
-  const database = makeTask9DiagnosticDb(true);
-  delete database.settings.formDiagnosticMatrixBatch;
-  await seedTask9Page(page, database);
-  await page.locator("#fdMatrixStart").click();
-  const batch = await page.evaluate(() => db.settings.formDiagnosticMatrixBatch);
-  expect(batch).toEqual({
-    version: 1,
-    batchId: expect.stringMatching(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-    ),
-    appVer: TASK9_APP_VER,
-    nextSlot: 0,
-    recordIds: [],
-    invalidated: false,
-  });
-  await expect(page.getByTestId("form-diagnostic-status")).toHaveText(
-    "次は「真横」を6射記録してください。",
-  );
-});
-
-test("restart double click opens one confirmation; cancel preserves and confirm replaces", async ({
+test("settings export: v2 records with diagnostics go out through one File share, numbers only", async ({
   page,
 }) => {
-  const database = makeTask9DiagnosticDb(true);
-  database.settings.formDiagnosticMatrixBatch.nextSlot = 1;
-  database.settings.formDiagnosticMatrixBatch.recordIds =
-    database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 1);
-  database.formAnalyses = database.formAnalyses.slice(0, 1);
-  await seedTask9Page(page, database);
-  await page.evaluate(() => {
-    const button = globalThis.document.querySelector("#fdMatrixStart");
-    button.click();
-    button.click();
-  });
-  await expect(page.locator(".confirmSheet")).toHaveCount(1);
-  await task9Confirm(page, "キャンセル");
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
-    TASK9_BATCH_ID,
-  );
-  await page.locator("#fdMatrixStart").click();
-  await task9Confirm(page, "開始し直す");
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).not.toBe(
-    TASK9_BATCH_ID,
-  );
-});
-
-test("restart post-confirm token change fails closed", async ({ page }) => {
-  const database = makeTask9DiagnosticDb(true);
-  database.settings.formDiagnosticMatrixBatch.nextSlot = 1;
-  database.settings.formDiagnosticMatrixBatch.recordIds =
-    database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 1);
-  database.formAnalyses = database.formAnalyses.slice(0, 1);
-  await seedTask9Page(page, database);
-  await page.locator("#fdMatrixStart").click();
-  /* コールバックはブラウザ側で走るので、Node 側の定数は引数で渡す。 */
-  await page.evaluate((appVer) => {
-    db.settings.formDiagnosticMatrixBatch = {
-      version: 1,
-      batchId: "22222222-2222-4222-8222-222222222222",
-      appVer,
-      nextSlot: 0,
-      recordIds: [],
-      invalidated: false,
-    };
-  }, TASK9_APP_VER);
-  await task9Confirm(page, "開始し直す");
-  await expect(page.locator("#toast")).toContainText(
-    "診断バッチが変更されたため、操作を中止しました。",
-  );
-  expect(await page.evaluate(() => db.settings.formDiagnosticMatrixBatch.batchId)).toBe(
-    "22222222-2222-4222-8222-222222222222",
-  );
-});
-
-test("allocation failure and save false both preserve prior coordinator and updatedAt", async ({
-  page,
-}) => {
-  const database = makeTask9DiagnosticDb(true);
-  delete database.settings.formDiagnosticMatrixBatch;
-  delete database.updatedAt;
-  await seedTask9Page(page, database);
-  await page.evaluate(() => {
-    delete db.updatedAt;
-  });
-  await page.evaluate(() => {
-    globalThis.allocateFormDiagnosticBatchId = () => ({
-      ok: false,
-      code: "crypto-unavailable",
-      batchId: null,
-    });
-  });
-  await page.locator("#fdMatrixStart").click();
-  expect(
-    await page.evaluate(() => ({
-      hasBatch: Object.hasOwn(db.settings, "formDiagnosticMatrixBatch"),
-      hasUpdatedAt: Object.hasOwn(db, "updatedAt"),
-    })),
-  ).toEqual({ hasBatch: false, hasUpdatedAt: false });
-  await page.reload();
-  await page.locator("#btnSettings").click();
-  await page.waitForTimeout(750);
-  await page.evaluate(() => {
-    delete db.updatedAt;
-    globalThis.save = () => false;
-  });
-  await page.locator("#fdMatrixStart").click();
-  expect(
-    await page.evaluate(() => ({
-      hasBatch: Object.hasOwn(db.settings, "formDiagnosticMatrixBatch"),
-      hasUpdatedAt: Object.hasOwn(db, "updatedAt"),
-    })),
-  ).toEqual({ hasBatch: false, hasUpdatedAt: false });
-  await expect(page.locator("#toast")).toContainText("診断バッチを保存できませんでした。");
-});
-
-test("side state uses fixed copy", async ({ page }) => {
-  const side = makeTask9DiagnosticDb(true);
-  side.settings.formDiagnosticMatrixBatch.nextSlot = 0;
-  side.settings.formDiagnosticMatrixBatch.recordIds = [];
-  side.formAnalyses = [];
-  await seedTask9Page(page, side);
-  await expect(page.getByTestId("form-diagnostic-status")).toHaveText(
-    "次は「真横」を6射記録してください。",
-  );
-});
-
-test("complete state uses fixed copy", async ({ page }) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true));
-  await expect(page.getByTestId("form-diagnostic-status")).toHaveText("18射の診断がそろいました。");
-});
-
-test("export post-confirm exact-debug and workflow rechecks prevent transport", async ({
-  page,
-}) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true));
-  await page.locator("#fdMatrixExport").click();
-  await page.evaluate(() => {
-    db.settings.formDebug = false;
-  });
-  await task9Confirm(page, "書き出す");
-  expect(await page.evaluate(() => globalThis.__task9Transport.shareCalls.length)).toBe(0);
-  await page.reload();
-  await page.locator("#btnSettings").click();
-  await page.locator("#fdMatrixExport").click();
-  await page.evaluate(() => globalThis.beginActiveWorkflow());
-  try {
-    await task9Confirm(page, "書き出す");
-    expect(await page.evaluate(() => globalThis.__task9Transport.shareCalls.length)).toBe(0);
-  } finally {
-    await page.evaluate(() => globalThis.endActiveWorkflow());
-  }
-});
-
-for (const [label, mutate, expectedCopy] of [
-  [
-    "incomplete",
-    (database) => {
-      database.settings.formDiagnosticMatrixBatch.nextSlot = 2;
-      database.settings.formDiagnosticMatrixBatch.recordIds =
-        database.settings.formDiagnosticMatrixBatch.recordIds.slice(0, 2);
-      database.formAnalyses = database.formAnalyses.slice(0, 2);
-    },
-    "18射の診断が完了していません。",
-  ],
-  [
-    "stale",
-    (database) => {
-      database.settings.formDiagnosticMatrixBatch.appVer = TASK9_APP_VER - 1;
-    },
-    "現在の診断バッチは使用できません。",
-  ],
-  [
-    "malformed",
-    (database) => {
-      database.settings.formDiagnosticMatrixBatch.extra = true;
-    },
-    "現在の診断バッチは使用できません。",
-  ],
-  [
-    "replay",
-    (database) => {
-      database.formAnalyses[0].captureMode = "replay";
-    },
-    "診断データを安全に書き出せません。",
-  ],
-  [
-    "duplicate selected ID",
-    (database) => {
-      database.formAnalyses.push(structuredClone(database.formAnalyses[0]));
-    },
-    "現在の診断バッチは使用できません。",
-  ],
-  [
-    "overflow",
-    (database) => {
-      database.formAnalyses[0].formPhaseDiag.receiptOverflow = 1;
-    },
-    "診断データを安全に書き出せません。",
-  ],
-]) {
-  test(`${label} refuses export without transport`, async ({ page }) => {
-    const database = makeTask9DiagnosticDb(true);
-    mutate(database);
-    await seedTask9Page(page, database);
-    await page.locator("#fdMatrixExport").click();
-    await task9Confirm(page, "書き出す");
-    await expect(page.locator("#toast")).toContainText(expectedCopy);
-    expect(
-      await page.evaluate(() => ({
-        shares: globalThis.__task9Transport.shareCalls.length,
-        urls: globalThis.__task9Transport.objectUrls.length,
-        native: globalThis.__task9Transport.nativeCalls.length,
-      })),
-    ).toEqual({ shares: 0, urls: 0, native: 0 });
-  });
-}
-
-test("output-too-large uses the fixed repeat copy", async ({ page }) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true));
-  await page.evaluate(() => {
-    globalThis.buildFormDiagnosticExport = () => ({
-      ok: false,
-      code: "output-too-large",
-      payload: null,
-      json: null,
-      byteLength: null,
-    });
-  });
-  await page.locator("#fdMatrixExport").click();
-  await task9Confirm(page, "書き出す");
-  await expect(page.locator("#toast")).toContainText("診断データを安全に書き出せません。");
-});
-
-test("export double click opens one confirmation and cancel preserves all state", async ({
-  page,
-}) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true));
+  await seedTask9Page(page, makeV2DiagnosticDb(), "web-success");
+  const section = page.getByTestId("form-diagnostic-section");
+  await expect(page.getByTestId("form-diagnostic-status")).toHaveText("診断の付いた記録: 3件");
   const before = await task9PersistenceSnapshot(page);
-  await page.evaluate(() => {
-    const button = globalThis.document.querySelector("#fdMatrixExport");
-    button.click();
-    button.click();
-  });
-  await expect(page.locator(".confirmSheet")).toHaveCount(1);
-  await task9Confirm(page, "キャンセル");
-  expect(await task9PersistenceSnapshot(page)).toEqual(before);
-  expect(await page.evaluate(() => globalThis.__task9Transport.shareCalls.length)).toBe(0);
-});
-
-for (const mode of ["web-success", "web-abort", "web-error"]) {
-  test(`${mode} uses one File transport and preserves DB/backups`, async ({ page }) => {
-    await seedTask9Page(page, makeTask9DiagnosticDb(true), mode);
-    const before = await task9PersistenceSnapshot(page);
-    await page.locator("#fdMatrixExport").click();
-    await task9Confirm(page, "書き出す");
-    await expect
-      .poll(() => page.evaluate(() => globalThis.__task9Transport.shareCalls.length))
-      .toBe(1);
-    const transport = await page.evaluate(() => globalThis.__task9Transport);
-    expect(transport.shareCalls[0].name).toBe("archery-note-form-diagnostics.json");
-    expect(transport.shareCalls[0].type).toBe("application/json;charset=utf-8");
-    expect(transport.objectUrls).toHaveLength(0);
-    expect(transport.nativeCalls).toHaveLength(0);
-    expect(await task9PersistenceSnapshot(page)).toEqual(before);
-    if (mode === "web-success")
-      await expect(page.locator("#toast")).toContainText("診断JSONを共有しました。");
-    if (mode === "web-abort") await expect(page.locator("#toast")).not.toHaveClass(/show/);
-    if (mode === "web-error")
-      await expect(page.locator("#toast")).toContainText("診断JSONを書き出せませんでした。");
-  });
-}
-
-test("native final cleanup warning has no download fallback and preserves state", async ({
-  page,
-}) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true), "native-cleanup-error");
-  const before = await task9PersistenceSnapshot(page);
-  await page.locator("#fdMatrixExport").click();
+  await section.locator("#fdV2Export").click();
+  await expect(page.locator(".confirmSheet")).toContainText("入るのは数値だけです");
+  await expect(page.locator(".confirmSheet")).not.toContainText("体の 9 点");
   await task9Confirm(page, "書き出す");
-  await expect(page.locator("#toast")).toContainText(
-    "診断JSONの一時ファイルを削除できませんでした。",
-  );
+  await expect
+    .poll(() => page.evaluate(() => globalThis.__task9Transport.shareCalls.length))
+    .toBe(1);
   const transport = await page.evaluate(() => globalThis.__task9Transport);
-  expect(transport.nativeCalls.map((call) => call.op)).toEqual([
-    "delete",
-    "write",
-    "share",
-    "delete",
-  ]);
+  expect(transport.shareCalls[0].name).toBe("archery-note-form-diagnostics.json");
+  expect(transport.shareCalls[0].type).toBe("application/json;charset=utf-8");
+  assertV2Diagnostics(JSON.parse(transport.shareCalls[0].text), 3);
   expect(transport.objectUrls).toHaveLength(0);
+  await expect(page.locator("#toast")).toContainText("診断を共有しました");
   expect(await task9PersistenceSnapshot(page)).toEqual(before);
 });
 
-test("no-share environment downloads exact MIME/allowlist and revokes URL", async ({ page }) => {
-  await seedTask9Page(page, makeTask9DiagnosticDb(true), "download");
+test("settings export: cancel sends nothing; without share it downloads and revokes the URL", async ({
+  page,
+}) => {
+  await seedTask9Page(page, makeV2DiagnosticDb(), "download");
   const before = await task9PersistenceSnapshot(page);
+  await page.locator("#fdV2Export").click();
+  await task9Confirm(page, "キャンセル");
+  expect(await page.evaluate(() => globalThis.__task9Transport.objectUrls.length)).toBe(0);
   const downloadPromise = page.waitForEvent("download");
-  await page.locator("#fdMatrixExport").click();
+  await page.locator("#fdV2Export").click();
   await task9Confirm(page, "書き出す");
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toBe("archery-note-form-diagnostics.json");
-  const filePath = await download.path();
-  const text = fs.readFileSync(filePath, "utf8");
-  expect(text.endsWith("\n")).toBe(true);
-  assertTask9Artifact(JSON.parse(text));
+  assertV2Diagnostics(JSON.parse(fs.readFileSync(await download.path(), "utf8")), 3);
   const transport = await page.evaluate(() => globalThis.__task9Transport);
   expect(transport.blobTypes).toEqual(["application/json;charset=utf-8"]);
   expect(transport.objectUrls).toHaveLength(1);
@@ -959,8 +725,21 @@ test("no-share environment downloads exact MIME/allowlist and revokes URL", asyn
   expect(await task9PersistenceSnapshot(page)).toEqual(before);
 });
 
+test("settings export: the setting turned off behind the confirmation stops the export", async ({
+  page,
+}) => {
+  await seedTask9Page(page, makeV2DiagnosticDb(), "web-success");
+  await page.locator("#fdV2Export").click();
+  await page.evaluate(() => {
+    db.settings.formDebug = "true";
+  });
+  await task9Confirm(page, "書き出す");
+  await expect(page.locator("#toast")).toContainText("「検証用の診断データ」を入にしてください");
+  expect(await page.evaluate(() => globalThis.__task9Transport.shareCalls.length)).toBe(0);
+});
+
 for (const viewport of [
-  { width: 360, height: 780 },
+  { width: 320, height: 640 },
   { width: 390, height: 844 },
   { width: 1280, height: 800 },
 ]) {
@@ -971,39 +750,30 @@ for (const viewport of [
     const layout = await page.evaluate(() => {
       const sheet = globalThis.document.querySelector(".sheet");
       const section = globalThis.document.querySelector("[data-form-diagnostic-section]");
-      const start = globalThis.document.querySelector("#fdMatrixStart").getBoundingClientRect();
-      const exportButton = globalThis.document
-        .querySelector("#fdMatrixExport")
-        .getBoundingClientRect();
       const sheetRect = sheet.getBoundingClientRect();
-      const overlap = !(
-        start.right <= exportButton.left ||
-        exportButton.right <= start.left ||
-        start.bottom <= exportButton.top ||
-        exportButton.bottom <= start.top
-      );
+      const rects = [...section.querySelectorAll("button")].map((b) => b.getBoundingClientRect());
       return {
+        buttons: rects.length,
         documentOverflow:
           globalThis.document.documentElement.scrollWidth >
           globalThis.document.documentElement.clientWidth,
         sheetOverflow: sheet.scrollWidth > sheet.clientWidth,
         sectionOverflow: section.scrollWidth > section.clientWidth,
-        clipped: [start, exportButton].some(
+        clipped: rects.some(
           (rect) =>
             rect.width < 44 ||
             rect.height < 44 ||
             rect.left < sheetRect.left ||
             rect.right > sheetRect.right,
         ),
-        overlap,
       };
     });
     expect(layout).toEqual({
+      buttons: 3,
       documentOverflow: false,
       sheetOverflow: false,
       sectionOverflow: false,
       clipped: false,
-      overlap: false,
     });
   });
 }

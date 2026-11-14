@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
-const APP_VER=128;
+const APP_VER=129;
 const TRASH_LIMIT=50;
 const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100,notes:10000};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
@@ -90,7 +90,9 @@ function normalizeDb(d){
   out.sessions=out.sessions.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sessions);
   out.setups=out.setups.filter(x=>x&&typeof x==="object"&&x.id&&x.name).slice(0,IMPORT_LIMITS.setups);
   out.sightMarks=out.sightMarks.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.sightMarks);
-  out.formAnalyses=out.formAnalyses.filter(x=>x&&typeof x==="object"&&x.id).slice(0,IMPORT_LIMITS.formAnalyses);
+  /* 射型の記録は、読み込みのときに件数で切り捨てない（保存は末尾に足すので、先頭から 1000 件に切ると、いちばん新しい記録が再読み込みで消える）。
+     件数の目安（IMPORT_LIMITS.formAnalyses）は、保存するときに知らせるだけ（47-form-v2-view.js）。自動では消さない */
+  out.formAnalyses=out.formAnalyses.filter(x=>x&&typeof x==="object"&&x.id);
   out.customRounds=out.customRounds.filter(x=>x&&typeof x==="object"&&x.id&&x.label&&Array.isArray(x.stages)).slice(0,IMPORT_LIMITS.customRounds);
   out.trash=out.trash.filter(x=>x&&x.id&&x.type&&x.data).slice(0,TRASH_LIMIT);
   if(out.active==null) out.active=null;
@@ -107,6 +109,11 @@ function normalizeDb(d){
   /* 入力方法（的面に打つ / 点数だけ）の前回値。既存データ・破損インポートでは "target" に補完 */
   if(out.settings.lastInputMode!=="score"&&out.settings.lastInputMode!=="target") out.settings.lastInputMode="target";
   if(typeof out.settings.launchCount!=="number"||!Number.isFinite(out.settings.launchCount)) out.settings.launchCount=0;
+  /* 射型の記録 v2（AN-100）: 身長（任意。胴の長さの割合のとなりに cm の目安を出すときだけ使う。100〜230cm の整数、無ければ null）と、
+     数えた合図の音（既定は切）。SCHEMA_VER は据え置き（キー単位の補完だけ） */
+  const formHeight=out.settings.formHeightCm;
+  out.settings.formHeightCm=(typeof formHeight==="number"&&Number.isFinite(formHeight)&&formHeight>=100&&formHeight<=230)?Math.round(formHeight):null;
+  if(typeof out.settings.formCountSound!=="boolean") out.settings.formCountSound=false;
   const FH_DEFS={gearSetup:false,analysis:false,sightAdjust:false,formTracking:false,addToHome:false,practiceDays:false};
   if(!out.settings.featureHints||typeof out.settings.featureHints!=="object"||Array.isArray(out.settings.featureHints)){
     out.settings.featureHints={...FH_DEFS};
@@ -175,6 +182,7 @@ function validateImportData(d){
   if(!Array.isArray(d.setups)) return {ok:false,reason:"setups 配列が見つかりません"};
   const warnings=[];
   for(const [k,limit] of Object.entries(IMPORT_LIMITS)){
+    if(k==="formAnalyses") continue; // 件数で切り捨てない（normalizeDb を参照）ので、注意も出さない
     if(Array.isArray(d[k])&&d[k].length>limit) warnings.push(`${k} が ${d[k].length} 件（上限 ${limit}）`);
   }
   return {ok:true,warnings};

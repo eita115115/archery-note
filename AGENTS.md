@@ -19,6 +19,7 @@ add one row here.
 | Codex 統合ループの経緯（履歴台帳） | `docs/codex/codex-progress.md` |
 | 統合作業の durable brief | `docs/codex/integration-plan.md` |
 | 役割ごとの担当 | `.claude/agents/an-*.md` |
+| 射型の記録の測り方（画面の形の補正・測り方の版・比べ方） | `docs/design/form-tracking-accuracy.md` |
 
 ## Project Shape
 

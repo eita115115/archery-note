@@ -283,7 +283,10 @@ const FEATURE_HINTS = [
     html: "カメラで<strong>射型</strong>を記録できます（分析 &gt; 射型）",
     act: "試す",
     when: () => db.sessions.length >= 5,
-    go: () => showView("analysis"),
+    go: () => {
+      ui.analysisTab = "form"; /* 射型のタブを直接開く（docs/design/form-v2/design.md 2.1） */
+      showView("analysis");
+    },
   },
   {
     key: "addToHome",
@@ -1853,8 +1856,9 @@ function analysisReasonHtml(rows) {
 }
 function analysisFormHtml(allRows, f) {
   const hasForm = Array.isArray(db.formAnalyses) && db.formAnalyses.some(Boolean);
+  /* 記録が 1 つも無く、射型の記録が切のとき: その場で入にできる案内だけを出す（docs/design/form-v2/design.md 2.1） */
   if (!allRows.length && !hasForm && !formTrackingEnabled())
-    return analysisEmptyHtml("射型の記録と、記録中に付けた「外れた理由」の印の集計をここに表示します。");
+    return analysisEmptyHtml("射型の記録と、記録中に付けた「外れた理由」の印の集計をここに表示します。") + formTrackingOffCard();
   const dists = [...new Set(allRows.map((r) => r.dist).filter(Boolean))];
   const selectedDist = Number(f.dist);
   /* 最後の練習を消した後も、選んでいる距離を欄に残して外せるようにする */
@@ -1869,12 +1873,7 @@ function analysisFormHtml(allRows, f) {
     period: f.period,
     today: today(),
   });
-  const form = formTrackingEnabled()
-    ? formTrackingCard(analysisFormRecords(f))
-    : `<section class="vsec" data-testid="analysis-form-off">
-      <div class="vsecH"><h2>射型の記録</h2><span class="aside">切</span></div>
-      <p class="basis">カメラで射型を記録する機能は、設定の「射型トラッキング」を入にすると使えます。動画と写真はこの端末の中だけで扱います。</p>
-    </section>`;
+  const form = formTrackingEnabled() ? formTrackingCard(analysisFormRecords(f)) : formTrackingOffCard();
   return `${head}${form}${analysisReasonHtml(rows)}`;
 }
 /* 選択を変えて描き直した後、同じ欄へフォーカスを戻す。下の固定タブに隠れないよう位置も合わせる */

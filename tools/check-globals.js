@@ -71,7 +71,9 @@ const BROWSER_GLOBALS = new Set([
   "ArrayBuffer",
   "Uint8Array",
   "Int32Array",
+  "Float32Array",
   "Float64Array",
+  "WebAssembly",
   // ブラウザ / DOM
   "window",
   "document",
