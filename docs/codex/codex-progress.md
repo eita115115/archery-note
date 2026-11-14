@@ -3608,3 +3608,15 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 検証: `npm run build:web-assets`、`npm run check:all`（exit 0）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（14 件 + 17 件）、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real`（AN-099 の結果と同一）、Playwright 473 passed。画面の写真 132 枚と検査 0 件。
 
 リスク: 実射・実機では未確認。動画の時刻（MediaRecorder）とコマの時刻は別の時計で、骨格が 1 コマほどずれることがある。iPhone の mp4 の頭出しは見ていない。推移の「区別できません」の境は仮の値。体の点の列の書き出しは、既定で切の 2 つめの設定のときだけ。次: 親の検証、オーナーの確認、実地の確認（design.md 6.3）。
+
+## AN-101 見直しの直し（15 点。版128据え置き・未公開）
+
+2026-11-14、AN-101 の実装（HEAD de5bda6）に対する 2 つの独立した見直し（解析と保存／画面・カメラ・動画）の 15 点を直した。版・依存・モデル・資産・Service Worker の決まりは変えていない。保存は追加だけ（`SCHEMA_VER`・保存キーは不変。射型の記録の件数の扱いは、消さない側へ変えた）。
+
+変更: `scripts/44-form-analyze.js`（`templateMatch` の番号ずれ、`analyzePacked` を `analyzeCore` で包んで `internalError`、`closeGaps`・`restore`・`MAX_SAMPLES` = 時刻の飛び）、`scripts/44-form-record.js`（`makeLiveCounter` の数え方と `LIMITS.LIVE_*`、`renumber`、`read` の `part`・`tpx`・`cov`・`dur`）、`scripts/10-storage-native.js`（`normalizeDb` が `formAnalyses` を件数で切らない、読み込みの注意から外す）、`scripts/70-gear-settings.js`（診断を切にしたら体の点の列も切）、`scripts/47-form-v2-view.js`（コマの時刻の覚えを捨てる、解析の失敗の画面、保存後は射数と撮影日を出さない、`formV2BeginReplay`・`formV2ReadStopped`、`formV2ConfirmLeave`、撮影日で `ts` を移す、録画のかたまり、1,000 件の確認、値の `esc`）、`scripts/47-form-view.js`（以前の記録の詳細の見出しと「秒」）、`tools/check-form-analyze.js`（+3）、`tools/check-form-record.js`（+4、撮影中の数え方をベンチマークの全部の場面 × 種 1〜3 で流す）、`tools/check-storage-contract.js`（+1）、`tests/e2e/form-v2-review-fixes.spec.js`（16 本）、`tests/e2e/fixtures/form-v2-stream.js`（映像の始め直しで時刻が戻る代役、姿勢推定の回数、部品の読み込みの失敗を途中で直せる）、`docs/design/form-v2/design.md`（11.8 と、2.4・4 章・11.4 の「2 秒おき」）、`docs/design/form-v2/algorithm.md`（2 か所）。
+
+撮影中の射数: 直す前は 105 回（全部の場面 × 種 1〜3）のうち 17 回で、全体の解析より多かった（撮影中 694 射・全体 674 射）。いまは 105 回で 0（同じ 89・少ない 16、650 射・674 射）、種 1〜5 の 175 回で 0（同じ 155・少ない 20、1,084 射・1,115 射）。数え方の 4 つの数（続けて 4 回・±0.15 秒・保持 0.6 秒以上・離れから 8 秒以内）は、2 秒おきと 1 秒おきの解析の結果を書き出して選んだ（1 秒おき・4 回で、多い回 0 のまま遅れの中央値 4.3 秒。2 秒おき・3 回では 5.4 秒）。8 秒を 7〜9 秒、0.6 秒を 0.5〜0.8 秒、0.15 秒を 0.1〜0.25 秒に変えても 0 のまま、10 秒にすると 1 回超える。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0、3 分 37 秒）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（17 件 + 21 件）、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real`（直す前の出力と 1 文字も変わらない）、Playwright 489 passed。新しい検査を、直す前のスクリプト（de5bda6 の作業ツリー）で流し、Node の 8 件と e2e の 15 本が落ちることを確かめた。
+
+リスク: 撮影中の数え方は合成の場面で決めた値で、実射で超えないとは言えない。数が増えるのが離れの 4〜5 秒あとになった。撮影中の計算は 2 倍。`check:all` は約 2 分長い。射型の記録の 1,000 件は目安（超えても保存できる）。実射・実機では未確認のまま。次: 親の検証、オーナーの確認、実地の確認（design.md 6.3）。
