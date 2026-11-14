@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>射型の記録 v2 試作</title>
+<style>
+/* ===== トークン（v5 と同じ値） ===== */
+:root{
+  color-scheme:dark;
+  --bg:#0e1217; --surface:#151a21; --raised:#1e252e; --mat:#090c10;
+  --rule:#2a323d; --rule-strong:#66727f;
+  --ink:#eef1f4; --sub:#a9b3bf;
+  --accent:#a8c7ac; --on-accent:#0f1a13; --accent-soft:#1c2a22;
+  --warn:#e6c46a; --danger:#ff9288; --info:#8fb8ea;
+  --cam:#1a2027; --cam-ink:#dfe5ea; --cam-sub:#8f9aa6; --cam-acc:#a8c7ac;
+  --font:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
+  --gut:16px; --safe-b:env(safe-area-inset-bottom,0px);
+}
+:root[data-theme=light]{
+  color-scheme:light;
+  --bg:#f3f4f1; --surface:#ffffff; --raised:#e7eae6; --mat:#dfe3de;
+  --rule:#d3d8d3; --rule-strong:#717d87;
+  --ink:#141c24; --sub:#4d5964;
+  --accent:#2c6649; --on-accent:#ffffff; --accent-soft:#dfeae3;
+  --warn:#7a5c10; --danger:#b3261e; --info:#1f5f9e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent;font-variant-numeric:tabular-nums}
+button,select,input{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer}
+#app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;background:var(--bg)}
+
+/* ===== 骨格（v5） ===== */
+.scr{padding-bottom:calc(84px + var(--safe-b))}
+.scr.act{padding-bottom:calc(96px + var(--safe-b))}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:18px var(--gut) 10px}
+.top h1{font-size:24px;font-weight:700;line-height:1.25}
+.top .date{font-size:14px;color:var(--sub);line-height:1.3;text-align:right}
+.txtBtn{white-space:nowrap;min-height:44px;min-width:44px;padding:0 4px;font-size:15px;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;gap:4px}
+.backBtn{min-height:48px;padding:0 12px 0 var(--gut);font-size:16px;font-weight:600;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.backBtn svg,.chev{width:10px;height:16px;flex:none}
+.sec{padding:0 var(--gut);margin-top:22px}
+.secH{display:flex;align-items:baseline;justify-content:space-between;gap:12px;border-top:2px solid var(--ink);padding:9px 0 8px}
+.secH h2{font-size:17px;font-weight:700;line-height:1.35}
+.secH .aside{font-size:14px;color:var(--sub);text-align:right}
+p.fact{font-size:15px;line-height:1.7;color:var(--ink);padding:10px 0 2px}
+p.fact + p.fact{padding-top:6px}
+p.basis{font-size:14px;line-height:1.65;color:var(--sub);padding:4px 0 0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;padding:8px 0;border-bottom:1px solid var(--rule);width:100%;text-align:left}
+.row .k{font-size:15px;color:var(--sub);flex:none;max-width:46%;line-height:1.4}
+.row .v{font-size:15px;font-weight:600;text-align:right;min-width:0}
+.row .v small{display:block;font-size:13px;font-weight:400;color:var(--sub);line-height:1.4}
+.row .main{min-width:0;flex:1}
+.row .main b{display:block;font-size:16px;font-weight:600;line-height:1.4}
+.row .main span{display:block;font-size:14px;color:var(--sub);line-height:1.45}
+.go{color:var(--sub);flex:none}
+.big{font-size:44px;font-weight:700;line-height:1}
+.big small{font-size:17px;font-weight:500;color:var(--sub);margin-left:4px}
+.figs{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--rule)}
+.fig{padding:10px 0 10px 12px;border-left:1px solid var(--rule)}
+.fig:first-child{padding-left:0;border-left:0}
+.fig .l{font-size:13px;color:var(--sub);line-height:1.3}
+.fig .n{font-size:28px;font-weight:700;line-height:1.2}
+.fig .n small{font-size:14px;font-weight:500;color:var(--sub);margin-left:2px}
+.fig .d{font-size:13px;color:var(--sub);line-height:1.3}
+.btn{min-height:48px;padding:0 18px;border-radius:6px;font-size:16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--rule-strong);background:transparent;color:var(--ink);text-align:center;line-height:1.25}
+.btn.pri{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.btn.block{display:flex;width:100%}
+.btn.tall{min-height:56px;font-size:17px}
+.btnRow{display:flex;gap:10px;padding-top:14px}
+.btnRow .btn{flex:1;padding:0 10px}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;border:1px solid var(--rule-strong);border-radius:6px;overflow:hidden}
+.seg button{min-height:44px;font-size:15px;font-weight:600;color:var(--sub);border-left:1px solid var(--rule-strong);padding:0 6px}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed=true]{background:var(--accent-soft);color:var(--ink);box-shadow:inset 0 -3px 0 var(--accent)}
+.utabs{display:flex;padding:0 var(--gut);border-bottom:1px solid var(--rule)}
+.utabs button{flex:1;min-height:48px;font-size:16px;font-weight:600;color:var(--sub);border-bottom:3px solid transparent;margin-bottom:-1px}
+.utabs button[aria-current=page]{color:var(--ink);border-bottom-color:var(--accent)}
+.cond{display:grid;grid-template-columns:1fr 1fr;margin:0 var(--gut);border-bottom:1px solid var(--rule)}
+.cond label{display:block;padding:8px 0 0;min-width:0}
+.cond label + label{border-left:1px solid var(--rule);padding-left:12px}
+.cond span{display:block;font-size:13px;color:var(--sub);line-height:1.3}
+.pick{appearance:none;-webkit-appearance:none;background:transparent;border:0;width:100%;min-height:44px;font-size:16px;font-weight:600;padding-right:18px;background-image:linear-gradient(45deg,transparent 50%,var(--sub) 50%),linear-gradient(135deg,var(--sub) 50%,transparent 50%);background-position:calc(100% - 9px) 55%,calc(100% - 4px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+.pick option{background:var(--surface);color:var(--ink)}
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,480px);display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--rule-strong);padding-bottom:var(--safe-b);z-index:20}
+.tabbar button{height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;font-weight:600;color:var(--sub);border-top:3px solid transparent}
+.tabbar button svg{width:22px;height:22px}
+.tabbar button[aria-current=page]{color:var(--ink);border-top-color:var(--accent)}
+.actbar{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,480px);background:var(--surface);border-top:1px solid var(--rule-strong);z-index:20;padding:10px var(--gut) calc(10px + var(--safe-b))}
+.band{background:var(--surface);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:14px var(--gut) 16px;margin-top:4px}
+.band .l{font-size:14px;color:var(--sub);line-height:1.4}
+.band .btn + .btn{margin-top:10px}
+svg text{font-family:var(--font);font-variant-numeric:tabular-nums}
+.ax{fill:var(--sub);font-size:13px}
+.axi{fill:var(--ink);font-size:13px;font-weight:700}
+.pill{display:inline-block;font-size:13px;font-weight:600;border:1px solid var(--rule-strong);border-radius:4px;padding:1px 6px;color:var(--sub);white-space:nowrap;line-height:1.5}
+.pill.ok{color:var(--accent);border-color:var(--accent)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+.pill.dif{color:var(--info);border-color:var(--info)}
+.foot{padding:22px var(--gut) 8px;font-size:13px;color:var(--sub);line-height:1.6}
+.foot .links{display:flex;flex-wrap:wrap;gap:0 14px}
+.mock{font-size:13px;color:var(--sub);border:1px solid var(--rule-strong);border-radius:4px;padding:1px 6px;white-space:nowrap}
+
+/* ===== 没入画面（撮影まわり） ===== */
+.rec{min-height:100dvh;display:flex;flex-direction:column}
+.recTop{flex:none;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:48px;border-bottom:1px solid var(--rule)}
+.recTop .ttl{font-size:15px;font-weight:600;text-align:center;white-space:nowrap}
+.recTop .txtBtn{padding:0 var(--gut);color:var(--ink);min-height:48px;justify-self:start}
+.recTop .txtBtn.r{justify-self:end;color:var(--sub)}
+.cam{position:relative;background:var(--cam);border-bottom:1px solid var(--rule)}
+.cam svg{display:block;width:100%;height:auto}
+.cam .tagL,.cam .tagR{position:absolute;top:8px;font-size:13px;font-weight:600;color:var(--cam-ink);background:rgba(0,0,0,.55);border-radius:4px;padding:2px 7px;line-height:1.5}
+.cam .tagL{left:8px}.cam .tagR{right:8px}
+.chk{padding:0 var(--gut)}
+.chk .row{min-height:46px;padding:6px 0}
+.chk .row .k{width:56px;color:var(--ink);font-weight:600}
+.chk .row .v{flex:1;text-align:left;font-weight:400;font-size:14px;color:var(--sub);line-height:1.45}
+.chk .row.bad .v{color:var(--ink)}
+.opt{display:grid;grid-template-columns:1fr 132px;align-items:center;gap:10px;min-height:56px;border-bottom:1px solid var(--rule)}
+.opt.w3{grid-template-columns:1fr 150px}
+.opt b{font-size:15px;font-weight:600;display:block;line-height:1.4}
+.opt span{font-size:13px;color:var(--sub);display:block;line-height:1.4}
+.count{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px var(--gut);text-align:center;width:100%}
+.count .lab{font-size:15px;color:var(--sub)}
+.count .num{font-size:160px;font-weight:700;line-height:1;letter-spacing:-.02em}
+.count .sub{font-size:17px;font-weight:600;margin-top:2px}
+.state{margin:0 var(--gut);padding:10px 12px;border:1px solid var(--rule-strong);border-radius:6px;font-size:15px;line-height:1.55}
+.state.warn{border-color:var(--warn);color:var(--warn);font-weight:600}
+.dock{flex:none;padding:10px var(--gut) calc(10px + var(--safe-b));border-top:1px solid var(--rule);background:var(--surface);margin-top:14px}
+.steps{padding:0 var(--gut)}
+.steps .row .main b{font-size:15px}
+
+/* ===== 図 ===== */
+.chartH{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:12px 0 2px}
+.chartH b{font-size:15px;font-weight:600}
+.chartH span{font-size:14px;color:var(--sub);text-align:right}
+.chart{border-bottom:1px solid var(--rule);padding-bottom:10px}
+.chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--sub);padding:8px 0 0;line-height:1.5}
+.legend i{display:inline-block;vertical-align:middle;margin-right:5px}
+.ovFig{background:var(--surface);border:1px solid var(--rule);margin-top:10px}
+.ovFig svg{display:block;width:100%;height:auto}
+details.more{border-bottom:1px solid var(--rule)}
+details.more summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600;cursor:pointer;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more ul{padding:0 0 12px 18px;font-size:14px;line-height:1.75;color:var(--sub)}
+.tbl{border-top:1px solid var(--rule-strong);margin-top:10px}
+.tr{display:grid;grid-template-columns:1.45fr .9fr .9fr .9fr;border-bottom:1px solid var(--rule);min-height:44px;align-items:center}
+.tr > *{padding:4px 6px 4px 0;font-size:15px;font-weight:600;text-align:right;line-height:1.3}
+.tr > *:first-child{text-align:left;font-weight:500;color:var(--sub);font-size:14px}
+.tr.h > *{font-size:13px;font-weight:600;color:var(--sub)}
+.tr.dif{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--info)}
+.tr.dif > *:first-child{color:var(--ink);padding-left:8px}
+.bars{padding-top:6px}
+.bar{display:grid;grid-template-columns:92px 1fr 104px;align-items:center;gap:8px;min-height:44px;border-bottom:1px solid var(--rule)}
+.bar .k{font-size:14px;color:var(--sub)}
+.bar .v{font-size:15px;font-weight:600;text-align:right;line-height:1.25}
+.bar .v small{display:block;font-size:13px;font-weight:400;color:var(--sub)}
+.bar svg{display:block;width:100%;height:22px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:10px var(--gut) 0}
+.chip{min-width:44px;height:44px;border:1px solid var(--rule-strong);border-radius:6px;font-size:16px;font-weight:700;padding:0 8px}
+.chip[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 -3px 0 var(--accent)}
+.scrub{padding:6px var(--gut) 0}
+.scrub input{width:100%;height:44px;accent-color:var(--accent);display:block}
+.scrub .t{display:flex;justify-content:space-between;font-size:13px;color:var(--sub)}
+.ovl{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:min(100%,480px);max-height:92dvh;overflow-y:auto;background:var(--surface);border-top:2px solid var(--ink);padding:6px var(--gut) calc(14px + var(--safe-b))}
+.sheet h2{font-size:17px;font-weight:700;padding:10px 0 4px}
+.fixRow{display:grid;grid-template-columns:1fr 112px;gap:10px;align-items:center;min-height:56px;border-bottom:1px solid var(--rule)}
+.fixRow b{display:block;font-size:15px;font-weight:600;line-height:1.4}
+.fixRow span{display:block;font-size:13px;color:var(--sub);line-height:1.4}
+.tog{min-height:44px;border:1px solid var(--rule-strong);border-radius:6px;font-size:14px;font-weight:700;padding:0 6px}
+.tog[aria-pressed=true]{background:var(--accent-soft);box-shadow:inset 0 -3px 0 var(--accent)}
+.saved{font-size:15px;font-weight:600;color:var(--accent);padding:0 0 8px}
+.err{padding:0 var(--gut);margin-top:18px}
+.err h2{font-size:15px;font-weight:700;color:var(--sub);border-top:2px solid var(--ink);padding:9px 0 2px}
+@media (max-width:340px){
+  :root{--gut:12px}
+  .count .num{font-size:132px}
+  .bar{grid-template-columns:80px 1fr 96px}
+  .opt{grid-template-columns:1fr 116px}
+  .opt.w3{grid-template-columns:1fr 144px}
+  .tr > *{font-size:14px}
+  .btn{padding:0 12px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+"use strict";
+/* ===== 架空の見本データ =====
+   6 射 + 引き戻し 1 回の 1 回ぶんと、8 回ぶんの推移。実測ではない。
+   単位: 時間 = 秒、位置 = 胴の長さの %、角度 = °。lim = 測定のゆれから出せる下限（algorithm.md 5.4）。 */
+const T_CM = 50; // 胴の長さの目安（身長 173cm × 0.288）
+const F = {
+  hold:   {name:"保持の時間", unit:"秒", dp:1, v:[3.4,3.1,3.6,5.4,3.2,3.0], nz:0.10, lim:0.5, kind:"時間", def:1},
+  follow: {name:"弓手を上げていた時間", unit:"秒", dp:1, v:[1.3,1.4,1.2,0.5,1.3,1.4], nz:0.10, lim:0.5, kind:"時間", def:1},
+  bowDy:  {name:"弓手の下がり", unit:"%", dp:0, v:[2,3,2,9,3,2], nz:1.2, lim:5.5, kind:"高さ", def:1, body:1},
+  relBack:{name:"離れの後ろへの動き", unit:"%", dp:0, v:[17,16,18,7,17,15], nz:1.5, lim:7, kind:"面内", def:1, body:1},
+  ancY:   {name:"アンカーの高さ（鼻より下）", unit:"%", dp:1, v:[26.2,25.5,26.8,25.9,25.1,26.4], nz:1.2, lim:5.5, kind:"高さ", def:1, body:1},
+  ext:    {name:"引き尺の目安", unit:"%", dp:1, v:[100.4,99.8,100.1,98.9,100.3,99.9], nz:0.6, lim:2.9, kind:"面内", def:1},
+  draw:   {name:"引きの時間", unit:"秒", dp:1, v:[1.6,1.5,1.7,1.9,1.6,1.5], nz:0.15, lim:0.6, kind:"時間"},
+  elb:    {name:"引き手の肘の高さ", unit:"°", dp:1, v:[6.1,5.4,6.6,3.0,5.9,6.3], nz:1.4, lim:6.7, kind:"面内"},
+  shTilt: {name:"弓手の肩の上がり", unit:"°", dp:1, v:[2.1,2.4,1.9,3.8,2.2,2.0], nz:0.7, lim:3.4, kind:"面内"},
+  headX:  {name:"頭の位置（前後）", unit:"%", dp:1, v:[15.8,16.4,15.5,17.9,16.1,15.9], nz:1.1, lim:5.2, kind:"面内", body:1},
+  lean:   {name:"上体の傾き", unit:"°", dp:1, v:[1.2,1.0,1.4,1.3,0.9,1.1], nz:0.5, lim:2.5, kind:"面内"},
+};
+const N = 6;
+const EVENTS = [ // 時間の帯（秒）。k: s = 射、l = 引き戻し
+  {k:"s",n:1,rel:14.2},{k:"s",n:2,rel:41.0},{k:"s",n:3,rel:68.9},{k:"l",rel:98.4,hold:4.8},{k:"s",n:4,rel:131.6},{k:"s",n:5,rel:158.3},{k:"s",n:6,rel:184.7},
+];
+const DUR = 192;
+const HIST = [ // 推移（架空）。view: s 真横 / o やや斜め、side: c 胸側 / b 背中側
+  {d:"10/03",n:6,view:"s",side:"c",hold:[3.0,3.6,4.3]},{d:"10/10",n:6,view:"s",side:"c",hold:[3.1,3.5,4.0]},
+  {d:"10/17",n:12,view:"o",side:"c",hold:[3.2,3.7,4.4]},{d:"10/24",n:6,view:"s",side:"c",hold:[3.0,3.4,3.9],gear:"タブ交換"},
+  {d:"10/31",n:6,view:"s",side:"b",hold:[2.9,3.3,3.8]},{d:"11/07",n:6,view:"s",side:"c",hold:[3.1,3.3,3.7]},
+  {d:"11/10",n:6,view:"o",side:"c",hold:[3.0,3.4,3.8]},{d:"11/14",n:6,view:"s",side:"c",hold:[3.1,3.3,3.6]},
+];
+const EXT_HIST = {"10/03":100.6,"10/10":100.2,"10/24":99.7,"11/07":100.1,"11/14":100.0};
+
+/* ===== 小道具 ===== */
+const $=(s)=>document.querySelector(s), $$=(s)=>[...document.querySelectorAll(s)];
+const qs=new URLSearchParams(location.search);
+document.documentElement.dataset.theme=qs.get("theme")==="light"?"light":"dark";
+const med=(a)=>{const v=[...a].sort((x,y)=>x-y),m=v.length>>1;return v.length%2?v[m]:(v[m-1]+v[m])/2};
+const sdv=(a)=>{const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)*(x-m),0)/(a.length-1))};
+const others=(k,i)=>F[k].v.filter((_,j)=>j!==i);
+const delta=(k,i)=>F[k].v[i]-med(others(k,i));
+const isDif=(k,i)=>Math.abs(delta(k,i))>F[k].lim;
+const fmt=(k,x,sign)=>{const f=F[k],s=(sign&&x>0?"+":"")+x.toFixed(f.dp).replace("-","−");return s+(f.unit==="秒"?" 秒":f.unit)};
+const cm=(pct)=>"約 "+Math.round(Math.abs(pct)*T_CM/100)+"cm";
+const W=()=>Math.min(document.documentElement.clientWidth,480)-2*(document.documentElement.clientWidth<=340?12:16);
+const chev=`<svg class="chev go" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+const backSvg=`<svg viewBox="0 0 10 16" aria-hidden="true"><path d="M8 2L2 8l6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+const mmss=(s)=>Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+const st={count:4,overlay:"rel",histKey:"hold",histView:"same",speed:"0.25",skel:"on",ghost:"on",vshot:4,saved:false,hand:"r",sound:"off",video:"off",fix:{}};
+
+/* ===== 骨格の図（胴の長さ = 1、原点 = 両肩の中点、弓は右） ===== */
+function pose(i,phase){ // i = 射の番号 0..5、null = ほかの射の中央
+  const g=(k)=>i==null?med(F[k].v):F[k].v[i];
+  const tilt=g("shTilt")*Math.PI/180, hy=0.38;
+  const p={nose:[0.16,hy],head:[0.05,hy+0.03],bSh:[0.38,0.38*Math.tan(tilt)],dSh:[-0.38,-0.38*Math.tan(tilt)],bHip:[0.3,-1],dHip:[-0.3,-1],
+    bEl:[0.98,0.03],bWr:[1.58,0.05],dWr:[0.14,hy-g("ancY")/100],dEl:[-0.86,0.02+g("elb")/45],
+    bKn:[0.32,-1.95],dKn:[-0.32,-1.95],bAn:[0.36,-2.85],dAn:[-0.36,-2.85]};
+  p.nose[0]=g("headX")/100; p.head[0]=p.nose[0]-0.11;
+  if(phase==="rel"){const b=g("relBack")/100,dy=-g("bowDy")/100;p.dWr=[p.dWr[0]-b,p.dWr[1]+0.02];p.dEl=[p.dEl[0]-b*0.6,p.dEl[1]-0.03];p.bWr=[p.bWr[0]+0.02,p.bWr[1]+dy];p.bEl=[p.bEl[0],p.bEl[1]+dy*0.5]}
+  return p;
+}
+function figure(p,m,o){ // m = {ox,oy,s}、o = {c 色, w 太さ, op, bow, legs, dots}
+  const X=(q)=>(m.ox+q[0]*m.s).toFixed(1), Y=(q)=>(m.oy-q[1]*m.s).toFixed(1), L=(a,b)=>`M${X(p[a])} ${Y(p[a])}L${X(p[b])} ${Y(p[b])}`;
+  let d=L("dSh","bSh")+L("bSh","bEl")+L("bEl","bWr")+L("dSh","dEl")+L("dEl","dWr")+L("bSh","bHip")+L("dSh","dHip")+L("dHip","bHip");
+  if(o.legs) d+=L("bHip","bKn")+L("bKn","bAn")+L("dHip","dKn")+L("dKn","dAn");
+  let h=`<path d="${d}" fill="none" stroke="${o.c}" stroke-width="${o.w}" stroke-linecap="round" stroke-linejoin="round" opacity="${o.op||1}"/>`;
+  h+=`<circle cx="${X(p.head)}" cy="${Y(p.head)}" r="${(0.2*m.s).toFixed(1)}" fill="none" stroke="${o.c}" stroke-width="${o.w}" opacity="${o.op||1}"/>`;
+  if(o.bow){const bw=p.bWr,t=[bw[0]+0.02,bw[1]+1.3],b=[bw[0]+0.02,bw[1]-1.3],c=[bw[0]+0.42,bw[1]],x=(q)=>(m.ox+q[0]*m.s).toFixed(1),y=(q)=>(m.oy-q[1]*m.s).toFixed(1);
+    h+=`<path d="M${x(t)} ${y(t)}Q${x(c)} ${y(c)} ${x(b)} ${y(b)}" fill="none" stroke="${o.bow}" stroke-width="2"/>`;
+    h+=o.rel?`<path d="M${x(t)} ${y(t)}L${x(b)} ${y(b)}" fill="none" stroke="${o.bow}" stroke-width="1"/>`:`<path d="M${x(t)} ${y(t)}L${X(p.dWr)} ${Y(p.dWr)}L${x(b)} ${y(b)}" fill="none" stroke="${o.bow}" stroke-width="1"/>`;}
+  if(o.dots) for(const k of ["nose","bSh","dSh","bEl","dEl","bWr","dWr","bHip","dHip"]) h+=`<circle cx="${X(p[k])}" cy="${Y(p[k])}" r="3.5" fill="${o.dots}"/>`;
+  return h;
+}
+function camSvg(o){ // 撮影の映像の見本。o = {h, small, cut, skel, ghost, phase, shot, frame}
+  const w=W()+2*(W()<300?12:16), h=o.h, s=o.small?h/7.2:h/4.3, m={ox:w*(o.cut?0.36:0.42),oy:h*(o.small?0.42:0.34),s};
+  const p=pose(o.shot==null?3:o.shot,o.phase);
+  let g=`<rect width="${w}" height="${h}" fill="var(--cam)"/><path d="M0 ${(m.oy+2.9*s).toFixed(0)}H${w}" stroke="var(--cam-sub)" stroke-width="1" opacity=".5"/>`;
+  g+=figure(p,m,{c:"var(--cam-sub)",w:Math.max(5,s*0.13),legs:1,bow:"var(--cam-sub)",rel:o.phase==="rel",op:.55});
+  if(o.ghost) g+=figure(pose(null,o.phase),m,{c:"var(--cam-ink)",w:1.5,op:.9});
+  if(o.skel!==false) g+=figure(p,m,{c:"var(--cam-acc)",w:2,dots:"var(--cam-acc)"});
+  if(o.frame){const mx=w*0.06;g+=`<rect x="${mx}" y="${h*0.05}" width="${w-2*mx}" height="${h*0.9}" fill="none" stroke="var(--cam-ink)" stroke-width="1.5" stroke-dasharray="6 6" opacity=".7"/>`;}
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="カメラの映像の見本（架空の射手）">${g}</svg>`;
+}
+
+/* ===== 共通の部品 ===== */
+const tabbar=()=>{const ic={rec:'<circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="11" cy="11" r="3" fill="currentColor"/>',note:'<path d="M5 3h12v16H5zM8 8h6M8 12h6" fill="none" stroke="currentColor" stroke-width="2"/>',an:'<path d="M3 19V9M9 19V4M15 19v-7M21 19H1" fill="none" stroke="currentColor" stroke-width="2"/>',gear:'<path d="M4 3c7 3 7 13 0 16M4 3v16" fill="none" stroke="currentColor" stroke-width="2"/>'};
+  const t=(k,l,cur)=>`<button ${cur?'aria-current="page"':''}><svg viewBox="0 0 22 22" aria-hidden="true">${ic[k]}</svg>${l}</button>`;
+  return `<nav class="tabbar">${t("rec","記録")}${t("note","ノート")}${t("an","分析",1)}${t("gear","弓具")}</nav>`};
+const anHead=()=>`<header class="top"><h1>分析</h1><span class="mock">架空の見本</span></header><div class="utabs" role="tablist"><button>スコア</button><button>着弾</button><button>比較</button><button aria-current="page">射型</button></div>`;
+const seg=(key,opts)=>`<div class="seg" role="group">${opts.map(([v,l])=>`<button data-set="${key}" data-val="${v}" aria-pressed="${st[key]===v}">${l}</button>`).join("")}</div>`;
+const linkRow=(go,b,s)=>`<button class="row" data-go="${go}"><span class="main"><b>${b}</b><span>${s}</span></span>${chev}</button>`;
+const difShots=()=>{const o=[];for(let i=0;i<N;i++){const ks=Object.keys(F).filter((k)=>isDif(k,i));if(ks.length)o.push({i,ks})}return o};
+function sentence(k,i){const f=F[k],o=others(k,i),lo=Math.min(...o),hi=Math.max(...o),x=f.v[i],n=i+1;
+  const rng=(a,b)=>a.toFixed(f.dp).replace("-","−")+"〜"+b.toFixed(f.dp).replace("-","−");
+  if(k==="hold") return `${n} 射目は、保持が ${x.toFixed(1)} 秒でした。ほかの 5 射は ${rng(lo,hi)} 秒です。`;
+  if(k==="follow") return `${n} 射目は、離れのあと ${x.toFixed(1)} 秒で弓手が下がりました。ほかの 5 射は ${rng(lo,hi)} 秒です。`;
+  if(k==="bowDy") return `${n} 射目は、離れの 0.3 秒あとに弓手が胴の ${Math.abs(x)}%（${cm(x)}）下がっていました。ほかの 5 射は ${lo}〜${hi}% です。`;
+  if(k==="relBack") return `${n} 射目は、離れで引き手が後ろへ動いた量が胴の ${x}%（${cm(x)}）でした。ほかの 5 射は ${lo}〜${hi}% です。`;
+  return `${n} 射目は、${f.name}が ${fmt(k,x)} でした。ほかの 5 射は ${rng(lo,hi)}${f.unit} です。`;
+}
+
+/* ===== 図: 時間の帯 ===== */
+function timeline(){
+  const w=W(),h=74,x=(t)=>4+(w-8)*t/DUR;
+  let g=`<path d="M0 46H${w}" stroke="var(--rule-strong)" stroke-width="1"/>`;
+  for(const e of EVENTS){const hold=e.k==="s"?F.hold.v[e.n-1]:e.hold,dr=e.k==="s"?F.draw.v[e.n-1]:1.7,x1=x(e.rel-hold),x2=x(e.rel),x0=x(e.rel-hold-dr);
+    g+=`<path d="M${x0} 46L${x1} 30" stroke="var(--sub)" stroke-width="2" fill="none"/>`;
+    if(e.k==="s"){g+=`<rect x="${x1}" y="26" width="${Math.max(3,x2-x1)}" height="8" fill="var(--ink)"/><path d="M${x2} 20V46" stroke="var(--ink)" stroke-width="2"/><text x="${x2}" y="14" text-anchor="middle" class="axi">${e.n}</text>`}
+    else{g+=`<rect x="${x1}" y="26.5" width="${Math.max(3,x2-x1)}" height="7" fill="none" stroke="var(--sub)" stroke-width="1.5"/><path d="M${x2} 30L${x(e.rel+1.4)} 46" stroke="var(--sub)" stroke-width="2" stroke-dasharray="3 3" fill="none"/><text x="${(x1+x2)/2}" y="14" text-anchor="middle" class="ax">戻</text>`}}
+  g+=`<text x="0" y="66" class="ax">0:00</text><text x="${w}" y="66" text-anchor="end" class="ax">${mmss(DUR)}</text><text x="${w/2}" y="66" text-anchor="middle" class="ax">時間</text>`;
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="時間の帯。6 射と引き戻し 1 回">${g}</svg>`;
+}
+/* ===== 図: 射の順の図（帯 = 測定のゆれで出せる下限、破線 = 中央値） ===== */
+function runChart(k){
+  const f=F[k],w=W(),h=104,pl=4,pr=4,pt=14,pb=24,m=med(f.v);
+  const lo=Math.min(...f.v,m-f.lim),hi=Math.max(...f.v,m+f.lim),pad=(hi-lo)*0.16||1;
+  const y=(v)=>pt+(h-pt-pb)*(1-(v-(lo-pad))/((hi+pad)-(lo-pad))), x=(i)=>pl+(w-pl-pr)*(i+0.5)/N;
+  let g=`<rect x="0" y="${y(m+f.lim)}" width="${w}" height="${y(m-f.lim)-y(m+f.lim)}" fill="var(--raised)"/><path d="M0 ${y(m)}H${w}" stroke="var(--sub)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  f.v.forEach((v,i)=>{const d=isDif(k,i);
+    g+=d?`<circle cx="${x(i)}" cy="${y(v)}" r="7" fill="var(--info)"/><text x="${x(i)+12}" y="${y(v)+5}" class="axi">${fmt(k,v)}</text>`:`<circle cx="${x(i)}" cy="${y(v)}" r="5.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>`;
+    g+=`<text x="${x(i)}" y="${h-5}" text-anchor="middle" class="${d?"axi":"ax"}">${i+1}</text>`});
+  const s=sdv(f.v),same=s<1.59*f.nz;
+  const note=same?`ばらつきは測定のゆれ（±${f.nz.toFixed(f.dp<1?1:f.dp)}${f.unit==="秒"?" 秒":f.unit}）と区別できません。`
+    :`ばらつき ±${s.toFixed(f.dp<1?1:f.dp)}${f.unit==="秒"?" 秒":f.unit}（6 射。射数が少ないので 0.6〜2.5 倍の幅で不確かです）。測定のゆれは ±${f.nz.toFixed(f.dp<1?1:f.dp)}${f.unit==="秒"?" 秒":f.unit}。`;
+  return `<div class="chart"><div class="chartH"><b>${f.name}</b><span>中央値 ${fmt(k,m)}</span></div><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${f.name}。射の順">${g}</svg><p class="basis">${note}</p></div>`;
+}
+/* ===== 図: 重ね図 ===== */
+function overlayFig(hi,phase,only){
+  const w=W()-2,h=Math.round(w*0.62),s=w/3.05,m={ox:w*0.36,oy:h*0.36,s};
+  let g="";
+  if(only==null){for(let i=0;i<N;i++) if(i!==hi) g+=figure(pose(i,phase),m,{c:"var(--sub)",w:1.5,op:.75})}
+  else g+=figure(pose(null,phase),m,{c:"var(--sub)",w:2});
+  if(hi!=null) g+=figure(pose(hi,phase),m,{c:"var(--info)",w:3});
+  return `<div class="ovFig"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="骨格の重ね図">${g}</svg></div>`;
+}
+
+/* ===== 画面 ===== */
+function scrOff(){return `<div class="scr">${anHead()}
+  <section class="sec"><div class="secH"><h2>射型の記録</h2><span class="aside">試験中・切</span></div>
+    <p class="fact">iPhone を台に置いて 1 エンドを撮ると、射数、保持の時間、ほかと違った射を記録します。</p>
+    <div class="row"><span class="k">映像</span><span class="v">保存しません<small>解析は端末の中だけで行い、外へ送りません</small></span></div>
+    <div class="row"><span class="k">残るもの</span><span class="v">射ごとの数値<small>1 回 約 2KB</small></span></div>
+    <div class="row"><span class="k">初回</span><span class="v">約 15.5MB を取り込みます<small>次からは圏外でも使えます</small></span></div>
+    <div class="row"><span class="k">対応</span><span class="v">iOS 16.4 以降</span></div>
+    <div class="btnRow"><button class="btn pri block tall" data-go="#home">入にする</button></div>
+    <p class="basis">設定 &gt; 記録 の「射型の記録（試験中）」と同じ切り替えです。切に戻しても、記録は消えません。</p>
+  </section>${tabbar()}</div>`}
+
+function miniTrend(){
+  const rows=HIST.filter((r)=>r.view==="s"&&r.side==="c"),w=W(),h=118,pt=12,pb=26,lo=2.6,hi=4.6;
+  const y=(v)=>pt+(h-pt-pb)*(1-(v-lo)/(hi-lo)),x=(i)=>56+(w-76)*i/(rows.length-1);
+  let g=`<path d="M0 ${y(3)}H${w}M0 ${y(4)}H${w}" stroke="var(--rule)" stroke-width="1"/><text x="0" y="${y(4)-4}" class="ax">4 秒</text><text x="0" y="${y(3)-4}" class="ax">3 秒</text>`;
+  rows.forEach((r,i)=>{g+=`<path d="M${x(i)} ${y(r.hold[0])}V${y(r.hold[2])}" stroke="var(--rule-strong)" stroke-width="5"/><circle cx="${x(i)}" cy="${y(r.hold[1])}" r="5" fill="${i===rows.length-1?"var(--accent)":"var(--ink)"}"/>`;
+    if(i===0||i===rows.length-1) g+=`<text x="${x(i)}" y="${h-6}" text-anchor="${i?"end":"start"}" class="ax">${r.d}</text>`});
+  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="保持の時間の推移">${g}</svg>`;
+}
+function scrHome(){const d=difShots()[0];return `<div class="scr">${anHead()}
+  <div class="band"><div class="l">射型の記録（試験中）</div>
+    <div class="btnRow" style="padding-top:10px"><button class="btn pri block tall" data-go="#place">撮影して記録する</button></div>
+    <div class="btnRow" style="padding-top:10px"><button class="btn block" data-go="#analyzing">保存した動画を解析する</button></div></div>
+  <section class="sec"><div class="secH"><h2>直近の記録</h2><span class="aside">11月14日（土）</span></div>
+    <p class="fact">${sentence("hold",d.i)}</p>
+    <p class="basis">6 射、引き戻し 1 回。真横・胸側、縦向き。70m 第 3 エンド。</p>
+    ${linkRow("#result","結果を開く","そろい方、重ね図、射ごとの値")}
+  </section>
+  <section class="sec"><div class="secH"><h2>保持の時間の推移</h2><span class="aside">同じ置き方 5 回</span></div>
+    <div class="chart">${miniTrend()}</div>
+    <p class="basis">点は各回の中央値、縦の線は射どうしの幅（四分位）。真横・胸側の 5 回（各 6 射）。</p>
+    ${linkRow("#history","推移と記録の一覧","項目を選ぶ、旧方式の記録")}
+  </section>
+  <div class="foot"><b>試作の案内</b>（数値はすべて架空の見本です）
+    <div class="links">${[["#off","切のとき"],["#place","置き方"],["#place/far","置き方（通らない例）"],["#capture","撮影"],["#capture/warn","撮影（注意）"],["#analyzing","解析中"],["#result","結果"],["#shot/4","射の詳細"],["#fix","射数を直す"],["#history","推移"],["#video","動画"],["#errors","困ったとき"]].map(([g,l])=>`<button class="txtBtn" data-go="${g}">${l}</button>`).join("")}</div></div>
+  ${tabbar()}</div>`}
+
+function scrPlace(arg){const far=arg==="far",small=document.documentElement.clientHeight<700;
+  const pill=(ok,t)=>`<span class="pill ${ok===1?"ok":ok===0?"warn":""}">${t}</span>`;
+  const rows=far?[["写り",1,"肩・肘・手首・腰の 8 点が取れています","通過"],["大きさ",0,"小さく写っています（胴 96px）。1 歩ぶん近づけてください","注意"],["余白",1,"左 31%・右 38%","通過"],["向き",2,"真横に近い・胸側","案内"],["速さ",1,"毎秒 27 コマ","通過"]]
+    :[["写り",1,"肩・肘・手首・腰の 8 点が取れています","通過"],["大きさ",1,"胴の長さ 212px","通過"],["余白",1,"左 9%・右 11%（弓を上げた形で確かめました）","通過"],["向き",2,"真横に近い・胸側。すべての項目を測れます","案内"],["速さ",1,"毎秒 28 コマ","通過"]];
+  return `<div class="rec" style="padding-bottom:calc(86px + var(--safe-b))">
+  <div class="recTop"><button class="txtBtn" data-go="#home">やめる</button><span class="ttl">置き方を確かめる</span><button class="txtBtn r" data-go="${far?"#place":"#place/far"}">別の例</button></div>
+  <div class="cam">${camSvg({h:small?188:270,small:far,frame:1})}<span class="tagL">縦向き 720×1280</span><span class="tagR">架空</span></div>
+  <div class="chk">${rows.map(([k,ok,v,p])=>`<div class="row ${ok===0?"bad":""}"><span class="k">${k}</span><span class="v">${v}</span>${pill(ok,p)}</div>`).join("")}</div>
+  <section class="sec" style="margin-top:14px"><div class="secH"><h2>撮り方</h2><span class="aside">変えなければこのまま</span></div>
+    <div class="opt"><div><b>利き手</b><span>引く手</span></div>${seg("hand",[["r","右"],["l","左"]])}</div>
+    <div class="opt"><div><b>数えた合図の音</b><span>1 射ごとに短い音</span></div>${seg("sound",[["off","切"],["on","入"]])}</div>
+    <div class="opt"><div><b>動画も残す</b><span>最長 10 分。端末に保存するまで残りません</span></div>${seg("video",[["off","切"],["on","入"]])}</div>
+    <p class="basis">台は胸の高さ、射線の真横、約 3m（縦向きは約 2.6m）が目安です。縦向きでも横向きでも、測る値は同じです。</p>
+  </section>
+  <div class="actbar"><button class="btn pri block tall" data-go="#capture">記録を始める</button></div></div>`}
+
+function scrCapture(arg){const warn=arg==="warn";return `<div class="rec">
+  <div class="recTop"><button class="txtBtn" data-go="#home">取り消す</button><span class="ttl">記録中 2:14</span><span class="mock" style="justify-self:end;margin-right:var(--gut)">架空</span></div>
+  <button class="count" id="cnt" aria-label="数えた射。試作では押すと増えます"><span class="lab">数えた射（目安）</span><span class="num">${st.count}</span><span class="sub">引き戻し 1 回</span></button>
+  <div class="state ${warn?"warn":""}">${warn?"引き手の肘が枠の外に出ています。台を少し離すと、次の射から測れます。":"体は枠の中です。毎秒 28 コマ。"+(st.video==="on"?"動画は残り 7 分 46 秒。":"")}</div>
+  <p class="basis" style="padding:10px var(--gut) 0">数は離れの 2〜3 秒あとに増えます。終わったあと、全体を見直して数え直します。射の最中に読む表示は出しません。</p>
+  <div class="dock"><button class="btn pri block tall" data-go="#analyzing">終わって結果を見る</button></div></div>`}
+
+function scrAnalyzing(){const r=(b,s,done)=>`<div class="row"><span class="main"><b>${b}</b><span>${s}</span></span><span class="pill ${done?"ok":""}">${done?"済":"計算中"}</span></div>`;
+  return `<div class="scr act"><header class="top"><h1>解析しています</h1><span class="mock">架空の見本</span></header>
+  <div class="steps">${r("記録を読み込む","3 分 12 秒、5,376 コマ（毎秒 28 コマ）",1)}${r("射を探す","6 射、引き戻し 1 回。見えなかった区間 なし",1)}${r("射ごとの値を測る","6 射 × 13 項目。真横・胸側",1)}${r("測定のゆれを見積もる","保持の中の 31 区間から",0)}</div>
+  <section class="sec"><p class="basis">映像は保存していません。解析に使った点の列は、結果の画面を閉じると消えます。</p></section>
+  <div class="actbar"><button class="btn pri block tall" data-go="#result">結果を見る</button></div></div>`}
+
+function scrResult(sheet){const difs=difShots(),d=difs[0];
+  const rngTxt=(k,i)=>{const f=F[k],o=others(k,i).map((x)=>f.body?Math.abs(x):x),a=Math.min(...o),b=Math.max(...o);return (f.body?"胴の ":"")+a.toFixed(f.dp)+"〜"+b.toFixed(f.dp)+(f.unit==="秒"?" 秒":f.unit)};
+  const valTxt=(k,i)=>{const f=F[k],x=f.body?Math.abs(f.v[i]):f.v[i];return (f.body?"胴の ":"")+x.toFixed(f.dp)+(f.unit==="秒"?" 秒":f.unit)+(f.body?"（"+cm(x)+"）":"")};
+  const ks=d?d.ks.filter((k)=>F[k].def):[];
+  const facts=d?`<p class="fact">${sentence(ks[0],d.i)}</p>`+(ks.length>1?`<p class="basis" style="padding-bottom:4px">同じ射で、ほかにも ${ks.length-1} 項目が違いました。</p>`+ks.slice(1).map((k)=>`<div class="row"><span class="k">${F[k].name}</span><span class="v">${valTxt(k,d.i)}<small>ほかの 5 射 ${rngTxt(k,d.i)}</small></span></div>`).join(""):""):`<p class="fact">6 射のあいだに、測定のゆれより大きい違いは見つかりませんでした。</p>`;
+  return `<div class="scr act">
+  <div style="display:flex;justify-content:space-between;align-items:center"><button class="backBtn" data-go="#home">${backSvg}射型</button><span class="mock" style="margin-right:var(--gut)">架空の見本</span></div>
+  <header class="top" style="padding-top:2px"><h1>11月14日の記録</h1><span class="date">14:32〜<br>3 分 12 秒</span></header>
+  <section class="sec" style="margin-top:8px"><div class="secH"><h2>この回</h2><button class="txtBtn" data-go="#fix" style="margin:-12px 0">射数を直す</button></div>
+    <div class="figs" style="grid-template-columns:1fr 1fr"><div class="fig"><div class="l">射</div><div class="n">6<small>射</small></div><div class="d">離れがはっきり写った射 6</div></div><div class="fig"><div class="l">引き戻し</div><div class="n">1<small>回</small></div><div class="d">3 射目と 4 射目の間</div></div></div>
+    <div class="chart" style="padding-top:8px">${timeline()}</div>
+    <div class="legend"><span><i style="width:14px;height:6px;background:var(--ink)"></i>保持</span><span><i style="width:2px;height:12px;background:var(--ink)"></i>離れ</span><span><i style="width:13px;height:6px;border:1.5px solid var(--sub)"></i>戻 = 引き戻し</span></div>
+  </section>
+  <section class="sec"><div class="secH"><h2>ほかと違った射</h2><span class="aside">${d?(d.i+1)+" 射目":"なし"}</span></div>
+    ${facts}
+    <p class="basis" style="padding-top:10px">どれも、この回の測定のゆれから出せる下限を超えた違いです。測定のゆれだけでこの欄に何か出る確率は、1 回の記録につき約 5% に抑えています。良し悪しの判定ではありません。</p>
+    ${d?linkRow("#shot/"+(d.i+1),(d.i+1)+" 射目を見る","ほかの 5 射の中央と重ねて比べます"):""}
+  </section>
+  <section class="sec"><div class="secH"><h2>そろい方</h2><span class="aside">6 射・射の順</span></div>
+    <div class="legend"><span><i style="width:14px;height:10px;background:var(--raised);border:1px solid var(--rule)"></i>この幅の中は、違いと言えません</span><span><i style="width:12px;height:12px;border-radius:50%;background:var(--info)"></i>違った射</span></div>
+    ${Object.keys(F).filter((k)=>F[k].def).map(runChart).join("")}
+  </section>
+  <section class="sec"><div class="secH"><h2>重ね図</h2><span class="aside">${d?"青 = "+(d.i+1)+" 射目":"6 射"}</span></div>
+    ${overlayFig(d?d.i:null,st.overlay==="rel"?"rel":"hold")}
+    <div style="padding-top:10px">${seg("overlay",[["hold","保持"],["rel","離れの 0.25 秒あと"]])}</div>
+    <p class="basis">射ごとの、その時刻の姿（9 点）を、両肩の中点を合わせて重ねています。2〜3cm より細かい違いは出せません。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>この記録の条件</h2><span class="aside">比べるときの区切り</span></div>
+    <div class="row"><span class="k">置き方</span><span class="v">真横に近い・胸側<small>時間・高さ・面内の項目をすべて測れます</small></span></div>
+    <div class="row"><span class="k">写り</span><span class="v">縦向き、胴の長さ 212px<small>毎秒 28 コマ、姿勢が取れたコマ 97%</small></span></div>
+    <label class="row" style="cursor:pointer"><span class="k">練習</span><select class="pick" style="width:62%;text-align:right" aria-label="紐づける練習"><option>今日 70m 第 3 エンド</option><option>今日 70m（エンドなし）</option><option>紐づけない</option></select></label>
+    <details class="more"><summary>一台のカメラでは見えないもの<span class="go">開く</span></summary><ul>
+      <li>背中の筋肉の使い方、肩甲骨の動き</li><li>引き手の肘が矢の線の真後ろにあるか（真横から分かるのは高さだけ）</li><li>弓手の左右のぶれ、弓の傾き</li><li>指の掛け方、弦の離れ方、押し手の握り</li><li>クリッカーが鳴った瞬間</li><li>2〜3cm より細かい位置の違い、数 mm の伸び合い</li><li>射ごとに変わる、点のゆっくりしたずれ（袖や胸当ての影響）</li></ul></details>
+    <div class="btnRow"><button class="btn" data-go="#video">動画で確かめる</button><button class="btn" data-go="#home">保存せずに閉じる</button></div>
+  </section>
+  <div class="actbar">${st.saved?`<div class="saved">保存しました。数値だけを残しました（1.9KB）。</div>`:""}<button class="btn pri block tall" id="save">${st.saved?"射型へ戻る":"記録を保存する"}</button></div>
+  ${sheet?fixSheet():""}</div>`}
+
+function fixSheet(){let n=0;const rows=EVENTS.map((e,i)=>{const on=st.fix[i]===undefined?e.k==="s":st.fix[i];if(on)n++;
+    const t=e.k==="s"?`${e.n} 射目`:"引き戻し", s=`${mmss(e.rel)}、保持 ${(e.k==="s"?F.hold.v[e.n-1]:e.hold).toFixed(1)} 秒`+(e.k==="l"?"。手が前へ戻りました":"");
+    return `<div class="fixRow"><div><b>${t}</b><span>${s}</span></div><button class="tog" data-fix="${i}" aria-pressed="${on}">${on?"射に数える":"数えない"}</button></div>`}).join("");
+  return `<div class="ovl"><div class="sheet" role="dialog" aria-label="射数を直す"><h2>射数を直す</h2>
+    <p class="basis" style="padding-bottom:6px">見つけた区間の一覧です。違っていれば切り替えてください。外した射は、比べる対象からも外します。</p>
+    ${rows}<p class="fact"><b>${n} 射</b>として記録します。</p>
+    <div class="btnRow"><button class="btn" data-go="#video">動画で確かめる</button><button class="btn pri" data-go="#result">この数にする</button></div></div></div>`}
+
+function scrShot(arg){const i=Math.min(N,Math.max(1,Number(arg)||4))-1,bars=[["draw","引き"],["hold","保持"],["follow","弓手を上げていた"]];
+  const bar=(k,l)=>{const f=F[k],mx=6,w=120,x=f.v[i]/mx*w,m=med(others(k,i))/mx*w,d=isDif(k,i);
+    return `<div class="bar"><span class="k">${l}</span><svg viewBox="0 0 ${w} 22" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="6" width="${w}" height="10" fill="var(--raised)"/><rect x="0" y="6" width="${x}" height="10" fill="${d?"var(--info)":"var(--ink)"}"/><path d="M${m} 1V21" stroke="var(--sub)" stroke-width="2"/></svg><span class="v">${f.v[i].toFixed(1)} 秒<small>ほか ${med(others(k,i)).toFixed(1)} 秒</small></span></div>`};
+  const tr=(k)=>{const f=F[k],d=isDif(k,i);return `<div class="tr ${d?"dif":""}"><span>${f.name}</span><span>${fmt(k,f.v[i])}</span><span>${fmt(k,med(others(k,i)))}</span><span>${fmt(k,delta(k,i),1)}</span></div>`};
+  const nd=Object.keys(F).filter((k)=>isDif(k,i)).length;
+  return `<div class="scr"><div style="display:flex;justify-content:space-between;align-items:center"><button class="backBtn" data-go="#result">${backSvg}結果</button><span class="mock" style="margin-right:var(--gut)">架空の見本</span></div>
+  <header class="top" style="padding-top:2px"><h1>${i+1} 射目</h1><span class="date">${mmss(EVENTS.filter((e)=>e.k==="s")[i].rel)}<br>6 射中</span></header>
+  <section class="sec" style="margin-top:8px"><div class="secH"><h2>時間</h2><span class="aside">縦線 = ほかの 5 射の中央値</span></div><div class="bars">${bars.map(([k,l])=>bar(k,l)).join("")}</div></section>
+  <section class="sec"><div class="secH"><h2>重ね図</h2><span class="aside">青 = この射、灰 = ほかの中央</span></div>
+    ${overlayFig(i,st.overlay==="rel"?"rel":"hold",1)}<div style="padding-top:10px">${seg("overlay",[["hold","保持"],["rel","離れの 0.25 秒あと"]])}</div></section>
+  <section class="sec"><div class="secH"><h2>射ごとの値</h2><span class="aside">${nd?nd+" 項目で違い":"違いなし"}</span></div>
+    <div class="tbl"><div class="tr h"><span>項目</span><span>この射</span><span>ほか 5 射</span><span>差</span></div>${Object.keys(F).map(tr).join("")}</div>
+    <p class="basis">色の付いた行は、差が測定のゆれから出せる下限を超えています。% は胴の長さに対する割合（1% は約 ${T_CM/100}cm）。引き尺の目安は、この回の中央値を 100% としています。</p>
+    <div class="btnRow"><button class="btn" data-go="#shot/${i?i:N}">前の射</button><button class="btn" data-go="#shot/${i+2>N?1:i+2}">次の射</button></div>
+  </section></div>`}
+
+function scrHistory(){const k=st.histKey,planar=k==="ext";
+  const ok=(r)=>planar?(r.view==="s"&&r.side==="c"):true, rows=HIST.filter(ok), out=HIST.length-rows.length;
+  const val=(r)=>planar?[EXT_HIST[r.d]-0.5,EXT_HIST[r.d],EXT_HIST[r.d]+0.5]:r.hold;
+  const w=W(),h=190,pt=14,pb=30,lo=planar?98:2.4,hi=planar?102:4.8,y=(v)=>pt+(h-pt-pb)*(1-(v-lo)/(hi-lo)),x=(i)=>58+(w-80)*i/(rows.length-1);
+  let g="";for(const t of (planar?[99,100,101]:[3,4])) g+=`<path d="M0 ${y(t)}H${w}" stroke="var(--rule)" stroke-width="1"/><text x="0" y="${y(t)-4}" class="ax">${t}${planar?"%":" 秒"}</text>`;
+  rows.forEach((r,i)=>{const v=val(r);g+=`<path d="M${x(i)} ${y(v[0])}V${y(v[2])}" stroke="var(--rule-strong)" stroke-width="5"/><circle cx="${x(i)}" cy="${y(v[1])}" r="5" fill="${i===rows.length-1?"var(--accent)":"var(--ink)"}"/>`;
+    if(r.gear) g+=`<path d="M${x(i)} ${pt}V${h-pb}" stroke="var(--info)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    if(i%2===(rows.length-1)%2) g+=`<text x="${x(i)}" y="${h-8}" text-anchor="middle" class="ax">${r.d}</text>`});
+  const meds=rows.slice(-5).map((r)=>val(r)[1]),rg=Math.min(...meds).toFixed(1)+"〜"+Math.max(...meds).toFixed(1)+(planar?"%":" 秒");
+  const vw={s:"真横",o:"やや斜め"},sd={c:"胸側",b:"背中側"};
+  return `<div class="scr"><div style="display:flex;justify-content:space-between;align-items:center"><button class="backBtn" data-go="#home">${backSvg}射型</button><span class="mock" style="margin-right:var(--gut)">架空の見本</span></div>
+  <header class="top" style="padding-top:2px"><h1>推移</h1><span class="date">10月3日〜<br>11月14日</span></header>
+  <div class="cond"><label><span>項目</span><select class="pick" id="hKey"><option value="hold" ${k==="hold"?"selected":""}>保持の時間</option><option value="ext" ${k==="ext"?"selected":""}>引き尺の目安</option></select></label>
+    <label><span>比べる回</span><select class="pick" aria-label="比べる回"><option>比べてよい回すべて</option><option>70m だけ</option><option>いまの弓具だけ</option></select></label></div>
+  <section class="sec" style="margin-top:14px"><div class="chart"><svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${F[k].name}の推移">${g}</svg></div>
+    <div class="legend"><span><i style="width:10px;height:10px;border-radius:50%;background:var(--ink)"></i>各回の中央値</span><span><i style="width:5px;height:12px;background:var(--rule-strong)"></i>射どうしの幅</span><span><i style="width:0;height:12px;border-left:1.5px dashed var(--info)"></i>弓具を変えた日</span></div>
+    <p class="fact">直近 ${meds.length} 回の中央値は ${rg}でした。</p>
+    <p class="basis">${planar?`引き尺の目安は面内の項目なので、真横・胸側の ${rows.length} 回だけを比べています。除いた回: やや斜め 2 回、背中側 1 回。最初の回の中央値を 100% としています。`:`保持の時間は置き方が違っても比べられます。8 回（計 54 射）。`}各回 6〜12 射なので、中央値には ±0.2 ${planar?"%":"秒"}ほどの不確かさがあります。</p>
+  </section>
+  <section class="sec"><div class="secH"><h2>記録</h2><span class="aside">${HIST.length} 件</span></div>
+    ${[...HIST].reverse().map((r)=>linkRow("#result",`${r.d}　${r.n} 射　保持 ${r.hold[1].toFixed(1)} 秒`,`${vw[r.view]}・${sd[r.side]}${r.gear?"。"+r.gear:""}${planar&&!ok(r)?"。この項目は比べていません":""}`)).join("")}
+  </section>
+  <section class="sec"><div class="secH"><h2>旧方式の記録</h2><span class="aside">3 件</span></div>
+    <p class="basis">測り方が違うので、推移には入れていません。記録はそのまま残してあり、開くと射ごとの値を見られます。</p>
+    ${linkRow("#history","9月26日　3 射","旧方式（測り方の版 2）")}${linkRow("#history","9月19日　0 射","旧方式（測り方の版 1）")}
+  </section>${tabbar()}</div>`}
+
+function scrVideo(){const rel=st.overlay==="rel";return `<div class="rec">
+  <div class="recTop"><button class="txtBtn" data-go="#result">結果へ</button><span class="ttl">動画で確かめる</span><span class="mock" style="justify-self:end;margin-right:var(--gut)">架空</span></div>
+  <div class="cam">${camSvg({h:document.documentElement.clientHeight<700?178:250,skel:st.skel==="on",ghost:st.ghost==="on",shot:st.vshot-1,phase:"rel"})}<span class="tagL">${st.vshot} 射目　離れの 0.25 秒あと</span></div>
+  <div class="chips">${[1,2,3,4,5,6].map((n)=>`<button class="chip" data-vshot="${n}" aria-pressed="${st.vshot===n}" aria-label="${n} 射目へ">${n}</button>`).join("")}<button class="chip" aria-pressed="false" aria-label="引き戻しへ">戻</button></div>
+  <div class="scrub"><input type="range" min="0" max="192" value="${EVENTS.filter((e)=>e.k==="s")[st.vshot-1].rel}" aria-label="再生位置"><div class="t"><span>${mmss(EVENTS.filter((e)=>e.k==="s")[st.vshot-1].rel)}</span><span>3:12</span></div></div>
+  <section class="sec" style="margin-top:8px">
+    <div class="btnRow" style="padding-top:0"><button class="btn">1 コマ戻る</button><button class="btn">再生</button><button class="btn">1 コマ進む</button></div>
+    <div class="opt w3" style="margin-top:10px"><div><b>速さ</b><span>再生の倍率</span></div>${seg("speed",[["0.25","0.25"],["0.5","0.5"],["1","1"]])}</div>
+    <div class="opt"><div><b>骨格</b><span>見つけた点と線</span></div>${seg("skel",[["on","入"],["off","切"]])}</div>
+    <div class="opt"><div><b>ほかの射を重ねる</b><span>白 = ほかの 5 射の中央の姿</span></div>${seg("ghost",[["on","入"],["off","切"]])}</div>
+    <div class="btnRow"><button class="btn block">動画を端末に保存（87MB）</button></div>
+    <p class="basis">この動画はアプリの中には保存されません。この画面を閉じると消えます。残すときは「端末に保存」で写真かファイルへ書き出してください。</p>
+  </section><div style="height:calc(20px + var(--safe-b))"></div></div>`}
+
+function scrErrors(){const e=(h,f,b,btns)=>`<div class="err"><h2>${h}</h2><p class="fact">${f}</p><p class="basis">${b}</p><div class="btnRow">${btns.map((t,i)=>`<button class="btn ${i===0?"pri":""}">${t}</button>`).join("")}</div></div>`;
+  return `<div class="scr"><div style="display:flex;justify-content:space-between;align-items:center"><button class="backBtn" data-go="#home">${backSvg}射型</button><span class="mock" style="margin-right:var(--gut)">文言の見本</span></div>
+  <header class="top" style="padding-top:2px"><h1>困ったとき</h1></header>
+  ${e("カメラの許可がない","カメラを使う許可がありません。","設定 > Safari > カメラ で「許可」にすると撮影できます。保存した動画の解析は、許可がなくても使えます。",["もう一度試す","動画を解析する"])}
+  ${e("解析の部品を読み込めない","解析の部品（約 15.5MB）を読み込めませんでした。","通信できる場所で一度開くと、次からは圏外でも使えます。記録や設定は変わっていません。",["もう一度試す","閉じる"])}
+  ${e("解析が遅い","解析が毎秒 12 コマです。","射は数えられますが、離れの時刻は ±0.05 秒ほど粗くなります。ほかのアプリを閉じるか、撮った動画をあとで解析すると細かく測れます。",["このまま続ける","やめる"])}
+  ${e("射が見つからなかった","射が見つかりませんでした。","弓を上げていた区間は 3 回ありましたが、引き切った区間は 0 回でした。射線の真後ろから撮ると引き尺が写りません。置き方を確かめてください。",["置き方を確かめる","動画で確かめる"])}
+  ${e("離れがはっきり写らなかった","5 射目は、離れがはっきり写りませんでした。","引いて、保持して、手を前へ戻さずに腕を下ろしたので、射として数えています。時刻は ±0.5 秒の幅で不確かなので、保持の時間は比べていません。",["射に数える","数えない"])}
+  ${e("背中側から撮った","背中側から撮った回です。","時間（保持、引き、弓手を上げていた時間）は測れました。引き手が頭に隠れるので、アンカーの高さは測れません。",["結果を見る"])}
+  ${e("撮影が中断された","撮影が中断されました。","アプリが裏へ回ったため、カメラが止まりました。ここまでの 4 分 12 秒（4 射）は残っています。",["ここまでを解析する","捨てる"])}
+  ${e("保存できない","記録を保存できませんでした。","端末の保存領域が足りません。結果はこの画面に残っています。設定 > データ でバックアップを書き出してから、もう一度試してください。",["もう一度試す","設定を開く"])}
+  </div>`}
+
+/* ===== 経路と操作 ===== */
+function render(){
+  const [name,arg]=(location.hash||"#home").slice(1).split("/");
+  const map={off:scrOff,home:scrHome,place:()=>scrPlace(arg),capture:()=>scrCapture(arg),analyzing:scrAnalyzing,result:()=>scrResult(false),fix:()=>scrResult(true),shot:()=>scrShot(arg),history:scrHistory,video:scrVideo,errors:scrErrors};
+  $("#app").innerHTML=(map[name]||scrHome)();
+  $$("[data-go]").forEach((b)=>b.addEventListener("click",()=>{if(location.hash===b.dataset.go)render();else location.hash=b.dataset.go}));
+  $$("[data-set]").forEach((b)=>b.addEventListener("click",()=>{const y=scrollY;st[b.dataset.set]=b.dataset.val;render();scrollTo(0,y)}));
+  $$("[data-fix]").forEach((b)=>b.addEventListener("click",()=>{const i=b.dataset.fix;st.fix[i]=b.getAttribute("aria-pressed")!=="true";render()}));
+  $$("[data-vshot]").forEach((b)=>b.addEventListener("click",()=>{st.vshot=Number(b.dataset.vshot);render()}));
+  const c=$("#cnt");if(c)c.addEventListener("click",()=>{st.count=st.count>=6?0:st.count+1;render()});
+  const s=$("#save");if(s)s.addEventListener("click",()=>{if(st.saved){st.saved=false;location.hash="#home"}else{st.saved=true;render();scrollTo(0,0)}});
+  const hk=$("#hKey");if(hk)hk.addEventListener("change",()=>{st.histKey=hk.value;render()});
+}
+let lastHash="";
+addEventListener("hashchange",()=>{render();if(location.hash!==lastHash)scrollTo(0,0);lastHash=location.hash});
+addEventListener("resize",render);
+render();
+</script>
+</body>
+</html>
