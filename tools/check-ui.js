@@ -14,6 +14,7 @@ const appScripts = [
   "scripts/20-scoring.js",
   "scripts/30-target-svg.js",
   "scripts/40-analysis-physics.js",
+  "scripts/44-form-analyze.js",
   "scripts/45-analysis-core.js",
   "scripts/46-form-core.js",
   "scripts/47-form-view.js",
@@ -140,7 +141,7 @@ function staticUiChecks() {
   const appScriptTags = [
     ...html.matchAll(/<script\b([^>]*)\bsrc="scripts\/[^"]+"([^>]*)><\/script>/g),
   ];
-  assert(appScriptTags.length === 14, `expected 14 app scripts, found ${appScriptTags.length}`);
+  assert(appScriptTags.length === 15, `expected 15 app scripts, found ${appScriptTags.length}`);
   assert(
     appScriptTags.every((match) => /\bdefer\b/.test(`${match[1]} ${match[2]}`)),
     "App scripts must use defer so first-load downloads can run in parallel while preserving order",

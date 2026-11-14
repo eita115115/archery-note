@@ -17,6 +17,7 @@ They execute in numbered order and share one global scope:
 | 20 | `20-scoring.js` | Scoring math (pure functions) | `scoreAt`, `hitFromGlobal`, `zoneStyle`, `scoreLabel`, `clamp`, `median`, `momentStats`, `ringW`, `lineCutRadius`, `isLineCutting` |
 | 30 | `30-target-svg.js` | Target SVG drawing | `targetMarkup`, `markCircle` |
 | 40 | `40-analysis-physics.js` | Physics engine, calibration, analysis helpers | `num`, `pct`, `levelFromScore`, `LEVELS`, `sessionMetrics`, `latestMark`, `personalPhysicsCalibration`, `adviceFor`, `judgementFor`, `groupSummaryHtml`, `exportSessionsCsv` |
+| 44 | `44-form-analyze.js` | Form tracking v2 analyser: pure whole-capture analysis (no DOM/db access; not called by the UI yet) | `FormAnalyze` |
 | 45 | `45-analysis-core.js` | Analysis pure functions (no DOM/db access) | `buildAnalysisRows`, `filterAnalysisRows`, `isoWeekKey`, `aggregateByPeriod` |
 | 46 | `46-form-core.js` | Form analysis core (pose detection) | form analysis functions |
 | 47 | `47-form-view.js` | Form analysis view | form view rendering |

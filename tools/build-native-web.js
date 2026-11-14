@@ -10,6 +10,7 @@ const appScripts = [
   "scripts/20-scoring.js",
   "scripts/30-target-svg.js",
   "scripts/40-analysis-physics.js",
+  "scripts/44-form-analyze.js",
   "scripts/45-analysis-core.js",
   "scripts/46-form-core.js",
   "scripts/47-form-view.js",
