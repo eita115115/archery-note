@@ -65,6 +65,8 @@ const core = new Function(
     FORM_VEL_FILTER, makeFormVelocitySource,
     formPreReleaseWindow, formAnchorVariation, summarizeFormShot,
     formRecordStats, formRecordInsights, formTrendSeries, formScoreLink,
+    FORM_GEOMETRY_VERSION, FORM_ARM, formRefScaleX, formShotArmAngle, formCaptureConditions,
+    formMergeCaptureConditions, formRecordGeometry, formComparableRecords,
     ARROW_PRESENCE, arrowPresence, ARROW_CHECK, judgeArrowCheck};`,
 )();
 
@@ -5051,10 +5053,704 @@ function recordCase(label, score) {
   assertEqual(r.confirmScore, null, "confirmScore null when no samples");
 }
 {
-  // preScores が空でも confirm 側だけで判定できる
+  // AN-098: 発射前に矢が1枚も測れていないときは、猶予窓が低くても「発射と一致」と言わない
+  // （旧: confirm 側だけで shot-match。矢の写らない映像で「発射と一致」と出ていた）
   const r = core.judgeArrowCheck([], [0.05, 0.1]);
-  assertEqual(r.judgment, "shot-match", "judgment works without pre-release samples");
+  assertEqual(r.judgment, "unclear", "no pre-release samples cannot be judged");
+  assertEqual(r.reason, "no-arrow-before-release", "no pre-release samples: reason");
   assertEqual(r.preScore, null, "preScore null when no samples");
+}
+{
+  // AN-098: 発射前のスコアが「矢あり」のしきい値に届かないときも判定しない（両方向とも）
+  const th = core.ARROW_PRESENCE.PRESENT_TH;
+  const gone = core.judgeArrowCheck([0, 0.1, 0.05], [0, 0, 0]);
+  assertEqual(gone.judgment, "unclear", "no arrow before release: not a shot-match");
+  assertEqual(gone.reason, "no-arrow-before-release", "no arrow before release: reason");
+  const still = core.judgeArrowCheck([0.2, 0.3], [0.9, 0.9]);
+  assertEqual(still.judgment, "unclear", "no arrow before release: not a letdown-mismatch");
+  const below = core.judgeArrowCheck([th - 0.01], [0]);
+  assertEqual(below.judgment, "unclear", "pre score just below PRESENT_TH is not judged");
+  const at = core.judgeArrowCheck([th], [0]);
+  assertEqual(at.judgment, "shot-match", "pre score at PRESENT_TH is judged");
+  assertEqual(at.reason, null, "judged result has no reason");
+  assertEqual(
+    core.judgeArrowCheck([0.9], []).reason,
+    "no-confirm-samples",
+    "no confirm samples: reason",
+  );
+  assertEqual(core.judgeArrowCheck([0.9], [0.45]).reason, "gray-zone", "gray zone: reason");
+  assert(
+    /if\(reason==="no-arrow-before-release"\) return "矢: 発射前に写らず判定なし";/.test(
+      viewScript,
+    ),
+    "capture list says the arrow check could not be judged",
+  );
+}
+
+/* ---------- AN-098: 画面の形（縦長・横長・中央固定）によらない測定 ----------
+   実射の映像を使わずに確かめる。正方形の画素の座標で射の動きを作り、同じ画素の動きを
+   横長 1280x720・縦長 720x1280・中央固定（幅 70%）の3通りに正規化して検出器へ流す。
+   「画面の大きさを渡さない」呼び出しは修正前と同じ計算なので、修正前の結果として使う。 */
+
+const PX = (x, y) => ({ x, y });
+const PX_LERP = (a, b, k) => ({ x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k });
+// 右利き・横から見た射手（胴体長 240px）。弓手は画面の左へ伸ばしたまま動かさない
+const PX_BODY = {
+  nose: PX(296, 190),
+  bS: PX(280, 250),
+  dS: PX(320, 252),
+  lH: PX(285, 490),
+  rH: PX(315, 490),
+  bE: PX(160, 250),
+  bW: PX(40, 248),
+};
+const PX_REST = { w: PX(200, 560), e: PX(330, 400) };
+const PX_ANCHOR = { w: PX(366, 205), e: PX(470, 235) };
+const PX_FOLLOW = { w: PX(520, 330), e: PX(560, 300) };
+
+/* n 射ぶんの画素座標の時系列（dt ms 間隔）。構え → 引き → 保持1.5秒 → 66ms の離れ → 残身 → 戻し。
+   保持中の引き手手首には ±1.2px の決まった揺れを足す（乱数は使わない）。 */
+function pixelShotSequence(n, dt, opts) {
+  const o = opts || {};
+  const out = [];
+  let t = 0,
+    i = 0;
+  const push = (pose) => {
+    t += dt;
+    const jx = Math.sin(i * 1.7) * 1.2,
+      jy = Math.cos(i * 2.3) * 1.2;
+    i++;
+    const pts = { ...PX_BODY, dW: PX(pose.w.x + jx, pose.w.y + jy), dE: pose.e };
+    out.push({ t, pts: o.mutate ? o.mutate(pts, { t, i, phase: pose.phase }) : pts });
+  };
+  const mix = (a, b, k, phase) => ({ w: PX_LERP(a.w, b.w, k), e: PX_LERP(a.e, b.e, k), phase });
+  for (let s = 0; s < n; s++) {
+    for (let k = 0; k < 30; k++) push({ ...PX_REST, phase: "rest" });
+    for (let k = 1; k <= 24; k++) push(mix(PX_REST, PX_ANCHOR, k / 24, "draw"));
+    for (let k = 0; k < 45; k++) push({ ...PX_ANCHOR, phase: "hold" });
+    for (let ms = dt; ; ms += dt) {
+      const x = Math.min(1, ms / 66);
+      push(mix(PX_ANCHOR, PX_FOLLOW, 1 - (1 - x) ** 2, "release"));
+      if (x >= 1) break;
+    }
+    for (let k = 0; k < 20; k++) push({ ...PX_FOLLOW, phase: "follow" });
+    for (let k = 1; k <= 20; k++) push(mix(PX_FOLLOW, PX_REST, k / 20, "return"));
+  }
+  return out;
+}
+
+/* 画素座標 → MediaPipe と同じ正規化ランドマーク。framing = {w,h,ox,oy,crop}。
+   crop があるときは、切り出した画像の幅で正規化してから 47-form-view.js と同じ式
+   （x*CROP_FRAC+CROP_OFF）で画面全体の座標へ戻す。 */
+function pixelToLandmarks(pts, framing) {
+  const N = (p) => {
+    const px = p.x + (framing.ox || 0),
+      py = p.y + (framing.oy || 0);
+    let x = px / framing.w;
+    if (framing.crop) {
+      const cw = framing.w * framing.crop.frac,
+        cx = framing.w * framing.crop.off;
+      x = ((px - cx) / cw) * framing.crop.frac + framing.crop.off;
+    }
+    return { x, y: py / framing.h, visibility: p.visibility == null ? 0.95 : p.visibility };
+  };
+  const l = [];
+  l[0] = N(pts.nose);
+  l[11] = N(pts.bS);
+  l[12] = N(pts.dS);
+  l[13] = N(pts.bE);
+  l[14] = N(pts.dE);
+  l[15] = N(pts.bW);
+  l[16] = N(pts.dW);
+  l[23] = N(pts.lH);
+  l[24] = N(pts.rH);
+  return l;
+}
+
+/* 本体の撮影ループと同じ順序（速度 → history へ追加 → 200件に制限 → stepFormPhase、
+   取消は直前の射を外す）で流し、保持された射の時刻と要約を返す。 */
+function runPixelSequence(seq, framing, passFrame) {
+  const st = core.makeFormPhaseDetector();
+  const velSrc = core.makeFormVelocitySource();
+  const hist = [];
+  const shots = [];
+  let minAnchor = Infinity;
+  for (const f of seq) {
+    const m = core.computeFormMetrics(
+      pixelToLandmarks(f.pts, framing),
+      "right",
+      passFrame ? { w: framing.w, h: framing.h } : undefined,
+    );
+    minAnchor = Math.min(minAnchor, m.anchorNorm);
+    const vel = velSrc.step(hist, m, f.t);
+    hist.push({ ts: f.t, m, vel });
+    if (hist.length > 200) hist.shift();
+    const r = core.stepFormPhase(st, m, hist, 1.0, f.t);
+    if (r.canceled) shots.pop();
+    else if (r.released)
+      shots.push({
+        ts: f.t,
+        shot: core.summarizeFormShot(hist, r.anchorStartTs, f.t, r.anchorEnter),
+      });
+  }
+  return { shots, minAnchor };
+}
+
+const FRAMINGS = {
+  landscape: { w: 1280, h: 720, ox: 280, oy: 0 },
+  portrait: { w: 720, h: 1280, ox: 0, oy: 300 },
+  crop: { w: 1280, h: 720, ox: 280, oy: 0, crop: { frac: 0.7, off: (1 - 0.7) / 2 } },
+  portraitCrop: { w: 720, h: 1280, ox: 110, oy: 300, crop: { frac: 0.7, off: (1 - 0.7) / 2 } },
+};
+
+{
+  // 倍率: 16:9 横長は厳密に 1（従来と同じ値）。画面の大きさなし・不正な値も 1
+  assertEqual(core.formRefScaleX({ w: 1280, h: 720 }), 1, "1280x720 reference scale is exactly 1");
+  assertEqual(
+    core.formRefScaleX({ w: 1920, h: 1080 }),
+    1,
+    "1920x1080 reference scale is exactly 1",
+  );
+  assertEqual(core.formRefScaleX(undefined), 1, "no frame keeps the legacy scale");
+  assertEqual(core.formRefScaleX({ w: 0, h: 720 }), 1, "invalid frame keeps the legacy scale");
+  assertClose(
+    core.formRefScaleX({ w: 720, h: 1280 }),
+    (720 * 9) / (1280 * 16),
+    1e-12,
+    "portrait scale",
+  );
+  assertEqual(core.FORM_GEOMETRY_VERSION, 2, "geometry version");
+}
+{
+  // 画面の大きさを渡さない呼び出しは、キーも値も従来のまま
+  const legacy = core.computeFormMetrics(fullDrawLandmarks(), "right");
+  assertJsonEqual(
+    Object.keys(legacy),
+    [
+      "bowArm",
+      "drawArm",
+      "anchorNorm",
+      "bodyScale",
+      "shoulderDrop",
+      "headOffset",
+      "forceLine",
+      "sc",
+      "score",
+      "conf",
+      "occluded",
+      "bW",
+      "dW",
+    ],
+    "no-frame metrics keep the exact legacy keys",
+  );
+  // 16:9 横長を渡したときは従来のキーの値がビット単位で同じ。手首の点も同じオブジェクト
+  const lms = fullDrawLandmarks();
+  const base = core.computeFormMetrics(lms, "right");
+  const withFrame = core.computeFormMetrics(lms, "right", { w: 1280, h: 720 });
+  Object.keys(base).forEach((key) =>
+    assertEqual(
+      JSON.stringify(withFrame[key]),
+      JSON.stringify(base[key]),
+      `16:9 landscape keeps legacy ${key}`,
+    ),
+  );
+  assert(
+    withFrame.dW === lms[16] && withFrame.bW === lms[15],
+    "16:9 landscape keeps wrist objects",
+  );
+  assert(withFrame.lmD === lms[16] && withFrame.lmB === lms[15], "frame-normalized wrists exposed");
+  assertEqual(withFrame.geom, 2, "metrics with a frame carry geometry version 2");
+}
+{
+  // 同じ画素の姿勢は、どの画面の形でも同じ値になる（修正後）。修正前は縦長だけ大きくずれる
+  const pts = { ...PX_BODY, dW: PX_ANCHOR.w, dE: PX_ANCHOR.e };
+  const truePx = {
+    draw: core.formAngleDeg(pts.dS, pts.dE, pts.dW),
+    bow: core.formAngleDeg(pts.bS, pts.bE, pts.bW),
+  };
+  const table = {};
+  Object.keys(FRAMINGS).forEach((name) => {
+    const fr = FRAMINGS[name];
+    const lms = pixelToLandmarks(pts, fr);
+    table[name] = {
+      before: core.computeFormMetrics(lms, "right"),
+      after: core.computeFormMetrics(lms, "right", { w: fr.w, h: fr.h }),
+    };
+  });
+  console.log("\n画面の形と測定値（同じ画素の姿勢。修正前 → 修正後）");
+  Object.keys(table).forEach((name) => {
+    const { before, after } = table[name];
+    console.log(
+      `  ${name.padEnd(13)} anchorNorm ${before.anchorNorm.toFixed(3)} → ${after.anchorNorm.toFixed(3)}` +
+        `  drawArm(検出用) ${before.drawArm.toFixed(1)}° → ${after.drawArm.toFixed(1)}°` +
+        `  引き手肘(表示) ${before.drawArm.toFixed(1)}° → ${after.drawArmPx.toFixed(1)}°`,
+    );
+  });
+  const ref = table.landscape.after;
+  ["portrait", "crop", "portraitCrop"].forEach((name) => {
+    const a = table[name].after;
+    ["anchorNorm", "drawArm", "bowArm", "shoulderDrop", "headOffset", "forceLine"].forEach((key) =>
+      assertClose(a[key], ref[key], 1e-9, `${name} ${key} equals landscape after the fix`),
+    );
+    assertEqual(a.score, ref.score, `${name} score equals landscape after the fix`);
+    assertClose(a.drawArmPx, truePx.draw, 1e-9, `${name} draw elbow is the square-pixel angle`);
+    assertClose(a.bowArmPx, truePx.bow, 1e-9, `${name} bow elbow is the square-pixel angle`);
+    assertClose(a.armQ.draw.seg, ref.armQ.draw.seg, 1e-9, `${name} arm length ratio equals`);
+  });
+  assertClose(ref.drawArmPx, truePx.draw, 1e-9, "landscape draw elbow is the square-pixel angle");
+  // 横長 16:9 は修正前後で同じ（検出に使う値）
+  assertEqual(
+    table.landscape.after.anchorNorm,
+    table.landscape.before.anchorNorm,
+    "landscape anchorNorm unchanged by the fix",
+  );
+  assertEqual(
+    table.landscape.after.drawArm,
+    table.landscape.before.drawArm,
+    "landscape detection drawArm unchanged by the fix",
+  );
+  // 修正前: 縦長はアンカー圏（CLOSE_IN）に入らず、角度も 10°以上ずれていた
+  assert(
+    table.landscape.before.anchorNorm < core.FORM_PH.CLOSE_IN,
+    "before: landscape anchor is inside CLOSE_IN",
+  );
+  assert(
+    table.portrait.before.anchorNorm > core.FORM_PH.CLOSE_IN,
+    `before: portrait anchor fails CLOSE_IN, got ${table.portrait.before.anchorNorm}`,
+  );
+  assert(
+    Math.abs(table.portrait.before.drawArm - table.landscape.before.drawArm) > 10,
+    "before: portrait draw elbow differs from landscape by more than 10 degrees",
+  );
+  // 中央固定は、切り出しの座標を画面全体へ戻しているので修正前から横長と同じ
+  assertClose(
+    table.crop.before.anchorNorm,
+    table.landscape.before.anchorNorm,
+    1e-9,
+    "crop remap already matched the full frame before the fix",
+  );
+}
+{
+  // 3射の時系列: 射数・リリース時刻・射ごとの値が、画面の形によらず同じ（修正後）
+  const seq = pixelShotSequence(3, 1000 / 30);
+  const after = {},
+    before = {};
+  Object.keys(FRAMINGS).forEach((name) => {
+    after[name] = runPixelSequence(seq, FRAMINGS[name], true);
+    before[name] = runPixelSequence(seq, FRAMINGS[name], false);
+  });
+  console.log("\n3射の合成時系列（修正前 → 修正後）");
+  Object.keys(FRAMINGS).forEach((name) => {
+    const b = before[name],
+      a = after[name];
+    console.log(
+      `  ${name.padEnd(13)} 射数 ${b.shots.length} → ${a.shots.length}` +
+        `  リリース [${b.shots.map((s) => s.ts.toFixed(0)).join(",")}] → [${a.shots.map((s) => s.ts.toFixed(0)).join(",")}]` +
+        `  アンカー最小 ${b.minAnchor.toFixed(3)} → ${a.minAnchor.toFixed(3)}`,
+    );
+  });
+  const ref = after.landscape;
+  assertEqual(ref.shots.length, 3, "landscape detects the three synthetic shots");
+  // 横長 16:9 の検出は修正前後で同じ
+  assertJsonEqual(
+    after.landscape.shots.map((s) => s.ts),
+    before.landscape.shots.map((s) => s.ts),
+    "landscape release timing is unchanged by the fix",
+  );
+  ["holdMs", "anchorNorm", "score", "confidence", "frames", "degraded"].forEach((key) =>
+    assertJsonEqual(
+      after.landscape.shots.map((s) => s.shot[key]),
+      before.landscape.shots.map((s) => s.shot[key]),
+      `landscape per-shot ${key} is unchanged by the fix`,
+    ),
+  );
+  ["portrait", "crop", "portraitCrop"].forEach((name) => {
+    const r = after[name];
+    assertJsonEqual(
+      r.shots.map((s) => s.ts),
+      ref.shots.map((s) => s.ts),
+      `${name}: shot count and release timing equal landscape after the fix`,
+    );
+    r.shots.forEach((s, i) => {
+      const a = s.shot,
+        b = ref.shots[i].shot;
+      assertEqual(a.holdMs, b.holdMs, `${name} shot ${i + 1} hold`);
+      assertEqual(a.frames, b.frames, `${name} shot ${i + 1} summary frames`);
+      assertEqual(a.geom, 2, `${name} shot ${i + 1} geometry version`);
+      ["bowArm", "drawArm", "shoulderDrop", "headOffset", "forceLine"].forEach((key) =>
+        assertClose(a.angles[key], b.angles[key], 1e-6, `${name} shot ${i + 1} ${key}`),
+      );
+      assertClose(a.anchorNorm, b.anchorNorm, 1e-9, `${name} shot ${i + 1} anchorNorm`);
+      assertClose(a.pre.drawMove, b.pre.drawMove, 1e-9, `${name} shot ${i + 1} drawMove`);
+      assertClose(a.pre.bowMove, b.pre.bowMove, 1e-9, `${name} shot ${i + 1} bowMove`);
+      assertEqual(a.pre.drawDrift, b.pre.drawDrift, `${name} shot ${i + 1} draw drift flag`);
+    });
+  });
+  // 修正前: 縦長は1射も検出できなかった（アンカー圏に入らない）
+  assertEqual(before.landscape.shots.length, 3, "before: landscape detects three shots");
+  assertEqual(before.portrait.shots.length, 0, "before: portrait detects no shot");
+  assertEqual(before.portraitCrop.shots.length, 0, "before: cropped portrait detects no shot");
+  assert(
+    before.portrait.minAnchor > core.FORM_PH.CLOSE_IN,
+    "before: portrait never enters CLOSE_IN",
+  );
+  // 修正後の表示用の肘の角度は、画素から直接測った角度
+  const expectedDraw = core.formAngleDeg(PX_BODY.dS, PX_ANCHOR.e, PX_ANCHOR.w);
+  ref.shots.forEach((s, i) =>
+    assertClose(
+      s.shot.angles.drawArm,
+      expectedDraw,
+      1.5,
+      `shot ${i + 1} draw elbow near pixel truth`,
+    ),
+  );
+}
+
+/* ---------- AN-098: 1射の肘の角度（使えるフレームだけの中央値／出せないときは null） ---------- */
+
+function armFrame(ts, drawPx, opts) {
+  const o = opts || {};
+  return {
+    ts,
+    m: {
+      anchorNorm: 0.2,
+      bowArm: 170,
+      drawArm: 60,
+      bowArmPx: o.bowPx == null ? 175 : o.bowPx,
+      drawArmPx: drawPx,
+      geom: 2,
+      armQ: {
+        bow: { seg: 0.5, vis: 0.9 },
+        draw: { seg: o.seg == null ? 0.5 : o.seg, vis: o.vis == null ? 0.9 : o.vis },
+      },
+      shoulderDrop: 0.07,
+      headOffset: 0.09,
+      forceLine: 0.07,
+      score: 80,
+      conf: 0.9,
+      bodyScale: 0.25,
+      bW: { x: 0.2, y: 0.4 },
+      dW: { x: 0.6, y: 0.31 },
+    },
+    vel: 0.05,
+  };
+}
+{
+  // 使えるフレームがそろっていれば中央値
+  const win = [0, 1, 2, 3, 4].map((i) => armFrame(9000 + i * 33, 30 + i));
+  const a = core.formShotArmAngle(win, "draw");
+  assertEqual(a.value, 32, "robust draw elbow is the median of usable frames");
+  assertEqual(a.used, 5, "all frames used");
+  // 5°↔179° の反転が混じっても、短く写ったフレーム（seg 不足）を除けば値は動かない
+  const flipped = [
+    armFrame(9000, 31),
+    armFrame(9033, 179, { seg: 0.05 }),
+    armFrame(9066, 32),
+    armFrame(9100, 5, { seg: 0.08 }),
+    armFrame(9133, 33),
+  ];
+  const b = core.formShotArmAngle(flipped, "draw");
+  assertEqual(b.value, 32, "flipped frames with a short forearm are excluded");
+  assertEqual(b.used, 3, "only usable frames counted");
+  // 見えていない（visibility が低い）フレームも除く
+  const hidden = core.formShotArmAngle(
+    [armFrame(1, 30), armFrame(2, 170, { vis: 0.2 }), armFrame(3, 31), armFrame(4, 32)],
+    "draw",
+  );
+  assertEqual(hidden.value, 31, "low-visibility frames are excluded");
+  // 使えるフレームが足りない → 値を出さない
+  const few = core.formShotArmAngle(
+    [armFrame(1, 30), armFrame(2, 31), armFrame(3, 175, { seg: 0.01 })],
+    "draw",
+  );
+  assertEqual(few.value, null, "too few usable frames yields no value");
+  // 使えるフレームの中で値がそろわない（反転が残る）→ 値を出さない
+  const split = core.formShotArmAngle(
+    [armFrame(1, 6), armFrame(2, 178), armFrame(3, 5), armFrame(4, 179), armFrame(5, 90)],
+    "draw",
+  );
+  assertEqual(split.value, null, "disagreeing frames yield no value instead of a flipped number");
+  // 弓手側は別に判定する
+  assertEqual(core.formShotArmAngle(flipped, "bow").value, 175, "bow arm judged independently");
+  // 画面の大きさなしで作った従来のフレームは、従来どおり全フレームの中央値
+  const legacyWin = [10, 170, 20].map((v, i) => ({ ts: i, m: { drawArm: v, bowArm: 171 } }));
+  assertEqual(
+    core.formShotArmAngle(legacyWin, "draw").value,
+    20,
+    "legacy frames keep plain median",
+  );
+}
+{
+  // summarizeFormShot: 反転だらけの射は引き手肘が null（射そのものは残る）。弓手肘は出る
+  const hist = [];
+  for (let i = 0; i < 20; i++)
+    hist.push(armFrame(9100 + i * 40, i % 2 ? 178 : 6, { seg: i % 2 ? 0.5 : 0.5 }));
+  const shot = core.summarizeFormShot(hist, 9100, 10000);
+  assert(shot, "shot with an unusable draw elbow is still summarized");
+  assertEqual(shot.angles.drawArm, null, "flipping draw elbow is reported as unavailable");
+  assertEqual(shot.angles.bowArm, 175, "bow elbow still reported");
+  assertEqual(shot.geom, 2, "shot carries geometry version 2");
+  assert(/「—」は、腕が短く写った/.test(viewScript), "detail sheet explains the missing angle");
+}
+{
+  // 実際の反転の形: 前腕がカメラの方を向いて短く写ると、肘の点が数画素動くだけで角度が反転する
+  // 肩→手首の線の上で、肘の点が手首の少し先（+）か少し手前（-）かだけが違う
+  const ux = 20 / Math.hypot(20, 22),
+    uy = -22 / Math.hypot(20, 22);
+  const mk = (along) => {
+    const pts = { ...PX_BODY, dW: PX(340, 230), dE: PX(340 + ux * along, 230 + uy * along) };
+    return core.computeFormMetrics(pixelToLandmarks(pts, FRAMINGS.landscape), "right", {
+      w: 1280,
+      h: 720,
+    });
+  };
+  const a = mk(6),
+    b = mk(-6);
+  assert(
+    Math.abs(a.drawArmPx - b.drawArmPx) > 150,
+    `a 12px elbow shift along the arm flips the angle, got ${a.drawArmPx} vs ${b.drawArmPx}`,
+  );
+  assert(
+    a.armQ.draw.seg < core.FORM_ARM.MIN_SEG && b.armQ.draw.seg < core.FORM_ARM.MIN_SEG,
+    "the flipping frames are below the usable arm length",
+  );
+}
+
+/* ---------- AN-098: ドリフトの端点（両端 100ms の中央値） ---------- */
+
+function holdHistory(releaseTs, opts) {
+  const o = opts || {};
+  const hist = [];
+  const dt = o.dt || 1000 / 60;
+  for (let ts = releaseTs - 700; ts <= releaseTs; ts += dt) {
+    const k = (ts - (releaseTs - 700)) / 700;
+    const spike = o.spikeAt != null && Math.abs(ts - o.spikeAt) < dt / 2 ? o.spike : 0;
+    hist.push({
+      ts,
+      m: {
+        anchorNorm: 0.22,
+        bowArm: 171,
+        drawArm: 150,
+        bodyScale: 0.25,
+        conf: 0.9,
+        score: 80,
+        bW: { x: 0.2, y: 0.4 },
+        dW: { x: 0.6 + (o.drift || 0) * k + spike, y: 0.31 },
+      },
+      vel: 0.05,
+    });
+  }
+  return hist;
+}
+{
+  const releaseTs = 10000;
+  // 窓の最初の1フレームだけ手首の点が跳ねた静止保持: 2フレームの差では「ドリフト」になっていた
+  const first = holdHistory(releaseTs).find((h) => h.ts >= releaseTs - 500).ts;
+  const spiky = holdHistory(releaseTs, { spikeAt: first, spike: 0.03 });
+  const win = spiky.filter((h) => h.ts >= releaseTs - 500 && h.ts <= releaseTs - 120);
+  const twoFrame =
+    Math.hypot(
+      win[0].m.dW.x - win[win.length - 1].m.dW.x,
+      win[0].m.dW.y - win[win.length - 1].m.dW.y,
+    ) / 0.25;
+  assert(twoFrame > 0.06, `two-frame difference flags the outlier as drift, got ${twoFrame}`);
+  const pre = core.formPreReleaseWindow(spiky, releaseTs);
+  assertClose(pre.drawMove, 0, 1e-9, "robust endpoints ignore a single-frame outlier");
+  assertEqual(pre.drawDrift, false, "single-frame outlier is not drift");
+  assert(pre.edgeFrames >= 5, `each end uses several frames at 60fps, got ${pre.edgeFrames}`);
+  // 本物のドリフト（保持中に 0.1 胴体長ぶん動く）は従来どおり検出する
+  const drifting = core.formPreReleaseWindow(holdHistory(releaseTs, { drift: 0.045 }), releaseTs);
+  assertEqual(drifting.drawDrift, true, "a real drift is still flagged");
+  assert(Number.isFinite(drifting.noise) && drifting.noise >= 0, "edge scatter is reported");
+  // 2フレームしかない窓は従来と同じ（最初と最後の差）
+  const two = [
+    {
+      ts: 9600,
+      m: { anchorNorm: 0.2, bodyScale: 0.25, bW: { x: 0.2, y: 0.4 }, dW: { x: 0.6, y: 0.3 } },
+    },
+    {
+      ts: 9800,
+      m: { anchorNorm: 0.26, bodyScale: 0.25, bW: { x: 0.2, y: 0.4 }, dW: { x: 0.62, y: 0.3 } },
+    },
+  ];
+  const p2 = core.formPreReleaseWindow(two, 10000);
+  assertClose(p2.drawMove, 0.08, 1e-9, "two-frame window keeps first-vs-last");
+  assertClose(p2.headMove, 0.06, 1e-9, "two-frame window head move");
+}
+
+/* ---------- AN-098: 撮影条件と測り方の版 ---------- */
+
+{
+  const live = core.formCaptureConditions({
+    frameW: 720,
+    frameH: 1280,
+    modelW: 504,
+    modelH: 1280,
+    crop: true,
+    facing: "environment",
+    handedness: "left",
+    source: "live",
+  });
+  assertJsonEqual(
+    live,
+    {
+      g: 2,
+      fw: 720,
+      fh: 1280,
+      mw: 504,
+      mh: 1280,
+      o: "p",
+      crop: 1,
+      facing: "environment",
+      hand: "left",
+      src: "live",
+    },
+    "portrait cropped live capture conditions",
+  );
+  const replay = core.formCaptureConditions({
+    frameW: 1920,
+    frameH: 1080,
+    handedness: "right",
+    source: "replay",
+    facing: null,
+  });
+  assertJsonEqual(
+    replay,
+    {
+      g: 2,
+      fw: 1920,
+      fh: 1080,
+      mw: 1920,
+      mh: 1080,
+      o: "l",
+      crop: 0,
+      facing: null,
+      hand: "right",
+      src: "replay",
+    },
+    "landscape replay capture conditions",
+  );
+  assertEqual(
+    core.formCaptureConditions({ frameW: 0, frameH: 0 }),
+    null,
+    "no frame, no conditions",
+  );
+  assert(JSON.stringify(live).length < 160, "capture conditions stay small");
+  // まとめ: 全射が同じなら同じ値。途中で変わった項目は mixed
+  assertJsonEqual(
+    core.formMergeCaptureConditions([live, live]),
+    live,
+    "same conditions merge as-is",
+  );
+  const land = core.formCaptureConditions({
+    frameW: 1280,
+    frameH: 720,
+    crop: false,
+    facing: "environment",
+    handedness: "left",
+    source: "live",
+  });
+  const merged = core.formMergeCaptureConditions([live, land]);
+  assertEqual(merged.g, 2, "mixed record keeps the geometry version");
+  assertEqual(merged.o, "mixed", "orientation changed mid-recording");
+  assertEqual(merged.fw, null, "frame width changed mid-recording");
+  assertEqual(merged.hand, "left", "unchanged field kept");
+  assertEqual(merged.mixed, 1, "mixed marker");
+  assertEqual(
+    core.formMergeCaptureConditions([live, null]),
+    null,
+    "a shot without conditions: none",
+  );
+  assertEqual(core.formMergeCaptureConditions([]), null, "no shots: none");
+
+  // 測り方の版: cap の無い旧記録は 1
+  const oldRec = makeFormRecord("o1", "2026-07-01", { bowArm: 150 });
+  const oldRec2 = makeFormRecord("o2", "2026-07-02", { bowArm: 151 });
+  const newRec = { ...makeFormRecord("n1", "2026-11-14", { bowArm: 176 }), cap: land };
+  const newRec2 = { ...makeFormRecord("n2", "2026-11-15", { bowArm: 177 }), cap: live };
+  assertEqual(core.formRecordGeometry(oldRec), 1, "record without cap is geometry 1");
+  assertEqual(core.formRecordGeometry(newRec), 2, "record with cap.g=2 is geometry 2");
+  assertEqual(core.formRecordGeometry({ cap: { g: "2" } }), 1, "malformed cap is geometry 1");
+  assertJsonEqual(
+    core.formComparableRecords([oldRec, oldRec2, newRec, newRec2], newRec2).map((r) => r.id),
+    ["n1", "n2"],
+    "comparable records share the geometry version (portrait and landscape are comparable)",
+  );
+  // 前回比: 版が違う記録とは比べない
+  const cross = core.formRecordInsights(newRec, oldRec);
+  assertEqual(cross.prev, null, "insights ignore a previous record of another geometry");
+  assert(
+    !cross.facts.some((t) => t.includes("前回比")) && !cross.causes.some((t) => t.includes("前回")),
+    "no previous-record wording across geometry versions",
+  );
+  const same = core.formRecordInsights(newRec2, newRec);
+  assert(same.prev && same.facts.some((t) => t.includes("前回比")), "same geometry is compared");
+  const legacyPair = core.formRecordInsights(oldRec2, oldRec);
+  assert(legacyPair.prev, "old records are still compared with each other");
+  // 推移: 点ごとに版を持つ
+  assertJsonEqual(
+    core.formTrendSeries([oldRec, newRec]).map((p) => p.geom),
+    [1, 2],
+    "trend points carry the geometry version",
+  );
+  // 得点との関係: いちばん新しい記録と同じ版だけ
+  const sessions = [
+    { id: "s1", date: "2026-07-01" },
+    { id: "s2", date: "2026-11-14" },
+    { id: "s3", date: "2026-11-15" },
+  ];
+  const metricsFn = (s) => ({ all: [1], avg: s.id === "s1" ? 5 : 9 });
+  const linkRecords = [
+    { ...makeFormRecord("o1", "2026-07-01", { stable: false }), sessionId: "s1", ts: 1 },
+    { ...newRec, sessionId: "s2", ts: 2 },
+    { ...makeFormRecord("n2", "2026-11-15", { stable: false }), cap: live, sessionId: "s3", ts: 3 },
+  ];
+  const link = core.formScoreLink(linkRecords, sessions, metricsFn);
+  assertEqual(link.geom, 2, "score link uses the newest record's geometry");
+  assertEqual(link.excluded, 1, "score link reports excluded records");
+  assertJsonEqual(
+    link.pairs.map((p) => p.recordId),
+    ["n1", "n2"],
+    "score link pairs only like with like",
+  );
+  const legacyLink = core.formScoreLink([linkRecords[0]], sessions, metricsFn);
+  assertEqual(legacyLink.excluded, 0, "legacy-only data excludes nothing");
+  assertEqual(legacyLink.n, 1, "legacy-only data keeps its pairs");
+}
+{
+  // 画面側の契約: 画面の大きさを core へ渡し、撮影条件を記録に添える。映像や点列は保存しない
+  const compactView = compactSource(viewScript);
+  assertEqual(
+    compactView.split("computeFormMetrics(lms,handedness,{w:video.videoWidth,h:video.videoHeight})")
+      .length - 1,
+    2,
+    "live capture and replay both pass the frame size to the core",
+  );
+  assert(
+    !/computeFormMetrics\(lms,handedness\)/.test(compactView),
+    "no caller computes metrics without the frame size",
+  );
+  assertEqual(
+    compactView.split("formAttachCaptureConditions(").length - 1,
+    4,
+    "live, diagnostic and replay records attach capture conditions (definition + 3 calls)",
+  );
+  assert(
+    /arrowPresence\(img,toLocal\(pB\),toLocal\(pD\)\)/.test(compactView) &&
+      /constpB=raw&&\(raw\.lmB\|\|raw\.bW\),pD=raw&&\(raw\.lmD\|\|raw\.dW\)/.test(compactView),
+    "arrow ROI uses frame-normalized wrists, not reference-space wrists",
+  );
+  assert(
+    !/cap[^;]{0,200}(landmarks|lms|imageData|getImageData)/.test(
+      boundedSourceSection(
+        coreScript,
+        "function formCaptureConditions(input) {",
+        "function formMergeCaptureConditions(list) {",
+        "capture conditions",
+      ),
+    ),
+    "capture conditions never include landmarks or pixels",
+  );
 }
 
 console.log("Form core checks OK");

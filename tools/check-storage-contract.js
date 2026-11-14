@@ -482,6 +482,62 @@ function checkFormAnalysesCompatibility(storageApi, fixtures) {
     db.sessions.some((session) => session.id === "fixture-form-session"),
     "[form-analyses] linked session survives",
   );
+  // AN-098: 旧記録は読み込みで何も足されない（撮影条件 cap を持たないまま）
+  assert(!Object.hasOwn(rec, "cap"), "[form-analyses] legacy record gains no capture conditions");
+  assertEqual(
+    JSON.stringify(rec),
+    JSON.stringify(fixtures.formAnalyses.formAnalyses[0]),
+    "[form-analyses] legacy record is unchanged by normalize",
+  );
+  // AN-098: 新しい記録の撮影条件（追加フィールドだけ。SCHEMA_VER・キーは変えない）は
+  // 読み込み・二度目の読み込み・JSON 往復でそのまま残る
+  const withCap = clone(fixtures.formAnalyses);
+  const cap = {
+    g: 2,
+    fw: 720,
+    fh: 1280,
+    mw: 504,
+    mh: 1280,
+    o: "p",
+    crop: 1,
+    facing: "environment",
+    hand: "right",
+    src: "live",
+  };
+  withCap.formAnalyses.push({
+    ...clone(withCap.formAnalyses[0]),
+    id: "fixture-form-analysis-cap",
+    cap,
+    features: [
+      {
+        phase: { anchorMs: 1700 },
+        angles: { bowArm: 176.4, drawArm: null },
+        anchorNorm: 0.21,
+        release: { bowMove: 0.01, drawMove: 0.02, stable: true, noise: 0.004 },
+        confidence: 0.9,
+        score: 80,
+        arrowCheck: { judgment: "unclear", preScore: null, confirmScore: 0.1 },
+      },
+    ],
+  });
+  const schemaBefore = withCap.schema;
+  const once = storageApi.normalizeDb(clone(withCap));
+  const twice = storageApi.normalizeDb(JSON.parse(JSON.stringify(once)));
+  [once, twice].forEach((loaded, i) => {
+    const kept = loaded.formAnalyses.find((f) => f.id === "fixture-form-analysis-cap");
+    assert(kept, `[form-analyses cap] record survives load ${i + 1}`);
+    assertEqual(
+      JSON.stringify(kept),
+      JSON.stringify(withCap.formAnalyses[1]),
+      `[form-analyses cap] record is unchanged by load ${i + 1}`,
+    );
+    assert(
+      JSON.stringify(kept).length < 2048,
+      `[form-analyses cap] one-shot record stays under 2 KB, got ${JSON.stringify(kept).length}`,
+    );
+  });
+  assertEqual(once.schema, storageApi.normalizeDb(clone(fixtures.formAnalyses)).schema, "[form-analyses cap] schema unchanged");
+  assert(schemaBefore != null, "[form-analyses cap] fixture declares a schema");
 }
 
 function checkFormAnalysisTrashRestore(storageApi, fixtures) {

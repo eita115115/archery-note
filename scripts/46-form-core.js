@@ -139,6 +139,7 @@ const FORM_PH = Object.freeze({
      no-depart 取消は発火から 400ms 経過済みで残滓リスクが更に高いため refractory 完全維持） */
   CANCEL_COOLDOWN_MS: 250,
   SUMMARY_FALLBACK_MS: 600, // summarizeFormShot フォールバック窓（リリース前この時間まで遡る）
+  PRE_EDGE_MS: 100, // formPreReleaseWindow: 窓の両端で中央値をとる幅（ドリフトの端点。検出には使わない）
   /* B'（Stage 1・中立スキャフォールド）: conf / dW可視性ゲート。0 = 完全無効（現行挙動と同一）。
      発動候補（CONF_GATE 0.45 / DW_VIS_GATE 0.5）への切替は第2回実射データの判定表GO後のみ。
      ゲートで無効化したフレームは hasNullGap を増やし nullBridged 経路（D'）と相互作用するため、
@@ -643,11 +644,60 @@ function arrowPresence(imageData, p1, p2, opts) {
   return total ? hit / total : 0;
 }
 
+/* ---------- 画面の形（縦横比）の補正と測り方の版 ----------
+   MediaPipe の正規化座標は x を画面の幅、y を画面の高さで割った値なので、そのまま混ぜると
+   同じ姿勢でも画面の形（横長・縦長）で距離も角度も変わる。検出のしきい値はすべて
+   16:9 の横長映像の正規化座標で調整してあるため、基準の座標系を「16:9 横長の正規化座標」
+   と決め、x に (w/h)/(16/9) を掛けてそこへ写す。16:9 横長では倍率がちょうど 1 になり、
+   これまでと同じ値が出る。画面の大きさを渡さない呼び出しも倍率 1（従来どおり）。
+   詳細と決めた理由: docs/design/form-tracking-accuracy.md */
+const FORM_GEOMETRY_VERSION = 2; // 1 = 画面の形を補正しない旧記録、2 = 補正あり（AN-098）
+
+/* frame = {w,h}: ランドマークの x,y が正規化された画面の大きさ（px）。
+   中央固定（切り出し）のときも、ランドマークは全体の画面へ戻してあるので全体の大きさを渡す。 */
+function formFrameOk(frame) {
+  return !!(
+    frame &&
+    Number.isFinite(frame.w) &&
+    Number.isFinite(frame.h) &&
+    frame.w > 0 &&
+    frame.h > 0
+  );
+}
+/* 基準の座標系（16:9 横長の正規化座標）へ写す x の倍率。1280x720・1920x1080 では厳密に 1 */
+function formRefScaleX(frame) {
+  return formFrameOk(frame) ? (frame.w * 9) / (frame.h * 16) : 1;
+}
+
+/* 肘の角度を1射の値として使えるかを決める下限（画面の大きさが分かる記録だけに使う）。
+   MIN_SEG: 上腕・前腕の画面上の長さ（胴体長比、正方形の画素）。腕がカメラの方を向いて
+   短く写ると、肘の点が数画素ずれただけで角度が 5°↔179° と反転する。
+   MIN_VIS: 肩・肘・手首の visibility の下限。
+   AGREE_DEG / AGREE_FRAC: 使えるフレームのうち中央値から AGREE_DEG 以内に入る割合の下限。
+   MIN_FRAMES: 使えるフレーム数の下限。満たさないときは値を出さない（null）。 */
+const FORM_ARM = Object.freeze({
+  MIN_SEG: 0.2,
+  MIN_VIS: 0.5,
+  AGREE_DEG: 20,
+  AGREE_FRAC: 0.6,
+  MIN_FRAMES: 3,
+});
+
 /* 33 ランドマーク → 射形メトリクス。handedness: "right"（既定、弓手=左腕）| "left"。
-   戻り値の距離系はすべて胴体長比 */
-function computeFormMetrics(landmarks, handedness) {
+   戻り値の距離系はすべて胴体長比。
+   frame（任意）= ランドマークを正規化した画面の大きさ {w,h}。渡すと基準の座標系へ写してから
+   計算し、加えて正方形の画素で測った肘の角度（bowArmPx / drawArmPx）と腕の写り方（armQ）を返す。
+   渡さないときは従来の値・従来のキーだけを返す。 */
+function computeFormMetrics(landmarks, handedness, frame) {
   if (!landmarks || !landmarks.length) return null;
-  const l = landmarks;
+  const hasFrame = formFrameOk(frame);
+  const kx = formRefScaleX(frame);
+  const src = landmarks;
+  // kx が 1（16:9 横長・画面の大きさなし）のときは元のランドマークをそのまま使う（従来と同一）
+  const l =
+    kx === 1
+      ? src
+      : src.map((p) => (p ? { x: p.x * kx, y: p.y, visibility: p.visibility } : p));
   const righty = handedness !== "left";
   const bS = l[righty ? FORM_LM.LEFT_SHOULDER : FORM_LM.RIGHT_SHOULDER];
   const bE = l[righty ? FORM_LM.LEFT_ELBOW : FORM_LM.RIGHT_ELBOW];
@@ -708,7 +758,7 @@ function computeFormMetrics(landmarks, handedness) {
   ]
     .filter(([p]) => p.visibility != null && p.visibility <= 0.5)
     .map(([, name]) => name);
-  return {
+  const out = {
     bowArm,
     drawArm,
     anchorNorm,
@@ -723,6 +773,49 @@ function computeFormMetrics(landmarks, handedness) {
     bW,
     dW,
   };
+  if (!hasFrame) return out;
+  /* 画面の大きさが分かるとき: 正方形の画素（高さを 1 とした座標）で肘の角度を測り直す。
+     検出は上の基準座標系の値（bowArm / drawArm）を使い続け、こちらは表示と保存に使う。 */
+  const sq = frame.w / frame.h;
+  const T = (p) => ({ x: p.x * sq, y: p.y });
+  const iB = righty
+    ? [FORM_LM.LEFT_SHOULDER, FORM_LM.LEFT_ELBOW, FORM_LM.LEFT_WRIST]
+    : [FORM_LM.RIGHT_SHOULDER, FORM_LM.RIGHT_ELBOW, FORM_LM.RIGHT_WRIST];
+  const iD = righty
+    ? [FORM_LM.RIGHT_SHOULDER, FORM_LM.RIGHT_ELBOW, FORM_LM.RIGHT_WRIST]
+    : [FORM_LM.LEFT_SHOULDER, FORM_LM.LEFT_ELBOW, FORM_LM.LEFT_WRIST];
+  const tMidSh = T({
+    x: (src[iB[0]].x + src[iD[0]].x) / 2,
+    y: (src[iB[0]].y + src[iD[0]].y) / 2,
+  });
+  const tMidHip = T({
+    x: (src[FORM_LM.LEFT_HIP].x + src[FORM_LM.RIGHT_HIP].x) / 2,
+    y: (src[FORM_LM.LEFT_HIP].y + src[FORM_LM.RIGHT_HIP].y) / 2,
+  });
+  const tScale = Math.max(1e-4, formDist(tMidSh, tMidHip));
+  const arm = (idx) => {
+    const s = T(src[idx[0]]),
+      e = T(src[idx[1]]),
+      w = T(src[idx[2]]);
+    const vis = idx
+      .map((i) => src[i].visibility)
+      .filter((v) => v != null)
+      .reduce((a, v) => Math.min(a, v), 1);
+    return {
+      angle: formAngleDeg(s, e, w),
+      q: { seg: Math.min(formDist(s, e), formDist(e, w)) / tScale, vis },
+    };
+  };
+  const aB = arm(iB),
+    aD = arm(iD);
+  out.geom = FORM_GEOMETRY_VERSION;
+  out.bowArmPx = aB.angle;
+  out.drawArmPx = aD.angle;
+  out.armQ = { bow: aB.q, draw: aD.q };
+  // 画面の正規化座標のままの手首（矢の有無を画素から読む ROI 用。bW / dW は基準座標系）
+  out.lmB = src[iB[2]];
+  out.lmD = src[iD[2]];
+  return out;
 }
 
 /* 表示用 EMA 平滑化。検出（stepFormPhase）には生値を使うこと */
@@ -735,13 +828,33 @@ function makeFormEma(alpha) {
     }
     if (!s) {
       s = { bowArm: m.bowArm, drawArm: m.drawArm, score: m.score, conf: m.conf };
+      if (Number.isFinite(m.bowArmPx) && Number.isFinite(m.drawArmPx)) {
+        s.bowArmPx = m.bowArmPx;
+        s.drawArmPx = m.drawArmPx;
+      }
       return m;
     }
     s.bowArm = s.bowArm * (1 - a) + m.bowArm * a;
     s.drawArm = s.drawArm * (1 - a) + m.drawArm * a;
     s.score = s.score * (1 - a) + m.score * a;
     s.conf = s.conf * (1 - a) + m.conf * a;
-    return { ...m, bowArm: s.bowArm, drawArm: s.drawArm, score: Math.round(s.score), conf: s.conf };
+    const out = {
+      ...m,
+      bowArm: s.bowArm,
+      drawArm: s.drawArm,
+      score: Math.round(s.score),
+      conf: s.conf,
+    };
+    // 正方形の画素で測った角度（画面の大きさを渡した呼び出しだけが持つ）も同じ係数でならす
+    if (Number.isFinite(m.bowArmPx) && Number.isFinite(m.drawArmPx)) {
+      s.bowArmPx = Number.isFinite(s.bowArmPx) ? s.bowArmPx * (1 - a) + m.bowArmPx * a : m.bowArmPx;
+      s.drawArmPx = Number.isFinite(s.drawArmPx)
+        ? s.drawArmPx * (1 - a) + m.drawArmPx * a
+        : m.drawArmPx;
+      out.bowArmPx = s.bowArmPx;
+      out.drawArmPx = s.drawArmPx;
+    }
+    return out;
   };
 }
 
@@ -1728,15 +1841,42 @@ function formPreReleaseWindow(history, releaseTs, windowSec, anchorStartTs) {
     : releaseTs - w * 1000;
   const frames = (history || []).filter((h) => h.m && h.ts >= earliest && h.ts <= releaseTs - 120);
   if (frames.length < 2) return null;
-  const f = frames[0].m,
-    l = frames[frames.length - 1].m;
+  /* 端点は1フレームではなく、窓の最初と最後それぞれ PRE_EDGE_MS ぶんの中央値を使う
+     （AN-098）。2フレームの差は、その2枚のランドマークの揺れをそのまま拾うため。
+     両端の組が重ならないよう、各組は窓のフレーム数の半分まで。2フレームしかない窓は
+     従来と同じ「最初と最後」になる。 */
+  const firstTs = frames[0].ts,
+    lastTs = frames[frames.length - 1].ts;
+  const half = Math.max(1, Math.floor(frames.length / 2));
+  const head = frames.filter((h) => h.ts <= firstTs + FORM_PH.PRE_EDGE_MS).slice(0, half);
+  const tail = frames.filter((h) => h.ts >= lastTs - FORM_PH.PRE_EDGE_MS).slice(-half);
+  const edge = (group) => ({
+    bodyScale: formMedian(group.map((h) => h.m.bodyScale)),
+    anchorNorm: formMedian(group.map((h) => h.m.anchorNorm)),
+    bW: { x: formMedian(group.map((h) => h.m.bW.x)), y: formMedian(group.map((h) => h.m.bW.y)) },
+    dW: { x: formMedian(group.map((h) => h.m.dW.x)), y: formMedian(group.map((h) => h.m.dW.y)) },
+  });
+  const f = edge(head),
+    l = edge(tail);
   const scale = (f.bodyScale + l.bodyScale) / 2;
+  /* 端点の組の中での手首の散らばり（各フレームから組の中央値までの距離の中央値、胴体長比）。
+     ドリフトの値がランドマークの揺れより大きいかを後から確かめるための参考値で、判定には使わない。 */
+  const scatter = (group, e, key) =>
+    formMedian(group.map((h) => formDist(h.m[key], e[key]))) / scale;
+  const noise = Math.max(
+    scatter(head, f, "bW"),
+    scatter(tail, l, "bW"),
+    scatter(head, f, "dW"),
+    scatter(tail, l, "dW"),
+  );
   const bowMove = formDist(f.bW, l.bW) / scale;
   const drawMove = formDist(f.dW, l.dW) / scale;
   const headMove = Math.abs(l.anchorNorm - f.anchorNorm);
   return {
     windowSec: w,
     frames: frames.length,
+    edgeFrames: Math.min(head.length, tail.length),
+    noise,
     bowMove,
     drawMove,
     headMove,
@@ -1761,26 +1901,30 @@ const ARROW_CHECK = Object.freeze({
    戻り値の judgment は "shot-match"（矢が消えた=リリースと整合）/
    "letdown-mismatch"（矢がまだある=レットダウンの疑い、要確認）/
    "unclear"（判定材料不足 or グレーゾーン）のいずれか。
-   この関数の戻り値は表示・保存注釈にのみ使い、released/canceled の判定を変えない。 */
+   この関数の戻り値は表示・保存注釈にのみ使い、released/canceled の判定を変えない。
+   AN-098: 「矢が消えた」「矢がまだある」と言えるのは、発射前に矢が写っていたときだけ。
+   発射前のスコア（中央値）が ARROW_PRESENCE.PRESENT_TH に届かない、または1枚も測れて
+   いないときは、猶予窓の値に関わらず "unclear"（reason: "no-arrow-before-release"）。
+   矢の写らない映像で猶予窓が低い値になり「発射と一致」と出ていた誤りへの対処。 */
+function formArrowSeenBeforeRelease(preScore) {
+  return Number.isFinite(preScore) && preScore >= ARROW_PRESENCE.PRESENT_TH;
+}
 function judgeArrowCheck(preScores, confirmScores) {
   const pre = (preScores || []).filter(Number.isFinite);
   const confirm = (confirmScores || []).filter(Number.isFinite);
   const preScore = pre.length ? formMedian(pre) : null;
   const confirmScore = confirm.length ? formMedian(confirm) : null;
-  if (confirmScore == null) {
-    return {
-      judgment: "unclear",
-      preScore,
-      confirmScore,
-      pre: pre.length,
-      confirm: confirm.length,
-    };
+  const base = { preScore, confirmScore, pre: pre.length, confirm: confirm.length };
+  if (!formArrowSeenBeforeRelease(preScore)) {
+    return { judgment: "unclear", reason: "no-arrow-before-release", ...base };
   }
-  let judgment;
-  if (confirmScore < ARROW_CHECK.GONE_TH) judgment = "shot-match";
-  else if (confirmScore >= ARROW_CHECK.STILL_TH) judgment = "letdown-mismatch";
-  else judgment = "unclear";
-  return { judgment, preScore, confirmScore, pre: pre.length, confirm: confirm.length };
+  if (confirmScore == null) {
+    return { judgment: "unclear", reason: "no-confirm-samples", ...base };
+  }
+  if (confirmScore < ARROW_CHECK.GONE_TH) return { judgment: "shot-match", reason: null, ...base };
+  if (confirmScore >= ARROW_CHECK.STILL_TH)
+    return { judgment: "letdown-mismatch", reason: null, ...base };
+  return { judgment: "unclear", reason: "gray-zone", ...base };
 }
 
 function copyFormReleaseFireSnapshot(debug) {
@@ -2733,6 +2877,36 @@ function formAnchorVariation(shots) {
   };
 }
 
+/* 1射ぶんの肘の角度（side: "bow" | "draw"）。win は要約窓のフレーム列。
+   画面の大きさを渡さずに作ったフレーム（armQ なし）だけの窓は、従来どおり全フレームの
+   中央値を返す。armQ を持つフレームがあるときは、FORM_ARM の下限を満たすフレームだけの
+   中央値を返し、枚数が足りない・値がそろわない（反転している）ときは null を返す。
+   戻り値 {value, used, total}: used=中央値に使った枚数、total=窓の枚数。 */
+function formShotArmAngle(win, side) {
+  const key = side === "draw" ? "drawArm" : "bowArm";
+  const frames = win || [];
+  const total = frames.length;
+  const hasQ = frames.some((h) => h.m && h.m.armQ);
+  if (!hasQ) {
+    const vals = frames.map((h) => h.m[key]);
+    return { value: total ? formMedian(vals) : null, used: total, total };
+  }
+  const vals = [];
+  frames.forEach((h) => {
+    const q = h.m.armQ && h.m.armQ[side];
+    const v = h.m[key + "Px"];
+    if (!q || !Number.isFinite(v)) return;
+    if (!(q.seg >= FORM_ARM.MIN_SEG)) return;
+    if (q.vis != null && q.vis < FORM_ARM.MIN_VIS) return;
+    vals.push(v);
+  });
+  if (vals.length < FORM_ARM.MIN_FRAMES) return { value: null, used: vals.length, total };
+  const med = formMedian(vals);
+  const agree = vals.filter((v) => Math.abs(v - med) <= FORM_ARM.AGREE_DEG).length;
+  if (agree / vals.length < FORM_ARM.AGREE_FRAC) return { value: null, used: vals.length, total };
+  return { value: med, used: vals.length, total };
+}
+
 /* 1 射の要約（formAnalysis.features 1 件分）。
    anchorStartTs=アンカー圏に入った時刻, releaseTs=リリース時刻 */
 function summarizeFormShot(history, anchorStartTs, releaseTs, activeAnchorEnter) {
@@ -2773,12 +2947,17 @@ function summarizeFormShot(history, anchorStartTs, releaseTs, activeAnchorEnter)
   }
   const md = (key) => (win.length ? formMedian(win.map((h) => h.m[key])) : null);
   const holdMs = anchorStartTs ? Math.max(0, releaseTs - anchorStartTs) : null;
+  const bowAngle = formShotArmAngle(win, "bow"),
+    drawAngle = formShotArmAngle(win, "draw");
   return {
     holdMs,
     degraded,
+    // 窓の全フレームが画面の形の補正つき（geom 2）なら 2、それ以外は 1（旧来の測り方）
+    geom: win.length && win.every((h) => h.m.geom === FORM_GEOMETRY_VERSION) ? 2 : 1,
+    armFrames: { bow: bowAngle.used, draw: drawAngle.used },
     angles: {
-      bowArm: md("bowArm"),
-      drawArm: md("drawArm"),
+      bowArm: bowAngle.value,
+      drawArm: drawAngle.value,
       shoulderDrop: md("shoulderDrop"),
       headOffset: md("headOffset"),
       forceLine: md("forceLine"),
@@ -2789,6 +2968,68 @@ function summarizeFormShot(history, anchorStartTs, releaseTs, activeAnchorEnter)
     pre: formPreReleaseWindow(history, releaseTs, null, anchorStartTs),
     frames: win.length,
   };
+}
+
+/* ---------- 撮影条件と測り方の版（AN-098） ---------- */
+
+/* 記録に添える撮影条件（追加フィールド cap）。値は短いキーで持つ（1記録あたり約150バイト）。
+   g=測り方の版, fw/fh=ランドマークを正規化した画面の大きさ, mw/mh=モデルへ渡した画像の大きさ
+   （中央固定のときは切り出した幅）, o=画面の向き "p"|"l"|"s", crop=中央固定 0|1,
+   facing="environment"|"user"|null（保存済み動画は null）, hand="right"|"left",
+   src="live"|"replay"。映像・画素・ランドマークは含めない。 */
+function formCaptureConditions(input) {
+  const i = input || {};
+  const frame = { w: i.frameW, h: i.frameH };
+  if (!formFrameOk(frame)) return null;
+  const fw = Math.round(frame.w),
+    fh = Math.round(frame.h);
+  const crop = i.crop === true ? 1 : 0;
+  const mw = Number.isFinite(i.modelW) && i.modelW > 0 ? Math.round(i.modelW) : fw;
+  const mh = Number.isFinite(i.modelH) && i.modelH > 0 ? Math.round(i.modelH) : fh;
+  return {
+    g: FORM_GEOMETRY_VERSION,
+    fw,
+    fh,
+    mw,
+    mh,
+    o: fh > fw ? "p" : fw > fh ? "l" : "s",
+    crop,
+    facing: i.facing === "user" || i.facing === "environment" ? i.facing : null,
+    hand: i.handedness === "left" ? "left" : "right",
+    src: i.source === "replay" ? "replay" : "live",
+  };
+}
+
+/* 射ごとの撮影条件を1記録ぶんにまとめる。途中で条件が変わった項目は "mixed"（数値は null）
+   とし、mixed:1 を立てる。条件を持たない射が混じるときは null（旧来の測り方として扱う）。 */
+function formMergeCaptureConditions(list) {
+  const caps = Array.isArray(list) ? list : [];
+  if (!caps.length || caps.some((c) => !c || c.g !== FORM_GEOMETRY_VERSION)) return null;
+  const out = { g: FORM_GEOMETRY_VERSION };
+  let mixed = false;
+  ["fw", "fh", "mw", "mh", "o", "crop", "facing", "hand", "src"].forEach((key) => {
+    const first = caps[0][key];
+    if (caps.every((c) => c[key] === first)) out[key] = first;
+    else {
+      mixed = true;
+      out[key] = typeof first === "number" ? null : "mixed";
+    }
+  });
+  if (mixed) out.mixed = 1;
+  return out;
+}
+
+/* 記録の測り方の版。cap.g を持たない記録（AN-098 より前）は 1。 */
+function formRecordGeometry(record) {
+  const g = record && record.cap && record.cap.g;
+  return Number.isSafeInteger(g) && g >= 2 ? g : 1;
+}
+
+/* record と同じ測り方の記録だけを残す。版の違う記録の角度・距離は同じ測定ではないので、
+   前回比・いつもとの差・推移・得点との関係のどれにも混ぜない。 */
+function formComparableRecords(records, record) {
+  const g = formRecordGeometry(record);
+  return (records || []).filter((r) => r && formRecordGeometry(r) === g);
 }
 
 /* ---------- 分析結果の活用: 記録統計・コーチングコメント・トレンド・得点との関係 ---------- */
@@ -2831,7 +3072,11 @@ function formRecordStats(record) {
 function formRecordInsights(record, prevRecord) {
   const st = formRecordStats(record);
   if (!st) return null;
-  const prev = prevRecord ? formRecordStats(prevRecord) : null;
+  // 測り方の版が違う記録とは比べない（AN-098）
+  const prev =
+    prevRecord && formRecordGeometry(prevRecord) === formRecordGeometry(record)
+      ? formRecordStats(prevRecord)
+      : null;
   const facts = [],
     causes = [],
     checks = [],
@@ -2917,6 +3162,7 @@ function formTrendSeries(records) {
         id: r.id,
         date: r.date || "",
         ts: r.ts || 0,
+        geom: formRecordGeometry(r),
         bowArm: st.bowArm,
         drawArm: st.drawArm,
         holdS: st.holdMs != null ? st.holdMs / 1000 : null,
@@ -2936,7 +3182,12 @@ function formScoreLink(records, sessions, metricsFn) {
   (sessions || []).forEach((s) => {
     if (s && s.id) byId[s.id] = s;
   });
-  const pairs = (records || [])
+  /* ドリフトの測り方も版で違うので、いちばん新しい記録と同じ版の記録だけで比べる（AN-098）。
+     旧記録だけのデータでは全件が版 1 なので、これまでと同じ結果になる。 */
+  const all = (records || []).filter(Boolean);
+  const newest = all.reduce((a, r) => (!a || (r.ts || 0) >= (a.ts || 0) ? r : a), null);
+  const same = newest ? formComparableRecords(all, newest) : [];
+  const pairs = same
     .map((r) => {
       const s = r && r.sessionId ? byId[r.sessionId] : null;
       if (!s) return null;
@@ -2966,5 +3217,11 @@ function formScoreLink(records, sessions, metricsFn) {
           driftN: drifty.length,
         }
       : null;
-  return { n: pairs.length, pairs, split };
+  return {
+    n: pairs.length,
+    pairs,
+    split,
+    geom: newest ? formRecordGeometry(newest) : null,
+    excluded: all.length - same.length,
+  };
 }
