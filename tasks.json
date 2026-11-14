@@ -1189,5 +1189,17 @@
     "owner": "claude",
     "acceptance": "npm run build:web-assets・check:all・lint・format:check・check:form-analyze と Playwright e2e 全件が成功。e2e は合成の列でカメラと姿勢推定を代え、縦向きと横向きで 入にする → 置き方 → 6 射と引き戻し → 結果の数と 1 文 → 候補を足す → 保存 → v2 の形で保存 → 一覧、困ったとき、動画のボタン（44px 以上）、以前の記録が別の区切りで不変、320×640 を確かめる。SCHEMA_VER・保存キーは不変で、以前の記録は読み込みで変わらず、v2 の記録と比べない。映像・画素・ランドマークの列は保存しない。実時間の検出器（46-form-core.js）は、利用者の撮影には使わない（コードと検査は残す）。新しい依存・モデル・資産・Service Worker の決まりの変更なし。版上げ・push・公開はオーナーの承認後。実射での確認（design.md 6.3）は未了のまま。",
     "evidence": "2026-11-14 実装（branch claude/sharp-faraday-bu8pii、版128据え置き・未push・未公開。commit dc92ade ほか）: scripts/44-form-record.js（FormV2）、scripts/47-form-v2-view.js、scripts/47-form-view.js（以前の記録の区切り・入口の切り替え）、scripts/44-form-analyze.js（FLOORS に時間と離れのあとの床、COMPARE_KEYS。既定の結果は不変）、scripts/10-storage-native.js（formHeightCm・formCountSound の補完）、scripts/50-record-view.js、scripts/70-gear-settings.js（身長の欄）、style.css、tools/check-form-record.js（13 件）、tools/check-storage-contract.js・check-storage-roundtrip.js（v2 の fixture）、tests/e2e/form-v2.spec.js（19 本）ほか。アプリのスクリプトは 17 本。記録の大きさ: 6 射 + 引き戻し 1 回 + 候補 1 回で 1,814〜1,827 バイト。検証の結果と、設計との違いは docs/design/form-v2/design.md 11 章と progress.md。passes は false のまま: 実射での確認と、オーナーに決めてほしいこと（検証用の設定のあいだ以前の撮影画面を残すこと、仮に置いた測定のゆれ、10fps への間引きを入れていないこと）が残る。"
+  },
+  {
+    "id": "AN-101",
+    "task": "射型の記録 v2 段7〜8 と 2 つの決定: 推移（項目を選ぶ・比べてよい回だけ）と一覧、以前の記録から評価の語と助言を外す、動画で確かめる（骨格・ほかの射の中央の姿・頭出し・端末に保存）、検証用の診断を v2 の上に作り直して以前の撮影画面への道を無くす、36 射を超えた撮影を 36 射以下の記録に分ける",
+    "status": "in-progress",
+    "passes": false,
+    "dependencies": [
+      "AN-100"
+    ],
+    "owner": "claude",
+    "acceptance": "npm run build:web-assets・check:all・lint・format:check・check:form-analyze と Playwright e2e 全件が成功し、bench:form（v2-analyzer、--with-real）の結果が変わらない。e2e は合成の列で、v2 の診断の書き出し（形、入れないもの、体の点の列は 2 つめの設定のときだけ）、以前の撮影画面への道が無いこと、36 射を超えた撮影がどの射も残して分かれること、推移（項目を選ぶ・比べてよい回だけ・回数と期間・評価の語なし・— を数えない）、以前の記録に評価の語と助言が無く保存データが変わらないこと、動画で確かめる（頭出し・骨格・保存・URL を手放す）、320×640 を確かめる。保存は追加のフィールドだけ（SCHEMA_VER・保存キーは不変）。映像・画素・ランドマークの列は保存しない。以前の検出器（46-form-core.js）と以前の撮影画面のコードと検査は残すが、どの画面からも行けない。新しい依存・モデル・資産・Service Worker の決まりの変更なし。版上げ・push・公開はオーナーの承認後。実射での確認（design.md 6.3）は未了のまま。",
+    "evidence": "2026-11-14 実装（branch claude/sharp-faraday-bu8pii、版128据え置き・未push・未公開。commit b5a2359 ほか）: scripts/44-form-record.js（buildRecords・diagBlock・diagnostics・landmarkDump・trend の作り直し・バッファの at/frameAt）、scripts/47-form-v2-view.js（推移の項目選び、分けた記録、動画で確かめる、診断の書き出し、見出しと折り返しの直し）、scripts/47-form-view.js（入口はいつも v2、以前の記録の語の見直し）、scripts/70-gear-settings.js（検証用の書き出しと 2 つめの設定。18 射の診断の画面を削除）、style.css、tools/check-form-record.js（17 件）、tools/check-ui.js（診断の検査を v2 へ、以前の撮影画面を呼ぶスクリプトが無いこと）、tests/e2e/form-v2.spec.js・form-diagnostics.spec.js・fixtures/form-v2-stream.js。検証: build:web-assets・check:all（exit 0）・lint・format:check 成功、check:form-analyze は 14 件 + 17 件、bench:form は AN-099 の結果と同一、Playwright 473 passed（481 から 23 本を外し 15 本を足した）。画面の写真 132 枚で検査 0 件。詳細は docs/design/form-v2/design.md 11.7 と progress.md。passes は false のまま: 実射・実機では未確認（動画の時刻のずれ、iPhone の MediaRecorder と再生、メモリ）で、オーナーの確認が残る。"
   }
 ]

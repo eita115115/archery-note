@@ -3596,3 +3596,15 @@ CI: PR #139 の validate は段4・5の push から失敗していた（check:ui
 検証: `npm run build:web-assets`、`npm run check:all`（exit 0）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（14 件 + 13 件）、Playwright 481 passed。画面の写真 124 枚と検査 0 件。
 
 リスク: 実射・実機では未確認。合成の射手は腕の形が単純で、置き方の印（`rho`）は「やや斜め」と出る。時間と離れのあとの項目のゆれは仮の値。検証用の設定が入のあいだは以前の撮影画面が開く。次: 親の検証、オーナーの確認（progress.md の「決めてほしいこと」）、実地の確認（design.md 6.3）、段 7〜8 の残り。
+
+## AN-101 射型の記録 v2 段7〜8 と 2 つの決定（版128据え置き・未公開）
+
+2026-11-14、オーナーの決定（検証用の診断を v2 の上に作り直す／36 射を超えた撮影は分ける）と、v2 の設計の段 7（推移と一覧、以前の記録の見せ方）・段 8（動画で確かめる）を実装した。解析器（`scripts/44-form-analyze.js`）は変えていない。
+
+変更: `scripts/44-form-record.js`（`buildRecords` = 36 射以下に等分・`cid`/`part`/`span`、`diagBlock`・`diagnostics`・`landmarkDump` = 検証用の書き出し、`trend` の作り直し = 理由ごとの数・分けた記録をまとめる・弓具の印・中央値の不確かさ、バッファの `at`・`frameAt`、`read` の通し番号）、`scripts/47-form-v2-view.js`（推移の項目選び、記録を全部表示、分けた記録の行き来と一括保存、動画で確かめる画面、診断の書き出し、射の詳細の見出し、値を途中で折り返さない、時間の帯の番号の間引き）、`scripts/47-form-view.js`（撮影の入口はいつも v2、以前の記録の一覧・詳細・得点との関係から評価の語と助言を外す）、`scripts/70-gear-settings.js`（検証用の書き出しと「体の点の列も含める」。18 射の診断の設定画面と関数を削除）、`style.css`・`style.min.css`、`tools/check-form-record.js`（17 件）、`tools/check-ui.js`（診断の静的検査を v2 へ。以前の撮影画面を呼ぶスクリプトが無いこと）、`tests/e2e/form-v2.spec.js`、`tests/e2e/form-diagnostics.spec.js`、`tests/e2e/fixtures/form-v2-stream.js`、`CONVENTIONS.md`、`docs/design/form-v2/design.md`（6.3 の手順、11.7）、`tasks.json`、`progress.md`。
+
+e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道が無い ×2、結果からの診断の書き出し、設定が切なら書き出しも `dg` も無い、36 射を超えた撮影、推移 ×2、以前の記録、射の詳細の見出しと折り返し、動画で確かめる、推移・分けた記録・以前の記録・設定の 320×640 ×2。form-diagnostics.spec.js 3 本 = 設定からの書き出しの共有・取り消しとダウンロード・設定が変わったら止める）。書き換えた 13 本（以前の撮影画面の保存の失敗とやり直しの 3 本は `openFormCapture`・`startFormReplay` を直接呼ぶ。設定の入・切で欄が隠れる・現れる 4 本と、欄が収まる 3 本（360 幅を 320 幅に替えた）は新しい欄へ。保存した動画の 1 本に確かめる画面を足し、これまでの 320×640 の 2 本に確かめる画面を足した。主な流れの 2 本は以前の記録の文を直した）。外した 22 本（18 射の診断の設定画面: 開始・やり直し・状態の文・書き出しの確認と転送。画面ごと無くしたため。純関数の検査 `tools/check-form-diagnostics.js` は残る）と、form-v2.spec.js の「検証用の設定が入のあいだは以前の撮影画面」の 1 本。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（14 件 + 17 件）、`npm run bench:form -- --adapter tools/form-bench/adapters/v2-analyzer.js --with-real`（AN-099 の結果と同一）、Playwright 473 passed。画面の写真 132 枚と検査 0 件。
+
+リスク: 実射・実機では未確認。動画の時刻（MediaRecorder）とコマの時刻は別の時計で、骨格が 1 コマほどずれることがある。iPhone の mp4 の頭出しは見ていない。推移の「区別できません」の境は仮の値。体の点の列の書き出しは、既定で切の 2 つめの設定のときだけ。次: 親の検証、オーナーの確認、実地の確認（design.md 6.3）。
