@@ -394,7 +394,7 @@ function formCaptureNoteText(rec){
   const size=Number.isFinite(c.fw)&&Number.isFinite(c.fh)?`${c.fw}×${c.fh}`:"大きさが途中で変化";
   const src=c.src==="replay"?"保存済み動画":c.src==="live"?"ライブ撮影":"撮影方法が途中で変化";
   const hand=c.hand==="left"?"左利き":c.hand==="right"?"右利き":"利き手を途中で変更";
-  const crop=c.crop===1?"・中央固定あり":c.crop==="mixed"?"・中央固定を途中で切替":"";
+  const crop=c.crop===1?"・中央固定あり":c.crop===0?"":"・中央固定を途中で切替";
   return `撮影条件: ${o}（${size}）・${src}・${hand}${crop}。肘の角度は画面の向きによらない測り方です。`;
 }
 function formCaptureNoteHtml(rec){ return `<div class="hint" data-testid="form-capture-note">${esc(formCaptureNoteText(rec))}</div>`; }

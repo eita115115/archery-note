@@ -3558,3 +3558,13 @@ CI: PR #139 の validate は段4・5の push から失敗していた（check:ui
 ## 公開 v128（AN-097）
 
 2026-11-13、オーナー承認後、PR #141 の CI 成功（19ded1a）を確かめて main へマージ（57728a4）。Pages の `version.json` が `{ "v": 128 }`、`sw.js` が `archery-note-v128`、公開ページを Chromium で開いて APP_VER 128・タブ4つ・コンソールのエラー 0 件。AN-097 を passes:true にした。
+
+## AN-098 射型の記録 段A（正確さ。版128据え置き・未公開）
+
+2026-11-14、射型の記録の測定を、画面の形（縦長・横長・中央固定）によらないものにした。変更: scripts/46-form-core.js（`formRefScaleX`、`computeFormMetrics` の frame 引数と正方形の画素の角度、`formShotArmAngle`、`formPreReleaseWindow` の端点、`judgeArrowCheck` の発射前の証拠、`formCaptureConditions`・`formMergeCaptureConditions`・`formRecordGeometry`・`formComparableRecords`、`formScoreLink`・`formRecordInsights`・`formTrendSeries` の版）、scripts/47-form-view.js（画面の大きさを core へ渡す、撮影条件を記録に添える、保存する値の丸め、同じ版だけの比較、撮影条件の行）、scripts/49-todays-result.js（アンカーの副軸を同じ版だけで）、tools/check-form-core.js（合成の画素座標の時系列ほか）、tools/check-storage-contract.js、tests/e2e/form-geometry.spec.js、docs/design/form-tracking-accuracy.md、AGENTS.md（正本の表に1行）。
+
+修正前後の数値（合成、実射なし）: 同じ画素の姿勢の anchorNorm は 横長 0.176 → 0.176、縦長 0.524 → 0.176。3射の時系列は 横長 3射 → 3射（リリース 3333/8033/12733ms で同じ）、縦長 0射 → 3射（同じ時刻）。中央固定は切り出しの座標を画面全体へ戻しているので修正前から横長と同じ。
+
+検証: check:all（exit 0）・lint・format:check 成功、golden:form-fixtures は oblique-single-release retained=1（4457.414ms/close）・scene-cut-arrow-retrieval retained=0 で変化なし、Playwright 462 passed (6.2m)（460 + 新しい2本）。fixture の `coreSha256` は取得時点の core の控えで、現在の core とは照合していない（README のとおり）ので更新していない。
+
+リスク: 実射では未確認（AN-001）。新しい記録の肘の角度は旧記録と測り方が違う（版で分けて比べない）。既存の検査1件（発射前のサンプルなしで「発射と一致」）の期待値を替えた。次: 親の検証、公開はオーナーの承認後。段B（結果の読みやすさ）。

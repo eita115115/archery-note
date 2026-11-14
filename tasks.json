@@ -1155,5 +1155,15 @@
     "owner": "claude",
     "acceptance": "evals/acceptance.md の UI 行（check:ui・lint）と リリース行（check:version）に加え check:all・format:check・Playwright e2e が成功。各修正に e2e があり、修正を外すと失敗する。矢円と採点、保存形式は不変。公開はオーナーの承認後。",
     "evidence": "2026-11-13 実装: scripts/50-record-view.js（teardownTargetInput・detachTargetWindowMouse・ui.zoomFor・watchCrampedScorecard）、style.css（.miniCard.is-cramped）、tools/check-app.js（静的検査を新しい書き方に合わせた）、tests/e2e/record-teardown.spec.js（4本。修正を外すと4本とも失敗）。check:all exit 0・lint・format:check 成功、Playwright 460 passed (6.9m)。版128（npm run version:bump、check:version 成功）。tools/diagnostics/verify-v96-worker-update.cjs の scoreTrendCard は、固定した過去のコミットに対して動く履歴の検査なので変えない。 / 2026-11-13 公開: オーナー承認（「mainに入れて構いません」）後、PR #141 の CI validate 成功（19ded1a）を確かめて main へマージ（57728a4）。Pages の version.json が { \"v\": 128 }、sw.js が archery-note-v128、公開ページを Chromium（390×844）で開いて APP_VER 128・見出し「記録」・タブ4つ・コンソールのエラー 0 件。"
+  },
+  {
+    "id": "AN-098",
+    "task": "射型の記録 段A（正確さ）: 画面の形（縦長・横長・中央固定）によらない測定、1射の肘の角度を使えるフレームだけの中央値に（出せないときは「—」）、ドリフトの端点を両端100msの中央値に、矢の判定は発射前に矢が写っていたときだけ、新しい記録に撮影条件と測り方の版を添え、版の違う記録は比べない",
+    "status": "in-progress",
+    "passes": false,
+    "dependencies": [],
+    "owner": "claude",
+    "acceptance": "npm run check:form・check:all・lint・format:check・golden:form-fixtures と Playwright e2e 全件が成功。tools/check-form-core.js の合成時系列で、横長1280×720・縦長720×1280・中央固定の3通りの射数・リリース時刻・射ごとの値が修正後に一致し、修正前は縦長が一致しないことを示す。既存の check-form の検査・境界の掃引・golden の metric fixture は変えずに通る（矢の判定の1件だけは直す対象の動作だったので期待値を替えた）。SCHEMA_VER・保存キーは不変で、旧記録は読み込みで変わらない。映像・画素・ランドマークは保存しない。実射での確認（AN-001）は未了のまま。公開・版上げはオーナーの承認後。",
+    "evidence": "2026-11-14 実装（branch claude/sharp-faraday-bu8pii、版128据え置き・未push・未公開）: scripts/46-form-core.js（formRefScaleX・computeFormMetrics の frame 引数・formShotArmAngle・formPreReleaseWindow の端点・judgeArrowCheck・formCaptureConditions・formMergeCaptureConditions・formRecordGeometry・formComparableRecords）、scripts/47-form-view.js、scripts/49-todays-result.js、tools/check-form-core.js、tools/check-storage-contract.js、tests/e2e/form-geometry.spec.js、docs/design/form-tracking-accuracy.md。合成3射: 縦長 720×1280 は修正前 0射（アンカー最小 0.433）→ 修正後 3射、リリース 3333/8033/12733ms で横長・中央固定と一致。同じ画素の姿勢の anchorNorm は縦長 0.524 → 0.176（横長 0.176 のまま）。check:all exit 0・lint・format:check 成功、golden:form-fixtures は oblique-single-release retained=1（4457.414ms/close）・scene-cut-arrow-retrieval retained=0 で変化なし、Playwright 462 passed (6.2m)（460 + 新しい2本）。実射での確認は AN-001 に残る。"
   }
 ]
