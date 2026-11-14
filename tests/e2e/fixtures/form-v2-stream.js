@@ -51,7 +51,10 @@ function formV2Stream(opts = {}) {
 }
 
 /* ページの中に代役を入れる。page.goto のあと（アプリのスクリプトが読み込まれたあと）に呼ぶ。
-   opts: { gumError: "NotAllowedError" など, modelFail: true, placeFrame: 置き方の確認で流す姿の番号, pauseAt: この番号で列を止める } */
+   opts: { gumError: "NotAllowedError" など, modelFail: true（__fv2.modelFail を false にすると、次から読み込める）,
+           placeFrame: 置き方の確認で流す姿の番号, pauseAt: この番号で列を止める,
+           restartClock: true = 映像を始め直すたびに、コマの時刻が最初へ戻る（本物のカメラの mediaTime と同じ） }
+   __fv2.detects = 姿勢推定を呼んだ回数 */
 async function installFormV2Stub(page, stream, opts = {}) {
   await page.evaluate(
     ({ stream, opts }) => {
@@ -65,6 +68,8 @@ async function installFormV2Stub(page, stream, opts = {}) {
         mode: "place",
         clock: 1000,
         pauseAt: opts.pauseAt == null ? null : opts.pauseAt,
+        modelFail: !!opts.modelFail,
+        detects: 0,
       });
       const slots = [0, 11, 12, 13, 14, 15, 16, 23, 24];
       const lmsAt = (i) => {
@@ -79,9 +84,10 @@ async function installFormV2Stub(page, stream, opts = {}) {
       };
       globalThis.loadFormPose = () => {
         st.poseLoads++;
-        if (opts.modelFail) return Promise.reject(new Error("synthetic model failure"));
+        if (st.modelFail) return Promise.reject(new Error("synthetic model failure"));
         return Promise.resolve({
           detectForVideo() {
+            st.detects++;
             const l = lmsAt(st.mode === "place" ? st.placeFrame : st.i);
             return { landmarks: l ? [l] : [] };
           },
@@ -118,6 +124,7 @@ async function installFormV2Stub(page, stream, opts = {}) {
         return {
           start(onFrame, onEnd) {
             on = true;
+            if (opts.restartClock) st.clock = 1000;
             const stage = () => {
               const el = globalThis.document.querySelector('[data-testid="form-v2-screen"]');
               return el ? el.dataset.stage : "";

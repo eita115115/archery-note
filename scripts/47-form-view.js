@@ -394,14 +394,15 @@ function openFormDetail(rec){
   const lm=linked?sessionMetrics(linked):null;
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet" data-testid="form-legacy-detail">
-    <h3>射型記録 ${fmtD(rec.date)} <span class="mini">${rec.shots||0}射 / ${esc(rec.modelVer||"")}</span></h3>
+    <h3>射型記録 ${fmtD(rec.date)} <span class="mini">${Number.isFinite(rec.shots)?rec.shots:0}射</span></h3>
     ${linked?`<div class="kv"><span>紐付いた練習</span><span>${fmtD(linked.date)} ${linked.dist?linked.dist+"m":""} ・ 平均 ${lm&&lm.all.length?lm.avg.toFixed(2):"—"} 点/本</span></div>`:`<div class="subNote">練習セッションには紐付いていません（撮影日に練習記録があると自動で紐付きます）。</div>`}
     ${st?`<div class="kv"><span>要約</span><span>弓手肘 ${st.bowArm!=null?st.bowArm.toFixed(0)+"°":"—"} / 引き手肘 ${st.drawArm!=null?st.drawArm.toFixed(0)+"°":"—"} / 保持 ${st.holdMs!=null?(st.holdMs/1000).toFixed(1)+"秒":"—"}</span></div>`:""}
     ${formInsightBlockHtml("この記録の値",formLegacyFacts(rec,prev))}
     <table class="tbl mt8"><tr><th>射</th><th>弓手肘</th><th>引き手肘</th><th class="right">保持</th></tr>
-    ${(rec.features||[]).map((f,i)=>`<tr><td>${i+1}</td><td>${f.angles&&Number.isFinite(f.angles.bowArm)?f.angles.bowArm.toFixed(0)+"°":"—"}${f.release&&f.release.stable===false?` ${icon("warn")}`:""}</td><td>${f.angles&&Number.isFinite(f.angles.drawArm)?f.angles.drawArm.toFixed(0)+"°":"—"}</td><td class="right">${f.phase&&Number.isFinite(f.phase.anchorMs)?(f.phase.anchorMs/1000).toFixed(1)+"s":"—"}</td></tr>`).join("")}</table>
+    ${(rec.features||[]).map((f,i)=>`<tr><td>${i+1}</td><td>${f.angles&&Number.isFinite(f.angles.bowArm)?f.angles.bowArm.toFixed(0)+"°":"—"}${f.release&&f.release.stable===false?` ${icon("warn")}`:""}</td><td>${f.angles&&Number.isFinite(f.angles.drawArm)?f.angles.drawArm.toFixed(0)+"°":"—"}</td><td class="right">${f.phase&&Number.isFinite(f.phase.anchorMs)?(f.phase.anchorMs/1000).toFixed(1)+"秒":"—"}</td></tr>`).join("")}</table>
     <div class="hint">${icon("warn")} = リリース前0.5秒にドリフトを観測した射。「—」は、腕が短く写った・値がそろわなかったなどで角度を出せなかった射です。以前の方式の記録なので、評価や助言は出していません（決めた幅に根拠が無いため）。値は保存されたままです。</div>
     ${formCaptureNoteHtml(rec)}
+    ${rec.modelVer?`<div class="hint" data-testid="form-legacy-model">解析の版: ${esc(rec.modelVer)}</div>`:""}
     <div class="btnrow"><button class="btn ghost" id="fdClose">閉じる</button></div>
   </div>`;
   openModal(ovl,{escapeTarget:"#fdClose"});
