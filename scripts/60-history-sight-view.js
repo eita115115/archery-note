@@ -12,7 +12,7 @@ function openPracticeDaysSheet() {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet">
     <h3>${icon("fire")} 練習曜日を設定</h3>
-    <p class="note">練習する曜日を選ぶと、ストリーク（連続記録）が始まります。あとで設定タブでも変更できます。</p>
+    <p class="note">練習する曜日を選ぶと、連続記録が始まります。あとで設定でも変えられます。</p>
     <div class="gamifyDayChips" id="pdChips" data-testid="practice-days-sheet-chips">
       ${DOW.map((lb, i) => `<button type="button" class="gamifyDayChip ${sel.has(i) ? "on" : ""}" aria-pressed="${sel.has(i)}" data-d="${i}">${lb}</button>`).join("")}
     </div>
@@ -187,7 +187,7 @@ function historyRoundHtml(entry, filtered, changesFor) {
   stages.forEach((s) => { const all = sessionArrows(s); total += sumScores(all); arrows += all.length; });
   const rg = stages[0].roundGroup;
   const count = Number(rg.stageCount);
-  const stageLabel = Number.isInteger(count) && count > 0 ? `${stages.length}/${count}ステージ` : `${stages.length}ステージ`;
+  const stageLabel = Number.isInteger(count) && count > 0 ? `${count}距離のうち ${stages.length}距離` : `${stages.length}距離`;
   const distances = stages.map((s) => historyDistanceLabel(s.dist)).join("・");
   return `<details class="historyRound" data-testid="history-round" data-gid="${esc(entry.gid)}" ${ui.histRoundOpen && ui.histRoundOpen.has(entry.gid) ? "open" : ""}>
     <summary class="historyRoundSummary">
@@ -294,7 +294,7 @@ function renderHistory(m) {
         ? noteListHtml(entries.slice(0, limit), monthCounts, filtered) +
           (entries.length > limit ? `<div class="btnrow"><button type="button" class="btn ghost" id="histMore">さらに表示（残り${entries.length - limit}件）</button></div>` : "")
         : all.length
-          ? `<div class="empty" data-testid="notes-no-match"><b>該当する記録はありません</b>絞り込みの条件を変えると表示されます。</div>`
+          ? `<div class="empty" data-testid="notes-no-match"><b>合う記録がありません</b>絞り込みを変えると見られます。</div>`
           : `<div class="empty historyEmpty" data-testid="history-empty">
         <b>ノートはまだ空です</b>
         <p>練習を記録して終了すると、日付の順にここへ並びます。練習のない日は「メモを書く」で書き残せます。</p>
@@ -361,7 +361,7 @@ function openTrashSheet() {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet trashSheet" data-testid="trash-sheet">
     <h3>ゴミ箱（${items.length}件）</h3>
-    <p class="basis">ゴミ箱へ移した順に、新しい${TRASH_LIMIT}件までを残しています。「元に戻す」で、元の場所へ戻ります。</p>
+    <p class="basis">ゴミ箱へ移した順に、新しい${TRASH_LIMIT}件までが残ります。「元に戻す」で、元の場所へ戻ります。</p>
     ${
       items.length
         ? items
@@ -515,7 +515,7 @@ function histRoundGroupHtml(sess) {
       const cur = x.id === sess.id;
       const d = Number(x.dist) || 0;
       return `<tr class="${cur ? "stageRowCur" : ""}">
-      <td><span class="stageTick" style="width:${8 + Math.round((d / maxDist) * 22)}px"></span>ステージ${(Number(x.roundGroup.stage) || 0) + 1} ・ ${historyDistanceLabel(x.dist)}</td>
+      <td><span class="stageTick" style="width:${8 + Math.round((d / maxDist) * 22)}px"></span>${(Number(x.roundGroup.stage) || 0) + 1}距離目 ・ ${historyDistanceLabel(x.dist)}</td>
       <td class="right">${all.length}射</td>
       <td class="right"><b>${t}</b></td>
       <td class="right">${cur ? `<span class="mini">（表示中）</span>` : `<button type="button" class="btn sm ghost" data-stage-jump="${esc(x.id)}">開く</button>`}</td>
@@ -523,9 +523,9 @@ function histRoundGroupHtml(sess) {
     })
     .join("");
   return `<div class="mt10" data-testid="history-stage-table">
-    <div class="subNote">${esc(roundLabel(rg.roundId))} のステージ（行程表）</div>
-    <table class="tbl mt8 stageTable"><tr><th>ステージ</th><th class="right">本数</th><th class="right">得点</th><th class="right"></th></tr>${rows}
-    <tr class="stageTotalRow"><td><b>ラウンド合計</b>${stages.length === Number(rg.stageCount) ? "" : ` <span class="mini">(${stages.length}/${rg.stageCount}ステージ)</span>`}</td><td class="right">${arrows}射</td><td class="right"><b>${total}</b></td><td class="right"></td></tr>
+    <div class="subNote">${esc(roundLabel(rg.roundId))} の距離ごとの記録</div>
+    <table class="tbl mt8 stageTable"><tr><th>距離</th><th class="right">射数</th><th class="right">得点</th><th class="right"></th></tr>${rows}
+    <tr class="stageTotalRow"><td><b>ラウンド合計</b>${stages.length === Number(rg.stageCount) ? "" : ` <span class="mini">(${rg.stageCount}距離のうち ${stages.length}距離)</span>`}</td><td class="right">${arrows}射</td><td class="right"><b>${total}</b></td><td class="right"></td></tr>
     </table>
   </div>`;
 }
@@ -540,7 +540,7 @@ function legacyRescoreHtml(sess, setup, total) {
   const entered = Number.isFinite(enteredDia) && enteredDia >= ARROW_DIA_MM_MIN && enteredDia <= ARROW_DIA_MM_MAX;
   const dia = (arrowR * 20).toFixed(1);
   const diff = r.total - total;
-  return `<div class="hint histRescore" data-testid="history-rescore">実寸判定（${entered ? `矢径 ${dia}mm` : `矢径未入力のため ${dia}mm`}）では <b>${r.total}点</b>（記録時 ${total}点・差 ${diff > 0 ? "+" : ""}${diff}点・${r.changed}本）。保存された点数と着弾図の円は記録時の判定のままです。</div>`;
+  return `<div class="hint histRescore" data-testid="history-rescore">いまの矢の太さ（${entered ? `外径 ${dia}mm` : `外径が未入力なので ${dia}mm`}）で数え直すと <b>${r.total}点</b>です（記録したときは ${total}点。${r.changed}射で ${diff > 0 ? "+" : diff < 0 ? "−" : "±"}${Math.abs(diff)}点）。保存した点数と図の円は、記録したときのままで、変えていません。</div>`;
 }
 /* 詳細を閉じたあと一覧を描き直したとき、開いていた項目へフォーカスを戻す */
 function focusNoteEntry(id) {
@@ -600,7 +600,7 @@ function noteConditionsHtml(sess, setup) {
   return `<section class="vsec" data-testid="note-conditions">
     <div class="vsecH"><h2>条件</h2></div>
     ${noteCondRowHtml("ラウンド", `${historyDistanceLabel(sess.dist)}・${esc(faceLabel(sess))}`, `${round ? esc(round) + "・" : ""}${plan.per}射 × ${sess.ends.length}エンド`)}
-    ${noteCondRowHtml("弓具", setup ? esc(setup.name) : "未指定", stored ? `矢の外径 ${dia}mm で判定` : `記録時の判定の円（直径 ${dia}mm）で採点`)}
+    ${noteCondRowHtml("弓具", setup ? esc(setup.name) : "未指定", stored ? `矢の外径 ${dia}mm で採点` : `記録したときの円（直径 ${dia}mm）で採点`)}
     ${noteCondRowHtml("サイト", sight)}
     ${noteCondRowHtml("天気・風", windText(sess) ? esc(windText(sess)) : "記録なし")}
     ${noteCondRowHtml("入力", input, pos && pos < all.length ? `位置なし ${all.length - pos}射` : "")}
@@ -645,10 +645,10 @@ function openHistDetail(id) {
       </div>
       <div class="bigNum noteTotal" data-testid="note-total" aria-label="合計 ${total}点">${total}</div>
     </header>
-    <p class="basis noteCond" data-testid="note-condition">${esc([faceLabel(sess), setup ? setup.name : "弓具未指定", sess.round && sess.round !== "free" ? roundLabel(sess.round) : "", windText(sess)].filter(Boolean).join("・"))}</p>
+    <p class="basis noteCond" data-testid="note-condition">${esc([faceLabel(sess), setup ? setup.name : "セッティング未指定", sess.round && sess.round !== "free" ? roundLabel(sess.round) : "", windText(sess)].filter(Boolean).join("・"))}</p>
     <section class="vsec">
       <div class="vsecH"><h2><label for="hNote">メモ</label></h2><span class="aside">${editingThis ? "編集の途中です" : "書くと保存されます"}</span></div>
-      ${editingThis ? `<p class="basis" data-testid="note-editing-lock">この記録は記録タブで直している途中です。メモ・タグの変更とゴミ箱へ移す操作は、記録タブで編集を終えるか取り消してからできます。</p>` : ""}
+      ${editingThis ? `<p class="basis" data-testid="note-editing-lock">この記録は記録タブで直している途中です。メモ・タグの変更とゴミ箱へ移す操作は、記録タブで編集を終えるか、やめてからできます。</p>` : ""}
       <textarea class="noteBox" id="hNote" data-testid="note-memo" placeholder="感覚、気づいたこと、次に確かめること"${editingThis ? " readonly" : ""}>${esc(sess.note || "")}</textarea>
       ${noteTagsHtml(sess.tags)}
     </section>
@@ -660,15 +660,15 @@ function openHistDetail(id) {
     ${histRoundGroupHtml(sess)}
     <section class="vsec"><div class="vsecH"><h2>スコア表</h2><span class="aside">${counts.map((c) => `${c.sub} ${c.count(all)}`).join("・")}</span></div></section>
     <div class="bleed" data-testid="history-end-table">${scorecardHtml(sess, { final: true })}</div>
-    ${all.some((a) => a.manual === true) ? `<p class="basis" data-testid="history-manual-note">* は手で直した点数です（位置からの採点とは違う点を、記録中に選んでいます）。</p>` : ""}
-    <section class="vsec"><div class="vsecH"><h2>着弾</h2><span class="aside">${posCount ? `${posCount}射の位置` : "位置の記録なし"}</span></div></section>
+    ${all.some((a) => a.manual === true) ? `<p class="basis" data-testid="history-manual-note">* は手で直した点数です（刺さった位置とは違う点を、記録中に選んだ矢）。</p>` : ""}
+    <section class="vsec"><div class="vsecH"><h2>矢の位置</h2><span class="aside">${posCount ? `${posCount}射` : "位置の記録なし"}</span></div></section>
     <div id="hPlot" class="recordSummaryPlot${posCount ? " bleed" : ""}"></div>
     ${resultImpactFigsHtml(st)}
     ${noteConditionsHtml(sess, setup)}
     ${sessionSightFoldHtml(sess, setup, { testid: "note-sight-details", cls: "histDetailNumbers" })}
     <section class="vsec histDetailActions" data-testid="note-ops">
       <div class="vsecH"><h2>この記録の操作</h2></div>
-      ${editingThis ? "" : op("hEdit", "点数や位置を直す", "記録中と同じ画面で直します。直した矢には印が付きます")}
+      ${editingThis ? "" : op("hEdit", "点数や位置を直す", "記録中と同じ画面で直せます。直した矢には印が付きます")}
       ${op("hCard", "スコア表を画像で保存", "共有の画面が出る端末では、そこから送れます")}
       ${op("hAnalysis", "分析で見る", "分析タブへ移ります")}
       ${rescore}
@@ -722,7 +722,7 @@ function openHistDetail(id) {
   if (hEdit)
     hEdit.onclick = () => {
       if (db.active) {
-        toast("記録の途中のものがあります。先に終了してください");
+        toast("途中の記録があります。先にそちらを終えてください");
         return;
       }
       syncNote();
@@ -734,7 +734,7 @@ function openHistDetail(id) {
       closeModal(ovl);
       if (view === "record") render();
       else showView("record");
-      toast("過去の記録を編集中。メニューの「編集を終了して保存する」で上書きします");
+      toast("前の記録を直しています。メニューの「編集を終了して保存する」で保存されます");
     };
   ovl.querySelector("#hCard").onclick = () => exportScorecardImage(sess);
   ovl.querySelector("#hAnalysis").onclick = () => {

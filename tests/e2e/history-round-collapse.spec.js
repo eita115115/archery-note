@@ -66,7 +66,7 @@ for (const theme of ["light", "dark"]) {
     const group = page.getByTestId("history-round");
     const summary = group.locator("summary");
     await expect(summary).toContainText("34");
-    await expect(summary).toContainText("4/4ステージ");
+    await expect(summary).toContainText("4距離のうち 4距離");
     await expect(summary).toContainText("4射");
     await expect(group).not.toHaveAttribute("open", "");
     await expect(page.locator('[data-id="old-single"]')).toBeVisible();
@@ -116,7 +116,7 @@ test("additional history keeps all stages together at a page boundary on a narro
   await page.setViewportSize({ width: 320, height: 568 });
   const before = await seed(page, true);
   const group = page.getByTestId("history-round");
-  await expect(group.locator("summary")).toContainText("4/4ステージ");
+  await expect(group.locator("summary")).toContainText("4距離のうち 4距離");
   await group.locator("summary").click();
   await expect(group.getByTestId("history-row")).toHaveCount(4);
   await page.locator("#histMore").click();
@@ -139,7 +139,7 @@ test("a filtered group labels its visible subtotal and excludes unmatched stages
   const before = await seed(page, false, true);
   await page.locator("#histDist").selectOption("70");
   const group = page.getByTestId("history-round");
-  await expect(group.locator("summary")).toContainText("2/4ステージ");
+  await expect(group.locator("summary")).toContainText("4距離のうち 2距離");
   await expect(group.locator(".historyRoundTotal")).toHaveText("17表示分の合計");
   await group.locator("summary").click();
   expect(

@@ -192,7 +192,7 @@ test("notes filters: all / practice / with memo / distance, and gear and round s
   await expect(page.locator("#histSetup")).toBeFocused();
   expect(await entryIds(page)).toEqual(["i1"]);
   await page.locator("#histRound").selectOption("70m72");
-  await expect(page.getByTestId("notes-no-match")).toContainText("該当する記録はありません");
+  await expect(page.getByTestId("notes-no-match")).toContainText("合う記録がありません");
   await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page.getByTestId("history-filter-toggle")).toContainText("すべて");
   await expect(page.getByTestId("history-filter-toggle")).toBeFocused();
@@ -298,7 +298,7 @@ test("note detail: figures, comparison, scorecard, plot, conditions and operatio
     /ラウンド\s*70m・122cm的\s*70m 72射・6射 × 12エンド/,
   );
   await expect(cond.locator(".lrow").nth(1)).toHaveText(
-    /弓具\s*架空のリカーブ\s*矢の外径 5\.7mm で判定/,
+    /弓具\s*架空のリカーブ\s*矢の外径 5\.7mm で採点/,
   );
   await expect(cond.locator(".lrow").nth(2)).toHaveText(/サイト\s*上下 5\.2・左右 0/);
   await expect(cond.locator(".lrow").nth(3)).toHaveText(/天気・風\s*晴れ/);
@@ -364,7 +364,7 @@ test("note detail for a score-only practice says there is no impact data and for
     `9点${all.filter((a) => a.s === 9).length}`,
   );
   await expect(page.getByTestId("note-conditions").locator(".lrow").nth(1)).toHaveText(
-    /架空のインドア用\s*矢の外径 5\.7mm で判定/,
+    /架空のインドア用\s*矢の外径 5\.7mm で採点/,
   );
   await page.locator("#hClose").click();
   await expectUserData(page, database);

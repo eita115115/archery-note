@@ -56,9 +56,12 @@ test("legacy session shows the real-size rescore without changing stored scores"
   await page.locator('[data-id="owned-legacy-rescore"]').first().click();
   const note = page.getByTestId("history-rescore");
   await expect(note).toBeVisible();
-  await expect(note).toContainText("矢径 5.0mm");
-  await expect(note).toContainText("29点");
-  await expect(note).toContainText("記録時 30点");
+  await expect(note).toContainText("いまの矢の太さ（外径 5.0mm）で数え直すと 29点です");
+  await expect(note).toContainText("記録したときは 30点");
+  /* 保存した点数を書き換えないことを、その場で言う（AGENTS.md: 以前の記録の点数は書き換えない） */
+  await expect(note).toContainText(
+    "保存した点数と図の円は、記録したときのままで、変えていません。",
+  );
   // v5 段 6: 見出しの合計は保存された点数のまま。実寸判定の点数は「この記録の操作」の中に並べて示す
   await expect(page.getByTestId("note-total")).toHaveText("30");
   await expect(page.getByTestId("note-ops").getByTestId("history-rescore")).toHaveCount(1);
