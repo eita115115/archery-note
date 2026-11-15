@@ -462,7 +462,7 @@ function staticUiChecks() {
     "native readiness UI missing",
   );
   assert(
-    surface.includes("自動バックアップ") &&
+    surface.includes("端末の中の控え") && !surface.includes("自動バックアップ") &&
       surface.includes("いま控えを残す") &&
       surface.includes("控えの内容に戻しました") &&
       /* データを置き換える操作の注意書きは、その操作の行にある（AGENTS.md） */
@@ -476,7 +476,7 @@ function staticUiChecks() {
   );
   assert(
     surface.includes("シャフト銘柄") &&
-      surface.includes("番手/スパイン") &&
+      surface.includes("スパイン（番）") && !surface.includes("番手/スパイン") &&
       surface.includes("ハンドル/弓本体") &&
       surface.includes("HOYT Grand Prix XCEED 2 H25") &&
       surface.includes("HOYT Formula RCRV PODIUM Limbs"),

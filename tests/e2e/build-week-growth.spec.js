@@ -16,7 +16,7 @@ test("demo data opens the score analysis with its target stated and remains remo
     "page",
   );
   await expect(page.getByTestId("analysis-score")).toBeVisible();
-  await expect(page.getByTestId("analysis-target")).toContainText("対象: ");
+  await expect(page.getByTestId("analysis-target")).toContainText(/\d+回・\d+射/);
   await expect(page.getByTestId("growth-dashboard")).toHaveCount(0);
   await expect(page.getByTestId("next-practice")).toHaveCount(0);
   await expect(page.locator("#main")).not.toContainText("次回試すこと");

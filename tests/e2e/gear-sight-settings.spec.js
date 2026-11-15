@@ -704,7 +704,9 @@ test("data-loss warnings sit next to export, import, restore and the irreversibl
   await expect(group.getByTestId("settings-import")).toContainText(
     "いまのデータは、読み込んだ内容にすべて置き換わります。",
   );
-  await expect(group.getByTestId("settings-import")).toContainText("自動バックアップに残します");
+  await expect(group.getByTestId("settings-import")).toContainText(
+    "下の「端末の中の控え」に残ります",
+  );
   await expect(group.getByTestId("settings-csv")).toContainText(
     "このファイルから元に戻すことはできません",
   );
