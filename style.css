@@ -1535,6 +1535,11 @@ button.ntag[aria-pressed="true"]{background:var(--accent-soft); color:var(--ink)
 .anRef[open] summary::after{content:"−";}
 .anRef summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
 .anRefBody{padding-top:4px;}
+/* 「詳しく」の中の見出しは長い（例: 外れた矢の影響を抑えた半径（ロバストRMS））。見出しは折り返し、値は右に残す。
+   値が入りきらない幅では値だけ次の行の右へ下ろす（320px・字幅の広い書体でも画面の外へ出さない） */
+.anRefBody .lrow{flex-wrap:wrap; align-items:baseline; row-gap:2px;}
+.anRefBody .lrow .lk{flex:1 1 11em; min-width:0; overflow-wrap:anywhere;}
+.anRefBody .lrow .lv{flex:0 1 auto; margin-left:auto;}
 .cmpRow small{display:block; font-size:13px; font-weight:400; color:var(--sub); line-height:1.2;}
 .cmpRow.is-cur > *:first-child{color:var(--ink); font-weight:700;}
 .anTrendTbl .cmpRow{grid-template-columns:1.3fr .8fr 1fr 1fr;}
