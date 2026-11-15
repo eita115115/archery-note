@@ -43,6 +43,11 @@ const statsOf = (page, id) =>
       flagged: st.excluded.length,
     };
   }, id);
+/* 差は言葉で書く（docs/design/voice.md）: 「より 0.3 点高い」「と同じ」 */
+const moreLess = (v, d) => {
+  const r = +v.toFixed(d);
+  return r === 0 ? "と同じ" : `より ${Math.abs(r).toFixed(d)} 点${r > 0 ? "高い" : "低い"}`;
+};
 const dirText = (mx, my) => {
   const p = [];
   if (Math.abs(mx) >= 0.05) p.push(`${mx > 0 ? "右" : "左"} ${Math.abs(mx).toFixed(1)}cm`);
@@ -70,7 +75,7 @@ test("score: mean, latest and best match the stored totals and the target line s
     md(list[totals.lastIndexOf(best)].date),
   );
   await expect(page.getByTestId("analysis-target")).toHaveText(
-    "対象: 70m・122cm的・72射、7回・504射、10/3〜11/10。うち1回は点数だけの記録です。",
+    "70m・122cm的・72射、7回・504射、10/3〜11/10。うち1回は点数だけの記録です。",
   );
   /* 推移の図: 軸の文字は 13px 以上、7回ぶんの点 */
   const chart = page.locator("svg.lineChart");
@@ -84,7 +89,7 @@ test("score: mean, latest and best match the stored totals and the target line s
     await chart.evaluate((el) => el.getBoundingClientRect().width / el.viewBox.baseVal.width),
   ).toBeCloseTo(1, 2);
   await expect(page.getByTestId("analysis-sd")).toHaveText(
-    `回ごとの標準偏差は ${sd(totals).toFixed(1)} 点です。`,
+    `ふだんは ±${sd(totals).toFixed(1)} 点ほど上下しています。`,
   );
   /* 前半と後半 */
   const firsts = list.map((s) => sum(s.ends.slice(0, 6).flat())),
@@ -97,7 +102,7 @@ test("score: mean, latest and best match the stored totals and the target line s
   );
   await expect(halves).toContainText("7回の平均です");
   await expect(halves).toContainText(
-    `差の回ごとの標準偏差は ${sd(seconds.map((v, i) => v - firsts[i])).toFixed(1)} 点です。`,
+    `前半と後半の差は、ふだん ±${sd(seconds.map((v, i) => v - firsts[i])).toFixed(1)} 点ほど上下しています。`,
   );
   /* エンド別の平均 */
   const endAvg = Array.from({ length: 12 }, (_, i) => mean(list.map((s) => sum(s.ends[i]))));
@@ -148,32 +153,32 @@ test("score: one factual trend sentence at five or more sessions, none below fiv
   const trend = page.getByTestId("analysis-trend");
   await expect(trend).toHaveCount(1);
   await expect(trend).toHaveText(
-    `直近3回の平均は ${recent.toFixed(1)} 点、それより前の4回の平均は ${earlier.toFixed(1)} 点で、差は ${signed(diff1(recent, earlier), 1)} 点です。`,
+    `直近 3回の平均は ${recent.toFixed(1)} 点。それまでの 4回の平均（${earlier.toFixed(1)} 点）${moreLess(diff1(recent, earlier), 1)}です。`,
   );
   await expect(page.getByTestId("analysis-trend-pending")).toHaveCount(0);
   /* 期間で 5回に絞っても文は出る（10/14 以降）。対象の行に期間が入る */
   await page.locator("#anPeriod").selectOption("30d");
   const five = totals.slice(2);
   await expect(page.getByTestId("analysis-target")).toHaveText(
-    "対象: 70m・122cm的・72射、5回・360射、10/14〜11/10、期間は直近30日。うち1回は点数だけの記録です。",
+    "70m・122cm的・72射、5回・360射、10/14〜11/10、期間は直近30日。うち1回は点数だけの記録です。",
   );
   await expect(page.getByTestId("analysis-trend")).toHaveText(
-    `直近3回の平均は ${mean(five.slice(-3)).toFixed(1)} 点、それより前の2回の平均は ${mean(five.slice(0, 2)).toFixed(1)} 点で、差は ${signed(diff1(mean(five.slice(-3)), mean(five.slice(0, 2))), 1)} 点です。`,
+    `直近 3回の平均は ${mean(five.slice(-3)).toFixed(1)} 点。それまでの 2回の平均（${mean(five.slice(0, 2)).toFixed(1)} 点）${moreLess(diff1(mean(five.slice(-3)), mean(five.slice(0, 2))), 1)}です。`,
   );
   /* 18m は 2回: 傾向の文は出さず、回数を書く */
   await page.locator("#anPeriod").selectOption("all");
   await page.locator("#anCond").selectOption("18|40|single|60");
   await expect(page.getByTestId("analysis-trend")).toHaveCount(0);
   await expect(page.getByTestId("analysis-trend-pending")).toHaveText(
-    "同じ条件の記録が 5回以上あるときに、直近3回とそれより前の平均の差を表示します（いまは 2回）。",
+    "同じ条件の記録が 5回になると、最近 3回とそれまでの平均を比べられます（いま 2回）。",
   );
   await expect(page.getByTestId("analysis-target")).toHaveText(
-    "対象: 18m・40cm的・60射、2回・120射、11/1〜11/7。",
+    "18m・40cm的・60射、2回・120射、11/1〜11/7。",
   );
   /* 弓具で絞ると 1回。図も標準偏差も出さない */
   await page.locator("#anSetup").selectOption("s2");
   await expect(page.getByTestId("analysis-target")).toHaveText(
-    "対象: 18m・40cm的・60射、1回・60射、11/7、弓具は 架空のインドア用。",
+    "18m・40cm的・60射、1回・60射、11/7、弓具は 架空のインドア用。",
   );
   await expect(page.locator("svg.lineChart")).toHaveCount(0);
   await expect(page.getByTestId("analysis-sd")).toHaveCount(0);
@@ -218,12 +223,12 @@ test("impact: RMS with its 95% interval, centre offset and spreads match the all
   const st = await statsOf(page, "p6");
   expect(st.n).toBe(72);
   const view = page.getByTestId("analysis-impact");
-  await expect(fig(view, "rms").locator(".l")).toHaveText("グループRMS（全射）");
+  await expect(fig(view, "rms").locator(".l")).toHaveText("グルーピングの大きさ");
   await expect(fig(view, "rms").locator(".n")).toHaveText(`${st.rr.toFixed(1)}cm`);
   await expect(fig(view, "rms").locator(".d")).toHaveText(
-    `95%区間 ${st.ci.lo.toFixed(1)}〜${st.ci.hi.toFixed(1)}cm`,
+    `半径・全射。幅 ${st.ci.lo.toFixed(1)}〜${st.ci.hi.toFixed(1)}cm`,
   );
-  await expect(fig(view, "offset").locator(".l")).toHaveText("着弾中心のずれ");
+  await expect(fig(view, "offset").locator(".l")).toHaveText("的の中心から矢の中心まで");
   await expect(fig(view, "offset").locator(".n")).toHaveText(
     `${Math.hypot(st.mx, st.my).toFixed(1)}cm`,
   );
@@ -231,7 +236,7 @@ test("impact: RMS with its 95% interval, centre offset and spreads match the all
   await expect(fig(view, "sx").locator(".n")).toHaveText(`${st.sx.toFixed(1)}cm`);
   await expect(fig(view, "sy").locator(".n")).toHaveText(`${st.sy.toFixed(1)}cm`);
   await expect(page.getByTestId("analysis-impact-target")).toContainText(
-    "対象: 11/10（火）・70m・122cm的、位置のある 72射。",
+    "11/10（火）・70m・122cm的、位置のある 72射。",
   );
   await expect(page.getByTestId("analysis-impact-target")).toContainText(
     `左右 ±${st.ciX.toFixed(1)}cm・上下 ±${st.ciY.toFixed(1)}cm`,
@@ -271,14 +276,16 @@ test("impact: the reference metrics B and C appear only inside the collapsed det
   expect(st.flagged).toBeGreaterThan(0);
   expect(st.b).toBeLessThan(st.rr);
   const ref = page.getByTestId("analysis-ref-metrics");
-  await expect(ref.locator("summary")).toContainText("比較用の指標");
+  await expect(ref.locator("summary")).toContainText("詳しく");
   expect(await ref.evaluate((el) => el.open)).toBe(false);
   await expect(ref.locator('[data-ref="b"]')).toBeHidden();
   await expect(ref.locator('[data-ref="c"]')).toBeHidden();
   /* 閉じた状態の画面に、B と C の数値は出ていない。正式な値は全射（A） */
   const closed = await page.locator("#main").innerText();
   expect(closed).not.toContain("ロバストRMS");
-  expect(closed).not.toContain("外れ値候補を除いたRMS");
+  expect(closed).not.toContain("大きく外れた矢を除いた半径");
+  /* 統計の言葉は「詳しく」を開くまで画面に出ない（docs/design/voice.md 4章） */
+  expect(closed).not.toMatch(/RMS|95%区間|外れ値候補/);
   await expect(fig(page.getByTestId("analysis-impact"), "rms").locator(".n")).toHaveText(
     `${st.rr.toFixed(1)}cm`,
   );
@@ -287,7 +294,14 @@ test("impact: the reference metrics B and C appear only inside the collapsed det
   await expect(ref.locator('[data-ref="b"] .lv')).toContainText(`72射中 ${st.flagged}射を除く`);
   await expect(ref.locator('[data-ref="c"] .lv')).toContainText(`${st.c.toFixed(1)} cm`);
   await expect(ref.locator('[data-ref="flagged"] .lv')).toHaveText(`${st.flagged}射`);
-  await expect(ref).toContainText("正式な値は上の全射の RMS です");
+  await expect(ref).toContainText("上の「グルーピングの大きさ」は、全射の RMS");
+  await expect(ref.locator('[data-ref="ci-rms"]')).toContainText(
+    `${st.ci.lo.toFixed(1)}〜${st.ci.hi.toFixed(1)} cm`,
+  );
+  await expect(ref.locator('[data-ref="ci-rms"] .lk')).toContainText("95%区間");
+  await expect(ref.locator('[data-ref="ci-centre"]')).toContainText(
+    `左右 ±${st.ciX.toFixed(1)} cm`,
+  );
   /* 開いても正式な値は変わらない */
   await expect(fig(page.getByTestId("analysis-impact"), "rms").locator(".n")).toHaveText(
     `${st.rr.toFixed(1)}cm`,
@@ -319,8 +333,8 @@ test("impact: a score-only record shows 着弾データなし with the positione
   await page.locator("#anImpact").selectOption("p5");
   await expect(page.locator("#anImpact option:checked")).toContainText("点数だけ");
   const none = page.getByTestId("analysis-no-impact");
-  await expect(none).toContainText("着弾データなし");
-  await expect(none).toContainText("72射のうち、位置のある矢は 0射");
+  await expect(none).toContainText("矢の位置がありません");
+  await expect(none).toContainText("72射とも位置なし");
   await expect(page.getByTestId("analysis-plot")).toHaveCount(0);
   await expect(page.getByTestId("analysis-impact")).toHaveCount(0);
   await expect(page.getByTestId("analysis-ref-metrics")).toHaveCount(0);
@@ -350,7 +364,7 @@ test("impact: the default is the latest record with positions, and mixed records
   await gotoSubTab(page, "impact");
   await expect(page.locator("#anImpact")).toHaveValue("i1");
   await expect(page.getByTestId("analysis-impact-target")).toContainText(
-    "位置のある 57射（位置なし 3射は図と数値に入れていません）",
+    "位置のある 57射（位置なし 3射は図と数字に入っていません）",
   );
   await expect(page.getByTestId("analysis-plot").locator("circle.arrowFoot")).toHaveCount(57);
   const st = await statsOf(page, "i1");
@@ -379,10 +393,10 @@ test("impact: fewer than three positioned arrows shows the plot but no RMS", asy
   await page.locator("#anImpact").selectOption("p6");
   await expect(page.getByTestId("analysis-plot").locator("circle.arrowFoot")).toHaveCount(2);
   await expect(page.getByTestId("analysis-impact-pending")).toContainText(
-    "グループRMSは計算していません",
+    "グルーピングは、矢が 3射になると出ます",
   );
   await expect(page.getByTestId("analysis-impact-pending")).toContainText(
-    "位置のある 2射（位置なし 70射は図と数値に入れていません）",
+    "位置のある 2射（位置なし 70射は図と数字に入っていません）",
   );
   await expect(page.getByTestId("analysis-impact")).toHaveCount(0);
   await expect(page.locator("#main")).not.toContainText("NaN");
@@ -448,12 +462,11 @@ test("compare: the default pair has the same conditions and the table shows the 
     totals.reduce((t, v) => t + (v - totals.reduce((x, y) => x + y, 0) / 7) ** 2, 0) / 6,
   );
   await expect(page.getByTestId("compare-total-diff")).toHaveText(
-    `合計の差（B − A）は ${signed(d)} 点です。同じ距離・的・射数の 7回の、回ごとの標準偏差は ${s7.toFixed(1)} 点で、差は${Math.abs(d) <= s7 ? "その範囲内" : "それより大きい値"}です。`,
+    `B の合計は A ${moreLess(d, 0)}です。同じ距離・的・射数の 7回では、ふだん ±${s7.toFixed(1)} 点ほど上下${d === 0 ? "します。" : Math.abs(d) <= s7 ? "するので、たまたまの差かもしれません。" : "します。この差はそれより大きい差です。"}`,
   );
   await expect(page.getByTestId("compare-caution")).toContainText(
-    "差は原因を示すものではありません",
+    "1回ずつの比較なので、下の変更が理由だとは言い切れません。",
   );
-  await expect(page.getByTestId("compare-caution")).toContainText("原因とは断定できません");
   /* 的の図は2枚。それぞれ 72射 */
   await expect(page.getByTestId("compare-plot-a").locator("circle.arrowFoot")).toHaveCount(72);
   await expect(page.getByTestId("compare-plot-b").locator("circle.arrowFoot")).toHaveCount(72);
@@ -482,7 +495,7 @@ test("compare: different distance, face or arrow count shows a notice and never 
   await page.locator("#cmpA").selectOption("i0");
   await expect(page.locator("#cmpA")).toBeFocused();
   const notice = page.getByTestId("compare-notice");
-  await expect(notice).toContainText("条件が違うため、合計と差は並べていません");
+  await expect(notice).toContainText("距離や射数が違うので、点数の差は出しません");
   await expect(notice).toContainText("A: 18m・40cm的・60射");
   await expect(notice).toContainText("B: 70m・122cm的・72射");
   await expect(page.getByTestId("compare-table")).toHaveCount(0);
@@ -490,7 +503,7 @@ test("compare: different distance, face or arrow count shows a notice and never 
   await expect(page.getByTestId("compare-plots")).toHaveCount(0);
   const text = await page.locator("#main").innerText();
   expect(text).not.toContain("B − A");
-  expect(text).not.toContain("合計の差");
+  expect(text).not.toContain("B の合計は");
   expect(text).not.toMatch(/[+−]\d/);
   /* それぞれの数値は別々の枠に出す */
   const i0 = data.sessions.find((s) => s.id === "i0"),
@@ -538,7 +551,7 @@ test("compare: a score-only record keeps the score rows and shows 着弾デー�
   await expect(table.locator('[data-row="rms"] [data-col="a"]')).toHaveText("—");
   await expect(table.locator('[data-row="rms"] [data-col="diff"]')).toHaveText("—");
   await expect(table.locator('[data-row="offset"] [data-col="diff"]')).toHaveText("—");
-  await expect(page.getByTestId("compare-plot-a")).toHaveText("着弾データなし");
+  await expect(page.getByTestId("compare-plot-a")).toHaveText("位置の記録なし");
   await expect(page.getByTestId("compare-plot-a").locator("svg")).toHaveCount(0);
   await expect(page.getByTestId("compare-plot-b").locator("circle.arrowFoot")).toHaveCount(72);
   await expect(page.getByTestId("compare-centers")).toHaveCount(0);

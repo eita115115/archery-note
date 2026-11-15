@@ -94,13 +94,13 @@ test("the form tab lists form records, opens one, and counts the reason marks wi
   await expect(rows.nth(2).locator(".lv")).toHaveText("2射");
   const arrows = data.sessions.reduce((n, s) => n + s.ends.flat().length, 0);
   await expect(reasons).toContainText(
-    `対象: ${data.sessions.length}回・${arrows}射のうち、理由の印がある 12射。`,
+    `${data.sessions.length}回・${arrows}射のうち、理由の印がある 12射。`,
   );
-  await expect(reasons).toContainText("印の数は原因を示すものではありません");
+  await expect(reasons).toContainText("印の数だけでは、外れた理由は言い切れません");
   /* 距離で絞ると、対象の回数と印の数も変わる */
   await page.locator("#anDist").selectOption("18");
   await expect(page.getByTestId("analysis-reasons")).toContainText(
-    "対象: 2回・120射のうち、理由の印がある 0射。",
+    "2回・120射のうち、理由の印がある 0射。",
   );
   await expect(page.getByTestId("analysis-reason-row")).toHaveCount(0);
   expect(errors).toEqual([]);

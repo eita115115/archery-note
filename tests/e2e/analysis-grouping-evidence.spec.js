@@ -121,9 +121,8 @@ for (const width of [320, 375])
         const rms = page.locator('[data-testid="analysis-impact"] [data-fig="rms"] .n');
         if (count === 1 || count === 2) {
           const pending = page.getByTestId("analysis-impact-pending");
-          await expect(pending).toContainText("グループRMSは計算していません");
+          await expect(pending).toContainText("グルーピングは、矢が 3射になると出ます");
           await expect(pending).toContainText(`位置のある ${count}射`);
-          await expect(pending).toContainText("3射以上あるときに計算します");
           await expect(rms).toHaveCount(0);
           await expect(view).not.toContainText("0.0cm");
         } else if (count >= 3) {

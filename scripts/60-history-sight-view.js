@@ -465,7 +465,7 @@ function scoreDistCard(ss) {
       </div>`;
       })
       .join("") +
-    `<p class="basis">上の対象の全${count}射を、保存された点数で数えています。</p></section>`
+    `<p class="basis">上と同じ記録の全 ${count}射を、保存された点数で数えた内訳です。</p></section>`
   );
 }
 function monthlyCard(ss) {

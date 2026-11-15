@@ -114,7 +114,7 @@ for (const width of [320, 375, 900]) {
     /* 外れた理由の印は 射型 に、対象つきで出る */
     await page.locator('#analysisSubTabs [data-an="form"]').tap();
     const reasons = page.getByTestId("analysis-reasons");
-    await expect(reasons).toContainText("対象: 4回・12射のうち、理由の印がある 12射。");
+    await expect(reasons).toContainText("4回・12射のうち、理由の印がある 12射。");
     await expect(reasons.getByTestId("analysis-reason-row")).toHaveCount(2);
     expect(await practice(page)).toEqual(before);
     await page.reload();

@@ -728,15 +728,15 @@ test("a score-only session shows totals, and geometry says 着弾データなし
   // 分析 > 着弾・比較: 「着弾データなし」。的の図と統計は作らない
   await page.locator('#analysisSubTabs [data-an="impact"]').click();
   const noImpact = page.getByTestId("analysis-no-impact");
-  await expect(noImpact).toContainText("着弾データなし");
-  await expect(noImpact).toContainText("12射のうち、位置のある矢は 0射");
+  await expect(noImpact).toContainText("矢の位置がありません");
+  await expect(noImpact).toContainText("12射とも位置なし");
   await expect(page.locator("main svg.main")).toHaveCount(0);
   await expect(page.getByTestId("analysis-grouping-trend")).toHaveCount(0);
   await expectCleanText(page);
   expect(await page.locator("main").innerHTML()).not.toMatch(/NaN|undefined/);
   await page.locator('#analysisSubTabs [data-an="compare"]').click();
-  await expect(page.getByTestId("compare-plot-a")).toHaveText("着弾データなし");
-  await expect(page.getByTestId("compare-plot-b")).toHaveText("着弾データなし");
+  await expect(page.getByTestId("compare-plot-a")).toHaveText("位置の記録なし");
+  await expect(page.getByTestId("compare-plot-b")).toHaveText("位置の記録なし");
   await expect(page.locator('[data-row="rms"] [data-col="diff"]')).toHaveText("—");
   await expect(page.locator("main svg.main")).toHaveCount(0);
   await expectCleanText(page);
