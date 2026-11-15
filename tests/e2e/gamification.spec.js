@@ -305,7 +305,7 @@ test("finishing a session states the streak before and after as a plain fact in 
   await expect(summaryGam).not.toContainText(/伸びました|練習できました|始めましょう|！/);
   // 初回セッションなので「初矢」バッジの条件も同時に満たす（名前と理由を文で示す）
   await expect(page.getByTestId("summary-badges")).toContainText(
-    "この記録で条件を満たしたバッジ: 「初矢」",
+    "この記録で付いたバッジ: 「初矢」",
   );
   // 記録タブには、目標と連続記録を1行だけ出す
   await page.locator("#sumClose").click();

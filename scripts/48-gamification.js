@@ -98,29 +98,29 @@ function computeStreak(sessions, practiceDays, todayStr){
 /* check(ss, cur, ctx): ss=全セッション（cur を含む）, cur=判定対象セッション,
    ctx={streak, nowIso}。DOM・Date.now() 非依存（テスト再現性のため new Date() を呼ばない） */
 const BADGE_DEFS=[
-  {id:"first_arrow",name:"初矢",cat:"reach",reason:"初セッション完了（矢1本以上）",
+  {id:"first_arrow",name:"初矢",cat:"reach",reason:"最初の練習を記録した（1射以上）",
    check:function(ss,cur){ return gamAllArrows(cur).length>0; }},
-  {id:"century",name:"百射",cat:"reach",reason:"累計100本達成",
+  {id:"century",name:"百射",cat:"reach",reason:"合わせて 100射になった",
    check:function(ss){ return gamTotalShots(ss)>=100; }},
-  {id:"millennium",name:"千射",cat:"reach",reason:"累計1000本達成",
+  {id:"millennium",name:"千射",cat:"reach",reason:"合わせて 1000射になった",
    check:function(ss){ return gamTotalShots(ss)>=1000; }},
-  {id:"gold_end",name:"ゴールドエンド",cat:"accuracy",reason:"1エンド（3本以上）全矢が満点",
+  {id:"gold_end",name:"ゴールドエンド",cat:"accuracy",reason:"1エンド（3射以上）が全部満点だった",
    check:function(ss,cur){
      return (cur.ends||[]).some(e=>Array.isArray(e)&&e.length>=3&&e.every(a=>a&&a.s===gamPerfect(cur)));
    }},
-  {id:"perfect_end",name:"完璧なエンド",cat:"accuracy",reason:"1エンド（3本以上）全矢9点以上（field:5点以上）",
+  {id:"perfect_end",name:"完璧なエンド",cat:"accuracy",reason:"1エンド（3射以上）が全部 9点以上だった（フィールドは 5点以上）",
    check:function(ss,cur){
      const th=cur&&cur.faceType==="field"?5:9;
      return (cur.ends||[]).some(e=>Array.isArray(e)&&e.length>=3&&e.every(a=>a&&a.s>=th));
    }},
-  {id:"tight_group",name:"鋼のグルーピング",cat:"accuracy",reason:"RMS ≤ 1.5×リング幅（座標入力10本以上）",
+  {id:"tight_group",name:"鋼のグルーピング",cat:"accuracy",reason:"グルーピングの半径がリング幅の 1.5倍以内だった（的面に打った 10射以上）",
    check:function(ss,cur){
      const coords=gamAllArrows(cur).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
      if(coords.length<10) return false;
      const rms=gamGroupRms(coords);
      return rms!==null&&rms<=gamRingW(cur)*1.5;
    }},
-  {id:"pb_breaker",name:"自己ベスト更新",cat:"growth",reason:"同一 round・距離・的・本数（12本以上）で過去最高合計を超過",
+  {id:"pb_breaker",name:"自己ベスト更新",cat:"growth",reason:"同じラウンド・距離・的・射数（12射以上）で、これまでの最高点を超えた",
    check:function(ss,cur){
      const arrs=gamAllArrows(cur);
      if(arrs.length<12) return false;
@@ -138,28 +138,28 @@ const BADGE_DEFS=[
      },0);
      return my>best;
    }},
-  {id:"week_warrior",name:"週間戦士",cat:"consistency",reason:"1 ISO週に3セッション以上",
+  {id:"week_warrior",name:"週間戦士",cat:"consistency",reason:"1週間に 3回以上練習した",
    check:function(ss,cur){
      if(!cur||!cur.date) return false;
      const wk=gamIsoWeek(cur.date);
      if(!wk) return false;
      return (ss||[]).filter(s=>s&&s.date&&gamIsoWeek(s.date)===wk).length>=3;
    }},
-  {id:"month_master",name:"月間マスター",cat:"consistency",reason:"1暦月に10セッション以上",
+  {id:"month_master",name:"月間マスター",cat:"consistency",reason:"1か月に 10回以上練習した",
    check:function(ss,cur){
      if(!cur||!cur.date) return false;
      const mo=cur.date.slice(0,7);
      return (ss||[]).filter(s=>s&&s.date&&s.date.slice(0,7)===mo).length>=10;
    }},
-  {id:"streak_7",name:"継続の炎",cat:"consistency",reason:"ストリークのベストが7以上",
+  {id:"streak_7",name:"継続の炎",cat:"consistency",reason:"連続記録が 7日になった",
    check:function(ss,cur,ctx){ return !!(ctx&&ctx.streak&&ctx.streak.best>=7); }},
-  {id:"distance_explorer",name:"距離探検家",cat:"diversity",reason:"3種以上の距離で記録",
+  {id:"distance_explorer",name:"距離探検家",cat:"diversity",reason:"3つ以上の距離で記録した",
    check:function(ss){
      const d=new Set();
      (ss||[]).forEach(s=>{ if(s&&s.dist!=null) d.add(String(s.dist)); });
      return d.size>=3;
    }},
-  {id:"all_weather",name:"全天候射手",cat:"diversity",reason:"3種以上の天候条件で記録",
+  {id:"all_weather",name:"全天候射手",cat:"diversity",reason:"3つ以上の天候で記録した",
    check:function(ss){
      const w=new Set();
      (ss||[]).forEach(s=>{ if(s&&s.wx) w.add(s.wx); });

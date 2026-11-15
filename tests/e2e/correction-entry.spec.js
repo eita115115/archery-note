@@ -130,7 +130,7 @@ for (const config of [
             .getByRole("combobox", { name: "的", exact: true })
             .selectOption(String(config.faceD));
           await page
-            .getByRole("combobox", { name: "1エンドの本数", exact: true })
+            .getByRole("combobox", { name: "1エンドの射数", exact: true })
             .selectOption(String(config.perEnd));
           await page.getByTestId("record-start").click();
           const sessions = (await state(page)).sessions;

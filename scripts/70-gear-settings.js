@@ -255,24 +255,24 @@ function inferCatalogGear(vals) {
   const total = len ? gpi * len + (point || 100) + 27 : null;
   const gpiSource =
     fam.type === "aluminum"
-      ? "（番手から計算）"
+      ? "（スパインから計算）"
       : fam.gpi && fam.gpi[spine]
         ? "（メーカー掲載値）"
         : "（モデル別近似）";
   const diaSource =
     fam.type === "aluminum"
-      ? "（番手から計算）"
+      ? "（スパインから計算）"
       : fam.odIn && fam.odIn[spine]
         ? "（メーカー掲載値）"
         : "（代表値/推定）";
   const notes = [
-    `${fam.name} / 番手 ${spine} をカタログ掲載モデルとして認識`,
+    `${fam.name} / スパイン ${spine}番（カタログにあるモデル）`,
     `シャフト重量 ${gpi.toFixed(2)}gr/in${gpiSource}`,
     `外径 ${dia.toFixed(2)}mm${diaSource}`,
   ];
   if (!listed)
     notes.push(
-      `注意: 番手 ${spine} はこのモデルの掲載サイズ一覧では未確認のため、重量・外径は近似として扱います`,
+      `注意: スパイン ${spine}番は、このモデルのカタログの一覧では未確認です。重さと外径はおよその値です`,
     );
   if (total)
     notes.push(
@@ -568,7 +568,7 @@ const GEAR_FIELDS = [
   ["string", "弦"],
   ["stabilizer", "スタビライザー/ウエイト"],
   ["tab", "タブ/リリーサー"],
-  ["shaftSpine", "シャフト番手/スパイン"],
+  ["shaftSpine", "スパイン（番）"],
   ["arrowLength", "矢尺/シャフト長 (inch)"],
   ["pointWeight", "ポイント重量 (gr)"],
   ["arrowDia", "矢の外径 (mm)"],
@@ -582,7 +582,7 @@ const GEAR_FIELDS = [
   ["nock", "ノック/ノッキングポイント"],
   ["nockFit", "ノックフィット"],
   ["arrowSpeed", "実測初速 (fps / m/s・任意)"],
-  ["arrowCd", "抗力係数 Cd (任意)"],
+  ["arrowCd", "空気抵抗の係数 Cd (任意)"],
   ["bowEfficiency", "弓効率 (%)"],
   ["temperature", "気温 (℃)"],
   ["altitude", "標高 (m)"],
@@ -634,7 +634,7 @@ const GEAR_SECTIONS = [
     ],
   },
   {
-    title: "物理モデル補正",
+    title: "計算の細かい設定",
     keys: ["arrowSpeed", "arrowCd", "bowEfficiency", "temperature", "altitude", "humidity"],
   },
   { title: "メモ", keys: ["notes"] },
@@ -664,11 +664,11 @@ const GEAR_PLACEHOLDERS = {
   poundage: "例: 38",
   drawLength: "例: 28.5",
   arrowSpeed: "例: 205fps / 62.5m/s",
-  arrowCd: "未入力なら矢径とベインから推定",
-  bowEfficiency: "未入力なら矢の重さから推定",
+  arrowCd: "空なら矢の外径とベインから出します",
+  bowEfficiency: "空なら矢の重さから出します",
   stabilizer: "例: SHIBUYA Vanquish PRO",
   tab: "例: SHIBUYA APEX",
-  shaftSetWeightSpread: "同一セットの最大差。例: 3",
+  shaftSetWeightSpread: "同じセットの中でいちばん大きい差。例: 3",
   shaftStraightness: "例: 0.003",
   foc: "例: 12",
   tuningResult: "例: ベアシャフトが少し硬め / 30mで左右が揃った",
@@ -694,7 +694,7 @@ function choiceFieldHtml(id, lb, opts, value, placeholder, mode) {
   return `<label class="f" for="${id}Pick">${lb}</label>
     <select class="inp choicePick" id="${id}Pick" data-target="${id}">
       <option value="">選択なし</option>
-      ${opts.map((v) => `<option value="${esc(v)}" ${match === v ? "selected" : ""}>${esc(v)}</option>`).join("")}
+      ${opts.map((v) => `<option value="${esc(v)}" ${match === v ? "selected" : ""}>${esc(gearOptionLabel(v))}</option>`).join("")}
       <option value="${MANUAL_CHOICE}" ${custom ? "selected" : ""}>候補にないので手入力</option>
     </select>
     <input class="inp choiceManual ${custom ? "" : "is-hidden"}" id="${id}" value="${esc(inputValue)}"${md}${ph}>`;
@@ -794,7 +794,7 @@ function gearSectionHtml(sec, s) {
 function gearPrecisionProfile(s) {
   const checks = [
     ["arrowWeight", "矢重量"],
-    ["arrowDia", "矢径"],
+    ["arrowDia", "矢の外径"],
     ["arrowLength", "矢尺"],
     ["pointWeight", "ポイント重量"],
     ["poundage", "実測ポンド"],
@@ -841,23 +841,23 @@ function spineGuidance(s) {
     const aluminum = actual > 1200 && actual % 100 >= 10 && actual % 100 <= 20;
     if (aluminum) {
       ((state = "アルミ番手"),
-        (text = "アルミ番手はカーボンスパインと体系が違うため、番手表と実射で確認します。"));
+        (text = "アルミの矢のサイズはカーボンのスパインと数え方が違うので、メーカーの表と実射で確かめます。"));
     } else {
       const diff = actual - ideal;
       if (Math.abs(diff) <= 90) {
         state = "概ね候補域";
         tone = "ok";
-        text = "現在の番手は初期候補レンジに入っています。";
+        text = "いまのスパインは、初期候補の範囲に入っています。";
       } else if (diff > 90) {
         state = "柔らかめ寄り";
         tone = "warn";
         text =
-          "現在の番手は初期候補より柔らかめの可能性があります。矢飛びとチューニングを確認してください。";
+          "いまのスパインは、初期候補より柔らかめかもしれません。矢飛びとチューニングで確かめてください。";
       } else {
         state = "硬め寄り";
         tone = "warn";
         text =
-          "現在の番手は初期候補より硬めの可能性があります。矢飛びとチューニングを確認してください。";
+          "いまのスパインは、初期候補より硬めかもしれません。矢飛びとチューニングで確かめてください。";
       }
     }
   }
@@ -866,23 +866,23 @@ function spineGuidance(s) {
 function spineGuidanceHtml(s) {
   const g = spineGuidance(s);
   if (!g.ready)
-    return `<p class="basis" data-testid="gear-spine">スパインの初期候補: ${esc(g.missing.join("・"))}が未入力のため計算していません。</p>`;
+    return `<p class="basis" data-testid="gear-spine">スパインの初期候補: ${esc(g.missing.join("・"))}を入れると出ます。</p>`;
   const cur =
     g.actual == null
       ? ""
       : g.state === "アルミ番手"
-        ? `いまの番手 ${g.actual} はアルミの番手で、カーボンのスパインとは数え方が違うため比べていません。`
+        ? `いまの ${g.actual} はアルミの矢のサイズで、カーボンのスパインとは数え方が違うので、比べられません。`
         : g.state === "概ね候補域"
-          ? `いまの番手 ${g.actual} は目安 ${Math.round(g.ideal)} との差が 90 以内です。`
-          : `いまの番手 ${g.actual} は目安 ${Math.round(g.ideal)} より${g.state === "柔らかめ寄り" ? "柔らかい側" : "硬い側"}です（差 ${Math.abs(Math.round(g.actual - g.ideal))}）。`;
-  return `<p class="basis" data-testid="gear-spine">スパインの初期候補（カーボン）: ${g.candidates.join(" / ")}。実測ポンド・引き尺・矢尺 ${g.len.toFixed(1)}インチ・ポイント ${g.point}グレインからの概算（${g.eff.toFixed(1)}ポンド相当）です。${cur}メーカーの番手表でも確かめてください。</p>`;
+          ? `いまの ${g.actual}番は、目安の ${Math.round(g.ideal)}番に近い値です（差 90 以内）。`
+          : `いまの ${g.actual}番は、目安の ${Math.round(g.ideal)}番より${g.state === "柔らかめ寄り" ? "柔らかめ" : "硬め"}です。実際の矢飛びで確かめてください。`;
+  return `<p class="basis" data-testid="gear-spine">スパインの初期候補（カーボン）: ${g.candidates.join(" / ")}。実測ポンド・引き尺・矢尺 ${g.len.toFixed(1)}インチ・ポイント ${g.point}グレインから出したおよその値（${g.eff.toFixed(1)}ポンド相当）です。${cur}メーカーのスパイン表でも確かめてください。</p>`;
 }
 /* 軌道の計算に使う項目の入力状況（事実だけ。評価の語は付けない） */
 function gearPrecisionHtml(s) {
   const p = gearPrecisionProfile(s);
   const total = p.filled.length + p.missing.length;
   return `<p class="fact" data-testid="gear-inputs">サイトの予測と換算に使う ${total}項目のうち、${p.filled.length}項目が入力済みです。</p>
-    ${p.missing.length ? `<p class="basis">未入力: ${esc(p.missing.join("・"))}。未入力の項目は、一般的な値で代用して計算します。</p>` : ""}
+    ${p.missing.length ? `<p class="basis">未入力: ${esc(p.missing.join("・"))}。未入力の項目は、よくある値で代わりに計算します。</p>` : ""}
     ${spineGuidanceHtml(s)}`;
 }
 /* ---------- 弓具 > セッティング（v5 段 8。docs/design/v5/design.md 4.7） ----------
@@ -902,9 +902,26 @@ function gearViewSetup() {
 }
 const GEAR_JA_UNITS = { lbs: "ポンド", inch: "インチ", gr: "グレイン" };
 /* 入力は自由記述。数だけが入っているときに限り単位を付ける（「38lbs」のような入力は、そのまま出す） */
+/* 保存してある選択肢の値（データに残る）はそのまま。画面に出すときだけ、いまの言い方に直す（docs/design/voice.md 9章「保存してある値は触らない」） */
+const GEAR_OPTION_LABELS = {
+  Loose: "ゆるい",
+  Tight: "きつい",
+  右寄り: "右に集まる",
+  左寄り: "左に集まる",
+  縦散り: "縦に散る",
+  横散り: "横に散る",
+  硬め傾向: "硬め",
+  柔らかめ傾向: "柔らかめ",
+  距離別サイト校正: "距離ごとのサイト合わせ",
+};
+function gearOptionLabel(v) {
+  const k = String(v == null ? "" : v);
+  return Object.prototype.hasOwnProperty.call(GEAR_OPTION_LABELS, k) ? GEAR_OPTION_LABELS[k] : k;
+}
 function gearValueText(s, k) {
   const raw = String(s[k] == null ? "" : s[k]).trim();
   if (!raw) return "";
+  if (k === "nockFit" || k === "tuningResult" || k === "tuningMethod") return gearOptionLabel(raw);
   const unit = GEAR_UNIT_LABELS[k];
   if (!unit || !/^[+-]?\d+(\.\d+)?$/.test(raw)) return raw;
   return raw + (GEAR_JA_UNITS[unit] || unit);
@@ -981,7 +998,7 @@ function gearHistoryEntries(s) {
     /* parts: 項目名と変化を分けて持つ（行の中で 項目名 / 変化 の2段に組む）。text は parts をつないだ1文 */
     const parts = changes.map((c) => ({
       label: gearLabelUnit("", String(c.label || "項目")).label,
-      change: `${c.from || "未入力"} → ${c.to || "未入力"}`,
+      change: `${gearOptionLabel(c.from) || "未入力"} → ${gearOptionLabel(c.to) || "未入力"}`,
     }));
     out.push({
       date: (h && h.date) || "",
@@ -1024,13 +1041,13 @@ function gearHistoryHtml(s) {
   const list = gearHistoryEntries(s);
   const head = `<div class="vsecH"><h2>変更の履歴</h2><span class="aside">${list.length}件</span></div>`;
   if (!list.length)
-    return `<section class="vsec" data-testid="gear-history">${head}<p class="basis">まだありません。セッティングを編集するか、サイト値を記録すると、日付と一緒にここへ残ります。</p></section>`;
+    return `<section class="vsec" data-testid="gear-history">${head}<p class="basis">まだありません。セッティングを編集するか、サイトを記録すると、日付と一緒にここへ残ります。</p></section>`;
   const first = list.slice(0, GEAR_HISTORY_SHOWN),
     rest = list.slice(GEAR_HISTORY_SHOWN);
   return `<section class="vsec" data-testid="gear-history">${head}
     ${first.map(gearHistoryRowHtml).join("")}
     ${rest.length ? `<details class="gearMore"><summary>以前の変更（${rest.length}件）</summary>${rest.map(gearHistoryRowHtml).join("")}</details>` : ""}
-    <p class="basis">変更した日は、ノートと分析の比較にも表示します。</p>
+    <p class="basis">変更した日は、ノートと分析の比較にも出ます。</p>
   </section>`;
 }
 function gearSetupSubText(x) {
@@ -1042,7 +1059,7 @@ function renderGear(m) {
   if (!s) {
     m.innerHTML = `<div class="gearView" id="gearList"><div class="empty" data-testid="gear-empty">
       <b>セッティングはまだありません</b>
-      <p>登録すると、サイト台帳と記録がセッティングごとに分かれます。矢の外径は、的の線の判定に使います。</p>
+      <p>登録すると、サイトの記録と練習の記録がセッティングごとに分かれます。矢の外径は、的の線の判定に使います。</p>
       <button type="button" class="btn pri" id="gWizardEmpty" data-testid="gear-wizard-start">最初のセッティングを登録</button>
     </div></div>`;
     $("#gWizardEmpty").onclick = () => openSetupWizard();
@@ -1060,7 +1077,7 @@ function renderGear(m) {
     <div class="specSheet" data-testid="gear-spec-sheet">${rows.map(gearSpecRowHtml).join("")}</div>
     ${others.length ? `<details class="gearMore" data-testid="gear-spec-more"><summary>ほかの項目（${others.length}件）</summary>${others.map(gearSpecRowHtml).join("")}</details>` : ""}
     ${memo ? `<div class="gearMemo" data-testid="gear-spec-notes"><span class="lk">メモ</span><p>${esc(memo)}</p></div>` : ""}
-    <details class="gearMore" data-testid="gear-inputs-fold"><summary>計算に使う項目の入力状況</summary>${gearPrecisionHtml(s)}</details>
+    <details class="gearMore" data-testid="gear-inputs-fold"><summary>サイトの計算に使う項目</summary>${gearPrecisionHtml(s)}</details>
   </section>
   ${gearHistoryHtml(s)}
   <section class="vsec" data-testid="gear-others">
@@ -1075,7 +1092,7 @@ function renderGear(m) {
     <p class="basis">記録に使うセッティングは、記録の条件で選びます。</p>
   </section>
   <section class="vsec gearDangerSec">
-    <button type="button" class="lrow link gearDelRow" id="gDel" data-testid="gear-delete"><span class="lmain"><b>「${esc(s.name)}」をゴミ箱へ移す</b><span>このセッティングのサイト台帳も一緒に移します。練習の記録は残ります。設定 &gt; データ のゴミ箱から元に戻せます。</span></span>${NOTE_GO}</button>
+    <button type="button" class="lrow link gearDelRow" id="gDel" data-testid="gear-delete"><span class="lmain"><b>「${esc(s.name)}」をゴミ箱へ移す</b><span>このセッティングのサイトの記録も一緒に移します。練習の記録は残ります。設定 &gt; データ のゴミ箱から元に戻せます。</span></span>${NOTE_GO}</button>
   </section>
   </div>`;
   $("#gAdd").onclick = () => openGearForm(null);
@@ -1094,7 +1111,7 @@ function renderGear(m) {
   $("#gDel").onclick = async () => {
     if (
       await appConfirm(
-        `「${s.name}」をゴミ箱へ移しますか？\nこのセッティングのサイト台帳も一緒に移します。練習の記録は消えませんが、セッティングとのつながりは外れます。`,
+        `「${s.name}」をゴミ箱へ移しますか？\nこのセッティングのサイトの記録も一緒に移します。練習の記録は消えませんが、セッティングとのつながりは外れます。`,
         { danger: true, okLabel: "ゴミ箱へ移す" },
       )
     ) {
@@ -1159,21 +1176,21 @@ function openCustomRoundForm(id) {
   ovl.innerHTML = `<div class="sheet"><h3>${src ? "自作ラウンドの編集" : "自作ラウンドの追加"}</h3>
     <label class="f">名前 *</label><input class="inp" id="crName" value="${esc(src ? src.label : "")}" placeholder="例: 60m/30m 各36射">
     <div id="crStages"></div>
-    <div class="btnrow"><button class="btn sec" id="crAddStage">＋ ステージを追加</button></div>
-    ${src ? `<div class="btnrow"><button class="btn danger" id="crDel">この定義を削除</button></div>` : ""}
-    <div class="btnrow"><button class="btn ghost" id="crCancel">キャンセル</button><button class="btn" id="crSave">保存</button></div>
+    <div class="btnrow"><button class="btn sec" id="crAddStage">＋ 距離を追加</button></div>
+    ${src ? `<div class="btnrow"><button class="btn danger" id="crDel">このラウンドを完全に消す</button></div>` : ""}
+    <div class="btnrow"><button class="btn ghost" id="crCancel">やめる</button><button class="btn" id="crSave">保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#crCancel" });
   function stageRowHtml(st, i) {
     return `<div class="advice recordNeutralAdvice">
-      <div class="kv"><span><b>ステージ${i + 1}</b></span><span>${stages.length > 1 ? `<button type="button" class="btn sm ghost" data-del-stage="${i}">${icon("del")} 削除</button>` : ""}</span></div>
+      <div class="kv"><span><b>${i + 1}距離目</b></span><span>${stages.length > 1 ? `<button type="button" class="btn sm ghost" data-del-stage="${i}">${icon("del")} 削除</button>` : ""}</span></div>
       <div class="row">
         <div><label class="f">距離 (m)</label><input class="inp" data-st-dist="${i}" inputmode="numeric" value="${esc(st.dist == null ? "" : st.dist)}" placeholder="例: 60"></div>
         <div><label class="f">的</label><select class="inp" data-st-face="${i}">${CUSTOM_ROUND_FACES.map(([v, lb]) => `<option value="${v}" ${String(st.face) === v ? "selected" : ""}>${lb}</option>`).join("")}</select></div>
       </div>
       <div class="row">
         <div><label class="f">射数</label><input class="inp" data-st-arrows="${i}" inputmode="numeric" value="${esc(st.arrows == null ? "" : st.arrows)}" placeholder="例: 36"></div>
-        <div><label class="f">1エンドの本数</label><select class="inp" data-st-perend="${i}">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === (+st.perEnd || 6) ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+        <div><label class="f">1エンドの射数</label><select class="inp" data-st-perend="${i}">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === (+st.perEnd || 6) ? "selected" : ""}>${n}射</option>`).join("")}</select></div>
       </div>
     </div>`;
   }
@@ -1238,15 +1255,15 @@ function openCustomRoundForm(id) {
         arrows = +stages[i].arrows,
         perEnd = +stages[i].perEnd || 6;
       if (!(dist > 0 && arrows > 0)) {
-        toast(`ステージ${i + 1}の距離と射数を入力してください`);
+        toast(`${i + 1}距離目の距離と射数を入れてください`);
         return;
       }
       if (!Number.isInteger(arrows)) {
-        toast(`ステージ${i + 1}の射数は正の整数で入力してください`);
+        toast(`${i + 1}距離目の射数は、1 以上の整数で入れてください`);
         return;
       }
       if (perEnd > arrows) {
-        toast(`ステージ${i + 1}の1エンドの本数（${perEnd}本）が射数（${arrows}射）を超えています`);
+        toast(`${i + 1}距離目は、1エンドの射数（${perEnd}射）が全体の射数（${arrows}射）より多くなっています`);
         return;
       }
       const f = parseFaceChoice(stages[i].face);
@@ -1259,7 +1276,7 @@ function openCustomRoundForm(id) {
       db.active.roundGroup &&
       db.active.roundGroup.roundId === id &&
       !(await appConfirm(
-        "記録中のラウンドがあり、変更するとステージ進行が完了できなくなる可能性があります。保存しますか？",
+        "記録中のラウンドがあります。変えると、残りの距離へ進めなくなることがあります。保存しますか？",
         { okLabel: "保存する" },
       ))
     )
@@ -1283,7 +1300,7 @@ function openCustomRoundForm(id) {
     del.onclick = async () => {
       const activeWarn =
         db.active && db.active.roundGroup && db.active.roundGroup.roundId === id
-          ? "\n記録中のラウンドがあり、削除するとステージ進行が完了できなくなる可能性があります。"
+          ? "\n記録中のラウンドがあります。消すと、残りの距離へ進めなくなることがあります。"
           : "";
       if (
         await appConfirm(
@@ -1330,7 +1347,7 @@ function gamifySettingsHtml() {
   return `<div class="gamifySettings" data-testid="settings-group-gamification">
       ${settingsRowHtml(
         "練習の目標と連続記録",
-        "入にすると、週と月の目標・練習した日数を、記録タブとノートに 1行で表示します",
+        "入にすると、週と月の目標・練習した日数が、記録タブとノートに 1行で出ます",
         settingsSegHtml("gamEnabled", "gamify-toggle", "gm", g.enabled ? 1 : 0, [
           ["0", "切"],
           ["1", "入"],
@@ -1340,7 +1357,7 @@ function gamifySettingsHtml() {
         g.enabled
           ? `
       <div class="setBlock">
-        <div class="lmain"><b id="gamDayLabel">練習曜日</b><span>選んだ曜日に記録が無い日があると、連続記録が止まります。選ばないあいだは、連続記録を数えません</span></div>
+        <div class="lmain"><b id="gamDayLabel">練習曜日</b><span>選んだ曜日に記録が無い日があると、連続記録が止まります。選ぶまでは、連続記録は始まりません</span></div>
         <div class="gamifyDayChips" id="gamDayChips" data-testid="gamify-day-chips" role="group" aria-labelledby="gamDayLabel">
           ${DOW.map((lb, i) => `<button type="button" class="gamifyDayChip ${pd.includes(i) ? "on" : ""}" aria-pressed="${pd.includes(i)}" data-d="${i}">${lb}</button>`).join("")}
         </div>
@@ -1348,7 +1365,7 @@ function gamifySettingsHtml() {
       ${goalRow("gamGoalDaily", "gamify-goal-daily", "1日の目標", "射", goals.dailyArrows)}
       ${goalRow("gamGoalWeekly", "gamify-goal-weekly", "週の目標", "回", goals.weeklySessions)}
       ${goalRow("gamGoalMonthly", "gamify-goal-monthly", "月の目標", "射", goals.monthlyArrows)}
-      <p class="basis gamifyInfo">練習した日は、曜日に関係なく 1日と数えます。練習曜日に記録が無い日は、持っている「休み」を 1つ使い、無ければ連続記録が 0 に戻ります（当日はまだ判定しません）。「休み」は連続 7日ごとに 1つ増え、3つまで持てます。</p>
+      <p class="basis gamifyInfo">練習した日は、何曜日でも 1日に数えます。練習曜日に休むと「休み」を 1つ使い、「休み」が無いと 0日に戻ります（その日のうちは、まだ休みに数えません）。「休み」は 7日続けるごとに 1つ増え、3つまで持てます。</p>
       ${gamificationBadgesCardHtml()}
       `
           : ""
@@ -1378,7 +1395,7 @@ function formDiagnosticSettingsHtml() {
       <div class="btnrow">
         <button type="button" class="btn sec" id="fdV2Export" data-testid="form-diagnostic-export" ${enabled ? "" : "disabled"}>診断を書き出す</button>
       </div>
-      <div class="hint">入るのは数値だけです（射と引き戻しの時刻と確かさ、数えなかった保持とその理由、射ごとの値、測定のゆれ、置き方の判定、毎秒コマ数と画面の大きさ、アプリと解析器の版）。映像、画像、日付、メモ、練習や弓具との紐づけ、端末の中の ID は入りません。</div>
+      <div class="hint">入るのは数値だけです（射と引き戻しの時刻と確かさ、数えなかったフルドローとその理由、射ごとの値、カメラで測るときのぶれ、置き方の判定、毎秒コマ数と画面の大きさ、アプリと解析器の版）。映像、画像、日付、メモ、どの練習・弓具とつないだか、端末の中の ID は入りません。</div>
       <div class="lmain formDiagLm"><b id="fdLmLabel">体の点の列も含める</b><span>入にすると、撮った直後の結果の画面から書き出す診断に、その撮影の体の 9点（鼻・肩・肘・手首・腰）の位置の列も入ります。映像や画像ではありませんが、体の動きそのものの記録です。解析器の見直しを頼まれたときだけ入にしてください。保存した記録と、この画面からの書き出しには入りません。</span></div>
       <div class="seg" id="fdLmChips" data-testid="settings-form-debug-landmarks-chips" role="group" aria-labelledby="fdLmLabel">
         <button type="button" data-fl="0" aria-pressed="${!lm}" ${enabled ? "" : "disabled"}>切</button>
@@ -1508,7 +1525,7 @@ function openSettings() {
       )}
       ${settingsRowHtml(
         "射場モード",
-        "日光の下で読めるよう、濃淡の差を大きくします",
+        "日なたでも読めるように、色の差を大きくします",
         settingsSegHtml("fmChips", "settings-field-mode-chips", "fm", db.settings.fieldMode ? 1 : 0, [
           ["0", "切"],
           ["1", "入"],
@@ -1529,12 +1546,12 @@ function openSettings() {
       ${customRoundsSettingsHtml()}
       ${settingsRowHtml(
         `<label for="setEye">アイ〜サイト距離</label>`,
-        "サイト調整の目安を mm に換算するときに使います",
+        "サイトの目安を mm に直すときに使います",
         `<span class="fieldUnit setNum"><input class="inp" id="setEye" data-testid="settings-eye-sight" inputmode="numeric" value="${esc(db.settings.eyeSight || 850)}"><span class="fieldUnitLabel">mm</span></span>`,
       )}
       ${settingsRowHtml(
         "射型の記録（試験中）",
-        "カメラで射型を記録する機能を 分析 &gt; 射型 に出します。解析は端末の中で行い、映像は保存も送信もしません。初回だけ解析用のデータ（約15MB）を読み込みます",
+        "カメラで射型を記録する機能を 分析 &gt; 射型 に出します。読み取りは端末の中で行い、映像は保存も送信もしません。初回だけ、読み取りに使うデータ（約15MB）を読み込みます",
         settingsSegHtml("ftChips", "settings-form-tracking-chips", "ft", formTrackingOn ? 1 : 0, [
           ["0", "切"],
           ["1", "入"],
@@ -1543,12 +1560,12 @@ function openSettings() {
       )}
       ${settingsRowHtml(
         `<label for="setFormHeight">身長（任意）</label>`,
-        "射型の記録で、胴の長さに対する割合のとなりに cm の目安を出すときだけ使います。空のままなら cm は出しません。体格の比からの換算なので、±5% ほどの幅があります",
+        "射型の記録で、胴の長さに対する割合のとなりに cm の目安を出すときだけ使います。空のままなら cm は出ません。体格の比から出す値なので、±5% ほどの幅があります",
         `<span class="fieldUnit setNum"><input class="inp" id="setFormHeight" data-testid="settings-form-height" inputmode="numeric" placeholder="未設定" value="${esc(db.settings.formHeightCm || "")}"><span class="fieldUnitLabel">cm</span></span>`,
       )}
       ${settingsRowHtml(
         "検証用の診断データ",
-        "入のあいだに保存する射型の記録に、解析器の中の値（時刻の不確かさ、判定の点、数えなかった理由など。数値だけ）を付け、書き出せるようにします。撮影の画面と数え方は変わりません。ふだんは切のままで使えます",
+        "入のあいだに保存する射型の記録に、解析器の中の値（時刻の幅、判定の点、数えなかった理由など。数値だけ）を付け、書き出せるようにします。撮影の画面と数え方は変わりません。ふだんは切のままで使えます",
         settingsSegHtml("fdChips", "settings-form-debug-chips", "fd", db.settings.formDebug === true ? 1 : 0, [
           ["0", "切"],
           ["1", "入"],
@@ -1563,12 +1580,12 @@ function openSettings() {
       <div class="vsecH"><h2>データ</h2><span class="aside">この端末に保存・練習 ${counts.sessions}回</span></div>
       <p class="basis setWarn" data-testid="settings-data-warning"><b>記録は、この端末のブラウザの中だけにあります。</b>iPhone の「設定 → Safari → 履歴とWebサイトデータを消去」や、ブラウザの「サイトデータを削除」を行うと、このアプリの記録もすべて消えます。その操作の前と機種変更の前に、バックアップを書き出してください。${web ? "ブラウザで開いたまま 7日間使わないと、記録が消える場合があります。ホーム画面に追加すると、この制限を受けにくくなります。" : ""}</p>
       ${storageMeterHtml()}
-      ${settingsLinkHtml("dExp", "settings-export", "バックアップを書き出す", `練習の記録・メモ・セッティング・サイト台帳を 1つのファイル（JSON）にします。${esc(lastBackupText())}`, "")}
-      ${settingsLinkHtml("dImp", "settings-import", "バックアップから読み込む", "<b>いまのデータは、読み込んだ内容にすべて置き換わります。</b>置き換える前の状態は、下の自動バックアップに残します", "")}
+      ${settingsLinkHtml("dExp", "settings-export", "バックアップを書き出す", `練習の記録・メモ・セッティング・サイトの記録を 1つのファイル（JSON）にします。${esc(lastBackupText())}`, "")}
+      ${settingsLinkHtml("dImp", "settings-import", "バックアップから読み込む", "<b>いまのデータは、読み込んだ内容にすべて置き換わります。</b>置き換える前の状態は、下の「端末の中の控え」に残ります", "")}
       ${settingsLinkHtml("dCsv", "settings-csv", "表計算用に書き出す（CSV）", "練習の記録だけを書き出します。このファイルから元に戻すことはできません", "")}
       <input type="file" id="dFile" accept=".json" class="settingsFileInputHidden">
       <div class="setBlock" data-testid="settings-snapshots">
-        <div class="lmain"><b>自動バックアップ</b><span>書き出す・読み込む・控えに戻す操作のたびに、この端末の中に控えを残します（${snaps.length}件）。ブラウザのデータを消すと、控えも一緒に消えます</span></div>
+        <div class="lmain"><b>端末の中の控え</b><span>書き出す・読み込む・控えに戻す操作のたびに、この端末の中に控えを残します（${snaps.length}件）。ブラウザのデータを消すと、控えも一緒に消えます</span></div>
         ${snaps.length ? `<label class="f" for="dSnapSel">戻す控え</label><select class="inp" id="dSnapSel">${snaps.map((s, i) => `<option value="${esc(snapshotKey(s, i))}">${esc(snapshotWhenText(s))}</option>`).join("")}</select><p class="basis" id="dSnapInfo" data-testid="settings-snapshot-info">この控えの中身: ${esc(snapshotCountsText(snaps[0]))}</p>` : ""}
         <div class="btnRow">
           <button type="button" class="btn sec" id="dSnapNow" data-testid="settings-snapshot-now">いま控えを残す</button>
@@ -1576,14 +1593,14 @@ function openSettings() {
         </div>
         <p class="basis">控えに戻すと、<b>いまのデータは控えの内容に置き換わります。</b>置き換える前の状態も控えに残します。</p>
       </div>
-      ${settingsLinkHtml("setTrash", "settings-trash", "ゴミ箱", "ゴミ箱へ移した練習・メモ・セッティング・サイト値を、元に戻せます", `${trashCount}件`)}
+      ${settingsLinkHtml("setTrash", "settings-trash", "ゴミ箱", "ゴミ箱へ移した練習・メモ・セッティング・サイトの記録を、元に戻せます", `${trashCount}件`)}
       ${trashCount ? settingsLinkHtml("trashClear", "settings-trash-clear", "ゴミ箱を空にする", "<b>ゴミ箱の中身を完全に消します。元に戻せません</b>", "", "setDanger") : ""}
       ${hasDemo ? settingsLinkHtml("dDemoRemove", "settings-demo-remove", "デモデータを消す", "架空のデモの記録だけを完全に消します。自分の記録は変わりません", "", "setDanger") : ""}
     </section>
 
     <section class="vsec" data-testid="settings-group-app">
       <div class="vsecH"><h2>アプリ</h2></div>
-      ${settingsLinkHtml("setAddHome", "settings-add-home", "ホーム画面に追加", web ? "いまはブラウザで開いています。追加の手順を表示します" : "ホーム画面から開いています", "")}
+      ${settingsLinkHtml("setAddHome", "settings-add-home", "ホーム画面に追加", web ? "いまはブラウザで開いています。追加のしかたを見られます" : "ホーム画面から開いています", "")}
       <div class="lrow" data-testid="settings-version"><span class="lk">版</span><span class="lv settingsVersionFooter">Archery Note v${APP_VER}<small>${canUpdate ? "新しい版があります" : "新しい版は、起動したときと画面に戻ったときに確かめます"}</small></span></div>
       ${canUpdate ? `<div class="btnRow"><button type="button" class="btn sec" id="setUpdate" data-testid="settings-update">新しい版に更新する</button></div>` : ""}
       <div class="lrow" data-testid="settings-license"><span class="lk">ライセンス</span><span class="lv">PolyForm Noncommercial 1.0.0<small>非営利の利用に限ります</small></span></div>
@@ -1841,7 +1858,7 @@ function openSettings() {
         const warnText = vr.warnings.length ? `\n注意: ${vr.warnings.join("、")}` : "";
         if (
           await appConfirm(
-            `読み込むと、いまのデータは読み込んだ内容にすべて置き換わります。\n（練習${(d.sessions || []).length}回 / セッティング${(d.setups || []).length}件 / メモ${Array.isArray(d.notes) ? d.notes.length : 0}件）${warnText}\n置き換える前の状態は、自動バックアップに残します。`,
+            `読み込むと、いまのデータは読み込んだ内容にすべて置き換わります。\n（練習${(d.sessions || []).length}回 / セッティング${(d.setups || []).length}件 / メモ${Array.isArray(d.notes) ? d.notes.length : 0}件）${warnText}\n置き換える前の状態は、端末の中の控えに残ります。`,
             { danger: true, okLabel: "読み込む" },
           )
         ) {
@@ -1934,7 +1951,7 @@ function openSetupWizard() {
     </div>
     ${choiceFieldHtml("wArrow", "シャフト銘柄", choiceOpts("arrow"), "", "例: EASTON X10", "")}
     <div class="row">
-      <div><label class="f">番手/スパイン</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
+      <div><label class="f">スパイン（番）</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
       <div><label class="f">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
     </div>
     <div class="row">
@@ -1944,7 +1961,7 @@ function openSetupWizard() {
     <div class="hint">矢の外径は、的の線の判定に使います。未入力のときは、カタログにある矢はカタログの値、それ以外は ${DEFAULT_ARROW_DIA_MM}mm を使います。</div>
     ${choiceFieldHtml("wSight", "サイト", choiceOpts("sight"), "", "", "")}
     <details class="adv" open>
-      <summary>サイト値（分かる距離だけ）</summary>
+      <summary>サイト（分かる距離だけ）</summary>
       ${[70, 50, 30, 18]
         .map(
           (d) => `<div class="row">
@@ -2019,7 +2036,7 @@ function openGearForm(id) {
     <label class="f" for="gfName">名前（必須）</label><input class="inp" id="gfName" value="${esc(s ? s.name : "")}" placeholder="例: メイン70m仕様">
     ${GEAR_SECTIONS.map((sec) => gearSectionHtml(sec, s)).join("")}
     <div class="btnRow"><button type="button" class="btn sec" id="gfInfer">カタログの値を入れる</button></div>
-    <div class="hint" id="gfInferHint">シャフト銘柄と番手から、カタログにある外径・1インチあたりの重さ・矢の重さを入れます。入れた値は保存の前に直せます。</div>
+    <div class="hint" id="gfInferHint">シャフト銘柄とスパインから、カタログにある外径・1インチあたりの重さ・矢の重さを入れます。入れた値は保存の前に直せます。</div>
     <div class="actbar"><button type="button" class="btn pri" id="gfSave" data-testid="gear-form-save">保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#gfCancel", swipe: false });
@@ -2032,13 +2049,13 @@ function openGearForm(id) {
     const hint = ovl.querySelector("#gfInferHint");
     if (!inf) {
       hint.textContent =
-        "カタログ推定できるシャフト名が見つかりませんでした。例: EASTON X10 / EASTON A/C/E / EASTON Avance / EASTON XX75 Platinum Plus";
+        "カタログにあるシャフト名が見つかりませんでした。例: EASTON X10 / EASTON A/C/E / EASTON Avance / EASTON XX75 Platinum Plus";
       toast("シャフト名を読み取れません");
       return;
     }
     if (inf.missing) {
-      hint.textContent = `${inf.fam.name} は見つかりました。番手/スパイン欄も入力してください。`;
-      toast("番手を追加してください");
+      hint.textContent = `${inf.fam.name} は見つかりました。スパインの欄も入れてください。`;
+      toast("スパインを入れてください");
       return;
     }
     const set = (k, v) => setChoiceValue(ovl, "gf_" + k, v);
@@ -2050,7 +2067,7 @@ function openGearForm(id) {
     const note = `カタログ推定: ${inf.notes.join(" / ")}`;
     ovl.querySelector("#gf_notes").value = old ? `${old}\n${note}` : note;
     hint.innerHTML = inf.notes.map(esc).join("<br>");
-    toast("カタログ情報から推定しました");
+    toast("カタログの値を入れました");
   };
   ovl.querySelector("#gfSave").onclick = () => {
     const name = ovl.querySelector("#gfName").value.trim();

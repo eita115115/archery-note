@@ -69,29 +69,29 @@ async function readRow(page, info, name, width) {
 }
 /* v5 段 5: 事実（これまでの最高とその日付、今回との差）→ 対象。評価語・「更新」「あと◯点」は書かない */
 function assertCopy(row, projected, relation, n, label, total, bestTotal) {
-  const word = label === "今日" ? "今回" : "この回";
+  const word = label === "今日" ? "今回" : "この日";
   expect(row.primary).toContain(`${bestTotal} 点`);
   expect(row.primary).toContain("10/2");
   expect(row.text).not.toMatch(/更新|あと|ペース|自己ベスト|上回りました|並びました|！|!/);
   if (projected) {
-    expect(row.primary).toContain(`${n}射に換算すると ${bestTotal} 点`);
-    expect(row.detail).toContain("換算値（推定）");
-    expect(row.detail).toContain("実際の合計の最高ではありません");
+    expect(row.primary).toContain("同じ射数の記録がまだないので");
+    expect(row.primary).toContain(`${n}射ぶんに直すと ${bestTotal} 点です`);
+    expect(row.detail).toContain("計算で出した点数で、実際に出した最高点ではありません。");
     expect(row.primary).not.toContain("最高です");
     if (relation === "above")
-      expect(row.primary).toContain(`${word}はそれより ${total - bestTotal} 点高い値です`);
+      expect(row.primary).toContain(`${word}はそれより ${total - bestTotal} 点高い点数です`);
     if (relation === "tie") expect(row.primary).toContain(`${word}と同じです`);
   } else {
-    expect(row.text).not.toContain("換算");
-    expect(row.text).not.toContain("推定");
-    expect(row.detail).toContain(`対象: 18m・40cm的・${n}射の、この日までの記録。`);
+    expect(row.text).not.toContain("ぶんに直すと");
+    expect(row.text).not.toContain("計算で出した");
+    expect(row.detail).toContain(`18m・40cm的・${n}射の、この日までの記録と比べました。`);
     if (relation === "above")
       expect(row.primary).toContain("この距離・的・射数で最高です（これまで");
     if (relation === "tie") expect(row.primary).toContain("これまでの最高（");
     if (relation === "tie") expect(row.primary).toContain("と同じです");
   }
   if (relation === "below")
-    expect(row.primary).toContain(`${word}との差は −${bestTotal - total} 点です`);
+    expect(row.primary).toContain(`${word}はそれより ${bestTotal - total} 点低い点数です`);
 }
 async function seed(page, theme, active) {
   await page.addInitScript(

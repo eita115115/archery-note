@@ -31,9 +31,17 @@ test("newer version banner reload preserves demo records", async ({ browser, bas
   const page = await context.newPage();
   try {
     await page.route("**/version.json?*", async (route) => {
-      const response = await route.fetch();
-      const version = await response.json();
-      await route.fulfill({ json: { ...version, v: version.v + 1 } });
+      /* 更新の帯を押すとページが読み直され、読み直しの途中の version.json の応答は捨てられる。
+         そのときは偽の版を返す必要が無いので、その要求はそのまま通す（帯の表示と記録の保持は下で確かめる） */
+      let version;
+      try {
+        const response = await route.fetch();
+        version = await response.json();
+      } catch {
+        await route.continue().catch(() => {});
+        return;
+      }
+      await route.fulfill({ json: { ...version, v: version.v + 1 } }).catch(() => {});
     });
     await page.goto(baseURL);
     await page.getByRole("button", { name: "架空のデモデータで試す" }).click();

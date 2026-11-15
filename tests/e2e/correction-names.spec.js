@@ -32,7 +32,7 @@ for (const width of [320, 375]) {
     await page.getByTestId("record-conditions").click();
     await page.getByRole("button", { name: "70m", exact: true }).click();
     await page.getByRole("combobox", { name: "的", exact: true }).selectOption("122");
-    await page.getByRole("combobox", { name: "1エンドの本数", exact: true }).selectOption("6");
+    await page.getByRole("combobox", { name: "1エンドの射数", exact: true }).selectOption("6");
     await page.getByTestId("record-start").click();
     for (let i = 0; i < 2; i++) {
       await settle(page);

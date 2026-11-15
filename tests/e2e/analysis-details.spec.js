@@ -86,7 +86,7 @@ for (const width of [320, 375, 900]) {
     );
     /* 2回では傾向の文を出さない */
     await expect(page.getByTestId("analysis-trend")).toHaveCount(0);
-    await expect(page.getByTestId("analysis-trend-pending")).toContainText("いまは 2回");
+    await expect(page.getByTestId("analysis-trend-pending")).toContainText("（いま 2回）");
     /* 条件ごとの記録（全条件）と月ごとのまとめ */
     await expect(page.getByTestId("analysis-cond-row")).toHaveCount(2);
     const monthly = page.getByTestId("analysis-monthly");
@@ -106,7 +106,7 @@ for (const width of [320, 375, 900]) {
     await expect(page.getByTestId("analysis-target")).toContainText("1回・3射");
     await expect(page.getByTestId("analysis-target")).toContainText("期間は直近7日");
     await page.locator("#anSetup").selectOption("detail-b");
-    await expect(page.getByTestId("analysis-score-none")).toContainText("0回");
+    await expect(page.getByTestId("analysis-score-none")).toContainText("に合う記録はありません");
     await expect(page.locator("#anCond option:checked")).toHaveText("30m・40cm的・3射");
     await page.locator("#anSetup").selectOption("");
     await page.locator("#anPeriod").selectOption("all");
@@ -114,7 +114,7 @@ for (const width of [320, 375, 900]) {
     /* 外れた理由の印は 射型 に、対象つきで出る */
     await page.locator('#analysisSubTabs [data-an="form"]').tap();
     const reasons = page.getByTestId("analysis-reasons");
-    await expect(reasons).toContainText("対象: 4回・12射のうち、理由の印がある 12射。");
+    await expect(reasons).toContainText("4回・12射のうち、理由の印がある 12射。");
     await expect(reasons.getByTestId("analysis-reason-row")).toHaveCount(2);
     expect(await practice(page)).toEqual(before);
     await page.reload();

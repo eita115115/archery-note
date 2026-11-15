@@ -67,8 +67,8 @@ assert(surface.includes("読み込みに時間がかかっています") && surf
 assert(surface.includes("前回と同じ条件") && surface.includes("記録の途中です") && surface.includes("最初の条件を選ぶ") && surface.includes("homeStartBandHtml") && surface.includes("quickStart") && surface.includes("quickStartMeta") && surface.includes("beginRecording") && !surface.includes("今の条件で開始") && surface.includes("recordSetupSnapshot") && !surface.includes("gearHeroHtml"), "record tab home (start band) missing");
 assert(scripts.includes('class="recScreen') && !scripts.includes("compactHud") && !surface.includes("まず今日の記録を始める。詳しい材料") && !surface.includes("距離・的サイズはこの画面で変更できます") && !surface.includes("タップ＆ドラッグで確定"), "Record screen should stay compact and low-noise");
 assert(surface.includes("levelFromScore") && surface.includes("function sessionSightFoldHtml") && !surface.includes("summarySightDialHtml") && !surface.includes("summaryDecisionHtml"), "record UI helpers missing");
-assert(surface.includes("activeGuideHtml") && surface.includes("初回の操作ガイド") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
-assert(surface.includes("SHOT_REASON_TAGS") && surface.includes("外れ理由") && surface.includes("矢番号") && surface.includes("arrowMetaSummaryHtml"), "Shot reason and arrow-number note UI missing");
+assert(surface.includes("activeGuideHtml") && surface.includes("はじめての使い方") && surface.includes("activeGuideSeen"), "First-run active recording guide missing");
+assert(surface.includes("SHOT_REASON_TAGS") && surface.includes("外れた理由") && surface.includes("矢番号") && surface.includes("arrowMetaSummaryHtml"), "Shot reason and arrow-number note UI missing");
 assert(surface.includes("window.PointerEvent") && surface.includes("touchstart") && surface.includes("mousedown"), "Input fallback handlers missing");
 assert(surface.includes("createSVGPoint()"), "SVG coordinate fallback missing");
 assert(surface.includes("Array.prototype.flat") && surface.includes("Object.values") && surface.includes("Math.hypot"), "Compatibility polyfills missing");
@@ -97,7 +97,7 @@ assert(/else if\(item\.type==="note"\)/.test(surface), "restoreTrash must restor
 assert(surface.includes("nativePulse") && surface.includes("shareOrDownloadText") && surface.includes("capPlugin") && surface.includes("updateAppChrome") && surface.includes("freshReload"), "Native interaction layer missing");
 assert(surface.includes("storageGetItem") && surface.includes("storageSetItem") && surface.includes("storageDriverProfile"), "Storage adapter missing");
 assert(surface.includes("scheduleSafetySnapshot") && surface.includes("flushSafetySnapshot") && surface.includes("requestIdleCallback"), "Deferred snapshot saving missing");
-assert(surface.includes("自動バックアップ") && surface.includes("いま控えを残す") && surface.includes("控えの内容に戻しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "Backup settings copy should be user-facing");
+assert(surface.includes("端末の中の控え") && !surface.includes("自動バックアップ") && surface.includes("いま控えを残す") && surface.includes("控えの内容に戻しました") && !surface.includes("\u81ea\u52d5\u9000\u907f") && !surface.includes("\u9000\u907f\u30c7\u30fc\u30bf"), "Backup settings copy should be user-facing");
 assert(surface.includes("ArcheryPhysicsCore") && surface.includes("window.ArcheryPhysicsCore"), "Physics core interface missing");
 
 const storageApi = new Function(section("const KEY=", "function uid") + "\nreturn {normalizeDb,blankDb,dataCounts,hashText,snapshotLabel,storageGetItem,storageSetItem,storageDriverProfile};")();
@@ -269,7 +269,7 @@ assert(scripts.includes('data-testid="active-menu"') && scripts.includes('data-t
 assert(scripts.includes("中心を拡大") && scripts.includes("全体に戻す") && !scripts.includes("zoomChips") && !scripts.includes('data-z="'), "Target zoom must be the single centre-zoom button");
 assert(!/toast\(`エンド\$\{[^`]*確定/.test(scripts) && scripts.includes('id="arrowAnnounce" aria-live="polite"') && scripts.includes('id="recMsg" aria-live="polite"'), "Recording feedback must use the status row and aria-live, not toasts");
 assert(scripts.includes('id="curChips" data-testid="active-arrow-chips"') && scripts.includes('data-i="${i}"') && scripts.includes("NUDGE_STEP_CM = 0.1") && scripts.includes("選択中の矢を${name}に微調整") && scripts.includes("選択中の矢を削除"), "Current-end slots and 1mm correction bar missing");
-assert(scripts.includes("drag.out || outsideTarget(cp)") && scripts.includes("離すと記録しません"), "Releasing outside the target must cancel the arrow");
+assert(scripts.includes("drag.out || outsideTarget(cp)") && scripts.includes("離すと記録されません"), "Releasing outside the target must cancel the arrow");
 assert(scripts.includes("scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s))") && scripts.includes("scoreAt(rec.x, rec.y, s.faceD, s.faceType, arrowR)"), "Corrections must re-score with the drawn arrow radius");
 
 /* スコア表: 表示は高い点から（X → 10 → … → M）、保存は打った順のまま。計・累計・数える列・小計は保存された点数から数える */

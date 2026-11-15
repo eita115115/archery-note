@@ -121,9 +121,8 @@ for (const width of [320, 375])
         const rms = page.locator('[data-testid="analysis-impact"] [data-fig="rms"] .n');
         if (count === 1 || count === 2) {
           const pending = page.getByTestId("analysis-impact-pending");
-          await expect(pending).toContainText("グループRMSは計算していません");
+          await expect(pending).toContainText("グルーピングは、矢が 3射になると出ます");
           await expect(pending).toContainText(`位置のある ${count}射`);
-          await expect(pending).toContainText("3射以上あるときに計算します");
           await expect(rms).toHaveCount(0);
           await expect(view).not.toContainText("0.0cm");
         } else if (count >= 3) {
@@ -153,7 +152,7 @@ for (const width of [320, 375])
         await settled(page);
         const history = await page.locator(".ovl").last().innerText();
         if (count === 1 || count === 2) {
-          expect(history).toContain("グループ RMS は比べていません");
+          expect(history).toContain("グルーピングはまだ出ません");
           expect(history).not.toContain("グルーピングは良好");
         }
         if (count >= 1) {
@@ -221,7 +220,7 @@ test("native one-arrow finish stays pending across analysis and history", async 
   await tap(page, "#bMenu"); // v5: 終了はメニューの中
   await tap(page, "#bFinish");
   await expect(page.getByTestId("todays-result-stability-pending")).toContainText(
-    "位置のある矢が1射",
+    "位置のある矢が 1射",
   );
   await settled(page);
   await page.screenshot({ path: testInfo.outputPath("native-summary.png") });
@@ -241,7 +240,7 @@ test("native one-arrow finish stays pending across analysis and history", async 
   await tap(page, '#tabs [data-v="history"]');
   await page.locator(`.historyRow[data-id="${current.id}"]`).click();
   const text = await page.locator(".ovl").last().innerText();
-  expect(text).toContain("グループ RMS は比べていません");
+  expect(text).toContain("グルーピングはまだ出ません");
   expect(text).not.toContain("グルーピングは良好");
   await tap(page, "#hClose");
   await page.reload();

@@ -188,10 +188,10 @@ function copyFormPhaseDiagnosticsForRecord(formPhaseDiag,phaseCounts,receiptSnap
 /* シャドー判定のショット一覧タグ（撮影画面）。judgment を利用者向けの短い日本語に変換する。
    あくまで参考表示（ベータ）で、既存のリリース検出結果を変えるものではない旨は撮影画面のhintで案内。 */
 function formArrowCheckLabel(judgment,reason){
-  if(judgment==="shot-match") return "矢: 発射と一致";
-  if(judgment==="letdown-mismatch") return "矢: 引き戻しの疑い（要確認）";
+  if(judgment==="shot-match") return "矢: リリースと合っています";
+  if(judgment==="letdown-mismatch") return "矢: 引き戻しかもしれません";
   /* 発射の前に矢が写っていなければ、消えたかどうかは言えない（AN-098）。事実だけを短く出す */
-  if(reason==="no-arrow-before-release") return "矢: 発射前に写らず判定なし";
+  if(reason==="no-arrow-before-release") return "矢: リリースの前に写らず、分かりません";
   return null; // そのほかの unclear は表示しない（判定材料不足を煽らない）
 }
 function formArrowCheckTagHtml(arrowCheck){
@@ -238,7 +238,7 @@ function formSelfBaselineLabel(value, key, priorRecords){
   if(priorVals.length<3) return `${value.toFixed(0)}°`;
   const base=formMedian(priorVals);
   const d=Math.round(value)-Math.round(base);
-  return `${value.toFixed(0)}°（以前の ${priorVals.length}件の中央値 ${base.toFixed(0)}° との差 ${d>0?"+":d<0?"−":""}${Math.abs(d)}°）`;
+  return `${value.toFixed(0)}°（以前の ${priorVals.length}件のまん中 ${base.toFixed(0)}° ${d===0?"と同じ":`より ${Math.abs(d)}°${d>0?"大きい":"小さい"}`}）`;
 }
 
 function formTrendMiniHtml(records=db.formAnalyses||[]){
@@ -254,9 +254,9 @@ function formTrendMiniHtml(records=db.formAnalyses||[]){
   const px=i=>(i/(series.length-1))*W;
   const py=v=>H-6-((v-min)/span)*(H-12);
   const path=series.map((p,i)=>`${i?"L":"M"}${px(i).toFixed(1)},${py(p.bowArm).toFixed(1)}`).join("");
-  return `<div class="formTrendLabel"><b>弓手肘の推移</b><span>${series.length}回 · ${min.toFixed(0)}〜${max.toFixed(0)}°</span></div>
-  <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H}px" role="img" aria-label="弓手肘角度の推移">
-    <title>弓手肘角度の推移: ${series.length}回、${min.toFixed(0)}〜${max.toFixed(0)}°</title>
+  return `<div class="formTrendLabel"><b>押し手の肘の推移</b><span>${series.length}回 · ${min.toFixed(0)}〜${max.toFixed(0)}°</span></div>
+  <svg width="100%" viewBox="0 0 ${W} ${H}" style="max-height:${H}px" role="img" aria-label="押し手の肘の角度の推移">
+    <title>押し手の肘の角度の推移: ${series.length}回、${min.toFixed(0)}〜${max.toFixed(0)}°</title>
     <path d="${path}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
     ${series.map((p,i)=>`<circle cx="${px(i).toFixed(1)}" cy="${py(p.bowArm).toFixed(1)}" r="3" fill="var(--green)"/>`).join("")}
   </svg>`;
@@ -267,11 +267,11 @@ function formScoreLinkHtml(records=db.formAnalyses||[]){
   const s=link.split;
   const diff=s.stableAvg-s.driftAvg;
   return `<div class="advice" style="background:var(--card);border-color:var(--line)">
-    <div class="note"><b>ドリフトを観測した射の割合と得点</b>（練習に紐付いた ${link.n} 記録）</div>
-    <div class="kv"><span>ドリフトの射が半分未満の回</span><span>平均 <b>${s.stableAvg.toFixed(2)}</b>（${s.stableN}回）</span></div>
-    <div class="kv"><span>ドリフトの射が半分以上の回</span><span>平均 <b>${s.driftAvg.toFixed(2)}</b>（${s.driftN}回）</span></div>
-    ${link.excluded?`<div class="note">測り方の違う記録 ${link.excluded}件は、この比較に入れていません。</div>`:""}
-    <div class="note">差（半分未満の回 − 半分以上の回）は ${diff>0?"+":diff<0?"−":"±"}${Math.abs(diff).toFixed(2)} 点/射です。ドリフト = リリース前 0.5 秒に、弓手か引き手が以前の方式の決めた幅より大きく動いたこと。その幅と「半分」という境目は確かめていない値で、回数も少なく、ほかの条件もそろえていません。射型が原因とは言えません。</div>
+    <div class="note"><b>リリース前に腕が動いた射の割合と得点</b>（練習とつないだ ${link.n} 記録）</div>
+    <div class="kv"><span>動いた射が半分未満の回</span><span>平均 <b>${s.stableAvg.toFixed(2)}</b>（${s.stableN}回）</span></div>
+    <div class="kv"><span>動いた射が半分以上の回</span><span>平均 <b>${s.driftAvg.toFixed(2)}</b>（${s.driftN}回）</span></div>
+    ${link.excluded?`<div class="note">測り方の違う記録 ${link.excluded}件は、この比較に入っていません。</div>`:""}
+    <div class="note">差（半分未満の回 − 半分以上の回）は ${diff>0?"+":diff<0?"−":"±"}${Math.abs(diff).toFixed(2)} 点/射です。ここでの「動いた」は、リリース前 0.5 秒に、押し手か引き手が、以前の方式で決めた幅より大きく動いたことです。その幅と「半分」という境目は確かめていない値で、回数も少なく、ほかの条件もそろっていません。射型が理由だとは言い切れません。</div>
   </div>`;
 }
 /* 以前の記録（撮りながら数える方式で保存した記録。cap が無いか、cap.g が 2 以下）。
@@ -288,20 +288,20 @@ function formLegacyRecordsHtml(records){
     const date=sightDateInfo(r).label;
     return `<div class="formAnalysisRow">
       <button class="listItem recordReadOnlyItem formRecordItem" data-form-id="${esc(r.id)}" type="button">
-      <span class="formRecordHead"><span>${esc(date)} · ${s.shots}射</span>${r.sessionId?`<span class="formRecordLink">練習に紐付け</span>`:""}</span>
-      <span class="formRecordAngles"><span>弓手肘 <b>${s.bowArm!=null?s.bowArm.toFixed(0)+"°":"—"}</b></span><span>引き手肘 <b>${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</b></span></span>
+      <span class="formRecordHead"><span>${esc(date)} · ${s.shots}射</span>${r.sessionId?`<span class="formRecordLink">練習とつないだ記録</span>`:""}</span>
+      <span class="formRecordAngles"><span>押し手の肘 <b>${s.bowArm!=null?s.bowArm.toFixed(0)+"°":"—"}</b></span><span>引き手の肘 <b>${s.drawArm!=null?s.drawArm.toFixed(0)+"°":"—"}</b></span></span>
       ${comparison?`<span class="formRecordComparison">${esc(comparison)}</span>`:""}
-      <span class="formRecordMeta">保持 ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} · アンカーのばらつき ${s.anchorStd!=null?`σ ${s.anchorStd.toFixed(3)}（${s.anchorN}射）`:"—"}</span>
+      <span class="formRecordMeta">フルドロー ${s.holdS!=null?s.holdS.toFixed(1)+"秒":"—"} · アンカーのぶれ ${s.anchorStd!=null?`±${(s.anchorStd*100).toFixed(1)}%（${s.anchorN}射）`:"—"}</span>
       </button>
-      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射型記録を削除">${icon("del")}</button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${esc(r.id)}" type="button" aria-label="${esc(date)}の射型の記録をゴミ箱へ移す">${icon("del")}</button>
     </div>`;
   }).join("");
   return `<div class="formLegacy" data-testid="analysis-form-legacy"><div class="vsecH"><h2>以前の記録</h2><span class="aside">${allRecs.length}件${allRecs.length>5?"・新しい5件を表示":""}</span></div>
-    <p class="basis" data-testid="analysis-form-legacy-note">撮りながら数える以前の方式で保存した記録です。測り方が違うので、新しい記録とは比べず、推移にも入れていません。記録はそのまま残してあり、開くと射ごとの値を見られます。以前の画面にあった評価の語と助言は、決めた幅に根拠が無いので出していません。</p>
+    <p class="basis" data-testid="analysis-form-legacy-note">以前の方式（撮りながら数える）で保存した記録です。測り方が違うので、新しい記録とは比べず、推移にも入りません。記録はそのまま残っていて、開くと射ごとの値を見られます。以前の画面にあった評価と助言は、根拠が足りなかったので、いまは出ません。</p>
     ${formTrendMiniHtml(allRecs)}
     <div class="formRecordList">${rows}</div>
     ${formScoreLinkHtml(records)}
-    <p class="basis" data-testid="analysis-form-legacy-basis">対象: 期間は撮影日、弓具・距離は紐付いた練習の条件で選んでいます。紐付けのない記録は保存された弓具だけで選び、距離は推測しません。弓手肘は中央値です。アンカーのばらつきは、射ごとのアンカー位置（胴の長さに対する比）の標準偏差で、2射以上の記録に出します。撮影の位置と角度が違う記録の差は、射型の差とは限りません。${allRecs.some(r=>formRecordGeometry(r)!==formRecordGeometry(allRecs[0]))?"画面の向きによる差を補正する前の記録と後の記録は測り方が違うため、互いに比べていません。":""}</p>
+    <p class="basis" data-testid="analysis-form-legacy-basis">期間は撮影日、弓具・距離はつないだ練習の条件で選ばれます。練習とつないでいない記録は、保存された弓具だけで選ばれ、距離は推測しません。押し手の肘は、その記録の射のまん中の値です。アンカーのぶれは、射ごとにアンカーの位置がどれだけ動いたかを、胴の長さに対する割合で表した値で、2射以上の記録に出ます。撮影の位置と角度が違う記録の差は、射型の差とは言い切れません。${allRecs.some(r=>formRecordGeometry(r)!==formRecordGeometry(allRecs[0]))?"画面の向きの違いを直す前の記録と、直したあとの記録は、測り方が違うので比べられません。":""}</p>
   </div>`;
 }
 
@@ -323,14 +323,14 @@ function bindFormTrackingCard(){
     const recordId=b.dataset.delForm;
     let matches=(db.formAnalyses||[]).filter(record=>record&&record.id===recordId);
     if(matches.length!==1){
-      toast("削除対象を一意に特定できないため、削除していません",6000);
+      toast("どの記録か確かめられなかったので、消していません。もう一度試してください。",6000);
       return;
     }
-    if(!(await appConfirm("この射型記録を削除しますか？",{danger:true,okLabel:"削除"}))) return;
+    if(!(await appConfirm("この射型の記録をゴミ箱へ移しますか？ 設定 > データ のゴミ箱から元に戻せます。",{danger:true,okLabel:"ゴミ箱へ移す"}))) return;
 
     matches=(db.formAnalyses||[]).filter(record=>record&&record.id===recordId);
     if(matches.length!==1){
-      toast("削除対象を一意に特定できないため、削除していません",6000);
+      toast("どの記録か確かめられなかったので、消していません。もう一度試してください。",6000);
       return;
     }
     const record=matches[0];
@@ -346,14 +346,14 @@ function bindFormTrackingCard(){
       db,recordId,trashEntry,APP_VER,TRASH_LIMIT,invalidateFormDiagnosticMatrixForRecord
     );
     if(!planned.ok){
-      toast("削除対象を一意に特定できないため、削除していません",6000);
+      toast("どの記録か確かめられなかったので、消していません。もう一度試してください。",6000);
       return;
     }
     const committed=commitFormDiagnosticDbCandidate(
       db,planned.candidate,{reason:"delete-form-analysis",forceSnapshot:true},save
     );
     if(!committed.ok){
-      toast("射型記録を保存できなかったため、削除していません",6000);
+      toast("保存できなかったので、射型の記録は消していません",6000);
       return;
     }
     render();
@@ -374,13 +374,13 @@ function formLegacyFacts(rec, prev){
   const st=formRecordStats(rec);
   if(!st) return [];
   const pv=prev?formRecordStats(prev):null, facts=[];
-  const diff=(a,b)=>`（前回比 ${a-b>=0?"+":""}${(a-b).toFixed(0)}°）`;
-  if(st.holdMs!=null) facts.push(`フルドロー保持は中央値 ${(st.holdMs/1000).toFixed(1)} 秒でした（${st.shots}射）。`);
-  if(st.bowArm!=null) facts.push(`弓手肘は中央値 ${st.bowArm.toFixed(0)}°${pv&&pv.bowArm!=null?diff(st.bowArm,pv.bowArm):""}です。`);
-  if(st.drawArm!=null) facts.push(`引き手肘は中央値 ${st.drawArm.toFixed(0)}°${pv&&pv.drawArm!=null?diff(st.drawArm,pv.drawArm):""}です。`);
-  if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカー位置のばらつきは σ=${st.anchorStd.toFixed(3)} です（胴の長さに対する比の標準偏差）。`);
+  const diff=(a,b)=>{ const d=+(a-b).toFixed(0); return d===0?"（前回と同じ）":`（前回より ${Math.abs(d)}°${d>0?"大きい":"小さい"}）`; };
+  if(st.holdMs!=null) facts.push(`フルドローは、ふつう ${(st.holdMs/1000).toFixed(1)} 秒でした（${st.shots}射のまん中の値）。`);
+  if(st.bowArm!=null) facts.push(`押し手の肘は、ふつう ${st.bowArm.toFixed(0)}°${pv&&pv.bowArm!=null?diff(st.bowArm,pv.bowArm):""}です。`);
+  if(st.drawArm!=null) facts.push(`引き手の肘は、ふつう ${st.drawArm.toFixed(0)}°${pv&&pv.drawArm!=null?diff(st.drawArm,pv.drawArm):""}です。`);
+  if(st.anchorStd!=null) facts.push(`${st.shots}射のアンカーの位置は、±${(st.anchorStd*100).toFixed(1)}% ほど動きました（胴の長さに対する割合）。`);
   const withRelease=(rec.features||[]).filter(f=>f&&f.release), drifted=withRelease.filter(f=>f.release.stable===false).length;
-  if(withRelease.length) facts.push(`${withRelease.length}射中 ${drifted}射で、リリース前 0.5 秒に弓手か引き手の動き（ドリフト）を観測しました。`);
+  if(withRelease.length) facts.push(`${withRelease.length}射のうち ${drifted}射で、リリース前 0.5 秒に押し手か引き手が動きました。`);
   return facts;
 }
 function openFormDetail(rec){
@@ -394,15 +394,15 @@ function openFormDetail(rec){
   const lm=linked?sessionMetrics(linked):null;
   const ovl=document.createElement("div"); ovl.className="ovl";
   ovl.innerHTML=`<div class="sheet" data-testid="form-legacy-detail">
-    <h3>射型記録 ${fmtD(rec.date)} <span class="mini">${Number.isFinite(rec.shots)?rec.shots:0}射</span></h3>
-    ${linked?`<div class="kv"><span>紐付いた練習</span><span>${fmtD(linked.date)} ${linked.dist?linked.dist+"m":""} ・ 平均 ${lm&&lm.all.length?lm.avg.toFixed(2):"—"} 点/本</span></div>`:`<div class="subNote">練習セッションには紐付いていません（撮影日に練習記録があると自動で紐付きます）。</div>`}
-    ${st?`<div class="kv"><span>要約</span><span>弓手肘 ${st.bowArm!=null?st.bowArm.toFixed(0)+"°":"—"} / 引き手肘 ${st.drawArm!=null?st.drawArm.toFixed(0)+"°":"—"} / 保持 ${st.holdMs!=null?(st.holdMs/1000).toFixed(1)+"秒":"—"}</span></div>`:""}
+    <h3>射型の記録 ${fmtD(rec.date)} <span class="mini">${Number.isFinite(rec.shots)?rec.shots:0}射</span></h3>
+    ${linked?`<div class="kv"><span>つないだ練習</span><span>${fmtD(linked.date)} ${linked.dist?linked.dist+"m":""} ・ 平均 ${lm&&lm.all.length?lm.avg.toFixed(2):"—"} 点/射</span></div>`:`<div class="subNote">練習とはつながっていません（撮影した日に練習の記録があると、自動でつながります）。</div>`}
+    ${st?`<div class="kv"><span>まとめ</span><span>押し手の肘 ${st.bowArm!=null?st.bowArm.toFixed(0)+"°":"—"} / 引き手の肘 ${st.drawArm!=null?st.drawArm.toFixed(0)+"°":"—"} / フルドロー ${st.holdMs!=null?(st.holdMs/1000).toFixed(1)+"秒":"—"}</span></div>`:""}
     ${formInsightBlockHtml("この記録の値",formLegacyFacts(rec,prev))}
-    <table class="tbl mt8"><tr><th>射</th><th>弓手肘</th><th>引き手肘</th><th class="right">保持</th></tr>
+    <table class="tbl mt8"><tr><th>射</th><th>押し手の肘</th><th>引き手の肘</th><th class="right">フルドロー</th></tr>
     ${(rec.features||[]).map((f,i)=>`<tr><td>${i+1}</td><td>${f.angles&&Number.isFinite(f.angles.bowArm)?f.angles.bowArm.toFixed(0)+"°":"—"}${f.release&&f.release.stable===false?` ${icon("warn")}`:""}</td><td>${f.angles&&Number.isFinite(f.angles.drawArm)?f.angles.drawArm.toFixed(0)+"°":"—"}</td><td class="right">${f.phase&&Number.isFinite(f.phase.anchorMs)?(f.phase.anchorMs/1000).toFixed(1)+"秒":"—"}</td></tr>`).join("")}</table>
-    <div class="hint">${icon("warn")} = リリース前0.5秒にドリフトを観測した射。「—」は、腕が短く写った・値がそろわなかったなどで角度を出せなかった射です。以前の方式の記録なので、評価や助言は出していません（決めた幅に根拠が無いため）。値は保存されたままです。</div>
+    <div class="hint">${icon("warn")} = リリース前 0.5秒に腕が動いた射。「—」は、腕が短く写った・値がそろわなかったなどで角度を出せなかった射です。以前の方式の記録なので、評価や助言は出ません。値は保存されたままです。</div>
     ${formCaptureNoteHtml(rec)}
-    ${rec.modelVer?`<div class="hint" data-testid="form-legacy-model">解析の版: ${esc(rec.modelVer)}</div>`:""}
+    ${rec.modelVer?`<div class="hint" data-testid="form-legacy-model">読み取り方の版: ${esc(rec.modelVer)}</div>`:""}
     <div class="btnrow"><button class="btn ghost" id="fdClose">閉じる</button></div>
   </div>`;
   openModal(ovl,{escapeTarget:"#fdClose"});
@@ -412,13 +412,13 @@ function openFormDetail(rec){
 /* 記録の撮影条件を1行で示す（AN-098）。条件を持たない旧記録は、測り方が違うことだけを伝える */
 function formCaptureNoteText(rec){
   const c=rec&&rec.cap;
-  if(formRecordGeometry(rec)<2||!c) return "この記録は画面の向きによる差を補正する前の測り方です。補正後の記録とは比べていません。";
+  if(formRecordGeometry(rec)<2||!c) return "この記録は、画面の向きの違いを直す前の測り方です。直したあとの記録とは比べられません。";
   const o=c.o==="p"?"縦向き":c.o==="l"?"横向き":c.o==="s"?"正方形":"向きが途中で変化";
   const size=Number.isFinite(c.fw)&&Number.isFinite(c.fh)?`${c.fw}×${c.fh}`:"大きさが途中で変化";
-  const src=c.src==="replay"?"保存済み動画":c.src==="live"?"ライブ撮影":"撮影方法が途中で変化";
+  const src=c.src==="replay"?"保存した動画":c.src==="live"?"その場で撮影":"撮影方法が途中で変化";
   const hand=c.hand==="left"?"左利き":c.hand==="right"?"右利き":"利き手を途中で変更";
   const crop=c.crop===1?"・中央固定あり":c.crop===0?"":"・中央固定を途中で切替";
-  return `撮影条件: ${o}（${size}）・${src}・${hand}${crop}。肘の角度は画面の向きによらない測り方です。`;
+  return `撮り方: ${o}（${size}）・${src}・${hand}${crop}。肘の角度は、画面の向きが違っても同じように測れます。`;
 }
 function formCaptureNoteHtml(rec){ return `<div class="hint" data-testid="form-capture-note">${esc(formCaptureNoteText(rec))}</div>`; }
 

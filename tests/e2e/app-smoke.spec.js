@@ -124,7 +124,7 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(page.getByTestId("gear-recording-pill")).toHaveText("記録に使用中");
   await expect(page.getByTestId("gear-subtab-setup")).toHaveAttribute("aria-current", "page");
   await page.getByTestId("gear-subtab-sight").click();
-  await expect(page.locator("#main")).toContainText("サイト台帳");
+  await expect(page.locator("#main")).toContainText("サイトの記録");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
   await expect(page.getByTestId("gear-subtab-sight")).toHaveAttribute("aria-current", "page");
   await expect(mainTab(page, "弓具")).toHaveAttribute("aria-current", "page");
@@ -349,7 +349,9 @@ test("records a multi-distance round with stage advance and history badges", asy
 
   // 履歴: 途中ラウンドを展開し、各ステージの詳細から別ステージへ移動
   await mainTab(page, "ノート").click();
-  await expect(page.getByTestId("history-round").locator("summary")).toContainText("2/4ステージ");
+  await expect(page.getByTestId("history-round").locator("summary")).toContainText(
+    "4距離のうち 2距離",
+  );
   await page.getByTestId("history-round").locator("summary").click();
   await expect(page.locator("#histList")).toContainText("WA1440 男子 1/4");
   await expect(page.locator("#histList")).toContainText("WA1440 男子 2/4");

@@ -1,11 +1,11 @@
 {
   "name": "archery-note",
-  "version": "0.129.0",
+  "version": "0.130.0",
   "private": true,
   "description": "Archery scoring, sight adjustment, and equipment notebook with a native-ready shell.",
   "license": "PolyForm-Noncommercial-1.0.0",
   "scripts": {
-    "check:all": "npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:form-analyze && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:pwa && npm run check:storage && npm run check:version && npm run check:distribution",
+    "check:all": "npm run check:app && npm run check:globals && npm run check:analysis && npm run check:form && npm run check:form-analyze && npm run check:gamification && npm run check:todays-result && npm run check:security && npm run check:ui && npm run check:voice && npm run check:pwa && npm run check:storage && npm run check:version && npm run check:distribution",
     "check:security": "node tools/check-security.js",
     "check:analysis": "node tools/check-analysis-core.js && node tools/check-grouping-interpretation.js && node tools/check-grouping-stats.js && node tools/check-coordless.js && node tools/check-analysis-view.js && node tools/check-gear-sight-view.js",
     "check:coordless": "node tools/check-coordless.js",
@@ -18,6 +18,7 @@
     "check:pwa": "node tools/check-pwa-assets.js && node tools/check-pwa-update-flow.js",
     "check:storage": "node tools/check-storage-contract.js && node tools/check-storage-roundtrip.js && node tools/check-save-debounce.js",
     "check:ui": "node tools/check-ui.js",
+    "check:voice": "node tools/check-voice.js",
     "check:version": "node tools/check-version-alignment.js",
     "lint": "eslint \"*.js\" \"scripts/**/*.js\" \"tools/**/*.js\" \"tests/**/*.js\" \"eslint.config.mjs\"",
     "format:check": "prettier \"package*.json\" \"README.md\" \"CHANGELOG.md\" \"CODE_OF_CONDUCT.md\" \"CONTRIBUTING.md\" \"SECURITY.md\" \"THIRD_PARTY.md\" \"docs/**/*.md\" \".github/**/*.md\" \"eslint.config.mjs\" \"playwright.config.js\" \"tools/e2e-server.js\" \"tools/lighthouse-baseline.js\" \"tests/**/*.js\" \".prettierrc\" --check",

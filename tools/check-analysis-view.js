@@ -94,6 +94,18 @@ const BANNED = [
   "下がり気味",
   "次回試す",
   "比較待ち",
+  /* AN-102（docs/design/voice.md）: どの画面にも書かない言葉。統計の言葉が本文に出ないことは、下の本文／たたんだ中の比べと tools/check-voice.js で見る */
+  "この回",
+  "測定のゆれ",
+  "判定できない",
+  "セッション",
+  "破棄",
+  "紐付",
+  "紐づ",
+  "ストリーク",
+  "弓手",
+  "着弾",
+  "台帳",
   "!",
   "！",
 ];
@@ -229,10 +241,10 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   const html = app.analysisScoreHtml(rowsOf(d), app.ui.analysisFilter);
   const text = clean(html, "score");
   assert(
-    text.includes("対象: 70m・122cm的・72射、7回・504射、10/3〜11/10。うち1回は点数だけの記録です。"),
+    text.includes("70m・122cm的・72射、7回・504射、10/3〜11/10。うち1回は点数だけの記録です。") && !text.includes("対象:"),
     "score target line",
   );
-  assert(/直近3回の平均は [\d.]+ 点、それより前の4回の平均は [\d.]+ 点で、差は [+−±][\d.]* 点です。/.test(text), "trend sentence states numbers only");
+  assert(/直近 3回の平均は [\d.]+ 点。それまでの 4回の平均（[\d.]+ 点）(より [\d.]+ 点(高い|低い)|と同じ)です。/.test(text), "trend sentence states both means and the difference in words");
   assert(!html.includes("analysis-trend-pending"));
   assert(html.includes('id="anCond"') && html.includes('id="anSetup"') && html.includes('id="anPeriod"'));
   /* 軸の文字は 13px（.ax）か font-size="13"。それより小さい指定を置かない */
@@ -243,7 +255,7 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   const html4 = app.analysisScoreHtml(rowsOf(d4), app.ui.analysisFilter);
   const text4 = clean(html4, "score with four sessions");
   assert(!html4.includes('data-testid="analysis-trend"'), "no trend sentence below five sessions");
-  assert(text4.includes("5回以上あるときに") && text4.includes("いまは 4回"));
+  assert(text4.includes("同じ条件の記録が 5回になると") && text4.includes("（いま 4回）"));
   assert(text4.includes("4回・288射"));
   /* 期間と弓具で絞る */
   const dp = load();
@@ -253,12 +265,12 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   /* 合う記録が無い */
   Object.assign(app.ui.analysisFilter, { period: "all", setupId: "s2", cond: "70|122|single|72" });
   const textN = clean(app.analysisScoreHtml(rowsOf(dp), app.ui.analysisFilter), "score none");
-  assert(textN.includes("この条件の記録はありません") && textN.includes("0回"));
+  assert(textN.includes("この条件の記録はありません") && textN.includes("に合う記録はありません"));
   /* 1回だけ */
   const d1 = load((x) => (x.sessions = [x.sessions[0]]));
   const text1 = clean(app.analysisScoreHtml(rowsOf(d1), app.ui.analysisFilter), "score single");
   assert(text1.includes("1回・72射、10/3。"));
-  assert(!text1.includes("標準偏差は"), "no spread with one session");
+  assert(!text1.includes("ほど上下しています"), "no spread with one session");
   /* 記録なし */
   const d0 = load((x) => (x.sessions = []));
   clean(app.analysisScoreHtml(rowsOf(d0), app.ui.analysisFilter), "score empty");
@@ -271,28 +283,32 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   const r = app.analysisImpactHtml();
   assert.equal(r.sess.id, "p6", "default is the latest record with positions");
   const text = clean(r.html, "impact");
-  assert(text.includes("グループRMS（全射）") && text.includes("着弾中心のずれ"));
-  assert(text.includes("左右のばらつき") && text.includes("上下のばらつき"));
-  assert(text.includes("対象: 11/10（火）・70m・122cm的、位置のある 72射。"));
-  assert(text.includes("95%区間"));
+  assert(text.includes("グルーピングの大きさ") && /的の中心から[\d.]+cm/.test(text));
+  assert(text.includes("左右の広がり") && text.includes("上下の広がり"));
+  assert(text.includes("11/10（火）・70m・122cm的、位置のある 72射。"));
+  assert(/半径・全射。幅 [\d.]+〜[\d.]+cm/.test(text), "the interval of the grouping size is stated in plain words");
+  assert(/矢の中心には、左右 ±[\d.]+cm・上下 ±[\d.]+cm ほどの幅があります。/.test(text), "the centre interval is stated in plain words");
   /* B と C は「比較用の指標」の中だけ。既定では閉じている */
   const a = r.html.indexOf('<details class="anRef"'),
     b = r.html.indexOf("</details>", a);
   assert(a >= 0 && b > a, "reference metrics details");
   assert(!/<details class="anRef"[^>]*\sopen/.test(r.html), "collapsed by default");
   const outside = r.html.slice(0, a) + r.html.slice(b);
-  for (const w of ["ロバストRMS", "外れ値候補を除いたRMS", 'data-ref="'])
+  /* 統計の言葉（95%区間・RMS・外れ値候補）は「詳しく」の中だけ（docs/design/voice.md 4章） */
+  for (const w of ["ロバストRMS", "RMS", "95%区間", "外れ値候補", 'data-ref="'])
     assert(!outside.includes(w), `"${w}" outside the reference metrics`);
   const inside = r.html.slice(a, b);
   assert(inside.includes('data-ref="b"') && inside.includes('data-ref="c"'));
-  assert(inside.includes("正式な値は上の全射の RMS です"));
+  assert(inside.includes("上の「グルーピングの大きさ」は、全射の RMS"));
+  assert(/data-ref="ci-rms">.*?95%区間.*?[\d.]+〜[\d.]+ cm/.test(inside), "95% interval of the grouping size inside the fold");
+  assert(/data-ref="ci-centre">.*?95%区間.*?左右 ±[\d.]+ cm/.test(inside), "95% interval of the centre inside the fold");
   /* 点数だけの記録 */
   app.ui.analysisImpactId = "p5";
   const n = app.analysisImpactHtml();
   assert.equal(n.sess, null, "no plot for a score-only record");
   const textN = clean(n.html, "impact without positions");
-  assert(textN.includes("着弾データなし"));
-  assert(textN.includes("72射のうち、位置のある矢は 0射"));
+  assert(textN.includes("矢の位置がありません"));
+  assert(textN.includes("72射とも位置なし"));
   assert(!n.html.includes('data-fig="rms"') && !n.html.includes("anRef"));
   /* 位置のある矢が 2射 */
   load((x) => {
@@ -302,13 +318,13 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   app.ui.analysisImpactId = "p6";
   const two = app.analysisImpactHtml();
   const text2 = clean(two.html, "impact pending");
-  assert(text2.includes("グループRMSは計算していません"));
-  assert(text2.includes("位置のある 2射（位置なし 70射は図と数値に入れていません）"));
+  assert(text2.includes("グルーピングは、矢が 3射になると出ます"));
+  assert(text2.includes("位置のある 2射（位置なし 70射は図と数字に入っていません）"));
   assert(!two.html.includes('data-fig="rms"'));
   /* すべて点数だけ */
   load((x) => x.sessions.forEach((s) => (s.ends = s.ends.map((e) => e.map((q) => ({ s: q.s, X: q.X }))))));
   const all = app.analysisImpactHtml();
-  assert(clean(all.html, "impact all score-only").includes("着弾データなし"));
+  assert(clean(all.html, "impact all score-only").includes("矢の位置がありません"));
   assert(!all.html.includes("analysis-grouping-trend"));
   checks += 16;
 }
@@ -323,17 +339,18 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
     p6 = d.sessions.find((s) => s.id === "p6");
   const diff = total(p6) - total(p4);
   assert(r.html.includes('data-testid="compare-table"'));
-  assert(text.includes(`合計の差（B − A）は ${diff === 0 ? "±0" : (diff > 0 ? "+" : "−") + Math.abs(diff)} 点です。`));
-  assert(text.includes("差は原因を示すものではありません") && text.includes("原因とは断定できません"));
-  assert(text.includes("対象: 70m・122cm的・72射"));
+  assert(text.includes(`B の合計は A ${diff === 0 ? "と同じ" : `より ${Math.abs(diff)} 点${diff > 0 ? "高い" : "低い"}`}です。`));
+  assert(/同じ距離・的・射数の \d+回では、ふだん ±[\d.]+ 点ほど上下/.test(text), "the usual spread of the same condition is stated");
+  assert(text.includes("1回ずつの比較なので、下の変更が理由だとは言い切れません。"), "the caution is said once");
+  assert(text.includes("70m・122cm的・72射") && text.includes("の 2回。"));
   /* 条件が違う2回 */
   app.ui.analysisCmp = { a: "i0", b: "p6" };
   const x = app.analysisCompareHtml();
   const textX = clean(x.html, "compare with different conditions");
   assert.deepEqual(x.plots, []);
-  assert(textX.includes("条件が違うため、合計と差は並べていません"));
+  assert(textX.includes("距離や射数が違うので、点数の差は出しません"));
   assert(!x.html.includes("compare-table") && !x.html.includes("compare-total-diff"));
-  assert(!textX.includes("B − A") && !textX.includes("合計の差"));
+  assert(!textX.includes("B − A") && !textX.includes("B の合計は"));
   assert(!/[+−]\d/.test(textX), "no signed difference between different conditions");
   assert(textX.includes(`${total(d.sessions.find((s) => s.id === "i0"))} 点`), "each side keeps its own total");
   /* 同じ記録 */
@@ -343,7 +360,7 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   app.ui.analysisCmp = { a: "p5", b: "p6" };
   const s = app.analysisCompareHtml();
   clean(s.html, "compare with a score-only record");
-  assert(/data-row="rms"><div>グループRMS cm<\/div><div data-col="a">—<\/div>/.test(s.html));
+  assert(/data-row="rms"><div>グルーピング 半径 cm<\/div><div data-col="a">—<\/div>/.test(s.html));
   /* 1回だけ・0回 */
   load((q) => (q.sessions = [q.sessions[0]]));
   assert(clean(app.analysisCompareHtml().html, "compare one").includes("比べるには記録が2回必要です"));
@@ -360,8 +377,8 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   });
   const text = clean(app.analysisFormHtml(rowsOf(d), app.ui.analysisFilter), "form");
   assert(text.includes("外れた理由の印"));
-  assert(text.includes("対象: 9回・624射のうち、理由の印がある 6射。"));
-  assert(text.includes("印の数は原因を示すものではありません"));
+  assert(text.includes("9回・624射のうち、理由の印がある 6射。"));
+  assert(text.includes("印の数だけでは、外れた理由は言い切れません"));
   const d0 = load();
   const text0 = clean(app.analysisFormHtml(rowsOf(d0), app.ui.analysisFilter), "form no marks");
   assert(text0.includes("理由の印がある 0射"));

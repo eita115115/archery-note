@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
-const APP_VER=129;
+const APP_VER=130;
 const TRASH_LIMIT=50;
 const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100,notes:10000};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
@@ -176,14 +176,15 @@ function normalizeDb(d){
   }
   return out;
 }
+const IMPORT_KIND_LABELS={sessions:"練習の記録",setups:"セッティング",sightMarks:"サイトの記録",customRounds:"自作ラウンド",notes:"メモ"};
 function validateImportData(d){
-  if(!d||typeof d!=="object"||Array.isArray(d)) return {ok:false,reason:"不正なデータ形式です"};
-  if(!Array.isArray(d.sessions)) return {ok:false,reason:"sessions 配列が見つかりません"};
-  if(!Array.isArray(d.setups)) return {ok:false,reason:"setups 配列が見つかりません"};
+  if(!d||typeof d!=="object"||Array.isArray(d)) return {ok:false,reason:"Archery Note のバックアップではないようです。いまのデータは変えていません"};
+  if(!Array.isArray(d.sessions)) return {ok:false,reason:"このファイルには練習の記録が入っていません。いまのデータは変えていません"};
+  if(!Array.isArray(d.setups)) return {ok:false,reason:"このファイルにはセッティングが入っていません。いまのデータは変えていません"};
   const warnings=[];
   for(const [k,limit] of Object.entries(IMPORT_LIMITS)){
     if(k==="formAnalyses") continue; // 件数で切り捨てない（normalizeDb を参照）ので、注意も出さない
-    if(Array.isArray(d[k])&&d[k].length>limit) warnings.push(`${k} が ${d[k].length} 件（上限 ${limit}）`);
+    if(Array.isArray(d[k])&&d[k].length>limit) warnings.push(`${IMPORT_KIND_LABELS[k]||k}が ${d[k].length} 件あります（読み込めるのは ${limit} 件まで）`);
   }
   return {ok:true,warnings};
 }
@@ -220,7 +221,7 @@ async function prefetchStorageEstimate(){
 function storageMeterHtml(){
   const u=storageUsageRatio();
   const warn=u.ratio>=STORAGE_WARN_RATIO;
-  const est=_storageEstimate?`<div class="hint">参考: ブラウザ全体の割当 約${_storageEstimate.quotaMb}MB（他機能と共有の目安であり、この上限そのものではありません）</div>`:"";
+  const est=_storageEstimate?`<div class="hint">参考: ブラウザ全体で使える量は 約${_storageEstimate.quotaMb}MB です（ほかの機能と分け合う目安で、このアプリの上限ではありません）</div>`:"";
   return `<div class="storageMeterBlock" data-testid="settings-storage-meter">
     <div class="storageMeterHead"><span>使用容量</span><span>${u.mb.toFixed(2)} / 約${u.capMb}MB（${u.percent}%）</span></div>
     <div class="storageMeter" role="img" aria-label="保存容量使用率 約${u.percent}%"><div class="storageMeterFill${warn?" warn":""}" style="width:${Math.min(u.percent,100)}%"></div></div>
@@ -234,7 +235,7 @@ function summaryStorageNoticeHtml(){
   if(storageUsageRatio().ratio<STORAGE_WARN_RATIO) return "";
   return `<aside class="summaryStorageNotice" data-testid="summary-storage-notice" aria-label="保存容量のお知らせ">
     <b>容量が残り少なくなっています</b>
-    <p>使用量が保存できる量の目安の 80% を超えています。設定の「バックアップを書き出す」で、控えのファイルを作れます。</p>
+    <p>使用量が、保存できる量の目安の 80% を超えています。設定の「バックアップを書き出す」で、バックアップのファイルを作れます。</p>
     <button type="button" class="btn sec" id="sumBackupSettings">バックアップ設定を開く</button>
   </aside>`;
 }
@@ -274,14 +275,14 @@ function storageSetItem(key,value){
 function storageDriverProfile(){
   const bridge=storageBridge();
   const native=!!(bridge && typeof bridge.getItem==="function" && typeof bridge.setItem==="function");
-  return {id:native?"native-sync-bridge":"localStorage",label:native?"ネイティブ保存ブリッジ":"ブラウザ保存",version:STORAGE_ADAPTER_VER,native};
+  return {id:native?"native-sync-bridge":"localStorage",label:native?"アプリの中の保存":"ブラウザ保存",version:STORAGE_ADAPTER_VER,native};
 }
 function runtimeKind(){
   const w=typeof window!=="undefined"?window:{};
   const nav=typeof navigator!=="undefined"?navigator:{};
   const isNative=!!(w.Capacitor && typeof w.Capacitor.getPlatform==="function");
   const standalone=!!(nav.standalone || (typeof w.matchMedia==="function" && w.matchMedia("(display-mode: standalone)").matches));
-  if(isNative) return {kind:"Native", label:"ネイティブ容器", tone:"ok"};
+  if(isNative) return {kind:"Native", label:"アプリ", tone:"ok"};
   if(standalone) return {kind:"PWA", label:"ホーム画面", tone:"mid"};
   return {kind:"Web", label:"ブラウザ", tone:"mid"};
 }
@@ -518,7 +519,7 @@ function writeDbNow(o){
     return true;
   }catch(e){
     console.error(e);
-    try{ toast("保存できませんでした（容量が足りません）。設定 > データ でバックアップを書き出してください",6000); }catch(_){}
+    try{ toast("保存できませんでした。端末の空きが足りません。設定 > データ でバックアップを書き出してください",6000); }catch(_){}
     return false;
   }
 }
@@ -663,7 +664,7 @@ function appConfirm(message,opts){
       ${o.title?`<h3>${esc(o.title)}</h3>`:""}
       <div class="confirmMsg">${esc(message)}</div>
       <div class="btnrow">
-        <button type="button" class="btn ghost" id="acCancel">${esc(o.cancelLabel||"キャンセル")}</button>
+        <button type="button" class="btn ghost" id="acCancel">${esc(o.cancelLabel||"やめる")}</button>
         <button type="button" class="btn ${o.danger?"danger":""}" id="acOk">${esc(o.okLabel||"確認")}</button>
       </div>
     </div>`;
@@ -750,7 +751,7 @@ function restoreTrash(id){
   save({reason:"restore-trash",forceSnapshot:true});
   return true;
 }
-function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型記録":t==="note"?"メモ":"削除データ"; }
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイトの記録":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型の記録":t==="note"?"メモ":"削除データ"; }
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);

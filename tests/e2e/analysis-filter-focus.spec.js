@@ -97,7 +97,7 @@ for (const [width, height, colorScheme] of [
     await expectWithinAppChrome(page.getByRole("combobox", { name: "条件", exact: true }));
     await expectWithinAppChrome(page.getByRole("combobox", { name: "弓具", exact: true }));
     await expectWithinAppChrome(page.getByRole("combobox", { name: "期間", exact: true }));
-    await expect(target(page)).toContainText("対象: ");
+    await expect(target(page)).toContainText(/\d+回・\d+射/);
     await expect(page.getByTestId("today-conclusion")).toHaveCount(0);
   });
 

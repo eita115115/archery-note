@@ -192,7 +192,7 @@ test("notes filters: all / practice / with memo / distance, and gear and round s
   await expect(page.locator("#histSetup")).toBeFocused();
   expect(await entryIds(page)).toEqual(["i1"]);
   await page.locator("#histRound").selectOption("70m72");
-  await expect(page.getByTestId("notes-no-match")).toContainText("該当する記録はありません");
+  await expect(page.getByTestId("notes-no-match")).toContainText("合う記録がありません");
   await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page.getByTestId("history-filter-toggle")).toContainText("すべて");
   await expect(page.getByTestId("history-filter-toggle")).toBeFocused();
@@ -256,14 +256,17 @@ test("note detail: figures, comparison, scorecard, plot, conditions and operatio
   await expect(stats.locator('[data-fig="count1"]')).toHaveText(
     `X${all.filter((a) => a.X).length}`,
   );
-  // 同じ条件との比較は「この回」で書く（この日より後の記録は入らない）
+  // 同じ条件との比較は「この日」で書く（この日より後の記録は入らない）
   const past = database.sessions
     .filter((s) => s.dist === 70 && s.id !== "p6")
     .map((s) => totalOf(s));
   const mean = past.reduce((a, b) => a + b, 0) / past.length;
   const cmp = detail.getByTestId("todays-result");
-  await expect(cmp).toContainText(`同じ条件の過去${past.length}回の平均 ${mean.toFixed(1)} 点`);
-  await expect(cmp).toContainText("この回");
+  await expect(cmp).toContainText(
+    `同じ条件のこれまで ${past.length}回の平均（${mean.toFixed(1)} 点）`,
+  );
+  await expect(cmp).toContainText("この日");
+  await expect(cmp).not.toContainText("この回");
   await expect(cmp).not.toContainText("今回");
 
   // スコア表（読むだけ・高い点から）。行を押して直す操作は無い
@@ -287,7 +290,7 @@ test("note detail: figures, comparison, scorecard, plot, conditions and operatio
     .evaluate((c) => +c.getAttribute("r") + +c.getAttribute("stroke-width") / 2);
   expect(foot).toBeCloseTo(0.285, 6);
   await expect(detail.getByTestId("no-impact")).toHaveCount(0);
-  await expect(detail.getByTestId("result-impact-figs")).toContainText("グループRMS");
+  await expect(detail.getByTestId("result-impact-figs")).toContainText("グルーピング（半径）");
 
   // 条件
   const cond = detail.getByTestId("note-conditions");
@@ -295,7 +298,7 @@ test("note detail: figures, comparison, scorecard, plot, conditions and operatio
     /ラウンド\s*70m・122cm的\s*70m 72射・6射 × 12エンド/,
   );
   await expect(cond.locator(".lrow").nth(1)).toHaveText(
-    /弓具\s*架空のリカーブ\s*矢の外径 5\.7mm で判定/,
+    /弓具\s*架空のリカーブ\s*矢の外径 5\.7mm で採点/,
   );
   await expect(cond.locator(".lrow").nth(2)).toHaveText(/サイト\s*上下 5\.2・左右 0/);
   await expect(cond.locator(".lrow").nth(3)).toHaveText(/天気・風\s*晴れ/);
@@ -336,14 +339,16 @@ test("note detail for a score-only practice says there is no impact data and for
   await expect(detail.getByTestId("note-total")).toHaveText(String(totalOf(p5)));
   await expect(detail.getByTestId("scorecard").locator(".scRow[data-end]")).toHaveCount(12);
   await expect(detail.locator("#hPlot svg")).toHaveCount(0);
-  await expect(detail.getByTestId("no-impact")).toContainText("着弾データなし");
-  await expect(detail.getByTestId("no-impact")).toContainText("72射すべて位置のない記録です");
+  await expect(detail.getByTestId("no-impact")).toContainText("矢の位置がありません");
+  await expect(detail.getByTestId("no-impact")).toContainText(
+    "この練習は 72射とも点数だけの記録です",
+  );
   await expect(detail.getByTestId("result-impact-figs")).toHaveCount(0);
   await expect(detail.getByTestId("note-conditions").locator(".lrow").nth(4)).toHaveText(
     /入力\s*点数だけ/,
   );
-  await detail.locator("details.histDetailNumbers summary").click();
-  await expect(detail.getByTestId("history-detail-numbers")).toContainText("着弾データなし");
+  await detail.locator("details.histDetailNumbers > summary").click();
+  await expect(detail.getByTestId("history-detail-numbers")).toContainText("位置の記録なし");
   await expect(detail).not.toContainText(/NaN|undefined|null/);
   await page.locator("#hClose").click();
 
@@ -359,7 +364,7 @@ test("note detail for a score-only practice says there is no impact data and for
     `9点${all.filter((a) => a.s === 9).length}`,
   );
   await expect(page.getByTestId("note-conditions").locator(".lrow").nth(1)).toHaveText(
-    /架空のインドア用\s*矢の外径 5\.7mm で判定/,
+    /架空のインドア用\s*矢の外径 5\.7mm で採点/,
   );
   await page.locator("#hClose").click();
   await expectUserData(page, database);
@@ -765,7 +770,7 @@ test("a later practice on the same day is not treated as earlier in the note det
   const errors = await open(page, database);
   await page.evaluate(() => globalThis.openHistDetail("p6"));
   const fold = page.getByTestId("note-sight-details");
-  await fold.locator("summary").click();
+  await fold.locator("summary").first().click();
   const rows = fold.locator(".sightDriftTbl tr");
   // 見出し + 位置のある6回（10/3〜11/10。11/4 は点数だけの記録）。後に保存した同じ日の p6b は入らない
   await expect(rows).toHaveCount(7);
@@ -775,7 +780,7 @@ test("a later practice on the same day is not treated as earlier in the note det
   await page.locator("#hClose").click();
   await page.evaluate(() => globalThis.openHistDetail("p6b"));
   const fold2 = page.getByTestId("note-sight-details");
-  await fold2.locator("summary").click();
+  await fold2.locator("summary").first().click();
   const rows2 = fold2.locator(".sightDriftTbl tr");
   await expect(rows2).toHaveCount(8);
   await expect(rows2.nth(6).locator("td").first()).toHaveText("6・11/10");
@@ -943,7 +948,7 @@ for (const theme of ["light", "dark"]) {
 
     await page.locator('.historyRow[data-id="p6"]').click();
     expect(await audit(".noteScreen")).toEqual(clean);
-    await page.locator("details.histDetailNumbers summary").click();
+    await page.locator("details.histDetailNumbers > summary").click();
     expect((await audit(".noteScreen")).hscroll).toBe(false);
     // スコア表は画面の幅ちょうど
     const card = await page.getByTestId("scorecard").boundingBox();

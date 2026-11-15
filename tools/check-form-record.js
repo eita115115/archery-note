@@ -228,7 +228,7 @@ test("compare: the shot that differed is named with numbers; noise alone marks n
   assert.ok(cmp.flags.every((f) => f.n === 4), "only the fourth shot is marked");
   const s = FV.summary(m, cmp, null);
   assert.equal(s.n, 4);
-  assert.match(s.text, /^4 射目は、保持が 5\.\d 秒でした。ほかの 5 射は 3\.\d〜3\.\d 秒です。$/);
+  assert.match(s.text, /^4 射目は、フルドローが 5\.\d 秒でした。ほかの 5 射は 3\.\d〜3\.\d 秒です。$/);
   assert.ok(cmp.feat.holdMs.limit >= 300, "the time floor is 0.3 s");
   assert.equal(cmp.feat.holdMs.indistinct, false);
   assert.equal(cmp.feat.headY.indistinct, true);
@@ -240,14 +240,14 @@ test("compare: the shot that differed is named with numbers; noise alone marks n
     const mm = FV.read(FV.buildRecord(analyse(capture(720, 1280, same, seed).buf), { ...CTX, frame: { w: 720, h: 1280 } }));
     const c = FV.compare(mm, FA);
     if (c.flags.length) flagged++;
-    else assert.equal(FV.summary(mm, c, null).text, "6 射のあいだに、測定のゆれより大きい違いは見つかりませんでした。");
+    else assert.equal(FV.summary(mm, c, null).text, "6 射とも、ほぼ同じでした。カメラで測るときのぶれより大きい違いはありません。");
   }
   assert.ok(flagged <= 2, `noise-only captures are rarely marked (${flagged}/20)`);
   /* 4 射に満たない回は比べない */
   const three = FV.read(FV.buildRecord(analyse(capture(720, 1280, same.slice(0, 3), 2).buf), { ...CTX, frame: { w: 720, h: 1280 } }));
   const c3 = FV.compare(three, FA);
   assert.deepEqual(c3.flags, []);
-  assert.match(FV.summary(three, c3, null).text, /4 射以上要ります。この回は 3 射でした。/);
+  assert.match(FV.summary(three, c3, null).text, /4 射要ります。この撮影は 3 射でした。/);
 });
 
 test("height: cm appears only with the setting, torso percent always", () => {
@@ -497,7 +497,7 @@ test("placement: the five rows are measured from the current landmarks", () => {
     ["写り", "大きさ", "余白", "向き", "速さ"],
   );
   assert.equal(a.rows[0].state, "ok");
-  assert.equal(a.rows[1].text, "胴の長さ 200px");
+  assert.equal(a.rows[1].text, "十分な大きさで写っています");
   assert.equal(a.rows[2].state, "warn", "at rest the reach is predicted: 300 px − 1.6 torso leaves the frame");
   assert.equal(a.rows[3].state, "wait");
   assert.equal(a.rows[4].text, "毎秒 28 コマ");
@@ -523,8 +523,8 @@ test("placement: the five rows are measured from the current landmarks", () => {
   const far = FX.toFrames(FX.makeCapture({ seed: 2, events: [], torsoPx: 96, cx: 300, cy: 420 }).poses, { w: 720, h: 1280 })[3].landmarks;
   const e = FV.placement(far, { w: 720, h: 1280 }, "right", 12, {});
   assert.equal(e.rows[1].state, "warn");
-  assert.match(e.rows[1].text, /小さく写っています（胴 9\dpx）/);
-  assert.match(e.rows[4].text, /解析が遅れています（毎秒 12 コマ）/);
+  assert.match(e.rows[1].text, /^小さく写っています。1 歩ぶん近づけてください$/);
+  assert.match(e.rows[4].text, /読み取りが遅れています（毎秒 12 コマ）/);
   const none = FV.placement(null, { w: 720, h: 1280 }, "right", 0, {});
   assert.equal(none.rows[0].state, "warn");
   assert.match(none.rows[0].text, /体が写っていません/);

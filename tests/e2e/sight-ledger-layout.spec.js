@@ -102,7 +102,7 @@ test("sight deletion cancels safely and confirmed deletion can be restored", asy
   await seed(page);
   const before = await snapshot(page);
   const del = page.locator('[data-del="sight-new"]');
-  await expect(del).toHaveAccessibleName("2026/10/13のサイト値をゴミ箱へ移す");
+  await expect(del).toHaveAccessibleName("2026/10/13のサイトの記録をゴミ箱へ移す");
   await del.tap();
   await page.locator("#acCancel").tap();
   expect(await snapshot(page)).toEqual(before);

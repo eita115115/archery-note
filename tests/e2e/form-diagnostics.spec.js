@@ -437,7 +437,7 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
 
   await expect(page.locator('[data-form-id="selected-record"]')).toHaveCount(1);
   await expect(page.locator("#toast")).toContainText(
-    "射型記録を保存できなかったため、削除していません",
+    "保存できなかったので、射型の記録は消していません",
   );
   expect(
     await page.evaluate(() => ({
@@ -710,7 +710,7 @@ test("settings export: cancel sends nothing; without share it downloads and revo
   await seedTask9Page(page, makeV2DiagnosticDb(), "download");
   const before = await task9PersistenceSnapshot(page);
   await page.locator("#fdV2Export").click();
-  await task9Confirm(page, "キャンセル");
+  await task9Confirm(page, "やめる");
   expect(await page.evaluate(() => globalThis.__task9Transport.objectUrls.length)).toBe(0);
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#fdV2Export").click();

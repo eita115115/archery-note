@@ -12,17 +12,17 @@ const FORM_V2_MODEL = "pose_landmarker_lite v1 (tasks-vision 0.10.14)";
 const FORM_V2_UNSEEN = [
   "背中の筋肉の使い方、肩甲骨の動き",
   "引き手の肘が矢の線の真後ろにあるか（真横から分かるのは高さだけ）",
-  "弓手の左右のぶれ、弓の傾き",
+  "押し手の左右のぶれ、弓の傾き",
   "指の掛け方、弦の離れ方、押し手の握り",
   "クリッカーが鳴った瞬間",
   "2〜3cm より細かい位置の違い、数 mm の伸び合い",
-  "保持が 0.4 秒に満たない射（数えられません）",
-  "射ごとに変わる、点のゆっくりしたずれ（袖や胸当ての影響）",
+  "フルドローが 0.4 秒より短い射（数えられません）",
+  "袖や胸当てで、体の点が少しずつずれること",
 ];
 const FORM_V2_REASON_TEXT = {
-  weakRelease: "離れの動きはありましたが、はっきりしませんでした",
-  noRelease: "腕は下ろしましたが、離れの動きが見つかりませんでした",
-  unobserved: "保持の途中で体が見えなくなりました",
+  weakRelease: "リリースの動きはありましたが、はっきりしませんでした",
+  noRelease: "腕は下ろしましたが、リリースの動きが見つかりませんでした",
+  unobserved: "フルドローの途中で体が見えなくなりました",
   bodyMoved: "同じ時刻に頭や胴が大きく動きました",
   short: "止まってから終わりまでが短すぎました",
   tooSoon: "前の射から 1.5 秒以内でした",
@@ -54,9 +54,9 @@ function formV2ViewText(view) {
 }
 function formV2ViewNote(view) {
   const v = view || {};
-  if (!v.cls) return "射が見つからなかったので、置き方は測れていません";
-  const plane = v.cls === "s" ? "時間・高さ・面内の項目を測れます" : v.cls === "o" ? "面内の項目は、この回の中だけで比べます" : "面内の項目は出していません";
-  return v.side === "b" ? `${plane}。アンカーの高さは出していません（引き手が頭に隠れます）` : plane;
+  if (!v.cls) return "射が見つからなかったので、置き方は分かりません";
+  const plane = v.cls === "s" ? "すべての項目を測れます" : v.cls === "o" ? "腕や体の位置は、この撮影の中だけで比べます" : "時間と高さだけを測れます";
+  return v.side === "b" ? `${plane}。アンカーの高さは測れません（引き手が頭に隠れます）` : plane;
 }
 /* この端末で解析の部品が動くか。動かない理由（文字列）か null。検査から差し替えられる */
 function formV2Unsupported() {
@@ -139,11 +139,25 @@ function formV2TimelineSvg(model) {
   g += `<text x="0" y="66" class="ax">${formV2Mmss(from)}</text><text x="${w}" y="66" text-anchor="end" class="ax">${formV2Mmss(from + dur)}</text><text x="${w / 2}" y="66" text-anchor="middle" class="ax">時間</text>`;
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="時間の帯。${model.count} 射、引き戻し ${model.letdowns} 回">${g}</svg>`;
 }
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
+/* 「毎射そろっているか」の詳しく: 射数から見た幅（標準偏差の区間）は本文に出さず、ここへまとめる */
+function formV2SpreadMoreHtml(cmp, keys) {
+  const li = keys.map((key) => {
+    const ft = cmp.feat[key], meta = FormV2.META[key];
+    if (!ft || ft.limit == null || ft.indistinct) return "";
+    const ref = ft.median, n = ft.vals.map((v) => FormV2.shown(key, v, ref)).filter(Number.isFinite).length;
+    if (!n) return "";
+    const iv = FormV2.sdInterval(n), s = FormV2.shownSize(key, ft.spread, ref), u = (v) => FormV2.fmt(key, v, { dp: Math.max(1, meta.dp) });
+    return `<li>${esc(meta.name)}: 標準偏差 ±${u(s)}。${n} 射から出した値なので、±${u(s * iv.lo)}〜±${u(s * iv.hi)} の幅があります。</li>`;
+  }).join("");
+  return li ? `<details class="fv2More" data-testid="form-v2-spread-more"><summary>詳しく</summary><ul>${li}</ul></details>` : "";
+}
+/* voice:fold-end */
 /* 射の順の図: 帯 = 測定のゆれから出せる下限、破線 = 中央値、塗りつぶし = 違った射 */
 function formV2RunChartHtml(model, cmp, key) {
   const ft = cmp.feat[key], meta = FormV2.META[key], w = formV2W(), h = 104, pt = 14, pb = 24, n = cmp.n;
   const ref = ft.median, vals = ft.vals.map((v) => FormV2.shown(key, v, ref)), ok = vals.filter(Number.isFinite);
-  if (!ok.length) return `<div class="fv2Chart"><div class="fv2ChartH"><b>${esc(meta.name)}</b><span>—</span></div><p class="basis">この回では測れませんでした。</p></div>`;
+  if (!ok.length) return `<div class="fv2Chart"><div class="fv2ChartH"><b>${esc(meta.name)}</b><span>—</span></div><p class="basis">この撮影では測れませんでした。</p></div>`;
   const m = FormV2.shown(key, ft.median, ref), lim = ft.limit == null ? null : FormV2.shownSize(key, ft.limit, ref), nz = FormV2.shownSize(key, ft.noise, ref);
   const lo = Math.min(...ok, lim == null ? m : m - lim), hi = Math.max(...ok, lim == null ? m : m + lim), pad = (hi - lo) * 0.16 || 1;
   const y = (v) => pt + (h - pt - pb) * (1 - (v - (lo - pad)) / (hi + pad - (lo - pad))), x = (i) => 4 + ((w - 8) * (i + 0.5)) / n;
@@ -159,14 +173,14 @@ function formV2RunChartHtml(model, cmp, key) {
     }
     if (n <= 12 || i % 2 === 0) g += `<text x="${x(i).toFixed(1)}" y="${h - 5}" text-anchor="middle" class="${d ? "axi" : "ax"}">${num}</text>`;
   });
-  const u = (v) => FormV2.fmt(key, v, { dp: Math.max(1, meta.dp) }), iv = FormV2.sdInterval(ok.length);
+  const u = (v) => FormV2.fmt(key, v, { dp: Math.max(1, meta.dp) });
   const spread = FormV2.shownSize(key, ft.spread, ref);
   let note;
-  if (ft.limit == null) note = n < 4 ? "4 射に満たないので、違いの印は出していません。" : "この項目は測定のゆれを見積もれなかったので、違いの印は出していません。";
-  else if (ft.indistinct) note = `ばらつきは測定のゆれ（±${u(nz)}）と区別できません。`;
-  else note = `ばらつき ±${u(spread)}（${ok.length} 射。射数が少ないので ${iv.lo.toFixed(1)}〜${iv.hi.toFixed(1)} 倍の幅で不確かです）。測定のゆれは ±${u(nz)}。`;
+  if (ft.limit == null) note = n < 4 ? "4 射になると、ほかと違った射に印が付きます。" : "この項目は、カメラで測るときのぶれが分からなかったので、印は付きません。";
+  else if (ft.indistinct) note = `どの射もほぼ同じです（違いは ±${u(nz)} より小さく、カメラでは見分けられません）。`;
+  else note = `射ごとに ±${u(spread)} ほど変わりました（${ok.length} 射）。カメラで測るときのぶれは ±${u(nz)} です。`;
   const cm = FormV2.cmText(key, m, formV2Height());
-  const head = meta.rel ? "この回の中央値を 100%" : `中央値 ${formV2ValHtml(key, m, cm)}`;
+  const head = meta.rel ? "この撮影のまん中を 100%" : `まん中 ${formV2ValHtml(key, m, cm)}`;
   return `<div class="fv2Chart" data-key="${key}"><div class="fv2ChartH"><b>${esc(meta.name)}</b><span>${head}</span></div><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(meta.name)}。射の順">${g}</svg><p class="basis">${note}</p></div>`;
 }
 /* 姿の図。pose = 18 個の整数（9 点 × (x, y)、0.01 胴、原点 = 両肩の中点、弓の向きが x 正、上が y 正）。見えない点は null */
@@ -194,12 +208,12 @@ function formV2MedianPose(poses) {
 function formV2OverlayHtml(model, phase, hi, only) {
   const w = formV2W() - 2, h = Math.round(w * 0.62), m = { ox: w * 0.4, oy: h * 0.36, s: w / 3.05 };
   const poses = model.compared.map((e) => (phase === "rel" ? e.pr : e.ps));
-  if (!poses.some(Array.isArray)) return `<p class="basis">${phase === "rel" ? "離れのあとの姿" : "保持の姿"}は、この記録にはありません。</p>`;
+  if (!poses.some(Array.isArray)) return `<p class="basis">${phase === "rel" ? "リリースのあとの姿" : "フルドローの姿"}は、この記録にはありません。</p>`;
   let g = "";
   if (only) g += formV2PosePath(formV2MedianPose(poses.filter((_, i) => i !== hi)), m, { c: "var(--sub)", w: 2 });
   else poses.forEach((p, i) => { if (i !== hi) g += formV2PosePath(p, m, { c: "var(--sub)", w: 1.5, op: 0.75 }); });
   if (hi != null && hi >= 0) g += formV2PosePath(poses[hi], m, { c: "var(--info)", w: 3 });
-  return `<div class="fv2Ov"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="骨格の重ね図（${phase === "rel" ? "離れのあと" : "保持"}）">${g}</svg></div>`;
+  return `<div class="fv2Ov"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="骨格の重ね図（${phase === "rel" ? "リリースのあと" : "フルドロー"}）">${g}</svg></div>`;
 }
 /* 「胴の 33.2%（約 16cm）」を、かっこの途中で折り返さない形にする（値と cm の目安を、それぞれひとかたまりにする） */
 function formV2ValHtml(key, x, cm) {
@@ -214,7 +228,7 @@ function formV2SegHtml(name, cur, opts) {
 function formV2RecordLine(rec) {
   const m = FormV2.read(rec), hold = FormV2.median(m.compared.map((e) => e.vals.holdMs));
   const part = m.part ? `。${m.part.of} つに分けた記録の ${m.part.k} つめ（${m.offset + 1} 射目から）` : "";
-  return { m, title: `${fmtMDW(rec.date)}\u3000${m.count} 射${Number.isFinite(hold) ? `\u3000保持 ${(hold / 1000).toFixed(1)} 秒` : ""}`, sub: `${formV2ViewText(rec.v2.view)}${m.letdowns ? `。引き戻し ${m.letdowns} 回` : ""}${rec.cap.src === "replay" ? "。保存した動画" : ""}${part}` };
+  return { m, title: `${fmtMDW(rec.date)}\u3000${m.count} 射${Number.isFinite(hold) ? `\u3000フルドロー ${(hold / 1000).toFixed(1)} 秒` : ""}`, sub: `${formV2ViewText(rec.v2.view)}${m.letdowns ? `。引き戻し ${m.letdowns} 回` : ""}${rec.cap.src === "replay" ? "。保存した動画" : ""}${part}` };
 }
 /* ---------- 推移（design.md 2.9・5.4）: 項目を選ぶ。比べてよい回だけを描く ---------- */
 let formV2TrendKey = "holdMs"; // 選んでいる項目（画面の状態。保存しない）
@@ -234,20 +248,20 @@ function formV2TrendCond(t, key) {
   const hand = ref && ref.cap.hand === "left" ? "左利き" : "右利き";
   if (kind === "t") return `${hand}の記録（時間の項目は、置き方が違っても比べます）`;
   if (kind === "h") return `${hand}・${side}で、真横かやや斜めの記録（高さの項目）`;
-  return `${hand}・${side}で真横、腕の写る長さの差が 6% 以内の記録（面内の項目）`;
+  return `${hand}・${side}で真横、腕の写る長さの差が 6% 以内の記録（腕や体の位置の項目）`;
 }
 function formV2TrendWhy(t) {
   const list = Object.keys(t.why).map((k) => `${k}（${t.why[k]} 回）`);
-  return list.length ? `入れていない回: ${list.join("、")}。` : "";
+  return list.length ? `推移に入っていない記録: ${list.join("、")}。` : "";
 }
 function formV2TrendHtml(records) {
   const keys = formV2TrendKeys(), key = keys.includes(formV2TrendKey) ? formV2TrendKey : keys[0];
   const t = FormV2.trend(records, key), pts = t.points, meta = FormV2.META[key], body = meta.unit === "b" && !meta.rel ? "胴の " : "";
   if (!t.ref) return "";
   const picker = `<label class="lrow fv2Pick"><span class="lk">項目</span><select class="pick" id="fv2TrendKey" data-testid="form-v2-trend-key" aria-label="推移の項目">${keys.map((k) => `<option value="${k}"${k === key ? " selected" : ""}>${esc(FormV2.META[k].name)}</option>`).join("")}</select></label>`;
-  const wrap = (inner) => `<div class="fv2Sub" data-testid="form-v2-trend" data-key="${key}" data-points="${pts.length}" data-excluded="${t.excluded}"><div class="fv2ChartH"><b>推移</b><span>${pts.length >= 3 ? `${pts.length} 回` : "比べてよい回だけ"}</span></div>${picker}${inner}</div>`;
-  if (t.refUnmeasured) return wrap(`<p class="basis" data-testid="form-v2-trend-note">いちばん新しい記録の置き方（${esc(formV2ViewText(t.ref.v2.view))}）では「${esc(meta.name)}」を測れないので、この項目の推移は出していません。</p>`);
-  if (pts.length < 3) return wrap(`<p class="basis" data-testid="form-v2-trend-note">「${esc(meta.name)}」を比べてよい記録は、まだ ${pts.length} 回です。3 回になると推移を出します。対象は、いちばん新しい記録と同じ条件: ${esc(formV2TrendCond(t, key))}。${esc(formV2TrendWhy(t))}</p>`);
+  const wrap = (inner) => `<div class="fv2Sub" data-testid="form-v2-trend" data-key="${key}" data-points="${pts.length}" data-excluded="${t.excluded}"><div class="fv2ChartH"><b>推移</b><span>${pts.length >= 3 ? `${pts.length} 回` : "同じ撮り方の記録だけ"}</span></div>${picker}${inner}</div>`;
+  if (t.refUnmeasured) return wrap(`<p class="basis" data-testid="form-v2-trend-note">いちばん新しい記録の置き方（${esc(formV2ViewText(t.ref.v2.view))}）では「${esc(meta.name)}」を測れないので、この項目の推移は見られません。</p>`);
+  if (pts.length < 3) return wrap(`<p class="basis" data-testid="form-v2-trend-note">同じ撮り方の記録が 3 回になると、「${esc(meta.name)}」の推移が見られます（いま ${pts.length} 回）。そろえる条件: ${esc(formV2TrendCond(t, key))}。${esc(formV2TrendWhy(t))}</p>`);
   const ref = meta.rel ? pts[0].med : NaN, sh = (v) => FormV2.shown(key, v, ref);
   const rows = pts.map((p) => { const a = sh(p.q1), b = sh(p.q3); return { p, med: sh(p.med), lo: Math.min(a, b), hi: Math.max(a, b) }; });
   const w = formV2W(), h = 150, pt = 12, pb = 26, left = 58;
@@ -266,26 +280,30 @@ function formV2TrendHtml(records) {
   const unc = t.unc == null ? null : FormV2.shownSize(key, t.unc, ref), range = FormV2.shownSize(key, t.range, ref);
   const cmA = FormV2.cmText(key, Math.min(...last), formV2Height()), cmB = FormV2.cmText(key, Math.max(...last), formV2Height());
   const cm = cmA && cmB ? `${cmA.replace("cm", "")}〜${cmB.replace("約 ", "")}` : "";
-  let doubt = "各回の射が少ないので、中央値の不確かさは見積もれていません。";
+  let doubt = "各回の射が少ないので、まん中の値にどのくらい幅があるかは、まだ分かりません。", how = "";
   if (unc != null) {
-    doubt = `各回の中央値には、射どうしの幅（四分位）から見て ±${f(unc)} ほどの不確かさがあります（95% の目安）。`
-      + (range <= 2 * unc ? `回どうしの中央値の差（いちばん離れた 2 回で ${f(range)}）は、この不確かさと区別できません。` : `中央値がいちばん離れた 2 回の差は ${f(range)} で、この不確かさより大きい違いです。`);
+    doubt = `各回のまん中の値には ±${f(unc)} ほどの幅があります。`
+      + (range <= 2 * unc ? `いちばん離れた 2 回の差（${f(range)}）はこの幅の中なので、たまたまかもしれません。` : `いちばん離れた 2 回の差は ${f(range)} で、この幅より大きい違いです。`);
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
+    how = `各回の中央値の幅（±${f(unc)}）は、射どうしの四分位の幅から出した 95% の目安です。`;
+/* voice:fold-end */
   }
-  if (meta.kind !== "t") doubt += "台の位置や向きが変わると、回ごとに一定のずれが乗ります。その大きさは見積もれていません。";
+  if (meta.kind !== "t") doubt += "台の位置や向きが変わると、その回の値がまとめてずれます。どのくらいずれるかは分かりません。";
   return wrap(`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(meta.name)}の推移。${pts.length} 回">${g}</svg>
-    <div class="fv2Legend"><span><i class="k7"></i>各回の中央値</span><span><i class="k8"></i>射どうしの幅（四分位）</span>${rows.some((r) => r.p.gear) ? `<span><i class="k9"></i>弓具が前の回と違う</span>` : ""}</div>
-    <p class="fact" data-testid="form-v2-trend-fact">直近 ${last.length} 回の中央値は ${body}${f(Math.min(...last), { bare: true })}〜${f(Math.max(...last))}${/[%°]$/.test(f(1)) ? " " : ""}でした${cm ? `（${cm}）` : ""}。</p>
-    <p class="basis" data-testid="form-v2-trend-basis">対象: ${esc(formV2TrendCond(t, key))}。${pts.length} 回（${fmtMD(pts[0].date)}〜${fmtMD(pts[pts.length - 1].date)}）、計 ${shots} 射、各 ${Math.min(...ns)}${Math.min(...ns) === Math.max(...ns) ? "" : `〜${Math.max(...ns)}`} 射。測れなかった値（—）は数えていません。${meta.rel ? "最初の回の中央値を 100% としています。" : ""}${esc(formV2TrendWhy(t))}</p>
-    <p class="basis" data-testid="form-v2-trend-doubt">${doubt}</p>`);
+    <div class="fv2Legend"><span><i class="k7"></i>各回のまん中の値</span><span><i class="k8"></i>射の半分が入る幅</span>${rows.some((r) => r.p.gear) ? `<span><i class="k9"></i>弓具が前の回と違う</span>` : ""}</div>
+    <p class="fact" data-testid="form-v2-trend-fact">直近 ${last.length} 回のまん中の値は ${body}${f(Math.min(...last), { bare: true })}〜${f(Math.max(...last))}${/[%°]$/.test(f(1)) ? " " : ""}でした${cm ? `（${cm}）` : ""}。</p>
+    <p class="basis" data-testid="form-v2-trend-basis">比べた記録: ${esc(formV2TrendCond(t, key))}。${pts.length} 回（${fmtMD(pts[0].date)}〜${fmtMD(pts[pts.length - 1].date)}）、計 ${shots} 射、各 ${Math.min(...ns)}${Math.min(...ns) === Math.max(...ns) ? "" : `〜${Math.max(...ns)}`} 射。測れなかった値（—）は入っていません。${meta.rel ? "最初の回のまん中を 100% としています。" : ""}${esc(formV2TrendWhy(t))}</p>
+    <p class="basis" data-testid="form-v2-trend-doubt">${doubt}</p>
+    ${how ? `<details class="fv2More" data-testid="form-v2-trend-more"><summary>詳しく</summary><ul><li>${how}</li></ul></details>` : ""}`);
 }
 /* 切のとき: その場で入にできる（design.md 2.1） */
 function formTrackingOffCard() {
   return `<section class="vsec" data-testid="analysis-form-off">
     <div class="vsecH"><h2>射型の記録</h2><span class="aside">試験中・切</span></div>
-    <p class="fact">iPhone を台に置いて 1 エンドを撮ると、射数、保持の時間、ほかと違った射を記録します。</p>
-    <div class="lrow"><span class="lk">映像</span><span class="lv">保存しません<small>解析は端末の中だけで行い、外へ送りません</small></span></div>
+    <p class="fact">iPhone を台に置いて 1 エンドを撮ると、射数、フルドローの時間、ほかと違った射が記録に残ります。</p>
+    <div class="lrow"><span class="lk">映像</span><span class="lv">保存しません<small>端末の中だけで読み取り、外へ送りません</small></span></div>
     <div class="lrow"><span class="lk">残るもの</span><span class="lv">射ごとの数値<small>1 回 約 2KB</small></span></div>
-    <div class="lrow"><span class="lk">初回</span><span class="lv">約 15.5MB を取り込みます<small>次からは圏外でも使えます</small></span></div>
+    <div class="lrow"><span class="lk">初回</span><span class="lv">約 15.5MB を読み込みます<small>次からは圏外でも使えます</small></span></div>
     <div class="lrow"><span class="lk">対応</span><span class="lv">iOS 16.4 以降</span></div>
     <div class="btnRow"><button type="button" class="btn fv2Tall" id="formEnable" data-testid="form-v2-enable">入にする</button></div>
     <p class="basis">設定 &gt; 記録 の「射型の記録（試験中）」と同じ切り替えです。切に戻しても、記録は消えません。</p>
@@ -309,21 +327,21 @@ function formTrackingCard(records = db.formAnalyses || []) {
   const rows = shownRows.map((rec) => {
     const line = formV2RecordLine(rec);
     return `<div class="formAnalysisRow">
-      <button class="lrow link fv2Item" data-form-v2-id="${esc(rec.id)}" type="button"><span class="lmain"><b>${esc(line.title)}</b><span>${esc(line.sub)}${skipped.has(rec.id) ? "。選んだ項目の推移には入れていません" : ""}</span></span>${FORM_V2_GO}</button>
-      <button class="btn sm ghost histDelBtn" data-del-form="${esc(rec.id)}" type="button" aria-label="${esc(fmtMDW(rec.date))}の射型記録を削除">${icon("del")}</button>
+      <button class="lrow link fv2Item" data-form-v2-id="${esc(rec.id)}" type="button"><span class="lmain"><b>${esc(line.title)}</b><span>${esc(line.sub)}${skipped.has(rec.id) ? "。選んだ項目の推移には入っていません" : ""}</span></span>${FORM_V2_GO}</button>
+      <button class="btn sm ghost histDelBtn" data-del-form="${esc(rec.id)}" type="button" aria-label="${esc(fmtMDW(rec.date))}の射型の記録をゴミ箱へ移す">${icon("del")}</button>
     </div>`;
   }).join("");
   const empty = !all.length
-    ? `<div class="empty">${total ? "この条件に合う射型の記録は 0件です。弓具・距離・期間の選択を広げると表示されます。" : "射型の記録はまだありません。台に置いて 1 エンドを撮ると、ここに並びます。"}</div>`
+    ? `<div class="empty">${total ? "この条件に合う射型の記録はありません。弓具・距離・期間を広げると見られます。" : "射型の記録はまだありません。台に置いて 1 エンドを撮ると、ここに並びます。"}</div>`
     : "";
   return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="vsecH"><h2>射型の記録</h2><span class="aside">試験中${v2.length ? `・${v2.length}件` : ""}</span></div>
     <div class="btnRow"><button type="button" class="btn fv2Tall" id="formStart" data-testid="form-v2-start">${icon("camera")} 撮影して記録する</button></div>
-    <div class="btnRow fv2Tight"><button type="button" class="btn sec" id="formReplay" data-testid="form-v2-replay">保存した動画を解析する</button></div>
+    <div class="btnRow fv2Tight"><button type="button" class="btn sec" id="formReplay" data-testid="form-v2-replay">保存した動画を読み取る</button></div>
     ${debug ? `<p class="basis" data-testid="form-v2-debug-note">「検証用の診断データ」が入です。撮影の画面と数え方はふだんと同じで、保存する記録に解析器の中の値（数値だけ）を付けます。書き出しは、結果の画面か 設定 &gt; 記録 から行います。</p>` : ""}
     ${latest}${formV2TrendHtml(v2)}
     ${rows ? `<div class="fv2Sub"><div class="fv2ChartH"><b>記録</b><span>${v2.length}件${v2.length > 8 && !formV2ListAll ? "・新しい8件を表示" : ""}</span></div><div class="formRecordList" data-testid="form-v2-list">${rows}</div>
       ${v2.length > 8 ? `<div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2ListAll" data-testid="form-v2-list-all">${formV2ListAll ? "新しい 8 件だけにする" : `${v2.length} 件すべてを表示`}</button></div>` : ""}
-      <p class="basis">映像は残していません。数値だけを、この端末の中に保存しています。期間は撮影日、弓具・距離は紐づけた練習の条件で選んでいます。</p></div>` : ""}
+      <p class="basis">映像は残りません。数値だけが、この端末の中に保存されます。期間は撮影日、弓具・距離はつないだ練習の条件で選ばれます。</p></div>` : ""}
     ${empty}
     ${legacy.length ? formLegacyRecordsHtml(legacy) : ""}
   </section>`;
@@ -423,17 +441,17 @@ function formV2TopHtml(label, title, right) {
 
 /* ---- 困ったとき（design.md 2.11）。生の例外の文は出さない ---- */
 const FORM_V2_ERRORS = {
-  insecure: ["この開き方ではカメラを使えません。", "カメラは https で開いたときだけ使えます。保存した動画の解析は、この開き方でも使えます。", ["replay", "close"]],
-  nocamera: ["カメラが見つかりませんでした。", "この端末かブラウザでは、カメラを使えません。保存した動画の解析は使えます。", ["retry", "replay", "close"]],
-  permission: ["カメラを使う許可がありません。", "設定 > Safari > カメラ で「許可」にすると撮影できます。保存した動画の解析は、許可がなくても使えます。", ["retry", "replay", "close"]],
+  insecure: ["この開き方ではカメラを使えません。", "カメラは https で開いたときだけ使えます。保存した動画の読み取りは、この開き方でも使えます。", ["replay", "close"]],
+  nocamera: ["カメラが見つかりませんでした。", "この端末かブラウザでは、カメラを使えません。保存した動画の読み取りは使えます。", ["retry", "replay", "close"]],
+  permission: ["カメラを使う許可がありません。", "設定 > Safari > カメラ で「許可」にすると撮影できます。保存した動画の読み取りは、許可がなくても使えます。", ["retry", "replay", "close"]],
   busy: ["カメラを始められませんでした。", "ほかのアプリがカメラを使っていると始められません。閉じてから、もう一度試してください。", ["retry", "replay", "close"]],
-  unsupported: ["この端末では動きません。", "解析の部品が動く条件（iOS 16.4 以降。WebAssembly と SIMD）を満たしていません。記録や設定は変わっていません。", ["close"]],
-  model: ["解析の部品（約 15.5MB）を読み込めませんでした。", "通信できる場所で一度開くと、次からは圏外でも使えます。記録や設定は変わっていません。", ["retry", "close"]],
-  file: ["動画を読み込めませんでした。", "対応していない形式の可能性があります。写真アプリで撮った動画（mp4・mov）を選んでください。", ["replay", "close"]],
-  detect: ["解析が途中で止まりました。", "解析の部品が応答しなくなりました。ここまでに読み込んだぶんは解析できます。", ["analyze", "close"]],
-  interrupted: ["撮影が中断されました。", "アプリが裏へ回ったため、カメラが止まりました。", ["analyze", "close"]],
+  unsupported: ["この端末では使えません。", "射型の記録は iOS 16.4 以降で使えます。これまでの記録と設定はそのままです。", ["close"]],
+  model: ["読み取りに使うデータ（約 15.5MB）を読み込めませんでした。", "電波の届く場所で一度開くと、次からは圏外でも使えます。記録と設定はそのままです。", ["retry", "close"]],
+  file: ["動画を読み込めませんでした。", "この形式には対応していないようです。写真アプリで撮った動画（mp4・mov）を選んでください。", ["replay", "close"]],
+  detect: ["読み取りが途中で止まりました。", "ここまでに読み取ったぶんは、結果を見られます。", ["analyze", "close"]],
+  interrupted: ["撮影が止まりました。", "アプリが裏へ回ったので、カメラが止まりました。", ["analyze", "close"]],
   readStopped: ["動画の読み取りが止まりました。", "アプリが裏へ回ったか、動画の再生が止まりました。", ["analyze", "retry", "close"]],
-  analyze: ["解析できませんでした。", "解析の途中で問題が起きました。読み取った点の列は、この画面を閉じるまで残っています。記録や設定は変わっていません。", ["analyze", "close"]],
+  analyze: ["結果を出せませんでした。", "計算の途中で問題が起きました。読み取ったデータは、この画面を閉じるまで残っています。記録と設定はそのままです。", ["analyze", "close"]],
 };
 const FORM_V2_STOPPED = ["interrupted", "detect", "readStopped", "analyze"]; // 途中まで読み取ったものが残りうる止まり方
 /* 保存していない結果や、まだ解析していない読み取りを捨てる前に確かめる（design.md 2.6）。捨ててよければ true */
@@ -445,18 +463,18 @@ async function formV2ConfirmLeave(S) {
     return appConfirm(`${tot.shots} 射の結果を保存せずに閉じますか？`, { danger: true, okLabel: "閉じる" });
   }
   if (!S.buffer || S.buffer.n < 10) return true;
-  return appConfirm(`ここまでに読み取った ${formV2Dur(S.buffer.durationMs / 1000)}ぶんを、解析せずに捨てますか？`, { danger: true, okLabel: "捨てる" });
+  return appConfirm(`ここまでに読み取った ${formV2Dur(S.buffer.durationMs / 1000)}ぶんを、結果を見ずに閉じますか？残りません。`, { danger: true, okLabel: "閉じる" });
 }
 function formV2ShowError(S, kind, extra) {
   formV2StopCapture(S);
   const e = FORM_V2_ERRORS[kind] || FORM_V2_ERRORS.busy, has = S.buffer && S.buffer.n >= 10;
   const part = kind === "interrupted" || kind === "readStopped";
-  const btn = { retry: [kind === "readStopped" ? "最初から読み直す" : "もう一度試す", "fv2Retry"], replay: ["保存した動画を解析する", "fv2ToReplay"], analyze: [part ? "ここまでを解析する" : kind === "analyze" ? "もう一度解析する" : "解析する", "fv2Analyze"], close: [(part || kind === "analyze") && has ? "捨てる" : "閉じる", "fv2ErrClose"] };
+  const btn = { retry: [kind === "readStopped" ? "最初から読み直す" : "もう一度試す", "fv2Retry"], replay: ["保存した動画を読み取る", "fv2ToReplay"], analyze: [part ? "ここまでの結果を見る" : kind === "analyze" ? "もう一度結果を出す" : "結果を見る", "fv2Analyze"], close: [(part || kind === "analyze") && has ? "保存せずに閉じる" : "閉じる", "fv2ErrClose"] };
   const acts = e[2].filter((a) => a !== "analyze" || has);
   formV2Paint(S, "error", `${formV2TopHtml("射型", "")}
     <header class="subHead"><h3>射型の記録</h3></header>
     <section class="vsec fv2Err" data-testid="form-v2-error" data-kind="${kind}" role="alert">
-      <div class="vsecH"><h2>${kind === "analyze" ? "解析" : FORM_V2_STOPPED.includes(kind) ? "中断" : "始められません"}</h2></div>
+      <div class="vsecH"><h2>${kind === "analyze" ? "結果" : FORM_V2_STOPPED.includes(kind) ? "中断" : "始められません"}</h2></div>
       <p class="fact">${esc(e[0])}</p>
       <p class="basis">${esc(e[1])}${extra ? esc(extra) : ""}</p>
       ${acts.map((a, i) => `<div class="btnRow${i ? " fv2Tight" : ""}"><button type="button" class="btn${i ? " sec" : ""}" id="${btn[a][1]}">${btn[a][0]}</button></div>`).join("")}
@@ -501,7 +519,7 @@ function formV2BeginLive(S) {
   if (window.isSecureContext !== true) return formV2ShowError(S, "insecure");
   if (formV2Unsupported()) return formV2ShowError(S, "unsupported");
   if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function") return formV2ShowError(S, "nocamera");
-  formV2PaintPlace(S, "解析の部品を読み込んでいます（初回だけ約 15.5MB）。");
+  formV2PaintPlace(S, "読み取りの準備をしています（初回だけ約 15.5MB を読み込みます）。");
   const token = (S.token = {});
   loadFormPose().then((lm) => {
     if (S.closed || S.token !== token) return null;
@@ -563,7 +581,7 @@ function formV2OnFrame(S, tMs) {
     const before = S.live.shots, r = S.live.update(S.buffer, S.hand, S.fps);
     if (r.shots !== before) { formV2CaptureCount(S); if (S.sound) formV2Beep(); nativePulse("light"); }
   }
-  if (S.recorder && rel - S.recStart >= FormV2.LIMITS.VIDEO_MS) { formV2StopRec(S); S.notice = "動画は 10 分になったので止めました。解析は続けています。"; formV2RecButton(S); }
+  if (S.recorder && rel - S.recStart >= FormV2.LIMITS.VIDEO_MS) { formV2StopRec(S); S.notice = "動画は 10 分になったので止めました。射の記録は続いています。"; formV2RecButton(S); }
   if (rel - S.lastUi >= 500) { S.lastUi = rel; formV2CaptureTick(S, rel, lms); }
   if (rel >= FormV2.LIMITS.MAX_MS || S.buffer.full) { S.limitHit = true; formV2Analyze(S); }
 }
@@ -644,16 +662,16 @@ function formV2BeginCapture(S) {
   S.startedAt = Date.now();
   S.notice = "";
   S.limitHit = false;
-  formV2Paint(S, "capture", `<div class="subTop fv2Top"><button type="button" class="backBtn" id="fv2Back" data-testid="form-v2-cancel">${REC_CHEVRON}取り消す</button><span class="fv2Ttl" id="fv2Clock" data-testid="form-v2-clock">記録中 0:00</span>
+  formV2Paint(S, "capture", `<div class="subTop fv2Top"><button type="button" class="backBtn" id="fv2Back" data-testid="form-v2-cancel">${REC_CHEVRON}やめる</button><span class="fv2Ttl" id="fv2Clock" data-testid="form-v2-clock">記録中 0:00</span>
       <button type="button" class="fv2RecBtn" id="fv2Rec" data-testid="form-v2-rec" aria-pressed="false"></button></div>
     <div class="fv2Count" data-testid="form-v2-count" aria-live="polite"><span class="lab">数えた射（目安）</span><span class="num" id="fv2Num">0</span><span class="sub" id="fv2Ld"></span></div>
     <div class="fv2Thumb" id="fv2Thumb" aria-hidden="true"></div>
     <div class="fv2State" id="fv2State" data-testid="form-v2-state" role="status">体を探しています。</div>
-    <p class="basis">数は離れの 4〜5 秒あとに増えます。終わったあと、全体を見直して数え直します。射の最中に読む表示は出しません。</p>
+    <p class="basis">射数は、リリースの 4〜5 秒あとに増えます。撮り終わったら、全体を見直して数え直します。</p>
     <div class="actbar"><button type="button" class="btn pri" id="fv2Finish" data-testid="form-v2-finish">終わって結果を見る</button></div>`, () => {
     S.root.querySelector("#fv2Thumb").appendChild(S.video);
     S.root.querySelector("#fv2Back").onclick = async () => {
-      if (await appConfirm("この撮影を取り消しますか？何も残りません。", { danger: true, okLabel: "取り消す", cancelLabel: "続ける" })) formV2Close(S);
+      if (await appConfirm("この撮影をやめますか？何も残りません。", { danger: true, okLabel: "やめる", cancelLabel: "続ける" })) formV2Close(S);
     };
     S.root.querySelector("#fv2Finish").onclick = () => formV2Analyze(S);
     S.root.querySelector("#fv2Rec").onclick = () => {
@@ -676,7 +694,7 @@ function formV2CaptureTick(S, rel, lms) {
   if (!state) return;
   const st = FormV2.captureState(lms, S.fps, Number.isFinite(S.noPoseSince) ? rel - S.noPoseSince : 0);
   let text = st.text, warn = st.warn;
-  if (rel >= FormV2.LIMITS.WARN_MS) { text = "あと 1 分で 30 分の上限です。上限になると、撮影を止めて解析へ進みます。"; warn = true; } else if (!warn) {
+  if (rel >= FormV2.LIMITS.WARN_MS) { text = "あと 1 分で 30 分の上限です。上限になると、撮影を止めて結果へ進みます。"; warn = true; } else if (!warn) {
     if (S.recorder) text += `動画は残り ${formV2Dur((FormV2.LIMITS.VIDEO_MS - (rel - S.recStart)) / 1000)}。`;
     if (S.notice) text += S.notice;
   }
@@ -783,7 +801,7 @@ function formV2BeginReplay(S) {
   formV2Paint(S, "reading", `${formV2TopHtml("やめる", "動画を読み込む")}
     <div class="fv2Cam bleed" id="fv2Cam"></div>
     <section class="vsec"><div class="vsecH"><h2>読み込んでいます</h2><span class="aside" id="fv2ReadPos" data-testid="form-v2-read-pos">0:00</span></div>
-      <p class="fact" id="fv2ReadFact" role="status">解析の部品を読み込んでいます（初回だけ約 15.5MB）。</p>
+      <p class="fact" id="fv2ReadFact" role="status">読み取りの準備をしています（初回だけ約 15.5MB を読み込みます）。</p>
       <p class="basis">動画を最後まで再生しながら、体の点を読み取ります。動画はこの端末の中だけで扱い、アプリの中には保存しません。利き手: ${S.hand === "left" ? "左" : "右"}（撮影の「撮り方」で変えられます）。</p>
     </section>`, () => {
     S.root.querySelector("#fv2Cam").appendChild(S.video);
@@ -834,10 +852,10 @@ function formV2Analyze(S) {
   formV2StopCapture(S);
   const step = (b, s, done) => `<div class="lrow"><span class="lmain"><b>${b}</b><span>${s}</span></span><span class="pill fv2Pill ${done ? "ok" : ""}">${done ? "済" : "計算中"}</span></div>`;
   const dur = S.buffer.durationMs / 1000, n = S.buffer.n;
-  const head = `${formV2TopHtml("やめる", "")}<header class="subHead"><h3>解析しています</h3></header>`;
+  const head = `${formV2TopHtml("やめる", "")}<header class="subHead"><h3>結果を出しています</h3></header>`;
   const read = `${formV2Dur(dur)}、${n.toLocaleString("ja-JP")} コマ${dur > 0 ? `（毎秒 ${Math.round(n / dur)} コマ）` : ""}`;
-  formV2Paint(S, "analyzing", `${head}<div class="fv2Steps" data-testid="form-v2-steps">${step("記録を読み込む", read, true)}${step("射を探す", "…", false)}${step("射ごとの値を測る", "…", false)}${step("測定のゆれを見積もる", "…", false)}</div>
-    <p class="basis">映像は保存していません。解析に使った点の列は、結果の画面を閉じると消えます。</p>`, () => {
+  formV2Paint(S, "analyzing", `${head}<div class="fv2Steps" data-testid="form-v2-steps">${step("記録を読み込む", read, true)}${step("射を探す", "…", false)}${step("射ごとの値を測る", "…", false)}${step("測るときのぶれを調べる", "…", false)}</div>
+    <p class="basis">映像は保存されません。読み取ったデータは、結果の画面を閉じると消えます。</p>`, () => {
     S.root.querySelector("#fv2Back").onclick = async () => { if (await formV2ConfirmLeave(S)) formV2Close(S); };
   });
   /* 解析や記録の組み立てで例外が起きても「計算中」のまま止まらない。点の列を残して、やり直せる画面を出す */
@@ -867,24 +885,24 @@ function formV2Analyze(S) {
       note: replay ? "(保存済み動画から解析)" : "", diag, placement: replay ? null : S.place,
     });
     const tot = formV2Totals(S), m = FormV2.read(S.record), q = result.quality, shots = tot.shots, df = Math.max(0, ...FormV2.COLS.map((k) => (FormV2.META[k].unit === "s" ? 0 : m.df[k] || 0)));
-    const found = `${shots} 射、引き戻し ${tot.letdowns} 回。${tot.openCands ? `離れがはっきり写らなかった保持 ${tot.openCands} 回` : "離れがはっきり写らなかった保持 なし"}${S.records.length > 1 ? `。1 つの記録は ${FormV2.LIMITS.MAX_SHOTS} 射までなので、${S.records.length} つの記録に分けます` : ""}`;
-    const vals = shots ? `${shots} 射 × ${FormV2.keysFor(S.record).length} 項目。${formV2ViewText(S.record.v2.view)}` : "射が無いので測っていません";
-    const noise = df ? `保持の中の区間どうしの差 ${df} 個から` : "見積もれる保持がありませんでした";
+    const found = `${shots} 射、引き戻し ${tot.letdowns} 回。${tot.openCands ? `リリースがはっきり写らなかったフルドロー ${tot.openCands} 回` : "リリースがはっきり写らなかったフルドロー なし"}${S.records.length > 1 ? `。1 つの記録は ${FormV2.LIMITS.MAX_SHOTS} 射までなので、${S.records.length} つの記録に分けます` : ""}`;
+    const vals = shots ? `${shots} 射 × ${FormV2.keysFor(S.record).length} 項目。${formV2ViewText(S.record.v2.view)}` : "射が無いので、測る値はありません";
+    const noise = df ? `フルドロー中の小さな動き ${df} か所から` : "使えるフルドローがありませんでした";
     const any = tot.events > 0;
     const warns = q.warnings || [];
-    const why = warns.includes("tooShort") ? "記録が短すぎました（10 コマ未満）。"
-      : warns.includes("noBody") ? "体の点が取れませんでした。上半身と両腕が入る向きに置いてください。"
-        : warns.includes("noFullDraw") ? "引き切った区間が見つかりませんでした。射線の真後ろや真上から撮ると、引き尺が写りません。置き方を確かめてください。"
-          : "引いて保持した区間はありましたが、射として数えられる離れは見つかりませんでした。";
+    const why = warns.includes("tooShort") ? "撮影が短すぎました（10 コマ未満）。"
+      : warns.includes("noBody") ? "体を読み取れませんでした。上半身と両腕が入る向きに置いてください。"
+        : warns.includes("noFullDraw") ? "引き切った所が見つかりませんでした。射線の真後ろや真上から撮ると、引き尺が写りません。置き方を確かめてください。"
+          : "フルドローはありましたが、射に数えられるリリースが見つかりませんでした。";
     const zero = !shots;
-    formV2Paint(S, "analyzing", `${head.replace("解析しています", zero ? "射が見つかりませんでした" : "解析が終わりました")}
+    formV2Paint(S, "analyzing", `${head.replace("結果を出しています", zero ? "射が見つかりませんでした" : "結果が出ました")}
       ${S.limitHit ? `<p class="fact" data-testid="form-v2-limit">30 分（またはコマ数の上限）になったので、撮影を止めました。</p>` : ""}
-      <div class="fv2Steps" data-testid="form-v2-steps">${step("記録を読み込む", read, true)}${step("射を探す", found, true)}${step("射ごとの値を測る", vals, true)}${step("測定のゆれを見積もる", noise, true)}</div>
-      ${zero ? `<section class="vsec" data-testid="form-v2-zero"><div class="vsecH"><h2>考えられる理由</h2></div><p class="fact">射として数えた区間は 0 回でした。</p><p class="basis">${why}</p>
+      <div class="fv2Steps" data-testid="form-v2-steps">${step("記録を読み込む", read, true)}${step("射を探す", found, true)}${step("射ごとの値を測る", vals, true)}${step("測るときのぶれを調べる", noise, true)}</div>
+      ${zero ? `<section class="vsec" data-testid="form-v2-zero"><div class="vsecH"><h2>考えられる理由</h2></div><p class="fact">射は 1 回も見つかりませんでした。</p><p class="basis">${why}</p>
         ${S.src === "live" ? `<div class="btnRow"><button type="button" class="btn" id="fv2Again">置き方を確かめる</button></div>` : ""}
-        ${any ? `<div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2Show">見つけた区間を見る</button></div>` : ""}
+        ${any ? `<div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2Show">見つけた動きを見る</button></div>` : ""}
         <div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2ZeroClose">閉じる</button></div></section>` : ""}
-      <p class="basis">映像は保存していません。解析に使った点の列は、結果の画面を閉じると消えます。</p>
+      <p class="basis">映像は保存されません。読み取ったデータは、結果の画面を閉じると消えます。</p>
       ${zero ? "" : `<div class="actbar"><button type="button" class="btn pri" id="fv2Show" data-testid="form-v2-show">結果を見る</button></div>`}`, () => {
       const on = (id, fn) => { const b = S.root.querySelector("#" + id); if (b) b.onclick = fn; };
       const leave = async () => { if (await formV2ConfirmLeave(S)) formV2Close(S); };
@@ -942,14 +960,16 @@ function formV2PaintResult(S) {
   if (first) {
     const ft = cmp.feat[first.key], ref = ft.median, k = first.key, dp = Math.max(1, FormV2.META[k].dp);
     const d = FormV2.shown(k, first.value, ref) - FormV2.median(first.others.map((t) => FormV2.shown(k, t, ref)));
-    basis = `ほかの ${first.others.length} 射の中央値との差は ${FormV2.fmt(k, d, { sign: true, dp })}、この回の測定のゆれ（±${FormV2.fmt(k, FormV2.shownSize(k, ft.noise, ref), { dp })}）から出せる下限は ${FormV2.fmt(k, FormV2.shownSize(k, ft.limit, ref), { dp })} です。`;
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
+    basis = `ほかの ${first.others.length} 射の中央値との差は ${FormV2.fmt(k, d, { sign: true, dp })} です。この撮影では、カメラで測るときのぶれ（±${FormV2.fmt(k, FormV2.shownSize(k, ft.noise, ref), { dp })}）から見て、${FormV2.fmt(k, FormV2.shownSize(k, ft.limit, ref), { dp })} を超えると印が付きます。`;
+/* voice:fold-end */
   }
   const lowConf = model.events.filter((e) => e.kind === "shot" && e.counted && e.conf < 6).map((e) => e.n);
   const keys = FormV2.keysFor(rec, FormAnalyze.DEFAULT_KEYS);
   const hiRow = first ? first.row : -1;
   const sessions = (db.sessions || []).filter((s) => s && s.date === rec.date);
-  const linkOpts = `<option value="">紐づけない</option>${sessions.map((s) => `<option value="${esc(s.id)}"${s.id === rec.sessionId ? " selected" : ""}>${esc(formV2SessionLabel(s))}</option>`).join("")}`;
-  const warnText = { small: "体が小さく写っていました（胴の長さ 100px 未満）。位置の項目は粗くなります。", lowFps: "毎秒 15 コマ未満でした。離れの時刻は粗くなります。", gappy: "姿勢が取れなかったコマが 2 割を超えました。値が欠けた射があります。", steep: "弓手の腕がかなり上を向いていました（長い距離）。検出の境目に近い置き方です。", timeGap: "コマの時刻が 5 秒より大きく飛んだ所がありました。その前後は、つながっていない区間として解析しています。", truncated: "記録が長すぎたので、終わりの部分は解析していません。" };
+  const linkOpts = `<option value="">つながない</option>${sessions.map((s) => `<option value="${esc(s.id)}"${s.id === rec.sessionId ? " selected" : ""}>${esc(formV2SessionLabel(s))}</option>`).join("")}`;
+  const warnText = { small: "体が小さく写っていました。位置の項目は粗くなります。", lowFps: "毎秒 15 コマ未満でした。リリースの時刻は粗くなります。", gappy: "体を読み取れなかったコマが 2 割を超えました。値が欠けた射があります。", steep: "押し手の腕がかなり上を向いていました（長い距離）。読み取りにくい置き方です。", timeGap: "コマの時刻が 5 秒より大きく飛んだ所がありました。その前後は、別々に読み取っています。", truncated: "撮影が長すぎたので、終わりの部分は入っていません。" };
   const warns = (v.w || []).filter((w) => warnText[w]).map((w) => `<p class="basis">${warnText[w]}</p>`).join("");
   const bytes = S.records.reduce((n, r) => n + JSON.stringify(r).length, 0);
   const mb = S.recBlob ? Math.max(0.1, S.recBlob.size / 1e6) : 0;
@@ -960,36 +980,38 @@ function formV2PaintResult(S) {
   formV2Paint(S, "result", `${formV2TopHtml("射型", "")}
     <header class="subHead fv2Head"><h3>${fmtMDW(rec.date)}の記録</h3><span class="viewDate">${hhmm}〜<br>${formV2Dur(model.dur)}</span></header>
     ${partsHtml}
-    <section class="vsec" data-testid="form-v2-summary"><div class="vsecH"><h2>この回</h2>${S.saved ? `<span class="aside">${rec.cap.src === "replay" ? "保存した動画" : "撮影"}</span>` : `<button type="button" class="txtBtn fv2FixBtn" id="fv2Fix" data-testid="form-v2-fix-open">射数を直す</button>`}</div>
-      <div class="figs two"><div class="fig"><div class="l">射</div><div class="n" data-testid="form-v2-shots">${model.count}<small>射</small></div><div class="d">${model.added || model.removed ? `直した数: 足した ${model.added}・外した ${model.removed}` : `離れがはっきり写った射 ${model.count}`}</div></div>
-        <div class="fig"><div class="l">引き戻し</div><div class="n" data-testid="form-v2-letdowns">${model.letdowns}<small>回</small></div><div class="d">射に数えていません</div></div></div>
+    <section class="vsec" data-testid="form-v2-summary"><div class="vsecH"><h2>この撮影</h2>${S.saved ? `<span class="aside">${rec.cap.src === "replay" ? "保存した動画" : "撮影"}</span>` : `<button type="button" class="txtBtn fv2FixBtn" id="fv2Fix" data-testid="form-v2-fix-open">射数を直す</button>`}</div>
+      <div class="figs two"><div class="fig"><div class="l">射</div><div class="n" data-testid="form-v2-shots">${model.count}<small>射</small></div><div class="d">${model.added || model.removed ? `直した数: 足した ${model.added}・外した ${model.removed}` : `リリースがはっきり写った射 ${model.count}`}</div></div>
+        <div class="fig"><div class="l">引き戻し</div><div class="n" data-testid="form-v2-letdowns">${model.letdowns}<small>回</small></div><div class="d">射数には入りません</div></div></div>
       <div class="fv2Chart fv2Timeline">${formV2TimelineSvg(model)}</div>
-      <div class="fv2Legend"><span><i class="k1"></i>保持</span><span><i class="k2"></i>離れ</span><span><i class="k3"></i>戻 = 引き戻し</span>${model.openCands ? `<span><i class="k4"></i>？ = 数えていない保持</span>` : ""}${model.removed ? `<span><i class="k3"></i>外 = 外した射</span>` : ""}</div>
-      ${model.openCands ? `<p class="basis" data-testid="form-v2-cand-note">離れがはっきり写らなかった保持が ${model.openCands} 回あります。射かもしれませんが、数には入れていません。${S.saved ? "" : "「射数を直す」で足せます。"}</p>` : ""}
-      ${lowConf.length ? `<p class="basis">${lowConf.join("・")} 射目は、離れの位置の決め手が弱めでした。数には入れています。動画があれば確かめてください。</p>` : ""}
+      <div class="fv2Legend"><span><i class="k1"></i>フルドロー</span><span><i class="k2"></i>リリース</span><span><i class="k3"></i>戻 = 引き戻し</span>${model.openCands ? `<span><i class="k4"></i>？ = 数えていないフルドロー</span>` : ""}${model.removed ? `<span><i class="k3"></i>外 = 外した射</span>` : ""}</div>
+      ${model.openCands ? `<p class="basis" data-testid="form-v2-cand-note">リリースがはっきり写らなかったフルドローが ${model.openCands} 回あります。射かもしれませんが、射数には入っていません。${S.saved ? "" : "「射数を直す」で足せます。"}</p>` : ""}
+      ${lowConf.length ? `<p class="basis">${lowConf.join("・")} 射目は、リリースの時刻がはっきりしませんでした。射数には入っています。動画があれば確かめてください。</p>` : ""}
     </section>
     <section class="vsec" data-testid="form-v2-diff"><div class="vsecH"><h2>ほかと違った射</h2><span class="aside">${first ? `${first.n} 射目` : "なし"}</span></div>
       <p class="fact" data-testid="form-v2-sentence">${esc(sum.text)}</p>
       ${mine.length > 1 ? `<p class="basis fv2Gap">同じ射で、ほかにも ${mine.length - 1} 項目が違いました。</p>${mine.slice(1).map(valText).join("")}` : ""}
-      ${others.length ? `<p class="basis fv2Gap">${others.join("・")} 射目にも、下限を超えた違いがあります。射の詳細で見られます。</p>` : ""}
-      ${cmp.n >= 4 ? `<p class="basis fv2Gap">${basis}${first ? "どれも" : "違いの印は、"}この回の測定のゆれから出せる下限を超えた${first ? "違いです" : "ときだけ出します"}。測定のゆれだけでこの欄に何か出る確率は、1 回の記録につき約 5% に抑えています。良し悪しの判定ではありません。</p>` : ""}
-      ${model.compared.length ? `<button type="button" class="lrow link" id="fv2ToShot" data-testid="form-v2-to-shot"><span class="lmain"><b>${first ? `${first.n} 射目を見る` : "射ごとの値を見る"}</b><span>ほかの射の中央と重ねて比べます</span></span>${FORM_V2_GO}</button>` : ""}
+      ${others.length ? `<p class="basis fv2Gap">${others.join("・")} 射目にも、ほかと違った所があります。射の詳細で見られます。</p>` : ""}
+      ${cmp.n >= 4 ? `<p class="basis fv2Gap" data-testid="form-v2-diff-basis">${first ? "ほかの射との違いが、カメラで測るときのぶれより大きかった所です。" : "ほかの射との違いが、カメラで測るときのぶれより大きいときだけ、ここに出ます。"}良し悪しではありません。</p>
+      <details class="fv2More" data-testid="form-v2-diff-more"><summary>詳しく</summary><ul><li>${basis}ぶれだけでここに何か出ることも、20 回の撮影に 1 回ほど（約 5%）あります。</li></ul></details>` : ""}
+      ${model.compared.length ? `<button type="button" class="lrow link" id="fv2ToShot" data-testid="form-v2-to-shot"><span class="lmain"><b>${first ? `${first.n} 射目を見る` : "射ごとの値を見る"}</b><span>ほかの射のまん中と重ねて比べます</span></span>${FORM_V2_GO}</button>` : ""}
     </section>
-    ${model.compared.length ? `<section class="vsec" data-testid="form-v2-charts"><div class="vsecH"><h2>そろい方</h2><span class="aside">${cmp.n} 射・射の順</span></div>
-      <div class="fv2Legend"><span><i class="k5"></i>この幅の中は、違いと言えません</span><span><i class="k6"></i>違った射</span></div>
+    ${model.compared.length ? `<section class="vsec" data-testid="form-v2-charts"><div class="vsecH"><h2>毎射そろっているか</h2><span class="aside">${cmp.n} 射・射の順</span></div>
+      <div class="fv2Legend"><span><i class="k5"></i>この幅の中は、ほぼ同じ</span><span><i class="k6"></i>違った射</span></div>
       ${keys.map((k) => formV2RunChartHtml(model, cmp, k)).join("")}
-      <p class="basis fv2Gap">位置の項目のゆれは、保持の中の区間どうしの差から見積もりました。時間の項目のゆれは、アンカーの決め方のあいまいさ（±0.1 秒）と離れの時刻の不確かさから置いた値です。${height ? `cm は身長 ${height}cm から出した目安で、±5% ほどの幅があります。` : "身長を設定すると、胴の長さに対する割合のとなりに cm の目安を出します（設定 &gt; 記録）。"}</p>
+      ${formV2SpreadMoreHtml(cmp, keys)}
+      <p class="basis fv2Gap">位置の項目のぶれは、フルドロー中の小さな動きから見積もりました。時間の項目のぶれは、アンカーとリリースの時刻が決めにくいぶん（±0.1 秒ほど）です。${height ? `cm は身長 ${height}cm から出した目安で、±5% ほどの幅があります。` : "身長を設定すると、胴の長さに対する割合のとなりに cm の目安を出します（設定 &gt; 記録）。"}</p>
     </section>
     <section class="vsec" data-testid="form-v2-overlay"><div class="vsecH"><h2>重ね図</h2><span class="aside">${first ? `青 = ${first.n} 射目` : `${cmp.n} 射`}</span></div>
       ${formV2OverlayHtml(model, S.overlay, hiRow, false)}
-      <div class="fv2SegRow">${formV2SegHtml("overlay", S.overlay, [["hold", "保持"], ["rel", "離れの 0.25 秒あと"]])}</div>
-      <p class="basis">射ごとの、その時刻の姿（9 点）を、両肩の中点を合わせて重ねています。2〜3cm より細かい違いは出せません。</p>
+      <div class="fv2SegRow">${formV2SegHtml("overlay", S.overlay, [["hold", "フルドロー"], ["rel", "リリースの 0.25 秒あと"]])}</div>
+      <p class="basis">射ごとの、その時刻の姿（9 点）を、両肩のまん中を合わせて重ねた図です。2〜3cm より細かい違いは分かりません。</p>
     </section>` : ""}
-    <section class="vsec" data-testid="form-v2-conditions"><div class="vsecH"><h2>この記録の条件</h2><span class="aside">比べるときの区切り</span></div>
+    <section class="vsec" data-testid="form-v2-conditions"><div class="vsecH"><h2>この記録の撮り方</h2><span class="aside">ほかの記録と比べる条件</span></div>
       <div class="lrow"><span class="lk">置き方</span><span class="lv">${esc(formV2ViewText(v.view))}<small>${esc(formV2ViewNote(v.view))}</small></span></div>
-      <div class="lrow"><span class="lk">写り</span><span class="lv">${rec.cap.o === "l" ? "横向き" : rec.cap.o === "p" ? "縦向き" : rec.cap.o === "s" ? "正方形" : "向きは不明"}${model.tpx ? `、胴の長さ ${esc(String(model.tpx))}px` : ""}<small>${rec.fps > 0 ? `毎秒 ${Math.round(rec.fps)} コマ、` : ""}姿勢が取れたコマ ${model.cov == null ? "—" : esc(String(model.cov))}%${rec.cap.src === "replay" ? "、保存した動画" : ""}</small></span></div>
+      <div class="lrow"><span class="lk">写り</span><span class="lv">${rec.cap.o === "l" ? "横向き" : rec.cap.o === "p" ? "縦向き" : rec.cap.o === "s" ? "正方形" : "向きは不明"}<small>${rec.fps > 0 ? `毎秒 ${Math.round(rec.fps)} コマ、` : ""}体を読み取れたコマ ${model.cov == null ? "—" : esc(String(model.cov))}%${rec.cap.src === "replay" ? "、保存した動画" : ""}</small></span></div>
       ${rec.cap.src === "replay" && !S.saved ? `<label class="lrow fv2Pick"><span class="lk">撮影日</span><input type="date" class="inp" id="fv2Date" data-testid="form-v2-date" value="${esc(rec.date)}" max="${today()}"></label>` : ""}
-      <label class="lrow fv2Pick"><span class="lk">練習</span><select class="pick" id="fv2Link" data-testid="form-v2-link" aria-label="紐づける練習">${linkOpts}</select></label>
+      <label class="lrow fv2Pick"><span class="lk">練習</span><select class="pick" id="fv2Link" data-testid="form-v2-link" aria-label="つなぐ練習">${linkOpts}</select></label>
       ${warns}
       <details class="fv2More"><summary>一台のカメラでは見えないもの</summary><ul>${FORM_V2_UNSEEN.map((t) => `<li>${t}</li>`).join("")}</ul></details>
       ${review ? `<div class="btnRow"><button type="button" class="btn sec" id="fv2Review" data-testid="form-v2-review">動画で確かめる</button></div>` : ""}
@@ -999,7 +1021,7 @@ function formV2PaintResult(S) {
         <p class="basis" data-testid="form-v2-diag-note">「検証用の診断データ」が入です。${rec.v2.dg ? "この記録には、解析器の中の値（数値だけ）が付いています。" : "この記録は設定が切のあいだに保存したので、解析器の中の値は付いていません。記録の数値だけを書き出します。"}映像・画像・日付・メモは入りません。${S.buffer && db.settings.formDebugLandmarks === true ? "「体の点の列も含める」が入なので、体の 9 点の位置の列も入ります。" : ""}</p>` : ""}
       ${S.saved ? "" : `<div class="btnRow"><button type="button" class="btn sec" id="fv2Discard" data-testid="form-v2-discard">保存せずに閉じる</button></div>`}
     </section>
-    <div class="actbar" data-testid="form-v2-actbar">${S.saveError ? `<div class="fv2Saved err" role="alert">記録を保存できませんでした。端末の保存領域が足りません。結果はこの画面に残っています。設定 &gt; データ でバックアップを書き出してから、もう一度試してください。</div>` : ""}${S.saved && !S.stored ? `<div class="fv2Saved" data-testid="form-v2-saved" role="status">保存しました。数値だけを残しました（${many ? `${S.records.length} つの記録、` : ""}${(S.savedBytes / 1000).toFixed(1)}KB）。</div>` : ""}
+    <div class="actbar" data-testid="form-v2-actbar">${S.saveError ? `<div class="fv2Saved err" role="alert">記録を保存できませんでした。端末の空きが足りません。結果はこの画面に残っています。設定 &gt; データ でバックアップを書き出してから、もう一度試してください。</div>` : ""}${S.saved && !S.stored ? `<div class="fv2Saved" data-testid="form-v2-saved" role="status">保存しました。数値だけを残しました（${many ? `${S.records.length} つの記録、` : ""}${(S.savedBytes / 1000).toFixed(1)}KB）。</div>` : ""}
       <button type="button" class="btn pri" id="fv2Save" data-testid="form-v2-save">${S.saved ? "射型へ戻る" : S.saveError ? "もう一度試す" : "記録を保存する"}</button></div>`, () => {
     const on = (id, fn) => { const b = S.root.querySelector("#" + id); if (b) b.onclick = fn; };
     const leave = async () => {
@@ -1020,7 +1042,7 @@ function formV2PaintResult(S) {
       const have = (db.formAnalyses || []).length, limit = IMPORT_LIMITS.formAnalyses;
       if (have + S.records.length > limit) {
         S.saving = true;
-        const go = await appConfirm(`射型の記録が ${have.toLocaleString("ja-JP")} 件あります（目安の上限は ${limit.toLocaleString("ja-JP")} 件）。このまま保存できますが、端末の保存領域が足りなくなることがあります。古い記録は 分析 > 射型 の一覧から 1 件ずつ削除できます（自動では消しません）。先に 設定 > データ でバックアップを書き出しておくと安心です。`, { title: "記録が多くなっています", okLabel: "このまま保存する", cancelLabel: "やめる" });
+        const go = await appConfirm(`射型の記録が ${have.toLocaleString("ja-JP")} 件あります（目安の上限は ${limit.toLocaleString("ja-JP")} 件）。このまま保存できますが、端末の空きが足りなくなることがあります。古い記録は 分析 > 射型 の一覧から 1 件ずつゴミ箱へ移せます（自動では消えません）。先に 設定 > データ でバックアップを書き出しておくと安心です。`, { title: "記録が多くなっています", okLabel: "このまま保存する", cancelLabel: "やめる" });
         S.saving = false;
         if (!go || S.closed || S.saved) return;
       }
@@ -1068,14 +1090,14 @@ function formV2OpenFix(S) {
     const rows = m.events.map((e) => {
       const at = formV2Mmss(e.tS);
       let t, s;
-      if (e.kind === "shot") { t = e.counted ? `${e.n} 射目` : "外した射"; s = `${at}、保持 ${e.holdS == null ? "—" : e.holdS.toFixed(1) + " 秒"}`; }
-      else if (e.kind === "letdown") { t = e.counted ? `${e.n} 射目（引き戻しを射に数えています）` : "引き戻し"; s = `${at}、保持 ${e.holdS == null ? "—" : e.holdS.toFixed(1) + " 秒"}。手が前へ戻りました`; }
-      else { t = e.counted ? `${e.n} 射目（足した射）` : e.likely ? "射かもしれません（ほかの射に似た動き）" : "射かもしれません"; s = `${at} ごろ（±${(e.uncS == null ? 0.5 : e.uncS).toFixed(1)} 秒）。${FORM_V2_REASON_TEXT[e.reason] || "離れがはっきり写りませんでした"}。値は測れていません`; }
+      if (e.kind === "shot") { t = e.counted ? `${e.n} 射目` : "外した射"; s = `${at}、フルドロー ${e.holdS == null ? "—" : e.holdS.toFixed(1) + " 秒"}`; }
+      else if (e.kind === "letdown") { t = e.counted ? `${e.n} 射目（引き戻しを射に数えています）` : "引き戻し"; s = `${at}、フルドロー ${e.holdS == null ? "—" : e.holdS.toFixed(1) + " 秒"}。手が前へ戻りました`; }
+      else { t = e.counted ? `${e.n} 射目（足した射）` : e.likely ? "射かもしれません（ほかの射に似た動き）" : "射かもしれません"; s = `${at} ごろ（±${(e.uncS == null ? 0.5 : e.uncS).toFixed(1)} 秒）。${FORM_V2_REASON_TEXT[e.reason] || "リリースがはっきり写りませんでした"}。値はありません`; }
       return `<div class="fv2FixRow" data-kind="${e.kind}"><div><b>${esc(t)}</b><span>${esc(s)}</span></div><button type="button" class="fv2Tog" data-src="${e.src}" data-i="${e.i}" aria-pressed="${e.counted}">${e.counted ? "射に数える" : "数えない"}</button></div>`;
     }).join("");
     ovl.innerHTML = `<div class="sheet fv2FixSheet" data-testid="form-v2-fix"><h3>射数を直す</h3>
-      <p class="basis">見つけた区間の一覧です。違っていれば切り替えてください。外した射と、足した射（値を測れていません）は、比べる対象に入りません。見つけていない時刻へ射を足すことはできません。</p>
-      ${rows || `<p class="fact">見つけた区間はありません。</p>`}
+      <p class="basis">カメラが見つけた動きの一覧です。違っていたら切り替えてください。外した射と足した射は、ほかの射との比べには入りません。ここに無い時刻には足せません。</p>
+      ${rows || `<p class="fact">見つけた動きはありません。</p>`}
       <p class="fact" data-testid="form-v2-fix-count"><b>${m.count} 射</b>として記録します。</p>
       <div class="btnRow"><button type="button" class="btn sec" id="fv2FixCancel">やめる</button><button type="button" class="btn" id="fv2FixOk" data-testid="form-v2-fix-ok">この数にする</button></div></div>`;
     ovl.querySelectorAll(".fv2Tog").forEach((b) => (b.onclick = () => {
@@ -1113,15 +1135,15 @@ function formV2PaintShot(S, row) {
   const pct = height ? `（身長 ${height}cm なら 1% は約 ${((FormV2.TORSO_PER_HEIGHT * height) / 100).toFixed(1)}cm。目安です）` : "";
   formV2Paint(S, "shot", `${formV2TopHtml("結果", "")}
     <header class="subHead fv2Head"><h3>${e.n} 射目</h3><span class="viewDate">${formV2Mmss(e.tS)}<br>${model.count === n ? `${n} 射中` : `値を測れた ${n} 射中`}</span></header>
-    <section class="vsec" data-testid="form-v2-shot-time"><div class="vsecH"><h2>時間</h2><span class="aside">縦線 = ほかの ${n - 1} 射の中央値</span></div>
-      <div class="fv2Bars">${[["drawMs", "引き"], ["holdMs", "保持"], ["followMs", "弓手を上げていた"]].map(([k, l]) => bar(k, l)).join("")}</div></section>
-    <section class="vsec" data-testid="form-v2-shot-overlay"><div class="vsecH"><h2>重ね図</h2><span class="aside">青 = この射、灰 = ほかの中央</span></div>
-      ${formV2OverlayHtml(model, S.overlay, i, true)}<div class="fv2SegRow">${formV2SegHtml("overlay", S.overlay, [["hold", "保持"], ["rel", "離れの 0.25 秒あと"]])}</div>
-      <p class="basis">灰色は、ほかの ${n - 1} 射の点ごとの中央値です。保存した姿（9 点）から描いています。</p></section>
+    <section class="vsec" data-testid="form-v2-shot-time"><div class="vsecH"><h2>時間</h2><span class="aside">縦線 = ほかの ${n - 1} 射のまん中</span></div>
+      <div class="fv2Bars">${[["drawMs", "引き"], ["holdMs", "フルドロー"], ["followMs", "押し手を残した"]].map(([k, l]) => bar(k, l)).join("")}</div></section>
+    <section class="vsec" data-testid="form-v2-shot-overlay"><div class="vsecH"><h2>重ね図</h2><span class="aside">青 = この射、灰 = ほかのまん中</span></div>
+      ${formV2OverlayHtml(model, S.overlay, i, true)}<div class="fv2SegRow">${formV2SegHtml("overlay", S.overlay, [["hold", "フルドロー"], ["rel", "リリースの 0.25 秒あと"]])}</div>
+      <p class="basis">灰色は、ほかの ${n - 1} 射の点ごとのまん中です。保存した姿（9 点）から描いています。</p></section>
     <section class="vsec" data-testid="form-v2-shot-table"><div class="vsecH"><h2>射ごとの値</h2><span class="aside">${flagged.size ? `${flagged.size} 項目で違い` : "違いなし"}</span></div>
       <div class="fv2Tbl"><div class="fv2Tr h"><span>項目</span><span>この射</span><span>ほか ${n - 1} 射</span><span>差</span></div>${keys.map(tr).join("")}</div>
-      ${model.count === n ? "" : `<p class="basis" data-testid="form-v2-shot-count-note">この記録の射数は ${model.count} 射です。足した ${model.added} 射は値を測れていないので、ここで比べているのは ${n} 射です。</p>`}
-      <p class="basis">色の付いた行は、差が測定のゆれから出せる下限を超えています。% は胴の長さに対する割合です${pct}。引き尺の目安は、この回の中央値を 100% としています。「—」は測れなかった値です。</p>
+      ${model.count === n ? "" : `<p class="basis" data-testid="form-v2-shot-count-note">この記録の射数は ${model.count} 射です。足した ${model.added} 射には値が無いので、ここで比べているのは ${n} 射です。</p>`}
+      <p class="basis">色の付いた行は、ほかの射との違いが、カメラで測るときのぶれより大きい所です。% は胴の長さに対する割合です${pct}。引き尺の目安は、この撮影のまん中を 100% としています。「—」は測れなかった値です。</p>
       <div class="btnRow"><button type="button" class="btn sec" id="fv2Prev" data-testid="form-v2-prev">前の射</button><button type="button" class="btn sec" id="fv2Next" data-testid="form-v2-next">次の射</button></div>
     </section>`, () => {
     S.root.querySelector("#fv2Back").onclick = () => formV2PaintResult(S);
@@ -1193,7 +1215,7 @@ function formV2PaintReview(S) {
   v.className = "fv2Video";
   v.dataset.testid = "form-v2-review-video";
   const inRange = (t) => t >= R.from - 1 && t <= R.from + R.dur + 1;
-  const chips = R.shots.map((e, i) => `<button type="button" class="fv2Chip" data-shot="${i}" aria-pressed="false" ${inRange(e.tMs) ? "" : "disabled"} aria-label="${e.kind === "shot" && e.n ? `${e.n} 射目へ` : e.kind === "letdown" ? "引き戻しへ" : e.kind === "cand" ? "数えていない保持へ" : "外した射へ"}">${e.label}</button>`).join("");
+  const chips = R.shots.map((e, i) => `<button type="button" class="fv2Chip" data-shot="${i}" aria-pressed="false" ${inRange(e.tMs) ? "" : "disabled"} aria-label="${e.kind === "shot" && e.n ? `${e.n} 射目へ` : e.kind === "letdown" ? "引き戻しへ" : e.kind === "cand" ? "数えていないフルドローへ" : "外した射へ"}">${e.label}</button>`).join("");
   const mb = S.recBlob ? Math.max(0.1, S.recBlob.size / 1e6) : 0;
   const cut = live && R.shots.some((e) => !inRange(e.tMs));
   formV2Paint(S, "review", `${formV2TopHtml("結果", "動画で確かめる")}
@@ -1204,11 +1226,11 @@ function formV2PaintReview(S) {
       <div class="btnRow"><button type="button" class="btn sec" id="fv2RevBack1" data-testid="form-v2-review-prev">前のコマ</button><button type="button" class="btn" id="fv2RevPlay" data-testid="form-v2-review-play">再生</button><button type="button" class="btn sec" id="fv2RevFwd1" data-testid="form-v2-review-next">次のコマ</button></div>
       <div class="fv2Opt w3"><div><b>速さ</b><span>再生の倍率</span></div>${formV2SegHtml("rate", "1", [["0.25", "0.25"], ["0.5", "0.5"], ["1", "1"]])}</div>
       <div class="fv2Opt"><div><b>骨格</b><span>読み取った点と線</span></div>${formV2SegHtml("skel", "on", [["on", "入"], ["off", "切"]])}</div>
-      <div class="fv2Opt"><div><b>ほかの射を重ねる</b><span>白 = ほかの射の中央の姿</span></div>${formV2SegHtml("ghost", "on", [["on", "入"], ["off", "切"]])}</div>
+      <div class="fv2Opt"><div><b>ほかの射を重ねる</b><span>白 = ほかの射のまん中の姿</span></div>${formV2SegHtml("ghost", "on", [["on", "入"], ["off", "切"]])}</div>
       ${S.recBlob ? `<div class="btnRow"><button type="button" class="btn sec" id="fv2RevSave" data-testid="form-v2-review-save">動画を端末に保存（${mb.toFixed(mb < 10 ? 1 : 0)}MB）</button></div>` : ""}
-      <p class="basis">骨格は、${live ? "撮影のときに" : "解析のときに"}読み取った点を、動画の時刻に合わせて描いています（もう一度読み取ってはいません。1 コマほどずれることがあります）。白い線は、その射を除いた射の、点ごとの中央の姿です。保持のあいだは保持の姿、離れのあとは離れの 0.25 秒あとの姿を重ねます。</p>
+      <p class="basis">骨格は、${live ? "撮影のときに" : "動画を読み込んだときに"}読み取った点を、動画の時刻に合わせて描いたものです（1 コマほどずれることがあります）。白い線は、その射を除いた射の、点ごとのまん中の姿です。フルドローのあいだはフルドローの姿、リリースのあとはリリースの 0.25 秒あとの姿を重ねます。</p>
       ${cut ? `<p class="basis" data-testid="form-v2-review-cut">動画に入っていない時刻の射は、番号を押せません（動画を残したのは ${formV2Mmss(R.from / 1000)}〜${formV2Mmss((R.from + R.dur) / 1000)}）。</p>` : ""}
-      <p class="basis" data-testid="form-v2-review-limits">${live ? "撮りながら残す動画は、最長 10 分・約 1.5Mbps（約 110MB まで）です。" : "選んだ動画は、もとのファイルをそのまま再生しています。"}動画も点の列も、アプリの中には保存されません。この画面と結果の画面を閉じると消えます。${live ? "残すときは「端末に保存」で写真かファイルへ書き出してください。" : ""}</p>
+      <p class="basis" data-testid="form-v2-review-limits">${live ? "撮りながら残す動画は、最長 10 分・約 1.5Mbps（約 110MB まで）です。" : "選んだ動画は、もとのファイルをそのまま再生しています。"}動画も読み取ったデータも、アプリの中には保存されません。この画面と結果の画面を閉じると消えます。${live ? "残すときは「端末に保存」で写真かファイルへ書き出してください。" : ""}</p>
     </section>`, () => {
     const root = S.root, cam = root.querySelector("#fv2RevCam"), cv = root.querySelector("#fv2RevCanvas"), tag = root.querySelector("#fv2RevTag");
     const pos = root.querySelector("#fv2RevPos"), now = root.querySelector("#fv2RevNow"), play = root.querySelector("#fv2RevPlay");
@@ -1255,8 +1277,8 @@ function formV2PaintReview(S) {
         ctx.stroke();
         for (const p of f.pts) if (Number.isFinite(p[0])) { ctx.beginPath(); ctx.arc(p[0], p[1], lw * 1.3, 0, Math.PI * 2); ctx.fill(); }
       }
-      const what = !e ? "" : e.kind === "shot" && e.n ? `${e.n} 射目` : e.kind === "letdown" ? "引き戻し" : e.kind === "cand" ? "数えていない保持" : "外した射";
-      tag.textContent = `${formV2Mmss(R.pos / 1000)}${what ? `\u3000${what}\u3000${R.pos <= e.tMs ? "離れの前" : "離れのあと"}` : ""}`;
+      const what = !e ? "" : e.kind === "shot" && e.n ? `${e.n} 射目` : e.kind === "letdown" ? "引き戻し" : e.kind === "cand" ? "数えていないフルドロー" : "外した射";
+      tag.textContent = `${formV2Mmss(R.pos / 1000)}${what ? `\u3000${what}\u3000${R.pos <= e.tMs ? "リリースの前" : "リリースのあと"}` : ""}`;
       now.textContent = formV2Mmss(R.pos / 1000);
       if (root.ownerDocument.activeElement !== pos) pos.value = String(Math.round(R.pos - R.from));
       const cur = e ? R.shots.indexOf(e) : -1;
@@ -1326,7 +1348,7 @@ function formV2PaintReview(S) {
 /* ---- 検証用の診断の書き出し（design.md 6.3）----
    設定「検証用の診断データ」が入のときだけ。数値だけを JSON にして、共有シートかダウンロードへ渡す（アプリからどこかへ送ることはしない）。
    buffer = 撮った直後のメモリの中の点の列。2 つめの設定「体の点の列も含める」が入のときだけ、書き出しに入れる */
-const FORM_V2_DIAG_CONFIRM = "検証用の診断を書き出します。入るのは数値だけです: 射と引き戻しの時刻と確かさ、数えなかった保持とその理由、射ごとの値、測定のゆれ、置き方の判定、毎秒コマ数と画面の大きさ、アプリと解析器の版。映像、画像、日付、メモ、練習や弓具との紐づけ、端末の中の ID は入りません。共有先は自分で確かめてください。";
+const FORM_V2_DIAG_CONFIRM = "検証用の診断を書き出します。入るのは数値だけです: 射と引き戻しの時刻と確かさ、数えなかったフルドローとその理由、射ごとの値、カメラで測るときのぶれ、置き方の判定、毎秒コマ数と画面の大きさ、アプリと解析器の版。映像、画像、日付、メモ、どの練習・弓具とつないだか、端末の中の ID は入りません。共有先は自分で確かめてください。";
 function formV2DiagRecords() {
   return (db.formAnalyses || []).filter((r) => FormV2.isV2(r) && r.v2.dg).sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 12);
 }

@@ -85,7 +85,6 @@ const BANNED = [
   "下がり気味",
   "おすすめ",
   "安心",
-  "大丈夫",
   "良好",
   "精度が上がります",
   "強くなります",
@@ -93,6 +92,18 @@ const BANNED = [
   "いまの提案",
   "用具",
   "射形",
+  /* AN-102（docs/design/voice.md）: どの画面にも書かない言葉。統計の言葉が本文に出ないことは、下の本文／たたんだ中の比べと tools/check-voice.js で見る */
+  "この回",
+  "測定のゆれ",
+  "判定できない",
+  "セッション",
+  "破棄",
+  "紐付",
+  "紐づ",
+  "ストリーク",
+  "弓手",
+  "着弾",
+  "台帳",
   "！",
 ];
 const textOf = (html) =>
@@ -102,8 +113,15 @@ const textOf = (html) =>
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 let checks = 0;
+/* 「大丈夫」は、オーナーが決めた言い方「サイトはそのままで大丈夫です」（docs/design/voice.md 5章。2026-11-15）の中でだけ使う。
+   その文は「動かす条件を満たさず、中心も定まっている」軸（state: none）にしか出ない（下の adviceCase で確かめる） */
+const OK_PHRASE = "そのままで大丈夫です";
 const clean = (html, label) => {
   const text = textOf(html);
+  assert(
+    !text.split(OK_PHRASE).join("").includes("大丈夫"),
+    `${label}: 「大丈夫」 outside the agreed sentence in: ${text}`,
+  );
   for (const w of [...BANNED, "!"])
     assert(!text.includes(w), `${label}: banned phrase "${w}" in: ${text}`);
   assert(!/NaN|undefined|Infinity|\bnull\b/.test(html), `${label}: broken value in ${html}`);
@@ -396,19 +414,29 @@ const load = (mutate) => {
   const pred = app.sightPredictionHtml(app.sightInterp("s1"), marks);
   const pt = clean(pred, "prediction");
   ok(
-    pt.includes("記録していない距離の予測") && pt.includes("実測 3点（18m・30m・70m）から"),
+    pt.includes("記録していない距離の予測") && pt.includes("実測 3距離（18m・30m・70m）から"),
     "prediction names the marks it comes from",
   );
   ok(
     pt.includes("決定係数") && pt.includes("左右は予測しません"),
     "prediction states the fit and its limit",
   );
+  {
+    /* 決定係数は「予測の計算方法」の中だけ。本文（たたんでいない所）には出ない（docs/design/voice.md 4章） */
+    const a = pred.indexOf('<details class="sightPredictionHelp"'),
+      b = pred.indexOf("</details>", a);
+    ok(a >= 0 && b > a, "prediction help fold exists");
+    ok(/実測 3距離との合い方（決定係数）は [0-9.]+% です。/.test(textOf(pred.slice(a, b))), "the fit is stated inside the fold");
+    const main = textOf(pred.slice(0, a) + pred.slice(b)).replace(/計算に使った実測[\s\S]*$/, "");
+    ok(!/決定係数|当てはま/.test(main), `no fit jargon in the main text of the prediction: ${main}`);
+  }
   const two = marks.filter((m) => m.dist !== 18);
   d.sightMarks = two;
   app.setDb(d);
   const p2 = clean(app.sightPredictionHtml(app.sightInterp("s1"), two), "prediction (2 marks)");
   ok(
-    p2.includes("実測が2点のため、当てはまりは確かめられません"),
+    p2.includes("実測が 2距離だけなので、予測はまだ粗めです。もう 1距離記録すると、合っているか確かめられます。") &&
+      p2.includes("合い方は確かめられません"),
     "two marks: the fit cannot be checked, and it says so",
   );
 }
@@ -441,6 +469,26 @@ const adviceCase = (label, mutate) => {
     text.includes("同時の検定で 5% 未満") && text.includes("リング幅の 1/10 以上"),
     `${label}: the rule is stated`,
   );
+  {
+    /* 本文はふつうの言葉だけ。区間・確率・検定は「詳しく」の中（docs/design/voice.md 4章） */
+    const a = html.indexOf('<details class="gearMore sightAdviceMore"'),
+      b = html.indexOf("</details>", a);
+    ok(a >= 0 && b > a, `${label}: the 詳しく fold exists`);
+    const main = textOf(html.slice(0, a)),
+      inside = textOf(html.slice(a, b));
+    ok(!/95%区間|確率|検定|誤差|寄り|ずれ(?!て)|ズレ|着弾|外れ値/.test(main), `${label}: no statistics word or nominalisation in the main text: ${main}`);
+    ok(/95%区間/.test(inside) && /確率は/.test(inside) && inside.includes("同時の検定"), `${label}: the statistics are kept inside the fold`);
+    ok(/^.*矢は的の中心(より (右|左|上|下)に [0-9.]+cm(・(上|下)に [0-9.]+cm)? の所)?に集まっています（/.test(main.replace(/\s+/g, " ")), `${label}: the fact says where the arrows gathered, with a verb: ${main}`);
+    const none = [md.h, md.v].filter((x) => x.state === "none");
+    ok(main.includes(OK_PHRASE) === none.length > 0, `${label}: 「そのままで大丈夫です」 only when an axis is in state none`);
+    ok(none.length !== 2 || main.includes("サイトはそのままで大丈夫です。"), `${label}: both axes none says the sight stays`);
+    for (const x of [md.h, md.v]) {
+      if (x.state === "move") ok(main.includes(`${x.name}は、矢が${x.dirWord}に ${Math.abs(x.m).toFixed(1)}cm ずれて集まっているので、サイトを${x.dirWord}へ ${x.amount} 動かす目安です。`), `${label}: ${x.key} move sentence carries the model's direction and amount`);
+      if (x.state === "open") ok(x.big === "まだ分かりません" && main.includes("矢の中心がまだはっきりしません。サイトはそのままで"), `${label}: ${x.key} open says not yet known and to leave the sight`);
+      if (x.state === "hold") ok(x.big === "まだ動かさない" && /まだ動かさず/.test(main), `${label}: ${x.key} hold says not to move yet`);
+      if (x.state !== "move") ok(!new RegExp(`${x.name}は、矢が.に [0-9.]+cm ずれて集まっているので`).test(main), `${label}: ${x.key} has no move sentence unless the model moves`);
+    }
+  }
   for (const k of ["h", "v"]) {
     const a = md[k],
       dec = adv.decision[k];
@@ -463,11 +511,11 @@ const adviceCase = (label, mutate) => {
         `${label}: ${k} amount is the decision's amount`,
       );
       ok(
-        text.includes(`${a.name}の量は、ずれ ${Math.abs(dec.m).toFixed(1)}cm`),
+        text.includes(`${a.name}の量は、矢の中心までの ${Math.abs(dec.m).toFixed(1)}cm`),
         `${label}: ${k} conversion is explained`,
       );
     }
-    if (a.state === "none") ok(a.big === "動かさない", `${label}: ${k} says 動かさない`);
+    if (a.state === "none") ok(a.big === "そのまま", `${label}: ${k} says そのまま`);
   }
   return { d, sess, adv, md, html, text };
 };
@@ -478,7 +526,7 @@ const adviceCase = (label, mutate) => {
     "fixture centre is within error: no move",
   );
   ok(
-    base.text.includes("この記録のサイト値は 上下 5.2・左右 0 です。"),
+    base.text.includes("この記録のサイトは 上下 5.2・左右 0 です。"),
     `the session's sight value is shown: ${base.text}`,
   );
   /* 中心を大きくずらすと「動かす」になり、量は換算の出どころと一緒に出る */
@@ -538,8 +586,8 @@ const adviceCase = (label, mutate) => {
   );
   const dt = clean(drift, "centre drift");
   ok(
-    dt.includes(`外れ値候補を除いた中心（70m・122cm的・直近 ${rows.length}回）`) &&
-      dt.includes("分析 > 着弾"),
+    dt.includes(`大きく外れた矢を除いた、矢の中心（70m・122cm的・直近 ${rows.length}回）`) &&
+      dt.includes("分析 > グルーピング"),
     "drift plot is labelled as the outlier-excluded centre",
   );
   ok(
@@ -619,7 +667,7 @@ const adviceCase = (label, mutate) => {
     const text = clean(html, label);
     for (const w of OLD_LABELS) ok(!text.includes(w), `${label}: old label "${w}" is gone`);
     ok(html.includes(`data-testid="${testid}"`), `${label}: test id`);
-    ok(text.includes("サイト調整の目安と詳しい根拠"), `${label}: fold title`);
+    ok(text.includes("サイトの目安と詳しい数字"), `${label}: fold title`);
     return { html, text };
   };
   const d = load((x) => {
@@ -638,17 +686,17 @@ const adviceCase = (label, mutate) => {
       r.html.includes(app.sightAdviceHtml(pos, setup, adv)),
       `${testid}: the advice block is the one the sight screen renders`,
     );
-    ok(/着弾中心は .*（位置のある \d+射/.test(r.text), `${testid}: centre and n are stated`);
+    ok(/矢は的の中心.*に集まっています（位置のある \d+射/.test(r.text), `${testid}: centre and n are stated`);
     ok(r.text.includes("グルーピング半径 (RMS・全射)"), `${testid}: all-arrow figures stay`);
-    ok(r.text.includes("矢番号・外れ理由メモ"), `${testid}: arrow notes stay`);
-    ok(r.text.includes("ラウンド進捗"), `${testid}: round progress stays`);
+    ok(r.text.includes("矢番号と外れた理由"), `${testid}: arrow notes stay`);
+    ok(r.text.includes("ラウンドの進み"), `${testid}: round progress stays`);
   }
   /* 位置のある矢が1本もない記録（点数だけ）: 着弾の数値を出さない */
   const keyOnly = d.sessions.find((s) => s.id === "p5");
   for (const testid of ["result-sight-details", "note-sight-details"]) {
     const r = foldCase(`fold ${testid} (score only)`, keyOnly, setup, testid);
     ok(!r.html.includes('data-testid="sight-advice"'), `${testid}: no advice without positions`);
-    ok(r.text.includes("着弾データなし"), `${testid}: says there is no impact data`);
+    ok(r.text.includes("矢の位置がない記録なので、サイトの目安は出ません。"), `${testid}: says there is no position data`);
     ok(
       !/\d(\.\d+)?\s?(cm|mm|クリック|目盛り)/.test(r.text.replace(/122cm的/g, "")),
       `${testid}: no impact or sight numbers without positions: ${r.text}`,
@@ -661,7 +709,7 @@ const adviceCase = (label, mutate) => {
   if (process.argv.includes("--print-fold")) console.log(textOf(app.sessionSightFoldHtml(pos, setup, {})).replace(/\s+/g, " "));
   const r2 = foldCase("fold (2 positions)", two, setup, "note-sight-details");
   ok(!r2.html.includes('data-testid="sight-advice"'), "two positions: no advice");
-  ok(r2.text.includes("位置のある矢が 3射に満たないため"), "two positions: the reason is stated");
+  ok(r2.text.includes("位置のある矢が 3射になると、サイトの目安が出ます。"), "two positions: says when the advice appears");
   /* セッティングの無い記録でも落ちない */
   foldCase("fold (no setup)", { ...pos, setupId: "" }, undefined, "note-sight-details");
   /* 2つの画面とも、この関数だけを使う（旧い部品の名前がソースに残っていない） */

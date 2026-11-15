@@ -39,11 +39,11 @@ for (const sample of [
       await settle(page);
       await page.screenshot({ path: testInfo.outputPath(`record-labels-${sample.width}.png`) });
       const face = page.getByRole("combobox", { name: "的", exact: true });
-      const arrows = page.getByRole("combobox", { name: "1エンドの本数", exact: true });
+      const arrows = page.getByRole("combobox", { name: "1エンドの射数", exact: true });
       await expect(face).toHaveCount(1);
       await expect(arrows).toHaveCount(1);
       await expect(page.getByLabel("的", { exact: true })).toHaveAttribute("id", "fFace");
-      await expect(page.getByLabel("1エンドの本数", { exact: true })).toHaveAttribute(
+      await expect(page.getByLabel("1エンドの射数", { exact: true })).toHaveAttribute(
         "id",
         "fArrows",
       );
@@ -66,7 +66,7 @@ for (const sample of [
       const chosenFace = await face.locator("option:checked").textContent();
       const chosenArrows = await arrows.locator("option:checked").textContent();
       expect(chosenFace).toContain(String(sample.faceD));
-      expect(chosenArrows).toBe(`${sample.perEnd}本`);
+      expect(chosenArrows).toBe(`${sample.perEnd}射`);
       await arrows.focus();
       // 本数 → 入力方法（的面に打つ / 点数だけ）→ 弓具とサイト。開始は下端に固定のボタン
       await page.keyboard.press("Tab");

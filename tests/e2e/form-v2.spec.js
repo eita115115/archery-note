@@ -159,8 +159,10 @@ for (const [label, w, h] of [
     /* 置き方: 5 行とも、いまの映像から測った値 */
     const checks = page.getByTestId("form-v2-checks");
     await expect(checks.locator("[data-row]")).toHaveCount(5);
-    await expect(checks.locator('[data-row="写り"]')).toContainText("8 点が取れています");
-    await expect(checks.locator('[data-row="大きさ"]')).toContainText("胴の長さ 200px");
+    await expect(checks.locator('[data-row="写り"]')).toContainText(
+      "肩・肘・手首・腰が写っています",
+    );
+    await expect(checks.locator('[data-row="大きさ"]')).toContainText("十分な大きさで写っています");
     await expect(checks.locator('[data-row="向き"]')).toContainText(
       "弓を上げる形をすると分かります",
     );
@@ -200,7 +202,9 @@ for (const [label, w, h] of [
     const steps = page.getByTestId("form-v2-steps");
     await expect(page.getByTestId("form-v2-show")).toBeVisible();
     await expect(steps).toContainText(/1 分 \d+ 秒、[\d,]+ コマ（毎秒 30 コマ）/);
-    await expect(steps).toContainText("6 射、引き戻し 1 回。離れがはっきり写らなかった保持 1 回");
+    await expect(steps).toContainText(
+      "6 射、引き戻し 1 回。リリースがはっきり写らなかったフルドロー 1 回",
+    );
     await expect(steps.locator(".pill")).toHaveText(["済", "済", "済", "済"]);
     await page.getByTestId("form-v2-show").click();
 
@@ -209,25 +213,37 @@ for (const [label, w, h] of [
     await expect(page.getByTestId("form-v2-shots")).toHaveText("6射");
     await expect(page.getByTestId("form-v2-letdowns")).toHaveText("1回");
     await expect(page.getByTestId("form-v2-sentence")).toHaveText(
-      /^4 射目は、保持が 5\.\d 秒でした。ほかの 5 射は 3\.\d〜3\.\d 秒です。$/,
+      /^4 射目は、フルドローが 5\.\d 秒でした。ほかの 5 射は 3\.\d〜3\.\d 秒です。$/,
     );
     const diff = page.getByTestId("form-v2-diff");
     await expect(diff).toContainText(/ほかの 5 射の中央値との差は \+\d\.\d 秒/);
-    await expect(diff).toContainText(/この回の測定のゆれ（±0\.1 秒）から出せる下限は 0\.\d 秒/);
-    await expect(diff).toContainText("良し悪しの判定ではありません");
+    await expect(diff).toContainText(
+      /カメラで測るときのぶれ（±0\.1 秒）から見て、0\.\d 秒 を超えると印が付きます/,
+    );
+    await expect(diff).toContainText("20 回の撮影に 1 回ほど（約 5%）");
+    /* 本文はふつうの言葉だけ。統計の言葉と数字は「詳しく」の中（docs/design/voice.md 4章） */
+    const diffBasis = page.getByTestId("form-v2-diff-basis");
+    await expect(diffBasis).toHaveText(
+      "ほかの射との違いが、カメラで測るときのぶれより大きかった所です。良し悪しではありません。",
+    );
+    await expect(page.getByTestId("form-v2-diff-more").locator("summary")).toHaveText("詳しく");
+    await expect(page.getByTestId("form-v2-diff-more")).toContainText("中央値との差");
     await expect(diff).not.toContainText("cm"); // 身長の設定が無いので cm は出さない
     await expect(page.getByTestId("form-v2-cand-note")).toContainText(
-      "離れがはっきり写らなかった保持が 1 回あります",
+      "リリースがはっきり写らなかったフルドローが 1 回あります",
     );
     await expect(page.getByTestId("form-v2-summary").locator("svg")).toHaveCount(1);
     await expect(page.getByTestId("form-v2-charts").locator(".fv2Chart")).toHaveCount(6);
     await expect(page.getByTestId("form-v2-charts").locator('[data-key="holdMs"]')).toContainText(
-      /ばらつき ±\d\.\d 秒（6 射。射数が少ないので 0\.6〜2\.\d 倍の幅で不確かです）。測定のゆれは ±0\.1 秒。/,
+      /射ごとに ±\d\.\d 秒 ほど変わりました（6 射）。カメラで測るときのぶれは ±0\.1 秒 です。/,
+    );
+    /* 射数から見た幅は消さず、「詳しく」の中へ */
+    await expect(page.getByTestId("form-v2-spread-more")).toContainText(
+      /フルドローの時間: 標準偏差 ±\d\.\d 秒。6 射から出した値なので、±\d\.\d 秒〜±\d\.\d 秒 の幅があります。/,
     );
     await expect(page.getByTestId("form-v2-overlay").locator("svg path")).toHaveCount(6);
-    await expect(page.getByTestId("form-v2-conditions")).toContainText(
-      `${w < h ? "縦向き" : "横向き"}、胴の長さ 200px`,
-    );
+    await expect(page.getByTestId("form-v2-conditions")).toContainText(w < h ? "縦向き" : "横向き");
+    await expect(page.getByTestId("form-v2-conditions")).not.toContainText("px");
     await page.getByTestId("form-v2-conditions").locator("summary").click();
     await expect(page.getByTestId("form-v2-conditions")).toContainText("クリッカーが鳴った瞬間");
     /* まだ保存していない */
@@ -239,7 +255,7 @@ for (const [label, w, h] of [
     await expect(fix.locator(".fv2FixRow")).toHaveCount(8);
     await expect(fix.locator('.fv2FixRow[data-kind="cand"]')).toContainText("射かもしれません");
     await expect(fix.locator('.fv2FixRow[data-kind="cand"]')).toContainText(
-      "腕は下ろしましたが、離れの動きが見つかりませんでした",
+      "腕は下ろしましたが、リリースの動きが見つかりませんでした",
     );
     await expect(page.getByTestId("form-v2-fix-count")).toHaveText("6 射として記録します。");
     await fix.locator('.fv2Tog[data-src="cd"]').click();
@@ -324,20 +340,20 @@ for (const [label, w, h] of [
     await page.getByTestId("form-v2-save").click();
     await expect(screen(page)).toHaveCount(0);
     await expect(card.locator("[data-form-v2-id]")).toHaveCount(1);
-    await expect(card.locator("[data-form-v2-id]")).toContainText(/7 射\s+保持 3\.\d 秒/);
-    await expect(page.getByTestId("form-v2-latest")).toContainText("4 射目は、保持が");
+    await expect(card.locator("[data-form-v2-id]")).toContainText(/7 射\s+フルドロー 3\.\d 秒/);
+    await expect(page.getByTestId("form-v2-latest")).toContainText("4 射目は、フルドローが");
     const legacy = card.getByTestId("analysis-form-legacy");
     await expect(legacy.getByRole("heading", { name: "以前の記録" })).toBeVisible();
     await expect(legacy.locator("[data-form-id]")).toHaveCount(2);
     await expect(legacy).toContainText(
-      "測り方が違うので、新しい記録とは比べず、推移にも入れていません",
+      "測り方が違うので、新しい記録とは比べず、推移にも入りません",
     );
     await expect(legacy.locator("[data-form-v2-id]")).toHaveCount(0);
     /* 保存した記録を開く: 保存した値だけから同じ結果を描く。射数は直せない */
     await card.locator("[data-form-v2-id]").click();
     await expect(page.getByTestId("form-v2-shots")).toHaveText("7射");
     await expect(page.getByTestId("form-v2-sentence")).toHaveText(
-      /^4 射目は、保持が 5\.\d 秒でした。/,
+      /^4 射目は、フルドローが 5\.\d 秒でした。/,
     );
     await expect(page.getByTestId("form-v2-fix-open")).toHaveCount(0);
     await expect(page.getByTestId("form-v2-overlay").locator("svg path")).toHaveCount(6);
@@ -367,7 +383,7 @@ test("fix the count can remove a counted shot; the removed shot leaves the compa
   await page.getByTestId("form-v2-fix-ok").click();
   await expect(page.getByTestId("form-v2-shots")).toHaveText("5射");
   await expect(page.getByTestId("form-v2-sentence")).toHaveText(
-    "5 射のあいだに、測定のゆれより大きい違いは見つかりませんでした。",
+    "5 射とも、ほぼ同じでした。カメラで測るときのぶれより大きい違いはありません。",
   );
   await page.getByTestId("form-v2-save").click();
   await expect(page.getByTestId("form-v2-saved")).toBeVisible();
@@ -480,7 +496,7 @@ for (const [kind, opts, fact] of [
   ["permission", { gumError: "NotAllowedError" }, "カメラを使う許可がありません。"],
   ["nocamera", { gumError: "NotFoundError" }, "カメラが見つかりませんでした。"],
   ["busy", { gumError: "NotReadableError" }, "カメラを始められませんでした。"],
-  ["model", { modelFail: true }, "解析の部品（約 15.5MB）を読み込めませんでした。"],
+  ["model", { modelFail: true }, "読み取りに使うデータ（約 15.5MB）を読み込めませんでした。"],
 ]) {
   test(`error: ${kind} is explained without a raw exception and can be retried`, async ({
     page,
@@ -516,7 +532,7 @@ test("error: a device without WebAssembly SIMD is told so before anything is loa
   await page.locator("#formStart").click();
   const err = page.getByTestId("form-v2-error");
   await expect(err).toHaveAttribute("data-kind", "unsupported");
-  await expect(err).toContainText("この端末では動きません。");
+  await expect(err).toContainText("この端末では使えません。");
   await expect(err).toContainText("iOS 16.4 以降");
   await expect(page.locator("#fv2Retry")).toHaveCount(0);
   expect(await page.evaluate(() => globalThis.__fv2)).toMatchObject({ poseLoads: 0, gumCalls: 0 });
@@ -538,8 +554,8 @@ test("zero shots: the reason and the next step are shown instead of a result", a
   await expect(page.locator("#fv2Num")).toHaveText("0");
   await page.getByTestId("form-v2-finish").click();
   const zero = page.getByTestId("form-v2-zero");
-  await expect(zero).toContainText("射として数えた区間は 0 回でした。");
-  await expect(zero).toContainText("引き切った区間が見つかりませんでした");
+  await expect(zero).toContainText("射は 1 回も見つかりませんでした。");
+  await expect(zero).toContainText("引き切った所が見つかりませんでした");
   await expect(page.getByTestId("form-v2-show")).toHaveCount(0);
   expect(await auditFormV2Screen(page)).toEqual([]);
   await page.locator("#fv2Again").click();
@@ -955,10 +971,10 @@ test("trends: a feature picker, comparable captures only, n and period stated, n
   const trend = page.getByTestId("form-v2-trend");
   /* 項目は、既定の 6 項目（保持の時間を含む） */
   await expect(page.getByTestId("form-v2-trend-key").locator("option")).toHaveText([
-    "保持の時間",
-    "弓手を上げていた時間",
-    "弓手の下がり",
-    "離れの後ろへの動き",
+    "フルドローの時間",
+    "押し手を残した時間",
+    "押し手の下がり",
+    "リリースの後ろへの動き",
     "アンカーの高さ（鼻より下）",
     "引き尺の目安",
   ]);
@@ -968,21 +984,26 @@ test("trends: a feature picker, comparable captures only, n and period stated, n
   await expect(trend).toHaveAttribute("data-excluded", "1");
   await expect(trend.locator("svg circle")).toHaveCount(5);
   await expect(page.getByTestId("form-v2-trend-fact")).toHaveText(
-    /^直近 5 回の中央値は \d\.\d〜\d\.\d 秒でした。$/,
+    /^直近 5 回のまん中の値は \d\.\d〜\d\.\d 秒でした。$/,
   );
   const basis = page.getByTestId("form-v2-trend-basis");
   await expect(basis).toContainText("右利きの記録");
   await expect(basis).toContainText("5 回（10/10〜10/15）、計 30 射、各 6 射");
-  await expect(basis).toContainText("入れていない回: 利き手が違う（1 回）。");
-  await expect(basis).toContainText("測れなかった値（—）は数えていません");
-  await expect(page.getByTestId("form-v2-trend-doubt")).toContainText(/±\d\.\d 秒 ほどの不確かさ/);
+  await expect(basis).toContainText("推移に入っていない記録: 利き手が違う（1 回）。");
+  await expect(basis).toContainText("測れなかった値（—）は入っていません");
+  await expect(page.getByTestId("form-v2-trend-doubt")).toContainText(
+    /±\d\.\d 秒 ほどの幅があります/,
+  );
+  await expect(page.getByTestId("form-v2-trend-more")).toContainText(
+    "四分位の幅から出した 95% の目安",
+  );
   await expect(trend).toContainText("弓具が前の回と違う");
   expect(await trend.innerText()).not.toMatch(JUDGEMENT);
   /* 一覧: 入れていない記録に、そう書く */
   await expect(page.locator('[data-form-v2-id="tr-3"]')).toContainText(
-    "選んだ項目の推移には入れていません",
+    "選んだ項目の推移には入っていません",
   );
-  await expect(page.locator('[data-form-v2-id="tr-1"]')).not.toContainText("入れていません");
+  await expect(page.locator('[data-form-v2-id="tr-1"]')).not.toContainText("入っていません");
   /* 引き尺の目安（面内の項目）: 真横の回だけ */
   await page.getByTestId("form-v2-trend-key").selectOption("ext");
   await expect(trend).toHaveAttribute("data-key", "ext");
@@ -990,12 +1011,12 @@ test("trends: a feature picker, comparable captures only, n and period stated, n
   await expect(trend).toHaveAttribute("data-excluded", "2");
   await expect(basis).toContainText("真横でない（1 回）");
   await expect(basis).toContainText("利き手が違う（1 回）");
-  await expect(basis).toContainText("最初の回の中央値を 100% としています");
+  await expect(basis).toContainText("最初の回のまん中を 100% としています");
   await expect(page.getByTestId("form-v2-trend-doubt")).toContainText(
-    "その大きさは見積もれていません",
+    "どのくらいずれるかは分かりません",
   );
   await expect(page.locator('[data-form-v2-id="tr-1"]')).toContainText(
-    "選んだ項目の推移には入れていません",
+    "選んだ項目の推移には入っていません",
   );
   expect(await trend.innerText()).not.toMatch(JUDGEMENT);
   expect(await auditFormV2Screen(page)).toEqual([]);
@@ -1013,7 +1034,7 @@ test("trends: fewer than three comparable captures gives the count, not a chart;
   await expect(trend).toHaveAttribute("data-points", "1");
   await expect(trend.locator("svg")).toHaveCount(0);
   await expect(page.getByTestId("form-v2-trend-note")).toContainText(
-    "「保持の時間」を比べてよい記録は、まだ 1 回です。3 回になると推移を出します。",
+    "同じ撮り方の記録が 3 回になると、「フルドローの時間」の推移が見られます（いま 1 回）。",
   );
   await expect(page.getByTestId("form-v2-trend-note")).toContainText("値を測れた射が無い（1 回）");
   await page.getByTestId("form-v2-trend-key").selectOption("followMs");
@@ -1028,25 +1049,31 @@ test("older records: numbers with their basis, no judgement words or advice, sto
   const legacy = page.getByTestId("analysis-form-legacy");
   await expect(legacy.locator("[data-form-id]")).toHaveCount(4);
   await expect(legacy.locator('[data-form-id="older-3"] .formRecordComparison')).toHaveText(
-    "以前の 3件の中央値 172° との差 +2°",
+    "以前の 3件のまん中 172° より 2°大きい",
   );
   await expect(legacy.locator('[data-form-id="older-3"]')).toContainText(
-    "アンカーのばらつき σ 0.005（2射）",
+    "アンカーのぶれ ±0.5%（2射）",
   );
   await expect(page.getByTestId("analysis-form-legacy-note")).toContainText(
-    "評価の語と助言は、決めた幅に根拠が無いので出していません",
+    "以前の画面にあった評価と助言は、根拠が足りなかったので、いまは出ません",
   );
   expect(await legacy.innerText()).not.toMatch(JUDGEMENT);
   await legacy.locator('[data-form-id="older-3"]').click();
   const sheet = page.getByTestId("form-legacy-detail");
   await expect(sheet).toContainText("この記録の値");
-  await expect(sheet).toContainText("弓手肘は中央値 174°（前回比 +1°）です。");
-  await expect(sheet).toContainText("2射のアンカー位置のばらつきは σ=0.005 です");
-  await expect(sheet).toContainText("2射中 2射で、リリース前 0.5 秒に弓手か引き手の動き");
+  await expect(sheet).toContainText("押し手の肘は、ふつう 174°（前回より 1°大きい）です。");
+  await expect(sheet).toContainText(
+    "2射のアンカーの位置は、±0.5% ほど動きました（胴の長さに対する割合）。",
+  );
+  await expect(sheet).toContainText(
+    "2射のうち 2射で、リリース前 0.5 秒に押し手か引き手が動きました。",
+  );
   await expect(sheet.locator("table tr")).toHaveCount(3);
   const text = await sheet.innerText();
   expect(text).not.toMatch(JUDGEMENT);
-  expect(text).not.toMatch(/\d+%|可能性があります|してください|しましょう/);
+  /* % は、アンカーの位置が動いた量（胴の長さに対する割合）だけ。確からしさや割合の評価としての % は出さない */
+  expect(text).not.toMatch(/\d+%(?! ほど動きました)|可能性があります|してください|しましょう/);
+  expect(text).not.toMatch(/σ|標準偏差|中央値|ドリフト/);
   await page.locator("#fdClose").click();
   expect((await stored(page)).formAnalyses).toEqual(OLD_MANY);
 });
@@ -1080,7 +1107,7 @@ test("the shot detail says what is counted, and a value with its cm stays in one
   await expect(screen(page).locator(".viewDate")).toContainText("値を測れた 6 射中");
   await expect(screen(page).locator(".viewDate")).not.toContainText("7 射中");
   await expect(page.getByTestId("form-v2-shot-count-note")).toHaveText(
-    "この記録の射数は 7 射です。足した 1 射は値を測れていないので、ここで比べているのは 6 射です。",
+    "この記録の射数は 7 射です。足した 1 射には値が無いので、ここで比べているのは 6 射です。",
   );
 });
 
@@ -1121,7 +1148,7 @@ test("video review: seek to a shot, skeleton and the other shots' median pose dr
   await expect(cam).toHaveAttribute("data-skel", "1");
   await expect(cam).toHaveAttribute("data-ghost", "1");
   await expect(page.getByTestId("form-v2-review-tag")).toContainText("4 射目");
-  await expect(page.getByTestId("form-v2-review-tag")).toContainText("離れの前");
+  await expect(page.getByTestId("form-v2-review-tag")).toContainText("リリースの前");
   const painted = () =>
     page.getByTestId("form-v2-review-canvas").evaluate((cv) => {
       const d = cv.getContext("2d").getImageData(0, 0, cv.width, cv.height).data;
@@ -1154,7 +1181,7 @@ test("video review: seek to a shot, skeleton and the other shots' median pose dr
   expect(stepped - pos).toBeGreaterThan(20);
   expect(stepped - pos).toBeLessThan(50);
   await page.getByTestId("form-v2-review-pos").fill(String(Math.round((release + 300) / 10) * 10));
-  await expect(page.getByTestId("form-v2-review-tag")).toContainText("離れのあと");
+  await expect(page.getByTestId("form-v2-review-tag")).toContainText("リリースのあと");
   await page.locator('[data-seg="rate"] [data-val="0.25"]').click();
   expect(await page.getByTestId("form-v2-review-video").evaluate((v) => v.playbackRate)).toBe(0.25);
   /* 上限と、残らないことが書いてある。保存はここからもできる */

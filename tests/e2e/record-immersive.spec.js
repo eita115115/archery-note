@@ -243,7 +243,7 @@ test("releasing the finger outside the target cancels the arrow", async ({ page 
   await expect(page.locator("#lensTag")).toContainText("点");
   // 的の枠の外（下のスコア表の上）まで指を動かすと「取消」。離しても記録しない
   await page.mouse.move(cx, box.y + box.height + 30, { steps: 4 });
-  await expect(page.locator("#lensTag")).toHaveText("取消離すと記録しません");
+  await expect(page.locator("#lensTag")).toHaveText("やめる離すと記録されません");
   await page.mouse.up();
   await expect(page.locator("#lens")).toBeHidden();
   await page.waitForTimeout(100);
@@ -253,9 +253,9 @@ test("releasing the finger outside the target cancels the arrow", async ({ page 
   await page.mouse.move(cx, cy);
   await page.mouse.down();
   await page.mouse.move(cx, box.y + box.height + 30, { steps: 4 });
-  await expect(page.locator("#lensTag")).toContainText("取消");
+  await expect(page.locator("#lensTag")).toContainText("やめる");
   await page.mouse.move(cx + 10, cy, { steps: 4 });
-  await expect(page.locator("#lensTag")).not.toContainText("取消");
+  await expect(page.locator("#lensTag")).not.toContainText("やめる");
   await page.mouse.up();
   await expect.poll(async () => (await stored(page)).active.cur.length).toBe(1);
   expect(errors).toEqual([]);
@@ -270,7 +270,7 @@ test("the menu holds finish, settings and the weather / note sheet", async ({ pa
   await expect(menu).toContainText("合計（2射）");
   await expect(menu).toContainText("9.00");
   await expect(menu.getByTestId("active-finish")).toContainText("ここで記録を終了する");
-  await expect(menu.getByTestId("active-finish")).toContainText("2射まで保存して結果を表示します");
+  await expect(menu.getByTestId("active-finish")).toContainText("2射まで保存して、結果を見ます");
   // 入力方法の切り替え（段 3）。いまの方法が選ばれている
   await expect(menu.getByTestId("input-mode-target")).toHaveAttribute("aria-pressed", "true");
   await expect(menu.getByTestId("input-mode-score")).toHaveAttribute("aria-pressed", "false");
@@ -326,9 +326,9 @@ test("the first-run guide sits in the empty scorecard area and can be dismissed"
 }) => {
   const errors = await open(page, {}, { activeGuideSeen: false });
   const guide = page.getByTestId("active-guide");
-  await expect(guide).toContainText("初回の操作ガイド");
-  await expect(guide).toContainText("的の外で指を離すと取消");
-  await guide.getByRole("button", { name: "次から表示しない" }).click();
+  await expect(guide).toContainText("はじめての使い方");
+  await expect(guide).toContainText("的の外で指を離すと、記録されません");
+  await guide.getByRole("button", { name: "次から出さない" }).click();
   await expect(guide).toHaveCount(0);
   await expect(page.getByTestId("active-scorecard")).toContainText(
     "的をタップするとその位置を1射として記録します",

@@ -80,9 +80,9 @@ test("trend and baseline only use records measured the same way", async ({ page 
   const d = await open(page);
   const card = page.getByTestId("analysis-form-card");
   // 推移は、いちばん新しい記録と同じ測り方の3件だけ（旧記録4件の 150°台は入らない）
-  await expect(card.locator("svg title")).toHaveText("弓手肘角度の推移: 3回、174〜178°");
+  await expect(card.locator("svg title")).toHaveText("押し手の肘の角度の推移: 3回、174〜178°");
   await expect(card).toContainText(
-    "画面の向きによる差を補正する前の記録と後の記録は測り方が違うため、互いに比べていません。",
+    "画面の向きの違いを直す前の記録と、直したあとの記録は、測り方が違うので比べられません。",
   );
   // 新しい記録の「いつもより」は旧記録を母集団にしない（同じ測り方は2件で、3件に満たない）
   await expect(card.locator('[data-form-id="new-3"] .formRecordComparison')).toHaveCount(0);
@@ -96,15 +96,15 @@ test("detail compares with the previous record of the same geometry only", async
   // 補正後の最初の記録: 直前は旧記録なので前回比を出さない
   await card.locator('[data-form-id="new-1"]').tap();
   const sheet = page.locator(".ovl .sheet");
-  await expect(sheet).toContainText("弓手肘は中央値 174°です。");
-  await expect(sheet).not.toContainText("（前回比");
+  await expect(sheet).toContainText("押し手の肘は、ふつう 174°です。");
+  await expect(sheet).not.toContainText("（前回");
   await expect(sheet.getByTestId("form-capture-note")).toHaveText(
-    "撮影条件: 横向き（1280×720）・ライブ撮影・右利き。肘の角度は画面の向きによらない測り方です。",
+    "撮り方: 横向き（1280×720）・その場で撮影・右利き。肘の角度は、画面の向きが違っても同じように測れます。",
   );
   await sheet.locator("#fdClose").tap();
   // 縦向きの記録は、横向きの補正後の記録と比べる（同じ測り方）
   await card.locator('[data-form-id="new-2"]').tap();
-  await expect(sheet).toContainText("弓手肘は中央値 176°（前回比 +2°）です。");
+  await expect(sheet).toContainText("押し手の肘は、ふつう 176°（前回より 2°大きい）です。");
   await expect(sheet.getByTestId("form-capture-note")).toContainText("縦向き（720×1280）");
   // 角度を出せなかった射は「—」
   await expect(sheet.locator("table tr").nth(3).locator("td").nth(2)).toHaveText("—");
@@ -112,8 +112,8 @@ test("detail compares with the previous record of the same geometry only", async
   await sheet.locator("#fdClose").tap();
   // 旧記録は旧記録どうしで比べ、測り方が違うことを示す
   await card.locator('[data-form-id="old-4"]').tap();
-  await expect(sheet).toContainText("弓手肘は中央値 153°（前回比 +1°）です。");
+  await expect(sheet).toContainText("押し手の肘は、ふつう 153°（前回より 1°大きい）です。");
   await expect(sheet.getByTestId("form-capture-note")).toHaveText(
-    "この記録は画面の向きによる差を補正する前の測り方です。補正後の記録とは比べていません。",
+    "この記録は、画面の向きの違いを直す前の測り方です。直したあとの記録とは比べられません。",
   );
 });

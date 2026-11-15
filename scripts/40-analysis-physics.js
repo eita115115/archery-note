@@ -7,26 +7,28 @@ function analysisHasGroupingEvidence(st){
 /* ============ sight advice ============ */
 /* グルーピングの数値。正式な値は全射（A）。外れ値候補を除いた RMS（B）とロバスト RMS（C）は参考として並べる
    （docs/design/grouping-stats-v3.md）。B は除いた分だけ小さく出るので正式な値には使わない */
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
 function groupSummaryHtml(st){
   if(!st) return "";
-  const ci=st.n>=2&&Number.isFinite(st.ciX)?`<div class="kv"><span>中心の誤差（95%区間）</span><span>左右 ±${st.ciX.toFixed(1)}cm ・ 上下 ±${st.ciY.toFixed(1)}cm</span></div>`:"";
+  const ci=st.n>=2&&Number.isFinite(st.ciX)?`<div class="kv"><span>矢の中心の幅（95%区間）</span><span>左右 ±${st.ciX.toFixed(1)}cm ・ 上下 ±${st.ciY.toFixed(1)}cm</span></div>`:"";
   const ex=st.excl, rob=st.robust, nFlag=(st.excluded||[]).length;
   const refRows=st.n>=MCD_MIN_N
     ? `<div class="kv"><span>全射RMSの95%区間</span><span>${st.rrCi?`${st.rrCi.lo.toFixed(1)}–${st.rrCi.hi.toFixed(1)} cm（正規分布を仮定）`:"—"}</span></div>
-    <div class="kv"><span>外れ値候補を除いたRMS（参考）</span><span>${ex?`${ex.rr.toFixed(1)} cm（${st.total}本中${nFlag}本を除く）`:"—"}</span></div>
-    <div class="subNoteSm">外れ値候補はMCD法の順位と検定で判定。除くと実力より小さく出るため、正式な値には使いません。</div>
+    <div class="kv"><span>大きく外れた矢を除いたRMS（参考）</span><span>${ex?`${ex.rr.toFixed(1)} cm（${st.total}射のうち ${nFlag}射を除く）`:"—"}</span></div>
+    <div class="subNoteSm">大きく外れた矢（外れ値候補）は、MCD法の順位と検定で選んでいます。除くと小さく出るので、ふだんの数字には使いません。</div>
     <div class="kv"><span>ロバストRMS（参考）</span><span>${rob?`${rob.rr.toFixed(1)} cm`:"—"}</span></div>
-    <div class="subNoteSm">極端な着弾の影響を抑えた、まとまっている矢のばらつきの推定（再重み付けMCD）。</div>`
-    : `<div class="kv"><span>外れ値候補を除いたRMS・ロバストRMS（参考）</span><span>6本以上で計算します</span></div>`;
-  return `<div class="kv"><span>グルーピング中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
+    <div class="subNoteSm">大きく外れた矢の影響を抑えて、まとまっている矢の広がりを見積もった値（再重み付けMCD）。</div>`
+    : `<div class="kv"><span>大きく外れた矢を除いたRMS・ロバストRMS（参考）</span><span>6射から出ます</span></div>`;
+  return `<div class="kv"><span>矢の中心</span><span>${cmOffsetText(st.mx,"x")} / ${cmOffsetText(st.my,"y")}</span></div>
     ${ci}
     <div class="kv"><span>グルーピング半径 (RMS・全射)</span><span>${st.rr.toFixed(1)} cm</span></div>
-    <div class="kv"><span>ばらつき（±1σ）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
+    <div class="kv"><span>広がり（標準偏差）</span><span>左右 ${st.sx.toFixed(1)}cm ・ 上下 ${st.sy.toFixed(1)}cm</span></div>
     ${st.major!=null?`<div class="kv"><span>グルーピング楕円</span><span>長軸 ${st.major.toFixed(1)}cm ・ 短軸 ${st.minor.toFixed(1)}cm ・ 角度 ${st.angleDeg.toFixed(0)}°</span></div>`:""}
     ${refRows}
-    ${nFlag?`<div class="kv"><span>外れ値候補</span><span>${nFlag}本（図の×印。全射RMSには含み、サイト判断でのみ除外）</span></div>
-    <div class="kv"><span>サイト判断の中心（外れ値候補を除く）</span><span>${cmOffsetText(ex.mx,"x")} / ${cmOffsetText(ex.my,"y")}</span></div>`:""}`;
+    ${nFlag?`<div class="kv"><span>大きく外れた矢</span><span>${nFlag}射（図の×印。全射RMSには入り、サイトの目安でだけ除きます）</span></div>
+    <div class="kv"><span>サイトの目安に使う矢の中心（大きく外れた矢を除く）</span><span>${cmOffsetText(ex.mx,"x")} / ${cmOffsetText(ex.my,"y")}</span></div>`:""}`;
 }
+/* voice:fold-end */
 function cmOffsetText(v, axis){
   const a=Math.abs(v).toFixed(1);
   if(axis==="x") return v>0?`右に ${a}cm`:`左に ${a}cm`;
@@ -589,11 +591,11 @@ function roundProgressHtml(sess){
   const arrows=r&&r.arrows?r.arrows:(stage&&stage.arrows?stage.arrows:null);
   if(!arrows) return "";
   const rg=sess.roundGroup;
-  const stageInfo=stage&&rg?` ステージ${(Number(rg.stage)||0)+1}/${rg.stageCount}`:"";
+  const stageInfo=stage&&rg?` ${rg.stageCount}距離のうち ${(Number(rg.stage)||0)+1}つめ`:"";
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0);
   const shot=all.length, remain=Math.max(0,arrows-shot);
   const pace=shot?total/shot*arrows:0;
-  return `<div class="kv"><span>ラウンド進捗</span><span>${esc(roundLabel(sess.round))}${stageInfo} / ${shot}/${arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
+  return `<div class="kv"><span>ラウンドの進み</span><span>${esc(roundLabel(sess.round))}${stageInfo} / ${shot}/${arrows}射 / 現在${total}点${shot&&remain?` / 予測${pace.toFixed(0)}点`:""}</span></div>`;
 }
 function sessionsCsv(){
   /* 既存の列の位置は変えない。group_* と sigma_* は全射（A）、excluded は外れ値候補の本数。研究用の比較列は末尾に追加 */

@@ -23,7 +23,7 @@ async function summary(page, setup = "a", dist = "30") {
   const control = page
     .getByTestId("sight-records-overview")
     .locator("summary")
-    .filter({ hasText: "サイト値のまとめ" });
+    .filter({ hasText: "サイトのまとめ" });
   await control.scrollIntoViewIfNeeded();
   await control.tap();
   const details = control.locator("..");
@@ -117,9 +117,7 @@ test("summary keeps the selected setup and lists each distance", async ({ page }
   await expect(await summary(page)).toHaveText(["90 / 左右0.4"]);
   /* 分析タブには、サイトの記録への入口だけを置く */
   await page.locator('#tabs [data-v="analysis"]').tap();
-  await expect(page.locator("#main summary").filter({ hasText: "サイト値のまとめ" })).toHaveCount(
-    0,
-  );
+  await expect(page.locator("#main summary").filter({ hasText: "サイトのまとめ" })).toHaveCount(0);
   expect(await snapshot(page)).toEqual(before);
 });
 test("restoring an older same-day mark keeps newer analysis value", async ({ page }) => {
