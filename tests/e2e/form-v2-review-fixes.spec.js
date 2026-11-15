@@ -149,13 +149,13 @@ for (const mode of ["throws", "returns the internal-error warning"]) {
     await captureToAnalysis(page);
     const err = page.getByTestId("form-v2-error");
     await expect(err).toHaveAttribute("data-kind", "analyze");
-    await expect(err).toContainText("解析できませんでした。");
-    await expect(err).toContainText("読み取った点の列は、この画面を閉じるまで残っています");
+    await expect(err).toContainText("結果を出せませんでした。");
+    await expect(err).toContainText("読み取ったデータは、この画面を閉じるまで残っています");
     await expect(err).not.toContainText("synthetic");
     await expect(page.locator(".fv2Steps")).toHaveCount(0); // 「計算中」の画面のままではない
     /* 捨てる前に確かめる。やめれば、点の列は残っている */
     await page.locator("#fv2ErrClose").click();
-    await expect(confirmSheet(page)).toContainText("解析せずに捨てますか？");
+    await expect(confirmSheet(page)).toContainText("結果を見ずに閉じますか？残りません。");
     await page.locator("#acCancel").click();
     await page.locator("#fv2Analyze").click();
     await expect(page.getByTestId("form-v2-show")).toBeVisible();
@@ -180,7 +180,7 @@ test("an imported record with markup in v2.part, tpx and cov is shown as text or
   const errors = await openFormTab(page, formDb({ formAnalyses: [rec] }));
   await expect(page.getByTestId("form-v2-latest")).toBeVisible();
   await page.locator('[data-form-v2-id="evil"]').click();
-  await expect(page.getByTestId("form-v2-conditions")).toContainText("姿勢が取れたコマ —%");
+  await expect(page.getByTestId("form-v2-conditions")).toContainText("体を読み取れたコマ —%");
   await expect(page.getByTestId("form-v2-conditions")).not.toContainText("胴の長さ");
   expect(await page.locator('img[src="x"]').count()).toBe(0);
   expect(await page.evaluate(() => globalThis.__xss)).toBeUndefined();
@@ -257,7 +257,7 @@ test("past 1,000 form records: saving asks first, and the newest record survives
   await page.getByTestId("form-v2-show").click();
   await page.getByTestId("form-v2-save").click();
   await expect(confirmSheet(page)).toContainText("射型の記録が 1,000 件あります");
-  await expect(confirmSheet(page)).toContainText("自動では消しません");
+  await expect(confirmSheet(page)).toContainText("自動では消えません");
   /* やめると、何も保存されず、結果は画面に残る */
   await page.locator("#acCancel").click();
   await expect(page.getByTestId("form-v2-saved")).toHaveCount(0);
@@ -339,7 +339,7 @@ test("a new camera stream is read from its first frame: a second capture after a
   stream.frames = restFrames(stream, 200);
   await installFormV2Stub(page, stream, { restartClock: true });
   await captureToAnalysis(page);
-  await expect(page.getByTestId("form-v2-zero")).toContainText("射として数えた区間は 0 回でした。");
+  await expect(page.getByTestId("form-v2-zero")).toContainText("射は 1 回も見つかりませんでした。");
   await page.locator("#fv2Again").click();
   await expect(screen(page)).toHaveAttribute("data-stage", "place");
   await expect(page.getByTestId("form-v2-begin")).toBeEnabled();
@@ -477,11 +477,11 @@ test("unsaved work is never discarded without asking: the analysis-done screen a
   await expect(err).toHaveAttribute("data-kind", "interrupted");
   await page.locator("#fv2ErrClose").click();
   await expect(confirmSheet(page)).toContainText(
-    "ここまでに読み取った 30 秒ぶんを、解析せずに捨てますか？",
+    "ここまでに読み取った 30 秒ぶんを、結果を見ずに閉じますか？残りません。",
   );
   await page.locator("#acCancel").click();
   await page.keyboard.press("Escape");
-  await expect(confirmSheet(page)).toContainText("解析せずに捨てますか？");
+  await expect(confirmSheet(page)).toContainText("結果を見ずに閉じますか？残りません。");
   await page.locator("#acCancel").click();
   await expect(err).toBeVisible();
   await page.locator("#fv2Analyze").click();

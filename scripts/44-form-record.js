@@ -40,19 +40,19 @@ const FormV2 = (() => {
   /* kind: t = 時間、h = 高さ、p = 面内。unit: s = 秒（保存は 0.01 秒）、b = 胴（0.001）、d = 度（0.1）。
      flip = 画面では符号を反対にして出す（下がり・鼻より下を正の数で書くため）。dp = 画面の小数の桁 */
   const META = Object.freeze({
-    holdMs: { name: "保持の時間", kind: "t", unit: "s", dp: 1 },
+    holdMs: { name: "フルドローの時間", kind: "t", unit: "s", dp: 1 },
     drawMs: { name: "引きの時間", kind: "t", unit: "s", dp: 1 },
-    followMs: { name: "弓手を上げていた時間", kind: "t", unit: "s", dp: 1 },
-    bowDy: { name: "弓手の下がり", kind: "h", unit: "b", dp: 0, flip: true },
-    relBack: { name: "離れの後ろへの動き", kind: "p", unit: "b", dp: 0 },
+    followMs: { name: "押し手を残した時間", kind: "t", unit: "s", dp: 1 },
+    bowDy: { name: "押し手の下がり", kind: "h", unit: "b", dp: 0, flip: true },
+    relBack: { name: "リリースの後ろへの動き", kind: "p", unit: "b", dp: 0 },
     ancY: { name: "アンカーの高さ（鼻より下）", kind: "h", unit: "b", dp: 1, flip: true },
     ext: { name: "引き尺の目安", kind: "p", unit: "b", dp: 1, rel: true },
     elbAng: { name: "引き手の肘の高さ", kind: "p", unit: "d", dp: 1 },
-    shTilt: { name: "弓手の肩の上がり", kind: "p", unit: "d", dp: 1 },
+    shTilt: { name: "押し手の肩の上がり", kind: "p", unit: "d", dp: 1 },
     headX: { name: "頭の位置（前後）", kind: "p", unit: "b", dp: 1 },
     headY: { name: "頭の位置（高さ）", kind: "h", unit: "b", dp: 1 },
     lean: { name: "上体の傾き", kind: "p", unit: "d", dp: 1 },
-    creep: { name: "保持の終わりの引き尺の変化", kind: "p", unit: "b", dp: 1 },
+    creep: { name: "フルドロー終わりの引き尺の変化", kind: "p", unit: "b", dp: 1 },
   });
   const SCALE = { s: 0.1, b: 1000, d: 10 }; // 解析器の値（ms・胴・度）× SCALE = 保存する整数
   const REASONS = ["", "weakRelease", "noRelease", "unobserved", "bodyMoved", "short", "tooSoon"];
@@ -220,8 +220,8 @@ const FormV2 = (() => {
     const rows = [];
     const body = P.bSh && P.dSh && P.bHip && P.dHip;
     rows.push(seen === 8
-      ? { k: "写り", state: "ok", text: "肩・肘・手首・腰の 8 点が取れています" }
-      : { k: "写り", state: "warn", text: body ? `8 点のうち ${seen} 点が取れています。上半身と両腕が入る向きにしてください` : "体が写っていません。上半身と両腕が入る向きにしてください" });
+      ? { k: "写り", state: "ok", text: "肩・肘・手首・腰が写っています" }
+      : { k: "写り", state: "warn", text: body ? `8 点のうち ${seen} 点が写っています。上半身と両腕が入る向きにしてください` : "体が写っていません。上半身と両腕が入る向きにしてください" });
     let T = NaN, mx = NaN;
     if (body) {
       mx = (P.bSh.x + P.dSh.x) / 2;
@@ -231,8 +231,8 @@ const FormV2 = (() => {
     rows.push(!fin(T)
       ? { k: "大きさ", state: "wait", text: "体が写ると測れます" }
       : T >= 140
-        ? { k: "大きさ", state: "ok", text: `胴の長さ ${tpx}px` }
-        : { k: "大きさ", state: "warn", text: `小さく写っています（胴 ${tpx}px）。1 歩ぶん近づけてください` });
+        ? { k: "大きさ", state: "ok", text: "十分な大きさで写っています" }
+        : { k: "大きさ", state: "warn", text: "小さく写っています。1 歩ぶん近づけてください" });
     /* 弓を上げた形: 弓手の手首が肩の高さの近くにあり、肩から胴の 0.6 以上、横へ出ている */
     const raised = !!(fin(T) && P.bWr && P.bWr.v >= 0.5 && (P.bSh.y - P.bWr.y) / T >= -0.45 && Math.abs(P.bWr.x - P.bSh.x) / T >= 0.6);
     if (raised) {
@@ -256,16 +256,16 @@ const FormV2 = (() => {
       const chest = (handedness === "left" ? -1 : 1) * m.dir > 0, ratio = m.rho / 1.15;
       const ang = ratio >= 0.94 ? "真横に近い" : ratio >= 0.77 ? "やや斜め" : "斜め";
       rows.push({ k: "向き", state: "info", text: !chest
-        ? `${ang}・背中側です。引き手が頭に隠れるので、胸側を勧めます`
-        : ratio >= 0.94 ? `${ang}・胸側。すべての項目を測れます` : ratio >= 0.77 ? `${ang}・胸側。面内の項目は、この回の中だけで比べます` : `${ang}・胸側。時間と高さの項目を測ります` });
+        ? `${ang}・背中側です。引き手が頭に隠れるので、胸側から撮るほうが向いています`
+        : ratio >= 0.94 ? `${ang}・胸側。すべての項目を測れます` : ratio >= 0.77 ? `${ang}・胸側。腕や体の位置は、この撮影の中だけで比べます` : `${ang}・胸側。時間と高さの項目を測ります` });
     } else rows.push({ k: "向き", state: "wait", text: "弓を上げる形をすると分かります" });
     rows.push(!(fps > 0)
       ? { k: "速さ", state: "wait", text: "測っています" }
       : fps >= 24
         ? { k: "速さ", state: "ok", text: `毎秒 ${Math.round(fps)} コマ` }
         : fps >= 15
-          ? { k: "速さ", state: "warn", text: `毎秒 ${Math.round(fps)} コマ。離れの時刻が少し粗くなります` }
-          : { k: "速さ", state: "warn", text: `解析が遅れています（毎秒 ${Math.round(fps)} コマ）。時刻が粗くなります` });
+          ? { k: "速さ", state: "warn", text: `毎秒 ${Math.round(fps)} コマ。リリースの時刻が少し粗くなります` }
+          : { k: "速さ", state: "warn", text: `読み取りが遅れています（毎秒 ${Math.round(fps)} コマ）。時刻が粗くなります` });
     return { rows, raised, tpx, seen };
   }
 
@@ -276,7 +276,7 @@ const FormV2 = (() => {
     }
     const cut = [13, 14, 15, 16].some((i) => { const p = lms[i]; return p && fin(p.x) && (p.x < 0.01 || p.x > 0.99 || p.y < 0.01 || p.y > 0.99); });
     if (cut) return { warn: true, text: "腕が枠の端にかかっています。台を少し離すと、次の射から測れます。" };
-    if (fps > 0 && fps < 15) return { warn: true, text: `解析が毎秒 ${Math.round(fps)} コマです。射は数えられますが、時刻は粗くなります。` };
+    if (fps > 0 && fps < 15) return { warn: true, text: `読み取りが毎秒 ${Math.round(fps)} コマです。射は数えられますが、時刻は粗くなります。` };
     return { warn: false, text: `体は枠の中です。${fps > 0 ? `毎秒 ${Math.round(fps)} コマ。` : ""}` };
   }
 
@@ -588,18 +588,18 @@ const FormV2 = (() => {
     const cm = cmText(k, x, heightCm), val = sp(`${body(k)}${fmt(k, x)}${cm ? `（${cm}）` : ""}`);
     const rest = `ほかの ${o.length} 射は ${body(k)}${fmt(k, lo, { bare: true })}〜${sp(fmt(k, hi))}です。`;
     const head = `${flag.n} 射目は、`;
-    if (k === "holdMs") return `${head}保持が ${val}でした。${rest}`;
+    if (k === "holdMs") return `${head}フルドローが ${val}でした。${rest}`;
     if (k === "drawMs") return `${head}引きが ${val}でした。${rest}`;
-    if (k === "followMs") return `${head}離れのあと ${val}で弓手が下がりました。${rest}`;
-    if (k === "bowDy") return `${head}離れの 0.3 秒あとの弓手の下がりが ${val}でした。${rest}`;
-    if (k === "relBack") return `${head}離れで引き手が後ろへ動いた量が ${val}でした。${rest}`;
+    if (k === "followMs") return `${head}リリースのあと ${val}で押し手が下がりました。${rest}`;
+    if (k === "bowDy") return `${head}リリースの 0.3 秒あとに押し手が ${val}下がりました。${rest}`;
+    if (k === "relBack") return `${head}リリースで引き手が後ろへ ${val}動きました。${rest}`;
     return `${head}${META[k].name}が ${val}でした。${rest}`;
   }
   /* 結果の 1 文（design.md 2.6）。text と、違った射の番号（無ければ null） */
   function summary(model, cmp, heightCm) {
-    if (!model.count) return { text: "射として数えた区間はありません。", n: null };
-    if (cmp.n < 4) return { text: `比べるには、値を測れた射が 4 射以上要ります。この回は ${cmp.n} 射でした。`, n: null };
-    if (!cmp.flags.length) return { text: `${cmp.n} 射のあいだに、測定のゆれより大きい違いは見つかりませんでした。`, n: null };
+    if (!model.count) return { text: "射は見つかりませんでした。", n: null };
+    if (cmp.n < 4) return { text: `ほかの射と比べるには、値を測れた射が 4 射要ります。この撮影は ${cmp.n} 射でした。`, n: null };
+    if (!cmp.flags.length) return { text: `${cmp.n} 射とも、ほぼ同じでした。カメラで測るときのぶれより大きい違いはありません。`, n: null };
     return { text: flagSentence(cmp.flags[0], cmp, heightCm), n: cmp.flags[0].n };
   }
 
@@ -608,7 +608,7 @@ const FormV2 = (() => {
     const m = META[key];
     if (!m || !isV2(a) || !isV2(b)) return { ok: false, why: "測り方が違う" };
     const va = a.v2, vb = b.v2;
-    if (va.av !== vb.av || a.cap.hand !== b.cap.hand) return { ok: false, why: va.av !== vb.av ? "解析の版が違う" : "利き手が違う" };
+    if (va.av !== vb.av || a.cap.hand !== b.cap.hand) return { ok: false, why: va.av !== vb.av ? "読み取り方の版が違う" : "利き手が違う" };
     for (const v of [va, vb]) if (!(v.tpx >= 100) || !(v.cov >= 80)) return { ok: false, why: "写りが足りない" };
     if (m.kind === "t") return { ok: true, why: "" };
     if (!va.view || !vb.view || va.view.side !== vb.view.side) return { ok: false, why: "胸側と背中側の違い" };
@@ -689,11 +689,11 @@ const FormV2 = (() => {
       kind: DIAG_KIND, version: 1,
       app: { appVer: fin(o.appVer) ? o.appVer : null, geometry: GEOM, featureVersion: FV },
       units: {
-        events: "[kind 0=射 1=引き戻し, 離れ 0.01s, 保持 0.01s, 引き 0.01s, 確かさ 0-10, 印 2=引き戻しを射に 4=射から外した 8=型から遠い]",
+        events: "[kind 0=射 1=引き戻し, リリース 0.01s, フルドロー 0.01s, 引き 0.01s, 確かさ 0-10, 印 2=引き戻しを射に 4=射から外した 8=型から遠い]",
         candidates: "[時刻 0.01s, 始め, 終わり, 幅, 理由, 射らしい 0/1, 足した 0/1]",
         features: COLS.join(",") + "（時間 0.01s・位置 0.001 胴・角度 0.1°）",
         noise: "features と同じ列・同じ単位",
-        "analyzerDetail.s": "[離れの不確かさ 0.01s, 射か引き戻しかの点 0.01, 離れの線 0=引き尺 1=肘, 引きの当てはめ 0/1, 型からの遠さ 0.01, 引き始め 0.01s, アンカー 0.01s, 引き終わり 0.01s]（events と同じ順）",
+        "analyzerDetail.s": "[リリースの不確かさ 0.01s, 射か引き戻しかの点 0.01, リリースの線 0=引き尺 1=肘, 引きの当てはめ 0/1, 型からの遠さ 0.01, 引き始め 0.01s, アンカー 0.01s, 引き終わり 0.01s]（events と同じ順）",
         "analyzerDetail.r": RUN_COLS.join(",") + "（時刻 0.01s・ほかは 0.01）",
         "analyzerDetail.pl": "置き方の確認（写り・大きさ・余白・向き・速さ の状態、胴 px、左右の余白 %、腕の長さ 0.001 胴）",
         landmarks: "t = 時刻 ms、p = 1 コマ 27 個（9 点 ×（x 0.1px, y 0.1px, visibility 0.01））。点の順: 鼻・左肩・右肩・左肘・右肘・左手首・右手首・左腰・右腰。姿勢が取れなかったコマは null",

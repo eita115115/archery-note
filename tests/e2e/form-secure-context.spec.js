@@ -6,7 +6,7 @@ const { expect, test } = require("@playwright/test");
    保存した動画の解析へ進める（以前は確認ダイアログ → 以前の撮影画面だった） */
 const INSECURE_FACT = "この開き方ではカメラを使えません。";
 const INSECURE_BASIS =
-  "カメラは https で開いたときだけ使えます。保存した動画の解析は、この開き方でも使えます。";
+  "カメラは https で開いたときだけ使えます。保存した動画の読み取りは、この開き方でも使えます。";
 
 function formDb() {
   return {
@@ -95,7 +95,7 @@ test("insecure HTTP blocks live capture before pose/media and offers saved-video
   await expect(error.getByText(INSECURE_BASIS, { exact: true })).toBeVisible();
   await expect(error.getByRole("button", { name: "閉じる", exact: true })).toBeVisible();
   await expect(error.getByRole("button", { name: "もう一度試す", exact: true })).toHaveCount(0);
-  const replay = error.getByRole("button", { name: "保存した動画を解析する", exact: true });
+  const replay = error.getByRole("button", { name: "保存した動画を読み取る", exact: true });
   await expect(replay).toBeVisible();
   await expect(page.locator("video")).toHaveCount(0);
   expect(await page.evaluate(() => globalThis.__captureProbe)).toEqual({

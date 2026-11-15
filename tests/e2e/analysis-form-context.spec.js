@@ -49,7 +49,7 @@ test("form analysis follows capture period and linked equipment/distance", async
   expect(await ids(page)).toEqual(["form-14"]);
   await page.locator("#anSetup").selectOption("a");
   await page.locator("#anDist").selectOption("18");
-  await expect(card).toContainText("この条件に合う射型の記録は 0件です");
+  await expect(card).toContainText("この条件に合う射型の記録はありません");
   await expect(card.locator("[data-form-id]")).toHaveCount(0);
   await page.locator("#anSetup").selectOption("");
   await page.locator("#anDist").selectOption("");
@@ -83,7 +83,7 @@ test("form-only no-match keeps controls available to restore the list", async ({
   await seed(page, true, true);
   await period(page, "7d");
   await expect(page.getByTestId("analysis-form-card")).toContainText(
-    "この条件に合う射型の記録は 0件です",
+    "この条件に合う射型の記録はありません",
   );
   await expect(page.locator("#anPeriod")).toBeVisible();
   await period(page, "all");
