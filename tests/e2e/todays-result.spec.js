@@ -186,16 +186,14 @@ test("second same-condition session shows the previous-comparison row in the sum
   // 文中の日付は、記録と同じ年なら月日だけ
   const june1 = new Date().getFullYear() === 2026 ? "6/1" : "2026/6/1";
   await expect(weeklyRow.locator(".fact")).toHaveText(
-    `同じ条件の前回（${june1}）は 48 点で、今回との差は +6 点です。`,
+    `同じ条件の前回（${june1}）は 48 点。今回はそれより 6 点高いです。`,
   );
   // 過去が 1 回なので、平均との比較は出さず、その理由を書く
   const cmp = page.getByTestId("todays-result-comparison");
   await expect(cmp.locator(".fact")).toHaveText(
-    "同じ条件の過去の記録が1回のため、平均との比較は表示していません。",
+    "同じ条件のこれまでの記録が 3回になると、平均と比べられます（いま 1回）。",
   );
-  await expect(cmp.locator(".basis")).toHaveText(
-    "条件: 70m・122cm的・6射。3回以上あるときに、平均と回ごとの標準偏差を表示します。",
-  );
+  await expect(cmp.locator(".basis")).toHaveText("条件: 70m・122cm的・6射。");
   await expect(page.getByTestId("todays-result-personal-best").locator(".fact")).toHaveText(
     `この距離・的・射数で最高です（これまで 48 点、${june1}）。`,
   );
@@ -223,7 +221,7 @@ test("first session at a new condition says condition-first, not first-ever (str
   const empty = page.getByTestId("todays-result-empty");
   await expect(empty).toBeVisible();
   await expect(empty).toHaveText(
-    "この条件（70m・122cm的・6射）では最初の記録です。同じ条件の記録が3回以上になると、平均との比較を表示します。",
+    "この条件（70m・122cm的・6射）では最初の記録です。同じ条件の記録が 3回になると、平均と比べられます。",
   );
   expect(unexpectedErrors).toEqual([]);
 });
@@ -254,7 +252,7 @@ test("history detail sheet reconstructs the panel with この日 wording and no 
   await expect(panel).toBeVisible();
   const weeklyRow = page.getByTestId("todays-result-weekly");
   await expect(weeklyRow.locator(".fact")).toHaveText(
-    "同じ条件の前回（6/1）は 48 点で、この回との差は +6 点です。",
+    "同じ条件の前回（6/1）は 48 点。この日はそれより 6 点高いです。",
   );
   await expect(panel).not.toContainText("今日");
   await expect(panel).not.toContainText("今回");

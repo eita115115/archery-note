@@ -134,7 +134,7 @@ function arrowLabelSvg(p, l, r, font, label, selected){
 /* 位置のある矢が1本もない記録（点数だけの入力）に出す表示。的の図・統計・サイトの目安は作らない */
 function noImpactHtml(sess){
   const n=((sess&&sess.ends)||[]).flat().length;
-  return `<div class="noImpact" data-testid="no-impact"><b>着弾データなし</b><span>${n}射すべて位置のない記録です（点数だけの入力）。合計・平均・10/X の数は点数から数えています。的の図・集まり具合・サイトの目安は、位置のある矢がある記録だけで作ります。</span></div>`;
+  return `<div class="noImpact" data-testid="no-impact"><b>矢の位置がありません</b><span>この練習は ${n}射とも点数だけの記録です。合計や 10・X の数は見られます。的の図・グルーピング・サイトの目安は、的面に打った記録で見られます。</span></div>`;
 }
 /* opts.idPrefix: 同じ画面に図を複数置くときの id の接頭辞（既定 "pl"）。
    opts.plain: 分析の図。矢・着弾中心の十字・半径 RMS の破線の円だけを描く（外れ値候補の×印と楕円は描かない） */
@@ -149,8 +149,8 @@ function plotSession(sess, container, opts){
   const ft=sess.faceType==="triple"?"spot":sess.faceType;
   container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,pfx,ft)}</div>`+
     (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"")+
-    (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射を表示しています（位置なし ${allArrows.length-posCount}射は、図と着弾の統計に入れていません）。</div>`:"")+
-    (manualCount?`<div class="hint plotManualNote" data-testid="plot-manual-note">* の付いた矢（${manualCount}射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録しています。</div>`:"");
+    (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射の図です（位置なし ${allArrows.length-posCount}射は、図とグルーピングに入っていません）。</div>`:"")+
+    (manualCount?`<div class="hint plotManualNote" data-testid="plot-manual-note">* の付いた矢（${manualCount}射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録されています。</div>`:"");
   const marks=container.querySelector("#"+pfx+"marks");
   let html="";
   /* 記録時の判定の半径で描く（旧判定の記録は旧半径。保存された点数と矢円を一致させる） */

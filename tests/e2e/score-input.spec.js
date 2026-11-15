@@ -220,7 +220,7 @@ test("a 72-arrow round is entered with the keypad only", async ({ page }) => {
   const head = sheet.getByTestId("result-total");
   await expect(head.getByTestId("session-total")).toHaveText("587/ 720");
   await expect(head.locator(".vsecH .aside")).toHaveText("72射・1射平均 8.15");
-  await expect(sheet.getByTestId("no-impact")).toContainText("着弾データなし");
+  await expect(sheet.getByTestId("no-impact")).toContainText("矢の位置がありません");
   await expect(sheet.locator("svg.main")).toHaveCount(0);
   await expectCleanText(page);
   const saved = (await storedDb(page)).sessions[0];
@@ -448,7 +448,7 @@ test("点数だけ直す overrides the score, keeps the automatic score and mark
   }
   await open1.click();
   const sheet = page.getByTestId("score-override-sheet");
-  await expect(sheet).toContainText("位置からの採点は 9点");
+  await expect(sheet).toContainText("刺さった位置では 9点");
   for (const k of await sheet.locator(".key").all())
     expect((await k.boundingBox()).height).toBeGreaterThanOrEqual(52);
   await page.getByTestId("override-key-10").click();
@@ -472,7 +472,7 @@ test("点数だけ直す overrides the score, keeps the automatic score and mark
 
   // もう一度直しても、最初の自動採点を保つ
   await open1.click();
-  await expect(page.getByTestId("score-override-sheet")).toContainText("位置からの採点は 9点");
+  await expect(page.getByTestId("score-override-sheet")).toContainText("刺さった位置では 9点");
   await page.getByTestId("override-key-8").click();
   s = await stored(page);
   expect(s.cur[0]).toEqual({
@@ -521,7 +521,7 @@ test("moving or re-placing a manually overridden arrow re-scores it from the pos
   // 1mm 動かす: 手修正を外し、動かした位置で採点する
   await page.locator('#curChips [data-i="0"]').click();
   await page.locator('#nudge [data-n="r"]').click();
-  await expect(page.locator("#recMsg")).toHaveText("手修正を外して採点しました");
+  await expect(page.locator("#recMsg")).toHaveText("位置どおりの点に戻しました");
   let s = await stored(page);
   expect(s.cur[0]).toEqual({ x: 7.9, y: 0, s: 9, X: false });
   expect(s.cur[1]).toEqual(manual(-7.8, 0));
@@ -557,7 +557,7 @@ test("manually corrected arrows carry a * on the result, note and analysis targe
   await page.getByTestId("active-finish").click();
   await expect(page.locator("#sumPlot .manualMark")).toHaveCount(1);
   await expect(page.locator("#sumPlot").getByTestId("plot-manual-note")).toHaveText(
-    "* の付いた矢（1射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録しています。",
+    "* の付いた矢（1射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録されています。",
   );
   // 印は矢円の右上で、矢円（判定の円）の数と位置は変わらない
   const foot = await page.locator("#sumPlot .arrowFoot").count();
@@ -705,7 +705,7 @@ test("a score-only session shows totals, and geometry says 着弾データなし
   const detail = page.locator(".histDetailSheet");
   await expect(detail.getByTestId("note-total")).toHaveText("97");
   await expect(detail.getByTestId("history-detail-stats")).toContainText("12射・1射平均 8.08");
-  await expect(detail.getByTestId("no-impact")).toContainText("着弾データなし");
+  await expect(detail.getByTestId("no-impact")).toContainText("矢の位置がありません");
   await expect(detail.locator("svg.main")).toHaveCount(0);
   // v5 段 6: エンドの表は記録中と同じスコア表（高い点から）
   await expect(
@@ -841,7 +841,7 @@ test("positioned sessions keep their analysis when score-only sessions are added
   // 混ざった記録の詳細: 的の図は位置のある矢だけで、その旨を書く
   await page.locator("#histList .historyRow").first().click();
   const detail = page.locator(".histDetailSheet");
-  await expect(detail.getByTestId("plot-position-note")).toContainText("位置のある 12射を表示");
+  await expect(detail.getByTestId("plot-position-note")).toContainText("位置のある 12射の図です");
   await expect(detail.getByTestId("plot-position-note")).toContainText("位置なし 3射");
   expect(await detail.locator("#plmarks .arrowFoot").count()).toBe(12);
   await expectCleanText(page);

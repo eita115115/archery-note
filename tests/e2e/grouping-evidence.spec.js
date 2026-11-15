@@ -91,12 +91,12 @@ for (const width of [320, 375]) {
         if (count < 3) {
           await expect(stability).toHaveCount(0);
           const pending = page.getByTestId("todays-result-stability-pending");
-          await expect(pending).toContainText("グループ RMS は比べていません");
-          await expect(pending).toContainText(`位置のある矢が${count}射`);
-          await expect(pending).toContainText("3射以上の位置があるときに計算します");
+          await expect(pending).toContainText("グルーピングはまだ出ません");
+          await expect(pending).toContainText(`位置のある矢が ${count}射`);
+          await expect(pending).toContainText("的面に打った矢が 3射になると出ます");
           await expect(page.getByTestId("todays-result-streak-stability")).toHaveCount(0);
         } else {
-          await expect(stability).toContainText("グループ RMS は");
+          await expect(stability).toContainText("グルーピングは半径");
           await expect(stability).toContainText("同じ距離・的の直近");
           await expect(page.getByTestId("todays-result-stability-pending")).toHaveCount(0);
         }
@@ -113,9 +113,9 @@ for (const width of [320, 375]) {
         await nativeTap(page, "#sumClose");
         await page.locator('#tabs [data-v="history"]').click();
         await page.locator(`.historyRow[data-id="${data.active.id}"]`).click();
-        // ノートの詳細では同じ事実を「この回」で書く
+        // ノートの詳細では同じ事実を「この日」で書く
         expect((await comparison.innerText()).trim()).toBe(
-          summaryText.trim().replaceAll("今回", "この回"),
+          summaryText.trim().replaceAll("今回", "この日"),
         );
         await settle(page);
         await page.screenshot({ path: testInfo.outputPath("history.png") });
@@ -147,7 +147,7 @@ for (const count of [1, 2]) {
     await nativeTap(page, "#bMenu"); // v5: 終了はメニューの中
     await nativeTap(page, "#bFinish");
     await expect(page.getByTestId("todays-result-stability-pending")).toContainText(
-      `位置のある矢が${count}射`,
+      `位置のある矢が ${count}射`,
     );
     await expect(page.getByTestId("todays-result-stability")).toHaveCount(0);
     await expect(page.getByTestId("todays-result-streak-stability")).toHaveCount(0);

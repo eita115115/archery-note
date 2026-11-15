@@ -256,14 +256,17 @@ test("note detail: figures, comparison, scorecard, plot, conditions and operatio
   await expect(stats.locator('[data-fig="count1"]')).toHaveText(
     `X${all.filter((a) => a.X).length}`,
   );
-  // 同じ条件との比較は「この回」で書く（この日より後の記録は入らない）
+  // 同じ条件との比較は「この日」で書く（この日より後の記録は入らない）
   const past = database.sessions
     .filter((s) => s.dist === 70 && s.id !== "p6")
     .map((s) => totalOf(s));
   const mean = past.reduce((a, b) => a + b, 0) / past.length;
   const cmp = detail.getByTestId("todays-result");
-  await expect(cmp).toContainText(`同じ条件の過去${past.length}回の平均 ${mean.toFixed(1)} 点`);
-  await expect(cmp).toContainText("この回");
+  await expect(cmp).toContainText(
+    `同じ条件のこれまで ${past.length}回の平均（${mean.toFixed(1)} 点）`,
+  );
+  await expect(cmp).toContainText("この日");
+  await expect(cmp).not.toContainText("この回");
   await expect(cmp).not.toContainText("今回");
 
   // スコア表（読むだけ・高い点から）。行を押して直す操作は無い
@@ -287,7 +290,7 @@ test("note detail: figures, comparison, scorecard, plot, conditions and operatio
     .evaluate((c) => +c.getAttribute("r") + +c.getAttribute("stroke-width") / 2);
   expect(foot).toBeCloseTo(0.285, 6);
   await expect(detail.getByTestId("no-impact")).toHaveCount(0);
-  await expect(detail.getByTestId("result-impact-figs")).toContainText("グループRMS");
+  await expect(detail.getByTestId("result-impact-figs")).toContainText("グルーピング（半径）");
 
   // 条件
   const cond = detail.getByTestId("note-conditions");
@@ -336,8 +339,10 @@ test("note detail for a score-only practice says there is no impact data and for
   await expect(detail.getByTestId("note-total")).toHaveText(String(totalOf(p5)));
   await expect(detail.getByTestId("scorecard").locator(".scRow[data-end]")).toHaveCount(12);
   await expect(detail.locator("#hPlot svg")).toHaveCount(0);
-  await expect(detail.getByTestId("no-impact")).toContainText("着弾データなし");
-  await expect(detail.getByTestId("no-impact")).toContainText("72射すべて位置のない記録です");
+  await expect(detail.getByTestId("no-impact")).toContainText("矢の位置がありません");
+  await expect(detail.getByTestId("no-impact")).toContainText(
+    "この練習は 72射とも点数だけの記録です",
+  );
   await expect(detail.getByTestId("result-impact-figs")).toHaveCount(0);
   await expect(detail.getByTestId("note-conditions").locator(".lrow").nth(4)).toHaveText(
     /入力\s*点数だけ/,

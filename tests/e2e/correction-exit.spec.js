@@ -114,7 +114,7 @@ for (const c of cases) {
     await page.getByRole("button", { name: c.faceD === 40 ? "18m" : "70m", exact: true }).click();
     await page.getByRole("combobox", { name: "的", exact: true }).selectOption(String(c.faceD));
     await page
-      .getByRole("combobox", { name: "1エンドの本数", exact: true })
+      .getByRole("combobox", { name: "1エンドの射数", exact: true })
       .selectOption(c.faceD === 40 ? "3" : "6");
     await page.getByTestId("record-start").click();
     const old = (await state(page)).sessions;

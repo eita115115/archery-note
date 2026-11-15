@@ -25,7 +25,7 @@ async function prepare(page, mode) {
   await page.getByTestId("record-conditions").click();
   await page.getByRole("button", { name: "18m", exact: true }).click();
   await page.getByRole("combobox", { name: "的", exact: true }).selectOption("40");
-  await page.getByRole("combobox", { name: "1エンドの本数", exact: true }).selectOption("6");
+  await page.getByRole("combobox", { name: "1エンドの射数", exact: true }).selectOption("6");
   await page.getByTestId("record-start").click();
   // Owned synthetic coordinates use the app's radius/scoring contract.
   await page.evaluate((mode) => {
@@ -153,7 +153,7 @@ for (const mode of ["first", "gam-round", "edit"]) {
       await expect(page.getByTestId("todays-result-empty")).toContainText("最初の記録です");
     if (mode === "gam-round") {
       await expect(page.getByTestId("summary-gamification")).toHaveCount(1);
-      await expect(page.locator(".ovl .recordNeutralAdvice")).toContainText("1/4ステージ");
+      await expect(page.locator(".ovl .recordNeutralAdvice")).toContainText("4距離のうち 1距離");
     }
     if (mode === "edit") {
       await expect(page.locator(".summaryTodaysResult")).toHaveCount(0);

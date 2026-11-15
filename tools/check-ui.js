@@ -375,8 +375,8 @@ function staticUiChecks() {
     "field-aware score labels missing",
   );
   assert(
-    surface.includes("初回の操作ガイド") &&
-      surface.includes("次から表示しない") &&
+    surface.includes("はじめての使い方") &&
+      surface.includes("次から出さない") &&
       surface.includes("activeGuideSeen"),
     "first-run active guide missing",
   );
@@ -426,7 +426,7 @@ function staticUiChecks() {
   );
   assert(
     surface.includes("SHOT_REASON_TAGS") &&
-      surface.includes("外れ理由") &&
+      surface.includes("外れた理由") &&
       surface.includes("矢番号") &&
       surface.includes("arrowMetaSummaryHtml"),
     "shot reason and arrow-number note UI missing",

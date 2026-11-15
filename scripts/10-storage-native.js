@@ -234,7 +234,7 @@ function summaryStorageNoticeHtml(){
   if(storageUsageRatio().ratio<STORAGE_WARN_RATIO) return "";
   return `<aside class="summaryStorageNotice" data-testid="summary-storage-notice" aria-label="保存容量のお知らせ">
     <b>容量が残り少なくなっています</b>
-    <p>使用量が保存できる量の目安の 80% を超えています。設定の「バックアップを書き出す」で、控えのファイルを作れます。</p>
+    <p>使用量が、保存できる量の目安の 80% を超えています。設定の「バックアップを書き出す」で、バックアップのファイルを作れます。</p>
     <button type="button" class="btn sec" id="sumBackupSettings">バックアップ設定を開く</button>
   </aside>`;
 }
@@ -518,7 +518,7 @@ function writeDbNow(o){
     return true;
   }catch(e){
     console.error(e);
-    try{ toast("保存できませんでした（容量が足りません）。設定 > データ でバックアップを書き出してください",6000); }catch(_){}
+    try{ toast("保存できませんでした。端末の空きが足りません。設定 > データ でバックアップを書き出してください",6000); }catch(_){}
     return false;
   }
 }
@@ -663,7 +663,7 @@ function appConfirm(message,opts){
       ${o.title?`<h3>${esc(o.title)}</h3>`:""}
       <div class="confirmMsg">${esc(message)}</div>
       <div class="btnrow">
-        <button type="button" class="btn ghost" id="acCancel">${esc(o.cancelLabel||"キャンセル")}</button>
+        <button type="button" class="btn ghost" id="acCancel">${esc(o.cancelLabel||"やめる")}</button>
         <button type="button" class="btn ${o.danger?"danger":""}" id="acOk">${esc(o.okLabel||"確認")}</button>
       </div>
     </div>`;
@@ -750,7 +750,7 @@ function restoreTrash(id){
   save({reason:"restore-trash",forceSnapshot:true});
   return true;
 }
-function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型記録":t==="note"?"メモ":"削除データ"; }
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型の記録":t==="note"?"メモ":"削除データ"; }
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);

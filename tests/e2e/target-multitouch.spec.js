@@ -55,7 +55,7 @@ for (const width of [320, 375]) {
         await page.getByRole("button", { name: "架空のデモデータで試す" }).click();
         await page.locator('#tabs [data-v="record"]').click();
         await page.getByTestId("record-conditions").click();
-        await page.getByRole("combobox", { name: "1エンドの本数", exact: true }).selectOption("6");
+        await page.getByRole("combobox", { name: "1エンドの射数", exact: true }).selectOption("6");
         await page.getByTestId("record-start").click();
         const sessions = await page.evaluate(() => JSON.parse(JSON.stringify(db.sessions)));
         const cdp = await context.newCDPSession(page);

@@ -90,7 +90,7 @@ for (const width of [360, 375]) {
         ),
       )
       .toBe(1);
-    await page.locator("#activeActionDock").getByRole("button", { name: "取消" }).click();
+    await page.locator("#activeActionDock").getByRole("button", { name: "1射戻す" }).click();
     await expect
       .poll(() =>
         page.evaluate(

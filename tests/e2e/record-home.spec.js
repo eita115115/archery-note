@@ -68,7 +68,7 @@ test("home with history: band, previous practice figures, strip, trend and recen
     await expect(cells.nth(i)).toHaveClass(ends[i] === hi ? /hi/ : /^$/);
   }
   await expect(prev).toContainText(
-    "エンドごとの合計（6射、60点満点）。最も高いエンドに色を付けています。",
+    "エンドごとの合計（6射、60点満点）。いちばん高いエンドに色が付いています。",
   );
 
   // 同じ条件の推移: 70m・122cm的・72射の 7 回（18m の 2 回は入らない）
@@ -80,10 +80,10 @@ test("home with history: band, previous practice figures, strip, trend and recen
   await expect(trend.locator(".vsecH .aside")).toHaveText("7回");
   await expect(trend.locator("svg.lineChart circle")).toHaveCount(7);
   await expect(trend.locator(".fact")).toHaveText(
-    `7回の平均は ${mean.toFixed(1)} 点、回ごとの標準偏差は ${sd.toFixed(1)} 点です。`,
+    `7回の平均は ${mean.toFixed(1)} 点。ふだんは ±${sd.toFixed(1)} 点ほど上下しています。`,
   );
   await expect(trend.locator(".basis")).toHaveText(
-    "対象: 10/3〜11/10、70m・122cm的・72射。破線は平均です。回数が少ないため、上向き・下向きの判定はしていません。",
+    "10/3〜11/10の 70m・122cm的・72射。破線は平均です。まだ回数が少ないので、上がり下がりは言えません。",
   );
 
   // 最近の練習: 日付の新しい順に 3 件。点数だけの記録も合計が出る
@@ -107,7 +107,7 @@ test("home with history: band, previous practice figures, strip, trend and recen
   await expect(sheet.getByTestId("note-total")).toHaveText(String(totalOf(expectRows[2])));
   // 記録タブから開いたときの戻るボタンは「戻る」（ノートへは移らない）
   await expect(sheet.locator("#hClose")).toHaveText("戻る");
-  await expect(sheet.getByTestId("no-impact")).toContainText("着弾データなし");
+  await expect(sheet.getByTestId("no-impact")).toContainText("矢の位置がありません");
   await sheet.locator("#hClose").click();
   await page.getByTestId("home-last-open").click();
   await expect(sheet.getByTestId("note-total")).toHaveText(String(totalOf(last)));
@@ -154,7 +154,7 @@ test("home without history says what to do and starts with the default condition
   const band = page.getByTestId("home-start-band");
   await expect(band.locator(".l")).toHaveText("記録の条件");
   await expect(page.locator("#quickStartMeta")).toHaveText("70m・122cm的");
-  await expect(band.locator(".m")).toHaveText("自由練習・1エンド 6射・弓具 未指定");
+  await expect(band.locator(".m")).toHaveText("自由練習・1エンド 6射・セッティング未指定");
   await expect(page.getByTestId("home-empty")).toContainText("練習の記録はまだありません");
   await expect(page.getByTestId("home-empty")).toContainText("1回記録して終了すると");
   for (const id of ["home-last", "home-trend", "home-recent", "home-goal-line", "end-strip"])
@@ -190,9 +190,11 @@ test("a paused recording replaces the start band; nothing on the tab can start a
   await expect(band.locator(".l")).toHaveText("記録の途中です");
   await expect(band.locator(".c")).toHaveText("70m・122cm的・72射");
   await expect(band.locator(".m")).toHaveText(
-    `11/12（木）・0エンド確定・1射・${active.cur[0].s}点。1射ごとに保存しています。`,
+    `11/12（木）・0エンド確定・1射・${active.cur[0].s}点。ここまでは保存されています。`,
   );
-  await expect(band).toContainText("記録の途中は、新しい記録を始められません。");
+  await expect(band).toContainText(
+    "途中の記録があります。再開して終えると、次の記録を始められます。",
+  );
   for (const sel of [
     "#quickStart",
     "#fStart",
@@ -259,7 +261,9 @@ test("conditions screen round trip: 18m / 40cm / 3 arrows / score input shows on
   await expect(page.locator("#fFace")).toHaveValue("40");
   await page.locator("#fArrows").selectOption("3");
   await page.getByTestId("start-input-score").click();
-  await expect(page.locator("#fInputModeNote")).toContainText("着弾位置は残らない");
+  await expect(page.locator("#fInputModeNote")).toContainText(
+    "矢の位置は残らないので、グルーピングとサイトの目安は出ません。",
+  );
   await page.locator(".recordDetails summary").click();
   await page.locator("#fWx").selectOption("室内");
   await page.locator("#fNote").fill("架空のメモ");

@@ -640,7 +640,7 @@ const adviceCase = (label, mutate) => {
     );
     ok(/着弾中心は .*（位置のある \d+射/.test(r.text), `${testid}: centre and n are stated`);
     ok(r.text.includes("グルーピング半径 (RMS・全射)"), `${testid}: all-arrow figures stay`);
-    ok(r.text.includes("矢番号・外れ理由メモ"), `${testid}: arrow notes stay`);
+    ok(r.text.includes("矢番号と外れた理由"), `${testid}: arrow notes stay`);
     ok(r.text.includes("ラウンド進捗"), `${testid}: round progress stays`);
   }
   /* 位置のある矢が1本もない記録（点数だけ）: 着弾の数値を出さない */

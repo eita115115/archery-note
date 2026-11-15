@@ -33,7 +33,7 @@ const ui = new Function(
   "BADGE_DEFS",
   dateHelpers +
     rowsSource +
-    "return {todaysResultPersonalBestRowHtml, todaysResultComparisonRowHtml, todaysResultWeeklyRowHtml, todaysResultStabilityRowHtml, todaysResultHtml, summaryGamificationHtml, signedText};",
+    "return {todaysResultPersonalBestRowHtml, todaysResultComparisonRowHtml, todaysResultWeeklyRowHtml, todaysResultStabilityRowHtml, todaysResultHtml, summaryGamificationHtml, signedText, moreLessText};",
 )(
   (iso) => iso.replace(/-0?/g, "/"),
   (s) => `${s.faceD}cm的`,
@@ -79,7 +79,7 @@ for (const fixture of baseline.rows) {
   const before = JSON.stringify(fixture.sessions);
   const result = core.computePersonalBestDistance(fixture.sessions, fixture.current.id);
   assert.deepEqual(result, fixture.pb, "PB computation unchanged");
-  const word = fixture.dayLabel === "今日" ? "今回" : "この回";
+  const word = fixture.dayLabel === "今日" ? "今回" : "この日";
   const html = ui.todaysResultPersonalBestRowHtml(result, fixture.current, word);
   noBanned(html, `pb ${fixture.n} ${fixture.relation}`);
   assert(html.includes('data-testid="todays-result-personal-best"'));
@@ -88,18 +88,18 @@ for (const fixture of baseline.rows) {
   assert(html.includes("10/2"), "the date of the best is stated");
   if (result.method === "exact-count") {
     assert(html.includes("この距離・的・射数"), "exact count: condition named");
-    assert(html.includes("対象: 18m・40cm的・"), "exact count: basis names the condition");
+    assert(/class="basis">18m・40cm的・\d+射の、この日までの記録と比べました。/.test(html), "exact count: basis names the condition");
     if (fixture.relation === "above") assert(html.includes("<b>最高です</b>（これまで"));
     if (fixture.relation === "tie") assert(html.includes("と同じです"));
-    if (fixture.relation === "below") assert(html.includes(`${word}との差は −12 点です`));
+    if (fixture.relation === "below") assert(html.includes(`${word}はそれより 12 点低い点数です`));
   } else {
-    assert(html.includes(`${result.todayArrows}射に換算すると`), "projection: says converted");
-    assert(html.includes("換算値（推定）"), "projection: says estimate");
-    assert(html.includes("実際の合計の最高ではありません"), "projection is not a record total");
+    assert(html.includes(`${result.todayArrows}射ぶんに直すと`), "projection: says converted");
+    assert(html.includes("同じ射数の記録がまだないので"), "projection: says why it is converted");
+    assert(html.includes("計算で出した点数で、実際に出した最高点ではありません。"), "projection is an estimate, not a record total");
     assert(!html.includes("最高です</b>"), "projection never claims a new best");
-    if (fixture.relation === "above") assert(html.includes("1 点高い値です"));
+    if (fixture.relation === "above") assert(html.includes("1 点高い点数です"));
     if (fixture.relation === "tie") assert(html.includes(`${word}と同じです`));
-    if (fixture.relation === "below") assert(html.includes(`${word}との差は −2 点です`));
+    if (fixture.relation === "below") assert(html.includes(`${word}はそれより 2 点低い点数です`));
   }
   assert.equal(JSON.stringify(fixture.sessions), before, "non-mutating calculation/render");
   checks++;
@@ -134,16 +134,19 @@ const shortPeer = sess("s", "2026-10-21", [10, 10, 10]);
   assert.equal(c.lastDate, "2026-11-04");
   const html = ui.todaysResultComparisonRowHtml(c, cur, "今回");
   noBanned(html, "comparison");
-  assert(html.includes("同じ条件の過去3回の平均 50.7 点との差は <b>+0.3 点</b>です。"));
-  assert(html.includes("対象: 10/3〜11/4、70m・122cm的・6射。"));
-  assert(html.includes("過去の回ごとの標準偏差は 3.1 点で、今回の差はその範囲内です。"));
+  assert(html.includes("同じ条件のこれまで 3回の平均（50.7 点）より <b>0.3 点高い</b>です。"));
+  assert(html.includes("10/3〜11/4の 70m・122cm的・6射 と比べました。"), "basis names the period and the condition");
+  assert(html.includes("この条件ではふだん ±3.1 点ほど上下するので、たまたまの差かもしれません。"), "spread stated once, in plain words");
+  assert(!/標準偏差|[+−]0\.3/.test(html), "no statistics word or signed number in the row");
   const far = core.computeConditionComparison(
     [...peers, sess("cur", "2026-11-10", [10, 10, 10, 10, 10, 10])],
     "cur",
     null,
   );
   assert.equal(far.withinSd, false);
-  assert(ui.todaysResultComparisonRowHtml(far, cur, "今回").includes("それより大きい値です"));
+  const farHtml = ui.todaysResultComparisonRowHtml(far, cur, "今回");
+  assert(farHtml.includes("上下します。今回の差はそれより大きい差です。"));
+  assert(!farHtml.includes("たまたま"), "outside the usual spread the row never says it may be chance");
   assert.equal(JSON.stringify(all), before, "comparison does not mutate");
   checks += 2;
 }
@@ -155,13 +158,13 @@ const shortPeer = sess("s", "2026-10-21", [10, 10, 10]);
   );
   const html = ui.todaysResultComparisonRowHtml(c, cur, "今回");
   noBanned(html, "insufficient");
-  assert(html.includes("同じ条件の過去の記録が2回のため、平均との比較は表示していません。"));
-  assert(html.includes("3回以上あるときに"));
+  assert(html.includes("同じ条件のこれまでの記録が 3回になると、平均と比べられます（いま 2回）。"));
+  assert(html.includes("条件: 70m・122cm的・6射。"));
   const none = core.computeConditionComparison([cur], "cur", null);
   assert(
     ui
       .todaysResultComparisonRowHtml(none, cur, "今回")
-      .includes("同じ条件の過去の記録がないため"),
+      .includes("平均と比べられます（いま 0回）。"),
   );
   const partial = core.computeConditionComparison([...peers, cur], "cur", 72);
   assert.deepEqual(
@@ -170,7 +173,7 @@ const shortPeer = sess("s", "2026-10-21", [10, 10, 10]);
   );
   const ph = ui.todaysResultComparisonRowHtml(partial, cur, "今回");
   noBanned(ph, "partial");
-  assert(ph.includes("6射で終了した記録です。射数が違うため、過去の 72射の合計とは比べていません。"));
+  assert(ph.includes("72射のうち 6射で終えたので、これまでの合計とは比べません。"));
   checks += 3;
 }
 /* ほかの行と、行をまとめる側 */
@@ -192,15 +195,16 @@ const shortPeer = sess("s", "2026-10-21", [10, 10, 10]);
   };
   const html = ui.todaysResultHtml(result, cur, { comparison: cmp });
   noBanned(html, "panel");
-  assert(html.includes("同じ条件の前回（11/4）は 50 点で、今回との差は <b>+1 点</b>です。"));
-  assert(html.includes("今回のグループ RMS は 9.1cm です。同じ距離・的の直近5回の平均は 9.4cm で、差は −0.3cm です。"));
-  assert(html.includes("この距離・的・射数の最高は 54 点、10/10 で、今回との差は −3 点です。"));
+  assert(html.includes("同じ条件の前回（11/4）は 50 点。今回はそれより <b>1 点高い</b>です。"));
+  assert(html.includes("今回のグルーピングは半径 9.1cm。同じ距離・的の直近 5回の平均（9.4cm）より <b>0.3cm小さくまとまりました</b>。"));
+  assert(html.includes("的面に打った矢で出しています。"));
+  assert(html.includes("この距離・的・射数の最高は 54 点、10/10 で、今回はそれより 3 点低い点数です。"));
   assert(!html.includes("todays-result-streak"), "growth streak rows are not rendered");
   const order = ["todays-result-comparison", "todays-result-weekly", "todays-result-personal-best", "todays-result-stability"].map((k) => html.indexOf(k));
   assert(order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), "row order");
   const retro = ui.todaysResultHtml(result, cur, { comparison: cmp, dayLabel: "この日" });
   noBanned(retro, "retro");
-  assert(retro.includes("この回との差は") && !retro.includes("今回"));
+  assert(retro.includes("この日はそれより") && !retro.includes("今回") && !retro.includes("この回"));
   const empty = { available: true, firstEver: true, weeklyDiff: {}, stabilityTrend: {}, personalBestDistance: {} };
   const first = ui.todaysResultHtml(empty, cur, { comparison: core.computeConditionComparison([cur], "cur", null) });
   noBanned(first, "first");
@@ -217,7 +221,10 @@ const shortPeer = sess("s", "2026-10-21", [10, 10, 10]);
     {},
   );
   noBanned(pending, "pending");
-  assert(pending.includes("位置のある矢が2射のため、グループ RMS は比べていません。"));
+  assert(pending.includes("位置のある矢が 2射なので、グルーピングはまだ出ません。"));
+  assert(pending.includes("的面に打った矢が 3射になると出ます。"));
+  assert.equal(ui.moreLessText(0.04, 1, " 点", "高い", "低い", "より", "と"), "と<b>同じ</b>");
+  assert.equal(ui.moreLessText(-5.66, 1, " 点", "高い", "低い", "より", "と"), "より <b>5.7 点低い</b>");
   assert.equal(ui.signedText(0, 1), "±0");
   assert.equal(ui.signedText(-0.04, 1), "±0");
   assert.equal(ui.signedText(-5.66, 1), "−5.7");
@@ -227,11 +234,11 @@ const shortPeer = sess("s", "2026-10-21", [10, 10, 10]);
     newBadges: [{ id: "b1" }],
   });
   noBanned(gam, "gamification");
-  assert(gam.includes('連続記録は <b data-testid="summary-streak-num">3</b> 日です（この記録の前は 2 日）。フリーズを1個使いました。'));
-  assert(gam.includes("この記録で条件を満たしたバッジ: 「見本」（検査用の理由）"));
+  assert(gam.includes('連続記録は <b data-testid="summary-streak-num">3</b> 日です（この記録の前は 2 日）。「休み」を 1つ使いました。'));
+  assert(gam.includes("この記録で付いたバッジ: 「見本」（検査用の理由）"));
   const unset = ui.summaryGamificationHtml({ streakBefore: {}, streakAfter: { configured: false }, newBadges: [] });
   noBanned(unset, "gamification unset");
-  assert(unset.includes("練習曜日が未設定のため、連続記録は数えていません。"));
+  assert(unset.includes("練習曜日を設定すると、連続記録が始まります。"));
   checks += 8;
 }
 /* 画面の文言そのもの（記録タブの待機画面・記録の条件・今日の結果）にも使わない語が無いこと */

@@ -128,13 +128,13 @@ function recordSetupSnapshot(setupId, dist) {
   if (!setup)
     return `<div class="setupLens" id="setupLens">
     <div class="lensCard"><div class="k">セッティング</div><b>未指定</b></div>
-    <div class="lensCard"><div class="k">サイト台帳</div><b>未接続</b></div>
+    <div class="lensCard"><div class="k">サイトの記録</div><b>記録なし</b></div>
   </div>`;
   const mk = dist ? latestMark(setupId, dist) : null;
   const markText = mk ? `上下 ${esc(mk.v === 0 ? 0 : mk.v || "—")} / 左右 ${esc(mk.h === 0 ? 0 : mk.h || "—")}` : "記録なし";
   return `<div class="setupLens" id="setupLens">
     <div class="lensCard"><div class="k">セッティング</div><b>${esc(setup.name)}</b></div>
-    <div class="lensCard"><div class="k">${dist ? dist + "m サイト" : "サイト台帳"}</div><b>${markText}</b></div>
+    <div class="lensCard"><div class="k">${dist ? dist + "m サイト" : "サイトの記録"}</div><b>${markText}</b></div>
   </div>`;
 }
 function faceChoiceValue(sess) {
@@ -167,7 +167,7 @@ function multiRoundStageGaugeHtml(def) {
     </div>${i < stages.length - 1 ? `<div class="stageGaugeRail"></div>` : ""}`,
     )
     .join("");
-  return `<div class="stageGauge" aria-label="${esc(def.label)}のステージ行程">${ticks}</div>`;
+  return `<div class="stageGauge" aria-label="${esc(def.label)}の距離の進み">${ticks}</div>`;
 }
 /* ---------- 初回（記録も弓具も無い） ----------
    v5: 専用の画面は持たない。記録タブの帯が「最初の条件を選ぶ」になり、記録の条件へ進む
@@ -245,7 +245,7 @@ const FEATURE_HINTS = [
   {
     key: "gearSetup",
     ico: "tool",
-    html: "<strong>弓具のセッティング</strong>を登録すると、サイト台帳をセッティングごとに分けられます",
+    html: "<strong>弓具のセッティング</strong>を登録すると、サイトの記録をセッティングごとに分けられます",
     act: "設定する",
     when: () => db.sessions.length >= 1 && db.setups.length === 0,
     go: () => showView("gear"),
@@ -253,7 +253,7 @@ const FEATURE_HINTS = [
   {
     key: "practiceDays",
     ico: "fire",
-    html: "<strong>練習曜日</strong>を設定すると、連続記録（ストリーク）が始まります",
+    html: "<strong>練習曜日</strong>を設定すると、連続記録が始まります",
     act: "設定する",
     when: () => {
       const g = db.settings.gamification;
@@ -264,7 +264,7 @@ const FEATURE_HINTS = [
   {
     key: "analysis",
     ico: "book",
-    html: "3回分たまりました。<strong>分析タブ</strong>で傾向が見えます",
+    html: "記録が 3回になりました。<strong>分析</strong>で推移を見られます",
     act: "見る",
     when: () => db.sessions.length >= 3,
     go: () => showView("analysis"),
@@ -272,7 +272,7 @@ const FEATURE_HINTS = [
   {
     key: "sightAdjust",
     ico: "target",
-    html: "2距離のサイト値があります。<strong>弓具 &gt; サイト</strong>で、ほかの距離の予測を見られます",
+    html: "2距離のサイトが記録に残りました。<strong>弓具 &gt; サイト</strong>で、ほかの距離の予測を見られます",
     act: "開く",
     when: () => new Set(db.sightMarks.map((x) => x.dist)).size >= 2,
     go: () => showView("sight"),
@@ -521,7 +521,7 @@ function homeStartBandHtml(last) {
   if (c.mdef) parts.push(`最初の距離 ${esc(c.dist)}m・${esc(faceLabel(c))}から`);
   else if (quota) parts.push(`${c.perEnd}射×${Math.ceil(quota / c.perEnd)}エンド`);
   else parts.push(`自由練習・1エンド ${c.perEnd}射`);
-  parts.push(setup ? esc(setup.name) : "弓具 未指定");
+  parts.push(setup ? esc(setup.name) : "セッティング未指定");
   if (setup) parts.push(mk && hasSightInput(mk.v) ? `サイト ${esc(sightValueText(mk.v))}` : "サイト 記録なし");
   return `<section class="band startBand" data-testid="home-start-band" aria-label="記録を始める">
     <div class="l">${label}</div>
@@ -541,9 +541,9 @@ function homePausedBandHtml(s) {
   return `<section class="band startBand" data-testid="record-paused" aria-label="記録の途中">
     <div class="l">${s._edit ? "編集の途中です" : "記録の途中です"}</div>
     <div class="c">${esc(s.dist)}m・${esc(faceLabel(s))}${quota ? `・${quota}射` : ""}</div>
-    <div class="m">${fmtMDW(s.date)}・${s.ends.length}エンド確定・${all.length}射・${sumScores(all)}点。1射ごとに保存しています。</div>
+    <div class="m">${fmtMDW(s.date)}・${s.ends.length}エンド確定・${all.length}射・${sumScores(all)}点。ここまでは保存されています。</div>
     <div class="btnRow"><button type="button" class="btn pri" id="recResume" data-testid="record-resume">記録を再開する</button></div>
-    <p class="basis">記録の途中は、新しい記録を始められません。再開して終了すると、次の記録を始められます。</p>
+    <p class="basis">途中の記録があります。再開して終えると、次の記録を始められます。</p>
   </section>`;
 }
 /* 初回（記録も弓具も無く、まだ条件を選んでいない）。帯が「最初の条件を選ぶ」になる */
@@ -662,7 +662,7 @@ function homeTrendHtml(ref) {
   const head = `<div class="vsecH"><h2>${esc(ref.dist)}m・${n}射の推移</h2><span class="aside">${same.length}回</span></div>`;
   if (shown.length < 2)
     return `<section class="vsec" data-testid="home-trend">${head}
-      <p class="fact">同じ条件（${cond}）の記録は1回です。2回目から推移を表示します。</p></section>`;
+      <p class="fact">同じ条件（${cond}）の記録はまだ 1回です。2回目から推移を見られます。</p></section>`;
   const tv = shown.map((s) => sumScores(s.ends.flat()));
   const m = tv.reduce((t, v) => t + v, 0) / tv.length;
   const sd = sampleSd(tv);
@@ -670,8 +670,8 @@ function homeTrendHtml(ref) {
     same.length > shown.length ? `直近${shown.length}回（全${same.length}回のうち）` : `${shown.length}回`;
   return `<section class="vsec" data-testid="home-trend">${head}
     ${totalsLineChartHtml(tv, shown.map((s) => fmtMD(s.date)), m)}
-    <p class="fact">${scope}の平均は ${m.toFixed(1)} 点、回ごとの標準偏差は ${sd.toFixed(1)} 点です。</p>
-    <p class="basis">対象: ${fmtDateRange(shown[0].date, shown[shown.length - 1].date)}、${cond}。破線は平均です。${shown.length < 8 ? "回数が少ないため、上向き・下向きの判定はしていません。" : ""}</p>
+    <p class="fact">${scope}の平均は ${m.toFixed(1)} 点。ふだんは ±${sd.toFixed(1)} 点ほど上下しています。</p>
+    <p class="basis">${fmtDateRange(shown[0].date, shown[shown.length - 1].date)}の ${cond}。破線は平均です。${shown.length < 8 ? "まだ回数が少ないので、上がり下がりは言えません。" : ""}</p>
   </section>`;
 }
 function homeLastPracticeHtml(ref) {
@@ -682,7 +682,7 @@ function homeLastPracticeHtml(ref) {
     <div class="bigRow">${sessionBigTotalHtml(ref)}<button type="button" class="txtBtn" id="homeLastOpen" data-testid="home-last-open">スコア表を見る</button></div>
     ${sessionFigsHtml(ref, "avg")}
     ${endStripHtml(ref)}
-    <p class="basis">エンドごとの合計（${per}射、${per * perfectScoreValue(ref)}点満点）。最も高いエンドに色を付けています。${sessionHasPos(ref) ? "" : "点数だけの記録です。"}</p>
+    <p class="basis">エンドごとの合計（${per}射、${per * perfectScoreValue(ref)}点満点）。いちばん高いエンドに色が付いています。${sessionHasPos(ref) ? "" : "点数だけの記録です。"}</p>
   </section>`;
 }
 function homeRecentRowHtml(s) {
@@ -780,8 +780,8 @@ function renderRecordHome(m) {
    記録タブの「条件を変える」から開く。タブと画面名の行は隠す（style.css: html.subscreen）。
    ラウンド → 距離と的 → 入力の方法 → 弓具とサイト → 日付・天気・風・メモ → 下端に「この条件で記録を始める」 */
 const INPUT_MODE_NOTE = {
-  target: "的をタップした位置を記録します。着弾の分布とサイト調整の目安に使えます。",
-  score: "点数キーで記録します。着弾位置は残らないため、着弾の分析には使えません。",
+  target: "的をタップした位置を記録します。グルーピングとサイトの目安に使えます。",
+  score: "点数だけを入れます。矢の位置は残らないので、グルーピングとサイトの目安は出ません。",
 };
 function renderRecordConditions(m) {
   const firstRun = shouldShowOnboarding();
@@ -810,7 +810,7 @@ function renderRecordConditions(m) {
       </optgroup>
     </select>
     <div class="hint stageGaugeWrap" id="fRoundStages" style="display:none"></div>
-    <p class="basis">規定の射数の途中でも終了できます。自作のラウンドは、設定の「自作ラウンド」で登録します。</p>
+    <p class="basis">決まった射数の途中でも終えられます。自作のラウンドは、設定の「自作ラウンド」で登録できます。</p>
   </section>
   <section class="vsec condSec" aria-labelledby="condDistH">
     <div class="vsecH"><h2 id="condDistH">距離と的</h2></div>
@@ -829,7 +829,7 @@ function renderRecordConditions(m) {
           ${FIELD_FACE_SIZES.map((f) => `<option value="F${f}" ${defFace === `F${f}` ? "selected" : ""}>${f}cm フィールド</option>`).join("")}
         </optgroup>
       </select></div>
-      <div><label class="f" for="fArrows">1エンドの本数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === def.perEnd ? "selected" : ""}>${n}本</option>`).join("")}</select></div>
+      <div><label class="f" for="fArrows">1エンドの射数</label><select class="inp" id="fArrows">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((n) => `<option value="${n}" ${n === def.perEnd ? "selected" : ""}>${n}射</option>`).join("")}</select></div>
     </div>
   </section>
   <section class="vsec condSec" aria-labelledby="fInputModeLabel">
@@ -839,13 +839,13 @@ function renderRecordConditions(m) {
   </section>
   <section class="vsec condSec" aria-labelledby="condGearH">
     <div class="vsecH"><h2 id="condGearH">弓具とサイト</h2><button type="button" class="txtBtn" id="jumpGear">弓具を開く</button></div>
-    <label class="f" for="fSetup">弓具（セッティング）</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select>
+    <label class="f" for="fSetup">セッティング</label><select class="inp" id="fSetup">${setupOptions(defSetup)}</select>
     <div class="sessionCondition">${recordSetupSnapshot(defSetup, defDist)}</div>
     <div class="row">
       <div><label class="f" for="fSightV">サイト 上下（目盛り）</label><input class="inp" id="fSightV" inputmode="decimal" placeholder="例: 5.4"></div>
       <div><label class="f" for="fSightH">サイト 左右（目盛り）</label><input class="inp" id="fSightH" inputmode="decimal" placeholder="例: 2 / -1.5"></div>
     </div>
-    <p class="basis">サイトの目盛りをそのまま書きます（左右は右なら 2、左なら -2）。弓具と距離が同じ記録が台帳にあれば、その値が入ります。</p>
+    <p class="basis">サイトの目盛りをそのまま書いてください（左右は、右なら 2、左なら -2）。同じセッティング・同じ距離の前の値があれば、はじめから入っています。</p>
   </section>
   <details class="adv recordDetails">
     <summary>日付・天気・風・メモ<span class="sumNote">必要なときだけ入力します</span></summary>
@@ -1065,7 +1065,7 @@ function arrowMetaSummaryHtml(sess) {
   });
   const reasonLine = Object.entries(reasons)
     .sort((a, b) => b[1] - a[1])
-    .map(([k, v]) => `${esc(k)} ${v}本`)
+    .map(([k, v]) => `${esc(k)} ${v}射`)
     .join(" / ");
   const rows = Object.entries(byNo)
     .sort((a, b) => b[1].n - a[1].n || String(a[0]).localeCompare(String(b[0])))
@@ -1073,14 +1073,14 @@ function arrowMetaSummaryHtml(sess) {
     .map(([no, b]) => {
       const avg = b.score / b.n;
       const offset = b.pos
-        ? `${cmOffsetText(b.x / b.pos, "x")}・${cmOffsetText(b.y / b.pos, "y")}${b.pos < b.n ? `（位置のある${b.pos}本）` : ""}`
-        : "着弾データなし";
+        ? `${cmOffsetText(b.x / b.pos, "x")}・${cmOffsetText(b.y / b.pos, "y")}${b.pos < b.n ? `（位置のある${b.pos}射）` : ""}`
+        : "位置の記録なし";
       const topReason = Object.entries(b.reasons).sort((a, c) => c[1] - a[1])[0];
-      return `<div class="note">#${esc(no)}: ${b.n}本 / 平均${avg.toFixed(1)} / ${offset}${topReason ? ` / ${esc(topReason[0])} ${topReason[1]}本` : ""}</div>`;
+      return `<div class="note">#${esc(no)}: ${b.n}射 / 平均${avg.toFixed(1)} / ${offset}${topReason ? ` / ${esc(topReason[0])} ${topReason[1]}射` : ""}</div>`;
     })
     .join("");
   return `<div class="advice recordNeutralAdvice">
-    <div class="note"><b>矢番号・外れ理由メモ</b>${reasonLine ? ` — ${reasonLine}` : ""}</div>
+    <div class="note"><b>矢番号と外れた理由</b>${reasonLine ? ` — ${reasonLine}` : ""}</div>
     ${rows}
   </div>`;
 }
@@ -1385,7 +1385,7 @@ function valueStripHtml(vals, o) {
   return `<div data-testid="${esc(opt.testid || "value-strip")}" role="group" aria-label="${esc(opt.label || "")}">${h}</div>`;
 }
 function analysisTabHeadingHtml(tab) {
-  const name = { score: "スコア", impact: "着弾", compare: "比較", form: "射型" }[tab];
+  const name = { score: "スコア", impact: "グルーピング", compare: "比較", form: "射型" }[tab];
   return `<h2 class="srOnly">分析: ${name}</h2>`;
 }
 function analysisEmptyHtml(msg) {
@@ -2216,22 +2216,22 @@ function activeStatus(s) {
 }
 function activeGuideHtml(scoreMode) {
   if (scoreMode) {
-    const lead = "下のキーで1射ずつ点数を入れます。エンドの本数がそろったら「エンド確定」を押します。";
+    const lead = "下のキーで 1射ずつ点数を入れてください。1エンドぶん入ったら「エンド確定」を押します。";
     if (db.settings.activeGuideSeen) return `<div class="miniEmpty">${lead}</div>`;
     return `<div class="miniEmpty activeGuide" data-testid="active-guide">
-    <b>初回の操作ガイド</b>
+    <b>はじめての使い方</b>
     <span>${lead}</span>
     <span>下の枠をタップしてからキーを押すと、その矢の点数を置き換えます。確定したエンドは行をタップして直します。</span>
-    <button type="button" class="txtBtn activeGuideDone" id="activeGuideDone">次から表示しない</button>
+    <button type="button" class="txtBtn activeGuideDone" id="activeGuideDone">次から出さない</button>
   </div>`;
   }
   if (db.settings.activeGuideSeen)
     return `<div class="miniEmpty">的をタップするとその位置を1射として記録します。長く押すと拡大鏡が出て、指を離した位置で記録します。</div>`;
   return `<div class="miniEmpty activeGuide" data-testid="active-guide">
-    <b>初回の操作ガイド</b>
-    <span>的をタップするとその位置を1射として記録します。長く押すと拡大鏡が出て、指を離した位置で記録します（0.4秒で微調整）。的の外で指を離すと取消です。</span>
+    <b>はじめての使い方</b>
+    <span>的をタップするとその位置を1射として記録します。長く押すと拡大鏡が出て、指を離した位置で記録します（0.4秒押すと、細かく動かせます）。的の外で指を離すと、記録されません。</span>
     <span>下の枠をタップすると、その矢を置き直し・1mm ずつ移動・削除できます。確定したエンドは行をタップして直します。</span>
-    <button type="button" class="txtBtn activeGuideDone" id="activeGuideDone">次から表示しない</button>
+    <button type="button" class="txtBtn activeGuideDone" id="activeGuideDone">次から出さない</button>
   </div>`;
 }
 /* 多距離ラウンドの次ステージ定義。最終ステージ・編集モード・単一距離では null */
@@ -2486,11 +2486,11 @@ function renderActiveDock(s, st) {
     html = (cls === "t2" ? missBtn : "") + editDoneBtn;
   } else if (st.allDone) {
     cls = "t2";
-    html = `<button type="button" class="btn ghost" id="bUndo" data-testid="active-undo" disabled>取消</button>` + finishBtn;
+    html = `<button type="button" class="btn ghost" id="bUndo" data-testid="active-undo" disabled>1射戻す</button>` + finishBtn;
   } else {
     cls = scoreMode ? "t2" : "t3";
     html =
-      `<button type="button" class="btn ghost" id="bUndo" data-testid="active-undo"${s.cur.length ? "" : " disabled"}>取消</button>` +
+      `<button type="button" class="btn ghost" id="bUndo" data-testid="active-undo"${s.cur.length ? "" : " disabled"}>1射戻す</button>` +
       (scoreMode ? "" : missBtn) +
       endBtn;
   }
@@ -2545,19 +2545,19 @@ function openActiveMenu() {
       <div class="fig"><div class="l">${counts.map((c) => c.sub).join(" / ")}</div><div class="n">${counts.map((c) => c.count(all)).join("<small>/</small>")}</div></div>
     </div>
     <div class="lrow recMenuMode">
-      <span class="lmain"><b id="mModeLabel">入力方法</b><span>${scoreMode ? "点数をキーで入れます。的の図と着弾の統計は、位置のある矢だけで作ります。" : "的をタップして位置と点数を記録します。"}</span></span>
+      <span class="lmain"><b id="mModeLabel">入力方法</b><span>${scoreMode ? "点数をキーで入れます。的の図とグルーピングは、的面に打った矢だけで出ます。" : "的をタップして位置と点数を記録します。"}</span></span>
       <div class="seg" role="group" aria-labelledby="mModeLabel" data-testid="input-mode">
         <button type="button" data-mode="target" data-testid="input-mode-target" aria-pressed="${!scoreMode}">的面に打つ</button>
         <button type="button" data-mode="score" data-testid="input-mode-score" aria-pressed="${scoreMode}">点数だけ</button>
       </div>
     </div>
     ${item("mMeta", "天気・風・メモを書く", meta || "必要なときだけ入力します")}
-    ${next ? item("mNextStage", `次の距離へ（${esc(next.dist)}m）`, "このステージを確定して次へ進みます") : ""}
+    ${next ? item("mNextStage", `次の距離へ（${esc(next.dist)}m）`, "この距離を確定して次へ進みます") : ""}
     ${item("mSettings", "設定", "表示・拡大鏡の位置など")}
     ${item(
       "bFinish",
       s._edit ? "編集を終了して保存する" : "ここで記録を終了する",
-      all.length ? `${all.length}射まで保存して結果を表示します` : "矢がまだありません。記録を破棄できます",
+      all.length ? `${all.length}射まで保存して、結果を見ます` : "まだ 1射も入っていません。この記録をやめられます",
       ' data-testid="active-finish"',
     )}
     <div class="btnRow"><button type="button" class="btn ghost" id="mClose">閉じる</button></div>
@@ -2605,7 +2605,7 @@ function openSessionMetaSheet() {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet" data-testid="active-meta-sheet">
     <h3>天気・風・メモ</h3>
-    <label class="f" for="amWx">天候・コンディション</label>
+    <label class="f" for="amWx">天候</label>
     <select class="inp" id="amWx">${opts(["晴れ", "くもり", "雨", "風 弱", "風 強", "室内"], s.wx)}</select>
     <div class="row">
       <div><label class="f" for="amWindDir">風向</label><select class="inp" id="amWindDir">${opts(["向かい風", "追い風", "左から", "右から", "巻き風"], s.windDir)}</select></div>
@@ -2637,7 +2637,7 @@ function shotMetaHtml(a, index) {
       <input class="inp" id="shotArrowNo" inputmode="numeric" maxlength="8" value="${esc(a.no || "")}" placeholder="${index + 1}">
     </div>
     <div>
-      <span class="metaLabel">外れ理由</span>
+      <span class="metaLabel">外れた理由</span>
       <div class="reasonTags" id="shotReasonTags">${tags}</div>
     </div>
   </div>`;
@@ -2708,8 +2708,8 @@ function openScoreOverrideSheet() {
   const basis = !placed
     ? "位置のない矢です。点数を選ぶと置き換わります。"
     : manual
-      ? `いまは手で直した ${autoText(a)} です（位置からの採点は ${autoText(a.auto)}）。位置は変わりません。`
-      : `位置からの採点は ${autoText(a)} です。違う点を選ぶと、手で直した印（*）が付きます。位置は変わりません。`;
+      ? `いまは手で直した ${autoText(a)} です（刺さった位置では ${autoText(a.auto)}）。矢の位置はそのままです。`
+      : `刺さった位置では ${autoText(a)} です。違う点を選ぶと * が付きます。矢の位置はそのままです。`;
   const ovl = document.createElement("div");
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet scoreOverride" data-testid="score-override-sheet">
@@ -2722,7 +2722,7 @@ function openScoreOverrideSheet() {
       )
       .join("")}</div>
     <div class="btnRow">
-      ${manual ? `<button type="button" class="btn ghost" id="soAuto" data-testid="score-override-auto">自動採点に戻す</button>` : ""}
+      ${manual ? `<button type="button" class="btn ghost" id="soAuto" data-testid="score-override-auto">位置どおりの点に戻す</button>` : ""}
       <button type="button" class="btn ghost" id="soCancel">やめる</button>
     </div>
   </div>`;
@@ -2999,7 +2999,7 @@ function nudgeArrow(dirKey) {
   if (dirKey === "r") a.x = +(a.x + step).toFixed(2) || 0;
   Object.assign(a, scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s)));
   /* 動かしたら位置から採点し直す。手で直した点数は外す（矢円と点数をそろえる） */
-  if (clearManualScore(a)) ui.recMsg = "手修正を外して採点しました";
+  if (clearManualScore(a)) ui.recMsg = "位置どおりの点に戻しました";
   nativePulse("light");
   scheduleSave("nudge");
   refreshActive();
@@ -3101,7 +3101,7 @@ function attachTargetInput(s) {
     const out = !!(drag && drag.out);
     lensTag.classList.toggle("is-cancel", out);
     lensTag.innerHTML = out
-      ? `<b>取消</b><span>離すと記録しません</span>`
+      ? `<b>やめる</b><span>離すと記録されません</span>`
       : `<b>${esc(scoreLabel(hit))}</b><span>${fine ? (cutting ? "線かみ" : "線なし") : "点"}</span>`;
     cur.innerHTML = `<g>
       <line x1="${p.x - w}" y1="${-p.y}" x2="${p.x + w}" y2="${-p.y}" stroke="${c}" stroke-width="${s.faceD / 500}"/>
@@ -3297,7 +3297,7 @@ function attachTargetInput(s) {
       /* 置き直し: 位置と点数だけ入れ替える（矢番号・理由はそのまま）。選択は保ち、続けて 1mm 動かせる。
          位置から採点し直すので、手で直した点数は外す。位置のなかった矢はここで位置のある矢になる */
       Object.assign(target, { x: rec.x, y: rec.y, s: rec.s, X: rec.X, src: "pos" });
-      if (clearManualScore(target)) ui.recMsg = "手修正を外して採点しました";
+      if (clearManualScore(target)) ui.recMsg = "位置どおりの点に戻しました";
       if (rec.spot != null) target.spot = rec.spot;
       else delete target.spot;
       scheduleSave("arrow-move");
@@ -3339,12 +3339,12 @@ async function advanceRoundStage() {
   const s = db.active;
   const next = s ? nextStageDef(s) : null;
   if (!next) {
-    toast("次のステージ定義が見つかりません");
+    toast("次の距離が見つかりません");
     return;
   }
   const shot = s.ends.flat().length + s.cur.length;
   if (!shot) {
-    toast("このステージの矢がまだありません");
+    toast("この距離は、まだ 1射も入っていません");
     return;
   }
   const stageDef = sessionStageDef(s);
@@ -3353,7 +3353,7 @@ async function advanceRoundStage() {
     stageDef.arrows &&
     shot < stageDef.arrows &&
     !(await appConfirm(
-      `このステージは ${shot}/${stageDef.arrows} 射です。確定して次の距離へ進みますか？`,
+      `この距離は ${stageDef.arrows}射のうち ${shot}射です。確定して次の距離へ進みますか？`,
       { okLabel: "次の距離へ" },
     ))
   )
@@ -3401,7 +3401,7 @@ async function advanceRoundStage() {
   ui.selArrow = -1;
   nativePulse("success");
   save();
-  toast(`${next.dist}m を開始（ステージ ${(Number(rg.stage) || 0) + 2}/${rg.stageCount}）`);
+  toast(`${next.dist}m を始めます（${rg.stageCount}距離のうち ${(Number(rg.stage) || 0) + 2}つめ）`);
   render();
 }
 
@@ -3416,9 +3416,9 @@ async function finishSession() {
         ? db.sessions.filter((x) => x && x.roundGroup && x.roundGroup.gid === rg.gid).length
         : 0;
     const msg = doneStages
-      ? `このステージを破棄しますか？（確定済みの ${doneStages} ステージは履歴に残ります）`
-      : "矢が0本です。このセッションを破棄しますか？";
-    if (await appConfirm(msg, { danger: true, okLabel: "破棄" })) {
+      ? `この距離は、まだ 1射も入っていません。この距離の記録をやめて消しますか？（確定した ${doneStages}距離はノートに残ります）`
+      : "まだ 1射も入っていません。この記録をやめて消しますか？";
+    if (await appConfirm(msg, { danger: true, okLabel: "やめて消す" })) {
       db.active = null;
       wakeLock.release();
       nativePulse("heavy");
@@ -3433,7 +3433,7 @@ async function finishSession() {
     !s._edit &&
     (Number(rg.stage) || 0) < rg.stageCount - 1 &&
     !(await appConfirm(
-      `ラウンド途中です（${(Number(rg.stage) || 0) + 1}/${rg.stageCount}）。ここで終了すると残りのステージは記録できません。終了しますか？`,
+      `ラウンドの途中です（${rg.stageCount}距離のうち ${(Number(rg.stage) || 0) + 1}つめ）。ここで終えると、残りの距離は記録できなくなります。終えますか？`,
       { okLabel: "終了する" },
     ))
   )
@@ -3523,7 +3523,7 @@ function roundGroupSummaryHtml(sess) {
   if (!g || !g.stages.length) return "";
   const breakdown = g.stages.map((st) => `${st.dist}m ${st.total}点`).join(" / ");
   return `<div class="advice recordNeutralAdvice">
-    <div class="note"><b>${esc(roundLabel(rg.roundId))} 合計 ${g.total}</b> / ${g.arrows}射${g.complete ? "" : `（${g.stages.length}/${rg.stageCount}ステージ）`}</div>
+    <div class="note"><b>${esc(roundLabel(rg.roundId))} 合計 ${g.total}</b> / ${g.arrows}射${g.complete ? "" : `（${rg.stageCount}距離のうち ${g.stages.length}距離）`}</div>
     <div class="note">${esc(breakdown)}</div>
   </div>`;
 }
@@ -3536,6 +3536,12 @@ function todaysResultRowHtml(kind, factHtml, basisText) {
   </div>`;
 }
 /* 差の表記: +5.7 / −5.7 / ±0 */
+/* 差を言葉にする: 「より <b>0.3 点高い</b>」「と<b>同じ</b>」。丸めて 0 なら同じ（符号つきの数を本文に出さない。docs/design/voice.md） */
+function moreLessText(v, dec, unit, more, less, than, same, sameWord) {
+  const r = +(+v).toFixed(dec || 0);
+  if (r === 0) return `${same}<b>${sameWord || "同じ"}</b>`;
+  return `${than} <b>${Math.abs(r).toFixed(dec || 0)}${unit}${r > 0 ? more : less}</b>`;
+}
 function signedText(v, dec) {
   const r = +(+v).toFixed(dec || 0);
   if (r === 0) return "±0";
@@ -3556,22 +3562,20 @@ function todaysResultComparisonRowHtml(cmp, sess, word) {
   if (cmp.available)
     return todaysResultRowHtml(
       "comparison",
-      `同じ条件の過去${cmp.sampleCount}回の平均 ${cmp.mean.toFixed(1)} 点との差は <b>${signedText(cmp.diff, 1)} 点</b>です。`,
-      `対象: ${fmtDateRange(cmp.firstDate, cmp.lastDate)}、${esc(sessionConditionText(sess))}。過去の回ごとの標準偏差は ${cmp.sd.toFixed(1)} 点で、${word}の差は${cmp.withinSd ? "その範囲内" : "それより大きい値"}です。`,
+      `同じ条件のこれまで ${cmp.sampleCount}回の平均（${cmp.mean.toFixed(1)} 点）${moreLessText(cmp.diff, 1, " 点", "高い", "低い", "より", "と")}です。`,
+      `この条件ではふだん ±${cmp.sd.toFixed(1)} 点ほど上下${+cmp.diff.toFixed(1) === 0 ? "します。" : cmp.withinSd ? "するので、たまたまの差かもしれません。" : `します。${word}の差はそれより大きい差です。`}${fmtDateRange(cmp.firstDate, cmp.lastDate)}の ${esc(sessionConditionText(sess))} と比べました。`,
     );
   if (cmp.reason === "partial")
     return todaysResultRowHtml(
       "comparison",
-      `${cmp.todayArrows}射で終了した記録です。射数が違うため、過去の ${cmp.quota}射の合計とは比べていません。`,
+      `${cmp.quota}射のうち ${cmp.todayArrows}射で終えたので、これまでの合計とは比べません。`,
       "",
     );
   if (cmp.reason === "insufficient-history")
     return todaysResultRowHtml(
       "comparison",
-      cmp.sampleCount
-        ? `同じ条件の過去の記録が${cmp.sampleCount}回のため、平均との比較は表示していません。`
-        : `同じ条件の過去の記録がないため、平均との比較は表示していません。`,
-      `条件: ${esc(sessionConditionText(sess))}。${cmp.minSessions}回以上あるときに、平均と回ごとの標準偏差を表示します。`,
+      `同じ条件のこれまでの記録が ${cmp.minSessions}回になると、平均と比べられます（いま ${cmp.sampleCount || 0}回）。`,
+      `条件: ${esc(sessionConditionText(sess))}。`,
     );
   return "";
 }
@@ -3579,7 +3583,7 @@ function todaysResultComparisonRowHtml(cmp, sess, word) {
 function todaysResultWeeklyRowHtml(wd, sess, word) {
   return todaysResultRowHtml(
     "weekly",
-    `同じ条件の前回（${refDateText(wd.compareDate, sess)}）は ${Math.round(wd.compareValue)} 点で、${word}との差は <b>${signedText(wd.deltaPoints, 0)} 点</b>です。`,
+    `同じ条件の前回（${refDateText(wd.compareDate, sess)}）は ${Math.round(wd.compareValue)} 点。${word}は${moreLessText(wd.deltaPoints, 0, " 点", "高い", "低い", "それより", "それと")}です。`,
     "",
   );
 }
@@ -3588,8 +3592,8 @@ function todaysResultStabilityRowHtml(st, word) {
   const n = Math.min(5, st.sampleCount);
   return todaysResultRowHtml(
     "stability",
-    `${word}のグループ RMS は ${st.latestValue.toFixed(1)}cm です。同じ距離・的の直近${n}回の平均は ${st.baselineValue.toFixed(1)}cm で、差は ${signedText(st.latestValue - st.baselineValue, 1)}cm です。`,
-    "位置のある矢だけで計算しています。値が小さいほど矢が集まっています。",
+    `${word}のグルーピングは半径 ${st.latestValue.toFixed(1)}cm。同じ距離・的の直近 ${n}回の平均（${st.baselineValue.toFixed(1)}cm）${moreLessText(st.latestValue - st.baselineValue, 1, "cm", "大きく広がりました", "小さくまとまりました", "より", "と", "同じでした")}。`,
+    "的面に打った矢で出しています。",
   );
 }
 /* これまでの最高との関係。同じ射数の記録があればその合計、無ければ1射平均の最も高い回を今回の射数に換算する */
@@ -3599,14 +3603,14 @@ function todaysResultPersonalBestRowHtml(pb, sess, word) {
   if (pb.method === "avg-projected") {
     const rel =
       pb.remaining < 0
-        ? `${word}はそれより ${Math.abs(Math.round(pb.remaining))} 点高い値です`
+        ? `${word}はそれより ${Math.abs(Math.round(pb.remaining))} 点高い点数です`
         : pb.remaining === 0
           ? `${word}と同じです`
-          : `${word}との差は −${Math.round(pb.remaining)} 点です`;
+          : `${word}はそれより ${Math.round(pb.remaining)} 点低い点数です`;
     return todaysResultRowHtml(
       "personal-best",
-      `この距離・的で1射平均が最も高い回（${bestDate}）を ${pb.todayArrows}射に換算すると ${pb.bestTotal} 点で、${rel}。`,
-      `同じ射数の記録がないため、1射平均からの換算値（推定）で比べています。実際の合計の最高ではありません。`,
+      `同じ射数の記録がまだないので、1射平均がいちばん高かった日（${bestDate}）を ${pb.todayArrows}射ぶんに直すと ${pb.bestTotal} 点です。${rel}。`,
+      `計算で出した点数で、実際に出した最高点ではありません。`,
     );
   }
   const fact =
@@ -3614,11 +3618,11 @@ function todaysResultPersonalBestRowHtml(pb, sess, word) {
       ? `この距離・的・射数で<b>最高です</b>（これまで ${best}）。`
       : pb.remaining === 0
         ? `この距離・的・射数のこれまでの最高（${best}）と同じです。`
-        : `この距離・的・射数の最高は ${best} で、${word}との差は −${Math.round(pb.remaining)} 点です。`;
+        : `この距離・的・射数の最高は ${best} で、${word}はそれより ${Math.round(pb.remaining)} 点低い点数です。`;
   return todaysResultRowHtml(
     "personal-best",
     fact,
-    `対象: ${esc(sessionConditionText(sess))}の、この日までの記録。`,
+    `${esc(sessionConditionText(sess))}の、この日までの記録と比べました。`,
   );
 }
 /* computeTodaysResult() と computeConditionComparison() の結果を、事実と根拠の行にする。
@@ -3628,7 +3632,7 @@ function todaysResultHtml(result, sess, opts) {
   opts = opts || {};
   if (!result || !result.available) return "";
   const retro = !!opts.dayLabel && opts.dayLabel !== "今日";
-  const word = retro ? "この回" : "今回";
+  const word = retro ? "この日" : "今回";
   const cmp = opts.comparison || null;
   const rows = [];
   if (result.weeklyDiff && result.weeklyDiff.available)
@@ -3641,8 +3645,8 @@ function todaysResultHtml(result, sess, opts) {
     rows.push(
       todaysResultRowHtml(
         "stability-pending",
-        `位置のある矢が${result.stabilityTrend.coordinateCount}射のため、グループ RMS は比べていません。`,
-        "3射以上の位置があるときに計算します。",
+        `位置のある矢が ${result.stabilityTrend.coordinateCount}射なので、グルーピングはまだ出ません。`,
+        "的面に打った矢が 3射になると出ます。",
       ),
     );
   if (!rows.length && (!cmp || (cmp.reason === "insufficient-history" && !cmp.sampleCount))) {
@@ -3654,7 +3658,7 @@ function todaysResultHtml(result, sess, opts) {
         : "最初の記録です。比べる過去の記録はありません。"
       : retro
         ? condFirst
-        : `${condFirst}同じ条件の記録が3回以上になると、平均との比較を表示します。`;
+        : `${condFirst}同じ条件の記録が 3回になると、平均と比べられます。`;
     return `<div class="summaryTodaysResult todaysResultEmpty" data-testid="todays-result-empty"><p class="fact">${msg}</p></div>`;
   }
   return `<div class="summaryTodaysResult" data-testid="todays-result">${todaysResultComparisonRowHtml(cmp, sess, word)}${rows.join("")}</div>`;
@@ -3671,9 +3675,9 @@ function summaryGamificationHtml(gam) {
     const freezeUsed = streakAfter.freezeUsedDates.filter(
       (d) => streakBefore.lastPracticeDate && d > streakBefore.lastPracticeDate,
     );
-    streakPart = `<p class="fact">連続記録は <b data-testid="summary-streak-num">${streakAfter.current}</b> 日です（この記録の前は ${streakBefore.current} 日）。${freezeUsed.length ? `フリーズを${freezeUsed.length}個使いました。` : ""}</p>`;
+    streakPart = `<p class="fact">連続記録は <b data-testid="summary-streak-num">${streakAfter.current}</b> 日です（この記録の前は ${streakBefore.current} 日）。${freezeUsed.length ? `「休み」を ${freezeUsed.length}つ使いました。` : ""}</p>`;
   } else {
-    streakPart = `<p class="fact">練習曜日が未設定のため、連続記録は数えていません。</p>
+    streakPart = `<p class="fact">練習曜日を設定すると、連続記録が始まります。</p>
       <button type="button" class="btn sm sec" id="sumStreakSetup" data-testid="summary-streak-setup">練習曜日を設定</button>`;
   }
   let badgesPart = "";
@@ -3682,17 +3686,17 @@ function summaryGamificationHtml(gam) {
       const def = BADGE_DEFS.find((b) => b.id === nb.id);
       return def ? `「${esc(def.name)}」（${esc(def.reason)}）` : "";
     });
-    badgesPart = `<p class="basis" data-testid="summary-badges">この記録で条件を満たしたバッジ: ${names.filter(Boolean).join("、")}</p>`;
+    badgesPart = `<p class="basis" data-testid="summary-badges">この記録で付いたバッジ: ${names.filter(Boolean).join("、")}</p>`;
   }
   return `<div class="summaryGamification" data-testid="summary-gamification">${streakPart}${badgesPart}</div>`;
 }
 /* 着弾の数値（グループ RMS と着弾中心のずれ）。位置のある矢の統計が無ければ空 */
 function resultImpactFigsHtml(st) {
   if (!st) return "";
-  const ci = st.rrCi ? `95%区間 ${st.rrCi.lo.toFixed(1)}〜${st.rrCi.hi.toFixed(1)}` : `${st.n}射`;
+  const ci = st.rrCi ? `${st.n}射・幅 ${st.rrCi.lo.toFixed(1)}〜${st.rrCi.hi.toFixed(1)}cm` : `${st.n}射`;
   return `<div class="figs two resultImpactFigs" data-testid="result-impact-figs">
-    <div class="fig"><div class="l">グループRMS（全射）</div><div class="n">${st.rr.toFixed(1)}<small>cm</small></div><div class="d">${ci}</div></div>
-    <div class="fig"><div class="l">着弾中心のずれ</div><div class="n offs">${cmOffsetText(st.mx, "x")}<br>${cmOffsetText(st.my, "y")}</div></div>
+    <div class="fig"><div class="l">グルーピング（半径）</div><div class="n">${st.rr.toFixed(1)}<small>cm</small></div><div class="d">${ci}</div></div>
+    <div class="fig"><div class="l">矢の中心の位置</div><div class="n offs">${cmOffsetText(st.mx, "x")}<br>${cmOffsetText(st.my, "y")}</div></div>
   </div>`;
 }
 /* ---------- 今日の結果（全画面。docs/design/v5/design.md 4.4・試作 #result） ----------
@@ -3732,12 +3736,12 @@ function openSummary(sess, isNew, gam, todaysResult) {
     ${roundGroupSummaryHtml(sess)}
     <section class="vsec"><div class="vsecH"><h2>スコア表</h2><span class="aside">高い点から表示</span></div></section>
     <div class="bleed">${scorecardHtml(sess, { final: true })}</div>
-    ${all.some(arrowIsManual) ? `<p class="basis">* は手で直した点数です（位置からの採点とは違う点を選んだ矢）。</p>` : ""}
-    <section class="vsec"><div class="vsecH"><h2>着弾</h2><span class="aside">${posCount ? `${posCount}射の位置` : "位置の記録なし"}</span></div></section>
+    ${all.some(arrowIsManual) ? `<p class="basis">* は手で直した点数です（刺さった位置とは違う点を選んだ矢）。</p>` : ""}
+    <section class="vsec"><div class="vsecH"><h2>矢の位置</h2><span class="aside">${posCount ? `${posCount}射` : "位置の記録なし"}</span></div></section>
     <div id="sumPlot" class="recordSummaryPlot${posCount ? " bleed" : ""}"></div>
     ${resultImpactFigsHtml(st)}
     ${sessionSightFoldHtml(sess, setup, { testid: "result-sight-details" })}
-    ${sess.setupId && (sess.sightV || sess.sightH) ? `<div class="btnrow"><button class="btn sec" id="sumMark">${icon("ledger")} このサイト値を台帳に記録</button></div>` : ""}
+    ${sess.setupId && (sess.sightV || sess.sightH) ? `<div class="btnrow"><button class="btn sec" id="sumMark">${icon("ledger")} このサイトを記録に残す</button></div>` : ""}
     <section class="vsec">
       <div class="vsecH"><h2><label for="sumNote">${title === "今日の結果" ? "今日のメモ" : "この記録のメモ"}</label></h2><span class="aside">ノートに残ります</span></div>
       <textarea class="noteBox" id="sumNote" data-testid="result-note" placeholder="感覚、気づいたこと、次に確かめること">${esc(sess.note || "")}</textarea>
@@ -3766,10 +3770,10 @@ function openSummary(sess, isNew, gam, todaysResult) {
         h: sess.sightH,
         date: sess.date,
         ts: Date.now(),
-        note: `練習記録より（${all.length}本 / 平均${(total / all.length).toFixed(1)}）`,
+        note: `練習の記録より（${all.length}射 / 平均${(total / all.length).toFixed(1)}）`,
       });
       save();
-      toast("サイト台帳に記録しました");
+      toast("サイトの記録に残しました");
       mk.disabled = true;
     };
   /* メモはこの記録の note に書く（記録の条件・記録中のメニューと同じ項目）。入力のたびに保存を予約する */

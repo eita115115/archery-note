@@ -9,9 +9,10 @@ test.use({ hasTouch: true, isMobile: true, serviceWorkers: "block" });
 
 const sum = (arr) => arr.reduce((n, a) => n + a.s, 0);
 const totalOf = (s) => sum(s.ends.flat());
-const signed = (v, d) => {
+/* 差は言葉で書く（docs/design/voice.md）: 「より 0.3 点高い」「と同じ」 */
+const moreLess = (v, d, than, same) => {
   const r = +v.toFixed(d);
-  return r === 0 ? "±0" : (r > 0 ? "+" : "−") + Math.abs(r).toFixed(d);
+  return r === 0 ? `${same}同じ` : `${than} ${Math.abs(r).toFixed(d)} 点${r > 0 ? "高い" : "低い"}`;
 };
 
 async function open(page, database, size) {
@@ -83,14 +84,14 @@ test("result screen: total, halves, counts, comparison with n / period / SD, bes
   const sd = Math.sqrt(peers.reduce((a, v) => a + (v - mean) ** 2, 0) / (peers.length - 1));
   const cmp = page.getByTestId("todays-result-comparison");
   await expect(cmp.locator(".fact")).toHaveText(
-    `同じ条件の過去7回の平均 ${mean.toFixed(1)} 点との差は ${signed(total - mean, 1)} 点です。`,
+    `同じ条件のこれまで 7回の平均（${mean.toFixed(1)} 点）${moreLess(total - mean, 1, "より", "と")}です。`,
   );
   await expect(cmp.locator(".basis")).toHaveText(
-    `対象: 10/3〜11/10、70m・122cm的・72射。過去の回ごとの標準偏差は ${sd.toFixed(1)} 点で、今回の差は${Math.abs(total - mean) <= sd ? "その範囲内" : "それより大きい値"}です。`,
+    `この条件ではふだん ±${sd.toFixed(1)} 点ほど上下${+(total - mean).toFixed(1) === 0 ? "します。" : Math.abs(total - mean) <= sd ? "するので、たまたまの差かもしれません。" : "します。今回の差はそれより大きい差です。"}10/3〜11/10の 70m・122cm的・72射 と比べました。`,
   );
   const prev = data.sessions.find((s) => s.id === "p6");
   await expect(page.getByTestId("todays-result-weekly").locator(".fact")).toHaveText(
-    `同じ条件の前回（11/10）は ${totalOf(prev)} 点で、今回との差は ${signed(total - totalOf(prev), 0)} 点です。`,
+    `同じ条件の前回（11/10）は ${totalOf(prev)} 点。今回は${moreLess(total - totalOf(prev), 0, "それより", "それと")}です。`,
   );
   // これまでの最高（p1）との差。事実と対象だけ
   const best = Math.max(...peers);
@@ -99,11 +100,13 @@ test("result screen: total, halves, counts, comparison with n / period / SD, bes
   const pb = page.getByTestId("todays-result-personal-best");
   await expect(pb.locator(".fact")).toHaveText(
     total < best
-      ? `この距離・的・射数の最高は ${best} 点、${bm}/${bd} で、今回との差は −${best - total} 点です。`
+      ? `この距離・的・射数の最高は ${best} 点、${bm}/${bd} で、今回はそれより ${best - total} 点低い点数です。`
       : `この距離・的・射数のこれまでの最高（${best} 点、${bm}/${bd}）と同じです。`,
   );
-  await expect(pb.locator(".basis")).toHaveText("対象: 70m・122cm的・72射の、この日までの記録。");
-  await expect(page.getByTestId("todays-result-stability")).toContainText("グループ RMS は");
+  await expect(pb.locator(".basis")).toHaveText(
+    "70m・122cm的・72射の、この日までの記録と比べました。",
+  );
+  await expect(page.getByTestId("todays-result-stability")).toContainText("グルーピングは半径");
   await expect(screen.locator('[data-testid^="todays-result-streak"]')).toHaveCount(0);
   const text = await screen.innerText();
   expect(text).not.toMatch(/NaN|undefined|null/);
@@ -117,8 +120,11 @@ test("result screen: total, halves, counts, comparison with n / period / SD, bes
   await expect(card.locator('[data-sub="block"]')).toHaveCount(2);
   // 着弾: 位置のある 72 射
   await expect(screen.locator("#sumPlot svg")).toHaveCount(1);
-  await expect(screen.getByTestId("result-impact-figs")).toContainText("グループRMS（全射）");
-  await expect(screen.getByTestId("result-impact-figs")).toContainText("95%区間");
+  await expect(screen.getByTestId("result-impact-figs")).toContainText("グルーピング（半径）");
+  await expect(screen.getByTestId("result-impact-figs")).toContainText(
+    /72射・幅 \d+\.\d〜\d+\.\dcm/,
+  );
+  await expect(screen.getByTestId("result-impact-figs")).not.toContainText(/95%区間|RMS/);
   await expect(screen.getByTestId("no-impact")).toHaveCount(0);
 
   // メモは、その記録の note（既存の項目）に残る
@@ -168,7 +174,7 @@ test("a new best is stated as a plain fact with the previous best and its date",
     `この距離・的・射数で最高です（これまで ${best} 点、${bm}/${bd}）。`,
   );
   await expect(page.getByTestId("todays-result-comparison").locator(".basis")).toContainText(
-    "今回の差はそれより大きい値です。",
+    "今回の差はそれより大きい差です。",
   );
   await expect(page.getByTestId("result-total").getByTestId("session-total")).toHaveText(
     "720/ 720",
@@ -189,15 +195,15 @@ test("score-only session: 着弾データなし, no impact figures, no broken va
   await finishCopyOf(page, src);
   const screen = page.getByTestId("result-screen");
   await expect(screen.getByTestId("session-total")).toHaveText(`${totalOf(src)}/ 720`);
-  await expect(screen.locator(".vsecH", { hasText: "着弾" }).locator(".aside")).toHaveText(
+  await expect(screen.locator(".vsecH", { hasText: "矢の位置" }).locator(".aside")).toHaveText(
     "位置の記録なし",
   );
-  await expect(screen.getByTestId("no-impact")).toContainText("着弾データなし");
+  await expect(screen.getByTestId("no-impact")).toContainText("矢の位置がありません");
   await expect(screen.locator("#sumPlot svg")).toHaveCount(0);
   await expect(screen.getByTestId("result-impact-figs")).toHaveCount(0);
   await expect(screen.getByTestId("todays-result-stability")).toHaveCount(0);
   await expect(screen.getByTestId("todays-result-comparison")).toContainText(
-    "同じ条件の過去7回の平均",
+    "同じ条件のこれまで 7回の平均",
   );
   await expect(screen.getByTestId("scorecard").locator('[data-sub="total"] .tot')).toHaveText(
     String(totalOf(src)),
@@ -222,17 +228,15 @@ test("no comparison is shown, with the reason, for fewer than 3 past sessions an
   await finishCopyOf(page, src);
   const cmp = page.getByTestId("todays-result-comparison");
   await expect(cmp.locator(".fact")).toHaveText(
-    "同じ条件の過去の記録が2回のため、平均との比較は表示していません。",
+    "同じ条件のこれまでの記録が 3回になると、平均と比べられます（いま 2回）。",
   );
-  await expect(cmp.locator(".basis")).toHaveText(
-    "条件: 70m・122cm的・72射。3回以上あるときに、平均と回ごとの標準偏差を表示します。",
-  );
+  await expect(cmp.locator(".basis")).toHaveText("条件: 70m・122cm的・72射。");
   await page.locator("#sumClose").click();
 
   // 72 射のラウンドを 36 射で終了: 射数が違うので比べない。前半 / 後半も出さない
   await finishCopyOf(page, src, { id: "live2", ends: src.ends.slice(0, 6) });
   await expect(page.getByTestId("todays-result-comparison").locator(".fact")).toHaveText(
-    "36射で終了した記録です。射数が違うため、過去の 72射の合計とは比べていません。",
+    "72射のうち 36射で終えたので、これまでの合計とは比べません。",
   );
   const head = page.getByTestId("result-total");
   await expect(head.locator('[data-fig="halves"]')).toHaveCount(0);
@@ -267,7 +271,7 @@ test("indoor 18m / 40cm counts 10 and 9, consistent with the scorecard", async (
   await expect(totalRow).toContainText(`10点${all.filter((a) => a.s === 10).length}`);
   await expect(totalRow).toContainText(`9点${all.filter((a) => a.s === 9).length}`);
   // 同じ条件は 2 回（i0・i1）なので比較は出ない
-  await expect(page.getByTestId("todays-result-comparison")).toContainText("2回のため");
+  await expect(page.getByTestId("todays-result-comparison")).toContainText("（いま 2回）");
   expect(errors).toEqual([]);
 });
 

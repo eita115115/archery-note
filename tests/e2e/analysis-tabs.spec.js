@@ -15,7 +15,7 @@ test.use({ hasTouch: true, isMobile: true, serviceWorkers: "block" });
 
 const TABS = [
   ["score", "スコア"],
-  ["impact", "着弾"],
+  ["impact", "グルーピング"],
   ["compare", "比較"],
   ["form", "射型"],
 ];
