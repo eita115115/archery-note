@@ -39,7 +39,7 @@ test("form analysis follows capture period and linked equipment/distance", async
   ).toEqual(["form-0", "form-12", "form-13", "form-2", "form-3"]);
   expect(await ids(page)).toEqual(["form-0", "form-2", "form-3", "form-12", "form-13"]);
   await expect(card.locator("svg title")).toContainText("5回");
-  await expect(card).toContainText("練習に紐付いた 5 記録");
+  await expect(card).toContainText("練習とつないだ 5 記録");
   await page.locator("#anDist").selectOption("");
   expect(await ids(page)).toContain("form-9");
   await page.locator("#anSetup").selectOption("b");
@@ -136,8 +136,8 @@ for (const width of [320, 375, 900]) {
     await expect(card.getByTestId("analysis-form-legacy")).toContainText("以前の記録");
     await expect(card.getByTestId("analysis-form-legacy-basis")).toContainText("期間は撮影日");
     const first = card.locator("[data-form-id]").first();
-    await expect(first).toContainText("弓手肘");
-    await expect(first).toContainText("引き手肘");
+    await expect(first).toContainText("押し手の肘");
+    await expect(first).toContainText("引き手の肘");
     await first.tap();
     await expect(page.locator("#fdClose")).toBeVisible();
     await page.locator("#fdClose").tap();

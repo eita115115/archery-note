@@ -5159,7 +5159,7 @@ function recordCase(label, score) {
   );
   assertEqual(core.judgeArrowCheck([0.9], [0.45]).reason, "gray-zone", "gray zone: reason");
   assert(
-    /if\(reason==="no-arrow-before-release"\) return "矢: 発射前に写らず判定なし";/.test(
+    /if\(reason==="no-arrow-before-release"\) return "矢: リリースの前に写らず、分かりません";/.test(
       viewScript,
     ),
     "capture list says the arrow check could not be judged",

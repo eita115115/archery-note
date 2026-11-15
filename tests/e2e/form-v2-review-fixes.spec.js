@@ -644,10 +644,10 @@ test("older-record detail: the model name is small print, not the heading, and s
   await openFormTab(page, formDb({ formAnalyses: [legacy] }));
   await page.locator('[data-form-id="old-1"]').click();
   const sheet = page.getByTestId("form-legacy-detail");
-  await expect(sheet.locator("h3")).toHaveText(/^射型記録 .*2射$/);
+  await expect(sheet.locator("h3")).toHaveText(/^射型の記録 .*2射$/);
   await expect(sheet.locator("h3")).not.toContainText("pose_landmarker");
   await expect(sheet.getByTestId("form-legacy-model")).toHaveText(
-    "解析の版: pose_landmarker_lite v1 (tasks-vision 0.10.14)",
+    "読み取り方の版: pose_landmarker_lite v1 (tasks-vision 0.10.14)",
   );
   const cells = await sheet.locator("table td.right").allInnerTexts();
   expect(cells).toEqual(["1.8秒", "2.1秒"]);

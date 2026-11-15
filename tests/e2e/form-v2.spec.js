@@ -346,7 +346,7 @@ for (const [label, w, h] of [
     await expect(legacy.getByRole("heading", { name: "以前の記録" })).toBeVisible();
     await expect(legacy.locator("[data-form-id]")).toHaveCount(2);
     await expect(legacy).toContainText(
-      "測り方が違うので、新しい記録とは比べず、推移にも入れていません",
+      "測り方が違うので、新しい記録とは比べず、推移にも入りません",
     );
     await expect(legacy.locator("[data-form-v2-id]")).toHaveCount(0);
     /* 保存した記録を開く: 保存した値だけから同じ結果を描く。射数は直せない */
@@ -1049,25 +1049,31 @@ test("older records: numbers with their basis, no judgement words or advice, sto
   const legacy = page.getByTestId("analysis-form-legacy");
   await expect(legacy.locator("[data-form-id]")).toHaveCount(4);
   await expect(legacy.locator('[data-form-id="older-3"] .formRecordComparison')).toHaveText(
-    "以前の 3件の中央値 172° との差 +2°",
+    "以前の 3件のまん中 172° より 2°大きい",
   );
   await expect(legacy.locator('[data-form-id="older-3"]')).toContainText(
-    "アンカーのばらつき σ 0.005（2射）",
+    "アンカーのぶれ ±0.5%（2射）",
   );
   await expect(page.getByTestId("analysis-form-legacy-note")).toContainText(
-    "評価の語と助言は、決めた幅に根拠が無いので出していません",
+    "以前の画面にあった評価と助言は、根拠が足りなかったので、いまは出ません",
   );
   expect(await legacy.innerText()).not.toMatch(JUDGEMENT);
   await legacy.locator('[data-form-id="older-3"]').click();
   const sheet = page.getByTestId("form-legacy-detail");
   await expect(sheet).toContainText("この記録の値");
-  await expect(sheet).toContainText("弓手肘は中央値 174°（前回比 +1°）です。");
-  await expect(sheet).toContainText("2射のアンカー位置のばらつきは σ=0.005 です");
-  await expect(sheet).toContainText("2射中 2射で、リリース前 0.5 秒に弓手か引き手の動き");
+  await expect(sheet).toContainText("押し手の肘は、ふつう 174°（前回より 1°大きい）です。");
+  await expect(sheet).toContainText(
+    "2射のアンカーの位置は、±0.5% ほど動きました（胴の長さに対する割合）。",
+  );
+  await expect(sheet).toContainText(
+    "2射のうち 2射で、リリース前 0.5 秒に押し手か引き手が動きました。",
+  );
   await expect(sheet.locator("table tr")).toHaveCount(3);
   const text = await sheet.innerText();
   expect(text).not.toMatch(JUDGEMENT);
-  expect(text).not.toMatch(/\d+%|可能性があります|してください|しましょう/);
+  /* % は、アンカーの位置が動いた量（胴の長さに対する割合）だけ。確からしさや割合の評価としての % は出さない */
+  expect(text).not.toMatch(/\d+%(?! ほど動きました)|可能性があります|してください|しましょう/);
+  expect(text).not.toMatch(/σ|標準偏差|中央値|ドリフト/);
   await page.locator("#fdClose").click();
   expect((await stored(page)).formAnalyses).toEqual(OLD_MANY);
 });

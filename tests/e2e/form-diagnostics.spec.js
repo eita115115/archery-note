@@ -437,7 +437,7 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
 
   await expect(page.locator('[data-form-id="selected-record"]')).toHaveCount(1);
   await expect(page.locator("#toast")).toContainText(
-    "射型記録を保存できなかったため、削除していません",
+    "保存できなかったので、射型の記録は消していません",
   );
   expect(
     await page.evaluate(() => ({
