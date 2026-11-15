@@ -3624,3 +3624,21 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 ## 公開 v129（射型の記録 v2、AN-098〜AN-101）
 
 2026-11-14、オーナー承認後に PR #143 を main へマージ（c43353e）。マージ前の CI は 320×640 の監査で「（約 16cm）」が幅 320 を越えて失敗した（ランナーのフォントで折り返し位置が変わり、white-space:nowrap の塊が押し出された）。値と cm の塊を max-width 100% の inline-block にし、間に折り返しの機会を入れて直した（251fafe。値を 3 倍に広げても画面内に収まることを確認）。Pages の version.json が 129、sw.js が archery-note-v129、公開ページで APP_VER 129・エラー 0 件。AN-098〜AN-101 を passes:true にした。次は実射での確認（AN-001）。
+
+## AN-102 画面の言葉づかいの書き換え（版129据え置き・未公開）
+
+2026-11-15、オーナーが `docs/design/voice.md` の提案を承認（「柔らかくなっていい感じ」）し、追加で決めた: 射手の状況を名詞にしない（寄り・上下・ずれ・不確かさ・当てはまり・まとまり方）、リリース／押し手／フルドロー／引き戻し、線かみ はそのまま、分析のタブ名は 着弾 → グルーピング。ほかの用語（サイトの記録・サイト合わせ・○距離目・スパイン ○番・「立」を使わない）は提案どおり。版・依存・保存の形・Service Worker の決まりは変えていない。
+
+変更（まとまりごとのコミット）: G 射型 v2 = `scripts/47-form-v2-view.js`・`44-form-record.js`（156a49a）／A+B 記録・結果 = `50-record-view.js`・`10-storage-native.js`・`30-target-svg.js`・`index.html`（97d461b）／D 分析 = `50-record-view.js`（55e10f1）／E サイト = `60-history-sight-view.js`・`40-analysis-physics.js`（画面に出る表だけ）・`50-record-view.js` のサイトの一覧（2d83b61）／F 弓具・設定・バッジ = `70-gear-settings.js`・`48-gamification.js`・`10-storage-native.js`（555d5ee）／C ノート = `60-history-sight-view.js` 前半（3aeb18e）／H 以前の射型の記録 = `47-form-view.js` 前半（f930b25）／検査・文書・記録 = `tools/check-voice.js`（新規）、`package.json`（`check:voice`）、`docs/design/voice.md`（決定版）、`docs/design/v5/design.md`・`ui-redesign-plan.md`・`AGENTS.md`（参照）、`style.css`・`style.min.css`（分析のタブの幅）。
+
+言い方: 符号つきの数は言葉に（「0.3 点高い」）。ばらつきは「ふだん ±○ 点ほど上下します」を 1回。統計の言葉と数字は消さずに、たたんだ中（`voice:fold-begin`〜`voice:fold-end` の印、または `<details>`）へ。サイトの目安は `sightAdviceModel` の状態を読むだけの文（`sightAdviceWhyText`）を足し、判断・向き・量は変えていない。
+
+保存してある値: 外れた理由の印・天気と風・ラウンドと的の名前はそのまま。弓具の選択肢（Loose・Tight・右寄り・縦散り・距離別サイト校正 など）は保存する値を変えず、`gearOptionLabel` で表示だけ言い換える。新しく作る記録の既定の文（サイト合わせのメモ、結果から残すサイトのメモ、ゴミ箱の名前）だけ、いまの言い方にした。
+
+検査とテスト: 文をそのまま確かめている検査 9 本（check-app・check-ui・check-analysis-view・check-gear-sight-view・check-personal-best-copy・check-form-record・check-form-core・check-coordless・check-voice）と e2e 36 ファイルを、文言と同じコミットで直した（見落としで後のコミットに入ったものが 3 か所: `やめる` の既定ボタン名 2 本は E のコミット、`対象:` の書き出し 1 本は F のコミット、分析の「いま ○回」「0回」「3射以上」の 6 本は最後のコミット）。意味のある確認は残した: 結果の行は期間・条件・ふだんの幅を言うこと、たまたまの差と言うのは幅の中のときだけ、分析とサイトは本文に統計の言葉が無く「詳しく」の中に数字が残っていること、「そのままで大丈夫です」は状態 none の軸にだけ出ること。`check-coordless` の照合の値は、書き換えの前後で見本の値を項目ごとに比べ、数値・真偽・構造の違いが 0 件であることを確かめてから置き換えた。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0。`check:voice` を含む）、`npm run lint`、`npm run format:check`、`npm run check:form-analyze`（17 件 + 21 件）、Playwright e2e 全件 489 passed（7.9 分）。画面は 375×812 と 320×640、ライトとダークで前後を撮り、監査（13px 未満・44px 未満・はみ出し・NaN/undefined）の指摘は前後とも同じ 12 件（スコア表の行ボタンの幅。以前からのもの）。
+
+リスク: 文言は実機（iPhone の Safari）では見ていない（Chromium の 375×812・320×640 で確認）。オーナーの射場での言い方と合うかは、画面を見てもらって確かめる。親切にしたぶん長くなった文がある（サイトの「まだ動かさない」の理由は 2文）。以前の撮影画面と `46-form-core.js` の助言文は、どの画面にも出ないので以前の言葉のまま。
+
+次: 親の検証 → オーナーの確認 → 承認後に版上げと公開。

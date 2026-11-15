@@ -20,6 +20,7 @@ add one row here.
 | 統合作業の durable brief | `docs/codex/integration-plan.md` |
 | 役割ごとの担当 | `.claude/agents/an-*.md` |
 | 射型の記録の測り方（画面の形の補正・測り方の版・比べ方） | `docs/design/form-tracking-accuracy.md` |
+| 画面の言葉づかい（声・用語集・使わない言葉・統計の言葉の置き場所） | `docs/design/voice.md`（検査は `npm run check:voice`） |
 
 ## Project Shape
 
@@ -64,8 +65,9 @@ add one row here.
 Inspect `package.json` scripts before running; this list can drift.
 
 - `npm run check:app` / `npm run check:ui`
+- `npm run check:voice` (in-app wording against `docs/design/voice.md`)
 - `npm run check:pwa` / `npm run check:storage` / `npm run check:version`
-- `npm run check:all` (app + ui + pwa + storage + version)
+- `npm run check:all` (app + ui + voice + pwa + storage + version)
 - `npm run format:check` / `npm run lint` / `npm run test:e2e`
 - `npm run build:native-web`
 

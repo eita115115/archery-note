@@ -139,6 +139,7 @@ function formV2TimelineSvg(model) {
   g += `<text x="0" y="66" class="ax">${formV2Mmss(from)}</text><text x="${w}" y="66" text-anchor="end" class="ax">${formV2Mmss(from + dur)}</text><text x="${w / 2}" y="66" text-anchor="middle" class="ax">時間</text>`;
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="時間の帯。${model.count} 射、引き戻し ${model.letdowns} 回">${g}</svg>`;
 }
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
 /* 「毎射そろっているか」の詳しく: 射数から見た幅（標準偏差の区間）は本文に出さず、ここへまとめる */
 function formV2SpreadMoreHtml(cmp, keys) {
   const li = keys.map((key) => {
@@ -151,6 +152,7 @@ function formV2SpreadMoreHtml(cmp, keys) {
   }).join("");
   return li ? `<details class="fv2More" data-testid="form-v2-spread-more"><summary>詳しく</summary><ul>${li}</ul></details>` : "";
 }
+/* voice:fold-end */
 /* 射の順の図: 帯 = 測定のゆれから出せる下限、破線 = 中央値、塗りつぶし = 違った射 */
 function formV2RunChartHtml(model, cmp, key) {
   const ft = cmp.feat[key], meta = FormV2.META[key], w = formV2W(), h = 104, pt = 14, pb = 24, n = cmp.n;
@@ -282,7 +284,9 @@ function formV2TrendHtml(records) {
   if (unc != null) {
     doubt = `各回のまん中の値には ±${f(unc)} ほどの幅があります。`
       + (range <= 2 * unc ? `いちばん離れた 2 回の差（${f(range)}）はこの幅の中なので、たまたまかもしれません。` : `いちばん離れた 2 回の差は ${f(range)} で、この幅より大きい違いです。`);
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
     how = `各回の中央値の幅（±${f(unc)}）は、射どうしの四分位の幅から出した 95% の目安です。`;
+/* voice:fold-end */
   }
   if (meta.kind !== "t") doubt += "台の位置や向きが変わると、その回の値がまとめてずれます。どのくらいずれるかは分かりません。";
   return wrap(`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(meta.name)}の推移。${pts.length} 回">${g}</svg>
@@ -956,7 +960,9 @@ function formV2PaintResult(S) {
   if (first) {
     const ft = cmp.feat[first.key], ref = ft.median, k = first.key, dp = Math.max(1, FormV2.META[k].dp);
     const d = FormV2.shown(k, first.value, ref) - FormV2.median(first.others.map((t) => FormV2.shown(k, t, ref)));
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
     basis = `ほかの ${first.others.length} 射の中央値との差は ${FormV2.fmt(k, d, { sign: true, dp })} です。この撮影では、カメラで測るときのぶれ（±${FormV2.fmt(k, FormV2.shownSize(k, ft.noise, ref), { dp })}）から見て、${FormV2.fmt(k, FormV2.shownSize(k, ft.limit, ref), { dp })} を超えると印が付きます。`;
+/* voice:fold-end */
   }
   const lowConf = model.events.filter((e) => e.kind === "shot" && e.counted && e.conf < 6).map((e) => e.n);
   const keys = FormV2.keysFor(rec, FormAnalyze.DEFAULT_KEYS);

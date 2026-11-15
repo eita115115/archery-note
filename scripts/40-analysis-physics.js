@@ -7,6 +7,7 @@ function analysisHasGroupingEvidence(st){
 /* ============ sight advice ============ */
 /* グルーピングの数値。正式な値は全射（A）。外れ値候補を除いた RMS（B）とロバスト RMS（C）は参考として並べる
    （docs/design/grouping-stats-v3.md）。B は除いた分だけ小さく出るので正式な値には使わない */
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
 function groupSummaryHtml(st){
   if(!st) return "";
   const ci=st.n>=2&&Number.isFinite(st.ciX)?`<div class="kv"><span>矢の中心の幅（95%区間）</span><span>左右 ±${st.ciX.toFixed(1)}cm ・ 上下 ±${st.ciY.toFixed(1)}cm</span></div>`:"";
@@ -27,6 +28,7 @@ function groupSummaryHtml(st){
     ${nFlag?`<div class="kv"><span>大きく外れた矢</span><span>${nFlag}射（図の×印。全射RMSには入り、サイトの目安でだけ除きます）</span></div>
     <div class="kv"><span>サイトの目安に使う矢の中心（大きく外れた矢を除く）</span><span>${cmOffsetText(ex.mx,"x")} / ${cmOffsetText(ex.my,"y")}</span></div>`:""}`;
 }
+/* voice:fold-end */
 function cmOffsetText(v, axis){
   const a=Math.abs(v).toFixed(1);
   if(axis==="x") return v>0?`右に ${a}cm`:`左に ${a}cm`;

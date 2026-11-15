@@ -932,11 +932,13 @@ function sightPredictionHtml(interp, marks) {
     interp.pts.length <= 2
       ? "実測が 2距離だけなので、予測はまだ粗めです。もう 1距離記録すると、合っているか確かめられます。"
       : "";
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
   /* 決定係数は本文に出さず「予測の計算方法」の中に書く（docs/design/voice.md 4章） */
   const fitDetail =
     interp.pts.length <= 2
       ? "実測が 2距離のときは、計算の線が必ず 2つの実測を通るので、合い方は確かめられません。初速の見積もりで値が変わります。"
       : `実測 ${interp.pts.length}距離との合い方（決定係数）は ${pct(interp.r2 || 0)} です。`;
+/* voice:fold-end */
   return `<section class="vsec sightPrediction" data-testid="sight-prediction">
     <div class="vsecH"><h2>記録していない距離の予測</h2><span class="aside">上下の値</span></div>
     ${predictions.length ? `<dl class="sightPredictionRows">${predictions.map((d) => `<div class="lrow" data-predict-dist="${d}"><dt class="lk">${d}m<span>予測・${from}</span></dt><dd class="lv">${interp.est(d).toFixed(1)}<small>目盛り</small></dd></div>`).join("")}</dl>` : `<p class="basis">よく使う距離（18・30・50・70m）は、どれも実測の記録があります。</p>`}
@@ -1181,6 +1183,7 @@ function sightAdviceHtml(sess, setup, adv, opts) {
   const d = md.d, ss = md.ss;
   const fig = (a) => `<div class="fig" data-axis="${a.key}" data-state="${a.state}"><div class="l">サイト ${a.name}</div><div class="n sightAdvN">${esc(a.big)}</div><div class="d">矢は${sightSideText(a.m, a.key) || "まん中"}</div></div>`;
   const nText = md.excluded ? `位置のある ${md.total}射のうち、大きく外れた ${md.excluded}射を除いた ${ss.n}射` : `位置のある ${ss.n}射`;
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
   const basis = [];
   basis.push(`矢の中心の位置には、左右 ±${d.h.ci.toFixed(1)}cm・上下 ±${d.v.ci.toFixed(1)}cm の幅があります（95%区間）。サイトが合っていても、たまたまこれだけ片側に集まる確率は ${fmtChance(d.test.p)} です。`);
   basis.push("同時の検定で 5% 未満になり、その方向の 95%区間が 0 を含まず、直す量がリング幅の 1/10 以上のときだけ「動かす」と出ます。");
@@ -1199,6 +1202,7 @@ function sightAdviceHtml(sess, setup, adv, opts) {
   } else if (d.windAccounted) basis.push(`横風の記録があるので、推定の横流れ ${Math.abs(d.windCm).toFixed(1)}cm を左右の誤差に足しています。`);
   else if (d.windUnknown) basis.push("風向の記録がないので、風の横流れは見込んでいません。");
   if (sess.sightV || sess.sightH) basis.push(`この記録のサイトは 上下 ${esc(sightValueText(sess.sightV))}・左右 ${esc(sightValueText(sess.sightH))} です。`);
+/* voice:fold-end */
   return `<div class="sightAdvice" data-testid="sight-advice">
     <div class="figs two">${fig(md.h)}${fig(md.v)}</div>
     <p class="fact" data-testid="sight-advice-fact">${sightCentreSentence(ss.mx, ss.my)}（${nText}）。</p>
@@ -1234,6 +1238,7 @@ function sessionSightFoldHtml(sess, setup, opts) {
       </div>
     </details>`;
 }
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
 /* 計算の内訳（折りたたみ）: 弾道の前提、同じサイト値の過去の記録、サイト値とずれの回帰、履歴からの換算。数値と件数だけを書く */
 function sightBasisRowsHtml(sess, setup, adv, sid, dist) {
   const rows = [];
@@ -1255,6 +1260,7 @@ function sightBasisRowsHtml(sess, setup, adv, sid, dist) {
     row("これまでの記録から出した 1目盛り（70m）", `${pc.click.v70 ? `上下 ${pc.click.v70.toFixed(1)}cm` : ""}${pc.click.v70 && pc.click.h70 ? "・" : ""}${pc.click.h70 ? `左右 ${pc.click.h70.toFixed(1)}cm` : ""}`, `サイトの記録 ${pc.sight.n}件・使えた練習 ${pc.usable}回`);
   return rows.join("");
 }
+/* voice:fold-end */
 function renderSight(m) {
   if (!ui.sightSel.setupId && db.setups[0]) ui.sightSel.setupId = db.setups[0].id;
   if (ui.sightSel.setupId && !db.setups.some((x) => x.id === ui.sightSel.setupId)) ui.sightSel.setupId = db.setups[0] ? db.setups[0].id : null;

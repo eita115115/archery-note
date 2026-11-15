@@ -186,7 +186,7 @@ test("score: one factual trend sentence at five or more sessions, none below fiv
   /* 合う記録が無い組み合わせは、その旨と 0回 を書く */
   await page.locator("#anCond").selectOption("70|122|single|72");
   await expect(page.getByTestId("analysis-score-none")).toContainText("この条件の記録はありません");
-  await expect(page.getByTestId("analysis-score-none")).toContainText("0回");
+  await expect(page.getByTestId("analysis-score-none")).toContainText("に合う記録はありません");
   await expect(page.getByTestId("analysis-score")).toHaveCount(0);
 });
 
@@ -196,7 +196,7 @@ test("score: four sessions under the same condition show no trend sentence", asy
   await openAnalysis(page, data);
   await expect(page.getByTestId("analysis-target")).toContainText("4回・288射");
   await expect(page.getByTestId("analysis-trend")).toHaveCount(0);
-  await expect(page.getByTestId("analysis-trend-pending")).toContainText("いまは 4回");
+  await expect(page.getByTestId("analysis-trend-pending")).toContainText("（いま 4回）");
   const text = await page.getByTestId("analysis-trend-section").innerText();
   expect(text).not.toMatch(/上が|下が|伸び|傾向/);
 });
@@ -228,7 +228,7 @@ test("impact: RMS with its 95% interval, centre offset and spreads match the all
   await expect(fig(view, "rms").locator(".d")).toHaveText(
     `半径・全射。幅 ${st.ci.lo.toFixed(1)}〜${st.ci.hi.toFixed(1)}cm`,
   );
-  await expect(fig(view, "offset").locator(".l")).toHaveText("的の中心から矢の中心まで");
+  await expect(fig(view, "offset").locator(".l")).toHaveText("的の中心から");
   await expect(fig(view, "offset").locator(".n")).toHaveText(
     `${Math.hypot(st.mx, st.my).toFixed(1)}cm`,
   );
@@ -345,7 +345,7 @@ test("impact: a score-only record shows 着弾データなし with the positione
   const rows = page.getByTestId("analysis-grouping-trend").locator(".cmpRow:not(.is-head)");
   await expect(rows).toHaveCount(6);
   await expect(page.getByTestId("analysis-grouping-trend")).toContainText(
-    "位置のある矢が3射以上ある 6回",
+    "位置のある矢が 3射以上ある 6回",
   );
   await expect(page.getByTestId("analysis-grouping-trend")).not.toContainText("11/4");
   expect((await stored(page)).sessions).toEqual(data.sessions);

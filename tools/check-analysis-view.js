@@ -94,6 +94,18 @@ const BANNED = [
   "下がり気味",
   "次回試す",
   "比較待ち",
+  /* AN-102（docs/design/voice.md）: どの画面にも書かない言葉。統計の言葉が本文に出ないことは、下の本文／たたんだ中の比べと tools/check-voice.js で見る */
+  "この回",
+  "測定のゆれ",
+  "判定できない",
+  "セッション",
+  "破棄",
+  "紐付",
+  "紐づ",
+  "ストリーク",
+  "弓手",
+  "着弾",
+  "台帳",
   "!",
   "！",
 ];
@@ -271,7 +283,7 @@ const byDate = (list) => [...list].sort((a, b) => a.date.localeCompare(b.date));
   const r = app.analysisImpactHtml();
   assert.equal(r.sess.id, "p6", "default is the latest record with positions");
   const text = clean(r.html, "impact");
-  assert(text.includes("グルーピングの大きさ") && text.includes("的の中心から矢の中心まで"));
+  assert(text.includes("グルーピングの大きさ") && /的の中心から[\d.]+cm/.test(text));
   assert(text.includes("左右の広がり") && text.includes("上下の広がり"));
   assert(text.includes("11/10（火）・70m・122cm的、位置のある 72射。"));
   assert(/半径・全射。幅 [\d.]+〜[\d.]+cm/.test(text), "the interval of the grouping size is stated in plain words");

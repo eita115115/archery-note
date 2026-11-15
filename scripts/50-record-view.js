@@ -1575,6 +1575,7 @@ function analysisScoreHtml(allRows, f) {
   <p class="foot">この端末に保存された記録の点数から出した数字です。</p>`;
 }
 /* ---------- 着弾 ---------- */
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
 function analysisRefMetricsHtml(im) {
   const body = im.refReady
     ? `<div class="lrow" data-ref="b"><span class="lk">大きく外れた矢を除いた半径（RMS）</span><span class="lv">${im.rmsB != null ? `${im.rmsB.toFixed(1)} cm` : "—"}<small>${im.st.total}射中 ${im.flagged}射を除く</small></span></div>
@@ -1590,6 +1591,8 @@ function analysisRefMetricsHtml(im) {
     </div>
   </details>`;
 }
+/* voice:fold-end */
+/* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
 /* 95%区間は本文に出さず「詳しく」の中に書く（docs/design/voice.md 4章）。値は analysisImpactModel のまま */
 function analysisIntervalRowsHtml(im) {
   const rms = im.ci
@@ -1603,6 +1606,7 @@ function analysisIntervalRowsHtml(im) {
       : "";
   return `<div class="lrow" data-ref="ci-rms"><span class="lk">グルーピングの大きさの幅（95%区間）</span><span class="lv">${rms}</span></div>${centre}`;
 }
+/* voice:fold-end */
 function analysisGroupingTrendHtml(sess, sessions) {
   const rows = sessions
     .filter((s) => trSameCondition(s, sess))
@@ -1674,7 +1678,7 @@ function analysisImpactHtml() {
     <section class="vsec anFirst" data-testid="analysis-impact">
       <div class="figs two">
         <div class="fig" data-fig="rms"><div class="l">グルーピングの大きさ</div><div class="n">${im.rms.toFixed(1)}<small>cm</small></div><div class="d">半径・全射${im.ci ? `。幅 ${im.ci.lo.toFixed(1)}〜${im.ci.hi.toFixed(1)}cm` : ""}</div></div>
-        <div class="fig" data-fig="offset"><div class="l">的の中心から矢の中心まで</div><div class="n">${im.offset.toFixed(1)}<small>cm</small></div><div class="d">${anOffsetDirText(im.mx, im.my)}</div></div>
+        <div class="fig" data-fig="offset"><div class="l">的の中心から</div><div class="n">${im.offset.toFixed(1)}<small>cm</small></div><div class="d">${anOffsetDirText(im.mx, im.my)}</div></div>
       </div>
       <div class="figs two">
         <div class="fig" data-fig="sx"><div class="l">左右の広がり</div><div class="n">${im.sx.toFixed(1)}<small>cm</small></div></div>
