@@ -81,7 +81,7 @@ function records(page) {
 function summary(page) {
   return page
     .locator("details")
-    .filter({ has: page.locator("summary").filter({ hasText: "サイト値のまとめ" }) });
+    .filter({ has: page.locator("summary").filter({ hasText: "サイトのまとめ" }) });
 }
 async function practice(page) {
   return page.evaluate(() => {
@@ -119,11 +119,11 @@ for (const [width, colorScheme] of [
     for (const v of ["111.1", "333.3", "555.5", "666.6", "7.7"])
       await expect(records(page)).toContainText(v);
     for (const v of ["222.2", "444.4"]) await expect(records(page)).not.toContainText(v);
-    await expect(summary(page)).toContainText("台帳4件 / 練習入力1回");
+    await expect(summary(page)).toContainText("サイトの記録 4件 / 練習で入れた値 1回");
     await page.locator("#sgSetup").selectOption("sight-b");
     await expect(records(page)).toContainText("222.2");
     for (const v of ["111.1", "444.4", "7.7"]) await expect(records(page)).not.toContainText(v);
-    await expect(summary(page)).toContainText("台帳1件 / 練習入力0回");
+    await expect(summary(page)).toContainText("サイトの記録 1件 / 練習で入れた値 0回");
     await page.locator("#sgSetup").selectOption("sight-a");
     await expect(records(page)).toHaveText(all);
     expect(
@@ -133,7 +133,7 @@ for (const [width, colorScheme] of [
     ).toBe(true);
     /* 分析タブにはカードを置かず、着弾 の下に入口の行だけを置く */
     await page.locator('#tabs [data-v="analysis"]').click();
-    await expect(page.locator("#main")).not.toContainText("サイト値の記録");
+    await expect(page.locator("#main")).not.toContainText("最近のサイト");
     await page.locator('#analysisSubTabs [data-an="impact"]').click();
     await page.getByTestId("analysis-to-sight").click();
     await expect(page.getByTestId("gear-subtab-sight")).toHaveAttribute("aria-current", "page");

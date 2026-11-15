@@ -3840,7 +3840,7 @@ function setupPerformanceLabel(setupId) {
 function sightHistoryCard(ss, sightMarks = db.sightMarks) {
   const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
     .filter((m) => hasSightInput(m && m.v) || hasSightInput(m && m.h))
-    .map((m) => Object.assign({ source: "台帳" }, m));
+    .map((m) => Object.assign({ source: "サイトの記録" }, m));
   const sessionRows = (Array.isArray(ss) ? ss : [])
     .filter((s) => hasSightInput(s && s.sightV) || hasSightInput(s && s.sightH))
     .map((s) => ({
@@ -3876,7 +3876,7 @@ function sightHistoryCard(ss, sightMarks = db.sightMarks) {
     </div>`;
     })
     .join("");
-  return `<section class="vsec sightRecCard" data-testid="sight-records-list"><div class="vsecH"><h2>サイト値の記録</h2><span class="aside">全距離・直近${rows.length}件</span></div>${body}<p class="basis">台帳の記録と、練習を始めるときに入れたサイト値を、新しい順に並べています。</p></section>`;
+  return `<section class="vsec sightRecCard" data-testid="sight-records-list"><div class="vsecH"><h2>最近のサイト</h2><span class="aside">全距離・直近${rows.length}件</span></div>${body}<p class="basis">サイトの記録と、練習を始めるときに入れたサイトを、新しい順に並べた一覧です。</p></section>`;
 }
 /* 旧 historyOverviewHtml（記録サマリー insightStrip）は履歴ヒーローへ統合済み（UI-P3 差し戻し対応）。
    同種数値の二重掲示（練習回数・平均点の重複）を避けるため、履歴一覧の集計数値はヒーロー1箇所のみ */
@@ -3929,7 +3929,7 @@ function sightDateInfo(item) {
 }
 function setupNameFor(id) {
   const setup = (db.setups || []).find((s) => s.id === id);
-  return setup && setup.name ? setup.name : "弓具未指定";
+  return setup && setup.name ? setup.name : "セッティング未指定";
 }
 function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
   const hf = filter || ui.histFilter || { setupId: "", dist: "" };
@@ -3937,7 +3937,7 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
   const distOk = (dist) => !hf.dist || String(dist) === String(hf.dist);
   const markRows = (Array.isArray(sightMarks) ? sightMarks : [])
     .filter((m) => setupOk(m && m.setupId) && distOk(m && m.dist))
-    .map((m) => Object.assign({ source: "台帳" }, m));
+    .map((m) => Object.assign({ source: "サイトの記録" }, m));
   const sessionSightRows = (sessionRows || [])
     .map((r) => r.s)
     .filter((s) => s && (hasSightInput(s.sightV) || hasSightInput(s.sightH)))
@@ -3963,7 +3963,7 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
       sessionCount: 0,
       latest: null,
     };
-    if (row.source === "台帳") current.markCount++;
+    if (row.source === "サイトの記録") current.markCount++;
     else current.sessionCount++;
     const candidate = { row, date, setupName: setupNameFor(row.setupId) };
     const prior = current.latest && current.latest.row;
@@ -3971,8 +3971,8 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
       priorStamp = Number(prior && prior.ts);
     const datedMarks =
       prior &&
-      row.source === "台帳" &&
-      prior.source === "台帳" &&
+      row.source === "サイトの記録" &&
+      prior.source === "サイトの記録" &&
       date.sort &&
       String(row.date || "").trim() === date.sort &&
       String(prior.date || "").trim() === date.sort &&
@@ -3984,7 +3984,7 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
       !current.latest ||
       date.sort > current.latest.date.sort ||
       (date.sort === current.latest.date.sort &&
-        row.source === "台帳" &&
+        row.source === "サイトの記録" &&
         (!datedMarks || stamp >= priorStamp))
     ) {
       current.latest = candidate;
@@ -4006,14 +4006,14 @@ function sightSummaryHtml(sessionRows, filter, sightMarks = db.sightMarks) {
       const latest = g.latest || {};
       const row = latest.row || {};
       return `<div class="listItem recordReadOnlyItem">
-        <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName || "弓具未指定")} / 最新 ${esc(latest.date ? latest.date.label : "—")} / 台帳${g.markCount}・練習${g.sessionCount}</div></div>
+        <div><div class="t">${esc(g.label)}</div><div class="d">${esc(latest.setupName || "セッティング未指定")} / 最新 ${esc(latest.date ? latest.date.label : "—")} / サイトの記録 ${g.markCount}件・練習 ${g.sessionCount}回</div></div>
         <div class="big">${esc(sightValueText(row.v))}<small> / 左右${esc(sightValueText(row.h))}</small></div>
       </div>`;
     })
     .join("");
   return historyAnalysisDetailsHtml(
-    "サイト値のまとめ",
-    `台帳${totalMarks}件 / 練習入力${totalSessions}回`,
+    "サイトのまとめ",
+    `サイトの記録 ${totalMarks}件 / 練習で入れた値 ${totalSessions}回`,
     body,
   );
 }

@@ -50,7 +50,7 @@ for (const width of [320, 375, 900]) {
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("2026/10/13");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText("80");
     await expect(panel.locator('[data-source-id="measured30"]')).toContainText(
-      "新しい記録に数値なし",
+      "新しい記録に数値がないので、前の値を使いました",
     );
     await expect(panel.locator('[data-source-id="measured18"]')).toContainText("2026/10/12");
     await summary.focus();
@@ -176,10 +176,10 @@ test("ambiguous ledger dates do not claim latest and display remains escaped", a
       db.sightMarks = old;
     }
   });
-  expect(uncertain[0]).toContain("同じ日時の候補が複数あります");
+  expect(uncertain[0]).toContain("同じ日時の記録が 2つ以上あります");
   expect(uncertain[1]).toContain("日付不明の記録を含みます");
   for (const text of uncertain) {
-    expect(text).toContain("数値のある記録から採用");
+    expect(text).toContain("数値のある記録を使いました");
     expect(text).not.toContain("新しい記録");
   }
   expect(results).toEqual([
@@ -216,10 +216,10 @@ test("prediction keeps setup scope, disappears below two distances and handles a
   });
   const panel = await prediction(page);
   await expect(panel.locator("[data-predict-dist]")).toHaveCount(0);
-  await expect(panel).toContainText("弾道の計算");
+  await expect(panel).toContainText("矢の飛び方の計算");
   // 0/0/0/100 のような矛盾した台帳では初速の当てはめが探索範囲の端に張り付くので採らず、用具からの推定を使う
   await expect(panel).toContainText("弓具から推定");
-  await expect(panel).toContainText("定番の距離");
+  await expect(panel).toContainText("よく使う距離");
   await panel.locator("details.sightSources summary").tap();
   await expect(panel.locator("[data-source-id]")).toHaveCount(4);
 });

@@ -142,7 +142,7 @@ for (const width of [320, 375, 900]) {
     await expect(page.locator("#fdClose")).toBeVisible();
     await page.locator("#fdClose").tap();
     await card.locator("[data-del-form]").first().tap();
-    await page.getByRole("button", { name: "キャンセル", exact: true }).tap();
+    await page.getByRole("button", { name: "やめる", exact: true }).tap();
     const layout = await card.evaluate((el) => ({
       overflow: el.scrollWidth > el.clientWidth,
       textOverflow: [

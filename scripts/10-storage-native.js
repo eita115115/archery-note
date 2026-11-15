@@ -750,7 +750,7 @@ function restoreTrash(id){
   save({reason:"restore-trash",forceSnapshot:true});
   return true;
 }
-function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイト値":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型の記録":t==="note"?"メモ":"削除データ"; }
+function trashTypeLabel(t){ return t==="session"?"練習":t==="sightMark"?"サイトの記録":t==="setupBundle"?"弓具":t==="formAnalysis"?"射型の記録":t==="note"?"メモ":"削除データ"; }
 function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);

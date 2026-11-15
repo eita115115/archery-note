@@ -891,9 +891,9 @@ function sightRecordOrder(marks) {
   const sameDay = marks.filter((m) => m.date === first.date);
   if (sameDay.length > 1) {
     if (sameDay.some((m) => !Number.isFinite(Number(m.ts)) || Number(m.ts) <= 0))
-      return { label: "同日・時刻不明", note: "同日の記録時刻が不足しています。" };
+      return { label: "同日・時刻不明", note: "同じ日の記録で、時刻の分からないものがあります。" };
     if (sameDay.filter((m) => Number(m.ts) === Number(first.ts)).length > 1)
-      return { label: "同日時の記録あり", note: "同じ日時の候補が複数あります。" };
+      return { label: "同日時の記録あり", note: "同じ日時の記録が 2つ以上あります。" };
   }
   return { label: "最新", note: "" };
 }
@@ -919,37 +919,42 @@ function sightPredictionHtml(interp, marks) {
       const dated = typeof mark.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(mark.date) && typeof info.first.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(info.first.date);
       const newerDate = dated && info.first.date > mark.date;
       const newerTime = dated && info.first.date === mark.date && Number.isFinite(Number(mark.ts)) && Number(mark.ts) > 0 && Number.isFinite(Number(info.first.ts)) && Number(info.first.ts) > Number(mark.ts);
-      notes.push(newerDate || newerTime ? "新しい記録に数値なし" : "数値のある記録から採用");
+      notes.push(newerDate || newerTime ? "新しい記録に数値がないので、前の値を使いました" : "数値のある記録を使いました");
     }
     return `<li data-source-id="${esc(mark.id)}"><div><b>${esc(point[0])}m</b><div class="sightSourceDate">${esc(fmtD(mark.date) || "日付不明")}</div></div><strong>${esc(point[1])}</strong>${notes.length ? `<p class="sightSourceNote">${esc(notes.join(" "))}</p>` : ""}</li>`;
   }).join("");
-  const from = `実測 ${interp.pts.length}点（${interp.pts.map((p) => `${esc(p[0])}m`).join("・")}）から`;
+  const from = `実測 ${interp.pts.length}距離（${interp.pts.map((p) => `${esc(p[0])}m`).join("・")}）から`;
   const model =
     interp.model === "physics"
-      ? `弾道の計算（初速 ${Math.round(interp.speedFps)}fps・${interp.speedSource === "measured" ? "実測" : interp.speedSource === "fitted" ? "台帳から推定" : "弓具から推定"}）に、上下の実測 ${interp.pts.length}点を当てはめた値です。`
-      : `上下の実測 ${interp.pts.length}点を直線で結んだ値です。`;
+      ? `矢の飛び方の計算（初速 ${Math.round(interp.speedFps)}fps・${interp.speedSource === "measured" ? "実測" : interp.speedSource === "fitted" ? "サイトの記録から推定" : "弓具から推定"}）を、上下の実測 ${interp.pts.length}距離に合わせた値です。`
+      : `上下の実測 ${interp.pts.length}距離を直線で結んだ値です。`;
   const fit =
     interp.pts.length <= 2
-      ? "実測が2点のため、当てはまりは確かめられません（2点は必ず通ります）。初速の仮定で値が変わります。"
-      : `実測との当てはまり（決定係数）は ${pct(interp.r2 || 0)} です。`;
+      ? "実測が 2距離だけなので、予測はまだ粗めです。もう 1距離記録すると、合っているか確かめられます。"
+      : "";
+  /* 決定係数は本文に出さず「予測の計算方法」の中に書く（docs/design/voice.md 4章） */
+  const fitDetail =
+    interp.pts.length <= 2
+      ? "実測が 2距離のときは、計算の線が必ず 2つの実測を通るので、合い方は確かめられません。初速の見積もりで値が変わります。"
+      : `実測 ${interp.pts.length}距離との合い方（決定係数）は ${pct(interp.r2 || 0)} です。`;
   return `<section class="vsec sightPrediction" data-testid="sight-prediction">
     <div class="vsecH"><h2>記録していない距離の予測</h2><span class="aside">上下の値</span></div>
-    ${predictions.length ? `<dl class="sightPredictionRows">${predictions.map((d) => `<div class="lrow" data-predict-dist="${d}"><dt class="lk">${d}m<span>予測・${from}</span></dt><dd class="lv">${interp.est(d).toFixed(1)}<small>目盛り</small></dd></div>`).join("")}</dl>` : `<p class="basis">定番の距離（18・30・50・70m）は、すべて実測の記録があります。</p>`}
+    ${predictions.length ? `<dl class="sightPredictionRows">${predictions.map((d) => `<div class="lrow" data-predict-dist="${d}"><dt class="lk">${d}m<span>予測・${from}</span></dt><dd class="lv">${interp.est(d).toFixed(1)}<small>目盛り</small></dd></div>`).join("")}</dl>` : `<p class="basis">よく使う距離（18・30・50・70m）は、どれも実測の記録があります。</p>`}
     <p class="basis sightPredictionMeta">${model}${fit}左右は予測しません。</p>
     <details class="sightSources"><summary>計算に使った実測 ${interp.pts.length}件</summary><ul class="sightSourceList">${sources}</ul></details>
-    <details class="sightPredictionHelp"><summary>予測の計算方法</summary><p>上下が数値で入力された記録だけを使います。距離ごとに最も新しい数値を採り、新しい記録の上下が未入力なら、それより前の数値を使います。</p><p>2距離以上あるとき、矢の弾道（重力・空気抵抗・目と矢と的の高さの差）から計算した照準角にサイト値を当てはめます。5距離以上で、初速を変えた方が統計的に有意に当てはまる場合は、初速も台帳から推定します。</p></details>
+    <details class="sightPredictionHelp"><summary>予測の計算方法</summary><p>上下が数値で入っている記録だけを使います。距離ごとにいちばん新しい数値を使い、新しい記録の上下が空なら、その前の数値を使います。</p><p>2距離以上あるとき、矢の飛び方（重力・空気抵抗・目と矢と的の高さの差）から計算した照準角に、サイトの目盛りを合わせます。5距離以上あり、初速を変えたほうが統計的に有意によく合うときは、初速もサイトの記録から推定します。</p><p data-testid="sight-prediction-fit">${fitDetail}</p></details>
   </section>`;
 }
 function sightLedgerHtml(marks) {
   const value = (v) => (v == null || v === "" ? "—" : String(v));
   const order = sightRecordOrder(marks);
-  return `${order.note ? `<p class="sightLedgerOrderNote">${esc(order.note)}</p>` : ""}<ol class="sightLedgerList" data-testid="sight-ledger" aria-label="サイト記録">${marks
+  return `${order.note ? `<p class="sightLedgerOrderNote">${esc(order.note)}</p>` : ""}<ol class="sightLedgerList" data-testid="sight-ledger" aria-label="サイトの記録">${marks
     .map((mk, i) => {
       const date = fmtD(mk.date) || "日付不明";
       return `<li class="sightLedgerRecord" data-sight-id="${esc(mk.id)}">
         <div class="sightMarkHead">
           <div class="sightMarkDate">${esc(date)}${i === 0 ? `<span class="sightMarkLatest${order.note ? " uncertain" : ""}">${esc(order.label)}</span>` : ""}</div>
-          <button class="btn sm ghost histDelBtn" type="button" data-del="${esc(mk.id)}" aria-label="${esc(date)}のサイト値をゴミ箱へ移す">${icon("del")}</button>
+          <button class="btn sm ghost histDelBtn" type="button" data-del="${esc(mk.id)}" aria-label="${esc(date)}のサイトの記録をゴミ箱へ移す">${icon("del")}</button>
         </div>
         <dl class="sightMarkValues"><div><dt>上下</dt><dd>${esc(value(mk.v))}</dd></div><div><dt>左右</dt><dd>${esc(value(mk.h))}</dd></div></dl>
         ${mk.note ? `<details class="sightMarkNote"><summary>メモ</summary><p>${esc(mk.note)}</p></details>` : ""}
@@ -1066,7 +1071,7 @@ function sightAdviceModel(sess, setup, adv) {
   const axis = (k) => {
     const a = d[k];
     const dirWord = k === "v" ? (a.m > 0 ? "上" : "下") : a.m > 0 ? "右" : "左";
-    const out = { key: k, name: k === "v" ? "上下" : "左右", m: a.m, ci: a.ci, shrink: a.shrink, dirWord, state: "none", big: "動かさない", amount: "" };
+    const out = { key: k, name: k === "v" ? "上下" : "左右", m: a.m, ci: a.ci, shrink: a.shrink, dirWord, state: "none", big: "そのまま", amount: "" };
     if (a.move) {
       const adj = Math.abs(a.adj);
       const mm = adj * (k === "v" ? adv.traj.mmPerCmV : adv.traj.mmPerCmH);
@@ -1078,21 +1083,52 @@ function sightAdviceModel(sess, setup, adv) {
       out.amount = ck ? `${Math.abs(ck.clicks).toFixed(1)}${ck.label === "クリック" ? "クリック" : "目盛り"}` : `${mm.toFixed(1)}mm`;
       if (holdAll || (holdWind && k === "h")) {
         out.state = "hold";
-        out.big = "保留";
+        out.big = "まだ動かさない";
       } else {
         out.state = "move";
         out.big = `${dirWord}へ ${out.amount}`;
       }
     } else if (!(a.ci <= d.w / 2)) {
       out.state = "open";
-      out.big = "判定できない";
+      out.big = "まだ分かりません";
     } else if (holdWind && k === "h") {
       out.state = "hold";
-      out.big = "保留";
+      out.big = "まだ動かさない";
     }
     return out;
   };
   return { d, ss, j, h: axis("h"), v: axis("v"), excluded: (adv.st.excluded || []).length, total: adv.st.n };
+}
+/* 矢が的の中心からどちらへどれだけ離れて集まったかを、動詞の文で言う（「寄り」「ずれ」と名詞にしない。docs/design/voice.md 3章） */
+function sightSideText(v, k) {
+  const a = Math.abs(v).toFixed(1);
+  if (+a === 0) return "";
+  return k === "h" ? `${v > 0 ? "右" : "左"}に ${a}cm` : `${v > 0 ? "上" : "下"}に ${a}cm`;
+}
+function sightCentreSentence(mx, my) {
+  const parts = [sightSideText(mx, "h"), sightSideText(my, "v")].filter(Boolean);
+  return parts.length ? `矢は的の中心より ${parts.join("・")} の所に集まっています` : "矢は的の中心に集まっています";
+}
+/* 目安の理由を、ふつうの言葉で 1〜2文にする。動かす／まだ動かさない／まだ分かりません／そのまま は sightAdviceModel の state を読むだけで、
+   条件・向き・量は変えない。「そのままで大丈夫です」は state が none の軸にだけ使う */
+function sightAdviceWhyText(md) {
+  const axes = [md.h, md.v];
+  const holdAll = md.j && md.j.label === "保留";
+  const out = [];
+  const held = axes.filter((a) => a.state === "hold");
+  axes.filter((a) => a.state === "move").forEach((a) => out.push(`${a.name}は、矢が${a.dirWord}に ${Math.abs(a.m).toFixed(1)}cm ずれて集まっているので、サイトを${a.dirWord}へ ${a.amount} 動かす目安です。`));
+  if (held.length) {
+    const names = held.map((a) => a.name).join("・");
+    out.push(holdAll
+      ? `${names}は、同じサイトで打った前の練習と、矢の集まる向きが逆でした。今回だけかもしれないので、まだ動かさず、同じねらいであと 1〜2エンド打って確かめてください。`
+      : `${names}は、風で流れたぶんが混ざっているかもしれません。まだ動かさず、風の弱いときに確かめてください。`);
+  }
+  const open = axes.filter((a) => a.state === "open");
+  if (open.length) out.push(`${open.map((a) => a.name).join("・")}は、矢の中心がまだはっきりしません。サイトはそのままで、同じねらいであと 1〜2エンド打ってから見直してください。`);
+  const none = axes.filter((a) => a.state === "none");
+  if (none.length === 2) out.push("サイトはそのままで大丈夫です。");
+  else if (none.length) out.push(`${none[0].name}はそのままで大丈夫です。`);
+  return out.join("");
 }
 function sightOffsetWord(v, k) {
   const a = Math.abs(v).toFixed(1);
@@ -1131,11 +1167,11 @@ function sightCentreDriftHtml(sess) {
     })
     .join("");
   return `<div class="sightDrift" data-testid="sight-centre-drift">
-    <p class="fact">外れ値候補を除いた中心（${esc(sess.dist)}m・${esc(faceLabel(sess))}・直近 ${rows.length}回）</p>
-    <svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" role="img" aria-label="外れ値候補を除いた中心の位置。古い順に 1 から ${rows.length} の番号"><rect x="1" y="1" width="${S - 2}" height="${S - 2}" fill="none" stroke="var(--rule)"/><path d="M${c} 6V${S - 6}M6 ${c}H${S - 6}" stroke="var(--rule-strong)" stroke-width="1"/>${w <= span ? `<circle cx="${c}" cy="${c}" r="${(w * k).toFixed(1)}" fill="none" stroke="var(--rule-strong)" stroke-dasharray="3 3"/>` : ""}<path d="${path}" fill="none" stroke="var(--sub)" stroke-width="1"/>${dots}</svg>
+    <p class="fact">大きく外れた矢を除いた、矢の中心（${esc(sess.dist)}m・${esc(faceLabel(sess))}・直近 ${rows.length}回）</p>
+    <svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" role="img" aria-label="大きく外れた矢を除いた、矢の中心の位置。古い順に 1 から ${rows.length} の番号"><rect x="1" y="1" width="${S - 2}" height="${S - 2}" fill="none" stroke="var(--rule)"/><path d="M${c} 6V${S - 6}M6 ${c}H${S - 6}" stroke="var(--rule-strong)" stroke-width="1"/>${w <= span ? `<circle cx="${c}" cy="${c}" r="${(w * k).toFixed(1)}" fill="none" stroke="var(--rule-strong)" stroke-dasharray="3 3"/>` : ""}<path d="${path}" fill="none" stroke="var(--sub)" stroke-width="1"/>${dots}</svg>
     <p class="basis">十字が的の中心。枠の端は中心から ${span.toFixed(1)}cm です（リング幅は ${w.toFixed(1)}cm${w <= span ? "。破線の円の半径" : ""}）。番号は古い順で、塗った点がこの記録です。</p>
     <table class="tbl sightDriftTbl"><tr><th>番号・日付</th><th>左右</th><th>上下</th><th>射数</th></tr>${rows.map((r, i) => `<tr><td>${i + 1}・${esc(fmtMD(r.s.date) || "日付なし")}</td><td>${sightOffsetWord(r.mx, "h")}</td><td>${sightOffsetWord(r.my, "v")}</td><td>${r.n}</td></tr>`).join("")}</table>
-    <p class="basis">正式な集計（全射）は 分析 &gt; 着弾 にあります。ここは、サイトの判断に使う値（外れ値候補を除く）です。</p>
+    <p class="basis">全射の数字は 分析 &gt; グルーピング にあります。ここは、サイトの目安に使う値（大きく外れた矢を除く）です。</p>
   </div>`;
 }
 function sightAdviceHtml(sess, setup, adv, opts) {
@@ -1143,29 +1179,31 @@ function sightAdviceHtml(sess, setup, adv, opts) {
   const md = sightAdviceModel(sess, setup, adv);
   if (!md) return "";
   const d = md.d, ss = md.ss;
-  const fig = (a) => `<div class="fig" data-axis="${a.key}" data-state="${a.state}"><div class="l">${a.name}</div><div class="n sightAdvN">${esc(a.big)}</div><div class="d">着弾中心 ${sightOffsetWord(a.m, a.key)}</div></div>`;
-  const nText = md.excluded ? `位置のある ${md.total}射のうち、外れ値候補 ${md.excluded}射を除いた ${ss.n}射` : `位置のある ${ss.n}射`;
+  const fig = (a) => `<div class="fig" data-axis="${a.key}" data-state="${a.state}"><div class="l">サイト ${a.name}</div><div class="n sightAdvN">${esc(a.big)}</div><div class="d">矢は${sightSideText(a.m, a.key) || "まん中"}</div></div>`;
+  const nText = md.excluded ? `位置のある ${md.total}射のうち、大きく外れた ${md.excluded}射を除いた ${ss.n}射` : `位置のある ${ss.n}射`;
   const basis = [];
-  basis.push("同時の検定で 5% 未満になり、その方向の 95%区間が 0 を含まず、補正量がリング幅の 1/10 以上のときだけ「動かす」としています。");
+  basis.push(`矢の中心の位置には、左右 ±${d.h.ci.toFixed(1)}cm・上下 ±${d.v.ci.toFixed(1)}cm の幅があります（95%区間）。サイトが合っていても、たまたまこれだけ片側に集まる確率は ${fmtChance(d.test.p)} です。`);
+  basis.push("同時の検定で 5% 未満になり、その方向の 95%区間が 0 を含まず、直す量がリング幅の 1/10 以上のときだけ「動かす」と出ます。");
   [md.h, md.v].forEach((a) => {
     if (a.state === "move" || (a.state === "hold" && a.amount)) {
       const conv = a.clickKind === "set" ? `登録した換算（70m で 1クリック = ${esc(a.key === "v" ? setup.calibV70 : setup.calibH70)}cm）` : a.clickKind === "est" ? "過去の記録から推定した 1目盛りの大きさ" : `アイ〜サイト距離 ${db.settings.eyeSight || 850}mm と弾道の計算`;
-      basis.push(`${a.name}の量は、ずれ ${Math.abs(a.m).toFixed(1)}cm から誤差の分を差し引いた ${a.adj.toFixed(1)}cm${a.clicks != null ? `（サイトで約 ${a.mm.toFixed(1)}mm）` : ""}を、${conv}で換算した値です。`);
+      basis.push(`${a.name}の量は、矢の中心までの ${Math.abs(a.m).toFixed(1)}cm から誤差のぶんを引いた ${a.adj.toFixed(1)}cm${a.clicks != null ? `（サイトで約 ${a.mm.toFixed(1)}mm）` : ""}を、${conv}で直した値です。`);
     }
-    if (a.state === "open") basis.push(`${a.name}は 95%区間（±${a.ci.toFixed(1)}cm）がリング幅の半分（${(d.w / 2).toFixed(1)}cm）より広く、中心がまだ定まっていません。`);
+    if (a.state === "open") basis.push(`${a.name}は、95%区間（±${a.ci.toFixed(1)}cm）がリング幅の半分（${(d.w / 2).toFixed(1)}cm）より広いので、矢の中心がまだ決まりません。`);
   });
   if (md.h.state === "hold" || md.v.state === "hold") {
     if (md.j && md.j.label === "保留" && adv.personal && Number.isFinite(adv.personal.mx))
-      basis.push(`同じサイト値の過去 ${adv.personal.sample}回の中心（${sightOffsetWord(adv.personal.mx, "h")}・${sightOffsetWord(adv.personal.my, "v")}）と今回の向きが逆のため、保留としています。`);
-    else if (d.windAccounted) basis.push(`横風の記録があり、推定の横流れ ${Math.abs(d.windCm).toFixed(1)}cm を左右の誤差に加えています。風上へねらいを直したかどうかは記録に無いため、左右は保留としています。`);
-    else basis.push("風の記録があり、左右のずれに風の影響が含まれる可能性があるため、左右は保留としています。");
-  } else if (d.windAccounted) basis.push(`横風の記録があるため、推定の横流れ ${Math.abs(d.windCm).toFixed(1)}cm を左右の誤差に加えています。`);
-  else if (d.windUnknown) basis.push("風向の記録がないため、風の横流れは見込んでいません。");
-  if (sess.sightV || sess.sightH) basis.push(`この記録のサイト値は 上下 ${esc(sightValueText(sess.sightV))}・左右 ${esc(sightValueText(sess.sightH))} です。`);
+      basis.push(`同じサイトで打った前の ${adv.personal.sample}回の矢の中心（${sightOffsetWord(adv.personal.mx, "h")}・${sightOffsetWord(adv.personal.my, "v")}）と今回の向きが逆なので、まだ動かさないとしています。`);
+    else if (d.windAccounted) basis.push(`横風の記録があり、推定の横流れ ${Math.abs(d.windCm).toFixed(1)}cm を左右の誤差に足しています。風上へねらいを直したかどうかは記録に無いので、左右はまだ動かさないとしています。`);
+    else basis.push("風の記録があり、左右は風で流れたぶんが混ざっているかもしれないので、まだ動かさないとしています。");
+  } else if (d.windAccounted) basis.push(`横風の記録があるので、推定の横流れ ${Math.abs(d.windCm).toFixed(1)}cm を左右の誤差に足しています。`);
+  else if (d.windUnknown) basis.push("風向の記録がないので、風の横流れは見込んでいません。");
+  if (sess.sightV || sess.sightH) basis.push(`この記録のサイトは 上下 ${esc(sightValueText(sess.sightV))}・左右 ${esc(sightValueText(sess.sightH))} です。`);
   return `<div class="sightAdvice" data-testid="sight-advice">
     <div class="figs two">${fig(md.h)}${fig(md.v)}</div>
-    <p class="fact" data-testid="sight-advice-fact">着弾中心は ${sightOffsetWord(ss.mx, "h")}・${sightOffsetWord(ss.my, "v")} です（${nText}）。95%区間は 左右 ±${d.h.ci.toFixed(1)}cm・上下 ±${d.v.ci.toFixed(1)}cm、中心が的の中心にあるとしたときにこれだけずれる確率は ${fmtChance(d.test.p)} です。</p>
-    <p class="basis" data-testid="sight-advice-basis">${basis.join("")}</p>
+    <p class="fact" data-testid="sight-advice-fact">${sightCentreSentence(ss.mx, ss.my)}（${nText}）。</p>
+    <p class="basis" data-testid="sight-advice-why">${sightAdviceWhyText(md)}</p>
+    <details class="gearMore sightAdviceMore" data-testid="sight-advice-more"><summary>詳しく</summary><p class="basis" data-testid="sight-advice-basis">${basis.join("")}</p></details>
     ${o.drift === false ? "" : sightCentreDriftHtml(sess)}
   </div>`;
 }
@@ -1178,18 +1216,18 @@ function sessionSightFoldHtml(sess, setup, opts) {
   const st = sessionMetrics(sess).st;
   const adv = adviceFor(sess, setup);
   const empty = st
-    ? "位置のある矢が 3射に満たないため、目安は出していません。"
-    : "着弾データなし。位置のある矢がない記録のため、着弾中心からの目安は出せません。";
+    ? "位置のある矢が 3射になると、サイトの目安が出ます。"
+    : "矢の位置がない記録なので、サイトの目安は出ません。";
   const sightKv =
     !adv && (sess.sightV || sess.sightH)
-      ? `<div class="kv"><span>この記録のサイト値</span><span>上下 ${esc(sightValueText(sess.sightV))}・左右 ${esc(sightValueText(sess.sightH))}</span></div>`
+      ? `<div class="kv"><span>この記録のサイト</span><span>上下 ${esc(sightValueText(sess.sightV))}・左右 ${esc(sightValueText(sess.sightH))}</span></div>`
       : "";
   return `<details class="adv summaryDetails${o.cls ? " " + o.cls : ""}" data-testid="${o.testid || "session-sight-details"}">
-      <summary>サイト調整の目安と詳しい根拠</summary>
+      <summary>サイトの目安と詳しい数字</summary>
       ${adv ? sightAdviceHtml(sess, setup, adv) : `<p class="basis" data-testid="session-sight-empty">${empty}</p>`}
       ${adv ? `<p class="basis">クリック換算の設定と計算の内訳は 弓具 &gt; サイト にあります。</p>` : ""}
       <div data-testid="history-detail-numbers">
-        ${st ? `<h4 class="foldH">着弾の数値</h4>${groupSummaryHtml(st)}` : `<div class="kv"><span>グルーピング</span><span>着弾データなし</span></div>`}
+        ${st ? `<h4 class="foldH">矢の位置の数字</h4>${groupSummaryHtml(st)}` : `<div class="kv"><span>グルーピング</span><span>位置の記録なし</span></div>`}
         ${sightKv}
         ${arrowMetaSummaryHtml(sess)}
         ${roundProgressHtml(sess)}
@@ -1202,19 +1240,19 @@ function sightBasisRowsHtml(sess, setup, adv, sid, dist) {
   const row = (k, v, sub) => rows.push(`<div class="lrow sightBasisRow"><span class="lk">${k}</span><span class="lv">${v}${sub ? `<small>${sub}</small>` : ""}</span></div>`);
   if (adv && adv.traj) {
     const ph = adv.traj.phys;
-    row("初速", `${ph.speedFps.toFixed(0)}fps`, ph.measuredSpeed ? "実測の入力" : "弓具の入力からの推定");
+    row("初速", `${ph.speedFps.toFixed(0)}fps`, ph.measuredSpeed ? "実測の入力" : "弓具の入力から推定");
     row("矢の重さ", `${ph.massGr.toFixed(0)}グレイン`, `飛行時間 ${adv.traj.tof.toFixed(2)}秒`);
   }
   if (adv && adv.personal && adv.personal.sample >= 2 && Number.isFinite(adv.personal.mx))
-    row("同じサイト値の過去の中心", `${sightOffsetWord(adv.personal.mx, "h")}・${sightOffsetWord(adv.personal.my, "v")}`, `${adv.personal.sample}回の記録`);
+    row("同じサイトで打った前の矢の中心", `${sightOffsetWord(adv.personal.mx, "h")}・${sightOffsetWord(adv.personal.my, "v")}`, `${adv.personal.sample}回の記録`);
   const reg = sid ? regressionAdvice(sid, dist) : {};
   [["v", "上下"], ["h", "左右"]].forEach(([k, name]) => {
     const r = reg[k];
-    if (r) row(`ずれが 0 になる${name}の値`, r.zero.toFixed(1), `サイト値とずれの回帰・${r.n}回・決定係数 ${pct(r.r2 || 0)}`);
+    if (r) row(`矢が的の中心に来る${name}の目盛り`, r.zero.toFixed(1), `サイトと矢の中心の回帰・${r.n}回・決定係数 ${pct(r.r2 || 0)}`);
   });
   const pc = sid ? personalPhysicsCalibration(sid) : null;
   if (pc && pc.click && (pc.click.v70 || pc.click.h70))
-    row("履歴から推定した 1目盛り（70m）", `${pc.click.v70 ? `上下 ${pc.click.v70.toFixed(1)}cm` : ""}${pc.click.v70 && pc.click.h70 ? "・" : ""}${pc.click.h70 ? `左右 ${pc.click.h70.toFixed(1)}cm` : ""}`, `サイト値 ${pc.sight.n}点・有効な練習 ${pc.usable}回`);
+    row("これまでの記録から出した 1目盛り（70m）", `${pc.click.v70 ? `上下 ${pc.click.v70.toFixed(1)}cm` : ""}${pc.click.v70 && pc.click.h70 ? "・" : ""}${pc.click.h70 ? `左右 ${pc.click.h70.toFixed(1)}cm` : ""}`, `サイトの記録 ${pc.sight.n}件・使えた練習 ${pc.usable}回`);
   return rows.join("");
 }
 function renderSight(m) {
@@ -1223,7 +1261,7 @@ function renderSight(m) {
   const sid = ui.sightSel.setupId;
   const setup = db.setups.find((x) => x.id === sid);
   if (!setup) {
-    m.innerHTML = `<div class="sightView"><div class="empty" data-testid="sight-empty"><b>セッティングがありません</b>サイト台帳はセッティングごとに分かれます。先に「セッティング」で登録してください。</div>${sightRecordsOverviewHtml(sid)}</div>`;
+    m.innerHTML = `<div class="sightView"><div class="empty" data-testid="sight-empty"><b>セッティングがありません</b>サイトの記録はセッティングごとに分かれます。先に「セッティング」で登録してください。</div>${sightRecordsOverviewHtml(sid)}</div>`;
     return;
   }
   // 距離候補: 台帳・セッションにある距離 + 定番
@@ -1245,40 +1283,40 @@ function renderSight(m) {
   const hasAnySess = db.sessions.some((s) => s.setupId === sid && s.dist === dist);
   const adviceEmpty = !lastSess
     ? hasAnySess
-      ? "着弾データなし。この距離の練習は点数だけの記録のため、着弾中心からの目安は出せません。"
-      : "この距離の練習の記録がないため、着弾中心からの目安は出せません。"
-    : "位置のある矢が 3射に満たないため、目安は出していません。";
+      ? "この距離の練習は点数だけの記録なので、サイトの目安は出ません。"
+      : "この距離の練習の記録がまだないので、サイトの目安は出ません。"
+    : "位置のある矢が 3射になると、サイトの目安が出ます。";
   const basisRows = sightBasisRowsHtml(lastSess, setup, adv, sid, dist);
   m.innerHTML = `<div class="sightView">
   <div class="cond one"><label><span>セッティング</span><select class="pick" id="sgSetup" data-testid="sight-setup">${db.setups.map((s) => `<option value="${esc(s.id)}" ${s.id === sid ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></label></div>
   <section class="vsec sightLedgerSec" data-testid="sight-ledger-section">
-    <div class="vsecH"><h2>サイト台帳</h2><span class="aside">上下の値・距離を押して選ぶ</span></div>
+    <div class="vsecH"><h2>サイトの記録</h2><span class="aside">上下の値・距離を押して選ぶ</span></div>
     <div class="sightGrid${scale ? "" : " noScale"}">
       ${scale ? `<div class="sightScaleCol">${scale}</div>` : ""}
       <div><div id="sgDistChips" role="group" aria-label="距離">${rows.map((r) => sightDistRowHtml(r, r.dist === dist)).join("")}</div>
       ${sightHorizontalNoteHtml(rows)}
       ${scale ? `<p class="basis">図の実線は実測、破線は予測です。</p>` : `<p class="basis">上下を数値で記録すると、目盛りの図に並びます。</p>`}</div>
     </div>
-    <div class="btnRow"><button type="button" class="btn pri" id="sgAdd" data-testid="sight-add" aria-label="${esc(dist)}m のサイト値を記録">サイト値を記録</button><button type="button" class="btn sec" id="sgCalMode" data-testid="sight-calibrate">校正する</button></div>
+    <div class="btnRow"><button type="button" class="btn pri" id="sgAdd" data-testid="sight-add" aria-label="${esc(dist)}m のサイトを記録">サイトを記録</button><button type="button" class="btn sec" id="sgCalMode" data-testid="sight-calibrate">サイト合わせ</button></div>
   </section>
   <section class="vsec" data-testid="sight-dist-records">
     <div class="vsecH"><h2>${esc(dist)}m の記録</h2><span class="aside">${marks.length}件・新しい順</span></div>
     ${marks.length ? sightLedgerHtml(marks) : `<p class="basis" data-testid="sight-ledger-empty">この距離の記録はまだありません。</p>`}
   </section>
   <section class="vsec" data-testid="sight-advice-section">
-    <div class="vsecH"><h2>調整の目安</h2><span class="aside">${adv ? `${esc(dist)}m・${fmtMDW(lastSess.date)}の記録` : `${esc(dist)}m`}</span></div>
+    <div class="vsecH"><h2>サイトの目安</h2><span class="aside">${adv ? `${esc(dist)}m・${fmtMDW(lastSess.date)}の記録` : `${esc(dist)}m`}</span></div>
     ${adv ? sightAdviceHtml(lastSess, setup, adv) : `<p class="basis" data-testid="sight-advice-empty">${adviceEmpty}</p>`}
-    ${basisRows ? `<details class="gearMore" data-testid="sight-basis-fold"><summary>計算の内訳</summary>${basisRows}<p class="basis">弾道は 3次元の空気抵抗つきの数値計算（RK4）です。未入力の項目は一般的な値で代用しています。</p></details>` : ""}
+    ${basisRows ? `<details class="gearMore" data-testid="sight-basis-fold"><summary>計算の内訳</summary>${basisRows}<p class="basis">矢の飛び方は、空気抵抗を入れた計算で出しています。入力のない項目は、よくある値で代わりにしています。</p></details>` : ""}
     <details class="gearMore" data-testid="sight-click-fold">
       <summary>クリック換算の設定</summary>
       <div class="row">
         <div><label class="f" for="sgCalV">上下 1クリックで動く量 (cm・70m)</label><input class="inp" id="sgCalV" inputmode="decimal" value="${esc(setup.calibV70 || "")}" placeholder="例: 4"></div>
         <div><label class="f" for="sgCalH">左右 1クリックで動く量 (cm・70m)</label><input class="inp" id="sgCalH" inputmode="decimal" value="${esc(setup.calibH70 || "")}" placeholder="例: 4"></div>
       </div>
-      <p class="basis">サイトを 1クリック動かしたとき、70m で着弾が動く量です。入れると、目安をクリック数で出します（ほかの距離へは距離の比で換算）。未入力のときは mm で出します。アイ〜サイト距離は 設定 &gt; 記録 にあります。</p>
+      <p class="basis">サイトを 1クリック動かしたとき、70m で矢の当たる所が動く量です。入れると、目安がクリック数で出ます（ほかの距離は、距離の比で直します）。入れていないときは mm で出ます。アイ〜サイト距離は 設定 &gt; 記録 にあります。</p>
     </details>
   </section>
-  ${interp ? sightPredictionHtml(interp, db.sightMarks.filter((mk) => mk.setupId === sid)) : `<section class="vsec" data-testid="sight-prediction-empty"><div class="vsecH"><h2>記録していない距離の予測</h2></div><p class="basis">上下を数値で記録した距離が 2つ以上あると、ほかの距離の値を計算します。</p></section>`}
+  ${interp ? sightPredictionHtml(interp, db.sightMarks.filter((mk) => mk.setupId === sid)) : `<section class="vsec" data-testid="sight-prediction-empty"><div class="vsecH"><h2>記録していない距離の予測</h2></div><p class="basis">上下を数値で記録した距離が 2つになると、ほかの距離の予測が見られます。</p></section>`}
   ${sightRecordsOverviewHtml(sid)}
   </div>`;
   const sgSetup = $("#sgSetup");
@@ -1311,8 +1349,8 @@ function renderSight(m) {
     (b) =>
       (b.onclick = async () => {
         const mk = db.sightMarks.find((x) => x.id === b.dataset.del);
-        if (await appConfirm("このサイト値をゴミ箱へ移しますか？", { danger: true, okLabel: "ゴミ箱へ移す" })) {
-          if (mk) trashItem("sightMark", `${mk.dist}m サイト値`, mk);
+        if (await appConfirm("このサイトの記録をゴミ箱へ移しますか？", { danger: true, okLabel: "ゴミ箱へ移す" })) {
+          if (mk) trashItem("sightMark", `${mk.dist}m のサイト`, mk);
           db.sightMarks = db.sightMarks.filter((x) => x.id !== b.dataset.del);
           save({ reason: "delete-sight-mark", forceSnapshot: true });
           render();
@@ -1338,14 +1376,14 @@ function renderSight(m) {
 function openMarkForm(setupId, dist) {
   const ovl = document.createElement("div");
   ovl.className = "ovl";
-  ovl.innerHTML = `<div class="sheet"><h3>サイト値を記録（${dist}m）</h3>
+  ovl.innerHTML = `<div class="sheet"><h3>サイトを記録（${dist}m）</h3>
     <label class="f">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
     <div class="row">
       <div><label class="f">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
       <div><label class="f">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
     </div>
     <label class="f" for="mkNote">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・36射で確認">
-    <div class="btnrow"><button class="btn ghost" id="mkCancel">キャンセル</button><button class="btn" id="mkSave">保存</button></div>
+    <div class="btnrow"><button class="btn ghost" id="mkCancel">やめる</button><button class="btn" id="mkSave">保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#mkCancel" });
   ovl.querySelector("#mkCancel").onclick = () => closeModal(ovl);
@@ -1363,7 +1401,7 @@ function openMarkForm(setupId, dist) {
     save();
     closeModal(ovl);
     render();
-    toast("台帳に記録しました");
+    toast("サイトの記録に残しました");
   };
 }
 function openCalibrationWizard(setupId) {
@@ -1375,8 +1413,8 @@ function openCalibrationWizard(setupId) {
   const dists = [70, 50, 30, 18];
   const ovl = document.createElement("div");
   ovl.className = "ovl";
-  ovl.innerHTML = `<div class="sheet" data-testid="sight-calibration"><h3>校正する（${esc(setup.name)}）</h3>
-    <p class="basis">実射で確かめた距離だけ入れてください。入れた値は、この日付の記録として台帳に追加します（前の記録は残ります）。欄には、いまの台帳の最新の値を入れてあります。</p>
+  ovl.innerHTML = `<div class="sheet" data-testid="sight-calibration"><h3>サイト合わせ（${esc(setup.name)}）</h3>
+    <p class="basis">実射で確かめた距離だけ入れてください。入れた値は、この日付の記録として追加されます（前の記録は残ります）。欄には、いまのいちばん新しい値が入っています。</p>
     <label class="f">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
     ${dists
       .map((d) => {
@@ -1388,13 +1426,13 @@ function openCalibrationWizard(setupId) {
       })
       .join("")}
     <label class="f" for="calNote">メモ</label><input class="inp" id="calNote" placeholder="例: 無風・70m は 36射で確認">
-    <div class="btnrow"><button class="btn ghost" id="calCancel">キャンセル</button><button class="btn" id="calSave">台帳に記録</button></div>
+    <div class="btnrow"><button class="btn ghost" id="calCancel">やめる</button><button class="btn" id="calSave">記録する</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#calCancel" });
   ovl.querySelector("#calCancel").onclick = () => closeModal(ovl);
   ovl.querySelector("#calSave").onclick = () => {
     const date = ovl.querySelector("#calDate").value || today();
-    const note = ovl.querySelector("#calNote").value.trim() || "校正";
+    const note = ovl.querySelector("#calNote").value.trim() || "サイト合わせ";
     let n = 0;
     dists.forEach((d) => {
       const v = ovl.querySelector(`#calV_${d}`).value.trim(),
@@ -1411,7 +1449,7 @@ function openCalibrationWizard(setupId) {
     save({ reason: "calibration", forceSnapshot: true });
     closeModal(ovl);
     render();
-    toast(`${n}距離の値を台帳に記録しました`);
+    toast(`${n}距離のサイトを記録しました`);
   };
 }
 

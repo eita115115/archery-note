@@ -208,7 +208,7 @@ test("score-only session: 着弾データなし, no impact figures, no broken va
   await expect(screen.getByTestId("scorecard").locator('[data-sub="total"] .tot')).toHaveText(
     String(totalOf(src)),
   );
-  await screen.locator(".summaryDetails summary").click();
+  await screen.locator(".summaryDetails > summary").click();
   expect(await screen.innerText()).not.toMatch(/NaN|undefined|null/);
   await page.locator("#sumClose").click();
   const saved = (await stored(page)).sessions.at(-1);
@@ -311,7 +311,7 @@ for (const theme of ["light", "dark"]) {
     await expect(page.locator("#sumClose")).toBeInViewport({ ratio: 1 });
     await expect(page.getByTestId("result-analysis")).toBeInViewport({ ratio: 1 });
     await expect(screen.getByTestId("session-total")).toBeInViewport({ ratio: 1 });
-    await screen.locator(".summaryDetails summary").click();
+    await screen.locator(".summaryDetails > summary").click();
     const audit = await screen.evaluate((root) => {
       const visible = (e) =>
         e.getClientRects().length && globalThis.getComputedStyle(e).visibility !== "hidden";

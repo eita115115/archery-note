@@ -711,8 +711,8 @@ test("a score-only session shows totals, and geometry says 着弾データなし
   await expect(
     detail.getByTestId("history-end-table").locator('.scRow[data-end="0"] .cell'),
   ).toHaveText(["X", "10", "9", "9", "8", "M"]);
-  await detail.locator("details.histDetailNumbers summary").click();
-  await expect(detail.getByTestId("history-detail-numbers")).toContainText("着弾データなし");
+  await detail.locator("details.histDetailNumbers > summary").click();
+  await expect(detail.getByTestId("history-detail-numbers")).toContainText("位置の記録なし");
   await expect(detail).not.toContainText("判断信頼度");
   await expect(detail).not.toContainText("次のアクション");
   await expectCleanText(page);
@@ -747,10 +747,10 @@ test("a score-only session shows totals, and geometry says 着弾データなし
   await page.locator('#tabs [data-v="gear"]').click();
   await expectCleanText(page);
   await page.locator('#gearSubTabs [data-sub="sight"]').click();
-  await expect(page.locator("main")).toContainText("サイト台帳");
+  await expect(page.locator("main")).toContainText("サイトの記録");
   await expect(page.locator("main")).not.toContainText("の着弾傾向");
   await expect(page.locator("main")).toContainText(
-    "着弾データなし。この距離の練習は点数だけの記録のため",
+    "この距離の練習は点数だけの記録なので、サイトの目安は出ません。",
   );
   await expectCleanText(page);
   expect(await page.locator("main").innerHTML()).not.toMatch(/NaN|undefined/);

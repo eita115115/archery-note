@@ -35,7 +35,7 @@ function makeLocalStorageShim() {
    表の同じ行を取り除いた値が、いまの値と一致することを確かめてから置き換えた（残した値は変わっていない）。
    AN-102（言葉づかいの書き換え）: 見本の値に入っている文（矢番号と外れた理由・数え直し・矢の位置の数字の表・目安の文）の言い回しだけが変わった。
    書き換えの前（commit b1704e0）と後で見本の値を項目ごとに比べ、数値・真偽・構造の違いが 0 件で、違うのは文字列（言い回し）だけであることを確かめてから置き換えた */
-const GOLDEN_SHA256 = "63301fbfa2a95a0bb431f7c64ede18ef96333ca3e7e887e35625cb1daac45064";
+const GOLDEN_SHA256 = "44aa562e7af51fb0150fa2db5811963360dabac96f62f24ea9de8ef749d71dd3";
 
 function loadApp(fixtureDb) {
   return new Function(

@@ -86,8 +86,9 @@ async function expectCleanCopy(locator, label) {
     c.querySelectorAll("svg, option, input, textarea").forEach((n) => n.remove());
     return c.textContent;
   });
+  /* 「大丈夫」は、決めた言い方「（サイトは）そのままで大丈夫です」の中でだけ使う（docs/design/voice.md 5章） */
   for (const w of [...BANNED, "おすすめ", "安心", "大丈夫", "用具", "射形"])
-    expect(text, `${label}: "${w}"`).not.toContain(w);
+    expect(text.split("そのままで大丈夫です").join(""), `${label}: "${w}"`).not.toContain(w);
   expect(text, label).not.toMatch(/NaN|undefined|Infinity|\bnull\b/);
   return text;
 }
@@ -398,7 +399,7 @@ test("the adjustment guide states the decision, the numbers, n and its basis in 
   const errors = await open(page, data);
   await gotoSight(page);
   const sec = page.getByTestId("sight-advice-section");
-  await expect(sec.getByRole("heading", { name: "調整の目安" })).toBeVisible();
+  await expect(sec.getByRole("heading", { name: "サイトの目安" })).toBeVisible();
   await expect(sec.locator(".vsecH .aside")).toHaveText("70m・11/10（火）の記録");
   const model = await page.evaluate(() => {
     const sess = db.sessions.find((s) => s.id === "p6");
@@ -417,23 +418,36 @@ test("the adjustment guide states the decision, the numbers, n and its basis in 
   });
   const figs = sec.locator(".fig");
   await expect(figs).toHaveCount(2);
-  await expect(figs.nth(0).locator(".l")).toHaveText("左右");
-  await expect(figs.nth(1).locator(".l")).toHaveText("上下");
+  await expect(figs.nth(0).locator(".l")).toHaveText("サイト 左右");
+  await expect(figs.nth(1).locator(".l")).toHaveText("サイト 上下");
   expect(model.moveH || model.moveV).toBe(false);
-  await expect(figs.locator(".n")).toHaveText(["動かさない", "動かさない"]);
-  const word = (v, pos, neg) => `${v > 0 ? pos : neg} ${Math.abs(v).toFixed(1)}cm`;
-  await expect(figs.nth(0).locator(".d")).toHaveText(`着弾中心 ${word(model.mx, "右", "左")}`);
-  await expect(figs.nth(1).locator(".d")).toHaveText(`着弾中心 ${word(model.my, "上", "下")}`);
+  await expect(figs.locator(".n")).toHaveText(["そのまま", "そのまま"]);
+  const word = (v, pos, neg) => `${v > 0 ? pos : neg}に ${Math.abs(v).toFixed(1)}cm`;
+  await expect(figs.nth(0).locator(".d")).toHaveText(`矢は${word(model.mx, "右", "左")}`);
+  await expect(figs.nth(1).locator(".d")).toHaveText(`矢は${word(model.my, "上", "下")}`);
+  /* 本文: 矢がどこに集まったか（動詞で）と射数、そして目安を 1文。統計の言葉は出さない（docs/design/voice.md） */
   const fact = sec.getByTestId("sight-advice-fact");
-  await expect(fact).toContainText(`位置のある ${model.n}射`);
-  await expect(fact).toContainText(`95%区間は 左右 ±${model.ciH}cm・上下 ±${model.ciV}cm`);
-  await expect(fact).toHaveText(/確率は [0-9.]+% です。$/);
-  await expect(sec.getByTestId("sight-advice-basis")).toContainText(
-    "同時の検定で 5% 未満になり、その方向の 95%区間が 0 を含まず、補正量がリング幅の 1/10 以上のときだけ",
+  await expect(fact).toHaveText(
+    `矢は的の中心より ${word(model.mx, "右", "左")}・${word(model.my, "上", "下")} の所に集まっています（位置のある ${model.n}射）。`,
+  );
+  await expect(sec.getByTestId("sight-advice-why")).toHaveText("サイトはそのままで大丈夫です。");
+  await expect(fact).not.toContainText(/95%区間|確率|寄り|着弾/);
+  /* 区間・確率・動かす条件は消さずに「詳しく」の中へ */
+  const more = sec.getByTestId("sight-advice-more");
+  expect(await more.evaluate((el) => el.open)).toBe(false);
+  await expect(more.locator("summary")).toHaveText("詳しく");
+  const basis = sec.getByTestId("sight-advice-basis");
+  await expect(basis).toBeHidden();
+  await expect(basis).toContainText(
+    `左右 ±${model.ciH}cm・上下 ±${model.ciV}cm の幅があります（95%区間）`,
+  );
+  await expect(basis).toContainText(/確率は [0-9.]+% です。/);
+  await expect(basis).toContainText(
+    "同時の検定で 5% 未満になり、その方向の 95%区間が 0 を含まず、直す量がリング幅の 1/10 以上のときだけ",
   );
   /* 外れ値候補を除いた中心の移り変わり（サイトの判断に使う値）。対象を見出しに書く */
   const drift = sec.getByTestId("sight-centre-drift");
-  await expect(drift).toContainText("外れ値候補を除いた中心（70m・122cm的・直近 6回）");
+  await expect(drift).toContainText("大きく外れた矢を除いた、矢の中心（70m・122cm的・直近 6回）");
   await expect(drift.locator("table tr")).toHaveCount(7);
   await expect(drift.locator("svg")).toHaveAttribute("role", "img");
   /* 計算の内訳は折りたたみ。数値と件数だけ */
@@ -461,7 +475,7 @@ test("the adjustment guide states the decision, the numbers, n and its basis in 
   /* 着弾の無い距離は、その理由を書く（数値を作らない） */
   await page.locator('#sgDistChips [data-d="30"]').click();
   await expect(page.getByTestId("sight-advice-empty")).toHaveText(
-    "この距離の練習の記録がないため、着弾中心からの目安は出せません。",
+    "この距離の練習の記録がまだないので、サイトの目安は出ません。",
   );
   await page.locator('#sgDistChips [data-d="70"]').click();
   const text = await expectCleanCopy(page.locator("#main"), "sight");
@@ -517,10 +531,10 @@ for (const size of [
       /* 位置のある記録: 同じ文（着弾中心・射数・95%区間・確率） */
       await show("p6");
       const fold = page.getByTestId(testid);
-      await fold.locator("summary").click();
+      await fold.locator("summary").first().click();
       await expect(fold.getByTestId("sight-advice-fact")).toHaveText(sightFact);
-      await expect(fold.locator(".sightAdvice .fig .n")).toHaveText(["動かさない", "動かさない"]);
-      await expect(fold.locator(".foldH")).toHaveText("着弾の数値");
+      await expect(fold.locator(".sightAdvice .fig .n")).toHaveText(["そのまま", "そのまま"]);
+      await expect(fold.locator(".foldH")).toHaveText("矢の位置の数字");
       let text = await expectCleanCopy(fold, surface);
       for (const w of OLD_ADVICE_LABELS) expect(text, `${surface}: "${w}"`).not.toContain(w);
       const fit = await fold.evaluate((el) => ({
@@ -543,10 +557,10 @@ for (const size of [
       await expect(page.locator(".ovl")).toHaveCount(0);
       /* 点数だけの記録: 目安も着弾の数値も出さない */
       await show("p5");
-      await fold.locator("summary").click();
+      await fold.locator("summary").first().click();
       await expect(fold.getByTestId("sight-advice")).toHaveCount(0);
       await expect(fold.getByTestId("session-sight-empty")).toHaveText(
-        "着弾データなし。位置のある矢がない記録のため、着弾中心からの目安は出せません。",
+        "矢の位置がない記録なので、サイトの目安は出ません。",
       );
       text = await expectCleanCopy(fold, `${surface} (score only)`);
       for (const w of OLD_ADVICE_LABELS) expect(text, `${surface}: "${w}"`).not.toContain(w);

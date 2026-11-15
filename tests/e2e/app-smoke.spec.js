@@ -124,7 +124,7 @@ test("loads core tabs and seeded history without console errors", async ({ page 
   await expect(page.getByTestId("gear-recording-pill")).toHaveText("記録に使用中");
   await expect(page.getByTestId("gear-subtab-setup")).toHaveAttribute("aria-current", "page");
   await page.getByTestId("gear-subtab-sight").click();
-  await expect(page.locator("#main")).toContainText("サイト台帳");
+  await expect(page.locator("#main")).toContainText("サイトの記録");
   await expect(page.locator("#main")).toContainText("E2E recurve setup");
   await expect(page.getByTestId("gear-subtab-sight")).toHaveAttribute("aria-current", "page");
   await expect(mainTab(page, "弓具")).toHaveAttribute("aria-current", "page");

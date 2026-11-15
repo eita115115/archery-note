@@ -710,7 +710,7 @@ test("settings export: cancel sends nothing; without share it downloads and revo
   await seedTask9Page(page, makeV2DiagnosticDb(), "download");
   const before = await task9PersistenceSnapshot(page);
   await page.locator("#fdV2Export").click();
-  await task9Confirm(page, "キャンセル");
+  await task9Confirm(page, "やめる");
   expect(await page.evaluate(() => globalThis.__task9Transport.objectUrls.length)).toBe(0);
   const downloadPromise = page.waitForEvent("download");
   await page.locator("#fdV2Export").click();

@@ -347,8 +347,8 @@ test("note detail for a score-only practice says there is no impact data and for
   await expect(detail.getByTestId("note-conditions").locator(".lrow").nth(4)).toHaveText(
     /入力\s*点数だけ/,
   );
-  await detail.locator("details.histDetailNumbers summary").click();
-  await expect(detail.getByTestId("history-detail-numbers")).toContainText("着弾データなし");
+  await detail.locator("details.histDetailNumbers > summary").click();
+  await expect(detail.getByTestId("history-detail-numbers")).toContainText("位置の記録なし");
   await expect(detail).not.toContainText(/NaN|undefined|null/);
   await page.locator("#hClose").click();
 
@@ -770,7 +770,7 @@ test("a later practice on the same day is not treated as earlier in the note det
   const errors = await open(page, database);
   await page.evaluate(() => globalThis.openHistDetail("p6"));
   const fold = page.getByTestId("note-sight-details");
-  await fold.locator("summary").click();
+  await fold.locator("summary").first().click();
   const rows = fold.locator(".sightDriftTbl tr");
   // 見出し + 位置のある6回（10/3〜11/10。11/4 は点数だけの記録）。後に保存した同じ日の p6b は入らない
   await expect(rows).toHaveCount(7);
@@ -780,7 +780,7 @@ test("a later practice on the same day is not treated as earlier in the note det
   await page.locator("#hClose").click();
   await page.evaluate(() => globalThis.openHistDetail("p6b"));
   const fold2 = page.getByTestId("note-sight-details");
-  await fold2.locator("summary").click();
+  await fold2.locator("summary").first().click();
   const rows2 = fold2.locator(".sightDriftTbl tr");
   await expect(rows2).toHaveCount(8);
   await expect(rows2.nth(6).locator("td").first()).toHaveText("6・11/10");
@@ -948,7 +948,7 @@ for (const theme of ["light", "dark"]) {
 
     await page.locator('.historyRow[data-id="p6"]').click();
     expect(await audit(".noteScreen")).toEqual(clean);
-    await page.locator("details.histDetailNumbers summary").click();
+    await page.locator("details.histDetailNumbers > summary").click();
     expect((await audit(".noteScreen")).hscroll).toBe(false);
     // スコア表は画面の幅ちょうど
     const card = await page.getByTestId("scorecard").boundingBox();
