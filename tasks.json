@@ -1205,13 +1205,13 @@
   {
     "id": "AN-102",
     "task": "画面の言葉づかいの書き換え: docs/design/voice.md（2026-11-15 オーナー決定）に合わせて、画面に出る日本語を書き直す。用語の統一（リリース・押し手・フルドロー・引き戻し・グルーピング・サイトの記録・サイト合わせ・距離・スパイン）、統計の言葉は「詳しく」の中へ、射手の状況を名詞にしない（寄り・ずれ・不確かさ など）、サイトの目安は計算を変えずに言葉だけ直す",
-    "status": "in-progress",
-    "passes": false,
+    "status": "done",
+    "passes": true,
     "dependencies": [
       "AN-101"
     ],
     "owner": "claude",
     "acceptance": "npm run check:all（check:voice を含む）・lint・format:check・check:form-analyze と Playwright e2e 全件が成功する。保存してある値（外れた理由の印・天気・弓具の選択肢の名前）と保存の形は変えない。data-testid と中の id は変えない。サイトの目安は、動かす／まだ動かさない／そのまま／まだ分かりません の条件・向き・量を計算のまま変えない（check-coordless の見本の値で、数値・真偽・構造の違いが 0 件であること）。データが消える場面の文は正確なまま、用語だけをそろえる。文をそのまま確かめている検査とテストは、意味のある確認を残したまま文言を直す。375×812 と 320×640、ライトとダークで、13px 未満の文字・44px 未満の押せるもの・はみ出し・NaN/undefined が増えていない。版上げ・push・公開はオーナーの承認後。",
-    "evidence": "2026-11-15 実装（branch claude/sharp-faraday-bu8pii、版129据え置き・未push・未公開。commit 156a49a・97d461b・55e10f1・2d83b61・555d5ee・3aeb18e・f930b25 と、検査・文書・記録のコミット）。検証: npm run check:all（exit 0。新しい check:voice を含む）・lint・format:check・check:form-analyze（17 件 + 21 件）成功、Playwright e2e 全件 489 passed。check-coordless の見本の値は書き換えの前（b1704e0）と後で数値・真偽・構造の違い 0 件（違うのは文字列だけ）。375×812・320×640、ライトとダークの監査の指摘は前後とも同じ 12 件。passes は false のまま: オーナーが画面を見て確認するまで完了としない（版上げ・公開も承認後）。 / 2026-11-15 公開準備: オーナー承認（「いいよ」）。版130（npm run version:bump、check:version 成功）、CHANGELOG v130。検証: check:all exit 0（Voice checks OK 1697 strings）、lint・format:check 成功、Playwright 489 passed (7.8m)。pwa-release の e2e が全件実行時に1度落ちた（読み直し中の version.json の応答が捨てられる競合）のを、テスト側で応答を通すよう直した（8004f1e、--repeat-each で 15/15）。passes は公開の確認後に書く。"
+    "evidence": "2026-11-15 実装（branch claude/sharp-faraday-bu8pii、版129据え置き・未push・未公開。commit 156a49a・97d461b・55e10f1・2d83b61・555d5ee・3aeb18e・f930b25 と、検査・文書・記録のコミット）。検証: npm run check:all（exit 0。新しい check:voice を含む）・lint・format:check・check:form-analyze（17 件 + 21 件）成功、Playwright e2e 全件 489 passed。check-coordless の見本の値は書き換えの前（b1704e0）と後で数値・真偽・構造の違い 0 件（違うのは文字列だけ）。375×812・320×640、ライトとダークの監査の指摘は前後とも同じ 12 件。passes は false のまま: オーナーが画面を見て確認するまで完了としない（版上げ・公開も承認後）。 / 2026-11-15 公開準備: オーナー承認（「いいよ」）。版130（npm run version:bump、check:version 成功）、CHANGELOG v130。検証: check:all exit 0（Voice checks OK 1697 strings）、lint・format:check 成功、Playwright 489 passed (7.8m)。pwa-release の e2e が全件実行時に1度落ちた（読み直し中の version.json の応答が捨てられる競合）のを、テスト側で応答を通すよう直した（8004f1e、--repeat-each で 15/15）。passes は公開の確認後に書く。 / 2026-11-15 公開 v130: PR #145 の CI が 320×640 の分析タブで失敗（「詳しく」の長い項目名がランナーの書体で画面の外へ出た）。.anRefBody の行だけ項目名を折り返し値を右に残す形に直した（e4657d2。字間 0.12em まで広げてはみ出し 0、分析の e2e 68 passed、check:all・lint・format:check 成功）。CI validate 成功を確かめて main へマージ（ade6537）。Pages の version.json が 130、sw.js が archery-note-v130、公開ページで APP_VER 130・コンソールのエラー 0 件。"
   }
 ]

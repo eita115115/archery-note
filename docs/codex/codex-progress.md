@@ -3642,3 +3642,9 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 リスク: 文言は実機（iPhone の Safari）では見ていない（Chromium の 375×812・320×640 で確認）。オーナーの射場での言い方と合うかは、画面を見てもらって確かめる。親切にしたぶん長くなった文がある（サイトの「まだ動かさない」の理由は 2文）。以前の撮影画面と `46-form-core.js` の助言文は、どの画面にも出ないので以前の言葉のまま。
 
 次: 親の検証 → オーナーの確認 → 承認後に版上げと公開。
+
+## 公開 v130（画面の言葉づかい、AN-102）
+
+2026-11-15、オーナー承認（「いいよ」）後に版130（`npm run version:bump`、`check:version` 成功）と CHANGELOG を入れ、PR #145 を main へマージ（ade6537）。マージ前の CI は 2 回落ちた。1 回め: 全件実行のときだけ `tests/e2e/pwa-release.spec.js` が、更新の帯で読み直す途中に捨てられた `version.json` の応答で「Response has been disposed」になった → 経路の処理で応答が取れないときは書き換えずに通す（8004f1e、`--repeat-each` で 15/15）。2 回め: 320×640 の分析タブ（グルーピング）で、「詳しく」の中の長い項目名がランナーの書体で幅 320 を越えた（手元の書体では収まる）→ `style.css` の `.anRefBody .lrow` だけ折り返しを許し（項目名 `flex:1 1 11em`、値は右寄せで入りきらなければ次の行の右へ）、`style.min.css` を作り直した（e4657d2）。字間を 0.06em・0.12em まで広げてもはみ出し 0、分析の e2e 68 passed（DejaVu だけの書体設定でも合格）、`check:all`・`lint`・`format:check` 成功、CI `validate` 成功。Pages の version.json が 130、sw.js が archery-note-v130、公開ページで APP_VER 130・コンソールのエラー 0 件。AN-102 を passes:true にした。
+
+次: オーナーに画面の言葉を見てもらう（AN-102 の確認事項 (a)〜(f)）。実射での確認（AN-001）。
