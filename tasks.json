@@ -1217,13 +1217,13 @@
   {
     "id": "AN-103",
     "task": "UI/UX 磨き込みと v131 公開準備: 初回帯の 320px 横はみ出し解消・記録の条件の上部 sticky 化・ヒント閉じるボタン 44px 化、記録中スコア表のスクロール位置保持・状態行の部分更新・過去エンド矢の視認色調整、ノート一覧のリアルタイム文字検索（IME・NFKC・複数語対応）とワンタップ解除、ノートの詳細の「操作へ」移動、セッティング・サイト系フォームの未保存確認とクリック換算欄の Tab フォーカス維持・label[for] 補完",
-    "status": "in-progress",
-    "passes": false,
+    "status": "done",
+    "passes": true,
     "dependencies": [
       "AN-102"
     ],
     "owner": "cursor",
     "acceptance": "evals/acceptance.md の UI 行（check:ui・lint・375px 前後確認）と リリース行（check:version v131）に加え、npm run check:all・format:check・配布版 npm run test:e2e:dist 全件（新規 ux-polish.spec.js 6 本を含む 495 本）が成功する。実寸の矢円と線かみ採点、保存データの形式と保存値、既存の data-testid と id は不変。375×812 と 320×640（ライト／ダーク）で 13px 未満の文字・44px 未満の押せるもの・横はみ出し・NaN/undefined が増えず、初回帯の 320px 横はみ出しと hintBannerClose の 44px 未満が 0 件になること。main マージと Pages 配信確認後に passes: true を記録する。",
-    "evidence": "2026-11-17 実装・v131 公開準備（オーナー承認「進めて」を受けて版131へ更新・CHANGELOG 追加）: scripts/10-storage-native.js・30-target-svg.js・50-record-view.js・60-history-sight-view.js・70-gear-settings.js・style.css・style.min.css・sw.js・version.json・package.json・package-lock.json・CHANGELOG.md・tests/e2e/ux-polish.spec.js。検証: npm run build:web-assets・check:all（exit 0、Voice checks OK 1701 strings、Version alignment OK v131）・lint・format:check・配布版 test:e2e:dist 495 passed。passes は main マージ・Pages 配信確認後に書く。"
+    "evidence": "2026-11-17 実装・v131 公開準備（オーナー承認「進めて」を受けて版131へ更新・CHANGELOG 追加。commit e6acf5a・0b578d6）: scripts/10-storage-native.js・30-target-svg.js・50-record-view.js・60-history-sight-view.js・70-gear-settings.js・style.css・style.min.css・sw.js・version.json・package.json・package-lock.json・CHANGELOG.md・tests/e2e/ux-polish.spec.js。検証: npm run build:web-assets・check:all（exit 0、Voice checks OK 1701 strings、Version alignment OK v131）・lint・format:check・配布版 test:e2e:dist 495 passed。 / 2026-11-17 公開 v131: PR #147 の CI validate 成功（0b578d6）を確かめ、オーナー承認（「勧めて」）後に main へマージ（c8e58b6）。main の CI validate・deploy 成功（run 44054392591）後、公開先 https://eita115115.github.io/archery-note/ で version.json が { \"v\": 131 }、sw.js が archery-note-v131、Chromium で開いた公開ページの APP_VER が 131・4タブ表示・ノート検索欄表示・コンソールのエラー 0 件を確認。"
   }
 ]
