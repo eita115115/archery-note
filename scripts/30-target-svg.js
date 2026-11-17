@@ -148,7 +148,7 @@ function plotSession(sess, container, opts){
   const manualCount=allArrows.filter(a=>arrowHasPos(a)&&a.manual===true).length;
   const ft=sess.faceType==="triple"?"spot":sess.faceType;
   container.innerHTML=`<div class="tgWrap">${targetMarkup(faceD,pfx,ft)}</div>`+
-    (sess.faceType==="triple"?`<div class="hint" style="text-align:center">三つ目的：3スポットを1つに重ねて表示しています</div>`:"")+
+    (sess.faceType==="triple"?`<div class="hint hintCenter">三つ目的：3スポットを1つに重ねて表示しています</div>`:"")+
     (posCount<allArrows.length?`<div class="hint plotPosNote" data-testid="plot-position-note">位置のある ${posCount}射の図です（位置なし ${allArrows.length-posCount}射は、図とグルーピングに入っていません）。</div>`:"")+
     (manualCount?`<div class="hint plotManualNote" data-testid="plot-manual-note">* の付いた矢（${manualCount}射）は、点数を手で直した矢です。円の位置から決まる点とは違う点で記録されています。</div>`:"");
   const marks=container.querySelector("#"+pfx+"marks");
