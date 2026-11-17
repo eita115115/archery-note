@@ -3658,3 +3658,9 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 検証: `npm run build:web-assets`、`npm run check:all`（exit 0、Voice checks OK 1701 strings、Version alignment OK v131）、`npm run lint`、`npm run format:check`、配布版 `npm run test:e2e:dist` 495 passed。320×640（字間 0.12em を含む）で横はみ出し 0 件。
 
 リスク: 実機 iPhone Safari でのキーボード表示中の検索操作感と屋外での過去エンド矢の見え方は未確認。ノート一覧に検索欄が増えたぶん最初の項目が 1 行下がる。次: PR の CI `validate` 確認 → オーナーによる main マージ → Pages の v131 配信確認後に `AN-103` を `passes: true` にする。
+
+## 公開 v131（UI/UX 磨き込み、AN-103）
+
+2026-11-17、PR #147 の CI `validate` が 1 回で成功（0b578d6）したことを確かめ、オーナー承認（「勧めて」）後に main へマージ（c8e58b6）。main の CI `validate`・`deploy` 成功（run 44054392591）後、Pages の `version.json` が 131、`sw.js` が `archery-note-v131`、公開ページで `APP_VER` 131・4タブ表示・ノート検索欄表示・コンソールのエラー 0 件を確認し、`AN-103` を `status: done`・`passes: true` にした。
+
+次: 実機 iPhone での触感確認、AN-102 の確認事項 (a)〜(f)、実射での確認（AN-001）。
