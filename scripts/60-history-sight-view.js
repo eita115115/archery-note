@@ -341,6 +341,7 @@ function renderHistory(m) {
       <span class="segPick${hf.dist ? " on" : ""}"><select id="histDist" aria-label="距離" data-testid="notes-filter-dist"${dists.length ? "" : " disabled"}><option value="">距離</option>${dists.map((d) => `<option value="${esc(d)}" ${String(hf.dist) === String(d) ? "selected" : ""}>${historyDistanceLabel(d)}</option>`).join("")}</select></span>
     </div>
     <div class="noteSearch">
+      <svg class="noteSearchIco" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="M15.4 15.4 20.5 20.5"/></svg>
       <input type="search" class="inp" id="histQuery" data-testid="notes-search" value="${esc(hf.q)}" placeholder="メモ・タグ・弓具・天気で探す" aria-label="ノートを文字で探す">
       <button type="button" class="txtBtn noteSearchClear" id="histQueryClear" data-testid="notes-search-clear"${hf.q ? "" : " hidden"}>クリア</button>
     </div>

@@ -3664,3 +3664,13 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 2026-11-17、PR #147 の CI `validate` が 1 回で成功（0b578d6）したことを確かめ、オーナー承認（「勧めて」）後に main へマージ（c8e58b6）。main の CI `validate`・`deploy` 成功（run 44054392591）後、Pages の `version.json` が 131、`sw.js` が `archery-note-v131`、公開ページで `APP_VER` 131・4タブ表示・ノート検索欄表示・コンソールのエラー 0 件を確認し、`AN-103` を `status: done`・`passes: true` にした。
 
 次: 実機 iPhone での触感確認、AN-102 の確認事項 (a)〜(f)、実射での確認（AN-001）。
+
+## AN-104 画面全体の見た目刷新と v132 仮反映
+
+2026-11-17、オーナーの指摘（「もっと見た目の改善してほしかったな」）と指示（「仮で反映してみて」）を受け、3つの不変条件と既存の全検査・E2E 契約を守ったまま画面全体のビジュアルを刷新し、実画面で確認できるよう v132 として仮反映した。
+
+変更: `style.css`・`style.min.css`（ライト `#f2f5f3`/`#ffffff`/`#186346`・ダーク `#0b0f14`/`#131922`/`#6ed09e` の配色とサーフェス階層、的面・得点ゾーン色 `--z*` は不変、`.vsecH` の 2px 太線廃止と左アクセントバー化、`.startBand`・`.figs`・`.cond`・`.specSheet`・`.sightLedgerRecord`・`.summaryTodaysResult`・`.empty` のカード化、トレイ型 `.seg`、カレンダー日付タイル `.entry .day`、タブのティントハイライト、折りたたみ右端の角丸バッジ化）、`scripts/50-record-view.js`（`totalsLineChartHtml` のエリアグラデーション・アクセント配色）、`scripts/60-history-sight-view.js`（`.noteSearch` の虫眼鏡 SVG アイコン）、`scripts/70-gear-settings.js`・`index.html`（`theme-color` 同期）、`scripts/10-storage-native.js`・`sw.js`・`version.json`・`package.json`・`package-lock.json`・`CHANGELOG.md`（v132）、`tasks.json`（`AN-104`、オーナー確認待ちのため `passes: false`）・`progress.md`。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0、Voice checks OK 1701 strings、Version alignment OK v132）、`npm run lint`、`npm run format:check`、配布版 `npm run test:e2e:dist` 495 passed。
+
+リスク: オーナーが実画面で見て好みと合わない部分があれば調整または v131 への切り戻しを行う（そのため `AN-104` は `in-progress`・`passes: false` で保持）。
