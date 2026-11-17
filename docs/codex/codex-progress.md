@@ -3648,3 +3648,13 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 2026-11-15、オーナー承認（「いいよ」）後に版130（`npm run version:bump`、`check:version` 成功）と CHANGELOG を入れ、PR #145 を main へマージ（ade6537）。マージ前の CI は 2 回落ちた。1 回め: 全件実行のときだけ `tests/e2e/pwa-release.spec.js` が、更新の帯で読み直す途中に捨てられた `version.json` の応答で「Response has been disposed」になった → 経路の処理で応答が取れないときは書き換えずに通す（8004f1e、`--repeat-each` で 15/15）。2 回め: 320×640 の分析タブ（グルーピング）で、「詳しく」の中の長い項目名がランナーの書体で幅 320 を越えた（手元の書体では収まる）→ `style.css` の `.anRefBody .lrow` だけ折り返しを許し（項目名 `flex:1 1 11em`、値は右寄せで入りきらなければ次の行の右へ）、`style.min.css` を作り直した（e4657d2）。字間を 0.06em・0.12em まで広げてもはみ出し 0、分析の e2e 68 passed（DejaVu だけの書体設定でも合格）、`check:all`・`lint`・`format:check` 成功、CI `validate` 成功。Pages の version.json が 130、sw.js が archery-note-v130、公開ページで APP_VER 130・コンソールのエラー 0 件。AN-102 を passes:true にした。
 
 次: オーナーに画面の言葉を見てもらう（AN-102 の確認事項 (a)〜(f)）。実射での確認（AN-001）。
+
+## AN-103 UI/UX 磨き込みと v131 公開準備
+
+2026-11-17、v130 の全画面を 375×812・320×640（ライト／ダーク）で実測監査し、3つの不変条件と `docs/design/v5/design.md`・`docs/design/voice.md` を守ったまま UI/UX を磨き込み、オーナー承認を受けて v131 への公開準備（`npm run version:bump`・CHANGELOG 追加）を行った。
+
+変更: `scripts/10-storage-native.js`（`APP_VER=131`、`appConfirm` の危険確認でキャンセル側初期フォーカス、`formStateSnapshot`・`bindUnsavedFormGuard`）、`scripts/30-target-svg.js`（三つ目的注記の `.hintCenter` 化。`markCircle` の半径・白縁は不変）、`scripts/50-record-view.js`（`ui.histFilter.q`、`activeNotice` の `#recMsg` 部分更新、過去エンド矢の視認色 `rgba(110,122,134,.58)`、確定済みスコア表のスクロール位置をエンド数変化時以外は保持）、`scripts/60-history-sight-view.js`（ノート一覧の日本語 IME・NFKC・複数語対応リアルタイム文字検索 `#histQuery` とクリアボタン、「合う記録がありません」の「すべての記録を表示」ボタン、`ui._histLimit` 維持、ノートの詳細の「操作へ」ボタン `#hJumpOps`、弓具 > サイトの `<details>` 開閉と `#sgCalV`/`#sgCalH` の Tab フォーカス維持、サイト記録・サイト合わせの `label[for]` と未保存確認）、`scripts/70-gear-settings.js`（セッティング編集・ウィザードの未保存確認、ウィザード `label[for]`、手入力欄 `aria-label`）、`style.css`・`style.min.css`（初回帯 320px 縦積み、`hintBannerClose` 44×44px 化、`html.subscreen .subTop` sticky 化、`.noteSearch`、`.histDetailSheet .subTop`）、`tests/e2e/ux-polish.spec.js`（新規 6 本）、`version.json`・`sw.js`・`package.json`・`package-lock.json`・`CHANGELOG.md`（v131）、`tasks.json`・`progress.md`。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0、Voice checks OK 1701 strings、Version alignment OK v131）、`npm run lint`、`npm run format:check`、配布版 `npm run test:e2e:dist` 495 passed。320×640（字間 0.12em を含む）で横はみ出し 0 件。
+
+リスク: 実機 iPhone Safari でのキーボード表示中の検索操作感と屋外での過去エンド矢の見え方は未確認。ノート一覧に検索欄が増えたぶん最初の項目が 1 行下がる。次: PR の CI `validate` 確認 → オーナーによる main マージ → Pages の v131 配信確認後に `AN-103` を `passes: true` にする。
