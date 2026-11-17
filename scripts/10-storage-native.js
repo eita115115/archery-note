@@ -671,9 +671,36 @@ function appConfirm(message,opts){
     let settled=false;
     const finish=v=>{ if(settled) return; settled=true; closeModal(ovl); resolve(v); };
     openModal(ovl,{escapeTarget:"#acCancel"});
+    if(o.danger) ovl.querySelector("#acCancel").focus({preventScroll:true});
     ovl.querySelector("#acCancel").onclick=()=>finish(false);
     ovl.querySelector("#acOk").onclick=()=>finish(true);
   });
+}
+function formStateSnapshot(root){
+  return JSON.stringify([...root.querySelectorAll("input,select,textarea")]
+    .filter(el=>el.type!=="file"&&el.type!=="hidden")
+    .map((el,i)=>[el.id||String(i), el.type==="checkbox"||el.type==="radio"?el.checked:el.value]));
+}
+function bindUnsavedFormGuard(ovl,closeSel){
+  const btn=ovl.querySelector(closeSel);
+  if(!btn) return;
+  const initial=formStateSnapshot(ovl);
+  let confirming=false;
+  btn.onclick=async()=>{
+    if(confirming) return;
+    if(formStateSnapshot(ovl)===initial){ closeModal(ovl); return; }
+    confirming=true;
+    try{
+      const discard=await appConfirm("入力した内容はまだ保存されていません。\n保存せずに閉じますか？",{
+        danger:true,
+        okLabel:"保存せずに閉じる",
+        cancelLabel:"入力を続ける"
+      });
+      if(discard) closeModal(ovl);
+    }finally{
+      confirming=false;
+    }
+  };
 }
 /* ---------- インライン SVG アイコン（計器の刻印、デザイン言語v2 5節） ----------
    24px グリッド・stroke 1.5（矢印系のみ1.6/1.8）・butt cap・currentColor・パス3本以内。

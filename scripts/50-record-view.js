@@ -11,7 +11,7 @@ let ui = {
   sightSel: { setupId: null, dist: 70 },
   gearSel: null /* 弓具 > セッティング で表示しているセッティングの id（null は記録に使っているもの） */,
   histOpen: null,
-  histFilter: { setupId: "", dist: "", round: "", kind: "all" } /* kind: "all" | "rec" | "memo" */,
+  histFilter: { setupId: "", dist: "", round: "", kind: "all", q: "" } /* kind: "all" | "rec" | "memo" */,
   /* cond は スコア の条件（距離|的径|的種|射数）。dist は 射型 の距離の選択 */
   analysisFilter: { setupId: "", dist: "", round: "", period: "all", cond: "" },
   analysisTab: "score" /* 分析の下線タブ: "score" | "impact" | "compare" | "form"。使っている間だけ覚える */,
@@ -2710,6 +2710,15 @@ function announceArrow(n, a) {
 }
 /* 状態行の一時的な案内（6射を入力済み、など）。次の操作で消える */
 function activeNotice(msg) {
+  const el = $("#recMsg");
+  if (el) {
+    ui.recMsg = "";
+    el.textContent = msg || "";
+    el.classList.toggle("is-warn", !!msg);
+    const t = $("#toast");
+    if (t && t.classList.contains("show")) positionToast(t);
+    return;
+  }
   ui.recMsg = msg;
   refreshActive();
 }
@@ -2783,7 +2792,7 @@ function drawActiveMarks(s) {
   [...s.ends, s.cur].forEach((end) => {
     if (end === focus) return;
     end.forEach((a) => {
-      if (placed(a)) html += markCircle(gp(a), s.faceD, "rgba(60,60,60,.45)", "", "", arrowR);
+      if (placed(a)) html += markCircle(gp(a), s.faceD, "rgba(110,122,134,.58)", "", "", arrowR);
     });
   });
   focus.forEach((a, i) => {
@@ -2864,6 +2873,9 @@ function refreshActive() {
   ).join("");
   /* 確定済みエンドのスコア表（高い点から表示）。行をタップするとそのエンドを下の枠に開く */
   const card = $("#recCard");
+  const prevScroll = card.scrollTop;
+  const endsChanged = card._lastEndsLen !== s.ends.length;
+  card._lastEndsLen = s.ends.length;
   const focused = document.activeElement;
   const rowFocus =
     focused && focused.dataset && focused.dataset.erow != null && card.contains(focused)
@@ -2876,6 +2888,7 @@ function refreshActive() {
         skipIndex: st.pulled ? Math.min(s.editIndex, s.ends.length) : null,
       })
     : activeGuideHtml(scoreMode);
+  card.scrollTop = prevScroll;
   card.querySelectorAll("[data-erow]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -2980,7 +2993,7 @@ function refreshActive() {
       bottom = top + row.offsetHeight;
     if (top < card.scrollTop) card.scrollTop = top;
     else if (bottom > card.scrollTop + card.clientHeight) card.scrollTop = bottom - card.clientHeight;
-  } else card.scrollTop = card.scrollHeight;
+  } else if (endsChanged) card.scrollTop = card.scrollHeight;
   const t = $("#toast");
   if (t && t.classList.contains("show")) positionToast(t);
 }
