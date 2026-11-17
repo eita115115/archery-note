@@ -629,21 +629,25 @@ function totalsLineChartHtml(vals, labels, meanVal) {
   const Y = (v) => T + ((hi - v) / (hi - lo)) * (H - T - B);
   const lines = Math.min(4, (hi - lo) / step);
   let h = `<svg class="lineChart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="合計点の推移: ${vals.map((v, i) => `${labels[i]} ${v}点`).join("、")}">`;
+  h += `<defs><linearGradient id="anTrendGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.22"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>`;
   for (let k = 0; k <= lines; k++) {
     const v = lo + ((hi - lo) / lines) * k;
     h += `<path d="M${L} ${Y(v).toFixed(1)}H${W - R + 10}" stroke="var(--rule)"/><text class="ax" x="${L - 8}" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end">${Math.round(v)}</text>`;
   }
   if (Number.isFinite(meanVal))
     h += `<path d="M${L} ${Y(meanVal).toFixed(1)}H${W - R + 10}" stroke="var(--sub)" stroke-dasharray="5 4"/>`;
-  h += `<path d="${vals.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join("")}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  const linePts = vals.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join("");
+  if (n > 1)
+    h += `<path d="${linePts}L${X(n - 1).toFixed(1)} ${(H - B).toFixed(1)}L${X(0).toFixed(1)} ${(H - B).toFixed(1)}Z" fill="url(#anTrendGrad)"/>`;
+  h += `<path d="${linePts}" fill="none" stroke="var(--accent)" stroke-width="2.4"/>`;
   /* 日付のラベルは 40px より詰まるときは1つおき（最後の回は必ず出す） */
   const everyOther = n > 1 && gap < 40;
   vals.forEach((v, i) => {
     const last = i === n - 1;
     const nb = [vals[i - 1], vals[i + 1]].filter((x) => x != null);
     const below = nb.length && v < nb.reduce((t, x) => t + x, 0) / nb.length;
-    h += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${last ? 5 : 4}" fill="${last ? "var(--accent)" : "var(--bg)"}" stroke="${last ? "var(--accent)" : "var(--ink)"}" stroke-width="2"/>`;
-    h += `<text x="${X(i).toFixed(1)}" y="${(below ? Y(v) + 20 : Y(v) - 10).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${last ? 700 : 500}" fill="var(--ink)" stroke="var(--bg)" stroke-width="4" paint-order="stroke">${v}</text>`;
+    h += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${last ? 5 : 4}" fill="${last ? "var(--accent)" : "var(--surface)"}" stroke="var(--accent)" stroke-width="2"/>`;
+    h += `<text x="${X(i).toFixed(1)}" y="${(below ? Y(v) + 20 : Y(v) - 10).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${last ? 700 : 500}" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke">${v}</text>`;
     if (!everyOther || (n - 1 - i) % 2 === 0)
       h += `<text class="ax" x="${X(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${labels[i]}</text>`;
   });
