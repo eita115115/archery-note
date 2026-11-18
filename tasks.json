@@ -1225,5 +1225,29 @@
     "owner": "cursor",
     "acceptance": "evals/acceptance.md の UI 行（check:ui・lint・375px 前後確認）と リリース行（check:version v131）に加え、npm run check:all・format:check・配布版 npm run test:e2e:dist 全件（新規 ux-polish.spec.js 6 本を含む 495 本）が成功する。実寸の矢円と線かみ採点、保存データの形式と保存値、既存の data-testid と id は不変。375×812 と 320×640（ライト／ダーク）で 13px 未満の文字・44px 未満の押せるもの・横はみ出し・NaN/undefined が増えず、初回帯の 320px 横はみ出しと hintBannerClose の 44px 未満が 0 件になること。main マージと Pages 配信確認後に passes: true を記録する。",
     "evidence": "2026-11-17 実装・v131 公開準備（オーナー承認「進めて」を受けて版131へ更新・CHANGELOG 追加。commit e6acf5a・0b578d6）: scripts/10-storage-native.js・30-target-svg.js・50-record-view.js・60-history-sight-view.js・70-gear-settings.js・style.css・style.min.css・sw.js・version.json・package.json・package-lock.json・CHANGELOG.md・tests/e2e/ux-polish.spec.js。検証: npm run build:web-assets・check:all（exit 0、Voice checks OK 1701 strings、Version alignment OK v131）・lint・format:check・配布版 test:e2e:dist 495 passed。 / 2026-11-17 公開 v131: PR #147 の CI validate 成功（0b578d6）を確かめ、オーナー承認（「勧めて」）後に main へマージ（c8e58b6）。main の CI validate・deploy 成功（run 44054392591）後、公開先 https://eita115115.github.io/archery-note/ で version.json が { \"v\": 131 }、sw.js が archery-note-v131、Chromium で開いた公開ページの APP_VER が 131・4タブ表示・ノート検索欄表示・コンソールのエラー 0 件を確認。"
+  },
+  {
+    "id": "AN-104",
+    "task": "仮見た目の整え（配色・カード・グラフ・日付枠）と v132 仮公開",
+    "status": "done",
+    "passes": true,
+    "dependencies": [
+      "AN-103"
+    ],
+    "owner": "cursor",
+    "acceptance": "オーナー指示「仮で反映してみて」に従い、見た目の変更を版132として Pages に仮載せすること。採点・矢円・保存形式は不変。",
+    "evidence": "2026-11-17 オーナー指示「仮で反映してみて」を受け PR #149 を main へマージ（eb0389b）。Pages に v132 を仮載せ。その後オーナー指示「戻して」により AN-105（v133）で撤回。"
+  },
+  {
+    "id": "AN-105",
+    "task": "仮見た目 v132 を戻し、v131 相当の見た目を v133 として公開する",
+    "status": "open",
+    "passes": false,
+    "dependencies": [
+      "AN-104"
+    ],
+    "owner": "cursor",
+    "acceptance": "evals/acceptance.md の UI 行とリリース行（check:version v133）に加え、npm run check:all・format:check・配布版 npm run test:e2e:dist 全件が成功する。見た目トークン・カード・グラフ面塗りは v131 時点に戻り、v131 の操作改善は残る。実寸の矢円と線かみ採点、保存データの形式と保存値は不変。main マージと Pages で version.json が { \"v\": 133 }、sw.js が archery-note-v133 になること。",
+    "evidence": "2026-11-18 オーナー指示「戻して」を受け、PR #149 を revert（見た目を v131 相当へ戻す）し、PWA 更新のため版を 133 に上げた。CHANGELOG に v132（仮）と v133（撤回）を記録。検証: build:web-assets・check:all（Voice 1701・Version alignment OK v133）・lint・format:check・配布版 test:e2e:dist 495 passed。"
   }
 ]
