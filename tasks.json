@@ -1252,14 +1252,14 @@
   },
   {
     "id": "AN-106",
-    "task": "Quiet Native Instrument UI/UX 刷新と射型の記録画面の改良（v134 公開準備）",
-    "status": "in-progress",
-    "passes": false,
+    "task": "Quiet Native Instrument UI/UX 刷新と射型の記録画面の改良（v134 公開）",
+    "status": "done",
+    "passes": true,
     "dependencies": [
       "AN-105"
     ],
     "owner": "antigravity",
     "acceptance": "evals/acceptance.md の UI 行（check:ui・lint・375px/320px ライト/ダーク確認）・リリース行（check:version v134）・format:check・check:voice・check:storage・check:distribution・PR CI validate・main マージ・Pages v134 配信確認がすべて成功すること。実寸の矢円と線かみ採点、既存データ保存契約（SCHEMA_VER 5）、主要 iPhone フローは不変。main マージと Pages 配信確認後に passes: true を記録する。",
-    "evidence": "2026-11-24 実装・v134 公開準備（branch feat/ui-ux-quiet-native-v134）: index.html・style.css・style.min.css・scripts/47-form-v2-view.js・50-record-view.js・60-history-sight-view.js・70-gear-settings.js・90-init.js・version 134 マーカー群（scripts/10-storage-native.js・sw.js・version.json・package.json・package-lock.json）・CHANGELOG.md・progress.md・tasks.json・docs/codex/codex-progress.md。"
+    "evidence": "2026-11-24 実装・PR #150（5ad12ef・b07c228・0bf0001）の CI validate 成功（run 45340722470、check:all・lint・format:check・配布版 test:e2e:dist 495 passed）後に main へマージ（044f341）。main の CI validate・deploy 成功（run 45342984970）後、公開先 https://eita115115.github.io/archery-note/ で version.json が { \"v\": 134 }、sw.js が archery-note-v134、公開ページで APP_VER 134・4タブ表示・横はみ出し 0・コンソールエラー 0 件を確認。"
   }
 ]

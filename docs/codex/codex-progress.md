@@ -3671,6 +3671,6 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 
 2026-11-18、オーナー「戻して」を受け、PR #149 を revert し見た目を v131 相当へ戻した。すでに v132 を受け取った端末の Service Worker を更新するため版を 133 に上げた（`archery-note-v133`）。v131 の操作改善（ノート検索・スクロール保持・未保存確認など）は残す。採点・矢円・保存形式は不変。main へ push（f53612f・c69f8db）後、CI `validate`・`deploy` 成功（run 44299984246）。Pages の `version.json` が 133、`sw.js` が `archery-note-v133` を確認し、`AN-105` を `passes: true` にした。
 
-## AN-106 UI/UX 刷新と射型の記録画面の改良（v134 公開準備）
+## 公開 v134（UI/UX 刷新と射型の記録画面の改良、AN-106）
 
-2026-11-24、AI 的な装飾（影・カラーグラデーション・装飾帯・ピル乱立）を排した Quiet Native Instrument UI と、射型の記録 v2 画面群（起動デッキ・3連テレメトリ帯・等倍 SVG 図表・精密骨格重ね図・カメラ枠ガイド・1射詳細ゲージ・320px SVG 縮小不具合の解消）を実装し、`npm run version:bump` で版を 134 に更新した。採点半径・ラインカッター判定・保存契約（`SCHEMA_VER` 5）は不変。次: PR の CI `validate` 通過確認後に `main` へマージし、GitHub Pages で `v134` 配信を確認する。
+2026-11-24、AI 的な装飾（影・カラーグラデーション・装飾帯・ピル乱立）を排した Quiet Native Instrument UI と、射型の記録 v2 画面群（起動デッキ・3連テレメトリ帯・等倍 SVG 図表・精密骨格重ね図・カメラ枠ガイド・1射詳細ゲージ・320px SVG 縮小不具合の解消）を実装し、`npm run version:bump` で版を 134 に更新した。採点半径・ラインカッター判定・保存契約（`SCHEMA_VER` 5）は不変。PR #150 は初回 CI で 375×667 画面の修正バー展開時スコア表詰まり判定（`record-teardown.spec.js:153`）の 1 件のみ失敗し、余白と `watchCrampedScorecard` を修正（0bf0001）して再実行の CI `validate`（run 45340722470）が全件通過。`main` へマージ（044f341）後、`main` の CI `validate`・`deploy` 成功（run 45342984970）、Pages の `version.json` が 134、`sw.js` が `archery-note-v134`、公開ページで `APP_VER` 134・4タブ表示・横はみ出し 0・コンソールエラー 0 件を確認し、`AN-106` を `status: done`・`passes: true` にした。
