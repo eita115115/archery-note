@@ -341,6 +341,7 @@ function renderHistory(m) {
       <span class="segPick${hf.dist ? " on" : ""}"><select id="histDist" aria-label="距離" data-testid="notes-filter-dist"${dists.length ? "" : " disabled"}><option value="">距離</option>${dists.map((d) => `<option value="${esc(d)}" ${String(hf.dist) === String(d) ? "selected" : ""}>${historyDistanceLabel(d)}</option>`).join("")}</select></span>
     </div>
     <div class="noteSearch">
+      <svg class="noteSearchIco" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="M15.4 15.4 20.5 20.5"/></svg>
       <input type="search" class="inp" id="histQuery" data-testid="notes-search" value="${esc(hf.q)}" placeholder="メモ・タグ・弓具・天気で探す" aria-label="ノートを文字で探す">
       <button type="button" class="txtBtn noteSearchClear" id="histQueryClear" data-testid="notes-search-clear"${hf.q ? "" : " hidden"}>クリア</button>
     </div>
@@ -1117,26 +1118,26 @@ function sightScaleSvg(rows) {
   const W = 112, H = 330, T = 16, B = 16;
   const Y = (v) => T + ((v - t.lo) / (t.hi - t.lo)) * (H - T - B);
   const fmt = (v) => (Math.abs(v) < 1e-9 ? 0 : v).toFixed(Math.min(t.dec, 3));
-  let h = `<path d="M40 ${T}V${H - B}" stroke="var(--ink)" stroke-width="2"/>`;
+  let h = `<path d="M40 ${T}V${H - B}" stroke="var(--ink)" stroke-width="1.8"/>`;
   const nMinor = Math.round((t.hi - t.lo) / t.minor);
   for (let i = 0; i <= nMinor; i++) {
     const v = t.lo + i * t.minor;
     const isMajor = i % 5 === 0;
-    h += `<path d="M40 ${Y(v).toFixed(1)}h${isMajor ? -12 : -6}" stroke="var(${isMajor ? "--ink" : "--rule-strong"})" stroke-width="${isMajor ? 1.5 : 1}"/>`;
-    if (isMajor) h += `<text class="ax" x="24" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end" font-size="13" fill="var(--sub)">${fmt(v)}</text>`;
+    h += `<path d="M40 ${Y(v).toFixed(1)}h${isMajor ? -11 : -5}" stroke="var(${isMajor ? "--ink" : "--rule-strong"})" stroke-width="${isMajor ? 1.5 : 1}"/>`;
+    if (isMajor) h += `<text class="ax" x="25" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end" font-size="13" fill="var(--sub)">${fmt(v)}</text>`;
   }
-  /* 近い値の名札は重ならないよう、上から順に 17px 以上あける（矢印の位置は動かさない） */
+  /* 近い値の名札は重ならないよう、上から順に 18px 以上あける（矢印の位置は動かさない） */
   const marks = pts.map((r) => ({ r, y: Y(r.v), ly: Y(r.v) })).sort((a, b) => a.y - b.y);
   marks.forEach((mk, i) => {
-    if (i > 0 && mk.ly < marks[i - 1].ly + 17) mk.ly = marks[i - 1].ly + 17;
+    if (i > 0 && mk.ly < marks[i - 1].ly + 18) mk.ly = marks[i - 1].ly + 18;
   });
   for (let i = marks.length - 1; i >= 0; i--) {
-    const max = i === marks.length - 1 ? H - 6 : marks[i + 1].ly - 17;
+    const max = i === marks.length - 1 ? H - 8 : marks[i + 1].ly - 18;
     if (marks[i].ly > max) marks[i].ly = max;
   }
   marks.forEach((mk) => {
-    const p = mk.r.kind === "pred", col = `var(${p ? "--sub" : "--accent"})`;
-    h += `<g data-scale-dist="${esc(mk.r.dist)}" data-scale-kind="${mk.r.kind}" data-scale-v="${esc(mk.r.text)}"><path d="M40 ${mk.y.toFixed(1)}H58" stroke="${col}" stroke-width="2"${p ? ' stroke-dasharray="4 3"' : ""}/><path d="M42 ${mk.y.toFixed(1)}l8 -5v10z" fill="${col}"/>${Math.abs(mk.ly - mk.y) > 0.5 ? `<path d="M58 ${mk.y.toFixed(1)}L64 ${mk.ly.toFixed(1)}" stroke="${col}" stroke-width="1"/>` : ""}<text x="66" y="${(mk.ly + 5).toFixed(1)}" font-size="14" font-weight="700" fill="var(--ink)">${esc(mk.r.dist)}m</text></g>`;
+    const p = mk.r.kind === "pred", col = `var(${p ? "--sub" : "--ink"})`;
+    h += `<g data-scale-dist="${esc(mk.r.dist)}" data-scale-kind="${mk.r.kind}" data-scale-v="${esc(mk.r.text)}"><path d="M40 ${mk.y.toFixed(1)}H58" stroke="${col}" stroke-width="1.8"${p ? ' stroke-dasharray="4 3"' : ""}/><path d="M41 ${mk.y.toFixed(1)}l7 -4.2v8.4z" fill="${col}"/>${Math.abs(mk.ly - mk.y) > 0.5 ? `<path d="M58 ${mk.y.toFixed(1)}L64 ${mk.ly.toFixed(1)}" stroke="${col}" stroke-width="1"/>` : ""}<text x="66" y="${(mk.ly + 4.5).toFixed(1)}" font-size="14" font-weight="${p ? 500 : 700}" fill="${col}">${esc(mk.r.dist)}m</text></g>`;
   });
   const label = `サイトの目盛り（上下の値）。${pts.map((r) => `${r.dist}m ${r.text}${r.kind === "pred" ? "（予測）" : ""}`).join("、")}`;
   return `<svg class="sightScale" data-testid="sight-scale" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">${h}</svg>`;

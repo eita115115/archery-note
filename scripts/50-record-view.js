@@ -612,8 +612,8 @@ function endStripHtml(sess) {
 }
 /* 合計点の推移（折れ線）。破線は平均。幅は画面に合わせて決め、文字は 13px のまま縮めない */
 function totalsLineChartHtml(vals, labels, meanVal) {
-  const gut = window.innerWidth <= 340 ? 12 : 16;
-  const W = Math.max(240, Math.min(window.innerWidth, 480) - gut * 2),
+  const gut = window.innerWidth <= 340 ? 25 : 33;
+  const W = Math.max(220, Math.min(window.innerWidth, 480) - gut * 2),
     H = 176,
     L = 42,
     R = 24,
@@ -633,17 +633,22 @@ function totalsLineChartHtml(vals, labels, meanVal) {
     const v = lo + ((hi - lo) / lines) * k;
     h += `<path d="M${L} ${Y(v).toFixed(1)}H${W - R + 10}" stroke="var(--rule)"/><text class="ax" x="${L - 8}" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end">${Math.round(v)}</text>`;
   }
-  if (Number.isFinite(meanVal))
-    h += `<path d="M${L} ${Y(meanVal).toFixed(1)}H${W - R + 10}" stroke="var(--sub)" stroke-dasharray="5 4"/>`;
-  h += `<path d="${vals.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join("")}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  if (Number.isFinite(meanVal)) {
+    const my = Y(meanVal).toFixed(1);
+    h += `<path d="M${L} ${my}H${W - R + 10}" stroke="var(--sub)" stroke-dasharray="4 4"/>`;
+  }
+  const linePts = vals
+    .map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1))
+    .join("");
+  h += `<path d="${linePts}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>`;
   /* 日付のラベルは 40px より詰まるときは1つおき（最後の回は必ず出す） */
   const everyOther = n > 1 && gap < 40;
   vals.forEach((v, i) => {
     const last = i === n - 1;
     const nb = [vals[i - 1], vals[i + 1]].filter((x) => x != null);
     const below = nb.length && v < nb.reduce((t, x) => t + x, 0) / nb.length;
-    h += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${last ? 5 : 4}" fill="${last ? "var(--accent)" : "var(--bg)"}" stroke="${last ? "var(--accent)" : "var(--ink)"}" stroke-width="2"/>`;
-    h += `<text x="${X(i).toFixed(1)}" y="${(below ? Y(v) + 20 : Y(v) - 10).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${last ? 700 : 500}" fill="var(--ink)" stroke="var(--bg)" stroke-width="4" paint-order="stroke">${v}</text>`;
+    h += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${last ? 4.8 : 3.5}" fill="${last ? "var(--ink)" : "var(--surface)"}" stroke="var(--ink)" stroke-width="2"/>`;
+    h += `<text x="${X(i).toFixed(1)}" y="${(below ? Y(v) + 20 : Y(v) - 10).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${last ? 700 : 500}" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke">${v}</text>`;
     if (!everyOther || (n - 1 - i) % 2 === 0)
       h += `<text class="ax" x="${X(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${labels[i]}</text>`;
   });

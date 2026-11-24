@@ -1,13 +1,13 @@
 :root{
-  /* UI v5（docs/design/v5/design.md 2章）— 既定はライトの値。html.dark / html.auto / html.field が上書きする。
-     比は WCAG の実測値（design.md 2章の表）。 */
+  /* Quiet Native Instrument — 既定はライトの値。html.dark / html.auto / html.field が上書きする。 */
   color-scheme:light;
-  --bg:#f3f4f1; --surface:#ffffff; --raised:#e7eae6; --mat:#dfe3de;
-  --rule:#d3d8d3; --rule-strong:#717d87;
-  --ink:#141c24; --sub:#4d5964;
-  /* セージは「主操作」「選択中」「入力中エンド」だけに使う */
-  --accent:#2c6649; --on-accent:#ffffff; --accent-soft:#dfeae3;
-  --warn:#7a5c10; --danger:#b3261e; --info:#1f5f9e;
+  --bg:#f5f5f7; --surface:#ffffff; --surface-2:#f0f1f4; --raised:#e9eaee; --bar-muted:#cfd2d9; --mat:#e6e7eb;
+  --rule:#e3e4e8; --rule-strong:#8c9099;
+  --ink:#111214; --sub:#5c6066;
+  /* 主操作は墨黒、リンク・補助アクションは静かなスポーツブルー */
+  --accent:#16181c; --on-accent:#ffffff; --accent-soft:#eceef2;
+  --link:#1558b0;
+  --warn:#8a5a0a; --danger:#c62828; --info:#1558b0;
   /* 的の色（的面・得点キーの上辺・セルの下線だけ。文字には使わない） */
   --zg:#ffe14d; --zr:#f23b3b; --zb:#37a6e0; --zk:#1c1e1c; --zw:#ffffff; --zm:#5d6672;
   --font:system-ui,-apple-system,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;
@@ -510,49 +510,54 @@ html.recording body:not(.modalOpen) .toast{bottom:var(--record-toast-bottom,calc
 }
 .updbar:not([hidden]){display:block;}
 .updbar[hidden]{display:none!important;}
-/* UI v5 dark（design.md 2章）。html.auto（システムがダーク）と同じ値。旧トークン名は :root の対応づけがそのまま効く */
+/* Quiet Native Instrument dark — html.auto（システムがダーク）と同じ値 */
 html.dark{
   color-scheme:dark;
-  --bg:#0e1217; --surface:#151a21; --raised:#1e252e; --mat:#090c10;
-  --rule:#2a323d; --rule-strong:#66727f;
-  --ink:#eef1f4; --sub:#a9b3bf;
-  --accent:#a8c7ac; --on-accent:#0f1a13; --accent-soft:#1c2a22;
-  --warn:#e6c46a; --danger:#ff9288; --info:#8fb8ea;
+  --bg:#0a0b0d; --surface:#15171a; --surface-2:#1d2025; --raised:#23262c; --bar-muted:#363a42; --mat:#060708;
+  --rule:#262930; --rule-strong:#6e737d;
+  --ink:#f2f3f5; --sub:#9aa0a8;
+  --accent:#f2f3f5; --on-accent:#111214; --accent-soft:#23262c;
+  --link:#6ba8ff;
+  --warn:#e8c468; --danger:#ff8a80; --info:#6ba8ff;
   --zm:#7b8591;
-  --status-ok:#86d3a0; --teal:#7cc4b8; --amber:#e8b56a; --navy:#8fb8ea; --blue:#8fb8ea;
+  --status-ok:#86d3a0; --teal:#7cc4b8; --amber:#e8b56a; --navy:#6ba8ff; --blue:#6ba8ff;
 }
 @media (prefers-color-scheme: dark){
   html.auto{
   color-scheme:dark;
-  --bg:#0e1217; --surface:#151a21; --raised:#1e252e; --mat:#090c10;
-  --rule:#2a323d; --rule-strong:#66727f;
-  --ink:#eef1f4; --sub:#a9b3bf;
-  --accent:#a8c7ac; --on-accent:#0f1a13; --accent-soft:#1c2a22;
-  --warn:#e6c46a; --danger:#ff9288; --info:#8fb8ea;
+  --bg:#0a0b0d; --surface:#15171a; --surface-2:#1d2025; --raised:#23262c; --bar-muted:#363a42; --mat:#060708;
+  --rule:#262930; --rule-strong:#6e737d;
+  --ink:#f2f3f5; --sub:#9aa0a8;
+  --accent:#f2f3f5; --on-accent:#111214; --accent-soft:#23262c;
+  --link:#6ba8ff;
+  --warn:#e8c468; --danger:#ff8a80; --info:#6ba8ff;
   --zm:#7b8591;
-  --status-ok:#86d3a0; --teal:#7cc4b8; --amber:#e8b56a; --navy:#8fb8ea; --blue:#8fb8ea;
+  --status-ok:#86d3a0; --teal:#7cc4b8; --amber:#e8b56a; --navy:#6ba8ff; --blue:#6ba8ff;
   }
 }
 /* 射場モード（直射日光下）: 文字と背景の差を最大にし、本文を 1px 大きくする。定義はここ1か所 */
 html.field{
-  --bg:#ffffff; --surface:#ffffff; --raised:#e9ecea;
-  --ink:#0a0f14; --sub:#36414c;            /* 白地に 19.24 / 10.41 */
-  --rule:#9aa5ae; --rule-strong:#4d5964;   /* 境界 7.17 */
-  --accent:#1c4a35;                        /* 白地に 10.09 */
-  --red:#a01515; --blue:#1050a0;
+  --bg:#ffffff; --surface:#ffffff; --surface-2:#f2f3f5; --raised:#e5e7eb; --bar-muted:#9ca3af;
+  --ink:#000000; --sub:#333840;
+  --rule:#8c929c; --rule-strong:#3f454f;
+  --accent:#000000; --on-accent:#ffffff; --accent-soft:#e8eaee;
+  --link:#0b4494;
+  --red:#a01515; --blue:#0b4494;
 }
 html.dark.field{
-  --bg:#000000; --surface:#0a0c10; --raised:#161b22;
-  --ink:#ffffff; --sub:#d0d7df;
-  --rule:#4a5563; --rule-strong:#8a96a6;
-  --accent:#c2e3c6;
+  --bg:#000000; --surface:#0a0b0d; --surface-2:#15171b; --raised:#1c1f25; --bar-muted:#525866;
+  --ink:#ffffff; --sub:#d4d8df;
+  --rule:#4b515c; --rule-strong:#9098a6;
+  --accent:#ffffff; --on-accent:#000000; --accent-soft:#242830;
+  --link:#8cc0ff;
 }
 @media (prefers-color-scheme: dark) {
   html.auto.field{
-  --bg:#000000; --surface:#0a0c10; --raised:#161b22;
-  --ink:#ffffff; --sub:#d0d7df;
-  --rule:#4a5563; --rule-strong:#8a96a6;
-  --accent:#c2e3c6;
+  --bg:#000000; --surface:#0a0b0d; --surface-2:#15171b; --raised:#1c1f25; --bar-muted:#525866;
+  --ink:#ffffff; --sub:#d4d8df;
+  --rule:#4b515c; --rule-strong:#9098a6;
+  --accent:#ffffff; --on-accent:#000000; --accent-soft:#242830;
+  --link:#8cc0ff;
   }
 }
 html.field body{font-size:17px;}
@@ -1904,4 +1909,527 @@ details.fv2More ul{margin:0; padding:0 0 12px 18px; font-size:14px; line-height:
   .fv2Tr > *{font-size:14px;}
   .fv2Tr > *:first-child{font-size:13px;}
   .fv2FixRow{grid-template-columns:1fr 104px;}
+}
+
+/* ===================================================================================
+   Quiet Native Instrument — UI/UX Redesign Layer
+   装飾（影・グラデーション・飾り線・過剰なピルバッジ）を排し、
+   iOS純正ツールと日本のスポーツ記録帳のような静かで端正な設計にする。
+   =================================================================================== */
+
+/* ---- 1. 画面タイトル行 ---- */
+.viewTop{
+  align-items:flex-end;
+  padding:calc(16px + var(--safe-t)) var(--gut) 12px;
+}
+.viewTop h1{font-size:28px; font-weight:700; letter-spacing:-.02em; line-height:1.18;}
+.viewTop .viewDate{font-size:13px; font-weight:500; color:var(--sub); margin-bottom:2px;}
+.txtBtn{color:var(--link); font-weight:600; font-size:15px;}
+
+/* ---- 2. 下線サブタブ & ボトムタブ ---- */
+.utabs{gap:0; padding:0 var(--gut); margin-bottom:12px; border-bottom:1px solid var(--rule);}
+.utabs button{font-size:15px; font-weight:600; border-bottom-width:2.5px; color:var(--sub);}
+.utabs button[aria-current=page]{font-weight:700; color:var(--ink); border-bottom-color:var(--ink);}
+
+nav.tabs{border-top:1px solid var(--rule); box-shadow:none;}
+nav.tabs button{gap:3px; font-size:13px; font-weight:500; color:var(--sub);}
+nav.tabs button.on,nav.tabs button[aria-current=page]{color:var(--ink); border-top-color:var(--accent); font-weight:700;}
+nav.tabs button.on .ic,nav.tabs button[aria-current=page] .ic{color:var(--ink);}
+
+/* ---- 3. グルーピングされた静かな白面（影なし・飾り線なし） ---- */
+.band.startBand{
+  margin:2px 0 0; padding:16px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+  box-shadow:none;
+}
+.startBand .l{font-size:13px; font-weight:600; color:var(--sub);}
+.band.startBand[data-testid="record-paused"] .l{color:var(--warn);}
+.startBand .c{font-size:22px; font-weight:700; letter-spacing:-.015em; margin-top:2px; color:var(--ink);}
+.startBand .m{font-size:14px; color:var(--sub); margin:3px 0 14px; line-height:1.45;}
+.startBand .btnRow{padding-top:12px;}
+.startBand .btnRow .btn{min-height:50px;}
+
+.vsec{
+  margin-top:14px; padding:16px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+  box-shadow:none;
+}
+.vsecH{
+  border-top:0; border-bottom:1px solid var(--rule);
+  padding:0 0 10px; margin-bottom:4px;
+  align-items:baseline;
+}
+.vsecH h2{font-size:16px; font-weight:700; letter-spacing:-.01em; color:var(--ink);}
+.vsecH .aside{font-size:13px; font-weight:500; color:var(--sub);}
+.vsec .lrow:last-of-type{border-bottom:0;}
+.vsec > .basis:last-child{padding-top:8px;}
+.vsec > .empty{padding:20px 8px 10px;}
+.vsec > details.gearMore:last-child{border-bottom:0;}
+
+/* ネストした vsec は二重枠にしない */
+.vsec .vsec{margin-top:12px; padding:12px 0 0; border:0; border-top:1px solid var(--rule); border-radius:0; background:transparent;}
+.vsec.anFirst{margin-top:10px;}
+.gearView > .vsec.anFirst{margin-top:4px;}
+.resultScreen .vsec{margin-top:14px;}
+.resultScreen .resultTotalSec{margin-top:8px;}
+.settingsScreen .vsec{margin-top:14px;}
+.settingsScreen .vsec.setFirst{margin-top:8px;}
+.anRef summary{border-top:0; border-bottom:0; min-height:46px; padding:2px 0;}
+.anRef[open] summary{border-bottom:1px solid var(--rule); padding-bottom:10px; margin-bottom:4px;}
+
+.badgeSection{
+  border:1px solid var(--rule); border-radius:12px;
+  background:var(--surface); padding:16px;
+}
+.badgeCard{border-radius:10px; background:var(--surface-2); border:1px solid var(--rule); padding:10px 6px;}
+.badgeCard:not(.locked){border-color:var(--ink); background:var(--surface);}
+.badgeRateTrack,.histScoreTrack,.storageMeter{border-radius:99px; background:var(--raised);}
+.badgeRateFill,.histScoreFill,.storageMeterFill{border-radius:99px; background:var(--ink);}
+
+main > .hintBanner,.hintBanner{
+  margin:12px 0 0; padding:12px 14px;
+  border-radius:12px; border:1px solid var(--rule);
+  background:var(--surface);
+}
+.hintBannerAction{color:var(--link);}
+
+/* ---- 4. 操作部品（純正iOS・物理道具の質感） ---- */
+.btn{
+  border-radius:10px; font-weight:600;
+  background:var(--accent); color:var(--on-accent); border:1px solid var(--accent);
+  box-shadow:none;
+  transition:opacity .12s;
+}
+.btn:active{opacity:.78; transform:none;}
+.btn.sec{background:var(--surface); color:var(--ink); border:1px solid var(--rule-strong);}
+.btn.ghost{background:var(--surface-2); color:var(--ink); border:1px solid var(--rule);}
+.btn.danger{background:transparent; color:var(--danger); border:1px solid var(--danger);}
+.btn.sm{border-radius:8px;}
+.startPrimary{border-radius:10px;}
+
+/* 連結セグメント: 装飾線なしの素直なネイティブセグメント */
+.seg{
+  background:var(--raised); border:1px solid var(--rule); border-radius:10px;
+  padding:1px; gap:2px; overflow:hidden;
+}
+.seg button{
+  border-left:0; border-radius:8px; min-height:44px;
+  font-size:14px; font-weight:500; color:var(--sub);
+}
+.seg button[aria-pressed=true]{
+  background:var(--surface); color:var(--ink); font-weight:700;
+  box-shadow:0 1px 2px rgba(0,0,0,.08);
+}
+html.dark .seg{background:#0f1114; border-color:var(--rule);}
+html.dark .seg button[aria-pressed=true],
+html.dark .seg .segPick.on{background:#2b2f37; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);}
+@media (prefers-color-scheme: dark){
+  html.auto .seg{background:#0f1114; border-color:var(--rule);}
+  html.auto .seg button[aria-pressed=true],
+  html.auto .seg .segPick.on{background:#2b2f37; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);}
+}
+html.field.dark .seg{background:#000; border-color:#888;}
+html.field.dark .seg button[aria-pressed=true],
+html.field.dark .seg .segPick.on{background:#262626; box-shadow:inset 0 0 0 1px #fff;}
+.seg .segPick{border-left:0; border-radius:8px;}
+.seg .segPick select{font-size:14px; border-radius:8px; color:var(--sub);}
+.seg .segPick.on{background:var(--surface); box-shadow:0 1px 2px rgba(0,0,0,.08);}
+.seg .segPick.on select{color:var(--ink); font-weight:700;}
+
+/* 入力・折りたたみ */
+.inp,select.inp,textarea.inp,.noteBox{
+  border:1px solid var(--rule-strong); border-radius:10px; background-color:var(--surface);
+}
+.inp:focus:not(:focus-visible),.noteBox:focus:not(:focus-visible){
+  border-color:var(--ink); box-shadow:none;
+}
+details.adv.recordDetails{
+  margin-top:14px; padding:4px 16px 8px!important;
+  border:1px solid var(--rule)!important; border-radius:12px;
+  background:var(--surface)!important;
+}
+
+/* 条件プルダウン（分析・サイト） */
+.cond{
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+  padding:2px 14px; margin-bottom:10px;
+}
+.cond label{padding:7px 0 1px;}
+.cond label + label{border-left:1px solid var(--rule); padding-left:14px;}
+.cond span{font-size:13px; font-weight:500; color:var(--sub);}
+.pick{font-size:15px; font-weight:600; min-height:44px;}
+
+/* ---- 5. 数値表示・棒グラフ・折れ線グラフ ---- */
+.bigNum{font-weight:700; letter-spacing:-.025em;}
+.bigNum.resultTotal{font-size:52px;}
+.bigRow{padding:8px 0 12px; border-bottom:1px solid var(--rule);}
+.figs{border-bottom:1px solid var(--rule); margin-top:2px;}
+.fig{padding:10px 4px 10px 12px;}
+.fig:first-child{padding-left:0;}
+.fig .l{font-size:13px; font-weight:500; color:var(--sub);}
+.fig .n{font-size:26px; font-weight:700; letter-spacing:-.015em; margin-top:2px;}
+.fig .d{margin-top:2px;}
+
+.strip{gap:4px; padding:12px 0 8px; border-bottom:1px solid var(--rule);}
+.strip div{height:78px; gap:4px;}
+.strip i{border-radius:3px 3px 0 0; background:var(--bar-muted,var(--raised)); border:0;}
+.strip div.hi i{background:var(--ink);}
+.strip div.hi b{color:var(--ink); font-weight:700;}
+.strip b{font-size:13px; font-weight:500;}
+
+.lineChart{max-width:100%; height:auto; margin:8px auto 0;}
+
+/* ---- 6. 記録中画面（没入・射場での片手操作を最優先） ---- */
+.recTop{background:var(--surface); border-bottom:1px solid var(--rule);}
+.recTop .condT{font-size:15px; font-weight:600; color:var(--ink);}
+.recTop .txtBtn{color:var(--ink);}
+.recStat{padding:7px var(--gut) 5px; background:var(--bg);}
+.recStat .endN{font-size:19px; font-weight:700; letter-spacing:-.01em;}
+.recStat .tot b{font-size:36px; font-weight:700; letter-spacing:-.02em; color:var(--ink);}
+.ruler{gap:3px; padding:0 var(--gut) 7px; background:var(--bg);}
+.ruler i{height:5px; border-radius:2px; background:var(--raised);}
+.ruler i.is-done{background:var(--sub);}
+.ruler i.is-cur{background:var(--ink);}
+
+.zoomBtn{
+  left:10px; bottom:10px; height:44px; padding:0 14px;
+  border-radius:8px; background:var(--surface); border:1px solid var(--rule-strong);
+  font-size:14px; font-weight:600; color:var(--ink);
+}
+.zoomBtn[aria-pressed="true"]{
+  background:var(--ink); border-color:var(--ink); color:var(--bg);
+}
+
+.scard{border-top:1px solid var(--rule); border-bottom:1px solid var(--rule); background:var(--surface);}
+.scHead{background:var(--surface-2); font-weight:600;}
+.scRow .cell::after{height:3px; border-radius:1px;}
+.scSub{background:var(--surface-2); border-color:var(--rule);}
+.scSub.total{background:var(--surface);}
+
+.curEnd{border-top:2px solid var(--ink); background:var(--surface);}
+.curCap{background:var(--surface-2); border-bottom:1px solid var(--rule);}
+.curRow .slot::after{height:3.5px; border-radius:1px;}
+.slot.is-next{box-shadow:inset 0 0 0 1.5px var(--ink);}
+.slot.is-next .ord{color:var(--ink); font-weight:700;}
+.slot.is-sel{box-shadow:inset 0 0 0 2px var(--ink); background:var(--accent-soft);}
+
+.keys{gap:6px; padding:10px var(--gut) 10px; background:var(--bg); border-top:1px solid var(--rule);}
+.key{
+  border-radius:8px; background:var(--surface); border:1px solid var(--rule-strong);
+  box-shadow:none;
+}
+.key::before{height:5px;}
+.key.is-miss{background:var(--surface-2);}
+.key:active{background:var(--raised);}
+
+.dockRow{background:var(--surface); border-top:1px solid var(--rule);}
+.editBar{background:var(--surface); border-top:2px solid var(--ink);}
+.nudgeKeys .btn.ghost{background:var(--surface-2); font-weight:700;}
+
+.lens{border:2px solid var(--ink); box-shadow:none;}
+.lensTag{border-radius:8px; padding:5px 10px; box-shadow:none;}
+
+/* ---- 7. ノート（月ごとにまとまる端正な記録帳） ---- */
+.historyRecords .noteSeg{margin-top:2px;}
+.noteSearch{position:relative; margin-top:8px;}
+.noteSearchIco{
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  width:17px; height:17px; color:var(--sub); pointer-events:none;
+}
+.noteSearch .inp{padding-left:36px; border-radius:10px; background:var(--raised); border:1px solid transparent;}
+.noteSearch .inp:focus:not(:focus-visible){background:var(--surface); border-color:var(--ink);}
+.historyRecords .historyFilters{
+  margin-top:6px; margin-bottom:2px; padding:0 14px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+}
+.historyRecords .historyFilters summary{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  list-style:none; font-size:14px; font-weight:600; padding:11px 0;
+}
+.historyRecords .historyFilters summary::-webkit-details-marker{display:none;}
+.historyRecords .historyFilters summary span{float:none; margin-left:auto; font-size:13px; font-weight:500; color:var(--sub);}
+.historyRecords .historyFilters summary::after{content:"＋"; flex:none; font-size:17px; font-weight:400; color:var(--sub);}
+.historyRecords .historyFilters[open] summary::after{content:"−";}
+
+.noteMonth{
+  padding:18px 2px 6px; border-bottom:0;
+  font-size:14px; font-weight:700; color:var(--sub);
+}
+.noteMonth .cnt{font-size:13px; font-weight:500; color:var(--sub);}
+
+/* 個別カード乱立をやめ、隣接するエントリを1枚の白い一覧として繋げる */
+.entry.noteEntry{
+  grid-template-columns:52px minmax(0,1fr); gap:0 12px;
+  padding:13px 14px; margin:0;
+  background:var(--surface);
+  border-left:1px solid var(--rule); border-right:1px solid var(--rule);
+  border-bottom:1px solid var(--rule); border-radius:0;
+}
+.noteMonth + .entry.noteEntry{border-top:1px solid var(--rule); border-top-left-radius:12px; border-top-right-radius:12px;}
+.entry.noteEntry:has(+ .noteMonth),
+.entry.noteEntry:last-child{border-bottom-left-radius:12px; border-bottom-right-radius:12px;}
+.entry.noteEntry:active{background:var(--surface-2);}
+.entry .day{
+  padding:2px 0 0; font-size:23px; font-weight:700; line-height:1.05; color:var(--ink);
+  text-align:center;
+}
+.entry .day small{font-size:13px; font-weight:500; color:var(--sub); margin-top:3px;}
+.entry.homeEntry{
+  grid-template-columns:56px minmax(0,1fr); gap:0 10px;
+  padding:11px 0; border-bottom:1px solid var(--rule);
+}
+.entry.homeEntry:last-child{border-bottom:0;}
+.entry.homeEntry .day{font-size:17px; text-align:left; padding:2px 0 0;}
+.entry .hd .sc1{font-size:22px; font-weight:700; color:var(--ink);}
+.entry.noteEntry.memoRow .hd b{font-size:14px; font-weight:700; color:var(--sub);}
+.entry .chg{margin-top:4px; font-size:13px; color:var(--info); line-height:1.45;}
+
+.historyRecords .historyRound{
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+  padding:0 14px; margin:6px 0;
+}
+.historyRoundStages{margin:0 0 10px 4px; padding-left:10px; border-left:2px solid var(--rule);}
+.historyRoundStages .entry.noteEntry{border-left:0; border-right:0; padding-left:4px; padding-right:4px;}
+.noteTrashLink{
+  margin-top:16px; padding:12px 14px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+}
+
+/* 結果・ノート詳細: 見出しだけの vsec はカード化せずすっきり見出し帯にし、スコア表は12列の視認性を優先して画面幅いっぱいを使う */
+.resultScreen .vsec:has(> .vsecH:only-child){
+  margin-top:18px; padding:0 2px 6px;
+  background:transparent; border:0; border-radius:0;
+}
+.resultScreen .vsec:has(> .vsecH:only-child) .vsecH{border-bottom:0; padding:0; margin-bottom:0;}
+.resultScreen .bleed:has(> .scard){
+  margin:0 calc(-1 * var(--gut));
+  border-radius:0; border-left:0; border-right:0; background:var(--surface);
+}
+
+/* ---- 8. 分析・サイト・弓具・結果 ---- */
+.resultScreen .bleed,.anBleed{
+  margin:0; border-radius:12px; overflow:hidden;
+  border:1px solid var(--rule); background:var(--mat);
+}
+.anBleed .hint{padding:8px 12px; background:var(--surface); border-top:1px solid var(--rule);}
+.pair.anBleed{border-radius:12px; overflow:hidden; border:1px solid var(--rule);}
+.pair > div{padding:8px 4px 6px;}
+.cmp{border-top:0; margin-top:6px;}
+.cmpRow.is-head{background:var(--surface-2);}
+.cmpRow > *:last-child{padding-right:6px;}
+.cmpRow > *:first-child{padding-left:6px;}
+.noImpact{
+  padding:14px 16px; border:1px solid var(--rule); border-radius:12px;
+  background:var(--surface);
+}
+.vsec .noImpact{border:0; border-radius:0; padding:8px 0; background:transparent;}
+
+/* サイト目盛り & 調整アドバイス */
+.sightDistRow{border-radius:0; padding:8px 10px!important; border-bottom:1px solid var(--rule);}
+.sightDistRow.is-cur{
+  border-radius:8px; background:var(--surface-2);
+  border:1px solid var(--ink); box-shadow:none;
+}
+.sightDistRow.is-cur .lk{padding-left:2px; color:var(--ink);}
+.sightAdvice .fig[data-state="move"] .sightAdvN{
+  display:inline-block; box-shadow:inset 0 -2.5px 0 var(--link); color:var(--ink);
+}
+.sightAdvice .fig[data-state="hold"] .sightAdvN{color:var(--warn);}
+.pill{border-radius:6px; padding:1px 7px; font-size:13px;}
+.pill.is-on{background:var(--surface-2); color:var(--ink); border-color:var(--rule-strong);}
+.sightMarkLatest{border-radius:6px; padding:1px 7px; background:var(--surface-2); color:var(--ink); border-color:var(--rule-strong);}
+
+.lrow.setRow:has(> .seg) .lmain{flex:1 1 100%;}
+.lrow.setRow:has(> .seg) .seg{flex:1 1 100%; margin-top:4px;}
+
+.resultScreen .summaryStorageNotice{
+  border-radius:12px; border:1px solid var(--rule); background:var(--surface); padding:14px 16px;
+}
+
+/* ---- 8b. 射型の記録 v2（生体計測器・Quiet Native Telemetry） ---- */
+.fv2Deck,.anView .analysisFormCard .fv2Sub,.anView .analysisFormCard .formLegacy{
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px; padding:16px;
+  margin-top:12px;
+}
+.fv2Deck{margin-top:0;}
+.fv2Sub .fv2ChartH{padding:0 0 8px; border-bottom:1px solid var(--rule); margin-bottom:6px;}
+.fv2OffSchema{
+  display:flex; justify-content:center; align-items:center;
+  background:var(--surface-2); border:1px solid var(--rule); border-radius:10px;
+  padding:10px; margin:10px 0 8px;
+}
+.fv2OffSchema svg{display:block; width:240px; max-width:100%; height:auto;}
+.fv2Metrics{
+  display:grid; grid-template-columns:0.74fr 0.96fr 1.18fr; gap:8px;
+  border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+  padding:9px 0; margin:6px 0 10px;
+}
+.fv2Metrics > div{min-width:0;}
+.fv2Metrics > div + div{border-left:1px solid var(--rule); padding-left:10px;}
+.fv2Metrics .k{display:block; font-size:13px; color:var(--sub); line-height:1.3;}
+.fv2Metrics .v{
+  display:block; margin-top:2px; font-size:17px; font-weight:700; color:var(--ink);
+  font-variant-numeric:tabular-nums; line-height:1.25; white-space:nowrap; overflow-wrap:normal;
+}
+.fv2Metrics > div:last-child .v{white-space:normal; overflow-wrap:anywhere;}
+.fv2Metrics .v small{font-size:13px; font-weight:500; color:var(--sub); margin-left:2px;}
+.fv2Deck .formRecordList,.fv2Sub .formRecordList{margin-top:4px;}
+.anView .formAnalysisRow{border-bottom:1px solid var(--rule);}
+.anView .formAnalysisRow:last-child{border-bottom:none;}
+.anView .formAnalysisRow .lrow.fv2Item{padding:10px 4px; border-bottom:0;}
+.anView .formAnalysisRow .lrow.fv2Item:active{background:var(--surface-2);}
+.anView .fv2Sub .btnRow.fv2Tight{padding-top:10px;}
+
+/* カメラ・ビューファインダー・置き方確認 */
+.resultScreen .fv2Cam.bleed{
+  margin:8px 0 0; border-radius:12px; background:#08090b;
+  border:1px solid var(--rule-strong); overflow:hidden;
+}
+.fv2Cam.fv2Rev::before,.fv2Cam.fv2Rev::after{
+  content:""; position:absolute; left:10px; right:10px; height:12px;
+  pointer-events:none; z-index:2; opacity:.5;
+}
+.fv2Cam.fv2Rev::before{
+  top:10px;
+  background:linear-gradient(#fff,#fff) 0 0/12px 1.5px no-repeat,
+             linear-gradient(#fff,#fff) 0 0/1.5px 12px no-repeat,
+             linear-gradient(#fff,#fff) 100% 0/12px 1.5px no-repeat,
+             linear-gradient(#fff,#fff) 100% 0/1.5px 12px no-repeat;
+}
+.fv2Cam.fv2Rev:has(.fv2Tag:not(:empty))::before{
+  background:linear-gradient(#fff,#fff) 100% 0/12px 1.5px no-repeat,
+             linear-gradient(#fff,#fff) 100% 0/1.5px 12px no-repeat;
+}
+.fv2Cam.fv2Rev::after{
+  bottom:10px;
+  background:linear-gradient(#fff,#fff) 0 100%/12px 1.5px no-repeat,
+             linear-gradient(#fff,#fff) 0 100%/1.5px 12px no-repeat,
+             linear-gradient(#fff,#fff) 100% 100%/12px 1.5px no-repeat,
+             linear-gradient(#fff,#fff) 100% 100%/1.5px 12px no-repeat;
+}
+.fv2Tag{
+  z-index:3; top:10px; left:10px; font-size:13px; font-weight:600;
+  color:#f2f3f5; background:rgba(8,9,11,.74);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.16); border-radius:6px; padding:3px 8px;
+  font-variant-numeric:tabular-nums;
+}
+.fv2Rows{
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+  padding:4px 14px; margin-top:10px;
+}
+.fv2Rows .lrow.fv2Chk:last-child{border-bottom:0;}
+.pill.fv2Pill{border-radius:6px; padding:2px 8px; font-weight:600;}
+.pill.fv2Pill.ok{color:#15803d; border-color:rgba(21,128,61,.35); background:rgba(21,128,61,.08);}
+.pill.fv2Pill.warn{color:var(--warn); border-color:var(--warn); background:rgba(180,83,9,.08);}
+.pill.fv2Pill.info{color:var(--link); border-color:rgba(21,88,176,.35); background:rgba(21,88,176,.08);}
+html.dark .pill.fv2Pill.ok{color:#4ade80; border-color:rgba(74,222,128,.35); background:rgba(74,222,128,.1);}
+html.dark .pill.fv2Pill.info{color:var(--link); border-color:rgba(107,168,255,.4); background:rgba(107,168,255,.12);}
+@media (prefers-color-scheme: dark){
+  html.auto .pill.fv2Pill.ok{color:#4ade80; border-color:rgba(74,222,128,.35); background:rgba(74,222,128,.1);}
+  html.auto .pill.fv2Pill.info{color:var(--link); border-color:rgba(107,168,255,.4); background:rgba(107,168,255,.12);}
+}
+
+/* 撮影中ステージ */
+@keyframes fv2LiveDot{0%,100%{opacity:1;}50%{opacity:.35;}}
+.sheet.fv2Screen[data-stage="capture"] #fv2Clock{
+  display:inline-flex; align-items:center; gap:6px; font-variant-numeric:tabular-nums;
+}
+.sheet.fv2Screen[data-stage="capture"] #fv2Clock::before{
+  content:""; width:7px; height:7px; border-radius:50%; background:var(--danger);
+  animation:fv2LiveDot 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce){
+  .sheet.fv2Screen[data-stage="capture"] #fv2Clock::before{animation:none;}
+}
+.fv2Count{min-height:200px; padding:4px 0;}
+.fv2Count .num{font-variant-numeric:tabular-nums; letter-spacing:-.04em;}
+.fv2Thumb{border-radius:8px; overflow:hidden; border:1.5px solid var(--rule-strong); background:#08090b;}
+.fv2State{
+  background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--ink);
+  border-radius:10px; padding:10px 12px; font-size:14px; color:var(--ink);
+}
+.fv2State.warn{border-color:var(--warn); border-left-color:var(--warn); color:var(--warn);}
+
+/* 解析中ステップ */
+.fv2Steps{
+  background:var(--surface); border:1px solid var(--rule); border-radius:12px;
+  padding:4px 16px; margin-top:10px;
+}
+.fv2Steps .lrow:last-child{border-bottom:0;}
+
+/* 結果・射の詳細・重ね図 */
+.resultScreen [data-testid="form-v2-diff"] > .fact[data-testid="form-v2-sentence"]{
+  background:var(--surface-2); border-radius:10px; padding:12px 14px; margin-top:10px;
+  font-weight:600; color:var(--ink);
+}
+.resultScreen #fv2ToShot.lrow.link{
+  background:var(--surface-2); border:1px solid var(--rule); border-radius:10px;
+  padding:10px 14px; margin-top:10px; border-bottom:1px solid var(--rule);
+}
+.fv2Chart{border-bottom:1px solid var(--rule); padding-bottom:12px; margin-top:4px;}
+.fv2Chart:last-of-type{border-bottom:0;}
+.fv2ChartH b,.fv2ChartH span{font-variant-numeric:tabular-nums;}
+.fv2Ov{
+  background:#f8f9fb; border:1px solid var(--rule); border-radius:10px; overflow:hidden; margin-top:10px;
+}
+html.dark .fv2Ov{background:#0e1014;}
+@media (prefers-color-scheme: dark){html.auto .fv2Ov{background:#0e1014;}}
+.fv2Legend .k2,.fv2Legend .k6{background:var(--link);}
+.fv2Legend .k5{background:var(--surface-2); border:1px solid var(--rule-strong);}
+.fv2Tbl{border-top:0; margin-top:10px; border:1px solid var(--rule); border-radius:10px; overflow:hidden;}
+.fv2Tr{padding:0 8px;}
+.fv2Tr > *{font-variant-numeric:tabular-nums;}
+.fv2Tr:last-child{border-bottom:0;}
+.fv2Tr.h{background:var(--surface-2);}
+.fv2Tr.dif{background:rgba(21,88,176,.08); box-shadow:inset 3px 0 0 var(--link);}
+.fv2Tr.dif > *:last-child{color:var(--link);}
+html.dark .fv2Tr.dif{background:rgba(107,168,255,.12);}
+@media (prefers-color-scheme: dark){html.auto .fv2Tr.dif{background:rgba(107,168,255,.12);}}
+.fv2Tog{border-radius:8px; background:var(--surface);}
+.fv2Tog[aria-pressed=true]{background:var(--accent); color:var(--on-accent); border-color:var(--accent); box-shadow:none;}
+
+/* 動画で確かめる画面 */
+.fv2Chips{gap:6px; padding:10px 0 4px;}
+.fv2Chip{border-radius:8px; background:var(--surface); border:1px solid var(--rule); font-variant-numeric:tabular-nums;}
+.fv2Chip[aria-pressed=true]{background:var(--accent); color:var(--on-accent); border-color:var(--accent); box-shadow:none;}
+.fv2Scrub .t{font-variant-numeric:tabular-nums;}
+.fv2RevCtl .btnRow:first-child{display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:8px;}
+.fv2RevCtl .btnRow .btn{min-height:46px;}
+.fv2Opt:last-of-type{border-bottom:0;}
+
+/* ---- 9. モーダル・シート・固定アクションバー ---- */
+.ovl,html.dark .ovl,html.auto .ovl{background:rgba(0,0,0,.48);}
+.sheet{
+  border-radius:16px 16px 0 0; border-top:1px solid var(--rule);
+  box-shadow:none; background:var(--surface);
+}
+.sheet.resultScreen{border-radius:0; border-top:0; background:var(--bg);}
+.confirmSheet{
+  align-self:center; margin:16px; border-radius:14px; padding:18px;
+  border:1px solid var(--rule);
+}
+.modalSwipeHandle::before{width:36px; height:4px; border-radius:99px; background:var(--rule-strong); opacity:.5;}
+.subTop{background:var(--bg); border-bottom:1px solid var(--rule);}
+.actbar{background:var(--surface); border-top:1px solid var(--rule); box-shadow:none;}
+.toast{border-radius:10px; box-shadow:none;}
+.updbar{border-radius:10px; box-shadow:none; border-color:var(--rule-strong); color:var(--ink);}
+
+/* ---- 10. 小画面（<= 340px）安全ガード ---- */
+@media (max-width:340px){
+  .band.startBand{padding:14px 12px;}
+  .vsec{padding:12px;}
+  .fv2Deck,.anView .analysisFormCard .fv2Sub,.anView .analysisFormCard .formLegacy{padding:12px;}
+  .fv2Rows,.fv2Steps{padding:4px 12px;}
+  .fv2Metrics{gap:6px;}
+  .fv2Metrics > div + div{padding-left:6px;}
+  .fv2Metrics .v{font-size:15px;}
+  .cond{padding:2px 10px;}
+  .entry.noteEntry{padding:11px 10px; gap:0 10px;}
+  .badgeSection{padding:12px;}
+}
+
+/* ---- 11. 大画面（タブレット・デスクトップ）でのフレーミング ---- */
+@media (min-width:560px){
+  nav.tabs{border-left:1px solid var(--rule); border-right:1px solid var(--rule);}
 }
