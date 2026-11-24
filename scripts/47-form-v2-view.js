@@ -42,10 +42,12 @@ function formV2Height() {
   const h = db.settings && db.settings.formHeightCm;
   return typeof h === "number" && h >= 100 && h <= 230 ? h : null;
 }
-/* 図の幅（px）。SVG を 1:1 で描いて、文字が 13px より小さくならないようにする */
+/* 図の幅（px）。カード内幅と 1:1 で一致させ、文字が 13px より小さくならないようにする */
 function formV2W() {
   const w = Math.min(document.documentElement.clientWidth || 375, 480);
-  return w - 2 * (w <= 340 ? 12 : 16);
+  const gut = w <= 340 ? 12 : 16;
+  const pad = w <= 340 ? 13 : 17;
+  return w - 2 * (gut + pad);
 }
 function formV2ViewText(view) {
   const v = view || {};
@@ -107,36 +109,45 @@ function formV2Beep() {
 }
 
 /* ---------- 図 ---------- */
-/* 時間の帯: 引き → 保持 → 離れ を 1 射ずつ。引き戻しは白抜き、数えていない候補は破線 */
+/* 時間の帯: 引き → フルドロー → リリース を 1 射ずつ。引き戻しは白抜き、数えていない候補は破線 */
 function formV2TimelineSvg(model) {
-  const w = formV2W(), h = 74, from = model.fromS || 0;
+  const w = formV2W(), h = 80, from = model.fromS || 0;
   const dur = model.toS == null ? Math.max(1, model.dur || 0, ...model.events.map((e) => e.tS + 1).filter(Number.isFinite)) : Math.max(1, model.toS - from), x = (t) => 4 + ((w - 8) * Math.min(dur, Math.max(0, t - from))) / dur;
-  let g = `<path d="M0 46H${w}" stroke="var(--rule-strong)" stroke-width="1"/>`, lastLabel = -99;
+  let g = `<rect x="0" y="22" width="${w}" height="28" rx="5" fill="var(--surface-2)"/>`
+    + `<path d="M0 50H${w}" stroke="var(--rule-strong)" stroke-width="1"/>`;
+  for (const frac of [0.25, 0.5, 0.75]) {
+    const tx = (w * frac).toFixed(1);
+    g += `<line x1="${tx}" y1="47" x2="${tx}" y2="53" stroke="var(--rule-strong)" stroke-width="1"/>`;
+  }
+  let lastLabel = -99;
   /* 番号は、前の番号に重なるときは省く（射の多い記録では、とびとびに出る） */
   const label = (cx, text, cls) => {
     const half = String(text).length * 4.6 + 2;
     if (cx - half < lastLabel + 3) return "";
     lastLabel = cx + half;
-    return `<text x="${Math.min(w - 6, Math.max(6, cx)).toFixed(1)}" y="14" text-anchor="middle" class="${cls}">${text}</text>`;
+    return `<text x="${Math.min(w - 6, Math.max(6, cx)).toFixed(1)}" y="13" text-anchor="middle" class="${cls}">${text}</text>`;
   };
   for (const e of model.events) {
     if (e.kind === "cand") {
       const x1 = x(e.fromS == null ? e.tS - 2 : e.fromS), x2 = x(e.tS);
-      g += `<rect x="${x1.toFixed(1)}" y="26.5" width="${Math.max(3, x2 - x1).toFixed(1)}" height="7" fill="${e.counted ? "var(--ink)" : "none"}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2"/>`;
+      g += `<rect x="${x1.toFixed(1)}" y="27" width="${Math.max(3, x2 - x1).toFixed(1)}" height="8" rx="1.5" fill="${e.counted ? "var(--ink)" : "var(--surface)"}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 2"/>`;
       g += label(e.counted ? x2 : (x1 + x2) / 2, e.counted ? e.n : "？", e.counted ? "axi" : "ax");
       continue;
     }
     const x2 = x(e.tS), x1 = x(e.tS - (e.holdS || 0)), x0 = x(e.tS - (e.holdS || 0) - (e.drawS || 0));
-    g += `<path d="M${x0.toFixed(1)} 46L${x1.toFixed(1)} 30" stroke="var(--sub)" stroke-width="2" fill="none"/>`;
     if (e.counted) {
-      g += `<rect x="${x1.toFixed(1)}" y="26" width="${Math.max(3, x2 - x1).toFixed(1)}" height="8" fill="var(--ink)"/><path d="M${x2.toFixed(1)} 20V46" stroke="var(--ink)" stroke-width="2"/>`;
+      g += `<polygon points="${x0.toFixed(1)},50 ${x1.toFixed(1)},32 ${x2.toFixed(1)},32 ${x2.toFixed(1)},50" fill="var(--ink)" fill-opacity="0.08"/>`;
+      g += `<path d="M${x0.toFixed(1)} 50L${x1.toFixed(1)} 32" stroke="var(--sub)" stroke-width="1.75" fill="none"/>`;
+      g += `<rect x="${x1.toFixed(1)}" y="27" width="${Math.max(3, x2 - x1).toFixed(1)}" height="9" rx="1.5" fill="var(--ink)"/><path d="M${x2.toFixed(1)} 20V50" stroke="var(--link)" stroke-width="2.2"/><rect x="${(x2 - 2).toFixed(1)}" y="18" width="4" height="4" rx="1" fill="var(--link)"/>`;
       g += label(x2, e.n, "axi");
     } else {
-      g += `<rect x="${x1.toFixed(1)}" y="26.5" width="${Math.max(3, x2 - x1).toFixed(1)}" height="7" fill="none" stroke="var(--sub)" stroke-width="1.5"/>`;
+      g += `<path d="M${x0.toFixed(1)} 50L${x1.toFixed(1)} 32" stroke="var(--sub)" stroke-width="1.5" fill="none"/>`;
+      g += `<rect x="${x1.toFixed(1)}" y="27.5" width="${Math.max(3, x2 - x1).toFixed(1)}" height="8" rx="1.5" fill="var(--surface)" stroke="var(--sub)" stroke-width="1.5"/>`;
+      if (e.kind === "letdown") g += `<line x1="${x2.toFixed(1)}" y1="35.5" x2="${Math.min(w - 2, x2 + 6).toFixed(1)}" y2="50" stroke="var(--sub)" stroke-width="1.4" stroke-dasharray="2 2"/>`;
       g += label((x1 + x2) / 2, e.kind === "letdown" ? "戻" : "外", "ax");
     }
   }
-  g += `<text x="0" y="66" class="ax">${formV2Mmss(from)}</text><text x="${w}" y="66" text-anchor="end" class="ax">${formV2Mmss(from + dur)}</text><text x="${w / 2}" y="66" text-anchor="middle" class="ax">時間</text>`;
+  g += `<text x="2" y="71" class="ax">${formV2Mmss(from)}</text><text x="${w - 2}" y="71" text-anchor="end" class="ax">${formV2Mmss(from + dur)}</text><text x="${w / 2}" y="71" text-anchor="middle" class="ax">時間</text>`;
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="時間の帯。${model.count} 射、引き戻し ${model.letdowns} 回">${g}</svg>`;
 }
 /* voice:fold-begin: たたんだ中（詳しく・計算の内訳）だけに出る文。統計の言葉を使ってよい（docs/design/voice.md 4章。tools/check-voice.js） */
@@ -153,25 +164,47 @@ function formV2SpreadMoreHtml(cmp, keys) {
   return li ? `<details class="fv2More" data-testid="form-v2-spread-more"><summary>詳しく</summary><ul>${li}</ul></details>` : "";
 }
 /* voice:fold-end */
-/* 射の順の図: 帯 = 測定のゆれから出せる下限、破線 = 中央値、塗りつぶし = 違った射 */
+/* 射の順の図: 帯 = カメラで測るときのぶれから出せる目安、破線 = まん中の値、青印 = 違った射 */
 function formV2RunChartHtml(model, cmp, key) {
-  const ft = cmp.feat[key], meta = FormV2.META[key], w = formV2W(), h = 104, pt = 14, pb = 24, n = cmp.n;
+  const ft = cmp.feat[key], meta = FormV2.META[key], w = formV2W(), h = 108, pt = 16, pb = 24, n = cmp.n;
   const ref = ft.median, vals = ft.vals.map((v) => FormV2.shown(key, v, ref)), ok = vals.filter(Number.isFinite);
   if (!ok.length) return `<div class="fv2Chart"><div class="fv2ChartH"><b>${esc(meta.name)}</b><span>—</span></div><p class="basis">この撮影では測れませんでした。</p></div>`;
   const m = FormV2.shown(key, ft.median, ref), lim = ft.limit == null ? null : FormV2.shownSize(key, ft.limit, ref), nz = FormV2.shownSize(key, ft.noise, ref);
   const lo = Math.min(...ok, lim == null ? m : m - lim), hi = Math.max(...ok, lim == null ? m : m + lim), pad = (hi - lo) * 0.16 || 1;
-  const y = (v) => pt + (h - pt - pb) * (1 - (v - (lo - pad)) / (hi + pad - (lo - pad))), x = (i) => 4 + ((w - 8) * (i + 0.5)) / n;
+  const y = (v) => pt + (h - pt - pb) * (1 - (v - (lo - pad)) / (hi + pad - (lo - pad))), x = (i) => 12 + ((w - 24) * (i + 0.5)) / n;
   const flagged = new Set(cmp.flags.filter((f) => f.key === key).map((f) => f.row));
-  let g = lim == null ? "" : `<rect x="0" y="${y(m + lim).toFixed(1)}" width="${w}" height="${(y(m - lim) - y(m + lim)).toFixed(1)}" fill="var(--raised)"/>`;
-  g += `<path d="M0 ${y(m).toFixed(1)}H${w}" stroke="var(--sub)" stroke-width="1" stroke-dasharray="4 4"/>`;
+  let g = "";
+  if (lim != null) {
+    const yHi = y(m + lim).toFixed(1), yLo = y(m - lim).toFixed(1);
+    g += `<rect x="0" y="${yHi}" width="${w}" height="${(yLo - yHi).toFixed(1)}" fill="var(--surface-2)"/>`;
+    g += `<line x1="0" y1="${yHi}" x2="${w}" y2="${yHi}" stroke="var(--rule)" stroke-width="1"/><line x1="0" y1="${yLo}" x2="${w}" y2="${yLo}" stroke="var(--rule)" stroke-width="1"/>`;
+  }
+  const ym = y(m);
+  g += `<path d="M0 ${ym.toFixed(1)}H${w}" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="4 3"/>`;
+  let runPts = [];
   vals.forEach((v, i) => {
-    const d = flagged.has(i), num = model.compared[i].n;
-    if (Number.isFinite(v)) {
-      g += d
-        ? `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="7" fill="var(--info)"/><text x="${(i >= n / 2 ? x(i) - 12 : x(i) + 12).toFixed(1)}" y="${(y(v) + 5).toFixed(1)}" text-anchor="${i >= n / 2 ? "end" : "start"}" class="axi">${FormV2.fmt(key, v)}</text>`
-        : `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="5.5" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>`;
+    if (Number.isFinite(v)) runPts.push(`${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+    else if (runPts.length) {
+      if (runPts.length >= 2) g += `<polyline points="${runPts.join(" ")}" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round" opacity="0.28"/>`;
+      runPts = [];
     }
-    if (n <= 12 || i % 2 === 0) g += `<text x="${x(i).toFixed(1)}" y="${h - 5}" text-anchor="middle" class="${d ? "axi" : "ax"}">${num}</text>`;
+  });
+  if (runPts.length >= 2) g += `<polyline points="${runPts.join(" ")}" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round" opacity="0.28"/>`;
+  vals.forEach((v, i) => {
+    const d = flagged.has(i), num = model.compared[i].n, xi = x(i).toFixed(1);
+    if (Number.isFinite(v)) {
+      const yi = y(v);
+      if (d) {
+        const right = i >= n / 2;
+        const lx = right ? Math.max(6, x(i) - 11).toFixed(1) : Math.min(w - 6, x(i) + 11).toFixed(1);
+        const ly = Math.min(h - pb - 4, Math.max(pt + 6, yi + 5)).toFixed(1);
+        g += `<line x1="${xi}" y1="${ym.toFixed(1)}" x2="${xi}" y2="${yi.toFixed(1)}" stroke="var(--link)" stroke-width="1.5" opacity="0.5"/>`;
+        g += `<circle cx="${xi}" cy="${yi.toFixed(1)}" r="6.5" fill="var(--link)" stroke="var(--surface)" stroke-width="2"/><text x="${lx}" y="${ly}" text-anchor="${right ? "end" : "start"}" class="axi" fill="var(--link)">${FormV2.fmt(key, v)}</text>`;
+      } else {
+        g += `<circle cx="${xi}" cy="${yi.toFixed(1)}" r="4.8" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>`;
+      }
+    }
+    if (n <= 12 || i % 2 === 0) g += `<text x="${xi}" y="${h - 5}" text-anchor="middle" class="${d ? "axi" : "ax"}">${num}</text>`;
   });
   const u = (v) => FormV2.fmt(key, v, { dp: Math.max(1, meta.dp) });
   const spread = FormV2.shownSize(key, ft.spread, ref);
@@ -183,7 +216,8 @@ function formV2RunChartHtml(model, cmp, key) {
   const head = meta.rel ? "この撮影のまん中を 100%" : `まん中 ${formV2ValHtml(key, m, cm)}`;
   return `<div class="fv2Chart" data-key="${key}"><div class="fv2ChartH"><b>${esc(meta.name)}</b><span>${head}</span></div><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${esc(meta.name)}。射の順">${g}</svg><p class="basis">${note}</p></div>`;
 }
-/* 姿の図。pose = 18 個の整数（9 点 × (x, y)、0.01 胴、原点 = 両肩の中点、弓の向きが x 正、上が y 正）。見えない点は null */
+/* 姿の図。pose = 18 個の整数（9 点 × (x, y)、0.01 胴、原点 = 両肩の中点、弓の向きが x 正、上が y 正）。見えない点は null。
+   注意: <path> は 1 姿につき 1 つだけ保つ（重ね図の検査が path 数を数えている） */
 function formV2PosePath(pose, m, o) {
   if (!Array.isArray(pose)) return "";
   const P = (i) => (Number.isFinite(pose[i * 2]) && Number.isFinite(pose[i * 2 + 1]) ? [m.ox + (pose[i * 2] / 100) * m.s, m.oy - (pose[i * 2 + 1] / 100) * m.s] : null);
@@ -193,8 +227,19 @@ function formV2PosePath(pose, m, o) {
     if (p && q) d += `M${p[0].toFixed(1)} ${p[1].toFixed(1)}L${q[0].toFixed(1)} ${q[1].toFixed(1)}`;
   }
   const nose = P(0);
+  let extra = "";
+  if (o.joints || o.ghostJoints) {
+    for (let i = 1; i <= 8; i++) {
+      const pt = P(i);
+      if (!pt) continue;
+      extra += o.joints
+        ? `<circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="3.6" fill="var(--surface)" stroke="${o.c}" stroke-width="2" opacity="${o.op || 1}"/>`
+        : `<circle cx="${pt[0].toFixed(1)}" cy="${pt[1].toFixed(1)}" r="1.8" fill="${o.c}" opacity="${o.op || 0.5}"/>`;
+    }
+  }
   return (d ? `<path d="${d}" fill="none" stroke="${o.c}" stroke-width="${o.w}" stroke-linecap="round" stroke-linejoin="round" opacity="${o.op || 1}"/>` : "")
-    + (nose ? `<circle cx="${nose[0].toFixed(1)}" cy="${nose[1].toFixed(1)}" r="${(0.16 * m.s).toFixed(1)}" fill="none" stroke="${o.c}" stroke-width="${o.w}" opacity="${o.op || 1}"/>` : "");
+    + (nose ? `<circle cx="${nose[0].toFixed(1)}" cy="${nose[1].toFixed(1)}" r="${(0.16 * m.s).toFixed(1)}" fill="${o.joints ? "var(--surface)" : "none"}" stroke="${o.c}" stroke-width="${o.w}" opacity="${o.op || 1}"/>` : "")
+    + extra;
 }
 function formV2MedianPose(poses) {
   const out = [];
@@ -206,13 +251,23 @@ function formV2MedianPose(poses) {
 }
 /* 重ね図。hi = 色を変える射（比べる射の中の番号）、only = true なら「この射」と「ほかの射の中央」だけ */
 function formV2OverlayHtml(model, phase, hi, only) {
-  const w = formV2W() - 2, h = Math.round(w * 0.62), m = { ox: w * 0.4, oy: h * 0.36, s: w / 3.05 };
+  const w = formV2W() - 2, h = Math.round(w * 0.66), m = { ox: w * 0.4, oy: h * 0.37, s: w / 3.05 };
   const poses = model.compared.map((e) => (phase === "rel" ? e.pr : e.ps));
   if (!poses.some(Array.isArray)) return `<p class="basis">${phase === "rel" ? "リリースのあとの姿" : "フルドローの姿"}は、この記録にはありません。</p>`;
   let g = "";
-  if (only) g += formV2PosePath(formV2MedianPose(poses.filter((_, i) => i !== hi)), m, { c: "var(--sub)", w: 2 });
-  else poses.forEach((p, i) => { if (i !== hi) g += formV2PosePath(p, m, { c: "var(--sub)", w: 1.5, op: 0.75 }); });
-  if (hi != null && hi >= 0) g += formV2PosePath(poses[hi], m, { c: "var(--info)", w: 3 });
+  const step = 0.5 * m.s;
+  for (let gx = m.ox - Math.ceil(m.ox / step) * step; gx < w; gx += step) {
+    if (gx > 4 && gx < w - 4) g += `<line x1="${gx.toFixed(1)}" y1="6" x2="${gx.toFixed(1)}" y2="${h - 6}" stroke="var(--rule)" stroke-width="0.75" opacity="0.55"/>`;
+  }
+  for (let gy = m.oy - Math.ceil(m.oy / step) * step; gy < h; gy += step) {
+    if (gy > 4 && gy < h - 4) g += `<line x1="6" y1="${gy.toFixed(1)}" x2="${w - 6}" y2="${gy.toFixed(1)}" stroke="var(--rule)" stroke-width="0.75" opacity="0.55"/>`;
+  }
+  g += `<line x1="${m.ox.toFixed(1)}" y1="6" x2="${m.ox.toFixed(1)}" y2="${h - 6}" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>`;
+  g += `<line x1="6" y1="${m.oy.toFixed(1)}" x2="${w - 6}" y2="${m.oy.toFixed(1)}" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="3 3" opacity="0.55"/>`;
+  g += `<circle cx="${m.ox.toFixed(1)}" cy="${m.oy.toFixed(1)}" r="4.5" fill="none" stroke="var(--rule-strong)" stroke-width="1" opacity="0.7"/>`;
+  if (only) g += formV2PosePath(formV2MedianPose(poses.filter((_, i) => i !== hi)), m, { c: "var(--sub)", w: 2, op: 0.68, ghostJoints: true });
+  else poses.forEach((p, i) => { if (i !== hi) g += formV2PosePath(p, m, { c: "var(--sub)", w: 1.5, op: 0.45 }); });
+  if (hi != null && hi >= 0) g += formV2PosePath(poses[hi], m, { c: "var(--link)", w: 3, op: 1, joints: true });
   return `<div class="fv2Ov"><svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="骨格の重ね図（${phase === "rel" ? "リリースのあと" : "フルドロー"}）">${g}</svg></div>`;
 }
 /* 「胴の 33.2%（約 16cm）」を、かっこの途中で折り返さない形にする（値と cm の目安を、それぞれひとかたまりにする） */
@@ -264,15 +319,17 @@ function formV2TrendHtml(records) {
   if (pts.length < 3) return wrap(`<p class="basis" data-testid="form-v2-trend-note">同じ撮り方の記録が 3 回になると、「${esc(meta.name)}」の推移が見られます（いま ${pts.length} 回）。そろえる条件: ${esc(formV2TrendCond(t, key))}。${esc(formV2TrendWhy(t))}</p>`);
   const ref = meta.rel ? pts[0].med : NaN, sh = (v) => FormV2.shown(key, v, ref);
   const rows = pts.map((p) => { const a = sh(p.q1), b = sh(p.q3); return { p, med: sh(p.med), lo: Math.min(a, b), hi: Math.max(a, b) }; });
-  const w = formV2W(), h = 150, pt = 12, pb = 26, left = 58;
+  const w = formV2W(), h = 154, pt = 12, pb = 26, left = 54;
   const lo0 = Math.min(...rows.map((r) => r.lo)), hi0 = Math.max(...rows.map((r) => r.hi)), pad = Math.max((hi0 - lo0) * 0.2, meta.unit === "s" ? 0.3 : 1);
-  const lo = lo0 - pad, hi = hi0 + pad, y = (v) => pt + (h - pt - pb) * (1 - (v - lo) / (hi - lo)), x = (i) => left + ((w - left - 20) * i) / (rows.length - 1);
+  const lo = lo0 - pad, hi = hi0 + pad, y = (v) => pt + (h - pt - pb) * (1 - (v - lo) / (hi - lo)), x = (i) => left + ((w - left - 16) * i) / (rows.length - 1);
   const ticks = formV2Ticks(lo0 - pad * 0.5, hi0 + pad * 0.5);
   let g = "";
   for (const v of ticks.out) g += `<path d="M0 ${y(v).toFixed(1)}H${w}" stroke="var(--rule)" stroke-width="1"/><text x="0" y="${(y(v) - 4).toFixed(1)}" class="ax">${FormV2.fmt(key, v, { dp: ticks.dp })}</text>`;
+  const medPts = rows.map((r, i) => `${x(i).toFixed(1)},${y(r.med).toFixed(1)}`).join(" ");
+  if (rows.length >= 2) g += `<polyline points="${medPts}" fill="none" stroke="var(--ink)" stroke-width="1.6" stroke-linejoin="round" opacity="0.32"/>`;
   rows.forEach((r, i) => {
-    if (r.p.gear) g += `<path d="M${x(i).toFixed(1)} ${pt}V${h - pb}" stroke="var(--info)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
-    g += `<path d="M${x(i).toFixed(1)} ${y(r.lo).toFixed(1)}V${y(r.hi).toFixed(1)}" stroke="var(--rule-strong)" stroke-width="5"/><circle cx="${x(i).toFixed(1)}" cy="${y(r.med).toFixed(1)}" r="5" fill="${i === rows.length - 1 ? "var(--accent)" : "var(--ink)"}"/>`;
+    if (r.p.gear) g += `<path d="M${x(i).toFixed(1)} ${pt}V${h - pb}" stroke="var(--link)" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+    g += `<path d="M${x(i).toFixed(1)} ${y(r.lo).toFixed(1)}V${y(r.hi).toFixed(1)}" stroke="var(--rule-strong)" stroke-width="5" stroke-linecap="round" opacity="0.72"/><circle cx="${x(i).toFixed(1)}" cy="${y(r.med).toFixed(1)}" r="5" fill="${i === rows.length - 1 ? "var(--link)" : "var(--ink)"}" stroke="var(--surface)" stroke-width="1.8"/>`;
     if (i === 0 || i === rows.length - 1) g += `<text x="${x(i).toFixed(1)}" y="${h - 6}" text-anchor="${i ? "end" : "start"}" class="ax">${fmtMD(r.p.date)}</text>`;
   });
   const dp = Math.max(1, meta.dp), f = (v, o) => FormV2.fmt(key, v, Object.assign({ dp }, o || {}));
@@ -298,8 +355,27 @@ function formV2TrendHtml(records) {
 }
 /* 切のとき: その場で入にできる（design.md 2.1） */
 function formTrackingOffCard() {
+  const hasHistory = (db.sessions || []).length > 0 || (db.formAnalyses || []).length > 0;
+  const schema = hasHistory
+    ? `<div class="fv2OffSchema" aria-hidden="true"><svg viewBox="0 0 240 120" width="240" height="120" fill="none">
+    <line x1="120" y1="10" x2="120" y2="110" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="3 3"/>
+    <line x1="28" y1="42" x2="212" y2="42" stroke="var(--rule)" stroke-width="1"/>
+    <path d="M110 42L128 42M128 42L152 44L174 42M110 42L90 42L104 38M110 42L112 94M128 42L126 94M112 94L126 94" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M174 20Q184 42 174 64" stroke="var(--sub)" stroke-width="1.5" stroke-linecap="round"/>
+    <line x1="174" y1="20" x2="104" y2="38" stroke="var(--sub)" stroke-width="1"/>
+    <line x1="174" y1="64" x2="104" y2="38" stroke="var(--sub)" stroke-width="1"/>
+    <circle cx="119" cy="24" r="7.5" fill="var(--surface-2)" stroke="var(--ink)" stroke-width="2"/>
+    <circle cx="110" cy="42" r="3" fill="var(--link)"/><circle cx="128" cy="42" r="3" fill="var(--link)"/>
+    <circle cx="174" cy="42" r="3" fill="var(--link)"/><circle cx="104" cy="38" r="3" fill="var(--link)"/>
+    <line x1="204" y1="18" x2="204" y2="102" stroke="var(--rule-strong)" stroke-width="1"/>
+    <line x1="200" y1="18" x2="208" y2="18" stroke="var(--rule-strong)" stroke-width="1"/>
+    <line x1="201" y1="42" x2="207" y2="42" stroke="var(--link)" stroke-width="1.5"/>
+    <line x1="200" y1="102" x2="208" y2="102" stroke="var(--rule-strong)" stroke-width="1"/>
+  </svg></div>`
+    : "";
   return `<section class="vsec" data-testid="analysis-form-off">
     <div class="vsecH"><h2>射型の記録</h2><span class="aside">試験中・切</span></div>
+    ${schema}
     <p class="fact">iPhone を台に置いて 1 エンドを撮ると、射数、フルドローの時間、ほかと違った射が記録に残ります。</p>
     <div class="lrow"><span class="lk">映像</span><span class="lv">保存しません<small>端末の中だけで読み取り、外へ送りません</small></span></div>
     <div class="lrow"><span class="lk">残るもの</span><span class="lv">射ごとの数値<small>1 回 約 2KB</small></span></div>
@@ -318,7 +394,14 @@ function formTrackingCard(records = db.formAnalyses || []) {
   let latest = "";
   if (v2.length) {
     const rec = v2[0], line = formV2RecordLine(rec), cmp = FormV2.compare(line.m, FormAnalyze);
+    const hold = FormV2.median(line.m.compared.map((e) => e.vals.holdMs));
+    const viewShort = esc(formV2ViewText(rec.v2.view).split("・")[0]);
     latest = `<div class="fv2Sub" data-testid="form-v2-latest"><div class="fv2ChartH"><b>直近の記録</b><span>${fmtMDW(rec.date)}${line.m.part ? `・${esc(String(line.m.part.of))} つに分けた ${esc(String(line.m.part.k))} つめ` : ""}</span></div>
+      <div class="fv2Metrics">
+        <div><span class="k">射数</span><b class="v">${line.m.count}<small>射</small></b></div>
+        <div><span class="k">フルドロー</span><b class="v">${Number.isFinite(hold) ? `${(hold / 1000).toFixed(1)}<small>秒</small>` : "—"}</b></div>
+        <div><span class="k">置き方</span><b class="v">${viewShort}</b></div>
+      </div>
       <p class="fact">${esc(FormV2.summary(line.m, cmp, formV2Height()).text)}</p>
       <p class="basis">${line.m.count} 射${line.m.letdowns ? `、引き戻し ${line.m.letdowns} 回` : ""}。${esc(formV2ViewText(rec.v2.view))}、${rec.cap.o === "l" ? "横向き" : rec.cap.o === "p" ? "縦向き" : "正方形"}。</p></div>`;
   }
@@ -334,15 +417,16 @@ function formTrackingCard(records = db.formAnalyses || []) {
   const empty = !all.length
     ? `<div class="empty">${total ? "この条件に合う射型の記録はありません。弓具・距離・期間を広げると見られます。" : "射型の記録はまだありません。台に置いて 1 エンドを撮ると、ここに並びます。"}</div>`
     : "";
-  return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="vsecH"><h2>射型の記録</h2><span class="aside">試験中${v2.length ? `・${v2.length}件` : ""}</span></div>
+  return `<section class="vsec analysisFormCard" data-testid="analysis-form-card"><div class="fv2Deck"><div class="vsecH"><h2>射型の記録</h2><span class="aside">試験中${v2.length ? `・${v2.length}件` : ""}</span></div>
     <div class="btnRow"><button type="button" class="btn fv2Tall" id="formStart" data-testid="form-v2-start">${icon("camera")} 撮影して記録する</button></div>
     <div class="btnRow fv2Tight"><button type="button" class="btn sec" id="formReplay" data-testid="form-v2-replay">保存した動画を読み取る</button></div>
     ${debug ? `<p class="basis" data-testid="form-v2-debug-note">「検証用の診断データ」が入です。撮影の画面と数え方はふだんと同じで、保存する記録に解析器の中の値（数値だけ）を付けます。書き出しは、結果の画面か 設定 &gt; 記録 から行います。</p>` : ""}
+    ${!v2.length && empty ? empty : ""}</div>
     ${latest}${formV2TrendHtml(v2)}
     ${rows ? `<div class="fv2Sub"><div class="fv2ChartH"><b>記録</b><span>${v2.length}件${v2.length > 8 && !formV2ListAll ? "・新しい8件を表示" : ""}</span></div><div class="formRecordList" data-testid="form-v2-list">${rows}</div>
       ${v2.length > 8 ? `<div class="btnRow fv2Tight"><button type="button" class="btn sec" id="fv2ListAll" data-testid="form-v2-list-all">${formV2ListAll ? "新しい 8 件だけにする" : `${v2.length} 件すべてを表示`}</button></div>` : ""}
       <p class="basis">映像は残りません。数値だけが、この端末の中に保存されます。期間は撮影日、弓具・距離はつないだ練習の条件で選ばれます。</p></div>` : ""}
-    ${empty}
+    ${v2.length && empty ? empty : ""}
     ${legacy.length ? formLegacyRecordsHtml(legacy) : ""}
   </section>`;
 }
@@ -624,24 +708,66 @@ function formV2PlaceFrame(S, lms, vw, vh, tMs) {
   const cv = S.root.querySelector("#fv2Canvas");
   if (cv) {
     if (cv.width !== vw || cv.height !== vh) { cv.width = vw; cv.height = vh; }
-    const ctx = cv.getContext("2d"), mx = vw * 0.06;
+    const ctx = cv.getContext("2d"), mx = vw * 0.06, my = vh * 0.05, arm = Math.min(vw, vh) * 0.06;
+    const lw = Math.max(2, vw / 240);
     ctx.clearRect(0, 0, vw, vh);
-    ctx.strokeStyle = "rgba(223,229,234,.8)";
-    ctx.lineWidth = Math.max(2, vw / 240);
-    ctx.setLineDash([vw / 60, vw / 60]);
-    ctx.strokeRect(mx, vh * 0.04, vw - 2 * mx, vh * 0.92);
-    ctx.setLineDash([]);
-    if (lms) {
-      ctx.strokeStyle = "#a8c7ac";
-      ctx.fillStyle = "#a8c7ac";
-      ctx.lineCap = "round";
+    const drawGuides = (stroke, width) => {
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = width;
+      ctx.lineCap = "square";
       ctx.beginPath();
-      for (const [a, b] of [[11, 12], [11, 13], [13, 15], [12, 14], [14, 16], [11, 23], [12, 24], [23, 24]]) {
-        const p = lms[a], q = lms[b];
-        if (p && q) { ctx.moveTo(p.x * vw, p.y * vh); ctx.lineTo(q.x * vw, q.y * vh); }
-      }
+      // 左上・右上・左下・右下のL字枠
+      ctx.moveTo(mx, my + arm); ctx.lineTo(mx, my); ctx.lineTo(mx + arm, my);
+      ctx.moveTo(vw - mx - arm, my); ctx.lineTo(vw - mx, my); ctx.lineTo(vw - mx, my + arm);
+      ctx.moveTo(mx, vh - my - arm); ctx.lineTo(mx, vh - my); ctx.lineTo(mx + arm, vh - my);
+      ctx.moveTo(vw - mx - arm, vh - my); ctx.lineTo(vw - mx, vh - my); ctx.lineTo(vw - mx, vh - my - arm);
+      // 中央垂直基準 tick
+      ctx.moveTo(vw * 0.5, my); ctx.lineTo(vw * 0.5, my + arm * 0.45);
+      ctx.moveTo(vw * 0.5, vh - my); ctx.lineTo(vw * 0.5, vh - my - arm * 0.45);
       ctx.stroke();
-      for (const i of [0, 11, 12, 13, 14, 15, 16, 23, 24]) { const p = lms[i]; if (p) { ctx.beginPath(); ctx.arc(p.x * vw, p.y * vh, Math.max(4, vw / 120), 0, Math.PI * 2); ctx.fill(); } }
+    };
+    drawGuides("rgba(0,0,0,.45)", lw + 2);
+    drawGuides("rgba(255,255,255,.78)", lw);
+    if (lms) {
+      const skLw = Math.max(3, vw / 190);
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      // 両肩・両腰の垂直目安線
+      if (lms[11] && lms[12] && lms[23] && lms[24]) {
+        const sx = ((lms[11].x + lms[12].x) / 2) * vw, sy = ((lms[11].y + lms[12].y) / 2) * vh;
+        const hx = ((lms[23].x + lms[24].x) / 2) * vw, hy = ((lms[23].y + lms[24].y) / 2) * vh;
+        ctx.strokeStyle = "rgba(255,255,255,.45)";
+        ctx.lineWidth = Math.max(1.5, lw * 0.7);
+        ctx.setLineDash([vw / 75, vw / 75]);
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(hx, hy); ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      const trace = (pairs, color, width) => {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+        ctx.beginPath();
+        for (const [a, b] of pairs) {
+          const p = lms[a], q = lms[b];
+          if (p && q) { ctx.moveTo(p.x * vw, p.y * vh); ctx.lineTo(q.x * vw, q.y * vh); }
+        }
+        ctx.stroke();
+      };
+      const torso = [[11, 12], [11, 23], [12, 24], [23, 24]], arms = [[11, 13], [13, 15], [12, 14], [14, 16]];
+      trace([...torso, ...arms], "rgba(0,0,0,.55)", skLw + 3);
+      trace(torso, "rgba(255,255,255,.9)", skLw);
+      trace(arms, "#38bdf8", skLw);
+      const r = Math.max(4.5, vw / 115);
+      for (const i of [0, 11, 12, 13, 14, 15, 16, 23, 24]) {
+        const p = lms[i];
+        if (!p) continue;
+        const px = p.x * vw, py = p.y * vh;
+        ctx.fillStyle = "rgba(0,0,0,.6)";
+        ctx.beginPath(); ctx.arc(px, py, r + 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = i >= 13 && i <= 16 ? "#38bdf8" : "#ffffff";
+        ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#08090b";
+        ctx.beginPath(); ctx.arc(px, py, Math.max(1.5, r * 0.36), 0, Math.PI * 2); ctx.fill();
+      }
     }
   }
   if (tMs - S.lastUi < 250) return;
@@ -1126,7 +1252,7 @@ function formV2PaintShot(S, row) {
   const bar = (k, l) => {
     const v = e.vals[k], o = FormV2.median(rest(k)), mx = Math.max(6000, ...model.compared.map((x) => x.vals[k] || 0)) * 1.05, w = 120;
     const x = Number.isFinite(v) ? (v / mx) * w : 0, mk = Number.isFinite(o) ? (o / mx) * w : -9;
-    return `<div class="fv2Bar"><span class="k">${l}</span><svg viewBox="0 0 ${w} 22" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="6" width="${w}" height="10" fill="var(--raised)"/><rect x="0" y="6" width="${x.toFixed(1)}" height="10" fill="${flagged.has(k) ? "var(--info)" : "var(--ink)"}"/><path d="M${mk.toFixed(1)} 1V21" stroke="var(--sub)" stroke-width="2"/></svg><span class="v">${Number.isFinite(v) ? (v / 1000).toFixed(1) + " 秒" : "—"}<small>ほか ${Number.isFinite(o) ? (o / 1000).toFixed(1) + " 秒" : "—"}</small></span></div>`;
+    return `<div class="fv2Bar"><span class="k">${l}</span><svg viewBox="0 0 ${w} 22" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="6" width="${w}" height="10" rx="4" fill="var(--raised)"/><rect x="0" y="6" width="${Math.max(0, x).toFixed(1)}" height="10" rx="4" fill="${flagged.has(k) ? "var(--link)" : "var(--ink)"}"/><path d="M${mk.toFixed(1)} 2V20" stroke="var(--surface)" stroke-width="4" stroke-linecap="round"/><path d="M${mk.toFixed(1)} 2V20" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/></svg><span class="v">${Number.isFinite(v) ? (v / 1000).toFixed(1) + " 秒" : "—"}<small>ほか ${Number.isFinite(o) ? (o / 1000).toFixed(1) + " 秒" : "—"}</small></span></div>`;
   };
   const tr = (k) => {
     const ref = cmp.feat[k].median, a = FormV2.shown(k, e.vals[k], ref), b = FormV2.median(rest(k).map((t) => FormV2.shown(k, t, ref))), d = Number.isFinite(a) && Number.isFinite(b) ? a - b : NaN;
@@ -1258,24 +1384,47 @@ function formV2PaintReview(S) {
       if (R.ghost && near && e && e.kind === "shot") {
         const P = mapGhost(R.pos <= e.tMs ? e.hold : e.rel, f, e);
         if (P) {
-          ctx.strokeStyle = "rgba(255,255,255,.9)";
-          ctx.lineWidth = lw * 0.75;
-          ctx.beginPath();
-          for (const [a, b] of [[2, 1], [1, 3], [3, 5], [2, 4], [4, 6], [1, 7], [2, 8], [8, 7]]) { const p = P(a), q = P(b); if (p && q) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ghost = true; } }
-          ctx.stroke();
+          const traceGhost = (color, width) => {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width;
+            ctx.beginPath();
+            for (const [a, b] of [[2, 1], [1, 3], [3, 5], [2, 4], [4, 6], [1, 7], [2, 8], [8, 7]]) { const p = P(a), q = P(b); if (p && q) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ghost = true; } }
+            ctx.stroke();
+          };
+          ctx.setLineDash([lw * 2.2, lw * 1.8]);
+          traceGhost("rgba(0,0,0,.42)", lw * 1.15);
+          traceGhost("rgba(255,255,255,.88)", lw * 0.72);
+          ctx.setLineDash([]);
+          for (let i = 1; i <= 8; i++) {
+            const p = P(i);
+            if (!p) continue;
+            ctx.strokeStyle = "rgba(255,255,255,.85)";
+            ctx.lineWidth = Math.max(1.5, lw * 0.45);
+            ctx.beginPath(); ctx.arc(p[0], p[1], lw * 0.85, 0, Math.PI * 2); ctx.stroke();
+          }
         }
       }
       if (R.skel && near) {
-        ctx.strokeStyle = "#a8c7ac";
-        ctx.fillStyle = "#a8c7ac";
-        ctx.lineWidth = lw;
-        ctx.beginPath();
-        for (const [a, b] of [[1, 2], [1, 3], [3, 5], [2, 4], [4, 6], [1, 7], [2, 8], [7, 8]]) {
-          const p = f.pts[a], q = f.pts[b];
-          if (Number.isFinite(p[0]) && Number.isFinite(q[0])) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); skel = true; }
+        const traceSkel = (color, width) => {
+          ctx.strokeStyle = color;
+          ctx.lineWidth = width;
+          ctx.beginPath();
+          for (const [a, b] of [[1, 2], [1, 3], [3, 5], [2, 4], [4, 6], [1, 7], [2, 8], [7, 8]]) {
+            const p = f.pts[a], q = f.pts[b];
+            if (Number.isFinite(p[0]) && Number.isFinite(q[0])) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); skel = true; }
+          }
+          ctx.stroke();
+        };
+        traceSkel("rgba(0,0,0,.55)", lw + 2.5);
+        traceSkel("#38bdf8", lw);
+        for (const p of f.pts) if (Number.isFinite(p[0])) {
+          ctx.fillStyle = "rgba(0,0,0,.6)";
+          ctx.beginPath(); ctx.arc(p[0], p[1], lw * 1.45, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#38bdf8";
+          ctx.beginPath(); ctx.arc(p[0], p[1], lw * 1.1, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = "#ffffff";
+          ctx.beginPath(); ctx.arc(p[0], p[1], Math.max(1.5, lw * 0.42), 0, Math.PI * 2); ctx.fill();
         }
-        ctx.stroke();
-        for (const p of f.pts) if (Number.isFinite(p[0])) { ctx.beginPath(); ctx.arc(p[0], p[1], lw * 1.3, 0, Math.PI * 2); ctx.fill(); }
       }
       const what = !e ? "" : e.kind === "shot" && e.n ? `${e.n} 射目` : e.kind === "letdown" ? "引き戻し" : e.kind === "cand" ? "数えていないフルドロー" : "外した射";
       tag.textContent = `${formV2Mmss(R.pos / 1000)}${what ? `\u3000${what}\u3000${R.pos <= e.tMs ? "リリースの前" : "リリースのあと"}` : ""}`;

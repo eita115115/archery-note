@@ -98,4 +98,26 @@ if(db.settings.gamification && db.settings.gamification.enabled && !db.settings.
     console.warn("[gamification] backfill failed, skipping this launch",e);
   }
 }
+/* 点数だけ入力の記録画面でキーボード入力（X / 0=10 / 1-9 / M / Backspace / Enter）に対応する */
+document.addEventListener("keydown",(e)=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(!document.documentElement.classList.contains("recording")) return;
+  if(document.body.classList.contains("modalOpen")||document.querySelector(".ovl")) return;
+  const tag=e.target&&e.target.tagName;
+  if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||tag==="BUTTON") return;
+  const s=db&&db.active;
+  if(!s||sessionInputMode(s)!=="score") return;
+  const k=e.key;
+  if(k==="Backspace"){ e.preventDefault(); undoActiveArrow(); return; }
+  if(k==="Enter"){
+    const st=activeStatus(s);
+    if(activeEditEnd(s)<0 && st.full){ e.preventDefault(); confirmActiveEnd(); }
+    return;
+  }
+  const id=k==="x"||k==="X"?"X":k==="m"||k==="M"?"M":k==="0"?"10":/^[1-9]$/.test(k)?k:"";
+  if(!id) return;
+  if(!scoreKeyDefs(s.faceType).some(d=>d.id===id)) return;
+  e.preventDefault();
+  pressScoreKey(id);
+});
 render();

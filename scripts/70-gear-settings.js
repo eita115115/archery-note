@@ -1324,7 +1324,7 @@ function applyTheme() {
   /* ブラウザ上部（ステータスバー）の色もテーマに合わせる。自動のときは端末の設定に任せる */
   document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
     const dark = t === "dark" || (t !== "light" && (m.getAttribute("media") || "").includes("dark"));
-    m.setAttribute("content", dark ? "#0e1217" : "#f3f4f1");
+    m.setAttribute("content", dark ? "#0a0b0d" : "#f5f5f7");
   });
 }
 /* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。

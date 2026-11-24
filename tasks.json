@@ -1249,5 +1249,17 @@
     "owner": "cursor",
     "acceptance": "evals/acceptance.md の UI 行とリリース行（check:version v133）に加え、npm run check:all・format:check・配布版 npm run test:e2e:dist 全件が成功する。見た目トークン・カード・グラフ面塗りは v131 時点に戻り、v131 の操作改善は残る。実寸の矢円と線かみ採点、保存データの形式と保存値は不変。main マージと Pages で version.json が { \"v\": 133 }、sw.js が archery-note-v133 になること。",
     "evidence": "2026-11-18 オーナー指示「戻して」を受け、PR #149 を revert（見た目を v131 相当へ戻す）し、PWA 更新のため版を 133 に上げて main へ push（f53612f・c69f8db）。検証: build:web-assets・check:all（Voice 1701・Version alignment OK v133）・lint・format:check・配布版 test:e2e:dist 495 passed。CI validate・deploy 成功（run 44299984246）。公開先 https://eita115115.github.io/archery-note/ で version.json が { \"v\": 133 }、sw.js が archery-note-v133 を確認。"
+  },
+  {
+    "id": "AN-106",
+    "task": "Quiet Native Instrument UI/UX 刷新と射型の記録画面の改良（v134 公開準備）",
+    "status": "in-progress",
+    "passes": false,
+    "dependencies": [
+      "AN-105"
+    ],
+    "owner": "antigravity",
+    "acceptance": "evals/acceptance.md の UI 行（check:ui・lint・375px/320px ライト/ダーク確認）・リリース行（check:version v134）・format:check・check:voice・check:storage・check:distribution・PR CI validate・main マージ・Pages v134 配信確認がすべて成功すること。実寸の矢円と線かみ採点、既存データ保存契約（SCHEMA_VER 5）、主要 iPhone フローは不変。main マージと Pages 配信確認後に passes: true を記録する。",
+    "evidence": "2026-11-24 実装・v134 公開準備（branch feat/ui-ux-quiet-native-v134）: index.html・style.css・style.min.css・scripts/47-form-v2-view.js・50-record-view.js・60-history-sight-view.js・70-gear-settings.js・90-init.js・version 134 マーカー群（scripts/10-storage-native.js・sw.js・version.json・package.json・package-lock.json）・CHANGELOG.md・progress.md・tasks.json・docs/codex/codex-progress.md。"
   }
 ]
