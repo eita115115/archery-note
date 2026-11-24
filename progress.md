@@ -4,6 +4,8 @@
 
 ## 現在地
 
+- AN-106 v134 公開準備（UI/UX Quiet Native Instrument 刷新と射型の記録画面の改良）。2026-11-24、AI 的な装飾（ベージュ・緑グラデーション・影・飾り帯・ピル乱立）を排した Quiet Native UI（`index.html`・`style.css`・`style.min.css`・`scripts/50-record-view.js`・`60-history-sight-view.js`・`70-gear-settings.js`・`90-init.js`）と、射型の記録 v2 画面群の図表・カメラ骨格・320px SVG スケール修正（`scripts/47-form-v2-view.js`・`style.css`）を実装し、`npm run version:bump` で版を 134 に更新。次: `feat/ui-ux-quiet-native-v134` の PR CI（`validate`）通過確認後に `main` へマージし、Pages の `version.json` が 134・`sw.js` が `archery-note-v134` になることを確認する。
+
 - 公開 v133 完了（仮見た目 v132 の撤回: AN-105）。2026-11-18 オーナー指示「戻して」を受け、PR #149 の仮見た目を revert し、PWA 更新のため版を 133 に上げて main へ push（f53612f・c69f8db）。CI `validate`・`deploy` 成功（run 44299984246）後、Pages の `version.json` が 133、`sw.js` が `archery-note-v133` を確認。見た目は v131 と同じ。v131 の操作改善はそのまま。
 
 - 公開 v132（仮見た目: AN-104）はオーナー確認後に撤回済み。
