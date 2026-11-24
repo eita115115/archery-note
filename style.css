@@ -2083,10 +2083,10 @@ details.adv.recordDetails{
 .recTop{background:var(--surface); border-bottom:1px solid var(--rule);}
 .recTop .condT{font-size:15px; font-weight:600; color:var(--ink);}
 .recTop .txtBtn{color:var(--ink);}
-.recStat{padding:7px var(--gut) 5px; background:var(--bg);}
+.recStat{padding:6px var(--gut) 4px; background:var(--bg);}
 .recStat .endN{font-size:19px; font-weight:700; letter-spacing:-.01em;}
 .recStat .tot b{font-size:36px; font-weight:700; letter-spacing:-.02em; color:var(--ink);}
-.ruler{gap:3px; padding:0 var(--gut) 7px; background:var(--bg);}
+.ruler{gap:3px; padding:0 var(--gut) 6px; background:var(--bg);}
 .ruler i{height:5px; border-radius:2px; background:var(--raised);}
 .ruler i.is-done{background:var(--sub);}
 .ruler i.is-cur{background:var(--ink);}
@@ -2123,7 +2123,7 @@ details.adv.recordDetails{
 .key:active{background:var(--raised);}
 
 .dockRow{background:var(--surface); border-top:1px solid var(--rule);}
-.editBar{background:var(--surface); border-top:2px solid var(--ink);}
+.editBar{background:var(--surface); border-top:1px solid var(--ink);}
 .nudgeKeys .btn.ghost{background:var(--surface-2); font-weight:700;}
 
 .lens{border:2px solid var(--ink); box-shadow:none;}

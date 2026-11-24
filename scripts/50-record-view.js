@@ -2279,7 +2279,7 @@ function watchCrampedScorecard() {
   if (!card) return;
   const css = window.CSS;
   if (css && typeof css.supports === "function" && css.supports("container-type: size")) return;
-  const check = () => card.classList.toggle("is-cramped", card.clientHeight > 0 && card.clientHeight <= 27);
+  const check = () => card.classList.toggle("is-cramped", card.clientWidth > 0 && card.clientHeight <= 27);
   check();
   if (typeof window.ResizeObserver === "function") new window.ResizeObserver(check).observe(card);
   else window.requestAnimationFrame(check);
