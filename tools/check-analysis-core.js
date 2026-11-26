@@ -519,6 +519,66 @@ return {groupingSessionRow};`,
   });
 }
 
+// 保存（DB_REV++）のあとも、位置のある矢が変わっていない記録は、計算済みのグルーピング統計を使い回す。
+// 合計・矢の並びは毎回作り直す。位置が 1 本でも変われば統計を計算し直す。
+{
+  const lazy = (st, key) => typeof Object.getOwnPropertyDescriptor(st, key).get === "function";
+  const rng = scoring.xoshiro128ss(4242);
+  const s = sampleSession();
+  s.ends = [0, 1].map(() =>
+    Array.from({ length: 6 }, () => ({ x: +(rng() * 20 - 10).toFixed(2), y: +(rng() * 20 - 10).toFixed(2), s: 9 })),
+  );
+  const m1 = analysis.sessionMetrics(s);
+  assert(lazy(m1.st, "excl") && lazy(m1.st, "robust"), "B/C are not computed until they are read");
+  const excl1 = m1.st.excl;
+  assert(!lazy(m1.st, "excl"), "reading B computes it once");
+
+  // 点数だけ直す・理由の印を付ける（矢を置き換える）: 統計は同じ物、合計と矢の並びは新しい
+  analysis.bumpDbRev();
+  s.ends[0][0] = Object.assign({}, s.ends[0][0], { s: 7, reason: "風" });
+  const m2 = analysis.sessionMetrics(s);
+  assert(m2 !== m1, "a save still rebuilds the metrics object");
+  assert(m2.st === m1.st && m2.st.excl === excl1, "unchanged positions reuse the computed statistics");
+  assert(m2.pts === m1.pts, "reused statistics keep pointing at the same points");
+  assertEqual(m2.total, m1.total - 2, "the total reflects the edited score");
+  assert(m2.all[0] === s.ends[0][0] && m2.all[0].reason === "風", "arrows are the current objects");
+
+  // 文字列の座標が数値に直っても、値が同じなら使い回す
+  analysis.bumpDbRev();
+  s.ends[1][2].x = String(s.ends[1][2].x);
+  assert(analysis.sessionMetrics(s).st === m1.st, "numeric strings with the same value reuse the statistics");
+  s.ends[1][2].x = Number(s.ends[1][2].x);
+
+  // 位置を動かす（署名が衝突する動かし方）: 保存のあとは計算し直す
+  analysis.bumpDbRev();
+  s.ends[0][1].x += 0.4;
+  s.ends[0][2].x -= 0.4;
+  const m3 = analysis.sessionMetrics(s);
+  assert(m3.st !== m1.st, "moved arrows recompute the statistics");
+  assertClose(m3.st.sx, scoring.robustStats(s.ends.flat()).sx, 1e-12, "recomputed spread is current");
+  assert(m3.st.sx !== m1.st.sx, "the move changes the spread");
+
+  // 矢を足す・位置のない矢にする・順を入れ替える: どれも計算し直す
+  analysis.bumpDbRev();
+  s.ends[1].push({ x: 1, y: 1, s: 10 });
+  const m4 = analysis.sessionMetrics(s);
+  assert(m4.st !== m3.st && m4.st.n === 13, "an added arrow recomputes the statistics");
+  analysis.bumpDbRev();
+  delete s.ends[1][6].x;
+  delete s.ends[1][6].y;
+  const m5 = analysis.sessionMetrics(s);
+  assert(m5.st !== m4.st && m5.st.n === 12 && m5.all.length === 13, "a score-only arrow leaves the statistics");
+  analysis.bumpDbRev();
+  [s.ends[0][0], s.ends[0][1]] = [s.ends[0][1], s.ends[0][0]];
+  assert(analysis.sessionMetrics(s).st !== m5.st, "reordered arrows recompute (order is part of the input)");
+
+  // 位置のある矢が 0 本の記録（点数だけ）: 統計は null のまま
+  const scoreOnly = { id: "k", date: "2026-01-02", dist: 18, faceD: 40, ends: [[{ s: 9 }, { s: 10 }]] };
+  assertEqual(analysis.sessionMetrics(scoreOnly).st, null, "score-only session has no statistics");
+  analysis.bumpDbRev();
+  assertEqual(analysis.sessionMetrics(scoreOnly).st, null, "score-only session stays without statistics");
+}
+
 // 実装側の署名が世代カウンタを参照していること（ハーネス外でも DB_REV が効く静的保証）
 assert(
   section(analysisScript, "function sessionMetricSignature", "function sessionMetrics").includes(
@@ -763,6 +823,30 @@ const coreSetups = [{ id: "setup-a", name: "Main recurve" }];
   assertClose(cs.windy.avg, 56 / 6, 1e-9, "windy average");
   const empty = core.conditionSplit([], () => true);
   assertEqual(empty.windy.avg, null, "empty split has null averages");
+  assertEqual(empty.windy.biasX, null, "empty split has a null bias");
+  // 中心の偏り（biasX）は読まれたときだけ計算する。平均点・半径を読むだけでは、記録ごとの B を計算しない
+  const isLazy = (st) => typeof Object.getOwnPropertyDescriptor(st, "excl").get === "function";
+  const many = Array.from({ length: 6 }, (_, i) =>
+    coreSession("w" + i, "2026-07-0" + (i + 1), 70, {
+      windSpeed: i % 2 ? "5" : "",
+      ends: [
+        Array.from({ length: 6 }, (_, j) => ({ x: ((i * 7 + j * 3) % 11) - 5, y: ((i * 5 + j * 4) % 9) - 4, s: 9 })),
+      ],
+    }),
+  );
+  const manyRows = core.buildAnalysisRows(many, coreSetups, metricsFn);
+  const split = core.conditionSplit(manyRows, (s) => Number(s.windSpeed) >= 3.5);
+  assertEqual(split.windy.sessions, 3, "windy sessions");
+  assert(split.calm.avg === 9 && Number.isFinite(split.calm.avgRms), "averages are available");
+  assert(manyRows.every((r) => isLazy(r.st)), "reading averages does not compute B for any session");
+  const wantBias = (rows) => rows.reduce((t, r) => t + scoring.robustStats(r.s.ends.flat()).excl.mx, 0) / rows.length;
+  assertClose(split.calm.biasX, wantBias(manyRows.filter((r) => !r.s.windSpeed)), 1e-12, "calm bias");
+  assert(
+    manyRows.every((r) => isLazy(r.st) === !!r.s.windSpeed),
+    "reading the calm bias computes B for the calm sessions only",
+  );
+  assertClose(split.windy.biasX, wantBias(manyRows.filter((r) => r.s.windSpeed)), 1e-12, "windy bias");
+  assert(Object.keys(split.calm).join() === "label,sessions,arrows,avg,avgRms,biasX", "split keys keep their order");
 }
 
 // reasonBreakdown

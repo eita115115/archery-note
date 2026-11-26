@@ -431,30 +431,53 @@ function mcdOutlierIndices(fit, rob){
   }
   return order.slice(0, flaggedCount).map(i=>fit.orig[i]);
 }
-/* グルーピング統計。最上位は A（全射）。excl は B（サイト判断用、外れ値候補がなければ A と同じ値）、robust は C */
+/* グルーピング統計。最上位は A（全射）。excl は B（サイト判断用、外れ値候補がなければ A と同じ値）、robust は C。
+   B と C（excl・robust・excluded・flagged）は MCD を使うので重い（72 射で A の数十倍）。読まれたときに 1 度だけ計算する。
+   合計・平均・全射の半径（A）しか使わない所（スコアの推移、伸びの継続、分析の一覧）は MCD を走らせない。
+   値は、先に全部計算していたときと同じ（tools/check-grouping-stats.js が、あとから読む順を変えても同じことを確かめる）。
+   渡した配列の中の点の座標を、返したあとで書き換えないこと（sessionMetrics は自分で作った写しを渡す） */
 function robustStats(arrows){
   const total=arrows.length;
   if(!total) return null;
   const A=sampleStats(arrows);
-  let robust=null, flaggedIdx=[];
-  const fit=total>=MCD_MIN_N?mcdFit(arrows):null;
-  if(fit){
-    const r=rmcdFromFit(fit);
-    if(r){
-      const e=ellipseOfCov(r.S.a, r.S.b, r.S.d);
-      robust={mx:r.T.x+fit.cx, my:r.T.y+fit.cy, sx:Math.sqrt(r.S.a), sy:Math.sqrt(r.S.d), cov:r.S.b,
-        rr:Math.sqrt(r.S.a+r.S.d), major:e.major, minor:e.minor, angleDeg:e.angleDeg, nw:r.m, h:fit.h, method:"rmcd"};
-      flaggedIdx=mcdOutlierIndices(fit, r).sort((p,q)=>p-q);
+  const base=Object.assign({},A), pts=arrows.slice();
+  const compute=()=>{
+    let robust=null, flaggedIdx=[];
+    const fit=total>=MCD_MIN_N?mcdFit(pts):null;
+    if(fit){
+      const r=rmcdFromFit(fit);
+      if(r){
+        const e=ellipseOfCov(r.S.a, r.S.b, r.S.d);
+        robust={mx:r.T.x+fit.cx, my:r.T.y+fit.cy, sx:Math.sqrt(r.S.a), sy:Math.sqrt(r.S.d), cov:r.S.b,
+          rr:Math.sqrt(r.S.a+r.S.d), major:e.major, minor:e.minor, angleDeg:e.angleDeg, nw:r.m, h:fit.h, method:"rmcd"};
+        flaggedIdx=mcdOutlierIndices(fit, r).sort((p,q)=>p-q);
+      }
     }
-  }
-  const flagged=new Set(flaggedIdx);
-  const excluded=flaggedIdx.map(i=>arrows[i]);
-  const unflagged=flagged.size?arrows.filter((_,i)=>!flagged.has(i)):arrows.slice();
-  const excl=Object.assign(flagged.size?sampleStats(unflagged):Object.assign({},A), {used:unflagged, excluded, total, method:"mcd-exclude"});
-  excl.confidence=clamp(1-1/Math.sqrt(excl.n),0,1);
+    const flagged=new Set(flaggedIdx);
+    const excluded=flaggedIdx.map(i=>pts[i]);
+    const unflagged=flagged.size?pts.filter((_,i)=>!flagged.has(i)):pts.slice();
+    const excl=Object.assign(flagged.size?sampleStats(unflagged):Object.assign({},base), {used:unflagged, excluded, total, method:"mcd-exclude"});
+    excl.confidence=clamp(1-1/Math.sqrt(excl.n),0,1);
+    return {excluded, excl, robust};
+  };
+  /* 重い 4 つは、どれかが読まれたときにまとめて計算し、普通の値のプロパティに置き換える（キーの順は変わらない）。
+     読まれる前に代入されたものは、その値を残す */
+  const HEAVY={excluded:"excluded", flagged:"excluded", excl:"excl", robust:"robust"};
+  const plain=(key, value)=>Object.defineProperty(A, key, {value, enumerable:true, configurable:true, writable:true});
+  const lazy=key=>Object.defineProperty(A, key, {enumerable:true, configurable:true,
+    get(){
+      const heavy=compute();
+      Object.keys(HEAVY).forEach(k=>{ if(Object.getOwnPropertyDescriptor(A, k).get) plain(k, heavy[HEAVY[k]]); });
+      return heavy[HEAVY[key]];
+    },
+    set(v){ plain(key, v); }});
+  A.total=total; A.used=arrows.slice();
+  lazy("excluded"); lazy("flagged");
+  A.method="mean";
   /* 演算信頼度 = 1 − 1/√n: 中心の推定誤差（標準誤差）がグルーピングの広がりの何割か、の補数 */
-  return Object.assign(A, {total, used:arrows.slice(), excluded, flagged:excluded, method:"mean",
-    confidence:clamp(1-1/Math.sqrt(A.n),0,1), rrCi:rmsCi(A), version:"grouping-v3", excl, robust});
+  A.confidence=clamp(1-1/Math.sqrt(A.n),0,1); A.rrCi=rmsCi(base); A.version="grouping-v3";
+  lazy("excl"); lazy("robust");
+  return A;
 }
 /* サイト判断に使う統計（外れ値候補を除いた B）。B を渡しても B を返す */
 function sightStats(st){ return st&&st.excl?st.excl:st; }

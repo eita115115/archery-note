@@ -378,12 +378,22 @@ function sampleSd(vals) {
   const m = vals.reduce((t, v) => t + v, 0) / vals.length;
   return Math.sqrt(vals.reduce((t, v) => t + (v - m) ** 2, 0) / (vals.length - 1));
 }
+/* 日付の文字列の比較。YYYY-MM-DD どうしは文字の順が日付の順なので、そのまま比べる（localeCompare は 1 回が重く、
+   1,000 回の記録の並べ替えで待機画面を出すたびに数十 ms かかっていた）。形の違う日付はこれまでどおり localeCompare */
+const ISO_DATE_TEXT = /^\d{4}-\d{2}-\d{2}$/;
+function compareDateText(a, b) {
+  const x = String(a || ""),
+    y = String(b || "");
+  if (x === y) return 0;
+  if (ISO_DATE_TEXT.test(x) && ISO_DATE_TEXT.test(y)) return x < y ? -1 : 1;
+  return x.localeCompare(y);
+}
 /* 日付の新しい順（同じ日は後から保存したものが先）。保存の並びは変えない */
 function sessionsByDateDesc() {
   return db.sessions
     .map((s, i) => ({ s, i }))
     .filter((x) => x.s && typeof x.s === "object")
-    .sort((a, b) => String(b.s.date || "").localeCompare(String(a.s.date || "")) || b.i - a.i)
+    .sort((a, b) => compareDateText(b.s.date, a.s.date) || b.i - a.i)
     .map((x) => x.s);
 }
 /* sess の時点までの記録（保存順）: 日付が前の記録と、同じ日付なら sess より先に保存した記録と sess 自身。
@@ -1608,13 +1618,13 @@ function analysisIntervalRowsHtml(im) {
 }
 /* voice:fold-end */
 function analysisGroupingTrendHtml(sess, sessions) {
+  /* 回数は、位置のある矢が 3射以上ある記録を数えるだけ（analysisImpactModel の ok と同じ条件）。
+     数値の組は表に出す直近 8 回だけ作る。全部の記録で作ると、使わない B・C（MCD）まで計算して 1,000 回で 1 秒かかる */
   const rows = sessions
-    .filter((s) => trSameCondition(s, sess))
-    .map((s) => ({ s, im: analysisImpactModel(s) }))
-    .filter((r) => r.im.ok)
+    .filter((s) => trSameCondition(s, sess) && analysisHasGroupingEvidence(sessionMetrics(s).st))
     .reverse();
   if (!rows.length) return "";
-  const shown = rows.slice(-8);
+  const shown = rows.slice(-8).map((s) => ({ s, im: analysisImpactModel(s) }));
   return `<section class="vsec" data-testid="analysis-grouping-trend">
     <div class="vsecH"><h2>グルーピングの推移</h2><span class="aside">${rows.length}回</span></div>
     <div class="cmp anTrendTbl">

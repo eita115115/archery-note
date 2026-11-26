@@ -457,11 +457,15 @@ function thinSnapshots(list,maxGenerations){
   }
   return snaps;
 }
-let _lastSnapTs=0;
+let _lastSnapTs=0, _snapFailTs=0;
 function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
   try{
     const now=Date.now();
     if(!force && _lastSnapTs && now-_lastSnapTs<30*60*1000) return;
+    /* 控えが 1 世代も入りきらなかった（本体だけで保存の空きの半分を超えている）あとは、30 分は試さない。
+       試すたびに全部の記録を読んで書いて失敗するので、保存 1 回が倍の重さになっていた（1,000 回の記録で実測）。
+       復元・読み込み・削除の前の控え（force）は、これまでどおり毎回試す */
+    if(!force && _snapFailTs && now-_snapFailTs<30*60*1000) return;
     const raw=rawOverride||JSON.stringify(db), h=hashText(raw);
     const current=readSnapshots();
     let snaps=current.filter(s=>s&&s.hash!==h);
@@ -475,8 +479,8 @@ function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
       if(snaps.length<=1) throw new Error("snapshot storage full");
       snaps.pop();
     }
-    _lastSnapTs=now;
-  }catch(e){ console.warn("snapshot failed",e); }
+    _lastSnapTs=now; _snapFailTs=0;
+  }catch(e){ _snapFailTs=Date.now(); console.warn("snapshot failed",e); }
 }
 function flushSafetySnapshot(){
   if(!snapshotPending) return;

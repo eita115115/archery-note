@@ -192,6 +192,96 @@ function checkSnapshotStillScheduled() {
   );
 }
 
+/* 控え（安全スナップショット）が 1 世代も入りきらないとき、保存のたびに控えを試さない。
+   試すたびに記録の全部を読んで書いて失敗するので、保存 1 回が倍の重さになる（1,000 回の記録で実測）。
+   30 分たてばもう一度試す。復元・読み込み・削除の前の控え（forceSnapshot）は毎回試す */
+function checkSnapshotBackoffWhenFull() {
+  const load = (quotaChars) => {
+    const timers = makeFakeTimers();
+    const store = new Map();
+    const snapAttempts = [];
+    let fakeNowMs = 1700000000000;
+    class FakeDate extends Date {
+      constructor(...args) {
+        if (args.length === 0) super(fakeNowMs);
+        else super(...args);
+      }
+      static now() {
+        return fakeNowMs;
+      }
+    }
+    let snapKey = null;
+    const shim = {
+      getItem: (key) => (store.has(key) ? store.get(key) : null),
+      setItem(key, value) {
+        const text = String(value);
+        if (key === snapKey) snapAttempts.push(text.length);
+        let used = text.length;
+        store.forEach((v, k) => {
+          if (k !== key) used += v.length;
+        });
+        if (used > quotaChars) throw new Error("QuotaExceededError");
+        store.set(key, text);
+      },
+      removeItem: (key) => store.delete(key),
+    };
+    const api = new Function(
+      "localStorage",
+      "setTimeout",
+      "clearTimeout",
+      "Date",
+      "console",
+      `${storageScript}
+return {save, flushSafetySnapshot, KEY, SNAP_KEY, getDb: () => db};`,
+    )(shim, timers.setTimeout, timers.clearTimeout, FakeDate, { warn() {}, error() {}, log() {} });
+    snapKey = api.SNAP_KEY;
+    /* 本体だけで 6,000 字を超える記録を入れる */
+    api.getDb().sessions = Array.from({ length: 40 }, (_, i) => ({
+      id: "s" + i,
+      date: "2026-01-01",
+      ends: [Array.from({ length: 6 }, (_, j) => ({ x: j, y: i, s: 9 }))],
+    }));
+    const saveAndIdle = (opts) => {
+      api.getDb().settings.eyeSight = (api.getDb().settings.eyeSight || 0) + 1;
+      const ok = api.save(opts || "edit");
+      timers.runAll();
+      return ok;
+    };
+    return { api, store, snapAttempts, saveAndIdle, advance: (ms) => (fakeNowMs += ms) };
+  };
+
+  /* 入りきらない: 本体 約 6,300 字、空き 10,000 字。控えは 1 世代も入らない */
+  const full = load(10000);
+  assert(full.saveAndIdle() === true, "[snapshot-backoff] the main write still succeeds when a snapshot cannot fit");
+  assert(full.store.get(full.api.KEY).length > 5000, "[snapshot-backoff] fixture is larger than half the quota");
+  assertEqual(full.snapAttempts.length, 1, "[snapshot-backoff] the first save tries the snapshot once");
+  assert(!full.store.has(full.api.SNAP_KEY), "[snapshot-backoff] the snapshot did not fit");
+  for (let i = 0; i < 5; i += 1) full.saveAndIdle();
+  assertEqual(full.snapAttempts.length, 1, "[snapshot-backoff] later saves do not retry a snapshot that cannot fit");
+  assert(
+    JSON.parse(full.store.get(full.api.KEY)).settings.eyeSight === full.api.getDb().settings.eyeSight,
+    "[snapshot-backoff] every save still writes the latest data",
+  );
+  full.saveAndIdle({ reason: "import", forceSnapshot: true });
+  assertEqual(full.snapAttempts.length, 2, "[snapshot-backoff] a forced snapshot is always attempted");
+  full.saveAndIdle();
+  assertEqual(full.snapAttempts.length, 2, "[snapshot-backoff] a failed forced snapshot keeps the pause");
+  full.advance(31 * 60 * 1000);
+  full.saveAndIdle();
+  assertEqual(full.snapAttempts.length, 3, "[snapshot-backoff] the snapshot is retried after 30 minutes");
+
+  /* 入る: これまでどおり 1 度書いて、30 分は書かない。30 分たてば次の世代を書く */
+  const roomy = load(1000000);
+  roomy.saveAndIdle();
+  assertEqual(roomy.snapAttempts.length, 1, "[snapshot-backoff] a snapshot that fits is written");
+  assertEqual(JSON.parse(roomy.store.get(roomy.api.SNAP_KEY)).length, 1, "[snapshot-backoff] one generation is stored");
+  roomy.saveAndIdle();
+  assertEqual(roomy.snapAttempts.length, 1, "[snapshot-backoff] no second snapshot inside 30 minutes");
+  roomy.advance(31 * 60 * 1000);
+  roomy.saveAndIdle();
+  assertEqual(JSON.parse(roomy.store.get(roomy.api.SNAP_KEY)).length, 2, "[snapshot-backoff] the next generation is stored after 30 minutes");
+}
+
 function checkCallSiteClassification() {
   /* 高頻度の記録操作はデバウンス、重要操作は即時 save のままであること（静的検査） */
   assert(
@@ -267,6 +357,7 @@ function main() {
   checkFlushPendingSave();
   checkImmediateSaveStaysImmediate();
   checkSnapshotStillScheduled();
+  checkSnapshotBackoffWhenFull();
   checkCallSiteClassification();
   checkLifecycleFlushContract();
   console.log("Save debounce checks OK");

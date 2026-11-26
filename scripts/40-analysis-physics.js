@@ -486,6 +486,11 @@ function sessionMetricSignature(sess){
   /* DB_REV: db変異（save/scheduleSave）ごとに増える世代カウンタ。署名衝突（例: 2本を逆方向に同距離ナッジ）でも編集保存後に必ず再計算させる */
   return [typeof DB_REV==="number"?DB_REV:0,sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,xs.toFixed(2),ys.toFixed(2),last].join("|");
 }
+function sameMetricPoints(a,b){
+  if(!a || !b || a.length!==b.length) return false;
+  for(let i=0;i<a.length;i++) if(!Object.is(a[i].x,b[i].x) || !Object.is(a[i].y,b[i].y)) return false;
+  return true;
+}
 function sessionMetrics(sess){
   const sig=sessionMetricSignature(sess||{});
   const cached=SESSION_METRIC_CACHE.get(sess);
@@ -494,8 +499,13 @@ function sessionMetrics(sess){
   const total=all.reduce((a,x)=>a+x.s,0);
   /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
   /* 座標のない矢（点数だけの入力・「M 位置なし」。x/y が無いか null）は統計に入れない。null を 0 と読まない */
-  const pts=all.filter(arrowHasPos).map(a=>({x:Number(a.x),y:Number(a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
-  const st=robustStats(pts);
+  let pts=all.filter(arrowHasPos).map(a=>({x:Number(a.x),y:Number(a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
+  /* 保存のたびに DB_REV が進むので、署名は毎回変わる。位置のある矢が 1 本も変わっていない記録は、前に計算した統計を
+     そのまま使う（座標を 1 本ずつ突き合わせるので、署名の衝突で古い統計を返すことはない）。過去の記録が多いと、
+     記録の終了・分析タブで全部の記録の MCD を計算し直していた（1,000 回で数秒）。all・total・avg は毎回作り直す */
+  let st;
+  if(cached && sameMetricPoints(cached.metrics.pts, pts)){ pts=cached.metrics.pts; st=cached.metrics.st; }
+  else st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st,pts};
   SESSION_METRIC_CACHE.set(sess,{signature:sig,metrics});
   return metrics;

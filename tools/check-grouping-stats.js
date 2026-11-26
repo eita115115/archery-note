@@ -18,7 +18,8 @@ function section(source, start, end) {
 const api = new Function(
   `${scoringSrc}
 ${section(analysisSrc, "function sightDecision(", "function adviceModel(")}
-return {robustStats, legacyRobustStats, sightStats, xoshiro128ss, sightDecision, MCD_TABLE_N};`,
+return {robustStats, legacyRobustStats, sightStats, xoshiro128ss, sightDecision, MCD_TABLE_N,
+  sampleStats, mcdFit, rmcdFromFit, mcdOutlierIndices, ellipseOfCov, rmsCi, clamp, MCD_MIN_N};`,
 )();
 
 let failures = 0;
@@ -285,20 +286,161 @@ for (const [n, flyers, min] of [
   }
 }
 
+/* ---------- B・C はあとから計算する（読まれたときに 1 度だけ）。先に全部計算する参照実装と同じ値 ---------- */
+{
+  /* 参照実装: 遅延にする前の robustStats（中の関数を順に呼んで、全部を先に計算する） */
+  const eager = (arrows) => {
+    const total = arrows.length;
+    if (!total) return null;
+    const A = api.sampleStats(arrows);
+    let robust = null,
+      flaggedIdx = [];
+    const fit = total >= api.MCD_MIN_N ? api.mcdFit(arrows) : null;
+    if (fit) {
+      const r = api.rmcdFromFit(fit);
+      if (r) {
+        const e = api.ellipseOfCov(r.S.a, r.S.b, r.S.d);
+        robust = {
+          mx: r.T.x + fit.cx,
+          my: r.T.y + fit.cy,
+          sx: Math.sqrt(r.S.a),
+          sy: Math.sqrt(r.S.d),
+          cov: r.S.b,
+          rr: Math.sqrt(r.S.a + r.S.d),
+          major: e.major,
+          minor: e.minor,
+          angleDeg: e.angleDeg,
+          nw: r.m,
+          h: fit.h,
+          method: "rmcd",
+        };
+        flaggedIdx = api.mcdOutlierIndices(fit, r).sort((p, q) => p - q);
+      }
+    }
+    const flagged = new Set(flaggedIdx);
+    const excluded = flaggedIdx.map((i) => arrows[i]);
+    const unflagged = flagged.size ? arrows.filter((_, i) => !flagged.has(i)) : arrows.slice();
+    const excl = Object.assign(flagged.size ? api.sampleStats(unflagged) : Object.assign({}, A), {
+      used: unflagged,
+      excluded,
+      total,
+      method: "mcd-exclude",
+    });
+    excl.confidence = api.clamp(1 - 1 / Math.sqrt(excl.n), 0, 1);
+    return Object.assign(A, {
+      total,
+      used: arrows.slice(),
+      excluded,
+      flagged: excluded,
+      method: "mean",
+      confidence: api.clamp(1 - 1 / Math.sqrt(A.n), 0, 1),
+      rrCi: api.rmsCi(A),
+      version: "grouping-v3",
+      excl,
+      robust,
+    });
+  };
+  const gauss = rngNormal(20261126);
+  const kinds = {
+    normal: () => ({ x: +(gauss() * 9).toFixed(2), y: +(gauss() * 9).toFixed(2) }),
+    outliers: (i) =>
+      i % 9 === 0
+        ? { x: 25 + gauss(), y: -30 + gauss() }
+        : { x: gauss() * 5, y: gauss() * 7 },
+    grid: () => ({ x: Math.round(gauss() * 4) / 2, y: Math.round(gauss() * 4) / 2 }),
+    same: () => ({ x: 1.5, y: -2 }),
+    line: (i) => ({ x: i * 0.5, y: i * 0.25 }),
+  };
+  const HEAVY = ["excl", "robust", "excluded", "flagged"];
+  const ORDERS = [HEAVY, ["flagged", "robust", "excl", "excluded"], ["robust"], ["excluded"], []];
+  let cases = 0,
+    bad = 0,
+    withOutliers = 0;
+  Object.keys(kinds).forEach((kind) => {
+    for (let n = 0; n <= 150; n += n < 20 ? 1 : 7) {
+      for (let rep = 0; rep < 3; rep++) {
+        const pts = Array.from({ length: n }, (_, i) => kinds[kind](i));
+        const want = eager(pts),
+          got = api.robustStats(pts);
+        cases++;
+        if (!want) {
+          if (got !== null) bad++;
+          continue;
+        }
+        /* まだ読んでいない間は、重い 4 つは計算されていない（アクセサのまま） */
+        const untouched = HEAVY.every(
+          (k) => typeof Object.getOwnPropertyDescriptor(got, k).get === "function",
+        );
+        ORDERS[cases % ORDERS.length].forEach((k) => void got[k]); /* 読む順を変えても同じ */
+        if (want.excluded.length) withOutliers++;
+        const same =
+          untouched &&
+          JSON.stringify(got) === JSON.stringify(want) &&
+          Object.keys(got).join() === Object.keys(want).join() &&
+          JSON.stringify({ ...got }) === JSON.stringify({ ...want }) &&
+          got.flagged === got.excluded &&
+          got.excl === got.excl &&
+          got.excluded.every((p, i) => p === want.excluded[i]) &&
+          got.used.every((p, i) => p === pts[i]) &&
+          got.used !== pts &&
+          got.excl.used !== got.used &&
+          got.excl.used.every((p, i) => p === want.excl.used[i]) &&
+          JSON.stringify(api.sightStats(got)) === JSON.stringify(api.sightStats(want));
+        if (!same) bad++;
+      }
+    }
+  });
+  check(bad === 0, "lazy B/C equals the eager reference", `${bad} of ${cases} differ`);
+  check(withOutliers >= 50, "lazy check covers flagged arrows", `only ${withOutliers} cases`);
+  /* 返したあとで配列に足しても、あとから読む B・C は呼んだときの矢のまま */
+  {
+    const pts = Array.from({ length: 36 }, (_, i) => kinds.outliers(i));
+    const want = JSON.stringify(eager(pts.slice()));
+    const got = api.robustStats(pts);
+    pts.push({ x: 500, y: 500 });
+    pts.reverse();
+    check(JSON.stringify(got) === want, "lazy B/C uses the arrows as they were at the call");
+  }
+  /* 代入は普通のプロパティと同じ */
+  {
+    const st = api.robustStats(Array.from({ length: 12 }, (_, i) => kinds.normal(i)));
+    st.excl = 5;
+    check(
+      st.excl === 5 && !Object.getOwnPropertyDescriptor(st, "excl").get && st.robust !== undefined,
+      "lazy fields accept assignment",
+    );
+  }
+  /* A だけを読むなら MCD を走らせない: 72 射 × 300 回で、B まで読む場合の 1/4 より短い */
+  {
+    const sets = Array.from({ length: 300 }, () => draw(gauss, SHAPES[1], 72));
+    sets.slice(0, 20).forEach((p) => void api.robustStats(p).excl);
+    const run = (read) => {
+      const t0 = process.hrtime.bigint();
+      let acc = 0;
+      sets.forEach((p) => (acc += read(api.robustStats(p))));
+      return { ms: Number(process.hrtime.bigint() - t0) / 1e6, acc };
+    };
+    const light = run((st) => st.rr),
+      heavy = run((st) => st.excl.rr);
+    console.log(`A だけ: ${light.ms.toFixed(1)}ms, B まで: ${heavy.ms.toFixed(1)}ms（72 射 × 300 回）`);
+    check(light.ms < heavy.ms / 4, "reading only A skips the MCD");
+  }
+}
+
 /* ---------- 速度 ---------- */
 {
   const gauss = rngNormal(31337);
   const time = (n, count) => {
     const sets = Array.from({ length: count }, () => draw(gauss, SHAPES[1], n));
-    sets.slice(0, 20).forEach((p) => api.robustStats(p));
+    sets.slice(0, 20).forEach((p) => void api.robustStats(p).excl);
     const t0 = process.hrtime.bigint();
-    sets.forEach((p) => api.robustStats(p));
+    sets.forEach((p) => void api.robustStats(p).excl);
     return Number(process.hrtime.bigint() - t0) / 1e6 / count;
   };
   const t72 = time(72, 300);
   const t144 = time(144, 200);
   const t0 = process.hrtime.bigint();
-  for (let i = 0; i < 3000; i++) api.robustStats(draw(gauss, SHAPES[0], 36));
+  for (let i = 0; i < 3000; i++) void api.robustStats(draw(gauss, SHAPES[0], 36)).excl;
   const t3000 = Number(process.hrtime.bigint() - t0) / 1e6;
   console.log(
     `速度: n=72 ${t72.toFixed(3)}ms, n=144 ${t144.toFixed(3)}ms, n=36×3000回 ${t3000.toFixed(0)}ms`,
