@@ -3025,6 +3025,14 @@ function nudgeArrow(dirKey) {
   if (dirKey === "d") a.y = +(a.y - step).toFixed(2) || 0;
   if (dirKey === "l") a.x = +(a.x - step).toFixed(2) || 0;
   if (dirKey === "r") a.x = +(a.x + step).toFixed(2) || 0;
+  if (s.faceType === "triple") {
+    /* 三つ目的の座標は、スポットの中心から測って保存している。動かした先がとなりのスポットに近くなったら、
+       置き直したときと同じに、近い方のスポットへ移す。移さないと、矢円がとなりのスポットの輪に触れても M のままになる */
+    const hit = hitFromGlobal(a.x, +(a.y + SPOT_Y[a.spot || 0]).toFixed(2), s.faceD, s.faceType, activeArrowR(s));
+    a.x = +hit.x.toFixed(2) || 0;
+    a.y = +hit.y.toFixed(2) || 0;
+    a.spot = hit.spot;
+  }
   Object.assign(a, scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s)));
   /* 動かしたら位置から採点し直す。手で直した点数は外す（矢円と点数をそろえる） */
   if (clearManualScore(a)) ui.recMsg = "位置どおりの点に戻しました";

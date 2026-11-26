@@ -562,7 +562,12 @@ function personalModel(sess,setup,currentSt){
   if(!sess || !currentSt) return null;
   currentSt=sightStats(currentSt);
   const sv=sightKey(sess.sightV), sh=sightKey(sess.sightH);
-  const same=db.sessions.filter(s=>s.id!==sess.id && (s.setupId||"")==(sess.setupId||"") && s.dist===sess.dist && s.faceD===sess.faceD && (s.faceType||"single")===(sess.faceType||"single") && sightKey(s.sightV)===sv && sightKey(s.sightH)===sh)
+  /* 使うのは、この記録より前の記録だけ（日付が前。同じ日は、この記録より先に保存したもの）。
+     以前の記録のノートを開いたとき、あとの練習を「同じサイトで打った前の練習」に数えていた（50-record-view.js の sessionsAsOf と同じ決まり）。
+     記録中の回（まだ db.sessions に無い）は、その日までの記録を全部使う */
+  const asOf=sess.date||today(), at=db.sessions.indexOf(sess);
+  const later=(s,i)=>!!s.date && (s.date>asOf || (s.date===asOf && at>=0 && i>at));
+  const same=db.sessions.filter((s,i)=>s.id!==sess.id && !later(s,i) && (s.setupId||"")==(sess.setupId||"") && s.dist===sess.dist && s.faceD===sess.faceD && (s.faceType||"single")===(sess.faceType||"single") && sightKey(s.sightV)===sv && sightKey(s.sightH)===sh)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1))
     .slice(-10);
   const items=same.map(s=>{
@@ -645,7 +650,7 @@ function scorecardSvg(sess){
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);
   const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(a=>scoreLabel(a)+(a.manual===true?"*":"")).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
   const h=210+rows.length*34;
-  const title=`${fmtD(sess.date)} ${sess.dist}m ${esc(roundLabel(sess.round))}`;
+  const title=`${fmtD(sess.date)} ${sess.dist}m ${roundLabel(sess.round)}`;
   const bg="#f7f8f4", ink="#1c1e1c", green="#1a5c3a";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="${h}" viewBox="0 0 900 ${h}">
   <rect width="900" height="${h}" fill="${bg}"/>
