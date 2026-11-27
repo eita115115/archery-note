@@ -378,12 +378,22 @@ function sampleSd(vals) {
   const m = vals.reduce((t, v) => t + v, 0) / vals.length;
   return Math.sqrt(vals.reduce((t, v) => t + (v - m) ** 2, 0) / (vals.length - 1));
 }
+/* 日付の文字列の比較。YYYY-MM-DD どうしは文字の順が日付の順なので、そのまま比べる（localeCompare は 1 回が重く、
+   1,000 回の記録の並べ替えで待機画面を出すたびに数十 ms かかっていた）。形の違う日付はこれまでどおり localeCompare */
+const ISO_DATE_TEXT = /^\d{4}-\d{2}-\d{2}$/;
+function compareDateText(a, b) {
+  const x = String(a || ""),
+    y = String(b || "");
+  if (x === y) return 0;
+  if (ISO_DATE_TEXT.test(x) && ISO_DATE_TEXT.test(y)) return x < y ? -1 : 1;
+  return x.localeCompare(y);
+}
 /* 日付の新しい順（同じ日は後から保存したものが先）。保存の並びは変えない */
 function sessionsByDateDesc() {
   return db.sessions
     .map((s, i) => ({ s, i }))
     .filter((x) => x.s && typeof x.s === "object")
-    .sort((a, b) => String(b.s.date || "").localeCompare(String(a.s.date || "")) || b.i - a.i)
+    .sort((a, b) => compareDateText(b.s.date, a.s.date) || b.i - a.i)
     .map((x) => x.s);
 }
 /* sess の時点までの記録（保存順）: 日付が前の記録と、同じ日付なら sess より先に保存した記録と sess 自身。
@@ -795,7 +805,9 @@ function renderRecordConditions(m) {
   const defSetup = def.setupId || "";
   const defDist = def.dist;
   const defFace = faceChoiceValue(def);
-  const defRound = def.round || "free";
+  /* しまった自作ラウンド（設定で消した・作り直した）は、前回の条件でも選ばない（自由練習から） */
+  const defRoundDef = findRoundDef(def.round);
+  const defRound = def.round && !(defRoundDef && defRoundDef.archived) ? def.round : "free";
   const knownDist = [70, 50, 30, 18].includes(+defDist);
   m.innerHTML = `
   <div class="subTop"><button type="button" class="backBtn" id="condBack" data-testid="conditions-back">${REC_CHEVRON}記録</button></div>
@@ -807,6 +819,7 @@ function renderRecordConditions(m) {
       ${ROUND_TYPES.map((r) => `<option value="${r.id}" ${r.id === defRound ? "selected" : ""}>${r.label}</option>`).join("")}
       <optgroup label="多距離ラウンド">
         ${multiRoundDefs()
+          .filter((r) => !r.archived)
           .map(
             (r) =>
               `<option value="${esc(r.id)}" ${r.id === defRound ? "selected" : ""}>${esc(r.label)}</option>`,
@@ -902,7 +915,9 @@ function renderRecordConditions(m) {
     $("#fRoundInfo").textContent = mdef
       ? `${mdef.stages.length}距離・合計 ${mdef.stages.reduce((t, st) => t + (st.arrows || 0), 0)}射`
       : quota
-        ? `${quota}射（${per}射×${Math.ceil(quota / per)}エンド）`
+        ? quota % per
+          ? `${quota}射（${per}射×${Math.floor(quota / per)}エンドと ${quota % per}射）`
+          : `${quota}射（${per}射×${quota / per}エンド）`
         : "射数は決めません";
   }
   /* 多距離ラウンド選択時: stage[0] の距離・的・本数へフォームを合わせ、ステージ一覧を1行表示する */
@@ -951,6 +966,15 @@ function renderRecordConditions(m) {
     refreshRoundInfo();
   };
   $("#jumpGear").onclick = () => showView("gear");
+  /* 距離の決まったラウンド（70m 72射 など）を選んだあとで別の距離にしたら、ラウンドを自由練習に戻す。
+     戻さないと、30m の記録が「70m 72射」のラウンドとして保存される */
+  function leaveFixedRound(d) {
+    const sel = $("#fRound");
+    const r = ROUND_TYPES.find((x) => x.id === sel.value);
+    if (!r || !r.dist || +d === r.dist) return;
+    sel.value = "free";
+    showRoundStages(null);
+  }
   function refreshLens() {
     const old = $("#setupLens");
     if (old) old.outerHTML = recordSetupSnapshot($("#fSetup").value, distState.d);
@@ -961,8 +985,11 @@ function renderRecordConditions(m) {
         if (c.dataset.d === "custom") {
           setDistChip(null);
           $("#fDistCustom").value = "";
+          leaveFixedRound(null);
+          fillSight();
         } else {
           setDistChip(+c.dataset.d);
+          leaveFixedRound(distState.d);
           suggestFace(distState.d);
           /* 初回だけ、18m は 3射エンドを初期値にする（2回目からは前回の本数を保つ） */
           if (firstRun) $("#fArrows").value = String(onboardDerived(distState.d).perEnd);
@@ -974,20 +1001,32 @@ function renderRecordConditions(m) {
   );
   $("#fDistCustom").oninput = (e) => {
     distState.d = +e.target.value || null;
+    leaveFixedRound(distState.d);
+    refreshRoundInfo();
     if (distState.d) {
       suggestFace(distState.d);
       fillSight();
     }
     refreshLens();
   };
+  /* サイトの欄には、その弓具・距離のいちばん新しい記録の値を入れる。距離か弓具を変えて、そこに記録が無いときは、
+     前に自動で入れた値を消す（手で打ち直した値は消さない）。消さないと、70m の値が 30m の記録に付いて保存され、
+     結果の画面の「このサイトを記録に残す」で 30m の記録として台帳にも入ってしまう */
+  let autoSight = null;
   function fillSight() {
     const sid = $("#fSetup").value,
       d = distState.d;
-    if (!sid || !d) return;
-    const mk = latestMark(sid, d);
+    const mk = sid && d ? latestMark(sid, d) : null;
+    const v = $("#fSightV"),
+      h = $("#fSightH");
     if (mk) {
-      $("#fSightV").value = mk.v ?? "";
-      $("#fSightH").value = mk.h ?? "";
+      v.value = mk.v ?? "";
+      h.value = mk.h ?? "";
+      autoSight = { v: v.value, h: h.value };
+    } else if (autoSight && v.value === autoSight.v && h.value === autoSight.h) {
+      v.value = "";
+      h.value = "";
+      autoSight = null;
     }
   }
   $("#fSetup").onchange = () => {
@@ -1613,13 +1652,13 @@ function analysisIntervalRowsHtml(im) {
 }
 /* voice:fold-end */
 function analysisGroupingTrendHtml(sess, sessions) {
+  /* 回数は、位置のある矢が 3射以上ある記録を数えるだけ（analysisImpactModel の ok と同じ条件）。
+     数値の組は表に出す直近 8 回だけ作る。全部の記録で作ると、使わない B・C（MCD）まで計算して 1,000 回で 1 秒かかる */
   const rows = sessions
-    .filter((s) => trSameCondition(s, sess))
-    .map((s) => ({ s, im: analysisImpactModel(s) }))
-    .filter((r) => r.im.ok)
+    .filter((s) => trSameCondition(s, sess) && analysisHasGroupingEvidence(sessionMetrics(s).st))
     .reverse();
   if (!rows.length) return "";
-  const shown = rows.slice(-8);
+  const shown = rows.slice(-8).map((s) => ({ s, im: analysisImpactModel(s) }));
   return `<section class="vsec" data-testid="analysis-grouping-trend">
     <div class="vsecH"><h2>グルーピングの推移</h2><span class="aside">${rows.length}回</span></div>
     <div class="cmp anTrendTbl">
@@ -1642,11 +1681,13 @@ function analysisImpactHtml() {
       sess: null,
     };
   const pick = sessions.slice(0, ANALYSIS_PICK_MAX);
-  let sess = pick.find((s) => s.id === ui.analysisImpactId);
-  if (!sess) {
-    sess = pick.find(sessionHasPos) || pick[0];
-    ui.analysisImpactId = sess.id;
-  }
+  /* 「分析で見る」で頼んだ記録が、新しい順の ANALYSIS_PICK_MAX 件より古くても、その記録を出す（選ぶ欄にも足す）。
+     これまでは黙って最新の記録に替わっていた */
+  const wanted = ui.analysisImpactId ? sessions.find((s) => s.id === ui.analysisImpactId) : null;
+  if (wanted && !pick.includes(wanted)) pick.push(wanted);
+  /* 選んでいないとき（null）は、位置のある最新の記録。自動で選んだ記録は覚えない
+     （覚えると、あとで練習を記録しても古い記録のままになる） */
+  const sess = wanted || pick.find(sessionHasPos) || pick[0];
   const setup = db.setups.find((x) => x.id === sess.setupId);
   const im = analysisImpactModel(sess);
   const dateText = esc(anDateLabel(sess.date));
@@ -1714,8 +1755,8 @@ function analysisCompareDefaults(sessions) {
     const same = others.filter((s) => anComparable(s, b));
     a = (sessionHasPos(b) && same.find(sessionHasPos)) || same[0] || others[0];
   }
-  c.a = a.id;
-  c.b = b.id;
+  /* 自動で選んだ組は覚えない（選ぶ欄で選んだものだけ ui.analysisCmp に残る）。
+     覚えると、あとで練習を記録しても B が古い記録のままになる */
   return { a, b };
 }
 function anCondFullLabel(sess) {
@@ -1916,6 +1957,8 @@ function renderAnalysis(m) {
   const tab = ui.analysisTab;
   const f = ui.analysisFilter;
   if (!ANALYSIS_PERIODS.some((p) => p[0] === f.period)) f.period = "all";
+  /* 絞り込んでいた弓具を消したら「すべて」に戻す。戻さないと、選ぶ欄は「すべて」と出るのに、消した弓具で絞ったままになる */
+  if (f.setupId && f.setupId !== "__none" && !db.setups.some((x) => x && x.id === f.setupId)) f.setupId = "";
   const allRows = buildAnalysisRows(db.sessions, db.setups, sessionMetrics);
   let html,
     after = null;
@@ -2227,6 +2270,7 @@ function activeStatus(s) {
   const pulled = s.editIndex != null;
   const doneArrows = s.ends.reduce((n, e) => n + e.length, 0);
   const allDone = !!plan.quota && !pulled && !s.cur.length && doneArrows >= plan.quota;
+  const cap = activeEndCapacity(s, plan, -1);
   return {
     plan,
     pulled,
@@ -2234,8 +2278,20 @@ function activeStatus(s) {
     allDone,
     endNo: pulled ? Math.min(s.editIndex, s.ends.length) + 1 : s.ends.length + 1,
     total: sumScores(sessionArrows(s)),
-    full: s.cur.length >= plan.per,
+    cap,
+    full: s.cur.length >= cap,
   };
+}
+/* そのエンドに入る本数（endIndex は確定したエンドの番号、-1 は入力中のエンド）。
+   規定の射数があるラウンドは、全体で規定の射数まで。1エンドの本数で割り切れないとき（36射を 5射ずつ など）は、
+   最後のエンドが残りの射数だけになる。これまでは最後のエンドも 1エンドぶん入り、36射のラウンドに 40射入った。
+   すでに規定の射数を超えている記録（以前の版で入れたもの）は、これまでどおり 1エンドの本数まで */
+function activeEndCapacity(s, plan, endIndex) {
+  if (!plan.quota || s.editIndex != null) return plan.per;
+  const others =
+    s.ends.reduce((n, e, i) => n + (i === endIndex ? 0 : e.length), 0) + (endIndex >= 0 ? s.cur.length : 0);
+  const room = plan.quota - others;
+  return room > 0 ? Math.min(plan.per, room) : plan.per;
 }
 function activeGuideHtml(scoreMode) {
   if (scoreMode) {
@@ -2432,7 +2488,7 @@ function undoActiveArrow() {
 }
 /* 位置のない矢を足せるか。入力中のエンドは本数がそろうまで、開いているエンドは本数が足りないときだけ */
 function activeCanAppend(s, st) {
-  if (activeEditEnd(s) >= 0) return activeEditArr(s).length < st.plan.per;
+  if (activeEditEnd(s) >= 0) return activeEditArr(s).length < activeEndCapacity(s, st.plan, activeEditEnd(s));
   return !st.allDone && !st.full;
 }
 /* 位置を作らずに1射を足す（得点キーと「M 位置なし」）。座標は持たせない */
@@ -2486,7 +2542,7 @@ function pressScoreKey(id) {
 function renderActiveDock(s, st) {
   const dock = $("#activeActionDock");
   const next = nextStageDef(s);
-  const left = Math.max(0, st.plan.per - s.cur.length);
+  const left = Math.max(0, st.cap - s.cur.length);
   const scoreMode = sessionInputMode(s) === "score";
   const editing = activeEditEnd(s) >= 0;
   const canAppend = activeCanAppend(s, st);
@@ -2851,7 +2907,7 @@ function refreshActive() {
       ? `第${st.endNo}エンドを修正中`
       : `第${st.endNo}エンド`;
   const first = st.doneArrows + 1;
-  const range = per > 1 ? `${first}〜${first + per - 1}射目` : `${first}射目`;
+  const range = st.cap > 1 ? `${first}〜${first + st.cap - 1}射目` : `${first}射目`;
   const notice = ui.recMsg || "";
   ui.recMsg = "";
   const msg = $("#recMsg");
@@ -3033,6 +3089,14 @@ function nudgeArrow(dirKey) {
   if (dirKey === "d") a.y = +(a.y - step).toFixed(2) || 0;
   if (dirKey === "l") a.x = +(a.x - step).toFixed(2) || 0;
   if (dirKey === "r") a.x = +(a.x + step).toFixed(2) || 0;
+  if (s.faceType === "triple") {
+    /* 三つ目的の座標は、スポットの中心から測って保存している。動かした先がとなりのスポットに近くなったら、
+       置き直したときと同じに、近い方のスポットへ移す。移さないと、矢円がとなりのスポットの輪に触れても M のままになる */
+    const hit = hitFromGlobal(a.x, +(a.y + SPOT_Y[a.spot || 0]).toFixed(2), s.faceD, s.faceType, activeArrowR(s));
+    a.x = +hit.x.toFixed(2) || 0;
+    a.y = +hit.y.toFixed(2) || 0;
+    a.spot = hit.spot;
+  }
   Object.assign(a, scoreAt(a.x, a.y, s.faceD, s.faceType, activeArrowR(s)));
   /* 動かしたら位置から採点し直す。手で直した点数は外す（矢円と点数をそろえる） */
   if (clearManualScore(a)) ui.recMsg = "位置どおりの点に戻しました";
@@ -3237,7 +3301,7 @@ function attachTargetInput(s) {
       const st = activeStatus(s);
       const blocked =
         activeEditEnd(s) >= 0
-          ? activeEditArr(s).length >= st.plan.per
+          ? activeEditArr(s).length >= activeEndCapacity(s, st.plan, activeEditEnd(s))
             ? "直す矢を選んでください"
             : ""
           : st.allDone
@@ -3441,6 +3505,14 @@ async function advanceRoundStage() {
   render();
 }
 
+/* 記録を終えた・やめた・直し始めたときに、選んでいた矢・開いていたエンド・中心の拡大を次へ持ち越さない。
+   持ち越すと、終えた直後に「点数や位置を直す」を開いたとき、前に選んでいた矢が選ばれたままで、
+   最初のタップがその矢を動かしていた（拡大も残り、矢の一部が画面の外になる） */
+function resetActiveSelection() {
+  ui.selArrow = -1;
+  ui.editEnd = -1;
+  ui.zoomFor = null;
+}
 async function finishSession() {
   const s = db.active;
   const shot = s.ends.flat().length + s.cur.length;
@@ -3456,6 +3528,7 @@ async function finishSession() {
       : "まだ 1射も入っていません。この記録をやめて消しますか？";
     if (await appConfirm(msg, { danger: true, okLabel: "やめて消す" })) {
       db.active = null;
+      resetActiveSelection();
       wakeLock.release();
       nativePulse("heavy");
       save();
@@ -3484,6 +3557,7 @@ async function finishSession() {
   const isEdit = !!s._edit;
   delete s._edit;
   db.active = null;
+  resetActiveSelection();
   wakeLock.release();
   if (isEdit) {
     const i = db.sessions.findIndex((x) => x.id === s.id);
@@ -3728,7 +3802,8 @@ function summaryGamificationHtml(gam) {
 }
 /* 着弾の数値（グループ RMS と着弾中心のずれ）。位置のある矢の統計が無ければ空 */
 function resultImpactFigsHtml(st) {
-  if (!st) return "";
+  /* 分析タブと同じ決まり: 位置のある矢が 3射になるまで出さない（1射で「半径 0.0cm」と出ていた） */
+  if (!analysisHasGroupingEvidence(st)) return "";
   const ci = st.rrCi ? `${st.n}射・幅 ${st.rrCi.lo.toFixed(1)}〜${st.rrCi.hi.toFixed(1)}cm` : `${st.n}射`;
   return `<div class="figs two resultImpactFigs" data-testid="result-impact-figs">
     <div class="fig"><div class="l">グルーピング（半径）</div><div class="n">${st.rr.toFixed(1)}<small>cm</small></div><div class="d">${ci}</div></div>

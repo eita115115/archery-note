@@ -66,6 +66,18 @@ $("#updBar").onclick=freshReload;
  * iOS Safari では pagehide が最も信頼できる。順序は本体（flushPendingSave）→ スナップショット。 */
 document.addEventListener("visibilitychange",()=>{ if(document.hidden){ flushPendingSave(); flushSafetySnapshot(); } else{ checkUpdate(); wakeLock.reacquire(); } });
 window.addEventListener("pagehide",()=>{ flushPendingSave(); flushSafetySnapshot(); });
+/* 同じ端末の別の画面（タブ）が保存したら、この画面のデータを読み込み直す。この画面は起動したときのデータを持ったままなので、
+   次に何か保存すると、別の画面で記録した練習を上書きして消していた。保留中のこの画面の書き込みは捨てる（新しいのは別の画面の内容） */
+window.addEventListener("storage",(e)=>{
+  if(e.key!==KEY || e.newValue==null) return;
+  if(typeof discardPendingSave==="function") discardPendingSave();
+  db=load();
+  DB_REV++;
+  applyTheme();
+  applyFieldMode();
+  render();
+  toast("ほかの画面で保存された内容に合わせました");
+});
 window.addEventListener("beforeunload",()=>{ flushPendingSave(); flushSafetySnapshot(); });
 checkUpdate();
 /* S1/S3（ストレージ守りタスク・OPFS移行裁定 §4）: 起動時に一度だけ非同期で先読みする。

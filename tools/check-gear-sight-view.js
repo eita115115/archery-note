@@ -55,7 +55,7 @@ return {
   ui,
   sessionMetrics, adviceFor, sightStats, sightInterp, judgementFor, arrowRadiusFromDiaMm,
   gearSpecRows, gearSpecOtherRows, gearSpecRowHtml, gearHistoryEntries, gearHistoryHtml, gearPrecisionHtml,
-  recordingSetupId, gearViewSetup, GEAR_FIELDS,
+  recordingSetupId, gearViewSetup, GEAR_FIELDS, GEAR_SUGGESTIONS, estimateArrowCd, personalPhysicsCalibration,
   sightDistRows, sightScaleTicks, sightScaleSvg, sightDistRowHtml, sightHorizontalNoteHtml,
   sightAdviceModel, sightAdviceHtml, sightCentreRows, sightCentreDriftHtml, sightBasisRowsHtml,
   sessionSightFoldHtml,
@@ -738,5 +738,119 @@ const adviceCase = (label, mutate) => {
     ok(!all.includes(w), `removed part "${w}" is still in the sources`);
 }
 
+
+/* ---------- サイトの目安: 「同じサイトで打った前の練習」は、その記録より前の記録だけ ---------- */
+/* 以前の記録のノートを開いたとき、あとの練習を「前の練習」に数えていた（中心が逆向きのあとの 3 回のせいで、
+   その日は「右へ」だった目安が「まだ動かさない」に変わる）。数えるのは、日付が前の記録と、同じ日の先に保存した記録 */
+{
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0), seed / 4294967296);
+  const gauss = () => {
+    let u = 0;
+    while (!u) u = rnd();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rnd());
+  };
+  const sess = (id, date, cx) => ({
+    id,
+    date,
+    setupId: "s1",
+    dist: 70,
+    faceD: 122,
+    faceType: "single",
+    perEnd: 6,
+    arrowR: 0.285,
+    round: "free",
+    sightV: "5.2",
+    sightH: "0",
+    ends: Array.from({ length: 6 }, () =>
+      Array.from({ length: 6 }, () => ({
+        x: +(cx + gauss() * 4).toFixed(2),
+        y: +(gauss() * 4).toFixed(2),
+        s: 9,
+        X: false,
+      })),
+    ),
+  });
+  const d = load((db) => {
+    db.sessions = [
+      sess("as-of-c", "2026-10-20", -6) /* 保存の並びは日付の順とは限らない */,
+      sess("as-of-a", "2026-10-01", 6),
+      sess("as-of-b1", "2026-10-10", -6),
+      sess("as-of-b2", "2026-10-10", -6),
+      sess("as-of-d", "2026-10-30", -6),
+    ];
+  });
+  const setup = d.setups[0];
+  const by = (id) => d.sessions.find((x) => x.id === id);
+  const personal = (id) => app.adviceFor(by(id), setup).personal;
+  ok(personal("as-of-a").sample === 0, "the oldest record has no earlier practice to compare with");
+  ok(app.adviceFor(by("as-of-a"), setup).decision.h.move === true, "the oldest record keeps its own advice");
+  ok(
+    app.judgementFor(app.adviceFor(by("as-of-a"), setup), by("as-of-a")).label !== "保留",
+    "later practice does not put the oldest record on hold",
+  );
+  ok(personal("as-of-b1").sample === 1, "same-day record saved first sees only the earlier date");
+  ok(personal("as-of-b2").sample === 2, "same-day record saved later also sees the one saved before it");
+  ok(personal("as-of-c").sample === 3, "a record sees every earlier date, whatever the stored order");
+  ok(personal("as-of-d").sample === 4, "the newest record sees all the others");
+  /* 記録中の回（db.sessions に無い）は、その日までの記録を全部使う。あとの日付の記録は使わない */
+  const live = sess("as-of-live", "2026-10-10", -6);
+  ok(app.adviceFor(live, setup).personal.sample === 3, "a session being recorded uses records up to its date");
+}
+
+/* ---------- 空気抵抗の係数の入力候補は、いまの計算の前提の中の値 ---------- */
+/* 実測は約 1.5〜2.6（docs/design/math-core-rebuild.md 3章）。候補を選んだときの値が、空のままのとき（外径から出す値）と
+   大きく離れないこと。以前の候補 0.90〜1.45 は古い前提の値で、標準の矢（5.6mm・29inch）の 2.6 の半分以下だった */
+{
+  const list = app.GEAR_SUGGESTIONS.arrowCd.map(Number);
+  ok(list.length >= 3 && list.every((v) => v >= 1.5 && v <= 2.6), `Cd suggestions are inside 1.5–2.6: ${list}`);
+  const standard = app.estimateArrowCd({ arrowLength: "29" }, 5.6);
+  ok(Math.abs(standard - 2.6) < 1e-9, "the reference arrow estimates Cd 2.6");
+  ok(list.includes(2.6), "the reference value is one of the suggestions");
+  ok(app.estimateArrowCd({ arrowCd: String(list[0]) }, 5.6) === list[0], "a chosen suggestion is used as it is");
+}
+
+/* ---------- 距離の無いサイトの記録（以前の版・読み込んだデータ）があっても、予測は数のまま ---------- */
+{
+  const d = load((db) => {
+    db.sightMarks.push({ id: "no-dist", setupId: "s1", dist: null, v: "4.1", h: "0", date: "2026-09-01", ts: 2 });
+    db.sightMarks.push({ id: "str-dist", setupId: "s1", v: "3.9", h: "0", date: "2026-09-02", ts: 3 });
+  });
+  const interp = app.sightInterp("s1");
+  ok(interp && interp.pts.every((p) => Number.isFinite(p[0]) && p[0] > 0), "marks without a distance are not used");
+  ok(Number.isFinite(interp.predict ? interp.predict(30) : interp.pts[0][1]), "the prediction stays a number");
+  const html = app.sightPredictionHtml(interp, d.sightMarks.filter((m) => m.setupId === "s1"));
+  ok(!/NaN|nullm|undefined/.test(textOf(html)), `no broken value in the prediction: ${textOf(html).slice(0, 120)}`);
+}
+
+/* ---------- 個人の校正は、結果を変えるものが同じなら前の結果を使う ---------- */
+{
+  const d = load();
+  const sess = d.sessions.find((s) => s.setupId === "s1" && s.ends.flat().some((a) => a.x != null));
+  const first = app.personalPhysicsCalibration("s1");
+  ok(first && app.personalPhysicsCalibration("s1") === first, "a second call reuses the result");
+  /* メモや印の保存（db の世代は進む）では計算し直さない */
+  sess.note = "架空のメモ";
+  sess.ends[0][0].reason = "風";
+  app.setDb(d);
+  ok(app.personalPhysicsCalibration("s1") === first, "a memo or a reason mark does not recompute");
+  /* 矢の位置・サイトの値・風・弓具の項目・サイトの記録が変わったら計算し直す */
+  const changes = [
+    () => { sess.ends[0][0].x += 1.5; },
+    () => { sess.sightV = "5.6"; },
+    () => { sess.windSpeed = "4"; sess.windDir = "左から"; },
+    () => { d.setups[0].arrowSpeed = "200"; },
+    () => { d.sightMarks.push({ id: "m-new", setupId: "s1", dist: 30, v: "3.1", h: "0", date: "2026-11-01", ts: 9 }); },
+    () => { d.settings.eyeSight = 900; },
+  ];
+  let prev = first;
+  changes.forEach((change, i) => {
+    change();
+    app.setDb(d);
+    const next = app.personalPhysicsCalibration("s1");
+    ok(next !== prev, `change ${i} recomputes the calibration`);
+    prev = next;
+  });
+}
 
 console.log(`Gear / sight / settings copy and view-model checks OK (${checks} checks)`);

@@ -281,8 +281,10 @@ function historyListBodyHtml(all, hf, dayChanges) {
   const sessionOnly = !!(hf.setupId || hf.dist || hf.round);
   const qNorm = normNoteQuery(hf.q);
   const qTokens = qNorm ? qNorm.split(/\s+/).filter(Boolean) : [];
+  const setupIds = new Set((db.setups || []).map((x) => x && x.id));
   const sessionOk = (s) =>
-    (!hf.setupId || (hf.setupId === "__none" ? !s.setupId : s.setupId === hf.setupId)) &&
+    /* 「未指定」は、弓具を選ばなかった記録と、弓具を消した記録（詳しくは「弓具 未指定」と出る） */
+    (!hf.setupId || (hf.setupId === "__none" ? !s.setupId || !setupIds.has(s.setupId) : s.setupId === hf.setupId)) &&
     (!hf.dist || String(s.dist) === String(hf.dist)) &&
     (!hf.round || (s.round || "free") === hf.round);
   const items = all.filter((it) => {
@@ -326,6 +328,8 @@ function renderHistory(m) {
   const hf = ui.histFilter;
   if (hf.kind !== "rec" && hf.kind !== "memo") hf.kind = "all";
   if (typeof hf.q !== "string") hf.q = "";
+  /* 絞り込んでいた弓具を消したら「すべて」に戻す（選ぶ欄は「すべて」と出るのに、消した弓具で絞ったままになっていた） */
+  if (hf.setupId && hf.setupId !== "__none" && !(db.setups || []).some((x) => x && x.id === hf.setupId)) hf.setupId = "";
   const sessions = all.filter((it) => it.kind === "session").map((it) => it.s);
   const dists = [...new Set(sessions.map((s) => s.dist).filter(Boolean))].sort((a, b) => b - a);
   const rounds = [...new Set(sessions.map((s) => s.round || "free"))];
@@ -831,6 +835,7 @@ function openHistDetail(id) {
       cp.cur = [];
       cp._edit = true;
       db.active = cp;
+      resetActiveSelection();
       save();
       closeModal(ovl);
       if (view === "record") render();
@@ -1379,8 +1384,10 @@ function renderSight(m) {
   }
   // 距離候補: 台帳・セッションにある距離 + 定番
   const dset = new Set([70, 50, 30, 18]);
-  db.sightMarks.filter((x) => x.setupId === sid).forEach((x) => dset.add(x.dist));
-  db.sessions.filter((x) => x.setupId === sid).forEach((x) => dset.add(x.dist));
+  /* 距離の無い記録（以前の版のデータや読み込んだデータ）は、距離の候補に入れない（「m」「nullm」の行になっていた） */
+  const okDist = (x) => sightMarkHasDist(x);
+  db.sightMarks.filter((x) => x.setupId === sid && okDist(x)).forEach((x) => dset.add(x.dist));
+  db.sessions.filter((x) => x.setupId === sid && okDist(x)).forEach((x) => dset.add(x.dist));
   const dists = [...dset].sort((a, b) => b - a);
   if (!dists.includes(ui.sightSel.dist)) ui.sightSel.dist = dists[0];
   const dist = ui.sightSel.dist;
@@ -1420,7 +1427,7 @@ function renderSight(m) {
     <div class="vsecH"><h2>サイトの目安</h2><span class="aside">${adv ? `${esc(dist)}m・${fmtMDW(lastSess.date)}の記録` : `${esc(dist)}m`}</span></div>
     ${adv ? sightAdviceHtml(lastSess, setup, adv) : `<p class="basis" data-testid="sight-advice-empty">${adviceEmpty}</p>`}
     ${basisRows ? `<details class="gearMore" data-testid="sight-basis-fold"><summary>計算の内訳</summary>${basisRows}<p class="basis">矢の飛び方は、空気抵抗を入れた計算で出しています。入力のない項目は、よくある値で代わりにしています。</p></details>` : ""}
-    <details class="gearMore" data-testid="sight-click-fold">
+    <details class="gearMore" data-testid="sight-click-fold"${ui.sightClickOpen ? " open" : ""}>
       <summary>クリック換算の設定</summary>
       <div class="row">
         <div><label class="f" for="sgCalV">上下 1クリックで動く量 (cm・70m)</label><input class="inp" id="sgCalV" inputmode="decimal" value="${esc(setup.calibV70 || "")}" placeholder="例: 4"></div>
@@ -1499,7 +1506,10 @@ function renderSight(m) {
     }),
   );
   const applyCal = (key, fromId, val) => {
-    setup[key] = parseFloat(val) || null;
+    /* 「4,5」や全角の「４」も数として読む。描き直しても折りたたみは開いたまま（閉じると次の欄に入れられない） */
+    const num = parseSightNumber(val);
+    setup[key] = Number.isFinite(num) && num !== 0 ? num : null;
+    ui.sightClickOpen = true;
     const prevY = window.scrollY;
     let nextFocus = calDownId || fromId;
     if (!calDownId && calTabDir === 1 && fromId === "sgCalV") nextFocus = "sgCalH";
@@ -1529,6 +1539,11 @@ function openMarkForm(setupId, dist) {
   openModal(ovl, { escapeTarget: "#mkCancel" });
   bindUnsavedFormGuard(ovl, "#mkCancel");
   ovl.querySelector("#mkSave").onclick = () => {
+    /* 上下も左右も空のまま保存すると、空の記録がいちばん新しい記録になり、次の練習のサイトの欄まで空になっていた */
+    if (!ovl.querySelector("#mkV").value.trim() && !ovl.querySelector("#mkH").value.trim()) {
+      toast("上下か左右の目盛りを入れてください");
+      return;
+    }
     db.sightMarks.push({
       id: uid(),
       setupId,

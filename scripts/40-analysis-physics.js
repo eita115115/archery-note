@@ -272,12 +272,25 @@ const LEVELS={
 };
 const PCAL_CACHE=new Map();
 /* 校正はセッション横断のRK4連鎖を含み重いので、db更新時刻をキーにメモ化する */
+/* 個人の校正は、その弓具の記録の数が多いと重い（1,000 回の記録で数百 ms）。以前は保存の時刻（db.updatedAt）を鍵にしていたので、
+   メモや印を 1 つ保存しただけでも計算し直していた。結果を変えるもの（弓具の項目・目の位置・その弓具の練習の条件と
+   矢の位置の統計・その弓具のサイトの記録）が前と同じなら、前の結果を使う。統計は、矢の位置が変わらなければ同じ物（sessionMetrics） */
+function personalPhysicsCalibrationDeps(setupId){
+  const setup=db.setups.find(s=>s.id===setupId);
+  const deps=[setup?JSON.stringify(setup):"", db.settings.eyeSight||850];
+  db.sessions.forEach(s=>{
+    if(s && s.setupId===setupId) deps.push(s.id,s.date,s.dist,s.faceD,s.faceType,s.sightV,s.sightH,s.windSpeed,s.windDir,s.wx,sessionMetrics(s).st);
+  });
+  db.sightMarks.forEach(m=>{ if(m && m.setupId===setupId) deps.push("mark",m.id,m.dist,m.v); });
+  return deps;
+}
 function personalPhysicsCalibration(setupId){
   if(!setupId) return null;
-  const key=[setupId,db.updatedAt||"",db.sessions.length,db.sightMarks.length].join("|");
-  if(PCAL_CACHE.has(key)) return PCAL_CACHE.get(key);
+  const deps=personalPhysicsCalibrationDeps(setupId), hit=PCAL_CACHE.get(setupId);
+  if(hit && hit.deps.length===deps.length && hit.deps.every((v,i)=>Object.is(v,deps[i]))) return hit.out;
   const out=computePersonalPhysicsCalibration(setupId);
-  PCAL_CACHE.set(key,out);
+  PCAL_CACHE.delete(setupId);
+  PCAL_CACHE.set(setupId,{deps,out});
   if(PCAL_CACHE.size>8) PCAL_CACHE.delete(PCAL_CACHE.keys().next().value);
   return out;
 }
@@ -486,6 +499,11 @@ function sessionMetricSignature(sess){
   /* DB_REV: db変異（save/scheduleSave）ごとに増える世代カウンタ。署名衝突（例: 2本を逆方向に同距離ナッジ）でも編集保存後に必ず再計算させる */
   return [typeof DB_REV==="number"?DB_REV:0,sess&&sess.id||"",sess&&sess.date||"",sess&&sess.dist||"",sess&&sess.faceD||"",sess&&sess.faceType||"single",ends.length,n,total,xs.toFixed(2),ys.toFixed(2),last].join("|");
 }
+function sameMetricPoints(a,b){
+  if(!a || !b || a.length!==b.length) return false;
+  for(let i=0;i<a.length;i++) if(!Object.is(a[i].x,b[i].x) || !Object.is(a[i].y,b[i].y)) return false;
+  return true;
+}
 function sessionMetrics(sess){
   const sig=sessionMetricSignature(sess||{});
   const cached=SESSION_METRIC_CACHE.get(sess);
@@ -494,8 +512,13 @@ function sessionMetrics(sess){
   const total=all.reduce((a,x)=>a+x.s,0);
   /* 統計入力の防御: groupingSessionRow と同じ Number 化＋有限フィルタ（total/avg は従来どおり s ベース） */
   /* 座標のない矢（点数だけの入力・「M 位置なし」。x/y が無いか null）は統計に入れない。null を 0 と読まない */
-  const pts=all.filter(arrowHasPos).map(a=>({x:Number(a.x),y:Number(a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
-  const st=robustStats(pts);
+  let pts=all.filter(arrowHasPos).map(a=>({x:Number(a.x),y:Number(a.y)})).filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y));
+  /* 保存のたびに DB_REV が進むので、署名は毎回変わる。位置のある矢が 1 本も変わっていない記録は、前に計算した統計を
+     そのまま使う（座標を 1 本ずつ突き合わせるので、署名の衝突で古い統計を返すことはない）。過去の記録が多いと、
+     記録の終了・分析タブで全部の記録の MCD を計算し直していた（1,000 回で数秒）。all・total・avg は毎回作り直す */
+  let st;
+  if(cached && sameMetricPoints(cached.metrics.pts, pts)){ pts=cached.metrics.pts; st=cached.metrics.st; }
+  else st=robustStats(pts);
   const metrics={all,total,avg:all.length?total/all.length:0,st,pts};
   SESSION_METRIC_CACHE.set(sess,{signature:sig,metrics});
   return metrics;
@@ -552,7 +575,12 @@ function personalModel(sess,setup,currentSt){
   if(!sess || !currentSt) return null;
   currentSt=sightStats(currentSt);
   const sv=sightKey(sess.sightV), sh=sightKey(sess.sightH);
-  const same=db.sessions.filter(s=>s.id!==sess.id && (s.setupId||"")==(sess.setupId||"") && s.dist===sess.dist && s.faceD===sess.faceD && (s.faceType||"single")===(sess.faceType||"single") && sightKey(s.sightV)===sv && sightKey(s.sightH)===sh)
+  /* 使うのは、この記録より前の記録だけ（日付が前。同じ日は、この記録より先に保存したもの）。
+     以前の記録のノートを開いたとき、あとの練習を「同じサイトで打った前の練習」に数えていた（50-record-view.js の sessionsAsOf と同じ決まり）。
+     記録中の回（まだ db.sessions に無い）は、その日までの記録を全部使う */
+  const asOf=sess.date||today(), at=db.sessions.indexOf(sess);
+  const later=(s,i)=>!!s.date && (s.date>asOf || (s.date===asOf && at>=0 && i>at));
+  const same=db.sessions.filter((s,i)=>s.id!==sess.id && !later(s,i) && (s.setupId||"")==(sess.setupId||"") && s.dist===sess.dist && s.faceD===sess.faceD && (s.faceType||"single")===(sess.faceType||"single") && sightKey(s.sightV)===sv && sightKey(s.sightH)===sh)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.id>b.id?1:-1))
     .slice(-10);
   const items=same.map(s=>{
@@ -635,7 +663,7 @@ function scorecardSvg(sess){
   const all=sess.ends.flat(), total=all.reduce((a,x)=>a+x.s,0), setup=db.setups.find(x=>x.id===sess.setupId);
   const rows=sess.ends.map((end,i)=>({i:i+1, scores:end.map(a=>scoreLabel(a)+(a.manual===true?"*":"")).join("  "), sum:end.reduce((a,x)=>a+x.s,0)}));
   const h=210+rows.length*34;
-  const title=`${fmtD(sess.date)} ${sess.dist}m ${esc(roundLabel(sess.round))}`;
+  const title=`${fmtD(sess.date)} ${sess.dist}m ${roundLabel(sess.round)}`;
   const bg="#f7f8f4", ink="#1c1e1c", green="#1a5c3a";
   return `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="${h}" viewBox="0 0 900 ${h}">
   <rect width="900" height="${h}" fill="${bg}"/>
@@ -776,9 +804,17 @@ function sightFitAtSpeed(pts, phys, speedMps){
   let sse=0,sst=0; fs.forEach((f,i)=>{ sse+=(pts[i][1]-(a+b*f))**2; sst+=(pts[i][1]-yb)**2; });
   return {a,b,sse,r2:sst>1e-12?clamp(1-sse/sst,0,1):0,ph};
 }
+function sightMarkHasDist(m){
+  const d=m&&m.dist;
+  if(d==null || (typeof d==="string" && !d.trim())) return false;
+  const n=Number(d);
+  return Number.isFinite(n) && n>0;
+}
 function sightInterp(setupId){
   const byDist={}, sourceByDist=Object.create(null);
-  [...db.sightMarks].filter(m=>m.setupId===setupId)
+  /* 距離の無い記録（以前の版のデータ・読み込んだデータ。null・空・数でない値）は使わない。1 件でもあると、予測がすべて NaN になっていた。
+     数に直せる文字の距離（"030" など）は、これまでどおりその書き方のまま別の距離として使う */
+  [...db.sightMarks].filter(m=>m.setupId===setupId && sightMarkHasDist(m))
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts||0)-(b.ts||0))
     .forEach(m=>{ const v=parseSightNumber(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
   const keys=Object.keys(byDist).sort((a,b)=>+a-+b);

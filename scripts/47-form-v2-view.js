@@ -534,10 +534,11 @@ const FORM_V2_ERRORS = {
   file: ["動画を読み込めませんでした。", "この形式には対応していないようです。写真アプリで撮った動画（mp4・mov）を選んでください。", ["replay", "close"]],
   detect: ["読み取りが途中で止まりました。", "ここまでに読み取ったぶんは、結果を見られます。", ["analyze", "close"]],
   interrupted: ["撮影が止まりました。", "アプリが裏へ回ったので、カメラが止まりました。", ["analyze", "close"]],
+  cameraLost: ["撮影が止まりました。", "カメラが止まりました（ほかのアプリがカメラを使ったときなど）。", ["analyze", "close"]],
   readStopped: ["動画の読み取りが止まりました。", "アプリが裏へ回ったか、動画の再生が止まりました。", ["analyze", "retry", "close"]],
   analyze: ["結果を出せませんでした。", "計算の途中で問題が起きました。読み取ったデータは、この画面を閉じるまで残っています。記録と設定はそのままです。", ["analyze", "close"]],
 };
-const FORM_V2_STOPPED = ["interrupted", "detect", "readStopped", "analyze"]; // 途中まで読み取ったものが残りうる止まり方
+const FORM_V2_STOPPED = ["interrupted", "cameraLost", "detect", "readStopped", "analyze"]; // 途中まで読み取ったものが残りうる止まり方
 /* 保存していない結果や、まだ解析していない読み取りを捨てる前に確かめる（design.md 2.6）。捨ててよければ true */
 async function formV2ConfirmLeave(S) {
   if (S.saved || S.closed) return true;
@@ -552,7 +553,7 @@ async function formV2ConfirmLeave(S) {
 function formV2ShowError(S, kind, extra) {
   formV2StopCapture(S);
   const e = FORM_V2_ERRORS[kind] || FORM_V2_ERRORS.busy, has = S.buffer && S.buffer.n >= 10;
-  const part = kind === "interrupted" || kind === "readStopped";
+  const part = kind === "interrupted" || kind === "cameraLost" || kind === "readStopped";
   const btn = { retry: [kind === "readStopped" ? "最初から読み直す" : "もう一度試す", "fv2Retry"], replay: ["保存した動画を読み取る", "fv2ToReplay"], analyze: [part ? "ここまでの結果を見る" : kind === "analyze" ? "もう一度結果を出す" : "結果を見る", "fv2Analyze"], close: [(part || kind === "analyze") && has ? "保存せずに閉じる" : "閉じる", "fv2ErrClose"] };
   const acts = e[2].filter((a) => a !== "analyze" || has);
   formV2Paint(S, "error", `${formV2TopHtml("射型", "")}
@@ -618,6 +619,17 @@ async function formV2StartCamera(S, token) {
     stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: S.facing, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
     if (S.closed || S.token !== token) { stream.getTracks().forEach((t) => t.stop()); return; }
     S.stream = stream;
+    /* 画面は出たままでカメラだけが止まったとき（ほかのアプリがカメラを使った など）、撮影の画面は止まったまま何も言わなかった。
+       ここまでのぶんを残して知らせる（裏へ回ったときと同じ） */
+    const track = stream.getVideoTracks && stream.getVideoTracks()[0];
+    if (track)
+      track.addEventListener("ended", () => {
+        if (S.closed || S.stream !== stream) return;
+        if (S.stage === "capture" && S.running) {
+          const sec = S.buffer ? S.buffer.durationMs / 1000 : 0;
+          formV2ShowError(S, "cameraLost", `ここまでの ${formV2Dur(sec)}は残っています。`);
+        }
+      });
     S.video.srcObject = stream;
     await S.video.play();
     if (S.closed || S.token !== token) return;
@@ -660,10 +672,16 @@ function formV2OnFrame(S, tMs) {
   const rel = tMs - S.t0;
   S.buffer.push(rel, lms, vw, vh);
   if (lms) S.noPoseSince = NaN; else if (!Number.isFinite(S.noPoseSince)) S.noPoseSince = rel;
-  if (S.stage === "reading") { if (rel - S.lastUi >= 500) { S.lastUi = rel; formV2ReadingTick(S, rel); } return; }
+  if (S.stage === "reading") {
+    /* 保存した動画でもコマ数の上限で止める。止めないと、残りの動画を読み続けて捨て、知らせもしなかった */
+    if (S.buffer.full) { S.limitHit = true; formV2Analyze(S); return; }
+    if (rel - S.lastUi >= 500) { S.lastUi = rel; formV2ReadingTick(S, rel); }
+    return;
+  }
   if (S.live.due(rel)) {
-    const before = S.live.shots, r = S.live.update(S.buffer, S.hand, S.fps);
+    const before = S.live.shots, beforeLd = S.live.letdowns, r = S.live.update(S.buffer, S.hand, S.fps);
     if (r.shots !== before) { formV2CaptureCount(S); if (S.sound) formV2Beep(); nativePulse("light"); }
+    else if (S.live.letdowns !== beforeLd) formV2CaptureCount(S); /* 引き戻しの数も出し直す（音と振動は射だけ） */
   }
   if (S.recorder && rel - S.recStart >= FormV2.LIMITS.VIDEO_MS) { formV2StopRec(S); S.notice = "動画は 10 分になったので止めました。射の記録は続いています。"; formV2RecButton(S); }
   if (rel - S.lastUi >= 500) { S.lastUi = rel; formV2CaptureTick(S, rel, lms); }
@@ -799,7 +817,12 @@ function formV2BeginCapture(S) {
     S.root.querySelector("#fv2Back").onclick = async () => {
       if (await appConfirm("この撮影をやめますか？何も残りません。", { danger: true, okLabel: "やめる", cancelLabel: "続ける" })) formV2Close(S);
     };
-    S.root.querySelector("#fv2Finish").onclick = () => formV2Analyze(S);
+    /* 「記録を始める」と同じ場所にあるので、始めるボタンの 2 度押しで撮影がすぐ終わっていた（3 コマで「短すぎました」）。
+       始めて 0.7 秒の間は、まだコマが少ない（30 コマ未満）なら受けない */
+    S.root.querySelector("#fv2Finish").onclick = () => {
+      if (Date.now() - S.startedAt < 700 && !(S.buffer && S.buffer.n >= 30)) return;
+      formV2Analyze(S);
+    };
     S.root.querySelector("#fv2Rec").onclick = () => {
       if (S.recorder) { formV2StopRec(S); S.notice = "動画を止めました。結果の画面から端末に保存できます。"; } else if (!formV2StartRec(S)) S.notice = "この端末では動画を残せません。";
       formV2RecButton(S);
@@ -836,13 +859,16 @@ function formV2StartRec(S) {
     /* かたまりは録画ごとに別の配列へためる。前の録画の止まる合図があとから届いても、次の録画の先頭（ヘッダ）を消さない */
     const chunks = [];
     S.recBlob = null;
+    S.recPending = false;
     S.recMime = mime;
     S.recLast = rec;
     rec.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
     rec.onstop = () => {
       if (S.closed || S.recLast !== rec) return; // 取り直したあとに届いた、前の録画
+      S.recPending = false;
       if (chunks.length) S.recBlob = new Blob(chunks, { type: mime });
       if (S.stage === "result") formV2Rerender(S);
+      else if (S.stage === "capture") formV2RecButton(S);
     };
     rec.start(1000);
     S.recorder = rec;
@@ -856,6 +882,8 @@ function formV2StartRec(S) {
 function formV2StopRec(S) {
   const r = S.recorder;
   if (r) S.recEnd = Number.isFinite(S.t0) ? S.lastT - S.t0 : 0;
+  /* 止めてから動画ができるまでの間も「もう一度録画」と出す（「動画を残す」と出て、押すと、いま止めた動画を捨てていた） */
+  if (r) S.recPending = true;
   S.recorder = null;
   try { if (r && r.state !== "inactive") r.stop(); } catch (e) {}
 }
@@ -865,7 +893,7 @@ function formV2RecButton(S) {
   const on = !!S.recorder;
   b.setAttribute("aria-pressed", String(on));
   b.classList.toggle("on", on);
-  b.innerHTML = `<i aria-hidden="true"></i>${on ? "録画を止める" : S.recBlob ? "もう一度録画" : "動画を残す"}`;
+  b.innerHTML = `<i aria-hidden="true"></i>${on ? "録画を止める" : S.recBlob || S.recPending ? "もう一度録画" : "動画を残す"}`;
 }
 async function formV2ShareVideo(S) {
   const blob = S.recBlob;
@@ -1022,7 +1050,7 @@ function formV2Analyze(S) {
           : "フルドローはありましたが、射に数えられるリリースが見つかりませんでした。";
     const zero = !shots;
     formV2Paint(S, "analyzing", `${head.replace("結果を出しています", zero ? "射が見つかりませんでした" : "結果が出ました")}
-      ${S.limitHit ? `<p class="fact" data-testid="form-v2-limit">30 分（またはコマ数の上限）になったので、撮影を止めました。</p>` : ""}
+      ${S.limitHit ? `<p class="fact" data-testid="form-v2-limit">${S.src === "replay" ? "コマ数の上限になったので、動画の途中で読み取りを止めました。ここまでの結果です。" : "30 分（またはコマ数の上限）になったので、撮影を止めました。"}</p>` : ""}
       <div class="fv2Steps" data-testid="form-v2-steps">${step("記録を読み込む", read, true)}${step("射を探す", found, true)}${step("射ごとの値を測る", vals, true)}${step("測るときのぶれを調べる", noise, true)}</div>
       ${zero ? `<section class="vsec" data-testid="form-v2-zero"><div class="vsecH"><h2>考えられる理由</h2></div><p class="fact">射は 1 回も見つかりませんでした。</p><p class="basis">${why}</p>
         ${S.src === "live" ? `<div class="btnRow"><button type="button" class="btn" id="fv2Again">置き方を確かめる</button></div>` : ""}

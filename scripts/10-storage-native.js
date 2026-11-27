@@ -4,7 +4,7 @@
 const KEY="archeryNote.v1";
 const SNAP_KEY="archeryNote.snapshots.v1";
 const SCHEMA_VER=5; /* v5: customRounds 追加のみ。migration 不要（配列補完のみ） */
-const APP_VER=134;
+const APP_VER=135;
 const TRASH_LIMIT=50;
 const IMPORT_LIMITS={sessions:10000,setups:100,sightMarks:5000,formAnalyses:1000,customRounds:100,notes:10000};
 const STORAGE_ADAPTER_VER="storage-adapter v32";
@@ -445,29 +445,49 @@ function cancelIdleTask(job){
    縮退リトライループ（storageSetItem 失敗時に末尾から pop する下のループ）はこの間引き後の配列に
    対してそのまま動作し、ロジック自体は変更していない。 */
 const SNAP_MAX_GENERATIONS=4;
+/* 読み込み・復元は、直前の状態の控え（reason が -before で終わる）と、置き換えたあとの控えを続けて作る。
+   この 2 つは時刻がいちばん近い組になるので、上の決まりのままだと、残すと約束した直前の控えのほうが外れていた
+   （控えが 3 世代以上あると毎回。読み込みの直後に、その日の練習を戻せなくなる）。
+   この組（1 分以内に続けて作ったもの）では直前の控えを残し、置き換えたあとの控えのほうを外す。
+   置き換えたあとの控えが最新のあいだは、この組からは外さない（最新は必ず残す）。置き換えたあとの内容は本体にあり、
+   次の定期の控えにも入る */
+const SNAP_BEFORE_PAIR_MS=60*1000;
+function isBeforeSnapshot(s){ return !!s && typeof s.reason==="string" && /-before$/.test(s.reason); }
 function thinSnapshots(list,maxGenerations){
   const snaps=list.slice();
   while(snaps.length>maxGenerations){
-    let dropIdx=1,minGap=Infinity;
+    let dropIdx=-1,minGap=Infinity;
     for(let i=1;i<snaps.length-1;i++){
       const gap=(snaps[i-1].ts||0)-(snaps[i].ts||0);
-      if(gap<minGap){ minGap=gap; dropIdx=i; }
+      let idx=i;
+      if(isBeforeSnapshot(snaps[i]) && !isBeforeSnapshot(snaps[i-1]) && gap<SNAP_BEFORE_PAIR_MS){
+        if(i-1===0) continue;
+        idx=i-1;
+      }
+      if(gap<minGap){ minGap=gap; dropIdx=idx; }
     }
+    if(dropIdx<0) dropIdx=snaps.length>2 && isBeforeSnapshot(snaps[1]) ? 2 : 1;
     snaps.splice(dropIdx,1);
   }
   return snaps;
 }
-let _lastSnapTs=0;
+let _lastSnapTs=0, _snapFailTs=0;
+/* 返す値: true = 控えを書いた（または同じ中身の控えが最新にあるので書かなくてよい）、false = 書けなかった。
+   読み込み・復元・「いま控えを残す」は、この値を見て、控えを残せたかを知らせる */
 function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
   try{
     const now=Date.now();
-    if(!force && _lastSnapTs && now-_lastSnapTs<30*60*1000) return;
+    if(!force && _lastSnapTs && now-_lastSnapTs<30*60*1000) return true;
+    /* 控えが 1 世代も入りきらなかった（本体だけで保存の空きの半分を超えている）あとは、30 分は試さない。
+       試すたびに全部の記録を読んで書いて失敗するので、保存 1 回が倍の重さになっていた（1,000 回の記録で実測）。
+       復元・読み込み・削除の前の控え（force）は、これまでどおり毎回試す */
+    if(!force && _snapFailTs && now-_snapFailTs<30*60*1000) return false;
     const raw=rawOverride||JSON.stringify(db), h=hashText(raw);
     const current=readSnapshots();
     let snaps=current.filter(s=>s&&s.hash!==h);
     const latest=current[0];
-    if(!force && latest && latest.hash===h){ _lastSnapTs=latest.ts||now; return; }
-    if(!force && latest && now-(latest.ts||0)<30*60*1000){ _lastSnapTs=latest.ts||now; return; }
+    if(!force && latest && latest.hash===h){ _lastSnapTs=latest.ts||now; return true; }
+    if(!force && latest && now-(latest.ts||0)<30*60*1000){ _lastSnapTs=latest.ts||now; return true; }
     snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
     snaps=thinSnapshots(snaps,SNAP_MAX_GENERATIONS);
     for(;;){
@@ -475,8 +495,9 @@ function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
       if(snaps.length<=1) throw new Error("snapshot storage full");
       snaps.pop();
     }
-    _lastSnapTs=now;
-  }catch(e){ console.warn("snapshot failed",e); }
+    _lastSnapTs=now; _snapFailTs=0;
+    return true;
+  }catch(e){ _snapFailTs=Date.now(); console.warn("snapshot failed",e); return false; }
 }
 function flushSafetySnapshot(){
   if(!snapshotPending) return;
@@ -510,11 +531,33 @@ let DB_REV=0;
 const SAVE_DEBOUNCE_MS=600;
 const SAVE_MAX_WAIT_MS=3000;
 let pendingSaveTimer=null, pendingSaveOpts=null, pendingSaveSince=0;
+/* 本体が書けないときは、控え（安全スナップショット）を古い世代から 1 つずつ外して空きを作り、本体を書き直す。
+   控えは本体の写しを数世代ぶん同じ保存先に持つので、記録が増えると本体より先に空きを使い切る。空きが尽きると、
+   それ以後の保存がすべて失敗していた（控えを減らすのは控えを書くときだけで、本体が書けないときは減らさなかった。
+   72 射の練習 340 回ほどで、打った矢が保存されなくなる）。いまの記録を残すことを、古い控えより優先する。
+   控えを全部外しても書けなかったとき（空き不足ではない失敗など）は、外した控えを元に戻す（安全のための控えを無駄に消さない）。
+   読み込み・復元の直前に作った控え（1 分以内の -before）は外さない。外すと、置き換える前のデータがどこにも残らない。
+   それでも入らないときは保存できなかったことにして、置き換えをやめる（呼ぶ側で端末のデータに戻す） */
+function writeMainAfterFreeingSnapshots(raw){
+  const before=storageGetItem(SNAP_KEY);
+  const snaps=readSnapshots(), now=Date.now();
+  const keep=(s)=>isBeforeSnapshot(s) && now-(s.ts||0)<SNAP_BEFORE_PAIR_MS;
+  let freed=false;
+  for(let i=snaps.length-1;i>=0;i--){
+    if(keep(snaps[i])) continue;
+    snaps.splice(i,1);
+    freed=true;
+    storageSetItem(SNAP_KEY, JSON.stringify(snaps));
+    if(storageSetItem(KEY, raw)) return true;
+  }
+  if(freed && before!=null) storageSetItem(SNAP_KEY, before);
+  return false;
+}
 function writeDbNow(o){
   db.schema=SCHEMA_VER; db.updatedAt=new Date().toISOString();
   try{
     const raw=JSON.stringify(db);
-    if(!storageSetItem(KEY, raw)) throw new Error("storage write failed");
+    if(!storageSetItem(KEY, raw) && !writeMainAfterFreeingSnapshots(raw)) throw new Error("storage write failed");
     scheduleSafetySnapshot(o.reason||"auto", raw, !!o.forceSnapshot);
     return true;
   }catch(e){
@@ -524,6 +567,11 @@ function writeDbNow(o){
   }
 }
 function hasPendingSave(){ return pendingSaveTimer!=null; }
+/* 保留中のデバウンス書き込みを書かずに捨てる（ほかの画面が新しい内容を保存したとき。90-init.js） */
+function discardPendingSave(){
+  if(pendingSaveTimer!=null) clearTimeout(pendingSaveTimer);
+  pendingSaveTimer=null; pendingSaveOpts=null; pendingSaveSince=0;
+}
 function flushPendingSave(){
   if(pendingSaveTimer==null) return;
   clearTimeout(pendingSaveTimer);
@@ -761,7 +809,14 @@ function restoreTrash(id){
   if(i<0) return false;
   const item=db.trash[i], data=cloneData(item.data);
   if(item.type==="session"){
-    if(!db.sessions.some(s=>s.id===data.id)) db.sessions.push(data);
+    /* 末尾に足すと、同じ日のあとの練習より新しい扱いになる（「前回の練習」「前回と同じ条件」が変わる）。
+       日付が後の記録、または同じ日で時刻が後の記録の前へ入れる。時刻の分からない記録どうしは、これまでどおり末尾 */
+    if(!db.sessions.some(s=>s.id===data.id)){
+      const tsOf=(x)=>typeof noteSortTs==="function"?noteSortTs(x):0;
+      const d=String(data.date||""), t=tsOf(data);
+      const at=db.sessions.findIndex(s=>s && (String(s.date||"")>d || (String(s.date||"")===d && t>0 && tsOf(s)>t)));
+      if(at<0) db.sessions.push(data); else db.sessions.splice(at,0,data);
+    }
   }else if(item.type==="sightMark"){
     if(!db.sightMarks.some(m=>m.id===data.id)) db.sightMarks.push(data);
   }else if(item.type==="setupBundle"){
@@ -783,6 +838,9 @@ function downloadText(filename,text,type){
   const blob=new Blob([text],{type:type||"text/plain"});
   const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);
 }
+/* 返す値: true = 共有した、false = ファイルとして保存した、null = 共有の画面を閉じてやめた。
+   やめたときは、続けて別の共有やファイルの保存を始めない（やめたのに保存が始まり、書き出したことになっていた） */
+function shareWasCanceled(e){ return !!e && (e.name==="AbortError" || e.message==="Share canceled"); }
 async function shareOrDownloadText(filename,text,type,title){
   const mime=type||"text/plain";
   try{
@@ -792,7 +850,7 @@ async function shareOrDownloadText(filename,text,type,title){
       nativePulse("success");
       return true;
     }
-  }catch(e){}
+  }catch(e){ if(shareWasCanceled(e)) return null; }
   try{
     const fs=capPlugin("Filesystem"), sh=capPlugin("Share");
     if(fs && sh && typeof fs.writeFile==="function" && typeof sh.share==="function"){
@@ -801,14 +859,14 @@ async function shareOrDownloadText(filename,text,type,title){
       nativePulse("success");
       return true;
     }
-  }catch(e){}
+  }catch(e){ if(shareWasCanceled(e)) return null; }
   try{
     if(navigator.share && text.length<90000){
       await navigator.share({title:title||filename,text});
       nativePulse("success");
       return true;
     }
-  }catch(e){}
+  }catch(e){ if(shareWasCanceled(e)) return null; }
   downloadText(filename,text,mime);
   nativePulse("light");
   return false;

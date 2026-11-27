@@ -235,8 +235,7 @@ function conditionSplit(rows, isWindyFn) {
     total: 0,
     rrSum: 0,
     rrCount: 0,
-    mxSum: 0,
-    mxCount: 0,
+    biasRows: [],
   });
   const windy = make("風あり"),
     calm = make("風なし・弱風");
@@ -250,20 +249,41 @@ function conditionSplit(rows, isWindyFn) {
       g.rrSum += r.st.rr;
       g.rrCount++;
     }
-    /* 中心の偏りは外れ値候補を除いた中心（B）、半径は全射（A） */
-    if (analysisHasGroupingEvidence(r.st) && Number.isFinite(sightStats(r.st).mx)) {
-      g.mxSum += sightStats(r.st).mx;
-      g.mxCount++;
-    }
+    if (analysisHasGroupingEvidence(r.st)) g.biasRows.push(r);
   });
-  const fin = (g) => ({
-    label: g.label,
-    sessions: g.sessions,
-    arrows: g.arrows,
-    avg: g.arrows ? g.total / g.arrows : null,
-    avgRms: g.rrCount ? g.rrSum / g.rrCount : null,
-    biasX: g.mxCount ? g.mxSum / g.mxCount : null,
-  });
+  /* 中心の偏りは外れ値候補を除いた中心（B）、半径は全射（A）。
+     B は MCD を使うので重い（1,000 回で 1 秒近く）。biasX は読まれたときに 1 度だけ計算する
+     （分析タブの「風の強い日と弱い日」は平均点しか使わない）。足す順は記録の順のままなので、値は変わらない */
+  const fin = (g) => {
+    const out = {
+      label: g.label,
+      sessions: g.sessions,
+      arrows: g.arrows,
+      avg: g.arrows ? g.total / g.arrows : null,
+      avgRms: g.rrCount ? g.rrSum / g.rrCount : null,
+    };
+    let bias;
+    Object.defineProperty(out, "biasX", {
+      enumerable: true,
+      configurable: true,
+      get() {
+        if (bias === undefined) {
+          let sum = 0,
+            count = 0;
+          g.biasRows.forEach((r) => {
+            const mx = sightStats(r.st).mx;
+            if (Number.isFinite(mx)) {
+              sum += mx;
+              count++;
+            }
+          });
+          bias = count ? sum / count : null;
+        }
+        return bias;
+      },
+    });
+    return out;
+  };
   return { windy: fin(windy), calm: fin(calm) };
 }
 
