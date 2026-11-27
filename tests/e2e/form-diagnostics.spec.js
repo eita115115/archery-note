@@ -62,10 +62,12 @@ async function seedDiagnosticDb(page, database) {
 async function installPrimaryWriteGate(page) {
   await page.evaluate(() => {
     const original = Storage.prototype.setItem;
-    globalThis.__formWriteProbe = { fail: true, attempts: [] };
+    globalThis.__formWriteProbe = { fail: true, attempts: [], snapshotsAt: [] };
     Storage.prototype.setItem = function (key, value) {
       if (key === "archeryNote.v1") {
         globalThis.__formWriteProbe.attempts.push(JSON.parse(value));
+        /* 本体を書こうとした時点の控え（本体が書けないときは控えを外して書き直すので、その前の控えと比べる） */
+        globalThis.__formWriteProbe.snapshotsAt.push(this.getItem("archeryNote.snapshots.v1"));
         if (globalThis.__formWriteProbe.fail) {
           throw new DOMException("synthetic quota failure", "QuotaExceededError");
         }
@@ -439,6 +441,9 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
   await expect(page.locator("#toast")).toContainText(
     "保存できなかったので、射型の記録は消していません",
   );
+  /* 本体が書けないときは、控えを古い世代から外して書き直す（世代の数だけ試す）。それでも書けなければ控えを元に戻す */
+  const snapshotsBefore = await page.evaluate(() => globalThis.__formWriteProbe.snapshotsAt[0]);
+  const generations = JSON.parse(snapshotsBefore || "[]").length;
   expect(
     await page.evaluate(() => ({
       ids: db.formAnalyses.map((record) => record.id),
@@ -455,8 +460,11 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
     invalidated: false,
     sameCoordinator: true,
     updatedAt: rollbackBaseline,
-    attempts: 1,
+    attempts: 1 + generations,
   });
+  expect(
+    await page.evaluate(() => globalThis.localStorage.getItem("archeryNote.snapshots.v1")),
+  ).toBe(snapshotsBefore);
 
   await page.evaluate(() => {
     globalThis.__formWriteProbe.fail = false;
@@ -479,7 +487,7 @@ test("selected deletion rolls back when the primary write fails", async ({ page 
     trashType: "formAnalysis",
     trashRecordId: "selected-record",
     invalidated: true,
-    attempts: 2,
+    attempts: 1 + generations + 1, // 失敗した削除（控えの世代の数だけ書き直す）と、成功した削除
   });
 });
 

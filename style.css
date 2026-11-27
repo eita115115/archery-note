@@ -272,9 +272,11 @@ nav.tabs button .ic svg{display:block; width:24px; height:24px;}
 nav.tabs button.on .ic{transform:translateY(-1px); color:var(--title);}
 nav.tabs button.on{color:var(--title);}
 /* target */
-.tgWrap{position:relative; width:100%; touch-action:none; border-radius:8px;}
+/* 記録を見るだけの図（結果・ノートの詳細・分析）。指を図の上に置いても画面を動かせる（none だと、図が画面の半分を占めるので
+   動かせなかった）。ダブルタップの拡大だけ止める。触って矢を置くのは記録中の的（.recTarget、touch-action:none）だけ */
+.tgWrap{position:relative; width:100%; border-radius:8px; touch-action:manipulation;}
 /* motion:状態 — ズーム段階の切り替え（拡大率変更）を滑らかにする */
-.tgWrap svg.main{width:100%; display:block; border-radius:8px; background:var(--target-surface-a); touch-action:none; transform-origin:center; transition:transform var(--motion-fast), filter var(--motion-fast);}
+.tgWrap svg.main{width:100%; display:block; border-radius:8px; background:var(--target-surface-a); touch-action:manipulation; transform-origin:center; transition:transform var(--motion-fast), filter var(--motion-fast);}
 /* ルーペ: ヘッダー直下に画面固定（位置は JS の placeLens が表示時に1回だけ決める）。入力中は動かない */
 .lensLayer{position:fixed; inset:0 auto auto 0; width:0; height:0; z-index:60; pointer-events:none;}
 .lens{

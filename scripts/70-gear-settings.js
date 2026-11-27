@@ -1766,6 +1766,7 @@ function openSettings() {
       openCustomRoundForm(null);
     };
   ovl.querySelector("#dExp").onclick = () => {
+    const previous = db.settings.lastBackupAt;
     db.settings.lastBackupAt = new Date().toISOString();
     save({ reason: "json-export", forceSnapshot: true });
     beginActiveWorkflow();
@@ -1774,7 +1775,15 @@ function openSettings() {
       JSON.stringify(db, null, 1),
       "application/json",
       "Archery Note Backup",
-    ).finally(endActiveWorkflow);
+    )
+      .then((done) => {
+        /* 共有の画面を閉じてやめたときは書き出していないので、「最後の書き出し」を元に戻す */
+        if (done !== null) return;
+        db.settings.lastBackupAt = previous == null ? null : previous;
+        save({ reason: "json-export-canceled" });
+        if (ovl.isConnected) reopenSettings(ovl);
+        toast("書き出しをやめました");
+      }).finally(endActiveWorkflow);
   };
   ovl.querySelector("#dCsv").onclick = () => exportSessionsCsv();
   const demoRemove = ovl.querySelector("#dDemoRemove");
@@ -1800,7 +1809,12 @@ function openSettings() {
   ovl.querySelector("#setTrash").onclick = () => openSettingsTrash(ovl);
   ovl.querySelector("#setAddHome").onclick = () => openAddToHomeSheet();
   const upd = ovl.querySelector("#setUpdate");
-  if (upd) upd.onclick = () => freshReload();
+  if (upd)
+    upd.onclick = () => {
+      /* 記録の途中（中断しているあいだも）は読み込み直さない。押しても何も起きなかったので、理由を知らせる */
+      if (isUpdateReloadBlocked()) toast("記録の途中は更新できません。記録を終えてから、もう一度押してください", 5000);
+      else freshReload();
+    };
   /* 選択肢は日時だけにして（狭い画面で切れない）、中身の件数は下の行に書く */
   const snapSel = ovl.querySelector("#dSnapSel");
   if (snapSel)
@@ -1832,12 +1846,13 @@ function openSettings() {
            次回起動のバックフィル（90-init.js）を再保証する。enabled:false でも無害
            （backfill 自体が enabled ゲートで no-op になるだけ） */
         if (db.settings.gamification) db.settings.gamification.backfilledAt = null;
-        save({ reason: "restore", forceSnapshot: true });
+        const stored = save({ reason: "restore", forceSnapshot: true });
         applyTheme();
         applyFieldMode();
         closeModal(ovl);
         render();
-        toast("控えの内容に戻しました");
+        /* 保存できなかったときは、save が出した「保存できませんでした」の知らせを消さない */
+        if (stored) toast("控えの内容に戻しました");
       } finally {
         endActiveWorkflow();
       }
@@ -1885,12 +1900,13 @@ function openSettings() {
               );
             }
           }
-          save({ reason: "import", forceSnapshot: true });
+          const stored = save({ reason: "import", forceSnapshot: true });
           applyTheme();
           applyFieldMode();
           closeModal(ovl);
           render();
-          toast("読み込みました");
+          /* 保存できなかったときは、save が出した「保存できませんでした」の知らせを消さない */
+          if (stored) toast("読み込みました");
         }
       } catch (_) {
         toast("ファイルを読み込めませんでした");

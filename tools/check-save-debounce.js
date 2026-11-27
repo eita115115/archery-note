@@ -195,8 +195,7 @@ function checkSnapshotStillScheduled() {
 /* 控え（安全スナップショット）が 1 世代も入りきらないとき、保存のたびに控えを試さない。
    試すたびに記録の全部を読んで書いて失敗するので、保存 1 回が倍の重さになる（1,000 回の記録で実測）。
    30 分たてばもう一度試す。復元・読み込み・削除の前の控え（forceSnapshot）は毎回試す */
-function checkSnapshotBackoffWhenFull() {
-  const load = (quotaChars) => {
+const loadQuota = (quotaChars) => {
     const timers = makeFakeTimers();
     const store = new Map();
     const snapAttempts = [];
@@ -232,7 +231,8 @@ function checkSnapshotBackoffWhenFull() {
       "Date",
       "console",
       `${storageScript}
-return {save, flushSafetySnapshot, KEY, SNAP_KEY, getDb: () => db};`,
+return {save, flushSafetySnapshot, writeSafetySnapshot, readSnapshots, normalizeDb, KEY, SNAP_KEY,
+  getDb: () => db, setDb: (d) => { db = d; }};`,
     )(shim, timers.setTimeout, timers.clearTimeout, FakeDate, { warn() {}, error() {}, log() {} });
     snapKey = api.SNAP_KEY;
     /* 本体だけで 6,000 字を超える記録を入れる */
@@ -247,11 +247,11 @@ return {save, flushSafetySnapshot, KEY, SNAP_KEY, getDb: () => db};`,
       timers.runAll();
       return ok;
     };
-    return { api, store, snapAttempts, saveAndIdle, advance: (ms) => (fakeNowMs += ms) };
-  };
-
+    return { api, store, timers, snapAttempts, saveAndIdle, advance: (ms) => (fakeNowMs += ms) };
+};
+function checkSnapshotBackoffWhenFull() {
   /* 入りきらない: 本体 約 6,300 字、空き 10,000 字。控えは 1 世代も入らない */
-  const full = load(10000);
+  const full = loadQuota(10000);
   assert(full.saveAndIdle() === true, "[snapshot-backoff] the main write still succeeds when a snapshot cannot fit");
   assert(full.store.get(full.api.KEY).length > 5000, "[snapshot-backoff] fixture is larger than half the quota");
   assertEqual(full.snapAttempts.length, 1, "[snapshot-backoff] the first save tries the snapshot once");
@@ -271,7 +271,7 @@ return {save, flushSafetySnapshot, KEY, SNAP_KEY, getDb: () => db};`,
   assertEqual(full.snapAttempts.length, 3, "[snapshot-backoff] the snapshot is retried after 30 minutes");
 
   /* 入る: これまでどおり 1 度書いて、30 分は書かない。30 分たてば次の世代を書く */
-  const roomy = load(1000000);
+  const roomy = loadQuota(1000000);
   roomy.saveAndIdle();
   assertEqual(roomy.snapAttempts.length, 1, "[snapshot-backoff] a snapshot that fits is written");
   assertEqual(JSON.parse(roomy.store.get(roomy.api.SNAP_KEY)).length, 1, "[snapshot-backoff] one generation is stored");
@@ -280,6 +280,102 @@ return {save, flushSafetySnapshot, KEY, SNAP_KEY, getDb: () => db};`,
   roomy.advance(31 * 60 * 1000);
   roomy.saveAndIdle();
   assertEqual(JSON.parse(roomy.store.get(roomy.api.SNAP_KEY)).length, 2, "[snapshot-backoff] the next generation is stored after 30 minutes");
+}
+
+/* 控えが保存の空きを使い切っても、本体は保存できる（古い控えから外して空きを作る）。
+   直す前は、控え 3 世代 + 本体で空きが尽きると、それ以後の保存がすべて失敗した（打った矢が残らない） */
+function checkMainWriteFreesSnapshots() {
+  const sessions = (n) =>
+    Array.from({ length: n }, (_, i) => ({
+      id: "q" + i,
+      date: "2026-01-01",
+      ends: [Array.from({ length: 6 }, (_, j) => ({ x: j, y: i, s: 9 }))],
+    }));
+  const grown = loadQuota(30000);
+  /* 30 分おきに 3 回: 控えが 3 世代たまる（本体は約 6,300 字、控えは約 19,000 字） */
+  grown.api.getDb().sessions = sessions(40);
+  for (let i = 0; i < 3; i += 1) {
+    assert(grown.saveAndIdle() === true, "[quota] early saves succeed");
+    grown.advance(31 * 60 * 1000);
+  }
+  assertEqual(grown.api.readSnapshots().length, 3, "[quota] three generations are stored");
+  /* 記録が増えて、本体 + 控え 3 世代では入らなくなる */
+  grown.api.getDb().sessions = sessions(80);
+  assert(grown.saveAndIdle() === true, "[quota] the main write succeeds after freeing old snapshots");
+  const stored = JSON.parse(grown.store.get(grown.api.KEY));
+  assertEqual(stored.sessions.length, 80, "[quota] the latest data is what is stored");
+  const left = grown.api.readSnapshots();
+  assert(left.length < 3 && left.length >= 1, "[quota] only as many old generations as needed are dropped");
+  assert(
+    left.every((g, i) => i === 0 || left[i - 1].ts > g.ts),
+    "[quota] the generations that remain are the newest ones, newest first",
+  );
+  /* 控えを全部外しても入らないときだけ、保存できなかったと返す。控えは空になる */
+  const tiny = loadQuota(8000);
+  tiny.api.getDb().sessions = sessions(20);
+  assert(tiny.saveAndIdle() === true, "[quota] small data fits");
+  tiny.advance(31 * 60 * 1000);
+  tiny.api.getDb().sessions = sessions(200);
+  assert(tiny.saveAndIdle() === false, "[quota] data larger than the whole quota still fails");
+  assertEqual(
+    JSON.parse(tiny.store.get(tiny.api.KEY)).sessions.length,
+    20,
+    "[quota] the last good main copy is left in place",
+  );
+  /* 控えを外しても書けなかったときは、外した控えを元に戻す（空き不足ではない失敗で、安全のための控えを消さない） */
+  const stuck = loadQuota(30000);
+  stuck.api.getDb().sessions = sessions(20);
+  for (let i = 0; i < 2; i += 1) {
+    stuck.saveAndIdle();
+    stuck.advance(31 * 60 * 1000);
+  }
+  const snapBefore = stuck.store.get(stuck.api.SNAP_KEY);
+  assert(JSON.parse(snapBefore).length === 2, "[quota] two generations before the failure");
+  stuck.api.getDb().sessions = sessions(200);
+  assert(stuck.saveAndIdle() === false, "[quota] a write larger than the whole quota fails");
+  assertEqual(stuck.store.get(stuck.api.SNAP_KEY), snapBefore, "[quota] the snapshots are put back when freeing did not help");
+}
+
+/* 読み込み・復元の直前の控え（-before）は、置き換えたあとの控えを作っても残る。
+   直す前は、控えが 3 世代以上あると、時刻がいちばん近い組として直前の控えのほうが外れていた */
+function checkBeforeSnapshotSurvives() {
+  const t = loadQuota(100000000);
+  const api = t.api;
+  const mark = (n) => (api.getDb().settings.eyeSight = n);
+  /* 4 日ぶんの定期の控え（4 世代でいっぱい） */
+  for (let day = 1; day <= 4; day += 1) {
+    mark(day);
+    t.saveAndIdle();
+    t.advance(24 * 60 * 60 * 1000);
+  }
+  assertEqual(api.readSnapshots().length, 4, "[before] the ring is full");
+  /* きょうの練習（定期の控えの 30 分の間隔の中）→ 読み込み */
+  mark(777);
+  api.save("finish");
+  t.timers.runAll();
+  api.writeSafetySnapshot("import-before", true);
+  api.setDb(api.normalizeDb({ sessions: [], settings: { eyeSight: 1 } }));
+  api.save({ reason: "import", forceSnapshot: true });
+  const reasons = () => api.readSnapshots().map((g) => g.reason);
+  const before = () => api.readSnapshots().find((g) => g.reason === "import-before");
+  assertEqual(api.readSnapshots().length, 4, "[before] still four generations");
+  assertEqual(reasons()[0], "import", "[before] the newest generation is the imported state");
+  assert(before() && before().data.settings.eyeSight === 777, "[before] the state before the import is kept");
+  /* 次の定期の控え（31 分あと）でも残る。外れるのは、置き換えた直後の控えのほう */
+  t.advance(31 * 60 * 1000);
+  mark(2);
+  t.saveAndIdle();
+  assert(before() && before().data.settings.eyeSight === 777, "[before] it survives the next periodic snapshot");
+  assert(!reasons().includes("import"), "[before] the just-after copy is the one that goes");
+  assertEqual(api.readSnapshots().length, 4, "[before] the ring stays at four generations");
+  /* そのあとは普通の控えと同じに間引かれる（ずっと残り続けはしない） */
+  for (let i = 0; i < 12; i += 1) {
+    t.advance(7 * 24 * 60 * 60 * 1000);
+    mark(100 + i);
+    t.saveAndIdle();
+  }
+  assertEqual(api.readSnapshots().length, 4, "[before] later snapshots keep four generations");
+  assert(reasons()[0] === "edit" || reasons()[0] === "auto", "[before] the newest generation is the latest save");
 }
 
 function checkCallSiteClassification() {
@@ -358,6 +454,8 @@ function main() {
   checkImmediateSaveStaysImmediate();
   checkSnapshotStillScheduled();
   checkSnapshotBackoffWhenFull();
+  checkMainWriteFreesSnapshots();
+  checkBeforeSnapshotSurvives();
   checkCallSiteClassification();
   checkLifecycleFlushContract();
   console.log("Save debounce checks OK");

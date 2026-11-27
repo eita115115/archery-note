@@ -730,6 +730,7 @@ function openHistDetail(id) {
       cp.cur = [];
       cp._edit = true;
       db.active = cp;
+      resetActiveSelection();
       save();
       closeModal(ovl);
       if (view === "record") render();
