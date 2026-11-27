@@ -11,7 +11,7 @@ let ui = {
   sightSel: { setupId: null, dist: 70 },
   gearSel: null /* 弓具 > セッティング で表示しているセッティングの id（null は記録に使っているもの） */,
   histOpen: null,
-  histFilter: { setupId: "", dist: "", round: "", kind: "all" } /* kind: "all" | "rec" | "memo" */,
+  histFilter: { setupId: "", dist: "", round: "", kind: "all", q: "" } /* kind: "all" | "rec" | "memo" */,
   /* cond は スコア の条件（距離|的径|的種|射数）。dist は 射型 の距離の選択 */
   analysisFilter: { setupId: "", dist: "", round: "", period: "all", cond: "" },
   analysisTab: "score" /* 分析の下線タブ: "score" | "impact" | "compare" | "form"。使っている間だけ覚える */,
@@ -622,8 +622,8 @@ function endStripHtml(sess) {
 }
 /* 合計点の推移（折れ線）。破線は平均。幅は画面に合わせて決め、文字は 13px のまま縮めない */
 function totalsLineChartHtml(vals, labels, meanVal) {
-  const gut = window.innerWidth <= 340 ? 12 : 16;
-  const W = Math.max(240, Math.min(window.innerWidth, 480) - gut * 2),
+  const gut = window.innerWidth <= 340 ? 25 : 33;
+  const W = Math.max(220, Math.min(window.innerWidth, 480) - gut * 2),
     H = 176,
     L = 42,
     R = 24,
@@ -643,17 +643,22 @@ function totalsLineChartHtml(vals, labels, meanVal) {
     const v = lo + ((hi - lo) / lines) * k;
     h += `<path d="M${L} ${Y(v).toFixed(1)}H${W - R + 10}" stroke="var(--rule)"/><text class="ax" x="${L - 8}" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end">${Math.round(v)}</text>`;
   }
-  if (Number.isFinite(meanVal))
-    h += `<path d="M${L} ${Y(meanVal).toFixed(1)}H${W - R + 10}" stroke="var(--sub)" stroke-dasharray="5 4"/>`;
-  h += `<path d="${vals.map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1)).join("")}" fill="none" stroke="var(--ink)" stroke-width="2"/>`;
+  if (Number.isFinite(meanVal)) {
+    const my = Y(meanVal).toFixed(1);
+    h += `<path d="M${L} ${my}H${W - R + 10}" stroke="var(--sub)" stroke-dasharray="4 4"/>`;
+  }
+  const linePts = vals
+    .map((v, i) => (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1))
+    .join("");
+  h += `<path d="${linePts}" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>`;
   /* 日付のラベルは 40px より詰まるときは1つおき（最後の回は必ず出す） */
   const everyOther = n > 1 && gap < 40;
   vals.forEach((v, i) => {
     const last = i === n - 1;
     const nb = [vals[i - 1], vals[i + 1]].filter((x) => x != null);
     const below = nb.length && v < nb.reduce((t, x) => t + x, 0) / nb.length;
-    h += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${last ? 5 : 4}" fill="${last ? "var(--accent)" : "var(--bg)"}" stroke="${last ? "var(--accent)" : "var(--ink)"}" stroke-width="2"/>`;
-    h += `<text x="${X(i).toFixed(1)}" y="${(below ? Y(v) + 20 : Y(v) - 10).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${last ? 700 : 500}" fill="var(--ink)" stroke="var(--bg)" stroke-width="4" paint-order="stroke">${v}</text>`;
+    h += `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${last ? 4.8 : 3.5}" fill="${last ? "var(--ink)" : "var(--surface)"}" stroke="var(--ink)" stroke-width="2"/>`;
+    h += `<text x="${X(i).toFixed(1)}" y="${(below ? Y(v) + 20 : Y(v) - 10).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${last ? 700 : 500}" fill="var(--ink)" stroke="var(--surface)" stroke-width="4" paint-order="stroke">${v}</text>`;
     if (!everyOther || (n - 1 - i) % 2 === 0)
       h += `<text class="ax" x="${X(i).toFixed(1)}" y="${H - 6}" text-anchor="middle">${labels[i]}</text>`;
   });
@@ -2330,7 +2335,7 @@ function watchCrampedScorecard() {
   if (!card) return;
   const css = window.CSS;
   if (css && typeof css.supports === "function" && css.supports("container-type: size")) return;
-  const check = () => card.classList.toggle("is-cramped", card.clientHeight > 0 && card.clientHeight <= 27);
+  const check = () => card.classList.toggle("is-cramped", card.clientWidth > 0 && card.clientHeight <= 27);
   check();
   if (typeof window.ResizeObserver === "function") new window.ResizeObserver(check).observe(card);
   else window.requestAnimationFrame(check);
@@ -2766,6 +2771,15 @@ function announceArrow(n, a) {
 }
 /* 状態行の一時的な案内（6射を入力済み、など）。次の操作で消える */
 function activeNotice(msg) {
+  const el = $("#recMsg");
+  if (el) {
+    ui.recMsg = "";
+    el.textContent = msg || "";
+    el.classList.toggle("is-warn", !!msg);
+    const t = $("#toast");
+    if (t && t.classList.contains("show")) positionToast(t);
+    return;
+  }
   ui.recMsg = msg;
   refreshActive();
 }
@@ -2839,7 +2853,7 @@ function drawActiveMarks(s) {
   [...s.ends, s.cur].forEach((end) => {
     if (end === focus) return;
     end.forEach((a) => {
-      if (placed(a)) html += markCircle(gp(a), s.faceD, "rgba(60,60,60,.45)", "", "", arrowR);
+      if (placed(a)) html += markCircle(gp(a), s.faceD, "rgba(110,122,134,.58)", "", "", arrowR);
     });
   });
   focus.forEach((a, i) => {
@@ -2920,6 +2934,9 @@ function refreshActive() {
   ).join("");
   /* 確定済みエンドのスコア表（高い点から表示）。行をタップするとそのエンドを下の枠に開く */
   const card = $("#recCard");
+  const prevScroll = card.scrollTop;
+  const endsChanged = card._lastEndsLen !== s.ends.length;
+  card._lastEndsLen = s.ends.length;
   const focused = document.activeElement;
   const rowFocus =
     focused && focused.dataset && focused.dataset.erow != null && card.contains(focused)
@@ -2932,6 +2949,7 @@ function refreshActive() {
         skipIndex: st.pulled ? Math.min(s.editIndex, s.ends.length) : null,
       })
     : activeGuideHtml(scoreMode);
+  card.scrollTop = prevScroll;
   card.querySelectorAll("[data-erow]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -3036,7 +3054,7 @@ function refreshActive() {
       bottom = top + row.offsetHeight;
     if (top < card.scrollTop) card.scrollTop = top;
     else if (bottom > card.scrollTop + card.clientHeight) card.scrollTop = bottom - card.clientHeight;
-  } else card.scrollTop = card.scrollHeight;
+  } else if (endsChanged) card.scrollTop = card.scrollHeight;
   const t = $("#toast");
   if (t && t.classList.contains("show")) positionToast(t);
 }

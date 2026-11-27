@@ -1216,14 +1216,62 @@
   },
   {
     "id": "AN-103",
+    "task": "UI/UX 磨き込みと v131 公開準備: 初回帯の 320px 横はみ出し解消・記録の条件の上部 sticky 化・ヒント閉じるボタン 44px 化、記録中スコア表のスクロール位置保持・状態行の部分更新・過去エンド矢の視認色調整、ノート一覧のリアルタイム文字検索（IME・NFKC・複数語対応）とワンタップ解除、ノートの詳細の「操作へ」移動、セッティング・サイト系フォームの未保存確認とクリック換算欄の Tab フォーカス維持・label[for] 補完",
+    "status": "done",
+    "passes": true,
+    "dependencies": [
+      "AN-102"
+    ],
+    "owner": "cursor",
+    "acceptance": "evals/acceptance.md の UI 行（check:ui・lint・375px 前後確認）と リリース行（check:version v131）に加え、npm run check:all・format:check・配布版 npm run test:e2e:dist 全件（新規 ux-polish.spec.js 6 本を含む 495 本）が成功する。実寸の矢円と線かみ採点、保存データの形式と保存値、既存の data-testid と id は不変。375×812 と 320×640（ライト／ダーク）で 13px 未満の文字・44px 未満の押せるもの・横はみ出し・NaN/undefined が増えず、初回帯の 320px 横はみ出しと hintBannerClose の 44px 未満が 0 件になること。main マージと Pages 配信確認後に passes: true を記録する。",
+    "evidence": "2026-11-17 実装・v131 公開準備（オーナー承認「進めて」を受けて版131へ更新・CHANGELOG 追加。commit e6acf5a・0b578d6）: scripts/10-storage-native.js・30-target-svg.js・50-record-view.js・60-history-sight-view.js・70-gear-settings.js・style.css・style.min.css・sw.js・version.json・package.json・package-lock.json・CHANGELOG.md・tests/e2e/ux-polish.spec.js。検証: npm run build:web-assets・check:all（exit 0、Voice checks OK 1701 strings、Version alignment OK v131）・lint・format:check・配布版 test:e2e:dist 495 passed。 / 2026-11-17 公開 v131: PR #147 の CI validate 成功（0b578d6）を確かめ、オーナー承認（「勧めて」）後に main へマージ（c8e58b6）。main の CI validate・deploy 成功（run 44054392591）後、公開先 https://eita115115.github.io/archery-note/ で version.json が { \"v\": 131 }、sw.js が archery-note-v131、Chromium で開いた公開ページの APP_VER が 131・4タブ表示・ノート検索欄表示・コンソールのエラー 0 件を確認。"
+  },
+  {
+    "id": "AN-104",
+    "task": "仮見た目の整え（配色・カード・グラフ・日付枠）と v132 仮公開",
+    "status": "done",
+    "passes": true,
+    "dependencies": [
+      "AN-103"
+    ],
+    "owner": "cursor",
+    "acceptance": "オーナー指示「仮で反映してみて」に従い、見た目の変更を版132として Pages に仮載せすること。採点・矢円・保存形式は不変。",
+    "evidence": "2026-11-17 オーナー指示「仮で反映してみて」を受け PR #149 を main へマージ（eb0389b）。Pages に v132 を仮載せ。その後オーナー指示「戻して」により AN-105（v133）で撤回。"
+  },
+  {
+    "id": "AN-105",
+    "task": "仮見た目 v132 を戻し、v131 相当の見た目を v133 として公開する",
+    "status": "done",
+    "passes": true,
+    "dependencies": [
+      "AN-104"
+    ],
+    "owner": "cursor",
+    "acceptance": "evals/acceptance.md の UI 行とリリース行（check:version v133）に加え、npm run check:all・format:check・配布版 npm run test:e2e:dist 全件が成功する。見た目トークン・カード・グラフ面塗りは v131 時点に戻り、v131 の操作改善は残る。実寸の矢円と線かみ採点、保存データの形式と保存値は不変。main マージと Pages で version.json が { \"v\": 133 }、sw.js が archery-note-v133 になること。",
+    "evidence": "2026-11-18 オーナー指示「戻して」を受け、PR #149 を revert（見た目を v131 相当へ戻す）し、PWA 更新のため版を 133 に上げて main へ push（f53612f・c69f8db）。検証: build:web-assets・check:all（Voice 1701・Version alignment OK v133）・lint・format:check・配布版 test:e2e:dist 495 passed。CI validate・deploy 成功（run 44299984246）。公開先 https://eita115115.github.io/archery-note/ で version.json が { \"v\": 133 }、sw.js が archery-note-v133 を確認。"
+  },
+  {
+    "id": "AN-106",
+    "task": "Quiet Native Instrument UI/UX 刷新と射型の記録画面の改良（v134 公開）",
+    "status": "done",
+    "passes": true,
+    "dependencies": [
+      "AN-105"
+    ],
+    "owner": "antigravity",
+    "acceptance": "evals/acceptance.md の UI 行（check:ui・lint・375px/320px ライト/ダーク確認）・リリース行（check:version v134）・format:check・check:voice・check:storage・check:distribution・PR CI validate・main マージ・Pages v134 配信確認がすべて成功すること。実寸の矢円と線かみ採点、既存データ保存契約（SCHEMA_VER 5）、主要 iPhone フローは不変。main マージと Pages 配信確認後に passes: true を記録する。",
+    "evidence": "2026-11-24 実装・PR #150（5ad12ef・b07c228・0bf0001）の CI validate 成功（run 45340722470、check:all・lint・format:check・配布版 test:e2e:dist 495 passed）後に main へマージ（044f341）。main の CI validate・deploy 成功（run 45342984970）後、公開先 https://eita115115.github.io/archery-note/ で version.json が { \"v\": 134 }、sw.js が archery-note-v134、公開ページで APP_VER 134・4タブ表示・横はみ出し 0・コンソールエラー 0 件を確認。"
+  },
+  {
+    "id": "AN-107",
     "task": "コードの最適化とバグ修正（2026-11-26 オーナー依頼「コードの最適化とバグ修正して」）: 記録が多いときの重さを実測して直す。5 領域（保存と起動／採点と統計／記録画面／ノート・サイト・弓具・設定／射型 v2）を下読みし、報告を 1 件ずつ再現してから直す",
     "status": "in-progress",
     "passes": false,
     "dependencies": [
-      "AN-102"
+      "AN-106"
     ],
     "owner": "claude",
     "acceptance": "表示する値・判断・保存の形を変えずに重さを減らす（遅延評価は先に全部計算する参照実装と一致すること）。直したバグごとに、直す前のスクリプトで落ちる検査を足す。npm run check:all・lint・format:check と Playwright e2e 全件が成功する。不変条件 3 つ（矢円と線かみの採点の一致、練習のデータを消さない、iPhone の主な流れを単純なまま）を守る。Service Worker の動き・保存の形を変えるものはオーナーの承認まで入れない。push・版上げ・公開はオーナーの承認後。",
-    "evidence": "2026-11-27 実装（branch claude/sharp-faraday-bu8pii、版130据え置き・未push・未公開。commit 5a28d08（最適化）・d018f51（採点と分析の 4 件）・1dae945（記録・分析・保存）と、ノート・設定・射型のコミット）。実測（1,000 回 × 72 射・CPU 4 倍遅延）: 分析タブ 1.8→0.37 秒、記録の終了 3.5→1.7 秒、1 射 約 0.45→0.22 秒。検証（66c0d6c）: check:all exit 0・lint・format:check 成功、Playwright e2e 510 passed（7.9m）。新しい検査はどれも直す前のスクリプトで落ちることを確かめた。passes は false のまま: push の許可と、オーナーに決めてほしいこと (a)〜(f) が残る。"
+    "evidence": "2026-11-27 実装（branch claude/sharp-faraday-bu8pii、版134据え置き・未push・未公開。commit 5a28d08（最適化）・d018f51（採点と分析の 4 件）・1dae945（記録・分析・保存）と、ノート・設定・射型のコミット）。実測（1,000 回 × 72 射・CPU 4 倍遅延）: 分析タブ 1.8→0.37 秒、記録の終了 3.5→1.7 秒、1 射 約 0.45→0.22 秒。検証（66c0d6c）: check:all exit 0・lint・format:check 成功、Playwright e2e 510 passed（7.9m）。新しい検査はどれも直す前のスクリプトで落ちることを確かめた。passes は false のまま: push の許可と、オーナーに決めてほしいこと (a)〜(f) が残る。"
   }
 ]

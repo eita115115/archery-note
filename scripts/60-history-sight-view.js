@@ -242,31 +242,61 @@ function notesGoalLineHtml() {
   if (streak.configured) parts.push(`連続 <b data-testid="streak-current">${streak.current}</b>日`);
   return `<p class="basis homeGoalLine notesGoalLine" data-testid="notes-goal-line">${parts.map((t) => `<span>${t}</span>`).join("・")}</p>`;
 }
-function renderHistory(m) {
-  const all = noteItems();
-  if (!ui.histFilter) ui.histFilter = { setupId: "", dist: "", round: "", kind: "all" };
-  const hf = ui.histFilter;
-  if (hf.kind !== "rec" && hf.kind !== "memo") hf.kind = "all";
-  /* 絞り込んでいた弓具を消したら「すべて」に戻す（選ぶ欄は「すべて」と出るのに、消した弓具で絞ったままになっていた） */
-  const setupIds = new Set((db.setups || []).map((x) => x && x.id));
-  if (hf.setupId && hf.setupId !== "__none" && !setupIds.has(hf.setupId)) hf.setupId = "";
-  const sessions = all.filter((it) => it.kind === "session").map((it) => it.s);
-  const dists = [...new Set(sessions.map((s) => s.dist).filter(Boolean))].sort((a, b) => b - a);
-  const rounds = [...new Set(sessions.map((s) => s.round || "free"))];
-  /* 距離・弓具・ラウンドは練習だけが持つ条件。どれかを選ぶと、メモだけの項目は外れる */
+function normNoteQuery(v) {
+  return String(v == null ? "" : v).normalize("NFKC").toLowerCase().trim();
+}
+function noteItemMatchesQuery(it, tokens, dayChanges) {
+  if (!tokens.length) return true;
+  const chg = dayChanges.get(it.date) || [];
+  let raw;
+  if (it.kind === "memo") {
+    const tags = Array.isArray(it.n.tags) ? it.n.tags : [];
+    raw = [it.n.text, ...tags, it.date, ...chg].filter(Boolean).join(" ");
+  } else {
+    const s = it.s;
+    const setup = db.setups.find((x) => x.id === s.setupId);
+    const rName = s.round && s.round !== "free" ? roundLabel(s.round) : "";
+    const tags = Array.isArray(s.tags) ? s.tags : [];
+    const scoreOnly = sessionArrows(s).length && !sessionHasPos(s) ? "点数だけ" : "";
+    raw = [
+      s.note,
+      ...tags,
+      setup && setup.name,
+      faceLabel(s),
+      historyDistanceLabel(s.dist),
+      rName,
+      s.wx,
+      s.windDir,
+      s.date,
+      scoreOnly,
+      ...chg,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+  const hay = normNoteQuery(raw);
+  return tokens.every((tk) => hay.includes(tk));
+}
+function historyListBodyHtml(all, hf, dayChanges) {
   const sessionOnly = !!(hf.setupId || hf.dist || hf.round);
+  const qNorm = normNoteQuery(hf.q);
+  const qTokens = qNorm ? qNorm.split(/\s+/).filter(Boolean) : [];
+  const setupIds = new Set((db.setups || []).map((x) => x && x.id));
   const sessionOk = (s) =>
     /* 「未指定」は、弓具を選ばなかった記録と、弓具を消した記録（詳しくは「弓具 未指定」と出る） */
     (!hf.setupId || (hf.setupId === "__none" ? !s.setupId || !setupIds.has(s.setupId) : s.setupId === hf.setupId)) &&
     (!hf.dist || String(s.dist) === String(hf.dist)) &&
     (!hf.round || (s.round || "free") === hf.round);
   const items = all.filter((it) => {
-    if (it.kind === "memo") return !sessionOnly && hf.kind !== "rec";
+    if (it.kind === "memo") {
+      if (sessionOnly || hf.kind === "rec") return false;
+      return noteItemMatchesQuery(it, qTokens, dayChanges);
+    }
     if (hf.kind === "memo" && !noteItemHasMemo(it)) return false;
-    return sessionOk(it.s);
+    if (!sessionOk(it.s)) return false;
+    return noteItemMatchesQuery(it, qTokens, dayChanges);
   });
-  const detailCount = [hf.setupId, hf.round].filter(Boolean).length;
-  const filtered = sessionOnly || hf.kind !== "all";
+  const filtered = sessionOnly || hf.kind !== "all" || qTokens.length > 0;
   const monthCounts = new Map();
   items.forEach((it) => {
     if (it.kind !== "session") return;
@@ -275,6 +305,36 @@ function renderHistory(m) {
   });
   const entries = historyListEntries(items);
   const limit = ui._histLimit || 50;
+  if (items.length) {
+    return (
+      noteListHtml(entries.slice(0, limit), monthCounts, filtered) +
+      (entries.length > limit
+        ? `<div class="btnrow"><button type="button" class="btn ghost" id="histMore">さらに表示（残り${entries.length - limit}件）</button></div>`
+        : "")
+    );
+  }
+  if (all.length) {
+    return `<div class="empty" data-testid="notes-no-match"><b>合う記録がありません</b><p>絞り込みを変えると見られます。</p><button type="button" class="btn ghost" id="notesResetFilter" data-testid="notes-reset-filter">すべての記録を表示</button></div>`;
+  }
+  return `<div class="empty historyEmpty" data-testid="history-empty">
+        <b>ノートはまだ空です</b>
+        <p>練習を記録して終了すると、日付の順にここへ並びます。練習のない日は「メモを書く」で書き残せます。</p>
+        <button type="button" class="btn" id="histEmptyCta">記録タブへ</button>
+      </div>`;
+}
+function renderHistory(m) {
+  const all = noteItems();
+  if (!ui.histFilter) ui.histFilter = { setupId: "", dist: "", round: "", kind: "all", q: "" };
+  const hf = ui.histFilter;
+  if (hf.kind !== "rec" && hf.kind !== "memo") hf.kind = "all";
+  if (typeof hf.q !== "string") hf.q = "";
+  /* 絞り込んでいた弓具を消したら「すべて」に戻す（選ぶ欄は「すべて」と出るのに、消した弓具で絞ったままになっていた） */
+  if (hf.setupId && hf.setupId !== "__none" && !(db.setups || []).some((x) => x && x.id === hf.setupId)) hf.setupId = "";
+  const sessions = all.filter((it) => it.kind === "session").map((it) => it.s);
+  const dists = [...new Set(sessions.map((s) => s.dist).filter(Boolean))].sort((a, b) => b - a);
+  const rounds = [...new Set(sessions.map((s) => s.round || "free"))];
+  const dayChanges = noteDayChanges();
+  const detailCount = [hf.setupId, hf.round].filter(Boolean).length;
   const seg = (kind, label) =>
     `<button type="button" data-kind="${kind}" aria-pressed="${!hf.dist && hf.kind === kind}">${label}</button>`;
   const trashCount = (db.trash || []).length;
@@ -283,6 +343,11 @@ function renderHistory(m) {
     <div class="seg noteSeg" id="noteSeg" role="group" aria-label="表示する項目" data-testid="notes-filter">
       ${seg("all", "すべて")}${seg("rec", "練習")}${seg("memo", "メモあり")}
       <span class="segPick${hf.dist ? " on" : ""}"><select id="histDist" aria-label="距離" data-testid="notes-filter-dist"${dists.length ? "" : " disabled"}><option value="">距離</option>${dists.map((d) => `<option value="${esc(d)}" ${String(hf.dist) === String(d) ? "selected" : ""}>${historyDistanceLabel(d)}</option>`).join("")}</select></span>
+    </div>
+    <div class="noteSearch">
+      <svg class="noteSearchIco" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="butt" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.2"/><path d="M15.4 15.4 20.5 20.5"/></svg>
+      <input type="search" class="inp" id="histQuery" data-testid="notes-search" value="${esc(hf.q)}" placeholder="メモ・タグ・弓具・天気で探す" aria-label="ノートを文字で探す">
+      <button type="button" class="txtBtn noteSearchClear" id="histQueryClear" data-testid="notes-search-clear"${hf.q ? "" : " hidden"}>クリア</button>
     </div>
     <details class="historyFilters" data-testid="history-filters" ${detailCount ? "open" : ""}>
     <summary data-testid="history-filter-toggle">弓具・ラウンドで絞り込む <span>${detailCount ? `${detailCount}条件` : "すべて"}</span></summary>
@@ -293,26 +358,49 @@ function renderHistory(m) {
     <div class="btnrow"><button type="button" class="btn ghost" id="histClear">絞り込みを解除</button></div>
     </details>
     <div id="histList">
-    ${
-      items.length
-        ? noteListHtml(entries.slice(0, limit), monthCounts, filtered) +
-          (entries.length > limit ? `<div class="btnrow"><button type="button" class="btn ghost" id="histMore">さらに表示（残り${entries.length - limit}件）</button></div>` : "")
-        : all.length
-          ? `<div class="empty" data-testid="notes-no-match"><b>合う記録がありません</b>絞り込みを変えると見られます。</div>`
-          : `<div class="empty historyEmpty" data-testid="history-empty">
-        <b>ノートはまだ空です</b>
-        <p>練習を記録して終了すると、日付の順にここへ並びます。練習のない日は「メモを書く」で書き残せます。</p>
-        <button type="button" class="btn" id="histEmptyCta">記録タブへ</button>
-      </div>`
-    }
+    ${historyListBodyHtml(all, hf, dayChanges)}
     </div>
     <button type="button" class="lrow link noteTrashLink" id="notesTrash" data-testid="notes-trash"><span class="lmain"><b>ゴミ箱（${trashCount}件）</b><span>${trashCount ? "ここから元に戻せます" : "ゴミ箱へ移した記録とメモが、ここに入ります"}</span></span>${NOTE_GO}</button>
   </div>`;
   const rerender = (focusSel) => {
-    ui._histLimit = 0;
     render();
     const el = focusSel && $(focusSel);
     if (el) el.focus({ preventScroll: true });
+  };
+  const resetAllFilters = (focusSel) => {
+    ui.histFilter = { setupId: "", dist: "", round: "", kind: "all", q: "" };
+    rerender(focusSel);
+  };
+  const bindList = () => {
+    const more = $("#histMore");
+    if (more)
+      more.onclick = () => {
+        ui._histLimit = (ui._histLimit || 50) + 50;
+        updateList();
+      };
+    if (!ui.histRoundOpen) ui.histRoundOpen = new Set();
+    m.querySelectorAll("#histList .historyRound").forEach((group) => {
+      group.ontoggle = () => {
+        if (!group.isConnected) return;
+        if (group.open) ui.histRoundOpen.add(group.dataset.gid);
+        else ui.histRoundOpen.delete(group.dataset.gid);
+      };
+    });
+    m.querySelectorAll("#histList .noteEntry").forEach(
+      (li) =>
+        (li.onclick = () =>
+          li.dataset.kind === "memo" ? openMemoDetail(li.dataset.id) : openHistDetail(li.dataset.id)),
+    );
+    const cta = $("#histEmptyCta");
+    if (cta) cta.onclick = () => showView("record");
+    const resetBtn = $("#notesResetFilter");
+    if (resetBtn) resetBtn.onclick = () => resetAllFilters("#histQuery");
+  };
+  const updateList = () => {
+    const listEl = $("#histList");
+    if (!listEl) return;
+    listEl.innerHTML = historyListBodyHtml(noteItems(), hf, noteDayChanges());
+    bindList();
   };
   m.querySelectorAll("#noteSeg button").forEach(
     (b) =>
@@ -335,27 +423,34 @@ function renderHistory(m) {
     hf.round = e.target.value;
     rerender(e.target.value ? "#histRound" : ".historyFilters summary");
   };
-  $("#histClear").onclick = () => {
-    ui.histFilter = { setupId: "", dist: "", round: "", kind: "all" };
-    rerender(".historyFilters summary");
+  $("#histClear").onclick = () => resetAllFilters(".historyFilters summary");
+  const qInput = $("#histQuery"),
+    qClear = $("#histQueryClear");
+  let composing = false;
+  const applyQuery = () => {
+    hf.q = qInput.value;
+    qClear.hidden = !hf.q;
+    updateList();
   };
-  const more = $("#histMore");
-  if (more) more.onclick = () => { ui._histLimit = (ui._histLimit || 50) + 50; render(); };
-  if (!ui.histRoundOpen) ui.histRoundOpen = new Set();
-  m.querySelectorAll("#histList .historyRound").forEach((group) => {
-    group.ontoggle = () => {
-      if (!group.isConnected) return;
-      if (group.open) ui.histRoundOpen.add(group.dataset.gid);
-      else ui.histRoundOpen.delete(group.dataset.gid);
-    };
+  qInput.addEventListener("compositionstart", () => {
+    composing = true;
   });
-  m.querySelectorAll("#histList .noteEntry").forEach(
-    (li) =>
-      (li.onclick = () =>
-        li.dataset.kind === "memo" ? openMemoDetail(li.dataset.id) : openHistDetail(li.dataset.id)),
-  );
-  const cta = $("#histEmptyCta");
-  if (cta) cta.onclick = () => showView("record");
+  qInput.addEventListener("compositionend", () => {
+    composing = false;
+    applyQuery();
+  });
+  qInput.addEventListener("input", (e) => {
+    if (composing || e.isComposing) return;
+    applyQuery();
+  });
+  qClear.onclick = () => {
+    qInput.value = "";
+    hf.q = "";
+    qClear.hidden = true;
+    updateList();
+    qInput.focus({ preventScroll: true });
+  };
+  bindList();
   $("#notesTrash").onclick = () => openTrashSheet();
 }
 /* ゴミ箱（ノートの一番下から開く。設定 > データにも同じ中身がある）。練習・メモ・弓具・サイト値を元に戻せる */
@@ -641,7 +736,7 @@ function openHistDetail(id) {
   const op = (opId, title, sub) =>
     `<button type="button" class="lrow link" id="${opId}"><span class="lmain"><b>${title}</b><span>${sub}</span></span>${NOTE_GO}</button>`;
   ovl.innerHTML = `<div class="sheet resultScreen noteScreen histDetailSheet" data-testid="note-detail" data-id="${esc(sess.id)}">
-    <div class="subTop"><button type="button" class="backBtn" id="hClose" data-testid="note-back">${REC_CHEVRON}${view === "history" ? "ノート" : "戻る"}</button></div>
+    <div class="subTop"><button type="button" class="backBtn" id="hClose" data-testid="note-back">${REC_CHEVRON}${view === "history" ? "ノート" : "戻る"}</button><button type="button" class="txtBtn" id="hJumpOps" data-testid="note-jump-ops">操作へ</button></div>
     <header class="subHead noteHead">
       <div>
         <div class="viewDate">${p ? `${p.y}年` : "日付なし"}</div>
@@ -722,6 +817,12 @@ function openHistDetail(id) {
       }),
   );
   ovl.querySelector("#hClose").onclick = close;
+  ovl.querySelector("#hJumpOps").onclick = () => {
+    const ops = ovl.querySelector('[data-testid="note-ops"]');
+    if (!ops) return;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    ops.scrollIntoView({ behavior: reduce ? "instant" : "smooth", block: "start" });
+  };
   const hEdit = ovl.querySelector("#hEdit");
   if (hEdit)
     hEdit.onclick = () => {
@@ -1022,26 +1123,26 @@ function sightScaleSvg(rows) {
   const W = 112, H = 330, T = 16, B = 16;
   const Y = (v) => T + ((v - t.lo) / (t.hi - t.lo)) * (H - T - B);
   const fmt = (v) => (Math.abs(v) < 1e-9 ? 0 : v).toFixed(Math.min(t.dec, 3));
-  let h = `<path d="M40 ${T}V${H - B}" stroke="var(--ink)" stroke-width="2"/>`;
+  let h = `<path d="M40 ${T}V${H - B}" stroke="var(--ink)" stroke-width="1.8"/>`;
   const nMinor = Math.round((t.hi - t.lo) / t.minor);
   for (let i = 0; i <= nMinor; i++) {
     const v = t.lo + i * t.minor;
     const isMajor = i % 5 === 0;
-    h += `<path d="M40 ${Y(v).toFixed(1)}h${isMajor ? -12 : -6}" stroke="var(${isMajor ? "--ink" : "--rule-strong"})" stroke-width="${isMajor ? 1.5 : 1}"/>`;
-    if (isMajor) h += `<text class="ax" x="24" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end" font-size="13" fill="var(--sub)">${fmt(v)}</text>`;
+    h += `<path d="M40 ${Y(v).toFixed(1)}h${isMajor ? -11 : -5}" stroke="var(${isMajor ? "--ink" : "--rule-strong"})" stroke-width="${isMajor ? 1.5 : 1}"/>`;
+    if (isMajor) h += `<text class="ax" x="25" y="${(Y(v) + 4.5).toFixed(1)}" text-anchor="end" font-size="13" fill="var(--sub)">${fmt(v)}</text>`;
   }
-  /* 近い値の名札は重ならないよう、上から順に 17px 以上あける（矢印の位置は動かさない） */
+  /* 近い値の名札は重ならないよう、上から順に 18px 以上あける（矢印の位置は動かさない） */
   const marks = pts.map((r) => ({ r, y: Y(r.v), ly: Y(r.v) })).sort((a, b) => a.y - b.y);
   marks.forEach((mk, i) => {
-    if (i > 0 && mk.ly < marks[i - 1].ly + 17) mk.ly = marks[i - 1].ly + 17;
+    if (i > 0 && mk.ly < marks[i - 1].ly + 18) mk.ly = marks[i - 1].ly + 18;
   });
   for (let i = marks.length - 1; i >= 0; i--) {
-    const max = i === marks.length - 1 ? H - 6 : marks[i + 1].ly - 17;
+    const max = i === marks.length - 1 ? H - 8 : marks[i + 1].ly - 18;
     if (marks[i].ly > max) marks[i].ly = max;
   }
   marks.forEach((mk) => {
-    const p = mk.r.kind === "pred", col = `var(${p ? "--sub" : "--accent"})`;
-    h += `<g data-scale-dist="${esc(mk.r.dist)}" data-scale-kind="${mk.r.kind}" data-scale-v="${esc(mk.r.text)}"><path d="M40 ${mk.y.toFixed(1)}H58" stroke="${col}" stroke-width="2"${p ? ' stroke-dasharray="4 3"' : ""}/><path d="M42 ${mk.y.toFixed(1)}l8 -5v10z" fill="${col}"/>${Math.abs(mk.ly - mk.y) > 0.5 ? `<path d="M58 ${mk.y.toFixed(1)}L64 ${mk.ly.toFixed(1)}" stroke="${col}" stroke-width="1"/>` : ""}<text x="66" y="${(mk.ly + 5).toFixed(1)}" font-size="14" font-weight="700" fill="var(--ink)">${esc(mk.r.dist)}m</text></g>`;
+    const p = mk.r.kind === "pred", col = `var(${p ? "--sub" : "--ink"})`;
+    h += `<g data-scale-dist="${esc(mk.r.dist)}" data-scale-kind="${mk.r.kind}" data-scale-v="${esc(mk.r.text)}"><path d="M40 ${mk.y.toFixed(1)}H58" stroke="${col}" stroke-width="1.8"${p ? ' stroke-dasharray="4 3"' : ""}/><path d="M41 ${mk.y.toFixed(1)}l7 -4.2v8.4z" fill="${col}"/>${Math.abs(mk.ly - mk.y) > 0.5 ? `<path d="M58 ${mk.y.toFixed(1)}L64 ${mk.ly.toFixed(1)}" stroke="${col}" stroke-width="1"/>` : ""}<text x="66" y="${(mk.ly + 4.5).toFixed(1)}" font-size="14" font-weight="${p ? 500 : 700}" fill="${col}">${esc(mk.r.dist)}m</text></g>`;
   });
   const label = `サイトの目盛り（上下の値）。${pts.map((r) => `${r.dist}m ${r.text}${r.kind === "pred" ? "（予測）" : ""}`).join("、")}`;
   return `<svg class="sightScale" data-testid="sight-scale" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">${h}</svg>`;
@@ -1267,6 +1368,12 @@ function sightBasisRowsHtml(sess, setup, adv, sid, dist) {
 }
 /* voice:fold-end */
 function renderSight(m) {
+  const prevSight = m.querySelector(".sightView");
+  const openFolds = new Set(
+    prevSight
+      ? [...prevSight.querySelectorAll("details[data-testid][open]")].map((d) => d.dataset.testid)
+      : [],
+  );
   if (!ui.sightSel.setupId && db.setups[0]) ui.sightSel.setupId = db.setups[0].id;
   if (ui.sightSel.setupId && !db.setups.some((x) => x.id === ui.sightSel.setupId)) ui.sightSel.setupId = db.setups[0] ? db.setups[0].id : null;
   const sid = ui.sightSel.setupId;
@@ -1332,6 +1439,10 @@ function renderSight(m) {
   ${interp ? sightPredictionHtml(interp, db.sightMarks.filter((mk) => mk.setupId === sid)) : `<section class="vsec" data-testid="sight-prediction-empty"><div class="vsecH"><h2>記録していない距離の予測</h2></div><p class="basis">上下を数値で記録した距離が 2つになると、ほかの距離の予測が見られます。</p></section>`}
   ${sightRecordsOverviewHtml(sid)}
   </div>`;
+  openFolds.forEach((tid) => {
+    const d = m.querySelector(`details[data-testid="${tid}"]`);
+    if (d) d.open = true;
+  });
   const sgSetup = $("#sgSetup");
   if (sgSetup)
     sgSetup.onchange = (e) => {
@@ -1373,38 +1484,60 @@ function renderSight(m) {
   );
   const cv = $("#sgCalV"),
     ch = $("#sgCalH");
-  /* 値を入れたら保存して描き直す。描き直すと折りたたみが閉じ、次の欄へ移した指の行き先も消えて、
-     2つめの欄に入れられなかった。開いたまま描き直し、移った先の欄へ戻す。「4,5」や全角の「４」も数として読む */
-  const calibChange = (key) => (e) => {
-    const v = parseSightNumber(e.target.value);
-    setup[key] = Number.isFinite(v) && v !== 0 ? v : null;
-    save();
+  let calDownId = "",
+    calTabDir = 0;
+  const sightRoot = m.querySelector(".sightView");
+  if (sightRoot)
+    sightRoot.addEventListener("pointerdown", (e) => {
+      const t = e.target && e.target.closest ? e.target.closest("input,select,button,summary") : null;
+      calDownId = t && t.id ? t.id : "";
+      setTimeout(() => {
+        calDownId = "";
+      }, 120);
+    });
+  [cv, ch].filter(Boolean).forEach((inp) =>
+    inp.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        calTabDir = e.shiftKey ? -1 : 1;
+        setTimeout(() => {
+          calTabDir = 0;
+        }, 120);
+      }
+    }),
+  );
+  const applyCal = (key, fromId, val) => {
+    /* 「4,5」や全角の「４」も数として読む。描き直しても折りたたみは開いたまま（閉じると次の欄に入れられない） */
+    const num = parseSightNumber(val);
+    setup[key] = Number.isFinite(num) && num !== 0 ? num : null;
     ui.sightClickOpen = true;
-    setTimeout(() => {
-      const next = document.activeElement && document.activeElement.id;
-      if (view !== "sight") return;
-      render();
-      const el = next && (next === "sgCalV" || next === "sgCalH") ? $("#" + next) : null;
-      if (el) el.focus();
-    }, 0);
+    const prevY = window.scrollY;
+    let nextFocus = calDownId || fromId;
+    if (!calDownId && calTabDir === 1 && fromId === "sgCalV") nextFocus = "sgCalH";
+    else if (!calDownId && calTabDir === -1 && fromId === "sgCalH") nextFocus = "sgCalV";
+    else if (!calDownId && calTabDir !== 0) nextFocus = "";
+    save();
+    render();
+    window.scrollTo({ top: prevY, left: 0, behavior: "instant" });
+    const target = nextFocus ? document.getElementById(nextFocus) : null;
+    if (target) target.focus({ preventScroll: true });
   };
-  if (cv) cv.onchange = calibChange("calibV70");
-  if (ch) ch.onchange = calibChange("calibH70");
+  if (cv) cv.onchange = (e) => applyCal("calibV70", "sgCalV", e.target.value);
+  if (ch) ch.onchange = (e) => applyCal("calibH70", "sgCalH", e.target.value);
 }
 function openMarkForm(setupId, dist) {
   const ovl = document.createElement("div");
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet"><h3>サイトを記録（${dist}m）</h3>
-    <label class="f">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
+    <label class="f" for="mkDate">日付</label><input class="inp" type="date" id="mkDate" value="${today()}">
     <div class="row">
-      <div><label class="f">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
-      <div><label class="f">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
+      <div><label class="f" for="mkV">上下</label><input class="inp" id="mkV" inputmode="decimal"></div>
+      <div><label class="f" for="mkH">左右</label><input class="inp" id="mkH" inputmode="decimal"></div>
     </div>
     <label class="f" for="mkNote">メモ</label><input class="inp" id="mkNote" placeholder="例: 無風・36射で確認">
     <div class="btnrow"><button class="btn ghost" id="mkCancel">やめる</button><button class="btn" id="mkSave">保存</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#mkCancel" });
-  ovl.querySelector("#mkCancel").onclick = () => closeModal(ovl);
+  bindUnsavedFormGuard(ovl, "#mkCancel");
   ovl.querySelector("#mkSave").onclick = () => {
     /* 上下も左右も空のまま保存すると、空の記録がいちばん新しい記録になり、次の練習のサイトの欄まで空になっていた */
     if (!ovl.querySelector("#mkV").value.trim() && !ovl.querySelector("#mkH").value.trim()) {
@@ -1438,13 +1571,13 @@ function openCalibrationWizard(setupId) {
   ovl.className = "ovl";
   ovl.innerHTML = `<div class="sheet" data-testid="sight-calibration"><h3>サイト合わせ（${esc(setup.name)}）</h3>
     <p class="basis">実射で確かめた距離だけ入れてください。入れた値は、この日付の記録として追加されます（前の記録は残ります）。欄には、いまのいちばん新しい値が入っています。</p>
-    <label class="f">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
+    <label class="f" for="calDate">日付</label><input class="inp" type="date" id="calDate" value="${today()}">
     ${dists
       .map((d) => {
         const mk = latestMark(setupId, d) || {};
         return `<div class="row">
-        <div><label class="f">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v === 0 ? 0 : mk.v || "")}"></div>
-        <div><label class="f">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h === 0 ? 0 : mk.h || "")}"></div>
+        <div><label class="f" for="calV_${d}">${d}m 上下</label><input class="inp" id="calV_${d}" inputmode="decimal" value="${esc(mk.v === 0 ? 0 : mk.v || "")}"></div>
+        <div><label class="f" for="calH_${d}">${d}m 左右</label><input class="inp" id="calH_${d}" inputmode="decimal" value="${esc(mk.h === 0 ? 0 : mk.h || "")}"></div>
       </div>`;
       })
       .join("")}
@@ -1452,7 +1585,7 @@ function openCalibrationWizard(setupId) {
     <div class="btnrow"><button class="btn ghost" id="calCancel">やめる</button><button class="btn" id="calSave">記録する</button></div>
   </div>`;
   openModal(ovl, { escapeTarget: "#calCancel" });
-  ovl.querySelector("#calCancel").onclick = () => closeModal(ovl);
+  bindUnsavedFormGuard(ovl, "#calCancel");
   ovl.querySelector("#calSave").onclick = () => {
     const date = ovl.querySelector("#calDate").value || today();
     const note = ovl.querySelector("#calNote").value.trim() || "サイト合わせ";

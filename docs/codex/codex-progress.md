@@ -3649,11 +3649,37 @@ e2e: 足した 15 本（form-v2.spec.js 12 本 = 以前の撮影画面への道�
 
 次: オーナーに画面の言葉を見てもらう（AN-102 の確認事項 (a)〜(f)）。実射での確認（AN-001）。
 
-## AN-103 コードの最適化とバグ修正（版130据え置き・未push・未公開）
+## AN-103 UI/UX 磨き込みと v131 公開準備
+
+2026-11-17、v130 の全画面を 375×812・320×640（ライト／ダーク）で実測監査し、3つの不変条件と `docs/design/v5/design.md`・`docs/design/voice.md` を守ったまま UI/UX を磨き込み、オーナー承認を受けて v131 への公開準備（`npm run version:bump`・CHANGELOG 追加）を行った。
+
+変更: `scripts/10-storage-native.js`（`APP_VER=131`、`appConfirm` の危険確認でキャンセル側初期フォーカス、`formStateSnapshot`・`bindUnsavedFormGuard`）、`scripts/30-target-svg.js`（三つ目的注記の `.hintCenter` 化。`markCircle` の半径・白縁は不変）、`scripts/50-record-view.js`（`ui.histFilter.q`、`activeNotice` の `#recMsg` 部分更新、過去エンド矢の視認色 `rgba(110,122,134,.58)`、確定済みスコア表のスクロール位置をエンド数変化時以外は保持）、`scripts/60-history-sight-view.js`（ノート一覧の日本語 IME・NFKC・複数語対応リアルタイム文字検索 `#histQuery` とクリアボタン、「合う記録がありません」の「すべての記録を表示」ボタン、`ui._histLimit` 維持、ノートの詳細の「操作へ」ボタン `#hJumpOps`、弓具 > サイトの `<details>` 開閉と `#sgCalV`/`#sgCalH` の Tab フォーカス維持、サイト記録・サイト合わせの `label[for]` と未保存確認）、`scripts/70-gear-settings.js`（セッティング編集・ウィザードの未保存確認、ウィザード `label[for]`、手入力欄 `aria-label`）、`style.css`・`style.min.css`（初回帯 320px 縦積み、`hintBannerClose` 44×44px 化、`html.subscreen .subTop` sticky 化、`.noteSearch`、`.histDetailSheet .subTop`）、`tests/e2e/ux-polish.spec.js`（新規 6 本）、`version.json`・`sw.js`・`package.json`・`package-lock.json`・`CHANGELOG.md`（v131）、`tasks.json`・`progress.md`。
+
+検証: `npm run build:web-assets`、`npm run check:all`（exit 0、Voice checks OK 1701 strings、Version alignment OK v131）、`npm run lint`、`npm run format:check`、配布版 `npm run test:e2e:dist` 495 passed。320×640（字間 0.12em を含む）で横はみ出し 0 件。
+
+リスク: 実機 iPhone Safari でのキーボード表示中の検索操作感と屋外での過去エンド矢の見え方は未確認。ノート一覧に検索欄が増えたぶん最初の項目が 1 行下がる。次: PR の CI `validate` 確認 → オーナーによる main マージ → Pages の v131 配信確認後に `AN-103` を `passes: true` にする。
+
+## 公開 v131（UI/UX 磨き込み、AN-103）
+
+2026-11-17、PR #147 の CI `validate` が 1 回で成功（0b578d6）したことを確かめ、オーナー承認（「勧めて」）後に main へマージ（c8e58b6）。main の CI `validate`・`deploy` 成功（run 44054392591）後、Pages の `version.json` が 131、`sw.js` が `archery-note-v131`、公開ページで `APP_VER` 131・4タブ表示・ノート検索欄表示・コンソールのエラー 0 件を確認し、`AN-103` を `status: done`・`passes: true` にした。
+
+次: 実機 iPhone での触感確認、AN-102 の確認事項 (a)〜(f)、実射での確認（AN-001）。
+
+## AN-104 仮見た目 v132 と AN-105 撤回（v133）
+
+2026-11-17、オーナー「もっと見た目の改善してほしかったな」→「仮で反映してみて」を受け、配色・カード・グラフ面塗りなどを仮載せして v132（PR #149、eb0389b）として Pages に出した。
+
+2026-11-18、オーナー「戻して」を受け、PR #149 を revert し見た目を v131 相当へ戻した。すでに v132 を受け取った端末の Service Worker を更新するため版を 133 に上げた（`archery-note-v133`）。v131 の操作改善（ノート検索・スクロール保持・未保存確認など）は残す。採点・矢円・保存形式は不変。main へ push（f53612f・c69f8db）後、CI `validate`・`deploy` 成功（run 44299984246）。Pages の `version.json` が 133、`sw.js` が `archery-note-v133` を確認し、`AN-105` を `passes: true` にした。
+
+## 公開 v134（UI/UX 刷新と射型の記録画面の改良、AN-106）
+
+2026-11-24、AI 的な装飾（影・カラーグラデーション・装飾帯・ピル乱立）を排した Quiet Native Instrument UI と、射型の記録 v2 画面群（起動デッキ・3連テレメトリ帯・等倍 SVG 図表・精密骨格重ね図・カメラ枠ガイド・1射詳細ゲージ・320px SVG 縮小不具合の解消）を実装し、`npm run version:bump` で版を 134 に更新した。採点半径・ラインカッター判定・保存契約（`SCHEMA_VER` 5）は不変。PR #150 は初回 CI で 375×667 画面の修正バー展開時スコア表詰まり判定（`record-teardown.spec.js:153`）の 1 件のみ失敗し、余白と `watchCrampedScorecard` を修正（0bf0001）して再実行の CI `validate`（run 45340722470）が全件通過。`main` へマージ（044f341）後、`main` の CI `validate`・`deploy` 成功（run 45342984970）、Pages の `version.json` が 134、`sw.js` が `archery-note-v134`、公開ページで `APP_VER` 134・4タブ表示・横はみ出し 0・コンソールエラー 0 件を確認し、`AN-106` を `status: done`・`passes: true` にした。
+
+## AN-107 コードの最適化とバグ修正（版134据え置き・未push・未公開）
 
 2026-11-26〜27、オーナーの依頼（「コードの最適化とバグ修正して」）。まず 1,000 回 × 72 射の見本で、起動・タブ・記録・保存の重さを CPU 4 倍遅延で測った。いちばん重かったのは、保存のたびに過去の全部の記録のグルーピング統計（MCD）を計算し直していたことで、画面が使うのは合計と全射の半径だけだった。統計の重い部分を読まれたときだけ計算し、矢の位置が変わらない記録は前の統計を使い、個人の校正も結果を変えるものが同じなら使い回すようにした（commit 5a28d08 と、ノート・設定・射型のコミット）。分析タブを最初に開く 1.8 秒が 0.37 秒、記録の終了 3.5 秒が 1.7 秒、1 射 約 0.45 秒が約 0.22 秒になった。値は変えていない（先に全部計算する参照実装と 585 組の点で一致）。
 
-次に、5 つの領域を下読みしてもらい（保存と起動／採点と統計／記録画面／ノート・サイト・弓具・設定／射型 v2）、報告を 1 件ずつ再現してから直した。直したものの一覧は progress.md の AN-103。どの直しにも、直す前のスクリプトで落ちる検査を付けた（e2e 21 本と Node の検査の追加分）。採点の全数の照合（的 9 種・矢の外径 3〜10mm・境界の上の点まで 7,300 万点）は不一致 0 件で、三つ目的の 1mm の移動だけが不変条件 1 を破っていた（直した）。
+次に、5 つの領域を下読みしてもらい（保存と起動／採点と統計／記録画面／ノート・サイト・弓具・設定／射型 v2）、報告を 1 件ずつ再現してから直した。直したものの一覧は progress.md の AN-107。どの直しにも、直す前のスクリプトで落ちる検査を付けた（e2e 21 本と Node の検査の追加分）。採点の全数の照合（的 9 種・矢の外径 3〜10mm・境界の上の点まで 7,300 万点）は不一致 0 件で、三つ目的の 1mm の移動だけが不変条件 1 を破っていた（直した）。
 
 途中で直した検査: form-diagnostics の 1 本は、本体が書けないときに控えを外して書き直す回数を数えるようにした。check-coordless の見本の値は、以前の記録の「前の練習」の数え方を直したぶんだけ変わったので、項目ごとに比べてから置き換えた。check-pwa-update-flow の静的な検査に合わせて、書き出しの .finally の書き方をそろえた。check-app の校正の切り出しに sessionMetrics を渡した。
 

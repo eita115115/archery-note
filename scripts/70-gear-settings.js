@@ -699,7 +699,7 @@ function choiceFieldHtml(id, lb, opts, value, placeholder, mode) {
       ${opts.map((v) => `<option value="${esc(v)}" ${match === v ? "selected" : ""}>${esc(gearOptionLabel(v))}</option>`).join("")}
       <option value="${MANUAL_CHOICE}" ${custom ? "selected" : ""}>候補にないので手入力</option>
     </select>
-    <input class="inp choiceManual ${custom ? "" : "is-hidden"}" id="${id}" value="${esc(inputValue)}"${md}${ph}>`;
+    <input class="inp choiceManual ${custom ? "" : "is-hidden"}" id="${id}" aria-label="${esc(lb)}（手入力）" value="${esc(inputValue)}"${md}${ph}>`;
 }
 function bindChoiceFields(root) {
   root.querySelectorAll(".choicePick").forEach((sel) => {
@@ -1343,7 +1343,7 @@ function applyTheme() {
   /* ブラウザ上部（ステータスバー）の色もテーマに合わせる。自動のときは端末の設定に任せる */
   document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
     const dark = t === "dark" || (t !== "light" && (m.getAttribute("media") || "").includes("dark"));
-    m.setAttribute("content", dark ? "#0e1217" : "#f3f4f1");
+    m.setAttribute("content", dark ? "#0a0b0d" : "#f5f5f7");
   });
 }
 /* 射場モード（3.3 AAAトグル）: outdoor-contrast-design.md「射場モードCSS」準拠。
@@ -1998,13 +1998,13 @@ function openSetupWizard() {
     ${choiceFieldHtml("wBow", "ハンドル/弓本体", choiceOpts("bow"), "", "", "")}
     ${choiceFieldHtml("wLimbs", "リム", choiceOpts("limbs"), "", "", "")}
     <div class="row">
-      <div><label class="f">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
-      <div><label class="f">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
+      <div><label class="f" for="wPound">実測ポンド</label><input class="inp" id="wPound" inputmode="decimal" placeholder="例: 38"></div>
+      <div><label class="f" for="wDraw">引き尺 (inch)</label><input class="inp" id="wDraw" inputmode="decimal" placeholder="例: 28.5"></div>
     </div>
     ${choiceFieldHtml("wArrow", "シャフト銘柄", choiceOpts("arrow"), "", "例: EASTON X10", "")}
     <div class="row">
-      <div><label class="f">スパイン（番）</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
-      <div><label class="f">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
+      <div><label class="f" for="wSpine">スパイン（番）</label><input class="inp" id="wSpine" inputmode="decimal" list="wSpineList" placeholder="例: 650"><datalist id="wSpineList">${opts("shaftSpine")}</datalist></div>
+      <div><label class="f" for="wArrowLength">矢尺 (inch)</label><input class="inp" id="wArrowLength" inputmode="decimal" list="wArrowLengthList" placeholder="例: 29"><datalist id="wArrowLengthList">${opts("arrowLength")}</datalist></div>
     </div>
     <div class="row">
       <div><label class="f" for="wDia">矢の外径 (mm)</label><input class="inp" id="wDia" inputmode="decimal" placeholder="例: 5.7"></div>
@@ -2017,8 +2017,8 @@ function openSetupWizard() {
       ${[70, 50, 30, 18]
         .map(
           (d) => `<div class="row">
-        <div><label class="f">${d}m 上下</label><input class="inp" id="wV_${d}" inputmode="decimal"></div>
-        <div><label class="f">${d}m 左右</label><input class="inp" id="wH_${d}" inputmode="decimal"></div>
+        <div><label class="f" for="wV_${d}">${d}m 上下</label><input class="inp" id="wV_${d}" inputmode="decimal"></div>
+        <div><label class="f" for="wH_${d}">${d}m 左右</label><input class="inp" id="wH_${d}" inputmode="decimal"></div>
       </div>`,
         )
         .join("")}
@@ -2027,7 +2027,7 @@ function openSetupWizard() {
   </div>`;
   openModal(ovl, { escapeTarget: "#wCancel", swipe: false });
   bindChoiceFields(ovl);
-  ovl.querySelector("#wCancel").onclick = () => closeModal(ovl);
+  bindUnsavedFormGuard(ovl, "#wCancel");
   ovl.querySelector("#wSave").onclick = () => {
     const name = ovl.querySelector("#wName").value.trim();
     if (!name) {
@@ -2093,7 +2093,7 @@ function openGearForm(id) {
   </div>`;
   openModal(ovl, { escapeTarget: "#gfCancel", swipe: false });
   bindChoiceFields(ovl);
-  ovl.querySelector("#gfCancel").onclick = () => closeModal(ovl);
+  bindUnsavedFormGuard(ovl, "#gfCancel");
   ovl.querySelector("#gfInfer").onclick = () => {
     const vals = {};
     GEAR_FIELDS.forEach(([k]) => (vals[k] = ovl.querySelector("#gf_" + k).value.trim()));
