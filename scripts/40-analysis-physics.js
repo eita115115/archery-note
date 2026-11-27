@@ -804,10 +804,17 @@ function sightFitAtSpeed(pts, phys, speedMps){
   let sse=0,sst=0; fs.forEach((f,i)=>{ sse+=(pts[i][1]-(a+b*f))**2; sst+=(pts[i][1]-yb)**2; });
   return {a,b,sse,r2:sst>1e-12?clamp(1-sse/sst,0,1):0,ph};
 }
+function sightMarkHasDist(m){
+  const d=m&&m.dist;
+  if(d==null || (typeof d==="string" && !d.trim())) return false;
+  const n=Number(d);
+  return Number.isFinite(n) && n>0;
+}
 function sightInterp(setupId){
   const byDist={}, sourceByDist=Object.create(null);
-  /* 距離の無い記録（以前の版のデータ・読み込んだデータ）は使わない。1 件でもあると、予測がすべて NaN になっていた */
-  [...db.sightMarks].filter(m=>m.setupId===setupId && Number.isFinite(m.dist) && m.dist>0)
+  /* 距離の無い記録（以前の版のデータ・読み込んだデータ。null・空・数でない値）は使わない。1 件でもあると、予測がすべて NaN になっていた。
+     数に直せる文字の距離（"030" など）は、これまでどおりその書き方のまま別の距離として使う */
+  [...db.sightMarks].filter(m=>m.setupId===setupId && sightMarkHasDist(m))
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts||0)-(b.ts||0))
     .forEach(m=>{ const v=parseSightNumber(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
   const keys=Object.keys(byDist).sort((a,b)=>+a-+b);

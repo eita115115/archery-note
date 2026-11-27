@@ -1278,9 +1278,9 @@ function renderSight(m) {
   // 距離候補: 台帳・セッションにある距離 + 定番
   const dset = new Set([70, 50, 30, 18]);
   /* 距離の無い記録（以前の版のデータや読み込んだデータ）は、距離の候補に入れない（「m」「nullm」の行になっていた） */
-  const okDist = (d) => Number.isFinite(d) && d > 0;
-  db.sightMarks.filter((x) => x.setupId === sid && okDist(x.dist)).forEach((x) => dset.add(x.dist));
-  db.sessions.filter((x) => x.setupId === sid && okDist(x.dist)).forEach((x) => dset.add(x.dist));
+  const okDist = (x) => sightMarkHasDist(x);
+  db.sightMarks.filter((x) => x.setupId === sid && okDist(x)).forEach((x) => dset.add(x.dist));
+  db.sessions.filter((x) => x.setupId === sid && okDist(x)).forEach((x) => dset.add(x.dist));
   const dists = [...dset].sort((a, b) => b - a);
   if (!dists.includes(ui.sightSel.dist)) ui.sightSel.dist = dists[0];
   const dist = ui.sightSel.dist;
