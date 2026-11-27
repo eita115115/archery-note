@@ -272,12 +272,25 @@ const LEVELS={
 };
 const PCAL_CACHE=new Map();
 /* 校正はセッション横断のRK4連鎖を含み重いので、db更新時刻をキーにメモ化する */
+/* 個人の校正は、その弓具の記録の数が多いと重い（1,000 回の記録で数百 ms）。以前は保存の時刻（db.updatedAt）を鍵にしていたので、
+   メモや印を 1 つ保存しただけでも計算し直していた。結果を変えるもの（弓具の項目・目の位置・その弓具の練習の条件と
+   矢の位置の統計・その弓具のサイトの記録）が前と同じなら、前の結果を使う。統計は、矢の位置が変わらなければ同じ物（sessionMetrics） */
+function personalPhysicsCalibrationDeps(setupId){
+  const setup=db.setups.find(s=>s.id===setupId);
+  const deps=[setup?JSON.stringify(setup):"", db.settings.eyeSight||850];
+  db.sessions.forEach(s=>{
+    if(s && s.setupId===setupId) deps.push(s.id,s.date,s.dist,s.faceD,s.faceType,s.sightV,s.sightH,s.windSpeed,s.windDir,s.wx,sessionMetrics(s).st);
+  });
+  db.sightMarks.forEach(m=>{ if(m && m.setupId===setupId) deps.push("mark",m.id,m.dist,m.v); });
+  return deps;
+}
 function personalPhysicsCalibration(setupId){
   if(!setupId) return null;
-  const key=[setupId,db.updatedAt||"",db.sessions.length,db.sightMarks.length].join("|");
-  if(PCAL_CACHE.has(key)) return PCAL_CACHE.get(key);
+  const deps=personalPhysicsCalibrationDeps(setupId), hit=PCAL_CACHE.get(setupId);
+  if(hit && hit.deps.length===deps.length && hit.deps.every((v,i)=>Object.is(v,deps[i]))) return hit.out;
   const out=computePersonalPhysicsCalibration(setupId);
-  PCAL_CACHE.set(key,out);
+  PCAL_CACHE.delete(setupId);
+  PCAL_CACHE.set(setupId,{deps,out});
   if(PCAL_CACHE.size>8) PCAL_CACHE.delete(PCAL_CACHE.keys().next().value);
   return out;
 }
@@ -793,7 +806,8 @@ function sightFitAtSpeed(pts, phys, speedMps){
 }
 function sightInterp(setupId){
   const byDist={}, sourceByDist=Object.create(null);
-  [...db.sightMarks].filter(m=>m.setupId===setupId)
+  /* 距離の無い記録（以前の版のデータ・読み込んだデータ）は使わない。1 件でもあると、予測がすべて NaN になっていた */
+  [...db.sightMarks].filter(m=>m.setupId===setupId && Number.isFinite(m.dist) && m.dist>0)
     .sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.ts||0)-(b.ts||0))
     .forEach(m=>{ const v=parseSightNumber(m.v); if(isFinite(v)){ byDist[m.dist]=v; sourceByDist[m.dist]=m; } });
   const keys=Object.keys(byDist).sort((a,b)=>+a-+b);

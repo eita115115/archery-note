@@ -247,13 +247,17 @@ function renderHistory(m) {
   if (!ui.histFilter) ui.histFilter = { setupId: "", dist: "", round: "", kind: "all" };
   const hf = ui.histFilter;
   if (hf.kind !== "rec" && hf.kind !== "memo") hf.kind = "all";
+  /* 絞り込んでいた弓具を消したら「すべて」に戻す（選ぶ欄は「すべて」と出るのに、消した弓具で絞ったままになっていた） */
+  const setupIds = new Set((db.setups || []).map((x) => x && x.id));
+  if (hf.setupId && hf.setupId !== "__none" && !setupIds.has(hf.setupId)) hf.setupId = "";
   const sessions = all.filter((it) => it.kind === "session").map((it) => it.s);
   const dists = [...new Set(sessions.map((s) => s.dist).filter(Boolean))].sort((a, b) => b - a);
   const rounds = [...new Set(sessions.map((s) => s.round || "free"))];
   /* 距離・弓具・ラウンドは練習だけが持つ条件。どれかを選ぶと、メモだけの項目は外れる */
   const sessionOnly = !!(hf.setupId || hf.dist || hf.round);
   const sessionOk = (s) =>
-    (!hf.setupId || (hf.setupId === "__none" ? !s.setupId : s.setupId === hf.setupId)) &&
+    /* 「未指定」は、弓具を選ばなかった記録と、弓具を消した記録（詳しくは「弓具 未指定」と出る） */
+    (!hf.setupId || (hf.setupId === "__none" ? !s.setupId || !setupIds.has(s.setupId) : s.setupId === hf.setupId)) &&
     (!hf.dist || String(s.dist) === String(hf.dist)) &&
     (!hf.round || (s.round || "free") === hf.round);
   const items = all.filter((it) => {
@@ -1273,8 +1277,10 @@ function renderSight(m) {
   }
   // 距離候補: 台帳・セッションにある距離 + 定番
   const dset = new Set([70, 50, 30, 18]);
-  db.sightMarks.filter((x) => x.setupId === sid).forEach((x) => dset.add(x.dist));
-  db.sessions.filter((x) => x.setupId === sid).forEach((x) => dset.add(x.dist));
+  /* 距離の無い記録（以前の版のデータや読み込んだデータ）は、距離の候補に入れない（「m」「nullm」の行になっていた） */
+  const okDist = (d) => Number.isFinite(d) && d > 0;
+  db.sightMarks.filter((x) => x.setupId === sid && okDist(x.dist)).forEach((x) => dset.add(x.dist));
+  db.sessions.filter((x) => x.setupId === sid && okDist(x.dist)).forEach((x) => dset.add(x.dist));
   const dists = [...dset].sort((a, b) => b - a);
   if (!dists.includes(ui.sightSel.dist)) ui.sightSel.dist = dists[0];
   const dist = ui.sightSel.dist;
@@ -1314,7 +1320,7 @@ function renderSight(m) {
     <div class="vsecH"><h2>サイトの目安</h2><span class="aside">${adv ? `${esc(dist)}m・${fmtMDW(lastSess.date)}の記録` : `${esc(dist)}m`}</span></div>
     ${adv ? sightAdviceHtml(lastSess, setup, adv) : `<p class="basis" data-testid="sight-advice-empty">${adviceEmpty}</p>`}
     ${basisRows ? `<details class="gearMore" data-testid="sight-basis-fold"><summary>計算の内訳</summary>${basisRows}<p class="basis">矢の飛び方は、空気抵抗を入れた計算で出しています。入力のない項目は、よくある値で代わりにしています。</p></details>` : ""}
-    <details class="gearMore" data-testid="sight-click-fold">
+    <details class="gearMore" data-testid="sight-click-fold"${ui.sightClickOpen ? " open" : ""}>
       <summary>クリック換算の設定</summary>
       <div class="row">
         <div><label class="f" for="sgCalV">上下 1クリックで動く量 (cm・70m)</label><input class="inp" id="sgCalV" inputmode="decimal" value="${esc(setup.calibV70 || "")}" placeholder="例: 4"></div>
@@ -1367,18 +1373,23 @@ function renderSight(m) {
   );
   const cv = $("#sgCalV"),
     ch = $("#sgCalH");
-  if (cv)
-    cv.onchange = (e) => {
-      setup.calibV70 = parseFloat(e.target.value) || null;
-      save();
+  /* 値を入れたら保存して描き直す。描き直すと折りたたみが閉じ、次の欄へ移した指の行き先も消えて、
+     2つめの欄に入れられなかった。開いたまま描き直し、移った先の欄へ戻す。「4,5」や全角の「４」も数として読む */
+  const calibChange = (key) => (e) => {
+    const v = parseSightNumber(e.target.value);
+    setup[key] = Number.isFinite(v) && v !== 0 ? v : null;
+    save();
+    ui.sightClickOpen = true;
+    setTimeout(() => {
+      const next = document.activeElement && document.activeElement.id;
+      if (view !== "sight") return;
       render();
-    };
-  if (ch)
-    ch.onchange = (e) => {
-      setup.calibH70 = parseFloat(e.target.value) || null;
-      save();
-      render();
-    };
+      const el = next && (next === "sgCalV" || next === "sgCalH") ? $("#" + next) : null;
+      if (el) el.focus();
+    }, 0);
+  };
+  if (cv) cv.onchange = calibChange("calibV70");
+  if (ch) ch.onchange = calibChange("calibH70");
 }
 function openMarkForm(setupId, dist) {
   const ovl = document.createElement("div");
@@ -1395,6 +1406,11 @@ function openMarkForm(setupId, dist) {
   openModal(ovl, { escapeTarget: "#mkCancel" });
   ovl.querySelector("#mkCancel").onclick = () => closeModal(ovl);
   ovl.querySelector("#mkSave").onclick = () => {
+    /* 上下も左右も空のまま保存すると、空の記録がいちばん新しい記録になり、次の練習のサイトの欄まで空になっていた */
+    if (!ovl.querySelector("#mkV").value.trim() && !ovl.querySelector("#mkH").value.trim()) {
+      toast("上下か左右の目盛りを入れてください");
+      return;
+    }
     db.sightMarks.push({
       id: uid(),
       setupId,

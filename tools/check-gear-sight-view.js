@@ -55,7 +55,7 @@ return {
   ui,
   sessionMetrics, adviceFor, sightStats, sightInterp, judgementFor, arrowRadiusFromDiaMm,
   gearSpecRows, gearSpecOtherRows, gearSpecRowHtml, gearHistoryEntries, gearHistoryHtml, gearPrecisionHtml,
-  recordingSetupId, gearViewSetup, GEAR_FIELDS, GEAR_SUGGESTIONS, estimateArrowCd,
+  recordingSetupId, gearViewSetup, GEAR_FIELDS, GEAR_SUGGESTIONS, estimateArrowCd, personalPhysicsCalibration,
   sightDistRows, sightScaleTicks, sightScaleSvg, sightDistRowHtml, sightHorizontalNoteHtml,
   sightAdviceModel, sightAdviceHtml, sightCentreRows, sightCentreDriftHtml, sightBasisRowsHtml,
   sessionSightFoldHtml,
@@ -808,6 +808,49 @@ const adviceCase = (label, mutate) => {
   ok(Math.abs(standard - 2.6) < 1e-9, "the reference arrow estimates Cd 2.6");
   ok(list.includes(2.6), "the reference value is one of the suggestions");
   ok(app.estimateArrowCd({ arrowCd: String(list[0]) }, 5.6) === list[0], "a chosen suggestion is used as it is");
+}
+
+/* ---------- 距離の無いサイトの記録（以前の版・読み込んだデータ）があっても、予測は数のまま ---------- */
+{
+  const d = load((db) => {
+    db.sightMarks.push({ id: "no-dist", setupId: "s1", dist: null, v: "4.1", h: "0", date: "2026-09-01", ts: 2 });
+    db.sightMarks.push({ id: "str-dist", setupId: "s1", v: "3.9", h: "0", date: "2026-09-02", ts: 3 });
+  });
+  const interp = app.sightInterp("s1");
+  ok(interp && interp.pts.every((p) => Number.isFinite(p[0]) && p[0] > 0), "marks without a distance are not used");
+  ok(Number.isFinite(interp.predict ? interp.predict(30) : interp.pts[0][1]), "the prediction stays a number");
+  const html = app.sightPredictionHtml(interp, d.sightMarks.filter((m) => m.setupId === "s1"));
+  ok(!/NaN|nullm|undefined/.test(textOf(html)), `no broken value in the prediction: ${textOf(html).slice(0, 120)}`);
+}
+
+/* ---------- 個人の校正は、結果を変えるものが同じなら前の結果を使う ---------- */
+{
+  const d = load();
+  const sess = d.sessions.find((s) => s.setupId === "s1" && s.ends.flat().some((a) => a.x != null));
+  const first = app.personalPhysicsCalibration("s1");
+  ok(first && app.personalPhysicsCalibration("s1") === first, "a second call reuses the result");
+  /* メモや印の保存（db の世代は進む）では計算し直さない */
+  sess.note = "架空のメモ";
+  sess.ends[0][0].reason = "風";
+  app.setDb(d);
+  ok(app.personalPhysicsCalibration("s1") === first, "a memo or a reason mark does not recompute");
+  /* 矢の位置・サイトの値・風・弓具の項目・サイトの記録が変わったら計算し直す */
+  const changes = [
+    () => { sess.ends[0][0].x += 1.5; },
+    () => { sess.sightV = "5.6"; },
+    () => { sess.windSpeed = "4"; sess.windDir = "左から"; },
+    () => { d.setups[0].arrowSpeed = "200"; },
+    () => { d.sightMarks.push({ id: "m-new", setupId: "s1", dist: 30, v: "3.1", h: "0", date: "2026-11-01", ts: 9 }); },
+    () => { d.settings.eyeSight = 900; },
+  ];
+  let prev = first;
+  changes.forEach((change, i) => {
+    change();
+    app.setDb(d);
+    const next = app.personalPhysicsCalibration("s1");
+    ok(next !== prev, `change ${i} recomputes the calibration`);
+    prev = next;
+  });
 }
 
 console.log(`Gear / sight / settings copy and view-model checks OK (${checks} checks)`);

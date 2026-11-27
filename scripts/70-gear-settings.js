@@ -1145,8 +1145,15 @@ const CUSTOM_ROUND_FACES = [
 function customRoundStagesText(def) {
   return def.stages.map((st) => `${st.dist}m ${st.arrows}射`).join("→");
 }
+/* 自作ラウンドを使った練習があるか（1 距離ごとの記録のラウンドか、多距離ラウンドの組の id） */
+function customRoundInUse(id) {
+  return (db.sessions || []).some(
+    (s) => s && (s.round === id || (s.roundGroup && s.roundGroup.roundId === id)),
+  );
+}
 function customRoundsSettingsHtml() {
-  const list = db.customRounds || [];
+  /* しまった定義（archived）は、使った練習の見え方のために残しているだけなので、一覧と記録の条件には出さない */
+  const list = (db.customRounds || []).filter((r) => r && !r.archived);
   return `<div class="setBlock" data-testid="settings-custom-rounds">
     <div class="lrow setHeadRow"><span class="lmain"><b>自作ラウンド</b><span>距離・的・射数の組み合わせを登録します。登録すると、記録の条件のラウンドに並びます</span></span><span class="lv">${list.length}件</span></div>
     ${list
@@ -1286,7 +1293,13 @@ function openCustomRoundForm(id) {
     db.customRounds = Array.isArray(db.customRounds) ? db.customRounds : [];
     if (src) {
       const i = db.customRounds.findIndex((r) => r.id === id);
-      if (i >= 0) db.customRounds[i] = { id, label, stages: clean };
+      /* 距離・的・射数を変えるときに、その定義を使った練習があれば、もとの定義はしまって残し、新しい定義を別に作る。
+         そのまま書き換えると、過去の練習の満点や射数の表示まで変わっていた（36射の記録が「満点 720」など） */
+      const stagesChanged = i >= 0 && JSON.stringify(db.customRounds[i].stages) !== JSON.stringify(clean);
+      if (i >= 0 && stagesChanged && customRoundInUse(id)) {
+        db.customRounds[i] = Object.assign({}, db.customRounds[i], { archived: true });
+        db.customRounds.push({ id: uid(), label, stages: clean });
+      } else if (i >= 0) db.customRounds[i] = { id, label, stages: clean };
       else db.customRounds.push({ id, label, stages: clean });
     } else {
       db.customRounds.push({ id: uid(), label, stages: clean });
@@ -1310,7 +1323,11 @@ function openCustomRoundForm(id) {
           { danger: true, okLabel: "削除" },
         )
       ) {
-        db.customRounds = (db.customRounds || []).filter((r) => r.id !== id);
+        /* その定義を使った練習があるときは、定義をしまって残す（一覧と記録の条件からは消える）。消してしまうと、
+           その練習が「自由練習」と表示され、満点も出なくなっていた（確かめの文は「過去の練習記録は残ります」） */
+        db.customRounds = customRoundInUse(id)
+          ? (db.customRounds || []).map((r) => (r.id === id ? Object.assign({}, r, { archived: true }) : r))
+          : (db.customRounds || []).filter((r) => r.id !== id);
         save({ reason: "delete-custom-round", forceSnapshot: true });
         closeModal(ovl);
         openSettings();
@@ -1802,8 +1819,8 @@ function openSettings() {
       }
     };
   ovl.querySelector("#dSnapNow").onclick = () => {
-    writeSafetySnapshot("manual", true);
-    toast("いまのデータの控えを残しました");
+    if (writeSafetySnapshot("manual", true)) toast("いまのデータの控えを残しました");
+    else toast("控えを残せませんでした。端末の空きが足りません。バックアップを書き出してください", 6000);
     reopenSettings(ovl);
   };
   ovl.querySelector("#setTrash").onclick = () => openSettingsTrash(ovl);
@@ -1836,9 +1853,17 @@ function openSettings() {
         { danger: true, okLabel: "控えに戻す" },
       )
     ) {
+      /* 置き換える前の控えを残せないときは、控えなしで進めるかを確かめる（確かめずに進めると、いまのデータがどこにも残らない） */
+      if (
+        !writeSafetySnapshot("restore-before", true) &&
+        !(await appConfirm(
+          "いまのデータの控えを残せません（端末の空きが足りません）。控えなしで、この控えに戻しますか？",
+          { danger: true, okLabel: "控えなしで戻す" },
+        ))
+      )
+        return;
       beginActiveWorkflow();
       try {
-        writeSafetySnapshot("restore-before", true);
         db = normalizeDb(snap.data);
         /* cross-feature audit finding②対応: 古いスナップショット復元は backfilledAt も
            復元時点の値のまま引き継がれ、以後バッジのバックフィルが二度と走らなくなる
@@ -1847,12 +1872,13 @@ function openSettings() {
            （backfill 自体が enabled ゲートで no-op になるだけ） */
         if (db.settings.gamification) db.settings.gamification.backfilledAt = null;
         const stored = save({ reason: "restore", forceSnapshot: true });
+        /* 保存できなかったときは、端末に残っているいまのデータに戻す（画面だけ戻した内容にならないように） */
+        if (!stored) db = load();
         applyTheme();
         applyFieldMode();
         closeModal(ovl);
         render();
-        /* 保存できなかったときは、save が出した「保存できませんでした」の知らせを消さない */
-        if (stored) toast("控えの内容に戻しました");
+        toast(stored ? "控えの内容に戻しました" : "戻せませんでした。端末の空きが足りません。いまのデータはそのままです", stored ? undefined : 6000);
       } finally {
         endActiveWorkflow();
       }
@@ -1879,7 +1905,14 @@ function openSettings() {
             { danger: true, okLabel: "読み込む" },
           )
         ) {
-          writeSafetySnapshot("import-before", true);
+          if (
+            !writeSafetySnapshot("import-before", true) &&
+            !(await appConfirm(
+              "いまのデータの控えを残せません（端末の空きが足りません）。控えなしで読み込みますか？先にバックアップを書き出すこともできます。",
+              { danger: true, okLabel: "控えなしで読み込む" },
+            ))
+          )
+            return;
           db = normalizeDb(d);
           /* cross-feature audit finding①対応: インポートは起動時バックフィル（90-init.js）を
            経由しないため、ここでリロードせず記録すると checkBadges が輸入済み履歴を無視して
@@ -1901,12 +1934,13 @@ function openSettings() {
             }
           }
           const stored = save({ reason: "import", forceSnapshot: true });
+          /* 保存できなかったときは、端末に残っているいまのデータに戻す（画面だけ読み込んだ内容になり、開き直すと消えていた） */
+          if (!stored) db = load();
           applyTheme();
           applyFieldMode();
           closeModal(ovl);
           render();
-          /* 保存できなかったときは、save が出した「保存できませんでした」の知らせを消さない */
-          if (stored) toast("読み込みました");
+          toast(stored ? "読み込みました" : "読み込めませんでした。端末の空きが足りません。いまのデータはそのままです", stored ? undefined : 6000);
         }
       } catch (_) {
         toast("ファイルを読み込めませんでした");

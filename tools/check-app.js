@@ -567,7 +567,7 @@ calibDb.sessions.push(
   calibSess("05",6,windDrift70*.9,0,"左から","4")
 );
 const calibApi = new Function(
-  "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc","sessionHasPos",
+  "db","normGearText","robustStats","sessionQuality","ringW","isWindy","pct","esc","sessionHasPos","sessionMetrics",
   arrowDiaConsts + section("function clamp", "function adviceModel") + section("function regress", "function latestMark") + "\nreturn {personalPhysicsCalibration};"
 )(
   calibDb,
@@ -578,9 +578,12 @@ const calibApi = new Function(
   s=>!!(s.windSpeed && +s.windSpeed>=3.5),
   v=>`${Math.round(v*100)}%`,
   s=>String(s == null ? "" : s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])),
-  scoreApi.sessionHasPos
+  scoreApi.sessionHasPos,
+  /* 個人の校正の使い回しの鍵（矢の位置の統計が同じ物か）。ここでは記録の矢の並びを同じ物として渡す */
+  (s) => ({ st: s.ends })
 );
 const pcal = calibApi.personalPhysicsCalibration("main");
+assert(calibApi.personalPhysicsCalibration("main") === pcal, "Personal physics calibration should be reused when nothing it reads has changed");
 assert(pcal && pcal.click.v70 > 1.5 && pcal.click.v70 < 2.5 && pcal.wind.sample >= 2 && pcal.wind.factor > .7 && pcal.score > .25, "Personal physics calibration failed");
 
 const gearApi = new Function(

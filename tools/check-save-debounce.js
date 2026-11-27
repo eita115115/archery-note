@@ -378,6 +378,36 @@ function checkBeforeSnapshotSurvives() {
   assert(reasons()[0] === "edit" || reasons()[0] === "auto", "[before] the newest generation is the latest save");
 }
 
+/* 控えを残せたかを返す。読み込み・復元の直前の控えは、本体を書くために外さない（外すと置き換える前のデータがどこにも残らない） */
+function checkSnapshotResultAndFreshBefore() {
+  const sessions = (n) =>
+    Array.from({ length: n }, (_, i) => ({
+      id: "q" + i,
+      date: "2026-01-01",
+      ends: [Array.from({ length: 6 }, (_, j) => ({ x: j, y: i, s: 9 }))],
+    }));
+  /* 入る: true */
+  const roomy = loadQuota(1000000);
+  roomy.api.getDb().sessions = sessions(10);
+  roomy.saveAndIdle();
+  assert(roomy.api.writeSafetySnapshot("manual", true) === true, "[snap-result] a snapshot that fits returns true");
+  /* 入らない: false（本体だけで空きの半分を超える） */
+  const full = loadQuota(10000);
+  full.api.getDb().sessions = sessions(40);
+  full.saveAndIdle();
+  assert(full.api.writeSafetySnapshot("manual", true) === false, "[snap-result] a snapshot that cannot fit returns false");
+  /* 読み込みの直前の控えを作り、置き換えた内容が大きくて入らない: 直前の控えは残し、保存できなかったと返す */
+  const imp = loadQuota(16000);
+  imp.api.getDb().sessions = sessions(20);
+  imp.saveAndIdle();
+  assert(imp.api.writeSafetySnapshot("import-before", true) === true, "[snap-result] the before-copy fits");
+  imp.api.setDb(imp.api.normalizeDb({ sessions: sessions(60), settings: {} }));
+  assert(imp.api.save({ reason: "import", forceSnapshot: true }) === false, "[snap-result] the larger import does not fit");
+  const kept = imp.api.readSnapshots();
+  assert(kept.some((g) => g.reason === "import-before" && g.data.sessions.length === 20), "[snap-result] the before-copy is kept");
+  assertEqual(JSON.parse(imp.store.get(imp.api.KEY)).sessions.length, 20, "[snap-result] the stored data is still the old data");
+}
+
 function checkCallSiteClassification() {
   /* 高頻度の記録操作はデバウンス、重要操作は即時 save のままであること（静的検査） */
   assert(
@@ -456,6 +486,7 @@ function main() {
   checkSnapshotBackoffWhenFull();
   checkMainWriteFreesSnapshots();
   checkBeforeSnapshotSurvives();
+  checkSnapshotResultAndFreshBefore();
   checkCallSiteClassification();
   checkLifecycleFlushContract();
   console.log("Save debounce checks OK");

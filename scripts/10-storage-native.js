@@ -472,20 +472,22 @@ function thinSnapshots(list,maxGenerations){
   return snaps;
 }
 let _lastSnapTs=0, _snapFailTs=0;
+/* 返す値: true = 控えを書いた（または同じ中身の控えが最新にあるので書かなくてよい）、false = 書けなかった。
+   読み込み・復元・「いま控えを残す」は、この値を見て、控えを残せたかを知らせる */
 function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
   try{
     const now=Date.now();
-    if(!force && _lastSnapTs && now-_lastSnapTs<30*60*1000) return;
+    if(!force && _lastSnapTs && now-_lastSnapTs<30*60*1000) return true;
     /* 控えが 1 世代も入りきらなかった（本体だけで保存の空きの半分を超えている）あとは、30 分は試さない。
        試すたびに全部の記録を読んで書いて失敗するので、保存 1 回が倍の重さになっていた（1,000 回の記録で実測）。
        復元・読み込み・削除の前の控え（force）は、これまでどおり毎回試す */
-    if(!force && _snapFailTs && now-_snapFailTs<30*60*1000) return;
+    if(!force && _snapFailTs && now-_snapFailTs<30*60*1000) return false;
     const raw=rawOverride||JSON.stringify(db), h=hashText(raw);
     const current=readSnapshots();
     let snaps=current.filter(s=>s&&s.hash!==h);
     const latest=current[0];
-    if(!force && latest && latest.hash===h){ _lastSnapTs=latest.ts||now; return; }
-    if(!force && latest && now-(latest.ts||0)<30*60*1000){ _lastSnapTs=latest.ts||now; return; }
+    if(!force && latest && latest.hash===h){ _lastSnapTs=latest.ts||now; return true; }
+    if(!force && latest && now-(latest.ts||0)<30*60*1000){ _lastSnapTs=latest.ts||now; return true; }
     snaps.unshift({ts:now,reason,hash:h,counts:dataCounts(db),data:JSON.parse(raw)});
     snaps=thinSnapshots(snaps,SNAP_MAX_GENERATIONS);
     for(;;){
@@ -494,7 +496,8 @@ function writeSafetySnapshot(reason="auto", force=false, rawOverride=null){
       snaps.pop();
     }
     _lastSnapTs=now; _snapFailTs=0;
-  }catch(e){ _snapFailTs=Date.now(); console.warn("snapshot failed",e); }
+    return true;
+  }catch(e){ _snapFailTs=Date.now(); console.warn("snapshot failed",e); return false; }
 }
 function flushSafetySnapshot(){
   if(!snapshotPending) return;
@@ -532,17 +535,22 @@ let pendingSaveTimer=null, pendingSaveOpts=null, pendingSaveSince=0;
    控えは本体の写しを数世代ぶん同じ保存先に持つので、記録が増えると本体より先に空きを使い切る。空きが尽きると、
    それ以後の保存がすべて失敗していた（控えを減らすのは控えを書くときだけで、本体が書けないときは減らさなかった。
    72 射の練習 340 回ほどで、打った矢が保存されなくなる）。いまの記録を残すことを、古い控えより優先する。
-   控えを全部外しても書けなかったとき（空き不足ではない失敗など）は、外した控えを元に戻す（安全のための控えを無駄に消さない） */
+   控えを全部外しても書けなかったとき（空き不足ではない失敗など）は、外した控えを元に戻す（安全のための控えを無駄に消さない）。
+   読み込み・復元の直前に作った控え（1 分以内の -before）は外さない。外すと、置き換える前のデータがどこにも残らない。
+   それでも入らないときは保存できなかったことにして、置き換えをやめる（呼ぶ側で端末のデータに戻す） */
 function writeMainAfterFreeingSnapshots(raw){
   const before=storageGetItem(SNAP_KEY);
-  const snaps=readSnapshots();
-  if(!snaps.length) return false;
-  while(snaps.length){
-    snaps.pop();
+  const snaps=readSnapshots(), now=Date.now();
+  const keep=(s)=>isBeforeSnapshot(s) && now-(s.ts||0)<SNAP_BEFORE_PAIR_MS;
+  let freed=false;
+  for(let i=snaps.length-1;i>=0;i--){
+    if(keep(snaps[i])) continue;
+    snaps.splice(i,1);
+    freed=true;
     storageSetItem(SNAP_KEY, JSON.stringify(snaps));
     if(storageSetItem(KEY, raw)) return true;
   }
-  if(before!=null) storageSetItem(SNAP_KEY, before);
+  if(freed && before!=null) storageSetItem(SNAP_KEY, before);
   return false;
 }
 function writeDbNow(o){
@@ -559,6 +567,11 @@ function writeDbNow(o){
   }
 }
 function hasPendingSave(){ return pendingSaveTimer!=null; }
+/* 保留中のデバウンス書き込みを書かずに捨てる（ほかの画面が新しい内容を保存したとき。90-init.js） */
+function discardPendingSave(){
+  if(pendingSaveTimer!=null) clearTimeout(pendingSaveTimer);
+  pendingSaveTimer=null; pendingSaveOpts=null; pendingSaveSince=0;
+}
 function flushPendingSave(){
   if(pendingSaveTimer==null) return;
   clearTimeout(pendingSaveTimer);
@@ -769,7 +782,14 @@ function restoreTrash(id){
   if(i<0) return false;
   const item=db.trash[i], data=cloneData(item.data);
   if(item.type==="session"){
-    if(!db.sessions.some(s=>s.id===data.id)) db.sessions.push(data);
+    /* 末尾に足すと、同じ日のあとの練習より新しい扱いになる（「前回の練習」「前回と同じ条件」が変わる）。
+       日付が後の記録、または同じ日で時刻が後の記録の前へ入れる。時刻の分からない記録どうしは、これまでどおり末尾 */
+    if(!db.sessions.some(s=>s.id===data.id)){
+      const tsOf=(x)=>typeof noteSortTs==="function"?noteSortTs(x):0;
+      const d=String(data.date||""), t=tsOf(data);
+      const at=db.sessions.findIndex(s=>s && (String(s.date||"")>d || (String(s.date||"")===d && t>0 && tsOf(s)>t)));
+      if(at<0) db.sessions.push(data); else db.sessions.splice(at,0,data);
+    }
   }else if(item.type==="sightMark"){
     if(!db.sightMarks.some(m=>m.id===data.id)) db.sightMarks.push(data);
   }else if(item.type==="setupBundle"){

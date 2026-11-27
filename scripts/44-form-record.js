@@ -235,7 +235,14 @@ const FormV2 = (() => {
         : { k: "大きさ", state: "warn", text: "小さく写っています。1 歩ぶん近づけてください" });
     /* 弓を上げた形: 弓手の手首が肩の高さの近くにあり、肩から胴の 0.6 以上、横へ出ている */
     const raised = !!(fin(T) && P.bWr && P.bWr.v >= 0.5 && (P.bSh.y - P.bWr.y) / T >= -0.45 && Math.abs(P.bWr.x - P.bSh.x) / T >= 0.6);
+    /* 余白と向きは、弓を上げた形のいちばん狭い値を覚えておく。台を動かした（体が画面の中で動いた・大きさが変わった）ときは
+       忘れて測り直す。忘れないと、置き直しても前の置き方の「腕が枠の外に出ます」が消えなかった */
+    if (fin(T) && fin(m.ax) && (Math.abs(mx - m.ax) > 0.25 * T || Math.abs(T / m.aT - 1) > 0.15)) {
+      m.left = m.right = m.rho = m.ax = m.aT = NaN;
+      m.dir = 0;
+    }
     if (raised) {
+      if (!fin(m.ax)) { m.ax = mx; m.aT = T; }
       const xs = keys.slice(0, 6).map((k) => P[k]).filter(Boolean).map((p) => p.x);
       const l = (Math.min(...xs) / w) * 100, r = ((w - Math.max(...xs)) / w) * 100;
       m.left = fin(m.left) ? Math.min(m.left, l) : l;
@@ -454,7 +461,10 @@ const FormV2 = (() => {
   function read(rec) {
     const v = rec.v2, events = [];
     let fi = 0;
-    (v.ev || []).forEach((r, i) => {
+    /* 行が配列でない記録（壊れた・手で直したバックアップ）でも画面を開けるように、その行だけ読まない。
+       読むと例外になり、射型のタブが開かず、その記録を消すこともできなかった */
+    (Array.isArray(v.ev) ? v.ev : []).forEach((r, i) => {
+      if (!Array.isArray(r)) return;
       const shot = r[0] === 0, flags = r[5] || 0;
       const e = { src: "ev", i, kind: shot ? "shot" : "letdown", tS: r[1] / 100, holdS: fin(r[2]) ? r[2] / 100 : null, drawS: fin(r[3]) ? r[3] / 100 : null, conf: r[4], flags, counted: shot ? !(flags & 4) : !!(flags & 2), fi: -1 };
       if (shot) {
@@ -468,7 +478,8 @@ const FormV2 = (() => {
       }
       events.push(e);
     });
-    (v.cd || []).forEach((r, i) => {
+    (Array.isArray(v.cd) ? v.cd : []).forEach((r, i) => {
+      if (!Array.isArray(r)) return;
       events.push({ src: "cd", i, kind: "cand", tS: r[0] / 100, fromS: fin(r[1]) ? r[1] / 100 : null, toS: fin(r[2]) ? r[2] / 100 : null, uncS: fin(r[3]) ? r[3] / 100 : null, reason: REASONS[r[4]] || "", likely: !!r[5], counted: !!r[6], flags: 0, fi: -1 });
     });
     events.sort((a, b) => a.tS - b.tS);
@@ -628,7 +639,11 @@ const FormV2 = (() => {
     const out = { key, points: [], excluded: 0, why: {}, skipped: [], ref: null, refUnmeasured: false, unc: null, range: null };
     const v2 = records.filter(isV2).sort((a, b) => (a.ts || 0) - (b.ts || 0));
     if (!v2.length || !META[key]) return out;
-    const ref = (out.ref = v2[v2.length - 1]);
+    /* 比べる相手は、写りの基準（胴 100px 以上・写った割合 80% 以上）を満たし、射が 1 つ以上あるいちばん新しい記録。
+       いちばん新しい記録が写りの足りない撮影だと、ほかの回もすべて「写りが足りない」で外れ、推移が空になっていた。
+       基準を満たす記録が無いときは、これまでどおりいちばん新しい記録 */
+    const usable = (r) => r.v2.tpx >= 100 && r.v2.cov >= 80 && (r.shots || 0) > 0;
+    const ref = (out.ref = [...v2].reverse().find(usable) || v2[v2.length - 1]);
     if (!keysFor(ref, [key]).length) { out.refUnmeasured = true; return out; }
     const groups = new Map();
     for (const r of v2) { const g = r.v2.cid || r.id; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(r); }

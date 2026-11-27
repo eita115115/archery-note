@@ -800,7 +800,9 @@ function renderRecordConditions(m) {
   const defSetup = def.setupId || "";
   const defDist = def.dist;
   const defFace = faceChoiceValue(def);
-  const defRound = def.round || "free";
+  /* しまった自作ラウンド（設定で消した・作り直した）は、前回の条件でも選ばない（自由練習から） */
+  const defRoundDef = findRoundDef(def.round);
+  const defRound = def.round && !(defRoundDef && defRoundDef.archived) ? def.round : "free";
   const knownDist = [70, 50, 30, 18].includes(+defDist);
   m.innerHTML = `
   <div class="subTop"><button type="button" class="backBtn" id="condBack" data-testid="conditions-back">${REC_CHEVRON}記録</button></div>
@@ -812,6 +814,7 @@ function renderRecordConditions(m) {
       ${ROUND_TYPES.map((r) => `<option value="${r.id}" ${r.id === defRound ? "selected" : ""}>${r.label}</option>`).join("")}
       <optgroup label="多距離ラウンド">
         ${multiRoundDefs()
+          .filter((r) => !r.archived)
           .map(
             (r) =>
               `<option value="${esc(r.id)}" ${r.id === defRound ? "selected" : ""}>${esc(r.label)}</option>`,

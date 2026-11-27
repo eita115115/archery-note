@@ -822,6 +822,83 @@ test("buffer: the frame nearest a time, for drawing the skeleton over the video"
   assert.equal(FV.makeBuffer().at(0), null);
 });
 
+test("trend: a newest capture with too little coverage is left out alone; it does not empty the trend", () => {
+  const base = FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  const mk = (i, f) => {
+    const r = JSON.parse(JSON.stringify(base));
+    r.id = `q${i}`;
+    r.ts = base.ts + i * 86400000;
+    if (f) f(r);
+    return r;
+  };
+  const good = [mk(0), mk(1), mk(2), mk(3)];
+  /* 的まで歩いた撮影（写った割合 57%）がいちばん新しい */
+  const t = FV.trend([...good, mk(4, (r) => { r.v2.cov = 57; })], "holdMs");
+  assert.equal(t.ref.id, "q3", "the reference is the newest capture that meets the coverage rule");
+  assert.equal(t.points.length, 4);
+  assert.deepEqual(t.why, { "写りが足りない": 1 });
+  assert.deepEqual(t.skipped, ["q4"]);
+  /* いちばん古いときと同じ扱い */
+  const old = FV.trend([mk(-1, (r) => { r.v2.cov = 57; }), ...good], "holdMs");
+  assert.equal(old.points.length, 4);
+  assert.deepEqual(old.skipped, ["q-1"]);
+  /* 射の無い記録も、比べる相手にしない */
+  assert.equal(FV.trend([...good, mk(5, (r) => { r.shots = 0; })], "holdMs").ref.id, "q3");
+  /* 基準を満たす記録が無いときは、これまでどおりいちばん新しい記録（何も並ばない） */
+  const poor = good.map((r) => { const c = JSON.parse(JSON.stringify(r)); c.v2.tpx = 60; return c; });
+  const none = FV.trend(poor, "holdMs");
+  assert.equal(none.ref.id, "q3");
+  assert.equal(none.points.length, 0);
+});
+
+test("placement: moving the camera clears the remembered margins; lowering the bow does not", () => {
+  const W = 720, H = 1280;
+  const { cap } = capture(W, H);
+  const frames = FX.toFrames(cap.poses, { w: W, h: H });
+  const res = analyse(capture(W, H).buf);
+  const held = frames.find((f) => f.tMs >= res.shots[0].releaseMs - 500).landmarks;
+  const xs = [11, 12, 13, 14, 15, 16].map((i) => held[i].x * W);
+  const left = Math.min(...xs), right = W - Math.max(...xs);
+  /* 余白の狭い側へ寄せて、余白を 3% にする */
+  const dx = right < left ? right - 0.03 * W : -(left - 0.03 * W);
+  assert.ok(Math.abs(dx) > 60, `the shift moves the body far enough (${dx.toFixed(0)} px)`);
+  const moved = held.map((p) => ({ ...p, x: p.x + dx / W }));
+  const mem = {};
+  const near = FV.placement(moved, { w: W, h: H }, "right", 28, mem);
+  assert.equal(near.rows[2].state, "warn");
+  assert.match(near.rows[2].text, /腕が枠の外に出ます/);
+  /* 腕を下ろしても、同じ置き方なら「注意」は残る */
+  const restMoved = frames[5].landmarks.map((p) => ({ ...p, x: p.x + dx / W }));
+  assert.equal(FV.placement(restMoved, { w: W, h: H }, "right", 28, mem).rows[2].state, "warn");
+  /* 台を動かして、もう一度弓を上げる: 新しい置き方の余白になる */
+  const back = FV.placement(held, { w: W, h: H }, "right", 28, mem);
+  assert.equal(back.rows[2].state, "ok", back.rows[2].text);
+  assert.match(back.rows[2].text, /弓を上げた形で確かめました/);
+  /* 台を動かしたあと、まだ弓を上げていないときは見込みに戻る */
+  const mem2 = {};
+  FV.placement(moved, { w: W, h: H }, "right", 28, mem2);
+  const restBack = FV.placement(frames[5].landmarks, { w: W, h: H }, "right", 28, mem2);
+  assert.doesNotMatch(restBack.rows[2].text, /弓を上げた形で確かめました/);
+});
+
+test("read: rows that are not arrays are skipped instead of throwing", () => {
+  const base = FV.buildRecord(analyse(capture(720, 1280).buf), { ...CTX, frame: { w: 720, h: 1280 } });
+  const want = FV.read(base);
+  const r = JSON.parse(JSON.stringify(base));
+  r.v2.ev = [null, ...r.v2.ev, "x", 5];
+  r.v2.cd = [null, ...(r.v2.cd || []), {}];
+  const got = FV.read(r);
+  assert.equal(got.count, want.count);
+  assert.equal(got.events.length, want.events.length);
+  const broken = JSON.parse(JSON.stringify(base));
+  broken.v2.ev = [null];
+  broken.v2.cd = [null];
+  assert.doesNotThrow(() => FV.read(broken));
+  assert.equal(FV.read(broken).count, 0);
+  broken.v2.cd = "x";
+  assert.doesNotThrow(() => FV.read(broken));
+});
+
 if (liveBench) {
   console.log(
     `  live count on the benchmark streams: ${liveBench.sessions} sessions, live > final in ${liveBench.over}, live = final in ${liveBench.equal}, live < final in ${liveBench.under} (live ${liveBench.liveShots} shots, final ${liveBench.finalShots})`,
