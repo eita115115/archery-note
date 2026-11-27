@@ -1265,13 +1265,13 @@
   {
     "id": "AN-107",
     "task": "コードの最適化とバグ修正（2026-11-26 オーナー依頼「コードの最適化とバグ修正して」）: 記録が多いときの重さを実測して直す。5 領域（保存と起動／採点と統計／記録画面／ノート・サイト・弓具・設定／射型 v2）を下読みし、報告を 1 件ずつ再現してから直す",
-    "status": "in-progress",
-    "passes": false,
+    "status": "done",
+    "passes": true,
     "dependencies": [
       "AN-106"
     ],
     "owner": "claude",
     "acceptance": "表示する値・判断・保存の形を変えずに重さを減らす（遅延評価は先に全部計算する参照実装と一致すること）。直したバグごとに、直す前のスクリプトで落ちる検査を足す。npm run check:all・lint・format:check と Playwright e2e 全件が成功する。不変条件 3 つ（矢円と線かみの採点の一致、練習のデータを消さない、iPhone の主な流れを単純なまま）を守る。Service Worker の動き・保存の形を変えるものはオーナーの承認まで入れない。push・版上げ・公開はオーナーの承認後。",
-    "evidence": "2026-11-27 実装（branch claude/sharp-faraday-bu8pii、版134据え置き・未push・未公開。commit 5a28d08（最適化）・d018f51（採点と分析の 4 件）・1dae945（記録・分析・保存）と、ノート・設定・射型のコミット）。実測（1,000 回 × 72 射・CPU 4 倍遅延）: 分析タブ 1.8→0.37 秒、記録の終了 3.5→1.7 秒、1 射 約 0.45→0.22 秒。検証（66c0d6c）: check:all exit 0・lint・format:check 成功、Playwright e2e 510 passed（7.9m）。新しい検査はどれも直す前のスクリプトで落ちることを確かめた。passes は false のまま: push の許可と、オーナーに決めてほしいこと (a)〜(f) が残る。"
+    "evidence": "2026-11-27 実装（branch claude/sharp-faraday-bu8pii、版134据え置き・未push・未公開。commit 5a28d08（最適化）・d018f51（採点と分析の 4 件）・1dae945（記録・分析・保存）と、ノート・設定・射型のコミット）。実測（1,000 回 × 72 射・CPU 4 倍遅延）: 分析タブ 1.8→0.37 秒、記録の終了 3.5→1.7 秒、1 射 約 0.45→0.22 秒。検証（66c0d6c）: check:all exit 0・lint・format:check 成功、Playwright e2e 510 passed（7.9m）。新しい検査はどれも直す前のスクリプトで落ちることを確かめた。(2026-11-27 公開まで: オーナー承認「許可します」「公開までやって」。main に入っていた v131〜v134 を merge して衝突を解き（5cc5f80）、版 135。merge 後 check:all・lint・format:check 成功、Playwright 516 passed、CI validate 成功、PR #151 を main へマージ（0e69bec）。Pages の version.json が 135、sw.js が archery-note-v135、公開ページで APP_VER 135・コンソールのエラー 0 件。オーナーに決めてほしいこと (b)〜(f) は別の作業として残す。)"
   }
 ]
